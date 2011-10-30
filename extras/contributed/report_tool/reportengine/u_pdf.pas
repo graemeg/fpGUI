@@ -496,7 +496,17 @@ begin
 if FArray.Count> 0
 then
   for Cpt:= 0 to Pred(FArray.Count) do
-    TPdfObjet(FArray[Cpt]).Free;
+    if TPdfObjet(FArray[Cpt]) is TPdfInteger
+    then
+      TPdfInteger(FArray[Cpt]).Free
+    else
+      if TPdfObjet(FArray[Cpt]) is TPdfReference
+      then
+        TPdfReference(FArray[Cpt]).Free
+      else
+        if TPdfObjet(FArray[Cpt]) is TPdfName
+        then
+          TPdfName(FArray[Cpt]).Free;
 FArray.Free;
 inherited;
 end;
@@ -549,7 +559,33 @@ begin
 if FStream.Count> 0
 then
   for Cpt:= 0 to Pred(FStream.Count) do
-    TPdfObjet(FStream[Cpt]).Free;
+    if TPdfObjet(FStream[Cpt]) is TPdfFonte
+    then
+      TPdfFonte(FStream[Cpt]).Free
+    else
+      if TPdfObjet(FStream[Cpt]) is TPdfColor
+      then
+        TPdfColor(FStream[Cpt]).Free
+      else
+        if TPdfObjet(FStream[Cpt]) is TPdfText
+        then
+          TPdfText(FStream[Cpt]).Free
+        else
+          if TPdfObjet(FStream[Cpt]) is TPdfRectangle
+          then
+            TPdfRectangle(FStream[Cpt]).Free
+          else
+            if TPdfObjet(FStream[Cpt]) is TPdfLigne
+            then
+              TPdfLigne(FStream[Cpt]).Free
+            else
+              if TPdfObjet(FStream[Cpt]) is TPdfLineStyle
+              then
+                TPdfLineStyle(FStream[Cpt]).Free
+              else
+                if TPdfObjet(FStream[Cpt]) is TPdfSurface
+                then
+                  TPdfSurface(FStream[Cpt]).Free;
 FStream.Free;
 inherited;
 end;
@@ -783,6 +819,34 @@ end;
 
 destructor TPdfDicElement.Destroy;
 begin
+FKey.Free;
+if FValue is TPdfBoolean
+then
+  TPdfBoolean(FValue).Free
+else
+  if FValue is TPdfDictionary
+  then
+    TPdfDictionary(FValue).Free
+  else
+    if FValue is TPdfInteger
+    then
+      TPdfInteger(FValue).Free
+    else
+      if FValue is TPdfName
+      then
+        TPdfName(FValue).Free
+      else
+        if FValue is TPdfReference
+        then
+          TPdfReference(FValue).Free
+        else
+          if FValue is TPdfString
+          then
+            TPdfString(FValue).Free
+          else
+            if FValue is TPdfArray
+            then
+              TPdfArray(FValue).Free;
 inherited;
 end;
 
@@ -831,7 +895,10 @@ begin
 if FElement.Count> 0
 then
   for Cpt:= 0 to Pred(FElement.Count) do
-    TPdfDicElement(FElement[Cpt]).Free;
+    try
+      TPdfDicElement(FElement[Cpt]).Free;
+    except
+      end;
 FElement.Free;
 inherited;
 end;
@@ -1444,11 +1511,24 @@ for Cpt:= 0 to Pred(Fontes.Count) do
   Inc(NumFont);
   end;
 TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue:= FXRefObjets.Count;
-if PdfPage.Count> 0
-then
-  for CptPage:= 0 to Pred(PdfPage.Count) do
-    TPdfElement(PdfPage[CptPage]).Free;
-//PdfPage.Free;
+//if PdfPage.Count> 0
+//then
+//  for CptPage:= 0 to Pred(PdfPage.Count) do
+//    if TPdfElement(PdfPage[CptPage]) is TPdfTexte
+//    then
+//      TPdfTexte(PdfPage[CptPage]).Free
+//    else
+//      if TPdfElement(PdfPage[CptPage]) is TPdfRect
+//      then
+//        TPdfRect(PdfPage[CptPage]).Free
+//      else
+//        if TPdfElement(PdfPage[CptPage]) is TPdfLine
+//        then
+//          TPdfLine(PdfPage[CptPage]).Free
+//        else
+//          if TPdfElement(PdfPage[CptPage]) is TPdfSurf
+//          then
+//            TPdfSurf(PdfPage[CptPage]).Free;
 end;
 
 destructor TPdfDocument.Destroy;
@@ -1456,8 +1536,10 @@ var
   Cpt: Integer;
 begin
 Trailer.Free;
-for Cpt:= 0 to Pred(FXRefObjets.Count) do
-  TPdfXRef(FXRefObjets[Cpt]).Free;
+if FXRefObjets.Count> 0
+then
+  for Cpt:= 0 to Pred(FXRefObjets.Count) do
+    TPdfXRef(FXRefObjets[Cpt]).Free;
 FXRefObjets.Free;
 inherited;
 end;

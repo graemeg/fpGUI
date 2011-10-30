@@ -2125,6 +2125,24 @@ then
 Bords.Free;
 Textes.Free;
 ALigne.Free;
+if PdfPage.Count> 0
+then
+  for Cpt:= 0 to Pred(PdfPage.Count) do
+    if TPdfElement(PdfPage[Cpt]) is TPdfTexte
+    then
+      TPdfTexte(PdfPage[Cpt]).Free
+    else
+      if TPdfElement(PdfPage[Cpt]) is TPdfRect
+      then
+        TPdfRect(PdfPage[Cpt]).Free
+      else
+        if TPdfElement(PdfPage[Cpt]) is TPdfLine
+        then
+          TPdfLine(PdfPage[Cpt]).Free
+        else
+          if TPdfElement(PdfPage[Cpt]) is TPdfSurf
+          then
+            TPdfSurf(PdfPage[Cpt]).Free;
 PdfPage.Free;
 DecimalSeparator:= OldSeparator;
 inherited;
@@ -2175,9 +2193,7 @@ then
   FPreparation:= ppVisualise;
   try
     ImprimeDocument;
-    if FVisualisation
-    then
-      F_Visu.ShowModal;
+    F_Visu.ShowModal;
   finally
     F_Visu.Free;
     end;
