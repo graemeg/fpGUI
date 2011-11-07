@@ -895,10 +895,7 @@ begin
 if FElement.Count> 0
 then
   for Cpt:= 0 to Pred(FElement.Count) do
-    try
-      TPdfDicElement(FElement[Cpt]).Free;
-    except
-      end;
+    TPdfDicElement(FElement[Cpt]).Free;
 FElement.Free;
 inherited;
 end;
@@ -1251,7 +1248,6 @@ Fontes.FObjet.AddElement('BaseFont',Nom);
 Nom:= TPdfName.CreateName('F'+IntToStr(NumFonte));
 Fontes.FObjet.AddElement('Name',Nom);
 // add font reference to all page dictionary
-XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
 for Cpt:= 1 to Pred(FXRefObjets.Count) do
   begin
   Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
@@ -1262,6 +1258,7 @@ for Cpt:= 1 to Pred(FXRefObjets.Count) do
       begin
       Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
       Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Font')]).FValue);
+      XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
       Dictionaire.AddElement(TPdfName(Nom).FValue,XRefObjets);
       end;
   end;
@@ -1375,9 +1372,9 @@ end;
 constructor TPdfDocument.CreateDocument;
 var
   Cpt,CptSect,CptPage,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
-  OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage: Integer;
+  OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage,PrevOutline,PrevSect: Integer;
   Dictionaire: TPdfDictionary;
-  XRefObjets,PrevOutline,PrevSect: TPdfReference;
+  XRefObjets: TPdfReference;
   Nom: TPdfName;
   FontName: string;
 begin
@@ -1423,15 +1420,18 @@ for CptSect:= 0 to Pred(Sections.Count) do
         XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
         TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet).AddElement('First',XRefObjets);
         NextSect:= ParentOutline;
-        PrevSect:= XRefObjets;
+        PrevSect:= Pred(FXRefObjets.Count);
         end
       else
         begin
         XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
         TPdfDictionary(TPdfXRef(FXRefObjets[NextSect]).FObjet).AddElement('Next',XRefObjets);
-        TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Prev',PrevSect);
+        XRefObjets:= TPdfReference.CreateReference(PrevSect);
+        TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Prev',XRefObjets);
         NextSect:= ParentOutline;
-        PrevSect:= XRefObjets;
+        if CptSect< Pred(Sections.Count)
+        then
+          PrevSect:= Pred(FXRefObjets.Count);
         end;
       if CptSect= Pred(Sections.Count)
       then
@@ -1470,7 +1470,7 @@ for CptSect:= 0 to Pred(Sections.Count) do
         XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
         TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('First',XRefObjets);
         NextOutline:= PageOutline;
-        PrevOutline:= XRefObjets;
+        PrevOutline:= Pred(FXRefObjets.Count);
         // add page reference to parent outline destination
         Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
         XRefObjets:= TPdfReference.CreateReference(NewPage);
@@ -1483,9 +1483,12 @@ for CptSect:= 0 to Pred(Sections.Count) do
         begin
         XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
         TPdfDictionary(TPdfXRef(FXRefObjets[NextOutline]).FObjet).AddElement('Next',XRefObjets);
-        TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet).AddElement('Prev',PrevOutline);
+        XRefObjets:= TPdfReference.CreateReference(PrevOutline);
+        TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet).AddElement('Prev',XRefObjets);
         NextOutline:= PageOutline;
-        PrevOutline:= XRefObjets;
+        if CptPage< Pred(T_Section(Sections[CptSect]).Pages.Count)
+        then
+          PrevOutline:= Pred(FXRefObjets.Count);
         end;
       if CptPage= Pred(T_Section(Sections[CptSect]).Pages.Count)
       then
@@ -1511,24 +1514,6 @@ for Cpt:= 0 to Pred(Fontes.Count) do
   Inc(NumFont);
   end;
 TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue:= FXRefObjets.Count;
-//if PdfPage.Count> 0
-//then
-//  for CptPage:= 0 to Pred(PdfPage.Count) do
-//    if TPdfElement(PdfPage[CptPage]) is TPdfTexte
-//    then
-//      TPdfTexte(PdfPage[CptPage]).Free
-//    else
-//      if TPdfElement(PdfPage[CptPage]) is TPdfRect
-//      then
-//        TPdfRect(PdfPage[CptPage]).Free
-//      else
-//        if TPdfElement(PdfPage[CptPage]) is TPdfLine
-//        then
-//          TPdfLine(PdfPage[CptPage]).Free
-//        else
-//          if TPdfElement(PdfPage[CptPage]) is TPdfSurf
-//          then
-//            TPdfSurf(PdfPage[CptPage]).Free;
 end;
 
 destructor TPdfDocument.Destroy;
