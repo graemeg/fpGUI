@@ -414,6 +414,7 @@ procedure PrintCoord(const pt: TPoint);
 function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
 procedure DumpStack;
+procedure DumpStack(var AList: TStrings);
 
 { These methods are safe to use even on Windows gui applications. }
 procedure DebugLn(const s1: TfpgString);
@@ -880,6 +881,29 @@ begin
         Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
     end;
   Writeln(stdout,'');
+end;
+
+procedure DumpStack(var AList: TStrings);
+var
+  lMessage: String;
+  i: longint;
+begin
+  AList.Add(' Stack trace:');
+  AList.Add('An unhandled exception occurred at $' + HexStr(PtrInt(ExceptAddr),sizeof(PtrInt)*2) + ' :');
+  if ExceptObject is Exception then
+  begin
+    lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
+    AList.Add(lMessage);
+  end
+  else
+    AList.Add('Exception object ' + ExceptObject.ClassName + ' is not of class Exception.');
+  AList.Add(BackTraceStrFunc(ExceptAddr));
+  if (ExceptFrameCount>0) then
+  begin
+    for i := 0 to ExceptFrameCount-1 do
+      AList.Add(BackTraceStrFunc(ExceptFrames[i]));
+  end;
+  AList.Add('');
 end;
 
 procedure DebugLn(const s1: TfpgString);
