@@ -3396,7 +3396,9 @@ begin
     begin
       showtopic := not gCommandLineParams.IsParam('k');
       { is the first parameter a known docview help, or some addition parameter }
-      if Pos(ctiCommandLineParamPrefix, ParamStr(1)) = 0 then
+      if Pos(ctiCommandLineParamPrefix, ParamStr(1)) = 1 then
+        // command line parameter order seems wrong, so do nothing
+      else
         OpenFile(ParamStr(1), '', showtopic);
     end;
   end;
