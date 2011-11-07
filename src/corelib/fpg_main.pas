@@ -542,6 +542,8 @@ var
   i: integer;
   ctime: TDateTime;
 begin
+  if fpgTimers = nil then
+    Exit;
   ctime := now;
   i := fpgTimers.Count;
   Result := i > 0;
@@ -559,6 +561,8 @@ procedure fpgResetAllTimers;
 var
   i: integer;
 begin
+  if fpgTimers = nil then
+    Exit;
   for i := 0 to fpgTimers.Count-1 do
     TfpgTimer(fpgTimers[i]).Reset;
 end;
@@ -570,6 +574,8 @@ var
   dt: TDateTime;
   tb: Boolean;
 begin
+  if fpgTimers = nil then
+    Exit;
   // returns -1 if no timers are pending
   dt := ctime + amaxtime * ONE_MILISEC;
   tb := False;
@@ -867,7 +873,7 @@ begin
 //  Dump_Stack(StdOut, get_frame);
 
   Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
-  if ExceptObject is exception then
+  if ExceptObject is Exception then
    begin
      lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
      Writeln(stdout,lMessage);
