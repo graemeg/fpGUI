@@ -269,6 +269,8 @@ type
     property    OnShowHint;
   end;
 
+  TfpgFrameClass = class of TfpgFrame;
+
 
 function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AShape: TPanelShape;
          AStyle: TPanelStyle): TfpgBevel;
