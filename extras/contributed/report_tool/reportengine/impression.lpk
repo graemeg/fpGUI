@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <Name Value="impression"/>
-    <AddToProjectUsesSection Value="False"/>
-    <Author Value="&quot;Jean-Marc Levecque&quot; <jmarc.levecque@dbmail.com>"/>
+    <Author Value="&quot;Jean-Marc Levecque&quot; &lt;jmarc.levecque@dbmail.com>"/>
     <CompilerOptions>
-      <Version Value="9"/>
+      <Version Value="11"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
         <LCLWidgetType Value="fpgui"/>
@@ -18,12 +17,10 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Linking>
-        <Debugging>
-          <UseLineInfoUnit Value="False"/>
-        </Debugging>
-      </Linking>
       <Other>
+        <CompilerMessages>
+          <UseMsgFile Value="True"/>
+        </CompilerMessages>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
