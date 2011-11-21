@@ -374,6 +374,7 @@ begin
 	if FActiveWindow = AValue then
 		Exit;
 	FActiveWindow := AValue;
+	FActiveWindow.BringToFront;
 	ActiveWidget := FActiveWindow;
 	for i := 0 to FList.Count-1 do
 	begin

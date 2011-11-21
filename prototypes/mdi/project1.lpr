@@ -1,6 +1,7 @@
 program project1;
 
 {$mode objfpc}{$H+}
+{$ifdef mswindows}{$apptype gui}{$endif}
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
