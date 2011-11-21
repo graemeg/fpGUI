@@ -497,6 +497,7 @@ type
     procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
+    procedure   BringToFront; virtual; abstract;
     procedure   SetFullscreen(AValue: Boolean); virtual;
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;

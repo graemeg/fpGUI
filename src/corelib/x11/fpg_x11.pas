@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -242,6 +242,7 @@ type
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
+    procedure   BringToFront; override;
   end;
 
 
@@ -2614,6 +2615,12 @@ procedure TfpgX11Window.SetFullscreen(AValue: Boolean);
 begin
   inherited SetFullscreen(AValue);
   fpgApplication.netlayer.WindowSetFullscreen(FWinHandle, AValue);
+end;
+
+procedure TfpgX11Window.BringToFront;
+begin
+  if HasHandle then
+    XRaiseWindow(xapplication.display, FWinHandle);
 end;
 
 { TfpgX11FontResource }

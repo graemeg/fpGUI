@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -197,6 +197,7 @@ type
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
+    procedure   BringToFront; override;
   end;
 
 
@@ -2013,6 +2014,12 @@ procedure TfpgGDIWindow.SetFullscreen(AValue: Boolean);
 begin
   inherited SetFullscreen(AValue);
   WindowSetFullscreen(AValue, True);
+end;
+
+procedure TfpgGDIWindow.BringToFront;
+begin
+  if HasHandle then
+    BringWindowToTop(FWinHandle);
 end;
 
 function TfpgGDIWindow.HandleIsValid: boolean;
