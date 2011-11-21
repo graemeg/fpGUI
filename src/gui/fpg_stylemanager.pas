@@ -66,7 +66,7 @@ type
     function    CreateInstance(const AStyleName: string): TfpgStyle; overload;
     function    CreateInstance: TfpgStyle; overload;
     procedure   FreeStyleInstance;
-    procedure   AssignStyleTypes(var AStrings: TStrings);
+    procedure   AssignStyleTypes(const AStrings: TStrings);
   end;
 
 
@@ -194,7 +194,7 @@ end;
 { Assign the registered list of style names to a StringList.
   This can be used to populate a combobox with the registered style
   class types. }
-procedure TfpgStyleManager.AssignStyleTypes(var AStrings: TStrings);
+procedure TfpgStyleManager.AssignStyleTypes(const AStrings: TStrings);
 var
   i: integer;
 begin

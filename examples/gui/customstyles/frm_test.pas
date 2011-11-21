@@ -54,7 +54,6 @@ end;
 procedure TTestForm.AfterCreate;
 var
   miSubMenu: TfpgMenuItem;
-  lst: TStrings;
 begin
   {@VFD_BODY_BEGIN: TestForm}
   Name := 'TestForm';
@@ -262,8 +261,7 @@ begin
 
   miSubMenu.SubMenu := pmSubMenu1;
 
-  lst := memStyles.Lines;
-  fpgStyleManager.AssignStyleTypes(lst);
+  fpgStyleManager.AssignStyleTypes(memStyles.Lines);
 end;
 
 
