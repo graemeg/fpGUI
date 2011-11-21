@@ -103,9 +103,7 @@ procedure TfpgMDIChildForm.TitleMouseUp(Sender: TObject; AButton: TMouseButton;
 	AShift: TShiftState; const AMousePos: TPoint);
 begin
 	FIsMouseDown := False;
-	{$IFDEF MSWINDOWS}
-	ReleaseMouse;
-	{$ENDIF}
+	Panel1.ReleaseMouse;
 end;
 
 procedure TfpgMDIChildForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton;
@@ -114,9 +112,7 @@ begin
 	FMDIWorkArea.ActiveWindow := self;
 	FIsMouseDown := True;
 	FLastPos := Panel1.WindowToScreen(self, AMousePos);
-	{$IFDEF MSWINDOWS}
-	CaptureMouse;
-	{$ENDIF}
+	Panel1.CaptureMouse;
 end;
 
 procedure TfpgMDIChildForm.TitleMouseExit(Sender: TObject);
