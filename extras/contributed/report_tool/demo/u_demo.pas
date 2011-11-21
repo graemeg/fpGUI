@@ -125,7 +125,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeEmptyPage(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -177,7 +177,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeSimpleText(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -229,7 +229,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeMultiPages(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -281,7 +281,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeMultiSections(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -333,7 +333,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeOutlines(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -385,7 +385,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeCadres(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -437,7 +437,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeColor(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -489,7 +489,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeLines(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -541,7 +541,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeGrid(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -593,7 +593,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeGraph(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -645,7 +645,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-//  Langue:= Version;
+//  Language:= Version;
   ImprimeSurf(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
@@ -693,7 +693,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'EmptyPage.pdf';
   ImprimeEmptyPage(True);
   Free;
@@ -705,7 +705,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'SimpleText.pdf';
   ImprimeSimpleText(True);
   Free;
@@ -717,7 +717,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'MultiPages.pdf';
   ImprimeMultiPages(True);
   Free;
@@ -729,7 +729,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'MultiSections.pdf';
   ImprimeMultiSections(True);
   Free;
@@ -741,7 +741,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Outlines.pdf';
   ImprimeOutlines(True);
   Free;
@@ -753,7 +753,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Cadres.pdf';
   ImprimeCadres(True);
   Free;
@@ -765,7 +765,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Color.pdf';
   ImprimeColor(True);
   Free;
@@ -777,7 +777,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Lines.pdf';
   ImprimeLines(True);
   Free;
@@ -789,7 +789,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Grid.pdf';
   ImprimeGrid(True);
   Free;
@@ -801,7 +801,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Graph.pdf';
   ImprimeGraph(True);
   Free;
@@ -813,7 +813,7 @@ begin
 FImprime:= T_Imprime.Create;
 with FImprime do
   begin
-  //Langue:= Version;
+  //Language:= Version;
   DefaultFile:= 'Surface.pdf';
   ImprimeSurf(True);
   Free;
@@ -885,13 +885,13 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins
   Section(0,0,0,0);
   // create an empty page
   Page;
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -902,23 +902,23 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins: 10 mm each side
   Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTexte1:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte2:= Fonte('helvetica-8',clBlack);
-  FtTexte3:= Fonte('helvetica-8:italic',clBlack);
+  FtTexte1:= Font('helvetica-15:bold',clBlack);
+  FtTexte2:= Font('helvetica-8',clBlack);
+  FtTexte3:= Font('helvetica-8:italic',clBlack);
   // write the text at position 100 mm from left and 120 mm from top
-  EcritPage(100,120,'Big text at absolute position',-1,FtTexte1);
+  WritePage(100,120,'Big text at absolute position',-1,FtTexte1);
   // write the text aligned to left
-  EcritPage(cnLeft,50,'Text aligned to left',ColDefaut,FtTexte2);
+  WritePage(cnLeft,50,'Text aligned to left',ColDefaut,FtTexte2);
   // write the text aligned to right
-  EcritPage(cnRight,75,'Text aligned to right',ColDefaut,FtTexte3);
+  WritePage(cnRight,75,'Text aligned to right',ColDefaut,FtTexte3);
   // write the text aligned to center
-  EcritPage(cnCenter,100,'Text aligned to center',ColDefaut,FtTexte2);
+  WritePage(cnCenter,100,'Text aligned to center',ColDefaut,FtTexte2);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -930,21 +930,21 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins
   Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-8',clBlack);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-8',clBlack);
   // write title on each page
-  EcritEnTete(cnCenter,lnFin,'MULTIPAGE DOCUMENT',ColDefaut,FtTitre);
+  WriteHeader(cnCenter,lnFin,'MULTIPAGE DOCUMENT',ColDefaut,FtTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte);
   // create five new empty pages
   for Cpt:= 1 to 5 do
     Page;
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -957,24 +957,24 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitreS1:= Fonte('helvetica-15:bold',clBlack);
-  FtTitreS2:= Fonte('helvetica-14:italic',clBlack);
-  FtTitreS3:= Fonte('helvetica-12:bold:italic',clBlack);
-  FtTexte:= Fonte('helvetica-8',clBlack);
-  FtNum:= Fonte('helvetica-7:italic',clBlack);
-  FtNumS:= Fonte('helvetica-7:italic',clGray);
+  FtTitreS1:= Font('helvetica-15:bold',clBlack);
+  FtTitreS2:= Font('helvetica-14:italic',clBlack);
+  FtTitreS3:= Font('helvetica-12:bold:italic',clBlack);
+  FtTexte:= Font('helvetica-8',clBlack);
+  FtNum:= Font('helvetica-7:italic',clBlack);
+  FtNumS:= Font('helvetica-7:italic',clGray);
   // create a new section and define the margins
   Section(20,10,10,10);
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS1);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS1);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionPied(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionFooter(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 3 do
     Page;
@@ -982,15 +982,15 @@ with FImprime do
   // create a new section and define the margins
   Section(10,10,10,10,0,oLandscape);
   // create a default column for section2 which is landscape oriented
-  ColDefSect2:= Colonne(20,257);
+  ColDefSect2:= Column(20,257);
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitreS2);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitreS2);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefSect2,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefSect2,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,True,ColDefSect2,FtNumS);
+  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,True,ColDefSect2,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefSect2,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefSect2,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -998,19 +998,19 @@ with FImprime do
   // create a new section and define the margins
   Section(20,20,20,20);
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS3);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS3);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 4 do
     Page;
 
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1023,39 +1023,39 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitreS1:= Fonte('helvetica-15:bold',clBlack);
-  FtTitreS2:= Fonte('helvetica-14:italic',clBlack);
-  FtTitreS3:= Fonte('helvetica-12:bold:italic',clBlack);
-  FtTexte:= Fonte('helvetica-8',clBlack);
-  FtNum:= Fonte('helvetica-7:italic',clBlack);
-  FtNumS:= Fonte('helvetica-7:italic',clGray);
+  FtTitreS1:= Font('helvetica-15:bold',clBlack);
+  FtTitreS2:= Font('helvetica-14:italic',clBlack);
+  FtTitreS3:= Font('helvetica-12:bold:italic',clBlack);
+  FtTexte:= Font('helvetica-8',clBlack);
+  FtNum:= Font('helvetica-7:italic',clBlack);
+  FtNumS:= Font('helvetica-7:italic',clGray);
   // create a new section and define the margins
   Section(20,10,10,10);
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS1);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS1);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionPied(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionFooter(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 3 do
     Page;
 
   // create a new section and define the margins
   Section(10,10,10,10,0,oLandscape);
-  TitreSection:= 'Landscape oriented';
+  SectionTitle:= 'Landscape oriented';
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS2);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS2);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,True,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,True,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -1063,20 +1063,20 @@ with FImprime do
   // create a new section and define the margins
   Section(20,20,20,20);
   // write title on each page of the section
-  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS3);
+  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS3);
   // write section number and total of sections on each page
-  NumSectionEnTete(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 4 do
     Page;
 
   // preparation is finished, so create PDF objects
   Outline:= True;
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1089,32 +1089,33 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(20,10,10,10,5);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-8',clBlack);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-8',clBlack);
   // create the style of lines to be used
-  TsFin:= StyleTrait(0.2,clBlack,lsSolid);
-  TsNorm:= StyleTrait(1,clBlack,lsSolid);
-  TsEpais:= StyleTrait(2,clBlack,lsSolid);
+  TsFin:= LineStyle(0.2,clBlack,lsSolid);
+  TsNorm:= LineStyle(1,clBlack,lsSolid);
+  TsEpais:= LineStyle(2,clBlack,lsSolid);
   // create line spacings to be used
-  IlTitre:= Interligne(3,0,3);
-  IlTexte:= Interligne(1,0,1);
+  IlTitre:= LineSpace(3,0,3);
+  IlTexte:= LineSpace(1,0,1);
   // write title on each page
-  EcritEnTete(cnCenter,lnFin,'SHOWING FRAMES',ColDefaut,FtTitre,IlTitre);
+  WriteHeader(cnCenter,lnFin,'SHOWING FRAMES',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // draw thin frame rectangle at margins
 //  CadreMarges(TsFin);
   // draw thick frame rectangle at header
-  CadreEnTete(TsEpais);
+  FrameHeader(TsEpais);
   // draw thick frame rectangle at footer
-  CadrePied(TsNorm);
-  CadrePage(TsEpais);
+  FramePage(TsNorm);
+  // draw normal frame rectangle at page
+  FrameFooter(TsEpais);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1130,52 +1131,52 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(20,10,10,10);
   // create the filling colors to be used
-  FdBlanc:= Fond(clWhite);
-  FdBeige:= Fond(clBeige);
-  FdEau:= Fond(clAqua);
-  FdVertPale:= Fond(clPaleGreen);
+  FdBlanc:= BackColor(clWhite);
+  FdBeige:= BackColor(clBeige);
+  FdEau:= BackColor(clAqua);
+  FdVertPale:= BackColor(clPaleGreen);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtNormBlack:= Fonte('helvetica-8',clBlack);
-  FtNormRed:= Fonte('helvetica-8',clRed);
-  FtNormGreen:= Fonte('helvetica-8',clGreen);
-  FtBoldBlue:= Fonte('helvetica-8:bold',clBlue);
-  FtItalGray:= Fonte('helvetica-8:italic',clGray);
-  FtBoldItalFuchsia:= Fonte('helvetica-8:bold:italic',clFuchsia);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtNormBlack:= Font('helvetica-8',clBlack);
+  FtNormRed:= Font('helvetica-8',clRed);
+  FtNormGreen:= Font('helvetica-8',clGreen);
+  FtBoldBlue:= Font('helvetica-8:bold',clBlue);
+  FtItalGray:= Font('helvetica-8:italic',clGray);
+  FtBoldItalFuchsia:= Font('helvetica-8:bold:italic',clFuchsia);
   // create the style of lines to be used
-  TsFinNoir:= StyleTrait(1,clBlack,lsSolid);
-  TsFinBleu:= StyleTrait(1,clBlue,lsSolid);
-  TsFinRouge:= StyleTrait(1,clRed,lsSolid);
-  TsEpaisNoir:= StyleTrait(3,clBlack,lsSolid);
-  TsEpaisGris:= StyleTrait(3,clGray,lsdot);
-  TsEpaisGreen:= StyleTrait(3,clGreen,lsSolid);
+  TsFinNoir:= LineStyle(1,clBlack,lsSolid);
+  TsFinBleu:= LineStyle(1,clBlue,lsSolid);
+  TsFinRouge:= LineStyle(1,clRed,lsSolid);
+  TsEpaisNoir:= LineStyle(3,clBlack,lsSolid);
+  TsEpaisGris:= LineStyle(3,clGray,lsdot);
+  TsEpaisGreen:= LineStyle(3,clGreen,lsSolid);
   // create columns to be used
-  Col1:= Colonne(20,100,2);
-  Col2:= Colonne(120,80,1);
-  Col3:= Colonne(70,100,5);
+  Col1:= Column(20,100,2);
+  Col2:= Column(120,80,1);
+  Col3:= Column(70,100,5);
   // create line spacings to be used
-  IlTitre:= Interligne(5,0,5);
-  IlTexte:= Interligne(0,0,0);
+  IlTitre:= LineSpace(5,0,5);
+  IlTexte:= LineSpace(0,0,0);
   // write title on each page
-  EcritEnTete(cnCenter,lnFin,'SHOWING COLORS',ColDefaut,FtTitre,IlTitre);
+  WriteHeader(cnCenter,lnFin,'SHOWING COLORS',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtNormRed,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtNormRed,IlTexte);
   // write some example texts
-  EcritPage(cnLeft,lnFin,'Bold blue text aligned to left',ColDefaut,FtBoldBlue,IlTexte);
-  EspacePage(10,ColDefaut,FdVertPale);
-  EcritPage(cnCenter,lnFin,'followed by centered normal black text after a 1 cm colored space',ColDefaut,FtNormBlack,IlTexte);
-  EspacePage(15);
-  EcritPage(cnLeft,lnFin,'text written on colored background after a 1.5 cm colored space',ColDefaut,FtItalGray,IlTexte,FdEau);
-  EspacePage(10);
-  EcritPage(cnLeft,lnCourante,'This text starts in column 1',Col1,FtNormGreen,IlTexte,FdBeige);
-  EcritPage(cnLeft,lnFin,'and ends in column 2',Col2,FtBoldItalFuchsia,IlTexte);
-  EcritPage(cnCenter,lnFin,'And this one is centered in column 3',Col3,FtNormRed,IlTexte,FdBeige);
+  WritePage(cnLeft,lnFin,'Bold blue text aligned to left',ColDefaut,FtBoldBlue,IlTexte);
+  SpacePage(10,ColDefaut,FdVertPale);
+  WritePage(cnCenter,lnFin,'followed by centered normal black text after a 1 cm colored space',ColDefaut,FtNormBlack,IlTexte);
+  SpacePage(15);
+  WritePage(cnLeft,lnFin,'text written on colored background after a 1.5 cm colored space',ColDefaut,FtItalGray,IlTexte,FdEau);
+  SpacePage(10);
+  WritePage(cnLeft,lnCourante,'This text starts in column 1',Col1,FtNormGreen,IlTexte,FdBeige);
+  WritePage(cnLeft,lnFin,'and ends in column 2',Col2,FtBoldItalFuchsia,IlTexte);
+  WritePage(cnCenter,lnFin,'And this one is centered in column 3',Col3,FtNormRed,IlTexte,FdBeige);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1190,45 +1191,45 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-8',clBlack);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-8',clBlack);
   // create the style of lines to be used
-  TsFinNoir:= StyleTrait(0.2,clBlack,lsSolid);
-  TsFinBleu:= StyleTrait(0.1,clBlue,lsDash);
-  TsEpais:= StyleTrait(2,clBlack,lsSolid);
-  TsFinRouge:= StyleTrait(1,clRed,lsDashDot);
+  TsFinNoir:= LineStyle(0.2,clBlack,lsSolid);
+  TsFinBleu:= LineStyle(0.1,clBlue,lsDash);
+  TsEpais:= LineStyle(2,clBlack,lsSolid);
+  TsFinRouge:= LineStyle(1,clRed,lsDashDot);
   // create line spacings to be used
-  IlTitre:= Interligne(3,0,3);
-  IlTexte:= Interligne(0,0,0);
+  IlTitre:= LineSpace(3,0,3);
+  IlTexte:= LineSpace(0,0,0);
   // define column borders
-  BdRect:= Bordure([bcGauche,bcDroite,bcHaut,bcBas],TsEpais);
-  BdColn:= Bordure([bcGauche,bcDroite,bcHaut],TsFinBleu);
-  BdFinCol:= Bordure([bcGauche,bcDroite,bcHaut,bcBas],TsFinNoir);
+  BdRect:= Border([bcGauche,bcDroite,bcHaut,bcBas],TsEpais);
+  BdColn:= Border([bcGauche,bcDroite,bcHaut],TsFinBleu);
+  BdFinCol:= Border([bcGauche,bcDroite,bcHaut,bcBas],TsFinNoir);
   // create columns to be used
-  Col1:= Colonne(20,60,2);
-  Col2:= Colonne(80,60,2);
-  Col3:= Colonne(140,60,2);
+  Col1:= Column(20,60,2);
+  Col2:= Column(80,60,2);
+  Col3:= Column(140,60,2);
   // write title on each page
-  EcritEnTete(cnCenter,lnFin,'SHOWING LINES',ColDefaut,FtTitre,IlTitre);
+  WriteHeader(cnCenter,lnFin,'SHOWING LINES',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // write some example texts with column borders
-  EcritPage(cnLeft,lnCourante,'Example of lines',Col1,FtTexte,IlTexte,-1,BdColn);
-  EcritPage(cnLeft,lnCourante,'with column borders',Col2,FtTexte,IlTexte,-1,BdFinCol);
-  EcritPage(cnLeft,lnFin,'',Col3,FtTexte);
-  EspacePage(5);
-  EcritPage(cnLeft,lnFin,'A thick border',Col3,FtTexte,IlTexte,-1,BdRect);
-  TraitHorizPage(2,2,Col2,TsEpais);
-  TraitPage(30,100,150,150,tsFinNoir);
-  TraitPage(50,70,180,100,tsFinBleu);
-  TraitPage(40,140,160,80,tsFinRouge);
-  TraitPage(60,50,60,120,tsEpais);
+  WritePage(cnLeft,lnCourante,'Example of lines',Col1,FtTexte,IlTexte,-1,BdColn);
+  WritePage(cnLeft,lnCourante,'with column borders',Col2,FtTexte,IlTexte,-1,BdFinCol);
+  WritePage(cnLeft,lnFin,'',Col3,FtTexte);
+  SpacePage(5);
+  WritePage(cnLeft,lnFin,'A thick border',Col3,FtTexte,IlTexte,-1,BdRect);
+  HorizLinePage(2,2,Col2,TsEpais);
+  LinePage(30,100,150,150,tsFinNoir);
+  LinePage(50,70,180,100,tsFinBleu);
+  LinePage(40,140,160,80,tsFinRouge);
+  LinePage(60,50,60,120,tsEpais);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1257,59 +1258,59 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-7',clBlack);
-  FtTexteBlue:= Fonte('helvetica-7',clBlue);
-  FtTexteRed:= Fonte('helvetica-7',clRed);
-  FtSTitre:= Fonte('helvetica-9:bold:italic',clBlue);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-7',clBlack);
+  FtTexteBlue:= Font('helvetica-7',clBlue);
+  FtTexteRed:= Font('helvetica-7',clRed);
+  FtSTitre:= Font('helvetica-9:bold:italic',clBlue);
   // create the style of lines to be used
-  TsFinNoir:= StyleTrait(0.5,clBlack,lsSolid);
-  TsEpaisBleu:= StyleTrait(1.5,clBlue,lsSolid);
+  TsFinNoir:= LineStyle(0.5,clBlack,lsSolid);
+  TsEpaisBleu:= LineStyle(1.5,clBlue,lsSolid);
   // create line spacings to be used
-  IlTitre:= Interligne(3,0,3);
-  IlTexte:= Interligne(1,0,0);
+  IlTitre:= LineSpace(3,0,3);
+  IlTexte:= LineSpace(1,0,0);
   // define column background color
-  FdBeige:= Fond(clBeige);
+  FdBeige:= BackColor(clBeige);
   // define column borders
-  BdColn:= Bordure([bcGauche,bcDroite],TsFinNoir);
-  BdColnG:= Bordure([bcGauche],TsEpaisBleu);
-  BdColnD:= Bordure([bcDroite],TsEpaisBleu);
+  BdColn:= Border([bcGauche,bcDroite],TsFinNoir);
+  BdColnG:= Border([bcGauche],TsEpaisBleu);
+  BdColnD:= Border([bcDroite],TsEpaisBleu);
   // create columns to be used
-  Col[1]:= Colonne(Col1Pos,Col1Wid,2);
-  Col[2]:= Colonne(Col2Pos,Col2Wid,2);
-  Col[3]:= Colonne(Col3Pos,Col3Wid,2);
-  Col[4]:= Colonne(Col4Pos,Col4Wid,2);
-  Col[5]:= Colonne(Col5Pos,Col5Wid,2);
+  Col[1]:= Column(Col1Pos,Col1Wid,2);
+  Col[2]:= Column(Col2Pos,Col2Wid,2);
+  Col[3]:= Column(Col3Pos,Col3Wid,2);
+  Col[4]:= Column(Col4Pos,Col4Wid,2);
+  Col[5]:= Column(Col5Pos,Col5Wid,2);
   // write title on each page
-  EcritEnTete(cnCenter,lnFin,'SHOWING GRIDS',ColDefaut,FtTitre,IlTitre);
+  WriteHeader(cnCenter,lnFin,'SHOWING GRIDS',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // write a grid without borders
-  EcritPage(cnCenter,lnFin,'Grid without borders',ColDefaut,FtSTitre,IlTitre);
+  WritePage(cnCenter,lnFin,'Grid without borders',ColDefaut,FtSTitre,IlTitre);
   for CptLig:= 1 to 10 do
     for CptCol:= 1 to 5 do
       if CptCol= 5
       then
-        EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte)
+        WritePage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte)
       else
-        EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte);
-  EspacePage(5);
+        WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte);
+  SpacePage(5);
   // write a grid with borders
-  PosHoriz:= EcritPage(cnCenter,lnFin,'Grid with borders and colors',ColDefaut,FtSTitre,IlTitre);
-  TraitPage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
+  PosHoriz:= WritePage(cnCenter,lnFin,'Grid with borders and colors',ColDefaut,FtSTitre,IlTitre);
+  LinePage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
   for CptLig:= 1 to 10 do
     for CptCol:= 1 to 5 do
       if CptCol= 1
       then
         if CptLig mod 2= 0
         then
-          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColnG)
+          WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColnG)
         else
-          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColnG)
+          WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColnG)
       else
         if CptCol= 5
         then
@@ -1317,40 +1318,40 @@ with FImprime do
           then
             begin
             PredPosHoriz:= PosHoriz;
-            PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
-            TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
-            TraitPage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
-            TraitPage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
+            PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
+            LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+            LinePage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
+            LinePage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
             end
           else
             begin
             if CptLig= 1
             then
-              PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD)
+              PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD)
             else
               if CptLig mod 2= 0
               then
                 begin
                 PredPosHoriz:= PosHoriz;
-                PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
-                TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
-                TraitPage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
+                PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
+                LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+                LinePage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
                 end
               else
                 begin
                 PredPosHoriz:= PosHoriz;
-                PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD);
-                TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+                PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD);
+                LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
                 end;
             end
         else
           if CptLig mod 2= 0
           then
-            EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColn)
+            WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColn)
           else
-            EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColn);
+            WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColn);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1366,47 +1367,47 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-7',clBlack);
-  FtMax:= Fonte('helvetica-7',clFuchsia);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-7',clBlack);
+  FtMax:= Font('helvetica-7',clFuchsia);
   // create line spacings to be used
-  IlTitre:= Interligne(3,0,3);
-  IlTexte:= Interligne(1,0,0);
+  IlTitre:= LineSpace(3,0,3);
+  IlTexte:= LineSpace(1,0,0);
   // create the style of lines to be used
-  TsNoir:= StyleTrait(1,clBlack,lsSolid);
-  TsGris:= StyleTrait(1,clGray,lsDot);
-  TsBleu:= StyleTrait(1,clBlue,lsSolid);
-  TsFuchsia:= StyleTrait(1,clFuchsia,lsDot);
-  EcritEnTete(cnCenter,lnFin,'SHOWING GRAPH',ColDefaut,FtTitre,IlTitre);
+  TsNoir:= LineStyle(1,clBlack,lsSolid);
+  TsGris:= LineStyle(1,clGray,lsDot);
+  TsBleu:= LineStyle(1,clBlue,lsSolid);
+  TsFuchsia:= LineStyle(1,clFuchsia,lsDot);
+  WriteHeader(cnCenter,lnFin,'SHOWING GRAPH',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // draw a graph
   Max:= 0;
-  EcritPage(10,Base,'0',-1,FtTexte);
-  TraitPage(20,Base,200,Base,TsNoir);
+  WritePage(10,Base,'0',-1,FtTexte);
+  LinePage(20,Base,200,Base,TsNoir);
   for Cpt:= 1 to 5 do
     begin
-    EcritPage(10,Base-Cpt*20,IntToStr(Cpt),-1,FtTexte);
-    TraitPage(20,Base-Cpt*20,200,Base-Cpt*20,TsGris);
+    WritePage(10,Base-Cpt*20,IntToStr(Cpt),-1,FtTexte);
+    LinePage(20,Base-Cpt*20,200,Base-Cpt*20,TsGris);
     end;
   for Cpt:= 0 to 18 do
     begin
     if ChartValues[Cpt]> Max
     then
       Max:= ChartValues[Cpt];
-    EcritPage(18+Cpt*10,Base+5,IntToStr(Cpt),-1,FtTexte);
-    TraitPage(20+Cpt*10,Base,20+Cpt*10,Base-ChartValues[Cpt],TsGris);
+    WritePage(18+Cpt*10,Base+5,IntToStr(Cpt),-1,FtTexte);
+    LinePage(20+Cpt*10,Base,20+Cpt*10,Base-ChartValues[Cpt],TsGris);
     if Cpt>0 then
-      TraitPage(20+Pred(Cpt)*10,Base-ChartValues[Pred(Cpt)],20+Cpt*10,Base-ChartValues[Cpt],TsBleu);
+      LinePage(20+Pred(Cpt)*10,Base-ChartValues[Pred(Cpt)],20+Cpt*10,Base-ChartValues[Cpt],TsBleu);
     end;
-  EcritPage(16,Base-Max,IntToStr(Max),-1,FtMax);
-  TraitPage(20,Base-Max,200,Base-Max,TsFuchsia);
+  WritePage(16,Base-Max,IntToStr(Max),-1,FtMax);
+  LinePage(20,Base-Max,200,Base-Max,TsFuchsia);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 
@@ -1418,23 +1419,23 @@ begin
 with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
-  Debut(oPortrait,A4,msMM,Langue,Preview);
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
   // create a new section and define the margins with an additional one due to frames drawing
   Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitre:= Fonte('helvetica-15:bold',clBlack);
-  FtTexte:= Fonte('helvetica-7',clBlack);
+  FtTitre:= Font('helvetica-15:bold',clBlack);
+  FtTexte:= Font('helvetica-7',clBlack);
   // create line spacings to be used
-  IlTitre:= Interligne(3,0,3);
-  IlTexte:= Interligne(1,0,0);
-  EcritEnTete(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitre,IlTitre);
+  IlTitre:= LineSpace(3,0,3);
+  IlTexte:= LineSpace(1,0,0);
+  WriteHeader(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
-  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // paint some surfaces
   SurfPage([40,40,100],[50,110,80],clGreen);
   SurfPage([30,50,150,80,120,130],[120,180,180,160,140,120],clFuchsia);
   // preparation is finished, so create PDF objects
-  Fin;
+  EndWrite;
   end;
 end;
 

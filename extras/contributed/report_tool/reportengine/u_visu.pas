@@ -104,12 +104,12 @@ with FImprime do
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 1
   then
     E_NumPage.Focusable:= False;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  E_NumPage.Text:= IntToStr(NumPage);
   L_NbrPages.Text:= IntToStr(T_Section(Sections[Pred(Sections.Count)]).TotPages);
-  E_NumSect.Text:= IntToStr(NumeroSection);
+  E_NumSect.Text:= IntToStr(NumSection);
   L_NbrSect.Text:= IntToStr(Sections.Count);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   ChangeBoutons;
   end;
 end;
@@ -174,12 +174,12 @@ procedure TF_Visu.Bt_PremPageClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroPage:= 1;
-  NumeroSection:= 1;
-  NumeroPageSection:= 1;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  NumPage:= 1;
+  NumSection:= 1;
+  NumPageSection:= 1;
+  E_NumPage.Text:= IntToStr(NumPage);
   Bv_Visu.Visible:= False;
-  with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+  with T_Section(Sections[Pred(NumSection)]),F_Visu do
     begin
     Bv_Visu.Height:= Paper.H;
     Bv_Visu.Width:= Paper.W;
@@ -188,9 +188,9 @@ with FImprime do
     end;
   Bv_Visu.Visible:= True;
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -198,14 +198,14 @@ procedure TF_Visu.Bt_PrecPageClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroPage:= NumeroPage-1;
-  if NumeroPageSection= 1
+  NumPage:= NumPage-1;
+  if NumPageSection= 1
   then
     begin
-    NumeroSection:= NumeroSection-1;
-    NumeroPageSection:= T_Section(Sections[Pred(NumeroSection)]).NbPages;
+    NumSection:= NumSection-1;
+    NumPageSection:= T_Section(Sections[Pred(NumSection)]).NbPages;
     Bv_Visu.Visible:= False;
-    with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+    with T_Section(Sections[Pred(NumSection)]),F_Visu do
       begin
       Bv_Visu.Height:= Paper.H;
       Bv_Visu.Width:= Paper.W;
@@ -216,14 +216,14 @@ with FImprime do
     end
   else
     begin
-    NumeroPageSection:= NumeroPageSection-1;
+    NumPageSection:= NumPageSection-1;
     Bv_Visu.Invalidate;
     end;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  E_NumPage.Text:= IntToStr(NumPage);
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -231,14 +231,14 @@ procedure TF_Visu.Bt_SuivPageClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroPage:= NumeroPage+1;
-  if NumeroPageSection= T_Section(Sections[Pred(NumeroSection)]).NbPages
+  NumPage:= NumPage+1;
+  if NumPageSection= T_Section(Sections[Pred(NumSection)]).NbPages
   then
     begin
-    NumeroSection:= NumeroSection+1;
-    NumeroPageSection:= 1;
+    NumSection:= NumSection+1;
+    NumPageSection:= 1;
     Bv_Visu.Visible:= False;
-    with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+    with T_Section(Sections[Pred(NumSection)]),F_Visu do
       begin
       Bv_Visu.Height:= Paper.H;
       Bv_Visu.Width:= Paper.W;
@@ -249,14 +249,14 @@ with FImprime do
     end
   else
     begin
-    NumeroPageSection:= NumeroPageSection+1;
+    NumPageSection:= NumPageSection+1;
     Bv_Visu.Invalidate;
     end;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  E_NumPage.Text:= IntToStr(NumPage);
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -264,12 +264,12 @@ procedure TF_Visu.Bt_DernPageClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroPage:= T_Section(Sections[Pred(Sections.Count)]).TotPages;
-  NumeroSection:= Sections.Count;
-  NumeroPageSection:= T_Section(Sections[Pred(Sections.Count)]).NbPages;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  NumPage:= T_Section(Sections[Pred(Sections.Count)]).TotPages;
+  NumSection:= Sections.Count;
+  NumPageSection:= T_Section(Sections[Pred(Sections.Count)]).NbPages;
+  E_NumPage.Text:= IntToStr(NumPage);
   Bv_Visu.Visible:= False;
-  with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+  with T_Section(Sections[Pred(NumSection)]),F_Visu do
     begin
     Bv_Visu.Height:= Paper.H;
     Bv_Visu.Width:= Paper.W;
@@ -278,9 +278,9 @@ with FImprime do
     end;
   Bv_Visu.Visible:= True;
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -288,12 +288,12 @@ procedure TF_Visu.Bt_PrecSectClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroSection:= NumeroSection-1;
-  NumeroPage:= T_Section(Sections[Pred(NumeroSection)]).FirstPage;
-  NumeroPageSection:= 1;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  NumSection:= NumSection-1;
+  NumPage:= T_Section(Sections[Pred(NumSection)]).FirstPage;
+  NumPageSection:= 1;
+  E_NumPage.Text:= IntToStr(NumPage);
   Bv_Visu.Visible:= False;
-  with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+  with T_Section(Sections[Pred(NumSection)]),F_Visu do
     begin
     Bv_Visu.Height:= Paper.H;
     Bv_Visu.Width:= Paper.W;
@@ -302,9 +302,9 @@ with FImprime do
     end;
   Bv_Visu.Visible:= True;
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -312,12 +312,12 @@ procedure TF_Visu.Bt_SuivSectClick(Sender: TObject);
 begin
 with FImprime do
   begin
-  NumeroSection:= NumeroSection+1;
-  NumeroPage:= T_Section(Sections[Pred(NumeroSection)]).FirstPage;
-  NumeroPageSection:= 1;
-  E_NumPage.Text:= IntToStr(NumeroPage);
+  NumSection:= NumSection+1;
+  NumPage:= T_Section(Sections[Pred(NumSection)]).FirstPage;
+  NumPageSection:= 1;
+  E_NumPage.Text:= IntToStr(NumPage);
   Bv_Visu.Visible:= False;
-  with T_Section(Sections[Pred(NumeroSection)]),F_Visu do
+  with T_Section(Sections[Pred(NumSection)]),F_Visu do
     begin
     Bv_Visu.Height:= Paper.H;
     Bv_Visu.Width:= Paper.W;
@@ -326,9 +326,9 @@ with FImprime do
     end;
   Bv_Visu.Visible:= True;
   ChangeBoutons;
-  E_NumSect.Text:= IntToStr(NumeroSection);
-  L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+  E_NumSect.Text:= IntToStr(NumSection);
+  L_NumPageSect.Text:= IntToStr(NumPageSection);
+  L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
   end;
 end;
 
@@ -337,7 +337,7 @@ begin
 with FImprime do
   if T_Section(Sections[Pred(Sections.Count)]).TotPages> 1
   then
-    if NumeroPage= 1
+    if NumPage= 1
     then
       begin
       Bt_PremPage.Enabled:= False;
@@ -352,7 +352,7 @@ with FImprime do
         Bt_SuivSect.Enabled:= False;
       end
     else
-      if NumeroPage= T_Section(Sections[Pred(Sections.Count)]).TotPages
+      if NumPage= T_Section(Sections[Pred(Sections.Count)]).TotPages
       then
         begin
         Bt_PremPage.Enabled:= True;
@@ -374,14 +374,14 @@ with FImprime do
         Bt_DernPage.Enabled:= True;
         if Sections.Count> 1
         then
-          if NumeroSection= 1
+          if NumSection= 1
           then
             begin
             Bt_PrecSect.Enabled:= False;
             Bt_SuivSect.Enabled:= True;
             end
           else
-            if NumeroSection= Sections.Count
+            if NumSection= Sections.Count
             then
               begin
               Bt_PrecSect.Enabled:= True;
@@ -420,14 +420,14 @@ then
     begin
     if E_NumPage.Value> T_Section(Sections[Pred(Sections.Count)]).TotPages
     then
-      NumeroPage:= T_Section(Sections[Pred(Sections.Count)]).TotPages
+      NumPage:= T_Section(Sections[Pred(Sections.Count)]).TotPages
     else
       if E_NumPage.Value= 0
       then
-        NumeroPage:= 1
+        NumPage:= 1
       else
-        NumeroPage:= E_NumPage.Value;
-    E_NumPage.Value:= NumeroPage;
+        NumPage:= E_NumPage.Value;
+    E_NumPage.Value:= NumPage;
     CptSect:= 0;
     CptPage:= 0;
     repeat
@@ -436,15 +436,15 @@ then
       repeat
         Inc(CptPage);
         Inc(CptPageSect);
-      until (CptPage= NumeroPage) or (CptPage= T_Section(Sections[Pred(Cptsect)]).NbPages);
-    until CptPage= NumeroPage;
-    NumeroSection:= CptSect;
-    NumeroPageSection:= CptPagesect;
+      until (CptPage= NumPage) or (CptPage= T_Section(Sections[Pred(Cptsect)]).NbPages);
+    until CptPage= NumPage;
+    NumSection:= CptSect;
+    NumPageSection:= CptPagesect;
     Bv_Visu.Invalidate;
     ChangeBoutons;
-    E_NumSect.Text:= IntToStr(NumeroSection);
-    L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-    L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+    E_NumSect.Text:= IntToStr(NumSection);
+    L_NumPageSect.Text:= IntToStr(NumPageSection);
+    L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
     end;
 end;
 
@@ -457,21 +457,21 @@ then
     begin
     if E_NumSect.Value> Sections.Count
     then
-      NumeroSection:= Sections.Count
+      NumSection:= Sections.Count
     else
     if E_NumSect.Value= 0
     then
-      NumeroSection:= 1
+      NumSection:= 1
     else
-      NumeroSection:= E_NumSect.Value;
-    E_NumSect.Value:= NumeroSection;
-    NumeroPage:= T_Section(Sections[Pred(Numerosection)]).FirstPage;
-    NumeroPageSection:= 1;
-    E_NumPage.Value:= NumeroPage;
+      NumSection:= E_NumSect.Value;
+    E_NumSect.Value:= NumSection;
+    NumPage:= T_Section(Sections[Pred(NumSection)]).FirstPage;
+    NumPageSection:= 1;
+    E_NumPage.Value:= NumPage;
     Bv_Visu.Invalidate;
     ChangeBoutons;
-    L_NumPageSect.Text:= IntToStr(NumeroPageSection);
-    L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages);
+    L_NumPageSect.Text:= IntToStr(NumPageSection);
+    L_NbrPageSect.Text:= IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
     end;
 end;
 

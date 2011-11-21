@@ -85,17 +85,17 @@ type
     public
       constructor Create;
       destructor Destroy; override;
-      procedure Debut(IniOriente: TOrient= oPortrait; IniTypePapier: TTypePapier= A4;
+      procedure BeginWrite(IniOriente: TOrient= oPortrait; IniTypePapier: TTypePapier= A4;
                 IniMesure: TMesure= msMM; IniVersion: Char= 'F'; IniVisu: Boolean= True);
                 // starts preview and printing process with initializations
                 // IniOriente = paper orientation >> oPortrait or oLandscape
                 // IniTypePapier = (A4, Letter,Legal,Executive,Comm10,Monarch,DL,C5,B5)
                 // IniMesure = millimeters (msMM) or inches (msInches)
                 // IniVersion = version française 'F' or version English 'E', or other, to come
-                // IniVisu = True (visualisation) or False (direct printing or PDF generation)
-      procedure Fin;
-      procedure ImprimeDocument;
-      procedure Visualisation;
+                // IniVisu = True (Preview) or False (direct printing or PDF generation)
+      procedure EndWrite;
+      procedure WriteDocument;
+      procedure PagePreview;
       procedure Section(MgGauche,MgDroite,MgHaute,MgBasse: Single; Retrait: Single= 0;
                 IniOriente: TOrient= oPortrait);
                 // new section with initialization of margins
@@ -103,29 +103,29 @@ type
                 // IniOriente = paper orientation >> oPortrait or oLandscape
       procedure Page;
                 // new page in the current section
-      function Fond(FdColor: TfpgColor): Integer;
+      function BackColor(FdColor: TfpgColor): Integer;
                // returns the number allocated to the color
                // FdColor = background color
-      function Fonte(FtNom: string; FtColor: TfpgColor): Integer;
+      function Font(FtNom: string; FtColor: TfpgColor): Integer;
                // returns the number allocated to the font
                // FtNom = FontDesc of the font
                // FtColor = font color
-      function StyleTrait(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
+      function LineStyle(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
                // returns the number allocated to the line style
                // StEpais = thickness of the line in pixels
                // StColor = line color
                // StStyle = line style
-      function Bordure(BdFlags: TFBordFlags; BdStyle: Integer): Integer;
+      function Border(BdFlags: TFBordFlags; BdStyle: Integer): Integer;
                // returns the number allocated to the border
                // BdFlags = position of the border (bdTop,bdBottom,bdLeft,bdRight)
                // BdStyle = border line style: thickness, color, style
-      function Colonne(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
+      function Column(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
                // returns the number allocated to the column
                // ClnPos = left position in numeric value in the measurement unit (msMM or msInch)
                // ClnWidth = width in numeric value in the measurement unit (msMM or msInch)
                // ClnMargin = left and right margins in numeric value in the measurement unit (msMM or msInch)
                // ClnColor = column background color
-      procedure EcritEnTete(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+      procedure WriteHeader(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
                 //         or numeric value in the measurement unit (msMM or msInch)
@@ -137,7 +137,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      function EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+      function WritePage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1): Single;
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
                 //         or numeric value in the measurement unit (msMM or msInch)
@@ -149,7 +149,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+      procedure WriteFooter(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
                 //         or numeric value in the measurement unit (msMM or msInch)
@@ -161,7 +161,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+      procedure NumSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -177,7 +177,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+      procedure NumSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -193,7 +193,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
+      procedure NumPageHeader(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -208,7 +208,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumPagePied(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
+      procedure NumPageFooter(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -223,7 +223,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+      procedure NumPageSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -238,7 +238,7 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+      procedure NumPageSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -253,60 +253,60 @@ type
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
                 // BordNum = border reference, if > -1
-      procedure TraitHorizEnTete(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+      procedure HorizLineHeader(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
                 // EspAvant = empty space before the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // EspApres =  empty space after the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // StyleNum = reference of the line style
-      procedure TraitHorizPage(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+      procedure HorizLinePage(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
                 // EspAvant = empty space before the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // EspApres =  empty space after the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // StyleNum = reference of the line style
-      procedure TraitHorizPied(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+      procedure HorizLineFooter(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
                 // EspAvant = empty space before the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // EspApres =  empty space after the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // StyleNum = reference of the line style
-      procedure EspaceEnTete(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+      procedure SpaceHeader(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-      procedure EspacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+      procedure SpacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-      procedure EspacePied(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+      procedure SpaceFooter(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-      function Interligne(ItlSup,ItlInt,ItlInf: Single): Integer;
+      function LineSpace(ItlSup,ItlInt,ItlInf: Single): Integer;
                // IntSup = space between lines, top : numeric value in the measurement unit (msMM or msInch)
                // IntInt = space between lines, internal if wrapping : numeric value in the measurement unit (msMM or msInch)
                // IntInf = space between lines, botom : numeric value in the measurement unit (msMM or msInch)
-      procedure Groupe(SautPage: Boolean= False);
+      procedure BeginGroup(SautPage: Boolean= False);
                 // SautPage = True >> forces new page before the group
                 //          = False >> does not create a new page if the whole group can stand on the same page as the preceding text
-      procedure FinGroupe(SautPage: Boolean= False);
+      procedure EndGroup(SautPage: Boolean= False);
                 // SautPage = True >> forces new page after the group
                 //          = False >> lets continue on the same page after the group
       procedure ColorColChange(ColNum: Integer; ColColor: TfpgColor);
                 // Changes the background color of a column
                 // ColNum = column reference
                 // ColColor = new background color for the column
-      procedure CadreMarges(AStyle: Integer);
+      procedure FrameMargins(AStyle: Integer);
                 // draw a frame at the page margins
                 // AStyle = reference of the line style of the frame
-      procedure CadreEnTete(AStyle: Integer);
+      procedure FrameHeader(AStyle: Integer);
                 // draw a frame at the limits of the header
                 // AStyle = reference of the line style of the frame
-      procedure CadrePage(AStyle: Integer);
+      procedure FramePage(AStyle: Integer);
                 // draw a frame at the page limits : left and right margins, header bottom and footer top
                 // AStyle = reference of the line style of the frame
-      procedure CadrePied(AStyle: Integer);
+      procedure FrameFooter(AStyle: Integer);
                 // draw a frame at the limits of the footer
                 // AStyle = reference of the line style of the frame
-      procedure TraitPage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
+      procedure LinePage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
                 // draw a line at absolute position
                 // XDebut = horizontal position of starting point in numeric value in the measurement unit (msMM or msInch)
                 // YDebut = vertical position of starting point in numeric value in the measurement unit (msMM or msInch)
@@ -314,16 +314,16 @@ type
                 // YFin = vertical position of ending point in numeric value in the measurement unit (msMM or msInch)
                 // AStyle = reference of the line style of the line
       procedure SurfPage(XLimits,YLimits: array of Single; AColor: TfpgColor);
-      property Langue: Char read FVersion write FVersion;
+      property Language: Char read FVersion write FVersion;
       property Visualiser: Boolean read FVisualisation write FVisualisation;
-      property NumeroSection: Integer read FNmSection write FNmSection;
-      property NumeroPage: Integer read FNmPage write FNmPage;
-      property NumeroPageSection: Integer read FNmPageSect write FNmPageSect;
-      property HauteurPapier: Integer read GetHauteurPapier;
-      property LargeurPapier: Integer read GetLargeurPapier;
+      property NumSection: Integer read FNmSection write FNmSection;
+      property NumPage: Integer read FNmPage write FNmPage;
+      property NumPageSection: Integer read FNmPageSect write FNmPageSect;
+      property PaperHeight: Integer read GetHauteurPapier;
+      property PagerWidth: Integer read GetLargeurPapier;
       property DefaultFile: string read FDefaultFile write FDefaultFile;
-      property CouleurCourante: Integer read FColorCourante write FColorCourante;
-      property TitreSection: string read GetTitreSection write SetTitreSection;
+      property CurrentColor: Integer read FColorCourante write FColorCourante;
+      property SectionTitle: string read GetTitreSection write SetTitreSection;
     end;
 
   // classes for interface with PDF generation
@@ -555,7 +555,7 @@ end;
 
 procedure T_Imprime.Bv_VisuPaint(Sender: TObject);
 begin
-ImprimePage(NumeroPage);
+ImprimePage(NumPage);
 end;
 
 procedure T_Imprime.PrepareFormat;
@@ -725,10 +725,10 @@ repeat
       LaPage:= T_Page(Pages.Items[Pred(CptPage)]);
     until (LaPage.PagesTot= PageNumero) or (CptPage= Pages.Count);
 until (LaPage.PagesTot= PageNumero) or (CptSect= Sections.Count);
-NumeroPage:= PageNumero;
-NumeroSection:= CptSect;
-NumeroPageSection:= LaPage.PagesSect;
-with T_Section(Sections[Pred(NumeroSection)]) do
+NumPage:= PageNumero;
+NumSection:= CptSect;
+NumPageSection:= LaPage.PagesSect;
+with T_Section(Sections[Pred(NumSection)]) do
   begin
   if CmdEnTete.Count> 0
   then
@@ -753,11 +753,11 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         with Cmd as T_Trait do
           TraceTrait(GetPosX,GetPosY,GetEndX,GetEndY,GetStyle);
       end;
-  if GetCmdPage(NumeroPageSection).Count> 0
+  if GetCmdPage(NumPageSection).Count> 0
   then
-    for CptCmd:= 0 to Pred(GetCmdPage(NumeroPageSection).Count) do
+    for CptCmd:= 0 to Pred(GetCmdPage(NumPageSection).Count) do
       begin
-      Cmd:= T_Commande(GetCmdPage(NumeroPageSection).Items[CptCmd]);
+      Cmd:= T_Commande(GetCmdPage(NumPageSection).Items[CptCmd]);
       if Cmd is T_EcritTexte
       then
         with Cmd as T_EcritTexte do
@@ -816,7 +816,7 @@ var
   Cpt: Integer;
   Cmd: T_Commande;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   if CmdPied.Count> 0
   then
     for Cpt:= 0 to Pred(CmdPied.Count) do
@@ -879,7 +879,7 @@ var
   StylTrait: TfpgLineStyle;
   Wraplst: TStringList;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   begin
   FinDeLigne:= False;
   if FPreparation= ppPrepare
@@ -895,7 +895,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   Fnt:= T_Fonte(Fontes[FonteNum]).GetFonte;
   if Interlignes.Count= 0
   then
-    Interligne(0,0,0);
+    LineSpace(0,0,0);
   if FInterLCourante<> InterL
   then
     FInterLCourante:= InterL;
@@ -1133,7 +1133,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             PdfRect:= TPdfRect.Create;
             with PdfRect do
               begin
-              PageId:= NumeroPage;
+              PageId:= NumPage;
               FGauche:= ColPos;
               FBas:= Paper.H-PosY+IntLSup-HautTxt;
               FHaut:= HautTxt;
@@ -1161,7 +1161,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfLine:= TPdfLine.Create;
                 with PdfLine do
                   begin
-                  PageId:= NumeroPage;
+                  PageId:= NumPage;
                   FStartX:= ColPos;
                   FStartY:= Paper.H-PosY+IntLSup;
                   FEndX:= ColPos;
@@ -1178,7 +1178,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfLine:= TPdfLine.Create;
                 with PdfLine do
                   begin
-                  PageId:= NumeroPage;
+                  PageId:= NumPage;
                   FStartX:= ColPos+ColWidth;
                   FStartY:= Paper.H-PosY+IntLSup;
                   FEndX:= ColPos+ColWidth;
@@ -1195,7 +1195,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfLine:= TPdfLine.Create;
                 with PdfLine do
                   begin
-                  PageId:= NumeroPage;
+                  PageId:= NumPage;
                   FStartX:= ColPos;
                   FStartY:= Paper.H-PosY+IntLSup;
                   FEndX:= ColPos+ColWidth;
@@ -1212,7 +1212,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfLine:= TPdfLine.Create;
                 with PdfLine do
                   begin
-                  PageId:= NumeroPage;
+                  PageId:= NumPage;
                   FStartX:= ColPos;
                   FStartY:= Paper.H-PosY+IntLSup-HautTxt;
                   FEndX:= ColPos+ColWidth;
@@ -1230,7 +1230,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             PdfTexte:= TPdfTexte.Create;
             with PdfTexte do
               begin
-              PageId:= NumeroPage;
+              PageId:= NumPage;
               FFont:= FonteNum;
               FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
               FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
@@ -1259,7 +1259,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfTexte:= TPdfTexte.Create;
                 with PdfTexte do
                   begin
-                  PageId:= NumeroPage;
+                  PageId:= NumPage;
                   FFont:= FonteNum;
                   FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
                   FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
@@ -1284,7 +1284,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         PdfTexte:= TPdfTexte.Create;
         with PdfTexte do
           begin
-          PageId:= NumeroPage;
+          PageId:= NumPage;
           FFont:= FonteNum;
           FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
           FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
@@ -1310,17 +1310,17 @@ function T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNu
     PageNum:
       if Total
       then
-        Result:= Textes[TexteNum]+' '+IntToStr(NumeroPage)+' '+Textes[TexteTot]+' '
+        Result:= Textes[TexteNum]+' '+IntToStr(NumPage)+' '+Textes[TexteTot]+' '
                  +IntToStr(T_Section(Sections[Pred(Sections.Count)]).TotPages)
       else
-        Result:= Textes[TexteNum]+' '+IntToStr(NumeroPage);
+        Result:= Textes[TexteNum]+' '+IntToStr(NumPage);
     SectNum:
       begin
       if Alpha
       then
-        NumAlpha:= ConvertitEnAlpha(NumeroSection)
+        NumAlpha:= ConvertitEnAlpha(NumSection)
       else
-        NumAlpha:= IntToStr(NumeroSection);
+        NumAlpha:= IntToStr(NumSection);
       if Total
       then
         Result:= Textes[TexteNum]+' '+NumAlpha+' '+Textes[TexteTot]+' '+IntToStr(Sections.Count)
@@ -1331,13 +1331,13 @@ function T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNu
       begin
       if Alpha
       then
-        NumAlpha:= ConvertitEnAlpha(NumeroPageSection)
+        NumAlpha:= ConvertitEnAlpha(NumPageSection)
       else
-        NumAlpha:= IntToStr(NumeroPageSection);
+        NumAlpha:= IntToStr(NumPageSection);
       if Total
       then
         Result:= Textes[TexteNum]+' '+NumAlpha+' '+Textes[TexteTot]+' '
-                 +IntToStr(T_Section(Sections[Pred(NumeroSection)]).NbPages)
+                 +IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages)
       else
         Result:= Textes[TexteNum]+' '+NumAlpha;
       end;
@@ -1352,7 +1352,7 @@ var
   StylTrait: TfpgLineStyle;
   Chaine: string;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   begin
   FinDeLigne:= False;
   if FPreparation= ppPrepare
@@ -1368,7 +1368,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   Fnt:= T_Fonte(Fontes[FonteNum]).GetFonte;
   if Interlignes.Count= 0
   then
-    Interligne(0,0,0);
+    LineSpace(0,0,0);
   if FInterLCourante<> InterL
   then
     FInterLCourante:= InterL;
@@ -1555,7 +1555,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               PdfRect:= TPdfRect.Create;
               with PdfRect do
                 begin
-                PageId:= NumeroPage;
+                PageId:= NumPage;
                 FGauche:= ColPos;
                 FBas:= Paper.H-PosY+IntLSup-HautTxt;
                 FHaut:= HautTxt;
@@ -1583,7 +1583,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                   PdfLine:= TPdfLine.Create;
                   with PdfLine do
                     begin
-                    PageId:= NumeroPage;
+                    PageId:= NumPage;
                     FStartX:= ColPos;
                     FStartY:= Paper.H-PosY+IntLSup;
                     FEndX:= ColPos;
@@ -1600,7 +1600,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                   PdfLine:= TPdfLine.Create;
                   with PdfLine do
                     begin
-                    PageId:= NumeroPage;
+                    PageId:= NumPage;
                     FStartX:= ColPos+ColWidth;
                     FStartY:= Paper.H-PosY+IntLSup;
                     FEndX:= ColPos+ColWidth;
@@ -1617,7 +1617,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                   PdfLine:= TPdfLine.Create;
                   with PdfLine do
                     begin
-                    PageId:= NumeroPage;
+                    PageId:= NumPage;
                     FStartX:= ColPos;
                     FStartY:= Paper.H-PosY+IntLSup;
                     FEndX:= ColPos+ColWidth;
@@ -1634,7 +1634,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                   PdfLine:= TPdfLine.Create;
                   with PdfLine do
                     begin
-                    PageId:= NumeroPage;
+                    PageId:= NumPage;
                     FStartX:= ColPos;
                     FStartY:= Paper.H-PosY+IntLSup-HautTxt;
                     FEndX:= ColPos+ColWidth;
@@ -1649,7 +1649,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             PdfTexte:= TPdfTexte.Create;
             with PdfTexte do
               begin
-              PageId:= NumeroPage;
+              PageId:= NumPage;
               FFont:= FonteNum;
               FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
               FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
@@ -1671,7 +1671,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
           PdfTexte:= TPdfTexte.Create;
           with PdfTexte do
             begin
-            PageId:= NumeroPage;
+            PageId:= NumPage;
             FFont:= FonteNum;
             FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
             FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
@@ -1691,7 +1691,7 @@ function T_Imprime.InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Singl
 var
   PosV: Single;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   begin
   if PosY> -1
   then
@@ -1760,7 +1760,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             PdfRect:= TPdfRect.Create;
             with PdfRect do
               begin
-              PageId:= NumeroPage;
+              PageId:= NumPage;
               FGauche:= ColPos;
               FBas:= Paper.H-PosY-EspHeight;
               FHaut:= EspHeight;
@@ -1783,7 +1783,7 @@ end;
 
 procedure T_Imprime.FinLigne(Zone: TZone);
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   case Zone of
     zEnTete:
       LoadCmdEnTete;
@@ -1802,7 +1802,7 @@ procedure T_Imprime.TraceCadre(StTrait: Integer; Zone: TZone);
 var
   Half,MargeL,MargeR,MargeT,MargeB,EnTeteH,PiedH: Integer;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
       LoadCadre(StTrait,Zone);
@@ -1860,7 +1860,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       PdfRect:= TPdfRect.Create;
       with PdfRect do
         begin
-        PageId:= NumeroPage;
+        PageId:= NumPage;
         with T_TraitStyle(TraitStyles[StTrait]) do
           begin
           FEpais:= GetEpais;
@@ -1908,7 +1908,7 @@ end;
 
 procedure T_Imprime.TraceTrait(XDebut,YDebut,XFin,YFin: Single; StTrait: Integer);
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
       LoadTrait(XDebut,YDebut,ColDefaut,XFin,YFin,StTrait);
@@ -1927,7 +1927,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       PdfLine:= TPdfLine.Create;
       with PdfLine do
         begin
-        PageId:= NumeroPage;
+        PageId:= NumPage;
         FStartX:= XDebut;
         FStartY:= Paper.H-YDebut;
         FEndX:= XFin;
@@ -1945,7 +1945,7 @@ procedure T_Imprime.TraceTraitHoriz(XDebut,YDebut: Single; Colonne: Integer; XFi
 var
   PosV: Single;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
       begin
@@ -1998,7 +1998,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       PdfLine:= TPdfLine.Create;
       with PdfLine do
         begin
-        PageId:= NumeroPage;
+        PageId:= NumPage;
         FStartX:= XDebut;
         FStartY:= Paper.H-YDebut;
         FEndX:= XFin;
@@ -2018,7 +2018,7 @@ var
   Cpt: Integer;
   Pts: array of TPoint;
 begin
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
       LoadSurf(Points,Couleur);
@@ -2046,7 +2046,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         end;
       with PdfSurf do
         begin
-        PageId:= NumeroPage;
+        PageId:= NumPage;
         //SetLength(FPoints,Length(Points));
         //for Cpt:= 0 to Pred(Length(Points)) do   // weird behaviour: points gets length= 0 inside the with clause !
         //  begin
@@ -2148,7 +2148,7 @@ DecimalSeparator:= OldSeparator;
 inherited;
 end;
 
-procedure T_Imprime.Debut(IniOriente: TOrient= oPortrait; IniTypePapier: TTypePapier= A4;
+procedure T_Imprime.BeginWrite(IniOriente: TOrient= oPortrait; IniTypePapier: TTypePapier= A4;
           IniMesure: TMesure= msMM; IniVersion: Char= 'F'; IniVisu: Boolean= True);
 begin
 FVersion:= IniVersion;
@@ -2166,7 +2166,7 @@ FInterLCourante:= -1;
 FGroupe:= False;
 end;
 
-procedure T_Imprime.Fin;
+procedure T_Imprime.EndWrite;
 var
   Cpt: Integer;
 begin
@@ -2175,24 +2175,24 @@ if Sections.Count> 0
 then
   for Cpt:= 1 to Sections.Count do
     begin
-    NumeroSection:= Cpt;
-    if T_Section(Sections[Pred(NumeroSection)]).TotPages> 0
+    NumSection:= Cpt;
+    if T_Section(Sections[Pred(NumSection)]).TotPages> 0
     then
       begin
-      NumeroPageSection:= 1;
-      NumeroPage:= 1;
+      NumPageSection:= 1;
+      NumPage:= 1;
       end;
     end
 else
   Exit;
-for Cpt:= 1 to T_Section(Sections[Pred(NumeroSection)]).TotPages do
+for Cpt:= 1 to T_Section(Sections[Pred(NumSection)]).TotPages do
   ImprimePage(Cpt);
 if FVisualisation
 then
   begin
   FPreparation:= ppVisualise;
   try
-    ImprimeDocument;
+    WriteDocument;
     F_Visu.ShowModal;
   finally
     F_Visu.Free;
@@ -2200,14 +2200,14 @@ then
   end;
 end;
 
-procedure T_Imprime.ImprimeDocument;
+procedure T_Imprime.WriteDocument;
 begin
 if FVisualisation
 then
   FCanevas:= Bv_Visu.Canvas;
 end;
 
-procedure T_Imprime.Visualisation;
+procedure T_Imprime.PagePreview;
 begin
 FVisualisation:= not FVisualisation;
 if FVisualisation
@@ -2252,8 +2252,8 @@ case FPreparation of
     FEnTeteHeight:= 0;
     FPageHeight:= 0;
     FPiedHeight:= 0;
-    NumeroSection:= NumeroSection+1;
-    ASection:= T_Section.Create(FPapier,FMargeCourante,NumeroSection);
+    NumSection:= NumSection+1;
+    ASection:= T_Section.Create(FPapier,FMargeCourante,NumSection);
     Sections.Add(ASection);
     CMargin:= Dim2Pixels(Retrait);
     AColonne:= T_Colonne.Create(FMargeCourante.L,FMargeCourante.R-FMargeCourante.L,CMargin,clWhite);
@@ -2267,32 +2267,32 @@ begin
 if FPreparation= ppPrepare
 then
   begin
-  NumeroPage:= NumeroPage+1;
-  T_Section(Sections[Pred(Sections.Count)]).LoadPage(NumeroPage);
+  NumPage:= NumPage+1;
+  T_Section(Sections[Pred(Sections.Count)]).LoadPage(NumPage);
   FPosRef.Y:= FMargeCourante.T+FEnTeteHeight;
   FPageHeight:= 0;
   end;
 end;
 
-function T_Imprime.Fond(FdColor: TfpgColor): Integer;
+function T_Imprime.BackColor(FdColor: TfpgColor): Integer;
 begin
 AFond:= T_Fond.Create(FdColor);
 Result:= Fonds.Add(AFond);
 end;
 
-function T_Imprime.Fonte(FtNom: string; FtColor: TfpgColor): Integer;
+function T_Imprime.Font(FtNom: string; FtColor: TfpgColor): Integer;
 begin
 AFonte:= T_Fonte.Create(FtNom,FtColor);
 Result:= Fontes.Add(AFonte);
 end;
 
-function T_Imprime.StyleTrait(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
+function T_Imprime.LineStyle(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
 begin
 ATraitStyle:= T_TraitStyle.Create(StEpais,StColor,StStyle);
 Result:= TraitStyles.Add(ATraitStyle);
 end;
 
-function T_Imprime.Bordure(BdFlags: TFBordFlags; BdStyle: Integer): Integer;
+function T_Imprime.Border(BdFlags: TFBordFlags; BdStyle: Integer): Integer;
 begin
 ABord:= T_Bord.Create(BdFlags,BdStyle);
 Result:= Bords.Add(ABord);
@@ -2304,12 +2304,12 @@ end;
 //Result:= Bords.Add(ABord);
 //end;
 
-function T_Imprime.Colonne(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
+function T_Imprime.Column(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
 var
   CPos,CWidth,CMargin: Single;
 begin
 CPos:= Dim2Pixels(ClnPos);
-with T_Section(Sections[Pred(NumeroSection)]) do
+with T_Section(Sections[Pred(NumSection)]) do
   begin
   if CPos< Marges.L
   then
@@ -2324,7 +2324,7 @@ AColonne:= T_Colonne.Create(CPos,CWidth,CMargin,ClnColor);
 Result:= T_Section(Sections[Pred(Sections.Count)]).Colonnes.Add(AColonne);
 end;
 
-procedure T_Imprime.EcritEnTete(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+procedure T_Imprime.WriteHeader(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTexte: Integer;
@@ -2356,7 +2356,7 @@ then
 EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZEnTete);
 end;
 
-function T_Imprime.EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+function T_Imprime.WritePage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1): Single;
 var
   RefTexte: Integer;
@@ -2388,7 +2388,7 @@ then
 Result:= EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPage);
 end;
 
-procedure T_Imprime.EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+procedure T_Imprime.WriteFooter(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTexte: Integer;
@@ -2420,7 +2420,7 @@ then
 EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPied);
 end;
 
-procedure T_Imprime.NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+procedure T_Imprime.NumSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2457,7 +2457,7 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,SectNum);
 end;
 
-procedure T_Imprime.NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+procedure T_Imprime.NumSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0;CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2494,7 +2494,7 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,SectNum);
 end;
 
-procedure T_Imprime.NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
+procedure T_Imprime.NumPageHeader(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
           Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2531,7 +2531,7 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZEnTete,PageNum);
 end;
 
-procedure T_Imprime.NumPagePied(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
+procedure T_Imprime.NumPageFooter(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
           Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2568,7 +2568,7 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZPied,PageNum);
 end;
 
-procedure T_Imprime.NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+procedure T_Imprime.NumPageSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2605,7 +2605,7 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,PSectNum);
 end;
 
-procedure T_Imprime.NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
+procedure T_Imprime.NumPageSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
@@ -2642,37 +2642,37 @@ then
 EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,PSectNum);
 end;
 
-procedure T_Imprime.TraitHorizEnTete(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+procedure T_Imprime.HorizLineHeader(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
 begin
 TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zEntete);
 end;
 
-procedure T_Imprime.TraitHorizPage(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+procedure T_Imprime.HorizLinePage(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
 begin
 TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zPage);
 end;
 
-procedure T_Imprime.TraitHorizPied(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
+procedure T_Imprime.HorizLineFooter(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
 begin
 TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zPied);
 end;
 
-procedure T_Imprime.EspaceEnTete(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+procedure T_Imprime.SpaceHeader(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
 begin
 InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zEntete);
 end;
 
-procedure T_Imprime.EspacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+procedure T_Imprime.SpacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
 begin
 InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zPage);
 end;
 
-procedure T_Imprime.EspacePied(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
+procedure T_Imprime.SpaceFooter(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
 begin
 InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zPied);
 end;
 
-function T_Imprime.Interligne(ItlSup,ItlInt,ItlInf: Single): Integer;
+function T_Imprime.LineSpace(ItlSup,ItlInt,ItlInf: Single): Integer;
 var
   Sup,Int,Inf: Integer;
 begin
@@ -2695,7 +2695,7 @@ AInterligne:= T_Interligne.Create(Sup,Int,Inf);
 Result:= Interlignes.Add(AInterligne);
 end;
 
-procedure T_Imprime.Groupe(SautPage: Boolean= False);
+procedure T_Imprime.BeginGroup(SautPage: Boolean= False);
 begin
 AGroupe:= T_Groupe.Create;
 FGroupe:= True;
@@ -2704,7 +2704,7 @@ then
   Page;
 end;
 
-procedure T_Imprime.FinGroupe(SautPage: Boolean= False);
+procedure T_Imprime.EndGroup(SautPage: Boolean= False);
 begin
 T_Section(Sections[Pred(Sections.Count)]).LoadCmdGroupeToPage;
 FGroupe:= False;
@@ -2719,27 +2719,27 @@ begin
 T_Colonne(T_Section(Sections[Pred(Sections.Count)]).Colonnes[ColNum]).SetColColor(ColColor);
 end;
 
-procedure T_Imprime.CadreMarges(AStyle: Integer);
+procedure T_Imprime.FrameMargins(AStyle: Integer);
 begin
 TraceCadre(AStyle,zMarges);
 end;
 
-procedure T_Imprime.CadreEnTete(AStyle: Integer);
+procedure T_Imprime.FrameHeader(AStyle: Integer);
 begin
 TraceCadre(AStyle,zEntete);
 end;
 
-procedure T_Imprime.CadrePage(AStyle: Integer);
+procedure T_Imprime.FramePage(AStyle: Integer);
 begin
 TraceCadre(AStyle,zPage);
 end;
 
-procedure T_Imprime.CadrePied(AStyle: Integer);
+procedure T_Imprime.FrameFooter(AStyle: Integer);
 begin
 TraceCadre(AStyle,zPied);
 end;
 
-procedure T_Imprime.TraitPage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
+procedure T_Imprime.LinePage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
 begin
 TraceTrait(Dim2Pixels(XDebut),Dim2Pixels(YDebut),Dim2Pixels(XFin),Dim2Pixels(YFin),AStyle);
 end;
