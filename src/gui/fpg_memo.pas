@@ -36,6 +36,7 @@ type
 
   TfpgMemo = class(TfpgWidget)
   private
+    FBorderStyle: TfpgEditBorderStyle;
     FLines: TStringList;
     FMaxLength: integer;
     FCursorPos: integer;
@@ -64,6 +65,7 @@ type
     FReadOnly: Boolean;
     FUpdateCount: integer;
     function    GetFontDesc: string;
+    procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetFontDesc(const AValue: string);
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
@@ -132,6 +134,7 @@ type
   published
     property    Align;
     property    BackgroundColor default clBoxColor;
+    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Hint;
@@ -480,6 +483,7 @@ begin
   FDefaultPopupMenu := nil;
   FReadOnly   := False;
   FUpdateCount := 0;
+  FBorderStyle := ebsDefault;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
@@ -527,6 +531,14 @@ end;
 function TfpgMemo.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+procedure TfpgMemo.SetBorderStyle(const AValue: TfpgEditBorderStyle);
+begin
+  if FBorderStyle = AValue then
+    exit;
+  FBorderStyle := AValue;
+  RePaint;
 end;
 
 procedure TfpgMemo.DeleteSelection;
@@ -924,9 +936,23 @@ var
 begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
-
-  InflateRect(r, -2, -2);
+  case BorderStyle of
+    ebsNone:
+        begin
+          // do nothing
+        end;
+    ebsDefault:
+        begin
+          Canvas.DrawControlFrame(r);
+          InflateRect(r, -2, -2);
+        end;
+    ebsSingle:
+        begin
+          Canvas.SetColor(clShadow2);
+          Canvas.DrawRectangle(r);
+          InflateRect(r, -1, -1);
+        end;
+  end;
   Canvas.SetClipRect(r);
 
   if Enabled and not ReadOnly then
