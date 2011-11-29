@@ -76,6 +76,9 @@ type
   TfpgDropAction = (daIgnore, daCopy, daMove, daLink, daAsk);
   TfpgDropActions = set of TfpgDropAction;
 
+  TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
+
+
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 3;

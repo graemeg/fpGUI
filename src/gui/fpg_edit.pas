@@ -39,8 +39,6 @@ uses
   fpg_menu;
 
 type
-  TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
-
 
   TfpgBaseEdit = class(TfpgWidget)
   private
