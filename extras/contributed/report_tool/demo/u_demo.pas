@@ -10,7 +10,7 @@ uses
   ShellApi,
   {$endif}
   fpg_main, fpg_base,
-  fpg_form, fpg_button, fpg_label, fpg_dialogs, fpg_utils, U_Imprime;
+  fpg_form, fpg_button, fpg_label, fpg_dialogs, fpg_utils, U_Report;
 
 type
   TF_Demo = class(TfpgForm)
@@ -108,7 +108,7 @@ var
 implementation
 
 uses
-  U_Commande, U_Pdf, U_ReportImages{, U_DemoImages};
+  U_Command, U_Pdf, U_ReportImages{, U_DemoImages};
 
 var
   ChartValues: array[0..18] of Integer;

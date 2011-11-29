@@ -27,7 +27,7 @@ uses
   {$endif}
   fpg_base, fpg_main,
   fpg_form, fpg_panel, fpg_label, fpg_button, fpg_edit, fpg_dialogs, fpg_utils,
-  U_Imprime;
+  U_Report;
 
 type
   TF_Visu = class(TfpgForm)
@@ -88,7 +88,7 @@ var
 implementation
 
 uses
-  U_Commande, U_Pdf, U_ReportImages;
+  U_Command, U_Pdf, U_ReportImages;
 
 procedure TF_Visu.FormShow(Sender: TObject);
 begin

@@ -36,7 +36,8 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="impression"/>
+        <PackageName Value="fpg_report"/>
+        <MaxVersion Minor="1"/>
       </Item1>
       <Item2>
         <PackageName Value="fpgui_toolkit"/>

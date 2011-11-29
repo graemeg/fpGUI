@@ -2,12 +2,12 @@
   This source is only used to compile and install the package.
  }
 
-unit impression; 
+unit fpg_report; 
 
 interface
 
 uses
-  U_Commande, U_Imprime, U_Pdf, U_Visu, U_ReportImages;
+  U_Command, U_Report, U_Pdf, U_Visu, U_ReportImages;
 
 implementation
 

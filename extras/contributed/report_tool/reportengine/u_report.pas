@@ -14,7 +14,7 @@
       This unit interfaces with the user program
 }
 
-unit U_Imprime;
+unit U_Report;
 
 {$mode objfpc}{$H+}
 
@@ -24,7 +24,7 @@ uses
   Classes, SysUtils, StrUtils,
   fpg_base, fpg_main,
   fpg_panel,
-  U_Commande, U_Pdf;
+  U_Command, U_Pdf;
 
 type
   TTypePapier= (A4,Letter,Legal,Executive,Comm10,Monarch,DL,C5,B5);

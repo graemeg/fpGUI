@@ -278,7 +278,7 @@ var
 implementation
 
 uses
-  U_Imprime, U_Commande;
+  U_Report, U_Command;
 
 var
   Trailer: TPdfDictionary;

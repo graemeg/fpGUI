@@ -14,7 +14,7 @@
       This unit builds the objects in memory to produce either the preview or pdf file
 }
 
-unit U_Commande;
+unit U_Command;
 
 {$mode objfpc}{$H+}
 

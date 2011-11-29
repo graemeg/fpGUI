@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="4">
-    <Name Value="impression"/>
+    <Name Value="fpg_report"/>
     <Author Value="&quot;Jean-Marc Levecque&quot; &lt;jmarc.levecque@dbmail.com>"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -28,12 +28,12 @@
     <Version Minor="1"/>
     <Files Count="5">
       <Item1>
-        <Filename Value="u_commande.pas"/>
-        <UnitName Value="U_Commande"/>
+        <Filename Value="u_command.pas"/>
+        <UnitName Value="U_Command"/>
       </Item1>
       <Item2>
-        <Filename Value="u_imprime.pas"/>
-        <UnitName Value="U_Imprime"/>
+        <Filename Value="u_report.pas"/>
+        <UnitName Value="U_Report"/>
       </Item2>
       <Item3>
         <Filename Value="u_pdf.pas"/>
