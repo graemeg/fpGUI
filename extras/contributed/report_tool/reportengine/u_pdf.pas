@@ -951,7 +951,7 @@ then
   TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).WriteDictionary(AFlux)
 else
   begin
-   Flux:= TMemoryStream.Create;
+  Flux:= TMemoryStream.Create;
   Flux.Position:= 0;
   CurrentColor:= '';
   CurrentWidth:= '';
@@ -1314,7 +1314,7 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
             TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
             end;
           end;
-        Txt:= TPdfText.CreateText(TextPosX,TextPosY,Ecriture);
+        Txt:= TPdfText.CreateText(TextPosX,TextPosY,Writting);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Txt);
         end;
   if TPdfElement(PdfPage[Cpt]) is TPdfRect
@@ -1323,19 +1323,19 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
     then
       with TPdfRect(PdfPage[Cpt]) do
         begin
-        if RectCouleur> -1
+        if RectColor> -1
         then
           begin
-          Clr:= TPdfColor.CreateColor(True,RectCouleur);
+          Clr:= TPdfColor.CreateColor(True,RectColor);
           TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
           end;
-        if RectTrace
+        if RectStroke
         then
           begin
           Sty:= TPdfLineStyle.CreateLineStyle(RectLineStyle,0);
           TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
           end;
-        Rct:= TPdfRectangle.CreateRectangle(RectEpais,RectGauche,RectBas,RectLarg,RectHaut,RectEmplit,RectTrace);
+        Rct:= TPdfRectangle.CreateRectangle(RectThickness,RectLeft,RectBottom,RectWidth,RectHeight,RectFill,RectStroke);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Rct);
         end;
   if TPdfElement(PdfPage[Cpt]) is TPdfLine
@@ -1352,7 +1352,7 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
           end;
         Sty:= TPdfLineStyle.CreateLineStyle(LineStyle,0);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
-        Lin:= TPdfLigne.CreateLigne(LineEpais,LineStartX,LineStartY,LineEndX,LineEndY);
+        Lin:= TPdfLigne.CreateLigne(LineThikness,LineBeginX,LineBeginY,LineEndX,LineEndY);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Lin);
         end;
   if TPdfElement(PdfPage[Cpt]) is TPdfSurf
@@ -1402,7 +1402,7 @@ then
     end;
   TreeRoot:= CreatePages(ParentPage);
   end;
-NumPage:= 0; // numéro de page identique à celui de l'appel à ImprimePage
+NumPage:= 0; // numéro de page identique à celui de l'appel à PrintPage
 for CptSect:= 0 to Pred(Sections.Count) do
   begin
   if Sections.Count> 1
@@ -1411,7 +1411,7 @@ for CptSect:= 0 to Pred(Sections.Count) do
     if Outline
     then
       begin
-      ParentOutline:= CreateOutline(OutlineRoot,Succ(CptSect),-1,T_Section(Sections[CptSect]).Titre);
+      ParentOutline:= CreateOutline(OutlineRoot,Succ(CptSect),-1,T_Section(Sections[CptSect]).Title);
       Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet);
       TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
       if CptSect= 0
@@ -1454,7 +1454,7 @@ for CptSect:= 0 to Pred(Sections.Count) do
     if (Sections.Count> 1) and Outline
     then
       begin
-      PageOutline:= CreateOutline(ParentOutline,Succ(CptSect),Succ(Cptpage),T_Section(Sections[CptSect]).Titre);
+      PageOutline:= CreateOutline(ParentOutline,Succ(CptSect),Succ(Cptpage),T_Section(Sections[CptSect]).Title);
       Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
       TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
       // add page reference to outline destination
@@ -1507,9 +1507,9 @@ then
   TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).Value:= T_Section(Sections[CptSect]).TotPages;
   end;
 NumFont:= 0;
-for Cpt:= 0 to Pred(Fontes.Count) do
+for Cpt:= 0 to Pred(Fonts.Count) do
   begin
-  FontName:= ExtractBaseFontName(T_Fonte(Fontes[Cpt]).GetFonte.FontDesc);
+  FontName:= ExtractBaseFontName(T_Font(Fonts[Cpt]).GetFont.FontDesc);
   CreateFont(FontName,NumFont);
   Inc(NumFont);
   end;
