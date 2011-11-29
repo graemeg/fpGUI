@@ -136,7 +136,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'EmptyPage.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -188,7 +188,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'SimpleText.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -240,7 +240,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'MultiPages.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -292,7 +292,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'MultiSections.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -344,7 +344,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Outlines.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -396,7 +396,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Cadres.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -448,7 +448,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Color.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -500,7 +500,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Lines.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -552,7 +552,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Grid.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -604,7 +604,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Graph.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -656,7 +656,7 @@ with FReport do
   Fd_SavePdf:= TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
   Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
-  Fd_SavePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
   Fd_SavePdf.FileName:= 'Surface.pdf';
   try
     if Fd_SavePdf.RunSaveFile
@@ -1494,7 +1494,7 @@ Bt_PrintGraph:= CreateButton(Self,450,390,150,'Show graph',@Bt_PrintGraphClick,'
 Bt_PrintGraph.Enabled:= False;
 Bt_PrintSurf:= CreateButton(Self,450,430,150,'Show surface',@Bt_PrintSurfClick,'stdimg.print');
 Bt_PrintSurf.Enabled:= False;
-Bt_Exit:= CreateButton(Self,450,500,150,'Fermer',@Bt_ExitClick,'stdimg.exit');
+Bt_Exit:= CreateButton(Self,450,500,150,'Exit',@Bt_ExitClick,'stdimg.exit');
 Bt_Exit.BackgroundColor:= clTomato;
 Randomize;
 for Cpt:= 0 to 18 do
