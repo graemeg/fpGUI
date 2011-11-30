@@ -425,10 +425,11 @@ var
   PdfSurf: TPdfSurf;
 
 const
+  PPI= 72;
   FontDefaut= 0;
   ColDefaut= 0;
-  lnCourante= -1;
-  lnFin= -2;
+  lnCurrent= -1;
+  lnEnd= -2;
 //  cnSuite= -1;
   cnLeft= -2;
   cnCenter= -3;
@@ -440,7 +441,6 @@ uses
   U_Visu;
 
 const
-  PPI= 72;
   InchToMM= 25.4;
 
 function T_Report.Dim2Pixels(Value: Single): Single;
@@ -702,7 +702,7 @@ begin
 F_Visu:= TF_Visu.Create(nil, self);
 with F_Visu do
   begin
-  Bv_Visu:= CreateBevel(F_Visu,(F_Visu.Width-FPaper.W) div 2,60+((F_Visu.Height-FPaper.H) div 2),
+  Bv_Visu:= CreateBevel(F_Visu,(F_Visu.Width-FPaper.W) div 2,((F_Visu.Height+50-FPaper.H) div 2),
             FPaper.W,FPaper.H,bsBox,bsRaised);
   Bv_Visu.BackgroundColor:= clWhite;
   Bv_Visu.OnPaint:= @Bv_VisuPaint;
@@ -945,13 +945,13 @@ with T_Section(Sections[Pred(NumSection)]) do
           ShiftFooterLines(HTxt);
           end;
         end;
-      if PosY= lnCourante
+      if PosY= lnCurrent
       then
         PosV:= FPosRef.Y+LnSpSup
       else
         begin
         EndOfLine:= True;
-        if PosY= lnFin
+        if PosY= lnEnd
         then
           begin
           PosV:= FPosRef.Y+LnSpSup;
@@ -1123,7 +1123,7 @@ with T_Section(Sections[Pred(NumSection)]) do
             DrawText(Round(GetTextPos),Round(PosY),Round(GetTextWidth),0,Texts[Text],TxtFlags,Round(LnSpInt));
             end
         else
-          DrawText(Round(PosX),Round(PosY)-Fnt.Ascent,Texts[Text],TxtFlags);
+          DrawText(Round(PosX),Round(PosY)-Fnt.Ascent,Round(Paper.W-PosX),0,Texts[Text],TxtFlags);
         end;
     ppPdfFile:
       if Column> -1
@@ -1283,21 +1283,48 @@ with T_Section(Sections[Pred(NumSection)]) do
             end;
           end
       else
-        begin
-        PdfTexte:= TPdfTexte.Create;
-        with PdfTexte do
+        if Fnt.TextWidth(Texts[Text])< Paper.W-PosX
+        then
           begin
-          PageId:= NumPage;
-          FFont:= FontNum;
-          FSize:= T_Font(Fonts[FontNum]).GetSize;
-          FColor:= T_Font(Fonts[FontNum]).GetColor;
-          FPosX:= PosX;
-          FPosY:= Paper.H-PosY;
-          FWidth:= Paper.W;
-          FText:= Texts[Text];
+          PdfTexte:= TPdfTexte.Create;
+          with PdfTexte do
+            begin
+            PageId:= NumPage;
+            FFont:= FontNum;
+            FSize:= T_Font(Fonts[FontNum]).GetSize;
+            FColor:= T_Font(Fonts[FontNum]).GetColor;
+            FPosX:= PosX;
+            FPosY:= Paper.H-PosY;
+            FWidth:= Paper.W;
+            FText:= Texts[Text];
+            end;
+          PdfPage.Add(PdfTexte);
+          end
+        else
+          begin
+          Wraplst:= TStringList.Create;
+          Wraplst.Text:= Texts[Text];
+          for Cpt:= 0 to Pred(Wraplst.Count) do
+            Wraplst[Cpt]:= AddLineBreaks(Wraplst[Cpt],Round(Paper.W-PosX),Fnt);
+          Wraplst.Text:= Wraplst.Text;
+          for Cpt:= 0 to Pred(Wraplst.Count) do
+            begin
+            PdfTexte:= TPdfTexte.Create;
+            with PdfTexte do
+              begin
+              PageId:= NumPage;
+              FFont:= FontNum;
+              FSize:= T_Font(Fonts[FontNum]).GetSize;
+              FColor:= T_Font(Fonts[FontNum]).GetColor;
+              FPosX:= PosX;
+              FPosY:= Paper.H-PosY-Fnt.Ascent-(Fnt.Height+LnSpInt)*Cpt;
+              FWidth:= Paper.W;
+              FText:= Wraplst[Cpt];
+              end;
+            PdfPage.Add(PdfTexte);
+            end;
+          WrapLst.Free;
           end;
-        PdfPage.Add(PdfTexte);
-        end;
     end;
   end;
 end;
@@ -1417,13 +1444,13 @@ with T_Section(Sections[Pred(NumSection)]) do
           ShiftFooterLines(HTxt);
           end;
         end;
-      if PosY= lnCourante
+      if PosY= lnCurrent
       then
         PosV:= FPosRef.Y+LnSpSup
       else
         begin
         EndOfLine:= True;
-        if PosY= lnFin
+        if PosY= lnEnd
         then
           begin
           PosV:= FPosRef.Y+LnSpSup;
@@ -1832,31 +1859,31 @@ with T_Section(Sections[Pred(NumSection)]) do
           case Zone of
             zEnTete:
               begin
-              DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginT+HeaderH);          // gauche
-              DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginT+HeaderH);          // droite
-              DrawLine(MarginL,MarginT+Half,MarginR,MarginT+Half);                  // haute
-              DrawLine(MarginL,MarginT+HeaderH-Half,MarginR,MarginT+HeaderH-Half);  // basse
+              DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginT+HeaderH);          // left
+              DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginT+HeaderH);          // right
+              DrawLine(MarginL,MarginT+Half,MarginR,MarginT+Half);                  // top
+              DrawLine(MarginL,MarginT+HeaderH-Half,MarginR,MarginT+HeaderH-Half);  // bottom
               end;
             zPage:
               begin
-              DrawLine(MarginL+Half,MarginT+HeaderH,MarginL+Half,MarginB-FooterH);  // gauche
-              DrawLine(MarginR-Half,MarginT+HeaderH,MarginR-Half,MarginB-FooterH);  // droite
-              DrawLine(MarginL,MarginT+HeaderH-Half,MarginR,MarginT+HeaderH-Half);  // haute
-              DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // basse
+              DrawLine(MarginL+Half,MarginT+HeaderH,MarginL+Half,MarginB-FooterH);  // left
+              DrawLine(MarginR-Half,MarginT+HeaderH,MarginR-Half,MarginB-FooterH);  // right
+              DrawLine(MarginL,MarginT+HeaderH-Half,MarginR,MarginT+HeaderH-Half);  // top
+              DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // bottom
               end;
             zPied:
               begin
-              DrawLine(MarginL+Half,MarginB-FooterH,MarginL+Half,MarginB);          // gauche
-              DrawLine(MarginR-Half,MarginB-FooterH,MarginR-Half,MarginB);          // droite
-              DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // haute
-              DrawLine(MarginL,MarginB-Half,MarginR,MarginB-Half);                  // basse
+              DrawLine(MarginL+Half,MarginB-FooterH,MarginL+Half,MarginB);          // left
+              DrawLine(MarginR-Half,MarginB-FooterH,MarginR-Half,MarginB);          // right
+              DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // top
+              DrawLine(MarginL,MarginB-Half,MarginR,MarginB-Half);                  // bottom
               end;
             zMarges:
               begin
-              DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginB-Succ(Half));       // gauche
-              DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginB-Succ(Half));       // droite
-              DrawLine(MarginL,MarginT+Half,MarginR,MarginT+Half);                  // haute
-              DrawLine(MarginL,MarginB-Half,MarginR,MarginB-Half);                  // basse
+              DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginB-Succ(Half));       // left
+              DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginB-Succ(Half));       // right
+              DrawLine(MarginL,MarginT+Half,MarginR,MarginT+Half);                  // top
+              DrawLine(MarginL,MarginB-Half,MarginR,MarginB-Half);                  // bottom
               end;
             end;
           end;
@@ -2076,7 +2103,7 @@ begin
 T_Section(Sections[Pred(Sections.Count)]).Title:= ATitle;
 end;
 
-{ Commandes publiques }
+{ public methods }
 
 constructor T_Report.Create;
 begin
@@ -2304,7 +2331,7 @@ VBorder:= T_Border.Create(BdFlags,BdStyle);
 Result:= Borders.Add(VBorder);
 end;
 
-//function T_Report.Bordure(BdFlags: TBorderFlags; StFlags: array of Integer): Integer;
+//function T_Report.Border(BdFlags: TBorderFlags; StFlags: array of Integer): Integer;
 //begin
 //VBorder:= T_Border.Create(BdFlags,BdStyle);
 //Result:= Borders.Add(VBorder);
@@ -2336,7 +2363,7 @@ var
   RefText: Integer;
   Flags: TfpgTextFlags;
 begin
-Flags:= [];
+Flags:= [txtWrap];
 if Horiz< 0
 then
   begin
@@ -2368,7 +2395,7 @@ var
   RefText: Integer;
   Flags: TfpgTextFlags;
 begin
-Flags:= [];
+Flags:= [txtWrap];
 if Horiz< 0
 then
   begin
@@ -2400,7 +2427,7 @@ var
   RefText: Integer;
   Flags: TfpgTextFlags;
 begin
-Flags:= [];
+Flags:= [txtWrap];
 if Horiz< 0
 then
   begin

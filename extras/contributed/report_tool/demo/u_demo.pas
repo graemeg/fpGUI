@@ -108,7 +108,7 @@ var
 implementation
 
 uses
-  U_Command, U_Pdf, U_ReportImages{, U_DemoImages};
+  U_Command, U_Pdf, U_ReportImages;
 
 var
   ChartValues: array[0..18] of Integer;
@@ -917,6 +917,10 @@ with FReport do
   WritePage(cnRight,75,'Text aligned to right',ColDefaut,FtText3);
   // write the text aligned to center
   WritePage(cnCenter,100,'Text aligned to center',ColDefaut,FtText2);
+  // write a long text in the default column
+  WritePage(cnLeft,150,'This long text is supposed to be written on two lines in ColDefaut (and does include parenthesis). If it does not, there is abviously a remaining bug in the way wrapping is performed.',ColDefaut,FtText2);
+  // write a long text without columns
+  WritePage(50,200,'This long text is supposed to be written on two lines whithout column (and does include parenthesis). If it does not, there is abviously a remaining bug in the way wrapping is performed.',-1,FtText2);
   // preparation is finished, so create PDF objects
   EndWrite;
   end;
@@ -937,9 +941,9 @@ with FReport do
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-8',clBlack);
   // write title on each page
-  WriteHeader(cnCenter,lnFin,'MULTIPAGE DOCUMENT',ColDefaut,FtTitle);
+  WriteHeader(cnCenter,lnEnd,'MULTIPAGE DOCUMENT',ColDefaut,FtTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText);
   // create five new empty pages
   for Cpt:= 1 to 5 do
     Page;
@@ -968,13 +972,13 @@ with FReport do
   // create a new section and define the margins
   Section(20,10,10,10);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS1);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS1);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionFooter(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionFooter(cnCenter,lnEnd,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 3 do
     Page;
@@ -984,13 +988,13 @@ with FReport do
   // create a default column for section2 which is landscape oriented
   ColDefSect2:= Column(20,257);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitleS2);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitleS2);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefSect2,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefSect2,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,True,ColDefSect2,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefSect2,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefSect2,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefSect2,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -998,13 +1002,13 @@ with FReport do
   // create a new section and define the margins
   Section(20,20,20,20);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS3);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS3);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,True,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 4 do
     Page;
@@ -1034,13 +1038,13 @@ with FReport do
   // create a new section and define the margins
   Section(20,10,10,10);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS1);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS1);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionFooter(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionFooter(cnCenter,lnEnd,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 3 do
     Page;
@@ -1049,13 +1053,13 @@ with FReport do
   Section(10,10,10,10,0,oLandscape);
   SectionTitle:= 'Landscape oriented';
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS2);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS2);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,True,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -1063,13 +1067,13 @@ with FReport do
   // create a new section and define the margins
   Section(20,20,20,20);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS3);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS3);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,True,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,False,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 4 do
     Page;
@@ -1103,9 +1107,9 @@ with FReport do
   IlTitle:= LineSpace(3,0,3);
   IlText:= LineSpace(1,0,1);
   // write title on each page
-  WriteHeader(cnCenter,lnFin,'SHOWING FRAMES',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING FRAMES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // draw thin frame rectangle at margins
 //  FrameMargins(TsThin);
   // draw thick frame rectangle at header
@@ -1153,19 +1157,19 @@ with FReport do
   IlTitle:= LineSpace(5,0,5);
   IlText:= LineSpace(0,0,0);
   // write title on each page
-  WriteHeader(cnCenter,lnFin,'SHOWING COLORS',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING COLORS',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtNormRed,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtNormRed,IlText);
   // write some example texts
-  WritePage(cnLeft,lnFin,'Bold blue text aligned to left',ColDefaut,FtBoldBlue,IlText);
+  WritePage(cnLeft,lnEnd,'Bold blue text aligned to left',ColDefaut,FtBoldBlue,IlText);
   SpacePage(10,ColDefaut,BcPaleGreen);
-  WritePage(cnCenter,lnFin,'followed by centered normal black text after a 1 cm colored space',ColDefaut,FtNormBlack,IlText);
+  WritePage(cnCenter,lnEnd,'followed by centered normal black text after a 1 cm colored space',ColDefaut,FtNormBlack,IlText);
   SpacePage(15);
-  WritePage(cnLeft,lnFin,'text written on colored background after a 1.5 cm colored space',ColDefaut,FtItalGray,IlText,BcAqua);
+  WritePage(cnLeft,lnEnd,'text written on colored background after a 1.5 cm colored space',ColDefaut,FtItalGray,IlText,BcAqua);
   SpacePage(10);
-  WritePage(cnLeft,lnCourante,'This text starts in column 1',Col1,FtNormGreen,IlText,BcBeige);
-  WritePage(cnLeft,lnFin,'and ends in column 2',Col2,FtBoldItalFuchsia,IlText);
-  WritePage(cnCenter,lnFin,'And this one is centered in column 3',Col3,FtNormRed,IlText,BcBeige);
+  WritePage(cnLeft,lnCurrent,'This text starts in column 1',Col1,FtNormGreen,IlText,BcBeige);
+  WritePage(cnLeft,lnEnd,'and ends in column 2',Col2,FtBoldItalFuchsia,IlText);
+  WritePage(cnCenter,lnEnd,'And this one is centered in column 3',Col3,FtNormRed,IlText,BcBeige);
   // preparation is finished, so create PDF objects
   EndWrite;
   end;
@@ -1205,15 +1209,15 @@ with FReport do
   Col2:= Column(80,60,2);
   Col3:= Column(140,60,2);
   // write title on each page
-  WriteHeader(cnCenter,lnFin,'SHOWING LINES',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING LINES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // write some example texts with column borders
-  WritePage(cnLeft,lnCourante,'Example of lines',Col1,FtText,IlText,-1,BdColn);
-  WritePage(cnLeft,lnCourante,'with column borders',Col2,FtText,IlText,-1,BdEndColn);
-  WritePage(cnLeft,lnFin,'',Col3,FtText);
+  WritePage(cnLeft,lnCurrent,'Example of lines',Col1,FtText,IlText,-1,BdColn);
+  WritePage(cnLeft,lnCurrent,'with column borders',Col2,FtText,IlText,-1,BdEndColn);
+  WritePage(cnLeft,lnEnd,'',Col3,FtText);
   SpacePage(5);
-  WritePage(cnLeft,lnFin,'A thick border',Col3,FtText,IlText,-1,BdRect);
+  WritePage(cnLeft,lnEnd,'A thick border',Col3,FtText,IlText,-1,BdRect);
   HorizLinePage(2,2,Col2,TsThick);
   LinePage(30,100,150,150,TsThinBlack);
   LinePage(50,70,180,100,TsThinBlue);
@@ -1277,21 +1281,21 @@ with FReport do
   Col[4]:= Column(Col4Pos,Col4Wid,2);
   Col[5]:= Column(Col5Pos,Col5Wid,2);
   // write title on each page
-  WriteHeader(cnCenter,lnFin,'SHOWING GRIDS',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING GRIDS',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // write a grid without borders
-  WritePage(cnCenter,lnFin,'Grid without borders',ColDefaut,FtSTitle,IlTitle);
+  WritePage(cnCenter,lnEnd,'Grid without borders',ColDefaut,FtSTitle,IlTitle);
   for CptLin:= 1 to 10 do
     for CptCol:= 1 to 5 do
       if CptCol= 5
       then
-        WritePage(cnLeft,lnFin,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText)
+        WritePage(cnLeft,lnEnd,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText)
       else
-        WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText);
+        WritePage(cnLeft,lnCurrent,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText);
   SpacePage(5);
   // write a grid with borders
-  PosHoriz:= WritePage(cnCenter,lnFin,'Grid with borders and colors',ColDefaut,FtSTitle,IlTitle);
+  PosHoriz:= WritePage(cnCenter,lnEnd,'Grid with borders and colors',ColDefaut,FtSTitle,IlTitle);
   LinePage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsThickBlue);
   for CptLin:= 1 to 10 do
     for CptCol:= 1 to 5 do
@@ -1299,9 +1303,9 @@ with FReport do
       then
         if CptLin mod 2= 0
         then
-          WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,BcBeige,BdColnL)
+          WritePage(cnLeft,lnCurrent,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,BcBeige,BdColnL)
         else
-          WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextBlue,IlText,-1,BdColnL)
+          WritePage(cnLeft,lnCurrent,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextBlue,IlText,-1,BdColnL)
       else
         if CptCol= 5
         then
@@ -1309,7 +1313,7 @@ with FReport do
           then
             begin
             PredPosHoriz:= PosHoriz;
-            PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextRed,IlText,BcBeige,BdColnR);
+            PosHoriz:= WritePage(cnLeft,lnEnd,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextRed,IlText,BcBeige,BdColnR);
             LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsThinBlack);
             LinePage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsThickBlue);
             LinePage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsThinBlack);
@@ -1318,29 +1322,29 @@ with FReport do
             begin
             if CptLin= 1
             then
-              PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,-1,BdColnR)
+              PosHoriz:= WritePage(cnLeft,lnEnd,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,-1,BdColnR)
             else
               if CptLin mod 2= 0
               then
                 begin
                 PredPosHoriz:= PosHoriz;
-                PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextRed,IlText,BcBeige,BdColnR);
+                PosHoriz:= WritePage(cnLeft,lnEnd,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextRed,IlText,BcBeige,BdColnR);
                 LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsThinBlack);
                 LinePage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsThinBlack);
                 end
               else
                 begin
                 PredPosHoriz:= PosHoriz;
-                PosHoriz:= WritePage(cnLeft,lnFin,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,-1,BdColnR);
+                PosHoriz:= WritePage(cnLeft,lnEnd,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,-1,BdColnR);
                 LinePage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsThinBlack);
                 end;
             end
         else
           if CptLin mod 2= 0
           then
-            WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,BcBeige,BdColn)
+            WritePage(cnLeft,lnCurrent,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtText,IlText,BcBeige,BdColn)
           else
-            WritePage(cnLeft,lnCourante,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextBlue,IlText,-1,BdColn);
+            WritePage(cnLeft,lnCurrent,'line '+IntToStr(CptLin)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTextBlue,IlText,-1,BdColn);
   // preparation is finished, so create PDF objects
   EndWrite;
   end;
@@ -1373,9 +1377,9 @@ with FReport do
   TsGray:= LineStyle(1,clGray,lsDot);
   TsBlue:= LineStyle(1,clBlue,lsSolid);
   TsFuchsia:= LineStyle(1,clFuchsia,lsDot);
-  WriteHeader(cnCenter,lnFin,'SHOWING GRAPH',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING GRAPH',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // draw a graph
   Max:= 0;
   WritePage(10,Base,'0',-1,FtText);
@@ -1419,9 +1423,9 @@ with FReport do
   // create line spacings to be used
   IlTitle:= LineSpace(3,0,3);
   IlText:= LineSpace(1,0,0);
-  WriteHeader(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitle,IlTitle);
+  WriteHeader(cnCenter,lnEnd,'SHOWING SURFACE',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
-  NumPageFooter(cnRight,lnFin,'Page','of',True,ColDefaut,FtText,IlText);
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // paint some surfaces
   SurfPage([40,40,100],[50,110,80],clGreen);
   SurfPage([30,50,150,80,120,130],[120,180,180,160,140,120],clFuchsia);

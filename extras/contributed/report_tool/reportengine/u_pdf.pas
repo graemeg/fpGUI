@@ -288,6 +288,34 @@ var
 
 // utility functions
 
+function InsertEscape(const AValue: string): string;
+var
+  Chaine: string;
+begin
+Result:= '';
+Chaine:= AValue;
+while Pos('\',Chaine)> 0 do
+  begin
+  Result:= Result+Copy(Chaine,1,Pred(Pos('\',Chaine)))+'\\';
+  Chaine:= Copy(Chaine,Succ(Pos('\',Chaine)),Length(Chaine)-Pos('\',Chaine));
+  end;
+Chaine:= Result+Chaine;
+Result:= '';
+while Pos('(',Chaine)> 0 do
+  begin
+  Result:= Result+Copy(Chaine,1,Pred(Pos('(',Chaine)))+'\(';
+  Chaine:= Copy(Chaine,Succ(Pos('(',Chaine)),Length(Chaine)-Pos('(',Chaine));
+  end;
+Chaine:= Result+Chaine;
+Result:= '';
+while Pos(')',Chaine)> 0 do
+  begin
+  Result:= Result+Copy(Chaine,1,Pred(Pos(')',Chaine)))+'\)';
+  Chaine:= Copy(Chaine,Succ(Pos(')',Chaine)),Length(Chaine)-Pos(')',Chaine));
+  end;
+Result:= Result+Chaine;
+end;
+
 procedure WriteChaine(const Valeur: string; AFlux: TStream);
 begin
 AFlux.Write(PChar(Valeur)^,Length(Valeur));
@@ -448,6 +476,9 @@ constructor TPdfString.CreateString(const AValue: string);
 begin
 inherited Create;
 FValue:= AValue;
+if (Pos('(',FValue)> 0) or (Pos(')',FValue)> 0) or (Pos('\',FValue)> 0)
+then
+  FValue:= InsertEscape(FValue);
 end;
 
 destructor TPdfString.Destroy;
