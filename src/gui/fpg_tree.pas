@@ -171,6 +171,7 @@ type
     FVScrollbar: TfpgScrollbar;
     FXOffset: integer; // for repaint and scrollbar-calculation
     FYOffset: integer;
+    FUpdateCount: integer;
     function    GetFontDesc: string;
     function    GetRootNode: TfpgTreeNode;
     procedure   SetDefaultColumnWidth(const AValue: word);
@@ -217,6 +218,7 @@ type
     // the nodes between the given node and the direct next node
     function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
+    procedure   RePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -233,6 +235,8 @@ type
     // only visual (visible) nodes
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
@@ -1336,6 +1340,10 @@ begin
   SendDebug(Classname + '.HandleResize');
   {$ENDIF}
   inherited HandleResize(awidth, aheight);
+  if (csLoading in ComponentState) then
+    Exit; //==>
+  if csUpdating in ComponentState then
+    Exit; //==>
   if not (csLoading in ComponentState) then
     ResetScrollbar;
   RePaint;
@@ -1491,6 +1499,8 @@ end;
 
 procedure TfpgTreeview.HandleShow;
 begin
+  if (csLoading in ComponentState) then
+    Exit;
   if not (csLoading in ComponentState) then
     ResetScrollbar;
   inherited HandleShow;
@@ -1515,6 +1525,9 @@ begin
   {$IFDEF DEBUG}
   SendDebug(Classname + '.HandlePaint');
   {$ENDIF}
+  if csUpdating in ComponentState then
+    Exit;
+
 //  inherited HandlePaint;
 
   Canvas.ClearClipRect;
@@ -1982,6 +1995,25 @@ begin
   end;
 end;
 
+procedure TfpgTreeView.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+  Updating;
+end;
+
+procedure TfpgTreeView.EndUpdate;
+begin
+  if FUpdateCount > 0 then
+  begin
+    Dec(FUpdateCount);
+    if FUpdateCount = 0 then
+    begin
+      Updated;
+      RePaint;
+    end;
+  end;
+end;
+
 function TfpgTreeView.NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
   //----------------
   procedure _FindNextNode;
@@ -2074,6 +2106,13 @@ begin
   result := i;
 end;
 
+procedure TfpgTreeView.RePaint;
+begin
+  if csUpdating in ComponentState then
+    Exit;
+  inherited RePaint;
+end;
+
 constructor TfpgTreeview.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -2086,6 +2125,7 @@ begin
   FFont := fpgGetFont('#Label1');
   Width := 150;
   Height := 100;
+  FUpdateCount := 0;
 
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;
