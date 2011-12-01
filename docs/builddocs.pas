@@ -15,7 +15,7 @@ program builddocs;
 {$mode objfpc}{$H+}
 
 uses
-  Classes, SysUtils, CustApp;
+  Classes, SysUtils, CustApp, Process;
 
 const
   cFPDOC = 'fpdoc';
@@ -29,9 +29,12 @@ type
     FXMLFiles: TStrings;
     FPasFiles: TStrings;
     FCommand: string;
+    FDivider: string;
     procedure   FileSearch(SearchDir: string; ExtensionMask: string; var FileList: TStrings; Recursive: boolean = True);
     function    ExtractFileNameOnly(AFilename: string): string;
-    procedure   BuildScript;
+    procedure   BuildCommandLine;
+    procedure   WriteScript;
+    procedure   ExecuteFPDoc;
   protected
     procedure   DoRun; override;
   public
@@ -82,7 +85,7 @@ begin
   Result := Copy(Result, 1, Length(Result)-p);
 end;
 
-procedure TBuildDocsApp.BuildScript;
+procedure TBuildDocsApp.BuildCommandLine;
 var
   lPFile, lXFile: string;
   i, j: integer;
@@ -103,21 +106,50 @@ begin
       lPFile := ExtractFileNameOnly(FPasFiles[j]);
       if SameText(lXFile, lPFile) then
       begin
-        FCommand := FCommand + ' \' + LineEnding + Format(cFileLine, [Format(cFilePath, [FPasFiles[j]]), FXMLFiles[i]]);
+      // fix command line separators at the same time
+        FCommand := FCommand + FDivider + Format(cFileLine, [SetDirSeparators(Format(cFilePath, [FPasFiles[j]])), FXMLFiles[i]]);
       end;
     end;
   end;
 
-  FXMLFiles.Text := FCommand;
-  FXMLFiles.SaveToFile('runme2.sh');
+//  FCommand := SetDirSeparators(FCommand);
+  {.$IFDEF Windows}
+  FCommand := StringReplace(FCommand, '''', '"', [rfReplaceAll]);
+  {.$ENDIF}
 end;
 
+procedure TBuildDocsApp.WriteScript;
+begin
+  FXMLFiles.Text := FCommand;
+  {$IFDEF Windows}
+  FXMLFiles.SaveToFile('runme2.bat');
+  {$else}
+  FXMLFiles.SaveToFile('runme2.sh');
+  {$endif}
+end;
+
+procedure TBuildDocsApp.ExecuteFPDoc;
+var
+  p: TProcess;
+begin
+  p := TProcess.Create(nil);
+  try
+//    writeln('------------ START -------------------');
+//    writeln(FCommand);
+//    writeln('------------ END -------------------');
+    p.CommandLine := FCommand;
+    p.Options := [poWaitOnExit];
+    p.Execute;
+  finally
+    p.Free;
+  end;
+end;
 procedure TBuildDocsApp.DoRun;
 var
   ErrorMsg: String;
 begin
   // quick check parameters
-  ErrorMsg:=CheckOptions('h','help');
+  ErrorMsg:=CheckOptions('hs','help');
   if ErrorMsg<>'' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -125,13 +157,24 @@ begin
   end;
 
   // parse parameters
-  if HasOption('h','help') then begin
+  if HasOption('h','help') then
+  begin
     WriteHelp;
     Terminate;
     Exit;
   end;
 
-  BuildScript;
+  if HasOption('s','script') then
+    FDivider := {$ifdef unix}' \' + LineEnding {$else} '' {$endif}
+  else
+    FDivider := '';
+
+  BuildCommandLine;
+
+  if HasOption('s','script') then
+    WriteScript
+  else
+    ExecuteFPDoc;
 
   // stop program loop
   Terminate;
@@ -156,6 +199,14 @@ procedure TBuildDocsApp.WriteHelp;
 begin
   { add your help code here }
   writeln('Usage: ',ExeName,' -h');
+  writeln('');
+  writeln('  -h        Show this help');
+  writeln('  -s        Generate a script/batch file to run later. Recommended');
+  writeln('            for Linux systems.');
+  writeln('');
+  writeln('If no command line parameters are specified, it will execute FPDoc.');
+  writeln('This option is recommended for Windows systems.');
+  writeln('');
 end;
 
 var
