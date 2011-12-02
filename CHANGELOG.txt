@@ -2,13 +2,70 @@
   Release notes for fpGUI
   =======================
 
+v0.8 (2011-11-02)
+  - New widget demos and many improvements to existing demos.
+  - New application examples
+    * Spinning Globe, show some graphics support with zooming.
+    * An experimental IDE called Maximus, which supports project
+      management, compiler settings management, macro management,
+      multi-threading enabled, fast procedure list searching, 
+      syntax-highlighting enabled text editor, OS independent 
+      file monitor support etc.
+  - PDF reporting engine and preview support. Thanks to
+    Jean-Marc Levecque for this awesome contribution.
+  - Huge improvements and enhancements to the Treeview widget.
+    * massive speed improvement
+    * improved painting support
+    * extended treeview and node method calls
+    * state image support (eg: having checkboxes next to nodes)
+    widget.
+  - Many Docview (fpGUI documentation viewer) improvements
+    * Bookmark support
+    * Improved annotation support
+    * Improved the text rendering and text wrapping
+    * Rewrote the font handling which gave a massive 200+% speed
+      increase in startup times (depending on the amount of fonts you
+      have installed on your system), and reduced memory usage by 50%.
+  - Added image support to RichView, the text viewer used by Docview.
+  - Two new supported platforms: OpenSolaris and MacOSX (with X11
+    support).
+  - Global keyboard shortcut support for menu items and actions.
+  - fpGUI API documentation has been extended and improved.
+  - OS independent DND (drag-n-drop) support has been implemented. This
+    supports external application-to-application and internal
+    widget-to-widget drag-n-drop.
+  - Improved the workings of implementing context sensitive help inside
+    your applications.
+  - Improved fpGUI project templates for use with Lazarus IDE or MSEide.
+  - Included the WIPFC (OpenWatcom IPF Compiler) binaries to allow you
+    to compile your own IPF help files into binary INF help files.
+  - UI Designer (the visual forms designer for fpGUI) has seen many
+    improvements:
+    * new components on the component palette.
+    * new properties accessible in the Object Inspector
+    * improved dialogs for "tab order" and "widget order" changes.
+    * code generated can now use spaces or tab characters for
+      indentation.
+    * improved File menu layout and new options.
+  - Improved themes support
+  - Experimental MDI (multi-document interface) support
+  - Extended the Unicode wrapper functions for the FPC's RTL file
+    handing
+    functions.
+  - New built-in code page conversion functions have been added.
+  - Grid widgets have improved scrolling support options.
+  - Improved fpGUI language translations.
+  - Many, many more bug fixes and improvements. For a full list run:
+      git log v0.8...v0.7
+
+
 v0.7 (2010-08-02)
   - Quite a few more minor bug fixes since v0.7-rc2.
   - Some memory leaks in TfpgListView
   - Added an example Debug Server in examples/apps/debugserver
     - This can be used with FPC's dbugintf unit so you can send
       debug messages. Handy for debugging CGI apps on your server.
-  - A new unit fpg_imgutils was added. It contains some handy 
+  - A new unit fpg_imgutils was added. It contains some handy
     utility functions for images.
   - Implemented disabled images support for all controls that can
     display images.
@@ -18,7 +75,7 @@ v0.7 (2010-08-02)
     now click the Year or Month to quickly select a different value
     without the need for scrolling through every month.
   - Many more improvements to the "prototype" text editor component
-    located in prototypes/textedit/. Soon this will become a 
+    located in prototypes/textedit/. Soon this will become a
     standard component in fpGUI.
   - Minor improvements to DocView's toolbar.
   - DocView now has a 'File | Open Special' option, which can open
@@ -34,7 +91,7 @@ v0.7 (2010-08-02)
   - fpGUI's UI Designer has a few more components on the component palette.
     eg: TfpgFilenameEdit, TfpgDirectoryEdit, TfpgFontEdit, etc...
   - Some more minor changes to allow compiling fpGUI under MacOSX with X11.
-  
+
 
 v0.7.rc2  (2010-04-08)
   - Localization of Character Map dialog.
@@ -97,7 +154,7 @@ v0.7.rc1  (2010-03-04)
        text search.
   - A lot of new components have been added, including enhancements
     to existing components.
-  - Various new dialogs have been added, which include Color Wheel, 
+  - Various new dialogs have been added, which include Color Wheel,
     Character Map, Database Login etc.
   - Improved integration with tiOPF project via the Model-GUI-Mediator
     design pattern.
@@ -125,16 +182,16 @@ v0.6  (2008-02-17) revision 534
   - Better support for newer desktop environments under Linux.
   - Anti-aliased line drawing support.
   - Line styles (dot, solid, dash...) are now fully supported on all platforms.
-  - Implemented the Command design pattern interface. Something like 
+  - Implemented the Command design pattern interface. Something like
     Delphi's TAction component.
   - Fixed many memory leaks in CoreLib units.
-  - New examples/demos added: Splash Screen, Command Handler, Gauges, 
+  - New examples/demos added: Splash Screen, Command Handler, Gauges,
     Anti-aliased line drawing etc..
   - Started working on Message Dialogs.
   - Better clipboard support.
-  - Including MANY more improvements and bug fixes. There are to 
+  - Including MANY more improvements and bug fixes. There are to
     many to list. For a detailed listing of the changes use the svn command
-    line client as follows:  svn log -r 367:534 
+    line client as follows:  svn log -r 367:534
 
 
 v0.5  (2007-09-13)
@@ -156,7 +213,7 @@ v0.5  (2007-09-13)
           o ShowMessage()
           o Font Selection dialog
           o File Open...
-          o File Save As... 
+          o File Save As...
     * Text Edit
     * Combo Box (aka Choice List)
     * Grids (aka Tables)
@@ -164,45 +221,45 @@ v0.5  (2007-09-13)
           o Custom Grid
           o Draw Grid
           o String Grid
-          o File Grid 
+          o File Grid
     * Progress Bar
     * List View
     * Main Menu bar and Popup Menus
-    * Treeview 
+    * Treeview
   - Align and Anchor support has been added.
-  - Clipboard support (application wide). Global (OS based) 
+  - Clipboard support (application wide). Global (OS based)
     is in the works.
-  - All painting is done via double buffering, so drawing flicker 
+  - All painting is done via double buffering, so drawing flicker
     is a thing of the past.
-  - Better font support. We now have support for Font Aliases. We 
-    can define a font style (font name, size and attributes) and 
-    give it a text name. Whenever we want to use that font style, 
+  - Better font support. We now have support for Font Aliases. We
+    can define a font style (font name, size and attributes) and
+    give it a text name. Whenever we want to use that font style,
     we can reference it by the text name.
-  - All colors are now defined in RGB order, no matter what platform 
+  - All colors are now defined in RGB order, no matter what platform
     we use.
-  - Modal form support (with some minor issues under Windows that 
+  - Modal form support (with some minor issues under Windows that
     should be fixed soon).
-  - Widgets and Forms now have a single consistent constructor due 
+  - Widgets and Forms now have a single consistent constructor due
     to the base window class that descends from TComponent.
-  - Delayed resource allocation. This is very handy under Linux where 
-    the X Server can be in a remote location (not on the same computer). 
-    This gives a performance bonus as we need to communicate less with 
+  - Delayed resource allocation. This is very handy under Linux where
+    the X Server can be in a remote location (not on the same computer).
+    This gives a performance bonus as we need to communicate less with
     the X Server which is inherently slow.
-  - Supports a Model-GUI-Mediator (MGM) implementation to work with 
-    the tiOPF Object Persistent Framework. Business Objects can now 
-    be saved in a OO fashion. The MGM implementation also makes the 
+  - Supports a Model-GUI-Mediator (MGM) implementation to work with
+    the tiOPF Object Persistent Framework. Business Objects can now
+    be saved in a OO fashion. The MGM implementation also makes the
     standard fpGUI components Object-Aware. No need for DB Components.
-  - fpGUI now has a Visual Form (GUI) Designer in the example/apps 
-    directory. Developers can now create forms visually at a much 
-    faster rate. The designer uses the same source file that contains 
-    your code - generating the ui code like you would have done 
-    manually. No external ui files like Lazarus (*.lfm) or Delphi 
-    (*.dfm). See the readme file in the project directory for more 
-    details. 
+  - fpGUI now has a Visual Form (GUI) Designer in the example/apps
+    directory. Developers can now create forms visually at a much
+    faster rate. The designer uses the same source file that contains
+    your code - generating the ui code like you would have done
+    manually. No external ui files like Lazarus (*.lfm) or Delphi
+    (*.dfm). See the readme file in the project directory for more
+    details.
 
 
 v0.4
-  - The last version of fpGUI using a single handle (windowless) 
+  - The last version of fpGUI using a single handle (windowless)
     design.
 
                   --------------oOo----------------
