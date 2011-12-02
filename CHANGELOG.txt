@@ -2,7 +2,7 @@
   Release notes for fpGUI
   =======================
 
-v0.8 (2011-11-02)
+v0.8 (2011-12-02)
   - New widget demos and many improvements to existing demos.
   - New application examples
     * Spinning Globe, show some graphics support with zooming.
