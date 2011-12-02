@@ -30,7 +30,7 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Minor="7" Build="1"/>
+    <Version Minor="8" Build="0"/>
     <Files Count="88">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
