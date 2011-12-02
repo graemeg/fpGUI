@@ -210,6 +210,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="9"/>
+    <Target>
+      <Filename Value="docview"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value="../components/richtext"/>
