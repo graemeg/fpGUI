@@ -40,7 +40,7 @@ resourcestring
 
 {.$DEFINE de}     // German
 {.$DEFINE ru}     // Russian
-{.$DEFINE fr}     // French
+{$DEFINE fr}     // French
 {.$DEFINE pt}     // Portuguese (Brazil)
 {.$DEFINE af}     // Afrikaans
 {.$DEFINE it}     // Italian

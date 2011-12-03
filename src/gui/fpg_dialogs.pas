@@ -1083,7 +1083,7 @@ begin
   grid := TfpgFileGrid.Create(self);
   with grid do
   begin
-    SetPosition(8, 44, 622, 200);
+    SetPosition(8, 44, 622, 202);
     Anchors := [anLeft, anRight, anTop, anBottom];
     Options := [go_AlternativeColor, go_SmoothScroll];
     OnRowChange := @ListChanged;
