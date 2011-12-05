@@ -38,7 +38,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="19">
+    <Units Count="20">
       <Unit0>
         <Filename Value="maximus.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -134,10 +134,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_find"/>
       </Unit18>
+      <Unit19>
+        <Filename Value="sha1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Sha1"/>
+      </Unit19>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
       <Filename Value="maximus"/>
     </Target>

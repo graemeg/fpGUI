@@ -9,7 +9,7 @@ uses
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros,
   frm_debug, project, unitlist, frm_projectoptions, ideutils, builderthread,
   ideimages, stringhelpers, frm_procedurelist, mPasLex, filemonitor, SynRegExpr,
-  fpg_textedit, frm_find;
+  fpg_textedit, frm_find, Sha1;
 
 
 procedure MainProc;
