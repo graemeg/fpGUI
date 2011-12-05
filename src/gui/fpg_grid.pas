@@ -57,6 +57,7 @@ type
     property    HeaderFont;
   published
     property    Align;
+    property    BorderStyle;
     property    ColumnCount;
     property    Columns;
     property    FocusRow;
@@ -127,6 +128,7 @@ type
     property    Align;
     property    AlternateBGColor;
     property    BackgroundColor;
+    property    BorderStyle;
 //    property    ColResizing;
     property    ColumnCount;
     property    Columns;
