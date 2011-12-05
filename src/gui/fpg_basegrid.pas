@@ -662,8 +662,6 @@ var
   cLeft: integer;
   c: integer;
 begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
   Canvas.ClearClipRect;
 
   r.SetRect(0, 0, Width, Height);
@@ -799,8 +797,6 @@ begin
                          FVScrollBar.Width,
                          FHScrollBar.Height);
   end;
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgBaseGrid.HandleShow;
