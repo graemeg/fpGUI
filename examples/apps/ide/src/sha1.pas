@@ -27,52 +27,47 @@ Jan 10, 2004 Defined uint32_t as Cardinal instead of LongInt
 ------------------------------------------------------------------------------}
 
 
-unit Sha1; // "US Secure Hash Algorithm 1 (SHA1)" (RFC3174)
+unit Sha1;
 
-{------------------------------------------------------------------------------
-
-   Based on the reference implementation in RFC 3174
-
-------------------------------------------------------------------------------}
-
-interface
-
+{$mode objfpc}{$H+}
 {$R-}
 {$Q-}
+
+interface
 
 uses SysUtils, Classes;
 
 const
-   shaSuccess      = 0;
-   shaNull         = 1;
-   shaInputTooLong = 2;
-   shaStateError   = 3;
-   SHA1HashSize    = 20;
+  shaSuccess      = 0;
+  shaNull         = 1;
+  shaInputTooLong = 2;
+  shaStateError   = 3;
+  SHA1HashSize    = 20;
 
 type
-   uint32_t      = Cardinal; // unsigned 32 bit integer
-   uint8_t       = Byte;     // unsigned 8 bit integer (i.e., unsigned char)
-   int_least16_t = LongInt;  // integer of >= 16 bits
+  uint32_t      = Cardinal; // unsigned 32 bit integer
+  uint8_t       = Byte;     // unsigned 8 bit integer (i.e., unsigned char)
+  int_least16_t = LongInt;  // integer of >= 16 bits
 
-   SHA1Digest = array[0..SHA1HashSize-1] of Char;
-   SHA1DigestString = AnsiString;  // string containing 20 chars
+  SHA1Digest = array[0..SHA1HashSize-1] of Char;
+  SHA1DigestString = AnsiString;  // string containing 20 chars
 
-   // This structure will hold context information for the SHA-1
-   // hashing operation
-   SHA1Context = record
-	Intermediate_Hash: array[0..SHA1HashSize div 4-1] of uint32_t; // Message Digest
-	Length_Low : uint32_t;                  // Message length in bits
-	Length_High: uint32_t;                  // Message length in bits
-	Message_Block_Index: int_least16_t;     // Index into message block array
-	Message_Block: array[0..63] of uint8_t; // 512-bit message blocks
-	Computed: Integer;                      // Is the digest computed?
-      Corrupted: Integer;                     // Is the message digest corrupted?
-   end;
+  // This structure will hold context information for the SHA-1
+  // hashing operation
+  SHA1Context = record
+    Intermediate_Hash: array[0..SHA1HashSize div 4-1] of uint32_t; // Message Digest
+    Length_Low : uint32_t;                  // Message length in bits
+    Length_High: uint32_t;                  // Message length in bits
+    Message_Block_Index: int_least16_t;     // Index into message block array
+    Message_Block: array[0..63] of uint8_t; // 512-bit message blocks
+    Computed: Integer;                      // Is the digest computed?
+    Corrupted: Integer;                     // Is the message digest corrupted?
+  end;
 
 function SHA1Reset ( var context       : SHA1Context ): Integer;
 function SHA1Input ( var context       : SHA1Context;
                      message_array     : PChar;
-			   length            : Cardinal ): Integer;
+                     length            : Cardinal ): Integer;
 function SHA1Result( var context       : SHA1Context;
                      var Message_Digest: SHA1Digest ): Integer;
 
@@ -83,8 +78,8 @@ function SHA1ofStream( const strm: TStream        ): SHA1DigestString;
 function SHA1toHex( const digest: SHA1DigestString ): String;
 
 procedure HMAC_SHA1( const Data; DataLen: Integer;
-			   const Key;  KeyLen : Integer;
-			   out   Digest       : SHA1Digest );
+                     const Key;  KeyLen : Integer;
+                     out   Digest       : SHA1Digest );
 function  HMAC_SHA1_EX( const Data: String;
                      const Key : String ): String; //overload;
 
@@ -387,9 +382,9 @@ end;
 // Keyed SHA1 (HMAC-SHA1), RFC 2104
 
 
-procedure HMAC_SHA1( const Data; DataLen: Integer;
-			   const Key;  KeyLen : Integer;
-			   out   Digest       : SHA1Digest );
+procedure HMAC_SHA1(const Data; DataLen: Integer;
+                    const Key;  KeyLen : Integer;
+                    out   Digest       : SHA1Digest );
 var  k_ipad, k_opad: array[0..64] of Byte;
      Context: SHA1Context;
      i      : Integer;
@@ -399,23 +394,23 @@ begin
    FillChar( k_opad, sizeof(k_ipad), 0 );
 
    if KeyLen > 64 then begin
-	// if key is longer than 64 bytes reset it to key=SHA1(key)
-	SHA1Reset ( Context);
-	SHA1Input ( Context, PChar(@Key), KeyLen );
-	SHA1Result( Context, Digest );
-	// store key in pads
-	Move( Digest, k_ipad, SHA1HashSize );
-	Move( Digest, k_opad, SHA1HashSize );
+    // if key is longer than 64 bytes reset it to key=SHA1(key)
+    SHA1Reset ( Context);
+    SHA1Input ( Context, PChar(@Key), KeyLen );
+    SHA1Result( Context, Digest );
+    // store key in pads
+    Move( Digest, k_ipad, SHA1HashSize );
+    Move( Digest, k_opad, SHA1HashSize );
    end else begin
-	// store key in pads
-	Move( Key, k_ipad, KeyLen );
-	Move( Key, k_opad, KeyLen );
+    // store key in pads
+    Move( Key, k_ipad, KeyLen );
+    Move( Key, k_opad, KeyLen );
    end;
 
    // XOR key with ipad and opad values
    for i:=0 to 63 do begin
-	k_ipad[i] := k_ipad[i] xor $36;
-	k_opad[i] := k_opad[i] xor $5c;
+   k_ipad[i] := k_ipad[i] xor $36;
+   k_opad[i] := k_opad[i] xor $5c;
    end;
 
    // perform inner SHA1
@@ -432,7 +427,7 @@ begin
 end;
 
 function HMAC_SHA1_EX( const Data: String;
-			 const Key : String ): String;
+                       const Key : String ): String;
 var  Digest: SHA1Digest;
 begin
    HMAC_SHA1( Data[1], length(Data), Key[1], length(Key), Digest );
@@ -446,7 +441,7 @@ end;
 SHA1 test suit:
 procedure TForm1.Button1Click(Sender: TObject);
 const TEST1   = 'abc';
-	TEST2a  = 'abcdbcdecdefdefgefghfghighijhi';
+      TEST2a  = 'abcdbcdecdefdefgefghfghighijhi';
       TEST2b  = 'jkijkljklmklmnlmnomnopnopq';
       TEST2   = TEST2a + TEST2b;
       TEST3   = 'a';
@@ -487,15 +482,15 @@ begin
         if (err<>0) then begin
             ListBox1.Items.Add( Format(
             'SHA1Result Error %d, could not compute message digest.', [err] ) );
-	  end else begin
-		s := '';
-		for i := 0 to 19 do begin
-		    s := s + Format('%02X ', [ ord(Message_Digest[i]) ] );
-		end;
-		ListBox1.Items.Add( 'Result: ' + s );
-	  end;
+        end else begin
+          s := '';
+          for i := 0 to 19 do begin
+          s := s + Format('%02X ', [ ord(Message_Digest[i]) ] );
+        end;
+    ListBox1.Items.Add( 'Result: ' + s );
+    end;
 
-	  ListBox1.Items.Add( 'Wanted: ' + Format('%s', [resultarray[j]] ) );
+    ListBox1.Items.Add( 'Wanted: ' + Format('%s', [resultarray[j]] ) );
     end;
 end;
 
