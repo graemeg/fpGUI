@@ -392,6 +392,7 @@ begin
   wc.NameBase := 'Memo';
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('BorderStyle', TPropertyEnum, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
@@ -574,6 +575,7 @@ begin
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
   wc.AddProperty('AlternateBGColor', TPropertyColor, 'The color of every alternative row. Dependent on grid Options property.');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('BorderStyle', TPropertyEnum, '');
   wc.AddProperty('Columns', TPropertyDBColumns, 'Defines the various columns for a grid. At least one column must exist.');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
@@ -582,6 +584,7 @@ begin
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('RowCount', TPropertyInteger, 'Default number of rows in the grid');
   wc.AddProperty('RowSelect', TPropertyBoolean, 'If enabled, a whole row is selected, not just a cell');
+  wc.AddProperty('ScrollbarStyle', TPropertyEnum, '');
   wc.AddProperty('ShowGrid', TPropertyBoolean, 'Must the grid lines be shown');
   wc.AddProperty('ShowHeader', TPropertyBoolean, 'Must the grid header be visible');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
