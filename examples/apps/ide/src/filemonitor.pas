@@ -1,6 +1,6 @@
 unit filemonitor;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
