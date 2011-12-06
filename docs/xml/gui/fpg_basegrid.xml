@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpgui">
+
+<module name="fpg_basegrid">
+<unit>$(fpgui_src)/gui/fpg_basegrid.pas</unit>
+<short>This unit defines a class that represents the most basic parts of a
+grid.</short>
+<descr><printshort id="fpg_basegrid"/>.</descr>
+
+
+<element name="TfpgBaseGrid.OnRowChange">
+<short>This even is fired as soon as the focused row has changed</short>
+<descr><printshort id="TfpgBaseGrid.OnRowChange"/>. This event only works on the
+row level of the grid.</descr>
+</element>
+
+<element name="TfpgBaseGrid.OnFocusChange">
+<short>This even is fired as soon as the focused cell has changed</short>
+<descr><printshort id="TfpgBaseGrid.OnFocusChange"/>. This event works on the
+grid cell level.</descr>
+</element>
+
+<element name="TfpgBaseGrid.OnCanSelectCell">
+<short>This event allows the program to decide if a cell can be selected or not</short>
+<descr><printshort id="TfpgBaseGrid.OnCanSelectCell"/>. The default value for
+<var>ACanSelect</var> is True. Setting this to false inside the event handler
+will prevent the cell at position ACol, ARow to be selected.</descr>
+</element>
+
+
+</module>
+
+</package>
+</fpdoc-descriptions>
