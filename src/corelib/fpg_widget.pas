@@ -1076,6 +1076,9 @@ var
   pw: TfpgWidget;
   w: TfpgWidget;
 begin
+  if FShowHint then
+    fpgApplication.HideHint;
+
   // setting the focus through all parents
   pw := Parent;
   w  := self;
@@ -1090,7 +1093,8 @@ end;
 
 procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  if FShowHint then
+    fpgApplication.HideHint;
 end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
