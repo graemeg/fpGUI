@@ -36,14 +36,12 @@ type
                   bsRaised3D, bsSunken3D, bsEtched, bsEmmbossed);
 
 
-  TfpgGauge = class(TfpgWidget)
+  TfpgBaseGauge = class(TfpgWidget)
   private
     FFont: TfpgFont;
-    FClientRect: TfpgRect;
     FMin: Longint;
     FMax: Longint;
     FPosition: Longint;
-    FKind: TGaugeKind;
     FShowText: Boolean;
     { TODO: Implement Border style }
     FBorderStyle: TBorderStyle;
@@ -58,12 +56,6 @@ type
 //    FLWMValue: Longint;   //  Low Watermark Value
 //    FHWMColor: TfpgColor; // High Watermark Color
 //    FHWMValue: Longint;   // High Watermark Color
-    procedure   BackgroundDraw;
-    procedure   TextDraw;
-    procedure   BarDraw;
-    procedure   PieDraw;
-    procedure   NeedleDraw;
-    procedure   DialDraw;
     procedure   SetGaugeKind(AValue: TGaugeKind);
     procedure   SetShowText(AValue: Boolean);
     procedure   SetBorderStyle(AValue: TBorderStyle);
@@ -74,36 +66,56 @@ type
     procedure   SetProgress(AValue: Longint);
     function    GetPercentage: Longint;
   protected
+    FClientRect: TfpgRect;
+    FKind: TGaugeKind;
+    procedure   BackgroundDraw; virtual;
+    procedure   TextDraw; virtual;
+    procedure   BarDraw; virtual;
+    procedure   PieDraw; virtual;
+    procedure   NeedleDraw; virtual;
+    procedure   DialDraw; virtual;
     procedure   HandlePaint; override;
+    property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
+    property    Color: TfpgColor read FColor write FColor default TfpgColor($c4c4c4);
+    property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
+    property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
+    property    MaxValue: Longint read FMax write SetMax default 100;
+    property    MinValue: Longint read FMin write SetMin default 0;
+    property    Progress: Longint read FPosition write SetProgress;
+    property    SecondColor: TfpgColor read FSecondColor write SetSecondColor default clWhite;
+    property    ShowText: Boolean read FShowText write SetShowText default True;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AddProgress(AValue: Longint);
     property    Percentage: Longint read GetPercentage;
     property    Font: TfpgFont read FFont;
+  end;
+
+
+  TfpgGauge = class(TfpgBaseGauge)
   published
     property    Align;
     property    Anchors;
-    property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
-    property    Color: TfpgColor read FColor write FColor default clButtonFace;
+    property    BorderStyle;
+    property    Color;
     property    Enabled;
-    property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
+    property    FirstColor;
     property    Hint;
-    property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
-    property    MaxValue: Longint read FMax write SetMax default 100;
-    property    MinValue: Longint read FMin write SetMin default 0;
+    property    Kind;
+    property    MaxValue;
+    property    MinValue;
     property    ParentShowHint;
-    property    Progress: Longint read FPosition write SetProgress;
-    property    SecondColor: TfpgColor read FSecondColor write SetSecondColor default clWhite;
+    property    Progress;
+    property    SecondColor;
     property    ShowHint;
-    property    ShowText: Boolean read FShowText write SetShowText default True;
+    property    ShowText;
     property    Visible;
     property    OnShowHint;
   end;
 
-
 // A convenience function to quickly create a gauge from code
 function CreateGauge (AOwner: TComponent; ALeft, ATop, AWidth,
-    AHeight: TfpgCoord; AKind: TGaugeKind ): TfpgGauge;
+    AHeight: TfpgCoord; AKind: TGaugeKind ): TfpgBaseGauge;
 
 
 implementation
@@ -162,9 +174,9 @@ begin
 end;
 
 function CreateGauge(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
-    AKind: TGaugeKind): TfpgGauge;
+    AKind: TGaugeKind): TfpgBaseGauge;
 begin
-  Result := TfpgGauge.Create(AOwner);
+  Result := TfpgBaseGauge.Create(AOwner);
   Result.Left   := ALeft;
   Result.Top    := ATop;
   Result.Width  := AWidth;
@@ -172,11 +184,11 @@ begin
   Result.Kind   := AKind;
 end;
 
-{ TfpgGauge }
+{ TfpgBaseGauge }
 
 { Drawing procedures - they're called from HandlePaint, which takes care of
   Canvas.BeginDraw and Canvas.EndDraw - Shouldn't be used otherwise. }
-procedure TfpgGauge.BackgroundDraw;
+procedure TfpgBaseGauge.BackgroundDraw;
 begin
   {common Background for all kinds }
 
@@ -233,7 +245,7 @@ begin
   end;  { with }
 end;
 
-procedure TfpgGauge.TextDraw;
+procedure TfpgBaseGauge.TextDraw;
 var
   S: string;
   X, Y: Integer;
@@ -252,7 +264,7 @@ begin
   Canvas.DrawString(x, y, S);
 end;
 
-procedure TfpgGauge.BarDraw;
+procedure TfpgBaseGauge.BarDraw;
 var
   BarLength: Longint;
   SavedRect: TfpgRect;
@@ -309,7 +321,7 @@ begin
   FClientRect := SavedRect;
 end;
 
-procedure TfpgGauge.PieDraw;
+procedure TfpgBaseGauge.PieDraw;
 var
   Angle: Double;
 begin
@@ -322,7 +334,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.NeedleDraw;
+procedure TfpgBaseGauge.NeedleDraw;
 var
   Center: TPoint;
   Radius: TPoint;
@@ -360,7 +372,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.DialDraw;
+procedure TfpgBaseGauge.DialDraw;
 var
   Center: TPoint;
   Radius: TPoint;
@@ -405,7 +417,7 @@ begin
   end;  { with }
 end;
 
-procedure TfpgGauge.HandlePaint;
+procedure TfpgBaseGauge.HandlePaint;
 begin
   inherited HandlePaint;
 //  Canvas.BeginDraw(True);
@@ -429,7 +441,7 @@ begin
 //  Canvas.EndDraw;
 end;
 
-procedure TfpgGauge.SetGaugeKind(AValue: TGaugeKind);
+procedure TfpgBaseGauge.SetGaugeKind(AValue: TGaugeKind);
 begin
   if AValue <> FKind then
   begin
@@ -438,7 +450,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetShowText(AValue: Boolean);
+procedure TfpgBaseGauge.SetShowText(AValue: Boolean);
 begin
   if AValue <> FShowText then
   begin
@@ -447,7 +459,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetBorderStyle(AValue: TBorderStyle);
+procedure TfpgBaseGauge.SetBorderStyle(AValue: TBorderStyle);
 begin
   if AValue <> FBorderStyle then
   begin
@@ -459,7 +471,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetFirstColor(AValue: TfpgColor);
+procedure TfpgBaseGauge.SetFirstColor(AValue: TfpgColor);
 begin
   if AValue <> FFirstColor then
   begin
@@ -469,7 +481,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetSecondColor(AValue: TfpgColor);
+procedure TfpgBaseGauge.SetSecondColor(AValue: TfpgColor);
 begin
   if AValue <> FSecondColor then
   begin
@@ -479,7 +491,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetMin(AValue: Longint);
+procedure TfpgBaseGauge.SetMin(AValue: Longint);
 begin
   if AValue <> FMin then
   begin
@@ -495,7 +507,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetMax(AValue: Longint);
+procedure TfpgBaseGauge.SetMax(AValue: Longint);
 begin
   if AValue <> FMax then
   begin
@@ -511,7 +523,7 @@ begin
   end;
 end;
 
-procedure TfpgGauge.SetProgress(AValue: Longint);
+procedure TfpgBaseGauge.SetProgress(AValue: Longint);
 var
   CurrPercentage: Longint;
   MustRepaint: Boolean;
@@ -535,7 +547,7 @@ begin
     RePaint;
 end;
 
-function TfpgGauge.GetPercentage: Longint;
+function TfpgBaseGauge.GetPercentage: Longint;
 Var
  V,T: Longint;
 begin
@@ -547,7 +559,7 @@ begin
     Result := Longint(Trunc( (V * 100.0) / T ));
 end;
 
-constructor TfpgGauge.Create(AOwner: TComponent);
+constructor TfpgBaseGauge.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable     := False;
@@ -565,7 +577,7 @@ begin
   FFont         := fpgStyle.DefaultFont;
 end;
 
-procedure TfpgGauge.AddProgress(AValue: Longint);
+procedure TfpgBaseGauge.AddProgress(AValue: Longint);
 begin
   Progress := FPosition + AValue;
 end;
