@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -205,29 +205,29 @@ begin
           begin
             { Round frame for the Pie }
             Canvas.SetLineStyle(2, lsSolid);
-        	  Canvas.SetColor(TfpgColor($98b2ed));
-        	  Canvas.DrawArc(Left, Top, Width, Height, 0, 360);
+            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.DrawArc(Left, Top, Width, Height, 0, 360);
           end;
       gkNeedle:
           begin
             { Half a filled circle background for needle }
             FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($425d9b),TfpgColor($98b2ed));
-    	      Canvas.SetLineStyle(2, lsSolid);
+            Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
-    	      Canvas.SetColor(TfpgColor($98b2ed));
-    	      Canvas.DrawArc(Left, Top, Width, Height * 2 - 1, 0, 180);
-    	      Canvas.SetLineStyle(1, lsSolid);
-    	      Canvas.SetColor(TfpgColor($3b4c71));
-    	      Canvas.DrawLine(Left, Bottom,Left + Width, Bottom);
+            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.DrawArc(Left, Top, Width, Height * 2 - 1, 0, 180);
+            Canvas.SetLineStyle(1, lsSolid);
+            Canvas.SetColor(TfpgColor($3b4c71));
+            Canvas.DrawLine(Left, Bottom,Left + Width, Bottom);
           end;
       gkDial:
           begin
             { 270° pie shaped background for Dial }
             FillArcGradient (Canvas,Left, Top, Width, Height , 225, -270 ,TfpgColor($425d9b),TfpgColor($98b2ed));
-    	      Canvas.SetLineStyle(2, lsSolid);
+            Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
-    	      Canvas.SetColor(TfpgColor($98b2ed));
-    	      Canvas.DrawArc(Left,Top,Width,Height,225,-270);
+            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.DrawArc(Left,Top,Width,Height,225,-270);
           end;
     end;
   end;  { with }
