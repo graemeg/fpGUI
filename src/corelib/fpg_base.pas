@@ -743,6 +743,8 @@ function  fpgGetBlue(const AColor: TfpgColor): word;
 function  fpgGetAlpha(const AColor: TfpgColor): word;
 function  fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 function  fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
+function  fpgDarker(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
+function  fpgLighter(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 
 
 { Points }
@@ -1034,6 +1036,32 @@ end;
 function fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
 begin
   Result := ABlue or (AGreen shl 8) or (ARed shl 16);
+end;
+
+function fpgDarker(const AColor: TfpgColor; APercent: Byte): TfpgColor;
+var
+  lColor: TFPColor;
+begin
+  lColor.Red := fpgGetRed(AColor);
+  lColor.Green := fpgGetGreen(AColor);
+  lColor.Blue := fpgGetBlue(AColor);
+  lColor.Red := Round(lColor.Red*APercent/100);
+  lColor.Green := Round(lColor.Green*APercent/100);
+  lColor.Blue := Round(lColor.Blue*APercent/100);
+  Result := FPColorTofpgColor(lColor);
+end;
+
+function fpgLighter(const AColor: TfpgColor; APercent: Byte): TfpgColor;
+var
+  lColor: TFPColor;
+begin
+  lColor.Red := fpgGetRed(AColor);
+  lColor.Green := fpgGetGreen(AColor);
+  lColor.Blue := fpgGetBlue(AColor);
+  lColor.Red := Round((lColor.Red*APercent/100) + (255 - APercent/100*255));
+  lColor.Green := Round((lColor.Green*APercent/100) + (255 - APercent/100*255));
+  lColor.Blue := Round((lColor.Blue*APercent/100) + (255 - APercent/100*255));
+  Result := FPColorTofpgColor(lColor);
 end;
 
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
