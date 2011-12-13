@@ -568,7 +568,7 @@ you open a new or additional help file.
 .* ************************************************************
 :h1 res=8 id='bookmarks'.Bookmarks
 :hp2.Bookmarks:ehp2.
-:note.:hp8.*** This feature is not implemented yet. ***:ehp8.
+:note.:hp8.*** This feature is partially implemented. ***:ehp8.
 :p.
 &dv. allows you to bookmark particular topics within the current help
 file. Simply click the bookmark toolbar button
@@ -581,9 +581,6 @@ the bookmark you want to open.
 You can view or delete all your bookmarks by clicking on "Edit..." in
 the "Bookmarks" menu. This window can remain open while you read, so
 that you can quickly look through your bookmarks.
-:note text='Note:'.
-&dv. bookmarks remember all the topic windows that are open, if
-there is more than one.
 :p.
 Bookmarks are saved in a file with the extension ".bookmarks", in the &dv. config
 directory. This is in the user's home profile directory where there is read/write
