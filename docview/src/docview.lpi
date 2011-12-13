@@ -209,9 +209,9 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
-      <Filename Value="docview"/>
+      <Filename Value="units/$(TargetCPU)-$(TargetOS)/docview"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
