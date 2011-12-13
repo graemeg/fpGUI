@@ -341,11 +341,12 @@ help file. You can quickly search through it just by typing the first few
 characters of the word you want to look up. &dv. jumps to the first match
 in the index automatically. To view the highlighted topic, press
 enter.
-:note text='Note:'.
+:nt.
 Help files may or may not include an "official" index. The index is
 manually created by the author, so (for the original OS/2 View program) it's
 usefulness is strictly dependent on how much work the author put into it.
 There may not even be Index information in the help file.
+:ent.
 :p.
 However, a useful index can be provided simply by listing the titles of
 each topic alphabetically, and this is what &dv. does. It then
@@ -455,9 +456,10 @@ selectable, so you can select your preferred storage location.
 .* preferred storage location for notes (eg: some users prefer it like OS/2's View program did,
 .* by storing notes in the same directory as the help file).
 
-:note.If a help file is changed (for example a program is
+:nt.If a help file is changed (for example a program is
 upgraded) then notes will no longer appear in the correct place;
 however, you can still read them from the Notes tab.
+:ent.
 
 .* ************************************************************
 .* History
