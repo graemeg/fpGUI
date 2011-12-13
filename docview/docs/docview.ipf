@@ -97,13 +97,10 @@ display or navigate properly.
 :ul.
 :li.Image support. The Rich Text View component can already handle images, I am only struggling
 to decode the images inside INF help files. This should hopefully be fixed soon.
-:li.Bookmark support
 :li.Printing support
 :li.Cross-file linking. Clicking a hyperlink that automatically opens another
 INF help file and goes to the correct topic. &dv. already supports loading
 multiple files, so this is almost complete.
-:li.Some optimization of the Rich Text View component. Better startup time, improved
-text wrapping and font substitution support.
 :li.Global searching of all help files on your help folder specified by the
 environment variables BOOKSHELF or HELP.
 :eul.
