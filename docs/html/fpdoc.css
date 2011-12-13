@@ -1,9 +1,4 @@
 /*
-  $Id$
-
-  Default style sheet for FPDoc reference documentation
-  by Sebastian Guenther, sg@freepascal.org
-
   Feel free to use this file as a template for your own style sheets.
 */
 
@@ -53,6 +48,11 @@ h3, td.h3 {
   font-size: 12pt
 }
 
+/* source fragments */
+span.code {
+  white-space: nowrap
+}
+
 /* symbols in source fragments */
 span.sym {
   color: darkred
@@ -95,7 +95,6 @@ span.asm {
   color: green
 }
 
-
 td.pre {
   white-space: pre
 }
@@ -126,4 +125,36 @@ span.bartitle {
   font-weight: bold;
   font-style: italic;
   color: darkblue
+}
+
+span.footer {
+  font-style: italic;
+  color: darkblue
+}
+
+/* definition list */
+dl {
+ border: 3px double #ccc;
+ padding: 0.5em;
+}
+
+/* definition list: term */
+dt {
+ float: left;
+ clear: left;
+ width: auto; /* normally browsers default width of largest item */
+ padding-right: 20px;
+ font-weight: bold;
+ color: darkgreen;
+}
+
+/* definition list: description */
+dd {
+ margin: 0 0 0 110px;
+ padding: 0 0 0.5em 0;
+}
+
+/* for browsers in standards compliance mode */
+td p {
+  margin: 0;
 }
