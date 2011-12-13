@@ -53,6 +53,8 @@ type
     tsHistory: TfpgTabSheet;
     lbHistory: TfpgListBox;
     Splitter1: TfpgSplitter;
+    bvlContentArea: TfpgBevel;
+    pnlTitle: TfpgPanel;
     RichView: TRichTextView;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
@@ -62,19 +64,19 @@ type
     miTools: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     ToolBar: TfpgBevel;
+    btnQuit: TfpgButton;
     btnOpen: TfpgButton;
+    Bevel1: TfpgBevel;
     btnBack: TfpgButton;
     btnFwd: TfpgButton;
     btnPrev: TfpgButton;
     btnNext: TfpgButton;
-    btnBookmark: TfpgButton;
-    btnHelp: TfpgButton;
-    btnQuit: TfpgButton;
-    Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
-    cbEncoding: TfpgComboBox;
-    Bevel3: TfpgBevel;
     btnTBNoteAdd: TfpgButton;
+    btnBookmark: TfpgButton;
+    Bevel3: TfpgBevel;
+    btnHelp: TfpgButton;
+    cbEncoding: TfpgComboBox;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
     miDebugHexInfo: TfpgMenuItem;
@@ -166,6 +168,7 @@ type
     procedure   DisplaySelectedSearchResultTopic;
     procedure   NavigateToHistoryIndex(AIndex: integer);
     procedure   UpdateLocationPanel;
+    procedure   UpdateTitlePanel;
     procedure   EnableControls;
     procedure   ClearAllWordSequences;
     procedure   DoSearch;
@@ -1164,6 +1167,12 @@ begin
     sep := ' > ';
   end;
   SetStatus(s);
+  UpdateTitlePanel;
+end;
+
+procedure TMainForm.UpdateTitlePanel;
+begin
+  pnlTitle.Text := CurrentTopic.Title;
 end;
 
 procedure TMainForm.EnableControls;
@@ -2658,6 +2667,7 @@ begin
   begin
     Name := 'tsContents';
     SetPosition(3, 24, 254, 279);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Contents';
   end;
 
@@ -2694,7 +2704,8 @@ begin
   with tsIndex do
   begin
     Name := 'tsIndex';
-    SetPosition(3, 24, 254, 249);
+    SetPosition(3, 24, 254, 279);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Index';
   end;
 
@@ -2716,7 +2727,7 @@ begin
   with lbIndex do
   begin
     Name := 'lbIndex';
-    SetPosition(4, 32, 242, 212);
+    SetPosition(4, 32, 242, 242);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
@@ -2744,7 +2755,8 @@ begin
   with tsSearch do
   begin
     Name := 'tsSearch';
-    SetPosition(3, 24, 254, 301);
+    SetPosition(3, 24, 254, 279);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Search';
   end;
 
@@ -2865,7 +2877,7 @@ begin
   with lbSearchResults do
   begin
     Name := 'lbSearchResults';
-    SetPosition(4, 220, 242, 76);
+    SetPosition(4, 220, 242, 54);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
@@ -2902,7 +2914,8 @@ begin
   with tsNotes do
   begin
     Name := 'tsNotes';
-    SetPosition(3, 24, 254, 249);
+    SetPosition(3, 24, 254, 279);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Notes';
   end;
 
@@ -2910,7 +2923,7 @@ begin
   with NotesListBox do
   begin
     Name := 'NotesListBox';
-    SetPosition(4, 32, 242, 212);
+    SetPosition(4, 32, 242, 242);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
@@ -2984,6 +2997,7 @@ begin
   begin
     Name := 'tsHistory';
     SetPosition(3, 24, 254, 249);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'History';
   end;
 
@@ -3004,16 +3018,37 @@ begin
   with Splitter1 do
   begin
     Name := 'Splitter1';
-    SetPosition(265, 120, 8, 168);
+    SetPosition(262, 2, 8, 306);
     Align := alLeft;
     OnDoubleClick :=@Splitter1DoubleClicked;
   end;
 
-  RichView := TRichTextView.Create(bvlBody);
+  bvlContentArea := TfpgBevel.Create(bvlBody);
+  with bvlContentArea do
+  begin
+    Name := 'bvlContentArea';
+    SetPosition(270, 2, 381, 306);
+    Align := alClient;
+    Hint := '';
+    Shape := bsSpacer;
+  end;
+
+  pnlTitle := TfpgPanel.Create(bvlContentArea);
+  with pnlTitle do
+  begin
+    Name := 'pnlTitle';
+    SetPosition(2, 2, 377, 20);
+    Align := alTop;
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Panel';
+  end;
+
+  RichView := TRichTextView.Create(bvlContentArea);
   with RichView do
   begin
     Name := 'RichView';
-    SetPosition(368, 192, 244, 92);
+    SetPosition(77, 188, 244, 92);
     TabOrder := 2;
     Align := alClient;
     OnOverLink  := @RichViewOverLink;
@@ -3300,14 +3335,15 @@ begin
     Name := 'cbEncoding';
     SetPosition(524, 2, 124, 22);
     Anchors := [anRight,anTop];
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
     Items.Add('UTF-8');
     Items.Add('CP437');
     Items.Add('CP850');
     Items.Add('IBM Graph (cp437)');
-    TabOrder := 10;
     FocusItem := 0;
+    TabOrder := 10;
     OnChange  := @cbEncodingChanged;
   end;
 
