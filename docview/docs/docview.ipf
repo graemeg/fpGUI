@@ -95,7 +95,7 @@ display or navigate properly.
 
 :p.:hp2.Features still planned?:ehp2.
 :ul.
-:li.Image support. The Ric Text View component can already handle images, I am only struggling
+:li.Image support. The Rich Text View component can already handle images, I am only struggling
 to decode the images inside INF help files. This should hopefully be fixed soon.
 :li.Bookmark support
 :li.Printing support
