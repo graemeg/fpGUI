@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="4">
+  <Package Version="3">
     <Name Value="fpg_report"/>
-    <Author Value="&quot;Jean-Marc Levecque&quot; &lt;jmarc.levecque@dbmail.com>"/>
+    <Author Value="&quot;Jean-Marc Levecque&quot; <jmarc.levecque@dbmail.com>"/>
     <CompilerOptions>
-      <Version Value="11"/>
+      <Version Value="9"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
-        <LCLWidgetType Value="fpgui"/>
+        <LCLWidgetType Value="nogui"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
@@ -17,6 +17,11 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
+      <Linking>
+        <Debugging>
+          <UseLineInfoUnit Value="False"/>
+        </Debugging>
+      </Linking>
       <Other>
         <CompilerMessages>
           <UseMsgFile Value="True"/>

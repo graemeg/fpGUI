@@ -23,7 +23,7 @@ interface
 uses
   Classes, SysUtils, StrUtils,
   fpg_base, fpg_main,
-  fpg_panel,
+  fpg_panel, fpg_imgfmt_bmp, fpg_imgfmt_jpg,
   U_Command, U_Pdf;
 
 type
@@ -80,6 +80,7 @@ type
       procedure DrawALine(XBegin,YBegin,XEnd,YEnd: Single; StyLine: Integer);
       procedure DrawAHorizLine(XBegin,YBegin: Single; Column: Integer; XEnd: Single; StyLine: Integer; Zone: TZone);
       procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
+      procedure PaintImage(PosX,PosY,ImgNum: Integer);
       function GetSectionTitle: string;
       procedure SetSectionTitle(ATitle: string);
     public
@@ -314,6 +315,14 @@ type
                 // YEnd = vertical position of ending point in numeric value in the measurement unit (msMM or msInch)
                 // AStyle = reference of the line style of the line
       procedure SurfPage(XLimits,YLimits: array of Single; AColor: TfpgColor);
+                // draw a coloured surface inside the defined limit points
+                // XLimits = list of horizontal positions of limit points
+                // YLimits = list of vertical positions of limit points
+                // AColor = colour to be painted within the limits
+      procedure ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+                // draw a bmp or jpg image at the defined position
+                // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
+                // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
       property Language: Char read FVersion write FVersion;
       property Visualiser: Boolean read FVisualization write FVisualization;
       property NumSection: Integer read FNmSection write FNmSection;
@@ -412,6 +421,24 @@ type
       property SurfColor: Integer read FColor write FColor;
     end;
 
+  TPdfImg = class(TPdfElement)
+    private
+      FPage: Integer;
+      FNumber: Integer;
+      FLeft: Single;
+      FBottom: Single;
+      FWidth: Integer;
+      FHeight: Integer;
+    protected
+    public
+      property PageId: Integer read FPage write FPage;
+      property ImgNumber: Integer read FNumber write FNumber;
+      property ImgLeft: Single read FLeft write FLeft;
+      property ImgBottom: Single read FBottom write FBottom;
+      property ImgWidth: Integer read FWidth write FWidth;
+      property ImgHeight: Integer read FHeight write FHeight;
+    end;
+
 var
   Infos: record
     Titre: string;
@@ -423,6 +450,7 @@ var
   PdfRect: TPdfRect;
   PdfLine: TPdfLine;
   PdfSurf: TPdfSurf;
+  PdfImg: TPdfImg;
 
 const
   PPI= 72;
@@ -774,6 +802,10 @@ with T_Section(Sections[Pred(NumSection)]) do
       then
         with Cmd as T_Surface do
           PaintSurface(GetPoints,GetColor);
+      if Cmd is T_Image
+      then
+        with Cmd as T_Image do
+          PaintImage(GetPosX,GetPosY,GetImage);
       end;
   if CmdFooter.Count> 0
   then
@@ -2093,6 +2125,31 @@ with T_Section(Sections[Pred(NumSection)]) do
     end;
 end;
 
+procedure T_Report.PaintImage(PosX,PosY,ImgNum: Integer);
+begin
+with T_Section(Sections[Pred(NumSection)]) do
+  case FPreparation of
+    ppPrepare:
+      LoadImg(PosX,PosY,ImgNum);
+    ppVisualize:
+      FCanvas.DrawImage(PosX,PosY,TfpgImage(Images[ImgNum]));
+    ppPdfFile:
+      begin
+      PdfImg:= TPdfImg.Create;
+      with PdfImg do
+        begin
+        PageId:= NumPage;
+        ImgNumber:= ImgNum;
+        ImgLeft:= PosX;
+        ImgBottom:= Paper.H-PosY-TfpgImage(Images[ImgNum]).Height;
+        ImgWidth:= TfpgImage(Images[ImgNum]).Width;
+        ImgHeight:= TfpgImage(Images[ImgNum]).Height;
+        end;
+      PdfPage.Add(PdfImg);
+      end;
+    end;
+end;
+
 function T_Report.GetSectionTitle: string;
 begin
 Result:= T_Section(Sections[Pred(Sections.Count)]).Title;
@@ -2116,6 +2173,7 @@ LineSpaces:= TList.Create;
 BackColors:= TList.Create;
 LineStyles:= TList.Create;
 Borders:= TList.Create;
+Images:= TList.Create;
 Texts:= TStringList.Create;
 VWriteLine:= T_WriteLine.Create;
 PdfPage:= TList.Create;
@@ -2156,6 +2214,11 @@ then
   for Cpt:= 0 to Pred(Borders.Count) do
     T_Border(Borders[Cpt]).Free;
 Borders.Free;
+if Images.Count> 0
+then
+  for Cpt:= 0 to Pred(Images.Count) do
+    T_Image(Images[Cpt]).Free;
+Images.Free;
 Texts.Free;
 VWriteLine.Free;
 if PdfPage.Count> 0
@@ -2798,6 +2861,26 @@ for Cpt:= 0 to Pred(Size) do
   Ends[Cpt].Y:= Dim2Pixels(YLimits[Cpt]);
   end;
 PaintSurface(Ends,AColor);
+end;
+
+procedure T_Report.ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+var
+  PosH,PosV,RefImage: Integer;
+  Image: TfpgImage;
+begin
+PosH:= Round(Dim2Pixels(Horiz));
+PosV:= Round(Dim2Pixels(Verti));
+if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+then
+  begin
+  Image:= LoadImage_BMP(ImgFileName);
+  Scale:= 1;
+  end;
+if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+then
+  Image:= LoadImage_JPG(ImgFileName,Scale);
+RefImage:= Images.Add(Image);
+PaintImage(PosH,PosV,RefImage);
 end;
 
 end.
