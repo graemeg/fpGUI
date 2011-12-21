@@ -22,7 +22,8 @@ interface
 
 uses
   Classes, SysUtils,
-  fpg_base, fpg_main, U_Pdf;
+  fpg_base, fpg_main, //fpg_imgfmt_bmp, fpg_imgfmt_jpg,
+  U_Pdf;
 
 type
   TZone = (zEnTete,zPied,zPage,zMarges);
@@ -80,6 +81,7 @@ type
       procedure LoadLineHorizPied(APosXBegin,APosYBegin: Single; AColumn: Integer; APosXEnd,APosYEnd: Single; AStyle: Integer);
       procedure LoadLineHorizGroupe(AHeight: Single);
       procedure LoadSurf(APos: T_Points; AColor: TfpgColor);
+      procedure LoadImg(APosX,APosY,AImgNum: Integer);
       function GetCmdPage(NumPage: Integer): TList;
       property CmdHeader: TList read FHeader;
       property CmdFooter: TList read FFooter;
@@ -335,6 +337,18 @@ type
       property GetColor: TfpgColor read FColor;
     end;
 
+  T_Image = class(T_Command)
+    private
+      FImage: Integer;
+      FPosX: Integer;
+      FPosY: Integer;
+    public
+      constructor Create(APosX,APosY,AImageNum: Integer);
+      property GetImage: Integer read FImage;
+      property GetPosX: Integer read FPosX;
+      property GetPosY: Integer read FPosY;
+    end;
+
 var
   Sections: TList;
 //  Columns: TList;
@@ -344,6 +358,7 @@ var
   BackColors: TList;
   LineStyles: TList;
   Borders: TList;
+  Images: TList;
   VSection: T_Section;
   VPage: T_Page;
   VGroup: T_Group;
@@ -558,6 +573,12 @@ end;
 procedure T_Section.LoadSurf(APos: T_Points; AColor: TfpgColor);
 begin
 VCommand:= T_Surface.Create(APos,AColor);
+T_Page(Pages[Pred(FPages.Count)]).Commands.Add(VCommand);
+end;
+
+procedure T_Section.LoadImg(APosX,APosY,AImgNum: Integer);
+begin
+VCommand:= T_Image.Create(APosX,APosY,AImgNum);
 T_Page(Pages[Pred(FPages.Count)]).Commands.Add(VCommand);
 end;
 
@@ -798,14 +819,24 @@ end;
 
 constructor T_Border.Create(AFlags: TBorderFlags; AStyle: Integer);
 begin
+inherited Create;
 FFlags:= AFlags;
 FStyle:= AStyle;
 end;
 
 constructor T_Frame.Create(AStyle: Integer; AZone: TZone);
 begin
+inherited Create;
 FStyle:= AStyle;
 FZone:= AZone;
+end;
+
+constructor T_Image.Create(APosX,APosY,AImageNum: Integer);
+begin
+inherited Create;
+FImage:= AImageNum;
+FPosX:= APosX;
+FPosY:= APosY;
 end;
 
 end.
