@@ -788,17 +788,6 @@ for CptH:= 0 to Pred(TfpgImage(Images[ANumber]).Height) do
     end;
 EndFlux:= AFlux.Position;
 Result:= EndFlux-BeginFlux;
-//aflux.position:= beginflux;
-//for CptH:= 0 to Pred(TfpgImage(Images[ANumber]).Height) do
-//  for CptW:= 0 to Pred(TfpgImage(Images[ANumber]).Width) do
-//    begin
-//    write(fpgGetRed(TfpgImage(Images[ANumber]).Colors[CptW,CptH]),' ');
-//    write(aflux.ReadByte,' - ');
-//    write(fpgGetGreen(TfpgImage(Images[ANumber]).Colors[CptW,CptH]),' ');
-//    write(aflux.ReadByte,' - ');
-//    write(fpgGetBlue(TfpgImage(Images[ANumber]).Colors[CptW,CptH]),' ');
-//    writeln(aflux.ReadByte);
-//    end;
 WriteChaine(CRLF,AFlux);
 WriteChaine('endstream',AFlux);
 end;
@@ -1437,17 +1426,17 @@ Images.FObjet.AddElement('Type',Nom);
 Nom:= TPdfName.CreateName('Image');
 Images.FObjet.AddElement('Subtype',Nom);
 // add width element to image dictionary
-Nom:= TPdfName.CreateName(IntToStr(ImgWidth));
-Images.FObjet.AddElement('Width',Nom);
+Long:= TPdfInteger.CreateInteger(ImgWidth);
+Images.FObjet.AddElement('Width',Long);
 // add height element to image dictionary
-Nom:= TPdfName.CreateName(IntToStr(ImgHeight));
-Images.FObjet.AddElement('Height',Nom);
+Long:= TPdfInteger.CreateInteger(ImgHeight);
+Images.FObjet.AddElement('Height',Long);
 // add color space element to image dictionary
 Nom:= TPdfName.CreateName('DeviceRGB');
 Images.FObjet.AddElement('ColorSpace',Nom);
 // add bits per component element to image dictionary
-Nom:= TPdfName.CreateName('8');
-Images.FObjet.AddElement('BitsPerComponent',Nom);
+Long:= TPdfInteger.CreateInteger(8);
+Images.FObjet.AddElement('BitsPerComponent',Long);
 // add name element to image dictionary
 Nom:= TPdfName.CreateName('I'+IntToStr(NumImg));
 Images.FObjet.AddElement('Name',Nom);
@@ -1589,7 +1578,7 @@ end;
 
 constructor TPdfDocument.CreateDocument;
 var
-  Cpt,CptSect,CptPage,NumFont,NumImg,TreeRoot,ParentPage,PageNum,NumPage: Integer;
+  Cpt,CptSect,CptPage,NumFont,{NumImg,}TreeRoot,ParentPage,PageNum,NumPage: Integer;
   OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage,PrevOutline,PrevSect: Integer;
   Dictionaire: TPdfDictionary;
   XRefObjets: TPdfReference;

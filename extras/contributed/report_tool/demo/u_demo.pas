@@ -104,7 +104,7 @@ type
       procedure PrintGrid(Preview: Boolean);
       procedure PrintGraph(Preview: Boolean);
       procedure PrintSurf(Preview: Boolean);
-      procedure PrintImag(Preview: Boolean);
+      procedure PrintImage(Preview: Boolean);
     public
       constructor Create(AOwner: TComponent); override;
     end;
@@ -705,7 +705,7 @@ FReport:= T_Report.Create;
 with FReport do
   begin
 //  Language:= Version;
-  PrintImag(False);
+  PrintImage(False);
   if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
   then
     begin
@@ -886,7 +886,7 @@ with FReport do
   begin
   //Language:= Version;
   DefaultFile:= 'Images.pdf';
-  PrintImag(True);
+  PrintImage(True);
   Free;
   end;
 end;
@@ -1510,7 +1510,7 @@ with FReport do
   end;
 end;
 
-procedure TF_Demo.PrintImag(Preview: Boolean);
+procedure TF_Demo.PrintImage(Preview: Boolean);
 var
   FtTitle,FtText: Integer;
   IlTitle,IlText: Integer;
@@ -1531,15 +1531,13 @@ with FReport do
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // paint some images
-  //ImagePage(30,30,'poppy.jpg',4);
-  //ImagePage(40,50,'poppy.jpg',3);
-  //ImagePage(50,80,'poppy.jpg',2);
-  //ImagePage(60,140,'poppy.jpg');
-  //ImagePage(100,30,'Unimesur_Logo.bmp');
-  ImagePage(100,50,'ImageTest.bmp');
-  //Page;
-  //ImagePage(80,30,'poppy-nb.jpg');
-  //Page;
+  ImagePage(30,30,'poppy.jpg',4);
+  ImagePage(40,50,'poppy.jpg',3);
+  ImagePage(50,80,'poppy.jpg',2);
+  ImagePage(60,140,'poppy.jpg');
+  ImagePage(100,30,'radiobuttons.bmp');
+  Page;
+  ImagePage(80,30,'poppy-nb.jpg');
   // preparation is finished, so create PDF objects
   EndWrite;
   end;

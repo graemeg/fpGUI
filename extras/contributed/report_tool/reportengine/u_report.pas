@@ -2217,7 +2217,7 @@ Borders.Free;
 if Images.Count> 0
 then
   for Cpt:= 0 to Pred(Images.Count) do
-    T_Image(Images[Cpt]).Free;
+    TfpgImage(Images[Cpt]).Free;
 Images.Free;
 Texts.Free;
 VWriteLine.Free;
@@ -2238,7 +2238,11 @@ then
         else
           if TPdfElement(PdfPage[Cpt]) is TPdfSurf
           then
-            TPdfSurf(PdfPage[Cpt]).Free;
+            TPdfSurf(PdfPage[Cpt]).Free
+          else
+            if TPdfElement(PdfPage[Cpt]) is TPdfImg
+            then
+              TPdfImg(PdfPage[Cpt]).Free;
 PdfPage.Free;
 DecimalSeparator:= OldSeparator;
 inherited;
