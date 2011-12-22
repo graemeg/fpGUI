@@ -1531,13 +1531,15 @@ with FReport do
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // paint some images
-  ImagePage(30,30,'poppy.jpg',4);
+  ImageHeader(10,12,'poppy.jpg',4);
   ImagePage(40,50,'poppy.jpg',3);
   ImagePage(50,80,'poppy.jpg',2);
   ImagePage(60,140,'poppy.jpg');
   ImagePage(100,30,'radiobuttons.bmp');
   Page;
   ImagePage(80,30,'poppy-nb.jpg');
+  ImagePage(30,120,'poppy.jpg',2);
+  Page;
   // preparation is finished, so create PDF objects
   EndWrite;
   end;
