@@ -215,7 +215,7 @@ end;
 
 procedure TMainForm.miHelpAbout(Sender: TObject);
 begin
-  ShowMessage('fpgGUI Globe written by Graeme Geldenhuys - 2010', 'About...', True);
+  ShowMessage('fpGUI Globe written by Graeme Geldenhuys - 2010', 'About...', True);
 end;
 
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
