@@ -80,7 +80,7 @@ type
       procedure DrawALine(XBegin,YBegin,XEnd,YEnd: Single; StyLine: Integer);
       procedure DrawAHorizLine(XBegin,YBegin: Single; Column: Integer; XEnd: Single; StyLine: Integer; Zone: TZone);
       procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
-      procedure PaintImage(PosX,PosY,ImgNum: Integer);
+      procedure PaintImage(PosX,PosY,ImgNum: Integer; Zone: TZone);
       function GetSectionTitle: string;
       procedure SetSectionTitle(ATitle: string);
     public
@@ -319,7 +319,15 @@ type
                 // XLimits = list of horizontal positions of limit points
                 // YLimits = list of vertical positions of limit points
                 // AColor = colour to be painted within the limits
+      procedure ImageHeader(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+                // draw a bmp or jpg image at the defined position
+                // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
+                // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
       procedure ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+                // draw a bmp or jpg image at the defined position
+                // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
+                // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
+      procedure ImageFooter(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
                 // draw a bmp or jpg image at the defined position
                 // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
                 // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
@@ -766,20 +774,24 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_WriteText
       then
         with Cmd as T_WriteText do
-          WriteText(GetPosX,GetPosY,GetColumn,GetText,GetFont,GetBackColor,GetBorder,GetLineSpace,GetFlags,ZEnTete);
+          WriteText(GetPosX,GetPosY,GetColumn,GetText,GetFont,GetBackColor,GetBorder,GetLineSpace,GetFlags,ZHeader);
       if Cmd is T_Number
       then
         with Cmd as T_Number do
           WriteNumber(GetPosX,GetPosY,GetColumn,GetTextNum,GetTextTot,GetFont,GetBackColor,GetBorder,GetLineSpace,
-                   GetFlags,GetTotal,GetAlpha,zEnTete,GetTypeNum);
+                   GetFlags,GetTotal,GetAlpha,zHeader,GetTypeNum);
       if Cmd is T_Space
       then
         with Cmd as T_Space do
-          InsertSpace(GetPosY,GetColumn,GetHeight,GetBackColor,zEnTete);
+          InsertSpace(GetPosY,GetColumn,GetHeight,GetBackColor,zHeader);
       if Cmd is T_Line
       then
         with Cmd as T_Line do
           DrawALine(GetPosX,GetPosY,GetEndX,GetEndY,GetStyle);
+      if Cmd is T_Image
+      then
+        with Cmd as T_Image do
+          PaintImage(GetPosX,GetPosY,GetImage,zHeader);
       end;
   if GetCmdPage(NumPageSection).Count> 0
   then
@@ -805,7 +817,7 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_Image
       then
         with Cmd as T_Image do
-          PaintImage(GetPosX,GetPosY,GetImage);
+          PaintImage(GetPosX,GetPosY,GetImage,zPage);
       end;
   if CmdFooter.Count> 0
   then
@@ -815,20 +827,24 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_WriteText
       then
         with Cmd as T_WriteText do
-          WriteText(GetPosX,GetPosY,GetColumn,GetText,GetFont,GetBackColor,GetBorder,GetLineSpace,GetFlags,ZPied);
+          WriteText(GetPosX,GetPosY,GetColumn,GetText,GetFont,GetBackColor,GetBorder,GetLineSpace,GetFlags,ZFooter);
       if Cmd is T_Number
       then
         with Cmd as T_Number do
           WriteNumber(GetPosX,GetPosY,GetColumn,GetTextNum,GetTextTot,GetFont,GetBackColor,GetBorder,GetLineSpace,
-                   GetFlags,GetTotal,GetAlpha,zPied,GetTypeNum);
+                   GetFlags,GetTotal,GetAlpha,zFooter,GetTypeNum);
       if Cmd is T_Space
       then
         with Cmd as T_Space do
-          InsertSpace(GetPosY,GetColumn,GetHeight,GetBackColor,zPied);
+          InsertSpace(GetPosY,GetColumn,GetHeight,GetBackColor,zFooter);
       if Cmd is T_Line
       then
         with Cmd as T_Line do
           DrawALine(GetPosX,GetPosY,GetEndX,GetEndY,GetStyle);
+      if Cmd is T_Image
+      then
+        with Cmd as T_Image do
+          PaintImage(GetPosX,GetPosY,GetImage,zFooter);
       end;
   if CmdFrames.Count> 0
   then
@@ -966,11 +982,11 @@ with T_Section(Sections[Pred(NumSection)]) do
         then
           HTxt:= Fnt.Height;
       case Zone of
-        zEntete:
+        zHeader:
           FPosRef.Y:= FCurrentMargin.T+FHeaderHeight;
         zPage:
           FPosRef.Y:= FCurrentMargin.T+FHeaderHeight+FPageHeight;
-        zPied:
+        zFooter:
           begin
           FPosRef.Y:= FCurrentMargin.B-HTxt;
           FFooterHeight:= FFooterHeight+HTxt;
@@ -988,7 +1004,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           begin
           PosV:= FPosRef.Y+LnSpSup;
           case Zone of
-            zEnTete:
+            zHeader:
               FPosRef.Y:= FPosRef.Y+HTxt;
             zPage:
               begin
@@ -1062,7 +1078,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           FPosRef.Y:= PosV+LnSpInf;
           end;
         case Zone of
-          zEnTete:
+          zHeader:
             FHeaderHeight:= FPosRef.Y-FCurrentMargin.T;
           zPage:
             FPageHeight:= FPosRef.Y-FHeaderHeight-FCurrentMargin.T;
@@ -1467,9 +1483,9 @@ with T_Section(Sections[Pred(NumSection)]) do
         then
           HTxt:= Fnt.Height;
       case Zone of
-        zEntete:
+        zHeader:
           FPosRef.Y:= FCurrentMargin.T+FHeaderHeight;
-        zPied:
+        zFooter:
           begin
           FPosRef.Y:= FCurrentMargin.B-HTxt;
           FFooterHeight:= FFooterHeight+HTxt;
@@ -1487,7 +1503,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           begin
           PosV:= FPosRef.Y+LnSpSup;
           case Zone of
-            zEnTete:
+            zHeader:
               FPosRef.Y:= FPosRef.Y+HTxt;
             end;
           if BordNum> -1
@@ -1503,7 +1519,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           FPosRef.Y:= PosV+LnSpInf;
           end;
         case Zone of
-          zEnTete:
+          zHeader:
             FHeaderHeight:= FPosRef.Y-FCurrentMargin.T;
           end;
         end;
@@ -1767,7 +1783,7 @@ with T_Section(Sections[Pred(NumSection)]) do
     ppPrepare:
       begin
       case Zone of
-        zEnTete:
+        zHeader:
           begin
           FPosRef.Y:= FCurrentMargin.T+FHeaderHeight;
           FPosRef.Y:= FPosRef.Y+SpaceHeight;
@@ -1788,7 +1804,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           FPageHeight:= FPosRef.Y-FHeaderHeight-FCurrentMargin.T;
           LoadSpacePage(PosV,Column,SpaceHeight,BkColorNum);
           end;
-        zPied:
+        zFooter:
           begin
           FPosRef.Y:= FCurrentMargin.B-SpaceHeight;
           FFooterHeight:= FFooterHeight+SpaceHeight;
@@ -1850,7 +1866,7 @@ procedure T_Report.LineEnd(Zone: TZone);
 begin
 with T_Section(Sections[Pred(NumSection)]) do
   case Zone of
-    zEnTete:
+    zHeader:
       LoadCmdHeader;
     zPage:
       if FGroup
@@ -1858,7 +1874,7 @@ with T_Section(Sections[Pred(NumSection)]) do
         LoadCmdGroup
       else
         LoadCmdPage;
-    zPied:
+    zFooter:
       LoadCmdFooter;
     end;
 end;
@@ -1889,7 +1905,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           HeaderH:= Round(FHeaderHeight);
           FooterH:= Round(FFooterHeight);
           case Zone of
-            zEnTete:
+            zHeader:
               begin
               DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginT+HeaderH);          // left
               DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginT+HeaderH);          // right
@@ -1903,14 +1919,14 @@ with T_Section(Sections[Pred(NumSection)]) do
               DrawLine(MarginL,MarginT+HeaderH-Half,MarginR,MarginT+HeaderH-Half);  // top
               DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // bottom
               end;
-            zPied:
+            zFooter:
               begin
               DrawLine(MarginL+Half,MarginB-FooterH,MarginL+Half,MarginB);          // left
               DrawLine(MarginR-Half,MarginB-FooterH,MarginR-Half,MarginB);          // right
               DrawLine(MarginL,MarginB-FooterH+Half,MarginR,MarginB-FooterH+Half);  // top
               DrawLine(MarginL,MarginB-Half,MarginR,MarginB-Half);                  // bottom
               end;
-            zMarges:
+            zMargins:
               begin
               DrawLine(MarginL+Half,MarginT,MarginL+Half,MarginB-Succ(Half));       // left
               DrawLine(MarginR-Half,MarginT,MarginR-Half,MarginB-Succ(Half));       // right
@@ -1934,7 +1950,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           end;
         with FCurrentMargin do
           case Zone of
-            zEnTete:
+            zHeader:
               begin
               FLeft:= L;
               FBottom:= Paper.H-T-FHeaderHeight;
@@ -1948,14 +1964,14 @@ with T_Section(Sections[Pred(NumSection)]) do
               FHeight:= B-T-FHeaderHeight-FFooterHeight;
               FWidth:= R-L;
               end;
-            zPied:
+            zFooter:
               begin
               FLeft:= L;
               FBottom:= Paper.H-B;
               FHeight:= FFooterHeight;
               FWidth:= R-L;
               end;
-            zMarges:
+            zMargins:
               begin
               FLeft:= L;
               FBottom:= Paper.H-B;
@@ -2015,14 +2031,14 @@ with T_Section(Sections[Pred(NumSection)]) do
     ppPrepare:
       begin
       case Zone of
-        zEnTete:
+        zHeader:
           begin
           FPosRef.Y:= FCurrentMargin.T+FHeaderHeight;
           PosV:= FPosRef.Y+XBegin;
           FPosRef.Y:= FPosRef.Y+XBegin+YBegin+T_LineStyle(LineStyles[StyLine]).GetThick;
           FHeaderHeight:= FPosRef.Y-FCurrentMargin.T;
           with T_Column(Columns[Column]) do
-            LoadLineHorizEnTete(ColPos,PosV,Column,ColPos+ColWidth,PosV,StyLine);
+            LoadLineHorizHeader(ColPos,PosV,Column,ColPos+ColWidth,PosV,StyLine);
           end;
         zPage:
           begin
@@ -2033,7 +2049,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           with T_Column(Columns[Column]) do
             LoadLineHorizPage(ColPos,PosV,Column,ColPos+ColWidth,PosV,StyLine);
           end;
-        zPied:
+        zFooter:
           begin
           FPosRef.Y:= FCurrentMargin.B-XBegin;
           PosV:= FPosRef.Y;
@@ -2041,7 +2057,7 @@ with T_Section(Sections[Pred(NumSection)]) do
           FFooterHeight:= FFooterHeight+XBegin+YBegin+T_LineStyle(LineStyles[StyLine]).GetThick;
           ShiftFooterLines(XBegin+YBegin+T_LineStyle(LineStyles[StyLine]).GetThick);
           with T_Column(Columns[Column]) do
-            LoadLineHorizPied(ColPos,PosV,Column,ColPos+ColWidth,PosV,StyLine);
+            LoadLineHorizFooter(ColPos,PosV,Column,ColPos+ColWidth,PosV,StyLine);
           end;
         end;
       if FGroup
@@ -2125,12 +2141,19 @@ with T_Section(Sections[Pred(NumSection)]) do
     end;
 end;
 
-procedure T_Report.PaintImage(PosX,PosY,ImgNum: Integer);
+procedure T_Report.PaintImage(PosX,PosY,ImgNum: Integer; Zone: TZone);
 begin
 with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
-      LoadImg(PosX,PosY,ImgNum);
+      case Zone of
+        zHeader:
+          LoadImgHeader(PosX,PosY,ImgNum);
+        zPage:
+          LoadImgPage(PosX,PosY,ImgNum);
+        zFooter:
+          LoadImgFooter(PosX,PosY,ImgNum);
+        end;
     ppVisualize:
       FCanvas.DrawImage(PosX,PosY,TfpgImage(Images[ImgNum]));
     ppPdfFile:
@@ -2174,6 +2197,7 @@ BackColors:= TList.Create;
 LineStyles:= TList.Create;
 Borders:= TList.Create;
 Images:= TList.Create;
+ImageNames:= TStringList.Create;
 Texts:= TStringList.Create;
 VWriteLine:= T_WriteLine.Create;
 PdfPage:= TList.Create;
@@ -2219,6 +2243,7 @@ then
   for Cpt:= 0 to Pred(Images.Count) do
     TfpgImage(Images[Cpt]).Free;
 Images.Free;
+ImageNames.Free;
 Texts.Free;
 VWriteLine.Free;
 if PdfPage.Count> 0
@@ -2453,7 +2478,7 @@ RefText:= Texts.IndexOf(Text);
 if RefText= -1
 then
   RefText:= Texts.Add(Text);
-WriteText(Horiz,Verti,ColNum,RefText,FontNum,BkColorNum,BordNum,LineSpNum,Flags,ZEnTete);
+WriteText(Horiz,Verti,ColNum,RefText,FontNum,BkColorNum,BordNum,LineSpNum,Flags,zHeader);
 end;
 
 function T_Report.WritePage(Horiz,Verti: Single; Text: string; ColNum: Integer= 0; FontNum: Integer= 0;
@@ -2517,7 +2542,7 @@ RefText:= Texts.IndexOf(Text);
 if RefText= -1
 then
   RefText:= Texts.Add(Text);
-WriteText(Horiz,Verti,ColNum,RefText,FontNum,BkColorNum,BordNum,LineSpNum,Flags,ZPied);
+WriteText(Horiz,Verti,ColNum,RefText,FontNum,BkColorNum,BordNum,LineSpNum,Flags,zFooter);
 end;
 
 procedure T_Report.NumSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TextTot: string= '';
@@ -2554,7 +2579,7 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,ZEnTete,SectNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,zHeader,SectNum);
 end;
 
 procedure T_Report.NumSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TextTot: string= '';
@@ -2591,7 +2616,7 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,ZPied,SectNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,zFooter,SectNum);
 end;
 
 procedure T_Report.NumPageHeader(Horiz,Verti: Single; TextePage: string= ''; TextTot: string= '';
@@ -2628,7 +2653,7 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,False,ZEnTete,PageNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,False,zHeader,PageNum);
 end;
 
 procedure T_Report.NumPageFooter(Horiz,Verti: Single; TextePage: string= ''; TextTot: string= '';
@@ -2665,7 +2690,7 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,False,ZPied,PageNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,False,zFooter,PageNum);
 end;
 
 procedure T_Report.NumPageSectionHeader(Horiz,Verti: Single; TexteSect: string= ''; TextTot: string= '';
@@ -2702,7 +2727,7 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,ZEnTete,PSectNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,zHeader,PSectNum);
 end;
 
 procedure T_Report.NumPageSectionFooter(Horiz,Verti: Single; TexteSect: string= ''; TextTot: string= '';
@@ -2739,12 +2764,12 @@ RefTextTot:= Texts.IndexOf(TextTot);
 if RefTextTot= -1
 then
   RefTextTot:= Texts.Add(TextTot);
-WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,ZPied,PSectNum);
+WriteNumber(Horiz,Verti,ColNum,RefTextPage,RefTextTot,FontNum,BkColorNum,BordNum,LineSpNum,Flags,Total,Alpha,zFooter,PSectNum);
 end;
 
 procedure T_Report.HorizLineHeader(SpBefore,SpAfter: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
 begin
-DrawAHorizLine(Dim2Pixels(SpBefore),Dim2Pixels(SpAfter),ColNum,-1,StyleNum,zEntete);
+DrawAHorizLine(Dim2Pixels(SpBefore),Dim2Pixels(SpAfter),ColNum,-1,StyleNum,zHeader);
 end;
 
 procedure T_Report.HorizLinePage(SpBefore,SpAfter: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
@@ -2754,12 +2779,12 @@ end;
 
 procedure T_Report.HorizLineFooter(SpBefore,SpAfter: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
 begin
-DrawAHorizLine(Dim2Pixels(SpBefore),Dim2Pixels(SpAfter),ColNum,-1,StyleNum,zPied);
+DrawAHorizLine(Dim2Pixels(SpBefore),Dim2Pixels(SpAfter),ColNum,-1,StyleNum,zFooter);
 end;
 
 procedure T_Report.SpaceHeader(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
 begin
-InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zEntete);
+InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zHeader);
 end;
 
 procedure T_Report.SpacePage(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
@@ -2769,7 +2794,7 @@ end;
 
 procedure T_Report.SpaceFooter(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
 begin
-InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zPied);
+InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zFooter);
 end;
 
 function T_Report.LineSpace(SpSup,SpInt,SpInf: Single): Integer;
@@ -2821,12 +2846,12 @@ end;
 
 procedure T_Report.FrameMargins(AStyle: Integer);
 begin
-DrawAFrame(AStyle,zMarges);
+DrawAFrame(AStyle,zMargins);
 end;
 
 procedure T_Report.FrameHeader(AStyle: Integer);
 begin
-DrawAFrame(AStyle,zEntete);
+DrawAFrame(AStyle,zHeader);
 end;
 
 procedure T_Report.FramePage(AStyle: Integer);
@@ -2836,7 +2861,7 @@ end;
 
 procedure T_Report.FrameFooter(AStyle: Integer);
 begin
-DrawAFrame(AStyle,zPied);
+DrawAFrame(AStyle,zFooter);
 end;
 
 procedure T_Report.LinePage(XBegin,YBegin,XEnd,YEnd: Single; AStyle: Integer);
@@ -2867,6 +2892,31 @@ for Cpt:= 0 to Pred(Size) do
 PaintSurface(Ends,AColor);
 end;
 
+procedure T_Report.ImageHeader(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+var
+  PosH,PosV,RefImage: Integer;
+  Image: TfpgImage;
+begin
+PosH:= Round(Dim2Pixels(Horiz));
+PosV:= Round(Dim2Pixels(Verti));
+RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+if RefImage= -1
+then
+  begin
+  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  then
+    begin
+    Image:= LoadImage_BMP(ImgFileName);
+    Scale:= 1;
+    end;
+  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+  then
+    Image:= LoadImage_JPG(ImgFileName,Scale);
+  RefImage:= Images.Add(Image);
+  end;
+PaintImage(PosH,PosV,RefImage,zHeader);
+end;
+
 procedure T_Report.ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
 var
   PosH,PosV,RefImage: Integer;
@@ -2874,17 +2924,47 @@ var
 begin
 PosH:= Round(Dim2Pixels(Horiz));
 PosV:= Round(Dim2Pixels(Verti));
-if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+if RefImage= -1
 then
   begin
-  Image:= LoadImage_BMP(ImgFileName);
-  Scale:= 1;
+  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  then
+    begin
+    Image:= LoadImage_BMP(ImgFileName);
+    Scale:= 1;
+    end;
+  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+  then
+    Image:= LoadImage_JPG(ImgFileName,Scale);
+  RefImage:= Images.Add(Image);
   end;
-if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+PaintImage(PosH,PosV,RefImage,zPage);
+end;
+
+procedure T_Report.ImageFooter(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+var
+  PosH,PosV,RefImage: Integer;
+  Image: TfpgImage;
+begin
+PosH:= Round(Dim2Pixels(Horiz));
+PosV:= Round(Dim2Pixels(Verti));
+RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+if RefImage= -1
 then
-  Image:= LoadImage_JPG(ImgFileName,Scale);
-RefImage:= Images.Add(Image);
-PaintImage(PosH,PosV,RefImage);
+  begin
+  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  then
+    begin
+    Image:= LoadImage_BMP(ImgFileName);
+    Scale:= 1;
+    end;
+  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+  then
+    Image:= LoadImage_JPG(ImgFileName,Scale);
+  RefImage:= Images.Add(Image);
+  end;
+PaintImage(PosH,PosV,RefImage,zFooter);
 end;
 
 end.
