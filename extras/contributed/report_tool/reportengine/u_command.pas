@@ -81,9 +81,9 @@ type
       procedure LoadLineHorizFooter(APosXBegin,APosYBegin: Single; AColumn: Integer; APosXEnd,APosYEnd: Single; AStyle: Integer);
       procedure LoadLineHorizGroupe(AHeight: Single);
       procedure LoadSurf(APos: T_Points; AColor: TfpgColor);
-      procedure LoadImgHeader(APosX,APosY,AImgNum: Integer);
-      procedure LoadImgPage(APosX,APosY,AImgNum: Integer);
-      procedure LoadImgFooter(APosX,APosY,AImgNum: Integer);
+      procedure LoadImgHeader(APosX,APosY: Single; AColumn,AImgNum: Integer);
+      procedure LoadImgPage(APosX,APosY: Single; AColumn,AImgNum: Integer);
+      procedure LoadImgFooter(APosX,APosY: Single; AColumn,AImgNum: Integer);
       function GetCmdPage(NumPage: Integer): TList;
       property CmdHeader: TList read FHeader;
       property CmdFooter: TList read FFooter;
@@ -342,13 +342,15 @@ type
   T_Image = class(T_Command)
     private
       FImage: Integer;
-      FPosX: Integer;
-      FPosY: Integer;
+      FColumn: Integer;
+      FPosX: Single;
+      FPosY: Single;
     public
-      constructor Create(APosX,APosY,AImageNum: Integer);
+      constructor Create(APosX,APosY: Single; AColumn,AImageNum: Integer);
       property GetImage: Integer read FImage;
-      property GetPosX: Integer read FPosX;
-      property GetPosY: Integer read FPosY;
+      property GetColumn: Integer read FColumn;
+      property GetPosX: Single read FPosX;
+      property GetPosY: Single read FPosY;
     end;
 
 var
@@ -579,21 +581,21 @@ VCommand:= T_Surface.Create(APos,AColor);
 T_Page(Pages[Pred(FPages.Count)]).Commands.Add(VCommand);
 end;
 
-procedure T_Section.LoadImgHeader(APosX,APosY,AImgNum: Integer);
+procedure T_Section.LoadImgHeader(APosX,APosY: Single; AColumn,AImgNum: Integer);
 begin
-VCommand:= T_Image.Create(APosX,APosY,AImgNum);
+VCommand:= T_Image.Create(APosX,APosY,AColumn,AImgNum);
 FHeader.Add(VCommand);
 end;
 
-procedure T_Section.LoadImgPage(APosX,APosY,AImgNum: Integer);
+procedure T_Section.LoadImgPage(APosX,APosY: Single; AColumn,AImgNum: Integer);
 begin
-VCommand:= T_Image.Create(APosX,APosY,AImgNum);
+VCommand:= T_Image.Create(APosX,APosY,AColumn,AImgNum);
 T_Page(Pages[Pred(FPages.Count)]).Commands.Add(VCommand);
 end;
 
-procedure T_Section.LoadImgFooter(APosX,APosY,AImgNum: Integer);
+procedure T_Section.LoadImgFooter(APosX,APosY: Single; AColumn,AImgNum: Integer);
 begin
-VCommand:= T_Image.Create(APosX,APosY,AImgNum);
+VCommand:= T_Image.Create(APosX,APosY,AColumn,AImgNum);
 FFooter.Add(VCommand);
 end;
 
@@ -846,10 +848,11 @@ FStyle:= AStyle;
 FZone:= AZone;
 end;
 
-constructor T_Image.Create(APosX,APosY,AImageNum: Integer);
+constructor T_Image.Create(APosX,APosY: Single; AColumn,AImageNum: Integer);
 begin
 inherited Create;
 FImage:= AImageNum;
+FColumn:= AColumn;
 FPosX:= APosX;
 FPosY:= APosY;
 end;
