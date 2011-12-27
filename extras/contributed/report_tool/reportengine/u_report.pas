@@ -23,7 +23,7 @@ interface
 uses
   Classes, SysUtils, StrUtils,
   fpg_base, fpg_main,
-  fpg_panel, fpg_imgfmt_bmp, fpg_imgfmt_jpg,
+  fpg_panel, fpg_dialogs, fpg_imgfmt_bmp, fpg_imgfmt_jpg,
   U_Command, U_Pdf;
 
 type
@@ -80,7 +80,7 @@ type
       procedure DrawALine(XBegin,YBegin,XEnd,YEnd: Single; StyLine: Integer);
       procedure DrawAHorizLine(XBegin,YBegin: Single; Column: Integer; XEnd: Single; StyLine: Integer; Zone: TZone);
       procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
-      procedure PaintImage(PosX,PosY,ImgNum: Integer; Zone: TZone);
+      procedure PaintImage(PosX,PosY: Single; Column,ImgNum: Integer; Zone: TZone);
       function GetSectionTitle: string;
       procedure SetSectionTitle(ATitle: string);
     public
@@ -269,15 +269,15 @@ type
                 // SpAfter =  empty space after the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // StyleNum = reference of the line style
-      procedure SpaceHeader(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+      procedure SpaceHeader(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // BkColorNum = background color reference, if > -1, replaces the column background color if any
-      procedure SpacePage(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+      procedure SpacePage(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // BkColorNum = background color reference, if > -1, replaces the column background color if any
-      procedure SpaceFooter(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+      procedure SpaceFooter(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
                 // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
                 // ColNum = column reference, default between left and right margins
                 // BkColorNum = background color reference, if > -1, replaces the column background color if any
@@ -319,18 +319,36 @@ type
                 // XLimits = list of horizontal positions of limit points
                 // YLimits = list of vertical positions of limit points
                 // AColor = colour to be painted within the limits
-      procedure ImageHeader(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+      procedure ImageHeader(Horiz,Verti: Single; ImgFileName: string; ColNum: Integer= 0; Scale: Integer= 1);
                 // draw a bmp or jpg image at the defined position
                 // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
                 // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
-      procedure ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+                // ImgFileName = name of the image file
+                // ColNum = column reference, default between left and right margins
+                // Scale =  1 for full size
+                //          2 for 1/2 size
+                //          3 for 1/3 size
+                //          4 for 1/4 size
+      procedure ImagePage(Horiz,Verti: Single; ImgFileName: string; ColNum: Integer= 0; Scale: Integer= 1);
                 // draw a bmp or jpg image at the defined position
                 // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
                 // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
-      procedure ImageFooter(Horiz,Verti: Single; ImgFileName: string; Scale: Integer= 1);
+                // ImgFileName = name of the image file
+                // ColNum = column reference, default between left and right margins
+                // Scale =  1 for full size
+                //          2 for 1/2 size
+                //          3 for 1/3 size
+                //          4 for 1/4 size
+      procedure ImageFooter(Horiz,Verti: Single; ImgFileName: string; ColNum: Integer= 0; Scale: Integer= 1);
                 // draw a bmp or jpg image at the defined position
                 // Horiz = horizontal position in numeric value in the measurement unit (msMM or msInch)
                 // Verti = vertical position in numeric value in the measurement unit (msMM or msInch)
+                // ImgFileName = name of the image file
+                // ColNum = column reference, default between left and right margins
+                // Scale =  1 for full size
+                //          2 for 1/2 size
+                //          3 for 1/3 size
+                //          4 for 1/4 size
       property Language: Char read FVersion write FVersion;
       property Visualiser: Boolean read FVisualization write FVisualization;
       property NumSection: Integer read FNmSection write FNmSection;
@@ -791,7 +809,7 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_Image
       then
         with Cmd as T_Image do
-          PaintImage(GetPosX,GetPosY,GetImage,zHeader);
+          PaintImage(GetPosX,GetPosY,GetColumn,GetImage,zHeader);
       end;
   if GetCmdPage(NumPageSection).Count> 0
   then
@@ -817,7 +835,7 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_Image
       then
         with Cmd as T_Image do
-          PaintImage(GetPosX,GetPosY,GetImage,zPage);
+          PaintImage(GetPosX,GetPosY,GetColumn,GetImage,zPage);
       end;
   if CmdFooter.Count> 0
   then
@@ -844,7 +862,7 @@ with T_Section(Sections[Pred(NumSection)]) do
       if Cmd is T_Image
       then
         with Cmd as T_Image do
-          PaintImage(GetPosX,GetPosY,GetImage,zFooter);
+          PaintImage(GetPosX,GetPosY,GetColumn,GetImage,zFooter);
       end;
   if CmdFrames.Count> 0
   then
@@ -2141,21 +2159,35 @@ with T_Section(Sections[Pred(NumSection)]) do
     end;
 end;
 
-procedure T_Report.PaintImage(PosX,PosY,ImgNum: Integer; Zone: TZone);
+procedure T_Report.PaintImage(PosX,PosY: Single; Column,ImgNum: Integer; Zone: TZone);
 begin
 with T_Section(Sections[Pred(NumSection)]) do
   case FPreparation of
     ppPrepare:
+      begin
+      if Column> -1
+      then
+        PosX:= T_Column(Columns[Column]).ColPos+PosX;
       case Zone of
         zHeader:
-          LoadImgHeader(PosX,PosY,ImgNum);
+          begin
+          PosY:= FCurrentMargin.T+PosY;
+          LoadImgHeader(PosX,PosY,Column,ImgNum);
+          end;
         zPage:
-          LoadImgPage(PosX,PosY,ImgNum);
+          begin
+          PosY:= FCurrentMargin.T+FHeaderHeight+PosY;
+          LoadImgPage(PosX,PosY,Column,ImgNum);
+          end;
         zFooter:
-          LoadImgFooter(PosX,PosY,ImgNum);
+          begin
+          PosY:= FCurrentMargin.B-FFooterHeight+PosY;
+          LoadImgFooter(PosX,PosY,Column,ImgNum);
+          end;
         end;
+      end;
     ppVisualize:
-      FCanvas.DrawImage(PosX,PosY,TfpgImage(Images[ImgNum]));
+      FCanvas.DrawImage(Round(PosX),Round(PosY),TfpgImage(Images[ImgNum]));
     ppPdfFile:
       begin
       PdfImg:= TPdfImg.Create;
@@ -2892,79 +2924,97 @@ for Cpt:= 0 to Pred(Size) do
 PaintSurface(Ends,AColor);
 end;
 
-procedure T_Report.ImageHeader(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+procedure T_Report.ImageHeader(Horiz,Verti: Single; ImgFileName: string; ColNum,Scale: Integer);
 var
-  PosH,PosV,RefImage: Integer;
+  RefImage: Integer;
   Image: TfpgImage;
 begin
-PosH:= Round(Dim2Pixels(Horiz));
-PosV:= Round(Dim2Pixels(Verti));
-RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
-if RefImage= -1
+Horiz:= Dim2Pixels(Horiz);
+Verti:= Dim2Pixels(Verti);
+if FileExists(ImgFileName)
 then
   begin
-  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+  if RefImage= -1
   then
     begin
-    Image:= LoadImage_BMP(ImgFileName);
-    Scale:= 1;
+    if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+    then
+      begin
+      Image:= LoadImage_BMP(ImgFileName);
+      Scale:= 1;
+      end;
+    if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+    then
+      Image:= LoadImage_JPG(ImgFileName,Scale);
+    RefImage:= Images.Add(Image);
     end;
-  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
-  then
-    Image:= LoadImage_JPG(ImgFileName,Scale);
-  RefImage:= Images.Add(Image);
-  end;
-PaintImage(PosH,PosV,RefImage,zHeader);
+  PaintImage(Horiz,Verti,ColNum,RefImage,zHeader);
+  end
+else
+  ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
-procedure T_Report.ImagePage(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+procedure T_Report.ImagePage(Horiz,Verti: Single; ImgFileName: string; ColNum,Scale: Integer);
 var
-  PosH,PosV,RefImage: Integer;
+  RefImage: Integer;
   Image: TfpgImage;
 begin
-PosH:= Round(Dim2Pixels(Horiz));
-PosV:= Round(Dim2Pixels(Verti));
-RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
-if RefImage= -1
+Horiz:= Dim2Pixels(Horiz);
+Verti:= Dim2Pixels(Verti);
+if FileExists(ImgFileName)
 then
   begin
-  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+  if RefImage= -1
   then
     begin
-    Image:= LoadImage_BMP(ImgFileName);
-    Scale:= 1;
+    if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+    then
+      begin
+      Image:= LoadImage_BMP(ImgFileName);
+      Scale:= 1;
+      end;
+    if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+    then
+      Image:= LoadImage_JPG(ImgFileName,Scale);
+    RefImage:= Images.Add(Image);
     end;
-  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
-  then
-    Image:= LoadImage_JPG(ImgFileName,Scale);
-  RefImage:= Images.Add(Image);
-  end;
-PaintImage(PosH,PosV,RefImage,zPage);
+  PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
+  end
+else
+  ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
-procedure T_Report.ImageFooter(Horiz,Verti: Single; ImgFileName: string; Scale: Integer);
+procedure T_Report.ImageFooter(Horiz,Verti: Single; ImgFileName: string; ColNum,Scale: Integer);
 var
-  PosH,PosV,RefImage: Integer;
+  RefImage: Integer;
   Image: TfpgImage;
 begin
-PosH:= Round(Dim2Pixels(Horiz));
-PosV:= Round(Dim2Pixels(Verti));
-RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
-if RefImage= -1
+Horiz:= Dim2Pixels(Horiz);
+Verti:= Dim2Pixels(Verti);
+if FileExists(ImgFileName)
 then
   begin
-  if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+  RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+  if RefImage= -1
   then
     begin
-    Image:= LoadImage_BMP(ImgFileName);
-    Scale:= 1;
+    if Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'bmp'
+    then
+      begin
+      Image:= LoadImage_BMP(ImgFileName);
+      Scale:= 1;
+      end;
+    if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
+    then
+      Image:= LoadImage_JPG(ImgFileName,Scale);
+    RefImage:= Images.Add(Image);
     end;
-  if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
-  then
-    Image:= LoadImage_JPG(ImgFileName,Scale);
-  RefImage:= Images.Add(Image);
-  end;
-PaintImage(PosH,PosV,RefImage,zFooter);
+  PaintImage(Horiz,Verti,ColNum,RefImage,zFooter);
+  end
+else
+  ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
 end.

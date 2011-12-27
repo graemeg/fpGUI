@@ -1514,6 +1514,7 @@ procedure TF_Demo.PrintImage(Preview: Boolean);
 var
   FtTitle,FtText: Integer;
   IlTitle,IlText: Integer;
+  Col1,Col2,Col3: Integer;
 begin
 with FReport do
   begin
@@ -1525,20 +1526,23 @@ with FReport do
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-7',clBlack);
   // create line spacings to be used
-  IlTitle:= LineSpace(3,0,3);
+  IlTitle:= LineSpace(0,0,3);
   IlText:= LineSpace(1,0,0);
+  Col1:= Column(20,60,2);
+  Col2:= Column(80,60,2);
+  Col3:= Column(140,60,2);
   WriteHeader(cnCenter,lnEnd,'SHOWING IMAGES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
   // paint some images
-  ImageHeader(10,12,'poppy.jpg',4);
-  ImagePage(40,50,'poppy.jpg',3);
-  ImagePage(50,80,'poppy.jpg',2);
-  ImagePage(60,140,'poppy.jpg');
-  ImagePage(100,30,'radiobuttons.bmp');
+  ImageHeader(0,0,'poppy.jpg',Col1,4);
+  ImagePage(30,40,'poppy.jpg',ColDefaut,3);
+  ImagePage(40,70,'poppy.jpg',ColDefaut,2);
+  ImagePage(50,130,'poppy.jpg');
+  ImagePage(0,20,'radiobuttons.bmp',Col3);
   Page;
-  ImagePage(80,30,'poppy-nb.jpg');
-  ImagePage(30,120,'poppy.jpg',2);
+  ImagePage(0,0,'poppy-nb.jpg',Col2);
+  ImagePage(20,100,'poppy.jpg',ColDefaut,2);
   Page;
   // preparation is finished, so create PDF objects
   EndWrite;
