@@ -1031,7 +1031,6 @@ end;
 procedure TF_Demo.PrintMultiSections(Preview: Boolean);
 var
   FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
-  ColDefSect2: Integer;
   Cpt: Integer;
 begin
 with FReport do
@@ -1062,15 +1061,14 @@ with FReport do
   // create a new section and define the margins
   Section(10,10,10,10,0,oLandscape);
   // create a default column for section2 which is landscape oriented
-  ColDefSect2:= Column(20,257);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitleS2);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS2);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefSect2,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefSect2,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefSect2,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -1097,7 +1095,6 @@ end;
 procedure TF_Demo.PrintOutlines(Preview: Boolean);
 var
   FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
-  ColDefSect2: Integer;
   Cpt: Integer;
 begin
 with FReport do

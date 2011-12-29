@@ -2978,7 +2978,8 @@ then
     if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
     then
       Image:= LoadImage_JPG(ImgFileName,Scale);
-    RefImage:= Images.Add(Image);
+    RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+    Images.Add(Image);
     end;
   PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
   end
