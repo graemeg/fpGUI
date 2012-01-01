@@ -1536,7 +1536,7 @@ with FReport do
   ImagePage(30,40,'poppy.jpg',ColDefaut,3);
   ImagePage(40,70,'poppy.jpg',ColDefaut,2);
   ImagePage(50,130,'poppy.jpg');
-  ImagePage(0,20,'radiobuttons.bmp',Col3);
+  ImagePage(0,20,'sys.radiobuttons',Col3);
   Page;
   ImagePage(0,0,'poppy-nb.jpg',Col2);
   ImagePage(20,100,'poppy.jpg',ColDefaut,2);

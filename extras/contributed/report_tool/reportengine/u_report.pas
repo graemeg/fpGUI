@@ -2947,12 +2947,28 @@ then
     if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
     then
       Image:= LoadImage_JPG(ImgFileName,Scale);
-    RefImage:= Images.Add(Image);
+    RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+    Images.Add(Image);
     end;
   PaintImage(Horiz,Verti,ColNum,RefImage,zHeader);
   end
 else
-  ShowMessage('Image '+ImgFileName+' is missing');
+  if fpgImages.GetImage(ImgFileName)<> nil
+  then
+    begin
+    RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+    if RefImage= -1
+    then
+      begin
+      Image:= fpgImages.GetImage(ImgFileName);
+      Scale:= 1;
+      RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+      Images.Add(Image);
+      end;
+    PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
+    end
+  else
+    ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
 procedure T_Report.ImagePage(Horiz,Verti: Single; ImgFileName: string; ColNum,Scale: Integer);
@@ -2984,7 +3000,22 @@ then
   PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
   end
 else
-  ShowMessage('Image '+ImgFileName+' is missing');
+  if fpgImages.GetImage(ImgFileName)<> nil
+  then
+    begin
+    RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+    if RefImage= -1
+    then
+      begin
+      Image:= fpgImages.GetImage(ImgFileName);
+      Scale:= 1;
+      RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+      Images.Add(Image);
+      end;
+    PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
+    end
+  else
+    ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
 procedure T_Report.ImageFooter(Horiz,Verti: Single; ImgFileName: string; ColNum,Scale: Integer);
@@ -3010,12 +3041,28 @@ then
     if (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),3)= 'jpg') or (Copy(ImgFileName,Succ(Pos('.',ImgFileName)),4)= 'jpeg')
     then
       Image:= LoadImage_JPG(ImgFileName,Scale);
-    RefImage:= Images.Add(Image);
+    RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+    Images.Add(Image);
     end;
   PaintImage(Horiz,Verti,ColNum,RefImage,zFooter);
   end
 else
-  ShowMessage('Image '+ImgFileName+' is missing');
+  if fpgImages.GetImage(ImgFileName)<> nil
+  then
+    begin
+    RefImage:= ImageNames.IndexOf(IntToStr(Scale)+ImgFileName);
+    if RefImage= -1
+    then
+      begin
+      Image:= fpgImages.GetImage(ImgFileName);
+      Scale:= 1;
+      RefImage:= ImageNames.Add(IntToStr(Scale)+ImgFileName);
+      Images.Add(Image);
+      end;
+    PaintImage(Horiz,Verti,ColNum,RefImage,zPage);
+    end
+  else
+    ShowMessage('Image '+ImgFileName+' is missing');
 end;
 
 end.
