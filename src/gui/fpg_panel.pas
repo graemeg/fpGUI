@@ -232,11 +232,18 @@ type
     "forms" inside other forms. You should also be able to design such
     frames with the UI designer too. }
   TfpgFrame = class(TfpgAbstractPanel)
+  private
+    FOnClose: TNotifyEvent;
+    FOnShow: TNotifyEvent;
+    FOnCreate: TNotifyEvent;
   protected
     WindowTitle: TfpgString;
+    procedure   HandleShow; override;
   public
     procedure   AfterConstruction; override;
     procedure   AfterCreate; virtual;
+    procedure   Close;
+    procedure   Show;
   published
     property    AcceptDrops;
     property    Align;
@@ -262,10 +269,13 @@ type
     property    OnDragEnter;
     property    OnDragLeave;
     property    OnDragStartDetected;
+    property    OnClose: TNotifyEvent read FOnClose write FOnClose;
+    property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property    OnMouseDown;
     property    OnMouseMove;
     property    OnMouseUp;
     property    OnPaint;
+    property    OnShow: TNotifyEvent read FOnShow write FOnShow;
     property    OnShowHint;
   end;
 
@@ -330,10 +340,20 @@ end;
 
 { TfpgFrame }
 
+procedure TfpgFrame.HandleShow;
+begin
+  inherited HandleShow;
+  HandleAlignments(0, 0);
+  if Assigned(FOnShow) then
+    FOnShow(self);
+end;
+
 procedure TfpgFrame.AfterConstruction;
 begin
-  inherited AfterConstruction;
   AfterCreate;
+  inherited AfterConstruction;
+  if Assigned(FOnCreate) then
+    FOnCreate(self);
 end;
 
 procedure TfpgFrame.AfterCreate;
@@ -341,6 +361,17 @@ begin
   // do nothing here
 end;
 
+procedure TfpgFrame.Close;
+begin
+  HandleHide;
+  if Assigned(FOnClose) then
+    FOnClose(self);
+end;
+
+procedure TfpgFrame.Show;
+begin
+  HandleShow;
+end;
 
 {TfpgAbstractPanel}
 
