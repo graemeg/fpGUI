@@ -1278,7 +1278,8 @@ begin
       end;
     end;  { for }
   end;  { if/else }
-  CheckFocusChange;
+  if RowCount = 1 then
+    CheckFocusChange;
   UpdateScrollBars;
 end;
 

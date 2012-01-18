@@ -28,6 +28,7 @@ type
       Bt_PdfGrid: TfpgButton;
       Bt_PdfGraph: TfpgButton;
       Bt_PdfSurf: TfpgButton;
+      Bt_PdfImages: TfpgButton;
       L_Visu: TfpgLabel;
       Bt_VisuEmptyPage: TfpgButton;
       Bt_VisuSimpleText: TfpgButton;
@@ -40,6 +41,7 @@ type
       Bt_VisuGrid: TfpgButton;
       Bt_VisuGraph: TfpgButton;
       Bt_VisuSurf: TfpgButton;
+      Bt_VisuImages: TfpgButton;
       L_Print: TfpgLabel;
       Bt_PrintEmptyPage: TfpgButton;
       Bt_PrintSimpleText: TfpgButton;
@@ -52,6 +54,7 @@ type
       Bt_PrintGrid: TfpgButton;
       Bt_PrintGraph: TfpgButton;
       Bt_PrintSurf: TfpgButton;
+      Bt_PrintImages: TfpgButton;
       Bt_Exit: TfpgButton;
       procedure Bt_PdfEmptyPageClick(Sender: TObject);
       procedure Bt_PdfSimpleTextClick(Sender: TObject);
@@ -64,6 +67,7 @@ type
       procedure Bt_PdfGridClick(Sender: TObject);
       procedure Bt_PdfGraphClick(Sender: TObject);
       procedure Bt_PdfSurfClick(Sender: TObject);
+      procedure Bt_PdfImagClick(Sender: TObject);
       procedure Bt_VisuEmptyPageClick(Sender: TObject);
       procedure Bt_VisuSimpleTextClick(Sender: TObject);
       procedure Bt_VisuMultiPagesClick(Sender: TObject);
@@ -75,6 +79,7 @@ type
       procedure Bt_VisuGridClick(Sender: TObject);
       procedure Bt_VisuGraphClick(Sender: TObject);
       procedure Bt_VisuSurfClick(Sender: TObject);
+      procedure Bt_VisuImagClick(Sender: TObject);
       procedure Bt_PrintEmptyPageClick(Sender: TObject);
       procedure Bt_PrintSimpleTextClick(Sender: TObject);
       procedure Bt_PrintMultiPagesClick(Sender: TObject);
@@ -86,6 +91,7 @@ type
       procedure Bt_PrintGridClick(Sender: TObject);
       procedure Bt_PrintGraphClick(Sender: TObject);
       procedure Bt_PrintSurfClick(Sender: TObject);
+      procedure Bt_PrintImagClick(Sender: TObject);
       procedure Bt_ExitClick(Sender: TObject);
       procedure PrintEmptyPage(Preview: Boolean);
       procedure PrintSimpleText(Preview: Boolean);
@@ -98,6 +104,7 @@ type
       procedure PrintGrid(Preview: Boolean);
       procedure PrintGraph(Preview: Boolean);
       procedure PrintSurf(Preview: Boolean);
+      procedure PrintImage(Preview: Boolean);
     public
       constructor Create(AOwner: TComponent); override;
     end;
@@ -688,6 +695,58 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.Bt_PdfImagClick(Sender: TObject);
+var
+  Fd_SavePdf: TfpgFileDialog;
+  PdfFile: string;
+  PdfFileStream: TFileStream;
+begin
+FReport:= T_Report.Create;
+with FReport do
+  begin
+//  Language:= Version;
+  PrintImage(False);
+  if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
+  then
+    begin
+    ShowMessage('There is no file to print');
+    Exit;
+    end;
+  Fd_SavePdf:= TfpgFileDialog.Create(nil);
+  Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
+  Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
+  Fd_SavePdf.FileName:= 'Images.pdf';
+  try
+    if Fd_SavePdf.RunSaveFile
+    then
+      begin
+      PdfFile:= Fd_SavePdf.FileName;
+      if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
+      then
+         PdfFile:= PdfFile+'.pdf';
+      Document:= TPdfDocument.CreateDocument;
+      with Document do
+        begin
+        PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
+        WriteDocument(PdfFileStream);
+        PdfFileStream.Free;
+        Free;
+        end;
+  {$ifdef linux}
+      fpgOpenURL(PdfFile);
+  {$endif}
+  {$ifdef win32}
+      ShellExecute(0,PChar('OPEN'),PChar(PdfFile),PChar(''),PChar(''),1);
+  {$endif}
+      end;
+  finally
+    Fd_SavePdf.Free;
+    end;
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_VisuEmptyPageClick(Sender: TObject);
 begin
 FReport:= T_Report.Create;
@@ -820,6 +879,18 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.Bt_VisuImagClick(Sender: TObject);
+begin
+FReport:= T_Report.Create;
+with FReport do
+  begin
+  //Language:= Version;
+  DefaultFile:= 'Images.pdf';
+  PrintImage(True);
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_PrintEmptyPageClick(Sender: TObject);
 begin
 
@@ -871,6 +942,11 @@ begin
 end;
 
 procedure TF_Demo.Bt_PrintSurfClick(Sender: TObject);
+begin
+
+end;
+
+procedure TF_Demo.Bt_PrintImagClick(Sender: TObject);
 begin
 
 end;
@@ -955,7 +1031,6 @@ end;
 procedure TF_Demo.PrintMultiSections(Preview: Boolean);
 var
   FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
-  ColDefSect2: Integer;
   Cpt: Integer;
 begin
 with FReport do
@@ -986,15 +1061,14 @@ with FReport do
   // create a new section and define the margins
   Section(10,10,10,10,0,oLandscape);
   // create a default column for section2 which is landscape oriented
-  ColDefSect2:= Column(20,257);
   // write title on each page of the section
-  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitleS2);
+  WriteHeader(cnCenter,lnEnd,'MULTI SECTION DOCUMENT',ColDefaut,FtTitleS2);
   // write section number and total of sections on each page
-  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefSect2,FtNum);
+  NumSectionHeader(cnRight,lnEnd,'Section','of',True,False,ColDefaut,FtNum);
   // write page number for the section and total pages of the section on each page
-  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefSect2,FtNumS);
+  NumPageSectionHeader(cnCenter,lnEnd,'Section page','of',True,True,ColDefaut,FtNumS);
   // write page number and total of pages on each page
-  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefSect2,FtNum);
+  NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtNum);
   // create some new empty pages in the section
   for Cpt:= 1 to 2 do
     Page;
@@ -1021,7 +1095,6 @@ end;
 procedure TF_Demo.PrintOutlines(Preview: Boolean);
 var
   FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
-  ColDefSect2: Integer;
   Cpt: Integer;
 begin
 with FReport do
@@ -1434,6 +1507,45 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.PrintImage(Preview: Boolean);
+var
+  FtTitle,FtText: Integer;
+  IlTitle,IlText: Integer;
+  Col1,Col2,Col3: Integer;
+begin
+with FReport do
+  begin
+  // define orientation, page format, measurement unit, language, preview (true) or print (false)
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
+  // create a new section and define the margins with an additional one due to frames drawing
+  Section(10,10,10,10);
+  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+  FtTitle:= Font('helvetica-15:bold',clBlack);
+  FtText:= Font('helvetica-7',clBlack);
+  // create line spacings to be used
+  IlTitle:= LineSpace(0,0,3);
+  IlText:= LineSpace(1,0,0);
+  Col1:= Column(20,60,2);
+  Col2:= Column(80,60,2);
+  Col3:= Column(140,60,2);
+  WriteHeader(cnCenter,lnEnd,'SHOWING IMAGES',ColDefaut,FtTitle,IlTitle);
+  // write page number and total of pages on each page
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
+  // paint some images
+  ImageHeader(0,0,'poppy.jpg',Col1,4);
+  ImagePage(30,40,'poppy.jpg',ColDefaut,3);
+  ImagePage(40,70,'poppy.jpg',ColDefaut,2);
+  ImagePage(50,130,'poppy.jpg');
+  ImagePage(0,20,'sys.radiobuttons',Col3);
+  Page;
+  ImagePage(0,0,'poppy-nb.jpg',Col2);
+  ImagePage(20,100,'poppy.jpg',ColDefaut,2);
+  Page;
+  // preparation is finished, so create PDF objects
+  EndWrite;
+  end;
+end;
+
 constructor TF_Demo.Create(AOwner: TComponent);
 var
   Cpt: Integer;
@@ -1451,7 +1563,7 @@ fpgSetNamedColor(clSelection,clSkyBlue);
 fpgSetNamedColor(clSelectionText,clDarkBlue);
 fpgSetNamedFont('Label1','bitstream vera sans-10');
 fpgSetNamedFont('Edit1','bitstream vera sans-10');
-L_Visu:= CreateLabel(Self,50,5,'Print to PDF',150,20,taCenter);
+L_Pdf:= CreateLabel(Self,50,5,'Print to PDF',150,20,taCenter);
 Bt_PdfEmptyPage:= CreateButton(Self,50,30,150,'Empty page',@Bt_PdfEmptyPageClick,'stdimg.Adobe_pdf');
 Bt_PdfSimpleText:= CreateButton(Self,50,70,150,'Simple text',@Bt_PdfSimpleTextClick,'stdimg.Adobe_pdf');
 Bt_PdfMultiPages:= CreateButton(Self,50,110,150,'Multiple pages',@Bt_PdfMultiPagesClick,'stdimg.Adobe_pdf');
@@ -1463,7 +1575,8 @@ Bt_PdfLines:= CreateButton(Self,50,310,150,'Draw lines',@Bt_PdfLinesClick,'stdim
 Bt_PdfGrid:= CreateButton(Self,50,350,150,'Show grid',@Bt_PdfGridClick,'stdimg.Adobe_pdf');
 Bt_PdfGraph:= CreateButton(Self,50,390,150,'Show graph',@Bt_PdfGraphClick,'stdimg.Adobe_pdf');
 Bt_PdfSurf:= CreateButton(Self,50,430,150,'Show surface',@Bt_PdfSurfClick,'stdimg.Adobe_pdf');
-L_Pdf:= CreateLabel(Self,250,5,'Preview',150,20,taCenter);
+Bt_PdfImages:= CreateButton(Self,50,470,150,'Show images',@Bt_PdfImagClick,'stdimg.Adobe_pdf');
+L_Visu:= CreateLabel(Self,250,5,'Preview',150,20,taCenter);
 Bt_VisuEmptyPage:= CreateButton(Self,250,30,150,'Empty page',@Bt_VisuEmptyPageClick,'stdimg.preview');
 Bt_VisuSimpleText:= CreateButton(Self,250,70,150,'Simple text',@Bt_VisuSimpleTextClick,'stdimg.preview');
 Bt_VisuMultiPages:= CreateButton(Self,250,110,150,'Multiple pages',@Bt_VisuMultiPagesClick,'stdimg.preview');
@@ -1475,6 +1588,7 @@ Bt_VisuLines:= CreateButton(Self,250,310,150,'Draw lines',@Bt_VisuLinesClick,'st
 Bt_VisuGrid:= CreateButton(Self,250,350,150,'Show grid',@Bt_VisuGridClick,'stdimg.preview');
 Bt_VisuGraph:= CreateButton(Self,250,390,150,'Show graph',@Bt_VisuGraphClick,'stdimg.preview');
 Bt_VisuSurf:= CreateButton(Self,250,430,150,'Show surface',@Bt_VisuSurfClick,'stdimg.preview');
+Bt_VisuImages:= CreateButton(Self,250,470,150,'Show images',@Bt_VisuImagClick,'stdimg.preview');
 L_Print:= CreateLabel(Self,450,5,'Print to printer',150,20,taCenter);
 Bt_PrintEmptyPage:= CreateButton(Self,450,30,150,'Empty page',@Bt_PrintEmptyPageClick,'stdimg.print');
 Bt_PrintEmptyPage.Enabled:= False;
@@ -1498,7 +1612,9 @@ Bt_PrintGraph:= CreateButton(Self,450,390,150,'Show graph',@Bt_PrintGraphClick,'
 Bt_PrintGraph.Enabled:= False;
 Bt_PrintSurf:= CreateButton(Self,450,430,150,'Show surface',@Bt_PrintSurfClick,'stdimg.print');
 Bt_PrintSurf.Enabled:= False;
-Bt_Exit:= CreateButton(Self,450,500,150,'Exit',@Bt_ExitClick,'stdimg.exit');
+Bt_PrintImages:= CreateButton(Self,450,470,150,'Show images',@Bt_PrintImagClick,'stdimg.print');
+Bt_PrintImages.Enabled:= False;
+Bt_Exit:= CreateButton(Self,450,510,150,'Exit',@Bt_ExitClick,'stdimg.exit');
 Bt_Exit.BackgroundColor:= clTomato;
 Randomize;
 for Cpt:= 0 to 18 do

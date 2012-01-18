@@ -104,7 +104,7 @@ end;
 initialization
   GrayConvMatrix := GCM_NTSC;
   GrayBrightness := True;
-  GrayBrightnessPercentage := 40;
+  GrayBrightnessPercentage := 50;
 
 end.
 

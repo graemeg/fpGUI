@@ -207,6 +207,7 @@ type
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); override;
     procedure   AdjustDrawingInfo; override;
     procedure   SetOldColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor); override;
     procedure   SetAlignment(const AValue: TAlignment);
     procedure   SetDecimalSeparator(const AValue: TfpgChar);
     procedure   SetNegativeColor(const AValue: TfpgColor);
@@ -233,6 +234,7 @@ type
     property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
   public
     constructor Create(AOwner: TComponent); override;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor;
   published
     property    FontDesc;
   end;
@@ -1650,6 +1652,14 @@ procedure TfpgBaseNumericEdit.SetOldColor(const AValue: TfpgColor);
 begin
   if FOldColor=AValue then exit;
   FOldColor:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetTextColor(const AValue: TfpgColor);
+begin
+  if FTextColor = AValue then exit;
+  FTextColor:= AValue;
+  FOldColor:= AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseNumericEdit.SetAlignment(const AValue: TAlignment);

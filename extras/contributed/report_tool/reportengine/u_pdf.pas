@@ -177,6 +177,21 @@ type
       destructor Destroy; override;
     end;
 
+  TPdfImage = class(TPdfObjet)
+    private
+      FNumber: Integer;
+      FLeft: Single;
+      FBottom: Single;
+      FWidth: Integer;
+      FHeight: Integer;
+    protected
+      function WriteImageStream(const ANumber: Integer; AFlux: TStream): Int64;
+      procedure WriteImage(const AFlux: TStream);
+    public
+      constructor CreateImage(const ALeft,ABottom: Single; AWidth,AHeight,ANumber: Integer);
+      destructor Destroy; override;
+    end;
+
   TPdfLineStyle = class(TPdfObjet)
     private
       FDash: TfpgLineStyle;
@@ -218,7 +233,7 @@ type
     protected
       procedure AddElement(const AKey: string; const AValue: TPdfObjet);
       function ElementParCle(const AValue: string): Integer;
-      procedure WriteDictionary(AFlux: TStream);
+      procedure WriteDictionary(const AObjet: Integer; const AFlux: TStream);
     public
       constructor CreateDictionary;
       destructor Destroy; override;
@@ -250,10 +265,11 @@ type
       procedure CreateInfo;
       procedure CreatePreferences;
       function CreatePages(Parent: Integer): Integer;
-      function CreatePage(Parent,Haut,Larg: Integer): Integer;
+      function CreatePage(Parent,Haut,Larg,PageNum: Integer): Integer;
       function CreateOutlines: Integer;
       function CreateOutline(Parent,SectNo,PageNo: Integer; SectTitre: string): Integer;
       procedure CreateFont(NomFonte: string; NumFonte: Integer);
+      procedure CreateImage(ImgWidth,ImgHeight,NumImg: Integer);
       function CreateContents: Integer;
       procedure CreateStream(NumeroPage,PageNum: Integer);
     public
@@ -569,6 +585,9 @@ for Cpt:= 0 to Pred(FStream.Count) do
   if TPdfObjet(FStream[Cpt]) is TPdfSurface
   then
     TPdfSurface(FStream[Cpt]).WriteSurface(AFlux);
+  if TPdfObjet(FStream[Cpt]) is TPdfImage
+  then
+    TPdfImage(FStream[Cpt]).WriteImage(AFlux);
   end;
 end;
 
@@ -616,7 +635,11 @@ then
               else
                 if TPdfObjet(FStream[Cpt]) is TPdfSurface
                 then
-                  TPdfSurface(FStream[Cpt]).Free;
+                  TPdfSurface(FStream[Cpt]).Free
+                else
+                  if TPdfObjet(FStream[Cpt]) is TPdfImage
+                  then
+                    TPdfImage(FStream[Cpt]).Free;
 FStream.Free;
 inherited;
 end;
@@ -749,6 +772,50 @@ begin
 inherited;
 end;
 
+function TPdfImage.WriteImageStream(const ANumber: Integer; AFlux: TStream): Int64;
+var
+  CptW,CptH: Integer;
+  BeginFlux,EndFlux: Int64;
+begin
+WriteChaine(CRLF+'stream'+CRLF,AFlux);
+BeginFlux:= AFlux.Position;
+for CptH:= 0 to Pred(TfpgImage(Images[ANumber]).Height) do
+  for CptW:= 0 to Pred(TfpgImage(Images[ANumber]).Width) do
+    begin
+    AFlux.WriteByte(fpgGetRed(TfpgImage(Images[ANumber]).Colors[CptW,CptH]));
+    AFlux.WriteByte(fpgGetGreen(TfpgImage(Images[ANumber]).Colors[CptW,CptH]));
+    AFlux.WriteByte(fpgGetBlue(TfpgImage(Images[ANumber]).Colors[CptW,CptH]));
+    end;
+EndFlux:= AFlux.Position;
+Result:= EndFlux-BeginFlux;
+WriteChaine(CRLF,AFlux);
+WriteChaine('endstream',AFlux);
+end;
+
+procedure TPdfImage.WriteImage(const AFlux: TStream);
+begin
+WriteChaine('q'+CRLF,AFlux);
+WriteChaine(IntToStr(FWidth)+' 0 0 '+IntToStr(FHeight)+' '+FormatFloat('0.##',FLeft)+' '
+            +FormatFloat('0.##',FBottom)+' cm'+CRLF,AFlux);
+WriteChaine('/I'+IntToStr(FNumber)+' Do '+CRLF,AFlux);
+WriteChaine('Q'+CRLF,AFlux);
+end;
+
+constructor TPdfImage.CreateImage(const ALeft,ABottom: Single; AWidth,AHeight,ANumber: Integer);
+begin
+inherited Create;
+FNumber:= ANumber;
+FLeft:= ALeft;
+FBottom:= ABottom;
+FWidth:= AWidth;
+FHeight:= AHeight;
+end;
+
+destructor TPdfImage.Destroy;
+begin
+inherited;
+end;
+
 procedure TPdfLineStyle.WriteLineStyle(const AFlux: TStream);
 begin
 WriteChaine('[',AFlux);
@@ -837,7 +904,7 @@ then
   TPdfArray(FValue).WriteArray(AFlux);
 if FValue is TPdfDictionary
 then
-  TPdfDictionary(FValue).WriteDictionary(AFlux);
+  TPdfDictionary(FValue).WriteDictionary(-1,AFlux);
 WriteChaine(CRLF,AFlux);
 end;
 
@@ -903,14 +970,42 @@ for Cpt:= 0 to Pred(FElement.Count) do
     end;
 end;
 
-procedure TPdfDictionary.WriteDictionary(AFlux: TStream);
+procedure TPdfDictionary.WriteDictionary(const AObjet: Integer; const AFlux: TStream);
 var
-  Cpt: Integer;
+  Long: TPdfInteger;
+  Flux: TMemoryStream;
+  Cpt,NumImg: Integer;
 begin
 WriteChaine('<<'+CRLF,AFlux);
 for Cpt:= 0 to Pred(FElement.Count) do
   TPdfDicElement(FElement[Cpt]).WriteDicElement(AFlux);
-WriteChaine('>>',AFlux);
+NumImg:= -1;
+for Cpt:= 0 to Pred(FElement.Count) do
+  if AObjet> -1
+  then
+    begin
+    if (TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue= 'Name')
+    then
+      if (TPdfObjet(TPdfDicElement(FElement[Cpt]).FValue) is TPdfName)
+         and (TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue[1]= 'I')
+      then
+        begin
+        NumImg:= StrToInt(Copy(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue,2,Length(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue)-1));
+        Flux:= TMemoryStream.Create;
+        Flux.Position:= 0;
+// write image stream length in xobject dictionary
+        Long:= TPdfInteger.CreateInteger(TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,Flux));
+        TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
+        TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
+        Flux.Free;
+        WriteChaine('>>',AFlux);
+// write image stream in xobject dictionary
+        TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,AFlux);
+        end;
+    end;
+if NumImg= -1
+then
+  WriteChaine('>>',AFlux);
 end;
 
 constructor TPdfDictionary.CreateDictionary;
@@ -973,13 +1068,15 @@ end;
 
 procedure TPdfDocument.WriteObjet(const AObjet: Integer; const AFlux: TStream);
 var
+  Dictionaire: TPdfDictionary;
   Long: TPdfInteger;
   Flux: TMemoryStream;
+  Cpt: Integer;
 begin
 WriteChaine(IntToStr(AObjet)+' 0 obj'+CRLF,AFlux);
 if TPdfXRef(FXRefObjets[AObjet]).FStream= nil
 then
-  TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).WriteDictionary(AFlux)
+  TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).WriteDictionary(AObjet,AFlux)
 else
   begin
   Flux:= TMemoryStream.Create;
@@ -991,7 +1088,7 @@ else
   Long:= TPdfInteger.CreateInteger(Flux.Size);
   TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
   Flux.Free;
-  TPdfXRef(FXRefObjets[AObjet]).FObjet.WriteDictionary(AFlux);
+  TPdfXRef(FXRefObjets[AObjet]).FObjet.WriteDictionary(-1,AFlux);
 // write stream in contents dictionary
   CurrentColor:= '';
   CurrentWidth:= '';
@@ -999,7 +1096,7 @@ else
   TPdfXRef(FXRefObjets[AObjet]).FStream.WriteStream(AFlux);
   WriteChaine('endstream',AFlux);
   end;
-WriteChaine(CRLF+'endobj'+CRLF,AFlux);
+WriteChaine(CRLF+'endobj'+CRLF+CRLF,AFlux);
 end;
 
 procedure TPdfDocument.CreateRefTable;
@@ -1134,7 +1231,7 @@ Pages.FObjet.AddElement('Count',Count);
 Result:= Pred(FXRefObjets.Count);
 end;
 
-function TPdfDocument.CreatePage(Parent,Haut,Larg: Integer): Integer;
+function TPdfDocument.CreatePage(Parent,Haut,Larg,PageNum: Integer): Integer;
 var
   Page: TPdfXRef;
   XRefObjets: TPdfReference;
@@ -1142,6 +1239,7 @@ var
   Dictionaire: TPdfDictionary;
   Table: TPdfArray;
   Coord: TPdfInteger;
+  Cpt: Integer;
 begin
 // add xref entry
 Page:= TPdfXRef.CreateXRef;
@@ -1180,12 +1278,26 @@ TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Cou
 // add font element in resources element to page dictionary
 Dictionaire:= TPdfDictionary.CreateDictionary;
 TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('Font',Dictionaire);
+for Cpt:= 0 to Pred(PdfPage.Count) do
+  if TPdfElement(PdfPage[Cpt]) is TPdfImg
+  then
+    if TPdfImg(PdfPage[Cpt]).PageId= PageNum
+    then
+      begin
+// add xobject element in resources element to page dictionary
+      Dictionaire:= TPdfDictionary.CreateDictionary;
+      TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('XObject',Dictionaire);
+      Break;
+      end;
 // add pdf element in procset array to page dictionary
 Dictionaire:= TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue);
 Nom:= TPdfName.CreateName('PDF');
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
 // add text element in procset array to page dictionary
 Nom:= TPdfName.CreateName('Text');
+TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
+// add image element in procset array to page dictionary
+Nom:= TPdfName.CreateName('ImageC');
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
 Result:= Pred(FXRefObjets.Count);
 end;
@@ -1295,6 +1407,60 @@ for Cpt:= 1 to Pred(FXRefObjets.Count) do
   end;
 end;
 
+procedure TPdfDocument.CreateImage(ImgWidth,ImgHeight,NumImg: Integer);
+var
+  Images: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Nom: TPdfName;
+  Dictionaire: TPdfDictionary;
+  Long: TPdfInteger;
+  Cpt: Integer;
+begin
+// add xref entry
+Images:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(Images);
+// add type element to image dictionary
+Nom:= TPdfName.CreateName('XObject');
+Images.FObjet.AddElement('Type',Nom);
+// add subtype element to image dictionary
+Nom:= TPdfName.CreateName('Image');
+Images.FObjet.AddElement('Subtype',Nom);
+// add width element to image dictionary
+Long:= TPdfInteger.CreateInteger(ImgWidth);
+Images.FObjet.AddElement('Width',Long);
+// add height element to image dictionary
+Long:= TPdfInteger.CreateInteger(ImgHeight);
+Images.FObjet.AddElement('Height',Long);
+// add color space element to image dictionary
+Nom:= TPdfName.CreateName('DeviceRGB');
+Images.FObjet.AddElement('ColorSpace',Nom);
+// add bits per component element to image dictionary
+Long:= TPdfInteger.CreateInteger(8);
+Images.FObjet.AddElement('BitsPerComponent',Long);
+// add name element to image dictionary
+Nom:= TPdfName.CreateName('I'+IntToStr(NumImg));
+Images.FObjet.AddElement('Name',Nom);
+// add image reference to page dictionary
+for Cpt:= 1 to Pred(FXRefObjets.Count) do
+  begin
+  Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
+  if Dictionaire.FElement.Count> 0
+  then
+    if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue= 'Page'
+    then
+      begin
+      Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
+      if Dictionaire.ElementParCle('XObject')> -1
+      then
+        begin
+        Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('XObject')]).FValue);
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        Dictionaire.AddElement(TPdfName(Nom).FValue,XRefObjets);
+        end;
+      end;
+  end;
+end;
+
 function TPdfDocument.CreateContents: Integer;
 var
   Contents: TPdfXRef;
@@ -1321,7 +1487,8 @@ var
   Rct: TPdfRectangle;
   Lin: TPdfLigne;
   Srf: TPdfSurface;
-  Sty: TpdfLineStyle;
+  Sty: TPdfLineStyle;
+  Img: TPdfImage;
 begin
 for Cpt:= 0 to Pred(PdfPage.Count) do
   begin
@@ -1397,12 +1564,21 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
         Srf:= TPdfSurface.CreateSurface(Points);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Srf);
         end;
+  if TPdfElement(PdfPage[Cpt]) is TPdfImg
+  then
+    if TPdfImg(PdfPage[Cpt]).PageId= NumeroPage
+    then
+      with TPdfImg(PdfPage[Cpt]) do
+        begin
+        Img:= TPdfImage.CreateImage(ImgLeft,ImgBottom,ImgWidth,ImgHeight,ImgNumber);
+        TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Img);
+        end;
   end;
 end;
 
 constructor TPdfDocument.CreateDocument;
 var
-  Cpt,CptSect,CptPage,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
+  Cpt,CptSect,CptPage,NumFont,{NumImg,}TreeRoot,ParentPage,PageNum,NumPage: Integer;
   OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage,PrevOutline,PrevSect: Integer;
   Dictionaire: TPdfDictionary;
   XRefObjets: TPdfReference;
@@ -1433,7 +1609,7 @@ then
     end;
   TreeRoot:= CreatePages(ParentPage);
   end;
-NumPage:= 0; // numéro de page identique à celui de l'appel à PrintPage
+NumPage:= 0; // page number identical to the call to PrintPage
 for CptSect:= 0 to Pred(Sections.Count) do
   begin
   if Sections.Count> 1
@@ -1478,7 +1654,7 @@ for CptSect:= 0 to Pred(Sections.Count) do
   for CptPage:= 0 to Pred(T_Section(Sections[CptSect]).Pages.Count) do
     begin
     with T_Section(Sections[CptSect]) do
-      NewPage:= CreatePage(ParentPage,Paper.H,Paper.W);
+      NewPage:= CreatePage(ParentPage,Paper.H,Paper.W,Succ(NumPage));
     Inc(NumPage);
     PageNum:= CreateContents; // pagenum = object number in the pdf file
     CreateStream(NumPage,PageNum);
@@ -1544,6 +1720,8 @@ for Cpt:= 0 to Pred(Fonts.Count) do
   CreateFont(FontName,NumFont);
   Inc(NumFont);
   end;
+for Cpt:= 0 to Pred(Images.Count) do
+  CreateImage(TfpgImage(Images[Cpt]).Width,TfpgImage(Images[Cpt]).Height,Cpt);
 TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue:= FXRefObjets.Count;
 end;
 
@@ -1581,7 +1759,7 @@ with TPdfXRef(FXRefObjets[0]) do
 WriteXRefTable(AFlux);
 // write trailer
 WriteChaine('trailer'+CRLF,AFlux);
-Trailer.WriteDictionary(AFlux);
+Trailer.WriteDictionary(-1,AFlux);
 // write offset of last xref table
 WriteChaine(CRLF+'startxref'+CRLF+IntToStr(XRefPos)+CRLF,AFlux);
 WriteChaine(PDF_FILE_END,AFlux);

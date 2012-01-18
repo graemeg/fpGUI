@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_label, fpg_edit, fpg_button, fpg_radiobutton,
-  fpg_listbox, fpg_checkbox;
+  fpg_listbox, fpg_checkbox, fpg_panel;
 
 type
 
@@ -26,6 +26,7 @@ type
     l_floatvalue: TfpgLabel;
     lblName4: TfpgLabel;
     l_currvalue: TfpgLabel;
+    pl_integer: TfpgPanel;
     edtInteger: TfpgEditInteger;
     edtFloat: TfpgEditFloat;
     edtCurrency: TfpgEditCurrency;
@@ -110,6 +111,7 @@ end;
 procedure TMainForm.edtIntegerChange(Sender: TObject);
 begin
   l_integervalue.Text := IntToStr(edtInteger.Value);
+  edtInteger.TextColor:= clBlue;
 end;
 
 procedure TMainForm.edtFloatChange(Sender: TObject);
@@ -167,6 +169,7 @@ begin
   SetPosition(376, 202, 392, 300);
   WindowTitle := 'Edit components';
   WindowPosition := wpScreenCenter;
+  fpgSetNamedColor(clText1,clBlue);
 
   lblName1 := TfpgLabel.Create(self);
   with lblName1 do
@@ -259,11 +262,20 @@ begin
     Text := '';
   end;
 
-  edtInteger := TfpgEditInteger.Create(self);
+  pl_integer := TfpgPanel.Create(self);
+  with pl_integer do
+  begin
+    Name := 'pl_integer';
+    SetPosition(20, 104, 130, 34);
+    FontDesc := '#Label1';
+    TextColor:= clGreen;
+  end;
+
+  edtInteger := TfpgEditInteger.Create(pl_integer);
   with edtInteger do
   begin
     Name := 'edtInteger';
-    SetPosition(24, 108, 120, 22);
+    SetPosition(4, 4, 120, 22);
     TabOrder := 9;
     FontDesc := '#Edit1';
     Value := 12345;
@@ -380,6 +392,7 @@ begin
     rbPoint.Checked := True
   else
     rbComma.Checked := True;
+  lbNegativeColor.SetFocus;
 end;
 
 procedure MainProc;

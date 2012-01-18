@@ -4,13 +4,16 @@ program stdimglist;
 
 uses
   Classes, SysUtils,
-  fpg_base, fpg_main, fpg_form, fpg_imgfmt_bmp, fpg_button;
+  fpg_base, fpg_main, fpg_form, fpg_imgfmt_bmp, fpg_button, u_report;
 
 type
 
   TMainForm = class(TfpgForm)
   private
+    FReport: T_Report;
+    btnPrint: TfpgButton;
     btnClose: TfpgButton;
+    procedure   btnPrintClick(Sender: TObject);
     procedure   btnCloseClick(Sender: TObject);
   protected
     procedure   HandlePaint; override;
@@ -28,13 +31,68 @@ begin
   MinWidth := 200;
   MinHeight := 100;
 
+  btnPrint := CreateButton(Self, Width-90, Height-70, 75, 'Print', @btnPrintClick);
+  btnPrint.ImageName := 'stdimg.print';
+  btnPrint.Anchors := [anRight, anBottom];
+
   btnClose := CreateButton(self, Width-90, Height-35, 75, 'Quit', @btnCloseClick);
   btnClose.ImageName := 'stdimg.quit';
   btnClose.Anchors := [anRight, anBottom];
+
+  FReport:= T_Report.Create;
+end;
+
+procedure TMainForm.btnPrintClick(Sender: TObject);
+var
+  FtTitle,FtText: integer;
+  ColName1,ColImg1,ColName2,ColImg2: integer;
+  n,i: integer;
+  sl: TStringList;
+  img: TfpgImage;
+begin
+  with FReport do
+  begin
+    BeginWrite(oPortrait,A4,msMM,'F',True);
+    Section(10,10,10,10);
+    FtTitle:= Font('helvetica-12:bold',clBlack);
+    FtText:= Font('helvetica-8',clBlack);
+    ColName1:= Column(20,45,0);
+    ColImg1:= Column(65,45,0);
+    ColName2:= Column(110,45,0);
+    ColImg2:= Column(155,45,0);
+    WriteHeader(cnCenter,lnEnd,'FpGUI standard images',ColDefaut,FtTitle);
+    NumPageFooter(cnCenter,lnEnd,'Page','of',True,ColDefaut,FtText);
+
+    sl  := TStringList.Create;
+    fpgImages.ListImages(sl);
+    i := 0;
+
+    for n := 0 to sl.Count-1 do
+    begin
+      if n mod 2 = 0 then
+      begin
+        WritePage(cnLeft,(n div 2)*7+30+i,sl[n],ColName1,FtText);
+        ImagePage(cnLeft,(n div 2)*7+13+i,sl[n],ColImg1);
+        if TfpgImage(sl.Objects[n]).Height> 16 then
+          inc(i,5);
+      end
+      else
+      begin
+        WritePage(cnLeft,(n div 2)*7+30+i,sl[n],ColName2,FtText);
+        ImagePage(cnLeft,(n div 2)*7+13+i,sl[n],ColImg2);
+        if (TfpgImage(sl.Objects[n]).Height> 16) and not (TfpgImage(sl.Objects[n-1]).Height> 16) then
+          inc(i,5);
+      end;
+    end;
+
+    EndWrite;
+    sl.Free;
+  end;
 end;
 
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
+  FReport.Free;
   Close;
 end;
 
