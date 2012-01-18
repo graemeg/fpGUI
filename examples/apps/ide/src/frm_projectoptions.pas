@@ -34,7 +34,6 @@ type
     CheckBox1: TfpgCheckBox;
     Label6: TfpgLabel;
     cbDefaultMakeCol: TfpgComboBox;
-    Button1: TfpgButton;
     pcCompiler: TfpgPageControl;
     TabSheet1: TfpgTabSheet;
     TabSheet2: TfpgTabSheet;
@@ -87,7 +86,6 @@ type
     procedure CleanupCompilerMakeOptionsGrid;
     procedure CleanupCompilerDirs;
     procedure SaveToMacroList(AList: TIDEMacroList);
-
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -795,19 +793,6 @@ begin
     Items.Add('4 (Make 4)');
     TabOrder := 6;
     FocusItem := 0;
-  end;
-
-  Button1 := TfpgButton.Create(tsCompiler);
-  with Button1 do
-  begin
-    Name := 'Button1';
-    SetPosition(148, 290, 144, 24);
-    Anchors := [anLeft,anBottom];
-    Text := 'Show command line';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 14;
   end;
 
   pcCompiler := TfpgPageControl.Create(tsCompiler);
