@@ -12,7 +12,7 @@ type
 
   { Note the tags for the UI Designer. This allows use to visually design
     our frame. }
-  TMyFrame = class(TfpgBevel)
+  TMyFrame = class(TfpgFrame)
   private
     {@VFD_HEAD_BEGIN: MyFrame}
     fraCheckBox1: TfpgCheckBox;
@@ -22,12 +22,10 @@ type
     {@VFD_HEAD_END: MyFrame}
     framnuFile: TfpgPopupMenu;
     framnuHelp: TfpgPopupMenu;
-    WindowTitle: TfpgString;
     procedure miHelpAboutClicked(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AfterCreate;
+    procedure AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -42,13 +40,6 @@ uses
 procedure TMyFrame.miHelpAboutClicked(Sender: TObject);
 begin
   TfpgMessageDialog.AboutFPGui('');
-end;
-
-constructor TMyFrame.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Shape := bsSpacer;
-  AfterCreate;
 end;
 
 destructor TMyFrame.Destroy;

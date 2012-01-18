@@ -130,7 +130,6 @@ begin
   begin
     Name := 'frame';
     SetPosition(0, 0, 280, 196);
-    Shape := bsSpacer;
     Align := alClient;
   end;
   PrintVisibleState(self);
@@ -150,7 +149,6 @@ begin
   begin
     Name := 'frame';
     SetPosition(0, 0, 280, 196);
-    Shape := bsSpacer;
     Align := alClient;
     Visible := False;
   end;
