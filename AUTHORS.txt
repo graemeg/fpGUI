@@ -10,8 +10,8 @@ Graeme Geldenhuys <graemeg@gmail.com>
 
 Implementation inspired by works from
 -------------------------------------
-Sebastian Guenther <sg@freepascal.org>
-Viktor Nagy <nvitya@freemail.hu>
+Sebastian Guenther
+Viktor Nagy
 
 
 Contributors
@@ -25,7 +25,7 @@ Vladimir Zhirov
 Alexsander Rosa
 Horacio Jamilis
 Michael van Canneyt
-JP Anghel
+Jean-Pierre Anghel
 
            ______________.o0O0o.______________
            
