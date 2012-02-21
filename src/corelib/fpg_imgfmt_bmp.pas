@@ -25,14 +25,18 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_base,
   fpg_main;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
-function  LoadImage_BMP(const AFileName: String): TfpgImage;
+function  LoadImage_BMP(const AFileName: TfpgString): TfpgImage;
 function  CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
 
 
 implementation
+
+uses
+  fpg_utils;
 
 
 function CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
@@ -41,14 +45,14 @@ begin
   ReadImage_BMP(Result, bmp, bmpsize);
 end;
 
-function LoadImage_BMP(const AFileName: String): TfpgImage;
+function LoadImage_BMP(const AFileName: TfpgString): TfpgImage;
 var
   AFile: file of char;
   AImageData: Pointer;
   AImageDataSize: integer;
 begin
   Result := nil;
-  if not FileExists(AFileName) then
+  if not fpgFileExists(AFileName) then
     Exit; //==>
 
   AssignFile(AFile, AFileName);
