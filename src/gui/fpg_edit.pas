@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Defines a Text Edit control. Also known a Text Entry control.
+      Defines a Text Edit widget. Also known a single line Text Entry widget.
+      This unit also defines numeric edit widgets.
 }
 
 // Future enhancements:
@@ -1874,8 +1875,8 @@ begin
       txt := Copy(ftext, 2, Length(fText) - 1)
     else
       txt := fText;
-  	while UTF8Pos(FThousandSeparator, txt) > 0 do
-  		txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+    while UTF8Pos(FThousandSeparator, txt) > 0 do
+      txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), Length(txt) - UTF8Pos(FThousandSeparator, txt));
     if UTF8Copy(fText, 1, 1) = '-' then
       fText := '-' + txt
@@ -1999,8 +2000,8 @@ begin
       txt := Copy(ftext, 2, Length(fText) - 1)
     else
       txt := fText;
-  	while UTF8Pos(FThousandSeparator, txt) > 0 do
-  		txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+    while UTF8Pos(FThousandSeparator, txt) > 0 do
+      txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), UTF8Length(txt) - UTF8Pos(FThousandSeparator, txt));
     if Copy(fText, 1, 1) = '-' then // No need for utf8 version here
       fText := '-' + txt
@@ -2144,8 +2145,8 @@ begin
       txt := Copy(ftext, 2, Length(fText) - 1)
     else
       txt := fText;
-  	while UTF8Pos(FThousandSeparator, txt) > 0 do
-  		txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+    while UTF8Pos(FThousandSeparator, txt) > 0 do
+      txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), UTF8Length(txt) - UTF8Pos(FThousandSeparator, txt));
     if Copy(fText, 1, 1) = '-' then
       fText := '-' + txt
