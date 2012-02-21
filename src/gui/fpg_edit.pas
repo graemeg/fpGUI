@@ -1830,8 +1830,10 @@ procedure TfpgBaseNumericEdit.SetTextColor(const AValue: TfpgColor);
 begin
   if FTextColor = AValue then
     Exit; //==>
-  FTextColor := AValue;
+  { Existing value might be negative so we must selectively change the
+    FTextColor values }
   FOldColor := AValue;
+  AdjustColorForNegativeValues;
   Repaint;
 end;
 
