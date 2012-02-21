@@ -225,6 +225,7 @@ type
     procedure   SetColumnWidth(AIndex, AWidth: word);
     // the width of a column - aIndex of the rootnode = 0
     function    GetColumnWidth(AIndex: word): word;
+    function    GetNodeAt(const X, Y: integer): TfpgTreeNode;
     procedure   GotoNextNodeUp;
     procedure   GotoNextNodeDown;
     procedure   FullCollapse;
@@ -1189,6 +1190,56 @@ begin
     result := h^.width
   else // not found -> returns the default
     result := DefaultColumnWidth;
+end;
+
+function TfpgTreeView.GetNodeAt(const X, Y: integer): TfpgTreeNode;
+var
+  col: integer;
+  lTop: integer;
+  lLeft: integer;
+  i, i1: integer;
+  cancel: boolean;
+  last, node: TfpgTreeNode;
+  w: integer;
+  lNodeXOffset: integer;
+begin
+  if ShowColumns then
+    col := FColumnHeight
+  else
+    col := 0;
+
+  Result := nil;
+  i := 0;
+  lTop := y - col - 1 + FYOffset;
+  lLeft := x + FXOffset;
+  cancel := False;
+  last := RootNode;
+
+  while not ((((i - 1) * GetNodeHeight) <= lTop) and ((i * GetNodeHeight) >= lTop)) do
+  begin
+    node := NextVisualNode(last);
+    if node = nil then
+      exit; //==>
+    if node = last then
+    begin
+      cancel := True;
+      break;  //==>
+    end;
+    inc(i);
+    last := node;
+  end;
+  
+  if (not cancel) or (node <> nil) then
+  begin
+    // +/- or node-selection?
+    i1  := StepToRoot(node);
+    w   := GetColumnLeft(i1);
+    lNodeXOffset := w - GetColumnWidth(i1) div 2 + 6;
+    if lLeft > lNodeXOffset then  { we are in the actual treenode area }
+    begin
+      Result := node;
+    end;
+  end;
 end;
 
 procedure TfpgTreeView.GotoNextNodeUp;
