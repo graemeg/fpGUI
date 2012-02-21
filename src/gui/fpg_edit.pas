@@ -1775,9 +1775,9 @@ procedure TfpgBaseNumericEdit.AdjustColorForNegativeValues;
 begin
   // Colour negative number
   if LeftStr(Text,1) = '-' then
-    TextColor := NegativeColor
+    FTextColor := NegativeColor
   else
-    TextColor := OldColor;
+    FTextColor := OldColor;
 end;
 
 function TfpgBaseNumericEdit.GetMarginAdjustment: integer;
