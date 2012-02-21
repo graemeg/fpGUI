@@ -1679,7 +1679,7 @@ end;
 
 procedure TfpgBaseNumericEdit.SetShowThousand;
 var
-	i,long: integer;
+  i,long: integer;
   txt, texte, decimal: string;
 begin
   if FDecimals > 0 then
@@ -1718,24 +1718,24 @@ begin
     if fText > '' then
       if fText[1] = '-' then
         txt:= UTF8Copy(txt, 2, UTF8Length(txt)-1);
-  	long := UTF8Length(txt);
-  	if long = 0 then
-  		texte := ''
-  	else
-  	begin
+    long := UTF8Length(txt);
+    if long = 0 then
+      texte := ''
+    else
+    begin
       for i := 1 to UTF8Length(txt) do
         if fpgCharAt(txt, i) = FThousandSeparator then
         begin
           txt:= UTF8Copy(txt, 1, i - 1) + UTF8Copy(txt, i + 1, long - i);
           dec(long);
         end;
-  		i := 0;
-  		texte := '';
-  		repeat
-  			if i > 0 then
-  				if ((i mod 3) = 0) and (fpgCharAt(txt,UTF8Length(txt)-UTF8Length(texte)) <> FThousandSeparator) then
+      i := 0;
+      texte := '';
+      repeat
+        if i > 0 then
+          if ((i mod 3) = 0) and (fpgCharAt(txt,UTF8Length(txt)-UTF8Length(texte)) <> FThousandSeparator) then
           begin
-  					texte := FThousandSeparator + texte;
+            texte := FThousandSeparator + texte;
             if fText[1] = '-' then
             begin
               if Pred(FCursorPos) <= UTF8Length(texte) then
@@ -1745,21 +1745,27 @@ begin
               if FCursorPos <= UTF8Length(texte) then
                 Inc(FCursorPos);
           end;
-  			texte := Copy(txt, long - i, 1) + texte;
-  			inc(i);
-  		until i = long;
-  	end;
-  if fText > '' then
-    if fText[1] = '-' then
-      if UTF8Pos(FDecimalSeparator, fText) > 0 then
-        fText := '-' + texte + FDecimalSeparator + decimal
+        texte := Copy(txt, long - i, 1) + texte;
+        inc(i);
+      until i = long;
+    end;
+    if fText > '' then
+    begin
+      if fText[1] = '-' then
+      begin
+        if UTF8Pos(FDecimalSeparator, fText) > 0 then
+          fText := '-' + texte + FDecimalSeparator + decimal
+        else
+          fText := '-' + texte;
+      end
       else
-        fText := '-' + texte
-    else
-      if UTF8Pos(FDecimalSeparator, fText) > 0 then
-        fText := texte + FDecimalSeparator + decimal
-      else
-        fText := texte + decimal;
+      begin
+        if UTF8Pos(FDecimalSeparator, fText) > 0 then
+          fText := texte + FDecimalSeparator + decimal
+        else
+          fText := texte + decimal;
+      end;
+    end;
   end;
 end;
 
