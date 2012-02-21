@@ -20,8 +20,8 @@ uses
   fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, fpg_interface, 
   fpg_editbtn, fpg_imgfmt_jpg, fpg_imgutils, fpg_OLEDragDrop, 
   fpg_stylemanager, fpg_style_win2k, fpg_style_motif, fpg_style_clearlooks, 
-  fpg_style_bluecurve, fpg_style_bitmap, fpg_readonly;
+  fpg_style_bluecurve, fpg_style_bitmap, fpg_readonly, fpg_imgfmt_png;
 
 implementation
 
-end.
+end.

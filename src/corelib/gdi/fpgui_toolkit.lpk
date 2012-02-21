@@ -31,7 +31,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="8" Build="0"/>
-    <Files Count="88">
+    <Files Count="89">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -384,6 +384,10 @@
         <Filename Value="..\..\gui\fpg_readonly.pas"/>
         <UnitName Value="fpg_readonly"/>
       </Item88>
+      <Item89>
+        <Filename Value="..\fpg_imgfmt_png.pas"/>
+        <UnitName Value="fpg_imgfmt_png"/>
+      </Item89>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="1">
@@ -400,4 +404,4 @@
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
-</CONFIG>
+</CONFIG>
