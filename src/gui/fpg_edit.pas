@@ -900,13 +900,14 @@ begin
     end;
   end;  { if }
 
-  if consumed then
-    RePaint
-  else
+  if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
     DoOnChange;
+
+  if consumed then
+    RePaint;
 end;
 
 procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -1142,10 +1143,11 @@ begin
   FTextOffset := 0;
 
   Adjust;
-  RePaint;
 
   if prevval <> Text then
     DoOnChange;
+
+  RePaint;
 end;
 
 procedure TfpgBaseEdit.SetSideMargin(const AValue: integer);
@@ -1350,9 +1352,9 @@ begin
   FCursorPos := FCursorPos + UTF8Length(s);
   FSelStart  := FCursorPos;
   Adjust;
-  Repaint;
   if prevval <> Text then
     DoOnChange;
+  Repaint;
 end;
 
 procedure TfpgBaseEdit.SetAutoSelect(const AValue: Boolean);
