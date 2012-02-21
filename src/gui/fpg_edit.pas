@@ -214,6 +214,7 @@ type
     procedure   SetShowThousand;
     procedure   AdjustColorForNegativeValues;
   protected
+    procedure   DoOnChange; override;
     function    GetMarginAdjustment: integer; override;
     procedure   HandlePaint; override;
     procedure   SetTextColor(const AValue: TfpgColor); override;
@@ -1778,6 +1779,12 @@ begin
     FTextColor := NegativeColor
   else
     FTextColor := OldColor;
+end;
+
+procedure TfpgBaseNumericEdit.DoOnChange;
+begin
+  AdjustColorForNegativeValues;
+  inherited DoOnChange;
 end;
 
 function TfpgBaseNumericEdit.GetMarginAdjustment: integer;
