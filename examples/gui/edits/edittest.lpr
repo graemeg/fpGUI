@@ -361,7 +361,7 @@ begin
   begin
     Name := 'lbNegativeColor';
     SetPosition(200, 28, 176, 92);
-    Color := clRed;
+    Color := TfpgColor($FF0000);
     OnChange := @lbChange;
   end;
 
