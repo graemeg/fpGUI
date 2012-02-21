@@ -216,6 +216,7 @@ type
   protected
     function    GetMarginAdjustment: integer; override;
     procedure   HandlePaint; override;
+    procedure   SetTextColor(const AValue: TfpgColor); override;
     procedure   FormatEdit; virtual;
     procedure   Justify; virtual; // to implement in derived classes
     property    OldColor: TfpgColor read FOldColor write SetOldColor;
@@ -1823,6 +1824,15 @@ begin
       fpgCaret.UnSetCaret(Canvas);
     end;
   end;
+end;
+
+procedure TfpgBaseNumericEdit.SetTextColor(const AValue: TfpgColor);
+begin
+  if FTextColor = AValue then
+    Exit; //==>
+  FTextColor := AValue;
+  FOldColor := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseNumericEdit.FormatEdit;
