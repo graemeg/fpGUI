@@ -105,6 +105,7 @@ procedure TMainForm.lbChange(Sender: TObject);
 begin
   edtFloat.NegativeColor := lbNegativeColor.Color;
   edtInteger.NegativeColor := lbNegativeColor.Color;
+  edtCurrency.NegativeColor := lbNegativeColor.Color;
 end;
 
 procedure TMainForm.edtIntegerChange(Sender: TObject);
