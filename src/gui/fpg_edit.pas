@@ -212,6 +212,7 @@ type
     procedure   SetNegativeColor(const AValue: TfpgColor);
     procedure   SetThousandSeparator(const AValue: TfpgChar);
     procedure   SetShowThousand;
+    procedure   AdjustColorForNegativeValues;
   protected
     function    GetMarginAdjustment: integer; override;
     procedure   HandlePaint; override;
@@ -1769,6 +1770,15 @@ begin
   end;
 end;
 
+procedure TfpgBaseNumericEdit.AdjustColorForNegativeValues;
+begin
+  // Colour negative number
+  if LeftStr(Text,1) = '-' then
+    TextColor := NegativeColor
+  else
+    TextColor := OldColor;
+end;
+
 function TfpgBaseNumericEdit.GetMarginAdjustment: integer;
 begin
   // Due to numeric edits being right aligned, the margin is negative
@@ -1818,11 +1828,7 @@ end;
 procedure TfpgBaseNumericEdit.FormatEdit;
 begin
   SetShowThousand;
-  // Colour negative number
-  if LeftStr(Text,1) = '-' then
-    TextColor := NegativeColor
-  else
-    TextColor := OldColor;
+  AdjustColorForNegativeValues;
 end;
 
 constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
