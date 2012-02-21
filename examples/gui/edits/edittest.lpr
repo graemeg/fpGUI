@@ -167,6 +167,7 @@ begin
   Name := 'MainForm';
   SetPosition(376, 202, 392, 300);
   WindowTitle := 'Edit components';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   lblName1 := TfpgLabel.Create(self);
@@ -184,9 +185,11 @@ begin
   begin
     Name := 'edtText';
     SetPosition(24, 28, 120, 22);
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 1;
     Text := 'Hello World!';
-    FontDesc := '#Edit1';
   end;
 
   chbPasswd := TfpgCheckBox.Create(self);
@@ -195,6 +198,7 @@ begin
     Name := 'chbPasswd';
     SetPosition(24, 55, 152, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 2;
     Text := 'Password Mode';
     OnChange := @chbPasswdChanged;
@@ -265,8 +269,9 @@ begin
   begin
     Name := 'edtInteger';
     SetPosition(24, 108, 120, 22);
-    TabOrder := 9;
     FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 9;
     Value := 12345;
     OnChange := @edtIntegerChange;
   end;
@@ -276,8 +281,9 @@ begin
   begin
     Name := 'edtFloat';
     SetPosition(24, 164, 120, 22);
-    TabOrder := 10;
     FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 10;
     Value := 12345.1234;
     OnChange := @edtFloatChange;
   end;
@@ -287,8 +293,9 @@ begin
   begin
     Name := 'edtCurrency';
     SetPosition(24, 220, 120, 22);
-    TabOrder := 11;
     FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 11;
     Value := 12345.12;
     OnChange := @edtCurrencyChange;
   end;
@@ -315,6 +322,7 @@ begin
     Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 1;
+    Hint := '';
     TabOrder := 7;
     Text := 'Point as DecimalSeparator';
     Tag := 0;
@@ -328,6 +336,7 @@ begin
     SetPosition(170, 160, 196, 20);
     FontDesc := '#Label1';
     GroupIndex := 1;
+    Hint := '';
     TabOrder := 8;
     Text := 'Comma as DecimalSeparator';
     Tag := 1;
@@ -340,6 +349,7 @@ begin
     Name := 'chbSpace';
     SetPosition(170, 200, 200, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 15;
     Text := 'Space as ThousandSeparator';
     OnChange := @chbSpaceChange;
@@ -351,6 +361,7 @@ begin
     Name := 'chbFloatDec';
     SetPosition(170, 220, 200, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 16;
     Text := 'Limit EditFloat to 3 decimals';
     OnChange := @chbFloatDecChange;
@@ -362,6 +373,9 @@ begin
     Name := 'lbNegativeColor';
     SetPosition(200, 28, 176, 92);
     Color := TfpgColor($FF0000);
+    FontDesc := '#List';
+    Hint := '';
+    TabOrder := 18;
     OnChange := @lbChange;
   end;
 
