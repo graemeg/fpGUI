@@ -905,8 +905,7 @@ begin
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
-    if Assigned(FOnChange) then
-      FOnChange(self);
+    DoOnChange;
 end;
 
 procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
