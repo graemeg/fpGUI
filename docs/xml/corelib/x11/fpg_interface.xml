@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpgui">
+
+<module name="fpg_interface">
+<short>This unit defines alias classes</short>
+<descr>This unit defines alias classes, linking the concrete classes from
+<var>fpg_main</var> to the fpGUI backends.</descr>
+
+</module>
+
+</package>
+</fpdoc-descriptions>
