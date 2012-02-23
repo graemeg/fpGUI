@@ -79,6 +79,11 @@ planned.</p></descr>
 </seealso>
 </element>
 
+<element name="TfpgApplication" link="#fpgui.fpg_base.TfpgApplication">
+<short>A concrete class that encapsulates a fpGUI application</short>
+</element>
+
+
     </module>
     <!-- fpg_main -->
   </package>
