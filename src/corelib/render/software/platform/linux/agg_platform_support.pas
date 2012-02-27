@@ -67,6 +67,15 @@ uses
  agg_color_conv ,
  file_utils_ ;
 
+const
+  {$IFDEF Ver2_2}
+  xFalse = False;
+  xTrue = True;
+  {$ELSE}
+  xFalse = 0;
+  xTrue = 1;
+  {$ENDIF}
+
 { TYPES DEFINITION }
 const
 //----------------------------------------------------------window_flag_e
@@ -1551,7 +1560,7 @@ begin
  m_specific.m_window_attributes.background_pixel:=
   XWhitePixel(m_specific.m_display ,m_specific.m_screen );
 
- m_specific.m_window_attributes.override_redirect:=false;
+ m_specific.m_window_attributes.override_redirect:=xfalse;
 
  window_mask:=CWBackPixel or CWBorderPixel;
 
