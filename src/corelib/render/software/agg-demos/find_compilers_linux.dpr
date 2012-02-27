@@ -339,7 +339,7 @@ begin
    if loaded then
     begin
      if FirstKey('skip' ,value ) then
-      writeln('to be not included -> skipped' )
+      writeln('not to be included -> skipped' )
      else
       begin
        target:='linux';
