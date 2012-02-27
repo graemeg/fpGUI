@@ -58,7 +58,8 @@ INTERFACE
 {$I agg_mode.inc }
 {$I- }
 uses
- X ,Xlib ,Xutil ,Xatom ,keysym ,libc ,CTypes ,SysUtils ,
+ X ,Xlib ,Xutil ,Xatom ,keysym ,CTypes ,SysUtils ,
+ agg_linux_mini_libc ,
  agg_basics ,
  agg_ctrl ,
  agg_rendering_buffer ,
@@ -1015,7 +1016,7 @@ begin
 
  p:=p + #0;
 
- libc.__chdir(PChar(@p[1 ] ) );
+ SetCurrentDir(p);
 
 end;
 
