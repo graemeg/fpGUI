@@ -2,7 +2,7 @@
 // AggPas 2.4 RM3 Demo application
 // Note: Press F1 key on run to see more info about this demo
 //
-// Paths: src;src\ctrl;src\svg;src\util;src\platform\win;expat-wrap
+// Paths: ..;..\ctrl;..\svg;..\util;..\platform\win;expat-wrap
 //
 program
  simple_blur ;
@@ -447,4 +447,4 @@ BEGIN
 // Free
  g_path.Destruct;
 
-END.
+END.
