@@ -13,7 +13,7 @@ uses
  file_utils_ ,
  Carbon ;
  
-{$I agg_mode.inc }
+{$I ../agg_mode.inc }
 
 type
  src_key = record
@@ -28,8 +28,8 @@ const
  make_max = 99;
  
  fpc_comp = '/usr/local/bin/ppcppc';
- fpc_libs = '-Fu"src;src/ctrl;src/platform/mac;src/util;src/svg;upi;expat-wrap"';
- fpc_incl = '-Fisrc';
+ fpc_libs = '-Fu"../;../ctrl;../platform/mac;../util;../svg;upi;expat-wrap"';
+ fpc_incl = '-Fi../';
  fpc_outd = '-FU_debug';
  fpc_frmw = '-k"-framework Carbon -framework QuickTime"';
  fpc_conf = '-Mdelphi -Tdarwin -Sg -Se3 -XX -Xs -B -v0i';
@@ -659,4 +659,4 @@ BEGIN
  else
   writeln('ERROR: Not enough memory for the pool buffer !' ); 
 
-END.
+END.

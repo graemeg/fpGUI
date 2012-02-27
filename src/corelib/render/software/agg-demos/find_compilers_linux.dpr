@@ -28,12 +28,12 @@ const
  make_max = 99;
 
  fpc_comp = 'ppc386';
- fpc_libs = '-Fu"src;src/ctrl;src/platform/linux;src/util;src/svg;expat-wrap"';
- fpc_incl = '-Fisrc';
+ fpc_libs = '-Fu"../;../ctrl;../platform/linux;../util;../svg;expat-wrap"';
+ fpc_incl = '-Fi../';
  fpc_outd = '-FU_debug';
  fpc_conf = '-Mdelphi -Tlinux -Sg -Se3 -XX -Xs -B -v0i';
- fpc_gapp = '-WG';
- fpc_capp = '-WC';
+ fpc_gapp = '';
+ fpc_capp = '';
 
 var
  key_array : array[0..key_max - 1 ] of src_key;
@@ -486,4 +486,4 @@ BEGIN
  else
   writeln('ERROR: Not enough memory for the pool buffer !' ); 
 
-END.
+END.

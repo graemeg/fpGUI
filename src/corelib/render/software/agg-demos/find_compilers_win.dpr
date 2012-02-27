@@ -33,7 +33,7 @@ uses
  agg_conv_stroke ,
  file_utils_ ;
 
-{$I agg_mode.inc }
+{$I ..\agg_mode.inc }
 {$I- }
 type
  src_key = record
@@ -48,8 +48,8 @@ const
  g_appl = 'AggPas';
  g_full = 'AggPas 2.4 RM3 vector graphics library';
 
- g_agg_paths = 'src;src\ctrl;src\platform\win;src\util;src\svg;gpc;expat-wrap';
- g_inc_paths = 'src';
+ g_agg_paths = '..\;..\ctrl;..\platform\win;..\util;..\svg;gpc;expat-wrap';
+ g_inc_paths = '..\';
  g_out_paths = '_debug';
 
  g_delphi_config = '-CG -B -H- -W-';
@@ -1493,4 +1493,4 @@ BEGIN
 
  app.Destruct;
 
-END.
+END.
