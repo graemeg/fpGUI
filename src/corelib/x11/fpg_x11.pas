@@ -3171,7 +3171,7 @@ begin
     xoffset        := 0;
     obdata         := #0;
     byte_order     := LSBFirst;
-    bitmap_bit_order := MSBFirst;
+    bitmap_bit_order := LSBFirst; //MSBFirst;
     bitmap_pad     := 32;
     bytes_per_line := 0;
 
