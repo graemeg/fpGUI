@@ -1,5 +1,7 @@
 unit HelpBitmap;
 
+{$mode objfpc}{$H+}
+
 interface
 
 // Encapsulates a bitmap as stored in a IPF file.
