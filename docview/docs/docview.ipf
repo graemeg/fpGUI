@@ -916,7 +916,7 @@ refid='InternetLinks'.Internet Links :elink.topic.
 :hp2.Writing fpGUI Toolkit and OS/2 Help Files:ehp2.
 :p.
 fpGUI Toolkit Help Files are produced using the IPF Compiler. IPF stands for
-Information Presentation Facility and was original designed by IBM.
+Information Presentation Facility and was originally designed by IBM.
 :p.
 The IPF Compiler takes a text file written in a markup language that tells
 it about things like headings, links, text and images, and produces
