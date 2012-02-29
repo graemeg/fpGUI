@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -26,16 +26,16 @@ uses
   fpg_x11;
 
 type
-  TfpgFontResourceImpl  = TfpgX11FontResource;
-  TfpgImageImpl         = TfpgX11Image;
-  TfpgCanvasImpl        = TfpgX11Canvas;
-  TfpgWindowImpl        = TfpgX11Window;
-  TfpgApplicationImpl   = TfpgX11Application;
-  TfpgClipboardImpl     = TfpgX11Clipboard;
-  TfpgFileListImpl      = TfpgX11FileList;
-  TfpgMimeDataImpl      = TfpgX11MimeData;
-  TfpgDragImpl          = TfpgX11Drag;
-  TfpgTimerImpl         = TfpgX11Timer;
+  TfpgFontResourceImpl  = class(TfpgX11FontResource);
+  TfpgImageImpl         = class(TfpgX11Image);
+  TfpgCanvasImpl        = class(TfpgX11Canvas);
+  TfpgWindowImpl        = class(TfpgX11Window);
+  TfpgApplicationImpl   = class(TfpgX11Application);
+  TfpgClipboardImpl     = class(TfpgX11Clipboard);
+  TfpgFileListImpl      = class(TfpgX11FileList);
+  TfpgMimeDataImpl      = class(TfpgX11MimeData);
+  TfpgDragImpl          = class(TfpgX11Drag);
+  TfpgTimerImpl         = class(TfpgX11Timer);
 
 implementation
 

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -26,16 +26,16 @@ uses
   fpg_gdi;
 
 type
-  TfpgFontResourceImpl  = TfpgGDIFontResource;
-  TfpgImageImpl         = TfpgGDIImage;
-  TfpgCanvasImpl        = TfpgGDICanvas;
-  TfpgWindowImpl        = TfpgGDIWindow;
-  TfpgApplicationImpl   = TfpgGDIApplication;
-  TfpgClipboardImpl     = TfpgGDIClipboard;
-  TfpgFileListImpl      = TfpgGDIFileList;
-  TfpgMimeDataImpl      = TfpgGDIMimeDataBase;
-  TfpgDragImpl          = TfpgGDIDrag;
-  TfpgTimerImpl         = TfpgGDITimer;
+  TfpgFontResourceImpl  = class(TfpgGDIFontResource);
+  TfpgImageImpl         = class(TfpgGDIImage);
+  TfpgCanvasImpl        = class(TfpgGDICanvas);
+  TfpgWindowImpl        = class(TfpgGDIWindow);
+  TfpgApplicationImpl   = class(TfpgGDIApplication);
+  TfpgClipboardImpl     = class(TfpgGDIClipboard);
+  TfpgFileListImpl      = class(TfpgGDIFileList);
+  TfpgMimeDataImpl      = class(TfpgGDIMimeDataBase);
+  TfpgDragImpl          = class(TfpgGDIDrag);
+  TfpgTimerImpl         = class(TfpgGDITimer);
 
 implementation
 
