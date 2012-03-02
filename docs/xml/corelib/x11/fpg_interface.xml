@@ -7,6 +7,11 @@
 <descr>This unit defines alias classes, linking the concrete classes from
 <var>fpg_main</var> to the fpGUI backends.</descr>
 
+<element name="TfpgWindowImpl">
+<short>Maps to a backend specific base class</short>
+<descr><printshort id="TfpgWindowImpl"/>.</descr>
+</element>
+
 </module>
 
 </package>
