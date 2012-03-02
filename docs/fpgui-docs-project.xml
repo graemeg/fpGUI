@@ -1,0 +1,58 @@
+<docproject>
+  <packages>
+    <!-- Multiple packages can be entered. 
+         If only one is specified, it is selected. 
+         "name" is a mandatory attribute
+         a "units" tag is required, and a "descriptions" tag as well
+    -->
+    <package name="fpgui" output="fpgui.ipf" contentfile="fpgui.cnt">
+<!--
+    <package name="fpgui" output="html/" contentfile="fpgui.cnt">
+-->
+      <!-- All input files, one "unit" tag per unit -->
+      <units>
+        <!-- "file" is a mandatory attribute, "options" is not mandatory -->
+        <unit file="../src/corelib/fpg_constants.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_base.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/x11/fpg_x11.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/x11/fpg_interface.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_main.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_widget.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_command_intf.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_imgfmt_bmp.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_utils.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_wuline.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_edit.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+      </units>
+      <descriptions>
+        <!-- Description files here. One "description" tag per file.
+            "file" is the only mandatory attribute -->
+        <description file="xml/corelib/fpg_constants.xml"/>
+        <description file="xml/corelib/fpg_base.xml"/>
+        <description file="xml/corelib/x11/fpg_x11.xml"/>
+        <description file="xml/corelib/x11/fpg_interface.xml"/>
+        <description file="xml/corelib/fpg_main.xml"/>
+        <description file="xml/corelib/fpg_widget.xml"/>
+        <description file="xml/corelib/fpg_command_intf.xml"/>
+        <description file="xml/corelib/fpg_imgfmt_bmp.xml"/>
+        <description file="xml/corelib/fpg_utils.xml"/>
+        <description file="xml/corelib/fpg_wuline.xml"/>
+        <description file="xml/gui/fpg_edit.xml"/>
+      </descriptions>
+    </package>
+  </packages>
+  <options>
+    <!-- All command-line options can be specified here with the same name
+         and value as on the actual command-line. Boolean options must have
+         a value of 'true', '1' or 'yes' -->
+    <option name="format" value="ipf"/>
+<!--
+    <option name="format" value="html"/>
+-->
+    <option name="hide-protected" value="true"/>
+    <option name="duplinkeddoc" value="true"/>
+<!--
+    <option name="footer-date" value="yyyy-mm-dd"/>
+-->
+  </options>
+</docproject>
