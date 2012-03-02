@@ -51,6 +51,20 @@ triggers the OnClick event, but this behaviour can be overridden by descendant
 components.</descr>
 </element>
 
+<element name="TfpgWidget.InvokeHelp">
+<short>Display context-sensitive help</short>
+<descr><p>InvokeHelp is called automatically when the user presses the application
+help key (normally F1) while the widget has the focus. If a help topic is defined
+for this widget (using HelpContext or HelpKeyword, depending on the value of HelpType),
+then InvokeHelp displays the topic by calling the KeywordHelp or ContextHelp method
+of the fpgApplication object. If no help topic is defined, then InvokeHelp attempts
+to call InvokeHelp for its parent. This allows a container widget to specify a
+default help topic for its children.</p></descr>
+<seealso>
+<link id="fpg_main.TfpgApplication.HelpFile">TfpgApplication.HelpFile</link>
+</seealso>
+</element>
+
 
 </module>
 </package>

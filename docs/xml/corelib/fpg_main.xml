@@ -79,8 +79,16 @@ planned.</p></descr>
 </seealso>
 </element>
 
-<element name="TfpgApplication" link="#fpgui.fpg_base.TfpgApplication">
+<element name="TfpgApplication">
 <short>A concrete class that encapsulates a fpGUI application</short>
+</element>
+
+<element name="TfpgApplication.InvokeHelp" link="#fpgui.fpg_base.TfpgApplicationBase.InvokeHelp">
+<short>fake</short>
+</element>
+
+<element name="TfpgApplication.HelpFile" link="#fpgui.fpg_base.TfpgApplicationBase.HelpFile">
+<short>fake</short>
 </element>
 
 
