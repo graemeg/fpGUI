@@ -984,6 +984,18 @@ the streets of Manhattan.</p>
 </element>
 
 
+<element name="TfpgComponent">
+<short>A descendant of the FPC TComponent class</short>
+<descr><p><printshort id="TfpgComponent"/>. It adds a location where we can extend
+the TComponent, without having to make changes to each and every class in fpGUI.</p>
+<p>For example: We added the TagPointer property (which is now largely obsolete) because
+a while back the Tag property of TComponent could only store a 32bit value.
+Many developers used it to store a pointer reference to a object under 32-bit system, but
+this was not possible under 64-bit systems. After some time, FPC finally updated
+the type of the Tag property to support 64-bit addresses too.</p></descr>
+</element>
+
+
     </module>
     <!-- fpg_base -->
   </package>
