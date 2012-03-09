@@ -343,4 +343,4 @@ BEGIN
  g_alpha_mask_rbuf.Destruct;
  g_rasterizer.Destruct;
 
-END.
+END.

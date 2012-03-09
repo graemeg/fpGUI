@@ -449,4 +449,4 @@ BEGIN
  g_rasterizer.Destruct;
  g_scanline.Destruct;
 
-END.
+END.
