@@ -159,7 +159,7 @@ begin
 { m_graphics.font(char_ptr(FONT_TIMES ) ,14.0 ,false ,false );
  m_graphics.fillColor(0 ,0 ,0 );
  m_graphics.noLine;
- m_graphics.text(100 ,20 ,char_ptr(PChar('Regular Raster Text -- Fast, but can''t be rotated' ) ) );{}
+ m_graphics.text(100 ,20 ,char_ptr(PChar('Regular Raster Text -- Fast, but can''t be rotated' ) ) ); }
 
 // Outlined Text
  m_graphics.font(char_ptr(FONT_TIMES ) ,50.0 ,false ,false ,{RasterFontCache}VectorFontCache );
@@ -177,7 +177,7 @@ begin
 
  m_graphics.noLine;
  m_graphics.text(12.5 ,565.5 ,char_ptr(@m_gmText[1 ] ) );
- //m_graphics.rectangle(12.5 ,565.5 ,290 ,590 ); (**)
+ //m_graphics.rectangle(12.5 ,565.5 ,290 ,590 ); *)
 
 // Text Alignment
  m_graphics.lineColor(0 ,0 ,0 );
@@ -559,7 +559,7 @@ begin
 
  m_graphics.lineColor(221 ,160 ,221 );
  m_graphics.lineWidth(6 );
- m_graphics.polyline (@poly[0 ] ,6 ); (**)
+ m_graphics.polyline (@poly[0 ] ,6 ); *)
 
 // TIMER DRAW
 // ----------
@@ -755,4 +755,5 @@ BEGIN
 
  app.Destruct;
 
-END.
+end.
+
