@@ -2779,7 +2779,7 @@ begin
       end;
       if FastDoubleBuffer then
       begin
-        // Rapid paint events reuse the double buffer which resests a delay
+        // Rapid paint events reuse the double buffer which resets a delay
         // After the delay the double buffer is freed, letting the OS use video
         // memory if needed.
         // Things like scrolling and resizing are fast
