@@ -1441,22 +1441,6 @@ begin
   // IBM Graph CodePage 437 (kind-of) to Unicode mapping.
   // Below is what we had before this function
   Result := SingleByteToUTF8(s, ArrayIPFToUTF8);
-  //Result := s;
-  //Result := StringReplace(Result, Chr($07), #$E2#$80#$A2, [rfReplaceAll, rfIgnoreCase]);    // u+2022  small bullet
-  //Result := tiStrTran(Result, Char(16), '>' );
-  //Result := tiStrTran(Result, Char(17), '<' );
-  //Result := tiStrTran(Result, Char($1f), '▼' );
-  //Result := tiStrTran(Result, Char(179), '│' );
-  //Result := tiStrTran(Result, Char(180), '┤' );
-  //Result := tiStrTran(Result, Char(191), '┐' );
-  //Result := tiStrTran(Result, Char(192), '└' );
-  //Result := tiStrTran(Result, Char(193), '┴' );
-  //Result := tiStrTran(Result, Char(194), '┬' );
-  //Result := tiStrTran(Result, Char(195), '├' );
-  //Result := tiStrTran(Result, Char(196), '─' );
-  //Result := tiStrTran(Result, Char(197), '┼' );
-  //Result := tiStrTran(Result, Char(217), '┘' );
-  //Result := tiStrTran(Result, Char(218), '┌' );
 end;
 
 function SingleByteToUTF8(const s: string; const Table: TCharToUTF8Table): TfpgString;
