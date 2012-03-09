@@ -146,11 +146,14 @@ type
 
 
   TfpgImage = class(TfpgImageImpl)
+  private
+    function    GetScanLine(Row: Integer): Pointer;
   public
     function    CreateDisabledImage: TfpgImage;
     function    ImageFromSource: TfpgImage;
     function    ImageFromRect(var ARect: TRect): TfpgImage; overload;
     function    ImageFromRect(var ARect: TfpgRect): TfpgImage; overload;
+    property    ScanLine[Row: Integer]: Pointer read GetScanLine;
   end;
 
 
@@ -2523,6 +2526,20 @@ end;
 
 
 { TfpgImage }
+
+function TfpgImage.GetScanLine(Row: Integer): Pointer;
+var
+  pdest: Plongword;
+begin
+  if (Height = 0) or (Width = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  pdest := ImageData; // This is so that pointer math uses correct increment size
+  Result := pdest + (Row * Width);
+end;
 
 function TfpgImage.CreateDisabledImage: TfpgImage;
 begin
