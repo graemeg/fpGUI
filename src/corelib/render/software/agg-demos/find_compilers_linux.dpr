@@ -27,7 +27,7 @@ const
  pool_max = 65536;
  make_max = 99;
 
- fpc_comp = 'ppc386';
+ fpc_comp = 'fpc';
  fpc_libs = '-Fu"../;../ctrl;../platform/linux;../util;../svg;expat-wrap"';
  fpc_incl = '-Fi../';
  fpc_outd = '-FU_debug';
