@@ -23,7 +23,7 @@
 // 17.09.2007-Milano: Porting & Finished OK
 // 16.09.2007-Milano: Unit port establishment
 //
-{ agg_font_freetype.pas }
+
 unit
  agg_font_freetype ;
 
@@ -1238,7 +1238,7 @@ begin
  m_glyph_index:=FT_Get_Char_Index(m_cur_face ,glyph_code );
 
  if m_hinting then
-  m_last_error:=FT_Load_Glyph(m_cur_face ,m_glyph_index ,FT_LOAD_DEFAULT{} {FT_LOAD_FORCE_AUTOHINT{} )
+  m_last_error:=FT_Load_Glyph(m_cur_face ,m_glyph_index ,FT_LOAD_DEFAULT {FT_LOAD_FORCE_AUTOHINT} )
  else
   m_last_error:=FT_Load_Glyph(m_cur_face ,m_glyph_index ,FT_LOAD_NO_HINTING );
 
@@ -1727,5 +1727,5 @@ begin
 
 end;
 
-END.
+end.
 
