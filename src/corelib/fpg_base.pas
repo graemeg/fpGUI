@@ -235,6 +235,7 @@ type
     procedure   CreateMaskFromSample(x, y: TfpgCoord);
     { Must always be called AFTER you populated the ImageData array. Then only does it allocate OS resources. }
     procedure   UpdateImage;
+    { Internal representation of color data is always ARGB }
     property    ImageData: pointer read FImageData;
     property    ImageDataSize: integer read FImageDataSize;
     property    MaskData: pointer read FMaskData;
