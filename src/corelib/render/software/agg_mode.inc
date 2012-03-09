@@ -20,6 +20,12 @@
 
 {$ENDIF }
 
+{$IFDEF CPUx86_64 }
+ {$DEFINE AGG_CPU_x86_64 }
+
+{$ENDIF }
+
+
 {$IFDEF FPC }
  {$MODE DELPHI }
 
@@ -39,7 +45,18 @@
  {$ENDIF}
 {$ENDIF }
 
+{$Warning fpGUI supports other *nix flavours too (FreeBSD, Solaris etc), so this
+   needs to be extended at some point. }
+
 {$IFDEF LINUX }
+ {$DEFINE AGG_LINUX }
+ {$IFNDEF AGG2D_NO_FONT}
+  {$DEFINE AGG2D_USE_FREETYPE}
+ {$ENDIF}
+{$ENDIF }
+
+{$Warning Experimental FreeBSD support - totally untested! }
+{$IFDEF FREEBSD }
  {$DEFINE AGG_LINUX }
  {$IFNDEF AGG2D_NO_FONT}
   {$DEFINE AGG2D_USE_FREETYPE}
@@ -48,7 +65,6 @@
 
 {$IFDEF DARWIN }
  {$DEFINE AGG_MACOSX }
-
 {$ENDIF }
 
 //----------------------------------------------------------------------------
@@ -109,3 +125,4 @@
   {$DEFINE AGG2D_NO_FONT}
  {$ENDIF}
 {$ENDIF}
+
