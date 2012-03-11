@@ -365,19 +365,19 @@ type
    function  FillColor : TAggColor; overload;
    function  LineColor : TAggColor; overload;
 
-   procedure FillLinearGradient(x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
-   procedure LineLinearGradient(x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+   procedure FillLinearGradient(const x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+   procedure LineLinearGradient(const x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
 
-   procedure FillRadialGradient(x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 ); overload;
-   procedure LineRadialGradient(x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 ); overload;
+   procedure FillRadialGradient(const x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 ); overload;
+   procedure LineRadialGradient(const x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 ); overload;
 
-   procedure FillRadialGradient(x ,y ,r : double; c1 ,c2 ,c3 : TAggColor ); overload;
-   procedure LineRadialGradient(x ,y ,r : double; c1 ,c2 ,c3 : TAggColor ); overload;
+   procedure FillRadialGradient(const x ,y ,r : double; c1 ,c2 ,c3 : TAggColor ); overload;
+   procedure LineRadialGradient(const x ,y ,r : double; c1 ,c2 ,c3 : TAggColor ); overload;
 
-   procedure FillRadialGradient(x ,y ,r : double ); overload;
-   procedure LineRadialGradient(x ,y ,r : double ); overload;
+   procedure FillRadialGradient(const x ,y ,r : double ); overload;
+   procedure LineRadialGradient(const x ,y ,r : double ); overload;
 
-   procedure LineWidth(w : double ); overload;
+   procedure LineWidth(const w : double ); overload;
    function  LineWidth : double; overload;
 
    procedure LineCap(cap : TAggLineCap ); overload;
@@ -394,20 +394,20 @@ type
    procedure Transformations(tr : PAggTransformations ); overload;
    procedure ResetTransformations;
 
-   procedure Affine(tr : PAggAffine ); overload;
-   procedure Affine(tr : PAggTransformations ); overload;
+   procedure Affine(const tr : PAggAffine ); overload;
+   procedure Affine(const tr : PAggTransformations ); overload;
 
-   procedure Rotate   (angle : double );
-   procedure Scale    (sx ,sy : double );
-   procedure Skew     (sx ,sy : double );
-   procedure Translate(x ,y : double );
+   procedure Rotate   (const angle : double );
+   procedure Scale    (const sx ,sy : double );
+   procedure Skew     (const sx ,sy : double );
+   procedure Translate(const x ,y : double );
 
-   procedure Parallelogram(x1 ,y1 ,x2 ,y2 : double; para : PDouble );
+   procedure Parallelogram(const x1 ,y1 ,x2 ,y2 : double; para : PDouble );
 
-   procedure Viewport(
+   procedure Viewport(const
               worldX1  ,worldY1  ,worldX2  ,worldY2 ,
               screenX1 ,screenY1 ,screenX2 ,screenY2 : double;
-              opt : TAggViewportOption = AGG_XMidYMid );
+              const opt : TAggViewportOption = AGG_XMidYMid );
 
   // Coordinates Conversions
    procedure WorldToScreen(x ,y : PDouble ); overload;
@@ -428,41 +428,41 @@ type
 
   // Basic Shapes
    procedure Line     (x1 ,y1 ,x2 ,y2 : double );
-   procedure Triangle (x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
-   procedure Rectangle(x1 ,y1 ,x2 ,y2 : double );
+   procedure Triangle (const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
+   procedure Rectangle(const x1 ,y1 ,x2 ,y2 : double );
 
-   procedure RoundedRect(x1 ,y1 ,x2 ,y2 ,r : double ); overload;
-   procedure RoundedRect(x1 ,y1 ,x2 ,y2 ,rx ,ry : double ); overload;
-   procedure RoundedRect(
+   procedure RoundedRect(const x1 ,y1 ,x2 ,y2 ,r : double ); overload;
+   procedure RoundedRect(const x1 ,y1 ,x2 ,y2 ,rx ,ry : double ); overload;
+   procedure RoundedRect(const
               x1 ,y1 ,x2 ,y2 ,
               rxBottom ,ryBottom ,
               rxTop ,ryTop : double ); overload;
 
-   procedure Ellipse(cx ,cy ,rx ,ry : double );
+   procedure Ellipse(const cx ,cy ,rx ,ry : double );
 
-   procedure Arc (cx ,cy ,rx ,ry ,start ,sweep : double );
-   procedure Star(cx ,cy ,r1 ,r2 ,startAngle : double; numRays : integer );
+   procedure Arc (const cx ,cy ,rx ,ry ,start ,sweep : double );
+   procedure Star(const cx ,cy ,r1 ,r2 ,startAngle : double; const numRays : integer );
 
-   procedure Curve(x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double ); overload;
-   procedure Curve(x1 ,y1 ,x2 ,y2 ,x3 ,y3 ,x4 ,y4 : double ); overload;
+   procedure Curve(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double ); overload;
+   procedure Curve(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 ,x4 ,y4 : double ); overload;
 
-   procedure Polygon (xy : PDouble; numPoints : integer );
-   procedure Polyline(xy : PDouble; numPoints : integer );
+   procedure Polygon (const xy : PDouble; numPoints : integer );
+   procedure Polyline(const xy : PDouble; numPoints : integer );
 
   // Path Commands
    procedure ResetPath;
 
-   procedure MoveTo (x ,y : double );
-   procedure MoveRel(dx ,dy : double );
+   procedure MoveTo (const x ,y : double );
+   procedure MoveRel(const dx ,dy : double );
 
-   procedure LineTo (x ,y : double );
-   procedure LineRel(dx ,dy : double );
+   procedure LineTo (const x ,y : double );
+   procedure LineRel(const dx ,dy : double );
 
-   procedure HorLineTo (x : double );
-   procedure HorLineRel(dx : double );
+   procedure HorLineTo (const x : double );
+   procedure HorLineRel(const dx : double );
 
-   procedure VerLineTo (y : double );
-   procedure VerLineRel(dy : double );
+   procedure VerLineTo (const y : double );
+   procedure VerLineRel(const dy : double );
 
    procedure ArcTo(
               rx ,ry ,angle : double;
@@ -490,7 +490,7 @@ type
    procedure DrawPath(flag : TAggDrawPathFlag = AGG_FillAndStroke );
 
   // Text Rendering
-   procedure FlipText(flip : boolean );
+   procedure FlipText(const flip : boolean );
 
    procedure Font(
               fileName : AnsiString; height : double;
@@ -1599,7 +1599,7 @@ begin
 end;
 
 { FILLLINEARGRADIENT }
-procedure TAgg2D.FillLinearGradient(x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+procedure TAgg2D.FillLinearGradient(const x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
 var
  i ,startGradient ,endGradient : int;
 
@@ -1673,7 +1673,7 @@ begin
 end;
 
 { LINELINEARGRADIENT }
-procedure TAgg2D.LineLinearGradient(x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+procedure TAgg2D.LineLinearGradient(const x1 ,y1 ,x2 ,y2 : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
 var
  i ,startGradient ,endGradient : int;
 
@@ -1747,7 +1747,7 @@ begin
 end;
 
 { FILLRADIALGRADIENT }
-procedure TAgg2D.FillRadialGradient(x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+procedure TAgg2D.FillRadialGradient(const x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
 var
  i ,startGradient ,endGradient : int;
 
@@ -1815,7 +1815,7 @@ begin
 end;
 
 { LINERADIALGRADIENT }
-procedure TAgg2D.LineRadialGradient(x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
+procedure TAgg2D.LineRadialGradient(const x ,y ,r : double; c1 ,c2 : TAggColor; profile : double = 1.0 );
 var
  i ,startGradient ,endGradient : int;
 
@@ -1883,7 +1883,7 @@ begin
 end;
 
 { FILLRADIALGRADIENT }
-procedure TAgg2D.FillRadialGradient(x ,y ,r : double; c1 ,c2 ,c3 : TAggColor );
+procedure TAgg2D.FillRadialGradient(const x ,y ,r : double; c1 ,c2 ,c3 : TAggColor );
 var
  i : int;
  c : TAggColor;
@@ -1935,7 +1935,7 @@ begin
 end;
 
 { LINERADIALGRADIENT }
-procedure TAgg2D.LineRadialGradient(x ,y ,r : double; c1 ,c2 ,c3 : TAggColor );
+procedure TAgg2D.LineRadialGradient(const x ,y ,r : double; c1 ,c2 ,c3 : TAggColor );
 var
  i : int;
  c : TAggColor;
@@ -1987,7 +1987,7 @@ begin
 end;
 
 { FILLRADIALGRADIENT }
-procedure TAgg2D.FillRadialGradient(x ,y ,r : double );
+procedure TAgg2D.FillRadialGradient(const x ,y ,r : double );
 var
  tat : trans_affine_translation;
 
@@ -2008,7 +2008,7 @@ begin
 end;
 
 { LINERADIALGRADIENT }
-procedure TAgg2D.LineRadialGradient(x ,y ,r : double );
+procedure TAgg2D.LineRadialGradient(const x ,y ,r : double );
 var
  tat : trans_affine_translation;
 
@@ -2029,7 +2029,7 @@ begin
 end;
 
 { LINEWIDTH }
-procedure TAgg2D.LineWidth(w : double );
+procedure TAgg2D.LineWidth(const w : double );
 begin
  m_lineWidth:=w;
 
@@ -2120,7 +2120,7 @@ begin
 end;
 
 { AFFINE }
-procedure TAgg2D.Affine(tr : PAggAffine );
+procedure TAgg2D.Affine(const tr : PAggAffine );
 begin
  m_transform.multiply(tr );
 
@@ -2130,7 +2130,7 @@ begin
 end;
 
 { AFFINE }
-procedure TAgg2D.Affine(tr : PAggTransformations );
+procedure TAgg2D.Affine(const tr : PAggTransformations );
 var
  ta : trans_affine;
 
@@ -2144,7 +2144,7 @@ begin
 end;
 
 { ROTATE }
-procedure TAgg2D.Rotate(angle : double );
+procedure TAgg2D.Rotate(const angle : double );
 var
  tar : trans_affine_rotation;
 
@@ -2156,7 +2156,7 @@ begin
 end;
 
 { SCALE }
-procedure TAgg2D.Scale(sx ,sy : double );
+procedure TAgg2D.Scale(const sx ,sy : double );
 var
  tas : trans_affine_scaling;
 
@@ -2171,7 +2171,7 @@ begin
 end;
 
 { SKEW }
-procedure TAgg2D.Skew(sx ,sy : double );
+procedure TAgg2D.Skew(const sx ,sy : double );
 var
  tas : trans_affine_skewing;
 
@@ -2183,7 +2183,7 @@ begin
 end;
 
 { TRANSLATE }
-procedure TAgg2D.Translate(x ,y : double );
+procedure TAgg2D.Translate(const x ,y : double );
 var
  tat : trans_affine_translation;
 
@@ -2195,7 +2195,7 @@ begin
 end;
 
 { PARALLELOGRAM }
-procedure TAgg2D.Parallelogram(x1 ,y1 ,x2 ,y2 : double; para : PDouble );
+procedure TAgg2D.Parallelogram(const x1 ,y1 ,x2 ,y2 : double; para : PDouble );
 var
  ta : trans_affine;
 
@@ -2210,10 +2210,10 @@ begin
 end;
 
 { VIEWPORT }
-procedure TAgg2D.Viewport(
+procedure TAgg2D.Viewport(const
            worldX1  ,worldY1  ,worldX2  ,worldY2 ,
            screenX1 ,screenY1 ,screenX2 ,screenY2 : double;
-           opt : TAggViewportOption = AGG_XMidYMid );
+           const opt : TAggViewportOption = AGG_XMidYMid );
 var
  vp : trans_viewport;
  mx : trans_affine;
@@ -2278,7 +2278,7 @@ begin
 end;
 
 { TRIANGLE }
-procedure TAgg2D.Triangle(x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
+procedure TAgg2D.Triangle(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
 begin
  m_path.remove_all;
  m_path.move_to(x1 ,y1 );
@@ -2291,7 +2291,7 @@ begin
 end;
 
 { RECTANGLE }
-procedure TAgg2D.Rectangle(x1 ,y1 ,x2 ,y2 : double );
+procedure TAgg2D.Rectangle(const x1 ,y1 ,x2 ,y2 : double );
 begin
  m_path.remove_all;
  m_path.move_to(x1 ,y1 );
@@ -2305,7 +2305,7 @@ begin
 end;
 
 { ROUNDEDRECT }
-procedure TAgg2D.RoundedRect(x1 ,y1 ,x2 ,y2 ,r : double );
+procedure TAgg2D.RoundedRect(const x1 ,y1 ,x2 ,y2 ,r : double );
 var
  rc : rounded_rect;
 
@@ -2323,7 +2323,7 @@ begin
 end;
 
 { ROUNDEDRECT }
-procedure TAgg2D.RoundedRect(x1 ,y1 ,x2 ,y2 ,rx ,ry : double );
+procedure TAgg2D.RoundedRect(const x1 ,y1 ,x2 ,y2 ,rx ,ry : double );
 var
  rc : rounded_rect;
 
@@ -2342,7 +2342,7 @@ begin
 end;
 
 { ROUNDEDRECT }
-procedure TAgg2D.RoundedRect(
+procedure TAgg2D.RoundedRect(const
            x1 ,y1 ,x2 ,y2 ,
            rxBottom ,ryBottom ,
            rxTop ,ryTop : double );
@@ -2366,7 +2366,7 @@ begin
 end;
 
 { ELLIPSE }
-procedure TAgg2D.Ellipse(cx ,cy ,rx ,ry : double );
+procedure TAgg2D.Ellipse(const cx ,cy ,rx ,ry : double );
 var
  el : bezier_arc;
 
@@ -2383,7 +2383,7 @@ begin
 end;
 
 { ARC }
-procedure TAgg2D.Arc(cx ,cy ,rx ,ry ,start ,sweep : double );
+procedure TAgg2D.Arc(const cx ,cy ,rx ,ry ,start ,sweep : double );
 var
  ar : {bezier_}agg_arc.arc;
 
@@ -2399,7 +2399,7 @@ begin
 end;
 
 { STAR }
-procedure TAgg2D.Star(cx ,cy ,r1 ,r2 ,startAngle : double; numRays : integer );
+procedure TAgg2D.Star(const cx ,cy ,r1 ,r2 ,startAngle : double; const numRays : integer );
 var
  da ,a ,x ,y : double;
 
@@ -2439,7 +2439,7 @@ begin
 end;
 
 { CURVE }
-procedure TAgg2D.Curve(x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
+procedure TAgg2D.Curve(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
 begin
  m_path.remove_all;
  m_path.move_to(x1 ,y1 );
@@ -2450,7 +2450,7 @@ begin
 end;
 
 { CURVE }
-procedure TAgg2D.Curve(x1 ,y1 ,x2 ,y2 ,x3 ,y3 ,x4 ,y4 : double );
+procedure TAgg2D.Curve(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 ,x4 ,y4 : double );
 begin
  m_path.remove_all;
  m_path.move_to(x1 ,y1 );
@@ -2461,7 +2461,7 @@ begin
 end;
 
 { POLYGON }
-procedure TAgg2D.Polygon(xy : PDouble; numPoints : integer );
+procedure TAgg2D.Polygon(const xy : PDouble; numPoints : integer );
 begin
  m_path.remove_all;
  m_path.add_poly(double_2_ptr(xy ) ,numPoints );
@@ -2472,7 +2472,7 @@ begin
 end;
 
 { POLYLINE }
-procedure TAgg2D.Polyline(xy : PDouble; numPoints : integer );
+procedure TAgg2D.Polyline(const xy : PDouble; numPoints : integer );
 begin
  m_path.remove_all;
  m_path.add_poly(double_2_ptr(xy ) ,numPoints );
@@ -2482,7 +2482,7 @@ begin
 end;
 
 { FLIPTEXT }
-procedure TAgg2D.FlipText(flip : boolean );
+procedure TAgg2D.FlipText(const flip : boolean );
 begin
   {$IFNDEF AGG2D_NO_FONT}
   m_fontEngine.flip_y_(not flip );
@@ -2745,56 +2745,57 @@ begin
 end;
 
 { MOVETO }
-procedure TAgg2D.MoveTo(x ,y : double );
+procedure TAgg2D.MoveTo(const x ,y : double );
 begin
  m_path.move_to(x ,y );
 
 end;
 
 { MOVEREL }
-procedure TAgg2D.MoveRel(dx ,dy : double );
+procedure TAgg2D.MoveRel(const dx ,dy : double );
 begin
  m_path.move_rel(dx ,dy );
 
 end;
 
 { LINETO }
-procedure TAgg2D.LineTo(x ,y : double );
+procedure TAgg2D.LineTo(const x ,y : double );
 begin
+// m_path.line_to(x+0.5 ,y+0.5 );
  m_path.line_to(x ,y );
 
 end;
 
 { LINEREL }
-procedure TAgg2D.LineRel(dx ,dy : double );
+procedure TAgg2D.LineRel(const dx ,dy : double );
 begin
  m_path.line_rel(dx ,dy );
 
 end;
 
 { HORLINETO }
-procedure TAgg2D.HorLineTo(x : double );
+procedure TAgg2D.HorLineTo(const x : double );
 begin
  m_path.hline_to(x );
 
 end;
 
 { HORLINEREL }
-procedure TAgg2D.HorLineRel(dx : double );
+procedure TAgg2D.HorLineRel(const dx : double );
 begin
  m_path.hline_rel(dx );
 
 end;
 
 { VERLINETO }
-procedure TAgg2D.VerLineTo(y : double );
+procedure TAgg2D.VerLineTo(const y : double );
 begin
  m_path.vline_to(y );
 
 end;
 
 { VERLINEREL }
-procedure TAgg2D.VerLineRel(dy : double );
+procedure TAgg2D.VerLineRel(const dy : double );
 begin
  m_path.vline_rel(dy );
 
