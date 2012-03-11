@@ -14,7 +14,7 @@ uses
 
 IMPLEMENTATION
 { UNIT IMPLEMENTATION }
-{ MAKE_ARROWS {..}
+{ MAKE_ARROWS }
 procedure make_arrows;
 begin
  ps.remove_all;
