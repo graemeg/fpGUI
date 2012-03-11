@@ -2575,6 +2575,7 @@ var
  str_  : PChar;
 
 begin
+ if str = '' then exit(0);
  x:=0;
  y:=0;
 
