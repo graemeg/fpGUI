@@ -156,8 +156,14 @@ type
  TAggFontEngine = font_engine_win32_tt_int32;
 {$ENDIF }
 
- TAggGradient  = (AGG_Solid ,AGG_Linear ,AGG_Radial );
- TAggDirection = (AGG_CW, AGG_CCW );
+ TAggGradient  = (
+   AGG_Solid ,
+   AGG_Linear ,
+   AGG_Radial );
+
+ TAggDirection = (
+   AGG_CW,
+   AGG_CCW );
 
  TAggLineJoin  = int;
  TAggLineCap   = int;
@@ -3341,9 +3347,8 @@ end;
 { ADDLINE }
 procedure TAgg2D.addLine(x1 ,y1 ,x2 ,y2 : double );
 begin
- m_path.move_to(x1 ,y1 );
- m_path.line_to(x2 ,y2 );
-
+  m_path.move_to(x1 ,y1 );
+  m_path.line_to(x2 ,y2 );
 end;
 
 { UPDATERASTERIZERGAMMA }
