@@ -75,10 +75,9 @@ uses
 
 {$IFDEF AGG2D_USE_FREETYPE }
  agg_font_freetype ,
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  agg_font_win32_tt ,
-
 {$ENDIF }
 
  Math ,Windows ,Classes ,Graphics ;
@@ -151,10 +150,9 @@ type
 
 {$IFDEF AGG2D_USE_FREETYPE }
  TAggFontEngine = font_engine_freetype_int32;
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  TAggFontEngine = font_engine_win32_tt_int32;
-
 {$ENDIF }
 
  TAggGradient  = (AGG_Solid ,AGG_Linear ,AGG_Radial );
@@ -304,13 +302,14 @@ type
 
    m_imageFlip : boolean;
 
-  {$IFNDEF AGG2D_USE_FREETYPE }
+  {$IFDEF AGG2D_USE_WINFONTS }
    m_fontDC : HDC;
-
   {$ENDIF }
 
+  {$IFNDEF AGG2D_NO_FONT}
    m_fontEngine       : TAggFontEngine;
    m_fontCacheManager : font_cache_manager;
+  {$ENDIF}
 
   // Other Pascal-specific members
    m_gammaNone  : gamma_none;
@@ -1163,15 +1162,15 @@ begin
 
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  m_fontDC:=GetDC(0 );
-
  m_fontEngine.Construct(m_fontDC );
-
 {$ENDIF }
 
+{$IFNDEF AGG2D_NO_FONT}
  m_fontCacheManager.Construct(@m_fontEngine );
+{$ENDIF}
 
  LineCap (m_lineCap );
  LineJoin(m_lineJoin );
@@ -1197,14 +1196,14 @@ begin
  m_convCurve.Destruct;
  m_convStroke.Destruct;
 
+ {$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.Destruct;
  m_fontCacheManager.Destruct;
+ {$ENDIF}
 
-{$IFNDEF AGG2D_USE_FREETYPE }
+ {$IFDEF AGG2D_USE_WINFONTS}
  ReleaseDC(0 ,m_fontDC );
-
-{$ENDIF }
-
+ {$ENDIF }
 end;
 
 { ATTACH }
@@ -2462,8 +2461,9 @@ end;
 { FLIPTEXT }
 procedure TAgg2D.FlipText(flip : boolean );
 begin
- m_fontEngine.flip_y_(not flip );
-
+  {$IFNDEF AGG2D_NO_FONT}
+  m_fontEngine.flip_y_(not flip );
+  {$ENDIF}
 end;
 
 { FONT }
@@ -2493,8 +2493,8 @@ begin
   m_fontEngine.height_(height )
  else
   m_fontEngine.height_(worldToScreen(height ) );
-
-{$ELSE }
+{$ENDIF}
+{$IFDEF AGG2D_USE_WINFONTS}
  m_fontEngine.hinting_(m_textHints );
 
  if bold then
@@ -2506,9 +2506,7 @@ begin
   m_fontEngine.create_font_(PChar(@fileName[1 ] ) ,glyph_ren_outline ,height ,0.0 ,b ,italic )
  else
   m_fontEngine.create_font_(PChar(@fileName[1 ] ) ,glyph_ren_agg_gray8 ,worldToScreen(height) ,0.0 ,b ,italic );
-
 {$ENDIF }
-
 end;
 
 { FONTHEIGHT }
@@ -2542,6 +2540,11 @@ end;
 
 { TEXTWIDTH }
 function TAgg2D.TextWidth(str : AnsiString ) : double;
+{$IFDEF AGG2D_NO_FONT}
+begin
+  // do nothing
+end;
+{$ELSE}
 var
  x ,y  : double;
  first : boolean;
@@ -2579,8 +2582,8 @@ begin
   result:=x
  else
   result:=ScreenToWorld(x );
-
 end;
+{$ENDIF}
 
 { TEXT }
 procedure TAgg2D.Text(
@@ -2604,6 +2607,7 @@ var
  tr : conv_transform;
 
 begin
+ {$IFNDEF AGG2D_NO_FONT}
  dx:=0.0;
  dy:=0.0;
 
@@ -2706,7 +2710,7 @@ begin
    inc(i );
 
   end;
-
+  {$ENDIF}
 end;
 
 { RESETPATH }
@@ -3391,13 +3395,10 @@ begin
   { OK }
    result:=true;
 
-  end;
+ end;
 
 end;
 
-END.
-
-{*}
-{!}{ To look At }
+end.
 
  
