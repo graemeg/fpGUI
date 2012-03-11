@@ -2512,7 +2512,7 @@ begin
 
  m_fontEngine.hinting_(m_textHints );
 
- if cahce = AGG_VectorFontCache then
+ if cache = AGG_VectorFontCache then
   m_fontEngine.height_(height )
  else
   m_fontEngine.height_(worldToScreen(height ) );
