@@ -39,6 +39,7 @@ INTERFACE
 {DEFINE AGG2D_USE_FREETYPE }
 
 uses
+ SysUtils,
  agg_basics ,
  agg_array ,
  agg_trans_affine ,
@@ -80,7 +81,9 @@ uses
  agg_font_win32_tt ,
 {$ENDIF }
 
- Math ,Windows ,Classes ,Graphics ;
+ Math,
+ Classes,
+ fpg_main;
 
 { GLOBAL VARIABLES & CONSTANTS }
 const
@@ -203,6 +206,8 @@ type
   AGG_RasterFontCache ,
   AGG_VectorFontCache );
 
+ TPixelFormat = (pf8bit, pf16bit, pf24bit, pf32bit);
+
  PAggTransformations = ^TAggTransformations;
  TAggTransformations = record
    affineMatrix : array[0..5 ] of double;
@@ -226,7 +231,7 @@ type
    constructor Construct;
    destructor  Destruct;
 
-   function  attach(bitmap : TBitmap; flip : boolean ) : boolean;
+   function  attach(bitmap : TfpgImage; flip : boolean ) : boolean;
 
    function  width : int;
    function  height : int;
@@ -330,7 +335,7 @@ type
    destructor  Destroy; override;
 
   // Vector Graphics Engine Initialization
-   function  Attach(bitmap : TBitmap; flip_y : boolean = false ) : boolean;
+   function  Attach(bitmap : TfpgImage; flip_y : boolean = false ) : boolean;
 
    procedure ClearAll(c : TAggColor ); overload;
    procedure ClearAll(r ,g ,b : byte; a : byte = 255 ); overload;
@@ -514,43 +519,43 @@ type
    procedure ImageFlip(f : boolean );
 
    procedure TransformImage(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
               dstX1 ,dstY1 ,dstX2 ,dstY2 : double ); overload;
 
    procedure TransformImage(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               dstX1 ,dstY1 ,dstX2 ,dstY2 : double ); overload;
 
    procedure TransformImage(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
               parallelo : PDouble ); overload;
 
-   procedure TransformImage(bitmap : TBitmap; parallelo : PDouble ); overload;
+   procedure TransformImage(bitmap : TfpgImage; parallelo : PDouble ); overload;
 
    procedure TransformImagePath(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
               dstX1 ,dstY1 ,dstX2 ,dstY2 : double ); overload;
 
    procedure TransformImagePath(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               dstX1 ,dstY1 ,dstX2 ,dstY2 : double ); overload;
 
    procedure TransformImagePath(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
               parallelo : PDouble ); overload;
 
-   procedure TransformImagePath(bitmap : TBitmap; parallelo : PDouble ); overload;
+   procedure TransformImagePath(bitmap : TfpgImage; parallelo : PDouble ); overload;
 
    procedure CopyImage(
-              bitmap : TBitmap;
+              bitmap : TfpgImage;
               imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
               dstX ,dstY : double ); overload;
 
-   procedure CopyImage(bitmap : TBitmap; dstX ,dstY : double ); overload;
+   procedure CopyImage(bitmap : TfpgImage; dstX ,dstY : double ); overload;
 
   private
    procedure render(fillColor_ : boolean ); overload;
@@ -572,7 +577,7 @@ type
 
  function  Agg2DUsesFreeType : boolean;
 
- function  BitmapAlphaTransparency(bitmap : TBitmap; alpha : byte ) : boolean;
+ function  BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
  
 
 IMPLEMENTATION
@@ -900,6 +905,18 @@ begin
 
 end;
 
+function ColorDepthToPixelFormat(const AColorDepth: integer): TPixelFormat;
+begin
+  case AColorDepth of
+    8: Result := pf8bit;
+    16: Result := pf16bit;
+    24: Result := pf24bit;
+    32: Result := pf32bit;
+    else
+      raise Exception.Create('Unknown ColorDepth parameter in ColorDepthToPixelFormat');
+  end;
+end;
+
 { CONSTRUCT }
 constructor TAggSpanConvImageBlend.Construct(m : TAggBlendMode; c : TAggColor; p : pixel_formats_ptr );
 begin
@@ -992,7 +1009,7 @@ begin
 end;
 
 { ATTACH }
-function TAggImage.attach(bitmap : TBitmap; flip : boolean ) : boolean;
+function TAggImage.attach(bitmap : TfpgImage; flip : boolean ) : boolean;
 var
  buffer : pointer;
  stride : integer;
@@ -1000,10 +1017,10 @@ var
 begin
  result:=false;
 
- if Assigned(bitmap ) and
-    not bitmap.Empty then
-  case bitmap.PixelFormat of
-   pf32bit :
+ if Assigned(bitmap ) (* and
+    not bitmap.Empty *)then        {$Note Implement TfpgImage.Empty }
+  case bitmap.ColorDepth of
+   32 :
     begin
     { Rendering Buffer }
      stride:=integer(bitmap.ScanLine[1 ] ) - integer(bitmap.ScanLine[0 ] );
@@ -1207,7 +1224,7 @@ begin
 end;
 
 { ATTACH }
-function TAgg2D.Attach(bitmap : TBitmap; flip_y : boolean = false ) : boolean;
+function TAgg2D.Attach(bitmap : TfpgImage; flip_y : boolean = false ) : boolean;
 var
  buffer : pointer;
  stride : integer;
@@ -1215,10 +1232,12 @@ var
 begin
  result:=false;
 
- if Assigned(bitmap ) and
-    not bitmap.Empty then
-  case bitmap.PixelFormat of
-   pf24bit ,pf32bit :
+ if Assigned(bitmap )
+  {and
+    not bitmap.Empty }then    {$Warning Implement bitmap.Emtpy }
+  case bitmap.ColorDepth of
+   24,
+   32:
     begin
     { Rendering Buffer }
      stride:=integer(bitmap.ScanLine[1 ] ) - integer(bitmap.ScanLine[0 ] );
@@ -1237,8 +1256,8 @@ begin
       bitmap.Height ,
       stride );
 
-    { Pixel Format }
-     m_pixf:=bitmap.PixelFormat;
+     { Pixel Format }
+     m_pixf :=  ColorDepthToPixelFormat(bitmap.ColorDepth);
 
      case m_pixf of
       pf24bit :
@@ -3002,7 +3021,7 @@ end;
 
 { TRANSFORMIMAGE }
 procedure TAgg2D.TransformImage(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
            dstX1 ,dstY1 ,dstX2 ,dstY2 : double );
 var
@@ -3038,7 +3057,7 @@ end;
 
 { TRANSFORMIMAGE }
 procedure TAgg2D.TransformImage(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            dstX1 ,dstY1 ,dstX2 ,dstY2 : double );
 var
  parall : array[0..5 ] of double;
@@ -3073,7 +3092,7 @@ end;
 
 { TRANSFORMIMAGE }
 procedure TAgg2D.TransformImage(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
            parallelo : PDouble );
 var
@@ -3117,7 +3136,7 @@ begin
 end;
 
 { TRANSFORMIMAGE }
-procedure TAgg2D.TransformImage(bitmap : TBitmap; parallelo : PDouble );
+procedure TAgg2D.TransformImage(bitmap : TfpgImage; parallelo : PDouble );
 var
  image : TAggImage;
 
@@ -3160,7 +3179,7 @@ end;
 
 { TRANSFORMIMAGEPATH }
 procedure TAgg2D.TransformImagePath(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
            dstX1 ,dstY1 ,dstX2 ,dstY2 : double );
 var
@@ -3189,7 +3208,7 @@ end;
 
 { TRANSFORMIMAGEPATH }
 procedure TAgg2D.TransformImagePath(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            dstX1 ,dstY1 ,dstX2 ,dstY2 : double );
 var
  parall : array[0..5 ] of double;
@@ -3217,7 +3236,7 @@ end;
 
 { TRANSFORMIMAGEPATH }
 procedure TAgg2D.TransformImagePath(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
            parallelo : PDouble );
 var
@@ -3237,7 +3256,7 @@ begin
 end;
 
 { TRANSFORMIMAGEPATH }
-procedure TAgg2D.TransformImagePath(bitmap : TBitmap; parallelo : PDouble );
+procedure TAgg2D.TransformImagePath(bitmap : TfpgImage; parallelo : PDouble );
 var
  image : TAggImage;
 
@@ -3256,7 +3275,7 @@ end;
 
 { COPYIMAGE }
 procedure TAgg2D.CopyImage(
-           bitmap : TBitmap;
+           bitmap : TfpgImage;
            imgX1 ,imgY1 ,imgX2 ,imgY2 : integer;
            dstX ,dstY : double );
 var
@@ -3280,7 +3299,7 @@ begin
 end;
 
 { COPYIMAGE }
-procedure TAgg2D.CopyImage(bitmap : TBitmap; dstX ,dstY : double );
+procedure TAgg2D.CopyImage(bitmap : TfpgImage; dstX ,dstY : double );
 var
  image : TAggImage;
 
@@ -3366,7 +3385,7 @@ begin
 end;
 
 { BITMAPALPHATRANSPARENCY }
-function BitmapAlphaTransparency(bitmap : TBitmap; alpha : byte ) : boolean;
+function BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
 var
  fcx ,fcy : integer;
  transp   : ^byte;
@@ -3374,10 +3393,11 @@ var
 begin
  result:=false;
 
- if Assigned(bitmap ) and
-    not bitmap.Empty and
-    (bitmap.PixelFormat = pf32bit ) then
-  begin
+ if Assigned(bitmap )
+  { and
+    not bitmap.Empty} and      {$Warning Implement bitmap.Empty }
+    (bitmap.ColorDepth = 32 ) then
+ begin
    for fcy:=0 to bitmap.Height - 1 do
     begin
      transp:=pointer(ptrcomp(bitmap.ScanLine[fcy ] ) + 3 );
