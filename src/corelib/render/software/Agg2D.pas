@@ -135,8 +135,6 @@ const
 
 { TYPES DEFINITION }
 type
- PDouble = ^double;
-
  PAggColor = ^TAggColor;
  TAggColor = rgba8;
 
