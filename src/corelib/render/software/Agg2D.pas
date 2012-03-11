@@ -427,7 +427,7 @@ type
    function  InBox(worldX ,worldY : double ) : boolean;
 
   // Basic Shapes
-   procedure Line     (x1 ,y1 ,x2 ,y2 : double );
+   procedure Line(const x1, y1, x2, y2: double; AFixAlignment: boolean = false );
    procedure Triangle (const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
    procedure Rectangle(const x1 ,y1 ,x2 ,y2 : double );
 
@@ -2268,13 +2268,25 @@ begin
 end;
 
 { LINE }
-procedure TAgg2D.Line(x1 ,y1 ,x2 ,y2 : double );
+procedure TAgg2D.Line(const x1, y1, x2, y2: double; AFixAlignment: boolean = false);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
 
- addLine (x1 ,y1 ,x2 ,y2 );
- DrawPath(AGG_StrokeOnly );
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
 
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ addLine(lx1, ly1, lx2, ly2);
+ DrawPath(AGG_StrokeOnly );
 end;
 
 { TRIANGLE }
