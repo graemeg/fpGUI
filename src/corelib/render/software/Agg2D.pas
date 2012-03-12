@@ -2516,9 +2516,9 @@ begin
 
 {$IFDEF AGG2D_USE_FREETYPE }
  if cache = AGG_VectorFontCache then
-  m_fontEngine.load_font(PChar(@fileName[1 ] ) ,0 ,glyph_ren_outline )
+  m_fontEngine.load_font(PChar(fileName) ,0 ,glyph_ren_outline )
  else
-  m_fontEngine.load_font(PChar(@fileName[1 ] ) ,0 ,glyph_ren_agg_gray8 );
+  m_fontEngine.load_font(PChar(fileName) ,0 ,glyph_ren_agg_gray8 );
 
  m_fontEngine.hinting_(m_textHints );
 
@@ -2590,7 +2590,7 @@ begin
  y:=0;
 
  first:=true;
- str_ :=@str[1 ];
+ str_ := PChar(str);
 
  while str_^ <> #0 do
   begin
