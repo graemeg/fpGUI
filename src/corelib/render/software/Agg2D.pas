@@ -2627,6 +2627,11 @@ procedure TAgg2D.Text(
            roundOff : boolean = false;
            ddx : double = 0.0;
            ddy : double = 0.0 );
+{$IFDEF AGG2D_NO_FONT}
+begin
+
+end;
+{$ELSE}
 var
  dx ,dy ,asc ,start_x ,start_y : double;
 
@@ -2643,7 +2648,6 @@ var
  tr : conv_transform;
 
 begin
- {$IFNDEF AGG2D_NO_FONT}
  dx:=0.0;
  dy:=0.0;
 
@@ -2746,8 +2750,8 @@ begin
    inc(i );
 
   end;
-  {$ENDIF}
 end;
+{$ENDIF}
 
 { RESETPATH }
 procedure TAgg2D.ResetPath;
