@@ -906,13 +906,13 @@ begin
    idx:=find_face(font_name );
 
    if idx >= 0 then
-    begin
+   begin
      m_cur_face:=FT_Face_ptr_ptr(ptrcomp(m_faces ) + idx * sizeof(FT_Face_ptr ) )^;
      m_name    :=PChar(face_name_ptr(ptrcomp(m_face_names ) + idx * sizeof(face_name ) ).name );
 
-    end
+   end
    else
-    begin
+   begin
      if m_num_faces >= m_max_faces then
       begin
        agg_freemem (pointer(m_face_names.name ) ,m_face_names.size );
@@ -977,7 +977,7 @@ begin
 
       end;
 
-    end;
+   end;
 
    if m_last_error = 0 then
     begin
