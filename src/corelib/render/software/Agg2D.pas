@@ -24,10 +24,9 @@ interface
 {$I agg_mode.inc }
 
 // With this define you can switch use of FreeType or Win32 TrueType font engine
-{DEFINE AGG2D_USE_FREETYPE }
+{off DEFINE AGG2D_USE_FREETYPE }
 
 uses
- SysUtils,
  agg_basics ,
  agg_array ,
  agg_trans_affine ,
@@ -69,8 +68,12 @@ uses
  agg_font_win32_tt ,
 {$ENDIF }
 
- Math,
+ Math ,
+ {$IFDEF WINDOWS}
+ Windows ,
+ {$ENDIF}
  Classes,
+ SysUtils,
  fpg_main;
 
 { GLOBAL VARIABLES & CONSTANTS }
