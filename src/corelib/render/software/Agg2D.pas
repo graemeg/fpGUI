@@ -580,6 +580,7 @@ type
  function  Rad2Deg(v : double ) : double;
 
  function  Agg2DUsesFreeType : boolean;
+ function  Agg2DUsesWin32TrueType : boolean;
 
  function  BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
  
@@ -901,12 +902,18 @@ function Agg2DUsesFreeType : boolean;
 begin
 {$IFDEF AGG2D_USE_FREETYPE }
  result:=true;
-
 {$ELSE }
  result:=false;
-
 {$ENDIF }
+end;
 
+function Agg2DUsesWin32TrueType: boolean;
+begin
+{$IFDEF AGG2D_USE_WINFONTS }
+ result:=true;
+{$ELSE}
+ result:=false;
+{$ENDIF }
 end;
 
 function ColorDepthToPixelFormat(const AColorDepth: integer): TPixelFormat;
