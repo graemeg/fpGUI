@@ -2577,7 +2577,7 @@ end;
 function TAgg2D.TextWidth(str : AnsiString ) : double;
 {$IFDEF AGG2D_NO_FONT}
 begin
-  // do nothing
+  Result := 0;
 end;
 {$ELSE}
 var
