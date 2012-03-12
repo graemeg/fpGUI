@@ -89,10 +89,16 @@ type
  FT_Int     = longint;
  FT_UInt    = longword;
  FT_Int32   = longint;
- FT_Long    = longint;
- FT_ULong   = longword;
+  {$if defined(cpu64) and not(defined(win64) and defined(cpux86_64))}
+  FT_Long = int64;
+  FT_ULong = qword;
+  FT_Pos = int64;
+  {$ELSE}
+  FT_Long = longint;
+  FT_ULong = longword;
+  FT_Pos = longint;
+  {$ENDIF}
  FT_Fixed   = longint;
- FT_Pos     = longint;
  FT_Error   = longint;
  FT_F26Dot6 = longint;
 
