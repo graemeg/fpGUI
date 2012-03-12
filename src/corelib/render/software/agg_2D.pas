@@ -14,19 +14,7 @@
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
-//----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
-//
-// [Pascal Port History] -----------------------------------------------------
-//
-// 22.08.2007-Milano: Unit port establishment
-// 23.08.2007-Milano: Porting
-// 11.09.2007-Milano: -"-
-// 13.09.2007-Milano: -"-, Finished OK
-//
-{ agg_2D.pas }
+
 unit
  agg_2D ;
 
@@ -73,11 +61,10 @@ uses
 
 {$IFDEF AGG2D_USE_FREETYPE }
  agg_font_freetype ,
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  agg_font_win32_tt ,
  Windows ,
-
 {$ENDIF }
 
  Math ;
@@ -149,10 +136,9 @@ type
 
 {$IFDEF AGG2D_USE_FREETYPE }
  FontEngine = font_engine_freetype_int32;
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  FontEngine = font_engine_win32_tt_int32;
-
 {$ENDIF }
 
  Gradient  = (Solid ,Linear ,Radial );
@@ -304,13 +290,13 @@ type
 
    m_pathTransform ,m_strokeTransform : conv_transform;
 
-  {$IFNDEF AGG2D_USE_FREETYPE }
-   m_fontDC : HDC;
-
-  {$ENDIF }
-
+  {$IFNDEF AGG2D_NO_FONT}
    m_fontEngine       : FontEngine;
    m_fontCacheManager : font_cache_manager;
+  {$ENDIF}
+  {$IFDEF AGG2D_USE_WINFONTS }
+   m_fontDC : HDC;
+  {$ENDIF }
 
   // Other Pascal-specific members
    m_gammaNone  : gamma_none;
@@ -625,6 +611,7 @@ type
             interpolator : span_interpolator_linear_ptr );
 
  function  Agg2DUsesFreeType : boolean;
+ function  Agg2DUsesWin32TrueType : boolean;
 
 IMPLEMENTATION
 { LOCAL VARIABLES & CONSTANTS }
@@ -680,7 +667,7 @@ var
 begin
 { pixfmt_rgba32(pixf ,@renBuf );
 
- pixf.premultiply; {!}
+ pixf.premultiply; }
 
 end;
 
@@ -692,7 +679,7 @@ var
 begin
 { pixfmt_rgba32(pixf ,@renBuf );
 
- pixf.demultiply; {!}
+ pixf.demultiply; }
 
 end;
 
@@ -809,15 +796,14 @@ begin
 
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
-
-{$ELSE }
- m_fontDC:=GetDC(0 );
-
- m_fontEngine.Construct(m_fontDC );
-
 {$ENDIF }
-
+{$IFDEF AGG2D_USE_WINFONTS}
+ m_fontDC:=GetDC(0 );
+ m_fontEngine.Construct(m_fontDC );
+{$ENDIF }
+{$IFNDEF AGG2D_NO_FONT}
  m_fontCacheManager.Construct(@m_fontEngine );
+{$ENDIF}
 
  lineCap (m_lineCap );
  lineJoin(m_lineJoin );
@@ -843,12 +829,12 @@ begin
  m_convCurve.Destruct;
  m_convStroke.Destruct;
 
+{$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.Destruct;
  m_fontCacheManager.Destruct;
-
-{$IFNDEF AGG2D_USE_FREETYPE }
+{$ENDIF}
+{$IFDEF AGG2D_USE_WINFONTS }
  ReleaseDC(0 ,m_fontDC );
-
 {$ENDIF }
 
 end;
@@ -2088,8 +2074,9 @@ end;
 { FLIPTEXT }
 procedure Agg2D.flipText(flip : boolean );
 begin
+ {$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.flip_y_(flip );
-
+ {$ENDIF}
 end;
 
 { FONT }
@@ -2119,8 +2106,8 @@ begin
   m_fontEngine.height_(height )
  else
   m_fontEngine.height_(worldToScreen(height ) );
-
-{$ELSE }
+{$ENDIF }
+{$IFDEF AGG2D_USE_WINFONTS}
  m_fontEngine.hinting_(m_textHints );
 
  if bold then
@@ -2132,7 +2119,6 @@ begin
   m_fontEngine.create_font_(PChar(fileName ) ,glyph_ren_outline ,height ,0.0 ,b ,italic )
  else
   m_fontEngine.create_font_(PChar(fileName ) ,glyph_ren_agg_gray8 ,worldToScreen(height) ,0.0 ,b ,italic );
-
 {$ENDIF }
 
 end;
@@ -2168,6 +2154,11 @@ end;
 
 { TEXTWIDTH }
 function Agg2D.textWidth(str : char_ptr ) : double;
+{$IFDEF AGG2D_NO_FONT}
+begin
+  Result:=0;
+end;
+{$ELSE}
 var
  x ,y  : double;
  first : boolean;
@@ -2205,6 +2196,7 @@ begin
   result:=screenToWorld(x );
 
 end;
+{$ENDIF}
 
 { TEXT }
 procedure Agg2D.text(
@@ -2212,6 +2204,11 @@ procedure Agg2D.text(
            roundOff : boolean = false;
            ddx : double = 0.0;
            ddy : double = 0.0 );
+{$IFDEF AGG2D_NO_FONT}
+begin
+
+end;
+{$ELSE}
 var
  dx ,dy ,asc ,start_x ,start_y : double;
 
@@ -2329,6 +2326,7 @@ begin
   end;
 
 end;
+{$ENDIF}
 
 { RESETPATH }
 procedure Agg2D.resetPath;
@@ -3288,15 +3286,20 @@ function Agg2DUsesFreeType : boolean;
 begin
 {$IFDEF AGG2D_USE_FREETYPE }
  result:=true;
-
 {$ELSE }
  result:=false;
-
 {$ENDIF }
 
 end;
 
-END.
+function Agg2DUsesWin32TrueType: boolean;
+begin
+{$IFDEF AGG2D_USE_WINFONTS }
+ result:=true;
+{$ELSE }
+ result:=false;
+{$ENDIF }
+end;
 
-{!}
+end.
 
