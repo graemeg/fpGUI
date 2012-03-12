@@ -577,6 +577,10 @@ type
  
 
 IMPLEMENTATION
+
+uses
+  fpg_stringutils;
+
 { LOCAL VARIABLES & CONSTANTS }
 var
  g_approxScale : double = 2.0;
@@ -994,6 +998,7 @@ begin
  result:=v * 180.0 / agg_basics.pi;
 
 end;
+
 
 { UNIT IMPLEMENTATION }
 { CONSTRUCT }
@@ -2640,14 +2645,17 @@ var
  mtx  : trans_affine;
  str_ : PChar;
 
- i : int;
-
  tat : trans_affine_translation;
  tar : trans_affine_rotation;
 
- tr : conv_transform;
+  tr : conv_transform;
+  charlen: int;
+  char_id: int32u;
+  First: Boolean;
 
 begin
+ if Str='' then exit;
+
  dx:=0.0;
  dy:=0.0;
 
@@ -2710,22 +2718,26 @@ begin
  if m_fontCacheType = AGG_RasterFontCache then
   WorldToScreen(@start_x ,@start_y );
 
- i:=0;
+  str_:=@str[1 ];
+  First:=true;
 
- str_:=@str[1 ];
-
- while char_ptr(ptrcomp(str_ ) + i * sizeof(char ) )^ <> #0 do
+  while str_^ <> #0 do
   begin
-   glyph:=m_fontCacheManager.glyph(int32u(char_ptr(ptrcomp(str_ ) + i * sizeof(char ) )^ ) );
+    char_id := UTF8CharToUnicode(str_, charlen);
+    inc(str_, charlen);
+    glyph := m_fontCacheManager.glyph(char_id);
 
-   if glyph <> NIL then
+    if glyph <> NIL then
     begin
-     if i <> 0 then
-      m_fontCacheManager.add_kerning(@x ,@y );
+      if First then
+      begin
+        m_fontCacheManager.add_kerning(@x ,@y );
+        First:=false;
+      end;
 
-     m_fontCacheManager.init_embedded_adaptors(glyph ,start_x ,start_y );
+      m_fontCacheManager.init_embedded_adaptors(glyph ,start_x ,start_y );
 
-     if glyph.data_type = glyph_data_outline then
+      if glyph.data_type = glyph_data_outline then
       begin
        m_path.remove_all;
        m_path.add_path(@tr ,0 ,false );
@@ -2736,19 +2748,15 @@ begin
 
      if glyph.data_type = glyph_data_gray8 then
       begin
-       render(
-        m_fontCacheManager.gray8_adaptor ,
-        m_fontCacheManager.gray8_scanline );
-
+        Render(
+          m_fontCacheManager.gray8_adaptor ,
+          m_fontCacheManager.gray8_scanline );
       end;
 
-     start_x:=start_x + glyph.advance_x;
-     start_y:=start_y + glyph.advance_y;
+     start_x := start_x + glyph.advance_x;
+     start_y := start_y + glyph.advance_y;
 
     end;
-
-   inc(i );
-
   end;
 end;
 {$ENDIF}
@@ -2778,7 +2786,6 @@ end;
 { LINETO }
 procedure TAgg2D.LineTo(const x ,y : double );
 begin
-// m_path.line_to(x+0.5 ,y+0.5 );
  m_path.line_to(x ,y );
 
 end;
