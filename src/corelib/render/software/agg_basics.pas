@@ -149,15 +149,7 @@ type
  p32 = record
    case integer of
     1 : (ptr : pointer );
-
-   {$IFDEF CPU64 }
-    2 : (int : system.int64 );
-
-   {$ELSE }
-    2 : (int : integer );
-
-   {$ENDIF }
-
+    2 : (int : ptrcomp );
   end;
 
  double_ptr_ptr = ^double_ptr;
