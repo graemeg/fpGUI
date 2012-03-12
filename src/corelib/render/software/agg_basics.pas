@@ -359,9 +359,9 @@ type
 { These implementations have changed to use FPC's Sar*() functions, so should
   now support all platforms with ASM code. At a later date these functions
   could be removed completely. }
- function  shr_int8 (i ,shift : int8 ) : int8;
- function  shr_int16(i ,shift : int16 ) : int16;
- function  shr_int32(i ,shift : int ) : int;
+ function  shr_int8 (i ,shift : int8 ) : int8; inline;
+ function  shr_int16(i ,shift : int16 ) : int16; inline;
+ function  shr_int32(i ,shift : int ) : int; inline;
 
 IMPLEMENTATION
 { UNIT IMPLEMENTATION }
