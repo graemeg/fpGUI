@@ -30,6 +30,7 @@ type
 
 
 function  UTF8CharacterLength(p: PChar): integer;
+function  UTF8CharToUnicode(p: PChar; out CharLen: longint): longword;
 function  UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
 function  UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
 function  UTF8CStringToUTF8String(SourceStart: PChar; SourceLen: SizeInt): string;
@@ -111,6 +112,57 @@ begin
   else
     Result := 0;
 end;
+
+function UTF8CharToUnicode(p: PChar; out CharLen: longint): longword;
+begin
+  if p=nil then begin
+    Result:=0;
+    CharLen:=0;
+    exit;
+  end;
+  if ord(p^) < %11000000 then begin
+    // regular single byte character (#0 is a normal char, this is pascal ;)
+  end
+  else if ((ord(p^) and %11100000) = %11000000) then begin
+    // could be double byte character
+    if (ord(p[1]) and %11000000) = %10000000 then begin
+      Result:=((ord(p^) and %00011111) shl 6)
+              or (ord(p[1]) and %00111111);
+      CharLen:=2;
+      exit;
+    end;
+  end
+  else if ((ord(p^) and %11110000) = %11100000) then begin
+    // could be triple byte character
+    if ((ord(p[1]) and %11000000) = %10000000)
+    and ((ord(p[2]) and %11000000) = %10000000) then begin
+      Result:=((ord(p^) and %00011111) shl 12)
+              or ((ord(p[1]) and %00111111) shl 6)
+              or (ord(p[2]) and %00111111);
+      CharLen:=3;
+      exit;
+    end;
+  end
+  else if ((ord(p^) and %11111000) = %11110000) then begin
+    // could be 4 byte character
+    if ((ord(p[1]) and %11000000) = %10000000)
+    and ((ord(p[2]) and %11000000) = %10000000)
+    and ((ord(p[3]) and %11000000) = %10000000) then begin
+      Result:=((ord(p^) and %00001111) shl 18)
+              or ((ord(p[1]) and %00111111) shl 12)
+              or ((ord(p[2]) and %00111111) shl 6)
+              or (ord(p[3]) and %00111111);
+      CharLen:=4;
+      exit;
+    end;
+  end
+  else begin
+    // invalid character
+  end;
+  Result:=ord(p^);
+  CharLen:=1;
+end;
+
 
 { Returns the character starting position as PChar in the UTF8Str string. }
 function UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
