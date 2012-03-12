@@ -2568,7 +2568,9 @@ end;
 procedure TAgg2D.TextHints(hints : boolean );
 begin
  m_textHints:=hints;
-
+ {$IFNDEF AGG2D_NO_FONT}
+ m_fontEngine.hinting_(m_textHints );
+ {$ENDIF}
 end;
 
 { TEXTWIDTH }
