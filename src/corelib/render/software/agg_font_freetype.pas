@@ -54,7 +54,7 @@ uses
 type
  face_name_ptr = ^face_name;
  face_name = record
-   name : char_ptr; //PChar;
+   name : PChar;
    size : unsigned;
 
   end;
