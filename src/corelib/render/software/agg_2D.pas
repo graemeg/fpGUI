@@ -35,7 +35,7 @@ INTERFACE
 {$I agg_mode.inc }
 
 // With this define uncommented you can use FreeType font engine
-{$DEFINE AGG2D_USE_FREETYPE }
+{ $DEFINE AGG2D_USE_FREETYPE }
 
 uses
  agg_basics ,
