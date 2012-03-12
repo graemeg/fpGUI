@@ -14,24 +14,12 @@
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
-//----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
 //
-// [Pascal Port History] -----------------------------------------------------
 //
-// 22.11.2007-Milano: Unit port establishment
-// 23.11.2007-Milano: Porting
-// 11.12.2007-Milano: -"-
-// 13.12.2007-Milano: -"-
-// 13.01.2008-Milano: Finished OK
-//
-{ Agg2D.pas }
-unit
- Agg2D ;
 
-INTERFACE
+unit Agg2D;
+
+interface
 
 {$I agg_mode.inc }
 
