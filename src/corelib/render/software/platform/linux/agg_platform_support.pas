@@ -2400,7 +2400,7 @@ begin
    x_tp.value   :=PCUChar(@capt[1 ] );
    x_tp.encoding:=XA_WM_NAME;
    x_tp.format  :=8;
-   x_tp.nitems  :=strlen(capt );
+   x_tp.nitems  := Length(capt);
 
    XSetWMName    (x_display ,x_window ,@x_tp );
    XStoreName    (x_display ,x_window ,capt );
