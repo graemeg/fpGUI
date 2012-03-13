@@ -10,7 +10,7 @@ uses
  Xutil ,
  Xatom ,
  keysym ,
- libc ;
+ baseunix ;
 
 BEGIN
  writeln('For compilation of AggPas on Linux X11 we need the following units:' );
@@ -22,6 +22,6 @@ BEGIN
  writeln('  Xutil' );
  writeln('  Xatom' );
  writeln('  keysym' );
- writeln('  libc' );
+ writeln('  baseunix' );
 
 END.
