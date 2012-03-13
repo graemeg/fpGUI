@@ -281,6 +281,12 @@ begin
  else
   WrPool(fpc_gapp + ' ' );
 
+  // this makes it easy to find and delete the executables later
+  {$IFDEF CPU32}
+    WrPool('-o' + name + '.elf32 ');
+  {$ELSE}
+    WrPool('-o' + name + '.elf64 ');
+  {$ENDIF}
  WrPool(name + ext ,true );
 
 
