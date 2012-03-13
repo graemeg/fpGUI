@@ -12,6 +12,7 @@ Implementation inspired by works from
 -------------------------------------
 Sebastian Guenther
 Viktor Nagy
+Milan Marusinec (Milano) for the AggPas port
 
 
 Contributors
