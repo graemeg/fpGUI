@@ -100,9 +100,9 @@ type
   FT_ULong = longword;
   FT_Pos = longint;
   {$ENDIF}
- FT_Fixed   = longint;
  FT_Error   = longint;
  FT_F26Dot6 = longint;
+  FT_Fixed = FT_Long;
 
  FT_Byte_ptr  = ^FT_Byte;
  FT_Short_ptr = ^FT_Short;
