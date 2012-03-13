@@ -31,6 +31,8 @@ INTERFACE
 
 {$I agg_mode.inc }
 
+{$packrecords c}
+
 uses
  agg_basics ;
 
@@ -109,11 +111,11 @@ type
 
  FT_Library_ptr_ptr = ^FT_Library_ptr;
  FT_Library_ptr = ^FT_Library;
- FT_Library = packed record
+ FT_Library =  record
   end;
 
  FT_Subglyph_ptr = ^FT_Subglyph; 
- FT_Subglyph = packed record  // TODO
+ FT_Subglyph =  record  // TODO
   end;
 
  FT_Bitmap_Size = record
@@ -130,14 +132,14 @@ type
 
  FT_Generic_Finalizer = procedure(AnObject : pointer ); cdecl;
 
- FT_Generic = packed record
+ FT_Generic =  record
   data      : pointer;
   finalizer : FT_Generic_Finalizer;
 
  end;
 
  FT_BBox_ptr = ^FT_BBox;
- FT_BBox = packed record
+ FT_BBox =  record
   xMin ,
   yMin ,
   xMax ,
@@ -146,14 +148,14 @@ type
  end;
 
  FT_Vector_ptr = ^FT_Vector;
- FT_Vector = packed record
+ FT_Vector =  record
   x ,
   y : FT_Pos;
 
  end;
 
  FT_Bitmap_ptr = ^FT_Bitmap;
- FT_Bitmap = packed record
+ FT_Bitmap =  record
   rows   ,
   width  ,
   pitch  : FT_Int;
@@ -169,7 +171,7 @@ type
  end;
 
  FT_Outline_ptr = ^FT_Outline;
- FT_Outline = packed record
+ FT_Outline =  record
   n_contours ,
   n_points   : FT_Short;
 
@@ -181,7 +183,7 @@ type
 
  end;
 
- FT_Glyph_Metrics = packed record
+ FT_Glyph_Metrics =  record
   width  ,
   height ,
 
@@ -198,7 +200,7 @@ type
  FT_Face_ptr = ^FT_Face;
 
  FT_GlyphSlot_ptr = ^FT_GlyphSlot;
- FT_GlyphSlot = packed record
+ FT_GlyphSlot =  record
   alibrary : FT_Library_ptr;
 
   face  : FT_Face_ptr;
@@ -251,7 +253,7 @@ type
 
  end;
 
- FT_Face = packed record
+ FT_Face =  record
   num_faces   ,
   face_index  ,
   face_flags  ,
@@ -286,7 +288,7 @@ type
 
  end;
 
- FT_Charmap = packed record
+ FT_Charmap =  record
   face     : FT_Face_ptr;
   encoding : FT_Encoding;
 
