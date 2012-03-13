@@ -629,7 +629,7 @@ begin
  suffix:=file_path + 'units\' + suffix;
 
 // Compose the command string
- command:='"' + comp_path + 'ppc386.exe" ';
+ command:='"' + comp_path + 'fpc.exe" ';
  command:=command + '-FD"' + suffix + '" ';
  command:=command + '-Fu'  + g_agg_paths + ' ';
  command:=command + '-Fi'  + g_inc_paths + ' ';
@@ -992,7 +992,7 @@ begin
  SysUtils.FindClose(SR );
 
 { Scan files for FPC compiler }
- find:=fold_name(file_path ,'ppc386' ,'*.exe' );
+ find:=fold_name(file_path ,'fpc' ,'*.exe' );
 
  err:=SysUtils.FindFirst(find ,faArchive ,SR );
 
