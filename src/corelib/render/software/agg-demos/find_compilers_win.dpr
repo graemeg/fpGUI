@@ -1188,7 +1188,7 @@ begin
   'I am sorry, but NO Object Pascal compilers were found'#13 +
   'on your system.'#13 +
   ''#13 +
-  'Please install Delphi or FreePascal'#13+
+  'Please install Delphi or Free Pascal'#13+
   'and then rerun this utility.'#13#13+
   'http://www.borland.com'#13#13 +
   '- or - '#13#13 +
@@ -1462,15 +1462,15 @@ begin
   message_(
    'This is just an AggPas library helper utility which has nothing to do'#13 +
    'with demonstrating any of graphical possibilities of AGG.'#13#13 +
-   'Author of this pascal port (Milano) recomends to proceed with this utility'#13 +
+   'Author of this pascal port (Milano) recommends to proceed with this utility'#13 +
    'on your system right after unpacking the archive, because it will'#13 +
    'scan your computer for all available Object Pascal compilers and'#13 +
-   'it will create the up-to-date working batch files for fompiling the library demos.'#13#13 +
+   'it will create the up-to-date working batch files for compiling the library demos.'#13#13 +
    'In the welcome screen of this utility, there is a logo for the AGG library,'#13 +
    'which was designed and proposed by Milano. It has the meaning of spiral primitive'#13 +
    'upon the interactive polygon control, which should mean in "translation" that'#13 +
    '"With AGG the possibilities are endless (the spiral) and custom adjustments'#13 +
-   'are easy possible. (interactive polygon)".' +
+   'are easily possible (interactive polygon).".' +
    #13#13'Note: F2 key saves current "screenshot" file in this demo''s directory.  ' );
 
 end;
