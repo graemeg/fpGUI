@@ -46,8 +46,8 @@ const
  fpc_incl = '-Fi../';
  fpc_outd = '-FU_debug';
  fpc_conf = '-Mdelphi -Tlinux -Sg -Se3 -XX -Xs -B -v0i';
- fpc_gapp = '';
- fpc_capp = '';
+ fpc_gapp = '';         // graphics app
+ fpc_capp = '';         // console app
 
 var
  key_array : array[0..key_max - 1 ] of src_key;
@@ -75,7 +75,7 @@ begin
     pointer(ptrcomp(pool_buff ) + pool_size )^ ,
     length(str ) );
 
-   inc(pool_size ,length(str ) );	
+   inc(pool_size ,length(str ) );
 
   end;
 
@@ -297,7 +297,7 @@ begin
   begin
    if make_count < make_max then
     begin
-     make_array[make_count ]:=name;	
+     make_array[make_count ]:=name;
 
      inc(make_count );
 
