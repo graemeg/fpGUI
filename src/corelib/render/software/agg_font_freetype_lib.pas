@@ -300,7 +300,7 @@ type
  function  FT_IS_SCALABLE(face : FT_Face_ptr ) : boolean;
  function  FT_HAS_KERNING(face : FT_Face_ptr ) : boolean;
 
- function  FT_Init_FreeType(alibrary : FT_Library_ptr ) : FT_Error; cdecl; external ft_lib name 'FT_Init_FreeType';
+ function  FT_Init_FreeType(var alibrary : FT_Library_ptr ) : FT_Error; cdecl; external ft_lib name 'FT_Init_FreeType';
 
  function  FT_Done_FreeType(alibrary : FT_Library_ptr ) : FT_Error; cdecl; external ft_lib name 'FT_Done_FreeType';
 

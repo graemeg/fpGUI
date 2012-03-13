@@ -834,7 +834,7 @@ begin
  m_curves16.approximation_scale_(4.0 );
  m_curves32.approximation_scale_(4.0 );
 
- m_last_error:=FT_Init_FreeType(@m_library );
+ m_last_error:=FT_Init_FreeType(m_library );
 
  if m_last_error = 0 then
   m_library_initialized:=true;
