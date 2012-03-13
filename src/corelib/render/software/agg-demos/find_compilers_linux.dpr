@@ -1,25 +1,39 @@
+{skip}
 {target:linux}
 {linux_console_app}
-//
-// AggPas 2.4 RM3 Helper utility application
-// Milan Marusinec alias Milano (c) 2006 - 2008
-//
-program
- find_compilers_linux ;
+{
+  fpGUI  -  Free Pascal GUI Toolkit
+
+  Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+  distribution, for details of the copyright.
+
+  See the file COPYING.modifiedLGPL, included in this distribution,
+  for details about redistributing fpGUI.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Description:
+    This unit creates batch script files that allows us to compile
+    all the AggPas demos with great ease.
+}
+
+program find_compilers_linux ;
+
+{$I agg_mode.inc }
+{$- }
 
 uses
  SysUtils ,
  agg_basics ,
- file_utils_ ,
- libc ;
+ file_utils_,
+ baseunix;
 
-{$I agg_mode.inc }
-{$- }
 type
  src_key = record
    key ,
    val : string[99 ];
-
   end;
 
 const
@@ -86,7 +100,7 @@ begin
 
    fname:=fname + #0;
 
-   libc.chmod(
+   fpchmod(
     PChar(@fname[1 ] ) ,
     S_IRWXU or S_IRWXG or S_IROTH or S_IWOTH );
 
@@ -382,28 +396,20 @@ end;
 { ITERATEFOLDER }
 procedure IterateFolder(inFolder : shortstring );
 var
- dp : libc.PDIR;
- ep : libc.Pdirent;
-
+ dp : pDIR;
+ ep : Pdirent;
 begin
  inFolder:=inFolder + #0;
-
- dp:=libc.opendir(PChar(@inFolder[1 ] ) );
-
+ dp:= fpopendir(PChar(@inFolder[1 ]));
  if dp <> NIL then
   begin
    repeat
-    ep:=libc.readdir(dp );
-
+    ep:= fpreaddir(dp^);
     if ep <> NIL then
      ProcessObject(strpas(ep.d_name ) );
-
    until ep = NIL;
-
-   libc.closedir(dp );
-
+   fpclosedir(dp^);
   end;
-
 end;
 
 { CREATEMAKEFILE }
@@ -486,4 +492,5 @@ BEGIN
  else
   writeln('ERROR: Not enough memory for the pool buffer !' ); 
 
-END.
+end.
+
