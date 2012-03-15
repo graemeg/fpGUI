@@ -70,11 +70,22 @@ uses
 {$ENDIF }
 
  Math ,
- {$IFDEF WINDOWS}
- Windows ,
- {$ENDIF}
  Classes,
  SysUtils,
+
+  // This allows for platform specific uses clauses
+  {$define uses_interface}
+  {$undef agg_platform_interface}
+  {$undef uses_implementation}
+  {$undef agg_platform_implementation}
+  {$IFDEF WINDOWS}
+    {$I agg_platform_gdi.inc}
+  {$ENDIF}
+  {$IFDEF UNIX}
+    {$I agg_platform_x11.inc}
+  {$ENDIF}
+
+ fpg_base,
  fpg_main;
 
 { GLOBAL VARIABLES & CONSTANTS }
@@ -326,6 +337,45 @@ type
    m_ifSpline16    : image_filter_spline16;
    m_ifSpline36    : image_filter_spline36;
    m_ifBlackman144 : image_filter_blackman144;
+  protected
+
+  {$undef uses_interface}
+  {$define agg_platform_interface}
+  {$undef uses_implementation}
+  {$undef agg_platform_implementation}
+    {$IFDEF WINDOWS}
+      {$I agg_platform_gdi.inc}
+    {$ENDIF}
+    {$IFDEF UNIX}
+      {$I agg_platform_x11.inc}
+    {$ENDIF}
+
+    // ------ TfpgCanvasBase implementation requirements ---------
+    procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
+    procedure   DoSetTextColor(cl: TfpgColor); override;
+    procedure   DoSetColor(cl: TfpgColor); override;
+    procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
+    procedure   DoGetWinRect(out r: TfpgRect); override;
+    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
+    procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
+    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
+    procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
+    procedure   DoSetClipRect(const ARect: TfpgRect); override;
+    function    DoGetClipRect: TfpgRect; override;
+    procedure   DoAddClipRect(const ARect: TfpgRect); override;
+    procedure   DoClearClipRect; override;
+    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
+    procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
+    procedure   DoEndDraw; override;
+    function    GetPixel(X, Y: integer): TfpgColor; override;
+    procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
+    // -------- TfpgCanvasBase  end  ---------------
 
   public
    constructor Create(awin: TfpgWindowBase); override;
@@ -581,6 +631,17 @@ type
 IMPLEMENTATION
 
 uses
+  // This allows for platform specific uses clauses
+  {$undef uses_interface}
+  {$undef agg_platform_interface}
+  {$define uses_implementation}
+  {$undef agg_platform_implementation}
+  {$IFDEF WINDOWS}
+    {$I agg_platform_gdi.inc}
+  {$ENDIF}
+  {$IFDEF UNIX}
+    {$I agg_platform_x11.inc}
+  {$ENDIF}
   fpg_stringutils;
 
 { LOCAL VARIABLES & CONSTANTS }
@@ -1085,6 +1146,18 @@ begin
  result:=m_alpha.func_operator_gamma(m_gamma.func_operator_gamma(x ) );
 
 end;
+
+{$undef uses_interface}
+{$undef agg_platform_interface}
+{$undef uses_implementation}
+{$define agg_platform_implementation}
+{$IFDEF WINDOWS}
+  {$I agg_platform_gdi.inc}
+{$ENDIF}
+{$IFDEF UNIX}
+  {$I agg_platform_x11.inc}
+{$ENDIF}
+
 
 { CREATE }
 constructor TAgg2D.Create(awin: TfpgWindowBase);
