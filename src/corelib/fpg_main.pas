@@ -1126,7 +1126,7 @@ end;
 
 function fpgColorToRGB(col: TfpgColor): TfpgColor;
 begin
-  if (col and cl_BaseNamedColor) <> 0 then
+  if (((col shr 24) and $FF) = $80) and ((col and $FFFFFF) <= $FF) then
     Result := fpgNamedColors[col and $FF] or (col and $7F000000)// named color keeping alpha
   else
     Result := col;
@@ -1153,7 +1153,10 @@ end;
 
 function fpgIsNamedColor(col: TfpgColor): boolean;
 begin
-  Result := (col and cl_BaseNamedColor) <> 0;
+  if (((col shr 24) and $FF) = $80) and ((col and $FFFFFF) <= $FF) then
+    Result := True
+  else
+    Result := False;
 end;
 
 function fpgGetNamedFontDesc(afontid: string): string;
