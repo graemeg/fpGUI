@@ -3192,7 +3192,7 @@ begin
 
       // only truecolor 24/32 displays supported now, otherwise color conversion required!
       // this must be match for the display !!!
-      depth          := xapplication.DisplayDepth; //  acolordepth;
+      depth          := fpgApplication.DisplayDepth;
       bits_per_pixel := 32;
 
       // Shouldn't we rather get this from XDefaultVisualOfScreen(). PVisual?
