@@ -959,7 +959,7 @@ begin
     Red   := fpgGetRed(AColor);
     Green := fpgGetGreen(AColor);
     Blue  := fpgGetBlue(AColor);
-//    Alpha := fpgGetAlpha(AColor);
+    Alpha := fpgGetAlpha(AColor);
   end
 end;
 
@@ -970,18 +970,18 @@ begin
     Red   := fpgGetRed(AColor);
     Green := fpgGetGreen(AColor);
     Blue  := fpgGetBlue(AColor);
-//    Alpha := fpgGetAlpha(AColor);
+    Alpha := fpgGetAlpha(AColor);
   end
 end;
 
 function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
 begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
 end;
 
 function FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
 begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
 end;
 
 function fpgGetRed(const AColor: TfpgColor): word;
@@ -1036,7 +1036,8 @@ end;
 
 function fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
 begin
-  Result := ABlue or (AGreen shl 8) or (ARed shl 16);
+  { color is always fully opaque }
+  Result := ABlue or (AGreen shl 8) or (ARed shl 16) or ($FF shl 24);
 end;
 
 function fpgDarker(const AColor: TfpgColor; APercent: Byte): TfpgColor;
