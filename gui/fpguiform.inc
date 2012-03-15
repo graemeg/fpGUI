@@ -214,6 +214,9 @@ begin
     FDefSize := Child.DefSize + 2 * BorderWidth;
     FMaxSize.cx := Min(InfiniteSize, Child.MaxSize.cx + 2 * BorderWidth);
     FMaxSize.cy := Min(InfiniteSize, Child.MaxSize.cy + 2 * BorderWidth);
+
+    if FMinSize.cx > Width then
+      Wnd.SetMinMaxClientSize(FMinSize, FMaxSize);
   end;
 end;
 
