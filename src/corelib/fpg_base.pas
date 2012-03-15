@@ -379,6 +379,7 @@ type
     procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
     procedure   SetClipRect(const ARect: TfpgRect);
     function    GetClipRect: TfpgRect;
+    function    GetLineWidth: integer;
     procedure   AddClipRect(const ARect: TfpgRect);
     procedure   ClearClipRect;
     procedure   Clear(AColor: TfpgColor);
@@ -400,7 +401,6 @@ type
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
     property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
     property    LineStyle: TfpgLineStyle read FLineStyle;
-    property    LineWidth: integer read FLineWidth;
   end;
 
 
@@ -1754,6 +1754,11 @@ end;
 function TfpgCanvasBase.GetClipRect: TfpgRect;
 begin
   Result := DoGetClipRect;
+end;
+
+function TfpgCanvasBase.GetLineWidth: integer;
+begin
+  Result := FLineWidth;
 end;
 
 procedure TfpgCanvasBase.AddClipRect(const ARect: TfpgRect);

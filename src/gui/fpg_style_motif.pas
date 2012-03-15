@@ -87,7 +87,7 @@ var
   oldLineStyle: TfpgLineStyle;
 begin
   oldColor      := ACanvas.Color;
-  oldLineWidth  := ACanvas.LineWidth;
+  oldLineWidth  := ACanvas.GetLineWidth;
   oldLineStyle  := ACanvas.LineStyle;
 
   ACanvas.SetColor(clBlack);
