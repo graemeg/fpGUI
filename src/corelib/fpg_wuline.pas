@@ -44,7 +44,7 @@ type
 // Blend a pixel with the current colour
 procedure AlphaBlendPixel(ACanvas: TfpgCanvas; X, Y: integer; R, G, B: word; ARatio: Double);
 var
-  LBack, LNew: TFPColor;
+  LBack, LNew: TRGBTriple;
   LMinusRatio: Double;
 begin
   if (X < 0) or (X > TCanvasHack(ACanvas).FWindow.Width - 1) or (Y < 0) or
@@ -52,11 +52,12 @@ begin
     Exit; // clipping
 
   LMinusRatio := 1 - ARatio;
-  LBack       := fpgColorToFPColor(ACanvas.Pixels[X, Y]);
+  LBack       := fpgColorToRGBTriple(ACanvas.Pixels[X, Y]);
   LNew.Blue   := round(B*ARatio + LBack.Blue*LMinusRatio);
   LNew.Green  := round(G*ARatio + LBack.Green*LMinusRatio);
   LNew.Red    := round(R*ARatio + LBack.Red*LMinusRatio);
-  ACanvas.Pixels[X, Y] := FPColorTofpgColor(LNew);
+  LNew.Alpha := 255;
+  ACanvas.Pixels[X, Y] := RGBTripleTofpgColor(LNew);
 end;
 
 // Draw a anti-aliased line
