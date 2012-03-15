@@ -35,6 +35,7 @@ uses
  agg_conv_stroke ,
  agg_conv_transform ,
  agg_conv_curve ,
+ agg_conv_dash ,
  agg_rendering_buffer ,
  agg_renderer_base ,
  agg_renderer_scanline ,
@@ -297,6 +298,7 @@ type
 
    m_convCurve  : conv_curve;
    m_convStroke : conv_stroke;
+   m_convDash: conv_dash;
 
    m_pathTransform ,m_strokeTransform : conv_transform;
 
@@ -1182,7 +1184,8 @@ begin
  m_transform.Construct;
 
  m_convCurve.Construct (@m_path );
- m_convStroke.Construct(@m_convCurve );
+ m_convDash.Construct(@m_convCurve);
+ m_convStroke.Construct(@m_convDash );
 
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
@@ -1201,7 +1204,6 @@ begin
 
  LineCap (m_lineCap );
  LineJoin(m_lineJoin );
-
 end;
 
 { DESTROY }
@@ -1222,6 +1224,7 @@ begin
 
  m_convCurve.Destruct;
  m_convStroke.Destruct;
+ m_convDash.Destruct;
 
  {$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.Destruct;
@@ -1231,6 +1234,9 @@ begin
  {$IFDEF AGG2D_USE_WINFONTS}
  ReleaseDC(0 ,m_fontDC );
  {$ENDIF }
+
+ if Assigned(FImg) then
+   FImg.Free;
 end;
 
 { ATTACH }
