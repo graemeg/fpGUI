@@ -2216,11 +2216,11 @@ end;
 procedure TfpgImageBase.FreeImage;
 begin
   if FImageData <> nil then
-    FreeMem(FImageData);
+    FreeMem(FImageData, FImageDataSize);
   FImageData     := nil;
   FImageDataSize := 0;
   if FMaskData <> nil then
-    FreeMem(FMaskData);
+    FreeMem(FMaskData, FMaskDataSize);
   FMaskData     := nil;
   FMaskDataSize := 0;
   FMasked       := False;
