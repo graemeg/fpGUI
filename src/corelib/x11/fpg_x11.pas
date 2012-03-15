@@ -209,7 +209,7 @@ type
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
     property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
-    constructor Create; override;
+    constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
   end;
 
@@ -2699,9 +2699,9 @@ end;
 
 { TfpgX11Canvas }
 
-constructor TfpgX11Canvas.Create;
+constructor TfpgX11Canvas.Create(awin: TfpgWindowBase);
 begin
-  inherited;
+  inherited Create(awin);
   FDrawing    := False;
   FDrawWindow := nil;
 
