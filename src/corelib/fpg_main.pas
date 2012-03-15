@@ -136,6 +136,7 @@ type
     procedure   SetParent(const AValue: TfpgWindow); reintroduce;
     function    GetParent: TfpgWindow; reintroduce;
     function    GetCanvas: TfpgCanvas; reintroduce;
+    function    CreateCanvas: TfpgCanvasBase; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -361,6 +362,8 @@ var
   fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }
   fpgCaret:  TfpgCaret;   { TODO -ograemeg : move this into fpgApplication }
   fpgImages: TfpgImages;  { TODO -ograemeg : move this into fpgApplication }
+
+  DefaultCanvasClass: TfpgCanvasBaseClass = nil;
 
 // Application & Clipboard singletons
 function  fpgApplication: TfpgApplication;
@@ -1902,6 +1905,11 @@ end;
 
 { TfpgWindow }
 
+function TfpgWindow.CreateCanvas: TfpgCanvasBase;
+begin
+  Result := DefaultCanvasClass.Create(self);
+end;
+
 constructor TfpgWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner); // initialize the platform internals
@@ -1923,7 +1931,7 @@ begin
   else
     FWindowType   := wtWindow;
 
-  FCanvas := TfpgCanvas.Create(self);
+  FCanvas := CreateCanvas;
 end;
 
 destructor TfpgWindow.Destroy;
@@ -2654,6 +2662,7 @@ initialization
   iCallTrace      := -1;
   InitializeDebugOutput;
   fpgInitMsgQueue;
+  DefaultCanvasClass := TfpgCanvas;
 
 finalization
   uClipboard.Free;
