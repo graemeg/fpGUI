@@ -744,6 +744,7 @@ function  fpgGetBlue(const AColor: TfpgColor): byte;
 function  fpgGetAlpha(const AColor: TfpgColor): byte;
 function  fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 function  fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
+function  fpgColor(const ARed, AGreen, ABlue, AAlpha: byte): TfpgColor;
 function  fpgDarker(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 function  fpgLighter(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 
@@ -1038,6 +1039,11 @@ function fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
 begin
   { color is always fully opaque }
   Result := ABlue or (AGreen shl 8) or (ARed shl 16) or ($FF shl 24);
+end;
+
+function fpgColor(const ARed, AGreen, ABlue, AAlpha: byte): TfpgColor;
+begin
+  Result := ABlue or (AGreen shl 8) or (ARed shl 16) or (AAlpha shl 24);
 end;
 
 function fpgDarker(const AColor: TfpgColor; APercent: Byte): TfpgColor;
