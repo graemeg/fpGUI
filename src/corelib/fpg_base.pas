@@ -30,26 +30,26 @@ uses
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
-  TfpgColor       = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+  TfpgColor       = type longword;    // Always in AARRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type string;
   TfpgChar        = type string[4];
 
   PPoint = ^TPoint;
 
-  TRGBTriple = record
-    Red: word;
-    Green: word;
-    Blue: word;
-    Alpha: word;
-  end deprecated;
+  TRGBTriple = packed record
+    Red: byte;
+    Green: byte;
+    Blue: byte;
+    Alpha: byte;
+  end;
 
   // Same declaration as in FPImage unit, but we don't use FPImage yet, so declare it here
   TFPColor = record
-    Red: word;
-    Green: word;
-    Blue: word;
-    Alpha: word;
-  end;
+    Red: byte;
+    Green: byte;
+    Blue: byte;
+    Alpha: byte;
+  end deprecated;
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
@@ -734,14 +734,14 @@ function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
 
 { Color }
-function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
-function  fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
-function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
-function  FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
-function  fpgGetRed(const AColor: TfpgColor): word;
-function  fpgGetGreen(const AColor: TfpgColor): word;
-function  fpgGetBlue(const AColor: TfpgColor): word;
-function  fpgGetAlpha(const AColor: TfpgColor): word;
+function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+function  fpgColorToFPColor(const AColor: TfpgColor): TFPColor; deprecated;
+function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function  FPColorTofpgColor(const AColor: TFPColor): TfpgColor; deprecated;
+function  fpgGetRed(const AColor: TfpgColor): byte;
+function  fpgGetGreen(const AColor: TfpgColor): byte;
+function  fpgGetBlue(const AColor: TfpgColor): byte;
+function  fpgGetAlpha(const AColor: TfpgColor): byte;
 function  fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 function  fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
 function  fpgDarker(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
@@ -952,7 +952,7 @@ begin
   end  { if/else }
 end;
 
-function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
+function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
 begin
   with Result do
   begin
@@ -963,7 +963,7 @@ begin
   end
 end;
 
-function fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
+function fpgColorToFPColor(const AColor: TfpgColor): TFPColor; deprecated;
 begin
   with Result do
   begin
@@ -974,64 +974,64 @@ begin
   end
 end;
 
-function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
+function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
 begin
   Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
 end;
 
-function FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
+function FPColorTofpgColor(const AColor: TFPColor): TfpgColor; deprecated;
 begin
   Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
 end;
 
-function fpgGetRed(const AColor: TfpgColor): word;
+function fpgGetRed(const AColor: TfpgColor): byte;
 var
   c: TfpgColor;
 begin
   c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((c shr 16) and $FF);
+  Result := (c shr 16) and $FF;
 end;
 
-function fpgGetGreen(const AColor: TfpgColor): word;
+function fpgGetGreen(const AColor: TfpgColor): byte;
 var
   c: TfpgColor;
 begin
   c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((c shr 8) and $FF);
+  Result := (c shr 8) and $FF;
 end;
 
-function fpgGetBlue(const AColor: TfpgColor): word;
+function fpgGetBlue(const AColor: TfpgColor): byte;
 var
   c: TfpgColor;
 begin
   c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word(c and $FF);
+  Result := c and $FF;
 end;
 
-function fpgGetAlpha(const AColor: TfpgColor): word;
+function fpgGetAlpha(const AColor: TfpgColor): byte;
 var
   c: TfpgColor;
 begin
   c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((c shr 32) and $FF);
+  Result := (c shr 24) and $FF;
 end;
 
 function fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 var
-  c1, c2: TFPColor;
-  avg: TFPColor;
+  c1, c2: TRGBTriple;
+  avg: TRGBTriple;
 begin
-  c1 := fpgColorToFPColor(AColor1);
-  c2 := fpgColorToFPColor(AColor2);
+  c1 := fpgColorToRGBTriple(AColor1);
+  c2 := fpgColorToRGBTriple(AColor2);
   avg.Red   := c1.Red + (c2.Red - c1.Red) div 2;
   avg.Green := c1.Green + (c2.Green - c1.Green) div 2;
   avg.Blue  := c1.Blue + (c2.Blue - c1.Blue) div 2;
   avg.Alpha := c1.Alpha + (c2.Alpha - c1.Alpha) div 2;
-  Result := FPColorTofpgColor(avg);
+  Result := RGBTripleTofpgColor(avg);
 end;
 
 function fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
@@ -1042,7 +1042,7 @@ end;
 
 function fpgDarker(const AColor: TfpgColor; APercent: Byte): TfpgColor;
 var
-  lColor: TFPColor;
+  lColor: TRGBTriple;
 begin
   lColor.Red := fpgGetRed(AColor);
   lColor.Green := fpgGetGreen(AColor);
@@ -1050,12 +1050,12 @@ begin
   lColor.Red := Round(lColor.Red*APercent/100);
   lColor.Green := Round(lColor.Green*APercent/100);
   lColor.Blue := Round(lColor.Blue*APercent/100);
-  Result := FPColorTofpgColor(lColor);
+  Result := RGBTripleTofpgColor(lColor);
 end;
 
 function fpgLighter(const AColor: TfpgColor; APercent: Byte): TfpgColor;
 var
-  lColor: TFPColor;
+  lColor: TRGBTriple;
 begin
   lColor.Red := fpgGetRed(AColor);
   lColor.Green := fpgGetGreen(AColor);
@@ -1063,7 +1063,7 @@ begin
   lColor.Red := Round((lColor.Red*APercent/100) + (255 - APercent/100*255));
   lColor.Green := Round((lColor.Green*APercent/100) + (255 - APercent/100*255));
   lColor.Blue := Round((lColor.Blue*APercent/100) + (255 - APercent/100*255));
-  Result := FPColorTofpgColor(lColor);
+  Result := RGBTripleTofpgColor(lColor);
 end;
 
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
