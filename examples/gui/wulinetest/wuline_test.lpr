@@ -45,7 +45,6 @@ end;
 
 procedure TMainForm.HandlePaint;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   if rbSpokes.Checked then
@@ -54,8 +53,6 @@ begin
     DrawLines
   else if rbSpiral.Checked then
     DrawSpiral;
-
-  Canvas.EndDraw;
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);
@@ -69,8 +66,6 @@ var
   x1, y1, x2, y2: integer;
   theta: double;
 begin
-  Canvas.BeginDraw;
-
   theta := phase;
   while theta < (360+phase) do
   begin
@@ -85,7 +80,6 @@ begin
 
     theta := theta + 10;
   end;
-  Canvas.EndDraw;
 end;
 
 procedure TMainForm.DrawSpiral;
@@ -96,7 +90,7 @@ begin
   X1 := 300;
   Y1 := 100;
   Theta := 0;
-  Canvas.BeginDraw;
+
   while Theta < 15 * 3.1415926535 do
   begin
     X2 := trunc(X1 + Cos(Theta) * Theta);
@@ -106,7 +100,7 @@ begin
     X1 := X2;
     Y1 := Y2;
   end;
-  Canvas.EndDraw;
+
 end;
 
 procedure TMainForm.DrawLines;
