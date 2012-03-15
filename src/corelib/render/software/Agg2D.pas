@@ -420,7 +420,7 @@ type
   // Basic Shapes
    procedure Line(const x1, y1, x2, y2: double; AFixAlignment: boolean = false );
    procedure Triangle (const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
-   procedure Rectangle(const x1 ,y1 ,x2 ,y2 : double );
+   procedure Rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean = false);
 
    procedure RoundedRect(const x1 ,y1 ,x2 ,y2 ,r : double ); overload;
    procedure RoundedRect(const x1 ,y1 ,x2 ,y2 ,rx ,ry : double ); overload;
@@ -2309,13 +2309,27 @@ begin
 end;
 
 { RECTANGLE }
-procedure TAgg2D.Rectangle(const x1 ,y1 ,x2 ,y2 : double );
+procedure TAgg2D.Rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
- m_path.move_to(x1 ,y1 );
- m_path.line_to(x2 ,y1 );
- m_path.line_to(x2 ,y2 );
- m_path.line_to(x1 ,y2 );
+
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
+
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ m_path.move_to(lx1 ,ly1 );
+ m_path.line_to(lx2 ,ly1 );
+ m_path.line_to(lx2 ,ly2 );
+ m_path.line_to(lx1 ,ly2 );
  m_path.close_polygon;
 
  DrawPath(AGG_FillAndStroke );
