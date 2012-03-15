@@ -353,7 +353,7 @@ type
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual; abstract;
   public
-    constructor Create; virtual;
+    constructor Create(awin: TfpgWindowBase); virtual;
     destructor  Destroy; override;
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
@@ -402,6 +402,8 @@ type
     property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
     property    LineStyle: TfpgLineStyle read FLineStyle;
   end;
+
+  TfpgCanvasBaseClass = class of TfpgCanvasBase;
 
 
   TfpgComponent = class(TComponent)
@@ -1445,10 +1447,11 @@ begin
   FInterpolation := AValue;
 end;
 
-constructor TfpgCanvasBase.Create;
+constructor TfpgCanvasBase.Create(awin: TfpgWindowBase);
 begin
   FBufferedDraw := True;
   FFastDoubleBuffer := True;
+  FWindow := awin;
 end;
 
 destructor TfpgCanvasBase.Destroy;

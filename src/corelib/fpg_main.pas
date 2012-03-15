@@ -176,7 +176,7 @@ type
   private
     function    AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
   public
-    constructor Create(awin: TfpgWindow); reintroduce;
+    constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
@@ -1758,12 +1758,11 @@ begin
   end;
 end;
 
-constructor TfpgCanvas.Create(awin: TfpgWindow);
+constructor TfpgCanvas.Create(awin: TfpgWindowBase);
 begin
-  inherited Create;
+  inherited Create(awin);
 
   FBeginDrawCount := 0;
-  FWindow         := awin;
 
   // options
   FBufferedDraw        := True; // transparent widgets must turn this off
