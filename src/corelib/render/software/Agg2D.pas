@@ -233,7 +233,7 @@ type
 
   end;
 
- TAgg2D = class
+ TAgg2D = class(TfpgCanvasBase)
   private
    m_rbuf : rendering_buffer;
    m_pixf : TPixelFormat;
@@ -326,7 +326,7 @@ type
    m_ifBlackman144 : image_filter_blackman144;
 
   public
-   constructor Create;
+   constructor Create(awin: TfpgWindowBase); override;
    destructor  Destroy; override;
 
   // Vector Graphics Engine Initialization
@@ -1085,8 +1085,11 @@ begin
 end;
 
 { CREATE }
-constructor TAgg2D.Create;
+constructor TAgg2D.Create(awin: TfpgWindowBase);
 begin
+  inherited Create(awin);
+
+  FLineWidth := 1;
  m_rbuf.Construct;
 
  m_pixf:=pf32bit;
