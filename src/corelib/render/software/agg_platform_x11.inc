@@ -31,7 +31,8 @@ type
   // to get access to protected methods
   TX11AppHack = class(TfpgApplication);
   TX11ImageHack = class(TfpgImage);
-
+  TX11WindowHack = class(TfpgWindow);
+  
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
@@ -207,17 +208,17 @@ var
   drawgc: Tgc;
   GcValues: TXGcValues;
 begin
-  if TfpgX11Window(FWindow).WinHandle <= 0 then
+  if TX11WindowHack(FWindow).WinHandle <= 0 then
   begin
     writeln('    no winhandle available');
     exit;
   end;
 
   FImg.UpdateImage;
-  drawgc := XCreateGc(fpgApplication.Display, TfpgX11Window(FWindow).WinHandle, 0, @GcValues);
+  drawgc := XCreateGc(fpgApplication.Display, TX11WindowHack(FWindow).WinHandle, 0, @GcValues);
 
   // finally dump the image to screen!
-  XPutImage(fpgApplication.Display, TfpgX11Window(FWindow).WinHandle,
+  XPutImage(fpgApplication.Display, TX11WindowHack(FWindow).WinHandle,
       drawgc, TX11ImageHack(FImg).XImage, 0, 0, 0, 0,
       FWindow.Width, FWindow.Height);
 
