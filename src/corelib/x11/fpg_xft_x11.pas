@@ -37,7 +37,7 @@ const
     {$LINKLIB libfontconfig}
   {$ELSE}
     libXft = 'libXft.so';
-    fclib = 'libfontconfig.so';
+    fclib = 'fontconfig';
   {$IFEND}
 
   
