@@ -153,9 +153,9 @@ type
   private
     FXimg: TXImage;
     FXimgmask: TXImage;
+  protected
     function    XImage: PXImage;
     function    XImageMask: PXImage;
-  protected
     procedure   DoFreeImage; override;
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); override;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); override;
