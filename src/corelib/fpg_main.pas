@@ -21,6 +21,9 @@ unit fpg_main;
 
 {.$Define DEBUG}
 
+// To enable the AggPas powered Canvas
+{.$define AGGCanvas}
+
 { TODO : Implement font size adjustments for each platform. eg: linux=10pt & windows=8pt }
 
 interface
@@ -460,6 +463,9 @@ implementation
 uses
   strutils,
   math,
+{$ifdef AGGCanvas}
+  Agg2D,
+{$endif}
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
@@ -2665,7 +2671,11 @@ initialization
   iCallTrace      := -1;
   InitializeDebugOutput;
   fpgInitMsgQueue;
+{$ifdef AGGCanvas}
+  DefaultCanvasClass := TAgg2D;
+{$else}
   DefaultCanvasClass := TfpgCanvas;
+{$endif}
 
 finalization
   uClipboard.Free;
