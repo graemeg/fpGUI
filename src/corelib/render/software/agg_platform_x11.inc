@@ -66,7 +66,7 @@ begin
     lsSolid:
       begin
         m_convDash.remove_all_dashes;
-        m_convDash.add_dash(1, 0);
+        m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
       end;
     lsDash:
       begin
