@@ -570,7 +570,7 @@ begin
 
 end;
 
-{ SPAN {not_implemented}
+{ SPAN - not_implemented}
 function renderer_base.span;
 begin
 end;
@@ -771,7 +771,7 @@ begin
 
 end;
 
-{ COPY_COLOR_HSPAN_NO_CLIP {not_implemented}
+{ COPY_COLOR_HSPAN_NO_CLIP - not_implemented}
 procedure renderer_base.copy_color_hspan_no_clip;
 begin
 end;
