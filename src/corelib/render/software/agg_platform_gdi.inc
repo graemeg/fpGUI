@@ -18,13 +18,10 @@
 
 {$ifdef agg_platform_implementation}
 
-procedure TAgg2D.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
+procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
 
-end;
 
-procedure TAgg2D.DoEndDraw;
-begin
 
 end;
 
