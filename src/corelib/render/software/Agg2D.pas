@@ -3647,8 +3647,9 @@ end;
 procedure TAgg2D.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi,
   w, h: integer);
 begin
-//  ImageFilter(AGG_NoFilter);
-  CopyImage(TfpgImage(img), xi, yi, xi+w, yi+h, x, y);
+  { We use TransformImage so we can get alpha blending support.
+    CopyImage doesn't use image blending, when it does painting. }
+  TransformImage(TfpgImage(img), xi, yi, xi+w, yi+h, x, y, x+w, y+h);
 end;
 
 procedure TAgg2D.DoDrawString(x, y: TfpgCoord; const txt: string);
