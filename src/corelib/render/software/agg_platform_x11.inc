@@ -27,27 +27,25 @@
 {$ifdef agg_platform_implementation}
 
 type
-  // to get access to protected methods
-  TX11AppHack = class(TfpgApplication);
+  // to get access to protected methods (seeing that FPC doesn't support Friend-classes)
   TX11ImageHack = class(TfpgImage);
-  TX11WindowHack = class(TfpgWindow);
-  
+
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   drawgc: Tgc;
   GcValues: TXGcValues;
 begin
-  if TX11WindowHack(FWindow).WinHandle <= 0 then
+  if TfpgWindow(FWindow).WinHandle <= 0 then
   begin
     writeln('    no winhandle available');
     exit;
   end;
 
   FImg.UpdateImage;
-  drawgc := XCreateGc(fpgApplication.Display, TX11WindowHack(FWindow).WinHandle, 0, @GcValues);
+  drawgc := XCreateGc(fpgApplication.Display, TfpgWindow(FWindow).WinHandle, 0, @GcValues);
 
   // finally dump the image to screen!
-  XPutImage(fpgApplication.Display, TX11WindowHack(FWindow).WinHandle,
+  XPutImage(fpgApplication.Display, TfpgWindow(FWindow).WinHandle,
       drawgc, TX11ImageHack(FImg).XImage, 0, 0, 0, 0,
       FWindow.Width, FWindow.Height);
 
