@@ -34,7 +34,6 @@ uses
 
  agg_conv_transform ,
  agg_conv_stroke ,
- agg_conv_dash ,
  agg_pattern_filters_rgba ,
  agg_arc ,
  agg_array ,
