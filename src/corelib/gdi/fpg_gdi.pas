@@ -82,11 +82,11 @@ type
   TfpgGDIImage = class(TfpgImageBase)
   private
     FIsTwoColor: boolean;
-    property    BMPHandle: HBITMAP read FBMPHandle;
-    property    MaskHandle: HBITMAP read FMaskHandle;
-  protected
     FBMPHandle: HBITMAP;
     FMaskHandle: HBITMAP;
+  protected
+    property    BMPHandle: HBITMAP read FBMPHandle;
+    property    MaskHandle: HBITMAP read FMaskHandle;
     procedure   DoFreeImage; override;
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); override;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); override;
@@ -142,7 +142,7 @@ type
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
     property    DCHandle: TfpgDCHandle read Fgc;
   public
-    constructor Create; override;
+    constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
   end;
 
@@ -2046,9 +2046,9 @@ end;
 
 { TfpgGDICanvas }
 
-constructor TfpgGDICanvas.Create;
+constructor TfpgGDICanvas.Create(awin: TfpgWindowBase);
 begin
-  inherited;
+  inherited Create(awin);
   FDrawing      := False;
   FDrawWindow   := nil;
   FBufferBitmap := 0;
