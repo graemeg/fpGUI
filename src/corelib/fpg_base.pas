@@ -1710,15 +1710,15 @@ end;
 procedure TfpgCanvasBase.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor;
   ADirection: TGradientDirection);
 var
-  RGBStart: TFPColor;
-  RGBStop: TFPColor;
+  RGBStart: TRGBTriple;
+  RGBStop: TRGBTriple;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TFPColor;
+  newcolor: TRGBTriple;
 begin
-  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToRGBTriple(AStart);
+  RGBStop  := fpgColorToRGBTriple(AStop);
 
   if ADirection = gdVertical then
     count := ARect.Bottom - ARect.Top
@@ -1735,7 +1735,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
-    SetColor(FPColorTofpgColor(newcolor));
+    SetColor(RGBTripleTofpgColor(newcolor));
 
     // We have to overshoot by 1 pixel as DrawLine paints 1 pixel short (by design)
     if ADirection = gdHorizontal then
