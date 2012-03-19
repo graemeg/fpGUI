@@ -68,7 +68,7 @@ begin
       for j := 0 to xlocal - 1 do
       begin
         colorA := imga.Colors[j, i];
-        colorB := (colorA.Blue shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF00) shl 8);
+        colorB := (colorA.Blue shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF) shl 16) or ((colorA.Alpha and $FF) shl 24);
         imgb.Colors[j, i] := colorB;
       end;
     imgb.UpdateImage;

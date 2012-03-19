@@ -296,7 +296,7 @@ begin
           Inc(p);
           pdest^ := pdest^ or (longword(p^) shl 8);
           Inc(p);
-          pdest^ := pdest^ or (longword(p^) shl 16);
+          pdest^ := pdest^ or (longword(p^) shl 16) or ($FF shl 24) {alpha set to full opaque};
           Inc(p);
           Inc(pdest);
           Inc(pixelcnt);
