@@ -81,12 +81,12 @@ type
 
   TfpgGDIImage = class(TfpgImageBase)
   private
-    FBMPHandle: HBITMAP;
-    FMaskHandle: HBITMAP;
     FIsTwoColor: boolean;
     property    BMPHandle: HBITMAP read FBMPHandle;
     property    MaskHandle: HBITMAP read FMaskHandle;
   protected
+    FBMPHandle: HBITMAP;
+    FMaskHandle: HBITMAP;
     procedure   DoFreeImage; override;
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); override;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); override;
