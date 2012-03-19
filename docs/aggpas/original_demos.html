@@ -1,0 +1,1511 @@
+<html><head><title>Anti-Grain Geometry - Demo Examples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" 
+href="original_demos_files/agg.css">
+</head><body><a name="PAGE_DEMO"><b></b></a>
+
+
+<table style="margin: 0px;" height="1px" width="640px" border="0" 
+cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td bgcolor="#583927"></td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" width="640px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr>
+<td>
+<table style="margin: 0px;" width="170px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr><td><a href="http://www.antigrain.com/index.html" 
+class="mpmenu">Home/</a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+</tbody></table>
+</td>
+<td width="1px" bgcolor="#583927"></td>
+<td style="text-align: right;" valign="top" width="450px">
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td><img src="original_demos_files/agg_logo.gif" border="0"></td>
+</tr>
+<tr>
+<td>
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr height="15px">
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/news/index.html">News</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/doc/index.html">Docs</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/download/index.html">Download</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/maillist/index.html">Mailing List</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/cvs/index.html">CVS</a>&nbsp;&nbsp;</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p></p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><h1>Demo Examples</h1></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>All 
+the demo examples are in the distribution package, see <a 
+href="http://www.antigrain.com/download/index.html#PAGE_DOWNLOAD">Download</a>.
+ 
+This page contains precompiled executables with screenshots and brief 
+explanations. It is safe to download and run the executables, there are 
+no viruses and no any trojan code. Also, there is nothing installed 
+on your computer, you just download, unpack, run, and see the examples.
+However, it's always a good idea to double check everything with your 
+favorite anti-virus software before running. 
+If you don't trust it, you can download the sources 
+(see <a 
+href="http://www.antigrain.com/download/index.html#PAGE_DOWNLOAD">Download</a>),
+ compile and run the examples, and of course, 
+analyse the source code for any possible destructive subroutines.
+I have no responsibility if your computer is infected with some 
+virus program.</p></td></tr></tbody></table> 
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+image examples require file <code>spheres.bmp</code> for Windows 
+executables, 
+and <code>spheres.ppm</code> for Linux ones. Download them from here:<br>
+<a href="http://www.antigrain.com/spheres.bmp"><img 
+src="original_demos_files/download.gif" border="0">&nbsp;(../spheres.bmp)</a><br>
+<a href="http://www.antigrain.com/spheres.ppm"><img 
+src="original_demos_files/download.gif" border="0">&nbsp;(../spheres.ppm)</a><br>
+You can also use any other .BMP or .PPM file of about the same size. 
+The .BMP file must be of 24 bit TrueColor, the .PPM one must be of type 
+P6 
+(24 bit per pixel RGB). There are two ways to use your own files in 
+image 
+demo examples. You can simply call it <code>spheres.bmp</code> or <code>spheres.ppm</code>
+ 
+and put them to the directory
+where you run the examples, or indicate the name of the file in the 
+command line, for example,
+<code>image_filters.exe my_image.bmp</code></p></td></tr></tbody></table>
+
+
+<table class="tbl" width="640px" border="0" cellpadding="5px" 
+cellspacing="1px">
+<tbody><tr><th>Screenshot</th><th>Source Code and Description</th><th>Executable</th>
+</tr><tr><td><a href="http://www.antigrain.com/demo/examples.jpg"><img 
+src="original_demos_files/examples_s.jpg" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><b>All examples in 
+one package</b></td><td><a 
+href="http://www.antigrain.com/demo/examples.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/examples.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/examples_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/examples_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/examples_amiga.tar.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/lion.png"><img 
+src="original_demos_files/lion_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_lion"><b></b></a><code><a 
+href="http://www.antigrain.com/demo/lion.cpp.html">lion.cpp</a></code>
+This is the first example I used to implement and debug the 
+scanline rasterizer, affine transformer, and basic renderers.
+You can rotate and scale the &#8220;Lion&#8221; with the left mouse button.
+Right mouse button adds &#8220;skewing&#8221; transformations, proportional 
+to the &#8220;X&#8221; coordinate. The image is drawn over the old one with 
+a cetrain opacity value. Change &#8220;Alpha&#8221; to draw funny looking
+&#8220;lions&#8221;. Change window size to clear the window.</td><td><a 
+href="http://www.antigrain.com/demo/lion.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/idea.gif"><img 
+src="original_demos_files/idea_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_idea"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/idea.cpp.html">idea.cpp</a></code>
+The polygons for this &#8220;idea&#8221; were taken from the book 
+"Dynamic HTML in Action" by Eric Schurman. An example of using 
+Microsoft Direct Animation can be found here: <a 
+href="http://www.antigrain.com/demo/ideaDA.html"><img 
+src="original_demos_files/link.gif" border="0">ideaDA.html</a>.
+If you use Microsoft Internet Explorer you can compare the quality
+of rendering in <b>AGG</b> and Microsoft Direct Animation. Note that 
+even 
+when you click "Rotate with High Quality", you will see it &#8220;jitters&#8221;.
+It's because there are actually no <b>Subpixel Accuracy</b> used in the 
+Microsoft Direct Animation.
+In the <b>AGG</b> example, there's no jitter even in the &#8220;Draft&#8221; (low 
+quality) mode.
+You can see the simulated jittering if you turn on the &#8220;Roundoff&#8221; mode, 
+in which there integer pixel coordinated are used. As for the 
+performance, 
+note, that the image in <b>AGG</b> is rotated with step of 0.01 degree 
+(initially), 
+while in the Direct Animation Example the angle step is 0.1 degree.</td><td><a
+ href="http://www.antigrain.com/demo/idea.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/idea.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/idea_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/idea_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/idea_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/lion_outline.gif"><img 
+src="original_demos_files/lion_outline_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_lion_outline"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/lion_outline.cpp.html">lion_outline.cpp</a></code>
+The example demonstrates my new algorithm of drawing <b>Anti-Aliased</b>
+lines. The algorithm works about 2.5 times faster than the scanline 
+rasterizer but has some restrictions, particularly, line joins can
+be only of the &#8220;miter&#8221; type, and when so called <b>miter limit</b> is
+exceded, they are not as accurate as generated by the stroke 
+converter (<a 
+href="http://www.antigrain.com/__code/include/agg_conv_stroke.h.html#conv_stroke">conv_stroke</a>).
+ To see the difference, maximize the window
+and try to rotate and scale the &#8220;lion&#8221; with and without using
+the scanline rasterizer (a checkbox at the bottom). The difference
+in performance is obvious.</td><td><a 
+href="http://www.antigrain.com/demo/lion_outline.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_outline.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_outline_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_outline_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_outline_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/aa_demo.gif"><img 
+src="original_demos_files/aa_demo_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_aa_demo"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/aa_demo.cpp.html">aa_demo.cpp</a></code>
+Demonstration of the <b><nobr>Anti-Aliasing</nobr></b> principle with <b>Subpixel
+ Accuracy</b>. The triangle is
+rendered two times, with its &#8220;natural&#8221; size (at the bottom-left) 
+and enlarged. To draw the enlarged version there is a special scanline
+renderer was written (see class renderer_enlarged in the source code). 
+You can drag the whole triangle as well as each vertex of it. Also 
+change &#8220;Gamma&#8221; to see how it affects the quality of <b><nobr>Anti-Aliasing</nobr></b>.</td><td><a
+ href="http://www.antigrain.com/demo/aa_demo.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/aa_demo.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/aa_demo_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/aa_demo_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/aa_demo_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gamma_correction.gif"><img
+ src="original_demos_files/gamma_correction_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gamma_correction"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gamma_correction.cpp.html">gamma_correction.cpp</a></code>
+<b><nobr>Anti-Aliasing</nobr></b> is very tricky because everything 
+depends. Particularly, 
+having straight linear dependence <b>&#8220;pixel coverage&#8221;</b> <span 
+class="larger">&#8594;</span> 
+<b>&#8220;brightness&#8221;</b> may be not the best. 
+It depends on the type of display (CRT, LCD), contrast, 
+<nobr>black-on-white</nobr> vs <nobr>white-on-black</nobr>, it even 
+depends on your 
+personal vision. There are no linear dependencies in this World. 
+This example demonstrates the importance of so called <b>Gamma 
+Correction</b> in <b><nobr>Anti-Aliasing</nobr></b>. There a traditional
+ <b>power</b> function is used, 
+in terms of <b>C++</b> it's <code>brighness = pow(brighness, gamma)</code>.
+ Change 
+&#8220;Gamma&#8221; and see how the quality changes. Note, that if you improve
+the quality on the white side, it becomes worse on the black side and 
+vice versa.</td><td><a 
+href="http://www.antigrain.com/demo/gamma_correction.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_correction.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_correction_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_correction_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_correction_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gamma_ctrl.gif"><img 
+src="original_demos_files/gamma_ctrl_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gamma_ctrl"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gamma_ctrl.cpp.html">gamma_ctrl.cpp</a></code>
+This is another experiment with gamma correction. 
+See also <a 
+href="http://www.antigrain.com/research/gamma_correction/index.html#PAGE_GAMMA_CORRECTION">Gamma
+ Correction</a>. I presumed that we can do better 
+than with a traditional power function. So, I created a 
+special control to have an arbitrary gamma function. The conclusion
+is that we can really achieve a better visual result with this control, 
+but still, in practice, the traditional <b>power function</b> is good 
+enough
+too.</td><td><a href="http://www.antigrain.com/demo/gamma_ctrl.zip"><img
+ src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_ctrl.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_ctrl_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_ctrl_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gamma_ctrl_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/rounded_rect.gif"><img 
+src="original_demos_files/rounded_rect_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_rounded_rect"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/rounded_rect.cpp.html">rounded_rect.cpp</a></code>
+Yet another example dedicated to Gamma Correction. 
+If you have a CRT monitor: The rectangle looks bad - the rounded corners
+ are 
+thicker than its side lines. First try to drag the <b>&#8220;subpixel offset&#8221;</b>
+ 
+control &#8212; it simply adds some fractional value to the coordinates. When 
+dragging 
+you will see that the rectangle is "blinking". Then increase <b>&#8220;Gamma&#8221;</b>
+ 
+to about 1.5. The result will look almost perfect &#8212; the visual thickness
+ of 
+the rectangle remains the same. That's good, but turn the checkbox 
+<b>&#8220;White on black&#8221;</b> on &#8212; what do we see? Our rounded rectangle looks
+ terrible. 
+Drag the <b>&#8220;subpixel offset&#8221;</b> slider &#8212; it's blinking as hell. 
+Now decrease "Gamma" to about 0.6. What do we see now? Perfect result! 
+If you use an LCD monitor, the good value of gamma will be closer to 1.0
+ in
+both cases &#8212; black on white or white on black. There's no perfection in 
+this 
+world, but at least you can control Gamma in <b><nobr>Anti-Grain</nobr> 
+Geometry</b> :-)</td><td><a 
+href="http://www.antigrain.com/demo/rounded_rect.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rounded_rect.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rounded_rect_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rounded_rect_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rounded_rect_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gamma_tuner.png"><img 
+src="original_demos_files/gamma_tuner_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gamma_tuner"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gamma_tuner.cpp.html">gamma_tuner.cpp</a></code>
+Yet another gamma tuner. Set gamma value with the slider, and then
+try to tune your monitor so that the vertical strips would be 
+almost invisible.</td><td><a 
+href="http://www.antigrain.com/demo/gamma_tuner.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/rasterizers.gif"><img 
+src="original_demos_files/rasterizers_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_rasterizers"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/rasterizers.cpp.html">rasterizers.cpp</a></code>
+It's a very simple example that was written to compare the performance 
+between Anti-Aliased and regular polygon filling. It appears that the 
+most
+expensive operation is rendering of horizontal scanlines. So that, 
+we can use the very same rasterization algorithm to draw regular, 
+aliased 
+polygons. Of course, it's possible to write a special version of the 
+rasterizer
+that will work faster, but won't calculate the pixel coverage values. 
+But 
+on the other hand, the existing version of the <a 
+href="http://www.antigrain.com/__code/include/agg_rasterizer_scanline_aa.h.html#rasterizer_scanline_aa">rasterizer_scanline_aa</a>
+ allows
+you to change gamma, and to "dilate" or "shrink" the polygons in range 
+of <span class="larger">±</span> 1 
+pixel. As usual, you can drag the triangles as well as the vertices of 
+them. 
+Compare the performance with different shapes and opacity.</td><td><a 
+href="http://www.antigrain.com/demo/rasterizers.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/rasterizers2.gif"><img 
+src="original_demos_files/rasterizers2_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_rasterizers2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/rasterizers2.cpp.html">rasterizers2.cpp</a></code>
+More complex example demostrating different rasterizers. Here you can 
+see how the 
+<b>outline</b> rasterizer works, and how to use an image as the line 
+pattern. This 
+capability can be very useful to draw geographical maps.</td><td><a 
+href="http://www.antigrain.com/demo/rasterizers2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers2.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers2_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers2_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/rasterizers2_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/component_rendering.gif"><img
+ src="original_demos_files/component_rendering_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_component_rendering"><b></b></a>
+<code><a 
+href="http://www.antigrain.com/demo/component_rendering.cpp.html">component_rendering.cpp</a></code>
+<b>AGG</b> has a gray-scale renderer that can use any 8-bit color 
+channel of an 
+RGB or RGBA frame buffer. Most likely it will be used to draw gray-scale
+ 
+images directly in the alpha-channel.</td><td><a 
+href="http://www.antigrain.com/demo/component_rendering.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/component_rendering.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/component_rendering_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/component_rendering_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/component_rendering_amiga.gz"><img
+ src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/polymorphic_renderer.gif"><img
+ src="original_demos_files/polymorphic_renderer_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_polymorphic_renderer"><b></b></a>
+<code><a 
+href="http://www.antigrain.com/demo/polymorphic_renderer.cpp.html">polymorphic_renderer.cpp</a></code>
+There's nothing looking effective. <b>AGG</b> has renderers for 
+different pixel formats 
+in memory, particularly, for different byte order (RGB or BGR). 
+But the renderers are class templates, where byte order is defined
+at the compile time. It's done for the sake of performance and in most 
+cases it fits all your needs. Still, if you need to switch between 
+different pixel formats dynamically, you can write a simple polymorphic 
+class wrapper, like the one in this example.</td><td><a 
+href="http://www.antigrain.com/demo/polymorphic_renderer.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/polymorphic_renderer.tar.gz"><img
+ src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/polymorphic_renderer_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/polymorphic_renderer_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/polymorphic_renderer_amiga.gz"><img
+ src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gouraud.png"><img 
+src="original_demos_files/gouraud_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gouraud"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gouraud.cpp.html">gouraud.cpp</a></code>
+Gouraud shading. It's a simple method of interpolating colors in a 
+triangle.
+There's no &#8220;cube&#8221; drawn, there're just 6 triangles.
+You define a triangle and colors in its vertices. When rendering, the 
+colors will be linearly interpolated. But there's a problem that appears
+ when
+drawing adjacent triangles with <b><nobr>Anti-Aliasing</nobr></b>. 
+Anti-Aliased polygons do not "dock" to 
+each other correctly, there visual artifacts at the edges appear. I call
+ it
+&#8220;the problem of adjacent edges&#8221;. <b>AGG</b> has a simple mechanism that 
+allows you
+to get rid of the artifacts, just dilating the polygons and/or changing 
+the gamma-correction value. But it's tricky, because the values depend 
+on the opacity of the polygons. In this example you can change the 
+opacity,
+the dilation value and gamma. Also you can drag the Red, Green and Blue 
+corners of the &#8220;cube&#8221;.</td><td><a 
+href="http://www.antigrain.com/demo/gouraud.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gouraud.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gouraud_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gouraud_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gouraud_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gradients.png"><img 
+src="original_demos_files/gradients_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gradients"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gradients.cpp.html">gradients.cpp</a></code>
+This &#8220;sphere&#8221; is rendered with color gradients only. Initially there was
+ an idea
+to compensate so called <a 
+href="http://www.cquest.utoronto.ca/psych/psy280f/ch3/mb/mb.html"><img 
+src="original_demos_files/link.gif" border="0">Mach Bands effect</a>. To
+ do so I added a gradient profile functor. 
+Then the concept was extended to set a color profile. As a result you 
+can
+render simple geometrical objects in 2D looking like 3D ones.
+In this example you can construct your own color profile and select the 
+gradient
+function. There're not so many gradient functions in <b>AGG</b>, but you
+ can easily
+add your own. Also, drag the &#8220;gradient&#8221; with the left mouse button, 
+scale and 
+rotate it with the right one.</td><td><a 
+href="http://www.antigrain.com/demo/gradients.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gradients.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gradients_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gradients_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gradients_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gradient_focal.png"><img 
+src="original_demos_files/gradient_focal_s.png" title="Click to enlarge"
+ border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gradient_focal"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gradient_focal.cpp.html">gradient_focal.cpp</a></code>
+This demo evolved from testing code and performance measurements. 
+In particular, it shows you how to calculate 
+the parameters of a radial gradient with a separate focal point, 
+considering
+arbitrary affine transformations. In this example window resizing
+transformations are taken into account. It also demonstrates the use 
+case 
+of <a 
+href="http://www.antigrain.com/__code/include/agg_gradient_lut.h.html#gradient_lut">gradient_lut</a>
+ and gamma correction.</td><td><a 
+href="http://www.antigrain.com/demo/gradient_focal.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/conv_contour.gif"><img 
+src="original_demos_files/conv_contour_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_conv_contour"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/conv_contour.cpp.html">conv_contour.cpp</a></code>
+One of the converters in <b>AGG</b> is <a 
+href="http://www.antigrain.com/__code/include/agg_conv_contour.h.html#conv_contour">conv_contour</a>.
+ It allows you to
+extend or shrink polygons. Initially, it was implemented to eliminate
+the &#8220;problem of adjacent edges&#8221; in the <a 
+href="http://www.antigrain.com/svg/index.html#PAGE_SVG">SVG Viewer</a>, 
+but it can be 
+very useful in many other applications, for example, to change 
+the font weight on the fly. The trick here is that the sign (dilation
+or shrinking) depends on the vertex order - clockwise or 
+counterclockwise.
+In the <a 
+href="http://www.antigrain.com/__code/include/agg_conv_contour.h.html#conv_contour">conv_contour</a>
+ you can control the behavior. Sometimes you need to
+preserve the dilation regardless of the initial orientation, sometimes 
+it should depend on the orientation. The glyph &#8216;<b>a</b>&#8217; has
+a &#8220;hole&#8221; whose orientation differs from the main contour. To change
+the &#8220;weight&#8221; correctly, you need to keep the orientation as it is 
+originally defined. If you turn &#8220;Autodetect orientation&#8230;&#8221; on, 
+the glyph will be extended or shrinked incorrectly. The radio buttons
+control the orientation flad assigned to all polygons. &#8220;Close&#8221; doesn't
+add the flag, &#8220;Close CW&#8221; and &#8220;Close CCW&#8221; add &#8220;clockwise&#8221; or
+&#8220;counterclockwise&#8221; flag respectively. Note, that the actual order 
+of vertices remains the same, the flag is being added despite of the 
+real orientation. Try to play with it.</td><td><a 
+href="http://www.antigrain.com/demo/conv_contour.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_contour.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_contour_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_contour_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_contour_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/conv_dash_marker.gif"><img
+ src="original_demos_files/conv_dash_marker_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_conv_dash_marker"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/conv_dash_marker.cpp.html">conv_dash_marker.cpp</a></code>
+The example demonstrates rather a complex pipeline that consists of 
+diffrerent converters, particularly, of the dash generator, marker 
+generator, and of course, the stroke converter. There is also a 
+converter that allows you to draw smooth curves based on polygons, 
+see <a 
+href="http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION">Interpolation
+ with Bezier Curves</a>. You can drag the three vertices of
+the &#8220;main&#8221; triangle.</td><td><a 
+href="http://www.antigrain.com/demo/conv_dash_marker.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_dash_marker.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_dash_marker_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_dash_marker_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_dash_marker_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/conv_stroke.gif"><img 
+src="original_demos_files/conv_stroke_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_conv_stroke"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/conv_stroke.cpp.html">conv_stroke.cpp</a></code>
+Another example that demonstrates the power of the custom pipeline 
+concept. First, we calculate a thick outline (stroke), then generate
+dashes, and then, calculate the outlines (strokes) of the dashes
+again. Drag the verices as in the previous example.</td><td><a 
+href="http://www.antigrain.com/demo/conv_stroke.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_stroke.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_stroke_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_stroke_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/conv_stroke_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/mol_view.gif"><img 
+src="original_demos_files/mol_view_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_mol_view"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/mol_view.cpp.html">mol_view.cpp</a></code>
+This is rather a complex but effective example that renders 
+2D organic molecules from the popular MDL Molecule Format (SDF). 
+Press the left mouse button to rotate and scale the molecule, 
+and the right one to drag it. PageUp, PageDown keys switch 
+between the molecules in the file. Look at the performance, 
+and note, that the molecules are being drawn from scratch 
+every time you change anything.<br>
+A little note for chemists. There's no ring perception 
+is done, so that, the double bonds in rings are drawn 
+incorrectly, but understandable. Also note, that 
+even very complex molecules with macrocycles,  
+drawn in limited space still remain consistent 
+and recognizable.</td><td><a 
+href="http://www.antigrain.com/demo/mol_view.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/mol_view.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/mol_view_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/mol_view_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/mol_view_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/alpha_mask.gif"><img 
+src="original_demos_files/alpha_mask_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_alpha_mask"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/alpha_mask.cpp.html">alpha_mask.cpp</a></code>
+Alpha-mask is a simple method of clipping and masking 
+polygons to a number of other arbitrary polygons. Alpha mask 
+is a buffer that is mixed to the scanline container and controls
+the <b><nobr>Anti-Aliasing</nobr></b> values in it. It's not the perfect
+ mechanism of clipping, 
+but it allows you not only to clip the polygons, but also to 
+change the opacity in certain areas, i.e., the clipping can be 
+translucent. Press and drag the left mouse button to scale and
+rotate the &#8220;lion&#8221;, resize the window to grnerate new alpha-mask.</td><td><a
+ href="http://www.antigrain.com/demo/alpha_mask.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/alpha_mask2.jpg"><img 
+src="original_demos_files/alpha_mask2_s.jpg" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_alpha_mask2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/alpha_mask2.cpp.html">alpha_mask2.cpp</a></code>
+Another example of alpha-masking. In the previous example
+the alpha-mask is applied to the scan line container with
+unpacked data (scanline_u), while in this one there a special
+adapter of a pixel format renderer is used (<a 
+href="http://www.antigrain.com/doc/basic_renderers/basic_renderers.agdoc.html#pixfmt_amask_adaptor">pixfmt_amask_adaptor</a>).
+It
+ allows you to use the alpha-mask with all possible primitives
+and renderers. Besides, if the alpha-mask buffer is of the same
+size as the main rendering buffer (usually it is) we don't have
+to perform clipping for the alpha-mask, because all the primitives
+are already clipped at the higher level, see class <a 
+href="http://www.antigrain.com/__code/include/agg_alpha_mask_u8.h.html#amask_no_clip_u8">amask_no_clip_u8</a>.
+Press and drag the left mouse button to scale and rotate the &#8220;lion&#8221; 
+and generate a new set of other primitives, change the <b>&#8220;N&#8221;</b> 
+value to generate a new set of masking ellipses.</td><td><a 
+href="http://www.antigrain.com/demo/alpha_mask2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask2_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/alpha_mask3.gif"><img 
+src="original_demos_files/alpha_mask3_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_alpha_mask3"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/alpha_mask3.cpp.html">alpha_mask3.cpp</a></code>
+Yet another example of alpha-masking. It simulates arbitrary
+polygon clipping similar to <a 
+href="http://www.antigrain.com/demo/gpc_test.cpp.html">gpc_test.cpp</a>.
+ Alpha-Masking 
+allows you to perform only the Intersection (AND) and 
+Difference (SUB) operations, but works much faster that 
+<a 
+href="http://www.antigrain.com/__code/include/agg_conv_gpc.h.html#conv_gpc">conv_gpc</a>.
+ Actually, there're different compexities and 
+different dependencies. The performance of <a 
+href="http://www.antigrain.com/__code/include/agg_conv_gpc.h.html#conv_gpc">conv_gpc</a>
+ depends on 
+the number of vertices, while Alpha-Masking depends on the 
+area of the rendered polygons. Still, with typical screen 
+resolutions, Alpha-Masking works much faster than <a 
+href="http://www.cs.man.ac.uk/aig/staff/alan/software/"><img 
+src="original_demos_files/link.gif" border="0"><b><nobr>General Polygon 
+Clipper</nobr></b></a>. 
+Compare the timings between <a 
+href="http://www.antigrain.com/demo/alpha_mask3.cpp.html">alpha_mask3.cpp</a>
+ and <a href="http://www.antigrain.com/demo/gpc_test.cpp.html">gpc_test.cpp</a>.</td><td><a
+ href="http://www.antigrain.com/demo/alpha_mask3.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_mask3_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/circles.gif"><img 
+src="original_demos_files/circles_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_circles"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/circles.cpp.html">circles.cpp</a></code>
+This example just demonstrates that <b>AGG</b> can be used in different
+scatter plot apllications. There's a number of small circles drawn. You 
+can 
+change the parameters of drawing, watching for the performance and 
+the number of circles simultaneously rendered. Press the left mouse 
+button
+to generate a new set of points. Press the right mouse 
+button to make the points randomly change their coordinates. Note, that
+the circles are drawn with high quality, possibly translucent, and 
+with subpixel accuracy.</td><td><a 
+href="http://www.antigrain.com/demo/circles.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/circles.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/circles_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/circles_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/circles_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/graph_test.gif"><img 
+src="original_demos_files/graph_test_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_graph_test"><b></b></a>
+<img src="original_demos_files/gdip_curves.gif" title="" 
+style="border-color: rgb(255, 255, 255);" align="right" border="4"><!---->
+<code><a href="http://www.antigrain.com/demo/graph_test.cpp.html">graph_test.cpp</a></code>
+Yet another example of the "general" kind. It was used mostly
+to compare the performance of different steps of rendering in order
+to see the weaknesses. The WIn GDI+ analog of it looks worse and 
+works slower. Try <a 
+href="http://www.antigrain.com/demo/GDI_graph_test.zip"><img 
+src="original_demos_files/download.gif" border="0">&nbsp;(GDI_graph_test.zip)</a>
+ and compare it with 
+the <b>AGG</b> one. The most disappointing thing in GDI+ is that it 
+cannot draw Bezier curves correctly. Run the GDI+ example, choose
+menu <b>Image/Bezier curves</b>, expand the window to about 1000x1000 
+pixels, 
+and then gradually change the size of the window. You will see that some
+curves miss the destination points (the centers of the node circles). 
+That looks really ridiculous, so, I overcame my laziness and made an 
+animated 
+GIF of 5 screenshots.</td><td><a 
+href="http://www.antigrain.com/demo/graph_test.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/graph_test.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/graph_test_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/graph_test_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/graph_test_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/multi_clip.png"><img 
+src="original_demos_files/multi_clip_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_multi_clip"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/multi_clip.cpp.html">multi_clip.cpp</a></code>
+A testing example that demonstrates clipping to multiple rectangular
+regions. It's a low-level (pixel) clipping that can be useful to 
+draw images clipped to a complex region with orthogonal boundaries.
+It can be useful in some window interfaces that use a custom mechanism
+to draw window content. The example uses all possible rendering 
+mechanisms.</td><td><a 
+href="http://www.antigrain.com/demo/multi_clip.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/multi_clip.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/multi_clip_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/multi_clip_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/multi_clip_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/perspective.gif"><img 
+src="original_demos_files/perspective_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_perspective"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/perspective.cpp.html">perspective.cpp</a></code>
+Perspective and bilinear transformations. In general, 
+these classes can transform an arbitrary quadrangle to another
+arbitrary quadrangle (with some restrictions). The example 
+demonstrates how to transform a rectangle to a quadrangle defined 
+by 4 vertices. You can drag the 4 corners of the quadrangle, as well
+as its boundaries. Note, that the perspective transformations don't
+work correctly if the destination quadrangle is concave. Bilinear 
+thansformations give a different result, but remain valid with any
+shape of the destination quadrangle.</td><td><a 
+href="http://www.antigrain.com/demo/perspective.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/perspective.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/perspective_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/perspective_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/perspective_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/simple_blur.gif"><img 
+src="original_demos_files/simple_blur_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_simple_blur"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/simple_blur.cpp.html">simple_blur.cpp</a></code>
+The example demonstrates how to write custom span generators. This one 
+just applies the simplest &#8220;blur&#8221; filter 3x3 to a prerendered image. 
+It calculates the average value of 9 neighbor pixels. 
+Just press the left mouse button and drag.</td><td><a 
+href="http://www.antigrain.com/demo/simple_blur.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/simple_blur.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/simple_blur_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/simple_blur_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/simple_blur_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gpc_test.gif"><img 
+src="original_demos_files/gpc_test_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gpc_test"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gpc_test.cpp.html">gpc_test.cpp</a></code>
+<a href="http://www.cs.man.ac.uk/aig/staff/alan/software/"><img 
+src="original_demos_files/link.gif" border="0"><b><nobr>General Polygon 
+Clipper</nobr></b></a> by Alan Murta is the most reliable implementation
+ of the polygon 
+boolean algebra. It implements Bala R. Vatti's algorithm of arbitrary 
+polygon clipping and allows you to calculate the Union, Intersection, 
+Difference, and Exclusive OR between two poly-polygons (i.e., polygonal
+areas consisted of several contours). <b>AGG</b> has a simple wrapper 
+class
+that can be used in the coordinate conversion pipeline. The 
+implementation
+by Alan Murta has restrictions of using it in commercial software, so 
+that, 
+please contact the author to settle the legal issues. The example 
+demonstrates the use of GPC. You can drag one polygon with the left 
+mouse button pressed. Note, that all operations are done in the 
+vectorial
+representation of the contours before rendering.</td><td><a 
+href="http://www.antigrain.com/demo/gpc_test.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gpc_test.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gpc_test_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gpc_test_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/gpc_test_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/pattern_fill.gif"><img 
+src="original_demos_files/pattern_fill_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_pattern_fill"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/pattern_fill.cpp.html">pattern_fill.cpp</a></code>
+The example demonstrates how to use arbitrary images as fill patterns.
+This span generator is very simple, so, it doesn't allow you to apply
+arbitrary transformations to the pattern, i.e., it cannot be used as a 
+texturing tool. But it works pretty fast and can be useful in some 
+applications.</td><td><a 
+href="http://www.antigrain.com/demo/pattern_fill.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/pattern_fill.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/pattern_fill_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/pattern_fill_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/pattern_fill_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/raster_text.gif"><img 
+src="original_demos_files/raster_text_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_raster_text"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/raster_text.cpp.html">raster_text.cpp</a></code>
+Classes that render raster text was added in <b>AGG</b> mostly 
+to prove the concept of the design. They can be used to 
+draw simple (aliased) raster text. The example demonstrates 
+how to use text as a custom scanline generator together 
+with any span generator (in this example it's gradient filling).
+The font format is propriatory, but there are some predefined
+fonts that are shown in the example.</td><td><a 
+href="http://www.antigrain.com/demo/raster_text.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/raster_text.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/raster_text_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/raster_text_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/raster_text_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image1.jpg"><img 
+src="original_demos_files/image1_s.jpg" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image1"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image1.cpp.html">image1.cpp</a></code>
+This is the first example with the new "reincarnation" of the image 
+transformation algorithms. The example allows you to rotate and scale 
+the image with respect to its center. Also, the image is scaled
+when resizing the window.</td><td><a 
+href="http://www.antigrain.com/demo/image1.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image1.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image1_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image1_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image1_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_alpha.png"><img 
+src="original_demos_files/image_alpha_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_alpha"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_alpha.cpp.html">image_alpha.cpp</a></code>
+A very powerful feature that allows you to simulate the alpha-channel 
+on the basis of some functioon. In this example it's brightness, but 
+it can be of any complexity. In the example you can form the brightness
+function and watch for the translucency. Resize the windows to move the
+image over the backgraund.</td><td><a 
+href="http://www.antigrain.com/demo/image_alpha.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_alpha.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_alpha_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_alpha_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_alpha_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_filters.jpg"><img 
+src="original_demos_files/image_filters_s.jpg" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_filters"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_filters.cpp.html">image_filters.cpp</a></code>
+The image transformer algorithm can work with different interpolation 
+filters, such as Bilinear, Bicubic, Sinc, Blackman. The example 
+demonstrates the difference in quality between different filters.
+When switch the &#8220;Run Test&#8221; on, the image starts rotating. But 
+at each step there is the previously rotated image taken, so 
+the quality degrades. This degradation as well as the performance 
+depend on the type of the interpolation filter.</td><td><a 
+href="http://www.antigrain.com/demo/image_filters.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_filters.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_filters_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_filters_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_filters_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_fltr_graph.gif"><img
+ src="original_demos_files/image_fltr_graph_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_fltr_graph"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_fltr_graph.cpp.html">image_fltr_graph.cpp</a></code>
+Demonstration of the shapes of different interpolation filters. Just 
+in case if you are curious.</td><td><a 
+href="http://www.antigrain.com/demo/image_fltr_graph.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_fltr_graph.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_fltr_graph_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_fltr_graph_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_fltr_graph_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_transforms.jpg"><img
+ src="original_demos_files/image_transforms_s.jpg" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_transforms"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_transforms.cpp.html">image_transforms.cpp</a></code>
+Affine transformations of the images. The examples demonstrates 
+how to construct the affine transformer matrix for different
+cases. See the &#8220;<code>readme!</code>&#8221; file for details. Now there are 
+methods in <a 
+href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine">trans_affine</a>
+ that allow you to construct transformations
+from an arbitrary parallelogram to another parallelogram. It's very
+convenient and easy.</td><td><a 
+href="http://www.antigrain.com/demo/image_transforms.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_transforms.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_transforms_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_transforms_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_transforms_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_perspective.jpg"><img
+ src="original_demos_files/image_perspective_s.jpg" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_perspective"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_perspective.cpp.html">image_perspective.cpp</a></code>
+Image perspective transformations. There are two types of arbitrary 
+quadrangle transformations, Perspective and Bilinear. The image 
+transformer always uses reverse transformations, and there is a problem.
+The Perspective transformations are perfectly reversible, so they 
+work correctly with images, but the Bilinear transformer behave
+somehow strange. It can transform a rectangle to a quadrangle, but
+not vice versa. In this example you can see this effect, when 
+the edges of the image "sag". I'd highly appreciate if someone
+could help me with math for transformations similar to Bilinear ones, 
+but correctly reversible (i.e., that can transform an arbitrary 
+quadrangle 
+to a rectangle). The bilinear transformations are simple, see 
+<a 
+href="http://www.antigrain.com/__code/include/agg_trans_bilinear.h.html">agg_trans_bilinear.h</a>
+ and <a 
+href="http://www.antigrain.com/__code/include/agg_simul_eq.h.html">agg_simul_eq.h</a></td><td><a
+ href="http://www.antigrain.com/demo/image_perspective.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_perspective.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_perspective_sgi.tar.gz"><img
+ src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_perspective_sun.tar.gz"><img
+ src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/image_perspective_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/distortions.png"><img 
+src="original_demos_files/distortions_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_distortions"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/distortions.cpp.html">distortions.cpp</a></code>
+To transform an image as well as to define a color gradient you have 
+to write several declarations. This approach can seem difficult to 
+handle 
+(compared with one function call), but it's very flexible. For example, 
+you can add an arbitrary distortion function. This mechanism is pretty 
+much 
+the same in image transformers and color gradients. Try to play with 
+this 
+example changing different parameters of the distortions.</td><td><a 
+href="http://www.antigrain.com/demo/distortions.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/distortions.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/distortions_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/distortions_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/distortions_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/lion_lens.gif"><img 
+src="original_demos_files/lion_lens_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_lion_lens"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/lion_lens.cpp.html">lion_lens.cpp</a></code>
+This example exhibits a non-linear transformer that &#8220;magnifies&#8221;
+vertices that fall inside a circle and extends the rest (<a 
+href="http://www.antigrain.com/__code/include/agg_trans_warp_magnifier.h.html#trans_warp_magnifier">trans_warp_magnifier</a>).
+ 
+Non-linear transformations are tricky because straight lines become 
+curves. 
+To achieve the correct result we need to divide long line segments into
+short ones. The example also demonstrates the use of <a 
+href="http://www.antigrain.com/__code/include/agg_conv_segmentator.h.html#conv_segmentator">conv_segmentator</a>
+ that
+does this division job. 
+Drag the center of the &#8220;lens&#8221; with the left mouse button and change 
+the &#8220;Scale&#8221; and &#8220;Radius&#8221;. The transformer can also shrink away
+the image if the scaling value is less than 1. To watch for 
+an amazing effect, set the scale to the minimum (0.01), decrease 
+the radius to about 1 and drag the &#8220;lens&#8221;. You will see it behaves 
+like a black hole consuming space around it. Move the lens somewhere to 
+the 
+side of the window and change the radius. It looks like changing the 
+event horizon of the &#8220;black hole&#8221;. There are some more screenshots
+of the poor lion: 
+<a href="http://www.antigrain.com/demo/lion_lens_sad.gif"><img 
+src="original_demos_files/link.gif" border="0"><b>Sad Lion</b></a>,
+<a href="http://www.antigrain.com/demo/lion_lens_cyclop.gif"><img 
+src="original_demos_files/link.gif" border="0"><b>Cyclop Lion</b></a>,
+<a href="http://www.antigrain.com/demo/lion_lens_black_hole.gif"><img 
+src="original_demos_files/link.gif" border="0"><b>Lion in Trouble</b> 
+(being eaten by the black hole), 
+an animated GIF</a>.</td><td><a 
+href="http://www.antigrain.com/demo/lion_lens.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_lens.tar.gz"><img 
+src="original_demos_files/dl_linux.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_lens_sgi.tar.gz"><img 
+src="original_demos_files/dl_irix64.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_lens_sun.tar.gz"><img 
+src="original_demos_files/dl_sunos.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/lion_lens_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/trans_polar.gif"><img 
+src="original_demos_files/trans_polar_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_trans_polar"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/trans_polar.cpp.html">trans_polar.cpp</a></code>
+Another example of non-linear transformations requested by one of my 
+friends.
+Here we render a standard <b>AGG</b> control in its original form (the 
+slider
+in the bottom) and after the transformation. The transformer itself is 
+not
+a part of <b>AGG</b> and just demonstrates how to write custom 
+transformers (class 
+<code>trans_polar</code>). Note that because the transformer is 
+non-linear, we need to use
+<a 
+href="http://www.antigrain.com/__code/include/agg_conv_segmentator.h.html#conv_segmentator">conv_segmentator</a>
+ first. Try to drag the value of the slider at the bottom 
+and watch how it's being synchronized in the polar coordinates. Also 
+change two other parameters (<b>Spiral</b> and <b>Base&nbsp;Y</b>) and 
+the size of the window.
+Don't worry much about the <code>transformed_control</code> class, it's 
+just an 
+adaptor used to render the controls with additional transformations.
+The use of <code>trans_polar</code> is quite standard: <br>
+<pre>agg::trans_polar tr;
+agg::<a href="http://www.antigrain.com/__code/include/agg_conv_transform.h.html#conv_transform">conv_transform</a>&lt;SomeVertexSource, 
+                    trans_polar&gt; tp(some_source, tr);
+</pre></td><td><a href="http://www.antigrain.com/demo/trans_polar.zip"><img
+ src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/trans_polar_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/scanline_boolean.gif"><img
+ src="original_demos_files/scanline_boolean_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_scanline_boolean"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/scanline_boolean.cpp.html">scanline_boolean.cpp</a></code>
+A new method to perform boolean operations on polygons (<b>Union</b>, 
+<b>Intersection</b>, <b>XOR</b>, and <b>Difference</b>). It uses the 
+scanline
+approach and in typical screen resolutions works much faster 
+(about 10 times) than vectorial algorithms like <a 
+href="http://www.cs.man.ac.uk/aig/staff/alan/software/"><img 
+src="original_demos_files/link.gif" border="0"><b><nobr>General Polygon 
+Clipper</nobr></b></a>. It 
+preserves perfect <b><nobr>Anti-Aliasing</nobr></b> and besides, can 
+work with translucency.
+There are two <b>XOR</b> operations, <b>Linear&nbsp;XOR</b> and 
+<b>Saddle&nbsp;XOR</b>. The only difference is in the formula
+of XORing of the two cells with <b><nobr>Anti-Aliasing</nobr></b>. The 
+first one is:
+<pre>cover = a+b; if(cover &gt; 1) cover = 2.0 - cover;</pre>
+<br>
+The second uses the classical &#8220;Saddle&#8221; formula:
+<pre>cover = 1.0 - (1.0 - a + a*b) * (1.0 - b + a*b);</pre>
+The <b>Linear&nbsp;XOR</b> produces
+more correct intersections and works constistently with the 
+scanline rasterizer algorithm. The <b>Saddle&nbsp;XOR</b> works better
+with semi-transparent polygons.</td><td><a 
+href="http://www.antigrain.com/demo/scanline_boolean.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/scanline_boolean_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/scanline_boolean2.gif"><img
+ src="original_demos_files/scanline_boolean2_s.gif" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_scanline_boolean2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/scanline_boolean2.cpp.html">scanline_boolean2.cpp</a></code>
+This is another example of using of the scanline boolean algebra. 
+The example is similar to <a 
+href="http://www.antigrain.com/demo/index.html#PAGE_DEMO_gpc_test">Demo 
+gpc_test.cpp</a>. Note that the cost
+of the boolean operation with <b><nobr>Anti-Aliasing</nobr></b> is 
+comparable with rendering
+(the rasterization time is not included). Also note that there is
+a difference in timings between using of <code>scanline_u</code> and 
+<code>scanline_p</code>. Most often <code>scanline_u</code> works 
+faster, but it's
+because of much less number of produced spans. Actually, when using
+the <code>scanline_u</code> the complexity of the algorithm becomes 
+proportional
+to the <b>area</b> of the polygons, while in <code>scanline_p</code> 
+it's
+proportional to the <b>perimeter</b>. Of course, the binary variant
+works much faster than the <b>Anti-Aliased</b> one.</td><td><a 
+href="http://www.antigrain.com/demo/scanline_boolean2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/scanline_boolean2_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/freetype_test.gif"><img 
+src="original_demos_files/freetype_test_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_freetype_test"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/freetype_test.cpp.html">freetype_test.cpp</a></code>
+This example demonstrates the use of the <a 
+href="http://www.freetype.org/"><img src="original_demos_files/link.gif"
+ border="0"><b>FreeType</b></a> font engine with cache.
+Cache can keep three types of data, vector path, <b>Anti-Aliased</b> 
+scanline shape, and monochrome scanline shape. In case of caching
+scanline shapes the speed is pretty good and comparable with 
+Windows hardware accelerated font rendering.</td><td><a 
+href="http://www.antigrain.com/demo/freetype_test.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/freetype_test_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/freetype_test.gif"><img 
+src="original_demos_files/freetype_test_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_truetype_test"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/truetype_test.cpp.html">truetype_test.cpp</a></code>
+The same as the above, but with using Win32 API as the 
+font engine (<code>GetGlyphOutline()</code>).</td><td><a 
+href="http://www.antigrain.com/demo/truetype_test.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/trans_curve1.gif"><img 
+src="original_demos_files/trans_curve1_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_trans_curve1"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/trans_curve1.cpp.html">trans_curve1.cpp</a></code>
+This is a "kinda-cool-stuff" demo that performs non-linear 
+transformations and draws vector text along a curve. 
+Note that it's not just calculating of the glyph angles 
+and positions, they are transformed as if they were elastic.
+The curve
+is calculated as a bicubic spline. The option "Preserve X scale"
+makes the converter distribute all the points uniformly along
+the curve. If it's unchechked, the scale will be proportional 
+to the distance between the control points.</td><td><a 
+href="http://www.antigrain.com/demo/trans_curve1.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/trans_curve1_ft_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/trans_curve2.gif"><img 
+src="original_demos_files/trans_curve2_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_trans_curve2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/trans_curve2.cpp.html">trans_curve2.cpp</a></code>
+Similar to the previous demo, but here the transformer operates 
+with two arbitrary curves. It requires more calculations, but gives
+you more freedom. In other words you will see :-).</td><td><a 
+href="http://www.antigrain.com/demo/trans_curve2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/trans_curve2_ft_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/aa_test.png"><img 
+src="original_demos_files/aa_test_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_aa_test"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/aa_test.cpp.html">aa_test.cpp</a></code>
+A test of <b><nobr>Anti-Aliasing</nobr></b> the same as in <br>
+<a href="http://homepage.mac.com/arekkusu/bugs/invariance"><img 
+src="original_demos_files/link.gif" border="0">http://homepage.mac.com/arekkusu/bugs/invariance</a><br>
+The performance of <b>AGG</b> on a typical P-IV 2GHz is: <br>
+Points: 37.46K/sec, Lines: 5.04K/sec, Triangles: 7.43K/sec</td><td><a 
+href="http://www.antigrain.com/demo/aa_test.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/aa_test_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/alpha_gradient.png"><img 
+src="original_demos_files/alpha_gradient_s.png" title="Click to enlarge"
+ border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_alpha_gradient"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/alpha_gradient.cpp.html">alpha_gradient.cpp</a></code>
+The demo shows how to combine any span generator with alpha-channel 
+gradient.</td><td><a 
+href="http://www.antigrain.com/demo/alpha_gradient.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br>
+<a href="http://www.antigrain.com/demo/alpha_gradient_amiga.gz"><img 
+src="original_demos_files/dl_amigaos.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/line_patterns.gif"><img 
+src="original_demos_files/line_patterns_s.gif" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_line_patterns"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/line_patterns.cpp.html">line_patterns.cpp</a></code>
+The demo shows a very powerful mechanism of using arbitrary images as 
+line patterns.
+The main point of it is that the images are drawn along the path. It 
+allows you
+to draw very fancy looking lines quite easily and very useful in 
+GIS/cartography 
+applications. There the bilinear filtering is used, but it's also 
+possible 
+to add any other filtering methods, or just use the nearest neighbour 
+one for the 
+sake of speed. <br>
+Before running this demo make sure that you have files <code>1.bmp</code>&#8230;<code>9.bmp</code>
+ for Win32, 
+MacOS, AmigaOS, and SDL platforms and <code>1.ppm</code>&#8230;<code>9.ppm</code>
+ for X11. <br>
+In the demo you can drag the control points of the curves and observe 
+that the images are 
+transformed quite consistently and smoothly. You can also try to replace
+ the image files 
+(1&#8230;9) with your own. The BMP files must have 24bit colors (TrueColor), 
+the PPM ones
+must be of type "P6". Also, the heigh should not exceed 64 pixels, and 
+the background
+should be white or very close to white. Actually, the algorithm uses 
+32bit images 
+with alpha channel, but in this demo alpha is simulated in such a way 
+that wite 
+is transparent, black is opaque. The intermediate colors have 
+intermediate opacity
+that is defined by the <code>brightness_to_alpha</code> array.</td><td><a
+ href="http://www.antigrain.com/demo/line_patterns.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/line_patterns_clip.png"><img
+ src="original_demos_files/line_patterns_clip_s.png" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_line_patterns_clip"><b></b></a>
+<code><a 
+href="http://www.antigrain.com/demo/line_patterns_clip.cpp.html">line_patterns_clip.cpp</a></code>
+Demonstrates the mechanism of clipping the polylines and/or polygons
+with image patterns. Shows that the clipper maintains correct pattern 
+repetition along the line, considering clipped parts.</td><td><a 
+href="http://www.antigrain.com/demo/line_patterns_clip.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/pattern_perspective.jpg"><img
+ src="original_demos_files/pattern_perspective_s.jpg" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_pattern_perspective"><b></b></a>
+<code><a 
+href="http://www.antigrain.com/demo/pattern_perspective.cpp.html">pattern_perspective.cpp</a></code>
+Pattern perspective transformations. Essentially it's 
+the same as <a 
+href="http://www.antigrain.com/demo/index.html#PAGE_DEMO_image_perspective">Demo
+ image_perspective.cpp</a>, but working with a repeating pattern.
+Can be used for texturing.</td><td><a 
+href="http://www.antigrain.com/demo/pattern_perspective.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_filters2.png"><img 
+src="original_demos_files/image_filters2_s.png" title="Click to enlarge"
+ border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_filters2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_filters2.cpp.html">image_filters2.cpp</a></code>
+Another example that demonstrates the difference of image filters. It 
+just 
+displays a simple 4x4 pixels image with huge zoom. You can see how 
+different 
+filters affect the result. Also see how gamma correction works.</td><td><a
+ href="http://www.antigrain.com/demo/image_filters2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/image_resample.jpg"><img 
+src="original_demos_files/image_resample_s.jpg" title="Click to enlarge"
+ border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_image_resample"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_resample.cpp.html">image_resample.cpp</a></code>
+The demonstration of image transformations with resampling. You can 
+see the difference in quality between regular image transformers and 
+the ones with resampling. Of course, image tranformations with 
+resampling
+work slower because they provide the best possible quality.</td><td><a 
+href="http://www.antigrain.com/demo/image_resample.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/pattern_resample.jpg"><img
+ src="original_demos_files/pattern_resample_s.jpg" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_pattern_resample"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/image_resample.cpp.html">image_resample.cpp</a></code>
+The demonstration of pattern transformations with resampling. The same 
+as
+the above but with texturing patterns.</td><td><a 
+href="http://www.antigrain.com/demo/pattern_resample.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/compositing.png"><img 
+src="original_demos_files/compositing_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_compositing"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/compositing.cpp.html">compositing.cpp</a></code>
+Extended compositing modes fully compatible with 
+<a 
+href="http://www.w3.org/TR/2004/WD-SVG12-20041027/rendering.html#comp-op-prop"><img
+ src="original_demos_files/link.gif" border="0">SVG 1.2</a></td><td><a 
+href="http://www.antigrain.com/demo/compositing.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/compositing2.png"><img 
+src="original_demos_files/compositing2_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_compositing2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/compositing2.cpp.html">compositing2.cpp</a></code>
+Another demo example with extended compositing modes.</td><td><a 
+href="http://www.antigrain.com/demo/compositing2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/bezier_div.png"><img 
+src="original_demos_files/bezier_div_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_bezier_div"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/bezier_div.cpp.html">bezier_div.cpp</a></code>
+Demonstration of new methods of Bezier curve approximation. You can 
+compare 
+the old, incremental method with adaptive De Casteljau's subdivion. The 
+new method uses two criteria to stop subdivision: estimation of distance
+ and 
+estimation of angle. It gives us perfectly smooth result even for very 
+sharp
+turns and loops.</td><td><a 
+href="http://www.antigrain.com/demo/bezier_div.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/flash_rasterizer.png"><img
+ src="original_demos_files/flash_rasterizer_s.png" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_flash_rasterizer"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/flash_rasterizer.cpp.html">flash_rasterizer.cpp</a></code>
+Demonstration of Flash compound shape rasterizer. The rasterizer 
+accepts vectorial data in a form of Flash paths, that is, with two 
+fill styles, fill on the left and fill on the right of the path.
+Then it produces a number of scanlines with corresponding styles
+and requests for the colors and/or gradients, images, etc. The 
+algorithm takes care of anti-aliasing and perfect stitching 
+between fill areas.</td><td><a 
+href="http://www.antigrain.com/demo/flash_rasterizer.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/flash_rasterizer2.png"><img
+ src="original_demos_files/flash_rasterizer2_s.png" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_flash_rasterizer2"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/flash_rasterizer2.cpp.html">flash_rasterizer2.cpp</a></code>
+Another possible way to render Flash compound shapes. The idea behind 
+it is prety simple. You just use the regular rasterizer, but in a 
+mode when it doesn't automatically close the contours. Every compound 
+shape is decomposed into a number of single shapes that are rasterized 
+and rendered separately.</td><td><a 
+href="http://www.antigrain.com/demo/flash_rasterizer2.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/gouraud_mesh.png"><img 
+src="original_demos_files/gouraud_mesh_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_gouraud_mesh"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/gouraud_mesh.cpp.html">gouraud_mesh.cpp</a></code>
+Yet another example that demonstrates the power of compound shape 
+rasterization.
+Here we create a mesh of triangles and render them in one pass with 
+multiple 
+Gouraud shaders (<a 
+href="http://www.antigrain.com/__code/include/agg_span_gouraud_rgba.h.html#span_gouraud_rgba">span_gouraud_rgba</a>).
+ The example demonstrates perfect
+<b><nobr>Anti-Aliasing</nobr></b> and perfect triangle stitching 
+(seamless edges) at the same time.</td><td><a 
+href="http://www.antigrain.com/demo/gouraud_mesh.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/rasterizer_compound.png"><img
+ src="original_demos_files/rasterizer_compound_s.png" title="Click to 
+enlarge" border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_rasterizer_compound"><b></b></a>
+<code><a 
+href="http://www.antigrain.com/demo/rasterizer_compound.cpp.html">rasterizer_compound.cpp</a></code>
+This simple example demonstrates a rather advanced technique of using 
+the compound rasterizer. The idea is you assign styles to the polygons
+(left=style, right=-1) and rasterize this "multi-styled" compound shape 
+as a whole. If the polygons in the shape overlap, the greater styles 
+have 
+higher priority. That is, the result is as if greater styles were 
+painted 
+last, but the geometry is flattened before rendering. It means there are
+ 
+no pixels will be painted twice. Then the style are associated with 
+colors, 
+gradients, images, etc. in a special style handler. It simulates 
+Constructive Solid Geometry so that, you can, for example draw a 
+translucent 
+fill plus translucent stroke without the overlapped part of the fill 
+being 
+visible through the stroke.</td><td><a 
+href="http://www.antigrain.com/demo/rasterizer_compound.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+<tr><td><a href="http://www.antigrain.com/demo/blur.png"><img 
+src="original_demos_files/blur_s.png" title="Click to enlarge" 
+border="0"></a></td><td style="text-align: justify;"><a 
+name="PAGE_DEMO_blur"><b></b></a>
+<code><a href="http://www.antigrain.com/demo/blur.cpp.html">blur.cpp</a></code>
+Now you can blur rendered images rather fast! There two algorithms
+are used: <a 
+href="http://incubator.quasimondo.com/processing/fast_blur_deluxe.php"><img
+ src="original_demos_files/link.gif" border="0">Stack Blur</a> by Mario 
+Klingemann and Fast Recursive Gaussian Filter, described
+<a 
+href="http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Smoothin.html"><img
+ src="original_demos_files/link.gif" border="0">here</a> 
+and <a 
+href="http://www.ph.tn.tudelft.nl/%7Elucas/publications/1995/SP95TYLV/SP95TYLV.pdf"><img
+ src="original_demos_files/link.gif" border="0">here (PDF)</a>. The 
+speed of both methods does not depend on the filter radius. 
+Mario's method works 3-5 times faster; it doesn't produce exactly 
+Gaussian 
+response, but pretty fair for most practical purposes. The recursive 
+filter 
+uses floating point arithmetic and works slower. But it is true Gaussian
+ filter, 
+with theoretically infinite impulse response. The radius (actually 
+2*sigma value)
+can be fractional and the filter produces quite adequate result.</td><td><a
+ href="http://www.antigrain.com/demo/blur.zip"><img 
+src="original_demos_files/dl_win32.gif" border="0"></a><br></td></tr>
+</tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>&#8230;TO 
+BE CONTINUED
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr><td><center><span class="authors">
+Copyright <span class="larger">©</span> 2002-2006
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+<tr><td><center><span class="authors">
+Web Design and Programming
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+</tbody></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body></html>

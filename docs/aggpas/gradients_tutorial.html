@@ -1,0 +1,539 @@
+<html><head><title>Anti-Grain Geometry - Working with Gradients</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" 
+href="gradients_tutorial_files/agg.css">
+</head><body><a name="PAGE_GRADIENTS_TUTORIAL"><b></b></a>
+
+
+<table style="margin: 0px;" height="1px" width="640px" border="0" 
+cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td bgcolor="#583927"></td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" width="640px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr>
+<td>
+<table style="margin: 0px;" width="170px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr><td><a href="http://www.antigrain.com/index.html" 
+class="mpmenu">Home/</a></td></tr>
+<tr><td><a href="http://www.antigrain.com/tips/index.html" 
+class="mpmenu">Tips &amp; Tricks/</a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+</tbody></table>
+</td>
+<td width="1px" bgcolor="#583927"></td>
+<td style="text-align: right;" valign="top" width="450px">
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td><img src="gradients_tutorial_files/agg_logo.gif" border="0"></td>
+</tr>
+<tr>
+<td>
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr height="15px">
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/news/index.html">News</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/doc/index.html">Docs</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/download/index.html">Download</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/maillist/index.html">Mailing List</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/cvs/index.html">CVS</a>&nbsp;&nbsp;</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>
+</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><h1>Working with Gradients<span 
+class="subtitle"><br>A Simple Step-by-Step Tutorial</span></h1></td></tr></tbody></table>
+
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>This
+ article will explain to you how to set up gradients and render them. 
+We will use a simple command-line example that produces the result in 
+the
+<code>agg_test.ppm</code> file. You can use, for example 
+<a href="http://www.irfanview.com/"><img 
+src="gradients_tutorial_files/link.gif" border="0">IrfanView 
+(www.irfanview.com)</a> to see the 
+results.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>You 
+will need to tell the compiler the <b>AGG</b> include directory and add
+three source files to the project or to the command line: 
+<code>agg_rasterizer_scanline_aa.cpp</code>, 
+<code><a 
+href="http://www.antigrain.com/__code/src/agg_trans_affine.cpp.html">agg_trans_affine.cpp</a></code>,
+ and <code><a 
+href="http://www.antigrain.com/__code/src/agg_sqrt_tables.cpp.html">agg_sqrt_tables.cpp</a></code>.
+ You 
+can find the source file here: <a 
+href="http://www.antigrain.com/tips/gradients_tutorial/gradients.cpp"><img
+ src="gradients_tutorial_files/download.gif" border="0">&nbsp;(gradients.cpp)</a>.</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre><span class="kw2">#include</span> <span class="op">&lt;</span>stdio<span class="op">.</span>h<span class="op">&gt;</span>
+<span class="kw2">#include</span> <span class="op">&lt;</span>string<span class="op">.</span>h<span class="op">&gt;</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_pixfmt_rgb.h.html">agg_pixfmt_rgb.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_renderer_base.h.html">agg_renderer_base.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_renderer_scanline.h.html">agg_renderer_scanline.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_scanline_u.h.html">agg_scanline_u.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_rasterizer_scanline_aa.h.html">agg_rasterizer_scanline_aa.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_ellipse.h.html">agg_ellipse.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html">agg_span_gradient.h</a>"</span>
+<span class="kw2">#include</span> <span class="str">"<a href="http://www.antigrain.com/__code/include/agg_span_interpolator_linear.h.html">agg_span_interpolator_linear.h</a>"</span>
+
+<span class="kw1">enum</span>
+<span class="op">{</span>
+    frame_width <span class="op">=</span> <span class="num">320</span><span class="op">,</span>
+    frame_height <span class="op">=</span> <span class="num">200</span>
+<span class="op">}</span><span class="op">;</span>
+
+<span class="rem">// Writing the buffer to a .PPM file, assuming it has </span>
+<span class="rem">// RGB-structure, one byte per color component</span>
+<span class="rem">//--------------------------------------------------</span>
+<span class="kw1">bool</span> write_ppm<span class="op">(</span><span class="kw1">const</span> <span class="kw1">unsigned</span> <span class="kw1">char</span><span class="op">*</span> buf<span class="op">,</span> 
+               <span class="kw1">unsigned</span> width<span class="op">,</span> 
+               <span class="kw1">unsigned</span> height<span class="op">,</span> 
+               <span class="kw1">const</span> <span class="kw1">char</span><span class="op">*</span> file_name<span class="op">)</span>
+<span class="op">{</span>
+    FILE<span class="op">*</span> fd <span class="op">=</span> fopen<span class="op">(</span>file_name<span class="op">,</span> <span class="str">"wb"</span><span class="op">)</span><span class="op">;</span>
+    <span class="kw1">if</span><span class="op">(</span>fd<span class="op">)</span>
+    <span class="op">{</span>
+        fprintf<span class="op">(</span>fd<span class="op">,</span> <span class="str">"P6 %d %d 255 "</span><span class="op">,</span> width<span class="op">,</span> height<span class="op">)</span><span class="op">;</span>
+        fwrite<span class="op">(</span>buf<span class="op">,</span> <span class="num">1</span><span class="op">,</span> width <span class="op">*</span> height <span class="op">*</span> <span class="num">3</span><span class="op">,</span> fd<span class="op">)</span><span class="op">;</span>
+        fclose<span class="op">(</span>fd<span class="op">)</span><span class="op">;</span>
+        <span class="kw1">return</span> <span class="kw1">true</span><span class="op">;</span>
+    <span class="op">}</span>
+    <span class="kw1">return</span> <span class="kw1">false</span><span class="op">;</span>
+<span class="op">}</span>
+
+
+
+<span class="rem">// A simple function to form the gradient color array </span>
+<span class="rem">// consisting of 3 colors, "begin", "middle", "end"</span>
+<span class="rem">//---------------------------------------------------</span>
+<span class="kw1">template</span><span class="op">&lt;</span><span class="kw1">class</span> Array<span class="op">&gt;</span>
+<span class="kw1">void</span> fill_color_array<span class="op">(</span>Array<span class="op">&amp;</span> array<span class="op">,</span> 
+                      agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a> begin<span class="op">,</span> 
+                      agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a> middle<span class="op">,</span> 
+                      agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a> end<span class="op">)</span>
+<span class="op">{</span>
+    <span class="kw1">unsigned</span> i<span class="op">;</span>
+    <span class="kw1">unsigned</span> half_size <span class="op">=</span> array<span class="op">.</span>size<span class="op">(</span><span class="op">)</span> <span class="op">/</span> <span class="num">2</span><span class="op">;</span>
+    <span class="kw1">for</span><span class="op">(</span>i <span class="op">=</span> <span class="num">0</span><span class="op">;</span> i <span class="op">&lt;</span> half_size<span class="op">;</span> <span class="op">++</span>i<span class="op">)</span>
+    <span class="op">{</span>
+        array<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> begin<span class="op">.</span>gradient<span class="op">(</span>middle<span class="op">,</span> i <span class="op">/</span> <span class="kw1">double</span><span class="op">(</span>half_size<span class="op">)</span><span class="op">)</span><span class="op">;</span>
+    <span class="op">}</span>
+    <span class="kw1">for</span><span class="op">(</span><span class="op">;</span> i <span class="op">&lt;</span> array<span class="op">.</span>size<span class="op">(</span><span class="op">)</span><span class="op">;</span> <span class="op">++</span>i<span class="op">)</span>
+    <span class="op">{</span>
+        array<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> middle<span class="op">.</span>gradient<span class="op">(</span>end<span class="op">,</span> <span class="op">(</span>i <span class="op">-</span> half_size<span class="op">)</span> <span class="op">/</span> <span class="kw1">double</span><span class="op">(</span>half_size<span class="op">)</span><span class="op">)</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+
+
+
+<span class="kw1">int</span> <span class="kw1">main</span><span class="op">(</span><span class="op">)</span>
+<span class="op">{</span>
+    <span class="kw1">unsigned</span> <span class="kw1">char</span><span class="op">*</span> buffer <span class="op">=</span> <span class="kw1">new</span> <span class="kw1">unsigned</span> <span class="kw1">char</span><span class="op">[</span>frame_width <span class="op">*</span> frame_height <span class="op">*</span> <span class="num">3</span><span class="op">]</span><span class="op">;</span>
+
+    agg::<a href="http://www.antigrain.com/doc/basic_renderers/basic_renderers.agdoc.html#rendering_buffer">rendering_buffer</a> rbuf<span class="op">(</span>buffer<span class="op">,</span> 
+                               frame_width<span class="op">,</span> 
+                               frame_height<span class="op">,</span> 
+                               <span class="op">-</span>frame_width <span class="op">*</span> <span class="num">3</span><span class="op">)</span><span class="op">;</span>
+
+    <span class="rem">// Pixel format and basic renderers.</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_pixfmt_rgb.h.html#pixfmt_rgb24">pixfmt_rgb24</a> pixfmt_type<span class="op">;</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/doc/basic_renderers/basic_renderers.agdoc.html#renderer_base">renderer_base</a><span class="op">&lt;</span>pixfmt_type<span class="op">&gt;</span> renderer_base_type<span class="op">;</span>
+
+
+    <span class="rem">// The gradient color array</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_array.h.html#pod_auto_array">pod_auto_array</a><span class="op">&lt;</span>agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">,</span> <span class="num">256</span><span class="op">&gt;</span> color_array_type<span class="op">;</span>
+
+
+    <span class="rem">// Gradient shape function (linear, radial, custom, etc)</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_x">gradient_x</a> gradient_func_type<span class="op">;</span>   
+
+
+    <span class="rem">// Span interpolator. This object is used in all span generators </span>
+    <span class="rem">// that operate with transformations during iterating of the spans,</span>
+    <span class="rem">// for example, image transformers use the interpolator too.</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_span_interpolator_linear.h.html#span_interpolator_linear">span_interpolator_linear</a><span class="op">&lt;</span><span class="op">&gt;</span> interpolator_type<span class="op">;</span>
+
+
+    <span class="rem">// Span allocator is an object that allocates memory for </span>
+    <span class="rem">// the array of colors that will be used to render the </span>
+    <span class="rem">// color spans. One object can be shared between different </span>
+    <span class="rem">// span generators.</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">&lt;</span>agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">&gt;</span> span_allocator_type<span class="op">;</span>
+
+
+    <span class="rem">// Finally, the gradient span generator working with the agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a> </span>
+    <span class="rem">// color type. </span>
+    <span class="rem">// The 4-th argument is the color function that should have </span>
+    <span class="rem">// the [] operator returning the color in range of [0...255].</span>
+    <span class="rem">// In our case it will be a simple look-up table of 256 colors.</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">&lt;</span>agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">,</span> 
+                               interpolator_type<span class="op">,</span> 
+                               gradient_func_type<span class="op">,</span> 
+                               color_array_type<span class="op">,</span>
+                               span_allocator_type<span class="op">&gt;</span> span_gradient_type<span class="op">;</span>
+
+
+    <span class="rem">// The gradient scanline renderer type</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_renderer_scanline.h.html#renderer_scanline_aa">renderer_scanline_aa</a><span class="op">&lt;</span>renderer_base_type<span class="op">,</span> 
+                                      span_gradient_type<span class="op">&gt;</span> renderer_gradient_type<span class="op">;</span>
+
+
+    <span class="rem">// Common declarations (pixel format and basic renderer).</span>
+    <span class="rem">//----------------</span>
+    pixfmt_type pixf<span class="op">(</span>rbuf<span class="op">)</span><span class="op">;</span>
+    renderer_base_type rbase<span class="op">(</span>pixf<span class="op">)</span><span class="op">;</span>
+
+
+    <span class="rem">// The gradient objects declarations</span>
+    <span class="rem">//----------------</span>
+    gradient_func_type  gradient_func<span class="op">;</span>                   <span class="rem">// The gradient function</span>
+    agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine">trans_affine</a>   gradient_mtx<span class="op">;</span>                    <span class="rem">// Affine transformer</span>
+    interpolator_type   span_interpolator<span class="op">(</span>gradient_mtx<span class="op">)</span><span class="op">;</span> <span class="rem">// Span interpolator</span>
+    span_allocator_type <a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">;</span>                  <span class="rem">// Span Allocator</span>
+    color_array_type    color_array<span class="op">;</span>                     <span class="rem">// Gradient colors</span>
+
+
+    <span class="rem">// Declare the gradient span itself. </span>
+    <span class="rem">// The last two arguments are so called "d1" and "d2" </span>
+    <span class="rem">// defining two distances in pixels, where the gradient starts</span>
+    <span class="rem">// and where it ends. The actual meaning of "d1" and "d2" depands</span>
+    <span class="rem">// on the gradient function.</span>
+    <span class="rem">//----------------</span>
+    span_gradient_type <a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">(</span><a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">,</span> 
+                                     span_interpolator<span class="op">,</span> 
+                                     gradient_func<span class="op">,</span> 
+                                     color_array<span class="op">,</span> 
+                                     <span class="num">0</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+
+    <span class="rem">// The gradient renderer</span>
+    <span class="rem">//----------------</span>
+    renderer_gradient_type ren_gradient<span class="op">(</span>rbase<span class="op">,</span> <a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">)</span><span class="op">;</span>
+
+
+    <span class="rem">// The rasterizing/scanline stuff</span>
+    <span class="rem">//----------------</span>
+    agg::<a href="http://www.antigrain.com/__code/include/agg_rasterizer_scanline_aa.h.html#rasterizer_scanline_aa">rasterizer_scanline_aa</a><span class="op">&lt;</span><span class="op">&gt;</span> ras<span class="op">;</span>
+    agg::<a href="http://www.antigrain.com/__code/include/agg_scanline_u.h.html#scanline_u8">scanline_u8</a> sl<span class="op">;</span>
+
+
+    <span class="rem">// Finally we can draw a circle.</span>
+    <span class="rem">//----------------</span>
+    rbase<span class="op">.</span>clear<span class="op">(</span>agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">(</span><span class="num">255</span><span class="op">,</span> <span class="num">255</span><span class="op">,</span> <span class="num">255</span><span class="op">)</span><span class="op">)</span><span class="op">;</span>
+
+    fill_color_array<span class="op">(</span>color_array<span class="op">,</span> 
+                     agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">(</span><span class="num">0</span><span class="op">,</span><span class="num">50</span><span class="op">,</span><span class="num">50</span><span class="op">)</span><span class="op">,</span> 
+                     agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">(</span><span class="num">240</span><span class="op">,</span> <span class="num">255</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">,</span> 
+                     agg::<a href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a><span class="op">(</span><span class="num">80</span><span class="op">,</span> <span class="num">0</span><span class="op">,</span> <span class="num">0</span><span class="op">)</span><span class="op">)</span><span class="op">;</span>
+
+    agg::<a href="http://www.antigrain.com/__code/include/agg_ellipse.h.html#ellipse">ellipse</a> ell<span class="op">(</span><span class="num">50</span><span class="op">,</span> <span class="num">50</span><span class="op">,</span> <span class="num">50</span><span class="op">,</span> <span class="num">50</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+    ras<span class="op">.</span>add_path<span class="op">(</span>ell<span class="op">)</span><span class="op">;</span>
+
+    agg::<a href="http://www.antigrain.com/__code/include/agg_renderer_scanline.h.html#render_scanlines">render_scanlines</a><span class="op">(</span>ras<span class="op">,</span> sl<span class="op">,</span> ren_gradient<span class="op">)</span><span class="op">;</span>
+
+    write_ppm<span class="op">(</span>buffer<span class="op">,</span> frame_width<span class="op">,</span> frame_height<span class="op">,</span> <span class="str">"agg_test.ppm"</span><span class="op">)</span><span class="op">;</span>
+
+    <span class="kw1">delete</span> <span class="op">[</span><span class="op">]</span> buffer<span class="op">;</span>
+    <span class="kw1">return</span> <span class="num">0</span><span class="op">;</span>
+<span class="op">}</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>It 
+looks rather complex, especially the necessity to declare a lot
+of types and objects. But the &#8220;complexity&#8221; gives you freedom, for
+example, you can define your own gradient functions or even arbitrary
+distortions.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+example renders a circle with linear gradient from (0,0) to (100,0).
+In <b>AGG</b> you can define an arbitrary color function, in our case 
+it's a 
+simple look-up table generated from three colors, <code>start</code>, <code>middle</code>,
+ and 
+<code>end</code>.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Here
+ is the result (the axes and text were added in <a 
+href="http://www.xara.com/"><img src="gradients_tutorial_files/link.gif"
+ border="0"><b><nobr>Xara X</nobr></b></a>):</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients1.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>It 
+also can seem like an overkill for this simple task, but later 
+you will see that it's not so.
+<br><br><br></p></td></tr></tbody></table>
+
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+next step is one little modification. Modify the following:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    <span class="rem">// Declare the gradient span itself. </span>
+    <span class="rem">// The last two arguments are so called "d1" and "d2" </span>
+    <span class="rem">// defining two distances in pixels, where the gradient starts</span>
+    <span class="rem">// and where it ends. The actual meaning of "d1" and "d2" depands</span>
+    <span class="rem">// on the gradient function.</span>
+    <span class="rem">//----------------</span>
+    span_gradient_type <a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">(</span><a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">,</span> 
+                                     span_interpolator<span class="op">,</span> 
+                                     gradient_func<span class="op">,</span> 
+                                     color_array<span class="op">,</span> 
+                                     <span class="num">50</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+result:</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients2.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>It 
+should explain those freaky <code>d1</code> and <code>d2</code> 
+arguments. In fact, they
+determine the geometrical <code>start</code> and <code>end</code> of the
+ gradient and their meaning
+depends on the gradient function.
+<br><br><br>
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Now 
+change the gradient function:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    <span class="rem">// Gradient shape function (linear, radial, custom, etc)</span>
+    <span class="rem">//-----------------</span>
+    <span class="kw1">typedef</span> agg::<a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_circle">gradient_circle</a> gradient_func_type<span class="op">;</span>   
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Set <code>d1</code>
+ back to 0:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    <span class="rem">// Declare the gradient span itself. </span>
+    <span class="rem">// The last two arguments are so called "d1" and "d2" </span>
+    <span class="rem">// defining two distances in pixels, where the gradient starts</span>
+    <span class="rem">// and where it ends. The actual meaning of "d1" and "d2" depands</span>
+    <span class="rem">// on the gradient function.</span>
+    <span class="rem">//----------------</span>
+    span_gradient_type <a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">(</span><a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">,</span> 
+                                     span_interpolator<span class="op">,</span> 
+                                     gradient_func<span class="op">,</span> 
+                                     color_array<span class="op">,</span> 
+                                     <span class="num">0</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>And 
+modify the circle:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    agg::<a href="http://www.antigrain.com/__code/include/agg_ellipse.h.html#ellipse">ellipse</a> ell<span class="op">(</span><span class="num">0</span><span class="op">,</span> <span class="num">0</span><span class="op">,</span> <span class="num">120</span><span class="op">,</span> <span class="num">120</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+result:</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients3.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><br><br><br>
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Modify
+ <code>d1</code> again:
+</p></td></tr></tbody></table><table width="640px" border="0" 
+cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    <span class="rem">// Declare the gradient span itself. </span>
+    <span class="rem">// The last two arguments are so called "d1" and "d2" </span>
+    <span class="rem">// defining two distances in pixels, where the gradient starts</span>
+    <span class="rem">// and where it ends. The actual meaning of "d1" and "d2" depands</span>
+    <span class="rem">// on the gradient function.</span>
+    <span class="rem">//----------------</span>
+    span_gradient_type <a href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#span_gradient">span_gradient</a><span class="op">(</span><a href="http://www.antigrain.com/__code/include/agg_span_allocator.h.html#span_allocator">span_allocator</a><span class="op">,</span> 
+                                     span_interpolator<span class="op">,</span> 
+                                     gradient_func<span class="op">,</span> 
+                                     color_array<span class="op">,</span> 
+                                     <span class="num">50</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients4.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>So 
+that, in case of a radial gradient, <code>d1</code> and <code>d2</code> 
+define the starting
+and ending radii.
+<br><br><br>
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>By 
+default the origin point for the gradients is (0,0). How to draw a 
+gradient
+in some other place? The answer is to use affine transformations. 
+Strictly 
+speaking, the transformations are fully defined by the span 
+interpolator. In our case
+we use <a 
+href="http://www.antigrain.com/__code/include/agg_span_interpolator_linear.h.html#span_interpolator_linear">span_interpolator_linear</a>
+ with an affine matrix. The linear interpolator 
+allows you to speed up the calculations vastly, because we calculate the
+ floating
+point coordinates only in the begin and end of the horizontal spans and 
+then 
+use a fast, integer, Bresenham-like interpolation with <b>Subpixel 
+Accuracy</b>.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Add 
+the following code somewhere before calling <code>agg::<a 
+href="http://www.antigrain.com/__code/include/agg_renderer_scanline.h.html#render_scanlines">render_scanlines</a>(ras,
+ sl, ren_gradient);</code></p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    gradient_mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_scaling">trans_affine_scaling</a><span class="op">(</span><span class="num">0</span><span class="op">.</span><span class="num">75</span><span class="op">,</span> <span class="num">1</span><span class="op">.</span><span class="num">2</span><span class="op">)</span><span class="op">;</span>
+    gradient_mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_rotation">trans_affine_rotation</a><span class="op">(</span><span class="op">-</span>agg::<a href="http://www.antigrain.com/__code/include/agg_basics.h.html#pi">pi</a><span class="op">/</span><span class="num">3</span><span class="op">.</span><span class="num">0</span><span class="op">)</span><span class="op">;</span>
+    gradient_mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_translation">trans_affine_translation</a><span class="op">(</span><span class="num">100</span><span class="op">.</span><span class="num">0</span><span class="op">,</span> <span class="num">100</span><span class="op">.</span><span class="num">0</span><span class="op">)</span><span class="op">;</span>
+    gradient_mtx<span class="op">.</span>invert<span class="op">(</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>And 
+modify the circle:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    agg::<a href="http://www.antigrain.com/__code/include/agg_ellipse.h.html#ellipse">ellipse</a> ell<span class="op">(</span><span class="num">100</span><span class="op">,</span> <span class="num">100</span><span class="op">,</span> <span class="num">120</span><span class="op">,</span> <span class="num">120</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients5.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+code of initializing of the affine matrix should be obvious except 
+for some strange <code>gradient_mtx.invert()</code>. It's necessary 
+because 
+the gradient generator uses <b>reverse</b> transformations instead of 
+<b>direct</b> ones. In other words it takes the destination point, 
+applies the transformations and obtains the coordinates in the gradient.
+Note that the affine transformations allow you to turn a circular 
+gradient
+into elliptical.
+<br><br><br>
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Now 
+it should be obvious how to define a linear gradient from some 
+<code>Point1</code> to <code>Point2</code>. So, get back to the original
+ code and 
+add the following function:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre><span class="rem">// Calculate the affine transformation matrix for the linear gradient </span>
+<span class="rem">// from (x1, y1) to (x2, y2). gradient_d2 is the "base" to scale the</span>
+<span class="rem">// gradient. Here d1 must be 0.0, and d2 must equal gradient_d2.</span>
+<span class="rem">//---------------------------------------------------------------</span>
+<span class="kw1">void</span> calc_linear_gradient_transform<span class="op">(</span><span class="kw1">double</span> x1<span class="op">,</span> <span class="kw1">double</span> y1<span class="op">,</span> <span class="kw1">double</span> x2<span class="op">,</span> <span class="kw1">double</span> y2<span class="op">,</span> 
+                                    agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine">trans_affine</a><span class="op">&amp;</span> mtx<span class="op">,</span>
+                                    <span class="kw1">double</span> gradient_d2 <span class="op">=</span> <span class="num">100</span><span class="op">.</span><span class="num">0</span><span class="op">)</span>
+<span class="op">{</span>
+    <span class="kw1">double</span> dx <span class="op">=</span> x2 <span class="op">-</span> x1<span class="op">;</span>
+    <span class="kw1">double</span> dy <span class="op">=</span> y2 <span class="op">-</span> y1<span class="op">;</span>
+    mtx<span class="op">.</span>reset<span class="op">(</span><span class="op">)</span><span class="op">;</span>
+    mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_scaling">trans_affine_scaling</a><span class="op">(</span>sqrt<span class="op">(</span>dx <span class="op">*</span> dx <span class="op">+</span> dy <span class="op">*</span> dy<span class="op">)</span> <span class="op">/</span> gradient_d2<span class="op">)</span><span class="op">;</span>
+    mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_rotation">trans_affine_rotation</a><span class="op">(</span>atan2<span class="op">(</span>dy<span class="op">,</span> dx<span class="op">)</span><span class="op">)</span><span class="op">;</span>
+    mtx <span class="op">*=</span> agg::<a href="http://www.antigrain.com/__code/include/agg_trans_affine.h.html#trans_affine_translation">trans_affine_translation</a><span class="op">(</span>x1<span class="op">,</span> y1<span class="op">)</span><span class="op">;</span>
+    mtx<span class="op">.</span>invert<span class="op">(</span><span class="op">)</span><span class="op">;</span>
+<span class="op">}</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Then
+ modify the circle:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    agg::<a href="http://www.antigrain.com/__code/include/agg_ellipse.h.html#ellipse">ellipse</a> ell<span class="op">(</span><span class="num">100</span><span class="op">,</span> <span class="num">100</span><span class="op">,</span> <span class="num">80</span><span class="op">,</span> <span class="num">80</span><span class="op">,</span> <span class="num">100</span><span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>And 
+add the transformations:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>    calc_linear_gradient_transform<span class="op">(</span><span class="num">50</span><span class="op">,</span> <span class="num">50</span><span class="op">,</span> <span class="num">150</span><span class="op">,</span> <span class="num">150</span><span class="op">,</span>  gradient_mtx<span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td><center><img 
+src="gradients_tutorial_files/gradients6.png" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Try 
+to play with different parameters, 
+transformations, and gradient functions: <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_circle">gradient_circle</a>,
+ <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_x">gradient_x</a>,
+ 
+<a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_y">gradient_y</a>,
+ <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_diamond">gradient_diamond</a>,
+ <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_xy">gradient_xy</a>,
+ <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_sqrt_xy">gradient_sqrt_xy</a>,
+ <a 
+href="http://www.antigrain.com/__code/include/agg_span_gradient.h.html#gradient_conic">gradient_conic</a>.
+Also look at the gradient functions and try to write your own. Actually,
+ 
+the set of the gradient functions in <b>AGG</b> is rather poor, it just 
+demonstrates
+the possibilities. For example, repeating or reflecting gradients should
+be implemented in gradient functions (or you can write adaptors that 
+will
+use the existing functions).
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr><td><center><span class="authors">
+Copyright <span class="larger">©</span> 2002-2006
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+<tr><td><center><span class="authors">
+Web Design and Programming
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+</tbody></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body></html>
