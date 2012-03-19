@@ -464,7 +464,7 @@ begin
   c := fpgColorToRGB(col);
 
   if xapplication.DisplayDepth >= 24 then
-    Result   := c
+    Result   := c and $FFFFFF       { No Alpha channel information }
   else if xapplication.DisplayDepth = 16 then
     Result   := ConvertTo565Pixel(c)
   else
@@ -2934,7 +2934,8 @@ end;
 
 procedure TfpgX11Canvas.DoSetTextColor(cl: TfpgColor);
 begin
-  SetXftColor(cl, FColorTextXft);
+  { We use fpgColorToX() because we don't want Alpha channel information for X11 text }
+  SetXftColor(fpgColorToX(cl), FColorTextXft);
 end;
 
 procedure TfpgX11Canvas.DoSetColor(cl: TfpgColor);
