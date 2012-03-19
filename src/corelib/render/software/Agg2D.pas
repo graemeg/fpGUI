@@ -626,6 +626,8 @@ type
  function  Agg2DUsesWin32TrueType : boolean;
 
  function  BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
+
+ function  fpgColor2AggColor(c: TfpgColor): TAggColor;
  
 
 IMPLEMENTATION
@@ -972,6 +974,15 @@ begin
 {$ELSE}
  result:=false;
 {$ENDIF }
+end;
+
+function fpgColor2AggColor(c: TfpgColor): TAggColor;
+var
+  t: TRGBTriple;
+  c1: TfpgColor;
+begin
+  t := fpgColorToRGBTriple(c);
+  Result.Construct(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 function ColorDepthToPixelFormat(const AColorDepth: integer): TPixelFormat;
