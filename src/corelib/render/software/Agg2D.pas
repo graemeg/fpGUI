@@ -3716,12 +3716,17 @@ end;
 
 procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-
+  NoFill;
+  LineColor(LineColor);
+  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
 end;
 
 procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-
+  {$Note AggPas's Arc only does stroking, not filling. Make another plan }
+  NoFill;
+  LineColor(LineColor);
+  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
 end;
 
 procedure TAgg2D.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
