@@ -19,6 +19,9 @@ unit fpg_base;
 
 {$mode objfpc}{$H+}
 
+// To enable the AggPas powered Canvas
+{.$define AGGCanvas}
+
 interface
 
 uses
@@ -2271,17 +2274,44 @@ procedure TfpgImageBase.CreateMaskFromSample(x, y: TfpgCoord);
 var
   p: ^longword;
   pmsk: ^byte;
-  c: longword;
+  c, n: longword;
   linecnt: integer;
   pixelcnt: integer;
   bit: byte;
   msklinelen: integer;
+  row, col: integer;
 begin
   if FColorDepth = 1 then
     Exit; //==>
 
   if (FImageData = nil) then
     Exit; //==>
+
+{$ifdef AGGCanvas}
+  p := FImageData;
+  if x < 0 then
+    Inc(p, FWidth - 1)
+  else
+    Inc(p, x);
+  if y < 0 then
+    Inc(p, FWidth * (FHeight - 1))
+  else
+    Inc(p, FWidth * y);
+
+  c := p^;  // the sample
+
+  for row := 0 to FHeight-1 do
+  begin
+    for col := 0 to FWidth-1 do
+    begin
+      n := PLongWord(FImageData)[row * FWidth + col];
+      if n = c then
+        { set Alpha value 100% transparent }
+        PLongWord(FImageData)[row * FWidth + col] := n and $00FFFFFF;
+    end;
+  end;
+
+{$else}
 
   AllocateMask;
   FMaskPoint := Point(x, y);
@@ -2334,6 +2364,7 @@ begin
 
     Inc(linecnt);
   until linecnt >= FHeight;
+{$endif}
 end;
 
 procedure TfpgImageBase.UpdateImage;
