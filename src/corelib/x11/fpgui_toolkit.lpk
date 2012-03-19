@@ -7,8 +7,8 @@
     <CompilerOptions>
       <Version Value="9"/>
       <SearchPaths>
-        <IncludeFiles Value="../.."/>
-        <OtherUnitFiles Value="..;../../gui;../../gui/db"/>
+        <IncludeFiles Value="../..;../render/software"/>
+        <OtherUnitFiles Value="..;../../gui;../../gui/db;../render/software"/>
         <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
