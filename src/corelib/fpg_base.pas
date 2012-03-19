@@ -979,12 +979,12 @@ end;
 
 function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
 begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 24);
 end;
 
 function FPColorTofpgColor(const AColor: TFPColor): TfpgColor; deprecated;
 begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 24);
 end;
 
 function fpgGetRed(const AColor: TfpgColor): byte;
