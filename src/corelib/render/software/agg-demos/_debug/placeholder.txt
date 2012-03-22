@@ -1,0 +1,2 @@
+This is simply to help Git recreated the directory structure. Git only
+tracks file content, not directory layout.
