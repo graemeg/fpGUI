@@ -61,3 +61,7 @@ trans_curve1_ft
 trans_curve2_ft
 trans_polar
 _debug/*
+*.elf64
+*.eld32
+*.exe
+compile-*
