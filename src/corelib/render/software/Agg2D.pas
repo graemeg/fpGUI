@@ -3662,22 +3662,23 @@ end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
 begin
-
+  ClipBox(ARect.Left, ARect.Top, ARect.Right+1, ARect.Bottom+1);
 end;
 
 function TAgg2D.DoGetClipRect: TfpgRect;
 begin
-
+  Result.SetRect(Round(ClipBox.x1), Round(ClipBox.y1), Round(ClipBox.x2 - ClipBox.x1), Round(ClipBox.y2 - ClipBox.y1));
 end;
 
 procedure TAgg2D.DoAddClipRect(const ARect: TfpgRect);
 begin
-
+  {$NOTE TAgg2D.DoAddClipRect must still be implemented }
 end;
 
 procedure TAgg2D.DoClearClipRect;
 begin
-
+  ClipBox(0, 0, FWindow.width, FWindow.height);
+  m_rasterizer.m_clipping := false;
 end;
 
 procedure TAgg2D.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
