@@ -448,7 +448,7 @@ begin
 end;
 
 { NORMALIZE }
-function rect.normalize;
+function rect.normalize: rect_ptr;
 var
  t : int;
 
@@ -474,7 +474,7 @@ begin
 end;
 
 { CLIP }
-function rect.clip;
+function rect.clip(r: rect_ptr): boolean;
 begin
  if x2 > r.x2 then
   x2:=r.x2;
@@ -493,7 +493,7 @@ begin
 end;
 
 { IS_VALID }
-function rect.is_valid;
+function rect.is_valid: boolean;
 begin
  result:=(x1 <= x2 ) and (y1 <= y2 );
 
