@@ -1023,6 +1023,13 @@ for more information.</p></descr>
 </element>
 
 
+<element name="TfpgBaseTimer.Enabled">
+<short>Allows you to enable or disable the timer</short>
+<descr><printshort id="TfpgBaseTimer.Enabled"/>. The timer will not function until you
+set the Enabled property to True. Later you can disable the timer by setting the
+Enabled property to False.</descr>
+</element>
+
 
     </module>
     <!-- fpg_base -->

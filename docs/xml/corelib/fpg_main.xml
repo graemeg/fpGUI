@@ -92,6 +92,23 @@ planned.</p></descr>
 </element>
 
 
+<element name="TfpgTimer">
+<short>A timer component for fpGUI applications</short>
+<descr><printshort id="TfpgTimer"/>.</descr>
+</element>
+
+<element name="TfpgTimer.Create">
+<short>Use this method to create a timer component instance</short>
+<descr><printshort id="TfpgTimer.Create"/>. The AInterval parameter is a value in
+milliseconds. The timer will fire the OnTimer event every AInterval milliseconds or
+until the timer is disabled when the Enabled property is set to False.</descr>
+</element>
+
+<element name="TfpgTimer.Enabled" link="#fpgui.fpg_base.TfpgBaseTimer.Enabled">
+</element>
+
+
+
     </module>
     <!-- fpg_main -->
   </package>
