@@ -1,6 +1,7 @@
 program dndexample;
 
 {$mode objfpc}{$H+}
+{$IFDEF MSWINDOWS} {$apptype gui} {$ENDIF}
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
