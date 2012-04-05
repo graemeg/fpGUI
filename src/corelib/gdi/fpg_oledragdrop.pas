@@ -208,7 +208,7 @@ var
 
 function WindowsMimeLookup(const CFFormat: string): string;
 begin
-  { replace know clipboard formats with mime types }
+  { replace known clipboard formats with mime types }
   if CFFormat = 'CF_TEXT' then
     Result := 'text/plain'
   else if CFFormat = 'CF_UNICODETEXT' then
