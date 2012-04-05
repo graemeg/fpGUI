@@ -1409,7 +1409,7 @@ end;
 function TfpgBaseEdit.GetClientRect: TfpgRect;
 begin
   case BorderStyle of
-    ebsNone:      inherited GetClientRect;
+    ebsNone:      Result := inherited GetClientRect;
     ebsDefault:   Result.SetRect(2, 2, Width-4, Height-4);
     ebsSingle:    Result.SetRect(1, 1, Width-2, Height-2);
   end;
@@ -1425,25 +1425,19 @@ end;
 procedure TfpgBaseTextEdit.HandlePaint;
 var
   r: TfpgRect;
-  flags: TfpgTextFlags;
 begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
-  r.Left := -FDrawOffset + GetMarginAdjustment;
 
   if Enabled and (FVisibleText = '') and (not Focused) then
   begin
     Canvas.SetTextColor(clShadow1);
-    flags := [txtLeft, txtVCenter];
-    Canvas.DrawText(r, FExtraHint, flags);    // fpgStyle.DrawString is called internally
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
   end
   else
   begin
     Canvas.SetTextColor(FTextColor);
-    flags := [txtLeft, txtVCenter];
-    if not Enabled then
-      flags += [txtDisabled];
-    Canvas.DrawText(r, FVisibleText, flags);  // fpgStyle.DrawString is called internally
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
   end;
 
   if Focused then
