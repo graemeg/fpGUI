@@ -38,12 +38,17 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="imgcnv.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="imgcnv"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="frm_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_main"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

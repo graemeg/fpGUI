@@ -52,7 +52,12 @@ procedure TMainForm.MemoDragEnter(Sender, Source: TObject;
 var
   s: string;
 begin
-  s := 'text/uri-list';  // 'text/plain';
+  {TODO: Once Windows DND backend is 100% complete, this IFDEF can be removed.}
+  {$IFDEF MSWINDOWS}
+  s := 'FileName';
+  {$ELSE}
+  s := 'text/uri-list';
+  {$ENDIF}
   Accept := AMimeList.IndexOf(s) > -1;
   if Accept then
   begin
@@ -71,15 +76,18 @@ begin
   sl := TStringList.Create;
   try
     sl.Text := AData;
-    memImages.BeginUpdate;
-    for i := 0 to sl.Count-1 do
-    begin
-      fileName := sl[i];
-      fileName := StringReplace(fileName, 'file://', '', []);
-      memImages.Text := memImages.Text + ConvertImage(fileName);
+    try
+      memImages.BeginUpdate;
+      for i := 0 to sl.Count-1 do
+      begin
+        fileName := sl[i];
+        fileName := StringReplace(fileName, 'file://', '', []);
+        memImages.Text := memImages.Text + ConvertImage(fileName);
+      end;
+    finally
+      memImages.EndUpdate;
     end;
   finally
-    memImages.EndUpdate;
     sl.Free;
   end;
 end;
