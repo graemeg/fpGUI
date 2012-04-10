@@ -212,7 +212,7 @@ type
     protected
       procedure WriteColor(const AFlux: TStream);
     public
-      constructor CreateColor(const AStroke: Boolean; Couleur: LongInt);
+      constructor CreateColor(const AStroke: Boolean; AColor: TfpgColor);
       destructor Destroy; override;
     end;
 
@@ -865,14 +865,13 @@ else
     end;
 end;
 
-constructor TPdfColor.CreateColor(const AStroke: Boolean; Couleur: Longint);
+constructor TPdfColor.CreateColor(const AStroke: Boolean; AColor: TfpgColor);
 begin
-inherited Create;
-FBlue:= FormatFloat('0.##',Couleur mod 256/256);
-Couleur:= Couleur div 256;
-FGreen:= FormatFloat('0.##',Couleur mod 256/256);
-FRed:= FormatFloat('0.##',Couleur div 256/256);
-FStroke:= AStroke;
+  inherited Create;
+  FBlue := FormatFloat('0.##', fpgGetBlue(AColor)/256);
+  FGreen := FormatFloat('0.##', fpgGetGreen(AColor)/256);
+  FRed := FormatFloat('0.##', fpgGetRed(AColor)/256);
+  FStroke := AStroke;
 end;
 
 destructor TPdfColor.Destroy;
