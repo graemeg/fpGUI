@@ -1067,10 +1067,8 @@ end;
 
 procedure TPdfDocument.WriteObjet(const AObjet: Integer; const AFlux: TStream);
 var
-  Dictionaire: TPdfDictionary;
   Long: TPdfInteger;
   Flux: TMemoryStream;
-  Cpt: Integer;
 begin
 WriteChaine(IntToStr(AObjet)+' 0 obj'+CRLF,AFlux);
 if TPdfXRef(FXRefObjets[AObjet]).FStream= nil
