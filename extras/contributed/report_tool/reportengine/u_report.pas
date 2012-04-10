@@ -395,7 +395,7 @@ type
       FBottom: Single;
       FHeight: Single;
       FWidth: Single;
-      FColor: Integer;
+      FColor: TfpgColor;
       FFill: Boolean;
       FStroke: Boolean;
       FLineStyle: TfpgLineStyle;
@@ -407,7 +407,7 @@ type
       property RectBottom: Single read FBottom write FBottom;
       property RectHeight: Single read FHeight write FHeight;
       property RectWidth: Single read FWidth write FWidth;
-      property RectColor: Integer read FColor write FColor;
+      property RectColor: TfpgColor read FColor write FColor;
       property RectFill: Boolean read FFill write FFill;
       property RectStroke: Boolean read FStroke write FStroke;
       property RectLineStyle: TfpgLineStyle read FLineStyle write FLineStyle;
@@ -421,7 +421,7 @@ type
       FBeginY: Single;
       FEndX: Single;
       FEndY: Single;
-      FColor: Integer;
+      FColor: TfpgColor;
       FStyle: TfpgLineStyle;
     protected
     public
@@ -431,7 +431,7 @@ type
       property LineBeginY: Single read FBeginY write FBeginY;
       property LineEndX: Single read FEndX write FEndX;
       property LineEndY: Single read FEndY write FEndY;
-      property LineColor: Integer read FColor write FColor;
+      property LineColor: TfpgColor read FColor write FColor;
       property LineStyle: TfpgLineStyle read FStyle write FStyle;
     end;
 
@@ -439,12 +439,12 @@ type
     private
       FPage: Integer;
       FPoints: T_Points;
-      FColor: Integer;
+      FColor: TfpgColor;
     protected
     public
       property PageId: Integer read FPage write FPage;
       property Points: T_Points read FPoints;
-      property SurfColor: Integer read FColor write FColor;
+      property SurfColor: TfpgColor read FColor write FColor;
     end;
 
   TPdfImg = class(TPdfElement)
