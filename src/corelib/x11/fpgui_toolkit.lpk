@@ -23,6 +23,7 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
+        <CustomOptions Value="-dAggCanvasX"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
