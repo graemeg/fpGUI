@@ -1502,12 +1502,8 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
 // adjust font size to display device
           Fnt.FTxtSize:= IntToStr(Round((StrToInt(FontSize)*fpgApplication.Screen_dpi_y) div 72));
           TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Fnt);
-          if Couleur> -1
-          then
-            begin
-            Clr:= TPdfColor.CreateColor(True,Couleur);
-            TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
-            end;
+          Clr:= TPdfColor.CreateColor(True,Couleur);
+          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
           end;
         Txt:= TPdfText.CreateText(TextPosX,TextPosY,Writting);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Txt);
@@ -1518,12 +1514,8 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
     then
       with TPdfRect(PdfPage[Cpt]) do
         begin
-        if RectColor> -1
-        then
-          begin
-          Clr:= TPdfColor.CreateColor(True,RectColor);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
-          end;
+        Clr:= TPdfColor.CreateColor(True,RectColor);
+        TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
         if RectStroke
         then
           begin
@@ -1539,12 +1531,8 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
     then
       with TPdfLine(PdfPage[Cpt]) do
         begin
-        if LineColor> -1
-        then
-          begin
-          Clr:= TPdfColor.CreateColor(False,LineColor);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
-          end;
+        Clr:= TPdfColor.CreateColor(False,LineColor);
+        TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
         Sty:= TPdfLineStyle.CreateLineStyle(LineStyle,0);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
         Lin:= TPdfLigne.CreateLigne(LineThikness,LineBeginX,LineBeginY,LineEndX,LineEndY);
