@@ -209,6 +209,7 @@ type
     property    GutterVisible;
     property    GutterShowLineNumbers;
     property    Lines;
+    property    RightEdge;
     property    ScrollBarStyle;
     property    TabWidth;
     property    Tracking;
