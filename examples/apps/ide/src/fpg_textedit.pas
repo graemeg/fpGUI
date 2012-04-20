@@ -190,7 +190,7 @@ type
     procedure   DeleteSelection;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
-    procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean);
+    procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean = False);
     property    FontHeight: Integer read FChrH;
     property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
