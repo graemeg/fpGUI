@@ -21,7 +21,7 @@ unit U_Pdf;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, StrUtils,
   fpg_main, fpg_base;
 
 type
@@ -252,8 +252,13 @@ type
       property Offset: Integer read FOffset write FOffset;
     end;
 
+  TPageLayout= (lSingle,lTwo,lContinuous);
+
   TPdfDocument = class(TObject)
     private
+      FPreferences: Boolean;
+      FPageLayout: TPageLayout;
+      FZoomValue: string;
       FXRefObjets: TList; // list of TPdfXRef
     protected
       function ElementParNom(const AValue: string): Integer;
@@ -273,9 +278,10 @@ type
       function CreateContents: Integer;
       procedure CreateStream(NumeroPage,PageNum: Integer);
     public
-      constructor CreateDocument;
+      constructor CreateDocument(const ALayout: TPageLayout= lSingle; const AZoom: string= '100'; const APreferences: Boolean= True);
       destructor Destroy; override;
       procedure WriteDocument(const AFlux: TStream);
+      property PageLayout: TPageLayout read FPageLayout write FPageLayout default lSingle;
     end;
 
 const
@@ -310,26 +316,36 @@ var
 begin
 Result:= '';
 Chaine:= AValue;
-while Pos('\',Chaine)> 0 do
-  begin
-  Result:= Result+Copy(Chaine,1,Pred(Pos('\',Chaine)))+'\\';
-  Chaine:= Copy(Chaine,Succ(Pos('\',Chaine)),Length(Chaine)-Pos('\',Chaine));
-  end;
-Chaine:= Result+Chaine;
-Result:= '';
-while Pos('(',Chaine)> 0 do
-  begin
-  Result:= Result+Copy(Chaine,1,Pred(Pos('(',Chaine)))+'\(';
-  Chaine:= Copy(Chaine,Succ(Pos('(',Chaine)),Length(Chaine)-Pos('(',Chaine));
-  end;
-Chaine:= Result+Chaine;
-Result:= '';
-while Pos(')',Chaine)> 0 do
-  begin
-  Result:= Result+Copy(Chaine,1,Pred(Pos(')',Chaine)))+'\)';
-  Chaine:= Copy(Chaine,Succ(Pos(')',Chaine)),Length(Chaine)-Pos(')',Chaine));
-  end;
-Result:= Result+Chaine;
+if Pos('\',Chaine)> 0
+then
+  Chaine:= AnsiReplaceStr(Chaine,'\','\\');
+if Pos('(',Chaine)> 0
+then
+  Chaine:= AnsiReplaceStr(Chaine,'(','\(');
+if Pos(')',Chaine)> 0
+then
+  Chaine:= AnsiReplaceStr(Chaine,')','\)');
+Result:= Chaine;
+//while Pos('\',Chaine)> 0 do
+//  begin
+//  Result:= Result+Copy(Chaine,1,Pred(Pos('\',Chaine)))+'\\';
+//  Chaine:= Copy(Chaine,Succ(Pos('\',Chaine)),Length(Chaine)-Pos('\',Chaine));
+//  end;
+//Chaine:= Result+Chaine;
+//Result:= '';
+//while Pos('(',Chaine)> 0 do
+//  begin
+//  Result:= Result+Copy(Chaine,1,Pred(Pos('(',Chaine)))+'\(';
+//  Chaine:= Copy(Chaine,Succ(Pos('(',Chaine)),Length(Chaine)-Pos('(',Chaine));
+//  end;
+//Chaine:= Result+Chaine;
+//Result:= '';
+//while Pos(')',Chaine)> 0 do
+//  begin
+//  Result:= Result+Copy(Chaine,1,Pred(Pos(')',Chaine)))+'\)';
+//  Chaine:= Copy(Chaine,Succ(Pos(')',Chaine)),Length(Chaine)-Pos(')',Chaine));
+//  end;
+//Result:= Result+Chaine;
 end;
 
 procedure WriteChaine(const Valeur: string; AFlux: TStream);
@@ -1121,6 +1137,7 @@ var
   Catalog: TPdfXRef;
   XRefObjets: TPdfReference;
   Nom: TPdfName;
+  Table: TPdfArray;
 begin
 // add xref entry
 Catalog:= TPdfXRef.CreateXRef;
@@ -1131,6 +1148,19 @@ Trailer.AddElement('Root',XRefObjets);
 // add type element to catalog dictionary
 Nom:= TPdfName.CreateName('Catalog');
 Catalog.FObjet.AddElement('Type',Nom);
+// add pagelayout element to catalog dictionary
+case FPageLayout of
+  lSingle:
+    Nom:= TPdfName.CreateName('SinglePage');
+  lTwo:
+    Nom:= TPdfName.CreateName('TwoColumnLeft');
+  lContinuous:
+    Nom:= TPdfName.CreateName('OneColumn');
+  end;
+Catalog.FObjet.AddElement('PageLayout',Nom);
+// add openaction element to catalog dictionary
+Table:= TPdfArray.CreateArray;
+Catalog.FObjet.AddElement('OpenAction',Table);
 Result:= Pred(FXRefObjets.Count);
 end;
 
@@ -1561,7 +1591,7 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
   end;
 end;
 
-constructor TPdfDocument.CreateDocument;
+constructor TPdfDocument.CreateDocument(const ALayout: TPageLayout; const AZoom: string; const APreferences: Boolean);
 var
   Cpt,CptSect,CptPage,NumFont,{NumImg,}TreeRoot,ParentPage,PageNum,NumPage: Integer;
   OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage,PrevOutline,PrevSect: Integer;
@@ -1571,6 +1601,9 @@ var
   FontName: string;
 begin
 inherited Create;
+FPreferences:= APreferences;
+FPageLayout:= ALayout;
+FZoomValue:= AZoom;
 CreateRefTable;
 CreateTrailer;
 Catalogue:= CreateCatalog;
@@ -1640,6 +1673,16 @@ for CptSect:= 0 to Pred(Sections.Count) do
     begin
     with T_Section(Sections[CptSect]) do
       NewPage:= CreatePage(ParentPage,Paper.H,Paper.W,Succ(NumPage));
+    // add zoom factor to catalog dictionary
+    if (CptSect= 0) and (CptPage= 0)
+    then
+      begin
+      XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+      Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[ElementParNom('Catalog')]).FObjet);
+      TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('OpenAction')]).FValue).AddItem(XRefObjets);
+      Nom:= TPdfName.CreateName('XYZ null null '+FormatFloat('0.##',StrToInt(FZoomValue)/100));
+      TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('OpenAction')]).FValue).AddItem(Nom);
+      end;
     Inc(NumPage);
     PageNum:= CreateContents; // pagenum = object number in the pdf file
     CreateStream(NumPage,PageNum);

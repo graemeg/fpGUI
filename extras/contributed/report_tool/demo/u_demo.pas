@@ -10,7 +10,8 @@ uses
   ShellApi,
   {$endif}
   fpg_main, fpg_base,
-  fpg_form, fpg_button, fpg_label, fpg_dialogs, fpg_utils, U_Report;
+  fpg_form, fpg_button, fpg_label, fpg_panel, fpg_radiobutton, fpg_checkbox, fpg_dialogs, fpg_spinedit, fpg_utils,
+  U_Report;
 
 type
   TF_Demo = class(TfpgForm)
@@ -55,6 +56,15 @@ type
       Bt_PrintGraph: TfpgButton;
       Bt_PrintSurf: TfpgButton;
       Bt_PrintImages: TfpgButton;
+      L_Settings: TfpgLabel;
+      Ckb_Preferences: TfpgCheckBox;
+      P_Zoom: TfpgPanel;
+      SE_Zoom: TFpgSpinEdit;
+      L_Zoom: TfpgLabel;
+      P_Layout: TfpgPanel;
+      RB_Single: TfpgRadiobutton;
+      RB_Two: TfpgRadiobutton;
+      RB_Continuous: TfpgRadiobutton;
       Bt_Exit: TfpgButton;
       procedure Bt_PdfEmptyPageClick(Sender: TObject);
       procedure Bt_PdfSimpleTextClick(Sender: TObject);
@@ -105,6 +115,9 @@ type
       procedure PrintGraph(Preview: Boolean);
       procedure PrintSurf(Preview: Boolean);
       procedure PrintImage(Preview: Boolean);
+      procedure Ckb_PreferencesChange(Sender: TObject);
+      procedure SE_ZoomChange(Sender: TObject);
+      procedure P_LayoutRBChange(Sender: TObject);
     public
       constructor Create(AOwner: TComponent); override;
     end;
@@ -119,6 +132,9 @@ uses
 
 var
   ChartValues: array[0..18] of Integer;
+  Preferences: Boolean;
+  ZoomValue: string;
+  LayoutMode: TPageLayout;
 
 const
   Langue= 'F';
@@ -153,7 +169,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -205,7 +221,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -257,7 +273,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -309,7 +325,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -361,7 +377,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -413,7 +429,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -465,7 +481,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -517,7 +533,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -569,7 +585,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -621,7 +637,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -673,7 +689,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -725,7 +741,7 @@ with FReport do
       if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
       then
          PdfFile:= PdfFile+'.pdf';
-      Document:= TPdfDocument.CreateDocument;
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
       with Document do
         begin
         PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
@@ -1546,6 +1562,29 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.Ckb_PreferencesChange(Sender: TObject);
+begin
+Preferences:= Ckb_Preferences.Checked;
+end;
+
+procedure TF_Demo.SE_ZoomChange(Sender: TObject);
+begin
+ZoomValue:= IntToStr(SE_Zoom.Value);
+end;
+
+procedure TF_Demo.P_LayoutRBChange(Sender: TObject);
+begin
+if RB_Single.Checked
+then
+  LayoutMode:= lSingle;
+if RB_Two.Checked
+then
+  LayoutMode:= lTwo;
+if RB_Continuous.Checked
+then
+  LayoutMode:= lContinuous;
+end;
+
 constructor TF_Demo.Create(AOwner: TComponent);
 var
   Cpt: Integer;
@@ -1553,7 +1592,7 @@ begin
 inherited Create(AOwner);
 Name := 'F_Demo';
 WindowTitle:= 'PDF demo';
-SetPosition(0, 0, 650, 550);
+SetPosition(0, 0, 900, 550);
 WindowPosition:= wpScreenCenter;
 Sizeable:= False;
 fpgSetNamedColor(clWindowBackground,clPaleGreen);
@@ -1614,8 +1653,34 @@ Bt_PrintSurf:= CreateButton(Self,450,430,150,'Show surface',@Bt_PrintSurfClick,'
 Bt_PrintSurf.Enabled:= False;
 Bt_PrintImages:= CreateButton(Self,450,470,150,'Show images',@Bt_PrintImagClick,'stdimg.print');
 Bt_PrintImages.Enabled:= False;
-Bt_Exit:= CreateButton(Self,450,510,150,'Exit',@Bt_ExitClick,'stdimg.exit');
+L_Settings:= CreateLabel(Self,650,5,'PDF settings',200,20,taCenter);
+Ckb_Preferences:= CreateCheckBox(Self,650,30,'FitWindow preference');
+Ckb_Preferences.OnChange:= @Ckb_PreferencesChange;;
+P_Zoom:= CreatePanel(Self,650,60,200,60,'Zoom',bsRaised,taCenter,tlTop,5);
+P_Zoom.BackgroundColor:= clPaleGreen;
+SE_Zoom:= CreateSpinEdit(P_Zoom,10,25,55,20,20,200,1,5,100);
+SE_Zoom.OnChange:= @SE_ZoomChange;
+L_Zoom:= CreateLabel(P_Zoom,70,25,'%');
+//RB_FullPage:= CreateRadiobutton(P_Zoom,10,25,'Full page');
+//RB_FullPage.OnChange:= @P_ZoomRBChange;
+//RB_FullWidth:= CreateRadiobutton(P_Zoom,10,50,'Full width');
+//RB_FullWidth.OnChange:= @P_ZoomRBChange;
+//RB_Real:= CreateRadiobutton(P_Zoom,10,75,'Real');
+//RB_Real.OnChange:= @P_ZoomRBChange;
+P_Layout:= CreatePanel(Self,650,130,200,110,'Layout',bsRaised,taCenter,tlTop,5);
+P_Layout.BackgroundColor:= clPaleGreen;
+RB_Single:= CreateRadiobutton(P_Layout,10,25,'Single');
+RB_Single.OnChange:= @P_LayoutRBChange;
+RB_Two:= CreateRadiobutton(P_Layout,10,50,'Two pages');
+RB_Two.OnChange:= @P_LayoutRBChange;
+RB_Continuous:= CreateRadiobutton(P_Layout,10,75,'Continuous');
+RB_Continuous.OnChange:= @P_LayoutRBChange;
+Ckb_Preferences.Checked:= True;
+//RB_FullPage.Checked:= True;
+RB_Single.Checked:= True;
+Bt_Exit:= CreateButton(Self,375,510,150,'Exit',@Bt_ExitClick,'stdimg.exit');
 Bt_Exit.BackgroundColor:= clTomato;
+ZoomValue:= '100';
 Randomize;
 for Cpt:= 0 to 18 do
   ChartValues[Cpt]:= Round(Random*100);
