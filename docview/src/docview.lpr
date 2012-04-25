@@ -1,6 +1,7 @@
 program docview;
 
 {$mode objfpc}{$H+}
+{$IFDEF WINDOWS}{$apptype gui}{$ENDIF}
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
