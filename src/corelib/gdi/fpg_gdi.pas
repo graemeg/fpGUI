@@ -17,6 +17,9 @@
       Win32 API Reference - http://msdn.microsoft.com/en-us/library/ff468919(VS.85).aspx
       Windows CE 3.0 API Reference - http://msdn.microsoft.com/en-us/library/ms925466.aspx
       FPC WinCE information - http://wiki.freepascal.org/WinCE_port
+
+    TODO:
+      * Refactor out the many $IFDEF CPU64 lines in this unit.
 }
 
 unit fpg_gdi;
@@ -386,9 +389,15 @@ function GetMyWidgetFromHandle(wh: TfpgWinHandle): TfpgWidget;
 var
   wg: TfpgWidget;
 begin
+  {$IFDEF CPU64}
+  wg := TfpgWidget(Windows.GetWindowLongPtr(wh, GWL_USERDATA));
+  if (wh <> 0) and (MainInstance = GetWindowLongPtr(wh, GWL_HINSTANCE))
+    and (wg is TfpgWidget)
+  {$ELSE}
   wg := TfpgWidget(Windows.GetWindowLong(wh, GWL_USERDATA));
   if (wh <> 0) and (MainInstance = longword(GetWindowLong(wh, GWL_HINSTANCE)))
     and (wg is TfpgWidget)
+  {$ENDIF}
   then
     Result := wg
   else
@@ -721,7 +730,11 @@ begin
     w := TfpgGDIWindow(PCreateStruct(lParam)^.lpCreateParams);
     w.FWinHandle := hwnd; // this is very important, because number of messages sent
     // before the createwindow returns the window handle
+    {$IFDEF CPU64}
+    Windows.SetWindowLongPtr(hwnd, GWL_USERDATA, long_ptr(w));
+    {$ELSE}
     Windows.SetWindowLong(hwnd, GWL_USERDATA, longword(w));
+    {$ENDIF}
   end
   else if (uMsg = WM_RENDERALLFORMATS) or (uMsg = WM_RENDERFORMAT) then
   begin
@@ -756,7 +769,11 @@ begin
     Exit; //==>
   end;
 
+  {$IFDEF CPU64}
+  w      := TfpgGDIWindow(Windows.GetWindowLongPtr(hwnd, GWL_USERDATA));
+  {$ELSE}
   w      := TfpgGDIWindow(Windows.GetWindowLong(hwnd, GWL_USERDATA));
+  {$ENDIF}
   Result := 0;
 
   if not (w is TfpgGDIWindow) then
@@ -1016,7 +1033,11 @@ begin
           SendDebug(w.ClassName + ': WM_MOVE');
           {$ENDIF}
           // window decoration correction ...
+          {$IFDEF CPU64}
+          if (GetWindowLongPtr(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
+          {$ELSE}
           if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
+          {$ENDIF}
           begin
             GetWindowRect(w.WinHandle, r);
             msgp.rect.Left := r.Left;
@@ -1041,7 +1062,13 @@ begin
           mw   := nil;
           h    := WindowFromPoint(pt);
           if h > 0 then  // get window mouse is hovering over
+          begin
+            {$IFDEF CPU64}
+            mw := TfpgGDIWindow(Windows.GetWindowLongPtr(h, GWL_USERDATA));
+            {$ELSE}
             mw := TfpgGDIWindow(Windows.GetWindowLong(h, GWL_USERDATA));
+            {$ENDIF}
+          end;
 
           if (mw is TfpgGDIWindow) then
           begin
@@ -1184,9 +1211,9 @@ begin
   FillChar(LFont, sizeof(LFont), 0);
   LFont.lfCharset := DEFAULT_CHARSET;
   {$IFDEF wince}
-  EnumFontFamiliesW(Display, @LFont, @MyFontEnumerator, LongInt(result));
+  EnumFontFamiliesW(Display, @LFont, @MyFontEnumerator, LParam(result));
   {$ELSE}
-  EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LongInt(result), 0);
+  EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LParam(result), 0);
   {$ENDIF}
   Result.Sort;
 end;
@@ -1608,7 +1635,11 @@ begin
     
     if aUpdate then
     begin
+      {$IFDEF CPU64}
+      SetWindowLongPtr(FWinHandle, GWL_STYLE, FWinStyle);
+      {$ELSE}
       SetWindowLong(FWinHandle, GWL_STYLE, FWinStyle);
+      {$ENDIF}
       {According to MSDN, call SetWindowPos to apply changes made by SetWindowLong.
       uFlags should be SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_FRAMECHANGED}
       SetWindowPos(FWinHandle,0,0,0,0,0,SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_FRAMECHANGED);
@@ -1619,7 +1650,11 @@ begin
     FWinStyle := FNonFullscreenStyle;
     if aUpdate then
     begin
+      {$IFDEF CPU64}
+      SetWindowLongPtr(FWinHandle, GWL_STYLE, FWinStyle);
+      {$ELSE}
       SetWindowLong(FWinHandle, GWL_STYLE, FWinStyle);
+      {$ENDIF}
       SetWindowPos(FWinHandle,0,0,0,0,0,SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_FRAMECHANGED);
       ShowWindow(FWinHandle, SW_SHOW);
     end;
@@ -1948,7 +1983,11 @@ var
   placement: TWindowPlacement;
 begin
   Result := inherited GetWindowState;
+  {$IFDEF CPU64}
+  case GetWindowLongPtr(FWinHandle, flagsoffs) of
+  {$ELSE}
   case GetWindowLong(FWinHandle, flagsoffs) of
+  {$ENDIF}
     1:
       begin
         Result := wsMaximized; { TODO: this could later become wsFullScreen or something }
