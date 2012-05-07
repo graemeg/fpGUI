@@ -1,7 +1,7 @@
 {
     << Impressions >>  U_ReportImages.pas
 
-    Copyright (C) 2010 - JM.Levecque - <jmarc.levecque@jmlesite.fr>
+    Copyright (C) 2010 - Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
 
    This library is a free software coming as a add-on to fpGUI toolkit
    See the copyright included in the fpGUI distribution for details about redistribution
