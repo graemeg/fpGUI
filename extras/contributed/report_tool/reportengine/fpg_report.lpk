@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <Name Value="fpg_report"/>
-    <Author Value="&quot;Jean-Marc Levecque&quot; <jmarc.levecque@dbmail.com>"/>
+    <Author Value="Jean-Marc Levecque &lt;jean-marc.levecque@jmlesite.fr>"/>
     <CompilerOptions>
-      <Version Value="9"/>
+      <Version Value="11"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
         <LCLWidgetType Value="nogui"/>
@@ -19,6 +19,7 @@
       </Parsing>
       <Linking>
         <Debugging>
+          <GenerateDebugInfo Value="False"/>
           <UseLineInfoUnit Value="False"/>
         </Debugging>
       </Linking>
@@ -30,7 +31,8 @@
       </Other>
     </CompilerOptions>
     <Description Value="PDF reporting engine"/>
-    <Version Minor="1"/>
+    <License Value="Modified LGPL with static linking exception."/>
+    <Version Minor="2"/>
     <Files Count="5">
       <Item1>
         <Filename Value="u_command.pas"/>
