@@ -481,7 +481,7 @@ var
 const
   PPI= 72;
   FontDefaut= 0;
-  ColDefaut= 0;
+  ColDefaut= -2;
   lnCurrent= -1;
   lnEnd= -2;
 //  cnSuite= -1;
@@ -971,6 +971,9 @@ with T_Section(Sections[Pred(NumSection)]) do
     LnSpInt:= GetInt;
     LnSpInf:= GetInf;
     end;
+  if Column= -2
+  then
+    Column:= DefaultCol;
   if Column> -1
   then
     HeighTxt:= TxtHeight(Round(T_Column(Columns[Column]).GetTextWidth),Texts[Text],Fnt,Round(LnSpInt))+Round(LnSpSup+LnSpInf)
@@ -1474,6 +1477,9 @@ with T_Section(Sections[Pred(NumSection)]) do
     LnSpInt:= GetInt;
     LnSpInf:= GetInf;
     end;
+  if Column= -2
+  then
+    Column:= DefaultCol;
   if Column> -1
   then
     HeighTxt:= TxtHeight(Round(T_Column(Columns[Column]).GetTextWidth),Texts[TextNum]+' 0 '+Texts[TextTot]+' 0',Fnt,Round(LnSpInt))+Round(LnSpSup+LnSpInf)
@@ -1797,6 +1803,9 @@ with T_Section(Sections[Pred(NumSection)]) do
     PosV:= PosY
   else
     PosV:= FPosRef.Y;
+  if Column= -2
+  then
+    Column:= DefaultCol;
   case FPreparation of
     ppPrepare:
       begin
@@ -2224,6 +2233,7 @@ OldSeparator:= DecimalSeparator;
 DecimalSeparator:= '.';
 Sections:= TList.Create;
 Fonts:= TList.Create;
+Columns:= TList.Create;
 LineSpaces:= TList.Create;
 BackColors:= TList.Create;
 LineStyles:= TList.Create;
@@ -2250,6 +2260,11 @@ then
   for Cpt:= 0 to Pred(Fonts.Count) do
     T_Font(Fonts[Cpt]).Free;
 Fonts.Free;
+if Columns.Count> 0
+then
+  for Cpt:= 0 to Pred(Columns.Count) do
+    T_Column(Columns[Cpt]).Free;
+Columns.Free;
 if LineSpaces.Count> 0
 then
   for Cpt:= 0 to Pred(LineSpaces.Count) do
@@ -2321,6 +2336,9 @@ then
 FCurrentFont:= -1;
 FCurrentLineSpace:= -1;
 FGroup:= False;
+with FPaper do
+  VColumn:= T_Column.Create(Printable.L,Printable.R-Printable.L,0,clWhite);
+Columns.Add(VColumn);
 end;
 
 procedure T_Report.EndWrite;
@@ -2414,7 +2432,7 @@ case FPreparation of
     Sections.Add(VSection);
     CMargin:= Dim2Pixels(BackPos);
     VColumn:= T_Column.Create(FCurrentMargin.L,FCurrentMargin.R-FCurrentMargin.L,CMargin,clWhite);
-    T_Section(Sections[Pred(Sections.Count)]).Columns.Add(VColumn);
+    T_Section(Sections[Pred(Sections.Count)]).DefaultCol:= Columns.Add(VColumn);
     end;
   end;
 end;
@@ -2466,19 +2484,10 @@ var
   CPos,CWidth,CMargin: Single;
 begin
 CPos:= Dim2Pixels(ClnPos);
-with T_Section(Sections[Pred(NumSection)]) do
-  begin
-  if CPos< Margins.L
-  then
-    CPos:= Margins.L;
-  CWidth:= Dim2Pixels(ClnWidth);
-  if CWidth> (Margins.R-Margins.L)
-  then
-    CWidth:= Margins.R-Margins.L;
-  end;
+CWidth:= Dim2Pixels(ClnWidth);
 CMargin:= Dim2Pixels(ClnMargin);
 VColumn:= T_Column.Create(CPos,CWidth,CMargin,ClnColor);
-Result:= T_Section(Sections[Pred(Sections.Count)]).Columns.Add(VColumn);
+Result:= Columns.Add(VColumn);
 end;
 
 procedure T_Report.WriteHeader(Horiz,Verti: Single; Text: string; ColNum: Integer= 0; FontNum: Integer= 0;
@@ -2814,17 +2823,17 @@ begin
 DrawAHorizLine(Dim2Pixels(SpBefore),Dim2Pixels(SpAfter),ColNum,-1,StyleNum,zFooter);
 end;
 
-procedure T_Report.SpaceHeader(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+procedure T_Report.SpaceHeader(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
 begin
 InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zHeader);
 end;
 
-procedure T_Report.SpacePage(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+procedure T_Report.SpacePage(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
 begin
 InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zPage);
 end;
 
-procedure T_Report.SpaceFooter(Verti: Single; ColNum: Integer=0; BkColorNum: Integer= -1);
+procedure T_Report.SpaceFooter(Verti: Single; ColNum: Integer= 0; BkColorNum: Integer= -1);
 begin
 InsertSpace(-1,ColNum,Dim2Pixels(Verti),BkColorNum,zFooter);
 end;
@@ -2873,7 +2882,7 @@ end;
 
 procedure T_Report.ColorColChange(ColNum: Integer; ColColor: TfpgColor);
 begin
-T_Column(T_Section(Sections[Pred(Sections.Count)]).Columns[ColNum]).SetColColor(ColColor);
+T_Column(Columns[ColNum]).SetColColor(ColColor);
 end;
 
 procedure T_Report.FrameMargins(AStyle: Integer);

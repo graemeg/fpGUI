@@ -57,7 +57,7 @@ type
       FHeader: TList;
       FFooter: TList;
       FFrames: TList;
-      FColumns: TList;
+      FDefCol: Integer;
       FTitle: string;
       function GetFirstPage: Integer;
       function GetTotalPages: Integer;
@@ -94,7 +94,7 @@ type
       property Paper: TPaper read FPaper;
       property Margins: TDimensions read FMargins;
       property CmdFrames: TList read FFrames;
-      property Columns: TList read FColumns;
+      property DefaultCol: Integer read FDefCol write FDefCol;
       property Title: string read FTitle write FTitle;
     end;
 
@@ -355,7 +355,7 @@ type
 
 var
   Sections: TList;
-//  Columns: TList;
+  Columns: TList;
   Texts: TStringList;
   ImageNames: TStringList;
   Fonts: TList;
@@ -419,7 +419,6 @@ FPages:= TList.Create;
 FHeader:= TList.Create;
 FFooter:= TList.Create;
 FFrames:= TList.Create;
-FColumns:= TList.Create;
 end;
 
 destructor T_Section.Destroy;
@@ -446,11 +445,6 @@ then
   for Cpt:= 0 to Pred(FFrames.Count) do
     T_Command(FFrames[Cpt]).Free;
 FFrames.Free;
-if FColumns.Count> 0
-then
-  for Cpt:= 0 to Pred(FColumns.Count) do
-    T_Command(FColumns[Cpt]).Free;
-FColumns.Free;
 inherited Destroy;
 end;
 
