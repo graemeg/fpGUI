@@ -707,6 +707,27 @@ help.</remark></descr>
 </seealso>
 </element>
 
+<element name="TfpgWindowBase.BringToFront">
+<short>Changes the z-order of a window</short>
+<descr>This doesn't have much meaning at the widget level, but at the TfpgForm level,
+it brings a window to the front - above all other windows of the application. Note that
+this only changes the z-order, it doesn't actually change window focus.</descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.ActivateWindow"></link>
+</seealso>
+</element>
+
+<element name="TfpgWindowBase.ActivateWindow">
+<short>This makse the target window the active window</short>
+<descr>This doesn't have much meaning at the widget level, but at the TfpgForm level,
+it makes the target window the active window. Note that depending on the operating system
+and Window Manager, the active window could still be obscured by other windows. Under Windows,
+it seems that the active window is always brought to the front too.</descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.BringToFront"></link>
+</seealso>
+</element>
+
       <!-- object Visibility: default -->
       <element name="TfpgCanvasBase">
         <short>Abstract class used to represent a Canvas for painting</short>
@@ -895,7 +916,7 @@ Right. And the Top is always smaller than the Bottom.
  For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
 </p></descr>
       </element>
-
+      
       <element name="TfpgCanvasBase.ClipLine">
         <short>Clips the line based on AClipRect boundaries.</short>
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
