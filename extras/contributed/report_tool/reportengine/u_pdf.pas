@@ -1241,7 +1241,7 @@ Info.FObjet.AddElement('Title',Nom);
 Nom:= TPdfString.CreateString(Infos.Auteur);
 Info.FObjet.AddElement('Author',Nom);
 // add creator element to info dictionary
-Nom:= TPdfString.CreateString('fpGUI/FPC');
+Nom:= TPdfString.CreateString(ApplicationName);
 Info.FObjet.AddElement('Creator',Nom);
 // add producer element to info dictionary
 Nom:= TPdfString.CreateString('fpGUI/FPC');
