@@ -1096,7 +1096,7 @@ with FReport do
   // write a long text in the default column
   WritePage(cnLeft,150,'This long text is supposed to be written on two lines in ColDefaut (and does include parenthesis). If it does not, there is obviously a remaining bug in the way wrapping is performed.',ColDefaut,FtText2);
   // write a long text without columns
-  WritePage(50,200,'This long text is supposed to be written on two lines whithout column (and does include parenthesis). If it does not, there is abviously a remaining bug in the way wrapping is performed.',-1,FtText2);
+  WritePage(50,200,'This long text is supposed to be written on two lines without column (and does include parenthesis). If it does not, there is obviously a remaining bug in the way wrapping is performed.',-1,FtText2);
   // preparation is finished, so create PDF objects
   EndWrite;
   end;
