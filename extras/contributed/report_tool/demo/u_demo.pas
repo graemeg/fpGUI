@@ -1088,13 +1088,13 @@ with FReport do
   // write the text at position 100 mm from left and 120 mm from top
   WritePage(100,120,'Big text at absolute position',-1,FtText1);
   // write the text aligned to left
-  WritePage(cnLeft,50,'Text aligned to left',ColDefaut,FtText2);
+  WritePage(cnLeft,50,'Text aligned to left (50mm from the top)',ColDefaut,FtText2);
   // write the text aligned to right
-  WritePage(cnRight,75,'Text aligned to right',ColDefaut,FtText3);
+  WritePage(cnRight,75,'Text aligned to right (75mm from the top)',ColDefaut,FtText3);
   // write the text aligned to center
-  WritePage(cnCenter,100,'Text aligned to center',ColDefaut,FtText2);
+  WritePage(cnCenter,100,'Text aligned to center(100mm from the top)',ColDefaut,FtText2);
   // write a long text in the default column
-  WritePage(cnLeft,150,'This long text is supposed to be written on two lines in ColDefaut (and does include parenthesis). If it does not, there is abviously a remaining bug in the way wrapping is performed.',ColDefaut,FtText2);
+  WritePage(cnLeft,150,'This long text is supposed to be written on two lines in ColDefaut (and does include parenthesis). If it does not, there is obviously a remaining bug in the way wrapping is performed.',ColDefaut,FtText2);
   // write a long text without columns
   WritePage(50,200,'This long text is supposed to be written on two lines whithout column (and does include parenthesis). If it does not, there is abviously a remaining bug in the way wrapping is performed.',-1,FtText2);
   // preparation is finished, so create PDF objects
