@@ -2058,7 +2058,10 @@ end;
 procedure TfpgGDIWindow.BringToFront;
 begin
   if HasHandle then
-    BringWindowToTop(FWinHandle);
+    Windows.SetWindowPos(
+      WinHandle, HWND_TOP,
+      FLeft, FTop, FWidth, FHeight,
+      SWP_NOACTIVATE or SWP_NOSIZE);
 end;
 
 function TfpgGDIWindow.HandleIsValid: boolean;
