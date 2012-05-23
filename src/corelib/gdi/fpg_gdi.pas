@@ -2033,7 +2033,10 @@ end;
 
 procedure TfpgGDIWindow.ActivateWindow;
 begin
-  SetForegroundWindow(FWinHandle);
+    Windows.SetWindowPos(
+      WinHandle, HWND_NOTOPMOST,
+      FLeft, FTop, FWidth, FHeight,
+      SWP_NOZORDER or SWP_NOSIZE);
 end;
 
 procedure TfpgGDIWindow.CaptureMouse;
