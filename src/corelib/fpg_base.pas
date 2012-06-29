@@ -2543,6 +2543,8 @@ var
   p: TProcess;
 begin
   Result := False;
+  if not fpgFileExists(GetHelpViewer) then
+    raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2567,6 +2569,8 @@ var
   p: TProcess;
 begin
   Result := False;
+  if not fpgFileExists(GetHelpViewer) then
+    raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
