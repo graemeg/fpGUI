@@ -224,6 +224,10 @@ msgstr "Выход"
 msgid "Failed to create the directory <%s>"
 msgstr "Невозможно создать директорию <%s>"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "ложный"

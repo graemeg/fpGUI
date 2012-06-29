@@ -56,6 +56,7 @@ rskeyesc  =  'Esc';
 rsexampletext  =  'Пример текста';
 rsexit  =  'Выход';
 rserrfailedtocreatedir  =  'Невозможно создать директорию <%s>';
+rsfailedtofindhelpviewer  =  'Failed to find the help viewer.';
 rsfalse  =  'ложный';
 rscollectionfavourites  =  'Избранные';
 rsshortfeb  =  'Фев';

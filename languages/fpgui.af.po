@@ -224,6 +224,10 @@ msgstr "Staak"
 msgid "Failed to create the directory <%s>"
 msgstr "Kon nie die lêergids <%s> skep nie"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "Onwaar"

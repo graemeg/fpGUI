@@ -224,6 +224,10 @@ msgstr "Sair"
 msgid "Failed to create the directory <%s>"
 msgstr "Falhou ao criar o diretório <%s>"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "Falso"

@@ -223,6 +223,10 @@ msgstr "Verlassen"
 msgid "Failed to create the directory <%s>"
 msgstr "Konnte Verzeichnis <%s> nicht anlegen"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "Falsch"

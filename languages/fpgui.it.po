@@ -224,6 +224,10 @@ msgstr "Esci"
 msgid "Failed to create the directory <%s>"
 msgstr "Impossibile creare la cartella <%s>"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "Falso"

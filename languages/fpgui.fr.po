@@ -224,6 +224,10 @@ msgstr "Sortir"
 msgid "Failed to create the directory <%s>"
 msgstr "Le répertoire <%s> n''a pas pu être ouvert"
 
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
 #: fpg_constants:rsfalse
 msgid "False"
 msgstr "False"

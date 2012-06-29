@@ -56,6 +56,7 @@ rskeyesc  =  'Esc';
 rsexampletext  =  'Teks Voorbeeld';
 rsexit  =  'Staak';
 rserrfailedtocreatedir  =  'Kon nie die lêergids <%s> skep nie';
+rsfailedtofindhelpviewer  =  'Failed to find the help viewer.';
 rsfalse  =  'Onwaar';
 rscollectionfavourites  =  'Gunstelinge';
 rsshortfeb  =  'Feb';

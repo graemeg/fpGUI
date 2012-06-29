@@ -56,6 +56,7 @@ rskeyesc  =  'Esc';
 rsexampletext  =  'Texto de Ejemplo';
 rsexit  =  'Salir';
 rserrfailedtocreatedir  =  'No se ha podido crear la carpeta <%s>';
+rsfailedtofindhelpviewer  =  'Failed to find the help viewer.';
 rsfalse  =  'Falso';
 rscollectionfavourites  =  'Favoritos';
 rsshortfeb  =  'Feb';
