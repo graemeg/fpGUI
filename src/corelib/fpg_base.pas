@@ -81,6 +81,13 @@ type
 
   TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
 
+  // in case we wanted to trap any fpGUI specific exceptions
+  EfpGUIException = class(Exception);
+
+  // For providing user feedback. No need to display backtrace information
+  EfpGUIUserFeedbackException = class(EfpGUIException);
+
+
 
 const
   MOUSE_LEFT       = 1;
