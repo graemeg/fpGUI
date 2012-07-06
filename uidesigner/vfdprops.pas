@@ -25,6 +25,7 @@ uses
   Classes,
   SysUtils,
   fpg_base,
+  fpg_main,
   fpg_widget,
   vfdwidgetclass,
   fpg_edit,
@@ -96,6 +97,7 @@ type
   
   TPropertyColor = class(TVFDWidgetProperty)
   public
+    procedure DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas; rect: TfpgRect; flags: integer); override;
     function  ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
     function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
     function  GetValueText(wg: TfpgWidget): string; override;
@@ -174,7 +176,6 @@ uses
   TypInfo,
   vfdformparser,
   vfdeditors,
-  fpg_main,
   fpg_dialogs;
 
 
@@ -793,6 +794,34 @@ begin
 end;
 
 { TPropertyColor }
+
+procedure TPropertyColor.DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas;
+  rect: TfpgRect; flags: integer);
+const
+  BLOCK_SIZE = 10;  { for margin and square size }
+var
+  s: TfpgString;
+  dx: integer;
+  i: integer;
+  c: TfpgColor;
+begin
+  inherited DrawValue(wg, Canvas, rect, flags);
+  try
+    s := GetValueText(wg);
+  except
+    on E: Exception do
+      debugln('Detected an error: ', E.Message);
+  end;
+  dx := Canvas.Font.TextWidth(s) + BLOCK_SIZE;
+  i := GetOrdProp(wg, Name);
+  c := fpgColorToRGB(TfpgColor(i));
+  { paint the color square }
+  Canvas.Color := c;
+  Canvas.FillRectangle(rect.Left+dx, rect.Top+((rect.Height-BLOCK_SIZE) div 2), BLOCK_SIZE, BLOCK_SIZE);
+  { paint a block border around the square }
+  Canvas.Color := clBlack;
+  Canvas.DrawRectangle(rect.Left+dx, rect.Top+((rect.Height-BLOCK_SIZE) div 2), BLOCK_SIZE, BLOCK_SIZE);
+end;
 
 function TPropertyColor.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
 var
