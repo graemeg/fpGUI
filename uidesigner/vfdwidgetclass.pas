@@ -188,7 +188,7 @@ begin
     s := GetValueText(wg);
   except
     on E: Exception do
-      writeln('Detected a error: ', E.Message);
+      debugln('Detected an error: ', E.Message);
   end;
   
   Canvas.BeginDraw;
@@ -203,7 +203,7 @@ end;
 
 procedure TVFDWidgetProperty.OnExternalEdit(wg: TfpgWidget);
 begin
-  writeln('external edit');
+  debugln('external edit');
 end;
 
 { TVFDPropertyEditor }
@@ -222,7 +222,7 @@ end;
 
 procedure TVFDPropertyEditor.LoadValue(wg: TfpgWidget);
 begin
-  Writeln('abstract: editor.LoadValue');
+  debugln('abstract: editor.LoadValue');
 end;
 
 procedure TVFDPropertyEditor.UpdateProperty(Sender: TObject);
@@ -233,7 +233,7 @@ end;
 
 procedure TVFDPropertyEditor.StoreValue(wg: TfpgWidget);
 begin
-  Writeln('abstract: editor.StoreValue');
+  debugln('abstract: editor.StoreValue');
   // check property type
   // the property must be published !
   // PPropInfo := GetPropInfo(object, 'propname');
