@@ -964,6 +964,11 @@ begin
           dir := -1
         else
           dir := 1;
+    keyF1:
+      begin
+        InvokeHelp;
+        consumed := True;
+      end;
 {
     keyReturn,
     keyDown,
