@@ -1,5 +1,5 @@
 {
-    << Impressions >>  U_Imprime.pas
+    << Impressions >>  U_Report.pas
 
     Copyright (C) 2010 - Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
 
