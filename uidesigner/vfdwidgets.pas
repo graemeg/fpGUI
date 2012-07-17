@@ -385,6 +385,7 @@ begin
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('IgnoreMouseCursor', TPropertyBoolean, 'If True, then mouse pointer doesn''t change');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('PasswordMode', TPropertyBoolean, 'When enabled, it masks the text input');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
