@@ -316,6 +316,11 @@ begin
     'vfd.splitter', @stdimg_vfd_splitter,
     sizeof(stdimg_vfd_splitter),
     0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.hyperlink', @stdimg_vfd_hyperlink,
+    sizeof(stdimg_vfd_hyperlink),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
