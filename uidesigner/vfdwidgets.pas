@@ -66,6 +66,7 @@ uses
   fpg_editbtn,
   fpg_ColorWheel,
   fpg_splitter,
+  fpg_hyperlink,
   vfdpropeditgrid,
   vfdmain;
 
@@ -957,6 +958,27 @@ begin
   wc.AddProperty('ColorGrabBar', TPropertyColor, '');
   wc.AddProperty('AutoSnap', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.splitter';
+  RegisterVFDWidget(wc);
+
+  // Hyperlink
+  wc          := TVFDWidgetClass.Create(TfpgHyperlink);
+  wc.NameBase := 'Hyperlink';
+  wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
+  wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
+  wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('Enabled', TPropertyBoolean, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('HotTrackColor', TPropertyColor, 'The color that the text must appear in when the mouse is over the widget.');
+  wc.AddProperty('HotTrackFont', TPropertyFontDesc, 'The font that the text must use, when the mouse is over the widget.');
+  wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('Text', TPropertyString, 'Label text');
+  wc.AddProperty('TextColor', TPropertyColor, '');
+  wc.AddProperty('URL', TPropertyString, 'The URL that must be opened in the default web browser. If OnClick is specified, then the URL has no affect.');
+  wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
+  wc.WidgetIconName := 'vfd.hyperlink';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
