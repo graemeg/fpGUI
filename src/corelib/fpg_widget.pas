@@ -1316,7 +1316,12 @@ begin
   itf := DebugMethodEnter('TfpgWidget.HandleAlignments - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if (csLoading in ComponentState) then
+  begin
+    {$IFDEF CStackDebug}
+    DebugLn('HandleAlignments ('+Name+'): csLoading detected, so we exit early');
+    {$ENDIF}
     Exit;  //==>
+  end;
 
   {$IFDEF CStackDebug}
   DebugLn(Format('dwidth=%d  dheight=%d  Classname=''%s''', [dwidth, dheight, ClassName]));
