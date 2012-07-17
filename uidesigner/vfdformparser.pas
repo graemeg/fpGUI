@@ -336,7 +336,7 @@ begin
       begin
         pwg := ffd.FindWidgetByName(wgparent);
         if pwg = nil then
-          Writeln('Warning! Parent object "' + wgparent + '" not found for "' + wgname + '"');
+          DebugLn('Warning! Parent object "' + wgparent + '" not found for "' + wgname + '"');
       end;
       if pwg = nil then
         pwg := ffd.Form;
@@ -507,7 +507,7 @@ begin
       end;
 
   if not lok then
-    Writeln('unknown: ', line);
+    DebugLn('unknown: ', line);
 
   Result := lok;
 end;
