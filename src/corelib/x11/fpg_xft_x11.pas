@@ -166,7 +166,7 @@ procedure XftTextExtents16(display : PXDisplay; fnt : PXftFont; txt : PChar; len
 procedure XftDrawSetClip(draw : PXftDraw; rg : TRegion); cdecl; external libXft;
 function  XftListFonts(display : PXDisplay; screen : integer; params : array of const) : PFcFontSet; cdecl; external libXft;
 function  XftNameUnparse(pat : PFcPattern; dest : PChar; destlen : integer) : boolean; cdecl; external libXft;
-procedure FcFontSetDestroy(fsp : PFcFontSet); cdecl; external libXft;
+procedure FcFontSetDestroy(fsp : PFcFontSet); cdecl; external fclib;
 
 
 //function FcFontList(config: PFcConfig; p:PFcPattern; os:PFcObjectSet): PFcFontSet;cdecl; external fclib name 'FcFontList';
