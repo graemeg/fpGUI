@@ -166,7 +166,6 @@ begin
   diff    := Max - Min; // diff..
   aPos    := Position - Min;  // absolute position
   percent := round(((100 / diff) * aPos));
-  txt     := IntToStr(percent) + '%';
   pos     := round(percent * (Width-2) / 100);
 
   // Bluecurve theme  :)
@@ -193,6 +192,7 @@ begin
   // paint percentage if required
   if FShowCaption then
   begin
+    txt := IntToStr(percent) + '%';
     x := (Width - FFont.TextWidth(txt)) div 2;
     y := (Height - FFont.Height) div 2;
     Canvas.SetTextColor(TextColor);
