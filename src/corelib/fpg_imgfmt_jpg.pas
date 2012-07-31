@@ -272,7 +272,7 @@ var
   inptr: JSAMPLE_PTR;
   col : JDIMENSION;
  // pad : int;
-  NewBGR: TFPColor;
+  NewBGR: TRGBTriple;
   PDest: PLongWord;
 begin
   inptr := JSAMPLE_PTR(dest^.buffer^[0]);
@@ -290,7 +290,7 @@ begin
       Inc(inptr);
       NewBGR.Blue:=inptr^;
       Inc(inptr);
-      PDest^ := FPColorTofpgColor(NewBGR);
+      PDest^ := RGBTripleTofpgColor(NewBGR);
       inc(PDest);
     end;
   end
@@ -303,7 +303,7 @@ begin
       NewBGR.Blue:=inptr^;
       NewBGR.Alpha:=inptr^;
       Inc(inptr);
-      PDest^ := FPColorTofpgColor(NewBGR);
+      PDest^ := RGBTripleTofpgColor(NewBGR);
       inc(PDest);
     end;  
   end;
