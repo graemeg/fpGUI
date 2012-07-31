@@ -30,6 +30,7 @@ type
       Bt_PdfGraph: TfpgButton;
       Bt_PdfSurf: TfpgButton;
       Bt_PdfImages: TfpgButton;
+      Bt_PdfTtfFont: TfpgButton;
       L_Visu: TfpgLabel;
       Bt_VisuEmptyPage: TfpgButton;
       Bt_VisuSimpleText: TfpgButton;
@@ -43,6 +44,7 @@ type
       Bt_VisuGraph: TfpgButton;
       Bt_VisuSurf: TfpgButton;
       Bt_VisuImages: TfpgButton;
+      Bt_VisuTtfFont: TfpgButton;
       L_Print: TfpgLabel;
       Bt_PrintEmptyPage: TfpgButton;
       Bt_PrintSimpleText: TfpgButton;
@@ -56,6 +58,7 @@ type
       Bt_PrintGraph: TfpgButton;
       Bt_PrintSurf: TfpgButton;
       Bt_PrintImages: TfpgButton;
+      Bt_PrintTtfFont: TfpgButton;
       L_Settings: TfpgLabel;
       Ckb_Preferences: TfpgCheckBox;
       P_Zoom: TfpgPanel;
@@ -65,6 +68,7 @@ type
       RB_Single: TfpgRadiobutton;
       RB_Two: TfpgRadiobutton;
       RB_Continuous: TfpgRadiobutton;
+      Bt_FontDir: TfpgButton;
       Bt_Exit: TfpgButton;
       procedure Bt_PdfEmptyPageClick(Sender: TObject);
       procedure Bt_PdfSimpleTextClick(Sender: TObject);
@@ -78,6 +82,7 @@ type
       procedure Bt_PdfGraphClick(Sender: TObject);
       procedure Bt_PdfSurfClick(Sender: TObject);
       procedure Bt_PdfImagClick(Sender: TObject);
+      procedure Bt_PdfTtfFontClick(Sender: TObject);
       procedure Bt_VisuEmptyPageClick(Sender: TObject);
       procedure Bt_VisuSimpleTextClick(Sender: TObject);
       procedure Bt_VisuMultiPagesClick(Sender: TObject);
@@ -90,6 +95,7 @@ type
       procedure Bt_VisuGraphClick(Sender: TObject);
       procedure Bt_VisuSurfClick(Sender: TObject);
       procedure Bt_VisuImagClick(Sender: TObject);
+      procedure Bt_VisuTtfFontClick(Sender: TObject);
       procedure Bt_PrintEmptyPageClick(Sender: TObject);
       procedure Bt_PrintSimpleTextClick(Sender: TObject);
       procedure Bt_PrintMultiPagesClick(Sender: TObject);
@@ -102,7 +108,9 @@ type
       procedure Bt_PrintGraphClick(Sender: TObject);
       procedure Bt_PrintSurfClick(Sender: TObject);
       procedure Bt_PrintImagClick(Sender: TObject);
+      procedure Bt_PrintTtfFontClick(Sender: TObject);
       procedure Bt_ExitClick(Sender: TObject);
+      procedure Bt_FontDirClick(Sender: TObject);
       procedure PrintEmptyPage(Preview: Boolean);
       procedure PrintSimpleText(Preview: Boolean);
       procedure PrintMultiPages(Preview: Boolean);
@@ -115,8 +123,10 @@ type
       procedure PrintGraph(Preview: Boolean);
       procedure PrintSurf(Preview: Boolean);
       procedure PrintImage(Preview: Boolean);
+      procedure PrintTtfFont(Preview: Boolean);
       procedure Ckb_PreferencesChange(Sender: TObject);
       procedure SE_ZoomChange(Sender: TObject);
+      procedure SE_ZoomExit(Sender: TObject);
       procedure P_LayoutRBChange(Sender: TObject);
     public
       constructor Create(AOwner: TComponent); override;
@@ -128,7 +138,7 @@ var
 implementation
 
 uses
-  U_Command, U_Pdf, U_ReportImages;
+  U_Command, U_Pdf;
 
 var
   ChartValues: array[0..18] of Integer;
@@ -763,6 +773,58 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.Bt_PdfTtfFontClick(Sender: TObject);
+var
+  Fd_SavePdf: TfpgFileDialog;
+  PdfFile: string;
+  PdfFileStream: TFileStream;
+begin
+FReport:= T_Report.Create;
+with FReport do
+  begin
+//  Language:= Version;
+  PrintTtfFont(False);
+  if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
+  then
+    begin
+    ShowMessage('There is no file to print');
+    Exit;
+    end;
+  Fd_SavePdf:= TfpgFileDialog.Create(nil);
+  Fd_SavePdf.InitialDir:= ExtractFilePath(Paramstr(0));
+  Fd_SavePdf.FontDesc:= 'bitstream vera sans-9';
+  Fd_SavePdf.Filter:= 'PDF files (*.pdf) |*.pdf';
+  Fd_SavePdf.FileName:= 'TtfFont.pdf';
+  try
+    if Fd_SavePdf.RunSaveFile
+    then
+      begin
+      PdfFile:= Fd_SavePdf.FileName;
+      if Lowercase(Copy(PdfFile,Length(PdfFile)-3,4))<> '.pdf'
+      then
+         PdfFile:= PdfFile+'.pdf';
+      Document:= TPdfDocument.CreateDocument(LayoutMode,ZoomValue,Preferences);
+      with Document do
+        begin
+        PdfFileStream:= TFileStream.Create(PdfFile,fmCreate);
+        WriteDocument(PdfFileStream);
+        PdfFileStream.Free;
+        Free;
+        end;
+  {$ifdef linux}
+      fpgOpenURL(PdfFile);
+  {$endif}
+  {$ifdef win32}
+      ShellExecute(0,PChar('OPEN'),PChar(PdfFile),PChar(''),PChar(''),1);
+  {$endif}
+      end;
+  finally
+    Fd_SavePdf.Free;
+    end;
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_VisuEmptyPageClick(Sender: TObject);
 begin
 FReport:= T_Report.Create;
@@ -907,6 +969,18 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.Bt_VisuTtfFontClick(Sender: TObject);
+begin
+FReport:= T_Report.Create;
+with FReport do
+  begin
+  //Language:= Version;
+  DefaultFile:= 'TtfFont.pdf';
+  PrintTtfFont(True);
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_PrintEmptyPageClick(Sender: TObject);
 begin
 
@@ -967,6 +1041,16 @@ begin
 
 end;
 
+procedure TF_Demo.Bt_PrintTtfFontClick(Sender: TObject);
+begin
+
+end;
+
+procedure TF_Demo.Bt_FontDirClick(Sender: TObject);
+begin
+FontDirectory:= SelectDirDialog('/Home');
+end;
+
 procedure TF_Demo.Bt_ExitClick(Sender: TObject);
 begin
 Close;
@@ -995,12 +1079,12 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins: 10 mm each side
-  Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtText1:= Font('helvetica-15:bold',clBlack);
   FtText2:= Font('helvetica-8',clBlack);
   FtText3:= Font('helvetica-8:italic',clBlack);
+  // create a new section and define the margins: 10 mm each side
+  Section(10,10,10,10);
   // write the text at position 100 mm from left and 120 mm from top
   WritePage(100,120,'Big text at absolute position',-1,FtText1);
   // write the text aligned to left
@@ -1027,11 +1111,11 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins
-  Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-8',clBlack);
+  // create a new section and define the margins
+  Section(20,10,10,10);
   // write title on each page
   WriteHeader(cnCenter,lnEnd,'MULTIPAGE DOCUMENT',ColDefaut,FtTitle);
   // write page number and total of pages on each page
@@ -1183,8 +1267,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(20,10,10,10,5);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-8',clBlack);
@@ -1195,6 +1277,8 @@ with FReport do
   // create line spacings to be used
   IlTitle:= LineSpace(3,0,3);
   IlText:= LineSpace(1,0,1);
+  // create a new section and define the margins with an additional one due to frames drawing
+  Section(20,10,10,10,5);
   // write title on each page
   WriteHeader(cnCenter,lnEnd,'SHOWING FRAMES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
@@ -1224,8 +1308,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(20,10,10,10);
   // create the filling colors to be used
   BcBeige:= BackColor(clBeige);
   BcAqua:= BackColor(clAqua);
@@ -1245,6 +1327,8 @@ with FReport do
   // create line spacings to be used
   IlTitle:= LineSpace(5,0,5);
   IlText:= LineSpace(0,0,0);
+  // create a new section and define the margins
+  Section(20,10,10,10);
   // write title on each page
   WriteHeader(cnCenter,lnEnd,'SHOWING COLORS',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
@@ -1276,8 +1360,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-8',clBlack);
@@ -1297,6 +1379,8 @@ with FReport do
   Col1:= Column(20,60,2);
   Col2:= Column(80,60,2);
   Col3:= Column(140,60,2);
+  // create a new section and define the margins
+  Section(20,10,10,10);
   // write title on each page
   WriteHeader(cnCenter,lnEnd,'SHOWING LINES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
@@ -1343,8 +1427,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(20,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-7',clBlack);
@@ -1369,6 +1451,8 @@ with FReport do
   Col[3]:= Column(Col3Pos,Col3Wid,2);
   Col[4]:= Column(Col4Pos,Col4Wid,2);
   Col[5]:= Column(Col5Pos,Col5Wid,2);
+  // create a new section and define the margins
+  Section(20,10,10,10);
   // write title on each page
   WriteHeader(cnCenter,lnEnd,'SHOWING GRIDS',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
@@ -1452,8 +1536,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-7',clBlack);
@@ -1466,6 +1548,8 @@ with FReport do
   TsGray:= LineStyle(1,clGray,lsDot);
   TsBlue:= LineStyle(1,clBlue,lsSolid);
   TsFuchsia:= LineStyle(1,clFuchsia,lsDot);
+  // create a new section and define the margins
+  Section(10,10,10,10);
   WriteHeader(cnCenter,lnEnd,'SHOWING GRAPH',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
@@ -1504,14 +1588,14 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-7',clBlack);
   // create line spacings to be used
   IlTitle:= LineSpace(3,0,3);
   IlText:= LineSpace(1,0,0);
+  // create a new section and define the margins
+  Section(10,10,10,10);
   WriteHeader(cnCenter,lnEnd,'SHOWING SURFACE',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
@@ -1533,8 +1617,6 @@ with FReport do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   BeginWrite(oPortrait,A4,msMM,Langue,Preview);
-  // create a new section and define the margins with an additional one due to frames drawing
-  Section(10,10,10,10);
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitle:= Font('helvetica-15:bold',clBlack);
   FtText:= Font('helvetica-7',clBlack);
@@ -1544,6 +1626,8 @@ with FReport do
   Col1:= Column(20,60,2);
   Col2:= Column(80,60,2);
   Col3:= Column(140,60,2);
+  // create a new section and define the margins
+  Section(10,10,10,10);
   WriteHeader(cnCenter,lnEnd,'SHOWING IMAGES',ColDefaut,FtTitle,IlTitle);
   // write page number and total of pages on each page
   NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
@@ -1562,12 +1646,62 @@ with FReport do
   end;
 end;
 
+procedure TF_Demo.PrintTtfFont(Preview: Boolean);
+var
+  FtTitle,FtText,FtText1,FtText2,FtText3,FtText4,FtText5,FtText6,FtText7,FtText8,FtText9,FtText10: Integer;
+  IlTitle,IlText: Integer;
+begin
+with FReport do
+  begin
+  // define orientation, page format, measurement unit, language, preview (true) or print (false)
+  BeginWrite(oPortrait,A4,msMM,Langue,Preview);
+  // create a new section and define the margins: 10 mm each side
+  Section(10,10,10,10);
+  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+  FtTitle:= Font('helvetica-15:bold',clBlack);
+  FtText:= Font('helvetica-7',clBlack);
+  FtText1:= Font('LiberationSans-10',clBlack);
+  FtText2:= Font('LiberationSans-10:bold:italic',clBlack);
+  FtText3:= Font('LiberationMono-10:italic',clBlack);
+  FtText4:= Font('LiberationSerif-10:bold',clBlack);
+  FtText5:= Font('DejaVuSans-10',clBlack);
+  FtText6:= Font('DejaVuSansCondensed-10',clBlack);
+  FtText7:= Font('DejaVuSansMono-10:bold:oblique',clBlack);
+  FtText8:= Font('DejaVuSerif-10:italic',clBlack);
+  FtText9:= Font('ComicSansMS-10',clBlack);
+  FtText10:= Font('ComicSansMS-10:bold',clBlack);
+  // create line spacings to be used
+  IlTitle:= LineSpace(0,0,5);
+  IlText:= LineSpace(3,0,3);
+  WriteHeader(cnCenter,lnEnd,'SHOWING TRUE TYPE FONTS',ColDefaut,FtTitle,IlTitle);
+  // write page number and total of pages on each page
+  NumPageFooter(cnRight,lnEnd,'Page','of',True,ColDefaut,FtText,IlText);
+  // write text aligned to center of the page
+  WritePage(cnCenter,lnEnd,'LiberationSans-10',ColDefaut,FtText1);
+  WritePage(cnCenter,lnEnd,'LiberationSans-10:bold:italic',ColDefaut,FtText2);
+  WritePage(cnCenter,lnEnd,'LiberationMono-10:italic',ColDefaut,FtText3);
+  WritePage(cnCenter,lnEnd,'LiberationSerif-10:bold',ColDefaut,FtText4);
+  WritePage(cnCenter,lnEnd,'DejaVuSans-10',ColDefaut,FtText5);
+  WritePage(cnCenter,lnEnd,'DejaVuSansCondensed-10',ColDefaut,FtText6);
+  WritePage(cnCenter,lnEnd,'DejaVuSansMono-10:bold:oblique',ColDefaut,FtText7);
+  WritePage(cnCenter,lnEnd,'DejaVuSerif-10:italic',ColDefaut,FtText8);
+  WritePage(cnCenter,lnEnd,'ComicSansMS-10',ColDefaut,FtText9);
+  WritePage(cnCenter,lnEnd,'ComicSansMS-10:bold',ColDefaut,FtText10);
+  EndWrite;
+  end;
+end;
+
 procedure TF_Demo.Ckb_PreferencesChange(Sender: TObject);
 begin
 Preferences:= Ckb_Preferences.Checked;
 end;
 
 procedure TF_Demo.SE_ZoomChange(Sender: TObject);
+begin
+ZoomValue:= IntToStr(SE_Zoom.Value);
+end;
+
+procedure TF_Demo.SE_ZoomExit(Sender: TObject);
 begin
 ZoomValue:= IntToStr(SE_Zoom.Value);
 end;
@@ -1592,7 +1726,7 @@ begin
 inherited Create(AOwner);
 Name := 'F_Demo';
 WindowTitle:= 'PDF demo';
-SetPosition(0, 0, 900, 550);
+SetPosition(0, 0, 900, 600);
 WindowPosition:= wpScreenCenter;
 Sizeable:= False;
 fpgSetNamedColor(clWindowBackground,clPaleGreen);
@@ -1615,6 +1749,7 @@ Bt_PdfGrid:= CreateButton(Self,50,350,150,'Show grid',@Bt_PdfGridClick,'stdimg.A
 Bt_PdfGraph:= CreateButton(Self,50,390,150,'Show graph',@Bt_PdfGraphClick,'stdimg.Adobe_pdf');
 Bt_PdfSurf:= CreateButton(Self,50,430,150,'Show surface',@Bt_PdfSurfClick,'stdimg.Adobe_pdf');
 Bt_PdfImages:= CreateButton(Self,50,470,150,'Show images',@Bt_PdfImagClick,'stdimg.Adobe_pdf');
+Bt_PdfTtfFont:= CreateButton(Self,50,510,150,'True type fonts',@Bt_PdfTtfFontClick,'stdimg.Adobe_pdf');
 L_Visu:= CreateLabel(Self,250,5,'Preview',150,20,taCenter);
 Bt_VisuEmptyPage:= CreateButton(Self,250,30,150,'Empty page',@Bt_VisuEmptyPageClick,'stdimg.preview');
 Bt_VisuSimpleText:= CreateButton(Self,250,70,150,'Simple text',@Bt_VisuSimpleTextClick,'stdimg.preview');
@@ -1628,6 +1763,7 @@ Bt_VisuGrid:= CreateButton(Self,250,350,150,'Show grid',@Bt_VisuGridClick,'stdim
 Bt_VisuGraph:= CreateButton(Self,250,390,150,'Show graph',@Bt_VisuGraphClick,'stdimg.preview');
 Bt_VisuSurf:= CreateButton(Self,250,430,150,'Show surface',@Bt_VisuSurfClick,'stdimg.preview');
 Bt_VisuImages:= CreateButton(Self,250,470,150,'Show images',@Bt_VisuImagClick,'stdimg.preview');
+Bt_VisuTtfFont:= CreateButton(Self,250,510,150,'True type fonts',@Bt_VisuTtfFontClick,'stdimg.preview');
 L_Print:= CreateLabel(Self,450,5,'Print to printer',150,20,taCenter);
 Bt_PrintEmptyPage:= CreateButton(Self,450,30,150,'Empty page',@Bt_PrintEmptyPageClick,'stdimg.print');
 Bt_PrintEmptyPage.Enabled:= False;
@@ -1653,6 +1789,8 @@ Bt_PrintSurf:= CreateButton(Self,450,430,150,'Show surface',@Bt_PrintSurfClick,'
 Bt_PrintSurf.Enabled:= False;
 Bt_PrintImages:= CreateButton(Self,450,470,150,'Show images',@Bt_PrintImagClick,'stdimg.print');
 Bt_PrintImages.Enabled:= False;
+Bt_PrintTtfFont:= CreateButton(Self,450,510,150,'True type fonts',@Bt_PrintTtfFontClick,'stdimg.print');
+Bt_PrintTtfFont.Enabled:= False;
 L_Settings:= CreateLabel(Self,650,5,'PDF settings',200,20,taCenter);
 Ckb_Preferences:= CreateCheckBox(Self,650,30,'FitWindow preference');
 Ckb_Preferences.OnChange:= @Ckb_PreferencesChange;;
@@ -1661,12 +1799,6 @@ P_Zoom.BackgroundColor:= clPaleGreen;
 SE_Zoom:= CreateSpinEdit(P_Zoom,10,25,55,20,20,200,1,5,100);
 SE_Zoom.OnChange:= @SE_ZoomChange;
 L_Zoom:= CreateLabel(P_Zoom,70,25,'%');
-//RB_FullPage:= CreateRadiobutton(P_Zoom,10,25,'Full page');
-//RB_FullPage.OnChange:= @P_ZoomRBChange;
-//RB_FullWidth:= CreateRadiobutton(P_Zoom,10,50,'Full width');
-//RB_FullWidth.OnChange:= @P_ZoomRBChange;
-//RB_Real:= CreateRadiobutton(P_Zoom,10,75,'Real');
-//RB_Real.OnChange:= @P_ZoomRBChange;
 P_Layout:= CreatePanel(Self,650,130,200,110,'Layout',bsRaised,taCenter,tlTop,5);
 P_Layout.BackgroundColor:= clPaleGreen;
 RB_Single:= CreateRadiobutton(P_Layout,10,25,'Single');
@@ -1675,10 +1807,10 @@ RB_Two:= CreateRadiobutton(P_Layout,10,50,'Two pages');
 RB_Two.OnChange:= @P_LayoutRBChange;
 RB_Continuous:= CreateRadiobutton(P_Layout,10,75,'Continuous');
 RB_Continuous.OnChange:= @P_LayoutRBChange;
+Bt_FontDir:= CreateButton(Self,640,260,220,'True type font files directory',@Bt_FontDirClick,'');
 Ckb_Preferences.Checked:= True;
-//RB_FullPage.Checked:= True;
 RB_Single.Checked:= True;
-Bt_Exit:= CreateButton(Self,375,510,150,'Exit',@Bt_ExitClick,'stdimg.exit');
+Bt_Exit:= CreateButton(Self,375,550,150,'Exit',@Bt_ExitClick,'stdimg.exit');
 Bt_Exit.BackgroundColor:= clTomato;
 ZoomValue:= '100';
 Randomize;

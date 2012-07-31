@@ -1,7 +1,7 @@
 {
     << Impressions >>  U_Pdf.pas
 
-    Copyright (C) 2010 - Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
+    Copyright (C) 2010 - JM.Levecque - <jmarc.levecque@jmlesite.fr>
 
    This library is a free software coming as a add-on to fpGUI toolkit
    See the copyright included in the fpGUI distribution for details about redistribution
@@ -22,7 +22,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,
-  fpg_main, fpg_base;
+  fpg_main, fpg_base, fpg_dialogs;
 
 type
   TPdfObjet = class(TObject)
@@ -113,6 +113,7 @@ type
       FTxtSize: string;
     protected
       procedure WriteFonte(const AFlux: TStream);
+      function WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): Int64;
     public
       constructor CreateFonte(const AFont: Integer; const ASize: string);
       destructor Destroy; override;
@@ -273,7 +274,13 @@ type
       function CreatePage(Parent,Haut,Larg,PageNum: Integer): Integer;
       function CreateOutlines: Integer;
       function CreateOutline(Parent,SectNo,PageNo: Integer; SectTitre: string): Integer;
-      procedure CreateFont(NomFonte: string; NumFonte: Integer);
+      procedure CreateStdFont(NomFonte: string; NumFonte: Integer);
+      function LoadFont(NomFonte: string): string;
+      procedure CreateTtfFont(const NumFonte: Integer);
+      procedure CreateTp1Font(const NumFonte: Integer);
+      procedure CreateFontDescriptor(const NumFonte: Integer);
+      procedure CreateFontWidth;
+      procedure CreateFontFile(const NumFonte: Integer);
       procedure CreateImage(ImgWidth,ImgHeight,NumImg: Integer);
       function CreateContents: Integer;
       procedure CreateStream(NumeroPage,PageNum: Integer);
@@ -282,6 +289,24 @@ type
       destructor Destroy; override;
       procedure WriteDocument(const AFlux: TStream);
       property PageLayout: TPageLayout read FPageLayout write FPageLayout default lSingle;
+    end;
+
+  TFontDef = record
+    FType: string;
+    FName: string;
+    FAscent: string;
+    FDescent: string;
+    FCapHeight: string;
+    FFlags: string;
+    FFontBBox: string;
+    FItalicAngle: string;
+    FStemV: string;
+    FMissingWidth: string;
+    FEncoding: string;
+    FFile: string;
+    FOriginalSize: string;
+    FDiffs: widestring;
+    FCharWidth: widestring;
     end;
 
 const
@@ -296,6 +321,7 @@ var
   Document: TPdfDocument;
   OldDecSeparator: Char;
   Outline: Boolean;
+  FontDirectory: string;
 
 implementation
 
@@ -307,6 +333,9 @@ var
   CurrentColor: string;
   CurrentWidth: string;
   Catalogue: Integer;
+  FontDef: TFontDef;
+  Flux: TMemoryStream;
+  FontFiles: array of string;
 
 // utility functions
 
@@ -376,7 +405,7 @@ function ExtractBaseFontName(const AValue: string): string;
 var
   FontName,Chaine1,Chaine2: string;
 begin
-FontName:= Uppercase(AValue[1])+Copy(AValue,2,Pos('-',AValue)-2);
+FontName:= Copy(AValue,1,Pred(Pos('-',AValue)));
 if Pos(':',AValue)> 0
 then
   begin
@@ -387,26 +416,10 @@ then
     begin
     Chaine2:= Copy(Chaine1,Succ(Pos(':',Chaine1)),Length(Chaine1)-Pos(':',Chaine1));
     Chaine2:= Uppercase(Chaine2[1])+Copy(Chaine2,2,Pred(Length(Chaine2)));
-    if (FontName= 'Helvetica') or (FontName= 'Courier')
-    then
-      if Chaine2= 'Italic'
-      then
-        Chaine2:= 'Oblique';
     Chaine1:= Copy(Chaine1,1,Pred(Pos(':',Chaine1)));
     Chaine1:= Uppercase(Chaine1[1])+Copy(Chaine1,2,Pred(Length(Chaine1)));
-    if (FontName= 'Helvetica') or (FontName= 'Courier')
-    then
-      if Chaine1= 'Italic'
-      then
-        Chaine1:= 'Oblique';
     Chaine1:= Chaine1+Chaine2;
-    end
-  else
-    if (FontName= 'Helvetica') or (FontName= 'Courier')
-    then
-      if Chaine1= 'Italic'
-      then
-        Chaine1:= 'Oblique';
+    end;
   Chaine1:= '-'+Chaine1;
   end;
 Result:= FontName+Chaine1;
@@ -485,7 +498,11 @@ procedure TPdfName.WriteName(const AFlux: TStream);
 begin
 if FValue<> ''
 then
-  WriteChaine('/'+FValue,AFlux);
+  if Pos('Length1',FValue)> 0
+  then
+    WriteChaine('/Length1',AFlux)
+  else
+    WriteChaine('/'+FValue,AFlux);
 end;
 
 constructor TPdfName.CreateName(const AValue: string);
@@ -663,6 +680,19 @@ end;
 procedure TPdfFonte.WriteFonte(const AFlux: TStream);
 begin
 WriteChaine('/F'+IntToStr(FTxtFont)+' '+FTxtSize+' Tf'+CRLF,AFlux);
+end;
+
+function TPdfFonte.WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): Int64;
+var
+  BeginFlux,EndFlux: Int64;
+begin
+WriteChaine(CRLF+'stream'+CRLF,AFlux);
+BeginFlux:= AFlux.Position;
+FFlux.SaveToStream(AFlux);
+EndFlux:= AFlux.Position;
+Result:= EndFlux-BeginFlux;
+WriteChaine(CRLF,AFlux);
+WriteChaine('endstream',AFlux);
 end;
 
 constructor TPdfFonte.CreateFonte(const AFont: Integer; const ASize: string);
@@ -988,39 +1018,66 @@ end;
 procedure TPdfDictionary.WriteDictionary(const AObjet: Integer; const AFlux: TStream);
 var
   Long: TPdfInteger;
-  Flux: TMemoryStream;
-  Cpt,NumImg: Integer;
+  Cpt,NumImg,NumFnt: Integer;
+  Value: string;
 begin
-WriteChaine('<<'+CRLF,AFlux);
-for Cpt:= 0 to Pred(FElement.Count) do
-  TPdfDicElement(FElement[Cpt]).WriteDicElement(AFlux);
-NumImg:= -1;
-for Cpt:= 0 to Pred(FElement.Count) do
-  if AObjet> -1
+if TPdfName(TPdfDicElement(FElement[0]).FKey).FValue= ''
+then
+  TPdfDicElement(FElement[0]).WriteDicElement(AFlux)  // write a charwidth array of a font
+else
+  begin
+  WriteChaine('<<'+CRLF,AFlux);
+  if FElement.Count> 0
   then
-    begin
-    if (TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue= 'Name')
-    then
-      if (TPdfObjet(TPdfDicElement(FElement[Cpt]).FValue) is TPdfName)
-         and (TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue[1]= 'I')
+    for Cpt:= 0 to Pred(FElement.Count) do
+      TPdfDicElement(FElement[Cpt]).WriteDicElement(AFlux);
+  NumImg:= -1;
+  NumFnt:= -1;
+  if FElement.Count> 0
+  then
+    for Cpt:= 0 to Pred(FElement.Count) do
+      if AObjet> -1
       then
         begin
-        NumImg:= StrToInt(Copy(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue,2,Length(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue)-1));
-        Flux:= TMemoryStream.Create;
-        Flux.Position:= 0;
+        if (TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue= 'Name')
+        then
+          if (TPdfObjet(TPdfDicElement(FElement[Cpt]).FValue) is TPdfName)
+             and (TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue[1]= 'I')
+          then
+            begin
+            NumImg:= StrToInt(Copy(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue,2,Length(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue)-1));
+            Flux:= TMemoryStream.Create;
+            Flux.Position:= 0;
 // write image stream length in xobject dictionary
-        Long:= TPdfInteger.CreateInteger(TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,Flux));
-        TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
-        TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
-        Flux.Free;
-        WriteChaine('>>',AFlux);
+            Long:= TPdfInteger.CreateInteger(TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,Flux));
+            TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
+            TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
+            Flux.Free;
+            WriteChaine('>>',AFlux);
 // write image stream in xobject dictionary
-        TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,AFlux);
+            TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg,AFlux);
+            end;
+        if Pos('Length1',TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue)> 0
+        then
+          begin
+          Flux:= TMemoryStream.Create;
+          Value:= TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue;
+          NumFnt:= StrToInt(Copy(Value,Succ(Pos(' ',Value)),Length(Value)-Pos(' ',Value)));
+          Flux.LoadFromFile(FontFiles[NumFnt]);
+// write fontfile stream length in xobject dictionary
+          Long:= TPdfInteger.CreateInteger(Flux.Size);
+          TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
+          TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
+          WriteChaine('>>',AFlux);
+// write fontfile stream in xobject dictionary
+          TPdfFonte(TPdfXRef(Document.FXRefObjets[NumFnt]).FObjet).WriteFonteStream(Flux,AFlux);
+          Flux.Free;
+          end;
         end;
-    end;
-if NumImg= -1
-then
-  WriteChaine('>>',AFlux);
+  if (NumImg= -1) and (NumFnt= -1)
+  then
+    WriteChaine('>>',AFlux);
+  end;
 end;
 
 constructor TPdfDictionary.CreateDictionary;
@@ -1303,8 +1360,12 @@ Page.FObjet.AddElement('Resources',Dictionaire);
 Table:= TPdfArray.CreateArray;
 TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('ProcSet',Table);
 // add font element in resources element to page dictionary
-Dictionaire:= TPdfDictionary.CreateDictionary;
-TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('Font',Dictionaire);
+if Fonts.Count> 0
+then
+  begin
+  Dictionaire:= TPdfDictionary.CreateDictionary;
+  TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('Font',Dictionaire);
+  end;
 for Cpt:= 0 to Pred(PdfPage.Count) do
   if TPdfElement(PdfPage[Cpt]) is TPdfImg
   then
@@ -1385,7 +1446,7 @@ Outline.FObjet.AddElement('Dest',Table);
 Result:= Pred(FXRefObjets.Count);
 end;
 
-procedure TPdfDocument.CreateFont(NomFonte: string; NumFonte: Integer);
+procedure TPdfDocument.CreateStdFont(NomFonte: string; NumFonte: Integer);
 var
   Fontes: TPdfXRef;
   XRefObjets: TPdfReference;
@@ -1393,6 +1454,10 @@ var
   Dictionaire: TPdfDictionary;
   Cpt: Integer;
 begin
+if Pos('Italic',NomFonte)> 0
+then
+  NomFonte:= Copy(NomFonte,1,Pred(Pos('Italic',NomFonte)))+'Oblique';
+//  AnsiReplaceText(NomFonte,'Italic','Oblique');
 // add xref entry
 Fontes:= TPdfXRef.CreateXRef;
 FXRefObjets.Add(Fontes);
@@ -1407,6 +1472,7 @@ Nom:= TPdfName.CreateName('WinAnsiEncoding');
 Fontes.FObjet.AddElement('Encoding',Nom);
 // add firstchar element to font dictionary
 Nom:= TPdfName.CreateName('32');
+//Nom:= TPdfName.CreateName('0');
 Fontes.FObjet.AddElement('FirstChar',Nom);
 // add lastchar element to font dictionary
 Nom:= TPdfName.CreateName('255');
@@ -1432,6 +1498,236 @@ for Cpt:= 1 to Pred(FXRefObjets.Count) do
       Dictionaire.AddElement(TPdfName(Nom).FValue,XRefObjets);
       end;
   end;
+SetLength(FontFiles,Succ(Length(FontFiles)));
+FontFiles[NumFonte]:= '';
+end;
+
+function TPdfDocument.LoadFont(NomFonte: string): string;
+var
+  FileTxt: TextFile;
+  Ligne: widestring;
+begin
+if FileExists(FontDirectory+NomFonte+'.fnt')
+then
+  begin
+  AssignFile(FileTxt,FontDirectory+NomFonte+'.fnt');
+  Reset(FileTxt);
+  while not Eof(FileTxt) do
+    begin
+    Readln(FileTxt,Ligne);
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'FontType'
+    then
+      FontDef.FType:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'FontName'
+    then
+      FontDef.FName:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'Ascent'
+    then
+      FontDef.FAscent:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'Descent'
+    then
+      FontDef.FDescent:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'CapHeight'
+    then
+      FontDef.FCapHeight:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'Flags'
+    then
+      FontDef.FFlags:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'FontBBox'
+    then
+      FontDef.FFontBBox:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'ItalicAngle'
+    then
+      FontDef.FItalicAngle:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'StemV'
+    then
+      FontDef.FStemV:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'MissingWidth'
+    then
+      FontDef.FMissingWidth:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'Encoding'
+    then
+      FontDef.FEncoding:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'FontFile'
+    then
+      FontDef.FFile:= FontDirectory+Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'OriginalSize'
+    then
+      FontDef.FOriginalSize:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'Diffs'
+    then
+      FontDef.FDiffs:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    if Copy(Ligne,1,Pred(Pos('=',Ligne)))= 'CharWidth'
+    then
+      FontDef.FCharWidth:= Copy(Ligne,Succ(Pos('=',Ligne)),Length(Ligne)-Pos('=',Ligne));
+    end;
+  Result:= FontDef.FType;
+  end
+else
+  ShowMessage('Font file '+NomFonte+'.fnt not found');
+end;
+
+procedure TPdfDocument.CreateTtfFont(const NumFonte: Integer);
+var
+  Fontes: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Nom: TPdfName;
+  Dictionaire: TPdfDictionary;
+  Value: TPdfInteger;
+  Cpt: Integer;
+begin
+// add xref entry
+Fontes:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(Fontes);
+// add type element to font dictionary
+Nom:= TPdfName.CreateName('Font');
+Fontes.FObjet.AddElement('Type',Nom);
+// add subtype element to font dictionary
+Nom:= TPdfName.CreateName(FontDef.FType);
+Fontes.FObjet.AddElement('Subtype',Nom);
+// add encoding element to font dictionary
+Nom:= TPdfName.CreateName('WinAnsiEncoding');
+Fontes.FObjet.AddElement('Encoding',Nom);
+// add firstchar element to font dictionary
+Value:= TPdfInteger.CreateInteger(32);
+Fontes.FObjet.AddElement('FirstChar',Value);
+// add lastchar element to font dictionary
+Value:= TPdfInteger.CreateInteger(255);
+Fontes.FObjet.AddElement('LastChar',Value);
+// add basefont element to font dictionary
+Nom:= TPdfName.CreateName(FontDef.FName);
+Fontes.FObjet.AddElement('BaseFont',Nom);
+// add name element to font dictionary
+Nom:= TPdfName.CreateName('F'+IntToStr(NumFonte));
+Fontes.FObjet.AddElement('Name',Nom);
+// add font reference to all page dictionary
+for Cpt:= 1 to Pred(FXRefObjets.Count) do
+  begin
+  Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
+  if Dictionaire.FElement.Count> 0
+  then
+    if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue= 'Page'
+    then
+      begin
+      Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
+      Dictionaire:= TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Font')]).FValue);
+      XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+      Dictionaire.AddElement(TPdfName(Nom).FValue,XRefObjets);
+      end;
+  end;
+CreateFontDescriptor(NumFonte);
+// add fontdescriptor reference to font dictionary
+XRefObjets:= TPdfReference.CreateReference(FXRefObjets.Count-2);
+Fontes.FObjet.AddElement('FontDescriptor',XRefObjets);
+CreateFontWidth;
+// add fontwidth reference to font dictionary
+XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+Fontes.FObjet.AddElement('Widths',XRefObjets);
+SetLength(FontFiles,Succ(Length(FontFiles)));
+FontFiles[NumFonte]:= FontDef.FFile;
+end;
+
+procedure TPdfDocument.CreateTp1Font(const NumFonte: Integer);
+begin
+
+end;
+
+procedure TPdfDocument.CreateFontDescriptor(const NumFonte: Integer);
+var
+  FtDesc: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Nom: TPdfName;
+  Value: TPdfInteger;
+  Table: TPdfArray;
+  Dictionaire: TPdfDictionary;
+begin
+// add xref entry
+FtDesc:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(FtDesc);
+// add type element to fontdescriptor dictionary
+Nom:= TPdfName.CreateName('FontDescriptor');
+FtDesc.FObjet.AddElement('Type',Nom);
+// add fontname element to fontdescriptor dictionary
+Nom:= TPdfName.CreateName(FontDef.FName);
+FtDesc.FObjet.AddElement('FontName',Nom);
+// add ascent element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FAscent));
+FtDesc.FObjet.AddElement('Ascent',Value);
+// add descent element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FDescent));
+FtDesc.FObjet.AddElement('Descent',Value);
+// add capheight element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FCapHeight));
+FtDesc.FObjet.AddElement('CapHeight',Value);
+// add flags element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FFlags));
+FtDesc.FObjet.AddElement('Flags',Value);
+// add fontbbox element to fontdescriptor dictionary
+Table:= TPdfArray.CreateArray;
+FtDesc.FObjet.AddElement('FontBBox',Table);
+// add coordinates in page fontbbox
+while Pos(' ',FontDef.FFontBBox)> 0 do
+  begin
+  Dictionaire:= TPdfDictionary(TPdfXRef(FtDesc).FObjet);
+  Value:= TPdfInteger.CreateInteger(StrToInt(Copy(FontDef.FFontBBox,1,Pred(Pos(' ',FontDef.FFontBBox)))));
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('FontBBox')]).FValue).AddItem(Value);
+  FontDef.FFontBBox:= Copy(FontDef.FFontBBox,Succ(Pos(' ',FontDef.FFontBBox)),Length(FontDef.FFontBBox)-Pos(' ',FontDef.FFontBBox));;
+  end;
+// add italicangle element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FItalicAngle));
+FtDesc.FObjet.AddElement('ItalicAngle',Value);
+// add stemv element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FStemV));
+FtDesc.FObjet.AddElement('StemV',Value);
+// add missingwidth element to fontdescriptor dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FMissingWidth));
+FtDesc.FObjet.AddElement('MissingWidth',Value);
+CreateFontFile(NumFonte);
+// add fontfilereference to fontdescriptor dictionary
+XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+FtDesc.FObjet.AddElement('FontFile2',XRefObjets);
+end;
+
+procedure TPdfDocument.CreateFontWidth;
+var
+  FtDesc: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Value: TPdfInteger;
+  Table: TPdfArray;
+  Dictionaire: TPdfDictionary;
+begin
+// add xref entry
+FtDesc:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(FtDesc);
+// add element to fontwidth dictionary
+Table:= TPdfArray.CreateArray;
+FtDesc.FObjet.AddElement('',Table);
+// add width values in fontwidth array
+while Pos(' ',FontDef.FCharWidth)> 0 do
+  begin
+  Dictionaire:= TPdfDictionary(TPdfXRef(FtDesc).FObjet);
+  Value:= TPdfInteger.CreateInteger(StrToInt(Copy(FontDef.FCharWidth,1,Pred(Pos(' ',FontDef.FCharWidth)))));
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('')]).FValue).AddItem(Value);
+  FontDef.FCharWidth:= Copy(FontDef.FCharWidth,Succ(Pos(' ',FontDef.FCharWidth)),Length(FontDef.FCharWidth)-Pos(' ',FontDef.FCharWidth));;
+  end;
+end;
+
+procedure TPdfDocument.CreateFontFile(const NumFonte: Integer);
+var
+  FtDesc: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Nom: TPdfName;
+  Value: TPdfInteger;
+begin
+// add xref entry
+FtDesc:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(FtDesc);
+// add filter element to fontfile dictionary
+Nom:= TPdfName.CreateName('FlateDecode');
+FtDesc.FObjet.AddElement('Filter',Nom);
+// add length1 element to fontfile dictionary
+Value:= TPdfInteger.CreateInteger(StrToInt(FontDef.FOriginalSize));
+FtDesc.FObjet.AddElement('Length1 '+IntToStr(NumFonte),Value);
 end;
 
 procedure TPdfDocument.CreateImage(ImgWidth,ImgHeight,NumImg: Integer);
@@ -1593,12 +1889,12 @@ end;
 
 constructor TPdfDocument.CreateDocument(const ALayout: TPageLayout; const AZoom: string; const APreferences: Boolean);
 var
-  Cpt,CptSect,CptPage,NumFont,{NumImg,}TreeRoot,ParentPage,PageNum,NumPage: Integer;
+  Cpt,CptSect,CptPage,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
   OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage,PrevOutline,PrevSect: Integer;
   Dictionaire: TPdfDictionary;
   XRefObjets: TPdfReference;
   Nom: TPdfName;
-  FontName: string;
+  FontName,FtName: string;
 begin
 inherited Create;
 FPreferences:= APreferences;
@@ -1741,15 +2037,39 @@ then
   Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[TreeRoot]).FObjet);
   TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).Value:= T_Section(Sections[CptSect]).TotPages;
   end;
+if FontDirectory= ''
+then
+  FontDirectory:= ExtractFilePath(Paramstr(0));
+// select the font type
 NumFont:= 0;
-for Cpt:= 0 to Pred(Fonts.Count) do
-  begin
-  FontName:= ExtractBaseFontName(T_Font(Fonts[Cpt]).GetFont.FontDesc);
-  CreateFont(FontName,NumFont);
-  Inc(NumFont);
-  end;
-for Cpt:= 0 to Pred(Images.Count) do
-  CreateImage(TfpgImage(Images[Cpt]).Width,TfpgImage(Images[Cpt]).Height,Cpt);
+if Fonts.Count> 0
+then
+  for Cpt:= 0 to Pred(Fonts.Count) do
+    begin
+    FontName:= ExtractBaseFontName(T_Font(Fonts[Cpt]).GetFont.FontDesc);
+    if Pos('-',FontName)> 0
+    then
+      FtName:= Copy(FontName,1,Pred(Pos('-',FontName)))
+    else
+      FtName:= FontName;
+    if (Lowercase(FtName)= 'courier') or (Lowercase(FtName)= 'helvetica') or (Lowercase(FtName)= 'times')
+    then
+      begin
+      FontName:= Uppercase(FontName[1])+Copy(FontName,2,Pred(Length(FontName)));
+      CreateStdFont(FontName,NumFont);
+      end
+    else
+      if LoadFont(FontName)= 'TrueType'
+      then
+        CreateTtfFont(NumFont)
+      else
+        CreateTp1Font(NumFont);  // not implemented yet
+    Inc(NumFont);
+    end;
+if Images.Count> 0
+then
+  for Cpt:= 0 to Pred(Images.Count) do
+    CreateImage(TfpgImage(Images[Cpt]).Width,TfpgImage(Images[Cpt]).Height,Cpt);
 TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue:= FXRefObjets.Count;
 end;
 
