@@ -1130,7 +1130,7 @@ end;
 
 procedure TF_Demo.PrintMultiSections(Preview: Boolean);
 var
-  FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
+  FtTitleS1,FtTitleS2,FtTitleS3,FtNum,FtNumS: Integer;
   Cpt: Integer;
 begin
 with FReport do
@@ -1141,7 +1141,6 @@ with FReport do
   FtTitleS1:= Font('helvetica-15:bold',clBlack);
   FtTitleS2:= Font('helvetica-14:italic',clBlack);
   FtTitleS3:= Font('helvetica-12:bold:italic',clBlack);
-  FtText:= Font('helvetica-8',clBlack);
   FtNum:= Font('helvetica-7:italic',clBlack);
   FtNumS:= Font('helvetica-7:italic',clGray);
   // create a new section and define the margins
@@ -1194,7 +1193,7 @@ end;
 
 procedure TF_Demo.PrintOutlines(Preview: Boolean);
 var
-  FtTitleS1,FtTitleS2,FtTitleS3,FtText,FtNum,FtNumS: Integer;
+  FtTitleS1,FtTitleS2,FtTitleS3,FtNum,FtNumS: Integer;
   Cpt: Integer;
 begin
 with FReport do
@@ -1205,7 +1204,6 @@ with FReport do
   FtTitleS1:= Font('helvetica-15:bold',clBlack);
   FtTitleS2:= Font('helvetica-14:italic',clBlack);
   FtTitleS3:= Font('helvetica-12:bold:italic',clBlack);
-  FtText:= Font('helvetica-8',clBlack);
   FtNum:= Font('helvetica-7:italic',clBlack);
   FtNumS:= Font('helvetica-7:italic',clGray);
   // create a new section and define the margins
