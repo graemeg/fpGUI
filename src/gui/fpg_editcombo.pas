@@ -900,7 +900,7 @@ end;
 
 destructor TfpgBaseEditCombo.Destroy;
 begin
-  if not Assigned(FDropDown) then
+  if Assigned(FDropDown) then
     FDropDown.Free;
   inherited Destroy;
 end;
