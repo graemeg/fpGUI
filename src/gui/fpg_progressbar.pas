@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -93,7 +93,7 @@ begin
     FPosition := AValue;
 
   FMax := AValue;
-	RePaint;
+  RePaint;
 end;
 
 procedure TfpgCustomProgressBar.SetMin(const AValue: longint);
@@ -108,7 +108,7 @@ begin
     FMax := AValue+1;
 
   FMin := AValue;
-	RePaint;
+  RePaint;
 end;
 
 procedure TfpgCustomProgressBar.SetPBPosition(const AValue: longint);
@@ -124,7 +124,7 @@ begin
   else
     FPosition := AValue;
 
-	RePaint;
+  RePaint;
 end;
 
 procedure TfpgCustomProgressBar.SetShowCaption(const AValue: boolean);
@@ -164,7 +164,7 @@ begin
 
   // calculate position
   diff    := Max - Min; // diff..
-  aPos    := Position - Min;	// absolute position
+  aPos    := Position - Min;  // absolute position
   percent := round(((100 / diff) * aPos));
   txt     := IntToStr(percent) + '%';
   pos     := round(percent * (Width-2) / 100);
@@ -193,11 +193,11 @@ begin
   // paint percentage if required
   if FShowCaption then
   begin
-  	x := (Width - FFont.TextWidth(txt)) div 2;
-  	y := (Height - FFont.Height) div 2;
+    x := (Width - FFont.TextWidth(txt)) div 2;
+    y := (Height - FFont.Height) div 2;
     Canvas.SetTextColor(TextColor);
     Canvas.Font := FFont;
-  	Canvas.DrawString(x, y, txt);
+    Canvas.DrawString(x, y, txt);
   end;
 end;
 
