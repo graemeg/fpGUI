@@ -156,10 +156,16 @@ type
     property    TopRow;
     property    VisibleRows;
     property    OnCanSelectCell;
-    property    OnDrawCell;
+    property    OnClick;
     property    OnDoubleClick;
+    property    OnDrawCell;
     property    OnFocusChange;
     property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnRowChange;
     property    OnShowHint;
   end;
