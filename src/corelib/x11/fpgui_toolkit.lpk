@@ -2,12 +2,13 @@
 <CONFIG>
   <Package Version="4">
     <Name Value="fpgui_toolkit"/>
+    <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
         <IncludeFiles Value="../..;../render/software"/>
-        <OtherUnitFiles Value="..;../../gui;../../gui/db;../render/software"/>
+        <OtherUnitFiles Value="..;../../gui;../../gui/db;../render/software;../../reportengine"/>
         <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -17,9 +18,8 @@
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
-        <SmartLinkUnit Value="True"/>
         <Optimizations>
-          <OptimizationLevel Value="2"/>
+          <OptimizationLevel Value="0"/>
         </Optimizations>
       </CodeGeneration>
       <Other>
@@ -27,12 +27,10 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGUI Toolkit
-"/>
-    <License Value="LGPL 2 with static linking exception.
-"/>
+    <Description Value="fpGUI Toolkit"/>
+    <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="8"/>
-    <Files Count="92">
+    <Files Count="97">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -401,6 +399,26 @@
         <Filename Value="../fpg_imgfmt_png.pas"/>
         <UnitName Value="fpg_imgfmt_png"/>
       </Item92>
+      <Item93>
+        <Filename Value="../../reportengine/u_command.pas"/>
+        <UnitName Value="U_Command"/>
+      </Item93>
+      <Item94>
+        <Filename Value="../../reportengine/u_pdf.pas"/>
+        <UnitName Value="U_Pdf"/>
+      </Item94>
+      <Item95>
+        <Filename Value="../../reportengine/u_report.pas"/>
+        <UnitName Value="U_Report"/>
+      </Item95>
+      <Item96>
+        <Filename Value="../../reportengine/u_reportimages.pas"/>
+        <UnitName Value="U_ReportImages"/>
+      </Item96>
+      <Item97>
+        <Filename Value="../../reportengine/u_visu.pas"/>
+        <UnitName Value="U_Visu"/>
+      </Item97>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">
