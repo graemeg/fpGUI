@@ -2750,7 +2750,7 @@ end;
 procedure T_Report.ImagePage(Horiz, Verti: single; ImgFileName: string; ColNum, Scale: integer);
 var
   RefImage: integer;
-  Image: TfpgImage;
+  Image, TempImage: TfpgImage;
 begin
   Horiz := Dim2Pixels(Horiz);
   Verti := Dim2Pixels(Verti);
@@ -2776,9 +2776,13 @@ begin
     RefImage := ImageNames.IndexOf(IntToStr(Scale) + ImgFileName);
     if RefImage = -1 then
     begin
-      Image    := fpgImages.GetImage(ImgFileName);
-      Scale    := 1;
+      { This returns a refence to an existing image }
+      TempImage := fpgImages.GetImage(ImgFileName);
+      Scale := 1;
       RefImage := ImageNames.Add(IntToStr(Scale) + ImgFileName);
+      { Clone the image because we don't want to free fpGUI registered images,
+        because they could be used by other widgets or areas of the application. }
+      Image := TempImage.ImageFromSource;
       Images.Add(Image);
     end;
     PaintImage(Horiz, Verti, ColNum, RefImage, zPage);
