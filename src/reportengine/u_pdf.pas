@@ -1691,7 +1691,6 @@ end;
 procedure TPdfDocument.CreateFontWidth;
 var
   FtDesc: TPdfXRef;
-  XRefObjets: TPdfReference;
   Value: TPdfInteger;
   Table: TPdfArray;
   Dictionaire: TPdfDictionary;
@@ -1715,7 +1714,6 @@ end;
 procedure TPdfDocument.CreateFontFile(const NumFonte: Integer);
 var
   FtDesc: TPdfXRef;
-  XRefObjets: TPdfReference;
   Nom: TPdfName;
   Value: TPdfInteger;
 begin
