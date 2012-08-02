@@ -223,9 +223,11 @@ end;
 
 procedure TfpgMemoStrings.Clear;
 begin
-  Memo.BeginUpdate;
+  if Assigned(Memo) then
+    Memo.BeginUpdate;
   inherited Clear;
-  Memo.EndUpdate;
+  if Assigned(Memo) then
+    Memo.EndUpdate;
 end;
 
 
