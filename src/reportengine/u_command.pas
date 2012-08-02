@@ -27,7 +27,7 @@ interface
 
 uses
   Classes, SysUtils,
-  fpg_base, fpg_main, //fpg_imgfmt_bmp, fpg_imgfmt_jpg,
+  fpg_base, fpg_main,
   U_Pdf;
 
 type
