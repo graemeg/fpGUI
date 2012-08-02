@@ -28,6 +28,7 @@ type
     procedure MemoDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
     function ConvertImage(const AFileName: string): string;
     procedure btnClearClicked(Sender: TObject);
+    procedure btnConvertClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -149,6 +150,16 @@ begin
   memImages.Text := '';
 end;
 
+procedure TMainForm.btnConvertClicked(Sender: TObject);
+begin
+  memImages.BeginUpdate;
+  try
+    memImages.Text := memImages.Text + ConvertImage(FilenameEdit1.FileName);
+  finally
+    memImages.EndUpdate;
+  end;
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -198,11 +209,12 @@ begin
   begin
     Name := 'Button1';
     SetPosition(396, 44, 80, 24);
-    Text := 'Button';
+    Text := 'Convert';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 4;
+    OnClick := @btnConvertClicked;
   end;
 
   pmFile := TfpgPopupMenu.Create(self);
