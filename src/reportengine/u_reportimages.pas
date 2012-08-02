@@ -1,17 +1,22 @@
 {
-    << Impressions >>  U_ReportImages.pas
+  fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2010 - Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
+  Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+  distribution, for details of the copyright.
 
-   This library is a free software coming as a add-on to fpGUI toolkit
-   See the copyright included in the fpGUI distribution for details about redistribution
+  See the file COPYING.modifiedLGPL, included in this distribution,
+  for details about redistributing fpGUI.
 
-   This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    Description:
-      This unit contains the images used by the preview dialog
+  Description:
+    This unit forms part of the PDF Reporting Engine. This unit
+    contains the images usde by the report preview form.
+
+    The PDF Reporting Engine was originally written by
+    Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
 }
 
 unit U_ReportImages;
