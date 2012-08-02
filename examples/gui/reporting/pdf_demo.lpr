@@ -13,17 +13,20 @@ uses
   U_Demo;
 
 procedure MainProc;
+var
+  frm: TF_Demo;
 begin
   fpgApplication.Initialize;
-  F_Demo:= TF_Demo.Create(nil);
+  frm := TF_Demo.Create(nil);
   try
-    F_Demo.Show;
+    frm.Show;
     fpgApplication.Run;
   finally
-    F_Demo.Free;
+    frm.Free;
   end;
 end;
 
 begin
   MainProc;
 end.
+
