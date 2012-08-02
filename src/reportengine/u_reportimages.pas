@@ -21,7 +21,7 @@
 
 unit U_ReportImages;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
