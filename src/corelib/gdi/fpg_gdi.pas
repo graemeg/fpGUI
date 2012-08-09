@@ -1632,6 +1632,7 @@ begin
       UpdateWindowPosition;
 
     FWinStyle := WS_POPUP or WS_SYSMENU;
+    FWinStyle := FWinStyle and not(WS_CAPTION or WS_THICKFRAME);
     
     if aUpdate then
     begin
@@ -1640,12 +1641,11 @@ begin
       {$ELSE}
       SetWindowLong(FWinHandle, GWL_STYLE, FWinStyle);
       {$ENDIF}
-      {According to MSDN, call SetWindowPos to apply changes made by SetWindowLong.
-      uFlags should be SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_FRAMECHANGED}
-      SetWindowPos(FWinHandle,0,0,0,0,0,SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_FRAMECHANGED);
-      ShowWindow(FWinHandle, SW_SHOW);
+      { According to MSDN, call SetWindowPos to apply changes made by SetWindowLong. }
+      SetWindowPos(FWinHandle,HWND_TOP,0,0,Width,Height,SWP_FRAMECHANGED or SWP_SHOWWINDOW or SWP_NOACTIVATE);
     end;
-  end else
+  end
+  else
   begin
     FWinStyle := FNonFullscreenStyle;
     if aUpdate then
