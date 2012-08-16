@@ -2384,7 +2384,7 @@ begin
       AllocateWindowHandle;
     XMapWindow(xapplication.Display, FWinHandle);
     Include(FWinFlags, xwsfMapped);
-    // Fullscreen can only be set visible (mapped) windows.
+    // Fullscreen can only be set on visible (already mapped) windows.
     if waFullScreen in FWindowAttributes then
       fpgApplication.netlayer.WindowSetFullscreen(FWinHandle, True);
   end
