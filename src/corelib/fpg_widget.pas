@@ -958,17 +958,18 @@ begin
 
   dir := 0;
 
+  if not consumed and (keycode = fpgApplication.HelpKey) then
+  begin
+    InvokeHelp;
+    consumed := True;
+  end;
+
   case keycode of
     keyTab:
         if (ssShift in shiftstate) then
           dir := -1
         else
           dir := 1;
-    keyF1:
-      begin
-        InvokeHelp;
-        consumed := True;
-      end;
 {
     keyReturn,
     keyDown,
