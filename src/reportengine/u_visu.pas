@@ -151,7 +151,7 @@ begin
   Fd_SavePdf          := TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
   Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-  Fd_SavePdf.Filter   := 'Fichiers pdf |*.pdf';
+  Fd_SavePdf.Filter   := 'PDF Documents |*.pdf';
   Fd_SavePdf.FileName := FReport.DefaultFile;
   try
     if Fd_SavePdf.RunSaveFile then
