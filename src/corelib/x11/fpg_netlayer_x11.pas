@@ -307,7 +307,7 @@ end;
 
 function TNETWindowLayer.GetNetAtom(AAtom: TNetAtomEnum): TNetAtom;
 begin
-  Result := FNetAtoms[AAtom]
+  Result := FNetAtoms[AAtom];
 end;
 
 procedure TNETWindowLayer.UpdateSupportedAtoms;
@@ -334,15 +334,13 @@ begin
     XFree(Atoms);
 end;
 
-function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar
-  ): Boolean;
+function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
 begin
   Result := True; //????
   WindowSetPropertyUTF8(AWindow, FNetAtoms[naWM_NAME], Length(AName), AName);
 end;
 
-function TNETWindowLayer.WindowGetHidden(const AWindow: TWindow; out AValue: Boolean
-  ): Boolean;
+function TNETWindowLayer.WindowGetHidden(const AWindow: TWindow; out AValue: Boolean): Boolean;
 var
   WinState: TNetWindowStates;
 begin
