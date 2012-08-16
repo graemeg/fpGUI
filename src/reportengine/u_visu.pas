@@ -474,6 +474,7 @@ begin
   OnShow         := @FormShow;
 
   CreateReportImages;
+
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
   Bt_Close       := CreateButton(Bv_Command, 10, 10, 26, '', @Bt_CloseClick, 'stdimg.exit');
   Bt_Print       := CreateButton(Bv_Command, 50, 10, 26, '', @Bt_PrintClick, 'stdimg.print');
@@ -484,6 +485,8 @@ begin
   Bt_Pdf         := CreateButton(Bv_Command, 170, 10, 26, '', @Bt_PdfClick, 'stdimg.Adobe_pdf');
   Bt_Pdf.ImageMargin := 0;
   Bv_Pages       := CreateBevel(Bv_Command, 220, 5, 300, 40, bsBox, bsLowered);
+  Bv_Sections    := CreateBevel(Bv_Command, 540, 5, 500, 40, bsBox, bsLowered);
+
   Bt_FirstPage   := CreateButton(Bv_Pages, 54, 6, 26, '', @Bt_FirstPageClick, 'repimg.First');
   Bt_PrecPage    := CreateButton(Bv_Pages, 80, 6, 26, '', @Bt_PrecPageClick, 'repimg.Precedent');
   E_NumPage      := CreateEditInteger(Bv_Pages, 110, 6, 60, 0);
@@ -493,7 +496,7 @@ begin
   L_Pages        := CreateLabel(Bv_Pages, 5, E_NumPage.Top, 'Page', 45, E_NumPage.Height, taLeftJustify, tlcenter);
   L_FromPage     := CreateLabel(Bv_Pages, 235, E_NumPage.Top, 'of', 30, E_NumPage.Height, taLeftJustify, tlcenter);
   L_NbrPages     := CreateLabel(Bv_Pages, 265, E_NumPage.Top, ' ', 30, E_NumPage.Height, taCenter, tlcenter);
-  Bv_Sections    := CreateBevel(Bv_Command, 540, 5, 500, 40, bsBox, bsLowered);
+
   Bt_PrecSect    := CreateButton(Bv_Sections, 90, 6, 26, '', @Bt_PrecSectClick, 'repimg.Precedent');
   E_NumSect      := CreateEditInteger(Bv_Sections, 120, 6, 60, 0);
   E_NumSect.OnKeyPress := @E_NumSectKeyPress;
