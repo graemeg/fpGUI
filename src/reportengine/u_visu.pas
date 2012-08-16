@@ -469,7 +469,6 @@ begin
   Name           := 'F_Visu';
   WindowTitle    := 'Preview';
   WindowPosition := wpUser;
-  Sizeable       := False;
   BackgroundColor := clMediumAquamarine;
   SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
   OnShow         := @FormShow;
