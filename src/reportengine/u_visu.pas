@@ -469,28 +469,21 @@ begin
   Name           := 'F_Visu';
   WindowTitle    := 'Preview';
   WindowPosition := wpUser;
-  BackgroundColor := clMediumAquamarine;
   SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
+  BackgroundColor := fpgColor(51,51,51); // black/brown or should be use clShadow2 for theming abilities??
   OnShow         := @FormShow;
 
   CreateReportImages;
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
-  Bv_Command.BackgroundColor := clBisque;
   Bt_Close       := CreateButton(Bv_Command, 10, 10, 26, '', @Bt_CloseClick, 'stdimg.exit');
-  Bt_Close.BackgroundColor := clOrangeRed;
   Bt_Print       := CreateButton(Bv_Command, 50, 10, 26, '', @Bt_PrintClick, 'stdimg.print');
-  Bt_Print.BackgroundColor := clGreen;
   Bt_Print.Enabled := False;
   Bt_Printer     := CreateButton(Bv_Command, 90, 10, 26, '', @Bt_PrinterClick, 'repimg.Printer');
-  Bt_Printer.BackgroundColor := clSilver;
   Bt_Printer.Enabled := False;
   Bt_Stop        := CreateButton(Bv_Command, 130, 10, 26, '', @Bt_StopClick, 'repimg.Stop');
-  Bt_Stop.BackgroundColor := clRed;
   Bt_Pdf         := CreateButton(Bv_Command, 170, 10, 26, '', @Bt_PdfClick, 'stdimg.Adobe_pdf');
-  Bt_Pdf.BackgroundColor := clWhite;
   Bt_Pdf.ImageMargin := 0;
   Bv_Pages       := CreateBevel(Bv_Command, 220, 5, 300, 40, bsBox, bsLowered);
-  Bv_Pages.BackgroundColor := clLinen;
   Bt_FirstPage   := CreateButton(Bv_Pages, 54, 6, 26, '', @Bt_FirstPageClick, 'repimg.First');
   Bt_PrecPage    := CreateButton(Bv_Pages, 80, 6, 26, '', @Bt_PrecPageClick, 'repimg.Precedent');
   E_NumPage      := CreateEditInteger(Bv_Pages, 110, 8, 60, 0);
@@ -501,7 +494,6 @@ begin
   L_FromPage     := CreateLabel(Bv_Pages, 235, E_NumPage.Top, 'of', 0, E_NumPage.Height, taLeftJustify, tlcenter);
   L_NbrPages     := CreateLabel(Bv_Pages, 265, E_NumPage.Top, ' ', 30, E_NumPage.Height, taCenter, tlcenter);
   Bv_Sections    := CreateBevel(Bv_Command, 540, 5, 500, 40, bsBox, bsLowered);
-  Bv_Sections.BackgroundColor := clLinen;
   Bt_PrecSect    := CreateButton(Bv_Sections, 90, 6, 26, '', @Bt_PrecSectClick, 'repimg.Precedent');
   E_NumSect      := CreateEditInteger(Bv_Sections, 120, 8, 60, 0);
   E_NumSect.OnKeyPress := @E_NumSectKeyPress;
