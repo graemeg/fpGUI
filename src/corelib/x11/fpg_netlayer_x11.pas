@@ -442,7 +442,10 @@ begin
 
   Msg.message_type := FNetAtoms[naWM_STATE];
   Msg.window := AWindow;
-  Msg.data.l[0] := Ord(AValue);
+  if AValue then
+    Msg.data.l[0] := _NET_WM_STATE_ADD
+  else
+    Msg.data.l[0] := _NET_WM_STATE_REMOVE;
   Msg.data.l[1] := FNetAtoms[naWM_STATE_FULLSCREEN];
   Msg.data.l[3] := _NET_SOURCE_APPLICATION;
 
