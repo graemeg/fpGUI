@@ -469,9 +469,11 @@ begin
   Name           := 'F_Visu';
   WindowTitle    := 'Preview';
   WindowPosition := wpUser;
-  SetPosition(0, 0, FpgApplication.ScreenWidth - 2, FpgApplication.ScreenHeight - 66);
   Sizeable       := False;
   BackgroundColor := clMediumAquamarine;
+  SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
+  OnShow         := @FormShow;
+
   CreateReportImages;
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
   Bv_Command.BackgroundColor := clBisque;
@@ -512,7 +514,6 @@ begin
   L_NumPageSect  := CreateLabel(Bv_Sections, 365, E_NumSect.Top, '-', 0, E_NumSect.Height, taLeftJustify, tlcenter);
   L_FromPageSect := CreateLabel(Bv_Sections, 410, E_NumSect.Top, 'of', 0, E_NumSect.Height, taLeftJustify, tlcenter);
   L_NbrPageSect  := CreateLabel(Bv_Sections, 440, E_NumSect.Top, '-', 0, E_NumSect.Height, taLeftJustify, tlcenter);
-  OnShow         := @FormShow;
 end;
 
 destructor TF_Visu.Destroy;
