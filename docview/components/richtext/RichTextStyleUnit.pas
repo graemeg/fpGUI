@@ -462,7 +462,11 @@ begin
     NewFont := fpgApplication.DefaultFont;
 
   if FontSame( NewFont, AFont ) then
-    exit; // no change
+  begin
+    if AFont <> NewFont then { they are not the same instance }
+      NewFont.Free;
+    Exit; // no change needed
+  end;
 
   AFont.Free;
   AFont := NewFont;
