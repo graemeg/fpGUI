@@ -166,6 +166,7 @@ begin
       Exit;
     end;
   end;
+  fl.Free;
 end;
 
 
