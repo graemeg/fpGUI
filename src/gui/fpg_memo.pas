@@ -176,10 +176,9 @@ type
   // custom stringlist that will notify the memo of item changes
   TfpgMemoStrings = class(TStringList)
   protected
-    Memo: TfpgMemo;
+    Memo: TfpgMemo;  { this is just a reference }
   public
     constructor Create(AMemo: TfpgMemo); reintroduce;
-    destructor  Destroy; override;
     function    Add(const s: String): Integer; override;
     procedure   Clear; override;
     procedure   Delete(Index: Integer); override;
@@ -192,12 +191,6 @@ constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
 begin
   inherited Create;
   Memo := AMemo;
-end;
-
-destructor TfpgMemoStrings.Destroy;
-begin
-  Memo := nil;
-  inherited Destroy;
 end;
 
 function TfpgMemoStrings.Add(const s: String): Integer;
