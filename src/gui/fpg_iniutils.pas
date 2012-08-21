@@ -26,6 +26,7 @@ uses
   Classes,
   SysUtils,
   IniFiles,
+  fpg_base,
   fpg_form;
 
 type
@@ -34,7 +35,7 @@ type
   private
     FReadOnly: Boolean;
   public
-    constructor CreateExt(const AFileName: string = ''; AReadOnly: Boolean = False);
+    constructor CreateExt(const AFileName: TfpgString = ''; AReadOnly: Boolean = False);
     function    ReadString(const ASection, AIdent, ADefault: string): string; override;
     function    ReadInteger(const ASection, AIdent: string; ADefault: longint): longint; override;
     function    ReadBool(const ASection, AIdent: string; ADefault: Boolean): Boolean; override;
@@ -47,12 +48,11 @@ type
   end;
 
 // singleton
-function gINI(const AFileName: string = ''): TfpgINIFile;
+function gINI(const AFileName: TfpgString = ''): TfpgINIFile;
 
 implementation
 
 uses
-  fpg_base,
   fpg_main,
   fpg_constants,
   fpg_utils;
@@ -61,7 +61,7 @@ var
   uINI: TfpgINIFile;
 
 
-function gINI(const AFileName: string): TfpgINIFile;
+function gINI(const AFileName: TfpgString): TfpgINIFile;
 begin
   if uINI = nil then
     uINI := TfpgINIFile.CreateExt(AFileName);
@@ -70,7 +70,7 @@ end;
 
 { TfpgINIFile }
 
-constructor TfpgINIFile.CreateExt(const AFileName: string; AReadOnly: Boolean);
+constructor TfpgINIFile.CreateExt(const AFileName: TfpgString; AReadOnly: Boolean);
 var
   lDir: TfpgString;
   lFileName: TfpgString;

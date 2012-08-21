@@ -277,7 +277,7 @@ type
   public
     constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
-    function    GetFont(const afontdesc: string): TfpgFont;
+    function    GetFont(const afontdesc: TfpgString): TfpgFont;
     procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
     procedure   RecreateHintWindow;
     procedure   Flush;
@@ -373,7 +373,7 @@ function  fpgApplication: TfpgApplication;
 function  fpgClipboard: TfpgClipboard;
 
 // Fonts (easy access function)
-function  fpgGetFont(const afontdesc: string): TfpgFont;
+function  fpgGetFont(const afontdesc: TfpgString): TfpgFont;
 
 // Message Queue  (easy access function)
 procedure fpgWaitWindowMessage;
@@ -1218,7 +1218,7 @@ begin
   fpgApplication.WaitWindowMessage(500);
 end;
 
-function fpgGetFont(const afontdesc: string): TfpgFont;
+function fpgGetFont(const afontdesc: TfpgString): TfpgFont;
 begin
   Result := fpgApplication.GetFont(afontdesc);
 end;
@@ -1305,11 +1305,11 @@ begin
   inherited Destroy;
 end;
 
-function TfpgApplication.GetFont(const afontdesc: string): TfpgFont;
+function TfpgApplication.GetFont(const afontdesc: TfpgString): TfpgFont;
 var
   fr: TfpgFontResource;
   n: integer;
-  fdesc: string;
+  fdesc: TfpgString;
 begin
   fdesc := afontdesc;
 
