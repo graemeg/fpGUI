@@ -310,9 +310,9 @@ begin
   inherited Clear;
   if UpdateCount > 0 then
       Exit;
+  ListBox.BeginUpdate;
   ListBox.FocusItem := -1;
-  ListBox.UpdateScrollBar;
-  ListBox.Invalidate;
+  ListBox.EndUpdate;
 end;
 
 procedure TfpgListBoxStrings.Exchange(Index1, Index2: Integer);
