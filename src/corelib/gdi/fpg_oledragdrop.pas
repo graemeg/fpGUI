@@ -57,8 +57,13 @@ type
   TfpgOLEDropSource = class(TInterfacedObject, IDropSource)
   private
     { IDropSource }
+    {$IF FPC_FULLVERSION>=20601}
+    function    QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD):HResult; StdCall;
+    function    GiveFeedback(dwEffect: DWORD): HResult; StdCall;
+    {$ELSE}
     function    QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Longint): HResult; stdcall;
-    function    GiveFeedback(dwEffect: Longint): HResult; stdcall;
+    function    GiveFeedback(dwEffect: longint): HResult; stdcall;
+    {$ENDIF}
   end;
 
 
@@ -457,12 +462,20 @@ end;
 
 { TfpgOLEDropSource }
 
-function TfpgOLEDropSource.GiveFeedback(dwEffect: Integer): HResult;
+{$IF FPC_FULLVERSION>=20601}
+function TfpgOLEDropSource.GiveFeedback(dwEffect: DWORD): HResult;
+{$ELSE}
+function TfpgOLEDropSource.GiveFeedback(dwEffect: longint): HResult;
+{$ENDIF}
 begin
   Result := DRAGDROP_S_USEDEFAULTCURSORS;
 end;
 
-function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Integer): HResult;
+{$IF FPC_FULLVERSION>=20601}
+function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD):HResult;
+{$ELSE}
+function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: LongInt): HResult;
+{$ENDIF}
 begin
   if FEscapePressed then
     Result := DRAGDROP_S_CANCEL
