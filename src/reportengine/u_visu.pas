@@ -44,6 +44,7 @@ uses
   U_Report;
 
 type
+
   TF_Visu = class(TfpgForm)
   private
     FReport: T_Report;
@@ -78,6 +79,7 @@ type
     FPreviewMargin: integer;
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormMouseScroll(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint);
     procedure VScrollBarScrolled(Sender: TObject; position: integer);
     procedure Bt_CloseClick(Sender: TObject);
     procedure Bt_PrintClick(Sender: TObject);
@@ -141,6 +143,15 @@ begin
   begin
     RepositionPage;
   end;
+end;
+
+procedure TF_Visu.FormMouseScroll(Sender: TObject; AShift: TShiftState;
+    AWheelDelta: Single; const AMousePos: TPoint);
+begin
+  if AWheelDelta < 0 then
+    VScrollBar.LineUp
+  else
+    VScrollBar.LineDown;
 end;
 
 procedure TF_Visu.VScrollBarScrolled(Sender: TObject; position: integer);
@@ -507,6 +518,7 @@ begin
   MinWidth := 640;
   OnShow   := @FormShow;
   OnResize := @FormResize;
+  OnMouseScroll := @FormMouseScroll;
 
   FPreviewMargin := 10;
 
@@ -514,6 +526,7 @@ begin
 
   Bv_PreviewPage := CreateBevel(self, 0, 0, 50, 50, bsBox, bsRaised);
   Bv_PreviewPage.BackgroundColor := clWhite;
+  Bv_PreviewPage.OnMouseScroll := @FormMouseScroll;
 
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
   Bv_Command.Align := alTop;
