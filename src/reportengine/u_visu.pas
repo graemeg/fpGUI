@@ -506,14 +506,25 @@ begin
 end;
 
 constructor TF_Visu.Create(AOwner: TComponent; AImprime: T_Report);
+var
+  w: integer;
+  h: integer;
 begin
   inherited Create(AOwner);
   FReport        := AImprime;
   Name           := 'F_Visu';
   WindowTitle    := 'Preview';
-  WindowPosition := wpUser;
-  SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
-  BackgroundColor := fpgColor(51,51,51); // black/brown or should be use clShadow2 for theming abilities??
+  WindowPosition := wpAuto;
+  if fpgApplication.ScreenWidth < 1055 then
+    w := fpgApplication.ScreenWidth
+  else
+    w := 1055;
+  if fpgApplication.ScreenHeight < 940 then
+    h := fpgApplication.ScreenHeight - 66 { some taskbar height I guess }
+  else
+    h := 940;
+  SetPosition(0, 0, w, h);
+  BackgroundColor := fpgColor(51,51,51); // black/brown or should we use clShadow2 for theming abilities??
   MinHeight := 350;
   MinWidth := 640;
   OnShow   := @FormShow;
