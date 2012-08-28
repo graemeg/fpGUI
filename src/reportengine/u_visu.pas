@@ -94,6 +94,7 @@ type
     procedure E_NumSectKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure ChangeButtons;
     procedure SetPreviewMargin(AValue: integer);
+    procedure RepositionPage;
   public
     constructor Create(AOwner: TComponent; AImprime: T_Report); reintroduce;
     destructor Destroy; override;
@@ -138,15 +139,7 @@ procedure TF_Visu.FormResize(Sender: TObject);
 begin
   if Assigned(Bv_Visu) then
   begin
-    Bv_Visu.Left := (Width - Bv_Visu.Width - VScrollBar.Width) div 2;
-    if Bv_Visu.Left < 0 then
-      Bv_Visu.Left := 0;
-    Bv_Visu.Top := (Height - Bv_Visu.Height - PreviewMargin) div 2;
-    if Bv_Visu.Top < Bv_Command.Height then
-      Bv_Visu.Top := Bv_Command.Height+PreviewMargin;
-    Bv_Visu.UpdateWindowPosition;
-
-    RecalcScrollbars;
+    RepositionPage;
   end;
 end;
 
@@ -221,15 +214,13 @@ begin
     NumSection      := 1;
     NumPageSection  := 1;
     E_NumPage.Text  := IntToStr(NumPage);
-    Bv_Visu.Visible := False;
     with T_Section(Sections[Pred(NumSection)]), F_Visu do
     begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
-      Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-      Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+      RepositionPage;
+      Bv_Visu.Invalidate;
     end;
-    Bv_Visu.Visible := True;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -246,15 +237,12 @@ begin
     begin
       NumSection      := NumSection - 1;
       NumPageSection  := T_Section(Sections[Pred(NumSection)]).NbPages;
-      Bv_Visu.Visible := False;
       with T_Section(Sections[Pred(NumSection)]), F_Visu do
       begin
         Bv_Visu.Height := Paper.H;
         Bv_Visu.Width  := Paper.W;
-        Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-        Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+        RepositionPage;
       end;
-      Bv_Visu.Visible := True;
     end
     else
     begin
@@ -278,15 +266,12 @@ begin
     begin
       NumSection      := NumSection + 1;
       NumPageSection  := 1;
-      Bv_Visu.Visible := False;
       with T_Section(Sections[Pred(NumSection)]), F_Visu do
       begin
         Bv_Visu.Height := Paper.H;
         Bv_Visu.Width  := Paper.W;
-        Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-        Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+        RepositionPage;
       end;
-      Bv_Visu.Visible := True;
     end
     else
     begin
@@ -309,15 +294,13 @@ begin
     NumSection      := Sections.Count;
     NumPageSection  := T_Section(Sections[Pred(Sections.Count)]).NbPages;
     E_NumPage.Text  := IntToStr(NumPage);
-    Bv_Visu.Visible := False;
     with T_Section(Sections[Pred(NumSection)]), F_Visu do
     begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
-      Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-      Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+      RepositionPage;
+      Bv_Visu.Invalidate;
     end;
-    Bv_Visu.Visible := True;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -333,15 +316,12 @@ begin
     NumPage         := T_Section(Sections[Pred(NumSection)]).FirstPage;
     NumPageSection  := 1;
     E_NumPage.Text  := IntToStr(NumPage);
-    Bv_Visu.Visible := False;
     with T_Section(Sections[Pred(NumSection)]), F_Visu do
     begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
-      Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-      Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+      RepositionPage;
     end;
-    Bv_Visu.Visible := True;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -357,15 +337,12 @@ begin
     NumPage         := T_Section(Sections[Pred(NumSection)]).FirstPage;
     NumPageSection  := 1;
     E_NumPage.Text  := IntToStr(NumPage);
-    Bv_Visu.Visible := False;
     with T_Section(Sections[Pred(NumSection)]), F_Visu do
     begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
-      Bv_Visu.Top    := 50 + (F_Visu.Height - 50 - Paper.H) div 2;
-      Bv_Visu.Left   := (F_Visu.Width - Paper.W) div 2;
+      RepositionPage;
     end;
-    Bv_Visu.Visible := True;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -447,6 +424,20 @@ begin
   FPreviewMargin := AValue;
 end;
 
+procedure TF_Visu.RepositionPage;
+begin
+  Bv_Visu.Left := (Width - Bv_Visu.Width - VScrollBar.Width - (PreviewMargin*2)) div 2;
+  if Bv_Visu.Left < PreviewMargin then
+    Bv_Visu.Left := PreviewMargin;
+
+  Bv_Visu.Top := (Height - Bv_Visu.Height - (PreviewMargin*2)) div 2;
+  if Bv_Visu.Top < Bv_Command.Height+PreviewMargin then
+    Bv_Visu.Top := Bv_Command.Height+PreviewMargin;
+
+  Bv_Visu.UpdateWindowPosition;
+  RecalcScrollbars;
+end;
+
 procedure TF_Visu.E_NumPageKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: Boolean);
 var
   CptSect, CptPage, CptPageSect: integer;
@@ -514,7 +505,7 @@ begin
   BackgroundColor := fpgColor(51,51,51); // black/brown or should be use clShadow2 for theming abilities??
   MinHeight := 350;
   MinWidth := 640;
-  OnShow         := @FormShow;
+  OnShow   := @FormShow;
   OnResize := @FormResize;
 
   FPreviewMargin := 10;
@@ -592,6 +583,7 @@ begin
     VScrollBar.Max := 0;
   VScrollBar.SliderSize := VScrollBar.Height / h;
   VScrollBar.Position := 0;
+  VScrollBar.RepaintSlider;
 end;
 
 end.
