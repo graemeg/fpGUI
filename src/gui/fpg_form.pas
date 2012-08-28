@@ -145,6 +145,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseMove;
+    property    OnMouseScroll;
     property    OnMouseUp;
     property    OnPaint;
     property    OnResize;

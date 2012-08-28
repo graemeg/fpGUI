@@ -100,6 +100,7 @@ type
     property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
+    property    OnMouseScroll;
     property    OnMouseUp;
     property    OnPaint;
     property    OnShowHint;
@@ -168,6 +169,7 @@ type
     property    OnDragEnter;
     property    OnDragLeave;
     property    OnDragStartDetected;
+    property    OnMouseScroll;
     property    OnPaint;
     property    OnShowHint;
   end;
@@ -223,6 +225,7 @@ type
     property    OnDragEnter;
     property    OnDragLeave;
     property    OnDragStartDetected;
+    property    OnMouseScroll;
     property    OnPaint;
     property    OnShowHint;
   end;
