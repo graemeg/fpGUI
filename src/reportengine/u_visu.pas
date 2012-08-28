@@ -40,6 +40,7 @@ uses
   fpg_edit,
   fpg_dialogs,
   fpg_utils,
+  fpg_scrollbar,
   U_Report;
 
 type
@@ -73,8 +74,11 @@ type
     L_FromPageSect: TfpgLabel;
     L_NbrPageSect: TfpgLabel;
     Bv_PreviewPage: TfpgBevel;
+    VScrollBar: TfpgScrollbar;
     FPreviewMargin: integer;
     procedure FormShow(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure VScrollBarScrolled(Sender: TObject; position: integer);
     procedure Bt_CloseClick(Sender: TObject);
     procedure Bt_PrintClick(Sender: TObject);
     procedure Bt_PrinterClick(Sender: TObject);
@@ -93,6 +97,7 @@ type
   public
     constructor Create(AOwner: TComponent; AImprime: T_Report); reintroduce;
     destructor Destroy; override;
+    procedure RecalcScrollbars;
     property PreviewMargin: integer read FPreviewMargin write SetPreviewMargin;
   end;
 
@@ -126,6 +131,31 @@ begin
     L_NumPageSect.Text := IntToStr(NumPageSection);
     L_NbrPageSect.Text := IntToStr(T_Section(Sections[Pred(NumSection)]).NbPages);
     ChangeButtons;
+  end;
+end;
+
+procedure TF_Visu.FormResize(Sender: TObject);
+begin
+  if Assigned(Bv_Visu) then
+  begin
+    Bv_Visu.Left := (Width - Bv_Visu.Width - VScrollBar.Width) div 2;
+    if Bv_Visu.Left < 0 then
+      Bv_Visu.Left := 0;
+    Bv_Visu.Top := (Height - Bv_Visu.Height - PreviewMargin) div 2;
+    if Bv_Visu.Top < Bv_Command.Height then
+      Bv_Visu.Top := Bv_Command.Height+PreviewMargin;
+    Bv_Visu.UpdateWindowPosition;
+
+    RecalcScrollbars;
+  end;
+end;
+
+procedure TF_Visu.VScrollBarScrolled(Sender: TObject; position: integer);
+begin
+  if Assigned(Bv_Visu) then
+  begin
+    Bv_Visu.Top := Bv_Command.Height + PreviewMargin - position;
+    Bv_Visu.UpdateWindowPosition;
   end;
 end;
 
@@ -482,7 +512,10 @@ begin
   WindowPosition := wpUser;
   SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
   BackgroundColor := fpgColor(51,51,51); // black/brown or should be use clShadow2 for theming abilities??
+  MinHeight := 350;
+  MinWidth := 640;
   OnShow         := @FormShow;
+  OnResize := @FormResize;
 
   FPreviewMargin := 10;
 
@@ -492,6 +525,7 @@ begin
   Bv_PreviewPage.BackgroundColor := clWhite;
 
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
+  Bv_Command.Align := alTop;
   Bt_Close       := CreateButton(Bv_Command, 10, 10, 26, '', @Bt_CloseClick, 'stdimg.exit');
   Bt_Print       := CreateButton(Bv_Command, 50, 10, 26, '', @Bt_PrintClick, 'stdimg.print');
   Bt_Print.Enabled := False;
@@ -526,12 +560,34 @@ begin
   L_NbrPageSect  := CreateLabel(Bv_Sections, 440, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
 
   Bv_Visu := Bv_PreviewPage; // assign to global reference variable
+
+  VScrollBar := TfpgScrollbar.Create(self);
+  with VScrollBar do
+  begin
+    Name := 'VScrollBar';
+    SetPosition(self.Width-24, 51, 16, self.Height - (Bv_Command.Height));
+    Orientation := orVertical;
+    Align := alRight;
+    ScrollStep := 50;
+    PageSize := 200;
+    OnScroll := @VScrollBarScrolled;
+  end;
 end;
 
 destructor TF_Visu.Destroy;
 begin
   DeleteReportImages;
   inherited Destroy;
+end;
+
+procedure TF_Visu.RecalcScrollbars;
+var
+  h: integer;
+begin
+  h := Bv_Visu.Height + (PreviewMargin*2);
+  VScrollBar.Max := Abs(h - VScrollBar.Height);
+  VScrollBar.SliderSize := VScrollBar.Height / h;
+  VScrollBar.Position := 0;
 end;
 
 end.

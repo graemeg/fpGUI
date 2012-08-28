@@ -749,6 +749,7 @@ begin
     Bv_Visu.SetPosition((F_Visu.Width - FPaper.W - F_Visu.PreviewMargin) div 2,
         ((F_Visu.Height + 50 + F_Visu.PreviewMargin - FPaper.H) div 2), FPaper.W, FPaper.H);
     Bv_Visu.OnPaint := @Bv_VisuPaint;
+    RecalcScrollbars;
   end;
 end;
 
