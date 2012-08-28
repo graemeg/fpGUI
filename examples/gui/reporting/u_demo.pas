@@ -22,7 +22,6 @@ uses
   fpg_checkbox,
   fpg_dialogs,
   fpg_spinedit,
-  fpg_utils,
   U_Report;
 
 type
@@ -161,651 +160,170 @@ const
   Langue = 'F';
 
 procedure TF_Demo.Bt_PdfEmptyPageClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintEmptyPage(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'EmptyPage.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'EmptyPage.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfSimpleTextClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintSimpleText(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'SimpleText.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'SimpleText.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfMultiPagesClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintMultiPages(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'MultiPages.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'MultiPages.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfMultiSectionsClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintMultiSections(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'MultiSections.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'MultiSections.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfOutlinesClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintOutlines(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Outlines.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Outlines.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfCadresClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintCadres(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Cadres.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Cadres.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfColorClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintColor(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Color.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Color.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfLinesClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintLines(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Lines.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Lines.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfGridClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintGrid(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Grid.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Grid.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfGraphClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintGraph(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Graph.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Graph.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfSurfClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintSurf(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Surface.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Surface.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfImagClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintImage(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'Images.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'Images.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;
 
 procedure TF_Demo.Bt_PdfTtfFontClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
     PrintTtfFont(False);
-    if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
-    begin
-      ShowMessage('There is no file to print');
-      Exit;
-    end;
-    Fd_SavePdf          := TfpgFileDialog.Create(nil);
-    Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-    Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
-    Fd_SavePdf.Filter   := 'PDF files (*.pdf) |*.pdf';
-    Fd_SavePdf.FileName := 'TtfFont.pdf';
-    try
-      if Fd_SavePdf.RunSaveFile then
-      begin
-        PdfFile := Fd_SavePdf.FileName;
-        if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
-          PdfFile := PdfFile + '.pdf';
-        Document := TPdfDocument.CreateDocument(LayoutMode, ZoomValue, Preferences);
-        with Document do
-        begin
-          PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-          WriteDocument(PdfFileStream);
-          PdfFileStream.Free;
-          Free;
-        end;
-        { TODO: Create a cross-platform fpgViewFile() method or something }
-        {$ifdef linux}
-        fpgOpenURL(PdfFile);
-        {$endif}
-        {$ifdef win32}
-        ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-        {$endif}
-      end;
-    finally
-      Fd_SavePdf.Free;
-    end;
+    DefaultFile:= 'TtfFont.pdf';
+    PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
 end;

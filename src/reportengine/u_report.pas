@@ -31,8 +31,8 @@ uses
   StrUtils,
   fpg_base,
   fpg_main,
-  fpg_panel,
   fpg_dialogs,
+  fpg_utils,
   fpg_imgfmt_bmp,
   fpg_imgfmt_jpg,
   U_Command,
@@ -346,6 +346,7 @@ type
     //          2 for 1/2 size
     //          3 for 1/3 size
     //          4 for 1/4 size
+    procedure PrintPdf(Layout: TPageLayout; Zoom: string; Prefer: Boolean);
     property Language: char read FVersion write FVersion;
     property Visualiser: Boolean read FVisualization write FVisualization;
     property NumSection: integer read FNmSection write FNmSection;
@@ -2831,6 +2832,49 @@ begin
   else
     { TODO: localize this message }
     ShowMessage('Image ' + ImgFileName + ' is missing');
+end;
+
+procedure T_Report.PrintPdf(Layout: TPageLayout; Zoom: string; Prefer: Boolean);
+var
+  Fd_SavePdf: TfpgFileDialog;
+  PdfFile: string;
+  PdfFileStream: TFileStream;
+begin
+  if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
+  begin
+    ShowMessage('There is no file to print');
+    Exit;
+  end;
+
+  Fd_SavePdf          := TfpgFileDialog.Create(nil);
+  Fd_SavePdf.InitialDir := fpgExtractFilePath(ParamStr(0));
+  Fd_SavePdf.Filter   := 'PDF Documents |*.pdf';
+  Fd_SavePdf.FileName := DefaultFile;
+  try
+    if Fd_SavePdf.RunSaveFile then
+    begin
+      PdfFile := Fd_SavePdf.FileName;
+      if Lowercase(fpgExtractFileExt(PdfFile)) <> '.pdf' then
+        PdfFile := PdfFile + '.pdf';
+      Document := TPdfDocument.CreateDocument(Layout, Zoom, Prefer);
+      with Document do
+      begin
+        PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
+        WriteDocument(PdfFileStream);
+        PdfFileStream.Free;
+        Free;
+      end;
+      { TODO: Create a cross-platform fpgViewFile() method or something }
+      {$ifdef linux}
+      fpgOpenURL(PdfFile);
+      {$endif}
+      {$ifdef win32}
+      ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
+      {$endif}
+    end;
+  finally
+    Fd_SavePdf.Free;
+  end;
 end;
 
 end.
