@@ -55,6 +55,7 @@ type
     FOnMouseExit: TNotifyEvent;
     FOnMouseMove: TMouseMoveEvent;
     FOnMouseUp: TMouseButtonEvent;
+    FOnMouseScroll: TMouseWheelEvent;
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
@@ -151,6 +152,7 @@ type
     property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
+    property    OnMouseScroll: TMouseWheelEvent read FOnMouseScroll write FOnMouseScroll;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
     property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
@@ -1180,7 +1182,8 @@ end;
 
 procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 begin
-  // do nothing yet
+  if Assigned(FOnMouseScroll) then
+    FOnMouseScroll(self, shiftstate, delta, Point(x, y));
 end;
 
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
