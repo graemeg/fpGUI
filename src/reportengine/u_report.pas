@@ -746,9 +746,8 @@ begin
   F_Visu := TF_Visu.Create(nil, self);
   with F_Visu do
   begin
-    Bv_Visu         := CreateBevel(F_Visu, (F_Visu.Width - FPaper.W) div 2, ((F_Visu.Height + 50 - FPaper.H) div 2),
-      FPaper.W, FPaper.H, bsBox, bsRaised);
-    Bv_Visu.BackgroundColor := clWhite;
+    Bv_Visu.SetPosition((F_Visu.Width - FPaper.W - F_Visu.PreviewMargin) div 2,
+        ((F_Visu.Height + 50 + F_Visu.PreviewMargin - FPaper.H) div 2), FPaper.W, FPaper.H);
     Bv_Visu.OnPaint := @Bv_VisuPaint;
   end;
 end;

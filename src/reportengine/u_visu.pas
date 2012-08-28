@@ -72,6 +72,7 @@ type
     L_NumPageSect: TfpgLabel;
     L_FromPageSect: TfpgLabel;
     L_NbrPageSect: TfpgLabel;
+    Bv_PreviewPage: TfpgBevel;
     FPreviewMargin: integer;
     procedure FormShow(Sender: TObject);
     procedure Bt_CloseClick(Sender: TObject);
@@ -486,6 +487,9 @@ begin
 
   CreateReportImages;
 
+  Bv_PreviewPage := CreateBevel(self, 0, 0, 50, 50, bsBox, bsRaised);
+  Bv_PreviewPage.BackgroundColor := clWhite;
+
   Bv_Command     := CreateBevel(Self, 0, 0, Width, 50, bsBox, bsRaised);
   Bt_Close       := CreateButton(Bv_Command, 10, 10, 26, '', @Bt_CloseClick, 'stdimg.exit');
   Bt_Print       := CreateButton(Bv_Command, 50, 10, 26, '', @Bt_PrintClick, 'stdimg.print');
@@ -519,6 +523,8 @@ begin
   L_NumPageSect  := CreateLabel(Bv_Sections, 365, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
   L_FromPageSect := CreateLabel(Bv_Sections, 410, E_NumSect.Top, 'of', 30, E_NumSect.Height, taLeftJustify, tlcenter);
   L_NbrPageSect  := CreateLabel(Bv_Sections, 440, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
+
+  Bv_Visu := Bv_PreviewPage; // assign to global reference variable
 end;
 
 destructor TF_Visu.Destroy;
