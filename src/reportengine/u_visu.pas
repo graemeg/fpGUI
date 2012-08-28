@@ -72,6 +72,7 @@ type
     L_NumPageSect: TfpgLabel;
     L_FromPageSect: TfpgLabel;
     L_NbrPageSect: TfpgLabel;
+    FPreviewMargin: integer;
     procedure FormShow(Sender: TObject);
     procedure Bt_CloseClick(Sender: TObject);
     procedure Bt_PrintClick(Sender: TObject);
@@ -90,6 +91,7 @@ type
   public
     constructor Create(AOwner: TComponent; AImprime: T_Report); reintroduce;
     destructor Destroy; override;
+    property PreviewMargin: integer read FPreviewMargin write SetPreviewMargin;
   end;
 
 var
@@ -406,6 +408,13 @@ begin
     end;
 end;
 
+procedure TF_Visu.SetPreviewMargin(AValue: integer);
+begin
+  if FPreviewMargin = AValue then
+    Exit;
+  FPreviewMargin := AValue;
+end;
+
 procedure TF_Visu.E_NumPageKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: Boolean);
 var
   CptSect, CptPage, CptPageSect: integer;
@@ -472,6 +481,8 @@ begin
   SetPosition(0, 0, fpgApplication.ScreenWidth - 2, fpgApplication.ScreenHeight - 66);
   BackgroundColor := fpgColor(51,51,51); // black/brown or should be use clShadow2 for theming abilities??
   OnShow         := @FormShow;
+
+  FPreviewMargin := 10;
 
   CreateReportImages;
 
