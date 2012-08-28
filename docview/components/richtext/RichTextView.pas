@@ -376,7 +376,7 @@ Type
     Property Focusable;
     property Visible;
     property RichTextSettings: TRichTextSettings read FRichTextSettings;
-    property ScrollBarWidth: longint read FScrollBarWidth write SetScrollBarWidth default 15;
+    property ScrollBarWidth: longint read FScrollBarWidth write SetScrollBarWidth default 16;
     property SmoothScroll: boolean read FSmoothScroll write FSmoothScroll;
     property ScrollDistance: integer read FScrollDistance write SetScrollDistance default 75;
     property UseDefaultMenu: boolean read FUseDefaultMenu write FUseDefaultMenu default True;
@@ -621,7 +621,7 @@ begin
   FNeedVScroll := False;
   FNeedHScroll := False;
   FSmoothScroll := True;
-  FScrollbarWidth := 15;
+  FScrollbarWidth := 16;
   FUseDefaultMenu := True;
   FDebug          := False;
   FLayoutRequired := True;
