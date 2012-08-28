@@ -89,6 +89,7 @@ type
     procedure E_NumPageKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure E_NumSectKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure ChangeButtons;
+    procedure SetPreviewMargin(AValue: integer);
   public
     constructor Create(AOwner: TComponent; AImprime: T_Report); reintroduce;
     destructor Destroy; override;
