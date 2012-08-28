@@ -346,7 +346,7 @@ type
     //          2 for 1/2 size
     //          3 for 1/3 size
     //          4 for 1/4 size
-    procedure PrintPdf(Layout: TPageLayout; Zoom: string; Prefer: Boolean);
+    procedure PrintPdf(Layout: TPageLayout = lSingle; Zoom: string = '100'; Prefer: Boolean = True);
     property Language: char read FVersion write FVersion;
     property Visualiser: Boolean read FVisualization write FVisualization;
     property NumSection: integer read FNmSection write FNmSection;
