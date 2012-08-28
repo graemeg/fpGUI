@@ -1244,7 +1244,7 @@ end;
 procedure TF_Demo.PrintCadres(Preview: Boolean);
 var
   FtTitle, FtText: integer;
-  TsThin, TsNorm, TsThick: integer;
+  {TsThin,} TsNorm, TsThick: integer;
   IlTitle, IlText: integer;
 begin
   with FReport do
@@ -1255,7 +1255,7 @@ begin
     FtTitle := Font('helvetica-15:bold', clBlack);
     FtText  := Font('helvetica-8', clBlack);
     // create the style of lines to be used
-    TsThin  := LineStyle(0.2, clBlack, lsSolid);
+//    TsThin  := LineStyle(0.2, clRed, lsSolid);
     TsNorm  := LineStyle(1, clBlack, lsSolid);
     TsThick := LineStyle(2, clBlack, lsSolid);
     // create line spacings to be used
@@ -1268,7 +1268,7 @@ begin
     // write page number and total of pages on each page
     NumPageFooter(cnRight, lnEnd, 'Page', 'of', True, ColDefaut, FtText, IlText);
     // draw thin frame rectangle at margins
-    //  FrameMargins(TsThin);
+//      FrameMargins(TsThin);
     // draw thick frame rectangle at header
     FrameHeader(TsThick);
     // draw thick frame rectangle at footer
