@@ -112,7 +112,6 @@ implementation
 
 uses
   U_Command,
-  U_Pdf,
   U_ReportImages;
 
 procedure TF_Visu.FormShow(Sender: TObject);
@@ -181,39 +180,8 @@ begin
 end;
 
 procedure TF_Visu.Bt_PdfClick(Sender: TObject);
-var
-  Fd_SavePdf: TfpgFileDialog;
-  PdfFile: string;
-  PdfFileStream: TFileStream;
 begin
-  Fd_SavePdf          := TfpgFileDialog.Create(nil);
-  Fd_SavePdf.InitialDir := fpgExtractFilePath(ParamStr(0));
-  Fd_SavePdf.Filter   := 'PDF Documents |*.pdf';
-  Fd_SavePdf.FileName := FReport.DefaultFile;
-  try
-    if Fd_SavePdf.RunSaveFile then
-    begin
-      PdfFile := Fd_SavePdf.FileName;
-      if Lowercase(fpgExtractFileExt(PdfFile)) <> '.pdf' then
-        PdfFile := PdfFile + '.pdf';
-      Document := TPdfDocument.CreateDocument;
-      with Document do
-      begin
-        PdfFileStream := TFileStream.Create(PdfFile, fmCreate);
-        WriteDocument(PdfFileStream);
-        PdfFileStream.Free;
-        Free;
-      end;
-      {$ifdef linux}
-      fpgOpenURL(PdfFile);
-      {$endif}
-      {$ifdef win32}
-      ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-      {$endif}
-    end;
-  finally
-    Fd_SavePdf.Free;
-  end;
+  FReport.PrintPdf;
 end;
 
 procedure TF_Visu.Bt_FirstPageClick(Sender: TObject);
