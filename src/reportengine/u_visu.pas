@@ -585,7 +585,11 @@ var
   h: integer;
 begin
   h := Bv_Visu.Height + (PreviewMargin*2);
-  VScrollBar.Max := Abs(h - VScrollBar.Height);
+  { if page is smaller than screen space, scrolling gets disabled }
+  if h > VScrollBar.Height then
+    VScrollBar.Max := Abs(h - VScrollBar.Height)
+  else
+    VScrollBar.Max := 0;
   VScrollBar.SliderSize := VScrollBar.Height / h;
   VScrollBar.Position := 0;
 end;
