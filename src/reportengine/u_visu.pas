@@ -187,15 +187,14 @@ var
   PdfFileStream: TFileStream;
 begin
   Fd_SavePdf          := TfpgFileDialog.Create(nil);
-  Fd_SavePdf.InitialDir := ExtractFilePath(ParamStr(0));
-  Fd_SavePdf.FontDesc := 'bitstream vera sans-9';
+  Fd_SavePdf.InitialDir := fpgExtractFilePath(ParamStr(0));
   Fd_SavePdf.Filter   := 'PDF Documents |*.pdf';
   Fd_SavePdf.FileName := FReport.DefaultFile;
   try
     if Fd_SavePdf.RunSaveFile then
     begin
       PdfFile := Fd_SavePdf.FileName;
-      if Lowercase(Copy(PdfFile, Length(PdfFile) - 3, 4)) <> '.pdf' then
+      if Lowercase(fpgExtractFileExt(PdfFile)) <> '.pdf' then
         PdfFile := PdfFile + '.pdf';
       Document := TPdfDocument.CreateDocument;
       with Document do
