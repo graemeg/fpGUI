@@ -36,7 +36,6 @@ uses
   fpg_button,
   fpg_edit,
   fpg_dialogs,
-  fpg_utils,
   fpg_scrollbar,
   U_Report;
 
