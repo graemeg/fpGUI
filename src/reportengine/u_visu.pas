@@ -28,9 +28,6 @@ interface
 uses
   Classes,
   SysUtils,
-  {$ifdef win32}
-  shellapi,
-  {$endif}
   fpg_base,
   fpg_main,
   fpg_form,
