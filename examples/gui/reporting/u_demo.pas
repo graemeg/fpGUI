@@ -9,9 +9,6 @@ interface
 uses
   Classes,
   SysUtils,
-  {$ifdef win32}
-  ShellApi,
-  {$endif}
   fpg_main,
   fpg_base,
   fpg_form,
