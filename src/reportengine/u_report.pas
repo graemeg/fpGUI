@@ -2865,12 +2865,7 @@ begin
         Free;
       end;
       { TODO: Create a cross-platform fpgViewFile() method or something }
-      {$ifdef linux}
       fpgOpenURL(PdfFile);
-      {$endif}
-      {$ifdef win32}
-      ShellExecute(0, PChar('OPEN'), PChar(PdfFile), PChar(''), PChar(''), 1);
-      {$endif}
     end;
   finally
     Fd_SavePdf.Free;
