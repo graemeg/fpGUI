@@ -29,7 +29,9 @@ uses
   FPImage,
   FPReadPNG;
 
-function LoadImage_PNG(const AFileName: TfpgString): TfpgImage;
+function LoadImage_PNG(const AFileName: TfpgString): TfpgImage; overload;
+function LoadImage_PNG(AStream: TStream): TfpgImage; overload;
+function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: PChar): TfpgImage; overload;
 function LoadImage_PNGcrop(const AMaxWidth, AMaxHeight: integer; const AFileName: TfpgString): TfpgImage;
 
 
@@ -80,6 +82,45 @@ begin
   begin
     Result := FPImageToFPG(imga);
     imga.Free;
+  end;
+end;
+
+function LoadImage_PNG(AStream: TStream): TfpgImage;
+var
+  imga: TFPMemoryImage;
+begin
+  Result := nil;
+  if AStream = nil then
+    Exit;
+
+  imga := TFPMemoryImage.Create(0, 0);
+  try
+    try
+      AStream.Position := 0;
+      imga.LoadFromStream(AStream, TFPReaderPNG.Create); // auto size image
+      Result := FPImageToFPG(imga);
+    except
+      on e: Exception do
+      begin
+        Result := nil;
+        raise; // so we can report PNG errors (eg: missing resource name)
+      end;
+    end;
+  finally
+    imga.Free;
+  end;
+end;
+
+function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: PChar): TfpgImage;
+var
+  res: TResourceStream;
+begin
+  try
+    res := TResourceStream.Create(AInstance, AResName, AResType);
+    Result := LoadImage_PNG(res);
+  finally
+    if res <> nil then
+      res.Free;
   end;
 end;
 
