@@ -38,14 +38,33 @@ implementation
 uses
   fpg_utils;
 
-function LoadImage_PNG(const AFileName: TfpgString): TfpgImage;
+function FPImageToFPG(ASource: TFPCustomImage): TfpgImage;
 var
   i, j: integer;
   colorA: TFPColor;   // struct Red, Green, Blue, Alpha: word
   colorB: TfpgColor;  // ONE long 32-bit-word
-  imga: TFPCustomImage;
-  imgb: TfpgImage;
   xlocal, ylocal: integer;
+begin
+  Result := nil;
+  if ASource=nil then Exit;
+
+  xlocal := ASource.Width;
+  ylocal := ASource.Height;
+  Result := TfpgImage.Create;
+  Result.AllocateImage(32, xlocal, ylocal); // 32=colordepth
+  for i := 0 to ylocal - 1 do
+    for j := 0 to xlocal - 1 do
+    begin
+      colorA := ASource.Colors[j, i];
+      colorB := (colorA.Blue shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF) shl 16) or ((colorA.Alpha and $FF) shl 24);
+      Result.Colors[j, i] := colorB;
+    end;
+  Result.UpdateImage;
+end;
+
+function LoadImage_PNG(const AFileName: TfpgString): TfpgImage;
+var
+  imga: TFPCustomImage;
 begin
   Result := nil;
   if not fpgFileExists(AFileName) then
@@ -56,25 +75,12 @@ begin
     imga.LoadFromFile(AFileName, TFPReaderPNG.Create); // auto size image
   except
     imga := nil;
-    imgb := nil;
   end;
   if imga <> nil then
   begin
-    xlocal := imga.Width;
-    ylocal := imga.Height;
-    imgb   := TfpgImage.Create;
-    imgb.AllocateImage(32, xlocal, ylocal); // 32=colordepth
-    for i := 0 to ylocal - 1 do
-      for j := 0 to xlocal - 1 do
-      begin
-        colorA := imga.Colors[j, i];
-        colorB := (colorA.Blue shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF) shl 16) or ((colorA.Alpha and $FF) shl 24);
-        imgb.Colors[j, i] := colorB;
-      end;
-    imgb.UpdateImage;
+    Result := FPImageToFPG(imga);
+    imga.Free;
   end;
-  imga.Free;
-  Result := imgb;
 end;
 
 function LoadImage_PNGcrop(const AMaxWidth, AMaxHeight: integer; const AFileName: TfpgString): TfpgImage;
