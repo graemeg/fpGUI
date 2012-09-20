@@ -1,0 +1,84 @@
+
+How to translate your own fpGUI-based applications
+--------------------------------------------------
+
+1) Decide on your default language. If it is not English, then you can
+   toggle fpGUI's default language too - this is optional though.
+   If you do want to change fpGUI's default language, then edit the
+   fpg_constants.pas unit, and enable the language define for the
+   language you want. fpGUI supports 8 languages out of the box.
+   Then simply recompile fpGUI.
+
+2) Now for your application. Simply create a myconstants.pas unit
+   where you define all your applications resource strings.
+
+   eg:
+   resourcestring
+     rsErrMessage = 'Some error occurred';
+
+   It is not mandatory to use a single resource string unit, but it
+   does make your life a whole lot easier.
+
+3) When compiling your project FPC would have created a myconstants.rst
+   file. A compiled resource string unit.
+
+4) Now use FPC's 'rstconv' tool to convert that to a standard .po file,
+   which can be edited by many freely available PO tools.
+   eg: gtranslator, poedit, KBabel etc.
+
+     rstconv -i myconstants.rst -o <appname>.en.po
+
+   For your application translation, fpGUI is coded to look for *.po
+   files with the following naming format.
+
+            <appname>.<lang>.po
+
+   where <lang> is the international 2 character language code.
+
+5) If you have other language .po translation files, they need to
+   periodically be updated with the latest resource string amendments.
+   fpGUI includes such a tool at: <fpgui>/tools/updatepofiles.pas
+
+   Compile this tool, and run it by passing the latest *.po file to it
+   as the only parameter. The 'updatepofiles' tool will then search for
+   all other *.po files in the same directory as the one passed in on
+   the command line. It will then update those other *.po files with the
+   latest resource string changes.
+
+   eg:   updatepofiles languages/<appname>.po
+
+6) Now use any PO Editor to translate the various <myapp>.<lang>.po
+   files.
+
+
+
+Summary
+-------
+So in summary, when you deploy your application, you will have the
+following files to distribute. For example:
+
+    myapp                -  executable (compiled for default English)
+    myapp.af.po          -  application translation for Afrikaans
+    myapp.ru.po          -  application translation for Russian
+    fpgui.af.po          -  fpGUI translation for Afrikaans
+    fpgui.ru.po          -  fpGUI translation for Russian
+
+
+When the application is run under Windows, it will automatically query
+the region information to find the language to use. Under Linux (*nix)
+it will look at the LANG environment variable.
+
+For example: say you want to force the above application to start up in
+Afrikaans under Linux, you can do the following in a terminal window.
+
+   export LANG=af_ZA.UTF-8
+   ./myapp
+
+
+For my applications I put together a simple console application (a
+shell/batch script will do as well) that runs all the above commands for
+me. So keeping my .po files up to date is a simple one line command.
+
+
+           -------------  end  ----------------
+
