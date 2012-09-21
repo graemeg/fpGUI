@@ -380,9 +380,16 @@ begin
 end;
 
 function WinColorTofpgColor(col: longword): TfpgColor;
+var
+  t: TRGBTriple;
 begin
-  //swapping bytes
-  Result := fpgColorToWin(col);
+  { Windown Color is BBGGRR format }
+  t.Blue := (col and $FF0000) shr 16;
+  t.Green := (col and $00FF00) shr 8;
+  t.Red := (col and $0000FF);
+  t.Alpha := $FF;
+
+  Result := RGBTripleTofpgColor(t);
 end;
 
 function GetMyWidgetFromHandle(wh: TfpgWinHandle): TfpgWidget;
