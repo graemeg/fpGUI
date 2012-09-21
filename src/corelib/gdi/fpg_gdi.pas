@@ -2194,9 +2194,9 @@ function TfpgGDICanvas.GetPixel(X, Y: integer): TfpgColor;
 var
   c: longword;
 begin
-  c := Windows.GetPixel(Fgc, X, Y);
   if c = CLR_INVALID then
     Writeln('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+  c := Windows.GetPixel(FWinGC, X, Y);
   Result := WinColorTofpgColor(c);
 end;
 
