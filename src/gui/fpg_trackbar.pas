@@ -162,6 +162,7 @@ begin
   else
     FPosition := AValue;
 
+  RePaint;
   DoChange;
 end;
 
