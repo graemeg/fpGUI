@@ -110,7 +110,6 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     procedure   DrawSlider(recalc: boolean); virtual;
-    procedure   RepaintSlider;
     procedure   PositionChange(d: integer);
   public
     constructor Create(AOwner: TComponent); override;
@@ -254,7 +253,6 @@ var
   drawwidth: integer;
   i: integer;
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
   Canvas.Clear(FBackgroundColor);
@@ -294,8 +292,6 @@ begin
       DrawSlider(round(2 + FSliderSize div 2 + linepos * position));
     end;
   end;  { if/else }
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgTrackBarExtra.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -415,9 +411,7 @@ begin
   else
     FPosition := AValue;
 
-  if HasHandle then
-    DrawSlider(False);
-  Repaint;
+  RePaint;
 end;
 
 procedure TfpgTrackBar.SetShowPosition(const AValue: boolean);
@@ -463,7 +457,7 @@ begin
   if FSliderDragging then
   begin
     FSliderDragStart := FSliderPos;
-    DrawSlider(False);
+    RePaint;
   end;
 end;
 
@@ -471,7 +465,7 @@ procedure TfpgTrackBar.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FSliderDragging   := False;
-  HandlePaint;
+  RePaint;
 end;
 
 procedure TfpgTrackBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -513,9 +507,6 @@ begin
   if FSliderPos > area then
     FSliderPos := area;
 
-  if ppos <> FSliderPos then
-    DrawSlider(False);
-
   if area <> FMin then
     newp := FMin + Trunc((FMax - FMin)  * (FSliderPos / area))
   else
@@ -524,6 +515,7 @@ begin
   if newp <> FPosition then
   begin
     Position := newp;
+    RePaint;
     if Assigned(FOnChange) then
       FOnChange(self, FPosition);
   end;
@@ -533,16 +525,12 @@ procedure TfpgTrackBar.HandlePaint;
 var
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
-
   DrawSlider(True);
   if Focused then
   begin
     r.SetRect(0, 0, Width, Height);
     Canvas.DrawFocusRect(r);
   end;
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgTrackBar.DrawSlider(recalc: boolean);
@@ -552,7 +540,6 @@ var
   r: TfpgRect;
   tw: TfpgCoord;
 begin
-  Canvas.BeginDraw;
   Canvas.Clear(FBackgroundColor);
   Canvas.SetColor(FBackgroundColor);
 
@@ -584,7 +571,6 @@ begin
   if Orientation = orVertical then
   begin
     Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
-    Canvas.EndDraw(0, Width, Width, Height - Width - Width);
   end
   else
   begin
@@ -598,14 +584,6 @@ begin
       fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.Height) div 2, IntToStr(Position), Enabled);
     end;
   end;
-  Canvas.EndDraw;
-end;
-
-procedure TfpgTrackBar.RepaintSlider;
-begin
-  if not HasHandle then
-    Exit; //==>
-  DrawSlider(True);
 end;
 
 procedure TfpgTrackBar.PositionChange(d: integer);
@@ -617,7 +595,7 @@ begin
     FPosition := FMax;
 
   if Visible then
-    DrawSlider(True);
+    RePaint;
 
   if Assigned(FOnChange) then
     FOnChange(self, FPosition);
