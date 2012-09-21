@@ -376,7 +376,7 @@ var
 begin
   c      := fpgColorToRGB(col);
   //swapping bytes (Red and Blue colors)
-  Result := ((c and $FF0000) shr 16) or ((c and $0000FF) shl 16) or (c and $00FF00);
+  Result := ((c and $FF0000) shr 16) or (c and $00FF00) or ((c and $0000FF) shl 16);
 end;
 
 function WinColorTofpgColor(col: longword): TfpgColor;
