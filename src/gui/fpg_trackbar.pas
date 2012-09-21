@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -43,20 +43,33 @@ uses
   
 type
   TTrackBarChange = procedure(Sender: TObject; APosition: integer) of object;
-  
-  
-  TfpgTrackBarExtra = class(TfpgWidget)
+
+
+  TfpgBaseTrackBar = class(TfpgWidget)
   private
+    FPosition: integer;
     FMax: integer;
     FMin: integer;
-    FOnChange: TTrackBarChange;
     FOrientation: TOrientation;
-    FPosition: integer;
-    FSliderSize: integer;
+    FOnChange: TTrackBarChange;
     procedure   DoChange;
+    procedure   SetTBPosition(AValue: integer);
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
-    procedure   SetTBPosition(const AValue: integer);
+  protected
+    property    Max: integer read FMax write SetMax default 100;
+    property    Min: integer read FMin write SetMin default 0;
+    property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
+    property    Position: integer read FPosition write SetTBPosition default 0;
+    property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+
+  TfpgTrackBarExtra = class(TfpgBaseTrackBar)
+  private
+    FSliderSize: integer;
     procedure   SetSliderSize(const AValue: integer);
     procedure   FixMinMaxOrder;
     procedure   FixPositionLimits;
@@ -71,24 +84,20 @@ type
     property    Align;
     property    BackgroundColor;
     property    Hint;
-    property    Min: integer read FMin write SetMin default 0;
-    property    Max: integer read FMax write SetMax default 10;
-    property    Position: integer read FPosition write SetTBPosition default 0;
+    property    Max default 10;
+    property    Min;
+    property    Orientation;
+    property    Position;
     property    ShowHint;
     property    SliderSize: integer read FSliderSize write SetSliderSize default 11;
-    property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
-    property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+    property    OnChange;
     property    OnShowHint;
   end;
   
   
-  TfpgTrackBar = class(TfpgWidget)
+  TfpgTrackBar = class(TfpgBaseTrackBar)
   private
-    FMax: integer;
-    FMin: integer;
-    FOrientation: TOrientation;
-    FPosition: integer;
     FScrollStep: integer;
     FShowPosition: boolean;
     FSliderPos: TfpgCoord;
@@ -97,11 +106,7 @@ type
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
     FMousePosition: TPoint;
-    FOnChange: TTrackBarChange;
     FFont: TfpgFont;
-    procedure   SetMax(const AValue: integer);
-    procedure   SetMin(const AValue: integer);
-    procedure   SetTBPosition(const AValue: integer);
     procedure   SetShowPosition(const AValue: boolean);
     function    GetTextWidth: TfpgCoord;
   protected
@@ -110,7 +115,6 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     procedure   DrawSlider(recalc: boolean); virtual;
-    procedure   PositionChange(d: integer);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -118,18 +122,18 @@ type
     property    Align;
     property    BackgroundColor;
     property    Enabled;
-    property    Position: integer read FPosition write SetTBPosition default 0;
-    property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
-    property    Min: integer read FMin write SetMin default 0;
-    property    Max: integer read FMax write SetMax default 100;
-    property    ParentShowHint;
     property    Hint;
+    property    Max;
+    property    Min;
+    property    Orientation;
+    property    ParentShowHint;
+    property    Position;
+    property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    ShowHint;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
-    property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
     property    TextColor;
-    property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+    property    OnChange;
     property    OnEnter;
     property    OnExit;
     property    OnShowHint;
@@ -138,38 +142,69 @@ type
 
 implementation
 
-{ TfpgTrackBarExtra }
+{ TfpgBaseTrackBar }
 
-procedure TfpgTrackBarExtra.DoChange;
+procedure TfpgBaseTrackBar.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(self, FPosition);
 end;
 
-procedure TfpgTrackBarExtra.SetMax(const AValue: integer);
-begin
-  if FMax = AValue then
-    Exit; //==>
-  FMax := AValue;
-  RePaint;
-end;
-
-procedure TfpgTrackBarExtra.SetMin(const AValue: integer);
-begin
-  if FMin = AValue then
-    Exit; //==>
-  FMin := AValue;
-  RePaint;
-end;
-
-procedure TfpgTrackBarExtra.SetTBPosition(const AValue: integer);
+procedure TfpgBaseTrackBar.SetTBPosition(AValue: integer);
 begin
   if FPosition = AValue then
     Exit; //==>
-  FPosition := AValue;
-  RePaint;
+
+  if AValue < FMin then
+    FPosition := FMin
+  else if AValue > FMax then
+    FPosition := FMax
+  else
+    FPosition := AValue;
+
   DoChange;
 end;
+
+procedure TfpgBaseTrackBar.SetMax(const AValue: integer);
+begin
+  if AValue = FMax then
+    Exit;
+  if AValue < FMin then
+    FMax := FMin
+  else
+    FMax := AValue;
+  if FPosition > FMax then
+    SetTBPosition(FMax);
+  Repaint;
+end;
+
+procedure TfpgBaseTrackBar.SetMin(const AValue: integer);
+begin
+  if AValue = FMin then
+    Exit;
+  if AValue > FMax then
+    FMin := FMax
+  else
+    FMin := AValue;
+  if FPosition < FMin then
+    SetTBPosition(FMin);
+  Repaint;
+end;
+
+constructor TfpgBaseTrackBar.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFocusable := True;
+  FMin := 0;
+  FMax := 100;
+  FPosition := 0;
+  FOrientation := orHorizontal;
+  FTextColor := Parent.TextColor;
+  FBackgroundColor := Parent.BackgroundColor;
+  FOnChange := nil;
+end;
+
+{ TfpgTrackBarExtra }
 
 procedure TfpgTrackBarExtra.SetSliderSize(const AValue: integer);
 begin
@@ -363,56 +398,11 @@ end;
 constructor TfpgTrackBarExtra.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFocusable    := True;
-  FMin          := 0;
   FMax          := 10;
-  FPosition     := 0;
   FSliderSize   := 11;
-  FOrientation  := orHorizontal;
-  FOnChange     := nil;
-  FTextColor  := Parent.TextColor;
-  FBackgroundColor := Parent.BackgroundColor;
 end;
 
 { TfpgTrackBar }
-
-procedure TfpgTrackBar.SetMax(const AValue: integer);
-begin
-  if AValue = FMax then
-    Exit;
-  if AValue < FMin then
-    FMax := FMin
-  else
-    FMax := AValue;
-  if FPosition > FMax then
-    SetTBPosition(FMax);
-  Repaint;
-end;
-
-procedure TfpgTrackBar.SetMin(const AValue: integer);
-begin
-  if AValue = FMin then
-    Exit;
-  if AValue > FMax then
-    FMin := FMax
-  else
-    FMin := AValue;
-  if FPosition < FMin then
-    SetTBPosition(FMin);
-  Repaint;
-end;
-
-procedure TfpgTrackBar.SetTBPosition(const AValue: integer);
-begin
-  if AValue < FMin then
-    FPosition := FMin
-  else if AValue > FMax then
-    FPosition := FMax
-  else
-    FPosition := AValue;
-
-  RePaint;
-end;
 
 procedure TfpgTrackBar.SetShowPosition(const AValue: boolean);
 begin
@@ -516,8 +506,7 @@ begin
   begin
     Position := newp;
     RePaint;
-    if Assigned(FOnChange) then
-      FOnChange(self, FPosition);
+    DoChange;
   end;
 end;
 
@@ -587,45 +576,21 @@ begin
   end;
 end;
 
-procedure TfpgTrackBar.PositionChange(d: integer);
-begin
-  FPosition := FPosition + d;
-  if FPosition < FMin then
-    FPosition := FMin;
-  if FPosition > FMax then
-    FPosition := FMax;
-
-  if Visible then
-    RePaint;
-
-  if Assigned(FOnChange) then
-    FOnChange(self, FPosition);
-end;
-
 constructor TfpgTrackBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFocusable    := True;
   Height        := 30;
   Width         := 100;
-  FOrientation  := orHorizontal;
-  FMin          := 0;
-  FMax          := 100;
-  FPosition     := 0;
   FSliderPos    := 0;
   FSliderDragging := False;
   FSliderLength := 11;
   FScrollStep   := 1;
   FShowPosition := False;
   FFont         := fpgGetFont('#Grid');
-  FTextColor    := Parent.TextColor;
-  FBackgroundColor := Parent.BackgroundColor;
-  FOnChange     := nil;
 end;
 
 destructor TfpgTrackBar.Destroy;
 begin
-  FOnChange := nil;
   FFont.Free;
   inherited Destroy;
 end;
