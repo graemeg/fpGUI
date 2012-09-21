@@ -526,7 +526,8 @@ var
   r: TfpgRect;
 begin
   DrawSlider(True);
-  if Focused then
+  { dont't draw focus rect while dragging - it flickers }
+  if Focused and (not FSliderDragging) then
   begin
     r.SetRect(0, 0, Width, Height);
     Canvas.DrawFocusRect(r);
