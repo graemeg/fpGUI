@@ -74,7 +74,7 @@ type
 
   // If you have to convert this to an Integer, mrNone = 0 etc.
   TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
-      mrIgnore, mrAll, mrNoToAll, mrYesToAll);
+      mrIgnore, mrAll, mrNoToAll, mrYesToAll, mrHelp);
 
   TfpgDropAction = (daIgnore, daCopy, daMove, daLink, daAsk);
   TfpgDropActions = set of TfpgDropAction;
@@ -1381,7 +1381,7 @@ end;
 procedure TfpgWindowBase.AfterConstruction;
 begin
   inherited AfterConstruction;
-  { Here is a neater way by using RTTI to set default property values all
+  { There is a neater way by using RTTI to set default property values all
     automatically. No need to duplicate the efforts and manually set the
     property default values in the constructor. This code is now the same for
     each TfpgWindowBase descendant (which includes GUI widgets) }
