@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -330,10 +330,18 @@ end;
 procedure TfpgMessageDialog.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if keycode = keyEscape then   // Esc cancels the dialog
-    ModalResult := mrCancel
+  case CheckClipBoardKey(keycode, shiftstate) of
+    ckCopy:
+        begin
+          fpgClipboard.Text := Text + LineEnding + LineEnding + InformativeText;
+          Consumed := True;
+        end;
   else
-    inherited HandleKeyPress(keycode, shiftstate, consumed);
+    if keycode = keyEscape then   // Esc cancels the dialog
+      ModalResult := mrCancel
+    else
+      inherited HandleKeyPress(keycode, shiftstate, consumed);
+  end;
 end;
 
 procedure TfpgMessageDialog.PrepareLayout;

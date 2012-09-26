@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -450,10 +450,18 @@ end;
 procedure TfpgMessageBox.FormKeyPressed(Sender: TObject; var KeyCode: word;
   var ShiftState: TShiftState; var Consumed: boolean);
 begin
-  if KeyCode = keyEscape then
-  begin
-    Consumed := False;
-    Close;
+  case CheckClipBoardKey(keycode, shiftstate) of
+    ckCopy:
+        begin
+          fpgClipboard.Text := FLines.Text;
+          Consumed := True;
+        end;
+  else
+    if KeyCode = keyEscape then
+    begin
+      Consumed := True;
+      Close;
+    end;
   end;
 end;
 
