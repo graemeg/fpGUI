@@ -31,6 +31,8 @@ type
     {@VFD_HEAD_END: fpgQueryDialog}
     procedure SetupCaptions;
     procedure edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     procedure AfterCreate; override;
   end;
@@ -69,6 +71,15 @@ procedure TfpgQueryDialog.edtTextKeyPressed(Sender: TObject; var KeyCode: word; 
 begin
   if KeyCode = keyEnter then
    btnOK.Click;
+end;
+
+procedure TfpgQueryDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+begin
+  if KeyCode = keyEscape then
+  begin
+    consumed := True;
+    ModalResult := mrCancel;
+  end;
 end;
 
 procedure TfpgQueryDialog.AfterCreate;
