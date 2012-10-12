@@ -67,6 +67,7 @@ type
     property    RowCount;
     property    ScrollBarStyle;
     property    TabOrder;
+    property    TopRow;
     property    OnRowChange;
     property    OnDoubleClick;
     property    OnShowHint;
