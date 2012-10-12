@@ -72,6 +72,8 @@ type
     procedure   DrawVerDivider; //  bsVerDivider
   protected
     procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property    AcceptDrops;
     property    Align;
@@ -604,6 +606,12 @@ begin
     bsSpacer:       DrawSpacer;
     bsVerDivider:   DrawVerDivider;
   end;
+end;
+
+constructor TfpgBevel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FPanelShape := bsBox;
 end;
 
 {TfpgPanel}
