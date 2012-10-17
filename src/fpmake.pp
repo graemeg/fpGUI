@@ -85,12 +85,14 @@ begin
     P.SourcePath.Add('corelib/gdi', AllWindowsOSes);
     P.SourcePath.Add('gui');
     P.SourcePath.Add('gui/db');
+    P.SourcePath.Add('reportengine');
 
     P.UnitPath.Add('corelib');
     P.UnitPath.Add('corelib/x11', AllUnixOSes);
     P.UnitPath.Add('corelib/gdi', AllWindowsOSes);
     P.UnitPath.Add('gui');
     P.UnitPath.Add('gui/db');
+    P.UnitPath.Add('reportengine');
 
     P.IncludePath.Add('.');
     P.IncludePath.Add('corelib');
@@ -99,7 +101,7 @@ begin
     P.IncludePath.Add('gui');
 
     { todo: add unit and include dependency for all }
-{    
+{
     P.Sources.AddSrcFiles('corelib/*.pas');
     P.Sources.AddSrcFiles('gui/*.pas');
     if Defaults.OS in AllUnixOSes then
@@ -215,6 +217,13 @@ begin
     T := P.Targets.AddUnit('fpg_colorwheel.pas');
     T := P.Targets.AddUnit('fpg_colormapping.pas');
     T := P.Targets.AddUnit('fpg_editbtn.pas');
+
+    { PDF report engine }
+    T := P.Targets.AddUnit('u_command.pas');
+    T := P.Targets.AddUnit('u_reportimages.pas');
+    T := P.Targets.AddUnit('u_pdf.pas');
+    T := P.Targets.AddUnit('u_report.pas');
+    T := P.Targets.AddUnit('u_visu.pas');
 
     Run;
   end;
