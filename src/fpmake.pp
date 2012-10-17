@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,9 +12,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      This program is kindly supplied by Henry Vermaak. It uses the new
-      fpmake build system introduced in FPC 2.2.2. fpmake is supposed to
-      replace the Makefile build system.
+      The original version of this program was kindly supplied by Henry
+      Vermaak. It uses the new fpmake build system introduced in FPC 2.2.2.
+      fpmake is supposed to replace the Makefile build system.
 
     Usage:
       - Compile fpmake.pas as follows:
@@ -54,7 +54,7 @@ begin
     P.Version := FPGUI_VERSION;
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
-    P.License := 'Modified LGPL';
+    P.License := 'LGPL with linking exception';
     P.Description := 'fpGUI Toolkit - a custom written GUI toolkit for Free Pascal.';
 
 //    P.Dependencies.Add('fcl');
@@ -192,14 +192,14 @@ begin
     T := P.Targets.AddUnit('fpg_trackbar.pas');
     T := P.Targets.AddUnit('fpg_button.pas');
     T := P.Targets.AddUnit('fpg_dialogs.pas');
-   	  T.Dependencies.AddInclude('charmapdialog.inc');
-   	  T.Dependencies.AddInclude('colordialog.inc');
-   	  T.Dependencies.AddInclude('inputquerydialog.inc');
-   	  T.Dependencies.AddInclude('messagedialog.inc');
-   	  T.Dependencies.AddInclude('newdirdialog.inc');
-   	  T.Dependencies.AddInclude('promptuserdialog.inc');
-   	  T.Dependencies.AddInclude('selectdirdialog.inc');
-   	  T.Dependencies.AddInclude('logo.inc');
+      T.Dependencies.AddInclude('charmapdialog.inc');
+      T.Dependencies.AddInclude('colordialog.inc');
+      T.Dependencies.AddInclude('inputquerydialog.inc');
+      T.Dependencies.AddInclude('messagedialog.inc');
+      T.Dependencies.AddInclude('newdirdialog.inc');
+      T.Dependencies.AddInclude('promptuserdialog.inc');
+      T.Dependencies.AddInclude('selectdirdialog.inc');
+      T.Dependencies.AddInclude('logo.inc');
     T := P.Targets.AddUnit('fpg_gauge.pas');
     T := P.Targets.AddUnit('fpg_iniutils.pas');
     T := P.Targets.AddUnit('fpg_memo.pas');
