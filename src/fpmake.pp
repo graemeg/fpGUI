@@ -151,24 +151,29 @@ begin
 
 
     { corelib/x11 }
-    T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_netlayer_x11.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_xft_x11.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_impl.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_x11.pas', AllUnixOSes);
-      T.Dependencies.AddUnit('fpg_xft_x11');
-      T.Dependencies.AddUnit('fpg_netlayer_x11');
-      T.Dependencies.AddUnit('fpg_base');
-      T.Dependencies.AddUnit('fpg_impl');
-    T := P.Targets.AddUnit('fpg_interface.pas', AllUnixOSes);
+    if Defaults.OS in AllUnixOSes then
+    begin
+      T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
+      T := P.Targets.AddUnit('fpg_netlayer_x11.pas', AllUnixOSes);
+      T := P.Targets.AddUnit('fpg_xft_x11.pas', AllUnixOSes);
+      T := P.Targets.AddUnit('fpg_impl.pas', AllUnixOSes);
+      T := P.Targets.AddUnit('fpg_x11.pas', AllUnixOSes);
+        T.Dependencies.AddUnit('fpg_xft_x11');
+        T.Dependencies.AddUnit('fpg_netlayer_x11');
+        T.Dependencies.AddUnit('fpg_base');
+        T.Dependencies.AddUnit('fpg_impl');
+      T := P.Targets.AddUnit('fpg_interface.pas', AllUnixOSes);
+    end;
 
 
     { corelib/gdi }
-    T := P.Targets.AddUnit('fpg_impl.pas', AllWindowsOSes);
-    T := P.Targets.AddUnit('fpg_gdi.pas', AllWindowsOSes);
-      T.Dependencies.AddInclude('fpg_keys_gdi.inc', AllWindowsOSes);
-    T := P.Targets.AddUnit('fpg_interface.pas', AllWindowsOSes);
-
+    if Defaults.OS in AllWindowsOSes then
+    begin
+      T := P.Targets.AddUnit('fpg_impl.pas', AllWindowsOSes);
+      T := P.Targets.AddUnit('fpg_gdi.pas', AllWindowsOSes);
+        T.Dependencies.AddInclude('fpg_keys_gdi.inc', AllWindowsOSes);
+      T := P.Targets.AddUnit('fpg_interface.pas', AllWindowsOSes);
+    end;
 
     { gui/db }
     T := P.Targets.AddUnit('fpgui_db.pas');
