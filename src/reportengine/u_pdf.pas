@@ -1178,7 +1178,7 @@ begin
   Nom        := TPdfString.CreateString(ApplicationName);
   Info.FObjet.AddElement('Creator', Nom);
   // add producer element to info dictionary
-  Nom        := TPdfString.CreateString('fpGUI/FPC');
+  Nom        := TPdfString.CreateString(fpGUIName + ' ' + FPGUI_VERSION);
   Info.FObjet.AddElement('Producer', Nom);
   // add creationdate element to info dictionary
   Nom        := TPdfString.CreateString(DateToPdfDate(Now));
