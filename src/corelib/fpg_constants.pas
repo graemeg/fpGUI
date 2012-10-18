@@ -100,6 +100,15 @@ const
   FPG_BOOKMARKS_FILE = 'bookmarks.ini';
   FPG_BOOKMARK_SECTION = 'bookmarks';
   
+  // Used for the internal message queue
+  cMessageQueueSize = 2048;
+
+  // version and name constants
+  {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
+  fpGUIName    = 'fpGUI Toolkit';
+  fpGUIWebsite = 'http://fpgui.sourceforge.net/';
+
+  txtWordDelims: set of char = [' ', #9, #13, #10];
 
 
 

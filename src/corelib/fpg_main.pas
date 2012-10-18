@@ -31,6 +31,7 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_constants,
   fpg_base,
   fpg_interface,
   fpg_impl;
@@ -62,17 +63,6 @@ const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
   TextFlagsDflt = [txtLeft, txtTop];
   
-  // Used for the internal message queue
-  cMessageQueueSize = 2048;
-
-  // version and name constants
-  {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
-  fpGUIName    = 'fpGUI Toolkit';
-  fpGUIWebsite = 'http://fpgui.sourceforge.net/';
-
-const
-  txtWordDelims: set of char = [' ', #9, #13, #10];
-
 
 type
   { *******************************************
@@ -469,7 +459,6 @@ uses
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
-  fpg_constants,
   fpg_widget,
   fpg_dialogs,
   fpg_hint,

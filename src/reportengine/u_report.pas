@@ -490,6 +490,7 @@ const
 implementation
 
 uses
+  fpg_constants,
   U_Visu;
 
 const
