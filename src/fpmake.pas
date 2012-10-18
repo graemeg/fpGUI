@@ -111,6 +111,16 @@ begin
 }
 
     { corelib }
+    T := P.Targets.AddUnit('fpg_constants.pas');
+      T.Dependencies.AddInclude('lang_en.inc');
+      T.Dependencies.AddInclude('lang_af.inc');
+      T.Dependencies.AddInclude('lang_de.inc');
+      T.Dependencies.AddInclude('lang_es.inc');
+      T.Dependencies.AddInclude('lang_fr.inc');
+      T.Dependencies.AddInclude('lang_it.inc');
+      T.Dependencies.AddInclude('lang_pt.inc');
+      T.Dependencies.AddInclude('lang_ru.inc');
+      T.ResourceStrings := True;
     T := P.Targets.AddUnit('fpg_base.pas');
       T.Dependencies.AddInclude('keys.inc');
       T.Dependencies.AddInclude('predefinedcolors.inc');
@@ -132,16 +142,6 @@ begin
       T.Dependencies.AddInclude('fpg_msgqueue.inc');
     T := P.Targets.AddUnit('fpg_stringhashlist.pas');
     T := P.Targets.AddUnit('fpg_widget.pas');
-    T := P.Targets.AddUnit('fpg_constants.pas');
-      T.Dependencies.AddInclude('lang_en.inc');
-      T.Dependencies.AddInclude('lang_af.inc');
-      T.Dependencies.AddInclude('lang_de.inc');
-      T.Dependencies.AddInclude('lang_es.inc');
-      T.Dependencies.AddInclude('lang_fr.inc');
-      T.Dependencies.AddInclude('lang_it.inc');
-      T.Dependencies.AddInclude('lang_pt.inc');
-      T.Dependencies.AddInclude('lang_ru.inc');
-      T.ResourceStrings := True;
 //    T := P.Targets.AddUnit('fpg_strings.pas');    // this unit is not used in fpGUI
     T := P.Targets.AddUnit('fpg_wuline.pas');
     T := P.Targets.AddUnit('fpg_extinterpolation.pas');
@@ -153,10 +153,10 @@ begin
     { corelib/x11 }
     if Defaults.OS in AllUnixOSes then
     begin
+      T := P.Targets.AddUnit('fpg_impl.pas', AllUnixOSes);
       T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
       T := P.Targets.AddUnit('fpg_netlayer_x11.pas', AllUnixOSes);
       T := P.Targets.AddUnit('fpg_xft_x11.pas', AllUnixOSes);
-      T := P.Targets.AddUnit('fpg_impl.pas', AllUnixOSes);
       T := P.Targets.AddUnit('fpg_x11.pas', AllUnixOSes);
         T.Dependencies.AddUnit('fpg_xft_x11');
         T.Dependencies.AddUnit('fpg_netlayer_x11');
@@ -224,9 +224,9 @@ begin
     T := P.Targets.AddUnit('fpg_editbtn.pas');
 
     { PDF report engine }
-    T := P.Targets.AddUnit('u_command.pas');
     T := P.Targets.AddUnit('u_reportimages.pas');
     T := P.Targets.AddUnit('u_pdf.pas');
+    T := P.Targets.AddUnit('u_command.pas');
     T := P.Targets.AddUnit('u_report.pas');
     T := P.Targets.AddUnit('u_visu.pas');
 
