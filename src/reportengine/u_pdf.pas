@@ -333,6 +333,7 @@ var
 implementation
 
 uses
+  fpg_utils,
   U_Report,
   U_Command;
 
@@ -1439,7 +1440,7 @@ var
   FileTxt: TextFile;
   Ligne: WideString;
 begin
-  if FileExists(FontDirectory + NomFonte + '.fnt') then
+  if fpgFileExists(FontDirectory + NomFonte + '.fnt') then
   begin
     AssignFile(FileTxt, FontDirectory + NomFonte + '.fnt');
     Reset(FileTxt);
