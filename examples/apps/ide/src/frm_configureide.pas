@@ -267,7 +267,6 @@ begin
     Name := 'pcSettings';
     SetPosition(4, 4, 570, 430);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    ActivePageIndex := 0;
     Hint := '';
     TabOrder := 3;
     TabPosition := tpRight;
@@ -277,7 +276,8 @@ begin
   with tsEnvironment do
   begin
     Name := 'tsEnvironment';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Environment';
   end;
 
@@ -285,7 +285,8 @@ begin
   with tsEditor do
   begin
     Name := 'tsEditor';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Editor';
   end;
 
@@ -293,7 +294,8 @@ begin
   with tsShortcuts do
   begin
     Name := 'tsShortcuts';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Shortcuts';
   end;
 
@@ -311,10 +313,10 @@ begin
   with edtFPCSrcDir do
   begin
     Name := 'edtFPCSrcDir';
-    SetPosition(8, 22, 424, 24);
+    SetPosition(8, 22, 342, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Directory := '';
+    ExtraHint := '';
     RootDirectory := '';
     TabOrder := 3;
     Hint := '*';
@@ -325,10 +327,10 @@ begin
   with edtFPGuiDir do
   begin
     Name := 'edtFPGuiDir';
-    SetPosition(8, 74, 424, 24);
+    SetPosition(8, 74, 342, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Directory := '';
+    ExtraHint := '';
     RootDirectory := '';
     TabOrder := 6;
     Hint := '*';
@@ -339,10 +341,10 @@ begin
   with edtFPGuiLibDir do
   begin
     Name := 'edtFPGuiLibDir';
-    SetPosition(8, 122, 424, 24);
+    SetPosition(8, 122, 342, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Directory := '${FPGUIDIR}lib/';
+    ExtraHint := '';
     RootDirectory := '';
     TabOrder := 7;
     Hint := '*';
@@ -353,10 +355,10 @@ begin
   with edtSyntaxDefDir do
   begin
     Name := 'edtSyntaxDefDir';
-    SetPosition(8, 170, 424, 24);
+    SetPosition(8, 170, 342, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Directory := '${FPGUIDIR}apps/ide/syntaxdefs/';
+    ExtraHint := '';
     RootDirectory := '';
     TabOrder := 8;
     Hint := '*';
@@ -367,10 +369,10 @@ begin
   with edtTempateDir do
   begin
     Name := 'edtTempateDir';
-    SetPosition(8, 218, 424, 24);
+    SetPosition(8, 218, 342, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Directory := '{FPGUIDIR}apps/ide/templates/';
+    ExtraHint := '';
     RootDirectory := '';
     TabOrder := 9;
     Hint := '*';
@@ -381,12 +383,12 @@ begin
   with edtCompiler do
   begin
     Name := 'edtCompiler';
-    SetPosition(8, 266, 424, 24);
+    SetPosition(8, 266, 342, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := '/opt/fpc_2.4.1/${TARGET}/bin/fpc';
-    InitialDir := '';
     Filter := '';
+    InitialDir := '';
     TabOrder := 10;
     Hint := '*';
     OnShowHint := @BeforeShowHint;
@@ -396,12 +398,12 @@ begin
   with edtDebugger do
   begin
     Name := 'edtDebugger';
-    SetPosition(8, 314, 426, 24);
+    SetPosition(8, 314, 344, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := 'gdb';
-    InitialDir := '';
     Filter := '';
+    InitialDir := '';
     TabOrder := 11;
     Hint := '*';
     OnShowHint := @BeforeShowHint;
@@ -501,8 +503,9 @@ begin
   with edtEditorFont do
   begin
     Name := 'edtEditorFont';
-    SetPosition(8, 22, 424, 24);
+    SetPosition(8, 22, 342, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
     FontDesc := '#Edit1';
     TabOrder := 2;
   end;
@@ -513,10 +516,10 @@ begin
     Name := 'edtExeExt';
     SetPosition(8, 362, 144, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '*';
     TabOrder := 21;
     Text := '';
-    FontDesc := '#Edit1';
     OnShowHint := @BeforeShowHint;
   end;
 
@@ -526,10 +529,10 @@ begin
     Name := 'edtTarget';
     SetPosition(164, 362, 192, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '*';
     TabOrder := 22;
     Text := 'i386-linux';
-    FontDesc := '#Edit1';
     OnShowHint := @BeforeShowHint;
   end;
 
@@ -539,6 +542,7 @@ begin
     Name := 'grdShortcuts';
     SetPosition(8, 8, 428, 408);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
     AddColumn('Action', 180, taLeftJustify);
     AddColumn('Shortcut', 110, taLeftJustify);
     AddColumn('Alternative', 110, taLeftJustify);
@@ -554,7 +558,8 @@ begin
   with tsSyntaxDefs do
   begin
     Name := 'tsSyntaxDefs';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Syntax Highlighting';
   end;
 
@@ -562,7 +567,8 @@ begin
   with tsFileFilters do
   begin
     Name := 'tsFileFilters';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'File Filters';
   end;
 
@@ -572,6 +578,7 @@ begin
     Name := 'grdSyntaxDefs';
     SetPosition(8, 8, 428, 408);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
     AddColumn('Syntax Definition File', 200, taLeftJustify);
     AddColumn('File Mask', 200, taLeftJustify);
     FontDesc := '#Grid';
@@ -588,6 +595,7 @@ begin
     Name := 'grdFileFilters';
     SetPosition(8, 8, 428, 408);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
     AddColumn('Name', 150, taLeftJustify);
     AddColumn('File Mask', 200, taLeftJustify);
     FontDesc := '#Grid';
@@ -603,6 +611,7 @@ begin
   begin
     Name := 'tsExtTools';
     SetPosition(125, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'External Tools';
   end;
 
@@ -623,10 +632,10 @@ begin
     SetPosition(8, 252, 428, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 3;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   Label12 := TfpgLabel.Create(tsExtTools);
@@ -647,8 +656,8 @@ begin
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := '';
-    InitialDir := '';
     Filter := '';
+    InitialDir := '';
     TabOrder := 5;
   end;
 
@@ -669,10 +678,10 @@ begin
     SetPosition(8, 348, 428, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 7;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   btnExtToolAdd := TfpgButton.Create(tsExtTools);
@@ -711,8 +720,6 @@ begin
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 10;
   end;
 
@@ -721,12 +728,14 @@ begin
   begin
     Name := 'cbTabPosition';
     SetPosition(8, 68, 144, 22);
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
     Items.Add('top');
     Items.Add('bottom');
     Items.Add('left');
     Items.Add('right');
+    FocusItem := -1;
     TabOrder := 3;
   end;
 
