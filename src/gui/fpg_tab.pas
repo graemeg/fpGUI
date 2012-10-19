@@ -901,7 +901,7 @@ begin
             h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
           else
             h := nil;
-		    end;
+        end;
         r2.Left    := 0;
         r2.Top     := 0;
         r2.Width   := Width;
@@ -933,7 +933,7 @@ begin
           // paint text on non-active tabs
           if h <> ActivePage then
           Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
-        				       Height-r2.Height-toffset, GetTabText(h.Text), lTxtFlags);
+              Height-r2.Height-toffset, GetTabText(h.Text), lTxtFlags);
 
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -977,8 +977,8 @@ begin
 
           // paint text on non-active tabs
           if h <> ActivePage then
-                     Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
-                                     FMargin+toffset, GetTabText(h.Text), lTxtFlags);
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
+                FMargin+toffset, GetTabText(h.Text), lTxtFlags);
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
           if h <> TfpgTabSheet(FPages.Last) then
