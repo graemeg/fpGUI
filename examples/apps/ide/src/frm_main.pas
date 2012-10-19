@@ -104,6 +104,7 @@ type
     function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
     procedure   TextEditDrawLine(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   SetupEditorPreference;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -317,15 +318,9 @@ begin
 end;
 
 procedure TMainForm.miConfigureIDE(Sender: TObject);
-var
-  i: integer;
 begin
   DisplayConfigureIDE;
-  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
-  FKeywordFont.Free;
-  FKeywordFont := nil;
-  for i := 0 to pcEditor.PageCount-1 do
-    TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+  SetupEditorPreference;
 end;
 
 procedure TMainForm.miViewDebug(Sender: TObject);
@@ -810,6 +805,17 @@ begin
 //  writeln('------');
 end;
 
+procedure TMainForm.SetupEditorPreference;
+var
+  i: integer;
+begin
+  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+  FKeywordFont.Free;
+  FKeywordFont := nil;
+  for i := 0 to pcEditor.PageCount-1 do
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+end;
+
 procedure TMainForm.MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
 begin
   OpenEditorPage(AData.FileName);
@@ -828,9 +834,8 @@ begin
 
   SetupProjectTree;
   SetupFilesGrid;
+  SetupEditorPreference;
 
-  // apply editor settings
-  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   FRegex := TRegExpr.Create;
 
   TextEditor.Clear;
