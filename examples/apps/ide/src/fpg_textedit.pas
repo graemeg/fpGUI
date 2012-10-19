@@ -149,6 +149,7 @@ type
     function    mousewheelacceleration(const avalue: double): double;
     function    mousewheelacceleration(const avalue: integer): integer;
     function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
+    procedure   DoCopy;
   protected
     { -- internal events -- }
     procedure   HandleShow; override;
@@ -1487,6 +1488,13 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.DoCopy;
+begin
+  if not FSelected then
+    Exit;
+  fpgClipboard.Text := GetSelectedText;
+end;
+
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
     delta: smallint);
 var
@@ -1527,7 +1535,7 @@ begin
   case CheckClipboardKey(keycode, shiftstate) of
     ckCopy:
       begin
-//        DoCopy;
+        DoCopy;
       end;
 
     ckPaste:
