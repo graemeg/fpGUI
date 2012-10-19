@@ -810,6 +810,7 @@ var
   i: integer;
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+  pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
   FKeywordFont.Free;
   FKeywordFont := nil;
   for i := 0 to pcEditor.PageCount-1 do
@@ -1375,9 +1376,9 @@ begin
 
   FRecentFiles := TfpgMRU.Create(self);
   FRecentFiles.ParentMenuItem := pmOpenRecentMenu;
-  FRecentFiles.OnClick         :=@miRecentProjectsClick;
-  FRecentFiles.MaxItems        := gINI.ReadInteger('Options', 'MRUProjectCount', 10);
-  FRecentFiles.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
+  FRecentFiles.OnClick        := @miRecentProjectsClick;
+  FRecentFiles.MaxItems       := gINI.ReadInteger('Options', 'MRUProjectCount', 10);
+  FRecentFiles.ShowFullPath   := gINI.ReadBool('Options', 'ShowFullPath', True);
   FRecentFiles.LoadMRU;
 
   {$IFDEF DEBUGSVR}

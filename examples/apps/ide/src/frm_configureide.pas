@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
   fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros, fpg_combobox,
-  fpg_checkbox;
+  fpg_checkbox, fpg_panel;
 
 type
   TConfigureIDEForm = class(TfpgForm)
@@ -57,6 +57,9 @@ type
     cbTabPosition: TfpgComboBox;
     Label14: TfpgLabel;
     cbSyntaxHighlighting: TfpgCheckBox;
+    lblActiveTabColor: TfpgLabel;
+    pnlActiveTabColor: TfpgPanel;
+    btnColor: TfpgButton;
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
@@ -65,6 +68,7 @@ type
     procedure SaveSettings;
     procedure SaveToMacroList(AList: TIDEMacroList);
     procedure FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure btnActiveTabColorClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -158,6 +162,7 @@ begin
   edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', GMacroList.FindByName(cMacro_Target).Value);
   edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   cbTabPosition.FocusItem := gINI.ReadInteger(cEditor, 'TabPosition', 0);
+  pnlActiveTabColor.BackgroundColor := gINI.ReadInteger(cEditor, 'ActiveTabColor', clWindowBackground);
   cbSyntaxHighlighting.Checked := gINI.ReadBool(cEditor, 'SyntaxHighlighting', True);
 end;
 
@@ -174,6 +179,7 @@ begin
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
   gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
   gINI.WriteInteger(cEditor, 'TabPosition', cbTabPosition.FocusItem);
+  gINI.WriteInteger(cEditor, 'ActiveTabColor', pnlActiveTabColor.BackgroundColor);
   gINI.WriteBool(cEditor, 'SyntaxHighlighting', cbSyntaxHighlighting.Checked);
 
   SaveToMacroList(GMacroList);
@@ -196,6 +202,11 @@ procedure TConfigureIDEForm.FormKeyPressed(Sender: TObject; var KeyCode: word; v
 begin
   if KeyCode = keyEscape then
     Close;
+end;
+
+procedure TConfigureIDEForm.btnActiveTabColorClicked(Sender: TObject);
+begin
+  pnlActiveTabColor.BackgroundColor := fpgSelectColorDialog(pnlActiveTabColor.BackgroundColor);
 end;
 
 constructor TConfigureIDEForm.Create(AOwner: TComponent);
@@ -733,12 +744,47 @@ begin
   with cbSyntaxHighlighting do
   begin
     Name := 'cbSyntaxHighlighting';
-    SetPosition(4, 100, 404, 20);
+    SetPosition(8, 144, 404, 20);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 5;
-    Text := 'Syntax Highlighting';
+    Text := 'Syntax highlighting';
+  end;
+
+  lblActiveTabColor := TfpgLabel.Create(tsEditor);
+  with lblActiveTabColor do
+  begin
+    Name := 'lblActiveTabColor';
+    SetPosition(8, 96, 404, 15);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Active tab color';
+  end;
+
+  pnlActiveTabColor := TfpgPanel.Create(tsEditor);
+  with pnlActiveTabColor do
+  begin
+    Name := 'pnlActiveTabColor';
+    SetPosition(8, 112, 144, 23);
+    FontDesc := '#Label1';
+    Hint := '';
+    Style := bsLowered;
+    Text := '';
+  end;
+
+  btnColor := TfpgButton.Create(tsEditor);
+  with btnColor do
+  begin
+    Name := 'btnColor';
+    SetPosition(156, 112, 80, 23);
+    Text := 'Color';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    OnClick := @btnActiveTabColorClicked;
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}
