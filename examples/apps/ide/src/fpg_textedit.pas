@@ -149,7 +149,6 @@ type
     function    mousewheelacceleration(const avalue: double): double;
     function    mousewheelacceleration(const avalue: integer): integer;
     function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
-    procedure   DoCopy;
   protected
     { -- internal events -- }
     procedure   HandleShow; override;
@@ -188,6 +187,7 @@ type
     procedure   Clear;
     procedure   ScrollTo(X, Y: Integer);
     procedure   GotoLine(ALine: integer);
+    procedure   CopyToClipboard;
     procedure   DeleteSelection;
     function    GetSelectedText: TfpgString;
     procedure   SaveToFile(const AFileName: TfpgString);
@@ -1488,7 +1488,7 @@ begin
   end;
 end;
 
-procedure TfpgBaseTextEdit.DoCopy;
+procedure TfpgBaseTextEdit.CopyToClipboard;
 begin
   if not FSelected then
     Exit;
@@ -1535,7 +1535,7 @@ begin
   case CheckClipboardKey(keycode, shiftstate) of
     ckCopy:
       begin
-        DoCopy;
+        CopyToClipboard;
       end;
 
     ckPaste:
