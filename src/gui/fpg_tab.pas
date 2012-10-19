@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -52,7 +52,7 @@ type
 
   TfpgTabSheet = class(TfpgWidget)
   private
-    FPageControl: TfpgPageControl;	  
+    FPageControl: TfpgPageControl;
     FText: string;
     FTabVisible: boolean;
     function    GetPageControl: TfpgPageControl;
@@ -105,6 +105,7 @@ type
     FTabOptions: TfpgTabOptions;
     FLastRClickPos: TfpgPoint;
     FUpdateCount: Integer;
+    FActiveTabColor: TfpgColor;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -132,7 +133,10 @@ type
     procedure   DoTabSheetClosing(ATabSheet: TfpgTabSheet);
     function    DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
     procedure   pmCloseTab(Sender: TObject);
+    function    GetActiveTabColor: TfpgColor;
+    procedure   SetActiveTabColor(AValue: TfpgColor);
   protected
+    procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
@@ -156,6 +160,7 @@ type
     property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex default 0;
+    property    ActiveTabColor: TfpgColor read GetActiveTabColor write SetActiveTabColor default clWindowBackground;
     property    Align;
     property    BackgroundColor;
     property    Enabled;
@@ -648,6 +653,7 @@ begin
     FOnClosingTabSheet(self, ATabSheet);
 end;
 
+{ Mode = 1 means the background tabs. Mode = 2 means the Active Tab }
 function TfpgPageControl.DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
 var
   r: TfpgRect;
@@ -661,13 +667,17 @@ begin
   end;
 
   if Mode = 2 then
+  begin
     r.Height -= 1;
+    Canvas.SetColor(ActiveTabColor);
+  end
+  else
+    Canvas.SetColor(BackgroundColor);
 
-  Canvas.SetColor(clWindowBackground);
   case TabPosition of
     tpTop:
       begin
-        Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height-2);     // fill tab background
+        Canvas.FillRectangle(r.Left+1, r.Top+1, r.Width-3, r.Height-2);     // fill tab background
         Canvas.SetColor(clHilite2);
         Canvas.DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
         Canvas.DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
@@ -681,7 +691,7 @@ begin
 
     tpBottom:
       begin
-        Canvas.FillRectangle(r.Left, r.Top, r.Width-2, r.Height-2);   // fill tab background
+        Canvas.FillRectangle(r.Left, r.Top+1, r.Width-2, r.Height-3);   // fill tab background
         Canvas.SetColor(clHilite2);
         Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
         Canvas.SetColor(clShadow2);
@@ -703,7 +713,7 @@ begin
         end;
         with Canvas do
         begin
-          FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
           SetColor(clHilite2);
           DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
           DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
@@ -720,12 +730,11 @@ begin
       begin
         if Mode = 2 then
         begin
-          r.Width  := r.Width + 1;
           r.Height := r.Height + 2;
         end;
         with Canvas do
         begin
-          FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
           SetColor(clHilite2);
           DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
           SetColor(clShadow1);
@@ -754,6 +763,30 @@ begin
   RemovePage(ts);
   DoTabSheetClosing(ts);
   ts.Free;
+end;
+
+function TfpgPageControl.GetActiveTabColor: TfpgColor;
+begin
+  Result := FActiveTabColor;
+end;
+
+procedure TfpgPageControl.SetActiveTabColor(AValue: TfpgColor);
+begin
+  if FActiveTabColor <> AValue then
+  begin
+    FActiveTabColor := AValue;
+    RePaint;
+  end;
+end;
+
+procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
+var
+  lWasMatch: boolean;
+begin
+  lWasMatch := FBackgroundColor = FActiveTabColor;
+  inherited SetBackgroundColor(AValue);
+  if lWasMatch then
+    ActiveTabColor := FBackgroundColor;
 end;
 
 procedure TfpgPageControl.OrderSheets;
@@ -1185,6 +1218,7 @@ begin
 
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
+  FActiveTabColor   := FBackgroundColor;
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
