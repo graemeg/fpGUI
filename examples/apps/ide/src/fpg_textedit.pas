@@ -188,6 +188,7 @@ type
     procedure   ScrollTo(X, Y: Integer);
     procedure   GotoLine(ALine: integer);
     procedure   DeleteSelection;
+    function    GetSelectedText: TfpgString;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
     procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean = False);
@@ -2177,6 +2178,59 @@ begin
 
   UpdateScrollbars;
   Invalidate;
+end;
+
+function TfpgBaseTextEdit.GetSelectedText: TfpgString;
+var
+  StartLine, StartPos, EndLine, EndPos, I, LineI: Integer;
+  FirstPart, LastPart, SLine: string;
+begin
+  Result := '';
+  if not FSelected then Exit;
+  if not FSelected then Exit;
+  if FSelStartNo > FSelEndNo then
+  begin
+    StartLine := FSelEndNo;
+    StartPos := FSelEndOffs;
+    EndLine := FSelStartNo;
+    EndPos := FSelStartOffs;
+  end
+  else
+  begin
+    if (FSelStartNo = FSelEndNo) and (FSelEndOffs < FSelStartOffs) then
+    begin
+      StartLine := FSelStartNo;
+      StartPos := FSelEndOffs;
+      EndLine := StartLine;
+      EndPos := FSelStartOffs;
+    end
+    else
+    begin
+      StartLine := FSelStartNo;
+      StartPos := FSelStartOffs;
+      EndLine := FSelEndNo;
+      EndPos := FSelEndOffs;
+    end;
+  end;
+  if StartLine > pred(FLines.Count) then Exit;
+  if EndLine > pred(FLines.Count) then
+    EndLine := pred(FLines.Count);
+  SLine := FLines[StartLine];
+  if StartLine < EndLine then
+  begin
+    FirstPart := Copy(SLine, StartPos + 1, Length(SLine) - StartPos);
+    SLine := FLines[EndLine];
+    if EndPos > Length(SLine) then
+      EndPos := Length(SLine);
+    LastPart := Copy(SLine, 1, EndPos);
+    LineI := StartLine + 1;
+    Result := FirstPart;
+    for I := LineI to (EndLine - 1) do
+      Result := Result + LineEnding + FLines[I];
+    Result := Result + LineEnding + LastPart;
+  end
+  else
+    Result := Copy(SLine, StartPos + 1, EndPos - StartPos);
 end;
 
 procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
