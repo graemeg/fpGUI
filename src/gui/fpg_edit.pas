@@ -693,6 +693,7 @@ end;
 procedure TfpgBaseEdit.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
 begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -704,7 +705,8 @@ begin
     ebsDefault:
         begin
           Canvas.DrawControlFrame(r);
-          InflateRect(r, -2, -2);
+          rect := fpgStyle.GetControlFrameBorders;
+          InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
         end;
     ebsSingle:
         begin
