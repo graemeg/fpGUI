@@ -1248,7 +1248,7 @@ end;
 Function TRichTextView.GetTextAreaRect: TfpgRect;
 begin
   Result := GetDrawRect;
-  InflateRect(Result, -2, -2);
+//  InflateRect(Result, -2, -2);
 end;
 
 function TRichTextView.GetTextAreaHeight: longint;
