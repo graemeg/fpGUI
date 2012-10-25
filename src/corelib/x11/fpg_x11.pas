@@ -3547,6 +3547,8 @@ var
 begin
   if FDropAccepted then
   begin
+    FillChar(xev, SizeOf(TXEvent), 0);
+
     xev.xany._type      := X.ClientMessage;
     xev.xany.display    := xapplication.Display;
     xev.xclient.window  := FLastTarget;
