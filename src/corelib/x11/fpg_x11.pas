@@ -2179,7 +2179,7 @@ begin
       xapplication.FLeaderWindow := XCreateSimpleWindow(xapplication.Display,
           XDefaultRootWindow(xapplication.Display), 0, 0, 1, 1, 0, 0, 0);
       SetWindowGroup(xapplication.FLeaderWindow);
-      xapplication.FClientLeaderAtom := XInternAtom(xapplication.Display, 'WM_CLIENT_LEADER', False);
+      xapplication.FClientLeaderAtom := XInternAtom(xapplication.Display, 'WM_CLIENT_LEADER', TBool(False));
     end;
   end;
 
