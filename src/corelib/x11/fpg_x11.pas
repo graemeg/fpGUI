@@ -1052,12 +1052,8 @@ var
   child: TWindow;
   prevchild: TWindow;
 
-  ret_root: TfpgWinHandle;
   ret_child: TfpgWinHandle;
-  root_x, root_y: integer;
-  child_x, child_y: integer;
 
-  s: string;
   i: integer;
   lTargetWinHandle: TWindow;
   w: TfpgX11Window;
@@ -1065,7 +1061,6 @@ var
   wg2: TfpgWidget;
   swg: TfpgWidget;
   msgp: TfpgMessageParams;
-  lDragEnterEvent: TfpgDragEnterEvent;
   lDropAction: TfpgDropAction;
   lAccept: Boolean;
   lMimeChoice: TfpgString;
@@ -3399,8 +3394,6 @@ end;
 
 procedure TfpgX11Drag.Dragging(ev: TXEvent);
 var
-  dx, dy: cint;
-  child: TWindow;
   lTarget: TWindow;
 begin
   lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root);
@@ -3436,8 +3429,7 @@ function TfpgX11Drag.IsDNDAware(win: TWindow): boolean;
 var
   actualtype: TAtom;
   actualformat: cint;
-  count, remaining, dummy: culong;
-  s: TfpgString;
+  count, remaining: culong;
   data: PChar;
   lversion: culong;
 begin
@@ -3490,8 +3482,6 @@ procedure TfpgX11Drag.SendDNDEnter(ATarget: TWindow);
 var
   xev: TXEvent;
   i, n: integer;
-  s: PChar;
-  sl: TStrings;
 begin
   xev.xany._type       := X.ClientMessage;
   xev.xany.display     := xapplication.Display;
