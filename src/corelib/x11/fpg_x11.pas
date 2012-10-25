@@ -2518,12 +2518,12 @@ begin
   begin
     if (actualformat = 32) and (count = 1) then
     begin
-      case data^.State of
-        Ord(wms_none):
+      case TWMStateType(data^.State) of
+        wms_none:
             begin
               // do nothing
             end;
-        Ord(wms_normal):
+        wms_normal:
             begin
               Result := wsNormal;
               maxh := false;
@@ -2538,11 +2538,11 @@ begin
               if (Result = wsNormal) and maxv and maxh then
                 Result := wsMaximized;
             end;
-        Ord(wms_withdrawn):
+        wms_withdrawn:
             begin
               // do nothing
             end;
-        Ord(wms_iconic):
+        wms_iconic:
             begin
               Result := wsMinimized;
             end;
