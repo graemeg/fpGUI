@@ -97,14 +97,14 @@ const
   MWM_HINTS_DECORATIONS   = 1 shl 1;
   MWM_HINTS_INPUT_MODE    = 1 shl 2;
   MWM_HINTS_STATUS        = 1 shl 3;
-// bit definitions for MwmHints.functions */
+// bit definitions for MwmHints.functions
   MWM_FUNC_ALL            = 1 shl 0;
   MWM_FUNC_RESIZE         = 1 shl 1;
   MWM_FUNC_MOVE           = 1 shl 2;
   MWM_FUNC_MINIMIZE       = 1 shl 3;
   MWM_FUNC_MAXIMIZE       = 1 shl 4;
   MWM_FUNC_CLOSE          = 1 shl 5;
-// bit definitions for MwmHints.decorations */
+// bit definitions for MwmHints.decorations
   MWM_DECOR_ALL           = 1 shl 0;
   MWM_DECOR_BORDER        = 1 shl 1;
   MWM_DECOR_RESIZEH       = 1 shl 2;
@@ -112,7 +112,7 @@ const
   MWM_DECOR_MENU          = 1 shl 4;
   MWM_DECOR_MINIMIZE      = 1 shl 5;
   MWM_DECOR_MAXIMIZE      = 1 shl 6;
-// bit definitions for MwmHints.inputMode */
+// bit definitions for MwmHints.inputMode
   MWM_INPUT_MODELESS                  = 0;
   MWM_INPUT_PRIMARY_APPLICATION_MODAL = 1;
   MWM_INPUT_SYSTEM_MODAL              = 2;
@@ -1195,12 +1195,12 @@ begin
   if lAccept then
   begin
     Msg.xclient.data.l[1] := 1;
-    Msg.xclient.data.l[4]   := FActionType;
+    Msg.xclient.data.l[4] := FActionType;
   end
   else
   begin
     Msg.xclient.data.l[1] := 0;
-    Msg.xclient.data.l[4]   := None;
+    Msg.xclient.data.l[4] := None;
   end;
   Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
   Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
@@ -3553,7 +3553,7 @@ begin
     xev.xclient.message_type := xapplication.XdndDrop;
     xev.xclient.format  := 32;
 
-    xev.xclient.data.l[0] := FSource.WinHandle;    // from;
+    xev.xclient.data.l[0] := FSource.WinHandle;    // from
     xev.xclient.data.l[1] := 0;                // reserved
     xev.xclient.data.l[2] := CurrentTime;       // timestamp
     xev.xclient.data.l[3] := 0;
