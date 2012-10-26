@@ -32,7 +32,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="8"/>
-    <Files Count="96">
+    <Files Count="97">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -417,6 +417,10 @@
         <Filename Value="..\..\reportengine\u_visu.pas"/>
         <UnitName Value="U_Visu"/>
       </Item96>
+      <Item97>
+        <Filename Value="..\..\gui\fpg_trayicon.pas"/>
+        <UnitName Value="fpg_trayicon"/>
+      </Item97>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">

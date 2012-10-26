@@ -118,6 +118,10 @@ const
   MWM_INPUT_SYSTEM_MODAL              = 2;
   MWM_INPUT_FULL_APPLICATION_MODAL    = 3;
   PROP_MWM_HINTS_ELEMENTS             = 5;
+// System Tray message opcodes
+  SYSTEM_TRAY_REQUEST_DOCK   = 0;
+  SYSTEM_TRAY_BEGIN_MESSAGE  = 1;
+  SYSTEM_TRAY_CANCEL_MESSAGE = 2;
 
 type
   TXWindowStateFlag = (xwsfMapped);
@@ -389,6 +393,23 @@ type
 
 
   TfpgX11Timer = class(TfpgBaseTimer)
+  end;
+
+
+  TfpgX11SystemTrayHandler = class(TfpgComponent)
+  private
+    FTrayIconParent: TWindow;
+    FTrayWidget: TfpgWindowBase;
+    function    GetTrayIconParent: TWindow;
+    function    GetSysTrayWindow: TWindow;
+    function    Send_Message(dest: TWindow; msg: longword; data1, data2, data3: longword): boolean;
+    property    TrayIconParent: TWindow read GetTrayIconParent;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure   Show;
+    procedure   Hide;
+    function    IsSystemTrayAvailable: boolean;
+    function    SupportsMessages: boolean;
   end;
 
 
@@ -3673,6 +3694,78 @@ begin
       SetTypeListProperty;
   end;
 end;
+
+{ TfpgX11SystemTrayHandler }
+
+function TfpgX11SystemTrayHandler.GetTrayIconParent: TWindow;
+begin
+  if FTrayIconParent = None then
+    FTrayIconParent := GetSysTrayWindow;
+  Result := FTrayIconParent;
+end;
+
+function TfpgX11SystemTrayHandler.GetSysTrayWindow: TWindow;
+var
+  buf: array[0..32] of char;
+  selection_atom: TAtom;
+begin
+  XGrabServer(xapplication.Display);
+
+  buf := PChar('_NET_SYSTEM_TRAY_S' + IntToStr(xapplication.DefaultScreen));
+  selection_atom := XInternAtom(xapplication.Display, buf, false);
+  Result := XGetSelectionOwner(xapplication.Display, selection_atom);
+
+  XUngrabServer(xapplication.Display);
+end;
+
+function TfpgX11SystemTrayHandler.Send_Message(dest: TWindow; msg: longword; data1, data2, data3: longword): boolean;
+var
+  ev: TXEvent;
+begin
+  FillChar(ev, SizeOf(TXEvent), 0);
+
+  ev.xclient._type := ClientMessage;
+  ev.xclient.window := dest;      { sender (tray icon window) }
+  ev.xclient.message_type := XInternAtom(xapplication.Display, '_NET_SYSTEM_TRAY_OPCODE', False );
+  ev.xclient.format := 32;
+
+  ev.xclient.data.l[0] := CurrentTime;
+  ev.xclient.data.l[1] := msg;    { message opcode }
+  ev.xclient.data.l[2] := data1;
+  ev.xclient.data.l[3] := data2;
+  ev.xclient.data.l[4] := data3;
+
+  Result := XSendEvent(xapplication.Display, TrayIconParent, False, NoEventMask, @ev) <> 0;
+  XSync(xapplication.Display, False);
+end;
+
+procedure TfpgX11SystemTrayHandler.Show;
+begin
+  Send_Message(TrayIconParent, SYSTEM_TRAY_REQUEST_DOCK, TfpgX11Window(Owner).WinHandle, 0, 0);
+end;
+
+procedure TfpgX11SystemTrayHandler.Hide;
+begin
+  TfpgX11Window(FTrayWidget).DoSetWindowVisible(False);
+end;
+
+constructor TfpgX11SystemTrayHandler.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FTrayWidget := AOwner as TfpgWindowBase;
+  FTrayIconParent := None;
+end;
+
+function TfpgX11SystemTrayHandler.IsSystemTrayAvailable: boolean;
+begin
+  Result := GetSysTrayWindow <> None;
+end;
+
+function TfpgX11SystemTrayHandler.SupportsMessages: boolean;
+begin
+  Result := True;
+end;
+
 
 initialization
   xapplication := nil;

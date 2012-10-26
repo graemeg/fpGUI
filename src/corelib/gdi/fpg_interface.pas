@@ -36,6 +36,7 @@ type
   TfpgMimeDataImpl      = class(TfpgGDIMimeDataBase);
   TfpgDragImpl          = class(TfpgGDIDrag);
   TfpgTimerImpl         = class(TfpgGDITimer);
+  TfpgSystemTrayHandler = class(TfpgGDISystemTrayIcon);
 
 implementation
 

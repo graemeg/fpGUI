@@ -304,8 +304,6 @@ type
   end;
 
 
-  { TfpgGDITimer }
-
   TfpgGDITimer = class(TfpgBaseTimer)
   private
     FHandle: THandle;
@@ -313,6 +311,16 @@ type
     procedure   SetEnabled(const AValue: boolean); override;
   public
     constructor Create(AInterval: integer); override;
+  end;
+
+
+  TfpgGDISystemTrayIcon = class(TfpgComponent)
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure   Show;
+    procedure   Hide;
+    function    IsSystemTrayAvailable: boolean;
+    function    SupportsMessages: boolean;
   end;
 
 
@@ -3103,6 +3111,35 @@ begin
   inherited Create(AInterval);
   FHandle := 0;
 end;
+
+
+{ TfpgGDISystemTrayIcon }
+
+constructor TfpgGDISystemTrayIcon.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+procedure TfpgGDISystemTrayIcon.Show;
+begin
+  //
+end;
+
+procedure TfpgGDISystemTrayIcon.Hide;
+begin
+  //
+end;
+
+function TfpgGDISystemTrayIcon.IsSystemTrayAvailable: boolean;
+begin
+  Result := False;
+end;
+
+function TfpgGDISystemTrayIcon.SupportsMessages: boolean;
+begin
+   Result := True;
+end;
+
 
 
 initialization
