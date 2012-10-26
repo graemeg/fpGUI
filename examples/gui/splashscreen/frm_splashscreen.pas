@@ -17,6 +17,7 @@ type
     lblName1: TfpgLabel;
     {@VFD_HEAD_END: SplashForm}
     tmr: TfpgTimer;
+    procedure   SplashFormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   SplashFormShow(Sender: TObject);
     procedure   TimerFired(Sender: TObject);
     procedure   SplashFormClick(Sender: TObject);
@@ -39,6 +40,11 @@ begin
   TimerFired(nil);
 end;
 
+procedure TSplashForm.SplashFormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  CloseAction := caFree;
+end;
+
 procedure TSplashForm.SplashFormShow(Sender: TObject);
 begin
   tmr.Enabled := True;
@@ -48,8 +54,7 @@ procedure TSplashForm.TimerFired(Sender: TObject);
 begin
   tmr.Enabled := False;
   tmr.Free;
-//  writeln('Timer fired');
-  Hide;
+  Close;
 end;
 
 constructor TSplashForm.Create(AOwner: TComponent);
@@ -63,6 +68,7 @@ begin
   
   OnShow := @SplashFormShow;
   OnClick := @SplashFormClick;
+  OnClose := @SplashFormClose;
 end;
 
 procedure TSplashForm.AfterCreate;
