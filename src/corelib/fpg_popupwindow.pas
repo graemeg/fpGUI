@@ -41,6 +41,7 @@ type
     FOnShow: TNotifyEvent;
     FPopupFrame: boolean;
     procedure   SetPopupFrame(const AValue: boolean);
+    function    GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandleClose; virtual;
@@ -53,7 +54,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AdjustWindowStyle; override;
-    procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord); overload;
+    procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord; const ACanAdjustPos: boolean = false); overload;
     procedure   ShowAt(x, y: TfpgCoord); overload;
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
@@ -215,6 +216,20 @@ begin
   end;
 end;
 
+function TfpgPopupWindow.GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
+begin
+  // translate coordinates
+  Result := WindowToScreen(AReferenceWindow, Point(x, y));
+
+  // popup window will not fit below (x,y) so we place it above (x,y)
+  if (Result.y + self.Height) > fpgApplication.ScreenHeight then
+    Result.y := Result.y - self.Height;
+
+  // popup window will not fit to right of (x,y) so we place it to left of (x,y)
+  if (Result.x + self.Width) > fpgApplication.ScreenWidth then
+    Result.x := Result.x - self.Width;
+end;
+
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
 begin
   {$IFDEF DEBUG}
@@ -308,7 +323,7 @@ begin
   FIsContainer := True;
 end;
 
-procedure TfpgPopupWindow.ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
+procedure TfpgPopupWindow.ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord; const ACanAdjustPos: boolean);
 var
   pt: TPoint;
 begin
@@ -317,7 +332,10 @@ begin
   if AWidget <> nil then
   begin
     // translate coordinates - window to screen
-    pt    := WindowToScreen(AWidget, Point(x, y));
+    if ACanAdjustPos then
+      pt := GetDisplayPos(AWidget, x, y)
+    else
+      pt := WindowToScreen(AWidget, Point(x, y));
     // reposition
     Left  := pt.X;
     Top   := pt.Y;
