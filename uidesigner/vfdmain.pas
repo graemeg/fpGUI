@@ -28,6 +28,7 @@ uses
   fpg_main,
   fpg_widget,
   fpg_dialogs,
+  fpg_constants,
   vfdprops,
   vfdforms,
   vfddesigner,
