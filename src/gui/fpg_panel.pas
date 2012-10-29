@@ -34,7 +34,7 @@ type
   TPanelShape = (bsBox, bsFrame, bsTopLine, bsBottomLine, bsLeftLine,
     bsRightLine, bsSpacer, bsVerDivider);
 
-  TPanelStyle = (bsLowered, bsRaised);
+  TPanelStyle = (bsLowered, bsRaised, bsFlat);
 
   TPanelBorder = (bsSingle, bsDouble);
 
@@ -137,6 +137,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
     property    AcceptDrops;
@@ -711,43 +712,44 @@ begin
     Repaint;
   end;
 end;
+
 procedure TfpgPanel.HandlePaint;
 var
   lTxtFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
 
-  //  Canvas.SetLineStyle(2, lsSolid);
-  //  Canvas.SetColor(clWindowBackground);
-  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
-  if FPanelBorder = bsSingle then
-    Canvas.SetLineStyle(1, lsSolid)
-  else
-    Canvas.SetLineStyle(2, lsSolid);
-
-  if Style = bsRaised then
-    Canvas.SetColor(clHilite2)
-  else
-    Canvas.SetColor(clShadow1);
-
-  if FPanelBorder = bsSingle then
+  if Style <> bsFlat then
   begin
-    Canvas.DrawLine(0, 0, Width - 1, 0);
-    Canvas.DrawLine(0, 1, 0, Height - 1);
-  end
-  else
-  begin
-    Canvas.DrawLine(0, 1, Width - 1, 1);
-    Canvas.DrawLine(1, 1, 1, Height - 1);
+    if FPanelBorder = bsSingle then
+      Canvas.SetLineStyle(1, lsSolid)
+    else
+      Canvas.SetLineStyle(2, lsSolid);
+
+    if Style = bsRaised then
+      Canvas.SetColor(clHilite2)
+    else
+      Canvas.SetColor(clShadow1);
+
+    if FPanelBorder = bsSingle then
+    begin
+      Canvas.DrawLine(0, 0, Width - 1, 0);
+      Canvas.DrawLine(0, 1, 0, Height - 1);
+    end
+    else
+    begin
+      Canvas.DrawLine(0, 1, Width - 1, 1);
+      Canvas.DrawLine(1, 1, 1, Height - 1);
+    end;
+
+    if Style = bsRaised then
+      Canvas.SetColor(clShadow1)
+    else
+      Canvas.SetColor(clHilite2);
+
+    Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+    Canvas.DrawLine(0, Height - 1, Width, Height - 1);
   end;
-
-  if Style = bsRaised then
-    Canvas.SetColor(clShadow1)
-  else
-    Canvas.SetColor(clHilite2);
-
-  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
 
   Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(Font);
@@ -758,6 +760,7 @@ begin
 
   if FWrapText then
     Include(lTxtFlags, txtWrap);
+
   case FAlignment of
     taLeftJustify:
       Include(lTxtFlags, txtLeft);
@@ -765,7 +768,8 @@ begin
       Include(lTxtFlags, txtRight);
     taCenter:
       Include(lTxtFlags, txtHCenter);
-    end;
+  end;
+
   case FLayout of
     tlTop:
       Include(lTxtFlags, txtTop);
@@ -773,7 +777,8 @@ begin
       Include(lTxtFlags, txtBottom);
     tlCenter:
       Include(lTxtFlags, txtVCenter);
-    end;
+  end;
+
   Canvas.DrawText(FMargin, FMargin, Width - FMargin * 2, Height - FMargin * 2, FText, lTxtFlags, FLineSpace);
 end;
 
@@ -797,6 +802,14 @@ begin
   FText := '';
   FFont.Free;
   inherited Destroy;
+end;
+
+function TfpgPanel.GetClientRect: TfpgRect;
+begin
+  if Style = bsFlat then
+    Result.SetRect(0, 0, Width, Height)
+  else
+    Result := inherited GetClientRect;
 end;
 
 {TfpgGroupBox}
