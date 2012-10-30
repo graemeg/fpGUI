@@ -855,6 +855,7 @@ begin
   begin
     FRootNode := TfpgTreeNode.Create;
     FRootNode.FTree := self;
+    FRootNode.Collapsed := False;
   end;
   FRootNode.TextColor     := clText1;
   FRootnode.SelTextColor  := clSelectionText;
