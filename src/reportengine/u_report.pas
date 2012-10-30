@@ -86,7 +86,7 @@ type
     function WriteNumber(PosX, PosY: single; Column, TextNum, TextTot, FontNum, BkColorNum, BordNum, SpLine: integer; TxtFlags: TfpgTextFlags; Total, Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): single;
     function InsertSpace(PosY: single; Column: integer; SpaceHeight: single; BkColorNum: integer; Zone: TZone): single;
     procedure LineEnd(Zone: TZone);
-    procedure DrawAFrame(StyLine: integer; Zone: TZone);
+    procedure DrawAFrame(StyLine, XLeft, XRight, YTop,YBottom: integer; Zone: TZone);
     procedure DrawALine(XBegin, YBegin, XEnd, YEnd: single; StyLine: integer);
     procedure DrawAHorizLine(XBegin, YBegin: single; Column: integer; XEnd: single; StyLine: integer; Zone: TZone);
     procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
@@ -844,7 +844,7 @@ begin
         Cmd := T_Command(CmdFrames.Items[CptCmd]);
         if Cmd is T_Frame then
           with Cmd as T_Frame do
-            DrawAFrame(GetStyle, GetZone);
+            DrawAFrame(GetStyle, GetLeft, GetRight, GetTop, GetBottom, GetZone);
       end;
   end;
 end;
@@ -1771,7 +1771,7 @@ begin
   end;
 end;
 
-procedure T_Report.DrawAFrame(StyLine: integer; Zone: TZone);
+procedure T_Report.DrawAFrame(StyLine, XLeft, XRight, YTop,YBottom: integer; Zone: TZone);
 var
   Half, MarginL, MarginR, MarginT, MarginB, HeaderH, FooterH: integer;
 begin
@@ -1779,7 +1779,25 @@ begin
   begin
     case FPreparation of
       ppPrepare:
-        LoadFrame(StyLine, Zone);
+        with FCurrentMargin do
+        begin
+          MarginL:= Round(L);
+          MarginR:= Round(R);
+          MarginT:= Round(T);
+          MarginB:= Round(B);
+          HeaderH:= Round(FHeaderHeight);
+          FooterH:= Round(FFooterHeight);
+          case Zone of
+            zHeader:
+              LoadFrame(StyLine, MarginL, MarginR, MarginT, MarginT + HeaderH, zHeader);
+            zPage:
+              LoadFrame(StyLine, MarginL, MarginR, MarginT + HeaderH, MarginB - FooterH, zPage);
+            zFooter:
+              LoadFrame(StyLine, MarginL, MarginR, MarginB - FooterH, MarginB, zFooter);
+            zMargins:
+              LoadFrame(StyLine, MarginL, MarginR, MarginT, MarginB, zMargins);
+          end;
+        end;
       ppVisualize:
       begin
         with FCanvas do
@@ -1790,45 +1808,10 @@ begin
             Half := Round(GetThick) div 2;
             SetColor(GetColor);
           end;
-          with FCurrentMargin do
-          begin
-            MarginL := Round(L);
-            MarginR := Round(R);
-            MarginT := Round(T);
-            MarginB := Round(B);
-            HeaderH := Round(FHeaderHeight);
-            FooterH := Round(FFooterHeight);
-            case Zone of
-              zHeader:
-              begin
-                DrawLine(MarginL + Half, MarginT, MarginL + Half, MarginT + HeaderH);          // left
-                DrawLine(MarginR - Half, MarginT, MarginR - Half, MarginT + HeaderH);          // right
-                DrawLine(MarginL, MarginT + Half, MarginR, MarginT + Half);                    // top
-                DrawLine(MarginL, MarginT + HeaderH - Half, MarginR, MarginT + HeaderH - Half);  // bottom
-              end;
-              zPage:
-              begin
-                DrawLine(MarginL + Half, MarginT + HeaderH, MarginL + Half, MarginB - FooterH);  // left
-                DrawLine(MarginR - Half, MarginT + HeaderH, MarginR - Half, MarginB - FooterH);  // right
-                DrawLine(MarginL, MarginT + HeaderH - Half, MarginR, MarginT + HeaderH - Half);  // top
-                DrawLine(MarginL, MarginB - FooterH + Half, MarginR, MarginB - FooterH + Half);  // bottom
-              end;
-              zFooter:
-              begin
-                DrawLine(MarginL + Half, MarginB - FooterH, MarginL + Half, MarginB);          // left
-                DrawLine(MarginR - Half, MarginB - FooterH, MarginR - Half, MarginB);          // right
-                DrawLine(MarginL, MarginB - FooterH + Half, MarginR, MarginB - FooterH + Half);  // top
-                DrawLine(MarginL, MarginB - Half, MarginR, MarginB - Half);                    // bottom
-              end;
-              zMargins:
-              begin
-                DrawLine(MarginL + Half, MarginT, MarginL + Half, MarginB - Succ(Half));       // left
-                DrawLine(MarginR - Half, MarginT, MarginR - Half, MarginB - Succ(Half));       // right
-                DrawLine(MarginL, MarginT + Half, MarginR, MarginT + Half);                    // top
-                DrawLine(MarginL, MarginB - Half, MarginR, MarginB - Half);                    // bottom
-              end;
-            end; { case }
-          end; { with FCurrentMargin }
+          DrawLine(XLeft + Half, YTop, XLeft + Half, YBottom);      // left
+          DrawLine(XRight - Half, YTop, XRight - half, YBottom);    // right
+          DrawLine(XLeft, YTop + Half, XRight, YTop + Half);        // top
+          DrawLine(XLeft, YBottom - Half, XRight, YBottom - Half);  // bottom
         end; { with FCanvas }
       end;
       ppPdfFile:
@@ -1843,37 +1826,10 @@ begin
             FColor     := GetColor;
             FLineStyle := GetStyle;
           end;
-          with FCurrentMargin do
-            case Zone of
-              zHeader:
-              begin
-                FLeft   := L;
-                FBottom := Paper.H - T - FHeaderHeight;
-                FHeight := FHeaderHeight;
-                FWidth  := R - L;
-              end;
-              zPage:
-              begin
-                FLeft   := L;
-                FBottom := Paper.H - B + FFooterHeight;
-                FHeight := B - T - FHeaderHeight - FFooterHeight;
-                FWidth  := R - L;
-              end;
-              zFooter:
-              begin
-                FLeft   := L;
-                FBottom := Paper.H - B;
-                FHeight := FFooterHeight;
-                FWidth  := R - L;
-              end;
-              zMargins:
-              begin
-                FLeft   := L;
-                FBottom := Paper.H - B;
-                FHeight := B - T;
-                FWidth  := R - L;
-              end;
-            end;
+          FLeft:= XLeft;
+          FBottom:= Paper.H - YBottom;
+          FHeight:= YBottom - YTop;
+          FWidth:= XRight - XLeft;
           FFill   := False;
           FStroke := True;
           PdfPage.Add(PdfRect);
@@ -2665,22 +2621,22 @@ end;
 
 procedure T_Report.FrameMargins(AStyle: integer);
 begin
-  DrawAFrame(AStyle, zMargins);
+  DrawAFrame(AStyle, 0, 0, 0, 0, zMargins);
 end;
 
 procedure T_Report.FrameHeader(AStyle: integer);
 begin
-  DrawAFrame(AStyle, zHeader);
+  DrawAFrame(AStyle, 0, 0, 0, 0, zHeader);
 end;
 
 procedure T_Report.FramePage(AStyle: integer);
 begin
-  DrawAFrame(AStyle, zPage);
+  DrawAFrame(AStyle, 0, 0, 0, 0, zPage);
 end;
 
 procedure T_Report.FrameFooter(AStyle: integer);
 begin
-  DrawAFrame(AStyle, zFooter);
+  DrawAFrame(AStyle, 0, 0, 0, 0, zFooter);
 end;
 
 procedure T_Report.LinePage(XBegin, YBegin, XEnd, YEnd: single; AStyle: integer);

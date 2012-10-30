@@ -81,7 +81,7 @@ type
     procedure LoadSpacePage(APosY: single; AColumn: integer; AHeight: single; ABackColor: integer);
     procedure LoadSpaceFooter(APosY: single; AColumn: integer; AHeight: single; ABackColor: integer);
     procedure LoadSpaceGroup(AHeight: single);
-    procedure LoadFrame(AStyle: integer; AZone: TZone);
+    procedure LoadFrame(AStyle, ALeft, ARight, ATop, ABottom: integer; AZone: TZone);
     procedure LoadLine(APosXBegin, APosYBegin: single; AColumn: integer; APosXEnd, APosYEnd: single; AStyle: integer);
     procedure LoadLineHorizHeader(APosXBegin, APosYBegin: single; AColumn: integer; APosXEnd, APosYEnd: single; AStyle: integer);
     procedure LoadLineHorizPage(APosXBegin, APosYBegin: single; AColumn: integer; APosXEnd, APosYEnd: single; AStyle: integer);
@@ -327,10 +327,18 @@ type
   private
     FStyle: integer;
     FZone: TZone;
+    FLeft: integer;
+    FRight: integer;
+    FTop: integer;
+    FBottom: integer;
   public
-    constructor Create(AStyle: integer; AZone: TZone);
+    constructor Create(AStyle, ALeft, ARight, ATop, ABottom: integer; AZone: TZone);
     property GetStyle: integer read FStyle;
     property GetZone: TZone read FZone;
+    property GetLeft: integer read FLeft;
+    property GetRight: integer read FRight;
+    property GetTop: integer read FTop;
+    property GetBottom: integer read FBottom;
   end;
 
   T_Surface = class(T_Command)
@@ -529,9 +537,9 @@ begin
   VGroup.FGroupHeight := VGroup.FGroupHeight + AHeight;
 end;
 
-procedure T_Section.LoadFrame(AStyle: integer; AZone: TZone);
+procedure T_Section.LoadFrame(AStyle, ALeft, ARight, ATop, ABottom: integer; AZone: TZone);
 begin
-  VCommand := T_Frame.Create(AStyle, AZone);
+  VCommand := T_Frame.Create(AStyle, ALeft, ARight,ATop, ABottom, AZone);
   FFrames.Add(VCommand);
 end;
 
@@ -818,11 +826,15 @@ begin
   FStyle := AStyle;
 end;
 
-constructor T_Frame.Create(AStyle: integer; AZone: TZone);
+constructor T_Frame.Create(AStyle, ALeft, ARight, ATop, ABottom: integer; AZone: TZone);
 begin
   inherited Create;
   FStyle := AStyle;
-  FZone  := AZone;
+  FZone:= AZone;
+  FLeft:= ALeft;
+  FRight:= ARight;
+  FTop:= ATop;
+  FBottom:= ABottom;;
 end;
 
 constructor T_Image.Create(APosX, APosY: single; AColumn, AImageNum: integer);
