@@ -193,8 +193,8 @@ begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
       RepositionPage;
-      Bv_Visu.Invalidate;
     end;
+    Bv_Visu.Invalidate;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -219,10 +219,8 @@ begin
       end;
     end
     else
-    begin
       NumPageSection := NumPageSection - 1;
-      Bv_Visu.Invalidate;
-    end;
+    Bv_Visu.Invalidate;
     E_NumPage.Text     := IntToStr(NumPage);
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
@@ -248,10 +246,8 @@ begin
       end;
     end
     else
-    begin
       NumPageSection := NumPageSection + 1;
-      Bv_Visu.Invalidate;
-    end;
+    Bv_Visu.Invalidate;
     E_NumPage.Text     := IntToStr(NumPage);
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
@@ -273,8 +269,8 @@ begin
       Bv_Visu.Height := Paper.H;
       Bv_Visu.Width  := Paper.W;
       RepositionPage;
-      Bv_Visu.Invalidate;
     end;
+    Bv_Visu.Invalidate;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -296,6 +292,7 @@ begin
       Bv_Visu.Width  := Paper.W;
       RepositionPage;
     end;
+    Bv_Visu.Invalidate;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
@@ -317,6 +314,7 @@ begin
       Bv_Visu.Width  := Paper.W;
       RepositionPage;
     end;
+    Bv_Visu.Invalidate;
     ChangeButtons;
     E_NumSect.Text     := IntToStr(NumSection);
     L_NumPageSect.Text := IntToStr(NumPageSection);
