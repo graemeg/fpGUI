@@ -366,14 +366,14 @@ begin
   begin
     if grid.FocusRow > 0 then
     begin
-      dbgrid.MoveColumn(grid.FocusRow - 1, grid.FocusRow - 2);
+      dbgrid.MoveColumn(grid.FocusRow, grid.FocusRow - 1);
       grid.FocusRow := grid.FocusRow - 1;
       grid.Update;
     end;
   end
   else if grid.FocusRow < grid.RowCount-1 then
   begin
-    dbgrid.MoveColumn(grid.FocusRow - 1, grid.FocusRow);
+    dbgrid.MoveColumn(grid.FocusRow, grid.FocusRow+1);
     grid.FocusRow := grid.FocusRow + 1;
     grid.Update;
   end;
