@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -97,7 +97,6 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
-    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
@@ -704,16 +703,6 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   PaintInternalButton;
-end;
-
-procedure TfpgBaseEditCombo.HandleRMouseDown(x, y: integer;
-  shiftstate: TShiftState);
-begin
-  // keyMenu was pressed
-  if shiftstate = [ssExtra1] then
-    HandleRMouseUp(x, y, [])
-  else
-    inherited HandleRMouseDown(x, y, shiftstate);
 end;
 
 procedure TfpgBaseEditCombo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);

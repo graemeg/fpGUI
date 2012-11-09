@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1103,6 +1103,9 @@ procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   if FShowHint then
     fpgApplication.HideHint;
+  // keyMenu was pressed
+  if shiftstate = [ssExtra1] then
+    HandleRMouseUp(x, y, []);
 end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
