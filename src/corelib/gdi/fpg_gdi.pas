@@ -207,6 +207,7 @@ type
   TfpgGDIApplication = class(TfpgApplicationBase)
   private
     FDrag: TfpgGDIDrag;
+    procedure   DoWakeMainThread(Sender: TObject);
     procedure   SetDrag(const AValue: TfpgGDIDrag);
     property    Drag: TfpgGDIDrag read FDrag write SetDrag;
   protected
@@ -1233,6 +1234,12 @@ begin
   Result.Sort;
 end;
 
+procedure TfpgGDIApplication.DoWakeMainThread(Sender: TObject);
+begin
+  // WakeMainThread is called during TThread.Synchronize.
+  Windows.PostMessage(TfpgGDIWindow(MainForm).WinHandle, WM_NULL, 0, 0);
+end;
+
 procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
 begin
   if Assigned(FDrag) then
@@ -1313,10 +1320,12 @@ begin
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
+  WakeMainThread := @DoWakeMainThread;
 end;
 
 destructor TfpgGDIApplication.Destroy;
 begin
+  WakeMainThread := nil;
   if Assigned(FDrag) then
     FDrag.Free;
   UnhookWindowsHookEx(ActivationHook);
