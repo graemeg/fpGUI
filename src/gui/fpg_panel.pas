@@ -294,6 +294,25 @@ type
   TfpgFrameClass = class of TfpgFrame;
 
 
+  TfpgImagePanel = class(TfpgWidget)
+  private
+    FImage: TfpgImage;
+    FOwnsImage: Boolean;
+    FScaleImage: Boolean;
+    procedure   SetImage(const AValue: TfpgImage);
+    procedure   SetScaleImage(const AValue: Boolean);
+  protected
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Image: TfpgImage read FImage write SetImage;
+    property    OwnsImage: Boolean read FOwnsImage write FOwnsImage;
+    property    ScaleImage: Boolean read FScaleImage write SetScaleImage;
+  end;
+
+
+
 function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AShape: TPanelShape;
          AStyle: TPanelStyle): TfpgBevel;
 
@@ -1047,6 +1066,59 @@ begin
   FFont.Free;
   inherited Destroy;
 end;
+
+{ TfpgImagePanel }
+
+procedure TfpgImagePanel.SetImage(const AValue: TfpgImage);
+begin
+  if FOwnsImage and Assigned(FImage) then
+    FImage.Free;
+  FImage := AValue;
+  Repaint;
+end;
+
+procedure TfpgImagePanel.SetScaleImage(const AValue: Boolean);
+begin
+  if FScaleImage = AValue then
+    Exit;
+  FScaleImage := AValue;
+  if Assigned(FImage) then
+    Repaint;
+end;
+
+procedure TfpgImagePanel.HandlePaint;
+var
+  x: integer;
+  y: integer;
+begin
+  inherited HandlePaint;
+  Canvas.Clear(BackgroundColor);
+  if Assigned(FImage) then
+  begin
+    x := (Width - FImage.Width) div 2;
+    y := (Height - FImage.Height) div 2;
+    if ScaleImage then
+      Canvas.StretchDraw(0, 0, Width, Height, FImage)
+    else
+      Canvas.DrawImage(x, y, FImage);
+  end;
+end;
+
+constructor TfpgImagePanel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FImage := nil;
+  FOwnsImage := False;
+end;
+
+destructor TfpgImagePanel.Destroy;
+begin
+  if FOwnsImage then
+    FImage.Free;
+  inherited Destroy;
+end;
+
+
 
 end.
 
