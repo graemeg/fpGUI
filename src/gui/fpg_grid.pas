@@ -203,7 +203,7 @@ var
   e: TFileEntry;
   x: integer;
   y: integer;
-  s: string;
+  s: Tfpgstring;
   img: TfpgImage;
 begin
   e := FFileList.Entry[ARow];
@@ -241,7 +241,7 @@ begin
           if e.EntryType = etDir then
             s := ''
           else
-            s := FormatFloat('###,###,###,##0', e.Size);
+            s := FormatFloat('### ### ### ##0', e.Size);
           x := ARect.Right - Font.TextWidth(s) - 1;
           if x < (ARect.Left + 2) then
             x := ARect.Left + 2;
