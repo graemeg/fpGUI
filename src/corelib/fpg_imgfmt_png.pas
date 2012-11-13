@@ -88,6 +88,7 @@ end;
 function LoadImage_PNG(AStream: TStream): TfpgImage;
 var
   imga: TFPMemoryImage;
+  reader: TFPReaderPNG;
 begin
   Result := nil;
   if AStream = nil then
@@ -97,7 +98,8 @@ begin
   try
     try
       AStream.Position := 0;
-      imga.LoadFromStream(AStream, TFPReaderPNG.Create); // auto size image
+      reader := TFPReaderPNG.Create;
+      imga.LoadFromStream(AStream, reader); // auto size image
       Result := FPImageToFPG(imga);
     except
       on e: Exception do
@@ -107,6 +109,7 @@ begin
       end;
     end;
   finally
+    reader.Free;
     imga.Free;
   end;
 end;
