@@ -197,9 +197,6 @@ uses
   ,ACLStringUtility
   ;
 
-// Load "missing" bitmap
-{ TODO -oGraeme -cbitmap : Create and load a "missing image"  image }
-{.$R Images}
 
 const
   FileErrorNotFound = 'File not found ';
