@@ -235,6 +235,7 @@ type
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    ParentShowHint;
+    property    ReadOnly;
     property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
     property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
     property    ShowHint;
@@ -1299,6 +1300,8 @@ end;
 
 procedure TfpgCalendarCombo.SetDateValue(const AValue: TDateTime);
 begin
+  if ReadOnly then
+    Exit;
   if FDate = AValue then
     Exit; //==>
   FDate := AValue;
