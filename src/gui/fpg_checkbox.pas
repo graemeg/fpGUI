@@ -34,6 +34,7 @@ type
   private
     FChecked: boolean;
     FOnChange: TNotifyEvent;
+    FReadOnly: Boolean;
     FText: string;
     FFont: TfpgFont;
     FBoxLayout: TBoxLayout;
@@ -45,6 +46,7 @@ type
     procedure   SetBoxLayout(const AValue: TBoxLayout);
     procedure   SetChecked(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetReadOnly(const AValue: Boolean);
     procedure   SetText(const AValue: string);
     procedure   DoOnChange;
   protected
@@ -55,6 +57,7 @@ type
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    Text: string read FText write SetText;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
@@ -80,6 +83,7 @@ type
     property    MinHeight;
     property    MinWidth;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    TabOrder;
     property    Text;
@@ -112,6 +116,8 @@ end;
 
 procedure TfpgBaseCheckBox.SetChecked(const AValue: boolean);
 begin
+  if ReadOnly then
+    Exit; //==>
   if FChecked = AValue then
     Exit; //==>
   FChecked := AValue;
@@ -143,6 +149,13 @@ begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   { TODO: Implement AutoSize property, then adjust width here if True }
+  RePaint;
+end;
+
+procedure TfpgBaseCheckBox.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly=AValue then exit;
+  FReadOnly:=AValue;
   RePaint;
 end;
 
@@ -184,9 +197,14 @@ begin
   // calculate which image to paint.
   if Enabled then
   begin
-    ix := Ord(FChecked);
-    if FIsPressed then
-      Inc(ix, 2);
+    if ReadOnly then
+      ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked)
+    else
+    begin
+      ix := Ord(FChecked);
+      if FIsPressed then
+        Inc(ix, 2);
+    end;
   end
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
@@ -279,6 +297,7 @@ begin
   FIsPressed  := False;
   FOnChange   := nil;
   FBoxLayout  := tbLeftBox;
+  FReadOnly   := False;
 end;
 
 destructor TfpgBaseCheckBox.Destroy;
