@@ -2694,8 +2694,7 @@ end;
 
 function TfpgX11FontResource.GetHeight: integer;
 begin
-  // Do NOT use FFontData^.height as it isn't as accurate
-  Result := GetAscent + GetDescent;
+  Result := FFontData^.Height;
 end;
 
 function TfpgX11FontResource.GetTextWidth(const txt: string): integer;
