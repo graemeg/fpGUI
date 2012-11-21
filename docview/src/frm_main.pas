@@ -1876,7 +1876,6 @@ begin
     tmpLowestEntryListIndex := -1;
     // Find alphabetically lowest (remaining) topic
     // first, look in contents lists
-    LogEvent(LogDebug, '  Merge contents' );
     for i := 0 to ContentsLists.Count - 1 do
     begin
       Contents := TList(ContentsLists.Items[i]);
@@ -1903,16 +1902,13 @@ begin
     end;
 
     // look in indices
-    LogEvent(LogDebug, '  Merge indices' );
     for i := 0 to tmpIndexLists.Count - 1 do
     begin
-      LogEvent(LogDebug, '  Merge indices ' + IntToStr(i) );
       tmpIndex := TStringList(tmpIndexLists.Items[i]);
       if IndexNextIndex[i] < tmpIndex.Count then
       begin
         // list is not yet finished, get next entry
         ListEntry := tmpIndex.Strings[ IndexNextIndex[i] ];
-        LogEvent(LogDebug, '    indices ListEntry=' + ListEntry );
         if LowestEntry <> '' then
           tmpTextCompareResult := CompareText( ListEntry, LowestEntry )
         else
@@ -1925,7 +1921,6 @@ begin
           tmpLowestEntryListIndex := i;
           tmpLowestEntryListType := ltIndex;
 
-          LogEvent(LogDebug, '  Merge indices ' + tmpIndex.Objects[ IndexNextIndex[i] ].ClassName);
           tmpLowestEntryTopic := TIndexEntry( tmpIndex.Objects[ IndexNextIndex[i] ] ).getTopic;
         end;
       end;
