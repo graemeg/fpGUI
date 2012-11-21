@@ -329,8 +329,7 @@ end;
 function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  { Note: this references the user Settings and not the parameter ASettings }
-  Result.FontNameSize := Settings.NormalFontDesc;
+  Result.FontNameSize := ASettings.NormalFont.FontDesc;
   Result.FontAttributes := [];
   Result.Alignment := ASettings.FDefaultAlignment;
   Result.Wrap := ASettings.FDefaultWrap;
