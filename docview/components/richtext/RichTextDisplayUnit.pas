@@ -212,7 +212,6 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
         // Now do the drawing
         if Element.ElementType = teImage then
         begin
-          ProfileEvent('DEBUG:  DrawRichTextLine - skipping image drawing (not implemented yet)');
           DrawTextBlock;
           TextBlockStart := NextP;
 
