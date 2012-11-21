@@ -1,0 +1,74 @@
+<h1>RichTextView formatting syntax</h>
+It has a HTML-like set of tags. Not very strict, so tag pairs don't have to match up. For example <</i><</b><</u><</color> tags are often used to get you back to default (normal) text formatting.
+
+To display a physical tags in your text, you need to prefix the << symbol of a tag, with an extra << symbol.
+
+<h2>Margins</h>
+The following text has a left margin of 10 spaces and a right margin of 5 spaces.
+<tt><wrap no>
+         1         2         3         4         5         6
+12345678901234567890123456789012345678901234567890123456789012345
+</tt><wrap yes>
+<rightmargin 5>
+<leftmargin 10>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tincidunt lacinia diam, a egestas arcu bibendum sit amet. Proin erat mauris, vehicula id auctor aliquam, semper id turpis. Etiam iaculis lectus sit amet velit molestie euismod. Proin vel fermentum sem. Vivamus ut odio ligula, et egestas purus. Pellentesque eu turpis vitae ante adipiscing lacinia. Nulla dignissim, ligula id eleifend accumsan, sapien lacus condimentum nulla, eu pulvinar risus magna quis turpis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vel semper nunc. Nulla eget justo at dolor vestibulum aliquam. Aenean commodo egestas odio, a rutrum sapien fringilla et.
+
+
+<align right><image 3><align left>
+<leftmargin 0><b>Note the above image is aligned to the right.</b> We can also specify margins using <b>pixels</b>. This paragraph has a left margin of 100px.
+
+<leftmargin 100 pixels>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tincidunt lacinia diam, a egestas arcu bibendum sit amet. Proin erat mauris, vehicula id auctor aliquam, semper id turpis. Etiam iaculis lectus sit amet velit molestie euismod. Proin vel fermentum sem. Vivamus ut odio ligula, et egestas purus. Pellentesque eu turpis vitae ante adipiscing lacinia. Nulla dignissim, ligula id eleifend accumsan, sapien lacus condimentum nulla, eu pulvinar risus magna quis turpis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vel semper nunc. Nulla eget justo at dolor vestibulum aliquam. Aenean commodo egestas odio, a rutrum sapien fringilla et.
+
+<leftmargin 0>Now the margin is set back to 0 (default).
+
+<h2>Headings</h>
+Then we have some general text texts like heading 1-3, normal text and fixed width text.
+<leftmargin 5>
+<h1>This is Heading 1 font</h>
+<h2>This is Heading 2 font</h>
+<h3>This is Heading 3 font</h>
+This is normal text
+<tt>This is fixed font text</tt>
+
+<leftmargin 0><h2>Text Color</h>
+We can also specify text colors like <green>green</color>, <blue>blue</color>, or <color #969229>some RRGGBB specified color</color>. <backcolor yellow>We can also specific a text background color.</backcolor>
+
+<h2>Alternative Fonts</h><image 1>
+<leftmargin 55 pixels>
+<font "Courier New" 8>This sentence is in Courier New 8 font.
+
+<font "Times New Roman" 12>This sentence is in 'Times New Roman' 12 font.
+
+<font "Helvetica" 18>This sentence is in Helvetica 18 font.</font>
+
+This sentence is in the default system font. <leftmargin 0>
+
+<h2>Text alignment</h>
+<align left>This text is left aligned.
+
+<align center>This text is centre aligned.
+<image 2>
+Images follow the same alignment as text.
+
+<align right>This is right aligned.
+<align left>
+
+This is back to normal.
+
+<h2>ASCII or Unicode text art</h>
+Using the <<tt><<wrap no> is handy to create text art. If your FixedFont supports Unicode drawing characters, then you can make your text art look even better.
+<tt><wrap no>
++-------------------------------------+
+|File   Edit  | View | Options   Help |
++-------------------------------------+
+              | All                |
+              | Some . . .         |
+              +--------------------+
+              | By . . .           |
+              +--------------------+
+</tt><wrap yes></tt><wrap yes>
+
+<h2>HyperLinks</h>
+RichTextView also supports hyperlinks. Simply use the <<link xyz> syntax, where "xyz" is the link text that will be sent to the <blue><link 1>OnClickLink()</link></color> and <green><link onoverlink>OnOverLink()</link></color> events.
+
+By default the link text will appear in the same color and styling as the surrounding text. If you want to make it more visible, use the <<color> tags.
+
