@@ -1579,6 +1579,12 @@ var
   st: integer;
   s: TfpgString;
 begin
+  if FSelEndLine = -1 then { no text is selected }
+  begin
+    Result := '';
+    Exit;
+  end;
+
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
   begin
     selsl := FSelStartLine;
