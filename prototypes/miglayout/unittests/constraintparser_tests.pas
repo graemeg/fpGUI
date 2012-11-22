@@ -5,7 +5,7 @@ unit constraintparser_tests;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, gui_mig_constraintparser,
+  Classes, SysUtils, TestFramework, gui_mig_constraintparser,
   gui_mig_lc;
 
 type
@@ -30,23 +30,23 @@ var
   lc: TLC;
 begin
   lc := cp.ParseLayoutConstraint('ltr');
-  AssertNotNull('Failed on 1', lc);
-  AssertTrue('Failed on 2', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 1');
+  CheckTrue(lc.LeftToRight_prop, 'Failed on 2');
   FreeAndNil(lc);
   
   lc := cp.ParseLayoutConstraint(' ltr ');
-  AssertNotNull('Failed on 3', lc);
-  AssertTrue('Failed on 4', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 3');
+  CheckTrue(lc.LeftToRight_prop, 'Failed on 4');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint('rtl');
-  AssertNotNull('Failed on 5', lc);
-  AssertFalse('Failed on 6', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 5');
+  CheckFalse(lc.LeftToRight_prop, 'Failed on 6');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' rtl ');
-  AssertNotNull('Failed on 7', lc);
-  AssertFalse('Failed on 8', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 7');
+  CheckFalse(lc.LeftToRight_prop, 'Failed on 8');
   FreeAndNil(lc);
 end;
 
@@ -55,23 +55,23 @@ var
   lc: TLC;
 begin
   lc := cp.ParseLayoutConstraint('lefttoright');
-  AssertNotNull('Failed on 1', lc);
-  AssertTrue('Failed on 2', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 1');
+  CheckTrue(lc.LeftToRight_prop, 'Failed on 2');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' lefttoright ');
-  AssertNotNull('Failed on 3', lc);
-  AssertTrue('Failed on 4', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 3');
+  CheckTrue(lc.LeftToRight_prop, 'Failed on 4');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint('righttoleft');
-  AssertNotNull('Failed on 5', lc);
-  AssertFalse('Failed on 6', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 5');
+  CheckFalse(lc.LeftToRight_prop, 'Failed on 6');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' righttoleft ');
-  AssertNotNull('Failed on 7', lc);
-  AssertFalse('Failed on 8', lc.LeftToRight);
+  CheckNotNull(lc, 'Failed on 7');
+  CheckFalse(lc.LeftToRight_prop, 'Failed on 8');
   FreeAndNil(lc);
 end;
 
@@ -80,23 +80,23 @@ var
   lc: TLC;
 begin
   lc := cp.ParseLayoutConstraint('ttb');
-  AssertNotNull('Failed on 1', lc);
-  AssertTrue('Failed on 2', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 1');
+  CheckTrue(lc.TopToBottom_prop, 'Failed on 2');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' ttb ');
-  AssertNotNull('Failed on 3', lc);
-  AssertTrue('Failed on 4', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 3');
+  CheckTrue(lc.TopToBottom_prop, 'Failed on 4');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint('btt');
-  AssertNotNull('Failed on 5', lc);
-  AssertFalse('Failed on 6', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 5');
+  CheckFalse(lc.TopToBottom_prop, 'Failed on 6');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' btt ');
-  AssertNotNull('Failed on 7', lc);
-  AssertFalse('Failed on 8', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 7');
+  CheckFalse(lc.TopToBottom_prop, 'Failed on 8');
   FreeAndNil(lc);
 end;
 
@@ -105,23 +105,23 @@ var
   lc: TLC;
 begin
   lc := cp.ParseLayoutConstraint('toptobottom');
-  AssertNotNull('Failed on 1', lc);
-  AssertTrue('Failed on 2', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 1');
+  CheckTrue(lc.TopToBottom_prop, 'Failed on 2');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' toptobottom ');
-  AssertNotNull('Failed on 3', lc);
-  AssertTrue('Failed on 4', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 3');
+  CheckTrue(lc.TopToBottom_prop, 'Failed on 4');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint('bottomtotop');
-  AssertNotNull('Failed on 5', lc);
-  AssertFalse('Failed on 6', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 5');
+  CheckFalse(lc.TopToBottom_prop, 'Failed on 6');
   FreeAndNil(lc);
 
   lc := cp.ParseLayoutConstraint(' bottomtotop ');
-  AssertNotNull('Failed on 7', lc);
-  AssertFalse('Failed on 8', lc.TopToBottom);
+  CheckNotNull(lc, 'Failed on 7');
+  CheckFalse(lc.TopToBottom_prop, 'Failed on 8');
   FreeAndNil(lc);
 end;
 
@@ -135,8 +135,9 @@ begin
   cp.Free;
 end;
 
-initialization
 
-  RegisterTest(TTestConstraintParser); 
+initialization
+  RegisterTest(TTestConstraintParser.Suite);
+
 end.
 
