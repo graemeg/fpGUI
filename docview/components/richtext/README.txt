@@ -63,7 +63,7 @@ Implemented tags:
 
 Not implemented yet:
   <justify>          full text justification
-  <rightmargin xx>   Text will begin xx spaces from the left
+  <rightmargin xx>   Text will end xx spaces from the right
   <defaultalign>     Set alignment back to the default RichTextSettings.DefaultAlignment
                      value
 
