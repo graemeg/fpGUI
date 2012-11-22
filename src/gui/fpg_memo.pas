@@ -70,7 +70,6 @@ type
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
-    procedure   DoPaste(const AText: TfpgString);
     procedure   AdjustCursor;
     function    LineCount: integer;
     function    GetLineText(linenum: integer): string;
@@ -96,6 +95,8 @@ type
     procedure   SetReadOnly(const AValue: Boolean);
     procedure   ResetSelectionVariables;
     procedure   SetCursorPos(const AValue: integer);
+    function    GetSelectionText: TfpgString;
+    procedure   SetSelectionText(const AText: TfpgString);
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -114,7 +115,6 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   UpdateScrollBars;
-    function    SelectionText: TfpgString;
     procedure   CopyToClipboard;
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
@@ -130,6 +130,7 @@ type
     property    Text: TfpgString read GetText write SetText;
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
+    Property    SelectionText : TfpgString Read GetSelectionText Write SetSelectionText;
   published
     property    Align;
     property    BackgroundColor default clBoxColor;
@@ -353,7 +354,7 @@ begin
     Exit;
   s := fpgShowCharMap;
   if s <> '' then
-    DoPaste(s);
+    SetSelectionText(s);
 end;
 
 procedure TfpgMemo.SetDefaultPopupMenuItemsState;
@@ -610,7 +611,7 @@ begin
   fpgClipboard.Text := SelectionText;
 end;
 
-procedure TfpgMemo.DoPaste(const AText: TfpgString);
+procedure TfpgMemo.SetSelectionText(const AText: TfpgString);
 var
   s: TfpgString;
   si: TfpgString;       { beginning of line to cursor }
@@ -1113,7 +1114,7 @@ begin
         end;
     ckPaste:
         begin
-          DoPaste(fpgClipboard.Text);
+          SetSelectionText(fpgClipboard.Text);
           if not ReadOnly then
             hasChanged := True;
         end;
@@ -1566,7 +1567,7 @@ begin
   end;
 end;
 
-function TfpgMemo.SelectionText: TfpgString;
+function TfpgMemo.GetSelectionText: TfpgString;
 var
   n: integer;
   selsl: integer;
@@ -1633,7 +1634,7 @@ end;
 
 procedure TfpgMemo.PasteFromClipboard;
 begin
-  DoPaste(fpgClipboard.Text);
+  SetSelectionText(fpgClipboard.Text);
 end;
 
 procedure TfpgMemo.Clear;
