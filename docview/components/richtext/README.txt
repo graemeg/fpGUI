@@ -4,13 +4,13 @@ for fpGUI Toolkit
 
 Summary
 -------
-This component displays 'rich' text, with various fonts, colors,
+This component displays “rich text”, with various fonts, colors,
 styles and alignment.
 
 The major features are:
   Fast, accurate drawing of text
 
-Features to come...
+Features to come…
   Selection and copy
   Built-in default popup menu
 
@@ -32,7 +32,7 @@ Implemented tags:
   <b> </b>           bold on, off
   <u> </u>           underline on, off
   <i> </i>           italic on, off
-  <h1> <h2> <h3>     heading 1-3, set with Heading1Font etc
+  <h1> <h2> <h3>     heading 1–3, set with Heading1Font etc
   </h>               changes heading text back to normal text
   <tt> </tt>         fixed font
   <color x> </color> set text to the color xxx, where xxx is a convenience
@@ -78,4 +78,3 @@ Problems/limitations
 --------------------
 Yes, there probably are some. :)
 
-
