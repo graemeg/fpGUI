@@ -1,3 +1,16 @@
-*.pas	diff=pascal
-*.lpr	diff=pascal
-*.pp	diff=pascal
+# A good default value
+* text=auto
+
+# Explicitly set some EOL styles and preferred diff style
+*.pas	text diff=pascal
+*.lpr	text diff=pascal
+*.pp	text diff=pascal
+*.inc  text diff=pascal
+*.txt  text
+
+# Denote all files that are truly binary and should not be modified
+*.bmp  binary
+*.png  binary
+*.inf  binary
+*.jpg  binary
+*.res  binary
