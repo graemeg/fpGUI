@@ -198,7 +198,9 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
         Style.FontAttributes := GetFPGuiFontAttributes(ASettings.Heading3Font);
       end;
 
-    ttHeadingOff:
+    ttHeading1Off,
+    ttHeading2Off,
+    ttHeading3Off:
       begin
         Style.FontNameSize := Copy(ASettings.NormalFont.FontDesc, 1, Pos(':', ASettings.NormalFont.FontDesc)-1);
         Style.FontAttributes := GetFPGuiFontAttributes(ASettings.NormalFont);
@@ -209,7 +211,8 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
         tmpFontParts := TStringList.Create;
         StrExtractStringsQuoted(tmpFontParts, Tag.Arguments);
         FontFaceName := tmpFontParts[0];
-        FontSizeString := tmpFontParts[1];
+        if tmpFontParts.Count=2 then
+          FontSizeString := tmpFontParts[1];
         tmpFontParts.Free;
 
         NewStyle := Style;
@@ -222,9 +225,11 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
           XSizeStr := tmpFontParts[0];
           YSizeStr := tmpFontParts[1];
           tmpFontParts.Destroy;
+          // This probably needs to be enhanced to extract the font name and size first.
           NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + YSizeStr;
         end
-        else
+        else if (FontSizeString<>'') then
+          // Same here
           NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + FontSizeString;
 
         if ( NewStyle.FontNameSize <> '' ) then
@@ -266,8 +271,11 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
     ttAlign:
       Style.Alignment := GetTagTextAlignment( Tag.Arguments, ASettings.FDefaultAlignment );
 
-    ttWrap:
-      Style.Wrap := GetTagTextWrap( Tag.Arguments );
+    ttnoWrap:
+      Style.Wrap := False;
+
+    ttnoWrapOff:
+      Style.Wrap := True;
 
     ttSetLeftMargin,
     ttSetRightMargin:

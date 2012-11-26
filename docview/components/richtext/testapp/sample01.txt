@@ -1,14 +1,14 @@
-<h1>RichTextView formatting syntax</h>
+<h1>RichTextView formatting syntax</h1>
 It has a HTML-like set of tags. Not very strict, so tag pairs don't have to match up. For example <</i><</b><</u><</color> tags are often used to get you back to default (normal) text formatting.
 
 To display a physical tags in your text, you need to prefix the << symbol of a tag, with an extra << symbol.
 
-<h2>Margins</h>
+<h2>Margins</h2>
 The following text has a left margin of 10 spaces and a right margin of 5 spaces.
-<tt><wrap no>
+<tt><nowrap>
          1         2         3         4         5         6
 12345678901234567890123456789012345678901234567890123456789012345
-</tt><wrap yes>
+</tt></nowrap>
 <rightmargin 5>
 <leftmargin 10>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tincidunt lacinia diam, a egestas arcu bibendum sit amet. Proin erat mauris, vehicula id auctor aliquam, semper id turpis. Etiam iaculis lectus sit amet velit molestie euismod. Proin vel fermentum sem. Vivamus ut odio ligula, et egestas purus. Pellentesque eu turpis vitae ante adipiscing lacinia. Nulla dignissim, ligula id eleifend accumsan, sapien lacus condimentum nulla, eu pulvinar risus magna quis turpis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vel semper nunc. Nulla eget justo at dolor vestibulum aliquam. Aenean commodo egestas odio, a rutrum sapien fringilla et.
 
@@ -20,29 +20,29 @@ The following text has a left margin of 10 spaces and a right margin of 5 spaces
 
 <leftmargin 0>Now the margin is set back to 0 (default).
 
-<h2>Headings</h>
+<h2>Headings</h2>
 Then we have some general text texts like heading 1-3, normal text and fixed width text.
 <leftmargin 5>
-<h1>This is Heading 1 font</h>
-<h2>This is Heading 2 font</h>
-<h3>This is Heading 3 font</h>
+<h1>This is Heading 1 font</h1>
+<h2>This is Heading 2 font</h2>
+<h3>This is Heading 3 font</h3>
 This is normal text
 <tt>This is fixed font text</tt>
 
-<leftmargin 0><h2>Text Color</h>
+<leftmargin 0><h2>Text Color</h2>
 We can also specify text colors like <green>green</color>, <blue>blue</color>, or <color #969229>some RRGGBB specified color</color>. <backcolor yellow>We can also specific a text background color.</backcolor>
 
-<h2>Alternative Fonts</h><image 1>
+<h2>Alternative Fonts</h2><image 1>
 <leftmargin 55 pixels>
-<font "Courier New" 8>This sentence is in Courier New 8 font.
+<font "Courier New-8">This sentence is in Courier New 8 font.
 
-<font "Times New Roman" 12>This sentence is in 'Times New Roman' 12 font.
+<font "Times New Roman-12">This sentence is in 'Times New Roman' 12 font.
 
-<font "Helvetica" 18>This sentence is in Helvetica 18 font.</font>
+<font "Helvetica-18">This sentence is in Helvetica 18 font.</font>
 
 This sentence is in the default system font. <leftmargin 0>
 
-<h2>Text alignment</h>
+<h2>Text alignment</h2>
 <align left>This text is left aligned.
 
 <align center>This text is centre aligned.
@@ -54,9 +54,9 @@ Images follow the same alignment as text.
 
 This is back to normal.
 
-<h2>ASCII or Unicode text art</h>
-Using the <<tt><<wrap no> is handy to create text art. If your FixedFont supports Unicode drawing characters, then you can make your text art look even better.
-<tt><wrap no>
+<h2>ASCII or Unicode text art</h2>
+Using the <<tt><<nowrap> is handy to create text art. If your FixedFont supports Unicode drawing characters, then you can make your text art look even better.
+<tt><nowrap>
 +-------------------------------------+
 |File   Edit  | View | Options   Help |
 +-------------------------------------+
@@ -65,9 +65,9 @@ Using the <<tt><<wrap no> is handy to create text art. If your FixedFont support
               +--------------------+
               | By . . .           |
               +--------------------+
-</tt><wrap yes></tt><wrap yes>
+</nowrap></tt>
 
-<h2>HyperLinks</h>
+<h2>HyperLinks</h2>
 RichTextView also supports hyperlinks. Simply use the <<link xyz> syntax, where "xyz" is the link text that will be sent to the <blue><link 1>OnClickLink()</link></color> and <green><link onoverlink>OnOverLink()</link></color> events.
 
 By default the link text will appear in the same color and styling as the surrounding text. If you want to make it more visible, use the <<color> tags.
