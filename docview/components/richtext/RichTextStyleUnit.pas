@@ -247,7 +247,11 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
     ttColor:
       GetTagColor( Tag.Arguments, Style.Color );
 
-    ttColorOff:
+    ttColorOff,
+    ttRedOff,
+    ttGreenOff,
+    ttBlackOff,
+    ttBlueOff:
       Style.Color := ASettings.FDefaultColor;
 
     ttBackgroundColor:
@@ -271,10 +275,10 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
     ttAlign:
       Style.Alignment := GetTagTextAlignment( Tag.Arguments, ASettings.FDefaultAlignment );
 
-    ttnoWrap:
+    ttNoWrap:
       Style.Wrap := False;
 
-    ttnoWrapOff:
+    ttNoWrapOff:
       Style.Wrap := True;
 
     ttSetLeftMargin,
