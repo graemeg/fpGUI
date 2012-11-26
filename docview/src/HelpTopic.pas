@@ -815,7 +815,7 @@ begin
   end;
 
   // It's a URL. Insert link at start of URL
-  T := '<blue><link ' + PARAM_LINK_URL + ' "';
+  T := '<color blue><link ' + PARAM_LINK_URL + ' "';
   T := T + State.TextBlock;
   T := T + '">';
   Insert(T, Text, State.StartOfTextBlock);
@@ -939,7 +939,7 @@ begin
       // then put code in to show it.
       if not TInternalHelpLink(Link).Automatic then
       begin
-        OutputString := '<blue>'
+        OutputString := '<color blue>'
                         + GetBeginLink( State.LinkIndex );
       end;
 
@@ -955,7 +955,7 @@ begin
         State.FootnoteLink := TFootnoteHelpLink(FootnoteLink);
       end;
 
-      OutputString := '<blue>' + GetBeginLink( State.LinkIndex );
+      OutputString := '<color blue>' + GetBeginLink( State.LinkIndex );
 
       inc( State.LinkIndex );
     end;
@@ -973,7 +973,7 @@ begin
         end;
       end;
 
-      OutputString := '<blue>' + GetBeginLink( State.LinkIndex );
+      OutputString := '<color blue>' + GetBeginLink( State.LinkIndex );
 
       inc( State.LinkIndex );
     end;
@@ -984,7 +984,7 @@ begin
       // :link reftype=hd refid=... database=<filename>
       ExternalLinkFileIndex := ( pData + 2 )^;
       ExternalLinkTopicID := StrNPas( pchar(pData + 4), (pData + 3)^ );
-      OutputString := '<blue><link ' + PARAM_LINK_EXTERNAL + ' '
+      OutputString := '<color blue><link ' + PARAM_LINK_EXTERNAL + ' '
                       + IntToStr( ExternalLinkFileIndex )
                       + ' '
                       + ExternalLinkTopicID
@@ -1010,7 +1010,7 @@ begin
          or StrStartsWithIgnoringCase(ProgramFilename, PRGM_FIREFOX)
          then
       begin
-        OutputString := '<blue><link ' + PARAM_LINK_URL + ' '
+        OutputString := '<color blue><link ' + PARAM_LINK_URL + ' '
                         + FullDoubleQuote( ProgramLink )
                         + '>';
       end
@@ -1019,7 +1019,7 @@ begin
         ProgramInfo := TSerializableStringList.create;
         ProgramInfo.add(ProgramPath);
         ProgramInfo.add(ProgramLink);
-        OutputString := '<blue><link ' + PARAM_LINK_PROGRAM + ' '
+        OutputString := '<color blue><link ' + PARAM_LINK_PROGRAM + ' '
                         + ProgramInfo.getSerializedString
                         + '>';
         ProgramInfo.destroy;

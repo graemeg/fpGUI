@@ -648,7 +648,7 @@ begin
     sl.Clear;
     with sl do
     begin
-      Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '<black>');
+      Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '</blue>');
       Add('<b>Title:</b> ' + f.Title);
       Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + ' bytes');
       Add('<b>INF/HLP file version</b> ' + f.FormatVersion);
@@ -2146,7 +2146,7 @@ begin
                    + IntToHex( Settings.Colors[ NotesTextColorIndex ], 6 )
                    + '><link note' + IntToStr( NoteIndex ) + '>';
     InsertText := InsertText + Text;
-    InsertText := InsertText + '</color></link>';
+    InsertText := InsertText + '</link></color>';
   end;
 end;
 
