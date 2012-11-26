@@ -1037,7 +1037,7 @@ begin
     begin
       State.FontState := fsFixed;
       State.InCharGraphics := true;
-      OutputString := RTF_NewLine + RTF_NewLine + '<tt><wrap no>';
+      OutputString := RTF_NewLine + RTF_NewLine + '<tt><nowrap>';
       State.Spacing := false;
       WordsOnLine := 0;
     end;
@@ -1046,7 +1046,7 @@ begin
     begin
       State.FontState := fsNormal;
       State.InCharGraphics := false;
-      OutputString := '</tt><wrap yes>';// + RTF_NewLine;
+      OutputString := '</nowrap></tt>';// + RTF_NewLine;
       State.Spacing := true;
     end;
 
@@ -1107,7 +1107,7 @@ begin
           State.Alignment := itaCenter;
         end;
       end;
-      OutputString := OutputString + '<wrap no>';
+      OutputString := OutputString + '<nowrap>';
       WordsOnLine := 0;
     end;
 
@@ -1115,7 +1115,7 @@ begin
     begin
       CheckForAutoURL( AText, State );
       // supposed to turn word wrap on, default font
-      OutputString := {'<align left>}'<wrap yes>'; // I guess...
+      OutputString := {'<align left>}'</nowrap>'; // I guess...
       State.Alignment := itaLeft;
     end;
 
