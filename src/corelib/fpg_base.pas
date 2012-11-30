@@ -1959,7 +1959,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TFPColor;
+  rgb: TRGBTriple;
 begin
   for x := 0 to Width - 1 do
   begin
@@ -2003,7 +2003,7 @@ begin
         with contributions[r] do
         begin
           c   := image.colors[place, y];
-          rgb := fpgColorToFPColor(c);
+          rgb := fpgColorToRGBTriple(c);
           a     := weight; // * rgb.Alpha / $FFFF;
           re    := re + a * rgb.Red;
           gr    := gr + a * rgb.Green;
@@ -2017,7 +2017,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      tempimage.colors[x, y] := FPColorTofpgColor(rgb);
+      tempimage.colors[x, y] := RGBTripleTofpgColor(rgb);
     end;
   end;
 end;
@@ -2030,7 +2030,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TFPColor;
+  rgb: TRGBTriple;
 begin
   for y := 0 to Height - 1 do
   begin
@@ -2074,7 +2074,7 @@ begin
         with contributions[r] do
         begin
           c := tempimage.colors[x, place];
-          rgb := fpgColorToFPColor(c);
+          rgb := fpgColorToRGBTriple(c);
           a     := weight;// * rgb.alpha / $FFFF;
           re    := re + a * rgb.red;
           gr    := gr + a * rgb.green;
@@ -2088,7 +2088,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      Canvas.Pixels[x + dx, y + dy] := FPColorTofpgColor(rgb);
+      Canvas.Pixels[x + dx, y + dy] := RGBTripleTofpgColor(rgb);
     end;
   end;
 end;
