@@ -329,7 +329,7 @@ var
   b: string;
   e: string;
 begin
-  if UTF8Length(SubStr) = 0 then
+  if Length(SubStr) = 0 then
     Exit; //==>
   b := UTF8Copy(AText, 1, Index-1); // beginning string
   e := UTF8Copy(AText, Index, UTF8Length(AText)-Index+1); // ending string
