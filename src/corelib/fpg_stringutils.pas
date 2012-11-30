@@ -342,7 +342,9 @@ var
 begin
   if BytePos > 0 then
   begin
+    {$R-}  { Disable range-check because we do it manually above }
     CharLen := UTF8CharacterLength(@s[BytePos]);
+    {$R+}
     aChar   := Copy(s, BytePos, CharLen);
     Result  := BytePos + CharLen;
   end else
