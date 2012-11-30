@@ -29,7 +29,7 @@ uses
   SysUtils,
   fpg_impl,
   syncobjs, // TCriticalSection usage
-  URIParser, variants, contnrs;
+  variants, contnrs;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
