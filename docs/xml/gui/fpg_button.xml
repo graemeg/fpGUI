@@ -19,7 +19,7 @@
         <short>Image below the button text.</short>
       </element>
       <element name="TfpgBaseButton">
-        <short>Base class the represents a push button control</short>
+        <short>Base class that represents a push button control</short>
       </element>
       <element name="TfpgBaseButton.ImageLayout">
         <short>Defines where on the button the image will be displayed</short>
@@ -40,7 +40,7 @@ a image resource was registered with the global <link id="fpg_main.fpgImages">fp
       </element>
 
       <element name="TfpgButton">
-        <short>Concrete button class used in user interfaces</short>
+        <short>Concrete button class used in user interfaces to represent a push button</short>
         <descr><printshort id="TfpgButton"/>. This class is a descendant of <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link> and
 simply publishes various properties for runtime type information.</descr>
         <seealso>
@@ -51,6 +51,7 @@ simply publishes various properties for runtime type information.</descr>
 <element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
 <element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
 <element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
+
 
     </module>
   </package>
