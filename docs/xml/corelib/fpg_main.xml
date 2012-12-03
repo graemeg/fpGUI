@@ -108,6 +108,10 @@ until the timer is disabled when the Enabled property is set to False.</descr>
 </element>
 
 
+<element name="TfpgWindow">
+<short>Encapsulates a top level or child window</short>
+<descr><printshort id="TfpgWindow"/>.</descr>
+</element>
 
     </module>
     <!-- fpg_main -->
