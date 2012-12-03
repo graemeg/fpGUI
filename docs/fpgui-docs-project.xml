@@ -18,26 +18,61 @@
         <unit file="../src/corelib/x11/fpg_interface.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_main.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_widget.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/corelib/fpg_command_intf.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_imgfmt_bmp.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_utils.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_wuline.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_edit.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_cmdlineparams.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_extinterpolation.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_stdimages.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_stringutils.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_popupwindow.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_imagelist.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_pofiles.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_translations.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_stringhashlist.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_command_intf.pas" options="-Fi../src -Fu../src/corelib/"/>
+
+        <unit file="../src/gui/fpg_button.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_dialogs.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_hyperlink.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_colormapping.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_colorwheel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+
       </units>
       <descriptions>
         <!-- Description files here. One "description" tag per file.
             "file" is the only mandatory attribute -->
+        <description file="xml/fpgui_topic_defaultlanguage.xml"/>
+        <description file="xml/fpgui_topic_dnd.xml"/>
+        <description file="xml/fpgui_topic_embedded_forms.xml"/>
+
         <description file="xml/corelib/fpg_constants.xml"/>
         <description file="xml/corelib/fpg_base.xml"/>
         <description file="xml/corelib/x11/fpg_x11.xml"/>
         <description file="xml/corelib/x11/fpg_interface.xml"/>
         <description file="xml/corelib/fpg_main.xml"/>
         <description file="xml/corelib/fpg_widget.xml"/>
-        <description file="xml/corelib/fpg_command_intf.xml"/>
         <description file="xml/corelib/fpg_imgfmt_bmp.xml"/>
         <description file="xml/corelib/fpg_utils.xml"/>
         <description file="xml/corelib/fpg_wuline.xml"/>
-        <description file="xml/gui/fpg_edit.xml"/>
+<!--        <description file="xml/corelib/fpg_cmdlineparams.xml"/> -->
+        <description file="xml/corelib/fpg_extinterpolation.xml"/>
+<!--        <description file="xml/corelib/fpg_stdimages.xml"/> -->
+<!--        <description file="xml/corelib/fpg_stringutils.xml"/> -->
+<!--        <description file="xml/corelib/fpg_popupwindow.xml"/> -->
+<!--        <description file="xml/corelib/fpg_imagelist.xml"/> -->
+<!--        <description file="xml/corelib/fpg_pofiles.xml"/> -->
+<!--        <description file="xml/corelib/fpg_translations.xml"/> -->
+<!--        <description file="xml/corelib/fpg_stringhashlist.xml"/> -->
+        <description file="xml/corelib/fpg_command_intf.xml"/>
+
+        <description file="xml/gui/fpg_button.xml"/>
+        <description file="xml/gui/fpg_dialogs.xml"/>
+        <description file="xml/gui/fpg_hyperlink.xml"/>
+        <description file="xml/gui/fpg_colormapping.xml"/>
+        <description file="xml/gui/fpg_colorwheel.xml"/>
+        <description file="xml/gui/fpg_tree.xml"/>
       </descriptions>
     </package>
   </packages>
