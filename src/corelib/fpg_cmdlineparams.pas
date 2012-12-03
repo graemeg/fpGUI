@@ -3,7 +3,7 @@
 
     Unit to handle command line processing
 
-    Copyright (C) 2007 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2007 - 2012 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,7 +30,7 @@ const
 
 type
 
-  TGfxCommandLineParams = class(TObject)
+  TfpgCommandLineParams = class(TObject)
   private
     FsParams: string;
     FslParams: TStringList;
@@ -57,7 +57,7 @@ type
 
 
 // Singleton
-function gCommandLineParams: TGfxCommandLineParams;
+function gCommandLineParams: TfpgCommandLineParams;
 
 
 implementation
@@ -66,37 +66,37 @@ uses
   SysUtils;
 
 var
-  uCommandLineParams: TGfxCommandLineParams;
+  uCommandLineParams: TfpgCommandLineParams;
 
 // Singleton
-function gCommandLineParams: TGfxCommandLineParams;
+function gCommandLineParams: TfpgCommandLineParams;
 begin
   if uCommandLineParams = nil then
-    uCommandLineParams := TGfxCommandLineParams.Create;
+    uCommandLineParams := TfpgCommandLineParams.Create;
   result := uCommandLineParams;
 end;
 
-{ TGfxCommandLineParams }
+{ TfpgCommandLineParams }
 
-constructor TGfxCommandLineParams.Create;
+constructor TfpgCommandLineParams.Create;
 begin
   inherited;
   FslParams := TStringList.Create;
   ReadParams;
 end;
 
-destructor TGfxCommandLineParams.destroy;
+destructor TfpgCommandLineParams.destroy;
 begin
   FslParams.Free;
   inherited;
 end;
 
-function TGfxCommandLineParams.GetParam(const AParam: string): string;
+function TfpgCommandLineParams.GetParam(const AParam: string): string;
 begin
   result := FslParams.Values[ upperCase(AParam)];
 end;
 
-function TGfxCommandLineParams.IsParam(const AParam: string): boolean;
+function TfpgCommandLineParams.IsParam(const AParam: string): boolean;
 var
   i: integer;
 begin
@@ -109,7 +109,7 @@ begin
   end;
 end;
 
-function TGfxCommandLineParams.IsParam(const AParams: array of string): boolean;
+function TfpgCommandLineParams.IsParam(const AParams: array of string): boolean;
 var
   i: integer;
 begin
@@ -122,7 +122,7 @@ begin
     end;
 end;
 
-procedure TGfxCommandLineParams.ReadParams;
+procedure TfpgCommandLineParams.ReadParams;
 var
   i: integer;
   j: integer;
@@ -155,7 +155,7 @@ begin
   end;
 end;
 
-function TGfxCommandLineParams.StrTran(AValue, ADel, AIns: string): string;
+function TfpgCommandLineParams.StrTran(AValue, ADel, AIns: string): string;
 var
   i: integer;
   sToChange: string;
@@ -172,7 +172,7 @@ begin
   result := result + sToChange;
 end;
 
-function TGfxCommandLineParams.NumToken(const AValue, AToken: string): integer;
+function TfpgCommandLineParams.NumToken(const AValue, AToken: string): integer;
 var
   i, iCount: integer;
   lsValue: string;
@@ -193,7 +193,7 @@ begin
   result := iCount + 1;
 end;
 
-function TGfxCommandLineParams.Token(const AValue, AToken: string;
+function TfpgCommandLineParams.Token(const AValue, AToken: string;
     const APos: integer): string;
 var
   i, iCount, iNumToken: integer;
@@ -235,7 +235,7 @@ begin
   end;
 end;
 
-function TGfxCommandLineParams.WordExtract(const AInput: string;
+function TfpgCommandLineParams.WordExtract(const AInput: string;
     const APos: integer; const ADelims: string): string;
 var
   iStart: integer;
@@ -261,7 +261,7 @@ begin
   end;
 end;
 
-function TGfxCommandLineParams.WordPosition(const AN: integer;
+function TfpgCommandLineParams.WordPosition(const AN: integer;
     const AStr: string; ADelims: string): integer;
 var
   lCount: integer;
@@ -301,7 +301,7 @@ begin
   end;
 end;
 
-function TGfxCommandLineParams.ExtractChar(const AValue: string;
+function TfpgCommandLineParams.ExtractChar(const AValue: string;
     const APos: integer): char;
 var
   lResult: string;
@@ -315,7 +315,7 @@ begin
   result := lResult[1];
 end;
 
-function TGfxCommandLineParams.StripLeadingDelims(const AStrToProcess: string;
+function TfpgCommandLineParams.StripLeadingDelims(const AStrToProcess: string;
     ADelims: string): string;
 var
   i: integer;
@@ -348,7 +348,7 @@ begin
 end;
 
 // Strip any trailing ADelims
-function TGfxCommandLineParams.StripTrailingDelims(const AStrToProcess: string;
+function TfpgCommandLineParams.StripTrailingDelims(const AStrToProcess: string;
     ADelims: string): string;
 var
   i: integer;
@@ -380,7 +380,7 @@ begin
 end;
 
 // Given a set of word delimiters, return number of words in S
-function TGfxCommandLineParams.WordCount(const AStrToProcess: string;
+function TfpgCommandLineParams.WordCount(const AStrToProcess: string;
     ADelims: string): integer;
 var
   i: integer;
@@ -420,7 +420,7 @@ begin
 end;
 
 // Is AChr in the string AStr ?
-function TGfxCommandLineParams.CharInStr(const AChr: char; const AStr: string): boolean;
+function TfpgCommandLineParams.CharInStr(const AChr: char; const AStr: string): boolean;
 begin
   result := pos(AChr, AStr) <> 0;
 end;
