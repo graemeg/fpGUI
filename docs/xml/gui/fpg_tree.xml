@@ -104,7 +104,7 @@ is the internal node all other nodes in the tree branches from.</descr>
 </element>
 
 <element name="TfpgTreeview.Selection">
-<short>Specifies the selected node in the tree vie</short>
+<short>Specifies the selected node in the tree view</short>
 <descr><p><printshort id="TfpgTreeview.Selection"/>. Read <var>Selection</var> to access
 the selected node of the tree view. If there is no selected node, the value returned
 is nil.</p>
