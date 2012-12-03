@@ -5,9 +5,17 @@
 <short>The base class for all other GUI widgets</short>
 <descr/>
 
+<element name="TfpgWidget">
+<short>This forms the basis of any visual widget in fpGUI</short>
+<descr><printshort id="TfpgWidget"/>.</descr>
+</element>
+
 <element name="TfpgWidget.SetPosition">
 <short>Sets the position and size of the component</short>
-<descr><printshort id="TfpgWidget.SetPosition"/>. It also fires the Resize message. If you are setting up a component like a button on a form, you don't really want the resize event to fire for the button, before the form is displayed (visible). In that case, rather use the components Top, Left, Width and Height properties.</descr>
+<descr><printshort id="TfpgWidget.SetPosition"/>. It also fires the Resize message.
+If you are setting up a component like a button on a form, you don't really want the
+resize event to fire for the button, before the form is displayed (visible). In that
+case, rather use the components Top, Left, Width and Height properties.</descr>
 <seealso>
 <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
 </seealso>
@@ -19,11 +27,13 @@
 
 <element name="TfpgWidget.Parent">
 <short>An alias for Owner</short>
-<descr>Unlike Delphi or Lazarus, fpGUI treats Owner and Parent as the same thing. Owner or Parent manages the life of children, and the parent/child hierarchy defines the visual aspect as well.</descr>
+<descr>Unlike Delphi or Lazarus, fpGUI treats Owner and Parent as the same thing.
+Owner or Parent manages the life of children, and the parent/child hierarchy
+defines the visual aspect as well.</descr>
 </element>
 
 <element name="TfpgWidget.IsContainer">
-<short>Can this component managed child components</short>
+<short>Can this widget manage child widgets</short>
 <descr>This is mainly used in fpGUI UI Designer, to know if you can drop a widget inside another widget.</descr>
 </element>
 
