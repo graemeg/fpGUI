@@ -4,7 +4,7 @@
 
 
 <module name="fpg_x11">
-<short>Implements support for X11 graphics systems.</short>
+<short>Implements support for the X11 graphics systems</short>
 <descr><printshort id="fpg_x11"/>. This backend is used by Linux, UNIX, *BSD,
 OpenSolaris and Mac OS X systems at the moment.</descr>
 
