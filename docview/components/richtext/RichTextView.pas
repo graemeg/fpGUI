@@ -716,7 +716,9 @@ begin
   if Length(FText) = 0 then
     exit;   // no need to paint anything further.
 
-  Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
+  if FLayoutRequired then
+    // we haven't yet done a layout
+    Layout;
   if not Debug then
     Draw( 0, FLayout.FNumLines )
   else
