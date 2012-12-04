@@ -48,9 +48,9 @@ simply publishes various properties for runtime type information.</descr>
         </seealso>
       </element>
 
-<element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
-<element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
-<element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
+<element name="TfpgButton.ImageName" link="#fpgui.fpg_button.TfpgBaseButton.ImageName"/>
+<element name="TfpgButton.ImageSpacing" link="#fpgui.fpg_button.TfpgBaseButton.ImageSpacing"/>
+<element name="TfpgButton.ImageLayout" link="#fpgui.fpg_button.TfpgBaseButton.ImageLayout"/>
 
 
     </module>

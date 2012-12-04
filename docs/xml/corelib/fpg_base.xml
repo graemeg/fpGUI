@@ -824,6 +824,10 @@ Gaussian, Sinc etc... These decendant filters are used in the
           <printshort id="TfpgCanvasbase.DrawLine"/>. This method draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported backends follow the Microsoft API and doesn't draw the last pixel. This optimises consecutive lines being drawn without overlapping pixels.</descr>
       </element>
 
+<element name="TfpgCanvasBase.StretchDraw">
+<short>Allows you to draw a bitmap, stretched or shrunken from its original size</short>
+</element>
+
       <!-- function Visibility: default -->
       <element name="KeycodeToText">
         <short>Returns the text representation of a keycode.</short>

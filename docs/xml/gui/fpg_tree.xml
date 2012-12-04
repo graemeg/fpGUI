@@ -147,12 +147,12 @@ and attribute all in one. A font alias is in the format <var>#aliasname</var>.</
 </element>
 
 
-<element name="TfpgTreeview.HandleLMouseUp" link="fpg_widget.TfpgWidget.HandleLMouseUp"/>
-<element name="TfpgTreeview.HandleLMouseDown" link="fpg_widget.TfpgWidget.HandleLMouseDown"/>
-<element name="TfpgTreeview.HandleRMouseUp" link="fpg_widget.TfpgWidget.HandleRMouseUp"/>
-<element name="TfpgTreeview.HandleDoubleClick" link="fpg_widget.TfpgWidget.HandleDoubleClick"/>
-<element name="TfpgTreeview.HandleKeyPress" link="fpg_widget.TfpgWidget.HandleKeyPress"/>
-<element name="TfpgTreeview.HandleMouseScroll" link="fpg_widget.TfpgWidget.HandleMouseScroll"/>
+<element name="TfpgTreeview.HandleLMouseUp" link="#fpgui.fpg_widget.TfpgWidget.HandleLMouseUp"/>
+<element name="TfpgTreeview.HandleLMouseDown" link="#fpgui.fpg_widget.TfpgWidget.HandleLMouseDown"/>
+<element name="TfpgTreeview.HandleRMouseUp" link="#fpgui.fpg_widget.TfpgWidget.HandleRMouseUp"/>
+<element name="TfpgTreeview.HandleDoubleClick" link="#fpgui.fpg_widget.TfpgWidget.HandleDoubleClick"/>
+<element name="TfpgTreeview.HandleKeyPress" link="#fpgui.fpg_widget.TfpgWidget.HandleKeyPress"/>
+<element name="TfpgTreeview.HandleMouseScroll" link="#fpgui.fpg_widget.TfpgWidget.HandleMouseScroll"/>
 
 
 </module>

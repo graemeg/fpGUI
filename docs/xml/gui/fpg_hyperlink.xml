@@ -3,9 +3,9 @@
   <package name="fpGUI">
     <module name="fpg_hyperlink">
       <short>A label component that can launch a web browser</short>
-      <descr><p>This component acts like a link found in a web page. You can assign a
+	  <descr><printshort id="fpg_hyperlink"/>. This component acts like a link found in a web page. You can assign a
 target URL and if the user clicks on the component, it will launch a web browser
-using the target URL as destination.</p></descr>
+using the target URL as destination.</descr>
       <element name="TfpgHyperlink">
         <short>A <var>TfpgCustomLabel</var> descendant that implements hyperlink support</short>
         <descr>This is a class to implement a hyperlink. Of course, such as all 
