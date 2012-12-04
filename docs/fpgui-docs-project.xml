@@ -7,6 +7,7 @@
     -->
     <package name="fpgui" output="fpgui.ipf" contentfile="fpgui.cnt">
 <!--
+    <package name="fpgui" output="fpgui.ipf" contentfile="fpgui.cnt">
     <package name="fpgui" output="html/" contentfile="fpgui.cnt">
 -->
       <!-- All input files, one "unit" tag per unit -->
@@ -16,6 +17,7 @@
         <unit file="../src/corelib/fpg_base.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/x11/fpg_x11.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/x11/fpg_interface.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/gdi/fpg_gdi.pas" options="-Fi../src -Fu../src/corelib/gdi/ -Fi../src/corelib/gdi/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_main.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_widget.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_imgfmt_bmp.pas" options="-Fi../src -Fu../src/corelib/x11/ -Fi../src/corelib/x11/ -Fu../src/gui/ -Fu../src/corelib/"/>
@@ -38,6 +40,8 @@
         <unit file="../src/gui/fpg_colormapping.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_colorwheel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_basegrid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_form.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
 
       </units>
       <descriptions>
@@ -51,6 +55,7 @@
         <description file="xml/corelib/fpg_base.xml"/>
         <description file="xml/corelib/x11/fpg_x11.xml"/>
         <description file="xml/corelib/x11/fpg_interface.xml"/>
+        <description file="xml/corelib/gdi/fpg_gdi.xml"/>
         <description file="xml/corelib/fpg_main.xml"/>
         <description file="xml/corelib/fpg_widget.xml"/>
         <description file="xml/corelib/fpg_imgfmt_bmp.xml"/>
@@ -73,6 +78,8 @@
         <description file="xml/gui/fpg_colormapping.xml"/>
         <description file="xml/gui/fpg_colorwheel.xml"/>
         <description file="xml/gui/fpg_tree.xml"/>
+        <description file="xml/gui/fpg_basegrid.xml"/>
+        <description file="xml/gui/fpg_form.xml"/>
       </descriptions>
     </package>
   </packages>
@@ -82,9 +89,12 @@
          a value of 'true', '1' or 'yes' -->
     <option name="format" value="ipf"/>
 <!--
+    <option name="format" value="ipf"/>
     <option name="format" value="html"/>
+    <option name="format" value="rtf"/>
+    <option name="format" value="chm"/>
 -->
-    <option name="hide-protected" value="true"/>
+    <option name="hide-protected" value="false"/>
     <option name="duplinkeddoc" value="true"/>
 <!--
     <option name="footer-date" value="yyyy-mm-dd"/>
