@@ -29,19 +29,19 @@
         <unit file="../src/corelib/fpg_stringutils.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_popupwindow.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_imagelist.pas" options="-Fi../src -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_stringhashlist.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_pofiles.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_translations.pas" options="-Fi../src -Fu../src/corelib/"/>
-        <unit file="../src/corelib/fpg_stringhashlist.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_command_intf.pas" options="-Fi../src -Fu../src/corelib/"/>
 
         <unit file="../src/gui/fpg_button.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_form.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_basegrid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_colorwheel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_dialogs.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_hyperlink.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_colormapping.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_colorwheel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_basegrid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_form.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
 
       </units>
       <descriptions>
