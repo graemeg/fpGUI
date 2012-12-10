@@ -94,7 +94,7 @@ msgstr "Verander"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr ""
+msgstr "Verander Titel"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
@@ -110,7 +110,7 @@ msgstr "Versameling"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr ""
+msgstr "Instel Boekmerke"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -174,7 +174,7 @@ msgstr "Lêergidse"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Lêergids"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -226,7 +226,7 @@ msgstr "Kon nie die lêergids <%s> skep nie"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr ""
+msgstr "Kon nie die help program find nie."
 
 #: fpg_constants:rsfalse
 msgid "False"
@@ -270,7 +270,7 @@ msgstr "Font Kenname"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr ""
+msgstr "Font lêer" <%s.fnt> is nie gevind nie"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
@@ -298,7 +298,7 @@ msgstr "Ignoreer"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr ""
+msgstr "Beeld-lêer <%s> is vermis"
 
 #: fpg_constants:rsinformation
 msgid "Information"
@@ -390,11 +390,11 @@ msgstr "Maandag"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr ""
+msgstr "Skyf Af"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr ""
+msgstr "Skyf Op"
 
 #: fpg_constants:rsname
 msgid "Name"
@@ -442,11 +442,11 @@ msgstr "Eienaar"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr ""
+msgstr "PDF Dokumente"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Bladsy"
 
 #: fpg_constants:rspassword
 msgid "Password"
@@ -466,7 +466,7 @@ msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Voorskou"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -514,7 +514,7 @@ msgstr "Soek"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Seksie"
 
 #: fpg_constants:rsselect
 msgid "Select"
@@ -578,7 +578,7 @@ msgstr "Teks om in te voeg"
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr ""
+msgstr "Daar is geen bladsye om te druk nie"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
@@ -650,5 +650,5 @@ msgstr "Ja vir Alles"
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr ""
+msgstr "van"
 
