@@ -107,15 +107,16 @@ var
 implementation
 
 uses
+  fpg_constants,
   U_Command,
   U_ReportImages;
 
 procedure TF_Visu.FormShow(Sender: TObject);
 begin
-  L_Pages.Text    := 'Page';
-  L_Sections.Text := 'Section';
-  L_PageSect.Text := 'Page';
-  L_FromPage.Text := 'of';
+  L_Pages.Text    := rsReportPage;
+  L_Sections.Text := rsReportSection;
+  L_PageSect.Text := rsReportPage;
+  L_FromPage.Text := rsReportPageOf;
   with FReport do
   begin
     if Sections.Count = 1 then
@@ -474,7 +475,7 @@ begin
   inherited Create(AOwner);
   FReport        := AImprime;
   Name           := 'F_Visu';
-  WindowTitle    := 'Preview';
+  WindowTitle    := rsReportPreview;
   WindowPosition := wpAuto;
   if fpgApplication.ScreenWidth < 1055 then
     w := fpgApplication.ScreenWidth
@@ -519,20 +520,20 @@ begin
   E_NumPage.OnKeyPress := @E_NumPageKeypress;
   Bt_NextPage    := CreateButton(Bv_Pages, 174, 6, 26, '', @Bt_NextPageClick, 'repimg.Next');
   Bt_LastPage    := CreateButton(Bv_Pages, 200, 6, 26, '', @Bt_LastPageClick, 'repimg.Last');
-  L_Pages        := CreateLabel(Bv_Pages, 5, E_NumPage.Top, 'Page', 45, E_NumPage.Height, taLeftJustify, tlcenter);
-  L_FromPage     := CreateLabel(Bv_Pages, 235, E_NumPage.Top, 'of', 30, E_NumPage.Height, taLeftJustify, tlcenter);
+  L_Pages        := CreateLabel(Bv_Pages, 5, E_NumPage.Top, rsReportPage, 45, E_NumPage.Height, taLeftJustify, tlcenter);
+  L_FromPage     := CreateLabel(Bv_Pages, 235, E_NumPage.Top, rsReportPageOf, 30, E_NumPage.Height, taLeftJustify, tlcenter);
   L_NbrPages     := CreateLabel(Bv_Pages, 265, E_NumPage.Top, ' ', 30, E_NumPage.Height, taCenter, tlcenter);
 
   Bt_PrecSect    := CreateButton(Bv_Sections, 90, 6, 26, '', @Bt_PrecSectClick, 'repimg.Precedent');
   E_NumSect      := CreateEditInteger(Bv_Sections, 120, 6, 60, 0);
   E_NumSect.OnKeyPress := @E_NumSectKeyPress;
   Bt_NextSect    := CreateButton(Bv_Sections, 184, 6, 26, '', @Bt_NextSectClick, 'repimg.Next');
-  L_Sections     := CreateLabel(Bv_Sections, 5, E_NumSect.Top, 'Section', 75, E_NumSect.Height, taLeftJustify, tlcenter);
-  L_FromSect     := CreateLabel(Bv_Sections, 250, E_NumSect.Top, 'of', 30, E_NumSect.Height, taLeftJustify, tlcenter);
+  L_Sections     := CreateLabel(Bv_Sections, 5, E_NumSect.Top, rsReportSection, 75, E_NumSect.Height, taLeftJustify, tlcenter);
+  L_FromSect     := CreateLabel(Bv_Sections, 250, E_NumSect.Top, rsReportPageOf, 30, E_NumSect.Height, taLeftJustify, tlcenter);
   L_NbrSect      := CreateLabel(Bv_Sections, 280, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
-  L_PageSect     := CreateLabel(Bv_Sections, 320, E_NumSect.Top, 'Page', 45, E_NumSect.Height, taLeftJustify, tlcenter);
+  L_PageSect     := CreateLabel(Bv_Sections, 320, E_NumSect.Top, rsReportPage, 45, E_NumSect.Height, taLeftJustify, tlcenter);
   L_NumPageSect  := CreateLabel(Bv_Sections, 365, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
-  L_FromPageSect := CreateLabel(Bv_Sections, 410, E_NumSect.Top, 'of', 30, E_NumSect.Height, taLeftJustify, tlcenter);
+  L_FromPageSect := CreateLabel(Bv_Sections, 410, E_NumSect.Top, rsReportPageOf, 30, E_NumSect.Height, taLeftJustify, tlcenter);
   L_NbrPageSect  := CreateLabel(Bv_Sections, 440, E_NumSect.Top, '-', 30, E_NumSect.Height, taLeftJustify, tlcenter);
 
   Bv_Visu := Bv_PreviewPage; // assign to global reference variable

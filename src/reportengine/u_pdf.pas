@@ -1482,8 +1482,7 @@ begin
     Result := FontDef.FType;
   end
   else
-    { TODO: Localize this message }
-    ShowMessage('Font file ' + NomFonte + '.fnt not found');
+    ShowMessage(Format(rsErrReportFontFileMissing, [NomFonte]));
 end;
 
 procedure TPdfDocument.CreateTtfFont(const NumFonte: integer);

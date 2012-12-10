@@ -2746,8 +2746,7 @@ begin
     PaintImage(Horiz, Verti, ColNum, RefImage, zPage);
   end
   else
-    { TODO: localize this message }
-    ShowMessage('Image ' + ImgFileName + ' is missing');
+    ShowMessage(Format(rsErrReportImageFileMissing, [ImgFileName]));
 end;
 
 procedure T_Report.ImageFooter(Horiz, Verti: single; ImgFileName: string; ColNum, Scale: integer);
@@ -2787,8 +2786,7 @@ begin
     PaintImage(Horiz, Verti, ColNum, RefImage, zPage);
   end
   else
-    { TODO: localize this message }
-    ShowMessage('Image ' + ImgFileName + ' is missing');
+    ShowMessage(Format(rsErrReportImageFileMissing, [ImgFileName]));
 end;
 
 procedure T_Report.PrintPdf(Layout: TPageLayout; Zoom: string; Prefer: Boolean);
@@ -2799,13 +2797,13 @@ var
 begin
   if T_Section(Sections[Pred(Sections.Count)]).TotPages = 0 then
   begin
-    ShowMessage('There is no file to print');
+    ShowMessage(rsErrReportNoPagesToPrint);
     Exit;
   end;
 
   Fd_SavePdf          := TfpgFileDialog.Create(nil);
   Fd_SavePdf.InitialDir := fpgExtractFilePath(ParamStr(0));
-  Fd_SavePdf.Filter   := 'PDF Documents |*.pdf';
+  Fd_SavePdf.Filter   := rsFileTypePDF + ' |*.pdf';
   Fd_SavePdf.FileName := DefaultFile;
   try
     if Fd_SavePdf.RunSaveFile then

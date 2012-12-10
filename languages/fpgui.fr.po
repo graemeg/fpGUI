@@ -268,6 +268,10 @@ msgstr "Longueur fixe"
 msgid "Font Aliases"
 msgstr "Alias"
 
+#: fpg_constants:rserrreportfontfilemissing
+msgid "Font file <%s.fnt> not found"
+msgstr ""
+
 #: fpg_constants:rsshortfri
 msgid "Fri"
 msgstr "Ven"
@@ -291,6 +295,10 @@ msgstr ""
 #: fpg_constants:rsignore
 msgid "Ignore"
 msgstr "Ignorer"
+
+#: fpg_constants:rserrreportimagefilemissing
+msgid "Image <%s> is missing"
+msgstr ""
 
 #: fpg_constants:rsinformation
 msgid "Information"
@@ -432,6 +440,14 @@ msgstr "Ouvrir un fichier"
 msgid "Owner"
 msgstr "Propriétaire"
 
+#: fpg_constants:rsfiletypepdf
+msgid "PDF Documents"
+msgstr ""
+
+#: fpg_constants:rsreportpage
+msgid "Page"
+msgstr ""
+
 #: fpg_constants:rspassword
 msgid "Password"
 msgstr "Mot de passe"
@@ -446,6 +462,10 @@ msgstr ""
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
+msgstr ""
+
+#: fpg_constants:rsreportpreview
+msgid "Preview"
 msgstr ""
 
 #: fpg_constants:rscollectionrecentlyused
@@ -491,6 +511,10 @@ msgstr "Sauver sous"
 #: fpg_constants:rssearch
 msgid "Search"
 msgstr "Chercher"
+
+#: fpg_constants:rsreportsection
+msgid "Section"
+msgstr ""
 
 #: fpg_constants:rsselect
 msgid "Select"
@@ -551,6 +575,10 @@ msgstr ""
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
 msgstr "Texte à insérer"
+
+#: fpg_constants:rserrreportnopagestoprint
+msgid "There are no pages to print"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
@@ -619,4 +647,8 @@ msgstr "Oui"
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
 msgstr "Oui à tous"
+
+#: fpg_constants:rsreportpageof
+msgid "of"
+msgstr ""
 
