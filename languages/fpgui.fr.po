@@ -46,7 +46,7 @@ msgstr "Toutes les polices"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
-msgstr ""
+msgstr "Alt+"
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
@@ -142,7 +142,7 @@ msgstr "Erreur critique"
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
-msgstr ""
+msgstr "Ctrl+"
 
 #: fpg_constants:rscut
 msgid "Cut"
@@ -226,11 +226,11 @@ msgstr "Le répertoire <%s> n''a pas pu être ouvert"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr ""
+msgstr "Visualiseur d'aide non trouvé"
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "False"
+msgstr "Faux"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
@@ -270,7 +270,7 @@ msgstr "Alias"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr ""
+msgstr "Fichier de police <%s.fnt> non trouvé"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
@@ -298,7 +298,7 @@ msgstr "Ignorer"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr ""
+msgstr "Image <%s> introuvable"
 
 #: fpg_constants:rsinformation
 msgid "Information"
@@ -374,7 +374,7 @@ msgstr "Message"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
-msgstr ""
+msgstr "Meta+"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -442,11 +442,11 @@ msgstr "Propriétaire"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr ""
+msgstr "Documents PDF"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Page"
 
 #: fpg_constants:rspassword
 msgid "Password"
@@ -466,7 +466,7 @@ msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Prévisualisation"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -514,7 +514,7 @@ msgstr "Chercher"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Section"
 
 #: fpg_constants:rsselect
 msgid "Select"
@@ -578,7 +578,7 @@ msgstr "Texte à insérer"
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr ""
+msgstr "Il n'y a pas de page à imprimer"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
@@ -650,5 +650,5 @@ msgstr "Oui à tous"
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr ""
+msgstr "de"
 
