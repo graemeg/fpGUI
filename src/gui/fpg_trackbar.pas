@@ -100,16 +100,17 @@ type
   private
     FScrollStep: integer;
     FShowPosition: boolean;
-    FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
     FMousePosition: TPoint;
-    FFont: TfpgFont;
     procedure   SetShowPosition(const AValue: boolean);
     function    GetTextWidth: TfpgCoord;
+    procedure   SetSliderLength(AValue: integer);
   protected
+    FFont: TfpgFont;
+    FSliderPos: TfpgCoord;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
@@ -131,6 +132,7 @@ type
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    ShowHint;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
+    property    SliderLength: integer read FSliderLength write SetSliderLength default 11;
     property    TabOrder;
     property    TextColor;
     property    OnChange;
@@ -419,6 +421,14 @@ begin
     Result := FFont.TextWidth(IntToStr(Max)) + 4
   else
     Result := 0;
+end;
+
+procedure TfpgTrackBar.SetSliderLength(AValue: integer);
+begin
+  if FSliderLength = AValue then
+    Exit;
+  FSliderLength := AValue;
+  RePaint;
 end;
 
 procedure TfpgTrackBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
