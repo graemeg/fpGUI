@@ -1,10 +1,7 @@
 {%mainunit Agg2D.pas}
 
 {$ifdef uses_interface}
-  X,
   Xlib,
-  Xutil,
-  Xatom,
 {$endif}
 
 
