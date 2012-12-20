@@ -1024,8 +1024,6 @@ procedure TfpgPopupMenu.HandlePaint;
 var
   n: integer;
 begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
   Canvas.Clear(BackgroundColor);
 //  Canvas.SetColor(clBlack);
 //  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
@@ -1033,8 +1031,6 @@ begin
 
   for n := 0 to VisibleCount-1 do
     DrawRow(n, n = FFocusItem);
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgPopupMenu.HandleShow;
