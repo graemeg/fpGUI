@@ -25,7 +25,7 @@
 
 type
   // to get access to protected methods (seeing that FPC doesn't support Friend-classes)
-  TX11ImageHack = class(TfpgImage);
+  TImageHack = class(TfpgImage);
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
@@ -34,7 +34,7 @@ var
 begin
   if TfpgWindow(FWindow).WinHandle <= 0 then
   begin
-    writeln('    no winhandle available');
+    debugln('    no winhandle available');
     exit;
   end;
 
@@ -43,7 +43,7 @@ begin
 
   // finally dump the image to screen!
   XPutImage(fpgApplication.Display, TfpgWindow(FWindow).WinHandle,
-      drawgc, TX11ImageHack(FImg).XImage, 0, 0, 0, 0,
+      drawgc, TImageHack(FImg).XImage, 0, 0, 0, 0,
       FWindow.Width, FWindow.Height);
 
   XFreeGc(fpgApplication.Display, drawgc);
