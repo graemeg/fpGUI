@@ -193,6 +193,8 @@ begin
   WindowTitle := 'Grid control test';
   Hint := '';
   WindowPosition := wpScreenCenter;
+  MinWidth := 200;
+  MinHeight := 200;
 
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
@@ -317,9 +319,9 @@ begin
     Name := 'edtTopRow';
     SetPosition(12, 280, 56, 24);
     Anchors := [anLeft,anBottom];
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 8;
-    FontDesc := '#Edit1';
     Value := 0;
   end;
 
@@ -411,6 +413,7 @@ begin
   begin
     Name := 'chkAlterColor';
     SetPosition(394, 156, 120, 24);
+    Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 15;
