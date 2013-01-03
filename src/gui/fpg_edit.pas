@@ -242,9 +242,15 @@ type
 
 
   TfpgEditInteger = class(TfpgBaseNumericEdit)
+  private
+    FLimit: Boolean;
+    FMaxValue: integer;
+    FMinValue: integer;
   protected
     function    GetValue: integer; virtual;
     procedure   SetValue(const AValue: integer); virtual;
+    procedure   SetMaxValue(const AValue: integer); virtual;
+    procedure   SetMinValue(const AValue: integer); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
@@ -258,6 +264,8 @@ type
     property    CustomThousandSeparator;
     property    Enabled;
     property    Hint;
+    property    MaxValue: integer read FMaxValue write SetMaxValue;
+    property    MinValue: integer read FMinValue write SetMinValue;
     property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
@@ -279,12 +287,17 @@ type
 
   TfpgEditFloat = class(TfpgBaseNumericEdit)
   private
-    FFixedDecimals: boolean;
+    FFixedDecimals: integer;
+    FLimit: Boolean;
+    FMaxValue: extended;
+    FMinValue: extended;
   protected
     function    GetValue: extended; virtual;
     procedure   SetValue(const AValue: extended); virtual;
+    procedure   SetMaxValue(const AValue: extended); virtual;
+    procedure   SetMinValue(const AValue: extended); virtual;
     procedure   SetDecimals(const AValue: integer);
-    procedure   SetFixedDecimals(const AValue: boolean);
+    procedure   SetFixedDecimals(const AValue: integer);
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
@@ -298,9 +311,11 @@ type
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default -1;
+    property    FixedDecimals: integer read FFixedDecimals write SetFixedDecimals default -1;
     property    Enabled;
-    property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
     property    Hint;
+    property    MaxValue: extended read FMaxValue write SetMaxValue;
+    property    MinValue: extended read FMinValue write SetMinValue;
     property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
@@ -321,9 +336,15 @@ type
 
 
   TfpgEditCurrency = class(TfpgBaseNumericEdit)
+  private
+    FLimit: Boolean;
+    FMaxValue: Currency;
+    FMinValue: Currency;
   protected
     function    GetValue: Currency; virtual;
     procedure   SetValue(const AValue: Currency); virtual;
+    procedure   SetMaxValue(const AValue: Currency); virtual;
+    procedure   SetMinValue(const AValue: Currency); virtual;
     procedure   SetDecimals(AValue: integer);
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
@@ -341,6 +362,8 @@ type
     property    Decimals: integer read FDecimals write SetDecimals default 2;
     property    Enabled;
     property    Hint;
+    property    MaxValue: Currency read FMaxValue write SetMaxValue;
+    property    MinValue: Currency read FMinValue write SetMinValue;
     property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
@@ -365,7 +388,7 @@ function CreateEditInteger(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True): TfpgEditInteger;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
-    AShowThousand: boolean= True; ADecimals: Integer= -1; AFixedDecimals: boolean= False): TfpgEditFloat;
+    AShowThousand: boolean= True; ADecimals: Integer= -1; AFixedDecimals: integer= -1): TfpgEditFloat;
 
 function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True; ADecimals: Integer= 2): TfpgEditCurrency;
@@ -387,7 +410,6 @@ const
   ipmCharmap    = 'miDefaultCharmap';
 
   cPasswordChar = #$E2#$97#$8F;    // U+25CF BLACK CIRCLE
-
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 begin
@@ -418,7 +440,7 @@ begin
 end;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True;
-         ADecimals: Integer= -1; AFixedDecimals: boolean= False): TfpgEditFloat;
+         ADecimals: Integer= -1; AFixedDecimals: integer= -1): TfpgEditFloat;
 begin
   Result       := TfpgEditFloat.Create(AOwner);
   Result.Left  := x;
@@ -426,7 +448,7 @@ begin
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
-  Result.FFixedDecimals:= AFixedDecimals;
+  Result.FixedDecimals := AFixedDecimals;
   if h < TfpgEditFloat(Result).FFont.Height + 4 + (Result.FHeightMargin * 2) then
     Result.Height := TfpgEditFloat(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
@@ -1880,6 +1902,19 @@ begin
     begin
       try
         Result := StrToInt(fText);
+        if FLimit then
+        begin
+          if Result> FMaxValue then
+          begin
+            SetValue(FMaxValue);
+            Result:= FMaxValue;
+          end;
+          if Result< FMinValue then
+          begin
+            SetValue(FMinValue);
+            Result:= FMinValue;
+          end;
+        end;
       except
         on E: EConvertError do
         begin
@@ -1896,13 +1931,43 @@ end;
 
 procedure TfpgEditInteger.SetValue(const AValue: integer);
 begin
-  try
-    Text := IntToStr(AValue);
-    FormatEdit;
-  except
-    on E: EConvertError do
-      Text := '';
-  end;
+  if FLimit then
+    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+      try
+        Text := IntToStr(AValue);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end
+    else
+      Exit
+  else
+    try
+      Text := IntToStr(AValue);
+      FormatEdit;
+    except
+      on E: EConvertError do
+        Text := '';
+    end;
+end;
+
+procedure TfpgEditInteger.SetMaxValue(const AValue: integer);
+begin
+  if AValue > FMinValue then
+    FMaxValue:= AValue
+  else
+    FMaxValue := FMinValue;
+  FLimit:= True;
+end;
+
+procedure TfpgEditInteger.SetMinValue(const AValue: integer);
+begin
+  if AValue < FMaxValue then
+    FMinValue:= AValue
+  else
+    FMinValue := FMaxValue;
+  FLimit:= True;
 end;
 
 procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
@@ -1960,6 +2025,7 @@ begin
   inherited Create(AOwner);
   FShowThousand := True;
   FDecimals := 0;
+  FLimit := False;
 end;
 
 { TfpgEditFloat }
@@ -1977,6 +2043,10 @@ begin
   else
     if FDecimals = 0 then
       if UTF8Pos(FDecimalSeparator, fText) > 0 then
+        fText := UTF8Copy(fText, 1, UTF8Length(fText) - 1);
+  if FFixedDecimals > -1 then
+    if UTF8Pos(FDecimalSeparator, fText) > 0 then
+      if UTF8Length(fText)-UTF8Pos(FDecimalSeparator, fText) > FFixedDecimals then
         fText := UTF8Copy(fText, 1, UTF8Length(fText) - 1);
 
   if ShowThousand then
@@ -2005,7 +2075,20 @@ begin
     begin
       try
         Result := StrToFloat(fText);
-      except
+        if FLimit then
+        begin
+          if Result> FMaxValue then
+          begin
+            SetValue(FMaxValue);
+            Result:= FMaxvalue;
+          end;
+          if Result< FMinValue then
+          begin
+            SetValue(FMinValue);
+            Result:= FMinValue;
+          end;
+        end;
+     except
         on E: EConvertError do
         begin
           Result := 0;
@@ -2021,16 +2104,51 @@ end;
 
 procedure TfpgEditFloat.SetValue(const AValue: extended);
 begin
-  try
-    if FFixedDecimals then
-      Text := FloatToStrF(AValue, ffFixed, 18, FDecimals)
+  if FLimit then
+    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+      try
+        Text := FloatToStr(AValue);
+        if FFixedDecimals > -1 then
+          if UTF8Pos(FDecimalSeparator, Text) > 0 then
+            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+              Text := Text + '0';
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end
     else
+      Exit
+  else
+    try
       Text := FloatToStr(AValue);
-    FormatEdit;
-  except
-    on E: EConvertError do
-      Text := '';
-  end;
+      if FFixedDecimals > -1 then
+        if UTF8Pos(FDecimalSeparator, Text) > 0 then
+          while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+            Text := Text + '0';
+      FormatEdit;
+    except
+      on E: EConvertError do
+        Text := '';
+    end;
+end;
+
+procedure TfpgEditFloat.SetMaxValue(const AValue: extended);
+begin
+  if AValue > FMinValue then
+    FMaxValue:= AValue
+  else
+    FMaxValue := FMinValue;
+  FLimit:= True;
+end;
+
+procedure TfpgEditFloat.SetMinValue(const AValue: extended);
+begin
+  if AValue < FMaxValue then
+    FMinValue:= AValue
+  else
+    FMinValue := FMaxValue;
+  FLimit:= True;
 end;
 
 procedure TfpgEditFloat.SetDecimals(const AValue: integer);
@@ -2038,13 +2156,21 @@ begin
   if AValue < -1 then
     Exit; // =>
   if FDecimals <> AValue then
-    FDecimals := AValue
+  begin
+    FDecimals := AValue;
+    FFixedDecimals := -1;
+  end;
 end;
 
-procedure TfpgEditFloat.SetFixedDecimals(const AValue: boolean);
+procedure TfpgEditFloat.SetFixedDecimals(const AValue: integer);
 begin
+  if AValue < -1 then
+    Exit; // =>
   if FFixedDecimals <> AValue then
+  begin
     FFixedDecimals := AValue;
+    FDecimals := -1;
+  end;
 end;
 
 procedure TfpgEditFloat.HandleKeyChar(var AText: TfpgChar;
@@ -2065,17 +2191,21 @@ procedure TfpgEditFloat.HandleSetFocus;
 begin
   try
     if GetValue = 0 then
-      Text := ''
+      fText := ''
     else
     begin
-      if FFixedDecimals then
-        Text := FloatToStrF(GetValue, ffFixed, 18, FDecimals)
-      else
-        Text := FloatToStr(GetValue);
+      fText := FloatToStr(GetValue);
+      if FFixedDecimals > -1 then
+      begin
+        if UTF8Pos(FDecimalSeparator, fText) = 0 then
+          fText := fText + FDecimalSeparator;
+        while (UTF8Length(fText) - (UTF8Pos(FDecimalSeparator, fText)) < FFixedDecimals) do
+          fText := fText +'0';
+      end;
     end;
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleSetFocus;
 end;
@@ -2083,14 +2213,18 @@ end;
 procedure TfpgEditFloat.HandleKillFocus;
 begin
   try
-    if FFixedDecimals then
-      Text := FloatToStrF(GetValue, ffFixed, 18, FDecimals)
-    else
-      Text := FloatToStr(GetValue);
+    fText := FloatToStr(GetValue);
+    if FFixedDecimals > -1 then
+    begin
+      if UTF8Pos(FDecimalSeparator, fText) = 0 then
+        fText := fText + FDecimalSeparator;
+      while (UTF8Length(fText) - (UTF8Pos(FDecimalSeparator, fText)) < FFixedDecimals) do
+        fText := fText +'0';
+    end;
     FormatEdit;
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleKillFocus;
 end;
@@ -2110,8 +2244,8 @@ constructor TfpgEditFloat.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := -1;
-  FFixedDecimals := False;
   FShowThousand := True;
+  FLimit := False;
 end;
 
 { TfpgEditCurrency }
@@ -2147,6 +2281,19 @@ begin
     if fText > '' then
     try
       Result := StrToCurr(fText);
+      if FLimit then
+      begin
+        if Result> FMaxValue then
+        begin
+          SetValue(FMaxValue);
+          Result:= FMaxvalue;
+        end;
+        if Result< FMinValue then
+        begin
+          SetValue(FMinValue);
+          Result:= FMinValue;
+        end;
+      end;
     except
       on E: EConvertError do
       begin
@@ -2161,13 +2308,43 @@ end;
 
 procedure TfpgEditCurrency.SetValue(const AValue: Currency);
 begin
-  try
-    Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
-    FormatEdit;
-  except
-    on E: EConvertError do
-      Text := '';
-  end;
+  if FLimit then
+    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+      try
+        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end
+    else
+      Exit
+  else
+    try
+      Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+      FormatEdit;
+    except
+      on E: EConvertError do
+        Text := '';
+    end;
+end;
+
+procedure TfpgEditCurrency.SetMaxValue(const AValue: Currency);
+begin
+  if AValue > FMinValue then
+    FMaxValue:= AValue
+  else
+    FMaxValue := FMinValue;
+  FLimit:= True;
+end;
+
+procedure TfpgEditCurrency.SetMinValue(const AValue: Currency);
+begin
+  if AValue < FMaxValue then
+    FMinValue:= AValue
+  else
+    FMinValue := FMaxValue;
+  FLimit:= True;
 end;
 
 procedure TfpgEditCurrency.SetDecimals(AValue: integer);
@@ -2256,6 +2433,7 @@ begin
   inherited Create(AOwner);
   FDecimals := 2;
   FShowThousand := True;
+  FLimit := False;
 end;
 
 

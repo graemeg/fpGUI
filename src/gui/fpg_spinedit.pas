@@ -107,7 +107,7 @@ type
     function GetNegativeColor: TfpgColor;
     function GetFontDesc: string;
     function GetDecimals: integer;
-    function GetFixedDecimals: Boolean;
+    function GetFixedDecimals: integer;
     procedure ResizeChildren; override;
     procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
     procedure SetTextColor(const AValue: Tfpgcolor); override;
@@ -119,7 +119,7 @@ type
     procedure SetLargeIncrement(const AValue: extended);
     procedure SetValue(const AValue: extended);
     procedure SetDecimals(const AValue: integer);
-    procedure SetFixedDecimals(const AValue: Boolean);
+    procedure SetFixedDecimals(const AValue: integer);
     procedure SetHint(const AValue: TfpgString); override;
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
@@ -150,7 +150,7 @@ type
     property LargeIncrement: extended read FLargeIncrement write SetLargeIncrement;
     property Value: extended read FValue write SetValue;
     property Decimals: integer read GetDecimals write SetDecimals;
-    property FixedDecimals: Boolean read GetFixedDecimals write SetFixedDecimals;
+    property FixedDecimals: integer read GetFixedDecimals write SetFixedDecimals;
     property Hint;
     property TabOrder;
     property    OnChange;
@@ -235,7 +235,7 @@ type
 
 function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
          AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ALargeIncrement: extended = 10.0;
-         ADecimals: integer = 1; AValue: extended = 0; AFixedDecimals: boolean= False): TfpgSpinEditFloat;
+         AFixedDecimals: integer = 1; AValue: extended = 0; ADecimals: integer = -1): TfpgSpinEditFloat;
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0;
          AMaxValue: integer = 100; AIncrement: integer = 1; ALargeIncrement: integer = 10;
          AValue: integer = 0): TfpgSpinEdit;
@@ -244,12 +244,14 @@ function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: in
 implementation
 
 uses
-  fpg_extgraphics, math;
+  fpg_extgraphics,
+  fpg_stringutils,
+  math;
 
 
 function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
          AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ALargeIncrement: extended = 10.0;
-         ADecimals: integer = 1; AValue: extended = 0; AFixedDecimals: boolean= False): TfpgSpinEditFloat;
+         AFixedDecimals: integer = 1; AValue: extended = 0; ADecimals: integer = -1): TfpgSpinEditFloat;
 var
   newh: TfpgCoord;
 begin
@@ -267,8 +269,8 @@ begin
   end;
   Result.Increment := AIncrement;
   Result.LargeIncrement := ALargeIncrement;
-  Result.FEdit.Decimals := ADecimals;
   Result.FEdit.FixedDecimals := AFixedDecimals;
+  Result.FEdit.Decimals := ADecimals;
   if (AValue <= Result.MaxValue) and (AValue >= Result.MinValue) then
     Result.Value := AValue;
 end;
@@ -502,7 +504,7 @@ begin
   Result := FEdit.Decimals;
 end;
 
-function TfpgSpinEditFloat.GetFixedDecimals: Boolean;
+function TfpgSpinEditFloat.GetFixedDecimals: integer;
 begin
   Result := FEdit.FixedDecimals;
 end;
@@ -607,13 +609,12 @@ begin
     FEdit.Decimals := AValue;
 end;
 
-procedure TfpgSpinEditFloat.SetFixedDecimals(const AValue: Boolean);
+procedure TfpgSpinEditFloat.SetFixedDecimals(const AValue: integer);
 begin
+  if AValue < 0 then
+    Exit; // =>
   if FEdit.FixedDecimals <> AValue then
-  begin
     FEdit.FixedDecimals := AValue;
-    FEdit.Text:= FloatToStrF(FEdit.Value, ffFixed, 18, FEdit.Decimals);
-  end;
 end;
 
 procedure TfpgSpinEditFloat.SetHint(const AValue: TfpgString);
@@ -878,9 +879,9 @@ begin
   FUp             := False;
   FDown           := False;
 
-  FEdit.Decimals := 1;
+  FEdit.Decimals := -1;
+  FEdit.FixedDecimals := 1;
   FEdit.Value    := FValue;
-  FEdit.FixedDecimals  := False;
 
   FButtonUp.OnClick := @ButtonUpClick;
   FButtonDown.OnClick := @ButtonDownClick;
