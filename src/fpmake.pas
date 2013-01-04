@@ -80,6 +80,9 @@ begin
     else
       Defaults.Options.Add('-dGDI');
 
+    { to try the experimental AggPas-enabled Canvas class }
+//    Defaults.Options.Add('-dAGGCanvas');
+
     P.SourcePath.Add('corelib');
     P.SourcePath.Add('corelib/x11', AllUnixOSes);
     P.SourcePath.Add('corelib/gdi', AllWindowsOSes);
@@ -93,6 +96,7 @@ begin
     P.UnitPath.Add('gui');
     P.UnitPath.Add('gui/db');
     P.UnitPath.Add('reportengine');
+    P.UnitPath.Add('corelib/render/software/');
 
     P.IncludePath.Add('.');
     P.IncludePath.Add('corelib');

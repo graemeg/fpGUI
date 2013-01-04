@@ -11,5 +11,8 @@ if [ ! -d $libpath ]; then
   echo ' '
 fi
 
+# Default build
 fpc -dRELEASE -dX11 @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+# experimental AggPas-enabled Canvas under X11
+#fpc -dRELEASE -dX11 -dAGGCanvas @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
 
