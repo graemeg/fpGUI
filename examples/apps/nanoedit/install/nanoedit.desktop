@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Exec='/path/to/nanoedit/nanoedit' %f
+Name=NanoEdit
+Icon=/path/to/fpgui/examples/apps/nanoedit/install/nanoedit.xpm
+Comment=fpGUI's own mini text editor
+NoDisplay=true
