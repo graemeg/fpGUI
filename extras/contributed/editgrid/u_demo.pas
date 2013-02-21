@@ -341,7 +341,6 @@ with EG_Grid do
   HoliDayColor[Pred(ColumnCount)] := clRed;
   SingleClickSelect[Pred(ColumnCount)] := True;
   DefaultRowHeight:= 20;
-  HeaderHeight:= 22;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
 //  Options:= [go_HideFocusRect];
   OnKeyPress:= @EG_GridKeyPress;
