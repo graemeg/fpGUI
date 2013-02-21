@@ -1,0 +1,589 @@
+diff --git a/src/gui/fpg_edit.pas b/src/gui/fpg_edit.pas
+index f66a585..8451a74 100644
+--- a/src/gui/fpg_edit.pas
++++ b/src/gui/fpg_edit.pas
+@@ -204,6 +204,8 @@   TfpgBaseNumericEdit = class(TfpgBaseEdit)
+     FNegativeColor: TfpgColor;
+     FThousandSeparator: TfpgChar;
+     FShowThousand: boolean;
++    FMaxLimit: boolean;
++    FMinLimit: boolean;
+     procedure   AdjustTextOffset(UsePxCursorPos: boolean); override;
+     procedure   AdjustDrawingInfo; override;
+     procedure   SetOldColor(const AValue: TfpgColor);
+@@ -217,6 +219,7 @@   TfpgBaseNumericEdit = class(TfpgBaseEdit)
+     procedure   DoOnChange; override;
+     function    GetMarginAdjustment: integer; override;
+     procedure   HandlePaint; override;
++    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
+     procedure   SetTextColor(const AValue: TfpgColor); override;
+     procedure   FormatEdit; virtual;
+     procedure   Justify; virtual; // to implement in derived classes
+@@ -233,9 +236,12 @@   TfpgBaseNumericEdit = class(TfpgBaseEdit)
+     property    HideSelection;
+ //    property    MaxLength;  { probably MaxValue and MinValue }
+     property    TabOrder;
+-    property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
++    property    ShowThousand: boolean read FShowThousand write FShowThousand;
+   public
+     constructor Create(AOwner: TComponent); override;
++    property    TextColor: TfpgColor read FTextColor write SetTextColor;
++    property    MaxLimit: boolean read FMaxLimit write FMaxLimit;
++    property    MinLimit: boolean read FMinLimit write FMinLimit;
+   published
+     property    FontDesc;
+   end;
+@@ -243,7 +249,6 @@   TfpgBaseNumericEdit = class(TfpgBaseEdit)
+ 
+   TfpgEditInteger = class(TfpgBaseNumericEdit)
+   private
+-    FLimit: Boolean;
+     FMaxValue: integer;
+     FMinValue: integer;
+   protected
+@@ -270,7 +275,7 @@   TfpgEditInteger = class(TfpgBaseNumericEdit)
+     property    ParentShowHint;
+     property    ReadOnly;
+     property    ShowHint;
+-    property    ShowThousand default True;
++    property    ShowThousand;
+     property    TabOrder;
+     property    TextColor;
+     property    Value: integer read GetValue write SetValue;
+@@ -288,7 +293,6 @@   TfpgEditInteger = class(TfpgBaseNumericEdit)
+   TfpgEditFloat = class(TfpgBaseNumericEdit)
+   private
+     FFixedDecimals: integer;
+-    FLimit: Boolean;
+     FMaxValue: extended;
+     FMinValue: extended;
+   protected
+@@ -298,6 +302,7 @@   TfpgEditFloat = class(TfpgBaseNumericEdit)
+     procedure   SetMinValue(const AValue: extended); virtual;
+     procedure   SetDecimals(const AValue: integer);
+     procedure   SetFixedDecimals(const AValue: integer);
++    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
+     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+     procedure   HandleSetFocus; override;
+     procedure   HandleKillFocus; override;
+@@ -320,7 +325,7 @@   TfpgEditFloat = class(TfpgBaseNumericEdit)
+     property    ParentShowHint;
+     property    ReadOnly;
+     property    ShowHint;
+-    property    ShowThousand default True;
++    property    ShowThousand;
+     property    TabOrder;
+     property    TextColor;
+     property    Value: extended read GetValue write SetValue;
+@@ -337,7 +342,6 @@   TfpgEditFloat = class(TfpgBaseNumericEdit)
+ 
+   TfpgEditCurrency = class(TfpgBaseNumericEdit)
+   private
+-    FLimit: Boolean;
+     FMaxValue: Currency;
+     FMinValue: Currency;
+   protected
+@@ -368,7 +372,7 @@   TfpgEditCurrency = class(TfpgBaseNumericEdit)
+     property    ParentShowHint;
+     property    ReadOnly;
+     property    ShowHint;
+-    property    ShowThousand default True;
++    property    ShowThousand;
+     property    TabOrder;
+     property    TextColor;
+     property    Value: Currency read GetValue write SetValue;
+@@ -1726,7 +1730,7 @@ procedure TfpgBaseNumericEdit.SetShowThousand;
+       else
+         txt := fText;
+   end;
+-  if ShowThousand then
++  if FShowThousand then
+   begin
+     if fText > '' then
+       if fText[1] = '-' then
+@@ -1843,6 +1847,13 @@ procedure TfpgBaseNumericEdit.HandlePaint;
+   end;
+ end;
+ 
++procedure TfpgBaseNumericEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
++begin
++  if (keycode = keyReturn) or (keycode = keyPEnter) then
++     FormatEdit;
++  inherited HandleKeyPress(keycode, shiftstate, consumed);
++end;
++
+ procedure TfpgBaseNumericEdit.SetTextColor(const AValue: TfpgColor);
+ begin
+   if FTextColor = AValue then
+@@ -1886,33 +1897,36 @@ function TfpgEditInteger.GetValue: integer;
+       txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), Length(txt) - UTF8Pos(FThousandSeparator, txt));
+     if UTF8Copy(fText, 1, 1) = '-' then
+-      fText := '-' + txt
+-    else
+-      fText := txt;
+-  end;
++      txt := '-' + txt;
++  end
++  else
++    txt := fText;
+ 
+-  if fText = '-' then
++  if txt = '-' then
+   begin
+     Result := 0;
+-    Text := fText;
++    Text := txt;
+   end
+   else
+   begin
+-    if Text <> '' then
++    if txt <> '' then
+     begin
+       try
+-        Result := StrToInt(fText);
+-        if FLimit then
++        Result := StrToInt(txt);
++        if FMaxLimit then
+         begin
+-          if Result> FMaxValue then
++          if Result > FMaxValue then
+           begin
+             SetValue(FMaxValue);
+-            Result:= FMaxValue;
++            Result := FMaxValue;
+           end;
+-          if Result< FMinValue then
++        end;
++        if FMinLimit then
++        begin
++          if Result < FMinValue then
+           begin
+             SetValue(FMinValue);
+-            Result:= FMinValue;
++            Result := FMinValue;
+           end;
+         end;
+       except
+@@ -1931,25 +1945,33 @@ function TfpgEditInteger.GetValue: integer;
+ 
+ procedure TfpgEditInteger.SetValue(const AValue: integer);
+ begin
+-  if FLimit then
+-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+-      try
+-        Text := IntToStr(AValue);
+-        FormatEdit;
+-      except
+-        on E: EConvertError do
+-          Text := '';
+-      end
+-    else
+-      Exit
+-  else
++  if not FMaxLimit and not FMinLimit then
+     try
+       Text := IntToStr(AValue);
+       FormatEdit;
+     except
+       on E: EConvertError do
+         Text := '';
+-    end;
++    end
++  else
++  begin
++    if FMaxLimit and (AValue <= FMaxValue) then
++      try
++        Text := IntToStr(AValue);
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++    if FMinLimit and (AValue >= FMinValue) then
++      try
++        Text := IntToStr(AValue);
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++   end;
+ end;
+ 
+ procedure TfpgEditInteger.SetMaxValue(const AValue: integer);
+@@ -1958,7 +1980,7 @@ procedure TfpgEditInteger.SetMaxValue(const AValue: integer);
+     FMaxValue:= AValue
+   else
+     FMaxValue := FMinValue;
+-  FLimit:= True;
++  FMaxLimit:= True;
+ end;
+ 
+ procedure TfpgEditInteger.SetMinValue(const AValue: integer);
+@@ -1967,7 +1989,7 @@ procedure TfpgEditInteger.SetMinValue(const AValue: integer);
+     FMinValue:= AValue
+   else
+     FMinValue := FMaxValue;
+-  FLimit:= True;
++  FMinLimit:= True;
+ end;
+ 
+ procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
+@@ -1981,6 +2003,12 @@ procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
+   else
+     consumed := True;
+   inherited HandleKeyChar(AText, shiftstate, consumed);
++  if FMaxLimit then
++    if GetValue > FMaxValue then
++      SetValue(FMaxValue);
++  if FMinLimit then
++    if GetValue < FMinValue then
++      SetValue(FMinValue);
+ end;
+ 
+ procedure TfpgEditInteger.HandleSetFocus;
+@@ -2025,7 +2053,8 @@ constructor TfpgEditInteger.Create(AOwner: TComponent);
+   inherited Create(AOwner);
+   FShowThousand := True;
+   FDecimals := 0;
+-  FLimit := False;
++  FMaxLimit := False;
++  FMinLimit := False;
+ end;
+ 
+ { TfpgEditFloat }
+@@ -2048,7 +2077,6 @@ function TfpgEditFloat.GetValue: extended;
+     if UTF8Pos(FDecimalSeparator, fText) > 0 then
+       if UTF8Length(fText)-UTF8Pos(FDecimalSeparator, fText) > FFixedDecimals then
+         fText := UTF8Copy(fText, 1, UTF8Length(fText) - 1);
+-
+   if ShowThousand then
+   begin
+     if Copy(fText, 1, 1) = '-' then   // No need for utf8 version here
+@@ -2059,33 +2087,36 @@ function TfpgEditFloat.GetValue: extended;
+       txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), UTF8Length(txt) - UTF8Pos(FThousandSeparator, txt));
+     if Copy(fText, 1, 1) = '-' then // No need for utf8 version here
+-      fText := '-' + txt
+-    else
+-      fText := txt;
+-  end;
++      txt := '-' + txt;
++  end
++  else
++    txt := fText;
+ 
+-  if fText = '-' then
++  if txt = '-' then
+   begin
+     Result := 0;
+-    Text := fText;
++    Text := txt;
+   end
+   else
+   begin
+-    if fText <> '' then
++    if txt <> '' then
+     begin
+       try
+-        Result := StrToFloat(fText);
+-        if FLimit then
++        Result := StrToFloat(txt);
++        if FMaxLimit then
+         begin
+-          if Result> FMaxValue then
++          if Result > FMaxValue then
+           begin
+             SetValue(FMaxValue);
+-            Result:= FMaxvalue;
++            Result := FMaxValue;
+           end;
+-          if Result< FMinValue then
++        end;
++        if FMinLimit then
++        begin
++          if Result < FMinValue then
+           begin
+             SetValue(FMinValue);
+-            Result:= FMinValue;
++            Result := FMinValue;
+           end;
+         end;
+      except
+@@ -2104,22 +2135,7 @@ function TfpgEditFloat.GetValue: extended;
+ 
+ procedure TfpgEditFloat.SetValue(const AValue: extended);
+ begin
+-  if FLimit then
+-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+-      try
+-        Text := FloatToStr(AValue);
+-        if FFixedDecimals > -1 then
+-          if UTF8Pos(FDecimalSeparator, Text) > 0 then
+-            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+-              Text := Text + '0';
+-        FormatEdit;
+-      except
+-        on E: EConvertError do
+-          Text := '';
+-      end
+-    else
+-      Exit
+-  else
++  if not FMaxLimit and not FMinLimit then
+     try
+       Text := FloatToStr(AValue);
+       if FFixedDecimals > -1 then
+@@ -2130,7 +2146,34 @@ procedure TfpgEditFloat.SetValue(const AValue: extended);
+     except
+       on E: EConvertError do
+         Text := '';
+-    end;
++    end
++  else
++  begin
++    if FMaxLimit and (AValue <= FMaxValue) then
++      try
++        Text := FloatToStr(AValue);
++        if FFixedDecimals > -1 then
++          if UTF8Pos(FDecimalSeparator, Text) > 0 then
++            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
++              Text := Text + '0';
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++    if FMinLimit and (AValue >= FMinValue) then
++      try
++        Text := FloatToStr(AValue);
++        if FFixedDecimals > -1 then
++          if UTF8Pos(FDecimalSeparator, Text) > 0 then
++            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
++              Text := Text + '0';
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++  end;
+ end;
+ 
+ procedure TfpgEditFloat.SetMaxValue(const AValue: extended);
+@@ -2139,7 +2182,7 @@ procedure TfpgEditFloat.SetMaxValue(const AValue: extended);
+     FMaxValue:= AValue
+   else
+     FMaxValue := FMinValue;
+-  FLimit:= True;
++  FMaxLimit := True;
+ end;
+ 
+ procedure TfpgEditFloat.SetMinValue(const AValue: extended);
+@@ -2148,7 +2191,7 @@ procedure TfpgEditFloat.SetMinValue(const AValue: extended);
+     FMinValue:= AValue
+   else
+     FMinValue := FMaxValue;
+-  FLimit:= True;
++  FMinLimit := True;
+ end;
+ 
+ procedure TfpgEditFloat.SetDecimals(const AValue: integer);
+@@ -2173,6 +2216,32 @@ procedure TfpgEditFloat.SetFixedDecimals(const AValue: integer);
+   end;
+ end;
+ 
++procedure TfpgEditFloat.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
++begin
++  if (keycode = keyReturn) or (keycode = keyPEnter) then
++  begin
++    fText := FloatToStr(GetValue);
++    if FFixedDecimals > -1 then
++    begin
++      if UTF8Pos(FDecimalSeparator, fText) > 0 then
++      begin
++        if (UTF8Length(fText) - UTF8Pos(FDecimalSeparator, fText)) > FFixedDecimals then
++          fText := Copy(fText, 1, UTF8Pos(FDecimalSeparator, fText) + FFixedDecimals);
++      end
++      else
++        if UTF8Pos(FDecimalSeparator, fText) = 0 then
++          fText := fText + FDecimalSeparator;
++      while (UTF8Length(fText) - (UTF8Pos(FDecimalSeparator, fText)) < FFixedDecimals) do
++        fText := fText +'0';
++    end;
++    if FDecimals > -1 then
++      if UTF8Pos(FDecimalSeparator, fText) > 0 then
++        if (UTF8Length(fText) - UTF8Pos(FDecimalSeparator, fText)) > FDecimals then
++          fText := Copy(fText, 1, UTF8Pos(FDecimalSeparator, fText) + FDecimals);
++  end;
++  inherited HandleKeyPress(keycode, shiftstate, consumed);
++end;
++
+ procedure TfpgEditFloat.HandleKeyChar(var AText: TfpgChar;
+   var shiftstate: TShiftState; var consumed: Boolean);
+ var
+@@ -2185,6 +2254,16 @@ procedure TfpgEditFloat.HandleKeyChar(var AText: TfpgChar;
+   else
+     consumed := True;
+   inherited HandleKeyChar(AText, shiftstate, consumed);
++  if FMaxLimit then
++    if GetValue > FMaxValue then
++      SetValue(FMaxValue);
++  if FMinLimit then
++    if GetValue < FMinValue then
++      SetValue(FMinValue);
++  if FDecimals > -1 then
++    if UTF8Pos(FDecimalSeparator, fText) > 0 then
++      if (UTF8Length(fText) - UTF8Pos(FDecimalSeparator, fText)) > FDecimals then
++        fText := Copy(fText, 1, UTF8Pos(FDecimalSeparator, fText) + FDecimals);
+ end;
+ 
+ procedure TfpgEditFloat.HandleSetFocus;
+@@ -2244,8 +2323,10 @@ constructor TfpgEditFloat.Create(AOwner: TComponent);
+ begin
+   inherited Create(AOwner);
+   FDecimals := -1;
++  FFixedDecimals := -1;
+   FShowThousand := True;
+-  FLimit := False;
++  FMaxLimit := False;
++  FMinLimit := False;
+ end;
+ 
+ { TfpgEditCurrency }
+@@ -2268,30 +2349,34 @@ function TfpgEditCurrency.GetValue: Currency;
+       txt := UTF8Copy(txt, 1, Pred(UTF8Pos(FThousandSeparator, txt)))
+              +UTF8Copy(txt, Succ(UTF8Pos(FThousandSeparator, txt)), UTF8Length(txt) - UTF8Pos(FThousandSeparator, txt));
+     if Copy(fText, 1, 1) = '-' then
+-      fText := '-' + txt
+-    else
+-      fText := txt;
+-  end;
+-  if fText = '-' then
++      txt := '-' + txt;
++  end
++  else
++    txt := fText;
++
++  if txt = '-' then
+   begin
+     Result := 0;
+-    Text:= fText;
++    Text:= txt;
+   end
+   else
+-    if fText > '' then
++    if txt > '' then
+     try
+-      Result := StrToCurr(fText);
+-      if FLimit then
++      Result := StrToCurr(txt);
++      if FMaxLimit then
+       begin
+-        if Result> FMaxValue then
++        if Result > FMaxValue then
+         begin
+           SetValue(FMaxValue);
+-          Result:= FMaxvalue;
++          Result := FMaxValue;
+         end;
+-        if Result< FMinValue then
++      end;
++      if FMinLimit then
++      begin
++        if Result < FMinValue then
+         begin
+           SetValue(FMinValue);
+-          Result:= FMinValue;
++          Result := FMinValue;
+         end;
+       end;
+     except
+@@ -2308,25 +2393,33 @@ function TfpgEditCurrency.GetValue: Currency;
+ 
+ procedure TfpgEditCurrency.SetValue(const AValue: Currency);
+ begin
+-  if FLimit then
+-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
+-      try
+-        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+-        FormatEdit;
+-      except
+-        on E: EConvertError do
+-          Text := '';
+-      end
+-    else
+-      Exit
+-  else
++  if not FMaxLimit and not FMinLimit then
+     try
+       Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+       FormatEdit;
+     except
+       on E: EConvertError do
+         Text := '';
+-    end;
++    end
++  else
++  begin
++    if FMaxLimit and (AValue <= FMaxValue) then
++      try
++        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++    if FMinLimit and (AValue >= FMinValue) then
++      try
++        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
++        FormatEdit;
++      except
++        on E: EConvertError do
++          Text := '';
++      end;
++   end;
+ end;
+ 
+ procedure TfpgEditCurrency.SetMaxValue(const AValue: Currency);
+@@ -2335,7 +2428,7 @@ procedure TfpgEditCurrency.SetMaxValue(const AValue: Currency);
+     FMaxValue:= AValue
+   else
+     FMaxValue := FMinValue;
+-  FLimit:= True;
++  FMaxLimit:= True;
+ end;
+ 
+ procedure TfpgEditCurrency.SetMinValue(const AValue: Currency);
+@@ -2344,7 +2437,7 @@ procedure TfpgEditCurrency.SetMinValue(const AValue: Currency);
+     FMinValue:= AValue
+   else
+     FMinValue := FMaxValue;
+-  FLimit:= True;
++  FMinLimit:= True;
+ end;
+ 
+ procedure TfpgEditCurrency.SetDecimals(AValue: integer);
+@@ -2389,6 +2482,12 @@ procedure TfpgEditCurrency.HandleKeyChar(var AText: TfpgChar;
+   else
+     consumed := True;
+   inherited HandleKeyChar(AText, shiftstate, consumed);
++  if FMaxLimit then
++    if GetValue > FMaxValue then
++      SetValue(FMaxValue);
++  if FMinLimit then
++    if GetValue < FMinValue then
++      SetValue(FMinValue);
+ end;
+ 
+ procedure TfpgEditCurrency.HandleSetFocus;
+@@ -2433,7 +2532,8 @@ constructor TfpgEditCurrency.Create(AOwner: TComponent);
+   inherited Create(AOwner);
+   FDecimals := 2;
+   FShowThousand := True;
+-  FLimit := False;
++  FMaxLimit := False;
++  FMinLimit := False;
+ end;
+ 
+ 
