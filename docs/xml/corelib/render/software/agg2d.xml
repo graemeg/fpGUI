@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+<module name="Agg2D">
+<short>Defines a AggPas powered Canvas class</short>
+<descr><p>This unit represents a fpGUI Canvas class, but powered by the software rendering engine, AggPas.</p>
+<ul>
+<li>Rendering of arbitrary polygons with Anti-Aliasing and Subpixel Accuracy</li>
+<li>Affine matrix transformations (Rotate, Scale, Skew, Translate, Viewport)</li>
+<li>User to World and vice versa coordinates conversions</li>
+<li>Clipping to the rectangular area</li>
+<li>Master Alpha Transparency</li>
+<li>Master Anti Aliasing Gamma correction</li>
+</ul>
+</descr>
+
+<element name="TAgg2D.Attach">
+<short>Associates a bitmap as the rendering output</short>
+<descr>This method associates vector engine object with bitmap image for the purpose of rendering vector graphics onto it's surface. </descr>
+</element>
+
+<element name="TAgg2D.Attach.bitmap">
+<short>A valid reference to non empty Device Independent Bitmap in pf24bit or pf32bit format. Bitmap can already contain some image data (eg. photo). In that case all renderings will take place over the existing image data. </short>
+</element>
+
+<element name="TAgg2D.Attach.flip_y">
+<short>Indicates if coordinate system on Y axis originates in Bottom Left corner. Otherwise coordinates on Y axis originate in Top Left corner. </short>
+</element>
+
+<element name="TAgg2D.Attach.Result">
+<descr><p>If True, vector engine was successfully connected to the bitmap surface and drawing routine can be immediately performed.</p>
+<p>If False, there was an error connecting to the surface. Check if bitmap image has required DIB format or if it's not empty. </p>
+        </descr>
+</element>
+</module>
+</package>
+</fpdoc-descriptions>
