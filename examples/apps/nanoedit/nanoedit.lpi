@@ -71,7 +71,7 @@
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
-        <UseAnsiStrings Value="False"/>
+        <AllowLabel Value="False"/>
       </SyntaxOptions>
     </Parsing>
     <Other>
