@@ -167,7 +167,8 @@ const
   cString1 = '''.*''';
 
   cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
-  cHexidecimal = '\b\$[0-9a-fA-F]*\b';
+  cHexadecimal = '\$[0-9a-fA-F]+';
+
 
 {@VFD_NEWFORM_IMPL}
 
@@ -757,6 +758,23 @@ begin
       j := Length(s);
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cHexadecimal }
+  ACanvas.TextColor := clMagenta;
+  FRegex.Expression := cHexadecimal;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth *j), ATextRect.Height);
       ACanvas.FillRectangle(r);
       ACanvas.DrawText(r, s);
     until not FRegex.ExecNext;
