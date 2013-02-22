@@ -18,7 +18,8 @@ type
       Ckb_Limits: TfpgCheckBox;
       Ckb_FloatDec: TfpgCheckBox;
       Ckb_FloatFixDec: TfpgCheckBox;
-      Ckb_EditWay: TfpgCheckBox;
+      Ckb_Column: TfpgCheckBox;
+      Ckb_Row: TfpgCheckBox;
       Rb_Point: TfpgRadioButton;
       Rb_Comma: TfpgRadioButton;
       Ckb_Space: TfpgCheckBox;
@@ -38,7 +39,8 @@ type
       procedure Ckb_SpaceChange(Sender: TObject);
       procedure Ckb_FloatDecChange(Sender: TObject);
       procedure Ckb_FloatFixDecChange(Sender: TObject);
-      procedure Ckb_EditWayChange(Sender: TObject);
+      procedure Ckb_ColumnChange(Sender: TObject);
+      procedure Ckb_RowChange(Sender: TObject);
       procedure Ckb_AutoCompleteChange(Sender: TObject);
       procedure Rb_EditComboChange(Sender: TObject);
       procedure Bt_FermerClick(Sender: TObject);
@@ -250,12 +252,28 @@ begin
       end;
 end;
 
-procedure TF_Demo.Ckb_EditWayChange(Sender: TObject);
+procedure TF_Demo.Ckb_ColumnChange(Sender: TObject);
 begin
-  if Ckb_EditWay.Checked then
-    EG_Grid.EditWay:= edRow
-  else
+  if Ckb_Column.Checked then
+  begin
     EG_Grid.EditWay:= edColumn;
+    Ckb_Row.Checked:= False;
+  end
+  else
+  if not Ckb_Row.Checked then
+    Eg_Grid.EditWay:= edNone;
+end;
+
+procedure TF_Demo.Ckb_RowChange(Sender: TObject);
+begin
+  if Ckb_Row.Checked then
+  begin
+    EG_Grid.EditWay:= edRow;
+    Ckb_Column.Checked:= False;
+  end
+  else
+  if not Ckb_Column.Checked then
+    Eg_Grid.EditWay:= edNone;
 end;
 
 procedure TF_Demo.Ckb_AutoCompleteChange(Sender: TObject);
@@ -312,34 +330,34 @@ with EG_Grid do
   AddColumn('None',50,taCenter);
   AddColumn('Text',100,etText);
   AddColumn('Integer',90,etInteger,taRightJustify);
-  AddColumn('Float',90,etFloat,taRightJustify);
+  //AddColumn('Float',90,etFloat,taRightJustify);
   //FloatFixedDecimals[Pred(ColumnCount)]:= 3;
   //NumericDecimals[Pred(ColumnCount)]:= 3;
-  AddColumn('Currency',90,etCurrency,taRightJustify);
-  AddColumn('ComboBox',120,etComboBox);
-  for Cpt:= 0 to Pred(ComboBoxListe.Count) do
-    AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
-  AddColumn('EditCombo',120,etEditCombo);
-  AddEditcomboItem(Pred(ColumnCount),'un');
-  AddEditcomboItem(Pred(ColumnCount),'deux');
-  AddEditcomboItem(Pred(ColumnCount),'trois');
-  AddEditcomboItem(Pred(ColumnCount),'quatre');
-  AddEditcomboItem(Pred(ColumnCount),'cinq');
-  AutoComplete[Pred(ColumnCount)] := True;
-  AllowNew[Pred(ColumnCount)] := anAsk;
-  AddColumn('CheckBox',100,etCheckBox,taCenter);
-  BoxCheckedText[Pred(ColumnCount)] := 'True';
-  BoxUncheckedText[Pred(ColumnCount)] := 'False';
-  BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
-  AddColumn('Calendar',120,etCalendar,taCenter);
-  GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
-  CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
-  DateValue[Pred(ColumnCount)] := Now;
-  WeekStartDay[Pred(ColumnCount)] := 1;
-  WeeklyHoliday[Pred(ColumnCount)] := 7;
-  DayColor[Pred(ColumnCount)] := clBlue;
-  HoliDayColor[Pred(ColumnCount)] := clRed;
-  SingleClickSelect[Pred(ColumnCount)] := True;
+  //AddColumn('Currency',90,etCurrency,taRightJustify);
+  //AddColumn('ComboBox',120,etComboBox);
+  //for Cpt:= 0 to Pred(ComboBoxListe.Count) do
+  //  AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
+  //AddColumn('EditCombo',120,etEditCombo);
+  //AddEditcomboItem(Pred(ColumnCount),'un');
+  //AddEditcomboItem(Pred(ColumnCount),'deux');
+  //AddEditcomboItem(Pred(ColumnCount),'trois');
+  //AddEditcomboItem(Pred(ColumnCount),'quatre');
+  //AddEditcomboItem(Pred(ColumnCount),'cinq');
+  //AutoComplete[Pred(ColumnCount)] := True;
+  //AllowNew[Pred(ColumnCount)] := anAsk;
+  //AddColumn('CheckBox',100,etCheckBox,taCenter);
+  //BoxCheckedText[Pred(ColumnCount)] := 'True';
+  //BoxUncheckedText[Pred(ColumnCount)] := 'False';
+  //BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
+  //AddColumn('Calendar',120,etCalendar,taCenter);
+  //GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
+  //CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
+  //DateValue[Pred(ColumnCount)] := Now;
+  //WeekStartDay[Pred(ColumnCount)] := 1;
+  //WeeklyHoliday[Pred(ColumnCount)] := 7;
+  //DayColor[Pred(ColumnCount)] := clBlue;
+  //HoliDayColor[Pred(ColumnCount)] := clRed;
+  //SingleClickSelect[Pred(ColumnCount)] := True;
   DefaultRowHeight:= 20;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
 //  Options:= [go_HideFocusRect];
@@ -352,8 +370,10 @@ Ckb_FloatDec:= CreateCheckBox(Self,150,Height-80,'Limit EditFloat to 3 decimals'
 Ckb_FloatDec.OnChange:= @Ckb_FloatDecChange;
 Ckb_FloatFixDec:= CreateCheckBox(Self,150,Height-60,'Set EditFloat to 3 decimals');
 Ckb_FloatFixDec.OnChange:= @Ckb_FloatFixDecChange;
-Ckb_EditWay:= CreateCheckBox(Self,150,Height-40,'Edit changing to next row');
-Ckb_EditWay.OnChange:= @Ckb_EditWayChange;;
+Ckb_Column:= CreateCheckBox(Self,150,Height-40,'Edit changing to next column');
+Ckb_Column.OnChange:= @Ckb_ColumnChange;;
+Ckb_Row:= CreateCheckBox(Self,150,Height-20,'Edit changing to next row');
+Ckb_Row.OnChange:= @Ckb_RowChange;;
 Rb_Point:= CreateRadioButton(Self,400,Height-100,'Point as decimal separator');
 Rb_Point.Tag:= 0;
 Rb_Point.OnChange:= @Rb_Change;

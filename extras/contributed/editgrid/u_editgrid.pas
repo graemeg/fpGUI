@@ -21,7 +21,7 @@ uses
 type
 
   TEditType = (etNone, etText, etInteger, etFloat, etCurrency, etComboBox, etEditCombo, etCheckBox, etCalendar);
-  TEditing =(edRow, edColumn);
+  TEditing =(edNone, edRow, edColumn);
 
   TfpgColumnData = class(TObject)
   private
@@ -39,7 +39,7 @@ type
     FMaxLimit: boolean;
     FMinLimit: boolean;
     FDecimals: integer;
-    FDecimalseparator: TfpgChar;
+    FDecimalSeparator: TfpgChar;
     FThousandSeparator: TfpgChar;
     FShowThousand: boolean;
   public
@@ -176,19 +176,20 @@ type
     FCellEditCombo: TfpgEditCombo;
     FCellCheckBox: TfpgCheckBox;
     FCellCalendar: TfpgCalendarCombo;
-//    FRefGrid: TfpgStringGrid;   // reference uniquement
     FFocusRect: TfpgRect;
     FEditing: boolean;
     FEditWay: TEditing;
     procedure   EditGridFocusChange(Sender: TObject; ARow,ACol: integer);
     procedure   EditGridDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
         const AMousePos: TPoint);
+    procedure   EditGridMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
+        const AMousePos: TPoint);
     function    GetColumnEditType(AIndex: integer): TEditType;
     procedure   SetEditCell;
+    procedure   CloseEditCell;
     procedure   IniTextCell;
     procedure   FCellEditTextKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellEditTextExit(Sender: TObject);
     function    GetNumericMaxLimit(AIndex: integer): boolean;
     procedure   SetNumericMaxLimit(AIndex: integer; const AValue: boolean);
     function    GetNumericMinLimit(AIndex: integer): boolean;
@@ -204,7 +205,6 @@ type
     procedure   IniIntegerCell;
     procedure   FCellEditIntegerKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellEditIntegerExit(Sender: TObject);
     function    GetMaxIntValue(AIndex: integer): integer;
     procedure   SetMaxIntValue(AIndex: integer; const AValue: integer);
     function    GetMinIntValue(AIndex: integer): integer;
@@ -212,7 +212,6 @@ type
     procedure   IniFloatCell;
     procedure   FCellEditFloatKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellEditFloatExit(Sender: TObject);
     function    GetMaxFloatValue(AIndex: integer): extended;
     procedure   SetMaxFloatValue(AIndex: integer; const AValue: extended);
     function    GetMinFloatValue(AIndex: integer): extended;
@@ -222,7 +221,6 @@ type
     procedure   IniCurrencyCell;
     procedure   FCellEditCurrencyKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellEditCurrencyExit(Sender: TObject);
     function    GetMaxCurrValue(AIndex: integer): currency;
     procedure   SetMaxCurrValue(AIndex: integer; const AValue: currency);
     function    GetMinCurrValue(AIndex: integer): currency;
@@ -230,11 +228,9 @@ type
     procedure   IniComboBoxCell;
     procedure   FCellComboBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellComboBoxExit(Sender: TObject);
     procedure   IniEditComboCell;
     procedure   FCellEditComboKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellEditComboExit(Sender: TObject);
     function    GetAutoComplete(AIndex: integer): boolean;
     procedure   SetAutoComplete(AIndex: integer; const AValue: boolean);
     function    GetAllowNew(AIndex: integer): TAllowNew;
@@ -242,7 +238,6 @@ type
     procedure   IniCheckBoxCell;
     procedure   FCellCheckBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellCheckBoxExit(Sender: TObject);
     function    GetBoxCheckedText(AIndex: integer): string;
     procedure   SetBoxCheckedText(AIndex: integer; const AValue: string);
     function    GetBoxUncheckedText(AIndex: integer): string;
@@ -252,7 +247,6 @@ type
     procedure   IniCalendarCell;
     procedure   FCellCalendarKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   FCellCalendarExit(Sender: TObject);
     function    GetDates(AIndex: integer): TDateTime;
     procedure   SetDates(AIndex: integer; const AValue: TDateTime);
     function    GetDatesList(AIndex: integer): TList;
@@ -506,36 +500,8 @@ begin
 end;
 
 procedure TfpgCustomEditGrid.EditGridFocusChange(Sender: TObject; ARow,ACol: integer);
-var
-  i: integer;
 begin
-  for i := 0 to Pred(ColumnCount) do
-    case Columns[i].EditType of
-      etText:
-        if Assigned(FCellEditText) then
-          FCellEditText.Visible:= False;
-      etInteger:
-        if Assigned(FCellEditInteger) then
-          FcellEditInteger.Visible:= False;
-      etFloat:
-        if Assigned(FCellEditFloat) then
-          FcellEditFloat.Visible:= False;
-      etCurrency:
-        if Assigned(FCellEditCurrency) then
-          FcellEditCurrency.Visible:= False;
-      etComboBox:
-        if Assigned(FCellComboBox) then
-          FcellComboBox.Visible:= False;
-      etEditCombo:
-        if Assigned(FCellEditCombo) then
-          FcellEditCombo.Visible:= False;
-      etCheckBox:
-        if Assigned(FCellCheckBox) then
-          FCellCheckBox.Visible:= False;
-      etCalendar:
-        if Assigned(FCellCalendar) then
-          FCellCalendar.Visible:= False;
-    end;
+  CloseEditCell;
 end;
 
 procedure TfpgCustomEditGrid.EditGridDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
@@ -565,6 +531,12 @@ begin
   FEditing := True;
 end;
 
+procedure TfpgCustomEditGrid.EditGridMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
+        const AMousePos: TPoint);
+begin
+  CloseEditCell;
+end;
+
 function TfpgCustomEditGrid.GetColumnEditType(AIndex: integer): TEditType;
 begin
   Result := TfpgEditColumn(Columns[AIndex]).EditType;
@@ -592,6 +564,63 @@ begin
   end;
 end;
 
+procedure TfpgCustomEditGrid.CloseEditCell;
+var
+  i: integer;
+begin
+  for i := 0 to Pred(ColumnCount) do
+    case Columns[i].EditType of
+      etText:
+        if Assigned(FCellEditText) then
+          begin
+          FCellEditText.Text := '';
+          FCellEditText.Visible := False;
+          end;
+      etInteger:
+        if Assigned(FCellEditInteger) then
+          begin
+          FCellEditInteger.Text := '';
+          FCellEditInteger.Visible := False;
+          end;
+      etFloat:
+        if Assigned(FCellEditFloat) then
+          begin
+          FCellEditFloat.Text := '';
+          FCellEditFloat.Visible := False;
+          end;
+      etCurrency:
+        if Assigned(FCellEditCurrency) then
+          begin
+          FCellEditCurrency.Text := '';
+          FCellEditCurrency.Visible := False;
+          end;
+      etComboBox:
+        if Assigned(FCellComboBox) then
+          begin
+          FCellComboBox.Text := '';
+          FCellComboBox.Visible := False;
+          end;
+      etEditCombo:
+        if Assigned(FCellEditCombo) then
+          begin
+          FCellEditCombo.Text := '';
+          FCellEditCombo.Visible := False;
+          end;
+      etCheckBox:
+        if Assigned(FCellCheckBox) then
+          begin
+          FCellCheckBox.Text := '';
+          FCellCheckBox.Visible := False;
+          end;
+      etCalendar:
+        if Assigned(FCellCalendar) then
+          begin
+//          FCellCalendar.Text := '';
+          FCellCalendar.Visible := False;
+          end;
+    end;
+end;
+
 procedure TfpgCustomEditGrid.IniTextCell;
 var
   Pt: TPoint;
@@ -609,7 +638,6 @@ begin
     FontDesc := '#Grid';
     Text := Cells[FocusCol, FocusRow];
     OnKeyPress := @FCellEditTextKeyPress;
-    OnExit  := @FCellEditTextExit;
     SetFocus;
   end;
 end;
@@ -617,55 +645,62 @@ end;
 procedure TfpgCustomEditGrid.FCellEditTextKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
           var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-        begin
-        Cells[FocusCol, FocusRow] := FCellEditText.Text;
-        FCellEditText.Text := '';
-        FCellEditText.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
+  if FCellEditText.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
+          begin
+          Cells[FocusCol, FocusRow] := FCellEditText.Text;
+          FCellEditText.Text := '';
+          FCellEditText.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
         end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
+      KeyTab:
+        begin
+// writeln('celledittext keytab');
+          FCellEditText.Text := '';
+          FCellEditText.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
+          FEditing := False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
         FCellEditText.Text := '';
         FCellEditText.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
-        begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
         FEditing := False;
         Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-      FCellEditText.Text := '';
-      FCellEditText.Visible := False;
-      if FEditing then
-        FEditing := False;
-      Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellEditTextExit(Sender: TObject);
-begin
-  FCellEditText.Visible := False;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetNumericMaxLimit(AIndex: integer): boolean;
@@ -751,7 +786,6 @@ begin
     CustomThousandSeparator := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ThousandSeparator;
     ShowThousand := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ShowThousand;
     OnKeyPress := @FCellEditIntegerKeyPress;
-    OnExit  := @FCellEditIntegerExit;
     SetFocus;
   end;
 end;
@@ -759,54 +793,62 @@ end;
 procedure TfpgCustomEditGrid.FCellEditIntegerKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        Cells[FocusCol, FocusRow] := FCellEditInteger.Text;
-        FCellEditInteger.Text:= '';
-        FCellEditInteger.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellEditInteger.Text := '';
-        FCellEditInteger.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+  if FCellEditInteger.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellEditInteger.Text := '';
-        FCellEditInteger.Visible := False;
-        if FEditing then
+          Cells[FocusCol, FocusRow] := FCellEditInteger.Text;
+          FCellEditInteger.Text:= '';
+          FCellEditInteger.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
+        end;
+      KeyTab:
+        begin
+// writeln('celleditinteger keytab');
+          FCellEditInteger.Text := '';
+          FCellEditInteger.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellEditIntegerExit(Sender: TObject);
-begin
-  FCellEditInteger.Visible := False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellEditInteger.Text := '';
+          FCellEditInteger.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetMaxIntValue(AIndex: integer): integer;
@@ -869,7 +911,6 @@ begin
     CustomThousandSeparator := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ThousandSeparator;
     ShowThousand := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ShowThousand;
     OnKeyPress := @FCellEditFloatKeyPress;
-    OnExit  := @FCellEditFloatExit;
     SetFocus;
   end;
 end;
@@ -877,76 +918,83 @@ end;
 procedure TfpgCustomEditGrid.FCellEditFloatKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        with FCellEditFloat do
+  if FCellEditFloat.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FixedDecimals > -1 then
+          with FCellEditFloat do
           begin
-            if UTF8Pos(CustomDecimalSeparator, Text) > 0 then
+            if FixedDecimals > -1 then
             begin
-              if (UTF8Length(Text) - UTF8Pos(CustomDecimalSeparator, Text)) > FixedDecimals then
-                Text := Copy(Text, 1, UTF8Pos(CustomDecimalSeparator, Text) + FixedDecimals);
-            end
-            else
-            begin
-              if UTF8Pos(CustomDecimalSeparator, Text) = 0 then
-                Text := Text + CustomDecimalSeparator;
-              while (UTF8Length(Text) - (UTF8Pos(CustomDecimalSeparator, Text)) < FixedDecimals) do
-                Text := Text +'0';
+              if UTF8Pos(CustomDecimalSeparator, Text) > 0 then
+              begin
+                if (UTF8Length(Text) - UTF8Pos(CustomDecimalSeparator, Text)) > FixedDecimals then
+                  Text := Copy(Text, 1, UTF8Pos(CustomDecimalSeparator, Text) + FixedDecimals);
+              end
+              else
+              begin
+                if UTF8Pos(CustomDecimalSeparator, Text) = 0 then
+                  Text := Text + CustomDecimalSeparator;
+                while (UTF8Length(Text) - (UTF8Pos(CustomDecimalSeparator, Text)) < FixedDecimals) do
+                  Text := Text +'0';
+              end;
             end;
+            if Decimals > -1 then
+              if UTF8Pos(CustomDecimalSeparator, Text) > 0 then
+                if (UTF8Length(Text) - UTF8Pos(CustomDecimalSeparator, Text)) > Decimals then
+                  Text := Copy(Text, 1, UTF8Pos(CustomDecimalSeparator, Text) + Decimals);
           end;
-          if Decimals > -1 then
-            if UTF8Pos(CustomDecimalSeparator, Text) > 0 then
-              if (UTF8Length(Text) - UTF8Pos(CustomDecimalSeparator, Text)) > Decimals then
-                Text := Copy(Text, 1, UTF8Pos(CustomDecimalSeparator, Text) + Decimals);
+          Cells[FocusCol, FocusRow] := FCellEditFloat.Text;
+          FCellEditFloat.Text:= '';
+          FCellEditFloat.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
         end;
-        Cells[FocusCol, FocusRow] := FCellEditFloat.Text;
-        FCellEditFloat.Text:= '';
-        FCellEditFloat.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellEditFloat.Text := '';
-        FCellEditFloat.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+      KeyTab:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellEditFloat.Text := '';
-        FCellEditFloat.Visible := False;
-        if FEditing then
+          FCellEditFloat.Text := '';
+          FCellEditFloat.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellEditFloatExit(Sender: TObject);
-begin
-  FCellEditFloat.Visible := False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellEditFloat.Text := '';
+          FCellEditFloat.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetMaxFloatValue(AIndex: integer): extended;
@@ -1017,7 +1065,6 @@ begin
     CustomThousandSeparator := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ThousandSeparator;
     ShowThousand := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ShowThousand;
     OnKeyPress := @FCellEditCurrencyKeyPress;
-    OnExit  := @FCellEditCurrencyExit;
     SetFocus;
   end;
 end;
@@ -1025,54 +1072,61 @@ end;
 procedure TfpgCustomEditGrid.FCellEditCurrencyKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        Cells[FocusCol, FocusRow] := FCellEditCurrency.Text;
-        FCellEditCurrency.Text:= '';
-        FCellEditCurrency.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellEditCurrency.Text := '';
-        FCellEditCurrency.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+  if FCellEditCurrency.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellEditCurrency.Text := '';
-        FCellEditCurrency.Visible := False;
-        if FEditing then
+          Cells[FocusCol, FocusRow] := FCellEditCurrency.Text;
+          FCellEditCurrency.Text:= '';
+          FCellEditCurrency.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
+        end;
+      KeyTab:
+        begin
+          FCellEditCurrency.Text := '';
+          FCellEditCurrency.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellEditCurrencyExit(Sender: TObject);
-begin
-  FCellEditFloat.Visible := False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellEditCurrency.Text := '';
+          FCellEditCurrency.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetMaxCurrValue(AIndex: integer): currency;
@@ -1130,7 +1184,6 @@ begin
       if Items[i] = Cells[FocusCol, FocusRow] then
         Text := Items[i];
     OnKeyPress := @FCellComboBoxKeyPress;
-    OnExit  := @FCellComboBoxExit;
     SetFocus;
   end;
 end;
@@ -1138,54 +1191,61 @@ end;
 procedure TfpgCustomEditGrid.FCellComboBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        Cells[FocusCol, FocusRow] := FCellComboBox.Text;
-        FCellComboBox.Text:= '';
-        FCellComboBox.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellComboBox.Text := '';
-        FCellComboBox.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+  if FCellComboBox.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellComboBox.Text := '';
-        FCellComboBox.Visible := False;
-        if FEditing then
+          Cells[FocusCol, FocusRow] := FCellComboBox.Text;
+          FCellComboBox.Text:= '';
+          FCellComboBox.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
+        end;
+      KeyTab:
+        begin
+          FCellComboBox.Text := '';
+          FCellComboBox.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellComboBoxExit(Sender: TObject);
-begin
-  FCellComboBox.Visible:= False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellComboBox.Text := '';
+          FCellComboBox.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 procedure TfpgCustomEditGrid.IniEditComboCell;
@@ -1211,7 +1271,6 @@ begin
     AutoCompletion := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AutoComplete;
     AllowNew := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AllowNew;
     OnKeyPress := @FCellEditComboKeyPress;
-    OnExit  := @FCellEditComboExit;
     SetFocus;
   end;
 end;
@@ -1219,56 +1278,63 @@ end;
 procedure TfpgCustomEditGrid.FCellEditComboKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        Cells[FocusCol, FocusRow] := FCellEditCombo.Text;
-        if (AllowNew[FocusCol] = anAsk) or (AllowNew[FocusCol] = anYes) then
-          TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).FItems.Add(FCellEditCombo.Text);
-        FCellEditCombo.Text:= '';
-        FCellEditCombo.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellEditCombo.Text := '';
-        FCellEditCombo.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+  if FCellEditCombo.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellEditCombo.Text := '';
-        FCellEditCombo.Visible := False;
-        if FEditing then
+          Cells[FocusCol, FocusRow] := FCellEditCombo.Text;
+          if (AllowNew[FocusCol] = anAsk) or (AllowNew[FocusCol] = anYes) then
+            TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).FItems.Add(FCellEditCombo.Text);
+          FCellEditCombo.Text:= '';
+          FCellEditCombo.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
+        end;
+      KeyTab:
+        begin
+          FCellEditCombo.Text := '';
+          FCellEditCombo.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellEditComboExit(Sender: TObject);
-begin
-  FCellEditCombo.Visible:= False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellEditCombo.Text := '';
+          FCellEditCombo.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetAutoComplete(AIndex: integer): boolean;
@@ -1312,7 +1378,6 @@ begin
       FCellCheckBox.Checked:= False;
     Text := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).BoxText;
     OnKeyPress := @FCellCheckBoxKeyPress;
-    OnExit  := @FCellCheckBoxExit;
     SetFocus;
   end;
 end;
@@ -1320,57 +1385,64 @@ end;
 procedure TfpgCustomEditGrid.FCellCheckBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        if FCellCheckBox.Checked then
-          Cells[FocusCol, FocusRow] := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).CheckedText
-        else
-          Cells[FocusCol, FocusRow] := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).UncheckedText;
-        FCellCheckBox.Text:= '';
-        FCellCheckBox.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
-              FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
-        end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        FCellCheckBox.Text := '';
-        FCellCheckBox.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+  if FCellCheckBox.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        FCellCheckBox.Text := '';
-        FCellCheckBox.Visible := False;
-        if FEditing then
+          if FCellCheckBox.Checked then
+            Cells[FocusCol, FocusRow] := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).CheckedText
+          else
+            Cells[FocusCol, FocusRow] := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).UncheckedText;
+          FCellCheckBox.Text:= '';
+          FCellCheckBox.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
+        end;
+      KeyTab:
+        begin
+          FCellCheckBox.Text := '';
+          FCellCheckBox.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellCheckBoxExit(Sender: TObject);
-begin
-  FCellCheckBox.Visible:= False;
+          Consumed:= True;
+        end;
+      KeyEscape:
+        begin
+          FCellCheckBox.Text := '';
+          FCellCheckBox.Visible := False;
+          FEditing := False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetBoxCheckedText(AIndex: integer): string;
@@ -1426,7 +1498,6 @@ begin
     HolidayColor := TfpgCalendarColumn(TfpgEditColumn(Columns[FocusCol]).Data).HolidayColor;
     SingleClickSelect := TfpgCalendarColumn(TfpgEditColumn(Columns[FocusCol]).Data).SingleClickSelect;
     OnKeyPress := @FCellCalendarKeyPress;
-    OnExit  := @FCellCalendarExit;
     SetFocus;
   end;
 end;
@@ -1434,58 +1505,65 @@ end;
 procedure TfpgCustomEditGrid.FCellCalendarKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
     var Consumed: boolean);
 begin
-  case KeyCode of
-    KeyReturn, KeyPEnter:
-      begin
-        with TfpgCalendarColumn(TfpgEditColumn(Columns[FocusCol]).Data) do
+  if FCellCalendar.Visible then
+    case KeyCode of
+      KeyReturn, KeyPEnter:
         begin
-          TDates(FDatesList[FocusRow]).FDate := FCellCalendar.DateValue;
-          Cells[FocusCol, FocusRow] := FormatDateTime(GridDateFormat, TDates(FDatesList[FocusRow]).FDate);
+          with TfpgCalendarColumn(TfpgEditColumn(Columns[FocusCol]).Data) do
+          begin
+            TDates(FDatesList[FocusRow]).FDate := FCellCalendar.DateValue;
+            Cells[FocusCol, FocusRow] := FormatDateTime(GridDateFormat, TDates(FDatesList[FocusRow]).FDate);
+          end;
+          //FCellCalendar.Text := '';
+          FCellCalendar.Visible := False;
+          case FEditWay of
+            edNone:
+              begin
+              FEditing:= False;
+              SetFocus;
+              end;
+            edColumn:
+              if FocusCol < Pred(ColumnCount) then
+                FocusCol := FocusCol + 1
+              else
+                FEditing:= False;
+            edRow:
+              if FocusRow < Pred(RowCount) then
+                FocusRow := FocusRow + 1
+              else
+                FEditing:= False;
+          end;
+          if FEditing then
+          begin
+            SetFocus;
+            SetEditCell;
+          end
+          else
+            Consumed:= True;
         end;
-        //FCellCalendar.Text := '';
-        FCellCalendar.Visible := False;
-        case FEditWay of
-          edColumn:
-            if FocusCol < FColumns.Count then
+      KeyTab:
+        begin
+          //FCellCalendar.Text := '';
+          FCellCalendar.Visible := False;
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
-          edRow:
-            if FocusRow < RowCount then
-              FocusRow := FocusRow + 1;
+          FEditing := False;
+          Consumed:= True;
         end;
-        SetFocus;
-        if FEditing then
-          SetEditCell;
-      end;
-    KeyTab:
-      begin
-        //FCellCalendar.Text := '';
-        FCellCalendar.Visible := False;
-        if FEditing then
-          FEditing := False;
-        if ssShift in ShiftState then
+      KeyEscape:
         begin
-          if FocusCol > 0 then
-            FocusCol := FocusCol - 1;
-        end
-        else
-          if FocusCol < FColumns.Count then
-            FocusCol := FocusCol + 1;
-        Consumed:= True;
-      end;
-    KeyEscape:
-      begin
-        //FCellCalendar.Text := '';
-        FCellCalendar.Visible := False;
-        if FEditing then
+          //FCellCalendar.Text := '';
+          FCellCalendar.Visible := False;
           FEditing := False;
-        Consumed:= True;
-      end;
-  end;
-end;
-
-procedure TfpgCustomEditGrid.FCellCalendarExit(Sender: TObject);
-begin
-  FCellCalendar.Visible:= False;
+          Consumed:= True;
+        end;
+    end;
 end;
 
 function TfpgCustomEditGrid.GetDates(AIndex: integer): TDateTime;
@@ -1650,11 +1728,7 @@ begin
           begin
           // specific warning and action should be performed in descendant
           end;
-      keyReturn, keyPEnter:
-        begin
-        // specific action should be performed in descendant
-        end;
-      keyF2:
+      keyReturn, keyPEnter, KeyF2:
         if RowCount > 0 then
           begin
           case Columns[FocusCol].EditType of
@@ -1677,6 +1751,34 @@ begin
           end;
           FEditing := True;
           end;
+      keyTab:
+        begin
+          if ssShift in ShiftState then
+          begin
+            if FocusCol > 0 then
+              FocusCol := FocusCol - 1;
+          end
+          else
+            if FocusCol < Pred(ColumnCount) then
+              FocusCol := FocusCol + 1;
+          Consumed := True;
+        end;
+      keyLeft:
+        begin
+// writeln('keyLeft');
+        end;
+      keyRight:
+        begin
+// writeln('keyRight');
+        end;
+      keyUp:
+        begin
+// writeln('keyUp');
+        end;
+      keyDown:
+        begin
+// writeln('keyDown');
+        end;
     else
       Consumed := False;
     end;
@@ -1686,10 +1788,11 @@ end;
 constructor TfpgCustomEditGrid.Create(AOwner: TComponent);
 begin
   inherited create(AOwner);
-  OnFocusChange := @EditGridFocusChange;
   OnDoubleClick := @EditGridDoubleClick;
+  OnFocusChange := @EditGridFocusChange;
+  OnMouseDown := @EditGridMouseDown;
   FEditing := False;
-  FEditWay := edColumn;
+  FEditWay := edNone;
 end;
 
 destructor TfpgCustomEditGrid.Destroy;
