@@ -185,9 +185,11 @@ type
     function    GetWordAtPos(const X, Y: Integer; out XBegin: Integer): TfpgString;
     procedure   GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
     procedure   Clear;
+    procedure   InsertTextAtPos(S: TfpgString; Col, Row: Integer);
     procedure   ScrollTo(X, Y: Integer);
     procedure   GotoLine(ALine: integer);
     procedure   CopyToClipboard;
+    procedure   PasteFromClipboard;
     procedure   DeleteSelection;
     function    GetSelectedText: TfpgString;
     procedure   SaveToFile(const AFileName: TfpgString);
@@ -1495,6 +1497,13 @@ begin
   fpgClipboard.Text := GetSelectedText;
 end;
 
+procedure TfpgBaseTextEdit.PasteFromClipboard;
+begin
+  if FSelected then
+    DeleteSelection;
+  InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+end;
+
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
     delta: smallint);
 var
@@ -2120,6 +2129,100 @@ begin
   FLines.Clear;
   FSelected := False;
   Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.InsertTextAtPos(S: TfpgString; Col, Row: Integer);
+var
+  SLine, BufS1, BufS2, BufS: TfpgString;
+  I, L: Integer;
+begin
+  if S = '' then
+    Exit;
+  if Row > FLines.Count then
+    Exit;
+  if Row = FLines.Count then
+    FLines.Add('');
+  SLine := FLines[Row];
+  if Col > UTF8Length(SLine) then
+  begin
+    L := UTF8Length(SLine);
+    for I := L to Col do
+      SLine := Sline + ' ';
+  end;
+  BufS1 := Copy(SLine, 1, Col);
+  BufS2 := Copy(SLine, Col + 1, Length(SLine) - Col);
+  SLine := BufS1 + S + BufS2;
+  FSelected := True;
+  { Handles both Windows and *nix line endings - maybe there is a better way? }
+  I := pos(#13#10, SLine);
+  if I > 0 then
+  begin
+    BufS := '';
+    FSelStartNo := Row;
+    FSelStartOffs := Length(BufS1);
+    while I > 0 do
+    begin
+      BufS := Copy(SLine, 1, I - 1);
+      FLines.Insert(Row, BufS);
+      Delete(SLine, 1, I+1);
+      I := pos(#13#10, SLine);
+      CaretPos.Y := Row;
+      CaretPos.X := Length(BufS);
+      FSelEndNo := Row;
+      FSelEndOffs := CaretPos.X;
+      Row := Row + 1;
+    end;
+    if SLine <> '' then
+    begin
+      FLines[Row] := SLine;
+      CaretPos.Y := Row;
+      CaretPos.X := Length(SLine) - Length(BufS2);
+      FSelEndNo := Row;
+      FSelEndOffs := CaretPos.X;
+    end;
+    Invalidate;
+  end
+  else
+  begin
+    I := pos(#10, SLine);
+    if I > 0 then
+    begin
+      BufS := '';
+      FSelStartNo := Row;
+      FSelStartOffs := Length(BufS1);
+      while I > 0 do
+      begin
+        BufS := Copy(SLine, 1, I - 1);
+        FLines.Insert(Row, BufS);
+        Delete(SLine, 1, I);
+        I := pos(#10, SLine);
+        CaretPos.Y := Row;
+        CaretPos.X := Length(BufS);
+        FSelEndNo := Row;
+        FSelEndOffs := CaretPos.X;
+        Row := Row + 1;
+      end;
+      if SLine <> '' then
+      begin
+        FLines[Row] := SLine;
+        CaretPos.Y := Row;
+        CaretPos.X := Length(SLine) - Length(BufS2);
+        FSelEndNo := Row;
+        FSelEndOffs := CaretPos.X;
+      end;
+      Invalidate;
+    end else
+    begin
+      CaretPos.Y := Row;
+      FLines[Row] := SLine;
+      CaretPos.X := Col + Length(S);
+      FSelStartNo := Row;
+      FSelEndNo := Row;
+      FSelStartOffs := Length(BufS1);
+      FSelEndOffs := CaretPos.X;
+      Invalidate;
+    end;
+  end;
 end;
 
 procedure TfpgBaseTextEdit.ScrollTo(X, Y: Integer);
