@@ -67,6 +67,9 @@ type
     procedure   btnOpenFileClicked(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
+    procedure   miEditCutClicked(Sender: TObject);
+    procedure   miEditCopyClicked(Sender: TObject);
+    procedure   miEditPasteClicked(Sender: TObject);
     procedure   miFindClicked(Sender: TObject);
     procedure   miSearchProcedureList(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
@@ -201,6 +204,30 @@ begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+end;
+
+procedure TMainForm.miEditCutClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.CutToClipboard;
+end;
+
+procedure TMainForm.miEditCopyClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.CopyToClipboard;
+end;
+
+procedure TMainForm.miEditPasteClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.PasteFromClipboard;
 end;
 
 procedure TMainForm.miFindClicked(Sender: TObject);
@@ -1239,9 +1266,9 @@ begin
   begin
     Name := 'mnuEdit';
     SetPosition(476, 80, 172, 20);
-    AddMenuItem('Cut', '', nil).Enabled := False;
-    AddMenuItem('Copy', '', nil).Enabled := False;
-    AddMenuItem('Paste', '', nil).Enabled := False;
+    AddMenuItem('Cut', rsKeyCtrl+'X', @miEditCutClicked);
+    AddMenuItem('Copy', rsKeyCtrl+'C', @miEditCopyClicked);
+    AddMenuItem('Paste', rsKeyCtrl+'V', @miEditPasteClicked);
     AddMenuItem('-', '', nil);
     AddMenuItem('Indent selection', rsKeyCtrl+'I', nil).Enabled := False;
     AddMenuItem('Unindent selection', rsKeyCtrl+'U', nil).Enabled := False;
