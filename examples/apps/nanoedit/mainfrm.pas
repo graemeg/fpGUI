@@ -18,6 +18,7 @@ type
     mnuSearch: TfpgPopupMenu;
     memEditor: TfpgTextEdit;
     btnGO: TfpgButton;
+    mnuEdit: TfpgPopupMenu;
     {@VFD_HEAD_END: MainFrom}
     FTextToFind: TfpgString;
     FFindOptions: TfpgFindOptions;
@@ -30,6 +31,9 @@ type
     procedure miFindClick(Sender: TObject);
     procedure miFindNextClick(Sender: TObject);
     procedure miQuitClick(Sender: TObject);
+    procedure miCutClicked(Sender: TObject);
+    procedure miCopyClicked(Sender: TObject);
+    procedure miPasteClicked(Sender: TObject);
     procedure btnGOClick(Sender: TObject);
     procedure memEditorChanged(Sender: TObject);
   public
@@ -153,6 +157,21 @@ begin
   Close;
 end;
 
+procedure TMainForm.miCutClicked(Sender: TObject);
+begin
+  memEditor.CutToClipboard;
+end;
+
+procedure TMainForm.miCopyClicked(Sender: TObject);
+begin
+  memEditor.CopyToClipboard;
+end;
+
+procedure TMainForm.miPasteClicked(Sender: TObject);
+begin
+  memEditor.PasteFromClipboard;
+end;
+
 procedure TMainForm.btnGOClick(Sender: TObject);
 var
   ftr: TElasticTabstopsDocFilter;
@@ -195,7 +214,7 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainFrom}
   Name := 'MainFrom';
-  SetPosition(298, 169, 717, 410);
+  SetPosition(326, 207, 717, 410);
   WindowTitle := 'fpGUI nanoedit';
   Hint := '';
   WindowPosition := wpScreenCenter;
@@ -213,7 +232,7 @@ begin
   with mnuFile do
   begin
     Name := 'mnuFile';
-    SetPosition(320, 4, 120, 20);
+    SetPosition(340, 6, 120, 20);
     AddMenuItem('Open...', 'Ctrl+O', @miOpenClick);
     AddMenuItem('Save', 'Ctrl+S', @miSaveClick);
     AddMenuItem('Save as...', 'Ctrl+Shift+S', @miSaveAsClick);
@@ -221,11 +240,21 @@ begin
     AddMenuItem('Quit', 'Ctrl+Q', @miQuitClick);
   end;
 
+  mnuEdit := TfpgPopupMenu.Create(self);
+  with mnuEdit do
+  begin
+    Name := 'mnuEdit';
+    SetPosition(340, 44, 120, 20);
+    AddMenuItem('Cut', 'Ctrl+X', @miCutClicked);
+    AddMenuItem('Copy', 'Ctrl+C', @miCopyClicked);
+    AddMenuItem('Paste', 'Ctrl+V', @miPasteClicked);
+  end;
+
   mnuSearch := TfpgPopupMenu.Create(self);
   with mnuSearch do
   begin
     Name := 'mnuSearch';
-    SetPosition(320, 25, 120, 20);
+    SetPosition(340, 25, 120, 20);
     AddMenuItem('Find...', 'Ctrl+F', @miFindClick);
     AddMenuItem('Find next', 'F3', @miFindNextClick);
     AddMenuItem('Replace', 'Ctrl+R', nil).Enabled := False;
@@ -260,6 +289,7 @@ begin
   {@VFD_BODY_END: MainFrom}
 
   menu.AddMenuItem('&File', nil).SubMenu := mnuFile;
+  menu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
   menu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
 end;
 
