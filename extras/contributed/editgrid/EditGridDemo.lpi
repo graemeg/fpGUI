@@ -6,7 +6,6 @@
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
-        <UseDefaultCompilerOptions Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
@@ -39,11 +38,21 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="3">
       <Unit0>
         <Filename Value="EditGridDemo.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="u_demo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_demo"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="u_editgrid.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_editgrid"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
