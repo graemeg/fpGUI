@@ -189,6 +189,7 @@ type
     procedure   ScrollTo(X, Y: Integer);
     procedure   GotoLine(ALine: integer);
     procedure   CopyToClipboard;
+    procedure   CutToClipboard;
     procedure   PasteFromClipboard;
     procedure   DeleteSelection;
     function    GetSelectedText: TfpgString;
@@ -1495,6 +1496,14 @@ begin
   if not FSelected then
     Exit;
   fpgClipboard.Text := GetSelectedText;
+end;
+
+procedure TfpgBaseTextEdit.CutToClipboard;
+begin
+  if not FSelected then
+    Exit;
+  CopyToClipboard;
+  DeleteSelection;
 end;
 
 procedure TfpgBaseTextEdit.PasteFromClipboard;
