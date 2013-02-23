@@ -106,7 +106,8 @@ type
     procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
-    procedure   TextEditDrawLine(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   HighlightObjectPascal(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   HighlightPatch(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   SetupEditorPreference;
   public
     constructor Create(AOwner: TComponent); override;
@@ -149,25 +150,6 @@ const
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project';
-
-  { nicely working so far }
-  cKeywords1 = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
-    + '|implementation|procedure|function|constructor|destructor|property|operator'
-    + '|private|protected|public|published|type|virtual|abstract|overload'
-    + '|override|class|unit|program|library|set|of|if|then|for|downto|to|as|div|mod|shr|shl'
-    + '|do|else|while|and|inherited|const|var|initialization|finalization'
-    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default'
-    + '|xor|repeat|until|constref|stdcall|cdecl|external|generic|specialize)\b';
-
-  cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
-  cComments2 = '\{[^\{]*\}';
-
-  cDefines1 = '\{\$[^\{]*\}';
-
-  cString1 = '''.*''';
-
-  cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
-  cHexadecimal = '\$[0-9a-fA-F]+';
 
 
 {@VFD_NEWFORM_IMPL}
@@ -661,9 +643,14 @@ begin
     if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
     begin
       ext := fpgExtractFileExt(AFilename);
-      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr')
-         or (ext = '.dpr') then
-        TfpgTextEdit(ts.Components[0]).OnDrawLine := @TextEditDrawLine;
+      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr') or (ext = '.dpr') then
+      begin
+        TfpgTextEdit(ts.Components[0]).OnDrawLine := @HighlightObjectPascal;
+      end
+      else if (ext = '.patch') or (ext = '.diff') then
+      begin
+        TfpgTextEdit(ts.Components[0]).OnDrawLine := @HighlightPatch;
+      end;
     end;
     ts.Realign;
     pcEditor.ActivePage := ts;
@@ -697,9 +684,28 @@ begin
   WindowTitle := Format(cTitle, [GProject.ProjectName]);
 end;
 
-procedure TMainForm.TextEditDrawLine(Sender: TObject; ALineText: TfpgString;
+procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;
   ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
   var AllowSelfDraw: Boolean);
+const
+  { nicely working so far }
+  cKeywords1 = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
+    + '|implementation|procedure|function|constructor|destructor|property|operator'
+    + '|private|protected|public|published|type|virtual|abstract|overload'
+    + '|override|class|unit|program|library|set|of|if|then|for|downto|to|as|div|mod|shr|shl'
+    + '|do|else|while|and|inherited|const|var|initialization|finalization'
+    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default'
+    + '|xor|repeat|until|constref|stdcall|cdecl|external|generic|specialize)\b';
+
+  cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
+  cComments2 = '\{[^\{]*\}';
+
+  cDefines1 = '\{\$[^\{]*\}';
+
+  cString1 = '''.*''';
+
+  cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
+  cHexadecimal = '\$[0-9a-fA-F]+';
 var
   oldfont: TfpgFont;
   s: TfpgString;  // copy of ALineText we work with
@@ -848,6 +854,146 @@ begin
 
   ACanvas.Font := oldfont;
 //  writeln('------');
+end;
+
+procedure TMainForm.HighlightPatch(Sender: TObject; ALineText: TfpgString;
+  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+  var AllowSelfDraw: Boolean);
+const
+  cRemovedLines = '^(-[^-]|\<|!).*';        // starts with "-" or "<" or "!" symbols
+  cAddedLines = '^(\+[^\+]|\>).*';          // starts with "+" or ">" symbols
+  cLeftFile = '^--- .*';                    // starts with "--- " symbols
+  cRightFile = '^(\+\+\+|\*\*\*) .*';       // starts with "+++ " or "*** " symbols
+  cHunk = '^\@\@.*';                        // starts with "@@" symbols
+  cStartOfFile = '^(diff|index) .*';        // starts with "diff " or "index " symbols
+var
+  oldfont: TfpgFont;
+  s: TfpgString;  // copy of ALineText we work with
+  i, j, c: integer;  // i = position of reserved word; c = last character pos
+  iLength: integer; // length of reserved word
+  w: integer;     // reserved word loop variable
+  r: TfpgRect;    // string rectangle to draw in
+  edt: TfpgTextEdit;
+  lMatchPos, lOffset: integer; // user for regex
+begin
+  edt := TfpgTextEdit(Sender);
+  AllowSelfDraw := False;
+
+  oldfont := TfpgFont(ACanvas.Font);
+  ACanvas.Color := clWhite;
+
+  { draw the plain text first }
+  ACanvas.TextColor := clBlack;
+  ACanvas.DrawText(ATextRect, ALineText);
+
+  lMatchPos := 0;
+  lOffset := 0;
+
+  { syntax highlighting for: cRemovedLines }
+  ACanvas.TextColor := clRed;
+  FRegex.Expression := cRemovedLines;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cAddedLines }
+  ACanvas.TextColor := clGreen;
+  FRegex.Expression := cAddedLines;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cLeftFile }
+  ACanvas.TextColor := clMagenta;
+  FRegex.Expression := cLeftFile;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cRightFile }
+  ACanvas.TextColor := clMagenta;
+  FRegex.Expression := cRightFile;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cHunk }
+  ACanvas.TextColor := clBlue;
+  FRegex.Expression := cHunk;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cStartOfFile }
+  ACanvas.TextColor := clBlack;
+  ACanvas.Color := clSilver;
+  FRegex.Expression := cStartOfFile;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+  ACanvas.Color := clWhite;
+
+  ACanvas.Font := oldfont;
 end;
 
 procedure TMainForm.SetupEditorPreference;
