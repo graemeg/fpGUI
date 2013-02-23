@@ -21,9 +21,9 @@ fpGUI IDE
     [ ] Watchpoints window
     [ ] Assembly window
     [ ] CPU window
-[ ] Syntax highlighting with descent speed.
+[x] Syntax highlighting with descent speed.
 [ ] Basic Search dialog
-[ ] Find in Files dialog
+[x] Find in Files dialog
 [ ] Regex support in all search dialogs
 [ ] External Tools setup and usage
 [ ] Keyboard Shortcuts dialog
