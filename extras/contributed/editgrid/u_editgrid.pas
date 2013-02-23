@@ -185,9 +185,9 @@ type
     procedure   EditGridMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
         const AMousePos: TPoint);
     function    GetColumnEditType(AIndex: integer): TEditType;
-    procedure   SetEditCell;
+    procedure   SetEditCell(AGrid: TfpgStringGrid);
     procedure   CloseEditCell;
-    procedure   IniTextCell;
+    procedure   IniTextCell(AGrid: TfpgStringGrid);
     procedure   FCellEditTextKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetNumericMaxLimit(AIndex: integer): boolean;
@@ -202,14 +202,14 @@ type
     procedure   SetNumericThousandSeparator(AIndex: integer; const AValue: TfpgChar);
     function    GetNumericShowThousand(AIndex: integer): boolean;
     procedure   SetNumericShowThousand(AIndex: integer; const AValue: boolean);
-    procedure   IniIntegerCell;
+    procedure   IniIntegerCell(AGrid: TfpgStringGrid);
     procedure   FCellEditIntegerKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetMaxIntValue(AIndex: integer): integer;
     procedure   SetMaxIntValue(AIndex: integer; const AValue: integer);
     function    GetMinIntValue(AIndex: integer): integer;
     procedure   SetMinIntValue(AIndex: integer; const AValue: integer);
-    procedure   IniFloatCell;
+    procedure   IniFloatCell(AGrid: TfpgStringGrid);
     procedure   FCellEditFloatKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetMaxFloatValue(AIndex: integer): extended;
@@ -218,24 +218,24 @@ type
     procedure   SetMinFloatValue(AIndex: integer; const AValue: extended);
     function    GetFloatFixedDecimals(AIndex: integer): integer;
     procedure   SetFloatFixedDecimals(AIndex: integer; const AValue: integer);
-    procedure   IniCurrencyCell;
+    procedure   IniCurrencyCell(AGrid: TfpgStringGrid);
     procedure   FCellEditCurrencyKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetMaxCurrValue(AIndex: integer): currency;
     procedure   SetMaxCurrValue(AIndex: integer; const AValue: currency);
     function    GetMinCurrValue(AIndex: integer): currency;
     procedure   SetMinCurrValue(AIndex: integer; const AValue: currency);
-    procedure   IniComboBoxCell;
+    procedure   IniComboBoxCell(AGrid: TfpgStringGrid);
     procedure   FCellComboBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
-    procedure   IniEditComboCell;
+    procedure   IniEditComboCell(AGrid: TfpgStringGrid);
     procedure   FCellEditComboKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetAutoComplete(AIndex: integer): boolean;
     procedure   SetAutoComplete(AIndex: integer; const AValue: boolean);
     function    GetAllowNew(AIndex: integer): TAllowNew;
     procedure   SetAllowNew(AIndex: integer; AValue: TAllowNew);
-    procedure   IniCheckBoxCell;
+    procedure   IniCheckBoxCell(AGrid: TfpgStringGrid);
     procedure   FCellCheckBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetBoxCheckedText(AIndex: integer): string;
@@ -244,7 +244,7 @@ type
     procedure   SetBoxUncheckedText(AIndex: integer; const AValue: string);
     function    GetBoxDisplayText(AIndex: integer): string;
     procedure   SetBoxDisplayText(AIndex: integer; const AValue: string);
-    procedure   IniCalendarCell;
+    procedure   IniCalendarCell(AGrid: TfpgStringGrid);
     procedure   FCellCalendarKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
     function    GetDates(AIndex: integer): TDateTime;
@@ -512,21 +512,21 @@ begin
   MouseToCell(AMousePos.X, AMousePos.Y, lCol, lRow);
   case Columns[lCol].EditType of
     etText:
-      IniTextCell;
+      IniTextCell(TfpgStringGrid(Sender));
     etInteger:
-      IniIntegerCell;
+      IniIntegerCell(TfpgStringGrid(Sender));
     etFloat:
-      IniFloatCell;
+      IniFloatCell(TfpgStringGrid(Sender));
     etCurrency:
-      IniCurrencyCell;
+      IniCurrencyCell(TfpgStringGrid(Sender));
     etComboBox:
-      IniComboBoxCell;
+      IniComboBoxCell(TfpgStringGrid(Sender));
     etEditCombo:
-      IniEditComboCell;
+      IniEditComboCell(TfpgStringGrid(Sender));
     etCheckBox:
-      IniCheckBoxCell;
+      IniCheckBoxCell(TfpgStringGrid(Sender));
     etCalendar:
-      IniCalendarCell;
+      IniCalendarCell(TfpgStringGrid(Sender));
   end;
   FEditing := True;
 end;
@@ -542,25 +542,25 @@ begin
   Result := TfpgEditColumn(Columns[AIndex]).EditType;
 end;
 
-procedure TfpgCustomEditGrid.SetEditCell;
+procedure TfpgCustomEditGrid.SetEditCell(AGrid: TfpgStringGrid);
 begin
   case Columns[FocusCol].EditType of
     etText:
-      IniTextCell;
+      IniTextCell(TfpgStringGrid(AGrid));
     etInteger:
-      IniIntegerCell;
+      IniIntegerCell(TfpgStringGrid(AGrid));
     etFloat:
-      IniFloatCell;
+      IniFloatCell(TfpgStringGrid(AGrid));
     etCurrency:
-      IniCurrencyCell;
+      IniCurrencyCell(TfpgStringGrid(AGrid));
     etComboBox:
-      IniComboBoxCell;
+      IniComboBoxCell(TfpgStringGrid(AGrid));
     etEditCombo:
-      IniEditComboCell;
+      IniEditComboCell(TfpgStringGrid(AGrid));
     etCheckBox:
-      IniCheckBoxCell;
+      IniCheckBoxCell(TfpgStringGrid(AGrid));
     etCalendar:
-      IniCalendarCell;
+      IniCalendarCell(TfpgStringGrid(AGrid));
   end;
 end;
 
@@ -621,15 +621,15 @@ begin
     end;
 end;
 
-procedure TfpgCustomEditGrid.IniTextCell;
+procedure TfpgCustomEditGrid.IniTextCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellEditText) then
     FCellEditText.Free;
-  FCellEditText := TfpgEdit.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellEditText := TfpgEdit.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellEditText do
   begin
     Name := 'FCellEditText';
@@ -654,10 +654,7 @@ begin
           FCellEditText.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -669,17 +666,12 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
-// writeln('celledittext keytab');
           FCellEditText.Text := '';
           FCellEditText.Visible := False;
           if ssShift in ShiftState then
@@ -691,14 +683,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
         FCellEditText.Text := '';
         FCellEditText.Visible := False;
         FEditing := False;
-        Consumed:= True;
+        SetFocus;
         end;
     end;
 end;
@@ -763,15 +755,15 @@ begin
   TfpgNumericColumn(TfpgEditColumn(Columns[AIndex]).Data).ShowThousand := AValue;
 end;
 
-procedure TfpgCustomEditGrid.IniIntegerCell;
+procedure TfpgCustomEditGrid.IniIntegerCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellEditInteger) then
     FCellEditInteger.Free;
-  FCellEditInteger := TfpgEditInteger.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellEditInteger := TfpgEditInteger.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellEditInteger do
   begin
     Name := 'FCellEditInteger';
@@ -802,10 +794,7 @@ begin
           FCellEditInteger.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -817,17 +806,12 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
-// writeln('celleditinteger keytab');
           FCellEditInteger.Text := '';
           FCellEditInteger.Visible := False;
           if ssShift in ShiftState then
@@ -839,14 +823,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellEditInteger.Text := '';
           FCellEditInteger.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -885,15 +869,15 @@ begin
   end;
 end;
 
-procedure TfpgCustomEditGrid.IniFloatCell;
+procedure TfpgCustomEditGrid.IniFloatCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellEditFloat) then
     FCellEditFloat.Free;
-  FCellEditFloat := TfpgEditFloat.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellEditFloat := TfpgEditFloat.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellEditFloat do
   begin
     Name := 'FCellEditFloat';
@@ -949,10 +933,7 @@ begin
           FCellEditFloat.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -964,13 +945,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -985,14 +962,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellEditFloat.Text := '';
           FCellEditFloat.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -1041,15 +1018,15 @@ begin
   TfpgFloatColumn(TfpgEditColumn(Columns[AIndex]).Data).FFixedDecimals := AValue;
 end;
 
-procedure TfpgCustomEditGrid.IniCurrencyCell;
+procedure TfpgCustomEditGrid.IniCurrencyCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellEditCurrency) then
     FCellEditCurrency.Free;
-  FCellEditCurrency := TfpgEditCurrency.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellEditCurrency := TfpgEditCurrency.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellEditCurrency do
   begin
     Name := 'FCellEditCurrency';
@@ -1081,10 +1058,7 @@ begin
           FCellEditCurrency.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -1096,13 +1070,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -1117,14 +1087,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellEditCurrency.Text := '';
           FCellEditCurrency.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -1163,16 +1133,16 @@ begin
   end;
 end;
 
-procedure TfpgCustomEditGrid.IniComboBoxCell;
+procedure TfpgCustomEditGrid.IniComboBoxCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
   i: integer;
 begin
   if Assigned(FCellComboBox) then
     FCellComboBox.Free;
-  FCellComboBox := TfpgComboBox.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellComboBox := TfpgComboBox.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellComboBox do
   begin
     Name := 'FCellComboBox';
@@ -1200,10 +1170,7 @@ begin
           FCellComboBox.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -1215,13 +1182,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -1236,28 +1199,28 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellComboBox.Text := '';
           FCellComboBox.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
 
-procedure TfpgCustomEditGrid.IniEditComboCell;
+procedure TfpgCustomEditGrid.IniEditComboCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
   i: integer;
 begin
   if Assigned(FCellEditCombo) then
     FCellEditCombo.Free;
-  FCellEditCombo := TfpgEditCombo.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellEditCombo := TfpgEditCombo.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellEditCombo do
   begin
     Name := 'FCellEditCombo';
@@ -1289,10 +1252,7 @@ begin
           FCellEditCombo.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -1304,13 +1264,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -1325,14 +1281,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellEditCombo.Text := '';
           FCellEditCombo.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -1357,15 +1313,15 @@ begin
   TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).AllowNew := AValue;
 end;
 
-procedure TfpgCustomEditGrid.IniCheckBoxCell;
+procedure TfpgCustomEditGrid.IniCheckBoxCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellCheckBox) then
     FCellCheckBox.Free;
-  FCellCheckBox := TfpgCheckBox.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellCheckBox := TfpgCheckBox.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellCheckBox do
   begin
     Name := 'FCellCheckBox';
@@ -1397,10 +1353,7 @@ begin
           FCellCheckBox.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -1412,13 +1365,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -1433,14 +1382,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           FCellCheckBox.Text := '';
           FCellCheckBox.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -1475,15 +1424,15 @@ begin
   TfpgCheckBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).BoxText := AValue;
 end;
 
-procedure TfpgCustomEditGrid.IniCalendarCell;
+procedure TfpgCustomEditGrid.IniCalendarCell(AGrid: TfpgStringGrid);
 var
   Pt: TPoint;
 begin
   if Assigned(FCellCalendar) then
     FCellCalendar.Free;
-  FCellCalendar := TfpgCalendarCombo.Create(Self);
-  Pt.X := FFocusRect.Left;
-  Pt.Y := FFocusRect.Top;
+  FCellCalendar := TfpgCalendarCombo.Create(AGrid.Parent);
+  Pt.X := Left + FFocusRect.Left;
+  Pt.Y := Top + FFocusRect.Top;
   with FCellCalendar do
   begin
     Name := 'FCellCalendar';
@@ -1518,10 +1467,7 @@ begin
           FCellCalendar.Visible := False;
           case FEditWay of
             edNone:
-              begin
               FEditing:= False;
-              SetFocus;
-              end;
             edColumn:
               if FocusCol < Pred(ColumnCount) then
                 FocusCol := FocusCol + 1
@@ -1533,13 +1479,9 @@ begin
               else
                 FEditing:= False;
           end;
+          SetFocus;
           if FEditing then
-          begin
-            SetFocus;
-            SetEditCell;
-          end
-          else
-            Consumed:= True;
+            SetEditCell(TfpgStringGrid(Self));
         end;
       KeyTab:
         begin
@@ -1554,14 +1496,14 @@ begin
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
       KeyEscape:
         begin
           //FCellCalendar.Text := '';
           FCellCalendar.Visible := False;
           FEditing := False;
-          Consumed:= True;
+          SetFocus;
         end;
     end;
 end;
@@ -1733,21 +1675,21 @@ begin
           begin
           case Columns[FocusCol].EditType of
             etText:
-              IniTextCell;
+              IniTextCell(TfpgStringGrid(Self));
             etInteger:
-              IniIntegerCell;
+              IniIntegerCell(TfpgStringGrid(Self));
             etFloat:
-              IniFloatCell;
+              IniFloatCell(TfpgStringGrid(Self));
             etCurrency:
-              IniCurrencyCell;
+              IniCurrencyCell(TfpgStringGrid(Self));
             etComboBox:
-              IniComboBoxCell;
+              IniComboBoxCell(TfpgStringGrid(Self));
             etEditCombo:
-              IniEditComboCell;
+              IniEditComboCell(TfpgStringGrid(Self));
             etCheckBox:
-              IniCheckBoxCell;
+              IniCheckBoxCell(TfpgStringGrid(Self));
             etCalendar:
-              IniCalendarCell;
+              IniCalendarCell(TfpgStringGrid(Self));
           end;
           FEditing := True;
           end;
@@ -1761,23 +1703,7 @@ begin
           else
             if FocusCol < Pred(ColumnCount) then
               FocusCol := FocusCol + 1;
-          Consumed := True;
-        end;
-      keyLeft:
-        begin
-// writeln('keyLeft');
-        end;
-      keyRight:
-        begin
-// writeln('keyRight');
-        end;
-      keyUp:
-        begin
-// writeln('keyUp');
-        end;
-      keyDown:
-        begin
-// writeln('keyDown');
+          SetFocus;
         end;
     else
       Consumed := False;
