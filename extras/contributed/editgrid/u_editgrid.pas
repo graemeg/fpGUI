@@ -187,6 +187,8 @@ type
     function    GetColumnEditType(AIndex: integer): TEditType;
     procedure   SetEditCell;
     procedure   CloseEditCell;
+    procedure   SetReturnWay;
+    procedure   SetTabWay(ShiftState: TShiftState);
     procedure   IniTextCell;
     procedure   FCellEditTextKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -621,6 +623,41 @@ begin
     end;
 end;
 
+procedure TfpgCustomEditGrid.SetReturnWay;
+begin
+  case FEditWay of
+    edNone:
+      FEditing:= False;
+    edColumn:
+      if FocusCol < Pred(ColumnCount) then
+        FocusCol := FocusCol + 1
+      else
+        FEditing:= False;
+    edRow:
+      if FocusRow < Pred(RowCount) then
+        FocusRow := FocusRow + 1
+      else
+        FEditing:= False;
+  end;
+  SetFocus;
+  if FEditing then
+    SetEditCell;
+end;
+
+procedure TfpgCustomEditGrid.SetTabWay(ShiftState: TShiftState);
+begin
+  if ssShift in ShiftState then
+  begin
+    if FocusCol > 0 then
+      FocusCol := FocusCol - 1;
+  end
+  else
+    if FocusCol < Pred(ColumnCount) then
+      FocusCol := FocusCol + 1;
+  FEditing := False;
+  SetFocus;
+end;
+
 procedure TfpgCustomEditGrid.IniTextCell;
 var
   Pt: TPoint;
@@ -652,38 +689,13 @@ begin
           Cells[FocusCol, FocusRow] := FCellEditText.Text;
           FCellEditText.Text := '';
           FCellEditText.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellEditText.Text := '';
           FCellEditText.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -792,38 +804,13 @@ begin
           Cells[FocusCol, FocusRow] := FCellEditInteger.Text;
           FCellEditInteger.Text:= '';
           FCellEditInteger.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellEditInteger.Text := '';
           FCellEditInteger.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -931,38 +918,13 @@ begin
           Cells[FocusCol, FocusRow] := FCellEditFloat.Text;
           FCellEditFloat.Text:= '';
           FCellEditFloat.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellEditFloat.Text := '';
           FCellEditFloat.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -1056,38 +1018,13 @@ begin
           Cells[FocusCol, FocusRow] := FCellEditCurrency.Text;
           FCellEditCurrency.Text:= '';
           FCellEditCurrency.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellEditCurrency.Text := '';
           FCellEditCurrency.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -1168,38 +1105,13 @@ begin
           Cells[FocusCol, FocusRow] := FCellComboBox.Text;
           FCellComboBox.Text:= '';
           FCellComboBox.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellComboBox.Text := '';
           FCellComboBox.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -1250,38 +1162,13 @@ begin
             TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).FItems.Add(FCellEditCombo.Text);
           FCellEditCombo.Text:= '';
           FCellEditCombo.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellEditCombo.Text := '';
           FCellEditCombo.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -1351,38 +1238,13 @@ begin
             Cells[FocusCol, FocusRow] := TfpgCheckBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).UncheckedText;
           FCellCheckBox.Text:= '';
           FCellCheckBox.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           FCellCheckBox.Text := '';
           FCellCheckBox.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
@@ -1465,38 +1327,13 @@ begin
           end;
           //FCellCalendar.Text := '';
           FCellCalendar.Visible := False;
-          case FEditWay of
-            edNone:
-              FEditing:= False;
-            edColumn:
-              if FocusCol < Pred(ColumnCount) then
-                FocusCol := FocusCol + 1
-              else
-                FEditing:= False;
-            edRow:
-              if FocusRow < Pred(RowCount) then
-                FocusRow := FocusRow + 1
-              else
-                FEditing:= False;
-          end;
-          SetFocus;
-          if FEditing then
-            SetEditCell;
+          SetReturnWay;
         end;
       KeyTab:
         begin
           //FCellCalendar.Text := '';
           FCellCalendar.Visible := False;
-          if ssShift in ShiftState then
-          begin
-            if FocusCol > 0 then
-              FocusCol := FocusCol - 1;
-          end
-          else
-            if FocusCol < Pred(ColumnCount) then
-              FocusCol := FocusCol + 1;
-          FEditing := False;
-          SetFocus;
+          SetTabWay(ShiftState);
         end;
       KeyEscape:
         begin
