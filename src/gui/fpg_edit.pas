@@ -204,6 +204,8 @@ type
     FNegativeColor: TfpgColor;
     FThousandSeparator: TfpgChar;
     FShowThousand: boolean;
+    FMaxLimit: boolean;
+    FMinLimit: boolean;
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); override;
     procedure   AdjustDrawingInfo; override;
     procedure   SetOldColor(const AValue: TfpgColor);
@@ -231,11 +233,12 @@ type
     property    CustomThousandSeparator: TfpgChar read FThousandSeparator write SetThousandSeparator;
     property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor default clRed;
     property    HideSelection;
-//    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
     property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
   public
     constructor Create(AOwner: TComponent); override;
+    property    MaxLimit: boolean read FMaxLimit write FMaxLimit;
+    property    MinLimit: boolean read FMinLimit write FMinLimit;
   published
     property    FontDesc;
   end;
@@ -243,7 +246,6 @@ type
 
   TfpgEditInteger = class(TfpgBaseNumericEdit)
   private
-    FLimit: Boolean;
     FMaxValue: integer;
     FMinValue: integer;
   protected
@@ -288,7 +290,6 @@ type
   TfpgEditFloat = class(TfpgBaseNumericEdit)
   private
     FFixedDecimals: integer;
-    FLimit: Boolean;
     FMaxValue: extended;
     FMinValue: extended;
   protected
@@ -337,7 +338,6 @@ type
 
   TfpgEditCurrency = class(TfpgBaseNumericEdit)
   private
-    FLimit: Boolean;
     FMaxValue: Currency;
     FMinValue: Currency;
   protected
@@ -1868,6 +1868,8 @@ begin
   FThousandSeparator := ThousandSeparator;
   FNegativeColor := clRed;
   FOldColor := TextColor;
+  FMaxLimit := False;
+  FMinLimit := False;
 end;
 
 { TfpgEditInteger }
@@ -1902,17 +1904,20 @@ begin
     begin
       try
         Result := StrToInt(fText);
-        if FLimit then
+        if FMaxLimit then
         begin
-          if Result> FMaxValue then
+          if Result > FMaxValue then
           begin
             SetValue(FMaxValue);
-            Result:= FMaxValue;
+            Result := FMaxValue;
           end;
-          if Result< FMinValue then
+        end;
+        if FMinLimit then
+        begin
+          if Result < FMinValue then
           begin
             SetValue(FMinValue);
-            Result:= FMinValue;
+            Result := FMinValue;
           end;
         end;
       except
@@ -1931,25 +1936,33 @@ end;
 
 procedure TfpgEditInteger.SetValue(const AValue: integer);
 begin
-  if FLimit then
-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
-      try
-        Text := IntToStr(AValue);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end
-    else
-      Exit
-  else
+  if not FMaxLimit and not FMinLimit then
     try
       Text := IntToStr(AValue);
       FormatEdit;
     except
       on E: EConvertError do
         Text := '';
-    end;
+    end
+  else
+  begin
+    if FMaxLimit and (AValue <= FMaxValue) then
+      try
+        Text := IntToStr(AValue);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+    if FMinLimit and (AValue >= FMinValue) then
+      try
+        Text := IntToStr(AValue);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+   end;
 end;
 
 procedure TfpgEditInteger.SetMaxValue(const AValue: integer);
@@ -1958,7 +1971,7 @@ begin
     FMaxValue:= AValue
   else
     FMaxValue := FMinValue;
-  FLimit:= True;
+  FMaxLimit:= True;
 end;
 
 procedure TfpgEditInteger.SetMinValue(const AValue: integer);
@@ -1967,7 +1980,7 @@ begin
     FMinValue:= AValue
   else
     FMinValue := FMaxValue;
-  FLimit:= True;
+  FMinLimit:= True;
 end;
 
 procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
@@ -1981,6 +1994,12 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+  if FMaxLimit then
+    if GetValue > FMaxValue then
+      SetValue(FMaxValue);
+  if FMinLimit then
+    if GetValue < FMinValue then
+      SetValue(FMinValue);
 end;
 
 procedure TfpgEditInteger.HandleSetFocus;
@@ -2025,7 +2044,6 @@ begin
   inherited Create(AOwner);
   FShowThousand := True;
   FDecimals := 0;
-  FLimit := False;
 end;
 
 { TfpgEditFloat }
@@ -2075,17 +2093,20 @@ begin
     begin
       try
         Result := StrToFloat(fText);
-        if FLimit then
+        if FMaxLimit then
         begin
-          if Result> FMaxValue then
+          if Result > FMaxValue then
           begin
             SetValue(FMaxValue);
-            Result:= FMaxvalue;
+            Result := FMaxValue;
           end;
-          if Result< FMinValue then
+        end;
+        if FMinLimit then
+        begin
+          if Result < FMinValue then
           begin
             SetValue(FMinValue);
-            Result:= FMinValue;
+            Result := FMinValue;
           end;
         end;
      except
@@ -2104,22 +2125,7 @@ end;
 
 procedure TfpgEditFloat.SetValue(const AValue: extended);
 begin
-  if FLimit then
-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
-      try
-        Text := FloatToStr(AValue);
-        if FFixedDecimals > -1 then
-          if UTF8Pos(FDecimalSeparator, Text) > 0 then
-            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
-              Text := Text + '0';
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end
-    else
-      Exit
-  else
+  if not FMaxLimit and not FMinLimit then
     try
       Text := FloatToStr(AValue);
       if FFixedDecimals > -1 then
@@ -2130,7 +2136,34 @@ begin
     except
       on E: EConvertError do
         Text := '';
-    end;
+    end
+  else
+  begin
+    if FMaxLimit and (AValue <= FMaxValue) then
+      try
+        Text := FloatToStr(AValue);
+        if FFixedDecimals > -1 then
+          if UTF8Pos(FDecimalSeparator, Text) > 0 then
+            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+              Text := Text + '0';
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+    if FMinLimit and (AValue >= FMinValue) then
+      try
+        Text := FloatToStr(AValue);
+        if FFixedDecimals > -1 then
+          if UTF8Pos(FDecimalSeparator, Text) > 0 then
+            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+              Text := Text + '0';
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+  end;
 end;
 
 procedure TfpgEditFloat.SetMaxValue(const AValue: extended);
@@ -2139,7 +2172,7 @@ begin
     FMaxValue:= AValue
   else
     FMaxValue := FMinValue;
-  FLimit:= True;
+  FMaxLimit := True;
 end;
 
 procedure TfpgEditFloat.SetMinValue(const AValue: extended);
@@ -2148,7 +2181,7 @@ begin
     FMinValue:= AValue
   else
     FMinValue := FMaxValue;
-  FLimit:= True;
+  FMinLimit := True;
 end;
 
 procedure TfpgEditFloat.SetDecimals(const AValue: integer);
@@ -2185,6 +2218,12 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+  if FMaxLimit then
+    if GetValue > FMaxValue then
+      SetValue(FMaxValue);
+  if FMinLimit then
+    if GetValue < FMinValue then
+      SetValue(FMinValue);
 end;
 
 procedure TfpgEditFloat.HandleSetFocus;
@@ -2244,8 +2283,8 @@ constructor TfpgEditFloat.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := -1;
+  FFixedDecimals := -1;
   FShowThousand := True;
-  FLimit := False;
 end;
 
 { TfpgEditCurrency }
@@ -2281,17 +2320,20 @@ begin
     if fText > '' then
     try
       Result := StrToCurr(fText);
-      if FLimit then
+      if FMaxLimit then
       begin
-        if Result> FMaxValue then
+        if Result > FMaxValue then
         begin
           SetValue(FMaxValue);
-          Result:= FMaxvalue;
+          Result := FMaxValue;
         end;
-        if Result< FMinValue then
+      end;
+      if FMinLimit then
+      begin
+        if Result < FMinValue then
         begin
           SetValue(FMinValue);
-          Result:= FMinValue;
+          Result := FMinValue;
         end;
       end;
     except
@@ -2308,25 +2350,33 @@ end;
 
 procedure TfpgEditCurrency.SetValue(const AValue: Currency);
 begin
-  if FLimit then
-    if (AValue <= FMaxValue) and (AValue >= FMinValue) then
-      try
-        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end
-    else
-      Exit
-  else
+  if not FMaxLimit and not FMinLimit then
     try
       Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
       FormatEdit;
     except
       on E: EConvertError do
         Text := '';
-    end;
+    end
+  else
+  begin
+    if FMaxLimit and (AValue <= FMaxValue) then
+      try
+        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+    if FMinLimit and (AValue >= FMinValue) then
+      try
+        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+        FormatEdit;
+      except
+        on E: EConvertError do
+          Text := '';
+      end;
+   end;
 end;
 
 procedure TfpgEditCurrency.SetMaxValue(const AValue: Currency);
@@ -2335,7 +2385,7 @@ begin
     FMaxValue:= AValue
   else
     FMaxValue := FMinValue;
-  FLimit:= True;
+  FMaxLimit:= True;
 end;
 
 procedure TfpgEditCurrency.SetMinValue(const AValue: Currency);
@@ -2344,7 +2394,7 @@ begin
     FMinValue:= AValue
   else
     FMinValue := FMaxValue;
-  FLimit:= True;
+  FMinLimit:= True;
 end;
 
 procedure TfpgEditCurrency.SetDecimals(AValue: integer);
@@ -2389,6 +2439,12 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+  if FMaxLimit then
+    if GetValue > FMaxValue then
+      SetValue(FMaxValue);
+  if FMinLimit then
+    if GetValue < FMinValue then
+      SetValue(FMinValue);
 end;
 
 procedure TfpgEditCurrency.HandleSetFocus;
@@ -2433,7 +2489,6 @@ begin
   inherited Create(AOwner);
   FDecimals := 2;
   FShowThousand := True;
-  FLimit := False;
 end;
 
 

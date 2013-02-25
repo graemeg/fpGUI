@@ -161,7 +161,10 @@ end;
 procedure TMainForm.chbFloatDecChange(Sender: TObject);
 begin
   if chbFloatDec.Checked then
-    edtFloat.Decimals := 3
+  begin
+    edtFloat.Decimals := 3;
+    chbFloatFixDec.Checked:= False;
+  end
   else
     edtFloat.Decimals := -1;
 end;
@@ -169,7 +172,10 @@ end;
 procedure TMainForm.chbFloatFixDecChange(Sender: TObject);
 begin
   if chbFloatFixDec.Checked then
-    edtFloat.FixedDecimals := 3
+  begin
+    edtFloat.FixedDecimals := 3;
+    chbFloatDec.Checked:= False;
+  end
   else
     edtFloat.FixedDecimals := -1;
 end;
@@ -177,14 +183,23 @@ end;
 procedure TMainForm.chbLimitChange(Sender: TObject);
 begin
   if chbLimit.Checked then
-    begin
+  begin
     edtInteger.MaxValue:= 5000;
     edtInteger.MinValue:= -1000;
-    edtFloat.MaxValue:= 5000;;
+    edtFloat.MaxValue:= 5000;
     edtFloat.MinValue:= -1000;
     edtCurrency.MaxValue:= 5000;
     edtCurrency.MinValue:= -1000;
-    end;
+  end
+  else
+  begin
+    edtInteger.MaxLimit:= False;
+    edtInteger.MinLimit:= False;
+    edtFloat.MaxLimit:= False;
+    edtFloat.MinLimit:= False;
+    edtCurrency.MaxLimit:= False;
+    edtCurrency.MinLimit:= False;
+  end;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -446,6 +461,7 @@ begin
     rbPoint.Checked := True
   else
     rbComma.Checked := True;
+  lbNegativeColor.SetFocus;
 end;
 
 procedure MainProc;
