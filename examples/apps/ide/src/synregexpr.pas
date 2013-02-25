@@ -1,6 +1,4 @@
-{$IFNDEF QSYNREGEXPR}
 unit SynRegExpr;
-{$ENDIF}
 
 {
      TRegExpr class library
@@ -30,8 +28,8 @@ unit SynRegExpr;
     not be charged seperatly.
  4. Altered versions must be plainly marked as such, and must
     not be misrepresented as being the original software.
- 5. RegExp Studio application and all the visual components as 
-    well as documentation is not part of the TRegExpr library 
+ 5. RegExp Studio application and all the visual components as
+    well as documentation is not part of the TRegExpr library
     and is not free for usage.
 
                                     mailto:anso@mail.ru
@@ -45,19 +43,10 @@ interface
 
 {$IFDEF FPC}
   {$MODE Delphi}
-  {$DEFINE SYN_COMPILER_1_UP}
-  {$DEFINE SYN_COMPILER_2_UP}
-  {$DEFINE SYN_COMPILER_3_UP}
-  {$DEFINE SYN_COMPILER_4_UP}
-  {$DEFINE SYN_DELPHI_2_UP}
-  {$DEFINE SYN_DELPHI_3_UP}
-  {$DEFINE SYN_DELPHI_4_UP}
-  {$DEFINE SYN_DELPHI_5_UP}
-  {$DEFINE SYN_LAZARUS}
 {$ENDIF}
 
 // ======== Determine compiler
-{$IFDEF VER80} Sorry, TRegExpr is for 32-bits Delphi only. Delphi 1 is not supported (and whos really care today?!). {$ENDIF}
+{$IFDEF VER80} Sorry, TRegExpr is for 32-bits Delphi only. Delphi 1 is not supported (and who really cares today?!). {$ENDIF}
 {$IFDEF VER90} {$DEFINE D2} {$ENDIF} // D2
 {$IFDEF VER93} {$DEFINE D2} {$ENDIF} // CPPB 1
 {$IFDEF VER100} {$DEFINE D3} {$DEFINE D2} {$ENDIF} // D3
@@ -71,9 +60,6 @@ interface
 {$BOOLEVAL OFF}
 {$EXTENDEDSYNTAX ON}
 {$LONGSTRINGS ON}
-{$IFNDEF SYN_LAZARUS}
-{$OPTIMIZATION ON}
-{$ENDIF}
 {$IFDEF D6}
   {$WARN SYMBOL_PLATFORM OFF} // Suppress .Net warnings
 {$ENDIF}
@@ -81,11 +67,6 @@ interface
   {$WARN UNSAFE_CAST OFF} // Suppress .Net warnings
   {$WARN UNSAFE_TYPE OFF} // Suppress .Net warnings
   {$WARN UNSAFE_CODE OFF} // Suppress .Net warnings
-{$ENDIF}
-{$IFDEF FPC}
- {$IFNDEF SYN_LAZARUS}
- {$MODE DELPHI} // Delphi-compatible mode in FreePascal
- {$ENDIF}
 {$ENDIF}
 
 // ======== Define options for TRegExpr engine
@@ -331,16 +312,16 @@ type
     // insert an operator in front of already-emitted operand
     // Means relocating the operand.
 
-    function ParseReg (paren : integer; var flagp : integer) : PRegExprChar;
+    function ParseReg (paren : integer; out flagp : integer) : PRegExprChar;
     // regular expression, i.e. main body or parenthesized thing
 
-    function ParseBranch (var flagp : integer) : PRegExprChar;
+    function ParseBranch (out flagp : integer) : PRegExprChar;
     // one alternative of an | operator
 
-    function ParsePiece (var flagp : integer) : PRegExprChar;
+    function ParsePiece (out flagp : integer) : PRegExprChar;
     // something followed by possible [*+?]
 
-    function ParseAtom (var flagp : integer) : PRegExprChar;
+    function ParseAtom (out flagp : integer) : PRegExprChar;
     // the lowest level
 
     function GetCompilerErrorPos : PtrInt;
@@ -650,16 +631,6 @@ function RegExprSubExpressions (const ARegExpr : string;
 
 
 implementation
-
-{$IFDEF SYN_LAZARUS}
-{$ELSE}
-uses
-{$IFDEF SYN_WIN32}
- Windows; // CharUpper/Lower
-{$ELSE}
-  Libc; //Qt.pas from Borland does not expose char handling functions
-{$ENDIF}
-{$ENDIF}
 
 const
  TRegExprVersionMajor : integer = 0;
@@ -1737,7 +1708,7 @@ function TRegExpr.CompileRegExpr (exp : PRegExprChar) : boolean;
  end; { of function TRegExpr.CompileRegExpr
 --------------------------------------------------------------}
 
-function TRegExpr.ParseReg (paren : integer; var flagp : integer) : PRegExprChar;
+function TRegExpr.ParseReg (paren : integer; out flagp : integer) : PRegExprChar;
 // regular expression, i.e. main body or parenthesized thing
 // Caller must absorb opening parenthesis.
 // Combining parenthesis handling with the base level of regular expression
@@ -1822,7 +1793,7 @@ function TRegExpr.ParseReg (paren : integer; var flagp : integer) : PRegExprChar
  end; { of function TRegExpr.ParseReg
 --------------------------------------------------------------}
 
-function TRegExpr.ParseBranch (var flagp : integer) : PRegExprChar;
+function TRegExpr.ParseBranch (out flagp : integer) : PRegExprChar;
 // one alternative of an | operator
 // Implements the concatenation operator.
  var
@@ -1852,7 +1823,7 @@ function TRegExpr.ParseBranch (var flagp : integer) : PRegExprChar;
  end; { of function TRegExpr.ParseBranch
 --------------------------------------------------------------}
 
-function TRegExpr.ParsePiece (var flagp : integer) : PRegExprChar;
+function TRegExpr.ParsePiece (out flagp : integer) : PRegExprChar;
 // something followed by possible [*+?{]
 // Note that the branching code sequences used for ? and the general cases
 // of * and + and { are somewhat optimized:  they use the same NOTHING node as
@@ -2073,7 +2044,7 @@ function TRegExpr.ParsePiece (var flagp : integer) : PRegExprChar;
  end; { of function TRegExpr.ParsePiece
 --------------------------------------------------------------}
 
-function TRegExpr.ParseAtom (var flagp : integer) : PRegExprChar;
+function TRegExpr.ParseAtom (out flagp : integer) : PRegExprChar;
 // the lowest level
 // Optimization:  gobbles an entire sequence of ordinary characters so that
 // it can turn them into a single node, which is smaller to store and
@@ -2114,7 +2085,7 @@ function TRegExpr.ParseAtom (var flagp : integer) : PRegExprChar;
     do EmitC (s [i]);
   end;
 
- function HexDig (ch : REChar) : PtrInt;
+ function HexDig (ch : REChar) : PtrUInt;
   begin
    Result := 0;
    if (ch >= 'a') and (ch <= 'f')
@@ -3942,7 +3913,7 @@ function TRegExpr.Replace (AInputStr : RegExprString;
       AReplaceFunc : TRegExprReplaceFunction)
      : RegExprString;
  begin
-  {$IFDEF SYN_LAZARUS}Result:={$ENDIF}ReplaceEx (AInputStr, AReplaceFunc);
+  Result := ReplaceEx (AInputStr, AReplaceFunc);
  end; { of function TRegExpr.Replace
 --------------------------------------------------------------}
 {$ENDIF}
