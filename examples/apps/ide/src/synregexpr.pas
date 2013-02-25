@@ -836,9 +836,11 @@ function RegExprSubExpressions (const ARegExpr : string;
             do inc (i);
            if i > Len
             then Result := -1 // unbalansed '('
-            else
-             if TRegExpr.ParseModifiersStr (System.Copy (ARegExpr, i, i - i0), Modif)
-              then AExtendedSyntax := (Modif and MaskModX) <> 0;
+            else begin
+             Modif := 0;
+             if TRegExpr.ParseModifiersStr (System.Copy (ARegExpr, i, i - i0), Modif) then
+               AExtendedSyntax := (Modif and MaskModX) <> 0;
+             end;
           end
          else begin // subexpression starts
            ASubExprs.Add (''); // just reserve space
@@ -1906,6 +1908,7 @@ function TRegExpr.ParsePiece (out flagp : integer) : PRegExprChar;
   end;
 
  begin
+  flagp := WORST;
   Result := ParseAtom (flags);
   if Result = nil
    then EXIT;
@@ -3188,7 +3191,7 @@ function TRegExpr.MatchPrim (prog : PRegExprChar) : boolean;
                 // If it could work, try it.
                 if (nextch = #0) or (reginput^ = nextch) then begin
                   {$IFDEF ComplexBraces}
-                  System.Move (LoopStack, SavedLoopStack, SizeOf (LoopStack)); //###0.925
+                  System.Move (LoopStack, SavedLoopStack{%H-}, SizeOf (LoopStack)); //###0.925
                   SavedLoopStackIdx := LoopStackIdx;
                   {$ENDIF}
                   if MatchPrim (next) then begin
