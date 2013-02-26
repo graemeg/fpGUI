@@ -24,6 +24,7 @@ type
       Rb_Comma: TfpgRadioButton;
       Ckb_Space: TfpgCheckBox;
       Ckb_Thousand: TfpgCheckBox;
+      Ckb_NegativeColor: TfpgCheckBox;
       P_EditCombo: TfpgPanel;
       Ckb_AutoComplete: TfpgCheckBox;
       Rb_No: TfpgRadioButton;
@@ -35,6 +36,7 @@ type
       procedure Bt_AddOneClick(Sender: TObject);
       procedure Ckb_LimitsChange(Sender: TObject);
       procedure Ckb_ThousandChange(Sender: TObject);
+      procedure Ckb_NegativeColorChange(Sender: TObject);
       procedure Rb_Change(Sender: TObject);
       procedure Ckb_SpaceChange(Sender: TObject);
       procedure Ckb_FloatDecChange(Sender: TObject);
@@ -65,6 +67,11 @@ ComboBoxListe.Add('two');
 ComboBoxListe.Add('three');
 ComboBoxListe.Add('four');
 ComboBoxListe.Add('five');
+ComboBoxListe.Add('six');
+ComboBoxListe.Add('seven');
+ComboBoxListe.Add('eight');
+ComboBoxListe.Add('nine');
+ComboBoxListe.Add('ten');
 end;
 
 procedure TF_Demo.EG_GridKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
@@ -145,17 +152,48 @@ var
   Cpt: Integer;
 begin
   with EG_Grid do
+  begin
     for Cpt:= 0 to Pred(ColumnCount) do
       if Ckb_Thousand.Checked then
         case ColumnEditType[Cpt] of
           etInteger, etFloat, etCurrency:
+            begin
             NumericShowThousand[Cpt]:= True;
+            Ckb_Space.Enabled:= False;
+            end;
         end
       else
         case ColumnEditType[Cpt] of
           etInteger, etFloat, etCurrency:
+            begin
             NumericShowThousand[Cpt]:= False;
+            Ckb_Space.Enabled:= True;
+            end;
         end;
+    Invalidate;
+  end;
+end;
+
+procedure TF_Demo.Ckb_NegativeColorChange(Sender: TObject);
+var
+  Cpt: Integer;
+begin
+  with EG_Grid do
+  begin
+    for Cpt:= 0 to Pred(ColumnCount) do
+      if Ckb_NegativeColor.Checked then
+        case ColumnEditType[Cpt] of
+          etInteger, etFloat, etCurrency:
+            NumericNegativeColor[Cpt]:= clRed;
+
+        end
+      else
+        case ColumnEditType[Cpt] of
+          etInteger, etFloat, etCurrency:
+            NumericNegativeColor[Cpt]:= clBlack;
+        end;
+    Invalidate;
+  end;
 end;
 
 procedure TF_Demo.Rb_Change(Sender: TObject);
@@ -163,6 +201,7 @@ var
   Cpt: Integer;
 begin
   with EG_Grid do
+  begin
     for Cpt:= 0 to Pred(ColumnCount) do
       if Sender is TfpgRadioButton then
         case (Sender as TfpgRadioButton).tag of
@@ -194,6 +233,8 @@ begin
                 end;
             end;
         end;
+    Invalidate;
+  end;
 end;
 
 procedure TF_Demo.Ckb_SpaceChange(Sender: TObject);
@@ -329,35 +370,31 @@ with EG_Grid do
   begin
   AddColumn('None',50,taCenter);
   AddColumn('Text',100,etText);
+  TextColor[Pred(ColumnCount)] := clBlue;
   AddColumn('Integer',90,etInteger,taRightJustify);
-  //AddColumn('Float',90,etFloat,taRightJustify);
-  //FloatFixedDecimals[Pred(ColumnCount)]:= 3;
-  //NumericDecimals[Pred(ColumnCount)]:= 3;
-  //AddColumn('Currency',90,etCurrency,taRightJustify);
-  //AddColumn('ComboBox',120,etComboBox);
-  //for Cpt:= 0 to Pred(ComboBoxListe.Count) do
-  //  AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
-  //AddColumn('EditCombo',120,etEditCombo);
-  //AddEditcomboItem(Pred(ColumnCount),'un');
-  //AddEditcomboItem(Pred(ColumnCount),'deux');
-  //AddEditcomboItem(Pred(ColumnCount),'trois');
-  //AddEditcomboItem(Pred(ColumnCount),'quatre');
-  //AddEditcomboItem(Pred(ColumnCount),'cinq');
-  //AutoComplete[Pred(ColumnCount)] := True;
-  //AllowNew[Pred(ColumnCount)] := anAsk;
-  //AddColumn('CheckBox',100,etCheckBox,taCenter);
-  //BoxCheckedText[Pred(ColumnCount)] := 'True';
-  //BoxUncheckedText[Pred(ColumnCount)] := 'False';
-  //BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
-  //AddColumn('Calendar',120,etCalendar,taCenter);
-  //GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
-  //CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
-  //DateValue[Pred(ColumnCount)] := Now;
-  //WeekStartDay[Pred(ColumnCount)] := 1;
-  //WeeklyHoliday[Pred(ColumnCount)] := 7;
-  //DayColor[Pred(ColumnCount)] := clBlue;
-  //HoliDayColor[Pred(ColumnCount)] := clRed;
-  //SingleClickSelect[Pred(ColumnCount)] := True;
+  AddColumn('Float',90,etFloat,taRightJustify);
+  AddColumn('Currency',90,etCurrency,taRightJustify);
+  AddColumn('ComboBox',120,etComboBox);
+  for Cpt:= 0 to Pred(ComboBoxListe.Count) do
+    AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
+  ComboBoxDropDownCount[Pred(ColumnCount)] := 6;
+  AddColumn('EditCombo',120,etEditCombo);
+  AutoComplete[Pred(ColumnCount)] := True;
+  AllowNew[Pred(ColumnCount)] := anAsk;
+  EditComboDropDownCount[Pred(ColumnCount)] := 4;
+  AddColumn('CheckBox',100,etCheckBox,taCenter);
+  BoxCheckedText[Pred(ColumnCount)] := 'True';
+  BoxUncheckedText[Pred(ColumnCount)] := 'False';
+  BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
+  AddColumn('Calendar',120,etCalendar,taCenter);
+  GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
+  CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
+  DateValue[Pred(ColumnCount)] := Now;
+  WeekStartDay[Pred(ColumnCount)] := 1;
+  WeeklyHoliday[Pred(ColumnCount)] := 7;
+  DayColor[Pred(ColumnCount)] := clBlue;
+  HoliDayColor[Pred(ColumnCount)] := clRed;
+  SingleClickSelect[Pred(ColumnCount)] := True;
   DefaultRowHeight:= 20;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
 //  Options:= [go_HideFocusRect];
@@ -386,6 +423,9 @@ Ckb_Space.OnChange:= @Ckb_SpaceChange;
 Ckb_Thousand:= CreateCheckBox(Self,400,Height-40,'Show thousand separator');
 Ckb_Thousand.OnChange:= @Ckb_ThousandChange;
 Ckb_Thousand.Checked:= True;
+Ckb_NegativeColor:= CreateCheckBox(Self,400,Height-20,'Negative values in red');
+Ckb_NegativeColor.OnChange:= @Ckb_NegativeColorChange;
+Ckb_NegativeColor.Checked:= True;
 P_EditCombo:= CreatePanel(Self,650,Height-110,170,100,'EditCombo',bsFlat,taCenter,tlTop);
 Ckb_AutoComplete:= CreateCheckBox(P_EditCombo,10,20,'Auto Completion');
 Ckb_AutoComplete.OnChange:= @Ckb_AutoCompleteChange;

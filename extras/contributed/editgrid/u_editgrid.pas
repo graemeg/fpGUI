@@ -26,7 +26,7 @@ type
   TfpgColumnData = class(TObject)
   private
     FMaxSet: boolean;
-    FminSet: boolean;
+    FMinSet: boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -42,6 +42,7 @@ type
     FDecimalSeparator: TfpgChar;
     FThousandSeparator: TfpgChar;
     FShowThousand: boolean;
+    FNegativeColor: TfpgColor;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -51,6 +52,7 @@ type
     property    DecimalSeparator: TfpgChar read FDecimalSeparator write FDecimalSeparator;
     property    ThousandSeparator: TfpgChar read FThousandSeparator write FThousandSeparator;
     property    ShowThousand: boolean read FShowThousand write FShowThousand;
+    property    NegativeColor: TfpgColor read FNegativeColor write FNegativeColor;
   end;
 
   TfpgIntegerColumn = class(TfpgNumericColumn)
@@ -91,10 +93,12 @@ type
   TfpgComboBoxColumn = class(TfpgColumnData)
   private
     FItems: TStringList;
+    FDropDownCount: integer;
   public
     constructor Create;
     destructor  Destroy; override;
     property    Items: TStringList read FItems write FItems;
+    property    DropDownCount: integer read FDropDownCount write FDropDownCount;
   end;
 
   TfpgEditComboColumn = class(TfpgColumnData)
@@ -102,12 +106,14 @@ type
     FItems: TStringList;
     FAutoComplete: boolean;
     FAllowNew: TAllowNew;
+    FDropDownCount: integer;
   public
     constructor Create;
     destructor  Destroy; override;
     property    Items: TStringList read FItems write FItems;
     property    AutoComplete: boolean read FAutoComplete write FAutoComplete;
     property    AllowNew: TAllowNew read FAllowNew write FAllowNew;
+    property    DropDownCount: integer read FDropDownCount write FDropDownCount;
   end;
 
   TfpgCheckBoxColumn = class(TfpgColumnData)
@@ -184,7 +190,11 @@ type
         const AMousePos: TPoint);
     procedure   EditGridMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
         const AMousePos: TPoint);
+    procedure   EditGridDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect;
+        const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     function    GetColumnEditType(AIndex: integer): TEditType;
+    function    GetTextColor(AIndex: integer): TfpgColor;
+    procedure   SetTextColor(AIndex: integer; const AValue: TfpgColor);
     procedure   SetEditCell;
     procedure   CloseEditCell;
     procedure   SetReturnWay;
@@ -204,6 +214,8 @@ type
     procedure   SetNumericThousandSeparator(AIndex: integer; const AValue: TfpgChar);
     function    GetNumericShowThousand(AIndex: integer): boolean;
     procedure   SetNumericShowThousand(AIndex: integer; const AValue: boolean);
+    function    GetNumericNegativeColor(AIndex: integer): TfpgColor;
+    procedure   SetNumericNegativeColor(AIndex: integer; const AValue: TfpgColor);
     procedure   IniIntegerCell;
     procedure   FCellEditIntegerKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -230,6 +242,8 @@ type
     procedure   IniComboBoxCell;
     procedure   FCellComboBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
+    function    GetComboBoxDropDownCount(AIndex: integer): integer;
+    procedure   SetComboBoxDropDownCount(AIndex: integer; AValue: integer);
     procedure   IniEditComboCell;
     procedure   FCellEditComboKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -237,6 +251,8 @@ type
     procedure   SetAutoComplete(AIndex: integer; const AValue: boolean);
     function    GetAllowNew(AIndex: integer): TAllowNew;
     procedure   SetAllowNew(AIndex: integer; AValue: TAllowNew);
+    function    GetEditComboDropDownCount(AIndex: integer): integer;
+    procedure   SetEditComboDropDownCount(AIndex: integer; AValue: integer);
     procedure   IniCheckBoxCell;
     procedure   FCellCheckBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -285,12 +301,14 @@ type
     function    AddColumn(ATitle: string; AWidth: integer; AEditType: TEditType = etNone;
         AAlignment: TAlignment = taLeftJustify; AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgEditColumn; overload;
     property    ColumnEditType[AIndex: integer]: TEditType read GetColumnEditType;
+    property    TextColor[AIndex: integer]: TfpgColor read GetTextColor write SetTextColor;
     property    NumericMaxLimit[AIndex: integer]: boolean read GetNumericMaxLimit write SetNumericMaxLimit;
     property    NumericMinLimit[AIndex: integer]: boolean read GetNumericMinLimit write SetNumericMinLimit;
     property    NumericDecimals[AIndex: integer]: integer read GetNumericDecimals write SetNumericDecimals;
     property    NumericDecimalSeparator[AIndex: integer]: TfpgChar read GetNumericDecimalSeparator write SetNumericDecimalSeparator;
     property    NumericThousandSeparator[AIndex: integer]: TfpgChar read GetNumericThousandSeparator write SetNumericThousandSeparator;
     property    NumericShowThousand[AIndex: integer]: boolean read GetNumericShowThousand write SetNumericShowThousand;
+    property    NumericNegativeColor[AIndex: integer]: Tfpgcolor read GetNumericNegativeColor write SetNumericNegativeColor;
     property    MaxIntValue[AIndex: integer]: integer read GetMaxIntValue write SetMaxIntValue;
     property    MinIntValue[AIndex: integer]: integer read GetMinIntValue write SetMinIntValue;
     property    MaxFloatValue[AIndex: integer]: extended read GetMaxFloatValue write SetMaxFloatValue;
@@ -299,9 +317,11 @@ type
     property    MaxCurrValue[AIndex: integer]: currency read GetMaxCurrValue write SetMaxCurrValue;
     property    MinCurrValue[AIndex: integer]: currency read GetMinCurrValue write SetMinCurrValue;
     procedure   AddComboItem(AIndex: integer; const AValue: string);
+    property    ComboBoxDropDownCount[AIndex: integer]: integer read GetComboBoxDropDownCount write SetComboBoxDropDownCount;
     procedure   AddEditComboItem(AIndex: integer; const AValue: string);
     property    AutoComplete[AIndex: integer]: boolean read GetAutoComplete write SetAutoComplete;
     property    AllowNew[AIndex: integer]: TAllowNew read GetAllowNew write SetAllowNew;
+    property    EditComboDropDownCount[AIndex: integer]: integer read GetEditComboDropDownCount write SetEditComboDropDownCount;
     property    BoxCheckedText[AIndex: integer]: string read GetBoxCheckedText write SetBoxCheckedText;
     property    BoxUncheckedText[AIndex: integer]: string read GetBoxUncheckedText write SetBoxUncheckedText;
     property    BoxDisplayText[AIndex: integer]: string read GetBoxDisplayText write SetBoxDisplayText;
@@ -539,9 +559,98 @@ begin
   CloseEditCell;
 end;
 
+procedure TfpgCustomEditGrid.EditGridDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect;
+    const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+var
+  Txt, Deci: string;
+  tSeparator,dseparator: TfpgChar;
+begin
+  case Columns[Acol].EditType of
+    etInteger:
+      begin
+        if Copy(Cells[ACol, ARow],1,1) = '-' then
+        begin
+          Txt:= UTF8Copy(Cells[ACol, ARow],2,Pred(UTF8Length(Cells[ACol, ARow])));
+          Canvas.TextColor:= TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).NegativeColor;
+        end
+        else
+          Txt:= Cells[ACol, ARow];
+        if UTF8Length(Txt)> 3 then
+        begin
+          tSeparator:= TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).ThousandSeparator;
+          if TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).ShowThousand then
+          begin
+            if UTF8Pos(tSeparator,Txt) = 0 then
+            begin
+              Txt:= UTF8Copy(Txt, 1, UTF8Length(txt) - 3) + tSeparator + UTF8Copy(Txt, UTF8Length(Txt) - 2, 3);
+              while UTF8Pos(tSeparator,Txt) > 3 do
+                Txt:= UTF8Copy(Txt, 1, UTF8Pos(tSeparator,Txt) - 4) + tSeparator
+                    + UTF8Copy(Txt, UTF8Pos(tSeparator,Txt) - 3, UTF8Length(txt) - UTF8Pos(tSeparator,Txt) + 4);
+            end;
+          end
+          else
+            if UTF8Pos(tSeparator,Txt) > 0 then
+              while UTF8Pos(tSeparator,Txt) > 0 do
+                Txt:= UTF8Copy(txt, 1, Pred(UTF8Pos(tSeparator, txt)))
+                      +UTF8Copy(txt, Succ(UTF8Pos(tSeparator, txt)), UTF8Length(txt) - UTF8Pos(tSeparator, txt));
+          if Copy(Cells[ACol, ARow],1,1) = '-' then
+            Cells[ACol, ARow] := '-' + Txt
+          else
+            Cells[ACol, ARow] := Txt;
+        end;
+      end;
+    etFloat, etCurrency:
+      begin
+        if Copy(Cells[ACol, ARow],1,1) = '-' then
+        begin
+          Txt:= UTF8Copy(Cells[ACol, ARow],2,Pred(UTF8Length(Cells[ACol, ARow])));
+          Canvas.TextColor:= TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).NegativeColor;
+        end
+        else
+          Txt:= Cells[ACol, ARow];
+        dSeparator:= TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).DecimalSeparator;
+        if UTF8Pos(dSeparator,Txt) > 0 then
+          Deci:= Copy(Cells[ACol, ARow], UTF8Pos(dSeparator,Txt), UTF8Length(Cells[ACol, ARow]) - Pred(UTF8Pos(dSeparator,Txt)));
+        if (UTF8Length(Txt) - UTF8Length(Deci)) > 3 then
+        begin
+          tSeparator:= TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).ThousandSeparator;
+          if TfpgNumericColumn(TfpgEditColumn(Columns[ACol]).Data).ShowThousand then
+          begin
+            if UTF8Pos(tSeparator,Txt) = 0 then
+            begin
+              Txt:= UTF8Copy(Txt, 1, UTF8Length(txt) - UTF8Length(Deci) - 3) + tSeparator + UTF8Copy(Txt, UTF8Length(Txt) - UTF8Length(Deci) - 2, 3) + Deci;
+              while UTF8Pos(tSeparator,Txt) > 3 do
+                Txt:= UTF8Copy(Txt, 1, UTF8Pos(tSeparator,Txt) - 4) + tSeparator
+                    + UTF8Copy(Txt, UTF8Pos(tSeparator,Txt) - 3, UTF8Length(txt) - UTF8Length(Deci) - UTF8Pos(tSeparator,Txt) + 4) + Deci;
+            end;
+          end
+          else
+            if UTF8Pos(tSeparator,Txt) > 0 then
+              while UTF8Pos(tSeparator,Txt) > 0 do
+                Txt:= UTF8Copy(txt, 1, Pred(UTF8Pos(tSeparator, txt)))
+                      +UTF8Copy(txt, Succ(UTF8Pos(tSeparator, txt)), UTF8Length(txt) - UTF8Length(Deci) - UTF8Pos(tSeparator, txt)) + Deci;
+          if Copy(Cells[ACol, ARow],1,1) = '-' then
+            Cells[ACol, ARow] := '-' + Txt
+          else
+            Cells[ACol, ARow] := Txt;
+        end;
+      end;
+  end;
+end;
+
 function TfpgCustomEditGrid.GetColumnEditType(AIndex: integer): TEditType;
 begin
   Result := TfpgEditColumn(Columns[AIndex]).EditType;
+end;
+
+function TfpgCustomEditGrid.GetTextColor(AIndex: integer): TfpgColor;
+begin
+  Result := TfpgEditColumn(Columns[AIndex]).TextColor;
+end;
+
+procedure TfpgCustomEditGrid.SetTextColor(AIndex: integer; const AValue: TfpgColor);
+begin
+  TfpgEditColumn(Columns[AIndex]).TextColor := AValue;
 end;
 
 procedure TfpgCustomEditGrid.SetEditCell;
@@ -767,6 +876,16 @@ begin
   TfpgNumericColumn(TfpgEditColumn(Columns[AIndex]).Data).ShowThousand := AValue;
 end;
 
+function TfpgCustomEditGrid.GetNumericNegativeColor(AIndex: integer): TfpgColor;
+begin
+  Result := TfpgNumericColumn(TfpgEditColumn(Columns[AIndex]).Data).NegativeColor;
+end;
+
+procedure TfpgCustomEditGrid.SetNumericNegativeColor(AIndex: integer; const AValue: TfpgColor);
+begin
+  TfpgNumericColumn(TfpgEditColumn(Columns[AIndex]).Data).NegativeColor := AValue;
+end;
+
 procedure TfpgCustomEditGrid.IniIntegerCell;
 var
   Pt: TPoint;
@@ -789,6 +908,7 @@ begin
       MinValue := MinIntValue[FocusCol];
     CustomThousandSeparator := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ThousandSeparator;
     ShowThousand := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).ShowThousand;
+    NegativeColor := TfpgNumericColumn(TfpgEditColumn(Columns[FocusCol]).Data).NegativeColor;
     OnKeyPress := @FCellEditIntegerKeyPress;
     SetFocus;
   end;
@@ -1090,6 +1210,7 @@ begin
     for i := 0 to Pred(Items.Count) do
       if Items[i] = Cells[FocusCol, FocusRow] then
         Text := Items[i];
+    DropDownCount := TfpgComboBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).DropDownCount;
     OnKeyPress := @FCellComboBoxKeyPress;
     SetFocus;
   end;
@@ -1123,6 +1244,16 @@ begin
     end;
 end;
 
+function TfpgCustomEditGrid.GetComboBoxDropDownCount(AIndex: integer): integer;
+begin
+  Result := TfpgComboBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount;
+end;
+
+procedure TfpgCustomEditGrid.SetComboBoxDropDownCount(AIndex: integer; AValue: integer);
+begin
+  TfpgComboBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount := AValue;
+end;
+
 procedure TfpgCustomEditGrid.IniEditComboCell;
 var
   Pt: TPoint;
@@ -1145,6 +1276,7 @@ begin
         Text := Items[i];
     AutoCompletion := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AutoComplete;
     AllowNew := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AllowNew;
+    DropDownCount := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).DropDownCount;
     OnKeyPress := @FCellEditComboKeyPress;
     SetFocus;
   end;
@@ -1198,6 +1330,16 @@ end;
 procedure TfpgCustomEditGrid.SetAllowNew(AIndex: integer; AValue: TAllowNew);
 begin
   TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).AllowNew := AValue;
+end;
+
+function TfpgCustomEditGrid.GetEditComboDropDownCount(AIndex: integer): integer;
+begin
+  Result := TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount;
+end;
+
+procedure TfpgCustomEditGrid.SetEditComboDropDownCount(AIndex: integer; AValue: integer);
+begin
+  TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount := AValue;
 end;
 
 procedure TfpgCustomEditGrid.IniCheckBoxCell;
@@ -1554,6 +1696,7 @@ begin
   OnDoubleClick := @EditGridDoubleClick;
   OnFocusChange := @EditGridFocusChange;
   OnMouseDown := @EditGridMouseDown;
+  OnDrawCell := @EditGridDrawCell;
   FEditing := False;
   FEditWay := edNone;
 end;
