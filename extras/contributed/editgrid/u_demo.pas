@@ -361,6 +361,7 @@ with EG_Grid do
   DefaultRowHeight:= 20;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
 //  Options:= [go_HideFocusRect];
+  Options:= [go_AlternativeColor];
   OnKeyPress:= @EG_GridKeyPress;
   end;
 Bt_AddOne:= CreateButton(Self,20,Height-100,100,'Add 1 line',@Bt_AddOneClick,'');
