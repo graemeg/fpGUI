@@ -71,6 +71,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := rsMyTitle;
   SetPosition(100, 100, 500, 400);
+  WindowPosition:= wpOneThirdDown;
   
   btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);
 
