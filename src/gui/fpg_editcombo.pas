@@ -87,6 +87,7 @@ type
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: integer;
+    FSpecialChar: integer;
     procedure   DoDropDown; override;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
@@ -523,6 +524,38 @@ var
   i: integer;
 begin
   prevval   := FText;
+  if FSpecialChar> -1 then
+  begin
+    case FSpecialChar of
+      58536:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ë';
+          'i':
+            AText:= 'ï';
+          'o':
+            AText:= 'ö';
+          'u':
+            AText:= 'ü';
+        end;
+      58462:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ê';
+          'i':
+            AText:= 'î';
+          'o':
+            AText:= 'ô';
+          'u':
+            AText:= 'û';
+        end;
+    end;
+    FSpecialChar:= -1;
+  end;
   s         := AText;
   consumed  := False;
   if FText = '' then
@@ -583,6 +616,9 @@ var
   i: integer;
 begin
   hasChanged := False;
+
+  if (keycode= 58536) or (keycode= 58462) then
+    FSpecialChar:= keycode;
 
   if not Enabled then
     consumed := False
@@ -883,6 +919,7 @@ begin
   FDrawOffset       := 0;
   FSelectedItem     := -1;       // to allow typing if list is empty
   FNewItem          := False;
+  FSpecialChar      := -1;
 
   CalculateInternalButtonRect;
 end;
