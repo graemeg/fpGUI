@@ -98,7 +98,7 @@ type
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
   protected
-    FSpecialChar: integer;
+    FDeadKeyChar: integer;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -480,7 +480,7 @@ begin
   FReadOnly   := False;
   FUpdateCount := 0;
   FBorderStyle := ebsDefault;
-  FSpecialChar := -1;
+  FDeadKeyChar := -1;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
@@ -1062,10 +1062,10 @@ var
 begin
   inherited;
   prevval  := Text;
-  if FSpecialChar> -1 then
+  if FDeadKeyChar> -1 then
   begin
-    case FSpecialChar of
-      58536:
+    case FDeadKeyChar of
+      keyDeadDiaeresis:
         case AText of
           'a':
             AText:= 'â';
@@ -1078,7 +1078,7 @@ begin
           'u':
             AText:= 'ü';
         end;
-      58462:
+      keyDeadCircumflex:
         case AText of
           'a':
             AText:= 'â';
@@ -1092,7 +1092,7 @@ begin
             AText:= 'û';
         end;
     end;
-    FSpecialChar:= -1;
+    FDeadKeyChar:= -1;
   end;
   s        := AText;
 
@@ -1143,7 +1143,7 @@ begin
   hasChanged := False;
 
   if (keycode= 58536) or (keycode= 58462) then
-    FSpecialChar:= keycode;
+    FDeadKeyChar:= keycode;
 
   case CheckClipBoardKey(keycode, shiftstate) of
     ckCopy:
