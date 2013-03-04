@@ -46,7 +46,7 @@ uses
   fpg_imagelist,
   fpg_scrollbar,
   fpg_menu;
-  
+
 type
 
   TfpgNodeAttachMode = (naAdd, naAddFirst, naAddChild, naAddChildFirst, naInsert);
@@ -56,11 +56,11 @@ type
     next: PfpgTreeColumnWidth;
     width: word;
   end;
-  
+
   // forward declaration
   TfpgTreeView = class;
   TfpgTreeNode = class;
-  
+
   TfpgTreeNodeFindMethod = procedure(ANode: TfpgTreeNode; var AFound: boolean) of object;
   TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
   TfpgStateImageClickedEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
@@ -142,8 +142,8 @@ type
     property    SelTextColor: TfpgColor read FSelTextColor write SetSelTextColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
   end;
-  
-  
+
+
   TfpgTreeView = class(TfpgWidget)
   private
     FImageList: TfpgImageList;
@@ -269,7 +269,7 @@ type
     property    OnShowHint;
     property    OnStateImageClicked: TfpgStateImageClickedEvent read FOnStateImageClicked write FOnStateImageClicked;
   end;
-  
+
 
 implementation
 
@@ -921,7 +921,7 @@ begin
         UpdateScrollBars;
       end;
     end;
-    
+
     if dy - FVScrollbar.Position < 0 then
     begin
       FVScrollbar.Position := dy;
@@ -1229,7 +1229,7 @@ begin
     inc(i);
     last := node;
   end;
-  
+
   if (not cancel) or (node <> nil) then
   begin
     // +/- or node-selection?
@@ -1450,7 +1450,7 @@ begin
       inc(i);
       last := node;
     end;
-    
+
     if (not cancel) or (node <> nil) then
     begin
       // +/- or node-selection?
@@ -1735,7 +1735,7 @@ begin
         Canvas.SetColor(FTreeLineColor);
         Canvas.SetLineStyle(1, lsSolid);  // rectangle is always solid line style
         Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
-        
+
         Canvas.SetColor(clText1);
 
         if h.Collapsed {or h.HasChildren} then
@@ -1749,7 +1749,7 @@ begin
           // draw a "-"
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
         end;
-        
+
         Canvas.SetLineStyle(1, FTreeLineStyle);
       end
       else
@@ -1791,12 +1791,12 @@ begin
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3);
       end;
     end;
-    
+
     if ShowColumns then
       i := ACenterPos
     else
       i := ACenterPos + GetNodeHeight;
-    
+
     if AVisibleHeight > i then
     begin
       if (h.count > 0) and (not h.Collapsed) then
@@ -1877,7 +1877,7 @@ begin
         ResetScrollbar;
         RePaint;
       end;
-      
+
     keyLeft:
       begin
         Consumed := True;
@@ -1885,7 +1885,7 @@ begin
         ResetScrollbar;
         RePaint;
       end;
-      
+
     keyUp:
       begin
         if Selection = nil then
@@ -1906,7 +1906,7 @@ begin
           end;
           Consumed := True;
       end;
-      
+
     keyDown:
       begin
         Consumed := True;
@@ -2188,14 +2188,14 @@ begin
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
   FHScrollbar.SliderSize  := 0.5;
-  
+
   FVScrollbar := TfpgScrollbar.Create(self);
   FVScrollbar.Orientation := orVertical;
   FVScrollbar.OnScroll    := @VScrollbarScroll;
   FVScrollbar.Visible     := False;
   FVScrollbar.Position    := 0;
   FVScrollbar.SliderSize  := 0.2;
-  
+
   FBackgroundColor  := clListBox;
   FTreeLineColor    := clShadow1; //clText1;
   FTreeLineStyle    := lsDot;
