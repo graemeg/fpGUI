@@ -56,9 +56,9 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="11"/>
+    <Version Value="9"/>
     <Target>
-      <Filename Value="project1"/>
+      <Filename Value="editgriddemo"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
@@ -66,7 +66,7 @@
     </SearchPaths>
     <Other>
       <CompilerMessages>
-        <MsgFileName Value=""/>
+        <UseMsgFile Value="True"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
