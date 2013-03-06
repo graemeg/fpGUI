@@ -744,6 +744,8 @@ type
 { Keyboard }
 function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
+function  UseDeadKey(AChar: TfpgChar; AKey: word): TfpgChar;
+function  ReadDeadKey(AKey: word): integer;
 
 { Color }
 function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
@@ -963,6 +965,68 @@ begin
     else if c = 'X' then
       Result := ckCut;
   end  { if/else }
+end;
+
+function UseDeadKey(AChar: TfpgChar; AKey: word): TfpgChar;
+begin
+  case AKey of
+    keyDeadCircumflex:
+      case AChar of
+        'a':
+          Result:= 'â';
+        'e':
+          Result:= 'ê';
+        'i':
+          Result:= 'î';
+        'o':
+          Result:= 'ô';
+        'u':
+          Result:= 'û';
+        'A':
+          Result:= 'Â';
+        'E':
+          Result:= 'Ê';
+        'I':
+          Result:= 'Î';
+        'O':
+          Result:= 'Ô';
+        'U':
+          Result:= 'Û';
+      end;
+    keyDeadDiaeresis:
+      case AChar of
+        'a':
+          Result:= 'ä';
+        'e':
+          Result:= 'ë';
+        'i':
+          Result:= 'ï';
+        'o':
+          Result:= 'ö';
+        'u':
+          Result:= 'ü';
+        'A':
+          Result:= 'Ä';
+        'E':
+          Result:= 'Ë';
+        'I':
+          Result:= 'Ï';
+        'O':
+          Result:= 'Ö';
+        'U':
+          Result:= 'Ü';
+      end;
+  end;
+end;
+
+function ReadDeadKey(AKey: word): integer;
+begin
+  case AKey of
+    keyDeadCircumflex, keyDeadDiaeresis:
+      Result := AKey;
+    else
+      Result := -1;
+  end;
 end;
 
 function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
