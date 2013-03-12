@@ -1087,6 +1087,8 @@ begin
   WindowTitle := 'fpGUI IDE - %s';
   Hint := '';
   WindowPosition := wpOneThirdDown;
+  MinWidth := 580;
+  MinHeight := 400;
 
   pnlMenu := TfpgBevel.Create(self);
   with pnlMenu do
