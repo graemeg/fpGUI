@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -99,6 +99,7 @@ type
     btnStart: TfpgButton;
     btnClear: TfpgButton;
     {@VFD_HEAD_END: MainForm}
+    miPause: TfpgMenuItem;
     FIPCSrv: TSimpleIPCServer;
     FPaused: Boolean;
     FAddAtBottom: Boolean;
@@ -111,6 +112,7 @@ type
     procedure   ReadDebugMessage;
     procedure   ShowDebugMessage(const AMsg: TDebugmessage);
     procedure   ShowMessageWindow;
+    procedure   miPauseClicked(Sender: TObject);
     procedure   miFileQuit(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpProductInformation(Sender: TObject);
@@ -147,6 +149,7 @@ end;
 procedure TMainForm.btnPauseClicked(Sender: TObject);
 begin
   FPaused := not FPaused;
+  miPause.Checked := FPaused;
 end;
 
 procedure TMainForm.btnStartClicked(Sender: TObject);
@@ -257,6 +260,12 @@ begin
     Show;
 end;
 
+procedure TMainForm.miPauseClicked(Sender: TObject);
+begin
+  FPaused := not FPaused;
+  btnPause.Down := FPaused;
+end;
+
 procedure TMainForm.miFileQuit(Sender: TObject);
 begin
   Close;
@@ -352,6 +361,8 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(260, 100, 120, 24);
+    miPause := AddMenuItem('Pause', '', @miPauseClicked);
+    AddMenuItem('-', '', nil);
     AddMenuItem('Quit', '', @miFileQuit);
   end;
 
@@ -373,7 +384,7 @@ begin
     Name := 'mnuHelp';
     SetPosition(260, 152, 120, 24);
     AddMenuItem('About fpGUI...', '', @miHelpAboutFPGui);
-    AddMenuItem('Product Information...', '', @miHelpProductInformation);
+    AddMenuItem('Product Information...', 'F1', @miHelpProductInformation);
   end;
 
   btnQuit := TfpgButton.Create(Bevel1);
@@ -461,7 +472,7 @@ begin
   {%endregion}
 
   // Hook up the menus to the MenuBar
-  MainMenu.AddMenuItem('File', nil).SubMenu := mnuFile;
+  MainMenu.AddMenuItem('Server', nil).SubMenu := mnuFile;
   MainMenu.AddMenuItem('Edit', nil).SubMenu := mnuEdit;
   MainMenu.AddMenuItem('Help', nil).SubMenu := mnuHelp;
 end;
