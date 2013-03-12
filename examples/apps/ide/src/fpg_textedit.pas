@@ -1543,7 +1543,6 @@ var
   Y: Integer;
   X: Integer;
   CaretScroll: Boolean;
-  HasChanged: boolean;
 begin
   {$IFDEF gDEBUG}
   SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress')
@@ -1558,15 +1557,13 @@ begin
 
     ckPaste:
       begin
-//        DoPaste(fpgClipboard.Text);
 //        if not ReadOnly then
-//          HasChanged := True;
+          PasteFromClipboard;
       end;
 
     ckCut:
       begin
-//        DoCopy;
-//        DeleteSection;
+        CutToClipboard;
       end;
   end;
 
