@@ -1258,7 +1258,7 @@ begin
     SetPosition(0, 4, 558, 73);
     Anchors := [anLeft,anRight,anTop,anBottom];
     BackgroundColor := TfpgColor($80000002);
-    AddColumn('New', 800, taLeftJustify);
+    AddColumn('New', 2000, taLeftJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
