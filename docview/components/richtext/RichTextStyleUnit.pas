@@ -363,7 +363,7 @@ begin
   FHeading3Font := fpgGetFont(DefaultTopicFontName + '-10:bold');
 
   FDefaultColor := clBlack;
-  FDefaultBackgroundColor := clWhite;
+  FDefaultBackgroundColor := clBoxColor;
 
   FDefaultAlignment := taLeft;
   FDefaultWrap := true;

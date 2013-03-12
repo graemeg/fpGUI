@@ -692,7 +692,7 @@ begin
   Canvas.ClearClipRect;
   DrawBorder;
   DrawRect := GetDrawRect;
-  Canvas.Color := BackgroundColor;
+  Canvas.Color := RichTextSettings.DefaultBackgroundColor;
   Canvas.FillRectangle(DrawRect);
 
   TextRect := GetTextAreaRect;
