@@ -605,6 +605,9 @@ var
   ts: TfpgTabSheet;
   m: TfpgTextEdit;
   ext: TfpgString;
+  pos_h: integer;
+  pos_v: integer;
+  editor: TfpgTextEdit;
 begin
   s := AFilename;
   f := fpgExtractFileName(s);
@@ -619,9 +622,14 @@ begin
   if found then
   begin
     // reuse existing tab
-    TfpgTextEdit(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
-    TfpgTextEdit(pcEditor.Pages[i].Components[0]).LoadFromFile(s);
-    TfpgTextEdit(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
+    editor := TfpgTextEdit(pcEditor.Pages[i].Components[0]);
+    pos_h := editor.ScrollPos_H;
+    pos_v := editor.ScrollPos_V;
+    editor.Lines.BeginUpdate;
+    editor.LoadFromFile(s);
+    editor.ScrollPos_H := pos_h;
+    editor.ScrollPos_V := pos_v;
+    editor.Lines.EndUpdate;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
     AddMessage('File reloaded: ' + s);
