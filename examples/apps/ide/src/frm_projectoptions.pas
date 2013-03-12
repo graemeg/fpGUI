@@ -218,6 +218,14 @@ begin
     TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
     Consumed := True;
     Exit;
+  end
+  else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
+  begin
+    if TfpgStringGrid(Sender).RowCount = 0 then
+      Exit;
+    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
+    Consumed := True;
+    Exit;
   end;
 
   if TfpgStringGrid(Sender).FocusCol < 10 then
@@ -245,6 +253,14 @@ begin
   if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
   begin
     TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
+    Consumed := True;
+    Exit;
+  end
+  else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
+  begin
+    if TfpgStringGrid(Sender).RowCount = 0 then
+      Exit;
+    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
     Consumed := True;
     Exit;
   end;
