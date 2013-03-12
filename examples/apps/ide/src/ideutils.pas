@@ -72,6 +72,7 @@ uses
   ,fpg_grid
   ,fpg_main
   ,fpg_utils
+  ,dbugintf
   ;
 
 var
@@ -392,19 +393,28 @@ begin
 end;
 
 procedure CheckGridModifyKeyPresses(Sender: TObject; var KeyCode: word;
-  var ShiftState: TShiftState; var Consumed: boolean);
+    var ShiftState: TShiftState; var Consumed: boolean);
+var
+  grd: TfpgStringGrid;
+  r: integer;
 begin
+  grd := TfpgStringGrid(Sender);
   if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
   begin
-    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
+    grd.RowCount := grd.RowCount + 1;
     Consumed := True;
     Exit;
   end
   else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
   begin
-    if TfpgStringGrid(Sender).RowCount = 0 then
+    if grd.RowCount = 0 then
       Exit;
-    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
+    r := grd.FocusRow;
+    grd.DeleteRow(r);
+    if (grd.RowCount <> 0) and (grd.RowCount > r) then
+      grd.FocusRow := r // focus what was next row
+    else if (grd.RowCount <> 0) and (grd.RowCount <= r) then
+      grd.FocusRow := r-1; // focus what was previous row
     Consumed := True;
     Exit;
   end;
