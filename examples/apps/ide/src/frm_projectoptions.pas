@@ -213,20 +213,9 @@ end;
 procedure TProjectOptionsForm.grdCompilerDirsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
-  if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
-  begin
-    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
-    Consumed := True;
+  CheckGridModifyKeyPresses(Sender, KeyCode, ShiftState, Consumed);
+  if Consumed then
     Exit;
-  end
-  else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
-  begin
-    if TfpgStringGrid(Sender).RowCount = 0 then
-      Exit;
-    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
-    Consumed := True;
-    Exit;
-  end;
 
   if TfpgStringGrid(Sender).FocusCol < 10 then
   begin
@@ -250,20 +239,9 @@ end;
 procedure TProjectOptionsForm.grdCompilerMakeOptionsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
-  if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
-  begin
-    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
-    Consumed := True;
+  CheckGridModifyKeyPresses(Sender, KeyCode, ShiftState, Consumed);
+  if Consumed then
     Exit;
-  end
-  else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
-  begin
-    if TfpgStringGrid(Sender).RowCount = 0 then
-      Exit;
-    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
-    Consumed := True;
-    Exit;
-  end;
 
   if TfpgStringGrid(Sender).FocusCol < 6 then
   begin

@@ -58,6 +58,9 @@ function IsPas(const FileName: string): Boolean;
 function IsInc(const FileName: string): Boolean;
 function IsProgram(const FileName: string): Boolean;
 
+{ Handles key shortcuts like Ctrl+Ins or Ctrl+Del to add or remove grid rows.
+  We add this here, so we can reuse it all over in the IDE. }
+procedure CheckGridModifyKeyPresses(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 
 
 
@@ -66,6 +69,7 @@ implementation
 uses
   fpg_form
   ,fpg_memo
+  ,fpg_grid
   ,fpg_main
   ,fpg_utils
   ;
@@ -385,6 +389,25 @@ var
 begin
   FileExt := ExtractUpperFileExt(FileName);
   Result := (FileExt = '.LPR') or (FileExt = '.DPR');
+end;
+
+procedure CheckGridModifyKeyPresses(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
+  begin
+    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
+    Consumed := True;
+    Exit;
+  end
+  else if (KeyCode = keyDelete) and (ssCtrl in ShiftState) then
+  begin
+    if TfpgStringGrid(Sender).RowCount = 0 then
+      Exit;
+    TfpgStringGrid(Sender).DeleteRow(TfpgStringGrid(Sender).FocusRow);
+    Consumed := True;
+    Exit;
+  end;
 end;
 
 
