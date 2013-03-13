@@ -76,6 +76,7 @@ type
     procedure   miFindClicked(Sender: TObject);
     procedure   miFindNextClicked(Sender: TObject);
     procedure   miFindPrevClicked(Sender: TObject);
+    procedure   miGoToLineClick(Sender: TObject);
     procedure   miSearchProcedureList(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
@@ -260,6 +261,27 @@ begin
     Exit;
   edt.FindText(FLastSearchText, FLastFindOptions, FLastFindBackward);
   edt.SetFocus;
+end;
+
+procedure TMainForm.miGoToLineClick(Sender: TObject);
+var
+  sValue: string;
+  i: integer;
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if not Assigned(edt) then
+    Exit;
+  if fpgInputQuery('Go to line', 'Go to line number?', sValue) then
+  begin
+    try
+      i := StrToInt(sValue);
+      edt.GotoLine(i);
+    except
+      on E: Exception do
+         ShowMessage('Invalid line number.' + LineEnding + E.Message);
+    end;
+  end;
 end;
 
 procedure TMainForm.miSearchProcedureList(Sender: TObject);
@@ -1493,6 +1515,7 @@ begin
     AddMenuItem('Replace...', rsKeyCtrl+'R', nil).Enabled := False;
     AddMenuItem('-', '', nil);
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
+    AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
   end;
 
   mnuView := TfpgPopupMenu.Create(self);
