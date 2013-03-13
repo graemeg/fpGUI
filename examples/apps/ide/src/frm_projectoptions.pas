@@ -85,6 +85,7 @@ type
     procedure SetupCellEdit(AGrid: TfpgStringGrid);
     procedure CleanupCompilerMakeOptionsGrid;
     procedure CleanupCompilerDirs;
+    procedure CleanupUserMacrosGrid;
     procedure SaveToMacroList(AList: TIDEMacroList);
   public
     constructor Create(AOwner: TComponent); override;
@@ -447,6 +448,13 @@ begin
         grdCompilerDirs.Cells[j, i] := cCheck;
     end;
   end;
+
+  grdUserMacros.RowCount := GProject.MacroNames.Count;
+  for i := 0 to GProject.MacroNames.Count-1 do
+  begin
+    grdUserMacros.Cells[6, i] := GProject.MacroNames.Names[i];
+    grdUserMacros.Cells[7, i] := GProject.MacroNames.ValueFromIndex[i];
+  end;
 end;
 
 procedure TProjectOptionsForm.SaveSettings;
@@ -483,6 +491,13 @@ begin
       if grdCompilerDirs.Cells[j, i] = cCheck then
         GProject.UnitDirsGrid[j, i] := True;
     end;
+  end;
+
+  CleanupUserMacrosGrid;
+  GProject.ClearAndInitMacrosGrid(grdUserMacros.RowCount);
+  for i := 0 to grdUserMacros.RowCount-1 do
+  begin
+    GProject.MacroNames.Values[grdUserMacros.Cells[6, i]] := grdUserMacros.Cells[7, i];
   end;
 end;
 
@@ -531,6 +546,18 @@ begin
   begin
     if Trim(grdCompilerDirs.Cells[10, i]) = '' then
       grdCompilerDirs.DeleteRow(i);
+  end;
+end;
+
+// remove all rows that have empty macro names or values
+procedure TProjectOptionsForm.CleanupUserMacrosGrid;
+var
+  i: integer;
+begin
+  for i := grdUserMacros.RowCount-1 downto 0 do
+  begin
+    if (Trim(grdUserMacros.Cells[6, i]) = '') or (Trim(grdUserMacros.Cells[7, i]) = '') then
+      grdUserMacros.DeleteRow(i);
   end;
 end;
 
