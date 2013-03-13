@@ -617,11 +617,16 @@ var
   ts: TfpgTabSheet;
   i: integer;
 begin
-  for i := 0 to pcEditor.PageCount-1 do
-  begin
-    ts := pcEditor.Pages[0];
-    pcEditor.RemoveTabSheet(ts);
-    ts.Free;
+  pcEditor.BeginUpdate;
+  try
+    for i := 0 to pcEditor.PageCount-1 do
+    begin
+      ts := pcEditor.Pages[0];
+      pcEditor.RemoveTabSheet(ts);
+      ts.Free;
+    end;
+  finally
+    pcEditor.EndUpdate;
   end;
 end;
 
