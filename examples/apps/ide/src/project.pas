@@ -25,6 +25,7 @@ type
     FMakeOptions: TStringList;
     FMacroNames: TStringList;
     FUnitOutputDir: TfpgString;
+    procedure   MergeWithGlobalMacros;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -33,6 +34,7 @@ type
     function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString;
     procedure   ClearAndInitMakeOptions(const ASize: integer);
     procedure   ClearAndInitUnitDirsGrid(const ASize: integer);
+    procedure   ClearAndInitMacrosGrid(const ASize: integer);
     property    ProjectDir: TfpgString read FProjectDir write FProjectDir;
     property    ProjectName: TfpgString read FProjectName write FProjectName;
     property    MainUnit: TfpgString read FMainUnit write FMainUnit;
@@ -60,6 +62,7 @@ uses
   ideconst
   ,ideutils
   ,fpg_utils
+  ,idemacros
   ;
 
 
@@ -81,6 +84,20 @@ end;
 
 
 { TProject }
+
+procedure TProject.MergeWithGlobalMacros;
+var
+  o: TIDEMacro;
+  i: integer;
+  n,v: TfpgString;
+begin
+  for i := 0 to MacroNames.Count-1 do
+  begin
+    MacroNames.GetNameValue(i, n, v);
+    o := TIDEMacro.Create(cMacroPrefix + n + cMacroSuffix, v, '');
+    GMacroList.Add(o);
+  end;
+end;
 
 constructor TProject.Create;
 begin
@@ -264,6 +281,9 @@ begin
 
   // Load Macro definitions
   LoadList(cProjectOptions, MacroNames, 'MacroCount', 'Macro');
+  if MacroNames.Count > 0 then
+    GMacroList.ResetToDefaults;
+  MergeWithGlobalMacros;
 
   // Load Unit search dirs
   LoadList(cProjectOptions, UnitDirs, 'UnitDirsCount', 'UnitDir');
@@ -355,6 +375,11 @@ begin
   FUnitDirs.Clear;
   SetLength(FUnitDirsGrid, 0, 0); // free items
   SetLength(FUnitDirsGrid, 10, ASize);   // 10 columns by X rows
+end;
+
+procedure TProject.ClearAndInitMacrosGrid(const ASize: integer);
+begin
+  FMacroNames.Clear;
 end;
 
 

@@ -26,6 +26,8 @@ const
 
 
   // Predefined Macros
+  cMacroPrefix          = '${';
+  cMacroSuffix          = '}';
   cMacro_FPCSrcDir      = '${FPCSRCDIR}';
   cMacro_FPGuiDir       = '${FPGUIDIR}';
   cMacro_FPGuiLibDir    = '${FPGUILIBDIR}';
