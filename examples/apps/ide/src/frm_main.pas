@@ -60,6 +60,9 @@ type
     FRegex: TRegExpr;
     FKeywordFont: TfpgFont;
     FFileMonitor: TFileMonitor;
+    FLastSearchText: TfpgString;
+    FLastFindOptions: TfpgFindOptions;
+    FLastFindBackward: Boolean;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -71,6 +74,8 @@ type
     procedure   miEditCopyClicked(Sender: TObject);
     procedure   miEditPasteClicked(Sender: TObject);
     procedure   miFindClicked(Sender: TObject);
+    procedure   miFindNextClicked(Sender: TObject);
+    procedure   miFindPrevClicked(Sender: TObject);
     procedure   miSearchProcedureList(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
@@ -217,16 +222,39 @@ procedure TMainForm.miFindClicked(Sender: TObject);
 var
   s: TfpgString;
   edt: TfpgTextEdit;
-  lFindOptions: TfpgFindOptions;
-  lBackward: Boolean;
 begin
-  lBackward := False;
-  lFindOptions := [];
-  DisplayFindForm(s, lFindOptions, lBackward);
+  FLastFindBackward := False;
+  FLastFindOptions := [];
+  DisplayFindForm(s, FLastFindOptions, FLastFindBackward);
   if s = '' then
     exit;
+  FLastSearchText := s;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
-  edt.FindText(s, lFindOptions, lBackward);
+  edt.FindText(s, FLastFindOptions, FLastFindBackward);
+  edt.SetFocus;
+end;
+
+procedure TMainForm.miFindNextClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  if FLastSearchText = '' then
+    Exit;
+  FLastFindBackward := False;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.FindText(FLastSearchText, FLastFindOptions, FLastFindBackward);
+  edt.SetFocus;
+end;
+
+procedure TMainForm.miFindPrevClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  if FLastSearchText = '' then
+    Exit;
+  FLastFindBackward := True;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.FindText(FLastSearchText, FLastFindOptions, FLastFindBackward);
   edt.SetFocus;
 end;
 
@@ -1455,8 +1483,8 @@ begin
     Name := 'mnuSearch';
     SetPosition(476, 98, 172, 20);
     AddMenuItem('Find...', rsKeyCtrl+'F', @miFindClicked);
-    AddMenuItem('Find Next', 'F3', nil).Enabled := False;
-    AddMenuItem('Find Previous', rsKeyShift+'F3', nil).Enabled := False;
+    AddMenuItem('Find Next', 'F3', @miFindNextClicked);
+    AddMenuItem('Find Previous', rsKeyShift+'F3', @miFindPrevClicked);
     AddMenuItem('Find in Files...', rsKeyCtrl+rsKeyShift+'F', nil).Enabled := False;
     AddMenuItem('Replace...', rsKeyCtrl+'R', nil).Enabled := False;
     AddMenuItem('-', '', nil);
