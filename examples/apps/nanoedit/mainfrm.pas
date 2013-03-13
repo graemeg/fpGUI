@@ -57,7 +57,7 @@ var
 begin
   if ParamCount > 0 then
   begin
-    ShowMessage(ParamStr(1));
+//    ShowMessage(ParamStr(1));
     s := ParamStr(1);
     if Pos('file://', s) > 0 then
       s := StringReplace(s, 'file://', '', []);
