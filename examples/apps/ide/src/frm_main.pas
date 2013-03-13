@@ -242,6 +242,8 @@ begin
     Exit;
   FLastFindBackward := False;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if not Assigned(edt) then
+    Exit;
   edt.FindText(FLastSearchText, FLastFindOptions, FLastFindBackward);
   edt.SetFocus;
 end;
@@ -254,6 +256,8 @@ begin
     Exit;
   FLastFindBackward := True;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if not Assigned(edt) then
+    Exit;
   edt.FindText(FLastSearchText, FLastFindOptions, FLastFindBackward);
   edt.SetFocus;
 end;
