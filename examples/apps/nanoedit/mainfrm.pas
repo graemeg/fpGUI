@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main,
-  fpg_form, fpg_button, fpg_menu, fpg_textedit;
+  fpg_form, fpg_button, fpg_menu, fpg_textedit, fpg_panel,
+  fpg_label;
 
 type
 
@@ -15,14 +16,17 @@ type
     {@VFD_HEAD_BEGIN: MainFrom}
     menu: TfpgMenuBar;
     mnuFile: TfpgPopupMenu;
+    mnuEdit: TfpgPopupMenu;
     mnuSearch: TfpgPopupMenu;
     memEditor: TfpgTextEdit;
     btnGO: TfpgButton;
-    mnuEdit: TfpgPopupMenu;
+    bevStatusBar: TfpgBevel;
+    lblStatusText: TfpgLabel;
     {@VFD_HEAD_END: MainFrom}
     FTextToFind: TfpgString;
     FFindOptions: TfpgFindOptions;
     FIsForward: boolean;
+    FFilename: TfpgString;
     procedure FormShow(Sender: TObject);
     procedure miOpenClick(Sender: TObject);
     procedure miSaveClick(Sender: TObject);
@@ -62,6 +66,8 @@ begin
     if Pos('file://', s) > 0 then
       s := StringReplace(s, 'file://', '', []);
     memEditor.LoadFromFile(s);
+    FFilename := s;
+    lblStatusText.Text := FFilename;
   end;
 end;
 
@@ -74,6 +80,7 @@ begin
     if dlg.RunOpenFile then
     begin
       memEditor.Lines.LoadFromFile(dlg.FileName);
+      FFileName := dlg.FileName;
     end;
   finally
     dlg.Free;
@@ -86,6 +93,8 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
+    if FFilename <> '' then
+      dlg.FileName := FFilename;
     if dlg.RunSaveFile then
     begin
       memEditor.Lines.SaveToFile(dlg.FileName);
@@ -101,9 +110,13 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
+    if FFilename <> '' then
+      dlg.FileName := FFilename;
     if dlg.RunSaveFile then
     begin
       memEditor.Lines.SaveToFile(dlg.FileName);
+      FFilename := dlg.FileName;
+      lblStatusText.Text := FFilename;
     end;
   finally
     dlg.Free;
@@ -266,7 +279,7 @@ begin
   with memEditor do
   begin
     Name := 'memEditor';
-    SetPosition(0, 52, 717, 358);
+    SetPosition(0, 52, 717, 332);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#edit2';
     GutterVisible := True;
@@ -284,6 +297,27 @@ begin
     ImageName := '';
     TabOrder := 4;
     OnClick := @btnGOClick;
+  end;
+
+  bevStatusBar := TfpgBevel.Create(self);
+  with bevStatusBar do
+  begin
+    Name := 'bevStatusBar';
+    SetPosition(1, 387, 715, 22);
+    Anchors := [anLeft,anRight,anBottom];
+    Hint := '';
+    Style := bsLowered;
+  end;
+
+  lblStatusText := TfpgLabel.Create(bevStatusBar);
+  with lblStatusText do
+  begin
+    Name := 'lblStatusText';
+    SetPosition(4, 4, 704, 15);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
   end;
 
   {@VFD_BODY_END: MainFrom}
