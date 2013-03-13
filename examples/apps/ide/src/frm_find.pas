@@ -34,6 +34,7 @@ type
     btnHelp: TfpgButton;
     {@VFD_HEAD_END: FindForm}
     procedure chkReplaceChanged(Sender: TObject);
+    procedure edtFindTextKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
   public
     procedure AfterCreate; override;
   end;
@@ -81,6 +82,15 @@ begin
   edtReplaceText.Enabled := chkReplace.Checked;
 end;
 
+procedure TFindForm.edtFindTextKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
+begin
+  if KeyCode = keyEnter then
+  begin
+    Consumed := True;
+    btnFind.Click;
+  end;
+end;
+
 procedure TFindForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -111,6 +121,7 @@ begin
     Hint := '';
     TabOrder := 2;
     Text := '';
+    OnKeyPress := @edtFindTextKeyPressed;
   end;
 
   chkReplace := TfpgCheckBox.Create(self);
