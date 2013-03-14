@@ -165,6 +165,7 @@ type
     procedure   btnNotesGotoClicked(Sender: TObject);
     procedure   UpdateEncodingComboBox;
     procedure   IndexSearchEditOnChange(Sender: TObject);
+    procedure   pnlTitleGradientPaint(Sender: TObject);
     procedure   DisplaySelectedSearchResultTopic;
     procedure   NavigateToHistoryIndex(AIndex: integer);
     procedure   UpdateLocationPanel;
@@ -1120,6 +1121,13 @@ begin
     lbIndex.FocusItem := tmpMatchIndex;
 
   InIndexSearch:= false;
+end;
+
+procedure TMainForm.pnlTitleGradientPaint(Sender: TObject);
+begin
+  pnlTitle.Canvas.GradientFill(pnlTitle.GetClientRect, TfpgColor($ff4466d9),
+      TfpgColor($ff63a0fe), gdHorizontal);
+  pnlTitle.Canvas.DrawText(pnlTitle.Margin, 3, pnlTitle.Text);
 end;
 
 procedure TMainForm.DisplaySelectedSearchResultTopic;
@@ -3034,9 +3042,15 @@ begin
     Name := 'pnlTitle';
     SetPosition(2, 2, 377, 20);
     Align := alTop;
+    Alignment := taLeftJustify;
+    BackgroundColor := TfpgColor($559DD4);
     FontDesc := '#Label2';
     Hint := '';
+    Margin := 15;
+    Style := bsFlat;
     Text := 'Panel';
+    TextColor := TfpgColor($FFFFFF);
+    OnPaint:=@pnlTitleGradientPaint;
   end;
 
   RichView := TRichTextView.Create(bvlContentArea);
