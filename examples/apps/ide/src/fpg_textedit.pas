@@ -1674,19 +1674,26 @@ begin
           if CaretPos.Y > pred(FLines.Count) then
             Exit;
           SLine := FLines[CaretPos.Y];
-          if Length(SLine) >= CaretPos.X + 1 then
+          if SLine = '' then  // short circut the code block
           begin
-            X := CaretPos.X + 1;
-            Delete(SLine, X, 1);
-            FLines[CaretPos.Y] := SLine;
+            FLines.Delete(CaretPos.Y);
           end
           else
           begin
-            if CaretPos.Y + 1 > pred(FLines.Count) then
-              Exit;
-            AddS := FLines[CaretPos.Y + 1];
-            FLines[CaretPos.Y] := SLine + AddS;
-            FLines.Delete(CaretPos.Y + 1);
+            if Length(SLine) >= CaretPos.X + 1 then
+            begin
+              X := CaretPos.X + 1;
+              Delete(SLine, X, 1);
+              FLines[CaretPos.Y] := SLine;
+            end
+            else
+            begin
+              if CaretPos.Y + 1 > pred(FLines.Count) then
+                Exit;
+              AddS := FLines[CaretPos.Y + 1];
+              FLines[CaretPos.Y] := SLine + AddS;
+              FLines.Delete(CaretPos.Y + 1);
+            end;
           end;
           consumed := True;
         end;
