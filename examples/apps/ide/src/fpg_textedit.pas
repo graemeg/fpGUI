@@ -1687,7 +1687,6 @@ begin
             AddS := FLines[CaretPos.Y + 1];
             FLines[CaretPos.Y] := SLine + AddS;
             FLines.Delete(CaretPos.Y + 1);
-            DrawVisible;
           end;
           consumed := True;
         end;
