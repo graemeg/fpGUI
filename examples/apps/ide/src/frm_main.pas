@@ -97,6 +97,7 @@ type
     procedure   miProjectSaveAs(Sender: TObject);
     procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
@@ -526,6 +527,22 @@ begin
     ts := OpenEditorPage(u.FileName);
     u.Opened := True;
     ts.TagPointer := u; // add reference to tabsheet
+  end;
+end;
+
+procedure TMainForm.grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
+var
+  cr: TClipboardKeyType;
+  i: integer;
+  s: TfpgString;
+begin
+  cr := CheckClipboardKey(KeyCode, ShiftState);
+  if cr = ckCopy then
+  begin
+    s := '';
+    for i := 0 to grdMessages.RowCount-1 do
+      s := s + grdMessages.Cells[0, i] + LineEnding;
+    fpgClipboard.Text := s;
   end;
 end;
 
@@ -1326,6 +1343,7 @@ begin
     RowSelect := True;
     ShowHeader := False;
     TabOrder := 13;
+    OnKeyPress := @grdMessageKeyPressed;
   end;
 
   tsScribble := TfpgTabSheet.Create(pnlWindow);
