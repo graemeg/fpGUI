@@ -88,6 +88,11 @@ begin
   begin
     Consumed := True;
     btnFind.Click;
+  end
+  else if KeyCode = keyEscape then
+  begin
+    Consumed := True;
+    Close;
   end;
 end;
 
