@@ -471,6 +471,7 @@ begin
       s := s + cProjectExt;
     try
       GProject.Save(s);
+      FRecentFiles.AddItem(s);
     except
       on E: Exception do
       begin
