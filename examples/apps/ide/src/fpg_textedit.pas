@@ -1681,6 +1681,7 @@ begin
           if SLine = '' then  // short circut the code block
           begin
             FLines.Delete(CaretPos.Y);
+            FVScrollBar.Max := FVScrollBar.Max - 1;
           end
           else
           begin
