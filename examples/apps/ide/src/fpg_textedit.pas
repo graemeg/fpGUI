@@ -1074,7 +1074,7 @@ begin
             if VPos > (FLines.Count - FVisLines) then
             begin
               CaretPos.Y := FLines.Count-1;
-              CaretPos.X := Length(FLines[CaretPos.Y]);
+              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
             end
             else
             begin
