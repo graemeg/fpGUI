@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -971,6 +971,8 @@ begin
               CaretPos.Y := 0;
               CaretPos.X := 0;
             end;
+            ScrollPos_V := 0;
+            UpdateScrollBars;
             Exit;
           end;
           if ssShift in ShiftState then
@@ -1017,6 +1019,8 @@ begin
               CaretPos.Y := pred(FLines.Count);
               CaretPos.X := Length(FLines[CaretPos.Y]);
             end;
+            ScrollPos_V := CaretPos.Y - FVisLines;
+            UpdateScrollBars;
             Exit;
           end;
           if ssShift in ShiftState then
