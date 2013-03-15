@@ -666,7 +666,7 @@ end;
   to set selection if Shift key is pressed. }
 procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
 var
-  SaveXCaret: Integer;
+  SaveYCaretOffset: Integer;
 
   procedure CtrlKeyLeftKey;
   var
@@ -1052,7 +1052,7 @@ begin
             FSelStartNo := CaretPos.Y;
             FSelStartOffs := CaretPos.X;
           end;
-          SaveXCaret := CaretPos.Y - FTopLine;
+          SaveYCaretOffset := CaretPos.Y - FTopLine;
           if AKeyCode = keyPageUp then
           begin
             if VPos = 0 then
@@ -1066,11 +1066,11 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageUp;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveXCaret;
+              CaretPos.Y := FTopLine + SaveYCaretOffset;
             end;
           end
           else
-          begin
+          begin  { PageDown handling }
             if VPos > (FLines.Count - FVisLines) then
             begin
               CaretPos.Y := FLines.Count-1;
@@ -1082,7 +1082,7 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageDown;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveXCaret;
+              CaretPos.Y := FTopLine + SaveYCaretOffset;
             end;
           end;
           if ssShift in ShiftState then
