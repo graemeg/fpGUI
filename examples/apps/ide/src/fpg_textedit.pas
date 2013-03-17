@@ -138,7 +138,6 @@ type
     procedure   SetVScrollPos(const AValue: Integer);
     procedure   UpdateCharBounds;
     procedure   GetSelBounds(var AStartNo, AEndNo, AStartOffs, AEndOffs: Integer);
-    procedure   UpdateScrollBars;
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetVPos(p: Integer);
@@ -185,6 +184,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   UpdateScrollBars;
     function    GetClientRect: TfpgRect; override;
     function    GetWordAtPos(const X, Y: Integer; out XBegin: Integer): TfpgString;
     procedure   GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
