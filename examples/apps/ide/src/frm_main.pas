@@ -684,6 +684,8 @@ var
   ext: TfpgString;
   pos_h: integer;
   pos_v: integer;
+  cur_pos_h: integer;
+  cur_pos_v: integer;
   editor: TfpgTextEdit;
 begin
   s := AFilename;
@@ -702,10 +704,15 @@ begin
     editor := TfpgTextEdit(pcEditor.Pages[i].Components[0]);
     pos_h := editor.ScrollPos_H;
     pos_v := editor.ScrollPos_V;
+    cur_pos_h := editor.CaretPos_H;
+    cur_pos_v := editor.CaretPos_V;
     editor.Lines.BeginUpdate;
     editor.LoadFromFile(s);
     editor.ScrollPos_H := pos_h;
     editor.ScrollPos_V := pos_v;
+    editor.CaretPos_H := cur_pos_h;
+    editor.CaretPos_V := cur_pos_v;
+    editor.UpdateScrollBars;
     editor.Lines.EndUpdate;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
