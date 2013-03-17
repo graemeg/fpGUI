@@ -109,6 +109,7 @@ type
     procedure   ClearMessagesWindow;
     procedure   CloseAllTabs;
     procedure   LoadProject(const AFilename: TfpgString);
+    function    CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
     procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
@@ -673,6 +674,20 @@ begin
   AddMessage('Project loaded');
 end;
 
+function TMainForm.CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
+var
+  m: TfpgTextEdit;
+begin
+  Result := pcEditor.AppendTabSheet(ATitle);
+  m := TfpgTextEdit.Create(Result);
+  m.SetPosition(1, 1, 200, 20);
+  m.Align := alClient;
+  m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+  m.GutterVisible := True;
+  m.GutterShowLineNumbers := True;
+  m.RightEdge := True;
+end;
+
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
 var
   s: TfpgString;
@@ -680,7 +695,6 @@ var
   i: integer;
   found: Boolean;
   ts: TfpgTabSheet;
-  m: TfpgTextEdit;
   ext: TfpgString;
   pos_h: integer;
   pos_v: integer;
@@ -721,17 +735,12 @@ begin
   else
   begin
     // we need a new tabsheet
-    ts := pcEditor.AppendTabSheet(f);
-    m := TfpgTextEdit.Create(ts);
-    m.SetPosition(1, 1, 200, 20);
-    m.Align := alClient;
-    m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
-    m.GutterVisible := True;
-    m.GutterShowLineNumbers := True;
-    m.RightEdge := True;
-    TfpgTextEdit(ts.Components[0]).Lines.BeginUpdate;
-    TfpgTextEdit(ts.Components[0]).Lines.LoadFromFile(s);
-    TfpgTextEdit(ts.Components[0]).Lines.EndUpdate;
+    ts := CreateNewEditorTab(f);
+    editor := ts.Components[0] as TfpgTextEdit;
+    editor.Lines.BeginUpdate;
+    if fpgFileExists(s) then
+      editor.Lines.LoadFromFile(s);
+    editor.Lines.EndUpdate;
     if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
     begin
       ext := fpgExtractFileExt(AFilename);
