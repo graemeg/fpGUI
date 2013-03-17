@@ -125,11 +125,13 @@ type
     function    GetHScrollPos: Integer;
     function    GetVScrollPos: Integer;
     function    GetCaretPosH: Integer;
+    function    GetCaretPosV: Integer;
     procedure   SetFontDesc(const AValue: string);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
     procedure   SetGutterVisible(const AValue: Boolean);
     procedure   SetHScrollPos(const AValue: Integer);
     procedure   SetCaretPosH(const AValue: Integer);
+    procedure   SetCaretPosV(const AValue: Integer);
     procedure   SetLines(const AValue: TStrings);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     procedure   SetTabWidth(const AValue: Integer);
@@ -199,6 +201,7 @@ type
     procedure   LoadFromFile(const AFileName: TfpgString);
     procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean = False);
     property    CaretPos_H: Integer read GetCaretPosH write SetCaretPosH;
+    property    CaretPos_V: Integer read GetCaretPosV write SetCaretPosV;
     property    FontHeight: Integer read FChrH;
     property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
@@ -426,6 +429,11 @@ begin
   Result := CaretPos.Y;
 end;
 
+function TfpgBaseTextEdit.GetCaretPosV: Integer;
+begin
+  Result := CaretPos.X;
+end;
+
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
@@ -466,6 +474,11 @@ end;
 procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: integer);
 begin
   CaretPos.Y := AValue;
+end;
+
+procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: integer);
+begin
+  CaretPos.X := AValue;
 end;
 
 procedure TfpgBaseTextEdit.SetVScrollPos(const AValue: Integer);
