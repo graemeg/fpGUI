@@ -95,6 +95,7 @@ type
     procedure   miRecentProjectsClick(Sender: TObject; const FileName: String);
     procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
+    procedure   AddUnitToProject(const AUnitName: TfpgString);
     procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
@@ -485,21 +486,15 @@ begin
   end;
 end;
 
-procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
+procedure TMainForm.AddUnitToProject(const AUnitName: TfpgString);
 var
   u: TUnit;
   s: TfpgString;
   r: TfpgTreeNode;
   n: TfpgTreeNode;
 begin
-  s := pcEditor.ActivePage.Hint;
-//  writeln('adding unit: ', s);
-  if s = '' then
-    Exit;
-  if GProject.UnitList.FileExists(s) then
-    Exit;
   u := TUnit.Create;
-  u.FileName := s;
+  u.FileName := AUnitName;
   u.Opened := True;
   GProject.UnitList.Add(u);
   // add reference to tabsheet
@@ -510,6 +505,19 @@ begin
   // add reference to treenode
   n.Data := u;
   tvProject.Invalidate;
+end;
+
+procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  s := pcEditor.ActivePage.Hint;
+//  writeln('adding unit: ', s);
+  if s = '' then
+    Exit;
+  if GProject.UnitList.FileExists(s) then
+    Exit;
+  AddUnitToProject(s);
 end;
 
 procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
