@@ -270,6 +270,7 @@ begin
     FIniFile := TfpgINIFile.CreateExt(AProjectFile);
 
   ProjectDir := fpgExtractFilePath(AProjectFile);
+  fpgSetCurrentDir(ProjectDir);
   ProjectName := FIniFile.ReadString(cProjectOptions, 'ProjectName', fpgChangeFileExt(fpgExtractFileName(AProjectFile), ''));
   MainUnit := FIniFile.ReadString(cProjectOptions, 'MainUnit', '');
   TargetFile := FIniFile.ReadString(cProjectOptions, 'TargetFile', '');
