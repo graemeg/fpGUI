@@ -39,8 +39,6 @@ type
     tsFiles: TfpgTabSheet;
     grdFiles: TfpgFileGrid;
     Splitter2: TfpgSplitter;
-    grdOpenFiles: TfpgStringGrid;
-    Splitter3: TfpgSplitter;
     pcEditor: TfpgPageControl;
     tseditor: TfpgTabSheet;
     TextEditor: TfpgTextEdit;
@@ -1461,31 +1459,6 @@ begin
     Name := 'Splitter2';
     SetPosition(142, 2, 8, 279);
     Align := alLeft;
-  end;
-
-  grdOpenFiles := TfpgStringGrid.Create(pnlClientArea);
-  with grdOpenFiles do
-  begin
-    Name := 'grdOpenFiles';
-    SetPosition(516, 2, 120, 279);
-    Align := alRight;
-    BackgroundColor := TfpgColor($80000002);
-    AddColumn('File', 100, taLeftJustify);
-    FontDesc := '#Grid';
-    HeaderFontDesc := '#GridHeader';
-    Hint := '';
-    RowCount := 0;
-    RowSelect := True;
-    ShowHeader := False;
-    TabOrder := 24;
-  end;
-
-  Splitter3 := TfpgSplitter.Create(pnlClientArea);
-  with Splitter3 do
-  begin
-    Name := 'Splitter3';
-    SetPosition(508, 2, 8, 279);
-    Align := alRight;
   end;
 
   pcEditor := TfpgPageControl.Create(pnlClientArea);
