@@ -22,7 +22,6 @@ type
     btnOpen: TfpgButton;
     btnSave: TfpgButton;
     btnSaveAll: TfpgButton;
-    btnTest: TfpgButton;
     pnlStatusBar: TfpgBevel;
     lblStatus: TfpgLabel;
     pnlClientArea: TfpgBevel;
@@ -52,6 +51,9 @@ type
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
+    {$ifdef DEBUGSVR}
+    btnTest: TfpgButton;
+    {$endif}
     pmOpenRecentMenu: TfpgPopupMenu;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
@@ -773,12 +775,14 @@ var
   s: TfpgString;
   r: TfpgString;
 begin
+  {$ifdef DEBUGSVR}
   TempHourGlassCursor(TfpgWidget(self));
   s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
-//  writeln('source string = ', s);
+  SendDebug('source string = ' + s);
   r := GMacroList.ExpandMacro(s);
-//  writeln('expanded string = ', r);
+  SendDebug('expanded string = ' + r);
   sleep(5000);
+  {$endif}
 end;
 
 function TMainForm.GetUnitsNode: TfpgTreeNode;
@@ -1283,20 +1287,6 @@ begin
     TabOrder := 6;
   end;
 
-  btnTest := TfpgButton.Create(Toolbar);
-  with btnTest do
-  begin
-    Name := 'btnTest';
-    SetPosition(168, 2, 80, 24);
-    Text := 'test';
-    Down := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 7;
-    OnClick := @miTest;
-  end;
-
   pnlStatusBar := TfpgBevel.Create(self);
   with pnlStatusBar do
   begin
@@ -1659,6 +1649,20 @@ begin
   FRecentFiles.LoadMRU;
 
   {$IFDEF DEBUGSVR}
+  btnTest := TfpgButton.Create(Toolbar);
+  with btnTest do
+  begin
+    Name := 'btnTest';
+    SetPosition(168, 2, 80, 24);
+    Text := 'test';
+    Down := False;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
+    OnClick := @miTest;
+  end;
+
   SendMethodExit('TMainForm.AfterCreate');
   {$ENDIF}
 end;
