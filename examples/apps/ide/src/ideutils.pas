@@ -1,3 +1,19 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      ---
+}
+
 unit ideutils;
 
 {$mode objfpc}{$H+}
@@ -101,7 +117,7 @@ type
     constructor Create(var AWidget: TfpgWidget);
     destructor Destroy; override;
   end;
-  
+
 constructor TTempHourClassCursor.Create(var AWidget: TfpgWidget);
 begin
   inherited Create;
@@ -115,7 +131,7 @@ begin
   FWidget.MouseCursor := FOldCursor;
   inherited Destroy;
 end;
-  
+
 
 
 function TempHourGlassCursor(var AWidget: TfpgWidget): IInterface;
