@@ -1,3 +1,21 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Maximus IDE is an example application, to showcase a bit more of
+      what fpGUI can do in a larger project. It also ties in a lot of
+      various fpGUI widgets and framework functionality.
+}
+
 unit frm_main;
 
 {$mode objfpc}{$H+}
