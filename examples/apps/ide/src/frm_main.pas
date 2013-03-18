@@ -517,7 +517,7 @@ begin
   GProject.UnitList.Add(u);
   // add reference to tabsheet
   pcEditor.ActivePage.TagPointer := u;
-  s := ExtractRelativepath(GProject.ProjectDir, u.FileName);
+  s := fpgExtractRelativepath(GProject.ProjectDir, u.FileName);
   r := GetUnitsNode;
   n := r.AppendText(s);
   // add reference to treenode
@@ -623,8 +623,7 @@ begin
   begin
     for i := 0 to GProject.UnitList.Count-1 do
     begin
-      {$Note ExtractRelativePath still needs a fpGUI wrapper }
-      s := ExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
+      s := fpgExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
       n := r.AppendText(s);
       n.Data := GProject.UnitList[i];
     end;
