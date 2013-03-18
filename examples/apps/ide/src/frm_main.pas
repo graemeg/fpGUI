@@ -73,6 +73,7 @@ type
     btnTest: TfpgButton;
     {$endif}
     pmOpenRecentMenu: TfpgPopupMenu;
+    miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
@@ -86,6 +87,7 @@ type
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
+    procedure   miFileNewUnit(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
     procedure   miEditCutClicked(Sender: TObject);
@@ -194,6 +196,34 @@ begin
   if s <> '' then
   begin
     OpenEditorPage(s);
+  end;
+end;
+
+procedure TMainForm.miFileNewUnit(Sender: TObject);
+var
+  newunit: TfpgString;
+  sl: TStringList;
+  FInternalMacroList: TIDEMacroList;
+  i: integer;
+begin
+  if fpgInputQuery('New Unit', 'Please give the new unit a file name', newunit) then
+  begin
+    if GProject.UnitList.FileExists(newunit) then
+    begin
+      ShowMessage(Format('The unit <%s> already exists in the project', [newunit]));
+      Exit;
+    end;
+    sl := TStringList.Create;
+    try
+      sl.LoadFromFile(GMacroList.ExpandMacro('${TEMPLATEDIR}default/unit.pas'));
+      sl.Text := StringReplace(sl.Text, '${UNITNAME}', fpgChangeFileExt(fpgExtractFileName(newunit), ''), [rfReplaceAll, rfIgnoreCase]);
+      sl.SaveToFile(GProject.ProjectDir + newunit);
+    finally
+      sl.Free;
+    end;
+//    AddUnitToProject(newunit);
+
+    OpenEditorPage(newunit);
   end;
 end;
 
@@ -1506,7 +1536,7 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(476, 61, 172, 20);
-    AddMenuItem('New...', rsKeyCtrl+'N', nil).Enabled := False;
+    miFile := AddMenuItem('New...', rsKeyCtrl+'N', @miFileNewUnit);
     AddMenuItem('-', '', nil);
     AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
     AddMenuItem('Open Recent', '', nil).Enabled := False;
