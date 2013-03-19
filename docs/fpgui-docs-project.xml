@@ -124,6 +124,7 @@
         <description file="xml/gui/fpg_tree.xml"/>
         <description file="xml/gui/fpg_basegrid.xml"/>
         <description file="xml/gui/fpg_form.xml"/>
+        <description file="xml/gui/fpg_grid.xml"/>
       </descriptions>
     </package>
   </packages>

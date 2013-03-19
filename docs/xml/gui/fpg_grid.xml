@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_grid">
+<short>This unit contains higher level grid widgets</short>
+<descr><printshort id="#fpgui.fpg_grid"/>. A File Grid and a String Grid widget.</descr>
+
+<element name="TfpgStringGrid.ShowGrid">
+<short>Enable or disable grid line painting</short>
+<descr>If enabled (the default), then grid lines are drawn around each cell.</descr>
+</element>
+
+<element name="TfpgStringGrid.OnDrawCell">
+<short>This event allows you to do custom painting of grid cells</short>
+<descr><p>ARow and ACol parameters should be obvious - they point to the cell being
+drawn. ARect is the boundaries of the Cell being painted. AFlags contain some
+state information about the grid. eg: Has the grid got focus, has the cell got
+focus etc. ADefaultDrawing is set to True by default, which means the grid
+will take care of painting the cell text for you (taking into account layout
+and alignment settings of each column). If you set this to False, then you
+need to paint the text yourself.</p>
+<code>
+procedure TMainForm.StringGridDrawCell(Sender: TObject; const ARow,
+  ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
+  var ADefaultDrawing: boolean);
+begin
+  // two rows with different background color
+  if (ARow = 7) or (ARow = 8) then
+  begin
+    if ((gdSelected in AFlags) and (gdFocused in AFlags)) or
+       (gdSelected in AFlags) then
+      Exit; // we want select cel to be painted as normal
+    // If we got here, we must do some painting. The background first.
+    StringGrid.Canvas.Color := clOrange;
+    StringGrid.Canvas.FillRectangle(ARect);
+    // NOTE: We want the grid to take care of the drawing of the text, which
+    //  handles text layout and alignment, so we MUST NOT set the
+    //  ADefaultDrawing to False. If we do, we need to handle text painting
+    //  ourselves.
+  end;
+end;
+</code>
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_basegrid.TfpgDrawCellEvent">fpg_basegrid.TfpgDrawCellEvent</link>
+</seealso>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>
+
