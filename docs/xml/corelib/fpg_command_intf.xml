@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <fpdoc-descriptions>
 <package name="fpGUI">
 
 <module name="fpg_command_intf">
 <short>This unit defines the Command design pattern interfaces used by fpGUI</short>
-<descr><p><printshort id="fpg_command_intf"/>. The Command design pattern is similar to
+<descr><p><printshort id="#fpgui.fpg_command_intf"/>. The Command design pattern is similar to
 the TActions from Delphi or Lazarus.</p></descr>
 
 <element name="ICommand">
 <short>This interface represents a Command</short>
-<descr><printshort id="ICommand"/>. Currently in only defines one procedure called <var>Execute</var>.</descr>
+<descr><printshort id="#fpgui.fpg_command_intf.ICommand"/>. Currently in only defines one procedure called <var>Execute</var>.</descr>
 </element>
 
 
 <element name="ICommandHolder">
 <short>An interface that allows to Get or Set a Command</short>
-<descr><printshort id="ICommandHolder"/>. An example of a class that implements this interface
-is the <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link> class.</descr>
+<descr><printshort id="#fpgui.fpg_command_intf.ICommandHolder"/>. An example of a class that implements this interface
+is the <link id="#fpgui.fpg_button.TfpgBaseButton">TfpgBaseButton</link> class.</descr>
 </element>
 
 </module>
