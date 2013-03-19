@@ -34,7 +34,11 @@ begin
   else if fpsystem('which opera') = 0 then
     Helper := 'opera'
   else if fpsystem('which mozilla') = 0 then
-     Helper := 'mozilla';
+     Helper := 'mozilla'
+  else if fpsystem('which chrome') = 0 then
+     Helper := 'chrome'
+  else if fpsystem('which chromium') = 0 then
+     Helper := 'chromium';
 
   if Helper <> '' then
     fpSystem(Helper + ' ' + aURL + '&');
