@@ -138,7 +138,7 @@
     <option name="format" value="rtf"/>
     <option name="format" value="chm"/>
 -->
-    <option name="hide-protected" value="false"/>
+    <option name="hide-protected" value="true"/>
     <option name="duplinkeddoc" value="true"/>
 <!--
     <option name="footer-date" value="yyyy-mm-dd"/>
