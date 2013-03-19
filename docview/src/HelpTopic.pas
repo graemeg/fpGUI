@@ -859,6 +859,7 @@ var
   ProgramLink: string;
   ProgramPath: string;
   ProgramFilename: string;
+  lURL: string;
   ProgramInfo : TSerializableStringList;
   tmpProgramLinkParts : TStrings;
 
@@ -1000,6 +1001,7 @@ begin
       tmpProgramLinkParts := TStringList.Create;
       StrExtractStrings(tmpProgramLinkParts, ProgramLink, [' '], #0);
       ProgramPath := tmpProgramLinkParts[0];
+      lURL := tmpProgramLinkParts[1];
       tmpProgramLinkParts.Destroy;
 
       ProgramFilename := ExtractFilename( ProgramPath );
@@ -1011,7 +1013,7 @@ begin
          then
       begin
         OutputString := '<color blue><link ' + PARAM_LINK_URL + ' '
-                        + FullDoubleQuote( ProgramLink )
+                        + FullDoubleQuote( lURL )
                         + '>';
       end
       else
