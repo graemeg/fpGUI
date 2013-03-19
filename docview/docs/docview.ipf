@@ -608,7 +608,7 @@ details on how to configure it.
 For more technical details about what browser is used, have a look at the fpgOpenURL()
 function in fpGUI Toolkit source code.
 :p.
-Email, Newsgroups and FTP links are also passed to operating system or desktop
+Email, Newsgroups and FTP links are also passed to the operating system or desktop
 environment, the same as web addresses.
 :p.
 :hp2.Note to help file authors:ehp2.
