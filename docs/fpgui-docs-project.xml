@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <docproject>
   <packages>
     <!-- Multiple packages can be entered. 
@@ -34,14 +35,57 @@
         <unit file="../src/corelib/fpg_translations.pas" options="-Fi../src -Fu../src/corelib/"/>
         <unit file="../src/corelib/fpg_command_intf.pas" options="-Fi../src -Fu../src/corelib/"/>
 
-        <unit file="../src/gui/fpg_button.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_form.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_basegrid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_button.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_colormapping.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_colorwheel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_dialogs.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_form.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_hyperlink.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
-        <unit file="../src/gui/fpg_colormapping.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+
+        <!-- undocumented units -->
+        <unit file="../src/gui/fpg_animation.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_checkbox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_combobox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_customgrid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_edit.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_editbtn.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_editcombo.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_gauge.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_grid.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_hint.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_hyperlink.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_iniutils.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_label.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_listbox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_listview.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_memo.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_menu.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_mru.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_panel.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_popupcalendar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_progressbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_radiobutton.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_readonly.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_scrollbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_spinedit.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_splitter.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_bitmap.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_bluecurve.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_clearlooks.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_motif.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_win2k.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_stylemanager.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_tab.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_trackbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_trayicon.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/reportengine/u_command.pas" options="-Fu../src/gui/reportengine/"/>
+        <unit file="../src/reportengine/u_pdf.pas" options="-Fu../src/gui/reportengine/"/>
+        <unit file="../src/reportengine/u_report.pas" options="-Fu../src/gui/reportengine/"/>
+        <unit file="../src/reportengine/u_reportimages.pas" options="-Fu../src/gui/reportengine/"/>
+        <unit file="../src/reportengine/u_visu.pas" options="-Fu../src/gui/reportengine/"/>
 
       </units>
       <descriptions>
