@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <fpdoc-descriptions>
   <package name="fpGUI">
     <module name="fpg_button">
@@ -35,23 +35,25 @@ is centred in the available horizontal space of the button.</descr>
       <element name="TfpgBaseButton.ImageName">
         <short>The registered name of a image to display on the button</short>
         <descr>
-          <printshort id="TfpgBaseButton.ImageName"/>. This is the name used when
-a image resource was registered with the global <link id="fpg_main.fpgImages">fpgImages</link> instance.</descr>
+          <printshort id="#fpgui.fpg_button.TfpgBaseButton.ImageName"/>. This is the name used when
+a image resource was registered with the global <link id="#fpgui.fpg_main.fpgImages">fpgImages</link> instance.</descr>
       </element>
 
       <element name="TfpgButton">
         <short>Concrete button class used in user interfaces to represent a push button</short>
-        <descr><printshort id="TfpgButton"/>. This class is a descendant of <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link> and
+        <descr><printshort id="#fpgui.fpg_button.TfpgButton"/>. This class is a 
+descendant of <link id="#fpgui.fpg_button.TfpgBaseButton">TfpgBaseButton</link> and
 simply publishes various properties for runtime type information.</descr>
         <seealso>
-          <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link>
+          <link id="#fpgui.fpg_button.TfpgBaseButton">TfpgBaseButton</link>
         </seealso>
       </element>
 
 <element name="TfpgButton.ImageName" link="#fpgui.fpg_button.TfpgBaseButton.ImageName"/>
 <element name="TfpgButton.ImageSpacing" link="#fpgui.fpg_button.TfpgBaseButton.ImageSpacing"/>
 <element name="TfpgButton.ImageLayout" link="#fpgui.fpg_button.TfpgBaseButton.ImageLayout"/>
-
+<element name="TfpgButton.Left" link="#fpgui.fpg_base.TfpgWindowBase.Left"/>
+<element name="TfpgButton.Height" link="#fpgui.fpg_base.TfpgWindowBase.Height"/>
 
     </module>
   </package>

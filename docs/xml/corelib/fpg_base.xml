@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <fpdoc-descriptions>
 
 <package name="fpGUI">
@@ -653,57 +653,61 @@ calculations and screen redraws.</p>
 
 <element name="TfpgWindowBase.Left">
 <short>Specifies the horizontal coordinate of the left edge of a component relative to its parent</short>
-<descr><p><printshort id="TfpgWindowBase.Left"/>. Use the Left property to determine where the left side
+<descr><p><printshort id="#fpgui.fpg_base.TfpgWindowBase.Left"/>. Use the Left property to determine where the left side
 of the control begins or to reposition the left side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, 
+see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
 </seealso>
 </element>
 
 <element name="TfpgWindowBase.Top">
 <short>Specifies the vertical (X) coordinate of the top edge of a component relative to its parent</short>
-<descr><p><printshort id="TfpgWindowBase.Top"/>. Use the Top property to determine where the top side
+<descr><p><printshort id="#fpgui.fpg_base.TfpgWindowBase.Top"/>. Use the Top property to determine where the top side
 of the control begins or to reposition the top side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+<var>UpdateWindowPosition</var> method is called. For more information on why this 
+is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
 </seealso>
 </element>
 
 <element name="TfpgWindowBase.Width">
 <short>Specifies the horizontal size of the control or form in pixels</short>
-<descr><p><printshort id="TfpgWindowBase.Width"/>. Use the Width property
+<descr><p><printshort id="#fpgui.fpg_base.TfpgWindowBase.Width"/>. Use the Width property
 to read or change the width of the control. For TfpgTabSheet controls of for
 controls that have their Align property set to alTop, alBottom or alClient, changing
 this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, 
+see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
 </seealso>
 </element>
 
 <element name="TfpgWindowBase.Height">
 <short>Specifies the vertical size of the control or form in pixels</short>
-<descr><p><printshort id="TfpgWindowBase.Height"/>. Use the Height property
+<descr><p><printshort id="#fpgui.fpg_base.TfpgWindowBase.Height"/>. Use the Height property
 to read or change the height of the control. For TfpgTabSheet controls of for
 controls that have their Align property set to alLeft, alRight or alClient, changing
 this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+<var>UpdateWindowPosition</var> method is called. For more information on why this 
+is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
 </seealso>
 </element>
 
@@ -724,7 +728,7 @@ it makes the target window the active window. Note that depending on the operati
 and Window Manager, the active window could still be obscured by other windows. Under Windows,
 it seems that the active window is always brought to the front too.</descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.BringToFront"></link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.BringToFront"></link>
 </seealso>
 </element>
 
@@ -742,7 +746,7 @@ it seems that the active window is always brought to the front too.</descr>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.Invert">
         <short>Inverts the Image</short>
-        <descr><printshort id="TfpgImageBase.Invert"/>. This changes the actual
+        <descr><printshort id="#fpgui.fpg_base.TfpgImageBase.Invert"/>. This changes the actual
 data of the image. There is no undo function. So if you want to undo this action,
 you must keep copy of the original image before you call <var>Invert</var>.</descr>
       </element>
@@ -804,7 +808,7 @@ you must keep copy of the original image before you call <var>Invert</var>.</des
         <short>A abstract class representing a base Interpolation filter.</short>
         <descr>This is used as the base class to implement Interpolation filters like
 Gaussian, Sinc etc... These decendant filters are used in the 
-<link id="TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link> function.
+<link id="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link> function.
 </descr>
         <seealso>
           <link id="TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link>
@@ -813,15 +817,16 @@ Gaussian, Sinc etc... These decendant filters are used in the
       <!-- procedure Visibility: public -->
       <element name="TfpgCanvasBase.DrawRectangle">
         <short>Draws a rectangle.</short>
-        <descr>
-          <printshort id="TfpgCanvasBase.DrawRectangle"/> You can specify the size of the rectangle via X, Y, Width and Height parameters or via a TfpgRect parameter.</descr>
+        <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawRectangle"/> You can specify the size of the rectangle via X, Y, Width and Height parameters or via a TfpgRect parameter.</descr>
       </element>
 
       <!-- procedure Visibility: public -->
       <element name="TfpgCanvasBase.DrawLine">
         <short>Draws a line</short>
-        <descr>
-          <printshort id="TfpgCanvasbase.DrawLine"/>. This method draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported backends follow the Microsoft API and doesn't draw the last pixel. This optimises consecutive lines being drawn without overlapping pixels.</descr>
+        <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLine"/>. This method 
+draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported 
+backends follow the Microsoft API and doesn't draw the last pixel. This optimises 
+consecutive lines being drawn without overlapping pixels.</descr>
       </element>
 
 <element name="TfpgCanvasBase.StretchDraw">
@@ -849,7 +854,7 @@ returns the correct enum type detected.
         <short>Converts the TfpgColor to TRGBTriple type</short>
         <descr>This function converts the given TfpgColor into a TRGBTriple type.</descr>
         <seealso>
-          <link id="fpg_base.TRGBTriple">TRGBTriple</link>
+          <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
         </seealso>
       </element>
 
@@ -859,7 +864,7 @@ returns the correct enum type detected.
         <descr>This function converts the given TRGBTriple into a TfpgColor type.
 </descr>
         <seealso>
-          <link id="fpg_base.TRGBTriple">TRGBTriple</link>
+          <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
         </seealso>
       </element>
       <!-- function Visibility: default -->
@@ -911,7 +916,7 @@ Right. And the Top is always smaller than the Bottom.
 
       <element name="TfpgCanvasBase.DrawLineClipped">
         <short>Draws a line inside a clip rectangle</short>
-        <descr><p><printshort id="TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
+        <descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
  then calls the DrawLine procedure with the clipped coordinates.  If the line
  lies completely outside of the clip boundary, then the Line routine is not
  called.  This procedure uses the well known Cohen-Sutherland line clipping
@@ -928,7 +933,7 @@ Right. And the Top is always smaller than the Bottom.
 
 <element name="TfpgCanvasBase.GradientFill">
 <short>Paints a rectangle with a gradient</short>
-<descr><printshort id="TfpgCanvasBase.GradientFill"/>. If the gradient direction is
+<descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.GradientFill"/>. If the gradient direction is
 set to gdHorizontal, then it pains from left to right. If the gradient direction is
 set to gdVertical, then it paints from top to bottom.</descr>
 </element>
@@ -972,7 +977,7 @@ will be removed.</descr>
 
 <element name="TfpgPoint">
 <short>An extension of the FPC TPoint structure</short>
-<descr><p><printshort id="TfpgPoint"/>. This structure is used inside the fpGUI framework, and includes some extra methods like
+<descr><p><printshort id="#fpgui.fpg_base.TfpgPoint"/>. This structure is used inside the fpGUI framework, and includes some extra methods like
 calculating lengths between to points etc.</p></descr>
 </element>
 
@@ -1011,7 +1016,7 @@ the streets of Manhattan.</p>
 
 <element name="TfpgComponent">
 <short>A descendant of the FPC TComponent class</short>
-<descr><p><printshort id="fpg_base.TfpgComponent"/>. It adds a location where we can extend
+<descr><p><printshort id="#fpgui.fpg_base.TfpgComponent"/>. It adds a location where we can extend
 the TComponent, without having to make changes to each and every class in fpGUI.</p>
 <p>For example: We added the TagPointer property (which is now largely obsolete) because
 a while back the Tag property of TComponent could only store a 32bit value.
@@ -1023,12 +1028,12 @@ the type of the Tag property to support 64-bit addresses too.</p></descr>
 <element name="fpgComponent.HelpContext">
 <short>A numeric ID for the widget's context-sensitive help topic</short>
 <descr><p>HelpContext supports help systems that use numeric topic IDs. For help
-systems that use topic keywords, see <link id="fpg_base.TfpgComponent.HelpKeyword">HelpKeyword</link>.</p>
-<p>To enable context-sensitive help for a widget, set <link id="fpg_base.TfpgComponent.HelpType">HelpType</link> to htContext and
+systems that use topic keywords, see <link id="#fpgui.fpg_base.TfpgComponent.HelpKeyword">HelpKeyword</link>.</p>
+<p>To enable context-sensitive help for a widget, set <link id="#fpgui.fpg_base.TfpgComponent.HelpType">HelpType</link> to htContext and
 set HelpContext to a numeric topic ID. A topic ID of 0 (default) means that no help
 topic is provided for the widget. A 0 ID also mean that the help system should
 refer to the parent widget, if there is one, for a help topic; refer to the
-<link id="fpg_widget.TfpgWidget.InvokeHelp">TfpgWidget.InvokeHelp</link> method
+<link id="#fpgui.fpg_widget.TfpgWidget.InvokeHelp">TfpgWidget.InvokeHelp</link> method
 for more information.</p></descr>
 </element>
 
@@ -1050,7 +1055,7 @@ for more information.</p></descr>
 
 <element name="TfpgBaseTimer.Enabled">
 <short>Allows you to enable or disable the timer</short>
-<descr><printshort id="TfpgBaseTimer.Enabled"/>. The timer will not function until you
+<descr><printshort id="#fpgui.fpg_base.TfpgBaseTimer.Enabled"/>. The timer will not function until you
 set the Enabled property to True. Later you can disable the timer by setting the
 Enabled property to False.</descr>
 </element>
