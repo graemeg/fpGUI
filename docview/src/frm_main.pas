@@ -445,7 +445,7 @@ begin
   end
   else if pos(PARAM_LINK_URL, Link) > 0 then
   begin
-    // we have a external URL of some kind
+    // we have an external URL of some kind
     // format is always:  'url "<uri>"'
     lURL := StringReplace(Link, 'url "', '', []);
     lURL := UTF8Copy(lURL, 0, UTF8Length(lURL)-1);
