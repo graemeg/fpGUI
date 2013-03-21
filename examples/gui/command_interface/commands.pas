@@ -14,11 +14,11 @@ uses
   
 type
   // non reference counted interface
-  TNullInterfacedObject = class(TObject)
+  TNullInterfacedObject = class(TObject, IUnknown)
   protected
-    function QueryInterface(const IID: TGUID; out Obj): longint; stdcall;
-    function _AddRef: longint; stdcall;
-    function _Release: longint; stdcall;
+    function QueryInterface(constref iid : tguid;out obj) : longint;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _AddRef : longint;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _Release : longint;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
   end;
 
 
@@ -44,7 +44,7 @@ uses
 
 { TNullInterfacedObject }
 
-function TNullInterfacedObject.QueryInterface(const IID: TGUID; out Obj): longint; stdcall;
+function TNullInterfacedObject.QueryInterface(constref IID: TGUID; out Obj): longint; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   if GetInterface(IID, Obj) then
     Result := 0
@@ -52,12 +52,12 @@ begin
     result := integer(e_nointerface);
 end;
 
-function TNullInterfacedObject._AddRef: longint; stdcall;
+function TNullInterfacedObject._AddRef: longint; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   Result := -1;
 end;
 
-function TNullInterfacedObject._Release: longint; stdcall;
+function TNullInterfacedObject._Release: longint; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   Result := -1;
 end;
@@ -72,7 +72,7 @@ end;
 
 procedure TAddCommand.Execute;
 begin
-  Writeln('>> TAddComand.Execute');
+  DebugLn('>> TAddComand.Execute');
   FMemo.Lines.Add('Hello ' + IntToStr(Random(500)));
   FMemo.Invalidate;
 end;
@@ -81,7 +81,7 @@ end;
 
 procedure TExitCommand.Execute;
 begin
-  Writeln('>> TExitComand.Execute');
+  DebugLn('>> TExitComand.Execute');
   fpgApplication.Terminated := True;
 end;
 
