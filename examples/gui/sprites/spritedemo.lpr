@@ -124,8 +124,8 @@ begin
   OnClose   := @FormClose;
   OnDestroy := @FormDestroy;
   
-  Background := LoadImage_BMP('splash_logo.bmp');
-  SpriteImg := LoadImage_BMP('ide_icon48x48.bmp');
+  Background := LoadImage_BMP('background.bmp');
+  SpriteImg := LoadImage_BMP('ufo.bmp');
   SpriteImg.CreateMaskFromSample(0, 0);
   SpriteImg.UpdateImage;
 
