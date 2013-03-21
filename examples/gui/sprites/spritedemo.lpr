@@ -73,6 +73,7 @@ begin
   // paint debug info
   if FShowInterval then
   begin
+    Canvas.TextColor := clWhite;
     Canvas.DrawText(4, 4, 'Timer Interval: ' + IntToStr(Timer.Interval));
   end;
 end;
