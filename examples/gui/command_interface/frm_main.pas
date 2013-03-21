@@ -9,19 +9,19 @@ unit frm_main;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
-  fpg_widget, fpg_form, fpg_label, fpg_button,
-  fpg_listbox, fpg_memo, fpg_combobox, fpg_grid,
-  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar,
-  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,
-  fpg_panel;
+  SysUtils,
+  Classes,
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_memo,
+  fpg_menu;
 
 type
 
   TMainForm = class(TfpgForm)
   private
-    procedure CommandHandler(Sender: TObject);
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     btnAdd: TfpgButton;
     memName1: TfpgMemo;
@@ -29,6 +29,9 @@ type
     MainMenu: TfpgMenuBar;
     mnuFile: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
+    miAdd: TfpgMenuItem;
+    procedure CommandHandler(Sender: TObject);
+  public
     procedure AfterCreate; override;
   end;
 
@@ -61,7 +64,7 @@ begin
   Name := 'MainForm';
   SetPosition(293, 236, 284, 254);
   WindowTitle := 'Command Interface Test';
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
 
   btnAdd := TfpgButton.Create(self);
   with btnAdd do
@@ -106,6 +109,7 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(44, 72, 120, 20);
+    miAdd := AddMenuItem('Add Item', '', @CommandHandler);
     AddMenuItem('Quit', '', @CommandHandler);
   end;
 
@@ -116,6 +120,7 @@ begin
   // instantiate the Command classes
   btnAdd.SetCommand(TAddCommand.Create(memName1));
   btnQuit.SetCommand(TExitCommand.Create);
+  miAdd.SetCommand(btnAdd.GetCommand);  // reuse exist command from btnAdd instance
   // The menu item File|Quit shares the command of btnQuit
   mnuFile.MenuItemByName('Quit').SetCommand(btnQuit.GetCommand);
 end;
