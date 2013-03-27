@@ -3539,7 +3539,11 @@ begin
   {$IFDEF WINDOWS}
   Font('Arial', 13);
   {$ELSE}
-  Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
+    {$IFDEF BSD}
+    Font('/usr/local/lib/X11/fonts/Liberation/LiberationSans-Regular.ttf', 13);
+    {$ELSE}
+    Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
+    {$ENDIF}
   {$ENDIF}
 end;
 
