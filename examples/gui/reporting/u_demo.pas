@@ -31,7 +31,7 @@ type
     Bt_PdfMultiPages: TfpgButton;
     Bt_PdfMultiSections: TfpgButton;
     Bt_PdfOutlines: TfpgButton;
-    Bt_PdfCadres: TfpgButton;
+    Bt_PdfFrames: TfpgButton;
     Bt_PdfColor: TfpgButton;
     Bt_PdfLines: TfpgButton;
     Bt_PdfGrid: TfpgButton;
@@ -45,7 +45,7 @@ type
     Bt_VisuMultiPages: TfpgButton;
     Bt_VisuMultiSections: TfpgButton;
     Bt_VisuOutlines: TfpgButton;
-    Bt_VisuCadres: TfpgButton;
+    Bt_VisuFrames: TfpgButton;
     Bt_VisuColor: TfpgButton;
     Bt_VisuLines: TfpgButton;
     Bt_VisuGrid: TfpgButton;
@@ -59,7 +59,7 @@ type
     Bt_PrintMultiPages: TfpgButton;
     Bt_PrintMultiSections: TfpgButton;
     Bt_PrintOutlines: TfpgButton;
-    Bt_PrintCadres: TfpgButton;
+    Bt_PrintFrames: TfpgButton;
     Bt_PrintColor: TfpgButton;
     Bt_PrintLines: TfpgButton;
     Bt_PrintGrid: TfpgButton;
@@ -83,7 +83,7 @@ type
     procedure Bt_PdfMultiPagesClick(Sender: TObject);
     procedure Bt_PdfMultiSectionsClick(Sender: TObject);
     procedure Bt_PdfOutlinesClick(Sender: TObject);
-    procedure Bt_PdfCadresClick(Sender: TObject);
+    procedure Bt_PdfFramesClick(Sender: TObject);
     procedure Bt_PdfColorClick(Sender: TObject);
     procedure Bt_PdfLinesClick(Sender: TObject);
     procedure Bt_PdfGridClick(Sender: TObject);
@@ -96,7 +96,7 @@ type
     procedure Bt_VisuMultiPagesClick(Sender: TObject);
     procedure Bt_VisuMultiSectionsClick(Sender: TObject);
     procedure Bt_VisuOutlinesClick(Sender: TObject);
-    procedure Bt_VisuCadresClick(Sender: TObject);
+    procedure Bt_VisuFramesClick(Sender: TObject);
     procedure Bt_VisuColorClick(Sender: TObject);
     procedure Bt_VisuLinesClick(Sender: TObject);
     procedure Bt_VisuGridClick(Sender: TObject);
@@ -109,7 +109,7 @@ type
     procedure Bt_PrintMultiPagesClick(Sender: TObject);
     procedure Bt_PrintMultiSectionsClick(Sender: TObject);
     procedure Bt_PrintOutlinesClick(Sender: TObject);
-    procedure Bt_PrintCadresClick(Sender: TObject);
+    procedure Bt_PrintFramesClick(Sender: TObject);
     procedure Bt_PrintColorClick(Sender: TObject);
     procedure Bt_PrintLinesClick(Sender: TObject);
     procedure Bt_PrintGridClick(Sender: TObject);
@@ -124,7 +124,7 @@ type
     procedure PrintMultiPages(Preview: Boolean);
     procedure PrintMultiSections(Preview: Boolean);
     procedure PrintOutlines(Preview: Boolean);
-    procedure PrintCadres(Preview: Boolean);
+    procedure PrintFrames(Preview: Boolean);
     procedure PrintColor(Preview: Boolean);
     procedure PrintLines(Preview: Boolean);
     procedure PrintGrid(Preview: Boolean);
@@ -221,14 +221,14 @@ begin
   end;
 end;
 
-procedure TF_Demo.Bt_PdfCadresClick(Sender: TObject);
+procedure TF_Demo.Bt_PdfFramesClick(Sender: TObject);
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //  Language:= Version;
-    PrintCadres(False);
-    DefaultFile:= 'Cadres.pdf';
+    PrintFrames(False);
+    DefaultFile:= 'Frames.pdf';
     PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
@@ -319,7 +319,7 @@ begin
   begin
     //  Language:= Version;
     PrintTtfFont(False);
-    DefaultFile:= 'TtfFont.pdf';
+    DefaultFile:= 'TrueTypeFonts.pdf';
     PrintPdf(LayoutMode, ZoomValue, Preferences);
     Free;
   end;
@@ -385,14 +385,14 @@ begin
   end;
 end;
 
-procedure TF_Demo.Bt_VisuCadresClick(Sender: TObject);
+procedure TF_Demo.Bt_VisuFramesClick(Sender: TObject);
 begin
   FReport := T_Report.Create;
   with FReport do
   begin
     //Language:= Version;
-    DefaultFile := 'Cadres.pdf';
-    PrintCadres(True);
+    DefaultFile := 'Frames.pdf';
+    PrintFrames(True);
     Free;
   end;
 end;
@@ -506,7 +506,7 @@ begin
 
 end;
 
-procedure TF_Demo.Bt_PrintCadresClick(Sender: TObject);
+procedure TF_Demo.Bt_PrintFramesClick(Sender: TObject);
 begin
 
 end;
@@ -756,7 +756,7 @@ begin
   end;
 end;
 
-procedure TF_Demo.PrintCadres(Preview: Boolean);
+procedure TF_Demo.PrintFrames(Preview: Boolean);
 var
   FtTitle, FtText: integer;
   {TsThin,} TsNorm, TsThick: integer;
@@ -1212,11 +1212,12 @@ begin
   SetPosition(0, 0, 900, 600);
   WindowPosition := wpScreenCenter;
   Sizeable       := False;
-  fpgSetNamedColor(clWindowBackground, clPaleGreen);
-  fpgSetNamedColor(clButtonFace, clCyan);
-  fpgSetNamedColor(clText1, clBlue);
-  fpgSetNamedColor(clSelection, clSkyBlue);
-  fpgSetNamedColor(clSelectionText, clDarkBlue);
+
+  //fpgSetNamedColor(clWindowBackground, clPaleGreen);
+  //fpgSetNamedColor(clButtonFace, clCyan);
+  //fpgSetNamedColor(clText1, clBlue);
+  //fpgSetNamedColor(clSelection, clSkyBlue);
+  //fpgSetNamedColor(clSelectionText, clDarkBlue);
   fpgSetNamedFont('Label1', 'bitstream vera sans-10');
   fpgSetNamedFont('Edit1', 'bitstream vera sans-10');
   L_Pdf           := CreateLabel(Self, 50, 5, 'Print to PDF', 150, 20, taCenter);
@@ -1225,7 +1226,7 @@ begin
   Bt_PdfMultiPages := CreateButton(Self, 50, 110, 150, 'Multiple pages', @Bt_PdfMultiPagesClick, 'stdimg.Adobe_pdf');
   Bt_PdfMultiSections := CreateButton(Self, 50, 150, 150, 'Multiple sections', @Bt_PdfMultiSectionsClick, 'stdimg.Adobe_pdf');
   Bt_PdfOutlines  := CreateButton(Self, 50, 190, 150, 'Outlines', @Bt_PdfOutlinesClick, 'stdimg.Adobe_pdf');
-  Bt_PdfCadres    := CreateButton(Self, 50, 230, 150, 'Draw frames', @Bt_PdfCadresClick, 'stdimg.Adobe_pdf');
+  Bt_PdfFrames    := CreateButton(Self, 50, 230, 150, 'Draw frames', @Bt_PdfFramesClick, 'stdimg.Adobe_pdf');
   Bt_PdfColor     := CreateButton(Self, 50, 270, 150, 'Show colors', @Bt_PdfColorClick, 'stdimg.Adobe_pdf');
   Bt_PdfLines     := CreateButton(Self, 50, 310, 150, 'Draw lines', @Bt_PdfLinesClick, 'stdimg.Adobe_pdf');
   Bt_PdfGrid      := CreateButton(Self, 50, 350, 150, 'Show grid', @Bt_PdfGridClick, 'stdimg.Adobe_pdf');
@@ -1239,7 +1240,7 @@ begin
   Bt_VisuMultiPages := CreateButton(Self, 250, 110, 150, 'Multiple pages', @Bt_VisuMultiPagesClick, 'stdimg.preview');
   Bt_VisuMultiSections := CreateButton(Self, 250, 150, 150, 'Multiple sections', @Bt_VisuMultiSectionsClick, 'stdimg.preview');
   Bt_VisuOutlines := CreateButton(Self, 250, 190, 150, 'Outlines', @Bt_VisuOutlinesClick, 'stdimg.preview');
-  Bt_VisuCadres   := CreateButton(Self, 250, 230, 150, 'Draw frames', @Bt_VisuCadresClick, 'stdimg.preview');
+  Bt_VisuFrames   := CreateButton(Self, 250, 230, 150, 'Draw frames', @Bt_VisuFramesClick, 'stdimg.preview');
   Bt_VisuColor    := CreateButton(Self, 250, 270, 150, 'Show colors', @Bt_VisuColorClick, 'stdimg.preview');
   Bt_VisuLines    := CreateButton(Self, 250, 310, 150, 'Draw lines', @Bt_VisuLinesClick, 'stdimg.preview');
   Bt_VisuGrid     := CreateButton(Self, 250, 350, 150, 'Show grid', @Bt_VisuGridClick, 'stdimg.preview');
@@ -1258,8 +1259,8 @@ begin
   Bt_PrintMultiSections.Enabled := False;
   Bt_PrintOutlines := CreateButton(Self, 450, 190, 150, 'Outlines', @Bt_PrintOutlinesClick, 'stdimg.print');
   Bt_PrintOutlines.Enabled := False;
-  Bt_PrintCadres  := CreateButton(Self, 450, 230, 150, 'Draw frames', @Bt_PrintCadresClick, 'stdimg.print');
-  Bt_PrintCadres.Enabled := False;
+  Bt_PrintFrames  := CreateButton(Self, 450, 230, 150, 'Draw frames', @Bt_PrintFramesClick, 'stdimg.print');
+  Bt_PrintFrames.Enabled := False;
   Bt_PrintColor   := CreateButton(Self, 450, 270, 150, 'Show colors', @Bt_PrintColorClick, 'stdimg.print');
   Bt_PrintColor.Enabled := False;
   Bt_PrintLines   := CreateButton(Self, 450, 310, 150, 'Draw lines', @Bt_PrintLinesClick, 'stdimg.print');
