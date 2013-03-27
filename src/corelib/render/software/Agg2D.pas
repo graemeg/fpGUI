@@ -3749,8 +3749,21 @@ begin
 end;
 
 procedure TAgg2D.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+var
+  i: integer;
+  poly: array of double;
 begin
-
+  SetLength(poly, (NumPts*2)+1); // dynamic arrays start at 0, but we want to use 1..NumPts
+  for i := 1 to NumPts do
+  begin
+    poly[i * 2 - 1] := Points[i-1].X + 0.5;
+    poly[i * 2] := Points[i-1].Y + 0.5;
+  end;
+  // Draw Polygon
+  LineWidth(1);
+  LineColor(LineColor);
+  FillColor($00, $00, $00);  // clBlack for now
+  Polygon(@poly[1], NumPts);
 end;
 
 
