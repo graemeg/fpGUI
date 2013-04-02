@@ -214,6 +214,7 @@ type
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgButtonFlags); overload;
     function    GetButtonBorders: TRect; virtual;
     function    GetButtonShift: TPoint; virtual;
+    function    HasButtonHoverEffect: boolean; virtual;
     { Menus }
     procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); virtual;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
@@ -2338,6 +2339,11 @@ end;
 function TfpgStyle.GetButtonShift: TPoint;
 begin
   Result := Point(1, 1);
+end;
+
+function TfpgStyle.HasButtonHoverEffect: boolean;
+begin
+  Result := False;
 end;
 
 function TfpgStyle.GetControlFrameBorders: TRect;
