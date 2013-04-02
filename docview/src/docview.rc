@@ -1,8 +1,8 @@
 MAINICON ICON "../images/docview-48x48.ico"
 
 1 VERSIONINFO
-FILEVERSION 0, 8, 0, 0
-PRODUCTVERSION 0, 8, 0, 0
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
 FILEFLAGSMASK 0
 FILEOS 0x40000
 FILETYPE 1
@@ -13,12 +13,12 @@ FILETYPE 1
   {
    VALUE "CompanyName", "fpGUI Toolkit"
    VALUE "FileDescription", "fpGUI's INF Documentation Viewer"
-   VALUE "FileVersion", "0.8.0"
+   VALUE "FileVersion", "1.0.0"
    VALUE "InternalName", "docview"
    VALUE "LegalCopyright", "GNU Public License"
    VALUE "OriginalFilename", "docview"
    VALUE "ProductName", "fpGUI Toolkit"
-   VALUE "ProductVersion", "0.8.0"
+   VALUE "ProductVersion", "1.0.0"
   }
  }
  BLOCK "VarFileInfo"
