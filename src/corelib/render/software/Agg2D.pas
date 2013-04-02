@@ -40,51 +40,51 @@ interface
 {$ENDIF}
 
 uses
- agg_basics ,
- agg_array ,
- agg_trans_affine ,
- agg_trans_viewport ,
- agg_path_storage ,
- agg_conv_stroke ,
- agg_conv_transform ,
- agg_conv_curve ,
- agg_conv_dash ,
- agg_rendering_buffer ,
- agg_renderer_base ,
- agg_renderer_scanline ,
- agg_span_gradient ,
- agg_span_image_filter_rgba ,
- agg_span_image_resample_rgba ,
- agg_span_converter ,
- agg_span_interpolator_linear ,
- agg_span_allocator ,
- agg_rasterizer_scanline_aa ,
- agg_gamma_functions ,
- agg_scanline_u ,
- agg_arc ,
- agg_bezier_arc ,
- agg_rounded_rect ,
- agg_font_engine ,
- agg_font_cache_manager ,
- agg_pixfmt ,
- agg_pixfmt_rgb ,
- agg_pixfmt_rgba ,
- agg_color ,
- agg_math_stroke ,
- agg_image_filters ,
- agg_vertex_source ,
- agg_render_scanlines ,
+  agg_basics ,
+  agg_array ,
+  agg_trans_affine ,
+  agg_trans_viewport ,
+  agg_path_storage ,
+  agg_conv_stroke ,
+  agg_conv_transform ,
+  agg_conv_curve ,
+  agg_conv_dash ,
+  agg_rendering_buffer ,
+  agg_renderer_base ,
+  agg_renderer_scanline ,
+  agg_span_gradient ,
+  agg_span_image_filter_rgba ,
+  agg_span_image_resample_rgba ,
+  agg_span_converter ,
+  agg_span_interpolator_linear ,
+  agg_span_allocator ,
+  agg_rasterizer_scanline_aa ,
+  agg_gamma_functions ,
+  agg_scanline_u ,
+  agg_arc ,
+  agg_bezier_arc ,
+  agg_rounded_rect ,
+  agg_font_engine ,
+  agg_font_cache_manager ,
+  agg_pixfmt ,
+  agg_pixfmt_rgb ,
+  agg_pixfmt_rgba ,
+  agg_color ,
+  agg_math_stroke ,
+  agg_image_filters ,
+  agg_vertex_source ,
+  agg_render_scanlines ,
 
 {$IFDEF AGG2D_USE_FREETYPE }
- agg_font_freetype ,
+  agg_font_freetype ,
 {$ENDIF }
 {$IFDEF AGG2D_USE_WINFONTS}
- agg_font_win32_tt ,
+  agg_font_win32_tt ,
 {$ENDIF }
 
- Math ,
- Classes,
- SysUtils,
+  Math,
+  Classes,
+  SysUtils,
 
   // This allows for platform specific uses clauses
   {$define uses_interface}
@@ -98,8 +98,8 @@ uses
     {$I agg_platform_x11.inc}
   {$ENDIF}
 
- fpg_base,
- fpg_main;
+  fpg_base,
+  fpg_main;
 
 { GLOBAL VARIABLES & CONSTANTS }
 const
