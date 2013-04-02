@@ -420,9 +420,12 @@ end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
 var
+  LinkDetails: TfpgString;
   LinkIndex: integer;
   lLink: THelpLink;
   lHelp: THelpFile;
+  f: THelpFile;
+  lHelpFileName: TfpgString;
   i: integer;
   lTopic: TTopic;
   lFound: Boolean;
@@ -441,7 +444,32 @@ begin
   end
   else if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
-    TfpgMessageDialog.Warning('', 'External links are not supported in DocView yet. Please try again with a later build.')
+    LinkDetails := StrRightFrom( Link, 10 );    // 10 is starting pos of data, after 'external '
+    LinkIndex := StrToInt( ExtractNextValue( LinkDetails, ' ' ) );
+    lHelp := CurrentTopic.HelpFile as THelpFile;
+
+    lHelpFileName := lHelp.ReferencedFiles[ LinkIndex ];
+
+    { Only open the external file once. So see if it is already openned. }
+    lFound := False;
+    for i := 0 to CurrentOpenFiles.Count-1 do
+    begin
+      f := THelpFile(CurrentOpenFiles[i]);
+      if SameText(fpgExtractFileName(f.Filename), lHelpFileName) then
+        lFound := True;
+    end;
+    if not lFound then
+    begin
+      OpenAdditionalFile := True;
+      OpenFile(lHelpFileName, '', false);
+      OpenAdditionalFile := False;
+    end;
+
+    { Not sure if we have an ID or Resource Name, so lets try both if possible }
+    if TryStrToInt(LinkDetails, i) then
+      DisplayTopicByResourceID(i)
+    else
+      DisplayTopicByName(LinkDetails);
   end
   else if pos(PARAM_LINK_URL, Link) > 0 then
   begin
