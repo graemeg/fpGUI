@@ -2607,7 +2607,11 @@ var
   p: TProcess;
 begin
   Result := False;
-  if not fpgFileExists(GetHelpViewer) then
+  if fpgExtractFilePath(GetHelpViewer) = '' then
+  begin
+    // do nothing - we are hoping docview is in the system PATH
+  end
+  else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
@@ -2633,7 +2637,11 @@ var
   p: TProcess;
 begin
   Result := False;
-  if not fpgFileExists(GetHelpViewer) then
+  if fpgExtractFilePath(GetHelpViewer) = '' then
+  begin
+    // do nothing - we are hoping docview is in the system PATH
+  end
+  else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try

@@ -322,6 +322,7 @@ type
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
+    function    GetHelpViewer: TfpgString; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
@@ -420,6 +421,7 @@ implementation
 
 uses
   baseunix,
+  unix,
   {$IFDEF LINUX}
   users,  { For Linux user and group name support. FPC only supports this in Linux. }
   {$ENDIF}
@@ -430,6 +432,7 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
+  fpg_constants,
   cursorfont,
   xatom,            // used for XA_WM_NAME
   keysym,
@@ -1431,6 +1434,16 @@ function TfpgX11Application.MessagesPending: boolean;
 begin
   Result := (XPending(display) > 0);
   fpgCheckTimers;
+end;
+
+function TfpgX11Application.GetHelpViewer: TfpgString;
+begin
+  Result := inherited GetHelpViewer;
+  if not fpgFileExists(Result) then
+  begin
+    if fpsystem('which ' + FPG_HELPVIEWER) = 0 then
+      Result := FPG_HELPVIEWER;
+  end;
 end;
 
 function GetParentWindow(wh: TfpgWinHandle; var pw, rw: TfpgWinHandle): boolean;
