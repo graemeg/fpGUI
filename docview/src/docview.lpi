@@ -31,7 +31,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="35">
+    <Units Count="36">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -201,6 +201,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpBookmark"/>
       </Unit34>
+      <Unit35>
+        <Filename Value="frm_bookmarks.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_bookmarks"/>
+      </Unit35>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
