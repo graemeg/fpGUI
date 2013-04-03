@@ -5,7 +5,13 @@ unit frm_note;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_memo, fpg_button;
+  SysUtils,
+  Classes,
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_memo,
+  fpg_button;
 
 type
 
@@ -23,6 +29,7 @@ type
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
     procedure   SetCanDelete(const AValue: boolean);
+    procedure   btnHelpClicked(Sender: TObject);
   public
     procedure   AfterCreate; override;
     property    Text: TfpgString read GetText write SetText;
@@ -56,6 +63,11 @@ begin
   btnDelete.Enabled := FCanDelete;
 end;
 
+procedure TNoteForm.btnHelpClicked(Sender: TObject);
+begin
+  InvokeHelp;
+end;
+
 procedure TNoteForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -65,6 +77,8 @@ begin
   WindowTitle := 'Notes';
   Hint := '';
   OnShow := @FormShow;
+  HelpType := htContext;
+  HelpContext := 7;
 
   Memo1 := TfpgMemo.Create(self);
   with Memo1 do
@@ -102,6 +116,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 3;
+    OnClick := @btnHelpClicked;
   end;
 
   btnCancel := TfpgButton.Create(self);
