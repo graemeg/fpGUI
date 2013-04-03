@@ -7,12 +7,13 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_main, frm_main, IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable,
-  TextSearchQuery, nvUtilities, HelpFile, SearchUnit, fpg_cmdlineparams,
-  IPFFileFormatUnit, HelpWindowDimensions, SettingsUnit,
+  Classes, fpg_main, frm_main, IPFEscapeCodes, HelpTopic, CompareWordUnit,
+  SearchTable, TextSearchQuery, nvUtilities, HelpFile, SearchUnit,
+  fpg_cmdlineparams, IPFFileFormatUnit, HelpWindowDimensions, SettingsUnit,
   RichTextStyleUnit, CanvasFontManager, ACLStringUtility, RichTextDocumentUnit,
   RichTextView, RichTextLayoutUnit, RichTextDisplayUnit, dvconstants, dvHelpers,
-  frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote, HelpBookmark;
+  frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote, HelpBookmark,
+  frm_bookmarks;
 
 {$IFDEF WINDOWS}
   {$R docview.rc}

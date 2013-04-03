@@ -132,6 +132,7 @@ type
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miViewExpandAllClicked(Sender: TObject);
     procedure   miViewCollapseAllClicked(Sender: TObject);
+    procedure   miOpenBookmarksMenuClicked(Sender: TObject);
     procedure   miBookmarksMenuItemClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
@@ -234,7 +235,6 @@ type
     procedure   ClearBookmarks;
     procedure   OnBookmarksChanged(Sender: TObject);
     procedure   BuildBookmarksMenu;
-    procedure   UpdateBookmarksDisplay;
     procedure   NavigateToBookmark(Bookmark: TBookmark);
   public
     constructor Create(AOwner: TComponent); override;
@@ -265,6 +265,7 @@ uses
   ,frm_configuration
   ,frm_text
   ,frm_note
+  ,frm_bookmarks
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit
@@ -619,6 +620,21 @@ end;
 procedure TMainForm.miViewCollapseAllClicked(Sender: TObject);
 begin
   tvContents.FullCollapse;
+end;
+
+procedure TMainForm.miOpenBookmarksMenuClicked(Sender: TObject);
+var
+  frm: TBookmarksForm;
+begin
+  frm := TBookmarksForm.Create(nil);
+  try
+    frm.BookmarkList := Bookmarks;
+    frm.OnGotoBookmark := @NavigateToBookmark;
+    frm.OnBookmarksChanged := @OnBookmarksChanged;
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.miBookmarksMenuItemClicked(Sender: TObject);
@@ -3130,8 +3146,8 @@ begin
   begin
     Name := 'miBookmarks';
     SetPosition(292, 144, 132, 20);
-    AddMenuItem('Add..', '', nil).Enabled := False;
-    AddMenuItem('Show', '', nil).Enabled := False;
+    AddMenuItem('Add', '', @btnBookmarkClick);
+    AddMenuItem('Show...', '', @miOpenBookmarksMenuClicked);
   end;
 
   miView := TfpgPopupMenu.Create(self);
@@ -3870,7 +3886,6 @@ end;
 procedure TMainForm.OnBookmarksChanged(Sender: TObject);
 begin
   BuildBookmarksMenu;
-//  UpdateBookmarksForm;
   SaveBookmarks;
 end;
 
@@ -3896,33 +3911,6 @@ begin
     MenuItem.Tag:= i;
     BookmarksMenuItems.Add( MenuItem );
   end;
-end;
-
-procedure TMainForm.UpdateBookmarksDisplay;
-var
-  i: integer;
-  Bookmark: TBookmark;
-Begin
-(*
-  BookmarksListBox.Items.BeginUpdate;
-  BookmarksListBox.Clear;
-
-  if not Assigned( BookmarkList ) then
-    exit;
-
-  for i := 0 to BookmarkList.Count - 1 do
-  begin
-    Bookmark := BookmarkList[ i ];
-    BookmarksListBox.Items.AddObject( Bookmark.Name,
-                                      Bookmark );
-  end;
-
-  if BookmarksListBox.Items.Count > 0 then
-    BookmarksListBox.ItemIndex := 0;
-
-  BookmarksListBox.Items.EndUpdate;
-  UpdateControls;
-*)
 end;
 
 procedure TMainForm.NavigateToBookmark(Bookmark: TBookmark);
