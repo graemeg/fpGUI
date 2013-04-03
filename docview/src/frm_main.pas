@@ -265,7 +265,6 @@ uses
   ,frm_configuration
   ,frm_text
   ,frm_note
-  ,NewViewConstantsUnit
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit

@@ -31,7 +31,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="36">
+    <Units Count="35">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -132,80 +132,75 @@
         <UnitName Value="HelpWindowDimensions"/>
       </Unit19>
       <Unit20>
-        <Filename Value="NewViewConstantsUnit.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="NewViewConstantsUnit"/>
-      </Unit20>
-      <Unit21>
         <Filename Value="SettingsUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SettingsUnit"/>
-      </Unit21>
-      <Unit22>
+      </Unit20>
+      <Unit21>
         <Filename Value="dvconstants.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dvConstants"/>
-      </Unit22>
-      <Unit23>
+      </Unit21>
+      <Unit22>
         <Filename Value="dvHelpers.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dvHelpers"/>
-      </Unit23>
-      <Unit24>
+      </Unit22>
+      <Unit23>
         <Filename Value="HelpWindow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpWindow"/>
-      </Unit24>
-      <Unit25>
+      </Unit23>
+      <Unit24>
         <Filename Value="../TODO.txt"/>
         <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
+      </Unit24>
+      <Unit25>
         <Filename Value="frm_configuration.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_configuration"/>
-      </Unit26>
-      <Unit27>
+      </Unit25>
+      <Unit26>
         <Filename Value="arrows.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
+      </Unit26>
+      <Unit27>
         <Filename Value="HelpBitmap.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpBitmap"/>
-      </Unit28>
-      <Unit29>
+      </Unit27>
+      <Unit28>
         <Filename Value="missing.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit29>
-      <Unit30>
+      </Unit28>
+      <Unit29>
         <Filename Value="frm_text.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_text"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="docview.rc"/>
+        <IsPartOfProject Value="True"/>
       </Unit30>
       <Unit31>
-        <Filename Value="docview.rc"/>
+        <Filename Value="../docs/docview.ipf"/>
         <IsPartOfProject Value="True"/>
       </Unit31>
       <Unit32>
-        <Filename Value="../docs/docview.ipf"/>
-        <IsPartOfProject Value="True"/>
-      </Unit32>
-      <Unit33>
         <Filename Value="frm_note.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_note"/>
-      </Unit33>
-      <Unit34>
+      </Unit32>
+      <Unit33>
         <Filename Value="HelpNote.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpNote"/>
-      </Unit34>
-      <Unit35>
+      </Unit33>
+      <Unit34>
         <Filename Value="HelpBookmark.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpBookmark"/>
-      </Unit35>
+      </Unit34>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
