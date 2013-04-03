@@ -231,7 +231,7 @@ implementation
 
 uses
   SysUtils
-  ,NewViewConstantsUnit
+  ,dvConstants
   ,nvUtilities
   ,ACLStringUtility
   ,SettingsUnit

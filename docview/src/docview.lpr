@@ -9,7 +9,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, fpg_main, frm_main, IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable,
   TextSearchQuery, nvUtilities, HelpFile, SearchUnit, fpg_cmdlineparams,
-  IPFFileFormatUnit, HelpWindowDimensions, NewViewConstantsUnit, SettingsUnit,
+  IPFFileFormatUnit, HelpWindowDimensions, SettingsUnit,
   RichTextStyleUnit, CanvasFontManager, ACLStringUtility, RichTextDocumentUnit,
   RichTextView, RichTextLayoutUnit, RichTextDisplayUnit, dvconstants, dvHelpers,
   frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote, HelpBookmark;
