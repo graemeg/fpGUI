@@ -36,6 +36,7 @@ const
   NOTES_FILE_EXTENSION = ExtensionSeparator + 'notes';
   BOOKMARK_FILE_EXTENSION = ExtensionSeparator + 'bookmark';
   BOOKMARK_SECTION = '[BOOKMARK]';
+  OWN_HELP_MARKER = '[DOCVIEWHELP]';
   cDocViewHelpFile = 'docview.inf';
 
 
