@@ -2558,6 +2558,7 @@ var
 begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
+  fpgApplication.HelpFile := cDocViewHelpFile;
   OnShow  := @MainFormShow;
   OnDestroy := @MainFormDestroy;
 //  Files := TList.Create;
