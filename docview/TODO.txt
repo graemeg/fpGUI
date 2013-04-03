@@ -23,11 +23,11 @@ Todo list
 [ ] - RichTextView component issue. Incompatible with original OS/2 VIEW. When
       resetting a font style (eg: italics to normal), it should not affect a
       previously set font color, unless a new font color is explicitly set.
-[ ] - External links are not supported yet.
 [o] - Implement Image support in INF or HLP files.
 
 
 
+[x] - External links are not supported yet.
 [x] - Access Violation when the application terminates.
 [x] - Settings / Customization dialog is needed.
 [x] - Create help file for DocView listing all supported features etc..
