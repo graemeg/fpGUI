@@ -3147,7 +3147,7 @@ begin
     Name := 'miBookmarks';
     SetPosition(292, 144, 132, 20);
     AddMenuItem('Add', '', @btnBookmarkClick);
-    AddMenuItem('Show...', '', @miOpenBookmarksMenuClicked);
+    AddMenuItem('Edit...', '', @miOpenBookmarksMenuClicked);
   end;
 
   miView := TfpgPopupMenu.Create(self);

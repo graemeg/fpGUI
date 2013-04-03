@@ -568,7 +568,6 @@ you open a new or additional help file.
 .* ************************************************************
 :h1 res=8 id='bookmarks'.Bookmarks
 :hp2.Bookmarks:ehp2.
-:note.:hp8.*** This feature is partially implemented. ***:ehp8.
 :p.
 &dv. allows you to bookmark particular topics within the current help
 file. Simply click the bookmark toolbar button
@@ -579,16 +578,16 @@ To jump to a bookmark, go to the "Bookmarks" menu, and click on
 the bookmark you want to open.
 :p.
 You can view or delete all your bookmarks by clicking on "Edit..." in
-the "Bookmarks" menu. This window can remain open while you read, so
-that you can quickly look through your bookmarks.
+the "Bookmarks" menu.
 :p.
 Bookmarks are saved in a file with the extension ".bookmarks", in the &dv. config
 directory. This is in the user's home profile directory where there is read/write
 access. Under Linux it is normally "~/.config/docview/" and under Windows it is
 normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
-I will probably add a setting in &dv., so the user can configure a
-preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
-by storing notes in the same directory as the help file).
+.* TODO
+.* I will probably add a setting in &dv., so the user can configure a
+.* preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
+.* by storing notes in the same directory as the help file).
 
 
 .* ************************************************************
