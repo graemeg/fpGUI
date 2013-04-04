@@ -180,7 +180,7 @@ begin
   if _Header.cBitCount <= 8 then
   begin
     _pPalette := GetMem( GetPaletteSize );
-    bytes := FileHandle.Read(_pPalette, GetPaletteSize);
+    bytes := FileHandle.Read(_pPalette^, GetPaletteSize);
     if bytes <> GetPaletteSize then
       raise EHelpBitmapException.Create( 'Failed to read Palette.' );
   end;
@@ -214,7 +214,7 @@ begin
 
     // Now read the block
     Block._Data := GetMem( Block._Size );
-    FileHandle.Read(Block._Data, Block._Size);
+    FileHandle.Read(Block._Data^, Block._Size);
 
     inc( BytesRead, Block._Size  );
     Blocks.Add( Block );
@@ -484,15 +484,19 @@ var
   BitmapData: PBYTE;
   ptr: PByte;
 begin
+  BitmapOutputPointer := nil;
+  BitmapData := nil;
+  ptr := nil;
+
   // Allocate memory to store the bitmap
   Bitmapdata := GetMem( TotalSize );
 
   // Copy header to bitmap
-  MemCopy( _Header, BitmapData, sizeof( _Header ) );
+  MemCopy( _Header, BitmapData^, sizeof( _Header ) );
 
   // Copy palette into bitmap
   ptr := BitmapData + sizeof( _Header );
-  MemCopy( _pPalette, ptr, GetPaletteSize );
+  MemCopy( _pPalette^, ptr^, GetPaletteSize );
 
   BytesWritten := 0;
 
@@ -506,7 +510,7 @@ begin
     case Block._CompressionType of
       0,1: // uncompressed (I'm not sure about 1)
       begin
-        MemCopy( Block._Data, BitmapOutputPointer, Block._Size );
+        MemCopy( Block._Data^, BitmapOutputPointer^, Block._Size );
         BytesWrittenFromBlock := Block._Size;
         inc( BytesWritten, BytesWrittenFromBlock );
       end;
