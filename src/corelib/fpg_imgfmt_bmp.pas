@@ -314,7 +314,7 @@ begin
       until linecnt >= img.Height;
     end;
     else
-      writeln('Unsupported BMP format!');
+      raise Exception.Create('Unsupported BMP format!');
   end;
 
   if ppal <> nil then
