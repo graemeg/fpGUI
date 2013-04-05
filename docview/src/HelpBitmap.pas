@@ -1,11 +1,29 @@
+{
+  fpGUI  -  Free Pascal GUI Toolkit
+
+  Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+  distribution, for details of the copyright.
+
+  See the file COPYING.modifiedLGPL, included in this distribution,
+  for details about redistributing fpGUI.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Description:
+    Encapsulates a bitmap as stored in a IPF file. Once created from
+    file data they can be used as a normal bitmap.
+}
+
 unit HelpBitmap;
 
 {$mode objfpc}{$H+}
 
-interface
+// Debug purposes only
+{.$define LZW_DEBUG}
 
-// Encapsulates a bitmap as stored in a IPF file.
-// Once created from file data they can be used as a normal bitmap.
+interface
 
 uses
   Classes, SysUtils, fpg_main, ctypes,
@@ -564,6 +582,24 @@ begin
 
 
   AllocateImage(32, _Header.cx, _Header.cy);
+
+  {$IFDEF LZW_DEBUG}
+  writeln('Width = ', Width);
+  writeln('Height = ', Height);
+  writeln('ImageDataSize = ', ImageDataSize);
+  writeln('------------- START -------------');
+  for i := 1 to ImageDataSize do
+  begin
+    write(HexStr(BitmapOutputPointer[i-1],2)+' ');
+    if (i mod 16 = 0) then
+      writeln('')
+    else if (i mod 4 = 0) then
+      write (' | ');
+  end;
+  Writeln('');
+  writeln('------------- END -------------');
+  {$ENDIF}
+
   if TotalSize <> ImageDataSize then
     writeln('Warning: INF Bitmap size and allocated bitmap size are different. ', TotalSize, ' vs ', ImageDataSize);
   Move(BitmapData^, ImageData^, TotalSize);
