@@ -2508,8 +2508,7 @@ begin
 
   if ImageIndices.Count > 0 then
   begin
-  { TODO -oGraeme : We do not support images yet }
-//   THelpFile(CurrentTopic.HelpFile).GetImages(ImageIndices, FImages);
+    THelpFile(CurrentTopic.HelpFile).GetImages(ImageIndices, FImages);
   end;
 
   ImageIndices.Free;

@@ -13,7 +13,7 @@ uses
   RichTextStyleUnit, CanvasFontManager, ACLStringUtility, RichTextDocumentUnit,
   RichTextView, RichTextLayoutUnit, RichTextDisplayUnit, dvconstants, dvHelpers,
   frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote, HelpBookmark,
-  frm_bookmarks;
+  frm_bookmarks, LZWDecompress;
 
 {$IFDEF WINDOWS}
   {$R docview.rc}

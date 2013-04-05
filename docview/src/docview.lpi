@@ -23,6 +23,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <CommandLineParams Value="/data/devel/tests/inf_test/test2.inf"/>
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
@@ -31,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="36">
+    <Units Count="37">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -206,6 +207,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_bookmarks"/>
       </Unit35>
+      <Unit36>
+        <Filename Value="lzwdecompress.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LZWDecompress"/>
+      </Unit36>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
