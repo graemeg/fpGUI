@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main,
   fpg_form, fpg_button, fpg_menu, fpg_textedit, fpg_panel,
-  fpg_label;
+  fpg_label, simpleipc;
 
 type
 
@@ -29,6 +29,8 @@ type
     FFindOptions: TfpgFindOptions;
     FIsForward: boolean;
     FFilename: TfpgString;
+    FIPCServer: TSimpleIPCServer;
+    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure miNewClick(Sender: TObject);
     procedure miOpenClick(Sender: TObject);
@@ -44,8 +46,12 @@ type
     procedure btnGOClick(Sender: TObject);
     procedure memEditorChanged(Sender: TObject);
     procedure UpdateStatus(const AMessage: TfpgString);
+    procedure StartIPCServer;
+    procedure CheckIPCMessages(Sender: TObject);
+    procedure IPCMessageReceived;
     procedure LoadFile(const AFileName: TfpgString);
   public
+    destructor Destroy; override;
     procedure AfterCreate; override;
   end;
 
@@ -59,6 +65,11 @@ uses
   frm_find;
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  StartIPCServer;
+end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 var
@@ -234,11 +245,48 @@ begin
   lblStatusText.Text := AMessage;
 end;
 
+procedure TMainForm.StartIPCServer;
+begin
+  FIPCServer := TSimpleIPCServer.Create(self);
+  FIPCServer.ServerID := 'nanoedit';
+  FIPCServer.Global := True;
+  FIPCServer.StartServer;
+  fpgApplication.OnIdle := @CheckIPCMessages;
+end;
+
+procedure TMainForm.CheckIPCMessages(Sender: TObject);
+begin
+  while FIPCServer.PeekMessage(1, True) do
+    IPCMessageReceived;
+end;
+
+procedure TMainForm.IPCMessageReceived;
+begin
+  case FIPCServer.MsgType of
+    0:
+      begin
+        BringToFront;
+      end;
+    1:
+      begin
+        LoadFile(FIPCServer.StringMessage);
+        BringToFront;
+      end;
+  end;
+end;
+
 procedure TMainForm.LoadFile(const AFileName: TfpgString);
 begin
   memEditor.LoadFromFile(AFilename);
   FFilename := AFileName;
   UpdateStatus(AFilename);
+end;
+
+destructor TMainForm.Destroy;
+begin
+  fpgApplication.OnIdle := nil;
+  FIPCServer.StopServer;
+  inherited Destroy;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -249,7 +297,8 @@ begin
   WindowTitle := 'fpGUI nanoedit';
   Hint := '';
   WindowPosition := wpScreenCenter;
-  OnShow  := @FormShow;
+  OnCreate := @FormCreate;
+  OnShow := @FormShow;
 
   menu := TfpgMenuBar.Create(self);
   with menu do
