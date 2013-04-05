@@ -44,6 +44,7 @@ type
     procedure btnGOClick(Sender: TObject);
     procedure memEditorChanged(Sender: TObject);
     procedure UpdateStatus(const AMessage: TfpgString);
+    procedure LoadFile(const AFileName: TfpgString);
   public
     procedure AfterCreate; override;
   end;
@@ -69,9 +70,7 @@ begin
     s := ParamStr(1);
     if Pos('file://', s) > 0 then
       s := StringReplace(s, 'file://', '', []);
-    memEditor.LoadFromFile(s);
-    FFilename := s;
-    UpdateStatus(FFilename);
+    LoadFile(s);
   end;
 end;
 
@@ -90,9 +89,7 @@ begin
   try
     if dlg.RunOpenFile then
     begin
-      memEditor.LoadFromFile(dlg.FileName);
-      FFileName := dlg.FileName;
-      UpdateStatus(FFileName);
+      LoadFile(dlg.FileName);
     end;
   finally
     dlg.Free;
@@ -235,6 +232,13 @@ end;
 procedure TMainForm.UpdateStatus(const AMessage: TfpgString);
 begin
   lblStatusText.Text := AMessage;
+end;
+
+procedure TMainForm.LoadFile(const AFileName: TfpgString);
+begin
+  memEditor.LoadFromFile(AFilename);
+  FFilename := AFileName;
+  UpdateStatus(AFilename);
 end;
 
 procedure TMainForm.AfterCreate;
