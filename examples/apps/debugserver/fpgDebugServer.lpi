@@ -54,7 +54,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="fpgDebugServer"/>
+      <Filename Value="dbugsrv"/>
     </Target>
     <SearchPaths>
       <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
