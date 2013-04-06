@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -415,11 +415,12 @@ begin
 
     pcol     := ppal;
     pixelcnt := 0;
+    // OS/2 1.x bitmap with uses 3-byte palette
     while (p) < (pdata) do
     begin
-      pcol^ := (LongWord(p[3]) shl 24) + (LongWord(p[2]) shl 16) + (LongWord(p[1]) shl 8) + LongWord(p[0]);
+      pcol^ := (LongWord($FF) shl 24) + (LongWord(p[2]) shl 16) + (LongWord(p[1]) shl 8) + LongWord(p[0]);
       Inc(pcol);
-      inc(p, 4);
+      inc(p, 3);
       Inc(pixelcnt);
     end;
   end;
