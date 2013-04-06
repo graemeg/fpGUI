@@ -142,7 +142,7 @@ begin
     else
       input_bit_buffer:= input_bit_buffer
                          or
-                         ( longword( 0 ) << ( 24 - input_bit_count ) );
+                         ( longword( 0 ) shl ( 24 - input_bit_count ) );
     inc( bytes_out );
     inc( input_bit_count, 8 );
   end;
