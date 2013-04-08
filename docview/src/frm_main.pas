@@ -58,6 +58,7 @@ type
     RichView: TRichTextView;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
+    miActions: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miView: TfpgPopupMenu;
@@ -129,6 +130,15 @@ type
     procedure   miFileOpenAdditionalFileClicked(Sender: TObject);
     procedure   miFileOpenSpecialClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
+    procedure   miActionsContentsClicked(Sender: TObject);
+    procedure   miActionsIndexClicked(Sender: TObject);
+    procedure   miActionsSearchClicked(Sender: TObject);
+    procedure   miActionsNotesClicked(Sender: TObject);
+    procedure   miActionsHistoryClicked(Sender: TObject);
+    procedure   miActionsBackClicked(Sender: TObject);
+    procedure   miActionsForwardClicked(Sender: TObject);
+    procedure   miActionsPrevTopicClicked(Sender: TObject);
+    procedure   miActionsNextTopicClicked(Sender: TObject);
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miViewExpandAllClicked(Sender: TObject);
     procedure   miViewCollapseAllClicked(Sender: TObject);
@@ -296,6 +306,26 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.miActionsBackClicked(Sender: TObject);
+begin
+  btnBack.Click;
+end;
+
+procedure TMainForm.miActionsForwardClicked(Sender: TObject);
+begin
+  btnFwd.Click;
+end;
+
+procedure TMainForm.miActionsPrevTopicClicked(Sender: TObject);
+begin
+  btnPrev.Click;
+end;
+
+procedure TMainForm.miActionsNextTopicClicked(Sender: TObject);
+begin
+  btnNext.Click;
 end;
 
 procedure TMainForm.Splitter1DoubleClicked(Sender: TObject;
@@ -604,6 +634,31 @@ end;
 procedure TMainForm.miFileCloseClicked(Sender: TObject);
 begin
   CloseFile;
+end;
+
+procedure TMainForm.miActionsContentsClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsContents;
+end;
+
+procedure TMainForm.miActionsIndexClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsIndex;
+end;
+
+procedure TMainForm.miActionsSearchClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsSearch;
+end;
+
+procedure TMainForm.miActionsNotesClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsNotes;
+end;
+
+procedure TMainForm.miActionsHistoryClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsHistory;
 end;
 
 procedure TMainForm.miConfigureClicked(Sender: TObject);
@@ -3121,15 +3176,32 @@ begin
   begin
     Name := 'miFile';
     SetPosition(292, 96, 132, 20);
-    AddMenuItem('Open...', 'Ctrl+O', @miFileOpenClicked);
-    AddMenuItem('Open additional file...', 'Ctrl+Shift+O', @miFileOpenAdditionalFileClicked);
-    AddMenuItem('Open Special...', 'Ctrl+L', @miFileOpenSpecialClicked);
-    AddMenuItem('Save current Topic to IPF...', 'Ctrl+S', @miFileSaveTopicAsIPF);
-    AddMenuItem('Close', 'Ctrl+W', @miFileCloseClicked);
-    AddMenuitem('-', '', nil);
+    AddMenuItem('Open...', rsKeyCtrl+'O', @miFileOpenClicked);
+    AddMenuItem('Open additional file...', rsKeyCtrl+rsKeyShift+'O', @miFileOpenAdditionalFileClicked);
+    AddMenuItem('Open Special...', rsKeyCtrl+'L', @miFileOpenSpecialClicked);
+    AddMenuItem('Save current Topic to IPF...', rsKeyCtrl+'S', @miFileSaveTopicAsIPF);
+    AddMenuItem('Close', rsKeyCtrl+'W', @miFileCloseClicked);
+    AddSeparator;
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
     AddMenuitem('-', '', nil);
     AddMenuItem('Quit', 'Ctrl+Q', @miFileQuitClicked);
+  end;
+
+  miActions := TfpgPopupMenu.Create(self);
+  with miActions do
+  begin
+    Name := 'miActions';
+    SetPosition(282, 96, 132, 20);
+    AddMenuItem('Contents', 'F5', @miActionsContentsClicked);
+    AddMenuItem('Index', 'F6', @miActionsIndexClicked);
+    AddMenuItem('Search', 'F7', @miActionsSearchClicked);
+    AddMenuItem('Notes', 'F8', @miActionsNotesClicked);
+    AddMenuItem('History', 'F9', @miActionsHistoryClicked);
+    AddSeparator;
+    AddMenuItem('Back', rsKeyCtrl+'Left', @miActionsBackClicked);
+    AddMenuItem('Forward', rsKeyCtrl+'Right', @miActionsForwardClicked);
+    AddMenuItem('Previous Topic', rsKeyCtrl+'Up', @miActionsPrevTopicClicked);
+    AddMenuItem('Next Topic', rsKeyCtrl+'Down', @miActionsNextTopicClicked);
   end;
 
   miSettings := TfpgPopupMenu.Create(self);
@@ -3145,8 +3217,10 @@ begin
   begin
     Name := 'miBookmarks';
     SetPosition(292, 144, 132, 20);
-    AddMenuItem('Add', '', @btnBookmarkClick);
-    AddMenuItem('Edit...', '', @miOpenBookmarksMenuClicked);
+    AddMenuItem('Add', rsKeyCtrl+'B', @btnBookmarkClick);
+    AddMenuItem('Edit...', rsKeyCtrl+'D', @miOpenBookmarksMenuClicked);
+    AddSeparator;
+    AddMenuItem('Add note at cursor position', rsKeyCtrl+'M', @btnNotesAddClick);
   end;
 
   miView := TfpgPopupMenu.Create(self);
@@ -3156,7 +3230,7 @@ begin
     SetPosition(292, 216, 132, 20);
     AddMenuItem('Expand All', '', @miViewExpandAllClicked);
     AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Topic Properties', '', @miTopicPropertiesClicked);
   end;
 
@@ -3180,9 +3254,9 @@ begin
   begin
     Name := 'miHelp';
     SetPosition(292, 168, 132, 20);
-    AddMenuItem('Help using DocView', '', @miHelpUsingDocView);
-    AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
-    AddMenuItem('-', '', nil);
+    AddMenuItem('Help using DocView', rsKeyCtrl+'F1', @miHelpUsingDocView);
+    AddMenuItem('Command line parameters', rsKeyCtrl+rsKeyShift+'F1', @miHelpCmdLineParams);
+    AddSeparator;
     AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
   end;
@@ -3418,6 +3492,7 @@ begin
   // hook up the sub-menus.
   MainMenu.AddMenuItem('&File', nil).SubMenu := miFile;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := miSettings;
+  MainMenu.AddMenuItem('&Actions', nil).SubMenu := miActions;
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
   MainMenu.AddMenuItem('&Tools', nil).SubMenu := miTools;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
