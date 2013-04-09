@@ -2,6 +2,33 @@
   Release notes for fpGUI
   =======================
 
+v1.0 (2013-04-09)
+  - Docview improvements: Bookmark maintenance, keyboard shortcuts,
+    image support in INF files, cross link support.
+  - Many improvements to the experimental Maximus IDE.
+  - More widget themeing improvements.
+  - Keyboard shortcut handling improvements.
+  - AggPas 2D graphics library merged into fpGUI as a new
+    cross-platform graphics backend. This is the first step in
+    adding AggPas support, and this is still work in progress, but
+    most functionality works already. Also added some 64-bit fixes
+    to the AggPas code.
+  - Many PDF report engine improvements. Also enhanced the look and
+    functionality of the Print Preview dialog.
+  - Lots more documentation added. This is an ongoing task.
+  - Big improvements to the TextEdit widget, that is used by Maximus
+    and the Nanoedit example project.
+  - Many improvements to the RichView component and it's supported
+    syntax - used by Docview. This widget is now also useable
+    in other projects, not just Docview.
+  - Improved fpGUI language translations.
+  - The UI Designer (forms designer) has also seen many improvements,
+    like new widgets added to the palette, more published properties
+    added to the Object Inspector window etc.
+  - Many, many more bug fixes and improvements. For a full list run:
+      git log v1.0...v0.8
+
+
 v0.8 (2011-12-02)
   - New widget demos and many improvements to existing demos.
   - New application examples
