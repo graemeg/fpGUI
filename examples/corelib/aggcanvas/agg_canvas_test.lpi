@@ -4,11 +4,13 @@
     <Version Value="9"/>
     <General>
       <Flags>
-        <SaveOnlyProjectUnits Value="True"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
         <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <Title Value="agg_canvas_test"/>
     </General>
     <VersionInfo>
       <StringTable ProductVersion=""/>
@@ -32,48 +34,18 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="1">
       <Unit0>
-        <Filename Value="docedit.lpr"/>
+        <Filename Value="agg_canvas_test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="docedit"/>
+        <UnitName Value="agg_canvas_test"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="frm_main.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_main"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="frm_options.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_options"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="model.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="model"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="fpdeutil.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="FPDEUtil"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="doceditmsg.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="doceditmsg"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="doceditopts.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="doceditopts"/>
-      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="docedit"/>
+      <Filename Value="agg_canvas_test"/>
     </Target>
     <SearchPaths>
       <UnitOutputDirectory Value="units"/>
@@ -83,7 +55,16 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
     <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CustomOptions Value="-dAggCanvas"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

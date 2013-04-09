@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -37,6 +37,9 @@ implementation
 
 uses
   fpg_utils;
+
+
+procedure ReadImage_OS2BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword); forward;
 
 
 function CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
@@ -147,6 +150,13 @@ begin
 
   p         := bmp;
   PByte(bh) := p;
+
+  if bh^.signature = $4d62 then { 'bM' }
+  begin
+    ReadImage_OS2BMP(img, bmp, bmpsize);
+    exit;
+  end;
+
   ppal      := nil;
   if bh^.filesize <> bmpsize then
     Exit; //==>
@@ -314,7 +324,229 @@ begin
       until linecnt >= img.Height;
     end;
     else
-      writeln('Unsupported BMP format!');
+      raise Exception.Create('Unsupported BMP format!');
+  end;
+
+  if ppal <> nil then
+    FreeMem(ppal);
+
+  img.UpdateImage;
+end;
+
+type
+  { These records come from the HelpBitmap unit - part of DocView }
+  INFBITMAPHEADER = packed record
+    // BITMAP FILE HEADER
+    usType: uint16; // = 'bM'
+    cbSize: uint32;
+    xHotspot: uint16;
+    yHotspot: uint16;
+    DataOffset: uint32; // =size(hdr)+size(palette)
+    // BITMAP INFO HEADER
+    cbFIx: uint32; // =size(info_hdr) (usually = 12?)
+    Width: uint16; // width size
+    Height: uint16; // height size
+    cPlanes: uint16; // planes, =1   (always seems to be one)
+    BitCount: uint16;    // bits per pixel
+                          // followed by RGB triples if <= 8bpp
+  end;
+
+
+procedure ReadImage_OS2BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
+var
+  bh: ^INFBITMAPHEADER;
+  p: PByte;
+  ppal: plongword;
+  pcol: Plongword;
+  palsize: integer;
+  pdata: PByte;
+  b: byte;
+  bit: byte;
+  bcnt: byte;
+  linecnt: integer;
+  pixelcnt: integer;
+  pdest: Plongword;
+  depth: integer;
+
+  function GetPalColor(cindex: longword): longword;
+  var
+    pc: Plongword;
+  begin
+    pc     := ppal;
+    Inc(pc, cindex);
+    Result := pc^;
+  end;
+
+begin
+  if img = nil then
+    Exit; //==>
+
+  img.FreeImage;
+
+  ppal      := nil;
+  p         := bmp;
+  PByte(bh) := p;
+
+  pdata := bmp;
+  Inc(pdata, bh^.DataOffset);
+  Inc(p, SizeOf(INFBITMAPHEADER));
+
+  depth := bh^.BitCount;
+
+  if depth > 1 then
+    img.AllocateImage(32, bh^.Width, bh^.Height)// color image (RGB or Indexed)
+  else
+  begin
+    img.AllocateImage(1, bh^.Width, bh^.Height);
+    img.AllocateMask;
+  end;
+
+  if depth <= 8 then
+  begin
+    // reading color palette
+    case depth of
+      1: palsize := 2;
+      4: palsize := 16;
+      else
+        palsize  := 256;
+    end;
+
+    GetMem(ppal, palsize * SizeOf(longword));
+
+    pcol     := ppal;
+    pixelcnt := 0;
+    // OS/2 1.x bitmap with uses 3-byte palette
+    while (p) < (pdata) do
+    begin
+      pcol^ := (LongWord($FF) shl 24) + (LongWord(p[2]) shl 16) + (LongWord(p[1]) shl 8) + LongWord(p[0]);
+      Inc(pcol);
+      inc(p, 3);
+      Inc(pixelcnt);
+    end;
+  end;
+
+  pdest := img.ImageData;
+  Inc(pdest, img.Width * (img.Height - 1));  // bottom-up line order
+  p := bmp;
+  Inc(p, bh^.DataOffset);
+
+  // reading the data...
+  case depth of
+    1:
+    begin
+      // direct line transfer
+      //writeln('reading 1-bit color bitmap');
+      linecnt := 0;
+      bcnt := img.Width div 32;
+      if (img.Width and $1F) > 0 then
+        Inc(bcnt);
+
+      pdest := img.ImageData;
+      Inc(pdest, bcnt * (img.Height - 1));  // bottom-up line order
+      repeat
+        move(p^, pdest^, bcnt * 4);
+        Inc(p, bcnt * 4);
+        Dec(pdest, bcnt);
+        Inc(linecnt);
+      until linecnt >= img.Height;
+
+      //Writeln(linecnt,' lines loaded.');
+      move(img.ImageData^, img.MaskData^, img.ImageDataSize);
+      img.Invert(True);
+    end;
+
+    4:
+    begin
+      //writeln('reading 4-bit color');
+      linecnt := 0;
+      repeat
+        // parse one line..
+        bit      := 0;
+        pixelcnt := 0;
+        bcnt     := 0;
+        repeat
+          if bit = 0 then
+            b := (p^ shr 4) and $0F
+          else
+          begin
+            b := p^ and $0F;
+            Inc(p);
+            Inc(bcnt);
+          end;
+
+          pdest^ := GetPalColor(b);
+          Inc(pdest);
+          Inc(pixelcnt);
+          bit := bit xor 1;
+        until pixelcnt >= img.Width;
+
+        while (bcnt mod 4) <> 0 do
+        begin
+          Inc(bcnt);
+          Inc(p);
+        end;
+
+        Inc(linecnt);
+        Dec(pdest, img.Width * 2);  // go to next line
+      until linecnt >= img.Height;
+    end;
+
+    8:
+    begin
+      //writeln('reading 8-bit color');
+      linecnt := 0;
+      repeat
+        // parse one line..
+        pixelcnt := 0;
+        repeat
+          pdest^ := GetPalColor(p^);
+          Inc(p);
+          Inc(pdest);
+          Inc(pixelcnt);
+        until pixelcnt >= img.Width;
+
+        while (pixelcnt mod 4) <> 0 do
+        begin
+          Inc(pixelcnt);
+          Inc(p);
+        end;
+
+        Inc(linecnt);
+        Dec(pdest, img.Width * 2);  // go to next line
+      until linecnt >= img.Height;
+    end;
+
+    24:
+    begin
+      //writeln('reading truecolor');
+      linecnt := 0;
+      repeat
+        // parse one line..
+        pixelcnt := 0;
+        repeat
+          pdest^ := p^;
+          Inc(p);
+          pdest^ := pdest^ or (longword(p^) shl 8);
+          Inc(p);
+          pdest^ := pdest^ or (longword(p^) shl 16) or ($FF shl 24) {alpha set to full opaque};
+          Inc(p);
+          Inc(pdest);
+          Inc(pixelcnt);
+        until pixelcnt >= img.Width;
+
+        pixelcnt := img.Width * 3;
+        while (pixelcnt mod 4) <> 0 do
+        begin
+          Inc(pixelcnt);
+          Inc(p);
+        end;
+
+        Inc(linecnt);
+        Dec(pdest, img.Width * 2);  // go to next line
+      until linecnt >= img.Height;
+    end;
+    else
+      raise Exception.Create('Unsupported BMP format!');
   end;
 
   if ppal <> nil then

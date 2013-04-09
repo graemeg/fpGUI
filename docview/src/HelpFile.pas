@@ -321,29 +321,6 @@ const
     entries.AddObject(anIndexEntry.getLabel, anIndexEntry);
   end;
 
-
-
-
-//Procedure OnLanguageEvent( Language: TLanguageFile;
-//                           const Apply: boolean );
-//var
-//  tmpPrefix : String;
-//begin
-//  tmpPrefix := 'HelpFile' + LANGUAGE_LABEL_DELIMITER;
-//
-//  Language.LL( Apply, FileErrorNotFound, tmpPrefix + 'FileErrorNotFound', 'File not found' );
-//  Language.LL( Apply, FileErrorAccessDenied, tmpPrefix + 'FileErrorAccessDenied', 'Access denied' );
-//  Language.LL( Apply, FileErrorInUse, tmpPrefix + 'FileErrorInUse', 'File in use by another program' );
-//  Language.LL( Apply,
-//               FileErrorInvalidHeader,
-//               tmpPrefix + 'FileErrorInvalidHeader',
-//               'File doesn''t appear to be an OS/2 Help document (header ID not correct)' );
-//  Language.LL( Apply,
-//               ErrorCorruptHelpFile,
-//               tmpPrefix + 'ErrorCorruptHelpFile',
-//               'File is corrupt' );
-//end;
-
 Function TopicFile( Topic: TTopic ): THelpFile;
 Begin
   Result := Topic.HelpFile as THelpFile;
@@ -1119,9 +1096,7 @@ begin
                                          + ': '
                                          + e.Message );}
       begin
-//        Bitmap := THelpBitmap.Create;
         Bitmap := THelpBitmap(fpgImages.GetImage('stdimg.dlg.critical'));
-//        Bitmap.LoadFromResourceName( 'MissingBitmap' );  // TODO: Add image resource to DocView
       end;
     end;
 

@@ -36,6 +36,7 @@ const
   NOTES_FILE_EXTENSION = ExtensionSeparator + 'notes';
   BOOKMARK_FILE_EXTENSION = ExtensionSeparator + 'bookmark';
   BOOKMARK_SECTION = '[BOOKMARK]';
+  OWN_HELP_MARKER = '[DOCVIEWHELP]';
   cDocViewHelpFile = 'docview.inf';
 
 
@@ -59,6 +60,18 @@ resourcestring
 const
   hcConfigGeneralTab               = 510;
   hcConfigFontsColorTab            = 520;
+
+const
+  PARAM_LINK_NOTE = 'note';
+  PARAM_LINK_PROGRAM = 'program';
+  PARAM_LINK_URL = 'url';
+  PARAM_LINK_EXTERNAL = 'external';
+
+  PRGM_EXPLORER = 'explore'; // web explorer
+  PRGM_NETSCAPE = 'netscape';
+  PRGM_MOZILLA = 'mozilla';
+  PRGM_FIREFOX = 'firefox';
+
 
 
 implementation

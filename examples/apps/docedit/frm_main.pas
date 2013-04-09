@@ -63,7 +63,9 @@ type
 implementation
 
 uses
-  fpg_dialogs, frm_options;
+  fpg_dialogs,
+  fpg_constants,
+  frm_options;
   
   
 const
