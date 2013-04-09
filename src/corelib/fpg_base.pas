@@ -599,6 +599,7 @@ type
   TFileEntryType = (etFile, etDir);
   TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
   TFileModeString = string[9];
+  TfpgSearchMode = (smAny, smFiles, smDirs);
 
 
   // A simple data object
@@ -638,6 +639,7 @@ type
     FEntries: TList;
     FDirectoryName: TfpgString;
     FFileMask: TfpgString;
+    FSearchMode: TfpgSearchMode;
     FShowHidden: boolean;
     FCurrentSpecialDir: integer;
     procedure   AddEntry(sr: TSearchRec);
@@ -660,6 +662,7 @@ type
     property    Entry[i: integer]: TFileEntry read GetEntry;
     property    FileMask: TfpgString read FFileMask write FFileMask;
     property    HasFileMode: boolean read FHasFileMode;
+    property    SearchMode: TfpgSearchMode read FSearchMode write FSearchMode;
     property    ShowHidden: boolean read FShowHidden write FShowHidden;
     property    SpecialDirs: TStringList read FSpecialDirs;
   end;
@@ -2852,6 +2855,7 @@ begin
   FFileMask := '*';
   FDirectoryName := '';
   FSpecialDirs := TStringList.Create;
+  FSearchMode := smAny;
 end;
 
 destructor TfpgFileListBase.Destroy;
@@ -2898,11 +2902,13 @@ begin
     // Reported to FPC as bug 9440 in Mantis.
     if fpgFindFirst(FDirectoryName + AllFilesMask, faAnyFile or $00000080, SearchRec) = 0 then
     begin
-      AddEntry(SearchRec);
-      while fpgFindNext(SearchRec) = 0 do
-      begin
-        AddEntry(SearchRec);
-      end;
+      repeat
+        if (FSearchMode=smAny) or
+           ((FSearchMode=smFiles) and (not HasAttrib(SearchRec.Attr, faDirectory))) or
+           ((FSearchMode=smDirs) and HasAttrib(SearchRec.Attr, faDirectory))
+        then
+          AddEntry(SearchRec);
+      until fpgFindNext(SearchRec) <> 0;
     end;
     Result:=True;
   finally
