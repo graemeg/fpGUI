@@ -1868,74 +1868,77 @@ var
   OldSelection: TfpgTreeNode;
 begin
   OldSelection := Selection;
-  case KeyCode of
-    keyRight:
-      begin
-        Consumed := True;
-        Selection.Expand;
-        DoExpand(Selection);
-        ResetScrollbar;
-        RePaint;
-      end;
+  if ShiftState = [] then
+  begin
+    case KeyCode of
+      keyRight:
+        begin
+          Consumed := True;
+          Selection.Expand;
+          DoExpand(Selection);
+          ResetScrollbar;
+          RePaint;
+        end;
 
-    keyLeft:
-      begin
-        Consumed := True;
-        Selection.Collapsed := true;
-        ResetScrollbar;
-        RePaint;
-      end;
+      keyLeft:
+        begin
+          Consumed := True;
+          Selection.Collapsed := true;
+          ResetScrollbar;
+          RePaint;
+        end;
 
-    keyUp:
-      begin
-        if Selection = nil then
-          Selection := RootNode.FirstSubNode
-        else
-          if Selection <> RootNode then
+      keyUp:
+        begin
+          if Selection = nil then
+            Selection := RootNode.FirstSubNode
+          else
+            if Selection <> RootNode then
+            begin
+              if NodeIsVisible(selection) then
+              begin
+                h := PrevVisualNode(Selection);
+                if (h <> RootNode) and (h <> nil) then
+                  Selection := h;
+              end
+              else
+              begin
+                Selection := RootNode.FirstSubNode;
+              end;
+            end;
+            Consumed := True;
+        end;
+
+      keyDown:
+        begin
+          Consumed := True;
+          if Selection = nil then
+            Selection := RootNode.FirstSubNode
+          else
           begin
             if NodeIsVisible(selection) then
             begin
-              h := PrevVisualNode(Selection);
-              if (h <> RootNode) and (h <> nil) then
+              h := NextVisualNode(Selection);
+              if (h <> nil) then
                 Selection := h;
             end
             else
-            begin
               Selection := RootNode.FirstSubNode;
-            end;
           end;
-          Consumed := True;
-      end;
-
-    keyDown:
-      begin
-        Consumed := True;
-        if Selection = nil then
-          Selection := RootNode.FirstSubNode
-        else
-        begin
-          if NodeIsVisible(selection) then
-          begin
-            h := NextVisualNode(Selection);
-            if (h <> nil) then
-              Selection := h;
-          end
-          else
-            Selection := RootNode.FirstSubNode;
         end;
-      end;
 
-    keyPageUp:
-      begin
-        FVScrollbar.PageUp;
-      end;
+      keyPageUp:
+        begin
+          FVScrollbar.PageUp;
+        end;
 
-    keyPageDown:
-      begin
-        FVScrollbar.PageDown;
-      end;
-    else
-      Consumed := False;
+      keyPageDown:
+        begin
+          FVScrollbar.PageDown;
+        end;
+      else
+        Consumed := False;
+    end;
   end;
 
   if Selection <> OldSelection then

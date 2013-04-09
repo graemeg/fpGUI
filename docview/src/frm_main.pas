@@ -58,6 +58,7 @@ type
     RichView: TRichTextView;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
+    miActions: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miView: TfpgPopupMenu;
@@ -129,9 +130,19 @@ type
     procedure   miFileOpenAdditionalFileClicked(Sender: TObject);
     procedure   miFileOpenSpecialClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
+    procedure   miActionsContentsClicked(Sender: TObject);
+    procedure   miActionsIndexClicked(Sender: TObject);
+    procedure   miActionsSearchClicked(Sender: TObject);
+    procedure   miActionsNotesClicked(Sender: TObject);
+    procedure   miActionsHistoryClicked(Sender: TObject);
+    procedure   miActionsBackClicked(Sender: TObject);
+    procedure   miActionsForwardClicked(Sender: TObject);
+    procedure   miActionsPrevTopicClicked(Sender: TObject);
+    procedure   miActionsNextTopicClicked(Sender: TObject);
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miViewExpandAllClicked(Sender: TObject);
     procedure   miViewCollapseAllClicked(Sender: TObject);
+    procedure   miOpenBookmarksMenuClicked(Sender: TObject);
     procedure   miBookmarksMenuItemClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
@@ -234,7 +245,6 @@ type
     procedure   ClearBookmarks;
     procedure   OnBookmarksChanged(Sender: TObject);
     procedure   BuildBookmarksMenu;
-    procedure   UpdateBookmarksDisplay;
     procedure   NavigateToBookmark(Bookmark: TBookmark);
   public
     constructor Create(AOwner: TComponent); override;
@@ -265,7 +275,7 @@ uses
   ,frm_configuration
   ,frm_text
   ,frm_note
-  ,NewViewConstantsUnit
+  ,frm_bookmarks
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit
@@ -296,6 +306,26 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.miActionsBackClicked(Sender: TObject);
+begin
+  btnBack.Click;
+end;
+
+procedure TMainForm.miActionsForwardClicked(Sender: TObject);
+begin
+  btnFwd.Click;
+end;
+
+procedure TMainForm.miActionsPrevTopicClicked(Sender: TObject);
+begin
+  btnPrev.Click;
+end;
+
+procedure TMainForm.miActionsNextTopicClicked(Sender: TObject);
+begin
+  btnNext.Click;
 end;
 
 procedure TMainForm.Splitter1DoubleClicked(Sender: TObject;
@@ -420,9 +450,12 @@ end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
 var
+  LinkDetails: TfpgString;
   LinkIndex: integer;
   lLink: THelpLink;
   lHelp: THelpFile;
+  f: THelpFile;
+  lHelpFileName: TfpgString;
   i: integer;
   lTopic: TTopic;
   lFound: Boolean;
@@ -441,7 +474,32 @@ begin
   end
   else if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
-    TfpgMessageDialog.Warning('', 'External links are not supported in DocView yet. Please try again with a later build.')
+    LinkDetails := StrRightFrom( Link, 10 );    // 10 is starting pos of data, after 'external '
+    LinkIndex := StrToInt( ExtractNextValue( LinkDetails, ' ' ) );
+    lHelp := CurrentTopic.HelpFile as THelpFile;
+
+    lHelpFileName := lHelp.ReferencedFiles[ LinkIndex ];
+
+    { Only open the external file once. So see if it is already openned. }
+    lFound := False;
+    for i := 0 to CurrentOpenFiles.Count-1 do
+    begin
+      f := THelpFile(CurrentOpenFiles[i]);
+      if SameText(fpgExtractFileName(f.Filename), lHelpFileName) then
+        lFound := True;
+    end;
+    if not lFound then
+    begin
+      OpenAdditionalFile := True;
+      OpenFile(lHelpFileName, '', false);
+      OpenAdditionalFile := False;
+    end;
+
+    { Not sure if we have an ID or Resource Name, so lets try both if possible }
+    if TryStrToInt(LinkDetails, i) then
+      DisplayTopicByResourceID(i)
+    else
+      DisplayTopicByName(LinkDetails);
   end
   else if pos(PARAM_LINK_URL, Link) > 0 then
   begin
@@ -578,6 +636,31 @@ begin
   CloseFile;
 end;
 
+procedure TMainForm.miActionsContentsClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsContents;
+end;
+
+procedure TMainForm.miActionsIndexClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsIndex;
+end;
+
+procedure TMainForm.miActionsSearchClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsSearch;
+end;
+
+procedure TMainForm.miActionsNotesClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsNotes;
+end;
+
+procedure TMainForm.miActionsHistoryClicked(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsHistory;
+end;
+
 procedure TMainForm.miConfigureClicked(Sender: TObject);
 begin
   ShowConfigForm;
@@ -592,6 +675,21 @@ end;
 procedure TMainForm.miViewCollapseAllClicked(Sender: TObject);
 begin
   tvContents.FullCollapse;
+end;
+
+procedure TMainForm.miOpenBookmarksMenuClicked(Sender: TObject);
+var
+  frm: TBookmarksForm;
+begin
+  frm := TBookmarksForm.Create(nil);
+  try
+    frm.BookmarkList := Bookmarks;
+    frm.OnGotoBookmark := @NavigateToBookmark;
+    frm.OnBookmarksChanged := @OnBookmarksChanged;
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.miBookmarksMenuItemClicked(Sender: TObject);
@@ -2465,8 +2563,7 @@ begin
 
   if ImageIndices.Count > 0 then
   begin
-  { TODO -oGraeme : We do not support images yet }
-//   THelpFile(CurrentTopic.HelpFile).GetImages(ImageIndices, FImages);
+    THelpFile(CurrentTopic.HelpFile).GetImages(ImageIndices, FImages);
   end;
 
   ImageIndices.Free;
@@ -2531,6 +2628,7 @@ var
 begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
+  fpgApplication.HelpFile := cDocViewHelpFile;
   OnShow  := @MainFormShow;
   OnDestroy := @MainFormDestroy;
 //  Files := TList.Create;
@@ -3078,15 +3176,32 @@ begin
   begin
     Name := 'miFile';
     SetPosition(292, 96, 132, 20);
-    AddMenuItem('Open...', 'Ctrl+O', @miFileOpenClicked);
-    AddMenuItem('Open additional file...', 'Ctrl+Shift+O', @miFileOpenAdditionalFileClicked);
-    AddMenuItem('Open Special...', 'Ctrl+L', @miFileOpenSpecialClicked);
-    AddMenuItem('Save current Topic to IPF...', 'Ctrl+S', @miFileSaveTopicAsIPF);
-    AddMenuItem('Close', 'Ctrl+W', @miFileCloseClicked);
-    AddMenuitem('-', '', nil);
+    AddMenuItem('Open...', rsKeyCtrl+'O', @miFileOpenClicked);
+    AddMenuItem('Open additional file...', rsKeyCtrl+rsKeyShift+'O', @miFileOpenAdditionalFileClicked);
+    AddMenuItem('Open Special...', rsKeyCtrl+'L', @miFileOpenSpecialClicked);
+    AddMenuItem('Save current Topic to IPF...', rsKeyCtrl+'S', @miFileSaveTopicAsIPF);
+    AddMenuItem('Close', rsKeyCtrl+'W', @miFileCloseClicked);
+    AddSeparator;
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
     AddMenuitem('-', '', nil);
     AddMenuItem('Quit', 'Ctrl+Q', @miFileQuitClicked);
+  end;
+
+  miActions := TfpgPopupMenu.Create(self);
+  with miActions do
+  begin
+    Name := 'miActions';
+    SetPosition(282, 96, 132, 20);
+    AddMenuItem('Contents', 'F5', @miActionsContentsClicked);
+    AddMenuItem('Index', 'F6', @miActionsIndexClicked);
+    AddMenuItem('Search', 'F7', @miActionsSearchClicked);
+    AddMenuItem('Notes', 'F8', @miActionsNotesClicked);
+    AddMenuItem('History', 'F9', @miActionsHistoryClicked);
+    AddSeparator;
+    AddMenuItem('Back', rsKeyCtrl+'Left', @miActionsBackClicked);
+    AddMenuItem('Forward', rsKeyCtrl+'Right', @miActionsForwardClicked);
+    AddMenuItem('Previous Topic', rsKeyCtrl+'Up', @miActionsPrevTopicClicked);
+    AddMenuItem('Next Topic', rsKeyCtrl+'Down', @miActionsNextTopicClicked);
   end;
 
   miSettings := TfpgPopupMenu.Create(self);
@@ -3102,8 +3217,10 @@ begin
   begin
     Name := 'miBookmarks';
     SetPosition(292, 144, 132, 20);
-    AddMenuItem('Add..', '', nil).Enabled := False;
-    AddMenuItem('Show', '', nil).Enabled := False;
+    AddMenuItem('Add', rsKeyCtrl+'B', @btnBookmarkClick);
+    AddMenuItem('Edit...', rsKeyCtrl+'D', @miOpenBookmarksMenuClicked);
+    AddSeparator;
+    AddMenuItem('Add note at cursor position', rsKeyCtrl+'M', @btnNotesAddClick);
   end;
 
   miView := TfpgPopupMenu.Create(self);
@@ -3113,7 +3230,7 @@ begin
     SetPosition(292, 216, 132, 20);
     AddMenuItem('Expand All', '', @miViewExpandAllClicked);
     AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Topic Properties', '', @miTopicPropertiesClicked);
   end;
 
@@ -3137,9 +3254,9 @@ begin
   begin
     Name := 'miHelp';
     SetPosition(292, 168, 132, 20);
-    AddMenuItem('Help using DocView', '', @miHelpUsingDocView);
-    AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
-    AddMenuItem('-', '', nil);
+    AddMenuItem('Help using DocView', rsKeyCtrl+'F1', @miHelpUsingDocView);
+    AddMenuItem('Command line parameters', rsKeyCtrl+rsKeyShift+'F1', @miHelpCmdLineParams);
+    AddSeparator;
     AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
   end;
@@ -3375,6 +3492,7 @@ begin
   // hook up the sub-menus.
   MainMenu.AddMenuItem('&File', nil).SubMenu := miFile;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := miSettings;
+  MainMenu.AddMenuItem('&Actions', nil).SubMenu := miActions;
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
   MainMenu.AddMenuItem('&Tools', nil).SubMenu := miTools;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
@@ -3842,7 +3960,6 @@ end;
 procedure TMainForm.OnBookmarksChanged(Sender: TObject);
 begin
   BuildBookmarksMenu;
-//  UpdateBookmarksForm;
   SaveBookmarks;
 end;
 
@@ -3868,33 +3985,6 @@ begin
     MenuItem.Tag:= i;
     BookmarksMenuItems.Add( MenuItem );
   end;
-end;
-
-procedure TMainForm.UpdateBookmarksDisplay;
-var
-  i: integer;
-  Bookmark: TBookmark;
-Begin
-(*
-  BookmarksListBox.Items.BeginUpdate;
-  BookmarksListBox.Clear;
-
-  if not Assigned( BookmarkList ) then
-    exit;
-
-  for i := 0 to BookmarkList.Count - 1 do
-  begin
-    Bookmark := BookmarkList[ i ];
-    BookmarksListBox.Items.AddObject( Bookmark.Name,
-                                      Bookmark );
-  end;
-
-  if BookmarksListBox.Items.Count > 0 then
-    BookmarksListBox.ItemIndex := 0;
-
-  BookmarksListBox.Items.EndUpdate;
-  UpdateControls;
-*)
 end;
 
 procedure TMainForm.NavigateToBookmark(Bookmark: TBookmark);
