@@ -29,6 +29,7 @@ type
 		constructor Create(AOwner: TComponent); override;
 		destructor Destroy; override;
 		function AddWindow(AWindowClass: TfpgFrameClass): TfpgFrame;
+    procedure CascadeWindows;
 		property ActiveWindow: TfpgMDIChildForm read FActiveWindow write SetActiveWindow;
 		property ChildWindowCount: integer read GetChildWindowCount;
 	end;
@@ -432,6 +433,35 @@ begin
 	frm.SetClientFrame(Result);
 	FList.Add(frm);
 	ActiveWindow := frm;
+end;
+
+procedure TfpgMDIWorkArea.CascadeWindows;
+const
+  GAP = 25;
+var
+  w: integer;
+  i: integer;
+  c: TfpgMDIChildForm;
+  x, y: integer;
+begin
+  x := 5;
+  y := 5;
+  for i := 0 to ComponentCount -1 do
+  begin
+    if Components[i] is TfpgScrollBar then
+      continue;
+    if Components[i] is TfpgMDIChildForm then
+    begin
+      c := Components[i] as TfpgMDIChildForm;
+      c.Left := x;
+      x += GAP;
+      c.Top := y;
+      y += GAP;
+      c.UpdateWindowPosition;
+      c.BringToFront;
+    end;
+  end;
+  ActiveWindow := c;
 end;
 
 end.
