@@ -55,7 +55,7 @@ type
 		FIsMouseDown: boolean;
 		FLastPos: TPoint;
 		FActive: boolean;
-		procedure SetWindowTitle(AValue: TfpgString);
+		procedure SetWindowTitle(AValue: TfpgString); reintroduce;
 		procedure TitleMouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
 		procedure TitleMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 		procedure TitleMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);

@@ -5,7 +5,7 @@ unit frm_child;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_edit,
+  SysUtils, Classes, fpg_base, fpg_main, fpg_button, fpg_edit,
   fpg_checkbox, fpg_radiobutton, fpg_gauge, fpg_mdi, fpg_panel, fpg_trackbar;
 
 type
@@ -25,7 +25,7 @@ type
 		FWindowTitle: TfpgString;
 		procedure btnCloseClicked(Sender: TObject);
 		procedure TrackBarChanged(Sender: TObject; APosition: integer);
-		procedure SetWindowTitle(AValue: TfpgString);
+		procedure SetWindowTitle(const ATitle: TfpgString); reintroduce;
 	public
 		procedure AfterCreate; override;
 		property WindowTitle: TfpgString read FWindowTitle write SetWindowTitle;
@@ -46,11 +46,11 @@ begin
 	Gauge1.Progress := APosition;
 end;
 
-procedure TChildForm.SetWindowTitle(AValue: TfpgString);
+procedure TChildForm.SetWindowTitle(const ATitle: TfpgString);
 begin
-	if FWindowTitle = AValue then
+	if FWindowTitle = ATitle then
 		Exit;
-	FWindowTitle := AValue;
+	FWindowTitle := ATitle;
 	TfpgMDIChildForm(Owner.Owner).WindowTitle := FWindowTitle;
 end;
 
