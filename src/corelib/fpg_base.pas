@@ -213,6 +213,13 @@ type
   PfpgMessageRec = ^TfpgMessageRec;
 
 
+  TfpgMoveEventRec = record
+    Sender: TObject;
+    x: TfpgCoord;
+    y: TfpgCoord;
+  end;
+
+
   TfpgLineStyle = (lsSolid, lsDash, lsDot, lsDashDot, lsDashDotDot);
 
 
