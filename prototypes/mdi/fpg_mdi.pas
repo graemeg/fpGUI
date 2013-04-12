@@ -9,7 +9,10 @@ uses
   fpg_button;
 
 type
-	// forward declarations
+
+  TfpgMDIChildMoveEvent = procedure(Sender: TObject; const rec: TfpgMoveEventRec) of object;
+
+  // forward declarations
 	TfpgMDIChildForm = class;
 
 
@@ -55,6 +58,7 @@ type
 		FIsMouseDown: boolean;
 		FLastPos: TPoint;
 		FActive: boolean;
+    FOnMove: TfpgMDIChildMoveEvent;
 		procedure SetWindowTitle(AValue: TfpgString); reintroduce;
 		procedure TitleMouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
 		procedure TitleMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -62,7 +66,9 @@ type
 		procedure TitleMouseExit(Sender: TObject);
 		procedure CloseMDIWindowClicked(Sender: TObject);
 		procedure SetActive(AValue: boolean);
+    procedure DoOnMove(const x, y: TfpgCoord);
 	protected
+    procedure HandleMove(x, y: TfpgCoord); override;
 		property Active: boolean read FActive write SetActive;
 	public
 		constructor Create(AOwner: TfpgMDIWorkArea); reintroduce;
@@ -70,6 +76,8 @@ type
 		procedure SetClientFrame(AFrame: TfpgFrame);
 		procedure UpdateWindowTitle;
 		procedure Close;
+  published
+    property OnMove: TfpgMDIChildMoveEvent read FOnMove write FOnMove;
 	end;
 
 implementation
@@ -149,6 +157,25 @@ begin
 		Bevel2.BackgroundColor := clMedGray;
 		Bevel4.BackgroundColor := clMedGray;
 	end;
+end;
+
+procedure TfpgMDIChildForm.DoOnMove(const x, y: TfpgCoord);
+var
+  rec: TfpgMoveEventRec;
+begin
+  if Assigned(FOnMove) then
+  begin
+    rec.Sender := self;
+    rec.x := x;
+    rec.y := y;
+    FOnMove(self, rec);
+  end;
+end;
+
+procedure TfpgMDIChildForm.HandleMove(x, y: TfpgCoord);
+begin
+  inherited HandleMove(x, y);
+  DoOnMove(x, y);
 end;
 
 procedure TfpgMDIChildForm.SetWindowTitle(AValue: TfpgString);
