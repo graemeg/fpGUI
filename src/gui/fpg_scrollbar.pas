@@ -363,8 +363,6 @@ var
   area: TfpgCoord;
   mm: TfpgCoord;
 begin
-//  Canvas.BeginDraw;
-
   if SliderSize > 1 then
     SliderSize := 1;
 
@@ -436,15 +434,9 @@ begin
 
   // Paint the slider button
   if Orientation = orVertical then
-  begin
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
-//    Canvas.EndDraw(0, Width, Width, Height - Width - Width);
-  end
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded])
   else
-  begin
     Canvas.DrawButtonFace(Height + FSliderPos, 0, FSliderLength, Height, [btfIsEmbedded]);
-//    Canvas.EndDraw(Height, 0, Width - Height - Height, Height);
-  end;
 end;
 
 procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
