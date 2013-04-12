@@ -11,7 +11,7 @@ object RadioButtonForm: TRadioButtonForm
       object ButtonBox1: TFBoxLayout
         Orientation = Vertical
         object Radio1a: TFRadioButton
-	        Checked = True
+          Checked = True
           Text = 'Button 1 a'
         end
         object Radio1b: TFRadioButton
@@ -24,7 +24,7 @@ object RadioButtonForm: TRadioButtonForm
           Text = 'Button 2 a'
         end
         object Radio2b: TFRadioButton
-	        Checked = True
+          Checked = True
           Text = 'Button 2 b'
         end
       end

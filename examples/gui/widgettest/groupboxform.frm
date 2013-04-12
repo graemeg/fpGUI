@@ -9,40 +9,40 @@ object GroupBoxForm: TGroupBoxForm
         Orientation = Vertical
         object GrayCheckBox: TFCheckBox
           Text = 'Gray other group box'
-	  OnClick = GrayCheckBoxClick
+          OnClick = GrayCheckBoxClick
         end
         object Button: TFButton
-	  Enabled = False
+          Enabled = False
           Text = 'Reset radio buttons'
-	  OnClick = ButtonClick
-	end
+          OnClick = ButtonClick
+        end
       end
     end
     object GroupBox2: TFGroupBox
       Text = 'Group box #2'
       object VertBox2: TFBoxLayout
         Orientation = Vertical
-	object Radio1: TFRadioButton
-	  Checked = True
-	  Text = 'Option 1'
-	  OnClick = RadioButtonClick
-	end
-	object Radio2: TFRadioButton
-	  Text = 'Option 2'
-	  OnClick = RadioButtonClick
-	end
-	object Radio3: TFRadioButton
-	  Text = 'Option 3'
-	  OnClick = RadioButtonClick
-	end
-	object Radio4: TFRadioButton
-	  Text = 'Option 4'
-	  OnClick = RadioButtonClick
-	end
-	object Radio5: TFRadioButton
-	  Text = 'Option 5'
-	  OnClick = RadioButtonClick
-	end
+        object Radio1: TFRadioButton
+          Checked = True
+          Text = 'Option 1'
+          OnClick = RadioButtonClick
+        end
+        object Radio2: TFRadioButton
+          Text = 'Option 2'
+          OnClick = RadioButtonClick
+        end
+        object Radio3: TFRadioButton
+          Text = 'Option 3'
+          OnClick = RadioButtonClick
+        end
+        object Radio4: TFRadioButton
+          Text = 'Option 4'
+          OnClick = RadioButtonClick
+        end
+        object Radio5: TFRadioButton
+          Text = 'Option 5'
+          OnClick = RadioButtonClick
+        end
       end
     end
   end

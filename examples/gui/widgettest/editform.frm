@@ -6,46 +6,46 @@ object EditForm: TEditForm
     RowCount = 5
     GridPositions = <
       item
-	      Widget = Label1
-      end
-      item
-	      x = 1
-	      Widget = Edit1
-      end
-      item
-	      x = 2
-	      Widget = GrayCheckBox1
-      end
-      item
-        y = 1
-	      width = 3
-	      Widget = Separator
-      end
-      item
-        y = 2
-	      Widget = Label2
-      end
-      item
-	      x = 1
-        y = 2
-	      Widget = Edit2
-      end
-      item
-	      x = 2
-        y = 2
-	      Widget = GrayCheckBox2
+        Widget = Label1
       end
       item
         x = 1
-	      y = 3
-	      Widget = PasswordDisplay
+        Widget = Edit1
       end
       item
-	      Widget = cbBorderStyle
         x = 2
-	      y = 4
-	      Width = 1
-	      Height = 1
+        Widget = GrayCheckBox1
+      end
+      item
+        y = 1
+        width = 3
+        Widget = Separator
+      end
+      item
+        y = 2
+        Widget = Label2
+      end
+      item
+        x = 1
+        y = 2
+        Widget = Edit2
+      end
+      item
+        x = 2
+        y = 2
+        Widget = GrayCheckBox2
+      end
+      item
+        x = 1
+        y = 3
+        Widget = PasswordDisplay
+      end
+      item
+        Widget = cbBorderStyle
+        x = 2
+        y = 4
+        Width = 1
+        Height = 1
       end>
     object Label1: TFLabel
       Text = 'Normal edit field:'
