@@ -12,20 +12,20 @@ uses
 
 type
 
-	TMainForm = class(TfpgForm)
-	private
-		{@VFD_HEAD_BEGIN: MainForm}
+  TMainForm = class(TfpgForm)
+  private
+    {@VFD_HEAD_BEGIN: MainForm}
     MainBar: TfpgMenuBar;
     MDIWorkArea: TfpgMDIWorkArea;
     Bevel1: TfpgBevel;
     pmChildren: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
-		procedure NewFormClicked(Sender: TObject);
-		procedure miQuitClicked(Sender: TObject);
+    procedure NewFormClicked(Sender: TObject);
+    procedure miQuitClicked(Sender: TObject);
     procedure miCascadeChildWindows(Sender: TObject);
-	public
-		procedure AfterCreate; override;
-	end;
+  public
+    procedure AfterCreate; override;
+  end;
 
 {@VFD_NEWFORM_DECL}
 
@@ -35,13 +35,13 @@ type
 
 procedure TMainForm.NewFormClicked(Sender: TObject);
 begin
-	ChildForm := MDIWorkArea.AddWindow(TChildForm) as TChildForm;
-	ChildForm.WindowTitle := Format('Child %d', [MDIWorkArea.ChildWindowCount]);
+  ChildForm := MDIWorkArea.AddWindow(TChildForm) as TChildForm;
+  ChildForm.WindowTitle := Format('Child %d', [MDIWorkArea.ChildWindowCount]);
 end;
 
 procedure TMainForm.miQuitClicked(Sender: TObject);
 begin
-	Close;
+  Close;
 end;
 
 procedure TMainForm.miCascadeChildWindows(Sender: TObject);
