@@ -22,11 +22,17 @@ type
 		FVerBar: TfpgScrollbar;
 		FList: TList;
 		FActiveWindow: TfpgMDIChildForm;
+    FScrollingHorizonal: Boolean;
+    FLastHorizonalPos: integer;
 		procedure InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
 		procedure SetActiveWindow(AValue: TfpgMDIChildForm);
 		function GetChildWindowCount: integer;
+    procedure MDIChildMoved(Sender: TObject; const rec: TfpgMoveEventRec);
+    function CalcVirtualWidth: integer;
+    procedure HorizontalScrollBarScrolled(Sender: TObject; position: integer);
 	protected
 		procedure HandlePaint; override;
+    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
 		procedure PositionScrollBars;
 	public
 		constructor Create(AOwner: TComponent); override;
@@ -66,6 +72,7 @@ type
 		procedure TitleMouseExit(Sender: TObject);
 		procedure CloseMDIWindowClicked(Sender: TObject);
 		procedure SetActive(AValue: boolean);
+    procedure ChildFormResized(Sender: TObject);
     procedure DoOnMove(const x, y: TfpgCoord);
 	protected
     procedure HandleMove(x, y: TfpgCoord); override;
@@ -159,6 +166,11 @@ begin
 	end;
 end;
 
+procedure TfpgMDIChildForm.ChildFormResized(Sender: TObject);
+begin
+  SendDebug('ChildFormResize');
+end;
+
 procedure TfpgMDIChildForm.DoOnMove(const x, y: TfpgCoord);
 var
   rec: TfpgMoveEventRec;
@@ -195,9 +207,10 @@ begin
 	FLastPos := Point(0,0);
 	{@VFD_BODY_BEGIN: MDIChildForm}
 	Name := 'MDIChildForm';
-	SetPosition(369, 166, 300, 250);
+	SetPosition(10, 10, 300, 250);
 	WindowTitle := 'ChildForm1';
 	Hint := '';
+  OnResize := @ChildFormResized;
 
 	Panel1 := TfpgPanel.Create(self);
 	with Panel1 do
@@ -412,10 +425,89 @@ begin
 	Result := FList.Count;
 end;
 
+procedure TfpgMDIWorkArea.MDIChildMoved(Sender: TObject; const rec: TfpgMoveEventRec);
+var
+  w: integer;
+begin
+  if FScrollingHorizonal then
+    Exit; // We are using the scrollbar to slide windows in/out of view
+  w := CalcVirtualWidth;
+  if w > Width then
+  begin
+    FHorBar.Max := w - Width;
+    FHorBar.SliderSize := Width / w;
+    if not FHorBar.Visible then
+    begin
+      FHorBar.Position := 0;
+      FLastHorizonalPos := 0;
+      FHorBar.Visible := True
+    end
+    else
+      FHorBar.RepaintSlider;
+  end
+  else
+    FHorBar.Visible := False;
+end;
+
+function TfpgMDIWorkArea.CalcVirtualWidth: integer;
+var
+  w: integer;
+  i: integer;
+  c: TfpgMDIChildForm;
+begin
+  w := Width;
+  for i := 0 to ComponentCount -1 do
+  begin
+    if Components[i] is TfpgScrollBar then
+      continue;
+    if Components[i] is TfpgMDIChildForm then
+    begin
+      c := Components[i] as TfpgMDIChildForm;
+      if c.Left < 0 then
+        w := Width + Abs(c.Left);
+      if c.Right > w then
+       w := c.Right;
+    end;
+  end;
+  Result := w;
+end;
+
+procedure TfpgMDIWorkArea.HorizontalScrollBarScrolled(Sender: TObject; position: integer);
+var
+  w: integer;
+  i: integer;
+  c: TfpgMDIChildForm;
+begin
+  FScrollingHorizonal := True;
+  for i := 0 to ComponentCount -1 do
+  begin
+    if Components[i] is TfpgScrollBar then
+      continue;
+    if Components[i] is TfpgMDIChildForm then
+    begin
+      c := Components[i] as TfpgMDIChildForm;
+      c.Left := c.Left + (FLastHorizonalPos - position);
+      c.UpdateWindowPosition;
+      fpgApplication.ProcessMessages;
+    end;
+  end;
+  FLastHorizonalPos := position;
+  FScrollingHorizonal := False;
+end;
+
 procedure TfpgMDIWorkArea.HandlePaint;
 begin
 	inherited HandlePaint;
 	Canvas.Clear(clLtGray);
+end;
+
+procedure TfpgMDIWorkArea.HandleResize(AWidth, AHeight: TfpgCoord);
+var
+  rec: TfpgMoveEventRec;
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if ComponentCount > 2 then
+    MDIChildMoved(self, rec);
 end;
 
 procedure TfpgMDIWorkArea.PositionScrollBars;
@@ -434,14 +526,20 @@ constructor TfpgMDIWorkArea.Create(AOwner: TComponent);
 begin
 	inherited Create(AOwner);
 	FIsContainer := True;
-	FHorBar := TfpgScrollbar.Create(self);
+  FScrollingHorizonal := False;
+
+  FHorBar := TfpgScrollbar.Create(self);
 	FHorBar.Visible := False;
 	FHorBar.Orientation := orHorizontal;
-	FVerBar := TfpgScrollbar.Create(self);
+  FHorBar.OnScroll := @HorizontalScrollBarScrolled;
+
+  FVerBar := TfpgScrollbar.Create(self);
 	FVerBar.Visible := False;
 	FVerBar.Orientation := orVertical;
-	PositionScrollBars;
-	FList := TList.Create;
+
+  PositionScrollBars;
+
+  FList := TList.Create;
 	FActiveWindow := nil;
 end;
 
@@ -458,6 +556,7 @@ begin
 	frm := TfpgMDIChildForm.Create(self);
 	Result := AWindowClass.Create(frm.bvlClientArea);
 	frm.SetClientFrame(Result);
+  frm.OnMove := @MDIChildMoved;
 	FList.Add(frm);
 	ActiveWindow := frm;
 end;
