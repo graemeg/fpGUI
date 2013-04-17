@@ -526,7 +526,34 @@ begin
   prevval   := FText;
   if FDeadKeyChar> -1 then
   begin
-    AText:= UseDeadKey(AText, FDeadKeyChar);
+    case FDeadKeyChar of
+      keyDeadDiaeresis:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ë';
+          'i':
+            AText:= 'ï';
+          'o':
+            AText:= 'ö';
+          'u':
+            AText:= 'ü';
+        end;
+      keyDeadCircumflex:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ê';
+          'i':
+            AText:= 'î';
+          'o':
+            AText:= 'ô';
+          'u':
+            AText:= 'û';
+        end;
+    end;
     FDeadKeyChar:= -1;
   end;
   s         := AText;
@@ -590,8 +617,8 @@ var
 begin
   hasChanged := False;
 
-  if FDeadKeyChar = -1 then
-    FDeadKeyChar:= ReadDeadKey(keycode);
+  if (keycode= 58536) or (keycode= 58462) then
+    FDeadKeyChar:= keycode;
 
   if not Enabled then
     consumed := False

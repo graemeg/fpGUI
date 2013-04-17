@@ -758,7 +758,34 @@ begin
   prevval   := Text;
   if FDeadKeyChar> -1 then
   begin
-    AText:= UseDeadKey(AText, FDeadKeyChar);
+    case FDeadKeyChar of
+      keyDeadDiaeresis:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ë';
+          'i':
+            AText:= 'ï';
+          'o':
+            AText:= 'ö';
+          'u':
+            AText:= 'ü';
+        end;
+      keyDeadCircumflex:
+        case AText of
+          'a':
+            AText:= 'â';
+          'e':
+            AText:= 'ê';
+          'i':
+            AText:= 'î';
+          'o':
+            AText:= 'ô';
+          'u':
+            AText:= 'û';
+        end;
+    end;
     FDeadKeyChar:= -1;
   end;
   s         := AText;
@@ -804,8 +831,8 @@ begin
   hasChanged := False;
   fpgApplication.HideHint;
 
-  if FDeadKeyChar = -1 then
-    FDeadKeyChar:= ReadDeadKey(keycode);
+  if (keycode= keyDeadCircumflex) or (keycode= keyDeadDiaeresis) then
+    FDeadKeyChar:= keycode;
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
