@@ -98,7 +98,6 @@ type
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
   protected
-    FSpecialChar: integer;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -480,7 +479,6 @@ begin
   FReadOnly   := False;
   FUpdateCount := 0;
   FBorderStyle := ebsDefault;
-  FSpecialChar := -1;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
@@ -1062,38 +1060,6 @@ var
 begin
   inherited;
   prevval  := Text;
-  if FSpecialChar> -1 then
-  begin
-    case FSpecialChar of
-      58536:
-        case AText of
-          'a':
-            AText:= 'â';
-          'e':
-            AText:= 'ë';
-          'i':
-            AText:= 'ï';
-          'o':
-            AText:= 'ö';
-          'u':
-            AText:= 'ü';
-        end;
-      58462:
-        case AText of
-          'a':
-            AText:= 'â';
-          'e':
-            AText:= 'ê';
-          'i':
-            AText:= 'î';
-          'o':
-            AText:= 'ô';
-          'u':
-            AText:= 'û';
-        end;
-    end;
-    FSpecialChar:= -1;
-  end;
   s        := AText;
 
   if (not consumed) and (not ReadOnly) then
@@ -1141,10 +1107,6 @@ begin
   fpgApplication.HideHint;
   Consumed := True;
   hasChanged := False;
-
-  if (keycode= 58536) or (keycode= 58462) then
-    FSpecialChar:= keycode;
-
   case CheckClipBoardKey(keycode, shiftstate) of
     ckCopy:
         begin
