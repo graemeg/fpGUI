@@ -94,7 +94,6 @@ type
     FVisibleText: TfpgString;
     FVisSelStartPx: integer;
     FVisSelEndPx: integer;
-    FSpecialChar: integer;
     function    GetMarginAdjustment: integer; virtual;
     procedure   DrawSelection; virtual;
     procedure   DoOnChange; virtual;
@@ -756,38 +755,6 @@ var
   prevval: string;
 begin
   prevval   := Text;
-  if FSpecialChar> -1 then
-  begin
-    case FSpecialChar of
-      58536:
-        case AText of
-          'a':
-            AText:= 'â';
-          'e':
-            AText:= 'ë';
-          'i':
-            AText:= 'ï';
-          'o':
-            AText:= 'ö';
-          'u':
-            AText:= 'ü';
-        end;
-      58462:
-        case AText of
-          'a':
-            AText:= 'â';
-          'e':
-            AText:= 'ê';
-          'i':
-            AText:= 'î';
-          'o':
-            AText:= 'ô';
-          'u':
-            AText:= 'û';
-        end;
-    end;
-    FSpecialChar:= -1;
-  end;
   s         := AText;
 
   if (not consumed) and (not ReadOnly) then
@@ -830,9 +797,6 @@ var
 begin
   hasChanged := False;
   fpgApplication.HideHint;
-
-  if (keycode= 58536) or (keycode= 58462) then
-    FSpecialChar:= keycode;
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
@@ -1106,7 +1070,6 @@ begin
   FPopupMenu          := nil;
   FDefaultPopupMenu   := nil;
   FOnChange           := nil;
-  FSpecialChar        := -1;
 end;
 
 destructor TfpgBaseEdit.Destroy;
