@@ -730,7 +730,7 @@ begin
     begin
       FHScrollBar.Max := cw - vw;
       FHScrollBar.Position := FXOffset;
-      FHScrollBar.SliderSize := Width / TotalColumnWidth;
+      FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
     end
     else
     begin
