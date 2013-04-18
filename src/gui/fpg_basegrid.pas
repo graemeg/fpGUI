@@ -50,6 +50,9 @@ type
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
+  
+  { TfpgBaseGrid }
+
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -137,6 +140,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
+    procedure   PrepareCells (firstrow, lastrow, firstcol, lastcol : integer); virtual;
     property    AlternateBGColor: TfpgColor read FAlternativeBGColor write SetAlternativeBGColor default clHilite1;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
@@ -825,12 +829,15 @@ begin
     r.Left := cLeft;
     for col := firstcol to ColumnCount-1 do
     begin
-      cWidths[firstcol] := ColumnWidth[col];
+      cWidths[col] := ColumnWidth[col];
       r.Width := cWidths[firstcol];
       lastcol := col;
       if (go_SmoothScroll in FOptions) and (r.Left <= clipr.Left) then
+      begin
         firstcol := col;
-      if r.Right >= clipr.Right then
+        if col>0 then inc (cLeft, cWidths[col-1]);
+      end;
+      if r.Left >= clipr.Right then
         break;
       inc (r.Left, r.Width);
     end;
@@ -854,14 +861,16 @@ begin
         lastrow := firstrow;
         for row := firstrow to RowCount-1 do
         begin
+          lastrow := row;
           inc (r.Top, DefaultRowHeight);
           if r.Top >= clipr.Bottom then
             break;
-          lastrow := row;
         end;
       end;
     end;
   end;
+
+  PrepareCells (firstrow, lastrow, firstcol, lastcol);
 
   r.Left := cLeft;
   r.Top := rTop;
@@ -924,7 +933,7 @@ begin
           Include(drawstate, gdFocused);
         if (row = FFocusRow) and (col = FFocusCol) then
           Include(drawstate, gdSelected);
-
+writeln (row, 'x', col, ' l:', r.Left, ' w:', r.Width, ' t:', r.Top, ' h:', r.Height);
         if DoDrawCellEvent(row, col, r, drawstate) then
           DrawCell(row, col, r, drawstate);
 
@@ -942,7 +951,7 @@ begin
       //  break;
     end;
   end; // item drawing
-
+writeln;
   Canvas.SetClipRect(clipr);
   Canvas.SetColor(FBackgroundColor);
   
@@ -1431,6 +1440,11 @@ begin
   end;  { if/else }
   CheckFocusChange;
   UpdateScrollBars;
+end;
+
+procedure TfpgBaseGrid.PrepareCells(firstrow, lastrow, firstcol, lastcol: integer);
+begin
+  // for descendents
 end;
 
 constructor TfpgBaseGrid.Create(AOwner: TComponent);
