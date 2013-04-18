@@ -686,32 +686,17 @@ begin
         end;
   end;
 
+  // set the scrollbar width/height space
+  if showV then
+    Dec(HWidth, FVScrollBar.Width);
   if showH then
-    FHScrollBar.Visible := true
-  else
-  begin
-    FHScrollBar.Visible := false;
-    if Hfits then
-    begin
-      FFirstCol := 0;
-      FXOffset := 0;
-    end;
-    // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
-  end;
+    Dec(VHeight, FHScrollBar.Height);
+
+  // show or hide the scrollbars
 
   if showV then
-    FVScrollBar.Visible := true
-  else
   begin
-    FVScrollBar.Visible := false;
-    if Vfits then
-      FFirstRow := 0;
-    // if vertical doesn't fit and no scrollbar, do not change firstrow
-  end;
-
-  if FVScrollBar.Visible then
-  begin
-    Dec(HWidth, FVScrollBar.Width);
+    FVScrollBar.Visible := true;
     FVScrollBar.Min         := 0;
     if RowCount > 0 then
       FVScrollBar.SliderSize := VisibleLines / RowCount
@@ -720,11 +705,21 @@ begin
     FVScrollBar.Max         := RowCount-VisibleLines;
     FVScrollBar.Position    := FFirstRow;
     FVScrollBar.RepaintSlider;
-  end;
-  
-  if FHScrollBar.Visible then
+    FVScrollBar.Top     := 2;
+    FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+    FVScrollBar.Height  := VHeight;
+  end
+  else
   begin
-    Dec(VHeight, FHScrollBar.Height);
+    FVScrollBar.Visible := false;
+    if Vfits then
+      FFirstRow := 0;
+    // if vertical doesn't fit and no scrollbar, do not change firstrow
+  end;
+
+  if showH then
+  begin
+    FHScrollBar.Visible := true;
     FHScrollBar.Min         := 0;
     if go_SmoothScroll in FOptions then
     begin
@@ -739,15 +734,20 @@ begin
       FHScrollBar.SliderSize  := 1 / ColumnCount;
     end;
     FHScrollBar.RepaintSlider;
+    FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+    FHScrollBar.Left    := 2;
+    FHScrollBar.Width   := HWidth;
+  end
+  else
+  begin
+    FHScrollBar.Visible := false;
+    if Hfits then
+    begin
+      FFirstCol := 0;
+      FXOffset := 0;
+    end;
+    // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
   end;
-
-  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
-  FHScrollBar.Left    := 2;
-  FHScrollBar.Width   := HWidth;
-
-  FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
-  FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
