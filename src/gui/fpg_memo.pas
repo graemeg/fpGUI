@@ -98,7 +98,6 @@ type
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
   protected
-    FDeadKeyChar: integer;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -480,7 +479,6 @@ begin
   FReadOnly   := False;
   FUpdateCount := 0;
   FBorderStyle := ebsDefault;
-  FDeadKeyChar := -1;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
@@ -1062,11 +1060,6 @@ var
 begin
   inherited;
   prevval  := Text;
-  if FDeadKeyChar> -1 then
-  begin
-    AText:= UseDeadKey(AText, FDeadKeyChar);
-    FDeadKeyChar:= -1;
-  end;
   s        := AText;
 
   if (not consumed) and (not ReadOnly) then
@@ -1114,10 +1107,6 @@ begin
   fpgApplication.HideHint;
   Consumed := True;
   hasChanged := False;
-
-  if FDeadKeyChar = -1 then
-    FDeadKeyChar:= ReadDeadKey(keycode);
-
   case CheckClipBoardKey(keycode, shiftstate) of
     ckCopy:
         begin

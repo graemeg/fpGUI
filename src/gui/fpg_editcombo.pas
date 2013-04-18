@@ -87,7 +87,6 @@ type
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: integer;
-    FDeadKeyChar: integer;
     procedure   DoDropDown; override;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
@@ -524,11 +523,6 @@ var
   i: integer;
 begin
   prevval   := FText;
-  if FDeadKeyChar> -1 then
-  begin
-    AText:= UseDeadKey(AText, FDeadKeyChar);
-    FDeadKeyChar:= -1;
-  end;
   s         := AText;
   consumed  := False;
   if FText = '' then
@@ -589,9 +583,6 @@ var
   i: integer;
 begin
   hasChanged := False;
-
-  if FDeadKeyChar = -1 then
-    FDeadKeyChar:= ReadDeadKey(keycode);
 
   if not Enabled then
     consumed := False
@@ -892,7 +883,6 @@ begin
   FDrawOffset       := 0;
   FSelectedItem     := -1;       // to allow typing if list is empty
   FNewItem          := False;
-  FDeadKeyChar      := -1;
 
   CalculateInternalButtonRect;
 end;
