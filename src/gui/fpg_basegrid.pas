@@ -585,34 +585,128 @@ var
   VHeight: integer;
   vw: integer;
   cw: integer;
+  vl: integer;
   i: integer;
   x: integer;
+  Hfits, showH : boolean;
+  Vfits, showV : boolean;
+
+  procedure hideScrollbar (sb : TfpgScrollBar);
+  begin
+    with sb do
+      if Visible then
+      begin
+        Visible := False;
+        UpdateWindowPosition;
+      end;
+  end;
+  
+  procedure getVisWidth;
+  begin
+    if showV then
+      vw := HWidth - (FVScrollBar.Width-1)
+    else
+      vw := HWidth;
+    Hfits := vw >= cw;
+  end;
+
+  procedure getVisLines;
+  var
+    hh : integer; // header height
+  begin
+    hh := 0;
+    if ShowHeader then inc (hh, FHeaderHeight+1);
+    if showH then inc (hh, FHScrollBar.Height);
+    vl := (VHeight - hh) div FDefaultRowHeight;
+    Vfits := vl >= RowCount;
+  end;
+
 begin
+  // if we don't want any scrollbars, hide them and exit
+  if FScrollBarStyle = ssNone then
+  begin
+    hideScrollbar (FHScrollBar);
+    hideScrollbar (FVScrollBar);
+    exit;
+  end;
+  
+  // preliminary width/height calculations
   VHeight := Height - 4;
   HWidth  := Width - 4;
-  
-  vw := VisibleWidth;
   cw := 0;
   for i := 0 to ColumnCount-1 do
     cw := cw + ColumnWidth[i];
-
-  // This needs improving while resizing
-  if cw > vw then
-    FHScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssVertical])
-  else
-  begin
-    FHScrollBar.Visible := False;
-    FFirstCol := 0;
-    FXOffset := 0;
-  end;
+  showV := False;
+  showH := False;
+  getVisWidth;
+  getVisLines;
   
-  // This needs improving while resizing
-  if (RowCount > VisibleLines) then
-    FVScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssHorizontal])
+  // determine whether to show scrollbars for different configurations
+  case FScrollBarStyle of
+    ssHorizontal:
+        begin
+          hideScrollbar (FVScrollBar);
+          if not Hfits then
+          begin
+            showH := true;
+            getVisLines;
+          end;
+        end;
+    ssVertical:
+        begin
+          hideScrollbar (FHScrollBar);
+          if not Vfits then
+          begin
+            showV := true;
+            getVisWidth;
+          end;
+        end;
+    ssAutoBoth:
+        if not Vfits then
+        begin
+          showV := true;
+          getVisWidth;
+          if not Hfits then
+          begin
+            showH := true;
+            getVisLines;
+            getVisWidth;
+          end;
+        end
+        else if not Hfits then
+        begin
+          showH := true;
+          getVisLines;
+          if not Vfits then
+          begin
+            showV := true;
+            getVisWidth;
+            getVisLines;
+          end;
+        end;
+  end;
+
+  if showH then
+    FHScrollBar.Visible := true
   else
   begin
-    FVScrollBar.Visible := False;
-    FFirstRow := 0;
+    FHScrollBar.Visible := false;
+    if Hfits then
+    begin
+      FFirstCol := 0;
+      FXOffset := 0;
+    end;
+    // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
+  end;
+
+  if showV then
+    FVScrollBar.Visible := true
+  else
+  begin
+    FVScrollBar.Visible := false;
+    if Vfits then
+      FFirstRow := 0;
+    // if vertical doesn't fit and no scrollbar, do not change firstrow
   end;
 
   if FVScrollBar.Visible then
