@@ -767,7 +767,9 @@ var
   clipr: TfpgRect;   // clip rectangle
   drawstate: TfpgGridDrawState;
   cLeft: integer;
-  c: integer;
+  rTop: integer;
+  firstcol, lastcol, firstrow, lastrow : integer;
+  cWidths: array of integer;
 begin
   Canvas.ClearClipRect;
 
@@ -798,32 +800,86 @@ begin
   r := clipr;
 
   cLeft := FMargin; // column starting point
+  rTop := FMargin; // row starting point
+
   if go_SmoothScroll in FOptions then
   begin
     if FHScrollBar.Visible then
       Dec(cLeft, FHScrollBar.Position);
-    c := 0;
+    firstcol := 0;
   end
   else
   begin
-    c := FFirstCol;
+    firstcol := FFirstCol;
   end;
+
+  // calculate column widths, and first/last columns and rows
+  if (ColumnCount <= 0) then
+  begin
+    firstcol := -1;
+    lastcol := -2;
+  end
+  else
+  begin
+    setlength (cWidths, ColumnCount);
+    r.Left := cLeft;
+    for col := firstcol to ColumnCount-1 do
+    begin
+      cWidths[firstcol] := ColumnWidth[col];
+      r.Width := cWidths[firstcol];
+      lastcol := col;
+      if (go_SmoothScroll in FOptions) and (r.Left <= clipr.Left) then
+        firstcol := col;
+      if r.Right >= clipr.Right then
+        break;
+      inc (r.Left, r.Width);
+    end;
+    if (RowCount <= 0) then
+    begin
+      firstrow := -1;
+      lastrow := -2;
+    end
+    else
+    begin
+      if ShowHeader then
+        inc (r.Top, FHeaderHeight);
+      if r.Top > clipr.Bottom then
+      begin
+        firstrow := -1;
+        lastrow := -2;
+      end
+      else
+      begin
+        firstrow := FFirstRow;
+        lastrow := firstrow;
+        for row := firstrow to RowCount-1 do
+        begin
+          inc (r.Top, DefaultRowHeight);
+          if r.Top >= clipr.Bottom then
+            break;
+          lastrow := row;
+        end;
+      end;
+    end;
+  end;
+
+  r.Left := cLeft;
+  r.Top := rTop;
 
   if (ColumnCount > 0) and ShowHeader then
   begin
     // Drawing horizontal headers
-    r.Left := cLeft;
     r.Height := FHeaderHeight;
     Canvas.SetFont(FHeaderFont);
-    for col := c to ColumnCount-1 do
+    for col := firstcol to lastcol do
     begin
-      r.Width := ColumnWidth[col];
+      r.Width := cWidths[col];
       Canvas.SetClipRect(clipr);
       Canvas.AddClipRect(r);
       DrawHeader(col, r, 0);
       inc(r.Left, r.Width);
-      if r.Left >= clipr.Right then
-        Break;  // small optimization. Don't draw what we can't see
+      //if r.Left >= clipr.Right then
+      //  Break;  // optimization made obsolete by firstcol/lastcol
     end;
     inc(r.Top, r.Height);
   end;
@@ -834,13 +890,13 @@ begin
     r.Height := DefaultRowHeight;
     Canvas.SetFont(FFont);
 
-    for row := FFirstRow to RowCount-1 do
+    for row := firstrow to lastrow do
     begin
       r.Left := cLeft;
-      for col := c to ColumnCount-1 do
+      for col := firstcol to lastcol do
       begin
         drawstate := [];
-        r.Width := ColumnWidth[col];
+        r.Width := cWidths[col];
         Canvas.SetClipRect(clipr);
 
         if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) and not (go_HideFocusRect in FOptions) then
@@ -877,13 +933,13 @@ begin
           DrawGrid(row, col, r, 0);
 
         inc(r.Left, r.Width);
-        if r.Left >= clipr.Right then
-          Break;  // small optimization. Don't draw what we can't see
+        //if r.Left >= clipr.Right then
+        //  Break;  // small optimization. Don't draw what we can't see
       end;
 //      Inc(r.Top, FDefaultRowHeight+1);
       inc(r.Top, r.Height);
-      if r.Top >= clipr.Bottom then
-        break;
+      //if r.Top >= clipr.Bottom then
+      //  break;
     end;
   end; // item drawing
 
