@@ -817,7 +817,7 @@ begin
     firstcol := FFirstCol;
   end;
 
-  // calculate column widths, and first/last columns and rows
+  // calculate column widths, and first/last columns
   if (ColumnCount <= 0) then
   begin
     firstcol := -1;
@@ -830,17 +830,18 @@ begin
     for col := firstcol to ColumnCount-1 do
     begin
       cWidths[col] := ColumnWidth[col];
-      r.Width := cWidths[firstcol];
-      lastcol := col;
+      r.Width := cWidths[col];
       if (go_SmoothScroll in FOptions) and (r.Left <= clipr.Left) then
       begin
         firstcol := col;
         if col>0 then inc (cLeft, cWidths[col-1]);
       end;
-      if r.Left >= clipr.Right then
+      lastcol := col;
+      if r.Right >= clipr.Right then
         break;
       inc (r.Left, r.Width);
     end;
+    // first/last rows...
     if (RowCount <= 0) then
     begin
       firstrow := -1;
@@ -858,14 +859,9 @@ begin
       else
       begin
         firstrow := FFirstRow;
-        lastrow := firstrow;
-        for row := firstrow to RowCount-1 do
-        begin
-          lastrow := row;
-          inc (r.Top, DefaultRowHeight);
-          if r.Top >= clipr.Bottom then
-            break;
-        end;
+        lastrow := firstrow + (clipr.Bottom - r.Top) div DefaultRowHeight;
+        if lastrow >= RowCount then
+          lastrow := RowCount-1;
       end;
     end;
   end;
@@ -888,7 +884,7 @@ begin
       DrawHeader(col, r, 0);
       inc(r.Left, r.Width);
       //if r.Left >= clipr.Right then
-      //  Break;  // optimization made obsolete by firstcol/lastcol
+      //  Break;  // optimization made obsolete by lastcol
     end;
     inc(r.Top, r.Height);
   end;
@@ -933,7 +929,6 @@ begin
           Include(drawstate, gdFocused);
         if (row = FFocusRow) and (col = FFocusCol) then
           Include(drawstate, gdSelected);
-writeln (row, 'x', col, ' l:', r.Left, ' w:', r.Width, ' t:', r.Top, ' h:', r.Height);
         if DoDrawCellEvent(row, col, r, drawstate) then
           DrawCell(row, col, r, drawstate);
 
@@ -943,15 +938,15 @@ writeln (row, 'x', col, ' l:', r.Left, ' w:', r.Width, ' t:', r.Top, ' h:', r.He
 
         inc(r.Left, r.Width);
         //if r.Left >= clipr.Right then
-        //  Break;  // small optimization. Don't draw what we can't see
+        //  Break;  // optimization made obsolete by lastcol
       end;
 //      Inc(r.Top, FDefaultRowHeight+1);
       inc(r.Top, r.Height);
       //if r.Top >= clipr.Bottom then
-      //  break;
+      //  break;  // optimization made obsolete by lastrow
     end;
   end; // item drawing
-writeln;
+
   Canvas.SetClipRect(clipr);
   Canvas.SetColor(FBackgroundColor);
   
