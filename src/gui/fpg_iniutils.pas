@@ -80,7 +80,7 @@ begin
   lFileName := fpgExtractFileName(AFileName);
 
   if lDir = '' then
-    lDir := GetAppConfigDir(False);
+    lDir := fpgGetAppConfigDir(False);
   if not (lDir[Length(lDir)] = PathDelim) then
     lDir := lDir + PathDelim;
 
