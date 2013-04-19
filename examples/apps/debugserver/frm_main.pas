@@ -114,6 +114,7 @@ type
     procedure   ShowMessageWindow;
     procedure   miPauseClicked(Sender: TObject);
     procedure   miFileQuit(Sender: TObject);
+    procedure   miEditCopy(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpProductInformation(Sender: TObject);
     procedure   btnClearClicked(Sender: TObject);
@@ -133,6 +134,7 @@ implementation
 uses
   dateutils
   ,fpg_dialogs
+  ,fpg_constants
   ;
 
 
@@ -271,6 +273,12 @@ begin
   Close;
 end;
 
+procedure TMainForm.miEditCopy(Sender: TObject);
+begin
+  if (grdMessages.RowCount > 0) and (grdMessages.FocusRow <> -1) then
+    fpgClipboard.Text :=  grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
 begin
   TfpgMessageDialog.AboutFPGui;
@@ -371,9 +379,9 @@ begin
   begin
     Name := 'mnuEdit';
     SetPosition(260, 126, 120, 24);
-    AddMenuItem('Cut', '', nil).Enabled := False;
-    AddMenuItem('Copy', '', nil).Enabled := False;
-    AddMenuItem('Paste', '', nil).Enabled := False;
+//    AddMenuItem('Cut', '', nil).Enabled := False;
+    AddMenuItem('Copy selected message to clipboard', rsKeyCtrl+'C', @miEditCopy);
+//    AddMenuItem('Paste', '', nil).Enabled := False;
     AddMenuItem('-', '', nil);
     AddMenuItem('Preferences...', '', nil).Enabled := False;
   end;
