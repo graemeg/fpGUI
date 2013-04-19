@@ -90,12 +90,12 @@ begin
 
 
   if lFileName = '' then
-    lFileName := ApplicationName + '.ini'
+    lFileName := fpgApplicationName + '.ini'
   else if fpgExtractFileExt(lFileName) = '' then
     lFileName := lFileName + '.ini';
 
   lFileName := lDir + lFileName;
-  Create(lFileName);
+  Create(fpgToOSEncoding(lFileName));
 end;
 
 function TfpgINIFile.ReadString(const ASection, AIdent, ADefault: string): string;
