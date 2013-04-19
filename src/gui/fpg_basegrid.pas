@@ -730,12 +730,14 @@ begin
       FHScrollBar.Max := cw - vw;
       FHScrollBar.Position := FXOffset;
       FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
+      FHScrollBar.PageSize := 5;
     end
     else
     begin
       FHScrollBar.Max := ColumnCount-1;
       FHScrollBar.Position := FFirstCol;
       FHScrollBar.SliderSize  := 1 / ColumnCount;
+      FHScrollBar.PageSize := 1;
     end;
     FHScrollBar.RepaintSlider;
     FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
