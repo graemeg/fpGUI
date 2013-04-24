@@ -1239,8 +1239,8 @@ begin
       begin
         for y := 0 to FRowCount-1 do
         begin
-          if (Integer(GetObject(x, y)) <> MergeID) then
-	    DrawCell(X, Y);
+          if (GetObject(x, y) <> TObject(MergeID)) then
+	          DrawCell(X, Y);
         end;
       end;           
    end;
@@ -2279,7 +2279,7 @@ var
   i: Integer;
 begin
   for i := 0 to FRowCount-1 do
-    if (Integer(GetObject(Index, i)) <> MergeID) then
+    if (GetObject(Index, i) <> TObject(MergeID)) then
       DrawCell(Index, i);
 end;
 
