@@ -1,25 +1,25 @@
 unit main3;
+
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  SysUtils, Classes,  fpg_base, fpg_main, fpg_form, fpg_panel, fpg_splitter, fpg_nicegrid;
+  SysUtils, Classes,  fpg_base, fpg_main, fpg_form, fpg_panel, fpg_splitter,
+  fpg_nicegrid;
 
 type
   TfrmMain = class(TfpgForm)
+  private
     Panel1: TfpgPanel;
     Splitter1: TfpgSplitter;
     Grid1: TfpgNiceGrid;
     GridSync1: TfpgNiceGridSync;
-  private
-    { Private declarations }
   public
-    { Public declarations }
     procedure AfterCreate; override;
   end;
 
-var frmMain: TfrmMain;
+
 
 implementation
 

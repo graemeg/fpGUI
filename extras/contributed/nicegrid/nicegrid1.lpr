@@ -7,17 +7,26 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_main, main1;
+  Classes, SysUtils,
+  fpg_base, fpg_main, fpg_form,
+  main1;
+
 
 procedure MainProc;
+var
+  frm: TfrmMain;
 begin
   fpgApplication.Initialize;
-  frmMain := TfrmMain.Create(nil);
-  frmMain.Show;
-  fpgApplication.Run;
-  frmMain.Free;
+  frm := TfrmMain.Create(nil);
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
 end;
 
 begin
   MainProc;
 end.
+

@@ -11,16 +11,14 @@ type
   TfrmMain = class(TfpgForm)
   private
     Grid1: TfpgNiceGrid;	  
-    procedure Grid1DrawCell(Sender: TObject; ACanvas: TfpgCanvas;
-                                  X,Y: Integer; Rc: TfpgRect; var Handled: Boolean);
+    procedure Grid1DrawCell(Sender: TObject; ACanvas: TfpgCanvas; X, Y: Integer; Rc: TfpgRect; var Handled: Boolean);
   public
-    { Public declarations }
     procedure AfterCreate; override;
   end;
 
-var frmMain: TfrmMain;
 
 implementation
+
 
 procedure TfrmMain.AfterCreate;
 var

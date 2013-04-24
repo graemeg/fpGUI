@@ -5,8 +5,8 @@ unit main1;
 interface
 
 uses
-  SysUtils, Classes,  fpg_base, fpg_main, fpg_form, fpg_menu,fpg_nicegrid,fpg_button,
-  fpg_checkbox,fpg_label;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu,
+  fpg_nicegrid, fpg_button, fpg_checkbox, fpg_label;
 
 type
 
@@ -45,7 +45,6 @@ type
     procedure AfterCreate; override;
   end;
 
- var frmMain: TfrmMain;
   
 implementation
   
@@ -55,7 +54,7 @@ var x: integer;
 begin
   Name := 'frmMain';
   SetPosition(252, 121, 638, 575);
-  WindowTitle := 'frmMain';
+  WindowTitle := 'NiceGrid - Demo 1';
   Hint := '';
   FFileSubMenu := TfpgPopupMenu.Create(self);
   with FFileSubMenu do
