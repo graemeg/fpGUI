@@ -2271,7 +2271,6 @@ var
   Note: THelpNote;
   NotesFile: TStringList;
   TopicIndex: integer;
-  s: TfpgString;
 begin
   ProfileEvent('Save notes for ' + AHelpFile.Filename);
   if not AHelpFile.NotesLoaded then
@@ -2472,8 +2471,6 @@ procedure TMainForm.DisplayTopic(ATopic: TTopic);
 var
   lText: String;
   ImageIndices: TList;
-  LinkIndex: longint;
-  Link: THelpLink;
   HelpFile: THelpFile;
   Topic: TTopic;
   HighlightWordSequences: TList;
@@ -3841,6 +3838,7 @@ begin
   if not fpgFileExists( BookmarksFileName ) then
     Exit;
 
+  {$NOTE: Replace this with TStringList or TStringStream.}
   FileMode := fmInput;
   AssignFile( BookmarksFile, BookmarksFileName );
   try
