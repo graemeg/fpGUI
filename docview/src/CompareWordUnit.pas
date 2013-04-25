@@ -2,11 +2,7 @@ Unit CompareWordUnit;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2001 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
-
-Interface
+interface
 
 // Compares words and produces a match level (relevance) based
 // on the relative sizes etc. Used in searching help files
@@ -21,15 +17,15 @@ const
 // Compares the given search word against the given
 // reference word. Returns a value indicating how well the
 // search word matches, 0 = not at all.
-function CompareWord( const SearchWord: string;
-                      const ReferenceWord: string ): longint;
+function CompareWord( const SearchWord: string; const ReferenceWord: string ): longint;
 
-Implementation
+
+implementation
 
 uses
   SysUtils;
 
-// LOoks for string a within string b, case insensitively
+// Looks for string a within string b, case insensitively
 function CaseInsensitivePos( const a, b: string ): longint;
 begin
   // Budget implementation to begin with.
@@ -63,21 +59,16 @@ begin
   if OccurrencePos = 1 then
   begin
     // word starts with searchword
-    Result := mwWordStart
-              * Length( SearchWord )
-              div Length( ReferenceWord );
+    Result := mwWordStart * Length(SearchWord) div Length(ReferenceWord);
     if Result = 0 then
       Result := 1;
     exit;
   end;
 
   // Matched searchword somewhere within word
-  Result := mwWordWithin
-            * Length( SearchWord )
-            div Length( ReferenceWord );
+  Result := mwWordWithin * Length(SearchWord) div Length(ReferenceWord);
   if Result = 0 then
     Result := 1;
-
 end;
 
 {// Note: searchstring must be uppercase,
@@ -103,5 +94,6 @@ begin
   end;
 end;
 }
-Initialization
-End.
+
+end.
+

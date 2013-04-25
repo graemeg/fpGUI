@@ -231,10 +231,19 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
             BitmapRect.Bottom := Trunc(BitmapRect.Top
                               + Bitmap.Height * Layout.VerticalImageScale);
 
-            FontManager.Canvas.StretchDraw(BitmapRect.Left, BitMapRect.Top,
-                BitmapRect.Right-BitMapRect.Left, BitMapRect.Bottom-BitMapRect.Top, Bitmap);
-
-            inc( X, trunc( Bitmap.Width * Layout.HorizontalImageScale ) );
+            if ((BitMapRect.Right - BitMapRect.Left) = Bitmap.Width) and
+               ((BitMapRect.Bottom - BitMapRect.Top) = Bitmap.Height) then
+            begin
+              // no stretching required
+              FontManager.Canvas.DrawImage(BitmapRect.Left, BitMapRect.Top, Bitmap);
+              inc(X, Bitmap.Width);
+            end
+            else
+            begin
+              FontManager.Canvas.StretchDraw(BitmapRect.Left, BitMapRect.Top,
+                  BitmapRect.Right-BitMapRect.Left, BitMapRect.Bottom-BitMapRect.Top, Bitmap);
+              inc(X, trunc(Bitmap.Width * Layout.HorizontalImageScale));
+            end;
           end;
         end
         else
