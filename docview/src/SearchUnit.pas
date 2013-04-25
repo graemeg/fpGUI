@@ -2,9 +2,11 @@ Unit SearchUnit;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
+{ TODO: Possible speed improvement here is to populate the DictionaryWords
+        array with already UTF8 text encoded words. That way we don't need
+        to do conversions each time for each word we search for. This should
+        be a nice speed impromevent.
+}
 
 Interface
 
@@ -52,6 +54,7 @@ uses
   ,CompareWordUnit
   ,nvUtilities
   ,ACLStringUtility
+  ,fpg_stringutils
   ;
 
 type
@@ -129,6 +132,8 @@ begin
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
     DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    // apply encoding conversion
+    DictWord := ConvertTextToUTF8(HelpFile.Encoding, DictWord);
     Results^[ DictIndex ] := CompareWord( SearchWord, DictWord );
   end;
 end;
@@ -147,6 +152,8 @@ begin
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
     DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    // apply encoding conversion
+    DictWord := ConvertTextToUTF8(HelpFile.Encoding, DictWord);
     if SameText( SearchWord, DictWord ) then
       Results^[ DictIndex ] := mwExactWord;
   end;
@@ -166,6 +173,8 @@ begin
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
     DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    // apply encoding conversion
+    DictWord := ConvertTextToUTF8(HelpFile.Encoding, DictWord);
     if StrStartsWithIgnoringCase(DictWord, SearchWord) then
       Results^[ DictIndex ] := MatchedWordRelevance( SearchWord, DictWord );
   end;
@@ -185,6 +194,8 @@ begin
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
     DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    // apply encoding conversion
+    DictWord := ConvertTextToUTF8(HelpFile.Encoding, DictWord);
     if StrEndsWithIgnoringCase( SearchWord, DictWord ) then
       Results^[ DictIndex ] := MatchedWordRelevance( SearchWord, DictWord );
   end;
