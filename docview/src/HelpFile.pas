@@ -130,6 +130,7 @@ type
     property Title: string read _Title;
     property Topics[ Index: longint ]: TTopic read GetTopic;
     property TopicList: TList read _Topics;
+    property FontTable: TList read _FontTable;
     property TopicCount: longint read GetTopicCount;
     property StringResourceIDCount: integer read GetStringResourceIDCount;
     property NumericResourceIDCount: integer read GetNumericResourceIDCount;

@@ -148,7 +148,7 @@ type
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpCmdLineParams(Sender: TObject);
     procedure   miHelpUsingDocView(Sender: TObject);
-    procedure   miDebugHeader(Sender: TObject);
+    procedure   miShowFileInfoClicked(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
     procedure   miToolsFindByResourceID(Sender: TObject);
     procedure   miToolsFindTopifByName(Sender: TObject);
@@ -732,11 +732,12 @@ begin
   OpenFile(OWN_HELP_MARKER, '', True);
 end;
 
-procedure TMainForm.miDebugHeader(Sender: TObject);
+procedure TMainForm.miShowFileInfoClicked(Sender: TObject);
 var
   f: THelpFile;
-  i: integer;
+  i, j: integer;
   sl: TStringList;
+  pFontSpec: pTHelpFontSpec;
 begin
   RichView.Clear;
   sl := TStringList.Create;
@@ -750,7 +751,13 @@ begin
       Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '</blue>');
       Add('<b>Title:</b> ' + f.Title);
       Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + ' bytes');
-      Add('<b>INF/HLP file version</b> ' + f.FormatVersion);
+      Add('<b>INF/HLP file version:</b> ' + f.FormatVersion);
+      Add('<b>Font table:</b> ');
+      for j := 0 to f.FontTable.Count-1 do
+      begin
+        pFontSpec := f.FontTable[j];
+        Add(Format('     %s (%d x %d), codepage: %d', [pFontSpec^.FaceName, pFontSpec^.Width, pFontSpec^.Height, pFontSpec^.Codepage]));
+      end;
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
@@ -3232,7 +3239,7 @@ begin
   begin
     Name := 'miTools';
     SetPosition(428, 96, 120, 20);
-    AddMenuItem('Show file info', '', @miDebugHeader);
+    AddMenuItem('Show file info', '', @miShowFileInfoClicked);
     AddMenuItem('Find topic by resource ID', '', @miToolsFindByResourceID);
     AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
     miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
