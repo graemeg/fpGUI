@@ -90,6 +90,8 @@ type
   // For providing user feedback. No need to display backtrace information
   EfpGUIUserFeedbackException = class(EfpGUIException);
 
+  TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encIBMGraph);
+
 
 
 const
