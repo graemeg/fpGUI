@@ -1333,7 +1333,7 @@ begin
   if SearchText = '' then
   begin
     ClearAllWordSequences;
-    exit;
+    exit; //==>
   end;
 
   lbSearchResults.Items.Add(rsDVSearchingMsg);
@@ -1345,7 +1345,7 @@ begin
     on e: ESearchSyntaxError do
     begin
       TfpgMessageDialog.Critical( rsSearch,  rsDVSearchSyntaxError + e.Message );
-      exit;
+      exit; //==>
     end;
   end;
 
@@ -1355,7 +1355,7 @@ begin
 
   SearchResults := TList.Create;
 
-  // Search open help file
+  // Search open help files
   for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
     HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
@@ -1371,7 +1371,7 @@ begin
         TfpgMessageDialog.Critical(rsError , E.Message);
         Query.Destroy;
         ClearWaitCursor;
-        exit;
+        exit; //==>
       end;
     end;
 
