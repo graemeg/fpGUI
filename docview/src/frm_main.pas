@@ -1174,7 +1174,7 @@ end;
 
 procedure TMainForm.cbEncodingChanged(Sender: TObject);
 begin
-  Settings.Encoding := TFontEncoding(cbEncoding.FocusItem);
+  Settings.Encoding := TfpgTextEncoding(cbEncoding.FocusItem);
   DisplayTopic(CurrentTopic);
 end;
 
@@ -2569,14 +2569,7 @@ begin
   ImageIndices.Free;
 
   // apply encoding conversion
-  case Settings.Encoding of
-    encUTF8:      lText := IPFToUTF8(lText);
-    encCP437:     lText := CP437ToUTF8(lText);
-    encCP850:     lText := CP850ToUTF8(lText);
-    encIBMGraph:  lText := IBMGraphToUTF8(lText);
-  else
-    lText := IPFToUTF8(lText);
-  end;
+  lText := ConvertTextToUTF8(HelpFile.Encoding, lText);
 
   { Load and insert annotations / notes }
   if not HelpFile.NotesLoaded then
@@ -3467,6 +3460,7 @@ begin
     Items.Add('UTF-8');
     Items.Add('CP437');
     Items.Add('CP850');
+    Items.Add('CP866');
     Items.Add('IBM Graph (cp437)');
     FocusItem := 0;
     TabOrder := 10;

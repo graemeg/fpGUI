@@ -9,6 +9,7 @@ interface
 uses
   Classes
   ,SysUtils
+  ,fpg_base
   ,fpg_imagelist
   ,IPFFileFormatUnit
   ,HelpTopic
@@ -17,9 +18,6 @@ uses
   ;
 
 type
-
-  TFontEncoding = (encUTF8, encCP437, encCP850, encIBMGraph);
-
 
   TIndexEntry = class(TObject)
   private
@@ -173,7 +171,7 @@ type
     procedure SetupFontSubstitutes( Substitutions: string );
   public
     NotesLoaded: boolean; // used externally
-    Encoding: TFontEncoding;
+    Encoding: TfpgTextEncoding;
   end;
 
 // Returns helpfile that the given topic is within
@@ -396,14 +394,7 @@ begin
     begin
       lText := TTopic(TopicList[i]).Title;
       // apply encoding conversion
-      case Encoding of
-        encUTF8:      lText := IPFToUTF8(lText);
-        encCP437:     lText := CP437ToUTF8(lText);
-        encCP850:     lText := CP850ToUTF8(lText);
-        encIBMGraph:  lText := IBMGraphToUTF8(lText);
-      else
-        lText := IPFToUTF8(lText);
-      end;
+      lText := ConvertTextToUTF8(Encoding, lText);
       TTopic(TopicList[i]).Title := lText;
     end;
   except
@@ -663,7 +654,6 @@ var
   pEnd: pByte;
   pIndexData: pointer;
   tmpIndexEntry: TIndexEntry;
-  lText: string;
 begin
   LogEvent(LogParse, 'Read index');
   _Index := TIndex.Create;
@@ -694,15 +684,7 @@ begin
     if pEntryHeader^.TOCIndex < _Topics.Count then
     begin
       // apply encoding conversion
-      case Encoding of
-        encUTF8:      lText := IPFToUTF8(EntryText);
-        encCP437:     lText := CP437ToUTF8(EntryText);
-        encCP850:     lText := CP850ToUTF8(EntryText);
-        encIBMGraph:  lText := IBMGraphToUTF8(EntryText);
-      else
-        lText := IPFToUTF8(EntryText);
-      end;
-      EntryText := lText;
+      EntryText := ConvertTextToUTF8(Encoding, EntryText);
       tmpIndexEntry := TIndexEntry.Create(EntryText, TTopic(_Topics[pEntryHeader^.TOCIndex]), pEntryHeader^.flags);
       _Index.Add(tmpIndexEntry);
     end
@@ -1067,10 +1049,11 @@ begin
   begin
     pFontSpec := p + i * sizeof( THelpFontSpec );
     _FontTable.Add( pFontSpec );
-    if pFontSpec^.CodePage = 850 then
-      Encoding := encCP850
-    else if pFontSpec^.CodePage = 437 then
-      Encoding := encCP437;
+    case pFontSpec^.CodePage of
+      437:  Encoding := encCP437;
+      850:  Encoding := encCP850;
+      866:  Encoding := encCP866;
+    end;
   end;
 end;
 
