@@ -118,6 +118,7 @@ type
     procedure   CheckDebugMessages;
     procedure   ReadDebugMessage;
     procedure   ShowDebugMessage(const AMsg: TDebugmessage);
+    procedure   ShowLiveViewMessage(const AMsg: TDebugmessage);
     procedure   ShowMessageWindow;
     procedure   miPauseClicked(Sender: TObject);
     procedure   miFileQuit(Sender: TObject);
@@ -148,6 +149,7 @@ uses
   dateutils
   ,fpg_dialogs
   ,fpg_constants
+  ,fpg_dbugintf
   ;
 
 
@@ -186,12 +188,13 @@ begin
     ADefaultDrawing := False;
     try
       i := StrToInt(grdMessages.Cells[ACol, ARow]);
+      { TODO: This needs improving. We need to somehow referce TDebugLevel instead }
       case i of
-        -1:  img := fpgImages.GetImage('dbs.state.stop');
-         0:  img := fpgImages.GetImage('dbs.state.info');
-         1:  img := fpgImages.GetImage('dbs.state.warning');
-         2:  img := fpgImages.GetImage('dbs.state.error');
-         3:  img := fpgImages.GetImage('dbs.state.identify');
+         0:  img := fpgImages.GetImage('dbs.state.stop');
+         1:  img := fpgImages.GetImage('dbs.state.info');
+         2:  img := fpgImages.GetImage('dbs.state.warning');
+         3:  img := fpgImages.GetImage('dbs.state.error');
+         4:  img := fpgImages.GetImage('dbs.state.identify');
       end;
       dx := (grdMessages.ColumnWidth[ACol] - 16) div 2;
       grdMessages.Canvas.DrawImage(ARect.Left + dx, ARect.Top {+ y}, img);
@@ -279,9 +282,14 @@ var
   Msg: TDebugMessage;
 begin
   FIPCSrv.MsgData.Seek(0, soFromBeginning);
-  ReadDebugMessageFromStream(FIPCSrv.MsgData, MSg);
+  ReadDebugMessageFromStream(FIPCSrv.MsgData, Msg);
   if not FPaused then
-    ShowDebugMessage(Msg)
+  begin
+    if Msg.MsgType = Ord(dlLive) then
+      ShowLiveViewMessage(Msg)
+    else
+      ShowDebugMessage(Msg);
+  end
   else
     Inc(FDiscarded);
 end;
@@ -308,6 +316,36 @@ begin
   end;
   if FShowOnMessage then
     ShowMessageWindow;
+end;
+
+procedure TMainForm.ShowLiveViewMessage(const AMsg: TDebugmessage);
+var
+  r: integer;
+  lFound: Boolean;
+begin
+  if not Assigned(FLiveViewFrame) then
+    Exit;
+  lFound := False;
+  FLiveViewFrame.Grid.BeginUpdate;
+  for r := 0 to FLiveViewFrame.Grid.RowCount-1 do
+  begin
+    if FLiveViewFrame.Grid.Cells[0, r] = AMsg.MsgTitle then
+    begin
+      lFound := True;
+      Break;
+    end;
+  end;
+  if lFound then
+  begin
+    FLiveViewFrame.Grid.Cells[1, r] := AMsg.Msg;
+  end
+  else
+  begin
+    FLiveViewFrame.Grid.RowCount := FLiveViewFrame.Grid.RowCount + 1;
+    FLiveViewFrame.Grid.Cells[0, FLiveViewFrame.Grid.RowCount-1] := AMsg.MsgTitle;
+    FLiveViewFrame.Grid.Cells[1, FLiveViewFrame.Grid.RowCount-1] := AMsg.Msg;
+  end;
+  FLiveViewFrame.Grid.EndUpdate;
 end;
 
 procedure TMainForm.ShowMessageWindow;
@@ -404,6 +442,7 @@ begin
   WindowTitle := 'fpGUI''s Debug Server';
   Hint := '';
   ShowHint := True;
+  WindowPosition := wpScreenCenter;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
