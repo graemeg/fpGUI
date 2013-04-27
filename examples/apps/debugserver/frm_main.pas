@@ -82,6 +82,7 @@ uses
   ,fpg_memo
   ,simpleipc
   ,dbugmsg
+  ,fra_liveview
   ;
 
 type
@@ -101,6 +102,7 @@ type
     btnClear: TfpgButton;
     btnExpandView: TfpgButton;
     Bevel3: TfpgBevel;
+    btnLiveView: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miPause: TfpgMenuItem;
     FIPCSrv: TSimpleIPCServer;
@@ -109,6 +111,7 @@ type
     FDiscarded: Integer;
     FShowOnMessage: Boolean;
     FMemo: TfpgMemo;
+    FLiveViewFrame: TLiveViewFrame;
     procedure   StartServer;
     procedure   StopServer;
     procedure   CheckMessages(Sender: TObject);
@@ -125,9 +128,12 @@ type
     procedure   btnClearClicked(Sender: TObject);
     procedure   btnPauseClicked(Sender: TObject);
     procedure   btnStartClicked(Sender: TObject);
+    procedure   btnLiveViewClicked(Sender: TObject);
     procedure   GridDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   GridRowChanged(Sender: TObject; ARow: Integer);
     procedure   GridClicked(Sender: TObject);
+    procedure   CreateLiveViewFrame;
+    procedure   DestroyLiveViewFrame;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -212,6 +218,31 @@ begin
     Exit;
   if (grdMessages.RowCount > 0) and (grdMessages.FocusRow <> -1) then
     FMemo.Text := grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
+procedure TMainForm.CreateLiveViewFrame;
+begin
+  if Assigned(FLiveViewFrame) then
+    FLiveViewFrame.Free;
+  FLiveViewFrame := TLiveViewFrame.Create(self);
+  grdMessages.Height := grdMessages.Height - FLiveViewFrame.Height;
+  grdMessages.UpdateWindowPosition;
+  FLiveViewFrame.SetPosition(grdMessages.Left, grdMessages.Bottom+1, grdMessages.Width, FLiveViewFrame.Height);
+end;
+
+procedure TMainForm.DestroyLiveViewFrame;
+begin
+  grdMessages.Height := grdMessages.Height + FLiveViewFrame.Height;
+  FreeAndNil(FLiveViewFrame);
+  grdMessages.UpdateWindowPosition;
+end;
+
+procedure TMainForm.btnLiveViewClicked(Sender: TObject);
+begin
+  if btnLiveView.Down then
+    CreateLiveViewFrame
+  else
+    DestroyLiveViewFrame;
 end;
 
 procedure TMainForm.StartServer;
@@ -308,7 +339,7 @@ const
 begin
   if btnExpandView.Down then
   begin
-    FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, grdMessages.Height);
+    FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, Height - grdMessages.Top - cSpacing);
     FMemo.UpdateWindowPosition;
     grdMessages.Anchors := grdMessages.Anchors - [anRight];
     Width := Width + FMemo.Width + (2 * cSpacing);
@@ -555,6 +586,23 @@ begin
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
+  end;
+
+  btnLiveView := TfpgButton.Create(Bevel1);
+  with btnLiveView do
+  begin
+    Name := 'btnLiveView';
+    SetPosition(156, 2, 24, 24);
+    Text := 'LV';
+    AllowAllUp := True;
+    Flat := True;
+    FontDesc := '#Label1';
+    GroupIndex := 3;
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    Focusable := False;
+    OnClick := @btnLiveViewClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
