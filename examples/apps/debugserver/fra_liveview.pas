@@ -22,6 +22,7 @@ type
     {@VFD_HEAD_END: fra_liveview}
   public
     procedure AfterCreate; override;
+    property Grid: TfpgStringGrid read Grid1;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -51,7 +52,7 @@ begin
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
-    RowCount := 5;
+    RowCount := 0;
     RowSelect := False;
     ShowHeader := False;
     TabOrder := 1;
