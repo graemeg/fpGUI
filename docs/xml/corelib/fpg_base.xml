@@ -935,11 +935,77 @@ Right. And the Top is always smaller than the Bottom.
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
 
+
 <element name="TfpgCanvasBase.GradientFill">
 <short>Paints a rectangle with a gradient</short>
 <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.GradientFill"/>. If the gradient direction is
 set to gdHorizontal, then it pains from left to right. If the gradient direction is
 set to gdVertical, then it paints from top to bottom.</descr>
+</element>
+
+
+<element name="TfpgCanvasBase.DrawArc">
+<short>Draws an outline arc shape</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawArc"/>. It uses the TfpgCanvas.Color
+value to draw the arc.</p>
+<dl>
+<dt>x</dt>
+<dd>The left x co-ordinate of the arc drawing position</dd>
+<dt>y</dt>
+<dd>The top y co-ordinate of the arc drawing position</dd>
+<dt>w</dt>
+<dd>The width of the whole arc</dd>
+<dt>h</dt>
+<dd>The height of the whole arc</dd>
+<dt>a1</dt>
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</dd>
+<dt>a2</dt>
+<dd>This parameter is the length of the arc in degrees. A positive value
+goes counter-clockwise, and a negative values goes clockwise.</dd>
+</dl>
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.FillArc">TfpgCanvasBase.FillArc</link>
+</seealso>
+<example file="examples/fpg_base.fpgcanvasbase.drawarc.pas"/>
+</element>
+
+
+<element name="TfpgCanvasBase.FillArc.a1">
+<descr>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</descr>
+</element>
+
+
+<element name="TfpgCanvasBase.FillArc">
+<short>Draws a filled arc shape</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.FillArc"/>. It uses the TfpgCanvas.Color
+value to draw and fill the arc.</p>
+<dl>
+<dt>x</dt>
+<dd>The left x co-ordinate of the arc drawing position</dd>
+<dt>y</dt>
+<dd>The top y co-ordinate of the arc drawing position</dd>
+<dt>w</dt>
+<dd>The width of the whole arc</dd>
+<dt>h</dt>
+<dd>The height of the whole arc</dd>
+<dt>a1</dt>
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</dd>
+<dt>a2</dt>
+<dd>This parameter is the length of the arc in degrees. A positive value
+goes counter-clockwise, and a negative values goes clockwise.</dd>
+</dl>
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.DrawArc">TfpgCanvasBase.DrawArc</link>
+</seealso>
+<example file="examples/fpg_base.fpgcanvasbase.fillarc.pas"/>
 </element>
 
 
