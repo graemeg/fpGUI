@@ -1,0 +1,65 @@
+[header]
+name=fpguiapp2
+comment=fpGUI with UI Designer template application
+select=0
+indent=0
+cursorcol=0
+cursorrow=0
+params=0
+paramdefaults=0
+[]
+{$mode objfpc}{$h+}
+{$ifdef mswindows}{$apptype gui}{$endif}
+
+uses
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Classes, fpg_main, fpg_form;
+
+type
+
+  TMainForm = class(TfpgForm)
+  private
+    {@VFD_HEAD_BEGIN: MainForm}
+    {@VFD_HEAD_END: MainForm}
+  public
+    procedure AfterCreate; override;
+  end;
+
+{@VFD_NEWFORM_DECL}
+
+
+
+{@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.AfterCreate;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(316, 186, 300, 250);
+  WindowTitle := 'MainForm';
+
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+end;
+
+
+procedure MainProc;
+var
+  frm: TMainForm;
+begin
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
+end;
+
+begin
+  MainProc;
+end.

@@ -1,0 +1,8 @@
+[header]
+name=doclink
+comment=Documentation Link tag
+noselect=1
+cursorrow=0
+cursorcol=10
+[]
+<link id=""></link>

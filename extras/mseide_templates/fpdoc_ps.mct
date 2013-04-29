@@ -1,0 +1,8 @@
+[header]
+name=docps
+comment=Documentation PrintShort tag
+noselect=1
+cursorrow=0
+cursorcol=16
+[]
+<printshort id=""/>.
