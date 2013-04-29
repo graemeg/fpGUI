@@ -138,6 +138,12 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
   
