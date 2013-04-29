@@ -82,6 +82,7 @@ uses
   ,fpg_memo
   ,simpleipc
   ,dbugmsg
+  ,fra_liveview
   ;
 
 type
@@ -101,6 +102,7 @@ type
     btnClear: TfpgButton;
     btnExpandView: TfpgButton;
     Bevel3: TfpgBevel;
+    btnLiveView: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miPause: TfpgMenuItem;
     FIPCSrv: TSimpleIPCServer;
@@ -109,12 +111,14 @@ type
     FDiscarded: Integer;
     FShowOnMessage: Boolean;
     FMemo: TfpgMemo;
+    FLiveViewFrame: TLiveViewFrame;
     procedure   StartServer;
     procedure   StopServer;
     procedure   CheckMessages(Sender: TObject);
     procedure   CheckDebugMessages;
     procedure   ReadDebugMessage;
     procedure   ShowDebugMessage(const AMsg: TDebugmessage);
+    procedure   ShowLiveViewMessage(const AMsg: TDebugmessage);
     procedure   ShowMessageWindow;
     procedure   miPauseClicked(Sender: TObject);
     procedure   miFileQuit(Sender: TObject);
@@ -125,9 +129,12 @@ type
     procedure   btnClearClicked(Sender: TObject);
     procedure   btnPauseClicked(Sender: TObject);
     procedure   btnStartClicked(Sender: TObject);
+    procedure   btnLiveViewClicked(Sender: TObject);
     procedure   GridDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   GridRowChanged(Sender: TObject; ARow: Integer);
     procedure   GridClicked(Sender: TObject);
+    procedure   CreateLiveViewFrame;
+    procedure   DestroyLiveViewFrame;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -142,6 +149,7 @@ uses
   dateutils
   ,fpg_dialogs
   ,fpg_constants
+  ,fpg_dbugintf
   ;
 
 
@@ -180,12 +188,13 @@ begin
     ADefaultDrawing := False;
     try
       i := StrToInt(grdMessages.Cells[ACol, ARow]);
+      { TODO: This needs improving. We need to somehow referce TDebugLevel instead }
       case i of
-        -1:  img := fpgImages.GetImage('dbs.state.stop');
-         0:  img := fpgImages.GetImage('dbs.state.info');
-         1:  img := fpgImages.GetImage('dbs.state.warning');
-         2:  img := fpgImages.GetImage('dbs.state.error');
-         3:  img := fpgImages.GetImage('dbs.state.identify');
+         0:  img := fpgImages.GetImage('dbs.state.stop');
+         1:  img := fpgImages.GetImage('dbs.state.info');
+         2:  img := fpgImages.GetImage('dbs.state.warning');
+         3:  img := fpgImages.GetImage('dbs.state.error');
+         4:  img := fpgImages.GetImage('dbs.state.identify');
       end;
       dx := (grdMessages.ColumnWidth[ACol] - 16) div 2;
       grdMessages.Canvas.DrawImage(ARect.Left + dx, ARect.Top {+ y}, img);
@@ -212,6 +221,31 @@ begin
     Exit;
   if (grdMessages.RowCount > 0) and (grdMessages.FocusRow <> -1) then
     FMemo.Text := grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
+procedure TMainForm.CreateLiveViewFrame;
+begin
+  if Assigned(FLiveViewFrame) then
+    FLiveViewFrame.Free;
+  FLiveViewFrame := TLiveViewFrame.Create(self);
+  grdMessages.Height := grdMessages.Height - FLiveViewFrame.Height;
+  grdMessages.UpdateWindowPosition;
+  FLiveViewFrame.SetPosition(grdMessages.Left, grdMessages.Bottom+1, grdMessages.Width, FLiveViewFrame.Height);
+end;
+
+procedure TMainForm.DestroyLiveViewFrame;
+begin
+  grdMessages.Height := grdMessages.Height + FLiveViewFrame.Height;
+  FreeAndNil(FLiveViewFrame);
+  grdMessages.UpdateWindowPosition;
+end;
+
+procedure TMainForm.btnLiveViewClicked(Sender: TObject);
+begin
+  if btnLiveView.Down then
+    CreateLiveViewFrame
+  else
+    DestroyLiveViewFrame;
 end;
 
 procedure TMainForm.StartServer;
@@ -248,9 +282,14 @@ var
   Msg: TDebugMessage;
 begin
   FIPCSrv.MsgData.Seek(0, soFromBeginning);
-  ReadDebugMessageFromStream(FIPCSrv.MsgData, MSg);
+  ReadDebugMessageFromStream(FIPCSrv.MsgData, Msg);
   if not FPaused then
-    ShowDebugMessage(Msg)
+  begin
+    if Msg.MsgType = Ord(dlLive) then
+      ShowLiveViewMessage(Msg)
+    else
+      ShowDebugMessage(Msg);
+  end
   else
     Inc(FDiscarded);
 end;
@@ -277,6 +316,36 @@ begin
   end;
   if FShowOnMessage then
     ShowMessageWindow;
+end;
+
+procedure TMainForm.ShowLiveViewMessage(const AMsg: TDebugmessage);
+var
+  r: integer;
+  lFound: Boolean;
+begin
+  if not Assigned(FLiveViewFrame) then
+    Exit;
+  lFound := False;
+  FLiveViewFrame.Grid.BeginUpdate;
+  for r := 0 to FLiveViewFrame.Grid.RowCount-1 do
+  begin
+    if FLiveViewFrame.Grid.Cells[0, r] = AMsg.MsgTitle then
+    begin
+      lFound := True;
+      Break;
+    end;
+  end;
+  if lFound then
+  begin
+    FLiveViewFrame.Grid.Cells[1, r] := AMsg.Msg;
+  end
+  else
+  begin
+    FLiveViewFrame.Grid.RowCount := FLiveViewFrame.Grid.RowCount + 1;
+    FLiveViewFrame.Grid.Cells[0, FLiveViewFrame.Grid.RowCount-1] := AMsg.MsgTitle;
+    FLiveViewFrame.Grid.Cells[1, FLiveViewFrame.Grid.RowCount-1] := AMsg.Msg;
+  end;
+  FLiveViewFrame.Grid.EndUpdate;
 end;
 
 procedure TMainForm.ShowMessageWindow;
@@ -308,7 +377,7 @@ const
 begin
   if btnExpandView.Down then
   begin
-    FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, grdMessages.Height);
+    FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, Height - grdMessages.Top - cSpacing);
     FMemo.UpdateWindowPosition;
     grdMessages.Anchors := grdMessages.Anchors - [anRight];
     Width := Width + FMemo.Width + (2 * cSpacing);
@@ -373,6 +442,7 @@ begin
   WindowTitle := 'fpGUI''s Debug Server';
   Hint := '';
   ShowHint := True;
+  WindowPosition := wpScreenCenter;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
@@ -555,6 +625,23 @@ begin
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
+  end;
+
+  btnLiveView := TfpgButton.Create(Bevel1);
+  with btnLiveView do
+  begin
+    Name := 'btnLiveView';
+    SetPosition(156, 2, 24, 24);
+    Text := 'LV';
+    AllowAllUp := True;
+    Flat := True;
+    FontDesc := '#Label1';
+    GroupIndex := 3;
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    Focusable := False;
+    OnClick := @btnLiveViewClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
