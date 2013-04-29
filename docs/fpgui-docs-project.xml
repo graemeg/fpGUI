@@ -133,15 +133,20 @@
          and value as on the actual command-line. Boolean options must have
          a value of 'true', '1' or 'yes' -->
     <option name="format" value="ipf"/>
+    <option name="hide-protected" value="true"/>
+    <option name="duplinkeddoc" value="true"/>
 <!--
+    ## Various output formats
     <option name="format" value="ipf"/>
     <option name="format" value="html"/>
     <option name="format" value="rtf"/>
     <option name="format" value="chm"/>
--->
+
+    ## Options for IPF output
     <option name="hide-protected" value="true"/>
     <option name="duplinkeddoc" value="true"/>
-<!--
+
+    ## Options for HTML output
     <option name="footer-date" value="yyyy-mm-dd"/>
 -->
   </options>
