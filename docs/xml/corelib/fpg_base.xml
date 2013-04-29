@@ -79,8 +79,8 @@ means no titlebar or window borders are going to be created.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtModalForm">
-        <short>This windows type is similar to <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs focus.</short>
-        <descr>This windows is the same as <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
+        <short>This windows type is similar to wtWindow, but grabs focus.</short>
+        <descr>This windows is the same as <link id="#fpgui.fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtPopup">
@@ -831,6 +831,10 @@ consecutive lines being drawn without overlapping pixels.</descr>
 
 <element name="TfpgCanvasBase.StretchDraw">
 <short>Allows you to draw a bitmap, stretched or shrunken from its original size</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw"/>. Default
+interpolation is <link id="#fpgui.fpg_base.TfpgMitchelInterpolation">TfpgMitchelInterpolation</link>,
+but others (found in <link id="#fpgui.fpg_extinterpolation">fpg_extinterpolation.pas</link>) can
+be used too, by using the <link id="#fpgui.fpg_base.TfpgCanvasBase.InterpolationFilter">InterpolationFilter</link> property of the Canvas.</descr>
 </element>
 
       <!-- function Visibility: default -->
@@ -1038,18 +1042,22 @@ for more information.</p></descr>
 </element>
 
 <element name="TfpgApplicationBase">
-<short>aoeu</short>
-<descr></descr>
+<short>Base class for the fpgApplication variable</short>
+<descr>This is the base class of TfpgApplication. All fpGUI-based applications
+will contain a instance of TfpgApplication. It encapsulates the application as
+a whole, and also supplies many useful functions and events.</descr>
 </element>
 
 <element name="TfpgApplicationBase.HelpFile">
 <short>Specify a help file for the application</short>
-<descr>bla bla bla</descr>
+<descr>This property is used to assign the help file (normally an INF file) which
+contains the help for the application.</descr>
 </element>
 
 <element name="TfpgApplicationBase.InvokeHelp">
 <short>Run the help viewer</short>
-<descr>bla bla bla</descr>
+<descr>This method will invoke the defined help viewer, passing it the HelpContext
+or HelpKeyword as parameter. The default help viewer is fpGUI's DocView.</descr>
 </element>
 
 

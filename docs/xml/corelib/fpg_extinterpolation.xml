@@ -4,7 +4,7 @@
     <module name="fpg_extinterpolation">
       <short>Extra interpolation filter declarations.</short>
       <descr>
-        <p>Some more interpolation filters for <link id="fpg_base.TfpgCanvasBase.StretchDraw">TfpgCanvasBase.StretchDraw</link>:<br/>
+        <p>This unit defines more interpolation filters for <link id="fpg_base.TfpgCanvasBase.StretchDraw">TfpgCanvasBase.StretchDraw</link>:<br/>
 Bessel, Gaussian and Sinc are infinite impulse response (IIR),
 the others are finite impulse response (FIR). The implementation
 of Bessel and Sinc are windowed with Blackman filter.</p>
