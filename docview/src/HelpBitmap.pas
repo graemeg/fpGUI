@@ -83,7 +83,7 @@ type
     _UncompressedBlockSize: longint;
     function GetPaletteSize: longint;
     procedure BitmapError(Msg: string);
-    procedure ReadBitmapData( Blocks: TList; TotalSize: longint );
+    procedure ReadBitmapData( Blocks: TList; TotalSize: longword);
   public
     constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
     destructor Destroy; override;
@@ -267,7 +267,7 @@ begin
   inherited Destroy;
 end;
 
-procedure THelpBitmap.ReadBitmapData( Blocks: TList; TotalSize: longint );
+procedure THelpBitmap.ReadBitmapData( Blocks: TList; TotalSize: longword );
 var
   BytesWritten: longint;
   BytesWrittenFromBlock: longword;

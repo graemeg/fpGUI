@@ -313,14 +313,6 @@ var
   t: TfpgString;
 begin
   t := s;
-  //case Settings.Encoding of
-  //  encUTF8:      t := IPFToUTF8(t);
-  //  encCP437:     t := CP437ToUTF8(t);
-  //  encCP850:     t := CP850ToUTF8(t);
-  //  encIBMGraph:  t := IBMGraphToUTF8(t);
-  //else
-  //  t := IPFToUTF8(t);
-  //end;
   FCanvas.DrawString(Point.X, Point.Y, t);
   Point.x := Point.X + Canvas.Font.TextWidth(t);
 end;

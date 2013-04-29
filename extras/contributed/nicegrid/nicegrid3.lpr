@@ -1,13 +1,15 @@
-program menutest;
+program nicegrid3;
 
-{$mode objfpc}{$H+}
+{$mode objfpc}
+{$h+}
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, frm_menutest, fpgfx;
-
+  Classes, SysUtils,
+  fpg_base, fpg_main,
+  main3;
 
 
 procedure MainProc;
@@ -16,12 +18,15 @@ var
 begin
   fpgApplication.Initialize;
   frm := TfrmMain.Create(nil);
-  frm.Show;
-  fpgApplication.Run;
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
 end;
 
 begin
   MainProc;
 end.
-
 

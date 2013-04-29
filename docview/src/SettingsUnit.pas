@@ -13,7 +13,6 @@ Uses
   ,fpg_base
   ,fpg_main
   ,CanvasFontManager
-  ,HelpFile
   ;
 
 Const
@@ -95,7 +94,7 @@ type
     GlobalSearchLocation: TGlobalSearchLocation;
     SearchDirectories: TStringList;
     IPFTopicSaveAsEscaped: boolean;
-    Encoding: TFontEncoding;
+    Encoding: TfpgTextEncoding;
   end;
 
 

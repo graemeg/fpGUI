@@ -1,0 +1,16 @@
+[header]
+name=docelem
+comment=Documentation Element
+select=0
+indent=0
+cursorcol=15
+cursorrow=0
+params=1
+ name
+paramdefaults=1
+ 
+[]
+<element name="${name}">
+<short></short>
+<descr></descr>
+</element>

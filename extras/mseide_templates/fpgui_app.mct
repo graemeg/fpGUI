@@ -1,0 +1,53 @@
+[header]
+name=fpguiapp1
+comment=fpGUI template application (with form)
+select=0
+indent=0
+cursorcol=0
+cursorrow=0
+params=0
+paramdefaults=0
+[]
+{$mode objfpc}{$h+}
+{$ifdef mswindows}{$apptype gui}{$endif}
+
+uses
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Classes, fpg_main, fpg_form;
+
+type
+  TMainForm = class(TfpgForm)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+{ TMainForm }
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  WindowTitle := 'My Title';
+  WindowPosition := wpUser;
+  SetPosition(100, 100, 300, 200);
+end;
+
+
+procedure MainProc;
+var
+  frm: TMainForm;
+begin
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
+end;
+
+begin
+  MainProc;
+end.

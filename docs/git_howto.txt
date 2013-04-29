@@ -1,0 +1,170 @@
+> Hi. I'm on develop branch. I commited change, how can I push it to
+> you?
+
+I'll explain the preferred method, instead of the simpler "send me a
+patch file". The preferred method has many more benefits for you and me,
+and makes integrating other developers changes easier.
+
+This is a bit long winded, but most of it is actually just about
+setting up a new remote repository. This setup process is only done
+once. The actual "how to share a branch with others" is answered near
+the end. So if you know how to setup a forked Github repository, then
+just skip to the end.
+
+
+Using Github
+------------
+If you cloned from SourceForge or from my GitHub repository, then you
+only have "read" access. So you will not be allowed to push changes.
+
+Best is to register with Github (it is free, and very quick). Browse to
+my fpGUI repository on Github (it is a mirror of the SourceForge one).
+
+  http://github.com/graemeg/fpGUI
+
+Click the "fork" button. Github will now fork my repository, and you
+should end up with a fpGUI repository in your github account.
+
+  NOTE: This fork isn't automatically kept in sync with mine - it is
+  your repository - you keep it up to date via 'git push'.
+
+Now back in your Github account, note the read-write URI for the fpGUI
+repository. It will be something like...
+
+  git@github.com:<username>/fpGUI.git
+
+Now on your PC, simply add the remote repository (no need to do a new
+clone):
+
+  git remote add github <read-write url supplied by Github>
+
+Now you can do a 'git fetch github' or 'git pull github'... If your
+repository was up to date, nothing will be updated accept for references
+to the branches in the 'github' remote.
+
+If you do a 'git remote' command, you should now see 'origin' and
+'github' listed.
+
+
+Lets do some coding (in a separate branch)
+------------------------------------------
+Now you can get to the "lets do some programming bit". Create a new
+branch off 'develop', which we call a "feature" branch.
+
+  NOTE:  Never do development work in 'master' or the 'develop'
+  branches. This will just cause you unnecessary work, and makes
+  my job more difficult fetching code from your repository.
+
+  $> git checkout -b myfeature develop
+
+Now write some code, an make some commits. All the commits will go
+into the branch named 'myfeature'. To see a graphical overview of your
+repository, type 'gitk --all'
+
+
+Moving local commits out of a wrong branch
+------------------------------------------
+Now if you accidentally made commits in 'master' or 'develop', it is
+not a problem to fix. This is the huge benefit of Git. Commits are
+local at first, so things can be shuffled around before you make them
+public.
+
+The easiest way to fix commits in a wrong branch, is to use the GUI
+tool 'gitk'. Run 'gitk --all'
+
+Find the commit under the 'develop' branch that still references
+'origin/develop', then right-click and select "Create new branch".
+Give at a meaningful name. We'll call it 'feature-1' just for now:
+
+Now close gitk, and switch to that new branch.
+
+  git checkout feature-1
+
+Now back into gitk via 'gitk --all'. The 'feature-1' branch will be in
+bold, indicating it is the current branch. Now we are going to
+cherry-pick commits from another branch. This just means we are going
+to duplicate commits from one branch into another.
+
+Find the commit(s) you made in the wrong branch. From oldest to
+newest, select a commit, right-click and select "Cherry-pick this
+commit". You will now see that commit is duplicated in your
+'feature-1' branch. Keep going until you have cherry-picked all your
+commits you want to move.
+
+Now you should have all your commits is the right branch, but
+'develop' still has them too. No problem. We will simply tell git
+discard those commits, by resetting the 'develop' branch to match
+'origin/develop'.
+
+Select the commit containing the reference 'origin/develop' (this
+should be the same commit you branched your 'feature-1' branch from.
+Right click on that commit, and select "Reset develop branch to here".
+
+Now if you refresh the view, F5, or quit and restart gitk, you will
+see your local commit history has been fixed, and your local commits
+have been moved to the feature branch.
+
+
+How to share my feature branch
+------------------------------
+Finally, we want to share the 'myfeature' branch, so we need to push
+it to the 'github' remote.
+
+  $> git push github myfeature
+
+
+This will push the 'myfeature' branch to your repository on Github.
+Now on the Github website under the 'myfeature' branch, there should
+be a button "send a pull request". Click that, and I'll be notified
+via email to take a look at your code.
+
+To keep your repository in sync with the official fpGUI repository,
+pull from 'origin' (which will be SourceForge, or my fpGUI mirror on
+Github - depending which repository you clone in the beginning). Make
+sure you are in say the 'master' branch. Then do the following:
+
+  $> git push github
+
+
+How to delete a remote branch
+-----------------------------
+Once you are done with a branch you shared - for example if it was
+merged into the official fpGUI code, then you can delete the branch
+from your Github repository.
+
+  $> git push github :myfeature
+
+
+How to delete a local branch
+----------------------------
+Now the 'myfeature' branch is deleted on the remote repository. Now
+you can delete it locally on your PC too. Make sure you our in some
+other branch, not 'myfeature'.
+
+eg:  $> git checkout master
+     $> git branch -d myfeature
+
+
+
+For any details on any of the commands used above, Git includes
+excellent help. Just type:
+
+  $> git help <command>
+
+eg:
+
+  $> git help remote
+  $> git help branch
+  $> git help push
+
+
+
+The Github also has some excellent documentation on using Git, and
+using the Github services. Here is one such document.
+
+About Remote Repositories:
+  https://help.github.com/categories/18/articles
+  
+
+  --------------------[ end  ]---------------------
+

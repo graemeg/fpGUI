@@ -51,6 +51,7 @@ function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
  // RTL wrapper filesystem functions with platform independant encoding
  // These functions are common for all platforms and rely on fpgXXXPlatformEncoding
 
+function fpgApplicationName: TfpgString;
 function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;
 function fpgFindNext(var Rslt: TSearchRec): longint;
 function fpgGetCurrentDir: TfpgString;
@@ -99,6 +100,11 @@ begin
     Result := ALine + AValue
   else
     Result := ALine;
+end;
+
+function fpgApplicationName: TfpgString;
+begin
+  Result := fpgFromOSEncoding(ApplicationName);
 end;
 
 function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;

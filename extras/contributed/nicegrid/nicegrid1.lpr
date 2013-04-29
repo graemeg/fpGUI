@@ -1,20 +1,23 @@
-program tabsheet_design;
+program nicegrid1;
 
-{$mode objfpc}{$H+}
+{$mode objfpc}
+{$h+}
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, tabtest;
+  Classes, SysUtils,
+  fpg_base, fpg_main, fpg_form,
+  main1;
 
 
 procedure MainProc;
 var
-  frm: TfrmTabTest;
+  frm: TfrmMain;
 begin
   fpgApplication.Initialize;
-  frm := TfrmTabTest.Create(nil);
+  frm := TfrmMain.Create(nil);
   try
     frm.Show;
     fpgApplication.Run;
@@ -26,5 +29,4 @@ end;
 begin
   MainProc;
 end.
-
 
