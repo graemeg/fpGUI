@@ -516,8 +516,6 @@ begin
   if newp <> FPosition then
   begin
     Position := newp;
-    RePaint;
-    DoChange;
   end;
 end;
 
