@@ -40,7 +40,7 @@ uses
   fpg_base,
   fpg_impl
   {$IFDEF DEBUG}
-  ,dbugintf
+  ,fpg_dbugintf
   {$ENDIF DEBUG}
   ,fpg_OLEDragDrop
   ;
@@ -877,7 +877,7 @@ begin
         begin
           {$IFDEF DEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            writeln('fpGFX/GDI: Found a mouse button event');
+            SendDebug('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -1413,7 +1413,7 @@ var
   wg: TfpgWidget;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIWindow.HandleDNDLeave ');
+  SendDebug('TfpgGDIWindow.HandleDNDLeave ');
   {$ENDIF}
   FUserMimeSelection := '';
   wg := self as TfpgWidget;
@@ -1437,7 +1437,7 @@ var
   msgp: TfpgMessageParams;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIWindow.HandleDNDEnter ');
+  SendDebug('TfpgGDIWindow.HandleDNDEnter ');
   {$ENDIF}
   wg := self as TfpgWidget;
   if wg.AcceptDrops then
@@ -1500,7 +1500,7 @@ begin
   if FDropPos <> PT then
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIWindow.HandleDNDPosition ');
+    SendDebug('TfpgGDIWindow.HandleDNDPosition ');
     {$ENDIF}
     FDropPos.x := PT.x;
     FDropPos.y := PT.y;
@@ -1526,7 +1526,7 @@ begin
     exit;
 
   {$IFDEF DND_DEBUG}
-  Writeln('TfpgGDIWindow.HandleDNDDrop');
+  SendDebug('TfpgGDIWindow.HandleDNDDrop');
   {$ENDIF}
 
   wg := self as TfpgWidget;
