@@ -2573,7 +2573,7 @@ begin
   ImageIndices.Free;
 
   // apply encoding conversion
-  lText := ConvertTextToUTF8(HelpFile.Encoding, lText);
+  lText := ConvertTextToUTF8(Settings.Encoding, lText);
 
   { Load and insert annotations / notes }
   if not HelpFile.NotesLoaded then
