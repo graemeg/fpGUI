@@ -3465,6 +3465,7 @@ begin
     Items.Add('CP437');
     Items.Add('CP850');
     Items.Add('CP866');
+    Items.Add('CP1250');
     Items.Add('IBM Graph (cp437)');
     FocusItem := 0;
     TabOrder := 10;
