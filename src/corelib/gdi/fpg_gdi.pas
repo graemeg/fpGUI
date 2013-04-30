@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -3089,7 +3089,11 @@ begin
   ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
 end;
 
-procedure TimerCallBackProc(window_hwnd : hwnd; msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
+{$IF FPC_FULLVERSION<20602}
+procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT; dwTime: DWORD); stdcall;
+{$ELSE}
+procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
+{$IFEND}
 begin
   { idEvent contains the handle to the timer that got triggered }
   fpgCheckTimers;
@@ -3102,7 +3106,6 @@ begin
   inherited SetEnabled(AValue);
   if FEnabled then
   begin
-//    FHandle := Windows.SetTimer(0, 0, Interval, nil);
     FHandle := Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
   end
   else
