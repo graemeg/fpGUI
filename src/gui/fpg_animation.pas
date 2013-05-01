@@ -31,6 +31,8 @@ uses
 
 type
 
+  { TfpgBaseImgAnim }
+
   TfpgBaseImgAnim = class(TfpgWidget)
   private
     FFrameCount: integer;
@@ -58,6 +60,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+
+    procedure   ImageFromByte(ABmp: Pointer; ASize: longword);
   end;
 
 
@@ -157,6 +161,24 @@ begin
     FImage.CreateMaskFromSample(0, 0);
     FImage.UpdateImage;
   end;
+  RecalcImageWidth;
+  Repaint;
+end;
+
+procedure TfpgBaseImgAnim.ImageFromByte(ABmp: Pointer; ASize: longword);
+begin
+  if ABmp=nil then
+    Exit;
+
+  FTimer.Enabled := False;
+  FImage.Free;
+  FImage := CreateImage_BMP(ABmp, ASize);
+  if FTransparent then
+  begin
+    FImage.CreateMaskFromSample(0, 0);
+    FImage.UpdateImage;
+  end;
+  FImageFilename := 'byte'; // because handle paint check if file is set
   RecalcImageWidth;
   Repaint;
 end;
