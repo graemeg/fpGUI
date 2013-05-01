@@ -1,0 +1,13 @@
+[header]
+name=logexit
+comment=tiOPF Log: method exit
+select=0
+indent=0
+cursorcol=33
+cursorrow=0
+params=1
+ procedure
+paramdefaults=1
+ *
+[]
+Log('<< '+Classname+'.${procedure} - ' + Name, lsDebug);

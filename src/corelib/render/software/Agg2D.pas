@@ -3566,7 +3566,7 @@ begin
   c := fpgColorToRGB(cl);
   t := fpgColorToRGBTriple(c);
 
-  LineColor(t.Red, t.Green, t.Blue{, t.Alpha});
+  LineColor(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 procedure TAgg2D.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);

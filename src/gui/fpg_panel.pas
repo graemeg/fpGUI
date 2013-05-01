@@ -177,6 +177,7 @@ type
     property    OnMouseScroll;
     property    OnMouseUp;
     property    OnPaint;
+    property    OnResize;
     property    OnShowHint;
   end;
   

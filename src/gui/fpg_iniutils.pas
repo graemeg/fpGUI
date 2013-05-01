@@ -80,7 +80,7 @@ begin
   lFileName := fpgExtractFileName(AFileName);
 
   if lDir = '' then
-    lDir := GetAppConfigDir(False);
+    lDir := fpgGetAppConfigDir(False);
   if not (lDir[Length(lDir)] = PathDelim) then
     lDir := lDir + PathDelim;
 
@@ -90,12 +90,12 @@ begin
 
 
   if lFileName = '' then
-    lFileName := ApplicationName + '.ini'
+    lFileName := fpgApplicationName + '.ini'
   else if fpgExtractFileExt(lFileName) = '' then
     lFileName := lFileName + '.ini';
 
   lFileName := lDir + lFileName;
-  Create(lFileName);
+  Create(fpgToOSEncoding(lFileName));
 end;
 
 function TfpgINIFile.ReadString(const ASection, AIdent, ADefault: string): string;
