@@ -147,6 +147,7 @@ type
   public
     constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
   end;
 
 
@@ -2129,6 +2130,27 @@ begin
     DoEndDraw;
   TryFreeBackBuffer;
   inherited;
+end;
+
+procedure TfpgGDICanvas.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase;
+  var ASrcRect: TfpgRect);
+var
+  srcdc: HDC;
+  destdc: HDC;
+begin
+  if (TfpgWindow(FWindow).WinHandle <= 0) or (TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle <= 0) then
+  begin
+    debugln('    no winhandle available');
+    exit;
+  end;
+
+  destdc := Windows.GetDC(TfpgWindow(FWindow).WinHandle);
+  srcdc := Windows.GetDC(TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle);
+
+  BitBlt(destdc, ADest_x, ADest_y, ASrcRect.Width, ASrcRect.Height, srcdc, ASrcRect.Left, ASrcRect.Top, SRCCOPY);
+
+  ReleaseDC(TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle, srcdc);
+  ReleaseDC(TfpgWindow(FWindow).WinHandle, destdc);
 end;
 
 procedure TfpgGDICanvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
