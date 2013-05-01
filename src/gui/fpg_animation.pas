@@ -61,7 +61,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
 
-    procedure   ImageFromByte(ABmp: Pointer; ASize: longword);
+    procedure   ImageFromByteArray(ABmp: Pointer; ASize: longword; AMaskSample: TPoint);
   end;
 
 
@@ -165,7 +165,8 @@ begin
   Repaint;
 end;
 
-procedure TfpgBaseImgAnim.ImageFromByte(ABmp: Pointer; ASize: longword);
+procedure TfpgBaseImgAnim.ImageFromByteArray(ABmp: Pointer; ASize: longword;
+  AMaskSample: TPoint);
 begin
   if ABmp=nil then
     Exit;
@@ -175,7 +176,7 @@ begin
   FImage := CreateImage_BMP(ABmp, ASize);
   if FTransparent then
   begin
-    FImage.CreateMaskFromSample(0, 0);
+    FImage.CreateMaskFromSample(AMaskSample.X, AMaskSample.Y);
     FImage.UpdateImage;
   end;
   FImageFilename := 'byte'; // because handle paint check if file is set
