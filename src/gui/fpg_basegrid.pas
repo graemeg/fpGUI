@@ -601,7 +601,7 @@ var
       if Visible then
       begin
         Visible := False;
-        UpdateWindowPosition;
+        UpdatePosition;
       end;
   end;
   
