@@ -215,6 +215,7 @@ type
   public
     constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
   end;
 
 
@@ -2825,6 +2826,13 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgX11Canvas.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase;
+    var ASrcRect: TfpgRect);
+begin
+  SortRect(ASrcRect);
+  XCopyArea(xapplication.Display, TfpgX11Canvas(ASrcCanvas).FDrawHandle, FDrawHandle, Fgc, ASrcRect.Left, ASrcRect.Top, ASrcRect.Width, ASrcRect.Height, ADest_x, ADest_y);
+end;
+
 procedure TfpgX11Canvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   x: integer;
@@ -2996,7 +3004,8 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoDrawPolygon(Points: fpg_base.PPoint; NumPts: Integer; Winding: boolean);
+procedure TfpgX11Canvas.DoDrawPolygon(Points: PPoint; NumPts: Integer;
+  Winding: boolean);
 var
   PointArray: PXPoint;
   i: integer;
