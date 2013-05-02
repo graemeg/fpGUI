@@ -39,10 +39,13 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
-  TfpgWidget = class(TfpgWindow)
+  { TfpgWidget }
+
+  TfpgWidget = class(TfpgWidgetBase)
   private
     FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
+    FHasOwnWindow: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnDragDrop: TfpgDragDropEvent;
@@ -63,10 +66,13 @@ type
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
     alist: TList;
+    function    GetWindowAllocated: Boolean;
+    function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
+    procedure   SetHasOwnWindow(AValue: Boolean);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -101,6 +107,8 @@ type
     FIsContainer: Boolean;
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
+    procedure   DoAllocateWindowHandle; virtual;
+    procedure   AllocateWindowHandle;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
@@ -114,7 +122,9 @@ type
     procedure   SetParentShowHint(const AValue: boolean); virtual;
     function    GetHint: TfpgString; virtual;
     procedure   SetHint(const AValue: TfpgString); virtual;
-    procedure   DoUpdateWindowPosition; override;
+    function    GetCanvas: TfpgCanvas; reintroduce;
+    function    CreateCanvas: TfpgCanvasBase; virtual;
+    procedure   DoUpdatePosition; virtual;
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
@@ -168,11 +178,15 @@ type
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
+    property    Window: TfpgNativeWindow read GetWindow;
+    property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
+    property    WindowAllocated: Boolean read GetWindowAllocated;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
+    property    Canvas: TfpgCanvas read GetCanvas;
     property    Visible: boolean read FVisible write SetVisible default True;
     property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
@@ -295,6 +309,16 @@ begin
     FActiveWidget.HandleSetFocus;
 end;
 
+function TfpgWidget.GetWindow: TfpgNativeWindow;
+begin
+  Result := TfpgNativeWindow(FWindow);
+end;
+
+function TfpgWidget.GetWindowAllocated: Boolean;
+begin
+  Result := FWindow <> nil;
+end;
+
 procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
 begin
   if FAcceptDrops = AValue then
@@ -332,6 +356,41 @@ begin
   FAlign := AValue;
   if Parent <> nil then
     Parent.Realign;
+end;
+
+procedure TfpgWidget.SetHasOwnWindow(AValue: Boolean);
+begin
+  if FHasOwnWindow=AValue then Exit;
+  FHasOwnWindow:=AValue;
+end;
+
+procedure TfpgWidget.DoAllocateWindowHandle;
+begin
+  if HasOwnWindow then
+  begin
+    FWindow := TfpgNativeWindow.Create(Self);
+    Window.WindowType:=wtChild;
+  end
+  else
+  begin
+    if Parent <> nil then
+    begin
+      FWindow := Parent.Window;
+    end
+    else
+    begin
+      WriteLn('FATAL: TfpgWidget.DoAllocateHandle called on a child widget with no parent');
+      raise Exception.Create('FATAL: TfpgWidget.DoAllocateHandle called on a child widget with no parent');
+    end;
+  end;
+end;
+
+procedure TfpgWidget.AllocateWindowHandle;
+begin
+  DoAllocateWindowHandle;
+  Window.AllocateWindowHandle;
+  if Window.Owner = Self then
+    Window.SetWindowVisible(Visible);
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -374,7 +433,17 @@ begin
   FHint := AValue;
 end;
 
-procedure TfpgWidget.DoUpdateWindowPosition;
+function TfpgWidget.GetCanvas: TfpgCanvas;
+begin
+  Result := TfpgCanvas(inherited GetCanvas);
+end;
+
+function TfpgWidget.CreateCanvas: TfpgCanvasBase;
+begin
+  Result := DefaultCanvasClass.Create(self);
+end;
+
+procedure TfpgWidget.DoUpdatePosition;
 var
   dw: integer;
   dh: integer;
@@ -397,7 +466,9 @@ begin
     HandleAlignments(dw, dh);
   end;
 
-  inherited DoUpdateWindowPosition;
+  if Window.Owner = Self then
+    Window.UpdateWindowPosition
+  else ; { TODO Notify Parent of position change}
   if (dw <> 0) or (dh <> 0) then
     DoResize;
 
@@ -468,6 +539,13 @@ end;
 procedure TfpgWidget.SetParent(const AValue: TfpgWidget);
 begin
   inherited SetParent(AValue);
+  if not HasOwnWindow then
+  begin
+    if AValue <> nil then
+      FWindow := AValue.Window
+    else
+      FWindow := nil;
+  end;
 end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
@@ -505,7 +583,6 @@ begin
 
   if Parent <> nil then
   begin
-    FWindowType := wtChild;
     FShowHint   := Parent.ShowHint;
   end;
 end;
@@ -527,7 +604,7 @@ begin
   inherited AfterConstruction;
   // This is for components that are created at runtime, after it's
   // parent has already been shown.
-  if (Parent <> nil) and (Parent.HasHandle) then
+  if (Parent <> nil) and (Parent.WindowAllocated) then
   begin
     HandleShow;
   end;
@@ -619,7 +696,7 @@ begin
     if not consumed then
     begin
       { only do this if the top-level form is not Modal }
-      if (wg is TfpgForm) and (TfpgForm(wg).WindowType <> wtModalForm) then
+      if (wg is TfpgForm) and (TfpgForm(wg).Window.WindowType <> wtModalForm) then
         if wg <> fpgApplication.MainForm then
           TfpgFormFriend(fpgApplication.MainForm).DoKeyShortcut(self, key, ss, consumed);
     end;
@@ -879,9 +956,7 @@ var
   n: integer;
   c: TComponent;
 begin
-  FOnScreen := True;
-  AllocateWindowHandle;
-  DoSetWindowVisible(FVisible);
+  InternalHandleShow;
 
   for n := 0 to ComponentCount - 1 do
   begin
@@ -900,7 +975,6 @@ procedure TfpgWidget.InternalHandleShow;
 begin
   FOnScreen := True;
   AllocateWindowHandle;
-  DoSetWindowVisible(FVisible);
 end;
 
 procedure TfpgWidget.HandleHide;
@@ -916,13 +990,16 @@ begin
   end;
   FOnScreen := False;
 
-  if HasHandle then
-    ReleaseWindowHandle;
+  if HasOwnWindow then
+  begin
+    FWindow.Free;
+    FWindow := nil;
+  end;
 end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if HasHandle then
+  if WindowAllocated then
     fpgSendMessage(self, self, FPGM_PAINT);
 end;
 
@@ -1421,7 +1498,7 @@ begin
     Width  := AWidth;
     Height := AHeight;
   end;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TfpgWidget.MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);

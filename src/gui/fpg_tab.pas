@@ -468,7 +468,7 @@ begin
     APage.Top     := FMargin + r.Top;
   end;
 
-  APage.UpdateWindowPosition; { Internal state is now resolved }
+  APage.UpdatePosition; { Internal state is now resolved }
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
@@ -810,7 +810,7 @@ var
   lTxtFlags: TfpgTextFlags;
   ActivePageVisible: Boolean;
 begin
-  if not HasHandle then
+  if not WindowAllocated then
     Exit; //==>
     
   if PageCount = 0 then

@@ -124,17 +124,14 @@ type
   TfpgTimer = class;
 
 
-  TfpgWindow = class(TfpgWindowImpl)
+  TfpgNativeWindow = class(TfpgWindowImpl)
   protected
-    procedure   SetParent(const AValue: TfpgWindow); reintroduce;
-    function    GetParent: TfpgWindow; reintroduce;
-    function    GetCanvas: TfpgCanvas; reintroduce;
-    function    CreateCanvas: TfpgCanvasBase; virtual;
+    procedure   SetParent(const AValue: TfpgNativeWindow); reintroduce;
+    function    GetParent: TfpgNativeWindow; reintroduce;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Parent: TfpgWindow read GetParent write SetParent;
-    property    Canvas: TfpgCanvas read GetCanvas;
+    property    Parent: TfpgNativeWindow read GetParent write SetParent;
     property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
 
@@ -170,7 +167,7 @@ type
   private
     function    AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
   public
-    constructor Create(awin: TfpgWindowBase); override;
+    constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
@@ -240,9 +237,9 @@ type
     FShowHint: boolean;
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
-    FHintWindow: TfpgWindow;
+    FHintWindow: TfpgWidgetBase;
     FHintTimer: TfpgTimer;
-    FHintWidget: TfpgWindow;
+    FHintWidget: TfpgNativeWindow;
     FHintPos: TPoint;
     FOnKeyPress: TKeyPressEvent;
     FStartDragDistance: integer;
@@ -282,7 +279,7 @@ type
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    DefaultFont: TfpgFont read FDefaultFont;
     property    HintPause: Integer read FHintPause write SetHintPause;
-    property    HintWindow: TfpgWindow read FHintWindow;
+    property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
@@ -342,11 +339,11 @@ type
     FTarget: TfpgWinHandle;
     procedure   SetMimeData(const AValue: TfpgMimeDataBase);
   protected
-    function    GetSource: TfpgWindow; reintroduce;
+    function    GetSource: TfpgNativeWindow; reintroduce;
   public
-    constructor Create(ASource: TfpgWindow);
+    constructor Create(ASource: TfpgNativeWindow);
     function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
-    property    Source: TfpgWindow read GetSource;
+    property    Source: TfpgNativeWindow read GetSource;
     property    Target: TfpgWinHandle read FTarget write FTarget;
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
   end;
@@ -1360,7 +1357,7 @@ begin
       w := ScreenWidth;
   end;
   wnd.SetPosition(APos.X, APos.Y, w, h);
-  wnd.UpdateWindowPosition;
+  wnd.UpdatePosition;
   wnd.Show;
 end;
 
@@ -1484,14 +1481,14 @@ begin
   begin
     { MouseEnter occured }
     FHintTimer.Enabled := Boolean(msg.Params.user.Param1);
-    FHintWidget := TfpgWindow(msg.Sender);
+    FHintWidget := TfpgNativeWindow(msg.Sender);
   end
   else
   begin
     { Handle mouse move information }
     FHintPos.X := msg.Params.user.Param2;
     FHintPos.Y := msg.Params.user.Param3;
-    FHintWidget := TfpgWindow(msg.Sender);
+    FHintWidget := TfpgNativeWindow(msg.Sender);
     if FHintTimer.Enabled then
       FHintTimer.Reset    // keep reseting to prevent hint from showing
     else
@@ -1520,7 +1517,7 @@ begin
     begin
 //writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
       TWidgetFriend(w).DoShowHint(lHint);
-      ActivateHint(w.WindowToScreen(w, FHintPos), lHint);
+      ActivateHint(w.Window.WindowToScreen(w.Window, FHintPos), lHint);
     end;
   except
     // silence it!
@@ -1763,9 +1760,9 @@ begin
   end;
 end;
 
-constructor TfpgCanvas.Create(awin: TfpgWindowBase);
+constructor TfpgCanvas.Create(awidget: TfpgWidgetBase);
 begin
-  inherited Create(awin);
+  inherited Create(awidget);
 
   FBeginDrawCount := 0;
 
@@ -1905,14 +1902,9 @@ begin
   Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
 end;
 
-{ TfpgWindow }
+{ TfpgNativeWindow }
 
-function TfpgWindow.CreateCanvas: TfpgCanvasBase;
-begin
-  Result := DefaultCanvasClass.Create(self);
-end;
-
-constructor TfpgWindow.Create(AOwner: TComponent);
+constructor TfpgNativeWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner); // initialize the platform internals
 
@@ -1928,35 +1920,29 @@ begin
 
   FModalForWin := nil;
 
-  if (AOwner <> nil) and (AOwner is TfpgWindow) then
+  if (AOwner <> nil) and (AOwner is TfpgNativeWindow) then
     FWindowType   := wtChild
   else
     FWindowType   := wtWindow;
 
-  FCanvas := CreateCanvas;
+  //FCanvas := CreateCanvas;
 end;
 
-destructor TfpgWindow.Destroy;
+destructor TfpgNativeWindow.Destroy;
 begin
-  FCanvas.Free;
+  //FCanvas.Free;
   inherited Destroy;
 end;
 
-procedure TfpgWindow.SetParent(const AValue: TfpgWindow);
+procedure TfpgNativeWindow.SetParent(const AValue: TfpgNativeWindow);
 begin
   inherited SetParent(AValue);
 end;
 
-function TfpgWindow.GetParent: TfpgWindow;
+function TfpgNativeWindow.GetParent: TfpgNativeWindow;
 begin
-  result := TfpgWindow(inherited GetParent);
+  result := TfpgNativeWindow(inherited GetParent);
 end;
-
-function TfpgWindow.GetCanvas: TfpgCanvas;
-begin
-  Result := TfpgCanvas(inherited GetCanvas);
-end;
-
 
 { TfpgStyle }
 
@@ -2633,12 +2619,12 @@ begin
   FMimeData := AValue;
 end;
 
-function TfpgDrag.GetSource: TfpgWindow;
+function TfpgDrag.GetSource: TfpgNativeWindow;
 begin
-  Result := TfpgWindow(inherited GetSource);
+  Result := TfpgNativeWindow(inherited GetSource);
 end;
 
-constructor TfpgDrag.Create(ASource: TfpgWindow);
+constructor TfpgDrag.Create(ASource: TfpgNativeWindow);
 begin
   inherited Create;
   FSource := ASource;

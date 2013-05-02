@@ -197,7 +197,7 @@ begin
     AForm.Height := readInteger(LINISection, 'Height', LHeight);
     AForm.Width := readInteger(LINISection, 'Width', LWidth);
   end;
-  AForm.UpdateWindowPosition;
+  AForm.UpdatePosition;
 
   //  AForm.WindowState := TWindowState(ReadInteger(LINISection, 'WindowState', ord(wsNormal)));
 

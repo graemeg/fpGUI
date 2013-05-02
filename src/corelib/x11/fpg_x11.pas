@@ -213,7 +213,7 @@ type
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
     property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
-    constructor Create(awin: TfpgWindowBase); override;
+    constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
   end;
 
@@ -238,7 +238,6 @@ type
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
     function    GetWindowState: TfpgWindowState; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -247,6 +246,7 @@ type
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
     procedure   BringToFront; override;
+    property    WinHandle: TfpgWinHandle read FWinHandle;
   end;
 
 
@@ -1123,13 +1123,15 @@ procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow);
 var
   wg: TfpgWidget;
+
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDleave');
   {$ENDIF}
   if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
   begin
-    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+
     if wg.AcceptDrops then
     begin
       if Assigned(wg.OnDragLeave) then
@@ -1207,14 +1209,14 @@ begin
     {$IFDEF DNDDEBUG}
     writeln('dragging over window: ', w.Name);
     {$ENDIF}
-    if w is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+    if w is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      wg := TfpgWidget(w);
+      wg := TfpgWidget(TfpgX11Window(w).Owner);
       if FLastDropTarget <> lTargetWinHandle then
       begin
         if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
         begin
-          wg2 := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+          wg2 := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
           if wg2.AcceptDrops then
           begin
             if Assigned(wg2.OnDragLeave) then
@@ -1245,7 +1247,7 @@ begin
 
           { TODO: We need to populate the Source parameter. }
           if Assigned(Drag) then
-            swg := TfpgDrag(Drag).Source as TfpgWidget
+            swg := TfpgWidget((TfpgDrag(Drag).Source as TfpgX11Window).Owner)
           else
             swg := nil;
           wg.OnDragEnter(wg, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
@@ -1348,7 +1350,7 @@ begin
   {$ENDIF}
   if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
   begin
-    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
     if not wg.AcceptDrops then
       Exit;
   end;
@@ -1384,7 +1386,7 @@ begin
 
   if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
   begin
-    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
     if wg.AcceptDrops then
     begin
       if Assigned(wg.OnDragDrop) then
@@ -1751,7 +1753,7 @@ begin
           // We need to get the corrected "focused" widget instead.
           kwg := FindKeyboardFocus;
           if kwg <> nil then
-            w := kwg
+            w := kwg.Window
           else
           begin
             {$IFDEF DEBUG}
@@ -1826,7 +1828,7 @@ begin
           if xapplication.TopModalForm <> nil then
           begin
             ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+            if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
 
@@ -1922,7 +1924,7 @@ begin
             if xapplication.TopModalForm <> nil then
             begin
               ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
-              if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+              if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                 blockmsg := true;
             end;
             if not blockmsg then
@@ -1957,7 +1959,7 @@ begin
               begin
                 // This is ugly!!!!!!!!!!!!!!!
                 ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
-                if (ew <> nil) and (TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+                if (ew <> nil) and (TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
 
@@ -2280,7 +2282,7 @@ begin
     mask := CWOverrideRedirect;
   end;
 
-  AdjustWindowStyle;
+  //AdjustWindowStyle;
 
   if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
   begin
@@ -2803,9 +2805,9 @@ end;
 
 { TfpgX11Canvas }
 
-constructor TfpgX11Canvas.Create(awin: TfpgWindowBase);
+constructor TfpgX11Canvas.Create(awidget: TfpgWidgetBase);
 begin
-  inherited Create(awin);
+  inherited Create(awidget);
   FDrawing    := False;
   FDrawWindow := nil;
 
@@ -3742,7 +3744,7 @@ begin
 
     XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
 
-    uDragSource := FSource as TfpgWidget;
+    uDragSource := FSource.Owner as TfpgWidget;
   end
   else
   begin

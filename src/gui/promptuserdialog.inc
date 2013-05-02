@@ -112,13 +112,13 @@ var
 begin
   MyTime := Now;
   repeat
-    MoveWindow(Left - MovingPixels, Top);
+    Window.MoveWindow(Left - MovingPixels, Top);
     fpgApplication.ProcessMessages;
     Sleep(aSleep);
-    MoveWindow(Left + MovingPixels * 2, Top);
+    Window.MoveWindow(Left + MovingPixels * 2, Top);
     fpgApplication.ProcessMessages;
     Sleep(aSleep);
-    MoveWindow(Left - MovingPixels, Top);
+    Window.MoveWindow(Left - MovingPixels, Top);
     fpgApplication.ProcessMessages;
   until SecondsBetween(Now, MyTime) >= Seconds;
 end;

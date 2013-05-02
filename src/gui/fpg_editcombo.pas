@@ -293,7 +293,7 @@ var
   rowcount, i: integer;
   r: TfpgRect;
 begin
-  if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
+  if (not Assigned(FDropDown)) or (not FDropDown.WindowAllocated) then
   begin
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
@@ -651,7 +651,8 @@ begin
                       FFocusItem := -1;
                       FText:= '';
                     end;  { if/else }
-                    Parent.ActivateWindow;
+                    {$NOTE Find Replacement for Parent.ActivateWindow}
+                    //Parent.ActivateWindow;
                   end;
                 end;
             hasChanged := True;

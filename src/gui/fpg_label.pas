@@ -203,7 +203,7 @@ begin
     Width := FFont.TextWidth(FText);
     Height:= FFont.Height;
   end;
-  UpdateWindowPosition;
+  UpdatePosition;
   RePaint;
 end;
 

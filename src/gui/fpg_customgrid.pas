@@ -349,7 +349,7 @@ begin
   if c <> nil then
   begin
     DoDeleteColumn(AIndex);
-    if HasHandle then
+    if WindowAllocated then
       Update;
   end;
 end;
@@ -365,7 +365,7 @@ end;
 procedure TfpgCustomGrid.MoveColumn(oldindex, newindex: integer);
 begin
   FColumns.Move(oldindex, newindex);
-  if HasHandle then
+  if WindowAllocated then
     Update;
 end;
 

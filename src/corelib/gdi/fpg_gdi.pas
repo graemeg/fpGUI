@@ -1754,7 +1754,7 @@ begin
   if ((WindowType = wtWindow) or (WindowType = wtModalForm)) and (waBorderLess in FWindowAttributes) then
     FWinStyle := FWinStyle and WS_POPUP;  // this is different to wtPopop (toolwindow, hint window) because it can steal focus like a normal form
 
-  AdjustWindowStyle;
+  //AdjustWindowStyle;
 
   if waAutoPos in FWindowAttributes then
   begin

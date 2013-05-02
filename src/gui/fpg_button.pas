@@ -197,7 +197,7 @@ begin
   Result.SetPosition(x, y, w, Result.Height); // font was used to calculate height.
   Result.OnClick := AOnClickEvent;
   Result.ImageName := AImage;
-  Result.UpdateWindowPosition;
+  Result.UpdatePosition;
 end;
 
 { TfpgBaseButton }

@@ -646,7 +646,7 @@ begin
     Exit; // ==>
 
   FSubItemImages[TfpgLVItemStates(AIndex)] := AValue;
-  if HasHandle then
+  if WindowAllocated then
     Invalidate;
 end;
   
@@ -787,7 +787,7 @@ begin
     Exit; // ==>
 
   FImages[TfpgLVItemStates(AIndex)] := AValue;
-  if HasHandle then
+  if WindowAllocated then
     Invalidate;
 end;
 
@@ -1741,9 +1741,9 @@ begin
 
 
   if FHScrollBar.Visible then
-    FHScrollBar.UpdateWindowPosition;
+    FHScrollBar.UpdatePosition;
   if FVScrollBar.Visible then
-    FVScrollBar.UpdateWindowPosition;
+    FVScrollBar.UpdatePosition;
 
   FScrollBarNeedsUpdate := False;
 end;

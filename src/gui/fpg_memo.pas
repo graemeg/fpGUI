@@ -314,8 +314,8 @@ begin
   FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
   FVScrollBar.Height  := VHeight;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;
 
 procedure TfpgMemo.DefaultPopupCut(Sender: TObject);

@@ -18,6 +18,7 @@
 
 {$ifdef uses_implementation}
   fpg_x11,
+  fpg_impl,
 {$endif}
 
 
@@ -31,20 +32,22 @@ procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   drawgc: Tgc;
   GcValues: TXGcValues;
+  X11Handle: TfpgWinHandle;
 begin
-  if TfpgWindow(FWindow).WinHandle <= 0 then
+  X11Handle := TfpgX11Window(TfpgWidgetBase(FWidget).Window).WinHandle;
+  if X11Handle <= 0 then
   begin
     debugln('    no winhandle available');
     exit;
   end;
 
   FImg.UpdateImage;
-  drawgc := XCreateGc(fpgApplication.Display, TfpgWindow(FWindow).WinHandle, 0, @GcValues);
+  drawgc := XCreateGc(fpgApplication.Display, X11Handle, 0, @GcValues);
 
   // finally dump the image to screen!
-  XPutImage(fpgApplication.Display, TfpgWindow(FWindow).WinHandle,
+  XPutImage(fpgApplication.Display, X11Handle,
       drawgc, TImageHack(FImg).XImage, 0, 0, 0, 0,
-      FWindow.Width, FWindow.Height);
+      FWidget.Width, FWidget.Height);
 
   XFreeGc(fpgApplication.Display, drawgc);
 end;

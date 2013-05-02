@@ -31,6 +31,9 @@ uses
   fpg_form;
   
 type
+
+  { TfpgHintWindow }
+
   TfpgHintWindow = class(TfpgBaseForm)
   private
     FFont: TfpgFont;
@@ -57,6 +60,7 @@ type
     procedure   HandlePaint; override;
     procedure   PaintBorder; virtual;
     procedure   PaintHintText; virtual;
+    procedure   DoAllocateWindowHandle; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -95,7 +99,12 @@ implementation
 
 
 type
+
+  { TfpgHintShadow }
+
   TfpgHintShadow = class(TfpgForm)
+  protected
+    procedure   DoAllocateWindowHandle; override;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -158,7 +167,7 @@ begin
   end;
 end;
 
-procedure TfpgHintWindow.SetShadowColor(AValue: Tfpgcolor);
+procedure TfpgHintWindow.SetShadowColor(AValue: TfpgColor);
 begin
   if uShadowForm.BackgroundColor <> AValue then
     uShadowForm.BackgroundColor := AValue;
@@ -218,12 +227,17 @@ begin
   Canvas.DrawText(FHintTextRec, Text, [txtHCenter, txtVCenter, txtWrap]);
 end;
 
+procedure TfpgHintWindow.DoAllocateWindowHandle;
+begin
+  inherited DoAllocateWindowHandle;
+  Window.WindowType := wtPopup;
+end;
+
 constructor TfpgHintWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'F_Hint';
   WindowPosition := wpUser;
-  WindowType := wtPopup;
   Sizeable := False;
   BackgroundColor:= clHintWindow; //clBlack;  // This becomes the hint border so don't set to clHintWindow
   FFont := fpgGetFont('#Label1');
@@ -248,12 +262,17 @@ begin
   uShadowForm.Free;
 end;
 
+procedure TfpgHintShadow.DoAllocateWindowHandle;
+begin
+  inherited DoAllocateWindowHandle;
+  Window.WindowType := wtPopup;
+end;
+
 constructor TfpgHintShadow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'F_Shadow';
   WindowPosition := wpUser;
-  WindowType := wtPopup;
   Sizeable := False;
   BackgroundColor := clGray;
 end;

@@ -353,7 +353,7 @@ end;
 procedure TfpgColorWheel.SetMarginWidth(NewWidth: longint);
 begin
   FMarginWidth := NewWidth;
-  if WinHandle = 0 then
+  if not WindowAllocated then
     Exit; //==>
   Invalidate;
 end;
@@ -361,7 +361,7 @@ end;
 procedure TfpgColorWheel.SetCursorSize(NewSize: longint);
 begin
   FCursorSize := NewSize;
-  if WinHandle = 0 then
+  if not WindowAllocated then
     Exit; //==>
   Invalidate;
 end;

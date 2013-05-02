@@ -155,7 +155,7 @@ begin
   if Assigned(Bv_Visu) then
   begin
     Bv_Visu.Top := Bv_Command.Height + PreviewMargin - position;
-    Bv_Visu.UpdateWindowPosition;
+    Bv_Visu.UpdatePosition;
   end;
 end;
 
@@ -407,7 +407,7 @@ begin
   if Bv_Visu.Top < Bv_Command.Height+PreviewMargin then
     Bv_Visu.Top := Bv_Command.Height+PreviewMargin;
 
-  Bv_Visu.UpdateWindowPosition;
+  Bv_Visu.UpdatePosition;
   RecalcScrollbars;
 end;
 
