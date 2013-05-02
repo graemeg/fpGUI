@@ -15,7 +15,7 @@
 # declare files that must always have specific EOL style
 *.dez  text eol=crlf
 
-# True binary files that should not be modify (just for safety sake)
+# True binary files that should not be modified (just for safety sake)
 *.jpg  binary
 *.png  binary
 *.bmp  binary
