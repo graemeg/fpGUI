@@ -31,8 +31,6 @@ uses
 
 type
 
-  { TfpgBaseImgAnim }
-
   TfpgBaseImgAnim = class(TfpgWidget)
   private
     FFrameCount: integer;
@@ -125,7 +123,7 @@ end;
 
 procedure TfpgBaseImgAnim.HandlePaint;
 begin
-  if (FImageFilename = '') or (FImage = nil) then
+  if (FImage = nil) then
     Exit; //==>
   Canvas.BeginDraw;
   Canvas.Clear(clWindowBackground);
@@ -179,7 +177,6 @@ begin
     FImage.CreateMaskFromSample(AMaskSample.X, AMaskSample.Y);
     FImage.UpdateImage;
   end;
-  FImageFilename := 'byte'; // because handle paint check if file is set
   RecalcImageWidth;
   Repaint;
 end;
