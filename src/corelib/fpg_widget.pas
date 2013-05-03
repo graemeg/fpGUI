@@ -962,8 +962,11 @@ begin
 
   if not consumed and (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
   begin
-    InvokeHelp;
-    consumed := True;
+    if fpgApplication.HelpFile <> '' then
+    begin
+      InvokeHelp;
+      consumed := True;
+    end;
   end;
 
   case keycode of
