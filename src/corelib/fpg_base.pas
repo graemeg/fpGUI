@@ -90,7 +90,7 @@ type
   // For providing user feedback. No need to display backtrace information
   EfpGUIUserFeedbackException = class(EfpGUIException);
 
-  TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encIBMGraph);
+  TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encCP1250, encIBMGraph);
 
 
 
@@ -390,7 +390,7 @@ type
     procedure   DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual;
     procedure   DrawPolygon(const Points: array of TPoint);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
-    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect);
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); virtual;
     // x,y is the top/left corner of where the text output will start.
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;

@@ -2573,7 +2573,7 @@ begin
   ImageIndices.Free;
 
   // apply encoding conversion
-  lText := ConvertTextToUTF8(HelpFile.Encoding, lText);
+  lText := ConvertTextToUTF8(Settings.Encoding, lText);
 
   { Load and insert annotations / notes }
   if not HelpFile.NotesLoaded then
@@ -3465,6 +3465,7 @@ begin
     Items.Add('CP437');
     Items.Add('CP850');
     Items.Add('CP866');
+    Items.Add('CP1250');
     Items.Add('IBM Graph (cp437)');
     FocusItem := 0;
     TabOrder := 10;

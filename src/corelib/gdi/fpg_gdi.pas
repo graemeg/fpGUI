@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -40,7 +40,7 @@ uses
   fpg_base,
   fpg_impl
   {$IFDEF DEBUG}
-  ,dbugintf
+  ,fpg_dbugintf
   {$ENDIF DEBUG}
   ,fpg_OLEDragDrop
   ;
@@ -147,6 +147,7 @@ type
   public
     constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
   end;
 
 
@@ -877,7 +878,7 @@ begin
         begin
           {$IFDEF DEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            writeln('fpGFX/GDI: Found a mouse button event');
+            SendDebug('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -1413,7 +1414,7 @@ var
   wg: TfpgWidget;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIWindow.HandleDNDLeave ');
+  SendDebug('TfpgGDIWindow.HandleDNDLeave ');
   {$ENDIF}
   FUserMimeSelection := '';
   wg := self as TfpgWidget;
@@ -1437,7 +1438,7 @@ var
   msgp: TfpgMessageParams;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIWindow.HandleDNDEnter ');
+  SendDebug('TfpgGDIWindow.HandleDNDEnter ');
   {$ENDIF}
   wg := self as TfpgWidget;
   if wg.AcceptDrops then
@@ -1500,7 +1501,7 @@ begin
   if FDropPos <> PT then
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIWindow.HandleDNDPosition ');
+    SendDebug('TfpgGDIWindow.HandleDNDPosition ');
     {$ENDIF}
     FDropPos.x := PT.x;
     FDropPos.y := PT.y;
@@ -1526,7 +1527,7 @@ begin
     exit;
 
   {$IFDEF DND_DEBUG}
-  Writeln('TfpgGDIWindow.HandleDNDDrop');
+  SendDebug('TfpgGDIWindow.HandleDNDDrop');
   {$ENDIF}
 
   wg := self as TfpgWidget;
@@ -2129,6 +2130,27 @@ begin
     DoEndDraw;
   TryFreeBackBuffer;
   inherited;
+end;
+
+procedure TfpgGDICanvas.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase;
+  var ASrcRect: TfpgRect);
+var
+  srcdc: HDC;
+  destdc: HDC;
+begin
+  if (TfpgWindow(FWindow).WinHandle <= 0) or (TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle <= 0) then
+  begin
+    debugln('    no winhandle available');
+    exit;
+  end;
+
+  destdc := Windows.GetDC(TfpgWindow(FWindow).WinHandle);
+  srcdc := Windows.GetDC(TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle);
+
+  BitBlt(destdc, ADest_x, ADest_y, ASrcRect.Width, ASrcRect.Height, srcdc, ASrcRect.Left, ASrcRect.Top, SRCCOPY);
+
+  ReleaseDC(TfpgWindow(TfpgGDICanvas(ASrcCanvas).FWindow).WinHandle, srcdc);
+  ReleaseDC(TfpgWindow(FWindow).WinHandle, destdc);
 end;
 
 procedure TfpgGDICanvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
@@ -3089,7 +3111,11 @@ begin
   ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
 end;
 
-procedure TimerCallBackProc(window_hwnd : hwnd; msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
+{$IF FPC_FULLVERSION<20602}
+procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT; dwTime: DWORD); stdcall;
+{$ELSE}
+procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
+{$IFEND}
 begin
   { idEvent contains the handle to the timer that got triggered }
   fpgCheckTimers;
@@ -3102,7 +3128,6 @@ begin
   inherited SetEnabled(AValue);
   if FEnabled then
   begin
-//    FHandle := Windows.SetTimer(0, 0, Interval, nil);
     FHandle := Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
   end
   else
