@@ -19,7 +19,7 @@ unit fpg_x11;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}      // general debugging - mostly OS messages though
+{$Define DEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
@@ -203,7 +203,7 @@ type
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
-    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
@@ -226,7 +226,7 @@ type
     FWinHandle: TfpgWinHandle;
     FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
     FModalForWin: TfpgX11Window;
-    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); override;
     procedure   DoReleaseWindowHandle; override;
     procedure   DoRemoveWindowLookup; override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
@@ -1030,7 +1030,7 @@ begin
   if FLastDropTarget <> 0 then
   begin
     fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
+    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget).Owner, FPGM_DROPEXIT, msgp);
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
@@ -1263,7 +1263,7 @@ begin
           fillchar(msgp, sizeof(msgp), 0);
           msgp.mouse.x := dx;
           msgp.mouse.y := dy;
-          fpgPostMessage(nil, w, FPGM_DROPENTER, msgp);
+          fpgPostMessage(nil, w.Owner, FPGM_DROPENTER, msgp);
         end;
       end;
     end;
@@ -1766,19 +1766,19 @@ begin
 
           if ev._type = X.KeyPress then
           begin
-            fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
+            fpgPostMessage(nil, w.Owner, FPGM_KEYPRESS, msgp);
 
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
               for i := 1 to UTF8Length(FComposeBuffer) do
               begin
                 msgp.keyboard.keychar := UTF8Copy(FComposeBuffer, i, 1);
-                fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
+                fpgPostMessage(nil, w.Owner, FPGM_KEYCHAR, msgp);
               end;
             end;
           end { if }
           else if ev._type = X.KeyRelease then
-            fpgPostMessage(nil, w, FPGM_KEYRELEASE, msgp);
+            fpgPostMessage(nil, w.Owner, FPGM_KEYRELEASE, msgp);
         end;
 
     X.ButtonPress,
@@ -1860,7 +1860,7 @@ begin
                 end;
 
                 msgp.mouse.delta := i;
-                fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
+                fpgPostMessage(nil, w.Owner, FPGM_SCROLL, msgp);
               end;
             end
             else
@@ -1879,7 +1879,7 @@ begin
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
               end;
-              fpgPostMessage(nil, w, mcode, msgp);
+              fpgPostMessage(nil, w.Owner, mcode, msgp);
             end;  { if/else }
           end;  { if not blocking }
         end;
@@ -1891,7 +1891,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window), FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window).Owner, FPGM_PAINT);
           end;
         end;
 
@@ -1902,7 +1902,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
           if ev.xgraphicsexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable), FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable).Owner, FPGM_PAINT);
           end;
         end;
 
@@ -1933,7 +1933,7 @@ begin
               msgp.mouse.y          := ev.xmotion.y;
               msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
               msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
-              fpgPostMessage(nil, w, FPGM_MOUSEMOVE, msgp);
+              fpgPostMessage(nil, w.Owner, FPGM_MOUSEMOVE, msgp);
             end;
           end;
         end;
@@ -1964,7 +1964,7 @@ begin
               end;
 
               if not blockmsg then
-                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
+                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window).Owner, FPGM_CLOSE);
              end;
           end
           { XDND protocol - XdndEnter }
@@ -2070,10 +2070,10 @@ begin
             end;
 
             if (w.FWidth <> msgp.rect.Width) or (w.FHeight <> msgp.rect.Height) then
-              fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+              fpgPostMessage(nil, w.Owner, FPGM_RESIZE, msgp);
 
             if (w.FLeft <> msgp.rect.Left) or (w.FTop <> msgp.rect.Top) then
-              fpgPostMessage(nil, w, FPGM_MOVE, msgp);
+              fpgPostMessage(nil, w.Owner, FPGM_MOVE, msgp);
           end;
         end;
 
@@ -2125,16 +2125,16 @@ begin
         end;
 
     X.FocusIn:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Owner, FPGM_ACTIVATE);
 
     X.FocusOut:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Owner, FPGM_DEACTIVATE);
 
     X.EnterNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEENTER);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Owner, FPGM_MOUSEENTER);
 
     X.LeaveNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Owner, FPGM_MOUSEEXIT);
 
     X.MapNotify:
         begin
@@ -2151,7 +2151,7 @@ begin
           //  msgp.rect.Top    := w.Top;
           //  msgp.rect.Width  := w.Width;
           //  msgp.rect.Height := w.Height;
-          //  fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+          //  fpgPostMessage(nil, w.owner, FPGM_RESIZE, msgp);
           //end;
         end;
 
@@ -2253,7 +2253,7 @@ end;
 
 { TfpgX11Window }
 
-procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWindowBase);
+procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
 var
   pwh: TfpgWinHandle;
   wh: TfpgWinHandle;
@@ -2270,7 +2270,7 @@ begin
     Exit; //==>
 
   if AParent <> nil then
-    pwh := TfpgX11Window(AParent).WinHandle
+    pwh := TfpgX11Window(AParent.Window).WinHandle
   else
     pwh := xapplication.RootWindow;
 
@@ -2544,7 +2544,7 @@ begin
       h := FHeight
     else
       h := 1;
-
+    WriteLn(FLeft,ftop,w,h);
     XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
   end;
 end;
@@ -2827,7 +2827,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgX11Canvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
+procedure TfpgX11Canvas.DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean);
 var
   x: integer;
   y: integer;
@@ -2840,15 +2840,15 @@ var
   pmh: longword;
   GcValues: TXGcValues;
 begin
-  if Assigned(TfpgX11Window(awin)) then
+  if Assigned(awidget) then
   begin
     // This occurs every now and again with TfpgMemo and InvertCaret painting!
     // Investigate this.
-    if not TfpgX11Window(awin).HasHandle then
+    if not TfpgX11Window(awidget.Window).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
-  XGetGeometry(xapplication.display, TfpgX11Window(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+  XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
 
   if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
@@ -2861,7 +2861,7 @@ begin
 
   if not FDrawing then
   begin
-    FDrawWindow := TfpgX11Window(awin);
+    FDrawWindow := TfpgX11Window(awidget.Window);
 
     if buffered then
     begin

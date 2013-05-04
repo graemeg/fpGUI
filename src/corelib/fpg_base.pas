@@ -367,7 +367,7 @@ type
     function    DoGetClipRect: TfpgRect; virtual; abstract;
     procedure   DoAddClipRect(const ARect: TfpgRect); virtual; abstract;
     procedure   DoClearClipRect; virtual; abstract;
-    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); virtual; abstract;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
@@ -451,13 +451,13 @@ type
 
   TfpgWidgetBase = class(TfpgComponent)
   private
-    FParent: TfpgWidgetBase;
-    function GetWindow: TfpgWindowBase; virtual;
+    function    GetWindow: TfpgWindowBase; virtual;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
 
   protected
+    FParent: TfpgWidgetBase;
     FMouseCursor: TMouseCursor;
     FTop: TfpgCoord;
     FLeft: TfpgCoord;
@@ -483,6 +483,8 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     procedure   DoDragStartDetected; virtual;
+    procedure   AddChild(AChild: TfpgWidgetBase);
+    procedure   RemoveChild(AChild: TfpgWidgetBase);
     procedure   SetParent(const AValue: TfpgWidgetBase); virtual;
     function    GetParent: TfpgWidgetBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -556,7 +558,7 @@ type
     FWindowState: TfpgWindowState;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
-    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
     procedure   DoRemoveWindowLookup; virtual; abstract;
     procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
@@ -590,6 +592,8 @@ type
     function    Right: TfpgCoord;
     function    Bottom: TfpgCoord;
     procedure   UpdateWindowPosition;
+    procedure   UpdateWindowPosition(ALeft, ATop, AWidth, AHeight: Integer);
+
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     function    HasParent: Boolean; override;
@@ -1280,39 +1284,56 @@ begin
 
 end;
 
+procedure TfpgWidgetBase.AddChild(AChild: TfpgWidgetBase);
+begin
+  if AChild.Owner <> self then
+    InsertComponent(AChild);
+  AChild.FParent := Self;
+end;
+
+procedure TfpgWidgetBase.RemoveChild(AChild: TfpgWidgetBase);
+begin
+  RemoveComponent(AChild);
+  AChild.FParent := nil;
+end;
+
 procedure TfpgWidgetBase.SetParent(const AValue: TfpgWidgetBase);
 begin
-
+  if FParent <> nil then
+    FParent.RemoveChild(Self);
+  if AValue <> nil then
+    AValue.AddChild(Self);
 end;
 
 function TfpgWidgetBase.GetParent: TfpgWidgetBase;
 begin
-
+  Result := FParent;
 end;
 
 function TfpgWidgetBase.GetCanvas: TfpgCanvasBase;
 begin
-
+  Result := FCanvas;
 end;
 
 procedure TfpgWidgetBase.SetTop(const AValue: TfpgCoord);
 begin
-
+  FTop := AValue;
 end;
 
 procedure TfpgWidgetBase.SetLeft(const AValue: TfpgCoord);
 begin
+  FLeft := AValue;
 
 end;
 
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
 begin
-
+  FHeight:=AValue;
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
 begin
-
+  FWidth:=AValue;
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
@@ -1337,12 +1358,12 @@ end;
 
 function TfpgWidgetBase.Right: TfpgCoord;
 begin
-
+  Result := Left+Width-1;
 end;
 
 function TfpgWidgetBase.Bottom: TfpgCoord;
 begin
-
+  Result := Top+Height-1;
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
@@ -1350,7 +1371,10 @@ begin
   if Window = nil then
     Exit; // ==>
   if Window.Owner = Self then
-    Window.UpdateWindowPosition
+  begin
+    WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
+    Window.UpdateWindowPosition(Left, Top, Width, Height);
+  end
   else if Parent <> nil then
     ;//TfpgWidgetBase(Parent).Invalidate;
 
@@ -1499,7 +1523,10 @@ end;
 
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
-  DoAllocateWindowHandle(FParent);
+  if Assigned(Owner) then
+    DoAllocateWindowHandle(TfpgWidgetBase(Owner).Parent)
+  else
+    DoAllocateWindowHandle(nil);
   if FMouseCursorIsDirty then
     DoSetMouseCursor;
 end;
@@ -1625,6 +1652,15 @@ end;
 procedure TfpgWindowBase.UpdateWindowPosition;
 begin
   DoUpdateWindowPosition;
+end;
+
+procedure TfpgWindowBase.UpdateWindowPosition(ALeft, ATop, AWidth, AHeight: Integer);
+begin
+  Left:=ALeft;
+  Top:=ATop;
+  Height:=AHeight;
+  Width:=AWidth;
+  UpdateWindowPosition;
 end;
 
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
@@ -2063,7 +2099,7 @@ procedure TfpgCanvasBase.BeginDraw(ABuffered: boolean);
 begin
   if FBeginDrawCount < 1 then
   begin
-    DoBeginDraw(FWidget.Window, ABuffered);
+    DoBeginDraw(FWidget, ABuffered);
 
     SetColor(clText1);
     SetTextColor(clText1);

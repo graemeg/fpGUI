@@ -370,6 +370,7 @@ begin
   begin
     FWindow := TfpgNativeWindow.Create(Self);
     Window.WindowType:=wtChild;
+    Window.UpdateWindowPosition(Left, Top, Width, Height);
   end
   else
   begin
@@ -390,7 +391,10 @@ begin
   DoAllocateWindowHandle;
   Window.AllocateWindowHandle;
   if Window.Owner = Self then
+  begin
     Window.SetWindowVisible(Visible);
+    //Window;
+  end;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -552,6 +556,8 @@ constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
 
+  //HasOwnWindow:=True;
+
   FIsContainer    := False;
   FOnScreen       := False;
   FVisible        := True;
@@ -585,6 +591,7 @@ begin
   begin
     FShowHint   := Parent.ShowHint;
   end;
+  FCanvas := CreateCanvas;
 end;
 
 destructor TfpgWidget.Destroy;
@@ -592,6 +599,7 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
+  FCanvas.Free;
   HandleHide;
   if Owner <> nil then
     if (Owner is TfpgWidget) and (TfpgWidget(Owner).ActiveWidget = self) then
@@ -999,7 +1007,7 @@ end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if WindowAllocated then
+  if WindowAllocated and (Window.HasHandle) then
     fpgSendMessage(self, self, FPGM_PAINT);
 end;
 
@@ -1334,12 +1342,36 @@ begin
 end;
 
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
+var
+  i: Integer;
+  w: TfpgWidget;
 begin
-//  writeln('TfpgWidget.MsgPaint - ', Classname);
+  writeln('TfpgWidget.MsgPaint - ', Classname);
+  if not (WindowAllocated or (Window.HasHandle)) then
+    Exit;//
+  WriteLn(Self.ClassName);
+  WriteLn(Canvas.ClassName);
   Canvas.BeginDraw;
+
   HandlePaint;
   if Assigned(FOnPaint) then
     FOnPaint(Self);
+
+  // this is just a super simple dumb crutch to get something happening.
+  // I think maybe there will be a dispatch object that each TfpgWindowBase will
+  // be assigned from the widget that can query the widget for it's children etc
+  // and calculate coordinates to send to events. That way the widget message
+  // code can stay very simple
+  for i := 0 to ComponentCount-1 do
+  begin
+    w := TfpgWidget(Components[i]);
+    if w.InheritsFrom(TfpgWidget) then
+    begin
+      if not w.HasOwnWindow then
+        w.MsgPaint(msg);
+    end;
+
+  end;
   Canvas.EndDraw;
 end;
 

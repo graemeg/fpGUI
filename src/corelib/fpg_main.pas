@@ -1924,8 +1924,6 @@ begin
     FWindowType   := wtChild
   else
     FWindowType   := wtWindow;
-
-  //FCanvas := CreateCanvas;
 end;
 
 destructor TfpgNativeWindow.Destroy;
