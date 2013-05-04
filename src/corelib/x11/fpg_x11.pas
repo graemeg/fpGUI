@@ -2938,7 +2938,7 @@ begin
   if FBufferPixmap > 0 then
   begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
-    XCopyArea(xapplication.Display, FBufferPixmap, FDrawWindow.FWinHandle, cgc, x, y, w, h, x, y);
+    XCopyArea(xapplication.Display, FBufferPixmap, FDrawWindow.FWinHandle, cgc, x, y, w, h, x+FTransX, y+FTransY);
     XFreeGc(xapplication.display, cgc);
   end;
 end;

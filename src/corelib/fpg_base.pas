@@ -350,6 +350,8 @@ type
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
     FFont: TfpgFontBase;
+    FTransX,
+    FTransY: TfpgCoord; // offset used when painting 'alien' widgets
     FPersistentResources: boolean;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
@@ -505,6 +507,8 @@ type
     procedure   UpdatePosition;
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
+    procedure   WidgetToWindow(var ALeft, ATop: TfpgCoord);
+    procedure   WindowToWidget(var ALeft, ATop: TfpgCoord);
     function    HasParent: Boolean; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
@@ -1393,6 +1397,36 @@ begin
 
 end;
 
+procedure TfpgWidgetBase.WidgetToWindow(var ALeft, ATop: TfpgCoord);
+var
+  W: TfpgWidgetBase;
+begin
+  if Window = nil then
+    Exit; // ==>
+  W := Self;
+  while Assigned(Parent) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  begin
+    ALeft := ALeft + Parent.Left;
+    ATop := ATop + Parent.Top;
+    W := W.Parent;
+  end;
+end;
+
+procedure TfpgWidgetBase.WindowToWidget(var ALeft, ATop: TfpgCoord);
+var
+  W: TfpgWidgetBase;
+begin
+  if Window = nil then
+    Exit; // ==>
+  W := Self;
+  while Assigned(Parent) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  begin
+    ALeft := ALeft - Parent.Left;
+    ATop := ATop - Parent.Top;
+    W := Parent;
+  end;
+end;
+
 function TfpgWidgetBase.HasParent: Boolean;
 begin
   Result:=inherited HasParent;
@@ -2099,6 +2133,10 @@ procedure TfpgCanvasBase.BeginDraw(ABuffered: boolean);
 begin
   if FBeginDrawCount < 1 then
   begin
+    FTransX := FWidget.Left;
+    FTransY := FWidget.Top;
+    FWidget.WidgetToWindow(FTransX, FTransY);
+
     DoBeginDraw(FWidget, ABuffered);
 
     SetColor(clText1);
