@@ -122,7 +122,7 @@ type
     procedure   SetHint(const AValue: TfpgString); virtual;
     function    GetCanvas: TfpgCanvas; reintroduce;
     function    CreateCanvas: TfpgCanvasBase; virtual;
-    procedure   DoUpdatePosition; virtual;
+    procedure   DoUpdatePosition; override;
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
@@ -361,7 +361,8 @@ begin
   begin
     FWindow := TfpgNativeWindow.Create(Self);
     Window.WindowType:=wtChild;
-    Window.UpdateWindowPosition(Left, Top, Width, Height);
+    UpdatePosition;
+    //Window.UpdateWindowPosition(Left, Top, Width, Height);
   end
   else
   begin
@@ -442,6 +443,7 @@ procedure TfpgWidget.DoUpdatePosition;
 var
   dw: integer;
   dh: integer;
+  ParentLeft, ParentTop: TfpgCoord;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -461,9 +463,21 @@ begin
     HandleAlignments(dw, dh);
   end;
 
-  if Window.Owner = Self then
-    Window.UpdateWindowPosition
-  else ; { TODO Notify Parent of position change}
+  if HasOwnWindow and Assigned(Window) then
+  begin
+    ParentLeft := 0;
+    ParentTop := 0;
+    if Assigned(Parent) and not Parent.HasOwnWindow then
+    begin
+      Parent.WidgetToWindow(ParentLeft, ParentTop);
+    end;
+    WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
+    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
+  end
+  else if Parent <> nil then
+    ;//TfpgWidgetBase(Parent).Invalidate;
+  {$TODO Notify Parent we've changed position and should redraw}
+
   if (dw <> 0) or (dh <> 0) then
     DoResize;
 

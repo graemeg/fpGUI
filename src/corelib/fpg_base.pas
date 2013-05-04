@@ -1379,32 +1379,15 @@ begin
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
-var
-  ParentLeft, ParentTop: TfpgCoord;
 begin
-  if Window = nil then
-    Exit; // ==>
-  if HasOwnWindow then
-  begin
-    ParentLeft := 0;
-    ParentTop := 0;
-    if Assigned(Parent) and not Parent.HasOwnWindow then
-    begin
-      Parent.WidgetToWindow(ParentLeft, ParentTop);
-    end;
-    WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
-    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
-  end
-  else if Parent <> nil then
-    ;//TfpgWidgetBase(Parent).Invalidate;
-
-  {$TODO Notify Parent we've changed position and should redraw}
-
+  DoUpdatePosition;
 end;
 
 procedure TfpgWidgetBase.MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
 begin
-
+  Left := x;
+  Top := y;
+  UpdatePosition;
 end;
 
 function TfpgWidgetBase.WidgetToScreen(ASource: TfpgWidgetBase;
@@ -1418,7 +1401,7 @@ var
   W: TfpgWidgetBase;
 begin
   W := Self;
-  while Assigned(W) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  while Assigned(W) and Assigned(W.Window) and (not W.HasOwnWindow) do
   begin
     AX := AX + W.Left;
     AY := AY + W.Top;
@@ -1431,7 +1414,7 @@ var
   W: TfpgWidgetBase;
 begin
   W := Self;
-  while Assigned(W) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  while Assigned(W) and Assigned(W.Window) and (not W.HasOwnWindow) do
   begin
     AX := AX - W.Left;
     AY := AY - W.Top;
@@ -2145,8 +2128,8 @@ procedure TfpgCanvasBase.BeginDraw(ABuffered: boolean);
 begin
   if FBeginDrawCount < 1 then
   begin
-    FTransX := FWidget.Left;
-    FTransY := FWidget.Top;
+    FTransX := 0;
+    FTransY := 0;
     FWidget.WidgetToWindow(FTransX, FTransY);
 
     DoBeginDraw(FWidget, ABuffered);
