@@ -46,6 +46,7 @@ type
     procedure   AdjustWindowStyle; virtual;
     procedure   SetWindowParameters; virtual;
     procedure   SetWindowTitle(const ATitle: string); virtual;
+    procedure   DoAllocateWindowHandle; override;
   public
     constructor Create(AOwner: TComponent); override;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
@@ -83,6 +84,12 @@ begin
   FWindowTitle := ATitle;
   if WindowAllocated then
     Window.WindowTitle := ATitle;
+end;
+
+procedure TfpgWindow.DoAllocateWindowHandle;
+begin
+  inherited DoAllocateWindowHandle;
+  Window.WindowType:=wtWindow;
 end;
 
 constructor TfpgWindow.Create(AOwner: TComponent);
