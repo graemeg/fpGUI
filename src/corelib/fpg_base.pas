@@ -532,11 +532,13 @@ type
     property    Window: TfpgWindowBase read GetWindow;
   end;
 
+  TfpgWindowEventDispatcher = class;
 
   { TfpgWindowBase }
 
   TfpgWindowBase = class(TfpgComponent)
   private
+    FDispatcher: TfpgWindowEventDispatcher;
     FParent: TfpgWindowBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
@@ -628,6 +630,20 @@ type
     property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
+    property    Dispatcher: TfpgWindowEventDispatcher read FDispatcher;
+  end;
+
+  { TfpgWindowEventDispatcher }
+
+  TfpgWindowEventDispatcher = class(TfpgComponent)
+  private
+    FWidget: TfpgWidgetBase;
+    FWindow: TfpgWindowBase;
+  public
+     constructor Create(AOwner: TfpgWindowBase); reintroduce;
+     property Window: TfpgWindowBase read FWindow write FWindow;
+     property Widget: TfpgWidgetBase read FWidget write FWidget;
+
   end;
 
 
@@ -1264,6 +1280,15 @@ begin
   end;
 end;
 
+{ TfpgWindowEventDispatcher }
+
+constructor TfpgWindowEventDispatcher.Create(AOwner: TfpgWindowBase);
+begin
+  inherited Create(AOwner);
+  FWindow := AOwner;
+  FWidget := TfpgWidgetBase(AOwner.Owner);
+end;
+
 { TfpgWidgetBase }
 
 function TfpgWidgetBase.GetWindow: TfpgWindowBase;
@@ -1643,6 +1668,7 @@ end;
 constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FDispatcher := TfpgWindowEventDispatcher.Create(Self);
   FMouseCursor := mcDefault;
   FMouseCursorIsDirty := False;
   FPosIsDirty := True;
