@@ -45,7 +45,6 @@ type
   private
     FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
-    FHasOwnWindow: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnDragDrop: TfpgDragDropEvent;
@@ -72,7 +71,6 @@ type
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
-    procedure   SetHasOwnWindow(AValue: Boolean);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -179,7 +177,6 @@ type
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
     property    Window: TfpgNativeWindow read GetWindow;
-    property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
     property    WindowAllocated: Boolean read GetWindowAllocated;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
@@ -356,12 +353,6 @@ begin
   FAlign := AValue;
   if Parent <> nil then
     Parent.Realign;
-end;
-
-procedure TfpgWidget.SetHasOwnWindow(AValue: Boolean);
-begin
-  if FHasOwnWindow=AValue then Exit;
-  FHasOwnWindow:=AValue;
 end;
 
 procedure TfpgWidget.DoAllocateWindowHandle;
@@ -556,7 +547,7 @@ constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
 
-  //HasOwnWindow:=True;
+  HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;

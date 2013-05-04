@@ -453,6 +453,7 @@ type
 
   TfpgWidgetBase = class(TfpgComponent)
   private
+    FHasOwnWindow: Boolean;
     function    GetWindow: TfpgWindowBase; virtual;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
@@ -494,6 +495,7 @@ type
     procedure   SetLeft(const AValue: TfpgCoord);
     procedure   SetHeight(const AValue: TfpgCoord);
     procedure   SetWidth(const AValue: TfpgCoord);
+    procedure   SetHasOwnWindow(AValue: Boolean); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
     property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
@@ -507,8 +509,9 @@ type
     procedure   UpdatePosition;
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
-    procedure   WidgetToWindow(var ALeft, ATop: TfpgCoord);
-    procedure   WindowToWidget(var ALeft, ATop: TfpgCoord);
+    procedure   WidgetToWindow(var AX, AY: TfpgCoord);
+    procedure   WindowToWidget(var AX, AY: TfpgCoord);
+    property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
     function    HasParent: Boolean; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
@@ -1268,6 +1271,12 @@ begin
   Result := FWindow;
 end;
 
+procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
+begin
+  if FHasOwnWindow=AValue then Exit;
+  FHasOwnWindow:=AValue;
+end;
+
 procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
 begin
 
@@ -1327,7 +1336,6 @@ end;
 procedure TfpgWidgetBase.SetLeft(const AValue: TfpgCoord);
 begin
   FLeft := AValue;
-
 end;
 
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
@@ -1371,18 +1379,26 @@ begin
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
+var
+  ParentLeft, ParentTop: TfpgCoord;
 begin
   if Window = nil then
     Exit; // ==>
-  if Window.Owner = Self then
+  if HasOwnWindow then
   begin
+    ParentLeft := 0;
+    ParentTop := 0;
+    if Assigned(Parent) and not Parent.HasOwnWindow then
+    begin
+      Parent.WidgetToWindow(ParentLeft, ParentTop);
+    end;
     WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
-    Window.UpdateWindowPosition(Left, Top, Width, Height);
+    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
     ;//TfpgWidgetBase(Parent).Invalidate;
 
-  {$TODO Notify Parent we've chaned position and should redraw}
+  {$TODO Notify Parent we've changed position and should redraw}
 
 end;
 
@@ -1397,33 +1413,29 @@ begin
 
 end;
 
-procedure TfpgWidgetBase.WidgetToWindow(var ALeft, ATop: TfpgCoord);
+procedure TfpgWidgetBase.WidgetToWindow(var AX, AY: TfpgCoord);
 var
   W: TfpgWidgetBase;
 begin
-  if Window = nil then
-    Exit; // ==>
   W := Self;
-  while Assigned(Parent) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  while Assigned(W) and Assigned(W.Window) and (W.Window.Owner <> W) do
   begin
-    ALeft := ALeft + Parent.Left;
-    ATop := ATop + Parent.Top;
+    AX := AX + W.Left;
+    AY := AY + W.Top;
     W := W.Parent;
   end;
 end;
 
-procedure TfpgWidgetBase.WindowToWidget(var ALeft, ATop: TfpgCoord);
+procedure TfpgWidgetBase.WindowToWidget(var AX, AY: TfpgCoord);
 var
   W: TfpgWidgetBase;
 begin
-  if Window = nil then
-    Exit; // ==>
   W := Self;
-  while Assigned(Parent) and Assigned(W.Window) and (W.Window.Owner <> W) do
+  while Assigned(W) and Assigned(W.Window) and (W.Window.Owner <> W) do
   begin
-    ALeft := ALeft - Parent.Left;
-    ATop := ATop - Parent.Top;
-    W := Parent;
+    AX := AX - W.Left;
+    AY := AY - W.Top;
+    W := W.Parent;
   end;
 end;
 
