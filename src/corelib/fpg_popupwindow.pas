@@ -334,7 +334,7 @@ var
 begin
   PopupListAdd(self);
   
-  if AWidget <> nil then
+  if (AWidget <> nil) and AWidget.WindowAllocated then
   begin
     // translate coordinates - window to screen
     if ACanAdjustPos then

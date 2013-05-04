@@ -11,6 +11,8 @@ uses
 
 type
 
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainFrom}

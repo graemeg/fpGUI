@@ -15,9 +15,6 @@ begin
   frm := TMainForm.Create(nil);
   try
     frm.Show;
-    frm.Width:=900;
-    //frm.Top:=20;
-    frm.UpdatePosition;
     fpgApplication.Run;
   finally
     frm.Free;

@@ -710,7 +710,7 @@ begin
   for n := 0 to VisibleCount-1 do
     with VisibleItem(n) do
     begin
-      if (SubMenu <> nil) and (SubMenu.Window.HasHandle) then
+      if (SubMenu <> nil) and (SubMenu.WindowAllocated) then
         SubMenu.Close;
     end;
 end;
@@ -724,7 +724,7 @@ begin
   for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
-    if (mi.SubMenu <> nil) and (mi.SubMenu.Window.HasHandle) then
+    if (mi.SubMenu <> nil) and (mi.SubMenu.WindowAllocated) then
     begin
       Result := False;
       Break;

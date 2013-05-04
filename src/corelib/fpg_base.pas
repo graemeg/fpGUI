@@ -455,9 +455,11 @@ type
   private
     FHasOwnWindow: Boolean;
     function    GetWindow: TfpgWindowBase; virtual;
+    function    GetWindowAllocated: Boolean;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+    function    WidgetRectInWindow: TfpgRect;
 
   protected
     FParent: TfpgWidgetBase;
@@ -511,12 +513,13 @@ type
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
     procedure   WindowToWidget(var AX, AY: TfpgCoord);
+    property    WindowAllocated: Boolean read GetWindowAllocated;
     property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
     function    HasParent: Boolean; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
-    procedure   CaptureMouse; virtual; abstract;
-    procedure   ReleaseMouse; virtual; abstract;
+    procedure   CaptureMouse; virtual;
+    procedure   ReleaseMouse; virtual;
     procedure   BringToFront; virtual; abstract;
     property    Left: TfpgCoord read FLeft write SetLeft;
     property    Top: TfpgCoord read FTop write SetTop;
@@ -609,7 +612,7 @@ type
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     procedure   ActivateWindow; virtual; abstract;
-    procedure   CaptureMouse; virtual; abstract;
+    procedure   CaptureMouse(AForWidget:TfpgWidgetBase); virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
     procedure   BringToFront; virtual; abstract;
     procedure   SetFullscreen(AValue: Boolean); virtual;
@@ -637,12 +640,18 @@ type
 
   TfpgWindowEventDispatcher = class(TfpgComponent)
   private
+    FMouseCapture: TfpgWidgetBase;
     FWidget: TfpgWidgetBase;
     FWindow: TfpgWindowBase;
+
+    procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+    function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
   public
-     constructor Create(AOwner: TfpgWindowBase); reintroduce;
-     property Window: TfpgWindowBase read FWindow write FWindow;
-     property Widget: TfpgWidgetBase read FWidget write FWidget;
+    constructor  Create(AOwner: TfpgWindowBase); reintroduce;
+    procedure    DefaultHandler(var message); override;
+    property     MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
+    property     Window: TfpgWindowBase read FWindow write FWindow;
+    property     Widget: TfpgWidgetBase read FWidget write FWidget;
 
   end;
 
@@ -1282,6 +1291,43 @@ end;
 
 { TfpgWindowEventDispatcher }
 
+procedure TfpgWindowEventDispatcher.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  w := FindWidgetForMouseEvent(Widget, AX, AY);
+  w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
+  WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
+
+  w.Dispatch(msg);
+end;
+
+function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
+var
+  i: Integer;
+  w: TfpgWidgetBase;
+begin
+  if Assigned(MouseCapture) then
+    Exit(MouseCapture); // ==>
+  Result := AWidget;
+  for i := AWidget.ComponentCount-1 downto 0 do
+  begin
+    w := TfpgWidgetBase(AWidget.Components[i]);
+    if Assigned(w) and w.InheritsFrom(TfpgWidgetBase) and not w.HasOwnWindow then
+    begin
+      //writeln(w.ClassName);
+      if PtInRect(w.WidgetRectInWindow, Point(AX, AY)) then
+      begin
+        Result := (FindWidgetForMouseEvent(w, AX, AY));
+        break;
+      end;
+    end;
+  end;
+  if Result = AWidget then exit;
+  Result.WindowToWidget(Ax, Ay);
+  WriteLn('wir: ', Format('x=%d:y=%d',[Ax,ay]));
+end;
+
 constructor TfpgWindowEventDispatcher.Create(AOwner: TfpgWindowBase);
 begin
   inherited Create(AOwner);
@@ -1289,11 +1335,40 @@ begin
   FWidget := TfpgWidgetBase(AOwner.Owner);
 end;
 
+procedure TfpgWindowEventDispatcher.DefaultHandler(var message);
+var
+  msg: TfpgMessageRec absolute message;
+begin
+  inherited DefaultHandler(message);
+  //WriteLn(msg.MsgCode);
+  case msg.MsgCode of
+    FPGM_MOUSEDOWN,
+    FPGM_MOUSEUP,
+    FPGM_MOUSEMOVE,
+    FPGM_DOUBLECLICK,
+    FPGM_MOUSEENTER,
+    FPGM_MOUSEEXIT: DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
+
+    //FPGM_PAINT: Widget.Dispatch(msg);
+    //FPGM_RESIZE: Widget.Dispatch(msg);
+    //FPGM_ACTIVATE: Widget.Dispatch(msg);
+    //FPGM_MOVE: Widget.Dispatch(msg);
+  else
+    Widget.Dispatch(msg);
+  end;
+
+end;
+
 { TfpgWidgetBase }
 
 function TfpgWidgetBase.GetWindow: TfpgWindowBase;
 begin
   Result := FWindow;
+end;
+
+function TfpgWidgetBase.GetWindowAllocated: Boolean;
+begin
+  Result := FWindow <> nil;
 end;
 
 procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
@@ -1315,6 +1390,17 @@ end;
 function TfpgWidgetBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
 begin
 
+end;
+
+function TfpgWidgetBase.WidgetRectInWindow: TfpgRect;
+var
+  l,t: TfpgCoord;
+begin
+  l := Left;
+  t := Top;
+  WindowToWidget(l,t);
+  Result.SetRect(l,t,Width,Height);
+  //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
 end;
 
 procedure TfpgWidgetBase.DoDragStartDetected;
@@ -1366,6 +1452,7 @@ end;
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
 begin
   FHeight:=AValue;
+  WriteLn(ClassName,' Height = ', AValue);
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
@@ -1375,12 +1462,48 @@ end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
 begin
+  if FTop <> y then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevTop := FTop
+    else
+      FPrevTop := y;
+    FTop := y;
+    FPosIsDirty := FPosIsDirty or (FTop <> FPrevTop);
+  end;
 
+  if FLeft <> x then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevLeft := FLeft
+    else
+      FPrevLeft := x;
+    FLeft := x;
+    FPosIsDirty := FPosIsDirty or (FLeft <> FPrevLeft);
+  end;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
+  if FWidth <> AWidth then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevWidth := FWidth
+    else
+      FPrevWidth := AWidth;
+    FWidth := ConstraintWidth(AWidth);
+    FSizeIsDirty := FSizeIsDirty or (FWidth <> FPrevWidth);
+  end;
 
+  if FHeight <> AHeight then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevHeight := FHeight
+    else
+      FPrevHeight := AHeight;
+    FHeight := ConstraintHeight(AHeight);
+    FSizeIsDirty := FSizeIsDirty or (FHeight <> FPrevHeight);
+  end;
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
@@ -1426,7 +1549,7 @@ var
   W: TfpgWidgetBase;
 begin
   W := Self;
-  while Assigned(W) and Assigned(W.Window) and (not W.HasOwnWindow) do
+  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) do
   begin
     AX := AX + W.Left;
     AY := AY + W.Top;
@@ -1439,7 +1562,7 @@ var
   W: TfpgWidgetBase;
 begin
   W := Self;
-  while Assigned(W) and Assigned(W.Window) and (not W.HasOwnWindow) do
+  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) do
   begin
     AX := AX - W.Left;
     AY := AY - W.Top;
@@ -1460,6 +1583,18 @@ end;
 function TfpgWidgetBase.GetBoundsRect: TfpgRect;
 begin
 
+end;
+
+procedure TfpgWidgetBase.CaptureMouse;
+begin
+  if Assigned(Window) then
+    Window.CaptureMouse(Self);
+end;
+
+procedure TfpgWidgetBase.ReleaseMouse;
+begin
+  if Assigned(Window) then
+    Window.ReleaseMouse;
 end;
 
 { TfpgRect }

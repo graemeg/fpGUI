@@ -65,7 +65,6 @@ type
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
     alist: TList;
-    function    GetWindowAllocated: Boolean;
     function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
@@ -177,7 +176,6 @@ type
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
     property    Window: TfpgNativeWindow read GetWindow;
-    property    WindowAllocated: Boolean read GetWindowAllocated;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
@@ -309,11 +307,6 @@ end;
 function TfpgWidget.GetWindow: TfpgNativeWindow;
 begin
   Result := TfpgNativeWindow(FWindow);
-end;
-
-function TfpgWidget.GetWindowAllocated: Boolean;
-begin
-  Result := FWindow <> nil;
 end;
 
 procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
@@ -561,7 +554,7 @@ constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
 
-  HasOwnWindow:=True;
+  //HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
@@ -1359,6 +1352,9 @@ begin
     Exit;//
   WriteLn(Self.ClassName);
   WriteLn(Canvas.ClassName);
+  if (Width < 1) or (Height < 1) then
+    Exit;
+
   Canvas.BeginDraw;
 
   HandlePaint;

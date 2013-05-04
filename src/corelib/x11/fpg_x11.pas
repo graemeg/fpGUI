@@ -243,7 +243,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
-    procedure   CaptureMouse; override;
+    procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
     procedure   BringToFront; override;
@@ -1031,7 +1031,7 @@ begin
   if FLastDropTarget <> 0 then
   begin
     fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget).Owner, FPGM_DROPEXIT, msgp);
+    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget).Dispatcher, FPGM_DROPEXIT, msgp);
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
@@ -1767,19 +1767,19 @@ begin
 
           if ev._type = X.KeyPress then
           begin
-            fpgPostMessage(nil, w.Owner, FPGM_KEYPRESS, msgp);
+            fpgPostMessage(nil, w.Dispatcher, FPGM_KEYPRESS, msgp);
 
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
               for i := 1 to UTF8Length(FComposeBuffer) do
               begin
                 msgp.keyboard.keychar := UTF8Copy(FComposeBuffer, i, 1);
-                fpgPostMessage(nil, w.Owner, FPGM_KEYCHAR, msgp);
+                fpgPostMessage(nil, w.Dispatcher, FPGM_KEYCHAR, msgp);
               end;
             end;
           end { if }
           else if ev._type = X.KeyRelease then
-            fpgPostMessage(nil, w.Owner, FPGM_KEYRELEASE, msgp);
+            fpgPostMessage(nil, w.Dispatcher, FPGM_KEYRELEASE, msgp);
         end;
 
     X.ButtonPress,
@@ -1861,7 +1861,7 @@ begin
                 end;
 
                 msgp.mouse.delta := i;
-                fpgPostMessage(nil, w.Owner, FPGM_SCROLL, msgp);
+                fpgPostMessage(nil, w.Dispatcher, FPGM_SCROLL, msgp);
               end;
             end
             else
@@ -1880,7 +1880,7 @@ begin
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
               end;
-              fpgPostMessage(nil, w.Owner, mcode, msgp);
+              fpgPostMessage(nil, w.Dispatcher, mcode, msgp);
             end;  { if/else }
           end;  { if not blocking }
         end;
@@ -1892,7 +1892,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window).Owner, FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window).Dispatcher, FPGM_PAINT);
           end;
         end;
 
@@ -1903,7 +1903,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
           if ev.xgraphicsexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable).Owner, FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable).Dispatcher, FPGM_PAINT);
           end;
         end;
 
@@ -1934,7 +1934,7 @@ begin
               msgp.mouse.y          := ev.xmotion.y;
               msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
               msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
-              fpgPostMessage(nil, w.Owner, FPGM_MOUSEMOVE, msgp);
+              fpgPostMessage(nil, w.Dispatcher, FPGM_MOUSEMOVE, msgp);
             end;
           end;
         end;
@@ -2071,10 +2071,10 @@ begin
             end;
 
             if (w.FWidth <> msgp.rect.Width) or (w.FHeight <> msgp.rect.Height) then
-              fpgPostMessage(nil, w.Owner, FPGM_RESIZE, msgp);
+              fpgPostMessage(nil, w.Dispatcher, FPGM_RESIZE, msgp);
 
             if (w.FLeft <> msgp.rect.Left) or (w.FTop <> msgp.rect.Top) then
-              fpgPostMessage(nil, w.Owner, FPGM_MOVE, msgp);
+              fpgPostMessage(nil, w.Dispatcher, FPGM_MOVE, msgp);
           end;
         end;
 
@@ -2126,16 +2126,16 @@ begin
         end;
 
     X.FocusIn:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Owner, FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Dispatcher, FPGM_ACTIVATE);
 
     X.FocusOut:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Owner, FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Dispatcher, FPGM_DEACTIVATE);
 
     X.EnterNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Owner, FPGM_MOUSEENTER);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Dispatcher, FPGM_MOUSEENTER);
 
     X.LeaveNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Owner, FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Dispatcher, FPGM_MOUSEEXIT);
 
     X.MapNotify:
         begin
@@ -2700,8 +2700,9 @@ begin
   XSetInputFocus(xapplication.Display, FWinHandle, RevertToParent, CurrentTime);
 end;
 
-procedure TfpgX11Window.CaptureMouse;
+procedure TfpgX11Window.CaptureMouse(AForWidget: TfpgWidgetBase);
 begin
+  Dispatcher.MouseCapture := AForWidget;
   XGrabPointer(xapplication.Display, FWinHandle,
       TBool(False),
       ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask
@@ -2716,6 +2717,7 @@ end;
 
 procedure TfpgX11Window.ReleaseMouse;
 begin
+  Dispatcher.MouseCapture := nil;
   XUngrabPointer(xapplication.display, CurrentTime);
 end;
 
@@ -2856,14 +2858,17 @@ begin
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
+  Writeln(FWidget.ClassName);
   XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+  h := FWidget.Height;
+  w := FWidget.Width;
 
   if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
     begin
       // check if the dimensions are ok
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
-      if (pmw <> w) or (pmh <> h) then
+      if (pmw < w) or (pmh < h) then
         DoEndDraw;
     end;
 
@@ -2889,6 +2894,7 @@ begin
           FPixWidth  := w;
         end;
         TryFreePixmap;
+        //FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
         FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
       end;
       if FastDoubleBuffer then
@@ -2938,7 +2944,10 @@ begin
   if FBufferPixmap > 0 then
   begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
-    XCopyArea(xapplication.Display, FBufferPixmap, FDrawWindow.FWinHandle, cgc, x, y, w, h, x+FTransX, y+FTransY);
+    if FWidget.HasOwnWindow then
+      XCopyArea(xapplication.Display, FBufferPixmap, FDrawWindow.FWinHandle, cgc, x, y, w, h, x, y)
+    else
+      XCopyArea(xapplication.Display, FBufferPixmap, TfpgWidget(FDrawWindow.Owner).Canvas.FDrawHandle, cgc, x, y, w, h, x+FTransX, y+FTransY);
     XFreeGc(xapplication.display, cgc);
   end;
 end;
