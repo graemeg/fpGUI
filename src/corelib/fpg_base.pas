@@ -650,7 +650,9 @@ type
     FMsg: PfpgMessageRec;
 
     procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+    procedure    DispatchKeyEvent(var msg: TfpgMessageRec);
     function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
+    function     FindWidgetForKeyEvent: TfpgWidgetBase;
     procedure    SetCurrentWidget(AValue: TfpgWidgetBase);
   public
     constructor  Create(AOwner: TfpgWindowBase); reintroduce;
@@ -910,6 +912,7 @@ uses
   fpg_utils, // needed for fpgFileList
   fpg_constants,
   fpg_form,  // needed for fpgApplication.CreateForms()
+  fpg_widget,// needed for ActiveWidget
   typinfo,
   process,
   {$IFDEF GDEBUG}
@@ -1304,10 +1307,24 @@ var
 begin
   w := FindWidgetForMouseEvent(Widget, AX, AY);
   CurrentWidget := w;
+  Window.MouseCursor:=CurrentWidget.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
   WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
 
   w.Dispatch(msg);
+end;
+
+procedure TfpgWindowEventDispatcher.DispatchKeyEvent(var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  w := FindWidgetForKeyEvent;
+  if Assigned(w) then
+  begin
+    msg.Dest := w;
+    w.Dispatch(msg);
+  end;
+
 end;
 
 function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
@@ -1335,6 +1352,16 @@ begin
     end;
   end;
   WriteLn('wir: ', Format('x=%d:y=%d',[Ax,ay]));
+end;
+
+type
+  TWidgetHack = class(TfpgWidget);
+
+function TfpgWindowEventDispatcher.FindWidgetForKeyEvent: TfpgWidgetBase;
+var
+  w: TWidgetHack;
+begin
+  Result := TWidgetHack(Widget).ActiveWidget;
 end;
 
 procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);
@@ -1386,7 +1413,11 @@ begin
     FPGM_MOUSEMOVE,
     FPGM_DOUBLECLICK,
     FPGM_MOUSEENTER,
-    FPGM_MOUSEEXIT: DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
+    FPGM_MOUSEEXIT:  DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
+
+    FPGM_KEYCHAR,
+    FPGM_KEYPRESS,
+    FPGM_KEYRELEASE: DispatchKeyEvent(msg);
 
     //FPGM_PAINT: Widget.Dispatch(msg);
     //FPGM_RESIZE: Widget.Dispatch(msg);
@@ -1418,7 +1449,7 @@ end;
 
 procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
 begin
-
+  FMouseCursor:=AValue;
 end;
 
 function TfpgWidgetBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
