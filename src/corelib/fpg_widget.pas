@@ -213,7 +213,8 @@ implementation
 uses
   fpg_constants,
   fpg_menu,
-  fpg_form;  { for OnKeyPress handling }
+  fpg_form,   { for OnKeyPress handling }
+  fpg_window; { for Finding the Toplevel Window }
 
 
 var
@@ -266,6 +267,23 @@ begin
   end;
 end;
 
+
+// finds the window that is a widget. not a NativeWindow
+function FindTopLevelWindow(AWidget: TfpgWidgetBase): TfpgWindow;
+var
+  w: TfpgWidgetBase;
+begin
+  Result := nil;
+  if AWidget = nil then
+    exit; // ==>
+  w := AWidget;
+  while Assigned(w) do
+  begin
+    if w is TfpgWindow then
+      Exit(TfpgWindow(w)); // ==>
+    w := w.Parent;
+  end;
+end;
 
 { TfpgWidget }
 

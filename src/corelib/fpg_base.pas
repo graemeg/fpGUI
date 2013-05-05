@@ -643,15 +643,20 @@ type
   TfpgWindowEventDispatcher = class(TfpgComponent)
   private
     FMouseCapture: TfpgWidgetBase;
+    FCurrentWidget: TfpgWidgetBase;
     FWidget: TfpgWidgetBase;
     FWindow: TfpgWindowBase;
+    FMousePos: TfpgPoint;
+    FMsg: PfpgMessageRec;
 
     procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
     function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
+    procedure    SetCurrentWidget(AValue: TfpgWidgetBase);
   public
     constructor  Create(AOwner: TfpgWindowBase); reintroduce;
     procedure    DefaultHandler(var message); override;
     property     MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
+    property     CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property     Window: TfpgWindowBase read FWindow write FWindow;
     property     Widget: TfpgWidgetBase read FWidget write FWidget;
 
@@ -1298,6 +1303,7 @@ var
   w: TfpgWidgetBase;
 begin
   w := FindWidgetForMouseEvent(Widget, AX, AY);
+  CurrentWidget := w;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
   WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
 
@@ -1309,6 +1315,9 @@ var
   i: Integer;
   w: TfpgWidgetBase;
 begin
+  // keep this to simulate mouse enter/exit events
+  FMousePos.SetPoint(AX, AY);
+
   if Assigned(MouseCapture) then
     Exit(MouseCapture); // ==>
   Result := AWidget;
@@ -1325,9 +1334,36 @@ begin
       end;
     end;
   end;
-  if Result = AWidget then exit;
-  Result.WindowToWidget(Ax, Ay);
   WriteLn('wir: ', Format('x=%d:y=%d',[Ax,ay]));
+end;
+
+procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);
+  procedure SendEnterExitMessage(AMessage: Integer; Target: TfpgWidgetBase);
+  var
+    msg: TfpgMessageRec;
+  begin
+    msg.Dest := Target;
+    msg.MsgCode:=AMessage;
+    msg.Sender := nil;
+    msg.Stop:=False;
+    msg.Params:= FMsg^.Params;
+    Target.Dispatch(msg);
+  end;
+begin
+  if FCurrentWidget=AValue then Exit;
+  if Assigned(FCurrentWidget) then
+  begin
+    SendEnterExitMessage(FPGM_MOUSEEXIT, FCurrentWidget);
+  end;
+
+  FCurrentWidget := AValue;
+
+  if Assigned(FCurrentWidget) then
+  begin
+    SendEnterExitMessage(FPGM_MOUSEENTER, FCurrentWidget);
+  end;
+
+
 end;
 
 constructor TfpgWindowEventDispatcher.Create(AOwner: TfpgWindowBase);
@@ -1342,6 +1378,7 @@ var
   msg: TfpgMessageRec absolute message;
 begin
   inherited DefaultHandler(message);
+  FMsg:=@msg;
   //WriteLn(msg.MsgCode);
   case msg.MsgCode of
     FPGM_MOUSEDOWN,
@@ -1398,9 +1435,9 @@ function TfpgWidgetBase.WidgetRectInWindow: TfpgRect;
 var
   l,t: TfpgCoord;
 begin
-  l := Left;
-  t := Top;
-  WindowToWidget(l,t);
+  l := 0;
+  t := 0;
+  WidgetToWindow(l,t);
   Result.SetRect(l,t,Width,Height);
   //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
 end;
