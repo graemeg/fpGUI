@@ -106,8 +106,6 @@ type
     procedure   SetShowGrid(const AValue: boolean);
     procedure   SetShowHeader(const AValue: boolean);
     function    VisibleLines: Integer;
-    function    VisibleWidth: integer;
-    function    VisibleHeight: integer;
     procedure   SetFirstRow(const AValue: Integer);
     procedure   SetAlternativeBGColor(const AValue: TfpgColor);
     procedure   SetBorderStyle(AValue: TfpgEditBorderStyle);
@@ -180,6 +178,8 @@ type
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   MouseToCell(X, Y: Integer; var ACol, ARow: Integer);
+    function    VisibleWidth: integer;
+    function    VisibleHeight: integer;
   end;
 
 

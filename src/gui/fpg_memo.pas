@@ -1670,6 +1670,7 @@ begin
   if FUpdateCount <= 0 then
   begin
     Invalidate;
+    RecalcLongestLine;
     UpdateScrollBars;
   end;
 end;
