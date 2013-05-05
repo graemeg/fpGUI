@@ -1462,12 +1462,20 @@ end;
 
 function TfpgWidgetBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
 begin
-
+  Result := NewWidth;
+  if (MaxWidth >= MinWidth) and (Result > MaxWidth) and (MaxWidth > 0) then
+    Result := MaxWidth;
+  if Result < MinWidth then
+    Result := MinWidth;
 end;
 
 function TfpgWidgetBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
 begin
-
+  Result := NewHeight;
+  if (MaxHeight >= MinHeight) and (Result > MaxHeight) and (MaxHeight > 0) then
+    Result := MaxHeight;
+  if Result < MinHeight then
+    Result := MinHeight;
 end;
 
 function TfpgWidgetBase.WidgetBoundsInWindow: TfpgRect;
