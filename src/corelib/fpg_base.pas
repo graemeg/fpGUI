@@ -646,7 +646,6 @@ type
     FCurrentWidget: TfpgWidgetBase;
     FWidget: TfpgWidgetBase;
     FWindow: TfpgWindowBase;
-    FMousePos: TfpgPoint;
     FMsg: PfpgMessageRec;
 
     procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
@@ -1332,9 +1331,6 @@ var
   i: Integer;
   w: TfpgWidgetBase;
 begin
-  // keep this to simulate mouse enter/exit events
-  FMousePos.SetPoint(AX, AY);
-
   if Assigned(MouseCapture) then
     Exit(MouseCapture); // ==>
   Result := AWidget;
