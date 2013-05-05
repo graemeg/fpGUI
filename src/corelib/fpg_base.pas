@@ -543,6 +543,7 @@ type
   private
     FDispatcher: TfpgWindowEventDispatcher;
     FParent: TfpgWindowBase;
+    function    GetPrimaryWidget: TfpgWidgetBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
@@ -632,6 +633,7 @@ type
     property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
     property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
+    property    PrimaryWidget: TfpgWidgetBase read GetPrimaryWidget;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
     property    Dispatcher: TfpgWindowEventDispatcher read FDispatcher;
   end;
@@ -1664,6 +1666,11 @@ begin
     Exit; //==>
   FMouseCursor := AValue;
   DoSetMouseCursor;
+end;
+
+function TfpgWindowBase.GetPrimaryWidget: TfpgWidgetBase;
+begin
+  Result := TfpgWidgetBase(Owner);
 end;
 
 function TfpgWindowBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
