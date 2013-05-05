@@ -104,7 +104,7 @@ type
     FIsContainer: Boolean;
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
-    procedure   DoAllocateWindowHandle; virtual;
+    procedure   DoAllocateWindowHandle; override;
     procedure   AllocateWindowHandle;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
@@ -572,7 +572,7 @@ constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
 
-  //HasOwnWindow:=True;
+  HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
@@ -1365,11 +1365,11 @@ var
   i: Integer;
   w: TfpgWidget;
 begin
-  writeln('TfpgWidget.MsgPaint - ', Classname);
+  //writeln('TfpgWidget.MsgPaint - ', Classname);
   if not (WindowAllocated or (Window.HasHandle)) then
     Exit;//
-  WriteLn(Self.ClassName);
-  WriteLn(Canvas.ClassName);
+  //WriteLn(Self.ClassName);
+  //WriteLn(Canvas.ClassName);
   if (Width < 1) or (Height < 1) then
     Exit;
 
@@ -1523,6 +1523,8 @@ begin
           dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
+        Write(wg.ClassName + ': ');
+        PrintRect(wg.WidgetBoundsInWindow);
       end;
     end;  { if }
 end;

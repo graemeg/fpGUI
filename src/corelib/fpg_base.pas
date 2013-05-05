@@ -459,7 +459,6 @@ type
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
-    function    WidgetRectInWindow: TfpgRect;
 
   protected
     FParent: TfpgWidgetBase;
@@ -483,6 +482,7 @@ type
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
+    procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
@@ -512,6 +512,7 @@ type
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
+    function    WidgetBoundsInWindow: TfpgRect;
     procedure   WindowToWidget(var AX, AY: TfpgCoord);
     property    WindowAllocated: Boolean read GetWindowAllocated;
     property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
@@ -910,6 +911,7 @@ uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
+  fpg_window,// needed f0r SetParameters
   fpg_form,  // needed for fpgApplication.CreateForms()
   fpg_widget,// needed for ActiveWidget
   typinfo,
@@ -1308,7 +1310,7 @@ begin
   CurrentWidget := w;
   Window.MouseCursor:=CurrentWidget.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
-  WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
+  //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
 
   w.Dispatch(msg);
 end;
@@ -1339,15 +1341,13 @@ begin
     w := TfpgWidgetBase(AWidget.Components[i]);
     if Assigned(w) and w.InheritsFrom(TfpgWidgetBase) and not w.HasOwnWindow then
     begin
-      //writeln(w.ClassName);
-      if PtInRect(w.WidgetRectInWindow, Point(AX, AY)) then
+      if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
       begin
         Result := (FindWidgetForMouseEvent(w, AX, AY));
         break;
       end;
     end;
   end;
-  WriteLn('wir: ', Format('x=%d:y=%d',[Ax,ay]));
 end;
 
 type
@@ -1440,7 +1440,17 @@ end;
 procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
 begin
   if FHasOwnWindow=AValue then Exit;
-  FHasOwnWindow:=AValue;
+  if WindowAllocated then
+  begin
+    if FHasOwnWindow then
+      Window.Free;
+    FHasOwnWindow:=AValue;
+    DoAllocateWindowHandle;
+    Window.AllocateWindowHandle;
+    UpdatePosition;
+  end
+  else
+    FHasOwnWindow:=AValue;
 end;
 
 procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
@@ -1458,7 +1468,7 @@ begin
 
 end;
 
-function TfpgWidgetBase.WidgetRectInWindow: TfpgRect;
+function TfpgWidgetBase.WidgetBoundsInWindow: TfpgRect;
 var
   l,t: TfpgCoord;
 begin
@@ -1895,9 +1905,13 @@ begin
 //  SetDefaults(self);
 end;
 
+type
+  TfpgWindowHack = class(TfpgWindow);
+
 procedure TfpgWindowBase.SetWindowParameters;
 begin
-  // does nothing
+  if PrimaryWidget is TfpgWindow then
+    TfpgWindowHack(PrimaryWidget).SetWindowParameters;
 end;
 
 function TfpgWindowBase.Right: TfpgCoord;

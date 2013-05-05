@@ -19,7 +19,7 @@ unit fpg_x11;
 
 {$mode objfpc}{$H+}
 
-{$Define DEBUG}      // general debugging - mostly OS messages though
+{.$Define DEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
@@ -2862,7 +2862,6 @@ begin
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
-  Writeln(FWidget.ClassName);
   XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
   h := FWidget.Height;
   w := FWidget.Width;

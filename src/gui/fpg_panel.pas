@@ -410,6 +410,7 @@ end;
 function TfpgAbstractPanel.GetClientRect: TfpgRect;
 begin
   Result.SetRect(2, 2, Width - 4, Height - 4);
+  PrintRect(Result);
 end;
 
 procedure TfpgAbstractPanel.SetPanelStyle(const AValue: TPanelStyle);

@@ -204,6 +204,7 @@ begin
       ShowMessage(e.Message);
   end;
 }
+  memEditor.HasOwnWindow:=not memEditor.HasOwnWindow;
 end;
 
 procedure TMainForm.memEditorChanged(Sender: TObject);
