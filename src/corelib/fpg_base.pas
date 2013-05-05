@@ -599,6 +599,7 @@ type
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
     // Make some setup before the window shows. Invoked after the window is created.
     procedure   SetWindowParameters; virtual;
@@ -1417,6 +1418,8 @@ begin
     FPGM_KEYPRESS,
     FPGM_KEYRELEASE: DispatchKeyEvent(msg);
 
+    FPGM_CLOSE: Widget.Dispatch(msg);
+
     //FPGM_PAINT: Widget.Dispatch(msg);
     //FPGM_RESIZE: Widget.Dispatch(msg);
     //FPGM_ACTIVATE: Widget.Dispatch(msg);
@@ -1908,6 +1911,14 @@ begin
   FMaxHeight := 0;
   FDragActive := False;
   FWindowState := wsNormal;
+end;
+
+destructor TfpgWindowBase.Destroy;
+begin
+  ReleaseWindowHandle;
+  inherited Destroy;
+
+
 end;
 
 procedure TfpgWindowBase.AfterConstruction;

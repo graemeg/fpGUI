@@ -311,7 +311,7 @@ end;
 
 procedure TfpgPopupWindow.DoAllocateWindowHandle;
 begin
-  inherited AllocateWindowHandle;
+  inherited DoAllocateWindowHandle;
   Window.WindowType := wtPopup;
 
   // Maybe remove later
@@ -340,7 +340,7 @@ begin
     if ACanAdjustPos then
       pt := GetDisplayPos(AWidget, x, y)
     else
-      pt := Window.WindowToScreen(AWidget.Window, Point(x, y));
+      pt := WidgetToScreen(AWidget, Point(x, y));
     // reposition
     Left  := pt.X;
     Top   := pt.Y;

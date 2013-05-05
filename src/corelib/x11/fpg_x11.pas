@@ -611,6 +611,18 @@ begin
   Result := nil;
 end;
 
+function FindWindowDispatcherFromWindow(wh: TfpgWinHandle): TfpgWindowEventDispatcher;
+var
+  w: TfpgX11Window;
+begin
+  w := FindWindowByHandle(wh);
+  Result := nil;
+  if w = nil then
+    Exit;
+
+  Result := w.Dispatcher;
+end;
+
 function FindWindowByBackupHandle(wh: TfpgWinHandle): TfpgX11Window;
 var
   p: PWindowLookupRec;
@@ -1035,7 +1047,7 @@ begin
   if FLastDropTarget <> 0 then
   begin
     fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget).Dispatcher, FPGM_DROPEXIT, msgp);
+    fpgPostMessage(nil, FindWindowDispatcherFromWindow(FLastDropTarget), FPGM_DROPEXIT, msgp);
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
@@ -1896,7 +1908,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window).Dispatcher, FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xexpose.window), FPGM_PAINT);
           end;
         end;
 
@@ -1907,7 +1919,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
           if ev.xgraphicsexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable).Dispatcher, FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xgraphicsexpose.drawable), FPGM_PAINT);
           end;
         end;
 
@@ -1969,7 +1981,7 @@ begin
               end;
 
               if not blockmsg then
-                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window).Owner, FPGM_CLOSE);
+                fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xclient.window), FPGM_CLOSE);
              end;
           end
           { XDND protocol - XdndEnter }
@@ -2130,16 +2142,16 @@ begin
         end;
 
     X.FocusIn:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Dispatcher, FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xfocus.window), FPGM_ACTIVATE);
 
     X.FocusOut:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window).Dispatcher, FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xfocus.window), FPGM_DEACTIVATE);
 
     X.EnterNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Dispatcher, FPGM_MOUSEENTER);
+        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xcrossing.window), FPGM_MOUSEENTER);
 
     X.LeaveNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window).Dispatcher, FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xcrossing.window), FPGM_MOUSEEXIT);
 
     X.MapNotify:
         begin

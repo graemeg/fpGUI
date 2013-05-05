@@ -43,10 +43,12 @@ type
     function GetWindowState: TfpgWindowState;
     procedure SetWindowState(AValue: TfpgWindowState);
   protected
+    FWindowType: TWindowType;
     procedure   AdjustWindowStyle; virtual;
     procedure   SetWindowParameters; virtual;
     procedure   SetWindowTitle(const ATitle: string); virtual;
     procedure   DoAllocateWindowHandle; override;
+    property    WindowType: TWindowType read FWindowType write FWindowType;
   public
     constructor Create(AOwner: TComponent); override;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
@@ -89,12 +91,13 @@ end;
 procedure TfpgWindow.DoAllocateWindowHandle;
 begin
   inherited DoAllocateWindowHandle;
-  Window.WindowType:=wtWindow;
+  Window.WindowType:=FWindowType;
 end;
 
 constructor TfpgWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  WindowType:=wtWindow;
   HasOwnWindow:=True;
 end;
 

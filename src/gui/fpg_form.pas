@@ -351,7 +351,7 @@ function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin
-  Window.WindowType := wtModalForm;
+  WindowType := wtModalForm;
   fpgApplication.PushModalForm(self);
   ModalResult := mrNone;
 
