@@ -1311,7 +1311,7 @@ begin
   Window.MouseCursor:=CurrentWidget.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
   //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
-
+  msg.Dest := w;
   w.Dispatch(msg);
 end;
 
@@ -1358,6 +1358,8 @@ var
   w: TWidgetHack;
 begin
   Result := TWidgetHack(Widget).ActiveWidget;
+  if Result = nil then
+    Result := Widget;
 end;
 
 procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);
@@ -1617,7 +1619,12 @@ end;
 function TfpgWidgetBase.WidgetToScreen(ASource: TfpgWidgetBase;
   const AScreenPos: TPoint): TPoint;
 begin
+  Result := AScreenPos;
+  if not ASource.WindowAllocated then
+    Exit; // ==>
 
+  Result := ASource.Window.WindowToScreen(ASource.Window, AScreenPos);
+  ASource.WindowToWidget(Result.X, Result.Y);
 end;
 
 procedure TfpgWidgetBase.WidgetToWindow(var AX, AY: TfpgCoord);

@@ -572,7 +572,7 @@ constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
 
-  HasOwnWindow:=True;
+  //HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
