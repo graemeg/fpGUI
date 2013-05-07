@@ -161,6 +161,7 @@ type
     property    OnDoubleClick;
     property    OnDrawCell;
     property    OnFocusChange;
+    property    OnHeaderClick;
     property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseEnter;

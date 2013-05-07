@@ -40,6 +40,7 @@ type
   TfpgGridHeaderStyle = (ghsButton, ghsThin, ghsFlat);
 
   TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: Integer) of object;
+  TfpgHeaderClick = procedure(Sender: TObject; ACol: Integer) of object;
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: Integer) of object;
   TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; var ACanSelect: boolean) of object;
   TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean) of object;
@@ -59,6 +60,7 @@ type
     FDragPos: integer;      // used for column resizing
     FHeaderStyle: TfpgGridHeaderStyle;
     FOnDrawCell: TfpgDrawCellEvent;
+    FOnHeaderClick: TfpgHeaderClick;
     FResizedCol: integer;   // used for column resizing
     FDefaultColWidth: integer;
     FDefaultRowHeight: integer;
@@ -168,6 +170,7 @@ type
     property    Options: TfpgGridOptions read FOptions write FOptions default [];
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
+    property    OnHeaderClick: TfpgHeaderClick read FOnHeaderClick write FOnHeaderClick;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
     property    OnCanSelectCell: TfpgCanSelectCellEvent read FOnCanSelectCell write FOnCanSelectCell;
   public
@@ -1276,12 +1279,60 @@ begin
 end;
 
 procedure TfpgBaseGrid.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  lColumn: integer;
+  hh: integer; { header height }
+  cLeft: integer; { column left }
+  c: integer;
+  n: integer;
+  cw: integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
+  if not FColResizing then
+  begin
+    if not ShowHeader then
+      Exit;
+    if (ColumnCount = 0) then
+      Exit; //==>
+    // searching for the appropriate character position
+    hh := FHeaderHeight;
+
+    if (y < FMargin+hh) then  // inside Header row
+    begin
+      {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
+
+      cLeft := FMargin; // column starting point
+      if go_SmoothScroll in FOptions then
+      begin
+        if FHScrollBar.Visible then
+          Dec(cLeft, FHScrollBar.Position);
+        c := 0;
+      end
+      else
+      begin
+        c := FFirstCol;
+      end;
+
+      cw := 0;
+      for n := c to ColumnCount-1 do
+      begin
+        inc(cw, ColumnWidth[n]);
+        if x < (cLeft+cw+4) then
+        begin
+          if Assigned(FOnHeaderClick) then
+            FOnHeaderClick(self, n);
+          Break;
+        end;
+      end;  { for }
+    end;
+  end;  {if not FColResizing }
+
   {$IFDEF DEBUG}
   if FColResizing then
+  begin
     Writeln('Column ', FResizedCol,' width = ', ColumnWidth[FResizedCol]);
+  end;
   {$ENDIF}
 
   FColResizing  := False;
@@ -1309,11 +1360,11 @@ begin
 
   // searching for the appropriate character position
   if ShowHeader then
-    hh := FHeaderHeight+1
+    hh := FHeaderHeight
   else
     hh := 0;
 
-  if ShowHeader and (y <= FMargin+hh) then  // inside Header row
+  if ShowHeader and (y < FMargin+hh) then  // inside Header row
   begin
     {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
 
