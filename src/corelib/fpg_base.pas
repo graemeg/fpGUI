@@ -471,6 +471,7 @@ type
     FPrevLeft: TfpgCoord;
     FPrevWidth: TfpgCoord;
     FPrevHeight: TfpgCoord;
+    FCurrentSize: TfpgSize;
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
     FMaxHeight: TfpgCoord;
@@ -509,6 +510,7 @@ type
     function    Right: TfpgCoord;
     function    Bottom: TfpgCoord;
     procedure   UpdatePosition;
+    procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
@@ -1541,7 +1543,6 @@ end;
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
 begin
   FHeight:=AValue;
-  WriteLn(ClassName,' Height = ', AValue);
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
@@ -1616,8 +1617,27 @@ begin
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
+var
+  msgp: TfpgMessageParams;
 begin
+
   DoUpdatePosition;
+  if (HasOwnWindow = False)
+  and ((FCurrentSize.W <> FWidth) or (FCurrentSize.H <> FHeight)) then
+  begin
+    msgp.rect.Left   := FLeft;
+    msgp.rect.Top    := FTop;
+    msgp.rect.Width  := FWidth;
+    msgp.rect.Height := FHeight;
+
+    fpgPostMessage(nil, Self, FPGM_RESIZE, msgp);
+  end;
+  FCurrentSize.SetSize(FWidth, FHeight);
+end;
+
+procedure TfpgWidgetBase.UpdateWindowPosition;
+begin
+  UpdatePosition;
 end;
 
 procedure TfpgWidgetBase.MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
@@ -1671,12 +1691,12 @@ end;
 
 function TfpgWidgetBase.GetClientRect: TfpgRect;
 begin
-
+  Result.SetRect(0,0,FWidth, FHeight);
 end;
 
 function TfpgWidgetBase.GetBoundsRect: TfpgRect;
 begin
-
+  Result.SetRect(Left, Top, Width+1, Height+1);
 end;
 
 procedure TfpgWidgetBase.CaptureMouse;

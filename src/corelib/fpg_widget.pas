@@ -393,6 +393,7 @@ procedure TfpgWidget.AllocateWindowHandle;
 begin
   DoAllocateWindowHandle;
   Window.AllocateWindowHandle;
+  FCurrentSize.SetSize(FWidth, FHeight);
   if Window.Owner = Self then
   begin
     Window.SetWindowVisible(Visible);
@@ -1023,7 +1024,7 @@ end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if WindowAllocated and (Window.HasHandle) then
+  if WindowAllocated {and (Window.HasHandle)} then
     fpgSendMessage(self, self, FPGM_PAINT);
 end;
 

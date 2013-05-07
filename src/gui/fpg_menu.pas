@@ -1371,7 +1371,7 @@ begin
     mi := TfpgMenuItem(FItems[n]);
     if mi.SubMenu <> nil then
     begin
-      if mi.SubMenu.Window.HasHandle then
+      if mi.SubMenu.WindowAllocated then
         mi.SubMenu.Close;
     end;
   end;

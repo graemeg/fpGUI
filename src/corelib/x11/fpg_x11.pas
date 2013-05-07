@@ -2870,7 +2870,7 @@ begin
   begin
     // This occurs every now and again with TfpgMemo and InvertCaret painting!
     // Investigate this.
-    if not TfpgX11Window(awidget.Window).HasHandle then
+    if not AWidget.WindowAllocated and not TfpgX11Window(awidget.Window).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
@@ -2909,7 +2909,6 @@ begin
           FPixWidth  := w;
         end;
         TryFreePixmap;
-        //FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
         FBufferPixmap := XCreatePixmap(xapplication.display, DrawWindow.WinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
       end;
       if FastDoubleBuffer then
