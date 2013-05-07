@@ -92,7 +92,8 @@ end;
 
 procedure TMainForm.btnDelRowClicked(Sender: TObject);
 begin
-  stringgrid.DeleteRow(stringgrid.FocusRow);
+  if StringGrid.RowCount > 0 then
+    stringgrid.DeleteRow(stringgrid.FocusRow);
 end;
 
 procedure TMainForm.chkDisabledChange(Sender: TObject);
