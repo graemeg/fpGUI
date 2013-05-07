@@ -16,7 +16,8 @@ uses
   fpg_button,
   fpg_checkbox,
   fpg_tab,
-  fpg_edit;
+  fpg_edit,
+  fpg_dialogs;
 
 
 type
@@ -42,6 +43,7 @@ type
     chkSmoothScroll: TfpgCheckBox;
     chkAlterColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
+    procedure   StringGridHeaderClicked(Sender: TObject; ACol: Integer);
     procedure   StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnAddFiveClicked(Sender: TObject);
     procedure   btnAddOneClicked(Sender: TObject);
@@ -65,6 +67,11 @@ type
 {@VFD_NEWFORM_DECL}
 
 { TMainForm }
+
+procedure TMainForm.StringGridHeaderClicked(Sender: TObject; ACol: Integer);
+begin
+  ShowMessage(Format('column %d clicked', [ACol]));
+end;
 
 procedure TMainForm.StringGridDoubleClicked(Sender: TObject;
   AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -245,6 +252,7 @@ begin
     // Add custom painting
     OnDrawCell := @StringGridDrawCell;
     OnDoubleClick := @StringGridDoubleClicked;
+    OnHeaderClick := @StringGridHeaderClicked;
   end;
 
   chkShowHeader := TfpgCheckBox.Create(self);
