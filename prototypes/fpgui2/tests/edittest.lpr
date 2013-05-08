@@ -439,7 +439,7 @@ begin
   btn.ShowImage := True;
   btn.Height := 55;
 
-  combo1 := CreateComboBox(self, 10, 200, 120, nil);
+  combo1 := CreateComboBox(self, 10, 200, 120, nil, 22);
   combo1.BackgroundColor := clYellow;
   combo1.TextColor := clBlue;
   combo1.Items.Add('ilImageLeft');
@@ -449,7 +449,7 @@ begin
   combo1.FocusItem := 0;
   combo1.OnChange := @Combo1Changed;
 
-  combo2 := CreateComboBox(self, 10, 230, 120, nil);
+  combo2 := CreateComboBox(self, 10, 230, 120, nil, 22);
   for i := 1 to 20 do
     combo2.Items.Add(Format('Items %.2d', [i]));
 
