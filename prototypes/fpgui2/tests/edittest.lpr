@@ -103,7 +103,6 @@ procedure TMyWidget.HandlePaint;
 var
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.Clear(clBlue);
 
@@ -123,7 +122,6 @@ begin
   Canvas.SetColor(clGreen);
   Canvas.FillRectangle(r);
 }
-  Canvas.EndDraw;
 end;
 
 constructor TMyWidget.Create(AOwner: TComponent);
@@ -151,7 +149,6 @@ var
   w: integer;
   pofs: integer;
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
@@ -244,7 +241,6 @@ begin
     x := 3;
 
   Canvas.DrawString(x + pofs, y + pofs, FText);
-  Canvas.EndDraw;
 end;
 
 procedure TXPButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
