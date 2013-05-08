@@ -384,6 +384,8 @@ begin
   listbox.Enabled := not checkbox1.Checked;
   xpluna.Enabled := not checkbox1.Checked;
   xpsilver.Enabled := not checkbox1.Checked;
+  trackbar1.Enabled := not checkbox1.Checked;
+  trackbar2.Enabled := not checkbox1.Checked;
 end;
 
 procedure TMainForm.TrackBarChanged(Sender: TObject; APosition: integer);
