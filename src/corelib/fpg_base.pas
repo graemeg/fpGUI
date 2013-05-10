@@ -2415,7 +2415,7 @@ var
 begin
   dx := 0;
   dy := 0;
-  // convert out 0,0 position to the position inside the native window
+  // convert our 0,0 position to the position inside the native window
   FWidget.WidgetToWindow(dx, dy);
   BeginDraw(FWidget.Window.PrimaryWidget.Canvas, dx, dy);
 end;

@@ -3130,10 +3130,7 @@ var
   bw: longword;
   d: longword;
 begin
-  r.Left    := 0;
-  r.Top     := 0;
-  XGetGeometry(xapplication.display, FDrawHandle, @rw, @x, @y,
-      @(r.width), @(r.height), @bw, @d);
+  r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
