@@ -1520,14 +1520,14 @@ end;
 { WORLDTOSCREEN }
 procedure TAgg2D.WorldToScreen(x ,y : PDouble );
 begin
- m_transform.transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.transform(@m_transform, x, y);
 
 end;
 
 { SCREENTOWORLD }
 procedure TAgg2D.ScreenToWorld(x ,y : PDouble );
 begin
- m_transform.inverse_transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.inverse_transform(@m_transform, x, y);
 
 end;
 
