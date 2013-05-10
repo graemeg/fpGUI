@@ -35,6 +35,7 @@ uses
   X,
   Xlib,
   XUtil,
+  xrender,
   ctypes,
   fpg_xft_x11,
   fpg_netlayer_x11,
@@ -173,7 +174,6 @@ type
   TfpgX11Canvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
-    FDrawWidget: TfpgWidgetBase;
     FBufferPixmap: TfpgDCHandle;
     FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
@@ -186,10 +186,9 @@ type
     FPixHeight,
     FPixWidth: Integer;
     FBufferFreeTimer: TObject;
+
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
-    function    GetDrawWindow: TfpgX11Window;
-    property    DrawWindow: TfpgX11Window read GetDrawWindow;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -207,7 +206,7 @@ type
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
-    procedure   DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean); override;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
@@ -215,6 +214,8 @@ type
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
+    function    GetBufferAllocated: Boolean; override;
+    procedure   DoAllocateBuffer; override;
     property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
     constructor Create(awidget: TfpgWidgetBase); override;
@@ -2828,7 +2829,6 @@ constructor TfpgX11Canvas.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
   FDrawing    := False;
-  FDrawWidget := nil;
 
   FBufferPixmap := 0;
   FDrawHandle   := 0;
@@ -2853,7 +2853,7 @@ begin
   XCopyArea(xapplication.Display, TfpgX11Canvas(ASrcCanvas).FDrawHandle, FDrawHandle, Fgc, ASrcRect.Left, ASrcRect.Top, ASrcRect.Width, ASrcRect.Height, ADest_x, ADest_y);
 end;
 
-procedure TfpgX11Canvas.DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean);
+procedure TfpgX11Canvas.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 var
   x: integer;
   y: integer;
@@ -2874,75 +2874,33 @@ begin
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
-  XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+  if CanvasTarget = nil then
+    CanvasTarget := Self;
+
+  FDrawHandle := TfpgX11Canvas(CanvasTarget).FDrawHandle;
+
+  //XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
   h := FWidget.Height;
   w := FWidget.Width;
 
-  if FDrawing and buffered and (FBufferPixmap > 0) then
+  {if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
     begin
       // check if the dimensions are ok
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
       if (pmw < w) or (pmh < h) then
         DoEndDraw;
-    end;
+    end;}
 
   if not FDrawing then
   begin
-    FDrawWidget := awidget;
-
-    if buffered then
-    begin
-      if (FBufferPixmap = 0)
-      or (FastDoubleBuffer = False)
-      or (FastDoubleBuffer and (w > FPixWidth) or (h > FPixHeight))
-      or ((FastDoubleBuffer = False) and ((w <> FPixWidth) or (h <> FPixHeight)))
-      then
-      begin
-        if FastDoubleBuffer and ((w > FPixWidth) or (h > FPixHeight)) then
-        begin
-          FPixHeight := h + 30;
-          FPixWidth  := w + 30;
-        end
-        else begin
-          FPixHeight := h;
-          FPixWidth  := w;
-        end;
-        TryFreePixmap;
-        FBufferPixmap := XCreatePixmap(xapplication.display, DrawWindow.WinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
-      end;
-      if FastDoubleBuffer then
-      begin
-        // Rapid paint events reuse the double buffer which resets a delay
-        // After the delay the double buffer is freed, letting the OS use video
-        // memory if needed.
-        // Things like scrolling and resizing are fast
-
-        // Reset the timers next trigger
-        if FBufferFreeTimer = nil then
-        begin
-          FBufferFreeTimer := TfpgTimer.Create(500);
-          TfpgTimer(FBufferFreeTimer).OnTimer := @BufferFreeTimer;
-        end
-        else
-          TfpgTimer(FBufferFreeTimer).Enabled := False;
-        TfpgTimer(FBufferFreeTimer).Enabled := True;
-      end;
-      FDrawHandle   := FBufferPixmap;
-    end
-    else
-    begin
-      TryFreePixmap;
-      FDrawHandle   := DrawWindow.FWinHandle;
-    end;
-
     Fgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
 
     FXftDraw := XftDrawCreate(xapplication.display, FDrawHandle,
-      XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
-      XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
+    XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
+    XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
 
     FClipRegion := XCreateRegion;
   end;
@@ -2955,13 +2913,10 @@ var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
 begin
-  if FBufferPixmap > 0 then
+  if (FDrawHandle = FBufferPixmap) then
   begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
-    if FWidget.HasOwnWindow then
-      XCopyArea(xapplication.Display, FBufferPixmap, DrawWindow.FWinHandle, cgc, x, y, w, h, x, y)
-    else
-      XCopyArea(xapplication.Display, FBufferPixmap, TfpgX11Canvas(DrawWindow.PrimaryWidget.Canvas).FDrawHandle, cgc, x, y, w, h, x+FTransX, y+FTransY);
+    XCopyArea(xapplication.Display, FBufferPixmap, TfpgX11Window(FWidget.Window).WinHandle, cgc, x+FDeltaX, y+FDeltaY, w, h, x+FDeltaX, y+FDeltaY);
     XFreeGc(xapplication.display, cgc);
   end;
 end;
@@ -2974,12 +2929,7 @@ begin
     XftDrawDestroy(FXftDraw);
     XFreeGc(xapplication.display, Fgc);
 
-    if FastDoubleBuffer = False then
-      TryFreePixmap;
-
     FDrawing    := False;
-    FDrawHandle := DrawWindow.FWinHandle; // fixes an av for Tfpgcaret. needs a better fix
-    FDrawWidget := nil;
   end;
 end;
 
@@ -3048,11 +2998,38 @@ begin
     FreeMem(PointArray);
 end;
 
-function TfpgX11Canvas.GetDrawWindow: TfpgX11Window;
+function TfpgX11Canvas.GetBufferAllocated: Boolean;
+var
+  x: integer;
+  y: integer;
+  rw: TXID;
+  d: TXID;
+  w: longword;
+  h: longword;
+  bw: longword;
 begin
-  Result := nil;
-  if Assigned(FDrawWidget) and FDrawWidget.WindowAllocated then
-    Result := TfpgX11Window(FDrawWidget.Window);
+  if FCanvasTarget <> Self then
+    Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
+  else
+  begin
+    Result := FBufferPixmap <> 0;
+    if Result then
+    begin
+      XGetGeometry(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+      if (w <> FWidget.Width) or (h <> FWidget.Height) then
+      begin
+        TryFreePixmap;
+        Result := False;
+      end;
+    end;
+  end;
+
+end;
+
+procedure TfpgX11Canvas.DoAllocateBuffer;
+begin
+  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width, FWidget.Height, xapplication.DisplayDepth);
+  FDrawHandle:=FBufferPixmap;
 end;
 
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
@@ -3141,8 +3118,8 @@ begin
   if Length(txt) < 1 then
     Exit; //==>
 
-  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x,
-    y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
+  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x+FDeltaX,
+    y+FDeltaY + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
 procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
@@ -3155,20 +3132,20 @@ var
 begin
   r.Left    := 0;
   r.Top     := 0;
-  XGetGeometry(xapplication.display, DrawWindow.FWinHandle, @rw, @x, @y,
+  XGetGeometry(xapplication.display, FDrawHandle, @rw, @x, @y,
       @(r.width), @(r.height), @bw, @d);
 end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
 end;
 
 procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
   XSetForeGround(xapplication.display, Fgc, 0);
   XSetFunction(xapplication.display, Fgc, GXcopy);
 end;
@@ -3177,9 +3154,9 @@ procedure TfpgX11Canvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of TXPoint;
 begin
-  pts[1].x := x1;   pts[1].y := y1;
-  pts[2].x := x2;   pts[2].y := y2;
-  pts[3].x := x3;   pts[3].y := y3;
+  pts[1].x := x1+FDeltaX;   pts[1].y := y1+FDeltaY;
+  pts[2].x := x2+FDeltaX;   pts[2].y := y2+FDeltaY;
+  pts[3].x := x3+FDeltaX;   pts[3].y := y3+FDeltaY;
 
   XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
@@ -3191,13 +3168,13 @@ begin
   if (w = 1) and (h = 1) then // a dot
     DoDrawLine(x, y, x+w, y+w)
   else
-    XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
+    XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w-1, h-1);
 end;
 
 procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   // Same behavior as Windows. See documentation for reason.
-  XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
+  XDrawLine(xapplication.display, FDrawHandle, Fgc, x1+FDeltaX, y1+FDeltaY, x2+FDeltaX, y2+FDeltaY);
 end;
 
 procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
@@ -3205,8 +3182,8 @@ var
   r: TXRectangle;
   rg: TRegion;
 begin
-  r.x      := ARect.Left;
-  r.y      := ARect.Top;
+  r.x      := ARect.Left+FDeltaX;
+  r.y      := ARect.Top+FDeltaY;
   r.Width  := ARect.Width;
   r.Height := ARect.Height;
 
@@ -3231,8 +3208,8 @@ var
   r: TXRectangle;
   rg: TRegion;
 begin
-  r.x      := ARect.Left;
-  r.y      := ARect.Top;
+  r.x      := ARect.Left+FDeltaX;
+  r.y      := ARect.Top+FDeltaY;
   r.Width  := ARect.Width;
   r.Height := ARect.Height;
 
@@ -3284,15 +3261,15 @@ begin
 
     drawgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     XSetClipMask(xapplication.display, drawgc, msk);
-    XSetClipOrigin(xapplication.display, drawgc, x, y);
+    XSetClipOrigin(xapplication.display, drawgc, x+FDeltaX, y+FDeltaY);
 
-    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgX11Image(img).XImage, xi, yi, x, y, w, h);
+    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgX11Image(img).XImage, xi, yi, x+FDeltaX, y+FDeltaY, w, h);
     XFreePixmap(xapplication.display, msk);
     XFreeGc(xapplication.display, drawgc);
     XFreeGc(xapplication.display, gc2);
   end
   else
-    XPutImage(xapplication.display, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
+    XPutImage(xapplication.display, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x+FDeltaX, y+FDeltaY, w, h);
 end;
 
 { TfpgX11Image }

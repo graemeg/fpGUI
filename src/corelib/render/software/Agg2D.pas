@@ -381,7 +381,7 @@ type
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
-    procedure   DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean); override;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
@@ -3698,7 +3698,7 @@ begin
   m_rasterizer.m_clipping := false;
 end;
 
-procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean);
+procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
   if Assigned(FImg) then
   begin

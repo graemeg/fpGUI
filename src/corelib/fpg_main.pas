@@ -1765,10 +1765,6 @@ begin
   inherited Create(awidget);
 
   FBeginDrawCount := 0;
-
-  // options
-  FBufferedDraw        := True; // transparent widgets must turn this off
-  FPersistentResources := False;
 end;
 
 destructor TfpgCanvas.Destroy;
@@ -2414,7 +2410,7 @@ begin
 
   // we could not be sure about the buffer contents!
   try
-    FCanvas.BeginDraw(False);
+    FCanvas.BeginDraw;
     try
       // this works well on narrow characters like 'i' or 'l' in non-mono fonts
       FCanvas.XORFillRectangle($FFFFFF, FLeft, FTop, FWidth, FHeight);

@@ -1390,7 +1390,7 @@ begin
     w := TfpgWidget(Components[i]);
     if w.InheritsFrom(TfpgWidget) then
     begin
-      if not w.HasOwnWindow then
+      if not w.HasOwnWindow and w.Visible then
         w.MsgPaint(msg);
     end;
 

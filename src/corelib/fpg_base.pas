@@ -342,7 +342,6 @@ type
     FInterpolation: TfpgCustomInterpolation;
     procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
-    FBufferedDraw: boolean;
     FBeginDrawCount: integer;
     FWidget: TfpgWidgetBase;
     FColor: TfpgColor;
@@ -350,9 +349,9 @@ type
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
     FFont: TfpgFontBase;
-    FTransX,
-    FTransY: TfpgCoord; // offset used when painting 'alien' widgets
-    FPersistentResources: boolean;
+    FDeltaX,
+    FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
+    FCanvasTarget: TfpgCanvasBase;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
@@ -369,7 +368,7 @@ type
     function    DoGetClipRect: TfpgRect; virtual; abstract;
     procedure   DoAddClipRect(const ARect: TfpgRect); virtual; abstract;
     procedure   DoClearClipRect; virtual; abstract;
-    procedure   DoBeginDraw(awidget: TfpgWidgetBase; buffered: boolean); virtual; abstract;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
@@ -377,6 +376,8 @@ type
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual; abstract;
+    function    GetBufferAllocated: Boolean; virtual; abstract;
+    procedure   DoAllocateBuffer; virtual; abstract;
   public
     constructor Create(awidget: TfpgWidgetBase); virtual;
     destructor  Destroy; override;
@@ -414,7 +415,7 @@ type
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
     procedure   SetFont(AFont: TfpgFontBase);
     procedure   BeginDraw; overload;
-    procedure   BeginDraw(ABuffered: boolean); overload;
+    procedure   BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
     procedure   EndDraw(ARect: TfpgRect); overload;
     procedure   EndDraw; overload;
@@ -424,7 +425,6 @@ type
     property    Font: TfpgFontBase read FFont write SetFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
-    property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
     property    LineStyle: TfpgLineStyle read FLineStyle;
   end;
 
@@ -1334,15 +1334,15 @@ end;
 function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
 var
   i: Integer;
-  w: TfpgWidgetBase;
+  w: TfpgWidget;
 begin
   if Assigned(MouseCapture) then
     Exit(MouseCapture); // ==>
   Result := AWidget;
   for i := AWidget.ComponentCount-1 downto 0 do
   begin
-    w := TfpgWidgetBase(AWidget.Components[i]);
-    if Assigned(w) and w.InheritsFrom(TfpgWidgetBase) and not w.HasOwnWindow then
+    w := TfpgWidget(AWidget.Components[i]);
+    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible then
     begin
       if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
       begin
@@ -2035,8 +2035,6 @@ end;
 
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
 begin
-  FBufferedDraw := True;
-  FFastDoubleBuffer := True;
   FWidget := awidget;
 end;
 
@@ -2412,19 +2410,41 @@ begin
 end;
 
 procedure TfpgCanvasBase.BeginDraw;
+var
+  dx,dy: Integer;
 begin
-  BeginDraw(FBufferedDraw);
+  dx := 0;
+  dy := 0;
+  // convert out 0,0 position to the position inside the native window
+  FWidget.WidgetToWindow(dx, dy);
+  BeginDraw(FWidget.Window.PrimaryWidget.Canvas, dx, dy);
 end;
 
-procedure TfpgCanvasBase.BeginDraw(ABuffered: boolean);
+procedure TfpgCanvasBase.BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer);
 begin
   if FBeginDrawCount < 1 then
   begin
-    FTransX := 0;
-    FTransY := 0;
-    FWidget.WidgetToWindow(FTransX, FTransY);
 
-    DoBeginDraw(FWidget, ABuffered);
+    FDeltaX := XDelta;
+    FDeltaY := YDelta;
+
+    if CanvasTarget = nil then
+      CanvasTarget := Self;
+
+    FCanvasTarget := CanvasTarget;
+
+    if CanvasTarget = Self then
+    begin
+      if GetBufferAllocated = False then
+        DoAllocateBuffer;
+    end
+    else
+    begin
+      CanvasTarget.BeginDraw;
+    end;
+
+
+    DoBeginDraw(FWidget, CanvasTarget);
 
     SetColor(clText1);
     SetTextColor(clText1);
@@ -2444,9 +2464,11 @@ begin
     if FBeginDrawCount = 0 then
     begin
       DoPutBufferToScreen(x, y, w, h);
-
-      if not FPersistentResources then
-        DoEndDraw;
+      if FCanvasTarget <> Self then
+      begin
+        FWidget.WidgetToWindow(x,y);
+        FCanvasTarget.EndDraw(x, y, w, h);
+      end;
     end;
   end;  { if }
 end;
