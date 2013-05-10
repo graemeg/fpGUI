@@ -1288,6 +1288,9 @@ begin
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
 
+ m_convDash.remove_all_dashes;
+ m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
 {$ENDIF }
