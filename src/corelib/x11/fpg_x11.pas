@@ -468,6 +468,7 @@ var
 
 const
   FPG_XDND_VERSION: culong = 4; // our supported XDND version
+  PIXMAP_RESIZE_SIZE = 50;
 
  // some externals
 
@@ -3021,8 +3022,7 @@ begin
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
 
 
-      if (wp - w > 100) or (hp - hp > 100) or (w > wp) or (h > hp) then
-      //if {(w - FWidget.Width > 50) or (h - FWidget.Height > 50) or} (w < FWidget.Width) or (h < FWidget.Height) then
+      if (wp - w > PIXMAP_RESIZE_SIZE*2) or (hp - hp > PIXMAP_RESIZE_SIZE*2) or (w > wp) or (h > hp) then
       begin
         WriteLn('REallocating');
         DeAllocateDC;
@@ -3036,7 +3036,7 @@ end;
 
 procedure TfpgX11Canvas.DoAllocateBuffer;
 begin
-  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+50, FWidget.Height+50, xapplication.DisplayDepth);
+  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+PIXMAP_RESIZE_SIZE, FWidget.Height+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
   FDrawHandle:=FBufferPixmap;
   if FDrawing then
     AllocateDC;
