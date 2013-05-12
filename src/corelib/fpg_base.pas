@@ -877,6 +877,7 @@ type
   end;
 
 
+operator = (const r1,r2 : TfpgRect) b : boolean;
 
 
 { ********  Helper functions  ******** }
@@ -929,6 +930,10 @@ const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
 
+operator=(const r1, r2: TfpgRect)b: boolean;
+begin
+  Result := CompareMem(@r1, @r2, SizeOf(TfpgRect));
+end;
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
@@ -2445,6 +2450,12 @@ begin
 
 
     DoBeginDraw(FWidget, CanvasTarget);
+
+
+    if GetClipRect = fpgRect(0,0,0,0) then
+      SetClipRect(FWidget.GetClientRect)
+    else
+      SetClipRect(fpgRect(0,0, FWidget.Width, FWidget.Height));
 
     SetColor(clText1);
     SetTextColor(clText1);

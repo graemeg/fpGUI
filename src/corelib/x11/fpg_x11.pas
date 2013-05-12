@@ -2905,7 +2905,6 @@ begin
   begin
     AllocateDC;
   end;
-
   FDrawing := True;
 end;
 
