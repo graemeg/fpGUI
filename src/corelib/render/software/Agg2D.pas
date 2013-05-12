@@ -400,6 +400,8 @@ type
 
    procedure ClearAll(c : TAggColor ); overload;
    procedure ClearAll(r ,g ,b : byte; a : byte = 255 ); overload;
+   procedure FillAll(c: TAggColor); overload;
+   procedure FillAll(r, g, b: byte; a: byte = 255); overload;
 
   // Master Rendering Properties
    procedure BlendMode(m : TAggBlendMode ); overload;
@@ -1288,6 +1290,9 @@ begin
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
 
+ m_convDash.remove_all_dashes;
+ m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
 {$ENDIF }
@@ -1491,6 +1496,22 @@ begin
 
 end;
 
+procedure TAgg2D.FillAll(c: TAggColor);
+var
+  clr: aggclr;
+begin
+  clr.Construct  (c );
+  m_renBase.fill(@clr );
+end;
+
+procedure TAgg2D.FillAll(r, g, b: byte; a: byte);
+var
+  clr: TAggColor;
+begin
+  clr.Construct(r, g, b, a);
+  FillAll(clr);
+end;
+
 { CLEARCLIPBOX }
 procedure TAgg2D.ClearClipBox(c : TAggColor );
 var
@@ -1517,14 +1538,14 @@ end;
 { WORLDTOSCREEN }
 procedure TAgg2D.WorldToScreen(x ,y : PDouble );
 begin
- m_transform.transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.transform(@m_transform, x, y);
 
 end;
 
 { SCREENTOWORLD }
 procedure TAgg2D.ScreenToWorld(x ,y : PDouble );
 begin
- m_transform.inverse_transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.inverse_transform(@m_transform, x, y);
 
 end;
 

@@ -103,7 +103,6 @@ procedure TMyWidget.HandlePaint;
 var
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.Clear(clBlue);
 
@@ -123,7 +122,6 @@ begin
   Canvas.SetColor(clGreen);
   Canvas.FillRectangle(r);
 }
-  Canvas.EndDraw;
 end;
 
 constructor TMyWidget.Create(AOwner: TComponent);
@@ -151,7 +149,6 @@ var
   w: integer;
   pofs: integer;
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
@@ -244,7 +241,6 @@ begin
     x := 3;
 
   Canvas.DrawString(x + pofs, y + pofs, FText);
-  Canvas.EndDraw;
 end;
 
 procedure TXPButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
@@ -388,6 +384,8 @@ begin
   listbox.Enabled := not checkbox1.Checked;
   xpluna.Enabled := not checkbox1.Checked;
   xpsilver.Enabled := not checkbox1.Checked;
+  trackbar1.Enabled := not checkbox1.Checked;
+  trackbar2.Enabled := not checkbox1.Checked;
 end;
 
 procedure TMainForm.TrackBarChanged(Sender: TObject; APosition: integer);
@@ -441,7 +439,7 @@ begin
   btn.ShowImage := True;
   btn.Height := 55;
 
-  combo1 := CreateComboBox(self, 10, 200, 120, nil);
+  combo1 := CreateComboBox(self, 10, 200, 120, nil, 22);
   combo1.BackgroundColor := clYellow;
   combo1.TextColor := clBlue;
   combo1.Items.Add('ilImageLeft');
@@ -451,7 +449,7 @@ begin
   combo1.FocusItem := 0;
   combo1.OnChange := @Combo1Changed;
 
-  combo2 := CreateComboBox(self, 10, 230, 120, nil);
+  combo2 := CreateComboBox(self, 10, 230, 120, nil, 22);
   for i := 1 to 20 do
     combo2.Items.Add(Format('Items %.2d', [i]));
 
