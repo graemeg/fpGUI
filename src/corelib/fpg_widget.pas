@@ -1524,8 +1524,8 @@ begin
           dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
-        Write(wg.ClassName + ': ');
-        PrintRect(wg.WidgetBoundsInWindow);
+        //Write(wg.ClassName + ': ');
+        //PrintRect(wg.WidgetBoundsInWindow);
       end;
     end;  { if }
 end;

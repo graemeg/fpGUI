@@ -1937,8 +1937,6 @@ destructor TfpgWindowBase.Destroy;
 begin
   ReleaseWindowHandle;
   inherited Destroy;
-
-
 end;
 
 procedure TfpgWindowBase.AfterConstruction;
@@ -2416,6 +2414,8 @@ begin
   dx := 0;
   dy := 0;
   // convert our 0,0 position to the position inside the native window
+  if FWidget.Window = nil then
+    exit;
   FWidget.WidgetToWindow(dx, dy);
   BeginDraw(FWidget.Window.PrimaryWidget.Canvas, dx, dy);
 end;
