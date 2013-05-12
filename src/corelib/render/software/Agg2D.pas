@@ -400,6 +400,8 @@ type
 
    procedure ClearAll(c : TAggColor ); overload;
    procedure ClearAll(r ,g ,b : byte; a : byte = 255 ); overload;
+   procedure FillAll(c: TAggColor); overload;
+   procedure FillAll(r, g, b: byte; a: byte = 255); overload;
 
   // Master Rendering Properties
    procedure BlendMode(m : TAggBlendMode ); overload;
@@ -1492,6 +1494,22 @@ begin
  clr.Construct(r ,g ,b ,a );
  ClearAll     (clr );
 
+end;
+
+procedure TAgg2D.FillAll(c: TAggColor);
+var
+  clr: aggclr;
+begin
+  clr.Construct  (c );
+  m_renBase.fill(@clr );
+end;
+
+procedure TAgg2D.FillAll(r, g, b: byte; a: byte);
+var
+  clr: TAggColor;
+begin
+  clr.Construct(r, g, b, a);
+  FillAll(clr);
 end;
 
 { CLEARCLIPBOX }
