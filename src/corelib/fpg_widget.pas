@@ -324,7 +324,7 @@ end;
 
 function TfpgWidget.GetWindow: TfpgNativeWindow;
 begin
-  Result := TfpgNativeWindow(FWindow);
+  Result := TfpgNativeWindow(inherited Window);
 end;
 
 procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
@@ -376,17 +376,7 @@ begin
     //Window.UpdateWindowPosition(Left, Top, Width, Height);
   end
   else
-  begin
-    if Parent <> nil then
-    begin
-      FWindow := Parent.Window;
-    end
-    else
-    begin
-      WriteLn('FATAL: TfpgWidget.DoAllocateHandle called on a child widget with no parent');
-      raise Exception.Create('FATAL: TfpgWidget.DoAllocateHandle called on a child widget with no parent');
-    end;
-  end;
+    FWindow := nil; // GetWindow asks the parent for it's window.
 end;
 
 procedure TfpgWidget.AllocateWindowHandle;

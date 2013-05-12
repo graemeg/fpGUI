@@ -1441,12 +1441,16 @@ end;
 
 function TfpgWidgetBase.GetWindow: TfpgWindowBase;
 begin
-  Result := FWindow;
+  Result := nil;
+  if HasOwnWindow then
+    Result := FWindow
+  else if Assigned(FParent) then
+    Result := FParent.Window;
 end;
 
 function TfpgWidgetBase.GetWindowAllocated: Boolean;
 begin
-  Result := FWindow <> nil;
+  Result := Window <> nil;
 end;
 
 procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
@@ -1459,6 +1463,7 @@ begin
     FHasOwnWindow:=AValue;
     DoAllocateWindowHandle;
     Window.AllocateWindowHandle;
+    Window.SetWindowVisible(TfpgWidget(Self).Visible);
     UpdatePosition;
   end
   else
@@ -1940,6 +1945,7 @@ end;
 
 destructor TfpgWindowBase.Destroy;
 begin
+  FreeAndNil(FDispatcher);
   ReleaseWindowHandle;
   inherited Destroy;
 end;
@@ -2453,7 +2459,7 @@ begin
 
 
     if GetClipRect = fpgRect(0,0,0,0) then
-      SetClipRect(FWidget.GetClientRect)
+      ClearClipRect//SetClipRect(FWidget.GetClientRect)
     else
       SetClipRect(fpgRect(0,0, FWidget.Width, FWidget.Height));
 
