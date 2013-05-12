@@ -1365,9 +1365,15 @@ function TfpgWindowEventDispatcher.FindWidgetForKeyEvent: TfpgWidgetBase;
 var
   w: TWidgetHack;
 begin
-  Result := TWidgetHack(Widget).ActiveWidget;
+  w := TWidgetHack(TWidgetHack(Widget).ActiveWidget);
+  while Assigned(w) do
+  begin
+    Result := w;
+    w := TWidgetHack(w.ActiveWidget);
+  end;
   if Result = nil then
     Result := Widget;
+  //WriteLn('KEY: ', Result.ClassName);
 end;
 
 procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);

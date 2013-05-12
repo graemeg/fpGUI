@@ -1357,7 +1357,7 @@ var
   w: TfpgWidget;
 begin
   //writeln('TfpgWidget.MsgPaint - ', Classname);
-  if not (WindowAllocated or (Window.HasHandle)) then
+  if not (WindowAllocated and (Window.HasHandle)) then
     Exit;//
   //WriteLn(Self.ClassName);
   //WriteLn(Canvas.ClassName);
