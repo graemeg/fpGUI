@@ -472,6 +472,7 @@ type
     FPrevWidth: TfpgCoord;
     FPrevHeight: TfpgCoord;
     FCurrentSize: TfpgSize;
+    FCurrentPos: TfpgPoint;
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
     FMaxHeight: TfpgCoord;
@@ -1633,22 +1634,34 @@ begin
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
-var
-  msgp: TfpgMessageParams;
-begin
-
-  DoUpdatePosition;
-  if (HasOwnWindow = False)
-  and ((FCurrentSize.W <> FWidth) or (FCurrentSize.H <> FHeight)) then
+  procedure SendMoveResize(AMsg: Integer);
+  var
+    msgp: TfpgMessageParams;
   begin
     msgp.rect.Left   := FLeft;
     msgp.rect.Top    := FTop;
     msgp.rect.Width  := FWidth;
     msgp.rect.Height := FHeight;
+    fpgPostMessage(nil, Self, AMsg, msgp);
+  end;
+begin
+  DoUpdatePosition;
+  if (HasOwnWindow = False) then
+  begin
+    // Size Changes
+    if ((FCurrentSize.W <> FWidth) or (FCurrentSize.H <> FHeight)) then
+    begin
+      SendMoveResize(FPGM_RESIZE);
+    end;
 
-    fpgPostMessage(nil, Self, FPGM_RESIZE, msgp);
+    // Position Changes
+    if ((FCurrentPos.X <> FLeft) or (FCurrentPos.Y <> FTop)) then
+    begin
+      SendMoveResize(FPGM_MOVE);
+    end;
   end;
   FCurrentSize.SetSize(FWidth, FHeight);
+  FCurrentPos.SetPoint(FLeft, FTop);
 end;
 
 procedure TfpgWidgetBase.UpdateWindowPosition;
