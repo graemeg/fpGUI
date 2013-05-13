@@ -3110,7 +3110,6 @@ end;
 function TfpgMimeDataBase.Formats: TStrings;
 var
   i: integer;
-  r: TfpgMimeDataItem;
   s: string;
 begin
   if Count = 0 then
