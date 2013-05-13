@@ -64,7 +64,7 @@ function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 function fpgExtractFileName(const FileName: TfpgString): TfpgString;
 function fpgExtractFileExt(const FileName: TfpgString): TfpgString;
-function fpgExtractRelativepath(const ABaseName, ADestName: TfpgString): TfpgString;
+function fpgExtractRelativePath(const ABaseName, ADestName: TfpgString): TfpgString;
 function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
 function fpgChangeFileExt(const FileName, Extension: TfpgString): TfpgString;
 function fpgGetAppConfigDir(const Global: Boolean): TfpgString;
@@ -171,7 +171,7 @@ begin
   Result := ExtractFileExt(fpgToOSEncoding(Filename));
 end;
 
-function fpgExtractRelativepath(const ABaseName, ADestName: TfpgString): TfpgString;
+function fpgExtractRelativePath(const ABaseName, ADestName: TfpgString): TfpgString;
 begin
   Result := ExtractRelativepath(fpgToOSEncoding(ABaseName), fpgToOSEncoding(ADestName));
 end;
