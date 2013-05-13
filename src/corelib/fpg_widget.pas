@@ -161,6 +161,7 @@ type
     destructor  Destroy; override;
     procedure   AfterConstruction; override;
     function    InDesigner: boolean;
+    function    IsLoading: boolean;
     procedure   InvokeHelp; virtual;
     procedure   Realign;
     procedure   SetFocus;
@@ -430,6 +431,11 @@ end;
 function TfpgWidget.InDesigner: boolean;
 begin
   Result := (FFormDesigner <> nil)
+end;
+
+function TfpgWidget.IsLoading: boolean;
+begin
+  Result := csLoading in ComponentState;
 end;
 
 procedure TfpgWidget.InvokeHelp;
