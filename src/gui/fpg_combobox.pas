@@ -428,7 +428,7 @@ var
   pt: TPoint;
 begin
   // translate ComboBox coordinates
-  pt := Window.WindowToScreen(AParent.Window, Point(AComboBox.Left, AComboBox.Bottom));
+  pt := WidgetToScreen(Self, Point(AComboBox.Left, AComboBox.Bottom));
 
   // dropdown will not fit below combobox so we place it above
   if (pt.y + ADropDown.Height) > fpgApplication.ScreenHeight then

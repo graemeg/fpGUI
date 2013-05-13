@@ -1517,7 +1517,7 @@ begin
     begin
 //writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
       TWidgetFriend(w).DoShowHint(lHint);
-      ActivateHint(w.Window.WindowToScreen(w.Window, FHintPos), lHint);
+      ActivateHint(w.WidgetToScreen(w, FHintPos), lHint);
     end;
   except
     // silence it!

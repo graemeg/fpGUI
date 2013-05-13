@@ -222,7 +222,7 @@ end;
 function TfpgPopupWindow.GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
 begin
   // translate coordinates
-  Result := Window.WindowToScreen(AReferenceWindow.Window, Point(x, y));
+  Result := AReferenceWindow.WidgetToScreen(AReferenceWindow, Point(x, y));
 
   // popup window will not fit below (x,y) so we place it above (x,y)
   if (Result.y + self.Height) > fpgApplication.ScreenHeight then

@@ -2925,9 +2925,9 @@ procedure TfpgX11Canvas.DoEndDraw;
 begin
   if FDrawing then
   begin
+    FDrawing    := False;
     XDestroyRegion(FClipRegion);
     DeAllocateDC;
-    FDrawing    := False;
   end;
 end;
 
@@ -3075,7 +3075,7 @@ end;
 
 procedure TfpgX11Canvas.DeAllocateDC;
 begin
-  if FDrawHandle = DrawHandle then
+  if not FDrawing or (FDrawHandle = DrawHandle) then
   begin
     if FXftDraw <> nil then
       XftDrawDestroy(FXftDraw);

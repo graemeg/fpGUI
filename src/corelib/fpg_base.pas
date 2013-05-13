@@ -1670,8 +1670,8 @@ begin
   if not ASource.WindowAllocated then
     Exit; // ==>
 
-  Result := ASource.Window.WindowToScreen(ASource.Window, AScreenPos);
-  ASource.WindowToWidget(Result.X, Result.Y);
+  ASource.WidgetToWindow(Result.X, Result.Y);
+  Result := ASource.Window.WindowToScreen(ASource.Window, Result);
 end;
 
 procedure TfpgWidgetBase.WidgetToWindow(var AX, AY: TfpgCoord);

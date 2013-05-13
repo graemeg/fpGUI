@@ -1105,7 +1105,7 @@ begin
   end;
 
   // translate Edit coordinates
-  pt := Window.WindowToScreen(self.Window, Point(edtMonth.Left, edtMonth.Bottom));
+  pt := WidgetToScreen(Self, Point(edtMonth.Left, edtMonth.Bottom));
   TPopupMenuFriend(FMonthsPopupMenu).PrepareToShow;  // forces height calculation
   // If dropdown will not fit below Edit, then we place it above
   if (pt.y + FMonthsPopupMenu.Height) > fpgApplication.ScreenHeight then

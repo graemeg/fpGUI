@@ -826,7 +826,7 @@ begin
   for n := 0 to VisibleCount-1 do
   with VisibleItem(n) do
   begin
-    if (SubMenu <> nil) and (SubMenu.Window.HasHandle) then
+    if (SubMenu <> nil) and (SubMenu.WindowAllocated) then
       SubMenu.Close;
   end;
 end;
