@@ -2573,9 +2573,9 @@ begin
         while Assigned(r) do
         begin
           //WriteLn('putting saved buffer pos');
-          DoPutBufferToScreen(r^.Left, r^.Top, r^.Width, r^.Height);
+          //DoPutBufferToScreen(r^.Left, r^.Top, r^.Width, r^.Height);
           if UnionfpgRect(finalrect, r^, r2) then
-          r2 := finalrect;
+            r2 := finalrect;
           Dispose(r);
           r := GetPutBufferItem;
         end;
