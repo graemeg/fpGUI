@@ -81,7 +81,7 @@ uses
   ,fpg_grid
   ,fpg_memo
   ,simpleipc
-  ,dbugmsg
+  ,fpg_dbugmsg
   ,fra_liveview
   ;
 
