@@ -1007,7 +1007,7 @@ begin
   if InDesigner then
     exit;
 
-  if WinHandle = 0 then
+  if not WindowAllocated then
     exit;
 
   RemoveCursor;
@@ -1066,7 +1066,7 @@ ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
 
   if InDesigner then
     exit;
-  if WinHandle = 0 then
+  if not WindowAllocated then
     exit;
 ProfileEvent('DEBUG:  TRichTextView.Layout    1 of 6');
   FSelectionEnd := -1;

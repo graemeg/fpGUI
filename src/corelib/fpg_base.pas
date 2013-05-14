@@ -143,6 +143,7 @@ const
   {$I predefinedcolors.inc}
 
 type
+  PfpgRect = ^TfpgRect;
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
     Left: TfpgCoord;
@@ -336,6 +337,8 @@ type
   end;
 
 
+  { TfpgCanvasBase }
+
   TfpgCanvasBase = class(TObject)
   private
     FFastDoubleBuffer: Boolean;
@@ -352,6 +355,9 @@ type
     FDeltaX,
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
+    FPutBufferQueue: TFPList;
+    procedure   AddPutBufferItem(ARect: TfpgRect);
+    function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
@@ -2061,6 +2067,32 @@ begin
   FInterpolation := AValue;
 end;
 
+procedure TfpgCanvasBase.AddPutBufferItem(ARect: TfpgRect);
+var
+  n: PfpgRect;
+begin
+  n := new(PfpgRect);
+  n^ := ARect;
+
+  if not Assigned(FPutBufferQueue) then
+    FPutBufferQueue := TFPList.Create;
+
+  FPutBufferQueue.Add(n);
+end;
+
+function TfpgCanvasBase.GetPutBufferItem: PfpgRect;
+begin
+  Result := nil;
+  if FPutBufferQueue = nil then
+    Exit; // ==>
+
+  Result := PfpgRect(FPutBufferQueue.Items[FPutBufferQueue.Count-1]);
+  FPutBufferQueue.Delete(FPutBufferQueue.Count-1);
+
+  if FPutBufferQueue.Count = 0 then
+    FreeAndNil(FPutBufferQueue);
+end;
+
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
 begin
   FWidget := awidget;
@@ -2492,20 +2524,72 @@ begin
   Inc(FBeginDrawCount);
 end;
 
+function IsfpgRectEmpty(const ARect : TfpgRect) : Boolean;
+begin
+  Result:=(ARect.Width <= 0) or (ARect.Height <= 0);
+end;
+
+function UnionfpgRect(out ARect : TfpgRect;const R1,R2 : TfpgRect) : Boolean;
+begin
+  ARect:=R1;
+  with R2 do
+  begin
+    if Left < R1.Left then
+      ARect.Left:=Left;
+    if Top < R1.Top then
+      ARect.Top:=Top;
+    if Width > R1.Width then
+      ARect.Width := Width;
+    if Height > R1.Height then
+      ARect.Height:= Height;
+    end;
+  {if IsfpgRectEmpty(ARect) then
+  begin
+    FillChar(ARect,SizeOf(ARect),0);
+    Result:=false;
+  end
+  else}
+    Result:=true;
+end;
+
+
+
 procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
+var
+  r: PfpgRect;
+  r2: TfpgRect;
+  finalrect: TfpgRect;
 begin
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
     if FBeginDrawCount = 0 then
     begin
-      DoPutBufferToScreen(x, y, w, h);
-      if FCanvasTarget <> Self then
+      if FCanvasTarget = Self then
+      begin
+        finalrect.SetRect(x,y,w,h);
+        r2 := finalrect;
+        r := GetPutBufferItem;
+        while Assigned(r) do
+        begin
+          //WriteLn('putting saved buffer pos');
+          DoPutBufferToScreen(r^.Left, r^.Top, r^.Width, r^.Height);
+          if UnionfpgRect(finalrect, r^, r2) then
+          r2 := finalrect;
+          Dispose(r);
+          r := GetPutBufferItem;
+        end;
+        DoPutBufferToScreen(finalrect.Left, finalrect.Top, finalrect.Width, finalrect.Height);
+      end
+      else
       begin
         FWidget.WidgetToWindow(x,y);
         FCanvasTarget.EndDraw(x, y, w, h);
       end;
-    end;
+    end
+    else
+      AddPutBufferItem(fpgRect(x,y,w,h));
+
   end;  { if }
 end;
 

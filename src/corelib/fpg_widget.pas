@@ -477,8 +477,9 @@ begin
     Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
-    ;//TfpgWidgetBase(Parent).Invalidate;
-  {$TODO Notify Parent we've changed position and should redraw}
+    Invalidate;//TfpgWidgetBase(Parent).Invalidate;
+  //
+  //{$TODO Notify Parent we've changed position and should redraw}
 
   if (dw <> 0) or (dh <> 0) then
     DoResize;
