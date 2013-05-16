@@ -2670,7 +2670,8 @@ begin
  m_fontEngine.hinting_(m_textHints );
 
  if cache = AGG_VectorFontCache then
-  m_fontEngine.height_(height{ * 1.3333} ) // 9pt = ~12px so that is a ration of 1.3333
+ {$NOTE We need to fix this. Translating from font pt to pixels is inaccurate. This is just a temp fix for now. }
+  m_fontEngine.height_(height * 1.3333 ) // 9pt = ~12px so that is a ration of 1.3333
  else
   m_fontEngine.height_(worldToScreen(height ) );
 {$ENDIF}
