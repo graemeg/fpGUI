@@ -3663,7 +3663,10 @@ end;
 
 procedure TAgg2D.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
-
+  LineWidth(1);
+  FillColor(LineColor);
+  LineColor(LineColor);
+  Triangle(x1+0.5, y1+0.5, x2+0.5, y2+0.5, x3+0.5, y3+0.5);
 end;
 
 procedure TAgg2D.DoDrawRectangle(x, y, w, h: TfpgCoord);

@@ -202,6 +202,10 @@ begin
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
 
+  // Draw filled triangle
+  Canvas.Color := clOrange;
+  Canvas.FillTriangle(200, 150, 175, 175, 275, 175);
+
   // Testing line drawing
   ac.NoFill;
   Canvas.SetColor(clBlue);
