@@ -3558,7 +3558,12 @@ end;
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
 {$IFDEF WINDOWS}
 begin
+ {$IFDEF AGG2D_USE_FREETYPE }
+ Font('c:\WINNT\Fonts\arial.ttf', 10);
+ {$ENDIF }
+ {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);
+ {$ENDIF }
 end;
 {$ENDIF}
 {$IFDEF UNIX}
