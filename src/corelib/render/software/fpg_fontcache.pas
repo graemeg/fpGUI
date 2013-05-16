@@ -34,6 +34,7 @@ uses
 type
   TFontCacheItem = class(TObject)
   private
+    FAngle: double;
     FFamilyName: TfpgString;
     FFileName: TfpgString;
     FFixedWidth: boolean;
@@ -55,6 +56,8 @@ type
     property    IsRegular: boolean read GetIsRegular write SetIsRegular;
     property    IsItalic: boolean read GetIsItalic write SetIsItalic;
     property    IsBold: boolean read GetIsBold write SetIsBold;
+    { following properties are used by FontCacheItemFromFontDesc() only }
+    property    Angle: double read FAngle write FAngle;
   end;
 
 
@@ -164,6 +167,7 @@ begin
   inherited Create;
   FFileName := AFilename;
   FStyleFlags := FPG_FONT_STYLE_REGULAR;
+  FAngle := 0.0;
 end;
 
 { TFontCacheList }

@@ -49,7 +49,7 @@ var
   procedure NextToken;
   begin
     token := '';
-    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '0'..'9']) do
+    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '0'..'9', '.']) do
     begin
       token := token + c;
       NextC;
@@ -98,7 +98,9 @@ begin
     if prop = 'BOLD' then
       Result.IsBold := True
     else if prop = 'ITALIC' then
-      Result.IsItalic := True;
+      Result.IsItalic := True
+    else if prop = 'ANGLE' then
+      Result.Angle := StrToFloatDef(propval, 0.0);
 //    else if prop = 'ANTIALIAS' then
 //      if propval = 'FALSE' then
 //        lf.lfQuality := NONANTIALIASED_QUALITY else
