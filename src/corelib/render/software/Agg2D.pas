@@ -3576,7 +3576,7 @@ begin
   c := fpgColorToRGB(cl);
   t := fpgColorToRGBTriple(c);
 
-  FillColor(t.Red, t.Green, t.Blue{, t.Alpha});
+  FillColor(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 procedure TAgg2D.DoSetColor(cl: TfpgColor);
