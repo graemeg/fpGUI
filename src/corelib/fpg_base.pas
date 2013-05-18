@@ -455,6 +455,9 @@ type
     property    HelpType: THelpType read FHelpType write FHelpType default htKeyword;
   end;
 
+  TfpgWidgetDirtyFlag = (wdfPosition, wdfSize, wdfConstraints, wdfMouseCursor);
+  TfpgWidgetDirtyFlags = set of TfpgWidgetDirtyFlag;
+
   { TfpgWidgetBase }
 
   TfpgWidgetBase = class(TfpgComponent)
@@ -462,6 +465,8 @@ type
     FHasOwnWindow: Boolean;
     function    GetWindow: TfpgWindowBase; virtual;
     function    GetWindowAllocated: Boolean;
+    procedure   SetMinHeight(AValue: TfpgCoord);
+    procedure   SetMinWidth(AValue: TfpgCoord);
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
@@ -484,9 +489,7 @@ type
     FMaxHeight: TfpgCoord;
     FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
-    FSizeIsDirty: Boolean;
-    FPosIsDirty: Boolean;
-    FMouseCursorIsDirty: Boolean;
+    FDirtyFlags: TfpgWidgetDirtyFlags;
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
@@ -535,8 +538,8 @@ type
     property    Top: TfpgCoord read FTop write SetTop;
     property    Width: TfpgCoord read FWidth write SetWidth;
     property    Height: TfpgCoord read FHeight write SetHeight;
-    property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
-    property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
+    property    MinWidth: TfpgCoord read FMinWidth write SetMinWidth;
+    property    MinHeight: TfpgCoord read FMinHeight write SetMinHeight;
     property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
     property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Canvas: TfpgCanvasBase read GetCanvas;
@@ -555,8 +558,6 @@ type
     FParent: TfpgWindowBase;
     function    GetPrimaryWidget: TfpgWidgetBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
-    function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
-    function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
   protected
     FMouseCursor: TMouseCursor;
     FWindowType: TWindowType;
@@ -569,10 +570,6 @@ type
     FPrevLeft: TfpgCoord;
     FPrevWidth: TfpgCoord;
     FPrevHeight: TfpgCoord;
-    FMinWidth: TfpgCoord;
-    FMinHeight: TfpgCoord;
-    FMaxHeight: TfpgCoord;
-    FMaxWidth: TfpgCoord;
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
     FMouseCursorIsDirty: Boolean;
@@ -586,6 +583,7 @@ type
     procedure   DoRemoveWindowLookup; virtual; abstract;
     procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
+    //procedure   DoSetWindowConstraints(AMinWidth, AMinHeight, AMaxWidth, AMaxHeight: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
@@ -639,10 +637,6 @@ type
     property    Top: TfpgCoord read FTop write SetTop;
     property    Width: TfpgCoord read FWidth write SetWidth;
     property    Height: TfpgCoord read FHeight write SetHeight;
-    property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
-    property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
-    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
-    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    PrimaryWidget: TfpgWidgetBase read GetPrimaryWidget;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
@@ -1466,6 +1460,20 @@ begin
   Result := Window <> nil;
 end;
 
+procedure TfpgWidgetBase.SetMinHeight(AValue: TfpgCoord);
+begin
+  if FMinHeight=AValue then Exit;
+  FMinHeight:=AValue;
+  Include(FDirtyFlags, wdfConstraints);
+end;
+
+procedure TfpgWidgetBase.SetMinWidth(AValue: TfpgCoord);
+begin
+  if FMinWidth=AValue then Exit;
+  FMinWidth:=AValue;
+  Include(FDirtyFlags, wdfConstraints);
+end;
+
 procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
 begin
   if FHasOwnWindow=AValue then Exit;
@@ -1582,7 +1590,9 @@ begin
     else
       FPrevTop := y;
     FTop := y;
-    FPosIsDirty := FPosIsDirty or (FTop <> FPrevTop);
+
+    if FTop <> FPrevTop then
+      Include(FDirtyFlags, wdfPosition);
   end;
 
   if FLeft <> x then
@@ -1592,7 +1602,9 @@ begin
     else
       FPrevLeft := x;
     FLeft := x;
-    FPosIsDirty := FPosIsDirty or (FLeft <> FPrevLeft);
+
+    if FLeft <> FPrevLeft then
+      Include(FDirtyFlags, wdfPosition);
   end;
 end;
 
@@ -1605,7 +1617,9 @@ begin
     else
       FPrevWidth := AWidth;
     FWidth := ConstraintWidth(AWidth);
-    FSizeIsDirty := FSizeIsDirty or (FWidth <> FPrevWidth);
+
+    if FWidth <> FPrevWidth then
+      Include(FDirtyFlags, wdfSize);
   end;
 
   if FHeight <> AHeight then
@@ -1615,7 +1629,9 @@ begin
     else
       FPrevHeight := AHeight;
     FHeight := ConstraintHeight(AHeight);
-    FSizeIsDirty := FSizeIsDirty or (FHeight <> FPrevHeight);
+
+    if FHeight <> FPrevHeight then
+      Include(FDirtyFlags, wdfSize);
   end;
 end;
 
@@ -1820,24 +1836,6 @@ begin
   Result := TfpgWidgetBase(Owner);
 end;
 
-function TfpgWindowBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
-begin
-  Result := NewWidth;
-  if (MaxWidth >= MinWidth) and (Result > MaxWidth) and (MaxWidth > 0) then
-    Result := MaxWidth;
-  if Result < MinWidth then
-    Result := MinWidth;
-end;
-
-function TfpgWindowBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
-begin
-  Result := NewHeight;
-  if (MaxHeight >= MinHeight) and (Result > MaxHeight) and (MaxHeight > 0) then
-    Result := MaxHeight;
-  if Result < MinHeight then
-    Result := MinHeight;
-end;
-
 function TfpgWindowBase.GetWindowState: TfpgWindowState;
 begin
   Result := FWindowState;
@@ -1933,28 +1931,23 @@ end;
 
 procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
+
   if FWidth <> AWidth then
   begin
-    if not (csLoading in ComponentState) then
-      FPrevWidth := FWidth
-    else
-      FPrevWidth := AWidth;
-    FWidth := ConstraintWidth(AWidth);
-    FSizeIsDirty := FSizeIsDirty or (FWidth <> FPrevWidth);
+    FWidth := AWidth;
+    FSizeIsDirty:=True;
   end;
 
   if FHeight <> AHeight then
   begin
-    if not (csLoading in ComponentState) then
-      FPrevHeight := FHeight
-    else
-      FPrevHeight := AHeight;
-    FHeight := ConstraintHeight(AHeight);
-    FSizeIsDirty := FSizeIsDirty or (FHeight <> FPrevHeight);
+    FHeight := AHeight;// ConstraintHeight(AHeight);
+    FSizeIsDirty:=True;
   end;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
+var
+  w: TfpgWidget absolute AOwner;
 begin
   inherited Create(AOwner);
   FDispatcher := TfpgWindowEventDispatcher.Create(Self);
@@ -1962,8 +1955,6 @@ begin
   FMouseCursorIsDirty := False;
   FPosIsDirty := True;
   FSizeIsDirty := True;
-  FMaxWidth := 0;
-  FMaxHeight := 0;
   FDragActive := False;
   FWindowState := wsNormal;
 end;
@@ -2573,7 +2564,6 @@ begin
         while Assigned(r) do
         begin
           //WriteLn('putting saved buffer pos');
-          //DoPutBufferToScreen(r^.Left, r^.Top, r^.Width, r^.Height);
           if UnionfpgRect(finalrect, r^, r2) then
             r2 := finalrect;
           Dispose(r);

@@ -1904,16 +1904,6 @@ constructor TfpgNativeWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner); // initialize the platform internals
 
-  FTop    := 0;
-  FLeft   := 0;
-  FWidth  := 16;
-  FHeight := 16;
-  FPrevWidth  := FWidth;
-  FPrevHeight := FHeight;
-
-  FMinWidth  := 2;
-  FMinHeight := 2;
-
   FModalForWin := nil;
 
   if (AOwner <> nil) and (AOwner is TfpgNativeWindow) then
@@ -1924,7 +1914,6 @@ end;
 
 destructor TfpgNativeWindow.Destroy;
 begin
-  //FCanvas.Free;
   inherited Destroy;
 end;
 

@@ -2288,6 +2288,7 @@ var
   WMHints: PXWMHints;
   prop: TAtom;
   mwmhints: TMWMHints;
+  w: TfpgWidgetBase;
 begin
   if HandleIsValid then
     Exit; //==>
@@ -2296,6 +2297,8 @@ begin
     pwh := TfpgX11Window(AParent.Window).WinHandle
   else
     pwh := xapplication.RootWindow;
+
+  w := PrimaryWidget;
 
   FillChar(attr, sizeof(attr), 0);
   mask := 0;
@@ -2396,8 +2399,8 @@ begin
   if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
   begin
     hints.flags      := hints.flags or PMinSize;
-    hints.min_width  := FMinWidth;
-    hints.min_height := FMinHeight;
+    hints.min_width  := w.MinWidth;
+    hints.min_height := w.MinHeight;
   end
   else
   begin
@@ -2556,6 +2559,8 @@ procedure TfpgX11Window.DoUpdateWindowPosition;
 var
   w: longword;
   h: longword;
+  hints: TXSizeHints;
+  widget: TfpgWidgetBase;
 begin
   if HasHandle then
   begin
@@ -2567,8 +2572,29 @@ begin
       h := FHeight
     else
       h := 1;
-    WriteLn(FLeft,ftop,w,h);
+
     XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
+
+    widget := PrimaryWidget;
+    hints.flags:=0;
+    if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
+    begin
+      hints.flags      := hints.flags or PMinSize;
+      hints.min_width  := widget.MinWidth;
+      hints.min_height := widget.MinHeight;
+    end
+    else
+    begin
+      hints.flags      := hints.flags or PMinSize or PMaxSize;
+      hints.min_width  := widget.MinWidth;
+      hints.min_height := widget.MinHeight;
+      hints.max_width  := widget.MaxWidth;
+      hints.max_height := widget.MaxHeight;
+    end;
+
+  XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
+
+
   end;
 end;
 

@@ -1437,7 +1437,7 @@ end;
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
-  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or FSizeIsDirty;
+  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or (wdfSize in FDirtyFlags);
 end;
 
 procedure TfpgListView.PaintHeaders;

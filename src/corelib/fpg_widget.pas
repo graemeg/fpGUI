@@ -457,7 +457,7 @@ begin
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 
-  if IsContainer and FSizeIsDirty then
+  if IsContainer and (wdfSize in FDirtyFlags) then
   begin
     {$IFDEF CStackDebug}
     DebugLn(Format('  Alignment deltas  w: %d  h: %d', [dw, dh]));
@@ -488,8 +488,8 @@ begin
   // them here not to affect the next iteration.
   FPrevWidth  := FWidth;
   FPrevHeight := FHeight;
-  FSizeIsDirty:= False;
-  FPosIsDirty := False;
+  Exclude(FDirtyFlags, wdfSize);
+  Exclude(FDirtyFlags, wdfPosition);
 end;
 
 procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
