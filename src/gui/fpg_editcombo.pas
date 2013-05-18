@@ -765,7 +765,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
+  fpgStyle.DrawControlFrame(Canvas, r);
 
   // internal background rectangle (without frame)
   InflateRect(r, -2, -2);

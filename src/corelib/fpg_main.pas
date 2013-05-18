@@ -176,8 +176,6 @@ type
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload;
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawControlFrame(x, y, w, h: TfpgCoord); overload;
-    procedure   DrawControlFrame(r: TfpgRect); overload;
     procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
     procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload;
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload;
@@ -1789,16 +1787,6 @@ end;
 procedure TfpgCanvas.DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags);
 begin
   DrawButtonFace(r.Left, r.Top, r.Width, r.Height, AFlags);
-end;
-
-procedure TfpgCanvas.DrawControlFrame(x, y, w, h: TfpgCoord);
-begin
-  fpgStyle.DrawControlFrame(self, x, y, w, h);
-end;
-
-procedure TfpgCanvas.DrawControlFrame(r: TfpgRect);
-begin
-  DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
 end;
 
 procedure TfpgCanvas.DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean);

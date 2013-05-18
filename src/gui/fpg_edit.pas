@@ -725,7 +725,7 @@ begin
         end;
     ebsDefault:
         begin
-          Canvas.DrawControlFrame(r);
+          fpgStyle.DrawControlFrame(Canvas, r);
           rect := fpgStyle.GetControlFrameBorders;
           InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
         end;

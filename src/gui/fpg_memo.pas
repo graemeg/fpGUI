@@ -938,7 +938,7 @@ begin
         end;
     ebsDefault:
         begin
-          Canvas.DrawControlFrame(r);
+          fpgStyle.DrawControlFrame(Canvas, r);
           InflateRect(r, -2, -2);
         end;
     ebsSingle:

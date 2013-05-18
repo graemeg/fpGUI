@@ -576,7 +576,7 @@ begin
   if Orientation = orVertical then
   begin
     r.SetRect((Width-4) div 2, 1, 4, Height {- tw} - 4);
-    Canvas.DrawControlFrame(r);
+    fpgStyle.DrawControlFrame(Canvas, r);
     r.SetRect((Width-20) div 2, FSliderPos, 21, FSliderLength);
     Canvas.DrawButtonFace(r, []);
     //if FShowPosition then
@@ -588,7 +588,7 @@ begin
   else
   begin
     r.SetRect(1, (Height-4) div 2, Width - tw - 4, 4);
-    Canvas.DrawControlFrame(r);
+    fpgStyle.DrawControlFrame(Canvas, r);
     r.SetRect(FSliderPos, (Height-20) div 2, FSliderLength, 21);
     Canvas.DrawButtonFace(r, []);
     if FShowPosition then
