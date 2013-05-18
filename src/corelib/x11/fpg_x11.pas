@@ -2321,6 +2321,12 @@ begin
     end;
   end;
 
+  if FWidth = 0 then
+    FWidth := 1;
+
+  if FHeight = 0 then
+    FHeight := 1;
+
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,
