@@ -1419,6 +1419,7 @@ begin
   FMsg:=@msg;
   //WriteLn(msg.MsgCode);
   case msg.MsgCode of
+    FPGM_SCROLL,
     FPGM_MOUSEDOWN,
     FPGM_MOUSEUP,
     FPGM_MOUSEMOVE,
