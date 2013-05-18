@@ -228,6 +228,8 @@ type
   end;
 
 
+  { TfpgX11Window }
+
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
@@ -3045,17 +3047,9 @@ begin
     Result := FBufferPixmap <> 0;
     if Result then
     begin
-      XGetGeometry(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
-      if (w <> FWidget.Width) or (h <> FWidget.Height) then
-      begin
-        writeln('window bigger than we know!');
-      end;
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
-
-
-      if (wp - w > PIXMAP_RESIZE_SIZE*2) or (hp - hp > PIXMAP_RESIZE_SIZE*2) or (w > wp) or (h > hp) then
+      if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
       begin
-        WriteLn('REallocating');
         DeAllocateDC;
         TryFreePixmap;
         Result := False;
@@ -3071,7 +3065,6 @@ begin
   FDrawHandle:=FBufferPixmap;
   if FDrawing then
     AllocateDC;
-  WriteLn('Allocated new buffer');
 end;
 
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
@@ -3102,7 +3095,6 @@ begin
     FXftDraw := XftDrawCreate(xapplication.display, DrawHandle,
     XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
     XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
-    WriteLn('Allocated GC');
 end;
 
 procedure TfpgX11Canvas.DeAllocateDC;
@@ -3132,7 +3124,6 @@ begin
     Result := FDrawHandle;
   if FDrawHandle <> Result then
   begin
-    WriteLn('Reallocating stuff');
     FDrawHandle:=Result;
     if Result <> 0 then
       AllocateDC;

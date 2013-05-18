@@ -383,7 +383,7 @@ procedure TfpgWidget.AllocateWindowHandle;
 begin
   DoAllocateWindowHandle;
   Window.AllocateWindowHandle;
-  FCurrentSize.SetSize(FWidth, FHeight);
+
   if Window.Owner = Self then
   begin
     Window.SetWindowVisible(Visible);
