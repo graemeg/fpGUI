@@ -266,7 +266,7 @@ begin
 
   Canvas.DrawString(45, y, 'DrawControlFrame():');
   y := y + Canvas.Font.Height;
-  Canvas.DrawControlFrame(5, y, 150, 23);
+  fpgStyle.DrawControlFrame(Canvas, 5, y, 150, 23);
 
   // A Vector Text example
   //----------------------
