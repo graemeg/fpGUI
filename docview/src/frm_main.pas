@@ -105,6 +105,9 @@ type
     Bookmarks: TList;
     BookmarksMenuItems: TList;
 
+    procedure   RichViewDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure   tvContentsDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure   tvContentsDragEntered(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
     procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
@@ -326,6 +329,77 @@ end;
 procedure TMainForm.miActionsNextTopicClicked(Sender: TObject);
 begin
   btnNext.Click;
+end;
+
+{ If you drop on RichView, only load the first INF file (closing all others
+  first. If you want multiple files or add more files, drop on Contents
+  TreeView. }
+procedure TMainForm.RichViewDragDrop(Sender, Source: TObject; X, Y: integer;
+  AData: variant);
+var
+  s: string;
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  sl.Text := Trim(AData);
+  try
+    for i := 0 to sl.Count-1 do
+    begin
+      s := sl[i];
+      if not SameText(fpgExtractFileExt(s), '.inf') then
+        Exit; //==>
+      s := StringReplace(s, 'file://', '', [rfIgnoreCase]);
+      OpenFile(s, '', false);
+      Break;
+    end;
+  finally
+    sl.Free;
+  end;
+end;
+
+procedure TMainForm.tvContentsDragDrop(Sender, Source: TObject; X, Y: integer;
+  AData: variant);
+var
+  s: string;
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  sl.Text := Trim(AData);
+  OpenAdditionalFile := True;
+  try
+    for i := 0 to sl.Count-1 do
+    begin
+      s := sl[i];
+      if not SameText(fpgExtractFileExt(s), '.inf') then
+        Exit; //==>
+      s := StringReplace(s, 'file://', '', [rfIgnoreCase]);
+      OpenFile(s, '', false);
+    end;
+  finally
+    OpenAdditionalFile := False;
+    sl.Free;
+  end;
+end;
+
+procedure TMainForm.tvContentsDragEntered(Sender, Source: TObject;
+  AMimeList: TStringList; var AMimeChoice: TfpgString;
+  var ADropAction: TfpgDropAction; var Accept: Boolean);
+var
+  i: integer;
+  s: string;
+begin
+  { the mime type we want to accept }
+  s := 'text/uri-list';
+  { if we wil accept the drop, set Accept to True }
+  Accept := AMimeList.IndexOf(s) > -1;
+  if Accept then
+  begin
+    { If the offered mime type is different, request our preference }
+    if AMimeChoice <> s then
+      AMimeChoice := s;
+  end;
 end;
 
 procedure TMainForm.Splitter1DoubleClicked(Sender: TObject;
@@ -2706,6 +2780,7 @@ begin
   WindowPosition := wpUser;
   MinWidth := 430;
   MinHeight := 300;
+  DNDEnabled := True;
   OnCloseQuery  := @MainFormCloseQuery;
 
   bvlStatusBar := TfpgBevel.Create(self);
@@ -2780,8 +2855,11 @@ begin
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
+    AcceptDrops := True;
     OnChange  := @tvContentsChange;
     //OnDoubleClick  := @tvContentsDoubleClick;
+    OnDragEnter := @tvContentsDragEntered;
+    OnDragDrop := @tvContentsDragDrop;
   end;
 
   btnGo := TfpgButton.Create(tsContents);
@@ -3155,9 +3233,12 @@ begin
     SetPosition(77, 188, 244, 92);
     TabOrder := 2;
     Align := alClient;
+    AcceptDrops := True;
     OnOverLink  := @RichViewOverLink;
     OnNotOverLink  := @RichViewNotOverLink;
     OnClickLink := @RichViewClickLink;
+    OnDragEnter := @tvContentsDragEntered;
+    OnDragDrop := @RichViewDragDrop;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
