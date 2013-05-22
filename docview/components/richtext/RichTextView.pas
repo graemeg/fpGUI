@@ -1179,7 +1179,7 @@ begin
         end;
     ebsDefault:
         begin
-          Canvas.DrawControlFrame(r);
+          fpgStyle.DrawControlFrame(Canvas, r);
         end;
     ebsSingle:
         begin
