@@ -219,6 +219,9 @@ begin
     AddColumn('Column 1', 100, taLeftJustify);
     AddColumn('Col 2', 50, taCenter);
     AddColumn('Numbers', 150, taRightJustify);
+    AddColumn('Column 4', 150, taRightJustify);
+    AddColumn('Column 5', 150, taRightJustify);
+    AddColumn('Column 6', 150, taRightJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
