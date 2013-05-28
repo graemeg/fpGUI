@@ -40,7 +40,7 @@ type
   TfpgScrollFrame = class (TfpgFrame)
   private
     FContentFrame : TfpgAutoSizingFrame;
-    FScrollFrame : TfpgFrame;
+    FVisibleArea : TfpgFrame;
     FHScrollBar : TfpgScrollBar;
     FVScrollBar : TfpgScrollBar;
     FScrollBarStyle : TfpgScrollStyle;
@@ -348,8 +348,8 @@ begin
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
 
-  FScrollFrame.SetPosition(0, 0, visWidth, visHeight);
-  FScrollFrame.UpdateWindowPosition;
+  FVisibleArea.SetPosition(0, 0, visWidth, visHeight);
+  FVisibleArea.UpdateWindowPosition;
 
   FContentFrame.UpdateWindowPosition;
 end;
@@ -358,10 +358,10 @@ constructor TfpgScrollFrame.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FScrollFrame := TfpgFrame.Create(self);
-  FScrollFrame.SetPosition(0, 0, 1, 1);
+  FVisibleArea := TfpgFrame.Create(self);
+  FVisibleArea.SetPosition(0, 0, 1, 1);
 
-  FContentFrame := TfpgAutoSizingFrame.Create(FScrollFrame);
+  FContentFrame := TfpgAutoSizingFrame.Create(FVisibleArea);
   FContentFrame.SetPosition(0, 0, 1, 1);
   FContentFrame.ParentScrollFrame := self;
 end;
@@ -370,11 +370,11 @@ constructor TfpgScrollFrame.Create(AOwner: TComponent; ContentFrameType: TfpgASF
 begin
   inherited Create(AOwner);
 
-  FScrollFrame := TfpgFrame.Create(self);
-  FScrollFrame.Left := 0;
-  FScrollFrame.Top := 0;
+  FVisibleArea := TfpgFrame.Create(self);
+  FVisibleArea.Left := 0;
+  FVisibleArea.Top := 0;
 
-  FContentFrame := ContentFrameType.Create(FScrollFrame);
+  FContentFrame := ContentFrameType.Create(FVisibleArea);
   FContentFrame.Left := 0;
   FContentFrame.Top := 0;
   FContentFrame.ParentScrollFrame := self;
