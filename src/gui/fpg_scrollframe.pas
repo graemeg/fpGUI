@@ -17,25 +17,32 @@ type
   
   TfpgScrollFrame = class;
 
-  { TfpgAutoSizingFrame }
+  { TfpgEmbeddingFrame }
 
-  TfpgAutoSizingFrame = class (TfpgFrame)
+  TfpgEmbeddingFrame = class (TfpgFrame)
+  // The purpose of the EmbeddingFrame is to pass scroll events to the ParentScrollFrame
   private
-    FMarginBR : integer;
-    FParentScrollFrame : TfpgScrollFrame; // it's actually the grandparent
-    procedure SetMarginBR (AValue: integer);
-    procedure UpdatePos;
+    FParentScrollFrame : TfpgScrollFrame;
   protected
     procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
         delta: smallint); override;
     procedure HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; 
         delta: smallint); override;
   public
+    property ParentScrollFrame : TfpgScrollFrame read FParentScrollFrame write FParentScrollFrame;
+  end;
+
+  { TfpgAutoSizingFrame }
+
+  TfpgAutoSizingFrame = class (TfpgEmbeddingFrame)
+  private
+    FMarginBR : integer;
+    procedure SetMarginBR (AValue: integer);
+  public
     procedure AdjustDimsFor (w : TfpgWidget; updatewp: boolean = true);
     procedure AdjustDimsWithout (w : TfpgWidget);
     procedure RecalcFrameSize;
     property MarginBR : integer read FMarginBR write SetMarginBR; // bottom-right margin
-    property ParentScrollFrame : TfpgScrollFrame read FParentScrollFrame write FParentScrollFrame;
   end;
 
   TfpgASFrameClass = class of TfpgAutoSizingFrame;
@@ -45,7 +52,7 @@ type
   TfpgScrollFrame = class (TfpgFrame)
   private
     FContentFrame : TfpgAutoSizingFrame;
-    FVisibleArea : TfpgFrame;
+    FVisibleArea : TfpgEmbeddingFrame;
     FHScrollBar : TfpgScrollBar;
     FVScrollBar : TfpgScrollBar;
     FScrollBarStyle : TfpgScrollStyle;
@@ -72,7 +79,24 @@ type
     property ContentFrame : TfpgAutoSizingFrame read FContentFrame write FContentFrame;
   end;
 
+
 implementation
+
+
+{ TfpgEmbeddingFrame }
+
+procedure TfpgEmbeddingFrame.HandleMouseScroll(x, y: integer; 
+  shiftstate: TShiftState; delta: smallint);
+begin
+  ParentScrollFrame.HandleMouseScroll(x, y, shiftstate, delta);
+end;
+
+procedure TfpgEmbeddingFrame.HandleMouseHorizScroll(x, y: integer; 
+  shiftstate: TShiftState; delta: smallint);
+begin
+  ParentScrollFrame.HandleMouseHorizScroll(x, y, shiftstate, delta);
+end;
+
 
 { TfpgAutoSizingFrame }
 
@@ -81,25 +105,6 @@ begin
   if FMarginBR=AValue then Exit;
   FMarginBR:=AValue;
   RecalcFrameSize;
-end;
-
-procedure TfpgAutoSizingFrame.UpdatePos;
-begin
-  UpdateWindowPosition;
-  if ParentScrollFrame is TfpgScrollFrame then
-    ParentScrollFrame.UpdateScrollbars;
-end;
-
-procedure TfpgAutoSizingFrame.HandleMouseScroll(x, y: integer; 
-  shiftstate: TShiftState; delta: smallint);
-begin
-  ParentScrollFrame.HandleMouseScroll(x, y, shiftstate, delta);
-end;
-
-procedure TfpgAutoSizingFrame.HandleMouseHorizScroll(x, y: integer; 
-  shiftstate: TShiftState; delta: smallint);
-begin
-  ParentScrollFrame.HandleMouseHorizScroll(x, y, shiftstate, delta);
 end;
 
 procedure TfpgAutoSizingFrame.AdjustDimsFor (w: TfpgWidget; updatewp: boolean = true);
@@ -114,7 +119,10 @@ begin
   begin
     HandleResize(new_w, new_h);
     if updatewp then
-      UpdatePos;
+      if ParentScrollFrame is TfpgScrollFrame then
+        ParentScrollFrame.UpdateScrollbars
+      else
+        UpdateWindowPosition;
   end;
 end;
 
@@ -152,7 +160,10 @@ begin
     end;
   end;
   HandleResize(max_w, max_h);
-  UpdatePos;
+  if ParentScrollFrame is TfpgScrollFrame then
+    ParentScrollFrame.UpdateScrollbars
+  else
+    UpdateWindowPosition;
 end;
 
 
@@ -417,8 +428,9 @@ constructor TfpgScrollFrame.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FVisibleArea := TfpgFrame.Create(self);
+  FVisibleArea := TfpgEmbeddingFrame.Create(self);
   FVisibleArea.SetPosition(0, 0, 1, 1);
+  FVisibleArea.ParentScrollFrame := self;
 
   FContentFrame := TfpgAutoSizingFrame.Create(FVisibleArea);
   FContentFrame.SetPosition(0, 0, 1, 1);
@@ -429,13 +441,12 @@ constructor TfpgScrollFrame.Create(AOwner: TComponent; ContentFrameType: TfpgASF
 begin
   inherited Create(AOwner);
 
-  FVisibleArea := TfpgFrame.Create(self);
-  FVisibleArea.Left := 0;
-  FVisibleArea.Top := 0;
+  FVisibleArea := TfpgEmbeddingFrame.Create(self);
+  FVisibleArea.SetPosition(0, 0, 1, 1);
+  FVisibleArea.ParentScrollFrame := self;
 
   FContentFrame := ContentFrameType.Create(FVisibleArea);
-  FContentFrame.Left := 0;
-  FContentFrame.Top := 0;
+  FContentFrame.SetPosition(0, 0, 1, 1);
   FContentFrame.ParentScrollFrame := self;
 end;
 
