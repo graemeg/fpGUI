@@ -100,7 +100,7 @@ var
 begin
   fpgApplication.Initialize;
   form := TfpgForm.Create(nil);
-  form.SetPosition(0,0,380,360);
+  form.SetPosition(0,0,480,260);
   outer_frame := TfpgScrollFrame.Create(form, t_sample_frame);
   outer_frame.Align:=alClient;
   outer_frame.ContentFrame.RecalcFrameSize;
