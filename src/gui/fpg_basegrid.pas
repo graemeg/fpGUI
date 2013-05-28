@@ -135,6 +135,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -1164,43 +1165,52 @@ end;
 procedure TfpgBaseGrid.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 var
   lRow: Integer;
-  lCol: Integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
 
   lRow := FFirstRow;
-  lCol := FFirstCol;
 
-  if delta > 0 then // scroll down
-    inc(FFirstRow, abs(delta)*3)
-  else              // scroll up
-    if FFirstRow > 0 then
-      dec(FFirstRow, abs(delta)*3);
+  // If vertical scrollbar is not visible, but
+  // horizontal is, Mouse wheel will scroll horizontally.  :)
+  if FHScrollBar.Visible and (not FVScrollBar.Visible) then
+  begin
+    HandleMouseHorizScroll(x, y, shiftstate, delta);
+    Exit;
+  end;
+
+  inc(FFirstRow, delta*3);
 
   // apply limits
   if FFirstRow > RowCount - VisibleLines then
     FFirstRow := RowCount - VisibleLines;
   if FFirstRow < 0 then
     FFirstRow := 0;
-    
-  // scroll left/right
-  // If vertical scrollbar is not visible, but
-  // horizontal is. Mouse wheel will scroll horizontally.  :)
-  if FHScrollBar.Visible and (not FVScrollBar.Visible) then
+
+  if lRow <> FFirstRow then
   begin
-    if delta > 0 then // scroll right
-    begin
-      if FFirstCol < (ColumnCount-1) then
-        inc(FFirstCol);
-    end
-    else
-    begin
-      if FFirstCol > 0 then
-        dec(FFirstCol);
-    end;
+    UpdateScrollBars;
+    RePaint;
+  end;
+end;
+
+procedure TfpgBaseGrid.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+var
+  lCol: Integer;
+begin
+  inherited HandleMouseHorizScroll(x, y, shiftstate, delta);
+
+  lCol := FFirstCol;
+
+  if go_SmoothScroll in Options then
+  begin
+    ;
+  end
+  else
+  begin
+    inc(FFirstCol, delta);
   end;
 
-  if (lRow <> FFirstRow) or (lCol <> FFirstCol) then
+  if lCol <> FFirstCol then
   begin
     UpdateScrollBars;
     RePaint;
