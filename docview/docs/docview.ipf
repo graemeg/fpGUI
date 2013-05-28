@@ -422,6 +422,7 @@ search result. Searches are :hp2.not:ehp2. case-sensitive.
 .* Notes
 .* ************************************************************
 :h2 res=7 id='notes'.Notes
+:i1.Annotate
 :hp2.Adding and Using Notes:ehp2.
 :p.
 &dv. allows you to add notes (annotations) to your help
@@ -568,7 +569,6 @@ you open a new or additional help file.
 .* ************************************************************
 :h1 res=8 id='bookmarks'.Bookmarks
 :hp2.Bookmarks:ehp2.
-:note.:hp8.*** This feature is partially implemented. ***:ehp8.
 :p.
 &dv. allows you to bookmark particular topics within the current help
 file. Simply click the bookmark toolbar button
@@ -579,16 +579,16 @@ To jump to a bookmark, go to the "Bookmarks" menu, and click on
 the bookmark you want to open.
 :p.
 You can view or delete all your bookmarks by clicking on "Edit..." in
-the "Bookmarks" menu. This window can remain open while you read, so
-that you can quickly look through your bookmarks.
+the "Bookmarks" menu.
 :p.
 Bookmarks are saved in a file with the extension ".bookmarks", in the &dv. config
 directory. This is in the user's home profile directory where there is read/write
 access. Under Linux it is normally "~/.config/docview/" and under Windows it is
 normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
-I will probably add a setting in &dv., so the user can configure a
-preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
-by storing notes in the same directory as the help file).
+.* TODO
+.* I will probably add a setting in &dv., so the user can configure a
+.* preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
+.* by storing notes in the same directory as the help file).
 
 
 .* ************************************************************
@@ -608,7 +608,7 @@ details on how to configure it.
 For more technical details about what browser is used, have a look at the fpgOpenURL()
 function in fpGUI Toolkit source code.
 :p.
-Email, Newsgroups and FTP links are also passed to operating system or desktop
+Email, Newsgroups and FTP links are also passed to the operating system or desktop
 environment, the same as web addresses.
 :p.
 :hp2.Note to help file authors:ehp2.
@@ -817,55 +817,90 @@ file names), so the environment variable "MYHELP" is not equal to "myhelp".
 .* ************************************************************
 .* Keyboard Shortcuts
 .* ************************************************************
-.* TODO
-.*  :h1 res=10 id='KeyboardShortcuts'.
-.*  Keyboard Shortcuts
-.*  :p.:hp2.Keyboard Shortcuts:ehp2.
-.*  :p.Most keyboard shortcuts are visible in the menu&comma. but a few are not&per.
-.*  The additional shortcuts are&colon.
-.*  :p.:hp2.Alt&plus.F4:ehp2. Exit
-.*  :p.:hp2.Ctrl&plus.C:ehp2. Copy selected text to clipboard
-.*  :p.:hp2.F7:ehp2. Back
-.*  :p.:hp2.F8:ehp2. Forward
-.*  :p.:hp2.Ctrl&plus.Left:ehp2. Back
-.*  :p.:hp2.F11:ehp2. Previous in contents
-.*  :p.:hp2.F12:ehp2. Next in contents
-.*  :p.
-.*  :p.:hp2.Shortcuts visible in the menu:ehp2.
-.*  :p.:hp2.Ctrl&plus.O:ehp2. Open files
-.*  :p.:hp2.Ctrl&plus.E:ehp2. Open files from help paths
-.*  :p.:hp2.Ctrl&plus.N:ehp2. Open a new window
-.*  :p.:hp2.Ctrl&plus.P:ehp2. Print topic
-.*  :p.:hp2.F3:ehp2. Exit
-.*  :p.
-.*  :p.
-.*  :p.:hp2.Ctrl&plus.A:ehp2. Select all text in topic
-.*  :p.:hp2.Ctrl&plus.Ins:ehp2. Copy selected text to clipboard
-.*  :p.
-.*  :p.:hp2.Ctrl&plus.F:ehp2. Find within current topic
-.*  :p.:hp2.Ctrl&plus.G:ehp2. Repeat last find
-.*  :p.
-.*  :p.:hp2.Ctrl&plus.S:ehp2. Open global search tool
-.*  :p.
-.*  :p.:hp2.Alt&plus.C:ehp2. Change to the contents tab
-.*  :p.:hp2.Alt&plus.I:ehp2. Change to the index tab
-.*  :p.:hp2.Alt&plus.S:ehp2. Change to the search tab
-.*  :p.:hp2.Alt&plus.N:ehp2. Change to the notes tab
-.*  :p.:hp2.Alt&plus.P:ehp2. Toggle the left panel &lpar.tabs&rpar. on and off
-.*  :p.:hp2.F5:ehp2. Expand all contents
-.*  :p.:hp2.F6:ehp2. Collapse all contents
-.*  :p.
-.*  :p.:hp2.Esc:ehp2. Back
-.*  :p.:hp2.Ctrl&plus.Right:ehp2. Forward
-.*  :p.:hp2.Ctrl&plus.Up:ehp2. Previous topic in contents
-.*  :p.:hp2.Ctrl&plus.Down:ehp2. Next topic in contents
-.*  :p.
-.*  :p.:hp2.Ctrl&plus.D:ehp2. Edit bookmarks
-.*  :p.:hp2.Ctrl&plus.B:ehp2. Bookmark current topic
-.*  :p.
-.*  :p.:hp2.Ctrl&plus.M:ehp2. Add note at cursor position
-.*  :p.
-.*  :p.:hp2.F1:ehp2. Help for &dv.
+:h1 res=10 id='KeyboardShortcuts'.Keyboard Shortcuts
+:p.:hp2.Keyboard Shortcuts:ehp2.
+:p.Most keyboard shortcuts are visible in the menu, but a few are not.
+Here is a list of keyboard shortcuts supported by &dv.:
+
+:table rules=vert frame=box cols='45 20'.
+:row.
+:c.:hp2.TASK:ehp2.
+:c.:hp2.PRESS:ehp2.
+
+:row.
+:c.----------
+:c.----------
+
+:row.
+:c.Open File
+:c.Ctrl+O
+
+:row.
+:c.Open Additional Files
+:c.Ctrl+Shift+O
+
+:row.
+:c.Open Special (eg: environment variable)
+:c.Ctrl+L
+
+:row.
+:c.Save Current Top
+:c.Ctrl+S
+
+:row.
+:c.Quit &dv.
+:c.Ctrl+Q
+
+:row.
+:c.Switch to Contents tab
+:c.F5
+
+:row.
+:c.Switch to Index tab
+:c.F6
+
+:row.
+:c.Switch to Search tab
+:c.F7
+
+:row.
+:c.Switch to Notes tab
+:c.F8
+
+:row.
+:c.Switch to History tab
+:c.F9
+
+:row.
+:c.Navigate Back
+:c.Ctrl+left arrow
+
+:row.
+:c.Navigate Forward
+:c.Ctrl+right arrow
+
+:row.
+:c.Navigate to previous topic in contents
+:c.Ctrl+up arrow
+
+:row.
+:c.Navigate to next topic in contents
+:c.Ctrl+down arrow
+
+:row.
+:c.Bookmark current topic
+:c.Ctrl+B
+
+:row.
+:c.Edit Bookmarks
+:c.Ctrl+M
+
+:row.
+:c.Add note (annotations) at cursor position
+:c.Ctrl+M
+
+:etable.
+
 
 
 .* ************************************************************

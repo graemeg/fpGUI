@@ -515,7 +515,7 @@ begin
   Bv_Sections    := CreateBevel(Bv_Command, 540, 5, 500, 40, bsBox, bsLowered);
 
   Bt_FirstPage   := CreateButton(Bv_Pages, 54, 6, 26, '', @Bt_FirstPageClick, 'repimg.First');
-  Bt_PrecPage    := CreateButton(Bv_Pages, 80, 6, 26, '', @Bt_PrecPageClick, 'repimg.Precedent');
+  Bt_PrecPage    := CreateButton(Bv_Pages, 80, 6, 26, '', @Bt_PrecPageClick, 'repimg.Previous');
   E_NumPage      := CreateEditInteger(Bv_Pages, 110, 6, 60, 0);
   E_NumPage.OnKeyPress := @E_NumPageKeypress;
   Bt_NextPage    := CreateButton(Bv_Pages, 174, 6, 26, '', @Bt_NextPageClick, 'repimg.Next');
@@ -524,7 +524,7 @@ begin
   L_FromPage     := CreateLabel(Bv_Pages, 235, E_NumPage.Top, rsReportPageOf, 30, E_NumPage.Height, taLeftJustify, tlcenter);
   L_NbrPages     := CreateLabel(Bv_Pages, 265, E_NumPage.Top, ' ', 30, E_NumPage.Height, taCenter, tlcenter);
 
-  Bt_PrecSect    := CreateButton(Bv_Sections, 90, 6, 26, '', @Bt_PrecSectClick, 'repimg.Precedent');
+  Bt_PrecSect    := CreateButton(Bv_Sections, 90, 6, 26, '', @Bt_PrecSectClick, 'repimg.Previous');
   E_NumSect      := CreateEditInteger(Bv_Sections, 120, 6, 60, 0);
   E_NumSect.OnKeyPress := @E_NumSectKeyPress;
   Bt_NextSect    := CreateButton(Bv_Sections, 184, 6, 26, '', @Bt_NextSectClick, 'repimg.Next');

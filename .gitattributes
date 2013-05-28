@@ -25,3 +25,5 @@
 *.res  binary
 *.tar.gz  binary
 *.wav  binary
+*.pdf  binary
+

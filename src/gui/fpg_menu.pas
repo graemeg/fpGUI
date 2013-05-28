@@ -135,6 +135,7 @@ type
     destructor  Destroy; override;
     procedure   Close; override;
     function    AddMenuItem(const AMenuName: TfpgString; const hotkeydef: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
+    procedure   AddSeparator;
     function    MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
     function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
@@ -1404,6 +1405,11 @@ begin
   begin
     result.Separator := true;
   end;
+end;
+
+procedure TfpgPopupMenu.AddSeparator;
+begin
+  AddMenuitem('-', '', nil);
 end;
 
 function TfpgPopupMenu.MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;

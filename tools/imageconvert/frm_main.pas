@@ -20,6 +20,7 @@ type
     pmFile: TfpgPopupMenu;
     btnClear: TfpgButton;
     Label1: TfpgLabel;
+    btnCopy: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure miFileQuit(Sender: TObject);
     procedure MemoDragEnter(Sender, Source: TObject; AMimeList: TStringList;
@@ -29,6 +30,7 @@ type
     function ConvertImage(const AFileName: string): string;
     procedure btnClearClicked(Sender: TObject);
     procedure btnConvertClicked(Sender: TObject);
+    procedure btnCopyClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -160,6 +162,11 @@ begin
   end;
 end;
 
+procedure TMainForm.btnCopyClicked(Sender: TObject);
+begin
+  fpgClipboard.Text := memImages.Text;
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -168,6 +175,7 @@ begin
   SetPosition(357, 227, 630, 378);
   WindowTitle := 'Image Conversion Tool';
   Hint := '';
+  ShowHint := True;
   DNDEnabled := True;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -231,11 +239,11 @@ begin
   with btnClear do
   begin
     Name := 'btnClear';
-    SetPosition(543, 44, 80, 24);
+    SetPosition(538, 64, 56, 23);
     Anchors := [anRight,anTop];
     Text := 'Clear';
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Clear text box';
     ImageName := '';
     TabOrder := 6;
     OnClick  := @btnClearClicked;
@@ -245,11 +253,23 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(4, 72, 619, 16);
-    Anchors := [anLeft,anRight,anTop];
+    SetPosition(4, 72, 315, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Drop one or more images on the text area below:';
+  end;
+
+  btnCopy := TfpgButton.Create(self);
+  with btnCopy do
+  begin
+    Name := 'btnCopy';
+    SetPosition(596, 64, 29, 23);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := 'Copy to clipboard';
+    ImageName := 'stdimg.copy';
+    TabOrder := 8;
+    OnClick := @btnCopyClicked;
   end;
 
   {@VFD_BODY_END: MainForm}

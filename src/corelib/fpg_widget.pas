@@ -960,7 +960,7 @@ begin
 
   dir := 0;
 
-  if not consumed and (keycode = fpgApplication.HelpKey) then
+  if not consumed and (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
   begin
     InvokeHelp;
     consumed := True;

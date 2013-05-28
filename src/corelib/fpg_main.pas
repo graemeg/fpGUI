@@ -214,6 +214,7 @@ type
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgButtonFlags); overload;
     function    GetButtonBorders: TRect; virtual;
     function    GetButtonShift: TPoint; virtual;
+    function    HasButtonHoverEffect: boolean; virtual;
     { Menus }
     procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); virtual;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
@@ -456,6 +457,9 @@ uses
 {$ifdef AGGCanvas}
   Agg2D,
 {$endif}
+{$IFDEF DEBUG}
+  dbugintf,
+{$ENDIF}
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
@@ -831,14 +835,14 @@ begin
   FClassName := AClassName;
   FMethodName := AMethodName;
   {$IFDEF DEBUG}
-  Writeln(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
+  SendDebug(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
   {$ENDIF}
 end;
 
 destructor TPrintCallTrace.Destroy;
 begin
   {$IFDEF DEBUG}
-  Writeln(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
+  SendDebug(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
   {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
@@ -1166,7 +1170,7 @@ begin
     end;
 
   {$IFDEF DEBUG}
-  Writeln('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
+  SendDebug('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
   {$ENDIF}
   Result := FPG_DEFAULT_FONT_DESC;
 end;
@@ -1327,7 +1331,7 @@ begin
   begin
     fr.Free;
     {$IFDEF DEBUG}
-    writeln('fpGFX: Error opening font.');
+    SendDebug('fpGFX: Error opening font.');
     {$ENDIF}
   end;
 end;
@@ -1650,7 +1654,7 @@ end;
 procedure TfpgApplication.HideHint;
 begin
   {$IFDEF DEBUG}
-  writeln('HideHint');
+  SendDebug('HideHint');
   {$ENDIF}
   FHintTimer.Enabled := False;
   if Assigned(FHintWindow) and TfpgHintWindow(FHintWindow).Visible then
@@ -2340,6 +2344,11 @@ begin
   Result := Point(1, 1);
 end;
 
+function TfpgStyle.HasButtonHoverEffect: boolean;
+begin
+  Result := False;
+end;
+
 function TfpgStyle.GetControlFrameBorders: TRect;
 begin
   Result := Rect(2, 2, 2, 2);
@@ -2433,7 +2442,7 @@ begin
     {$Note This occurs every now and again with TfpgMemo and CaretInvert painting! }
     // Investigate this.
     {$IFDEF DEBUG}
-    writeln('TfpgCaret.InvertCaret cause an exception');
+    SendDebug('TfpgCaret.InvertCaret cause an exception');
     {$ENDIF}
   end;
 end;

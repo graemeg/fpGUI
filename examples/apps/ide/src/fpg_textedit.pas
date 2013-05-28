@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -124,17 +124,20 @@ type
     function    GetGutterVisible: Boolean;
     function    GetHScrollPos: Integer;
     function    GetVScrollPos: Integer;
+    function    GetCaretPosH: Integer;
+    function    GetCaretPosV: Integer;
     procedure   SetFontDesc(const AValue: string);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
     procedure   SetGutterVisible(const AValue: Boolean);
     procedure   SetHScrollPos(const AValue: Integer);
+    procedure   SetCaretPosH(const AValue: Integer);
+    procedure   SetCaretPosV(const AValue: Integer);
     procedure   SetLines(const AValue: TStrings);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     procedure   SetTabWidth(const AValue: Integer);
     procedure   SetVScrollPos(const AValue: Integer);
     procedure   UpdateCharBounds;
     procedure   GetSelBounds(var AStartNo, AEndNo, AStartOffs, AEndOffs: Integer);
-    procedure   UpdateScrollBars;
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetVPos(p: Integer);
@@ -181,6 +184,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   UpdateScrollBars;
     function    GetClientRect: TfpgRect; override;
     function    GetWordAtPos(const X, Y: Integer; out XBegin: Integer): TfpgString;
     procedure   GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
@@ -196,6 +200,8 @@ type
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
     procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean = False);
+    property    CaretPos_H: Integer read GetCaretPosH write SetCaretPosH;
+    property    CaretPos_V: Integer read GetCaretPosV write SetCaretPosV;
     property    FontHeight: Integer read FChrH;
     property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
@@ -418,6 +424,16 @@ begin
   Result := VPos;
 end;
 
+function TfpgBaseTextEdit.GetCaretPosH: Integer;
+begin
+  Result := CaretPos.Y;
+end;
+
+function TfpgBaseTextEdit.GetCaretPosV: Integer;
+begin
+  Result := CaretPos.X;
+end;
+
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
@@ -453,6 +469,16 @@ begin
     Exit; //==>
   end;
   FTabWidth := AValue;
+end;
+
+procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: integer);
+begin
+  CaretPos.Y := AValue;
+end;
+
+procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: integer);
+begin
+  CaretPos.X := AValue;
 end;
 
 procedure TfpgBaseTextEdit.SetVScrollPos(const AValue: Integer);
@@ -666,7 +692,7 @@ end;
   to set selection if Shift key is pressed. }
 procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
 var
-  SaveXCaret: Integer;
+  SaveYCaretOffset: Integer;
 
   procedure CtrlKeyLeftKey;
   var
@@ -971,6 +997,8 @@ begin
               CaretPos.Y := 0;
               CaretPos.X := 0;
             end;
+            ScrollPos_V := 0;
+            UpdateScrollBars;
             Exit;
           end;
           if ssShift in ShiftState then
@@ -1017,6 +1045,8 @@ begin
               CaretPos.Y := pred(FLines.Count);
               CaretPos.X := Length(FLines[CaretPos.Y]);
             end;
+            ScrollPos_V := CaretPos.Y - FVisLines;
+            UpdateScrollBars;
             Exit;
           end;
           if ssShift in ShiftState then
@@ -1048,7 +1078,7 @@ begin
             FSelStartNo := CaretPos.Y;
             FSelStartOffs := CaretPos.X;
           end;
-          SaveXCaret := CaretPos.Y - FTopLine;
+          SaveYCaretOffset := CaretPos.Y - FTopLine;
           if AKeyCode = keyPageUp then
           begin
             if VPos = 0 then
@@ -1062,15 +1092,15 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageUp;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveXCaret;
+              CaretPos.Y := FTopLine + SaveYCaretOffset;
             end;
           end
           else
-          begin
+          begin  { PageDown handling }
             if VPos > (FLines.Count - FVisLines) then
             begin
               CaretPos.Y := FLines.Count-1;
-              CaretPos.X := Length(FLines[CaretPos.Y]);
+              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
             end
             else
             begin
@@ -1078,7 +1108,7 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageDown;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveXCaret;
+              CaretPos.Y := FTopLine + SaveYCaretOffset;
             end;
           end;
           if ssShift in ShiftState then
@@ -1677,6 +1707,7 @@ begin
           if SLine = '' then  // short circut the code block
           begin
             FLines.Delete(CaretPos.Y);
+            FVScrollBar.Max := FVScrollBar.Max - 1;
           end
           else
           begin

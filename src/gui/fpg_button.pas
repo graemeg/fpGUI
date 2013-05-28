@@ -550,6 +550,12 @@ begin
       Include(lBtnFlags, btfHover)
     else if FFlat then
       Include(lBtnFlags, btfFlat);
+
+    if (not FFlat) and (not FDown) and fpgStyle.HasButtonHoverEffect then
+    begin
+      if FState = 1 then
+        Include(lBtnFlags, btfHover);
+    end;
   end
   else
   begin
@@ -558,7 +564,7 @@ begin
       Include(lBtnFlags, btfHover);
   end;
 
-  if not FFlat and FDefault then
+  if (not FFlat) and FDefault then
     Include(lBtnFlags, btfIsDefault);
 
   if FBackgroundColor <> clButtonFace then
@@ -747,7 +753,7 @@ begin
     FDown := False;
     Repaint;
   end
-  else if FFlat then
+  else if FFlat or fpgStyle.HasButtonHoverEffect then
   begin
     if Enabled then
       Repaint;
@@ -766,7 +772,7 @@ begin
     FDown := True;
     Repaint;
   end
-  else if FFlat then
+  else if FFlat or fpgStyle.HasButtonHoverEffect then
   begin
     if Enabled then
       Repaint;

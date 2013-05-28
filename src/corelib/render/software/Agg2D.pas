@@ -40,51 +40,51 @@ interface
 {$ENDIF}
 
 uses
- agg_basics ,
- agg_array ,
- agg_trans_affine ,
- agg_trans_viewport ,
- agg_path_storage ,
- agg_conv_stroke ,
- agg_conv_transform ,
- agg_conv_curve ,
- agg_conv_dash ,
- agg_rendering_buffer ,
- agg_renderer_base ,
- agg_renderer_scanline ,
- agg_span_gradient ,
- agg_span_image_filter_rgba ,
- agg_span_image_resample_rgba ,
- agg_span_converter ,
- agg_span_interpolator_linear ,
- agg_span_allocator ,
- agg_rasterizer_scanline_aa ,
- agg_gamma_functions ,
- agg_scanline_u ,
- agg_arc ,
- agg_bezier_arc ,
- agg_rounded_rect ,
- agg_font_engine ,
- agg_font_cache_manager ,
- agg_pixfmt ,
- agg_pixfmt_rgb ,
- agg_pixfmt_rgba ,
- agg_color ,
- agg_math_stroke ,
- agg_image_filters ,
- agg_vertex_source ,
- agg_render_scanlines ,
+  agg_basics ,
+  agg_array ,
+  agg_trans_affine ,
+  agg_trans_viewport ,
+  agg_path_storage ,
+  agg_conv_stroke ,
+  agg_conv_transform ,
+  agg_conv_curve ,
+  agg_conv_dash ,
+  agg_rendering_buffer ,
+  agg_renderer_base ,
+  agg_renderer_scanline ,
+  agg_span_gradient ,
+  agg_span_image_filter_rgba ,
+  agg_span_image_resample_rgba ,
+  agg_span_converter ,
+  agg_span_interpolator_linear ,
+  agg_span_allocator ,
+  agg_rasterizer_scanline_aa ,
+  agg_gamma_functions ,
+  agg_scanline_u ,
+  agg_arc ,
+  agg_bezier_arc ,
+  agg_rounded_rect ,
+  agg_font_engine ,
+  agg_font_cache_manager ,
+  agg_pixfmt ,
+  agg_pixfmt_rgb ,
+  agg_pixfmt_rgba ,
+  agg_color ,
+  agg_math_stroke ,
+  agg_image_filters ,
+  agg_vertex_source ,
+  agg_render_scanlines ,
 
 {$IFDEF AGG2D_USE_FREETYPE }
- agg_font_freetype ,
+  agg_font_freetype ,
 {$ENDIF }
 {$IFDEF AGG2D_USE_WINFONTS}
- agg_font_win32_tt ,
+  agg_font_win32_tt ,
 {$ENDIF }
 
- Math ,
- Classes,
- SysUtils,
+  Math,
+  Classes,
+  SysUtils,
 
   // This allows for platform specific uses clauses
   {$define uses_interface}
@@ -98,8 +98,8 @@ uses
     {$I agg_platform_x11.inc}
   {$ENDIF}
 
- fpg_base,
- fpg_main;
+  fpg_base,
+  fpg_main;
 
 { GLOBAL VARIABLES & CONSTANTS }
 const
@@ -3539,7 +3539,11 @@ begin
   {$IFDEF WINDOWS}
   Font('Arial', 13);
   {$ELSE}
-  Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
+    {$IFDEF BSD}
+    Font('/usr/local/lib/X11/fonts/Liberation/LiberationSans-Regular.ttf', 13);
+    {$ELSE}
+    Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
+    {$ENDIF}
   {$ENDIF}
 end;
 
@@ -3745,8 +3749,21 @@ begin
 end;
 
 procedure TAgg2D.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+var
+  i: integer;
+  poly: array of double;
 begin
-
+  SetLength(poly, (NumPts*2)+1); // dynamic arrays start at 0, but we want to use 1..NumPts
+  for i := 1 to NumPts do
+  begin
+    poly[i * 2 - 1] := Points[i-1].X + 0.5;
+    poly[i * 2] := Points[i-1].Y + 0.5;
+  end;
+  // Draw Polygon
+  LineWidth(1);
+  LineColor(LineColor);
+  FillColor($00, $00, $00);  // clBlack for now
+  Polygon(@poly[1], NumPts);
 end;
 
 

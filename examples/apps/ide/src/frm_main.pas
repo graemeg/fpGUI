@@ -1,3 +1,21 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Maximus IDE is an example application, to showcase a bit more of
+      what fpGUI can do in a larger project. It also ties in a lot of
+      various fpGUI widgets and framework functionality.
+}
+
 unit frm_main;
 
 {$mode objfpc}{$H+}
@@ -22,7 +40,6 @@ type
     btnOpen: TfpgButton;
     btnSave: TfpgButton;
     btnSaveAll: TfpgButton;
-    btnTest: TfpgButton;
     pnlStatusBar: TfpgBevel;
     lblStatus: TfpgLabel;
     pnlClientArea: TfpgBevel;
@@ -39,8 +56,6 @@ type
     tsFiles: TfpgTabSheet;
     grdFiles: TfpgFileGrid;
     Splitter2: TfpgSplitter;
-    grdOpenFiles: TfpgStringGrid;
-    Splitter3: TfpgSplitter;
     pcEditor: TfpgPageControl;
     tseditor: TfpgTabSheet;
     TextEditor: TfpgTextEdit;
@@ -54,7 +69,11 @@ type
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
+    {$ifdef DEBUGSVR}
+    btnTest: TfpgButton;
+    {$endif}
     pmOpenRecentMenu: TfpgPopupMenu;
+    miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
@@ -68,6 +87,7 @@ type
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
+    procedure   miFileNewUnit(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
     procedure   miEditCutClicked(Sender: TObject);
@@ -95,8 +115,10 @@ type
     procedure   miRecentProjectsClick(Sender: TObject; const FileName: String);
     procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
+    procedure   AddUnitToProject(const AUnitName: TfpgString);
     procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
@@ -108,6 +130,7 @@ type
     procedure   ClearMessagesWindow;
     procedure   CloseAllTabs;
     procedure   LoadProject(const AFilename: TfpgString);
+    function    CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
     procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
@@ -173,6 +196,34 @@ begin
   if s <> '' then
   begin
     OpenEditorPage(s);
+  end;
+end;
+
+procedure TMainForm.miFileNewUnit(Sender: TObject);
+var
+  newunit: TfpgString;
+  sl: TStringList;
+  FInternalMacroList: TIDEMacroList;
+  i: integer;
+begin
+  if fpgInputQuery('New Unit', 'Please give the new unit a file name', newunit) then
+  begin
+    if GProject.UnitList.FileExists(newunit) then
+    begin
+      ShowMessage(Format('The unit <%s> already exists in the project', [newunit]));
+      Exit;
+    end;
+    sl := TStringList.Create;
+    try
+      sl.LoadFromFile(GMacroList.ExpandMacro('${TEMPLATEDIR}default/unit.pas'));
+      sl.Text := StringReplace(sl.Text, '${UNITNAME}', fpgChangeFileExt(fpgExtractFileName(newunit), ''), [rfReplaceAll, rfIgnoreCase]);
+      sl.SaveToFile(GProject.ProjectDir + newunit);
+    finally
+      sl.Free;
+    end;
+//    AddUnitToProject(newunit);
+
+    OpenEditorPage(newunit);
   end;
 end;
 
@@ -471,6 +522,7 @@ begin
       s := s + cProjectExt;
     try
       GProject.Save(s);
+      FRecentFiles.AddItem(s);
     except
       on E: Exception do
       begin
@@ -482,12 +534,30 @@ begin
   end;
 end;
 
-procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
+procedure TMainForm.AddUnitToProject(const AUnitName: TfpgString);
 var
   u: TUnit;
   s: TfpgString;
   r: TfpgTreeNode;
   n: TfpgTreeNode;
+begin
+  u := TUnit.Create;
+  u.FileName := AUnitName;
+  u.Opened := True;
+  GProject.UnitList.Add(u);
+  // add reference to tabsheet
+  pcEditor.ActivePage.TagPointer := u;
+  s := fpgExtractRelativepath(GProject.ProjectDir, u.FileName);
+  r := GetUnitsNode;
+  n := r.AppendText(s);
+  // add reference to treenode
+  n.Data := u;
+  tvProject.Invalidate;
+end;
+
+procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
+var
+  s: TfpgString;
 begin
   s := pcEditor.ActivePage.Hint;
 //  writeln('adding unit: ', s);
@@ -495,18 +565,7 @@ begin
     Exit;
   if GProject.UnitList.FileExists(s) then
     Exit;
-  u := TUnit.Create;
-  u.FileName := s;
-  u.Opened := True;
-  GProject.UnitList.Add(u);
-  // add reference to tabsheet
-  pcEditor.ActivePage.TagPointer := u;
-  s := ExtractRelativepath(GProject.ProjectDir, u.FileName);
-  r := GetUnitsNode;
-  n := r.AppendText(s);
-  // add reference to treenode
-  n.Data := u;
-  tvProject.Invalidate;
+  AddUnitToProject(s);
 end;
 
 procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -525,6 +584,22 @@ begin
     ts := OpenEditorPage(u.FileName);
     u.Opened := True;
     ts.TagPointer := u; // add reference to tabsheet
+  end;
+end;
+
+procedure TMainForm.grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
+var
+  cr: TClipboardKeyType;
+  i: integer;
+  s: TfpgString;
+begin
+  cr := CheckClipboardKey(KeyCode, ShiftState);
+  if cr = ckCopy then
+  begin
+    s := '';
+    for i := 0 to grdMessages.RowCount-1 do
+      s := s + grdMessages.Cells[0, i] + LineEnding;
+    fpgClipboard.Text := s;
   end;
 end;
 
@@ -578,8 +653,7 @@ begin
   begin
     for i := 0 to GProject.UnitList.Count-1 do
     begin
-      {$Note ExtractRelativePath still needs a fpGUI wrapper }
-      s := ExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
+      s := fpgExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
       n := r.AppendText(s);
       n.Data := GProject.UnitList[i];
     end;
@@ -655,6 +729,20 @@ begin
   AddMessage('Project loaded');
 end;
 
+function TMainForm.CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
+var
+  m: TfpgTextEdit;
+begin
+  Result := pcEditor.AppendTabSheet(ATitle);
+  m := TfpgTextEdit.Create(Result);
+  m.SetPosition(1, 1, 200, 20);
+  m.Align := alClient;
+  m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+  m.GutterVisible := True;
+  m.GutterShowLineNumbers := True;
+  m.RightEdge := True;
+end;
+
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
 var
   s: TfpgString;
@@ -662,10 +750,11 @@ var
   i: integer;
   found: Boolean;
   ts: TfpgTabSheet;
-  m: TfpgTextEdit;
   ext: TfpgString;
   pos_h: integer;
   pos_v: integer;
+  cur_pos_h: integer;
+  cur_pos_v: integer;
   editor: TfpgTextEdit;
 begin
   s := AFilename;
@@ -684,10 +773,15 @@ begin
     editor := TfpgTextEdit(pcEditor.Pages[i].Components[0]);
     pos_h := editor.ScrollPos_H;
     pos_v := editor.ScrollPos_V;
+    cur_pos_h := editor.CaretPos_H;
+    cur_pos_v := editor.CaretPos_V;
     editor.Lines.BeginUpdate;
     editor.LoadFromFile(s);
     editor.ScrollPos_H := pos_h;
     editor.ScrollPos_V := pos_v;
+    editor.CaretPos_H := cur_pos_h;
+    editor.CaretPos_V := cur_pos_v;
+    editor.UpdateScrollBars;
     editor.Lines.EndUpdate;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
@@ -696,17 +790,12 @@ begin
   else
   begin
     // we need a new tabsheet
-    ts := pcEditor.AppendTabSheet(f);
-    m := TfpgTextEdit.Create(ts);
-    m.SetPosition(1, 1, 200, 20);
-    m.Align := alClient;
-    m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
-    m.GutterVisible := True;
-    m.GutterShowLineNumbers := True;
-    m.RightEdge := True;
-    TfpgTextEdit(ts.Components[0]).Lines.BeginUpdate;
-    TfpgTextEdit(ts.Components[0]).Lines.LoadFromFile(s);
-    TfpgTextEdit(ts.Components[0]).Lines.EndUpdate;
+    ts := CreateNewEditorTab(f);
+    editor := ts.Components[0] as TfpgTextEdit;
+    editor.Lines.BeginUpdate;
+    if fpgFileExists(s) then
+      editor.Lines.LoadFromFile(s);
+    editor.Lines.EndUpdate;
     if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
     begin
       ext := fpgExtractFileExt(AFilename);
@@ -733,12 +822,14 @@ var
   s: TfpgString;
   r: TfpgString;
 begin
+  {$ifdef DEBUGSVR}
   TempHourGlassCursor(TfpgWidget(self));
   s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
-//  writeln('source string = ', s);
+  SendDebug('source string = ' + s);
   r := GMacroList.ExpandMacro(s);
-//  writeln('expanded string = ', r);
+  SendDebug('expanded string = ' + r);
   sleep(5000);
+  {$endif}
 end;
 
 function TMainForm.GetUnitsNode: TfpgTreeNode;
@@ -1243,20 +1334,6 @@ begin
     TabOrder := 6;
   end;
 
-  btnTest := TfpgButton.Create(Toolbar);
-  with btnTest do
-  begin
-    Name := 'btnTest';
-    SetPosition(168, 2, 80, 24);
-    Text := 'test';
-    Down := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 7;
-    OnClick := @miTest;
-  end;
-
   pnlStatusBar := TfpgBevel.Create(self);
   with pnlStatusBar do
   begin
@@ -1325,6 +1402,7 @@ begin
     RowSelect := True;
     ShowHeader := False;
     TabOrder := 13;
+    OnKeyPress := @grdMessageKeyPressed;
   end;
 
   tsScribble := TfpgTabSheet.Create(pnlWindow);
@@ -1420,31 +1498,6 @@ begin
     Align := alLeft;
   end;
 
-  grdOpenFiles := TfpgStringGrid.Create(pnlClientArea);
-  with grdOpenFiles do
-  begin
-    Name := 'grdOpenFiles';
-    SetPosition(516, 2, 120, 279);
-    Align := alRight;
-    BackgroundColor := TfpgColor($80000002);
-    AddColumn('File', 100, taLeftJustify);
-    FontDesc := '#Grid';
-    HeaderFontDesc := '#GridHeader';
-    Hint := '';
-    RowCount := 0;
-    RowSelect := True;
-    ShowHeader := False;
-    TabOrder := 24;
-  end;
-
-  Splitter3 := TfpgSplitter.Create(pnlClientArea);
-  with Splitter3 do
-  begin
-    Name := 'Splitter3';
-    SetPosition(508, 2, 8, 279);
-    Align := alRight;
-  end;
-
   pcEditor := TfpgPageControl.Create(pnlClientArea);
   with pcEditor do
   begin
@@ -1483,7 +1536,7 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(476, 61, 172, 20);
-    AddMenuItem('New...', rsKeyCtrl+'N', nil).Enabled := False;
+    miFile := AddMenuItem('New...', rsKeyCtrl+'N', @miFileNewUnit);
     AddMenuItem('-', '', nil);
     AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
     AddMenuItem('Open Recent', '', nil).Enabled := False;
@@ -1643,6 +1696,20 @@ begin
   FRecentFiles.LoadMRU;
 
   {$IFDEF DEBUGSVR}
+  btnTest := TfpgButton.Create(Toolbar);
+  with btnTest do
+  begin
+    Name := 'btnTest';
+    SetPosition(168, 2, 80, 24);
+    Text := 'test';
+    Down := False;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
+    OnClick := @miTest;
+  end;
+
   SendMethodExit('TMainForm.AfterCreate');
   {$ENDIF}
 end;

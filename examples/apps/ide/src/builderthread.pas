@@ -1,3 +1,19 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      ---
+}
+
 unit BuilderThread;
 
 {$mode objfpc}{$H+}
@@ -115,7 +131,7 @@ begin
   finally
     FreeAndNil(p);
   end;
-  
+
 end;
 
 procedure TBuilderThread.DoOutputLine;

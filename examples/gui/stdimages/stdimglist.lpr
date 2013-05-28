@@ -4,7 +4,7 @@ program stdimglist;
 
 uses
   Classes, SysUtils,
-  fpg_base, fpg_main, fpg_form, fpg_imgfmt_bmp, fpg_button;
+  fpg_base, fpg_main, fpg_form, fpg_imgfmt_bmp, fpg_button, u_reportimages;
 
 type
 
@@ -27,6 +27,8 @@ begin
   WindowPosition := wpOneThirdDown;
   MinWidth := 200;
   MinHeight := 100;
+
+  CreateReportImages;
 
   btnClose := CreateButton(self, Width-90, Height-35, 75, 'Quit', @btnCloseClick);
   btnClose.ImageName := 'stdimg.quit';

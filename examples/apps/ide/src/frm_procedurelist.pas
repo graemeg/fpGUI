@@ -1,3 +1,19 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      ---
+}
+
 unit frm_procedurelist;
 
 {$mode objfpc}{$H+}
@@ -194,7 +210,7 @@ begin
 {
   E := TSimpleEngine.Create;
   try
-    writeln(Format('Parsing file <%s> for OS <%s> and CPU <%s>', [FFilename, OSTarget, CPUTarget]));
+//    writeln(Format('Parsing file <%s> for OS <%s> and CPU <%s>', [FFilename, OSTarget, CPUTarget]));
     M := ParseSource(E, FFilename, OSTarget, CPUTarget);
 
     { Cool, we successfully parsed the unit.
@@ -203,8 +219,7 @@ begin
     for I := 0 to Decls.Count - 1 do
     begin
       p := TObject(Decls[I]) as TPasElement;
-      Writeln('Interface item ', I, ': ' + p.Name + ' [line ' + IntToStr(p.SourceLinenumber) + ']');
-
+//      Writeln('Interface item ', I, ': ' + p.Name + ' [line ' + IntToStr(p.SourceLinenumber) + ']');
     end;
     FreeAndNil(M);
   finally
@@ -357,7 +372,7 @@ begin
   else if StrContains('destructor', ProcName, False) then // Do not localize.
     Result := ImageIndexTrash
   else if StrBeginsWith('class proc', ProcName, False)    // Do not localize.
-      or StrContains('class func', ProcName, False) 
+      or StrContains('class func', ProcName, False)
       or (ProcClass <> '') then
     Result := ImageIndexGear
   else
@@ -991,7 +1006,7 @@ begin
       finally
         SFile.Free;
       end;
-      SendDebug('Procedure List: Starting Parse');
+//      SendDebug('Procedure List: Starting Parse');
       case Language of
         ltPas: Parser.Origin := MemStream.Memory;
 //        ltCpp: CParser.SetOrigin(MemStream.Memory, MemStream.Size);
@@ -1004,7 +1019,7 @@ begin
       finally
         LoadObjectCombobox;
       end;
-      SendDebug('Procedure List: QuickSorting procedures');
+//      SendDebug('Procedure List: QuickSorting procedures');
       QuickSort(0, FProcList.Count - 1);
 //      StatusBar.Panels[1].Text := Trim(IntToStr(lvProcs.Items.Count));
     finally
@@ -1155,7 +1170,7 @@ begin
   FLanguage := ltPas;
   FSearchAll := True; // search anywhere in a method name
 //  FImageList := TfpgImageList.Create;
-  
+
 //  CreateImage_BMP(@grdimg_destructor_16, SizeOf(grdimg_destructor_16));
 
   fpgImages.AddMaskedBMP(  // 16x16 image
