@@ -50,6 +50,9 @@ type
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
+  
+  { TfpgBaseGrid }
+
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -132,11 +135,13 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
+    procedure   PrepareCells (firstrow, lastrow, firstcol, lastcol : integer); virtual;
     property    AlternateBGColor: TfpgColor read FAlternativeBGColor write SetAlternativeBGColor default clHilite1;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
@@ -585,75 +590,179 @@ var
   VHeight: integer;
   vw: integer;
   cw: integer;
+  vl: integer;
   i: integer;
   x: integer;
+  hmax: integer;
+  vmax: integer;
+  Hfits, showH : boolean;
+  Vfits, showV : boolean;
+
+  procedure hideScrollbar (sb : TfpgScrollBar);
+  begin
+    with sb do
+      if Visible then
+      begin
+        Visible := False;
+        UpdateWindowPosition;
+      end;
+  end;
+  
+  procedure getVisWidth;
+  begin
+    if showV then
+      vw := HWidth - (FVScrollBar.Width-1)
+    else
+      vw := HWidth;
+    Hfits := vw >= cw;
+  end;
+
+  procedure getVisLines;
+  var
+    hh : integer; // header height
+  begin
+    hh := 0;
+    if ShowHeader then inc (hh, FHeaderHeight+1);
+    if showH then inc (hh, FHScrollBar.Height);
+    vl := (VHeight - hh) div FDefaultRowHeight;
+    Vfits := vl >= RowCount;
+  end;
+
 begin
+  // if we don't want any scrollbars, hide them and exit
+  if FScrollBarStyle = ssNone then
+  begin
+    hideScrollbar (FHScrollBar);
+    hideScrollbar (FVScrollBar);
+    exit;
+  end;
+  
+  // preliminary width/height calculations
   VHeight := Height - 4;
   HWidth  := Width - 4;
-  
-  vw := VisibleWidth;
   cw := 0;
   for i := 0 to ColumnCount-1 do
     cw := cw + ColumnWidth[i];
-
-  // This needs improving while resizing
-  if cw > vw then
-    FHScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssVertical])
-  else
-  begin
-    FHScrollBar.Visible := False;
-    FFirstCol := 0;
-    FXOffset := 0;
-  end;
+  showV := False;
+  showH := False;
+  getVisWidth;
+  getVisLines;
   
-  // This needs improving while resizing
-  if (RowCount > VisibleLines) then
-    FVScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssHorizontal])
-  else
-  begin
-    FVScrollBar.Visible := False;
-    FFirstRow := 0;
+  // determine whether to show scrollbars for different configurations
+  case FScrollBarStyle of
+    ssHorizontal:
+        begin
+          hideScrollbar (FVScrollBar);
+          if not Hfits then
+          begin
+            showH := true;
+            getVisLines;
+          end;
+        end;
+    ssVertical:
+        begin
+          hideScrollbar (FHScrollBar);
+          if not Vfits then
+          begin
+            showV := true;
+            getVisWidth;
+          end;
+        end;
+    ssAutoBoth:
+        if not Vfits then
+        begin
+          showV := true;
+          getVisWidth;
+          if not Hfits then
+          begin
+            showH := true;
+            getVisLines;
+            getVisWidth;
+          end;
+        end
+        else if not Hfits then
+        begin
+          showH := true;
+          getVisLines;
+          if not Vfits then
+          begin
+            showV := true;
+            getVisWidth;
+            getVisLines;
+          end;
+        end;
   end;
 
-  if FVScrollBar.Visible then
-  begin
+  // set the scrollbar width/height space
+  if showV then
     Dec(HWidth, FVScrollBar.Width);
+  if showH then
+    Dec(VHeight, FHScrollBar.Height);
+
+  // show or hide the scrollbars
+
+  if showV then
+  begin
+    FVScrollBar.Visible := true;
     FVScrollBar.Min         := 0;
     if RowCount > 0 then
       FVScrollBar.SliderSize := VisibleLines / RowCount
     else
       FVScrollBar.SliderSize := 0;
-    FVScrollBar.Max         := RowCount-VisibleLines;
+    vmax := RowCount-VisibleLines;
+    if FFirstRow>vmax then
+      FFirstRow:=vmax;
+    FVScrollBar.Max         := vmax;
     FVScrollBar.Position    := FFirstRow;
     FVScrollBar.RepaintSlider;
-  end;
-  
-  if FHScrollBar.Visible then
+    FVScrollBar.Top     := 2;
+    FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+    FVScrollBar.Height  := VHeight;
+  end
+  else
   begin
-    Dec(VHeight, FHScrollBar.Height);
+    FVScrollBar.Visible := false;
+    if Vfits then
+      FFirstRow := 0;
+    // if vertical doesn't fit and no scrollbar, do not change firstrow
+  end;
+
+  if showH then
+  begin
+    FHScrollBar.Visible := true;
     FHScrollBar.Min         := 0;
     if go_SmoothScroll in FOptions then
     begin
-      FHScrollBar.Max := cw - vw;
+      hmax := cw - vw;
+      FHScrollBar.Max := hmax;
+      if FXOffset>hmax then
+        FXOffset:=hmax;
       FHScrollBar.Position := FXOffset;
-      FHScrollBar.SliderSize := Width / TotalColumnWidth;
+      FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
+      FHScrollBar.PageSize := 5;
     end
     else
     begin
       FHScrollBar.Max := ColumnCount-1;
       FHScrollBar.Position := FFirstCol;
       FHScrollBar.SliderSize  := 1 / ColumnCount;
+      FHScrollBar.PageSize := 1;
     end;
     FHScrollBar.RepaintSlider;
+    FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+    FHScrollBar.Left    := 2;
+    FHScrollBar.Width   := HWidth;
+  end
+  else
+  begin
+    FHScrollBar.Visible := false;
+    if Hfits then
+    begin
+      FFirstCol := 0;
+      FXOffset := 0;
+    end;
+    // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
   end;
-
-  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
-  FHScrollBar.Left    := 2;
-  FHScrollBar.Width   := HWidth;
-
-  FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
-  FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
@@ -673,7 +782,9 @@ var
   clipr: TfpgRect;   // clip rectangle
   drawstate: TfpgGridDrawState;
   cLeft: integer;
-  c: integer;
+  rTop: integer;
+  firstcol, lastcol, firstrow, lastrow : integer;
+  cWidths: array of integer;
 begin
   Canvas.ClearClipRect;
 
@@ -704,32 +815,87 @@ begin
   r := clipr;
 
   cLeft := FMargin; // column starting point
+  rTop := FMargin; // row starting point
+
   if go_SmoothScroll in FOptions then
   begin
     if FHScrollBar.Visible then
       Dec(cLeft, FHScrollBar.Position);
-    c := 0;
+    firstcol := 0;
   end
   else
   begin
-    c := FFirstCol;
+    firstcol := FFirstCol;
   end;
+
+  // calculate column widths, and first/last columns
+  if (ColumnCount <= 0) then
+  begin
+    firstcol := -1;
+    lastcol := -2;
+  end
+  else
+  begin
+    setlength (cWidths, ColumnCount);
+    r.Left := cLeft;
+    for col := firstcol to ColumnCount-1 do
+    begin
+      cWidths[col] := ColumnWidth[col];
+      r.Width := cWidths[col];
+      if (go_SmoothScroll in FOptions) and (r.Left <= clipr.Left) then
+      begin
+        firstcol := col;
+        if col>0 then inc (cLeft, cWidths[col-1]);
+      end;
+      lastcol := col;
+      if r.Right >= clipr.Right then
+        break;
+      inc (r.Left, r.Width);
+    end;
+    // first/last rows...
+    if (RowCount <= 0) then
+    begin
+      firstrow := -1;
+      lastrow := -2;
+    end
+    else
+    begin
+      if ShowHeader then
+        inc (r.Top, FHeaderHeight);
+      if r.Top > clipr.Bottom then
+      begin
+        firstrow := -1;
+        lastrow := -2;
+      end
+      else
+      begin
+        firstrow := FFirstRow;
+        lastrow := firstrow + (clipr.Bottom - r.Top) div DefaultRowHeight;
+        if lastrow >= RowCount then
+          lastrow := RowCount-1;
+      end;
+    end;
+  end;
+
+  PrepareCells (firstrow, lastrow, firstcol, lastcol);
+
+  r.Left := cLeft;
+  r.Top := rTop;
 
   if (ColumnCount > 0) and ShowHeader then
   begin
     // Drawing horizontal headers
-    r.Left := cLeft;
     r.Height := FHeaderHeight;
     Canvas.SetFont(FHeaderFont);
-    for col := c to ColumnCount-1 do
+    for col := firstcol to lastcol do
     begin
-      r.Width := ColumnWidth[col];
+      r.Width := cWidths[col];
       Canvas.SetClipRect(clipr);
       Canvas.AddClipRect(r);
       DrawHeader(col, r, 0);
       inc(r.Left, r.Width);
-      if r.Left >= clipr.Right then
-        Break;  // small optimization. Don't draw what we can't see
+      //if r.Left >= clipr.Right then
+      //  Break;  // optimization made obsolete by lastcol
     end;
     inc(r.Top, r.Height);
   end;
@@ -740,13 +906,13 @@ begin
     r.Height := DefaultRowHeight;
     Canvas.SetFont(FFont);
 
-    for row := FFirstRow to RowCount-1 do
+    for row := firstrow to lastrow do
     begin
       r.Left := cLeft;
-      for col := c to ColumnCount-1 do
+      for col := firstcol to lastcol do
       begin
         drawstate := [];
-        r.Width := ColumnWidth[col];
+        r.Width := cWidths[col];
         Canvas.SetClipRect(clipr);
 
         if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) and not (go_HideFocusRect in FOptions) then
@@ -774,7 +940,6 @@ begin
           Include(drawstate, gdFocused);
         if (row = FFocusRow) and (col = FFocusCol) then
           Include(drawstate, gdSelected);
-
         if DoDrawCellEvent(row, col, r, drawstate) then
           DrawCell(row, col, r, drawstate);
 
@@ -783,13 +948,13 @@ begin
           DrawGrid(row, col, r, 0);
 
         inc(r.Left, r.Width);
-        if r.Left >= clipr.Right then
-          Break;  // small optimization. Don't draw what we can't see
+        //if r.Left >= clipr.Right then
+        //  Break;  // optimization made obsolete by lastcol
       end;
 //      Inc(r.Top, FDefaultRowHeight+1);
       inc(r.Top, r.Height);
-      if r.Top >= clipr.Bottom then
-        break;
+      //if r.Top >= clipr.Bottom then
+      //  break;  // optimization made obsolete by lastrow
     end;
   end; // item drawing
 
@@ -1008,47 +1173,64 @@ end;
 procedure TfpgBaseGrid.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 var
   lRow: Integer;
-  lCol: Integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
 
   lRow := FFirstRow;
-  lCol := FFirstCol;
 
-  if delta > 0 then // scroll down
-    inc(FFirstRow, abs(delta)*3)
-  else              // scroll up
-    if FFirstRow > 0 then
-      dec(FFirstRow, abs(delta)*3);
+  // If vertical scrollbar is not visible, but
+  // horizontal is, Mouse wheel will scroll horizontally.  :)
+  if FHScrollBar.Visible and (not FVScrollBar.Visible) then
+  begin
+    HandleMouseHorizScroll(x, y, shiftstate, delta);
+    Exit;
+  end;
+
+  inc(FFirstRow, delta*3);
 
   // apply limits
   if FFirstRow > RowCount - VisibleLines then
     FFirstRow := RowCount - VisibleLines;
   if FFirstRow < 0 then
     FFirstRow := 0;
-    
-  // scroll left/right
-  // If vertical scrollbar is not visible, but
-  // horizontal is. Mouse wheel will scroll horizontally.  :)
-  if FHScrollBar.Visible and (not FVScrollBar.Visible) then
-  begin
-    if delta > 0 then // scroll right
-    begin
-      if FFirstCol < (ColumnCount-1) then
-        inc(FFirstCol);
-    end
-    else
-    begin
-      if FFirstCol > 0 then
-        dec(FFirstCol);
-    end;
-  end;
 
-  if (lRow <> FFirstRow) or (lCol <> FFirstCol) then
+  if lRow <> FFirstRow then
   begin
     UpdateScrollBars;
     RePaint;
   end;
+end;
+
+procedure TfpgBaseGrid.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+var
+  old_val: Integer;
+begin
+  inherited HandleMouseHorizScroll(x, y, shiftstate, delta);
+
+  if go_SmoothScroll in Options then
+  begin
+    old_val := FXOffset;
+    inc(FXOffset, delta*FHScrollBar.ScrollStep);
+    if (FXOffset<0) then
+      FXOffset:=0;
+    // finding the maximum Xoffset is tricky, let updatescrollbars do it.
+    if (FXOffset=old_val) then
+      Exit;
+  end
+  else
+  begin
+    old_val := FFirstCol;
+    inc(FFirstCol, delta);
+    if FFirstCol<0 then
+      FFirstCol:=0
+    else if FFirstCol > ColumnCount-1 then
+      FFirstCol:=ColumnCount-1;
+    if FFirstCol=old_val then
+      Exit;
+  end;
+
+  UpdateScrollBars;
+  RePaint;
 end;
 
 procedure TfpgBaseGrid.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -1283,6 +1465,11 @@ begin
   UpdateScrollBars;
 end;
 
+procedure TfpgBaseGrid.PrepareCells(firstrow, lastrow, firstcol, lastcol: integer);
+begin
+  // for descendents
+end;
+
 constructor TfpgBaseGrid.Create(AOwner: TComponent);
 begin
   Updating;
@@ -1329,7 +1516,7 @@ begin
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.Visible     := False;
   FHScrollBar.OnScroll    := @HScrollBarMove;
-  FHScrollBar.ScrollStep  := 5;
+  FHScrollBar.ScrollStep  := 20;
 end;
 
 destructor TfpgBaseGrid.Destroy;

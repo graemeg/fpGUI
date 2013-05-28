@@ -39,6 +39,8 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
+  { TfpgWidget }
+
   TfpgWidget = class(TfpgWindow)
   private
     FAcceptDrops: boolean;
@@ -56,6 +58,7 @@ type
     FOnMouseMove: TMouseMoveEvent;
     FOnMouseUp: TMouseButtonEvent;
     FOnMouseScroll: TMouseWheelEvent;
+    FOnMouseHorizScroll: TMouseWheelEvent;
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
@@ -81,6 +84,7 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgMouseHorizScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
     procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
     procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
@@ -134,6 +138,7 @@ type
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -153,6 +158,7 @@ type
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnMouseScroll: TMouseWheelEvent read FOnMouseScroll write FOnMouseScroll;
+    property    OnMouseHorizScroll: TMouseWheelEvent read FOnMouseHorizScroll write FOnMouseHorizScroll;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
     property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
@@ -854,6 +860,12 @@ begin
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
+procedure TfpgWidget.MsgMouseHorizScroll(var msg: TfpgMessageRec);
+begin
+  HandleMouseHorizScroll(msg.Params.mouse.x, msg.Params.mouse.y,
+      msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
 procedure TfpgWidget.MsgDropEnter(var msg: TfpgMessageRec);
 begin
   // do nothing
@@ -1187,6 +1199,12 @@ procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; d
 begin
   if Assigned(FOnMouseScroll) then
     FOnMouseScroll(self, shiftstate, delta, Point(x, y));
+end;
+
+procedure TfpgWidget.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+begin
+  if Assigned(FOnMouseHorizScroll) then
+    FOnMouseHorizScroll(self, shiftstate, delta, Point(x, y));
 end;
 
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
