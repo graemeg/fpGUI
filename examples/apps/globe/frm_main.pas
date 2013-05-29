@@ -579,7 +579,7 @@ procedure TGlobe.DrawGrid;
 var
   temp: integer;
 begin
-  Canvas.Color := TfpgColor($8080FF); // clGray;
+  Canvas.Color := TfpgColor($FF8080FF); // clGray;
   Canvas.SetLineStyle(0, lsDash);
   { Parallels }
   temp := Wfi;
