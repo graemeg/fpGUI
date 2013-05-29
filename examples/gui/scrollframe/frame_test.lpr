@@ -89,7 +89,6 @@ begin
       'Click to embed another Scroll-Frame here', @click_embed_button);
   OnPaint:=@paint_my_stuff;
   create_buttons(self);
-  RecalcFrameSize;
 end;
 
 
@@ -100,10 +99,9 @@ var
 begin
   fpgApplication.Initialize;
   form := TfpgForm.Create(nil);
-  form.SetPosition(0,0,480,260);
+  form.SetPosition(0,0,380,360);
   outer_frame := TfpgScrollFrame.Create(form, t_sample_frame);
   outer_frame.Align:=alClient;
-  outer_frame.ContentFrame.RecalcFrameSize;
   try
     form.Show;
     fpgApplication.Run;

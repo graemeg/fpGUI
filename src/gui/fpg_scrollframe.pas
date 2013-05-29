@@ -39,6 +39,7 @@ type
     FMarginBR : integer;
     procedure SetMarginBR (AValue: integer);
   public
+    procedure AfterConstruction; override;
     procedure AdjustDimsFor (w : TfpgWidget; updatewp: boolean = true);
     procedure AdjustDimsWithout (w : TfpgWidget);
     procedure RecalcFrameSize;
@@ -104,6 +105,12 @@ procedure TfpgAutoSizingFrame.SetMarginBR(AValue: integer);
 begin
   if FMarginBR=AValue then Exit;
   FMarginBR:=AValue;
+  RecalcFrameSize;
+end;
+
+procedure TfpgAutoSizingFrame.AfterConstruction;
+begin
+  inherited AfterConstruction;
   RecalcFrameSize;
 end;
 
@@ -429,11 +436,11 @@ begin
   inherited Create(AOwner);
 
   FVisibleArea := TfpgEmbeddingFrame.Create(self);
-  FVisibleArea.SetPosition(0, 0, 1, 1);
+  FVisibleArea.HandleMove(0, 0);
   FVisibleArea.ParentScrollFrame := self;
 
   FContentFrame := TfpgAutoSizingFrame.Create(FVisibleArea);
-  FContentFrame.SetPosition(0, 0, 1, 1);
+  FContentFrame.HandleMove(0, 0);
   FContentFrame.ParentScrollFrame := self;
 end;
 
@@ -442,11 +449,11 @@ begin
   inherited Create(AOwner);
 
   FVisibleArea := TfpgEmbeddingFrame.Create(self);
-  FVisibleArea.SetPosition(0, 0, 1, 1);
+  FVisibleArea.HandleMove(0, 0);
   FVisibleArea.ParentScrollFrame := self;
 
   FContentFrame := ContentFrameType.Create(FVisibleArea);
-  FContentFrame.SetPosition(0, 0, 1, 1);
+  FContentFrame.HandleMove(0, 0);
   FContentFrame.ParentScrollFrame := self;
 end;
 
