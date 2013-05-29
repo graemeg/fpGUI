@@ -672,12 +672,8 @@ end;
 
 procedure TGlobe.HandlePaint;
 begin
-  Canvas.BeginDraw;
   Canvas.Clear(clWindowBackground);
-//  R := Width div 2;
-  // inherited HandlePaint;
   DrawGlobe;
-  Canvas.EndDraw;
 end;
 
 constructor TGlobe.Create(AOwner: TComponent);
