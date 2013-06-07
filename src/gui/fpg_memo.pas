@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -147,6 +147,7 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnShowHint;
   end;
@@ -1058,11 +1059,14 @@ var
   s: string;
   ls: string;
 begin
-  inherited;
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+  if consumed then
+    Exit; //==>
+
   prevval  := Text;
   s        := AText;
 
-  if (not consumed) and (not ReadOnly) then
+  if (not ReadOnly) then
   begin
     // Printable characters only
     // Note: This is now UTF-8 compliant!
@@ -1082,15 +1086,13 @@ begin
         FSelEndLine   := -1;
         AdjustCursor;
       end;
-
       consumed := True;
     end;
 
     if prevval <> Text then
       if Assigned(FOnChange) then
         FOnChange(self);
-  end;
-
+  end; { if not ReadOnly }
 
   if consumed then
     RePaint;
