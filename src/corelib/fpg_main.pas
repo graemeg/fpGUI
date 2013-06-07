@@ -78,8 +78,7 @@ type
       Public event properties: Event Types
     *******************************************}
   { Keyboard }
-  TKeyEvent = procedure(Sender: TObject; AKey: Word; AShift: TShiftState) of object;
-  TKeyCharEvent = procedure(Sender: TObject; AKeyChar: Char) of object;
+  TfpgKeyCharEvent = procedure(Sender: TObject; AChar: TfpgChar; var Consumed: boolean) of object;
   TKeyPressEvent = procedure(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean) of object;
   { Mouse }
   TMouseButtonEvent = procedure(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint) of object;
