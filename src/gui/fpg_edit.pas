@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -187,6 +187,7 @@ type
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -279,6 +280,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -328,6 +330,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -375,6 +378,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -754,10 +758,14 @@ var
   s: TfpgChar;
   prevval: string;
 begin
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+  if consumed then
+    Exit; //==>
+
   prevval   := Text;
   s         := AText;
 
-  if (not consumed) and (not ReadOnly) then
+  if (not ReadOnly) then
   begin
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
@@ -780,8 +788,6 @@ begin
 
   if consumed then
     RePaint;
-
-  inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 procedure TfpgBaseEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -1992,8 +1998,10 @@ begin
   if ((n >= 48) and (n <= 57) or (AText = '-') and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
@@ -2216,8 +2224,10 @@ begin
      or ((AText = FDecimalSeparator) and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
@@ -2437,8 +2447,10 @@ begin
      or ((AText = FDecimalSeparator) and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
