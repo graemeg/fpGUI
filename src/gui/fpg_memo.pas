@@ -145,10 +145,17 @@ type
     property    TabOrder;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
     property    OnKeyChar;
     property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
