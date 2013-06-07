@@ -133,11 +133,18 @@ type
     property    Width;
     property    OnChange;
     property    OnCloseUp;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
     property    OnKeyChar;
     property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
