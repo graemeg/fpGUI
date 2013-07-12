@@ -168,7 +168,7 @@ uses
   ,UnitList
   ,BuilderThread
   {$IFDEF DEBUGSVR}
-  ,dbugintf
+  ,fpg_dbugintf
   {$ENDIF}
   ,ideutils
   ;
