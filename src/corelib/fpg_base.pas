@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -777,7 +777,6 @@ function  fpgLighter(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 
 
 { Points }
-function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 procedure SortRect(var ARect: TRect);
 procedure SortRect(var ARect: TfpgRect);
 procedure SortRect(var left, top, right, bottom: integer);
@@ -1100,14 +1099,6 @@ begin
   lColor.Green := Round((lColor.Green*APercent/100) + (255 - APercent/100*255));
   lColor.Blue := Round((lColor.Blue*APercent/100) + (255 - APercent/100*255));
   Result := RGBTripleTofpgColor(lColor);
-end;
-
-function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
-begin
-  Result := (APoint.x >= ARect.Left) and
-            (APoint.y >= ARect.Top) and
-            (APoint.x <= ARect.Right) and
-            (APoint.y <= ARect.Bottom);
 end;
 
 procedure SortRect(var ARect: TRect);

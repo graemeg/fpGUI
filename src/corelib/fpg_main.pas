@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -392,10 +392,15 @@ function  fpgGetTickCount: DWord;
 procedure fpgPause(MilliSeconds: Cardinal);
 
 // Rectangle, Point & Size routines
+function  CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+function  IsRectEmpty(const ARect: TfpgRect): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+function  UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
 function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
@@ -419,11 +424,12 @@ procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
-function DebugMethodEnter(const s1: TfpgString): IInterface;
+function  DebugMethodEnter(const s1: TfpgString): IInterface;
 procedure DebugSeparator;
 
 // operator overloading of some useful structures
-operator = (a: TRect; b: TRect): boolean;
+operator = (const a, b: TRect): boolean;
+operator = (const a, b: TfpgRect): boolean;
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
 operator = (const APoint1, APoint2: TPoint) b: Boolean;
 operator + (const APoint1, APoint2: TPoint) p: TPoint;
@@ -443,7 +449,8 @@ operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
 operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
-operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+operator = (const AColor1, AColor2: TFPColor) b: Boolean; deprecated;
+operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 
 
 implementation
@@ -618,6 +625,17 @@ begin
    until ((Now*MSecsPerDay)-lStart) > MilliSeconds;
 end;
 
+function CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
+begin
+  Dest := Src;
+  if IsRectEmpty(Dest) then
+  begin
+    FillChar(Dest, SizeOf(Dest), 0);
+    Result := false;
+  end
+  else
+    Result := true;
+end;
 
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
@@ -650,6 +668,35 @@ begin
     Result := False;
 end;
 
+function IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+begin
+  ARect := r1;
+  with r2 do
+  begin
+    if Left > r1.Left then
+      ARect.Left := Left;
+    if Top > r1.Top then
+      ARect.Top := Top;
+    if Right < r1.Right then
+      ARect.Width := ARect.Left + Right;
+    if Bottom < r1.Bottom then
+      ARect.Height := ARect.Top + Bottom;
+  end;
+
+  if IsRectEmpty(ARect) then
+  begin
+    FillChar(ARect, SizeOf(ARect), 0);
+    Result := false;
+  end
+  else
+    Result := true;
+end;
+
+function IsRectEmpty(const ARect: TfpgRect): Boolean;
+begin
+  Result := (ARect.Width <= 0) or (ARect.Height <= 0);
+end;
+
 function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
   if Assigned(@Rect) then
@@ -661,10 +708,10 @@ begin
       inc(Right, dx);
       inc(Bottom, dy);
     end;
-    OffsetRect := True;
+    Result := True;
   end
   else
-    OffsetRect := False;
+    Result := False;
 end;
 
 function OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
@@ -676,10 +723,42 @@ begin
       inc(Left, dx);
       inc(Top, dy);
     end;
-    OffsetRect := True;
+    Result := True;
   end
   else
-    OffsetRect := False;
+    Result := False;
+end;
+
+function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+begin
+  Result := (APoint.x >= ARect.Left) and
+            (APoint.y >= ARect.Top) and
+            (APoint.x <= ARect.Right) and
+            (APoint.y <= ARect.Bottom);
+end;
+
+function UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+begin
+  ARect := R1;
+  with R2 do
+  begin
+    if Left < R1.Left then
+      ARect.Left := Left;
+    if Top < R1.Top then
+      ARect.Top := Top;
+    if Right > R1.Right then
+      ARect.Width := ARect.Left + Right;
+    if Bottom > R1.Bottom then
+      ARect.Height := ARect.Top + Bottom;
+  end;
+
+  if IsRectEmpty(ARect) then
+  begin
+    FillChar(ARect, SizeOf(ARect), 0);
+    Result := false;
+  end
+  else
+    Result := true;
 end;
 
 function CenterPoint(const Rect: TRect): TPoint;
@@ -954,15 +1033,20 @@ begin
   DebugLn('>--------------------------<');
 end;
 
-operator = (a: TRect; b: TRect): boolean;
+operator = (const a, b: TRect): boolean;
 begin
-  if    (a.Top    = b.Top)
-    and (a.Left   = b.Left)
-    and (a.Bottom = b.Bottom)
-    and (a.Right  = b.Right) then
-    Result := True
-  else
-    Result := False;
+  Result := (a.Top = b.Top) and
+            (a.Left = b.Left) and
+            (a.Bottom = b.Bottom) and
+            (a.Right = b.Right);
+end;
+
+operator = (const a, b: TfpgRect): boolean;
+begin
+  Result := (a.Left = b.Left) and
+            (a.Top = b.Top) and
+            (a.Width = b.Width) and
+            (a.Height = b.Height);
 end;
 
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
@@ -1078,6 +1162,14 @@ begin
 end;
 
 operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+begin
+  b := (AColor1.Red = AColor2.Red)
+        and (AColor1.Green = AColor2.Green)
+        and (AColor1.Blue = AColor2.Blue)
+        and (AColor1.Alpha = AColor2.Alpha);
+end;
+
+operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 begin
   b := (AColor1.Red = AColor2.Red)
         and (AColor1.Green = AColor2.Green)
