@@ -797,7 +797,7 @@ end;
 
 procedure TfpgPageControl.RePaintTitles;
 const
-  TabHeight = 21;
+  TAB_HEIGHT = 21;
 var
   TabW, TabH: Integer;
   r2: TfpgRect;
@@ -820,7 +820,7 @@ begin
   TabH:=FixedTabHeight;
   ActivePageVisible := false;
   If TabH = 0 then
-    TabH := TabHeight;
+    TabH := TAB_HEIGHT;
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
@@ -913,7 +913,7 @@ begin
       begin
         lTxtFlags += TextFlagsDflt;
         lp := 0;
-        r2.SetRect(2, Height - ButtonHeight-3, 50, 21);
+        r2.SetRect(2, Height - ButtonHeight-3, 50, TabH);
         while h <> nil do
         begin
           if h <> ActivePage then
@@ -957,7 +957,7 @@ begin
       begin
         lTxtFlags += TextFlagsDflt;
         lp := 0;
-        r2.SetRect(2, 2, 50, 21);
+        r2.SetRect(2, 2, 50, TabH);
         while h <> nil do
         begin
           if h <> ActivePage then
@@ -1003,7 +1003,7 @@ begin
         lTxtFlags += [txtVCenter, txtLeft];
         lp := 0;
         TabW := MaxButtonWidth;
-        r2.SetRect(Width - 2 - TabW, 2, TabW, 21);
+        r2.SetRect(Width - 2 - TabW, 2, TabW, TabH);
         while h <> nil do
         begin
           if h <> ActivePage then
@@ -1048,7 +1048,7 @@ begin
         lTxtFlags += [txtVCenter, txtLeft];
         lp := 0;
         TabW := MaxButtonWidth;
-        r2.SetRect(2, 2, TabW, 21);
+        r2.SetRect(2, 2, TabW, TabH);
         while h <> nil do
         begin
           if h <> ActivePage then
