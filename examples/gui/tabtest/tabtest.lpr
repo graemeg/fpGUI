@@ -22,6 +22,8 @@ type
     btn2, btn3: TfpgButton;
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
+    edtHeight: TfpgEditInteger;
+    procedure   edtHeightChanged(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   btn2Click(Sender: TObject);
     procedure   btn3Click(Sender: TObject);
@@ -32,6 +34,11 @@ type
   end;
 
 { TMainForm }
+
+procedure TMainForm.edtHeightChanged(Sender: TObject);
+begin
+  pcMain.FixedTabHeight := edtHeight.Value;
+end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
@@ -79,6 +86,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Tab control test';
   SetPosition(100, 100, 566, 350);
+  ShowHint := True;
   
   btnQuit := CreateButton(self, 476, 320, 80, 'Quit', @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
@@ -136,7 +144,14 @@ begin
   cbTabPos.Items.Add('tpNone');
   cbTabPos.FocusItem := 0;
   cbTabPos.Anchors := [anBottom, anLeft];
+  cbTabPos.Hint := 'Tab position';
   cbTabPos.OnChange := @cbTabPosChanged;
+
+  CreateLabel(self, 390, 325, 'Height:');
+  edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
+  edtHeight.Value := 0;
+  edtHeight.Hint := 'Tab height';
+  edtHeight.OnChange := @edtHeightChanged;
 end;
 
 procedure MainProc;
