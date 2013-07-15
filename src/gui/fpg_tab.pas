@@ -630,6 +630,11 @@ begin
   if FTabPosition = AValue then
     Exit; //==>
   FTabPosition := AValue;
+  if FTabPosition = tpNone then
+  begin
+    FLeftButton.Visible := False;
+    FRightButton.Visible := False;
+  end;
   RePaint;
 end;
 
