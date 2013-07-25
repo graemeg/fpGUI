@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes,
+  Classes, SysUtils,
   fpg_main, fpg_base, fpg_widget, fpg_form, fpg_tab, fpg_button,
   fpg_label, fpg_edit, fpg_checkbox, fpg_combobox;
 
@@ -23,6 +23,8 @@ type
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
     edtHeight: TfpgEditInteger;
+    lbl: TfpgLabel;
+    procedure   TabSheet4Painting(Sender: TObject);
     procedure   edtHeightChanged(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   btn2Click(Sender: TObject);
@@ -34,6 +36,11 @@ type
   end;
 
 { TMainForm }
+
+procedure TMainForm.TabSheet4Painting(Sender: TObject);
+begin
+  lbl.Text := 'H: ' + IntToStr(tsFour.Height);
+end;
 
 procedure TMainForm.edtHeightChanged(Sender: TObject);
 begin
@@ -123,7 +130,9 @@ begin
   tsFour := TfpgTabSheet.Create(pcMain);
   tsFour.Text := 'This is one long text caption';
   tsFour.BackgroundColor := clMediumSeaGreen;
-  
+  tsFour.OnPaint := @TabSheet4Painting;
+  lbl := CreateLabel(tsFour, 30, 50, 'TabSheet Four');
+
   pcMain.ActivePage := tsOne;
 
   btn2 := CreateButton(self, 10, 320, 80, 'Page 1', @btn2Click);
