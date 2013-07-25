@@ -183,6 +183,10 @@ implementation
 
 uses
   fpg_stringutils;
+
+const
+  DFL_TAB_HEIGHT = 21;
+  DFL_TAB_WIDTH = 0;
   
   
 // compare function used by FPages.Sort
@@ -532,7 +536,7 @@ procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
 begin
   if FFixedTabWidth = AValue then
     Exit; //==>
-  if AValue > 5 then
+  if AValue >= 5 then
   begin
     FFixedTabWidth := AValue;
     RePaint;
@@ -543,7 +547,7 @@ procedure TfpgPageControl.SetFixedTabHeight(const AValue: integer);
 begin
   if FFixedTabHeight = AValue then
     Exit; //==>
-  if AValue > 5 then
+  if AValue >= 5 then
   begin
     FFixedTabHeight := AValue;
     RePaint;
@@ -674,6 +678,8 @@ begin
   if Mode = 2 then
   begin
     r.Height -= 1;
+    if TabPosition = tpBottom then
+      r.Top += 1;
     Canvas.SetColor(ActiveTabColor);
   end
   else
@@ -696,22 +702,27 @@ begin
 
     tpBottom:
       begin
-        Canvas.FillRectangle(r.Left, r.Top+1, r.Width-2, r.Height-3);   // fill tab background
+        Canvas.FillRectangle(r.Left, r.Top, r.Width-1, r.Height-2);   // fill tab background
         Canvas.SetColor(clHilite2);
         Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
         Canvas.SetColor(clShadow2);
         Canvas.DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
         Canvas.SetColor(clShadow1);
-        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top+1);   // right inner edge
+        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top-1);   // right inner edge
         Canvas.DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
         Canvas.SetColor(clShadow2);
         Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
-        Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top+1);       // right outer edge
+        Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top-1);       // right outer edge
+        if Mode = 2 then  { selected tab }
+        begin
+          Canvas.SetColor(ActiveTabColor);
+          Canvas.DrawLine(r.Left+1, r.Top-1, r.Right-1, r.Top-1);
+        end;
       end;
 
     tpLeft:
       begin
-        if Mode = 2 then
+        if Mode = 2 then  { selected tab }
         begin
           r.Width  := r.Width - 1;
           r.Height := r.Height + 2;
@@ -918,17 +929,17 @@ begin
       begin
         lTxtFlags += TextFlagsDflt;
         lp := 0;
-        r2.SetRect(2, Height - ButtonHeight-3, 50, TabH);
+        r2.SetRect(2, Height - ButtonHeight, 50, TabH-2);
         while h <> nil do
         begin
           if h <> ActivePage then
           begin
-            toffset := 2;
+            toffset := 1;
             h.Visible := False;
           end
           else
           begin
-            toffset := 4;
+            toffset := 2;
             h.Visible := True;
             h.SetPosition(FMargin+2, FMargin+2 , Width - (FMargin*2) - 4, Height - TabH - (FMargin+2)*2);
           end;
@@ -979,7 +990,6 @@ begin
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
           r3 := DrawTab(r2, h = ActivePage);
-
           // paint text on non-active tabs
           if h <> ActivePage then
             Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
