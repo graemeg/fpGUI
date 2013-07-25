@@ -930,15 +930,15 @@ begin
           begin
             toffset := 4;
             h.Visible := True;
-            h.SetPosition(FMargin+2, FMargin+2 , Width - (FMargin*2) - 4, Height - r2.Height - (FMargin+2)*2);
+            h.SetPosition(FMargin+2, FMargin+2 , Width - (FMargin*2) - 4, Height - TabH - (FMargin+2)*2);
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
           r3 := DrawTab(r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
-          Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
-              Height-r2.Height-toffset, GetTabText(h.Text), lTxtFlags);
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
+                Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
 
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -951,7 +951,7 @@ begin
         r2.Left    := 0;
         r2.Top     := 0;
         r2.Width   := Width;
-        r2.Height  := Height - r2.Height;
+        r2.Height  := Height - TabH;
         Canvas.DrawButtonFace(r2, []);
         // Draw text of ActivePage, because we didn't before.
         DrawTab(r3, false, 2);
