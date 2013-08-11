@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes,
+  Classes, SysUtils,
   fpg_main, fpg_base, fpg_widget, fpg_form, fpg_tab, fpg_button,
   fpg_label, fpg_edit, fpg_checkbox, fpg_combobox;
 
@@ -22,6 +22,10 @@ type
     btn2, btn3: TfpgButton;
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
+    edtHeight: TfpgEditInteger;
+    lbl: TfpgLabel;
+    procedure   TabSheet4Painting(Sender: TObject);
+    procedure   edtHeightChanged(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   btn2Click(Sender: TObject);
     procedure   btn3Click(Sender: TObject);
@@ -32,6 +36,16 @@ type
   end;
 
 { TMainForm }
+
+procedure TMainForm.TabSheet4Painting(Sender: TObject);
+begin
+  lbl.Text := 'H: ' + IntToStr(tsFour.Height);
+end;
+
+procedure TMainForm.edtHeightChanged(Sender: TObject);
+begin
+  pcMain.FixedTabHeight := edtHeight.Value;
+end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
@@ -79,6 +93,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Tab control test';
   SetPosition(100, 100, 566, 350);
+  ShowHint := True;
   
   btnQuit := CreateButton(self, 476, 320, 80, 'Quit', @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
@@ -115,7 +130,9 @@ begin
   tsFour := TfpgTabSheet.Create(pcMain);
   tsFour.Text := 'This is one long text caption';
   tsFour.BackgroundColor := clMediumSeaGreen;
-  
+  tsFour.OnPaint := @TabSheet4Painting;
+  lbl := CreateLabel(tsFour, 30, 50, 'TabSheet Four');
+
   pcMain.ActivePage := tsOne;
 
   btn2 := CreateButton(self, 10, 320, 80, 'Page 1', @btn2Click);
@@ -136,7 +153,14 @@ begin
   cbTabPos.Items.Add('tpNone');
   cbTabPos.FocusItem := 0;
   cbTabPos.Anchors := [anBottom, anLeft];
+  cbTabPos.Hint := 'Tab position';
   cbTabPos.OnChange := @cbTabPosChanged;
+
+  CreateLabel(self, 390, 325, 'Height:');
+  edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
+  edtHeight.Value := 0;
+  edtHeight.Hint := 'Tab height';
+  edtHeight.OnChange := @edtHeightChanged;
 end;
 
 procedure MainProc;

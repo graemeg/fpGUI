@@ -433,12 +433,15 @@
       <Item101>
         <Filename Value="../fpg_dbugmsg.pas"/>
         <UnitName Value="fpg_dbugmsg"/>
-      </Item101>
-
+      </Item101>      
       <Item102>
+        <Filename Value="../render/software/fpg_fontcache.pas"/>
+        <UnitName Value="fpg_fontcache"/>
+      </Item102>
+      <Item103>
         <Filename Value="../../gui/fpg_window.pas"/>
         <UnitName Value="fpg_window"/>
-      </Item102>
+      </Item103>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">

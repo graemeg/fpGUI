@@ -1522,6 +1522,7 @@ var
   swg: TfpgWidget; { source widget }
   CF: DWORD;
   lIsTranslated: Boolean;
+  lPoint: Windows.Point;
 begin
   if not FUserAcceptDrag then
     exit;
@@ -1547,7 +1548,11 @@ begin
           swg := uDragSource as TfpgWidget
         else
           swg := nil;
-        wg.OnDragDrop(wg, swg, pt.x, pt.y, data);
+        // convert mouse screen coordinates to widget coordinates
+        lPoint.x := pt.x;
+        lPoint.y := pt.y;
+        ScreenToClient(wg.WinHandle, lPoint);
+        wg.OnDragDrop(wg, swg, lPoint.x, lPoint.y, data);
         uDragSource := nil;
       end;
       GlobalUnlock(stgmed.HGLOBAL);

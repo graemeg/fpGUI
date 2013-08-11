@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -133,10 +133,18 @@ type
     property    Width;
     property    OnChange;
     property    OnCloseUp;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
@@ -522,6 +530,9 @@ var
   prevval: string;
   i: integer;
 begin
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+  if Consumed then
+    Exit; //==>
   prevval   := FText;
   s         := AText;
   consumed  := False;
@@ -572,8 +583,6 @@ begin
 
   if consumed then
     RePaint;
-//  else
-    inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 procedure TfpgBaseEditCombo.HandleKeyPress(var keycode: word;
@@ -766,7 +775,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
+  fpgStyle.DrawControlFrame(Canvas, r);
 
   // internal background rectangle (without frame)
   InflateRect(r, -2, -2);

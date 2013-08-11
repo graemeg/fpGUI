@@ -168,7 +168,7 @@ uses
   ,UnitList
   ,BuilderThread
   {$IFDEF DEBUGSVR}
-  ,dbugintf
+  ,fpg_dbugintf
   {$ENDIF}
   ,ideutils
   ;
@@ -892,6 +892,7 @@ begin
   if not Assigned(FKeywordFont) then
     FKeywordFont := fpgGetFont(edt.FontDesc + ':bold');
   ACanvas.Font := FKeywordFont;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cKeywords1;
   FRegex.ModifierI := True;
   if FRegex.Exec(ALineText) then
@@ -912,6 +913,7 @@ begin
 
   { syntax highlighting for: cDecimal }
   ACanvas.TextColor := clNavy;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cDecimal;
   if FRegex.Exec(ALineText) then
   begin
@@ -929,6 +931,7 @@ begin
 
   { syntax highlighting for: cHexadecimal }
   ACanvas.TextColor := clMagenta;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cHexadecimal;
   if FRegex.Exec(ALineText) then
   begin
@@ -946,6 +949,7 @@ begin
 
   { syntax highlighting for: comments2 }
   ACanvas.TextColor := clDarkCyan;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cComments2;
   if FRegex.Exec(ALineText) then
   begin
@@ -963,6 +967,7 @@ begin
 
   { syntax highlighting for: cDefines1 }
   ACanvas.TextColor := clRed;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cDefines1;
   if FRegex.Exec(ALineText) then
   begin
@@ -980,6 +985,7 @@ begin
 
   { syntax highlighting for: cString1 }
   ACanvas.TextColor := clOlive;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cString1;
   if FRegex.Exec(ALineText) then
   begin
@@ -997,6 +1003,7 @@ begin
 
   { syntax highlighting for: comments1 }
   ACanvas.TextColor := clDarkCyan;
+  ACanvas.Color := clWhite;
   FRegex.Expression := cComments1;
   if FRegex.Exec(ALineText) then
   begin

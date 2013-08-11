@@ -4,7 +4,7 @@ unit fpg_nicegrid;
 interface
 
 uses
-   Classes, SysUtils, fpg_base, fpg_main, fpg_panel, fpg_scrollbar, fpg_types, fpg_edit;
+   Classes, SysUtils, fpg_base, fpg_main, fpg_panel, fpg_scrollbar, fpg_edit;
 
 type
   PHeaderInfo = ^THeaderInfo;
@@ -987,13 +987,13 @@ var
 begin
   if (FGutterKind = gkNone)
     then Exit;
-  CopyfpgRect(GutterBox, CellBox);
+  CopyRect(GutterBox, CellBox);
   GutterBox.Left := 0;
   for x := 0 to FRowCount-1 do
   begin
     R := fpgRect(-1, (x * FDefRowHeight) -1, FGutterWidth, FDefRowHeight +1);
-    OffsetfpgRect(R, 2, -FVertOffset + FixedHeight);
-    if IntersectfpgRect(Dummy, R, GutterBox) then
+    OffsetRect(R, 2, -FVertOffset + FixedHeight);
+    if IntersectRect(Dummy, R, GutterBox) then
     begin
       case FGutterKind of
         gkBlank, gkPointer:
@@ -1040,8 +1040,8 @@ begin
            GetColCoord(P^.Rc.Width+1) - GetColCoord(P^.Rc.Left)+1,
            FDefRowHeight * (P^.Rc.Height+1)+1
                      );
-    OffsetfpgRect(R, -FHorzOffset + FixedWidth, 0);
-    if IntersectfpgRect(Dummy, R, fpgRect(1,1,ClientWidth,ClientHeight)) 
+    OffsetRect(R, -FHorzOffset + FixedWidth, 0);
+    if IntersectRect(Dummy, R, fpgRect(1,1,ClientWidth,ClientHeight))
       then DrawFixCell(R, P^.Str, FHeaderFont, FHeaderFontColor, FOnDrawHeader);
   end;
   R := fpgRect(1,1, FixedWidth, FixedHeight );
@@ -1063,9 +1063,9 @@ begin
                       GetColCoord(x+1)-GetColCoord(x)+1,
                       FooterBottom-FooterTop+1
                       ); 
-    OffsetfpgRect(R, -FHorzOffset + FixedWidth, 0);
+    OffsetRect(R, -FHorzOffset + FixedWidth, 0);
   
-    if IntersectfpgRect(Dummy, R, fpgRect(1,1,ClientWidth,ClientHeight)) 
+    if IntersectRect(Dummy, R, fpgRect(1,1,ClientWidth,ClientHeight))
       then DrawFixCell(R, FColumns[x].FFooter, FFooterFont, FFooterFontColor, FOnDrawFooter);
   end;
   R := fpgRect(1, FooterTop, FixedWidth, FooterBottom-FooterTop);
@@ -1084,8 +1084,8 @@ var
 begin
   Handled := False;
   Rc := GetCellRect(x, y);
-  OffsetfpgRect(Rc, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
-  if IntersectfpgRect(Dummy, Rc, CellBox) then
+  OffsetRect(Rc, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
+  if IntersectRect(Dummy, Rc, CellBox) then
   begin
     Column := FColumns[x];
     with Canvas do
@@ -1093,8 +1093,8 @@ begin
       Font:=fpgGetFont(Column.Font);
       SetTextColor(Column.FontColor);
     
-      if not FEnabled
-        then SetTextColor(FGridColor);
+      if not FEnabled then
+        SetTextColor(FGridColor);
 		
       SetColor(GetCellColor(X, Y)); 
       if Assigned(FOnDrawCell)
@@ -1105,14 +1105,13 @@ begin
         FillRectangle(Rc);
         if FShowGrid then
         begin
-	  SetColor(FGridColor);
-	  inc(Rc.Width,1);
-	  inc(Rc.Height,1);
+          SetColor(FGridColor);
+          inc(Rc.Width,1);
+          inc(Rc.Height,1);
           DrawRectangle(Rc);
-	end;
-        InflatefpgRect(Rc, -4, -2);
-        DrawStringUni(Canvas, SafeGetCell(x, y), Rc, Column.HorzAlign,
-                            Column.VertAlign);
+	      end;
+        InflateRect(Rc, -4, -2);
+        DrawStringUni(Canvas, SafeGetCell(x, y), Rc, Column.HorzAlign, Column.VertAlign);
       end;
     end;
   end;
@@ -1127,8 +1126,8 @@ begin
   Handled := False;          
   Result := Point(-1, -1);
   R := GetCellRect(x, y);
-  OffsetfpgRect(R, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
-  if IntersectfpgRect(Dummy, R, CellBox) then
+  OffsetRect(R, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
+  if IntersectRect(Dummy, R, CellBox) then
   begin
     Column := FColumns[x];
     with Canvas do
@@ -1165,7 +1164,7 @@ begin
   R1 := GetCellRect(FSelectArea.Left, FSelectArea.Top);
   R2 := GetCellRect(FSelectArea.Width, FSelectArea.Height);
   R := fpgRect(R1.Left+2, R1.Top+2, R2.Right - R1.Left, R2.Bottom - R1.Top); 
-  OffsetfpgRect(R, HOffset, VOffset);
+  OffsetRect(R, HOffset, VOffset);
 
   with Canvas do
   begin
@@ -1380,7 +1379,7 @@ end;
 function TfpgNiceGrid.CellRectToClient(R: TfpgRect): TfpgRect;
 begin
   Result := R;
-  OffsetfpgRect(Result, - FHorzOffset + FixedWidth, - FVertOffset + FixedHeight);
+  OffsetRect(Result, - FHorzOffset + FixedWidth, - FVertOffset + FixedHeight);
 end;
 
 function TfpgNiceGrid.GetCellAtPos(X, Y: Integer): TPoint;
@@ -1959,7 +1958,7 @@ begin
     end;
   end;
 
-  if PtInfpgRect(SmallBox, Point(X, Y))
+  if PtInRect(SmallBox, Point(X, Y))
     then Result := gtSmallBox else
   if IsSizing
     then Result := gtColSizing else
@@ -2534,8 +2533,8 @@ end;
 
 procedure TfpgNiceGrid.AdjustSelection(Value: TfpgRect; Force: Boolean);
 begin
-  if EqualfpgRect(FSelectArea, Value) and not Force
-    then Exit;  //==>
+  if (FSelectArea = Value) and not Force then
+    Exit;  //==>
   FSelectArea := Value;
 end;
 
@@ -2988,7 +2987,7 @@ var
 begin
   for x := 0 to Mergeds.Count-1 do
   begin
-    CopyfpgRect(Rc, TfpgMergeCell(Mergeds[x]).Rc);
+    CopyRect(Rc, TfpgMergeCell(Mergeds[x]).Rc);
     for y := Rc.Left to Rc.Right do
     begin
       if (y >= FColumns.Count)
@@ -3014,8 +3013,8 @@ begin
   t := FDefRowHeight * Data.Rc.Top;
   h := FDefRowHeight * (Data.Rc.Bottom - Data.Rc.Top + 1);
   Rc := fpgRect(l1-1, t-1, l2-l1, h);
-  OffsetfpgRect(Rc, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
-  if IntersectfpgRect(Dummy, Rc, CellBox) then
+  OffsetRect(Rc, -FHorzOffset + FixedWidth, -FVertOffset + FixedHeight);
+  if IntersectRect(Dummy, Rc, CellBox) then
   begin
     with Canvas do
     begin
@@ -3032,7 +3031,7 @@ begin
         SetColor(Data.Color);
         FillRectangle(Rc);
       end;
-      InflatefpgRect(Rc, -4, -2);
+      InflateRect(Rc, -4, -2);
       DrawStringUni(Canvas, Data.Text, Rc, Data.HorzAlign, Data.VertAlign);
     end;
   end;
@@ -3302,7 +3301,7 @@ begin
 
   Rc := FGrid.GetCellRect(X, Y);
   Rc := FGrid.CellRectToClient(Rc);
-  InflatefpgRect(Rc, -2, -2); 
+  InflateRect(Rc, -2, -2);
   SetPosition(Rc.Left, Rc.Top,Rc.Width,Rc.Height);
   Visible:=true;
   SetFocus;

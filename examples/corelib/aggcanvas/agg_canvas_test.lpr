@@ -202,6 +202,10 @@ begin
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
 
+  // Draw filled triangle
+  Canvas.Color := clOrange;
+  Canvas.FillTriangle(200, 150, 175, 175, 275, 175);
+
   // Testing line drawing
   ac.NoFill;
   Canvas.SetColor(clBlue);
@@ -262,7 +266,7 @@ begin
 
   Canvas.DrawString(45, y, 'DrawControlFrame():');
   y := y + Canvas.Font.Height;
-  Canvas.DrawControlFrame(5, y, 150, 23);
+  fpgStyle.DrawControlFrame(Canvas, 5, y, 150, 23);
 
   // A Vector Text example
   //----------------------

@@ -2670,7 +2670,8 @@ begin
  m_fontEngine.hinting_(m_textHints );
 
  if cache = AGG_VectorFontCache then
-  m_fontEngine.height_(height )
+ {$NOTE We need to fix this. Translating from font pt to pixels is inaccurate. This is just a temp fix for now. }
+  m_fontEngine.height_(height * 1.3333 ) // 9pt = ~12px so that is a ration of 1.3333
  else
   m_fontEngine.height_(worldToScreen(height ) );
 {$ENDIF}
@@ -3555,18 +3556,29 @@ begin
 end;
 
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
+{$IFDEF WINDOWS}
 begin
-  {$NOTE This is only temporary until I can correctly query font names }
-  {$IFDEF WINDOWS}
+ {$IFDEF AGG2D_USE_FREETYPE }
+ Font('c:\WINNT\Fonts\arial.ttf', 10);
+ {$ENDIF }
+ {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);
-  {$ELSE}
-    {$IFDEF BSD}
-    Font('/usr/local/lib/X11/fonts/Liberation/LiberationSans-Regular.ttf', 13);
-    {$ELSE}
-    Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
-    {$ENDIF}
-  {$ENDIF}
+ {$ENDIF }
 end;
+{$ENDIF}
+{$IFDEF UNIX}
+var
+  s: TfpgString;
+  i: integer;
+  fnt: TFontCacheItem;
+  lSize: double;
+begin
+  fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
+  i := gFontCache.Find(fnt);
+  if i > 0 then
+    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+end;
+{$ENDIF}
 
 procedure TAgg2D.DoSetTextColor(cl: TfpgColor);
 var
@@ -3576,7 +3588,7 @@ begin
   c := fpgColorToRGB(cl);
   t := fpgColorToRGBTriple(c);
 
-  FillColor(t.Red, t.Green, t.Blue{, t.Alpha});
+  FillColor(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 procedure TAgg2D.DoSetColor(cl: TfpgColor);
@@ -3656,7 +3668,10 @@ end;
 
 procedure TAgg2D.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
-
+  LineWidth(1);
+  FillColor(LineColor);
+  LineColor(LineColor);
+  Triangle(x1+0.5, y1+0.5, x2+0.5, y2+0.5, x3+0.5, y3+0.5);
 end;
 
 procedure TAgg2D.DoDrawRectangle(x, y, w, h: TfpgCoord);

@@ -554,7 +554,7 @@ begin
   Canvas.FillRectangle(r);
 
   Canvas.Color := clBlack;
-  Canvas.DrawControlFrame(r);
+  fpgStyle.DrawControlFrame(Canvas, r);
 end;
 
 procedure TfpgValueBar.SetMarginWidth(NewWidth: longint);

@@ -331,9 +331,9 @@ end;
 
 function TfpgCustomStringGrid.GetCell(ACol, ARow: Integer): string;
 begin
-  if ACol > ColumnCount-1 then
+  if (ACol < 0) or (ACol > ColumnCount-1) then
     Exit; //==>
-  if ARow > RowCount-1 then
+  if (ARow < 0) or (ARow > RowCount-1) then
     Exit; //==>
   Result := TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow];
 end;

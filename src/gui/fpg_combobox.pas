@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -182,7 +182,7 @@ type
   
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord = 24): TfpgComboBox;
 
 
 implementation
@@ -537,7 +537,9 @@ end;
 
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord): TfpgComboBox;
+var
+  lh: integer;
 begin
   Result           := TfpgComboBox.Create(AOwner);
   Result.Left      := x;
@@ -545,8 +547,9 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  if h < TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2) then
-    Result.Height := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2)
+  lh := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2);
+  if h < lh then
+    Result.Height := lh
   else
     Result.Height := h;
 
@@ -728,7 +731,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
+  fpgStyle.DrawControlFrame(Canvas, r);
 
   // internal background rectangle (without frame)
   InflateRect(r, -2, -2);
