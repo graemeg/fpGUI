@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -171,6 +171,8 @@ type
     property    OnDragLeave;
     property    OnDragDrop;
     property    OnDragStartDetected;
+    property    OnEnter;
+    property    OnExit;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
