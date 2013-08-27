@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -77,6 +77,17 @@ type
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
+    property    OnEnter;
+    property    OnExit;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
   
