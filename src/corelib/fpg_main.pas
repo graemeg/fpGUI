@@ -462,7 +462,7 @@ uses
   Agg2D,
 {$endif}
 {$IFDEF DEBUG}
-  dbugintf,
+  fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
   fpg_stdimages,

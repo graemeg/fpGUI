@@ -190,7 +190,7 @@ implementation
 uses
   fpg_listbox,
   {$IFDEF DEBUG}
-  dbugintf,
+  fpg_dbugintf,
   {$ENDIF}
   math;
   
