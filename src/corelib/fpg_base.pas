@@ -119,6 +119,7 @@ const
   FPGM_FREEME      = 19;
   FPGM_DROPENTER   = 20;
   FPGM_DROPEXIT    = 21;
+  FPGM_HSCROLL      = 22;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
