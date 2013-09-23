@@ -488,6 +488,13 @@ begin
   Result := Result or ((rgb and $F80000) shr 8);
 end;
 
+function ConvertTo555Pixel(rgb: longword): word;
+begin
+  Result := (rgb and $F8) shr 3;
+  Result := Result or ((rgb and $F800) shr 6);
+  Result := Result or ((rgb and $F80000) shr 9);
+end;
+
 function fpgColorToX(col: TfpgColor): longword;
 var
   xc: TXColor;
@@ -499,6 +506,8 @@ begin
     Result   := c and $FFFFFF       { No Alpha channel information }
   else if xapplication.DisplayDepth = 16 then
     Result   := ConvertTo565Pixel(c)
+  else if (xapplication.DisplayDepth = 15) then
+    Result   := ConvertTo555Pixel(c)
   else
   begin
     c        := col;
