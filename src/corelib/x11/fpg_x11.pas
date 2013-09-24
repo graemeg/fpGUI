@@ -501,7 +501,6 @@ var
   c: TfpgColor;
 begin
   c := fpgColorToRGB(col);
-
   if xapplication.DisplayDepth >= 24 then
     Result   := c and $FFFFFF       { No Alpha channel information }
   else if xapplication.DisplayDepth = 16 then
@@ -510,7 +509,6 @@ begin
     Result   := ConvertTo555Pixel(c)
   else
   begin
-    c        := col;
     xc.blue  := (c and $000000FF) shl 8;
     xc.green := (c and $0000FF00);
     xc.red   := (c and $00FF0000) shr 8;
