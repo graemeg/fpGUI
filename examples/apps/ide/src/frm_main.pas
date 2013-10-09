@@ -856,7 +856,7 @@ const
     + '|xor|repeat|until|constref|stdcall|cdecl|external|generic|specialize)\b';
 
   cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
-  cComments2 = '\{[^\{]*\}';
+  cComments2 = '\{[^\$][^\{]*\}';
 
   cDefines1 = '\{\$[^\{]*\}';
 
