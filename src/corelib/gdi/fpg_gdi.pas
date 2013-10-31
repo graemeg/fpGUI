@@ -1249,6 +1249,8 @@ begin
 end;
 
 function TfpgGDIApplication.GetHiddenWindow: HWND;
+var
+  lHandle: TfpgWinHandle;
 begin
   if (FHiddenWindow = 0) then
   begin
@@ -1264,8 +1266,12 @@ begin
     end;
     Windows.RegisterClass(@HiddenWndClass);
 
+    if MainForm <> nil then
+      lHandle := TfpgGDIWindow(MainForm).FWinHandle
+    else
+      lHandle := -1;
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
-      DWORD(WS_POPUP), 0, 0, 0, 0, TfpgGDIWindow(MainForm).FWinHandle, 0, MainInstance, nil);
+      DWORD(WS_POPUP), 0, 0, 0, 0, lHandle, 0, MainInstance, nil);
   end;
   Result := FHiddenWindow;
 end;
