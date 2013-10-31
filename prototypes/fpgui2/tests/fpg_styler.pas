@@ -331,7 +331,7 @@ begin
             InflateRect(r, -3, -3);
 
             oldColor      := Canvas.Color;
-            oldLineWidth  := Canvas.LineWidth;
+            oldLineWidth  := Canvas.GetLineWidth;
             oldLineStyle  := Canvas.LineStyle;
 
             Canvas.SetColor(clText1);

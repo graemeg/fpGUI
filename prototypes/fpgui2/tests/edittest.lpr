@@ -116,7 +116,7 @@ begin
   
   InflateRect(r, -1, -1);
 //  Canvas.DrawControlFrame(2, 2, Width-4, Height-4);
-  Canvas.DrawControlFrame(r);
+  fpgStyle.DrawControlFrame(Canvas, r);
 
 {
   Canvas.SetColor(clGreen);
