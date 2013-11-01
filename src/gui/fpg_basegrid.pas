@@ -632,8 +632,8 @@ begin
   // if we don't want any scrollbars, hide them and exit
   if FScrollBarStyle = ssNone then
   begin
-    hideScrollbar (FHScrollBar);
-    hideScrollbar (FVScrollBar);
+    hideScrollbar(FHScrollBar);
+    hideScrollbar(FVScrollBar);
     exit;
   end;
   
@@ -1475,7 +1475,7 @@ begin
     w := 0;
     for n := FFocusCol downto FFirstCol do
     begin
-      w := w + ColumnWidth[n]+1;
+      w := w + ColumnWidth[n];
       if w > VisibleWidth then
       begin
         if n = FFocusCol then
