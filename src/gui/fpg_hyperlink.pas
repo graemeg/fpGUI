@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -80,7 +80,9 @@ end;
 implementation
 
 uses
-  fpg_utils;
+  fpg_utils
+  ,fpg_constants
+  ;
 
 
 { TfpgHyperlink }
@@ -91,7 +93,7 @@ begin
   Width           := 120;
   FHotTrackColor  := clBlue;
   TextColor       := clBlue;
-  FUrl            := 'http://opensoft.homeip.net/fpgui/';
+  FUrl            := fpGUIWebsite;
   FText           := 'fpGUI website';
   FHTFont         := 'Arial-8:antialias=true:underline:bold';
   FontDesc        := 'Arial-8:antialias=true:underline';
