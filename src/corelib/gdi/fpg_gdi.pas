@@ -1129,7 +1129,7 @@ begin
           {$IFDEF DEBUG}
           SendDebug(w.ClassName + ': WM_TIMECHANGE');
           {$ENDIF}
-          writeln('fpGUI/GDI: ' + w.ClassName + ': WM_TIMECHANGE');
+//          writeln('fpGUI/GDI: ' + w.ClassName + ': WM_TIMECHANGE');
           fpgResetAllTimers;
         end;
 
