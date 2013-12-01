@@ -727,14 +727,14 @@ end;
 procedure TfpgBaseStaticCombo.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
-
-  // internal background rectangle (without frame)
-  InflateRect(r, -2, -2);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then
