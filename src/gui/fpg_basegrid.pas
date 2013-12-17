@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -52,8 +52,6 @@ type
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
   
-  { TfpgBaseGrid }
-
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -779,6 +777,7 @@ var
   rTop: integer;
   firstcol, lastcol, firstrow, lastrow : integer;
   cWidths: array of integer;
+  rect: TRect;
 begin
   Canvas.ClearClipRect;
 
@@ -791,7 +790,8 @@ begin
     ebsDefault:
         begin
           fpgStyle.DrawControlFrame(Canvas, r);
-          InflateRect(r, -2, -2);
+          rect := fpgStyle.GetControlFrameBorders;
+          InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
         end;
     ebsSingle:
         begin
