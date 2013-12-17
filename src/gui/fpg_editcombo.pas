@@ -780,7 +780,12 @@ begin
   Canvas.SetClipRect(r);
 
   if Enabled then
-    Canvas.SetColor(FBackgroundColor)
+  begin
+    if ReadOnly then
+      Canvas.SetColor(clWindowBackground)
+    else
+      Canvas.SetColor(FBackgroundColor);
+  end
   else
     Canvas.SetColor(clWindowBackground);
 
