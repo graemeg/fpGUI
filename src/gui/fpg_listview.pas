@@ -1077,7 +1077,7 @@ end;
 procedure TfpgListView.MsgPaint(var msg: TfpgMessageRec);
 begin
   // Optimises painting and prevents Begin[End]Draw and OnPaint event firing
-  // in not needed.
+  // if not needed.
   if FUpdateCount = 0 then
     inherited MsgPaint(msg);
 end;
@@ -1417,10 +1417,10 @@ begin
   if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
     Canvas.Color := clButtonFace;
-    Canvas.FillRectangle(Width - 2 - FVScrollBar.Width,
-                         Height - 2 - FHScrollBar.Height,
-                         Width - 2,
-                         Height - 2);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
   end;
   
   if FVScrollBar.Visible then
