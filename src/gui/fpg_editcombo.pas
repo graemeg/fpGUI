@@ -770,7 +770,6 @@ var
   end;
 
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -869,8 +868,6 @@ begin
     else
       fpgCaret.UnSetCaret(Canvas);
   end;
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgBaseEditCombo.Create(AOwner: TComponent);
