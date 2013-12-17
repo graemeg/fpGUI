@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1404,13 +1404,28 @@ end;
 procedure TfpgListView.HandlePaint;
 var
   ClipRect: TfpgRect;
+  rect: TRect;
 begin
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
-  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
-  
-  ClipRect.SetRect(2, 2, Width-4, Height-4);
+  Canvas.ClearClipRect;
+  ClipRect.SetRect(0, 0, Width, Height);
+  fpgStyle.DrawControlFrame(Canvas, ClipRect);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(ClipRect, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(ClipRect);
+
+  if Enabled then
+  begin
+//    if ReadOnly then
+//      Canvas.SetColor(clWindowBackground)
+//    else
+      Canvas.SetColor(FBackgroundColor);
+  end
+  else
+    Canvas.SetColor(clWindowBackground);
+
+  Canvas.FillRectangle(ClipRect);
 
   // This paints the small square remaining below the vscrollbar
   // and to the right of the hscrollbar
