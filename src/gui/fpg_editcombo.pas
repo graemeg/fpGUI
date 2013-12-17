@@ -128,6 +128,7 @@ type
     property    Hint;
     property    Items;
     property    Margin;
+    property    ReadOnly;
     property    Text;
     property    TextColor;
     property    Width;
