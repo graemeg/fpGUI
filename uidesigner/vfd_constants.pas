@@ -33,6 +33,7 @@ const
   cAppName = 'fpGUI UI Designer';
   cAppVersion = FPGUI_VERSION;
   cAppNameAndVersion = cAppName + ' v' + cAppVersion;
+  cDesignerINIVersion = 1;
 
 resourcestring
   rsOpenFormFile = 'Open form file';
@@ -44,6 +45,7 @@ resourcestring
   rsNewUnnamedForm = 'new';
 
   rsDlgProductInfo = 'Product Information...';
+  rsDlgSetup = 'General Settings...';
 
   rsErrUnitNotFound = 'The unit <%s> was not found.';
   rsErrLoadingForm = 'Error loading form';

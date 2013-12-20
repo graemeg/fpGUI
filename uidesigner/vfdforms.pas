@@ -40,7 +40,11 @@ type
 
   TVFDDialog = class(TfpgForm)
   protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   SetupCaptions; virtual;
+    procedure   FormShow(Sender: TObject); virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -105,13 +109,15 @@ type
   end;
 
 
-  TfrmVFDSetup = class(TfpgForm)
+  TfrmVFDSetup = class(TVFDDialog)
   private
     FINIVersion: integer;
-    procedure   FormShow(Sender: TObject);
     procedure   LoadSettings;
     procedure   SaveSettings;
     procedure   btnOKClick(Sender: TObject);
+  protected
+    procedure   FormShow(Sender: TObject); override;
+    procedure   SetupCaptions; override;
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
     lb1: TfpgLabel;
@@ -132,7 +138,6 @@ type
     cbIndentationType: TfpgComboBox;
     lblIndentType: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
-    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
   end;
@@ -145,10 +150,8 @@ uses
   fpg_main,
   fpg_iniutils,
   fpg_constants,
+  vfd_constants,
   vfdprops; // used to get Object Inspector defaults
-
-const
-  cDesignerINIVersion = 1;
 
 
 { TInsertCustomForm }
@@ -388,6 +391,11 @@ end;
 
 { TVFDDialogBase }
 
+procedure TVFDDialog.FormShow(Sender: TObject);
+begin
+  SetupCaptions;
+end;
+
 procedure TVFDDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then
@@ -398,14 +406,32 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TVFDDialog.SetupCaptions;
+begin
+  // to be implemented in descendants
+end;
+
+constructor TVFDDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow := @FormShow;
+end;
+
 procedure TfrmVFDSetup.FormShow(Sender: TObject);
 begin
+  inherited FormShow(Sender);
   { If it's an older version, don't load the size because the dialog dimensions
     probably changed in a newer version }
   if FINIVersion >= cDesignerINIVersion then
     gINI.ReadFormState(self)
   else
     gINI.ReadFormState(self, -1, -1, True);
+end;
+
+procedure TfrmVFDSetup.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgSetup;
 end;
 
 procedure TfrmVFDSetup.LoadSettings;
@@ -438,12 +464,6 @@ procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
 begin
   SaveSettings;
   ModalResult := mrOK;
-end;
-
-constructor TfrmVFDSetup.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  OnShow := @FormShow;
 end;
 
 procedure TfrmVFDSetup.AfterCreate;
