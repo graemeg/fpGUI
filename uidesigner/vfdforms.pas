@@ -33,7 +33,6 @@ uses
   fpg_combobox,
   fpg_trackbar,
   fpg_checkbox,
-  fpg_panel,
   fpg_tree;
 
 type

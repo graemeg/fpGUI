@@ -854,7 +854,6 @@ var
   PropInfo: PPropInfo;
   i: integer;
   c: TfpgColor;
-  nc: TfpgColor;
 begin
   PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);

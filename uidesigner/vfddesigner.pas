@@ -643,9 +643,7 @@ end;
 procedure TFormDesigner.EditWidgetOrTabOrder(AMode: TfpgEditMode);
 var
   frm: TWidgetOrderForm;
-  n, fi: integer;
-  cd: TWidgetDesigner;
-  identlevel: integer;
+  n: integer;
   lFocused: TfpgTreeNode;
   lNode: TfpgTreeNode;
   s: string;
@@ -678,9 +676,7 @@ begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
   frm.Title := cEditOrder[AMode];
-  fi  := 0;
 
-  identlevel := 0;
   frm.Treeview1.RootNode.Clear;
   lFocused := nil;
 
