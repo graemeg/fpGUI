@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      The main uiDesigner forms.
+      This unit defines various forms/dialogs used in the UI Designer.
 }
 
 unit vfdforms;
@@ -49,6 +49,8 @@ type
 
 
   TInsertCustomForm = class(TVFDDialog)
+  protected
+    procedure   SetupCaptions; override;
   public
     l1,
     l2: TfpgLabel;
@@ -56,34 +58,38 @@ type
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
   TNewFormForm = class(TVFDDialog)
   private
-    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     l1: TfpgLabel;
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
   TEditPositionForm = class(TVFDDialog)
   private
-    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     lbPos: TfpgLabel;
     edPos: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
@@ -91,6 +97,8 @@ type
   private
     function    GetTitle: string;
     procedure   SetTitle(const AValue: string);
+  protected
+    procedure   SetupCaptions; override;
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
     lblTitle: TfpgLabel;
@@ -156,6 +164,12 @@ uses
 
 { TInsertCustomForm }
 
+procedure TInsertCustomForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgInsertCustomWidget;
+end;
+
 procedure TInsertCustomForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -191,6 +205,12 @@ begin
     btnOK.Click;
 end;
 
+procedure TNewFormForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgNewForm;
+end;
+
 procedure TNewFormForm.AfterCreate;
 begin
   inherited AfterCreate;
@@ -221,6 +241,12 @@ procedure TEditPositionForm.edPosKeyPressed(Sender: TObject; var KeyCode: word;
 begin
   if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
     btnOK.Click;
+end;
+
+procedure TEditPositionForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgEditFormPosition;
 end;
 
 procedure TEditPositionForm.AfterCreate;
@@ -257,6 +283,12 @@ end;
 procedure TWidgetOrderForm.SetTitle(const AValue: string);
 begin
   lblTitle.Text := Format(lblTitle.Text, [AValue]);
+end;
+
+procedure TWidgetOrderForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgWidgetOrder;
 end;
 
 constructor TWidgetOrderForm.Create(AOwner: TComponent);

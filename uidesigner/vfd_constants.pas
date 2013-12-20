@@ -44,8 +44,12 @@ resourcestring
   rsCompiledOn = 'Compiled on:  %s';
   rsNewUnnamedForm = 'new';
 
-  rsDlgProductInfo = 'Product Information...';
-  rsDlgSetup = 'General Settings...';
+  rsDlgProductInfo = 'Product Information';
+  rsDlgSetup = 'General Settings';
+  rsDlgInsertCustomWidget = 'Insert Custom Widget';
+  rsDlgNewForm = 'New Form';
+  rsDlgEditFormPosition = 'Form Position';
+  rsDlgWidgetOrder = 'Widget Order';
 
   rsErrUnitNotFound = 'The unit <%s> was not found.';
   rsErrLoadingForm = 'Error loading form';
