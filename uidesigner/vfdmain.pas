@@ -460,7 +460,7 @@ begin
   FEditedFileName := Value;
   s := ExtractFileName(FEditedFileName);
   if s = '' then
-    s := '[new]';
+    s := '[' + rsNewUnnamedForm + ']';
   frmMain.WindowTitle := cAppNameAndVersion + ' - ' + s;
 end;
 

@@ -14,8 +14,8 @@
   Description:
     This unit contains all the language resource strings used by the
     UI Designer project. Thus making it possible to translate the UI Designer
-    to other languages.
-  }
+    to other languages. It also contains all project constants.
+}
 
 unit vfd_constants;
 
@@ -41,6 +41,7 @@ resourcestring
   rsVersion = 'Version: %s';
   rsWrittenBy = 'Written by %s';
   rsCompiledOn = 'Compiled on:  %s';
+  rsNewUnnamedForm = 'new';
 
   rsDlgProductInfo = 'Product Information...';
 
