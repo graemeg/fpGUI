@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -25,7 +25,8 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, fpg_base, fpg_main, vfdmain, vfdresizer, vfdforms,
   vfdfile, newformdesigner, vfdwidgets, vfdformparser, vfdeditors,
-  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid;
+  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid,
+  vfd_constants;
 
 
 procedure MainProc;
@@ -37,10 +38,10 @@ begin
     maindsgn := TMainDesigner.Create;
     maindsgn.CreateWindows;
 
-    // Note:  This needs improving!!
+    // Making sure the correct form is set as the MainForm
     fpgApplication.MainForm := frmMain;
 
-    { If file passed in as param, load it! }
+    { If a file is passed in as a parameter, then load it }
     maindsgn.EditedFileName := ParamStr(1);
     if FileExists(maindsgn.EditedFileName) then
       maindsgn.OnLoadFile(maindsgn);
