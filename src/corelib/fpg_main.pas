@@ -476,7 +476,9 @@ uses
   fpg_imgutils,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
-  fpg_style_motif;   // TODO: This needs to be removed!
+  fpg_style_motif,   // TODO: This needs to be removed!
+  fpg_style_carbon,
+  fpg_style_plastic;
 
 var
   fpgTimers: TList;
