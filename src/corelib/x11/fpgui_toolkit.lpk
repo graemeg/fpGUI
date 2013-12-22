@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <Name Value="fpgui_toolkit"/>
@@ -29,7 +29,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1"/>
-    <Files Count="102">
+    <Files Count="104">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -438,6 +438,14 @@
         <Filename Value="../render/software/fpg_fontcache.pas"/>
         <UnitName Value="fpg_fontcache"/>
       </Item102>
+      <Item103>
+        <Filename Value="../../gui/fpg_style_carbon.pas"/>
+        <UnitName Value="fpg_style_carbon"/>
+      </Item103>
+      <Item104>
+        <Filename Value="../../gui/fpg_style_plastic.pas"/>
+        <UnitName Value="fpg_style_plastic"/>
+      </Item104>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">
