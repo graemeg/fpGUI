@@ -43,6 +43,14 @@ resourcestring
   rsWrittenBy = 'Written by %s';
   rsCompiledOn = 'Compiled on:  %s';
   rsNewUnnamedForm = 'new';
+  rsDesignerHelp1 = 'F11: switch to Properties';
+  rsDesignerHelp2 = 'TAB, SHIFT+TAB: select next widget';
+  rsDesignerHelp3 = 'F2: edit widget order';
+  rsDesignerQuickHelp = 'Quick Help';
+  rsLeft = 'Left';
+  rsTop = 'Top';
+  rsWidth = 'Width';
+  rsHeight = 'Height';
 
   rsDlgProductInfo = 'Product Information';
   rsDlgSetup = 'General Settings';
@@ -50,12 +58,15 @@ resourcestring
   rsDlgNewForm = 'New Form';
   rsDlgEditFormPosition = 'Form Position';
   rsDlgWidgetOrder = 'Widget Order';
+  rsDlgTabOrder = 'Tab Order';
 
   rsErrUnitNotFound = 'The unit <%s> was not found.';
   rsErrLoadingForm = 'Error loading form';
   rsErrFailedToFindDesignerForm = 'Failed to find Designer Form';
   rsErrFormSaveIOError = 'Form save I/O failure in <%s>.';
   rsErrNameConflict = 'Name Conflict';
+  rsErrNoStringsProperty = 'Failed to find TStrings type property.';
+  rsErrFailedToParseBoolean = 'Failed to parse Boolean value <%s>';
 
 implementation
 

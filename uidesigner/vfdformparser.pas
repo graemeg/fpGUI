@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -65,6 +65,8 @@ function  GetColorValue(var s: string): integer;
 
 implementation
 
+uses
+  vfd_constants;
 
 { TVFDFormParser }
 
@@ -152,7 +154,7 @@ begin
   else if UpperCase(fs) = 'FALSE' then
     Result := False
   else
-    raise exception.Create('Failed to parse Boolean value <' + s + '>');
+    raise Exception.CreateFmt(rsErrFailedToParseBoolean, [s]);
     
   if Result then
     Delete(s, 1, 4)
