@@ -157,6 +157,7 @@ uses
   fpg_main,
   fpg_iniutils,
   fpg_constants,
+  fpg_utils,
   vfd_constants,
   vfdprops; // used to get Object Inspector defaults
 
@@ -167,6 +168,8 @@ procedure TInsertCustomForm.SetupCaptions;
 begin
   inherited SetupCaptions;
   WindowTitle := rsDlgInsertCustomWidget;
+  l1.Text := fpgAddColon(rsNewClassName);
+  l2.Text := fpgAddColon(rsName);
 end;
 
 procedure TInsertCustomForm.AfterCreate;
@@ -174,7 +177,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   inherited;
   WindowPosition := wpScreenCenter;
-  WindowTitle := 'Insert Custom Widget';
+  WindowTitle := 'TInsertCustomForm';
   SetPosition(0, 0, 300, 100);
 
   l1        := CreateLabel(self, 8, 4, 'Class name:');
@@ -182,8 +185,8 @@ begin
   edClass.Text := 'Tfpg';
   l2        := CreateLabel(self, 8, 48, 'Name:');
   edName    := CreateEdit(self, 8, 68, 150, 0);
-  btnOK     := CreateButton(self, 180, 20, 100, 'OK', @OnButtonClick);
-  btnCancel := CreateButton(self, 180, 52, 100, 'Cancel', @OnButtonClick);
+  btnOK     := CreateButton(self, 180, 20, 100, rsOK, @OnButtonClick);
+  btnCancel := CreateButton(self, 180, 52, 100, rsCancel, @OnButtonClick);
   {%endregion}
 end;
 
@@ -208,6 +211,7 @@ procedure TNewFormForm.SetupCaptions;
 begin
   inherited SetupCaptions;
   WindowTitle := rsDlgNewForm;
+  l1.Text := fpgAddColon(rsNewFormName);
 end;
 
 procedure TNewFormForm.AfterCreate;
@@ -215,7 +219,7 @@ begin
   inherited AfterCreate;
   WindowPosition := wpScreenCenter;
   SetPosition(0, 0, 286, 66);
-  WindowTitle := 'New Form';
+  WindowTitle := 'TNewFormForm';
 
   l1           := CreateLabel(self, 8, 8, 'Form name:');
   edName       := CreateEdit(self, 8, 28, 180, 0);
@@ -246,6 +250,7 @@ procedure TEditPositionForm.SetupCaptions;
 begin
   inherited SetupCaptions;
   WindowTitle := rsDlgEditFormPosition;
+  lbPos.Text := fpgAddColon(rsPosition);
 end;
 
 procedure TEditPositionForm.AfterCreate;
@@ -254,10 +259,10 @@ begin
   WindowPosition := wpScreenCenter;
   Width := 186;
   Height := 66;
-  WindowTitle := 'Position';
+  WindowTitle := 'TEditPositionForm';
   Sizeable := False;
 
-  lbPos           := CreateLabel(self, 8, 8, 'Pos:      ');
+  lbPos           := CreateLabel(self, 8, 8, 'Pos:');
   edPos           := CreateEdit(self, 8, 28, 80, 0);
   edPos.OnKeyPress := @edPosKeyPressed;
   btnOK           := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
@@ -288,6 +293,11 @@ procedure TWidgetOrderForm.SetupCaptions;
 begin
   inherited SetupCaptions;
   WindowTitle := rsDlgWidgetOrder;
+  lblTitle.Text := fpgAddColon(rsFormTitle);
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
+  btnUp.Text := rsUp;
+  btnDown.Text := rsDown;
 end;
 
 constructor TWidgetOrderForm.Create(AOwner: TComponent);
@@ -309,7 +319,7 @@ begin
   {@VFD_BODY_BEGIN: WidgetOrderForm}
   Name := 'WidgetOrderForm';
   SetPosition(534, 173, 426, 398);
-  WindowTitle := 'Widget order';
+  WindowTitle := 'TWidgetOrderForm';
   Hint := '';
   WindowPosition := wpScreenCenter;
 
@@ -463,6 +473,19 @@ procedure TfrmVFDSetup.SetupCaptions;
 begin
   inherited SetupCaptions;
   WindowTitle := rsDlgSetup;
+  lb1.Text := fpgAddColon(rsGridResolution);
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
+  lblRecentFiles.Text := fpgAddColon(rsRecentFilesCount);
+  chkFullPath.Text := rsShowFullPathName;
+  lblName1.Text := rsFormDesigner;
+  lblName2.Text := rsOpenRecentSettings;
+  lblName3.Text := rsVarious;
+  chkUndoOnExit.Text := rsUndoOnPropertyExit;
+  chkOneClick.Text := rsOneClickSelectAndMove;
+  Label1.Text := fpgAddColon(rsDefaultFileExt);
+  chkCodeRegions.Text := rsUseCodeRegions;
+  lblIndentType.Text := fpgAddColon(rsIndentType);
 end;
 
 procedure TfrmVFDSetup.LoadSettings;

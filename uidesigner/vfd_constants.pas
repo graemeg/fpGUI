@@ -51,6 +51,23 @@ resourcestring
   rsTop = 'Top';
   rsWidth = 'Width';
   rsHeight = 'Height';
+  rsNewClassName = 'Class name';
+  rsNewFormName = 'Form name';
+  rsPosition = 'Position';
+  rsFormTitle = 'Form %s';
+  rsUp = 'Up';
+  rsDown = 'Down';
+  rsGridResolution = 'Grid resolution';
+  rsRecentFilesCount = 'Recent files count';
+  rsShowFullPathName = 'Show the full file path';
+  rsFormDesigner = 'Form designer';
+  rsOpenRecentSettings = 'Open Recent menu settings';
+  rsVarious = 'Various';
+  rsUndoOnPropertyExit = 'Undo on property editor exit';
+  rsOneClickSelectAndMove = 'One click select and move';
+  rsDefaultFileExt = 'Default file extension';
+  rsUseCodeRegions = 'Use code-folding regions in auto-generated code';
+  rsIndentType = 'Indent Type for generated code';
 
   rsDlgProductInfo = 'Product Information';
   rsDlgSetup = 'General Settings';
