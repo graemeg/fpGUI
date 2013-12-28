@@ -75,14 +75,13 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
         if fpgStyleManager.SetStyle('my style system colors') then
           fpgStyle := fpgStyleManager.Style;
 
-
-
       PropList := TPropertyList.Create;
       maindsgn := TMainDesigner.Create;
 
       maindsgn.CreateWindows;
 
-      // Note:  This needs improving!!
+     // Making sure the correct form is set as the MainForm
+
       fpgApplication.MainForm := frmMain;
 
       fpgApplication.Run;

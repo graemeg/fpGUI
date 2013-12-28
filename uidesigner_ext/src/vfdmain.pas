@@ -110,9 +110,10 @@ var
 implementation
 
 uses
-  vfdformparser,
-  fpg_iniutils,
-  fpg_utils;
+ fpg_iniutils,
+ fpg_utils,
+ vfd_constants,
+ vfdformparser;
 
 var
   DefaultPasExt: string = '.pas';
@@ -880,7 +881,7 @@ begin
   s := ExtractFileName(FEditedFileName);
   p := ExtractFilePath(FEditedFileName);
   if s = '' then
-    s := '[new]';
+  s := '[' + rsNewUnnamedForm + ']';
   frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + p + s;
 
   if frmMain.btnToFront.Tag = 1 then

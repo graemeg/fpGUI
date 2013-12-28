@@ -48,59 +48,65 @@ type
 
   TVFDDialog = class(TfpgForm)
   protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
-      var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   SetupCaptions; virtual;
+    procedure   FormShow(Sender: TObject); virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
   TInsertCustomForm = class(TVFDDialog)
+  protected
+    procedure   SetupCaptions; override;
   public
-    l1, l2: TfpgLabel;
+    l1,
+    l2: TfpgLabel;
     edClass: TfpgEdit;
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
-
 
   TNewFormForm = class(TVFDDialog)
   private
-    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word;
-      var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     l1: TfpgLabel;
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
-  TEditPositionForm = class(TVFDDialog)
+   TEditPositionForm = class(TVFDDialog)
   private
-    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word;
-      var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     lbPos: TfpgLabel;
     edPos: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
-
 
   TWidgetOrderForm = class(TVFDDialog)
   private
-    function GetTitle: string;
-    procedure SetTitle(const AValue: string);
+    function    GetTitle: string;
+    procedure   SetTitle(const AValue: string);
+  protected
+    procedure   SetupCaptions; override;
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
-
-
     lblTitle: TfpgLabel;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
@@ -110,12 +116,11 @@ type
     {@VFD_HEAD_END: WidgetOrderForm}
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
-    property Title: string read GetTitle write SetTitle;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
+    property    Title: string read GetTitle write SetTitle;
   end;
-
 
   TfrmVFDSetup = class(TfpgForm)
   private
@@ -173,10 +178,12 @@ uses
   fpg_main,
   fpg_iniutils,
   fpg_constants,
+  fpg_utils,
+  vfd_constants,
   vfdprops; // used to get Object Inspector defaults
 
-const
-  cDesignerINIVersion = 1;
+//const
+ // cDesignerINIVersion = 1;
 
 var
   changeide: integer;
@@ -184,28 +191,36 @@ var
 
 { TInsertCustomForm }
 
+procedure TInsertCustomForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgInsertCustomWidget;
+  l1.Text := fpgAddColon(rsNewClassName);
+  l2.Text := fpgAddColon(rsName);
+end;
+
 procedure TInsertCustomForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
   inherited;
   WindowPosition := wpScreenCenter;
-  WindowTitle := 'Insert Custom Widget';
+  WindowTitle := 'TInsertCustomForm';
   SetPosition(0, 0, 300, 100);
 
-  l1 := CreateLabel(self, 8, 4, 'Class name:');
-  edClass := CreateEdit(self, 8, 24, 150, 0);
+  l1        := CreateLabel(self, 8, 4, 'Class name:');
+  edClass   := CreateEdit(self, 8, 24, 150, 0);
   edClass.Text := 'Tfpg';
-  l2 := CreateLabel(self, 8, 48, 'Name:');
-  edName := CreateEdit(self, 8, 68, 150, 0);
-  btnOK := CreateButton(self, 180, 20, 100, 'OK', @OnButtonClick);
-  btnCancel := CreateButton(self, 180, 52, 100, 'Cancel', @OnButtonClick);
+  l2        := CreateLabel(self, 8, 48, 'Name:');
+  edName    := CreateEdit(self, 8, 68, 150, 0);
+  btnOK     := CreateButton(self, 180, 20, 100, rsOK, @OnButtonClick);
+  btnCancel := CreateButton(self, 180, 52, 100, rsCancel, @OnButtonClick);
   {%endregion}
 end;
 
 procedure TInsertCustomForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := mrOk
+    ModalResult := mrOK
   else
     ModalResult := mrCancel;
 end;
@@ -219,19 +234,26 @@ begin
     btnOK.Click;
 end;
 
+procedure TNewFormForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgNewForm;
+  l1.Text := fpgAddColon(rsNewFormName);
+end;
+
 procedure TNewFormForm.AfterCreate;
 begin
   inherited AfterCreate;
   WindowPosition := wpScreenCenter;
   SetPosition(0, 0, 286, 66);
-  WindowTitle := 'New Form';
+  WindowTitle := 'TNewFormForm';
 
-  l1 := CreateLabel(self, 8, 8, 'Form name:');
-  edName := CreateEdit(self, 8, 28, 180, 0);
-  edName.Text := '';
+  l1           := CreateLabel(self, 8, 8, 'Form name:');
+  edName       := CreateEdit(self, 8, 28, 180, 0);
+  edName.Text  := '';
   edName.OnKeyPress := @OnedNameKeyPressed;
-  btnOK := CreateButton(self, 196, 8, 80, rsOK, @OnButtonClick);
-  btnCancel := CreateButton(self, 196, 36, 80, rsCancel, @OnButtonClick);
+  btnOK        := CreateButton(self, 196, 8, 80, rsOK, @OnButtonClick);
+  btnCancel    := CreateButton(self, 196, 36, 80, rsCancel, @OnButtonClick);
 end;
 
 procedure TNewFormForm.OnButtonClick(Sender: TObject);
@@ -244,11 +266,18 @@ end;
 
 { TEditPositionForm }
 
-procedure TEditPositionForm.edPosKeyPressed(Sender: TObject;
-  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+procedure TEditPositionForm.edPosKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
 begin
   if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
     btnOK.Click;
+end;
+
+procedure TEditPositionForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgEditFormPosition;
+  lbPos.Text := fpgAddColon(rsPosition);
 end;
 
 procedure TEditPositionForm.AfterCreate;
@@ -257,20 +286,20 @@ begin
   WindowPosition := wpScreenCenter;
   Width := 186;
   Height := 66;
-  WindowTitle := 'Position';
+  WindowTitle := 'TEditPositionForm';
   Sizeable := False;
 
-  lbPos := CreateLabel(self, 8, 8, 'Pos:      ');
-  edPos := CreateEdit(self, 8, 28, 80, 0);
+  lbPos           := CreateLabel(self, 8, 8, 'Pos:');
+  edPos           := CreateEdit(self, 8, 28, 80, 0);
   edPos.OnKeyPress := @edPosKeyPressed;
-  btnOK := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
-  btnCancel := CreateButton(self, 98, 36, 80, rsCancel, @OnButtonClick);
+  btnOK           := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
+  btnCancel       := CreateButton(self, 98, 36, 80, rsCancel, @OnButtonClick);
 end;
 
 procedure TEditPositionForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := mrOk
+    ModalResult := mrOK
   else
     ModalResult := mrCancel;
 end;
@@ -285,6 +314,17 @@ end;
 procedure TWidgetOrderForm.SetTitle(const AValue: string);
 begin
   lblTitle.Text := Format(lblTitle.Text, [AValue]);
+end;
+
+procedure TWidgetOrderForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgWidgetOrder;
+  lblTitle.Text := fpgAddColon(rsFormTitle);
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
+  btnUp.Text := rsUp;
+  btnDown.Text := rsDown;
 end;
 
 constructor TWidgetOrderForm.Create(AOwner: TComponent);
@@ -304,11 +344,9 @@ procedure TWidgetOrderForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: WidgetOrderForm}
-
-
   Name := 'WidgetOrderForm';
-  SetPosition(692, 160, 426, 398);
-  WindowTitle := 'Widget order';
+  SetPosition(534, 173, 426, 398);
+  WindowTitle := 'TWidgetOrderForm';
   Hint := '';
   WindowPosition := wpScreenCenter;
 
@@ -327,12 +365,12 @@ begin
   begin
     Name := 'btnOK';
     SetPosition(346, 24, 75, 24);
-    Anchors := [anRight, anTop];
+    Anchors := [anRight,anTop];
     Text := 'OK';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.ok';
-    ModalResult := mrOk;
+    ModalResult := mrOK;
     TabOrder := 2;
   end;
 
@@ -341,7 +379,7 @@ begin
   begin
     Name := 'btnCancel';
     SetPosition(346, 52, 75, 24);
-    Anchors := [anRight, anTop];
+    Anchors := [anRight,anTop];
     Text := 'Cancel';
     FontDesc := '#Label1';
     Hint := '';
@@ -355,7 +393,7 @@ begin
   begin
     Name := 'btnUp';
     SetPosition(346, 108, 75, 24);
-    Anchors := [anRight, anTop];
+    Anchors := [anRight,anTop];
     Text := 'Up';
     FontDesc := '#Label1';
     Hint := '';
@@ -369,7 +407,7 @@ begin
   begin
     Name := 'btnDown';
     SetPosition(346, 136, 75, 24);
-    Anchors := [anRight, anTop];
+    Anchors := [anRight,anTop];
     Text := 'Down';
     FontDesc := '#Label1';
     Hint := '';
@@ -383,7 +421,7 @@ begin
   begin
     Name := 'TreeView1';
     SetPosition(4, 24, 336, 368);
-    Anchors := [anLeft, anRight, anTop, anBottom];
+    Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 7;
@@ -399,7 +437,7 @@ begin
   lNode := Treeview1.Selection;
   if lNode = nil then
     exit;
-
+  
   if Sender = btnUp then
   begin
     if lNode.Prev = nil then
@@ -413,24 +451,41 @@ begin
     if (lNode.Next.Next = nil) then // the last node doesn't have a next
       lNode.MoveTo(lNode.Next, naAdd)
     else
-      lNode.MoveTo(lNode.Next.Next, naInsert);
+      lNode.MoveTo(lNode.Next.Next, naInsert);  
   end;
-
+  
   Treeview1.Invalidate;
 end;
 
 { TVFDDialogBase }
 
-procedure TVFDDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
-  var consumed: boolean);
+procedure TVFDDialog.FormShow(Sender: TObject);
+begin
+  SetupCaptions;
+end;
+
+procedure TVFDDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then
   begin
-    consumed := True;
+    consumed    := True;
     ModalResult := mrCancel;
   end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
+
+procedure TVFDDialog.SetupCaptions;
+begin
+  // to be implemented in descendants
+end;
+
+constructor TVFDDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow := @FormShow;
+end;
+
+{ TfrmVFDSetup}
 
 procedure TfrmVFDSetup.UndoLook(Sender: TObject);
 begin
