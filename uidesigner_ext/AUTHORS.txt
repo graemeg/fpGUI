@@ -1,0 +1,34 @@
+
+ Here is a list of people that have contributed in some way towards
+ the fpGUI project.
+
+
+Lead Developer and Maintainer
+-----------------------------
+Graeme Geldenhuys <graemeg@gmail.com>
+ 
+
+Implementation inspired by works from
+-------------------------------------
+Sebastian Guenther
+Viktor Nagy
+Milan Marusinec (Milano) for the AggPas port
+
+
+Contributors
+------------
+Felipe Monteiro de Carvalho
+Andrew Haines
+Giuliano Colla
+Jean-Marc Levecque
+Antonio Sanguigni
+Vladimir Zhirov
+Alexsander Rosa
+Horacio Jamilis
+Michael van Canneyt
+Jean-Pierre Anghel
+Fred van Stappen
+
+           ______________.o0O0o.______________
+           
+           

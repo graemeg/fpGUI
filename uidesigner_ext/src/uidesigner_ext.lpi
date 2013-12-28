@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <General>
+      <Flags>
+        <SaveOnlyProjectUnits Value="True"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <LRSInOutputDirectory Value="False"/>
+      </Flags>
+      <SessionStorage Value="None"/>
+      <MainUnit Value="0"/>
+      <Title Value="uidesigner_ext"/>
+      <UseAppBundle Value="False"/>
+      <Icon Value="0"/>
+    </General>
+    <VersionInfo>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="16">
+      <Unit0>
+        <Filename Value="uidesigner_ext.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uidesigner_ext"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="vfdmain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdmain"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="vfdresizer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdresizer"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="vfdforms.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdforms"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="vfddesigner.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfddesigner"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="vfdfile.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdfile"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="newformdesigner.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="newformdesigner"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="vfdwidgets.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdwidgets"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="vfdwidgetclass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdwidgetclass"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="vfdeditors.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdeditors"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="vfdformparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdformparser"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="vfdprops.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdprops"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="vfdutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdutils"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="vfdpropeditgrid.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdpropeditgrid"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="anchors.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="icons.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="uidesigner_ext"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="units"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <AllowLabel Value="False"/>
+        <CPPInline Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
+        <UseExternalDbgSyms Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <Verbosity>
+        <ShowHintsForUnusedUnitsInMainSrc Value="True"/>
+      </Verbosity>
+      <WriteFPCLogo Value="False"/>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>
