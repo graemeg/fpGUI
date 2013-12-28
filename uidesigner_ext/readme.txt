@@ -1,4 +1,6 @@
-This is a extended version of fpGUI Designer. 
+This is a extended version of fpGUI Designer.
+ 
+With run-only-once, window list, undo feature, integration into IDE, editor launcher,...
 
 Fred van Stappen. fiens@hotmail.com  
 
