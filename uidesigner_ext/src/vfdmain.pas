@@ -910,7 +910,7 @@ begin
   begin
     case gINI.ReadInteger('Options', 'Editor', 0) of
       2: AProcess.CommandLine := 'notepad ' + p + s;
-      // 3 :  AProcess.CommandLine := 'wordpad ' + p + s ;
+      3 :  AProcess.CommandLine := 'write ' + p + s ;
       4: AProcess.CommandLine :=
           gINI.ReadString('Options', 'CustomEditor', '') + ' ' + p + s;
     end;
