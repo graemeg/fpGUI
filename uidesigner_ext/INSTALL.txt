@@ -1,0 +1,14 @@
+This is a extended version of fpGUI Designer.
+ 
+With run-only-once, window list, undo feature, integration into IDE, editor launcher,...
+
+How to install it ?
+Just compile /uidesigner_ext/src/uidesigner_ext.pas
+
+For integation with fpc, Lazarus, Typhon, Geany, external-code-editor, ..., you may use the patches...
+Those patches are in /uidesigner_ext/patch.
+
+Please read the readme-patch-files before to apply patch.
+
+Fred van Stappen
+fiens@hotmail.com

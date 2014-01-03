@@ -1,8 +1,7 @@
-This is a patch that enable complete integration of fpGUI into Lazarus.
-
-First, compile uidesinger_ext.
-
-Then copy main.pp into /Lazarus/ide and rebuild the ide.
+This is a extended version of fpGUI Designer.
+ 
+With run-only-once, window list, undo feature, integration into IDE, editor launcher,...
+There are also some patches for integration with fpc, Lazarus, Typhon, Geany,...
 
 Fred van Stappen. fiens@hotmail.com  
 

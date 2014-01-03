@@ -39,7 +39,7 @@
     </RequiredPackages>
     <Units Count="16">
       <Unit0>
-        <Filename Value="uidesigner_ext.lpr"/>
+        <Filename Value="uidesigner_ext.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uidesigner_ext"/>
       </Unit0>
