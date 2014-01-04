@@ -1,12 +1,10 @@
 program fpGUIDirectTemplate;
 
 {$mode objfpc}{$H+}
-  {$DEFINE UseCThreads}
-
-uses {$IFDEF UNIX} {$IFDEF UseCThreads}
-  {$ENDIF} {$ENDIF}
+  
+uses 
   fpg_main,
-  fpg_form { you can add units after this };
+  fpg_form;
 
 type
    Tform1 = class(TfpgForm)

@@ -1,4 +1,5 @@
 This is a patch that define fpGUI path into fpc.cfg.
+For Windows, it adds the fpc path in Windows PATH Environment Variable.
 
 Copy this files into fpGUI root-directory (can be fpGUI-develop too):
 - For Windows : fpc_fpg_patch.pas and fpc_fpg_patch.bat

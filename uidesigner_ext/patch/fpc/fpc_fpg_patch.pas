@@ -1,3 +1,7 @@
+{ This is a patch that define fpGUI path into fpc.cfg free-pascal-congig-file.
+Fred van Stappen
+fiens@hotmail.com
+}
 program fpc_fpg_patch;
 
 {$mode objfpc}{$H+}
@@ -30,11 +34,10 @@ type
       writeln('') ;
 
     writeln('This patch will define the fpGUI location...');
-writeln('');
-
-writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
+    writeln('');
+    writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
    tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) ;
-      writeln('Location of fpGUI : ' + tempstr );
+    writeln('Location of fpGUI : ' + tempstr );
 
       y := 0 ;
       {$IFDEF linux}
@@ -51,7 +54,7 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
      {$ENDIF}
 
    {$IFDEF windows}
-     while y < 13 do
+     while y < 17 do
       begin
     case y of
     0 : ordir := 'c:\codetyphon\fpc\bin\x86_64-win64\fpc.cfg' ;
@@ -67,6 +70,10 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
     10: ordir := 'c:\fpc\bin\x86_64-win64\fpc.cfg' ;
     11: ordir := 'c:\fpc\bin\i386-win32\fpc.cfg' ;
     12: ordir := 'c:\fpc\bin\fpc.cfg' ;
+    13: ordir := 'c:\fpc\2.6.2\bin\i386-win32\fpc.cfg' ;
+    14: ordir := 'c:\fpc\2.6.2\bin\x86_64-win64\fpc.cfg' ;
+    15: ordir := 'c:\fpc\2.7.1\bin\i386-win32\fpc.cfg' ;
+    16: ordir := 'c:\fpc\2.7.1\bin\x86_64-win64\fpc.cfg' ;
     end;
      {$ENDIF}
 
@@ -95,7 +102,7 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
      if  x = 0 then begin
     AssignFile(f,pchar(ordir));
     append(f);
-  writeln(f,tempstr2) ;
+   writeln(f,tempstr2) ;
     Flush(f);
       CloseFile(f);
    writeln('Patch added in ' + ordir) ;
@@ -104,7 +111,7 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
 
   end;
 
-     /////////////Writing new fpc-fpg.cfg////////////////////////////////////////////////
+     /////////////Writing new fpc-fpg.cfg//////////
       {$IFDEF linux}
      ordir := '/etc/fpc-fpg.cfg' ;
       {$ENDIF}
@@ -115,13 +122,12 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
     ForceDirectories('c:\fpc_ext');
     ordir := 'c:\fpc_ext\fpc-fpg.cfg' ;
    {$ENDIF}
-
    AssignFile(f,pchar(ordir));
    rewrite(f);
        append(f);
     writeln(f,'# Begin fpGUI-block') ;
       append(f);
-    writeln(f,'# searchpath for fpGUI units and inc and define output in /units') ;
+    writeln(f,'# search-path for fpGUI units and includes') ;
     tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) + directoryseparator + 'src' ;
     append(f);
     writeln(f,'-Fu' + tempstr) ;
@@ -154,7 +160,11 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
      append(f);
      writeln(f,'-MObjFPC');
      append(f);
-     writeln(f,'-Sch');
+     writeln(f,'-Schi');
+     {$IFDEF windows}
+     append(f);
+     writeln(f,'-WG');
+     {$ENDIF}
      append(f);
      writeln(f,'-O1');
      append(f);
@@ -163,10 +173,10 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
      writeln(f,'-Xs');
      append(f);
      writeln(f,'-XX');
-    // append(f);
+      // append(f);
     // writeln(f,'# define output in /units');
-   //   append(f);
-   //  writeln(f,'-FUunits');
+     //append(f);
+     //writeln(f,'-FUunits');
      append(f);
      writeln(f,'# End fpGUI-block') ;
        Flush(f);
@@ -185,22 +195,21 @@ writeln('Location of fpc_fpg_patch : ' + ParamStr(0) );
   begin
     if  (ParamStr(1) = '1') then DoPatch else
     begin
-    writeln('This is a patch for fpc.cfg to define fpGUI path.');
-     writeln('');
-      writeln('WARNING: Be sure that the patch is in fpGUI root-directory.');
+   writeln('This is a patch for fpc.cfg to define fpGUI path.');
+   writeln('');
+   writeln('WARNING: Be sure that the patch is in fpGUI root-directory.');
 
         tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) ;
 
-      writeln( '(Now in ' + tempstr + ')') ;
-     writeln('Do you want to patch fpc.cfg (y/n) ?');
-     readln(quid) ;
+   writeln( '(Now in ' + tempstr + ')') ;
+   writeln('Do you want to patch fpc.cfg (y/n) ?');
+   readln(quid) ;
 
      case lowercase(quid) of
      'y' : DoPatch;
           end;
      end;
      Terminate;     
-
   end;
 
   procedure Tfpc_fpg_patch.ConsoleClose;
