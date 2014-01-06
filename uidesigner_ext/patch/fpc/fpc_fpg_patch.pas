@@ -128,8 +128,34 @@ type
     writeln(f,'# Begin fpGUI-block') ;
       append(f);
     writeln(f,'# search-path for fpGUI units and includes') ;
-    tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) + directoryseparator + 'src' ;
+    tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) + directoryseparator + 'lib' ;
+    
+       append(f);
+
+     {$IFDEF linux}
+    //// added both 32 and 64 bit, (so if you use 2 compilers ( 32 and 64 bit), it works...
+    writeln(f,'-Fu' + tempstr + directoryseparator + 'x86_64-linux') ;
+       append(f);
+   writeln(f,'-Fu' + tempstr + directoryseparator + 'i386-linux') ;
     append(f);
+    writeln(f,'-Fi' + tempstr + directoryseparator + 'x86_64-linux') ;
+     append(f);
+   writeln(f,'-Fi' + tempstr + directoryseparator + 'i386-linux') ;
+     {$ENDIF}
+
+     {$IFDEF windows}
+    /// added both 32 and 64 bit, (so if you use 2 compilers ( 32 and 64 bit), it works...)
+    writeln(f,'-Fu' + tempstr + directoryseparator + 'x86_64-win64') ;
+      append(f);    
+    writeln(f,'-Fu' + tempstr + directoryseparator + 'i386-win32') ;
+      append(f);
+    writeln(f,'-Fi' + tempstr + directoryseparator + 'x86_64-win64') ;
+       append(f);    
+    writeln(f,'-Fi' + tempstr + directoryseparator + 'i386-win32') ;
+     {$ENDIF}
+
+     tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) + directoryseparator + 'src' ;
+     append(f);
     writeln(f,'-Fu' + tempstr) ;
         append(f);
     writeln(f,'-Fi' + tempstr) ;

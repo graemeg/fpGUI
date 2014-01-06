@@ -15,6 +15,32 @@ sudo ./fpc_fpg_patch 1
 echo "-------------------------------------------------------------"
 sudo rm fpc_fpg_patch.o
 sudo rm fpc_fpg_patch
+
+echo ""
+echo "-------------------------------------------------------------"
+echo "      Do you want to delete"
+echo "fpc_fpg_patch.pas and fpc_fpg_patch.sh"
+echo "   in fpGUI-root directory (y/n) ? "
+
+read var_read
+case $var_read in
+
+#------------------- OK, delete it -------------------
+y)  
+sudo rm fpc_fpg_patch.pas
+sudo rm fpc_fpg_patch.sh
+
+;;
+Y)
+sudo rm fpc_fpg_patch.pas
+sudo rm fpc_fpg_patch.sh
+;;
+#------------------- else exit -------------------
+*) 
+echo "Exiting..."
+exit
+;;
+esac 
 }
 
 # =================== Init =============================
