@@ -132,6 +132,7 @@ type
     
        append(f);
 
+  { /// does not work if fpGUI-package was install via package-install Lazarus/Typhon (circular reference)...
      {$IFDEF linux}
     //// added both 32 and 64 bit, (so if you use 2 compilers ( 32 and 64 bit), it works...
     writeln(f,'-Fu' + tempstr + directoryseparator + 'x86_64-linux') ;
@@ -153,7 +154,7 @@ type
        append(f);    
     writeln(f,'-Fi' + tempstr + directoryseparator + 'i386-win32') ;
      {$ENDIF}
-
+    }
      tempstr := copy(ParamStr(0),1, pos(directoryseparator + 'fpc_fpg_patch',ParamStr(0))-1) + directoryseparator + 'src' ;
      append(f);
     writeln(f,'-Fu' + tempstr) ;
