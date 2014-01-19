@@ -799,6 +799,7 @@ begin
     r.SetBottom(Height - FMargin);
     Canvas.FillRectangle(r);
   end;
+  UpdateScrollBar;
 end;
 
 constructor TfpgBaseListBox.Create(AOwner: TComponent);
