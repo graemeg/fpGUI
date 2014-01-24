@@ -706,6 +706,7 @@ var
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
   TmpW: widestring;
+  wheelpos: integer;
 
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
@@ -1091,7 +1092,13 @@ begin
           begin
             msgp.mouse.x := pt.x;
             msgp.mouse.y := pt.y;
-            msgp.mouse.delta := SmallInt(HiWord(wParam)) div -120;
+            { calculate direction of the mouse wheel }
+            wheelpos := 0;
+            dec(wheelpos, SmallInt(HiWord(wParam)));
+            if wheelpos > 0 then
+              msgp.mouse.delta := 1
+            else
+              msgp.mouse.delta := -1;
 
             i := 0;
             if (wParam and MK_LBUTTON) <> 0 then
