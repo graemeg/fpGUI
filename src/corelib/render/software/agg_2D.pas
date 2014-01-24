@@ -325,7 +325,7 @@ type
 
    procedure clearAll(c : Color ); overload;
    procedure clearAll(r ,g ,b : unsigned; a : unsigned = 255 ); overload;
-   procedure FillAll(c: TAggColor); overload;
+   procedure FillAll(c: Color); overload;
    procedure FillAll(r, g, b: byte; a: byte = 255); overload;
 
    procedure clearClipBox(c : Color ); overload;
@@ -426,7 +426,7 @@ type
               rxTop ,ryTop : double ); overload;
 
    procedure ellipse(cx ,cy ,rx ,ry : double );
-             
+
    procedure arc (cx ,cy ,rx ,ry ,start ,sweep : double );
    procedure star(cx ,cy ,r1 ,r2 ,startAngle : double; numRays : int );
 
@@ -934,7 +934,7 @@ begin
 
 end;
 
-procedure Agg2D.FillAll(c: TAggColor);
+procedure Agg2D.FillAll(c: Color);
 var
   clr: aggclr;
 begin
@@ -944,7 +944,7 @@ end;
 
 procedure Agg2D.FillAll(r, g, b: byte; a: byte);
 var
-  clr: TAggColor;
+  clr: Color;
 begin
   clr.Construct(r, g, b, a);
   FillAll(clr);
