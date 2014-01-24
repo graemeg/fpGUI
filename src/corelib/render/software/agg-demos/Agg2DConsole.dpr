@@ -23,8 +23,9 @@ const
   RGBA_Width = 4;
   LineCount = 30;
   {$IFDEF Unix}
-  FontFile = '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf';
-  {$ELSE}
+  FontFile = '../../arial.ttf';
+  {$ENDIF}
+  {$IFDEF Windows}
   FontFile = 'Arial';
   {$ENDIF}
 
