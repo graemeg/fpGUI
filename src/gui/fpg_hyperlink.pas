@@ -95,8 +95,8 @@ begin
   TextColor       := clHyperLink;
   FUrl            := fpGUIWebsite;
   FText           := 'fpGUI website';
-  FHTFont         := 'Arial-8:antialias=true:underline:bold';
-  FontDesc        := 'Arial-8:antialias=true:underline';
+  FHTFont         := FPG_DEFAULT_SANS + '-8:antialias=true:underline:bold';
+  FontDesc        := FPG_DEFAULT_SANS + '-8:antialias=true:underline';
 end;
 
 procedure TfpgHyperlink.SetURL(const Value: TfpgString);
