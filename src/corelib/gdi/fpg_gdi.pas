@@ -706,6 +706,7 @@ var
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
   TmpW: widestring;
+  wheelpos: integer;
 
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
@@ -723,7 +724,7 @@ var
       dy := 0;
       IntfWidth   := AWidth;
       IntfHeight  := AHeight;
-      
+
       GetWindowBorderDimensions(w, dx, dy);
       Inc(IntfWidth, dx);
       Inc(IntfHeight, dy);
@@ -851,7 +852,7 @@ begin
             msgp.keyboard.keychar := UTF8Encode(tmpW);
             fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
           end;
-          
+
           // Allow Alt+F4 and other system key combinations
           if (uMsg = WM_SYSKEYUP) or (uMsg = WM_SYSKEYDOWN) then
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -963,7 +964,7 @@ begin
                     end;
                     mcode := FPGM_MOUSEDOWN;
                   end;
-                  
+
               WM_LBUTTONUP,
               WM_MBUTTONUP,
               WM_RBUTTONUP:
@@ -1001,7 +1002,7 @@ begin
               WM_LBUTTONDOWN,
               WM_LBUTTONUP:
                   msgp.mouse.Buttons := MOUSE_LEFT;
-                
+
               WM_MBUTTONDOWN,
               WM_MBUTTONUP:
                   msgp.mouse.Buttons := MOUSE_MIDDLE;
@@ -1030,8 +1031,8 @@ begin
         begin
           if w.FSkipResizeMessage then
             Exit;
-            
-          // note that WM_SIZING allows some control on sizeing
+
+          // note that WM_SIZING allows some control on sizing
           //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
           msgp.rect.Width  := smallint(lParam and $FFFF);
           msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
@@ -1091,7 +1092,13 @@ begin
           begin
             msgp.mouse.x := pt.x;
             msgp.mouse.y := pt.y;
-            msgp.mouse.delta := SmallInt(HiWord(wParam)) div -120;
+            { calculate direction of the mouse wheel }
+            wheelpos := 0;
+            dec(wheelpos, SmallInt(HiWord(wParam)));
+            if wheelpos > 0 then
+              msgp.mouse.delta := 1
+            else
+              msgp.mouse.delta := -1;
 
             i := 0;
             if (wParam and MK_LBUTTON) <> 0 then
@@ -1615,7 +1622,7 @@ begin
 
   CurrentWindowHndl := WindowFromPoint(spt);
   CursorInDifferentWindow := (CurrentWindowHndl <> uLastWindowHndl);
-  
+
   if CursorInDifferentWindow then
   begin
     FillChar(msgp, sizeof(msgp), 0);
@@ -1635,7 +1642,7 @@ begin
         fpgSendMessage(nil, CurrentWindow, FPGM_MOUSEENTER, msgp);
     end;
   end;
-  
+
   uLastWindowHndl := CurrentWindowHndl;
 end;
 
@@ -1658,18 +1665,18 @@ begin
       FNonFullscreenRect.Left := 0;
     if FNonFullscreenRect.Top < 0 then
       FNonFullscreenRect.Top := 0;
-    
+
     Left      := 0;
     Top       := 0;
     Width     := wapplication.GetScreenWidth;
     Height    := wapplication.GetScreenHeight;
-    
+
     if aUpdate then
       UpdateWindowPosition;
 
     FWinStyle := WS_POPUP or WS_SYSMENU;
     FWinStyle := FWinStyle and not(WS_CAPTION or WS_THICKFRAME);
-    
+
     if aUpdate then
     begin
       {$IFDEF CPU64}
@@ -1699,7 +1706,7 @@ begin
     Top    := FNonFullscreenRect.Top;
     Width  := FNonFullscreenRect.Width;
     Height := FNonFullscreenRect.Height;
-    
+
     if aUpdate then
       UpdateWindowPosition;
   end;
@@ -1722,7 +1729,7 @@ var
 begin
   if FWinHandle > 0 then
     Exit; //==>
-    
+
   FSkipResizeMessage := True;
 
   FWinStyle   := WS_OVERLAPPEDWINDOW;
@@ -1778,7 +1785,7 @@ begin
     FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX);
 
   FWinStyle := FWinStyle or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
-  
+
   if waFullScreen in FWindowAttributes then
     WindowSetFullscreen(True, False);
 
@@ -2232,7 +2239,7 @@ begin
     DeleteObject(FClipRegion);
 
     TryFreeBackBuffer;
-      
+
     Windows.ReleaseDC(FDrawWindow.FWinHandle, FWingc);
 
     FDrawing    := False;
@@ -2490,7 +2497,7 @@ begin
   if FBufferBitmap > 0 then
     DeleteObject(FBufferBitmap);
   FBufferBitmap := 0;
-  
+
   if FBufgc > 0 then
     DeleteDC(FBufgc);
   FBufgc := 0;
@@ -2915,7 +2922,7 @@ var
   drvs: string;
 begin
   FSpecialDirs.Clear;
-  
+
   // making drive list
   if Copy(aDirectory, 2, 1) = ':' then
   begin
@@ -3200,7 +3207,7 @@ initialization
   GetVersionEx(WinVersion);
   UnicodeEnabledOS := (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_NT) or
     (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_CE);
-    
+
   if SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, @FontSmoothingType, 0)
     and (FontSmoothingType = FE_FONTSMOOTHINGCLEARTYPE) then
       FontSmoothingType := CLEARTYPE_QUALITY
