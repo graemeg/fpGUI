@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="17">
       <Unit0>
-        <Filename Value="uidesigner.lpr"/>
+        <Filename Value="uidesigner.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uidesigner"/>
       </Unit0>

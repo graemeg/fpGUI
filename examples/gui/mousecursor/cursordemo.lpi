@@ -37,7 +37,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="cursordemo.lpr"/>
+        <Filename Value="cursordemo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cursordemo"/>
       </Unit0>

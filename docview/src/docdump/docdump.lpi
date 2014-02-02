@@ -28,7 +28,7 @@
     </RunParams>
     <Units Count="16">
       <Unit0>
-        <Filename Value="docdump.lpr"/>
+        <Filename Value="docdump.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="docdump"/>
       </Unit0>

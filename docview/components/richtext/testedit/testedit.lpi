@@ -45,7 +45,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="testedit.lpr"/>
+        <Filename Value="testedit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="testedit"/>
       </Unit0>

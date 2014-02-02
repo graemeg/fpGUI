@@ -36,7 +36,7 @@
     </RequiredPackages>
     <Units Count="4">
       <Unit0>
-        <Filename Value="globe.lpr"/>
+        <Filename Value="globe.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="globe"/>
       </Unit0>

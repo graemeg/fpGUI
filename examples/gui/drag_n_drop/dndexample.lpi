@@ -39,7 +39,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="dndexample.lpr"/>
+        <Filename Value="dndexample.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dndexample"/>
       </Unit0>

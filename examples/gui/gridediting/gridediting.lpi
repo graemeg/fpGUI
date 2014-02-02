@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="gridediting.lpr"/>
+        <Filename Value="gridediting.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="gridediting"/>
       </Unit0>

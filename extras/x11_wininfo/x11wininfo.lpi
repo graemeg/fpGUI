@@ -35,7 +35,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="x11wininfo.lpr"/>
+        <Filename Value="x11wininfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="x11wininfo"/>
       </Unit0>

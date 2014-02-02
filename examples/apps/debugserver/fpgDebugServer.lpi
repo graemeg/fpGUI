@@ -40,7 +40,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="fpgDebugServer.lpr"/>
+        <Filename Value="fpgDebugServer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpgDebugServer"/>
       </Unit0>

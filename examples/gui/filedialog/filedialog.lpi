@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="filedialog.lpr"/>
+        <Filename Value="filedialog.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="filedialog"/>
       </Unit0>

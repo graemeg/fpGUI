@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="drawtest.lpr"/>
+        <Filename Value="drawtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="drawtest"/>
       </Unit0>

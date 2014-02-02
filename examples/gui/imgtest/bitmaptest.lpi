@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="bitmaptest.lpr"/>
+        <Filename Value="bitmaptest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="bitmaptest"/>
       </Unit0>

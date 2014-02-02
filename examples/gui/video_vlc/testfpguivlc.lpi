@@ -40,7 +40,7 @@
     </RequiredPackages>
     <Units Count="5">
       <Unit0>
-        <Filename Value="testfpguivlc.lpr"/>
+        <Filename Value="testfpguivlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="testfpguivlc"/>
       </Unit0>

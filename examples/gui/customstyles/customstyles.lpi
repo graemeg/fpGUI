@@ -35,7 +35,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="customstyles.lpr"/>
+        <Filename Value="customstyles.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="customstyles"/>
       </Unit0>

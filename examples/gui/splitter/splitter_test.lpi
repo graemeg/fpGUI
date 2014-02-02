@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="splitter_test.lpr"/>
+        <Filename Value="splitter_test.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="splitter_test"/>
       </Unit0>

@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="fpgcanvas.lpr"/>
+        <Filename Value="fpgcanvas.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpgcanvas"/>
       </Unit0>

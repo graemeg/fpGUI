@@ -39,7 +39,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="jpeg.lpr"/>
+        <Filename Value="jpeg.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>

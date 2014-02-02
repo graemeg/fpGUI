@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="edittest.lpr"/>
+        <Filename Value="edittest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="edittest"/>
       </Unit0>
