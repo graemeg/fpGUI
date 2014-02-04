@@ -41,7 +41,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="pdf_demo.lpr"/>
+        <Filename Value="pdf_demo.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>

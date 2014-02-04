@@ -1007,7 +1007,7 @@ begin
   if InDesigner then
     exit;
 
-  if WinHandle = 0 then
+  if IsLoading then
     exit;
 
   RemoveCursor;
@@ -1066,8 +1066,10 @@ ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
 
   if InDesigner then
     exit;
-  if WinHandle = 0 then
+
+  if IsLoading then
     exit;
+
 ProfileEvent('DEBUG:  TRichTextView.Layout    1 of 6');
   FSelectionEnd := -1;
   FSelectionStart := -1;
@@ -1177,7 +1179,7 @@ begin
         end;
     ebsDefault:
         begin
-          Canvas.DrawControlFrame(r);
+          fpgStyle.DrawControlFrame(Canvas, r);
         end;
     ebsSingle:
         begin

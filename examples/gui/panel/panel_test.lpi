@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="panel_test.lpr"/>
+        <Filename Value="panel_test.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>

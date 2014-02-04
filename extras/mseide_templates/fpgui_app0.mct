@@ -1,0 +1,37 @@
+[header]
+name=fpguiapp
+comment=fpGUI template application (no forms)
+select=0
+indent=0
+cursorcol=0
+cursorrow=0
+params=0
+paramdefaults=0
+[]
+{$mode objfpc}{$h+}
+{$ifdef mswindows}{$apptype gui}{$endif}
+
+uses
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Classes, fpg_main, frm_main;
+
+
+procedure MainProc;
+var
+  frm: TMainForm;
+begin
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
+end;
+
+begin
+  MainProc;
+end.

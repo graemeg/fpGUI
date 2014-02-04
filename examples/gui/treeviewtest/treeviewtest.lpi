@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="treeviewtest.lpr"/>
+        <Filename Value="treeviewtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="treeviewtest"/>
       </Unit0>

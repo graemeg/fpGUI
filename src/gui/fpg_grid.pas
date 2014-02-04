@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -68,8 +68,17 @@ type
     property    ScrollBarStyle;
     property    TabOrder;
     property    TopRow;
-    property    OnRowChange;
+    property    OnClick;
     property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
+    property    OnRowChange;
     property    OnShowHint;
   end;
 
@@ -160,7 +169,10 @@ type
     property    OnClick;
     property    OnDoubleClick;
     property    OnDrawCell;
+    property    OnEnter;
+    property    OnExit;
     property    OnFocusChange;
+    property    OnHeaderClick;
     property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseEnter;
@@ -170,6 +182,7 @@ type
     property    OnRowChange;
     property    OnShowHint;
   end;
+
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
 
@@ -330,9 +343,9 @@ end;
 
 function TfpgCustomStringGrid.GetCell(ACol, ARow: Integer): string;
 begin
-  if ACol > ColumnCount-1 then
+  if (ACol < 0) or (ACol > ColumnCount-1) then
     Exit; //==>
-  if ARow > RowCount-1 then
+  if (ARow < 0) or (ARow > RowCount-1) then
     Exit; //==>
   Result := TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow];
 end;

@@ -3,11 +3,11 @@
 // Based on Anti-Grain Geometry
 // Copyright (C) 2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Agg2D - Version 1.0 Release Milano 3 (AggPas 2.3 RM3)
+// Agg2D - Version 1.0 Release Milano 3 (AggPas 2.4 RM3)
 // Pascal Port By: Milan Marusinec alias Milano
 //                 milan@marusinec.sk
 //                 http://www.aggpas.org
-// Copyright (c) 2007
+// Copyright (c) 2007 - 2008
 //
 // Permission to copy, use, modify, sell and distribute this software
 // is granted provided this copyright notice appears in all copies.
@@ -325,6 +325,8 @@ type
 
    procedure clearAll(c : Color ); overload;
    procedure clearAll(r ,g ,b : unsigned; a : unsigned = 255 ); overload;
+   procedure FillAll(c: Color); overload;
+   procedure FillAll(r, g, b: byte; a: byte = 255); overload;
 
    procedure clearClipBox(c : Color ); overload;
    procedure clearClipBox(r ,g ,b : unsigned; a : unsigned = 255 ); overload;
@@ -424,7 +426,7 @@ type
               rxTop ,ryTop : double ); overload;
 
    procedure ellipse(cx ,cy ,rx ,ry : double );
-             
+
    procedure arc (cx ,cy ,rx ,ry ,start ,sweep : double );
    procedure star(cx ,cy ,r1 ,r2 ,startAngle : double; numRays : int );
 
@@ -930,6 +932,22 @@ begin
  clr.Construct(r ,g ,b ,a );
  clearAll     (clr );
 
+end;
+
+procedure Agg2D.FillAll(c: Color);
+var
+  clr: aggclr;
+begin
+  clr.Construct  (c );
+  m_renBase.fill(@clr );
+end;
+
+procedure Agg2D.FillAll(r, g, b: byte; a: byte);
+var
+  clr: Color;
+begin
+  clr.Construct(r, g, b, a);
+  FillAll(clr);
 end;
 
 { CLEARCLIPBOX }

@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="beveltest.lpr"/>
+        <Filename Value="beveltest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="beveltest"/>
       </Unit0>

@@ -1,1 +1,1 @@
-FPGUI_VERSION = '1.0';
+FPGUI_VERSION = '1.1';

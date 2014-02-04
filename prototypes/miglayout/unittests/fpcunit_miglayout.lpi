@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="fpcunit_miglayout.lpr"/>
+        <Filename Value="fpcunit_miglayout.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcunit_miglayout"/>
       </Unit0>

@@ -38,9 +38,9 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
-        <Filename Value="fpgDebugServer.lpr"/>
+        <Filename Value="fpgDebugServer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpgDebugServer"/>
       </Unit0>
@@ -49,6 +49,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_main"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="fra_liveview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fra_liveview"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

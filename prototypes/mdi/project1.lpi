@@ -38,7 +38,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="project1.lpr"/>
+        <Filename Value="project1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
       </Unit0>

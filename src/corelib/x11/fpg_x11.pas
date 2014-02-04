@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -215,6 +215,7 @@ type
   public
     constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
   end;
 
 
@@ -315,6 +316,7 @@ type
     xia_wm_delete_window: TAtom;
     xia_wm_state: TAtom;
     xia_targets: TAtom;
+    xia_save_targets: TAtom;
     netlayer: TNETWindowLayer;
     InputMethod: PXIM;
     InputContext: PXIC;
@@ -322,6 +324,7 @@ type
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
+    function    GetHelpViewer: TfpgString; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
@@ -340,11 +343,17 @@ type
   TfpgX11Clipboard = class(TfpgClipboardBase)
   private
     FWaitingForSelection: Boolean;
+    FOwnsSelection: Boolean;
+    procedure   SendClipboardToManager;
+    procedure   DoLostSelection;
+    procedure   DoSetTargets(AWin: TWindow; AProperty: TAtom);
   protected
     FClipboardText: TfpgString;
     function    DoGetText: TfpgString; override;
     procedure   DoSetText(const AValue: TfpgString); override;
     procedure   InitClipboard; override;
+  public
+    destructor  Destroy; override;
   end;
 
 
@@ -420,6 +429,7 @@ implementation
 
 uses
   baseunix,
+  unix,
   {$IFDEF LINUX}
   users,  { For Linux user and group name support. FPC only supports this in Linux. }
   {$ENDIF}
@@ -430,6 +440,7 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
+  fpg_constants,
   cursorfont,
   xatom,            // used for XA_WM_NAME
   keysym,
@@ -477,20 +488,27 @@ begin
   Result := Result or ((rgb and $F80000) shr 8);
 end;
 
+function ConvertTo555Pixel(rgb: longword): word;
+begin
+  Result := (rgb and $F8) shr 3;
+  Result := Result or ((rgb and $F800) shr 6);
+  Result := Result or ((rgb and $F80000) shr 9);
+end;
+
 function fpgColorToX(col: TfpgColor): longword;
 var
   xc: TXColor;
   c: TfpgColor;
 begin
   c := fpgColorToRGB(col);
-
   if xapplication.DisplayDepth >= 24 then
     Result   := c and $FFFFFF       { No Alpha channel information }
   else if xapplication.DisplayDepth = 16 then
     Result   := ConvertTo565Pixel(c)
+  else if (xapplication.DisplayDepth = 15) then
+    Result   := ConvertTo555Pixel(c)
   else
   begin
-    c        := col;
     xc.blue  := (c and $000000FF) shl 8;
     xc.green := (c and $0000FF00);
     xc.red   := (c and $00FF0000) shr 8;
@@ -665,29 +683,93 @@ begin
 end;
 
 // clipboard event
+procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom); forward;
+
+
+procedure HandleMultiple(var e: TXSelectionEvent);
+type
+  TAtomPair = record
+    Target: TAtom;
+    Prop: TAtom;
+  end;
+
+var
+  Atom: TAtom;
+  Length: culong;
+  BytesLeft: culong;
+  Format: DWord;
+  Data: Pointer;
+  xia_Atom_Pair: TAtom;
+  AtomPair: TAtomPair;
+  i: Integer;
+  r: cint;
+begin
+
+  xia_Atom_Pair := XInternAtom(xapplication.Display, 'ATOM_PAIR', False);
+
+  // find out how much data there is
+  r := XGetWindowProperty(xapplication.Display, e.requestor, e._property, 0,  0, False, AnyPropertyType,
+      @Atom, @Format, @Length, @BytesLeft, @Data);
+
+  if (r <> Success) or  (Format <> 32) or (Atom <> xia_Atom_Pair) then
+    Exit; // ==>
+
+  // read one entry at a time
+  while BytesLeft > 0 do
+  begin
+    // read the data
+    r := XGetWindowProperty(xapplication.Display, e.requestor, e._property, 0, SizeOf(AtomPair), False, AnyPropertyType,
+      @Atom, @Format, @Length, @BytesLeft, @Data);
+
+    if r <> Success then
+      Exit; // ==>
+
+    // copy data to our variable
+    Move(Data^, AtomPair, SizeOf(TAtomPair));
+    XFree(Data);
+
+    // process this target in the list;
+    HandleAtom(e, AtomPair.Target, AtomPair.Prop);
+  end;
+end;
+
+procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom);
+begin
+  if Atom = None then
+  begin
+    Exit; // ==>
+  end;
+
+  if Atom = xapplication.xia_targets then
+  begin
+    fpgClipboard.DoSetTargets(e.requestor, Prop);
+  end
+  else if Atom = XInternAtom(xapplication.Display, 'MULTIPLE', False) then
+  begin
+    // multiple targets
+    HandleMultiple(e);
+  end
+  else// if Atom = XA_STRING then
+  begin
+    XChangeProperty(xapplication.Display, e.requestor, Prop, Atom,
+              8, PropModeReplace, PByte(@fpgClipboard.FClipboardText[1]), Length(fpgClipboard.FClipboardText));
+  end;
+  //else WriteLn('Unhandled Selection atom: ', XGetAtomName(xapplication.Display, Atom));
+end;
+
 procedure ProcessSelectionRequest(var ev: TXEvent);
 var
   e: TXSelectionEvent;
-  a: TAtom;
 begin
   e._type       := SelectionNotify;
+  e.display     := ev.xselectionrequest.display;
   e.requestor   := ev.xselectionrequest.requestor;
   e.selection   := ev.xselectionrequest.selection;
   e.target      := ev.xselectionrequest.target;
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
 
-  if e.target = xapplication.xia_targets then
-  begin
-    a := XA_STRING;
-    XChangeProperty(xapplication.Display, e.requestor, e._property, XA_ATOM,
-        32, PropModeReplace, PByte(@a), Sizeof(TAtom)); // I think last parameter is right?
-  end
-  else
-  begin
-    XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
-        8, PropModeReplace, PByte(@fpgClipboard.FClipboardText[1]), Length(fpgClipboard.FClipboardText));
-  end;
+  HandleAtom(e, e.target, e._property);
 
   XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
 end;
@@ -1396,6 +1478,7 @@ begin
   // Initialize atoms
   xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', TBool(False));
   xia_targets           := XInternAtom(FDisplay, 'TARGETS', TBool(False));
+  xia_save_targets      := XInternAtom(FDisplay, 'SAVE_TARGETS', TBool(False));
   xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', TBool(False));
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
@@ -1431,6 +1514,16 @@ function TfpgX11Application.MessagesPending: boolean;
 begin
   Result := (XPending(display) > 0);
   fpgCheckTimers;
+end;
+
+function TfpgX11Application.GetHelpViewer: TfpgString;
+begin
+  Result := inherited GetHelpViewer;
+  if not fpgFileExists(Result) then
+  begin
+    if fpsystem('which ' + FPG_HELPVIEWER) = 0 then
+      Result := FPG_HELPVIEWER;
+  end;
 end;
 
 function GetParentWindow(wh: TfpgWinHandle; var pw, rw: TfpgWinHandle): boolean;
@@ -2026,9 +2119,13 @@ begin
     X.SelectionClear:
         begin
           { TODO : Not sure if I am handling this correctly? }
+          { We Get this message when another program has declared that
+            it has ownership of the xia_clipboard selection atom
+          }
           if ev.xselectionclear.selection = xia_clipboard then
           begin
             fpgClipboard.FClipboardText := '';
+            fpgClipboard.DoLostSelection;
             Exit;
           end;
         end;
@@ -2736,6 +2833,13 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgX11Canvas.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase;
+    var ASrcRect: TfpgRect);
+begin
+  SortRect(ASrcRect);
+  XCopyArea(xapplication.Display, TfpgX11Canvas(ASrcCanvas).FDrawHandle, FDrawHandle, Fgc, ASrcRect.Left, ASrcRect.Top, ASrcRect.Width, ASrcRect.Height, ADest_x, ADest_y);
+end;
+
 procedure TfpgX11Canvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   x: integer;
@@ -2907,7 +3011,8 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoDrawPolygon(Points: fpg_base.PPoint; NumPts: Integer; Winding: boolean);
+procedure TfpgX11Canvas.DoDrawPolygon(Points: PPoint; NumPts: Integer;
+  Winding: boolean);
 var
   PointArray: PXPoint;
   i: integer;
@@ -3265,8 +3370,70 @@ end;
 
 { TfpgX11Clipboard }
 
+procedure TfpgX11Clipboard.SendClipboardToManager;
+var
+  ClipboardManager: TAtom;
+  StartTime: DWord;
+begin
+  // if we don't own the clipboard then there is nothing to save
+  if not FOwnsSelection then
+    Exit; // ==>
+
+  // check if the manager atom exists
+  ClipboardManager:= XInternAtom(xapplication.Display, 'CLIPBOARD_MANAGER', False);
+  if ClipboardManager = None then
+    Exit; // ==>
+
+  // check if a program has control of the manager atom
+  if XGetSelectionOwner(xapplication.Display, ClipboardManager) = None then
+    Exit; // ==>
+
+  // this triggers the manager to request the clipboard contents from us
+  XConvertSelection(xapplication.Display,
+                    ClipboardManager,
+                    xapplication.xia_save_targets,
+                    None, //XInternAtom(xapplication.Display, 'FPG_CLIPBOARD', True), // 'None' seems to work as the property name
+                    FClipboardWndHandle,
+                    CurrentTime);
+
+  XSync(xapplication.Display, False);
+
+  StartTime := fpgGetTickCount;
+  // now wait for the manager to get the clipboard
+  repeat
+    fpgWaitWindowMessage;
+    fpgDeliverMessages;
+  until not FOwnsSelection or ((fpgGetTickCount - StartTime) > 3000); // allow 3 seconds for the clipboard to be read
+end;
+
+procedure TfpgX11Clipboard.DoLostSelection;
+begin
+  FOwnsSelection := False;
+end;
+
+procedure TfpgX11Clipboard.DoSetTargets(AWin: TWindow; AProperty: TAtom);
+const
+  target_count = 3;
+var
+  targets: array[0..target_count-1] of TAtom;
+begin
+
+  targets[0] := XA_STRING;
+  targets[1] := xapplication.xia_targets;
+  targets[2] := xapplication.xia_save_targets;
+  //targets[3] := XInternAtom(xapplication.Display, 'UTF8_STRING', True);
+  //targets[4] := XInternAtom(xapplication.Display, 'MULTIPLE', True);
+
+  // list the types of data we have in the clipboard
+  XChangeProperty(xapplication.Display, AWin, AProperty, XA_ATOM, 32,
+                  PropModeReplace, @targets[0], target_count);
+end;
+
 function TfpgX11Clipboard.DoGetText: TfpgString;
 begin
+  if FOwnsSelection then
+    Exit(FClipboardText); // ==>
+
   XConvertSelection(xapplication.Display, xapplication.xia_clipboard,
       XA_STRING, xapplication.xia_clipboard, FClipboardWndHandle, 0);
 
@@ -3286,6 +3453,8 @@ begin
   FClipboardText := AValue;
   XSetSelectionOwner(xapplication.Display, xapplication.xia_clipboard,
       FClipboardWndHandle, CurrentTime);
+  DoSetTargets(FClipboardWndHandle, xapplication.xia_targets);
+  FOwnsSelection := True;
 end;
 
 procedure TfpgX11Clipboard.InitClipboard;
@@ -3293,6 +3462,12 @@ begin
   FWaitingForSelection := False;
   FClipboardWndHandle := XCreateSimpleWindow(xapplication.Display,
       xapplication.RootWindow, 10, 10, 10, 10, 0, 0, 0);
+end;
+
+destructor TfpgX11Clipboard.Destroy;
+begin
+  SendClipboardToManager;
+  inherited Destroy;
 end;
 
 { TfpgX11FileList }

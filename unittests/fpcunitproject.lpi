@@ -38,7 +38,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="fpcunitproject.lpr"/>
+        <Filename Value="fpcunitproject.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcunitproject"/>
       </Unit0>

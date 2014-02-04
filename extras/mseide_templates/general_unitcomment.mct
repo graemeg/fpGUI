@@ -1,0 +1,25 @@
+[header]
+name=cu
+comment=Unit header comment
+select=0
+indent=0
+cursorcol=6
+cursorrow=11
+params=1
+ project
+paramdefaults=1
+ fpGUI
+[]
+{
+    This file is part of the ${project} project.
+
+    See the file license.txt, included in this distribution,
+    for details about redistributing ${project}.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      .
+}

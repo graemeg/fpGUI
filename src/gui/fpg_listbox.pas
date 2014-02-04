@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -673,6 +673,7 @@ procedure TfpgBaseListBox.HandlePaint;
 var
   n: integer;
   r: TfpgRect;
+  rect: TRect;
 begin
   //if FUpdateCount > 0 then
   //  Exit; //==>
@@ -691,8 +692,9 @@ begin
   end
   else
   begin
-    Canvas.DrawControlFrame(r);
-    InflateRect(r, -2, -2);
+    fpgStyle.DrawControlFrame(Canvas, r);
+    rect := fpgStyle.GetControlFrameBorders;
+    InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   end;
 
   Canvas.SetClipRect(r);
@@ -797,6 +799,7 @@ begin
     r.SetBottom(Height - FMargin);
     Canvas.FillRectangle(r);
   end;
+  UpdateScrollBar;
 end;
 
 constructor TfpgBaseListBox.Create(AOwner: TComponent);

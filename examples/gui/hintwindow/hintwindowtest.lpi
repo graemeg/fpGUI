@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="hintwindowtest.lpr"/>
+        <Filename Value="hintwindowtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="hintwindowtest"/>
       </Unit0>

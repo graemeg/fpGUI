@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="calendartest.lpr"/>
+        <Filename Value="calendartest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="calendartest"/>
       </Unit0>

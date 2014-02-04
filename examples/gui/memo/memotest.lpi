@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="memotest.lpr"/>
+        <Filename Value="memotest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="memotest"/>
       </Unit0>

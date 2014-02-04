@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="fontselect.lpr"/>
+        <Filename Value="fontselect.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fontselect"/>
       </Unit0>

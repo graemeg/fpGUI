@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="wuline_test.lpr"/>
+        <Filename Value="wuline_test.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="wuline_test"/>
       </Unit0>

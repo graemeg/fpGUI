@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="tabtest.lpr"/>
+        <Filename Value="tabtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="tabtest"/>
       </Unit0>

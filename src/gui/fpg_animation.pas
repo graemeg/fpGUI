@@ -48,7 +48,7 @@ type
   protected
     procedure   HandlePaint; override;
     procedure   SetEnabled(const AValue: boolean); override;
-    procedure   SetImageFilename(const AValue: TfpgString); virtual;
+    procedure   SetImageFilename(const AValue: TfpgString); overload;
     //
     property    Interval: integer read FInterval write SetInterval default 50;
     property    ImageFileName: TfpgString read FImageFilename write SetImageFilename;
@@ -58,6 +58,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   ImageFromByteArray(ABmp: Pointer; ASize: longword); overload;
+    procedure   ImageFromByteArray(ABmp: Pointer; ASize: longword; AMaskSample: TPoint); overload;
+    procedure   SetImageFilename(const AValue: TfpgString; AMaskSample: TPoint); overload;
   end;
 
 
@@ -121,7 +124,7 @@ end;
 
 procedure TfpgBaseImgAnim.HandlePaint;
 begin
-  if (FImageFilename = '') or (FImage = nil) then
+  if (FImage = nil) then
     Exit; //==>
   Canvas.BeginDraw;
   Canvas.Clear(clWindowBackground);
@@ -137,6 +140,11 @@ begin
 end;
 
 procedure TfpgBaseImgAnim.SetImageFilename(const AValue: TfpgString);
+begin
+  SetImageFilename(AValue, Point(0,0));
+end;
+
+procedure TfpgBaseImgAnim.SetImageFilename(const AValue: TfpgString; AMaskSample: TPoint);
 begin
   if FImageFilename = AValue then
     Exit; //==>
@@ -154,7 +162,29 @@ begin
   FImage := LoadImage_BMP(FImageFilename);
   if FTransparent then
   begin
-    FImage.CreateMaskFromSample(0, 0);
+    FImage.CreateMaskFromSample(AMaskSample.X, AMaskSample.Y);
+    FImage.UpdateImage;
+  end;
+  RecalcImageWidth;
+  Repaint;
+end;
+
+procedure TfpgBaseImgAnim.ImageFromByteArray(ABmp: Pointer; ASize: longword);
+begin
+  ImageFromByteArray(ABmp, ASize, Point(0,0));
+end;
+
+procedure TfpgBaseImgAnim.ImageFromByteArray(ABmp: Pointer; ASize: longword; AMaskSample: TPoint);
+begin
+  if ABmp=nil then
+    Exit;
+
+  FTimer.Enabled := False;
+  FImage.Free;
+  FImage := CreateImage_BMP(ABmp, ASize);
+  if FTransparent then
+  begin
+    FImage.CreateMaskFromSample(AMaskSample.X, AMaskSample.Y);
     FImage.UpdateImage;
   end;
   RecalcImageWidth;

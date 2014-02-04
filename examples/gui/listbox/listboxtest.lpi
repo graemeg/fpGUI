@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="listboxtest.lpr"/>
+        <Filename Value="listboxtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="listboxtest"/>
       </Unit0>

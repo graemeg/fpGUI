@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="colorlistboxtest.lpr"/>
+        <Filename Value="colorlistboxtest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="colorlistboxtest"/>
       </Unit0>

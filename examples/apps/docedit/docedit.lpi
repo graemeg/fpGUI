@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="7">
       <Unit0>
-        <Filename Value="docedit.lpr"/>
+        <Filename Value="docedit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="docedit"/>
       </Unit0>

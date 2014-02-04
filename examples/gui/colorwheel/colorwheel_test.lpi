@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="colorwheel_test.lpr"/>
+        <Filename Value="colorwheel_test.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="colorwheel_test"/>
       </Unit0>

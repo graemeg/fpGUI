@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="spritedemo.lpr"/>
+        <Filename Value="spritedemo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="spritedemo"/>
       </Unit0>

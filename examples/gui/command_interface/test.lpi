@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
-        <Filename Value="test.lpr"/>
+        <Filename Value="test.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="test"/>
       </Unit0>

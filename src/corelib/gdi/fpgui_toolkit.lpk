@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
@@ -31,7 +31,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1"/>
-    <Files Count="98">
+    <Files Count="102">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -424,8 +424,24 @@
         <Filename Value="..\render\software\Agg2D.pas"/>
         <UnitName Value="Agg2D"/>
       </Item98>
+      <Item99>
+        <Filename Value="..\fpg_dbugintf.pas"/>
+        <UnitName Value="fpg_dbugintf"/>
+      </Item99>
+      <Item100>
+        <Filename Value="..\fpg_dbugmsg.pas"/>
+        <UnitName Value="fpg_dbugmsg"/>
+      </Item100>
+      <Item101>
+        <Filename Value="..\..\gui\fpg_style_carbon.pas"/>
+        <UnitName Value="fpg_style_carbon"/>
+      </Item101>
+      <Item102>
+        <Filename Value="..\..\gui\fpg_style_plastic.pas"/>
+        <UnitName Value="fpg_style_plastic"/>
+      </Item102>
     </Files>
-    <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
+    <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>

@@ -235,6 +235,8 @@ uses
   ,nvUtilities
   ,ACLStringUtility
   ,SettingsUnit
+  ,fpg_stringutils
+  ,HelpFile
   ;
 
 const
@@ -2544,7 +2546,10 @@ begin
 
         // normal lookup
         if GlobalDictIndex < _GlobalDictionary.Count then
-          StringToAdd := _GlobalDictionary[ GlobalDictIndex ]
+        begin
+          StringToAdd := _GlobalDictionary[ GlobalDictIndex ];
+          StringToAdd := ConvertTextToUTF8(THelpFile(HelpFile).Encoding, StringToAdd);
+        end
         else
           StringToAdd := '';
 

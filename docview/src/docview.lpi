@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="37">
       <Unit0>
-        <Filename Value="docview.lpr"/>
+        <Filename Value="docview.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="docview"/>
       </Unit0>

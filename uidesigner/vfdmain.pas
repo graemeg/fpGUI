@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -28,15 +28,11 @@ uses
   fpg_main,
   fpg_widget,
   fpg_dialogs,
-  fpg_constants,
   vfdprops,
   vfdforms,
   vfddesigner,
   vfdfile,
   newformdesigner;
-
-const
-  program_version = FPGUI_VERSION;
 
 type
 
@@ -85,9 +81,11 @@ var
 implementation
 
 uses
-  vfdformparser,
+  fpg_constants,
   fpg_iniutils,
-  fpg_utils;
+  fpg_utils,
+  vfd_constants,
+  vfdformparser;
 
 var
   DefaultPasExt : String = '.pas';
@@ -123,8 +121,10 @@ begin
   begin
     afiledialog          := TfpgFileDialog.Create(nil);
     afiledialog.Filename := EditedFilename;
-    afiledialog.WindowTitle := 'Open form file';
-    afiledialog.Filter   := 'Pascal source files (*.pp;*.pas;*.inc;*.dpr;*.lpr)|*.pp;*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
+    afiledialog.WindowTitle := rsOpenFormFile;
+    afiledialog.Filter   :=
+        Format(cFileFilter, [rsPascalSourceFiles, cPascalSourceFiles, cPascalSourceFiles])
+        + '|' + Format(cFileFilter, [rsAllFiles, AllFilesMask, AllFilesMask]);
     if afiledialog.RunOpenFile then
     begin
       EditedFileName := aFileDialog.Filename;
@@ -147,7 +147,7 @@ begin
   
   if not fpgFileExists(fname) then
   begin
-    ShowMessage('File does not exists.', 'Error loading form');
+    ShowMessage(Format(rsErrUnitNotFound, [fname]), rsErrLoadingForm);
     Exit;
   end;
 
@@ -186,8 +186,10 @@ begin
   begin
     afiledialog          := TfpgFileDialog.Create(nil);
     afiledialog.Filename := EditedFilename;
-    afiledialog.WindowTitle := 'Save form source';
-    afiledialog.Filter   := 'Pascal source files (*.pp;*.pas;*.inc;*.dpr;*.lpr)|*.pp;*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
+    afiledialog.WindowTitle := rsSaveFormFile;
+    afiledialog.Filter :=
+        Format(cFileFilter, [rsPascalSourceFiles, cPascalSourceFiles, cPascalSourceFiles])
+        + '|' + Format(cFileFilter, [rsAllFiles, AllFilesMask, AllFilesMask]);
     if afiledialog.RunSaveFile then
     begin
       fname:=aFileDialog.Filename;
@@ -224,7 +226,7 @@ begin
     fd := nil;
     fd := Designer(n);
     if fd = nil then
-      raise Exception.Create('Failed to find Designer Form');
+      raise Exception.Create(rsErrFailedToFindDesignerForm);
     FFile.SetFormData(fd.Form.Name, fd.GetFormSourceDecl, fd.GetFormSourceImpl);
   end;
 
@@ -241,8 +243,7 @@ begin
     frmMain.mru.AddItem(fname);
   except
     on E: Exception do
-      raise Exception.Create('Form save I/O failure in TMainDesigner.OnSaveFile.' + #13 +
-          E.Message);
+      raise Exception.CreateFmt(rsErrFormSaveIOError + LineEnding + E.Message, ['TMainDesigner.OnSaveFile']);
   end;
 end;
 
@@ -302,7 +303,7 @@ begin
     begin
       if DoesNameAlreadyExist(nfrm.edName.Text) then
       begin
-        TfpgMessageDialog.Critical('Name Conflict','The form name already exists in the current unit, please try again');
+        TfpgMessageDialog.Critical(rsErrNameConflict,'The form name already exists in the current unit, please try again');
         exit;
       end;
       fd := TFormDesigner.Create;
@@ -323,7 +324,7 @@ end;
 procedure TMainDesigner.CreateWindows;
 begin
   frmMain := TfrmMain.Create(nil);
-  frmMain.WindowTitle := 'fpGUI Designer v' + program_version;
+  frmMain.WindowTitle := cAppNameAndVersion;
   frmMain.Show;
 
   frmProperties := TfrmProperties.Create(nil);
@@ -459,8 +460,8 @@ begin
   FEditedFileName := Value;
   s := ExtractFileName(FEditedFileName);
   if s = '' then
-    s := '[new]';
-  frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + s;
+    s := '[' + rsNewUnnamedForm + ']';
+  frmMain.WindowTitle := cAppNameAndVersion + ' - ' + s;
 end;
 
 procedure TMainDesigner.LoadDefaults;

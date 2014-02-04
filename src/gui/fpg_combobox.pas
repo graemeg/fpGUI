@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -182,14 +182,16 @@ type
   
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord = 24): TfpgComboBox;
 
 
 implementation
 
 uses
   fpg_listbox,
-  dbugintf,
+  {$IFDEF DEBUG}
+  fpg_dbugintf,
+  {$ENDIF}
   math;
   
 
@@ -535,7 +537,9 @@ end;
 
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord): TfpgComboBox;
+var
+  lh: integer;
 begin
   Result           := TfpgComboBox.Create(AOwner);
   Result.Left      := x;
@@ -543,8 +547,9 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  if h < TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2) then
-    Result.Height := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2)
+  lh := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2);
+  if h < lh then
+    Result.Height := lh
   else
     Result.Height := h;
 
@@ -722,14 +727,14 @@ end;
 procedure TfpgBaseStaticCombo.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
-
-  // internal background rectangle (without frame)
-  InflateRect(r, -2, -2);
+  fpgStyle.DrawControlFrame(Canvas, r);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then

@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Demo form showing some widgets in different states, and how the themes
+      paint them.
+}
 unit frm_test;
 
 {$mode objfpc}{$H+}
@@ -5,8 +22,16 @@ unit frm_test;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
-  fpg_form, fpg_edit, fpg_label, fpg_button, fpg_menu,
+  SysUtils,
+  Classes,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_form,
+  fpg_edit,
+  fpg_label,
+  fpg_button,
+  fpg_menu,
   fpg_memo;
 
 type
@@ -33,6 +58,7 @@ type
     Label1: TfpgLabel;
     {@VFD_HEAD_END: TestForm}
     procedure CloseClicked(Sender: TObject);
+    procedure HelpAboutClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -42,13 +68,19 @@ type
 implementation
 
 uses
-  fpg_stylemanager;
+  fpg_stylemanager,
+  fpg_dialogs;
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TTestForm.CloseClicked(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TTestForm.HelpAboutClicked(Sender: TObject);
+begin
+  TfpgMessageDialog.AboutFPGui('');
 end;
 
 procedure TTestForm.AfterCreate;
@@ -198,7 +230,7 @@ begin
     AddMenuItem('-', '', nil);
     AddMenuItem('Save && Reload', '', nil);
     AddMenuItem('-', '', nil);
-    AddMenuItem('&Quit', 'Ctrl+Q', nil);
+    AddMenuItem('&Quit', 'Ctrl+Q', @CloseClicked);
   end;
 
   pmEdit := TfpgPopupMenu.Create(self);
@@ -219,7 +251,7 @@ begin
   begin
     Name := 'pmHelp';
     SetPosition(204, 196, 120, 24);
-    AddMenuItem('About...', '', nil);
+    AddMenuItem('About...', '', @HelpAboutClicked);
   end;
 
   pmSubMenu1 := TfpgPopupMenu.Create(self);

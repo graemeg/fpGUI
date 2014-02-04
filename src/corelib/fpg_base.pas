@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -89,6 +89,8 @@ type
 
   // For providing user feedback. No need to display backtrace information
   EfpGUIUserFeedbackException = class(EfpGUIException);
+
+  TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encCP1250, encIBMGraph);
 
 
 
@@ -211,6 +213,13 @@ type
     Stop: Boolean;
   end;
   PfpgMessageRec = ^TfpgMessageRec;
+
+
+  TfpgMoveEventRec = record
+    Sender: TObject;
+    x: TfpgCoord;
+    y: TfpgCoord;
+  end;
 
 
   TfpgLineStyle = (lsSolid, lsDash, lsDot, lsDashDot, lsDashDotDot);
@@ -380,7 +389,7 @@ type
     procedure   DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual;
     procedure   DrawPolygon(const Points: array of TPoint);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
-    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect);
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); virtual;
     // x,y is the top/left corner of where the text output will start.
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
@@ -602,6 +611,7 @@ type
   TFileEntryType = (etFile, etDir);
   TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
   TFileModeString = string[9];
+  TfpgSearchMode = (smAny, smFiles, smDirs);
 
 
   // A simple data object
@@ -641,6 +651,7 @@ type
     FEntries: TList;
     FDirectoryName: TfpgString;
     FFileMask: TfpgString;
+    FSearchMode: TfpgSearchMode;
     FShowHidden: boolean;
     FCurrentSpecialDir: integer;
     procedure   AddEntry(sr: TSearchRec);
@@ -663,6 +674,7 @@ type
     property    Entry[i: integer]: TFileEntry read GetEntry;
     property    FileMask: TfpgString read FFileMask write FFileMask;
     property    HasFileMode: boolean read FHasFileMode;
+    property    SearchMode: TfpgSearchMode read FSearchMode write FSearchMode;
     property    ShowHidden: boolean read FShowHidden write FShowHidden;
     property    SpecialDirs: TStringList read FSpecialDirs;
   end;
@@ -765,7 +777,6 @@ function  fpgLighter(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 
 
 { Points }
-function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 procedure SortRect(var ARect: TRect);
 procedure SortRect(var ARect: TfpgRect);
 procedure SortRect(var left, top, right, bottom: integer);
@@ -782,7 +793,7 @@ uses
   typinfo,
   process,
   {$IFDEF GDEBUG}
-  dbugintf,
+  fpg_dbugintf,
   {$ENDIF}
   dateutils;
 
@@ -1088,14 +1099,6 @@ begin
   lColor.Green := Round((lColor.Green*APercent/100) + (255 - APercent/100*255));
   lColor.Blue := Round((lColor.Blue*APercent/100) + (255 - APercent/100*255));
   Result := RGBTripleTofpgColor(lColor);
-end;
-
-function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
-begin
-  Result := (APoint.x >= ARect.Left) and
-            (APoint.y >= ARect.Top) and
-            (APoint.x <= ARect.Right) and
-            (APoint.y <= ARect.Bottom);
 end;
 
 procedure SortRect(var ARect: TRect);
@@ -2549,7 +2552,11 @@ var
   p: TProcess;
 begin
   Result := False;
-  if not fpgFileExists(GetHelpViewer) then
+  if fpgExtractFilePath(GetHelpViewer) = '' then
+  begin
+    // do nothing - we are hoping docview is in the system PATH
+  end
+  else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
@@ -2577,7 +2584,11 @@ var
   p: TProcess;
 begin
   Result := False;
-  if not fpgFileExists(GetHelpViewer) then
+  if fpgExtractFilePath(GetHelpViewer) = '' then
+  begin
+    // do nothing - we are hoping docview is in the system PATH
+  end
+  else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
@@ -2790,6 +2801,7 @@ begin
   FFileMask := '*';
   FDirectoryName := '';
   FSpecialDirs := TStringList.Create;
+  FSearchMode := smAny;
 end;
 
 destructor TfpgFileListBase.Destroy;
@@ -2836,11 +2848,13 @@ begin
     // Reported to FPC as bug 9440 in Mantis.
     if fpgFindFirst(FDirectoryName + AllFilesMask, faAnyFile or $00000080, SearchRec) = 0 then
     begin
-      AddEntry(SearchRec);
-      while fpgFindNext(SearchRec) = 0 do
-      begin
-        AddEntry(SearchRec);
-      end;
+      repeat
+        if (FSearchMode=smAny) or
+           ((FSearchMode=smFiles) and (not HasAttrib(SearchRec.Attr, faDirectory))) or
+           ((FSearchMode=smDirs) and HasAttrib(SearchRec.Attr, faDirectory))
+        then
+          AddEntry(SearchRec);
+      until fpgFindNext(SearchRec) <> 0;
     end;
     Result:=True;
   finally
@@ -3087,7 +3101,6 @@ end;
 function TfpgMimeDataBase.Formats: TStrings;
 var
   i: integer;
-  r: TfpgMimeDataItem;
   s: string;
 begin
   if Count = 0 then

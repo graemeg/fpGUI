@@ -273,10 +273,10 @@ type
 
 implementation
 
-{.$IFDEF DEBUG}
+{$IFDEF DEBUG}
 uses
-  dbugintf;
-{.$ENDIF}
+  fpg_dbugintf;
+{$ENDIF}
 
 type
   PColumnLeft = ^integer;

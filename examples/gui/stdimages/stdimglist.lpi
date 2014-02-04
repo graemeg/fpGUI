@@ -34,7 +34,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="stdimglist.lpr"/>
+        <Filename Value="stdimglist.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
     </Units>

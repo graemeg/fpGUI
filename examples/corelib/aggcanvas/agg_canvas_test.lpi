@@ -36,7 +36,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="agg_canvas_test.lpr"/>
+        <Filename Value="agg_canvas_test.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="agg_canvas_test"/>
       </Unit0>

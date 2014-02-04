@@ -33,7 +33,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="filegrid.lpr"/>
+        <Filename Value="filegrid.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="filegrid"/>
       </Unit0>

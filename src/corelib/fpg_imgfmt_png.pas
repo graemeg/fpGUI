@@ -68,6 +68,7 @@ end;
 function LoadImage_PNG(const AFileName: TfpgString): TfpgImage;
 var
   imga: TFPCustomImage;
+  PNGReader: TFPReaderPNG;
 begin
   Result := nil;
   if not fpgFileExists(AFileName) then
@@ -75,7 +76,12 @@ begin
 
   imga := TFPMemoryImage.Create(0, 0);
   try
-    imga.LoadFromFile(AFileName, TFPReaderPNG.Create); // auto size image
+    PNGReader := TFPReaderPNG.Create;
+    try
+      imga.LoadFromFile(AFileName, PNGReader); // auto size image
+    finally
+      PNGReader.Free;
+    end;
   except
     imga := nil;
   end;

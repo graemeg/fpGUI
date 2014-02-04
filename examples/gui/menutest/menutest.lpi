@@ -32,7 +32,7 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="menutest.lpr"/>
+        <Filename Value="menutest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="menutest"/>
       </Unit0>

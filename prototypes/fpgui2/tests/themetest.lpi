@@ -35,7 +35,7 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="themetest.lpr"/>
+        <Filename Value="themetest.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="themetest"/>
       </Unit0>
