@@ -691,6 +691,7 @@ begin
   wc.AddProperty('Position', TPropertyInteger, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowPosition', TPropertyBoolean, '');
+  wc.AddProperty('SliderLength', TPropertyInteger, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('TextColor', TPropertyColor, '');
   wc.WidgetIconName := 'vfd.trackbar';
