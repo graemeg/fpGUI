@@ -90,6 +90,7 @@ type
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     function    GetTotalColumnWidth: integer;
+    function    GetAdjustedBorderSizes: TRect;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetHeaderFontDesc(const AValue: string);
@@ -229,6 +230,32 @@ begin
   Result := 0;
   for i := 0 to ColumnCount-1 do
     Result := Result + ColumnWidth[i];
+end;
+
+// Adjust theme borders based on BorderStyle property
+function TfpgBaseGrid.GetAdjustedBorderSizes: TRect;
+begin
+  Result := fpgStyle.GetControlFrameBorders;
+  case BorderStyle of
+    ebsNone:
+      begin
+        Result.Left := 0;
+        Result.Right := 0;
+        Result.Top := 0;
+        Result.Bottom := 0;
+      end;
+    ebsDefault:
+      begin
+        // do nothing - the theme values are correct
+      end;
+    ebsSingle:
+      begin
+        Result.Left := 1;
+        Result.Right := 1;
+        Result.Top := 1;
+        Result.Bottom := 1;
+      end;
+  end;
 end;
 
 procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
@@ -638,9 +665,9 @@ begin
     hideScrollbar(FVScrollBar);
     exit;
   end;
-  
+
+  borders := GetAdjustedBorderSizes;
   // preliminary width/height calculations
-  borders := fpgStyle.GetControlFrameBorders;
   crect := GetClientRect;
   VHeight := crect.Height;
   HWidth  := crect.Width;
@@ -1243,7 +1270,7 @@ begin
   begin
     colresize := False;
     hh := FHeaderHeight;
-    borders := fpgStyle.GetControlFrameBorders;
+    borders := GetAdjustedBorderSizes;
 
     cLeft := borders.Left; // column starting point
     if go_SmoothScroll in FOptions then
@@ -1301,7 +1328,7 @@ begin
       Exit; //==>
     // searching for the appropriate character position
     hh := FHeaderHeight;
-    borders := fpgStyle.GetControlFrameBorders;
+    borders := GetAdjustedBorderSizes;
 
     if (y < (borders.Top+hh)) then  // inside Header row
     begin
@@ -1363,7 +1390,7 @@ begin
 
   pcol := FFocusCol;
   prow := FFocusRow;
-  borders := fpgStyle.GetControlFrameBorders;
+  borders := GetAdjustedBorderSizes;
 
   // searching for the appropriate character position
   if ShowHeader then
@@ -1508,9 +1535,6 @@ var
 begin
   Updating;
   inherited Create(AOwner);
-
-  borders := fpgStyle.GetControlFrameBorders;
-
   Focusable   := True;
   Width       := 120;
   Height      := 80;
@@ -1528,6 +1552,8 @@ begin
   FOptions    := [];
   FHeaderStyle := ghsButton;
   FBorderStyle := ebsDefault;
+
+  borders := GetAdjustedBorderSizes;
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
