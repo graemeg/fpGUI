@@ -115,8 +115,7 @@ type
     property    Columns[AIndex: Integer]: TfpgStringColumn read GetColumns;
   public
     constructor Create(AOwner: TComponent); override;
-    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify;
-        AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
+    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify; AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
     procedure   DeleteRow(AIndex: integer); override;
     property    Cells[ACol, ARow: Integer]: string read GetCell write SetCell;
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
