@@ -415,7 +415,7 @@ begin
   end;
 
   if AValue = nmsBoth then Exit;
-  // now remove properties we dont want
+  // now remove properties we don't want
 
   Msg.data.l[0] := _NET_WM_STATE_REMOVE;
   Msg.data.l[1] := 0;
