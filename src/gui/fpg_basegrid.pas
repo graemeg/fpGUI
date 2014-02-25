@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -179,6 +179,7 @@ type
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   MouseToCell(X, Y: Integer; var ACol, ARow: Integer);
+    function    GetClientRect: TfpgRect; override;
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
   end;
@@ -1625,6 +1626,19 @@ begin
       ACol := n;
       Break;
     end;
+  end;
+end;
+
+function TfpgBaseGrid.GetClientRect: TfpgRect;
+var
+  rect: TRect;
+begin
+  Result := inherited GetClientRect;
+  rect := fpgStyle.GetControlFrameBorders;
+  case BorderStyle of
+//    ebsNone:      // nothing to do
+    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    InflateRect(Result, -1, -1);
   end;
 end;
 
