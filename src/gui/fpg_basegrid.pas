@@ -73,7 +73,6 @@ type
     FFirstRow: Integer;
     FFirstCol: Integer;
     FXOffset: integer;  // used for go_SmoothScroll
-    FMargin: integer;
     FFont: TfpgFont;
     FHeaderFont: TfpgFont;
     FRowSelect: boolean;
@@ -1220,6 +1219,7 @@ var
   colresize: boolean;
   cLeft: integer;
   c: integer;
+  borders: TRect;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
   
@@ -1243,8 +1243,9 @@ begin
   begin
     colresize := False;
     hh := FHeaderHeight;
+    borders := fpgStyle.GetControlFrameBorders;
 
-    cLeft := FMargin; // column starting point
+    cLeft := borders.Left; // column starting point
     if go_SmoothScroll in FOptions then
     begin
       if FHScrollBar.Visible then
@@ -1256,7 +1257,7 @@ begin
       c := FFirstCol;
     end;
 
-    if (y <= FMargin + hh) then // we are over the Header row
+    if (y <= (borders.Top + hh)) then // we are over the Header row
     begin
       cw := 0;
       for n := c to ColumnCount-1 do
@@ -1288,6 +1289,7 @@ var
   c: integer;
   n: integer;
   cw: integer;
+  borders: TRect;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
@@ -1299,12 +1301,13 @@ begin
       Exit; //==>
     // searching for the appropriate character position
     hh := FHeaderHeight;
+    borders := fpgStyle.GetControlFrameBorders;
 
-    if (y < FMargin+hh) then  // inside Header row
+    if (y < (borders.Top+hh)) then  // inside Header row
     begin
       {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
 
-      cLeft := FMargin; // column starting point
+      cLeft := borders.Left; // column starting point
       if go_SmoothScroll in FOptions then
       begin
         if FHScrollBar.Visible then
@@ -1351,6 +1354,7 @@ var
   pcol: Integer;
   c: integer;
   cLeft: integer;
+  borders: TRect;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
@@ -1359,6 +1363,7 @@ begin
 
   pcol := FFocusCol;
   prow := FFocusRow;
+  borders := fpgStyle.GetControlFrameBorders;
 
   // searching for the appropriate character position
   if ShowHeader then
@@ -1366,11 +1371,11 @@ begin
   else
     hh := 0;
 
-  if ShowHeader and (y < FMargin+hh) then  // inside Header row
+  if ShowHeader and (y < (borders.Top+hh)) then  // inside Header row
   begin
     {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
 
-    cLeft := FMargin; // column starting point
+    cLeft := borders.Left; // column starting point
     if go_SmoothScroll in FOptions then
     begin
       if FHScrollBar.Visible then
@@ -1498,9 +1503,14 @@ begin
 end;
 
 constructor TfpgBaseGrid.Create(AOwner: TComponent);
+var
+  borders: TRect;
 begin
   Updating;
   inherited Create(AOwner);
+
+  borders := fpgStyle.GetControlFrameBorders;
+
   Focusable   := True;
   Width       := 120;
   Height      := 80;
@@ -1518,7 +1528,6 @@ begin
   FOptions    := [];
   FHeaderStyle := ghsButton;
   FBorderStyle := ebsDefault;
-  FMargin     := GetClientRect.Left;
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
@@ -1531,8 +1540,8 @@ begin
   FAlternativeBGColor := clHilite1;
   FColResizing      := False;
 
-  MinHeight   := HeaderHeight + DefaultRowHeight + FMargin;
-  MinWidth    := DefaultColWidth + FMargin;
+  MinHeight   := HeaderHeight + DefaultRowHeight + borders.Top + borders.Bottom;
+  MinWidth    := DefaultColWidth + borders.Left + borders.Right;
   
   FVScrollBar := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
