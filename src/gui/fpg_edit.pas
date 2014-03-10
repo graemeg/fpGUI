@@ -1885,6 +1885,7 @@ begin
   FAlignment := taRightJustify;
   FDecimalSeparator := DecimalSeparator;
   FThousandSeparator := ThousandSeparator;
+  FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;
   FMaxLimit := False;
@@ -2063,7 +2064,6 @@ end;
 constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FShowThousand := True;
   FDecimals := 0;
 end;
 
@@ -2307,7 +2307,6 @@ begin
   inherited Create(AOwner);
   FDecimals := -1;
   FFixedDecimals := -1;
-  FShowThousand := True;
 end;
 
 { TfpgEditCurrency }
@@ -2513,7 +2512,6 @@ constructor TfpgEditCurrency.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := 2;
-  FShowThousand := True;
 end;
 
 
