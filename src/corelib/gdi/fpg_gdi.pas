@@ -2255,8 +2255,10 @@ var
   c: longword;
 begin
   c := Windows.GetPixel(FWinGC, X, Y);
+  {$IFDEF DEBUG}
   if c = CLR_INVALID then
-    Writeln('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+    SendDebug('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+  {$ENDIF}
   Result := WinColorTofpgColor(c);
 end;
 
@@ -2972,7 +2974,7 @@ end;
 destructor TfpgGDIDrag.Destroy;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIDrag.Destroy ');
+  SendDebug('TfpgGDIDrag.Destroy ');
   {$ENDIF}
   inherited Destroy;
 end;
@@ -2994,14 +2996,14 @@ begin
   if FDragging then
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIDrag.Execute (already dragging)');
+    SendDebug('TfpgGDIDrag.Execute (already dragging)');
     {$ENDIF}
     Result := daIgnore;
   end
   else
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIDrag.Execute (new drag)');
+    SendDebug('TfpgGDIDrag.Execute (new drag)');
     {$ENDIF}
     FDragging := True;
     wapplication.Drag := self;
@@ -3016,7 +3018,7 @@ begin
       {$Note OLE DND: We are only handling strings at the moment, this needs to be extended to other types too }
       itm := FMimeData[i];
       {$IFDEF DND_DEBUG}
-      writeln('  Processing mime-type: ', itm.Format);
+      SendDebug('  Processing mime-type: ', itm.Format);
       {$ENDIF}
 
       { description of data we are sending }
