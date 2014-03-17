@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -262,7 +262,7 @@ begin
     newh := h;
   Result.SetPosition(x, y, w, newh);
 
-  if AMaxValue > AMinValue then
+  if AMaxValue >= AMinValue then
   begin
     Result.MinValue := AMinValue;
     Result.MaxValue := AMaxValue;
@@ -288,7 +288,7 @@ begin
     newh := h;
   Result.SetPosition(x, y, w, newh);
 
-  if AMaxValue > AMinValue then
+  if AMaxValue >= AMinValue then
   begin
     Result.MinValue := AMinValue;
     Result.MaxValue := AMaxValue;
@@ -550,27 +550,23 @@ end;
 
 procedure TfpgSpinEditFloat.SetMaxValue(const AValue: extended);
 begin
-  if (FMaxValue <> AValue) and (AValue > FMinValue) then
+  if (FMaxValue <> AValue) and (AValue >= FMinValue) then
   begin
     FMaxValue := AValue;
     if FValue > FMaxValue then
-    begin
       FValue      := FMaxValue;
-      FEdit.Value := FValue;
-    end;
+    FEdit.Value := FValue;
   end;
 end;
 
 procedure TfpgSpinEditFloat.SetMinValue(const AValue: extended);
 begin
-  if (FMinValue <> AValue) and (AValue < FMaxValue) then
+  if (FMinValue <> AValue) and (AValue <= FMaxValue) then
   begin
     FMinValue := AValue;
     if FValue < FMinValue then
-    begin
       FValue      := FMinValue;
-      FEdit.Value := FValue;
-    end;
+    FEdit.Value := FValue;
   end;
 end;
 
@@ -990,27 +986,23 @@ end;
 
 procedure TfpgSpinEdit.SetMaxValue(const AValue: integer);
 begin
-  if (FMaxValue <> AValue) and (AValue > FMinValue) then
+  if (FMaxValue <> AValue) and (AValue >= FMinValue) then
   begin
     FMaxValue := AValue;
     if FValue > FMaxValue then
-    begin
       FValue      := FMaxValue;
-      FEdit.Value := FValue;
-    end;
+    FEdit.Value := FValue;
   end;
 end;
 
 procedure TfpgSpinEdit.SetMinValue(const AValue: integer);
 begin
-  if (FMinValue <> AValue) and (AValue < FMaxValue) then
+  if (FMinValue <> AValue) and (AValue <= FMaxValue) then
   begin
     FMinValue := AValue;
     if FValue < FMinValue then
-    begin
       FValue      := FMinValue;
-      FEdit.Value := FValue;
-    end;
+    FEdit.Value := FValue;
   end;
 end;
 
