@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,10 +21,7 @@ unit fpg_scrollbar;
 
 {
   TODO:
-    * Set slider button to minimum length (default setting)
     * Create property to enable dynamic sizing of slider button length.
-    * Paint scroll area between arrow buttons and slider button a different
-      color on click.
 }
 
 interface
