@@ -370,12 +370,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width, Height-Width-Width);
+    Canvas.FillRectangle(0, Width, Width, Height - (2 * Width));
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width-Height-Height, Height);
+    Canvas.FillRectangle(Height, 0, Width - (2 * Height), Height);
     area := Width - (Height shl 1);
   end;
 
@@ -412,7 +412,7 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - (FSliderPos + FSliderLength));
+      Canvas.FillRectangle(0, Width + FSliderPos + FSliderLength, Width, Height - (2 * Width) - (FSliderPos + FSliderLength));
       Canvas.SetColor(clScrollBar);
     end;
   end
@@ -427,7 +427,7 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - (FSliderPos + FSliderLength), Height);
+      Canvas.FillRectangle(Height + FSliderPos + FSliderLength, 0, Width - (2 * Height) - (FSliderPos + FSliderLength), Height);
       Canvas.SetColor(clScrollBar);
     end;
   end;
