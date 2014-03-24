@@ -173,6 +173,7 @@ type
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
