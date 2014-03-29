@@ -221,6 +221,9 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    { Combobox }
+    procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); virtual;
+    procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
     { Checkbox }
     function    GetCheckBoxSize: integer; virtual;
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
@@ -2451,6 +2454,68 @@ begin
   else
     ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect;
+    const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean;
+    const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect;
+    const ABtnPressed: Boolean);
+var
+  lr: TfpgRect;
+begin
+  lr := r;
+  if IsEnabled then
+  begin
+    if IsReadOnly then
+      ACanvas.SetColor(clWindowBackground)
+    else
+      ACanvas.SetColor(ABackgroundColor);
+  end
+  else
+    ACanvas.SetColor(clWindowBackground);
+
+  ACanvas.FillRectangle(r);
+
+  if IsFocused then
+  begin
+    ACanvas.SetColor(clSelection);
+    InflateRect(lr, -1, -1);
+    ACanvas.FillRectangle(lr);
+  end;
+
+  // paint the fake dropdown button
+  DrawInternalComboBoxButton(ACanvas, AInternalBtnRect, IsEnabled, ABtnPressed);
+end;
+
+procedure TfpgStyle.DrawInternalComboBoxButton(ACanvas: TfpgCanvas;
+    r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean);
+var
+  ar: TfpgRect;
+  btnflags: TfpgButtonFlags;
+begin
+  btnflags := [];
+  ar := r;
+
+  { The bounding rectangle for the arrow }
+  ar.Width := 8;
+  ar.Height := 6;
+  ar.Left := r.Left + ((r.Width-ar.Width) div 2);
+  ar.Top := r.Top + ((r.Height-ar.Height) div 2);
+
+  if IsPressed then
+  begin
+    Include(btnflags, btfIsPressed);
+    OffsetRect(ar, 1, 1);
+  end;
+  // paint button face
+  DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, btnflags);
+  if IsEnabled then
+    ACanvas.SetColor(clText1)
+  else
+    ACanvas.SetColor(clShadow1);
+
+  // paint arrow
+  DrawDirectionArrow(ACanvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
 end;
 
 function TfpgStyle.GetCheckBoxSize: integer;
