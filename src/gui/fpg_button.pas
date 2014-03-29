@@ -546,6 +546,9 @@ begin
   if FEmbedded then
     Include(lBtnFlags, btfIsEmbedded);
 
+  if not Enabled then
+    Include(lBtnFlags, btfDisabled);
+
   // In the UI Designer we want the button more visible
   if not (csDesigning in ComponentState) then
   begin

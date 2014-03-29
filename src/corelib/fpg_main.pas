@@ -47,7 +47,7 @@ type
   TAnchors = set of TAnchor;
 
   TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
-    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
+    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
