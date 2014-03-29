@@ -100,7 +100,6 @@ type
     procedure   DoOnDropDown; virtual;
     procedure   DoDropDown; virtual; abstract;
     procedure   DoOnCloseUp; virtual;
-    procedure   PaintInternalButton; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
     property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
@@ -385,40 +384,6 @@ procedure TfpgBaseComboBox.DoOnCloseUp;
 begin
   if Assigned(OnCloseUp) then
     OnCloseUp(self);
-end;
-
-procedure TfpgBaseComboBox.PaintInternalButton;
-var
-  ar: TfpgRect;
-  btnflags: TfpgButtonFlags;
-begin
-  btnflags := [];
-  ar := FInternalBtnRect;
-
-  { The bounding rectangle for the arrow }
-  ar.Width := 8;
-  ar.Height := 6;
-  ar.Left := FInternalBtnRect.Left + ((FInternalBtnRect.Width-ar.Width) div 2);
-  ar.Top := FInternalBtnRect.Top + ((FInternalBtnRect.Height-ar.Height) div 2);
-
-  if FBtnPressed then
-  begin
-    Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
-  end;
-  // paint button face
-  fpgStyle.DrawButtonFace(Canvas,
-      FInternalBtnRect.Left,
-      FInternalBtnRect.Top,
-      FInternalBtnRect.Width,
-      FInternalBtnRect.Height, btnflags);
-  if Enabled then
-    Canvas.SetColor(clText1)
-  else
-    Canvas.SetColor(clShadow1);
-
-  // paint arrow
-  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
 end;
 
 function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
@@ -735,37 +700,15 @@ begin
   InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
-  if Enabled then
-  begin
-    if ReadOnly then
-      Canvas.SetColor(clWindowBackground)
-    else
-      Canvas.SetColor(FBackgroundColor);
-  end
-  else
-    Canvas.SetColor(clWindowBackground);
+  fpgStyle.DrawStaticComboBox(Canvas, r, Enabled, Focused, ReadOnly, FBackgroundColor, FInternalBtnRect, FBtnPressed);
 
-  Canvas.FillRectangle(r);
-
-  // paint the fake dropdown button
-  PaintInternalButton;
-
-  Dec(r.Width, FInternalBtnRect.Width);
-  Canvas.SetClipRect(r);
+//  Dec(r.Width, FInternalBtnRect.Width);
+//  Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
-
   if Focused then
-  begin
-    Canvas.SetColor(clSelection);
-    Canvas.SetTextColor(clSelectionText);
-    InflateRect(r, -1, -1);
-    Canvas.FillRectangle(r);
-  end
+    Canvas.SetTextColor(clSelectionText)
   else
-  begin
     Canvas.SetTextColor(FTextColor);
-  end;
-
   { adjust rectangle size smaller for text }
   r.Left := r.Left + Margin;
   r.Width := r.Width - (Margin*2);

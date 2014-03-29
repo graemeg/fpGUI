@@ -793,7 +793,7 @@ begin
   Canvas.FillRectangle(r);
 
   // paint the fake dropdown button
-  PaintInternalButton;
+  fpgStyle.DrawInternalComboBoxButton(Canvas, FInternalBtnRect, Enabled, FBtnPressed);
 
   Dec(r.Width, FInternalBtnRect.Width);
   Canvas.SetClipRect(r);
