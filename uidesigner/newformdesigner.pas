@@ -644,7 +644,7 @@ begin
 
   x := 64;
 
-  btnAnLeft := CreateButton(self, x, y - 2, 28, '', nil);
+  btnAnLeft := CreateButton(self, x, y - 2, 26, '', nil);
   with btnAnLeft do
   begin
     ImageName  := 'vfd.anchorleft';
