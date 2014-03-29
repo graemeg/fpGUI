@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -697,12 +697,12 @@ begin
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
   if not FAutoCompletion then
   begin
-    PaintInternalButton;
+    Repaint;
     DoDropDown;
   end
   else if FBtnPressed then
     begin
-      PaintInternalButton;
+      Repaint;
       DoDropDown;
     end;
 end;
@@ -712,7 +712,7 @@ procedure TfpgBaseEditCombo.HandleLMouseUp(x, y: integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  PaintInternalButton;
+  Repaint;
 end;
 
 procedure TfpgBaseEditCombo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -392,7 +392,6 @@ var
   ar: TfpgRect;
   btnflags: TfpgButtonFlags;
 begin
-  Canvas.BeginDraw;
   btnflags := [];
   ar := FInternalBtnRect;
 
@@ -420,7 +419,6 @@ begin
 
   // paint arrow
   fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
-  Canvas.EndDraw(FInternalBtnRect);
 end;
 
 function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
@@ -688,7 +686,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
-  PaintInternalButton;
+  Repaint;
   DoDropDown;
 end;
 
@@ -696,7 +694,7 @@ procedure TfpgBaseStaticCombo.HandleLMouseUp(x, y: integer; shiftstate: TShiftSt
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  PaintInternalButton;
+  Repaint;
 end;
 
 procedure TfpgBaseStaticCombo.HandleMouseScroll(x, y: integer;
