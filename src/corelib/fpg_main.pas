@@ -221,6 +221,9 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    { Checkbox }
+    function    GetCheckBoxSize: integer; virtual;
+    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
   end;
   
 
@@ -2448,6 +2451,21 @@ begin
   else
     ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
+end;
+
+function TfpgStyle.GetCheckBoxSize: integer;
+begin
+  Result := 13; // 13x13 - it is always a rectangle
+end;
+
+procedure TfpgStyle.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+var
+  img: TfpgImage;
+  size: integer;
+begin
+  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
+  size := GetCheckBoxSize;
+  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
 end;
 
 
