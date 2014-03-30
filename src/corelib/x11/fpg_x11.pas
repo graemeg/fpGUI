@@ -3015,7 +3015,7 @@ end;
 
 procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  XFillArc(xapplication.display, DrawHandle, Fgc, x, y, w, h,
+  XFillArc(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
@@ -3029,8 +3029,8 @@ begin
   GetMem(PointArray, SizeOf(TXPoint)*(NumPts+1)); // +1 for return line
   for i := 0 to NumPts-1 do
   begin
-    PointArray[i].x := Points[i].x;
-    PointArray[i].y := Points[i].y;
+    PointArray[i].x := Points[i].x+FDeltaX;
+    PointArray[i].y := Points[i].y+FDeltaY;
   end;
   XFillPolygon(xapplication.display, DrawHandle, Fgc, PointArray, NumPts, CoordModeOrigin, X.Complex);
   if PointArray <> nil then

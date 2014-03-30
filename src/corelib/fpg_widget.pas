@@ -143,6 +143,7 @@ type
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
+    function    Invalidated: Boolean;
     function    IsHidden: Boolean; virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
@@ -1025,8 +1026,9 @@ end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if WindowAllocated {and (Window.HasHandle)} and not FInvalidated then
-    fpgSendMessage(self, self, FPGM_PAINT);
+  if WindowAllocated {and (Window.HasHandle)} and not Invalidated then
+    fpgPostMessage(self, self, FPGM_PAINT);
+
 end;
 
 procedure TfpgWidget.SetFocus;
@@ -1296,6 +1298,14 @@ begin
     FOnMouseScroll(self, shiftstate, delta, Point(x, y));
 end;
 
+function TfpgWidget.Invalidated: Boolean;
+begin
+  Result := FInvalidated;
+  // if the parent is invalidated we will be repainted anyway
+  if not Result and not HasOwnWindow and Assigned(Parent) then
+    Result := Parent.Invalidated;
+end;
+
 function TfpgWidget.IsHidden: Boolean;
 begin
   // this currently is only True for TabSheets that are not the active page.
@@ -1433,6 +1443,12 @@ var
   itf: IInterface;
 {$ENDIF}
 begin
+  {  This saves a bunch of duplicated paint messages in children when they
+     invalidate themselves as they resize. We will send paint messages to them
+     anyway and we know a resize event will lead to a paint message
+  }
+  if HasOwnWindow then
+    Invalidate; // invalidate uses PostMessage instead of SendMessage now for this to work
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
