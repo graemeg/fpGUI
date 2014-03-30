@@ -479,7 +479,7 @@ begin
     begin
       Parent.WidgetToWindow(ParentLeft, ParentTop);
     end;
-    WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
+    //WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
     Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
@@ -620,9 +620,14 @@ begin
   {$ENDIF}
   FCanvas.Free;
   HandleHide;
-  if Owner <> nil then
-    if (Owner is TfpgWidget) and (TfpgWidget(Owner).ActiveWidget = self) then
-      TfpgWidget(Owner).ActiveWidget := nil;
+  if Parent <> nil then
+  begin
+    if Parent.ActiveWidget = self then
+      Parent.ActiveWidget := nil;
+    if not HasOwnWindow and Visible then
+      Parent.Invalidate;
+  end;
+
   inherited Destroy;
 end;
 
