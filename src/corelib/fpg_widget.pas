@@ -45,6 +45,7 @@ type
   private
     FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
+    FInvalidated: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnDragDrop: TfpgDragDropEvent;
@@ -142,6 +143,7 @@ type
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
+    function    IsHidden: Boolean; virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -335,7 +337,7 @@ begin
   if FAcceptDrops = AValue then
     exit;
   FAcceptDrops := AValue;
-  DoAcceptDrops(AValue);
+  //DoAcceptDrops(AValue);
 end;
 
 function TfpgWidget.GetHint: TfpgString;
@@ -1023,7 +1025,7 @@ end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if WindowAllocated {and (Window.HasHandle)} then
+  if WindowAllocated {and (Window.HasHandle)} and not FInvalidated then
     fpgSendMessage(self, self, FPGM_PAINT);
 end;
 
@@ -1294,6 +1296,26 @@ begin
     FOnMouseScroll(self, shiftstate, delta, Point(x, y));
 end;
 
+function TfpgWidget.IsHidden: Boolean;
+begin
+  // this currently is only True for TabSheets that are not the active page.
+  // Perhaps in the future this could be smart enough to know if the widget is
+  // completely covered by another widget and return True here.
+  Result := False;
+  if Assigned(Parent) then
+  begin
+    if (not Visible)
+    or (Left >= Parent.Width-1)
+    or (Left + Width <= 0)
+    or (Top >= Parent.Height-1)
+    or (Top + Height <= 0) then
+      Result := True;
+  end;
+
+  if not Result and not HasOwnWindow and Assigned(Parent) then
+    Result := Parent.IsHidden;
+end;
+
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
 var
   w: TfpgWidget;
@@ -1366,6 +1388,10 @@ var
   i: Integer;
   w: TfpgWidget;
 begin
+  if IsHidden then
+    Exit;
+
+  FInvalidated:=False;
   //writeln('TfpgWidget.MsgPaint - ', Classname);
   if not (WindowAllocated and (Window.HasHandle)) then
     Exit;//

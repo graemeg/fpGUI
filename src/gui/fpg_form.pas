@@ -199,7 +199,7 @@ procedure TfpgBaseForm.SetDNDEnabled(const AValue: boolean);
 begin
   if FDNDEnabled = AValue then exit;
   FDNDEnabled := AValue;
-  DoDNDEnabled(AValue);
+  //DoDNDEnabled(AValue);
 end;
 
 procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);

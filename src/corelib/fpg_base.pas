@@ -1326,18 +1326,21 @@ begin
 
 end;
 
+type
+  TWidgetHack = class(TfpgWidget);
+
 function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
 var
   i: Integer;
-  w: TfpgWidget;
+  w: TWidgetHack;
 begin
   if Assigned(MouseCapture) then
     Exit(MouseCapture); // ==>
   Result := AWidget;
   for i := AWidget.ComponentCount-1 downto 0 do
   begin
-    w := TfpgWidget(AWidget.Components[i]);
-    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible then
+    w := TWidgetHack(AWidget.Components[i]);
+    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
     begin
       if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
       begin
@@ -1347,9 +1350,6 @@ begin
     end;
   end;
 end;
-
-type
-  TWidgetHack = class(TfpgWidget);
 
 function TfpgWindowEventDispatcher.FindWidgetForKeyEvent: TfpgWidgetBase;
 var
