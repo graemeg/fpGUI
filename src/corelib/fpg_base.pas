@@ -531,7 +531,7 @@ type
     function    GetBoundsRect: TfpgRect; virtual;
     procedure   CaptureMouse; virtual;
     procedure   ReleaseMouse; virtual;
-    procedure   BringToFront; virtual; abstract;
+    procedure   BringToFront; virtual;
     property    Left: TfpgCoord read FLeft write SetLeft;
     property    Top: TfpgCoord read FTop write SetTop;
     property    Width: TfpgCoord read FWidth write SetWidth;
@@ -1623,6 +1623,10 @@ begin
     if FHeight <> FPrevHeight then
       Include(FDirtyFlags, wdfSize);
   end;
+  if (FHeight < FPrevHeight)
+  or (FWidth < FPrevWidth) then
+    if Assigned(Parent) and not HasOwnWindow then
+      TWidgetHack(Parent).Invalidate;
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
@@ -1724,6 +1728,14 @@ procedure TfpgWidgetBase.ReleaseMouse;
 begin
   if Assigned(Window) then
     Window.ReleaseMouse;
+end;
+
+procedure TfpgWidgetBase.BringToFront;
+begin
+  if not HasOwnWindow then
+  begin
+    ComponentIndex:=FParent.ComponentCount-1;
+  end;
 end;
 
 { TfpgRect }

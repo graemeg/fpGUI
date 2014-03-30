@@ -1449,6 +1449,7 @@ begin
   }
   if HasOwnWindow then
     Invalidate; // invalidate uses PostMessage instead of SendMessage now for this to work
+
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
