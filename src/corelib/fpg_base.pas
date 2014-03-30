@@ -1598,6 +1598,9 @@ begin
     if FLeft <> FPrevLeft then
       Include(FDirtyFlags, wdfPosition);
   end;
+  if (FTop <> FPrevTop) or (FLeft <> FPrevLeft) then
+    if Assigned(Parent) and not HasOwnWindow then
+      TWidgetHack(Parent).Invalidate;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
