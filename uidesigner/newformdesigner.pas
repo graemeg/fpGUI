@@ -722,7 +722,7 @@ begin
     if maindsgn.selectedform <> nil then
     begin
       maindsgn.selectedform.Form.SetFocus;
-      maindsgn.selectedform.Form.ActivateWindow;
+      maindsgn.selectedform.Form.Window.ActivateWindow;
     end;
     consumed := True;
   end;

@@ -180,7 +180,7 @@ begin
 
   UpdateResizerPositions;
 
-  if FSelected and Widget.Parent.HasHandle then
+  if FSelected and Widget.WindowAllocated then
     for n := 1 to 8 do
       resizer[n].Show;
 end;
@@ -266,7 +266,7 @@ begin
           rs.left := Widget.left - 2;
         end;
       end; // case
-      if rs.HasHandle then
+      if rs.WindowAllocated then
         rs.UpdateWindowPosition;
     end;
   end;
@@ -755,7 +755,7 @@ begin
     keyF11:
       begin
         frmProperties.SetFocus;
-        frmProperties.ActivateWindow;
+        frmProperties.Window.ActivateWindow;
       end;
     else
       consumed := False;

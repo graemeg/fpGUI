@@ -1305,8 +1305,12 @@ var
   w: TfpgWidgetBase;
 begin
   w := FindWidgetForMouseEvent(Widget, AX, AY);
-  CurrentWidget := w;
-  Window.MouseCursor:=CurrentWidget.MouseCursor;
+  CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
+
+  if Assigned(MouseCapture) then
+    w := MouseCapture; // still if the mouse is captured that's where the events go
+
+  Window.MouseCursor:=w.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
   //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
   msg.Dest := w;
@@ -1334,8 +1338,6 @@ var
   i: Integer;
   w: TWidgetHack;
 begin
-  if Assigned(MouseCapture) then
-    Exit(MouseCapture); // ==>
   Result := AWidget;
   for i := AWidget.ComponentCount-1 downto 0 do
   begin
