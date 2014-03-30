@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1151,7 +1151,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(370, 182, 233, 142);
+  SetPosition(370, 182, 235, 149);
   Hint := '';
 
   edtYear := TfpgEdit.Create(self);
@@ -1268,7 +1268,7 @@ begin
   with grdName1 do
   begin
     Name := 'grdName1';
-    SetPosition(0, 23, 233, 119);
+    SetPosition(0, 23, 235, 125);
     AddColumn('Sun', 33, taCenter);
     AddColumn('Mon', 32, taCenter);
     AddColumn('Tue', 33, taCenter);

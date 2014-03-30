@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -61,6 +61,7 @@ type
     procedure   miHelpAboutClick(Sender: TObject);
     procedure   miHelpAboutGUI(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: string);
+    procedure   SetupCaptions;
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -148,15 +149,17 @@ type
   TfrmAbout = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: frmAbout}
-    lblName1: TfpgLabel;
+    lblAppName: TfpgLabel;
     lblVersion: TfpgLabel;
-    btnName1: TfpgButton;
-    lblName3: TfpgLabel;
-    lblName4: TfpgHyperlink;
+    btnClose: TfpgButton;
+    lblWrittenBy: TfpgLabel;
+    lblURL: TfpgHyperlink;
     lblCompiled: TfpgLabel;
     {@VFD_HEAD_END: frmAbout}
+    procedure   SetupCaptions;
+    procedure   FormShow(Sender: TObject);
   public
-    procedure AfterCreate; override;
+    procedure   AfterCreate; override;
     class procedure Execute;
   end;
 
@@ -172,9 +175,11 @@ implementation
 
 uses
   fpg_main,
-  vfdmain,
   fpg_iniutils,
-  fpg_dialogs;
+  fpg_dialogs,
+  fpg_constants,
+  vfdmain,
+  vfd_constants;
 
 
 // Anchor images
@@ -182,6 +187,25 @@ uses
 
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TfrmAbout.SetupCaptions;
+begin
+  WindowTitle := rsDlgProductInfo;
+  lblAppName.Text := cAppName;
+  lblVersion.Text := Format(rsVersion, [cAppVersion]);
+  lblWrittenBy.Text := Format(rsWrittenBy, ['Graeme Geldenhuys']);
+  lblURL.URL := fpGUIWebsite;
+  lblURL.Text := fpGUIWebsite;
+  lblCompiled.Text := Format(rsCompiledOn, [{$I %date%} + ' ' + {$I %time%}]);
+  btnClose.Text := rsClose;
+end;
+
+procedure TfrmAbout.FormShow(Sender: TObject);
+begin
+  SetupCaptions;
+  lblURL.HotTrackColor := clBlue;
+  lblURL.TextColor := clRoyalBlue;
+end;
 
 procedure TfrmAbout.AfterCreate;
 begin
@@ -191,13 +215,14 @@ begin
   SetPosition(378, 267, 276, 180);
   WindowTitle := 'Product Information...';
   Hint := '';
-  Sizeable := False;
   WindowPosition := wpScreenCenter;
+  Sizeable := False;
+  OnShow := @FormShow;
 
-  lblName1 := TfpgLabel.Create(self);
-  with lblName1 do
+  lblAppName := TfpgLabel.Create(self);
+  with lblAppName do
   begin
-    Name := 'lblName1';
+    Name := 'lblAppName';
     SetPosition(12, 16, 255, 31);
     FontDesc := 'Arial-20';
     Hint := '';
@@ -215,14 +240,13 @@ begin
     Text := 'Version:  %s';
   end;
 
-  btnName1 := TfpgButton.Create(self);
-  with btnName1 do
+  btnClose := TfpgButton.Create(self);
+  with btnClose do
   begin
-    Name := 'btnName1';
+    Name := 'btnClose';
     SetPosition(194, 148, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Close';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.close';
@@ -230,27 +254,28 @@ begin
     TabOrder := 2;
   end;
 
-  lblName3 := TfpgLabel.Create(self);
-  with lblName3 do
+  lblWrittenBy := TfpgLabel.Create(self);
+  with lblWrittenBy do
   begin
-    Name := 'lblName3';
+    Name := 'lblWrittenBy';
     SetPosition(12, 100, 241, 14);
     FontDesc := 'Arial-9';
     Hint := '';
     Text := 'Written by Graeme Geldenhuys';
   end;
 
-  lblName4 := TfpgHyperlink.Create(self);
-  with lblName4 do
+  lblURL := TfpgHyperlink.Create(self);
+  with lblURL do
   begin
-    Name := 'lblName4';
+    Name := 'lblURL';
     SetPosition(12, 116, 246, 14);
-    Text := 'http://fpgui.sourceforge.net';
-    URL := 'http://fpgui.sourceforge.net';
     FontDesc := 'Arial-9:underline';
-    TextColor := clRoyalBlue;
+    Hint := '';
     HotTrackColor := clBlue;
     HotTrackFont := 'Arial-9:underline';
+    Text := 'http://fpgui.sourceforge.net';
+    TextColor := clRoyalBlue;
+    URL := 'http://fpgui.sourceforge.net';
   end;
 
   lblCompiled := TfpgLabel.Create(self);
@@ -273,8 +298,6 @@ var
 begin
   frm := TfrmAbout.Create(nil);
   try
-    frm.lblVersion.Text := Format(frm.lblVersion.Text, [program_version]);
-    frm.lblCompiled.Text := Format(frm.lblCompiled.Text, [ {$I %date%} + ' ' + {$I %time%}]);
     frm.ShowModal;
   finally
     frm.Free;
@@ -314,7 +337,6 @@ begin
     Name := 'btnNewForm';
     SetPosition(4, 28, 25, 24);
     Text := '';
-    Down := False;
     FontDesc := '#Label1';
     Hint := 'Add New Form to Unit';
     ImageMargin := -1;
@@ -331,9 +353,8 @@ begin
     Name := 'btnOpen';
     SetPosition(30, 28, 25, 24);
     Text := '';
-    Down := False;
     FontDesc := '#Label1';
-    Hint := 'Open a file';
+    Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
     ImageSpacing := 0;
@@ -348,7 +369,6 @@ begin
     Name := 'btnSave';
     SetPosition(56, 28, 25, 24);
     Text := '';
-    Down := False;
     FontDesc := '#Label1';
     Hint := 'Save the current form design';
     ImageMargin := -1;
@@ -377,11 +397,12 @@ begin
     Name := 'chlPalette';
     SetPosition(4, 67, 144, 22);
     Anchors := [anLeft,anBottom];
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
     Items.Add('-');
-    TabOrder := 5;
     FocusItem := 0;
+    TabOrder := 5;
   end;
 
   filemenu := TfpgPopupMenu.Create(self);
@@ -623,7 +644,7 @@ begin
 
   x := 64;
 
-  btnAnLeft := CreateButton(self, x, y - 2, 28, '', nil);
+  btnAnLeft := CreateButton(self, x, y - 2, 26, '', nil);
   with btnAnLeft do
   begin
     ImageName  := 'vfd.anchorleft';
@@ -897,6 +918,7 @@ procedure TfrmMain.FormShow(Sender: TObject);
 begin
   gINI.ReadFormState(self);
   UpdateWindowPosition;
+  SetupCaptions;
 end;
 
 procedure TfrmMain.PaletteBarResized(Sender: TObject);
@@ -935,6 +957,11 @@ procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
 begin
   maindsgn.EditedFileName := FileName;
   maindsgn.OnLoadFile(maindsgn);
+end;
+
+procedure TfrmMain.SetupCaptions;
+begin
+  btnOpen.Hint := rsOpenFormFile;
 end;
 
 constructor TfrmMain.Create(AOwner: TComponent);

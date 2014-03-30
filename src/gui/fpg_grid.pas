@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -68,8 +68,17 @@ type
     property    ScrollBarStyle;
     property    TabOrder;
     property    TopRow;
-    property    OnRowChange;
+    property    OnClick;
     property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
+    property    OnRowChange;
     property    OnShowHint;
   end;
 
@@ -106,8 +115,7 @@ type
     property    Columns[AIndex: Integer]: TfpgStringColumn read GetColumns;
   public
     constructor Create(AOwner: TComponent); override;
-    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify;
-        AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
+    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify; AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
     procedure   DeleteRow(AIndex: integer); override;
     property    Cells[ACol, ARow: Integer]: string read GetCell write SetCell;
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
@@ -160,6 +168,8 @@ type
     property    OnClick;
     property    OnDoubleClick;
     property    OnDrawCell;
+    property    OnEnter;
+    property    OnExit;
     property    OnFocusChange;
     property    OnHeaderClick;
     property    OnKeyPress;
@@ -171,6 +181,7 @@ type
     property    OnRowChange;
     property    OnShowHint;
   end;
+
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
 

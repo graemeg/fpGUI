@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -128,6 +128,7 @@ type
     property    Hint;
     property    Items;
     property    Margin;
+    property    ReadOnly;
     property    Text;
     property    TextColor;
     property    Width;
@@ -697,12 +698,12 @@ begin
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
   if not FAutoCompletion then
   begin
-    PaintInternalButton;
+    Repaint;
     DoDropDown;
   end
   else if FBtnPressed then
     begin
-      PaintInternalButton;
+      Repaint;
       DoDropDown;
     end;
 end;
@@ -712,7 +713,7 @@ procedure TfpgBaseEditCombo.HandleLMouseUp(x, y: integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  PaintInternalButton;
+  Repaint;
 end;
 
 procedure TfpgBaseEditCombo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -727,6 +728,7 @@ end;
 procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
   tw, tw2, st, len: integer;
   Texte: string;
 
@@ -771,25 +773,28 @@ var
   end;
 
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
-
-  // internal background rectangle (without frame)
-  InflateRect(r, -2, -2);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then
-    Canvas.SetColor(FBackgroundColor)
+  begin
+    if ReadOnly then
+      Canvas.SetColor(clWindowBackground)
+    else
+      Canvas.SetColor(FBackgroundColor);
+  end
   else
     Canvas.SetColor(clWindowBackground);
 
   Canvas.FillRectangle(r);
 
   // paint the fake dropdown button
-  PaintInternalButton;
+  fpgStyle.DrawInternalComboBoxButton(Canvas, FInternalBtnRect, Enabled, FBtnPressed);
 
   Dec(r.Width, FInternalBtnRect.Width);
   Canvas.SetClipRect(r);
@@ -870,8 +875,6 @@ begin
     else
       fpgCaret.UnSetCaret(Canvas);
   end;
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgBaseEditCombo.Create(AOwner: TComponent);

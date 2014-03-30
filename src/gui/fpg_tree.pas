@@ -275,7 +275,7 @@ implementation
 
 {$IFDEF DEBUG}
 uses
-  dbugintf;
+  fpg_dbugintf;
 {$ENDIF}
 
 type

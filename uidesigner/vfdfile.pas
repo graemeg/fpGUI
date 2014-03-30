@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      This unit handles the load, save and merge functions. Doing
+      This unit handles the load, save and merge functions. Doing VFD
       marker searching.
 }
 

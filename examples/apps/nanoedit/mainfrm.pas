@@ -42,6 +42,7 @@ type
     procedure miPasteClicked(Sender: TObject);
     procedure btnGOClick(Sender: TObject);
     procedure memEditorChanged(Sender: TObject);
+    procedure UpdateStatus(const AMessage: TfpgString);
   public
     procedure AfterCreate; override;
   end;
@@ -69,7 +70,7 @@ begin
       s := StringReplace(s, 'file://', '', []);
     memEditor.LoadFromFile(s);
     FFilename := s;
-    lblStatusText.Text := FFilename;
+    UpdateStatus(FFilename);
   end;
 end;
 
@@ -83,6 +84,7 @@ begin
     begin
       memEditor.Lines.LoadFromFile(dlg.FileName);
       FFileName := dlg.FileName;
+      UpdateStatus(FFileName);
     end;
   finally
     dlg.Free;
@@ -100,6 +102,7 @@ begin
     if dlg.RunSaveFile then
     begin
       memEditor.Lines.SaveToFile(dlg.FileName);
+      UpdateStatus(Format('<%s> successfully saved.', [FFileName]));
     end;
   finally
     dlg.Free;
@@ -118,7 +121,7 @@ begin
     begin
       memEditor.Lines.SaveToFile(dlg.FileName);
       FFilename := dlg.FileName;
-      lblStatusText.Text := FFilename;
+      UpdateStatus(Format('<%s> successfully saved.', [FFileName]));
     end;
   finally
     dlg.Free;
@@ -224,6 +227,11 @@ begin
       ShowMessage(e.Message);
   end;
 }
+end;
+
+procedure TMainForm.UpdateStatus(const AMessage: TfpgString);
+begin
+  lblStatusText.Text := AMessage;
 end;
 
 procedure TMainForm.AfterCreate;

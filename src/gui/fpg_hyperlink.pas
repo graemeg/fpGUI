@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -58,7 +58,7 @@ type
     property    FontDesc;
     property    Height;
     property    Hint;
-    property    HotTrackColor: TfpgColor read FHotTrackColor write SetHotTrackColor default clBlue;
+    property    HotTrackColor: TfpgColor read FHotTrackColor write SetHotTrackColor default clHyperLink;
     property    HotTrackFont: TfpgString read FHTFont write SetHotTrackFont;
     property    Layout;
     property    Left;
@@ -66,7 +66,7 @@ type
     property    ParentShowHint;
     property    ShowHint;
     property    Text;
-    property    TextColor default clBlue;
+    property    TextColor default clHyperLink;
     property    URL: TfpgString read FUrl write SetURL;
     property    Top;
     property    Width;
@@ -80,7 +80,9 @@ end;
 implementation
 
 uses
-  fpg_utils;
+  fpg_utils
+  ,fpg_constants
+  ;
 
 
 { TfpgHyperlink }
@@ -89,12 +91,12 @@ constructor TfpgHyperlink.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Width           := 120;
-  FHotTrackColor  := clBlue;
-  TextColor       := clBlue;
-  FUrl            := 'http://opensoft.homeip.net/fpgui/';
+  FHotTrackColor  := clHyperLink;
+  TextColor       := clHyperLink;
+  FUrl            := fpGUIWebsite;
   FText           := 'fpGUI website';
-  FHTFont         := 'Arial-8:antialias=true:underline:bold';
-  FontDesc        := 'Arial-8:antialias=true:underline';
+  FHTFont         := FPG_DEFAULT_SANS + '-8:antialias=true:underline:bold';
+  FontDesc        := FPG_DEFAULT_SANS + '-8:antialias=true:underline';
 end;
 
 procedure TfpgHyperlink.SetURL(const Value: TfpgString);

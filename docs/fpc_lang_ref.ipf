@@ -5003,7 +5003,7 @@ internally to denote 'nodefault'.
 :p.
 aoeu
 .* START HERE !!!!!!!!!!!!!!!!!!!!!!
-
+:h5.*** START HERE ***
 
 .* ==============================================================
 :h2 name=interfaces.Interfaces
@@ -5156,7 +5156,7 @@ used by a program or another unit. The syntax for a unit is as follows:
 &ra.─────┬────────────────────────────────────────────┬─ :hp2.end:ehp2. ── . ─────────────────&ra.&la.
       ├─ initialization part ─┬───────────────────┬┤
       │                       └ finalization part ┘│
-      └─  :hp2.begin:ehp2. ─── statement ─┬───────────────────┘
+      └─  :hp2.begin:ehp2. ─┬─ statement ─┬───────────────────┘
                  ^───── ; ─────┘
 
 &ra.&ra.─── unit header ── :hp2.unit:ehp2. ── unit identifier ── ; ──────────────────────────────&ra.&la.

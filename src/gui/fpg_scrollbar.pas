@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,10 +21,7 @@ unit fpg_scrollbar;
 
 {
   TODO:
-    * Set slider button to minimum length (default setting)
     * Create property to enable dynamic sizing of slider button length.
-    * Paint scroll area between arrow buttons and slider button a different
-      color on click.
 }
 
 interface
@@ -370,12 +367,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width, Height-Width-Width);
+    Canvas.FillRectangle(0, Width, Width, Height - (2 * Width));
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width-Height-Height, Height);
+    Canvas.FillRectangle(Height, 0, Width - (2 * Height), Height);
     area := Width - (Height shl 1);
   end;
 
@@ -412,7 +409,7 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - (FSliderPos + FSliderLength));
+      Canvas.FillRectangle(0, Width + FSliderPos + FSliderLength, Width, Height - (2 * Width) - (FSliderPos + FSliderLength));
       Canvas.SetColor(clScrollBar);
     end;
   end
@@ -427,7 +424,7 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - (FSliderPos + FSliderLength), Height);
+      Canvas.FillRectangle(Height + FSliderPos + FSliderLength, 0, Width - (2 * Height) - (FSliderPos + FSliderLength), Height);
       Canvas.SetColor(clScrollBar);
     end;
   end;

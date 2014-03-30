@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="17">
       <Unit0>
         <Filename Value="uidesigner.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -111,10 +111,15 @@
         <Filename Value="icons.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
+      <Unit16>
+        <Filename Value="vfd_constants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfd_constants"/>
+      </Unit16>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <SearchPaths>
       <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>

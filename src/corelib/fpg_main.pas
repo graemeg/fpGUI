@@ -47,7 +47,7 @@ type
   TAnchors = set of TAnchor;
 
   TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
-    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
+    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
@@ -218,6 +218,12 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    { Combobox }
+    procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); virtual;
+    procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
+    { Checkbox }
+    function    GetCheckBoxSize: integer; virtual;
+    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
   end;
   
 
@@ -459,7 +465,7 @@ uses
   Agg2D,
 {$endif}
 {$IFDEF DEBUG}
-  dbugintf,
+  fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
   fpg_stdimages,
@@ -473,7 +479,9 @@ uses
   fpg_imgutils,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
-  fpg_style_motif;   // TODO: This needs to be removed!
+  fpg_style_motif,   // TODO: This needs to be removed!
+  fpg_style_carbon,
+  fpg_style_plastic;
 
 var
   fpgTimers: TList;
@@ -2056,6 +2064,7 @@ begin
   fpgSetNamedColor(clGridInactiveSel, $FF99A6BF);         // same as clInactiveSel
   fpgSetNamedColor(clGridInactiveSelText, $FF000000);     // same as clInactiveSelText
   fpgSetNamedColor(clSplitterGrabBar, $FF839EFE);         // pale blue
+  fpgSetNamedColor(clHyperLink, clBlue);
 
 
   // Global Font Objects
@@ -2414,6 +2423,83 @@ begin
   else
     ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect;
+    const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean;
+    const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect;
+    const ABtnPressed: Boolean);
+var
+  lr: TfpgRect;
+begin
+  lr := r;
+  if IsEnabled then
+  begin
+    if IsReadOnly then
+      ACanvas.SetColor(clWindowBackground)
+    else
+      ACanvas.SetColor(ABackgroundColor);
+  end
+  else
+    ACanvas.SetColor(clWindowBackground);
+
+  ACanvas.FillRectangle(r);
+
+  if IsFocused then
+  begin
+    ACanvas.SetColor(clSelection);
+    InflateRect(lr, -1, -1);
+    ACanvas.FillRectangle(lr);
+  end;
+
+  // paint the fake dropdown button
+  DrawInternalComboBoxButton(ACanvas, AInternalBtnRect, IsEnabled, ABtnPressed);
+end;
+
+procedure TfpgStyle.DrawInternalComboBoxButton(ACanvas: TfpgCanvas;
+    r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean);
+var
+  ar: TfpgRect;
+  btnflags: TfpgButtonFlags;
+begin
+  btnflags := [];
+  ar := r;
+
+  { The bounding rectangle for the arrow }
+  ar.Width := 8;
+  ar.Height := 6;
+  ar.Left := r.Left + ((r.Width-ar.Width) div 2);
+  ar.Top := r.Top + ((r.Height-ar.Height) div 2);
+
+  if IsPressed then
+  begin
+    Include(btnflags, btfIsPressed);
+    OffsetRect(ar, 1, 1);
+  end;
+  // paint button face
+  DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, btnflags);
+  if IsEnabled then
+    ACanvas.SetColor(clText1)
+  else
+    ACanvas.SetColor(clShadow1);
+
+  // paint arrow
+  DrawDirectionArrow(ACanvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
+end;
+
+function TfpgStyle.GetCheckBoxSize: integer;
+begin
+  Result := 13; // 13x13 - it is always a rectangle
+end;
+
+procedure TfpgStyle.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+var
+  img: TfpgImage;
+  size: integer;
+begin
+  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
+  size := GetCheckBoxSize;
+  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
 end;
 
 

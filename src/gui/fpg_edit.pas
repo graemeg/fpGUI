@@ -1116,21 +1116,24 @@ begin
 end;
 
 procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
+var
+  rect: TRect;
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   if AutoSize then
   begin
+    rect := fpgStyle.GetControlFrameBorders;
     case BorderStyle of
       ebsNone:
         if Height < FFont.Height + (FHeightMargin * 2) then
-          Height:= FFont.Height + (FHeightMargin * 2);
+          Height := FFont.Height + (FHeightMargin * 2);
       ebsDefault:
-        if Height < FFont.Height + 4 + (FHeightMargin * 2) then
-          Height:= FFont.Height + 4 + (FHeightMargin * 2);
+        if Height < FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
       ebsSingle:
-        if Height < FFont.Height + 2 + (FHeightMargin * 2) then
-          Height:= FFont.Height + 2 + (FHeightMargin * 2);
+        if Height < FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
   end;
   Adjust;
@@ -1179,18 +1182,24 @@ begin
 end;
 
 procedure TfpgBaseEdit.SetHeightMargin(const AValue: integer);
+var
+  rect: TRect;
 begin
   if (FHeightMargin = AValue) or (AValue <= 0) then
     Exit; //=>
   FHeightMargin := AValue;
-  case BorderStyle of
-    ebsNone:
-      Height:= FFont.Height + (FHeightMargin * 2);
-    ebsDefault:
-      Height:= FFont.Height + 4 + (FHeightMargin * 2);
-    ebsSingle:
-      Height:= FFont.Height + 2 + (FHeightMargin * 2);
+  if AutoSize then
+  begin
+    rect := fpgStyle.GetControlFrameBorders;
+    case BorderStyle of
+      ebsNone:
+        Height := FFont.Height + (FHeightMargin * 2);
+      ebsDefault:
+        Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
+      ebsSingle:
+        Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
+  end;
   Repaint;
 end;
 
@@ -1426,11 +1435,15 @@ begin
 end;
 
 function TfpgBaseEdit.GetClientRect: TfpgRect;
+var
+  rect: TRect;
 begin
+  Result := inherited GetClientRect;
+  rect := fpgStyle.GetControlFrameBorders;
   case BorderStyle of
-    ebsNone:      Result := inherited GetClientRect;
-    ebsDefault:   Result.SetRect(2, 2, Width-4, Height-4);
-    ebsSingle:    Result.SetRect(1, 1, Width-2, Height-2);
+//    ebsNone:      // nothing to do
+    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    InflateRect(Result, -1, -1);
   end;
 end;
 
@@ -1872,6 +1885,7 @@ begin
   FAlignment := taRightJustify;
   FDecimalSeparator := DecimalSeparator;
   FThousandSeparator := ThousandSeparator;
+  FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;
   FMaxLimit := False;
@@ -2050,7 +2064,6 @@ end;
 constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FShowThousand := True;
   FDecimals := 0;
 end;
 
@@ -2294,7 +2307,6 @@ begin
   inherited Create(AOwner);
   FDecimals := -1;
   FFixedDecimals := -1;
-  FShowThousand := True;
 end;
 
 { TfpgEditCurrency }
@@ -2500,7 +2512,6 @@ constructor TfpgEditCurrency.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := 2;
-  FShowThousand := True;
 end;
 
 

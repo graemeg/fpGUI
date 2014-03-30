@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      The main uiDesigner forms.
+      This unit defines various forms/dialogs used in the UI Designer.
 }
 
 unit vfdforms;
@@ -33,18 +33,23 @@ uses
   fpg_combobox,
   fpg_trackbar,
   fpg_checkbox,
-  fpg_panel,
   fpg_tree;
 
 type
 
   TVFDDialog = class(TfpgForm)
   protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   SetupCaptions; virtual;
+    procedure   FormShow(Sender: TObject); virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
   TInsertCustomForm = class(TVFDDialog)
+  protected
+    procedure   SetupCaptions; override;
   public
     l1,
     l2: TfpgLabel;
@@ -52,34 +57,38 @@ type
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
   TNewFormForm = class(TVFDDialog)
   private
-    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     l1: TfpgLabel;
     edName: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
   TEditPositionForm = class(TVFDDialog)
   private
-    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+  protected
+    procedure   SetupCaptions; override;
   public
     lbPos: TfpgLabel;
     edPos: TfpgEdit;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
 
 
@@ -87,6 +96,8 @@ type
   private
     function    GetTitle: string;
     procedure   SetTitle(const AValue: string);
+  protected
+    procedure   SetupCaptions; override;
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
     lblTitle: TfpgLabel;
@@ -105,13 +116,15 @@ type
   end;
 
 
-  TfrmVFDSetup = class(TfpgForm)
+  TfrmVFDSetup = class(TVFDDialog)
   private
     FINIVersion: integer;
-    procedure   FormShow(Sender: TObject);
     procedure   LoadSettings;
     procedure   SaveSettings;
     procedure   btnOKClick(Sender: TObject);
+  protected
+    procedure   FormShow(Sender: TObject); override;
+    procedure   SetupCaptions; override;
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
     lb1: TfpgLabel;
@@ -132,7 +145,6 @@ type
     cbIndentationType: TfpgComboBox;
     lblIndentType: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
-    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
   end;
@@ -145,20 +157,27 @@ uses
   fpg_main,
   fpg_iniutils,
   fpg_constants,
+  fpg_utils,
+  vfd_constants,
   vfdprops; // used to get Object Inspector defaults
-
-const
-  cDesignerINIVersion = 1;
 
 
 { TInsertCustomForm }
+
+procedure TInsertCustomForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgInsertCustomWidget;
+  l1.Text := fpgAddColon(rsNewClassName);
+  l2.Text := fpgAddColon(rsName);
+end;
 
 procedure TInsertCustomForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
   inherited;
   WindowPosition := wpScreenCenter;
-  WindowTitle := 'Insert Custom Widget';
+  WindowTitle := 'TInsertCustomForm';
   SetPosition(0, 0, 300, 100);
 
   l1        := CreateLabel(self, 8, 4, 'Class name:');
@@ -166,8 +185,8 @@ begin
   edClass.Text := 'Tfpg';
   l2        := CreateLabel(self, 8, 48, 'Name:');
   edName    := CreateEdit(self, 8, 68, 150, 0);
-  btnOK     := CreateButton(self, 180, 20, 100, 'OK', @OnButtonClick);
-  btnCancel := CreateButton(self, 180, 52, 100, 'Cancel', @OnButtonClick);
+  btnOK     := CreateButton(self, 180, 20, 100, rsOK, @OnButtonClick);
+  btnCancel := CreateButton(self, 180, 52, 100, rsCancel, @OnButtonClick);
   {%endregion}
 end;
 
@@ -188,12 +207,19 @@ begin
     btnOK.Click;
 end;
 
+procedure TNewFormForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgNewForm;
+  l1.Text := fpgAddColon(rsNewFormName);
+end;
+
 procedure TNewFormForm.AfterCreate;
 begin
   inherited AfterCreate;
   WindowPosition := wpScreenCenter;
   SetPosition(0, 0, 286, 66);
-  WindowTitle := 'New Form';
+  WindowTitle := 'TNewFormForm';
 
   l1           := CreateLabel(self, 8, 8, 'Form name:');
   edName       := CreateEdit(self, 8, 28, 180, 0);
@@ -220,16 +246,23 @@ begin
     btnOK.Click;
 end;
 
+procedure TEditPositionForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgEditFormPosition;
+  lbPos.Text := fpgAddColon(rsPosition);
+end;
+
 procedure TEditPositionForm.AfterCreate;
 begin
   inherited AfterCreate;
   WindowPosition := wpScreenCenter;
   Width := 186;
   Height := 66;
-  WindowTitle := 'Position';
+  WindowTitle := 'TEditPositionForm';
   Sizeable := False;
 
-  lbPos           := CreateLabel(self, 8, 8, 'Pos:      ');
+  lbPos           := CreateLabel(self, 8, 8, 'Pos:');
   edPos           := CreateEdit(self, 8, 28, 80, 0);
   edPos.OnKeyPress := @edPosKeyPressed;
   btnOK           := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
@@ -256,6 +289,17 @@ begin
   lblTitle.Text := Format(lblTitle.Text, [AValue]);
 end;
 
+procedure TWidgetOrderForm.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgWidgetOrder;
+  lblTitle.Text := fpgAddColon(rsFormTitle);
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
+  btnUp.Text := rsUp;
+  btnDown.Text := rsDown;
+end;
+
 constructor TWidgetOrderForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -275,7 +319,7 @@ begin
   {@VFD_BODY_BEGIN: WidgetOrderForm}
   Name := 'WidgetOrderForm';
   SetPosition(534, 173, 426, 398);
-  WindowTitle := 'Widget order';
+  WindowTitle := 'TWidgetOrderForm';
   Hint := '';
   WindowPosition := wpScreenCenter;
 
@@ -388,6 +432,11 @@ end;
 
 { TVFDDialogBase }
 
+procedure TVFDDialog.FormShow(Sender: TObject);
+begin
+  SetupCaptions;
+end;
+
 procedure TVFDDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then
@@ -398,14 +447,45 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TVFDDialog.SetupCaptions;
+begin
+  // to be implemented in descendants
+end;
+
+constructor TVFDDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow := @FormShow;
+end;
+
 procedure TfrmVFDSetup.FormShow(Sender: TObject);
 begin
+  inherited FormShow(Sender);
   { If it's an older version, don't load the size because the dialog dimensions
     probably changed in a newer version }
   if FINIVersion >= cDesignerINIVersion then
     gINI.ReadFormState(self)
   else
     gINI.ReadFormState(self, -1, -1, True);
+end;
+
+procedure TfrmVFDSetup.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  WindowTitle := rsDlgSetup;
+  lb1.Text := fpgAddColon(rsGridResolution);
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
+  lblRecentFiles.Text := fpgAddColon(rsRecentFilesCount);
+  chkFullPath.Text := rsShowFullPathName;
+  lblName1.Text := rsFormDesigner;
+  lblName2.Text := rsOpenRecentSettings;
+  lblName3.Text := rsVarious;
+  chkUndoOnExit.Text := rsUndoOnPropertyExit;
+  chkOneClick.Text := rsOneClickSelectAndMove;
+  Label1.Text := fpgAddColon(rsDefaultFileExt);
+  chkCodeRegions.Text := rsUseCodeRegions;
+  lblIndentType.Text := fpgAddColon(rsIndentType);
 end;
 
 procedure TfrmVFDSetup.LoadSettings;
@@ -438,12 +518,6 @@ procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
 begin
   SaveSettings;
   ModalResult := mrOK;
-end;
-
-constructor TfrmVFDSetup.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  OnShow := @FormShow;
 end;
 
 procedure TfrmVFDSetup.AfterCreate;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1077,7 +1077,7 @@ end;
 procedure TfpgListView.MsgPaint(var msg: TfpgMessageRec);
 begin
   // Optimises painting and prevents Begin[End]Draw and OnPaint event firing
-  // in not needed.
+  // if not needed.
   if FUpdateCount = 0 then
     inherited MsgPaint(msg);
 end;
@@ -1404,23 +1404,38 @@ end;
 procedure TfpgListView.HandlePaint;
 var
   ClipRect: TfpgRect;
+  rect: TRect;
 begin
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
-  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
-  
-  ClipRect.SetRect(2, 2, Width-4, Height-4);
+  Canvas.ClearClipRect;
+  ClipRect.SetRect(0, 0, Width, Height);
+  fpgStyle.DrawControlFrame(Canvas, ClipRect);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(ClipRect, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(ClipRect);
+
+  if Enabled then
+  begin
+//    if ReadOnly then
+//      Canvas.SetColor(clWindowBackground)
+//    else
+      Canvas.SetColor(FBackgroundColor);
+  end
+  else
+    Canvas.SetColor(clWindowBackground);
+
+  Canvas.FillRectangle(ClipRect);
 
   // This paints the small square remaining below the vscrollbar
   // and to the right of the hscrollbar
   if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
     Canvas.Color := clButtonFace;
-    Canvas.FillRectangle(Width - 2 - FVScrollBar.Width,
-                         Height - 2 - FHScrollBar.Height,
-                         Width - 2,
-                         Height - 2);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
   end;
   
   if FVScrollBar.Visible then

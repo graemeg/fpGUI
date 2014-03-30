@@ -919,7 +919,7 @@ uses
   typinfo,
   process,
   {$IFDEF GDEBUG}
-  dbugintf,
+  fpg_dbugintf,
   {$ENDIF}
   dateutils;
 
