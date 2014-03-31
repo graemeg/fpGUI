@@ -627,6 +627,8 @@ begin
     if not HasOwnWindow and Visible then
       Parent.Invalidate;
   end;
+  if Assigned(Window) then
+    Window.Dispatcher.NotifyWidgetDestroying(Self);
 
   inherited Destroy;
 end;

@@ -650,16 +650,18 @@ type
     FWidget: TfpgWidgetBase;
     FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
+    LastMousePos: TfpgPoint; // point in the native window
 
     procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
     procedure    DispatchKeyEvent(var msg: TfpgMessageRec);
-    function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
+    function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
     function     FindWidgetForKeyEvent: TfpgWidgetBase;
     procedure    SetCurrentWidget(AValue: TfpgWidgetBase);
   public
     constructor  Create(AOwner: TfpgWindowBase); reintroduce;
     procedure    DefaultHandler(var message); override;
     function     FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
+    procedure    NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
     property     MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
     property     CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property     Window: TfpgWindowBase read FWindow write FWindow;
@@ -1305,11 +1307,19 @@ procedure TfpgWindowEventDispatcher.DispatchMouseEvent(AX, AY: TfpgCoord; var ms
 var
   w: TfpgWidgetBase;
 begin
+  LastMousePos.X:=AX;
+  LastMousePos.Y:=AY;
   w := FindWidgetForMouseEvent(Widget, AX, AY);
   CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
 
   if Assigned(MouseCapture) then
     w := MouseCapture; // still if the mouse is captured that's where the events go
+
+  // Setting this to nil allows us to know if we should bother to update the cursor
+  // in NotifyWidgetDestroying if the widget destroyed has the mouse focus.
+  // This FPGM_MOUSEEXIT is for the native window.
+  if msg.MsgCode = FPGM_MOUSEEXIT then
+    FCurrentWidget := nil;
 
   Window.MouseCursor:=w.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
@@ -1334,7 +1344,7 @@ end;
 type
   TWidgetHack = class(TfpgWidget);
 
-function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord): TfpgWidgetBase;
+function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
 var
   i: Integer;
   w: TWidgetHack;
@@ -1343,6 +1353,9 @@ begin
   for i := AWidget.ComponentCount-1 downto 0 do
   begin
     w := TWidgetHack(AWidget.Components[i]);
+    // we get notified a widget is destroying before it's gone from the list
+    if w = AInvalidWidget then
+      continue;
     if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
     begin
       if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
@@ -1383,6 +1396,7 @@ procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);
   end;
 begin
   if FCurrentWidget=AValue then Exit;
+
   if Assigned(FCurrentWidget) then
   begin
     SendEnterExitMessage(FPGM_MOUSEEXIT, FCurrentWidget);
@@ -1441,6 +1455,16 @@ function TfpgWindowEventDispatcher.FindWidgetFromWindowPoint(AX, AY: TfpgCoord
   ): TfpgWidgetBase;
 begin
   Result := FindWidgetForMouseEvent(Widget, AX, AY);
+end;
+
+procedure TfpgWindowEventDispatcher.NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+begin
+  if FCurrentWidget = AWidget then
+  begin
+    FCurrentWidget := nil; // this prevents an exit message being sent to a destroyed object
+    CurrentWidget := FindWidgetForMouseEvent(Widget, LastMousePos.X, LastMousePos.Y, AWidget);
+    Window.MouseCursor:=FCurrentWidget.MouseCursor;
+  end;
 end;
 
 { TfpgWidgetBase }
