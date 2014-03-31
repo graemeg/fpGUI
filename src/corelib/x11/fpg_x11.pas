@@ -1622,6 +1622,7 @@ var
   blockmsg: boolean;
   w: TfpgX11Window;
   ew: TfpgX11Window;
+  mw: TfpgWidgetBase;
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
@@ -1831,12 +1832,12 @@ begin
           begin
             if (Popup <> nil) then
             begin
-              ew := w;
+              mw := w.Dispatcher.FindWidgetFromWindowPoint(ev.xbutton.x, ev.xbutton.y);
               while (w <> nil) and (w.Parent <> nil) do
                 w := TfpgX11Window(w.Parent);
 
               if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
-                 (not PopupDontCloseWidget(TfpgWidget(ew))) then
+                 (not PopupDontCloseWidget(TfpgWidget(mw))) then
               begin
                 ClosePopups;
               end;

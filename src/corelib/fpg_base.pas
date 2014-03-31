@@ -659,6 +659,7 @@ type
   public
     constructor  Create(AOwner: TfpgWindowBase); reintroduce;
     procedure    DefaultHandler(var message); override;
+    function     FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
     property     MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
     property     CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property     Window: TfpgWindowBase read FWindow write FWindow;
@@ -1434,6 +1435,12 @@ begin
     Widget.Dispatch(msg);
   end;
 
+end;
+
+function TfpgWindowEventDispatcher.FindWidgetFromWindowPoint(AX, AY: TfpgCoord
+  ): TfpgWidgetBase;
+begin
+  Result := FindWidgetForMouseEvent(Widget, AX, AY);
 end;
 
 { TfpgWidgetBase }
