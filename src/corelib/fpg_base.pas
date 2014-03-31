@@ -1358,7 +1358,7 @@ function TfpgWindowEventDispatcher.FindWidgetForKeyEvent: TfpgWidgetBase;
 var
   w: TWidgetHack;
 begin
-  w := TWidgetHack(TWidgetHack(Widget).ActiveWidget);
+  w := TWidgetHack(Widget);
   while Assigned(w) do
   begin
     Result := w;
