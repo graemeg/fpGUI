@@ -2447,9 +2447,10 @@ begin
   This code was originally introduced in commit 2ffdd747. I'm looking for an
   alternative solution to the original problem. }
 //      else if FocusRootWidget <> nil then
-//        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
+//        lmwh := TfpgX11Window(FocusRootWidget.Window).WinHandle // <-- alienwindows
+////        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
       else if fpgApplication.MainForm <> nil then
-        lmwh := TfpgX11Window(fpgApplication.MainForm).WinHandle;
+        lmwh := TfpgX11Window(fpgApplication.MainForm.Window).WinHandle;
       if lmwh <> 0 then
       begin
         XSetTransientForHint(xapplication.display, FWinHandle, lmwh);
