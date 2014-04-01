@@ -99,6 +99,7 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: TfpgString;
+    FInvalidRects: array of TfpgRect;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
@@ -181,6 +182,7 @@ type
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
+    procedure   InvalidateRect(ARect: TfpgRect);
     property    Window: TfpgNativeWindow read GetWindow;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
@@ -1037,9 +1039,11 @@ end;
 
 procedure TfpgWidget.RePaint;
 begin
-  if WindowAllocated {and (Window.HasHandle)} and not Invalidated then
+  if WindowAllocated and not Invalidated then
+  begin
+    FInvalidated := True;
     fpgPostMessage(self, self, FPGM_PAINT);
-
+  end;
 end;
 
 procedure TfpgWidget.SetFocus;
@@ -1443,6 +1447,8 @@ begin
 
   end;
   Canvas.EndDraw;
+
+  SetLength(FInvalidRects, 0); // clear rect list
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
@@ -1726,6 +1732,17 @@ end;
 procedure TfpgWidget.Invalidate;
 begin
   RePaint;
+end;
+
+procedure TfpgWidget.InvalidateRect(ARect: TfpgRect);
+begin
+  //SetLength(FInvalidRects, Length(FInvalidRects)+1);
+  //FInvalidRects[High(FInvalidRects)] := ARect;
+
+  {$TODO finish InvalidateRect}
+
+  // just call invalidate for now
+  Invalidate;
 end;
 
 

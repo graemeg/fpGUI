@@ -1654,6 +1654,9 @@ begin
     if FLeft <> FPrevLeft then
       Include(FDirtyFlags, wdfPosition);
   end;
+
+  if (wdfPosition in FDirtyFlags) and Assigned(Parent) and not HasOwnWindow then
+    TfpgWidget(Parent).InvalidateRect(fpgRect(FPrevLeft, FPrevTop, FWidth, FHeight));
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -1684,7 +1687,7 @@ begin
   if (FHeight < FPrevHeight)
   or (FWidth < FPrevWidth) then
     if Assigned(Parent) and not HasOwnWindow then
-      TWidgetHack(Parent).Invalidate;
+      TWidgetHack(Parent).InvalidateRect(fpgRect(FLeft, FTop, FPrevWidth, FPrevHeight));
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
