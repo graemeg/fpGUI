@@ -292,7 +292,7 @@ type
     FDNDVersion: integer;
     FDNDDataType: TAtom;
     FSrcTimeStamp: clong;
-    FLastDropTarget: TfpgWinHandle;
+    FLastDropTarget: TfpgWidgetBase;
     FDropPos: TPoint;
     FDrag: TfpgX11Drag;
     { X11 window grouping }
@@ -404,8 +404,8 @@ type
     procedure   HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
     procedure   HandleSelectionRequest(ev: TXEvent);
   protected
-    FSource: TfpgX11Window;
-    function    GetSource: TfpgX11Window; virtual;
+    FSource: TfpgWidgetBase;
+    function    GetSource: TfpgWidgetBase; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
@@ -1059,15 +1059,15 @@ procedure TfpgX11Application.ResetDNDVariables;
 var
   msgp: TfpgMessageParams;
 begin
-  if FLastDropTarget <> 0 then
+  if FLastDropTarget <> nil then
   begin
     fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FindWindowDispatcherFromWindow(FLastDropTarget), FPGM_DROPEXIT, msgp);
+    fpgPostMessage(nil, FLastDropTarget, FPGM_DROPEXIT, msgp);
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
   FSrcWinHandle   := 0;
-  FLastDropTarget := 0;
+  FLastDropTarget := nil;
   FDropPos.X := 0;
   FDropPos.Y := 0;
 end;
@@ -1160,9 +1160,9 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDleave');
   {$ENDIF}
-  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
   begin
-    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    wg := FLastDropTarget as TFpgWidget;
 
     if wg.AcceptDrops then
     begin
@@ -1184,8 +1184,7 @@ var
   ret_child: TfpgWinHandle;
 
   i: integer;
-  lTargetWinHandle: TWindow;
-  w: TfpgX11Window;
+  win: TfpgX11Window;
   wg: TfpgWidget;
   wg2: TfpgWidget;
   swg: TfpgWidget;
@@ -1194,6 +1193,9 @@ var
   lAccept: Boolean;
   lMimeChoice: TfpgString;
   lMimeList: TStringList;
+  {$IFDEF DNDDEBUG}
+  s: pchar;
+  {$ENDIF}
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDposition  (toplevel window = ', ATopLevelWindow.Name, ')');
@@ -1202,7 +1204,6 @@ begin
   FSrcWinHandle := ASource;
   FActionType   := AAction;
   FSrcTimeStamp := ATimeStamp;
-  lTargetWinHandle := ATopLevelWindow.WinHandle;
   lMimeChoice := 'text/plain';
 
   {$IFDEF DNDDEBUG}
@@ -1227,28 +1228,30 @@ begin
   end;
 
   if child <> 0 then
-    w := FindWindowByHandle(child)
+    win := FindWindowByHandle(child)
   else
-    w := ATopLevelWindow;
+    win := ATopLevelWindow;
 
   {$IFDEF DNDDEBUG}
-  writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, w.WinHandle, w.WinHandle]));
+  writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, win.WinHandle, win.WinHandle]));
   {$ENDIF}
 
-  if Assigned(w) then
+  if Assigned(win) then
   begin
-    lTargetWinHandle := w.WinHandle;
     {$IFDEF DNDDEBUG}
-    writeln('dragging over window: ', w.Name);
+    writeln('dragging over window: ', win.ClassName);
     {$ENDIF}
-    if w is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+    if win is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      wg := TfpgWidget(TfpgX11Window(w).Owner);
-      if FLastDropTarget <> lTargetWinHandle then
+      wg := TfpgWidget(win.Dispatcher.FindWidgetFromWindowPoint(dx,dy));
+      {$IFDEF DNDDEBUG}
+      writeln('dragging over widget: ', wg.ClassName);
+      {$ENDIF}
+      if FLastDropTarget <> wg then
       begin
-        if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+        wg2 := TfpgWidget(FLastDropTarget);
+        if wg2 <> nil then { 0 would be first time in, so there is no last window }
         begin
-          wg2 := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
           if wg2.AcceptDrops then
           begin
             if Assigned(wg2.OnDragLeave) then
@@ -1259,7 +1262,7 @@ begin
           fpgPostMessage(nil, wg2, FPGM_DROPEXIT, msgp);
         end;
       end;
-      FLastDropTarget := lTargetWinHandle;
+      FLastDropTarget := wg;
       if wg.AcceptDrops then
       begin
         if Assigned(wg.OnDragEnter) then
@@ -1279,7 +1282,7 @@ begin
 
           { TODO: We need to populate the Source parameter. }
           if Assigned(Drag) then
-            swg := TfpgWidget((TfpgDrag(Drag).Source as TfpgX11Window).Owner)
+            swg := TfpgWidget((TfpgDrag(Drag).Source as TfpgWidget).Owner)
           else
             swg := nil;
           wg.OnDragEnter(wg, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
@@ -1295,7 +1298,7 @@ begin
           fillchar(msgp, sizeof(msgp), 0);
           msgp.mouse.x := dx;
           msgp.mouse.y := dy;
-          fpgPostMessage(nil, w.Owner, FPGM_DROPENTER, msgp);
+          fpgPostMessage(nil, win.Owner, FPGM_DROPENTER, msgp);
         end;
       end;
     end;
@@ -1380,9 +1383,10 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDselection');
   {$ENDIF}
-  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
   begin
-    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    wg := TfpgWidget(FLastDropTarget);
     if not wg.AcceptDrops then
       Exit;
   end;
@@ -1416,9 +1420,10 @@ begin
     s := data;
   end;
 
-  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
   begin
-    wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    wg := TfpgWidget(FLastDropTarget);
     if wg.AcceptDrops then
     begin
       if Assigned(wg.OnDragDrop) then
@@ -1860,7 +1865,7 @@ begin
           w := FindWindowByHandle(ev.xbutton.window); // restore w
           if xapplication.TopModalForm <> nil then
           begin
-            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
             if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
@@ -1956,7 +1961,7 @@ begin
             end;
             if xapplication.TopModalForm <> nil then
             begin
-              ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+              ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
               if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                 blockmsg := true;
             end;
@@ -1991,7 +1996,7 @@ begin
               if xapplication.TopModalForm <> nil then
               begin
                 // This is ugly!!!!!!!!!!!!!!!
-                ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+                ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
                 if (ew <> nil) and (TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
@@ -3645,7 +3650,7 @@ end;
 
 procedure TfpgX11Drag.SetTypeListProperty;
 begin
-  XChangeProperty(xapplication.Display, FSource.WinHandle,
+  XChangeProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle,
       xapplication.XdndTypeList, XA_ATOM, 32,
       PropModeReplace, @FMimeTypesArray[0], Length(FMimeTypesArray));
 end;
@@ -3752,7 +3757,7 @@ begin
   xev.xclient.message_type := xapplication.XdndLeave;
   xev.xclient.format    := 32;
 
-  xev.xclient.data.l[0] := FSource.WinHandle;
+  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
   xev.xclient.data.l[1] := 0;
 
   xev.xclient.data.l[2] := 0;
@@ -3773,7 +3778,7 @@ begin
   xev.xclient.message_type := xapplication.XdndEnter;
   xev.xclient.format   := 32;
 
-  xev.xclient.data.l[0] := FSource.WinHandle;
+  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
 
   n := FMimeData.Count;
 
@@ -3815,7 +3820,7 @@ begin
   xev.xclient.message_type := xapplication.XdndPosition;
   xev.xclient.format   := 32;
 
-  xev.xclient.data.l[0] := FSource.WinHandle;
+  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
   xev.xclient.data.l[1] := 0;
 
   xev.xclient.data.l[2] := (x_root shl 16) or y_root;    // root coordinates
@@ -3839,7 +3844,7 @@ begin
     xev.xclient.message_type := xapplication.XdndDrop;
     xev.xclient.format  := 32;
 
-    xev.xclient.data.l[0] := FSource.WinHandle;    // from
+    xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;    // from
     xev.xclient.data.l[1] := 0;                // reserved
     xev.xclient.data.l[2] := CurrentTime;       // timestamp
     xev.xclient.data.l[3] := 0;
@@ -3917,7 +3922,7 @@ begin
   XSendEvent(xapplication.Display, e.requestor, false, NoEventMask, @e );
 end;
 
-function TfpgX11Drag.GetSource: TfpgX11Window;
+function TfpgX11Drag.GetSource: TfpgWidgetBase;
 begin
   Result := FSource;
 end;
@@ -3928,8 +3933,10 @@ begin
   writeln('TfpgX11Drag.Destroy ');
   {$ENDIF}
   FSource.MouseCursor := mcDefault;
-  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndAware);
-  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndTypeList);
+  // Andrew Haines (April 1st 2014): Why are we deleting this property?
+  // it was maybe harmless when each widget had a window
+  //XDeleteProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle, xapplication.XdndAware);
+  XDeleteProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle, xapplication.XdndTypeList);
   SetLength(FMimeTypesArray, 0);
   inherited Destroy;
 end;
@@ -3947,9 +3954,9 @@ begin
     FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
     xapplication.Drag := self;
 
-    XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
+    XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, TfpgX11Window(FSource.Window).WinHandle, CurrentTime);
     win := XGetSelectionOwner(xapplication.Display, xapplication.XdndSelection);
-    if win <> FSource.WinHandle then
+    if win <> TfpgX11Window(FSource.Window).WinHandle then
       raise Exception.Create('fpGUI/X11: Application failed to aquire selection owner status');
 
     InitializeMimeTypesToAtoms;

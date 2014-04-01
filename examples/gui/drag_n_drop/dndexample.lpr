@@ -132,7 +132,6 @@ var
   v: variant;
 begin
   m := TfpgMimeData.Create;
-
   { via convenience properties }
   m.Text := 'My name is Earl';
   m.HTML := 'My name is <b>Earl</b>';
@@ -141,7 +140,7 @@ begin
 //  m.SetData('text/html', 'My name is <b>Earl</b>');
 
   { tell TfpgDrag who is the Source of the drag }
-  d := TfpgDrag.Create(Sender as TfpgWindow);
+  d := TfpgDrag.Create(Sender as TfpgWidgetBase);
 
   { TfpgDrag now takes ownership of TfpgMimeData }
   d.MimeData := m;

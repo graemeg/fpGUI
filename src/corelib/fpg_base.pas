@@ -488,14 +488,14 @@ type
     FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
     FDirtyFlags: TfpgWidgetDirtyFlags;
+    FDoAcceptDrops: Boolean;
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
-    procedure   DoSetMouseCursor; virtual; abstract;
-    procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
-    procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
+    //procedure   DoSetMouseCursor; virtual; abstract;
+    procedure   DoAcceptDrops(const AValue: boolean); virtual;
     procedure   DoDragStartDetected; virtual;
     procedure   AddChild(AChild: TfpgWidgetBase);
     procedure   RemoveChild(AChild: TfpgWidgetBase);
@@ -645,6 +645,7 @@ type
 
   TfpgWindowEventDispatcher = class(TfpgComponent)
   private
+    FPassiveMouseCapture: TfpgWidgetBase;
     FMouseCapture: TfpgWidgetBase;
     FCurrentWidget: TfpgWidgetBase;
     FWidget: TfpgWidgetBase;
@@ -1312,6 +1313,20 @@ begin
   w := FindWidgetForMouseEvent(Widget, AX, AY);
   CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
 
+  // passive captures send all messages to the widget that receives the original
+  // mousedown but only while the mouse is inside the native window.
+  case msg.MsgCode of
+    FPGM_MOUSEUP   :
+      begin
+        w := FPassiveMouseCapture;
+        FPassiveMouseCapture := nil;
+      end;
+    FPGM_MOUSEDOWN : FPassiveMouseCapture := w;
+  end;
+
+  if Assigned(FPassiveMouseCapture) then
+    w := FPassiveMouseCapture;
+
   if Assigned(MouseCapture) then
     w := MouseCapture; // still if the mouse is captured that's where the events go
 
@@ -1517,6 +1532,8 @@ end;
 procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
 begin
   FMouseCursor:=AValue;
+  if WindowAllocated and (Window.Dispatcher.CurrentWidget = Self) then
+    Window.MouseCursor:=FMouseCursor;
 end;
 
 function TfpgWidgetBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
@@ -1537,6 +1554,19 @@ begin
     Result := MinHeight;
 end;
 
+procedure TfpgWidgetBase.DoAcceptDrops(const AValue: boolean);
+begin
+  FDoAcceptDrops:=AValue;
+  if WindowAllocated then
+    Window.DoAcceptDrops(AValue);
+end;
+
+procedure TfpgWidgetBase.DoDragStartDetected;
+begin
+  if Assigned(FOnDragStartDetected) then
+    FOnDragStartDetected(self);
+end;
+
 function TfpgWidgetBase.WidgetBoundsInWindow: TfpgRect;
 var
   l,t: TfpgCoord;
@@ -1546,11 +1576,6 @@ begin
   WidgetToWindow(l,t);
   Result.SetRect(l,t,Width,Height);
   //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
-end;
-
-procedure TfpgWidgetBase.DoDragStartDetected;
-begin
-
 end;
 
 procedure TfpgWidgetBase.AddChild(AChild: TfpgWidgetBase);

@@ -36,9 +36,10 @@ uses
 type
 
   { TfpgWindow }
-
+  // Base class for all toplevel windows
   TfpgWindow = class(TfpgWidget)
   private
+    FDNDEnabled: boolean;
     FWindowTitle: string;
     function GetWindowState: TfpgWindowState;
     procedure SetWindowState(AValue: TfpgWindowState);
@@ -48,6 +49,8 @@ type
     procedure   SetWindowParameters; virtual;
     procedure   SetWindowTitle(const ATitle: string); virtual;
     procedure   DoAllocateWindowHandle; override;
+    procedure   AllocateWindowHandle; override;
+    procedure   DoDNDEnabled(const AValue: boolean); virtual;
     property    WindowType: TWindowType read FWindowType write FWindowType;
   public
     constructor Create(AOwner: TComponent); override;
@@ -58,6 +61,11 @@ type
   end;
 
 implementation
+
+type
+
+  TfpgWindowHack = class(TfpgWindowBase)
+  end;
 
 { TfpgWindow }
 
@@ -92,6 +100,19 @@ procedure TfpgWindow.DoAllocateWindowHandle;
 begin
   inherited DoAllocateWindowHandle;
   Window.WindowType:=FWindowType;
+end;
+
+procedure TfpgWindow.AllocateWindowHandle;
+begin
+  inherited AllocateWindowHandle;
+  TfpgWindowHack(Window).DoDNDEnabled(FDNDEnabled);
+end;
+
+procedure TfpgWindow.DoDNDEnabled(const AValue: boolean);
+begin
+  FDNDEnabled:=AValue;
+  if WindowAllocated then
+    TfpgWindowHack(Window).DoDNDEnabled(AValue);
 end;
 
 constructor TfpgWindow.Create(AOwner: TComponent);

@@ -342,11 +342,11 @@ type
     FTarget: TfpgWinHandle;
     procedure   SetMimeData(const AValue: TfpgMimeDataBase);
   protected
-    function    GetSource: TfpgNativeWindow; reintroduce;
+    function    GetSource: TfpgWidgetBase; reintroduce;
   public
-    constructor Create(ASource: TfpgNativeWindow);
+    constructor Create(ASource: TfpgWidgetBase);
     function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
-    property    Source: TfpgNativeWindow read GetSource;
+    property    Source: TfpgWidgetBase read GetSource;
     property    Target: TfpgWinHandle read FTarget write FTarget;
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
   end;
@@ -2767,12 +2767,12 @@ begin
   FMimeData := AValue;
 end;
 
-function TfpgDrag.GetSource: TfpgNativeWindow;
+function TfpgDrag.GetSource: TfpgWidgetBase;
 begin
-  Result := TfpgNativeWindow(inherited GetSource);
+  Result := TfpgWidgetBase(inherited GetSource);
 end;
 
-constructor TfpgDrag.Create(ASource: TfpgNativeWindow);
+constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create;
   FSource := ASource;

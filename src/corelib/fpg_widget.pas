@@ -107,7 +107,7 @@ type
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
     procedure   DoAllocateWindowHandle; override;
-    procedure   AllocateWindowHandle;
+    procedure   AllocateWindowHandle; virtual;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
@@ -234,6 +234,9 @@ type
   TfpgFormFriend = class(TfpgBaseForm)
   end;
 
+  TfpgWindowHack = class(TfpgWidgetBase)
+  end;
+
 function FindKeyboardFocus: TfpgWidget;
 begin
   Result := nil;
@@ -338,7 +341,7 @@ begin
   if FAcceptDrops = AValue then
     exit;
   FAcceptDrops := AValue;
-  //DoAcceptDrops(AValue);
+  DoAcceptDrops(AValue);
 end;
 
 function TfpgWidget.GetHint: TfpgString;
@@ -395,6 +398,7 @@ begin
     Window.SetWindowVisible(Visible);
     //Window;
   end;
+  //TfpgWindowHack(Window).DoAcceptDrops(True);
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
