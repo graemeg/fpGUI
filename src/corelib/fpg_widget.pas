@@ -783,7 +783,6 @@ begin
   begin
     // dispatching message to designer
     FFormDesigner.Dispatch(msg);
-    CaptureMouse;
     if msg.Stop then
       Exit;
   end;
@@ -826,7 +825,6 @@ begin
   if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
-    ReleaseMouse;
     if msg.Stop then
       Exit;
   end;
