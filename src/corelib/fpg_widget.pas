@@ -99,7 +99,7 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: TfpgString;
-    FInvalidRects: array of TfpgRect;
+    FInvalidRect: TfpgRect;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
@@ -1038,11 +1038,19 @@ begin
 end;
 
 procedure TfpgWidget.RePaint;
+var
+  P: TfpgMessageParams;
 begin
-  if WindowAllocated and not Invalidated then
+  if WindowAllocated then
   begin
-    FInvalidated := True;
-    fpgPostMessage(self, self, FPGM_PAINT);
+    if not HasOwnWindow and Assigned(Parent) then
+      Parent.InvalidateRect(GetBoundsRect)
+    else if not Invalidated then
+    begin
+      FInvalidated := True;
+      P.rect := FInvalidRect;
+      fpgPostMessage(self, self, FPGM_PAINT, P);
+    end;
   end;
 end;
 
@@ -1412,16 +1420,18 @@ procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 var
   i: Integer;
   w: TfpgWidget;
+  HasInvalidRegion: Boolean;
+  Params: TfpgMessageParams;
+  {$IFDEF DEBUG}
+  Tmp: TfpgRect;
+  {$ENDIF}
 begin
   if IsHidden then
     Exit;
 
-  FInvalidated:=False;
-  //writeln('TfpgWidget.MsgPaint - ', Classname);
   if not (WindowAllocated and (Window.HasHandle)) then
     Exit;//
-  //WriteLn(Self.ClassName);
-  //WriteLn(Canvas.ClassName);
+
   if (Width < 1) or (Height < 1) then
     Exit;
 
@@ -1431,24 +1441,65 @@ begin
   if Assigned(FOnPaint) then
     FOnPaint(Self);
 
-  // this is just a super simple dumb crutch to get something happening.
-  // I think maybe there will be a dispatch object that each TfpgWindowBase will
-  // be assigned from the widget that can query the widget for it's children etc
-  // and calculate coordinates to send to events. That way the widget message
-  // code can stay very simple
+  {$IFDEF DEBUG}
+  Tmp := FInvalidRect; // for debugging
+  {$ENDIF}
+
+  // combine existing invalid rect with message rect if sent
+  if FInvalidRect = fpgRect(0,0,0,0) then
+    FInvalidRect := msg.Params.rect
+  else
+    if msg.Params.rect <> fpgRect(0,0,0,0) then
+      UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
+
+  HasInvalidRegion:=FInvalidRect <> fpgRect(0,0,0,0);
+
+  if HasOwnWindow then
+  begin
+    //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
+    //Write('Main ClipRect: '); PrintRect(FInvalidRect);
+    if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
+    begin
+      Canvas.EndDraw;
+      FInvalidRect := fpgRect(0,0,0,0);
+      FInvalidated:=False;
+      {$IFDEF DEBUG}
+      Writeln('Invalid Rect Detected!');
+      Write('MSG: '); PrintRect(msg.Params.rect);
+      Write('INV: '); PrintRect(Tmp);
+      {$ENDIF}
+      Exit;
+    end;
+  end;
+
+
+
   for i := 0 to ComponentCount-1 do
   begin
     w := TfpgWidget(Components[i]);
     if w.InheritsFrom(TfpgWidget) then
     begin
-      if not w.HasOwnWindow and w.Visible then
-        w.MsgPaint(msg);
+      if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
+      begin
+        if not HasInvalidRegion or IntersectRect(Params.rect, FInvalidRect, w.GetBoundsRect) then
+        begin
+          if HasInvalidRegion then
+            w.ParentToWidget(Params.rect.Left, Params.rect.Top)
+          else
+            Params.rect := fpgRect(0,0,0,0);
+          fpgSendMessage(Self, w, FPGM_PAINT, Params);
+        end;
+      end;
     end;
 
   end;
-  Canvas.EndDraw;
+  if HasInvalidRegion then
+    Canvas.EndDraw(FInvalidRect)
+  else
+    Canvas.EndDraw;
 
-  SetLength(FInvalidRects, 0); // clear rect list
+  FInvalidRect := fpgRect(0,0,0,0);
+  FInvalidated:=False;
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
@@ -1460,13 +1511,6 @@ var
   itf: IInterface;
 {$ENDIF}
 begin
-  {  This saves a bunch of duplicated paint messages in children when they
-     invalidate themselves as they resize. We will send paint messages to them
-     anyway and we know a resize event will lead to a paint message
-  }
-  if HasOwnWindow then
-    Invalidate; // invalidate uses PostMessage instead of SendMessage now for this to work
-
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
@@ -1736,12 +1780,20 @@ end;
 
 procedure TfpgWidget.InvalidateRect(ARect: TfpgRect);
 begin
-  //SetLength(FInvalidRects, Length(FInvalidRects)+1);
-  //FInvalidRects[High(FInvalidRects)] := ARect;
+  if not HasOwnWindow then
+  begin
+    // If we don't have our own window then call invalidate on the parent
+    WidgetToParent(ARect.Left, ARect.Top);
+    if Assigned(Parent) then
+      Parent.InvalidateRect(ARect);
+    Exit;
+  end;
 
-  {$TODO finish InvalidateRect}
+  if FInvalidRect = fpgRect(0,0,0,0) then
+    FInvalidRect := ARect
+  else
+    UnionRect(FInvalidRect, FInvalidRect, ARect);
 
-  // just call invalidate for now
   Invalidate;
 end;
 

@@ -21,6 +21,7 @@ unit fpg_x11;
 
 {.$Define DEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
+{.$Define X11CanvasDEBUG}
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
@@ -169,12 +170,28 @@ type
   end;
 
 
+  { TfpgX11ClipRegion }
+
+  TfpgX11ClipRegion = class
+  private
+    FRegion: TRegion;
+    FLastCanvas: TfpgCanvasBase;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure EnsureClipRect(ACanvas: TfpgCanvasBase);
+    procedure UpdateClipRect(ACanvas: TfpgCanvasBase);
+
+  end;
+
+
   { TfpgX11Canvas }
 
   TfpgX11Canvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
     FBufferPixmap: TfpgDCHandle;
+    FAllocatingGC: Boolean;
     FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgX11FontResource;
@@ -182,17 +199,19 @@ type
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
     FColorTextXft: TXftColor;
-    FClipRegion: TRegion;
     FPixHeight,
     FPixWidth: Integer;
     FBufferFreeTimer: TObject;
+    FClipRegion: TfpgX11ClipRegion;
 
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
     procedure   AllocateDC;
-    procedure   DeAllocateDC;
+    procedure   DeAllocateDC(Force: Boolean);
     procedure   ReAllocateDC;
     function    DrawHandle: TfpgDCHandle;
+    procedure   EnsureClipRect;
+    function    WeAreTargetCanvas: Boolean;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -882,6 +901,68 @@ end;
 function FileIsSymlink(const AFilename: string): boolean;
 begin
   Result := (FpReadLink(AFilename) <> '');
+end;
+
+{ TfpgX11ClipRegion }
+
+constructor TfpgX11ClipRegion.Create;
+begin
+  FRegion := XCreateRegion();
+end;
+
+destructor TfpgX11ClipRegion.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TfpgX11ClipRegion.EnsureClipRect(ACanvas: TfpgCanvasBase);
+var
+  XCanvas: TfpgX11Canvas absolute ACanvas;
+  r: TXRectangle;
+  rg: TRegion;
+  x,y: TfpgCoord;
+  //ClipRegion: TRegion;
+begin
+  if FLastCanvas = ACanvas then
+    Exit
+  ;//else  WriteLn('Canvas Target Switched');
+
+  FLastCanvas := ACanvas;
+
+  with XCanvas do
+  begin
+    if FClipRectSet then
+    begin
+      r.x      := FClipRect.Left+FDeltaX;
+      r.y      := FClipRect.Top+FDeltaY;
+      r.Width  := FClipRect.Width;
+      r.Height := FClipRect.Height;
+    end
+    else
+    begin
+      x := 0;
+      y := 0;
+      FWidget.WidgetToWindow(x, y);
+      r.x := x;
+      r.y := y;
+      r.width := FWidget.Width;
+      r.height := FWidget.Height;
+    end;
+
+    rg := XCreateRegion;
+
+    XUnionRectWithRegion(@r, rg, rg);
+    XSetRegion(xapplication.display, Fgc, rg);
+    XftDrawSetClip(FXftDraw, rg);
+
+    XDestroyRegion(rg);
+  end;
+end;
+
+procedure TfpgX11ClipRegion.UpdateClipRect(ACanvas: TfpgCanvasBase);
+begin
+  FLastCanvas := nil;
+  EnsureClipRect(ACanvas);
 end;
 
 
@@ -1631,6 +1712,7 @@ var
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
+  dispatcher: TfpgWindowEventDispatcher;
   mcode: integer;
   msgp: TfpgMessageParams;
   rfds: baseunix.TFDSet;
@@ -1929,7 +2011,13 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xexpose.window), FPGM_PAINT);
+            with ev.xexpose do
+              msgp.rect := fpgRect(x, y, width, height);
+
+            dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
+            // use invalidate instead of sending a FPGM_PAINT message since possibly we have already queued a message
+            if Assigned(dispatcher) then
+              TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
           end;
         end;
 
@@ -1940,7 +2028,13 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
           if ev.xgraphicsexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xgraphicsexpose.drawable), FPGM_PAINT);
+            with ev.xgraphicsexpose do
+              msgp.rect := fpgRect(x, y, width, height);
+
+            dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
+            // use invalidate instead of sending a FPGM_PAINT message since possibly we have already queued a message
+            if Assigned(dispatcher) then
+              TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
           end;
         end;
 
@@ -2341,6 +2435,7 @@ begin
 
   if FHeight = 0 then
     FHeight := 1;
+
 
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
@@ -2877,25 +2972,40 @@ begin
 end;
 
 { TfpgX11Canvas }
+{$IFDEF X11CanvasDEBUG}
+var
+  CanvasCount: INteger = 0;
+{$ENDIF}
 
 constructor TfpgX11Canvas.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
+
+  {$IFDEF X11CanvasDEBUG}
+  Inc(CanvasCount);
+  WriteLn('Creating Canvas#: ', CanvasCount);
+  {$ENDIF}
   FDrawing    := False;
 
   FBufferPixmap := 0;
   //FDrawHandle   := 0;
   Fgc           := nil;
   FXftDraw      := nil;
-  FClipRegion   := nil;
 end;
 
 destructor TfpgX11Canvas.Destroy;
 begin
+  {$IFDEF X11CanvasDEBUG}
+  Dec(CanvasCount);
+  WriteLn('Destroying Canvas#: ', CanvasCount);
+  {$ENDIF}
+
   if FDrawing then
     DoEndDraw;
   FreeAndNil(FBufferFreeTimer);
+  FreeAndNil(FClipRegion);
   TryFreePixmap;
+  DeAllocateDC(True);
   inherited Destroy;
 end;
 
@@ -2926,8 +3036,9 @@ begin
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
-  if CanvasTarget = nil then
-    CanvasTarget := Self;
+  // each window has a clipregion that all sub canvas's use
+  if WeAreTargetCanvas then
+    FClipRegion := TfpgX11ClipRegion.Create;
 
   //FDrawHandle := TfpgX11Canvas(CanvasTarget).FDrawHandle;
 
@@ -2943,15 +3054,20 @@ begin
       if (pmw < w) or (pmh < h) then
         DoEndDraw;
     end;}
+  if FDrawing and (FBufferPixmap > 0) then // only
+  begin
+    XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
+    if (pmw < w) or (pmh < h) then
+      DoEndDraw;
+  end;
 
   if not FDrawing then
   begin
     AllocateDC;
-    FClipRegion := XCreateRegion;
-  end
-  else if FDrawHandle <> DrawHandle then
+  {end
+  else if not WeAreTargetCanvas then
   begin
-    AllocateDC;
+    AllocateDC;}
   end;
   FDrawing := True;
 end;
@@ -2971,11 +3087,12 @@ end;
 
 procedure TfpgX11Canvas.DoEndDraw;
 begin
+  FreeAndNil(FClipRegion);
+  FCanvasTarget := nil;
   if FDrawing then
   begin
     FDrawing    := False;
-    XDestroyRegion(FClipRegion);
-    DeAllocateDC;
+    DeAllocateDC(False);
   end;
 end;
 
@@ -3064,7 +3181,7 @@ begin
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
       if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
       begin
-        DeAllocateDC;
+        DeAllocateDC(True);
         TryFreePixmap;
         Result := False;
       end;
@@ -3075,6 +3192,8 @@ end;
 
 procedure TfpgX11Canvas.DoAllocateBuffer;
 begin
+  if FBufferPixmap <> 0 then
+    WriteLn('Allocating Buffer when it already exists!');
   FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+PIXMAP_RESIZE_SIZE, FWidget.Height+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
   FDrawHandle:=FBufferPixmap;
   if FDrawing then
@@ -3097,12 +3216,27 @@ begin
   FBufferPixmap := 0;
 end;
 
+{$IFDEF X11CanvasDEBUG}
+var
+  GCCount: Integer = 0;
+{$ENDIF}
+
 procedure TfpgX11Canvas.AllocateDC;
 var
   GcValues: TXGcValues;
 begin
-
+    FAllocatingGC:=True;
+    if Assigned(FGC) then
+    begin
+      DeAllocateDC(True);
+      //WriteLn('Allocating gc when it is already allocated');
+    end;
+    {$IFDEF X11CanvasDEBUG}
+    Inc(GCCount);
+    WriteLn('Alloc GC Count = ', GCCount);
+    {$ENDIF}
     Fgc := XCreateGc(xapplication.display, DrawHandle, 0, @GcValues);
+    FAllocatingGC:=False;
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
 
@@ -3111,22 +3245,35 @@ begin
     XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
 end;
 
-procedure TfpgX11Canvas.DeAllocateDC;
+procedure TfpgX11Canvas.DeAllocateDC(Force: Boolean);
 begin
-  if not FDrawing or (FDrawHandle = DrawHandle) then
+  if not FDrawing or (WeAreTargetCanvas) or Force then
   begin
     if FXftDraw <> nil then
+    begin
       XftDrawDestroy(FXftDraw);
+      FXftDraw := nil;
+    end;
     if Fgc <> nil then
+    begin
       XFreeGc(xapplication.display, Fgc);
+      Fgc := nil;
+      {$IFDEF X11CanvasDEBUG}
+      Dec(GCCount);
+      WriteLn('DE alloc GC Count = ', GCCount);
+      {$ENDIF}
+    end;
+  end
+  else
+  begin
+    WriteLn('Asked to DeallocateDC but didn''t!');
   end;
-  FXftDraw := nil;
-  Fgc := nil;
+
 end;
 
 procedure TfpgX11Canvas.ReAllocateDC;
 begin
-  DeAllocateDC;
+  DeAllocateDC(True);
   AllocateDC;
 end;
 
@@ -3140,8 +3287,20 @@ begin
   begin
     FDrawHandle:=Result;
     if Result <> 0 then
-      AllocateDC;
+      ReAllocateDC;
   end;
+end;
+
+procedure TfpgX11Canvas.EnsureClipRect;
+begin
+  {if TfpgX11Canvas(FCanvasTarget).FClipRegion.FLastCanvas <> self then
+    WriteLn('UPdating cliprect to correct target!!!');}
+  TfpgX11Canvas(FCanvasTarget).FClipRegion.EnsureClipRect(Self);
+end;
+
+function TfpgX11Canvas.WeAreTargetCanvas: Boolean;
+begin
+  Result := FCanvasTarget = Self;
 end;
 
 procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);
@@ -3230,11 +3389,13 @@ end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
+  EnsureClipRect;
   XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
 end;
 
 procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
+  EnsureClipRect;
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
   XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
@@ -3249,7 +3410,7 @@ begin
   pts[1].x := x1+FDeltaX;   pts[1].y := y1+FDeltaY;
   pts[2].x := x2+FDeltaX;   pts[2].y := y2+FDeltaY;
   pts[3].x := x3+FDeltaX;   pts[3].y := y3+FDeltaY;
-
+  EnsureClipRect;
   XFillPolygon(xapplication.display, DrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
@@ -3257,6 +3418,7 @@ procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
+  EnsureClipRect;
   if (w = 1) and (h = 1) then // a dot
     DoDrawLine(x, y, x+w, y+w)
   else
@@ -3265,29 +3427,19 @@ end;
 
 procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
+  EnsureClipRect;
   // Same behavior as Windows. See documentation for reason.
   XDrawLine(xapplication.display, DrawHandle, Fgc, x1+FDeltaX, y1+FDeltaY, x2+FDeltaX, y2+FDeltaY);
 end;
 
 procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
-var
-  r: TXRectangle;
-  rg: TRegion;
 begin
-  r.x      := ARect.Left+FDeltaX;
-  r.y      := ARect.Top+FDeltaY;
-  r.Width  := ARect.Width;
-  r.Height := ARect.Height;
-
-  rg := XCreateRegion;
-
-  XUnionRectWithRegion(@r, rg, FClipRegion);
-  XSetRegion(xapplication.display, Fgc, FClipRegion);
-  XftDrawSetClip(FXftDraw, FClipRegion);
-
-  FClipRect    := ARect;
-  FClipRectSet := True;
-  XDestroyRegion(rg);
+  FClipRect := ARect;
+  FClipRectSet:=True;
+  if WeAreTargetCanvas then
+  begin
+    TfpgX11Canvas(FCanvasTarget).FClipRegion.UpdateClipRect(Self);
+  end;
 end;
 
 function TfpgX11Canvas.DoGetClipRect: TfpgRect;
@@ -3297,23 +3449,11 @@ end;
 
 procedure TfpgX11Canvas.DoAddClipRect(const ARect: TfpgRect);
 var
-  r: TXRectangle;
-  rg: TRegion;
+  NewRect: TfpgRect;
 begin
-  r.x      := ARect.Left+FDeltaX;
-  r.y      := ARect.Top+FDeltaY;
-  r.Width  := ARect.Width;
-  r.Height := ARect.Height;
-  rg := XCreateRegion;
-  XUnionRectWithRegion(@r, rg, rg);
-  XIntersectRegion(FClipRegion, rg, FClipRegion);
-  XSetRegion(xapplication.display, Fgc, FClipRegion);
-
-  FClipRect    := ARect;    // Double check this, it might be wrong!!
-  FClipRectSet := True;
-
-  XftDrawSetClip(FXftDraw, FClipRegion);
-  XDestroyRegion(rg);
+  UnionRect(NewRect, FClipRect, ARect);
+  TfpgX11Canvas(FCanvasTarget).FClipRegion.UpdateClipRect(Self);
+  FClipRectSet:=True;
 end;
 
 procedure TfpgX11Canvas.DoClearClipRect;
@@ -3334,7 +3474,7 @@ var
 begin
   if img = nil then
     Exit; //==>
-
+  EnsureClipRect;
   if img.Masked then
   begin
     // rendering the mask

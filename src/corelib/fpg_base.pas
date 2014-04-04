@@ -522,6 +522,8 @@ type
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
+    procedure   WidgetToParent(var AX, AY: TfpgCoord);
+    procedure   ParentToWidget(var AX, AY: TfpgCoord);
     function    WidgetBoundsInWindow: TfpgRect;
     procedure   WindowToWidget(var AX, AY: TfpgCoord);
     property    WindowAllocated: Boolean read GetWindowAllocated;
@@ -925,6 +927,7 @@ uses
   {$IFDEF GDEBUG}
   fpg_dbugintf,
   {$ENDIF}
+  math,
   dateutils;
 
 
@@ -1630,7 +1633,10 @@ begin
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
+var
+  TmpRect: TfpgRect;
 begin
+  TmpRect := fpgRect(FPrevLeft, FPrevTop, FPrevWidth, FPrevHeight);
   if FTop <> y then
   begin
     if not (csLoading in ComponentState) then
@@ -1656,7 +1662,10 @@ begin
   end;
 
   if (wdfPosition in FDirtyFlags) and Assigned(Parent) and not HasOwnWindow then
-    TfpgWidget(Parent).InvalidateRect(fpgRect(FPrevLeft, FPrevTop, FWidth, FHeight));
+  begin
+    if UnionRect(TmpRect, TmpRect, fpgRect(FLeft, FTop, FWidth, FHeight)) then
+      TfpgWidget(Parent).InvalidateRect(TmpRect);
+  end;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -1749,6 +1758,18 @@ begin
     AY := AY + W.Top;
     W := W.Parent;
   end;
+end;
+
+procedure TfpgWidgetBase.WidgetToParent(var AX, AY: TfpgCoord);
+begin
+  Inc(AX, FLeft);
+  Inc(AY, FTop);
+end;
+
+procedure TfpgWidgetBase.ParentToWidget(var AX, AY: TfpgCoord);
+begin
+  Dec(AX, FLeft);
+  Dec(AY, FTop);
 end;
 
 procedure TfpgWidgetBase.WindowToWidget(var AX, AY: TfpgCoord);
@@ -2588,24 +2609,27 @@ var
   r2: TfpgRect;
   finalrect: TfpgRect;
 begin
+
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
+    if FCanvasTarget = self then
+      WriteLn('EndDraw: ',FBeginDrawCount);
     if FBeginDrawCount = 0 then
     begin
       if FCanvasTarget = Self then
       begin
         finalrect.SetRect(x,y,w,h);
-        r2 := finalrect;
+        {r2 := finalrect;
         r := GetPutBufferItem;
         while Assigned(r) do
         begin
           //WriteLn('putting saved buffer pos');
-          if UnionfpgRect(finalrect, r^, r2) then
-            r2 := finalrect;
+          {if UnionfpgRect(finalrect, r^, r2) then
+            r2 := finalrect;}
           Dispose(r);
           r := GetPutBufferItem;
-        end;
+        end;}
         DoPutBufferToScreen(finalrect.Left, finalrect.Top, finalrect.Width, finalrect.Height);
       end
       else
@@ -2614,8 +2638,8 @@ begin
         FCanvasTarget.EndDraw(x, y, w, h);
       end;
     end
-    else
-      AddPutBufferItem(fpgRect(x,y,w,h));
+    //else
+      //AddPutBufferItem(fpgRect(x,y,w,h));
 
   end;  { if }
 end;

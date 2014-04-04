@@ -156,6 +156,7 @@ begin
       p^.Sender  := Sender;
       p^.Dest    := Dest;
       p^.Stop    := False;
+      FillChar(p^.Params, 0, SizeOf(p^.Params));
     end
     else
       raise Exception.Create('THE fpGUI MESSAGE QUEUE IS FULL.');
@@ -189,6 +190,7 @@ begin
   m.MsgCode := MsgCode;
   m.Sender  := Sender;
   m.Dest    := Dest;
+  FillChar(m.Params, 0, SizeOf(m.Params));
 
   fpgDeliverMessage(m);
 end;

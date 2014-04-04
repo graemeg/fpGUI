@@ -403,7 +403,7 @@ function  IsRectEmpty(const ARect: TfpgRect): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
-function  UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+function  UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
 function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
@@ -674,27 +674,25 @@ begin
 end;
 
 function IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+var
+  TmpRect: TfpgRect; // use tmp to avoid changing r1 if ARect and r1 are the same var
 begin
-  ARect := r1;
-  with r2 do
-  begin
-    if Left > r1.Left then
-      ARect.Left := Left;
-    if Top > r1.Top then
-      ARect.Top := Top;
-    if Right < r1.Right then
-      ARect.Width := ARect.Left + Right;
-    if Bottom < r1.Bottom then
-      ARect.Height := ARect.Top + Bottom;
-  end;
+  TmpRect := r1;
+  TmpRect.Left:=Max(R1.Left, R2.Left);
+  TmpRect.Top:=Max(R1.Top, R2.Top);
+  TmpRect.SetBottom(Min(R1.Bottom, R2.Bottom));
+  TmpRect.SetRight(Min(R1.Right, R2.Right));
 
-  if IsRectEmpty(ARect) then
+  if IsRectEmpty(TmpRect) then
   begin
     FillChar(ARect, SizeOf(ARect), 0);
     Result := false;
   end
   else
+  begin
+    ARect := TmpRect;
     Result := true;
+  end;
 end;
 
 function IsRectEmpty(const ARect: TfpgRect): Boolean;
@@ -742,20 +740,16 @@ begin
             (APoint.y <= ARect.Bottom);
 end;
 
-function UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+function UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+var
+  TmpRect: TfpgRect;
 begin
-  ARect := R1;
-  with R2 do
-  begin
-    if Left < R1.Left then
-      ARect.Left := Left;
-    if Top < R1.Top then
-      ARect.Top := Top;
-    if Right > R1.Right then
-      ARect.Width := ARect.Left + Right;
-    if Bottom > R1.Bottom then
-      ARect.Height := ARect.Top + Bottom;
-  end;
+  TmpRect := R1;
+
+  TmpRect.Left:=Min(R1.Left,R2.Left);
+  TmpRect.Top :=Min(R1.Top, R2.Top);
+  TmpRect.SetBottom(Max(R1.Bottom, R2.Bottom));
+  TmpRect.SetRight (Max(R1.Right, R2.Right));
 
   if IsRectEmpty(ARect) then
   begin
@@ -763,7 +757,10 @@ begin
     Result := false;
   end
   else
+  begin
     Result := true;
+    ARect := TmpRect;
+  end;
 end;
 
 function CenterPoint(const Rect: TRect): TPoint;
