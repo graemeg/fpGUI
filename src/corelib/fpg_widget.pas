@@ -1041,7 +1041,7 @@ procedure TfpgWidget.RePaint;
 var
   P: TfpgMessageParams;
 begin
-  if WindowAllocated then
+  if WindowAllocated  and Window.HasHandle then
   begin
     if not HasOwnWindow and Assigned(Parent) then
       Parent.InvalidateRect(GetBoundsRect)
@@ -1430,7 +1430,12 @@ begin
     Exit;
 
   if not (WindowAllocated and (Window.HasHandle)) then
+  begin
+    // The window will generate a paint message later when it exists
+    FInvalidated:=False;
     Exit;//
+  end;
+
 
   if (Width < 1) or (Height < 1) then
     Exit;

@@ -372,6 +372,7 @@ procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: T
 procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer); overload;
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: TfpgMessageParams); overload;
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
+function  fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 procedure fpgDeliverMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;

@@ -195,6 +195,33 @@ begin
   fpgDeliverMessage(m);
 end;
 
+function fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
+var
+  e: TMessageListElement;
+begin
+  Result := False;
+  fpgApplication.Lock;
+  try
+    e := UsedLastMessage;
+    while e <> nil do
+    begin
+      if (e.msg.Dest = Dest) and (e.msg.MsgCode = MsgCode) then
+      begin
+        Result := True;
+        if Assigned(Msg) then
+          Msg^ := e.msg;
+        Exit;
+      end;
+      if e = UsedFirstMessage then
+        break;
+      e := e.Next;
+    end;
+
+  finally
+    fpgApplication.Unlock;
+  end;
+end;
+
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 var
   oItem: TMsgHookItem;

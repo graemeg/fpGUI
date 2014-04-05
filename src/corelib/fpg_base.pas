@@ -2613,8 +2613,6 @@ begin
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
-    if FCanvasTarget = self then
-      WriteLn('EndDraw: ',FBeginDrawCount);
     if FBeginDrawCount = 0 then
     begin
       if FCanvasTarget = Self then

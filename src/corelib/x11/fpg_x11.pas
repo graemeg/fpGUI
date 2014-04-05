@@ -191,13 +191,13 @@ type
   private
     FDrawing: boolean;
     FBufferPixmap: TfpgDCHandle;
-    FAllocatingGC: Boolean;
     FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgX11FontResource;
     FClipRect: TfpgRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
+    FXftDrawHandle: TfpgDCHandle;
     FColorTextXft: TXftColor;
     FPixHeight,
     FPixWidth: Integer;
@@ -208,7 +208,6 @@ type
     procedure   TryFreePixmap;
     procedure   AllocateDC;
     procedure   DeAllocateDC(Force: Boolean);
-    procedure   ReAllocateDC;
     function    DrawHandle: TfpgDCHandle;
     procedure   EnsureClipRect;
     function    WeAreTargetCanvas: Boolean;
@@ -450,6 +449,16 @@ type
     function    IsSystemTrayAvailable: boolean;
     function    SupportsMessages: boolean;
   end;
+
+  {$IFDEF DEBUG}
+  { EfpgX11Exception }
+
+  EfpgX11Exception = class(Exception)
+    Display: PXDisplay;
+    ErrorEv: PXErrorEvent;
+    constructor Create(ADisplay: PXDisplay; AErrorEv: PXErrorEvent);
+  end;
+  {$ENDIF}
 
 
 function fpgColorToX(col: TfpgColor): longword;
@@ -902,6 +911,23 @@ function FileIsSymlink(const AFilename: string): boolean;
 begin
   Result := (FpReadLink(AFilename) <> '');
 end;
+
+{$IFDEF DEBUG}
+{ EfpgX11Exception }
+
+constructor EfpgX11Exception.Create(ADisplay: PXDisplay; AErrorEv: PXErrorEvent);
+var
+  ErrText: array[0..511] of char;
+begin
+  Display:=ADisplay;
+  ErrorEv:=AErrorEv;
+
+  FillChar(ErrText,0, SizeOf(ErrText));
+  XGetErrorText(Display, ErrorEv^.error_code, @ErrText, SizeOf(ErrText));
+
+  inherited Create(ErrText);
+end;
+{$ENDIF}
 
 { TfpgX11ClipRegion }
 
@@ -2013,9 +2039,8 @@ begin
           begin
             with ev.xexpose do
               msgp.rect := fpgRect(x, y, width, height);
-
             dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
-            // use invalidate instead of sending a FPGM_PAINT message since possibly we have already queued a message
+            // use invalidate if a FPGM_PAINT message is already queued
             if Assigned(dispatcher) then
               TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
           end;
@@ -2030,9 +2055,8 @@ begin
           begin
             with ev.xgraphicsexpose do
               msgp.rect := fpgRect(x, y, width, height);
-
             dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
-            // use invalidate instead of sending a FPGM_PAINT message since possibly we have already queued a message
+            // use invalidate in case a FPGM_PAINT message is already queued
             if Assigned(dispatcher) then
               TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
           end;
@@ -2984,6 +3008,7 @@ begin
   {$IFDEF X11CanvasDEBUG}
   Inc(CanvasCount);
   WriteLn('Creating Canvas#: ', CanvasCount);
+  WriteLn('CreatingCanvas: 0x', hexStr(Pointer(Self)));
   {$ENDIF}
   FDrawing    := False;
 
@@ -2995,13 +3020,17 @@ end;
 
 destructor TfpgX11Canvas.Destroy;
 begin
+
   {$IFDEF X11CanvasDEBUG}
   Dec(CanvasCount);
   WriteLn('Destroying Canvas#: ', CanvasCount);
+  WriteLn('Destroying: 0x', hexStr(Pointer(Self)));
   {$ENDIF}
 
   if FDrawing then
     DoEndDraw;
+
+
   FreeAndNil(FBufferFreeTimer);
   FreeAndNil(FClipRegion);
   TryFreePixmap;
@@ -3058,17 +3087,15 @@ begin
   begin
     XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
     if (pmw < w) or (pmh < h) then
+    begin
       DoEndDraw;
+      WriteLn('What!!!');
+    end;
   end;
 
   if not FDrawing then
-  begin
     AllocateDC;
-  {end
-  else if not WeAreTargetCanvas then
-  begin
-    AllocateDC;}
-  end;
+
   FDrawing := True;
 end;
 
@@ -3089,11 +3116,8 @@ procedure TfpgX11Canvas.DoEndDraw;
 begin
   FreeAndNil(FClipRegion);
   FCanvasTarget := nil;
-  if FDrawing then
-  begin
-    FDrawing    := False;
-    DeAllocateDC(False);
-  end;
+  FDrawing    := False;
+  DeAllocateDC(True);
 end;
 
 function TfpgX11Canvas.GetPixel(X, Y: integer): TfpgColor;
@@ -3175,13 +3199,13 @@ begin
     Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
   else
   begin
-    Result := FBufferPixmap <> 0;
+
+    Result := FBufferPixmap > 0;
     if Result then
     begin
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
       if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
       begin
-        DeAllocateDC(True);
         TryFreePixmap;
         Result := False;
       end;
@@ -3193,11 +3217,9 @@ end;
 procedure TfpgX11Canvas.DoAllocateBuffer;
 begin
   if FBufferPixmap <> 0 then
-    WriteLn('Allocating Buffer when it already exists!');
+    TryFreePixmap;
   FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+PIXMAP_RESIZE_SIZE, FWidget.Height+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
   FDrawHandle:=FBufferPixmap;
-  if FDrawing then
-    AllocateDC;
 end;
 
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
@@ -3225,24 +3247,34 @@ procedure TfpgX11Canvas.AllocateDC;
 var
   GcValues: TXGcValues;
 begin
-    FAllocatingGC:=True;
-    if Assigned(FGC) then
-    begin
-      DeAllocateDC(True);
-      //WriteLn('Allocating gc when it is already allocated');
-    end;
     {$IFDEF X11CanvasDEBUG}
     Inc(GCCount);
     WriteLn('Alloc GC Count = ', GCCount);
     {$ENDIF}
-    Fgc := XCreateGc(xapplication.display, DrawHandle, 0, @GcValues);
-    FAllocatingGC:=False;
+
+    // Allocating a GC for the window handle allow us to use it with the pixbuf which has the same
+    // root and depth. http://www.x.org/archive/X11R7.5/doc/man/man3/XFreeGC.3.html
+    // this saves us from getting errors when we free and reallocate the pixbuf for a new size
+    if not Assigned(Fgc) then
+      Fgc := XCreateGc(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, 0, @GcValues);
+
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
 
-    FXftDraw := XftDrawCreate(xapplication.display, DrawHandle,
-    XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
-    XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
+    // if the targetcanvas has resized and a new buffer is created then the
+    // drawhandle FXftDraw was created with is invalid
+    if Assigned(FXftDraw) and (FXftDrawHandle <> DrawHandle) then
+    begin
+      XftDrawDestroy(FXftDraw);
+      FXftDraw:=nil;
+    end;
+
+    FXftDrawHandle := DrawHandle;
+    if not Assigned(FXftDraw) then
+      FXftDraw := XftDrawCreate(xapplication.display,
+                                FXftDrawHandle,
+                                XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
+                                XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
 end;
 
 procedure TfpgX11Canvas.DeAllocateDC(Force: Boolean);
@@ -3264,17 +3296,13 @@ begin
       {$ENDIF}
     end;
   end
+  {$IFDEF X11CanvasDEBUG}
   else
   begin
     WriteLn('Asked to DeallocateDC but didn''t!');
   end;
+  {$ENDIF}
 
-end;
-
-procedure TfpgX11Canvas.ReAllocateDC;
-begin
-  DeAllocateDC(True);
-  AllocateDC;
 end;
 
 function TfpgX11Canvas.DrawHandle: TfpgDCHandle;
@@ -3287,7 +3315,7 @@ begin
   begin
     FDrawHandle:=Result;
     if Result <> 0 then
-      ReAllocateDC;
+      AllocateDC;
   end;
 end;
 
@@ -3630,7 +3658,6 @@ begin
                     FClipboardWndHandle,
                     CurrentTime);
 
-  XSync(xapplication.Display, False);
 
   StartTime := fpgGetTickCount;
   // now wait for the manager to get the clipboard
@@ -4176,9 +4203,24 @@ begin
   Result := True;
 end;
 
+{$IFDEF DEBUG}
+var
+  OldXErrorHandler: TXErrorHandler;
+
+function fpgXErrorHandler(Display: PDisplay; Error: PXErrorEvent):cint;cdecl;
+begin
+  Result := 0;
+  raise EfpgX11Exception.Create(Display, Error);
+end;
+{$ENDIF}
 
 initialization
   xapplication := nil;
+{$IFDEF DEBUG}
+  OldXErrorHandler:=XSetErrorHandler(@fpgXErrorHandler);
+finalization
+  XSetErrorHandler(OldXErrorHandler);
+{$ENDIF}
 
 end.
 
