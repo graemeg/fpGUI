@@ -205,6 +205,7 @@ type
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
+    procedure   DoSetClipRectInternal(const ARect: TfpgRect);
     procedure   DoSetClipRect(const ARect: TfpgRect); override;
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
@@ -2998,10 +2999,7 @@ begin
   begin
     XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
     if (pmw < w) or (pmh < h) then
-    begin
       DoEndDraw;
-      WriteLn('What!!!');
-    end;
   end;
 
   if not FDrawing then
@@ -3156,6 +3154,7 @@ var
 procedure TfpgX11Canvas.AllocateDC;
 var
   GcValues: TXGcValues;
+  ResetCliprect: Boolean;
 begin
     {$IFDEF X11CanvasDEBUG}
     Inc(GCCount);
@@ -3171,10 +3170,12 @@ begin
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
 
+    ResetCliprect:=False;
     // if the targetcanvas has resized and a new buffer is created then the
     // drawhandle FXftDraw was created with is invalid
     if Assigned(FXftDraw) and (FXftDrawHandle <> DrawHandle) then
     begin
+      ResetCliprect := True;
       XftDrawDestroy(FXftDraw);
       FXftDraw:=nil;
     end;
@@ -3185,6 +3186,8 @@ begin
                                 FXftDrawHandle,
                                 XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
                                 XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
+    if ResetCliprect then
+      DoSetClipRectInternal(FClipRect);
 end;
 
 procedure TfpgX11Canvas.DeAllocateDC(Force: Boolean);
@@ -3307,6 +3310,12 @@ begin
     y+FDeltaY + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
+procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
+begin
+  DoSetClipRectInternal(ARect);
+  FClipRectSet:=True;
+end;
+
 procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
 var
   rw: TfpgWinHandle;
@@ -3358,13 +3367,12 @@ begin
   XDrawLine(xapplication.display, DrawHandle, Fgc, x1+FDeltaX, y1+FDeltaY, x2+FDeltaX, y2+FDeltaY);
 end;
 
-procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
+procedure TfpgX11Canvas.DoSetClipRectInternal(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
 begin
   FClipRect := ARect;
-  FClipRectSet:=True;
 
   if FClipRectSet then
   begin
@@ -3407,9 +3415,8 @@ procedure TfpgX11Canvas.DoClearClipRect;
 var
   r: TfpgRect;
 begin
-  DoGetWinRect(r);
-  DoSetClipRect(r);
   FClipRectSet := False;
+  DoSetClipRectInternal(fpgRect(0,0,0,0));
 end;
 
 procedure TfpgX11Canvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
