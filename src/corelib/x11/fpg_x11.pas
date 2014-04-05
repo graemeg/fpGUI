@@ -169,22 +169,6 @@ type
     constructor Create;
   end;
 
-
-  { TfpgX11ClipRegion }
-
-  TfpgX11ClipRegion = class
-  private
-    FRegion: TRegion;
-    FLastCanvas: TfpgCanvasBase;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    procedure EnsureClipRect(ACanvas: TfpgCanvasBase);
-    procedure UpdateClipRect(ACanvas: TfpgCanvasBase);
-
-  end;
-
-
   { TfpgX11Canvas }
 
   TfpgX11Canvas = class(TfpgCanvasBase)
@@ -202,14 +186,11 @@ type
     FPixHeight,
     FPixWidth: Integer;
     FBufferFreeTimer: TObject;
-    FClipRegion: TfpgX11ClipRegion;
-
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
     procedure   AllocateDC;
     procedure   DeAllocateDC(Force: Boolean);
     function    DrawHandle: TfpgDCHandle;
-    procedure   EnsureClipRect;
     function    WeAreTargetCanvas: Boolean;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
@@ -928,69 +909,6 @@ begin
   inherited Create(ErrText);
 end;
 {$ENDIF}
-
-{ TfpgX11ClipRegion }
-
-constructor TfpgX11ClipRegion.Create;
-begin
-  FRegion := XCreateRegion();
-end;
-
-destructor TfpgX11ClipRegion.Destroy;
-begin
-  inherited Destroy;
-end;
-
-procedure TfpgX11ClipRegion.EnsureClipRect(ACanvas: TfpgCanvasBase);
-var
-  XCanvas: TfpgX11Canvas absolute ACanvas;
-  r: TXRectangle;
-  rg: TRegion;
-  x,y: TfpgCoord;
-  //ClipRegion: TRegion;
-begin
-  if FLastCanvas = ACanvas then
-    Exit
-  ;//else  WriteLn('Canvas Target Switched');
-
-  FLastCanvas := ACanvas;
-
-  with XCanvas do
-  begin
-    if FClipRectSet then
-    begin
-      r.x      := FClipRect.Left+FDeltaX;
-      r.y      := FClipRect.Top+FDeltaY;
-      r.Width  := FClipRect.Width;
-      r.Height := FClipRect.Height;
-    end
-    else
-    begin
-      x := 0;
-      y := 0;
-      FWidget.WidgetToWindow(x, y);
-      r.x := x;
-      r.y := y;
-      r.width := FWidget.Width;
-      r.height := FWidget.Height;
-    end;
-
-    rg := XCreateRegion;
-
-    XUnionRectWithRegion(@r, rg, rg);
-    XSetRegion(xapplication.display, Fgc, rg);
-    XftDrawSetClip(FXftDraw, rg);
-
-    XDestroyRegion(rg);
-  end;
-end;
-
-procedure TfpgX11ClipRegion.UpdateClipRect(ACanvas: TfpgCanvasBase);
-begin
-  FLastCanvas := nil;
-  EnsureClipRect(ACanvas);
-end;
-
 
 { TfpgX11Application }
 
@@ -3032,7 +2950,6 @@ begin
 
 
   FreeAndNil(FBufferFreeTimer);
-  FreeAndNil(FClipRegion);
   TryFreePixmap;
   DeAllocateDC(True);
   inherited Destroy;
@@ -3064,12 +2981,6 @@ begin
     if not AWidget.WindowAllocated and not TfpgX11Window(awidget.Window).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
-
-  // each window has a clipregion that all sub canvas's use
-  if WeAreTargetCanvas then
-    FClipRegion := TfpgX11ClipRegion.Create;
-
-  //FDrawHandle := TfpgX11Canvas(CanvasTarget).FDrawHandle;
 
   //XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
   h := FWidget.Height;
@@ -3114,7 +3025,6 @@ end;
 
 procedure TfpgX11Canvas.DoEndDraw;
 begin
-  FreeAndNil(FClipRegion);
   FCanvasTarget := nil;
   FDrawing    := False;
   DeAllocateDC(True);
@@ -3319,13 +3229,6 @@ begin
   end;
 end;
 
-procedure TfpgX11Canvas.EnsureClipRect;
-begin
-  {if TfpgX11Canvas(FCanvasTarget).FClipRegion.FLastCanvas <> self then
-    WriteLn('UPdating cliprect to correct target!!!');}
-  TfpgX11Canvas(FCanvasTarget).FClipRegion.EnsureClipRect(Self);
-end;
-
 function TfpgX11Canvas.WeAreTargetCanvas: Boolean;
 begin
   Result := FCanvasTarget = Self;
@@ -3417,13 +3320,11 @@ end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
-  EnsureClipRect;
   XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
 end;
 
 procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
-  EnsureClipRect;
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
   XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
@@ -3438,7 +3339,6 @@ begin
   pts[1].x := x1+FDeltaX;   pts[1].y := y1+FDeltaY;
   pts[2].x := x2+FDeltaX;   pts[2].y := y2+FDeltaY;
   pts[3].x := x3+FDeltaX;   pts[3].y := y3+FDeltaY;
-  EnsureClipRect;
   XFillPolygon(xapplication.display, DrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
@@ -3446,7 +3346,6 @@ procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
-  EnsureClipRect;
   if (w = 1) and (h = 1) then // a dot
     DoDrawLine(x, y, x+w, y+w)
   else
@@ -3455,19 +3354,40 @@ end;
 
 procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
-  EnsureClipRect;
   // Same behavior as Windows. See documentation for reason.
   XDrawLine(xapplication.display, DrawHandle, Fgc, x1+FDeltaX, y1+FDeltaY, x2+FDeltaX, y2+FDeltaY);
 end;
 
 procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
+var
+  r: TXRectangle;
+  rg: TRegion;
 begin
   FClipRect := ARect;
   FClipRectSet:=True;
-  if WeAreTargetCanvas then
+
+  if FClipRectSet then
   begin
-    TfpgX11Canvas(FCanvasTarget).FClipRegion.UpdateClipRect(Self);
+    r.x      := FClipRect.Left+FDeltaX;
+    r.y      := FClipRect.Top+FDeltaY;
+    r.Width  := FClipRect.Width;
+    r.Height := FClipRect.Height;
+  end
+  else
+  begin
+    r.x := FDeltaX;
+    r.y := FDeltaY;
+    r.width := FWidget.Width;
+    r.height := FWidget.Height;
   end;
+
+  rg := XCreateRegion;
+
+  XUnionRectWithRegion(@r, rg, rg);
+  XSetRegion(xapplication.display, Fgc, rg);
+  XftDrawSetClip(FXftDraw, rg);
+
+  XDestroyRegion(rg);
 end;
 
 function TfpgX11Canvas.DoGetClipRect: TfpgRect;
@@ -3480,8 +3400,7 @@ var
   NewRect: TfpgRect;
 begin
   UnionRect(NewRect, FClipRect, ARect);
-  TfpgX11Canvas(FCanvasTarget).FClipRegion.UpdateClipRect(Self);
-  FClipRectSet:=True;
+  DoSetClipRect(NewRect);
 end;
 
 procedure TfpgX11Canvas.DoClearClipRect;
@@ -3502,7 +3421,6 @@ var
 begin
   if img = nil then
     Exit; //==>
-  EnsureClipRect;
   if img.Masked then
   begin
     // rendering the mask
