@@ -1544,7 +1544,6 @@ begin
   //dh      := msg.Params.rect.Height - FHeight;
   dw := FWidth - _w;
   dh := FHeight - _h;
-  WriteLn('resize dw = ', dw, ' dh = ', dh);
   HandleAlignments(dw, dh);
   if InDesigner then
   begin
