@@ -412,6 +412,7 @@ function  fpgSize(const AWidth, AHeight: integer): TfpgSize;
 procedure PrintRect(const Rect: TRect);
 procedure PrintRect(const Rect: TfpgRect);
 procedure PrintCoord(const x, y: TfpgCoord);
+procedure PrintSize(const ASize: TfpgSize);
 procedure PrintCoord(const pt: TPoint);
 function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
@@ -921,6 +922,11 @@ begin
   {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
+end;
+
+procedure PrintSize(const ASize: TfpgSize);
+begin
+  writeln('w=', ASize.W, '  h=', ASize.H);
 end;
 
 procedure PrintCoord(const pt: TPoint);

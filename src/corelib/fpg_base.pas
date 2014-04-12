@@ -569,14 +569,12 @@ type
     procedure   SetMouseCursor(const AValue: TMouseCursor);
   protected
     FPosition,
-    FDirtyPosition: TfpgPoint;
+    FNotifiedPosition: TfpgPoint;
     FSize,
-    FDirtySize: TfpgSize;
+    FNotifiedSize: TfpgSize;
     FMouseCursor: TMouseCursor;
     FWindowType: TWindowType;
     FWindowAttributes: TWindowAttributes;
-    FSizeIsDirty: Boolean;
-    FPosIsDirty: Boolean;
     FMouseCursorIsDirty: Boolean;
     FWindowState: TfpgWindowState;
     function    HandleIsValid: boolean; virtual; abstract;
@@ -602,6 +600,7 @@ type
     function    FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
     function    FindWidgetForKeyEvent: TfpgWidgetBase;
     procedure   SetCurrentWidget(AValue: TfpgWidgetBase);
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -1903,6 +1902,24 @@ begin
   end;
 end;
 
+procedure TfpgWindowBase.MsgResize(var msg: TfpgMessageRec);
+var
+  NewSize: TfpgSize;
+begin
+  NewSize := fpgSize(msg.Params.rect.Width, msg.Params.rect.Height);
+  {$IFDEF DEBUG}
+  WriteLn('FPGM_RESIZE to Native Window: Requested Value, Current Value , Message Value');
+  PrintSize(FSize);
+  PrintSize(FNotifiedSize);
+  PrintSize(NewSize);
+  {$ENDIF}
+  if (NewSize <> FNotifiedSize) {and (NewSize <> FSize)} then
+  begin
+    FNotifiedSize := NewSize;
+    DefaultHandler(msg);
+  end;
+end;
+
 constructor TfpgWindowBase.Create(AOwner: TComponent);
 var
   w: TfpgWidget absolute AOwner;
@@ -1910,8 +1927,6 @@ begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
   FMouseCursorIsDirty := False;
-  FPosIsDirty := True;
-  FSizeIsDirty := True;
   FWindowState := wsNormal;
 end;
 
