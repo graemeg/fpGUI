@@ -124,13 +124,9 @@ type
 
 
   TfpgNativeWindow = class(TfpgWindowImpl)
-  protected
-    procedure   SetParent(const AValue: TfpgNativeWindow); reintroduce;
-    function    GetParent: TfpgNativeWindow; reintroduce;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Parent: TfpgNativeWindow read GetParent write SetParent;
     property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
 
@@ -2000,16 +1996,6 @@ end;
 destructor TfpgNativeWindow.Destroy;
 begin
   inherited Destroy;
-end;
-
-procedure TfpgNativeWindow.SetParent(const AValue: TfpgNativeWindow);
-begin
-  inherited SetParent(AValue);
-end;
-
-function TfpgNativeWindow.GetParent: TfpgNativeWindow;
-begin
-  result := TfpgNativeWindow(inherited GetParent);
 end;
 
 { TfpgStyle }

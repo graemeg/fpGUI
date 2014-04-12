@@ -458,6 +458,7 @@ var
   dw: integer;
   dh: integer;
   ParentLeft, ParentTop: TfpgCoord;
+  PaintRect: TfpgRect;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -489,9 +490,24 @@ begin
     Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
-    Invalidate;//TfpgWidgetBase(Parent).Invalidate;
-  //
-  //{$TODO Notify Parent we've changed position and should redraw}
+  begin
+    Invalidate;
+
+    if (dw < 0) or (dh < 0) then
+      Parent.InvalidateRect(fpgRect(FLeft, FTop, FPrevWidth, FPrevHeight));
+    if wdfPosition in FDirtyFlags then
+    begin
+      PaintRect := fpgRect(FLeft, FTop, FWidth, FHeight);
+      UnionRect(PaintRect, fpgRect(FPrevLeft, FPrevTop, FWidth, FHeight), PaintRect);
+      //PaintRect.Width:=PaintRect.Width+(FPrevLeft-FLeft);
+      //PaintRect.Height:=PaintRect.Height+(FPrevTop-FTop);
+
+      PaintRect.Width:=PaintRect.Width+5;
+      PaintRect.Height:=PaintRect.Height+5;
+      Parent.InvalidateRect(PaintRect);
+
+    end;
+  end;
 
   if (dw <> 0) or (dh <> 0) then
     DoResize;
@@ -634,7 +650,7 @@ begin
       Parent.Invalidate;
   end;
   if Assigned(Window) then
-    Window.Dispatcher.NotifyWidgetDestroying(Self);
+    Window.NotifyWidgetDestroying(Self);
 
   inherited Destroy;
 end;
@@ -1528,6 +1544,7 @@ begin
   //dh      := msg.Params.rect.Height - FHeight;
   dw := FWidth - _w;
   dh := FHeight - _h;
+  WriteLn('resize dw = ', dw, ' dh = ', dh);
   HandleAlignments(dw, dh);
   if InDesigner then
   begin

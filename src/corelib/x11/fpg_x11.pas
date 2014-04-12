@@ -636,18 +636,6 @@ begin
   Result := nil;
 end;
 
-function FindWindowDispatcherFromWindow(wh: TfpgWinHandle): TfpgWindowEventDispatcher;
-var
-  w: TfpgX11Window;
-begin
-  w := FindWindowByHandle(wh);
-  Result := nil;
-  if w = nil then
-    Exit;
-
-  Result := w.Dispatcher;
-end;
-
 function FindWindowByBackupHandle(wh: TfpgWinHandle): TfpgX11Window;
 var
   p: PWindowLookupRec;
@@ -1269,7 +1257,7 @@ begin
     {$ENDIF}
     if win is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      wg := TfpgWidget(win.Dispatcher.FindWidgetFromWindowPoint(dx,dy));
+      wg := TfpgWidget(win.FindWidgetFromWindowPoint(dx,dy));
       {$IFDEF DNDDEBUG}
       writeln('dragging over widget: ', wg.ClassName);
       {$ENDIF}
@@ -1657,7 +1645,6 @@ var
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
-  dispatcher: TfpgWindowEventDispatcher;
   mcode: integer;
   msgp: TfpgMessageParams;
   rfds: baseunix.TFDSet;
@@ -1831,19 +1818,19 @@ begin
 
           if ev._type = X.KeyPress then
           begin
-            fpgPostMessage(nil, w.Dispatcher, FPGM_KEYPRESS, msgp);
+            fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
 
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
               for i := 1 to UTF8Length(FComposeBuffer) do
               begin
                 msgp.keyboard.keychar := UTF8Copy(FComposeBuffer, i, 1);
-                fpgPostMessage(nil, w.Dispatcher, FPGM_KEYCHAR, msgp);
+                fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
               end;
             end;
           end { if }
           else if ev._type = X.KeyRelease then
-            fpgPostMessage(nil, w.Dispatcher, FPGM_KEYRELEASE, msgp);
+            fpgPostMessage(nil, w, FPGM_KEYRELEASE, msgp);
         end;
 
     X.ButtonPress,
@@ -1864,9 +1851,9 @@ begin
           begin
             if (Popup <> nil) then
             begin
-              mw := w.Dispatcher.FindWidgetFromWindowPoint(ev.xbutton.x, ev.xbutton.y);
-              while (w <> nil) and (w.Parent <> nil) do
-                w := TfpgX11Window(w.Parent);
+              mw := w.FindWidgetFromWindowPoint(ev.xbutton.x, ev.xbutton.y);
+              while (w <> nil) and (w.PrimaryWidget.Parent <> nil) do
+                w := TfpgX11Window(w.PrimaryWidget.Parent.Window);
 
               if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
                  (not PopupDontCloseWidget(TfpgWidget(mw))) then
@@ -1925,7 +1912,7 @@ begin
                 end;
 
                 msgp.mouse.delta := i;
-                fpgPostMessage(nil, w.Dispatcher, FPGM_SCROLL, msgp);
+                fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
               end;
             end
             else
@@ -1944,7 +1931,7 @@ begin
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
               end;
-              fpgPostMessage(nil, w.Dispatcher, mcode, msgp);
+              fpgPostMessage(nil, w, mcode, msgp);
             end;  { if/else }
           end;  { if not blocking }
         end;
@@ -1958,10 +1945,10 @@ begin
           begin
             with ev.xexpose do
               msgp.rect := fpgRect(x, y, width, height);
-            dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
+            w := FindWindowByHandle(ev.xexpose.window);
             // use invalidate if a FPGM_PAINT message is already queued
-            if Assigned(dispatcher) then
-              TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
+            if Assigned(w) then
+              TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
           end;
         end;
 
@@ -1974,10 +1961,10 @@ begin
           begin
             with ev.xgraphicsexpose do
               msgp.rect := fpgRect(x, y, width, height);
-            dispatcher := FindWindowDispatcherFromWindow(ev.xexpose.window);
+            w := FindWindowByHandle(ev.xexpose.window);
             // use invalidate in case a FPGM_PAINT message is already queued
-            if Assigned(dispatcher) then
-              TfpgWidget(dispatcher.Widget).InvalidateRect(msgp.rect);
+            if Assigned(w) then
+              TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
           end;
         end;
 
@@ -2008,7 +1995,7 @@ begin
               msgp.mouse.y          := ev.xmotion.y;
               msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
               msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
-              fpgPostMessage(nil, w.Dispatcher, FPGM_MOUSEMOVE, msgp);
+              fpgPostMessage(nil, w, FPGM_MOUSEMOVE, msgp);
             end;
           end;
         end;
@@ -2039,7 +2026,7 @@ begin
               end;
 
               if not blockmsg then
-                fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xclient.window), FPGM_CLOSE);
+                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
              end;
           end
           { XDND protocol - XdndEnter }
@@ -2145,10 +2132,10 @@ begin
             end;
 
             if (w.FWidth <> msgp.rect.Width) or (w.FHeight <> msgp.rect.Height) then
-              fpgPostMessage(nil, w.Dispatcher, FPGM_RESIZE, msgp);
+              fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
 
             if (w.FLeft <> msgp.rect.Left) or (w.FTop <> msgp.rect.Top) then
-              fpgPostMessage(nil, w.Dispatcher, FPGM_MOVE, msgp);
+              fpgPostMessage(nil, w, FPGM_MOVE, msgp);
           end;
         end;
 
@@ -2200,16 +2187,16 @@ begin
         end;
 
     X.FocusIn:
-        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xfocus.window), FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_ACTIVATE);
 
     X.FocusOut:
-        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xfocus.window), FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_DEACTIVATE);
 
     X.EnterNotify:
-        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xcrossing.window), FPGM_MOUSEENTER);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEENTER);
 
     X.LeaveNotify:
-        fpgPostMessage(nil, FindWindowDispatcherFromWindow(ev.xcrossing.window), FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEEXIT);
 
     X.MapNotify:
         begin
@@ -2479,7 +2466,7 @@ begin
   // for modal windows, this is necessary
   if FWindowType = wtModalForm then
   begin
-    if Parent = nil then
+    if PrimaryWidget.Parent = nil then
     begin
       lmwh := 0;
       if fpgApplication.PrevModalForm <> nil then
@@ -2654,7 +2641,6 @@ begin
 
   XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
 
-
   end;
 end;
 
@@ -2810,7 +2796,7 @@ end;
 
 procedure TfpgX11Window.CaptureMouse(AForWidget: TfpgWidgetBase);
 begin
-  Dispatcher.MouseCapture := AForWidget;
+  MouseCapture := AForWidget;
   XGrabPointer(xapplication.Display, FWinHandle,
       TBool(False),
       ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask
@@ -2825,7 +2811,7 @@ end;
 
 procedure TfpgX11Window.ReleaseMouse;
 begin
-  Dispatcher.MouseCapture := nil;
+  MouseCapture := nil;
   XUngrabPointer(xapplication.display, CurrentTime);
 end;
 

@@ -548,15 +548,20 @@ type
     property    Window: TfpgWindowBase read GetWindow;
   end;
 
-  TfpgWindowEventDispatcher = class;
 
   { TfpgWindowBase }
 
   TfpgWindowBase = class(TfpgComponent)
   private
-    FDispatcher: TfpgWindowEventDispatcher;
-    FParent: TfpgWindowBase;
+    FPassiveMouseCapture: TfpgWidgetBase;
+    FMouseCapture: TfpgWidgetBase;
+    FCurrentWidget: TfpgWidgetBase;
+    FWidget: TfpgWidgetBase;
+    FWindow: TfpgWindowBase;
+    FMsg: PfpgMessageRec;
+    LastMousePos: TfpgPoint; // point in the native window
     function    GetPrimaryWidget: TfpgWidgetBase;
+    function GetWidget: TfpgWidgetBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
   protected
     FMouseCursor: TMouseCursor;
@@ -592,8 +597,6 @@ type
     function    GetWindowState: TfpgWindowState; virtual;
     procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
     procedure   DoDragStartDetected; virtual;
-    procedure   SetParent(const AValue: TfpgWindowBase); virtual;
-    function    GetParent: TfpgWindowBase; virtual;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
     procedure   SetTop(const AValue: TfpgCoord);
@@ -603,6 +606,12 @@ type
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
     property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
+    // alien windows methods
+    procedure   DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+    procedure   DispatchKeyEvent(var msg: TfpgMessageRec);
+    function    FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
+    function    FindWidgetForKeyEvent: TfpgWidgetBase;
+    procedure   SetCurrentWidget(AValue: TfpgWidgetBase);
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -618,7 +627,6 @@ type
 
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
-    function    HasParent: Boolean; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     procedure   ActivateWindow; virtual; abstract;
@@ -629,6 +637,11 @@ type
     procedure   SetWindowVisible(AValue: Boolean);
     property    HasHandle: boolean read HandleIsValid;
     procedure   AllocateWindowHandle;
+    procedure   DefaultHandler(var message); override;
+    function    FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
+    procedure   NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+    property    MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
+    property    CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
     property    WindowTitle: string write SetWindowTitle;
@@ -637,39 +650,8 @@ type
     property    Top: TfpgCoord read FTop write SetTop;
     property    Width: TfpgCoord read FWidth write SetWidth;
     property    Height: TfpgCoord read FHeight write SetHeight;
-    property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    PrimaryWidget: TfpgWidgetBase read GetPrimaryWidget;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
-    property    Dispatcher: TfpgWindowEventDispatcher read FDispatcher;
-  end;
-
-  { TfpgWindowEventDispatcher }
-
-  TfpgWindowEventDispatcher = class(TfpgComponent)
-  private
-    FPassiveMouseCapture: TfpgWidgetBase;
-    FMouseCapture: TfpgWidgetBase;
-    FCurrentWidget: TfpgWidgetBase;
-    FWidget: TfpgWidgetBase;
-    FWindow: TfpgWindowBase;
-    FMsg: PfpgMessageRec;
-    LastMousePos: TfpgPoint; // point in the native window
-
-    procedure    DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
-    procedure    DispatchKeyEvent(var msg: TfpgMessageRec);
-    function     FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
-    function     FindWidgetForKeyEvent: TfpgWidgetBase;
-    procedure    SetCurrentWidget(AValue: TfpgWidgetBase);
-  public
-    constructor  Create(AOwner: TfpgWindowBase); reintroduce;
-    procedure    DefaultHandler(var message); override;
-    function     FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
-    procedure    NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
-    property     MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
-    property     CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
-    property     Window: TfpgWindowBase read FWindow write FWindow;
-    property     Widget: TfpgWidgetBase read FWidget write FWidget;
-
   end;
 
 
@@ -939,6 +921,9 @@ operator=(const r1, r2: TfpgRect)b: boolean;
 begin
   Result := CompareMem(@r1, @r2, SizeOf(TfpgRect));
 end;
+
+type
+  TWidgetHack = class(TfpgWidget);
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
@@ -1305,186 +1290,6 @@ begin
   end;
 end;
 
-{ TfpgWindowEventDispatcher }
-
-procedure TfpgWindowEventDispatcher.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
-var
-  w: TfpgWidgetBase;
-begin
-  LastMousePos.X:=AX;
-  LastMousePos.Y:=AY;
-  w := FindWidgetForMouseEvent(Widget, AX, AY);
-  CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
-
-  // passive captures send all messages to the widget that receives the original
-  // mousedown but only while the mouse is inside the native window.
-  case msg.MsgCode of
-    FPGM_MOUSEUP   :
-      begin
-        w := FPassiveMouseCapture;
-        FPassiveMouseCapture := nil;
-      end;
-    FPGM_MOUSEDOWN : FPassiveMouseCapture := w;
-  end;
-
-  if Assigned(FPassiveMouseCapture) then
-    w := FPassiveMouseCapture;
-
-  if Assigned(MouseCapture) then
-    w := MouseCapture; // still if the mouse is captured that's where the events go
-
-  // Setting this to nil allows us to know if we should bother to update the cursor
-  // in NotifyWidgetDestroying if the widget destroyed has the mouse focus.
-  // This FPGM_MOUSEEXIT is for the native window.
-  if msg.MsgCode = FPGM_MOUSEEXIT then
-    FCurrentWidget := nil;
-
-  Window.MouseCursor:=w.MouseCursor;
-  w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
-  //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
-  msg.Dest := w;
-  w.Dispatch(msg);
-end;
-
-procedure TfpgWindowEventDispatcher.DispatchKeyEvent(var msg: TfpgMessageRec);
-var
-  w: TfpgWidgetBase;
-begin
-  w := FindWidgetForKeyEvent;
-  if Assigned(w) then
-  begin
-    msg.Dest := w;
-    w.Dispatch(msg);
-  end;
-
-end;
-
-type
-  TWidgetHack = class(TfpgWidget);
-
-function TfpgWindowEventDispatcher.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
-var
-  i: Integer;
-  w: TWidgetHack;
-begin
-  Result := AWidget;
-  for i := AWidget.ComponentCount-1 downto 0 do
-  begin
-    w := TWidgetHack(AWidget.Components[i]);
-    // we get notified a widget is destroying before it's gone from the list
-    if w = AInvalidWidget then
-      continue;
-    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
-    begin
-      if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
-      begin
-        Result := (FindWidgetForMouseEvent(w, AX, AY));
-        break;
-      end;
-    end;
-  end;
-end;
-
-function TfpgWindowEventDispatcher.FindWidgetForKeyEvent: TfpgWidgetBase;
-var
-  w: TWidgetHack;
-begin
-  w := TWidgetHack(Widget);
-  while Assigned(w) do
-  begin
-    Result := w;
-    w := TWidgetHack(w.ActiveWidget);
-  end;
-  if Result = nil then
-    Result := Widget;
-  //WriteLn('KEY: ', Result.ClassName);
-end;
-
-procedure TfpgWindowEventDispatcher.SetCurrentWidget(AValue: TfpgWidgetBase);
-  procedure SendEnterExitMessage(AMessage: Integer; Target: TfpgWidgetBase);
-  var
-    msg: TfpgMessageRec;
-  begin
-    msg.Dest := Target;
-    msg.MsgCode:=AMessage;
-    msg.Sender := nil;
-    msg.Stop:=False;
-    msg.Params:= FMsg^.Params;
-    Target.Dispatch(msg);
-  end;
-begin
-  if FCurrentWidget=AValue then Exit;
-
-  if Assigned(FCurrentWidget) then
-  begin
-    SendEnterExitMessage(FPGM_MOUSEEXIT, FCurrentWidget);
-  end;
-
-  FCurrentWidget := AValue;
-
-  if Assigned(FCurrentWidget) then
-  begin
-    SendEnterExitMessage(FPGM_MOUSEENTER, FCurrentWidget);
-  end;
-
-
-end;
-
-constructor TfpgWindowEventDispatcher.Create(AOwner: TfpgWindowBase);
-begin
-  inherited Create(AOwner);
-  FWindow := AOwner;
-  FWidget := TfpgWidgetBase(AOwner.Owner);
-end;
-
-procedure TfpgWindowEventDispatcher.DefaultHandler(var message);
-var
-  msg: TfpgMessageRec absolute message;
-begin
-  inherited DefaultHandler(message);
-  FMsg:=@msg;
-  //WriteLn(msg.MsgCode);
-  case msg.MsgCode of
-    FPGM_SCROLL,
-    FPGM_MOUSEDOWN,
-    FPGM_MOUSEUP,
-    FPGM_MOUSEMOVE,
-    FPGM_DOUBLECLICK,
-    FPGM_MOUSEENTER,
-    FPGM_MOUSEEXIT:  DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
-
-    FPGM_KEYCHAR,
-    FPGM_KEYPRESS,
-    FPGM_KEYRELEASE: DispatchKeyEvent(msg);
-
-    FPGM_CLOSE: Widget.Dispatch(msg);
-
-    //FPGM_PAINT: Widget.Dispatch(msg);
-    //FPGM_RESIZE: Widget.Dispatch(msg);
-    //FPGM_ACTIVATE: Widget.Dispatch(msg);
-    //FPGM_MOVE: Widget.Dispatch(msg);
-  else
-    Widget.Dispatch(msg);
-  end;
-
-end;
-
-function TfpgWindowEventDispatcher.FindWidgetFromWindowPoint(AX, AY: TfpgCoord
-  ): TfpgWidgetBase;
-begin
-  Result := FindWidgetForMouseEvent(Widget, AX, AY);
-end;
-
-procedure TfpgWindowEventDispatcher.NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
-begin
-  if FCurrentWidget = AWidget then
-  begin
-    FCurrentWidget := nil; // this prevents an exit message being sent to a destroyed object
-    CurrentWidget := FindWidgetForMouseEvent(Widget, LastMousePos.X, LastMousePos.Y, AWidget);
-    Window.MouseCursor:=FCurrentWidget.MouseCursor;
-  end;
-end;
-
 { TfpgWidgetBase }
 
 function TfpgWidgetBase.GetWindow: TfpgWindowBase;
@@ -1535,7 +1340,7 @@ end;
 procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
 begin
   FMouseCursor:=AValue;
-  if WindowAllocated and (Window.Dispatcher.CurrentWidget = Self) then
+  if WindowAllocated and (Window.CurrentWidget = Self) then
     Window.MouseCursor:=FMouseCursor;
 end;
 
@@ -1660,12 +1465,6 @@ begin
     if FLeft <> FPrevLeft then
       Include(FDirtyFlags, wdfPosition);
   end;
-
-  if (wdfPosition in FDirtyFlags) and Assigned(Parent) and not HasOwnWindow then
-  begin
-    if UnionRect(TmpRect, TmpRect, fpgRect(FLeft, FTop, FWidth, FHeight)) then
-      TfpgWidget(Parent).InvalidateRect(TmpRect);
-  end;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -1693,10 +1492,6 @@ begin
     if FHeight <> FPrevHeight then
       Include(FDirtyFlags, wdfSize);
   end;
-  if (FHeight < FPrevHeight)
-  or (FWidth < FPrevWidth) then
-    if Assigned(Parent) and not HasOwnWindow then
-      TWidgetHack(Parent).InvalidateRect(fpgRect(FLeft, FTop, FPrevWidth, FPrevHeight));
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
@@ -1894,6 +1689,11 @@ begin
   Result := TfpgWidgetBase(Owner);
 end;
 
+function TfpgWindowBase.GetWidget: TfpgWidgetBase;
+begin
+  Result := Owner as TfpgWidgetBase;
+end;
+
 function TfpgWindowBase.GetWindowState: TfpgWindowState;
 begin
   Result := FWindowState;
@@ -1910,16 +1710,6 @@ begin
     FOnDragStartDetected(self);
 end;
 
-procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
-begin
-  FParent := AValue;
-end;
-
-function TfpgWindowBase.GetParent: TfpgWindowBase;
-begin
-  result := FParent;
-end;
-
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
   if Assigned(Owner) then
@@ -1928,6 +1718,51 @@ begin
     DoAllocateWindowHandle(nil);
   if FMouseCursorIsDirty then
     DoSetMouseCursor;
+end;
+
+procedure TfpgWindowBase.DefaultHandler(var message);
+var
+  msg: TfpgMessageRec absolute message;
+begin
+  inherited DefaultHandler(message);
+  FMsg:=@msg;
+  //WriteLn(msg.MsgCode);
+  case msg.MsgCode of
+    FPGM_SCROLL,
+    FPGM_MOUSEDOWN,
+    FPGM_MOUSEUP,
+    FPGM_MOUSEMOVE,
+    FPGM_DOUBLECLICK,
+    FPGM_MOUSEENTER,
+    FPGM_MOUSEEXIT:  DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
+
+    FPGM_KEYCHAR,
+    FPGM_KEYPRESS,
+    FPGM_KEYRELEASE: DispatchKeyEvent(msg);
+
+    //FPGM_CLOSE: Widget.Dispatch(msg);
+    //FPGM_PAINT: Widget.Dispatch(msg);
+    //FPGM_RESIZE: Widget.Dispatch(msg);
+    //FPGM_ACTIVATE: Widget.Dispatch(msg);
+    //FPGM_MOVE: Widget.Dispatch(msg);
+  else
+    PrimaryWidget.Dispatch(msg);
+  end;
+end;
+
+function TfpgWindowBase.FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
+begin
+  Result := FindWidgetForMouseEvent(PrimaryWidget, AX, AY);
+end;
+
+procedure TfpgWindowBase.NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+begin
+  if FCurrentWidget = AWidget then
+  begin
+    FCurrentWidget := nil; // this prevents an exit message being sent to a destroyed object
+    CurrentWidget := FindWidgetForMouseEvent(PrimaryWidget, LastMousePos.X, LastMousePos.Y, AWidget);
+    MouseCursor:=FCurrentWidget.MouseCursor;
+  end;
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
@@ -2003,12 +1838,131 @@ begin
   end;
 end;
 
+procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  LastMousePos.X:=AX;
+  LastMousePos.Y:=AY;
+  w := FindWidgetForMouseEvent(PrimaryWidget, AX, AY);
+  CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
+
+  // passive captures send all messages to the widget that receives the original
+  // mousedown but only while the mouse is inside the native window.
+  case msg.MsgCode of
+    FPGM_MOUSEUP   :
+      begin
+        w := FPassiveMouseCapture;
+        FPassiveMouseCapture := nil;
+      end;
+    FPGM_MOUSEDOWN : FPassiveMouseCapture := w;
+  end;
+
+  if Assigned(FPassiveMouseCapture) then
+    w := FPassiveMouseCapture;
+
+  if Assigned(MouseCapture) then
+    w := MouseCapture; // still if the mouse is captured that's where the events go
+
+  // Setting this to nil allows us to know if we should bother to update the cursor
+  // in NotifyWidgetDestroying if the widget destroyed has the mouse focus.
+  // This FPGM_MOUSEEXIT is for the native window.
+  if msg.MsgCode = FPGM_MOUSEEXIT then
+    FCurrentWidget := nil;
+
+  MouseCursor:=w.MouseCursor;
+  w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
+  //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
+  msg.Dest := w;
+  w.Dispatch(msg);
+
+
+end;
+
+procedure TfpgWindowBase.DispatchKeyEvent(var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  w := FindWidgetForKeyEvent;
+  if Assigned(w) then
+  begin
+    msg.Dest := w;
+    w.Dispatch(msg);
+  end;
+end;
+
+function TfpgWindowBase.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX,
+  AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase): TfpgWidgetBase;
+var
+  i: Integer;
+  w: TWidgetHack;
+begin
+  Result := AWidget;
+  for i := AWidget.ComponentCount-1 downto 0 do
+  begin
+    w := TWidgetHack(AWidget.Components[i]);
+    // we get notified a widget is destroying before it's gone from the list
+    if w = AInvalidWidget then
+      continue;
+    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
+    begin
+      if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
+      begin
+        Result := (FindWidgetForMouseEvent(w, AX, AY));
+        break;
+      end;
+    end;
+  end;
+end;
+
+function TfpgWindowBase.FindWidgetForKeyEvent: TfpgWidgetBase;
+var
+  w: TWidgetHack;
+begin
+  w := TWidgetHack(PrimaryWidget);
+  while Assigned(w) do
+  begin
+    Result := w;
+    w := TWidgetHack(w.ActiveWidget);
+  end;
+  if Result = nil then
+    Result := PrimaryWidget;
+  //WriteLn('KEY: ', Result.ClassName);
+end;
+
+procedure TfpgWindowBase.SetCurrentWidget(AValue: TfpgWidgetBase);
+  procedure SendEnterExitMessage(AMessage: Integer; Target: TfpgWidgetBase);
+  var
+    msg: TfpgMessageRec;
+  begin
+    msg.Dest := Target;
+    msg.MsgCode:=AMessage;
+    msg.Sender := nil;
+    msg.Stop:=False;
+    msg.Params:= FMsg^.Params;
+    Target.Dispatch(msg);
+  end;
+begin
+  if FCurrentWidget=AValue then Exit;
+
+  if Assigned(FCurrentWidget) then
+  begin
+    SendEnterExitMessage(FPGM_MOUSEEXIT, FCurrentWidget);
+  end;
+
+  FCurrentWidget := AValue;
+
+  if Assigned(FCurrentWidget) then
+  begin
+    SendEnterExitMessage(FPGM_MOUSEENTER, FCurrentWidget);
+  end;
+end;
+
 constructor TfpgWindowBase.Create(AOwner: TComponent);
 var
   w: TfpgWidget absolute AOwner;
 begin
   inherited Create(AOwner);
-  FDispatcher := TfpgWindowEventDispatcher.Create(Self);
   FMouseCursor := mcDefault;
   FMouseCursorIsDirty := False;
   FPosIsDirty := True;
@@ -2019,7 +1973,6 @@ end;
 
 destructor TfpgWindowBase.Destroy;
 begin
-  FreeAndNil(FDispatcher);
   ReleaseWindowHandle;
   inherited Destroy;
 end;
@@ -2077,11 +2030,6 @@ end;
 function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
   Result := DoWindowToScreen(ASource, AScreenPos);
-end;
-
-function TfpgWindowBase.HasParent: Boolean;
-begin
-  Result := FParent <> nil;
 end;
 
 function TfpgWindowBase.GetClientRect: TfpgRect;
