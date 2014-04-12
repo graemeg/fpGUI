@@ -560,26 +560,24 @@ type
     FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
     LastMousePos: TfpgPoint; // point in the native window
-    function    GetPrimaryWidget: TfpgWidgetBase;
+    function GetHeight: TfpgCoord;
+    function GetLeft: TfpgCoord;
+    function GetPrimaryWidget: TfpgWidgetBase;
+    function GetTop: TfpgCoord;
     function GetWidget: TfpgWidgetBase;
+    function GetWidth: TfpgCoord;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
   protected
+    FPosition,
+    FDirtyPosition: TfpgPoint;
+    FSize,
+    FDirtySize: TfpgSize;
     FMouseCursor: TMouseCursor;
     FWindowType: TWindowType;
     FWindowAttributes: TWindowAttributes;
-    FTop: TfpgCoord;
-    FLeft: TfpgCoord;
-    FWidth: TfpgCoord;
-    FHeight: TfpgCoord;
-    FPrevTop: TfpgCoord;
-    FPrevLeft: TfpgCoord;
-    FPrevWidth: TfpgCoord;
-    FPrevHeight: TfpgCoord;
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
     FMouseCursorIsDirty: Boolean;
-    FOnDragStartDetected: TNotifyEvent;
-    FDragActive: boolean;
     FWindowState: TfpgWindowState;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
@@ -596,16 +594,8 @@ type
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     function    GetWindowState: TfpgWindowState; virtual;
     procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
-    procedure   DoDragStartDetected; virtual;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
-    procedure   SetTop(const AValue: TfpgCoord);
-    procedure   SetLeft(const AValue: TfpgCoord);
-    procedure   SetHeight(const AValue: TfpgCoord);
-    procedure   SetWidth(const AValue: TfpgCoord);
-    procedure   HandleMove(x, y: TfpgCoord); virtual;
-    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
-    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
     // alien windows methods
     procedure   DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
     procedure   DispatchKeyEvent(var msg: TfpgMessageRec);
@@ -646,10 +636,10 @@ type
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
     property    WindowTitle: string write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState default wsNormal;
-    property    Left: TfpgCoord read FLeft write SetLeft;
-    property    Top: TfpgCoord read FTop write SetTop;
-    property    Width: TfpgCoord read FWidth write SetWidth;
-    property    Height: TfpgCoord read FHeight write SetHeight;
+    property    Left: TfpgCoord read GetLeft;
+    property    Top: TfpgCoord read GetTop;
+    property    Width: TfpgCoord read GetWidth;
+    property    Height: TfpgCoord read GetHeight;
     property    PrimaryWidget: TfpgWidgetBase read GetPrimaryWidget;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
   end;
@@ -1689,9 +1679,29 @@ begin
   Result := TfpgWidgetBase(Owner);
 end;
 
+function TfpgWindowBase.GetHeight: TfpgCoord;
+begin
+  Result := FSize.H;
+end;
+
+function TfpgWindowBase.GetLeft: TfpgCoord;
+begin
+  Result := FPosition.X;
+end;
+
+function TfpgWindowBase.GetTop: TfpgCoord;
+begin
+  Result := FPosition.Y;
+end;
+
 function TfpgWindowBase.GetWidget: TfpgWidgetBase;
 begin
   Result := Owner as TfpgWidgetBase;
+end;
+
+function TfpgWindowBase.GetWidth: TfpgCoord;
+begin
+  Result := FSize.W;
 end;
 
 function TfpgWindowBase.GetWindowState: TfpgWindowState;
@@ -1702,12 +1712,6 @@ end;
 procedure TfpgWindowBase.SetWindowState(const AValue: TfpgWindowState);
 begin
   // do nothing
-end;
-
-procedure TfpgWindowBase.DoDragStartDetected;
-begin
-  if Assigned(FOnDragStartDetected) then
-    FOnDragStartDetected(self);
 end;
 
 procedure TfpgWindowBase.AllocateWindowHandle;
@@ -1777,65 +1781,6 @@ end;
 procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);
 begin
   DoSetWindowTitle(ATitle);
-end;
-
-procedure TfpgWindowBase.SetTop(const AValue: TfpgCoord);
-begin
-  HandleMove(Left, AValue);
-end;
-
-procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
-begin
-  HandleMove(AValue, Top);
-end;
-
-procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
-begin
-  HandleResize(Width, AValue);
-end;
-
-procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
-begin
-  HandleResize(AValue, Height);
-end;
-
-procedure TfpgWindowBase.HandleMove(x, y: TfpgCoord);
-begin
-  if FTop <> y then
-  begin
-    if not (csLoading in ComponentState) then
-      FPrevTop := FTop
-    else
-      FPrevTop := y;
-    FTop := y;
-    FPosIsDirty := FPosIsDirty or (FTop <> FPrevTop);
-  end;
-
-  if FLeft <> x then
-  begin
-    if not (csLoading in ComponentState) then
-      FPrevLeft := FLeft
-    else
-      FPrevLeft := x;
-    FLeft := x;
-    FPosIsDirty := FPosIsDirty or (FLeft <> FPrevLeft);
-  end;
-end;
-
-procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
-begin
-
-  if FWidth <> AWidth then
-  begin
-    FWidth := AWidth;
-    FSizeIsDirty:=True;
-  end;
-
-  if FHeight <> AHeight then
-  begin
-    FHeight := AHeight;// ConstraintHeight(AHeight);
-    FSizeIsDirty:=True;
-  end;
 end;
 
 procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
@@ -1967,7 +1912,6 @@ begin
   FMouseCursorIsDirty := False;
   FPosIsDirty := True;
   FSizeIsDirty := True;
-  FDragActive := False;
   FWindowState := wsNormal;
 end;
 
@@ -1998,12 +1942,12 @@ end;
 
 function TfpgWindowBase.Right: TfpgCoord;
 begin
-  Result := FLeft + FWidth - 1;
+  Result := FPosition.X + FSize.W - 1;
 end;
 
 function TfpgWindowBase.Bottom: TfpgCoord;
 begin
-  Result := FTop + FHeight - 1;
+  Result := FPosition.Y + FSize.H - 1;
 end;
 
 procedure TfpgWindowBase.UpdateWindowPosition;
@@ -2013,17 +1957,14 @@ end;
 
 procedure TfpgWindowBase.UpdateWindowPosition(ALeft, ATop, AWidth, AHeight: Integer);
 begin
-  Left:=ALeft;
-  Top:=ATop;
-  Height:=AHeight;
-  Width:=AWidth;
+  FPosition := fpgPoint(ALeft, ATop);
+  FSize := fpgSize(AWidth, AHeight);
   UpdateWindowPosition;
 end;
 
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
-  Left  := x;
-  Top   := y;
+  FPosition := fpgPoint(x, y);
   DoMoveWindow(x, y);
 end;
 

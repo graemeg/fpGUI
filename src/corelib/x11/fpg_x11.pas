@@ -2131,10 +2131,10 @@ begin
               end;
             end;
 
-            if (w.FWidth <> msgp.rect.Width) or (w.FHeight <> msgp.rect.Height) then
+            if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
               fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
 
-            if (w.FLeft <> msgp.rect.Left) or (w.FTop <> msgp.rect.Top) then
+            if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
               fpgPostMessage(nil, w, FPGM_MOVE, msgp);
           end;
         end;
@@ -2360,15 +2360,15 @@ begin
     end;
   end;
 
-  if FWidth = 0 then
-    FWidth := 1;
+  if FSize.W = 0 then
+    FSize.W := 1;
 
-  if FHeight = 0 then
-    FHeight := 1;
+  if FSize.H = 0 then
+    FSize.H := 1;
 
 
   wh := XCreateWindow(xapplication.Display, pwh,
-    FLeft, FTop, FWidth, FHeight, 0,
+    FPosition.X, FPosition.Y, FSize.W, FSize.H, 0,
     CopyFromParent,
     InputOutput,
     xapplication.DefaultVisual,
@@ -2430,16 +2430,16 @@ begin
   if waScreenCenterPos in FWindowAttributes then
   begin
     hints.flags := hints.flags or PPosition;
-    FLeft := (xapplication.ScreenWidth - FWidth) div 2;
-    FTop  := (xapplication.ScreenHeight - FHeight) div 2;
-    DoMoveWindow(FLeft, FTop);
+    FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
+    FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
+    DoMoveWindow(FPosition.X, FPosition.Y);
   end
   else if waOneThirdDownPos in FWindowAttributes then
   begin
     hints.flags := hints.flags or PPosition;
-    FLeft := (xapplication.ScreenWidth - FWidth) div 2;
-    FTop  := (xapplication.ScreenHeight - FHeight) div 3;
-    DoMoveWindow(FLeft, FTop);
+    FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
+    FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
+    DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 
   if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
@@ -2451,10 +2451,10 @@ begin
   else
   begin
     hints.flags      := hints.flags or PMinSize or PMaxSize;
-    hints.min_width  := FWidth;
-    hints.min_height := FHeight;
-    hints.max_width  := FWidth;
-    hints.max_height := FHeight;
+    hints.min_width  := FSize.W;
+    hints.min_height := FSize.H;
+    hints.max_width  := FSize.W;
+    hints.max_height := FSize.H;
   end;
 
   XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
@@ -2611,16 +2611,16 @@ var
 begin
   if HasHandle then
   begin
-    if FWidth > 1 then
-      w := FWidth
+    if FSize.W > 1 then
+      w := FSize.W
     else
       w := 1;
-    if FHeight > 1 then
-      h := FHeight
+    if FSize.H > 1 then
+      h := FSize.H
     else
       h := 1;
 
-    XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
+    XMoveResizeWindow(xapplication.display, FWinHandle, FPosition.X, FPosition.Y, w, h);
 
     widget := PrimaryWidget;
     hints.flags:=0;
