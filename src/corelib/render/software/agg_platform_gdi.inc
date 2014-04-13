@@ -26,19 +26,19 @@ var
   srcdc: HDC;
   destdc: HDC;
 begin
-  if TfpgWindow(FWindow).WinHandle <= 0 then
+  if not FWidget.WindowAllocated or not FWidget.Window.HasHandle then
   begin
     debugln('    no winhandle available');
     exit;
   end;
 
   FImg.UpdateImage;
-  destdc := Windows.GetDC(TfpgWindow(FWindow).WinHandle);
+  destdc := Windows.GetDC(TfpgGDIWindow(FWidget.Window).WinHandle);
   srcdc := CreateCompatibleDC(fpgApplication.Display);
   SelectObject(srcdc, TImageHack(FImg).BMPHandle);
   BitBlt(destdc, x, y, w, h, srcdc, 0, 0, SRCCOPY);
   DeleteDC(srcdc);
-  ReleaseDC(TfpgWindow(FWindow).WinHandle, destdc);
+  ReleaseDC(TfpgGDIWindow(FWidget.Window).WinHandle, destdc);
 
 (*
   if (dvc_width <> bmp_width ) or
