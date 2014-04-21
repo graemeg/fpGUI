@@ -2378,9 +2378,11 @@ begin
 
   if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
   begin
-    hints.flags      := hints.flags or PMinSize;
+    hints.flags      := hints.flags or PMinSize or PMaxSize;
     hints.min_width  := FMinWidth;
     hints.min_height := FMinHeight;
+    hints.max_width  := FMaxWidth;
+    hints.max_height := FMaxHeight;
   end
   else
   begin
