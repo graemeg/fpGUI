@@ -2381,8 +2381,14 @@ begin
     hints.flags      := hints.flags or PMinSize or PMaxSize;
     hints.min_width  := FMinWidth;
     hints.min_height := FMinHeight;
-    hints.max_width  := FMaxWidth;
-    hints.max_height := FMaxHeight;
+    if FMaxWidth > 0 then
+      hints.max_width := FMaxWidth
+    else
+      hints.max_width := xapplication.ScreenWidth;
+    if FMaxHeight > 0 then
+      hints.max_height := FMaxHeight
+    else
+      hints.max_height := xapplication.ScreenHeight;
   end
   else
   begin
