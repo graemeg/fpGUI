@@ -133,6 +133,7 @@ type
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: TfpgString read FText write SetText;
+    property    TreeView: TfpgTreeView read FTree;
     { determines the + or - image in the treeview }
     property    HasChildren: Boolean read FHasChildren write SetHasChildren;
     // color settings
