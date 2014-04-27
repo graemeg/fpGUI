@@ -10,6 +10,20 @@ You can include icons with items' text labels and display different icons to
 indicate whether a node is expanded or collapsed.</p>
 </descr>
 
+<element name="TfpgTreeNode">
+<short>TfpgTreeNdoe describes an individual node in a tree view widget.</short>
+<descr>Each node in a tree view control consists of a label and an optional
+bitmapped image. Each item can be the parent of a list of subitems. By clicking
+an item, the user can expand or collapse the associated list of subitems.</descr>
+<seealso>
+  <link id="fpgui.fpg_tree.TfpgTreeView">TfpgTreeView</link>
+</seealso>
+</element>
+
+<element name="TfpgTreeNode.TreeView">
+<short>Specifies the tree view widget that displays the node.</short>
+<descr>Use TreeView to determine the tree view associated with the tree node.</descr>
+</element>
 
 <element name="TfpgTreeView">
 <short>Represents a window that displays a hierachy list of items</short>
@@ -21,6 +35,9 @@ in a tree view control consists of a label and a number of optional bitmapped im
 Each node can have a list of subnodes associated with it. By clicking on a node,
 the user can expand or collapse the associated list of subnodes.</p>
 <remark>There is basic column support, but this is still very experimental.</remark></descr>
+<seealso>
+  <link id="fpgui.fpg_tree.TfpgTreeNode">TfpgTreeNode</link>
+</seealso>
 </element>
 
 <element name="TfpgTreeView.FullCollapse">
