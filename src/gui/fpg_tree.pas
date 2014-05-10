@@ -84,7 +84,6 @@ type
     FText: TfpgString;
     FTextColor: TfpgColor;
     FHasChildren: Boolean;
-    FTree: TfpgTreeView;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -97,8 +96,11 @@ type
     procedure   SetHasChildren(const AValue: Boolean);
     procedure   DoTreeCheck(ANode: TfpgTreeNode);
     procedure   SetStateImageIndex(const AValue: integer);
+  protected
+    FTree: TfpgTreeView;
   public
-    constructor Create;
+    constructor Create; overload;
+    constructor Create(ATreeView: TfpgTreeView; AText: TfpgString); overload;
     destructor  Destroy; override;
     // node related
     function    AppendText(AText: TfpgString): TfpgTreeNode;
@@ -133,6 +135,7 @@ type
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: TfpgString read FText write SetText;
+    property    TreeView: TfpgTreeView read FTree;
     { determines the + or - image in the treeview }
     property    HasChildren: Boolean read FHasChildren write SetHasChildren;
     // color settings
@@ -394,7 +397,8 @@ begin
   FData           := nil;
   FFirstSubNode   := nil;
   FLastSubNode    := nil;
-  FText           := '';
+  FText := '';
+  FTree := nil;
   FImageIndex     := -1;
   FStateImageIndex := -1;
   FCollapsed      := True;
@@ -409,6 +413,13 @@ begin
   FTextColor          := clUnset;
   FInactSelColor      := clUnset;
   FInactSelTextColor  := clUnset;
+end;
+
+constructor TfpgTreeNode.Create(ATreeView: TfpgTreeView; AText: TfpgString);
+begin
+  Create;
+  FText := AText;
+  FTree := ATreeView;
 end;
 
 destructor TfpgTreeNode.Destroy;

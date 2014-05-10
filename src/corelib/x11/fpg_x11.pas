@@ -25,7 +25,7 @@ unit fpg_x11;
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
-         of the window borders. This as something to do with win_gravity = StaticGravity setting. }
+         of the window borders. This has something to do with win_gravity = StaticGravity setting. }
 
 interface
 
@@ -2446,9 +2446,17 @@ begin
 
   if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
   begin
-    hints.flags      := hints.flags or PMinSize;
+    hints.flags      := hints.flags or PMinSize or PMaxSize;
     hints.min_width  := w.MinWidth;
     hints.min_height := w.MinHeight;
+    if w.MaxWidth > 0 then
+      hints.max_width := w.MaxWidth
+    else
+      hints.max_width := xapplication.ScreenWidth;
+    if w.MaxHeight > 0 then
+      hints.max_height := w.MaxHeight
+    else
+      hints.max_height := xapplication.ScreenHeight;
   end
   else
   begin

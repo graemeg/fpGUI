@@ -136,7 +136,7 @@ The following trademarks are used in this online help file:
 .* ************************************************************
 .* Using DocView
 .* ************************************************************
-:h1 res=2 id='Using'.Using &dv.
+:h1 res=2 id='Using'.Using DocView
 :hp2.Using &dv.:ehp2.
 :p.
 Once you have :link reftype=hd refid='OpeningFiles'.opened a
@@ -169,8 +169,7 @@ Colours and some of the behaviour of &dv. can be adjusted from the "Tools
 .* ************************************************************
 .* Opening Help File
 .* ************************************************************
-:h1 res=3 id='OpeningFiles'.
-Opening Files
+:h1 res=3 id='OpeningFiles'.Opening Files
 :i1 id=30005.open
 :p.:hp2.Opening Help Files:ehp2.
 :p.

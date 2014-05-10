@@ -590,6 +590,7 @@ begin
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
   FMenuOptions := [];
   FMouseIsOver := False;
+  FIsContainer := True;
 end;
 
 destructor TfpgMenuBar.Destroy;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -62,6 +62,7 @@ type
     procedure   miHelpAboutGUI(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: string);
     procedure   SetupCaptions;
+    procedure   BuildThemePreviewMenu;
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -178,6 +179,7 @@ uses
   fpg_iniutils,
   fpg_dialogs,
   fpg_constants,
+  fpg_stylemanager,
   vfdmain,
   vfd_constants;
 
@@ -463,11 +465,6 @@ begin
   begin
     Name := 'previewmenu';
     SetPosition(324, 36, 120, 20);
-    AddMenuItem('with Windows 9x', '', nil).Enabled := False;
-    AddMenuItem('with Windows XP', '', nil).Enabled := False;
-    AddMenuItem('with OpenSoft', '', nil).Enabled := False;
-    AddMenuItem('with Motif', '', nil).Enabled := False;
-    AddMenuItem('with OpenLook', '', nil).Enabled := False;
   end;
 
   {@VFD_BODY_END: frmMain}
@@ -499,6 +496,8 @@ begin
       Inc(y, 30);
     end;
   end;
+
+  BuildThemePreviewMenu;
 
   chlPalette.Items.Sort;
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
@@ -962,6 +961,23 @@ end;
 procedure TfrmMain.SetupCaptions;
 begin
   btnOpen.Hint := rsOpenFormFile;
+end;
+
+procedure TfrmMain.BuildThemePreviewMenu;
+var
+  sl: TStringList;
+  i: integer;
+begin
+  sl := TStringList.Create;
+  fpgStyleManager.AssignStyleTypes(sl);
+  sl.Sort;
+  for i := 0 to sl.Count-1 do
+  begin
+    if sl[i] = 'auto' then
+      continue;
+    previewmenu.AddMenuItem(sl[i], '', nil).Enabled := False;
+  end;
+  sl.Free;
 end;
 
 constructor TfrmMain.Create(AOwner: TComponent);
