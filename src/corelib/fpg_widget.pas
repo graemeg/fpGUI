@@ -335,7 +335,7 @@ end;
 
 function TfpgWidget.GetWindow: TfpgNativeWindow;
 begin
-  Result := TfpgNativeWindow(inherited Window);
+  Result := TfpgNativeWindow(inherited GetWindow);
 end;
 
 procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);

@@ -463,14 +463,12 @@ type
   TfpgWidgetBase = class(TfpgComponent)
   private
     FHasOwnWindow: Boolean;
-    function    GetWindow: TfpgWindowBase; virtual;
     function    GetWindowAllocated: Boolean;
     procedure   SetMinHeight(AValue: TfpgCoord);
     procedure   SetMinWidth(AValue: TfpgCoord);
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
-
   protected
     FParent: TfpgWidgetBase;
     FMouseCursor: TMouseCursor;
@@ -492,6 +490,7 @@ type
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
+    function    GetWindow: TfpgWindowBase; virtual;
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
     //procedure   DoSetMouseCursor; virtual; abstract;
