@@ -126,7 +126,6 @@ type
   TfpgNativeWindow = class(TfpgWindowImpl)
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
 
@@ -1997,11 +1996,6 @@ begin
     FWindowType   := wtChild
   else
     FWindowType   := wtWindow;
-end;
-
-destructor TfpgNativeWindow.Destroy;
-begin
-  inherited Destroy;
 end;
 
 { TfpgStyle }
