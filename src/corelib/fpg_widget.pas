@@ -384,7 +384,6 @@ begin
     FWindow := TfpgNativeWindow.Create(Self);
     Window.WindowType:=wtChild;
     UpdatePosition;
-    //Window.UpdateWindowPosition(Left, Top, Width, Height);
   end
   else
     FWindow := nil; // GetWindow asks the parent for it's window.
@@ -464,9 +463,8 @@ var
 {$ENDIF}
 begin
   {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.DoUpdateWindowPosition - ' + ClassName + ' ('+Name+')');
+  itf := DebugMethodEnter('TfpgWidget.DoUpdatePosition - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-//  writeln('TfpgWidget.DoUpdateWindowPosition - ' + Classname + ' ('+Name+')');
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 

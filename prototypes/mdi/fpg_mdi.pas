@@ -112,7 +112,7 @@ begin
   Left := Left + dx;
   Top := Top + dy;
   FLastPos := pt;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TfpgMDIChildForm.TitleMouseUp(Sender: TObject; AButton: TMouseButton;
@@ -487,7 +487,7 @@ begin
     begin
       c := Components[i] as TfpgMDIChildForm;
       c.Left := c.Left + (FLastHorizonalPos - position);
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       fpgApplication.ProcessMessages;
     end;
   end;
@@ -583,7 +583,7 @@ begin
       x += GAP;
       c.Top := y;
       y += GAP;
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       c.BringToFront;
     end;
   end;

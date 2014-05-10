@@ -267,7 +267,7 @@ begin
         end;
       end; // case
       if rs.WindowAllocated then
-        rs.UpdateWindowPosition;
+        rs.UpdatePosition;
     end;
   end;
 
@@ -885,7 +885,7 @@ begin
         if Font.TextWidth16(Text) > width then
         begin
           Width := Font.TextWidth16(Text);
-          UpdateWindowPosition;
+          UpdatePosition;
           cd.UpdateResizerPositions;
         end;
       end;
@@ -1012,7 +1012,7 @@ begin
       begin
         wg := cd.Widget;
         SetNewPos(wg, posval);
-        wg.UpdateWindowPosition;
+        wg.UpdatePosition;
         cd.UpdateResizerPositions;
       end;
     end;
@@ -1020,7 +1020,7 @@ begin
     if wg = nil then
     begin
       SetNewPos(FForm, posval);
-      FForm.UpdateWindowPosition;
+      FForm.UpdatePosition;
     end;
   end; { if }
 

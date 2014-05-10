@@ -2380,8 +2380,8 @@ begin
   FVScrollBar.Left    := Width - FVScrollBar.Width-1;
   FVScrollBar.Height  := VHeight;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;     
     
 procedure TfpgNiceGrid.SetShowGrid(Value: Boolean);

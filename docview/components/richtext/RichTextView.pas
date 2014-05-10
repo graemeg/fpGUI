@@ -1049,8 +1049,8 @@ begin
   FVScrollBar.Left    := r.Right+1;
   FVScrollBar.Height  := r.Height;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;
 
 

@@ -494,7 +494,7 @@ begin
       wg.Height := GetIntValue(s);
     lok := lok and CheckSymbol(s, ')');
     lok := lok and CheckSymbol(s, ';');
-    wg.UpdateWindowPosition;
+    wg.UpdatePosition;
     //if lok then Writeln('sd ok.');
     //writeln('WT: ',sval);
   end;

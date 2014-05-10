@@ -917,7 +917,7 @@ end;
 procedure TfrmMain.FormShow(Sender: TObject);
 begin
   gINI.ReadFormState(self);
-  UpdateWindowPosition;
+  UpdatePosition;
   SetupCaptions;
 end;
 

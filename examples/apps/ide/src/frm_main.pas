@@ -1187,7 +1187,7 @@ begin
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
   Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
   Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
-  UpdateWindowPosition;
+  UpdatePosition;
 
   SetupProjectTree;
   SetupFilesGrid;
