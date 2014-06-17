@@ -80,7 +80,7 @@ begin
   try
     if dlg.RunOpenFile then
     begin
-      memEditor.Lines.LoadFromFile(dlg.FileName);
+      memEditor.LoadFromFile(dlg.FileName);
       FFileName := dlg.FileName;
       UpdateStatus(FFileName);
     end;
@@ -99,7 +99,7 @@ begin
       dlg.FileName := FFilename;
     if dlg.RunSaveFile then
     begin
-      memEditor.Lines.SaveToFile(dlg.FileName);
+      memEditor.SaveToFile(dlg.FileName);
       UpdateStatus(Format('<%s> successfully saved.', [FFileName]));
     end;
   finally
