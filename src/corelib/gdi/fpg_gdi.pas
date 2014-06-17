@@ -263,10 +263,13 @@ type
 
 
   TfpgGDIFileList = class(TfpgFileListBase)
+  private
     function    EncodeAttributesString(attrs: longword): TFileModeString;
-    constructor Create; override;
+  protected
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
+  public
+    constructor Create; override;
   end;
 
 
