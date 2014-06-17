@@ -2731,7 +2731,7 @@ var
   e: TFileEntry;
 begin
   e := TFileEntry.Create;
-  e.Name        := fpgFromOSEncoding(sr.Name);
+  e.Name        := sr.Name;
   e.Extension   := fpgExtractFileExt(e.Name);
   e.Size        := sr.Size;
   // e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
