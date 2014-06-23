@@ -1842,31 +1842,50 @@ begin
           if not blockmsg then
           begin
             if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
+            // 4=up, 5=down, 6=left, 7=right
             begin
               // generate scroll events:
               if ev._type = X.ButtonPress then
               begin
-                if ev.xbutton.button = Button4 then
+                if (ev.xbutton.button = Button4) or (ev.xbutton.button = 6) then // x.pp lacks Button6, Button7
                   i := -1
                 else
                   i := 1;
 
         	      // Check for other mouse wheel messages in the queue
-                while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
-                begin
-      	          if NewEvent.xbutton.Button = 4 then
-      	            Dec(i)
-                  else if NewEvent.xbutton.Button = 5 then
-      	            Inc(i)
-                  else
-            	    begin
-            	      XPutBackEvent(display, @NewEvent);
-                    break;
-            	    end;
-                end;
+                if ev.xbutton.button in [Button4,Button5] then
+                  while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
+                  begin
+      	            if NewEvent.xbutton.Button = 4 then
+      	              Dec(i)
+                    else if NewEvent.xbutton.Button = 5 then
+      	              Inc(i)
+                    else
+            	      begin
+            	        XPutBackEvent(display, @NewEvent);
+                      break;
+            	      end;
+                  end
+                else // button is 6 or 7
+                  while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
+                  begin
+    	              if NewEvent.xbutton.Button = 6 then
+    	                Dec(i)
+                    else if NewEvent.xbutton.Button = 7 then
+    	                Inc(i)
+                    else
+          	        begin
+          	          XPutBackEvent(display, @NewEvent);
+                      break;
+          	        end;
+                  end;
 
                 msgp.mouse.delta := i;
-                fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
+
+                if ev.xbutton.button in [Button4,Button5] then
+                  fpgPostMessage(nil, w, FPGM_SCROLL, msgp)
+                else
+                  fpgPostMessage(nil, w, FPGM_HSCROLL, msgp);
               end;
             end
             else
