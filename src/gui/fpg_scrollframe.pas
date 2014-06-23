@@ -1,3 +1,21 @@
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Defines a scrollable frame widget.
+
+      This unit was originally written by David Emerson <dle3ab@angelbase.com>
+}
 unit fpg_scrollframe;
 
 {$mode objfpc}{$H+}
@@ -17,7 +35,6 @@ type
   
   TfpgScrollFrame = class;
 
-  { TfpgEmbeddingFrame }
 
   TfpgEmbeddingFrame = class (TfpgFrame)
   // The purpose of the EmbeddingFrame is to pass scroll events to the ParentScrollFrame
@@ -32,7 +49,6 @@ type
     property ParentScrollFrame : TfpgScrollFrame read FParentScrollFrame write FParentScrollFrame;
   end;
 
-  { TfpgAutoSizingFrame }
 
   TfpgAutoSizingFrame = class (TfpgEmbeddingFrame)
   private
@@ -48,7 +64,6 @@ type
 
   TfpgASFrameClass = class of TfpgAutoSizingFrame;
 
-  { TfpgScrollFrame }
 
   TfpgScrollFrame = class (TfpgFrame)
   private
