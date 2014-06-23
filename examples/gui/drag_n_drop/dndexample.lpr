@@ -81,7 +81,6 @@ procedure TMainForm.Bevel1DragEnter(Sender, Source: TObject;
   AMimeList: TStringList; var AMimeChoice: TfpgString;
   var ADropAction: TfpgDropAction; var Accept: Boolean);
 var
-  i: integer;
   s: string;
 begin
   { the mime type we want to accept }
@@ -108,7 +107,6 @@ procedure TMainForm.PanelDragDrop(Sender, Source: TObject; X, Y: integer;
   AData: Variant);
 var
   s: string;
-  v: variant;
 begin
   s := AData;
   Bevel1.Text := Format('Drop event at (%d,%d) with value(s):'+LineEnding+'%s', [X, Y, s]);
@@ -129,7 +127,6 @@ procedure TMainForm.LabelDragStartDetected(Sender: TObject);
 var
   m: TfpgMimeData;
   d: TfpgDrag;
-  v: variant;
 begin
   m := TfpgMimeData.Create;
 
