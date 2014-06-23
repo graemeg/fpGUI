@@ -10,23 +10,24 @@ Graeme Geldenhuys <graemeg@gmail.com>
 
 Implementation inspired by works from
 -------------------------------------
-Sebastian Guenther
-Viktor Nagy
+Sebastian Guenther for the very first fpGUI implementation
+Viktor Nagy for ideas from the LPTK project
 Milan Marusinec (Milano) for the AggPas port
 
 
 Contributors
 ------------
-Felipe Monteiro de Carvalho
-Andrew Haines
-Giuliano Colla
-Jean-Marc Levecque
-Antonio Sanguigni
-Vladimir Zhirov
 Alexsander Rosa
+Andrew Haines
+Antonio Sanguigni
+David Laurence Emerson
+Felipe Monteiro de Carvalho
+Giuliano Colla
 Horacio Jamilis
-Michael van Canneyt
+Jean-Marc Levecque
 Jean-Pierre Anghel
+Michael van Canneyt
+Vladimir Zhirov
 
            ______________.o0O0o.______________
            
