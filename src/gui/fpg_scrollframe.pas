@@ -65,35 +65,34 @@ type
   TfpgASFrameClass = class of TfpgAutoSizingFrame;
 
 
-  TfpgScrollFrame = class (TfpgFrame)
+  TfpgScrollFrame = class(TfpgFrame)
   private
-    FContentFrame : TfpgAutoSizingFrame;
-    FVisibleArea : TfpgEmbeddingFrame;
-    FHScrollBar : TfpgScrollBar;
-    FVScrollBar : TfpgScrollBar;
-    FScrollBarStyle : TfpgScrollStyle;
-    function GetXOffset: integer;
-    function GetYOffset: integer;
-    procedure SetXOffset (x: integer);
-    procedure SetYOffset (y: integer);
+    FContentFrame: TfpgAutoSizingFrame;
+    FVisibleArea: TfpgEmbeddingFrame;
+    FHScrollBar: TfpgScrollBar;
+    FVScrollBar: TfpgScrollBar;
+    FScrollBarStyle: TfpgScrollStyle;
+    function    GetXOffset: integer;
+    function    GetYOffset: integer;
+    procedure   SetXOffset(x: integer);
+    procedure   SetYOffset(y: integer);
   protected
-    procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
-        delta: smallint); override;
-    procedure HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; 
-        delta: smallint); override;
-    procedure HandleResize(awidth, aheight: TfpgCoord); override;
-    procedure HandleShow; override;
-    procedure HScrollBarMove(Sender: TObject; position: integer);
-    procedure VScrollBarMove(Sender: TObject; position: integer);
-    procedure UpdateScrollbars; virtual;
-    property XOffset : integer read GetXOffset write SetXOffset; // these do not...
-    property YOffset : integer read GetYOffset write SetYOffset; // ...updatewindowposition
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure   HandleShow; override;
+    procedure   HandlePaint; override;
+    procedure   HScrollBarMove(Sender: TObject; position: integer);
+    procedure   VScrollBarMove(Sender: TObject; position: integer);
+    procedure   UpdateScrollbars; virtual;
+    property    XOffset: integer read GetXOffset write SetXOffset; // these do not...
+    property    YOffset: integer read GetYOffset write SetYOffset; // ...updatewindowposition
   public
     constructor Create (AOwner: TComponent); override;
     constructor Create (AOwner: TComponent; ContentFrameType: TfpgASFrameClass); virtual;
-    procedure AfterCreate; override;
-    procedure SetContentFrameType(AContentFrameType: TfpgASFrameClass);
-    property ContentFrame : TfpgAutoSizingFrame read FContentFrame write FContentFrame;
+    procedure   AfterCreate; override;
+    procedure   SetContentFrameType(AContentFrameType: TfpgASFrameClass);
+    property    ContentFrame: TfpgAutoSizingFrame read FContentFrame write FContentFrame;
   end;
 
 
@@ -265,6 +264,28 @@ begin
   if (csLoading in ComponentState) then
     Exit;
   UpdateScrollBars;
+end;
+
+procedure TfpgScrollFrame.HandlePaint;
+begin
+  if csDesigning in ComponentState then
+  begin
+    // clear background rectangle
+    Canvas.Clear(clDarkGray);
+    // When designing, don't draw colors
+    // but draw an outline
+    Canvas.SetLineStyle(1, lsDash);
+    Canvas.DrawRectangle(GetClientRect);
+    Canvas.SetLineStyle(1, lsSolid);
+    Canvas.Color := clUIDesignerGreen;
+    Canvas.DrawLine(0, 0, Width, Height);
+    Canvas.DrawLine(Width, 0, 0, Height);
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Name + ': ' + ClassName);
+    Exit;  //==>
+  end;
+
+  inherited HandlePaint;
 end;
 
 procedure TfpgScrollFrame.HScrollBarMove (Sender: TObject; position: integer);
