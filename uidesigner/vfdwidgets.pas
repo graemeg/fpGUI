@@ -172,7 +172,6 @@ begin
     sizeof(stdimg_vfd_colorlistbox),
     0, 0);
 
-
   fpgImages.AddMaskedBMP(
     'vfd.combobox', @stdimg_vfd_combobox,
     sizeof(stdimg_vfd_combobox),
@@ -322,6 +321,10 @@ begin
     'vfd.hyperlink', @stdimg_vfd_hyperlink,
     sizeof(stdimg_vfd_hyperlink),
     0, 0);
+
+  fpgImages.AddBMP(
+    'vfd.scrollframe', @stdimg_vfd_scrollframe,
+    sizeof(stdimg_vfd_scrollframe));
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
