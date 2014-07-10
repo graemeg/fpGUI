@@ -92,6 +92,7 @@ type
     constructor Create (AOwner: TComponent); override;
     constructor Create (AOwner: TComponent; ContentFrameType: TfpgASFrameClass); virtual;
     procedure AfterCreate; override;
+    procedure SetContentFrameType(AContentFrameType: TfpgASFrameClass);
     property ContentFrame : TfpgAutoSizingFrame read FContentFrame write FContentFrame;
   end;
 
@@ -493,6 +494,15 @@ begin
     end;
 
   FScrollBarStyle := ssAutoBoth;
+end;
+
+procedure TfpgScrollFrame.SetContentFrameType(AContentFrameType: TfpgASFrameClass);
+begin
+  if Assigned(FContentFrame) then
+    FContentFrame.Free;
+  FContentFrame := AContentFrameType.Create(FVisibleArea);
+  FContentFrame.HandleMove(0, 0);
+  FContentFrame.ParentScrollFrame := self;
 end;
 
 
