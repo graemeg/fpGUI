@@ -134,7 +134,6 @@ end;
 
 procedure TfpgScrollBar.HandlePaint;
 begin
-  Canvas.BeginDraw; // Do not remove - Scrollbars do painting outside HandlePaint as well!
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
@@ -145,9 +144,7 @@ begin
     DrawButton(0, 0, Height, Height, 'sys.sb.left', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
     DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end;
-
   DrawSlider(FRecalc);
-  Canvas.EndDraw;   // Do not remove - Scrollbars do painting outside HandlePaint as well!
   FRecalc := False;
 end;
 
@@ -162,7 +159,7 @@ begin
   if not HasHandle then
     Exit; //==>
   FRecalc := True;
-  Invalidate;//  DrawSlider(True);
+  Invalidate;
 end;
 
 procedure TfpgScrollBar.LineUp;
@@ -219,7 +216,7 @@ begin
     FPosition := AValue;
 
   if HasHandle then
-    Invalidate;//    DrawSlider(False);
+    Invalidate;
 end;
 
 procedure TfpgScrollBar.Step(ASteps: Integer);
@@ -576,7 +573,7 @@ begin
     FSliderPos := area;
 
   if ppos <> FSliderPos then
-    Invalidate;  // DrawSlider(False);
+    Invalidate;
 
   if area <> 0 then
     newp := FMin + Trunc((FMax - FMin)  * (FSliderPos / area))
@@ -609,7 +606,7 @@ begin
   if Visible then
   begin
     FRecalc := True;
-    Invalidate;   // DrawSlider(True);
+    Invalidate;
   end;
 
   if Assigned(FOnScroll) then
