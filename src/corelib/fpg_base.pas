@@ -2246,7 +2246,7 @@ begin
   FMasked       := False;
   FWidth        := 0;
   FHeight       := 0;
-//  DoFreeImage;
+  DoFreeImage;
 end;
 
 procedure TfpgImageBase.AllocateImage(acolordepth, awidth, aheight: integer);
