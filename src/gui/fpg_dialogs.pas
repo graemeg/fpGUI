@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -227,6 +227,7 @@ type
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I inputintegerdialog.inc}
 {$I managebookmarksdialog.inc}
 
 
@@ -240,6 +241,7 @@ function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
 function fpgShowCharMap: TfpgString;
 function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
 function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
+function fpgIntegerQuery(const ACaption, APrompt: TfpgString; var Value: Integer; MaxValue: Integer; MinValue: Integer): Boolean;
 
 
 implementation
@@ -1632,6 +1634,7 @@ end;
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I inputintegerdialog.inc}
 {$I managebookmarksdialog.inc}
 
 

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,16 +21,16 @@
 
 type
 
-  TfpgQueryDialog = class(TfpgForm)
+  TfpgIntegerDialog = class(TfpgForm)
   private
-    {@VFD_HEAD_BEGIN: fpgQueryDialog}
+    {@VFD_HEAD_BEGIN: fpgIntegerDialog}
     lblText: TfpgLabel;
-    edtText: TfpgEdit;
+    edtInteger: TfpgEditInteger;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    {@VFD_HEAD_END: fpgQueryDialog}
+    {@VFD_HEAD_END: fpgIntegerDialog}
     procedure SetupCaptions;
-    procedure edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure edtIntegerKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   protected
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -42,38 +42,40 @@ type
 
 {$IFDEF read_implementation}
 
-function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
+function fpgIntegerQuery(const ACaption, APrompt: TfpgString; var Value: Integer; MaxValue: Integer; MinValue: Integer= 0): Boolean;
 var
-  dlg: TfpgQueryDialog;
+  dlg: TfpgIntegerDialog;
 begin
-  dlg := TfpgQueryDialog.Create(nil);
+  dlg := TfpgIntegerDialog.Create(nil);
   try
     dlg.WindowTitle := ACaption;
     dlg.lblText.Text := APrompt;
-    dlg.edtText.Text := Value;
+    dlg.edtInteger.MaxValue:= MaxValue;
+    dlg.edtinteger.MinValue:= MinValue;
+    dlg.edtInteger.Value := Value;
     Result := dlg.ShowModal = mrOK;
     if Result then
-      Value := dlg.edtText.Text;
+      Value := dlg.edtInteger.Value;
   finally
     dlg.Free;
   end;
 end;
 
-{ TfpgQueryDialog }
+{ TfpgIntegerDialog }
 
-procedure TfpgQueryDialog.SetupCaptions;
+procedure TfpgIntegerDialog.SetupCaptions;
 begin
   btnOK.Text := rsOK;
   btnCancel.Text := rsCancel;
 end;
 
-procedure TfpgQueryDialog.edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+procedure TfpgIntegerDialog.edtIntegerKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
   if KeyCode = keyEnter then
    btnOK.Click;
 end;
 
-procedure TfpgQueryDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgIntegerDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if KeyCode = keyEscape then
   begin
@@ -82,13 +84,13 @@ begin
   end;
 end;
 
-procedure TfpgQueryDialog.AfterCreate;
+procedure TfpgIntegerDialog.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: fpgQueryDialog}
-  Name := 'fpgQueryDialog';
-  SetPosition(300, 150, 340, 97);
-  WindowTitle := 'QueryDialog';
+  {@VFD_BODY_BEGIN: fpgIntegerDialog}
+  Name := 'fpgIntegerDialog';
+  SetPosition(100, 150, 208, 97);
+  WindowTitle := 'IntegerDialog';
   Hint := '';
   WindowPosition := wpOneThirdDown;
 
@@ -96,32 +98,32 @@ begin
   with lblText do
   begin
     Name := 'lblText';
-    SetPosition(8, 8, 324, 16);
+    SetPosition(8, 8, 208, 16);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'lblText';
   end;
 
-  edtText := TfpgEdit.Create(self);
-  with edtText do
+  edtInteger := TfpgEditInteger.Create(self);
+  with edtInteger do
   begin
-    Name := 'edtText';
-    SetPosition(8, 26, 324, 24);
+    Name := 'edtInteger';
+    SetPosition(8, 26, 100, 24);
     Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
     Hint := '';
     TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
-    OnKeyPress := @edtTextKeyPressed;
+    Value := 0;
+    OnKeyPress := @edtIntegerKeyPressed;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(144, 64, 92, 24);
+    SetPosition(8, 64, 92, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
@@ -135,7 +137,7 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(240, 64, 92, 24);
+    SetPosition(108, 64, 92, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
@@ -145,7 +147,7 @@ begin
     TabOrder := 4;
   end;
 
-  {@VFD_BODY_END: fpgQueryDialog}
+  {@VFD_BODY_END: fpgIntegerDialog}
   {%endregion}
 
   SetupCaptions;
