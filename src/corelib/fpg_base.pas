@@ -1741,9 +1741,9 @@ begin
   RGBStop  := fpgColorToRGBTriple(AStop);
 
   if ADirection = gdVertical then
-    count := ARect.Bottom - ARect.Top
+    count := ARect.Height
   else
-    count := ARect.Right - ARect.Left;
+    count := ARect.Width;
 
   RDiff := RGBStop.Red - RGBStart.Red;
   GDiff := RGBStop.Green - RGBStart.Green;
