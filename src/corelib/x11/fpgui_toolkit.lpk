@@ -29,7 +29,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1"/>
-    <Files Count="106">
+    <Files Count="107">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -454,6 +454,10 @@
         <Filename Value="../../gui/fpg_scrollframe.pas"/>
         <UnitName Value="fpg_scrollframe"/>
       </Item106>
+      <Item107>
+        <Filename Value="../../gui/inputintegerdialog.inc"/>
+        <Type Value="Include"/>
+      </Item107>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">
