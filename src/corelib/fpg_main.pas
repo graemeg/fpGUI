@@ -2145,17 +2145,17 @@ begin
   if (btfIsPressed in AFlags) then
   begin
     if (btfIsEmbedded in AFlags) then
-      ACanvas.SetColor(clHilite2)
+      ACanvas.SetColor(clShadow1)
     else
     begin
       if (btfFlat in AFlags) or (btfHover in AFlags) then
         ACanvas.SetColor(clShadow1)  { light shadow }
       else
-        ACanvas.SetColor(clShadow2); { dark shadow }
+        ACanvas.SetColor(clShadow1); { light shadow }
     end;
   end
   else
-    ACanvas.SetColor(clHilite2);
+    ACanvas.SetColor(clHilite2); { white }
 
   ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
   ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
@@ -2164,13 +2164,13 @@ begin
   if (btfIsPressed in AFlags) then
   begin
     if (btfIsEmbedded in AFlags) then
-      ACanvas.SetColor(clHilite1)
+      ACanvas.SetColor(clShadow1)
     else
     begin
       if (btfFlat in AFlags) or (btfHover in AFlags) then
-        ACanvas.SetColor(clHilite2)  { light shadow }
+        ACanvas.SetColor(clHilite2)  { white }
       else
-        ACanvas.SetColor(clShadow2); { dark shadow }
+        ACanvas.SetColor(clHilite2); { white }
     end;
   end
   else
@@ -2187,13 +2187,24 @@ begin
   if (btfFlat in AFlags) or (btfHover in AFlags) then
     exit; { "toolbar" style buttons need a nice thin/flat border }
 
+  // Left and Top (inner)
+  if btfIsPressed in AFlags then
+  begin
+    if not (btfIsEmbedded in AFlags) then
+    begin
+      ACanvas.SetColor(clShadow2);  { dark shadow }
+      ACanvas.DrawLine(r.Left+1, r.Bottom-1, r.Left+1, r.Top+1);  // left
+      ACanvas.DrawLine(r.Left+1, r.Top+1, r.Right-1, r.Top+1);    // top
+    end;
+  end;
+
   // Right and Bottom (inner)
   if btfIsPressed in AFlags then
   begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clButtonFace)
     else
-      ACanvas.SetColor(clHilite1);
+      ACanvas.SetColor(clButtonFace);
   end
   else
     ACanvas.SetColor(clShadow1);
