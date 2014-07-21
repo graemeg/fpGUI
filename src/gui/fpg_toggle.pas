@@ -166,7 +166,7 @@ begin
   Canvas.Clear(BackgroundColor);
 
   // Text
-
+  Canvas.SetFont(Font);
   if Enabled then
     TextEnabled := []
   else
