@@ -203,6 +203,7 @@ type
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
     function    GetControlFrameBorders: TRect; virtual;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
+    function    GetBevelWidth: TfpgCoord; virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
@@ -2262,6 +2263,11 @@ begin
   { right, then bottom }
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);
+end;
+
+function TfpgStyle.GetBevelWidth: TfpgCoord;
+begin
+  Result := 1;
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);

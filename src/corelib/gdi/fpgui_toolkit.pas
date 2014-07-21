@@ -22,7 +22,7 @@ uses
   fpg_style_win2k, fpg_style_motif, fpg_style_clearlooks, fpg_style_bluecurve, 
   fpg_style_bitmap, fpg_readonly, fpg_imgfmt_png, U_Command, U_Pdf, U_Report, 
   U_ReportImages, U_Visu, fpg_trayicon, Agg2D, fpg_dbugintf, fpg_dbugmsg,
-  fpg_style_carbon, fpg_style_plastic, fpg_style_win8;
+  fpg_style_carbon, fpg_style_plastic, fpg_style_win8, fpg_toggle;
 
 implementation
 
