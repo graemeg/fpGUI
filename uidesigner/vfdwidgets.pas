@@ -67,6 +67,7 @@ uses
   fpg_ColorWheel,
   fpg_splitter,
   fpg_hyperlink,
+  fpg_toggle,
   vfdpropeditgrid,
   vfdmain;
 
@@ -325,6 +326,12 @@ begin
   fpgImages.AddBMP(
     'vfd.scrollframe', @stdimg_vfd_scrollframe,
     sizeof(stdimg_vfd_scrollframe));
+
+  fpgImages.AddMaskedBMP(
+    'vfd.toggle', @stdimg_vfd_toggle,
+    sizeof(stdimg_vfd_toggle),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -983,6 +990,30 @@ begin
   wc.AddProperty('URL', TPropertyString, 'The URL that must be opened in the default web browser. If OnClick is specified, then the URL has no affect.');
   wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
   wc.WidgetIconName := 'vfd.hyperlink';
+  RegisterVFDWidget(wc);
+
+  // ToggleBox
+  wc          := TVFDWidgetClass.Create(TfpgToggle);
+  wc.NameBase := 'Toggle';
+  wc.AddProperty('Align', TPropertyEnum, '');
+  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('CheckedCaption', TPropertyString, 'Initial text');
+  wc.AddProperty('CheckedColor', TPropertyColor, '');
+  wc.AddProperty('CheckedTextColor', TPropertyColor, '');
+  wc.AddProperty('Enabled', TPropertyBoolean, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('TextColor', TPropertyColor, '');
+  wc.AddProperty('ToggleWidth', TPropertyInteger, 'Width of toggle button');
+  wc.AddProperty('UnCheckedCaption', TPropertyString, 'Initial text');
+  wc.AddProperty('UnCheckedColor', TPropertyColor, '');
+  wc.AddProperty('UnCheckedTextColor', TPropertyColor, '');
+  wc.AddProperty('UseAnimation', TPropertyBoolean, '');
+  wc.WidgetIconName := 'vfd.toggle';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...

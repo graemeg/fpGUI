@@ -63,6 +63,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+  published
     property    UseAnimation: Boolean read FUseAnimation write FUseAnimation;
     property    ToggleWidth: TfpgCoord read FToggleWidth write SetToggleWidth default 45;
     property    CheckedCaption : TfpgString read FCheckedCaption write SetCheckedCaption;
