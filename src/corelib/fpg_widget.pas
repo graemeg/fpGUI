@@ -176,7 +176,7 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
-    procedure   Invalidate; // double check this works as developers expect????
+    procedure   Invalidate;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
