@@ -2105,7 +2105,7 @@ end;
 
 procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
 begin
-  tempimage := TfpgImageBase.Create;
+  tempimage := TfpgImage.Create;
   tempimage.AllocateImage(image.ColorDepth, w, image.Height);
 
   xfactor   := image.Width / w;
