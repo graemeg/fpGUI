@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -64,7 +64,7 @@ begin
   if not fpgFileExists(AFileName) then
     Exit; //==>
 
-  AssignFile(AFile, AFileName);
+  AssignFile(AFile, fpgToOSEncoding(AFileName));
   FileMode := fmOpenRead; // read-only
   Reset(AFile);
   AImageDataSize := FileSize(AFile);
