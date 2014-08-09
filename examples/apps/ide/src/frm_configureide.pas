@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2014 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -229,7 +229,6 @@ constructor TConfigureIDEForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FInternalMacroList := TIDEMacroList.Create;
-  OnKeyPress  := @FormKeyPressed;
 end;
 
 destructor TConfigureIDEForm.Destroy;
@@ -248,6 +247,7 @@ begin
   Hint := '';
   ShowHint := True;
   WindowPosition := wpOneThirdDown;
+  OnKeyPress := @FormKeyPressed;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do

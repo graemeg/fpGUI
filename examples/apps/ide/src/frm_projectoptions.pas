@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2014 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -103,6 +103,7 @@ type
     procedure CleanupCompilerDirs;
     procedure CleanupUserMacrosGrid;
     procedure SaveToMacroList(AList: TIDEMacroList);
+    procedure FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -582,6 +583,12 @@ begin
 //  AList.SetValue(cMacro_FPCSrcDir, edtFPCSrcDir.Directory);
 end;
 
+procedure TProjectOptionsForm.FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEscape then
+    Close;
+end;
+
 constructor TProjectOptionsForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -603,6 +610,7 @@ begin
   WindowTitle := 'Project Options';
   Hint := '';
   ShowHint := True;
+  OnKeyPress := @FormKeyPressed;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
