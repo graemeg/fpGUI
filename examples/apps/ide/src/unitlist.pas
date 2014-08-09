@@ -50,6 +50,7 @@ type
     function    FindByName(const AUnitName: TfpgString): TUnit;
     function    FileExists(const AFilename: TfpgString): Boolean;
     function    AddFileName(const AFilename: TfpgString): TUnit;
+    function    Remove(AUnit: TUnit): integer;
     procedure   Add(NewUnit: TUnit);
     procedure   Clear;
     procedure   Delete(AIndex: integer);
@@ -143,6 +144,11 @@ begin
     Add(u);
     Result := u;
   end;
+end;
+
+function TUnitList.Remove(AUnit: TUnit): integer;
+begin
+  Result := FList.Remove(AUnit);
 end;
 
 procedure TUnitList.Add(NewUnit: TUnit);
