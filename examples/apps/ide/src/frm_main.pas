@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2014 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -541,18 +541,18 @@ var
   r: TfpgTreeNode;
   n: TfpgTreeNode;
 begin
-  u := TUnit.Create;
-  u.FileName := AUnitName;
-  u.Opened := True;
-  GProject.UnitList.Add(u);
-  // add reference to tabsheet
-  pcEditor.ActivePage.TagPointer := u;
-  s := fpgExtractRelativepath(GProject.ProjectDir, u.FileName);
-  r := GetUnitsNode;
-  n := r.AppendText(s);
-  // add reference to treenode
-  n.Data := u;
-  tvProject.Invalidate;
+  u := GProject.UnitList.AddFilename(AUnitName);
+  if Assigned(n) then
+  begin
+    // add reference to tabsheet
+    pcEditor.ActivePage.TagPointer := u;
+    s := u.GetRelativePath;
+    r := GetUnitsNode;
+    n := r.AppendText(s);
+    // add reference to treenode
+    n.Data := u;
+    tvProject.Invalidate;
+  end;
 end;
 
 procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);

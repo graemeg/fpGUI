@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2014 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -31,6 +31,7 @@ type
     function GetUnitName: TfpgString;
   public
     constructor Create;
+    function GetRelativePath: TfpgString;
     property FileName: TfpgString read FFilename write FFilename;
     property UnitName: TfpgString read GetUnitName;
     property Opened: Boolean read FOpened write FOpened;
@@ -48,6 +49,7 @@ type
     function    Count: integer;
     function    FindByName(const AUnitName: TfpgString): TUnit;
     function    FileExists(const AFilename: TfpgString): Boolean;
+    function    AddFileName(const AFilename: TfpgString): TUnit;
     procedure   Add(NewUnit: TUnit);
     procedure   Clear;
     procedure   Delete(AIndex: integer);
@@ -58,7 +60,8 @@ type
 implementation
 
 uses
-  fpg_utils;
+  fpg_utils,
+  project;
 
 { TUnitList }
 
@@ -128,6 +131,20 @@ begin
   end;
 end;
 
+function TUnitList.AddFileName(const AFilename: TfpgString): TUnit;
+var
+  u: TUnit;
+begin
+  if not FileExists(AFilename) then
+  begin
+    u := TUnit.Create;
+    u.FileName := AFilename;
+    u.Opened := True;
+    Add(u);
+    Result := u;
+  end;
+end;
+
 procedure TUnitList.Add(NewUnit: TUnit);
 var
   l: Integer;
@@ -174,6 +191,11 @@ end;
 function TUnit.GetUnitName: TfpgString;
 begin
   Result := fpgExtractFileName(Filename);
+end;
+
+function TUnit.GetRelativePath: TfpgString;
+begin
+  Result := fpgExtractRelativepath(GProject.ProjectDir, FileName);
 end;
 
 constructor TUnit.Create;
