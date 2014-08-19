@@ -39,8 +39,6 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
-  { TfpgWidget }
-
   TfpgWidget = class(TfpgWindow)
   private
     FAcceptDrops: boolean;

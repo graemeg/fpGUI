@@ -2187,7 +2187,7 @@ begin
   p := FImageData;
   Inc(p, (FWidth * y) + x);
   p^ := AValue;
-//  write(IntToHex(AValue, 6) + ' ');
+//  write(IntToHex(AValue, 8) + ' ');
 end;
 
 constructor TfpgImageBase.Create;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -222,6 +222,7 @@ type
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
+    procedure   ApplyFormIcon;
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
@@ -315,6 +316,7 @@ type
     xia_wm_protocols: TAtom;
     xia_wm_delete_window: TAtom;
     xia_wm_state: TAtom;
+    xia_net_wm_icon: TAtom;
     xia_targets: TAtom;
     xia_save_targets: TAtom;
     netlayer: TNETWindowLayer;
@@ -1484,6 +1486,7 @@ begin
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
   xia_wm_state          := XInternAtom(FDisplay, 'WM_STATE', TBool(False));
+  xia_net_wm_icon       := XInternAtom(FDisplay, '_NET_WM_ICON', TBool(False));
 
   { initializa the XDND atoms }
   FDNDTypeList := TObjectList.Create;
@@ -2301,6 +2304,45 @@ end;
 
 { TfpgX11Window }
 
+procedure TfpgX11Window.ApplyFormIcon;
+var
+  ico: TfpgImage;
+  ar1: array of longword; // 32 bit CPU's
+  ar2: array of qword;    // 64 bit CPU's
+  ps: pbyte;
+  pd: ^TRGBTriple;
+  i: integer;
+  iconName: string;
+begin
+    if self is TfpgForm then
+      iconName := TfpgForm(self).IconName;
+    if iconName = '' then
+      Exit;
+    ico := fpgImages.GetImage(iconName);
+    if Assigned(ico) then
+    begin
+      SetLength(ar1, 2 + (ico.Width * ico.Height));
+      ar1[0] := ico.Width;
+      ar1[1] := ico.Height;
+      pd := @ar1[2];
+      ps := ico.ImageData;
+      move(ps^,pd^, ico.ImageDataSize);
+    end
+    else
+      exit; // we don't have a icon to set
+
+    {$ifdef cpu64}
+    setlength(ar2,length(ar1));
+    for i := low(ar2) to high(ar2) do
+      ar2[i] := ar1[i]; // copy array data over
+    XChangeProperty(xapplication.display, FWinHandle, xapplication.xia_net_wm_icon,
+        XA_CARDINAL, 32, PropModeReplace, @ar2[0], Length(ar2));
+    {$else}
+    XChangeProperty(xapplication.display, FWinHandle, xapplication.xia_net_wm_icon,
+        XA_CARDINAL, 32, PropModeReplace, @ar1[0], Length(ar1));
+    {$endif}
+end;
+
 procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   pwh: TfpgWinHandle;
@@ -2359,13 +2401,13 @@ begin
   if AParent = nil then // is a toplevel window
   begin
     { setup a window icon }
-    IconPixMap := XCreateBitmapFromData(fpgApplication.Display, FWinHandle,
+
+    IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
       @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
 
     WMHints := XAllocWMHints;
     WMHints^.icon_pixmap := IconPixmap;
     WMHints^.flags := IconPixmapHint;
-
     { setup window grouping posibilities }
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
@@ -2373,8 +2415,7 @@ begin
       WMHints^.window_group := xapplication.FLeaderWindow;
     end;
 
-
-    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
+    XSetWMProperties(xapplication.display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
 
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
@@ -2395,6 +2436,9 @@ begin
     begin
       DoDNDEnabled(True);
     end;
+
+    if xapplication.xia_net_wm_icon <> 0 then
+      ApplyFormIcon;
   end;
 
   FillChar(hints, sizeof(hints), 0);
