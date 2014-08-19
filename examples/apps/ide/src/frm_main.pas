@@ -1631,7 +1631,7 @@ begin
   begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
-    AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'O', @miProjectOptions);
+    AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'F11', @miProjectOptions);
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
