@@ -105,6 +105,9 @@ type
     Bookmarks: TList;
     BookmarksMenuItems: TList;
 
+    procedure   RichViewDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure   tvContentsDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure   tvContentsDragEntered(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
     procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
@@ -148,7 +151,7 @@ type
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpCmdLineParams(Sender: TObject);
     procedure   miHelpUsingDocView(Sender: TObject);
-    procedure   miDebugHeader(Sender: TObject);
+    procedure   miShowFileInfoClicked(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
     procedure   miToolsFindByResourceID(Sender: TObject);
     procedure   miToolsFindTopifByName(Sender: TObject);
@@ -326,6 +329,77 @@ end;
 procedure TMainForm.miActionsNextTopicClicked(Sender: TObject);
 begin
   btnNext.Click;
+end;
+
+{ If you drop on RichView, only load the first INF file (closing all others
+  first. If you want multiple files or add more files, drop on Contents
+  TreeView. }
+procedure TMainForm.RichViewDragDrop(Sender, Source: TObject; X, Y: integer;
+  AData: variant);
+var
+  s: string;
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  sl.Text := Trim(AData);
+  try
+    for i := 0 to sl.Count-1 do
+    begin
+      s := sl[i];
+      if not SameText(fpgExtractFileExt(s), '.inf') then
+        Exit; //==>
+      s := StringReplace(s, 'file://', '', [rfIgnoreCase]);
+      OpenFile(s, '', false);
+      Break;
+    end;
+  finally
+    sl.Free;
+  end;
+end;
+
+procedure TMainForm.tvContentsDragDrop(Sender, Source: TObject; X, Y: integer;
+  AData: variant);
+var
+  s: string;
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  sl.Text := Trim(AData);
+  OpenAdditionalFile := True;
+  try
+    for i := 0 to sl.Count-1 do
+    begin
+      s := sl[i];
+      if not SameText(fpgExtractFileExt(s), '.inf') then
+        Exit; //==>
+      s := StringReplace(s, 'file://', '', [rfIgnoreCase]);
+      OpenFile(s, '', false);
+    end;
+  finally
+    OpenAdditionalFile := False;
+    sl.Free;
+  end;
+end;
+
+procedure TMainForm.tvContentsDragEntered(Sender, Source: TObject;
+  AMimeList: TStringList; var AMimeChoice: TfpgString;
+  var ADropAction: TfpgDropAction; var Accept: Boolean);
+var
+  i: integer;
+  s: string;
+begin
+  { the mime type we want to accept }
+  s := 'text/uri-list';
+  { if we wil accept the drop, set Accept to True }
+  Accept := AMimeList.IndexOf(s) > -1;
+  if Accept then
+  begin
+    { If the offered mime type is different, request our preference }
+    if AMimeChoice <> s then
+      AMimeChoice := s;
+  end;
 end;
 
 procedure TMainForm.Splitter1DoubleClicked(Sender: TObject;
@@ -732,11 +806,12 @@ begin
   OpenFile(OWN_HELP_MARKER, '', True);
 end;
 
-procedure TMainForm.miDebugHeader(Sender: TObject);
+procedure TMainForm.miShowFileInfoClicked(Sender: TObject);
 var
   f: THelpFile;
-  i: integer;
+  i, j: integer;
   sl: TStringList;
+  pFontSpec: pTHelpFontSpec;
 begin
   RichView.Clear;
   sl := TStringList.Create;
@@ -750,7 +825,13 @@ begin
       Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '</blue>');
       Add('<b>Title:</b> ' + f.Title);
       Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + ' bytes');
-      Add('<b>INF/HLP file version</b> ' + f.FormatVersion);
+      Add('<b>INF/HLP file version:</b> ' + f.FormatVersion);
+      Add('<b>Font table:</b> ');
+      for j := 0 to f.FontTable.Count-1 do
+      begin
+        pFontSpec := f.FontTable[j];
+        Add(Format('     %s (%d x %d), codepage: %d', [pFontSpec^.FaceName, pFontSpec^.Width, pFontSpec^.Height, pFontSpec^.Codepage]));
+      end;
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
@@ -1174,7 +1255,7 @@ end;
 
 procedure TMainForm.cbEncodingChanged(Sender: TObject);
 begin
-  Settings.Encoding := TFontEncoding(cbEncoding.FocusItem);
+  Settings.Encoding := TfpgTextEncoding(cbEncoding.FocusItem);
   DisplayTopic(CurrentTopic);
 end;
 
@@ -1326,7 +1407,7 @@ begin
   if SearchText = '' then
   begin
     ClearAllWordSequences;
-    exit;
+    exit; //==>
   end;
 
   lbSearchResults.Items.Add(rsDVSearchingMsg);
@@ -1338,7 +1419,7 @@ begin
     on e: ESearchSyntaxError do
     begin
       TfpgMessageDialog.Critical( rsSearch,  rsDVSearchSyntaxError + e.Message );
-      exit;
+      exit; //==>
     end;
   end;
 
@@ -1348,7 +1429,7 @@ begin
 
   SearchResults := TList.Create;
 
-  // Search open help file
+  // Search open help files
   for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
     HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
@@ -1364,7 +1445,7 @@ begin
         TfpgMessageDialog.Critical(rsError , E.Message);
         Query.Destroy;
         ClearWaitCursor;
-        exit;
+        exit; //==>
       end;
     end;
 
@@ -2264,7 +2345,6 @@ var
   Note: THelpNote;
   NotesFile: TStringList;
   TopicIndex: integer;
-  s: TfpgString;
 begin
   ProfileEvent('Save notes for ' + AHelpFile.Filename);
   if not AHelpFile.NotesLoaded then
@@ -2465,8 +2545,6 @@ procedure TMainForm.DisplayTopic(ATopic: TTopic);
 var
   lText: String;
   ImageIndices: TList;
-  LinkIndex: longint;
-  Link: THelpLink;
   HelpFile: THelpFile;
   Topic: TTopic;
   HighlightWordSequences: TList;
@@ -2569,14 +2647,7 @@ begin
   ImageIndices.Free;
 
   // apply encoding conversion
-  case Settings.Encoding of
-    encUTF8:      lText := IPFToUTF8(lText);
-    encCP437:     lText := CP437ToUTF8(lText);
-    encCP850:     lText := CP850ToUTF8(lText);
-    encIBMGraph:  lText := IBMGraphToUTF8(lText);
-  else
-    lText := IPFToUTF8(lText);
-  end;
+  lText := ConvertTextToUTF8(Settings.Encoding, lText);
 
   { Load and insert annotations / notes }
   if not HelpFile.NotesLoaded then
@@ -2709,6 +2780,7 @@ begin
   WindowPosition := wpUser;
   MinWidth := 430;
   MinHeight := 300;
+  DNDEnabled := True;
   OnCloseQuery  := @MainFormCloseQuery;
 
   bvlStatusBar := TfpgBevel.Create(self);
@@ -2783,8 +2855,11 @@ begin
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
+    AcceptDrops := True;
     OnChange  := @tvContentsChange;
     //OnDoubleClick  := @tvContentsDoubleClick;
+    OnDragEnter := @tvContentsDragEntered;
+    OnDragDrop := @tvContentsDragDrop;
   end;
 
   btnGo := TfpgButton.Create(tsContents);
@@ -3158,9 +3233,12 @@ begin
     SetPosition(77, 188, 244, 92);
     TabOrder := 2;
     Align := alClient;
+    AcceptDrops := True;
     OnOverLink  := @RichViewOverLink;
     OnNotOverLink  := @RichViewNotOverLink;
     OnClickLink := @RichViewClickLink;
+    OnDragEnter := @tvContentsDragEntered;
+    OnDragDrop := @RichViewDragDrop;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -3239,7 +3317,7 @@ begin
   begin
     Name := 'miTools';
     SetPosition(428, 96, 120, 20);
-    AddMenuItem('Show file info', '', @miDebugHeader);
+    AddMenuItem('Show file info', '', @miShowFileInfoClicked);
     AddMenuItem('Find topic by resource ID', '', @miToolsFindByResourceID);
     AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
     miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
@@ -3467,6 +3545,8 @@ begin
     Items.Add('UTF-8');
     Items.Add('CP437');
     Items.Add('CP850');
+    Items.Add('CP866');
+    Items.Add('CP1250');
     Items.Add('IBM Graph (cp437)');
     FocusItem := 0;
     TabOrder := 10;
@@ -3840,6 +3920,7 @@ begin
   if not fpgFileExists( BookmarksFileName ) then
     Exit;
 
+  {$NOTE: Replace this with TStringList or TStringStream.}
   FileMode := fmInput;
   AssignFile( BookmarksFile, BookmarksFileName );
   try

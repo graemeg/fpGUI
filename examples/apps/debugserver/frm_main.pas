@@ -79,8 +79,10 @@ uses
   ,fpg_menu
   ,fpg_basegrid
   ,fpg_grid
+  ,fpg_memo
   ,simpleipc
-  ,dbugmsg
+  ,fpg_dbugmsg
+  ,fra_liveview
   ;
 
 type
@@ -98,6 +100,9 @@ type
     btnPause: TfpgButton;
     btnStart: TfpgButton;
     btnClear: TfpgButton;
+    btnExpandView: TfpgButton;
+    Bevel3: TfpgBevel;
+    btnLiveView: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miPause: TfpgMenuItem;
     FIPCSrv: TSimpleIPCServer;
@@ -105,21 +110,31 @@ type
     FAddAtBottom: Boolean;
     FDiscarded: Integer;
     FShowOnMessage: Boolean;
+    FMemo: TfpgMemo;
+    FLiveViewFrame: TLiveViewFrame;
     procedure   StartServer;
     procedure   StopServer;
     procedure   CheckMessages(Sender: TObject);
     procedure   CheckDebugMessages;
     procedure   ReadDebugMessage;
     procedure   ShowDebugMessage(const AMsg: TDebugmessage);
+    procedure   ShowLiveViewMessage(const AMsg: TDebugmessage);
     procedure   ShowMessageWindow;
     procedure   miPauseClicked(Sender: TObject);
     procedure   miFileQuit(Sender: TObject);
+    procedure   miEditCopy(Sender: TObject);
+    procedure   btnExpandViewClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpProductInformation(Sender: TObject);
     procedure   btnClearClicked(Sender: TObject);
     procedure   btnPauseClicked(Sender: TObject);
     procedure   btnStartClicked(Sender: TObject);
+    procedure   btnLiveViewClicked(Sender: TObject);
     procedure   GridDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure   GridRowChanged(Sender: TObject; ARow: Integer);
+    procedure   GridClicked(Sender: TObject);
+    procedure   CreateLiveViewFrame;
+    procedure   DestroyLiveViewFrame;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -133,6 +148,8 @@ implementation
 uses
   dateutils
   ,fpg_dialogs
+  ,fpg_constants
+  ,fpg_dbugintf
   ;
 
 
@@ -171,12 +188,13 @@ begin
     ADefaultDrawing := False;
     try
       i := StrToInt(grdMessages.Cells[ACol, ARow]);
+      { TODO: This needs improving. We need to somehow referce TDebugLevel instead }
       case i of
-        -1:  img := fpgImages.GetImage('dbs.state.stop');
-         0:  img := fpgImages.GetImage('dbs.state.info');
-         1:  img := fpgImages.GetImage('dbs.state.warning');
-         2:  img := fpgImages.GetImage('dbs.state.error');
-         3:  img := fpgImages.GetImage('dbs.state.identify');
+         0:  img := fpgImages.GetImage('dbs.state.stop');
+         1:  img := fpgImages.GetImage('dbs.state.info');
+         2:  img := fpgImages.GetImage('dbs.state.warning');
+         3:  img := fpgImages.GetImage('dbs.state.error');
+         4:  img := fpgImages.GetImage('dbs.state.identify');
       end;
       dx := (grdMessages.ColumnWidth[ACol] - 16) div 2;
       grdMessages.Canvas.DrawImage(ARect.Left + dx, ARect.Top {+ y}, img);
@@ -187,6 +205,47 @@ begin
         end;
     end;
   end;
+end;
+
+procedure TMainForm.GridRowChanged(Sender: TObject; ARow: Integer);
+begin
+  if not btnExpandView.Down then
+    Exit;
+  FMemo.Text := grdMessages.Cells[2, ARow];
+//  FMemo.Text := grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
+procedure TMainForm.GridClicked(Sender: TObject);
+begin
+  if not btnExpandView.Down then
+    Exit;
+  if (grdMessages.RowCount > 0) and (grdMessages.FocusRow <> -1) then
+    FMemo.Text := grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
+procedure TMainForm.CreateLiveViewFrame;
+begin
+  if Assigned(FLiveViewFrame) then
+    FLiveViewFrame.Free;
+  FLiveViewFrame := TLiveViewFrame.Create(self);
+  grdMessages.Height := grdMessages.Height - FLiveViewFrame.Height;
+  grdMessages.UpdateWindowPosition;
+  FLiveViewFrame.SetPosition(grdMessages.Left, grdMessages.Bottom+1, grdMessages.Width, FLiveViewFrame.Height);
+end;
+
+procedure TMainForm.DestroyLiveViewFrame;
+begin
+  grdMessages.Height := grdMessages.Height + FLiveViewFrame.Height;
+  FreeAndNil(FLiveViewFrame);
+  grdMessages.UpdateWindowPosition;
+end;
+
+procedure TMainForm.btnLiveViewClicked(Sender: TObject);
+begin
+  if btnLiveView.Down then
+    CreateLiveViewFrame
+  else
+    DestroyLiveViewFrame;
 end;
 
 procedure TMainForm.StartServer;
@@ -223,9 +282,14 @@ var
   Msg: TDebugMessage;
 begin
   FIPCSrv.MsgData.Seek(0, soFromBeginning);
-  ReadDebugMessageFromStream(FIPCSrv.MsgData, MSg);
+  ReadDebugMessageFromStream(FIPCSrv.MsgData, Msg);
   if not FPaused then
-    ShowDebugMessage(Msg)
+  begin
+    if Msg.MsgType = Ord(dlLive) then
+      ShowLiveViewMessage(Msg)
+    else
+      ShowDebugMessage(Msg);
+  end
   else
     Inc(FDiscarded);
 end;
@@ -254,6 +318,36 @@ begin
     ShowMessageWindow;
 end;
 
+procedure TMainForm.ShowLiveViewMessage(const AMsg: TDebugmessage);
+var
+  r: integer;
+  lFound: Boolean;
+begin
+  if not Assigned(FLiveViewFrame) then
+    Exit;
+  lFound := False;
+  FLiveViewFrame.Grid.BeginUpdate;
+  for r := 0 to FLiveViewFrame.Grid.RowCount-1 do
+  begin
+    if FLiveViewFrame.Grid.Cells[0, r] = AMsg.MsgTitle then
+    begin
+      lFound := True;
+      Break;
+    end;
+  end;
+  if lFound then
+  begin
+    FLiveViewFrame.Grid.Cells[1, r] := AMsg.Msg;
+  end
+  else
+  begin
+    FLiveViewFrame.Grid.RowCount := FLiveViewFrame.Grid.RowCount + 1;
+    FLiveViewFrame.Grid.Cells[0, FLiveViewFrame.Grid.RowCount-1] := AMsg.MsgTitle;
+    FLiveViewFrame.Grid.Cells[1, FLiveViewFrame.Grid.RowCount-1] := AMsg.Msg;
+  end;
+  FLiveViewFrame.Grid.EndUpdate;
+end;
+
 procedure TMainForm.ShowMessageWindow;
 begin
   if not Visible then
@@ -269,6 +363,37 @@ end;
 procedure TMainForm.miFileQuit(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.miEditCopy(Sender: TObject);
+begin
+  if (grdMessages.RowCount > 0) and (grdMessages.FocusRow <> -1) then
+    fpgClipboard.Text :=  grdMessages.Cells[2, grdMessages.FocusRow];
+end;
+
+procedure TMainForm.btnExpandViewClicked(Sender: TObject);
+const
+  cSpacing = 4;
+begin
+  if btnExpandView.Down then
+  begin
+    FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, Height - grdMessages.Top - cSpacing);
+    FMemo.UpdateWindowPosition;
+    grdMessages.Anchors := grdMessages.Anchors - [anRight];
+    Width := Width + FMemo.Width + (2 * cSpacing);
+    UpdateWindowPosition;
+    grdMessages.Anchors := grdMessages.Anchors + [anRight];
+    GridClicked(nil); // update memo contents
+  end
+  else
+  begin
+    grdMessages.Anchors := grdMessages.Anchors - [anRight];
+    Width := Width - FMemo.Width - (2 * cSpacing);
+    FMemo.Visible := False;
+    UpdateWindowPosition;
+    grdMessages.Anchors := grdMessages.Anchors + [anRight];
+    FreeAndNil(FMemo);
+  end;
 end;
 
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
@@ -293,6 +418,7 @@ begin
   fpgImages.AddMaskedBMP('dbs.stop', @DBS_stop, sizeof(DBS_stop), 0, 0);
   fpgImages.AddMaskedBMP('dbs.pause', @DBS_pause, sizeof(DBS_pause), 0, 0);
   fpgImages.AddMaskedBMP('dbs.run', @DBS_run, sizeof(DBS_run), 0, 0);
+  fpgImages.AddMaskedBMP('dbs.extended_view', @DBS_extended_view, sizeof(DBS_extended_view), 0, 0);
 
   fpgImages.AddMaskedBMP('dbs.state.info', @DBS_state_info, sizeof(DBS_state_info), 0, 0);
   fpgImages.AddMaskedBMP('dbs.state.warning', @DBS_state_warning, sizeof(DBS_state_warning), 0, 0);
@@ -316,6 +442,7 @@ begin
   WindowTitle := 'fpGUI''s Debug Server';
   Hint := '';
   ShowHint := True;
+  WindowPosition := wpScreenCenter;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
@@ -332,8 +459,8 @@ begin
     SetPosition(0, 21, 486, 30);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
-    Style := bsLowered;
     Shape := bsBottomLine;
+    Style := bsLowered;
   end;
 
   grdMessages := TfpgStringGrid.Create(self);
@@ -342,6 +469,7 @@ begin
     Name := 'grdMessages';
     SetPosition(4, 55, 478, 254);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
     AddColumn('Type', 50, taLeftJustify);
     AddColumn('Time', 75, taCenter);
     AddColumn('Message', 330, taLeftJustify);
@@ -354,6 +482,8 @@ begin
     TabOrder := 2;
     Options := [go_SmoothScroll];
     OnDrawCell  := @GridDrawCell;
+//    OnRowChange := @GridRowChanged;
+    OnClick := @GridClicked;
   end;
 
   mnuFile := TfpgPopupMenu.Create(self);
@@ -371,9 +501,9 @@ begin
   begin
     Name := 'mnuEdit';
     SetPosition(260, 126, 120, 24);
-    AddMenuItem('Cut', '', nil).Enabled := False;
-    AddMenuItem('Copy', '', nil).Enabled := False;
-    AddMenuItem('Paste', '', nil).Enabled := False;
+    //    AddMenuItem('Cut', '', nil).Enabled := False;
+    AddMenuItem('Copy selected message to clipboard', rsKeyCtrl+'C', @miEditCopy);
+    //    AddMenuItem('Paste', '', nil).Enabled := False;
     AddMenuItem('-', '', nil);
     AddMenuItem('Preferences...', '', nil).Enabled := False;
   end;
@@ -410,8 +540,8 @@ begin
     Name := 'Bevel2';
     SetPosition(34, 2, 8, 25);
     Hint := '';
-    Style := bsLowered;
     Shape := bsLeftLine;
+    Style := bsLowered;
   end;
 
   btnPause := TfpgButton.Create(Bevel1);
@@ -439,6 +569,7 @@ begin
     Name := 'btnStart';
     SetPosition(67, 2, 24, 24);
     Text := '';
+    Enabled := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'start server';
@@ -448,7 +579,6 @@ begin
     TabOrder := 2;
     Focusable := False;
     OnClick := @btnStartClicked;
-    Enabled := False;
   end;
 
   btnClear := TfpgButton.Create(Bevel1);
@@ -466,6 +596,52 @@ begin
     TabOrder := 2;
     Focusable := False;
     OnClick :=@btnClearClicked;
+  end;
+
+  btnExpandView := TfpgButton.Create(Bevel1);
+  with btnExpandView do
+  begin
+    Name := 'btnExpandView';
+    SetPosition(128, 2, 24, 24);
+    Text := '';
+    AllowAllUp := True;
+    Flat := True;
+    FontDesc := '#Label1';
+    GroupIndex := 2;
+    Hint := 'Toggle expanded view';
+    ImageMargin := -1;
+    ImageName := 'dbs.extended_view';
+    ImageSpacing := 0;
+    TabOrder := 6;
+    Focusable := False;
+    OnClick := @btnExpandViewClicked;
+  end;
+
+  Bevel3 := TfpgBevel.Create(Bevel1);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(120, 2, 8, 24);
+    Hint := '';
+    Shape := bsLeftLine;
+    Style := bsLowered;
+  end;
+
+  btnLiveView := TfpgButton.Create(Bevel1);
+  with btnLiveView do
+  begin
+    Name := 'btnLiveView';
+    SetPosition(156, 2, 24, 24);
+    Text := 'LV';
+    AllowAllUp := True;
+    Flat := True;
+    FontDesc := '#Label1';
+    GroupIndex := 3;
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    Focusable := False;
+    OnClick := @btnLiveViewClicked;
   end;
 
   {@VFD_BODY_END: MainForm}

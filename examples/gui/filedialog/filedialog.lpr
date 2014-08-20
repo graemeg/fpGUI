@@ -105,6 +105,7 @@ procedure TMainForm.btnUserInputClicked(Sender: TObject);
 var
   lAnswer: TfpgString;
 begin
+  lAnswer := '';
   if fpgInputQuery('Caption here', 'And the prompt goes here', lAnswer) then
     ShowMessage(Format('User entered <%s>', [lAnswer]));
 end;

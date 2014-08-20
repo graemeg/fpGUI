@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -209,8 +209,6 @@ type
 
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
   private
-    procedure SetShiftIsPressed(const AValue: Boolean);
-  private
     FImages: array[TfpgLVItemStates] of TfpgImageList;
     FSubitemImages: array[TfpgLVItemStates] of TfpgImageList;
     FItemIndex: Integer;
@@ -225,6 +223,7 @@ type
     FUpdateCount: Integer;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
+    FScrollBarWidth: integer;
     FColumns: TfpgLVColumns;
     FItems: TfpgLVItems;
     FOnPaintItem: TfpgLVPaintItemEvent;
@@ -241,7 +240,9 @@ type
     procedure   SetItems(const AValue: TfpgLVItems);
     procedure   SetMultiSelect(const AValue: Boolean);
     procedure   SetOnColumnClick(const AValue: TfpgLVColumnClickEvent);
+    procedure   SetScrollBarWidth(const AValue: integer);
     procedure   SetShowHeaders(const AValue: Boolean);
+    procedure   SetShiftIsPressed(const AValue: Boolean);
     function    SubItemGetImages(AIndex: integer): TfpgImageList;
     procedure   SubItemSetImages(AIndex: integer; const AValue: TfpgImageList);
     procedure   VScrollChange(Sender: TObject; Position: Integer);
@@ -308,6 +309,7 @@ type
     property    Hint;
     property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
     property    ParentShowHint;
+    property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
     property    SubItemImages: TfpgImageList index Ord(lisNoState) read SubItemGetImages write SubItemSetImages;
     property    SubItemImagesSelected: TfpgImageList index Ord(lisSelected) read SubItemGetImages write SubItemSetImages;
@@ -738,6 +740,15 @@ begin
   FOnColumnClick:=AValue;
 end;
 
+procedure TfpgListView.SetScrollBarWidth(const AValue: integer);
+begin
+  if AValue = FScrollBarWidth then
+    Exit; //==>
+  FScrollBarWidth := AValue;
+  FVScrollBar.Width := FScrollBarWidth;
+  FHScrollBar.Height:= FScrollBarWidth;
+end;
+
 procedure TfpgListView.SetShiftIsPressed(const AValue: Boolean);
 begin
   if AValue = FShiftIsPressed then
@@ -1077,7 +1088,7 @@ end;
 procedure TfpgListView.MsgPaint(var msg: TfpgMessageRec);
 begin
   // Optimises painting and prevents Begin[End]Draw and OnPaint event firing
-  // in not needed.
+  // if not needed.
   if FUpdateCount = 0 then
     inherited MsgPaint(msg);
 end;
@@ -1404,23 +1415,38 @@ end;
 procedure TfpgListView.HandlePaint;
 var
   ClipRect: TfpgRect;
+  rect: TRect;
 begin
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
-  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
-  
-  ClipRect.SetRect(2, 2, Width-4, Height-4);
+  Canvas.ClearClipRect;
+  ClipRect.SetRect(0, 0, Width, Height);
+  fpgStyle.DrawControlFrame(Canvas, ClipRect);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(ClipRect, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(ClipRect);
+
+  if Enabled then
+  begin
+//    if ReadOnly then
+//      Canvas.SetColor(clWindowBackground)
+//    else
+      Canvas.SetColor(FBackgroundColor);
+  end
+  else
+    Canvas.SetColor(clWindowBackground);
+
+  Canvas.FillRectangle(ClipRect);
 
   // This paints the small square remaining below the vscrollbar
   // and to the right of the hscrollbar
   if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
     Canvas.Color := clButtonFace;
-    Canvas.FillRectangle(Width - 2 - FVScrollBar.Width,
-                         Height - 2 - FHScrollBar.Height,
-                         Width - 2,
-                         Height - 2);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
   end;
   
   if FVScrollBar.Visible then
@@ -1777,6 +1803,7 @@ begin
   FSelectionFollowsFocus := True;
   FItemIndex := -1;
   FScrollBarNeedsUpdate := True;
+  FScrollBarWidth := FVScrollBar.Width;
 end;
 
 destructor TfpgListView.Destroy;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -47,7 +47,7 @@ type
   TAnchors = set of TAnchor;
 
   TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
-    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
+    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
@@ -78,8 +78,7 @@ type
       Public event properties: Event Types
     *******************************************}
   { Keyboard }
-  TKeyEvent = procedure(Sender: TObject; AKey: Word; AShift: TShiftState) of object;
-  TKeyCharEvent = procedure(Sender: TObject; AKeyChar: Char) of object;
+  TfpgKeyCharEvent = procedure(Sender: TObject; AChar: TfpgChar; var Consumed: boolean) of object;
   TKeyPressEvent = procedure(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean) of object;
   { Mouse }
   TMouseButtonEvent = procedure(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint) of object;
@@ -176,8 +175,6 @@ type
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload;
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawControlFrame(x, y, w, h: TfpgCoord); overload;
-    procedure   DrawControlFrame(r: TfpgRect); overload;
     procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
     procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload;
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload;
@@ -224,6 +221,12 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    { Combobox }
+    procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); virtual;
+    procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
+    { Checkbox }
+    function    GetCheckBoxSize: integer; virtual;
+    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
   end;
   
 
@@ -395,10 +398,15 @@ function  fpgGetTickCount: DWord;
 procedure fpgPause(MilliSeconds: Cardinal);
 
 // Rectangle, Point & Size routines
+function  CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+function  IsRectEmpty(const ARect: TfpgRect): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+function  UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
 function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
@@ -422,11 +430,12 @@ procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
-function DebugMethodEnter(const s1: TfpgString): IInterface;
+function  DebugMethodEnter(const s1: TfpgString): IInterface;
 procedure DebugSeparator;
 
 // operator overloading of some useful structures
-operator = (a: TRect; b: TRect): boolean;
+operator = (const a, b: TRect): boolean;
+operator = (const a, b: TfpgRect): boolean;
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
 operator = (const APoint1, APoint2: TPoint) b: Boolean;
 operator + (const APoint1, APoint2: TPoint) p: TPoint;
@@ -446,7 +455,8 @@ operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
 operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
-operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+operator = (const AColor1, AColor2: TFPColor) b: Boolean; deprecated;
+operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 
 
 implementation
@@ -458,7 +468,7 @@ uses
   Agg2D,
 {$endif}
 {$IFDEF DEBUG}
-  dbugintf,
+  fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
   fpg_stdimages,
@@ -472,7 +482,9 @@ uses
   fpg_imgutils,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
-  fpg_style_motif;   // TODO: This needs to be removed!
+  fpg_style_motif,   // TODO: This needs to be removed!
+  fpg_style_carbon,
+  fpg_style_plastic;
 
 var
   fpgTimers: TList;
@@ -621,6 +633,17 @@ begin
    until ((Now*MSecsPerDay)-lStart) > MilliSeconds;
 end;
 
+function CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
+begin
+  Dest := Src;
+  if IsRectEmpty(Dest) then
+  begin
+    FillChar(Dest, SizeOf(Dest), 0);
+    Result := false;
+  end
+  else
+    Result := true;
+end;
 
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
@@ -653,6 +676,35 @@ begin
     Result := False;
 end;
 
+function IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+begin
+  ARect := r1;
+  with r2 do
+  begin
+    if Left > r1.Left then
+      ARect.Left := Left;
+    if Top > r1.Top then
+      ARect.Top := Top;
+    if Right < r1.Right then
+      ARect.Width := ARect.Left + Right;
+    if Bottom < r1.Bottom then
+      ARect.Height := ARect.Top + Bottom;
+  end;
+
+  if IsRectEmpty(ARect) then
+  begin
+    FillChar(ARect, SizeOf(ARect), 0);
+    Result := false;
+  end
+  else
+    Result := true;
+end;
+
+function IsRectEmpty(const ARect: TfpgRect): Boolean;
+begin
+  Result := (ARect.Width <= 0) or (ARect.Height <= 0);
+end;
+
 function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
   if Assigned(@Rect) then
@@ -664,10 +716,10 @@ begin
       inc(Right, dx);
       inc(Bottom, dy);
     end;
-    OffsetRect := True;
+    Result := True;
   end
   else
-    OffsetRect := False;
+    Result := False;
 end;
 
 function OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
@@ -679,10 +731,42 @@ begin
       inc(Left, dx);
       inc(Top, dy);
     end;
-    OffsetRect := True;
+    Result := True;
   end
   else
-    OffsetRect := False;
+    Result := False;
+end;
+
+function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+begin
+  Result := (APoint.x >= ARect.Left) and
+            (APoint.y >= ARect.Top) and
+            (APoint.x <= ARect.Right) and
+            (APoint.y <= ARect.Bottom);
+end;
+
+function UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+begin
+  ARect := R1;
+  with R2 do
+  begin
+    if Left < R1.Left then
+      ARect.Left := Left;
+    if Top < R1.Top then
+      ARect.Top := Top;
+    if Right > R1.Right then
+      ARect.Width := ARect.Left + Right;
+    if Bottom > R1.Bottom then
+      ARect.Height := ARect.Top + Bottom;
+  end;
+
+  if IsRectEmpty(ARect) then
+  begin
+    FillChar(ARect, SizeOf(ARect), 0);
+    Result := false;
+  end
+  else
+    Result := true;
 end;
 
 function CenterPoint(const Rect: TRect): TPoint;
@@ -957,15 +1041,20 @@ begin
   DebugLn('>--------------------------<');
 end;
 
-operator = (a: TRect; b: TRect): boolean;
+operator = (const a, b: TRect): boolean;
 begin
-  if    (a.Top    = b.Top)
-    and (a.Left   = b.Left)
-    and (a.Bottom = b.Bottom)
-    and (a.Right  = b.Right) then
-    Result := True
-  else
-    Result := False;
+  Result := (a.Top = b.Top) and
+            (a.Left = b.Left) and
+            (a.Bottom = b.Bottom) and
+            (a.Right = b.Right);
+end;
+
+operator = (const a, b: TfpgRect): boolean;
+begin
+  Result := (a.Left = b.Left) and
+            (a.Top = b.Top) and
+            (a.Width = b.Width) and
+            (a.Height = b.Height);
 end;
 
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
@@ -1081,6 +1170,14 @@ begin
 end;
 
 operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+begin
+  b := (AColor1.Red = AColor2.Red)
+        and (AColor1.Green = AColor2.Green)
+        and (AColor1.Blue = AColor2.Blue)
+        and (AColor1.Alpha = AColor2.Alpha);
+end;
+
+operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 begin
   b := (AColor1.Red = AColor2.Red)
         and (AColor1.Green = AColor2.Green)
@@ -1791,16 +1888,6 @@ begin
   DrawButtonFace(r.Left, r.Top, r.Width, r.Height, AFlags);
 end;
 
-procedure TfpgCanvas.DrawControlFrame(x, y, w, h: TfpgCoord);
-begin
-  fpgStyle.DrawControlFrame(self, x, y, w, h);
-end;
-
-procedure TfpgCanvas.DrawControlFrame(r: TfpgRect);
-begin
-  DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
-end;
-
 procedure TfpgCanvas.DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean);
 begin
   fpgStyle.DrawBevel(self, x, y, w, h, ARaised);
@@ -2008,6 +2095,7 @@ begin
   fpgSetNamedColor(clGridInactiveSel, $FF99A6BF);         // same as clInactiveSel
   fpgSetNamedColor(clGridInactiveSelText, $FF000000);     // same as clInactiveSelText
   fpgSetNamedColor(clSplitterGrabBar, $FF839EFE);         // pale blue
+  fpgSetNamedColor(clHyperLink, clBlue);
 
 
   // Global Font Objects
@@ -2057,17 +2145,17 @@ begin
   if (btfIsPressed in AFlags) then
   begin
     if (btfIsEmbedded in AFlags) then
-      ACanvas.SetColor(clHilite2)
+      ACanvas.SetColor(clShadow1)
     else
     begin
       if (btfFlat in AFlags) or (btfHover in AFlags) then
         ACanvas.SetColor(clShadow1)  { light shadow }
       else
-        ACanvas.SetColor(clShadow2); { dark shadow }
+        ACanvas.SetColor(clShadow1); { light shadow }
     end;
   end
   else
-    ACanvas.SetColor(clHilite2);
+    ACanvas.SetColor(clHilite2); { white }
 
   ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
   ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
@@ -2076,13 +2164,13 @@ begin
   if (btfIsPressed in AFlags) then
   begin
     if (btfIsEmbedded in AFlags) then
-      ACanvas.SetColor(clHilite1)
+      ACanvas.SetColor(clShadow1)
     else
     begin
       if (btfFlat in AFlags) or (btfHover in AFlags) then
-        ACanvas.SetColor(clHilite2)  { light shadow }
+        ACanvas.SetColor(clHilite2)  { white }
       else
-        ACanvas.SetColor(clShadow2); { dark shadow }
+        ACanvas.SetColor(clHilite2); { white }
     end;
   end
   else
@@ -2099,13 +2187,24 @@ begin
   if (btfFlat in AFlags) or (btfHover in AFlags) then
     exit; { "toolbar" style buttons need a nice thin/flat border }
 
+  // Left and Top (inner)
+  if btfIsPressed in AFlags then
+  begin
+    if not (btfIsEmbedded in AFlags) then
+    begin
+      ACanvas.SetColor(clShadow2);  { dark shadow }
+      ACanvas.DrawLine(r.Left+1, r.Bottom-1, r.Left+1, r.Top+1);  // left
+      ACanvas.DrawLine(r.Left+1, r.Top+1, r.Right-1, r.Top+1);    // top
+    end;
+  end;
+
   // Right and Bottom (inner)
   if btfIsPressed in AFlags then
   begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clButtonFace)
     else
-      ACanvas.SetColor(clHilite1);
+      ACanvas.SetColor(clButtonFace);
   end
   else
     ACanvas.SetColor(clShadow1);
@@ -2366,6 +2465,83 @@ begin
   else
     ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect;
+    const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean;
+    const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect;
+    const ABtnPressed: Boolean);
+var
+  lr: TfpgRect;
+begin
+  lr := r;
+  if IsEnabled then
+  begin
+    if IsReadOnly then
+      ACanvas.SetColor(clWindowBackground)
+    else
+      ACanvas.SetColor(ABackgroundColor);
+  end
+  else
+    ACanvas.SetColor(clWindowBackground);
+
+  ACanvas.FillRectangle(r);
+
+  if IsFocused then
+  begin
+    ACanvas.SetColor(clSelection);
+    InflateRect(lr, -1, -1);
+    ACanvas.FillRectangle(lr);
+  end;
+
+  // paint the fake dropdown button
+  DrawInternalComboBoxButton(ACanvas, AInternalBtnRect, IsEnabled, ABtnPressed);
+end;
+
+procedure TfpgStyle.DrawInternalComboBoxButton(ACanvas: TfpgCanvas;
+    r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean);
+var
+  ar: TfpgRect;
+  btnflags: TfpgButtonFlags;
+begin
+  btnflags := [];
+  ar := r;
+
+  { The bounding rectangle for the arrow }
+  ar.Width := 8;
+  ar.Height := 6;
+  ar.Left := r.Left + ((r.Width-ar.Width) div 2);
+  ar.Top := r.Top + ((r.Height-ar.Height) div 2);
+
+  if IsPressed then
+  begin
+    Include(btnflags, btfIsPressed);
+    OffsetRect(ar, 1, 1);
+  end;
+  // paint button face
+  DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, btnflags);
+  if IsEnabled then
+    ACanvas.SetColor(clText1)
+  else
+    ACanvas.SetColor(clShadow1);
+
+  // paint arrow
+  DrawDirectionArrow(ACanvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
+end;
+
+function TfpgStyle.GetCheckBoxSize: integer;
+begin
+  Result := 13; // 13x13 - it is always a rectangle
+end;
+
+procedure TfpgStyle.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+var
+  img: TfpgImage;
+  size: integer;
+begin
+  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
+  size := GetCheckBoxSize;
+  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
 end;
 
 

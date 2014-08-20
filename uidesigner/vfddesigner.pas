@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -142,13 +142,14 @@ type
 implementation
 
 uses
+  TypInfo,
   vfdmain,
   vfdutils,
-  TypInfo,
+  vfd_constants,
   fpg_tree;
 
 const
-  cEditOrder: array[TfpgEditMode] of string = ('Widget Order', 'Tab Order');
+  cEditOrder: array[TfpgEditMode] of string = (rsDlgWidgetOrder, rsDlgTabOrder);
   
 
 { TWidgetDesigner }
@@ -643,9 +644,7 @@ end;
 procedure TFormDesigner.EditWidgetOrTabOrder(AMode: TfpgEditMode);
 var
   frm: TWidgetOrderForm;
-  n, fi: integer;
-  cd: TWidgetDesigner;
-  identlevel: integer;
+  n: integer;
   lFocused: TfpgTreeNode;
   lNode: TfpgTreeNode;
   s: string;
@@ -678,9 +677,7 @@ begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
   frm.Title := cEditOrder[AMode];
-  fi  := 0;
 
-  identlevel := 0;
   frm.Treeview1.RootNode.Clear;
   lFocused := nil;
 
@@ -743,10 +740,10 @@ begin
         end;
 
     keyF1:
-      ShowMessage('F11: switch to Properties' + LineEnding +
-        'TAB, SHIFT+TAB: select next widget' + LineEnding +
-        'F2: edit widget order' + LineEnding {+
-        'F4: edit items' + LineEnding}, 'Small help');
+      ShowMessage(rsDesignerHelp1 + LineEnding +
+        rsDesignerHelp2 + LineEnding +
+        rsDesignerHelp3 + LineEnding {+
+        'F4: edit items' + LineEnding}, rsDesignerQuickHelp);
 
     keyF2:
       EditWidgetOrTabOrder(emTabOrder);
@@ -981,22 +978,22 @@ begin
 
   if Sender = frmProperties.btnLeft then
   begin
-    frm.lbPos.Text := 'Left:';
+    frm.lbPos.Text := rsLeft + ':';
     frm.edPos.Text := IntToStr(wg.Left);
   end
   else if Sender = frmProperties.btnTop then
   begin
-    frm.lbPos.Text := 'Top:';
+    frm.lbPos.Text := rsTop + ':';
     frm.edPos.Text := IntToStr(wg.Top);
   end
   else if Sender = frmProperties.btnWidth then
   begin
-    frm.lbPos.Text := 'Width:';
+    frm.lbPos.Text := rsWidth + ':';
     frm.edPos.Text := IntToStr(wg.Width);
   end
   else if Sender = frmProperties.btnHeight then
   begin
-    frm.lbPos.Text := 'Height:';
+    frm.lbPos.Text := rsHeight + ':';
     frm.edPos.Text := IntToStr(wg.Height);
   end;
 
@@ -1473,7 +1470,7 @@ procedure TDesignedForm.AfterCreate;
 begin
   inherited AfterCreate;
   WindowPosition := wpUser;
-  WindowTitle := 'New Form';
+  WindowTitle := rsDlgNewForm;
   SetPosition(300, 150, 300, 250);
 end;
 

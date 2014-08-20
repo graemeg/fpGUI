@@ -807,7 +807,7 @@ begin
   img.Free;
   
   nr.SetRect(20, 250, 100, 4);
-  Canvas.DrawControlFrame(nr);
+  fpgStyle.DrawControlFrame(Canvas, nr);
   nr.SetRect(70, 241, 11, 21);
   Canvas.DrawButtonFace(nr, []);
 

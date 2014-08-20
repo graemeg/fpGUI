@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -100,7 +100,6 @@ type
     procedure   DoOnDropDown; virtual;
     procedure   DoDropDown; virtual; abstract;
     procedure   DoOnCloseUp; virtual;
-    procedure   PaintInternalButton; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
     property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
@@ -182,14 +181,16 @@ type
   
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord = 24): TfpgComboBox;
 
 
 implementation
 
 uses
   fpg_listbox,
-  dbugintf,
+  {$IFDEF DEBUG}
+  fpg_dbugintf,
+  {$ENDIF}
   math;
   
 
@@ -385,42 +386,6 @@ begin
     OnCloseUp(self);
 end;
 
-procedure TfpgBaseComboBox.PaintInternalButton;
-var
-  ar: TfpgRect;
-  btnflags: TfpgButtonFlags;
-begin
-  Canvas.BeginDraw;
-  btnflags := [];
-  ar := FInternalBtnRect;
-
-  { The bounding rectangle for the arrow }
-  ar.Width := 8;
-  ar.Height := 6;
-  ar.Left := FInternalBtnRect.Left + ((FInternalBtnRect.Width-ar.Width) div 2);
-  ar.Top := FInternalBtnRect.Top + ((FInternalBtnRect.Height-ar.Height) div 2);
-
-  if FBtnPressed then
-  begin
-    Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
-  end;
-  // paint button face
-  fpgStyle.DrawButtonFace(Canvas,
-      FInternalBtnRect.Left,
-      FInternalBtnRect.Top,
-      FInternalBtnRect.Width,
-      FInternalBtnRect.Height, btnflags);
-  if Enabled then
-    Canvas.SetColor(clText1)
-  else
-    Canvas.SetColor(clShadow1);
-
-  // paint arrow
-  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
-  Canvas.EndDraw(FInternalBtnRect);
-end;
-
 function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
 var
   pt: TPoint;
@@ -535,7 +500,9 @@ end;
 
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgComboBox;
+      h: TfpgCoord): TfpgComboBox;
+var
+  lh: integer;
 begin
   Result           := TfpgComboBox.Create(AOwner);
   Result.Left      := x;
@@ -543,8 +510,9 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  if h < TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2) then
-    Result.Height := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2)
+  lh := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2);
+  if h < lh then
+    Result.Height := lh
   else
     Result.Height := h;
 
@@ -683,7 +651,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
-  PaintInternalButton;
+  Repaint;
   DoDropDown;
 end;
 
@@ -691,7 +659,7 @@ procedure TfpgBaseStaticCombo.HandleLMouseUp(x, y: integer; shiftstate: TShiftSt
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  PaintInternalButton;
+  Repaint;
 end;
 
 procedure TfpgBaseStaticCombo.HandleMouseScroll(x, y: integer;
@@ -722,47 +690,25 @@ end;
 procedure TfpgBaseStaticCombo.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
-
-  // internal background rectangle (without frame)
-  InflateRect(r, -2, -2);
+  fpgStyle.DrawControlFrame(Canvas, r);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
-  if Enabled then
-  begin
-    if ReadOnly then
-      Canvas.SetColor(clWindowBackground)
-    else
-      Canvas.SetColor(FBackgroundColor);
-  end
-  else
-    Canvas.SetColor(clWindowBackground);
+  fpgStyle.DrawStaticComboBox(Canvas, r, Enabled, Focused, ReadOnly, FBackgroundColor, FInternalBtnRect, FBtnPressed);
 
-  Canvas.FillRectangle(r);
-
-  // paint the fake dropdown button
-  PaintInternalButton;
-
-  Dec(r.Width, FInternalBtnRect.Width);
-  Canvas.SetClipRect(r);
+//  Dec(r.Width, FInternalBtnRect.Width);
+//  Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
-
   if Focused then
-  begin
-    Canvas.SetColor(clSelection);
-    Canvas.SetTextColor(clSelectionText);
-    InflateRect(r, -1, -1);
-    Canvas.FillRectangle(r);
-  end
+    Canvas.SetTextColor(clSelectionText)
   else
-  begin
     Canvas.SetTextColor(FTextColor);
-  end;
-
   { adjust rectangle size smaller for text }
   r.Left := r.Left + Margin;
   r.Width := r.Width - (Margin*2);

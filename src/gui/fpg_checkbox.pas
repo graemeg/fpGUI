@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -210,8 +210,7 @@ begin
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
   // paint the check (in this case a X)
-  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*FBoxSize, 0, FBoxSize, FBoxSize);
+  fpgStyle.DrawCheckbox(Canvas, r.Left, r.Top, ix*FBoxSize, 0);
 
   r := GetClientRect;
   { max focus rectangle and text boundry }
@@ -291,7 +290,7 @@ begin
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;
-  FBoxSize    := 13;
+  FBoxSize    := fpgStyle.GetCheckBoxSize;
   FImgTextSpacing := 6;
   FChecked    := False;
   FIsPressed  := False;

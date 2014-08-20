@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -176,6 +176,7 @@ uses
   TypInfo,
   vfdformparser,
   vfdeditors,
+  vfd_constants,
   fpg_dialogs;
 
 
@@ -442,7 +443,7 @@ var
 begin
   sl := TStringList(GetObjectProp(wg, Name, TStrings));
   if not Assigned(sl) then
-    raise Exception.Create('Failed to find TStrings type property.');
+    raise Exception.Create(rsErrNoStringsProperty);
 
   Result := '';
 
@@ -461,7 +462,7 @@ var
 begin
   sl     := TStringList(GetObjectProp(wg, Name, TStrings));
   if not Assigned(sl) then
-    raise Exception.Create('Failed to find TStrings type property.');
+    raise Exception.Create(rsErrNoStringsProperty);
   Result := '[' + IntToStr(sl.Count) + ' lines]';
 end;
 
@@ -471,7 +472,7 @@ var
 begin
   sl := TStringList(GetObjectProp(wg, Name, TStrings));
   if not Assigned(sl) then
-    raise Exception.Create('Failed to find TStrings type property.');
+    raise Exception.Create(rsErrNoStringsProperty);
   EditStringList(sl);
 end;
 
@@ -500,7 +501,7 @@ begin
   begin
     sl := TStringList(GetObjectProp(wg, Name, TStrings));
     if not Assigned(sl) then
-      raise Exception.Create('Failed to find TStrings type property.');
+      raise Exception.Create(rsErrNoStringsProperty);
     sl.Add(sval);
   end;
 end;
@@ -854,7 +855,6 @@ var
   PropInfo: PPropInfo;
   i: integer;
   c: TfpgColor;
-  nc: TfpgColor;
 begin
   PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);

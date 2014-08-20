@@ -35,7 +35,7 @@ type
   private
     FWidget: TfpgWidget;
     FCanvas: TfpgCanvas;
-    FFont: TfpgFont;
+    FFontCache: TFPList;
     function    GetCurrentFont: TfpgFont;
     procedure   SetDefaultFont(const AValue: TfpgFont);
   protected
@@ -235,14 +235,20 @@ begin
   FWidget := AWidget;
   FDefaultFont := fpgGetFont(DefaultTopicFont);
   FCanvas.Font := FDefaultFont;
-  FFont := nil;
+  FFontCache := TFPList.Create;
 end;
 
 destructor TCanvasFontManager.Destroy;
+var
+  i: Integer;
 begin
   FCanvas.Font := fpgApplication.DefaultFont;
   FDefaultFont.Free;
-  FFont.Free;
+
+  for i := 0 to FFontCache.Count-1 do
+    TObject(FFontCache.Items[i]).Free;
+  FFontCache.Free;
+
   inherited Destroy;
 end;
 
@@ -262,6 +268,11 @@ end;
 // Set the current font for the canvas to match the given
 // spec, creating or re-using fonts as needed.
 procedure TCanvasFontManager.SetFont(const AFontDesc: TfpgString);
+const
+  MAX_FONT_CACHE = 10;
+var
+  i: Integer;
+  Tmp: TfpgFont;
 begin
   if FCanvas.Font.FontDesc = AFontDesc then
     Exit; // nothing to do so exit
@@ -272,10 +283,25 @@ begin
     Exit;
   end;
 
-  if Assigned(FFont) then
-    FFont.Free;
-  FFont := fpgGetFont(AFontDesc);
-  FCanvas.Font := FFont;
+  for i := 0 to FFontCache.Count-1 do
+  begin
+    Tmp := TfpgFont(FFontCache.Items[i]);
+    if Tmp.FontDesc = AFontDesc then
+    begin
+      FFontCache.Move(i, 0);
+      FCanvas.Font := Tmp;
+      Exit;
+    end;
+  end;
+
+  Tmp := fpgGetFont(AFontDesc);
+  FFontCache.Insert(0, Tmp);
+  if FFontCache.Count > MAX_FONT_CACHE then
+  begin
+    TObject(FFontCache.Items[MAX_FONT_CACHE]).Free;
+    FFontCache.Delete(MAX_FONT_CACHE);
+  end;
+  FCanvas.Font := Tmp;
 end;
 
 function TCanvasFontManager.CharWidth( const C: TfpgChar ): longint;
@@ -313,14 +339,6 @@ var
   t: TfpgString;
 begin
   t := s;
-  //case Settings.Encoding of
-  //  encUTF8:      t := IPFToUTF8(t);
-  //  encCP437:     t := CP437ToUTF8(t);
-  //  encCP850:     t := CP850ToUTF8(t);
-  //  encIBMGraph:  t := IBMGraphToUTF8(t);
-  //else
-  //  t := IPFToUTF8(t);
-  //end;
   FCanvas.DrawString(Point.X, Point.Y, t);
   Point.x := Point.X + Canvas.Font.TextWidth(t);
 end;

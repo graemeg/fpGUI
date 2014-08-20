@@ -25,6 +25,7 @@ interface
 uses
   Classes
   ,Contnrs
+  ,fpg_base
   ,fpg_main
   ;
   
@@ -67,6 +68,7 @@ type
     function    CreateInstance: TfpgStyle; overload;
     procedure   FreeStyleInstance;
     procedure   AssignStyleTypes(const AStrings: TStrings);
+    function    StyleTypesAsString: TfpgString;
   end;
 
 
@@ -201,6 +203,19 @@ begin
   AStrings.Clear;
   for i := 0 to FList.Count - 1 do
     AStrings.Add(TfpgStyleClassMapping(FList.Items[i]).MappingName);
+end;
+
+function TfpgStyleManager.StyleTypesAsString: TfpgString;
+var
+  i: integer;
+  s: string;
+begin
+  for i := 0 to FList.Count - 1 do
+  begin
+    if i > 0 then
+      s := ', ';
+    Result := Result + s + '"' + TfpgStyleClassMapping(FList.Items[i]).MappingName + '"';
+  end;
 end;
 
 

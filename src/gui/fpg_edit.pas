@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -187,6 +187,7 @@ type
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -279,6 +280,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -328,6 +330,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -375,6 +378,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -725,7 +729,7 @@ begin
         end;
     ebsDefault:
         begin
-          Canvas.DrawControlFrame(r);
+          fpgStyle.DrawControlFrame(Canvas, r);
           rect := fpgStyle.GetControlFrameBorders;
           InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
         end;
@@ -754,10 +758,14 @@ var
   s: TfpgChar;
   prevval: string;
 begin
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+  if consumed then
+    Exit; //==>
+
   prevval   := Text;
   s         := AText;
 
-  if (not consumed) and (not ReadOnly) then
+  if (not ReadOnly) then
   begin
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
@@ -780,8 +788,6 @@ begin
 
   if consumed then
     RePaint;
-
-  inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 procedure TfpgBaseEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -1110,21 +1116,24 @@ begin
 end;
 
 procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
+var
+  rect: TRect;
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   if AutoSize then
   begin
+    rect := fpgStyle.GetControlFrameBorders;
     case BorderStyle of
       ebsNone:
         if Height < FFont.Height + (FHeightMargin * 2) then
-          Height:= FFont.Height + (FHeightMargin * 2);
+          Height := FFont.Height + (FHeightMargin * 2);
       ebsDefault:
-        if Height < FFont.Height + 4 + (FHeightMargin * 2) then
-          Height:= FFont.Height + 4 + (FHeightMargin * 2);
+        if Height < FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
       ebsSingle:
-        if Height < FFont.Height + 2 + (FHeightMargin * 2) then
-          Height:= FFont.Height + 2 + (FHeightMargin * 2);
+        if Height < FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
   end;
   Adjust;
@@ -1173,18 +1182,24 @@ begin
 end;
 
 procedure TfpgBaseEdit.SetHeightMargin(const AValue: integer);
+var
+  rect: TRect;
 begin
   if (FHeightMargin = AValue) or (AValue <= 0) then
     Exit; //=>
   FHeightMargin := AValue;
-  case BorderStyle of
-    ebsNone:
-      Height:= FFont.Height + (FHeightMargin * 2);
-    ebsDefault:
-      Height:= FFont.Height + 4 + (FHeightMargin * 2);
-    ebsSingle:
-      Height:= FFont.Height + 2 + (FHeightMargin * 2);
+  if AutoSize then
+  begin
+    rect := fpgStyle.GetControlFrameBorders;
+    case BorderStyle of
+      ebsNone:
+        Height := FFont.Height + (FHeightMargin * 2);
+      ebsDefault:
+        Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
+      ebsSingle:
+        Height := FFont.Height + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
+  end;
   Repaint;
 end;
 
@@ -1420,11 +1435,15 @@ begin
 end;
 
 function TfpgBaseEdit.GetClientRect: TfpgRect;
+var
+  rect: TRect;
 begin
+  Result := inherited GetClientRect;
+  rect := fpgStyle.GetControlFrameBorders;
   case BorderStyle of
-    ebsNone:      Result := inherited GetClientRect;
-    ebsDefault:   Result.SetRect(2, 2, Width-4, Height-4);
-    ebsSingle:    Result.SetRect(1, 1, Width-2, Height-2);
+//    ebsNone:      // nothing to do
+    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    InflateRect(Result, -1, -1);
   end;
 end;
 
@@ -1866,6 +1885,7 @@ begin
   FAlignment := taRightJustify;
   FDecimalSeparator := DecimalSeparator;
   FThousandSeparator := ThousandSeparator;
+  FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;
   FMaxLimit := False;
@@ -1992,8 +2012,10 @@ begin
   if ((n >= 48) and (n <= 57) or (AText = '-') and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
@@ -2042,7 +2064,6 @@ end;
 constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FShowThousand := True;
   FDecimals := 0;
 end;
 
@@ -2216,8 +2237,10 @@ begin
      or ((AText = FDecimalSeparator) and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
@@ -2284,7 +2307,6 @@ begin
   inherited Create(AOwner);
   FDecimals := -1;
   FFixedDecimals := -1;
-  FShowThousand := True;
 end;
 
 { TfpgEditCurrency }
@@ -2437,8 +2459,10 @@ begin
      or ((AText = FDecimalSeparator) and (UTF8Pos(AText, Text) <= 0)) then
     consumed := False
   else
-    consumed := True;
+    Exit; //==>
+
   inherited HandleKeyChar(AText, shiftstate, consumed);
+
   if FMaxLimit then
     if GetValue > FMaxValue then
       SetValue(FMaxValue);
@@ -2488,7 +2512,6 @@ constructor TfpgEditCurrency.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := 2;
-  FShowThousand := True;
 end;
 
 

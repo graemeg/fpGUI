@@ -400,6 +400,8 @@ type
 
    procedure ClearAll(c : TAggColor ); overload;
    procedure ClearAll(r ,g ,b : byte; a : byte = 255 ); overload;
+   procedure FillAll(c: TAggColor); overload;
+   procedure FillAll(r, g, b: byte; a: byte = 255); overload;
 
   // Master Rendering Properties
    procedure BlendMode(m : TAggBlendMode ); overload;
@@ -1288,6 +1290,9 @@ begin
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
 
+ m_convDash.remove_all_dashes;
+ m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
 {$ENDIF }
@@ -1491,6 +1496,22 @@ begin
 
 end;
 
+procedure TAgg2D.FillAll(c: TAggColor);
+var
+  clr: aggclr;
+begin
+  clr.Construct  (c );
+  m_renBase.fill(@clr );
+end;
+
+procedure TAgg2D.FillAll(r, g, b: byte; a: byte);
+var
+  clr: TAggColor;
+begin
+  clr.Construct(r, g, b, a);
+  FillAll(clr);
+end;
+
 { CLEARCLIPBOX }
 procedure TAgg2D.ClearClipBox(c : TAggColor );
 var
@@ -1517,14 +1538,14 @@ end;
 { WORLDTOSCREEN }
 procedure TAgg2D.WorldToScreen(x ,y : PDouble );
 begin
- m_transform.transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.transform(@m_transform, x, y);
 
 end;
 
 { SCREENTOWORLD }
 procedure TAgg2D.ScreenToWorld(x ,y : PDouble );
 begin
- m_transform.inverse_transform(@m_transform ,double_ptr(x ) ,double_ptr(y ) );
+ m_transform.inverse_transform(@m_transform, x, y);
 
 end;
 
@@ -2649,7 +2670,8 @@ begin
  m_fontEngine.hinting_(m_textHints );
 
  if cache = AGG_VectorFontCache then
-  m_fontEngine.height_(height )
+ {$NOTE We need to fix this. Translating from font pt to pixels is inaccurate. This is just a temp fix for now. }
+  m_fontEngine.height_(height * 1.3333 ) // 9pt = ~12px so that is a ratio of 1.3333
  else
   m_fontEngine.height_(worldToScreen(height ) );
 {$ENDIF}
@@ -3534,18 +3556,29 @@ begin
 end;
 
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
+{$IFDEF WINDOWS}
 begin
-  {$NOTE This is only temporary until I can correctly query font names }
-  {$IFDEF WINDOWS}
+ {$IFDEF AGG2D_USE_FREETYPE }
+ Font('c:\WINNT\Fonts\arial.ttf', 10);
+ {$ENDIF }
+ {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);
-  {$ELSE}
-    {$IFDEF BSD}
-    Font('/usr/local/lib/X11/fonts/Liberation/LiberationSans-Regular.ttf', 13);
-    {$ELSE}
-    Font('/usr/share/fonts/truetype/ttf-liberation/LiberationSans-Regular.ttf', 13);
-    {$ENDIF}
-  {$ENDIF}
+ {$ENDIF }
 end;
+{$ENDIF}
+{$IFDEF UNIX}
+var
+  s: TfpgString;
+  i: integer;
+  fnt: TFontCacheItem;
+  lSize: double;
+begin
+  fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
+  i := gFontCache.Find(fnt);
+  if i > 0 then
+    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+end;
+{$ENDIF}
 
 procedure TAgg2D.DoSetTextColor(cl: TfpgColor);
 var
@@ -3555,7 +3588,7 @@ begin
   c := fpgColorToRGB(cl);
   t := fpgColorToRGBTriple(c);
 
-  FillColor(t.Red, t.Green, t.Blue{, t.Alpha});
+  FillColor(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 procedure TAgg2D.DoSetColor(cl: TfpgColor);
@@ -3566,7 +3599,7 @@ begin
   c := fpgColorToRGB(cl);
   t := fpgColorToRGBTriple(c);
 
-  LineColor(t.Red, t.Green, t.Blue{, t.Alpha});
+  LineColor(t.Red, t.Green, t.Blue, t.Alpha);
 end;
 
 procedure TAgg2D.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
@@ -3635,7 +3668,10 @@ end;
 
 procedure TAgg2D.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
-
+  LineWidth(1);
+  FillColor(LineColor);
+  LineColor(LineColor);
+  Triangle(x1+0.5, y1+0.5, x2+0.5, y2+0.5, x3+0.5, y3+0.5);
 end;
 
 procedure TAgg2D.DoDrawRectangle(x, y, w, h: TfpgCoord);

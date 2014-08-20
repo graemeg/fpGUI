@@ -1,4 +1,4 @@
-{
+(*
   A very quick and basic style implementation. It took all of 10 minutes.
   To apply this style, follow these instructions:
 
@@ -31,7 +31,7 @@
       end;
     end;
 
-}
+*)
 unit mystyle;
 
 {$mode objfpc}{$H+}

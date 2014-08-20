@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -415,7 +415,7 @@ begin
   end;
 
   if AValue = nmsBoth then Exit;
-  // now remove properties we dont want
+  // now remove properties we don't want
 
   Msg.data.l[0] := _NET_WM_STATE_REMOVE;
   Msg.data.l[1] := 0;
@@ -690,6 +690,8 @@ var
   bytes_after: culong;
 begin
   Result := False;
+  if (AWindow = 0) or (AProperty = 0) then
+    Exit;
   XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Atoms);
 

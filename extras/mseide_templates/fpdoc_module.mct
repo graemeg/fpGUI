@@ -1,0 +1,23 @@
+[header]
+name=docmod
+comment=Documentation Module (new XML file)
+noselect=1
+cursorrow=5
+cursorcol=7
+params=2
+ pkgname
+ modname
+[]
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="${pkgname}">
+
+<module name="${modname}">
+<short></short>
+<descr>
+</descr>
+
+</module>
+
+</package>
+</fpdoc-descriptions>

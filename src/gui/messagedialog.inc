@@ -262,7 +262,6 @@ var
   y: integer;
   tw: integer;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   case FDialogType of
     mtAbout:
@@ -312,7 +311,6 @@ begin
       Inc(y, FLineHeight);
     end;
   end;
-  Canvas.EndDraw;
 end;
 
 procedure TfpgMessageDialog.HandleShow;

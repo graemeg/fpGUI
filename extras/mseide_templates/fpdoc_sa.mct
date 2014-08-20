@@ -1,0 +1,15 @@
+[header]
+name=docsa
+comment=Documentation SeeAlso tag
+select=0
+indent=0
+cursorcol=22
+cursorrow=1
+params=1
+ linkid
+paramdefaults=1
+ 
+[]
+<seealso>
+<link id="${linkid}"></link>
+</seealso>

@@ -357,8 +357,8 @@ type
  procedure NoP;
 
 { These implementations have changed to use FPC's Sar*() functions, so should
-  now support all platforms with ASM code. At a later date these functions
-  could be removed completely. }
+  now support all platforms without the need for ASM code. At a later date these
+  functions could be removed completely. }
  function  shr_int8 (i ,shift : int8 ) : int8; inline;
  function  shr_int16(i ,shift : int16 ) : int16; inline;
  function  shr_int32(i ,shift : int ) : int; inline;

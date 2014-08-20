@@ -138,6 +138,12 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
   
@@ -439,7 +445,7 @@ begin
 
   if Orientation = orVertical then
   begin
-    if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
+    if (y >= FSliderPos) and (y <= FSliderPos + FSliderLength) then
     begin
       FSliderDragging := True;
       FSliderDragPos  := y;
@@ -516,8 +522,6 @@ begin
   if newp <> FPosition then
   begin
     Position := newp;
-    RePaint;
-    DoChange;
   end;
 end;
 
@@ -571,12 +575,20 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
+    r.SetRect((Width-4) div 2, 1, 4, Height {- tw} - 4);
+    fpgStyle.DrawControlFrame(Canvas, r);
+    r.SetRect((Width-20) div 2, FSliderPos, 21, FSliderLength);
+    Canvas.DrawButtonFace(r, []);
+    //if FShowPosition then
+    //begin
+    //  Canvas.SetTextColor(TextColor);
+    //  fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.Height) div 2, IntToStr(Position), Enabled);
+    //end;
   end
   else
   begin
     r.SetRect(1, (Height-4) div 2, Width - tw - 4, 4);
-    Canvas.DrawControlFrame(r);
+    fpgStyle.DrawControlFrame(Canvas, r);
     r.SetRect(FSliderPos, (Height-20) div 2, FSliderLength, 21);
     Canvas.DrawButtonFace(r, []);
     if FShowPosition then

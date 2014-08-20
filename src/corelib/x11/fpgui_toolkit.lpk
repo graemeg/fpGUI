@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <Name Value="fpgui_toolkit"/>
@@ -28,8 +28,8 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="1"/>
-    <Files Count="99">
+    <Version Major="1" Minor="2"/>
+    <Files Count="107">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -426,6 +426,38 @@
         <Filename Value="../render/software/Agg2D.pas"/>
         <UnitName Value="Agg2D"/>
       </Item99>
+      <Item100>
+        <Filename Value="../fpg_dbugintf.pas"/>
+        <UnitName Value="fpg_dbugintf"/>
+      </Item100>
+      <Item101>
+        <Filename Value="../fpg_dbugmsg.pas"/>
+        <UnitName Value="fpg_dbugmsg"/>
+      </Item101>
+      <Item102>
+        <Filename Value="../render/software/fpg_fontcache.pas"/>
+        <UnitName Value="fpg_fontcache"/>
+      </Item102>
+      <Item103>
+        <Filename Value="../../gui/fpg_style_carbon.pas"/>
+        <UnitName Value="fpg_style_carbon"/>
+      </Item103>
+      <Item104>
+        <Filename Value="../../gui/fpg_style_plastic.pas"/>
+        <UnitName Value="fpg_style_plastic"/>
+      </Item104>
+      <Item105>
+        <Filename Value="../../gui/fpg_style_win8.pas"/>
+        <UnitName Value="fpg_style_win8"/>
+      </Item105>
+      <Item106>
+        <Filename Value="../../gui/fpg_scrollframe.pas"/>
+        <UnitName Value="fpg_scrollframe"/>
+      </Item106>
+      <Item107>
+        <Filename Value="../../gui/inputintegerdialog.inc"/>
+        <Type Value="Include"/>
+      </Item107>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">

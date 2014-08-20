@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -34,10 +34,11 @@ type
   EJPEG = class(Exception);
   
 procedure ReadImage_JPG(img: TfpgImage; bmp: TStream; const AScale: integer = 1);
-function  LoadImage_JPG(const AFileName: String; const AScale: integer = 1): TfpgImage;
+function  LoadImage_JPG(const AFileName: TfpgString; const AScale: integer = 1): TfpgImage;
   
 implementation
 uses
+  fpg_utils,
   {PASJPG10 library}
   jmorecfg,
   jpeglib,
@@ -360,21 +361,21 @@ begin
   img.UpdateImage;   
 end;
 
-function LoadImage_JPG(const AFileName: String; const AScale: integer): TfpgImage;
+function LoadImage_JPG(const AFileName: TfpgString; const AScale: integer): TfpgImage;
 var
   inFile: TStream;
 begin
   Result := nil;
-  if not FileExists(AFileName) then
+  if not fpgFileExists(AFileName) then
     Exit; //==>
   
-  inFile:=TFileStream.Create(AFileName,fmOpenRead);
- try
-  Result:=TfpgImage.Create;	
-  ReadImage_JPG(Result, inFile, AScale);
- finally
-  inFile.Free;
- end;
+  inFile := TFileStream.Create(fpgToOSEncoding(AFileName), fmOpenRead);
+  try
+    Result := TfpgImage.Create;
+    ReadImage_JPG(Result, inFile, AScale);
+  finally
+    inFile.Free;
+  end;
 end;
 
 

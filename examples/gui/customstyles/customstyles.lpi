@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -52,7 +52,13 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="customstyles_test"/>
+    </Target>
+    <SearchPaths>
+      <UnitOutputDirectory Value="units"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <CStyleOperator Value="False"/>
@@ -73,7 +79,6 @@
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

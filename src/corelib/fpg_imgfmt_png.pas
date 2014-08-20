@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -68,6 +68,7 @@ end;
 function LoadImage_PNG(const AFileName: TfpgString): TfpgImage;
 var
   imga: TFPCustomImage;
+  PNGReader: TFPReaderPNG;
 begin
   Result := nil;
   if not fpgFileExists(AFileName) then
@@ -75,7 +76,12 @@ begin
 
   imga := TFPMemoryImage.Create(0, 0);
   try
-    imga.LoadFromFile(AFileName, TFPReaderPNG.Create); // auto size image
+    PNGReader := TFPReaderPNG.Create;
+    try
+      imga.LoadFromFile(fpgToOSEncoding(AFileName), PNGReader); // auto size image
+    finally
+      PNGReader.Free;
+    end;
   except
     imga := nil;
   end;
@@ -159,7 +165,7 @@ begin
           // Calculated to fit the image within required size: xlocal, ylocal
   imga := TFPMemoryImage.Create(0, 0);
   try
-    imga.LoadFromFile(AFileName, TFPReaderPNG.Create); // auto size image
+    imga.LoadFromFile(fpgToOSEncoding(AFileName), TFPReaderPNG.Create); // auto size image
   except
     imga := nil;
     imgb := nil;

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
 
 <package name="fpGUI">
@@ -52,7 +52,7 @@ etc.).
       <!-- record type Visibility: default -->
       <element name="TRGBTriple">
         <short>A record structure holding the RGBA values of a color</short>
-        <descr><printshort id="TRGBTriple"/>. This is now marked as "deprecated". Please use <link id="fpg_base.TFPColor">TFPColor</link> instead.</descr>
+        <descr><printshort id="TRGBTriple"/>.</descr>
         <seealso/>
       </element>
       <!-- variable Visibility: default -->
@@ -79,8 +79,8 @@ means no titlebar or window borders are going to be created.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtModalForm">
-        <short>This windows type is similar to <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs focus.</short>
-        <descr>This windows is the same as <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
+        <short>This windows type is similar to wtWindow, but grabs focus.</short>
+        <descr>This windows is the same as <link id="#fpgui.fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtPopup">
@@ -717,18 +717,18 @@ help.</remark></descr>
 it brings a window to the front - above all other windows of the application. Note that
 this only changes the z-order, it doesn't actually change window focus.</descr>
 <seealso>
-<link id="fpg_base.TfpgWindowBase.ActivateWindow"></link>
+<link id="fpg_base.TfpgWindowBase.ActivateWindow"/>
 </seealso>
 </element>
 
 <element name="TfpgWindowBase.ActivateWindow">
-<short>This makse the target window the active window</short>
+<short>This makes the target window the active window</short>
 <descr>This doesn't have much meaning at the widget level, but at the TfpgForm level,
 it makes the target window the active window. Note that depending on the operating system
 and Window Manager, the active window could still be obscured by other windows. Under Windows,
 it seems that the active window is always brought to the front too.</descr>
 <seealso>
-<link id="#fpgui.fpg_base.TfpgWindowBase.BringToFront"></link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.BringToFront"/>
 </seealso>
 </element>
 
@@ -831,6 +831,10 @@ consecutive lines being drawn without overlapping pixels.</descr>
 
 <element name="TfpgCanvasBase.StretchDraw">
 <short>Allows you to draw a bitmap, stretched or shrunken from its original size</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw"/>. Default
+interpolation is <link id="#fpgui.fpg_base.TfpgMitchelInterpolation">TfpgMitchelInterpolation</link>,
+but others (found in <link id="#fpgui.fpg_extinterpolation">fpg_extinterpolation.pas</link>) can
+be used too, by using the <link id="#fpgui.fpg_base.TfpgCanvasBase.InterpolationFilter">InterpolationFilter</link> property of the Canvas.</descr>
 </element>
 
       <!-- function Visibility: default -->
@@ -931,11 +935,77 @@ Right. And the Top is always smaller than the Bottom.
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
 
+
 <element name="TfpgCanvasBase.GradientFill">
 <short>Paints a rectangle with a gradient</short>
 <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.GradientFill"/>. If the gradient direction is
 set to gdHorizontal, then it pains from left to right. If the gradient direction is
 set to gdVertical, then it paints from top to bottom.</descr>
+</element>
+
+
+<element name="TfpgCanvasBase.DrawArc">
+<short>Draws an outline arc shape</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawArc"/>. It uses the TfpgCanvas.Color
+value to draw the arc.</p>
+<dl>
+<dt>x</dt>
+<dd>The left x co-ordinate of the arc drawing position</dd>
+<dt>y</dt>
+<dd>The top y co-ordinate of the arc drawing position</dd>
+<dt>w</dt>
+<dd>The width of the whole arc</dd>
+<dt>h</dt>
+<dd>The height of the whole arc</dd>
+<dt>a1</dt>
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</dd>
+<dt>a2</dt>
+<dd>This parameter is the length of the arc in degrees. A positive value
+goes counter-clockwise, and a negative values goes clockwise.</dd>
+</dl>
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.FillArc">TfpgCanvasBase.FillArc</link>
+</seealso>
+<example file="examples/fpg_base.fpgcanvasbase.drawarc.pas"/>
+</element>
+
+
+<element name="TfpgCanvasBase.FillArc.a1">
+<descr>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</descr>
+</element>
+
+
+<element name="TfpgCanvasBase.FillArc">
+<short>Draws a filled arc shape</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.FillArc"/>. It uses the TfpgCanvas.Color
+value to draw and fill the arc.</p>
+<dl>
+<dt>x</dt>
+<dd>The left x co-ordinate of the arc drawing position</dd>
+<dt>y</dt>
+<dd>The top y co-ordinate of the arc drawing position</dd>
+<dt>w</dt>
+<dd>The width of the whole arc</dd>
+<dt>h</dt>
+<dd>The height of the whole arc</dd>
+<dt>a1</dt>
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+position. A value of 270 is the 6 o'clock position. Positive values move
+counter-clockwise, and negative values move clockwise.</dd>
+<dt>a2</dt>
+<dd>This parameter is the length of the arc in degrees. A positive value
+goes counter-clockwise, and a negative values goes clockwise.</dd>
+</dl>
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.DrawArc">TfpgCanvasBase.DrawArc</link>
+</seealso>
+<example file="examples/fpg_base.fpgcanvasbase.fillarc.pas"/>
 </element>
 
 
@@ -971,8 +1041,7 @@ set to gdVertical, then it paints from top to bottom.</descr>
 <element name="TFPColor">
 <short>A record structure holding the RGBA values of a color.</short>
 <descr>This is the same declaration as the one found in FPImage (included with the
-Free Pascal Compiler). In future when FPImage is integrated with fpGUI, this declaration
-will be removed.</descr>
+Free Pascal Compiler). Except the fpGUI version uses Byte values and not Word values. This is now marked as "deprecated". Please use <link id="fpg_base.TRGBTripple">TRGBTripple</link> instead.</descr>
 </element>
 
 <element name="TfpgPoint">
@@ -1038,18 +1107,22 @@ for more information.</p></descr>
 </element>
 
 <element name="TfpgApplicationBase">
-<short>aoeu</short>
-<descr></descr>
+<short>Base class for the fpgApplication variable</short>
+<descr>This is the base class of TfpgApplication. All fpGUI-based applications
+will contain a instance of TfpgApplication. It encapsulates the application as
+a whole, and also supplies many useful functions and events.</descr>
 </element>
 
 <element name="TfpgApplicationBase.HelpFile">
 <short>Specify a help file for the application</short>
-<descr>bla bla bla</descr>
+<descr>This property is used to assign the help file (normally an INF file) which
+contains the help for the application.</descr>
 </element>
 
 <element name="TfpgApplicationBase.InvokeHelp">
 <short>Run the help viewer</short>
-<descr>bla bla bla</descr>
+<descr>This method will invoke the defined help viewer, passing it the HelpContext
+or HelpKeyword as parameter. The default help viewer is fpGUI's DocView.</descr>
 </element>
 
 

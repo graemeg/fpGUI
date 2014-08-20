@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,10 +21,7 @@ unit fpg_scrollbar;
 
 {
   TODO:
-    * Set slider button to minimum length (default setting)
     * Create property to enable dynamic sizing of slider button length.
-    * Paint scroll area between arrow buttons and slider button a different
-      color on click.
 }
 
 interface
@@ -39,7 +36,7 @@ uses
 type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
-  TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssAutoBoth);
+  TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssAutoBoth, ssBothVisible);
   
   TfpgScrollBarPart = (sbpNone, sbpUpBack, sbpPageUpBack, sbpSlider, sbpDownForward, sbpPageDownForward);
 
@@ -137,7 +134,6 @@ end;
 
 procedure TfpgScrollBar.HandlePaint;
 begin
-  Canvas.BeginDraw; // Do not remove - Scrollbars do painting outside HandlePaint as well!
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
@@ -148,9 +144,7 @@ begin
     DrawButton(0, 0, Height, Height, 'sys.sb.left', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
     DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end;
-
   DrawSlider(FRecalc);
-  Canvas.EndDraw;   // Do not remove - Scrollbars do painting outside HandlePaint as well!
   FRecalc := False;
 end;
 
@@ -165,7 +159,7 @@ begin
   if not HasHandle then
     Exit; //==>
   FRecalc := True;
-  Invalidate;//  DrawSlider(True);
+  Invalidate;
 end;
 
 procedure TfpgScrollBar.LineUp;
@@ -222,7 +216,7 @@ begin
     FPosition := AValue;
 
   if HasHandle then
-    Invalidate;//    DrawSlider(False);
+    Invalidate;
 end;
 
 procedure TfpgScrollBar.Step(ASteps: Integer);
@@ -363,8 +357,6 @@ var
   area: TfpgCoord;
   mm: TfpgCoord;
 begin
-//  Canvas.BeginDraw;
-
   if SliderSize > 1 then
     SliderSize := 1;
 
@@ -372,12 +364,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width, Height-Width-Width);
+    Canvas.FillRectangle(0, Width, Width, Height - (2 * Width));
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width-Height-Height, Height);
+    Canvas.FillRectangle(Height, 0, Width - (2 * Height), Height);
     area := Width - (Height shl 1);
   end;
 
@@ -414,7 +406,7 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - (FSliderPos + FSliderLength));
+      Canvas.FillRectangle(0, Width + FSliderPos + FSliderLength, Width, Height - (2 * Width) - (FSliderPos + FSliderLength));
       Canvas.SetColor(clScrollBar);
     end;
   end
@@ -429,22 +421,16 @@ begin
     else if FScrollbarDownPart in [{sbpDownForward,} sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - (FSliderPos + FSliderLength), Height);
+      Canvas.FillRectangle(Height + FSliderPos + FSliderLength, 0, Width - (2 * Height) - (FSliderPos + FSliderLength), Height);
       Canvas.SetColor(clScrollBar);
     end;
   end;
 
   // Paint the slider button
   if Orientation = orVertical then
-  begin
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
-//    Canvas.EndDraw(0, Width, Width, Height - Width - Width);
-  end
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded])
   else
-  begin
     Canvas.DrawButtonFace(Height + FSliderPos, 0, FSliderLength, Height, [btfIsEmbedded]);
-//    Canvas.EndDraw(Height, 0, Width - Height - Height, Height);
-  end;
 end;
 
 procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -587,7 +573,7 @@ begin
     FSliderPos := area;
 
   if ppos <> FSliderPos then
-    Invalidate;  // DrawSlider(False);
+    Invalidate;
 
   if area <> 0 then
     newp := FMin + Trunc((FMax - FMin)  * (FSliderPos / area))
@@ -620,7 +606,7 @@ begin
   if Visible then
   begin
     FRecalc := True;
-    Invalidate;   // DrawSlider(True);
+    Invalidate;
   end;
 
   if Assigned(FOnScroll) then

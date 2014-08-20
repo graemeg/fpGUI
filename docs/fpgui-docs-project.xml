@@ -45,6 +45,8 @@
         <unit file="../src/gui/fpg_tree.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
 
         <!-- undocumented units -->
+        <unit file="../src/corelib/fpg_dbugintf.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/corelib/fpg_dbugmsg.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_animation.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_checkbox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_combobox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
@@ -69,14 +71,18 @@
         <unit file="../src/gui/fpg_radiobutton.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_readonly.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_scrollbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_scrollframe.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_spinedit.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_splitter.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style_bitmap.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style_bluecurve.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_carbon.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style_clearlooks.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style_motif.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_plastic.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_style_win2k.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_style_win8.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_stylemanager.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_tab.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_trackbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
@@ -133,15 +139,20 @@
          and value as on the actual command-line. Boolean options must have
          a value of 'true', '1' or 'yes' -->
     <option name="format" value="ipf"/>
+    <option name="hide-protected" value="true"/>
+    <option name="duplinkeddoc" value="true"/>
 <!--
+    ## Various output formats
     <option name="format" value="ipf"/>
     <option name="format" value="html"/>
     <option name="format" value="rtf"/>
     <option name="format" value="chm"/>
--->
+
+    ## Options for IPF output
     <option name="hide-protected" value="true"/>
     <option name="duplinkeddoc" value="true"/>
-<!--
+
+    ## Options for HTML output
     <option name="footer-date" value="yyyy-mm-dd"/>
 -->
   </options>

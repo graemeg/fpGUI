@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -128,15 +128,24 @@ type
     property    Hint;
     property    Items;
     property    Margin;
+    property    ReadOnly;
     property    Text;
     property    TextColor;
     property    Width;
     property    OnChange;
     property    OnCloseUp;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
+    property    OnKeyChar;
     property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
@@ -522,6 +531,9 @@ var
   prevval: string;
   i: integer;
 begin
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+  if Consumed then
+    Exit; //==>
   prevval   := FText;
   s         := AText;
   consumed  := False;
@@ -529,7 +541,7 @@ begin
     FNewItem := False;
 
   // Handle only printable characters
-  // Note: This is now UTF-8 compliant!
+  // Note: This is not UTF-8 compliant!
   if Enabled and (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
   begin
     if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
@@ -572,8 +584,6 @@ begin
 
   if consumed then
     RePaint;
-//  else
-    inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 procedure TfpgBaseEditCombo.HandleKeyPress(var keycode: word;
@@ -687,12 +697,12 @@ begin
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
   if not FAutoCompletion then
   begin
-    PaintInternalButton;
+    Repaint;
     DoDropDown;
   end
   else if FBtnPressed then
     begin
-      PaintInternalButton;
+      Repaint;
       DoDropDown;
     end;
 end;
@@ -702,7 +712,7 @@ procedure TfpgBaseEditCombo.HandleLMouseUp(x, y: integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  PaintInternalButton;
+  Repaint;
 end;
 
 procedure TfpgBaseEditCombo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -717,6 +727,7 @@ end;
 procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
+  rect: TRect;
   tw, tw2, st, len: integer;
   Texte: string;
 
@@ -761,25 +772,28 @@ var
   end;
 
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  Canvas.DrawControlFrame(r);
-
-  // internal background rectangle (without frame)
-  InflateRect(r, -2, -2);
+  fpgStyle.DrawControlFrame(Canvas, r);
+  rect := fpgStyle.GetControlFrameBorders;
+  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then
-    Canvas.SetColor(FBackgroundColor)
+  begin
+    if ReadOnly then
+      Canvas.SetColor(clWindowBackground)
+    else
+      Canvas.SetColor(FBackgroundColor);
+  end
   else
     Canvas.SetColor(clWindowBackground);
 
   Canvas.FillRectangle(r);
 
   // paint the fake dropdown button
-  PaintInternalButton;
+  fpgStyle.DrawInternalComboBoxButton(Canvas, FInternalBtnRect, Enabled, FBtnPressed);
 
   Dec(r.Width, FInternalBtnRect.Width);
   Canvas.SetClipRect(r);
@@ -860,8 +874,6 @@ begin
     else
       fpgCaret.UnSetCaret(Canvas);
   end;
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgBaseEditCombo.Create(AOwner: TComponent);

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -63,6 +63,10 @@ type
     procedure   SetPopupFrame(const AValue: boolean);
     procedure   UpdateScrollbarCoords;
     procedure   SetAutoHeight(const AValue: boolean);
+    function    GetScrollBarPage: integer;
+    procedure   SetScrollBarPage(const AValue: integer);
+    function    GetScrollBarWidth: integer;
+    procedure   SetScrollBarWidth(const AValue: integer);
   protected
     FFont: TfpgFont;
     FScrollBar: TfpgScrollBar;
@@ -74,7 +78,6 @@ type
     procedure   UpdateScrollBar;
     procedure   FollowFocus;
     function    ListHeight: TfpgCoord;
-    function    ScrollBarWidth: TfpgCoord;
     function    PageLength: integer;
     procedure   ScrollBarMove(Sender: TObject; APosition: integer);
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
@@ -90,6 +93,8 @@ type
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
+    property    ScrollBarPage: Integer read GetScrollBarPage write SetScrollBarPage;
+    property    ScrollBarWidth: Integer read GetScrollBarWidth write SetScrollBarWidth;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HotTrack: boolean read FHotTrack write FHotTrack default False;
@@ -105,6 +110,7 @@ type
     function    RowHeight: integer; virtual;
     procedure   SetFirstItem(item: integer);
     property    Font: TfpgFont read FFont;
+    property    VisibleItems: integer read PageLength;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnKeyPress; // to allow to detect return or tab key has been pressed
     property    OnScroll: TNotifyEvent read FOnScroll write FOnScroll;
@@ -147,6 +153,8 @@ type
     property    Items;
     property    ParentShowHint;
     property    PopupFrame;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowHint;
     property    TabOrder;
     property    Text;
@@ -416,6 +424,33 @@ begin
   Height := (Succ(PageLength) * RowHeight) + (2 * FMargin);
 end;
 
+function TfpgBaseListBox.GetScrollBarPage: integer;
+begin
+  Result:= FScrollBar.PageSize;
+end;
+
+procedure TfpgBaseListBox.SetScrollBarPage(const AValue: integer);
+begin
+  if AValue= FScrollBar.PageSize then
+    Exit; //==>
+  FScrollBar.PageSize:= AValue;
+end;
+
+function TfpgBaseListBox.GetScrollBarWidth: integer;
+begin
+  if FScrollBar.Visible then
+    result := FScrollBar.Width
+  else
+    result := 0;
+end;
+
+procedure TfpgBaseListBox.SetScrollBarWidth(const AValue: integer);
+begin
+  if AValue = FScrollBar.Width then
+    Exit; //==>
+  FScrollBar.Width := AValue;
+end;
+
 procedure TfpgBaseListBox.MsgPaint(var msg: TfpgMessageRec);
 begin
   // Optimising painting and preventing OnPaint from firing if not needed
@@ -480,14 +515,6 @@ end;
 function TfpgBaseListBox.ListHeight: TfpgCoord;
 begin
   result := height - (2*FMargin);
-end;
-
-function TfpgBaseListBox.ScrollBarWidth: TfpgCoord;
-begin
-  if FScrollBar.Visible then
-    result := FScrollBar.Width
-  else
-    result := 0;
 end;
 
 function TfpgBaseListBox.PageLength: integer;
@@ -673,6 +700,7 @@ procedure TfpgBaseListBox.HandlePaint;
 var
   n: integer;
   r: TfpgRect;
+  rect: TRect;
 begin
   //if FUpdateCount > 0 then
   //  Exit; //==>
@@ -691,8 +719,9 @@ begin
   end
   else
   begin
-    Canvas.DrawControlFrame(r);
-    InflateRect(r, -2, -2);
+    fpgStyle.DrawControlFrame(Canvas, r);
+    rect := fpgStyle.GetControlFrameBorders;
+    InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   end;
 
   Canvas.SetClipRect(r);
@@ -797,6 +826,7 @@ begin
     r.SetBottom(Height - FMargin);
     Canvas.FillRectangle(r);
   end;
+  UpdateScrollBar;
 end;
 
 constructor TfpgBaseListBox.Create(AOwner: TComponent);
@@ -1277,4 +1307,3 @@ begin
 end;
 
 end.
-

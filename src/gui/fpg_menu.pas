@@ -417,6 +417,8 @@ begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
   newf := CalcMouseCol(x);
+  if newf = VisibleCount then
+    Exit; //mouse points over the last item
 
   // process menu options
   if mnuo_nofollowingmouse in FMenuOptions then
@@ -467,6 +469,9 @@ begin
     Exit; // We have no menu items in MainMenu.
     
   newf := CalcMouseCol(x);
+  if newf = VisibleCount then
+    Exit; //mouse points over the last item
+
   if (FLastItemClicked <> -1) and (FLastItemClicked <> newf) then
   begin
     // do nothing
@@ -585,6 +590,7 @@ begin
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
   FMenuOptions := [];
   FMouseIsOver := False;
+  FIsContainer := True;
 end;
 
 destructor TfpgMenuBar.Destroy;
@@ -660,6 +666,8 @@ begin
     inc(w, ItemWidth(VisibleItem(n)));
     inc(n);
   end;
+  if x > w then
+    Result := n;
 end;
 
 function TfpgMenuBar.GetItemPosX(index: integer): integer;

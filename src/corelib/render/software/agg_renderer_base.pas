@@ -79,6 +79,7 @@ type
    function  bounding_ymax : int; virtual;
 
    procedure clear(c : aggclr_ptr );
+   procedure fill(const c: aggclr_ptr);
 
    procedure copy_pixel (x ,y : int; c : aggclr_ptr ); virtual;
    procedure blend_pixel(x ,y : int; c : aggclr_ptr; cover : int8u ); virtual;
@@ -346,6 +347,17 @@ begin
   for y:=0 to height - 1 do
    m_ren.copy_hline(m_ren ,0 ,y ,width ,c );
 
+end;
+
+procedure renderer_base.fill(const c: aggclr_ptr);
+var
+  y: unsigned;
+begin
+  if (width > 0) and (height > 0) then
+  begin
+    for y:=0 to height - 1 do
+      m_ren.blend_hline(m_ren, 0, y, width, c, cover_mask);
+  end;
 end;
 
 { COPY_PIXEL }

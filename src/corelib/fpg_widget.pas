@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -39,6 +39,8 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
+  { TfpgWidget }
+
   TfpgWidget = class(TfpgWindow)
   private
     FAcceptDrops: boolean;
@@ -50,12 +52,14 @@ type
     FOnDragLeave: TNotifyEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
+    FOnKeyChar: TfpgKeyCharEvent;
     FOnMouseDown: TMouseButtonEvent;
     FOnMouseEnter: TNotifyEvent;
     FOnMouseExit: TNotifyEvent;
     FOnMouseMove: TMouseMoveEvent;
     FOnMouseUp: TMouseButtonEvent;
     FOnMouseScroll: TMouseWheelEvent;
+    FOnMouseHorizScroll: TMouseWheelEvent;
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
@@ -81,6 +85,7 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgMouseHorizScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
     procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
     procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
@@ -134,6 +139,7 @@ type
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -146,6 +152,7 @@ type
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
     property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
     property    OnExit: TNotifyEvent read FOnExit write FOnExit;
+    property    OnKeyChar: TfpgKeyCharEvent read FOnKeyChar write FOnKeyChar;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
     property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
     property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
@@ -153,6 +160,7 @@ type
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnMouseScroll: TMouseWheelEvent read FOnMouseScroll write FOnMouseScroll;
+    property    OnMouseHorizScroll: TMouseWheelEvent read FOnMouseHorizScroll write FOnMouseHorizScroll;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
     property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
@@ -161,6 +169,7 @@ type
     destructor  Destroy; override;
     procedure   AfterConstruction; override;
     function    InDesigner: boolean;
+    function    IsLoading: boolean;
     procedure   InvokeHelp; virtual;
     procedure   Realign;
     procedure   SetFocus;
@@ -430,6 +439,11 @@ end;
 function TfpgWidget.InDesigner: boolean;
 begin
   Result := (FFormDesigner <> nil)
+end;
+
+function TfpgWidget.IsLoading: boolean;
+begin
+  Result := csLoading in ComponentState;
 end;
 
 procedure TfpgWidget.InvokeHelp;
@@ -854,6 +868,12 @@ begin
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
+procedure TfpgWidget.MsgMouseHorizScroll(var msg: TfpgMessageRec);
+begin
+  HandleMouseHorizScroll(msg.Params.mouse.x, msg.Params.mouse.y,
+      msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
 procedure TfpgWidget.MsgDropEnter(var msg: TfpgMessageRec);
 begin
   // do nothing
@@ -943,7 +963,8 @@ end;
 
 procedure TfpgWidget.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  // descendants will implement this.
+  if FFocusable and Assigned(OnKeyChar) then
+    OnKeyChar(self, AText, consumed);
 end;
 
 procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
@@ -962,8 +983,11 @@ begin
 
   if not consumed and (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
   begin
-    InvokeHelp;
-    consumed := True;
+    if fpgApplication.HelpFile <> '' then
+    begin
+      InvokeHelp;
+      consumed := True;
+    end;
   end;
 
   case keycode of
@@ -1187,6 +1211,12 @@ procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; d
 begin
   if Assigned(FOnMouseScroll) then
     FOnMouseScroll(self, shiftstate, delta, Point(x, y));
+end;
+
+procedure TfpgWidget.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+begin
+  if Assigned(FOnMouseHorizScroll) then
+    FOnMouseHorizScroll(self, shiftstate, delta, Point(x, y));
 end;
 
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;

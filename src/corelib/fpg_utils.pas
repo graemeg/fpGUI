@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -51,6 +51,7 @@ function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
  // RTL wrapper filesystem functions with platform independant encoding
  // These functions are common for all platforms and rely on fpgXXXPlatformEncoding
 
+function fpgApplicationName: TfpgString;
 function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;
 function fpgFindNext(var Rslt: TSearchRec): longint;
 function fpgGetCurrentDir: TfpgString;
@@ -63,7 +64,7 @@ function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 function fpgExtractFileName(const FileName: TfpgString): TfpgString;
 function fpgExtractFileExt(const FileName: TfpgString): TfpgString;
-function fpgExtractRelativepath(const ABaseName, ADestName: TfpgString): TfpgString;
+function fpgExtractRelativePath(const ABaseName, ADestName: TfpgString): TfpgString;
 function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
 function fpgChangeFileExt(const FileName, Extension: TfpgString): TfpgString;
 function fpgGetAppConfigDir(const Global: Boolean): TfpgString;
@@ -99,6 +100,11 @@ begin
     Result := ALine + AValue
   else
     Result := ALine;
+end;
+
+function fpgApplicationName: TfpgString;
+begin
+  Result := fpgFromOSEncoding(ApplicationName);
 end;
 
 function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;
@@ -165,7 +171,7 @@ begin
   Result := ExtractFileExt(fpgToOSEncoding(Filename));
 end;
 
-function fpgExtractRelativepath(const ABaseName, ADestName: TfpgString): TfpgString;
+function fpgExtractRelativePath(const ABaseName, ADestName: TfpgString): TfpgString;
 begin
   Result := ExtractRelativepath(fpgToOSEncoding(ABaseName), fpgToOSEncoding(ADestName));
 end;
