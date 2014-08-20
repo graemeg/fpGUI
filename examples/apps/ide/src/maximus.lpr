@@ -39,7 +39,6 @@ uses
   ideimages,
   stringhelpers,
   frm_procedurelist,
-  mPasLex,
   filemonitor,
   SynRegExpr,
   fpg_textedit,
