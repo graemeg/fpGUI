@@ -1504,6 +1504,7 @@ procedure TfpgBaseGrid.FollowFocus;
 var
   n: Integer;
   w: TfpgCoord;
+  lmin, lmax: TfpgCoord;
 begin
   if (RowCount > 0) and (FFocusRow < 0) then
     FFocusRow := 0;
@@ -1546,6 +1547,19 @@ begin
       end;
     end;  { for }
   end;  { if/else }
+
+  // If smoothscroll, convert FFirstCol to X Offset value
+  if go_SmoothScroll in FOptions then
+  begin
+    w := 0;
+    for n := 0 to FFocusCol-1 do
+      w := w + ColumnWidth[n];
+    lmin := FXOffset;
+    lmax := FXOffset + VisibleWidth;
+    if (w > lmax) or (w < lmin) then
+      FXOffset := w;
+  end;
+
   CheckFocusChange;
   UpdateScrollBars;
 end;
