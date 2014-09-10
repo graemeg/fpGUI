@@ -121,6 +121,8 @@ end;
 procedure TMainForm.btnClearClicked(Sender: TObject);
 begin
   Grid1.RowCount := 0;
+  Edit1.Text := '';
+  Bevel1.Text := '';
 end;
 
 procedure TMainForm.LabelDragStartDetected(Sender: TObject);
