@@ -2,9 +2,16 @@ unit frm_main;
 
 {$mode objfpc}{$H+}
 
+{$IFDEF WINDOWS}
+  {$define ABOUT_SYSMENU}
+{$ENDIF}
+
 interface
 
 uses
+  {$IFDEF ABOUT_SYSMENU}
+  Windows,    // Used for HMENU to add a new menu to the window System Menu. This feature is just for fun.
+  {$ENDIF}
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
   fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_imagelist,
@@ -202,6 +209,7 @@ type
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearIndexComponents;
+    procedure   ProcessAboutMsg(var Msg: TfpgMessageRec); message FPGM_ABOUT;
 
     // Note manipulations --------------------------------
     // make sure that note insert positions are not in
@@ -634,6 +642,11 @@ end;
 procedure TMainForm.MainFormShow(Sender: TObject);
 var
   lFilename: TfpgString;
+  {$IFDEF ABOUT_SYSMENU}
+  hSysMenu: HMENU;
+const
+  ID_ABOUT = 200001;  // Must match the definition in fpg_gdi.pas
+  {$ENDIF}
 begin
   bvlBody.Realign;
 
@@ -660,6 +673,12 @@ begin
         OpenFile(lFilename, '', true);
     end;
   end;
+  // This is just for fun! ;-)
+  {$IFDEF ABOUT_SYSMENU}
+  hSysMenu := GetSystemMenu(self.WinHandle, false);
+  AppendMenu(hSysMenu, MF_SEPARATOR, 0, nil);
+  AppendMenu(hSysMenu, MF_STRING, ID_ABOUT, PChar('&About fpGUI Toolkit...'));
+  {$ENDIF}
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -889,7 +908,7 @@ end;
 procedure TMainForm.miToolsShowEnvVariablesClicked(Sender: TObject);
   function LGetEnvVarValue(const AVariable: string): string;
   begin
-    Result := Format('%s = ''%s''', [AVariable, GetEnvironmentVariable(AVariable)]);
+    Result := Format('%s = ''%s''', [AVariable, SysUtils.GetEnvironmentVariable(AVariable)]);
   end;
 begin
   RichView.Clear;
@@ -2221,6 +2240,11 @@ begin
   lbIndex.Items.Clear;
   DisplayedIndex.Clear;
   IndexLoaded := False;
+end;
+
+procedure TMainForm.ProcessAboutMsg(var Msg: TfpgMessageRec);
+begin
+  TfpgMessageDialog.AboutFPGui;
 end;
 
 procedure TMainForm.CorrectNotesPositions(Topic: TTopic; AText: pchar);
