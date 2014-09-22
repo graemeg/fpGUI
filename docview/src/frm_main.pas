@@ -2748,7 +2748,6 @@ begin
   img := CreateImage_BMP(@dv_missing, sizeof(dv_missing));
   FImages.AddImage(img);
 
-
   // load toolbar images
   fpgImages.AddMaskedBMP(
     'dv.arrowleft', @usr_arrow_left,
