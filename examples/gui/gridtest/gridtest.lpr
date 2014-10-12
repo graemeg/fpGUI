@@ -230,6 +230,11 @@ begin
     AddColumn('Column 4', 150, taRightJustify);
     AddColumn('Column 5', 150, taRightJustify);
     AddColumn('Column 6', 150, taRightJustify);
+//    BorderStyle:= ebsNone;
+//    BorderStyle:= ebsSingle;
+    AutoHeight := True;
+    ScrollBarPage:= Pred(VisibleRows);
+    ScrollBarWidth := 12;
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
@@ -237,6 +242,10 @@ begin
     RowSelect := False;
     TabOrder := 1;
     AddColumn('Column 0', 65);
+//    AddColumn('Column 5', 60);
+//    AddColumn('Column 6', 100);
+//    AddColumn('Column 7', 150);
+//    AddColumn('Column 8', 65);
     // Alignment test
     Cells[1, 2] := 'left';
     Cells[2, 2] := 'center';
