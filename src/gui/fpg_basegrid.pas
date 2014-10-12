@@ -98,6 +98,8 @@ type
     procedure   SetHeaderStyle(const AValue: TfpgGridHeaderStyle);
     procedure   SetRowSelect(const AValue: boolean);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
+    function    GetScrollBarPage: integer;
+    procedure   SetScrollBarPage(const AValue: integer);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetDefaultColWidth(const AValue: integer);
     procedure   SetDefaultRowHeight(const AValue: integer);
@@ -159,6 +161,7 @@ type
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
+    property    ScrollBarPage: Integer read GetScrollBarPage write SetScrollBarPage;
     property    HeaderHeight: integer read FHeaderHeight write SetHeaderHeight;
     property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
@@ -306,6 +309,18 @@ begin
   if FScrollBarStyle = AValue then
     Exit; //==>
   FScrollBarStyle := AValue;
+end;
+
+function TfpgBaseGrid.GetScrollBarPage: integer;
+begin
+  Result:= FVScrollBar.PageSize;
+end;
+
+procedure TfpgBaseGrid.SetScrollBarPage(const AValue: integer);
+begin
+  if AValue= FVScrollBar.PageSize then
+    Exit; //==>
+  FVScrollBar.PageSize:= AValue;
 end;
 
 procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
