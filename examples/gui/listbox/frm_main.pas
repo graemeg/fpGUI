@@ -92,6 +92,9 @@ begin
   begin
     Name := 'lstName1';
     SetPosition(12, 12, 140, 168);
+    AutoHeight := True;
+    ScrollBarPage:= Pred(VisibleItems);
+    ScrollBarWidth := 12;
     FontDesc := '#List';
     HotTrack := False;
     PopupFrame := False;
