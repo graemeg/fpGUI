@@ -136,6 +136,7 @@ type
   published
     property    Align;
     property    AlternateBGColor;
+    property    AutoHeight;
     property    BackgroundColor;
     property    BorderStyle;
 //    property    ColResizing;
