@@ -88,10 +88,12 @@ type
     FItems: TStringList;
     FBtnPressed: Boolean;
     FStoredShowHint: Boolean;
+    FScrollBarWidth: integer;
     procedure   DisableShowHint;
     procedure   RestoreShowHint;
     procedure   SetMargin(const AValue: integer); virtual;
     procedure   SetAutoSize(const AValue: Boolean); virtual;
+    procedure   SetScrollBarWidth(const AValue: integer);
     procedure   CalculateInternalButtonRect; virtual;
     procedure   InternalOnClose(Sender: TObject); virtual;
     procedure   InternalItemsChanged(Sender: TObject); virtual;
@@ -110,6 +112,7 @@ type
     property    Options: TfpgComboOptions read FOptions write FOptions;
     property    Margin: integer read FMargin write SetMargin default 1;
     property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
+    property    ScrollBarWidth: integer read FScrollBarWidth write SetScrollBarWidth;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
     property    OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
@@ -162,6 +165,7 @@ type
     property    Options;
     property    ParentShowHint;
     property    ReadOnly;
+    property    ScrollBarWidth;
     property    ShowHint;
     property    TabOrder;
     property    Text;
@@ -200,14 +204,17 @@ type
   private
     FCallerWidget: TfpgBaseStaticCombo;
     FListBox: TfpgListBox;
+    FScrollBarWidth: integer;
     procedure   SetFirstItem;
   protected
     procedure   ListBoxSelect(Sender: TObject);
     procedure   HandleShow; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   SetScrollBarWidth(const AValue: integer);
   public
     constructor Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo); reintroduce;
     property    ListBox: TfpgListBox read FListBox;
+    property    ScrollBarWidth: integer read FScrollBarWidth write SetScrollBarWidth;
   end;
 
 
@@ -273,6 +280,14 @@ begin
   Repaint;
 end;
 
+procedure TfpgBaseComboBox.SetScrollBarWidth(const AValue: integer);
+begin
+  if FScrollBarWidth = AValue then
+    Exit;
+  FScrollBarWidth := AValue;
+  CalculateInternalButtonRect;
+end;
+
 procedure TfpgBaseComboBox.DisableShowHint;
 begin
   FStoredShowHint := ShowHint;
@@ -306,14 +321,13 @@ begin
   begin
     r := fpgStyle.GetControlFrameBorders;
     FHeight := FFont.Height + (Margin*2) + (r.Top+r.Bottom);
-    CalculateInternalButtonRect;
     UpdateWindowPosition;
   end;
 end;
 
 procedure TfpgBaseComboBox.CalculateInternalButtonRect;
 begin
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+  FInternalBtnRect.SetRect(Width - FScrollBarWidth-2, 2, FScrollBarWidth, Height-4);
 end;
 
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
@@ -421,6 +435,7 @@ begin
   FAutoSize       := False;
   FDropDownCount  := 8;
   FMargin         := 1;
+  FScrollBarWidth := 16;
   FFocusItem      := -1; // nothing is selected
   FReadOnly       := False;
   FItems := TStringList.Create;
@@ -479,6 +494,12 @@ begin
   begin
     Close;
   end
+end;
+
+procedure TComboboxDropdownWindow.SetScrollBarWidth(const AValue: integer);
+begin
+  if FScrollBarWidth <> AValue then
+    FScrollBarWidth := AValue;
 end;
 
 constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo);
@@ -564,6 +585,7 @@ begin
 
     ddw.Width   := Width;
     ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
+    ddw.ListBox.ScrollBarWidth:= FScrollBarWidth;
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     r := GetDropDownPos(Parent, self, ddw);  // find suitable position
     ddw.Height := r.Height;  // in case GetDropDownPos resized us
@@ -722,7 +744,6 @@ begin
   FTextColor        := Parent.TextColor;
   FFocusable        := True;
 
-  CalculateInternalButtonRect;
 end;
 
 destructor TfpgBaseStaticCombo.Destroy;
