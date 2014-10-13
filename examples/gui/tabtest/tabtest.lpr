@@ -108,6 +108,7 @@ begin
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
   pcMain.ActiveTabColor:= clOrangeRed;
   pcMain.ActiveTabTextColor:= clYellow;
+  pcMain.ActiveFontDesc := 'liberation sans-10:bold';
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One

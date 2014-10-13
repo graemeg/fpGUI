@@ -91,6 +91,7 @@ type
   TfpgPageControl = class(TfpgWidget)
   private
     FFont: TfpgFont;
+    FActiveFont: TfpgFont;
     FActivePage: TfpgTabSheet;
     FMargin: integer;
     FFixedTabWidth: integer;
@@ -143,6 +144,10 @@ type
     procedure   SetActiveTabColor(AValue: TfpgColor);
     function    GetActiveTabTextColor: TfpgColor;
     procedure   SetActiveTabTextColor(AValue: TfpgColor);
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(const AValue: string);
+    function    GetActiveFontDesc: string;
+    procedure   SetActiveFontDesc(const AValue: string);
   protected
     procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
@@ -175,6 +180,8 @@ type
     property    Enabled;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    ActiveFontDesc: string read GetActiveFontDesc write SetActiveFontDesc;
     property    Hint;
     property    Options: TfpgTabOptions read FTabOptions write FTabOptions;
     property    ParentShowHint;
@@ -531,7 +538,7 @@ begin
   if FFixedTabHeight > 0 then
     result := FFixedTabHeight
   else
-    result := FFont.Height + 10;   { TODO: correct this }
+    result := FActiveFont.Height + 10;   { TODO: correct this }
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
@@ -539,7 +546,7 @@ begin
   if FFixedTabWidth > 0 then
     result := FFixedTabWidth
   else
-    result := FFont.TextWidth(AText) + 10;
+    result := FActiveFont.TextWidth(AText) + 10;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
@@ -576,14 +583,14 @@ begin
   i       := 1;
   if FFixedTabWidth > 0 then
   begin
-    while FFont.TextWidth(s1) < (FFixedTabWidth-10) do
+    while FActiveFont.TextWidth(s1) < (FFixedTabWidth-10) do
     begin
       if Length(s1) = Length(s) then
         Break;
       s1 := UTF8Copy(s, 1, i);
       inc(i);
     end;
-    if FFont.TextWidth(s1) > (FFixedTabWidth-10) then
+    if FActiveFont.TextWidth(s1) > (FFixedTabWidth-10) then
       UTF8Delete(s1, UTF8Length(s1), 1);
     if Length(s1) > 0 then
       s1 := Trim(s1);
@@ -820,6 +827,30 @@ begin
   end;
 end;
 
+function TfpgPageControl.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TfpgPageControl.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
+end;
+
+function TfpgPageControl.GetActiveFontDesc: string;
+begin
+  Result := FActiveFont.FontDesc;
+end;
+
+procedure TfpgPageControl.SetActiveFontDesc(const AValue: string);
+begin
+  FActiveFont.Free;
+  FActiveFont := fpgGetFont(AValue);
+  RePaint;
+end;
+
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
 var
   lWasMatch: boolean;
@@ -972,6 +1003,7 @@ begin
           r2.Width := ButtonWidth(h.Text);
           r3 := DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
+          Canvas.Font := FFont;
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
@@ -993,6 +1025,7 @@ begin
         Canvas.DrawButtonFace(r2, []);
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.Font := FActiveFont;
         Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.Left+4, r3.Top+5, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1022,7 +1055,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) - FFont.TextWidth(GetTabText(h.Text))) div 2,
                 FMargin+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
@@ -1041,8 +1074,10 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.Font := FActiveFont;
         Canvas.SetTextColor(ActiveTabTextColor);
-        Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
+        Canvas.DrawText(r3.Left + (ButtonWidth(ActivePage.Text) - FActiveFont.TextWidth(GetTabText(ActivePage.Text))) div 2,
+            FMargin+toffset, GetTabText(ActivePage.Text), lTxtFlags);
       end;
 
     tpRight:
@@ -1069,6 +1104,7 @@ begin
           r3 := DrawTab(h, r2, h = ActivePage);
 
           // paint text on non-active tabs
+          Canvas.Font := FFont;
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
@@ -1090,6 +1126,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.Font := FActiveFont;
         Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1118,6 +1155,7 @@ begin
           r3 := DrawTab(h, r2, h = ActivePage);
 
           // paint text on non-active tabs
+          Canvas.Font := FFont;
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
@@ -1139,6 +1177,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.Font := FActiveFont;
         Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1264,6 +1303,8 @@ constructor TfpgPageControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FFont   := fpgStyle.DefaultFont;
+  //FActiveFont := fpgStyle.DefaultFont;  // setting both FFont and FActiveFont to the same value raises an AV.  Why ??
+  FActiveFont := fpgGetFont('#Label1');
   FPages  := TList.Create;
   Width   := 150;
   Height  := 100;
@@ -1278,7 +1319,7 @@ begin
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
-  FFixedTabHeight   := 21;
+  FFixedTabHeight   := 0;
   FFirstTabButton   := nil;
   FStyle            := tsTabs;
   FTabPosition      := tpTop;
