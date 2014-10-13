@@ -734,17 +734,17 @@ var
   // paint selection rectangle
   procedure DrawSelection;
   var
-    lcolor: TfpgColor;
+    lcolor,ltxtcolor: TfpgColor;
   begin
     if Focused then
     begin
       lcolor := clSelection;
-      Canvas.SetTextColor(clSelectionText);
+      ltxtcolor := clSelectionText;
     end
     else
     begin
       lcolor := clInactiveSel;
-      Canvas.SetTextColor(clText1);
+      ltxtcolor := clText1;
     end;
 
     len := FSelOffset;
@@ -759,16 +759,16 @@ var
 
     // XOR on Anti-aliased text doesn't look to good. Lets try standard
     // Blue & White like what was doen in TfpgEdit.
-{   Canvas.SetColor(lcolor);
+   Canvas.SetColor(lcolor);
     Canvas.FillRectangle(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
     r.SetRect(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
     Canvas.AddClipRect(r);
-    Canvas.SetTextColor(clWhite);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + FMargin, 3, Text, Enabled);
+    Canvas.SetTextColor(ltxtcolor);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + FMargin + tw, 3, UTF8Copy(Items[FSelectedItem], Succ(st), Pred(len)), Enabled);
     Canvas.ClearClipRect;
-}
-    Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
-      -FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
+
+    //Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
+    //  -FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
   end;
 
 begin
