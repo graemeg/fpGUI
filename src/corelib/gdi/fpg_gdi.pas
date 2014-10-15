@@ -1290,7 +1290,7 @@ begin
     if MainForm <> nil then
       lHandle := TfpgGDIWindow(MainForm).FWinHandle
     else
-      lHandle := -1;
+      lHandle := 0;
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
       DWORD(WS_POPUP), 0, 0, 0, 0, lHandle, 0, MainInstance, nil);
   end;
