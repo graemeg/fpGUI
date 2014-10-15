@@ -1876,13 +1876,25 @@ begin
 end;
 
 { LINE }
-procedure Agg2D.line(x1 ,y1 ,x2 ,y2 : double );
+procedure Agg2D.line(const x1, y1, x2, y2: double; AFixAlignment: boolean = false);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
 
- addLine (x1 ,y1 ,x2 ,y2 );
- drawPath(StrokeOnly );
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
 
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ addLine(lx1, ly1, lx2, ly2);
+ drawPath(StrokeOnly);
 end;
 
 { TRIANGLE }
@@ -1899,13 +1911,27 @@ begin
 end;
 
 { RECTANGLE }
-procedure Agg2D.rectangle(x1 ,y1 ,x2 ,y2 : double );
+procedure Agg2D.rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
- m_path.move_to(x1 ,y1 );
- m_path.line_to(x2 ,y1 );
- m_path.line_to(x2 ,y2 );
- m_path.line_to(x1 ,y2 );
+
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
+
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ m_path.move_to(lx1 ,ly1 );
+ m_path.line_to(lx2 ,ly1 );
+ m_path.line_to(lx2 ,ly2 );
+ m_path.line_to(lx1 ,ly2 );
  m_path.close_polygon;
 
  drawPath(FillAndStroke );
