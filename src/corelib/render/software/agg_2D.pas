@@ -2128,7 +2128,7 @@ procedure Agg2D.font(
            fileName : char_ptr; height : double;
            bold : boolean = false;
            italic : boolean = false;
-           ch : FontCacheType = RasterFontCache;
+           ch : FontCacheType = VectorFontCache;
            angle : double = 0.0 );
 var
  b : int;
@@ -2147,10 +2147,11 @@ begin
  m_fontEngine.hinting_(m_textHints );
 
  if ch = VectorFontCache then
-  m_fontEngine.height_(height )
+ {$NOTE We need to fix this. Translating from font pt to pixels is inaccurate. This is just a temp fix for now. }
+  m_fontEngine.height_(height * 1.3333 ) // 9pt = ~12px so that is a ratio of 1.3333
  else
   m_fontEngine.height_(worldToScreen(height ) );
-{$ENDIF }
+{$ENDIF}
 {$IFDEF AGG2D_USE_WINFONTS}
  m_fontEngine.hinting_(m_textHints );
 
@@ -2193,7 +2194,9 @@ end;
 procedure Agg2D.textHints(hints : boolean );
 begin
  m_textHints:=hints;
-
+ {$IFNDEF AGG2D_NO_FONT}
+ m_fontEngine.hinting_(m_textHints );
+ {$ENDIF}
 end;
 
 { TEXTWIDTH }
@@ -2376,6 +2379,7 @@ end;
 procedure Agg2D.resetPath;
 begin
  m_path.remove_all;
+ m_path.move_to(0 ,0 );
 
 end;
 
