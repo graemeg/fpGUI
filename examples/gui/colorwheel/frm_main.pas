@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
   fpg_edit, fpg_form, fpg_label, fpg_button,
   fpg_dialogs, fpg_menu, fpg_checkbox,
-  fpg_panel, fpg_ColorWheel;
+  fpg_panel, fpg_ColorWheel, fpg_spinedit;
 
 type
 
@@ -28,13 +28,14 @@ type
     Label4: TfpgLabel;
     Label5: TfpgLabel;
     Label6: TfpgLabel;
-    edR: TfpgEdit;
-    edG: TfpgEdit;
-    edB: TfpgEdit;
+    edR: TfpgSpinEdit;
+    edG: TfpgSpinEdit;
+    edB: TfpgSpinEdit;
     Label7: TfpgLabel;
     Label8: TfpgLabel;
     Bevel2: TfpgBevel;
     Label9: TfpgLabel;
+    L_Hexa: TfpgLabel;
     chkCrossHair: TfpgCheckBox;
     chkBGColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
@@ -58,6 +59,51 @@ implementation
 
 {@VFD_NEWFORM_IMPL}
 
+function ConvertToHexa(Value: Integer): string;
+var
+  ValH,ValL: Integer;
+begin
+ValH:= Value div 16;
+ValL:= Value mod 16;
+case ValH of
+  15:
+    Result:= 'F';
+  14:
+    Result:= 'E';
+  13:
+    Result:= 'D';
+  12:
+    Result:= 'C';
+  11:
+    Result:= 'B';
+  10:
+    Result:= 'A';
+  else
+    Result:= IntToStr(ValH);
+  end;
+case ValL of
+  15:
+    Result:= Result+'F';
+  14:
+    Result:= Result+'E';
+  13:
+    Result:= Result+'D';
+  12:
+    Result:= Result+'C';
+  11:
+    Result:= Result+'B';
+  10:
+    Result:= Result+'A';
+  else
+    Result:= Result+IntToStr(ValL);
+  end;
+end;
+
+function Hexa(Red,Green,Blue: Integer): string;
+begin
+Result:= '$'+ConvertToHexa(Red)+ConvertToHexa(Green)+ConvertToHexa(Blue);
+end;
+
 procedure TMainForm.ColorChanged(Sender: TObject);
 begin
   UpdateHSVComponents;
@@ -71,12 +117,13 @@ var
   c: TfpgColor;
 begin
   FViaRGB := True;  // revent recursive updates
-  rgb.Red := StrToInt(edR.Text);
-  rgb.Green := StrToInt(edG.Text);
-  rgb.Blue := StrToInt(edB.Text);
+  rgb.Red := edR.Value;
+  rgb.Green := edG.Value;
+  rgb.Blue := edB.Value;
   c := RGBTripleTofpgColor(rgb);
   ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB := False;
+  L_Hexa.Text:= 'Hexa = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -127,9 +174,10 @@ var
 begin
   c := ValueBar1.SelectedColor;
   rgb := fpgColorToRGBTriple(c);
-  edR.Text := IntToStr(rgb.Red);
-  edG.Text := IntToStr(rgb.Green);
-  edB.Text := IntToStr(rgb.Blue);
+  edR.Value := rgb.Red;
+  edG.Value := rgb.Green;
+  edB.Value := rgb.Blue;
+  L_Hexa.Text:= 'Hexa = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 procedure TMainForm.AfterCreate;
@@ -275,37 +323,53 @@ begin
     Text := 'Blue';
   end;
 
-  edR := TfpgEdit.Create(self);
+  edR := TfpgSpinEdit.Create(self);
   with edR do
   begin
     Name := 'edR';
     SetPosition(296, 280, 44, 26);
     TabOrder := 13;
-    Text := '255';
+    MinValue := 0;
+    MaxValue := 255;
+    Value := 255;
     FontDesc := '#Edit1';
     OnExit  := @RGBChanged;
   end;
 
-  edG := TfpgEdit.Create(self);
+  edG := TfpgSpinEdit.Create(self);
   with edG do
   begin
     Name := 'edG';
     SetPosition(296, 308, 44, 26);
     TabOrder := 14;
-    Text := '255';
+    MinValue := 0;
+    MaxValue := 255;
+    Value := 255;
     FontDesc := '#Edit1';
     OnExit := @RGBChanged;
   end;
 
-  edB := TfpgEdit.Create(self);
+  edB := TfpgSpinEdit.Create(self);
   with edB do
   begin
     Name := 'edB';
     SetPosition(296, 336, 44, 26);
     TabOrder := 15;
-    Text := '255';
+    MinValue := 0;
+    MaxValue := 255;
+    Value := 255;
     FontDesc := '#Edit1';
     OnExit := @RGBChanged;
+  end;
+
+  L_Hexa := TfpgLabel.Create(self);
+  with L_Hexa do
+  begin
+    Name := 'L_Hexa';
+    SetPosition(380, 316, 120, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Hexa = ';
   end;
 
   Label7 := TfpgLabel.Create(self);
@@ -376,6 +440,9 @@ begin
 //  ColorWheel1.BackgroundColor := clFuchsia;
 //  ValueBar1.BackgroundColor := clFuchsia;
 //  ColorWheel1.CursorSize := 400;
+  UpdateHSVComponents;
+  if not FViaRGB then
+    UpdateRGBComponents;
 end;
 
 
