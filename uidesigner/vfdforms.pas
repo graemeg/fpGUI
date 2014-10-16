@@ -128,7 +128,6 @@ type
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
     lb1: TfpgLabel;
-    chlGrid: TfpgComboBox;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     lblRecentFiles: TfpgLabel;
@@ -144,6 +143,7 @@ type
     chkCodeRegions: TfpgCheckBox;
     cbIndentationType: TfpgComboBox;
     lblIndentType: TfpgLabel;
+    edtGridX: TfpgEditInteger;
     {@VFD_HEAD_END: frmVFDSetup}
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
@@ -491,7 +491,7 @@ end;
 procedure TfrmVFDSetup.LoadSettings;
 begin
   FINIVersion             := gINI.ReadInteger('Designer', 'Version', 0);
-  chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 4)+1;
+  edtGridX.Value          := gINI.ReadInteger('Options', 'GridResolution', 4);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
   chkFullPath.Checked     := gINI.ReadBool('Options', 'ShowFullPath', True);
   edtDefaultExt.Text      := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
@@ -504,7 +504,7 @@ end;
 procedure TfrmVFDSetup.SaveSettings;
 begin
   gINI.WriteInteger('Designer', 'Version', cDesignerINIVersion);
-  gINI.WriteInteger('Options', 'GridResolution', StrToInt(chlGrid.Text));
+  gINI.WriteInteger('Options', 'GridResolution', edtGridX.Value);
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
   gINI.WriteBool('Options', 'ShowFullPath', chkFullPath.Checked);
   gINI.WriteString('Options', 'DefaultFileExt', edtDefaultExt.Text);
@@ -540,28 +540,6 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Grid resolution:';
-  end;
-
-  chlGrid := TfpgComboBox.Create(self);
-  with chlGrid do
-  begin
-    Name := 'chlGrid';
-    SetPosition(144, 28, 88, 24);
-    ExtraHint := '';
-    FontDesc := '#List';
-    Hint := '';
-    Items.Add('1');
-    Items.Add('2');
-    Items.Add('3');
-    Items.Add('4');
-    Items.Add('5');
-    Items.Add('6');
-    Items.Add('7');
-    Items.Add('8');
-    Items.Add('9');
-    Items.Add('10');
-    FocusItem := -1;
-    TabOrder := 1;
   end;
 
   btnOK := TfpgButton.Create(self);
@@ -734,6 +712,19 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Indent Type for generated code:';
+  end;
+
+  edtGridX := TfpgEditInteger.Create(self);
+  with edtGridX do
+  begin
+    Name := 'edtGridX';
+    SetPosition(119, 28, 48, 24);
+    FontDesc := '#Edit1';
+    Hint := '';
+    MaxValue := 10;
+    MinValue := 1;
+    TabOrder := 18;
+    Value := 4;
   end;
 
   {@VFD_BODY_END: frmVFDSetup}
