@@ -799,6 +799,8 @@ begin
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('MaxValue', TPropertyInteger, '');
+  wc.AddProperty('MinValue', TPropertyInteger, '');
   wc.AddProperty('NegativeColor', TPropertyColor, 'Color used for negative values');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ReadOnly', TPropertyBoolean, '');
@@ -820,6 +822,8 @@ begin
   wc.AddProperty('FixedDecimals', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('MaxValue', TPropertyFloat, '');
+  wc.AddProperty('MinValue', TPropertyFloat, '');
   wc.AddProperty('NegativeColor', TPropertyColor, 'Color used for negative values');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ReadOnly', TPropertyBoolean, '');
