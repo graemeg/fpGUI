@@ -88,7 +88,7 @@ type
     FOneClickMove: boolean;
   protected
     FWidgets: TList;
-    FForm: TfpgForm;
+    FForm: TDesignedForm;
     FFormOther: string;
     FDragging: boolean;
     FDragPosX,
@@ -134,7 +134,7 @@ type
     function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
     // The widgets can be selected and dragged within one click
     property    OneClickMove: boolean read FOneClickMove write FOneClickMove;
-    property    Form: TfpgForm read FForm;
+    property    Form: TDesignedForm read FForm;
     property    FormOther: string read FFormOther write FFormOther;
   end;
 
