@@ -491,7 +491,7 @@ end;
 procedure TfrmVFDSetup.LoadSettings;
 begin
   FINIVersion             := gINI.ReadInteger('Designer', 'Version', 0);
-  chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
+  chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 4)+1;
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
   chkFullPath.Checked     := gINI.ReadBool('Options', 'ShowFullPath', True);
   edtDefaultExt.Text      := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
@@ -504,7 +504,7 @@ end;
 procedure TfrmVFDSetup.SaveSettings;
 begin
   gINI.WriteInteger('Designer', 'Version', cDesignerINIVersion);
-  gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
+  gINI.WriteInteger('Options', 'GridResolution', StrToInt(chlGrid.Text));
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
   gINI.WriteBool('Options', 'ShowFullPath', chkFullPath.Checked);
   gINI.WriteString('Options', 'DefaultFileExt', edtDefaultExt.Text);
@@ -551,8 +551,15 @@ begin
     FontDesc := '#List';
     Hint := '';
     Items.Add('1');
+    Items.Add('2');
+    Items.Add('3');
     Items.Add('4');
+    Items.Add('5');
+    Items.Add('6');
+    Items.Add('7');
     Items.Add('8');
+    Items.Add('9');
+    Items.Add('10');
     FocusItem := -1;
     TabOrder := 1;
   end;

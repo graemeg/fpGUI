@@ -466,11 +466,7 @@ end;
 
 procedure TMainDesigner.LoadDefaults;
 begin
-  case gINI.ReadInteger('Options', 'GridResolution', 1) of
-    0: GridResolution := 2;
-    1: GridResolution := 4;
-    2: GridResolution := 8;
-  end;
+  GridResolution  := gINI.ReadInteger('Options', 'GridResolution', 4);
   DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
   OneClickMove    := gINI.ReadBool('Options', 'OneClickMove', True);
