@@ -38,8 +38,10 @@ type
 
   TMainDesigner = class(TObject)
   private
+    FShowGrid: boolean;
     procedure   SetEditedFileName(const Value: string);
     procedure   LoadDefaults;
+    procedure   SetShowGrid(AValue: boolean);
   protected
     FDesigners: TList;
     FFile: TVFDFile;
@@ -71,6 +73,7 @@ type
     procedure   OnExit(Sender: TObject);
     procedure   OnOptionsClick(Sender: TObject);
     property    EditedFileName: string read FEditedFileName write SetEditedFileName;
+    property    ShowGrid: boolean read FShowGrid write SetShowGrid;
   end;
 
 
@@ -165,7 +168,13 @@ begin
           CreateParseForm(bl.FormName, bl.Data, bl2.Data); // pair was found
       end;
   end;
-  
+
+  for n := 0 to FDesigners.Count - 1 do
+  begin
+    selectedform := nil;
+    TFormDesigner(FDesigners[n]).Form.ShowGrid := FShowGrid;
+  end;
+
   frmMain.mru.AddItem(fname);
 end;
 
@@ -310,6 +319,7 @@ begin
       if nfrm.edName.Text <> '' then
         fd.Form.Name := nfrm.edName.Text;
       fd.Form.WindowTitle := fd.Form.Name;
+      fd.Form.ShowGrid := FShowGrid;
       fd.OneClickMove := OneClickMove;
       FDesigners.Add(fd);
       SelectedForm := fd;
@@ -471,6 +481,17 @@ begin
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
   OneClickMove    := gINI.ReadBool('Options', 'OneClickMove', True);
   fpgApplication.HintPause := 1000;
+end;
+
+procedure TMainDesigner.SetShowGrid(AValue: boolean);
+var
+  i: integer;
+begin
+  if FShowGrid = AValue then
+    Exit;
+  FShowGrid := AValue;
+  for i := 0 to FDesigners.Count-1 do
+    TFormDesigner(FDesigners[i]).Form.ShowGrid := AValue;
 end;
 
 end.

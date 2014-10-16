@@ -59,8 +59,15 @@ type
 
 
   TDesignedForm = class(TfpgForm)
+  private
+    FShowGrid: boolean;
+    procedure   SetShowGrid(AValue: boolean);
+  protected
+    procedure   HandlePaint; override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
+    property    ShowGrid: boolean read FShowGrid write SetShowGrid;
   end;
 
 
@@ -1465,6 +1472,51 @@ begin
 end;
 
 { TDesignedForm }
+
+procedure TDesignedForm.SetShowGrid(AValue: boolean);
+begin
+  if FShowGrid = AValue then
+    Exit;
+  FShowGrid := AValue;
+  Invalidate;
+end;
+
+procedure TDesignedForm.HandlePaint;
+var
+  i: integer;
+begin
+  inherited HandlePaint;
+  if FShowGrid then
+  begin
+    Canvas.Clear(TfpgColor($ff3e85cd));
+    // horizontal lines
+    for i := 0 to Height-1 do
+    begin
+      if i mod 50 = 0 then
+        Canvas.SetColor(TfpgColor($ff5492d0))
+      else
+        Canvas.SetColor(TfpgColor($ff488bcf));
+      if i mod 10 = 0 then
+        Canvas.DrawLine(0, i, Width-1, i);
+    end;
+    // vertical lines
+    for i := 0 to Width-1 do
+    begin
+      if i mod 50 = 0 then
+        Canvas.SetColor(TfpgColor($ff5492d0))
+      else
+        Canvas.SetColor(TfpgColor($ff488bcf));
+      if i mod 10 = 0 then
+        Canvas.DrawLine(i, 0, i, Height-1);
+    end;
+  end;
+end;
+
+constructor TDesignedForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FShowGrid := False;
+end;
 
 procedure TDesignedForm.AfterCreate;
 begin
