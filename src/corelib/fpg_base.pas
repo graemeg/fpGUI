@@ -1747,6 +1747,9 @@ begin
   else
     count := ARect.Right - ARect.Left;
 
+  if count < 1 then
+    Exit; // there is nothing to paint
+
   RDiff := RGBStop.Red - RGBStart.Red;
   GDiff := RGBStop.Green - RGBStart.Green;
   BDiff := RGBStop.Blue - RGBStart.Blue;
