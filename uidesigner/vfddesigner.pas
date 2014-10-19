@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -683,7 +683,7 @@ var
 begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
-  frm.Title := cEditOrder[AMode];
+  frm.Title := maindsgn.selectedform.Form.Name;
 
   frm.Treeview1.RootNode.Clear;
   lFocused := nil;
