@@ -292,7 +292,6 @@ end;
 procedure TWidgetOrderForm.SetupCaptions;
 begin
   inherited SetupCaptions;
-  WindowTitle := rsDlgWidgetOrder;
   btnOK.Text := rsOK;
   btnCancel.Text := rsCancel;
   btnUp.Text := rsUp;
