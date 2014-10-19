@@ -31,11 +31,11 @@ type
     edR: TfpgSpinEdit;
     edG: TfpgSpinEdit;
     edB: TfpgSpinEdit;
+    lblHex: TfpgLabel;
     Label7: TfpgLabel;
     Label8: TfpgLabel;
     Bevel2: TfpgBevel;
     Label9: TfpgLabel;
-    L_Hexa: TfpgLabel;
     chkCrossHair: TfpgCheckBox;
     chkBGColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
@@ -123,7 +123,7 @@ begin
   c := RGBTripleTofpgColor(rgb);
   ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB := False;
-  L_Hexa.Text:= 'Hexa = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -177,7 +177,7 @@ begin
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
-  L_Hexa.Text:= 'Hexa = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 procedure TMainForm.AfterCreate;
@@ -186,6 +186,7 @@ begin
   Name := 'MainForm';
   SetPosition(349, 242, 537, 411);
   WindowTitle := 'ColorWheel test app';
+  Hint := '';
   WindowPosition := wpUser;
 
   Button1 := TfpgButton.Create(self);
@@ -222,6 +223,7 @@ begin
   begin
     Name := 'Bevel1';
     SetPosition(20, 288, 76, 56);
+    Hint := '';
   end;
 
   Label1 := TfpgLabel.Create(self);
@@ -362,14 +364,14 @@ begin
     OnExit := @RGBChanged;
   end;
 
-  L_Hexa := TfpgLabel.Create(self);
-  with L_Hexa do
+  lblHex := TfpgLabel.Create(self);
+  with lblHex do
   begin
-    Name := 'L_Hexa';
+    Name := 'lblHex';
     SetPosition(380, 316, 120, 16);
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Hexa = ';
+    Text := 'Hex = ';
   end;
 
   Label7 := TfpgLabel.Create(self);
@@ -397,6 +399,7 @@ begin
   begin
     Name := 'Bevel2';
     SetPosition(388, 8, 2, 260);
+    Hint := '';
     Style := bsLowered;
   end;
 
@@ -417,6 +420,7 @@ begin
     Name := 'chkCrossHair';
     SetPosition(396, 32, 128, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 20;
     Text := 'Large CrossHair';
     OnChange  := @chkCrossHairChange;
@@ -428,6 +432,7 @@ begin
     Name := 'chkBGColor';
     SetPosition(396, 56, 132, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 21;
     Text := 'New BG Color';
     OnChange  := @chkBGColorChange;
