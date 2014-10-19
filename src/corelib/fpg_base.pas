@@ -577,6 +577,7 @@ type
     procedure   CreateForm(InstanceClass: TComponentClass; out Reference);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; virtual; abstract;
     function    Screen_dpi_x: integer; virtual; abstract;
     function    Screen_dpi_y: integer; virtual; abstract;
     function    Screen_dpi: integer; virtual; abstract;

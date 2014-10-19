@@ -246,6 +246,7 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
     function    Screen_dpi_x: integer; override;
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
@@ -1414,6 +1415,11 @@ begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Bottom - r.Top;
   // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
+end;
+
+function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
+begin
+  raise EfpGUIException.Create('Not implemented yet');
 end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;

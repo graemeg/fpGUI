@@ -331,6 +331,7 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
     function    Screen_dpi_x: integer; override;
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
@@ -2238,6 +2239,28 @@ var
 begin
   XGetWindowAttributes(FDisplay, FRootWindow, @wa);
   Result := wa.Height;
+end;
+
+function TfpgX11Application.GetScreenPixelColor(APos: TPoint): TfpgColor;
+var
+  Image: PXImage;
+  Pixel: Cardinal;
+  x_Color: TXColor;
+begin
+  Result := 0;
+  Image := XGetImage(Display, FRootWindow, APos.X, APos.Y, 1, 1, $FFFFFFFF, ZPixmap);
+  if Image = nil then
+    raise Exception.Create('fpGFX/X11: Invalid XImage');
+  try
+    Pixel := XGetPixel(Image, 0, 0);
+    x_Color.pixel := Pixel;
+    XQueryColor(Display, DefaultColorMap, @x_Color);
+    Result := TfpgColor(((x_Color.red and $00FF) shl 16) or
+                       ((x_Color.green and $00FF) shl 8) or
+                        (x_Color.blue and $00FF));
+  finally
+    XDestroyImage(Image);
+  end;
 end;
 
 function TfpgX11Application.Screen_dpi_x: integer;
