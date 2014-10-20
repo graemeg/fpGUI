@@ -1418,8 +1418,11 @@ begin
 end;
 
 function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
+var
+  c: longword;
 begin
-  raise EfpGUIException.Create('Not implemented yet');
+  c := Windows.GetPixel(FDisplay, APos.X, APos.Y);
+  Result := WinColorTofpgColor(c);
 end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;
