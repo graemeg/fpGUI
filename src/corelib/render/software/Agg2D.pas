@@ -3559,10 +3559,7 @@ procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
 {$IFDEF WINDOWS}
 begin
  {$IFDEF AGG2D_USE_FREETYPE }
- if DirectoryExists('c:\WINNT\Fonts') then
-   Font('c:\WINNT\Fonts\arial.ttf', 10)
- else
-   Font('c:\Windows\Fonts\arial.ttf', 10);
+   Font(GetWindowsFontDir + 'arial.ttf', 10);
  {$ENDIF }
  {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);
