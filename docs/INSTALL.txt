@@ -126,14 +126,19 @@ Example:
  MacOSX instructions and known issues
  ====================================
 
-NOTE:
-  MacOSX is still an unsupported platform, but some users have reported
+NOTE #1:
+  MacOSX is still an unsupported platform, but users have reported
   that it works, so I decided to add some of their notes here for any other
   Mac users that want to try fpGUI.
 
-To run fpGUI based application under MacOSX, you use the X11 backend. X11
-is included with all recent MacOSX versions (in older OSX versions it was
-a separate install - but included on the install DVD).
+NOTE #2:
+  It seems Apple stopped shipping X11 with OSX. From OSX 10.9 you need to
+  install X11 Server support by downloading it from the open source project
+  named XQuartz [http://xquartz.macosforge.org/landing/].
+
+To compile and run fpGUI based application under MacOSX, you use the X11 backend.
+X11 is included with all recent MacOSX versions (in older OSX versions it was a
+separate install - but included on the install DVD).
 
 An example workflow to work with any fpgui app is:
 a) launch X11 (Applications -> Utilities)
@@ -156,9 +161,17 @@ d) type ./appname to start the application "appname"
    choose the path during installation, so probably other OSX users will
    have to double check the correct X11 library path.
 
+   If you still get the error about the missing X11 the you might have to setup
+   a generic symlink. eg:
+
+      cd /usr/X11/lib
+      sudo ln -s libX11.6.dylib libX11.dylib
+      sudo ln -s libXft.2.dylib libXft.dylib
+      sudo ln -s libfontconfig.1.dylib libfontconfig.dylib
+
  * Compiling from the command line, the compiler cannot create the
-   sub-directory "units" used by most demos inluded with fpGUI. So remember to
-   create such a directory if the compiler fails. The compiler output will
+   sub-directory "units" used by most demos included with fpGUI. So remember to
+   create such a directory if the compilation fails. The compiler output will
    clearly state such a situation. When using Lazarus or Maximus IDE to compile
    fpGUI projects, the IDE will creates the missing unit output path for you.
 
