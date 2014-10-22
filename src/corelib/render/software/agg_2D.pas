@@ -414,9 +414,9 @@ type
               opt : ViewportOption = XMidYMid );
 
   // Basic Shapes
-   procedure line     (x1 ,y1 ,x2 ,y2 : double );
+   procedure line     (const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean = false );
    procedure triangle (x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
-   procedure rectangle(x1 ,y1 ,x2 ,y2 : double );
+   procedure rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean = false);
 
    procedure roundedRect(x1 ,y1 ,x2 ,y2 ,r : double ); overload;
    procedure roundedRect(x1 ,y1 ,x2 ,y2 ,rx ,ry : double ); overload;
@@ -443,7 +443,7 @@ type
               fileName : char_ptr; height : double;
               bold : boolean = false;
               italic : boolean = false;
-              ch : FontCacheType = RasterFontCache;
+              ch : FontCacheType = VectorFontCache;
               angle : double = 0.0 );
 
    function  fontHeight : double;
