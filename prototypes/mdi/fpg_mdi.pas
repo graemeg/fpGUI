@@ -100,7 +100,7 @@ var
   dx, dy: integer;
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, AMousePos);
+  pt := WidgetToScreen(self, AMousePos);
   if not FIsMouseDown then
   begin
     FLastPos := pt;
@@ -127,7 +127,7 @@ procedure TfpgMDIChildForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton
 begin
   FMDIWorkArea.ActiveWindow := self;
   FIsMouseDown := True;
-  FLastPos := Panel1.WindowToScreen(self, AMousePos);
+  FLastPos := Panel1.WidgetToScreen(self, AMousePos);
   Panel1.CaptureMouse;
 end;
 
