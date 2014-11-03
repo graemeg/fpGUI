@@ -50,17 +50,17 @@
         <UnitName Value="frmvlcplayer"/>
       </Unit1>
       <Unit2>
-        <Filename Value="../fpg_vlc.pas"/>
+        <Filename Value="../../../src/3rdparty/libvlc/fpg_vlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpg_vlc"/>
       </Unit2>
       <Unit3>
-        <Filename Value="../../libvlc/libvlc.pp"/>
+        <Filename Value="../../../src/3rdparty/libvlc/libvlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="libvlc"/>
       </Unit3>
       <Unit4>
-        <Filename Value="../../libvlc/vlc.pas"/>
+        <Filename Value="../../../src/3rdparty/libvlc/vlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="vlc"/>
       </Unit4>

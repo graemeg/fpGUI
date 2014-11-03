@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_panel, fpg_button, fpg_main, fpg_form,
-  fpg_editbtn, fpg_memo, fpg_label, libvlc, vlc, fpg_vlc;
+  fpg_editbtn, fpg_memo, fpg_label, vlc, fpg_vlc;
 
 type
 
@@ -23,8 +23,8 @@ type
     Button3: TfpgButton;
     Button4: TfpgButton;
     Memo1: TfpgMemo;
-    procedure Sync;
     {@VFD_HEAD_END: VLCPlayerDemo}
+    procedure Sync;
   public
     P :  TFpgVLCPlayer;
     FMsg: String;
