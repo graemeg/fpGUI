@@ -46,32 +46,27 @@ used by Netscape and Internet Explorer web browsers. As well as some internal
 color constants used by many GUI components (like clText, clWindowBackground 
 etc.).
 </p>
-        </descr>
-        <seealso/>
-      </element>
-      <!-- record type Visibility: default -->
-      <element name="TRGBTriple">
-        <short>A record structure holding the RGBA values of a color</short>
-        <descr><printshort id="TRGBTriple"/>.</descr>
-        <seealso/>
-      </element>
-      <!-- variable Visibility: default -->
-      <element name="TRGBTriple.Alpha">
-        <short>Alpha support has not really been implemented in fpGUI yet.</short>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- enumeration type Visibility: default -->
-      <element name="TWindowType">
-        <short>Enum type defining what types of windows can be created.</short>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowType.wtChild">
-        <short>The window being created is a child on another window. This normally
+</descr>
+</element>
+
+<element name="TRGBTriple">
+<short>A record structure holding the RGBA values of a color</short>
+<descr><printshort id="TRGBTriple"/>.</descr>
+</element>
+
+<element name="TRGBTriple.Alpha">
+<short>Alpha support has not really been implemented in fpGUI yet.</short>
+</element>
+
+<element name="TWindowType">
+<short>Enum type defining what types of windows can be created.</short>
+</element>
+
+<element name="TWindowType.wtChild">
+<short>The window being created is a child on another window. This normally
 means no titlebar or window borders are going to be created.</short>
-      </element>
+</element>
+
 <element name="TWindowType.wtWindow">
 <short>This would specify a standard window with titlebar and window borders. It grabs input
 focus, and appears in the taskbar.</short>
