@@ -72,21 +72,21 @@ etc.).
         <short>The window being created is a child on another window. This normally
 means no titlebar or window borders are going to be created.</short>
       </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowType.wtWindow">
-        <short>This would specify a standard window with titlebar and window borders.</short>
-        <descr>This would specify a standard window with titlebar and window borders. It grabs input focus, and appears in the taskbar.</descr>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowType.wtModalForm">
-        <short>This windows type is similar to wtWindow, but grabs focus.</short>
-        <descr>This windows is the same as <link id="#fpgui.fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowType.wtPopup">
-        <short>This window will normally not have a titlebar or window borders.</short>
-        <descr>This window will normally not have a titlebar or window borders and will appear above other windows. It is used for example in the dropdown window of a ComboBox or a tooltip window or popup menus. This type of window does not steal focus.</descr>
-      </element>
+<element name="TWindowType.wtWindow">
+<short>This would specify a standard window with titlebar and window borders. It grabs input
+focus, and appears in the taskbar.</short>
+</element>
+
+<element name="TWindowType.wtModalForm">
+<short>This windows is similar to <link id="#fpgui.fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs
+the input focus until it has closed. This window normally doesn't appear in the taskbar.</short>
+</element>
+
+<element name="TWindowType.wtPopup">
+<short>This window will normally not have a titlebar or window borders and will appear above other windows. It
+is used for example in the dropdown window of a ComboBox or a tooltip window or popup menus. This type of
+window does not steal focus.</short>
+</element>
 
 <element name="TWindowAttribute">
 <short>An enum types defining extra attributes of a window.</short>
