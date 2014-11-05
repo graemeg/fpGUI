@@ -18,7 +18,7 @@ For more information, see the fpGUI Toolkit website at: <url href="http://fpgui.
       <descr><p>This unit contains all the abstract classes for the CoreLib code
 of fpGUI. It also defines many types and constants used throughout the toolkit.
 </p>
-        <p>When implementing support for a completely new windowing system 
+        <p>When implementing support for a completely new windowing system
 (eg: Carbon used in Mac OS-X) you would implement all the abstract methods
 defined in this unit.
 </p>
@@ -26,8 +26,8 @@ defined in this unit.
       <!-- alias type Visibility: default -->
       <element name="TfpgCoord">
         <short>A custom type used to represent X and Y coordinates.</short>
-        <descr>Internally TfpgCoord is actually a Integer type. We created a custom 
-alias type for use in fpGUI in the event that we might want to change the 
+        <descr>Internally TfpgCoord is actually a Integer type. We created a custom
+alias type for use in fpGUI in the event that we might want to change the
 underlying type in the future. Example to floating points.
 </descr>
         <seealso/>
@@ -39,11 +39,11 @@ underlying type in the future. Example to floating points.
           <p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter the
 operating system.
 </p>
-          <p>The <var>fpg_base</var> unit also contains definitions of many useful color 
-constants. It defines the standard predefined Delphi colors (like clRed, 
-clMagenta etc.), the 140 web safe colors using the defacto standard names as 
-used by Netscape and Internet Explorer web browsers. As well as some internal 
-color constants used by many GUI components (like clText, clWindowBackground 
+          <p>The <var>fpg_base</var> unit also contains definitions of many useful color
+constants. It defines the standard predefined Delphi colors (like clRed,
+clMagenta etc.), the 140 web safe colors using the defacto standard names as
+used by Netscape and Internet Explorer web browsers. As well as some internal
+color constants used by many GUI components (like clText, clWindowBackground
 etc.).
 </p>
 </descr>
@@ -125,7 +125,7 @@ the first time.</short>
 <link id="fpg_base.TWindowAttribute">TWindowAttribute</link>
 </seealso>
 </element>
-      
+
       <!-- enumeration type Visibility: default -->
       <element name="TMouseCursor">
         <short>Enum types of the available mouse cursor shapes.</short>
@@ -366,7 +366,7 @@ the first time.</short>
       <element name="TfpgRect">
         <short>A graphical (pixel based) rectangle structure used throughout fpGUI.</short>
         <descr>
-          <p>Note that this structure is not a class, so static allocations are 
+          <p>Note that this structure is not a class, so static allocations are
 allowed. This makes it much easier to use in Widgets and in fpGUI internal
 messages.</p>
           <p>Think of the pixel screen/grid like the grid of a spreadsheet (or as a magnified look of the top corner of your screen).
@@ -382,11 +382,11 @@ messages.</p>
    +---+---+---
    |   |   |
 </pre>
-          <p>x is at (0,0). A pixel is always 1x1, you don't get smaller (we are not using sub-pixels like on LCD screens, because they don't apply to all screens).  
+          <p>x is at (0,0). A pixel is always 1x1, you don't get smaller (we are not using sub-pixels like on LCD screens, because they don't apply to all screens).
 </p>
-          <p>So with that example, Width = 1 pixel and Height = 1 pixel. In the case of 
-Classes.Bounds() the Right and Bottom values are (1,1) which looking at the 
-above image will be wrong, the pixel only covers one block, so in a screen/pixel 
+          <p>So with that example, Width = 1 pixel and Height = 1 pixel. In the case of
+Classes.Bounds() the Right and Bottom values are (1,1) which looking at the
+above image will be wrong, the pixel only covers one block, so in a screen/pixel
 environment, Right, Bottom is also (0,0), the same as Top/Left. This is what
 TfpgRect.Right and TfpgRect.Bottom will report.
 </p>
@@ -401,20 +401,20 @@ TfpgRect.Right and TfpgRect.Bottom will report.
    +---+---+---
    |   |   |
 </pre>
-          <p>In this example we have a rectangle. Top/Left = (0,0) and Bottom/Right = (1,1). 
-This means Width = 2 pixels and Height = 2 pixels. Clearly visible in the image 
+          <p>In this example we have a rectangle. Top/Left = (0,0) and Bottom/Right = (1,1).
+This means Width = 2 pixels and Height = 2 pixels. Clearly visible in the image
 above.
 </p>
-          <p>But if we call Classes.Bounds(0,0,2,2) it reports Bottom/Right as (2,2) which 
-is wrong (again looking at the image above as reference). This is my point. 
+          <p>But if we call Classes.Bounds(0,0,2,2) it reports Bottom/Right as (2,2) which
+is wrong (again looking at the image above as reference). This is my point.
 Bounds() cannot be used in this case in a graphical environment.
 </p>
-          <p>The reason I don't use a grid layout as shown below, is 
-because if the mouse is over the rectangle containing x, the OS (graphics system) reports its 
-position as (0,0). You don't have to have the mouse pointer over the intersecting 
-lines at (0,0) as indicated in the image below. The whole square containing 
+          <p>The reason I don't use a grid layout as shown below, is
+because if the mouse is over the rectangle containing x, the OS (graphics system) reports its
+position as (0,0). You don't have to have the mouse pointer over the intersecting
+lines at (0,0) as indicated in the image below. The whole square containing
 the x is referenced as (0,0), hence the grid layout as show in the images above,
-and what fpGUI uses. The same grid layout as used in TfpgStringGrid or any 
+and what fpGUI uses. The same grid layout as used in TfpgStringGrid or any
 Spreadsheet program etc.
 </p>
           <pre>.
@@ -641,7 +641,7 @@ redundant calculations, fpGUI allows you to set all the properties,
 then act on it once you call <var>UpdateWindowPosition</var>. In most cases fpGUI
 can even reduce the API calls needed, because it could pass for
 example Width and Height via one API call. In the case of X11, it can actually do all
-four values in a single API call. Thus improving efficiency and reduces resize 
+four values in a single API call. Thus improving efficiency and reduces resize
 calculations and screen redraws.</p>
 </descr>
 </element>
@@ -652,7 +652,7 @@ calculations and screen redraws.</p>
 of the control begins or to reposition the left side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, 
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so,
 see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
@@ -666,7 +666,7 @@ help.</remark></descr>
 of the control begins or to reposition the top side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this 
+<var>UpdateWindowPosition</var> method is called. For more information on why this
 is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
@@ -682,7 +682,7 @@ controls that have their Align property set to alTop, alBottom or alClient, chan
 this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this is so, 
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so,
 see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
@@ -698,7 +698,7 @@ controls that have their Align property set to alLeft, alRight or alClient, chan
 this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
-<var>UpdateWindowPosition</var> method is called. For more information on why this 
+<var>UpdateWindowPosition</var> method is called. For more information on why this
 is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
 help.</remark></descr>
 <seealso>
@@ -802,7 +802,7 @@ you must keep copy of the original image before you call <var>Invert</var>.</des
       <element name="TfpgBaseInterpolation">
         <short>A abstract class representing a base Interpolation filter.</short>
         <descr>This is used as the base class to implement Interpolation filters like
-Gaussian, Sinc etc... These decendant filters are used in the 
+Gaussian, Sinc etc... These decendant filters are used in the
 <link id="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link> function.
 </descr>
         <seealso>
@@ -818,9 +818,9 @@ Gaussian, Sinc etc... These decendant filters are used in the
       <!-- procedure Visibility: public -->
       <element name="TfpgCanvasBase.DrawLine">
         <short>Draws a line</short>
-        <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLine"/>. This method 
-draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported 
-backends follow the Microsoft API and doesn't draw the last pixel. This optimises 
+        <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLine"/>. This method
+draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported
+backends follow the Microsoft API and doesn't draw the last pixel. This optimises
 consecutive lines being drawn without overlapping pixels.</descr>
       </element>
 
@@ -892,7 +892,7 @@ returns the correct enum type detected.
       <!-- function Visibility: default -->
       <element name="fpgGetAvgColor">
         <short>Calculates the average color using the two supplied</short>
-        <descr>This function calculates and returns the average color by using AColor1 
+        <descr>This function calculates and returns the average color by using AColor1
 and AColor2. The Alpha value also gets taken into account.
 </descr>
       </element>
@@ -908,7 +908,7 @@ rectangle ARect.  If it is, the function returns True, otherwise False.
       <!-- procedure Visibility: default -->
       <element name="SortRect">
         <short>Fixes the Top, Bottom and Left, Right to always represent a valid rectangle</short>
-        <descr>This function fixes a rectangle so that the Left point is always smaller than the 
+        <descr>This function fixes a rectangle so that the Left point is always smaller than the
 Right. And the Top is always smaller than the Bottom.
 </descr>
       </element>
@@ -924,7 +924,7 @@ Right. And the Top is always smaller than the Bottom.
  For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
 </p></descr>
       </element>
-      
+
       <element name="TfpgCanvasBase.ClipLine">
         <short>Clips the line based on AClipRect boundaries.</short>
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
@@ -953,7 +953,7 @@ value to draw the arc.</p>
 <dt>h</dt>
 <dd>The height of the whole arc</dd>
 <dt>a1</dt>
-<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock
 position. A value of 270 is the 6 o'clock position. Positive values move
 counter-clockwise, and negative values move clockwise.</dd>
 <dt>a2</dt>
@@ -969,7 +969,7 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
 
 
 <element name="TfpgCanvasBase.FillArc.a1">
-<descr>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+<descr>This is the starting point of the arc. A value of 0 is the 3 o'clock
 position. A value of 270 is the 6 o'clock position. Positive values move
 counter-clockwise, and negative values move clockwise.</descr>
 </element>
@@ -989,7 +989,7 @@ value to draw and fill the arc.</p>
 <dt>h</dt>
 <dd>The height of the whole arc</dd>
 <dt>a1</dt>
-<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock 
+<dd>This is the starting point of the arc. A value of 0 is the 3 o'clock
 position. A value of 270 is the 6 o'clock position. Positive values move
 counter-clockwise, and negative values move clockwise.</dd>
 <dt>a2</dt>
