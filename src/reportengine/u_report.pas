@@ -16,7 +16,7 @@
     the user program.
 
     The PDF Reporting Engine was originally written by
-    Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
+    Jean-Marc Levecque <jmarc.levecque@jmlesite.web4me.fr>
 }
 
 unit U_Report;
