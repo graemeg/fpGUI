@@ -90,6 +90,7 @@ type
     FBorderStyle: TfpgEditBorderStyle;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
+    function    GetScrollBarWidth: Integer;
     function    GetTotalColumnWidth: integer;
     function    GetAdjustedBorderSizes: TRect;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -101,6 +102,7 @@ type
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     function    GetScrollBarPage: integer;
     procedure   SetScrollBarPage(const AValue: integer);
+    procedure   SetScrollBarWidth(const AValue: integer);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetDefaultColWidth(const AValue: integer);
     procedure   SetDefaultRowHeight(const AValue: integer);
@@ -166,6 +168,7 @@ type
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    ScrollBarPage: Integer read GetScrollBarPage write SetScrollBarPage;
+    property    ScrollBarWidth: Integer read GetScrollBarWidth write SetScrollBarWidth;
     property    HeaderHeight: integer read FHeaderHeight write SetHeaderHeight;
     property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
@@ -230,6 +233,11 @@ end;
 function TfpgBaseGrid.GetHeaderFontDesc: string;
 begin
   Result := FHeaderFont.FontDesc;
+end;
+
+function TfpgBaseGrid.GetScrollBarWidth: Integer;
+begin
+  Result := FVScrollBar.Width;
 end;
 
 function TfpgBaseGrid.GetTotalColumnWidth: integer;
@@ -325,6 +333,16 @@ begin
   if AValue= FVScrollBar.PageSize then
     Exit; //==>
   FVScrollBar.PageSize:= AValue;
+end;
+
+procedure TfpgBaseGrid.SetScrollBarWidth(const AValue: integer);
+begin
+  if FVScrollBar.Width = AValue then
+    Exit; //==>
+  FVScrollBar.Width := AValue;
+  FHScrollBar.Height:= AValue;
+  if FAutoHeight then
+    Height := AdjustHeight;
 end;
 
 procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
@@ -577,7 +595,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgBasegrid.SetAutoHeight(const AValue: boolean);
+procedure TfpgBaseGrid.SetAutoHeight(const AValue: boolean);
 begin
   if FAutoHeight= AValue then
     Exit; //==>
@@ -648,7 +666,7 @@ begin
   Repaint;
 end;
 
-function TfpgBasegrid.AdjustHeight: integer;
+function TfpgBaseGrid.AdjustHeight: Integer;
 var
   r: TRect;
 begin

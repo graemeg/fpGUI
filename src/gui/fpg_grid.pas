@@ -160,6 +160,7 @@ type
     property    RowSelect;
     property    ScrollBarStyle;
     property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowGrid;
     property    ShowHeader;
     property    ShowHint;
