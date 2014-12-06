@@ -736,6 +736,20 @@ var
     Vfits := vl >= RowCount;
   end;
 
+  function ColMax: integer;
+  var
+    i : integer;
+  begin
+    i := 0;
+    result := ColumnCount;
+    while i < HWidth do
+    begin
+      dec(result);
+      i := i + ColumnWidth[result];
+    end;
+    inc(result);
+  end;
+
 begin
   // if we don't want any scrollbars, hide them and exit
   if FScrollBarStyle = ssNone then
@@ -848,16 +862,15 @@ begin
       if FXOffset>hmax then
         FXOffset:=hmax;
       FHScrollBar.Position := FXOffset;
-      FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
       FHScrollBar.PageSize := 5;
     end
     else
     begin
-      FHScrollBar.Max := ColumnCount-1;
+      FHScrollBar.Max := ColMax;
       FHScrollBar.Position := FFirstCol;
-      FHScrollBar.SliderSize := 1 / ColumnCount;
       FHScrollBar.PageSize := 1;
     end;
+    FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
     FHScrollBar.RepaintSlider;
     FHScrollBar.Top     := Height - FHScrollBar.Height - borders.Bottom;
     FHScrollBar.Left    := borders.Left;
