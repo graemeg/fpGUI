@@ -738,16 +738,18 @@ var
 
   function ColMax: integer;
   var
-    i : integer;
+    i: integer;
+    w: integer;
   begin
-    i := 0;
-    result := ColumnCount;
-    while i < HWidth do
+    w := 0;
+    Result := 0;
+    for i := 0 to ColumnCount-1 do
     begin
-      dec(result);
-      i := i + ColumnWidth[result];
+      w := w + ColumnWidth[i];
+      if w > Width then
+        inc(Result);
     end;
-    inc(result);
+    inc(Result);
   end;
 
 begin
