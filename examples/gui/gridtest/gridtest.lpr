@@ -17,7 +17,8 @@ uses
   fpg_checkbox,
   fpg_tab,
   fpg_edit,
-  fpg_dialogs;
+  fpg_dialogs,
+  fpg_scrollbar;
 
 
 type
@@ -256,6 +257,14 @@ begin
     OnDrawCell := @StringGridDrawCell;
     OnDoubleClick := @StringGridDoubleClicked;
     OnHeaderClick := @StringGridHeaderClicked;
+    // Testing various scrollbar styles
+//    ScrollBarStyle:= ssNone;
+//    ScrollBarStyle:= ssHorizontal;
+//    ScrollBarStyle:= ssVertical;
+    ScrollBarStyle:= ssAutoBoth;
+//    ScrollBarStyle:= ssHorizVisible;
+//    ScrollBarStyle:= ssVertiVisible;
+//    ScrollBarStyle:= ssBothVisible;
   end;
 
   chkShowHeader := TfpgCheckBox.Create(self);

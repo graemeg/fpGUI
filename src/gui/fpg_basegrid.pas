@@ -815,6 +815,25 @@ begin
             getVisLines;
           end;
         end;
+    ssHorizVisible:
+        begin
+          hideScrollbar (FVScrollBar);
+          showH := true;
+          getVisLines;
+        end;
+    ssVertiVisible:
+        begin
+          hideScrollbar (FHScrollBar);
+          showV := true;
+          getVisWidth;
+        end;
+    ssBothVisible:
+        begin
+          showV := true;
+          showH := true;
+          getVisLines;
+          getVisWidth;
+        end;
   end;
 
   // set the scrollbar width/height space
