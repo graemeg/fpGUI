@@ -81,11 +81,12 @@ type
     FSelected: boolean;
     resizer: array[1..8] of TwgResizer;
     other: TStringList;
+    MarkForDeletion: Boolean;
     constructor Create(AFormDesigner: TFormDesigner; wg: TfpgWidget; wgc: TVFDWidgetClass);
     destructor  Destroy; override;
+    procedure   UpdateResizerPositions;
     property    Selected: boolean read FSelected write SetSelected;
     property    Widget: TfpgWidget read FWidget;
-    procedure   UpdateResizerPositions;
     property    FormDesigner: TFormDesigner read FFormDesigner;
   end;
 
@@ -205,6 +206,7 @@ begin
   FSelected := False;
   wg.MouseCursor := mcDefault;
   other := TStringList.Create;
+  MarkForDeletion := False;
 end;
 
 destructor TWidgetDesigner.Destroy;
@@ -630,20 +632,44 @@ procedure TFormDesigner.DeleteWidgets;
 var
   n: integer;
   cd: TWidgetDesigner;
+
+  procedure DeleteChildWidget(ADesignWidget: TWidgetDesigner);
+  var
+    i: integer;
+  begin
+    if not Assigned(ADesignWidget.Widget) then  // safety check
+      Exit;
+    if ADesignWidget.Widget.IsContainer and (ADesignWidget.Widget.ComponentCount > 0) then
+    begin
+      for i := ADesignWidget.Widget.ComponentCount - 1 downto 0 do
+        DeleteChildWidget(WidgetDesigner(TfpgWidget(ADesignWidget.Widget.Components[i])));
+    end;
+    ADesignWidget.MarkForDeletion := True;
+  end;
+
 begin
   n := 0;
+  // Pass 1: Mark widgets and children than need deletion
   while n < FWidgets.Count do
   begin
     cd := TWidgetDesigner(FWidgets.Items[n]);
     if cd.Selected then
+      DeleteChildWidget(cd);
+    Inc(n);
+  end;
+
+  // Pass 2: free TWidgetDesigner instances that have no more Widget instances
+  for n := FWidgets.Count-1 downto 0 do
+  begin
+    cd := TWidgetDesigner(FWidgets.Items[n]);
+    if cd.MarkForDeletion then
     begin
       cd.Widget.Free;
       cd.Free;
       FWidgets.Delete(n);
-    end
-    else
-      Inc(n);
+    end;
   end;
+
   UpdatePropWin;
 end;
 

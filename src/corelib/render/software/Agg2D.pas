@@ -2653,9 +2653,10 @@ procedure TAgg2D.Font(
            italic : boolean = false;
            cache : TAggFontCacheType = AGG_VectorFontCache;
            angle : double = 0.0 );
+{$IFDEF AGG2D_USE_WINFONTS}
 var
  b : int;
-
+{$ENDIF}
 begin
  m_textAngle    :=angle;
  m_fontHeight   :=height;
