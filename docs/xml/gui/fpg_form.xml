@@ -56,6 +56,10 @@ menu.</p>
 <link id="fpg_form.TfpgBaseForm.OnCloseQuery">OnCloseQuery</link>
 </seealso></element>
 
+<!-- inherited docs -->
+<element name="TfpgForm.OnCloseQuery" link="#fpgui.fpg_form.TfpgBaseForm.OnCloseQuery"></element>
+<element name="TfpgForm.OnClose" link="#fpgui.fpg_form.TfpgBaseForm.OnClose"></element>
+
     </module>
   </package>
 </fpdoc-descriptions>
