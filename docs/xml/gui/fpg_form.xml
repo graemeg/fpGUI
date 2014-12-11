@@ -25,6 +25,37 @@ horizontally.
 </short>
 </element>
 
+<element name="TfpgBaseForm">
+<short>TfpgBaseForm is the base class from which to derive a window such as a form or dialog</short>
+<descr><printshort id="TfpgBaseForm"/>.</descr>
+</element>
+
+<element name="TfpgBaseForm.OnCloseQuery">
+<short>Occurs when close is attempted</short>
+<descr><p><printshort id="TfpgBaseForm.OnCloseQuery"/>. Use OnCloseQuery to specify the conditions
+under which the form can close. An OnCloseQuery event handler returns a Boolean CanClose value
+that determines whether a form is allowed to close. Its default value is True.</p>
+<p>You can use an OnCloseQuery event handler to ask users if they are sure they really want
+the form closed immediately. For example, you can use the handler to display a message box
+that prompts the user to save a file before closing the form.</p></descr>
+<seealso>
+<link id="fpg_form.TfpgBaseForm.OnClose">OnClose</link>
+</seealso>
+</element>
+
+<element name="TfpgBaseForm.OnClose">
+<short>Occurs when the form closes</short>
+<descr><p><printshort id="TfpgBaseForm.OnClose"/>. Use OnClose to perform special processing when
+the form closes. The OnClose event specifies which event handler to call when a form is about
+to close. The handler specified by OnClose might, for example, test to make sure all fields in
+a data-entry form have valid contents before allowing the form to close.</p>
+<p>A form is closed by the Close method or when the user chooses Close from the form's system
+menu.</p>
+<remark>Closing or hiding the main form terminates the application.</remark></descr>
+<seealso>
+<link id="fpg_form.TfpgBaseForm.OnCloseQuery">OnCloseQuery</link>
+</seealso></element>
+
     </module>
   </package>
 </fpdoc-descriptions>
