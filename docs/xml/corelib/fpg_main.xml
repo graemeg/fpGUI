@@ -113,6 +113,19 @@ until the timer is disabled when the Enabled property is set to False.</descr>
 <descr><printshort id="TfpgWindow"/>.</descr>
 </element>
 
+<element name="TfpgImageBase">
+<short>The base class representing a image</short>
+<descr><printshort id="TfpgImageBase"/>.</descr>
+</element>
+
+<element name="TfpgImageBase.ImageData">
+<short>Contains the pixel data of the image. The data format is in AARRGGBB format.</short>
+<descr><printshort id="TfpgImageBase.ImageData"/>.</descr>
+</element>
+
+
+
+
     </module>
     <!-- fpg_main -->
   </package>
