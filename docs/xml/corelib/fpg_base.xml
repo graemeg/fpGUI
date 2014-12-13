@@ -23,30 +23,30 @@ of fpGUI. It also defines many types and constants used throughout the toolkit.
 defined in this unit.
 </p>
       </descr>
-      <!-- alias type Visibility: default -->
-      <element name="TfpgCoord">
-        <short>A custom type used to represent X and Y coordinates.</short>
-        <descr>Internally TfpgCoord is actually a Integer type. We created a custom
+
+<element name="TfpgCoord">
+<short>A custom type used to represent X and Y coordinates.</short>
+<descr>Internally TfpgCoord is actually a Integer type. We created a custom
 alias type for use in fpGUI in the event that we might want to change the
 underlying type in the future. Example to floating points.
 </descr>
-        <seealso/>
-      </element>
-      <!-- alias type Visibility: default -->
-      <element name="TfpgColor">
-        <short>Represents a color in integer format.</short>
-        <descr>
-          <p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter the
+</element>
+
+<element name="TfpgColor">
+<short>Represents a color in integer format.</short>
+<descr>
+<p>TfpgColor is always in AARRGGBB (Alpha, Red, Green, Blue) format, no matter the
 operating system.
 </p>
-          <p>The <var>fpg_base</var> unit also contains definitions of many useful color
+<p>The <var>fpg_base</var> unit also contains definitions of many useful color
 constants. It defines the standard predefined Delphi colors (like clRed,
 clMagenta etc.), the 140 web safe colors using the defacto standard names as
 used by Netscape and Internet Explorer web browsers. As well as some internal
 color constants used by many GUI components (like clText, clWindowBackground
-etc.).
-</p>
-</descr>
+etc.).</p></descr>
+<seealso>
+<link id="fpg_base.TRGBTriple">TRGBTriple</link>
+</seealso>
 </element>
 
 <element name="TRGBTriple">
