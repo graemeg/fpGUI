@@ -367,7 +367,7 @@ begin
   begin
     if Items[i]= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem] then
     begin
-      FocusItem := i;
+      FNewItem := False;
       FSelectedItem:= i;
       FText:= Items[i];
       Break;
