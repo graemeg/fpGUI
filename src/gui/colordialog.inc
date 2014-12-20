@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -22,6 +22,28 @@
 
 type
 
+  TColorPickedEvent = procedure(Sender: TObject; const AMousePos: TPoint; const AColor: TfpgColor) of object;
+
+  TPickerButton = class(TfpgButton)
+  private
+    FContinuousResults: Boolean;
+    FOnColorPicked: TColorPickedEvent;
+    FColorPos: TPoint;
+    FColor: TfpgColor;
+    FColorPicking: Boolean;
+  private
+    procedure   DoColorPicked;
+  protected
+    procedure   HandleLMouseDown(X, Y: integer; ShiftState: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    ContinuousResults: Boolean read FContinuousResults write FContinuousResults;
+    property    OnColorPicked: TColorPickedEvent read FOnColorPicked write FOnColorPicked;
+  end;
+
   TfpgColorSelectDialog = class(TfpgBaseDialog)
   private
     {@VFD_HEAD_BEGIN: ColorSelectDialog}
@@ -37,19 +59,29 @@ type
     edR: TfpgSpinEdit;
     edG: TfpgSpinEdit;
     edB: TfpgSpinEdit;
-    Label3: TfpgLabel;
-    Label4: TfpgLabel;
-    Label5: TfpgLabel;
-    pnlColorPreview: TfpgBevel;
+    lblRed: TfpgLabel;
+    lblGreen: TfpgLabel;
+    lblBlue: TfpgLabel;
+    btnPicker: TPickerButton;
+    chkContinuous: TfpgCheckBox;
+    lblHex: TfpgLabel;
+    edHex: TfpgEdit;
     {@VFD_HEAD_END: ColorSelectDialog}
     FViaRGB: Boolean;  // to prevent recursive changes
+    FColorPicking: Boolean;
+    procedure   btnColorPicked(Sender: TObject; const AMousePos: TPoint; const AColor: TfpgColor);
+    procedure   chkContinuousChanged(Sender: TObject);
     function    GetSelectedColor: TfpgColor;
     procedure   SetSelectedColor(const AValue: TfpgColor);
     procedure   ColorChanged(Sender: TObject);
+    procedure   NamedColorChanged(Sender: TObject);
     procedure   RGBChanged(Sender: TObject);
     procedure   UpdateRGBComponents;
     procedure   PopulatePaletteColorCombo;
     procedure   cbColorPaletteChange(Sender: TObject);
+    procedure   OnTabChange(Sender: TObject; tab:TfpgTabSheet);
+  protected
+    procedure   SetupCaptions; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -79,7 +111,119 @@ begin
   end;
 end;
 
+
+function ConvertToHex(Value: integer): string;
+var
+  ValH, ValL: integer;
+begin
+  ValH := Value div 16;
+  ValL := Value mod 16;
+  case ValH of
+    15:
+      Result := 'F';
+    14:
+      Result := 'E';
+    13:
+      Result := 'D';
+    12:
+      Result := 'C';
+    11:
+      Result := 'B';
+    10:
+      Result := 'A';
+    else
+      Result := IntToStr(ValH);
+  end;
+  case ValL of
+    15:
+      Result := Result + 'F';
+    14:
+      Result := Result + 'E';
+    13:
+      Result := Result + 'D';
+    12:
+      Result := Result + 'C';
+    11:
+      Result := Result + 'B';
+    10:
+      Result := Result + 'A';
+    else
+      Result := Result + IntToStr(ValL);
+  end;
+end;
+
+function Hex(Red, Green, Blue: integer): string;
+begin
+  Result := '$' + ConvertToHex(Red) + ConvertToHex(Green) + ConvertToHex(Blue);
+end;
+
+{ TPickerButton }
+
+procedure TPickerButton.DoColorPicked;
+var
+  pt: TPoint;
+begin
+  pt := WindowToScreen(self, FColorPos);
+  FColor := fpgApplication.GetScreenPixelColor(pt);
+  if Assigned(FOnColorPicked) then
+    FOnColorPicked(self, FColorPos, FColor);
+end;
+
+procedure TPickerButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
+begin
+  inherited HandleLMouseDown(X, Y, ShiftState);
+  MouseCursor := mcCross;
+  FColorPicking := True;
+  CaptureMouse;
+end;
+
+procedure TPickerButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  ReleaseMouse;
+  FColorPicking := False;
+  MouseCursor := mcDefault;
+  DoColorPicked;
+end;
+
+procedure TPickerButton.HandleMouseMove(x, y: integer; btnstate: word;
+  shiftstate: TShiftState);
+begin
+  //inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  if not FColorPicking then
+    Exit;
+  FColorPos.x := x;
+  FColorPos.y := y;
+  if FContinuousResults then
+    DoColorPicked;
+end;
+
+constructor TPickerButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FColorPicking := False;
+  FContinuousResults := False;
+end;
+
 { TfpgColorSelectDialog }
+
+procedure TfpgColorSelectDialog.OnTabChange(Sender: TObject; tab:TfpgTabSheet);
+begin
+  if pcColorSelect.ActivePageIndex = 0 then
+    RGBChanged(sender)
+  else
+   NamedColorChanged(sender) ;
+end;
+
+procedure TfpgColorSelectDialog.btnColorPicked(Sender: TObject; const AMousePos: TPoint; const AColor: TfpgColor);
+begin
+  ColorWheel.SetSelectedColor(AColor);
+end;
+
+procedure TfpgColorSelectDialog.chkContinuousChanged(Sender: TObject);
+begin
+  btnPicker.ContinuousResults := chkContinuous.Checked;
+end;
 
 function TfpgColorSelectDialog.GetSelectedColor: TfpgColor;
 begin
@@ -99,7 +243,24 @@ begin
 //  UpdateHSVComponents;
   if not FViaRGB then
     UpdateRGBComponents;
-  pnlColorPreview.BackgroundColor := ValueBar.SelectedColor;
+end;
+
+procedure   TfpgColorSelectDialog.NamedColorChanged(Sender: TObject);
+var
+  tred, tgreen, tblue: Byte;
+begin
+  tred := fpgGetRed(ColorListBox1.Color);
+  tgreen := fpgGetGreen(ColorListBox1.Color);
+  tblue := fpgGetBlue(ColorListBox1.Color);
+
+  // keep text readable based on background color
+  if (tred + tgreen + tblue) / (256*3) >0.60 then
+    edHex.TextColor := clBlack
+  else
+    edHex.TextColor := clWhite ;
+
+  edHex.BackgroundColor:=ColorListBox1.Color;
+  edHex.Text := Hex(tred,tgreen,tblue);
 end;
 
 procedure TfpgColorSelectDialog.RGBChanged(Sender: TObject);
@@ -114,6 +275,13 @@ begin
   c := FPColorTofpgColor(rgb);
   ColorWheel.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB     := False;
+  // keep text readable based on background color
+  if ValueBar.Value > 0.75 then
+    edHex.TextColor := clBlack
+  else
+    edHex.TextColor := clWhite;
+  edHex.BackgroundColor := c;
+  edHex.Text := Hex(rgb.Red, rgb.Green, rgb.Blue);
 end;
 
 procedure TfpgColorSelectDialog.UpdateRGBComponents;
@@ -126,6 +294,13 @@ begin
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
+  // keep text readable based on background color
+  if ValueBar.Value > 0.75 then
+    edHex.TextColor := clBlack
+  else
+    edHex.TextColor := clWhite;
+  edHex.BackgroundColor := c;
+  edHex.Text := Hex(rgb.Red, rgb.Green, rgb.Blue);
 end;
 
 procedure TfpgColorSelectDialog.PopulatePaletteColorCombo;
@@ -149,21 +324,34 @@ begin
   ColorListBox1.SetFocus;
 end;
 
+procedure TfpgColorSelectDialog.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  tsColorWheel.Text := rsTabsheetColorWheel;
+  tsColorNames.Text := rsTabPredefined;
+  lblRed.Text := rsColorRed;
+  lblGreen.Text := rsColorGreen;
+  lblBlue.Text := rsColorBlue;
+  chkContinuous.Text := rsContinuous;
+  btnPicker.Hint := rsColorPickerHint;
+  lblHex.Text := rsHexadecimal;
+end;
+
 constructor TfpgColorSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FViaRGB := false;
 end;
 
-
 procedure TfpgColorSelectDialog.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: ColorSelectDialog}
   Name := 'ColorSelectDialog';
-  SetPosition(340, 164, 328, 375);
+  SetPosition(340, 164, 328, 385);
   WindowTitle := 'Color Select Dialog';
   Hint := '';
+  IconName := '';
   WindowPosition := wpOneThirdDown;
 
   pcColorSelect := TfpgPageControl.Create(self);
@@ -172,9 +360,9 @@ begin
     Name := 'pcColorSelect';
     SetPosition(4, 4, 320, 332);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    ActivePageIndex := 0;
     Hint := '';
     TabOrder := 1;
+    OnChange := @OnTabChange;
   end;
 
   tsColorWheel := TfpgTabSheet.Create(pcColorSelect);
@@ -182,6 +370,7 @@ begin
   begin
     Name := 'tsColorWheel';
     SetPosition(3, 24, 314, 305);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Color Wheel';
   end;
 
@@ -190,7 +379,8 @@ begin
   begin
     Name := 'tsColorNames';
     SetPosition(3, 24, 314, 305);
-    Text := 'Predefined';
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Text := rsTabPredefined;
   end;
 
   cbColorPalette := TfpgComboBox.Create(tsColorNames);
@@ -199,9 +389,12 @@ begin
     Name := 'cbColorPalette';
     SetPosition(8, 24, 299, 22);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
+    FocusItem := -1;
     TabOrder := 1;
+    OnChange:= @NamedColorChanged;
   end;
 
   ColorListBox1 := TfpgColorListBox.Create(tsColorNames);
@@ -210,10 +403,11 @@ begin
     Name := 'ColorListBox1';
     SetPosition(8, 72, 299, 224);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    Color := TfpgColor($00FFFF);
+    Color := TfpgColor($FF00FFFF);
     FontDesc := '#List';
     Hint := '';
     TabOrder := 2;
+    OnChange:= @NamedColorChanged;
   end;
 
   Label1 := TfpgLabel.Create(tsColorNames);
@@ -282,10 +476,10 @@ begin
     OnChange := @RGBChanged;
   end;
 
-  Label3 := TfpgLabel.Create(tsColorWheel);
-  with Label3 do
+  lblRed := TfpgLabel.Create(tsColorWheel);
+  with lblRed do
   begin
-    Name := 'Label3';
+    Name := 'lblRed';
     SetPosition(8, 220, 80, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
@@ -293,10 +487,10 @@ begin
     Text := 'Red';
   end;
 
-  Label4 := TfpgLabel.Create(tsColorWheel);
-  with Label4 do
+  lblGreen := TfpgLabel.Create(tsColorWheel);
+  with lblGreen do
   begin
-    Name := 'Label4';
+    Name := 'lblGreen';
     SetPosition(8, 248, 80, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
@@ -304,10 +498,10 @@ begin
     Text := 'Green';
   end;
 
-  Label5 := TfpgLabel.Create(tsColorWheel);
-  with Label5 do
+  lblBlue := TfpgLabel.Create(tsColorWheel);
+  with lblBlue do
   begin
-    Name := 'Label5';
+    Name := 'lblBlue';
     SetPosition(8, 276, 80, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
@@ -315,17 +509,61 @@ begin
     Text := 'Blue';
   end;
 
-  pnlColorPreview := TfpgBevel.Create(tsColorWheel);
-  with pnlColorPreview do
+  btnPicker := TPickerButton.Create(tsColorWheel);
+  with btnPicker do
   begin
-    Name := 'pnlColorPreview';
-    SetPosition(248, 232, 52, 52);
+    Name := 'btnPicker';
+    SetPosition(167, 230, 23, 23);
+    Text := '';
+    FontDesc := '#Label1';
     Hint := '';
+    ImageMargin := -1;
+    ImageName := 'stdimg.colpicker';
+    FShowHint := True;
+    TabOrder := 24;
+    OnColorPicked := @btnColorPicked;
+  end;
+
+  chkContinuous := TfpgCheckBox.Create(tsColorWheel);
+  with chkContinuous do
+  begin
+    Name := 'chkContinuous';
+    SetPosition(167, 258, 130, 20);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 25;
+    Text := 'Continuous';
+    OnChange := @chkContinuousChanged;
+  end;
+
+  lblHex := TfpgLabel.Create(self);
+  with lblHex do
+  begin
+    Name := 'lblHex';
+    SetPosition(25, 340, 100, 15);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Hexadecimal';
+  end;
+
+  edHex := TfpgEdit.Create(self);
+  with edHex do
+  begin
+    Name := 'edHex';
+    SetPosition(25, 356, 100, 23);
+    ExtraHint := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 3;
+    Text := '';
+    MaxLength:= 7;
   end;
 
   {@VFD_BODY_END: ColorSelectDialog}
   {%endregion}
 
+   FColorPicking := False;
   // link colorwheel and valuebar
   ColorWheel.ValueBar := ValueBar;
 
