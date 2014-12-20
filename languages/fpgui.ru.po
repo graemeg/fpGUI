@@ -76,6 +76,10 @@ msgstr "Август"
 msgid "BkSp"
 msgstr ""
 
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr ""
+
 #: fpg_constants:rsbold
 msgid "Bold"
 msgstr "Жирный"
@@ -100,6 +104,10 @@ msgstr ""
 msgid "Character Map"
 msgstr ""
 
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Закрыть"
@@ -107,6 +115,10 @@ msgstr "Закрыть"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Группа"
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
+msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
@@ -119,6 +131,10 @@ msgstr "Подтвердить"
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
 msgstr "Подтверждение"
+
+#: fpg_constants:rscontinuous
+msgid "Continuous"
+msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -280,6 +296,10 @@ msgstr "Пт"
 msgid "Friday"
 msgstr "Пятница"
 
+#: fpg_constants:rscolorgreen
+msgid "Green"
+msgstr ""
+
 #: fpg_constants:rsfilegroup
 msgid "Group"
 msgstr "Группа"
@@ -287,6 +307,10 @@ msgstr "Группа"
 #: fpg_constants:rshelp
 msgid "Help"
 msgstr "Справка"
+
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr ""
 
 #: fpg_constants:rskeyhome
 msgid "Home"
@@ -464,6 +488,10 @@ msgstr ""
 msgid "PgUp"
 msgstr ""
 
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr ""
+
 #: fpg_constants:rsreportpreview
 msgid "Preview"
 msgstr ""
@@ -471,6 +499,10 @@ msgstr ""
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Ранее использованные"
+
+#: fpg_constants:rscolorred
+msgid "Red"
+msgstr ""
 
 #: fpg_constants:rsreplace
 msgid "Replace"

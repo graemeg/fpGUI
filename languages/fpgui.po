@@ -642,3 +642,35 @@ msgstr ""
 msgid "of"
 msgstr ""
 
+#: fpg_constants:rscontinuous
+msgid "Continuous"
+msgstr ""
+
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr ""
+
+#: fpg_constants:rscolorred
+msgid "Red"
+msgstr ""
+
+#: fpg_constants:rscolorgreen
+msgid "Green"
+msgstr ""
+
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr ""
+
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr ""
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
+msgstr ""
+
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr ""
+
