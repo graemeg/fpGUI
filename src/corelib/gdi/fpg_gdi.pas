@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -346,6 +346,10 @@ var
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
   NeedToUnitialize: Boolean;
+
+
+const
+  ID_ABOUT = 200001;
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -1204,6 +1208,13 @@ begin
           Windows.EndPaint(w.WinHandle, @PaintStruct);
         end;
 
+    WM_SYSCOMMAND:
+        begin
+          if wParam = ID_ABOUT then
+            fpgSendMessage(nil, w, FPGM_ABOUT, msgp)
+          else
+            Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+        end
     else
       Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
   end;

@@ -64,6 +64,7 @@ procedure TMainForm.Edit1DragEnter(Sender, Source: TObject;
 var
   s: string;
 begin
+  ShowMimeList(AMimeList);
   s := 'text/plain';
   if chkAccept.Checked then
     Accept := False
@@ -73,7 +74,6 @@ begin
   begin
     if AMimeChoice <> s then
       AMimeChoice := s;
-    ShowMimeList(AMimeList);
   end;
 end;
 
@@ -83,6 +83,7 @@ procedure TMainForm.Bevel1DragEnter(Sender, Source: TObject;
 var
   s: string;
 begin
+  ShowMimeList(AMimeList);
   { the mime type we want to accept }
   s := 'text/html';
   { if we wil accept the drop, set Accept to True }
@@ -93,7 +94,6 @@ begin
     if AMimeChoice <> s then
       AMimeChoice := s;
 
-    ShowMimeList(AMimeList);
     Bevel1.BackgroundColor := clRed;
   end;
 end;
@@ -121,6 +121,8 @@ end;
 procedure TMainForm.btnClearClicked(Sender: TObject);
 begin
   Grid1.RowCount := 0;
+  Edit1.Text := '';
+  Bevel1.Text := '';
 end;
 
 procedure TMainForm.LabelDragStartDetected(Sender: TObject);

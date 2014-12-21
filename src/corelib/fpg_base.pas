@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -121,7 +121,8 @@ const
   FPGM_FREEME      = 19;
   FPGM_DROPENTER   = 20;
   FPGM_DROPEXIT    = 21;
-  FPGM_HSCROLL      = 22;
+  FPGM_HSCROLL     = 22;
+  FPGM_ABOUT       = 23;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
@@ -138,6 +139,7 @@ var
   FPG_DEFAULT_FONT_DESC: string = 'Liberation Sans-10:antialias=true';
   FPG_DEFAULT_SANS: string = 'Liberation Sans';
   {$ENDIF}
+  FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
 
 const
   UserNamedColorStart   = 128;
@@ -727,8 +729,8 @@ type
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
   end;
-  
-  
+
+
   { TfpgBaseTimer }
 
   TfpgBaseTimer = class(TObject)

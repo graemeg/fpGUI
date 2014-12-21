@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -51,7 +51,7 @@ type
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
-    
+
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
 
@@ -62,7 +62,7 @@ type
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
   TextFlagsDflt = [txtLeft, txtTop];
-  
+
 
 type
   { *******************************************
@@ -203,6 +203,7 @@ type
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
     function    GetControlFrameBorders: TRect; virtual;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
+    function    GetBevelWidth: TfpgCoord; virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
@@ -228,7 +229,7 @@ type
     function    GetCheckBoxSize: integer; virtual;
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
   end;
-  
+
 
   TMsgHookItem = class
     Dest: TObject;
@@ -326,12 +327,12 @@ type
     property    Width: integer read FWidth;
     property    Height: integer read FHeight;
   end;
-  
-  
+
+
   TfpgClipboard = class(TfpgClipboardImpl)
   end;
 
-  
+
   TfpgFileList = class(TfpgFileListImpl)
   end;
 
@@ -1295,7 +1296,7 @@ begin
     Result := TStringList.Create
   else
     Exit; //==>
-  
+
   for n := 0 to fpgNamedFonts.Count-1 do
   begin
     oFont := TNamedFontItem(fpgNamedFonts[n]);
@@ -1364,7 +1365,7 @@ begin
   fpgStyleManager.FreeStyleInstance;
   fpgStyle := nil;
   fpgCaret.Free;
-  
+
   for i := fpgTimers.Count-1 downto 0 do
     if fpgTimers[i] <> nil then
       TfpgTimer(fpgTimers[i]).Free;
@@ -1380,7 +1381,7 @@ begin
   FFontResList.Free;
 
   FreeAndNil(FModalFormStack);
-  
+
   for i := 0 to FMessageHookList.Count-1 do
     TMsgHookItem(FMessageHookList[i]).Free;
   FreeAndNil(FMessageHookList);
@@ -1391,7 +1392,7 @@ begin
     uMsgQueueList.Delete(i);
   end;
   uMsgQueueList.Free;
-  
+
   inherited Destroy;
 end;
 
@@ -1502,7 +1503,7 @@ begin
   ShortDayNames[5] := rsShortThu;
   ShortDayNames[6] := rsShortFri;
   ShortDayNames[7] := rsShortSat;
-  
+
   LongDayNames[1] := rsLongSun;
   LongDayNames[2] := rsLongMon;
   LongDayNames[3] := rsLongTue;
@@ -1936,10 +1937,10 @@ begin
     end;
   end;
   nw := Max(wtxt, w);
-  
+
   wraplst := TStringList.Create;
   wraplst.Text := AText;
-  
+
   if (txtWrap in AFlags) then
   begin
     for i := 0 to wraplst.Count-1 do
@@ -1949,7 +1950,7 @@ begin
   end;
 
   htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
-  
+
   // Now paint the actual text
   for i := 0 to wraplst.Count-1 do
   begin
@@ -1964,7 +1965,7 @@ begin
       nx := x + (w - wtxt) div 2
     else // txtLeft is default
       nx := x;
-      
+
     // vertical alignment
     if (txtBottom in AFlags) then
       ny := y + l + h - htxt
@@ -1975,7 +1976,7 @@ begin
 
     fpgStyle.DrawString(self, nx, ny, wraplst[i], lEnabled);
   end;
-  
+
   wraplst.Free;
   Result := htxt;
 end;
@@ -2053,7 +2054,7 @@ begin
   fpgSetNamedFont('Label1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Label2', FPG_DEFAULT_FONT_DESC + ':bold');
   fpgSetNamedFont('Edit1', FPG_DEFAULT_FONT_DESC);
-  fpgSetNamedFont('Edit2', 'Courier New-10');
+  fpgSetNamedFont('Edit2', FPG_DEFAULT_FIXED_FONT_DESC);
   fpgSetNamedFont('List', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-9');
   fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-9:bold');
@@ -2253,7 +2254,7 @@ begin
   ACanvas.SetColor(clWindowBackground);
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.FillRectangle(x, y, w, h);
-  
+
   if ARaised then
     ACanvas.SetColor(clHilite2)
   else
@@ -2273,6 +2274,11 @@ begin
   { right, then bottom }
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);
+end;
+
+function TfpgStyle.GetBevelWidth: TfpgCoord;
+begin
+  Result := 1;
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);

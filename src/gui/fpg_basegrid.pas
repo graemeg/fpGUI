@@ -32,7 +32,7 @@ uses
   fpg_widget,
   fpg_scrollbar,
   fpg_menu;
-  
+
 type
 
   TfpgGridDrawState = set of (gdSelected, gdFocused, gdFixed);
@@ -51,7 +51,7 @@ type
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
-  
+
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -94,6 +94,7 @@ type
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetHeaderFontDesc(const AValue: string);
+    procedure   SetHeaderHeight(const AValue: integer);
     procedure   SetHeaderStyle(const AValue: TfpgGridHeaderStyle);
     procedure   SetRowSelect(const AValue: boolean);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
@@ -158,7 +159,7 @@ type
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
-    property    HeaderHeight: integer read FHeaderHeight;
+    property    HeaderHeight: integer read FHeaderHeight write SetHeaderHeight;
     property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
@@ -275,6 +276,13 @@ begin
   if FHeaderHeight < FHeaderFont.Height + 2 then
     FHeaderHeight := FHeaderFont.Height + 2;
   RePaint;
+end;
+
+procedure TfpgBaseGrid.SetHeaderHeight(const AValue: integer);
+begin
+  if AValue >= FHeaderFont.Height + 2 then
+    FHeaderHeight := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseGrid.SetHeaderStyle(const AValue: TfpgGridHeaderStyle);
@@ -637,7 +645,7 @@ var
         UpdateWindowPosition;
       end;
   end;
-  
+
   procedure getVisWidth;
   begin
     if showV then
@@ -681,7 +689,7 @@ begin
   showH := False;
   getVisWidth;
   getVisLines;
-  
+
   // determine whether to show scrollbars for different configurations
   case FScrollBarStyle of
     ssHorizontal:
@@ -991,7 +999,7 @@ begin
 
   Canvas.SetClipRect(clipr);
   Canvas.SetColor(FBackgroundColor);
-  
+
   // clearing after the last column
   if r.Left <= clipr.Right then
   begin
@@ -1142,7 +1150,7 @@ begin
           end;
           consumed := True;
         end;
-        
+
     keyHome:
         begin
           if FRowSelect then
@@ -1168,7 +1176,7 @@ begin
           end;
           consumed := True;
         end;
-        
+
     keyEnd:
         begin
           if FRowSelect then
@@ -1194,7 +1202,7 @@ begin
           consumed := True;
         end;
   end;  { case }
-  
+
   if consumed then
     CheckFocusChange;
 
@@ -1275,7 +1283,7 @@ var
   borders: TRect;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
-  
+
   if (ColumnCount = 0) or (RowCount = 0) then
     Exit; //==>
 
@@ -1460,7 +1468,7 @@ begin
   begin   // Selecting a Cell via mouse
     MouseToCell(x, y, FFocusCol, FFocusRow);
   end;  { if/else }
-  
+
   if not CanSelectCell(FFocusRow, FFocusCol) then
   begin
     // restore previous values
@@ -1504,6 +1512,7 @@ procedure TfpgBaseGrid.FollowFocus;
 var
   n: Integer;
   w: TfpgCoord;
+  lmin, lmax: TfpgCoord;
 begin
   if (RowCount > 0) and (FFocusRow < 0) then
     FFocusRow := 0;
@@ -1546,6 +1555,19 @@ begin
       end;
     end;  { for }
   end;  { if/else }
+
+  // If smoothscroll, convert FFirstCol to X Offset value
+  if go_SmoothScroll in FOptions then
+  begin
+    w := 0;
+    for n := 0 to FFocusCol-1 do
+      w := w + ColumnWidth[n];
+    lmin := FXOffset;
+    lmax := FXOffset + VisibleWidth;
+    if (w > lmax) or (w < lmin) then
+      FXOffset := w;
+  end;
+
   CheckFocusChange;
   UpdateScrollBars;
 end;
@@ -1583,7 +1605,7 @@ begin
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
-  
+
   FTemp             := 50;  // Just to prove that ColumnWidth does adjust.
   FDefaultColWidth  := 64;
   FDefaultRowHeight := FFont.Height + 2;
@@ -1594,7 +1616,7 @@ begin
 
   MinHeight   := HeaderHeight + DefaultRowHeight + borders.Top + borders.Bottom;
   MinWidth    := DefaultColWidth + borders.Left + borders.Right;
-  
+
   FVScrollBar := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.Visible     := False;

@@ -106,6 +106,9 @@ begin
   pcMain.Width    := Width - 20;
   pcMain.Height   := 300;
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
+  pcMain.ActiveTabColor:= clOrangeRed;
+  pcMain.ActiveTabTextColor:= clYellow;
+  pcMain.ActiveFontDesc := 'liberation sans-10:bold';
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One
@@ -124,6 +127,9 @@ begin
   // Tab Three
   tsThree := TfpgTabSheet.Create(pcMain);
   tsThree.Text := 'Tab Three';
+  tsThree.BackgroundColor:= clWheat;
+  tsThree.TabColor:= clLightBlue;
+  tsThree.TabTextColor:= clWhite;
   CreateLabel(tsThree, 80, 50, 'TabSheet Three');
   
   // Tab Four
