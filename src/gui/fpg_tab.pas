@@ -1346,6 +1346,7 @@ begin
   for i:=0 to FPages.Count-1 do
     TfpgTabSheet(FPages[i]).PageControl:=nil;
   FPages.Free;
+  FActiveFont.Free;
   ActiveWidget := nil;
   FFirstTabButton := nil;
   inherited Destroy;
