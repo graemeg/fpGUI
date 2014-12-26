@@ -191,14 +191,26 @@ type
     will rework this to use a Style Manager like the previous fpGUI.
     Also support Bitmap based styles for easier theme implementations. }
   TfpgStyle = class(TObject)
+  protected
+    FDefaultFont: TfpgFont;
+    FFixedFont: TfpgFont;
+    FMenuAccelFont: TfpgFont;
+    FMenuDisabledFont: TfpgFont;
+    FMenuFont: TfpgFont;
+    procedure   SetDefaultFont(AValue: TfpgFont);
+    procedure   SetFixedFont(AValue: TfpgFont);
+    procedure   SetMenuAccelFont(AValue: TfpgFont);
+    procedure   SetMenuDisabledFont(AValue: TfpgFont);
+    procedure   SetMenuFont(AValue: TfpgFont);
   public
-    DefaultFont: TfpgFont;
-    FixedFont: TfpgFont;
-    MenuFont: TfpgFont;
-    MenuAccelFont: TfpgFont;
-    MenuDisabledFont: TfpgFont;
     constructor Create; virtual;
     destructor  Destroy; override;
+    { font objects }
+    property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
+    property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
+    property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
+    property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
+    property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
     { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
@@ -510,7 +522,7 @@ type
   end;
 
 
-  TNamedFontItem = class
+  TNamedFontItem = class(TObject)
   public
     FontID: string;
     FontDesc: string;
@@ -2049,6 +2061,41 @@ end;
 
 { TfpgStyle }
 
+procedure TfpgStyle.SetDefaultFont(AValue: TfpgFont);
+begin
+  if FDefaultFont = AValue then Exit;
+  FDefaultFont.Free;
+  FDefaultFont := AValue;
+end;
+
+procedure TfpgStyle.SetFixedFont(AValue: TfpgFont);
+begin
+  if FFixedFont = AValue then Exit;
+  FFixedFont.Free;
+  FFixedFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuAccelFont(AValue: TfpgFont);
+begin
+  if FMenuAccelFont = AValue then Exit;
+  FMenuAccelFont.Free;
+  FMenuAccelFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuDisabledFont(AValue: TfpgFont);
+begin
+  if FMenuDisabledFont = AValue then Exit;
+  FMenuDisabledFont.Free;
+  FMenuDisabledFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuFont(AValue: TfpgFont);
+begin
+  if FMenuFont = AValue then Exit;
+  FMenuFont.Free;
+  FMenuFont := AValue;
+end;
+
 constructor TfpgStyle.Create;
 begin
   // Setup font aliases
@@ -2101,20 +2148,20 @@ begin
 
 
   // Global Font Objects
-  DefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
-  FixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
-  MenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
-  MenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
-  MenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
+  FDefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
+  FFixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
+  FMenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
+  FMenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
+  FMenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
 end;
 
 destructor TfpgStyle.Destroy;
 begin
-  DefaultFont.Free;
-  FixedFont.Free;
-  MenuFont.Free;
-  MenuAccelFont.Free;
-  MenuDisabledFont.Free;
+  FDefaultFont.Free;
+  FFixedFont.Free;
+  FMenuFont.Free;
+  FMenuAccelFont.Free;
+  FMenuDisabledFont.Free;
   inherited Destroy;
 end;
 
