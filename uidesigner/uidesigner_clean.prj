@@ -1,16 +1,17 @@
 [projectoptions]
 mainfile=${PROJECTNAME}.lpr
-targetfile=units/${TargetCPU}-${TargetOS}/${PROJECTNAME}${EXEEXT}
+targetfile=units/${TARGET}/${PROJECTNAME}${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
-unitdirs=6
- ${FPGUI_DIR}/lib/${Target}
- ${FPGUI_DIR}/src/corelib/render/software
- ${FPGUI_DIR}/src
- ${FPGUI_DIR}/src/corelib/${FPG_RENDERER}
- ${FPGUI_DIR}/src/gui/
- ${FPGUI_DIR}/src/corelib/
+unitdirs=7
+ ${FPGUI}/lib/${TARGET}
+ ${FPGUI}/src/reportengine
+ ${FPGUI}/src/corelib/render/software
+ ${FPGUI}/src
+ ${FPGUI}/src/corelib/${FPG_GFX}
+ ${FPGUI}/src/gui
+ ${FPGUI}/src/corelib
 unitpref=-Fu
 incpref=-Fi
 libpref=-Fl
@@ -24,7 +25,7 @@ makeoptions=6
  -B
  -O2 -XX -Xs -CX
  -vewinh
- -FEunits/${Target}/
+ -FEunits/${TARGET}/
 codetemplatedirs=1
  ${TEMPLATEDIR}
 toolmenus=3
@@ -32,9 +33,9 @@ toolmenus=3
  UI Designer
  Image Converter
 toolfiles=3
- ${FPGUI_DIR}/docview/src/units/${TARGET}/docview${EXEEXT}
- ${FPGUI_DIR}/uidesigner/units/${TARGET}/uidesigner${EXEEXT}
- ${FPGUI_DIR}/tools/imageconvert/imgcnv${EXEEXT}
+ ${FPGUI}/docview/src/units/${TARGET}/docview${EXEEXT}
+ ${FPGUI}/uidesigner/units/${TARGET}/uidesigner${EXEEXT}
+ ${FPGUI}/tools/imageconvert/imgcnv${EXEEXT}
 toolparams=3
  fpgui+rtl+fcl -k ${cursword}
  ${CURSOURCEFILE}
@@ -171,8 +172,9 @@ makeoptionson=6
  39
  39
 aftcommandon=0
-unitdirson=6
+unitdirson=7
  65568
+ 65543
  196615
  131079
  196615
@@ -252,7 +254,7 @@ filemasks=5
 showgrid=1
 snaptogrid=1
 moveonfirstclick=1
-formdesignerdocking=0
+noformdesignerdocking=0
 gridsizex=8
 gridsizey=8
 autoindent=1
@@ -265,8 +267,8 @@ tabstops=2
 spacetabs=1
 showtabs=0
 tabindent=0
-editfontname=DeJaVu Sans Mono
-editfontheight=13
+editfontname=Raize
+editfontheight=16
 editfontwidth=0
 editfontextraspace=0
 editfontcolor=-1879048183
@@ -294,12 +296,12 @@ beforeload=
 afterload=
 beforerun=
 sourcedirs=7
- ${FPGUI_DIR}/src/reportengine/
- ${FPGUI_DIR}/src/corelib/render/software/
- ${FPGUI_DIR}/src/
- ${FPGUI_DIR}/src/corelib/${FPG_RENDERER}/
- ${FPGUI_DIR}/src/gui/
- ${FPGUI_DIR}/src/corelib/
+ ${FPGUI}/src/reportengine/
+ ${FPGUI}/src/corelib/render/software/
+ ${FPGUI}/src/
+ ${FPGUI}/src/corelib/${FPG_GFX}/
+ ${FPGUI}/src/gui/
+ ${FPGUI}/src/corelib/
  ./
 defines=0
 progparameters=
