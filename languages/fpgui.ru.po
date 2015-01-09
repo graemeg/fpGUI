@@ -30,7 +30,7 @@ msgstr "Информация о %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr ""
+msgstr "Добавить текущую директорию"
 
 #: fpg_constants:rsall
 msgid "All"
@@ -78,7 +78,7 @@ msgstr ""
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "Синий"
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -98,7 +98,7 @@ msgstr "Изменить"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr ""
+msgstr "Изменить Заголовок"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
@@ -122,7 +122,7 @@ msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr ""
+msgstr "Настроить Закладки"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -190,7 +190,7 @@ msgstr "Директории"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Директория"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -286,7 +286,7 @@ msgstr "Псевдонимы шрифтов"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr ""
+msgstr "Файл шрифта <%s.fnt> не найден"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
@@ -322,7 +322,7 @@ msgstr "Пропустить"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr ""
+msgstr "Изображение <%s> не найдено"
 
 #: fpg_constants:rsinformation
 msgid "Information"
@@ -466,7 +466,7 @@ msgstr "Владелец"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr ""
+msgstr "PDF Документы"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
@@ -610,7 +610,7 @@ msgstr ""
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr ""
+msgstr "Нет страниц для печати"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
