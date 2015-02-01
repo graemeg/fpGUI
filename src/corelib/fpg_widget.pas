@@ -503,7 +503,7 @@ begin
 
   inherited Create(AOwner);
 
-  if (AOwner <> nil) and (AOwner is TfpgWidget) then
+  if (AOwner <> nil) and (AOwner is TfpgWidget) and (not (WindowType in [wtModalForm, wtPopup])) {and not InheritsFrom(TfpgForm)} then
   begin
     Parent := TfpgWidget(AOwner);
     FTabOrder := AOwner.ComponentCount;

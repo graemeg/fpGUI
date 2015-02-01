@@ -2271,11 +2271,13 @@ var
   WMHints: PXWMHints;
   prop: TAtom;
   mwmhints: TMWMHints;
+  IsToplevel: Boolean;
 begin
   if HandleIsValid then
     Exit; //==>
 
-  if AParent <> nil then
+  IsToplevel := (AParent = nil) or (FWindowType in [wtModalForm, wtPopup]);
+  if not IsToplevel then
     pwh := TfpgX11Window(AParent).WinHandle
   else
     pwh := xapplication.RootWindow;
@@ -2314,7 +2316,7 @@ begin
   FWinHandle := wh;
   FBackupWinHandle := wh;
 
-  if AParent = nil then // is a toplevel window
+  if IsToplevel then // is a toplevel window
   begin
     { setup a window icon }
     IconPixMap := XCreateBitmapFromData(fpgApplication.Display, FWinHandle,
@@ -2400,11 +2402,13 @@ begin
   // for modal windows, this is necessary
   if FWindowType = wtModalForm then
   begin
-    if Parent = nil then
+    if IsToplevel then
     begin
       lmwh := 0;
       if fpgApplication.PrevModalForm <> nil then
         lmwh := TfpgX11Window(fpgApplication.PrevModalForm).WinHandle
+      {else if AParent <> nil then
+        lmwh := TfpgX11Window(AParent).WinHandle}
 { 2011-03-24: Graeme Geldenhuys
   I commented code this code because it caused more problems that it solved
   when multiple modal dialogs or prompts are shown in succession.

@@ -577,6 +577,8 @@ end;
 
 constructor TfpgBaseDialog.Create(AOwner: TComponent);
 begin
+  // WindowType must be set before inherited or our parent property will be set
+  WindowType:=wtModalForm;
   inherited Create(AOwner);
   Width     := 500;
   Height    := 400;
