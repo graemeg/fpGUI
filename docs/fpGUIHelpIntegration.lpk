@@ -24,7 +24,7 @@
 "/>
     <License Value="LGPL
 "/>
-    <Version Minor="3"/>
+    <Version Major="1" Minor="3"/>
     <Files Count="1">
       <Item1>
         <Filename Value="pkghelpfpGUI.pas"/>

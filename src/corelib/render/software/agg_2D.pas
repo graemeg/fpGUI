@@ -414,9 +414,9 @@ type
               opt : ViewportOption = XMidYMid );
 
   // Basic Shapes
-   procedure line     (x1 ,y1 ,x2 ,y2 : double );
+   procedure line     (const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean = false );
    procedure triangle (x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double );
-   procedure rectangle(x1 ,y1 ,x2 ,y2 : double );
+   procedure rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean = false);
 
    procedure roundedRect(x1 ,y1 ,x2 ,y2 ,r : double ); overload;
    procedure roundedRect(x1 ,y1 ,x2 ,y2 ,rx ,ry : double ); overload;
@@ -443,7 +443,7 @@ type
               fileName : char_ptr; height : double;
               bold : boolean = false;
               italic : boolean = false;
-              ch : FontCacheType = RasterFontCache;
+              ch : FontCacheType = VectorFontCache;
               angle : double = 0.0 );
 
    function  fontHeight : double;
@@ -1876,13 +1876,25 @@ begin
 end;
 
 { LINE }
-procedure Agg2D.line(x1 ,y1 ,x2 ,y2 : double );
+procedure Agg2D.line(const x1, y1, x2, y2: double; AFixAlignment: boolean = false);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
 
- addLine (x1 ,y1 ,x2 ,y2 );
- drawPath(StrokeOnly );
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
 
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ addLine(lx1, ly1, lx2, ly2);
+ drawPath(StrokeOnly);
 end;
 
 { TRIANGLE }
@@ -1899,13 +1911,27 @@ begin
 end;
 
 { RECTANGLE }
-procedure Agg2D.rectangle(x1 ,y1 ,x2 ,y2 : double );
+procedure Agg2D.rectangle(const x1 ,y1 ,x2 ,y2 : double; AFixAlignment: boolean);
+var
+  lx1, ly1, lx2, ly2: double;
 begin
  m_path.remove_all;
- m_path.move_to(x1 ,y1 );
- m_path.line_to(x2 ,y1 );
- m_path.line_to(x2 ,y2 );
- m_path.line_to(x1 ,y2 );
+
+ lx1 := x1;
+ ly1 := y1;
+ lx2 := x2;
+ ly2 := y2;
+
+ if AFixAlignment then
+ begin
+   AlignPoint(@lx1, @ly1);
+   AlignPoint(@lx2, @ly2);
+ end;
+
+ m_path.move_to(lx1 ,ly1 );
+ m_path.line_to(lx2 ,ly1 );
+ m_path.line_to(lx2 ,ly2 );
+ m_path.line_to(lx1 ,ly2 );
  m_path.close_polygon;
 
  drawPath(FillAndStroke );
@@ -2102,7 +2128,7 @@ procedure Agg2D.font(
            fileName : char_ptr; height : double;
            bold : boolean = false;
            italic : boolean = false;
-           ch : FontCacheType = RasterFontCache;
+           ch : FontCacheType = VectorFontCache;
            angle : double = 0.0 );
 var
  b : int;
@@ -2121,10 +2147,11 @@ begin
  m_fontEngine.hinting_(m_textHints );
 
  if ch = VectorFontCache then
-  m_fontEngine.height_(height )
+ {$NOTE We need to fix this. Translating from font pt to pixels is inaccurate. This is just a temp fix for now. }
+  m_fontEngine.height_(height * 1.3333 ) // 9pt = ~12px so that is a ratio of 1.3333
  else
   m_fontEngine.height_(worldToScreen(height ) );
-{$ENDIF }
+{$ENDIF}
 {$IFDEF AGG2D_USE_WINFONTS}
  m_fontEngine.hinting_(m_textHints );
 
@@ -2167,7 +2194,9 @@ end;
 procedure Agg2D.textHints(hints : boolean );
 begin
  m_textHints:=hints;
-
+ {$IFNDEF AGG2D_NO_FONT}
+ m_fontEngine.hinting_(m_textHints );
+ {$ENDIF}
 end;
 
 { TEXTWIDTH }
@@ -2350,6 +2379,7 @@ end;
 procedure Agg2D.resetPath;
 begin
  m_path.remove_all;
+ m_path.move_to(0 ,0 );
 
 end;
 

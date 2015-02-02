@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,9 +23,24 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, fpg_base, fpg_main, vfdmain, vfdresizer, vfdforms,
-  vfdfile, newformdesigner, vfdwidgets, vfdformparser, vfdeditors,
-  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid,
+  Classes,
+  SysUtils,
+  fpg_base,
+  fpg_main,
+  fpg_utils,
+  vfdmain,
+  vfdresizer,
+  vfdforms,
+  vfdfile,
+  newformdesigner,
+  vfdwidgets,
+  vfdformparser,
+  vfdeditors,
+  vfdwidgetclass,
+  vfdutils,
+  vfdprops,
+  vfddesigner,
+  vfdpropeditgrid,
   vfd_constants;
 
 
@@ -43,7 +58,7 @@ begin
 
     { If a file is passed in as a parameter, then load it }
     maindsgn.EditedFileName := ParamStr(1);
-    if FileExists(maindsgn.EditedFileName) then
+    if fpgFileExists(maindsgn.EditedFileName) then
       maindsgn.OnLoadFile(maindsgn);
 
     fpgApplication.Run;

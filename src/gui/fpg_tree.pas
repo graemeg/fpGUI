@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -84,7 +84,6 @@ type
     FText: TfpgString;
     FTextColor: TfpgColor;
     FHasChildren: Boolean;
-    FTree: TfpgTreeView;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -97,8 +96,11 @@ type
     procedure   SetHasChildren(const AValue: Boolean);
     procedure   DoTreeCheck(ANode: TfpgTreeNode);
     procedure   SetStateImageIndex(const AValue: integer);
+  protected
+    FTree: TfpgTreeView;
   public
-    constructor Create;
+    constructor Create; overload;
+    constructor Create(ATreeView: TfpgTreeView; AText: TfpgString); overload;
     destructor  Destroy; override;
     // node related
     function    AppendText(AText: TfpgString): TfpgTreeNode;
@@ -133,6 +135,7 @@ type
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: TfpgString read FText write SetText;
+    property    TreeView: TfpgTreeView read FTree;
     { determines the + or - image in the treeview }
     property    HasChildren: Boolean read FHasChildren write SetHasChildren;
     // color settings
@@ -264,8 +267,10 @@ type
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
     property    OnDoubleClick;
+    property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
+    property    OnKeyChar;
+    property    OnKeyPress;
     property    OnShowHint;
     property    OnStateImageClicked: TfpgStateImageClickedEvent read FOnStateImageClicked write FOnStateImageClicked;
   end;
@@ -394,7 +399,8 @@ begin
   FData           := nil;
   FFirstSubNode   := nil;
   FLastSubNode    := nil;
-  FText           := '';
+  FText := '';
+  FTree := nil;
   FImageIndex     := -1;
   FStateImageIndex := -1;
   FCollapsed      := True;
@@ -409,6 +415,13 @@ begin
   FTextColor          := clUnset;
   FInactSelColor      := clUnset;
   FInactSelTextColor  := clUnset;
+end;
+
+constructor TfpgTreeNode.Create(ATreeView: TfpgTreeView; AText: TfpgString);
+begin
+  Create;
+  FText := AText;
+  FTree := ATreeView;
 end;
 
 destructor TfpgTreeNode.Destroy;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -24,7 +24,7 @@ unit fpg_x11;
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
-         of the window borders. This as something to do with win_gravity = StaticGravity setting. }
+         of the window borders. This has something to do with win_gravity = StaticGravity setting. }
 
 interface
 
@@ -222,6 +222,7 @@ type
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
+    procedure   ApplyFormIcon;
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
@@ -315,6 +316,7 @@ type
     xia_wm_protocols: TAtom;
     xia_wm_delete_window: TAtom;
     xia_wm_state: TAtom;
+    xia_net_wm_icon: TAtom;
     xia_targets: TAtom;
     xia_save_targets: TAtom;
     netlayer: TNETWindowLayer;
@@ -331,6 +333,7 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
     function    Screen_dpi_x: integer; override;
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
@@ -1483,6 +1486,7 @@ begin
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
   xia_wm_state          := XInternAtom(FDisplay, 'WM_STATE', TBool(False));
+  xia_net_wm_icon       := XInternAtom(FDisplay, '_NET_WM_ICON', TBool(False));
 
   { initializa the XDND atoms }
   FDNDTypeList := TObjectList.Create;
@@ -1685,7 +1689,7 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, {atimeoutms} 50);
+    r := fpSelect(xfd + 1, @rfds, nil, nil, Min(atimeoutms, 50));
     if r <> 0 then  // We got a X event or the timeout happened
       XNextEvent(display, @ev)
     else
@@ -1842,31 +1846,50 @@ begin
           if not blockmsg then
           begin
             if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
+            // 4=up, 5=down, 6=left, 7=right
             begin
               // generate scroll events:
               if ev._type = X.ButtonPress then
               begin
-                if ev.xbutton.button = Button4 then
+                if (ev.xbutton.button = Button4) or (ev.xbutton.button = 6) then // x.pp lacks Button6, Button7
                   i := -1
                 else
                   i := 1;
 
         	      // Check for other mouse wheel messages in the queue
-                while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
-                begin
-      	          if NewEvent.xbutton.Button = 4 then
-      	            Dec(i)
-                  else if NewEvent.xbutton.Button = 5 then
-      	            Inc(i)
-                  else
-            	    begin
-            	      XPutBackEvent(display, @NewEvent);
-                    break;
-            	    end;
-                end;
+                if ev.xbutton.button in [Button4,Button5] then
+                  while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
+                  begin
+      	            if NewEvent.xbutton.Button = 4 then
+      	              Dec(i)
+                    else if NewEvent.xbutton.Button = 5 then
+      	              Inc(i)
+                    else
+            	      begin
+            	        XPutBackEvent(display, @NewEvent);
+                      break;
+            	      end;
+                  end
+                else // button is 6 or 7
+                  while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
+                  begin
+    	              if NewEvent.xbutton.Button = 6 then
+    	                Dec(i)
+                    else if NewEvent.xbutton.Button = 7 then
+    	                Inc(i)
+                    else
+          	        begin
+          	          XPutBackEvent(display, @NewEvent);
+                      break;
+          	        end;
+                  end;
 
                 msgp.mouse.delta := i;
-                fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
+
+                if ev.xbutton.button in [Button4,Button5] then
+                  fpgPostMessage(nil, w, FPGM_SCROLL, msgp)
+                else
+                  fpgPostMessage(nil, w, FPGM_HSCROLL, msgp);
               end;
             end
             else
@@ -2221,6 +2244,28 @@ begin
   Result := wa.Height;
 end;
 
+function TfpgX11Application.GetScreenPixelColor(APos: TPoint): TfpgColor;
+var
+  Image: PXImage;
+  Pixel: Cardinal;
+  x_Color: TXColor;
+begin
+  Result := 0;
+  Image := XGetImage(Display, FRootWindow, APos.X, APos.Y, 1, 1, $FFFFFFFF, ZPixmap);
+  if Image = nil then
+    raise Exception.Create('fpGFX/X11: Invalid XImage');
+  try
+    Pixel := XGetPixel(Image, 0, 0);
+    x_Color.pixel := Pixel;
+    XQueryColor(Display, DefaultColorMap, @x_Color);
+    Result := TfpgColor(((x_Color.red and $00FF) shl 16) or
+                       ((x_Color.green and $00FF) shl 8) or
+                        (x_Color.blue and $00FF));
+  finally
+    XDestroyImage(Image);
+  end;
+end;
+
 function TfpgX11Application.Screen_dpi_x: integer;
 var
   mm: integer;
@@ -2258,6 +2303,45 @@ begin
 end;
 
 { TfpgX11Window }
+
+procedure TfpgX11Window.ApplyFormIcon;
+var
+  ico: TfpgImage;
+  ar1: array of longword; // 32 bit CPU's
+  ar2: array of qword;    // 64 bit CPU's
+  ps: pbyte;
+  pd: ^TRGBTriple;
+  i: integer;
+  iconName: string;
+begin
+    if self is TfpgForm then
+      iconName := TfpgForm(self).IconName;
+    if iconName = '' then
+      Exit;
+    ico := fpgImages.GetImage(iconName);
+    if Assigned(ico) then
+    begin
+      SetLength(ar1, 2 + (ico.Width * ico.Height));
+      ar1[0] := ico.Width;
+      ar1[1] := ico.Height;
+      pd := @ar1[2];
+      ps := ico.ImageData;
+      move(ps^,pd^, ico.ImageDataSize);
+    end
+    else
+      exit; // we don't have a icon to set
+
+    {$ifdef cpu64}
+    setlength(ar2,length(ar1));
+    for i := low(ar2) to high(ar2) do
+      ar2[i] := ar1[i]; // copy array data over
+    XChangeProperty(xapplication.display, FWinHandle, xapplication.xia_net_wm_icon,
+        XA_CARDINAL, 32, PropModeReplace, @ar2[0], Length(ar2));
+    {$else}
+    XChangeProperty(xapplication.display, FWinHandle, xapplication.xia_net_wm_icon,
+        XA_CARDINAL, 32, PropModeReplace, @ar1[0], Length(ar1));
+    {$endif}
+end;
 
 procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
@@ -2319,13 +2403,13 @@ begin
   if IsToplevel then // is a toplevel window
   begin
     { setup a window icon }
-    IconPixMap := XCreateBitmapFromData(fpgApplication.Display, FWinHandle,
+
+    IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
       @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
 
     WMHints := XAllocWMHints;
     WMHints^.icon_pixmap := IconPixmap;
     WMHints^.flags := IconPixmapHint;
-
     { setup window grouping posibilities }
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
@@ -2333,8 +2417,7 @@ begin
       WMHints^.window_group := xapplication.FLeaderWindow;
     end;
 
-
-    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
+    XSetWMProperties(xapplication.display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
 
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
@@ -2355,6 +2438,9 @@ begin
     begin
       DoDNDEnabled(True);
     end;
+
+    if xapplication.xia_net_wm_icon <> 0 then
+      ApplyFormIcon;
   end;
 
   FillChar(hints, sizeof(hints), 0);
@@ -2380,9 +2466,17 @@ begin
 
   if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
   begin
-    hints.flags      := hints.flags or PMinSize;
+    hints.flags      := hints.flags or PMinSize or PMaxSize;
     hints.min_width  := FMinWidth;
     hints.min_height := FMinHeight;
+    if FMaxWidth > 0 then
+      hints.max_width := FMaxWidth
+    else
+      hints.max_width := xapplication.ScreenWidth;
+    if FMaxHeight > 0 then
+      hints.max_height := FMaxHeight
+    else
+      hints.max_height := xapplication.ScreenHeight;
   end
   else
   begin

@@ -2412,7 +2412,7 @@ begin
         BuffList[I] := SLine;
       end;
     end;
-    BuffList.SaveToFile(AFileName);
+    BuffList.SaveToFile(fpgToOSEncoding(AFileName));
   finally
     BuffList.Free;
   end;
@@ -2423,7 +2423,7 @@ begin
   if not fpgFileExists(AFileName) then
     Exit; //==>
   Clear;
-  FLines.LoadFromFile(AFileName);
+  FLines.LoadFromFile(fpgToOSEncoding(AFileName));
   HandleResize(Width, Height);
   Invalidate;
 end;

@@ -41,6 +41,12 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
+    <Target>
+      <Filename Value="modalformstests"/>
+    </Target>
+    <SearchPaths>
+      <UnitOutputDirectory Value="units"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <UseAnsiStrings Value="False"/>
@@ -48,6 +54,7 @@
     </Parsing>
     <Other>
       <CustomOptions Value="-FUunits"/>
+      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>

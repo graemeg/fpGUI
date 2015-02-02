@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -62,6 +62,8 @@ type
     procedure   miHelpAboutGUI(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: string);
     procedure   SetupCaptions;
+    procedure   BuildThemePreviewMenu;
+    procedure   ToggleDesignerGrid(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -76,6 +78,7 @@ type
     miOpenRecentMenu: TfpgPopupMenu;
     helpmenu: TfpgPopupMenu;
     previewmenu: TfpgPopupMenu;
+    btnGrid: TfpgButton;
     {@VFD_HEAD_END: frmMain}
     mru: TfpgMRU;
     constructor Create(AOwner: TComponent); override;
@@ -178,6 +181,7 @@ uses
   fpg_iniutils,
   fpg_dialogs,
   fpg_constants,
+  fpg_stylemanager,
   vfdmain,
   vfd_constants;
 
@@ -216,7 +220,6 @@ begin
   WindowTitle := 'Product Information...';
   Hint := '';
   WindowPosition := wpScreenCenter;
-  Sizeable := False;
   OnShow := @FormShow;
 
   lblAppName := TfpgLabel.Create(self);
@@ -463,11 +466,25 @@ begin
   begin
     Name := 'previewmenu';
     SetPosition(324, 36, 120, 20);
-    AddMenuItem('with Windows 9x', '', nil).Enabled := False;
-    AddMenuItem('with Windows XP', '', nil).Enabled := False;
-    AddMenuItem('with OpenSoft', '', nil).Enabled := False;
-    AddMenuItem('with Motif', '', nil).Enabled := False;
-    AddMenuItem('with OpenLook', '', nil).Enabled := False;
+  end;
+
+  btnGrid := TfpgButton.Create(self);
+  with btnGrid do
+  begin
+    Name := 'btnGrid';
+    SetPosition(103, 28, 25, 24);
+    Text := '';
+    AllowAllUp := True;
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := 'Toggle designer grid';
+    ImageMargin := -1;
+    ImageName := 'vfd.grid';
+    ImageSpacing := 0;
+    TabOrder := 13;
+    Focusable := False;
+    AllowDown := True;
+    OnClick := @ToggleDesignerGrid;
   end;
 
   {@VFD_BODY_END: frmMain}
@@ -499,6 +516,8 @@ begin
       Inc(y, 30);
     end;
   end;
+
+  BuildThemePreviewMenu;
 
   chlPalette.Items.Sort;
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
@@ -964,9 +983,35 @@ begin
   btnOpen.Hint := rsOpenFormFile;
 end;
 
+procedure TfrmMain.BuildThemePreviewMenu;
+var
+  sl: TStringList;
+  i: integer;
+begin
+  sl := TStringList.Create;
+  fpgStyleManager.AssignStyleTypes(sl);
+  sl.Sort;
+  for i := 0 to sl.Count-1 do
+  begin
+    if sl[i] = 'auto' then
+      continue;
+    previewmenu.AddMenuItem(sl[i], '', nil).Enabled := False;
+  end;
+  sl.Free;
+end;
+
+procedure TfrmMain.ToggleDesignerGrid(Sender: TObject);
+begin
+  maindsgn.ShowGrid := btnGrid.Down;
+end;
+
 constructor TfrmMain.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  fpgImages.AddMaskedBMP(
+    'vfd.grid', @vfd_grid,
+    sizeof(vfd_grid), 0, 0);
+
   OnShow := @FormShow;
 end;
 

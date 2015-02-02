@@ -72,6 +72,7 @@ const
     $FF27546A, $FFE5E5E5);
 
 
+{%region 'Byte arrays of images' -fold}
 const
   win8_checkboxes: array[0..2601] of byte = (
       66, 77, 42, 10,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0, 40,  0,  0,
@@ -387,6 +388,7 @@ const
      199,199,214,214,214,233,233,233,255,255,255,255,255,255,255,255,255,
        0);
 
+{%endregion}
 
 { TfpgWin8Style }
 
