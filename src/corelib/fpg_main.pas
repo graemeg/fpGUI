@@ -2015,10 +2015,13 @@ begin
 
   FModalForWin := nil;
 
-  if (AOwner <> nil) and (AOwner is TfpgWindow) then
-    FWindowType   := wtChild
-  else
-    FWindowType   := wtWindow;
+  if not (FWindowType in [wtModalForm, wtPopup]) then
+  begin
+    if (AOwner <> nil) and (AOwner is TfpgWindow) then
+      FWindowType   := wtChild
+    else
+      FWindowType   := wtWindow;
+  end;
 
   FCanvas := CreateCanvas;
 end;

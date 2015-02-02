@@ -342,6 +342,8 @@ function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin
+  if HasHandle and (FWindowType <> wtModalForm) then
+    HandleHide;
   FWindowType := wtModalForm;
   fpgApplication.PushModalForm(self);
   ModalResult := mrNone;

@@ -99,7 +99,7 @@ procedure TForm1.btnOpenForm2Click(Sender: TObject);
 var
   frm: TForm2;
 begin
-  frm := TForm2.Create(nil);
+  frm := TForm2.Create(Self);
   try
     frm.ShowModal;
     writeln('Form2: This should only appear after the form closes.');
@@ -113,6 +113,7 @@ end;
 constructor TForm1.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  Visible:=False;
   WindowTitle := 'Form1';
   Sizeable := False;
   SetPosition(150, 150, 200, 200);
@@ -144,7 +145,7 @@ procedure TMainForm.btnOpenForm1Click(Sender: TObject);
 var
   frm: TForm1;
 begin
-  frm := TForm1.Create(nil);
+  frm := TForm1.Create(Self);
   try
     frm.ShowModal;
     writeln('Form1: This should only appear after the form closes.');
