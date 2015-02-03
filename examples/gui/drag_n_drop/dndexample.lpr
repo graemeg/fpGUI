@@ -64,6 +64,7 @@ procedure TMainForm.Edit1DragEnter(Sender, Source: TObject;
 var
   s: string;
 begin
+  ShowMimeList(AMimeList);
   s := 'text/plain';
   if chkAccept.Checked then
     Accept := False
@@ -73,7 +74,6 @@ begin
   begin
     if AMimeChoice <> s then
       AMimeChoice := s;
-    ShowMimeList(AMimeList);
   end;
 end;
 
@@ -81,9 +81,9 @@ procedure TMainForm.Bevel1DragEnter(Sender, Source: TObject;
   AMimeList: TStringList; var AMimeChoice: TfpgString;
   var ADropAction: TfpgDropAction; var Accept: Boolean);
 var
-  i: integer;
   s: string;
 begin
+  ShowMimeList(AMimeList);
   { the mime type we want to accept }
   s := 'text/html';
   { if we wil accept the drop, set Accept to True }
@@ -94,7 +94,6 @@ begin
     if AMimeChoice <> s then
       AMimeChoice := s;
 
-    ShowMimeList(AMimeList);
     Bevel1.BackgroundColor := clRed;
   end;
 end;
@@ -108,7 +107,6 @@ procedure TMainForm.PanelDragDrop(Sender, Source: TObject; X, Y: integer;
   AData: Variant);
 var
   s: string;
-  v: variant;
 begin
   s := AData;
   Bevel1.Text := Format('Drop event at (%d,%d) with value(s):'+LineEnding+'%s', [X, Y, s]);
@@ -123,13 +121,14 @@ end;
 procedure TMainForm.btnClearClicked(Sender: TObject);
 begin
   Grid1.RowCount := 0;
+  Edit1.Text := '';
+  Bevel1.Text := '';
 end;
 
 procedure TMainForm.LabelDragStartDetected(Sender: TObject);
 var
   m: TfpgMimeData;
   d: TfpgDrag;
-  v: variant;
 begin
   m := TfpgMimeData.Create;
   { via convenience properties }

@@ -308,8 +308,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    Image: TfpgImage read FImage write SetImage;
-    property    OwnsImage: Boolean read FOwnsImage write FOwnsImage;
-    property    ScaleImage: Boolean read FScaleImage write SetScaleImage;
+    property    OwnsImage: Boolean read FOwnsImage write FOwnsImage default False;
+    property    ScaleImage: Boolean read FScaleImage write SetScaleImage default False;
   end;
 
 
@@ -1111,6 +1111,7 @@ begin
   inherited Create(AOwner);
   FImage := nil;
   FOwnsImage := False;
+  FScaleImage := False;
 end;
 
 destructor TfpgImagePanel.Destroy;

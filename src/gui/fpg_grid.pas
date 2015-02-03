@@ -136,6 +136,7 @@ type
   published
     property    Align;
     property    AlternateBGColor;
+    property    AutoHeight;
     property    BackgroundColor;
     property    BorderStyle;
 //    property    ColResizing;
@@ -158,6 +159,8 @@ type
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowGrid;
     property    ShowHeader;
     property    ShowHint;

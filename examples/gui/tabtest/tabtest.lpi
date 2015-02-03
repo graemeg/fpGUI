@@ -42,6 +42,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
+    <Target>
+      <Filename Value="tabtest"/>
+    </Target>
     <SearchPaths>
       <UnitOutputDirectory Value="units"/>
     </SearchPaths>

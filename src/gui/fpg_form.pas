@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -47,6 +47,7 @@ type
   TfpgBaseForm = class(TfpgWindow)
   private
     FFullScreen: boolean;
+    FIconName: TfpgString;
     FOnActivate: TNotifyEvent;
     FOnClose: TFormCloseEvent;
     FOnCloseQuery: TFormCloseQueryEvent;
@@ -80,6 +81,7 @@ type
     procedure   DoAllocateWindowHandle; override;
     { -- properties -- }
     property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
+    property    IconName: string read FIconName write FIconName;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
@@ -118,6 +120,7 @@ type
     property    FullScreen;
     property    Height;
     property    Hint;
+    property    IconName;
     property    Left;
     property    MaxHeight;
     property    MaxWidth;
@@ -351,7 +354,10 @@ function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin
-  WindowType := wtModalForm;
+  if WindowAllocated and (FWindowType <> wtModalForm) then
+    HandleHide;
+  FWindowType := wtModalForm;
+
   fpgApplication.PushModalForm(self);
   ModalResult := mrNone;
 

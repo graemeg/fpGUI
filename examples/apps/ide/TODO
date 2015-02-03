@@ -1,6 +1,6 @@
 
         Personal todo list for fpGUI IDE project
-        
+
 
 Legend
 ======
@@ -22,8 +22,8 @@ fpGUI IDE
     [ ] Assembly window
     [ ] CPU window
 [x] Syntax highlighting with descent speed.
-[ ] Basic Search dialog
-[x] Find in Files dialog
+[x] Basic Search dialog
+[ ] Find in Files dialog
 [ ] Regex support in all search dialogs
 [ ] External Tools setup and usage
 [ ] Keyboard Shortcuts dialog
@@ -36,7 +36,7 @@ fpGUI IDE
 [ ] Unit Testing framework integration (with DUnit2 project)
 [ ] Code Templates support
 [o] File Browser tabsheet implementation. File navigation and opening of files.
-[ ] GoTo Line Number dialog
+[x] GoTo Line Number dialog
 [ ] Converting all UI to MiG Layout Manager based dialogs.
 [ ] TextEdit: enable line drawing functionality. eg: some key combination with
     the cursor (arrow) keys allows line drawing. Double and single line

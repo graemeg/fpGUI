@@ -386,7 +386,7 @@ type
     property HeaderFontColor: TfpgColor read FHeaderFontColor write SetHeaderFontColor;
     property FooterFont: string read FFooterFont write SetFooterFont;
     property FooterFontColor: TfpgColor read FFooterFontColor write SetFooterFontColor;
-    property SelectionColor: TfpgColor read FSelectionColor write SetSelectionColor default $00CAFFFF;
+    property SelectionColor: TfpgColor read FSelectionColor write SetSelectionColor default $FFCAFFFF;
     property FitToWidth: Boolean read FFitToWidth write SetFitToWidth default False;
     property AutoColWidth: Boolean read FAutoColWidth write SetAutoColWidth default False;
     property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
@@ -491,7 +491,7 @@ begin
   FHeaderLightColor := clHilite1; 
   FHeaderDarkColor := clShadow1;
   FHeaderFont:='Arial-8';
-  FSelectionColor := $00CAFFFF;
+  FSelectionColor := $FFCAFFFF;
   FFooterFont := 'Arial-8';
   FooterFontColor := clRed;
   FDefRowHeight := 18;

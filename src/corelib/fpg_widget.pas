@@ -60,6 +60,7 @@ type
     FOnMouseMove: TMouseMoveEvent;
     FOnMouseUp: TMouseButtonEvent;
     FOnMouseScroll: TMouseWheelEvent;
+    FOnMouseHorizScroll: TMouseWheelEvent;
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
@@ -86,6 +87,7 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgMouseHorizScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
     procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
     procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
@@ -146,6 +148,7 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    Invalidated: Boolean;
     function    IsHidden: Boolean; virtual;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -166,6 +169,7 @@ type
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnMouseScroll: TMouseWheelEvent read FOnMouseScroll write FOnMouseScroll;
+    property    OnMouseHorizScroll: TMouseWheelEvent read FOnMouseHorizScroll write FOnMouseHorizScroll;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
     property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
@@ -236,7 +240,7 @@ type
   TfpgFormFriend = class(TfpgBaseForm)
   end;
 
-  TfpgWindowHack = class(TfpgWidgetBase)
+  TfpgWindowHack = class(TfpgWindow)
   end;
 
 function FindKeyboardFocus: TfpgWidget;
@@ -618,7 +622,8 @@ begin
 
   inherited Create(AOwner);
 
-  if (AOwner <> nil) and (AOwner is TfpgWidget) then
+  if (AOwner <> nil) and (AOwner is TfpgWidget)
+  and not (InheritsFrom(TfpgWindow) and (TfpgWindowHack(Self).FWindowType in [wtModalForm, wtPopup, wtWindow])) then
   begin
     Parent := TfpgWidget(AOwner);
     FTabOrder := AOwner.ComponentCount;
@@ -982,6 +987,12 @@ end;
 procedure TfpgWidget.MsgMouseScroll(var msg: TfpgMessageRec);
 begin
   HandleMouseScroll(msg.Params.mouse.x, msg.Params.mouse.y,
+      msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
+procedure TfpgWidget.MsgMouseHorizScroll(var msg: TfpgMessageRec);
+begin
+  HandleMouseHorizScroll(msg.Params.mouse.x, msg.Params.mouse.y,
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
@@ -1361,6 +1372,12 @@ begin
 
   if not Result and not HasOwnWindow and Assigned(Parent) then
     Result := Parent.IsHidden;
+end;
+
+procedure TfpgWidget.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+begin
+  if Assigned(FOnMouseHorizScroll) then
+    FOnMouseHorizScroll(self, shiftstate, delta, Point(x, y));
 end;
 
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -65,6 +65,7 @@ type
     FColumns: TFPList;
     procedure   HandleSetFocus; override;
     procedure   SetTextColor(const AValue: TfpgColor); override;
+    procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
     procedure   DoDeleteColumn(ACol: integer); virtual;
     procedure   DoSetRowCount(AValue: integer); virtual;
@@ -138,6 +139,18 @@ begin
   end;
 //  Repaint;
   Update;
+end;
+
+procedure TfpgCustomGrid.SetBackgroundColor(const AValue: TfpgColor);
+var
+  i: integer;
+begin
+  inherited SetBackgroundColor(AValue);
+  for i := 0 to ColumnCount-1 do
+  begin
+    TfpgGridColumn(FColumns.Items[i]).BackgroundColor := AValue;
+  end;
+  RePaint;
 end;
 
 function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;

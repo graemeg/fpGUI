@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -58,10 +58,10 @@ uses
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
       mtCustom);
-      
+
   TfpgMsgDlgBtn = (mbNoButton, mbOK, mbCancel, mbYes, mbNo, mbAbort,
       mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose);
-      
+
   TfpgMsgDlgButtons = set of TfpgMsgDlgBtn;
 
 const
@@ -104,7 +104,7 @@ type
     property    CentreText: Boolean read FCentreText write FCentreText default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
   end;
-  
+
 
   TfpgBaseDialog = class(TfpgForm)
   protected
@@ -152,8 +152,8 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   SetSampleText(AText: string);
   end;
-  
-  
+
+
   TfpgFileDialog = class(TfpgBaseDialog)
   private
     chlDir: TfpgComboBox;
@@ -227,6 +227,7 @@ type
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I inputintegerdialog.inc}
 {$I managebookmarksdialog.inc}
 
 
@@ -240,6 +241,7 @@ function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
 function fpgShowCharMap: TfpgString;
 function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
 function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
+function fpgIntegerQuery(const ACaption, APrompt: TfpgString; var Value: Integer; const MaxValue: Integer; const MinValue: Integer = 0): Boolean;
 
 
 implementation
@@ -253,8 +255,8 @@ uses
   {$ENDIF}
   ,DateUtils
   ;
-  
-  
+
+
 procedure WrapText(const AText: String; ALines: TStrings; AFont: TfpgFont;
     const ALineWidth: Integer; out AWidth: Integer);
 var
@@ -396,7 +398,7 @@ begin
       dres := dlg.RunOpenFile
     else
       dres := dlg.RunSaveFile;
-    
+
     if dres then
       Result := dlg.FileName
     else
@@ -532,7 +534,7 @@ var
   outw: integer;
 begin
   WrapText(AMessage, FLines, FFont, FMaxLineWidth, outw);
-  
+
   // dialog width with 10 pixel border on both sides
   Width := outw + 2*10;
 
@@ -577,6 +579,8 @@ end;
 
 constructor TfpgBaseDialog.Create(AOwner: TComponent);
 begin
+  // WindowType must be set before inherited or our parent property will be set
+  WindowType:=wtModalForm;
   inherited Create(AOwner);
   Width     := 500;
   Height    := 400;
@@ -744,7 +748,7 @@ var
       NextC;
     end;
   end;
-  
+
   procedure ProcessAliasFont;
   var
     i: integer;
@@ -785,7 +789,7 @@ begin
 
   NextToken;
   lbFaces.FocusItem := lbFaces.Items.IndexOf(token);
-  
+
   if c = '-' then
   begin
     NextC;
@@ -846,7 +850,7 @@ begin
   MinHeight   := Height;
   FSampleText := 'The quick brown fox jumps over the lazy dog. 0123456789 [oO0,ilLI]';
   FMode       := 1; // normal fonts
-  
+
   btnCancel.Left := Width - FDefaultButtonWidth - FSpacing;
   btnOK.Left     := btnCancel.Left - FDefaultButtonWidth - FSpacing;
 
@@ -1000,7 +1004,7 @@ begin
     Exit; //==>
   if AText = '' then
     Exit; //==>
-    
+
   FSampleText := AText;
   memSample.Text := FSampleText;
 end;
@@ -1171,7 +1175,7 @@ begin
   end;
 
   { Create lower Panel details }
-  
+
   pnlFileInfo := TfpgPanel.Create(self);
   with pnlFileInfo do
   begin
@@ -1194,7 +1198,7 @@ begin
     OnChange := @edFilenameChanged;
     OnKeyPress := @edFilenameKeyPressed;
   end;
-  
+
   { Filter section }
 
   chlFilter := TfpgComboBox.Create(self);
@@ -1398,7 +1402,7 @@ begin
       ExcludeTrailingPathDelimiter(grid.FileList.DirectoryName))
   else
     fsel := '';
-    
+
   grid.FileList.FileMask := GetFileFilter;
   grid.FileList.ShowHidden := ShowHidden;
 
@@ -1407,7 +1411,7 @@ begin
     ShowMessage(Format(rsErrCouldNotOpenDir, [ADir]), rsError);
     Exit; //==>
   end;
-  
+
   grid.FileList.Sort(soFileName);
 
   // we don't want chlDir to call DirChange while populating items
@@ -1420,7 +1424,7 @@ begin
     HighlightFile(fsel)
   else
     grid.FocusRow := 0;
-    
+
   grid.Update;
   grid.SetFocus;
 
@@ -1583,7 +1587,7 @@ begin
 
   if not HighlightFile(fname) then
     edFilename.Text := fname;
-    
+
   WindowTitle     := rsOpenAFile;
   btnOK.ImageName := 'stdimg.open';   // Do NOT localize
   btnOK.Text      := rsOpen;
@@ -1632,6 +1636,7 @@ end;
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I inputintegerdialog.inc}
 {$I managebookmarksdialog.inc}
 
 

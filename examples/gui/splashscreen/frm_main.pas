@@ -49,7 +49,6 @@ type
 implementation
 
 uses
-  fpg_command_intf,
   commands;
 
 {@VFD_NEWFORM_IMPL}

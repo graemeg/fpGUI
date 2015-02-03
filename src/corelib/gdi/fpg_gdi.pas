@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -255,6 +255,7 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
     function    Screen_dpi_x: integer; override;
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
@@ -272,10 +273,13 @@ type
 
 
   TfpgGDIFileList = class(TfpgFileListBase)
+  private
     function    EncodeAttributesString(attrs: longword): TFileModeString;
-    constructor Create; override;
+  protected
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
+  public
+    constructor Create; override;
   end;
 
 
@@ -355,6 +359,7 @@ var
 
 const
   BUFFER_RESIZE_SIZE = 50;
+  ID_ABOUT = 200001;
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -1216,6 +1221,13 @@ begin
           Windows.EndPaint(w.WinHandle, @PaintStruct);
         end;
 
+    WM_SYSCOMMAND:
+        begin
+          if wParam = ID_ABOUT then
+            fpgSendMessage(nil, w, FPGM_ABOUT, msgp)
+          else
+            Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+        end
     else
       Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
   end;
@@ -1291,7 +1303,7 @@ begin
     if MainForm <> nil then
       lHandle := TfpgGDIWindow(MainForm).FWinHandle
     else
-      lHandle := -1;
+      lHandle := 0;
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
       DWORD(WS_POPUP), 0, 0, 0, 0, lHandle, 0, MainInstance, nil);
   end;
@@ -1415,6 +1427,14 @@ begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Bottom - r.Top;
   // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
+end;
+
+function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
+var
+  c: longword;
+begin
+  c := Windows.GetPixel(FDisplay, APos.X, APos.Y);
+  Result := WinColorTofpgColor(c);
 end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;
@@ -2293,8 +2313,10 @@ var
   c: longword;
 begin
   c := Windows.GetPixel(FWinGC, X, Y);
+  {$IFDEF DEBUG}
   if c = CLR_INVALID then
-    Writeln('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+    SendDebug('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+  {$ENDIF}
   Result := WinColorTofpgColor(c);
 end;
 
@@ -3069,7 +3091,7 @@ end;
 destructor TfpgGDIDrag.Destroy;
 begin
   {$IFDEF DND_DEBUG}
-  writeln('TfpgGDIDrag.Destroy ');
+  SendDebug('TfpgGDIDrag.Destroy ');
   {$ENDIF}
   inherited Destroy;
 end;
@@ -3091,14 +3113,14 @@ begin
   if FDragging then
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIDrag.Execute (already dragging)');
+    SendDebug('TfpgGDIDrag.Execute (already dragging)');
     {$ENDIF}
     Result := daIgnore;
   end
   else
   begin
     {$IFDEF DND_DEBUG}
-    writeln('TfpgGDIDrag.Execute (new drag)');
+    SendDebug('TfpgGDIDrag.Execute (new drag)');
     {$ENDIF}
     FDragging := True;
     wapplication.Drag := self;
@@ -3113,7 +3135,7 @@ begin
       {$Note OLE DND: We are only handling strings at the moment, this needs to be extended to other types too }
       itm := FMimeData[i];
       {$IFDEF DND_DEBUG}
-      writeln('  Processing mime-type: ', itm.Format);
+      SendDebug('  Processing mime-type: ', itm.Format);
       {$ENDIF}
 
       { description of data we are sending }

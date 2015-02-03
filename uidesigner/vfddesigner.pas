@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -59,8 +59,15 @@ type
 
 
   TDesignedForm = class(TfpgForm)
+  private
+    FShowGrid: boolean;
+    procedure   SetShowGrid(AValue: boolean);
+  protected
+    procedure   HandlePaint; override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
+    property    ShowGrid: boolean read FShowGrid write SetShowGrid;
   end;
 
 
@@ -74,11 +81,12 @@ type
     FSelected: boolean;
     resizer: array[1..8] of TwgResizer;
     other: TStringList;
+    MarkForDeletion: Boolean;
     constructor Create(AFormDesigner: TFormDesigner; wg: TfpgWidget; wgc: TVFDWidgetClass);
     destructor  Destroy; override;
+    procedure   UpdateResizerPositions;
     property    Selected: boolean read FSelected write SetSelected;
     property    Widget: TfpgWidget read FWidget;
-    procedure   UpdateResizerPositions;
     property    FormDesigner: TFormDesigner read FFormDesigner;
   end;
 
@@ -88,7 +96,7 @@ type
     FOneClickMove: boolean;
   protected
     FWidgets: TList;
-    FForm: TfpgForm;
+    FForm: TDesignedForm;
     FFormOther: string;
     FDragging: boolean;
     FDragPosX,
@@ -134,7 +142,7 @@ type
     function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
     // The widgets can be selected and dragged within one click
     property    OneClickMove: boolean read FOneClickMove write FOneClickMove;
-    property    Form: TfpgForm read FForm;
+    property    Form: TDesignedForm read FForm;
     property    FormOther: string read FFormOther write FFormOther;
   end;
 
@@ -198,6 +206,7 @@ begin
   FSelected := False;
   wg.MouseCursor := mcDefault;
   other := TStringList.Create;
+  MarkForDeletion := False;
 end;
 
 destructor TWidgetDesigner.Destroy;
@@ -623,20 +632,44 @@ procedure TFormDesigner.DeleteWidgets;
 var
   n: integer;
   cd: TWidgetDesigner;
+
+  procedure DeleteChildWidget(ADesignWidget: TWidgetDesigner);
+  var
+    i: integer;
+  begin
+    if not Assigned(ADesignWidget.Widget) then  // safety check
+      Exit;
+    if ADesignWidget.Widget.IsContainer and (ADesignWidget.Widget.ComponentCount > 0) then
+    begin
+      for i := ADesignWidget.Widget.ComponentCount - 1 downto 0 do
+        DeleteChildWidget(WidgetDesigner(TfpgWidget(ADesignWidget.Widget.Components[i])));
+    end;
+    ADesignWidget.MarkForDeletion := True;
+  end;
+
 begin
   n := 0;
+  // Pass 1: Mark widgets and children than need deletion
   while n < FWidgets.Count do
   begin
     cd := TWidgetDesigner(FWidgets.Items[n]);
     if cd.Selected then
+      DeleteChildWidget(cd);
+    Inc(n);
+  end;
+
+  // Pass 2: free TWidgetDesigner instances that have no more Widget instances
+  for n := FWidgets.Count-1 downto 0 do
+  begin
+    cd := TWidgetDesigner(FWidgets.Items[n]);
+    if cd.MarkForDeletion then
     begin
       cd.Widget.Free;
       cd.Free;
       FWidgets.Delete(n);
-    end
-    else
-      Inc(n);
+    end;
   end;
+
   UpdatePropWin;
 end;
 
@@ -676,7 +709,7 @@ var
 begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
-  frm.Title := cEditOrder[AMode];
+  frm.Title := maindsgn.selectedform.Form.Name;
 
   frm.Treeview1.RootNode.Clear;
   lFocused := nil;
@@ -1178,6 +1211,14 @@ begin
     s := s + Ind(1) + 'Hint := ' + QuotedStr(t) + ';' + LineEnding;
   end;
 
+  // IconName property - This is ugly, Form's properties are not handled well!!
+  PropInfo := GetPropInfo(FForm.ClassType, 'IconName');
+  t := GetStrProp(FForm, 'IconName');
+  if IsStoredProp(FForm, PropInfo) then
+  begin
+    s := s + Ind(1) + 'IconName := ' + QuotedStr(t) + ';' + LineEnding;
+  end;
+
   // ShowHint property - This is ugly, Form's properties are not handled well!!
   PropInfo := GetPropInfo(FForm.ClassType, 'ShowHint');
   i := GetOrdProp(FForm, 'ShowHint');
@@ -1465,6 +1506,51 @@ begin
 end;
 
 { TDesignedForm }
+
+procedure TDesignedForm.SetShowGrid(AValue: boolean);
+begin
+  if FShowGrid = AValue then
+    Exit;
+  FShowGrid := AValue;
+  Invalidate;
+end;
+
+procedure TDesignedForm.HandlePaint;
+var
+  i: integer;
+begin
+  inherited HandlePaint;
+  if FShowGrid then
+  begin
+    Canvas.Clear(TfpgColor($ff3e85cd));
+    // horizontal lines
+    for i := 0 to Height-1 do
+    begin
+      if i mod 50 = 0 then
+        Canvas.SetColor(TfpgColor($ff5492d0))
+      else
+        Canvas.SetColor(TfpgColor($ff488bcf));
+      if i mod 10 = 0 then
+        Canvas.DrawLine(0, i, Width-1, i);
+    end;
+    // vertical lines
+    for i := 0 to Width-1 do
+    begin
+      if i mod 50 = 0 then
+        Canvas.SetColor(TfpgColor($ff5492d0))
+      else
+        Canvas.SetColor(TfpgColor($ff488bcf));
+      if i mod 10 = 0 then
+        Canvas.DrawLine(i, 0, i, Height-1);
+    end;
+  end;
+end;
+
+constructor TDesignedForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FShowGrid := False;
+end;
 
 procedure TDesignedForm.AfterCreate;
 begin

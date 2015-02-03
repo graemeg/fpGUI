@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -121,6 +121,8 @@ const
   FPGM_FREEME      = 19;
   FPGM_DROPENTER   = 20;
   FPGM_DROPEXIT    = 21;
+  FPGM_HSCROLL     = 22;
+  FPGM_ABOUT       = 23;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
@@ -137,6 +139,7 @@ var
   FPG_DEFAULT_FONT_DESC: string = 'Liberation Sans-10:antialias=true';
   FPG_DEFAULT_SANS: string = 'Liberation Sans';
   {$ENDIF}
+  FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
 
 const
   UserNamedColorStart   = 128;
@@ -356,6 +359,7 @@ type
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
     FPutBufferQueue: TFPList;
+    FWindow: TfpgWindowBase;
     procedure   AddPutBufferItem(ARect: TfpgRect);
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
@@ -673,6 +677,7 @@ type
     procedure   CreateForm(InstanceClass: TComponentClass; out Reference);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; virtual; abstract;
     function    Screen_dpi_x: integer; virtual; abstract;
     function    Screen_dpi_y: integer; virtual; abstract;
     function    Screen_dpi: integer; virtual; abstract;
@@ -825,8 +830,8 @@ type
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
   end;
-  
-  
+
+
   { TfpgBaseTimer }
 
   TfpgBaseTimer = class(TObject)
@@ -2772,7 +2777,7 @@ end;
 
 procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
 begin
-  tempimage := TfpgImageBase.Create;
+  tempimage := TfpgImage.Create;
   tempimage.AllocateImage(image.ColorDepth, w, image.Height);
 
   xfactor   := image.Width / w;
@@ -2848,7 +2853,7 @@ begin
   p := FImageData;
   Inc(p, (FWidth * y) + x);
   p^ := AValue;
-//  write(IntToHex(AValue, 6) + ' ');
+//  write(IntToHex(AValue, 8) + ' ');
 end;
 
 constructor TfpgImageBase.Create;
@@ -2913,7 +2918,7 @@ begin
   FMasked       := False;
   FWidth        := 0;
   FHeight       := 0;
-//  DoFreeImage;
+  DoFreeImage;
 end;
 
 procedure TfpgImageBase.AllocateImage(acolordepth, awidth, aheight: integer);
@@ -3399,7 +3404,7 @@ var
   e: TFileEntry;
 begin
   e := TFileEntry.Create;
-  e.Name        := fpgFromOSEncoding(sr.Name);
+  e.Name        := sr.Name;
   e.Extension   := fpgExtractFileExt(e.Name);
   e.Size        := sr.Size;
   // e.Attributes  := sr.Attr; // this is incorrect and needs to improve!

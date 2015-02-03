@@ -56,6 +56,7 @@ var
   var
     j: integer;
   begin
+    Result := '';
     if indent = 0 then
       exit;
     for j := 1 to indent do

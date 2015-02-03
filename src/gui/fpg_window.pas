@@ -54,6 +54,7 @@ type
     property    WindowType: TWindowType read FWindowType write FWindowType;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   ActivateWindow;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState;
 
@@ -117,9 +118,15 @@ end;
 
 constructor TfpgWindow.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner);
   WindowType:=wtWindow;
+  inherited Create(AOwner);
   HasOwnWindow:=True;
+end;
+
+procedure TfpgWindow.ActivateWindow;
+begin
+  if WindowAllocated then
+    Window.ActivateWindow;
 end;
 
 end.

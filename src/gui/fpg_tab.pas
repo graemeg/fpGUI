@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1304,10 +1304,7 @@ var
 begin
   Result := nil;
   h := TfpgTabSheet(FPages.First);
-
   lp := FMargin;
-  if MaxButtonWidthSum > (Width-(FMargin*2)) then
-    h := FFirstTabButton;
 
   case TabPosition of
     tpTop:
@@ -1337,6 +1334,8 @@ begin
 
   if TabPosition in [tpTop, tpBottom] then
   begin
+    if MaxButtonWidthSum > (Width-(FMargin*2)) then
+      h := FFirstTabButton;
     if (y > p1) and (y < p2) then
     begin
        while h <> nil do
@@ -1359,11 +1358,13 @@ begin
 
   if TabPosition in [tpLeft, tpRight] then
   begin
+    bh := ButtonHeight;  // initialize button height
+    if MaxButtonHeightSum > (Height-(FMargin*2)) then
+      h := FFirstTabButton;
     if (x > p1) and (x < p2) then
     begin
       while h <> nil do
       begin
-        bh := ButtonHeight;  // initialize button height
         if (y > lp) and (y < lp + bh) then
         begin
           if h <> ActivePage then

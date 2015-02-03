@@ -288,7 +288,12 @@ begin
             'stdimg.executable',
             @stdimg_executable_16,
       sizeof(stdimg_executable_16), 0,0);
-
+      
+  fpgImages.AddMaskedBMP(
+            'stdimg.colpicker',
+            @stdimg_colpicker,
+      sizeof(stdimg_colpicker), 0,0);
+      
 
   // Dialog icons
   fpgImages.AddMaskedBMP(

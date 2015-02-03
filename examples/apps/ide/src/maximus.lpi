@@ -42,7 +42,6 @@
       <Unit0>
         <Filename Value="maximus.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="maximus"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -52,7 +51,6 @@
       <Unit2>
         <Filename Value="frm_configureide.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_configureide"/>
       </Unit2>
       <Unit3>
         <Filename Value="ideconst.pas"/>
@@ -67,7 +65,6 @@
       <Unit5>
         <Filename Value="frm_debug.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_debug"/>
       </Unit5>
       <Unit6>
         <Filename Value="project.pas"/>
@@ -77,7 +74,6 @@
       <Unit7>
         <Filename Value="unitlist.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="UnitList"/>
       </Unit7>
       <Unit8>
         <Filename Value="frm_projectoptions.pas"/>
@@ -97,47 +93,42 @@
       <Unit11>
         <Filename Value="ideimages.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ideimages"/>
       </Unit11>
       <Unit12>
         <Filename Value="stringhelpers.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="stringhelpers"/>
       </Unit12>
       <Unit13>
         <Filename Value="frm_procedurelist.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_procedurelist"/>
       </Unit13>
       <Unit14>
-        <Filename Value="mpaslex.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="mPasLex"/>
-      </Unit14>
-      <Unit15>
         <Filename Value="filemonitor.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="filemonitor"/>
-      </Unit15>
-      <Unit16>
+      </Unit14>
+      <Unit15>
         <Filename Value="synregexpr.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SynRegExpr"/>
-      </Unit16>
-      <Unit17>
+      </Unit15>
+      <Unit16>
         <Filename Value="fpg_textedit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpg_textedit"/>
-      </Unit17>
-      <Unit18>
+      </Unit16>
+      <Unit17>
         <Filename Value="frm_find.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_find"/>
-      </Unit18>
-      <Unit19>
+      </Unit17>
+      <Unit18>
         <Filename Value="sha1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Sha1"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="mPasLex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="mPasLex"/>
       </Unit19>
     </Units>
   </ProjectOptions>
@@ -162,11 +153,7 @@
       </Optimizations>
     </CodeGeneration>
     <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CustomOptions Value="-dDEBUGSVRx"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>

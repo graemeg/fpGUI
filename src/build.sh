@@ -1,6 +1,7 @@
 #!/bin/bash
 
-fpctarget=`fpc -iTP`-`fpc -iTO`
+fpcbin=fpc
+fpctarget=`$fpcbin -iTP`-`$fpcbin -iTO`
 #echo $fpctarget
 libpath='../lib/'$fpctarget
 
@@ -12,7 +13,7 @@ if [ ! -d $libpath ]; then
 fi
 
 # Default build
-fpc -dRELEASE -dX11 @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+$fpcbin -dRELEASE -dX11 @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
 # experimental AggPas-enabled Canvas under X11
-#fpc -dRELEASE -dX11 -dAGGCanvas @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+#$fpcbin -dRELEASE -dX11 -dAGGCanvas @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
 

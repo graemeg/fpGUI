@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2014 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -118,6 +118,7 @@ type
     procedure   AddUnitToProject(const AUnitName: TfpgString);
     procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   tvProjectKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
@@ -541,18 +542,18 @@ var
   r: TfpgTreeNode;
   n: TfpgTreeNode;
 begin
-  u := TUnit.Create;
-  u.FileName := AUnitName;
-  u.Opened := True;
-  GProject.UnitList.Add(u);
-  // add reference to tabsheet
-  pcEditor.ActivePage.TagPointer := u;
-  s := fpgExtractRelativepath(GProject.ProjectDir, u.FileName);
-  r := GetUnitsNode;
-  n := r.AppendText(s);
-  // add reference to treenode
-  n.Data := u;
-  tvProject.Invalidate;
+  u := GProject.UnitList.AddFilename(AUnitName);
+  if Assigned(n) then
+  begin
+    // add reference to tabsheet
+    pcEditor.ActivePage.TagPointer := u;
+    s := u.GetRelativePath;
+    r := GetUnitsNode;
+    n := r.AppendText(s);
+    // add reference to treenode
+    n.Data := u;
+    tvProject.Invalidate;
+  end;
 end;
 
 procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
@@ -584,6 +585,38 @@ begin
     ts := OpenEditorPage(u.FileName);
     u.Opened := True;
     ts.TagPointer := u; // add reference to tabsheet
+  end;
+end;
+
+procedure TMainForm.tvProjectKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+var
+  r: TfpgTreeNode;
+  n: TfpgTreeNode;
+  i: integer;
+begin
+  if keyCode = keyDelete then
+  begin
+    r := GetUnitsNode;
+    if r.FindSubNode(tvProject.Selection.Text, False) = tvProject.Selection then
+    begin
+      // remove from project, then from tree view
+      n := tvProject.Selection;
+      tvProject.GotoNextNodeUp;
+      r.Remove(n);
+      tvProject.Invalidate;
+      GProject.UnitList.Remove(TUnit(n.Data));
+
+      for i := 0 to pcEditor.PageCount-1 do
+      begin
+        if pcEditor.Pages[i].TagPointer = n.Data then
+        begin
+          pcEditor.Pages[i].TagPointer := nil;
+          break
+        end;
+      end;
+      TUnit(n.Data).Free;
+      n.Free;
+    end;
   end;
 end;
 
@@ -1478,6 +1511,7 @@ begin
     Hint := '';
     TabOrder := 20;
     OnDoubleClick := @tvProjectDoubleClick;
+    OnKeyPress := @tvProjectKeyPressed;
   end;
 
   tsFiles := TfpgTabSheet.Create(pnlTool);
@@ -1597,7 +1631,7 @@ begin
   begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
-    AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'O', @miProjectOptions);
+    AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'F11', @miProjectOptions);
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);

@@ -76,6 +76,10 @@ msgstr "Août"
 msgid "BkSp"
 msgstr ""
 
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr ""
+
 #: fpg_constants:rsbold
 msgid "Bold"
 msgstr "Gras"
@@ -100,6 +104,10 @@ msgstr "Changer le titre"
 msgid "Character Map"
 msgstr "Table de caractères"
 
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Fermer"
@@ -107,6 +115,10 @@ msgstr "Fermer"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Collection"
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
+msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
@@ -119,6 +131,10 @@ msgstr "Confirmer"
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
 msgstr "Confirmation"
+
+#: fpg_constants:rscontinuous
+msgid "Continuous"
+msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -280,6 +296,10 @@ msgstr "Ven"
 msgid "Friday"
 msgstr "Vendredi"
 
+#: fpg_constants:rscolorgreen
+msgid "Green"
+msgstr ""
+
 #: fpg_constants:rsfilegroup
 msgid "Group"
 msgstr "Groupe"
@@ -287,6 +307,10 @@ msgstr "Groupe"
 #: fpg_constants:rshelp
 msgid "Help"
 msgstr "Aide"
+
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr ""
 
 #: fpg_constants:rskeyhome
 msgid "Home"
@@ -464,6 +488,10 @@ msgstr ""
 msgid "PgUp"
 msgstr ""
 
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr ""
+
 #: fpg_constants:rsreportpreview
 msgid "Preview"
 msgstr "Prévisualisation"
@@ -471,6 +499,10 @@ msgstr "Prévisualisation"
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Récemment utilisé"
+
+#: fpg_constants:rscolorred
+msgid "Red"
+msgstr ""
 
 #: fpg_constants:rsreplace
 msgid "Replace"

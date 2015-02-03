@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -209,8 +209,6 @@ type
 
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
   private
-    procedure SetShiftIsPressed(const AValue: Boolean);
-  private
     FImages: array[TfpgLVItemStates] of TfpgImageList;
     FSubitemImages: array[TfpgLVItemStates] of TfpgImageList;
     FItemIndex: Integer;
@@ -225,6 +223,7 @@ type
     FUpdateCount: Integer;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
+    FScrollBarWidth: integer;
     FColumns: TfpgLVColumns;
     FItems: TfpgLVItems;
     FOnPaintItem: TfpgLVPaintItemEvent;
@@ -241,7 +240,9 @@ type
     procedure   SetItems(const AValue: TfpgLVItems);
     procedure   SetMultiSelect(const AValue: Boolean);
     procedure   SetOnColumnClick(const AValue: TfpgLVColumnClickEvent);
+    procedure   SetScrollBarWidth(const AValue: integer);
     procedure   SetShowHeaders(const AValue: Boolean);
+    procedure   SetShiftIsPressed(const AValue: Boolean);
     function    SubItemGetImages(AIndex: integer): TfpgImageList;
     procedure   SubItemSetImages(AIndex: integer; const AValue: TfpgImageList);
     procedure   VScrollChange(Sender: TObject; Position: Integer);
@@ -308,6 +309,7 @@ type
     property    Hint;
     property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
     property    ParentShowHint;
+    property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
     property    SubItemImages: TfpgImageList index Ord(lisNoState) read SubItemGetImages write SubItemSetImages;
     property    SubItemImagesSelected: TfpgImageList index Ord(lisSelected) read SubItemGetImages write SubItemSetImages;
@@ -736,6 +738,15 @@ begin
   if FOnColumnClick=AValue then
     Exit;
   FOnColumnClick:=AValue;
+end;
+
+procedure TfpgListView.SetScrollBarWidth(const AValue: integer);
+begin
+  if AValue = FScrollBarWidth then
+    Exit; //==>
+  FScrollBarWidth := AValue;
+  FVScrollBar.Width := FScrollBarWidth;
+  FHScrollBar.Height:= FScrollBarWidth;
 end;
 
 procedure TfpgListView.SetShiftIsPressed(const AValue: Boolean);
@@ -1792,6 +1803,7 @@ begin
   FSelectionFollowsFocus := True;
   FItemIndex := -1;
   FScrollBarNeedsUpdate := True;
+  FScrollBarWidth := FVScrollBar.Width;
 end;
 
 destructor TfpgListView.Destroy;

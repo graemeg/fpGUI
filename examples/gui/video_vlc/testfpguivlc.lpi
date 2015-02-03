@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -50,17 +50,17 @@
         <UnitName Value="frmvlcplayer"/>
       </Unit1>
       <Unit2>
-        <Filename Value="../fpg_vlc.pas"/>
+        <Filename Value="../../../src/3rdparty/libvlc/fpg_vlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpg_vlc"/>
       </Unit2>
       <Unit3>
-        <Filename Value="../../libvlc/libvlc.pp"/>
+        <Filename Value="../../../src/3rdparty/libvlc/libvlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="libvlc"/>
       </Unit3>
       <Unit4>
-        <Filename Value="../../libvlc/vlc.pas"/>
+        <Filename Value="../../../src/3rdparty/libvlc/vlc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="vlc"/>
       </Unit4>
@@ -74,7 +74,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value="../../../src/3rdparty/libvlc"/>
-      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Other>
       <CompilerMessages>

@@ -36,7 +36,6 @@
       <Unit0>
         <Filename Value="uidesigner.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="uidesigner"/>
       </Unit0>
       <Unit1>
         <Filename Value="vfdmain.pas"/>
@@ -46,7 +45,6 @@
       <Unit2>
         <Filename Value="vfdresizer.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdresizer"/>
       </Unit2>
       <Unit3>
         <Filename Value="vfdforms.pas"/>
@@ -81,7 +79,6 @@
       <Unit9>
         <Filename Value="vfdeditors.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdeditors"/>
       </Unit9>
       <Unit10>
         <Filename Value="vfdformparser.pas"/>
@@ -96,12 +93,10 @@
       <Unit12>
         <Filename Value="vfdutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdutils"/>
       </Unit12>
       <Unit13>
         <Filename Value="vfdpropeditgrid.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdpropeditgrid"/>
       </Unit13>
       <Unit14>
         <Filename Value="anchors.inc"/>
@@ -134,8 +129,5 @@
         <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

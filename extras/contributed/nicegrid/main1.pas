@@ -78,7 +78,7 @@ begin
     RowCount := 20;
     AutoAddRow := True;
     DefColWidth := 100;
-    Color:=$ECE9D8; 
+    Color := $ffece9d8;
     GridColor := clSilver;
     HeaderLine := 2;
     HeaderColor := clButtonFace;
@@ -87,7 +87,7 @@ begin
     HeaderFontColor := clWhite;
     HeaderFont := 'MS Sans Serif';
     FooterFontColor := clRed;
-    SelectionColor := 13816575;
+    SelectionColor := $ffD2D2FF;
     BeginUpdate;  // JP
     with Columns.Add do
     begin
@@ -105,7 +105,7 @@ begin
       Width:=100;
       Font:='Arial-8';
       FontColor:=clRed;
-      Color:=$FFFACD;//14024703;
+      Color:=$FFFFFACD;//14024703;
       HorzAlign:=haCenter;
     end;
     with Columns.Add do
@@ -302,9 +302,9 @@ begin
     begin
       BeginUpdate; 
       GridColor := clGray;
-      HeaderColor := $000000DF;
+      HeaderColor := $FF0000DF;
       HeaderDarkColor := clBlack;
-      HeaderLightColor := $000080FF;
+      HeaderLightColor := $FF0080FF;
       HeaderFontColor := clWhite;
       GutterFontColor:=clWhite;
       EndUpdate;

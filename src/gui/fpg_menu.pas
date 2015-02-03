@@ -1342,6 +1342,7 @@ end;
 
 constructor TfpgPopupMenu.Create(AOwner: TComponent);
 begin
+  FWindowType:=wtPopup;
   inherited Create(AOwner);
   FMargin     := 3;
   FTextMargin := 3;

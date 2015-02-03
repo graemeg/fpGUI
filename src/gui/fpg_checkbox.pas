@@ -50,6 +50,7 @@ type
     procedure   SetText(const AValue: string);
     procedure   DoOnChange;
   protected
+    procedure   HandleCheckChanged; virtual;
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -121,6 +122,7 @@ begin
   if FChecked = AValue then
     Exit; //==>
   FChecked := AValue;
+  HandleCheckChanged;
   RePaint;
   if not (csDesigning in ComponentState) then
     DoOnChange;
@@ -171,6 +173,11 @@ procedure TfpgBaseCheckBox.DoOnChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(self);
+end;
+
+procedure TfpgBaseCheckBox.HandleCheckChanged;
+begin
+  // nothing here for us
 end;
 
 procedure TfpgBaseCheckBox.HandlePaint;

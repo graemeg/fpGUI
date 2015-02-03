@@ -43,7 +43,7 @@ type
     constructor Create(ACompDesigner: TObject; adirection: integer); reintroduce;
     procedure   Show;
   end;
-  
+
 
 implementation
 
@@ -65,18 +65,14 @@ begin
   FDragging := True;
   FDragPosX := x;
   FDragPosy := y;
-  {$IFDEF MSWINDOWS}
   CaptureMouse;
-  {$ENDIF}
 end;
 
 procedure TwgResizer.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FDragging := False;
-  {$IFDEF MSWINDOWS}
   ReleaseMouse;
-  {$ENDIF}
 end;
 
 procedure TwgResizer.HandleMouseMove(x, y: integer; btnstate: word;
@@ -91,7 +87,7 @@ begin
 
   if (not FDragging) or ((btnstate and MOUSE_LEFT) = 0) then
     Exit;
-    
+
   dx := x - FDragPosX;
   dy := y - FDragPosY;
 

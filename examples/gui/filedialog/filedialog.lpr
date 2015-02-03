@@ -105,6 +105,7 @@ procedure TMainForm.btnUserInputClicked(Sender: TObject);
 var
   lAnswer: TfpgString;
 begin
+  lAnswer := '';
   if fpgInputQuery('Caption here', 'And the prompt goes here', lAnswer) then
     ShowMessage(Format('User entered <%s>', [lAnswer]));
 end;
@@ -118,7 +119,7 @@ procedure TMainForm.btnOpenFileClick(Sender: TObject);
 var
   dlg: TfpgFileDialog;
 begin
-  dlg := TfpgFileDialog.Create(nil);
+  dlg := TfpgFileDialog.Create(Self);
   try
     // defines 3 filters (All Files, Object Pascal and Lazarus Project)
     dlg.Filter := 'All Files (*)|*|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp|Lazarus Project (*.lpi)|*.lpi';
