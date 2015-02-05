@@ -15,13 +15,13 @@ Macro1=TargetCPU=i386
 Macro2=TargetOS=win32
 Macro3=tiOPF_fpGUI_Dir=/home/graemeg/devel/tiopf/
 UnitDirsCount=7
-UnitDirEnabled1=1,1,1,1,0,0,0,1,0,0
-UnitDirEnabled2=1,1,1,1,0,0,1,1,0,0
-UnitDirEnabled3=1,1,1,0,0,0,1,1,0,0
+UnitDirEnabled1=1,1,1,1,0,1,0,1,0,0
+UnitDirEnabled2=1,1,1,1,0,1,1,1,0,0
+UnitDirEnabled3=1,1,1,0,0,1,1,1,0,0
 UnitDirEnabled4=0,0,0,1,0,0,1,1,0,0
-UnitDirEnabled5=1,1,1,1,0,0,1,0,0,0
-UnitDirEnabled6=1,1,1,1,0,0,1,0,0,0
-UnitDirEnabled7=1,1,1,1,0,0,1,0,0,0
+UnitDirEnabled5=1,1,1,1,0,1,1,0,0,0
+UnitDirEnabled6=1,1,1,1,0,1,1,0,0,0
+UnitDirEnabled7=1,1,1,1,0,1,1,0,0,0
 MakeOption1=-l -Mobjfpc -Sch
 MakeOption2=-gl -O-
 MakeOption3=-B
