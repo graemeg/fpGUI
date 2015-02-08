@@ -1770,6 +1770,11 @@ begin
     CurrentWidget := FindWidgetForMouseEvent(PrimaryWidget, LastMousePos.X, LastMousePos.Y, AWidget);
     MouseCursor:=FCurrentWidget.MouseCursor;
   end;
+  if FMouseCapture = AWidget then
+    ReleaseMouse;
+
+  if FPassiveMouseCapture = AWidget then
+    FPassiveMouseCapture := nil;
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
@@ -1811,6 +1816,9 @@ begin
 
   if Assigned(MouseCapture) then
     w := MouseCapture; // still if the mouse is captured that's where the events go
+
+  if w = nil then
+    w := PrimaryWidget;
 
   // Setting this to nil allows us to know if we should bother to update the cursor
   // in NotifyWidgetDestroying if the widget destroyed has the mouse focus.

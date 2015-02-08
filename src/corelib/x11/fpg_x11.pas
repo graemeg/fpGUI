@@ -1656,6 +1656,7 @@ var
   KeySym: TKeySym;
   Popup: TfpgWidget;
   needToWait: boolean;
+  eformwidget: TfpgForm;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -1883,7 +1884,11 @@ begin
           w := FindWindowByHandle(ev.xbutton.window); // restore w
           if xapplication.TopModalForm <> nil then
           begin
-            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
+            eformwidget := WidgetParentForm(TfpgWidget(w.Owner));
+            if eformwidget <> nil then
+              ew := TfpgX11Window(eformwidget.Window)
+            else
+              ew := nil;
             if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
@@ -2008,7 +2013,11 @@ begin
             end;
             if xapplication.TopModalForm <> nil then
             begin
-              ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
+              eformwidget := WidgetParentForm(TfpgWidget(w.Owner));
+              if eformwidget <> nil then
+                ew := TfpgX11Window(eformwidget.Window)
+              else
+                ew := nil;
               if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                 blockmsg := true;
             end;
