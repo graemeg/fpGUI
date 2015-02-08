@@ -9,7 +9,10 @@ uses
   
 type
 
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
+    procedure ShowFocusItemChange(Sender: TObject);
   private
     FEdit: TfpgEdit;
     FAddButton: TfpgButton;
@@ -18,6 +21,7 @@ type
     FTmpListView: TfpgListView;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
+    FShowFocus: TfpgCheckBox;
     procedure LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer);
     procedure CloseBttn(Sender: TObject);
     procedure AddBttn(Sender: TObject);
@@ -34,6 +38,11 @@ type
 
 
 { TMainForm }
+
+procedure TMainForm.ShowFocusItemChange(Sender: TObject);
+begin
+  FListView.ShowFocusRect:=TfpgCheckBox(Sender).Checked;
+end;
 
 procedure TMainForm.LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn;
   Button: Integer);
@@ -258,6 +267,17 @@ begin
     Checked := True;
     Text := 'Show Headers';
     OnChange := @ShowHeadersChange;
+  end;
+
+  FShowFocus := TfpgCheckBox.Create(BottomPanel);
+  with FShowFocus do begin
+    Parent := BottomPanel;
+    Top := 10;
+    Left := 320;
+    Width := 130;
+    Checked := True;
+    Text := 'Show Item Focus';
+    OnChange:=@ShowFocusItemChange;
   end;
 
 end;

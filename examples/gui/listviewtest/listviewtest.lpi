@@ -36,7 +36,6 @@
       <Unit0>
         <Filename Value="listviewtest.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="listviewtest"/>
       </Unit0>
     </Units>
   </ProjectOptions>
@@ -53,11 +52,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

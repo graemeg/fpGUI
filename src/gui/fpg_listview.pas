@@ -41,9 +41,12 @@ type
   TfpgLVColumnClickEvent = procedure(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer) of object;
   
 
+  { TfpgLVColumn }
+
   TfpgLVColumn = class(TComponent)
   private
     FAlignment: TAlignment;
+    FAutoExpand: Boolean;
     FCaptionAlignment: TAlignment;
     FDown: Boolean;
     FAutoSize: Boolean;
@@ -56,7 +59,9 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     Ref: Integer;
+    function GetWidth: Integer;
     procedure   SetAlignment(const AValue: TAlignment);
+    procedure   SetAutoExpand(AValue: Boolean);
     procedure   SetAutoSize(const AValue: Boolean);
     procedure   SetCaption(const AValue: String);
     procedure   SetCaptionAlignment(const AValue: TAlignment);
@@ -72,7 +77,8 @@ type
     property    CaptionAlignment: TAlignment read FCaptionAlignment write SetCaptionAlignment;
     property    Alignment: TAlignment read FAlignment write SetAlignment;
     property    AutoSize: Boolean read FAutoSize write SetAutoSize;
-    property    Width: Integer read FWidth write SetWidth;
+    property    AutoExpand: Boolean read FAutoExpand write SetAutoExpand;
+    property    Width: Integer read GetWidth write SetWidth;
     property    Height: Integer read FHeight write SetHeight;
     property    Visible: Boolean read FVisible write SetVisible;
     property    ColumnIndex: Integer read FColumnIndex write SetColumnIndex;
@@ -81,12 +87,16 @@ type
   end;
   
 
+  { TfpgLVColumns }
+
   TfpgLVColumns = class(TPersistent)
   private
     FListView: TfpgListView;
     FColumns: TObjectList;
     function    GetColumn(AIndex: Integer): TfpgLVColumn;
     procedure   SetColumn(AIndex: Integer; const AValue: TfpgLVColumn);
+    procedure   SetColumnFillRow(AValue: TfpgLVColumn);
+    function    GetTotalColumsWidth(AIgnoreColumn: TfpgLVColumn): Integer;
   public
     constructor Create(AListView: TfpgListView);
     destructor  Destroy; override;
@@ -108,6 +118,7 @@ type
                                      ColumnIndex: Integer; Area: TfpgRect; var PaintPart: TfpgLVItemPaintPart) of object;
   TfpgLVPaintItemEvent = procedure(ListView: TfpgListView; Canvas: TfpgCanvas; Item: TfpgLVItem;
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart) of object;
+  TfpgLVItemActivateEvent = procedure(ListView: TfpgListView; Item: TfpgLVItem) of object;
   TfpgLVItemSelectEvent = procedure(ListView: TfpgListView; Item: TfpgLVItem;
                                     ItemIndex: Integer; Selected: Boolean) of object;
   
@@ -210,6 +221,8 @@ type
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
   private
     FImages: array[TfpgLVItemStates] of TfpgImageList;
+    FOnItemActivate: TfpgLVItemActivateEvent;
+    FShowFocusRect: Boolean;
     FSubitemImages: array[TfpgLVItemStates] of TfpgImageList;
     FItemIndex: Integer;
     FMultiSelect: Boolean;
@@ -241,6 +254,7 @@ type
     procedure   SetMultiSelect(const AValue: Boolean);
     procedure   SetOnColumnClick(const AValue: TfpgLVColumnClickEvent);
     procedure   SetScrollBarWidth(const AValue: integer);
+    procedure   SetShowFocusRect(AValue: Boolean);
     procedure   SetShowHeaders(const AValue: Boolean);
     procedure   SetShiftIsPressed(const AValue: Boolean);
     function    SubItemGetImages(AIndex: integer): TfpgImageList;
@@ -266,6 +280,7 @@ type
     function    ItemIndexFromY(Y: Integer): Integer;
     function    HeaderHeight: Integer;
     procedure   DoRepaint;
+    procedure   DoItemActivate(AItem: TfpgLVItem);
     procedure   DoColumnClick(Column: TfpgLVColumn; Button: Integer);
     procedure   HandleHeaderMouseMove(x, y: Integer; btnstate: word; Shiftstate: TShiftState);
     property    ShiftIsPressed: Boolean read FShiftIsPressed write SetShiftIsPressed;
@@ -276,6 +291,7 @@ type
     procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -317,10 +333,12 @@ type
     property    SubItemImagesHotTrack: TfpgImageList index Ord(lisHotTrack) read SubItemGetImages write SubItemSetImages;
 
     property    ShowHeaders: Boolean read FShowHeaders write SetShowHeaders;
+    property    ShowFocusRect: Boolean read FShowFocusRect write SetShowFocusRect;
     property    ShowHint;
     property    TabOrder;
     property    VScrollBar: TfpgScrollBar read FVScrollBar;
     property    OnColumnClick: TfpgLVColumnClickEvent read FOnColumnClick write SetOnColumnClick;
+    property    OnItemActivate: TfpgLVItemActivateEvent read FOnItemActivate write FOnItemActivate;
     property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
     property    OnSelectionChanged: TfpgLVItemSelectEvent read FOnSelectionChanged write FOnSelectionChanged;
@@ -749,6 +767,13 @@ begin
   FHScrollBar.Height:= FScrollBarWidth;
 end;
 
+procedure TfpgListView.SetShowFocusRect(AValue: Boolean);
+begin
+  if FShowFocusRect=AValue then Exit;
+  FShowFocusRect:=AValue;
+  Invalidate;
+end;
+
 procedure TfpgListView.SetShiftIsPressed(const AValue: Boolean);
 begin
   if AValue = FShiftIsPressed then
@@ -1014,6 +1039,12 @@ begin
     RePaint;
 end;
 
+procedure TfpgListView.DoItemActivate(AItem: TfpgLVItem);
+begin
+  if Assigned(FOnItemActivate) then
+    FOnItemActivate(Self, AItem);
+end;
+
 procedure TfpgListView.DoColumnClick(Column: TfpgLVColumn; Button: Integer);
 begin
   if not Column.Clickable then
@@ -1271,6 +1302,17 @@ begin
   DoRepaint;
 end;
 
+procedure TfpgListView.HandleDoubleClick(x, y: integer; button: word;
+  shiftstate: TShiftState);
+var
+  Item: TfpgLVItem;
+begin
+  inherited HandleDoubleClick(x, y, button, shiftstate);
+  Item := ItemGetFromPoint(x,y);
+  if Assigned(Item) then
+    DoItemActivate(Item);
+end;
+
 procedure TfpgListView.HandleMouseMove(x, y: integer; btnstate: word;
   shiftstate: TShiftState);
 var
@@ -1390,6 +1432,14 @@ begin
         CheckSelectionFocus;
       CheckMultiSelect
     end;
+    keyEnter:
+    begin
+      if shiftstate = [] then
+      begin
+        if FItemIndex <> -1 then
+          DoItemActivate(Items.Item[FItemIndex]);
+      end;
+    end
   else
     consumed := False;
     inherited HandleKeyPress(keycode, shiftstate, consumed);
@@ -1596,7 +1646,7 @@ begin
     if Assigned(FOnPaintItem) then
       FOnPaintItem(Self, Canvas, Item, I, ItemRect, PaintPart);
 
-    if lvppFocused in PaintPart then
+    if (lvppFocused in PaintPart) and (FShowFocusRect) then
     begin
       if lisSelected in ItemState then
         Canvas.Color := TfpgColor(not clSelection)
@@ -1781,6 +1831,7 @@ begin
   FHeight      := 80;
   Focusable := True;
   FShowHeaders := True;
+  FShowFocusRect := True;
 
   FVScrollBar := TfpgScrollBar.Create(Self);
   FVScrollBar.Orientation := orVertical;
@@ -1885,6 +1936,27 @@ begin
   FColumns.Items[AIndex] := AValue;
 end;
 
+procedure TfpgLVColumns.SetColumnFillRow(AValue: TfpgLVColumn);
+var
+  P: Pointer;
+  C: TfpgLVColumn absolute P;
+begin
+  for P in FColumns do
+    if C <> AValue then
+      C.AutoExpand:=False;
+end;
+
+function TfpgLVColumns.GetTotalColumsWidth(AIgnoreColumn: TfpgLVColumn): Integer;
+var
+  P: Pointer;
+  C: TfpgLVColumn absolute P;
+begin
+  Result := 0;
+  for P in FColumns do
+    if (C <> AIgnoreColumn) and (C.Visible) then
+      Inc(Result, C.FWidth);
+end;
+
 constructor TfpgLVColumns.Create(AListView: TfpgListView);
 begin
   FListView := AListView;
@@ -1986,6 +2058,23 @@ begin
   FAlignment:=AValue;
   if Assigned(FColumns)and Assigned(FColumns.FListView) then
     FColumns.FListView.DoRepaint;
+end;
+
+function TfpgLVColumn.GetWidth: Integer;
+begin
+  Result := 0;
+  if AutoExpand then
+    Result := FColumns.FListView.Width - FColumns.GetTotalColumsWidth(Self);
+  if Result < FWidth then
+    Result := FWidth;
+end;
+
+procedure TfpgLVColumn.SetAutoExpand(AValue: Boolean);
+begin
+  if FAutoExpand=AValue then Exit;
+  FAutoExpand:=AValue;
+  if AValue then
+    FColumns.SetColumnFillRow(Self);
 end;
 
 procedure TfpgLVColumn.SetWidth(const AValue: Integer);
