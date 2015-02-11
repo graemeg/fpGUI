@@ -12,7 +12,7 @@ uses
   gui_mig_constraintparser,
   gui_mig_boundsize,
   gui_mig_unitvalue,
-  gui_mig_exceptions;
+  gui_mig_exceptions, gui_mig_platformdefaults, gui_mig_incellgapprovider;
 
 type
   TMainForm = class(TfpgForm)

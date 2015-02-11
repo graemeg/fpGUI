@@ -5,7 +5,7 @@ unit gui_mig_unitvalue;
 interface
 
 uses
-  Classes, SysUtils, fphash;
+  Classes, SysUtils{, fphash,}, contnrs;
   
 type
 
@@ -13,6 +13,42 @@ type
   private
     FPixels: integer;
   public
+    const
+      STATIC = 100;
+      ADD = 101; // Must have "sub-unit values"
+      SUB = 102; // Must have "sub-unit values"
+      MUL = 103; // Must have "sub-unit values"
+      DIV_ = 104; // Must have "sub-unit values"
+      MIN = 105; // Must have "sub-unit values"
+      MAX = 106; // Must have "sub-unit values"
+      MID = 107; // Must have "sub-unit values"
+
+      PIXEL = 0;
+      LPX = 1;
+      LPY = 2;
+      MM = 3;
+      CM = 4;
+      INCH = 5;
+      PERCENT = 6;
+      PT = 7;
+      SPX = 8;
+      SPY = 9;
+      ALIGN = 12;
+      MIN_SIZE = 13;
+      PREF_SIZE = 14;
+      MAX_SIZE = 15;
+      BUTTON = 16;
+      LINK_X = 18;   // First link
+      LINK_Y = 19;
+      LINK_W = 20;
+      LINK_H = 21;
+      LINK_X2 = 22;
+      LINK_Y2 = 23;
+      LINK_XPOS = 24;
+      LINK_YPOS = 25;    // Last link
+      LOOKUP = 26;
+      LABEL_ALIGN = 27;
+      IDENTITY = -1;
     property    Pixels: integer read FPixels;
   end;
   

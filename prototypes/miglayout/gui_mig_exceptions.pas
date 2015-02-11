@@ -10,6 +10,7 @@ uses
 type
 
   EIllegalArgument = class(Exception);
+  EIllegalAccess = class(Exception);
 
 
 implementation

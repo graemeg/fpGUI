@@ -21,6 +21,7 @@ type
     FFillX: Boolean;
     FFillY: Boolean;
     FFlowX: Boolean;
+    FFlowY: Boolean;
     FGridGapX: TBoundSize;
     FGridGapY: TBoundSize;
     FHideMode: integer;
@@ -58,6 +59,7 @@ type
     property    FillX_prop: Boolean read FFillX write FFillX default False;
     property    FillY_prop: Boolean read FFillY write FFillY default False;
     property    FlowX_prop: Boolean read FFlowX write FFlowX default True;
+    property    FlowY_prop: Boolean read FFlowY write FFlowY default True;
     property    GridGapX: TBoundSize read FGridGapX write FGridGapX;
     property    GridGapY: TBoundSize read FGridGapY write FGridGapY;
     property    HideMode: integer read FHideMode write SetHideMode;
@@ -86,12 +88,12 @@ end;
 
 function TLC.GetInsets: TUnitValueArray;
 begin
-
+   Result := FInsets;
 end;
 
 procedure TLC.SetInsets(const AValue: TUnitValueArray);
 begin
-
+  FInsets := AValue;
 end;
 
 constructor TLC.Create;
