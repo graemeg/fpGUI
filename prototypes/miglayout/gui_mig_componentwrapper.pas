@@ -7,6 +7,11 @@ interface
 uses
   Classes, SysUtils;
 
+type
+  TComponentWrapper = class // interface?
+
+  end;
+
 implementation
 
 end.

@@ -14,7 +14,8 @@ type
       DEF_H_UNIT = TUnitValue.LPX;
       DEF_V_UNIT = TUnitValue.LPY;
     class var
-      GAP_PROVIDER: IInCellGapProvider = nil;
+      GAP_PROVIDER: IInCellGapProvider;
+      MOD_COUNT: Integer;
 
   end;
 
