@@ -1,0 +1,45 @@
+Release process
+===============
+
+1. Create new release branch off 'develop':
+    git checkout -b release-1.x develop
+
+2. Bump version numbers
+
+	docview/src/docview.rc
+	src/VERSION_FILE.inc
+	fpgui_toolkit.lpk  (both X11 & gdi)
+	docs/manifest.xml
+
+3. Run localization script to update all *.po files
+
+4. Switch to 'develop' branch
+
+5. Bump version numbers - same files as step 2.
+
+6. Push both release and develop branches
+
+7. Build new documentation
+     [ ] INF
+     [ ] HTML for website
+
+8. Build new DocView
+
+9. Archive Docview and INF and release to SourceForge (Github?)
+
+10. Archive HTML and release to SourceForge.
+
+11. Push HTML API docs to website
+
+
+
+Release notification
+====================
+
+1. Update website with new release and changelog
+
+2. Post message to FPC Users mailing list
+
+3. Post message to Lazarus mailing list
+
+4. Post message to Lazarus Forum (3rd party)
