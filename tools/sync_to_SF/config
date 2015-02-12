@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+[remote "github"]
+	url = git@github.com:graemeg/fpGUI.git
+	fetch = +refs/heads/*:refs/heads/*
+	fetch = +refs/tags/*:refs/tags/*
+[remote "sourceforge"]
+	url = ssh://graemeg@git.code.sf.net/p/fpgui/code
+	mirror = true
