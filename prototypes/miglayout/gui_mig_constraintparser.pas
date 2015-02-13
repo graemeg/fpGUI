@@ -17,11 +17,13 @@ type
     function  StartsWithLenient(s: String; Match: string; MinChars: integer; AcceptTrailing: Boolean): Integer;
     function  ParseUnitValue(const s: string; EmptyReplacement: TUnitValue; IsHorizontal: Boolean): TUnitValue;
     function  ToTrimmedTokens(s: string; seperator: char): TStrings;
+    function  ParseAlignKeywords(s: string; IsHorizontal: Boolean): TUnitValue;
   public
     function  ParseBoundSize(s: string; IsGap, IsHorizontal: Boolean): TBoundSize;
     function  ParseInsets(s: string; AcceptPanel: Boolean): TUnitValueArray;
     function  ParseLayoutConstraint(const s: string): TLC;
     function  ParseUnitValue(const s: string; IsHorizontal: Boolean): TUnitValue;
+    function  ParseUnitValueOrAlign(s: String; IsHorizontal: Boolean; EmptyReplacement: TUnitValue): TUnitValue;
   end;
 
 implementation
@@ -44,6 +46,7 @@ var
   gaps: TStrings;
   millis: String;
   insStr: String;
+  ins: TUnitValueArray;
 begin
   result := TLC.Create;
   
@@ -154,9 +157,27 @@ begin
             if ix > 0 then
             begin
               insStr := Copy(part,ix,Length(part));
-              //ins: parseinsets
-              {$NOTE resume translation here}
+              ins:= ParseInsets(insStr, True);
+              {$NOTE layoututil todo}
+              //LayoutUtil.PutCCString(ins, insStr);
+              Result.Insets := ins;
             end;
+          end;
+        'a':
+          begin
+            ix := StartsWithLenient(part, ['aligny', 'ay'], [6, 2], True);
+            if ix > 0 then
+              Result.AlignY := ParseUnitValueOrAlign(trim(copy(part, ix, Length(part))), False, nil);
+            ix := StartsWithLenient(part, ['alignx', 'ax'], [6, 2], True);
+            if ix > 0 then
+              Result.AlignX := ParseUnitValueOrAlign(trim(copy(part, ix, Length(part))), False, nil);
+            ix := StartsWithLenient(part, 'align', 2, True);
+            if ix > 0 then
+            begin
+              gaps := ToTrimmedTokens(Trim(Copy(part, ix, Length(part))), ' ');
+              Result.AlignX := ParseUnitValueOrAlign(trim(copy(part, ix, Length(part))), False, nil);
+            end;
+
           end;
       end;
 
@@ -171,6 +192,23 @@ end;
 function TConstraintParser.ParseUnitValue(const s: string; IsHorizontal: Boolean): TUnitValue;
 begin
   ParseUnitValue(s, nil, IsHorizontal);
+end;
+
+function TConstraintParser.ParseUnitValueOrAlign(s: String;
+  IsHorizontal: Boolean; EmptyReplacement: TUnitValue): TUnitValue;
+var
+  align: TUnitValue;
+begin
+  if Length(s) = 0 then
+    Exit(EmptyReplacement);
+
+  align := ParseAlignKeywords(s, IsHorizontal);
+  if align <> nil then
+    Exit(align);
+
+  Result := ParseUnitValue(s, EmptyReplacement, IsHorizontal);
+
+
 end;
 
 function TConstraintParser.StartsWithLenient(s: String;  Matches: array of string;
@@ -238,7 +276,7 @@ end;
 function TConstraintParser.ParseUnitValue(const s: string;
   EmptyReplacement: TUnitValue; IsHorizontal: Boolean): TUnitValue;
 begin
-
+  {$Note Parseunitvalue todo}
 end;
 
 function TConstraintParser.ToTrimmedTokens(s: string; seperator: char): TStrings;
@@ -269,6 +307,37 @@ begin
   if Result.Count = 0 then
     Result.Add(Trim(s));
 
+end;
+
+function TConstraintParser.ParseAlignKeywords(s: string; IsHorizontal: Boolean
+  ): TUnitValue;
+begin
+  if StartsWithLenient(s, 'center', 1, False) > 0 then
+    Exit(TUnitValue.CENTER);
+  if IsHorizontal then
+  begin
+    if StartsWithLenient(s, 'left', 1, False) > 0 then
+      Exit(TUnitValue.LEFT);
+    if StartsWithLenient(s, 'right', 1, False) > 0 then
+      Exit(TUnitValue.RIGHT);
+    if StartsWithLenient(s, 'leading', 4, False) > 0 then
+      Exit(TUnitValue.LEADING);
+    if StartsWithLenient(s, 'trailing', 5, False) > 0 then
+      Exit(TUnitValue.TRAILING);
+    if StartsWithLenient(s, 'label', 5, False) > 0 then
+      Exit(TUnitValue.LABEL_);
+  end
+  else
+  begin
+    if StartsWithLenient(s, 'baseline', 4, False) > 0 then
+      Exit(TUnitValue.BASELINE_IDENTITY);
+    if StartsWithLenient(s, 'top', 1, False) > 0 then
+      Exit(TUnitValue.TOP);
+    if StartsWithLenient(s, 'bottom', 1, False) > 0 then
+      Exit(TUnitValue.BOTTOM);
+  end;
+
+  Result := nil;
 end;
 
 function TConstraintParser.ParseBoundSize(s: string; IsGap,

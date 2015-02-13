@@ -35,7 +35,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -81,13 +81,17 @@
       <Unit9>
         <Filename Value="net/miginfocom/layout/gui_mig_componentwrapper.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="gui_mig_componentwrapper"/>
       </Unit9>
       <Unit10>
         <Filename Value="gui_mig_componentwrapper.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="gui_mig_componentwrapper"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="gui_mig_unitconverter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="gui_mig_unitconverter"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

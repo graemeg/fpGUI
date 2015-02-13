@@ -9,7 +9,7 @@ uses
 
 type
   IInCellGapProvider = interface
-    function GetDefaultGap(comp: TComponentWrapper; adjacentcomponent: TComponentWrapper; adjacentside: Integer; tag: string; IsLTR: Boolean): TBoundSize;
+    function GetDefaultGap(comp: IComponentWrapper; adjacentcomponent: IComponentWrapper; adjacentside: Integer; tag: string; IsLTR: Boolean): TBoundSize;
   end;
 
 implementation

@@ -9,7 +9,7 @@ uses
   Classes, fpg_main, fpg_form, fpg_label, gui_miglayout, gui_mig_lc,
   gui_mig_constraintparser, gui_mig_boundsize, gui_mig_unitvalue,
   gui_mig_exceptions, gui_mig_platformdefaults, gui_mig_incellgapprovider,
-  gui_mig_componentwrapper;
+  gui_mig_componentwrapper, gui_mig_unitconverter;
 
 type
   TMainForm = class(TfpgForm)
