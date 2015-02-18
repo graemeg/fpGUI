@@ -86,7 +86,6 @@ type
   
   TfpgPageControl = class(TfpgWidget)
   private
-    FFont: TfpgFont;
     FActivePage: TfpgTabSheet;
     FMargin: integer;
     FFixedTabWidth: integer;
@@ -521,7 +520,7 @@ begin
   if FFixedTabHeight > 0 then
     result := FFixedTabHeight
   else
-    result := FFont.Height + 10;   { TODO: correct this }
+    result := fpgStyle.DefaultFont.Height + 10;   { TODO: correct this }
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
@@ -529,7 +528,7 @@ begin
   if FFixedTabWidth > 0 then
     result := FFixedTabWidth
   else
-    result := FFont.TextWidth(AText) + 10;
+    result := fpgStyle.DefaultFont.TextWidth(AText) + 10;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
@@ -566,14 +565,14 @@ begin
   i       := 1;
   if FFixedTabWidth > 0 then
   begin
-    while FFont.TextWidth(s1) < (FFixedTabWidth-10) do
+    while fpgStyle.DefaultFont.TextWidth(s1) < (FFixedTabWidth-10) do
     begin
       if Length(s1) = Length(s) then
         Break;
       s1 := UTF8Copy(s, 1, i);
       inc(i);
     end;
-    if FFont.TextWidth(s1) > (FFixedTabWidth-10) then
+    if fpgStyle.DefaultFont.TextWidth(s1) > (FFixedTabWidth-10) then
       UTF8Delete(s1, UTF8Length(s1), 1);
     if Length(s1) > 0 then
       s1 := Trim(s1);
@@ -948,7 +947,7 @@ begin
           r3 := DrawTab(r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
                 Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
 
           r2.Left := r2.Left + r2.Width;
@@ -992,7 +991,7 @@ begin
           r3 := DrawTab(r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
                 FMargin+toffset, GetTabText(h.Text), lTxtFlags);
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -1223,7 +1222,6 @@ end;
 constructor TfpgPageControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont   := fpgStyle.DefaultFont;
   FPages  := TList.Create;
   Width   := 150;
   Height  := 100;
