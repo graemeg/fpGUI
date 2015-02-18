@@ -108,9 +108,6 @@ type
     function    MenuFocused: boolean;
     function    SearchItemByAccel(s: string): integer;
   protected
-    FMenuFont: TfpgFont;
-    FMenuAccelFont: TfpgFont;
-    FMenuDisabledFont: TfpgFont;
     FSymbolWidth: integer;
     FItems: TList;
     FFocusItem: integer;
@@ -1100,7 +1097,7 @@ begin
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
-      fpgStyle.DrawString(Canvas, rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
+      fpgStyle.DrawString(Canvas, rect.Right-fpgStyle.MenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
     end;
 
     // process menu item submenu arrow image
@@ -1182,7 +1179,7 @@ begin
   if mi.Separator then
     Result := 5
   else
-    Result := FMenuFont.Height + 2;
+    Result := fpgStyle.MenuFont.Height + 2;
 end;
 
 function TfpgPopupMenu.MenuFocused: boolean;
@@ -1263,14 +1260,14 @@ begin
     mi  := VisibleItem(n);
     x   := ItemHeight(mi);
     inc(h, x);
-    x := FMenuFont.TextWidth(mi.Text);
+    x := fpgStyle.MenuFont.TextWidth(mi.Text);
     if tw < x then
       tw := x;
 
     if mi.SubMenu <> nil then
-      x := FMenuFont.Height
+      x := fpgStyle.MenuFont.Height
     else
-      x := FMenuFont.TextWidth(mi.HotKeyDef);
+      x := fpgStyle.MenuFont.TextWidth(mi.HotKeyDef);
     if hkw < x then
       hkw := x;
   end;
@@ -1348,11 +1345,7 @@ begin
   FTextMargin := 3;
   FItems      := TList.Create;
 
-  // fonts
-  FMenuFont         := fpgStyle.MenuFont;
-  FMenuAccelFont    := fpgStyle.MenuAccelFont;
-  FMenuDisabledFont := fpgStyle.MenuDisabledFont;
-  FSymbolWidth      := FMenuFont.Height+2;
+  FSymbolWidth      := fpgStyle.MenuFont.Height+2;
 
   FBeforeShow   := nil;
   FFocusItem    := -1;
