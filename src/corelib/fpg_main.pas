@@ -275,7 +275,6 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
-    FDefaultFont: TfpgFont;
     FFontResList: TList;
     FMessageHookList: TFPList;
     procedure   FreeFontRes(afontres: TfpgFontResource);
@@ -297,7 +296,6 @@ type
     procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   ShowException(E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
-    property    DefaultFont: TfpgFont read FDefaultFont;
     property    HintPause: Integer read FHintPause write SetHintPause;
     property    HintWindow: TfpgWindow read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
@@ -1384,8 +1382,6 @@ begin
       TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
 
-  FDefaultFont.Free;
-
   for i := FFontResList.Count-1 downto 0 do
   begin
     TfpgFontResource(FFontResList[i]).Free;
@@ -1671,7 +1667,6 @@ end;
 
 procedure TfpgApplication.InternalInit;
 begin
-  FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   fpgInitTimers;
   fpgNamedFonts := TList.Create;
 
