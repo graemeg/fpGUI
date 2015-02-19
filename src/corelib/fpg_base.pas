@@ -1847,6 +1847,8 @@ procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
   if AFont = nil then
     exit;
+  if FFont = AFont then
+    exit;
   FFont := AFont;
   DoSetFontRes(AFont.FFontRes);
 end;
