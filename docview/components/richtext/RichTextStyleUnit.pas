@@ -470,7 +470,7 @@ end;
 Procedure TRichTextSettings.AssignFont(var AFont: TfpgFont; NewFont: TfpgFont );
 begin
   If NewFont = Nil Then
-    NewFont := fpgApplication.DefaultFont;
+    NewFont := fpgStyle.DefaultFont;
 
   if FontSame( NewFont, AFont ) then
   begin

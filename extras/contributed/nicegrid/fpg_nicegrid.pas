@@ -3417,7 +3417,7 @@ end;
 constructor TfpgMergeCell.Create;
 begin
   inherited Create;
-  Font := fpgApplication.DefaultFont.FontDesc; 
+  Font := fpgStyle.DefaultFont.FontDesc;
 end;
 
 destructor TfpgMergeCell.Destroy;
