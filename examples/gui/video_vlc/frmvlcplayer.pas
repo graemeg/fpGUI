@@ -23,14 +23,17 @@ type
     Button3: TfpgButton;
     Button4: TfpgButton;
     Memo1: TfpgMemo;
+    lblTimeLapse: TfpgLabel;
     {@VFD_HEAD_END: VLCPlayerDemo}
     procedure Sync;
+    procedure DoGUIUpdateTimeLapse;
   public
     P :  TFpgVLCPlayer;
     FMsg: String;
     procedure AfterCreate; override;
     Procedure InitPlayer;
     Procedure Log(Const Msg : String);
+    Procedure UpdateTimeLapse(const Msg: String);
     Procedure DoPlay(sender : TObject);
     Procedure DoPause(sender : TObject);
     Procedure DoResume(sender : TObject);
@@ -145,6 +148,7 @@ procedure TVLCPlayerDemoForm.DoOnTimeChanged(Sender: TObject;
   const time: TDateTime);
 begin
   Log('Time changed : '+TimeToStr(Time));
+  UpdateTimeLapse(TimeToStr(time));
 end;
 
 procedure TVLCPlayerDemoForm.DoOnSnapshot(Sender: TObject;
@@ -167,6 +171,7 @@ begin
   SetPosition(424, 319, 813, 574);
   WindowTitle := 'VLCPlayerDemo';
   Hint := '';
+  IconName := '';
 
   Panel1 := TfpgPanel.Create(self);
   with Panel1 do
@@ -187,7 +192,7 @@ begin
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := '';
-    Filter := 'Video files|*.avi;*.flv;*.mp4';
+    Filter := 'Video files|*.avi;*.flv;*.mp4;*.mkv|Audio files|*.mp3;*.acc;*.flac;*.ogg';
     InitialDir := '';
     TabOrder := 2;
   end;
@@ -269,6 +274,16 @@ begin
     TabOrder := 8;
   end;
 
+  lblTimeLapse := TfpgLabel.Create(self);
+  with lblTimeLapse do
+  begin
+    Name := 'lblTimeLapse';
+    SetPosition(30, 510, 105, 15);
+    FontDesc := 'Liberation Sans-12:bold:antialias=true';
+    Hint := '';
+    Text := 'Label';
+  end;
+
   {@VFD_BODY_END: VLCPlayerDemo}
   {%endregion}
 end;
@@ -306,10 +321,21 @@ begin
   Memo1.Lines.Add(FMsg);
 end;
 
+procedure TVLCPlayerDemoForm.DoGUIUpdateTimeLapse;
+begin
+  lblTimeLapse.Text := FMsg;
+end;
+
 procedure TVLCPlayerDemoForm.Log(const Msg: String);
 begin
   FMsg:=Msg;
   TThread.Synchronize(Nil,@Self.Sync);
+end;
+
+procedure TVLCPlayerDemoForm.UpdateTimeLapse(const Msg: String);
+begin
+  FMsg := Msg;
+  TThread.Synchronize(nil, @self.DoGUIUpdateTimeLapse);
 end;
 
 procedure TVLCPlayerDemoForm.DoPlay(sender: TObject);
