@@ -202,6 +202,10 @@ begin
   end;
 
   // macros definitions
+  { first delete old items in ini file }
+  c := FIniFile.ReadInteger(cProjectOptions, 'MacroCount', 0);
+  for j := 1 to c do
+    FIniFile.DeleteKey(cProjectOptions, 'Macro' + IntToStr(j));
   SaveList(MacroNames, 'MacroCount', 'Macro');
 
   // unit search directories
