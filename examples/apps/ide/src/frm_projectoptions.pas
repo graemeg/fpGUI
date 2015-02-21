@@ -23,7 +23,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
   fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_basegrid,
-  fpg_combobox, fpg_edit, idemacros;
+  fpg_combobox, fpg_edit, idemacros, fpg_menu;
 
 type
 
@@ -78,6 +78,7 @@ type
     Label12: TfpgLabel;
     grdUserMacros: TfpgStringGrid;
     {@VFD_HEAD_END: ProjectOptionsForm}
+    mnuMacros: TfpgPopupMenu;
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
     FLastGrid: TfpgStringGrid; // reference only
@@ -104,6 +105,8 @@ type
     procedure CleanupUserMacrosGrid;
     procedure SaveToMacroList(AList: TIDEMacroList);
     procedure FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure miDelMacro(Sender: TObject);
+    procedure grdUserMacrosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -347,7 +350,10 @@ var
   r, c: integer;
 begin
   if TfpgStringGrid(Sender).RowCount = 0 then
+  begin
     TfpgStringGrid(Sender).RowCount := 1;
+    exit;
+  end;
   r := TfpgStringGrid(Sender).FocusRow;
   c := TfpgStringGrid(Sender).FocusCol;
   if c < 6 then   // checkbox area
@@ -365,7 +371,7 @@ procedure TProjectOptionsForm.grdUserMacrosDrawCell(Sender: TObject;
 var
   img: TfpgImage;
 begin
-  if (gdSelected in AFlags) and (ACol = 6) then
+  if (gdSelected in AFlags) and (ACol >= 6) then
   begin
     FFocusRect := ARect;
   end;
@@ -1184,11 +1190,59 @@ begin
     TabOrder := 1;
     OnClick := @grdUserMacrosClicked;
     OnDrawCell := @grdUserMacrosDrawCell;
+    OnKeyPress := @grdUserMacrosKeyPressed;
   end;
 
   {@VFD_BODY_END: ProjectOptionsForm}
   {%endregion}
+
+  mnuMacros := TfpgPopupMenu.Create(self);
+  with mnuMacros do
+  begin
+    Name := 'mnuFile';
+    SetPosition(476, 61, 172, 20);
+    AddMenuItem('Add macro', '', nil);
+    AddMenuItem('Delete macro', '', @miDelMacro);
+    AddMenuItem('Edit macro', '', nil);
+  end;
+  grdUserMacros.PopupMenu := mnuMacros;
+
+end;
+
+procedure TProjectOptionsForm.miDelMacro(Sender: TObject);
+begin
+  GProject.MacroNames.Delete(grdUserMacros.FocusRow);
+  grdUserMacros.DeleteRow(grdUserMacros.FocusRow);
+end;
+
+procedure TProjectOptionsForm.grdUserMacrosKeyPressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  CheckGridModifyKeyPresses(Sender, KeyCode, ShiftState, Consumed);
+  if Consumed then
+    Exit;
+
+  if TfpgStringGrid(Sender).FocusCol < 6 then
+  begin
+    if (KeyCode = keySpace) then
+    begin
+      grdUserMacrosClicked(Sender);
+      Consumed := True;
+    end;
+  end
+  else if TfpgStringGrid(Sender).FocusCol >= 6 then
+  begin
+    if (KeyCode = keyF2) or (KeyCode = keyReturn) then
+    begin
+      // we need to edit the cell contents
+      SetupCellEdit(TfpgStringGrid(Sender));
+      Consumed := True;
+    end;
+  end;
 end;
 
 
+
 end.
+
+
