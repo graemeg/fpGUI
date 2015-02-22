@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <docproject>
   <packages>
-    <!-- Multiple packages can be entered. 
-         If only one is specified, it is selected. 
+    <!-- Multiple packages can be entered.
+         If only one is specified, it is selected.
          "name" is a mandatory attribute
          a "units" tag is required, and a "descriptions" tag as well
     -->
@@ -131,6 +131,7 @@
         <description file="xml/gui/fpg_basegrid.xml"/>
         <description file="xml/gui/fpg_form.xml"/>
         <description file="xml/gui/fpg_grid.xml"/>
+        <description file="xml/gui/fpg_panel.xml"/>
       </descriptions>
     </package>
   </packages>
