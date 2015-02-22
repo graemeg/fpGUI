@@ -3,7 +3,7 @@
 
 <package name="fpGUI">
 <descr><p>fpGUI Toolkit is intended for Open Source and Commercial applications.
-fpGUI uses the LGPL2 license with the static linking exception - the same as
+fpGUI uses the LGPL v2 license with a static linking exception - the same as
 the Free Pascal Compiler's RTL.</p>
 <p>fpGUI is an Object Pascal toolkit for cross-platform application development.
 It provides single-source portability across Linux, MS Windows, *BSD, OpenSolaris and
@@ -19,7 +19,7 @@ For more information, see the fpGUI Toolkit website at: <url href="http://fpgui.
 of fpGUI. It also defines many types and constants used throughout the toolkit.
 </p>
         <p>When implementing support for a completely new windowing system
-(eg: Carbon used in Mac OS-X) you would implement all the abstract methods
+(eg: Carbon used in Mac OSX) you would implement all the abstract methods
 defined in this unit.
 </p>
       </descr>
