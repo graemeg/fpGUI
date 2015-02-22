@@ -51,6 +51,14 @@ design such frames with the UI designer too.</descr>
 </seealso>
 </element>
 
+<element name="TfpgImagePanel">
+<short>A panel to display an image</short>
+<descr><printshort id="TfpgImagePanel"/>. This was previously done by simply using a
+TfpgWidget and implementing the image painting in the OnPaint event. But this class
+just saves you a bit of time.</descr>
+</element>
+
+
 
 </module>
 </package>
