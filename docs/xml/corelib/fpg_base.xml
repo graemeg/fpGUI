@@ -764,11 +764,32 @@ you must keep copy of the original image before you call <var>Invert</var>.</des
         <descr/>
       </element>
 
-      <!-- procedure Visibility: public -->
-      <element name="TfpgImageBase.UpdateImage">
-        <short>Updates the internal image resources and OS resources from image data</short>
-        <descr/>
-      </element>
+<element name="TfpgImageBase.UpdateImage">
+<short>Updates the internal image resources and OS resources from image data</short>
+<descr><printshort id="TfpgImageBase.UpdateImage"/>. This method must always be called <b>after</b>
+you populated the <var>ImageData</var> array. Then only does it allocate OS resources.</descr>
+<seealso>
+  <link id="TfpgImageBase.ImageData"/>
+</seealso>
+</element>
+
+<element name="TfpgImageBase.ImageData">
+<short>Internal representation of color data of the image</short>
+<descr><printshort id="TfpgImageBase.ImageData"/>. This method gives you a pointer to the image date
+which is always in the format ARGB. If you update the internal data you <b>always</b> need to call
+<var>UpdateImage</var> afterwards.</descr>
+<seealso>
+  <link id="TfpgImageBase.UpdateImage"/>
+</seealso>
+</element>
+
+<element name="TfpgImageBase.ImageDataSize">
+<short>Tells you the size of the image data</short>
+<descr><printshort id="TfpgImageBase.ImageDataSize"/>. You would need this if you work directly with
+the ImageData values.</descr>
+</element>
+
+
 
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Width">
