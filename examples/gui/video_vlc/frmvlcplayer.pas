@@ -336,6 +336,8 @@ procedure TVLCPlayerDemoForm.UpdateTimeLapse(const Msg: String);
 begin
   FMsg := Msg;
   TThread.Synchronize(nil, @self.DoGUIUpdateTimeLapse);
+// This could also be used in FPC 3.0+
+//  TThread.Queue(nil, @DoGUIUpdateTimeLapse);
 end;
 
 procedure TVLCPlayerDemoForm.DoPlay(sender: TObject);

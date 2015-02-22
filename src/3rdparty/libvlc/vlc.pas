@@ -322,8 +322,8 @@ Type
     Property VideoPosition ;
     Property VideoFractionalPosition ;
     Property VideoFramesPerSecond;
-    Property VideoScale : Double;
-    Property AspectRatio : String;
+    Property VideoScale;
+    Property AspectRatio;
   Published
     Property AudioDelay ;
     Property AudioVolume ;
@@ -391,7 +391,7 @@ Type
 
   TVLCMediaListPlayer = Class(TCustomVLCMediaListPlayer)
   Public
-    Property VLC : TVLCLibrary;
+    Property VLC;
   Published
     Property Player;
     Property PlayMode;
