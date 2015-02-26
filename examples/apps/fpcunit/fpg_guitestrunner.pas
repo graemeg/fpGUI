@@ -309,6 +309,7 @@ end;
 
 procedure TGUITestRunnerForm.btnRunClicked(Sender: TObject);
 begin
+  tvTests.FullExpand;
   if tvTests.Selection = nil then
   begin
     TfpgMessageDialog.Critical('No selection', 'Please select a test case first.');
