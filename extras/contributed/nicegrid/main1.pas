@@ -66,7 +66,7 @@ begin
   FMenuBar := CreateMenuBar(self);
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   
- Grid1 := TfpgNiceGrid.Create(self);
+  Grid1 := TfpgNiceGrid.Create(self);
   with Grid1 do
   begin
     Name := 'Grid1';

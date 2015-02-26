@@ -76,15 +76,13 @@ type
 
   TfpgNiceColumns = class(TOwnedCollection) 
   private
-    FGrid: TfpgNiceGrid;
+    function GetGrid: TfpgNiceGrid;
     function GetItem(Index: Integer): TfpgNiceColumn;
     procedure SetItem(Index: Integer; Value: TfpgNiceColumn);
   protected
-    function GetOwner: TPersistent; override;
     procedure Update(Item: TCollectionItem); override;
   public
-    constructor Create(AOwner: TPersistent; AItemClass: TCollectionItemClass);
-    property Grid: TfpgNiceGrid read FGrid;
+    property Grid: TfpgNiceGrid read GetGrid;
     property Items[Index: Integer]: TfpgNiceColumn read GetItem write SetItem; default;
     function Add: TfpgNiceColumn;
     function AddItem(Item: TfpgNiceColumn; Index: Integer): TfpgNiceColumn;
@@ -610,9 +608,9 @@ end;
 
 procedure TfpgNiceGrid.HandleShow;
 begin
-  inherited HandleShow;
   if (csLoading in ComponentState) then
     Exit;
+  inherited HandleShow;
   UpdateScrollBars;
 end;
   
@@ -1226,7 +1224,7 @@ var
   R1: TfpgRect;
 begin
   if FUpdating then Exit;
-  if not (HasHandle) then Exit;
+  if not (Window.HasHandle) then Exit;
   Canvas.Setcolor(FColor);
   Canvas.FillRectangle(fpgRect(0, 0, Width, Height));
 
@@ -2307,15 +2305,15 @@ end;
 
 procedure TfpgNiceGrid.HandleResize(awidth, aheight: TfpgCoord);
 begin
-  inherited HandleResize(awidth, aheight);
   if (csLoading in ComponentState) then
     Exit; //==>
   if csUpdating in ComponentState then
     Exit; //==>
+  inherited HandleResize(awidth, aheight);
   Recalculate;
   if (FColumns.Count > 0)
     then EnsureVisible(FCol, FRow);
-  if HasHandle then
+  if Assigned(Window) and (Window.HasHandle) then
      UpdateScrollBars;
 end;
 
@@ -3171,7 +3169,7 @@ begin
   if (FVisible <> Value) then
   begin
     FVisible := Value;
-    TfpgNiceColumns(Collection).FGrid.ForcedColumn := Index;
+    TfpgNiceColumns(Collection).Grid.ForcedColumn := Index;
     Changed(True);
   end;
 end;
@@ -3185,13 +3183,13 @@ end;
 function TfpgNiceColumn.IsFontStored: Boolean;
 begin
   Result := True;
-  if (TfpgNiceColumns(Collection).FGrid.Font.FontDesc = FFont) then
+  if (TfpgNiceColumns(Collection).Grid.Font.FontDesc = FFont) then
 	  Result:= false;
 end;
 
 function TfpgNiceColumn.GetGrid: TfpgNiceGrid;
 begin
-  Result := TfpgNiceColumns(Collection).FGrid;
+  Result := TfpgNiceColumns(Collection).Grid;
 end;
 
 function TfpgNiceColumn.GetDisplayName: string;
@@ -3203,12 +3201,6 @@ end;
 
 { TfpgNiceColumns }
     
-constructor TfpgNiceColumns.Create(AOwner: TPersistent; AItemClass: TCollectionItemClass); 
-begin
-  FGrid := TfpgNiceGrid(AOwner);    
-  inherited Create(FGrid,TfpgNiceColumn);
-end;    
-
 function TfpgNiceColumns.Add: TfpgNiceColumn;
 begin
   Result := TfpgNiceColumn(inherited Add);
@@ -3219,14 +3211,14 @@ begin
   Result := TfpgNiceColumn(inherited GetItem(Index));
 end;
 
+function TfpgNiceColumns.GetGrid: TfpgNiceGrid;
+begin
+  Result := TfpgNiceGrid(Owner);
+end;
+
 procedure TfpgNiceColumns.SetItem(Index: Integer; Value: TfpgNiceColumn);
 begin
   inherited SetItem(Index, Value);
-end;
-
-function TfpgNiceColumns.GetOwner: TPersistent;
-begin
-  Result := FGrid;
 end;
 
 function TfpgNiceColumns.Insert(Index: Integer): TfpgNiceColumn;
@@ -3238,7 +3230,7 @@ function TfpgNiceColumns.AddItem(Item: TfpgNiceColumn;
   Index: Integer): TfpgNiceColumn;
 begin
   if (Item = nil)
-    then Result := FGrid.CreateColumn
+    then Result := Grid.CreateColumn
     else
     begin
       Result := Item;
@@ -3254,11 +3246,12 @@ end;
 
 procedure TfpgNiceColumns.Update(Item: TCollectionItem);
 begin
-  if not (Grid.HasHandle) then
+  if not Assigned(Grid.Window) or not (Grid.Window.HasHandle) then
     Exit; // ==> 	  
-  if (Item <> nil)
-    then FGrid.UpdateColumn(Item.Index)
-    else FGrid.UpdateColumns;
+  if (Item <> nil) then
+    Grid.UpdateColumn(Item.Index)
+  else
+    Grid.UpdateColumns;
 end;
 
 
