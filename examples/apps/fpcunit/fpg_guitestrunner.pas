@@ -473,16 +473,6 @@ begin
   SetPosition(305, 196, 530, 547);
   WindowTitle := 'GUI Test Runner';
 
-  bvlTree := TfpgBevel.Create(self);
-  with bvlTree do
-  begin
-    Name := 'bvlTree';
-    SetPosition(4, 8, 512, 364);
-    Shape := bsSpacer;
-    MinHeight := 200;
-    Align := alClient;
-  end;
-
   bvlButtons := TfpgBevel.Create(self);
   with bvlButtons do
   begin
@@ -508,6 +498,16 @@ begin
     Name := 'splitter';
     SetPosition(2, 376, 521, 8);
     Align := alBottom;
+  end;
+
+  bvlTree := TfpgBevel.Create(self);
+  with bvlTree do
+  begin
+    Name := 'bvlTree';
+    SetPosition(4, 8, 512, 364);
+    Shape := bsSpacer;
+    MinHeight := 200;
+    Align := alClient;
   end;
 
   pbName1 := TfpgProgressBar.Create(bvlTree);
