@@ -2621,13 +2621,31 @@ var
     Result := c;
   end;
 
+  function LookAhead: char;
+  var
+    i: integer;
+    lc: char;
+  begin
+    i := cp+1;
+    if i > length(desc) then
+      lc := #0
+    else
+      lc := desc[i];
+    result := lc;
+  end;
+
   procedure NextToken;
   begin
     token := '';
-    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '0'..'9']) do
+    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '@', '0'..'9']) do
     begin
       token := token + c;
       NextC;
+      if (c = '-') and (LookAhead in [' ', 'a'..'z', 'A'..'Z', '_']) then
+      begin
+        token := token + c;
+        NextC;
+      end;
     end;
   end;
 
