@@ -1583,17 +1583,20 @@ begin
     ckCopy:
       begin
         CopyToClipboard;
+        consumed := True;
       end;
 
     ckPaste:
       begin
 //        if not ReadOnly then
           PasteFromClipboard;
+          consumed := True;
       end;
 
     ckCut:
       begin
         CutToClipboard;
+        consumed := True;
       end;
   end;
 
@@ -1611,6 +1614,8 @@ begin
 
   SLine := FLines[CaretPos.Y];
 
+  if not consumed then
+  begin
   case keycode of
     keyBackspace:
         begin
@@ -1728,7 +1733,8 @@ begin
           end;
           consumed := True;
         end;
-  end;
+  end;  // case keycode
+  end; // if not consumed
 
   if CaretScroll then
   begin
