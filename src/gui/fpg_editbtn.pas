@@ -83,6 +83,11 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
     property    OnFilenameSet: TFilenameSetEvent read FOnFilenameSet write FOnFilenameSet;
   end;
@@ -107,6 +112,11 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
 

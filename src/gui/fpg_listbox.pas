@@ -168,6 +168,11 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnScroll;
     property    OnSelect;
     property    OnShowHint;

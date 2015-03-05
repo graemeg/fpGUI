@@ -153,8 +153,11 @@ type
     property    OnExit;
     property    OnKeyChar;
     property    OnKeyPress;
-    property    OnMouseEnter;
+    property    OnMouseDown;
     property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnPaint;
     property    OnShowHint;
   end;
