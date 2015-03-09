@@ -39,13 +39,14 @@ function  fpgFileSize(const AFilename: TfpgString): integer;
 function fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: Boolean = True): TfpgString;
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
-function fpgAllFilesMask: TfpgString;
+function fpgAllFilesMask: TfpgString; deprecated;
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;
 function fpgGetToolkitConfigDir: TfpgString;
-{ This is so that when we support LTR and RTL languages, the colon will be
-  added at the correct place. }
 function fpgAddColon(const AText: TfpgString): TfpgString;
-function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
+function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean; deprecated;
+function fpgGetBit(const AData: LongInt; ABit: Longint): boolean; inline;
+procedure fpgSetBit(var AData: Longint; ABit: Longint; const AValue: boolean); inline;
+function fpgIntToBin(AValue: uint64; ADigits: byte=64): string;
 
 
  // RTL wrapper filesystem functions with platform independant encoding
@@ -214,7 +215,6 @@ begin
     Result := Path;
 end;
 
-{function fpgHasSubDirs returns True if the directory passed has subdirectories}
 function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 var
   FileInfo: TSearchRec;
@@ -225,7 +225,7 @@ begin
   if Dir <> '' then
   begin
     FCurrentDir := fpgAppendPathDelim(Dir);
-    FCurrentDir := FCurrentDir + fpgAllFilesMask;
+    FCurrentDir := FCurrentDir + AllFilesMask;
     try
       if fpgFindFirst(FCurrentDir, faAnyFile or $00000080, FileInfo) = 0 then
         repeat
@@ -297,6 +297,31 @@ end;
 function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
 begin
   Result := (AData and (1 shl AIndex) <> 0);
+end;
+
+function fpgGetBit(const AData: LongInt; ABit: Longint): boolean;
+begin
+  Result := (AData and (1 shl ABit) <> 0);
+end;
+
+procedure fpgSetBit(var AData: Longint; ABit: Longint; const AValue: boolean);
+begin
+  if AValue <> fpgGetBit(AData, ABit) then
+    AData := AData xor (1 shl ABit);
+end;
+
+function fpgIntToBin(AValue: uint64; ADigits: byte=64): string;
+begin
+  SetLength(Result, ADigits);
+  while ADigits > 0 do
+  begin
+    if odd(AValue) then
+      Result[ADigits] := '1'
+    else
+      Result[ADigits] := '0';
+    AValue := AValue shr 1;
+    dec(ADigits);
+  end;
 end;
 
 
