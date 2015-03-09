@@ -35,16 +35,8 @@ procedure TDocDump.DoRun;
 var
   ErrorMsg: String;
 begin
-  // quick check parameters
-  ErrorMsg:=CheckOptions('h','help');
-  if ErrorMsg<>'' then begin
-    ShowException(Exception.Create(ErrorMsg));
-    Terminate;
-    Exit;
-  end;
-
-  // parse parameters
-  if HasOption('h','help') then begin
+  if (ParamCount = 0) or HasOption('h','help') then
+  begin
     WriteHelp;
     Terminate;
     Exit;
@@ -84,7 +76,8 @@ end;
 procedure TDocDump.WriteHelp;
 begin
   { add your help code here }
-  writeln('Usage: ',ExeName,' -h');
+  writeln('Usage: ',ExeName,' <INF file>');
+  writeln('     -h  display this help');
 end;
 
 var
