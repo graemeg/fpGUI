@@ -76,9 +76,11 @@ body, p, th, td, caption, h1, h2, h3, ul, ol, dl {
   font-family: "Open Sans",Arial,Helvetica,sans-serif;
 }
 
+/*
 tt, span.kw, pre {
   font-family: "Droid Sans Mono", "Courier New", monospace;
 }
+*/
 
 pre {
   font-family: "Droid Sans Mono", "Courier New", monospace;
@@ -162,6 +164,10 @@ td p {
 
 td b {
   font-weight: normal;
+}
+
+td b a {
+  color: #08860A;
 }
 
 
