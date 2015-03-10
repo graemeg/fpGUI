@@ -133,10 +133,6 @@ p.cmt {
   max-width: 100%;
 }
 
-dl dd {
-  margin-left: 10px;
-}
-
 /*
 table, table td, table th {
   border: 1px solid #EEE;
@@ -170,6 +166,15 @@ td b a {
   color: #08860A;
 }
 
+dt {
+  float: left;
+}
+
+dd {
+    margin: 0px 0px 0px 110px;
+    padding: 0px 0px 0.5em;
+    width: 80%;
+}
 
 /* keywords in source fragments */
 span.kw {
