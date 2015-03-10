@@ -186,7 +186,8 @@ span.toggletreeopen {
     padding-left: 20px;
 }
 
-ul.classtreelist li { padding-left: 0px; }
+ul.classtreelist li {
+	padding-left: 30px; }
 
 ul.classtreelist { list-style-type:none; }
 
