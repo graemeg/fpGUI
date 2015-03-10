@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -265,14 +265,14 @@ end;
 
 procedure TfpgColorSelectDialog.RGBChanged(Sender: TObject);
 var
-  rgb: TFPColor;
+  rgb: TRGBTriple;
   c: TfpgColor;
 begin
   FViaRGB     := True;  // prevent recursive updates
   rgb.Red     := edR.Value;
   rgb.Green   := edG.Value;
   rgb.Blue    := edB.Value;
-  c := FPColorTofpgColor(rgb);
+  c := RGBTripleTofpgColor(rgb);
   ColorWheel.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB     := False;
   // keep text readable based on background color
@@ -286,11 +286,11 @@ end;
 
 procedure TfpgColorSelectDialog.UpdateRGBComponents;
 var
-  rgb: TFPColor;
+  rgb: TRGBTriple;
   c: TfpgColor;
 begin
   c := ValueBar.SelectedColor;
-  rgb := fpgColorToFPColor(c);
+  rgb := fpgColorToRGBTriple(c);
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;

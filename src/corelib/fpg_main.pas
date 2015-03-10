@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -467,7 +467,6 @@ operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
 operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
-operator = (const AColor1, AColor2: TFPColor) b: Boolean; deprecated;
 operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 
 
@@ -1179,14 +1178,6 @@ operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
 begin
   s.w := ASize.w - i;
   s.h := ASize.h - i;
-end;
-
-operator = (const AColor1, AColor2: TFPColor) b: Boolean;
-begin
-  b := (AColor1.Red = AColor2.Red)
-        and (AColor1.Green = AColor2.Green)
-        and (AColor1.Blue = AColor2.Blue)
-        and (AColor1.Alpha = AColor2.Alpha);
 end;
 
 operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;

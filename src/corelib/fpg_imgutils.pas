@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -78,11 +78,11 @@ end;
 function fpgCalculateGray(const AFrom: TfpgColor; const ABrighter: boolean = False; const APercent: integer = 0): TfpgColor;
 var
   g: integer;
-  rgb: TFPColor;
+  rgb: TRGBTriple;
 begin
   with GrayConvMatrix do
   begin
-    rgb := fpgColorToFPColor(AFrom);
+    rgb := fpgColorToRGBTriple(AFrom);
     g := round(red*rgb.red + green*rgb.green + blue*rgb.blue);
 
     if ABrighter then
@@ -97,7 +97,7 @@ begin
     rgb.Green := g;
     rgb.Blue := g;
   end;
-  Result := FPColorTofpgColor(rgb);
+  Result := RGBTripleTofpgColor(rgb);
 end;
 
 

@@ -119,18 +119,18 @@ Const
 procedure FillRectGradient(Canvas: TfpgCanvas; X, Y, W, H: TfpgCoord;
     Strip: Integer; Astart, Astop: TfpgColor);
 var
-  RGBStart: TFPColor;
-  RGBStop: TFPColor;
+  RGBStart: TRGBTriple;
+  RGBStop: TRGBTriple;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TFPColor;
+  newcolor: TRGBTriple;
   Hx, Hy: TfpgCoord; // Coordinates for Horizontal Lines
   Vx, Vy: TfpgCoord; // Coordinates for Vertical Lines
   avgcolor: TfpgColor;
 begin
-  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
 
   count := Strip;
   Hx := X;
@@ -151,7 +151,7 @@ begin
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
    
     Canvas.SetLineStyle(1, lsSolid);
-    Canvas.SetColor(FPColorTofpgColor(newcolor));
+    Canvas.SetColor(RGBTripleTofpgColor(newcolor));
     Canvas.DrawLine(Hx, Hy, W+2, Hy); // Horizontal Line
     Canvas.DrawLine(Vx, Vy, Vx, H+2); // Vertical Line
     // next Horizontal Line: one pixel lower, one pixel shorter on the left

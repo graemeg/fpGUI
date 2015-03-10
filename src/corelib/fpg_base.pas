@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -48,14 +48,6 @@ type
     Blue: byte;
     Alpha: byte;
   end;
-
-  // Same declaration as in FPImage unit, but we don't use FPImage yet, so declare it here
-  TFPColor = record
-    Red: byte;
-    Green: byte;
-    Blue: byte;
-    Alpha: byte;
-  end deprecated;
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
@@ -766,9 +758,7 @@ function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKe
 
 { Color }
 function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
-function  fpgColorToFPColor(const AColor: TfpgColor): TFPColor; deprecated;
 function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
-function  FPColorTofpgColor(const AColor: TFPColor): TfpgColor; deprecated;
 function  fpgGetRed(const AColor: TfpgColor): byte;
 function  fpgGetGreen(const AColor: TfpgColor): byte;
 function  fpgGetBlue(const AColor: TfpgColor): byte;
@@ -997,23 +987,7 @@ begin
   end
 end;
 
-function fpgColorToFPColor(const AColor: TfpgColor): TFPColor; deprecated;
-begin
-  with Result do
-  begin
-    Red   := fpgGetRed(AColor);
-    Green := fpgGetGreen(AColor);
-    Blue  := fpgGetBlue(AColor);
-    Alpha := fpgGetAlpha(AColor);
-  end
-end;
-
 function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
-begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 24);
-end;
-
-function FPColorTofpgColor(const AColor: TFPColor): TfpgColor; deprecated;
 begin
   Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 24);
 end;
