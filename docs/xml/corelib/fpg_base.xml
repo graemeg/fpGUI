@@ -1141,6 +1141,28 @@ contains the help for the application.</descr>
 or HelpKeyword as parameter. The default help viewer is fpGUI's DocView.</descr>
 </element>
 
+<element name="TfpgApplicationBase.MainForm">
+<short>Identifies which form in the application is the main form</short>
+<descr><p><printshort id="TfpgApplicationBase.MainForm"/>. Use the MainForm property to
+determine the form that acts as the application's main window. The first form that is
+show will be assigned as the main form of the application. If the main form closes,
+then all other forms are closed too, and the application quits.</p>
+<p>There are cases where the first form that was created and show, you don't want to
+act as the application's main form. In such a case, simply assign the form you want to
+act as the application's main form to the <var>MainForm</var> property.</p></descr>
+<seealso>
+  <link id="TfpgApplicationBase.CreateForm"/>
+</seealso>
+</element>
+
+<element name="TfpgApplicationBase.CreateForm">
+<short>Creates a new form</short>
+<descr><printshort id="TfpgApplicationBase.CreateForm"/>. Call CreateForm to dynamically create
+a form at runtime. CreateForm creates a new form of the type specified by the InstanceClass
+parameter and assigns it to the variable given by the Reference parameter. The owner of
+the new form is the fpgApplication object.</descr>
+</element>
+
 
 <element name="TfpgBaseTimer.Enabled">
 <short>Allows you to enable or disable the timer</short>
