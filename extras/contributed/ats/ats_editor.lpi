@@ -45,6 +45,7 @@
       <Unit1>
         <Filename Value="ats_main.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="ats_main"/>
       </Unit1>
       <Unit2>
         <Filename Value="ptrparsefunc.pas"/>

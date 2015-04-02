@@ -27,9 +27,7 @@ type
 
 
   TfrmLangTable = class(TfpgForm)
-  public
-    menuFile: TfpgPopupMenu;
-  
+  private
     {@VFD_HEAD_BEGIN: frmLangTable}
     mainmenu: TfpgMenuBar;
     grid: TLangGrid;
@@ -37,20 +35,25 @@ type
     btnCopyRow: TfpgButton;
     btnDeleteRow: TfpgButton;
     btnEdit: TfpgButton;
+    pmActions: TfpgPopupMenu;
+    pmFile: TfpgPopupMenu;
     {@VFD_HEAD_END: frmLangTable}
-    
-    procedure AfterCreate; override;
-    
+    procedure FormShow(Sender: TObject);
+    procedure btnCopyRowClicked(Sender: TObject);
+    procedure btnDeleteRowClicked(Sender: TObject);
+    procedure btnNewRowClicked(Sender: TObject);
     procedure menuProcExit(Sender: TObject);
     procedure menuProcSave(Sender: TObject);
     procedure menuProcOpen(Sender: TObject);
     procedure menuProcNew(Sender: TObject);
     procedure btnEditClicked(Sender : TObject);
+  public
+    procedure AfterCreate; override;
   end;
 
 
   TfrmTextEdit = class(TfpgForm)
-  public
+  private
     {@VFD_HEAD_BEGIN: frmTextEdit}
     Label1: TfpgLabel;
     edID: TfpgEdit;
@@ -61,15 +64,12 @@ type
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     {@VFD_HEAD_END: frmTextEdit}
-    
     textrow : TatsTextRow;
-
-    procedure AfterCreate; override;
-    
     procedure OnLangChange(sender : TObject);
-    
+  protected
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    
+  public
+    procedure AfterCreate; override;
     procedure LoadTexts;
   end;
 
@@ -115,10 +115,10 @@ procedure TLangGrid.HandleKeyPress(var keycode: word; var shiftstate: TShiftStat
 begin
   if keycode = keyEnter then
   begin
+    consumed := True;
     frmMain.btnEdit.Click;
-  end
-  else
-    inherited HandleKeyPress(keycode, shiftstate, consumed);
+  end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TLangGrid.UpdateColumns;
@@ -151,6 +151,7 @@ begin
   SetPosition(326, 139, 466, 168);
   WindowTitle := 'Edit Text';
   Hint := '';
+  IconName := '';
 
   Label1 := TfpgLabel.Create(self);
   with Label1 do
@@ -168,10 +169,10 @@ begin
     Name := 'edID';
     SetPosition(8, 28, 228, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 1;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   cmbLang1 := TfpgComboBox.Create(self);
@@ -179,8 +180,10 @@ begin
   begin
     Name := 'cmbLang1';
     SetPosition(8, 65, 80, 22);
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
+    FocusItem := -1;
     TabOrder := 3;
     OnChange := @OnLangChange;
   end;
@@ -191,10 +194,10 @@ begin
     Name := 'edLang1';
     SetPosition(100, 64, 356, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 3;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   cmbLang2 := TfpgComboBox.Create(self);
@@ -202,8 +205,10 @@ begin
   begin
     Name := 'cmbLang2';
     SetPosition(8, 97, 80, 22);
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
+    FocusItem := -1;
     TabOrder := 4;
     OnChange := @OnLangChange;
   end;
@@ -214,10 +219,10 @@ begin
     Name := 'edLang2';
     SetPosition(100, 96, 356, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 4;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   btnOK := TfpgButton.Create(self);
@@ -266,9 +271,12 @@ end;
 
 procedure TfrmTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if keycode = keyEnter then btnOK.Click
-  else if keycode = keyEscape then btnCancel.Click
-  else inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if keycode = keyEnter then
+    btnOK.Click
+  else if keycode = keyEscape then
+    btnCancel.Click
+  else
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfrmTextEdit.LoadTexts;
@@ -279,6 +287,32 @@ begin
   edLang2.Text := textrow.GetText(cmbLang2.Text, b);
 end;
 
+procedure TfrmLangTable.FormShow(Sender: TObject);
+begin
+  grid.SetFocus;
+end;
+
+procedure TfrmLangTable.btnCopyRowClicked(Sender: TObject);
+begin
+  ShowMessage('Copy row to be implemented.');
+end;
+
+procedure TfrmLangTable.btnDeleteRowClicked(Sender: TObject);
+begin
+  ShowMessage('Delete row to be implemented.');
+end;
+
+procedure TfrmLangTable.btnNewRowClicked(Sender: TObject);
+var
+  s: string;
+begin
+  if not fpgInputQuery('New row', 'Enter the name of the new Text ID', s) then
+    Exit;
+  Grid.atstable.AddRow(s);
+  Grid.SetFocus;
+  Grid.FocusRow := Grid.GetRowCount-1;
+  Grid.FocusCol := 1;
+end;
 
 procedure TfrmLangTable.AfterCreate;
 var
@@ -289,6 +323,8 @@ begin
   SetPosition(282, 304, 619, 513);
   WindowTitle := 'ATS Table Editor';
   Hint := '';
+  IconName := '';
+  OnShow := @FormShow;
 
   mainmenu := TfpgMenuBar.Create(self);
   with mainmenu do
@@ -317,39 +353,42 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 2;
+    OnClick := @btnNewRowClicked;
   end;
 
   btnCopyRow := TfpgButton.Create(self);
   with btnCopyRow do
   begin
     Name := 'btnCopyRow';
-    SetPosition(92, 482, 71, 24);
+    SetPosition(87, 482, 71, 24);
     Anchors := [anLeft,anBottom];
     Text := 'Copy Row';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 3;
+    OnClick := @btnCopyRowClicked;
   end;
 
   btnDeleteRow := TfpgButton.Create(self);
   with btnDeleteRow do
   begin
     Name := 'btnDeleteRow';
-    SetPosition(292, 482, 83, 24);
+    SetPosition(247, 482, 83, 24);
     Anchors := [anLeft,anBottom];
     Text := 'Delete Row';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 4;
+    OnClick := @btnDeleteRowClicked;
   end;
 
   btnEdit := TfpgButton.Create(self);
   with btnEdit do
   begin
     Name := 'btnEdit';
-    SetPosition(188, 482, 79, 24);
+    SetPosition(163, 482, 79, 24);
     Anchors := [anLeft,anBottom];
     Text := 'Edit Item';
     FontDesc := '#Label1';
@@ -359,16 +398,34 @@ begin
     OnClick := @btnEditClicked;
   end;
 
-  {@VFD_BODY_END: frmLangTable}
-  
-  menuFile := TfpgPopupMenu.Create(self);
-  menuFile.AddMenuItem('&New', '', @menuProcNew);
-  menuFile.AddMenuItem('&Open...', '', @menuProcOpen);
-  menuFile.AddMenuItem('&Save...', '', @menuProcSave);
-  menuFile.AddMenuItem('-', '', nil);
-  menuFile.AddMenuItem('&Exit', '', @menuProcExit);
+  pmActions := TfpgPopupMenu.Create(self);
+  with pmActions do
+  begin
+    Name := 'pmActions';
+    SetPosition(400, 130, 180, 22);
+    AddMenuItem('New Row', 'Ctrl+Ins', @btnNewRowClicked);
+    AddMenuItem('Copy Row', 'Ctrl+C', @btnCopyRowClicked);
+    AddMenuItem('Edit Item', 'Enter', @btnEditClicked);
+    AddMenuItem('Delete Row', 'Ctrl+Del', @btnDeleteRowClicked);
+  end;
 
-  mainmenu.AddMenuItem('&File', nil).SubMenu := menuFile;
+  pmFile := TfpgPopupMenu.Create(self);
+  with pmFile do
+  begin
+    Name := 'pmFile';
+    SetPosition(400, 108, 180, 22);
+    AddMenuItem('&New', 'Ctrl+N', @menuProcNew);
+    AddMenuItem('&Open...', 'Ctrl+O', @menuProcOpen);
+    AddMenuItem('&Save...', 'Ctrl+S', @menuProcSave);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Exit', '', @menuProcExit);
+  end;
+
+  {@VFD_BODY_END: frmLangTable}
+
+  // Hook up the menus to the mainmenu
+  mainmenu.AddMenuItem('&File', nil).SubMenu := pmFile;
+  mainmenu.AddMenuItem('&Actions', nil).SubMenu := pmActions;
 
   grid.atstable := atsTexts;
   grid.UpdateColumns;
