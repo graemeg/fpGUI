@@ -45,43 +45,29 @@ type
 
   protected
     function FindRow(const atextid : string) : TatsTextRow;
-
-    function AddRow(const atextid : string) : TatsTextRow;
-
   public
     constructor Create;
     destructor Destroy; override;
-    
     procedure Clear;
-
     procedure AddLang(const alangid : string);
-
     procedure SetText(const atextid, alangid, atext : string);
     function GetText(const atextid, alangid : string; var found : boolean) : string; overload;
     function GetText(const atextid : string) : string; overload;
-
     // later this can prepare a fast search table too:
     procedure SelectLang(const alangid : string);
-
     //procedure SetFallbackOrder(const alangids : string);
-
     property CurrentLang : string read FCurrentLangId;
-    
   public
-
     function LoadFromFile(const afilename : string) : boolean;
-    
     function LoadFromPascalFile(const afilename : string) : boolean;
-    
     function LoadFromArray(const aarr : array of string) : boolean;
-    
     procedure LoadPureText(const fdata : string);
-    
     procedure SaveToFile(const afilename : string; aformat : TatsFormat);
-    
+
     // utility functions
     function RowCount : integer;
     function GetRow(arow : integer) : TatsTextRow;
+    function AddRow(const atextid : string) : TatsTextRow;
 
     property LangList : TStringList read FLangIds;
   end;
