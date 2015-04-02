@@ -45,9 +45,7 @@ type
     procedure menuProcSave(Sender: TObject);
     procedure menuProcOpen(Sender: TObject);
     procedure menuProcNew(Sender: TObject);
-
-    procedure EditClick(Sender : TObject);
-
+    procedure btnEditClicked(Sender : TObject);
   end;
 
 
@@ -358,7 +356,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 5;
-    OnClick := @EditClick;
+    OnClick := @btnEditClicked;
   end;
 
   {@VFD_BODY_END: frmLangTable}
@@ -460,7 +458,7 @@ begin
   grid.Update;
 end;
 
-procedure TfrmLangTable.EditClick(Sender: TObject);
+procedure TfrmLangTable.btnEditClicked(Sender: TObject);
 var
   frm : TfrmTextEdit;
   tr : TatsTextRow;
