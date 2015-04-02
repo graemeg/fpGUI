@@ -8,24 +8,23 @@ uses
   fpg_combobox, fpg_dialogs, fpg_utils;
 
 const
-  langtabledata:
-    {$I atstable.inc}
+  langtabledata: {$I atstable.inc}
 
 type
-
-  { TLangGrid }
 
   TLangGrid = class(TfpgCustomGrid)
   protected
     procedure DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    function GetRowCount: Integer; override;
+    function  GetRowCount: Integer; override;
   public
     atstable: TatsTextTable;
     procedure UpdateColumns;
+  published
+    property  FocusCol;
+    property  FocusRow;
   end;
 
-  { TfrmLangTable }
 
   TfrmLangTable = class(TfpgForm)
   public
@@ -51,7 +50,6 @@ type
 
   end;
 
-  { TfrmTextEdit }
 
   TfrmTextEdit = class(TfpgForm)
   public
