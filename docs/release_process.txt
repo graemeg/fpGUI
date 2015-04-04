@@ -29,7 +29,8 @@ Release process
 
 10. Archive HTML and release to SourceForge.
 
-11. Push HTML API docs to website
+11. Push HTML API docs to website.
+    - Use rsync script in fpgui_website repository.
 
 
 
