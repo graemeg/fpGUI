@@ -265,7 +265,7 @@ end;
 
 procedure TfpgColorSelectDialog.RGBChanged(Sender: TObject);
 var
-  rgb: TRGBTriple;
+  rgb: fpg_base.TRGBTriple;
   c: TfpgColor;
 begin
   FViaRGB     := True;  // prevent recursive updates
@@ -286,7 +286,7 @@ end;
 
 procedure TfpgColorSelectDialog.UpdateRGBComponents;
 var
-  rgb: TRGBTriple;
+  rgb: fpg_base.TRGBTriple;
   c: TfpgColor;
 begin
   c := ValueBar.SelectedColor;
