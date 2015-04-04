@@ -156,6 +156,7 @@
     ## Options for HTML output
     <option name="footer-date" value="yyyy-mm-dd"/>
     <option name="css-file" value="fpdoc.css"/>
+    <option name="hide-protected" value="true"/>
 -->
   </options>
 </docproject>
