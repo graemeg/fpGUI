@@ -307,7 +307,7 @@ begin
     //else
     //  grdMessages.Items.InsertItem(LI, 0);
     grdMessages.Cells[0, r] := IntToStr(AMsg.MsgType);
-    grdMessages.Cells[1, r] := FormatDateTime('HH:mm:ss', AMsg.MsgTimeStamp);
+    grdMessages.Cells[1, r] := FormatDateTime('HH:nn:ss', AMsg.MsgTimeStamp);
     grdMessages.Cells[2, r] := AMsg.Msg;
     grdMessages.FocusCol := 0;
     grdMessages.FocusRow := grdMessages.RowCount-1;
