@@ -158,7 +158,6 @@ end;
 procedure TfpgToggle.HandlePaint;
 var
   ToggleText: TfpgString;
-  PaintColor: TFPColor;
   TextEnabled: TfpgTextFlags;
   BvlWdth: TfpgCoord;
   ButtonRect: TfpgRect;

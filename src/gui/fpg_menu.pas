@@ -1070,7 +1070,6 @@ procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect; AFlags: TfpgM
 var
   s: string;
   x: integer;
-  img: TfpgImage;
   lFlags: TfpgMenuItemFlags;
 begin
   lFlags := AFlags;

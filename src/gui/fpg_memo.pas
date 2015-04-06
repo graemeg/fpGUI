@@ -1703,7 +1703,6 @@ end;
 procedure TfpgMemo.SetText(const AValue: TfpgString);
 var
   n: integer;
-  c: TfpgChar;
   s: TfpgString;
 begin
   FLines.Clear;
