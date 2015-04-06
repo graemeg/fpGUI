@@ -995,7 +995,6 @@ end;
 function fpgColor2AggColor(c: TfpgColor): TAggColor;
 var
   t: TRGBTriple;
-  c1: TfpgColor;
 begin
   t := fpgColorToRGBTriple(c);
   Result.Construct(t.Red, t.Green, t.Blue, t.Alpha);
@@ -2653,9 +2652,6 @@ procedure TAgg2D.Font(
            italic : boolean = false;
            cache : TAggFontCacheType = AGG_VectorFontCache;
            angle : double = 0.0 );
-var
- b : int;
-
 begin
  m_textAngle    :=angle;
  m_fontHeight   :=height;
@@ -3568,7 +3564,6 @@ end;
 {$ENDIF}
 {$IFDEF UNIX}
 var
-  s: TfpgString;
   i: integer;
   fnt: TFontCacheItem;
   lSize: double;

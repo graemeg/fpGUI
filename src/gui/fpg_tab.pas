@@ -184,11 +184,6 @@ implementation
 uses
   fpg_stringutils;
 
-const
-  DFL_TAB_HEIGHT = 21;
-  DFL_TAB_WIDTH = 0;
-  
-  
 // compare function used by FPages.Sort
 
 function SortCompare(Item1, Item2: Pointer): integer;
@@ -410,7 +405,6 @@ var
   wd: integer;  { width delta }
   h: integer;
   hd: integer;  { height delta }
-  msg: TfpgMessageParams;
 begin
   // PageControl has bevelled edges in some themes
   r := fpgStyle.GetControlFrameBorders;
@@ -821,8 +815,6 @@ var
   h: TfpgTabSheet;
   lp: integer;
   toffset: integer;
-  TextLeft, TextTop: Integer;
-  dx: integer;
   lTxtFlags: TfpgTextFlags;
   ActivePageVisible: Boolean;
 begin

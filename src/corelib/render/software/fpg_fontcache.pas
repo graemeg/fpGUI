@@ -207,7 +207,6 @@ function TFontCacheList.BuildFontCacheItem(const AFontFile: TfpgString): TFontCa
 var
   face_ptr: FT_Face_ptr;
   s: Ansistring;
-  i: integer;
   flags: integer;
 begin
   FT_New_Face(m_library, PChar(AFontFile), 0, face_ptr);
