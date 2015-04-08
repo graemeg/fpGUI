@@ -44,3 +44,7 @@ Release notification
 3. Post message to Lazarus mailing list
 
 4. Post message to Lazarus Forum (3rd party)
+
+5. Update Wikipedia (English and Afrikaans)
+
+6. Update FPC's wiki about fpGUI
