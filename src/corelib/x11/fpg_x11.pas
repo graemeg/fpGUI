@@ -226,6 +226,8 @@ type
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
+    FGroupLeader: TfpgWinHandle;
+    FSpecialClassHint: PXClassHint;
     FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
     FModalForWin: TfpgX11Window;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
@@ -841,10 +843,15 @@ begin
     Result := None;
 end;
 
-procedure SetWindowGroup(AWindow: TfpgWinHandle);
+procedure SetWindowGroup(AWindow: TfpgWinHandle; PassClassHint: PXClassHint = nil);
 var
   ClassHint: PXClassHint;
 begin
+  if assigned (PassClassHint) then
+  begin
+    XSetClassHint(xapplication.display, AWindow, PassClassHint);
+    exit;
+  end;
   ClassHint := XAllocClassHint;
   ClassHint^.res_name := PChar(fpgGetExecutableName);
   ClassHint^.res_class := PChar(ApplicationName);
@@ -2411,10 +2418,11 @@ begin
     WMHints^.icon_pixmap := IconPixmap;
     WMHints^.flags := IconPixmapHint;
     { setup window grouping posibilities }
+    if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
       WMHints^.flags := WMHints^.flags or WindowGroupHint;
-      WMHints^.window_group := xapplication.FLeaderWindow;
+      WMHints^.window_group := FGroupLeader;
     end;
 
     XSetWMProperties(xapplication.display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
@@ -2422,9 +2430,9 @@ begin
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
       { set class group hint per top-level window }
-      SetWindowGroup(FWinHandle);
+      SetWindowGroup(FWinHandle, FSpecialClassHint);
       XChangeProperty(xapplication.display, FWinHandle, xapplication.FClientLeaderAtom, 33, 32,
-        PropModeReplace, @xapplication.FLeaderWindow, 1);
+        PropModeReplace, @FGroupLeader, 1);
     end;
 
     { so newish window manager can close unresponsive programs }
