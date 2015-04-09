@@ -94,6 +94,11 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
 

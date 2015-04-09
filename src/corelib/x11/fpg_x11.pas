@@ -1071,19 +1071,19 @@ begin
   {$IFDEF DNDDEBUG}
   writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
       [ FDNDVersion,
-        BoolToStr(fpgIsBitSet(ev.xclient.data.l[1], 0), True),
+        BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
         ev.xclient.data.l[0],
         ev.xclient.data.l[1],
         ev.xclient.data.l[2],
         ev.xclient.data.l[3],
         ev.xclient.data.l[4]  ]));
   writeln(Format('  * We will be using XDND v%d protocol *', [FDNDVersion]));
-  if fpgIsBitSet(ev.xclient.data.l[1], 0) then
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
     writeln('  ** We need to fetch XdndTypeList (>3 types)');
   {$ENDIF}
 
   // read typelist
-  if fpgIsBitSet(ev.xclient.data.l[1], 0) then
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
   begin
     // now fetch the data
     XGetWindowProperty(Display, FSrcWinHandle,

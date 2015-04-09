@@ -7,14 +7,12 @@
 <descr><p>Utility functions used throughout fpGUI. Some have common
 implementations and some have platform specific implementations.</p></descr>
 
-<!-- function Visibility: default -->
 <element name="fpgToOSEncoding">
 <short>Converts string from fpGUI to OS specific filesystem encoding</short>
 <descr>This function is specific to filesystem strings like Paths, Filenames
  and Directories.</descr>
 </element>
 
-<!-- function Visibility: default -->
 <element name="fpgFromOSEncoding">
 <short>Converts OS specific filesystem encoding to fpGUI string</short>
 <descr>This function is specific to filesystem strings like Paths, Filenames
@@ -22,7 +20,6 @@ implementations and some have platform specific implementations.</p></descr>
 </descr>
 </element>
 
-<!-- procedure Visibility: default -->
 <element name="fpgOpenURL">
 <short>Launches the users Web Browser using the specified URL</short>
 <descr>On each platform, this function will try and find the appropriate (system
@@ -30,34 +27,101 @@ implementations and some have platform specific implementations.</p></descr>
 </descr>
 </element>
 
-<!-- argument Visibility: default -->
 <element name="fpgOpenURL.aURL">
 <short>URL address to go to</short>
 </element>
 
-<!-- function Visibility: default -->
+<element name="fpgFileSize">
+<short>Returns the given file's size in bytes</short>
+<descr><printshort id="fpgFileSize"/>.</descr>
+</element>
+
 <element name="fpgAddTrailingValue">
 <short>If ALine is not '', add the trailing value AValue</short>
 <descr>If ALine is not '', add the trailing value AValue
 </descr>
 </element>
 
-<!-- argument Visibility: default -->
 <element name="fpgAddTrailingValue.ALine">
 <short>The source string</short>
 </element>
 
-<!-- argument Visibility: default -->
 <element name="fpgAddTrailingValue.AValue">
 <short>The value that must be added</short>
 </element>
 
-<!-- argument Visibility: default -->
 <element name="fpgAddTrailingValue.ADuplicates">
 <short>Are duplicate AValue's allowed</short>
 </element>
 
-</module> 
+<element name="fpgAppendPathDelim">
+<short>Appends the path delimiter to the given string</short>
+<descr><printshort id="fpgAppendPathDelim"/>.</descr>
+</element>
+
+<element name="fpgHasSubDirs">
+<short>This function returns True if the directory passed has subdirectories</short>
+<descr><printshort id="fpgHasSubDirs"/>.</descr>
+</element>
+
+<element name="fpgConvertLineEndings">
+<short>Replaces all line endings in the string with the native line ending</short>
+<descr><printshort id="fpgConvertLineEndings"/>.</descr>
+</element>
+
+<element name="fpgAddColon">
+<short>Appends a colon symbol to the given text</short>
+<descr><printshort id="fpgAddColon"/>. This is so that when we support LTR and RTL
+languages, the colon will be added at the correct place. Currently the RTL behaviour
+has not been implemented yet.</descr>
+</element>
+
+<element name="fpgIsBitSet">
+<short>Read a specific bit value in a LongInt variable</short>
+<descr>This procedure allows you to read a specific AIndex bit value from the AData variable.</descr>
+<seealso>
+  <link id="fpgSetBit"/>
+  <link id="fpgGetBit"/>
+</seealso>
+<version>Deprecated in v1.4</version>
+</element>
+
+<element name="fpgGetBit">
+<short>Read a specific bit value in a LongInt variable</short>
+<descr>This procedure allows you to read a specific ABit bit value from the AData variable.</descr>
+<seealso>
+  <link id="fpgSetBit"/>
+</seealso>
+<version>Added in v1.4</version>
+</element>
+
+<element name="fpgSetBit">
+<short>Set a specific bit value in a LongInt variable</short>
+<descr>This function allows you to set a specific ABit bit value in a the AData variable.</descr>
+<seealso>
+  <link id="fpgGetBit"/>
+</seealso>
+<version>Added in v1.4</version>
+</element>
+
+<element name="fpgGetToolkitConfigDir">
+<short>Returns the general fpGUI Toolkit config file</short>
+<descr><printshort id="fpgGetToolkitConfigDir"/>. This is used to store user defined values
+that apply to the whole fpGUI toolkit and applications developed with fpGUI. Things like
+directory bookmarks, global themes, fonts etc.</descr>
+</element>
+
+<element name="fpgAllFilesMask">
+<short>Returns the all files mask used to filter files</short>
+<descr><printshort id="fpgAllFilesMask"/>. This is used in the File Dialog, File Grid and
+many other places. Because FPC 2.2.2 and later contains the ALLFilesMask variable, this
+function is now deprecated.</descr>
+<version>Deprecated in v1.4</version>
+</element>
+
+
+
+</module>
 
 </package>
 </fpdoc-descriptions>

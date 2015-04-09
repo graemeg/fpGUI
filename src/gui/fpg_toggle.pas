@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -158,7 +158,6 @@ end;
 procedure TfpgToggle.HandlePaint;
 var
   ToggleText: TfpgString;
-  PaintColor: TFPColor;
   TextEnabled: TfpgTextFlags;
   BvlWdth: TfpgCoord;
   ButtonRect: TfpgRect;

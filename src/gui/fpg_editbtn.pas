@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -83,6 +83,11 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
     property    OnFilenameSet: TFilenameSetEvent read FOnFilenameSet write FOnFilenameSet;
   end;
@@ -91,11 +96,11 @@ type
   TfpgDirectoryEdit = class(TfpgBaseEditButton)
   private
     FRootDirectory: TfpgString;
-    function GetDirectory: TfpgString;
-    procedure SetDirectory(const AValue: TfpgString);
+    function    GetDirectory: TfpgString;
+    procedure   SetDirectory(const AValue: TfpgString);
   protected
-    procedure HandlePaint; override;
-    procedure InternalButtonClick(Sender: TObject); override;
+    procedure   HandlePaint; override;
+    procedure   InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -107,16 +112,21 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
 
 
   TfpgFontEdit = class(TfpgBaseEditButton)
   protected
-    function GetFontDesc: TfpgString; virtual;
-    procedure SetFontDesc(const AValue: TfpgString); virtual;
-    procedure HandlePaint; override;
-    procedure InternalButtonClick(Sender: TObject); override;
+    function    GetFontDesc: TfpgString; virtual;
+    procedure   SetFontDesc(const AValue: TfpgString); virtual;
+    procedure   HandlePaint; override;
+    procedure   InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
