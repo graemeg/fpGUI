@@ -1279,12 +1279,10 @@ begin
   Ckb_Preferences := CreateCheckBox(Self, 650, 30, 'FitWindow preference');
   Ckb_Preferences.OnChange := @Ckb_PreferencesChange;
   P_Zoom          := CreatePanel(Self, 650, 60, 200, 60, 'Zoom', bsRaised, taCenter, tlTop, 5);
-  P_Zoom.BackgroundColor := clPaleGreen;
   SE_Zoom         := CreateSpinEdit(P_Zoom, 10, 25, 55, 20, 20, 200, 1, 5, 100);
   SE_Zoom.OnChange := @SE_ZoomChange;
   L_Zoom          := CreateLabel(P_Zoom, 70, 25, '%');
   P_Layout        := CreatePanel(Self, 650, 130, 200, 110, 'Layout', bsRaised, taCenter, tlTop, 5);
-  P_Layout.BackgroundColor := clPaleGreen;
   RB_Single       := CreateRadiobutton(P_Layout, 10, 25, 'Single');
   RB_Single.OnChange := @P_LayoutRBChange;
   RB_Two          := CreateRadiobutton(P_Layout, 10, 50, 'Two pages');
@@ -1295,7 +1293,6 @@ begin
   Ckb_Preferences.Checked := True;
   RB_Single.Checked := True;
   Bt_Exit         := CreateButton(Self, 375, 550, 150, 'Exit', @Bt_ExitClick, 'stdimg.exit');
-  Bt_Exit.BackgroundColor := clTomato;
   ZoomValue       := '100';
   Randomize;
   for Cpt := 0 to 18 do

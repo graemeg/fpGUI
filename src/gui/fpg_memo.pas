@@ -153,8 +153,11 @@ type
     property    OnExit;
     property    OnKeyChar;
     property    OnKeyPress;
-    property    OnMouseEnter;
+    property    OnMouseDown;
     property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnPaint;
     property    OnShowHint;
   end;
@@ -308,12 +311,12 @@ var
 begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
-  
+
   if FVScrollBar.Visible then
     Dec(HWidth, FVScrollBar.Width);
   if FHScrollBar.Visible then
     Dec(VHeight, FHScrollBar.Height);
-  
+
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
   FHScrollBar.Width   := HWidth;
@@ -1048,7 +1051,7 @@ begin
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
-    
+
   // The little square in the bottom right corner
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
@@ -1348,7 +1351,7 @@ begin
     RePaint
   else
     inherited;
-    
+
   if hasChanged then
     if Assigned(FOnChange) then
       FOnChange(self);
@@ -1675,7 +1678,8 @@ end;
 
 procedure TfpgMemo.EndUpdate;
 begin
-  Dec(FUpdateCount);
+  if FUpdateCount > 0 then
+    Dec(FUpdateCount);
   if FUpdateCount <= 0 then
   begin
     Invalidate;

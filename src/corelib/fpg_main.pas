@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -51,7 +51,7 @@ type
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
-    
+
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
 
@@ -62,7 +62,7 @@ type
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
   TextFlagsDflt = [txtLeft, txtTop];
-  
+
 
 type
   { *******************************************
@@ -183,6 +183,7 @@ type
     function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
+    property    Window: TfpgWindowBase read FWindow;
   end;
 
 
@@ -190,19 +191,32 @@ type
     will rework this to use a Style Manager like the previous fpGUI.
     Also support Bitmap based styles for easier theme implementations. }
   TfpgStyle = class(TObject)
+  protected
+    FDefaultFont: TfpgFont;
+    FFixedFont: TfpgFont;
+    FMenuAccelFont: TfpgFont;
+    FMenuDisabledFont: TfpgFont;
+    FMenuFont: TfpgFont;
+    procedure   SetDefaultFont(AValue: TfpgFont);
+    procedure   SetFixedFont(AValue: TfpgFont);
+    procedure   SetMenuAccelFont(AValue: TfpgFont);
+    procedure   SetMenuDisabledFont(AValue: TfpgFont);
+    procedure   SetMenuFont(AValue: TfpgFont);
   public
-    DefaultFont: TfpgFont;
-    FixedFont: TfpgFont;
-    MenuFont: TfpgFont;
-    MenuAccelFont: TfpgFont;
-    MenuDisabledFont: TfpgFont;
     constructor Create; virtual;
     destructor  Destroy; override;
+    { font objects }
+    property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
+    property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
+    property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
+    property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
+    property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
     { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
     function    GetControlFrameBorders: TRect; virtual;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
+    function    GetBevelWidth: TfpgCoord; virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
@@ -228,7 +242,7 @@ type
     function    GetCheckBoxSize: integer; virtual;
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
   end;
-  
+
 
   TMsgHookItem = class
     Dest: TObject;
@@ -261,7 +275,6 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
-    FDefaultFont: TfpgFont;
     FFontResList: TList;
     FMessageHookList: TFPList;
     procedure   FreeFontRes(afontres: TfpgFontResource);
@@ -283,7 +296,6 @@ type
     procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   ShowException(E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
-    property    DefaultFont: TfpgFont read FDefaultFont;
     property    HintPause: Integer read FHintPause write SetHintPause;
     property    HintWindow: TfpgWindow read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
@@ -326,12 +338,12 @@ type
     property    Width: integer read FWidth;
     property    Height: integer read FHeight;
   end;
-  
-  
+
+
   TfpgClipboard = class(TfpgClipboardImpl)
   end;
 
-  
+
   TfpgFileList = class(TfpgFileListImpl)
   end;
 
@@ -455,7 +467,6 @@ operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
 operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
 operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
-operator = (const AColor1, AColor2: TFPColor) b: Boolean; deprecated;
 operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 
 
@@ -508,7 +519,7 @@ type
   end;
 
 
-  TNamedFontItem = class
+  TNamedFontItem = class(TObject)
   public
     FontID: string;
     FontDesc: string;
@@ -1169,14 +1180,6 @@ begin
   s.h := ASize.h - i;
 end;
 
-operator = (const AColor1, AColor2: TFPColor) b: Boolean;
-begin
-  b := (AColor1.Red = AColor2.Red)
-        and (AColor1.Green = AColor2.Green)
-        and (AColor1.Blue = AColor2.Blue)
-        and (AColor1.Alpha = AColor2.Alpha);
-end;
-
 operator = (const AColor1, AColor2: TRGBTriple) b: Boolean;
 begin
   b := (AColor1.Red = AColor2.Red)
@@ -1295,7 +1298,7 @@ begin
     Result := TStringList.Create
   else
     Exit; //==>
-  
+
   for n := 0 to fpgNamedFonts.Count-1 do
   begin
     oFont := TNamedFontItem(fpgNamedFonts[n]);
@@ -1364,13 +1367,11 @@ begin
   fpgStyleManager.FreeStyleInstance;
   fpgStyle := nil;
   fpgCaret.Free;
-  
+
   for i := fpgTimers.Count-1 downto 0 do
     if fpgTimers[i] <> nil then
       TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
-
-  FDefaultFont.Free;
 
   for i := FFontResList.Count-1 downto 0 do
   begin
@@ -1380,7 +1381,7 @@ begin
   FFontResList.Free;
 
   FreeAndNil(FModalFormStack);
-  
+
   for i := 0 to FMessageHookList.Count-1 do
     TMsgHookItem(FMessageHookList[i]).Free;
   FreeAndNil(FMessageHookList);
@@ -1391,7 +1392,7 @@ begin
     uMsgQueueList.Delete(i);
   end;
   uMsgQueueList.Free;
-  
+
   inherited Destroy;
 end;
 
@@ -1502,7 +1503,7 @@ begin
   ShortDayNames[5] := rsShortThu;
   ShortDayNames[6] := rsShortFri;
   ShortDayNames[7] := rsShortSat;
-  
+
   LongDayNames[1] := rsLongSun;
   LongDayNames[2] := rsLongMon;
   LongDayNames[3] := rsLongTue;
@@ -1657,7 +1658,6 @@ end;
 
 procedure TfpgApplication.InternalInit;
 begin
-  FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   fpgInitTimers;
   fpgNamedFonts := TList.Create;
 
@@ -1936,10 +1936,10 @@ begin
     end;
   end;
   nw := Max(wtxt, w);
-  
+
   wraplst := TStringList.Create;
   wraplst.Text := AText;
-  
+
   if (txtWrap in AFlags) then
   begin
     for i := 0 to wraplst.Count-1 do
@@ -1949,7 +1949,7 @@ begin
   end;
 
   htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
-  
+
   // Now paint the actual text
   for i := 0 to wraplst.Count-1 do
   begin
@@ -1964,7 +1964,7 @@ begin
       nx := x + (w - wtxt) div 2
     else // txtLeft is default
       nx := x;
-      
+
     // vertical alignment
     if (txtBottom in AFlags) then
       ny := y + l + h - htxt
@@ -1975,7 +1975,7 @@ begin
 
     fpgStyle.DrawString(self, nx, ny, wraplst[i], lEnabled);
   end;
-  
+
   wraplst.Free;
   Result := htxt;
 end;
@@ -2015,10 +2015,13 @@ begin
 
   FModalForWin := nil;
 
-  if (AOwner <> nil) and (AOwner is TfpgWindow) then
-    FWindowType   := wtChild
-  else
-    FWindowType   := wtWindow;
+  if not (FWindowType in [wtModalForm, wtPopup]) then
+  begin
+    if (AOwner <> nil) and (AOwner is TfpgWindow) then
+      FWindowType   := wtChild
+    else
+      FWindowType   := wtWindow;
+  end;
 
   FCanvas := CreateCanvas;
 end;
@@ -2047,13 +2050,48 @@ end;
 
 { TfpgStyle }
 
+procedure TfpgStyle.SetDefaultFont(AValue: TfpgFont);
+begin
+  if FDefaultFont = AValue then Exit;
+  FDefaultFont.Free;
+  FDefaultFont := AValue;
+end;
+
+procedure TfpgStyle.SetFixedFont(AValue: TfpgFont);
+begin
+  if FFixedFont = AValue then Exit;
+  FFixedFont.Free;
+  FFixedFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuAccelFont(AValue: TfpgFont);
+begin
+  if FMenuAccelFont = AValue then Exit;
+  FMenuAccelFont.Free;
+  FMenuAccelFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuDisabledFont(AValue: TfpgFont);
+begin
+  if FMenuDisabledFont = AValue then Exit;
+  FMenuDisabledFont.Free;
+  FMenuDisabledFont := AValue;
+end;
+
+procedure TfpgStyle.SetMenuFont(AValue: TfpgFont);
+begin
+  if FMenuFont = AValue then Exit;
+  FMenuFont.Free;
+  FMenuFont := AValue;
+end;
+
 constructor TfpgStyle.Create;
 begin
   // Setup font aliases
   fpgSetNamedFont('Label1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Label2', FPG_DEFAULT_FONT_DESC + ':bold');
   fpgSetNamedFont('Edit1', FPG_DEFAULT_FONT_DESC);
-  fpgSetNamedFont('Edit2', 'Courier New-10');
+  fpgSetNamedFont('Edit2', FPG_DEFAULT_FIXED_FONT_DESC);
   fpgSetNamedFont('List', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-9');
   fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-9:bold');
@@ -2099,20 +2137,20 @@ begin
 
 
   // Global Font Objects
-  DefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
-  FixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
-  MenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
-  MenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
-  MenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
+  FDefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
+  FFixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
+  FMenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
+  FMenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
+  FMenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
 end;
 
 destructor TfpgStyle.Destroy;
 begin
-  DefaultFont.Free;
-  FixedFont.Free;
-  MenuFont.Free;
-  MenuAccelFont.Free;
-  MenuDisabledFont.Free;
+  FDefaultFont.Free;
+  FFixedFont.Free;
+  FMenuFont.Free;
+  FMenuAccelFont.Free;
+  FMenuDisabledFont.Free;
   inherited Destroy;
 end;
 
@@ -2253,7 +2291,7 @@ begin
   ACanvas.SetColor(clWindowBackground);
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.FillRectangle(x, y, w, h);
-  
+
   if ARaised then
     ACanvas.SetColor(clHilite2)
   else
@@ -2273,6 +2311,11 @@ begin
   { right, then bottom }
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);
+end;
+
+function TfpgStyle.GetBevelWidth: TfpgCoord;
+begin
+  Result := 1;
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_panel">
+<short>This unit defines various panel and frame widgets</short>
+<descr><printshort id="#fpgui.fpg_panel"/>. More specifically, it defines
+a Panel, Bevel, Frame, ImagePanel and GroupBox control.</descr>
+
+<element name="TfpgAbstractPanel">
+<short>Base class for a Panel, Bevel etc</short>
+<descr><printshort id="TfpgAbstractPanel"/>.</descr>
+</element>
+
+<element name="TfpgBevel">
+<short>Draws a panel with various borders</short>
+<descr><printshort id="TfpgBevel"/>. This widget doesn't have a text
+label though, unlike TfpgPanel.</descr>
+<seealso>
+  <link id="TfpgPanel"/>
+</seealso>
+</element>
+
+<element name="TfpgPanel">
+<short>Draws a panel with various borders and has a text label</short>
+<descr><printshort id="TfpgPanel"/>. If you don't need the text label,
+then it is recommended that you rather use the TfpgBevel widget.</descr>
+<seealso>
+  <link id="TfpgBevel"/>
+</seealso>
+</element>
+
+<element name="TfpgGroupBox">
+<short>Draws a panel width a caption</short>
+<descr><p><printshort id="TfpgGroupBox"/>. This is similar in functionality
+to the TfpgPanel, but the Text label is drawn in the border of the panel, whereas
+in the TfpgPanel in is drawn within the client area.</p>
+<p>This widget is frequently used to hold radiobutton groups.</p></descr>
+<seealso>
+  <link id="TfpgPanel"/>
+</seealso>
+</element>
+
+<element name="TfpgFrame">
+<short>A panel that acts like an embedded Form</short>
+<descr><printshort id="TfpgFrame"/>. This widget should be used (instead of TfpgForm),
+if you want to embed a reusable "form" inside other forms. You are able to
+design such frames with the UI designer too.</descr>
+<seealso>
+  <link id="#fpgui.fpg_form.TfpgForm">fpg_form.TfpgForm</link>
+</seealso>
+</element>
+
+<element name="TfpgImagePanel">
+<short>A panel to display an image</short>
+<descr><printshort id="TfpgImagePanel"/>. This was previously done by simply using a
+TfpgWidget and implementing the image painting in the OnPaint event. But this class
+just saves you a bit of time.</descr>
+</element>
+
+
+
+</module>
+</package>
+</fpdoc-descriptions>
+

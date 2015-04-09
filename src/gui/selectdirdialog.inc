@@ -135,7 +135,6 @@ begin
       begin
         try
           SortList        := TStringList.Create;
-          SortList.Sorted := True;
           repeat
             // check if special file
             if (FileInfo.Name = '.') or (FileInfo.Name = '..') or (FileInfo.Name = '') then
@@ -153,10 +152,12 @@ begin
                 hidden files then do not add it to the list. }
               //if ((faHidden and FileInfo.Attr) > 0) and not FShowHidden then
                 //continue;
-
               SortList.Add(FileInfo.Name);
             end;
           until fpgFindNext(FileInfo) <> 0;
+
+          SortList.Sort;
+
           for i := 0 to SortList.Count - 1 do
           begin
             NewNode := Node.AppendText(SortList[i]);

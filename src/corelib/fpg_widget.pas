@@ -39,8 +39,6 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
-  { TfpgWidget }
-
   TfpgWidget = class(TfpgWindow)
   private
     FAcceptDrops: boolean;
@@ -176,7 +174,7 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
-    procedure   Invalidate; // double check this works as developers expect????
+    procedure   Invalidate;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
@@ -509,7 +507,7 @@ begin
 
   inherited Create(AOwner);
 
-  if (AOwner <> nil) and (AOwner is TfpgWidget) then
+  if (AOwner <> nil) and (AOwner is TfpgWidget) and (not (WindowType in [wtModalForm, wtPopup])) {and not InheritsFrom(TfpgForm)} then
   begin
     Parent := TfpgWidget(AOwner);
     FTabOrder := AOwner.ComponentCount;

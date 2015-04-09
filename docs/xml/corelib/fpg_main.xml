@@ -29,7 +29,7 @@
       </element>
       <element name="fpgColorToRGB">
         <short>Convert a color to the RGB values of that color</short>
-        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. 
+        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values are in RGB format.
 For example, you get "named" colors too (eg: clWindowBackground), which
 is simply an index value, but later translated to a real RGB value via the theming system.</descr>
       </element>
@@ -91,6 +91,20 @@ planned.</p></descr>
 <short>fake</short>
 </element>
 
+<element name="TfpgApplication.GetFormByClassName">
+<short>Finds a form instance by its ClassName property</short>
+<descr><printshort id="TfpgApplication.GetFormByClassName"/>. This only works if the form has
+been created with <var>fpgApplication.CreateForm()</var>. If no form is found, then nil is
+returned.</descr>
+</element>
+
+<element name="TfpgApplication.GetFormByName">
+<short>Finds a form instance by its Name property</short>
+<descr><printshort id="TfpgApplication.GetFormByName"/>. This only works if the form has
+been created with <var>fpgApplication.CreateForm()</var>. If no form is found, then nil is
+returned.</descr>
+</element>
+
 
 <element name="TfpgTimer">
 <short>A timer component for fpGUI applications</short>
@@ -112,6 +126,19 @@ until the timer is disabled when the Enabled property is set to False.</descr>
 <short>Encapsulates a top level or child window</short>
 <descr><printshort id="TfpgWindow"/>.</descr>
 </element>
+
+<element name="TfpgImageBase">
+<short>The base class representing a image</short>
+<descr><printshort id="TfpgImageBase"/>.</descr>
+</element>
+
+<element name="TfpgImageBase.ImageData">
+<short>Contains the pixel data of the image. The data format is in AARRGGBB format.</short>
+<descr><printshort id="TfpgImageBase.ImageData"/>.</descr>
+</element>
+
+
+
 
     </module>
     <!-- fpg_main -->

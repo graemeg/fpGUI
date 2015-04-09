@@ -5,8 +5,8 @@
 
 
 
- Building fpGUI from the Command Line
- ====================================
+Building fpGUI from the Command Line
+════════════════════════════════════
 
 This is still a work in progress until I can find a suitable solution. I'm
 not 100% satisfied with this, but it's a quick and dirty way to get things
@@ -28,12 +28,12 @@ The extrafpc.cfg file located in the src directory is combined with your global
 fpc.cfg file. The local extrafpc.cfg file sets up all the required search and
 include paths to compile the CoreLib and GUI directories.
 
-All compiled units (*.o and *.ppu) are saved in the <fpgui>/lib directory. This 
+All compiled units (*.o and *.ppu) are saved in the <fpgui>/lib directory. This
 makes the search paths for you applications a little easier to setup.
 
 
- Building fpGUI using Lazarus
- ============================
+Building fpGUI using Lazarus
+════════════════════════════
 
 I use a Lazarus feature call Packages that compiles the required
 units and keeps track of the compiled units and paths when creating
@@ -54,8 +54,8 @@ applications.
    source. The compiled units will be placed in the <project>/units
    directory.
 
-When you create you own project, all you need to do is tell Lazarus to 
-associate the 'fpgui_package.lpk' with your project and it will automatically 
+When you create you own project, all you need to do is tell Lazarus to
+associate the 'fpgui_package.lpk' with your project and it will automatically
 find all the fpGUI compiled units and source for you.
 
  * Creating a new project. Select Project->New Project.  Select
@@ -69,8 +69,8 @@ find all the fpGUI compiled units and source for you.
    automatically include the paths to the fpGUI compiled units for you.
 
 
- Building fpGUI from the Free Pascal Text IDE
- ============================================
+Building fpGUI from the Free Pascal Text IDE
+════════════════════════════════════════════
 
 First you would need to setup the 'fp' IDE to find the related files.
 As far as I understand the text mode IDE has it's own built-in compiler
@@ -93,7 +93,7 @@ so doesn't read the standard fpc.cfg file.
    Again change the paths to point to your actual directories and
    X11 or GDI corelib backend.
 
-    /home/graemeg/programming/fpGUI/src/corelib  
+    /home/graemeg/programming/fpGUI/src/corelib
     /home/graemeg/programming/fpGUI/src/corelib/x11
 
  * Now changes to 'Miscellaneous' tab, PPU output directory. Type in
@@ -106,11 +106,11 @@ so doesn't read the standard fpc.cfg file.
    directories for you!
 
  * Now you are ready to open your projects main program unit (F3) and
-   compiling it by pressing (F9). 
+   compiling it by pressing (F9).
 
 
- Compiling any of the examples from the Command Line
- ===================================================
+Compiling any of the examples from the Command Line
+═══════════════════════════════════════════════════
 
 You need to compile fpGUI first as mentioned above!
 Every project in the ../examples directory has it's own extrafpc.cfg file.
@@ -123,17 +123,22 @@ Example:
   fpc @extrafpc.cfg docedit.lpr
 
 
- MacOSX instructions and known issues
- ====================================
+Mac OSX instructions and known issues
+═════════════════════════════════════
 
-NOTE:
-  MacOSX is still an unsupported platform, but some users have reported
+NOTE #1:
+  MacOSX is still an unsupported platform, but users have reported
   that it works, so I decided to add some of their notes here for any other
   Mac users that want to try fpGUI.
 
-To run fpGUI based application under MacOSX, you use the X11 backend. X11
-is included with all recent MacOSX versions (in older OSX versions it was
-a separate install - but included on the install DVD).
+NOTE #2:
+  It seems Apple stopped shipping X11 with OSX. From OSX 10.9 you need to
+  install X11 Server support by downloading it from the open source project
+  named XQuartz [http://xquartz.macosforge.org/landing/].
+
+To compile and run fpGUI based application under MacOSX, you use the X11 backend.
+X11 is included with all recent MacOSX versions (in older OSX versions it was a
+separate install - but included on the install DVD).
 
 An example workflow to work with any fpgui app is:
 a) launch X11 (Applications -> Utilities)
@@ -156,14 +161,20 @@ d) type ./appname to start the application "appname"
    choose the path during installation, so probably other OSX users will
    have to double check the correct X11 library path.
 
+   If you still get the error about the missing X11 the you might have to setup
+   a generic symlink. eg:
+
+      cd /usr/X11/lib
+      sudo ln -s libX11.6.dylib libX11.dylib
+      sudo ln -s libXft.2.dylib libXft.dylib
+      sudo ln -s libfontconfig.1.dylib libfontconfig.dylib
+
  * Compiling from the command line, the compiler cannot create the
-   sub-directory "units" used by most demos inluded with fpGUI. So remember to
-   create such a directory if the compiler fails. The compiler output will
+   sub-directory "units" used by most demos included with fpGUI. So remember to
+   create such a directory if the compilation fails. The compiler output will
    clearly state such a situation. When using Lazarus or Maximus IDE to compile
    fpGUI projects, the IDE will creates the missing unit output path for you.
 
 
 
-                =================[  END  ]===================
-
-
+                ═══════════════════[  END  ]════════════════════

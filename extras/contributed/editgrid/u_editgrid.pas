@@ -551,6 +551,7 @@ begin
       IniCalendarCell;
   end;
   FEditing := True;
+  Enabled:= False;
 end;
 
 procedure TfpgCustomEditGrid.EditGridMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState;
@@ -736,17 +737,26 @@ procedure TfpgCustomEditGrid.SetReturnWay;
 begin
   case FEditWay of
     edNone:
+      begin
       FEditing:= False;
+      Enabled:= True;
+      end;
     edColumn:
       if FocusCol < Pred(ColumnCount) then
         FocusCol := FocusCol + 1
       else
+        begin
         FEditing:= False;
+        Enabled:= True;
+        end;
     edRow:
       if FocusRow < Pred(RowCount) then
         FocusRow := FocusRow + 1
       else
+        begin
         FEditing:= False;
+        Enabled:= True;
+        end;
   end;
   SetFocus;
   if FEditing then
@@ -764,6 +774,7 @@ begin
     if FocusCol < Pred(ColumnCount) then
       FocusCol := FocusCol + 1;
   FEditing := False;
+  Enabled:= True;
   SetFocus;
 end;
 
@@ -811,6 +822,7 @@ begin
         FCellEditText.Text := '';
         FCellEditText.Visible := False;
         FEditing := False;
+        Enabled:= True;
         SetFocus;
         end;
     end;
@@ -937,6 +949,7 @@ begin
           FCellEditInteger.Text := '';
           FCellEditInteger.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1051,6 +1064,7 @@ begin
           FCellEditFloat.Text := '';
           FCellEditFloat.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1151,6 +1165,7 @@ begin
           FCellEditCurrency.Text := '';
           FCellEditCurrency.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1239,6 +1254,7 @@ begin
           FCellComboBox.Text := '';
           FCellComboBox.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1307,6 +1323,7 @@ begin
           FCellEditCombo.Text := '';
           FCellEditCombo.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1393,6 +1410,7 @@ begin
           FCellCheckBox.Text := '';
           FCellCheckBox.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1482,6 +1500,7 @@ begin
           //FCellCalendar.Text := '';
           FCellCalendar.Visible := False;
           FEditing := False;
+          Enabled:= True;
           SetFocus;
         end;
     end;
@@ -1671,6 +1690,7 @@ begin
               IniCalendarCell;
           end;
           FEditing := True;
+          Enabled:= False;
           end;
       keyTab:
         begin

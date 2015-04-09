@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -83,6 +83,11 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
     property    OnFilenameSet: TFilenameSetEvent read FOnFilenameSet write FOnFilenameSet;
   end;
@@ -91,11 +96,11 @@ type
   TfpgDirectoryEdit = class(TfpgBaseEditButton)
   private
     FRootDirectory: TfpgString;
-    function GetDirectory: TfpgString;
-    procedure SetDirectory(const AValue: TfpgString);
+    function    GetDirectory: TfpgString;
+    procedure   SetDirectory(const AValue: TfpgString);
   protected
-    procedure HandlePaint; override;
-    procedure InternalButtonClick(Sender: TObject); override;
+    procedure   HandlePaint; override;
+    procedure   InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -107,16 +112,21 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnMouseDown;
+    property    OnMouseExit;
+    property    OnMouseEnter;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
 
 
   TfpgFontEdit = class(TfpgBaseEditButton)
   protected
-    function GetFontDesc: TfpgString; virtual;
-    procedure SetFontDesc(const AValue: TfpgString); virtual;
-    procedure HandlePaint; override;
-    procedure InternalButtonClick(Sender: TObject); override;
+    function    GetFontDesc: TfpgString; virtual;
+    procedure   SetFontDesc(const AValue: TfpgString); virtual;
+    procedure   HandlePaint; override;
+    procedure   InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -183,7 +193,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgApplication.DefaultFont);
+    Canvas.SetFont(fpgStyle.DefaultFont);
     if Text <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -354,7 +364,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgApplication.DefaultFont);
+    Canvas.SetFont(fpgStyle.DefaultFont);
     if Filename <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -439,7 +449,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgApplication.DefaultFont);
+    Canvas.SetFont(fpgStyle.DefaultFont);
     if Directory <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -502,7 +512,7 @@ begin
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
     Canvas.TextColor := clShadow1;
-    Canvas.SetFont(fpgApplication.DefaultFont);
+    Canvas.SetFont(fpgStyle.DefaultFont);
     Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
     img := fpgImages.GetImage('stdimg.font'); // don't free the img instance - we only got a reference
     if img <> nil then

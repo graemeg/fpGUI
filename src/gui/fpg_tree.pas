@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -267,8 +267,10 @@ type
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
     property    OnDoubleClick;
+    property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
+    property    OnKeyChar;
+    property    OnKeyPress;
     property    OnShowHint;
     property    OnStateImageClicked: TfpgStateImageClickedEvent read FOnStateImageClicked write FOnStateImageClicked;
   end;

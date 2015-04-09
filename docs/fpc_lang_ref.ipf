@@ -1,3 +1,5 @@
+.* This file is encoded using IBM850 encoding
+.* :encoding=IBM850:
 :userdoc.
 :title.Free Pascal&colon. Language Reference guide
 :docprof toc=123456.
@@ -9,9 +11,9 @@
 .nameit symbol='fpcversion' text='2&per.4'
 .nameit symbol='date' text='December 2009'
 .nameit symbol='progref' text='Programmer&apos.s Guide [ http://www.freepascal.org/docs.var ]'
-.nameit symbol='ra' text='â–º'
-.nameit symbol='la' text='â—„'
-.nameit symbol='dar' text='â–¼'
+.nameit symbol='ra' text='>'
+.nameit symbol='la' text='<'
+.nameit symbol='dar' text='v'
 .nameit symbol='uar' text='^'
 .nameit symbol='linux' text='Linux'
 .* ==============================================================
@@ -31,10 +33,6 @@ Document version &fpcversion. (r617)
 Written by :hp1.Michael van Canneyt:ehp1.
 .br
 LaTeX to IPF conversion by :hp1.Graeme Geldenhuys:ehp1.
-:p.
-:p.
-:p.
-:note.:color fc=red.Please switch DocView to using the UTF-8 text encoding for this document.:color fc=default.
 
 .* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 .* % About this guide
@@ -42,33 +40,33 @@ LaTeX to IPF conversion by :hp1.Graeme Geldenhuys:ehp1.
 :h2.About this guide
 :p.
 This document serves as the reference for the Pascal langauge as implemented
-by the &fpc. compiler. It describes all Pascal constructs supported by 
-&fpc., and lists all supported data types. It does not, however, give a 
-detailed explanation of the Pascal language: it is not a tutorial. 
-The aim is to list which Pascal constructs are supported, and to show 
+by the &fpc. compiler. It describes all Pascal constructs supported by
+&fpc., and lists all supported data types. It does not, however, give a
+detailed explanation of the Pascal language: it is not a tutorial.
+The aim is to list which Pascal constructs are supported, and to show
 where the &fpc. implementation differs from the &tp. or &delphi.
 implementations.
 
 :p.
-The &tp. and &delphi. Pascal compilers introduced various features in the 
+The &tp. and &delphi. Pascal compilers introduced various features in the
 Pascal language. The Free Pascal compiler emulates these compilers in the
 appropriate mode of the compiler: certain features are available only
-if the compiler is switched to the appropriate mode. When required for 
-a certain feature, the use of the :hp1.-M:ehp1. command-line switch or 
+if the compiler is switched to the appropriate mode. When required for
+a certain feature, the use of the :hp1.-M:ehp1. command-line switch or
 :hp1.{$MODE}:ehp1. directive will be indicated in the text. More information
 about the various modes can be found in the user's manual and the
 programmer's manual.
 
 :p.
 Earlier versions of this document also contained the reference documentation
-of the :hp1.system:ehp1. unit and :hp1.objpas:ehp1. unit. This has been moved to the 
+of the :hp1.system:ehp1. unit and :hp1.objpas:ehp1. unit. This has been moved to the
 RTL reference guide.
 
 .* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 .* % Notations
 :h3.Notations
 :p.
-Throughout this document, we will refer to functions, types and variables 
+Throughout this document, we will refer to functions, types and variables
 with :font facename=Courier size=16x16.typewriter:font facename='System Proportional'. font.
 Files are referred to with a sans font: :font facename=Sans size=16x16.filename:font facename='System Proportional'..
 
@@ -85,35 +83,35 @@ other, then the diagram is ended.
 :p.
 Syntactical elements are written like this:
 :cgraphic.
-&ra.&ra.â”€â”€â”€ syntactical elemements are like this â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ syntactical elemements are like this ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 :ecgraphic.
 
 :p.
 Keywords which must be typed exactly as in the diagram:
 :cgraphic.
-&ra.&ra.â”€â”€â”€ :hp2.keywords are like this:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ :hp2.keywords are like this:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 :ecgraphic.
 
 :p.
 When something can be repeated, there is an arrow around it:
 :cgraphic.
-&ra.&ra.â”€â”€â”€â”€â”€â”¬â”€ this can be repeated â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-       ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄÄÄÂÄ this can be repeated ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+       ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 When there are different possibilities, they are listed in rows:
 :cgraphic.
-&ra.&ra.â”€â”€â”€â”€â”€â”¬â”€ First possibility â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-       â””â”€ Second possibility â”€â”˜
+&ra.&ra.ÄÄÄÄÄÂÄ First possibility ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+       ÀÄ Second possibility ÄÙ
 :ecgraphic.
 
 :p.
 Note, that one of the possibilities can be empty:
 :cgraphic.
-&ra.&ra.â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-       â”œâ”€ First possibility  â”€â”¤
-       â””â”€ Second possibility â”€â”˜
+&ra.&ra.ÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+       ÃÄ First possibility  Ä´
+       ÀÄ Second possibility ÄÙ
 :ecgraphic.
 
 :p.
@@ -126,7 +124,7 @@ combined and nested.
 .* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :h2.About the Pascal Language
 :p.
-The language Pascal was originally designed by Niklaus Wirth around 1970. It 
+The language Pascal was originally designed by Niklaus Wirth around 1970. It
 has evolved significantly since that day, with a lot of contributions by the
 various compiler constructors (Notably: Borland). The basic elements have been
 kept throughout the years:
@@ -141,13 +139,13 @@ kept throughout the years:
 
 :p.
 The &tp. and &delphi. Pascal compilers introduced various features in
-the Pascal language, most notably easier string handling and object 
+the Pascal language, most notably easier string handling and object
 orientedness. The &fpc. compiler initially emulated most of &tp.
 and later on &delphi.. It emulates these compilers in the appropriate mode
-of the compiler: certain features are available only if the compiler is 
+of the compiler: certain features are available only if the compiler is
 switched to the appropriate mode. When required for a certain feature, the use
 of the -M command-line switch or {$MODE } directive will be indicated in the
-text. More information about the various modes can be found in the User's 
+text. More information about the various modes can be found in the User's
 Manual and the Programmer's Manual.
 
 
@@ -156,13 +154,13 @@ Manual and the Programmer's Manual.
 .* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :h2.Pascal Tokens
 :p.
-Tokens are the basic lexical building blocks of source code: they 
+Tokens are the basic lexical building blocks of source code: they
 are the 'words' of the language: characters are combined into tokens according
 to the rules of the programming language. There are five classes of tokens:
 
 :parml tsize=20 break=none.
 :pt.:hp2.reserved words:ehp2.
-:pd. These are words which have a fixed meaning in the language. They cannot 
+:pd. These are words which have a fixed meaning in the language. They cannot
 be changed or redefined.
 
 :pt.:hp2.identifiers:ehp2.
@@ -178,7 +176,7 @@ so on.
 
 :pt.:hp2.constants:ehp2.
 :pd.Numerical or character constants are used to denote actual values in the
-source code, such as 1 (integer constant) or 2.3 (float constant) or 
+source code, such as 1 (integer constant) or 2.3 (float constant) or
 'String constant' (a string: a piece of text).
 :eparml.
 
@@ -195,18 +193,18 @@ various ways to denote strings&comma. numbers&comma. identifiers etc&per.
 symbols in a Pascal source file.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Recognised symbols:ehp2.
 
-&ra.&ra.â”€â”€â”€ letter â”€â”€â”¬â”€ A..Z â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-               â””â”€ a..z â”€â”˜
+&ra.&ra.ÄÄÄ letter ÄÄÂÄ A..Z ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+               ÀÄ a..z ÄÙ
 
-&ra.&ra.â”€â”€â”€ digit â”€ 0..9 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ digit Ä 0..9 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ hex digit â”€â”€â”¬â”€ 0..9 â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                  â”œâ”€ A..Z â”€â”¤
-                  â””â”€ a..z â”€â”˜
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ hex digit ÄÄÂÄ 0..9 ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                  ÃÄ A..Z Ä´
+                  ÀÄ a..z ÄÙ
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -222,11 +220,11 @@ and the following character pairs too:
 :exmp.
 
 :p.
-When used in a range specifier, the character pair (. is equivalent to the 
-left square bracket [. Likewise, the character pair .) is equivalent to the 
+When used in a range specifier, the character pair (. is equivalent to the
+left square bracket [. Likewise, the character pair .) is equivalent to the
 right square bracket ]. When used for comment delimiters, the character pair
 (* is equivalent to the left brace { and the character pair *) is equivalent
-to the right brace }. These character pairs retain their normal meaning in 
+to the right brace }. These character pairs retain their normal meaning in
 string expressions.
 
 .* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -235,7 +233,7 @@ string expressions.
 :p.
 Comments are pieces of the source code which are completely discarded by the
 compiler. They exist only for the benefit of the programmer, so he can explain
-certain pieces of code. For the compiler, it is as if the comments were not 
+certain pieces of code. For the compiler, it is as if the comments were not
 present.
 
 :p.
@@ -247,7 +245,7 @@ Function Beautiful: Integer;
 
 :p.
 The use of (* and *) as comment delimiters dates from the very first days of
-the Pascal language. It has been replaced mostly by the use of { and } as 
+the Pascal language. It has been replaced mostly by the use of { and } as
 comment delimiters, as in the following example:
 :xmp.
 { My beautiful function returns an interesting result }
@@ -313,7 +311,7 @@ The compiler will react with a 'invalid character' error when it encounters
 such constructs, regardless of the :hp1.-Mturbo:ehp1. switch.
 
 :nt.
-In :hp1.TP:ehp1. and :hp1.Delphi:ehp1. mode, nested comments are not allowed, 
+In :hp1.TP:ehp1. and :hp1.Delphi:ehp1. mode, nested comments are not allowed,
 for maximum compatibility with existing code for those compilers.
 :ent.
 
@@ -324,12 +322,12 @@ for maximum compatibility with existing code for those compilers.
 :h3.Reserved words
 :p.
 Reserved words are part of the Pascal language, and as such, cannot be
-redefined by the programmer. Throughout the syntax diagrams they will be 
+redefined by the programmer. Throughout the syntax diagrams they will be
 denoted using a :hp2.bold:ehp2. typeface. Pascal is not case sensitive so the compiler
 will accept any combination of upper or lower case letters for reserved words.
 
 :p.
-We make a distinction between &tp. and &delphi. reserved words. In 
+We make a distinction between &tp. and &delphi. reserved words. In
 :hp2.TP:ehp2. mode, only the &tp. reserved words are recognised, but
 the &delphi. ones can be redefined. By default, &fpc. recognises the &delphi.
 reserved words.
@@ -357,7 +355,7 @@ end             not              shl
 
 :h4.&fpc. reserved words
 :p.
-On top of the &tp. reserved words, &fpc. also considers the 
+On top of the &tp. reserved words, &fpc. also considers the
 following as reserved words:
 .*              *                *                *
 :xmp.
@@ -411,7 +409,7 @@ that these types can be redefined in other units. The programmer is however
 :p.
 Identifiers denote programmer defined names for specific constants, types,
 variables, procedures and functions, units, and programs. All programmer
-defined names in the source code â€“ excluding reserved words â€“ are designated
+defined names in the source code - excluding reserved words - are designated
 as identifiers.
 
 :p.
@@ -421,14 +419,14 @@ character, or an underscore (_). The following diagram gives the basic syntax
 for identifiers.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Identifiers:ehp2.
 
-&ra.&ra.â”€â”€â”€ identifier â”€â”€â”¬â”€ letter â”€â”¬â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                   â””â”€â”€â”€ _ â”€â”€â”€â”€â”˜ ^â”€â”¬â”€ letter â”€â”¬â”€â”˜
-                                  â”œâ”€ digit â”€â”€â”¤
-                                  â””â”€â”€â”€ _ â”€â”€â”€â”€â”˜
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ identifier ÄÄÂÄ letter ÄÂÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                   ÀÄÄÄ _ ÄÄÄÄÙ ^ÄÂÄ letter ÄÂÄÙ
+                                  ÃÄ digit ÄÄ´
+                                  ÀÄÄÄ _ ÄÄÄÄÙ
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -477,15 +475,15 @@ Most identifiers (constants, variables, functions or methods, properties) can
 have a hint directive appended to their definition:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Hint directives:ehp2.
 
-&ra.&ra.â”€â”€â”€ hint directive â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                       â”œâ”€â”€ Deprecated â”€â”€â”€â”¤
-                       â”œâ”€ Experimental â”€â”€â”¤
-                       â”œâ”€â”€â”€ Platform â”€â”€â”€â”€â”¤
-                       â””â”€ Unimplemented â”€â”˜
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ hint directive ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                       ÃÄÄ Deprecated ÄÄÄ´
+                       ÃÄ Experimental ÄÄ´
+                       ÃÄÄÄ Platform ÄÄÄÄ´
+                       ÀÄ Unimplemented ÄÙ
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -567,7 +565,7 @@ Note that case is insignificant when using hexadecimal constants.
 
 :li. As of version 1.0.7, Octal format (base 8) is also supported.
 To specify a constant in octal format, prepend it with a ampersand (&amp.).
-For instance 15 is specified in octal notation as &amp.17. 
+For instance 15 is specified in octal notation as &amp.17.
 
 :li. Binary notation (base 2). A binary number can be specified
 by preceding it with a percent sign (%). Thus, 255 can be
@@ -578,46 +576,46 @@ specified in binary notation as %11111111.
 The following diagrams show the syntax for numbers.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Numbers:ehp2.
 
-&ra.&ra.â”€â”€â”€ hex digit sequence â”€â”€â”¬â”€â”€ hex digit â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                           &uar.â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ hex digit sequence ÄÄÂÄÄ hex digit ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                           &uar.ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ octal digit sequence â”€â”€â”¬â”€â”€ octal digit â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                             &uar.â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ octal digit sequence ÄÄÂÄÄ octal digit ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                             &uar.ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ binary digit sequence â”€â”€â”¬â”¬â”€ 1 â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                              â”‚â””â”€ 0 â”€â”˜â”‚
-                              &uar.â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ binary digit sequence ÄÄÂÂÄ 1 ÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                              ³ÀÄ 0 ÄÙ³
+                              &uar.ÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ digit sequence â”€â”€â”¬â”€â”€ digit â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                       ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ digit sequence ÄÄÂÄÄ digit ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                       ^ÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ unsigned integer â”€â”€â”¬â”€â”€â”€â”€â”€â”€ digit sequence â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”œâ”€ $ â”€ hex digit sequence â”€â”€â”€â”€â”¤
-                         â”œâ”€ & â”€ octal digit sequence â”€â”€â”¤
-                         â””â”€ % â”€ binary digit sequence â”€â”˜
+&ra.&ra.ÄÄÄ unsigned integer ÄÄÂÄÄÄÄÄÄ digit sequence ÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÃÄ $ Ä hex digit sequence ÄÄÄÄ´
+                         ÃÄ & Ä octal digit sequence ÄÄ´
+                         ÀÄ % Ä binary digit sequence ÄÙ
 
-&ra.&ra.â”€â”€â”€ hex digit sequence â”€â”€â”¬â”€â”€ hex digit â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                           ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ hex digit sequence ÄÄÂÄÄ hex digit ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                           ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ sign â”€â”€â”¬â”€â”€ + â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-             â””â”€â”€ - â”€â”€â”˜
+&ra.&ra.ÄÄÄ sign ÄÄÂÄÄ + ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+             ÀÄÄ - ÄÄÙ
 
-&ra.&ra.â”€â”€â”€ unsigned real â”€ digit sequence â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€&ra.&la.
-                                      â”” . â”€ digit sequence â”˜â”” scale factor â”˜
+&ra.&ra.ÄÄÄ unsigned real Ä digit sequence ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄ&ra.&la.
+                                      À . Ä digit sequence ÙÀ scale factor Ù
 
-&ra.&ra.â”€â”€â”€ scale factor â”€â”¬â”€ E â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”¬â”€ digit sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                    â””â”€ e â”€â”˜â”” sign â”˜
+&ra.&ra.ÄÄÄ scale factor ÄÂÄ E ÄÂÂÄÄÄÄÄÄÂÄ digit sequence ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                    ÀÄ e ÄÙÀ sign Ù
 
-&ra.&ra.â”€â”€â”€ unsigned number â”€â”€â”¬â”€â”€â”€ unsigned real â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                        â””â”€ unsigned integer â”€â”˜
+&ra.&ra.ÄÄÄ unsigned number ÄÄÂÄÄÄ unsigned real ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                        ÀÄ unsigned integer ÄÙ
 
-&ra.&ra.â”€â”€â”€ signed number â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ unsigned number â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                      â””â”€ sign â”€â”˜
+&ra.&ra.ÄÄÄ signed number ÄÄÂÄÄÄÄÄÄÄÄÂÄ unsigned number ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                      ÀÄ sign ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :nt.
@@ -630,18 +628,18 @@ Octal and Binary notation are not supported in TP or Delphi compatibility mode.
 .* % Labels
 :h3.Labels
 :p.
-A label is a name for a location in the source code to which can be 
+A label is a name for a location in the source code to which can be
 jumped to from another location with a :hp2.goto:ehp2. statement. A Label is a
 standard identifier with the exception that it can start with a digit.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Label:ehp2.
 
-&ra.&ra.â”€â”€â”€ label â”€â”€â”¬â”€ digit sequence â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-              â””â”€â”€ identifier â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ label ÄÄÂÄ digit sequence ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+              ÀÄÄ identifier ÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :nt.
@@ -657,42 +655,42 @@ the goto statement.
 :h3.Character strings
 :p.
 A character string (or string for short) is a sequence of zero or more
-characters (byte sized), enclosed in single quotes, and on a single 
-line of the program source code: no literal carriage return or linefeed 
+characters (byte sized), enclosed in single quotes, and on a single
+line of the program source code: no literal carriage return or linefeed
 characters can appear in the string.
 
 :p.
 A character set with nothing between the quotes ('') is an empty string.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Character strings:ehp2.
 
-&ra.&ra.â”€â”€â”€ character string â”€â”€â”¬â”¬â”€ quoted string â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”‚â””â”€ control string â”€â”˜â”‚
-                         ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ character string ÄÄÂÂÄ quoted string ÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ³ÀÄ control string ÄÙ³
+                         ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ quoted string â”€ ' â”€â”€â”¬â”€ string character â”€â”¬â”€ ' â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                          ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ quoted string Ä ' ÄÄÂÄ string character ÄÂÄ ' ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                          ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ string character â”€â”€â”¬â”€ Any character except ' or CR â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ " â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ 
+&ra.&ra.ÄÄÄ string character ÄÄÂÄ Any character except ' or CR ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄ " ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ control string â”€â”€â”¬â”€ # â”€ unsigned integer â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                       ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ control string ÄÄÂÄ # Ä unsigned integer ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                       ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 The string consists of standard, 8-bit ASCII characters or Unicode (normally
 UTF-8 encoded) characters. The :hp1.control string:ehp1. can be used to specify
 characters which cannot be typed on a keyboard, such as :hp1.#27:ehp1. for
-the escape character. 
+the escape character.
 
 :p.
-The single quote character can be embedded in the string by typing it twice. 
-The C construct of escaping characters in the string (using a backslash) 
+The single quote character can be embedded in the string by typing it twice.
+The C construct of escaping characters in the string (using a backslash)
 is not supported in Pascal.
 
 :p.
@@ -732,8 +730,8 @@ on unices (including Mac OS X), and as
 :exmp.
 
 on a classic Mac-like operating system.
- 
-It is possible to use other character sets in strings: in that case the 
+
+It is possible to use other character sets in strings: in that case the
 codepage of the source file must be specified with the :hp1.{$CODEPAGE XXX}:ehp1.
 directive or with the :hp2.-Fc:ehp2. command line option for the compiler. In that
 case the characters in a string will be interpreted as characters from the
@@ -759,20 +757,20 @@ Just as in &tp., &fpc. supports both ordinary and typed constants.
 .* % Ordinary constants
 :h3 name=constants_ordinary.Ordinary constants
 :p.
-Ordinary constants declarations are constructed using an identifier name 
-followed by an "=" token, and followed by an optional expression consisting 
-of legal combinations of numbers, characters, boolean values or enumerated 
-values as appropriate. The following syntax diagram shows how to construct 
+Ordinary constants declarations are constructed using an identifier name
+followed by an "=" token, and followed by an optional expression consisting
+of legal combinations of numbers, characters, boolean values or enumerated
+values as appropriate. The following syntax diagram shows how to construct
 a legal declaration of an ordinary constant.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Constant declaration:ehp2.
 
-&ra.&ra.â”€â”€â”€ constant declaration â”€â”¬â”€ identifier â”€ = â”€ expression â”€ hint directives â”€ ; â”€â”¬â”€â”€â”€&ra.&la.
-                            ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ constant declaration ÄÂÄ identifier Ä = Ä expression Ä hint directives Ä ; ÄÂÄÄÄ&ra.&la.
+                            ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -783,7 +781,7 @@ declaration.
 
 :p.
 Operators such as +, -, *, /, not, and, or, div, mod, ord, chr,
-sizeof, pi, int, trunc, round, frac, odd can be used, however. 
+sizeof, pi, int, trunc, round, frac, odd can be used, however.
 For more information on expressions, see the section :link reftype=hd refid=expressions.Expressions:elink.&per.
 
 
@@ -812,7 +810,7 @@ in a compiler error:
 
 :p.
 For string constants, the type of the string is dependent on some compiler
-switches. If a specific type is desired, a typed constant should be used, 
+switches. If a specific type is desired, a typed constant should be used,
 as explained in the following section.
 
 :p.
@@ -830,37 +828,37 @@ for constants of complex structures (defined later in the manual).
 Their definition is quite simple.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Constant declaration:ehp2.
 
        typed
-&ra.&ra.â”€â”€â”€ constant â”€â”€â”€â”¬â”€ identifier â”€ : â”€ type â”€ = â”€ type constant â”€ hint directives â”€ ; â”€â”¬â”€â”€â”€&ra.&la.
-     declaration  ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ constant ÄÄÄÂÄ identifier Ä : Ä type Ä = Ä type constant Ä hint directives Ä ; ÄÂÄÄÄ&ra.&la.
+     declaration  ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ typed constant â”€â”€â”¬â”€â”€â”€â”€â”€â”€ constant â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                       â”œâ”€   address constant  â”€â”¤
-                       â”œâ”€    array constant   â”€â”¤
-                       â”œâ”€   record constant   â”€â”¤
-                       â””â”€ procedural constant â”€â”˜
+&ra.&ra.ÄÄÄ typed constant ÄÄÂÄÄÄÄÄÄ constant ÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                       ÃÄ   address constant  Ä´
+                       ÃÄ    array constant   Ä´
+                       ÃÄ   record constant   Ä´
+                       ÀÄ procedural constant ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
-Contrary to ordinary constants, a value can be assigned to them at 
-run-time. This is an old concept from &tp., which has been 
-replaced with support for initialized variables: For a detailed 
+Contrary to ordinary constants, a value can be assigned to them at
+run-time. This is an old concept from &tp., which has been
+replaced with support for initialized variables: For a detailed
 description, see :link reftype=hd refid='variables_initializedvars'.Initialized variables:elink..
 
-Support for assigning values to typed constants is controlled by the 
-:hp2.{$J}:ehp2. directive: it can be switched off, but is on by default 
+Support for assigning values to typed constants is controlled by the
+:hp2.{$J}:ehp2. directive: it can be switched off, but is on by default
 (for &tp. compatibility). Initialized variables are always allowed.
 
 :nt.
 It should be stressed that typed constants are automatically initialized at program start.
-This is also true for :hp1.local:ehp1. typed constants and initialized variables. 
-Local typed constants are also initialized at program start. If their value was 
-changed during previous invocations of the function, they will retain their 
+This is also true for :hp1.local:ehp1. typed constants and initialized variables.
+Local typed constants are also initialized at program start. If their value was
+changed during previous invocations of the function, they will retain their
 changed value, i.e. they are not initialized each time the function is invoked.
 :ent.
 
@@ -870,8 +868,8 @@ changed value, i.e. they are not initialized each time the function is invoked.
 :p.
 A special kind of constant declaration block is the :hp1.resourcestring:ehp1.
 block. Resourcestring declarations are much like constant string
-declarations: resource strings act as constant strings, but they 
-can be localized by means of a set of special routines in the 
+declarations: resource strings act as constant strings, but they
+can be localized by means of a set of special routines in the
 :hp1.objpas:ehp1. unit. A resource string declaration block
 is only allowed in the :hp1.Delphi:ehp1. or :hp1.ObjFPC:ehp1. modes.
 
@@ -890,13 +888,13 @@ at runtime with some special mechanisms in the :hp1.objpas:ehp1. unit.
 
 :p.
 Semantically, the strings act like ordinary constants; It is not allowed
-to assign values to them (except through the special mechanisms in the 
-objpas unit). However, they can be used in assignments or expressions as 
-ordinary string constants. The main use of the resourcestring section is 
+to assign values to them (except through the special mechanisms in the
+objpas unit). However, they can be used in assignments or expressions as
+ordinary string constants. The main use of the resourcestring section is
 to provide an easy means of internationalization.
 
 :p.
-More on the subject of resourcestrings can be found in the 
+More on the subject of resourcestrings can be found in the
 :link reftype=hd database='prog.inf' refid=0.&progref.:elink., and
 in the :hp1.objpas:ehp1. unit reference.
 
@@ -914,7 +912,7 @@ resourcestring
 If the localization routines translate :hp1.Part1:ehp1. and :hp1.Part2:ehp1., the
 :hp1.Sentence:ehp1. constant will not be translated automatically: it has a
 separate entry in the resource string tables, and must therefor be
-translated separately. The above construct simply says that the 
+translated separately. The above construct simply says that the
 initial value of :hp1.Sentence:ehp1. equals :hp1.Part1+' '+Part2:ehp1..
 :ent.
 
@@ -938,7 +936,7 @@ end.
 :exmp.
 
 :p.
-This will print 'Yes.' or 'No.' depending on the value of B, even if the 
+This will print 'Yes.' or 'No.' depending on the value of B, even if the
 constants Yes and No have been localized by some localization mechanism.
 :ent.
 
@@ -953,31 +951,31 @@ that can be used to denote this custom type when declaring variables further
 in the source code.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Type declaration:ehp2.
 
-&ra.&ra.â”€â”€â”€ type declaration â”€â”€â”€ identifier â”€ = â”€ type â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ type declaration ÄÄÄ identifier Ä = Ä type Ä ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 There are 7 major type classes:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Types:ehp2.
 
-&ra.&ra.â”€â”€â”€ type  â”€â”€â”¬â”€â”€â”€ simple type â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-              â”œâ”€   string type    â”€â”¤
-              â”œâ”€ structured type  â”€â”¤
-              â”œâ”€  pointer type    â”€â”¤
-              â”œâ”€ procedural type  â”€â”¤
-              â”œâ”€  generic type    â”€â”¤
-              â”œâ”€ specialized type â”€â”¤
-              â””â”€ type identifier  â”€â”˜
+&ra.&ra.ÄÄÄ type  ÄÄÂÄÄÄ simple type ÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+              ÃÄ   string type    Ä´
+              ÃÄ structured type  Ä´
+              ÃÄ  pointer type    Ä´
+              ÃÄ procedural type  Ä´
+              ÃÄ  generic type    Ä´
+              ÃÄ specialized type Ä´
+              ÀÄ type identifier  ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -985,7 +983,7 @@ The last case, :hp1.type identifier:ehp1., is just a means to give another
 name to a type. This presents a way to make types platform independent, by
 only using these types, and then defining these types for each platform
 individually. Any programmer who then uses these custom types doesn't have to worry
-about the underlying type size: it is opaque to him. It also allows to use shortcut names 
+about the underlying type size: it is opaque to him. It also allows to use shortcut names
 for fully qualified type names. e.g. define :hp1.system.longint:ehp1. as
 :hp1.Olongint:ehp1. and then redefine :hp1.longint:ehp1..
 
@@ -997,23 +995,23 @@ The base or simple types of &fpc. are the &delphi. types.
 We will discuss each type separately.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Simple types:ehp2.
 
-&ra.&ra.â”€â”€â”€ simple type  â”€â”€â”¬â”€ ordinal type â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                     â””â”€  real type   â”€â”˜
+&ra.&ra.ÄÄÄ simple type  ÄÄÂÄ ordinal type ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                     ÀÄ  real type   ÄÙ
 
-&ra.&ra.â”€â”€â”€ real type â”€â”€â”€ real type identifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ real type ÄÄÄ real type identifier ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 
 .* ...................................................................
 :h4.Ordinal types
 :p.
-With the exception of :hp1.int64:ehp1., :hp1.qword:ehp1. and Real types, 
-all base types are ordinal types. Ordinal types have the following 
+With the exception of :hp1.int64:ehp1., :hp1.qword:ehp1. and Real types,
+all base types are ordinal types. Ordinal types have the following
 characteristics:
 :ol.
 :li. Ordinal types are countable and ordered, i.e. it is, in principle,
@@ -1036,7 +1034,7 @@ A list of pre-defined integer types are presented below.
 :lm margin=10.
 :cgraphic.
   :hp2.Name:ehp2.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄ
   Integer
   Shortint
   SmallInt
@@ -1052,7 +1050,7 @@ A list of pre-defined integer types are presented below.
   WordBool
   LongBool
   Char
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
 :lm margin=1.
 
@@ -1064,7 +1062,7 @@ some Pascal constructs will not work with these two integer types.
 
 :cgraphic.
  :hp2.Type                         Range                   Size in bytes:ehp2.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  Byte                         0 .. 255                            1
  Shortint                  -128 .. 127                            1
  Smallint                -32768 .. 32767                          2
@@ -1075,18 +1073,18 @@ some Pascal constructs will not work with these two integer types.
  Longword                     0 .. 4294967295                     4
  Int64     -9223372036854775808 .. 9223372036854775807            8
  QWord                        0 .. 18446744073709551615           8
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
 
 :p.
 The :hp1.integer:ehp1. type maps to the smallint type in the default
 &fpc. mode. It maps to either a longint in either Delphi or ObjFPC
-mode. The :hp1.cardinal:ehp1. type is currently always mapped to the 
+mode. The :hp1.cardinal:ehp1. type is currently always mapped to the
 longword type.
 
 :nt.
-All decimal constants which do no fit within the -2147483648..2147483647 range 
-are silently and automatically parsed as 64-bit integer constants as of version 
+All decimal constants which do no fit within the -2147483648..2147483647 range
+are silently and automatically parsed as 64-bit integer constants as of version
 1.9.0. Earlier versions would convert it to a real-typed constant.
 :ent.
 
@@ -1103,18 +1101,18 @@ to a boolean value, can also be assigned to a boolean type.
 
 :cgraphic.
  :hp2.Name             Size        Ord(True):ehp2.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  Boolean           1          1
  ByteBool          1          Any nonzero value
  WordBool          2          Any nonzero value
  LongBool          4          Any nonzero value
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
 
 :p.
 &fpc. also supports the :hp1.ByteBool:ehp1., :hp1.WordBool:ehp1. and :hp1.LongBool:ehp1. types.
 These are of type :hp1.Byte:ehp1., :hp1.Word:ehp1. or :hp1.Longint:ehp1., but are
-assignment compatible with a :hp1.Boolean:ehp1.: the value :hp1.False:ehp1. is 
+assignment compatible with a :hp1.Boolean:ehp1.: the value :hp1.False:ehp1. is
 equivalent to 0 (zero) and any nonzero value is considered :hp1.True:ehp1. when
 converting to a boolean value. A boolean value of :hp1.True:ehp1. is converted
 to -1 in case it is assigned to a variable of type :hp1.LongBool:ehp1..
@@ -1138,7 +1136,7 @@ way that when the result is known, the rest of the expression will no longer
 be evaluated: this is called short-cut boolean evaluation.
 
 :p.
-In the following example, the function :hp1.Func:ehp1. will never be called, 
+In the following example, the function :hp1.Func:ehp1. will never be called,
 which may have strange side-effects.
 
 :xmp.
@@ -1163,20 +1161,20 @@ enumeration type, where a value is assigned to a particular element of
 the enumeration list.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Enumeration types:ehp2.
 
-&ra.&ra.â”€â”€â”€ enumerated type â”€ ( â”€â”¬â”¬â”€â”€ identifier list â”€â”€â”€â”¬â”¬â”€ ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                           â”‚â””â”€ assigned enum list â”€â”˜â”‚
-                           ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ , â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ enumerated type Ä ( ÄÂÂÄÄ identifier list ÄÄÄÂÂÄ ) ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                           ³ÀÄ assigned enum list ÄÙ³
+                           ^ÄÄÄÄÄÄÄÄÄÄ , ÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ identifier list â”€â”€â”¬â”€ identifier â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                        ^â”€â”€â”€â”€â”€â”€ , â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ identifier list ÄÄÂÄ identifier ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                        ^ÄÄÄÄÄÄ , ÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ assigned enum list â”€â”€â”¬â”€ identifier â”€ := â”€ expression â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                           ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ , â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ assigned enum list ÄÄÂÄ identifier Ä := Ä expression ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                           ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ , ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -1226,8 +1224,8 @@ this kind of enumeration types. Trying to do this anyhow will result in a
 compiler error.
 :li. Enumeration types are stored using a default, independent of the
 actual number of values: the compiler does not try to optimize for space.
-This behaviour can be changed with the :hp2.{$PACKENUM n}:ehp2. compiler 
-directive, which tells the compiler the minimal number of bytes to be 
+This behaviour can be changed with the :hp2.{$PACKENUM n}:ehp2. compiler
+directive, which tells the compiler the minimal number of bytes to be
 used for enumeration types. For instance:
 
 :xmp.
@@ -1256,12 +1254,12 @@ A subrange type is a range of values from an ordinal type (the host type). To de
 one must specify its limiting values: the highest and lowest value of the type.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Subrange types:ehp2.
 
-&ra.&ra.â”€â”€â”€ subrange type â”€ constant â”€ .. â”€ constant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ subrange type Ä constant Ä .. Ä constant ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -1300,7 +1298,7 @@ platform, refer to the &progref..
 
 :cgraphic.
  :hp2.Type                Range           Significant digits     Size in bytes:ehp2.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  Real          platform dependent           ???                  4 or 8
  Single        1.5E-45 .. 3.4E38            7-8                       4
  Double       5.0E-324 .. 1.7E308          15-16                      8
@@ -1308,7 +1306,7 @@ platform, refer to the &progref..
  Comp          -2E64+1 .. 2E63-1           19-20                      8
  Currency    -922337203685477.5808 ..      19-20                      8
               922337203685477.5807
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
 
 :p.
@@ -1346,7 +1344,7 @@ quotes, as follows: 'a' or 'A' are both character constants.
 
 :p.
 A character can also be specified by its character
-value (commonly an ASCII code), by preceding the ordinal value with the 
+value (commonly an ASCII code), by preceding the ordinal value with the
 number symbol (#). For example specifying :hp1.#65:ehp1. would be the same as :hp1.'A':ehp1.
 
 :p.
@@ -1370,22 +1368,22 @@ It also supports AnsiStrings (with unlimited length) as in Delphi.
 To declare a variable as a string, use the following type specification:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.String Type:ehp2.
 
-&ra.&ra.â”€â”€â”€ string type â”€ :hp2.string:ehp2. â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                             â””â”€ [ â”€â”€ unsigned integer â”€â”€ ] â”€â”˜
+&ra.&ra.ÄÄÄ string type Ä :hp2.string:ehp2. ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                             ÀÄ [ ÄÄ unsigned integer ÄÄ ] ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
-If there is a size specifier, then its maximum value - indicating the maximum 
+If there is a size specifier, then its maximum value - indicating the maximum
 size of the string - is 255.
 :p.
-The meaning of a string declaration statement without size indicator is 
+The meaning of a string declaration statement without size indicator is
 interpreted differently depending on the :hp2.{$H}:ehp2. switch. If no size
-indication is present, the above declaration can declare an AnsiString or 
+indication is present, the above declaration can declare an AnsiString or
 a short string.
 :p.
 Whatever the actual type, AnsiStrings and short strings can be used
@@ -1439,8 +1437,8 @@ Error: string length must be a value from 1 to 255
 
 :p.
 For short strings, the length is stored in the character at index 0. Old
-&tp. code relies on this, and it is implemented similarly in &fpc.. 
-Despite this, to write portable code, it is best to set the length of a 
+&tp. code relies on this, and it is implemented similarly in &fpc..
+Despite this, to write portable code, it is best to set the length of a
 shortstring  with the :hp1.SetLength():ehp1. call, and to retrieve
 it with the :hp1.Length():ehp1. call. These functions will always work, whatever
 the internal representation of the short strings or other strings in use:
@@ -1452,16 +1450,16 @@ this allows easy switching between the various string types.
 :h4 name=character_types_ansistrings.AnsiStrings
 :p.
 AnsiStrings are strings that have no length limit. They are reference
-counted and are guaranteed to be null terminated. Internally, an ansistring is treated as 
+counted and are guaranteed to be null terminated. Internally, an ansistring is treated as
 a pointer: the actual content of the string is stored on the heap, as much
-memory as needed to store the string content is allocated. 
+memory as needed to store the string content is allocated.
 
-This is all handled transparantly, i.e. they can be manipulated as a normal 
-short string. Ansistrings can be defined using the predefined :hp2.AnsiString:ehp2. 
-type. 
+This is all handled transparantly, i.e. they can be manipulated as a normal
+short string. Ansistrings can be defined using the predefined :hp2.AnsiString:ehp2.
+type.
 
 :nt.
-The null-termination does not mean that null characters (char(0) or #0) 
+The null-termination does not mean that null characters (char(0) or #0)
 cannot be used: the null-termination is not used internally, but is there for
 convenience when dealing with external routines that expect a
 null-terminated string (as most C routines do).
@@ -1469,19 +1467,19 @@ null-terminated string (as most C routines do).
 
 :p.
 If the {$H} switch is on, then a string definition using the
-regular :hp1.String:ehp1. keyword and that doesn't contain a length specifier, 
+regular :hp1.String:ehp1. keyword and that doesn't contain a length specifier,
 will be regarded as an ansistring as well. If a length specifier is present,
 a short string will be used, regardless of the {$H} setting.
 
 :p.
 If the string is empty (''), then the internal pointer representation
-of the string pointer is :hp1.Nil:ehp1.. If the string is not empty, then the 
+of the string pointer is :hp1.Nil:ehp1.. If the string is not empty, then the
 pointer points to a structure in heap memory.
 
 :p.
 The internal representation as a pointer, and the automatic null-termination
-make it possible to typecast an ansistring to a pchar. If the string is empty 
-(so the pointer is Nil) then the compiler makes sure that the typecasted 
+make it possible to typecast an ansistring to a pchar. If the string is empty
+(so the pointer is Nil) then the compiler makes sure that the typecasted
 pchar will point to a null byte.
 
 :p.
@@ -1493,13 +1491,13 @@ string. A statement
 :exmp.
 
 :p.
-results in the reference count of :hp1.S2:ehp1. being decreased with 1, 
+results in the reference count of :hp1.S2:ehp1. being decreased with 1,
 the reference count of :hp1.S1:ehp1. is increased by 1, and finally :hp1.S1:ehp1.
 (as a pointer) is copied to :hp1.S2:ehp1.. This is a significant speed-up in
 the code.
 
 :p.
-If the reference count of a string reaches zero, then the memory occupied 
+If the reference count of a string reaches zero, then the memory occupied
 by the string is deallocated automatically, and the pointer is set to
 :hp1.Nil:ehp1., so no memory leaks arise.
 
@@ -1507,7 +1505,7 @@ by the string is deallocated automatically, and the pointer is set to
 When an ansistring is declared, the &fpc. compiler initially
 allocates just memory for a pointer, not more. This pointer is guaranteed
 to be :hp1.Nil:ehp1., meaning that the string is initially empty. This is
-true for local and global ansistrings or ansistrings that are part of a 
+true for local and global ansistrings or ansistrings that are part of a
 structure (arrays, records or objects).
 
 :p.
@@ -1519,16 +1517,16 @@ var
 :exmp.
 
 :p.
-will copy the value :hp1.Nil:ehp1. 100,000 times into :hp1.A:ehp1.. 
-When :hp1.A:ehp1. goes out of scope, then the reference 
+will copy the value :hp1.Nil:ehp1. 100,000 times into :hp1.A:ehp1..
+When :hp1.A:ehp1. goes out of scope, then the reference
 count of the 100,000 strings will be decreased by 1 for each
-of these strings. All this happens invisible to the programmer, 
+of these strings. All this happens invisible to the programmer,
 but when considering performance issues, this is important.
 
 :p.
-Memory for the string content will be allocated only when the string is 
-assigned a value. If the string goes out of scope, then its reference 
-count is automatically decreased by 1. If the reference count reaches 
+Memory for the string content will be allocated only when the string is
+assigned a value. If the string goes out of scope, then its reference
+count is automatically decreased by 1. If the reference count reaches
 zero, the memory reserved for the string is released.
 
 :p.
@@ -1557,7 +1555,7 @@ and passing it to a C routine that modifies the string.
 
 :p.
 The :hp1.Length():ehp1. function must be used to get the length of an
-ansistring: the length is not stored at character 0 of the ansistring. 
+ansistring: the length is not stored at character 0 of the ansistring.
 The construct
 
 :xmp.
@@ -1618,7 +1616,7 @@ It is therefore :hp2.not:ehp2. advisable to typecast one of the following:
 :ol.
 :li. Expressions.
 :li. Strings that have a reference count larger than 1.
-In this case you should call :hp1.UniqueString():ehp1. to ensure the 
+In this case you should call :hp1.UniqueString():ehp1. to ensure the
 string has a reference count 1.
 :eol.
 
@@ -1627,18 +1625,18 @@ string has a reference count 1.
 .* ...................................................................
 :h4 name=character_types_widestrings.WideStrings
 :p.
-WideStrings (used to represent Unicode character strings) are implemented in much 
-the same way as AnsiStrings: reference counted, null-terminated arrays, only they 
+WideStrings (used to represent Unicode character strings) are implemented in much
+the same way as AnsiStrings: reference counted, null-terminated arrays, only they
 are implemented as arrays of :hp1.WideChars:ehp1. instead of regular :hp1.Chars:ehp1..
 A :hp1.WideChar:ehp1. is a two-byte character (an element of a DBCS: Double Byte
-Character Set). Mostly the same rules apply for WideStrings as for 
+Character Set). Mostly the same rules apply for WideStrings as for
 AnsiStrings. The compiler transparently converts WideStrings to
 AnsiStrings and vice versa.
 
 :p.
 Similarly to the typecast of an Ansistring to a PChar null-terminated
 array of characters, a WideString can be converted to a PWideChar
-null-terminated array of characters. 
+null-terminated array of characters.
 Note that the :hp1.PWideChar:ehp1. array is terminated by 2 null bytes instead of
 1, so a typecast to a PChar is not automatic.
 
@@ -1750,20 +1748,20 @@ the unit :hp2.strings:ehp2. must be used.
 
 :p.
 However, it is possible to do some pointer arithmetic. The
-operators + and - can be used to do operations 
+operators + and - can be used to do operations
 on :hp1.PChar:ehp1. pointers.
 In the table below, :hp1.P:ehp1. and :hp1.Q:ehp1. are of type :hp1.PChar:ehp1., and
 :hp1.I:ehp1. is of type :hp1.Longint:ehp1..
 
 :cgraphic.
  :hp2.Operation                                                  Result:ehp2.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  P + I                       Adds I to the address pointed to by P.
  I + P                       Adds I to the address pointed to by P.
  P - I               Substracts I from the address pointed to by P.
  P - Q     Returns, as an integer, the distance between 2 addresses
                       (or the number of characters between P and Q)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
 
 
@@ -1775,25 +1773,25 @@ A structured type is a type that can hold multiple values in one variable.
 Stuctured types can be nested to unlimited levels.
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Structured Types:ehp2.
 
-&ra.&ra.â”€â”€â”€ structured type  â”€â”€â”¬â”€â”€â”€â”€  array type    â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”œâ”€â”€â”€â”€  record type   â”€â”€â”€â”€â”¤
-                         â”œâ”€â”€â”€â”€  object type   â”€â”€â”€â”€â”¤
-                         â”œâ”€â”€â”€â”€  class type    â”€â”€â”€â”€â”¤
-                         â”œâ”€ class reference type â”€â”¤
-                         â”œâ”€â”€â”€â”€ interface type â”€â”€â”€â”€â”¤
-                         â”œâ”€â”€â”€â”€    set type    â”€â”€â”€â”€â”¤
-                         â””â”€â”€â”€â”€â”€  file type  â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ structured type  ÄÄÂÄÄÄÄ  array type    ÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÃÄÄÄÄ  record type   ÄÄÄÄ´
+                         ÃÄÄÄÄ  object type   ÄÄÄÄ´
+                         ÃÄÄÄÄ  class type    ÄÄÄÄ´
+                         ÃÄ class reference type Ä´
+                         ÃÄÄÄÄ interface type ÄÄÄÄ´
+                         ÃÄÄÄÄ    set type    ÄÄÄÄ´
+                         ÀÄÄÄÄÄ  file type  ÄÄÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 Unlike Delphi, &fpc. does not support the keyword :hp1.packed:ehp1. for all
-structured types.  In the following sections each of the possible 
-structured types is discussed. It will be mentioned when a type supports 
+structured types.  In the following sections each of the possible
+structured types is discussed. It will be mentioned when a type supports
 the :hp1.packed:ehp1. keyword.
 
 
@@ -1860,15 +1858,15 @@ There are some more restrictions to elements of bitpacked structures:
 :li. The address cannot be retrieved, unless the bit size is a multiple of
 8 and the element happens to be stored on a byte boundary.
 :li. An element of a bitpacked structure cannot be used as a var parameter,
-unless the bit size is a multiple of 8 and the element happens to be stored 
+unless the bit size is a multiple of 8 and the element happens to be stored
 on a byte boundary.
 :eul.
 
 :p.
-To determine the size of an element in a bitpacked structure, there is the 
-:hp1.BitSizeOf():ehp1. function. It returns the size - in bits - of the element. 
-For other types or elements of structures which are not bitpacked, this will 
-simply return the size in bytes multiplied by 8, i.e., the return value is 
+To determine the size of an element in a bitpacked structure, there is the
+:hp1.BitSizeOf():ehp1. function. It returns the size - in bits - of the element.
+For other types or elements of structures which are not bitpacked, this will
+simply return the size in bytes multiplied by 8, i.e., the return value is
 then the same as :hp1.8*SizeOf:ehp1..
 
 :p.
@@ -1880,25 +1878,25 @@ The size of bitpacked records and arrays is limited:
 :eul.
 
 :p.
-The reason is that the offset of an element must be calculated with 
+The reason is that the offset of an element must be calculated with
 the maximum integer size of the system.
 
 
 .* ...................................................................
 :h4 name=structured_types_arrays.Arrays
 :p.
-&fpc. supports arrays as in &tp.. Multi-dimensional arrays and (bit)packed 
+&fpc. supports arrays as in &tp.. Multi-dimensional arrays and (bit)packed
 arrays are also supported, as well as the dynamic arrays of &delphi.:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Array types:ehp2.
 
-&ra.&ra.â”€â”€ array type â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.array:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.of:ehp2. â”€ type â”€â”€&ra.&la.
-                 â”œâ”€   :hp2.packed:ehp2.    â”€â”¤         â””â”€ :hp2.[:ehp2. â”€â”¬â”€ ordinal type â”€â”¬â”€ :hp2.]:ehp2. â”€â”˜
-                 â””â”€  :hp2.bitpacked:ehp2.  â”€â”˜               ^â”€â”€â”€â”€â”€â”€ , â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄ array type ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.array:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.of:ehp2. Ä type ÄÄ&ra.&la.
+                 ÃÄ   :hp2.packed:ehp2.    Ä´         ÀÄ :hp2.[:ehp2. ÄÂÄ ordinal type ÄÂÄ :hp2.]:ehp2. ÄÙ
+                 ÀÄ  :hp2.bitpacked:ehp2.  ÄÙ               ^ÄÄÄÄÄÄ , ÄÄÄÄÄÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 
@@ -1951,32 +1949,32 @@ program testarray1;
 
 type
   TA = Array[0..9, 0..9] of Integer;
-  
-var   
+
+var
   A, B: TA;
   I, J: Integer;
 begin
   for I := 0 to 9 do
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       A[I,J] := I * J;
   for I := 0 to 9 do
   begin
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       Write(A[I, J]:2, ' ');
     writeln;
   end;
   B := A;
   writeln;
   for I := 0 to 9 do
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       A[9-I, 9-J] := I * J;
   for I := 0 to 9 do
   begin
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       write(B[I, J]:2, ' ');
     writeln;
   end;
-end.  
+end.
 :exmp.
 
 :p.
@@ -1997,12 +1995,12 @@ Type
 :p.
 When declaring a variable of a dynamic array type, the initial length of the
 array is zero. The actual length of the array must be set with the standard
-:hp1.SetLength():ehp1. function, which will allocate the necessary memory to contain 
+:hp1.SetLength():ehp1. function, which will allocate the necessary memory to contain
 the array elements on the heap. The following example will set the length to
 1000:
 
 :xmp.
-var 
+var
   A: TByteArray;
 begin
   SetLength(A, 1000);
@@ -2013,26 +2011,26 @@ After a call to :hp1.SetLength():ehp1., valid array indexes are 0 to 999: the ar
 index is always zero-based.
 
 :p.
-Note that the length of the array is set in elements, not in bytes of 
-allocated memory (although these may be the same). The amount of 
-memory allocated is the size of the array multiplied by the size of 
+Note that the length of the array is set in elements, not in bytes of
+allocated memory (although these may be the same). The amount of
+memory allocated is the size of the array multiplied by the size of
 1 element in the array. The memory will be disposed of at the exit of the
-current procedure or function. 
+current procedure or function.
 
 :p.
-It is also possible to resize the array: in that case, as much of the 
+It is also possible to resize the array: in that case, as much of the
 elements in the array as will fit in the new size, will be kept. The array
 can be resized to zero, which effectively resets the variable.
 
 :p.
-At all times, trying to access an element of the array with an index 
-that is not in the current length of the array will generate a run-time 
+At all times, trying to access an element of the array with an index
+that is not in the current length of the array will generate a run-time
 error.
 
 :p.
-Dynamic arrays are reference counted: assignment of one dynamic array-type 
-variable to another will let both variables point to the same array. 
-Contrary to ansistrings, an assignment to an element of one array will 
+Dynamic arrays are reference counted: assignment of one dynamic array-type
+variable to another will let both variables point to the same array.
+Contrary to ansistrings, an assignment to an element of one array will
 be reflected in the other: there is no copy-on-write. Consider the following
 example:
 
@@ -2057,33 +2055,33 @@ program testarray1;
 
 type
   TA = array of array of Integer;
-  
-var   
+
+var
   A, B: TA;
   I, J: Integer;
 begin
   Setlength(A, 10, 10);
   for I := 0 to 9 do
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       A[I, J] := I * J;
   for I:=0 to 9 do
   begin
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       Write(A[I, J]:2, ' ');
     writeln;
   end;
   B := A;
   writeln;
   for I := 0 to 9 do
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       A[9-I, 9-J] := I * J;
   for I := 0 to 9 do
   begin
-    for J := 0 to 9 do 
+    for J := 0 to 9 do
       Write(B[I, J]:2, ' ');
     writeln;
   end;
-end.  
+end.
 :exmp.
 
 :p.
@@ -2097,7 +2095,7 @@ reference count of A (and B) is decreased with 1. As soon as the reference
 count reaches zero the memory, allocated for the contents of the array, is disposed of.
 
 :p.
-It is also possible to copy and/or resize the array with the standard 
+It is also possible to copy and/or resize the array with the standard
 :hp1.Copy():ehp1. function, which acts as the copy function for strings:
 
 :xmp.
@@ -2105,8 +2103,8 @@ program testarray3;
 
 type
   TA = array of Integer;
-  
-var   
+
+var
   A, B: TA;
   I: Integer;
 
@@ -2114,10 +2112,10 @@ begin
   Setlength(A, 10);
   for I := 0 to 9 do
       A[I] := I;
-  B := Copy(A, 3, 6);    
+  B := Copy(A, 3, 6);
   for I := 0 to 5 do
     Writeln(B[I]);
-end.  
+end.
 :exmp.
 
 :p.
@@ -2128,14 +2126,14 @@ Starting at the element at index 3 (i.e. the fourth element) of the array.
 The :hp1.Length():ehp1. function will return the number of elements in the array.
 The :hp1.Low():ehp1. function on a dynamic array will always return 0, and the
 :hp1.High():ehp1. function will return the value :hp1.Length-1:ehp1., i.e., the value of the
-highest allowed array index. 
+highest allowed array index.
 
 
 
 :h5.Packing and unpacking an array
 :p.
 Arrays can be packed and bitpacked. Two array types which have the same index
-type and element type, but which are differently packed are not assignment 
+type and element type, but which are differently packed are not assignment
 compatible.
 
 :p.
@@ -2146,7 +2144,7 @@ routine, as in the following example:
 
 :xmp.
 var
-  foo: array [ 'a'..'f' ] of Boolean 
+  foo: array [ 'a'..'f' ] of Boolean
     = ( false, false, true, false, false, false );
   bar: packed array [ 42..47 ] of Boolean;
   baz: array [ '0'..'5' ] of Boolean;
@@ -2168,27 +2166,27 @@ More information about the pack and unpack routines can be found in the
 The syntax diagram for a record type is:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Record types:ehp2.
 
-&ra.&ra.â”€â”€ record type â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.record:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.end:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                  â”œâ”€   :hp2.packed:ehp2.    â”€â”¤          â””â”€ field list â”€â”˜
-                  â””â”€  :hp2.bitpacked:ehp2.  â”€â”˜
+&ra.&ra.ÄÄ record type ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.record:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.end:ehp2. ÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                  ÃÄ   :hp2.packed:ehp2.    Ä´          ÀÄ field list ÄÙ
+                  ÀÄ  :hp2.bitpacked:ehp2.  ÄÙ
 
-&ra.&ra.â”€â”€ field list â”€â”¬â”€â”€â”€ fixed fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”¬â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                 â””â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ variant part â”€â”˜ â””â”€ ; â”€â”˜
-                   â””â”€  fixed fields â”€ ; â”€â”˜
+&ra.&ra.ÄÄ field list ÄÂÄÄÄ fixed fields ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÂÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                 ÀÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ variant part ÄÙ ÀÄ ; ÄÙ
+                   ÀÄ  fixed fields Ä ; ÄÙ
 
-&ra.&ra.â”€â”€ fixed fields â”€â”¬â”€ identifier list â”€ : â”€ type â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄ fixed fields ÄÂÄ identifier list Ä : Ä type ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                   ÀÄÄÄÄÄÄÄÄÄÄÄÄ ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€ variant part â”€ :hp2.case:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ ordinal type identifier â”€ :hp2.of:ehp2. â”€â”¬â”€ variantâ”€â”¬â”€â”€â”€&ra.&la.
-                          â”” identifier â”€ : â”˜                                ^â”€â”€â”€â”€ ; â”€â”€â”€â”˜
+&ra.&ra.ÄÄ variant part Ä :hp2.case:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ ordinal type identifier Ä :hp2.of:ehp2. ÄÂÄ variantÄÂÄÄÄ&ra.&la.
+                          À identifier Ä : Ù                                ^ÄÄÄÄ ; ÄÄÄÙ
 
-&ra.&ra.â”€â”€ variant â”€â”¬â”€ constant â”€ , â”€â”¬â”€ : â”€ ( â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-              ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         ^â”€â”€ field list â”€â”€â”˜
+&ra.&ra.ÄÄ variant ÄÂÄ constant Ä , ÄÂÄ : Ä ( ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ ) ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+              ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ         ^ÄÄ field list ÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -2250,7 +2248,7 @@ each part is first rounded up to two. So in the above example:
 :ul.
 :li. :hp1.SizeOf():ehp1. would return 24 for :hp1.Point:ehp1.
 :li. It would result in 24 for :hp1.RPoint}:ehp1.
-:li. Finally, 26 would be the size of :hp1.BetterRPoint:ehp1. 
+:li. Finally, 26 would be the size of :hp1.BetterRPoint:ehp1.
 :li. For :hp1.MyRec:ehp1., the value would be 12.
 :eul.
 
@@ -2258,9 +2256,9 @@ each part is first rounded up to two. So in the above example:
 If a typed file with records, produced by a &tp. program, must be read,
 then chances are that attempting to read that file correctly will fail.
 The reason for this is that by default, elements of a record are aligned at
-2-byte boundaries, for performance reasons. 
+2-byte boundaries, for performance reasons.
 :p.
-This default behaviour can be changed with the :hp1.{$PACKRECORDS N}:ehp1. 
+This default behaviour can be changed with the :hp1.{$PACKRECORDS N}:ehp1.
 switch. Possible values for :hp1.N:ehp1. are 1, 2, 4, 16 or :hp1.Default:ehp1.
 This switch tells the compiler to align elements of a record or object or
 class that have size larger than :hp1.n:ehp1. on :hp1.n:ehp1. byte boundaries.
@@ -2298,7 +2296,7 @@ type
     Trec4 = Record
       A,B : Byte;
     end;
-   
+
     {$PackRecords 4}
     Trec5 = Record
       A : Byte;
@@ -2312,7 +2310,7 @@ type
       B : Array[1..3] of byte;
       C : byte;
     end;
-   
+
     {$PackRecords 4}
     Trec7 = Record
       A : Byte;
@@ -2386,10 +2384,10 @@ right after A, hence, the total size of the record is 3.
 :li.For Trec3, the sizes of A,B are 1, and hence they are aligned on 1 byte boundaries. The same
 is true for Trec4.
 
-:li.For Trec5, since the size of B â€“ 3 â€“ is smaller than 4, B will be on a 4-byte boundary, as this
+:li.For Trec5, since the size of B - 3 - is smaller than 4, B will be on a 4-byte boundary, as this
 is the first power of two that is larger than its size. The same holds for Trec6.
 
-:li.For Trec7, B is aligned on a 4 byte boundary, since its size â€“ 7 â€“ is larger than 4. However, in
+:li.For Trec7, B is aligned on a 4 byte boundary, since its size - 7 - is larger than 4. However, in
 Trec8, it is aligned on a 8-byte boundary, since 8 is the first power of two that is greater than
 7, thus making the total size of the record 16.
 :eul.
@@ -2427,12 +2425,12 @@ Note the :hp1.{$PackRecords 2}:ehp1. after the first declaration!
 &fpc. supports the set types as in &tp.. The prototype of a set declaration is:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Set types:ehp2.
 
-&ra.&ra.â”€â”€ set type â”€â”€ :hp2.set:ehp2. â”€â”€ :hp2.of:ehp2. â”€â”€ ordinal type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ set type ÄÄ :hp2.set:ehp2. ÄÄ :hp2.of:ehp2. ÄÄ ordinal type ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -2478,13 +2476,13 @@ its data for instance in memory.
 Here is the type declaration for a file type:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.File types:ehp2.
 
-&ra.&ra.â”€â”€ file type â”€â”€ :hp2.file:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                        â””â”€ :hp2.of:ehp2. â”€ type â”€â”˜
+&ra.&ra.ÄÄ file type ÄÄ :hp2.file:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                        ÀÄ :hp2.of:ehp2. Ä type ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -2522,12 +2520,12 @@ address in memory, where the data of another variable may be stored. A pointer
 type can be defined as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Pointer types:ehp2.
 
-&ra.&ra.â”€â”€ pointer type â”€â”€ ^ â”€â”€ type identifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ pointer type ÄÄ ^ ÄÄ type identifier ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -2716,24 +2714,24 @@ types.
 syntax diagram:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Procedural types:ehp2.
 
-&ra.&ra.â”€â”€ procedural type â”€â”¬â”€ function header â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€&ra.&la.
-                      â””â”€ procedure header â”€â”˜â””â”€ :hp2.of:ehp2. â”€ :hp2.object:ehp2. â”€â”˜â””â”€ ; â”€ call modifier â”€â”˜
+&ra.&ra.ÄÄ procedural type ÄÂÄ function header ÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄ&ra.&la.
+                      ÀÄ procedure header ÄÙÀÄ :hp2.of:ehp2. Ä :hp2.object:ehp2. ÄÙÀÄ ; Ä call modifier ÄÙ
 
-&ra.&ra.â”€â”€ function header â”€â”€ :hp2.function:ehp2. â”€ formal parameter list â”€ : â”€ result type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ function header ÄÄ :hp2.function:ehp2. Ä formal parameter list Ä : Ä result type ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€ procedure header â”€â”€ :hp2.procedure:ehp2. â”€ formal parameter list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ procedure header ÄÄ :hp2.procedure:ehp2. Ä formal parameter list ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€ call modifiers â”€â”¬â”€ :hp2.register:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                     â”œâ”€  :hp2.cdecl:ehp2.   â”€â”¤
-                     â”œâ”€  :hp2.pascal:ehp2.  â”€â”¤
-                     â”œâ”€ :hp2.stdcall:ehp2.  â”€â”¤
-                     â”œâ”€ :hp2.safecall:ehp2. â”€â”¤
-                     â””â”€  :hp2.inline:ehp2.  â”€â”˜
+&ra.&ra.ÄÄ call modifiers ÄÂÄ :hp2.register:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                     ÃÄ  :hp2.cdecl:ehp2.   Ä´
+                     ÃÄ  :hp2.pascal:ehp2.  Ä´
+                     ÃÄ :hp2.stdcall:ehp2.  Ä´
+                     ÃÄ :hp2.safecall:ehp2. Ä´
+                     ÀÄ  :hp2.inline:ehp2.  ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -3018,27 +3016,27 @@ The variables must be declared in a variable declaration section of a unit or a 
 It looks as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Variable declaration:ehp2.
 
-&ra.&ra.â”€â”€ variable declaration  â”€â”€ identifier â”€â”€ : â”€â”€ type â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€&ra.
-                                                       â””â”€ :hp2.=:ehp2. â”€ expression â”€â”˜
+&ra.&ra.ÄÄ variable declaration  ÄÄ identifier ÄÄ : ÄÄ type ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄ&ra.
+                                                       ÀÄ :hp2.=:ehp2. Ä expression ÄÙ
 
-&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ hintdirective â”€â”€ :hp2.;:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-    â””â”€ variable modifiers â”€â”˜
+&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ hintdirective ÄÄ :hp2.;:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+    ÀÄ variable modifiers ÄÙ
 
-&ra.&ra.â”€â”€ variable modifiers â”€â”¬â”€â”¬â”€â”€â”€â”€â”€ :hp2.absolute:ehp2. â”€â”¬â”€ integer expression â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€&ra.
-                         ^ â”‚                â””â”€     identifier     â”€â”˜                       â”‚â”‚
-                         â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ :hp2.; export:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤â”‚
-                         â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ :hp2.; cvar:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤â”‚
-                         â”‚ â”œâ”€ :hp2.; external:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¤â”‚
-                         â”‚ â”‚              â””â”€ string constant â”€â”˜â””â”€ :hp2.name:ehp2. â”€ string constant â”€â”˜â”‚â”‚
-                         â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ hintdirective â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄ variable modifiers ÄÂÄÂÄÄÄÄÄ :hp2.absolute:ehp2. ÄÂÄ integer expression ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄ&ra.
+                         ^ ³                ÀÄ     identifier     ÄÙ                       ³³
+                         ³ ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ :hp2.; export:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´³
+                         ³ ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ :hp2.; cvar:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´³
+                         ³ ÃÄ :hp2.; external:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂ´³
+                         ³ ³              ÀÄ string constant ÄÙÀÄ :hp2.name:ehp2. Ä string constant ÄÙ³³
+                         ³ ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ hintdirective ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ³
+                         ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -3092,7 +3090,7 @@ above case).
 :eol.
 
 :p.
-Note that assembler names must be unique. Itâ€™s not possible to declare or export 2 variables with the
+Note that assembler names must be unique. It's not possible to declare or export 2 variables with the
 same assembler name.
 
 
@@ -3133,7 +3131,7 @@ even better way of doing this:
 :xmp.
 const
   SDefault = 'This is an initialized string';
-  
+
 var
   S: String = SDefault;
 :exmp.
@@ -3217,39 +3215,39 @@ value on the fly, or to check the values which are written to the property.
 The declaration is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Properties:ehp2.
 
-&ra.&ra.â”€â”€ property definition  â”€â”€ identifier â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ property specifiers â”€â”€â”€â”€â”€â”€&ra.&la.
-                                         â””â”€ property interface â”€â”˜
+&ra.&ra.ÄÄ property definition  ÄÄ identifier ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ property specifiers ÄÄÄÄÄÄ&ra.&la.
+                                         ÀÄ property interface ÄÙ
 
-&ra.&ra.â”€â”€ property interface â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ : â”€â”€ type identifier â”€â”€&ra.
-                         â””â”€ property parameter list â”€â”˜
+&ra.&ra.ÄÄ property interface ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ : ÄÄ type identifier ÄÄ&ra.
+                         ÀÄ property parameter list ÄÙ
 
-&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-    â””â”€ :hp2.index:ehp2. â”€ integerconstant â”€â”˜
+&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+    ÀÄ :hp2.index:ehp2. Ä integerconstant ÄÙ
 
-&ra.&ra.â”€â”€ property parameter list â”€â”€ :hp2.[:ehp2. â”€â”¬â”€ parameter declaration â”€â”¬â”€ :hp2.]:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                   ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄ property parameter list ÄÄ :hp2.[:ehp2. ÄÂÄ parameter declaration ÄÂÄ :hp2.]:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                   ^ÄÄÄÄÄÄÄÄÄÄÄ ; ÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€ property specifiers â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€&ra.&la.
-                          â””â”€ read specifier â”€â”˜â””â”€ write specifier â”€â”˜â””â”€ default specifier â”€â”˜
+&ra.&ra.ÄÄ property specifiers ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄ&ra.&la.
+                          ÀÄ read specifier ÄÙÀÄ write specifier ÄÙÀÄ default specifier ÄÙ
 
-&ra.&ra.â”€â”€ read specifier â”€â”€ :hp2.read:ehp2. â”€â”€ field or function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ read specifier ÄÄ :hp2.read:ehp2. ÄÄ field or function ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€ write specifier â”€â”€ :hp2.write:ehp2. â”€â”€ field or function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄ write specifier ÄÄ :hp2.write:ehp2. ÄÄ field or function ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€ default specifier â”€â”€â”¬â”€ :hp2.default:ehp2. â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”‚            â””â”€ constant â”€â”˜â”‚
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€ :hp2.nodefault:ehp2. â”€â”€â”€â”€â”€â”€â”€â”˜                      
+&ra.&ra.ÄÄ default specifier ÄÄÂÄ :hp2.default:ehp2. ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ³            ÀÄ constant ÄÙ³
+                         ÀÄÄÄÄÄÄÄÄ :hp2.nodefault:ehp2. ÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€ field or procedure â”€â”€â”¬â”€â”€â”€ field identifier â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                          â””â”€ procedure identifier â”€â”˜
+&ra.&ra.ÄÄ field or procedure ÄÄÂÄÄÄ field identifier ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                          ÀÄ procedure identifier ÄÙ
 
-&ra.&ra.â”€â”€ field or function â”€â”€â”¬â”€â”€â”€ field identifier â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â””â”€ function identifier â”€â”€â”˜
+&ra.&ra.ÄÄ field or function ÄÄÂÄÄÄ field identifier ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÀÄ function identifier ÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -3266,15 +3264,15 @@ function GetMyInt: Integer;
 procedure SetMyInt(AValue: Integer);
 
 property MyProp: Integer read GetMyInt write SetMyInt;
-  
+
 implementation
 
 uses
   sysutils;
 
 var
-  FMyInt: Integer;  
-  
+  FMyInt: Integer;
+
 function GetMyInt: Integer;
 begin
   Result := FMyInt;
@@ -3284,7 +3282,7 @@ procedure SetMyInt(AValue: Integer);
 begin
   if ((AValue mod 2) = 1) then
     raise Exception.Create('MyProp can only contain even value');
-  FMyInt := AValue;  
+  FMyInt := AValue;
 end;
 
 end.
@@ -3312,8 +3310,8 @@ uses
   sysutils;
 
 var
-  FMyInt: Integer;  
-  
+  FMyInt: Integer;
+
 function GetMyInt: Integer;
 begin
   Result := FMyInt;
@@ -3323,7 +3321,7 @@ procedure SetMyInt(AValue: Integer);
 begin
   If ((AValue mod 2) = 1) then
     Raise Exception.Create('Only even values are allowed');
-  FMyInt := AValue;  
+  FMyInt := AValue;
 end;
 
 end.
@@ -3346,7 +3344,7 @@ property MyProp: Integer read GetMyInt write SetMyInt;
 
 implementation
 
-end.  
+end.
 :exmp.
 
 :p.
@@ -3374,13 +3372,13 @@ objects. Here we present some technical questions regarding object oriented prog
 
 :p.
 Objects should be treated as a special kind of record. The record contains all the fields that are
-declared in the objects definition, and pointers to the methods that are associated to the objectsâ€™ type.
+declared in the objects definition, and pointers to the methods that are associated to the objects' type.
 
 :p.
 An object is declared just as a record would be declared; except that now, procedures and functions
-can be declared as if they were part of the record. Objects can â€œinheritâ€ fields and methods from
-â€œparentâ€ objects. This means that these fields and methods can be used as if they were included in
-the objects declared as a â€œchildâ€ object.
+can be declared as if they were part of the record. Objects can "inherit" fields and methods from
+"parent" objects. This means that these fields and methods can be used as if they were included in
+the objects declared as a "child" object.
 
 :p.
 Furthermore, a concept of visibility is introduced: fields, procedures and functions can be declared as
@@ -3395,30 +3393,30 @@ limited to the implementation of the current unit.
 The prototype declaration of an object is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Object types:ehp2.
 
-&ra.&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.object:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”¬â”€ component list â”€â”¬â”€ end â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-     â””â”€ :hp2.packed:ehp2. â”€â”˜          â””â”€ heritage â”€â”˜ ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.object:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÂÄ component list ÄÂÄ end ÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+     ÀÄ :hp2.packed:ehp2. ÄÙ          ÀÄ heritage ÄÙ ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ heritage â”€â”€ ( â”€â”€ object type identifier â”€â”€ ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ heritage ÄÄ ( ÄÄ object type identifier ÄÄ ) ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ component list â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€&ra.
-                      â””â”€ object visibility specifier â”€â”˜â””â”¬â”€ field definition â”€â”¬â”˜
-                                                        ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ component list ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ&ra.
+                      ÀÄ object visibility specifier ÄÙÀÂÄ field definition ÄÂÙ
+                                                        ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-    â””â”¬â”€ method definition â”€â”¬â”˜
-     ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+    ÀÂÄ method definition ÄÂÙ
+     ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ field definition â”€â”€ identifier list â”€â”€ : â”€â”€ type â”€â”€ ; â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€&ra.&la.
-                                                              â””â”€ :hp2.static;:ehp2. â”€â”˜
+&ra.&ra.ÄÄÄ field definition ÄÄ identifier list ÄÄ : ÄÄ type ÄÄ ; ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄ&ra.&la.
+                                                              ÀÄ :hp2.static;:ehp2. ÄÙ
 
-&ra.&ra.â”€â”€â”€ object visibility specifier â”€â”¬â”€  :hp2.private:ehp2.  â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                   â”œâ”€ :hp2.protected:ehp2. â”€â”¤
-                                   â””â”€  :hp2.public:ehp2.   â”€â”˜
+&ra.&ra.ÄÄÄ object visibility specifier ÄÂÄ  :hp2.private:ehp2.  ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                   ÃÄ :hp2.protected:ehp2. Ä´
+                                   ÀÄ  :hp2.public:ehp2.   ÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 .* TODO:  The "method definition" is missing from the above graph.
@@ -3449,7 +3447,7 @@ outside the unit in which :hp1.TObj:ehp1. is declared.
 
 :note.
 In MacPas mode, the :hp1.Object:ehp1. keyword is replaced by the :hp1.class:ehp1.
-keyword for compatibility with other pascal compilers available on the Mac. 
+keyword for compatibility with other pascal compilers available on the Mac.
 That means that objects cannot be used in MacPas mode.
 
 :nt.
@@ -3526,7 +3524,7 @@ end;
 
 :p.
 One cannot access fields that are in a private or protected sections of an object from
-outside the objectsâ€™ methods. If this is attempted anyway, the compiler will complain about
+outside the objects' methods. If this is attempted anyway, the compiler will complain about
 an unknown identifier.
 
 :p.
@@ -3586,7 +3584,7 @@ will be the following
 :exmp.
 
 :p.
-Note that the last line of code references the object type itself (cl), 
+Note that the last line of code references the object type itself (cl),
 and not an instance of the object (cl1 or cl2).
 
 
@@ -3600,24 +3598,24 @@ constructor and the destructor explicitly when using objects.
 The declaration of a constructor or destructor is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Constructors and Destructors:ehp2.
 
-&ra.&ra.â”€â”€â”€ constructor declaration â”€â”€ constructor header â”€â”€ ; â”€â”€ subroutine block â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ constructor declaration ÄÄ constructor header ÄÄ ; ÄÄ subroutine block ÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ destructor declaration â”€â”€ destructor header â”€â”€ ; â”€â”€ subroutine block â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ destructor declaration ÄÄ destructor header ÄÄ ; ÄÄ subroutine block ÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ constructor header â”€â”€ :hp2.constructor:ehp2. â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€ identifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€&ra.
-                                          â””â”€ qualified method identifier â”€â”˜
+&ra.&ra.ÄÄÄ constructor header ÄÄ :hp2.constructor:ehp2. ÄÄÂÄÄÄÄÄÄÄÄÄ identifier ÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ&ra.
+                                          ÀÄ qualified method identifier ÄÙ
 
-&ra.â”€â”€â”€â”€ formal parameter list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.ÄÄÄÄ formal parameter list ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ destructor header â”€â”€ :hp2.destructor:ehp2. â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€ identifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.
-                                        â””â”€ qualified method identifier â”€â”˜
+&ra.&ra.ÄÄÄ destructor header ÄÄ :hp2.destructor:ehp2. ÄÄÂÄÄÄÄÄÄÄÄÄ identifier ÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ&ra.
+                                        ÀÄ qualified method identifier ÄÙ
 
-&ra.â”€â”€â”€â”€ formal parameter list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.ÄÄÄÄ formal parameter list ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -3635,7 +3633,7 @@ i.e. an identifier of the form :hp1.objectidentifier.methodidentifier:ehp1..
 :p.
 &fpc. supports also the extended syntax of the :hp1.New:ehp1. and :hp1.Dispose:ehp1.
 procedures. In case a dynamic variable of an object type must be allocated
-the constructorâ€™s name can be specified in the call to :hp1.New:ehp1..
+the constructor's name can be specified in the call to :hp1.New:ehp1..
 The :hp1.New:ehp1. is implemented as a function which returns a pointer to the
 instantiated object. Consider the following declarations:
 
@@ -3676,7 +3674,7 @@ pp^.init;
 :p.
 In the last case, the compiler will issue a warning that the
 extended syntax of :hp1.New:ehp1. and :hp1.Dispose:ehp1. must be used to generate instances of an
-object. It is possible to ignore this warning, but itâ€™s better programming practice to
+object. It is possible to ignore this warning, but it's better programming practice to
 use the extended syntax to create instances of an object.
 Similarly, the :hp1.Dispose:ehp1. procedure accepts the name of a destructor. The
 destructor will then be called, before removing the object from the heap.
@@ -3704,30 +3702,30 @@ declaration, with some additional specifiers, as can be seen from the
 following diagram, which is part of the object declaration:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Methods:ehp2.
 
-&ra.&ra.â”€â”€â”€ method definition â”€â”¬â”€  function header   â”€â”¬â”€ ; â”€â”€ method directives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”œâ”€  procedure header  â”€â”¤
-                         â”œâ”€ constructor header â”€â”¤
-                         â””â”€ destructor header  â”€â”˜
+&ra.&ra.ÄÄÄ method definition ÄÂÄ  function header   ÄÂÄ ; ÄÄ method directives ÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÃÄ  procedure header  Ä´
+                         ÃÄ constructor header Ä´
+                         ÀÄ destructor header  ÄÙ
 
-&ra.&ra.â”€â”€â”€ method directives â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€&ra.&la.
-                         â””â”€ :hp2.virtual:ehp2. â”€ ; â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”˜â””â”€ call modifier â”€ ; â”€â”˜
-                                         â””â”€ :hp2.abstract:ehp2. â”€ ; â”€â”˜
-                                               
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ method directives ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄ&ra.&la.
+                         ÀÄ :hp2.virtual:ehp2. Ä ; ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÙÀÄ call modifier Ä ; ÄÙ
+                                         ÀÄ :hp2.abstract:ehp2. Ä ; ÄÙ
+
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
-from the point of view of declarations, :hp1.Method definitions:ehp1. are 
+from the point of view of declarations, :hp1.Method definitions:ehp1. are
 normal function or procedure declarations.
-Contrary to &tp. and &delphi., fields can be declared after methods in the same 
+Contrary to &tp. and &delphi., fields can be declared after methods in the same
 block, i.e. the following will generate an error when compiling with &delphi.
 or &tp., but not with &fpc.:
 
 :xmp.
-type 
+type
   MyObj = object
     procedure Doit;
     Field: Longint;
@@ -3842,7 +3840,7 @@ As it is visible, both the parent and child objects have a method called
 :hp1.Doit:ehp1.. Consider now the following declarations and calls:
 
 :xmp.
-var 
+var
   ParentA, ParentB: PParent;
   Child: PChild;
 begin
@@ -3888,9 +3886,9 @@ static methods, only on virtual methods.
 
 :p.
 To be able to do this, the compiler keeps - per object type - a table with
-virtual methods: the VMT (Virtual Method Table). This is simply a table 
+virtual methods: the VMT (Virtual Method Table). This is simply a table
 with pointers to each of the virtual methods: each virtual method has its
-fixed location in this table (an index). The compiler uses this table to 
+fixed location in this table (an index). The compiler uses this table to
 look up the actual method that must be used. When a descendent object
 overrides a method, the entry of the parent method is overwritten in the
 VMT. More information about the VMT can be found in :link reftype=hd database='prog.inf' refid=0.&progref.:elink..
@@ -3904,12 +3902,12 @@ the VMT of the actual type that it was created with.
 :h5 name='objects_abstract_methods'.Abstract Methods
 :p.
 An abstract method is a special kind of virtual method. A method that is
-declared :hp1.abstract:ehp1. does not have an implementation for this method. 
+declared :hp1.abstract:ehp1. does not have an implementation for this method.
 It is up to inherited objects to override and implement this method.
 
 :p.
-From this it follows that a method can not be abstract if it is not virtual 
-(this can be seen from the syntax diagram). A second consequence is that 
+From this it follows that a method can not be abstract if it is not virtual
+(this can be seen from the syntax diagram). A second consequence is that
 an instance of an object that has an abstract method cannot be created
 directly.
 
@@ -4022,7 +4020,7 @@ var
 :exmp.
 
 :p.
-The main difference is that the variable A will take up as much 
+The main difference is that the variable A will take up as much
 space on the stack as the size of the object (TSomeObject). The
 variable B, on the other hand, will always take just the size of
 a pointer on the stack. The actual class data is on the heap.
@@ -4031,7 +4029,7 @@ a pointer on the stack. The actual class data is on the heap.
 From this, a second difference follows: a class must :hp2.always:ehp2. be initialized
 through its constructor, whereas for an object, this is not necessary.
 Calling the constructor allocates the necessary memory on the heap for the
-class instance data. 
+class instance data.
 
 :nt.
 In earlier versions of &fpc. it was necessary, in order to use classes,
@@ -4056,55 +4054,55 @@ In fact, the compiler will give a warning if it encounters the
 The prototype declaration of a class is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Class types:ehp2.
 
-&ra.&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.class:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ end â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-     â””â”€ :hp2.packed:ehp2. â”€â”˜         â””â”€ heritage â”€â”˜ â””â”¬ component list â”€â”¬â”€â”˜
-                                          ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.class:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ end ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+     ÀÄ :hp2.packed:ehp2. ÄÙ         ÀÄ heritage ÄÙ ÀÂ component list ÄÂÄÙ
+                                          ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ heritage â”€â”€ ( â”€â”€ class type identifier â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ ) â”€â”€â”€â”€&ra.&la.
-                                               â””â”€ implemented interfaces â”€â”˜ 
+&ra.&ra.ÄÄÄ heritage ÄÄ ( ÄÄ class type identifier ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ ) ÄÄÄÄ&ra.&la.
+                                               ÀÄ implemented interfaces ÄÙ
 
-&ra.&ra.â”€â”€â”€ implemented interfaces â”€â”¬ , â”€â”€ interface identifier â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                              ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ 
+&ra.&ra.ÄÄÄ implemented interfaces ÄÂ , ÄÄ interface identifier ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                              ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ component list â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€&ra.
-                      â””â”€ visibility specifier â”€â”˜â””â”¬â”€ field definition â”€â”¬â”˜
-                                                 ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ component list ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ&ra.
+                      ÀÄ visibility specifier ÄÙÀÂÄ field definition ÄÂÙ
+                                                 ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-    â””â”¬â”¬â”€â”€ method definition â”€â”€â”¬â”¬â”˜
-     â”‚â””â”€ property definition â”€â”˜â”‚
-     ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+    ÀÂÂÄÄ method definition ÄÄÂÂÙ
+     ³ÀÄ property definition ÄÙ³
+     ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ field definition â”€â”€ identifier list â”€â”€ : â”€â”€ type â”€â”€ ; â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                                              â””â”€ :hp2.static;:ehp2. â”€â”˜
+&ra.&ra.ÄÄÄ field definition ÄÄ identifier list ÄÄ : ÄÄ type ÄÄ ; ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ&ra.&la.
+                                                              ÀÄ :hp2.static;:ehp2. ÄÙ
 
-&ra.&ra.â”€â”€â”€ method definition â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€ function header â”€â”€â”¬â”¬â”€â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€&ra.
-                         â”‚â””â”€ :hp2.class:ehp2. â”€â”˜â””â”€ procedure header â”€â”˜â”‚
-                         â”œâ”€â”€â”€â”€â”€ constructor header â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                         â””â”€â”€â”€â”€â”€ destructor header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ method definition ÄÂÂÄÄÄÄÄÄÄÄÄÂÂÄ function header ÄÄÂÂÄÄ ; ÄÄÄÄÄÄÄÄ&ra.
+                         ³ÀÄ :hp2.class:ehp2. ÄÙÀÄ procedure header ÄÙ³
+                         ÃÄÄÄÄÄ constructor header ÄÄÄÄÄÄÄÄ´
+                         ÀÄÄÄÄÄ destructor header ÄÄÄÄÄÄÄÄÄÙ
 
-&ra.â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-     â””â”€â”¬â”¬â”€ :hp2.virtual:ehp2. â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€ ; â”€â”˜â””â”€ call modifiers â”€ ; â”€â”˜
-       â”‚â””â”€ :hp2.dynamic:ehp2. â”€â”˜â””â”€ ; â”€â”€ :hp2.abstract:ehp2. â”€â”€â”˜â”‚
-       â”œâ”€â”€â”€â”€â”€â”€â”€â”€ :hp2.override:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-       â””â”€ :hp2.message:ehp2. â”€â”¬â”€ integer constant â”€â”¬â”˜
-                   â””â”€ string constant â”€â”€â”˜
-                         
-&ra.&ra.â”€â”€â”€ class visibility specifier â”€â”¬â”€  :hp2.private:ehp2.  â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                  â”œâ”€ :hp2.protected:ehp2. â”€â”¤
-                                  â”œâ”€  :hp2.public:ehp2.   â”€â”¤
-                                  â””â”€ :hp2.published:ehp2. â”€â”˜
+&ra.ÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+     ÀÄÂÂÄ :hp2.virtual:ehp2. ÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄ ; ÄÙÀÄ call modifiers Ä ; ÄÙ
+       ³ÀÄ :hp2.dynamic:ehp2. ÄÙÀÄ ; ÄÄ :hp2.abstract:ehp2. ÄÄÙ³
+       ÃÄÄÄÄÄÄÄÄ :hp2.override:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+       ÀÄ :hp2.message:ehp2. ÄÂÄ integer constant ÄÂÙ
+                   ÀÄ string constant ÄÄÙ
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ class visibility specifier ÄÂÄ  :hp2.private:ehp2.  ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                  ÃÄ :hp2.protected:ehp2. Ä´
+                                  ÃÄ  :hp2.public:ehp2.   Ä´
+                                  ÀÄ :hp2.published:ehp2. ÄÙ
+
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 :nt.
 In MacPas mode, the :hp1.Object:ehp1. keyword is replaced by the :hp1.class:ehp1.
-keyword for compatibility with other pascal compilers available on the Mac. 
+keyword for compatibility with other pascal compilers available on the Mac.
 That means that in MacPas mode, the reserved word 'class' in the above
 diagram may be replaced by the reserved word 'object'.
 :ent.
@@ -4139,7 +4137,7 @@ they are implemented in other modules.
 :pt.:hp2.Published:ehp2.
 :pd.Is the same as a :hp1.Public:ehp1. section, but the compiler
 generates also type information that is needed for automatic streaming of
-these classes if the compiler is in the {$M+} state. Fields defined in 
+these classes if the compiler is in the {$M+} state. Fields defined in
 a :hp1.published:ehp1. section must be of class type.
 Array properties cannot be in a published section.
 
@@ -4151,8 +4149,8 @@ interfaces. This feature will be discussed in the next chapter.
 
 :p.
 Classes can contain :hp1.class:ehp1. methods: these are functions that do not
-require an instance. The :hp1.self:ehp1. identifier is valid in such methods, 
-but refers to the class pointer (the VMT). 
+require an instance. The :hp1.self:ehp1. identifier is valid in such methods,
+but refers to the class pointer (the VMT).
 
 :p.
 Similar to objects, if the {$STATIC ON} directive is active, then a class
@@ -4194,7 +4192,7 @@ will be the following
 :exmp.
 
 :p.
-Note that the last line of code references the class type itself (TMyClass), 
+Note that the last line of code references the class type itself (TMyClass),
 and not an instance of the class (c1 or c2).
 
 :p.
@@ -4202,20 +4200,20 @@ It is also possible to define class reference types:
 
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Class reference type:ehp2.
 
-&ra.&ra.â”€â”€â”€ :hp2.class of:ehp2. â”€â”€ classtype â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ :hp2.class of:ehp2. ÄÄ classtype ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
 Class reference types are used to create instances of a certain class, which
-is not yet known at compile time, but which is specified at run time. 
+is not yet known at compile time, but which is specified at run time.
 Essentially, a variable of a class reference type contains a pointer to the
-definition of the speficied class. This can be used to construct an instance 
-of the class corresponding to the definition, or to check inheritance. 
+definition of the speficied class. This can be used to construct an instance
+of the class corresponding to the definition, or to check inheritance.
 The following example shows how it works:
 
 :xmp.
@@ -4243,7 +4241,7 @@ end;
 :exmp.
 
 :p.
-On return of the :hp1.CreateComponent:ehp1. function, C will contain an 
+On return of the :hp1.CreateComponent:ehp1. function, C will contain an
 instance of the class TEdit. Note that the following call will fail to
 compile:
 
@@ -4269,7 +4267,7 @@ type
 
 function CheckObjectBetween(Instance: TObject): boolean;
 begin
-  if not (Instance is TMinClass) 
+  if not (Instance is TMinClass)
      or ((Instance is TMaxClass) and (Instance.ClassType <> TMaxClass)) then
     raise Exception.Create('SomeError')
 end;
@@ -4288,7 +4286,7 @@ More about instantiating a class can be found in the next section.
 :p.
 Classes must be created using one of their constructors (there can be
 multiple constructors). Remember that a class is a pointer to an object on
-the heap. When a variable of some class is declared, the compiler just 
+the heap. When a variable of some class is declared, the compiler just
 allocates room for this pointer, not the entire object. The constructor of
 a class returns a pointer to an initialized instance of the object on the
 heap. So, to initialize an instance of some class, one would do the following:
@@ -4315,8 +4313,8 @@ value of  the {$PackRecords} directive.
 :li. Just as for objects and records, a packed class can be declared.
 This has the same effect as on an object, or record, namely that the
 elements are aligned on 1-byte boundaries. i.e. as close as possible.
-:li. :hp1.SizeOf(class):ehp1. will return the same as :hp1.SizeOf(Pointer):ehp1., 
-since a class is but a pointer to an object. To get the size of the class 
+:li. :hp1.SizeOf(class):ehp1. will return the same as :hp1.SizeOf(Pointer):ehp1.,
+since a class is but a pointer to an object. To get the size of the class
 instance data, use the :hp1.TObject.InstanceSize:ehp1. method.
 :eul.
 :ent.
@@ -4341,21 +4339,21 @@ Declaration of methods in classes follows the same rules as method
 declarations in objects:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Methods:ehp2.
 
-&ra.&ra.â”€â”€â”€ method definition â”€â”¬â”€  function header   â”€â”¬â”€ ; â”€â”€ method directives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â”œâ”€  procedure header  â”€â”¤
-                         â”œâ”€ constructor header â”€â”¤
-                         â””â”€ destructor header  â”€â”˜
+&ra.&ra.ÄÄÄ method definition ÄÂÄ  function header   ÄÂÄ ; ÄÄ method directives ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÃÄ  procedure header  Ä´
+                         ÃÄ constructor header Ä´
+                         ÀÄ destructor header  ÄÙ
 
-&ra.&ra.â”€â”€â”€ method directives â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€&ra.&la.
-                          â”œâ”€ :hp2.virtual:ehp2. â”€ ; â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”˜â””â”€ call modifiers â”€ ; â”€â”˜
-                          â”‚               â””â”€ :hp2.abstract:ehp2. â”€ ; â”€â”€â”¤
-                          â”œâ”€â”€â”€â”€â”€â”€â”€â”€ :hp2.reintroduce:ehp2. â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                          â””â”€ :hp2.message:ehp2. â”€ constant expression â”€â”˜
-                         
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ method directives ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄ&ra.&la.
+                          ÃÄ :hp2.virtual:ehp2. Ä ; ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÙÀÄ call modifiers Ä ; ÄÙ
+                          ³               ÀÄ :hp2.abstract:ehp2. Ä ; ÄÄ´
+                          ÃÄÄÄÄÄÄÄÄ :hp2.reintroduce:ehp2. Ä ; ÄÄÄÄÄÄÄÄ´
+                          ÀÄ :hp2.message:ehp2. Ä constant expression ÄÙ
+
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 
@@ -4379,7 +4377,7 @@ begin
 Classes have virtual methods, just as objects do. There is however a
 difference between the two. For objects, it is sufficient to redeclare the
 same method in a descendent object with the keyword :hp1.virtual:ehp1. to
-override it. For classes, the situation is different: virtual methods 
+override it. For classes, the situation is different: virtual methods
 :hp2.must:ehp2. be overridden with the :hp1.override:ehp1. keyword. Failing to do so,
 will start a :hp2.new:ehp2. batch of virtual methods, hiding the previous
 one.  The :hp1.Inherited:ehp1. keyword will not jump to the inherited method, if
@@ -4389,11 +4387,11 @@ one.  The :hp1.Inherited:ehp1. keyword will not jump to the inherited method, if
 The following code is :hp2.wrong:ehp2.:
 
 :xmp.
-type 
+type
   TObjParent = class
     procedure MyProc; virtual;
   end;
-  
+
   ObjChild = class(TObjParent)
     procedure MyProc; virtual;
   end;
@@ -4414,11 +4412,11 @@ produce strange effects.
 The correct declaration is as follows:
 
 :xmp.
-type 
+type
   TObjParent = class
     procedure MyProc; virtual;
   end;
-  
+
   TObjChild  = Class(TObjParent)
     procedure MyProc; override;
   end;
@@ -4428,15 +4426,15 @@ type
 This will compile and run without warnings or errors.
 
 :p.
-If the virtual method should really be replaced with a method with the 
+If the virtual method should really be replaced with a method with the
 same name, then the :hp1.reintroduce:ehp1. keyword can be used:
 
 :xmp.
-type 
+type
   TObjParent = class
     procedure MyProc; virtual;
   end;
-  
+
   TObjChild  = Class(TObjParent)
     procedure MyProc; reintroduce;
   end;
@@ -4447,9 +4445,9 @@ This new method is no longer virtual.
 
 :p.
 To be able to do this, the compiler keeps - per class type - a table with
-virtual methods: the VMT (Virtual Method Table). This is simply a table 
+virtual methods: the VMT (Virtual Method Table). This is simply a table
 with pointers to each of the virtual methods: each virtual method has its
-fixed location in this table (an index). The compiler uses this table to 
+fixed location in this table (an index). The compiler uses this table to
 look up the actual method that must be used at runtime. When a descendent object
 overrides a method, the entry of the parent method is overwritten in the
 VMT. More information about the VMT can be found in the &progref..
@@ -4474,13 +4472,13 @@ procedure or function declaration, as in the following example:
 
 :p.
 Class methods are methods that do not have an instance (i.e. Self does not
-point to a class instance) but which follow the scoping and inheritance 
+point to a class instance) but which follow the scoping and inheritance
 rules of a class. They can be used to return information about the current
-class, for instance for registration or use in a class factory. Since no 
+class, for instance for registration or use in a class factory. Since no
 instance is available, no information available in instances can be used.
 
 :p.
-Class methods can be called from inside a regular method, but can also be called 
+Class methods can be called from inside a regular method, but can also be called
 using a class identifier:
 
 :xmp.
@@ -4506,10 +4504,10 @@ begin
 :exmp.
 
 :p.
-The reverse is not possible: Inside a class method, the Self identifier 
-points to the VMT table of the class. No fields, properties or 
-regular methods are available inside a class method. Accessing a regular 
-property or method will result in a compiler error. 
+The reverse is not possible: Inside a class method, the Self identifier
+points to the VMT table of the class. No fields, properties or
+regular methods are available inside a class method. Accessing a regular
+property or method will result in a compiler error.
 
 :p.
 Note that class methods can be virtual, and can be overridden.
@@ -4530,7 +4528,7 @@ GTK. In difference with &delphi., &fpc. also accepts strings as message
 identifiers. Message methods are always virtual.
 
 :p.
-As can be seen in the class declaration diagram, message methods are 
+As can be seen in the class declaration diagram, message methods are
 declared with a :hp1.message:ehp1. keyword, followed by an integer constant
 expression.
 
@@ -4560,7 +4558,7 @@ type
     MsgID: Cardinal;
     Data: Pointer;
   end;
-  
+
 var
   Msg: TMSg;
 begin
@@ -4570,7 +4568,7 @@ begin
 
 :p.
 In this example, the Dispatch() method will look at the object and all
-its ancestors (starting at the object, and searching up the inheritance 
+its ancestors (starting at the object, and searching up the inheritance
 class tree), to see if a message method with message :hp1.MsgID:ehp1. has been
 declared. If such a method is found, it is called, and passed the
 Msg parameter.
@@ -4622,7 +4620,7 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-constructor TMyClass.Create(AOwner: TComponent); 
+constructor TMyClass.Create(AOwner: TComponent);
 begin
   inherited;
   // Do more things
@@ -4646,12 +4644,12 @@ type
     constructor CreateNew(AOwner: TComponent; DoExtra: Boolean);
   end;
 
-constructor TMyClass.Create(AOwner: TComponent); 
+constructor TMyClass.Create(AOwner: TComponent);
 begin
   inherited;
 end;
 
-constructor TMyClass.CreateNew(AOwner: TComponent; DoExtra: Boolean); 
+constructor TMyClass.CreateNew(AOwner: TComponent; DoExtra: Boolean);
 begin
   inherited Create(AOwner);
   // Do stuff
@@ -4697,52 +4695,52 @@ value on the fly. Moreover, properties can be read-only or write only.
 The prototype declaration of a property is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Properties:ehp2.
 
-&ra.&ra.â”€â”€â”€ property definition â”€â”€ :hp2.property:ehp2. â”€â”€ identifier â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€&ra.
-                                                     â””â”€ property interface â”€â”˜
-                                                     
-&ra.â”€â”€â”€â”€ property specifier â”€â”€ hint directive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄ property definition ÄÄ :hp2.property:ehp2. ÄÄ identifier ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄ&ra.
+                                                     ÀÄ property interface ÄÙ
 
-&ra.&ra.â”€â”€â”€ property interface â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ : â”€â”€ type identifier â”€â”€&ra.
-                          â””â”€ property parameter list â”€â”˜
+&ra.ÄÄÄÄ property specifier ÄÄ hint directive ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-      â””â”€ :hp2.index:ehp2. â”€â”€ integer constant â”€â”˜
+&ra.&ra.ÄÄÄ property interface ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ : ÄÄ type identifier ÄÄ&ra.
+                          ÀÄ property parameter list ÄÙ
 
-&ra.&ra.â”€â”€â”€ property parameter list â”€â”€ [ â”€â”€ parameter declaration â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                    ^â”€â”€â”€â”€â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.ÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+      ÀÄ :hp2.index:ehp2. ÄÄ integer constant ÄÙ
 
-&ra.&ra.â”€â”€â”€ property specifiers â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€&ra.
-                            â””â”€ read specifier â”€â”˜ â”œâ”€â”€â”€ write specifier â”€â”€â”€â”€â”¤
-                                                 â””â”€ implements specifier â”€â”˜
+&ra.&ra.ÄÄÄ property parameter list ÄÄ [ ÄÄ parameter declaration ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                    ^ÄÄÄÄÄÄÄÄÄ ; ÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.
-      â””â”€ default specifier â”€â”˜â””â”€ stored specifier â”€â”˜
+&ra.&ra.ÄÄÄ property specifiers ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄ&ra.
+                            ÀÄ read specifier ÄÙ ÃÄÄÄ write specifier ÄÄÄÄ´
+                                                 ÀÄ implements specifier ÄÙ
 
-&ra.â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-      â””â”€ default array property specifier â”€â”˜
+&ra.ÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.
+      ÀÄ default specifier ÄÙÀÄ stored specifier ÄÙ
 
-&ra.&ra.â”€â”€â”€â”€ read specifier â”€â”€ :hp2.read:ehp2. â”€â”€ field or method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.ÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+      ÀÄ default array property specifier ÄÙ
 
-&ra.&ra.â”€â”€â”€â”€ write specifier â”€â”€ :hp2.write:ehp2. â”€â”€ field or method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄÄ read specifier ÄÄ :hp2.read:ehp2. ÄÄ field or method ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€â”€ implements specifier â”€â”€ :hp2.implements:ehp2. â”€â”€ identifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
+&ra.&ra.ÄÄÄÄ write specifier ÄÄ :hp2.write:ehp2. ÄÄ field or method ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€â”€ default specifier â”€â”¬â”€ :hp2.default:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                          â”‚           â””â”€ constant â”€â”˜â”‚
-                          â””â”€â”€â”€â”€â”€ :hp2.nodefault:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄÄ implements specifier ÄÄ :hp2.implements:ehp2. ÄÄ identifier ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€â”€ stored specifier â”€â”€ :hp2.stored:ehp2. â”€â”¬â”€ constant â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                   â””â”€ identifier â”€â”˜
-                          
-&ra.&ra.â”€â”€â”€â”€ field or method â”€â”€â”¬â”€ field identifier â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         â””â”€ method identifier â”€â”˜
+&ra.&ra.ÄÄÄÄ default specifier ÄÂÄ :hp2.default:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                          ³           ÀÄ constant ÄÙ³
+                          ÀÄÄÄÄÄ :hp2.nodefault:ehp2. ÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€â”€ default array property specifier â”€â”€ ; â”€â”€ :hp2.default:ehp2. â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                         
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄÄ stored specifier ÄÄ :hp2.stored:ehp2. ÄÂÄ constant ÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                   ÀÄ identifier ÄÙ
+
+&ra.&ra.ÄÄÄÄ field or method ÄÄÂÄ field identifier ÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                         ÀÄ method identifier ÄÙ
+
+&ra.&ra.ÄÄÄÄ default array property specifier ÄÄ ; ÄÄ :hp2.default:ehp2. ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -4787,7 +4785,7 @@ type
     property Z: Longint read GetZ;
   end;
 
-var 
+var
   MyClass: TMyClass;
 :exmp.
 
@@ -4834,7 +4832,7 @@ the same type. The following is an example of a property with an index:
 
 :xmp.
 {$mode objfpc}
-type 
+type
   TPoint = class(TObject)
   private
     FX: Longint;
@@ -4863,7 +4861,7 @@ begin
   end;
 end;
 
-var 
+var
   P: TPoint;
 
 begin
@@ -4902,7 +4900,7 @@ type as the index, and the second argument is a parameter of the same
 type as the property type. As an example, see the following declaration:
 
 :xmp.
-type 
+type
   TIntList = class
   private
     Function GetInt(I: Longint): Longint;
@@ -4914,7 +4912,7 @@ type
     property StrItems[S: String]: String read GetAsString write SetAsstring;
   end;
 
-var 
+var
   AIntList: TIntList;
 :exmp.
 
@@ -4977,8 +4975,8 @@ The :hp1.stored specifier:ehp1. should be either a boolean constant, a boolean
 field of the class, or a parameterless function which returns a boolean
 result. This specifier has no result on the class behaviour. It is an aid
 for the streaming system: the stored specifier is specified in the RTTI
-generated for a class (it can only be streamed if RTTI is generated), 
-and is used to determine whether a property should be streamed or not: 
+generated for a class (it can only be streamed if RTTI is generated),
+and is used to determine whether a property should be streamed or not:
 it saves space in a stream. It is not possible to specify the 'Stored'
 directive for array properties.
 
@@ -5112,7 +5110,7 @@ identifier.
 
 :p.
 When the compiler looks for unit files, it adds the extension :hp1..ppu:ehp1.
-to the name of the unit. On &linux. and in operating systems where filenames 
+to the name of the unit. On &linux. and in operating systems where filenames
 are case sensitive when looking for a unit, the following mechanism is
 used:
 
@@ -5123,19 +5121,19 @@ used:
 :eol.
 
 :p.
-Additionally, If a unit name is longer than 8 characters, the compiler 
-will first look for a unit name with this length, and then it will 
-truncate the name to 8 characters and look for it again. 
-For compatibility reasons, this is also true on platforms that 
+Additionally, If a unit name is longer than 8 characters, the compiler
+will first look for a unit name with this length, and then it will
+truncate the name to 8 characters and look for it again.
+For compatibility reasons, this is also true on platforms that
 support long file names.
 
 :p.
 Note that the above search is performed in each directory in the search
-path. 
+path.
 
 :p.
 The program block contains the statements that will be executed when the
-program is started. Note that these statements need not necessarily be the 
+program is started. Note that these statements need not necessarily be the
 first statements that are executed: the initialization code of the units
 may also contain statements that are executed prior to the program code.
 
@@ -5148,38 +5146,38 @@ The structure of a program block is discussed below.
 used by a program or another unit. The syntax for a unit is as follows:
 
 :cgraphic.
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 :hp2.Units:ehp2.
 
-&ra.&ra.â”€â”€â”€ unit â”€â”€ unit header â”€â”€ interface part â”€â”€  implementation part â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.
+&ra.&ra.ÄÄÄ unit ÄÄ unit header ÄÄ interface part ÄÄ  implementation part ÄÄÄÄÄÄÄÄÄÄÄÄ&ra.
 
-&ra.â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ :hp2.end:ehp2. â”€â”€ . â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-      â”œâ”€ initialization part â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¤
-      â”‚                       â”” finalization part â”˜â”‚
-      â””â”€  :hp2.begin:ehp2. â”€â”¬â”€ statement â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                 ^â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”˜
+&ra.ÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ :hp2.end:ehp2. ÄÄ . ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+      ÃÄ initialization part ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂ´
+      ³                       À finalization part Ù³
+      ÀÄ  :hp2.begin:ehp2. ÄÂÄ statement ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                 ^ÄÄÄÄÄ ; ÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ unit header â”€â”€ :hp2.unit:ehp2. â”€â”€ unit identifier â”€â”€ ; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                                     
-&ra.&ra.â”€â”€â”€ interface part â”€â”€ :hp2.interface:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”¬â”€â”€&ra.&la.
-                                   â””â”€ uses clause â”€â”˜â”‚â”œâ”€ constant declaration part â”€â”¤â”‚
-                                                    â”‚â”œâ”€   type declatation part   â”€â”¤â”‚
-                                                    â”‚â””â”€  procedure headers part   â”€â”˜â”‚
-                                                    ^â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                   
-&ra.&ra.â”€â”€â”€ procedure headers part â”€â”¬â”€ procedure header â”€â”¬â”€ ; â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€&ra.&la.
-                              â””â”€ function header  â”€â”˜     â””â”€ call modifiers â”€â”€ ; â”€â”˜
+&ra.&ra.ÄÄÄ unit header ÄÄ :hp2.unit:ehp2. ÄÄ unit identifier ÄÄ ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
 
-&ra.&ra.â”€â”€â”€ implementation part â”€â”€ :hp2.implementation:ehp2. â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€ declaration part â”€â”€â”€â”€â”€â”€&ra.&la.
-                                             ^â”€ uses clause â”€â”˜
+&ra.&ra.ÄÄÄ interface part ÄÄ :hp2.interface:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÂÄÄ&ra.&la.
+                                   ÀÄ uses clause ÄÙ³ÃÄ constant declaration part Ä´³
+                                                    ³ÃÄ   type declatation part   Ä´³
+                                                    ³ÀÄ  procedure headers part   ÄÙ³
+                                                    ^ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-&ra.&ra.â”€â”€â”€ initialization part â”€â”€ :hp2.initialization:ehp2. â”€â”¬â”€ statement â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                             ^â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ procedure headers part ÄÂÄ procedure header ÄÂÄ ; ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄ&ra.&la.
+                              ÀÄ function header  ÄÙ     ÀÄ call modifiers ÄÄ ; ÄÙ
 
-&ra.&ra.â”€â”€â”€ finalization part â”€â”€ :hp2.finalization:ehp2. â”€â”¬â”€ statement â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€&ra.&la.
-                                         ^â”€â”€â”€â”€â”€ ; â”€â”€â”€â”€â”€â”˜
-                         
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+&ra.&ra.ÄÄÄ implementation part ÄÄ :hp2.implementation:ehp2. ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄ declaration part ÄÄÄÄÄÄ&ra.&la.
+                                             ^Ä uses clause ÄÙ
+
+&ra.&ra.ÄÄÄ initialization part ÄÄ :hp2.initialization:ehp2. ÄÂÄ statement ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                             ^ÄÄÄÄÄ ; ÄÄÄÄÄÙ
+
+&ra.&ra.ÄÄÄ finalization part ÄÄ :hp2.finalization:ehp2. ÄÂÄ statement ÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ&ra.&la.
+                                         ^ÄÄÄÄÄ ; ÄÄÄÄÄÙ
+
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 :ecgraphic.
 
 :p.
@@ -5228,7 +5226,7 @@ The type :hp1.SomeBType:ehp1. is defined in unit :hp1.b:ehp1..
 :p.
 All functions and methods that are declared in the interface part must
 be implemented in the implementation part of the unit, except for
-declarations of external functions or procedures. If a declared method 
+declarations of external functions or procedures. If a declared method
 or function is not implemented in the implementation part, the compiler
 will give an error, for example the following:
 
@@ -5254,23 +5252,23 @@ unita.pp(5,10) Error: Forward declaration not solved "MyFunction&colon.SmallInt;
 :p.
 The implementation part is primarily intended for the implementation of the
 functions and procedures declared in the interface part. However, it can
-also contain declarations of it's own: The declarations inside the 
-implementation part are :hp2.not:ehp2. accessible outside the unit. 
+also contain declarations of it's own: The declarations inside the
+implementation part are :hp2.not:ehp2. accessible outside the unit.
 
 :p.
 The initialization and finalization part of a unit are optional:
 
 :p.
-The initialization block is used to initialize certain variables or 
-execute code that is necessary for the correct functioning of the unit. 
+The initialization block is used to initialize certain variables or
+execute code that is necessary for the correct functioning of the unit.
 The initialization parts of the units
-are executed in the order that the compiler loaded the units when compiling 
+are executed in the order that the compiler loaded the units when compiling
 a program. They are executed before the first statement of the program is
 executed.
 
 :p.
 The finalization part of the units are executed in the reverse order of the
-initialization execution. They are used for instance to clean up any resources 
+initialization execution. They are used for instance to clean up any resources
 allocated in the initialization part  of the unit, or during the lifetime of
 the program. The finalization part is always executed in the case of a
 normal program termination: whether it is because the final :hp1.end:ehp1. is
@@ -5292,7 +5290,7 @@ end.
 :exmp.
 
 :p.
-An initialization section by itself (i.e. without finalization) may simply be 
+An initialization section by itself (i.e. without finalization) may simply be
 replaced by a statement block. That is, the following:
 
 :xmp.
@@ -5367,7 +5365,7 @@ on the target processor and emulation options.
 
 :h2.Object Pascal Grammar
 :p.This section describes the Object Pascal grammar in a EBNF
-(Extended Backusâ€“Naur Form) like style. The syntax only covers the
+(Extended Backus-Naur Form) like style. The syntax only covers the
 :hp1.ObjFPC:ehp1. mode of the &fpc. compiler.
 
 :cgraphic.

@@ -21,6 +21,19 @@ type
   // to get access to protected methods (seeing that FPC doesn't support Friend-classes)
   TImageHack = class(TfpgImage);
 
+function GetWindowsFontDir: string;
+var
+  lWinFontPath: array[0..MAX_PATH] of WideChar;
+  lPasWinFontPath: string;
+  i: Integer;
+begin
+  // Find for example C:\Windows\Fonts or C:\WINNT\Fonts
+  Windows.GetWindowsDirectoryW(@lWinFontPath[0], MAX_PATH);
+  lPasWinFontPath := lWinFontPath;
+  lPasWinFontPath := IncludeTrailingPathDelimiter(lPasWinFontPath) + 'Fonts' + PathDelim;
+  Result := lPasWinFontPath;
+end;
+
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   srcdc: HDC;

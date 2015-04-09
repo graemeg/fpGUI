@@ -36,7 +36,6 @@
       <Unit0>
         <Filename Value="modalforms.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="modalforms"/>
       </Unit0>
     </Units>
   </ProjectOptions>
@@ -54,6 +53,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
+      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

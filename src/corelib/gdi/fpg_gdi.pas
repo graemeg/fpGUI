@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -246,6 +246,7 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
     function    Screen_dpi_x: integer; override;
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
@@ -346,6 +347,10 @@ var
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
   NeedToUnitialize: Boolean;
+
+
+const
+  ID_ABOUT = 200001;
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -1204,6 +1209,13 @@ begin
           Windows.EndPaint(w.WinHandle, @PaintStruct);
         end;
 
+    WM_SYSCOMMAND:
+        begin
+          if wParam = ID_ABOUT then
+            fpgSendMessage(nil, w, FPGM_ABOUT, msgp)
+          else
+            Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+        end
     else
       Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
   end;
@@ -1279,7 +1291,7 @@ begin
     if MainForm <> nil then
       lHandle := TfpgGDIWindow(MainForm).FWinHandle
     else
-      lHandle := -1;
+      lHandle := 0;
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
       DWORD(WS_POPUP), 0, 0, 0, 0, lHandle, 0, MainInstance, nil);
   end;
@@ -1403,6 +1415,14 @@ begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Bottom - r.Top;
   // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
+end;
+
+function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
+var
+  c: longword;
+begin
+  c := Windows.GetPixel(FDisplay, APos.X, APos.Y);
+  Result := WinColorTofpgColor(c);
 end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;
@@ -2601,13 +2621,31 @@ var
     Result := c;
   end;
 
+  function LookAhead: char;
+  var
+    i: integer;
+    lc: char;
+  begin
+    i := cp+1;
+    if i > length(desc) then
+      lc := #0
+    else
+      lc := desc[i];
+    result := lc;
+  end;
+
   procedure NextToken;
   begin
     token := '';
-    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '0'..'9']) do
+    while (c <> #0) and (c in [' ', 'a'..'z', 'A'..'Z', '_', '@', '0'..'9']) do
     begin
       token := token + c;
       NextC;
+      if (c = '-') and (LookAhead in [' ', 'a'..'z', 'A'..'Z', '_']) then
+      begin
+        token := token + c;
+        NextC;
+      end;
     end;
   end;
 

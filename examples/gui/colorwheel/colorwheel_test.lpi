@@ -38,7 +38,6 @@
       <Unit0>
         <Filename Value="colorwheel_test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="colorwheel_test"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -64,8 +63,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

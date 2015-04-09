@@ -1,5 +1,7 @@
 unit ptrparsefunc;
 
+{$mode objfpc}{$H+}
+
 interface
 
 procedure ppSkipSpaces(var ReadPtr : PChar; bufend : PChar);

@@ -30,8 +30,8 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="1" Minor="2"/>
-    <Files Count="104">
+    <Version Major="1" Minor="4"/>
+    <Files Count="107">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -448,6 +448,18 @@
         <Filename Value="..\..\gui\inputquerydialog.inc"/>
         <Type Value="Include"/>
       </Item104>
+      <Item105>
+        <Filename Value="..\..\gui\fpg_toggle.pas"/>
+        <UnitName Value="fpg_toggle"/>
+      </Item105>
+      <Item106>
+        <Filename Value="..\..\gui\fpg_stringgridbuilder.pas"/>
+        <UnitName Value="fpg_StringGridBuilder"/>
+      </Item106>
+      <Item107>
+        <Filename Value="..\fpg_csvparser.pas"/>
+        <UnitName Value="fpg_CSVParser"/>
+      </Item107>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="1">

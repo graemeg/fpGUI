@@ -62,6 +62,10 @@ msgstr ""
 msgid "BkSp"
 msgstr ""
 
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr ""
+
 #: fpg_constants:rsbold
 msgid "Bold"
 msgstr ""
@@ -86,12 +90,20 @@ msgstr ""
 msgid "Character Map"
 msgstr ""
 
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr ""
 
 #: fpg_constants:rscollection
 msgid "Collection"
+msgstr ""
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
 msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
@@ -104,6 +116,10 @@ msgstr ""
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
+msgstr ""
+
+#: fpg_constants:rscontinuous
+msgid "Continuous"
 msgstr ""
 
 #: fpg_constants:rscopy
@@ -254,12 +270,20 @@ msgstr ""
 msgid "Font Aliases"
 msgstr ""
 
+#: fpg_constants:rserrreportfontfilemissing
+msgid "Font file <%s.fnt> not found"
+msgstr ""
+
 #: fpg_constants:rsshortfri
 msgid "Fri"
 msgstr ""
 
 #: fpg_constants:rslongfri
 msgid "Friday"
+msgstr ""
+
+#: fpg_constants:rscolorgreen
+msgid "Green"
 msgstr ""
 
 #: fpg_constants:rsfilegroup
@@ -270,12 +294,20 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr ""
+
 #: fpg_constants:rskeyhome
 msgid "Home"
 msgstr ""
 
 #: fpg_constants:rsignore
 msgid "Ignore"
+msgstr ""
+
+#: fpg_constants:rserrreportimagefilemissing
+msgid "Image <%s> is missing"
 msgstr ""
 
 #: fpg_constants:rsinformation
@@ -422,6 +454,14 @@ msgstr ""
 msgid "Owner"
 msgstr ""
 
+#: fpg_constants:rsfiletypepdf
+msgid "PDF Documents"
+msgstr ""
+
+#: fpg_constants:rsreportpage
+msgid "Page"
+msgstr ""
+
 #: fpg_constants:rspassword
 msgid "Password"
 msgstr ""
@@ -438,8 +478,20 @@ msgstr ""
 msgid "PgUp"
 msgstr ""
 
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr ""
+
+#: fpg_constants:rsreportpreview
+msgid "Preview"
+msgstr ""
+
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
+msgstr ""
+
+#: fpg_constants:rscolorred
+msgid "Red"
 msgstr ""
 
 #: fpg_constants:rsreplace
@@ -480,6 +532,10 @@ msgstr ""
 
 #: fpg_constants:rssearch
 msgid "Search"
+msgstr ""
+
+#: fpg_constants:rsreportsection
+msgid "Section"
 msgstr ""
 
 #: fpg_constants:rsselect
@@ -540,6 +596,10 @@ msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
+msgstr ""
+
+#: fpg_constants:rserrreportnopagestoprint
+msgid "There are no pages to print"
 msgstr ""
 
 #: fpg_constants:rsshortthu
@@ -610,35 +670,7 @@ msgstr ""
 msgid "Yes to All"
 msgstr ""
 
-#: fpg_constants:rserrreportimagefilemissing
-msgid "Image <%s> is missing"
-msgstr ""
-
-#: fpg_constants:rserrreportnopagestoprint
-msgid "There are no pages to print"
-msgstr ""
-
-#: fpg_constants:rserrreportfontfilemissing
-msgid "Font file <%s.fnt> not found"
-msgstr ""
-
-#: fpg_constants:rsfiletypepdf
-msgid "PDF Documents"
-msgstr ""
-
-#: fpg_constants:rsreportpage
-msgid "Page"
-msgstr ""
-
-#: fpg_constants:rsreportsection
-msgid "Section"
-msgstr ""
-
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr ""
-
-#: fpg_constants:rsreportpreview
-msgid "Preview"
 msgstr ""
 

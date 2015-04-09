@@ -63,6 +63,7 @@ type
     procedure   miMRUClick(Sender: TObject; const FileName: string);
     procedure   SetupCaptions;
     procedure   BuildThemePreviewMenu;
+    procedure   ToggleDesignerGrid(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -77,6 +78,7 @@ type
     miOpenRecentMenu: TfpgPopupMenu;
     helpmenu: TfpgPopupMenu;
     previewmenu: TfpgPopupMenu;
+    btnGrid: TfpgButton;
     {@VFD_HEAD_END: frmMain}
     mru: TfpgMRU;
     constructor Create(AOwner: TComponent); override;
@@ -218,7 +220,6 @@ begin
   WindowTitle := 'Product Information...';
   Hint := '';
   WindowPosition := wpScreenCenter;
-  Sizeable := False;
   OnShow := @FormShow;
 
   lblAppName := TfpgLabel.Create(self);
@@ -465,6 +466,25 @@ begin
   begin
     Name := 'previewmenu';
     SetPosition(324, 36, 120, 20);
+  end;
+
+  btnGrid := TfpgButton.Create(self);
+  with btnGrid do
+  begin
+    Name := 'btnGrid';
+    SetPosition(103, 28, 25, 24);
+    Text := '';
+    AllowAllUp := True;
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := 'Toggle designer grid';
+    ImageMargin := -1;
+    ImageName := 'vfd.grid';
+    ImageSpacing := 0;
+    TabOrder := 13;
+    Focusable := False;
+    AllowDown := True;
+    OnClick := @ToggleDesignerGrid;
   end;
 
   {@VFD_BODY_END: frmMain}
@@ -980,9 +1000,18 @@ begin
   sl.Free;
 end;
 
+procedure TfrmMain.ToggleDesignerGrid(Sender: TObject);
+begin
+  maindsgn.ShowGrid := btnGrid.Down;
+end;
+
 constructor TfrmMain.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  fpgImages.AddMaskedBMP(
+    'vfd.grid', @vfd_grid,
+    sizeof(vfd_grid), 0, 0);
+
   OnShow := @FormShow;
 end;
 

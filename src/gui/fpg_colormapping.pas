@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -45,9 +45,9 @@ var
   r, g, b: longint;
   hi, lo: longint;
   d:   longint;
-  rgb: TFPColor;
+  rgb: TRGBTriple;
 begin
-  rgb   := fpgColorToFPColor(C);
+  rgb   := fpgColorToRGBTriple(C);
   r     := rgb.Red;
   g     := rgb.Green;
   b     := rgb.Blue;
@@ -78,7 +78,7 @@ end;
 function HSVToRGB(const H: longint; const S, V: double): TfpgColor;
 var
   r, g, b: longint;
-  rgb: TFPColor;
+  rgb: TRGBTriple;
 begin
   if (h < 0) or (h > 1535) or (S < 0) or (S > 1) or (V < 0) or (V > 1) then
   begin
@@ -130,7 +130,7 @@ begin
   rgb.Red := r;
   rgb.Green := g;
   rgb.Blue := b;
-  Result := FPColorTofpgColor(rgb);
+  Result := RGBTripleTofpgColor(rgb);
 end;
 
 

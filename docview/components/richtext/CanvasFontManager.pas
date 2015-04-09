@@ -222,7 +222,7 @@ begin
 
   // if nothing found, use default font of fpGUI
   if FontDesc = '' then
-    FontDesc := fpgApplication.DefaultFont.FontDesc;
+    FontDesc := fpgStyle.DefaultFont.FontDesc;
 end;
 
 
@@ -242,7 +242,7 @@ destructor TCanvasFontManager.Destroy;
 var
   i: Integer;
 begin
-  FCanvas.Font := fpgApplication.DefaultFont;
+  FCanvas.Font := fpgStyle.DefaultFont;
   FDefaultFont.Free;
 
   for i := 0 to FFontCache.Count-1 do

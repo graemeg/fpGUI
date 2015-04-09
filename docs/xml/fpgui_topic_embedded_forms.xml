@@ -14,7 +14,7 @@ in multiple places in your application.
 <p>At first you will be tempted to design a "frame" using a TfpgForm descendant,
 because that is what the UI Designer will create for you by default. Please refrain
 from using TfpgForm descendants as "frames" because there are quite a few pitfalls.
-Instead, use TfpgBevel as the base class for a UI Frame design. This eliminates
+Instead, use TfpgFrame as the base class for a UI Frame design. This eliminates
 all the possible problems you might get. You can still use the UI Designer because,
 the UI Designer simply ignores the base class of any UI design - it only care about
 what is inside the designer comment markers.
@@ -33,7 +33,7 @@ form will most likely be ignored - giving undesired results.</li>
 </ul>
 
 <p>
-Simply using TfpgBevel (or soon to appear TfpgFrame) as your base class for embedded forms/frames
+Simply using TfpgFrame as your base class for embedded forms/frames
 will resolve all these issues for you. For an example of this, take a look at the demo
 project in [fpgui]/examples/embedded_form/ directory.
 </p>

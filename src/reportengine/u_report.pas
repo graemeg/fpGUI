@@ -16,7 +16,7 @@
     the user program.
 
     The PDF Reporting Engine was originally written by
-    Jean-Marc Levecque <jean-marc.levecque@jmlesite.fr>
+    Jean-Marc Levecque <jmarc.levecque@jmlesite.web4me.fr>
 }
 
 unit U_Report;
@@ -353,7 +353,7 @@ type
     property NumPage: integer read FNmPage write FNmPage;
     property NumPageSection: integer read FNmPageSect write FNmPageSect;
     property PaperHeight: integer read GetPaperHeight;
-    property PagerWidth: integer read GetPaperWidth;
+    property PaperWidth: integer read GetPaperWidth;
     property DefaultFile: string read FDefaultFile write FDefaultFile;
     property CurrentColor: integer read FCurrentColor write FCurrentColor;
     property SectionTitle: string read GetSectionTitle write SetSectionTitle;

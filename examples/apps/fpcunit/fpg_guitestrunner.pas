@@ -7,11 +7,10 @@ interface
 uses
   SysUtils, Classes,
   // fpGUI toolkit
-  fpg_base, fpg_main, fpg_edit, fpg_widget, fpg_form, fpg_label, fpg_button,
-  fpg_listbox, fpg_memo, fpg_combobox, fpg_basegrid, fpg_grid,
-  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar, fpg_progressbar,
-  fpg_radiobutton, fpg_tab, fpg_menu, fpg_panel, fpg_popupcalendar,
-  fpg_gauge, fpg_splitter, fpg_imagelist,
+  fpg_base, fpg_main, fpg_form, fpg_label, fpg_button,
+  fpg_memo,
+  fpg_dialogs, fpg_tree, fpg_progressbar,
+  fpg_menu, fpg_panel, fpg_splitter, fpg_imagelist,
   // FPCUnit support
   fpcunit, testregistry, testdecorator;
 
@@ -310,6 +309,7 @@ end;
 
 procedure TGUITestRunnerForm.btnRunClicked(Sender: TObject);
 begin
+  tvTests.FullExpand;
   if tvTests.Selection = nil then
   begin
     TfpgMessageDialog.Critical('No selection', 'Please select a test case first.');
@@ -474,16 +474,6 @@ begin
   SetPosition(305, 196, 530, 547);
   WindowTitle := 'GUI Test Runner';
 
-  bvlTree := TfpgBevel.Create(self);
-  with bvlTree do
-  begin
-    Name := 'bvlTree';
-    SetPosition(4, 8, 512, 364);
-    Shape := bsSpacer;
-    MinHeight := 200;
-    Align := alClient;
-  end;
-
   bvlButtons := TfpgBevel.Create(self);
   with bvlButtons do
   begin
@@ -509,6 +499,16 @@ begin
     Name := 'splitter';
     SetPosition(2, 376, 521, 8);
     Align := alBottom;
+  end;
+
+  bvlTree := TfpgBevel.Create(self);
+  with bvlTree do
+  begin
+    Name := 'bvlTree';
+    SetPosition(4, 8, 512, 364);
+    Shape := bsSpacer;
+    MinHeight := 200;
+    Align := alClient;
   end;
 
   pbName1 := TfpgProgressBar.Create(bvlTree);

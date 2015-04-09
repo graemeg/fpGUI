@@ -2653,9 +2653,10 @@ procedure TAgg2D.Font(
            italic : boolean = false;
            cache : TAggFontCacheType = AGG_VectorFontCache;
            angle : double = 0.0 );
+{$IFDEF AGG2D_USE_WINFONTS}
 var
  b : int;
-
+{$ENDIF}
 begin
  m_textAngle    :=angle;
  m_fontHeight   :=height;
@@ -3559,7 +3560,7 @@ procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
 {$IFDEF WINDOWS}
 begin
  {$IFDEF AGG2D_USE_FREETYPE }
- Font('c:\WINNT\Fonts\arial.ttf', 10);
+   Font(GetWindowsFontDir + 'arial.ttf', 10);
  {$ENDIF }
  {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);

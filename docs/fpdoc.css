@@ -1,0 +1,207 @@
+/*
+  Custom style sheets created for fpGUI class documentation.
+  Graeme Geldenhuys - 2015-03-10
+
+  I found the default blue theme of FPDoc a bit dated and needed some change.
+  Rather than play with colour, I muted the colours used and opted to rather
+  use fonts to add some style to the layout.
+
+  TODO:
+    - Add media support
+*/
+
+@font-face {
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:300;
+  src:local("Open Sans Light"),local("OpenSans-Light"),url(//fonts.gstatic.com/s/opensans/v10/DXI1ORHCpsQm3Vp6mXoaTYnF5uFdDttMLvmWuJdhhgs.ttf) format("truetype")
+}
+@font-face {
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:400;
+  src:local("Open Sans"),local("OpenSans"),url(//fonts.gstatic.com/s/opensans/v10/cJZKeOuBrn4kERxqtaUH3aCWcynf_cDxXwCLxiixG1c.ttf) format("truetype")
+}
+@font-face {
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:600;
+  src:local("Open Sans Semibold"),local("OpenSans-Semibold"),url(//fonts.gstatic.com/s/opensans/v10/MTP_ySUJH_bn48VBG8sNSonF5uFdDttMLvmWuJdhhgs.ttf) format("truetype")
+}
+@font-face {
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:700;
+  src:local("Open Sans Bold"),local("OpenSans-Bold"),url(//fonts.gstatic.com/s/opensans/v10/k3k702ZOKiLJc3WVjuplzInF5uFdDttMLvmWuJdhhgs.ttf) format("truetype")
+}
+@font-face {
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:800;
+  src:local("Open Sans Extrabold"),local("OpenSans-Extrabold"),url(//fonts.gstatic.com/s/opensans/v10/EInbV5DfGHOiMmvb1Xr-honF5uFdDttMLvmWuJdhhgs.ttf) format("truetype")
+}
+@font-face {
+  font-family:'Droid Sans Mono';
+  font-style:normal;
+  font-weight:400;
+  src:local("Droid Sans Mono"),local("DroidSansMono"),url(//fonts.gstatic.com/s/droidsansmono/v7/ns-m2xQYezAtqh7ai59hJUYuTAAIFFn5GTWtryCmBQ4.woff) format("woff")
+}
+
+/*
+@media (max-width: 980px) {
+  body {
+    font-size:calc-em(14px)
+  }
+}
+*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0px;
+  padding: 0px;
+  border: 0px none;
+  font-size: 14px;
+}
+
+body {
+  background-color: white;
+  color: rgb(64, 66, 68);
+  width: 80%;
+  padding: 35px;
+  box-sizing: border-box;
+  font-weight: 400;
+}
+
+body, p, th, td, caption, h1, h2, h3, ul, ol, dl {
+/*  color: black;  */
+  font-family: "Open Sans",Arial,Helvetica,sans-serif;
+}
+
+/*
+tt, span.kw, pre {
+  font-family: "Droid Sans Mono", "Courier New", monospace;
+}
+*/
+
+pre {
+  font-family: "Droid Sans Mono", "Courier New", monospace;
+  color: #FFF;
+  display: block;
+  background-color: #404244;
+  padding: 25px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+  margin: 1.5em 0px 0.8em;
+}
+
+p {
+  line-height: 1.56em;
+  margin-bottom: 1.5em;
+  color: #404244;
+  max-width: 85%;
+
+}
+
+/*
+body, p, th, td, caption, ul, ol, dl, tt, span.kw, pre {
+  font-size: 14px
+}
+*/
+
+h1 {
+  margin-bottom: 1em;
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+a {
+  color: #5CAA15;
+  text-decoration: none;
+  transition-duration: 0.3s;
+}
+
+a:hover {
+  color:#46a2da
+}
+
+p.cmt {
+  color: gray;
+  max-width: 100%;
+}
+
+/*
+table, table td, table th {
+  border: 1px solid #EEE;
+}
+*/
+
+/* source fragments */
+span.code {
+  white-space: nowrap
+}
+
+table.remark {
+  background-color: #ffffc0;
+  width: 80%
+}
+
+table.bar {
+  background-color: #EEE;
+  padding: 8px;
+}
+
+td p {
+ margin: 0;
+}
+
+td b {
+  font-weight: normal;
+}
+
+td b a {
+  color: #08860A;
+}
+
+dt {
+  float: left;
+}
+
+dd {
+    margin: 0px 0px 0px 110px;
+    padding: 0px 0px 0.5em;
+    width: 80%;
+}
+
+/* keywords in source fragments */
+span.kw {
+  font-weight: bold
+}
+
+/* comments in source fragments */
+span.cmt {
+  color: #729046;
+}
+
+
+span.toggletreeclose {
+    background: url(minus.png) center left no-repeat;
+    padding-left: 20px;
+}
+
+span.toggletreeopen {
+    background: url(plus.png) center left no-repeat;
+    padding-left: 20px;
+}
+
+ul.classtreelist li {
+	padding-left: 30px; }
+
+ul.classtreelist { list-style-type:none; }
+
+li.classtree ul { display: block; }
+
+li.classtreeclosed ul { display: none; }
