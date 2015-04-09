@@ -439,37 +439,41 @@
         <UnitName Value="fpg_fontcache"/>
       </Item102>
       <Item103>
-        <Filename Value="../../gui/fpg_style_carbon.pas"/>
-        <UnitName Value="fpg_style_carbon"/>
+        <Filename Value="../../gui/fpg_window.pas"/>
+        <UnitName Value="fpg_window"/>
       </Item103>
       <Item104>
-        <Filename Value="../../gui/fpg_style_plastic.pas"/>
-        <UnitName Value="fpg_style_plastic"/>
+        <Filename Value="../../gui/fpg_style_carbon.pas"/>
+        <UnitName Value="fpg_style_carbon"/>
       </Item104>
       <Item105>
-        <Filename Value="../../gui/fpg_style_win8.pas"/>
-        <UnitName Value="fpg_style_win8"/>
+        <Filename Value="../../gui/fpg_style_plastic.pas"/>
+        <UnitName Value="fpg_style_plastic"/>
       </Item105>
       <Item106>
-        <Filename Value="../../gui/fpg_scrollframe.pas"/>
-        <UnitName Value="fpg_scrollframe"/>
+        <Filename Value="../../gui/fpg_style_win8.pas"/>
+        <UnitName Value="fpg_style_win8"/>
       </Item106>
       <Item107>
-        <Filename Value="../../gui/inputintegerdialog.inc"/>
-        <Type Value="Include"/>
+        <Filename Value="../../gui/fpg_scrollframe.pas"/>
+        <UnitName Value="fpg_scrollframe"/>
       </Item107>
       <Item108>
-        <Filename Value="../../gui/fpg_toggle.pas"/>
-        <UnitName Value="fpg_toggle"/>
+        <Filename Value="../../gui/inputintegerdialog.inc"/>
+        <Type Value="Include"/>
       </Item108>
       <Item109>
-        <Filename Value="../../gui/fpg_stringgridbuilder.pas"/>
-        <UnitName Value="fpg_StringGridBuilder"/>
+        <Filename Value="../../gui/fpg_toggle.pas"/>
+        <UnitName Value="fpg_toggle"/>
       </Item109>
       <Item110>
+        <Filename Value="../../gui/fpg_stringgridbuilder.pas"/>
+        <UnitName Value="fpg_StringGridBuilder"/>
+      </Item110>
+      <Item111>
         <Filename Value="../fpg_csvparser.pas"/>
         <UnitName Value="fpg_CSVParser"/>
-      </Item110>
+      </Item111>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">

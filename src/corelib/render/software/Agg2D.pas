@@ -381,7 +381,7 @@ type
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
-    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
@@ -392,7 +392,7 @@ type
     // -------- TfpgCanvasBase  end  ---------------
 
   public
-   constructor Create(awin: TfpgWindowBase); override;
+   constructor Create(awidget: TfpgWidgetBase); override;
    destructor  Destroy; override;
 
   // Vector Graphics Engine Initialization
@@ -1187,9 +1187,9 @@ end;
 
 
 { CREATE }
-constructor TAgg2D.Create(awin: TfpgWindowBase);
+constructor TAgg2D.Create(awidget: TfpgWidgetBase);
 begin
-  inherited Create(awin);
+  inherited Create(awidget);
 
   FLineWidth := 1;
  m_rbuf.Construct;
@@ -3639,8 +3639,8 @@ procedure TAgg2D.DoGetWinRect(out r: TfpgRect);
 begin
   r.Left    := 0;
   r.Top     := 0;
-  r.Width := FWindow.Width;
-  r.Height := FWindow.Height;
+  r.Width := FWidget.Width;
+  r.Height := FWidget.Height;
 end;
 
 procedure TAgg2D.DoFillRectangle(x, y, w, h: TfpgCoord);
@@ -3731,16 +3731,16 @@ end;
 
 procedure TAgg2D.DoClearClipRect;
 begin
-  ClipBox(0, 0, FWindow.width, FWindow.height);
+  ClipBox(0, 0, FWidget.width, FWidget.height);
   m_rasterizer.m_clipping := false;
 end;
 
-procedure TAgg2D.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
+procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
   if Assigned(FImg) then
   begin
     { if the window was resized }
-    if (FImg.Width <> FWindow.Width) or (FImg.Height <> FWindow.Height) then
+    if (FImg.Width <> FWidget.Width) or (FImg.Height <> FWidget.Height) then
     begin
       FImg.Free;
       FImg := nil;
@@ -3750,7 +3750,7 @@ begin
   if not Assigned(FImg) then
   begin
     FImg := TfpgImage.Create;
-    FImg.AllocateImage(32, FWindow.Width, FWindow.Height);
+    FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
     Attach(FImg);
   end;
 end;

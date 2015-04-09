@@ -429,7 +429,7 @@ begin
     Result.Height := TfpgEdit(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
-  Result.UpdateWindowPosition;
+  Result.UpdatePosition;
 end;
 
 function CreateEditInteger(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True): TfpgEditInteger;
@@ -443,7 +443,7 @@ begin
     Result.Height := TfpgEditInteger(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
-  Result.UpdateWindowPosition;
+  Result.UpdatePosition;
 end;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True;
@@ -460,7 +460,7 @@ begin
     Result.Height := TfpgEditFloat(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
-  Result.UpdateWindowPosition;
+  Result.UpdatePosition;
 end;
 
 function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True;
@@ -476,7 +476,7 @@ begin
     Result.Height := TfpgEditCurrency(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
-  Result.UpdateWindowPosition;
+  Result.UpdatePosition;
 end;
 
 
@@ -1288,7 +1288,7 @@ begin
   begin
     r := fpgStyle.GetControlFrameBorders;
     FHeight := FFont.Height + (FHeightMargin*2) + (r.Top+r.Bottom);
-    UpdateWindowPosition;
+    UpdatePosition;
   end;
 end;
 

@@ -574,11 +574,11 @@ var
   r: TfpgTreeNode;
   n: TfpgTreeNode;
   ts: TfpgTabSheet;
-  u: TUnit;
+  u: TUnit = nil;
 begin
   r := GetUnitsNode;
   n := tvProject.Selection;
-  if n.Data <> nil then
+  if (n <> nil) and (n.Data <> nil) then
     u := TUnit(n.Data);
   if u <> nil then
   begin
@@ -1220,7 +1220,7 @@ begin
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
   Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
   Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
-  UpdateWindowPosition;
+  UpdatePosition;
 
   SetupProjectTree;
   SetupFilesGrid;

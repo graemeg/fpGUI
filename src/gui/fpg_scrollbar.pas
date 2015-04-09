@@ -156,7 +156,7 @@ end;
 
 procedure TfpgScrollBar.RepaintSlider;
 begin
-  if not HasHandle then
+  if not WindowAllocated then
     Exit; //==>
   FRecalc := True;
   Invalidate;
@@ -215,8 +215,8 @@ begin
   else
     FPosition := AValue;
 
-  if HasHandle then
-    Invalidate;
+  if WindowAllocated then
+    Invalidate;//    DrawSlider(False);
 end;
 
 procedure TfpgScrollBar.Step(ASteps: Integer);

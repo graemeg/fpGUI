@@ -1105,7 +1105,7 @@ begin
   end;
 
   // translate Edit coordinates
-  pt := WindowToScreen(self, Point(edtMonth.Left, edtMonth.Bottom));
+  pt := WidgetToScreen(Self, Point(edtMonth.Left, edtMonth.Bottom));
   TPopupMenuFriend(FMonthsPopupMenu).PrepareToShow;  // forces height calculation
   // If dropdown will not fit below Edit, then we place it above
   if (pt.y + FMonthsPopupMenu.Height) > fpgApplication.ScreenHeight then
@@ -1454,7 +1454,7 @@ procedure TfpgCalendarCombo.DoDropDown;
 var
   ddw: TfpgPopupCalendar;
 begin
-  if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
+  if (not Assigned(FDropDown)) or (not FDropDown.WindowAllocated) then
   begin
     FreeAndNil(FDropDown);  // safety measure
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);

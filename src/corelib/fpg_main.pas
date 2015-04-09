@@ -123,17 +123,9 @@ type
   TfpgTimer = class;
 
 
-  TfpgWindow = class(TfpgWindowImpl)
-  protected
-    procedure   SetParent(const AValue: TfpgWindow); reintroduce;
-    function    GetParent: TfpgWindow; reintroduce;
-    function    GetCanvas: TfpgCanvas; reintroduce;
-    function    CreateCanvas: TfpgCanvasBase; virtual;
+  TfpgNativeWindow = class(TfpgWindowImpl)
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
-    property    Parent: TfpgWindow read GetParent write SetParent;
-    property    Canvas: TfpgCanvas read GetCanvas;
     property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
 
@@ -169,7 +161,7 @@ type
   private
     function    AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
   public
-    constructor Create(awin: TfpgWindowBase); override;
+    constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
@@ -257,9 +249,9 @@ type
     FShowHint: boolean;
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
-    FHintWindow: TfpgWindow;
+    FHintWindow: TfpgWidgetBase;
     FHintTimer: TfpgTimer;
-    FHintWidget: TfpgWindow;
+    FHintWidget: TfpgNativeWindow;
     FHintPos: TPoint;
     FOnKeyPress: TKeyPressEvent;
     FStartDragDistance: integer;
@@ -297,7 +289,7 @@ type
     procedure   ShowException(E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    HintPause: Integer read FHintPause write SetHintPause;
-    property    HintWindow: TfpgWindow read FHintWindow;
+    property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
@@ -357,11 +349,11 @@ type
     FTarget: TfpgWinHandle;
     procedure   SetMimeData(const AValue: TfpgMimeDataBase);
   protected
-    function    GetSource: TfpgWindow; reintroduce;
+    function    GetSource: TfpgWidgetBase; reintroduce;
   public
-    constructor Create(ASource: TfpgWindow);
+    constructor Create(ASource: TfpgWidgetBase);
     function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
-    property    Source: TfpgWindow read GetSource;
+    property    Source: TfpgWidgetBase read GetSource;
     property    Target: TfpgWinHandle read FTarget write FTarget;
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
   end;
@@ -387,6 +379,7 @@ procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: T
 procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer); overload;
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: TfpgMessageParams); overload;
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
+function  fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 procedure fpgDeliverMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
@@ -418,7 +411,7 @@ function  IsRectEmpty(const ARect: TfpgRect): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
-function  UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+function  UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
 function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
@@ -430,6 +423,7 @@ function  fpgSize(const AWidth, AHeight: integer): TfpgSize;
 procedure PrintRect(const Rect: TRect);
 procedure PrintRect(const Rect: TfpgRect);
 procedure PrintCoord(const x, y: TfpgCoord);
+procedure PrintSize(const ASize: TfpgSize);
 procedure PrintCoord(const pt: TPoint);
 function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
@@ -688,27 +682,25 @@ begin
 end;
 
 function IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
+var
+  TmpRect: TfpgRect; // use tmp to avoid changing r1 if ARect and r1 are the same var
 begin
-  ARect := r1;
-  with r2 do
-  begin
-    if Left > r1.Left then
-      ARect.Left := Left;
-    if Top > r1.Top then
-      ARect.Top := Top;
-    if Right < r1.Right then
-      ARect.Width := ARect.Left + Right;
-    if Bottom < r1.Bottom then
-      ARect.Height := ARect.Top + Bottom;
-  end;
+  TmpRect := r1;
+  TmpRect.Left:=Max(R1.Left, R2.Left);
+  TmpRect.Top:=Max(R1.Top, R2.Top);
+  TmpRect.SetBottom(Min(R1.Bottom, R2.Bottom));
+  TmpRect.SetRight(Min(R1.Right, R2.Right));
 
-  if IsRectEmpty(ARect) then
+  if IsRectEmpty(TmpRect) then
   begin
     FillChar(ARect, SizeOf(ARect), 0);
     Result := false;
   end
   else
+  begin
+    ARect := TmpRect;
     Result := true;
+  end;
 end;
 
 function IsRectEmpty(const ARect: TfpgRect): Boolean;
@@ -756,20 +748,16 @@ begin
             (APoint.y <= ARect.Bottom);
 end;
 
-function UniongRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+function UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+var
+  TmpRect: TfpgRect;
 begin
-  ARect := R1;
-  with R2 do
-  begin
-    if Left < R1.Left then
-      ARect.Left := Left;
-    if Top < R1.Top then
-      ARect.Top := Top;
-    if Right > R1.Right then
-      ARect.Width := ARect.Left + Right;
-    if Bottom > R1.Bottom then
-      ARect.Height := ARect.Top + Bottom;
-  end;
+  TmpRect := R1;
+
+  TmpRect.Left:=Min(R1.Left,R2.Left);
+  TmpRect.Top :=Min(R1.Top, R2.Top);
+  TmpRect.SetBottom(Max(R1.Bottom, R2.Bottom));
+  TmpRect.SetRight (Max(R1.Right, R2.Right));
 
   if IsRectEmpty(ARect) then
   begin
@@ -777,7 +765,10 @@ begin
     Result := false;
   end
   else
+  begin
     Result := true;
+    ARect := TmpRect;
+  end;
 end;
 
 function CenterPoint(const Rect: TRect): TPoint;
@@ -941,6 +932,11 @@ begin
   {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
+end;
+
+procedure PrintSize(const ASize: TfpgSize);
+begin
+  writeln('w=', ASize.W, '  h=', ASize.H);
 end;
 
 procedure PrintCoord(const pt: TPoint);
@@ -1458,7 +1454,7 @@ begin
       w := ScreenWidth;
   end;
   wnd.SetPosition(APos.X, APos.Y, w, h);
-  wnd.UpdateWindowPosition;
+  wnd.UpdatePosition;
   wnd.Show;
 end;
 
@@ -1582,14 +1578,14 @@ begin
   begin
     { MouseEnter occured }
     FHintTimer.Enabled := Boolean(msg.Params.user.Param1);
-    FHintWidget := TfpgWindow(msg.Sender);
+    FHintWidget := TfpgNativeWindow(msg.Sender);
   end
   else
   begin
     { Handle mouse move information }
     FHintPos.X := msg.Params.user.Param2;
     FHintPos.Y := msg.Params.user.Param3;
-    FHintWidget := TfpgWindow(msg.Sender);
+    FHintWidget := TfpgNativeWindow(msg.Sender);
     if FHintTimer.Enabled then
       FHintTimer.Reset    // keep reseting to prevent hint from showing
     else
@@ -1618,7 +1614,7 @@ begin
     begin
 //writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
       TWidgetFriend(w).DoShowHint(lHint);
-      ActivateHint(w.WindowToScreen(w, FHintPos), lHint);
+      ActivateHint(w.WidgetToScreen(w, FHintPos), lHint);
     end;
   except
     // silence it!
@@ -1860,15 +1856,11 @@ begin
   end;
 end;
 
-constructor TfpgCanvas.Create(awin: TfpgWindowBase);
+constructor TfpgCanvas.Create(awidget: TfpgWidgetBase);
 begin
-  inherited Create(awin);
+  inherited Create(awidget);
 
   FBeginDrawCount := 0;
-
-  // options
-  FBufferedDraw        := True; // transparent widgets must turn this off
-  FPersistentResources := False;
 end;
 
 destructor TfpgCanvas.Destroy;
@@ -1992,61 +1984,24 @@ begin
   Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
 end;
 
-{ TfpgWindow }
+{ TfpgNativeWindow }
 
-function TfpgWindow.CreateCanvas: TfpgCanvasBase;
-begin
-  Result := DefaultCanvasClass.Create(self);
-end;
-
-constructor TfpgWindow.Create(AOwner: TComponent);
+constructor TfpgNativeWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner); // initialize the platform internals
-
-  FTop    := 0;
-  FLeft   := 0;
-  FWidth  := 16;
-  FHeight := 16;
-  FPrevWidth  := FWidth;
-  FPrevHeight := FHeight;
-
-  FMinWidth  := 2;
-  FMinHeight := 2;
 
   FModalForWin := nil;
 
   if not (FWindowType in [wtModalForm, wtPopup]) then
   begin
-    if (AOwner <> nil) and (AOwner is TfpgWindow) then
+    if (AOwner <> nil) and (AOwner is TfpgNativeWindow) then
       FWindowType   := wtChild
     else
       FWindowType   := wtWindow;
   end;
 
-  FCanvas := CreateCanvas;
+  //FCanvas := CreateCanvas;
 end;
-
-destructor TfpgWindow.Destroy;
-begin
-  FCanvas.Free;
-  inherited Destroy;
-end;
-
-procedure TfpgWindow.SetParent(const AValue: TfpgWindow);
-begin
-  inherited SetParent(AValue);
-end;
-
-function TfpgWindow.GetParent: TfpgWindow;
-begin
-  result := TfpgWindow(inherited GetParent);
-end;
-
-function TfpgWindow.GetCanvas: TfpgCanvas;
-begin
-  Result := TfpgCanvas(inherited GetCanvas);
-end;
-
 
 { TfpgStyle }
 
@@ -2649,7 +2604,7 @@ begin
 
   // we could not be sure about the buffer contents!
   try
-    FCanvas.BeginDraw(False);
+    FCanvas.BeginDraw;
     try
       // this works well on narrow characters like 'i' or 'l' in non-mono fonts
       FCanvas.XORFillRectangle($FFFFFF, FLeft, FTop, FWidth, FHeight);
@@ -2852,12 +2807,12 @@ begin
   FMimeData := AValue;
 end;
 
-function TfpgDrag.GetSource: TfpgWindow;
+function TfpgDrag.GetSource: TfpgWidgetBase;
 begin
-  Result := TfpgWindow(inherited GetSource);
+  Result := TfpgWidgetBase(inherited GetSource);
 end;
 
-constructor TfpgDrag.Create(ASource: TfpgWindow);
+constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create;
   FSource := ASource;

@@ -599,7 +599,7 @@ begin
     Top     := 0;
     Left    := self.Width - btnEdit.Width;
     Text    := '...';
-    UpdateWindowPosition;
+    UpdatePosition;
     Anchors := [anTop, anRight];
     OnClick := @OnEditClick;
     Visible := True;

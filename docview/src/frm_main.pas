@@ -653,7 +653,7 @@ begin
   // restore previous window position and size
   gINI.ReadFormState(self);
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
-  UpdateWindowPosition;
+  UpdatePosition;
 
   CreateMRUMenuItems;
   ProcessCommandLineParams;

@@ -666,7 +666,7 @@ begin
     Exit; // ==>
 
   FSubItemImages[TfpgLVItemStates(AIndex)] := AValue;
-  if HasHandle then
+  if WindowAllocated then
     Invalidate;
 end;
   
@@ -823,7 +823,7 @@ begin
     Exit; // ==>
 
   FImages[TfpgLVItemStates(AIndex)] := AValue;
-  if HasHandle then
+  if WindowAllocated then
     Invalidate;
 end;
 
@@ -1513,7 +1513,7 @@ end;
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
-  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or FSizeIsDirty;
+  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or (wdfSize in FDirtyFlags);
 end;
 
 procedure TfpgListView.PaintHeaders;
@@ -1817,9 +1817,9 @@ begin
 
 
   if FHScrollBar.Visible then
-    FHScrollBar.UpdateWindowPosition;
+    FHScrollBar.UpdatePosition;
   if FVScrollBar.Visible then
-    FVScrollBar.UpdateWindowPosition;
+    FVScrollBar.UpdatePosition;
 
   FScrollBarNeedsUpdate := False;
 end;

@@ -575,7 +575,7 @@ begin
     TfpgStringColumn(FColumns[c]).Cells.Delete(AIndex);
   end;
   FRowCount := FRowCount-1;
-  if HasHandle then
+  if WindowAllocated then
     Update;
 end;
 

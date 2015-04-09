@@ -312,7 +312,7 @@ begin
     r := fpgStyle.GetControlFrameBorders;
     FHeight := FFont.Height + (Margin*2) + (r.Top+r.Bottom);
     CalculateInternalButtonRect;
-    UpdateWindowPosition;
+    UpdatePosition;
   end;
 end;
 
@@ -396,7 +396,7 @@ var
   pt: TPoint;
 begin
   // translate ComboBox coordinates
-  pt := WindowToScreen(AParent, Point(AComboBox.Left, AComboBox.Bottom));
+  pt := WidgetToScreen(Self, Point(AComboBox.Left, AComboBox.Bottom));
 
   // dropdown will not fit below combobox so we place it above
   if (pt.y + ADropDown.Height) > fpgApplication.ScreenHeight then
@@ -549,7 +549,7 @@ begin
   {$IFDEF DEBUG}
   SendMethodEnter('TfpgBaseStaticCombo.DoDropDown');
   {$ENDIF}
-  if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
+  if (not Assigned(FDropDown)) or (not FDropDown.WindowAllocated) then
   begin
     {$IFDEF DEBUG}
     SendDebug('.... creating');
@@ -640,7 +640,7 @@ end;
 procedure TfpgBaseStaticCombo.HandleResize( AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  if FSizeIsDirty then
+  if wdfSize in FDirtyFlags then
     CalculateInternalButtonRect;
 end;
 

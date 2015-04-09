@@ -189,7 +189,7 @@ begin
   if AutoSize then
   begin
     Width := Font.TextWidth(FText) + 24; // 24 is extra padding for image
-    UpdateWindowPosition;
+    UpdatePosition;
   end;
 end;
 

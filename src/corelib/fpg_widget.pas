@@ -39,10 +39,13 @@ type
   TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
-  TfpgWidget = class(TfpgWindow)
+  { TfpgWidget }
+
+  TfpgWidget = class(TfpgWidgetBase)
   private
     FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
+    FInvalidated: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnDragDrop: TfpgDragDropEvent;
@@ -65,6 +68,7 @@ type
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
     alist: TList;
+    function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
@@ -97,6 +101,7 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: TfpgString;
+    FInvalidRect: TfpgRect;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
@@ -104,6 +109,8 @@ type
     FIsContainer: Boolean;
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
+    procedure   DoAllocateWindowHandle; override;
+    procedure   AllocateWindowHandle; virtual;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
@@ -117,7 +124,9 @@ type
     procedure   SetParentShowHint(const AValue: boolean); virtual;
     function    GetHint: TfpgString; virtual;
     procedure   SetHint(const AValue: TfpgString); virtual;
-    procedure   DoUpdateWindowPosition; override;
+    function    GetCanvas: TfpgCanvas; reintroduce;
+    function    CreateCanvas: TfpgCanvasBase; virtual;
+    procedure   DoUpdatePosition; override;
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
@@ -137,6 +146,8 @@ type
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
+    function    Invalidated: Boolean;
+    function    IsHidden: Boolean; virtual;
     procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
@@ -174,12 +185,15 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
-    procedure   Invalidate;
+    procedure   Invalidate; // double check this works as developers expect????
+    procedure   InvalidateRect(ARect: TfpgRect);
+    property    Window: TfpgNativeWindow read GetWindow;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
+    property    Canvas: TfpgCanvas read GetCanvas;
     property    Visible: boolean read FVisible write SetVisible default True;
     property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
@@ -211,7 +225,8 @@ implementation
 uses
   fpg_constants,
   fpg_menu,
-  fpg_form;  { for OnKeyPress handling }
+  fpg_form,   { for OnKeyPress handling }
+  fpg_window; { for Finding the Toplevel Window }
 
 
 var
@@ -223,6 +238,9 @@ var
 
 type
   TfpgFormFriend = class(TfpgBaseForm)
+  end;
+
+  TfpgWindowHack = class(TfpgWindow)
   end;
 
 function FindKeyboardFocus: TfpgWidget;
@@ -265,6 +283,23 @@ begin
 end;
 
 
+// finds the window that is a widget. not a NativeWindow
+function FindTopLevelWindow(AWidget: TfpgWidgetBase): TfpgWindow;
+var
+  w: TfpgWidgetBase;
+begin
+  Result := nil;
+  if AWidget = nil then
+    exit; // ==>
+  w := AWidget;
+  while Assigned(w) do
+  begin
+    if w is TfpgWindow then
+      Exit(TfpgWindow(w)); // ==>
+    w := w.Parent;
+  end;
+end;
+
 { TfpgWidget }
 
 procedure TfpgWidget.SetEnabled(const AValue: boolean);
@@ -300,6 +335,11 @@ begin
   FActiveWidget := AValue;
   if FActiveWidget <> nil then
     FActiveWidget.HandleSetFocus;
+end;
+
+function TfpgWidget.GetWindow: TfpgNativeWindow;
+begin
+  Result := TfpgNativeWindow(inherited GetWindow);
 end;
 
 procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
@@ -339,6 +379,31 @@ begin
   FAlign := AValue;
   if Parent <> nil then
     Parent.Realign;
+end;
+
+procedure TfpgWidget.DoAllocateWindowHandle;
+begin
+  if HasOwnWindow then
+  begin
+    FWindow := TfpgNativeWindow.Create(Self);
+    Window.WindowType:=wtChild;
+    UpdatePosition;
+  end
+  else
+    FWindow := nil; // GetWindow asks the parent for it's window.
+end;
+
+procedure TfpgWidget.AllocateWindowHandle;
+begin
+  DoAllocateWindowHandle;
+  Window.AllocateWindowHandle;
+
+  if Window.Owner = Self then
+  begin
+    Window.SetWindowVisible(Visible);
+    //Window;
+  end;
+  //TfpgWindowHack(Window).DoAcceptDrops(True);
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -381,22 +446,33 @@ begin
   FHint := AValue;
 end;
 
-procedure TfpgWidget.DoUpdateWindowPosition;
+function TfpgWidget.GetCanvas: TfpgCanvas;
+begin
+  Result := TfpgCanvas(inherited GetCanvas);
+end;
+
+function TfpgWidget.CreateCanvas: TfpgCanvasBase;
+begin
+  Result := DefaultCanvasClass.Create(self);
+end;
+
+procedure TfpgWidget.DoUpdatePosition;
 var
   dw: integer;
   dh: integer;
+  ParentLeft, ParentTop: TfpgCoord;
+  PaintRect: TfpgRect;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
 begin
   {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.DoUpdateWindowPosition - ' + ClassName + ' ('+Name+')');
+  itf := DebugMethodEnter('TfpgWidget.DoUpdatePosition - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-//  writeln('TfpgWidget.DoUpdateWindowPosition - ' + Classname + ' ('+Name+')');
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 
-  if IsContainer and FSizeIsDirty then
+  if IsContainer and (wdfSize in FDirtyFlags) then
   begin
     {$IFDEF CStackDebug}
     DebugLn(Format('  Alignment deltas  w: %d  h: %d', [dw, dh]));
@@ -404,7 +480,37 @@ begin
     HandleAlignments(dw, dh);
   end;
 
-  inherited DoUpdateWindowPosition;
+  if HasOwnWindow and Assigned(Window) then
+  begin
+    ParentLeft := 0;
+    ParentTop := 0;
+    if Assigned(Parent) and not Parent.HasOwnWindow then
+    begin
+      Parent.WidgetToWindow(ParentLeft, ParentTop);
+    end;
+    //WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
+    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
+  end
+  else if Parent <> nil then
+  begin
+    Invalidate;
+
+    if (dw < 0) or (dh < 0) then
+      Parent.InvalidateRect(fpgRect(FLeft, FTop, FPrevWidth, FPrevHeight));
+    if wdfPosition in FDirtyFlags then
+    begin
+      PaintRect := fpgRect(FLeft, FTop, FWidth, FHeight);
+      UnionRect(PaintRect, fpgRect(FPrevLeft, FPrevTop, FWidth, FHeight), PaintRect);
+      //PaintRect.Width:=PaintRect.Width+(FPrevLeft-FLeft);
+      //PaintRect.Height:=PaintRect.Height+(FPrevTop-FTop);
+
+      PaintRect.Width:=PaintRect.Width+5;
+      PaintRect.Height:=PaintRect.Height+5;
+      Parent.InvalidateRect(PaintRect);
+
+    end;
+  end;
+
   if (dw <> 0) or (dh <> 0) then
     DoResize;
 
@@ -412,8 +518,8 @@ begin
   // them here not to affect the next iteration.
   FPrevWidth  := FWidth;
   FPrevHeight := FHeight;
-  FSizeIsDirty:= False;
-  FPosIsDirty := False;
+  Exclude(FDirtyFlags, wdfSize);
+  Exclude(FDirtyFlags, wdfPosition);
 end;
 
 procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
@@ -480,11 +586,20 @@ end;
 procedure TfpgWidget.SetParent(const AValue: TfpgWidget);
 begin
   inherited SetParent(AValue);
+  if not HasOwnWindow then
+  begin
+    if AValue <> nil then
+      FWindow := AValue.Window
+    else
+      FWindow := nil;
+  end;
 end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
+
+  //HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
@@ -507,7 +622,8 @@ begin
 
   inherited Create(AOwner);
 
-  if (AOwner <> nil) and (AOwner is TfpgWidget) and (not (WindowType in [wtModalForm, wtPopup])) {and not InheritsFrom(TfpgForm)} then
+  if (AOwner <> nil) and (AOwner is TfpgWidget)
+  and not (InheritsFrom(TfpgWindow) and (TfpgWindowHack(Self).FWindowType in [wtModalForm, wtPopup, wtWindow])) then
   begin
     Parent := TfpgWidget(AOwner);
     FTabOrder := AOwner.ComponentCount;
@@ -517,9 +633,9 @@ begin
 
   if Parent <> nil then
   begin
-    FWindowType := wtChild;
     FShowHint   := Parent.ShowHint;
   end;
+  FCanvas := CreateCanvas;
 end;
 
 destructor TfpgWidget.Destroy;
@@ -527,10 +643,18 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
+  FCanvas.Free;
   HandleHide;
-  if Owner <> nil then
-    if (Owner is TfpgWidget) and (TfpgWidget(Owner).ActiveWidget = self) then
-      TfpgWidget(Owner).ActiveWidget := nil;
+  if Parent <> nil then
+  begin
+    if Parent.ActiveWidget = self then
+      Parent.ActiveWidget := nil;
+    if not HasOwnWindow and Visible then
+      Parent.Invalidate;
+  end;
+  if Assigned(Window) then
+    Window.NotifyWidgetDestroying(Self);
+
   inherited Destroy;
 end;
 
@@ -539,7 +663,7 @@ begin
   inherited AfterConstruction;
   // This is for components that are created at runtime, after it's
   // parent has already been shown.
-  if (Parent <> nil) and (Parent.HasHandle) then
+  if (Parent <> nil) and (Parent.WindowAllocated) then
   begin
     HandleShow;
   end;
@@ -631,7 +755,7 @@ begin
     if not consumed then
     begin
       { only do this if the top-level form is not Modal }
-      if (wg is TfpgForm) and (TfpgForm(wg).WindowType <> wtModalForm) then
+      if (wg is TfpgForm) and (TfpgForm(wg).Window.WindowType <> wtModalForm) then
         if wg <> fpgApplication.MainForm then
           TfpgFormFriend(fpgApplication.MainForm).DoKeyShortcut(self, key, ss, consumed);
     end;
@@ -897,9 +1021,7 @@ var
   n: integer;
   c: TComponent;
 begin
-  FOnScreen := True;
-  AllocateWindowHandle;
-  DoSetWindowVisible(FVisible);
+  InternalHandleShow;
 
   for n := 0 to ComponentCount - 1 do
   begin
@@ -918,7 +1040,6 @@ procedure TfpgWidget.InternalHandleShow;
 begin
   FOnScreen := True;
   AllocateWindowHandle;
-  DoSetWindowVisible(FVisible);
 end;
 
 procedure TfpgWidget.HandleHide;
@@ -934,14 +1055,28 @@ begin
   end;
   FOnScreen := False;
 
-  if HasHandle then
-    ReleaseWindowHandle;
+  if HasOwnWindow then
+  begin
+    FWindow.Free;
+    FWindow := nil;
+  end;
 end;
 
 procedure TfpgWidget.RePaint;
+var
+  P: TfpgMessageParams;
 begin
-  if HasHandle then
-    fpgSendMessage(self, self, FPGM_PAINT);
+  if WindowAllocated  and Window.HasHandle then
+  begin
+    if not HasOwnWindow and Assigned(Parent) then
+      Parent.InvalidateRect(GetBoundsRect)
+    else if not Invalidated then
+    begin
+      FInvalidated := True;
+      P.rect := FInvalidRect;
+      fpgPostMessage(self, self, FPGM_PAINT, P);
+    end;
+  end;
 end;
 
 procedure TfpgWidget.SetFocus;
@@ -1211,6 +1346,34 @@ begin
     FOnMouseScroll(self, shiftstate, delta, Point(x, y));
 end;
 
+function TfpgWidget.Invalidated: Boolean;
+begin
+  Result := FInvalidated;
+  // if the parent is invalidated we will be repainted anyway
+  if not Result and not HasOwnWindow and Assigned(Parent) then
+    Result := Parent.Invalidated;
+end;
+
+function TfpgWidget.IsHidden: Boolean;
+begin
+  // this currently is only True for TabSheets that are not the active page.
+  // Perhaps in the future this could be smart enough to know if the widget is
+  // completely covered by another widget and return True here.
+  Result := False;
+  if Assigned(Parent) then
+  begin
+    if (not Visible)
+    or (Left >= Parent.Width-1)
+    or (Left + Width <= 0)
+    or (Top >= Parent.Height-1)
+    or (Top + Height <= 0) then
+      Result := True;
+  end;
+
+  if not Result and not HasOwnWindow and Assigned(Parent) then
+    Result := Parent.IsHidden;
+end;
+
 procedure TfpgWidget.HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 begin
   if Assigned(FOnMouseHorizScroll) then
@@ -1285,13 +1448,94 @@ begin
 end;
 
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
+var
+  i: Integer;
+  w: TfpgWidget;
+  HasInvalidRegion: Boolean;
+  Params: TfpgMessageParams;
+  {$IFDEF DEBUG}
+  Tmp: TfpgRect;
+  {$ENDIF}
 begin
-//  writeln('TfpgWidget.MsgPaint - ', Classname);
+  if IsHidden then
+    Exit;
+
+  if not (WindowAllocated and (Window.HasHandle)) then
+  begin
+    // The window will generate a paint message later when it exists
+    FInvalidated:=False;
+    Exit;//
+  end;
+
+
+  if (Width < 1) or (Height < 1) then
+    Exit;
+
   Canvas.BeginDraw;
+
   HandlePaint;
   if Assigned(FOnPaint) then
     FOnPaint(Self);
-  Canvas.EndDraw;
+
+  {$IFDEF DEBUG}
+  Tmp := FInvalidRect; // for debugging
+  {$ENDIF}
+
+  // combine existing invalid rect with message rect if sent
+  if FInvalidRect = fpgRect(0,0,0,0) then
+    FInvalidRect := msg.Params.rect
+  else
+    if msg.Params.rect <> fpgRect(0,0,0,0) then
+      UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
+
+  HasInvalidRegion:=FInvalidRect <> fpgRect(0,0,0,0);
+
+  if HasOwnWindow then
+  begin
+    //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
+    //Write('Main ClipRect: '); PrintRect(FInvalidRect);
+    if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
+    begin
+      Canvas.EndDraw;
+      FInvalidRect := fpgRect(0,0,0,0);
+      FInvalidated:=False;
+      {$IFDEF DEBUG}
+      Writeln('Invalid Rect Detected!');
+      Write('MSG: '); PrintRect(msg.Params.rect);
+      Write('INV: '); PrintRect(Tmp);
+      {$ENDIF}
+      Exit;
+    end;
+  end;
+
+
+
+  for i := 0 to ComponentCount-1 do
+  begin
+    w := TfpgWidget(Components[i]);
+    if w.InheritsFrom(TfpgWidget) then
+    begin
+      if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
+      begin
+        if not HasInvalidRegion or IntersectRect(Params.rect, FInvalidRect, w.GetBoundsRect) then
+        begin
+          if HasInvalidRegion then
+            w.ParentToWidget(Params.rect.Left, Params.rect.Top)
+          else
+            Params.rect := fpgRect(0,0,0,0);
+          fpgSendMessage(Self, w, FPGM_PAINT, Params);
+        end;
+      end;
+    end;
+
+  end;
+  if HasInvalidRegion then
+    Canvas.EndDraw(FInvalidRect)
+  else
+    Canvas.EndDraw;
+
+  FInvalidRect := fpgRect(0,0,0,0);
+  FInvalidated:=False;
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
@@ -1420,6 +1664,8 @@ begin
           dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
+        //Write(wg.ClassName + ': ');
+        //PrintRect(wg.WidgetBoundsInWindow);
       end;
     end;  { if }
 end;
@@ -1449,7 +1695,7 @@ begin
     Width  := AWidth;
     Height := AHeight;
   end;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TfpgWidget.MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
@@ -1566,6 +1812,25 @@ end;
 procedure TfpgWidget.Invalidate;
 begin
   RePaint;
+end;
+
+procedure TfpgWidget.InvalidateRect(ARect: TfpgRect);
+begin
+  if not HasOwnWindow then
+  begin
+    // If we don't have our own window then call invalidate on the parent
+    WidgetToParent(ARect.Left, ARect.Top);
+    if Assigned(Parent) then
+      Parent.InvalidateRect(ARect);
+    Exit;
+  end;
+
+  if FInvalidRect = fpgRect(0,0,0,0) then
+    FInvalidRect := ARect
+  else
+    UnionRect(FInvalidRect, FInvalidRect, ARect);
+
+  Invalidate;
 end;
 
 

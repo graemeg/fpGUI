@@ -11,6 +11,8 @@ uses
 
 type
 
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainFrom}
@@ -205,6 +207,7 @@ begin
       ShowMessage(e.Message);
   end;
 }
+  memEditor.HasOwnWindow:=not memEditor.HasOwnWindow;
 end;
 
 procedure TMainForm.memEditorChanged(Sender: TObject);

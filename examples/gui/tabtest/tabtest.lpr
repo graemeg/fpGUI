@@ -161,6 +161,7 @@ begin
   edtHeight.Value := 0;
   edtHeight.Hint := 'Tab height';
   edtHeight.OnChange := @edtHeightChanged;
+  edtHeight.BringToFront;
 end;
 
 procedure MainProc;

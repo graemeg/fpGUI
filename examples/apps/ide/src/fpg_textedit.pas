@@ -675,8 +675,8 @@ begin
   FVScrollBar.Left    := Width - FVScrollBar.Width - r.Top;
   FVScrollBar.Height  := VHeight;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;
 
 procedure TfpgBaseTextEdit.UpdateGutterCoords;
@@ -1165,7 +1165,7 @@ end;
 procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  if HasHandle then
+  if WindowAllocated then
   begin
     UpdateCharBounds;
     UpdateScrollBars;

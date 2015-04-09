@@ -1007,7 +1007,7 @@ begin
   if InDesigner then
     exit;
 
-  if IsLoading then
+  if IsLoading or not WindowAllocated then
     exit;
 
   RemoveCursor;
@@ -1049,8 +1049,8 @@ begin
   FVScrollBar.Left    := r.Right+1;
   FVScrollBar.Height  := r.Height;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;
 
 
@@ -1066,8 +1066,7 @@ ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
 
   if InDesigner then
     exit;
-
-  if IsLoading then
+  if IsLoading or not WindowAllocated then
     exit;
 
 ProfileEvent('DEBUG:  TRichTextView.Layout    1 of 6');

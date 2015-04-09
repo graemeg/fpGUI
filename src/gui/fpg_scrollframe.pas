@@ -254,7 +254,7 @@ begin
   inherited HandleResize(awidth, aheight);
   if (csLoading in ComponentState) or (csUpdating in ComponentState) then
     Exit; //==>
-  if HasHandle then
+  if WindowAllocated then
     UpdateScrollBars;
 end;
 

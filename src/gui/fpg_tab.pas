@@ -50,6 +50,8 @@ type
   TfpgTabOptions = set of TfpgTabOption;
 
 
+  { TfpgTabSheet }
+
   TfpgTabSheet = class(TfpgWidget)
   private
     FPageControl: TfpgPageControl;
@@ -64,6 +66,7 @@ type
   protected
     procedure   HandlePaint; override;
     procedure   SetName(const NewName: TComponentName); override;
+    function    IsHidden: Boolean; override;
   public
     constructor Create(AOwner: TComponent); override;
     constructor CreateWithTitle(AOwner: TComponent; const AText: TfpgString = ''); virtual;
@@ -255,6 +258,16 @@ begin
   end;
 end;
 
+function TfpgTabSheet.IsHidden: Boolean;
+begin
+  Result := False;
+  if Assigned(PageControl) then
+    Result := PageControl.ActivePage <> Self;
+
+  if not Result then
+    Result := inherited IsHidden;
+end;
+
 constructor TfpgTabSheet.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -296,7 +309,7 @@ begin
     FPageControl.InsertPage(Self);
 end;
 
-  
+
 { TfpgPageControl }
 
 function TfpgPageControl.GetActivePageIndex: integer;
@@ -471,7 +484,7 @@ begin
     APage.Top     := FMargin + r.Top;
   end;
 
-  APage.UpdateWindowPosition; { Internal state is now resolved }
+  APage.UpdatePosition; { Internal state is now resolved }
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
@@ -825,7 +838,7 @@ var
   lTxtFlags: TfpgTextFlags;
   ActivePageVisible: Boolean;
 begin
-  if not HasHandle then
+  if not WindowAllocated then
     Exit; //==>
     
   if PageCount = 0 then

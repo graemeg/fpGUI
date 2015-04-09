@@ -28,7 +28,8 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_widget;
+  fpg_widget,
+  fpg_window;
 
 type
   TWindowPosition = (wpUser, wpAuto, wpScreenCenter, wpOneThirdDown);
@@ -41,7 +42,9 @@ type
        var AHandled: Boolean): Boolean of object;
 
 
-  TfpgBaseForm = class(TfpgWidget)
+  { TfpgBaseForm }
+
+  TfpgBaseForm = class(TfpgWindow)
   private
     FFullScreen: boolean;
     FIconName: TfpgString;
@@ -75,6 +78,7 @@ type
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
     function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
     procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); override;
+    procedure   DoAllocateWindowHandle; override;
     { -- properties -- }
     property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
     property    IconName: string read FIconName write FIconName;
@@ -82,7 +86,6 @@ type
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
-    property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     { -- events -- }
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
     property    OnClose: TFormCloseEvent read FOnClose write FOnClose;
@@ -252,40 +255,46 @@ begin
 end;
 
 procedure TfpgBaseForm.AdjustWindowStyle;
+var
+  WindowAttributes: TWindowAttributes;
 begin
   if fpgApplication.MainForm = nil then
     fpgApplication.MainForm := self;
 
+  WindowAttributes := Window.WindowAttributes;
+
   if FWindowPosition = wpAuto then
-    Include(FWindowAttributes, waAutoPos)
+    Include(WindowAttributes, waAutoPos)
   else
-    Exclude(FWindowAttributes, waAutoPos);
+    Exclude(WindowAttributes, waAutoPos);
 
   if FWindowPosition = wpScreenCenter then
-    Include(FWindowAttributes, waScreenCenterPos)
+    Include(WindowAttributes, waScreenCenterPos)
   else
-    Exclude(FWindowAttributes, waScreenCenterPos);
+    Exclude(WindowAttributes, waScreenCenterPos);
 
   if FWindowPosition = wpOneThirdDown then
-    Include(FWindowAttributes, waOneThirdDownPos)
+    Include(WindowAttributes, waOneThirdDownPos)
   else
-    Exclude(FWindowAttributes, waOneThirdDownPos);
+    Exclude(WindowAttributes, waOneThirdDownPos);
 
   if FSizeable then
-    Include(FWindowAttributes, waSizeable)
+    Include(WindowAttributes, waSizeable)
   else
-    Exclude(FWindowAttributes, waSizeable);
+    Exclude(WindowAttributes, waSizeable);
     
   if FFullScreen then
-    Include(FWindowAttributes, waFullScreen)
+    Include(WindowAttributes, waFullScreen)
   else
-    Exclude(FWindowAttributes, waFullScreen);
+    Exclude(WindowAttributes, waFullScreen);
+
+  Window.WindowAttributes := WindowAttributes;
 end;
 
 procedure TfpgBaseForm.SetWindowParameters;
 begin
   inherited;
-  DoSetWindowTitle(FWindowTitle);
+  Window.WindowTitle := FWindowTitle;
 end;
 
 constructor TfpgBaseForm.Create(AOwner: TComponent);
@@ -345,9 +354,10 @@ function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin
-  if HasHandle and (FWindowType <> wtModalForm) then
+  if WindowAllocated and (FWindowType <> wtModalForm) then
     HandleHide;
   FWindowType := wtModalForm;
+
   fpgApplication.PushModalForm(self);
   ModalResult := mrNone;
 
@@ -525,6 +535,12 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TfpgBaseForm.DoAllocateWindowHandle;
+begin
+  inherited DoAllocateWindowHandle;
+  AdjustWindowStyle;
 end;
 
 procedure TfpgBaseForm.Hide;

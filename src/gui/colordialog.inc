@@ -163,7 +163,7 @@ procedure TPickerButton.DoColorPicked;
 var
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, FColorPos);
+  pt := WidgetToScreen(self, FColorPos);
   FColor := fpgApplication.GetScreenPixelColor(pt);
   if Assigned(FOnColorPicked) then
     FOnColorPicked(self, FColorPos, FColor);

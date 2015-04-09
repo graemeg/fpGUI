@@ -741,7 +741,7 @@ begin
     if maindsgn.selectedform <> nil then
     begin
       maindsgn.selectedform.Form.SetFocus;
-      maindsgn.selectedform.Form.ActivateWindow;
+      maindsgn.selectedform.Form.Window.ActivateWindow;
     end;
     consumed := True;
   end;
@@ -936,7 +936,7 @@ end;
 procedure TfrmMain.FormShow(Sender: TObject);
 begin
   gINI.ReadFormState(self);
-  UpdateWindowPosition;
+  UpdatePosition;
   SetupCaptions;
 end;
 

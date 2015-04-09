@@ -100,7 +100,7 @@ var
   dx, dy: integer;
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, AMousePos);
+  pt := WidgetToScreen(self, AMousePos);
   if not FIsMouseDown then
   begin
     FLastPos := pt;
@@ -112,7 +112,7 @@ begin
   Left := Left + dx;
   Top := Top + dy;
   FLastPos := pt;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TfpgMDIChildForm.TitleMouseUp(Sender: TObject; AButton: TMouseButton;
@@ -127,7 +127,7 @@ procedure TfpgMDIChildForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton
 begin
   FMDIWorkArea.ActiveWindow := self;
   FIsMouseDown := True;
-  FLastPos := Panel1.WindowToScreen(self, AMousePos);
+  FLastPos := Panel1.WidgetToScreen(self, AMousePos);
   Panel1.CaptureMouse;
 end;
 
@@ -487,7 +487,7 @@ begin
     begin
       c := Components[i] as TfpgMDIChildForm;
       c.Left := c.Left + (FLastHorizonalPos - position);
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       fpgApplication.ProcessMessages;
     end;
   end;
@@ -583,7 +583,7 @@ begin
       x += GAP;
       c.Top := y;
       y += GAP;
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       c.BringToFront;
     end;
   end;

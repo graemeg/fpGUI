@@ -30,11 +30,14 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  fpg_impl;
+  fpg_impl,
+  fpg_window;
   
 type
 
-  TfpgPopupWindow = class(TfpgWidget)
+  { TfpgPopupWindow }
+
+  TfpgPopupWindow = class(TfpgWindow)
   private
     FDontCloseWidget: TfpgWidget;
     FOnClose: TNotifyEvent;
@@ -51,9 +54,9 @@ type
     procedure   DoPaintPopupFrame; virtual;
     procedure   DoOnClose; virtual;
     procedure   DoOnShow; virtual;
+    procedure   DoAllocateWindowHandle; override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure   AdjustWindowStyle; override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord; const ACanAdjustPos: boolean = false); overload;
     procedure   ShowAt(x, y: TfpgCoord); overload;
     procedure   Close; virtual;
@@ -174,7 +177,7 @@ begin
   p := uFirstPopup;
   while p <> nil do
   begin
-    if p^.Widget.WinHandle = AWinHandle then
+    if p^.Widget.Window.WinHandle = AWinHandle then
     begin
       Result := p^.Widget;
       Exit; //==>
@@ -219,7 +222,7 @@ end;
 function TfpgPopupWindow.GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
 begin
   // translate coordinates
-  Result := WindowToScreen(AReferenceWindow, Point(x, y));
+  Result := AReferenceWindow.WidgetToScreen(AReferenceWindow, Point(x, y));
 
   // popup window will not fit below (x,y) so we place it above (x,y)
   if (Result.y + self.Height) > fpgApplication.ScreenHeight then
@@ -236,13 +239,6 @@ begin
   writeln('TfpgPopupWindow.MsgClose [', Classname, ']');
   {$ENDIF}
   HandleClose;
-end;
-
-procedure TfpgPopupWindow.AdjustWindowStyle;
-begin
-  inherited AdjustWindowStyle;
-  // We could possibly change this later
-  Exclude(FWindowAttributes, waSizeable);
 end;
 
 procedure TfpgPopupWindow.HandleClose;
@@ -277,7 +273,7 @@ begin
     end;
     // make space for the frame
     HandleResize(Width+2, Height+2);
-    UpdateWindowPosition;
+    UpdatePosition;
 
     for i := 0 to ComponentCount-1 do
     begin
@@ -285,7 +281,7 @@ begin
         TfpgWidget(Components[i]).Anchors := [anLeft, anTop];
     end;
     HandleResize(Width+2, Height+2);
-    UpdateWindowPosition;
+    UpdatePosition;
     Repaint;
   end;
 end;
@@ -313,10 +309,19 @@ begin
     FOnShow(self);
 end;
 
+procedure TfpgPopupWindow.DoAllocateWindowHandle;
+begin
+  inherited DoAllocateWindowHandle;
+  Window.WindowType := wtPopup;
+
+  // Maybe remove later
+  Window.WindowAttributes := Window.WindowAttributes - [waSizeable];
+end;
+
 constructor TfpgPopupWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowType := wtPopup;
+
   FDontCloseWidget := nil;
   Parent := nil;
   FPopupFrame := False;
@@ -329,13 +334,13 @@ var
 begin
   PopupListAdd(self);
   
-  if AWidget <> nil then
+  if (AWidget <> nil) and AWidget.WindowAllocated then
   begin
     // translate coordinates - window to screen
     if ACanAdjustPos then
       pt := GetDisplayPos(AWidget, x, y)
     else
-      pt := WindowToScreen(AWidget, Point(x, y));
+      pt := WidgetToScreen(AWidget, Point(x, y));
     // reposition
     Left  := pt.X;
     Top   := pt.Y;

@@ -299,7 +299,7 @@ begin
   Result := inherited Add(s);
   if UpdateCount > 0 then
       Exit;
-  if Assigned(ListBox) and (ListBox.HasHandle) then
+  if Assigned(ListBox) and (ListBox.WindowAllocated) then
   begin
     ListBox.UpdateScrollBar;
     ListBox.Invalidate;
@@ -311,7 +311,7 @@ begin
   inherited Delete(Index);
   if UpdateCount > 0 then
       Exit;
-  if Assigned(ListBox) and (ListBox.HasHandle) then
+  if Assigned(ListBox) and (ListBox.WindowAllocated) then
   begin
     ListBox.UpdateScrollBar;
     ListBox.Invalidate;
@@ -333,7 +333,7 @@ begin
   inherited Exchange(Index1, Index2);
   if UpdateCount > 0 then
     Exit;
-  if Assigned(ListBox) and (ListBox.HasHandle) then
+  if Assigned(ListBox) and (ListBox.WindowAllocated) then
   begin
     ListBox.Invalidate;
   end;
@@ -344,7 +344,7 @@ begin
   inherited Assign(Source);
   if UpdateCount > 0 then
     Exit;
-  if Assigned(ListBox) and (ListBox.HasHandle) then
+  if Assigned(ListBox) and (ListBox.WindowAllocated) then
   begin
     ListBox.UpdateScrollBar;
     ListBox.Invalidate;
@@ -418,7 +418,7 @@ begin
   FScrollBar.Top     := 2;
   FScrollBar.Left    := Width - FScrollBar.Width - 2;
   FScrollBar.Height  := VHeight;
-  FScrollBar.UpdateWindowPosition;
+  FScrollBar.UpdatePosition;
 end;
 
 procedure TfpgBaseListBox.SetAutoHeight(const AValue: boolean);
@@ -473,7 +473,7 @@ procedure TfpgBaseListBox.UpdateScrollBar;
 var
   pn : integer;
 begin
-  if not HasHandle then
+  if not WindowAllocated then
     Exit; //==>
   pn := PageLength;
   FScrollBar.Visible := PageLength < ItemCount-1;

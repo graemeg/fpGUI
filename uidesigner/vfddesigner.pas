@@ -188,7 +188,7 @@ begin
 
   UpdateResizerPositions;
 
-  if FSelected and Widget.Parent.HasHandle then
+  if FSelected and Widget.WindowAllocated then
     for n := 1 to 8 do
       resizer[n].Show;
 end;
@@ -275,8 +275,8 @@ begin
           rs.left := Widget.left - 2;
         end;
       end; // case
-      if rs.HasHandle then
-        rs.UpdateWindowPosition;
+      if rs.WindowAllocated then
+        rs.UpdatePosition;
     end;
   end;
 
@@ -788,7 +788,7 @@ begin
     keyF11:
       begin
         frmProperties.SetFocus;
-        frmProperties.ActivateWindow;
+        frmProperties.Window.ActivateWindow;
       end;
     else
       consumed := False;
@@ -918,7 +918,7 @@ begin
         if Font.TextWidth16(Text) > width then
         begin
           Width := Font.TextWidth16(Text);
-          UpdateWindowPosition;
+          UpdatePosition;
           cd.UpdateResizerPositions;
         end;
       end;
@@ -1045,7 +1045,7 @@ begin
       begin
         wg := cd.Widget;
         SetNewPos(wg, posval);
-        wg.UpdateWindowPosition;
+        wg.UpdatePosition;
         cd.UpdateResizerPositions;
       end;
     end;
@@ -1053,7 +1053,7 @@ begin
     if wg = nil then
     begin
       SetNewPos(FForm, posval);
-      FForm.UpdateWindowPosition;
+      FForm.UpdatePosition;
     end;
   end; { if }
 

@@ -138,6 +138,7 @@ const
   {$I predefinedcolors.inc}
 
 type
+  PfpgRect = ^TfpgRect;
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
     Left: TfpgCoord;
@@ -223,6 +224,7 @@ type
   // forward declaration
   TfpgWindowBase = class;
   TfpgCanvasBase = class;
+  TfpgWidgetBase = class;
 
 
   TfpgImageBase = class(TObject)
@@ -330,21 +332,28 @@ type
   end;
 
 
+  { TfpgCanvasBase }
+
   TfpgCanvasBase = class(TObject)
   private
     FFastDoubleBuffer: Boolean;
     FInterpolation: TfpgCustomInterpolation;
     procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
-    FBufferedDraw: boolean;
     FBeginDrawCount: integer;
-    FWindow: TfpgWindowBase;
+    FWidget: TfpgWidgetBase;
     FColor: TfpgColor;
     FTextColor: TfpgColor;
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
     FFont: TfpgFontBase;
-    FPersistentResources: boolean;
+    FDeltaX,
+    FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
+    FCanvasTarget: TfpgCanvasBase;
+    FPutBufferQueue: TFPList;
+    FWindow: TfpgWindowBase;
+    procedure   AddPutBufferItem(ARect: TfpgRect);
+    function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
@@ -361,7 +370,7 @@ type
     function    DoGetClipRect: TfpgRect; virtual; abstract;
     procedure   DoAddClipRect(const ARect: TfpgRect); virtual; abstract;
     procedure   DoClearClipRect; virtual; abstract;
-    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); virtual; abstract;
+    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
@@ -369,8 +378,10 @@ type
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual; abstract;
+    function    GetBufferAllocated: Boolean; virtual; abstract;
+    procedure   DoAllocateBuffer; virtual; abstract;
   public
-    constructor Create(awin: TfpgWindowBase); virtual;
+    constructor Create(awidget: TfpgWidgetBase); virtual;
     destructor  Destroy; override;
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
@@ -406,7 +417,7 @@ type
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
     procedure   SetFont(AFont: TfpgFontBase);
     procedure   BeginDraw; overload;
-    procedure   BeginDraw(ABuffered: boolean); overload;
+    procedure   BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
     procedure   EndDraw(ARect: TfpgRect); overload;
     procedure   EndDraw; overload;
@@ -416,7 +427,6 @@ type
     property    Font: TfpgFontBase read FFont write SetFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
-    property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
     property    LineStyle: TfpgLineStyle read FLineStyle;
   end;
 
@@ -441,17 +451,23 @@ type
     property    HelpType: THelpType read FHelpType write FHelpType default htKeyword;
   end;
 
+  TfpgWidgetDirtyFlag = (wdfPosition, wdfSize, wdfConstraints, wdfMouseCursor);
+  TfpgWidgetDirtyFlags = set of TfpgWidgetDirtyFlag;
 
-  TfpgWindowBase = class(TfpgComponent)
+  { TfpgWidgetBase }
+
+  TfpgWidgetBase = class(TfpgComponent)
   private
-    FParent: TfpgWindowBase;
+    FHasOwnWindow: Boolean;
+    function    GetWindowAllocated: Boolean;
+    procedure   SetMinHeight(AValue: TfpgCoord);
+    procedure   SetMinWidth(AValue: TfpgCoord);
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
   protected
+    FParent: TfpgWidgetBase;
     FMouseCursor: TMouseCursor;
-    FWindowType: TWindowType;
-    FWindowAttributes: TWindowAttributes;
     FTop: TfpgCoord;
     FLeft: TfpgCoord;
     FWidth: TfpgCoord;
@@ -465,19 +481,105 @@ type
     FMaxHeight: TfpgCoord;
     FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
-    FSizeIsDirty: Boolean;
-    FPosIsDirty: Boolean;
-    FMouseCursorIsDirty: Boolean;
+    FDirtyFlags: TfpgWidgetDirtyFlags;
+    FDoAcceptDrops: Boolean;
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
+    FWindow: TfpgWindowBase;
+    function    GetWindow: TfpgWindowBase; virtual;
+    procedure   DoAllocateWindowHandle; virtual; abstract;
+    procedure   DoUpdatePosition; virtual; abstract;
+    //procedure   DoSetMouseCursor; virtual; abstract;
+    procedure   DoAcceptDrops(const AValue: boolean); virtual;
+    procedure   DoDragStartDetected; virtual;
+    procedure   AddChild(AChild: TfpgWidgetBase);
+    procedure   RemoveChild(AChild: TfpgWidgetBase);
+    procedure   SetParent(const AValue: TfpgWidgetBase); virtual;
+    function    GetParent: TfpgWidgetBase; virtual;
+    function    GetCanvas: TfpgCanvasBase; virtual;
+    procedure   SetTop(const AValue: TfpgCoord);
+    procedure   SetLeft(const AValue: TfpgCoord);
+    procedure   SetHeight(const AValue: TfpgCoord);
+    procedure   SetWidth(const AValue: TfpgCoord);
+    procedure   SetHasOwnWindow(AValue: Boolean); virtual;
+    procedure   HandleMove(x, y: TfpgCoord); virtual;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
+    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
+  public
+    // The standard constructor.
+    constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
+    // general properties and functions
+    function    Right: TfpgCoord;
+    function    Bottom: TfpgCoord;
+    procedure   UpdatePosition;
+    procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
+    procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
+    function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
+    procedure   WidgetToWindow(var AX, AY: TfpgCoord);
+    procedure   WidgetToParent(var AX, AY: TfpgCoord);
+    procedure   ParentToWidget(var AX, AY: TfpgCoord);
+    function    WidgetBoundsInWindow: TfpgRect;
+    procedure   WindowToWidget(var AX, AY: TfpgCoord);
+    property    WindowAllocated: Boolean read GetWindowAllocated;
+    property    HasOwnWindow: Boolean read FHasOwnWindow write SetHasOwnWindow;
+    function    HasParent: Boolean; override;
+    function    GetClientRect: TfpgRect; virtual;
+    function    GetBoundsRect: TfpgRect; virtual;
+    procedure   CaptureMouse; virtual;
+    procedure   ReleaseMouse; virtual;
+    procedure   BringToFront; virtual;
+    property    Left: TfpgCoord read FLeft write SetLeft;
+    property    Top: TfpgCoord read FTop write SetTop;
+    property    Width: TfpgCoord read FWidth write SetWidth;
+    property    Height: TfpgCoord read FHeight write SetHeight;
+    property    MinWidth: TfpgCoord read FMinWidth write SetMinWidth;
+    property    MinHeight: TfpgCoord read FMinHeight write SetMinHeight;
+    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
+    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
+    property    Canvas: TfpgCanvasBase read GetCanvas;
+    property    Parent: TfpgWidgetBase read GetParent write SetParent;
+    property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
+    property    Window: TfpgWindowBase read GetWindow;
+  end;
+
+
+  { TfpgWindowBase }
+
+  TfpgWindowBase = class(TfpgComponent)
+  private
+    FPassiveMouseCapture: TfpgWidgetBase;
+    FMouseCapture: TfpgWidgetBase;
+    FCurrentWidget: TfpgWidgetBase;
+    FWidget: TfpgWidgetBase;
+    FWindow: TfpgWindowBase;
+    FMsg: PfpgMessageRec;
+    LastMousePos: TfpgPoint; // point in the native window
+    function GetHeight: TfpgCoord;
+    function GetLeft: TfpgCoord;
+    function GetPrimaryWidget: TfpgWidgetBase;
+    function GetTop: TfpgCoord;
+    function GetWidget: TfpgWidgetBase;
+    function GetWidth: TfpgCoord;
+    procedure   SetMouseCursor(const AValue: TMouseCursor);
+  protected
+    FPosition,
+    FNotifiedPosition: TfpgPoint;
+    FSize,
+    FNotifiedSize: TfpgSize;
+    FMouseCursor: TMouseCursor;
+    FWindowType: TWindowType;
+    FWindowAttributes: TWindowAttributes;
+    FMouseCursorIsDirty: Boolean;
     FWindowState: TfpgWindowState;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
-    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
     procedure   DoRemoveWindowLookup; virtual; abstract;
     procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
+    //procedure   DoSetWindowConstraints(AMinWidth, AMinHeight, AMaxWidth, AMaxHeight: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
@@ -485,70 +587,68 @@ type
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     function    GetWindowState: TfpgWindowState; virtual;
     procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
-    procedure   DoDragStartDetected; virtual;
-    procedure   SetParent(const AValue: TfpgWindowBase); virtual;
-    function    GetParent: TfpgWindowBase; virtual;
-    function    GetCanvas: TfpgCanvasBase; virtual;
-    procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
-    procedure   SetTop(const AValue: TfpgCoord);
-    procedure   SetLeft(const AValue: TfpgCoord);
-    procedure   SetHeight(const AValue: TfpgCoord);
-    procedure   SetWidth(const AValue: TfpgCoord);
-    procedure   HandleMove(x, y: TfpgCoord); virtual;
-    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
-    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
-    property    WindowState: TfpgWindowState read GetWindowState {write SetWindowState} default wsNormal;
+    // alien windows methods
+    procedure   DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+    procedure   DispatchKeyEvent(var msg: TfpgMessageRec);
+    function    FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX, AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase = nil): TfpgWidgetBase;
+    function    FindWidgetForKeyEvent: TfpgWidgetBase;
+    procedure   SetCurrentWidget(AValue: TfpgWidgetBase);
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
-    // Make some setup before the window shows. Forms modify the window creation parameters.
-    procedure   AdjustWindowStyle; virtual;
     // Make some setup before the window shows. Invoked after the window is created.
     procedure   SetWindowParameters; virtual;
     // general properties and functions
     function    Right: TfpgCoord;
     function    Bottom: TfpgCoord;
     procedure   UpdateWindowPosition;
+    procedure   UpdateWindowPosition(ALeft, ATop, AWidth, AHeight: Integer);
+
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
-    function    HasParent: Boolean; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     procedure   ActivateWindow; virtual; abstract;
-    procedure   CaptureMouse; virtual; abstract;
+    procedure   CaptureMouse(AForWidget:TfpgWidgetBase); virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
     procedure   BringToFront; virtual; abstract;
     procedure   SetFullscreen(AValue: Boolean); virtual;
+    procedure   SetWindowVisible(AValue: Boolean);
     property    HasHandle: boolean read HandleIsValid;
+    procedure   AllocateWindowHandle;
+    procedure   DefaultHandler(var message); override;
+    function    FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
+    procedure   NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+    property    MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
+    property    CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
-    property    Left: TfpgCoord read FLeft write SetLeft;
-    property    Top: TfpgCoord read FTop write SetTop;
-    property    Width: TfpgCoord read FWidth write SetWidth;
-    property    Height: TfpgCoord read FHeight write SetHeight;
-    property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
-    property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
-    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
-    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
-    property    Canvas: TfpgCanvasBase read GetCanvas;
-    property    Parent: TfpgWindowBase read GetParent write SetParent;
+    property    WindowTitle: string write SetWindowTitle;
+    property    WindowState: TfpgWindowState read GetWindowState write SetWindowState default wsNormal;
+    property    Left: TfpgCoord read GetLeft;
+    property    Top: TfpgCoord read GetTop;
+    property    Width: TfpgCoord read GetWidth;
+    property    Height: TfpgCoord read GetHeight;
+    property    PrimaryWidget: TfpgWidgetBase read GetPrimaryWidget;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
   end;
 
 
   TfpgApplicationBase = class(TfpgComponent)
   private
-    FMainForm: TfpgWindowBase;
+    FMainForm: TfpgWidgetBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
     FHelpKey: word;
     FHelpFile: TfpgString;
-    function    GetForm(Index: Integer): TfpgWindowBase;
+    function    GetForm(Index: Integer): TfpgWidgetBase;
     function    GetFormCount: integer;
-    function    GetTopModalForm: TfpgWindowBase;
+    function    GetTopModalForm: TfpgWidgetBase;
     function    GetHelpFile: TfpgString;
   protected
     FOnIdle: TNotifyEvent;
@@ -562,10 +662,10 @@ type
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
     function    GetFontFaceList: TStringList;
-    procedure   PushModalForm(AForm: TfpgWindowBase);
+    procedure   PushModalForm(AForm: TfpgWidgetBase);
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
-    function    RemoveWindowFromModalStack(AForm: TfpgWindowBase): Integer;
+    function    RemoveWindowFromModalStack(AForm: TfpgWidgetBase): Integer;
     procedure   CreateForm(InstanceClass: TComponentClass; out Reference);
     function    GetFormByClassName(const AClassName: string): TfpgWindowBase;
     function    GetFormByName(const AName: string): TfpgWindowBase;
@@ -582,13 +682,13 @@ type
     function    ContextHelp(const AHelpContext: THelpContext): Boolean;
     function    KeywordHelp(const AHelpKeyword: string): Boolean;
     property    FormCount: integer read GetFormCount;
-    property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
+    property    Forms[Index: Integer]: TfpgWidgetBase read GetForm;
     property    HelpContext;
     property    HelpFile: TfpgString read GetHelpFile write FHelpFile;
     property    HelpKey: word read FHelpKey write FHelpKey default keyF1;
     property    IsInitialized: boolean read FIsInitialized;
-    property    TopModalForm: TfpgWindowBase read GetTopModalForm;
-    property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
+    property    TopModalForm: TfpgWidgetBase read GetTopModalForm;
+    property    MainForm: TfpgWidgetBase read FMainForm write FMainForm;
     property    Terminated: boolean read FTerminated write FTerminated;
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
   end;
@@ -751,6 +851,7 @@ type
   end;
 
 
+operator = (const r1,r2 : TfpgRect) b : boolean;
 
 
 { ********  Helper functions  ******** }
@@ -785,12 +886,15 @@ uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
+  fpg_window,// needed f0r SetParameters
   fpg_form,  // needed for fpgApplication.CreateForms()
+  fpg_widget,// needed for ActiveWidget
   typinfo,
   process,
   {$IFDEF GDEBUG}
   fpg_dbugintf,
   {$ENDIF}
+  math,
   dateutils;
 
 
@@ -798,6 +902,13 @@ const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
 
+operator=(const r1, r2: TfpgRect)b: boolean;
+begin
+  Result := CompareMem(@r1, @r2, SizeOf(TfpgRect));
+end;
+
+type
+  TWidgetHack = class(TfpgWidget);
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
@@ -1148,6 +1259,331 @@ begin
   end;
 end;
 
+{ TfpgWidgetBase }
+
+function TfpgWidgetBase.GetWindow: TfpgWindowBase;
+begin
+  Result := nil;
+  if HasOwnWindow then
+    Result := FWindow
+  else if Assigned(FParent) then
+    Result := FParent.Window;
+end;
+
+function TfpgWidgetBase.GetWindowAllocated: Boolean;
+begin
+  Result := Window <> nil;
+end;
+
+procedure TfpgWidgetBase.SetMinHeight(AValue: TfpgCoord);
+begin
+  if FMinHeight=AValue then Exit;
+  FMinHeight:=AValue;
+  Include(FDirtyFlags, wdfConstraints);
+end;
+
+procedure TfpgWidgetBase.SetMinWidth(AValue: TfpgCoord);
+begin
+  if FMinWidth=AValue then Exit;
+  FMinWidth:=AValue;
+  Include(FDirtyFlags, wdfConstraints);
+end;
+
+procedure TfpgWidgetBase.SetHasOwnWindow(AValue: Boolean);
+begin
+  if FHasOwnWindow=AValue then Exit;
+  if WindowAllocated then
+  begin
+    if FHasOwnWindow then
+      Window.Free;
+    FHasOwnWindow:=AValue;
+    DoAllocateWindowHandle;
+    Window.AllocateWindowHandle;
+    Window.SetWindowVisible(TfpgWidget(Self).Visible);
+    UpdatePosition;
+  end
+  else
+    FHasOwnWindow:=AValue;
+end;
+
+procedure TfpgWidgetBase.SetMouseCursor(const AValue: TMouseCursor);
+begin
+  FMouseCursor:=AValue;
+  if WindowAllocated and (Window.CurrentWidget = Self) then
+    Window.MouseCursor:=FMouseCursor;
+end;
+
+function TfpgWidgetBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
+begin
+  Result := NewWidth;
+  if (MaxWidth >= MinWidth) and (Result > MaxWidth) and (MaxWidth > 0) then
+    Result := MaxWidth;
+  if Result < MinWidth then
+    Result := MinWidth;
+end;
+
+function TfpgWidgetBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+begin
+  Result := NewHeight;
+  if (MaxHeight >= MinHeight) and (Result > MaxHeight) and (MaxHeight > 0) then
+    Result := MaxHeight;
+  if Result < MinHeight then
+    Result := MinHeight;
+end;
+
+procedure TfpgWidgetBase.DoAcceptDrops(const AValue: boolean);
+begin
+  FDoAcceptDrops:=AValue;
+  if WindowAllocated then
+    Window.DoAcceptDrops(AValue);
+end;
+
+procedure TfpgWidgetBase.DoDragStartDetected;
+begin
+  if Assigned(FOnDragStartDetected) then
+    FOnDragStartDetected(self);
+end;
+
+function TfpgWidgetBase.WidgetBoundsInWindow: TfpgRect;
+var
+  l,t: TfpgCoord;
+begin
+  l := 0;
+  t := 0;
+  WidgetToWindow(l,t);
+  Result.SetRect(l,t,Width,Height);
+  //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
+end;
+
+procedure TfpgWidgetBase.AddChild(AChild: TfpgWidgetBase);
+begin
+  if AChild.Owner <> self then
+    InsertComponent(AChild);
+  AChild.FParent := Self;
+end;
+
+procedure TfpgWidgetBase.RemoveChild(AChild: TfpgWidgetBase);
+begin
+  RemoveComponent(AChild);
+  AChild.FParent := nil;
+end;
+
+procedure TfpgWidgetBase.SetParent(const AValue: TfpgWidgetBase);
+begin
+  if FParent <> nil then
+    FParent.RemoveChild(Self);
+  if AValue <> nil then
+    AValue.AddChild(Self);
+end;
+
+function TfpgWidgetBase.GetParent: TfpgWidgetBase;
+begin
+  Result := FParent;
+end;
+
+function TfpgWidgetBase.GetCanvas: TfpgCanvasBase;
+begin
+  Result := FCanvas;
+end;
+
+procedure TfpgWidgetBase.SetTop(const AValue: TfpgCoord);
+begin
+  HandleMove(FLeft, AValue);
+end;
+
+procedure TfpgWidgetBase.SetLeft(const AValue: TfpgCoord);
+begin
+  HandleMove(AValue, FTop);
+end;
+
+procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
+begin
+  HandleResize(FWidth, AValue);
+end;
+
+procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
+begin
+  HandleResize(AValue, FHeight);
+end;
+
+procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
+var
+  TmpRect: TfpgRect;
+begin
+  TmpRect := fpgRect(FPrevLeft, FPrevTop, FPrevWidth, FPrevHeight);
+  if FTop <> y then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevTop := FTop
+    else
+      FPrevTop := y;
+    FTop := y;
+
+    if FTop <> FPrevTop then
+      Include(FDirtyFlags, wdfPosition);
+  end;
+
+  if FLeft <> x then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevLeft := FLeft
+    else
+      FPrevLeft := x;
+    FLeft := x;
+
+    if FLeft <> FPrevLeft then
+      Include(FDirtyFlags, wdfPosition);
+  end;
+end;
+
+procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  if FWidth <> AWidth then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevWidth := FWidth
+    else
+      FPrevWidth := AWidth;
+    FWidth := ConstraintWidth(AWidth);
+
+    if FWidth <> FPrevWidth then
+      Include(FDirtyFlags, wdfSize);
+  end;
+
+  if FHeight <> AHeight then
+  begin
+    if not (csLoading in ComponentState) then
+      FPrevHeight := FHeight
+    else
+      FPrevHeight := AHeight;
+    FHeight := ConstraintHeight(AHeight);
+
+    if FHeight <> FPrevHeight then
+      Include(FDirtyFlags, wdfSize);
+  end;
+end;
+
+constructor TfpgWidgetBase.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+procedure TfpgWidgetBase.AfterConstruction;
+begin
+  inherited AfterConstruction;
+end;
+
+function TfpgWidgetBase.Right: TfpgCoord;
+begin
+  Result := Left+Width-1;
+end;
+
+function TfpgWidgetBase.Bottom: TfpgCoord;
+begin
+  Result := Top+Height-1;
+end;
+
+procedure TfpgWidgetBase.UpdatePosition;
+begin
+  DoUpdatePosition;
+end;
+
+procedure TfpgWidgetBase.UpdateWindowPosition;
+begin
+  UpdatePosition;
+end;
+
+procedure TfpgWidgetBase.MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
+begin
+  Left := x;
+  Top := y;
+  UpdatePosition;
+end;
+
+function TfpgWidgetBase.WidgetToScreen(ASource: TfpgWidgetBase;
+  const AScreenPos: TPoint): TPoint;
+begin
+  Result := AScreenPos;
+  if not ASource.WindowAllocated then
+    Exit; // ==>
+
+  ASource.WidgetToWindow(Result.X, Result.Y);
+  Result := ASource.Window.WindowToScreen(ASource.Window, Result);
+end;
+
+procedure TfpgWidgetBase.WidgetToWindow(var AX, AY: TfpgCoord);
+var
+  W: TfpgWidgetBase;
+begin
+  W := Self;
+  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) do
+  begin
+    AX := AX + W.Left;
+    AY := AY + W.Top;
+    W := W.Parent;
+  end;
+end;
+
+procedure TfpgWidgetBase.WidgetToParent(var AX, AY: TfpgCoord);
+begin
+  Inc(AX, FLeft);
+  Inc(AY, FTop);
+end;
+
+procedure TfpgWidgetBase.ParentToWidget(var AX, AY: TfpgCoord);
+begin
+  Dec(AX, FLeft);
+  Dec(AY, FTop);
+end;
+
+procedure TfpgWidgetBase.WindowToWidget(var AX, AY: TfpgCoord);
+var
+  W: TfpgWidgetBase;
+begin
+  W := Self;
+  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) do
+  begin
+    AX := AX - W.Left;
+    AY := AY - W.Top;
+    W := W.Parent;
+  end;
+end;
+
+function TfpgWidgetBase.HasParent: Boolean;
+begin
+  Result:=inherited HasParent;
+end;
+
+function TfpgWidgetBase.GetClientRect: TfpgRect;
+begin
+  Result.SetRect(0,0,FWidth, FHeight);
+end;
+
+function TfpgWidgetBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);
+end;
+
+procedure TfpgWidgetBase.CaptureMouse;
+begin
+  if Assigned(Window) then
+    Window.CaptureMouse(Self);
+end;
+
+procedure TfpgWidgetBase.ReleaseMouse;
+begin
+  if Assigned(Window) then
+    Window.ReleaseMouse;
+end;
+
+procedure TfpgWidgetBase.BringToFront;
+begin
+  if not HasOwnWindow then
+  begin
+    ComponentIndex:=FParent.ComponentCount-1;
+  end;
+end;
+
 { TfpgRect }
 
 procedure TfpgRect.SetRect(aleft, atop, awidth, aheight: TfpgCoord);
@@ -1217,22 +1653,34 @@ begin
   DoSetMouseCursor;
 end;
 
-function TfpgWindowBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
+function TfpgWindowBase.GetPrimaryWidget: TfpgWidgetBase;
 begin
-  Result := NewWidth;
-  if (MaxWidth >= MinWidth) and (Result > MaxWidth) and (MaxWidth > 0) then
-    Result := MaxWidth;
-  if Result < MinWidth then
-    Result := MinWidth;
+  Result := TfpgWidgetBase(Owner);
 end;
 
-function TfpgWindowBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+function TfpgWindowBase.GetHeight: TfpgCoord;
 begin
-  Result := NewHeight;
-  if (MaxHeight >= MinHeight) and (Result > MaxHeight) and (MaxHeight > 0) then
-    Result := MaxHeight;
-  if Result < MinHeight then
-    Result := MinHeight;
+  Result := FSize.H;
+end;
+
+function TfpgWindowBase.GetLeft: TfpgCoord;
+begin
+  Result := FPosition.X;
+end;
+
+function TfpgWindowBase.GetTop: TfpgCoord;
+begin
+  Result := FPosition.Y;
+end;
+
+function TfpgWindowBase.GetWidget: TfpgWidgetBase;
+begin
+  Result := Owner as TfpgWidgetBase;
+end;
+
+function TfpgWindowBase.GetWidth: TfpgCoord;
+begin
+  Result := FSize.W;
 end;
 
 function TfpgWindowBase.GetWindowState: TfpgWindowState;
@@ -1245,39 +1693,70 @@ begin
   // do nothing
 end;
 
-procedure TfpgWindowBase.DoDragStartDetected;
-begin
-  if Assigned(FOnDragStartDetected) then
-    FOnDragStartDetected(self);
-end;
-
-procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
-begin
-  FParent := AValue;
-end;
-
-function TfpgWindowBase.GetParent: TfpgWindowBase;
-begin
-  result := FParent;
-end;
-
-function TfpgWindowBase.GetCanvas: TfpgCanvasBase;
-begin
-  Result := FCanvas;
-end;
-
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
-  DoAllocateWindowHandle(FParent);
+  if Assigned(Owner) then
+    DoAllocateWindowHandle(TfpgWidgetBase(Owner).Parent)
+  else
+    DoAllocateWindowHandle(nil);
   if FMouseCursorIsDirty then
     DoSetMouseCursor;
+end;
+
+procedure TfpgWindowBase.DefaultHandler(var message);
+var
+  msg: TfpgMessageRec absolute message;
+begin
+  inherited DefaultHandler(message);
+  FMsg:=@msg;
+  //WriteLn(msg.MsgCode);
+  case msg.MsgCode of
+    FPGM_SCROLL,
+    FPGM_MOUSEDOWN,
+    FPGM_MOUSEUP,
+    FPGM_MOUSEMOVE,
+    FPGM_DOUBLECLICK,
+    FPGM_MOUSEENTER,
+    FPGM_MOUSEEXIT:  DispatchMouseEvent(msg.Params.mouse.x, msg.Params.mouse.y, msg);
+
+    FPGM_KEYCHAR,
+    FPGM_KEYPRESS,
+    FPGM_KEYRELEASE: DispatchKeyEvent(msg);
+
+    //FPGM_CLOSE: Widget.Dispatch(msg);
+    //FPGM_PAINT: Widget.Dispatch(msg);
+    //FPGM_RESIZE: Widget.Dispatch(msg);
+    //FPGM_ACTIVATE: Widget.Dispatch(msg);
+    //FPGM_MOVE: Widget.Dispatch(msg);
+  else
+    PrimaryWidget.Dispatch(msg);
+  end;
+end;
+
+function TfpgWindowBase.FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
+begin
+  Result := FindWidgetForMouseEvent(PrimaryWidget, AX, AY);
+end;
+
+procedure TfpgWindowBase.NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+begin
+  if FCurrentWidget = AWidget then
+  begin
+    FCurrentWidget := nil; // this prevents an exit message being sent to a destroyed object
+    CurrentWidget := FindWidgetForMouseEvent(PrimaryWidget, LastMousePos.X, LastMousePos.Y, AWidget);
+    MouseCursor:=FCurrentWidget.MouseCursor;
+  end;
+  if FMouseCapture = AWidget then
+    ReleaseMouse;
+
+  if FPassiveMouseCapture = AWidget then
+    FPassiveMouseCapture := nil;
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
 begin
   if HasHandle then
   begin
-    Canvas.FreeResources;
     DoReleaseWindowHandle;
   end;
   DoRemoveWindowLookup;
@@ -1288,83 +1767,161 @@ begin
   DoSetWindowTitle(ATitle);
 end;
 
-procedure TfpgWindowBase.SetTop(const AValue: TfpgCoord);
+procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
 begin
-  HandleMove(Left, AValue);
-end;
+  LastMousePos.X:=AX;
+  LastMousePos.Y:=AY;
+  w := FindWidgetForMouseEvent(PrimaryWidget, AX, AY);
+  CurrentWidget := w;  // setting CurrentWidget will generate the enter/leave events
 
-procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
-begin
-  HandleMove(AValue, Top);
-end;
-
-procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
-begin
-  HandleResize(Width, AValue);
-end;
-
-procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
-begin
-  HandleResize(AValue, Height);
-end;
-
-procedure TfpgWindowBase.HandleMove(x, y: TfpgCoord);
-begin
-  if FTop <> y then
-  begin
-    if not (csLoading in ComponentState) then
-      FPrevTop := FTop
-    else
-      FPrevTop := y;
-    FTop := y;
-    FPosIsDirty := FPosIsDirty or (FTop <> FPrevTop);
+  // passive captures send all messages to the widget that receives the original
+  // mousedown but only while the mouse is inside the native window.
+  case msg.MsgCode of
+    FPGM_MOUSEUP   :
+      begin
+        w := FPassiveMouseCapture;
+        FPassiveMouseCapture := nil;
+      end;
+    FPGM_MOUSEDOWN : FPassiveMouseCapture := w;
   end;
 
-  if FLeft <> x then
+  if Assigned(FPassiveMouseCapture) then
+    w := FPassiveMouseCapture;
+
+  if Assigned(MouseCapture) then
+    w := MouseCapture; // still if the mouse is captured that's where the events go
+
+  if w = nil then
+    w := PrimaryWidget;
+
+  // Setting this to nil allows us to know if we should bother to update the cursor
+  // in NotifyWidgetDestroying if the widget destroyed has the mouse focus.
+  // This FPGM_MOUSEEXIT is for the native window.
+  if msg.MsgCode = FPGM_MOUSEEXIT then
+    FCurrentWidget := nil;
+
+  MouseCursor:=w.MouseCursor;
+  w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
+  //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
+  msg.Dest := w;
+  w.Dispatch(msg);
+
+
+end;
+
+procedure TfpgWindowBase.DispatchKeyEvent(var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  w := FindWidgetForKeyEvent;
+  if Assigned(w) then
   begin
-    if not (csLoading in ComponentState) then
-      FPrevLeft := FLeft
-    else
-      FPrevLeft := x;
-    FLeft := x;
-    FPosIsDirty := FPosIsDirty or (FLeft <> FPrevLeft);
+    msg.Dest := w;
+    w.Dispatch(msg);
   end;
 end;
 
-procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
+function TfpgWindowBase.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase; AX,
+  AY: TfpgCoord; AInvalidWidget: TfpgWidgetBase): TfpgWidgetBase;
+var
+  i: Integer;
+  w: TWidgetHack;
 begin
-  if FWidth <> AWidth then
+  Result := AWidget;
+  for i := AWidget.ComponentCount-1 downto 0 do
   begin
-    if not (csLoading in ComponentState) then
-      FPrevWidth := FWidth
-    else
-      FPrevWidth := AWidth;
-    FWidth := ConstraintWidth(AWidth);
-    FSizeIsDirty := FSizeIsDirty or (FWidth <> FPrevWidth);
+    w := TWidgetHack(AWidget.Components[i]);
+    // we get notified a widget is destroying before it's gone from the list
+    if w = AInvalidWidget then
+      continue;
+    if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
+    begin
+      if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
+      begin
+        Result := (FindWidgetForMouseEvent(w, AX, AY));
+        break;
+      end;
+    end;
+  end;
+end;
+
+function TfpgWindowBase.FindWidgetForKeyEvent: TfpgWidgetBase;
+var
+  w: TWidgetHack;
+begin
+  w := TWidgetHack(PrimaryWidget);
+  while Assigned(w) do
+  begin
+    Result := w;
+    w := TWidgetHack(w.ActiveWidget);
+  end;
+  if Result = nil then
+    Result := PrimaryWidget;
+  //WriteLn('KEY: ', Result.ClassName);
+end;
+
+procedure TfpgWindowBase.SetCurrentWidget(AValue: TfpgWidgetBase);
+  procedure SendEnterExitMessage(AMessage: Integer; Target: TfpgWidgetBase);
+  var
+    msg: TfpgMessageRec;
+  begin
+    msg.Dest := Target;
+    msg.MsgCode:=AMessage;
+    msg.Sender := nil;
+    msg.Stop:=False;
+    msg.Params:= FMsg^.Params;
+    Target.Dispatch(msg);
+  end;
+begin
+  if FCurrentWidget=AValue then Exit;
+
+  if Assigned(FCurrentWidget) then
+  begin
+    SendEnterExitMessage(FPGM_MOUSEEXIT, FCurrentWidget);
   end;
 
-  if FHeight <> AHeight then
+  FCurrentWidget := AValue;
+
+  if Assigned(FCurrentWidget) then
   begin
-    if not (csLoading in ComponentState) then
-      FPrevHeight := FHeight
-    else
-      FPrevHeight := AHeight;
-    FHeight := ConstraintHeight(AHeight);
-    FSizeIsDirty := FSizeIsDirty or (FHeight <> FPrevHeight);
+    SendEnterExitMessage(FPGM_MOUSEENTER, FCurrentWidget);
+  end;
+end;
+
+procedure TfpgWindowBase.MsgResize(var msg: TfpgMessageRec);
+var
+  NewSize: TfpgSize;
+begin
+  NewSize := fpgSize(msg.Params.rect.Width, msg.Params.rect.Height);
+  {$IFDEF DEBUG}
+  WriteLn('FPGM_RESIZE to Native Window: Requested Value, Current Value , Message Value');
+  PrintSize(FSize);
+  PrintSize(FNotifiedSize);
+  PrintSize(NewSize);
+  {$ENDIF}
+  if (NewSize <> FNotifiedSize) {and (NewSize <> FSize)} then
+  begin
+    FNotifiedSize := NewSize;
+    DefaultHandler(msg);
   end;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
+var
+  w: TfpgWidget absolute AOwner;
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
   FMouseCursorIsDirty := False;
-  FPosIsDirty := True;
-  FSizeIsDirty := True;
-  FMaxWidth := 0;
-  FMaxHeight := 0;
-  FDragActive := False;
   FWindowState := wsNormal;
+end;
+
+destructor TfpgWindowBase.Destroy;
+begin
+  ReleaseWindowHandle;
+  inherited Destroy;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;
@@ -1377,24 +1934,23 @@ begin
 //  SetDefaults(self);
 end;
 
-procedure TfpgWindowBase.AdjustWindowStyle;
-begin
-  // does nothing here
-end;
+type
+  TfpgWindowHack = class(TfpgWindow);
 
 procedure TfpgWindowBase.SetWindowParameters;
 begin
-  // does nothing
+  if PrimaryWidget is TfpgWindow then
+    TfpgWindowHack(PrimaryWidget).SetWindowParameters;
 end;
 
 function TfpgWindowBase.Right: TfpgCoord;
 begin
-  Result := FLeft + FWidth - 1;
+  Result := FPosition.X + FSize.W - 1;
 end;
 
 function TfpgWindowBase.Bottom: TfpgCoord;
 begin
-  Result := FTop + FHeight - 1;
+  Result := FPosition.Y + FSize.H - 1;
 end;
 
 procedure TfpgWindowBase.UpdateWindowPosition;
@@ -1402,21 +1958,22 @@ begin
   DoUpdateWindowPosition;
 end;
 
+procedure TfpgWindowBase.UpdateWindowPosition(ALeft, ATop, AWidth, AHeight: Integer);
+begin
+  FPosition := fpgPoint(ALeft, ATop);
+  FSize := fpgSize(AWidth, AHeight);
+  UpdateWindowPosition;
+end;
+
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
-  Left  := x;
-  Top   := y;
+  FPosition := fpgPoint(x, y);
   DoMoveWindow(x, y);
 end;
 
 function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
   Result := DoWindowToScreen(ASource, AScreenPos);
-end;
-
-function TfpgWindowBase.HasParent: Boolean;
-begin
-  Result := FParent <> nil;
 end;
 
 function TfpgWindowBase.GetClientRect: TfpgRect;
@@ -1438,6 +1995,11 @@ begin
   // now decendants must override this and implement the actualy fullscreen part
 end;
 
+procedure TfpgWindowBase.SetWindowVisible(AValue: Boolean);
+begin
+  DoSetWindowVisible(AValue);
+end;
+
 { TfpgCanvasBase }
 
 procedure TfpgCanvasBase.SetInterpolation(const AValue: TfpgCustomInterpolation);
@@ -1446,11 +2008,35 @@ begin
   FInterpolation := AValue;
 end;
 
-constructor TfpgCanvasBase.Create(awin: TfpgWindowBase);
+procedure TfpgCanvasBase.AddPutBufferItem(ARect: TfpgRect);
+var
+  n: PfpgRect;
 begin
-  FBufferedDraw := True;
-  FFastDoubleBuffer := True;
-  FWindow := awin;
+  n := new(PfpgRect);
+  n^ := ARect;
+
+  if not Assigned(FPutBufferQueue) then
+    FPutBufferQueue := TFPList.Create;
+
+  FPutBufferQueue.Add(n);
+end;
+
+function TfpgCanvasBase.GetPutBufferItem: PfpgRect;
+begin
+  Result := nil;
+  if FPutBufferQueue = nil then
+    Exit; // ==>
+
+  Result := PfpgRect(FPutBufferQueue.Items[FPutBufferQueue.Count-1]);
+  FPutBufferQueue.Delete(FPutBufferQueue.Count-1);
+
+  if FPutBufferQueue.Count = 0 then
+    FreeAndNil(FPutBufferQueue);
+end;
+
+constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
+begin
+  FWidget := awidget;
 end;
 
 destructor TfpgCanvasBase.Destroy;
@@ -1830,15 +2416,49 @@ begin
 end;
 
 procedure TfpgCanvasBase.BeginDraw;
+var
+  dx,dy: Integer;
 begin
-  BeginDraw(FBufferedDraw);
+  dx := 0;
+  dy := 0;
+  // convert our 0,0 position to the position inside the native window
+  if FWidget.Window = nil then
+    exit;
+  FWidget.WidgetToWindow(dx, dy);
+  BeginDraw(FWidget.Window.PrimaryWidget.Canvas, dx, dy);
 end;
 
-procedure TfpgCanvasBase.BeginDraw(ABuffered: boolean);
+procedure TfpgCanvasBase.BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer);
 begin
   if FBeginDrawCount < 1 then
   begin
-    DoBeginDraw(FWindow, ABuffered);
+
+    FDeltaX := XDelta;
+    FDeltaY := YDelta;
+
+    if CanvasTarget = nil then
+      CanvasTarget := Self;
+
+    FCanvasTarget := CanvasTarget;
+
+    if CanvasTarget = Self then
+    begin
+      if GetBufferAllocated = False then
+        DoAllocateBuffer;
+    end
+    else
+    begin
+      CanvasTarget.BeginDraw;
+    end;
+
+
+    DoBeginDraw(FWidget, CanvasTarget);
+
+
+    if GetClipRect = fpgRect(0,0,0,0) then
+      ClearClipRect//SetClipRect(FWidget.GetClientRect)
+    else
+      SetClipRect(fpgRect(0,0, FWidget.Width, FWidget.Height));
 
     SetColor(clText1);
     SetTextColor(clText1);
@@ -1850,18 +2470,72 @@ begin
   Inc(FBeginDrawCount);
 end;
 
-procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
+function IsfpgRectEmpty(const ARect : TfpgRect) : Boolean;
 begin
+  Result:=(ARect.Width <= 0) or (ARect.Height <= 0);
+end;
+
+function UnionfpgRect(out ARect : TfpgRect;const R1,R2 : TfpgRect) : Boolean;
+begin
+  ARect:=R1;
+  with R2 do
+  begin
+    if Left < R1.Left then
+      ARect.Left:=Left;
+    if Top < R1.Top then
+      ARect.Top:=Top;
+    if Width > R1.Width then
+      ARect.Width := Width;
+    if Height > R1.Height then
+      ARect.Height:= Height;
+    end;
+  {if IsfpgRectEmpty(ARect) then
+  begin
+    FillChar(ARect,SizeOf(ARect),0);
+    Result:=false;
+  end
+  else}
+    Result:=true;
+end;
+
+
+
+procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
+var
+  r: PfpgRect;
+  r2: TfpgRect;
+  finalrect: TfpgRect;
+begin
+
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
     if FBeginDrawCount = 0 then
     begin
-      DoPutBufferToScreen(x, y, w, h);
+      if FCanvasTarget = Self then
+      begin
+        finalrect.SetRect(x,y,w,h);
+        {r2 := finalrect;
+        r := GetPutBufferItem;
+        while Assigned(r) do
+        begin
+          //WriteLn('putting saved buffer pos');
+          {if UnionfpgRect(finalrect, r^, r2) then
+            r2 := finalrect;}
+          Dispose(r);
+          r := GetPutBufferItem;
+        end;}
+        DoPutBufferToScreen(finalrect.Left, finalrect.Top, finalrect.Width, finalrect.Height);
+      end
+      else
+      begin
+        FWidget.WidgetToWindow(x,y);
+        FCanvasTarget.EndDraw(x, y, w, h);
+      end;
+    end
+    //else
+      //AddPutBufferItem(fpgRect(x,y,w,h));
 
-      if not FPersistentResources then
-        DoEndDraw;
-    end;
   end;  { if }
 end;
 
@@ -1872,7 +2546,7 @@ end;
 
 procedure TfpgCanvasBase.EndDraw;
 begin
-  EndDraw(0, 0, FWindow.Width, FWindow.Height);
+  EndDraw(0, 0, FWidget.Width, FWidget.Height);
 end;
 
 procedure TfpgCanvasBase.FreeResources;
@@ -2379,11 +3053,11 @@ end;
 
 { TfpgApplicationBase }
 
-function TfpgApplicationBase.GetTopModalForm: TfpgWindowBase;
+function TfpgApplicationBase.GetTopModalForm: TfpgWidgetBase;
 begin
   Result := nil;
   if (FModalFormStack <> nil) and (FModalFormStack.Count > 0) then
-    Result := TFpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-1]);
+    Result := TfpgWidgetBase(FModalFormStack.Items[FModalFormStack.Count-1]);
 end;
 
 function TfpgApplicationBase.GetHelpFile: TfpgString;
@@ -2425,9 +3099,9 @@ begin
   Result := ComponentCount;
 end;
 
-function TfpgApplicationBase.GetForm(Index: Integer): TfpgWindowBase;
+function TfpgApplicationBase.GetForm(Index: Integer): TfpgWidgetBase;
 begin
-  Result := TfpgWindowBase(Components[Index]);
+  Result := TfpgWidgetBase(Components[Index]);
 end;
 
 function TfpgApplicationBase.GetFontFaceList: TStringList;
@@ -2435,7 +3109,7 @@ begin
   Result := DoGetFontFaceList;
 end;
 
-procedure TfpgApplicationBase.PushModalForm(AForm: TfpgWindowBase);
+procedure TfpgApplicationBase.PushModalForm(AForm: TfpgWidgetBase);
 var
   StackIndex: Integer;
 begin
@@ -2466,7 +3140,7 @@ begin
   Result := TfpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-2]);
 end;
 
-function TfpgApplicationBase.RemoveWindowFromModalStack (AForm: TfpgWindowBase): Integer;
+function TfpgApplicationBase.RemoveWindowFromModalStack (AForm: TfpgWidgetBase): Integer;
 begin
   Result := FModalFormStack.Remove(AForm);
 end;

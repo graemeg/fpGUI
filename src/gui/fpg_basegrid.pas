@@ -710,7 +710,7 @@ var
       if Visible then
       begin
         Visible := False;
-        UpdateWindowPosition;
+        UpdatePosition;
       end;
   end;
 
@@ -908,8 +908,16 @@ begin
     // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
   end;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Left    := 2;
+  FHScrollBar.Width   := HWidth;
+
+  FVScrollBar.Top     := 2;
+  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Height  := VHeight;
+
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 end;
 
 function TfpgBaseGrid.GetHeaderText(ACol: Integer): string;
@@ -1148,7 +1156,7 @@ begin
     Exit; //==>
   if csUpdating in ComponentState then
     Exit; //==>
-  if HasHandle then
+  if WindowAllocated then
     UpdateScrollBars;
 end;
 

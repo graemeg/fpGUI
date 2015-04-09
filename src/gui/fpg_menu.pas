@@ -715,7 +715,7 @@ begin
   for n := 0 to VisibleCount-1 do
     with VisibleItem(n) do
     begin
-      if (SubMenu <> nil) and (SubMenu.HasHandle) then
+      if (SubMenu <> nil) and (SubMenu.WindowAllocated) then
         SubMenu.Close;
     end;
 end;
@@ -729,7 +729,7 @@ begin
   for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
-    if (mi.SubMenu <> nil) and (mi.SubMenu.HasHandle) then
+    if (mi.SubMenu <> nil) and (mi.SubMenu.WindowAllocated) then
     begin
       Result := False;
       Break;
@@ -808,7 +808,7 @@ begin
     op := OpenerPopup;
     while op <> nil do
     begin
-      if op.HasHandle then
+      if op.Window.HasHandle then
         op.Close;
       op := op.OpenerPopup;
     end;
@@ -831,7 +831,7 @@ begin
   for n := 0 to VisibleCount-1 do
   with VisibleItem(n) do
   begin
-    if (SubMenu <> nil) and (SubMenu.HasHandle) then
+    if (SubMenu <> nil) and (SubMenu.WindowAllocated) then
       SubMenu.Close;
   end;
 end;
@@ -904,7 +904,7 @@ begin
 
   mi := VisibleItem(FFocusItem);
   if (mi <> nil) and (not MenuFocused) and (mi.SubMenu <> nil)
-      and mi.SubMenu.HasHandle then
+      and mi.SubMenu.Window.HasHandle then
     mi.SubMenu.Close
   else
     DoSelect;
@@ -1373,18 +1373,18 @@ begin
     mi := TfpgMenuItem(FItems[n]);
     if mi.SubMenu <> nil then
     begin
-      if mi.SubMenu.HasHandle then
+      if mi.SubMenu.WindowAllocated then
         mi.SubMenu.Close;
     end;
   end;
   inherited Close;
   uFocusedPopupMenu := OpenerPopup;
-  if (uFocusedPopupMenu <> nil) and uFocusedPopupMenu.HasHandle then
+  if (uFocusedPopupMenu <> nil) and uFocusedPopupMenu.Window.HasHandle then
     uFocusedPopupMenu.RePaint;
 
-  if (OpenerMenuBar <> nil) and OpenerMenuBar.HasHandle then
+  if (OpenerMenuBar <> nil) and OpenerMenuBar.Window.HasHandle then
   begin
-    if (OpenerPopup = nil) or not OpenerPopup.HasHandle then
+    if (OpenerPopup = nil) or not OpenerPopup.Window.HasHandle then
     begin
       OpenerMenuBar.DeActivateMenu;
     end;
