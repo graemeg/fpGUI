@@ -228,7 +228,6 @@ type
   end;
 
 
-  { TfpgX11Window }
 
   TfpgX11Window = class(TfpgWindowBase)
   private

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -35,7 +35,6 @@ uses
 
 type
 
-  { TfpgWindow }
   // Base class for all toplevel windows
   TfpgWindow = class(TfpgWidget)
   private
@@ -57,8 +56,6 @@ type
     procedure   ActivateWindow;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState;
-
-
   end;
 
 implementation

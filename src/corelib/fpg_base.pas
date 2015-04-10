@@ -32,7 +32,8 @@ uses
   SysUtils,
   fpg_impl,
   syncobjs, // TCriticalSection usage
-  variants, contnrs;
+  variants,
+  contnrs;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -454,7 +455,6 @@ type
   TfpgWidgetDirtyFlag = (wdfPosition, wdfSize, wdfConstraints, wdfMouseCursor);
   TfpgWidgetDirtyFlags = set of TfpgWidgetDirtyFlag;
 
-  { TfpgWidgetBase }
 
   TfpgWidgetBase = class(TfpgComponent)
   private
@@ -487,6 +487,7 @@ type
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
     function    GetWindow: TfpgWindowBase; virtual;
+    // TODO: Maybe rename this to DoAllocateNativeWindow() or DoCreateNativeWindow() - it will be more accurate
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
     //procedure   DoSetMouseCursor; virtual; abstract;
@@ -544,8 +545,6 @@ type
   end;
 
 
-  { TfpgWindowBase }
-
   TfpgWindowBase = class(TfpgComponent)
   private
     FPassiveMouseCapture: TfpgWidgetBase;
@@ -555,12 +554,12 @@ type
     FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
     LastMousePos: TfpgPoint; // point in the native window
-    function GetHeight: TfpgCoord;
-    function GetLeft: TfpgCoord;
-    function GetPrimaryWidget: TfpgWidgetBase;
-    function GetTop: TfpgCoord;
-    function GetWidget: TfpgWidgetBase;
-    function GetWidth: TfpgCoord;
+    function    GetHeight: TfpgCoord;
+    function    GetLeft: TfpgCoord;
+    function    GetPrimaryWidget: TfpgWidgetBase;
+    function    GetTop: TfpgCoord;
+    function    GetWidget: TfpgWidgetBase;
+    function    GetWidth: TfpgCoord;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
   protected
     FPosition,

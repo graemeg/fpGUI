@@ -42,8 +42,6 @@ type
        var AHandled: Boolean): Boolean of object;
 
 
-  { TfpgBaseForm }
-
   TfpgBaseForm = class(TfpgWindow)
   private
     FFullScreen: boolean;
