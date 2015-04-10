@@ -18,5 +18,5 @@ echo "You've got the correct output lib directory"
 
 :end
 
-fpc -dDEBUG -dGDI @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
+fpc -dGDI @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
 
