@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -250,7 +250,7 @@ uses
   fpg_widget,
   fpg_utils,
   fpg_stringutils
-  {$IFDEF MSWINDOWS}
+  {$IFDEF WINDOWS}
   ,Windows   // used by File Dialog & Select Dir Dialog
   {$ENDIF}
   ,DateUtils
