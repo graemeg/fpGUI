@@ -666,8 +666,8 @@ type
     function    PrevModalForm: TfpgWindowBase;
     function    RemoveWindowFromModalStack(AForm: TfpgWidgetBase): Integer;
     procedure   CreateForm(InstanceClass: TComponentClass; out Reference);
-    function    GetFormByClassName(const AClassName: string): TfpgWindowBase;
-    function    GetFormByName(const AName: string): TfpgWindowBase;
+    function    GetFormByClassName(const AClassName: string): TfpgWidgetBase;
+    function    GetFormByName(const AName: string): TfpgWidgetBase;
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; virtual; abstract;
@@ -3175,7 +3175,7 @@ begin
   end;
 end;
 
-function TfpgApplicationBase.GetFormByClassName(const AClassName: string): TfpgWindowBase;
+function TfpgApplicationBase.GetFormByClassName(const AClassName: string): TfpgWidgetBase;
 var
   i: integer;
 begin
@@ -3190,7 +3190,7 @@ begin
   end;
 end;
 
-function TfpgApplicationBase.GetFormByName(const AName: string): TfpgWindowBase;
+function TfpgApplicationBase.GetFormByName(const AName: string): TfpgWidgetBase;
 var
   i: integer;
 begin
