@@ -30,6 +30,14 @@ unit fpg_gdi;
 {.$Define DND_DEBUG}
 {.$Define DEBUGKEYS}
 
+// enable or disable DND support. Disabled by default while implementing AlienWindows.
+{.$define HAS_DND}
+
+{$IFDEF WINCE}
+  // WinCE doesn't have DND support
+  {$undefine HAS_DND}
+{$ENDIF}
+
 interface
 
 uses
@@ -42,7 +50,7 @@ uses
   {$IFDEF DEBUG}
   ,fpg_dbugintf
   {$ENDIF DEBUG}
-  {$IFNDEF wince}
+  {$IFDEF HAS_DND}
   ,fpg_OLEDragDrop
   {$ENDIF}
   ;
@@ -163,13 +171,13 @@ type
 
   TfpgGDIWindow = class(TfpgWindowBase)
   private
-    {$IFNDEF WINCE}
+    {$IFDEF HAS_DND}
     FDropManager: TfpgOLEDropTarget;
     {$ENDIF}
     FDropPos: TPoint;
     FUserMimeSelection: TfpgString;
     FUserAcceptDrag: Boolean;
-    {$IFNDEF WINCE}
+    {$IFDEF HAS_DND}
     procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
     function    GetDropManager: TfpgOLEDropTarget;
@@ -185,7 +193,7 @@ type
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
-    {$IFNDEF WINCE}
+    {$IFDEF HAS_DND}
     property    DropManager: TfpgOLEDropTarget read GetDropManager;
     {$ENDIF}
   protected
@@ -1465,7 +1473,7 @@ var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
 
-{$IFNDEF WINCE}
+{$IFDEF HAS_DND}
 procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 var
   wg: TfpgWidget;
@@ -1633,7 +1641,7 @@ begin
   end;
   Result := FDropManager;
 end;
-{$ENDIF}
+{$ENDIF HAS_DND}
 
 function TfpgGDIWindow.DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
 var
@@ -1875,8 +1883,8 @@ begin
     PWideChar(wcname),   // registered class name
     PWideChar(wname),    // window name
     FWinStyle,       // window style
-    FLeft,           // horizontal position of window
-    FTop,            // vertical position of window
+    FPosition.X,           // horizontal position of window
+    FPosition.Y,            // vertical position of window
     rwidth,          // window width
     rheight,         // window height
     FParentWinHandle, // handle to parent or owner window
@@ -2048,7 +2056,7 @@ end;
 
 procedure TfpgGDIWindow.DoAcceptDrops(const AValue: boolean);
 begin
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   if AValue then
   begin
     if HasHandle then
@@ -2065,7 +2073,7 @@ begin
   {$ENDIF}
 end;
 
-(*
+(*  // TODO: disabled for AlienWindows branch. We should fine a solution later.
 procedure TfpgGDIWindow.DoDragStartDetected;
 begin
   inherited DoDragStartDetected;
@@ -2121,7 +2129,7 @@ constructor TfpgGDIWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   FDropManager := nil;
   {$ENDIF}
   FDropPos.x := 0;
@@ -2133,7 +2141,7 @@ end;
 
 destructor TfpgGDIWindow.Destroy;
 begin
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   if Assigned(FDropManager) then
     FDropManager.Free;
   {$ENDIF}
@@ -2475,7 +2483,7 @@ begin
     wr.Right  := x + w;
     wr.Bottom := y + h;
     {$IFDEF WinCE}
-    FrameRect(Fgc, wr, FBrush);
+    FrameRect(FDrawGC, wr, FBrush);
     {$ELSE}
     Windows.FrameRect(FDrawGC, wr, FBrush); // this handles 1x1 rectangles
     {$ENDIF}
@@ -2499,7 +2507,7 @@ begin
 
   WideText := Utf8Decode(txt);
   {$ifdef wince}
-  Windows.ExtTextOut(Fgc, x, y, ETO_CLIPPED, nil, PWideChar(WideText), Length(WideText), nil);
+  Windows.ExtTextOut(FDrawGC, x, y, ETO_CLIPPED, nil, PWideChar(WideText), Length(WideText), nil);
   {$else}
   Windows.TextOutW(FDrawGC, x, y, PWideChar(WideText), Length(WideText));
   {$endif}
@@ -3141,13 +3149,13 @@ var
   M: PStgMedium;
   itm: TfpgMimeDataItem;
   lEffects: DWORD;
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   FDataObject: TfpgOLEDataObject;
   FDropSource: TfpgOLEDropSource;
   {$ENDIF}
   lIsTranslated: boolean;
 begin
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   if FDragging then
   begin
     {$IFDEF DND_DEBUG}
@@ -3238,7 +3246,7 @@ begin
 //    (FDropSource as IUnknown)._Release;
 //    (FDataObject as IUnknown)._Release;
   end;
-  {$ENDIF}
+  {$ENDIF HAS_DND}
 end;
 
 { TGDIDragManager }
@@ -3282,14 +3290,14 @@ end;
 
 procedure TGDIDragManager.RegisterDragDrop;
 begin
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   Activex.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, self as IDropTarget)
   {$ENDIF}
 end;
 
 procedure TGDIDragManager.RevokeDragDrop;
 begin
-  {$IFNDEF WINCE}
+  {$IFDEF HAS_DND}
   ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
   {$ENDIF}
 end;
