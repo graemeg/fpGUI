@@ -166,10 +166,10 @@ type
     FUserMimeSelection: TfpgString;
     FUserAcceptDrag: Boolean;
     function    GetDropManager: TfpgOLEDropTarget;
-    {procedure   HandleDNDLeave(Sender: TObject);
+    procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
     procedure   HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
-    procedure   HandleDNDDrop(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);}
+    procedure   HandleDNDDrop(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
@@ -1457,7 +1457,6 @@ var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
 
-(*
 procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 var
   wg: TfpgWidget;
@@ -1612,17 +1611,16 @@ begin
     end;
   end;
 end;
-*)
 
 function TfpgGDIWindow.GetDropManager: TfpgOLEDropTarget;
 begin
   if not Assigned(FDropManager) then
   begin
     FDropManager := TfpgOLEDropTarget.Create(self);
-    {FDropManager.OnDragLeave := @HandleDNDLeave;
+    FDropManager.OnDragLeave := @HandleDNDLeave;
     FDropManager.OnDragEnter := @HandleDNDEnter;
     FDropManager.OnDragOver  := @HandleDNDPosition;
-    FDropManager.OnDragDrop  := @HandleDNDDrop;}
+    FDropManager.OnDragDrop  := @HandleDNDDrop;
   end;
   Result := FDropManager;
 end;
