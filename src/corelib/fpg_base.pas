@@ -1465,6 +1465,8 @@ end;
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FWidth := 10;
+  FHeight := 10;
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;
