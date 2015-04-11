@@ -61,13 +61,13 @@ type
   TMainForm = class(TfpgForm)
   private
     FbtnRuntime: TfpgButton;
+    procedure FormPaint(Sender: TObject);
     procedure Trackbar1Changed(Sender: TObject; APosition: integer);
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
     procedure btn3Click(Sender: TObject);
     procedure checkbox1Changed(Sender: TObject);
     procedure TrackBarChanged(Sender: TObject; APosition: integer);
-    procedure xpsilverClick(Sender: TObject);
     procedure Combo1Changed(Sender: TObject);
   public
     label1: TfpgLabel;
@@ -300,14 +300,6 @@ end;
 
 { TMainForm }
 
-procedure TMainForm.xpsilverClick(Sender: TObject);
-begin
-  if BackgroundColor = clWindowBackground then
-    BackgroundColor := clGreen
-  else
-    BackgroundColor := clWindowBackground;
-end;
-
 procedure TMainForm.Combo1Changed(Sender: TObject);
 begin
   // ilImageLeft, ilImageTop, ilImageRight, ilImageBottom
@@ -317,6 +309,11 @@ begin
     2:  btn.ImageLayout := ilImageRight;
     3:  btn.ImageLayout := ilImageBottom;
   end;
+end;
+
+procedure TMainForm.FormPaint(Sender: TObject);
+begin
+  Canvas.GradientFill(GetClientRect, clMoneyGreen, clOrange, gdHorizontal);
 end;
 
 procedure TMainForm.Trackbar1Changed(Sender: TObject; APosition: integer);
@@ -400,12 +397,15 @@ var
 begin
   SetPosition(200, 200, 500, 350);
   WindowTitle := 'UTF-8 Title -> Òåñò';
+  OnPaint := @FormPaint;
 
   label1 := CreateLabel(self, 5, 5, 'Hello world!');
+  label1.BackgroundColor := clNone;
   label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
   label2.FontDesc := 'Sans-12:bold:underline';
   label2.Width := 200;
-  
+  label2.BackgroundColor := clNone;
+
   w := TMyWidget.Create(self);
   w.Top := 40;
   w.Left := 140;
@@ -493,18 +493,22 @@ begin
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
-  xpsilver.OnClick := @xpsilverClick;
-  
+
   checkbox1  := CreateCheckBox(self, 10, 265, 'Disable components');
   checkbox1.OnChange := @checkbox1Changed;
+  checkbox1.BackgroundColor := clNone;
   checkbox2  := CreateCheckBox(self, 10, 285, 'Checkbox Two');
+  checkbox2.BackgroundColor := clNone;
   
   radiobtn1 := CreateRadioButton(self, 180, 265, 'Radio One');
   radiobtn1.GroupIndex := 2;
+  radiobtn1.BackgroundColor := clNone;
   radiobtn2 := CreateRadioButton(self, 180, 285, 'Radio Two');
   radiobtn2.GroupIndex := 2;
+  radiobtn2.BackgroundColor := clNone;
   radiobtn3 := CreateRadioButton(self, 180, 305, 'Radio Three');
   radiobtn3.GroupIndex := 2;
+  radiobtn3.BackgroundColor := clNone;
   radiobtn1.Checked := True;
   
   trackbar1 := TfpgTrackBar.Create(self);
@@ -513,9 +517,11 @@ begin
   trackbar1.Width  := 100;
   trackbar1.Height := 25;
   trackbar1.ShowPosition := True;
+  trackbar1.BackgroundColor := clNone;
   trackbar1.OnChange :=@Trackbar1Changed;
 
   lblTrackBarPos := CreateLabel(self, 420, 200, '0');
+  lblTrackbarpos.BackgroundColor := clNone;
 
   trackbar2 := TfpgTrackBarExtra.Create(self);
   trackbar2.Top    := 230;
@@ -523,6 +529,7 @@ begin
   trackbar2.Orientation := orVertical;
   trackbar2.Width  := 25;
   trackbar2.Height := 100;
+  trackbar2.BackgroundColor := clNone;
   trackbar2.OnChange := @TrackBarChanged;
   
   progress := TfpgProgressBar.Create(self);
