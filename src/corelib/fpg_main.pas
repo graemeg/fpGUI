@@ -759,7 +759,7 @@ begin
   TmpRect.SetBottom(Max(R1.Bottom, R2.Bottom));
   TmpRect.SetRight (Max(R1.Right, R2.Right));
 
-  if IsRectEmpty(ARect) then
+  if IsRectEmpty(TmpRect) then
   begin
     FillChar(ARect, SizeOf(ARect), 0);
     Result := false;

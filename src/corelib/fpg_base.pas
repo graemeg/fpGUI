@@ -2487,7 +2487,7 @@ begin
       ARect.Width := Width;
     if Height > R1.Height then
       ARect.Height:= Height;
-    end;
+  end;
   {if IsfpgRectEmpty(ARect) then
   begin
     FillChar(ARect,SizeOf(ARect),0);
