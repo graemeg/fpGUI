@@ -203,7 +203,7 @@ begin
 
   // If the form is off screen (positioned outside all monitor screens) then
   // center the form on screen.
-  //{$IFDEF MSWINDOWS}
+  //{$IFDEF WINDOWS}
   //if (AForm.FormStyle <> fsMDIChild) {$IFNDEF FPC} and tiFormOffScreen(AForm) {$ENDIF} then
   //begin
   //if Assigned(Application.MainForm) and (Application.MainForm <> AForm) then
@@ -211,7 +211,7 @@ begin
   //else
   //AForm.Position:= poScreenCenter;
   //end;
-  //{$ENDIF MSWINDOWS}
+  //{$ENDIF WINDOWS}
 end;
 
 // Do NOT localize

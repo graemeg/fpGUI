@@ -124,7 +124,7 @@ const
 
 
 var
-  {$IFDEF MSWINDOWS}
+  {$IFDEF WINDOWS}
   FPG_DEFAULT_FONT_DESC: string = 'Arial-8:antialias=true';
   FPG_DEFAULT_SANS: string = 'Arial';
   {$ENDIF}

@@ -166,6 +166,7 @@
       </Item33>
       <Item34>
         <Filename Value="fpg_oledragdrop.pas"/>
+        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="fpg_OLEDragDrop"/>
       </Item34>
       <Item35>
@@ -422,6 +423,7 @@
       </Item97>
       <Item98>
         <Filename Value="..\render\software\Agg2D.pas"/>
+        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="Agg2D"/>
       </Item98>
       <Item99>
