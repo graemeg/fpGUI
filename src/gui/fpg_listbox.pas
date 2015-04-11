@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,9 +23,6 @@ unit fpg_listbox;
 {
   TODO:
     * Refactor these to have a better hierarchy
-    * Only surface properties as published in TfpgListBox
-    * Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
-      the items list.
     * Color Listbox: User Defined color palette support.
 }
 
@@ -406,17 +403,12 @@ end;
 
 procedure TfpgBaseListBox.UpdateScrollbarCoords;
 var
-  HWidth: integer;
   VHeight: integer;
 begin
-  VHeight := Height - 4;
-  HWidth  := Width - 4;
+  VHeight := Height - (fpgStyle.GetControlFrameBorders.Top + fpgStyle.GetControlFrameBorders.Bottom);
 
-  if FScrollBar.Visible then
-    Dec(HWidth, FScrollBar.Width);
-
-  FScrollBar.Top     := 2;
-  FScrollBar.Left    := Width - FScrollBar.Width - 2;
+  FScrollBar.Top     := fpgStyle.GetControlFrameBorders.Top;
+  FScrollBar.Left    := Width - FScrollBar.Width - fpgStyle.GetControlFrameBorders.Right;
   FScrollBar.Height  := VHeight;
   FScrollBar.UpdatePosition;
 end;
