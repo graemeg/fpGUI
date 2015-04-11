@@ -816,14 +816,14 @@ end;
 
 procedure TfpgOLEDropTarget.RegisterDragDrop;
 begin
-  //ActiveX.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, Self as IDropTarget);
+  ActiveX.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, Self as IDropTarget);
   FRegistered := True;
 end;
 
 procedure TfpgOLEDropTarget.RevokeDragDrop;
 begin
   FRegistered := False;
-  //ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
+  ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
 end;
 
 destructor TfpgOLEDropTarget.Destroy;
