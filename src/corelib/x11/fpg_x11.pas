@@ -3414,8 +3414,8 @@ end;
 
 procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
 begin
-  DoSetClipRectInternal(ARect);
   FClipRectSet:=True;
+  DoSetClipRectInternal(ARect);
 end;
 
 procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
