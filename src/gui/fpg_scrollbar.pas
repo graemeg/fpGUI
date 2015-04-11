@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -113,6 +113,7 @@ begin
   FScrollTimer.Enabled := False;
   FScrollTimer.OnTimer := @ScrollTimer;
   Orientation   := orVertical;
+  FWidth        := 16;  // TODO: This value should come from fpgStyle
   FMin          := 0;
   FMax          := 100;
   FPosition     := 10;
