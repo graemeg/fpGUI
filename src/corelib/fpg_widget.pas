@@ -1089,7 +1089,9 @@ end;
 
 procedure TfpgWidget.HandlePaint;
 begin
-  // descendants will implement this.
+  Canvas.ClearClipRect;
+  if FBackgroundColor <> clNone then
+    Canvas.Clear(FBackgroundColor);
 end;
 
 procedure TfpgWidget.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);

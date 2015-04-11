@@ -57,6 +57,7 @@ type
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
   protected
+    procedure   HandlePaint; override;
     property    Max: integer read FMax write SetMax default 100;
     property    Min: integer read FMin write SetMin default 0;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
@@ -200,6 +201,14 @@ begin
   Repaint;
 end;
 
+procedure TfpgBaseTrackBar.HandlePaint;
+begin
+  inherited HandlePaint;
+  Canvas.ClearClipRect;
+  if FBackgroundColor <> clNone then
+    Canvas.Clear(FBackgroundColor);
+end;
+
 constructor TfpgBaseTrackBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -297,9 +306,8 @@ var
   drawwidth: integer;
   i: integer;
 begin
-//  inherited HandlePaint;
+  inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
-  Canvas.Clear(FBackgroundColor);
 
   if FFocused then
     Canvas.SetColor(clWidgetFrame)
@@ -529,6 +537,7 @@ procedure TfpgTrackBar.HandlePaint;
 var
   r: TfpgRect;
 begin
+  inherited HandlePaint;
   DrawSlider(True);
   { dont't draw focus rect while dragging - it flickers }
   if Focused and (not FSliderDragging) then
@@ -545,9 +554,6 @@ var
   r: TfpgRect;
   tw: TfpgCoord;
 begin
-  Canvas.Clear(FBackgroundColor);
-  Canvas.SetColor(FBackgroundColor);
-
   if Orientation = orVertical then
     area := Height-4
   else

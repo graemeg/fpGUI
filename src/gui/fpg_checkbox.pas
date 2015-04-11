@@ -193,9 +193,6 @@ var
   LFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
-  Canvas.ClearClipRect;
-  Canvas.SetColor(FBackgroundColor);
-  Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
   Canvas.SetLineStyle(1, lsSolid);
 

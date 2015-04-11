@@ -232,13 +232,9 @@ end;
 
 procedure TfpgCustomLabel.HandlePaint;
 var
-  r: TfpgRect;
   lTxtFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
-  Canvas.ClearClipRect;
-  r.SetRect(0, 0, Width, Height);
-  Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(Font);
   if Enabled then
     Canvas.SetTextColor(FTextColor)

@@ -697,8 +697,7 @@ var
   r: TfpgRect;
   rect: TRect;
 begin
-//  inherited HandlePaint;
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
   rect := fpgStyle.GetControlFrameBorders;
