@@ -66,12 +66,12 @@ type
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
     alist: TList;
-    function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
   protected
+    function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
     procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
