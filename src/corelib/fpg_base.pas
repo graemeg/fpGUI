@@ -352,7 +352,6 @@ type
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
     FPutBufferQueue: TFPList;
-    FWindow: TfpgWindowBase;
     procedure   AddPutBufferItem(ARect: TfpgRect);
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
