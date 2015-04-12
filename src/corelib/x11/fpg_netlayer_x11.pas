@@ -601,8 +601,8 @@ begin
 end;
 
 procedure TNETWindowLayer.WindowSetSupportPING(const AWindow: TWindow);
-var
-  WM_PROTOCOLS: TAtom;
+//var
+  //WM_PROTOCOLS: TAtom;
 begin
   //WM_PROTOCOLS := XInternAtom(FDisplay, 'WM_PROTOCOLS', True);
   WindowAddProtocol(AWindow, FNetAtoms[naWM_PING]);

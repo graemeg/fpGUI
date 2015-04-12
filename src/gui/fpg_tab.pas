@@ -422,7 +422,6 @@ var
   wd: integer;  { width delta }
   h: integer;
   hd: integer;  { height delta }
-  msg: TfpgMessageParams;
 begin
   // PageControl has bevelled edges in some themes
   r := fpgStyle.GetControlFrameBorders;
@@ -833,8 +832,6 @@ var
   h: TfpgTabSheet;
   lp: integer;
   toffset: integer;
-  TextLeft, TextTop: Integer;
-  dx: integer;
   lTxtFlags: TfpgTextFlags;
   ActivePageVisible: Boolean;
 begin

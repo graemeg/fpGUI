@@ -435,8 +435,6 @@ begin
 end;
 
 procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
-var
-  lPos: TfpgCoord;
 begin
   inherited;
   CaptureMouse;

@@ -161,7 +161,6 @@ var
   c : TComponent;
   max_w, max_h : integer;
   this_need : integer;
-  par : TfpgWidget;
 begin
   if ComponentCount=0 then
     Exit;
@@ -217,8 +216,6 @@ end;
 
 procedure TfpgScrollFrame.HandleMouseScroll(x, y: integer; 
   shiftstate: TShiftState; delta: smallint);
-var
-  old_val, new_val : integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
   with FVScrollBar do

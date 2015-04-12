@@ -260,7 +260,6 @@ var
   logo: TfpgImage;
   i: integer;
   y: integer;
-  tw: integer;
 begin
   inherited HandlePaint;
   case FDialogType of
