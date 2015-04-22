@@ -696,7 +696,6 @@ var
   cw: integer;
   vl: integer;
   i: integer;
-  x: integer;
   hmax: integer;
   vmax: integer;
   Hfits, showH : boolean;
@@ -929,7 +928,6 @@ var
   rTop: integer;
   firstcol, lastcol, firstrow, lastrow : integer;
   cWidths: array of integer;
-  rect: TRect;
 begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -1446,7 +1444,6 @@ end;
 
 procedure TfpgBaseGrid.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
-  lColumn: integer;
   hh: integer; { header height }
   cLeft: integer; { column left }
   c: integer;
@@ -1512,7 +1509,6 @@ var
   hh: integer;
   n: Integer;
   cw: integer;
-  nw: integer;
   prow: Integer;
   pcol: Integer;
   c: integer;
