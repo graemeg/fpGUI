@@ -197,7 +197,6 @@ var
   s: TfpgString;
   dir: TfpgString;
   i: integer;
-  p: integer;
   prevn, nextn: TfpgTreeNode;
 begin
   if AValue = '' then
