@@ -1,24 +1,25 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# translation of fpgui. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008. Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009 Stéphane Aulery <lkppo@free.fr>, 2015
 msgid ""
 msgstr ""
-"Project-Id-Version: FPGUI\n"
+"Project-Id-Version: fpgui 1.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:56+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Afrikaans <en@li.org>\n"
+"PO-Revision-Date: 2015-04-22 22:00+0100\n"
+"Last-Translator: Stéphane Aulery <lkppo@free.fr>\n"
+"Language-Team: French <traduc@traduc.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: "
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> n''est pas assigné"
+msgstr "<%s> n’est pas assigné"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Un nouvel item a été détecté"
+msgstr "Un nouvel élément a été détecté"
 
 #: fpg_constants:rsabort
 msgid "Abort"
@@ -26,7 +27,7 @@ msgstr "Arrêter"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr "A propos de %s"
+msgstr "À propos de %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
@@ -50,7 +51,7 @@ msgstr "Alt+"
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "Anti alias"
+msgstr "Anticrénelage"
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
@@ -74,11 +75,11 @@ msgstr "Août"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr ""
+msgstr "RtAr"
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "Bleu"
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -106,7 +107,7 @@ msgstr "Table de caractères"
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
-msgstr ""
+msgstr "Cliquer sur la pipette et maintenir le bouton => relâcher pour mémoriser la couleur"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -118,7 +119,7 @@ msgstr "Collection"
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr ""
+msgstr "Cercle chromatique"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
@@ -134,7 +135,7 @@ msgstr "Confirmation"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
-msgstr ""
+msgstr "Continu"
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -142,7 +143,7 @@ msgstr "Copier"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "Le répertoire <%s> n''a pas pu être ouvert"
+msgstr "Le répertoire <%s> n’a pas pu être ouvert"
 
 #: fpg_constants:rscreate
 msgid "Create"
@@ -178,7 +179,7 @@ msgstr "Décembre"
 
 #: fpg_constants:rskeydel
 msgid "Del"
-msgstr ""
+msgstr "Suppr"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
@@ -194,19 +195,19 @@ msgstr "Répertoire"
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr ""
+msgstr "Bas"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr "Disque"
+msgstr "Lecteur"
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "Editer"
+msgstr "Modifier"
 
 #: fpg_constants:rskeyend
 msgid "End"
-msgstr ""
+msgstr "Fin"
 
 #: fpg_constants:rslanguage
 msgid "English"
@@ -214,7 +215,7 @@ msgstr "Français"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
-msgstr ""
+msgstr "Entrée"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
@@ -226,7 +227,7 @@ msgstr "Erreur"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
-msgstr ""
+msgstr "Échap"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
@@ -234,15 +235,15 @@ msgstr "Texte exemple"
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "Sortir"
+msgstr "Quitter"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "Le répertoire <%s> n''a pas pu être ouvert"
+msgstr "Le répertoire <%s> n’a pas pu être ouvert"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "Visualiseur d'aide non trouvé"
+msgstr "Visionneuse d’aide introuvable"
 
 #: fpg_constants:rsfalse
 msgid "False"
@@ -262,7 +263,7 @@ msgstr "Février"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "Sélection fichier"
+msgstr "Sélection de fichier"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
@@ -282,11 +283,11 @@ msgstr "Longueur fixe"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "Alias"
+msgstr "Alias de police"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "Fichier de police <%s.fnt> non trouvé"
+msgstr "Fichier de police <%s.fnt> introuvable"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
@@ -298,7 +299,7 @@ msgstr "Vendredi"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr ""
+msgstr "Vert"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
@@ -310,11 +311,11 @@ msgstr "Aide"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
-msgstr ""
+msgstr "Hexadécimal"
 
 #: fpg_constants:rskeyhome
 msgid "Home"
-msgstr ""
+msgstr "Accueil"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
@@ -326,11 +327,11 @@ msgstr "Image <%s> introuvable"
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr "Information"
+msgstr "Informations"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
-msgstr ""
+msgstr "Ins"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
@@ -346,7 +347,7 @@ msgstr "Italique"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr "L''item n''est pas du type <%s>!"
+msgstr "L’élément n’est pas de type <%s> !"
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
@@ -374,7 +375,7 @@ msgstr "Juin"
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr ""
+msgstr "Gauche"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
@@ -414,11 +415,11 @@ msgstr "Lundi"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr "Déplacer vers le bas"
+msgstr "Baisser"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr "Déplacer vers le haut"
+msgstr "Élever"
 
 #: fpg_constants:rsname
 msgid "Name"
@@ -442,7 +443,7 @@ msgstr "Novembre"
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr "OK"
+msgstr "Ok"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
@@ -482,19 +483,19 @@ msgstr "Coller"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
-msgstr ""
+msgstr "PgBs"
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
-msgstr ""
+msgstr "PgHt"
 
 #: fpg_constants:rstabpredefined
 msgid "Predefined"
-msgstr ""
+msgstr "Prédéfini"
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr "Prévisualisation"
+msgstr "Aperçu"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -502,7 +503,7 @@ msgstr "Récemment utilisé"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr ""
+msgstr "Rouge"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -514,7 +515,7 @@ msgstr "Retenter"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr ""
+msgstr "Droite"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -534,15 +535,15 @@ msgstr "Samedi"
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr "Sauver"
+msgstr "Enregistrer"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr "Sauver sous"
+msgstr "Enregistrer sous"
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "Chercher"
+msgstr "Rechercher"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
@@ -550,7 +551,7 @@ msgstr "Section"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "Selectionner"
+msgstr "Sélectionner"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
@@ -558,7 +559,7 @@ msgstr "Sélectionner un répertoire"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "Choisir la police"
+msgstr "Choisir la police de caractères"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
@@ -570,11 +571,11 @@ msgstr "Septembre"
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
-msgstr "Serif"
+msgstr "À empattement"
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
-msgstr ""
+msgstr "Maj+"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
@@ -586,7 +587,7 @@ msgstr "Taille"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Espace"
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -602,7 +603,7 @@ msgstr "Dimanche"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr ""
+msgstr "Tab"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
@@ -610,7 +611,7 @@ msgstr "Texte à insérer"
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr "Il n'y a pas de page à imprimer"
+msgstr "Il n’y a pas de page à imprimer"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
@@ -622,7 +623,7 @@ msgstr "Jeudi"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "Aujourd''hui"
+msgstr "Aujourd’hui"
 
 #: fpg_constants:rstrue
 msgid "True"
@@ -650,11 +651,11 @@ msgstr "Souligné"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr ""
+msgstr "Haut"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "Nom utilisateur"
+msgstr "Nom d’utilisateur"
 
 #: fpg_constants:rswarning
 msgid "Warning"
@@ -670,7 +671,7 @@ msgstr "Mercredi"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "Voulez-vous ajouter l''item <%s> à la liste?"
+msgstr "Voulez-vous ajouter l’élément <%s> à la liste ?"
 
 #: fpg_constants:rsyes
 msgid "Yes"
