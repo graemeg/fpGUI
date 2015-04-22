@@ -333,11 +333,11 @@ end;
 
 procedure TMainDesigner.CreateWindows;
 begin
-  frmMain := TfrmMain.Create(nil);
+  fpgApplication.CreateForm(TfrmMain, frmMain);
   frmMain.WindowTitle := cAppNameAndVersion;
   frmMain.Show;
 
-  frmProperties := TfrmProperties.Create(nil);
+  fpgApplication.CreateForm(TfrmProperties, frmProperties);
   frmProperties.Show;
 end;
 
