@@ -441,9 +441,9 @@ begin
 end;
 
 procedure TfpgBaseEditCombo.SetDefaultPopupMenuItemsState;
-var
-  i: integer;
-  itm: TfpgMenuItem;
+//var
+  //i: integer;
+  //itm: TfpgMenuItem;
 begin
   //for i := 0 to FDefaultPopupMenu.ComponentCount-1 do
   //begin

@@ -189,7 +189,6 @@ procedure TfpgBaseCheckBox.HandlePaint;
 var
   r: TfpgRect;
   ix: integer;
-  img: TfpgImage;
   LFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;

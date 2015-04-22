@@ -727,7 +727,6 @@ var
   Data: Pointer;
   xia_Atom_Pair: TAtom;
   AtomPair: TAtomPair;
-  i: Integer;
   r: cint;
 begin
 

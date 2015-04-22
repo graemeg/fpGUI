@@ -488,7 +488,7 @@ var
   d: integer;
   area: integer;
   newp: integer;
-  ppos: integer;
+  //ppos: integer;
   tw: TfpgCoord;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
@@ -514,7 +514,7 @@ begin
     area  := Width - FSliderLength-4-tw;
   end;
 
-  ppos       := FSliderPos;
+  //ppos       := FSliderPos;
   FSliderPos := FSliderDragStart + d;
 
   if FSliderPos < 0 then

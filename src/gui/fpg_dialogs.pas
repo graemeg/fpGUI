@@ -1469,7 +1469,6 @@ end;
 function TfpgFileDialog.CreatePopupMenu: TfpgPopupMenu;
 var
   i: integer;
-  s: TfpgString;
   lst: TStringList;
   mi: TfpgMenuItem;
 begin
