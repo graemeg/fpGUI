@@ -74,6 +74,7 @@ uses
   agg_image_filters ,
   agg_vertex_source ,
   agg_render_scanlines ,
+  agg_blur,
 
 {$IFDEF AGG2D_USE_FREETYPE }
   agg_font_freetype ,
@@ -619,6 +620,7 @@ type
               dstX ,dstY : double ); overload;
 
    procedure CopyImage(bitmap : TfpgImage; dstX ,dstY : double ); overload;
+   procedure Blur(rx ,ry : unsigned);
 
   private
    procedure render(fillColor_ : boolean ); overload;
@@ -3488,6 +3490,19 @@ begin
 
   end;
 
+end;
+
+procedure TAgg2D.Blur(rx, ry: unsigned);
+begin
+  if (m_pixf = pf32bit) then
+    stack_blur_rgba32(@m_pixFormat, rx, ry)
+  else if (m_pixf = pf24bit) then
+    stack_blur_rgb24(@m_pixFormat, rx, ry)
+  else if (m_pixf = pf8bit) then
+    stack_blur_gray8(@m_pixFormat, rx, ry)
+  begin
+    raise Exception.Create('Unsupported pixel format');
+  end;
 end;
 
 { RENDER }

@@ -58,6 +58,7 @@ uses
  agg_image_filters ,
  agg_vertex_source ,
  agg_render_scanlines ,
+ agg_blur,
 
 {$IFDEF AGG2D_USE_FREETYPE }
  agg_font_freetype ,
@@ -540,6 +541,7 @@ type
               parallelogram_ : double_ptr ); overload;
 
    procedure transformImagePath(img : Image_ptr; parallelogram_ : double_ptr ); overload;
+   procedure Blur(rx ,ry : unsigned);
 
   // Image Blending (no transformations available)
    procedure blendImage(
@@ -2832,6 +2834,11 @@ procedure Agg2D.transformImagePath(img : Image_ptr; parallelogram_ : double_ptr 
 begin
  renderImage(img ,0 ,0 ,img.renBuf._width ,img.renBuf._height ,parallelogram_ );
 
+end;
+
+procedure Agg2D.Blur(rx, ry: unsigned);
+begin
+  stack_blur_rgba32(@m_pixFormat, rx, ry);
 end;
 
 { BLENDIMAGE }
