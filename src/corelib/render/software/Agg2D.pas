@@ -3500,6 +3500,7 @@ begin
     stack_blur_rgb24(@m_pixFormat, rx, ry)
   else if (m_pixf = pf8bit) then
     stack_blur_gray8(@m_pixFormat, rx, ry)
+  else
   begin
     raise Exception.Create('Unsupported pixel format');
   end;
