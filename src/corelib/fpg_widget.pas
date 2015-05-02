@@ -941,12 +941,12 @@ begin
 end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
-{$IFDEF Debug}
+{$IFDEF CStackDebug}
 var
   itf: IInterface;
 {$ENDIF}
 begin
-  {$IFDEF Debug}
+  {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgMouseEnter - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if InDesigner then
@@ -962,12 +962,12 @@ begin
 end;
 
 procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
-{$IFDEF Debug}
+{$IFDEF CStackDebug}
 var
   itf: IInterface;
 {$ENDIF}
 begin
-  {$IFDEF Debug}
+  {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgMouseExit - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if InDesigner then
@@ -1313,11 +1313,11 @@ procedure TfpgWidget.HandleMouseEnter;
 var
   msgp: TfpgMessageParams;
   b: boolean;
-{$IFDEF Debug}
+{$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
 begin
-  {$IFDEF Debug}
+  {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.HandleMouseEnter - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   fillchar(msgp, sizeof(msgp), 0);
@@ -1333,7 +1333,7 @@ end;
 
 procedure TfpgWidget.HandleMouseExit;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF CStackDebug}
   writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
   {$ENDIF}
   if FShowHint then
