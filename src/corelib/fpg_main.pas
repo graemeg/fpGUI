@@ -877,19 +877,17 @@ end;
 
 procedure PrintRect(const Rect: TRect);
 begin
-  writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
-      ' bottom=', Rect.Bottom);
+  DebugLn(Format('Rect left=%d top=%d right=%d bottom=%d', [Rect.Left, Rect.Top, Rect.Right, Rect.Bottom]));
 end;
 
 procedure PrintRect(const Rect: TfpgRect);
 begin
-  writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
-      ' bottom=', Rect.Bottom, ' width=', Rect.Width, ' height=', Rect.Height);
+  DebugLn(Format('Rect left=%d top=%d right=%d bottom=%d width=%d height=%d', [Rect.Left, Rect.Top, Rect.Right, Rect.Bottom, Rect.Width, Rect.Height]));
 end;
 
 procedure PrintCoord(const x, y: TfpgCoord);
 begin
-  writeln('x=', x, '  y=', y);
+  DebugLn(Format('x=%d, y=%d', [x, y]));
 end;
 
 var
@@ -935,7 +933,7 @@ end;
 
 procedure PrintSize(const ASize: TfpgSize);
 begin
-  writeln('w=', ASize.W, '  h=', ASize.H);
+  DebugLn(Format('w=%d  h=%d', [ASize.W, ASize.H]));
 end;
 
 procedure PrintCoord(const pt: TPoint);

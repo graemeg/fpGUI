@@ -1896,7 +1896,7 @@ var
 begin
   NewSize := fpgSize(msg.Params.rect.Width, msg.Params.rect.Height);
   {$IFDEF DEBUG}
-  WriteLn('FPGM_RESIZE to Native Window: Requested Value, Current Value , Message Value');
+  DebugLn('FPGM_RESIZE to Native Window: Requested Value, Current Value , Message Value');
   PrintSize(FSize);
   PrintSize(FNotifiedSize);
   PrintSize(NewSize);
@@ -3255,7 +3255,7 @@ begin
       else
         p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -n ' + IntToStr(AHelpContext);
         {$ifdef GDEBUG}
-        senddebug(p.CommandLine);
+        DebugLn(p.CommandLine);
         {$endif}
     end
     else
@@ -3284,7 +3284,7 @@ begin
     begin
       p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -s ' + AHelpKeyword;
       {$ifdef GDEBUG}
-      senddebug(p.CommandLine);
+      DebugLn(p.CommandLine);
       {$endif}
     end
     else
