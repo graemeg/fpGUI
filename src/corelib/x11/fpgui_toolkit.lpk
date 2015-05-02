@@ -22,8 +22,7 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
-        <CustomOptions Value="-dAggCanvasX"/>
-        <CompilerPath Value="$(CompPath)"/>
+        <CustomOptions Value="-dAggCanvas"/>
       </Other>
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
