@@ -430,6 +430,7 @@ procedure DumpStack;
 procedure DumpStack(var AList: TStrings);
 
 { These methods are safe to use even on Windows gui applications. }
+procedure DebugWrite(const s1: TfpgString);
 procedure DebugLn(const s1: TfpgString);
 procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
@@ -1003,6 +1004,16 @@ begin
       AList.Add(BackTraceStrFunc(ExceptFrames[i]));
   end;
   AList.Add('');
+end;
+
+procedure DebugWrite(const s1: TfpgString);
+var
+  s: string;
+begin
+  if not Assigned(uDebugText) then
+    Exit; //==>
+  s := DupeString(' ', uDebugIndent);
+  write(uDebugText^, s + fpgConvertLineEndings(s1));
 end;
 
 procedure DebugLn(const s1: TfpgString);
