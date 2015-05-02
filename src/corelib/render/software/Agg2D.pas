@@ -390,6 +390,8 @@ type
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
+    function    GetBufferAllocated: Boolean; override;
+    procedure   DoAllocateBuffer; override;
     // -------- TfpgCanvasBase  end  ---------------
 
   public
@@ -3751,27 +3753,12 @@ end;
 
 procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
-  if Assigned(FImg) then
-  begin
-    { if the window was resized }
-    if (FImg.Width <> FWidget.Width) or (FImg.Height <> FWidget.Height) then
-    begin
-      FImg.Free;
-      FImg := nil;
-    end;
-  end;
-
-  if not Assigned(FImg) then
-  begin
-    FImg := TfpgImage.Create;
-    FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
-    Attach(FImg);
-  end;
+  // do nothing
 end;
 
 procedure TAgg2D.DoEndDraw;
 begin
-  // nothing to do here
+  FCanvasTarget := nil;
 end;
 
 function TAgg2D.GetPixel(X, Y: integer): TfpgColor;
@@ -3815,6 +3802,39 @@ begin
   LineColor(LineColor);
   FillColor($00, $00, $00);  // clBlack for now
   Polygon(@poly[1], NumPts);
+end;
+
+function TAgg2D.GetBufferAllocated: Boolean;
+begin
+  if FCanvasTarget <> Self then
+  begin
+    Result := TAgg2D(FCanvasTarget).GetBufferAllocated
+  end
+  else
+  begin
+    Result := Assigned(FImg);
+    if Result then
+    begin
+      { if the window was resized }
+      if (FImg.Width <> FWidget.Width) or (FImg.Height <> FWidget.Height) then
+      begin
+//        DebugLn('**** Free old pixel buffer, because the window size has changed');
+        FImg.Free;
+        FImg := nil;
+        Result := False;
+      end;
+    end
+  end;
+end;
+
+procedure TAgg2D.DoAllocateBuffer;
+begin
+  if not Assigned(FImg) then
+  begin
+    FImg := TfpgImage.Create;
+    FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
+    Attach(FImg);
+  end;
 end;
 
 
