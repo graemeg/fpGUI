@@ -426,7 +426,7 @@ type
    procedure force_redraw;
    procedure update_window;
 
-  // So, finally, how to draw anythig with AGG? Very simple.
+  // So, finally, how to draw anything with AGG? Very simple.
   // rbuf_window() returns a reference to the main rendering
   // buffer which can be attached to any rendering class.
   // rbuf_img() returns a reference to the previously created

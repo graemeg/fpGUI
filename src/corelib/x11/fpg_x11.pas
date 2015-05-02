@@ -169,7 +169,6 @@ type
     constructor Create;
   end;
 
-  { TfpgX11Canvas }
 
   TfpgX11Canvas = class(TfpgCanvasBase)
   private
