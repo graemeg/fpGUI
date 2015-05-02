@@ -366,7 +366,7 @@ type
 IMPLEMENTATION
 { UNIT IMPLEMENTATION }
 { agg_getmem }
-function agg_getmem;
+function agg_getmem(var buf : pointer; sz : unsigned ) : boolean;
 begin
  result:=false;
 
@@ -383,7 +383,7 @@ begin
 end;
 
 { agg_freemem }
-function agg_freemem;
+function agg_freemem(var buf : pointer; sz : unsigned ) : boolean;
 begin
  if buf = NIL then
   result:=true
@@ -404,7 +404,7 @@ begin
 end;
 
 { deg2rad }
-function deg2rad;
+function deg2rad(deg : double ) : double;
 begin
  result:=deg * pi / 180;
 
