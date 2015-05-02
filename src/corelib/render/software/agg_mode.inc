@@ -23,7 +23,8 @@
 
 
 {$IFDEF FPC }
- {$MODE DELPHI }
+ {$MODE delphi}
+ {$H+}
 {$ENDIF }
 
 // OS
