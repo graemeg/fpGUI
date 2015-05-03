@@ -79,6 +79,9 @@ type
 
    constructor Construct(ren : renderer_base_ptr );
 
+   function sweep_scanline(sl: scanline_ptr): boolean; virtual;
+   function sweep_scanline_em(sl: scanline_ptr): boolean; virtual;
+
    procedure color_ (c : aggclr_ptr ); virtual;
    procedure prepare(u : unsigned ); virtual;
    procedure render (sl : scanline_ptr ); virtual;
@@ -251,7 +254,7 @@ begin
 end;
 
 { CONSTRUCT }
-constructor renderer_scanline_aa_solid.Construct;
+constructor renderer_scanline_aa_solid.Construct(ren: renderer_base_ptr);
 begin
  m_ren:=ren;
 
@@ -259,20 +262,30 @@ begin
 
 end;
 
+function renderer_scanline_aa_solid.sweep_scanline(sl: scanline_ptr): boolean;
+begin
+
+end;
+
+function renderer_scanline_aa_solid.sweep_scanline_em(sl: scanline_ptr): boolean;
+begin
+
+end;
+
 { COLOR_ }
-procedure renderer_scanline_aa_solid.color_;
+procedure renderer_scanline_aa_solid.color_(c: aggclr_ptr);
 begin
  m_color:=c^;
 
 end;
 
 { PREPARE }
-procedure renderer_scanline_aa_solid.prepare;
+procedure renderer_scanline_aa_solid.prepare(u: unsigned);
 begin
 end;
 
 { RENDER }
-procedure renderer_scanline_aa_solid.render;
+procedure renderer_scanline_aa_solid.render(sl: scanline_ptr);
 var
  x ,y  : int;
 
