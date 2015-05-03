@@ -3753,7 +3753,11 @@ end;
 
 procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
-  // do nothing
+  if CanvasTarget <> Self then
+  begin
+    // let this TAgg2D attach to the Native Window's Canvas.FImg
+    Attach(TAgg2D(CanvasTarget).FImg);
+  end;
 end;
 
 procedure TAgg2D.DoEndDraw;
@@ -3808,7 +3812,7 @@ function TAgg2D.GetBufferAllocated: Boolean;
 begin
   if FCanvasTarget <> Self then
   begin
-    Result := TAgg2D(FCanvasTarget).GetBufferAllocated
+    Result := TAgg2D(FCanvasTarget).GetBufferAllocated;
   end
   else
   begin
