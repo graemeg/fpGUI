@@ -2954,6 +2954,9 @@ var
   pixelcnt: integer;
   bit: byte;
   msklinelen: integer;
+  {$ifdef AGGCanvas}
+  row, col, n: integer;
+  {$endif}
 begin
   if FColorDepth = 1 then
     Exit; //==>
