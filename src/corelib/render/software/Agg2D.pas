@@ -3764,6 +3764,7 @@ end;
 procedure TAgg2D.DoEndDraw;
 begin
   FCanvasTarget := nil;
+  ResetTransformations;
 end;
 
 function TAgg2D.GetPixel(X, Y: integer): TfpgColor;
