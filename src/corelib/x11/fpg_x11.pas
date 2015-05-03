@@ -2432,7 +2432,7 @@ begin
 
   IsToplevel := (AParent = nil) or (FWindowType in [wtModalForm, wtPopup]);
   if not IsToplevel then
-    pwh := TfpgX11Window(AParent).WinHandle
+    pwh := TfpgX11Window(AParent.Window).WinHandle
   else
     pwh := xapplication.RootWindow;
 
