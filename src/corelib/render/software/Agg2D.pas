@@ -3757,6 +3757,7 @@ begin
   begin
     // let this TAgg2D attach to the Native Window's Canvas.FImg
     Attach(TAgg2D(CanvasTarget).FImg);
+    Translate(FDeltaX, FDeltaY);
   end;
 end;
 
