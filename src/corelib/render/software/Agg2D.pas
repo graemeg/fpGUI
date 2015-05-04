@@ -3653,10 +3653,7 @@ end;
 
 procedure TAgg2D.DoGetWinRect(out r: TfpgRect);
 begin
-  r.Left    := 0;
-  r.Top     := 0;
-  r.Width := FWidget.Width;
-  r.Height := FWidget.Height;
+  r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
 
 procedure TAgg2D.DoFillRectangle(x, y, w, h: TfpgCoord);
