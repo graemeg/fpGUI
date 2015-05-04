@@ -2525,7 +2525,7 @@ begin
           Dispose(r);
           r := GetPutBufferItem;
         end;}
-        DoPutBufferToScreen(finalrect.Left, finalrect.Top, finalrect.Width, finalrect.Height);
+        DoPutBufferToScreen(x, y, w, h);
       end
       else
       begin
