@@ -129,8 +129,8 @@ begin
 
   // finally dump the image to screen!
   XPutImage(fpgApplication.Display, X11Handle,
-      drawgc, TImageHack(FImg).XImage, x, y, FDeltaX, FDeltaY,
-      w, h);
+      drawgc, TImageHack(FImg).XImage, 0, 0, 0, 0,
+      FWidget.Width, FWidget.Height);
 
   XFreeGc(fpgApplication.Display, drawgc);
 end;
