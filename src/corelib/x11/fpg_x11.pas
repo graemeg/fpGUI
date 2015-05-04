@@ -3417,12 +3417,6 @@ begin
 end;
 
 procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
-var
-  rw: TfpgWinHandle;
-  x: integer;
-  y: integer;
-  bw: longword;
-  d: longword;
 begin
   r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
