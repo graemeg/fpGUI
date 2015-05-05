@@ -3728,13 +3728,20 @@ begin
 end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
+var
+ R: TfpgRect;
 begin
-  ClipBox(ARect.Left, ARect.Top, ARect.Right+1, ARect.Bottom+1);
+  R := ARect;
+  Inc(R.Top, FDeltaY);
+  Inc(R.Left, FDeltaX);
+  ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+1);
 end;
 
 function TAgg2D.DoGetClipRect: TfpgRect;
 begin
   Result.SetRect(Round(ClipBox.x1), Round(ClipBox.y1), Round(ClipBox.x2 - ClipBox.x1), Round(ClipBox.y2 - ClipBox.y1));
+  Dec(Result.Left, FDeltaX);
+  Dec(Result.Top, FDeltaY);
 end;
 
 procedure TAgg2D.DoAddClipRect(const ARect: TfpgRect);
@@ -3744,7 +3751,7 @@ end;
 
 procedure TAgg2D.DoClearClipRect;
 begin
-  ClipBox(0, 0, FWidget.width, FWidget.height);
+  ClipBox(FDeltaX, FDeltaY, FDeltaX+FWidget.width, FDeltaY+FWidget.height);
   m_rasterizer.m_clipping := false;
 end;
 
