@@ -1482,13 +1482,13 @@ begin
   {$ENDIF}
 
   // combine existing invalid rect with message rect if sent
-  if FInvalidRect = fpgRect(0,0,0,0) then
+  if FInvalidRect.IsEmpty then
     FInvalidRect := msg.Params.rect
   else
-    if msg.Params.rect <> fpgRect(0,0,0,0) then
+    if not msg.Params.rect.IsEmpty then
       UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
 
-  HasInvalidRegion:=FInvalidRect <> fpgRect(0,0,0,0);
+  HasInvalidRegion:=not FInvalidRect.IsEmpty;
 
   if HasOwnWindow then
   begin
