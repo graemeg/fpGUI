@@ -140,6 +140,9 @@ const
 
 type
   PfpgRect = ^TfpgRect;
+
+  { TfpgRect }
+
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
     Left: TfpgCoord;
@@ -150,6 +153,7 @@ type
     function  Right: TfpgCoord;
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
+    function  IsEmpty: Boolean;
   end;
 
 
@@ -1612,6 +1616,11 @@ end;
 procedure TfpgRect.SetRight(Value: TfpgCoord);
 begin
   Width := Value - Left + 1;
+end;
+
+function TfpgRect.IsEmpty: Boolean;
+begin
+  Result := (Left or Top or Width or Height) = 0;
 end;
 
 
