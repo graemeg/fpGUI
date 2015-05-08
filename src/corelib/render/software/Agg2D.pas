@@ -1354,9 +1354,7 @@ var
 begin
  result:=false;
 
- if Assigned(bitmap )
-  {and
-    not bitmap.Empty }then    {$Warning Implement bitmap.Emtpy }
+ if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) then
   case bitmap.ColorDepth of
    24,
    32:
@@ -3857,10 +3855,7 @@ var
 begin
  result:=false;
 
- if Assigned(bitmap )
-  { and
-    not bitmap.Empty} and      {$Warning Implement bitmap.Empty }
-    (bitmap.ColorDepth = 32 ) then
+ if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) and (bitmap.ColorDepth = 32 ) then
  begin
    for fcy:=0 to bitmap.Height - 1 do
     begin
