@@ -1278,10 +1278,10 @@ begin
  m_fillGradientInterpolator.Construct(@m_fillGradientMatrix );
  m_lineGradientInterpolator.Construct(@m_lineGradientMatrix );
 
- m_lineWidth  :=1;
- m_evenOddFlag:=false;
+ m_lineWidth  := 1.0;
+ m_evenOddFlag := false;
 
- m_imageFlip:=false;
+ m_imageFlip := false;
 
  m_path.Construct;
  m_transform.Construct;
@@ -3851,31 +3851,22 @@ function BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
 var
  fcx ,fcy : integer;
  transp   : ^byte;
-
 begin
  result:=false;
-
  if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) and (bitmap.ColorDepth = 32 ) then
  begin
    for fcy:=0 to bitmap.Height - 1 do
     begin
      transp:=pointer(ptrcomp(bitmap.ScanLine[fcy ] ) + 3 );
-
      for fcx:=0 to bitmap.Width - 1 do
       begin
        transp^:=alpha;
-
        inc(ptrcomp(transp ) ,4 );
-
       end;
-
     end;
-
   { OK }
    result:=true;
-
  end;
-
 end;
 
 end.

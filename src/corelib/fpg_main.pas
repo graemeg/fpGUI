@@ -2007,8 +2007,6 @@ begin
     else
       FWindowType   := wtWindow;
   end;
-
-  //FCanvas := CreateCanvas;
 end;
 
 { TfpgStyle }

@@ -141,8 +141,6 @@ const
 type
   PfpgRect = ^TfpgRect;
 
-  { TfpgRect }
-
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
     Left: TfpgCoord;
@@ -336,8 +334,6 @@ type
     function    MaxSupport: double; override;
   end;
 
-
-  { TfpgCanvasBase }
 
   TfpgCanvasBase = class(TObject)
   private
