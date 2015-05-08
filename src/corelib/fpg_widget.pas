@@ -1482,13 +1482,13 @@ begin
   {$ENDIF}
 
   // combine existing invalid rect with message rect if sent
-  if FInvalidRect.IsEmpty then
+  if FInvalidRect.IsUnassigned then
     FInvalidRect := msg.Params.rect
   else
-    if not msg.Params.rect.IsEmpty then
+    if not msg.Params.rect.IsUnassigned then
       UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
 
-  HasInvalidRegion:=not FInvalidRect.IsEmpty;
+  HasInvalidRegion:=not FInvalidRect.IsUnassigned;
 
   if HasOwnWindow then
   begin
@@ -1497,7 +1497,7 @@ begin
     if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
     begin
       Canvas.EndDraw;
-      FInvalidRect := fpgRect(0,0,0,0);
+      FInvalidRect.Clear;
       FInvalidated:=False;
       {$IFDEF DEBUG}
       Writeln('Invalid Rect Detected!');
@@ -1522,7 +1522,7 @@ begin
           if HasInvalidRegion then
             w.ParentToWidget(Params.rect.Left, Params.rect.Top)
           else
-            Params.rect := fpgRect(0,0,0,0);
+            Params.rect.Clear;
           fpgSendMessage(Self, w, FPGM_PAINT, Params);
         end;
       end;
@@ -1534,7 +1534,7 @@ begin
   else
     Canvas.EndDraw;
 
-  FInvalidRect := fpgRect(0,0,0,0);
+  FInvalidRect.Clear;
   FInvalidated:=False;
 end;
 
@@ -1825,7 +1825,7 @@ begin
     Exit;
   end;
 
-  if FInvalidRect = fpgRect(0,0,0,0) then
+  if FInvalidRect.IsUnassigned then
     FInvalidRect := ARect
   else
     UnionRect(FInvalidRect, FInvalidRect, ARect);

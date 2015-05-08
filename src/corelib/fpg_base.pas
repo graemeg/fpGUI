@@ -153,7 +153,8 @@ type
     function  Right: TfpgCoord;
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
-    function  IsEmpty: Boolean;
+    function  IsUnassigned: Boolean;
+    procedure Clear;
   end;
 
 
@@ -1618,9 +1619,17 @@ begin
   Width := Value - Left + 1;
 end;
 
-function TfpgRect.IsEmpty: Boolean;
+function TfpgRect.IsUnassigned: Boolean;
 begin
   Result := (Left or Top or Width or Height) = 0;
+end;
+
+procedure TfpgRect.Clear;
+begin
+  Top    := 0;
+  Left   := 0;
+  Width  := 0;
+  Height := 0;
 end;
 
 
@@ -2464,7 +2473,7 @@ begin
     DoBeginDraw(FWidget, CanvasTarget);
 
 
-    if GetClipRect = fpgRect(0,0,0,0) then
+    if GetClipRect.IsUnassigned then
       ClearClipRect//SetClipRect(FWidget.GetClientRect)
     else
       SetClipRect(fpgRect(0,0, FWidget.Width, FWidget.Height));
