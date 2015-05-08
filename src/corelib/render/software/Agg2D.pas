@@ -669,6 +669,7 @@ uses
 { LOCAL VARIABLES & CONSTANTS }
 var
  g_approxScale : double = 2.0;
+ g_ResizeThreshold: integer = 50;
 
 type
  PAggSpanConvImageBlend = ^TAggSpanConvImageBlend;
@@ -3824,9 +3825,13 @@ begin
     if Result then
     begin
       { if the window was resized }
-      if (FImg.Width <> FWidget.Width) or (FImg.Height <> FWidget.Height) then
+      if (FImg.Width < FWidget.Width) or (FImg.Height < FWidget.Height) then
+//      if (abs(FImg.Width - FWidget.Width) > g_ResizeThreshold) or (abs(FImg.Height - FWidget.Height) > g_ResizeThreshold) then
       begin
-//        DebugLn('**** Free old pixel buffer, because the window size has changed');
+        {$IFDEF GDEBUG}
+        DebugLn('img vs widget width = ' + IntToStr(FImg.Width) + ' ' + IntToStr(FWidget.Width));
+        DebugLn('**** Free old pixel buffer, because the window size has changed');
+        {$ENDIF}
         FImg.Free;
         FImg := nil;
         Result := False;
@@ -3840,7 +3845,7 @@ begin
   if not Assigned(FImg) then
   begin
     FImg := TfpgImage.Create;
-    FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
+    FImg.AllocateImage(32, FWidget.Width+g_ResizeThreshold, FWidget.Height+g_ResizeThreshold);
     Attach(FImg);
   end;
 end;
