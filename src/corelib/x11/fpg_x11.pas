@@ -1970,13 +1970,13 @@ begin
 
     X.Expose:
         begin
-          repeat
-            //
-          until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
+          with ev.xexpose do
+            msgp.rect := fpgRect(x, y, width, height);
+          while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
+            with ev.xexpose do
+              UnionRect(msgp.rect, msgp.rect, fpgRect(x, y, width, height));
           if ev.xexpose.count = 0 then
           begin
-            with ev.xexpose do
-              msgp.rect := fpgRect(x, y, width, height);
             w := FindWindowByHandle(ev.xexpose.window);
             // use invalidate if a FPGM_PAINT message is already queued
             if Assigned(w) then
