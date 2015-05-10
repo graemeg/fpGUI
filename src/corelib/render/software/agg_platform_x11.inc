@@ -110,14 +110,18 @@ begin
   end;
 end;
 
+type
+  TfpgX11WindowHack = class(TfpgX11Window);
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   drawgc: Tgc;
   GcValues: TXGcValues;
   X11Handle: TfpgWinHandle;
+  win: TfpgX11WindowHack;
 begin
-  X11Handle := TfpgX11Window(TfpgWidgetBase(FWidget).Window).WinHandle;
+  win := TfpgX11WindowHack(TfpgWidgetBase(FWidget).Window);
+  X11Handle := win.WinHandle;
   if X11Handle <= 0 then
   begin
     debugln('    no winhandle available');
@@ -133,6 +137,7 @@ begin
       w, h);
 
   XFreeGc(fpgApplication.Display, drawgc);
+  win.TriggerSyncCounter;
 end;
 
 

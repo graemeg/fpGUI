@@ -43,6 +43,9 @@ uses
   fpg_base,
   fpg_impl;
 
+{$LINKLIB Xext} // for xsync functions
+
+
 const
   IconBitmapWidth = 16;
   IconBitmapHeight = 16;
@@ -92,6 +95,12 @@ type
     status: culong;
   end;
 
+  // XSync extension types
+  TXSyncCounter = TXID;
+  TXSyncValue = record
+    hi: cint;
+    lo: cunsigned;
+  end;
 
 const
 // Motif window hints
@@ -228,9 +237,14 @@ type
 
 
 
+  { TfpgX11Window }
+
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
+    FSyncCounter: TXSyncCounter;
+    FSyncValue: TXSyncValue;
+    FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
   protected
     FWinFlags: TXWindowStateFlags;
@@ -252,6 +266,7 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
     function    GetWindowState: TfpgWindowState; override;
+    procedure   TriggerSyncCounter;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
@@ -502,6 +517,11 @@ function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandl
 
 function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external;
 function XCreateIC(para1: PXIM; para2: array of const): PXIC; cdecl; external;
+
+// XSync functions
+function XSyncCreateCounter(dpy: PXDisplay; initial_value: TXSyncValue): TXSyncCounter; cdecl; external;
+function XSyncSetCounter(dpy: PXDisplay; counter: TXSyncCounter; value: TXSyncValue): TStatus; cdecl; external;
+function XSyncDestroyCounter(dpy: PXDisplay; counter: TXSyncCounter ): TStatus; cdecl; external;
 
 const
   AltGrMask = 1 shl 13;  // missing from X unit
@@ -2063,7 +2083,14 @@ begin
 
               if not blockmsg then
                 fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
-             end;
+            end
+            else if ev.xclient.data.l[0] = netlayer.NetAtom[naWM_SYNC_REQUEST] then
+            begin
+              w := TfpgX11Window(FindWindowByHandle(ev.xclient.window));
+              w.FSyncValue.lo := ev.xclient.data.l[2];
+              w.FSyncValue.hi := ev.xclient.data.l[3];
+              w.FHasSyncValue:=True;
+            end;
           end
           { XDND protocol - XdndEnter }
           else if Assigned(w) and (ev.xclient.message_type = XdndEnter) then
@@ -2513,6 +2540,14 @@ begin
     fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
 
+    // use this to synchronize painting the window with the window frame being redrawn
+    FSyncCounter:=XSyncCreateCounter(xapplication.Display, FSyncValue);
+    if FSyncCounter > 0 then
+    begin
+      fpgApplication.netlayer.WindowSetSupportSyncRequest(FWinHandle);
+      fpgApplication.netlayer.WindowSetPropertyCardinal(FWinHandle, fpgApplication.netlayer.NetAtom[naWM_SYNC_REQUEST_COUNTER], 1, @FSyncCounter);
+    end;
+
     XFree(WMHints);
 
     { we need to set the XdndAware property }
@@ -2653,6 +2688,10 @@ begin
   if HandleIsValid then
   begin
 //    PrintCallTraceDbgLn('XDestroyWindow');
+    if FSyncCounter > 0 then
+      XSyncDestroyCounter(xapplication.Display, FSyncCounter);
+    FSyncCounter:=0;
+
     XDestroyWindow(xapplication.Display, FWinHandle);
   end
   else
@@ -2875,6 +2914,13 @@ begin
     XFree(data);
 end;
 
+procedure TfpgX11Window.TriggerSyncCounter;
+begin
+  if FHasSyncValue then
+    XSyncSetCounter(xapplication.Display, FSyncCounter, FSyncValue);
+  FHasSyncValue:=False;
+end;
+
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
 var
   tp: TXTextProperty;
@@ -2901,6 +2947,7 @@ begin
   FWinHandle := 0;
   FBackupWinHandle := 0;
   QueueEnabledDrops := False;
+  FSyncValue.lo:=1;
 end;
 
 procedure TfpgX11Window.ActivateWindow;
@@ -3118,6 +3165,7 @@ begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
     XCopyArea(xapplication.Display, FBufferPixmap, TfpgX11Window(FWidget.Window).WinHandle, cgc, x+FDeltaX, y+FDeltaY, w, h, x+FDeltaX, y+FDeltaY);
     XFreeGc(xapplication.display, cgc);
+    TfpgX11Window(FWidget.Window).TriggerSyncCounter;
   end;
 end;
 
