@@ -166,7 +166,7 @@ begin
 end;
 
 { ATTACH }
-procedure rendering_buffer.attach;
+procedure rendering_buffer.attach(buf_ : int8u_ptr; width_ ,height_ : unsigned; stride_ : int );
 var
  _rows    : ^int8u_ptr;
  _row_ptr : int8u_ptr;

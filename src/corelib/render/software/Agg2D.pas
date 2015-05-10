@@ -1427,8 +1427,6 @@ begin
 
      m_rasterizer.gamma(@m_gammaNone );
 
-     m_blendMode:=AGG_BlendAlpha;
-
      FillEvenOdd(false );
      BlendMode  (AGG_BlendAlpha );
 
@@ -3510,8 +3508,7 @@ end;
 { RENDER }
 procedure TAgg2D.render(fillColor_ : boolean );
 begin
- if (m_blendMode = AGG_BlendAlpha ) or
-    (m_pixf = pf24bit ) then
+ if (m_blendMode = AGG_BlendAlpha ) or (m_pixf = pf24bit ) then
   Agg2DRenderer_render(self ,@m_renBase ,@m_renSolid ,fillColor_ )
  else
   Agg2DRenderer_render(self ,@m_renBaseComp ,@m_renSolidComp ,fillColor_ );
@@ -3521,8 +3518,7 @@ end;
 { RENDER }
 procedure TAgg2D.render(ras : PAggFontRasterizer; sl : PAggFontScanline );
 begin
- if (m_blendMode = AGG_BlendAlpha ) or
-    (m_pixf = pf24bit ) then
+ if (m_blendMode = AGG_BlendAlpha ) or (m_pixf = pf24bit ) then
   Agg2DRenderer_render(self ,@m_renBase ,@m_renSolid ,ras ,sl )
  else
   Agg2DRenderer_render(self ,@m_renBaseComp ,@m_renSolidComp ,ras ,sl );
@@ -3564,8 +3560,7 @@ begin
 
  interpolator.Construct(@mtx );
 
- if (m_blendMode = AGG_BlendAlpha ) or
-    (m_pixf = pf24bit ) then
+ if (m_blendMode = AGG_BlendAlpha ) or (m_pixf = pf24bit ) then
   Agg2DRenderer_renderImage(self ,img ,@m_renBasePre ,@interpolator )
  else
   Agg2DRenderer_renderImage(self ,img ,@m_renBaseCompPre ,@interpolator );
