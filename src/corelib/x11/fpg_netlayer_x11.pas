@@ -124,7 +124,8 @@ type
 
                //Window Manager Protocols
                naWM_PING,
-               naWM_SYNC_REQUEST
+               naWM_SYNC_REQUEST,
+               naWM_SYNC_REQUEST_COUNTER
              );
 
   TNetAtomsSet = set of TNetAtomEnum;
@@ -161,6 +162,7 @@ type
     function    WindowGetFrameExtents(const AWindow: TWindow; out ATopHeight, ALeftWidth, ARightWidth, ABottomHeight: Integer): Boolean;
     procedure   WindowSetSupportPING(const AWindow: TWindow);
     procedure   WindowReplyToPING(const AWindow: TWindow; AClientMessage: PXClientMessageEvent);
+    procedure   WindowSetSupportSyncRequest(const AWindow: TWindow);
     function    WindowGetState(const AWindow: TWindow; out AWindowState: TNetWindowStates): Boolean;
     function    WindowSetModal(const AWindow: TWindow; const AValue: Boolean): Boolean;
     procedure   WindowDemandsAttention(const AWindow: TWindow);
@@ -282,7 +284,8 @@ type
     '_NET_WM_USER_TIME',
     '_NET_FRAME_EXTENTS',
     '_NET_WM_PING',
-    '_NET_WM_SYNC_REQUEST');
+    '_NET_WM_SYNC_REQUEST',
+    '_NET_WM_SYNC_REQUEST_COUNTER');
 
   _NET_SOURCE_APPLICATION = 1;
   _NET_SOURCE_PAGER       = 2;
@@ -612,6 +615,11 @@ procedure TNETWindowLayer.WindowReplyToPING(const AWindow: TWindow;
 begin
   AClientMessage^.window := FRootWindow;
   SendRootWindowMessage(PXEvent(AClientMessage));
+end;
+
+procedure TNETWindowLayer.WindowSetSupportSyncRequest(const AWindow: TWindow);
+begin
+  WindowAddProtocol(AWindow, FNetAtoms[naWM_SYNC_REQUEST]);
 end;
 
 function TNETWindowLayer.ManagerCloseWindow(const AWindow: TWindow): Boolean;
