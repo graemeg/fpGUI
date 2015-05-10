@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -15,9 +15,9 @@
       This is a homegrown font cache, or font translation system. AggPas
       references font files (eg: *.ttf) directly, whereas the rest
       of fpGUI doesn't. Under X11 for example, the translation of
-      'Aria-12' to the actual *.ttf file will be done by the fontconfig
+      'Arial-12' to the actual *.ttf file will be done by the fontconfig
       library. Unfortunately fontconfig doesn't have an API to give
-      use that *.ttf font file it resolved too. So for AggPas (or rather
+      us that *.ttf font file it resolved too. So for AggPas (or rather
       the AggPas backend in fpGUI) we had to implement our own
       font translation system.
 }
@@ -37,7 +37,6 @@ type
     FAngle: double;
     FFamilyName: TfpgString;
     FFileName: TfpgString;
-    FFixedWidth: boolean;
     FStyleFlags: Integer;
     function    GetIsBold: boolean;
     function    GetIsFixedWidth: boolean;
