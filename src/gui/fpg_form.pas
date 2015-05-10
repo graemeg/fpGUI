@@ -248,7 +248,9 @@ end;
 
 procedure TfpgBaseForm.HandlePaint;
 begin
-  inherited HandlePaint;
+  // Don't call inherited or Canvas.Clear will be called twice.
+  //inherited HandlePaint;
+  Canvas.ClearClipRect;
   Canvas.Clear(FBackgroundColor);
 end;
 
