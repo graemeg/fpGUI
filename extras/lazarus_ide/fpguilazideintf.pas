@@ -151,7 +151,7 @@ begin
     +'  frm: TMainForm;'+le
     +'begin'+le
     +'  fpgApplication.Initialize;'+le
-    +'  frm := TMainForm.Create(nil);'+le
+    +'  fpgApplication.CreateForm(TMainForm, frm);'+le
     +'  try'+le
     +'    frm.Show;'+le
     +'    fpgApplication.Run;'+le
@@ -301,7 +301,7 @@ begin
     +'  frm: TMainForm;'+le
     +'begin'+le
     +'  fpgApplication.Initialize;'+le
-    +'  frm := TMainForm.Create(nil);'+le
+    +'  fpgApplication.CreateForm(TMainForm, frm);'+le
     +'  try'+le
     +'    frm.Show;'+le
     +'    fpgApplication.Run;'+le
