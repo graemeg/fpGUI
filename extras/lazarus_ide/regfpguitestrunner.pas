@@ -93,7 +93,7 @@ begin
       Add('');
       Add('begin');
       Add('  fpgApplication.Initialize;');
-      Add('  frm := TGUITestRunnerForm.Create(nil);');
+      Add('  fpgApplication.CreateForm(TGUITestRunnerForm, frm);');
       Add('  try');
       Add('    frm.Show;');
       Add('    fpgApplication.Run;');
