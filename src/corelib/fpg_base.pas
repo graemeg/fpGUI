@@ -2273,11 +2273,12 @@ procedure TfpgImageBase.CreateMaskFromSample(x, y: TfpgCoord);
 var
   p: ^longword;
   pmsk: ^byte;
-  c: longword;
+  c, n: longword;
   linecnt: integer;
   pixelcnt: integer;
   bit: byte;
   msklinelen: integer;
+  row, col: integer;
 begin
   if FColorDepth = 1 then
     Exit; //==>
