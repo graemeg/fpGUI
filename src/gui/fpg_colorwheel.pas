@@ -344,8 +344,8 @@ begin
 
   // draw a crosshair with centre at mouse cursor position
   len := FCursorSize*2 + 2; // length of crosshair lines
-  Canvas.XORFillRectangle($FFFFFF, X-FCursorSize, Y, len, 2);
-  Canvas.XORFillRectangle($FFFFFF, X, Y-FCursorSize, 2, len);
+  Canvas.XORFillRectangle($00FFFFFF, X-FCursorSize, Y, len, 2);
+  Canvas.XORFillRectangle($00FFFFFF, X, Y-FCursorSize, 2, len);
 end;
 
 procedure TfpgColorWheel.SetMarginWidth(NewWidth: longint);
