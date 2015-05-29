@@ -130,6 +130,7 @@ begin
   rgb.Red := r;
   rgb.Green := g;
   rgb.Blue := b;
+  rgb.Alpha := $FF;
   Result := RGBTripleTofpgColor(rgb);
 end;
 
