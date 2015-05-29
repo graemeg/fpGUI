@@ -203,6 +203,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
     procedure   SetCurrentDirectory(const ADir: string);
+    procedure   SetupCaptions; override;
   public
     FileName: string;
     constructor Create(AOwner: TComponent); override;
@@ -1108,6 +1109,8 @@ end;
 
 procedure TfpgFileDialog.InitializeComponents;
 begin
+  self.ShowHint := True;
+
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
@@ -1455,6 +1458,16 @@ begin
 
   if FOpenMode then // when saving file, we want to keep file name
     edFilename.Clear;
+end;
+
+procedure TfpgFileDialog.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  btnUpDir.Hint := rsGoToParentDirectory;
+  btnDirNew.Hint := rsCreateDirectory;
+  btnShowHidden.Hint := rsShowHidden;
+  btnGoHome.Hint := rsGoToHomeDirectory;
+  btnBookmark.Hint := rsBookmarks;
 end;
 
 function TfpgFileDialog.HighlightFile(const AFilename: string): boolean;
