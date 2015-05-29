@@ -34,14 +34,14 @@ type
   TCanvasFontManager = class(TObject)
   private
     FWidget: TfpgWidget;
-    FCanvas: TfpgCanvas;
+    FCanvas: TfpgCanvasBase;
     FFontCache: TFPList;
     function    GetCurrentFont: TfpgFont;
     procedure   SetDefaultFont(const AValue: TfpgFont);
   protected
     FDefaultFont: TfpgFont;
   public
-    constructor Create(ACanvas: TfpgCanvas; AWidget: TfpgWidget); reintroduce;
+    constructor Create(ACanvas: TfpgCanvasBase; AWidget: TfpgWidget); reintroduce;
     destructor  Destroy; override;
     function    AverageCharWidth: longint;
     function    CharDescender: longint;
@@ -51,7 +51,7 @@ type
     function    MaximumCharWidth: longint;
     procedure   DrawString(var Point: TPoint; const Length: longint; const S: PChar);
     procedure   SetFont(const AFontDesc: TfpgString);
-    property    Canvas: TfpgCanvas read FCanvas;
+    property    Canvas: TfpgCanvasBase read FCanvas;
     property    CurrentFont: TfpgFont read GetCurrentFont;
     property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
     property    Widget: TfpgWidget read FWidget;
@@ -228,7 +228,7 @@ end;
 
 { TCanvasFontManager }
 
-constructor TCanvasFontManager.Create(ACanvas: TfpgCanvas; AWidget: TfpgWidget);
+constructor TCanvasFontManager.Create(ACanvas: TfpgCanvasBase; AWidget: TfpgWidget);
 begin
   inherited Create;
   FCanvas := ACanvas;
