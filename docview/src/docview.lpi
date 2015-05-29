@@ -35,7 +35,6 @@
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="docview"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -45,7 +44,6 @@
       <Unit2>
         <Filename Value="IPFEscapeCodes.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="IPFEscapeCodes"/>
       </Unit2>
       <Unit3>
         <Filename Value="HelpTopic.pas"/>
@@ -55,22 +53,18 @@
       <Unit4>
         <Filename Value="HelpFile.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpFile"/>
       </Unit4>
       <Unit5>
         <Filename Value="CompareWordUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CompareWordUnit"/>
       </Unit5>
       <Unit6>
         <Filename Value="SearchTable.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SearchTable"/>
       </Unit6>
       <Unit7>
         <Filename Value="TextSearchQuery.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="TextSearchQuery"/>
       </Unit7>
       <Unit8>
         <Filename Value="nvUtilities.pas"/>
@@ -84,7 +78,6 @@
       <Unit10>
         <Filename Value="SearchUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SearchUnit"/>
       </Unit10>
       <Unit11>
         <Filename Value="../components/richtext/RichTextStyleUnit.pas"/>
@@ -99,7 +92,6 @@
       <Unit13>
         <Filename Value="../components/richtext/ACLStringUtility.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ACLStringUtility"/>
       </Unit13>
       <Unit14>
         <Filename Value="../components/richtext/RichTextDocumentUnit.pas"/>
@@ -129,7 +121,6 @@
       <Unit19>
         <Filename Value="HelpWindowDimensions.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpWindowDimensions"/>
       </Unit19>
       <Unit20>
         <Filename Value="SettingsUnit.pas"/>
@@ -139,7 +130,6 @@
       <Unit21>
         <Filename Value="dvconstants.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="dvConstants"/>
       </Unit21>
       <Unit22>
         <Filename Value="dvHelpers.pas"/>
@@ -149,7 +139,6 @@
       <Unit23>
         <Filename Value="HelpWindow.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpWindow"/>
       </Unit23>
       <Unit24>
         <Filename Value="../TODO.txt"/>
@@ -158,7 +147,6 @@
       <Unit25>
         <Filename Value="frm_configuration.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_configuration"/>
       </Unit25>
       <Unit26>
         <Filename Value="arrows.inc"/>
@@ -176,7 +164,6 @@
       <Unit29>
         <Filename Value="frm_text.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_text"/>
       </Unit29>
       <Unit30>
         <Filename Value="docview.rc"/>
@@ -189,22 +176,18 @@
       <Unit32>
         <Filename Value="frm_note.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_note"/>
       </Unit32>
       <Unit33>
         <Filename Value="HelpNote.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpNote"/>
       </Unit33>
       <Unit34>
         <Filename Value="HelpBookmark.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpBookmark"/>
       </Unit34>
       <Unit35>
         <Filename Value="frm_bookmarks.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_bookmarks"/>
       </Unit35>
       <Unit36>
         <Filename Value="lzwdecompress.pas"/>
@@ -237,11 +220,7 @@
       </Optimizations>
     </CodeGeneration>
     <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CustomOptions Value="-O-"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>

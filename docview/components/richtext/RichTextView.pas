@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -77,7 +77,7 @@ Type
     Procedure   DebugMIClick( Sender: TObject );
     Procedure   DefaultMenuPopup( Sender: TObject );
     procedure   SetScrollDistance(const AValue: integer);
-    procedure SetBorderStyle(AValue: TfpgEditBorderStyle);
+    procedure   SetBorderStyle(AValue: TfpgEditBorderStyle);
   protected
     FFontManager: TCanvasFontManager;
     FRichTextSettings: TRichTextSettings;
