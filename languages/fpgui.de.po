@@ -83,6 +83,10 @@ msgstr ""
 msgid "Bold"
 msgstr "Fett"
 
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr ""
+
 #: fpg_constants:rscancel
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -294,6 +298,14 @@ msgstr "Fre"
 #: fpg_constants:rslongfri
 msgid "Friday"
 msgstr "Freitag"
+
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr ""
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Got to home directory"
+msgstr ""
 
 #: fpg_constants:rscolorgreen
 msgid "Green"

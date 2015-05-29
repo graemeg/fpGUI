@@ -674,3 +674,15 @@ msgstr ""
 msgid "of"
 msgstr ""
 
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr ""
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Got to home directory"
+msgstr ""
+
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr ""
+
