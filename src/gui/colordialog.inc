@@ -103,7 +103,7 @@ begin
   Result := APresetColor;
   frm := TfpgColorSelectDialog.Create(nil);
   try
-    frm.ColorWheel.SetSelectedColor(APresetColor);
+    frm.SelectedColor := APresetColor;
     if frm.ShowModal = mrOK then
       Result := frm.SelectedColor;
   finally
