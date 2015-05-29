@@ -1315,7 +1315,7 @@ begin
   WindowTitle := rsFileSelection;
   Width       := 640;
   Height      := 410;
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
   FSpacing    := 10;
 
   FFilterList := TStringList.Create;
