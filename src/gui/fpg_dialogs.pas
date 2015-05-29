@@ -118,6 +118,7 @@ type
     procedure   SetupCaptions; virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -603,6 +604,12 @@ begin
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
   btnOK.TabOrder  := 1;
+end;
+
+procedure TfpgBaseDialog.AfterCreate;
+begin
+  inherited AfterCreate;
+  SetupCaptions;
 end;
 
 
