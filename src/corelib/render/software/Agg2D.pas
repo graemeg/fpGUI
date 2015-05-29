@@ -2839,11 +2839,10 @@ begin
  start_y:=y + dy;
 
  if roundOff then
-  begin
+ begin
    start_x:=Trunc(start_x );
    start_y:=Trunc(start_y );
-
-  end;
+ end;
 
  start_x:=start_x + ddx;
  start_y:=start_y + ddy;
@@ -2860,7 +2859,7 @@ begin
  tr.Construct(m_fontCacheManager.path_adaptor ,@mtx );
 
  if m_fontCacheType = AGG_RasterFontCache then
-  WorldToScreen(@start_x ,@start_y );
+   WorldToScreen(@start_x ,@start_y );
 
   str_:=@str[1 ];
   First:=true;
