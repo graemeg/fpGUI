@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -214,6 +214,7 @@ begin
     Exit;  //==>
   end;
 
+  // generate the colorwheel image
   if (FImage = nil) or FRecalcWheel then
   begin
     // we must only do this when needed, because it's very slow
@@ -232,7 +233,6 @@ begin
           // point is within wheel
           C := HSVToRGB(lHue, lSaturation, 1.0);
           // draw the pixel
-          Canvas.Pixels[X + FMarginWidth, Y + FMarginWidth] := C;
           FImage.Colors[x, y] := c;
         end
         else
@@ -242,12 +242,10 @@ begin
       FImage.UpdateImage;
     end;
     FRecalcWheel := False;
-  end
-  else
-  begin
-    // paint buffer image seeing that we have it
-    Canvas.DrawImage(FMarginWidth, FMarginWidth, FImage);
   end;
+
+  // paint buffer image seeing that we have it
+  Canvas.DrawImage(FMarginWidth, FMarginWidth, FImage);
 
   DrawCursor;
 end;
