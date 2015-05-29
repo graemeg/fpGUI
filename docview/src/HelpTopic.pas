@@ -244,21 +244,21 @@ const
   (
     //rrggbb
     '', // default
-    '#0000ff', // blue
-    '#ff0000', // red
-    '#ff00ff', // pink (purple)
-    '#00ff00', // green
-    '#00ffff', // cyan
-    '#ffff00', // yellow
-    '#808000', // neutral = brown
-    '#404040', // dark gray
-    '#000080', // dark blue
-    '#800000', // dark red
-    '#800080', // dark pink (purple)
-    '#008000', // dark green
-    '#008080', // dark cyan
-    '#000000', // black
-    '#c0c0c0'  // pale gray
+    '#ff0000ff', // blue
+    '#ffff0000', // red
+    '#ffff00ff', // pink (purple)
+    '#ff00ff00', // green
+    '#ff00ffff', // cyan
+    '#ffffff00', // yellow
+    '#ff808000', // neutral = brown
+    '#ff404040', // dark gray
+    '#ff000080', // dark blue
+    '#ff800000', // dark red
+    '#ff800080', // dark pink (purple)
+    '#ff008000', // dark green
+    '#ff008080', // dark cyan
+    '#ff000000', // black
+    '#ffc0c0c0'  // pale gray
   );
 
   // for ecHighlight1

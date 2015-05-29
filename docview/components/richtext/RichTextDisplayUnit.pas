@@ -75,7 +75,7 @@ end;
 function InvertRGB( Arg: TfpgColor ): TfpgColor;
 begin
   Result := fpgColorToRGB( Arg ); // in case it's a system color e.g. button face
-  Result := Result xor $ffffff; // now invert the RGB components
+  Result := Result xor $00ffffff; // now invert the RGB components
 end;
 
 // Draw a string at the given location with given color/selected state
