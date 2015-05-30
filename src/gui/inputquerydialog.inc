@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -79,7 +79,20 @@ begin
   begin
     consumed := True;
     ModalResult := mrCancel;
+  end
+  else if keycode = keyLeft then
+  begin
+    // fake the Shift+Tab key press
+    keycode := keyTab;
+    shiftstate := [ssShift];
+  end
+  else if keycode = keyRight then
+  begin
+    // fake the Tab key press
+    keycode := keyTab;
+    shiftstate := [];
   end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgQueryDialog.AfterCreate;
