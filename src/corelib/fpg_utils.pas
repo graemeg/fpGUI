@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -61,6 +61,7 @@ function fpgExpandFileName(const FileName: TfpgString): TfpgString;
 function fpgFileExists(const FileName: TfpgString): Boolean;
 function fpgDeleteFile(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
+function fpgCreateDir(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 function fpgExtractFileName(const FileName: TfpgString): TfpgString;
@@ -150,6 +151,11 @@ end;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 begin
   Result := DirectoryExists(fpgToOSEncoding(ADirectory));
+end;
+
+function fpgCreateDir(const ADirectory: TfpgString): Boolean;
+begin
+  Result := CreateDir(fpgToOSEncoding(ADirectory));
 end;
 
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
