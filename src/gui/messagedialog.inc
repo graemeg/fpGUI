@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -336,6 +336,20 @@ begin
   else
     if keycode = keyEscape then   // Esc cancels the dialog
       ModalResult := mrCancel
+    else if keycode = keyLeft then
+    begin
+      // fake the Shift+Tab key press
+      keycode := keyTab;
+      shiftstate := [ssShift];
+      inherited HandleKeyPress(keycode, shiftstate, consumed);
+    end
+    else if keycode = keyRight then
+    begin
+      // fake the Tab key press
+      keycode := keyTab;
+      shiftstate := [];
+      inherited HandleKeyPress(keycode, shiftstate, consumed);
+    end
     else
       inherited HandleKeyPress(keycode, shiftstate, consumed);
   end;
