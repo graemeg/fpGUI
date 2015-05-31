@@ -62,6 +62,7 @@ function fpgFileExists(const FileName: TfpgString): Boolean;
 function fpgDeleteFile(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 function fpgCreateDir(const ADirectory: TfpgString): Boolean;
+function fpgRemoveDir(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 function fpgExtractFileName(const FileName: TfpgString): TfpgString;
@@ -156,6 +157,11 @@ end;
 function fpgCreateDir(const ADirectory: TfpgString): Boolean;
 begin
   Result := CreateDir(fpgToOSEncoding(ADirectory));
+end;
+
+function fpgRemoveDir(const ADirectory: TfpgString): Boolean;
+begin
+  Result := RemoveDir(fpgToOSEncoding(ADirectory));
 end;
 
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
