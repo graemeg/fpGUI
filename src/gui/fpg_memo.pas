@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1108,8 +1108,7 @@ begin
     RePaint;
 end;
 
-procedure TfpgMemo.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgMemo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   cx: integer;
   ls: string;
@@ -1347,14 +1346,14 @@ begin
     end;
   end;
 
-  if Consumed then
-    RePaint
-  else
-    inherited;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
     if Assigned(FOnChange) then
       FOnChange(self);
+
+  if Consumed then
+    RePaint;
 end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
