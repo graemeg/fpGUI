@@ -2969,7 +2969,8 @@ var
   bit: byte;
   msklinelen: integer;
   {$ifdef AGGCanvas}
-  row, col, n: integer;
+  row, col: integer;
+  n: longword;
   {$endif}
 begin
   if FColorDepth = 1 then

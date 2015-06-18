@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -933,8 +933,7 @@ begin
     end;
   end;  { if }
 
-  if not consumed then
-    inherited HandleKeyPress(keycode, shiftstate, consumed);
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
     DoOnChange;

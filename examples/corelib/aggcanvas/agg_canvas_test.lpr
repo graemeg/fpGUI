@@ -245,7 +245,7 @@ begin
 
 
   // Testing basic style drawings
-  Canvas.Font := fpgApplication.DefaultFont;
+  Canvas.Font := fpgStyle.DefaultFont;
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);
