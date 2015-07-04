@@ -74,11 +74,11 @@ msgstr "Août"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr ""
+msgstr "Retour"
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "Bleu"
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -86,7 +86,7 @@ msgstr "Gras"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr ""
+msgstr "Signets"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
@@ -110,7 +110,7 @@ msgstr "Table de caractères"
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
-msgstr ""
+msgstr "Cliquer le Picker et le maintenir => relacher pour avoir la couleur"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -122,7 +122,7 @@ msgstr "Collection"
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr ""
+msgstr "Roue des couleurs"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
@@ -138,7 +138,7 @@ msgstr "Confirmation"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
-msgstr ""
+msgstr "Continu"
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -182,7 +182,7 @@ msgstr "Décembre"
 
 #: fpg_constants:rskeydel
 msgid "Del"
-msgstr ""
+msgstr "Suppr"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
@@ -198,7 +198,7 @@ msgstr "Répertoire"
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr ""
+msgstr "Bas"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -210,15 +210,15 @@ msgstr "Editer"
 
 #: fpg_constants:rskeyend
 msgid "End"
-msgstr ""
+msgstr "Fin"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "Français"
+msgstr "Anglais"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
-msgstr ""
+msgstr "Entrée"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
@@ -230,7 +230,7 @@ msgstr "Erreur"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
-msgstr ""
+msgstr "Echap"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
@@ -302,15 +302,15 @@ msgstr "Vendredi"
 
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
-msgstr ""
+msgstr "Aller au répertoire parent"
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Got to home directory"
-msgstr ""
+msgstr "Aller au répertoire origine"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr ""
+msgstr "Vert"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
@@ -322,11 +322,11 @@ msgstr "Aide"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
-msgstr ""
+msgstr "Hexadécimal"
 
 #: fpg_constants:rskeyhome
 msgid "Home"
-msgstr ""
+msgstr "Début"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
@@ -342,7 +342,7 @@ msgstr "Information"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
-msgstr ""
+msgstr "Ins"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
@@ -386,7 +386,7 @@ msgstr "Juin"
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr ""
+msgstr "Gauche"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
@@ -494,15 +494,15 @@ msgstr "Coller"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
-msgstr ""
+msgstr "PgBas"
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
-msgstr ""
+msgstr "PgHaut"
 
 #: fpg_constants:rstabpredefined
 msgid "Predefined"
-msgstr ""
+msgstr "Prédéfini"
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
@@ -514,7 +514,7 @@ msgstr "Récemment utilisé"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr ""
+msgstr "Rouge"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -526,7 +526,7 @@ msgstr "Retenter"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr ""
+msgstr "Droit"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -586,7 +586,7 @@ msgstr "Serif"
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
-msgstr ""
+msgstr "Maj+"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
@@ -598,7 +598,7 @@ msgstr "Taille"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Espace"
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -614,7 +614,7 @@ msgstr "Dimanche"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr ""
+msgstr "Tab"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
@@ -662,7 +662,7 @@ msgstr "Souligné"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr ""
+msgstr "Haut"
 
 #: fpg_constants:rsusername
 msgid "User name"
