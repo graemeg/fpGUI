@@ -214,7 +214,7 @@ msgstr "Fin"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "Anglais"
+msgstr "Français"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
