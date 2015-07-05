@@ -589,6 +589,7 @@ begin
   MinWidth  := 300;
   MinHeight := 300;
   WindowPosition := wpOneThirdDown;
+  ShowHint := True;
   FSpacing  := 6;
   FDefaultButtonWidth := 80;
 
@@ -1109,8 +1110,6 @@ end;
 
 procedure TfpgFileDialog.InitializeComponents;
 begin
-  self.ShowHint := True;
-
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
