@@ -162,6 +162,7 @@ begin
   CreateLabel(self, 390, 325, 'Height:');
   edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
   edtHeight.Value := 0;
+  edtHeight.Anchors := [anBottom, anLeft];
   edtHeight.Hint := 'Tab height';
   edtHeight.OnChange := @edtHeightChanged;
 end;
