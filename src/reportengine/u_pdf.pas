@@ -45,7 +45,6 @@ type
     procedure WriteBoolean(const AStream: TStream);
   public
     constructor CreateBoolean(const AValue: Boolean);
-    destructor Destroy; override;
   end;
 
   TPdfInteger = class(TPdfObject)
@@ -57,7 +56,6 @@ type
     property Value: integer read FValue write FValue;
   public
     constructor CreateInteger(const AValue: integer);
-    destructor Destroy; override;
   end;
 
   TPdfReference = class(TPdfObject)
@@ -67,7 +65,6 @@ type
     procedure WriteReference(const AStream: TStream);
   public
     constructor CreateReference(const AValue: integer);
-    destructor Destroy; override;
   end;
 
   TPdfName = class(TPdfObject)
@@ -77,7 +74,6 @@ type
     procedure WriteName(const AStream: TStream);
   public
     constructor CreateName(const AValue: string);
-    destructor Destroy; override;
   end;
 
   TPdfString = class(TPdfObject)
@@ -87,7 +83,6 @@ type
     procedure Write(const AStream: TStream);
   public
     constructor CreateString(const AValue: string);
-    destructor Destroy; override;
   end;
 
   TPdfArray = class(TPdfObject)
@@ -121,7 +116,6 @@ type
     function WriteEmbeddedFont(const ASrcStream: TMemoryStream; const AStream: TStream): int64;
   public
     constructor CreateFont(const AFont: integer; const ASize: string);
-    destructor Destroy; override;
   end;
 
   TPdfText = class(TPdfObject)
@@ -147,7 +141,6 @@ type
     procedure WriteLineSegment(const AStream: TStream);
   public
     constructor CreateLineSegment(const AWidth, AX1, AY1, AX2, AY2: single);
-    destructor Destroy; override;
   end;
 
   TPdfRectangle = class(TPdfObject)
@@ -163,7 +156,6 @@ type
     procedure WriteRectangle(const AStream: TStream);
   public
     constructor CreateRectangle(const ALineWidth, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
-    destructor Destroy; override;
   end;
 
   TRefPos = record
@@ -180,7 +172,6 @@ type
     procedure WriteSurface(const AStream: TStream);
   public
     constructor CreateSurface(const APoints: T_Points);
-    destructor Destroy; override;
   end;
 
   TPdfImage = class(TPdfObject)
@@ -195,7 +186,6 @@ type
     procedure WriteImage(const AStream: TStream);
   public
     constructor CreateImage(const ALeft, ABottom: single; AWidth, AHeight, ANumber: integer);
-    destructor Destroy; override;
   end;
 
   TPdfLineStyle = class(TPdfObject)
@@ -206,7 +196,6 @@ type
     procedure WriteLineStyle(const AStream: TStream);
   public
     constructor CreateLineStyle(ADash: TfpgLineStyle; APhase: integer);
-    destructor Destroy; override;
   end;
 
   TPdfColor = class(TPdfObject)
@@ -219,7 +208,6 @@ type
     procedure WriteColor(const AStream: TStream);
   public
     constructor CreateColor(const AStroke: Boolean; AColor: TfpgColor);
-    destructor Destroy; override;
   end;
 
   TPdfDicElement = class(TObject)
@@ -436,11 +424,6 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfBoolean.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfInteger.WriteInteger(const AStream: TStream);
 begin
   WriteString(IntToStr(FValue), AStream);
@@ -457,11 +440,6 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfInteger.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfReference.WriteReference(const AStream: TStream);
 begin
   WriteString(IntToStr(FValue) + ' 0 R', AStream);
@@ -471,11 +449,6 @@ constructor TPdfReference.CreateReference(const AValue: integer);
 begin
   inherited Create;
   FValue := AValue;
-end;
-
-destructor TPdfReference.Destroy;
-begin
-  inherited;
 end;
 
 procedure TPdfName.WriteName(const AStream: TStream);
@@ -493,11 +466,6 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfName.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfString.Write(const AStream: TStream);
 begin
   WriteString('(' + Utf8ToAnsi(FValue) + ')', AStream);
@@ -509,11 +477,6 @@ begin
   FValue := AValue;
   if (Pos('(', FValue) > 0) or (Pos(')', FValue) > 0) or (Pos('\', FValue) > 0) then
     FValue := InsertEscape(FValue);
-end;
-
-destructor TPdfString.Destroy;
-begin
-  inherited;
 end;
 
 procedure TPdfArray.WriteArray(const AStream: TStream);
@@ -653,11 +616,6 @@ begin
   FTxtSize := ASize;
 end;
 
-destructor TPdfFonte.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfText.WriteText(const AStream: TStream);
 begin
   WriteString('BT' + CRLF, AStream);
@@ -704,11 +662,6 @@ begin
   FY2  := AY2;
 end;
 
-destructor TPdfLineSegment.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfRectangle.WriteRectangle(const AStream: TStream);
 begin
   if FStroke then
@@ -739,11 +692,6 @@ begin
   FStroke := AStroke;
 end;
 
-destructor TPdfRectangle.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfSurface.WriteSurface(const AStream: TStream);
 var
   Cpt: integer;
@@ -759,11 +707,6 @@ constructor TPdfSurface.CreateSurface(const APoints: T_Points);
 begin
   inherited Create;
   FPoints := APoints;
-end;
-
-destructor TPdfSurface.Destroy;
-begin
-  inherited;
 end;
 
 function TPdfImage.WriteImageStream(const ANumber: integer; AStream: TStream): int64;
@@ -806,11 +749,6 @@ begin
   FHeight := AHeight;
 end;
 
-destructor TPdfImage.Destroy;
-begin
-  inherited;
-end;
-
 procedure TPdfLineStyle.WriteLineStyle(const AStream: TStream);
 begin
   WriteString('[', AStream);
@@ -832,11 +770,6 @@ begin
   inherited Create;
   FDash  := ADash;
   FPhase := APhase;
-end;
-
-destructor TPdfLineStyle.Destroy;
-begin
-  inherited;
 end;
 
 procedure TPdfColor.WriteColor(const AStream: TStream);
@@ -863,11 +796,6 @@ begin
   FGreen  := FormatFloat('0.##', fpgGetGreen(AColor) / 256);
   FRed    := FormatFloat('0.##', fpgGetRed(AColor) / 256);
   FStroke := AStroke;
-end;
-
-destructor TPdfColor.Destroy;
-begin
-  inherited;
 end;
 
 procedure TPdfDicElement.WriteDicElement(const AStream: TStream);
