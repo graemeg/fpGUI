@@ -112,15 +112,15 @@ type
     destructor Destroy; override;
   end;
 
-  TPdfFonte = class(TPdfObject)
+  TPdfEmbeddedFont = class(TPdfObject)
   private
     FTxtFont: integer;
     FTxtSize: string;
   protected
-    procedure WriteFonte(const AStream: TStream);
-    function WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): int64;
+    procedure WriteFont(const AStream: TStream);
+    function WriteEmbeddedFont(const ASrcStream: TMemoryStream; const AStream: TStream): int64;
   public
-    constructor CreateFonte(const AFont: integer; const ASize: string);
+    constructor CreateFont(const AFont: integer; const ASize: string);
     destructor Destroy; override;
   end;
 
@@ -152,7 +152,7 @@ type
 
   TPdfRectangle = class(TPdfObject)
   private
-    FEpais: single;
+    FLineWidth: single;
     FRecX: single;
     FRecY: single;
     FRecW: single;
@@ -162,7 +162,7 @@ type
   protected
     procedure WriteRectangle(const AStream: TStream);
   public
-    constructor CreateRectangle(const AEpais, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
+    constructor CreateRectangle(const ALineWidth, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
     destructor Destroy; override;
   end;
 
@@ -568,8 +568,8 @@ var
 begin
   for Cpt := 0 to Pred(FStream.Count) do
   begin
-    if TPdfObject(FStream[Cpt]) is TPdfFonte then
-      TPdfFonte(FStream[Cpt]).WriteFonte(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfEmbeddedFont then
+      TPdfEmbeddedFont(FStream[Cpt]).WriteFont(AStream);
     if TPdfObject(FStream[Cpt]) is TPdfColor then
       TPdfColor(FStream[Cpt]).WriteColor(AStream);
     if TPdfObject(FStream[Cpt]) is TPdfText then
@@ -606,8 +606,8 @@ begin
   begin
     for Cpt := 0 to Pred(FStream.Count) do
     begin
-      if TPdfObject(FStream[Cpt]) is TPdfFonte then
-        TPdfFonte(FStream[Cpt]).Free
+      if TPdfObject(FStream[Cpt]) is TPdfEmbeddedFont then
+        TPdfEmbeddedFont(FStream[Cpt]).Free
       else if TPdfObject(FStream[Cpt]) is TPdfColor then
         TPdfColor(FStream[Cpt]).Free
       else if TPdfObject(FStream[Cpt]) is TPdfText then
@@ -628,25 +628,25 @@ begin
   inherited;
 end;
 
-procedure TPdfFonte.WriteFonte(const AStream: TStream);
+procedure TPdfEmbeddedFont.WriteFont(const AStream: TStream);
 begin
   WriteString('/F' + IntToStr(FTxtFont) + ' ' + FTxtSize + ' Tf' + CRLF, AStream);
 end;
 
-function TPdfFonte.WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): int64;
+function TPdfEmbeddedFont.WriteEmbeddedFont(const ASrcStream: TMemoryStream; const AStream: TStream): int64;
 var
   BeginFlux, EndFlux: int64;
 begin
-  WriteString(CRLF + 'stream' + CRLF, AFlux);
-  BeginFlux := AFlux.Position;
-  FFlux.SaveToStream(AFlux);
-  EndFlux   := AFlux.Position;
+  WriteString(CRLF + 'stream' + CRLF, AStream);
+  BeginFlux := AStream.Position;
+  ASrcStream.SaveToStream(AStream);
+  EndFlux   := AStream.Position;
   Result    := EndFlux - BeginFlux;
-  WriteString(CRLF, AFlux);
-  WriteString('endstream', AFlux);
+  WriteString(CRLF, AStream);
+  WriteString('endstream', AStream);
 end;
 
-constructor TPdfFonte.CreateFonte(const AFont: integer; const ASize: string);
+constructor TPdfEmbeddedFont.CreateFont(const AFont: integer; const ASize: string);
 begin
   inherited Create;
   FTxtFont := AFont;
@@ -713,11 +713,11 @@ procedure TPdfRectangle.WriteRectangle(const AStream: TStream);
 begin
   if FStroke then
   begin
-    if (FormatFloat('0.##', FEpais) + ' w') <> uCurrentWidth then
+    if (FormatFloat('0.##', FLineWidth) + ' w') <> uCurrentWidth then
     begin
       WriteString('1 J' + CRLF, AStream);
-      WriteString(FormatFloat('0.##', FEpais) + ' w' + CRLF, AStream);
-      uCurrentWidth := FormatFloat('0.##', FEpais) + ' w';
+      WriteString(FormatFloat('0.##', FLineWidth) + ' w' + CRLF, AStream);
+      uCurrentWidth := FormatFloat('0.##', FLineWidth) + ' w';
     end;
   end;
   WriteString(FormatFloat('0.##', FRecX) + ' ' + FormatFloat('0.##', FRecY) + ' ' + FormatFloat('0.##', FRecW) + ' ' + FormatFloat('0.##', FRecH) + ' re' + CRLF, AStream);
@@ -727,10 +727,10 @@ begin
     WriteString('f' + CRLF, AStream);
 end;
 
-constructor TPdfRectangle.CreateRectangle(const AEpais, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
+constructor TPdfRectangle.CreateRectangle(const ALineWidth, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
 begin
   inherited Create;
-  FEpais  := AEpais;
+  FLineWidth  := ALineWidth;
   FRecX   := APosX;
   FRecY   := APosY;
   FRecW   := AWidth;
@@ -990,7 +990,7 @@ begin
             TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AStream);
             WriteString('>>', AStream);
             // write fontfile stream in xobject dictionary
-            TPdfFonte(TPdfXRef(Document.FGlobalXRefs[NumFnt]).FDict).WriteFonteStream(uStream, AStream);
+            TPdfEmbeddedFont(TPdfXRef(Document.FGlobalXRefs[NumFnt]).FDict).WriteEmbeddedFont(uStream, AStream);
             uStream.Free;
           end;
         end;
@@ -1700,7 +1700,7 @@ var
   i: integer;
   Txt: TPdfText;
   Clr: TPdfColor;
-  Fnt: TPdfFonte;
+  Fnt: TPdfEmbeddedFont;
   Rct: TPdfRectangle;
   Lin: TPdfLineSegment;
   Srf: TPdfSurface;
@@ -1717,7 +1717,7 @@ begin
         begin
           if FontName > -1 then
           begin
-            Fnt          := TPdfFonte.CreateFonte(FontName, FontSize);
+            Fnt          := TPdfEmbeddedFont.CreateFont(FontName, FontSize);
             // adjust font size to display device
             Fnt.FTxtSize := IntToStr(Round((StrToInt(FontSize) * fpgApplication.Screen_dpi_y) div 72));
             TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Fnt);
