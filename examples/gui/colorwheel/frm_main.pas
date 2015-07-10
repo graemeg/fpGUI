@@ -77,6 +77,7 @@ type
     procedure   UpdateRGBComponents;
     procedure   ColorChanged(Sender: TObject);
     procedure   RGBChanged(Sender: TObject);
+    procedure   RGBChanging;
     procedure   ConvertToInt(Value: string);
     procedure   eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
     procedure   eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
@@ -240,6 +241,11 @@ begin
 end;
 
 procedure TMainForm.RGBChanged(Sender: TObject);
+begin
+  RGBChanging;
+end;
+
+procedure TMainForm.RGBChanging;
 var
   rgb: TRGBTriple;
   c: TfpgColor;
@@ -337,7 +343,7 @@ begin
   if ((KeyCode= KeyReturn) or (KeyCode= KeyPEnter)) and (Length(eHex.Text)= 7) then
   begin
     ConvertToInt(eHex.Text);
-    RGBChanged(Sender);
+    RGBChanging;
   end;
 end;
 
@@ -346,7 +352,7 @@ begin
   if Length(eHex.Text)= 7 then
   begin
     ConvertToInt(eHex.Text);
-    RGBChanged(Sender);
+    RGBChanging;
   end;
  end;
 
@@ -506,6 +512,7 @@ begin
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit  := @RGBChanged;
   end;
 
@@ -519,6 +526,7 @@ begin
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit := @RGBChanged;
   end;
 
@@ -532,6 +540,7 @@ begin
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit := @RGBChanged;
   end;
 
