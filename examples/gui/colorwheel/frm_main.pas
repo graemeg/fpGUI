@@ -85,7 +85,6 @@ type
     procedure   eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
     procedure   eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
       var Consumed: boolean);
-    procedure   eHexMouseExit(Sender: TObject);
     procedure   PopulatePaletteColorCombo;
     procedure   cbColorsChange(Sender: TObject);
     procedure   lbColorsChange(Sender: TObject);
@@ -353,15 +352,6 @@ begin
   end;
 end;
 
-procedure TMainForm.eHexMouseExit(Sender: TObject);
-begin
-  if Length(eHex.Text)= 7 then
-  begin
-    ConvertToInt(eHex.Text);
-    RGBChanging;
-  end;
- end;
-
 procedure TMainForm.PopulatePaletteColorCombo;
 begin
   with cbColors do
@@ -396,7 +386,6 @@ begin
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
   eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
-  ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
 end;
 
 procedure TMainForm.AfterCreate;
@@ -639,7 +628,6 @@ begin
     MaxLength:= 7;
     OnKeyChar:= @eHexKeyChar;
     OnKeyPress:= @eHexKeyPress;
-    OnMouseExit := @eHexMouseExit;
   end;
 
   Label7 := TfpgLabel.Create(self);
