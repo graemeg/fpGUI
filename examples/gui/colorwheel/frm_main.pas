@@ -386,6 +386,8 @@ begin
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
   eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  ConvertToInt(eHex.Text);
+  RGBChanging;
 end;
 
 procedure TMainForm.AfterCreate;
