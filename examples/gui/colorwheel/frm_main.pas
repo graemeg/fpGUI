@@ -312,8 +312,8 @@ end;
 procedure TMainForm.UpdateHSVComponents;
 begin
   edH.Text := IntToStr(ColorWheel1.Hue);
-  edS.Text := FormatFloat('0.000', ColorWheel1.Saturation);
-  edV.Text := FormatFloat('0.000', ValueBar1.Value);
+  edS.Text := FormatFloat('##0.0', ColorWheel1.Saturation * 100);
+  edV.Text := FormatFloat('##0.0', ValueBar1.Value * 100);
   Bevel1.BackgroundColor := ValueBar1.SelectedColor;
 end;
 
@@ -441,7 +441,7 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(116, 284, 52, 18);
+    SetPosition(108, 284, 64, 18);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -452,29 +452,29 @@ begin
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(116, 316, 52, 18);
+    SetPosition(108, 312, 64, 18);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Sat';
+    Text := 'Saturation';
   end;
 
   Label3 := TfpgLabel.Create(self);
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(116, 344, 52, 18);
+    SetPosition(108, 340, 64, 18);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Val';
+    Text := 'Brightness';
   end;
 
   edH := TfpgEdit.Create(self);
   with edH do
   begin
     Name := 'edH';
-    SetPosition(172, 280, 56, 26);
+    SetPosition(176, 280, 44, 26);
     TabOrder := 8;
     Text := '';
     FontDesc := '#Edit1';
@@ -485,7 +485,7 @@ begin
   with edS do
   begin
     Name := 'edS';
-    SetPosition(172, 308, 56, 26);
+    SetPosition(176, 308, 44, 26);
     TabOrder := 9;
     Text := '';
     FontDesc := '#Edit1';
@@ -496,7 +496,7 @@ begin
   with edV do
   begin
     Name := 'edV';
-    SetPosition(172, 336, 56, 26);
+    SetPosition(176, 336, 44, 26);
     TabOrder := 10;
     Text := '';
     FontDesc := '#Edit1';
