@@ -56,6 +56,7 @@ type
     edG: TfpgSpinEdit;
     edB: TfpgSpinEdit;
     lblHex: TfpgLabel;
+    eHex: TfpgEdit;
     Label7: TfpgLabel;
     Label8: TfpgLabel;
     Bevel2: TfpgBevel;
@@ -76,6 +77,11 @@ type
     procedure   UpdateRGBComponents;
     procedure   ColorChanged(Sender: TObject);
     procedure   RGBChanged(Sender: TObject);
+    procedure   ConvertToInt(Value: string);
+    procedure   eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
+    procedure   eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
+      var Consumed: boolean);
+    procedure   eHexMouseExit(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -86,6 +92,52 @@ type
 implementation
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.ConvertToInt(Value: string);
+var
+  iRed, iGreen, iBlue: integer;
+  i, iTemp : integer;
+  HexVal: string;
+begin
+  for i:= 2 to 7 do
+  begin
+    HexVal:= Copy(Value,i,1);
+    case Uppercase(HexVal) of
+      'F':
+        iTemp:= 15;
+      'E':
+        iTemp:= 14;
+      'D':
+        iTemp:= 13;
+      'C':
+        iTemp:= 12;
+      'B':
+        iTemp:= 11;
+      'A':
+        iTemp:= 10
+      else
+        if (HexVal>= '0') and (HexVal<= '9') then
+          iTemp:= StrToInt(HexVal);
+    end;
+    case i of
+      2:
+        iRed:= iTemp;
+      3:
+        iRed:= iRed * 16 +iTemp;
+      4:
+        iGreen:= iTemp;
+      5:
+        iGreen:= iGreen * 16 +iTemp;
+      6:
+        iBlue:= iTemp;
+      7:
+        iBlue:= iBlue * 16 +iTemp;
+    end;
+  end;
+  edR.Value := iRed;
+  edG.Value := iGreen;
+  edB.Value := iBlue;
+end;
 
 function ConvertToHexa(Value: Integer): string;
 var
@@ -199,7 +251,7 @@ begin
   c := RGBTripleTofpgColor(rgb);
   ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB := False;
-  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -264,8 +316,39 @@ begin
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
-  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
+
+procedure TMainForm.eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
+begin
+if Length(eHex.Text)= 0 then
+begin
+  if AChar<> '$' then
+    Consumed:= True;
+end
+else
+  if ((AChar< '0') or (AChar> '9')) and ((AChar< 'A') or (AChar> 'F')) and ((AChar< 'a') or (AChar> 'f')) then
+    Consumed:= True;
+end;
+
+procedure TMainForm.eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
+          var Consumed: boolean);
+begin
+  if ((KeyCode= KeyReturn) or (KeyCode= KeyPEnter)) and (Length(eHex.Text)= 7) then
+  begin
+    ConvertToInt(eHex.Text);
+    RGBChanged(Sender);
+  end;
+end;
+
+procedure TMainForm.eHexMouseExit(Sender: TObject);
+begin
+  if Length(eHex.Text)= 7 then
+  begin
+    ConvertToInt(eHex.Text);
+    RGBChanged(Sender);
+  end;
+ end;
 
 procedure TMainForm.AfterCreate;
 begin
@@ -456,10 +539,24 @@ begin
   with lblHex do
   begin
     Name := 'lblHex';
-    SetPosition(380, 316, 120, 16);
+    SetPosition(375, 320, 120, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Hex = ';
+  end;
+
+  eHex := TfpgEdit.Create(self);
+  with eHex do
+  begin
+    Name := 'E_Hexa';
+    SetPosition(420, 316, 65, 26);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := '';
+    MaxLength:= 7;
+    OnKeyChar:= @eHexKeyChar;
+    OnKeyPress:= @eHexKeyPress;
+    OnMouseExit := @eHexMouseExit;
   end;
 
   Label7 := TfpgLabel.Create(self);
