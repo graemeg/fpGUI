@@ -56,6 +56,7 @@ type
     FText: string;
     FTabVisible: boolean;
     FTabColor: TfpgColor;
+    FTabTextColor: TfpgColor;
     function    GetPageControl: TfpgPageControl;
     function    GetPageIndex: Integer;
     function    GetText: string;
@@ -74,6 +75,7 @@ type
     property    PageControl: TfpgPageControl read FPageControl write SetPageControl;
     property    TabVisible: boolean read FTabVisible write FTabVisible;
     property    TabColor: Tfpgcolor read FTabColor write FTabColor;
+    property    TabTextColor: TfpgColor read FTabTextColor write FTabTextColor;
   published
     property    BackgroundColor;
     property    Enabled;
@@ -107,6 +109,7 @@ type
     FLastRClickPos: TfpgPoint;
     FUpdateCount: Integer;
     FActiveTabColor: TfpgColor;
+    FActiveTabTextColor: TfpgColor;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -137,6 +140,8 @@ type
     procedure   pmCloseTab(Sender: TObject);
     function    GetActiveTabColor: TfpgColor;
     procedure   SetActiveTabColor(AValue: TfpgColor);
+    function    GetActiveTabTextColor: TfpgColor;
+    procedure   SetActiveTabTextColor(AValue: TfpgColor);
   protected
     procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
@@ -163,6 +168,7 @@ type
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex default 0;
     property    ActiveTabColor: TfpgColor read GetActiveTabColor write SetActiveTabColor default clWindowBackground;
+    property    ActiveTabTextColor: TfpgColor read GetActiveTabTextColor write SetActiveTabTextColor;
     property    Align;
     property    BackgroundColor;
     property    Enabled;
@@ -793,6 +799,20 @@ begin
   end;
 end;
 
+function TfpgPageControl.GetActiveTabTextColor: TfpgColor;
+begin
+  Result := FActiveTabTextColor;
+end;
+
+procedure TfpgPageControl.SetActiveTabTextColor(AValue: TfpgColor);
+begin
+  if FActiveTabTextColor <> AValue then
+  begin
+    FActiveTabTextColor := AValue;
+    RePaint;
+  end;
+end;
+
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
 var
   lWasMatch: boolean;
@@ -944,9 +964,11 @@ begin
           r3 := DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
+          begin
+            Canvas.SetTextColor(h.TabTextColor);
             Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
                 Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
-
+          end;
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
           if h <> TfpgTabSheet(FPages.Last) then
@@ -962,6 +984,7 @@ begin
         Canvas.DrawButtonFace(r2, []);
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.Left+4, r3.Top+5, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
 
@@ -988,8 +1011,11 @@ begin
           r3 := DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
+          begin
+            Canvas.SetTextColor(h.TabTextColor);
             Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
                 FMargin+toffset, GetTabText(h.Text), lTxtFlags);
+          end;
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
           if h <> TfpgTabSheet(FPages.Last) then
@@ -1006,6 +1032,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
 
@@ -1034,7 +1061,10 @@ begin
 
           // paint text on non-active tabs
           if h <> ActivePage then
+          begin
+            Canvas.SetTextColor(h.TabTextColor);
             Canvas.DrawText(r2.left+toffset, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
+          end;
           r2.Top += r2.Height;
           lp := r2.Top;
           if h <> TfpgTabSheet(FPages.Last) then
@@ -1051,6 +1081,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
 
@@ -1079,7 +1110,10 @@ begin
 
           // paint text on non-active tabs
           if h <> ActivePage then
+          begin
+            Canvas.SetTextColor(h.TabTextColor);
             Canvas.DrawText(r2.left+toffset, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
+          end;
           r2.Top += r2.Height;
           lp := r2.Top;
           if h <> TfpgTabSheet(FPages.Last) then
@@ -1096,6 +1130,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         DrawTab(h, r3, false, 2);
+        Canvas.SetTextColor(ActiveTabTextColor);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
   end; { case }
@@ -1229,6 +1264,7 @@ begin
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FActiveTabColor   := FBackgroundColor;
+  FActiveTabTextColor := FTextColor;
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
