@@ -335,6 +335,9 @@ begin
   mi.Enabled := False;
   mi.SubMenu := FDisabledSubMenu;
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
+  fpgStyle.MenuFont:= fpgGetFont('Liberation Sans-10:bold:antialias=true');
+  fpgStyle.MenuAccelFont:= fpgGetFont('Liberation Sans-10:bold:underlined:antialias=true');
+  fpgStyle.MenuDisabledFont:= fpgGetFont('Liberation Sans-10:bold:antialias=true');;
 end;
 
 
