@@ -106,6 +106,8 @@ begin
   pcMain.Width    := Width - 20;
   pcMain.Height   := 300;
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
+  pcMain.ActiveTabColor:= clOrangeRed;
+  pcMain.ActiveTabTextColor:= clYellow;
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One
@@ -124,6 +126,9 @@ begin
   // Tab Three
   tsThree := TfpgTabSheet.Create(pcMain);
   tsThree.Text := 'Tab Three';
+  tsThree.BackgroundColor:= clWheat;
+  tsThree.TabColor:= clLightBlue;
+  tsThree.TabTextColor:= clWhite;
   CreateLabel(tsThree, 80, 50, 'TabSheet Three');
   
   // Tab Four
@@ -159,6 +164,7 @@ begin
   CreateLabel(self, 390, 325, 'Height:');
   edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
   edtHeight.Value := 0;
+  edtHeight.Anchors := [anBottom, anLeft];
   edtHeight.Hint := 'Tab height';
   edtHeight.OnChange := @edtHeightChanged;
 end;
