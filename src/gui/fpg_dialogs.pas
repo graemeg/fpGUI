@@ -1126,6 +1126,8 @@ begin
     SetPosition(8, 44, 624, 202);
     Anchors := [anLeft, anRight, anTop, anBottom];
     Options := [go_AlternativeColor, go_SmoothScroll];
+    ScrollBarPage:= Pred(VisibleRows);
+    ScrollBarWidth:= 12;
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
   end;
