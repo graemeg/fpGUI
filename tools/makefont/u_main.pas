@@ -14,8 +14,11 @@ type
     private
       L_SelectMap: Tfpglabel;
       Cb_SelectMap: TfpgComboBox;
+      Bt_SelectDest: TfpgButton;
+      L_DestDir: TfpgLabel;
       Bt_SelectFile: TfpgButton;
       Bt_Exit: TfpgButton;
+      procedure Bt_SelectDestClick(Sender: TObject);
       procedure Bt_SelectFileClick(Sender: TObject);
       procedure Bt_ExitClick(Sender: TObject);
     public
@@ -32,6 +35,12 @@ uses
 
 var
   MapList: TStringList;
+
+procedure TF_MainForm.Bt_SelectDestClick(Sender: TObject);
+begin
+DestDir:= SelectDirDialog(RepCourant);
+L_DestDir.Text:= DestDir;
+end;
 
 procedure TF_MainForm.Bt_SelectFileClick(Sender: TObject);
 var
@@ -81,7 +90,7 @@ begin
 inherited Create(AOwner);
 Name := 'F_MainForm';
 WindowTitle:= 'TTF parser';
-SetPosition(0, 0, 400, 300);
+SetPosition(0, 0, 500, 250);
 WindowPosition:= wpScreenCenter;
 Sizeable:= False;
 MapList:= TStringList.Create;
@@ -108,12 +117,15 @@ with MapList do
   Add('koi8-r');
   Add('koi8-u');
   end;
-L_SelectMap:= CreateLabel(Self,150,30,'Select mapping',100,20,taCenter);
-Cb_SelectMap:= CreateComboBox(Self,150,50,100,MapList,20);
+L_SelectMap:= CreateLabel(Self,200,30,'Select mapping',100,20,taCenter);
+Cb_SelectMap:= CreateComboBox(Self,200,50,100,MapList,20);
 Cb_SelectMap.FocusItem:= 3;
-Bt_SelectFile:= CreateButton(Self,150,200,100,'Select file',@Bt_SelectFileClick,'');
-Bt_Exit:= CreateButton(Self,160,250,80,'Exit',@Bt_ExitClick,'');
+Bt_SelectDest:= CreateButton(Self,170,100,160,'Destination directory',@Bt_SelectDestClick);
+L_DestDir:= CreateLabel(Self,0,130,'',500,18,taCenter);
+Bt_SelectFile:= CreateButton(Self,200,180,100,'Select file',@Bt_SelectFileClick,'');
+Bt_Exit:= CreateButton(Self,210,220,80,'Exit',@Bt_ExitClick,'');
 RepCourant:= ExtractFilePath(Paramstr(0));
+L_DestDir.Text:= Repcourant;
 end;
 
 end.

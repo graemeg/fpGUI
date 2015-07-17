@@ -54,12 +54,12 @@ type
 
 var
   Parser: T_Parser;
-  RepCourant: string;
+  RepCourant,DestDir: string;
 
 implementation
 
 uses
-  u_data;
+  u_data, tiCompress, tiCompressZLib;
 
 var
   Flux: TFileStream;
@@ -592,9 +592,9 @@ end;
 
 procedure T_Parser.MakedefinitionFile(FontFile: string);
 var
-  FileDlg: TfpgFileDialog;
   DestFile: TStringList;
   Chaine,Fichier: widestring;
+  FontFileName: string;
   Cpt: Integer;
 begin
 DestFile:= TStringList.Create;
@@ -643,20 +643,10 @@ for Cpt:= 32 to 255 do
   Chaine:= Chaine+IntToStr(CharWidth[Cpt])+' ';
 Chaine:= Chaine+']';
 DestFile.Add(Chaine);
-FileDlg:= TfpgFileDialog.Create(nil);
-FileDlg.InitialDir:= RepCourant;
-FileDlg.Filter:= 'Fichiers fnt |*.fnt';
-FontFile:= StringReplace(FontFile,'-Regular','',[rfIgnoreCase]);
-Fichier:= Copy(FontFile,1,Length(FontFile)-3)+'fnt';
-FileDlg.FileName:= Fichier;
-try
-  if FileDlg.RunSaveFile
-  then
-    DestFile.SaveToFile(Fichier);
-finally
-  FileDlg.Free;
-  DestFile.Free;
-  end;
+FontFileName:= StringReplace(FontFile,'-Regular','',[rfIgnoreCase]);
+Fichier:= Copy(FontFileName,1,Length(FontFileName)-3)+'fnt';
+DestFile.SaveToFile(DestDir+Fichier);
+tiCompressStringToFile(FontFile,Copy(DestDir+FontFileName,1,Length(DestDir+FontFileName)-3)+'z');
 end;
 
 function T_Parser.MakeDifferences: widestring;

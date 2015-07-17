@@ -4,7 +4,7 @@ program makefonts;
 
 uses
   Classes,
-  fpg_main, u_main, u_parsettf, u_data ;
+  fpg_main, u_main, u_parsettf, u_data, dzlib, tiCompressZLib, tiCompress;
 
 {.$R *.res}
 
