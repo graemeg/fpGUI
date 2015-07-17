@@ -95,6 +95,7 @@ type
     procedure   SetReadOnly(const AValue: Boolean);
     procedure   ResetSelectionVariables;
     procedure   SetCursorPos(const AValue: integer);
+    procedure   SetLineHeight(const AValue: integer);
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
   protected
@@ -124,7 +125,7 @@ type
     property    CursorPos: integer read FCursorPos write SetCursorPos;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
     property    Font: TfpgFont read FFont;
-    property    LineHeight: integer read FLineHeight;
+    property    LineHeight: integer read FLineHeight write SetLineHeight;
     property    MaxLength: integer read FMaxLength write FMaxLength;
     property    TabWidth: integer read FTabWidth write FTabWidth;
     property    Text: TfpgString read GetText write SetText;
@@ -465,6 +466,16 @@ begin
   FSelEndPos    := FCursorPos;
   AdjustCursor;
   Repaint;
+end;
+
+procedure Tfpgmemo.SetLineHeight(const AValue: integer);
+begin
+  if FLineHeight = AValue then
+    Exit;
+  if AValue < FFont.Height then
+    FLineHeight:= FFont.Height
+  else
+   FLineHeight:= AValue;
 end;
 
 constructor TfpgMemo.Create(AOwner: TComponent);

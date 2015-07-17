@@ -12,6 +12,7 @@ uses
   fpg_main,
   fpg_form,
   fpg_button,
+  fpg_label,
   fpg_memo;
   
 type
@@ -20,8 +21,15 @@ type
     {@VFD_HEAD_BEGIN: MainForm}
     memo: TfpgMemo;
     btnQuit: TfpgButton;
+    llineHeight: Tfpglabel;
+    btnFive: Tfpgbutton;
+    btnDefault: Tfpgbutton;
+    btnTwenty: Tfpgbutton;
     {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClicked(Sender: TObject);
+    procedure   btnFiveClick(Sender: TObject);
+    procedure   btnDefaultClick(Sender: TObject);
+    procedure   btnTwentyClick(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -33,11 +41,29 @@ begin
   Close;
 end;
 
+procedure TMainForm.btnFiveClick(Sender: TObject);
+begin
+  memo.LineHeight:= 5;
+  memo.Invalidate;
+end;
+
+procedure TMainForm.btnDefaultClick(Sender: TObject);
+begin
+  memo.LineHeight:= memo.Font.Height + 2;
+  memo.Invalidate;
+end;
+
+procedure TMainForm.btnTwentyClick(Sender: TObject);
+begin
+  memo.LineHeight:= 20;
+  memo.Invalidate;
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(329, 251, 300, 201);
+  SetPosition(329, 251, 300, 230);
   WindowTitle := 'Memo Test';
   WindowPosition := wpOneThirdDown;
 
@@ -69,6 +95,41 @@ begin
     ImageName := 'stdimg.quit';
     TabOrder := 1;
     OnClick := @btnQuitClicked;
+  end;
+
+  llineHeight := TfpgLabel.Create(self);
+  with llineHeight do
+  begin
+    Name := 'llineHeight';
+    SetPosition(10,200,65,24);
+    Text := 'Line height';
+  end;
+
+  btnFive := Tfpgbutton.Create(self);
+  with btnFive do
+  begin
+    Name := 'btnFive';
+    SetPosition(80,195,30,24);
+    Text := '5';
+    OnClick := @btnFiveClick;
+  end;
+
+  btnDefault := Tfpgbutton.Create(self);
+  with btnDefault do
+  begin
+    Name := 'btnDefault';
+    SetPosition(120,195,50,24);
+    Text := 'Default';
+    OnClick := @btnDefaultClick;
+  end;
+
+  btnTwenty := Tfpgbutton.Create(self);
+  with btnTwenty do
+  begin
+    Name := 'btnTwenty';
+    SetPosition(180,195,30,24);
+    Text := '20';
+    OnClick := @btnTwentyClick;
   end;
 
   {@VFD_BODY_END: MainForm}
