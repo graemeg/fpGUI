@@ -577,7 +577,10 @@ begin
   begin
     clr := fpgColorToRGB(clButtonFace);
     fpgSetNamedColor(clButtonface, FBackgroundColor);
+    Include(lBtnFlags, btfAltColor);
+    fpgStyle.AlternateColor:= FBackgroundColor;
     fpgStyle.DrawButtonFace(Canvas, r, lBtnFlags);
+    Exclude(lBtnFlags, btfAltColor);
     fpgSetNamedColor(clButtonface, clr);
   end
   else

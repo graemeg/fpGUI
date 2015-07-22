@@ -47,7 +47,7 @@ type
   TAnchors = set of TAnchor;
 
   TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
-    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled);
+    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled, btfAltColor);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu);
@@ -192,6 +192,7 @@ type
     Also support Bitmap based styles for easier theme implementations. }
   TfpgStyle = class(TObject)
   protected
+    FAlternateColor: TfpgColor;
     FDefaultFont: TfpgFont;
     FFixedFont: TfpgFont;
     FMenuAccelFont: TfpgFont;
@@ -208,6 +209,7 @@ type
     constructor Create; virtual;
     destructor  Destroy; override;
     { font objects }
+    property    AlternateColor: TfpgColor read FAlternateColor write FAlternateColor;
     property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
     property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
     property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
