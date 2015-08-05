@@ -141,7 +141,7 @@ type
     memSample: TfpgMemo;
     procedure   OnCollectionChanged(Sender: TObject);
     procedure   OnParamChange(Sender: TObject);
-    procedure   OnSameTextChanged(Sender: TObject);
+    procedure   OnSampleTextChanged(Sender: TObject);
     procedure   CreateFontList;
     procedure   CreateFontAliasList;
     procedure   SetupUI(AMode: Byte);
@@ -644,7 +644,7 @@ begin
     memSample.Lines.Add(fpgGetNamedFontDesc(UTF8Copy(fdesc, 2, UTF8Length(fdesc)-1)));
 end;
 
-procedure TfpgFontSelectDialog.OnSameTextChanged(Sender: TObject);
+procedure TfpgFontSelectDialog.OnSampleTextChanged(Sender: TObject);
 begin
   FSampleText := memSample.Text;
 end;
@@ -1019,7 +1019,7 @@ begin
     SetPosition(8, 288, 584, 65);
     Text := FSampleText;
     Anchors := [anLeft, anTop, anRight, anBottom];
-    OnChange := @OnSameTextChanged;
+    OnChange := @OnSampleTextChanged;
   end;
 
   CreateFontList;
