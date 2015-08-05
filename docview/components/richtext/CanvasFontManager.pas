@@ -179,8 +179,8 @@ begin
       AFontDesc := AFontDesc + ':Strikeout';
 
   if faUnderScore in Attrs Then
-    if Pos(':Underscore', AFontDesc) = 0 then
-      AFontDesc := AFontDesc + ':Underscore';
+    if Pos(':Underline', AFontDesc) = 0 then
+      AFontDesc := AFontDesc + ':Underline';
 end;
 
 // Provide font name substitutes for some common bitmap fonts found in INF files
