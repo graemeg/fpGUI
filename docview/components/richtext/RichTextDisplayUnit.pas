@@ -263,9 +263,10 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
            and ( faItalic in Style.FontAttributes )
            and ( not FontManager.IsFixed )
            then
+        begin
           // end of italic; add a space
-          inc( X, FontManager.CharWidth( ' ' )  );
-
+//          inc( X, FontManager.CharWidth( ' ' )  );
+        end;
         Layout.PerformStyleTag( Element.Tag, Style, X );
         NewMarginX := ( Start.X + Style.LeftMargin );
         if NewMarginX > X then
