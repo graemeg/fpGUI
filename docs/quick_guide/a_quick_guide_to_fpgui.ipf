@@ -13,7 +13,7 @@
 :h1.A Quick Guide to &fpg.
 :hp2.A Quick Guide to &fpg.:ehp2.
 :p.By Graeme Geldenhuys
-:artwork align=left name='qguide_images/wizard_pink.bmp'.
+:artwork align=left name='images/wizard_pink.bmp'.
 
 :table cols="13 20".
 :row.
