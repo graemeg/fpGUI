@@ -9,17 +9,25 @@
 .nameit symbol=dv text='DocView'
 .nameit symbol=fpg text='fpGUI'
 
-.* This is a comment
-:h1.A Quick Guide to &fpg.
-:cgraphic.
- þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
-  A Quick Guide to using fpGUI Toolkit
- þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
-:ecgraphic.
 
-:p.Written by Graeme Geldenhuys :artwork runin name='images/wizard_pink.bmp'.
-
-:p.All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
+:h1.A Quick Guide to using &fpg.
+:font facename='Helvetica-20:antialias=true'.
+.* :artwork name='img0.bmp' align=center.
+:lines align=center.
+A Quick Guide to using
+.br
+fpGUI Toolkit
+.br
+:elines.
+:font facename=default.
+:lines align=center.
+Written by Graeme Geldenhuys
+:artwork align=center name='images/wizard_pink.bmp'.
+.br
+.br
+All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
+.br
+:elines.
 
 :table cols="13 20".
 :row.
@@ -31,11 +39,23 @@
 :etable.
 
 
+:h2.License
+:cgraphic.
+þþþþþþþþþ
+ License
+þþþþþþþþþ
+:ecgraphic.
+:p.
+This work is licensed under the Creative Commons Attribution-NonCommercial-
+ShareAlike 3.0 Unported License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter
+to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
 :h2.Preface
 :cgraphic.
- þþþþþþþþþ
-  Preface
- þþþþþþþþþ
+þþþþþþþþþ
+ Preface
+þþþþþþþþþ
 :ecgraphic.
 :p.
 I've been meaning to start this book back in 2013, but always seemed to find
@@ -73,9 +93,9 @@ But for now, lets look at &fpg. itself!
 
 :h2.Colophon
 :cgraphic.
- þþþþþþþþþþ
-  Colophon
- þþþþþþþþþþ
+þþþþþþþþþþ
+ Colophon
+þþþþþþþþþþ
 :ecgraphic.
 :p.
 This is the first book that I wrote using IPF and related technologies, though
@@ -85,9 +105,9 @@ using my own IPF syntax and file navigation schemes.
 
 :h2.A Brief History of &fpg.
 :cgraphic.
- þþþþþþþþþþþþþþþþþþþþþþþþþþ
-  A Brief History of fpGUI
- þþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþþþ
+ A Brief History of fpGUI
+þþþþþþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
 circa 2006.
@@ -152,9 +172,9 @@ other developers in using the widgetset.
 
 :h3.Integration with Lazarus IDE
 :cgraphic.
- þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
-  Integration with Lazarus IDE
- þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+ Integration with Lazarus IDE
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
 For that you follow these simple steps:
@@ -190,10 +210,11 @@ Lazarus IDE as your editor! :)
 
 :h4.UI Designer
 :cgraphic.
- þþþþþþþþþþþþþ
-  UI Designer
- þþþþþþþþþþþþþ
+þþþþþþþþþþþþþ
+ UI Designer
+þþþþþþþþþþþþþ
 :ecgraphic.
+
 :p.
 This page describes how &fpg.'s forms designer application, UIDesigner, can be
 integrated with Lazarus IDE. Thus allowing you to launch the forms designer
@@ -235,11 +256,11 @@ the UIDesigner inside Lazarus IDE.
 :ecgraphic.
 .* :artwork align=left name='qguide_images/laz_uidesigner_setup.bmp'.
 
-:h4.DocView
+:h4.Docview
 :cgraphic.
- þþþþþþþþþ
-  DocView
- þþþþþþþþþ
+þþþþþþþþþ
+ Docview
+þþþþþþþþþ
 :ecgraphic.
 
 :cgraphic.
