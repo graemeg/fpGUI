@@ -6,8 +6,9 @@
 
 .* This as a marco definition
 .nameit symbol=pubdate text='August 2015'
-.nameit symbol=dv text='DocView'
-.nameit symbol=fpg text='fpGUI'
+.nameit symbol=dv text='Docview'
+.nameit symbol=fpg text='fpGUI Toolkit'
+.nameit symbol=fpc text='Free Pascal Compiler'
 
 
 :h1.A Quick Guide to using &fpg.
@@ -152,13 +153,13 @@ documentation as there was no documentation included with the
 original fpGUI and fpGFX projects. Documentation is important to attract
 other developers in using the widgetset.
 
-:h2.Part I: Basic &fpg.
+:h2.Part I: Basic fpGUI
 :h3.Getting Started
 :h3.Creating Dialogs
 :h3.Creating Main Windows
 :h3.Implementing Application Functionality
 :h3.Creating Custom Widgets
-:h2.Part II: Intermediate &fpg.
+:h2.Part II: Intermediate fpGUI
 :h3.Layout Management
 :h3.Event Processing
 :h3.2D Graphics with AggPas
@@ -167,8 +168,46 @@ other developers in using the widgetset.
 :h3.Internationalization
 :h3.Providing Online Help
 :h3.Multithreading
-:h2.Installing &fpg.
-:h3.Standalone Setup
+:h2.Installing fpGUI
+
+
+
+
+:h3.Building fpGUI from the Command Line
+:cgraphic.
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+ Building fpGUI from the Command Line
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+This is still a work in progress until I can find a suitable solution. I'm
+not 100% satisfied with this, but it's a quick and easy way to get things
+to compile. I'll assume you have the :color fc=darkred.fpc:color fc=default. executable setup in your system's
+PATH environment variable so it
+can be run from any location on your computer. I'll also assume your global
+:color fc=darkred.fpc.cfg:color fc=default. file has been setup correctly so the &fpc. can find the RTL and
+FCL units.
+
+:p.
+Under Linux, *BSD, OpenSolaris and MacOSX run:
+:xmp.
+ cd <fpgui>/src
+ build.sh
+:exmp.
+
+:p.
+Under Windows run:
+:xmp.
+ cd <fpgui>\src
+ build.bat
+:exmp.
+:p.
+The :color fc=darkred.extrafpc.cfg:color fc=default. file located in the :color fc=darkred.src:color fc=default. directory is combined with your global
+fpc.cfg file. The local extrafpc.cfg file sets up all the required search and
+include paths to compile the :color fc=darkred.corelib:color fc=default. and :color fc=darkred.gui:color fc=default. directories.
+:p.
+All compiled units (*.o and *.ppu) are saved in the <fpgui>/lib directory. This
+makes the search paths for you applications a little easier to setup.
 
 :h3.Integration with Lazarus IDE
 :cgraphic.
@@ -177,38 +216,45 @@ other developers in using the widgetset.
 þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
-For that you follow these simple steps:
-
+Lazarus IDE is a very versatile IDE and allows you to create many types of
+projects with it. Those include LCL desktop applications, web applications,
+console applications, and more importantly, fpGUI Toolkit applications.
+:p.
+To accomplish the latter, follow these simple steps:
 :p.
 :hp2.Lets configure Lazarus to have a new project type::ehp2.
 :ol.
-:li.Run Lazarus and open the fpgui_toolkit.lpk package found in the
-.br
-&fpg. code: <fpgui>/src/corelib/[x11|gdi]/fpgui_toolkit.lpk
-.br
+:li.Run Lazarus and open the :color fc=darkred.fpgui_toolkit.lpk:color fc=default. package found in the
+following location:
+:xmp.
+ <fpgui>/src/corelib/[x11|gdi]/fpgui_toolkit.lpk
+:exmp.
+:note.The [x11|gdi] means you need to choose the "x11" or "gdi" directory based on
+your platform.
+:p.
 Click "Compile".
 
-:li.Now open the IDE add-on package, compile and install.
-.br
-Open <fpgui>/extras/lazarus_ide/fpgui_ide.lpk
-.br
-Click "Compile" & "Install".
-.br
-Lazarus will rebuild and restart itself.
+:li.Now you need to install the IDE add-on package which registers a new project
+type with Lazarus IDE. Do that by opening the :color fc=darkred.fpgui_ide.lpk:color fc=default. package, found at:
+:xmp.
+ <fpgui>/extras/lazarus_ide/fpgui_ide.lpk
+:exmp.
+:p.
+Click "Compile" and then "Install". Lazarus will rebuild and restart itself.
 :eol.
 
 :p.
 :hp2.Now to create a &fpg. application::ehp2.
 :ol.
 :li.Run Lazarus
-:li.Select "Project -> New Project..." and select "fpGUI Toolkit Application".
+:li.Select ":hp2.Project:ehp2. ¯ :hp2.New Project...:ehp2." and select "fpGUI Toolkit Application".
 :eol.
 
 :p.
-All done, you have create your first fpGUI Toolkit application using
+All done, you have created your first fpGUI application using
 Lazarus IDE as your editor! :)
 
-:h4.UI Designer
+:h4 id=laz_uidesigner.UI Designer
 :cgraphic.
 þþþþþþþþþþþþþ
  UI Designer
@@ -226,8 +272,8 @@ Alternative methods exist, but that requires recompiling the IDE - and that
 seems like just to much effort.
 :p.
 The process is quite simple. While in Lazarus, simply select the menu items
-":hp2.Tools:ehp2. -> :hp2.Configure External Tools...:ehp2.". A dialog will
-appear. Select the :hp2.Add:ehp2. button, and then fill in the details as
+":hp2.Tools:ehp2. ¯ :hp2.Configure External Tools...:ehp2.". A dialog will
+appear. Select the "Add" button, and then fill in the details as
 shown in the screen below. Please use the correct path to the UIDesigner
 executable.
 :p.
@@ -262,6 +308,11 @@ the UIDesigner inside Lazarus IDE.
  Docview
 þþþþþþþþþ
 :ecgraphic.
+:p.
+Integrating Docview with Lazarus IDE is the exact same process as was done
+setting up Lazarus IDE with the :link reftype=hd refid=laz_uidesigner.UI Designer:elink..
+Please refer to that page for detailed instructions, and then apply the following
+settings to the External Tools item you are setting up.
 
 :cgraphic.
 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
