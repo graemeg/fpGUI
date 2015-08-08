@@ -11,9 +11,15 @@
 
 .* This is a comment
 :h1.A Quick Guide to &fpg.
-:hp2.A Quick Guide to &fpg.:ehp2.
-:p.By Graeme Geldenhuys
-:artwork align=left name='images/wizard_pink.bmp'.
+:cgraphic.
+ þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+  A Quick Guide to using fpGUI Toolkit
+ þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+
+:p.Written by Graeme Geldenhuys :artwork runin name='images/wizard_pink.bmp'.
+
+:p.All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
 
 :table cols="13 20".
 :row.
@@ -24,7 +30,19 @@
 :c.&pubdate.
 :etable.
 
+
+:h2.Preface
+:cgraphic.
+ þþþþþþþþþ
+  Preface
+ þþþþþþþþþ
+:ecgraphic.
 :p.
+I've been meaning to start this book back in 2013, but always seemed to find
+other things to do. I've finally decided to put pen-to-paper (in a digital
+way) and get started.
+:p.
+:hp2.What is fpGUI:ehp2.
 :p.
 fpGUI Toolkit (or the Free Pascal GUI Toolkit) is a multi-platform toolkit for
 creating graphical user interfaces. Offering a complete set of custom drawn
@@ -40,15 +58,10 @@ embedded systems like ARM-Linux and WinCE.
 fpGUI is open source and free software, licensed under a Modified LGPL
 license. The toolkit has been implemented using the Object Pascal language,
 and is meant for use with the Free Pascal compiler.
-
-
-:h2.Preface
-I've been meaning to start this book back in 2013, but always seemed to find
-other things to do. I've now finally decided to put pen to paper and get
-going - even if it is just a draft document for the time being.
 :p.
 :hp2.Who This Book Is For:ehp2.
-:p.I've written this book for programmers who want to learn to use the &fpg.
+:p.
+I've written this book for programmers who want to learn to use the &fpg.
 toolkit, and that might not have used it, or similar toolkits before.
 :p.
 This book covers using &fpg. directly (no LCL involved). The Lazarus
@@ -59,13 +72,24 @@ LCL and make it into a usable LCL target.
 But for now, lets look at &fpg. itself!
 
 :h2.Colophon
+:cgraphic.
+ þþþþþþþþþþ
+  Colophon
+ þþþþþþþþþþ
+:ecgraphic.
+:p.
 This is the first book that I wrote using IPF and related technologies, though
 I have written many shorter articles or README-style documents with it. The
 master text was written primarily with the EditPad Pro v7 text editor and
 using my own IPF syntax and file navigation schemes.
 
 :h2.A Brief History of &fpg.
-:hp2.A Brief History of &fpg.:ehp2.
+:cgraphic.
+ þþþþþþþþþþþþþþþþþþþþþþþþþþ
+  A Brief History of fpGUI
+ þþþþþþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
 circa 2006.
 :p.
 After developing many cross platform applications with Kylix and Delphi
@@ -127,6 +151,12 @@ other developers in using the widgetset.
 :h3.Standalone Setup
 
 :h3.Integration with Lazarus IDE
+:cgraphic.
+ þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+  Integration with Lazarus IDE
+ þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
 For that you follow these simple steps:
 
 :p.
@@ -158,7 +188,13 @@ Lazarus will rebuild and restart itself.
 All done, you have create your first fpGUI Toolkit application using
 Lazarus IDE as your editor! :)
 
-:h4.UIDesigner
+:h4.UI Designer
+:cgraphic.
+ þþþþþþþþþþþþþ
+  UI Designer
+ þþþþþþþþþþþþþ
+:ecgraphic.
+:p.
 This page describes how &fpg.'s forms designer application, UIDesigner, can be
 integrated with Lazarus IDE. Thus allowing you to launch the forms designer
 with a simple keyboard shortcut, and automatically load the current file being
@@ -200,6 +236,12 @@ the UIDesigner inside Lazarus IDE.
 .* :artwork align=left name='qguide_images/laz_uidesigner_setup.bmp'.
 
 :h4.DocView
+:cgraphic.
+ þþþþþþþþþ
+  DocView
+ þþþþþþþþþ
+:ecgraphic.
+
 :cgraphic.
 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ³ Edit Tool                                       X ³
