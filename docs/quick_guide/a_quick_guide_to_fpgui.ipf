@@ -83,7 +83,8 @@ and is meant for use with the Free Pascal compiler.
 :hp2.Who This Book Is For:ehp2.
 :p.
 I've written this book for programmers who want to learn to use the &fpg.
-toolkit, and that might not have used it, or similar toolkits before.
+toolkit, and that might not have used it, or similar toolkits before. I am
+assuming that you have some basic understanding of the Object Pascal language.
 :p.
 This book covers using &fpg. directly (no LCL involved). The Lazarus
 LCL-fpGUI widgetset is not feature complete, and not nearly ready for real
@@ -103,6 +104,15 @@ This is the first book that I wrote using IPF and related technologies, though
 I have written many shorter articles or README-style documents with it. The
 master text was written primarily with the EditPad Pro v7 text editor and
 using my own IPF syntax and file navigation schemes.
+:p.
+You can download the IPF colour scheme from here:
+.br
+  http://www.editpadpro.com/cgi-bin/cscsdl4.pl?id=243
+:p.
+You can download the IPF file navigation scheme from here:
+.br
+  http://www.editpadpro.com/cgi-bin/fnsdl2.pl?id=71
+
 
 :h2.A Brief History of &fpg.
 :cgraphic.
@@ -154,7 +164,89 @@ original fpGUI and fpGFX projects. Documentation is important to attract
 other developers in using the widgetset.
 
 :h2.Part I: Basic fpGUI
-:h3.Getting Started
+:h3 id=ch_getting_started.Getting Started
+:cgraphic.
+þþþþþþþþþþþþþþþþþ
+ Getting Started
+þþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+In this chapter we will start small, and introduce some basic concepts and
+terminology. In later chapters we will start with a realistic application.
+:p.
+I'll also assume that you have setup your development environment as
+described in the :link reftype=hd refid=ch_installing_fpgui.Instaling
+fpGUI:elink. chapter. Because there are multiple ways to set up your build
+environment, I'll make no assumption what environment you are using. So for
+the rest of the book I'll simply say you must rebuild and run the application when needed.
+
+:p.
+:hp2.See Also:ehp2.
+:ul compact.
+:li.:link reftype=hd refid=ch_hello_world.Hello World:elink.
+:li.:link reftype=hd refid=ch_making_connections.Making Connections:elink.
+:li.:link reftype=hd refid=ch_using_documentation.Using the Class Documentation:elink.
+:eul.
+
+:h4 id=ch_hello_world.Hello World
+:cgraphic.
+þþþþþþþþþþþþþ
+ Hello World
+þþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+Here is a very simple fpGUI application. We will study it line by line.
+:xmp.
+  1   program helloworld;
+  2
+  3   {$mode objfpc}{$H+}
+  4
+  5   uses
+  6     Classes, fpg_base, fpg_main, fpg_form, fpg_label;
+  7
+  8   type
+  9     TMainForm = class(TfpgForm)
+ 10     public
+ 11       procedure AfterCreate; override;
+ 12     end;
+ 13
+ 14   procedure TMainForm.AfterCreate;
+ 15   begin
+ 16     Name := 'MainForm';
+ 17     SetPosition(316, 186, 170, 30);
+ 18     WindowTitle := 'MainForm';
+ 19     CreateLabel(self, 40, 4, 'Hello World!');
+ 20   end;
+ 21
+ 22   procedure MainProc;
+ 23   var
+ 24     frm: TMainForm;
+ 25   begin
+ 26     fpgApplication.Initialize;
+ 27     fpgApplication.CreateForm(TMainForm, frm);
+ 28     try
+ 29       frm.Show;
+ 30       fpgApplication.Run;
+ 31     finally
+ 32       frm.Free;
+ 33     end;
+ 34   end;
+ 35
+ 36   begin
+ 37     MainProc;
+ 38   end.
+:exmp.
+
+:artwork align=center name='images/ch1_hello_world.bmp' align=center.
+:lines align=center.:hp2.Figure 1::ehp2. Hello World application under FreeBSD:elines.
+
+
+:h4 id=ch_making_connections.Making Connections
+
+
+:h4 id=ch_using_documentation.Using the Class Documentation
+
+
 :h3.Creating Dialogs
 :h3.Creating Main Windows
 :h3.Implementing Application Functionality
@@ -168,7 +260,7 @@ other developers in using the widgetset.
 :h3.Internationalization
 :h3.Providing Online Help
 :h3.Multithreading
-:h2.Installing fpGUI
+:h2 id=ch_installing_fpgui.Installing fpGUI
 
 
 
@@ -182,10 +274,12 @@ other developers in using the widgetset.
 :p.
 This is still a work in progress until I can find a suitable solution. I'm
 not 100% satisfied with this, but it's a quick and easy way to get things
-to compile. I'll assume you have the :color fc=darkred.fpc:color fc=default. executable setup in your system's
+to compile. I'll assume you have the :color fc=darkred.fpc:color fc=default.
+executable setup in your system's
 PATH environment variable so it
 can be run from any location on your computer. I'll also assume your global
-:color fc=darkred.fpc.cfg:color fc=default. file has been setup correctly so the &fpc. can find the RTL and
+:color fc=darkred.fpc.cfg:color fc=default. file has been setup correctly so
+the &fpc. can find the RTL and
 FCL units.
 
 :p.
@@ -202,9 +296,11 @@ Under Windows run:
  build.bat
 :exmp.
 :p.
-The :color fc=darkred.extrafpc.cfg:color fc=default. file located in the :color fc=darkred.src:color fc=default. directory is combined with your global
+The :color fc=darkred.extrafpc.cfg:color fc=default. file located in the
+:color fc=darkred.src:color fc=default. directory is combined with your global
 fpc.cfg file. The local extrafpc.cfg file sets up all the required search and
-include paths to compile the :color fc=darkred.corelib:color fc=default. and :color fc=darkred.gui:color fc=default. directories.
+include paths to compile the :color fc=darkred.corelib:color fc=default. and
+:color fc=darkred.gui:color fc=default. directories.
 :p.
 All compiled units (*.o and *.ppu) are saved in the <fpgui>/lib directory. This
 makes the search paths for you applications a little easier to setup.
@@ -224,18 +320,22 @@ To accomplish the latter, follow these simple steps:
 :p.
 :hp2.Lets configure Lazarus to have a new project type::ehp2.
 :ol.
-:li.Run Lazarus and open the :color fc=darkred.fpgui_toolkit.lpk:color fc=default. package found in the
+:li.Run Lazarus and open the :color fc=darkred.fpgui_toolkit.lpk:color
+fc=default. package found in the
 following location:
 :xmp.
  <fpgui>/src/corelib/[x11|gdi]/fpgui_toolkit.lpk
 :exmp.
-:note.The [x11|gdi] means you need to choose the "x11" or "gdi" directory based on
+:note.The [x11|gdi] means you need to choose the "x11" or "gdi" directory
+based on
 your platform.
 :p.
 Click "Compile".
 
-:li.Now you need to install the IDE add-on package which registers a new project
-type with Lazarus IDE. Do that by opening the :color fc=darkred.fpgui_ide.lpk:color fc=default. package, found at:
+:li.Now you need to install the IDE add-on package which registers a new
+project
+type with Lazarus IDE. Do that by opening the :color
+fc=darkred.fpgui_ide.lpk:color fc=default. package, found at:
 :xmp.
  <fpgui>/extras/lazarus_ide/fpgui_ide.lpk
 :exmp.
@@ -247,7 +347,8 @@ Click "Compile" and then "Install". Lazarus will rebuild and restart itself.
 :hp2.Now to create a &fpg. application::ehp2.
 :ol.
 :li.Run Lazarus
-:li.Select ":hp2.Project:ehp2. ¯ :hp2.New Project...:ehp2." and select "fpGUI Toolkit Application".
+:li.Select ":hp2.Project:ehp2. ¯ :hp2.New Project...:ehp2." and select "fpGUI
+Toolkit Application".
 :eol.
 
 :p.
@@ -310,8 +411,10 @@ the UIDesigner inside Lazarus IDE.
 :ecgraphic.
 :p.
 Integrating Docview with Lazarus IDE is the exact same process as was done
-setting up Lazarus IDE with the :link reftype=hd refid=laz_uidesigner.UI Designer:elink..
-Please refer to that page for detailed instructions, and then apply the following
+setting up Lazarus IDE with the :link reftype=hd refid=laz_uidesigner.UI
+Designer:elink..
+Please refer to that page for detailed instructions, and then apply the
+following
 settings to the External Tools item you are setting up.
 
 :cgraphic.
