@@ -136,7 +136,7 @@ uses
 
 function TLayoutLineList.GetItem(Index: Integer): TLayoutLine;
 begin
-  inherited GetItem(Index);
+  result := TLayoutLine( inherited GetItem(Index));
 end;
 
 procedure TLayoutLineList.SetItem(Index: Integer; const AValue: TLayoutLine);
