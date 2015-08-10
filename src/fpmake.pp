@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -14,11 +14,12 @@
     Description:
       The original version of this program was kindly supplied by Henry
       Vermaak. It uses the new fpmake build system introduced in FPC 2.2.2.
-      fpmake is supposed to replace the Makefile build system.
+      fpmake is supposed to replace the Makefile build system and work closely
+      with the fppkg (online package management) system.
 
     Usage:
       - Compile fpmake.pas as follows:
-             fpc fpmake.pas
+             fpc fpmake.pp
 
       - To find out more about what fpmake can do and see some help
              fpmake --help
@@ -29,10 +30,10 @@
         Note that if you installed FPC in a non-standard location on you
         system you need to tell fpmake which compiler and units to use. The
         following is all in one line:
-             fpmake.exe -r c:\fpc\2.2.3\bin\i386-win32\ppc386.exe
-                -UG c:\fpc\2.2.3\units\i386-win32
+             fpmake.exe -r c:\fpc\2.6.4\bin\i386-win32\ppc386.exe
+                -UG c:\fpc\2.6.4\units\i386-win32
           or
-             ./fpmake -v build -UG /opt/fpc/lib/fpc/2.2.3/units/i386-linux/
+             ./fpmake -v build -UG /opt/fpc/lib/fpc/2.6.4/units/i386-linux/
 }
 
 program fpmake;
