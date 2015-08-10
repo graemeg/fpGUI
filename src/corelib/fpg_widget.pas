@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -19,7 +19,7 @@ unit fpg_widget;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}
+{.$Define GDEBUG}
 {.$Define CStackDebug}
 
 interface
@@ -638,7 +638,7 @@ end;
 
 destructor TfpgWidget.Destroy;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
   FCanvas.Free;
@@ -1453,7 +1453,7 @@ var
   w: TfpgWidget;
   HasInvalidRegion: Boolean;
   Params: TfpgMessageParams;
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   Tmp: TfpgRect;
   {$ENDIF}
 begin
@@ -1477,7 +1477,7 @@ begin
   if Assigned(FOnPaint) then
     FOnPaint(Self);
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   Tmp := FInvalidRect; // for debugging
   {$ENDIF}
 
@@ -1499,7 +1499,7 @@ begin
       Canvas.EndDraw;
       FInvalidRect.Clear;
       FInvalidated:=False;
-      {$IFDEF DEBUG}
+      {$IFDEF GDEBUG}
       Writeln('Invalid Rect Detected!');
       Write('MSG: '); PrintRect(msg.Params.rect);
       Write('INV: '); PrintRect(Tmp);

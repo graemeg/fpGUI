@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -211,12 +211,12 @@ end;
 
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   DebugLn(Classname + ' ' + Name + '.BaseForm - MsgActivate');
   {$ENDIF}
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     DebugLn('Inside if block');
     {$ENDIF}
     FocusRootWidget := self;

@@ -1909,7 +1909,7 @@ var
   NewSize: TfpgSize;
 begin
   NewSize := fpgSize(msg.Params.rect.Width, msg.Params.rect.Height);
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   DebugLn('FPGM_RESIZE to Native Window: Requested Value, Current Value , Message Value');
   PrintSize(FSize);
   PrintSize(FNotifiedSize);

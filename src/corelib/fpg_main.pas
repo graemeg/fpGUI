@@ -19,7 +19,7 @@ unit fpg_main;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}
+{.$Define GDEBUG}
 
 // To enable the AggPas powered Canvas
 {.$define AGGCanvas}
@@ -472,7 +472,7 @@ uses
 {$ifdef AGGCanvas}
   Agg2D,
 {$endif}
-{$IFDEF DEBUG}
+{$IFDEF GDEBUG}
   fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
@@ -918,14 +918,14 @@ begin
     spacing += '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   SendDebug(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
   {$ENDIF}
 end;
 
 destructor TPrintCallTrace.Destroy;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   SendDebug(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
   {$ENDIF}
   dec(iCallTrace);
@@ -1273,7 +1273,7 @@ begin
       Exit; //==>
     end;
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   SendDebug('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
   {$ENDIF}
   Result := FPG_DEFAULT_FONT_DESC;
@@ -1432,7 +1432,7 @@ begin
   else
   begin
     fr.Free;
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     SendDebug('fpGFX: Error opening font.');
     {$ENDIF}
   end;
@@ -1682,6 +1682,8 @@ begin
 
   FHintTimer := TfpgTimer.Create(HintPause);
   FHintTimer.OnTimer := @HintTimerFired;
+
+  DesignedDPI := Screen_dpi;
 end;
 
 procedure TfpgApplication.Flush;
@@ -1754,7 +1756,7 @@ end;
 
 procedure TfpgApplication.HideHint;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   SendDebug('HideHint');
   {$ENDIF}
   FHintTimer.Enabled := False;
@@ -2621,7 +2623,7 @@ begin
   except
     {$Note This occurs every now and again with TfpgMemo and CaretInvert painting! }
     // Investigate this.
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     SendDebug('TfpgCaret.InvertCaret cause an exception');
     {$ENDIF}
   end;

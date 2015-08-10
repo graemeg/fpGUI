@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -19,7 +19,7 @@ unit fpg_translations;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}
+{.$Define GDEBUG}
 
 interface
 
@@ -120,7 +120,7 @@ var
   FallbackLang: string;
   Dir: string;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('BaseAppName = ',BaseAppName);
   writeln('BaseDirectory = ',BaseDirectory);
   writeln('CustomLang = ',CustomLang);
@@ -141,7 +141,7 @@ begin
 //  writeln('TranslateResourceStrings A Lang=',Lang,' FallbackLang=',FallbackLang);
   Dir := fpgAddTrailingValue(BaseDirectory, PathDelim, false);
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('Lang = ' + Lang);
   writeln('SystemLanguageID1 = ' + SystemLanguageID1);
   writeln('SystemLanguageID2 = ' + SystemLanguageID2);

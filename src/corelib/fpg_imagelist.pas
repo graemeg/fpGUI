@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -91,7 +91,7 @@ function TfpgImageList.GetFListIndex(AIndex: Integer): Integer;
 var
   i: integer;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageList.GetFListIndex');
   {$ENDIF}
   result := -1;
@@ -107,7 +107,7 @@ function TfpgImageList.GetItem(AIndex: integer): TfpgImageItem;
 var
   AFindIndex: integer;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageList.GetItem');
   {$ENDIF}
   result := nil;
@@ -153,7 +153,7 @@ procedure TfpgImageList.AddItemFromFile(AFileName: TfpgString; AIndex: integer);
 var
   AImageItem: TfpgImageItem;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageList.AddItemFromFile');
   {$ENDIF}
   
@@ -188,7 +188,7 @@ end;
 
 procedure TfpgImageList.RemoveIndex(AIndex: integer);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageList.RemoveIndex');
   {$ENDIF}
   AIndex := GetFListIndex(AIndex);
@@ -233,7 +233,7 @@ end;
 
 procedure TfpgImageItem.SetIndex(AIndex: integer);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageItem.SetIndex');
   {$ENDIF}
   if AIndex <> FIndex then
@@ -246,7 +246,7 @@ end;
 
 procedure TfpgImageItem.SetImage(AImage: TfpgImage);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageItem.SetImage');
   {$ENDIF}
   FImage := AImage;
@@ -272,7 +272,7 @@ end;
 
 constructor TfpgImageItem.Create(AFileName: TfpgString; AIndex: integer);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageItem.Create(', AFileName, ',', AIndex, ')');
   {$ENDIF}
   Index := AIndex;
@@ -288,7 +288,7 @@ end;
 
 procedure TfpgImageItem.LoadFromFile(AFileName: TfpgString);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TfpgImageItem.LoadFromFile');
   {$ENDIF}
   if FImage <> nil then

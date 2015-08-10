@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -47,7 +47,7 @@ unit fpg_pofiles;
 
 {$mode objfpc}{$H+}{$INLINE ON}
 
-{.$Define DEBUG}
+{.$Define GDEBUG}
 
 interface
 
@@ -155,7 +155,7 @@ var
   lPos: integer;
   ToolkitOnly: Boolean;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TranslateUnitResourceStrings:');
   {$ENDIF}
   Result := False;
@@ -166,7 +166,7 @@ begin
   lFile := fpgExtractFileName(AFilename);
   lPos := Pos('.', lFile);
   lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('  lFile = ', lFile);
   writeln('  ResUnitName="', ResUnitName, '"');
   writeln('  AFilename="', AFilename, '"');
@@ -181,7 +181,7 @@ begin
     begin
       if not fpgFileExists(lFile) then
         Exit;
-      {$IFDEF DEBUG}
+      {$IFDEF GDEBUG}
       writeln('  ************  Only translating the toolkit   ***********');
       {$ENDIF}
       po := TPOFile.Create(nil);
@@ -246,14 +246,14 @@ begin
 
   if (FallbackLang <> '') then
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     writeln('1) Trying fallback language... ', Fallbacklang);
     {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [FallbackLang]));
   end;
   if (Lang <> '') then
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     writeln('2) Trying language... ', Lang);
     {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [Lang]));
@@ -366,7 +366,7 @@ procedure TPOFile.Add(const Identifier, OriginalValue, TranslatedValue: string);
 var
   Item: TPOFileItem;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TPOFile.Add: ' + Identifier + ' | ' + OriginalValue + ' | ' + TranslatedValue);
   {$ENDIF}
   if (TranslatedValue = '') then
@@ -383,13 +383,13 @@ var
   s: string;
 begin
   s := StringReplace(Identifier, '.', ':', []);
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('TPOFile.Translate: ' + s + '(' + Identifier + ') | ' + OriginalValue);
   {$ENDIF}
   Item := TPOFileItem(FIdentifierToItem.Data[s]);
   if Item = nil then
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     writeln('  identifier lookup failed, trying original value');
     {$ENDIF}
     Item := TPOFileItem(FOriginalToItem.Data[OriginalValue]);
@@ -402,7 +402,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     writeln('  OriginalValue lookup failed, defaulting to original value');
     {$ENDIF}
     Result := OriginalValue;

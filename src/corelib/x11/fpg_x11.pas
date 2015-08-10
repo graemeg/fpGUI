@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -19,7 +19,7 @@ unit fpg_x11;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}      // general debugging - mostly OS messages though
+{.$Define GDEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 {.$Define X11CanvasDEBUG}
 
@@ -450,7 +450,7 @@ type
     function    SupportsMessages: boolean;
   end;
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   { EfpgX11Exception }
 
   EfpgX11Exception = class(Exception)
@@ -653,7 +653,7 @@ begin
     end;
     p := p^.Next;
   end;
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('fpGUI/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
@@ -673,7 +673,7 @@ begin
     end;
     p := p^.Next;
   end;
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('fpGUI/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
@@ -909,7 +909,7 @@ begin
   Result := (FpReadLink(AFilename) <> '');
 end;
 
-{$IFDEF DEBUG}
+{$IFDEF GDEBUG}
 { EfpgX11Exception }
 
 constructor EfpgX11Exception.Create(ADisplay: PXDisplay; AErrorEv: PXErrorEvent);
@@ -1029,7 +1029,7 @@ begin
     Result := keyNIL;
   end;
 
-{$IFDEF Debug}
+{$IFDEF GDebug}
   if Result = keyNIL then
     WriteLn('fpGFX/X11: Unknown KeySym: $', IntToHex(KeySym, 4));
 {$ENDIF}
@@ -1716,7 +1716,7 @@ var
   // Debug info only
   procedure ReportLostWindow(const event: TXEvent);
   begin
-    {$IFDEF DEBUG}
+    {$IFDEF GDEBUG}
     writeln('fpGUI/X11: ', GetXEventName(event._type), ' can''t find <',
         IntToHex(event.xany.window, 9), '>');
     {$ENDIF}
@@ -1785,7 +1785,7 @@ begin
   Popup := PopupListFirst;
 
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   w := FindWindowByHandle(ev.xany.window);
   if not Assigned(w) then
     WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7))
@@ -1837,7 +1837,7 @@ begin
             w := kwg.Window
           else
           begin
-            {$IFDEF DEBUG}
+            {$IFDEF GDEBUG}
             writeln('ERR: We couldn''t find keyboard focused window. Using event window instead!');
             {$ENDIF}
             w := FindWindowByHandle(ev.xkey.window);
@@ -1971,14 +1971,14 @@ begin
             begin
               if ev._type = X.ButtonRelease then
               begin
-                {$IFDEF DEBUG}
+                {$IFDEF GDEBUG}
                 writeln('****  PostMessage MouseUp ', w.ClassName, ' - ', w.Name);
                 {$ENDIF}
                 mcode := FPGM_MOUSEUP;
               end
               else
               begin
-                {$IFDEF DEBUG}
+                {$IFDEF GDEBUG}
                 writeln('**** PostMessage MouseDown ', w.ClassName, ' - ', w.Name);
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
@@ -2228,7 +2228,7 @@ begin
           end
           else
           begin
-            {$IFDEF DEBUG}
+            {$IFDEF GDEBUG}
             writeln('found a clipboard selection request');
             {$ENDIF}
             ProcessSelectionRequest(ev);
@@ -2391,7 +2391,7 @@ end;
 function TfpgX11Application.Screen_dpi: integer;
 begin
   Result := Screen_dpi_y;
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   writeln('Display width in mm: ', DisplayWidthMM(Display, DefaultScreen));
   writeln('Display height in mm: ', DisplayHeightMM(Display, DefaultScreen));
   writeln('Display dpi: ', Result);
@@ -3280,7 +3280,7 @@ end;
 
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   WriteLn('fpGFX/X11: Freeing Buffer w=', FPixWidth, ' h=', FPixHeight);
   {$ENDIF}
   TryFreePixmap;
@@ -4270,7 +4270,7 @@ begin
   Result := True;
 end;
 
-{$IFDEF DEBUG}
+{$IFDEF GDEBUG}
 var
   OldXErrorHandler: TXErrorHandler;
 
@@ -4283,7 +4283,7 @@ end;
 
 initialization
   xapplication := nil;
-{$IFDEF DEBUG}
+{$IFDEF GDEBUG}
   OldXErrorHandler:=XSetErrorHandler(@fpgXErrorHandler);
 finalization
   XSetErrorHandler(OldXErrorHandler);

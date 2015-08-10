@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -20,7 +20,7 @@ unit fpg_basegrid;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}
+{.$Define GDEBUG}
 
 interface
 
@@ -1473,7 +1473,7 @@ begin
 
     if (y < (borders.Top+hh)) then  // inside Header row
     begin
-      {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
+      {$IFDEF GDEBUG} Writeln('header click...'); {$ENDIF}
 
       cLeft := borders.Left; // column starting point
       if go_SmoothScroll in FOptions then
@@ -1501,7 +1501,7 @@ begin
     end;
   end;  {if not FColResizing }
 
-  {$IFDEF DEBUG}
+  {$IFDEF GDEBUG}
   if FColResizing then
   begin
     Writeln('Column ', FResizedCol,' width = ', ColumnWidth[FResizedCol]);
@@ -1540,7 +1540,7 @@ begin
 
   if ShowHeader and (y < (borders.Top+hh)) then  // inside Header row
   begin
-    {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
+    {$IFDEF GDEBUG} Writeln('header click...'); {$ENDIF}
 
     cLeft := borders.Left; // column starting point
     if go_SmoothScroll in FOptions then
@@ -1560,7 +1560,7 @@ begin
       inc(cw, ColumnWidth[n]);
       if (x >= (cLeft+cw-4)) and (x <= (cLeft+cw+4)) then
       begin
-        {$IFDEF DEBUG} Writeln('column resize...'); {$ENDIF}
+        {$IFDEF GDEBUG} Writeln('column resize...'); {$ENDIF}
         FColResizing  := True;
         FResizedCol   := n;
         FDragPos      := x;
