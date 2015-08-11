@@ -1683,7 +1683,6 @@ begin
   FHintTimer := TfpgTimer.Create(HintPause);
   FHintTimer.OnTimer := @HintTimerFired;
 
-  DesignedDPI := Screen_dpi;
 end;
 
 procedure TfpgApplication.Flush;
