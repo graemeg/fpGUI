@@ -327,10 +327,13 @@ text, or size of the widget) without causing any flicker.
 Line 30 tells the fpGUI framework to start running our program, and process
 any system or user generated events. Behind the scenes an application
 generates many events. They are defined in two categories. User generated
-events would be something like when the mouse is clicked on a button.
+events would be generated when the user interacts with the application. For
+example, when clicking on a button.
 Operating System events would be clipboard handling, placing windows in a
-specific location on the desktop etc. You don't need to worry too much about
-these, the fpGUI framework takes care of all this for you.
+specific location on the desktop, telling the framework when it should repaint
+the form etc. You don't need to worry about system events, as the fpGUI
+framework takes care of all this for you. User events (or widget events) will
+be covered in the next topic.
 
 :p.
 Line 32 frees our TMainForm instance, referenced by the frm variable,
@@ -355,7 +358,105 @@ Other that the window borders and window icon, the content of the window
 should be identical on all fpGUI supported platforms.
 
 
-:h4 id=ch_making_connections.Making Connections
+:h4 id=ch_making_connections.Handling User Events
+:cgraphic.
+þþþþþþþþþþþþþþþþþþþþþþ
+ Handling User Events
+þþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+The big difference between modern GUI applications and console applications is
+that modern GUI applications tend to be event based applications. On the
+contrary, when you run a small console applications they normally start up, do
+their thing, and then exit.
+
+:p.
+Event based GUI applications start, then waits for user interaction, then
+react to whatever the user did, then wait for the next interaction etc. An
+example of such an event would be when the user clicks a Button, which would
+then trigger the OnClick event for that button. The OnClick event handler
+would then execute a block of code &emdash. maybe calling one or more
+functions &emdash. then wait for more user input.
+
+:xmp.
+  1   program closeme;
+  2
+  3   {$mode objfpc}{$H+}
+  4
+  5   uses
+  6     Classes, fpg_main, fpg_form, fpg_button;
+  7
+  8   type
+  9     TMainForm = class(TfpgForm)
+ 10     private
+ 11       procedure btnQuitClicked(Sender: TObject);
+ 12     public
+ 13       procedure AfterCreate; override;
+ 14     end;
+ 15
+ 16   procedure TMainForm.btnQuitClicked(Sender: TObject);
+ 17   begin
+ 18     Close;
+ 19   end;
+ 20
+ 21   procedure TMainForm.AfterCreate;
+ 22   begin
+ 23     Name := 'MainForm';
+ 24     SetPosition(316, 186, 170, 30);
+ 25     WindowTitle := 'MainForm';
+ 26     CreateButton(self, 40, 4, 85, 'Quit', @btnQuitClicked);
+ 27   end;
+ 28
+ 29   procedure MainProc;
+ 30   var
+ 31     frm: TMainForm;
+ 32   begin
+ 33     fpgApplication.Initialize;
+ 34     fpgApplication.CreateForm(TMainForm, frm);
+ 35     try
+ 36       frm.Show;
+ 37       fpgApplication.Run;
+ 38     finally
+ 39       frm.Free;
+ 40     end;
+ 41   end;
+ 42
+ 43   begin
+ 44     MainProc;
+ 45   end.
+:exmp.
+
+:p.
+Essentially most of this program is identical to the previous example. What we
+have changed is replacing the Label widget with a Button widget. We also
+implemented a OnClick event handler for the button, so that when you click the
+button, the application quits. I'll now step through the changes in more
+detail.
+
+:p.On line 6 we had to specify the fpGUI unit that contains the declaration of
+the :color fc=darkred.TfpgButton:color fc=default. class.
+
+:p.Line 11 declares the method which will become our Button's :color fc=darkred.OnClick:color fc=default. event
+handler. In Lines 16 to 19 we have the implementation of that method. On line
+18 we simply call the form's :color fc=darkred.Close:color fc=default. method. In fpGUI, when the main form of the
+application closes, then the program terminates.
+
+:p.In the :color fc=darkred.AfterCreate:color fc=default. method we removed the earlier :color fc=darkred.CreateLabel():color fc=default. line and
+replaced it with a :color fc=darkred.CreateButton():color fc=default. call instead on line 26. Note that the
+parameters for the CreateButton() call is slightly different to the
+CreateLabel() call we used before. Also note the last parameter &emdash.
+:color fc=darkred.@btnQuitClicked:color fc=default. &emdash. this is how we pass a reference to the method
+:color fc=darkred.btnQuitClicked:color fc=default., so it can be assigned to the Button's OnClick event handler.
+
+:p.
+That's it! The rest of the program is exactly the same as before. Now compile
+and run this new program. The main form should now look like Figure 2. When
+you click the button, the application terminates.
+
+:p.
+:artwork align=center name='images/ch1_closeme.bmp' align=center.
+:lines align=center.:hp2.Figure 2::ehp2. CloseMe application under
+FreeBSD:elines.
 
 
 :h4 id=ch_using_documentation.Using the Class Documentation
