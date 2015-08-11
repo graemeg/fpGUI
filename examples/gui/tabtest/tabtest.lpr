@@ -22,6 +22,7 @@ type
     btn2, btn3: TfpgButton;
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
+    lblHeight: TfpgLabel;
     edtHeight: TfpgEditInteger;
     lbl: TfpgLabel;
     procedure   TabSheet4Painting(Sender: TObject);
@@ -106,6 +107,8 @@ begin
   pcMain.Width    := Width - 20;
   pcMain.Height   := 300;
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
+  pcMain.ActiveTabColor:= clOrangeRed;
+  pcMain.ActiveTabTextColor:= clYellow;
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One
@@ -124,6 +127,9 @@ begin
   // Tab Three
   tsThree := TfpgTabSheet.Create(pcMain);
   tsThree.Text := 'Tab Three';
+  tsThree.BackgroundColor:= clWheat;
+  tsThree.TabColor:= clLightBlue;
+  tsThree.TabTextColor:= clWhite;
   CreateLabel(tsThree, 80, 50, 'TabSheet Three');
   
   // Tab Four
@@ -156,9 +162,11 @@ begin
   cbTabPos.Hint := 'Tab position';
   cbTabPos.OnChange := @cbTabPosChanged;
 
-  CreateLabel(self, 390, 325, 'Height:');
+  lblHeight := CreateLabel(self, 390, 325, 'Height:');
+  lblHeight.Anchors := [anBottom, anLeft];
   edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
   edtHeight.Value := 0;
+  edtHeight.Anchors := [anBottom, anLeft];
   edtHeight.Hint := 'Tab height';
   edtHeight.OnChange := @edtHeightChanged;
   edtHeight.BringToFront;
