@@ -1256,26 +1256,24 @@ var
   i: integer;
 begin
   i := ActivePageIndex;
-  if ssAlt in shiftstate then
-  case keycode of
-    keyLeft:
-        begin
-          if ActivePage <> TfpgTabSheet(FPages.First) then
-          begin
-            ActivePage := TfpgTabSheet(FPages[i-1]);
-            consumed := True;
-          end;
-        end;
 
-    keyRight:
-        begin
-          if ActivePage <> TfpgTabSheet(FPages.Last) then
-          begin
-            ActivePage := TfpgTabSheet(FPages[i+1]);
-            consumed := True;
-          end;
-        end;
-  end;  { case/else }
+  if (shiftstate = [ssCtrl]) and (keycode = keyTab) then
+  begin
+    consumed := True;
+    if ActivePage <> TfpgTabSheet(FPages.Last) then
+      ActivePage := TfpgTabSheet(FPages[i+1])
+    else
+      ActivePage := TfpgTabSheet(FPages.First); // loop back to the front
+  end
+  else if (shiftstate = [ssCtrl, ssShift]) and (keycode = keyTab) then
+  begin
+    consumed := True;
+    if ActivePage <> TfpgTabSheet(FPages.First) then
+      ActivePage := TfpgTabSheet(FPages[i-1])
+    else
+      ActivePage := TfpgTabSheet(FPages.Last);  // loop back to the end
+  end;
+
   if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
