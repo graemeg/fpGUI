@@ -365,18 +365,19 @@ should be identical on all fpGUI supported platforms.
 þþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
-The big difference between modern GUI applications and console applications is
-that modern GUI applications tend to be event based applications. On the
-contrary, when you run a small console applications they normally start up, do
-their thing, and then exit.
+The big difference between modern GUI applications and console applications are
+that modern GUI applications tend to be event based applications. When you run
+a small console utility application, they tend to start up, do their thing,
+and then exit.
 
 :p.
-Event based GUI applications start, then waits for user interaction, then
-react to whatever the user did, then wait for the next interaction etc. An
-example of such an event would be when the user clicks a Button, which would
-then trigger the OnClick event for that button. The OnClick event handler
-would then execute a block of code &emdash. maybe calling one or more
-functions &emdash. then wait for more user input.
+Most GUI applications on the other hand start up, then waits for user
+interaction, then react to whatever the user did, then wait for the next
+interaction etc. An example of such an event would be when the user clicks a
+Button, which would then trigger the :color fc=darkred.OnClick:color
+fc=default. event for that button. The :color fc=darkred.OnClick:color
+fc=default. event handler would then execute a block of code &emdash. maybe
+calling one or more functions &emdash. then wait for more user input.
 
 :xmp.
   1   program closeme;
@@ -429,29 +430,46 @@ functions &emdash. then wait for more user input.
 :p.
 Essentially most of this program is identical to the previous example. What we
 have changed is replacing the Label widget with a Button widget. We also
-implemented a OnClick event handler for the button, so that when you click the
+implemented an :color fc=darkred.OnClick:color fc=default. event handler for
+the button, so that when you click the
 button, the application quits. I'll now step through the changes in more
 detail.
 
 :p.On line 6 we had to specify the fpGUI unit that contains the declaration of
 the :color fc=darkred.TfpgButton:color fc=default. class.
 
-:p.Line 11 declares the method which will become our Button's :color fc=darkred.OnClick:color fc=default. event
+:p.Line 11 declares the method which will become our Button's :color
+fc=darkred.OnClick:color fc=default. event
 handler. In Lines 16 to 19 we have the implementation of that method. On line
-18 we simply call the form's :color fc=darkred.Close:color fc=default. method. In fpGUI, when the main form of the
+18 we simply call the form's :color fc=darkred.Close:color fc=default. method.
+In fpGUI, when the main form of the
 application closes, then the program terminates.
 
-:p.In the :color fc=darkred.AfterCreate:color fc=default. method we removed the earlier :color fc=darkred.CreateLabel():color fc=default. line and
-replaced it with a :color fc=darkred.CreateButton():color fc=default. call instead on line 26. Note that the
-parameters for the CreateButton() call is slightly different to the
-CreateLabel() call we used before. Also note the last parameter &emdash.
-:color fc=darkred.@btnQuitClicked:color fc=default. &emdash. this is how we pass a reference to the method
-:color fc=darkred.btnQuitClicked:color fc=default., so it can be assigned to the Button's OnClick event handler.
+:p.In the :color fc=darkred.AfterCreate:color fc=default. method, line 26, we
+removed the earlier :color fc=darkred.CreateLabel():color fc=default. call and
+replaced it with a :color fc=darkred.CreateButton():color fc=default. call.
+
+:nt.The parameters for the :color fc=darkred.CreateButton():color fc=default.
+call are slightly different to the earlier :color
+fc=darkred.CreateLabel():color fc=default. call. As was mentioned before,
+these are convenience functions, and each of them have different parameters
+&emdash. assigning values to the most used properties of the widget in
+question.:ent.
+
+The :color fc=darkred.CreateButton():color fc=default. can also assign the
+:color fc=darkred.OnClick:color fc=default. event handler for our button.
+After all, what is the point of having a button if it doesn't do something
+when clicked. So the last parameter we passed to :color
+fc=darkred.CreateButton():color fc=default. is a reference to such method.
+This method must have the same signature as what the :color
+fc=darkred.TfpgButton.OnClick:color fc=default. definition specifies &emdash.
+so we can't simply assign any method as the event handler.
 
 :p.
 That's it! The rest of the program is exactly the same as before. Now compile
 and run this new program. The main form should now look like Figure 2. When
-you click the button, the application terminates.
+you click the button (or press the Spacebar key - which also clicks the
+button), the application terminates.
 
 :p.
 :artwork align=center name='images/ch1_closeme.bmp' align=center.
