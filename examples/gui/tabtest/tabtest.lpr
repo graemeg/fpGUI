@@ -22,6 +22,7 @@ type
     btn2, btn3: TfpgButton;
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
+    lblHeight: TfpgLabel;
     edtHeight: TfpgEditInteger;
     lbl: TfpgLabel;
     procedure   TabSheet4Painting(Sender: TObject);
@@ -161,7 +162,8 @@ begin
   cbTabPos.Hint := 'Tab position';
   cbTabPos.OnChange := @cbTabPosChanged;
 
-  CreateLabel(self, 390, 325, 'Height:');
+  lblHeight := CreateLabel(self, 390, 325, 'Height:');
+  lblHeight.Anchors := [anBottom, anLeft];
   edtHeight := CreateEditInteger(self, 435, 320, 30, 24, False);
   edtHeight.Value := 0;
   edtHeight.Anchors := [anBottom, anLeft];

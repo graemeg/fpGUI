@@ -2414,9 +2414,13 @@ begin
   //                                 BufferLength );
 end;
 
+// TODO: This doesn't seem to be used anywhere, so we could probably delete it.
 function TRichTextView.CopyTextToBuffer( Buffer: PChar;
                                          BufferLength: longint ): longint;
 begin
+  Result := -1;
+  // TODO: we do this to trap code using this, so we can fix it accordingly.
+  raise Exception.Create('TRichTextView.CopyTextToBuffer was called, but it is not implemented yet.');
   //Result := CopyPlainTextToBuffer( FText,
   //                                 FText + strlen( FText ),
   //                                 Buffer,
