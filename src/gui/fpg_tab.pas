@@ -523,7 +523,7 @@ begin
   if FFixedTabHeight > 0 then
     result := FFixedTabHeight
   else
-    result := fpgStyle.DefaultFont.Height + 10;   { TODO: correct this }
+    result := fpgStyle.TabFont.Height + 10;   { TODO: correct this }
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
@@ -531,7 +531,7 @@ begin
   if FFixedTabWidth > 0 then
     result := FFixedTabWidth
   else
-    result := fpgStyle.DefaultFont.TextWidth(AText) + 10;
+    result := fpgStyle.TabFont.TextWidth(AText) + 10;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
@@ -568,14 +568,14 @@ begin
   i       := 1;
   if FFixedTabWidth > 0 then
   begin
-    while fpgStyle.DefaultFont.TextWidth(s1) < (FFixedTabWidth-10) do
+    while fpgStyle.TabFont.TextWidth(s1) < (FFixedTabWidth-10) do
     begin
       if Length(s1) = Length(s) then
         Break;
       s1 := UTF8Copy(s, 1, i);
       inc(i);
     end;
-    if fpgStyle.DefaultFont.TextWidth(s1) > (FFixedTabWidth-10) then
+    if fpgStyle.TabFont.TextWidth(s1) > (FFixedTabWidth-10) then
       UTF8Delete(s1, UTF8Length(s1), 1);
     if Length(s1) > 0 then
       s1 := Trim(s1);
@@ -789,6 +789,7 @@ begin
     Exit; //==>
 
   Canvas.SetTextColor(TextColor);
+  Canvas.SetFont(fpgStyle.TabFont);
   lTxtFlags := [];
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
@@ -899,7 +900,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.TabFont.TextWidth(GetTabText(h.Text)) div 2,
                 Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
@@ -951,7 +952,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.DefaultFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.TabFont.TextWidth(GetTabText(h.Text)) div 2,
                 FMargin+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;

@@ -197,11 +197,13 @@ type
     FMenuAccelFont: TfpgFont;
     FMenuDisabledFont: TfpgFont;
     FMenuFont: TfpgFont;
+    FTabFont: TfpgFont;
     procedure   SetDefaultFont(AValue: TfpgFont);
     procedure   SetFixedFont(AValue: TfpgFont);
     procedure   SetMenuAccelFont(AValue: TfpgFont);
     procedure   SetMenuDisabledFont(AValue: TfpgFont);
     procedure   SetMenuFont(AValue: TfpgFont);
+    procedure   SetTabFont(AValue: TfpgFont);
   public
     constructor Create; virtual;
     destructor  Destroy; override;
@@ -211,6 +213,7 @@ type
     property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
     property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
     property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
+    property    TabFont: TfpgFont read FTabFont write SetTabFont;
     { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
@@ -2185,6 +2188,13 @@ begin
   FMenuFont := AValue;
 end;
 
+procedure TfpgStyle.SetTabFont(AValue: TfpgFont);
+begin
+  if FTabFont = AValue then Exit;
+  FTabFont.Free;
+  FTabFont := AValue;
+end;
+
 constructor TfpgStyle.Create;
 begin
   // Setup font aliases
@@ -2243,6 +2253,7 @@ begin
   FMenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
   FMenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
   FMenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
+  FTabFont          := fpgGetFont(fpgGetNamedFontdesc('Label1'));
 end;
 
 destructor TfpgStyle.Destroy;
@@ -2252,6 +2263,7 @@ begin
   FMenuFont.Free;
   FMenuAccelFont.Free;
   FMenuDisabledFont.Free;
+  FTabFont.Free;
   inherited Destroy;
 end;
 
