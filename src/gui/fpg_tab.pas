@@ -110,6 +110,7 @@ type
     FUpdateCount: Integer;
     FActiveTabColor: TfpgColor;
     FActiveTabTextColor: TfpgColor;
+    FTabTextColor: TfpgColor;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -181,6 +182,7 @@ type
     property    Style: TfpgTabStyle read FStyle write SetStyle default tsTabs;
     property    TabOrder;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
+    property    TabTextColor: TfpgColor read FTabTextColor write FTabTextColor;
     property    TextColor;
     property    OnShowHint;
   end;
@@ -266,6 +268,7 @@ begin
   FFocusable := True;
   FBackgroundColor := Parent.BackgroundColor;
   FTabColor  := Parent.BackgroundColor;
+  FTabTextColor := TfpgPageControl(Parent).TabTextColor;
   FTextColor := Parent.TextColor;
   FIsContainer := True;
 end;
