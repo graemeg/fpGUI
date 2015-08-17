@@ -1119,7 +1119,7 @@ begin
     begin
       CheckForAutoURL( AText, State );
       // supposed to turn word wrap on, default font
-      OutputString := {'<align left>}'</nowrap>'; // I guess...
+      OutputString := '</nowrap><align left>'; // I guess...
       State.Alignment := itaLeft;
     end;
 
@@ -1254,6 +1254,7 @@ begin
     begin
       result := true;
       // supposed to turn word wrap on, default font
+      State.Alignment := itaLeft;
       State.Spacing := true;
     end;
   end; // case escape code of...
