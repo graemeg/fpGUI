@@ -40,6 +40,8 @@ All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
 .br
 :elines.
 
+:p.
+:p.
 :table cols="13 20".
 :row.
 :c.Version
@@ -468,7 +470,7 @@ so we can't simply assign any method as the event handler.
 :p.
 That's it! The rest of the program is exactly the same as before. Now compile
 and run this new program. The main form should now look like Figure 2. When
-you click the button (or press the Spacebar key - which also clicks the
+you click the button (or press the Spacebar key - which also "clicks" the
 button), the application terminates.
 
 :p.
@@ -476,6 +478,31 @@ button), the application terminates.
 :lines align=center.:hp2.Figure 2::ehp2. CloseMe application under
 FreeBSD:elines.
 
+:p.
+Now that we have the basics down, lets add two more widgets to our program. In
+this case the two new widgets will keep each other in sync - always
+represeting the same value. We will be adding a SpinEdit and a TrackBar widget
+to our current program. We also need to enlarge our main form to make space
+for these new widgets. The end result will look like the program in Figure 3.
+
+:p.
+:artwork align=center name='images/ch1_closeme2.bmp' align=center.
+:lines align=center.:hp2.Figure 3::ehp2. CloseMe application with two extra
+widgets:elines.
+
+:p.
+In summary, here are the changes we are going to make, and the order in which
+we are going to make them.
+:ol compact.
+:li.enlarged the form by changing the height
+:li.added new units to uses clause
+:li.create spin edit, but store reference
+:li.use reference to set OnChange event
+:li.define spnEdit's OnChange event
+:li.create trackbar, but in a slightly different way. results is the same
+:li.define OnChange event for TrackBar.
+:li.now implement both OnChange events
+:eol.
 
 :h4 id=ch_using_documentation.Using the Class Documentation
 
