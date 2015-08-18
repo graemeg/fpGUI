@@ -1,5 +1,5 @@
 .* This file is encoded using IBM850 encoding
-.* :encoding=IBM850:
+.* :encoding=IBM850:wrap=hard:tabSize=2:noTabs=true:
 
 .* =============================================
 .* Copyright (c) 2015 by Graeme Geldenhuys
@@ -495,14 +495,39 @@ In summary, here are the changes we are going to make, and the order in which
 we are going to make them.
 :ol compact.
 :li.enlarged the form by changing the height
-:li.added new units to uses clause
-:li.create spin edit, but store reference
+:li.add new units to uses clause
+:li.create the SpinEdit widget and store its reference
 :li.use reference to set OnChange event
 :li.define spnEdit's OnChange event
 :li.create trackbar, but in a slightly different way. results is the same
 :li.define OnChange event for TrackBar.
 :li.now implement both OnChange events
 :eol.
+
+:p.
+:hp2.Step 1 - enlarged the form by changing the height:ehp2.
+:p.
+In the existing :color fc=darkred.AfterCreate:color fc=default. method, we change the height value from 30 to 65 in the :color fc=darkred.SetPossition:color fc=default. call, so it look as follows:
+:xmp.
+  SetPosition(316, 186, 170, 65);
+:exmp.
+
+:p.
+:hp2.Step 2 - add new units to uses clause:ehp2.
+:p.
+At the beginning of our program we modify the uses clause line by adding the :color fc=darkred.fpg_spinedit:color fc=default. and :color fc=darkred.fpg_trackbar:color fc=default. units to the existing list of units.
+
+:p.
+:hp2.Step 3 - create the SpinEdit widget and store its reference:ehp2.
+:p.The :color fc=darkred.CreateSpinEdit:color fc=default. helper function doesn't take an :color fc=darkred.OnChange:color fc=default. event handler, so we need to store the reference of the newly created widget, so we can then use that reference to assign the :color fc=darkred.OnChange:color fc=default. event handler.
+
+:p.
+Because we will need to reference the SpinEdit widget later again in our program, we define the reference variable in the form's Private section, and simply assign it a value in the AfterCreate, as shown below.
+
+:xmp.
+  spnEdit := CreateSpinEdit(self, 5, 32, 40, 24);
+  spnEdit.OnChange := @SpinEditChanged;
+:exmp.
 
 :h4 id=ch_using_documentation.Using the Class Documentation
 
@@ -520,6 +545,17 @@ we are going to make them.
 :h3.Internationalization
 :h3.Providing Online Help
 :h3.Multithreading
+
+.* Ideas to implement multithreading with GUI updates:
+
+.* Schedule a method that pulls other data from a threadsafe queue
+.* based on tthreadlist. The threads populate the threadsafe queue,
+.* and the main gui pulls data from there when it can.
+
+.* fpGUI's event queue is thread safe, but is it really a good idea to use
+.* that for this purpose?
+
+
 :h2 id=ch_installing_fpgui.Installing fpGUI
 
 
