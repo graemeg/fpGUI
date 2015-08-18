@@ -13,16 +13,16 @@ For more information, see the fpGUI Toolkit website at: <url href="http://fpgui.
 </p>
 </descr>
 
-    <module name="fpg_base">
-      <short>The base unit and starting point of fpGUI</short>
-      <descr><p>This unit contains all the abstract classes for the CoreLib code
+<module name="fpg_base">
+<short>The base unit and starting point of fpGUI</short>
+<descr><p>This unit contains all the abstract classes for the CoreLib code
 of fpGUI. It also defines many types and constants used throughout the toolkit.
 </p>
-        <p>When implementing support for a completely new windowing system
+<p>When implementing support for a completely new windowing system
 (eg: Carbon used in Mac OSX) you would implement all the abstract methods
 defined in this unit.
 </p>
-      </descr>
+</descr>
 
 <element name="TfpgCoord">
 <short>A custom type used to represent X and Y coordinates.</short>
@@ -934,22 +934,24 @@ Right. And the Top is always smaller than the Bottom.
 </descr>
       </element>
 
-      <element name="TfpgCanvasBase.DrawLineClipped">
-        <short>Draws a line inside a clip rectangle</short>
-        <descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
- then calls the DrawLine procedure with the clipped coordinates.  If the line
- lies completely outside of the clip boundary, then the Line routine is not
- called.  This procedure uses the well known Cohen-Sutherland line clipping
- algorithm to clip each coordinate.</p>
+<element name="TfpgCanvasBase.DrawLineClipped">
+<short>Draws a line inside a clip rectangle</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLineClipped"/>. This procedure
+clips a line to the AClipRect boundaries and
+then calls the DrawLine procedure with the clipped coordinates.  If the line
+lies completely outside of the clip boundary, then the Line routine is not
+called.  This procedure uses the well known Cohen-Sutherland line clipping
+algorithm to clip each coordinate.</p>
 <p>Use this if you do not want to change the Canvas.ClipRegion for some reason.
- For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
+For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
 </p></descr>
-      </element>
+</element>
 
-      <element name="TfpgCanvasBase.ClipLine">
-        <short>Clips the line based on AClipRect boundaries.</short>
-        <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
-      </element>
+<element name="TfpgCanvasBase.ClipLine">
+<short>Clips the line based on AClipRect boundaries.</short>
+<descr>This does not do any drawing, in only clips the line coordinates. This
+method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
+</element>
 
 
 <element name="TfpgCanvasBase.GradientFill">
@@ -1025,40 +1027,39 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
 </element>
 
 
-      <element name="TFileEntry">
-        <short>A simple data object representing a file</short>
-        <descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+<element name="TFileEntry">
+<short>A simple data object representing a file</short>
+<descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
 
-      </element>
-      <element name="TFileEntry.Name">
-        <short>Name of a file</short>
-      </element>
+</element>
+<element name="TFileEntry.Name">
+<short>Name of a file</short>
+</element>
 
-      <element name="TFileEntry.Extension">
-        <short>The extension of a file</short>
-      </element>
+<element name="TFileEntry.Extension">
+<short>The extension of a file</short>
+</element>
 
-      <element name="TFileEntry.Size">
-        <short>Size of a file in bytes</short>
-      </element>
+<element name="TFileEntry.Size">
+<short>Size of a file in bytes</short>
+</element>
 
-      <element name="TFileEntry.IsLink">
-        <short>Is this item a symbolic link (on unix-type OSes)</short>
-      </element>
+<element name="TFileEntry.IsLink">
+<short>Is this item a symbolic link (on unix-type OSes)</short>
+</element>
 
-      <element name="TFileEntry.LinkTarget">
-        <short>If it is a symbolic link, LinkTarget is what it points too</short>
-      </element>
+<element name="TFileEntry.LinkTarget">
+<short>If it is a symbolic link, LinkTarget is what it points too</short>
+</element>
 
-      <element name="TFileEntry.ModTime">
-        <short>Last modified timestamp</short>
-      </element>
-
+<element name="TFileEntry.ModTime">
+<short>Last modified timestamp</short>
 </element>
 
 <element name="TfpgPoint">
 <short>An extension of the FPC TPoint structure</short>
-<descr><p><printshort id="#fpgui.fpg_base.TfpgPoint"/>. This structure is used inside the fpGUI framework, and includes some extra methods like
+<descr><p><printshort id="#fpgui.fpg_base.TfpgPoint"/>. This structure is used
+inside the fpGUI framework, and includes some extra methods like
 calculating lengths between to points etc.</p></descr>
 </element>
 
