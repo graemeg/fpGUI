@@ -1054,10 +1054,6 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
         <short>Last modified timestamp</short>
       </element>
 
-<element name="TFPColor">
-<short>A record structure holding the RGBA values of a color.</short>
-<descr>This is the same declaration as the one found in FPImage (included with the
-Free Pascal Compiler). Except the fpGUI version uses Byte values and not Word values. This is now marked as "deprecated". Please use <link id="fpg_base.TRGBTripple">TRGBTripple</link> instead.</descr>
 </element>
 
 <element name="TfpgPoint">
