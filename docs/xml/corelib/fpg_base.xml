@@ -55,7 +55,7 @@ etc.).</p></descr>
 </element>
 
 <element name="TRGBTriple.Alpha">
-<short>Alpha support has not really been implemented in fpGUI yet.</short>
+<short>Returns the Alpha portion of the color value.</short>
 </element>
 
 <element name="TWindowType">
