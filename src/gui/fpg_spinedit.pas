@@ -238,7 +238,8 @@ function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
          AFixedDecimals: integer = 1; AValue: extended = 0; ADecimals: integer = -1): TfpgSpinEditFloat;
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0;
          AMaxValue: integer = 100; AIncrement: integer = 1; ALargeIncrement: integer = 10;
-         AValue: integer = 0): TfpgSpinEdit;
+         AValue: integer = 0): TfpgSpinEdit; overload;
+function CreateSpinEdit(AOwner: TComponent; x, y, w: TfpgCoord; AOnChangeEvent: TNotifyEvent = nil): TfpgSpinEdit; overload;
 
 
 implementation
@@ -297,6 +298,15 @@ begin
   Result.LargeIncrement := ALargeIncrement;
   if (AValue <= Result.MaxValue) and (AValue >= Result.MinValue) then
     Result.Value := AValue;
+end;
+
+function CreateSpinEdit(AOwner: TComponent; x, y, w: TfpgCoord; AOnChangeEvent: TNotifyEvent): TfpgSpinEdit;
+begin
+  Result := TfpgSpinEdit.Create(AOwner);
+  Result.SetPosition(x, y, w, Result.Height);
+  if Assigned(AOnChangeEvent) then
+    Result.OnChange := AOnChangeEvent;
+  Result.UpdatePosition;
 end;
 
 
