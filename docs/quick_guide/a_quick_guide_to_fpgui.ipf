@@ -105,6 +105,29 @@ LCL and make it into a usable LCL target.
 :p.
 But for now, lets look at &fpg. itself!
 
+:h2.Conventions
+:p.
+The conventions used in this book should be pretty straight forward, but here
+is the general gist of it.
+
+:dl tsize=15.
+:dthd.:hp2.TYPEFACE:ehp2.
+:ddhd.:hp2.MEANING:ehp2.
+:dt.:font facename='System Monospaced' size=0x0.Monospace type:font
+facename=default size=0x0.
+:dd.Monospace text represents text as it appears on screen or in code. It also
+represents anything you need to type.
+:dt.:hp2.Boldface:ehp2.
+:dd.Boldface words in code listings represent reserved words or compiler
+options.
+:dt.:color fc=darkred.Dark Red text:color fc=default.
+:dd.Darkred words in text represent Object Pascal identifiers, such as
+variable or type names.
+:dt.:hp1.Italic text:ehp1.
+:dd.Italic text might be used to emphasise certain words in the text.
+:edl.
+
+
 :h2.Colophon
 :cgraphic.
 þþþþþþþþþþ
