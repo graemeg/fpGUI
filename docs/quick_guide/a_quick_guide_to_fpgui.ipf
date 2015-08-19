@@ -106,6 +106,11 @@ LCL and make it into a usable LCL target.
 But for now, lets look at &fpg. itself!
 
 :h2.Conventions
+:cgraphic.
+þþþþþþþþþþþþþ
+ Conventions
+þþþþþþþþþþþþþ
+:ecgraphic.
 :p.
 The conventions used in this book should be pretty straight forward, but here
 is the general gist of it.
@@ -136,8 +141,9 @@ variable or type names.
 :ecgraphic.
 :p.
 This is the first book that I wrote using IPF and related technologies, though
-I have written many shorter articles or README-style documents with it. The
-master text was written primarily with the EditPad Pro v7 text editor and
+I have written many shorter articles or README-style documents with it.
+:p.
+The master text was written primarily with the EditPad Pro v7 text editor and
 using my own IPF syntax and file navigation schemes.
 :p.
 You can download the IPF colour scheme from here:
@@ -147,6 +153,14 @@ You can download the IPF colour scheme from here:
 You can download the IPF file navigation scheme from here:
 .br
   http://www.editpadpro.com/cgi-bin/fnsdl2.pl?id=71
+:p.
+The source code examples are processed with a small custom written tool I
+created. I can simply copy some source code into the program and it will
+generate the same source code prefixed with line numbers and some IPF markup
+added.
+:p.
+The final binary INF file is generated using the cross-platform OpenWatcom IPF
+Compiler (WIPFC) - included with fpGUI.
 
 
 :h2.A Brief History of &fpg.
