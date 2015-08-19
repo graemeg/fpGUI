@@ -487,7 +487,7 @@ FreeBSD:elines.
 :p.
 Now that we have the basics down, lets add two more widgets to our program. In
 this case the two new widgets will keep each other in sync - always
-represeting the same value. We will be adding a SpinEdit and a TrackBar widget
+representing the same value. We will be adding a SpinEdit and a TrackBar widget
 to our current program. We also need to enlarge our main form to make space
 for these new widgets. The end result will look like the program in Figure 3.
 
@@ -503,7 +503,6 @@ we are going to make them.
 :li.enlarged the form by changing the height
 :li.add new units to uses clause
 :li.create the SpinEdit widget and store its reference
-:li.use reference to set OnChange event
 :li.define spnEdit's OnChange event
 :li.create trackbar, but in a slightly different way. results is the same
 :li.define OnChange event for TrackBar.
