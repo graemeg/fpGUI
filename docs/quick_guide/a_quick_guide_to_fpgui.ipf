@@ -274,7 +274,8 @@ fc=darkred.TfpgForm:color fc=default. class is defined in the :color
 fc=darkred.fpg_form:color fc=default. unit.
 
 :p.
-Lines 8 to 12 we define a new class, descending from the fpGUI TfpgForm class.
+Lines 8 to 12 we define a new class, descending from the fpGUI :color
+fc=darkred.TfpgForm:color fc=default. class.
 A :color fc=darkred.TfpgForm:color fc=default. is a basic representation of a
 window in our application. We define a descending class, named :color
 fc=darkred.TMainForm:color fc=default., so we can add our own customisations
@@ -284,8 +285,10 @@ add our own customisations like the window size, window title etc. This will
 be explained in more detail later in the book.
 
 :p.
-Lines 14 to 20 is the implementation of the AfterCreate method. Line 16 sets
-the :color fc=darkred.Name:color fc=default. property of the TMainForm. Every
+Lines 14 to 20 is the implementation of the :color
+fc=darkred.AfterCreate:color fc=default. method. Line 16 sets
+the :color fc=darkred.Name:color fc=default. property of the :color
+fc=darkred.TMainForm:color fc=default.. Every
 widget in fpGUI needs to have a name
 assigned to it. In fpGUI terminology, a widget is a visual element displayed
 in the user interface. Examples of widgets are a Button, ComboBox, Form etc.
@@ -307,7 +310,8 @@ the UI Designer is also very easy to read, and as close as possible to what a
 human would have typed - thus making in very easy to read and understand.
 
 :p.
-Lines 22 to 34 we define a procedure called "MainProc". We did this simply to
+Lines 22 to 34 we define a procedure called :color fc=darkred.MainProc:color
+fc=default.. We did this simply to
 organise our source code a little better. In Lines 23 and 24 we define a local
 variable that will represent our application's main window. The :color
 fc=darkred.frm:color fc=default. variable will hold an instance of the
@@ -317,8 +321,9 @@ TMainForm class we defined earlier.
 Line 26 initialises the fpGUI framework so it is ready to run our application.
 
 :p.
-Line 27 we ask the fpgApplication to create a instance of the TMainForm class,
-and save that instance in the frm variable.
+Line 27 we ask the fpgApplication to create a instance of the :color
+fc=darkred.TMainForm:color fc=default. class,
+and save that instance in the :color fc=darkred.frm:color fc=default. variable.
 
 :p.
 Line 29 makes the main window visible. In fpGUI all widgets are created hidden
@@ -338,7 +343,8 @@ framework takes care of all this for you. User events (or widget events) will
 be covered in the next topic.
 
 :p.
-Line 32 frees our TMainForm instance, referenced by the frm variable,
+Line 32 frees our :color fc=darkred.TMainForm:color fc=default. instance,
+referenced by the :color fc=darkred.frm:color fc=default. variable,
 releasing the memory used back to the operating system. In Object Pascal you
 normally need to free all class instances you create.
 
@@ -382,51 +388,51 @@ fc=default. event handler would then execute a block of code &emdash. maybe
 calling one or more functions &emdash. then wait for more user input.
 
 :xmp.
-  1   program closeme;
+  1   :hp2.program:ehp2. closeme;
   2
   3   {$mode objfpc}{$H+}
   4
-  5   uses
+  5   :hp2.uses:ehp2.
   6     Classes, fpg_main, fpg_form, fpg_button;
   7
-  8   type
-  9     TMainForm = class(TfpgForm)
- 10     private
- 11       procedure btnQuitClicked(Sender: TObject);
- 12     public
- 13       procedure AfterCreate; override;
- 14     end;
+  8   :hp2.type:ehp2.
+  9     TMainForm = :hp2.class:ehp2.(TfpgForm)
+ 10     :hp2.private:ehp2.
+ 11       :hp2.procedure:ehp2. btnQuitClicked(Sender: TObject);
+ 12     :hp2.public:ehp2.
+ 13       :hp2.procedure:ehp2. AfterCreate; override;
+ 14     :hp2.end:ehp2.;
  15
- 16   procedure TMainForm.btnQuitClicked(Sender: TObject);
- 17   begin
+ 16   :hp2.procedure:ehp2. TMainForm.btnQuitClicked(Sender: TObject);
+ 17   :hp2.begin:ehp2.
  18     Close;
- 19   end;
+ 19   :hp2.end:ehp2.;
  20
- 21   procedure TMainForm.AfterCreate;
- 22   begin
+ 21   :hp2.procedure:ehp2. TMainForm.AfterCreate;
+ 22   :hp2.begin:ehp2.
  23     Name := 'MainForm';
  24     SetPosition(316, 186, 170, 30);
  25     WindowTitle := 'MainForm';
  26     CreateButton(self, 40, 4, 85, 'Quit', @btnQuitClicked);
- 27   end;
+ 27   :hp2.end:ehp2.;
  28
- 29   procedure MainProc;
- 30   var
+ 29   :hp2.procedure:ehp2. MainProc;
+ 30   :hp2.var:ehp2.
  31     frm: TMainForm;
- 32   begin
+ 32   :hp2.begin:ehp2.
  33     fpgApplication.Initialize;
  34     fpgApplication.CreateForm(TMainForm, frm);
- 35     try
+ 35     :hp2.try:ehp2.
  36       frm.Show;
  37       fpgApplication.Run;
- 38     finally
+ 38     :hp2.finally:ehp2.
  39       frm.Free;
- 40     end;
- 41   end;
+ 40     :hp2.end:ehp2.;
+ 41   :hp2.end:ehp2.;
  42
- 43   begin
+ 43   :hp2.begin:ehp2.
  44     MainProc;
- 45   end.
+ 45   :hp2.end:ehp2..
 :exmp.
 
 :p.
@@ -507,7 +513,9 @@ we are going to make them.
 :p.
 :hp2.Step 1 - enlarged the form by changing the height:ehp2.
 :p.
-In the existing :color fc=darkred.AfterCreate:color fc=default. method, we change the height value from 30 to 65 in the :color fc=darkred.SetPossition:color fc=default. call, so it look as follows:
+In the existing :color fc=darkred.AfterCreate:color fc=default. method, we
+change the height value from 30 to 65 in the :color
+fc=darkred.SetPossition:color fc=default. call, so it look as follows:
 :xmp.
   SetPosition(316, 186, 170, 65);
 :exmp.
