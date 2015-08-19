@@ -522,19 +522,58 @@ fc=darkred.SetPossition:color fc=default. call, so it look as follows:
 :p.
 :hp2.Step 2 - add new units to uses clause:ehp2.
 :p.
-At the beginning of our program we modify the uses clause line by adding the :color fc=darkred.fpg_spinedit:color fc=default. and :color fc=darkred.fpg_trackbar:color fc=default. units to the existing list of units.
+At the beginning of our program we modify the uses clause line by adding the
+:color fc=darkred.fpg_spinedit:color fc=default. and :color
+fc=darkred.fpg_trackbar:color fc=default. units to the existing list of units.
 
 :p.
 :hp2.Step 3 - create the SpinEdit widget and store its reference:ehp2.
-:p.The :color fc=darkred.CreateSpinEdit:color fc=default. helper function doesn't take an :color fc=darkred.OnChange:color fc=default. event handler, so we need to store the reference of the newly created widget, so we can then use that reference to assign the :color fc=darkred.OnChange:color fc=default. event handler.
+:p.
+The :color fc=darkred.CreateSpinEdit:color fc=default. helper function doesn't
+take an :color fc=darkred.OnChange:color fc=default. event handler, so we need
+to store the reference of the newly created widget, so we can then use that
+reference to assign the :color fc=darkred.OnChange:color fc=default. event
+handler.
 
 :p.
-Because we will need to reference the SpinEdit widget later again in our program, we define the reference variable in the form's Private section, and simply assign it a value in the AfterCreate, as shown below.
+Because we will need to reference the SpinEdit widget later again in our
+program, we define a field variable - named :color fc=darkred.spnEdit:color
+fc=default. -  inside :color fc=darkred.TMainForm:color fc=default.'s private
+section. This field variable will hold a reference to our SpinEdit widget. We
+create the SpinEdit widget as shown below. Note in the second line of code how
+we use the reference variable, and then assign the OnChange event handler.
 
 :xmp.
   spnEdit := CreateSpinEdit(self, 5, 32, 40, 24);
   spnEdit.OnChange := @SpinEditChanged;
 :exmp.
+
+:p.
+:hp2.Step 4 - define spnEdit's OnChange event:ehp2.
+:p.
+In the previous step we assigned the method :color
+fc=darkred.SpinEditChanged:color fc=default. as the OnChange event handler of
+our SpinEdit widget. But at this point we don't have such a method defined
+yet. So lets do that now.
+
+:p.
+Declare the :color fc=darkred.SpinEditChanged:color fc=default. method in the
+:color fc=darkred.TMainForm:color fc=default.'s private section, and then
+create an empty implementation for now. The implementation looks as follows:
+
+:xmp.
+  :hp2.procedure:ehp2. TMainForm.SpinEditChanged(Sender: TObject);
+  :hp2.begin:ehp2.
+    :color fc=darkcyan.// code to be added here:color fc=default.
+  :hp2.end:ehp2.;
+:exmp.
+
+
+
+
+
+
+
 
 :h4 id=ch_using_documentation.Using the Class Documentation
 
