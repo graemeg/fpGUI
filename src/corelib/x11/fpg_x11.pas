@@ -1688,7 +1688,7 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, Min(atimeoutms, 50));
+    r := fpSelect(xfd + 1, @rfds, nil, nil, 10);
     if r <> 0 then  // We got a X event or the timeout happened
       XNextEvent(display, @ev)
     else
