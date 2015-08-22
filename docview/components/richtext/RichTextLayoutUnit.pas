@@ -23,6 +23,7 @@ Type
     Length: longint;
     Height: longint;
     Width: longint;
+    MaxAscender: longint;
     MaxDescender: longint;
     MaxTextHeight: longint; // maximum height of text, doesn't include images
     LinkIndex: longint; // link index at start of line, if any
@@ -240,8 +241,10 @@ Procedure TRichTextLayout.CheckFontHeights( Var Line: TLayoutLine );
 var
   FontHeight: longint;
   Descender: longint;
+  Ascender: longint;
 begin
   FontHeight := FFontManager.CharHeight;
+  Ascender := FFontManager.CharAscender;
   Descender := FFontManager.CharDescender;
 
   if FontHeight > Line.Height then
@@ -252,6 +255,9 @@ begin
 
   if Descender > Line.MaxDescender then
     Line.MaxDescender := Descender;
+
+  if Ascender > Line.MaxAscender then
+    Line.MaxAscender := Ascender;
 end;
 
 function TRichTextLayout.IsValidBitmapIndex( Index: longint ): boolean;
@@ -297,6 +303,7 @@ Var
     CurrentLine := TLayoutLine.Create;
     CurrentLine.Style := Style;
     CurrentLine.Height := 0;
+    CurrentLine.MaxAscender := 0;
     CurrentLine.MaxDescender := 0;
     CurrentLine.MaxTextHeight := 0;
     CurrentLine.Width := 0;
