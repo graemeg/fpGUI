@@ -44,6 +44,7 @@ type
     constructor Create(ACanvas: TfpgCanvas; AWidget: TfpgWidget); reintroduce;
     destructor  Destroy; override;
     function    AverageCharWidth: longint;
+    function    CharAscender: longint;
     function    CharDescender: longint;
     function    CharHeight: longint;
     function    CharWidth( const C: TfpgChar ): longint;  // Retrieve the width of the given char, in the current font
@@ -312,6 +313,11 @@ end;
 function TCanvasFontManager.AverageCharWidth: longint;
 begin
   Result := FCanvas.Font.TextWidth('c');
+end;
+
+function TCanvasFontManager.CharAscender: longint;
+begin
+  Result := FCanvas.Font.Ascent;
 end;
 
 function TCanvasFontManager.MaximumCharWidth: longint;
