@@ -306,7 +306,7 @@ begin
   Result.SetPosition(x, y, w, Result.Height);
   if Assigned(AOnChangeEvent) then
     Result.OnChange := AOnChangeEvent;
-  Result.UpdatePosition;
+  Result.UpdateWindowPosition;
 end;
 
 
