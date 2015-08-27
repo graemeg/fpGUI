@@ -1128,6 +1128,7 @@ begin
                          FVScrollBar.Top+FVScrollBar.Height,
                          FVScrollBar.Width,
                          FHScrollBar.Height);
+    UpdateScrollbars;
   end;
 end;
 
