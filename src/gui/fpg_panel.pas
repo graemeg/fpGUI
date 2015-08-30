@@ -1075,6 +1075,7 @@ begin
   if FOwnsImage and Assigned(FImage) then
     FImage.Free;
   FImage := AValue;
+  OwnsImage:= True;
   Repaint;
 end;
 
