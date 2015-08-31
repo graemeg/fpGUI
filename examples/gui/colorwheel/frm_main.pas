@@ -397,6 +397,7 @@ begin
   SetPosition(0, 0, 540, 420);
   WindowTitle := 'ColorWheel test app';
   Hint := '';
+  IconName := '';
   WindowPosition := wpScreenCenter;
 
   Button1 := TfpgButton.Create(self);
@@ -441,7 +442,7 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(108, 284, 64, 18);
+    SetPosition(108, 284, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -452,7 +453,7 @@ begin
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(108, 312, 64, 18);
+    SetPosition(108, 312, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -463,7 +464,7 @@ begin
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(108, 340, 64, 18);
+    SetPosition(108, 340, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -474,40 +475,46 @@ begin
   with edH do
   begin
     Name := 'edH';
-    SetPosition(176, 280, 44, 26);
+    SetPosition(176, 280, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 8;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   edS := TfpgEdit.Create(self);
   with edS do
   begin
     Name := 'edS';
-    SetPosition(176, 308, 44, 26);
+    SetPosition(176, 308, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 9;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   edV := TfpgEdit.Create(self);
   with edV do
   begin
     Name := 'edV';
-    SetPosition(176, 336, 44, 26);
+    SetPosition(176, 336, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 10;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   Label4 := TfpgLabel.Create(self);
   with Label4 do
   begin
     Name := 'Label4';
-    SetPosition(230, 284, 56, 18);
+    SetPosition(230, 284, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -518,7 +525,7 @@ begin
   with Label5 do
   begin
     Name := 'Label5';
-    SetPosition(230, 316, 56, 18);
+    SetPosition(230, 312, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -529,7 +536,7 @@ begin
   with Label6 do
   begin
     Name := 'Label6';
-    SetPosition(230, 344, 56, 18);
+    SetPosition(230, 340, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -540,7 +547,7 @@ begin
   with edR do
   begin
     Name := 'edR';
-    SetPosition(290, 280, 44, 26);
+    SetPosition(290, 280, 44, 24);
     TabOrder := 13;
     MinValue := 0;
     MaxValue := 255;
@@ -554,7 +561,7 @@ begin
   with edG do
   begin
     Name := 'edG';
-    SetPosition(290, 308, 44, 26);
+    SetPosition(290, 308, 44, 24);
     TabOrder := 14;
     MinValue := 0;
     MaxValue := 255;
@@ -568,7 +575,7 @@ begin
   with edB do
   begin
     Name := 'edB';
-    SetPosition(290, 336, 44, 26);
+    SetPosition(290, 336, 44, 24);
     TabOrder := 15;
     MinValue := 0;
     MaxValue := 255;
@@ -578,33 +585,37 @@ begin
     OnExit := @RGBChanged;
   end;
 
-  Label10 := TfpgLabel.Create(Self);
+  Label10 := TfpgLabel.Create(self);
   with Label10 do
   begin
     Name := 'Label10';
-    Setposition(352,100,180,16);
+    SetPosition(352, 100, 180, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Predefined Color Palettes';
   end;
 
-  cbColors := TfpgComboBox.Create(Self);
+  cbColors := TfpgComboBox.Create(self);
   with cbColors do
   begin
     Name := 'cbColors';
-    SetPosition(352,120,180,22);
+    SetPosition(352, 120, 180, 22);
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
+    FocusItem := -1;
+    TabOrder := 18;
   end;
 
-  lbColors := TfpgColorListBox.Create(Self);
+  lbColors := TfpgColorListBox.Create(self);
   with lbColors do
   begin
     Name := 'lbColors';
-    SetPosition(352,150,180,160);
+    SetPosition(352, 150, 180, 160);
+    Color := TfpgColor($FF00FFFF);
     FontDesc := '#List';
     Hint := '';
-    ScrollbarWidth := 12;
+    TabOrder := 19;
     ScrollbarPage := VisibleItems;
     OnChange := @lbColorsChange;
   end;
@@ -622,10 +633,12 @@ begin
   eHex := TfpgEdit.Create(self);
   with eHex do
   begin
-    Name := 'E_Hexa';
-    SetPosition(420, 336, 65, 26);
+    Name := 'eHex';
+    SetPosition(420, 336, 65, 24);
+    ExtraHint := '';
     FontDesc := '#Label2';
     Hint := '';
+    TabOrder := 21;
     Text := '';
     MaxLength:= 7;
     OnKeyChar:= @eHexKeyChar;
@@ -712,12 +725,12 @@ begin
   chkContinuous := TfpgCheckBox.Create(self);
   with chkContinuous do
   begin
-    Name := 'chkContinous';
+    Name := 'chkContinuous';
     SetPosition(205, 375, 90, 19);
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 25;
-    Text := 'Continous';
+    Text := 'Continuous';
     OnChange := @chkContinuousChanged;
   end;
 
