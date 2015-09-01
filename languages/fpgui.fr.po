@@ -48,6 +48,10 @@ msgstr "Toutes les polices"
 msgid "Alt+"
 msgstr "Alt+"
 
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr "Anti alias"
@@ -206,7 +210,7 @@ msgstr "Disque"
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "Editer"
+msgstr "Éditer"
 
 #: fpg_constants:rskeyend
 msgid "End"

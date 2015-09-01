@@ -12,6 +12,7 @@ rsall  =  'Все';
 rsallfiles  =  'Все файлы';
 rscollectionallfonts  =  'Все шрифты';
 rskeyalt  =  'Alt+';
+rserrunexpected  =  'An unexpected error occurred.';
 rsantialiasing  =  'Сглаживание';
 rsshortapr  =  'Апр';
 rslongapr  =  'Апрель';
