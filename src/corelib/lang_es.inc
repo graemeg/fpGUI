@@ -12,6 +12,7 @@ rsall  =  'Todos';
 rsallfiles  =  'Todos los Archivos';
 rscollectionallfonts  =  'Todas las Fuentes';
 rskeyalt  =  'Alt+';
+rserrunexpected  =  'An unexpected error occurred.';
 rsantialiasing  =  'Anti aliasing';
 rsshortapr  =  'Apr';
 rslongapr  =  'April';

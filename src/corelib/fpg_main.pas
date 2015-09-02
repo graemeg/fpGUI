@@ -1765,7 +1765,7 @@ end;
 
 procedure TfpgApplication.ShowException(E: Exception);
 begin
-  TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+  TfpgMessageDialog.Critical(rsErrUnexpected, E.Message);
 end;
 
 procedure TfpgApplication.WaitWindowMessage(atimeoutms: integer);

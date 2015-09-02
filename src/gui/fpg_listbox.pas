@@ -233,6 +233,8 @@ type
     property    Items;
     property    ParentShowHint;
     property    PopupFrame;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowColorNames;
     property    ShowHint;
     property    TabOrder;

@@ -54,7 +54,7 @@ begin
   hi    := max(max(r, g), b);
   lo    := min(min(r, g), b);
   d     := hi - lo;
-  Value := hi / 256;
+  Value := hi / 255;
   if d > 0 then
   begin
     if r = hi then

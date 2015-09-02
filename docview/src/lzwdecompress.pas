@@ -1,7 +1,8 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+  Copyright (C) 2001 - Aaron Lawrence (aaronl@consultant.com)
+  Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -24,9 +25,9 @@ interface
 uses
   SysUtils, types;
 
-procedure LZWDecompressBlock( pbInput: pByte;
+procedure LZWDecompressBlock( pbInput: PByte;
                               number_bytes: LongWord;
-                              pbOutput: PBYTE;
+                              pbOutput: PByte;
                               Var bytesOut: LongWord;
                               Var FinalCode: byte );
 
@@ -57,9 +58,9 @@ Implementation
  * Variables renamed etc to make things clearer.
  */
 *)
-// -- Stuff for LZW decompression -- */
+// -- Stuff for LZW decompression --
 const INIT_BITS = 9;
-const MAX_BITS = 12;     //PLF Tue  95-10-03 02:16:56*/
+const MAX_BITS = 12;
 const HASHING_SHIFT = MAX_BITS - 8;
 
 {if MAX_BITS == 15
@@ -140,9 +141,11 @@ begin
       inc( pbInput );
     end
     else
-      input_bit_buffer:= input_bit_buffer
-                         or
-                         ( longword( 0 ) shl ( 24 - input_bit_count ) );
+      input_bit_buffer := input_bit_buffer or longword($00);
+{ The C version of LZWDecompress uses only "or $00", so I'm assuming the code
+  below is not needed. Tested and I see no difference. }
+//                         or
+//                         ( longword( 0 ) shl ( 24 - input_bit_count ) );
     inc( bytes_out );
     inc( input_bit_count, 8 );
   end;
@@ -153,7 +156,7 @@ begin
 
   if bytes_out > bytes_to_read then
   begin
-    // flush static vars and quit */
+    // flush static vars and quit
     bytes_out:= 0;
     input_bit_count:= 0;
     input_bit_buffer:= 0;
@@ -167,11 +170,7 @@ end;
 //      this takes one of the INF bitmap blocks
 //      and decompresses it using LZW algorithms.
 
-procedure LZWDecompressBlock( pbInput: pByte;
-                              number_bytes: LongWord;
-                              pbOutput: PBYTE;
-                              Var bytesOut: LongWord;
-                              Var FinalCode: byte );
+procedure LZWDecompressBlock(pbInput: PByte; number_bytes: LongWord; pbOutput: PByte; var bytesOut: LongWord; var FinalCode: byte);
 var
   nextAvailableCode: LongWord;
   currentCode: LongWord;
@@ -196,40 +195,40 @@ begin
   begin
     if clear_flag then
     begin
-      clear_flag:= false;
-      lastCode:= currentCode;
-      character:= currentCode;
+      clear_flag := false;
+      lastCode := currentCode;
+      character := currentCode;
 
-      pbOutput^:= currentCode;
+      pbOutput^ := currentCode;
       inc( pbOutput );
-      FinalCode:= currentCode;
+      FinalCode := currentCode;
       inc( BytesOut );
     end
     else if currentCode = CLEAR_TABLE then
     begin
-      clear_flag:= true;
-      nextAvailableCode:= FIRST_CODE;
-      bitsPerCode:= INIT_BITS;
-      maxDictionaryCode:= MaxValNBits( bitsPerCode );
+      clear_flag := true;
+      nextAvailableCode := FIRST_CODE;
+      bitsPerCode := INIT_BITS;
+      maxDictionaryCode := MaxValNBits( bitsPerCode );
     end
     else
     begin
       if currentCode >= nextAvailableCode then
       begin
          decode_stack[ 0 ]:= character;
-         theString:= decode_string( Addr( decode_stack[ 1 ] ),
+         theString := decode_string( Addr( decode_stack[ 1 ] ),
                                     lastCode );
       end
       else
-        theString:= decode_string( Addr( decode_stack[ 0 ] ),
+        theString := decode_string( Addr( decode_stack[ 0 ] ),
                                    currentCode );
 
-      character:= longword( theString^ );
+      character := longword( theString^ );
       while theString >= Addr( decode_stack[ 0 ] ) do
       begin
-        FinalCode:= theString^;
+        FinalCode := theString^;
 
-        pbOutput^:= theString^;
+        pbOutput^ := theString^;
         inc( pbOutput );
         dec( TheString );
 

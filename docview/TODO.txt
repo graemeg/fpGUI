@@ -13,11 +13,11 @@ Todo list
 [o] - Implement a ipfdump program. Already started work on this and is called
       docdump in the src directory.
 [ ] - Implement a IPF Compiler in Object Pascal
-[ ] - Text is not selectable in RichTextView. I imagine people want to
+[o] - Text is not selectable in RichTextView. I imagine people want to
       copy & paste examples. Although "Save current Topic" already exists.
 [ ] - Communication between application and docview. Both directions. Possible
       solutions is Pipes or IPC unit.
-[ ] - Implement popup window for "notes" hyperlinks. eg: The hyper link text
+[o] - Implement popup window for "notes" hyperlinks. eg: The hyper link text
       might be 'IBM', the "notes" link should then show a popup window (almost
       like a tooltip window) showing 'International Business Machines'.
 [ ] - RichTextView component issue. Incompatible with original OS/2 VIEW. When
@@ -57,8 +57,8 @@ Todo list
 
 fpdoc IPF todo list
 ===================
-[ ] - Class declaration in overview page is missing. Like HTML output.
-[ ] - Class inheritance tree must be shown in overview page. Like HTML output.
+[x] - Class declaration in overview page is missing. Like HTML output.
+[x] - Class inheritance tree must be shown in overview page. Like HTML output.
 [ ] - 
 [ ] - 
 [ ] - 

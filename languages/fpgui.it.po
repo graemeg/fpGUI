@@ -48,6 +48,10 @@ msgstr "Tutti i Fonts"
 msgid "Alt+"
 msgstr ""
 
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr "Anti aliasing"
