@@ -1,7 +1,7 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+  Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -73,7 +73,7 @@ type
   end;
 
 
-  THelpBitmap = class( TfpgImage )
+  THelpBitmap = class(TfpgImage)
   protected
     _Header: INFBITMAPHEADER;
     _PaletteColorCount: longint;
@@ -81,12 +81,12 @@ type
     _BitsSize: longint;
     FileHandle: TFileStream;
     _UncompressedBlockSize: longint;
-    function GetPaletteSize: longint;
-    procedure BitmapError(Msg: string);
-    procedure ReadBitmapData( Blocks: TList; TotalSize: longword);
+    function    GetPaletteSize: longint;
+    procedure   BitmapError(Msg: string);
+    procedure   ReadBitmapData( Blocks: TList; TotalSize: longword);
   public
-    constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
-    destructor Destroy; override;
+    constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longword);
+    destructor  Destroy; override;
   end;
 
 
@@ -128,7 +128,7 @@ begin
   inherited Destroy;
 end;
 
-constructor THelpBitmap.CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
+constructor THelpBitmap.CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longword);
 var
   WordsPerLine: longint;
   LineSize: longint;
