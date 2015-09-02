@@ -141,9 +141,11 @@ begin
       inc( pbInput );
     end
     else
-      input_bit_buffer:= input_bit_buffer
-                         or
-                         ( longword( 0 ) shl ( 24 - input_bit_count ) );
+      input_bit_buffer := input_bit_buffer or longword($00);
+{ The C version of LZWDecompress uses only "or $00", so I'm assuming the code
+  below is not needed. Tested and I see no difference. }
+//                         or
+//                         ( longword( 0 ) shl ( 24 - input_bit_count ) );
     inc( bytes_out );
     inc( input_bit_count, 8 );
   end;
