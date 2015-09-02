@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_main,
   fpg_widget, fpg_form, fpg_label, fpg_button,
-  fpg_listbox, fpg_panel, fpgui_db, db, dbf{, dbf_fields};
+  fpg_listbox, fpg_panel, fpgui_db, db, dbf, u_reportimages;
 
 type
 
@@ -114,6 +114,7 @@ constructor TMainForm.Create(AOwner: TComponent);
 //  fields: TDbfFieldDefs;
 begin
   inherited Create(AOwner);
+  CreateReportImages;
   DataSet             := TDBF.Create(Self);
   DataSet.TableName   := 'test.dbf';
   
@@ -150,10 +151,11 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(225, 208, 417, 315);
+  SetPosition(461, 212, 417, 315);
   WindowTitle := 'fpGUI DB controls test';
-  WindowPosition := wpScreenCenter;
-  Sizeable := False;
+  Hint := '';
+  IconName := '';
+  WindowPosition := wpOneThirdDown;
 
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
@@ -162,7 +164,9 @@ begin
     SetPosition(332, 264, 75, 24);
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.quit';
+    TabOrder := 1;
     OnClick := @btnQuitClicked;
   end;
 
@@ -171,10 +175,11 @@ begin
   begin
     Name := 'btnFirst';
     SetPosition(8, 264, 30, 24);
-    Text := '<<';
+    Text := '';
     FontDesc := '#Label1';
-    ImageName := '';
     Hint := 'First record';
+    ImageName := 'repimg.first';
+    TabOrder := 2;
     OnClick := @btnFirstClick;
     OnMouseEnter := @ButtonEnter;
     OnMouseExit := @ButtonExit;
@@ -185,10 +190,11 @@ begin
   begin
     Name := 'btnPrev';
     SetPosition(40, 264, 30, 24);
-    Text := '<';
+    Text := '';
     FontDesc := '#Label1';
-    ImageName := '';
     Hint := 'Previous record';
+    ImageName := 'repimg.previous';
+    TabOrder := 3;
     OnClick := @btnPrevClick;
     OnMouseEnter := @ButtonEnter;
     OnMouseExit := @ButtonExit;
@@ -199,10 +205,11 @@ begin
   begin
     Name := 'btnNext';
     SetPosition(72, 264, 30, 24);
-    Text := '>';
+    Text := '';
     FontDesc := '#Label1';
-    ImageName := '';
     Hint := 'Next record';
+    ImageName := 'repimg.next';
+    TabOrder := 4;
     OnClick := @btnNextClick;
     OnMouseEnter := @ButtonEnter;
     OnMouseExit := @ButtonExit;
@@ -213,10 +220,11 @@ begin
   begin
     Name := 'btnLast';
     SetPosition(104, 264, 30, 24);
-    Text := '>>';
+    Text := '';
     FontDesc := '#Label1';
-    ImageName := '';
     Hint := 'Last record';
+    ImageName := 'repimg.last';
+    TabOrder := 5;
     OnClick := @btnLastClick;
     OnMouseEnter := @ButtonEnter;
     OnMouseExit := @ButtonExit;
@@ -228,6 +236,8 @@ begin
     Name := 'lstName1';
     SetPosition(8, 24, 400, 156);
     FontDesc := '#List';
+    Hint := '';
+    TabOrder := 6;
   end;
 
   dblblName := TfpgDBLabel.Create(self);
@@ -249,8 +259,9 @@ begin
   begin
     Name := 'lblName1';
     SetPosition(20, 208, 80, 16);
-    Text := 'Name:';
     FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Name:';
   end;
 
   lblName2 := TfpgLabel.Create(self);
@@ -258,8 +269,9 @@ begin
   begin
     Name := 'lblName2';
     SetPosition(20, 228, 80, 16);
-    Text := 'E-mail:';
     FontDesc := '#Label1';
+    Hint := '';
+    Text := 'E-mail:';
   end;
 
   pnlName1 := TfpgBevel.Create(self);
@@ -268,6 +280,7 @@ begin
     Name := 'pnlName1';
     SetPosition(0, 296, 416, 18);
     Anchors := [anLeft,anRight,anBottom];
+    Hint := '';
     Style := bsLowered;
   end;
 
@@ -276,8 +289,9 @@ begin
   begin
     Name := 'lblName3';
     SetPosition(8, 4, 400, 16);
-    Text := 'Available DB Records:';
     FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Available DB Records:';
   end;
 
   lblName4 := TfpgLabel.Create(self);
@@ -285,8 +299,9 @@ begin
   begin
     Name := 'lblName4';
     SetPosition(8, 188, 168, 16);
-    Text := 'Current record:';
     FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Current record:';
   end;
 
   lblStatusBar := TfpgLabel.Create(pnlName1);
@@ -295,8 +310,9 @@ begin
     Name := 'lblStatusBar';
     SetPosition(5, 1, 404, 16);
     Anchors := [anLeft,anRight,anTop];
-    Text := '';
     FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
   end;
 
   {@VFD_BODY_END: MainForm}
