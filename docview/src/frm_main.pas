@@ -1747,6 +1747,7 @@ begin
   // Now load the various parts of the file(s)
   // into the user interface
   DisplayFiles( tmpHelpFiles, FirstContentsNode );
+  tmpHelpFiles.Free;
 
   //if CmdLineParameters.getHelpManagerFlag then
   //  ShowLeftPanel := Settings.ShowLeftPanel_Help
