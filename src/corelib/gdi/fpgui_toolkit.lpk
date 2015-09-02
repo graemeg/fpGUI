@@ -30,7 +30,7 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="1" Minor="4"/>
+    <Version Major="1" Minor="4" Release="1"/>
     <Files Count="107">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
@@ -166,6 +166,7 @@
       </Item33>
       <Item34>
         <Filename Value="fpg_oledragdrop.pas"/>
+        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="fpg_OLEDragDrop"/>
       </Item34>
       <Item35>
@@ -422,6 +423,7 @@
       </Item97>
       <Item98>
         <Filename Value="..\render\software\Agg2D.pas"/>
+        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="Agg2D"/>
       </Item98>
       <Item99>

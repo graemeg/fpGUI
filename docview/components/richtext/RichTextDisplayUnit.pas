@@ -122,6 +122,7 @@ Procedure DrawRichTextLine( var FontManager: TCanvasFontManager;
     Line: TLayoutLine; Start: TPoint );
 var
   X, Y: longint;
+  YBaseLine: longint;
   Element: TTextElement;
   StartedDrawing: boolean;
   Style: TTextDrawStyle;
@@ -180,7 +181,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
 
   TextBlockStart := P;
 
-  Y := Start.Y; // + Line.MaxDescender; // co-ordinates are from top/left, so do we need descender? [Graeme]
+  YBaseLine := Start.Y + Line.MaxAscender;
 
   while P < EndP do
   begin
@@ -209,6 +210,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
           StartedDrawing := true;
         end;
 
+        Y := YBaseLine - FontManager.CharAscender;
         // Now do the drawing
         if Element.ElementType = teImage then
         begin
@@ -263,9 +265,10 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
            and ( faItalic in Style.FontAttributes )
            and ( not FontManager.IsFixed )
            then
+        begin
           // end of italic; add a space
-          inc( X, FontManager.CharWidth( ' ' )  );
-
+//          inc( X, FontManager.CharWidth( ' ' )  );
+        end;
         Layout.PerformStyleTag( Element.Tag, Style, X );
         NewMarginX := ( Start.X + Style.LeftMargin );
         if NewMarginX > X then

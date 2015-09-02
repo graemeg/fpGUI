@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -175,53 +175,53 @@ type
     FValue: integer;
     procedure EnableButtons;
   protected
-    function IsMinLimitReached: Boolean; override;
-    function IsMaxLimitReached: Boolean; override;
-    function GetEditBackgroundColor: TfpgColor;
-    function GetTextColor: TfpgColor;
-    function GetNegativeColor: TfpgColor;
-    function GetFontDesc: string;
-    procedure ResizeChildren; override;
-    procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
-    procedure SetTextColor(const AValue: Tfpgcolor); override;
-    procedure SetNegativeColor(const AValue: Tfpgcolor);
-    procedure SetFontDesc(const AValue: string);
-    procedure SetMaxValue(const AValue: integer);
-    procedure SetMinValue(const AValue: integer);
-    procedure SetIncrement(const AValue: integer);
-    procedure SetLargeIncrement(const AValue: integer);
-    procedure SetValue(const AValue: integer);
-    procedure SetHint(const AValue: TfpgString); override;
-    procedure ButtonUpClick(Sender: TObject);
-    procedure ButtonDownClick(Sender: TObject);
-    procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure ButtonUpMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure ButtonDownMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
-    procedure EditExit(Sender: TObject);
-    procedure MouseEnter(Sender: TObject);
-    procedure MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
-    procedure MouseExit(Sender: TObject);
-    procedure TimerStep(Sender: TObject);
+    function    IsMinLimitReached: Boolean; override;
+    function    IsMaxLimitReached: Boolean; override;
+    function    GetEditBackgroundColor: TfpgColor;
+    function    GetTextColor: TfpgColor;
+    function    GetNegativeColor: TfpgColor;
+    function    GetFontDesc: string;
+    procedure   ResizeChildren; override;
+    procedure   SetEditBackgroundColor(const AValue: Tfpgcolor);
+    procedure   SetTextColor(const AValue: Tfpgcolor); override;
+    procedure   SetNegativeColor(const AValue: Tfpgcolor);
+    procedure   SetFontDesc(const AValue: string);
+    procedure   SetMaxValue(const AValue: integer);
+    procedure   SetMinValue(const AValue: integer);
+    procedure   SetIncrement(const AValue: integer);
+    procedure   SetLargeIncrement(const AValue: integer);
+    procedure   SetValue(const AValue: integer);
+    procedure   SetHint(const AValue: TfpgString); override;
+    procedure   ButtonUpClick(Sender: TObject);
+    procedure   ButtonDownClick(Sender: TObject);
+    procedure   ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   ButtonUpMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   ButtonDownMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+    procedure   EditExit(Sender: TObject);
+    procedure   MouseEnter(Sender: TObject);
+    procedure   MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   MouseExit(Sender: TObject);
+    procedure   TimerStep(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property EditBackgroundColor: Tfpgcolor read GetEditBackgroundColor write SetEditBackgroundColor default clBoxColor;
-    property ButtonsBackgroundColor;
-    property ButtonWidth;
-    property TextColor: Tfpgcolor read GetTextColor write SetTextColor;
-    property NegativeColor: TfpgColor read GetNegativeColor write SetNegativeColor;
-    property ArrowUpColor;
-    property ArrowDownColor;
-    property FontDesc: string read GetFontDesc write SetFontDesc;
-    property MaxValue: integer read FMaxValue write SetMaxValue default 100;
-    property MinValue: integer read FMinValue write SetMinValue default 0;
-    property Increment: integer read FIncrement write SetIncrement default 1;
-    property LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
-    property Value: integer read FValue write SetValue default 0;
-    property Hint;
-    property TabOrder;
+    property    EditBackgroundColor: Tfpgcolor read GetEditBackgroundColor write SetEditBackgroundColor default clBoxColor;
+    property    ButtonsBackgroundColor;
+    property    ButtonWidth;
+    property    TextColor: Tfpgcolor read GetTextColor write SetTextColor;
+    property    NegativeColor: TfpgColor read GetNegativeColor write SetNegativeColor;
+    property    ArrowUpColor;
+    property    ArrowDownColor;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    MaxValue: integer read FMaxValue write SetMaxValue default 100;
+    property    MinValue: integer read FMinValue write SetMinValue default 0;
+    property    Increment: integer read FIncrement write SetIncrement default 1;
+    property    LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
+    property    Value: integer read FValue write SetValue default 0;
+    property    Hint;
+    property    TabOrder;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -238,7 +238,8 @@ function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
          AFixedDecimals: integer = 1; AValue: extended = 0; ADecimals: integer = -1): TfpgSpinEditFloat;
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0;
          AMaxValue: integer = 100; AIncrement: integer = 1; ALargeIncrement: integer = 10;
-         AValue: integer = 0): TfpgSpinEdit;
+         AValue: integer = 0): TfpgSpinEdit; overload;
+function CreateSpinEdit(AOwner: TComponent; x, y, w: TfpgCoord; AOnChangeEvent: TNotifyEvent = nil): TfpgSpinEdit; overload;
 
 
 implementation
@@ -297,6 +298,15 @@ begin
   Result.LargeIncrement := ALargeIncrement;
   if (AValue <= Result.MaxValue) and (AValue >= Result.MinValue) then
     Result.Value := AValue;
+end;
+
+function CreateSpinEdit(AOwner: TComponent; x, y, w: TfpgCoord; AOnChangeEvent: TNotifyEvent): TfpgSpinEdit;
+begin
+  Result := TfpgSpinEdit.Create(AOwner);
+  Result.SetPosition(x, y, w, Result.Height);
+  if Assigned(AOnChangeEvent) then
+    Result.OnChange := AOnChangeEvent;
+  Result.UpdateWindowPosition;
 end;
 
 
@@ -427,6 +437,7 @@ end;
 constructor TfpgAbstractSpinEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FHeight := 24;
   FButtonWidth := 13; // width of spin buttons
   Shape := bsSpacer;
 

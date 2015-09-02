@@ -1,7 +1,7 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+  Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -73,7 +73,7 @@ type
   end;
 
 
-  THelpBitmap = class( TfpgImage )
+  THelpBitmap = class(TfpgImage)
   protected
     _Header: INFBITMAPHEADER;
     _PaletteColorCount: longint;
@@ -81,12 +81,12 @@ type
     _BitsSize: longint;
     FileHandle: TFileStream;
     _UncompressedBlockSize: longint;
-    function GetPaletteSize: longint;
-    procedure BitmapError(Msg: string);
-    procedure ReadBitmapData( Blocks: TList; TotalSize: longword);
+    function    GetPaletteSize: longint;
+    procedure   BitmapError(Msg: string);
+    procedure   ReadBitmapData( Blocks: TList; TotalSize: longword);
   public
-    constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
-    destructor Destroy; override;
+    constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longword);
+    destructor  Destroy; override;
   end;
 
 
@@ -128,7 +128,7 @@ begin
   inherited Destroy;
 end;
 
-constructor THelpBitmap.CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
+constructor THelpBitmap.CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longword);
 var
   WordsPerLine: longint;
   LineSize: longint;
@@ -282,10 +282,14 @@ var
   ptr: PByte;
   i: integer;
   img: TfpgImage;
+  {$IFDEF LZW_DEBUG}
+  s: TFileStream;
+  {$ENDIF}
 begin
   BitmapOutputPointer := nil;
   BitmapData := nil;
   ptr := nil;
+  lastOutByte := $0;
 
   // Allocate memory to store the bitmap
   BitmapData := GetMem( TotalSize );
@@ -309,6 +313,9 @@ begin
     case Block._CompressionType of
       0,1: // uncompressed (I'm not sure about 1)
       begin
+        {$IFDEF LZW_DEBUG}
+        writeln('Uncompressed image type');
+        {$ENDIF}
         MemCopy( Block._Data^, BitmapOutputPointer^, Block._Size );
         BytesWrittenFromBlock := Block._Size;
         inc( BytesWritten, BytesWrittenFromBlock );
@@ -316,6 +323,9 @@ begin
 
       2: // LZW compression
       begin
+        {$IFDEF LZW_DEBUG}
+        writeln('LZW compressed image type');
+        {$ENDIF}
         LZWDecompressBlock( Block._Data,
                             Block._Size,
                             BitmapOutputPointer,
@@ -353,35 +363,25 @@ begin
          > BitmapData + TotalSize ) then
       assert( false );
 
-{ NOTE: This doesn't seem right. It moves the pointer so later the moving of data to
-  ImageData will be wrong! }
-//    inc( BitmapOutputPointer, BytesWrittenFromBlock ); TPersistentObjectState
+    inc( BitmapOutputPointer, BytesWrittenFromBlock );
   end;
-
-  i := TotalSize + SizeOf(_Header) + GetPaletteSize;
-  img := CreateImage_BMP(BitmapData, i);
-
-  AllocateImage(32, _Header.cx, _Header.cy);
 
   {$IFDEF LZW_DEBUG}
-  writeln('Width = ', Width);
-  writeln('Height = ', Height);
-  writeln('ImageDataSize = ', ImageDataSize);
-  writeln('------------- START -------------');
-  for i := 1 to ImageDataSize do
-  begin
-    write(HexStr(BitmapOutputPointer[i-1],2)+' ');
-    if (i mod 16 = 0) then
-      writeln('')
-    else if (i mod 4 = 0) then
-      write (' | ');
-  end;
-  Writeln('');
-  writeln('------------- END -------------');
+  // write the decompressed image to a .BMP file to verify it is okay
+  s := TFileStream.Create(Format('/tmp/image_%d.bmp', [TotalSize]), fmCreate);
+  BitmapData[0] := Byte('B');
+  s.WriteBuffer(BitmapData^, TotalSize);
+  s.Destroy;
+  BitmapData[0] := Byte('b');
   {$ENDIF}
 
-//  Move(BitmapOutputPointer^, ImageData^, ImageDataSize);
-  Move(img.ImageData^, self.ImageData^, img.ImageDataSize);
+  img := CreateImage_BMP(BitmapData, TotalSize);
+
+  FreeImage;  // just as a precaution
+  AllocateImage(32, _Header.cx, _Header.cy);
+  // copy imagedata from the img instance to our THelpBitmap.ImageData
+  MemCopy(img.ImageData^, self.ImageData^, img.ImageDataSize);
+
   UpdateImage;
   img.Free;
 

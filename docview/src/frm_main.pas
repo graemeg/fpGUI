@@ -306,7 +306,7 @@ const
 
 procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
 begin
-  TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+  fpgApplication.ShowException(E);
 end;
 
 procedure TMainForm.lbIndexKeyPress(Sender: TObject; var KeyCode: word;
@@ -1747,6 +1747,7 @@ begin
   // Now load the various parts of the file(s)
   // into the user interface
   DisplayFiles( tmpHelpFiles, FirstContentsNode );
+  tmpHelpFiles.Free;
 
   //if CmdLineParameters.getHelpManagerFlag then
   //  ShowLeftPanel := Settings.ShowLeftPanel_Help

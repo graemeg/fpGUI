@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
   fpg_edit, fpg_form, fpg_label, fpg_button,
-  fpg_dialogs, fpg_menu, fpg_checkbox,
+  fpg_dialogs, fpg_menu, fpg_checkbox, fpg_listbox, fpg_combobox,
   fpg_panel, fpg_ColorWheel, fpg_spinedit;
 
 type
@@ -55,7 +55,11 @@ type
     edR: TfpgSpinEdit;
     edG: TfpgSpinEdit;
     edB: TfpgSpinEdit;
+    Label10: TfpgLabel;
+    cbColors: TfpgComboBox;
+    lbColors: TfpgColorListBox;
     lblHex: TfpgLabel;
+    eHex: TfpgEdit;
     Label7: TfpgLabel;
     Label8: TfpgLabel;
     Bevel2: TfpgBevel;
@@ -76,6 +80,14 @@ type
     procedure   UpdateRGBComponents;
     procedure   ColorChanged(Sender: TObject);
     procedure   RGBChanged(Sender: TObject);
+    procedure   RGBChanging;
+    procedure   ConvertToInt(Value: string);
+    procedure   eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
+    procedure   eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
+      var Consumed: boolean);
+    procedure   PopulatePaletteColorCombo;
+    procedure   cbColorsChange(Sender: TObject);
+    procedure   lbColorsChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -86,6 +98,52 @@ type
 implementation
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.ConvertToInt(Value: string);
+var
+  iRed, iGreen, iBlue: integer;
+  i, iTemp : integer;
+  HexVal: string;
+begin
+  for i:= 2 to 7 do
+  begin
+    HexVal:= Copy(Value,i,1);
+    case Uppercase(HexVal) of
+      'F':
+        iTemp:= 15;
+      'E':
+        iTemp:= 14;
+      'D':
+        iTemp:= 13;
+      'C':
+        iTemp:= 12;
+      'B':
+        iTemp:= 11;
+      'A':
+        iTemp:= 10
+      else
+        if (HexVal>= '0') and (HexVal<= '9') then
+          iTemp:= StrToInt(HexVal);
+    end;
+    case i of
+      2:
+        iRed:= iTemp;
+      3:
+        iRed:= iRed * 16 +iTemp;
+      4:
+        iGreen:= iTemp;
+      5:
+        iGreen:= iGreen * 16 +iTemp;
+      6:
+        iBlue:= iTemp;
+      7:
+        iBlue:= iBlue * 16 +iTemp;
+    end;
+  end;
+  edR.Value := iRed;
+  edG.Value := iGreen;
+  edB.Value := iBlue;
+end;
 
 function ConvertToHexa(Value: Integer): string;
 var
@@ -188,6 +246,11 @@ begin
 end;
 
 procedure TMainForm.RGBChanged(Sender: TObject);
+begin
+  RGBChanging;
+end;
+
+procedure TMainForm.RGBChanging;
 var
   rgb: TRGBTriple;
   c: TfpgColor;
@@ -199,7 +262,7 @@ begin
   c := RGBTripleTofpgColor(rgb);
   ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB := False;
-  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -249,8 +312,8 @@ end;
 procedure TMainForm.UpdateHSVComponents;
 begin
   edH.Text := IntToStr(ColorWheel1.Hue);
-  edS.Text := FormatFloat('0.000', ColorWheel1.Saturation);
-  edV.Text := FormatFloat('0.000', ValueBar1.Value);
+  edS.Text := FormatFloat('##0.0', ColorWheel1.Saturation * 100);
+  edV.Text := FormatFloat('##0.0', ValueBar1.Value * 100);
   Bevel1.BackgroundColor := ValueBar1.SelectedColor;
 end;
 
@@ -264,17 +327,78 @@ begin
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
-  lblHex.Text:= 'Hex = '+ Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
+end;
+
+procedure TMainForm.eHexKeyChar(Sender: TObject; AChar: TfpgChar; var Consumed: boolean);
+begin
+if Length(eHex.Text)= 0 then
+begin
+  if AChar<> '$' then
+    Consumed:= True;
+end
+else
+  if ((AChar< '0') or (AChar> '9')) and ((AChar< 'A') or (AChar> 'F')) and ((AChar< 'a') or (AChar> 'f')) then
+    Consumed:= True;
+end;
+
+procedure TMainForm.eHexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
+          var Consumed: boolean);
+begin
+  if ((KeyCode= KeyReturn) or (KeyCode= KeyPEnter)) and (Length(eHex.Text)= 7) then
+  begin
+    ConvertToInt(eHex.Text);
+    RGBChanging;
+  end;
+end;
+
+procedure TMainForm.PopulatePaletteColorCombo;
+begin
+  with cbColors do
+  begin
+    Items.Clear;
+    Items.Add('cpStandardColors');
+    Items.Add('cpSystemColors');
+    Items.Add('cpWebColors');
+    FocusItem := 0;
+    OnChange := @cbColorsChange;
+  end;
+end;
+
+procedure TMainForm.cbColorsChange(Sender: TObject);
+begin
+  if cbColors.Text = 'cpStandardColors' then
+    lbColors.ColorPalette := cpStandardColors
+  else if cbColors.Text = 'cpSystemColors' then
+    lbColors.ColorPalette := cpSystemColors
+  else
+    lbColors.ColorPalette := cpWebColors;
+end;
+
+procedure TMainForm.lbColorsChange(Sender: TObject);
+var
+  rgb: TRGBTriple;
+  c: TfpgColor;
+begin
+  c := lbColors.Color;
+  rgb := fpgColorToRGBTriple(c);
+  edR.Value := rgb.Red;
+  edG.Value := rgb.Green;
+  edB.Value := rgb.Blue;
+  eHex.Text:= Hexa(rgb.Red,rgb.Green,rgb.Blue);
+  ConvertToInt(eHex.Text);
+  RGBChanging;
 end;
 
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(349, 242, 537, 411);
+  SetPosition(0, 0, 540, 420);
   WindowTitle := 'ColorWheel test app';
   Hint := '';
-  WindowPosition := wpUser;
+  IconName := '';
+  WindowPosition := wpScreenCenter;
 
   Button1 := TfpgButton.Create(self);
   with Button1 do
@@ -294,14 +418,14 @@ begin
   with ColorWheel1 do
   begin
     Name := 'ColorWheel1';
-    SetPosition(20, 20, 272, 244);
+    SetPosition(12, 20, 272, 244);
   end;
 
   ValueBar1 := TfpgValueBar.Create(self);
   with ValueBar1 do
   begin
     Name := 'ValueBar1';
-    SetPosition(304, 20, 52, 244);
+    SetPosition(290, 20, 52, 244);
     Value := 1;
     OnChange  := @ColorChanged;
   end;
@@ -318,7 +442,7 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(116, 284, 52, 18);
+    SetPosition(108, 284, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -329,62 +453,68 @@ begin
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(116, 316, 52, 18);
+    SetPosition(108, 312, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Sat';
+    Text := 'Saturation';
   end;
 
   Label3 := TfpgLabel.Create(self);
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(116, 344, 52, 18);
+    SetPosition(108, 340, 64, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Val';
+    Text := 'Brightness';
   end;
 
   edH := TfpgEdit.Create(self);
   with edH do
   begin
     Name := 'edH';
-    SetPosition(172, 280, 56, 26);
+    SetPosition(176, 280, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 8;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   edS := TfpgEdit.Create(self);
   with edS do
   begin
     Name := 'edS';
-    SetPosition(172, 308, 56, 26);
+    SetPosition(176, 308, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 9;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   edV := TfpgEdit.Create(self);
   with edV do
   begin
     Name := 'edV';
-    SetPosition(172, 336, 56, 26);
+    SetPosition(176, 336, 44, 24);
+    BackgroundColor := clWindowBackground;
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 10;
     Text := '';
-    FontDesc := '#Edit1';
-    BackgroundColor := clWindowBackground;
   end;
 
   Label4 := TfpgLabel.Create(self);
   with Label4 do
   begin
     Name := 'Label4';
-    SetPosition(236, 284, 56, 18);
+    SetPosition(230, 284, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -395,7 +525,7 @@ begin
   with Label5 do
   begin
     Name := 'Label5';
-    SetPosition(236, 316, 56, 18);
+    SetPosition(230, 312, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -406,7 +536,7 @@ begin
   with Label6 do
   begin
     Name := 'Label6';
-    SetPosition(236, 344, 56, 18);
+    SetPosition(230, 340, 56, 16);
     Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
@@ -417,12 +547,13 @@ begin
   with edR do
   begin
     Name := 'edR';
-    SetPosition(296, 280, 44, 26);
+    SetPosition(290, 280, 44, 24);
     TabOrder := 13;
     MinValue := 0;
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit  := @RGBChanged;
   end;
 
@@ -430,12 +561,13 @@ begin
   with edG do
   begin
     Name := 'edG';
-    SetPosition(296, 308, 44, 26);
+    SetPosition(290, 308, 44, 24);
     TabOrder := 14;
     MinValue := 0;
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit := @RGBChanged;
   end;
 
@@ -443,23 +575,74 @@ begin
   with edB do
   begin
     Name := 'edB';
-    SetPosition(296, 336, 44, 26);
+    SetPosition(290, 336, 44, 24);
     TabOrder := 15;
     MinValue := 0;
     MaxValue := 255;
     Value := 255;
     FontDesc := '#Edit1';
+    OnChange := @RGBChanged;
     OnExit := @RGBChanged;
+  end;
+
+  Label10 := TfpgLabel.Create(self);
+  with Label10 do
+  begin
+    Name := 'Label10';
+    SetPosition(352, 100, 180, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Predefined Color Palettes';
+  end;
+
+  cbColors := TfpgComboBox.Create(self);
+  with cbColors do
+  begin
+    Name := 'cbColors';
+    SetPosition(352, 120, 180, 22);
+    ExtraHint := '';
+    FontDesc := '#List';
+    Hint := '';
+    FocusItem := -1;
+    TabOrder := 18;
+  end;
+
+  lbColors := TfpgColorListBox.Create(self);
+  with lbColors do
+  begin
+    Name := 'lbColors';
+    SetPosition(352, 150, 180, 160);
+    Color := TfpgColor($FF00FFFF);
+    FontDesc := '#List';
+    Hint := '';
+    TabOrder := 19;
+    ScrollbarPage := VisibleItems;
+    OnChange := @lbColorsChange;
   end;
 
   lblHex := TfpgLabel.Create(self);
   with lblHex do
   begin
     Name := 'lblHex';
-    SetPosition(380, 316, 120, 16);
+    SetPosition(375, 340, 120, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Hex = ';
+  end;
+
+  eHex := TfpgEdit.Create(self);
+  with eHex do
+  begin
+    Name := 'eHex';
+    SetPosition(420, 336, 65, 24);
+    ExtraHint := '';
+    FontDesc := '#Label2';
+    Hint := '';
+    TabOrder := 21;
+    Text := '';
+    MaxLength:= 7;
+    OnKeyChar:= @eHexKeyChar;
+    OnKeyPress:= @eHexKeyPress;
   end;
 
   Label7 := TfpgLabel.Create(self);
@@ -476,7 +659,7 @@ begin
   with Label8 do
   begin
     Name := 'Label8';
-    SetPosition(304, 3, 64, 16);
+    SetPosition(290, 3, 64, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'ValueBar';
@@ -486,7 +669,7 @@ begin
   with Bevel2 do
   begin
     Name := 'Bevel2';
-    SetPosition(388, 8, 2, 260);
+    SetPosition(388, 8, 2, 80);
     Hint := '';
     Style := bsLowered;
   end;
@@ -542,17 +725,18 @@ begin
   chkContinuous := TfpgCheckBox.Create(self);
   with chkContinuous do
   begin
-    Name := 'chkContinous';
+    Name := 'chkContinuous';
     SetPosition(205, 375, 90, 19);
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 25;
-    Text := 'Continous';
+    Text := 'Continuous';
     OnChange := @chkContinuousChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
 
+  PopulatePaletteColorCombo;
   // link the two components
   ColorWheel1.ValueBar := ValueBar1;
 //  ColorWheel1.BackgroundColor := clFuchsia;

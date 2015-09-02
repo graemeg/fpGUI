@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,7 +32,7 @@ uses
 function LoadImage_PNG(const AFileName: TfpgString): TfpgImage; overload;
 function LoadImage_PNG(AStream: TStream): TfpgImage; overload;
 function LoadImage_PNG(const AImageData: Pointer; const AImageDataSize: LongWord): TfpgImage; overload;
-function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: PChar): TfpgImage; overload;
+function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: {$IFNDEF WINCE} PChar {$ELSE} PWideChar{$ENDIF}): TfpgImage; overload;
 function LoadImage_PNGcrop(const AMaxWidth, AMaxHeight: integer; const AFileName: TfpgString): TfpgImage;
 
 
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: PChar): TfpgImage;
+function LoadImage_PNG(AInstance: THandle; const AResName: String; AResType: {$IFNDEF WINCE} PChar {$ELSE} PWideChar{$ENDIF}): TfpgImage;
 var
   res: TResourceStream;
 begin

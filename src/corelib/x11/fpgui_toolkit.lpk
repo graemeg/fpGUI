@@ -23,12 +23,11 @@
       </CodeGeneration>
       <Other>
         <CustomOptions Value="-dAggCanvasX"/>
-        <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="1" Minor="4"/>
+    <Version Major="1" Minor="4" Release="1"/>
     <Files Count="110">
       <Item1>
         <Filename Value="../stdimages.inc"/>

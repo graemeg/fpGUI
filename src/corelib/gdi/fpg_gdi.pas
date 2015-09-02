@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,6 +30,14 @@ unit fpg_gdi;
 {.$Define DND_DEBUG}
 {.$Define DEBUGKEYS}
 
+// enable or disable DND support. Disabled by default while implementing AlienWindows.
+{$define HAS_DND}
+
+{$IFDEF WINCE}
+  // WinCE doesn't have DND support
+  {$undefine HAS_DND}
+{$ENDIF}
+
 interface
 
 uses
@@ -42,7 +50,9 @@ uses
   {$IFDEF DEBUG}
   ,fpg_dbugintf
   {$ENDIF DEBUG}
+  {$IFDEF HAS_DND}
   ,fpg_OLEDragDrop
+  {$ENDIF}
   ;
 
 { Constants missing on windows unit }
@@ -153,15 +163,19 @@ type
 
   TfpgGDIWindow = class(TfpgWindowBase)
   private
+    {$IFDEF HAS_DND}
     FDropManager: TfpgOLEDropTarget;
+    {$ENDIF}
     FDropPos: TPoint;
     FUserMimeSelection: TfpgString;
     FUserAcceptDrag: Boolean;
-    function    GetDropManager: TfpgOLEDropTarget;
+    {$IFDEF HAS_DND}
     procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
+    function    GetDropManager: TfpgOLEDropTarget;
     procedure   HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
     procedure   HandleDNDDrop(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
+    {$ENDIF}
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
@@ -171,7 +185,9 @@ type
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
+    {$IFDEF HAS_DND}
     property    DropManager: TfpgOLEDropTarget read GetDropManager;
+    {$ENDIF}
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgGDIWindow;
@@ -1445,6 +1461,7 @@ var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
 
+{$IFDEF HAS_DND}
 procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 var
   wg: TfpgWidget;
@@ -1610,6 +1627,7 @@ begin
   end;
   Result := FDropManager;
 end;
+{$ENDIF HAS_DND}
 
 function TfpgGDIWindow.DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
 var
@@ -2016,6 +2034,7 @@ end;
 
 procedure TfpgGDIWindow.DoAcceptDrops(const AValue: boolean);
 begin
+  {$IFDEF HAS_DND}
   if AValue then
   begin
     if HasHandle then
@@ -2029,6 +2048,7 @@ begin
       DropManager.RevokeDragDrop;
     QueueAcceptDrops := False;
   end;
+  {$ENDIF}
 end;
 
 procedure TfpgGDIWindow.DoDragStartDetected;
@@ -2066,7 +2086,9 @@ begin
 
     else
     begin
+      {$IFNDEF WINCE}
       placement.length:= sizeof(placement);
+      // This Windows function doesn't exist in WinCE
       if GetWindowPlacement(FWinHandle, placement) then
       begin
         case placement.ShowCmd of
@@ -2074,6 +2096,7 @@ begin
           SW_SHOWMINIMIZED: result:= wsMinimized;
         end;
       end;
+      {$ENDIF}
     end; { case..else }
   end; { case }
 end;
@@ -2082,7 +2105,9 @@ constructor TfpgGDIWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
+  {$IFDEF HAS_DND}
   FDropManager := nil;
+  {$ENDIF}
   FDropPos.x := 0;
   FDropPos.y := 0;
   FFullscreenIsSet := false;
@@ -2092,8 +2117,10 @@ end;
 
 destructor TfpgGDIWindow.Destroy;
 begin
+  {$IFDEF HAS_DND}
   if Assigned(FDropManager) then
     FDropManager.Free;
+  {$ENDIF}
   inherited Destroy;
 end;
 
@@ -3027,10 +3054,13 @@ var
   M: PStgMedium;
   itm: TfpgMimeDataItem;
   lEffects: DWORD;
+  {$IFDEF HAS_DND}
   FDataObject: TfpgOLEDataObject;
   FDropSource: TfpgOLEDropSource;
+  {$ENDIF}
   lIsTranslated: boolean;
 begin
+  {$IFDEF HAS_DND}
   if FDragging then
   begin
     {$IFDEF DND_DEBUG}
@@ -3121,6 +3151,7 @@ begin
 //    (FDropSource as IUnknown)._Release;
 //    (FDataObject as IUnknown)._Release;
   end;
+  {$ENDIF HAS_DND}
 end;
 
 { TGDIDragManager }
@@ -3164,18 +3195,22 @@ end;
 
 procedure TGDIDragManager.RegisterDragDrop;
 begin
+  {$IFDEF HAS_DND}
   Activex.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, self as IDropTarget)
+  {$ENDIF}
 end;
 
 procedure TGDIDragManager.RevokeDragDrop;
 begin
+  {$IFDEF HAS_DND}
   ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
+  {$ENDIF}
 end;
 
 {$IF FPC_FULLVERSION<20602}
 procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT; dwTime: DWORD); stdcall;
 {$ELSE}
-procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
+procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
 {$IFEND}
 begin
   { idEvent contains the handle to the timer that got triggered }
@@ -3240,12 +3275,12 @@ end;
 initialization
   wapplication   := nil;
   MouseFocusedWH := 0;
-  NeedToUnitialize := Succeeded(OleInitialize(nil));
 
 {$IFDEF WinCE}
   UnicodeEnabledOS := True;
   FontSmoothingType := DEFAULT_QUALITY;
 {$ELSE}
+  NeedToUnitialize := Succeeded(OleInitialize(nil));
   WinVersion.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
   GetVersionEx(WinVersion);
   UnicodeEnabledOS := (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_NT) or
@@ -3256,11 +3291,11 @@ initialization
       FontSmoothingType := CLEARTYPE_QUALITY
     else
       FontSmoothingType := ANTIALIASED_QUALITY;
-{$ENDIF}
 
 finalization
   if NeedToUnitialize then
     OleUninitialize;
+{$ENDIF}
 
 end.
 

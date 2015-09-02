@@ -44,6 +44,7 @@ type
     constructor Create(ACanvas: TfpgCanvas; AWidget: TfpgWidget); reintroduce;
     destructor  Destroy; override;
     function    AverageCharWidth: longint;
+    function    CharAscender: longint;
     function    CharDescender: longint;
     function    CharHeight: longint;
     function    CharWidth( const C: TfpgChar ): longint;  // Retrieve the width of the given char, in the current font
@@ -179,8 +180,8 @@ begin
       AFontDesc := AFontDesc + ':Strikeout';
 
   if faUnderScore in Attrs Then
-    if Pos(':Underscore', AFontDesc) = 0 then
-      AFontDesc := AFontDesc + ':Underscore';
+    if Pos(':Underline', AFontDesc) = 0 then
+      AFontDesc := AFontDesc + ':Underline';
 end;
 
 // Provide font name substitutes for some common bitmap fonts found in INF files
@@ -312,6 +313,11 @@ end;
 function TCanvasFontManager.AverageCharWidth: longint;
 begin
   Result := FCanvas.Font.TextWidth('c');
+end;
+
+function TCanvasFontManager.CharAscender: longint;
+begin
+  Result := FCanvas.Font.Ascent;
 end;
 
 function TCanvasFontManager.MaximumCharWidth: longint;

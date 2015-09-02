@@ -1,7 +1,7 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+  Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,127 +32,120 @@ uses
   fpg_base;
 
 type
-  TPdfObjet = class(TObject)
+  TPdfObject = class(TObject)
   public
     constructor Create; virtual;
     destructor Destroy; override;
   end;
 
-  TPdfBoolean = class(TPdfObjet)
+  TPdfBoolean = class(TPdfObject)
   private
     FValue: Boolean;
   protected
-    procedure WriteBoolean(const AFlux: TStream);
+    procedure WriteBoolean(const AStream: TStream);
   public
     constructor CreateBoolean(const AValue: Boolean);
-    destructor Destroy; override;
   end;
 
-  TPdfInteger = class(TPdfObjet)
+  TPdfInteger = class(TPdfObject)
   private
     FValue: integer;
   protected
-    procedure WriteInteger(const AFlux: TStream);
+    procedure WriteInteger(const AStream: TStream);
     procedure IncrementeInteger;
     property Value: integer read FValue write FValue;
   public
     constructor CreateInteger(const AValue: integer);
-    destructor Destroy; override;
   end;
 
-  TPdfReference = class(TPdfObjet)
+  TPdfReference = class(TPdfObject)
   private
     FValue: integer;
   protected
-    procedure WriteReference(const AFlux: TStream);
+    procedure WriteReference(const AStream: TStream);
   public
     constructor CreateReference(const AValue: integer);
-    destructor Destroy; override;
   end;
 
-  TPdfName = class(TPdfObjet)
+  TPdfName = class(TPdfObject)
   private
     FValue: string;
   protected
-    procedure WriteName(const AFlux: TStream);
+    procedure WriteName(const AStream: TStream);
   public
     constructor CreateName(const AValue: string);
-    destructor Destroy; override;
   end;
 
-  TPdfString = class(TPdfObjet)
+  TPdfString = class(TPdfObject)
   private
     FValue: string;
   protected
-    procedure WriteString(const AFlux: TStream);
+    procedure Write(const AStream: TStream);
   public
     constructor CreateString(const AValue: string);
-    destructor Destroy; override;
   end;
 
-  TPdfArray = class(TPdfObjet)
+  TPdfArray = class(TPdfObject)
   private
     FArray: TList;
   protected
-    procedure WriteArray(const AFlux: TStream);
-    procedure AddItem(const AValue: TPdfObjet);
+    procedure WriteArray(const AStream: TStream);
+    procedure AddItem(const AValue: TPdfObject);
   public
     constructor CreateArray;
     destructor Destroy; override;
   end;
 
-  TPdfStream = class(TPdfObjet)
+  TPdfStream = class(TPdfObject)
   private
     FStream: TList;
   protected
-    procedure WriteStream(const AFlux: TStream);
-    procedure AddItem(const AValue: TPdfObjet);
+    procedure WriteStream(const AStream: TStream);
+    procedure AddItem(const AValue: TPdfObject);
   public
     constructor CreateStream;
     destructor Destroy; override;
   end;
 
-  TPdfFonte = class(TPdfObjet)
+  TPdfEmbeddedFont = class(TPdfObject)
   private
     FTxtFont: integer;
     FTxtSize: string;
   protected
-    procedure WriteFonte(const AFlux: TStream);
-    function WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): int64;
+    procedure WriteFont(const AStream: TStream);
+    function WriteEmbeddedFont(const ASrcStream: TMemoryStream; const AStream: TStream): int64;
   public
-    constructor CreateFonte(const AFont: integer; const ASize: string);
-    destructor Destroy; override;
+    constructor CreateFont(const AFont: integer; const ASize: string);
   end;
 
-  TPdfText = class(TPdfObjet)
+  TPdfText = class(TPdfObject)
   private
     FTxtPosX: single;
     FTxtPosY: single;
     FTxtText: TPdfString;
   protected
-    procedure WriteText(const AFlux: TStream);
+    procedure WriteText(const AStream: TStream);
   public
     constructor CreateText(const APosX, APosY: single; const AText: string);
     destructor Destroy; override;
   end;
 
-  TPdfLigne = class(TPdfObjet)
+  TPdfLineSegment = class(TPdfObject)
   private
-    FEpais: single;
-    FStaX: single;
-    FStaY: single;
-    FEndX: single;
-    FEndY: single;
+    FWidth: single;
+    FX1: single;
+    FY1: single;
+    FX2: single;
+    FY2: single;
   protected
-    procedure WriteLigne(const AFlux: TStream);
+    procedure WriteLineSegment(const AStream: TStream);
   public
-    constructor CreateLigne(const AEpais, AStaX, AStaY, AEndX, AEndY: single);
-    destructor Destroy; override;
+    constructor CreateLineSegment(const AWidth, AX1, AY1, AX2, AY2: single);
   end;
 
-  TPdfRectangle = class(TPdfObjet)
+  TPdfRectangle = class(TPdfObject)
   private
-    FEpais: single;
+    FLineWidth: single;
     FRecX: single;
     FRecY: single;
     FRecW: single;
@@ -160,10 +153,9 @@ type
     FFill: Boolean;
     FStroke: Boolean;
   protected
-    procedure WriteRectangle(const AFlux: TStream);
+    procedure WriteRectangle(const AStream: TStream);
   public
-    constructor CreateRectangle(const AEpais, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
-    destructor Destroy; override;
+    constructor CreateRectangle(const ALineWidth, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
   end;
 
   TRefPos = record
@@ -173,17 +165,16 @@ type
 
   T_Points = array of TRefPos;
 
-  TPdfSurface = class(TPdfObjet)
+  TPdfSurface = class(TPdfObject)
   private
     FPoints: T_Points;
   protected
-    procedure WriteSurface(const AFlux: TStream);
+    procedure WriteSurface(const AStream: TStream);
   public
     constructor CreateSurface(const APoints: T_Points);
-    destructor Destroy; override;
   end;
 
-  TPdfImage = class(TPdfObjet)
+  TPdfImage = class(TPdfObject)
   private
     FNumber: integer;
     FLeft: single;
@@ -191,55 +182,52 @@ type
     FWidth: integer;
     FHeight: integer;
   protected
-    function WriteImageStream(const ANumber: integer; AFlux: TStream): int64;
-    procedure WriteImage(const AFlux: TStream);
+    function WriteImageStream(const ANumber: integer; AStream: TStream): int64;
+    procedure WriteImage(const AStream: TStream);
   public
     constructor CreateImage(const ALeft, ABottom: single; AWidth, AHeight, ANumber: integer);
-    destructor Destroy; override;
   end;
 
-  TPdfLineStyle = class(TPdfObjet)
+  TPdfLineStyle = class(TPdfObject)
   private
     FDash: TfpgLineStyle;
     FPhase: integer;
   protected
-    procedure WriteLineStyle(const AFlux: TStream);
+    procedure WriteLineStyle(const AStream: TStream);
   public
     constructor CreateLineStyle(ADash: TfpgLineStyle; APhase: integer);
-    destructor Destroy; override;
   end;
 
-  TPdfColor = class(TPdfObjet)
+  TPdfColor = class(TPdfObject)
   private
     FRed: string;
     FGreen: string;
     FBlue: string;
     FStroke: Boolean;
   protected
-    procedure WriteColor(const AFlux: TStream);
+    procedure WriteColor(const AStream: TStream);
   public
     constructor CreateColor(const AStroke: Boolean; AColor: TfpgColor);
-    destructor Destroy; override;
   end;
 
   TPdfDicElement = class(TObject)
   private
     FKey: TPdfName;
-    FValue: TPdfObjet;
+    FValue: TPdfObject;
   protected
-    procedure WriteDicElement(const AFlux: TStream);
+    procedure WriteDicElement(const AStream: TStream);
   public
-    constructor CreateDicElement(const AKey: string; const AValue: TPdfObjet);
+    constructor CreateDicElement(const AKey: string; const AValue: TPdfObject);
     destructor Destroy; override;
   end;
 
-  TPdfDictionary = class(TPdfObjet)
+  TPdfDictionary = class(TPdfObject)
   private
     FElement: TList; // list of TPdfDicElement
   protected
-    procedure AddElement(const AKey: string; const AValue: TPdfObjet);
+    procedure AddElement(const AKey: string; const AValue: TPdfObject);
     function ElementParCle(const AValue: string): integer;
-    procedure WriteDictionary(const AObjet: integer; const AFlux: TStream);
+    procedure WriteDictionary(const AObjet: integer; const AStream: TStream);
   public
     constructor CreateDictionary;
     destructor Destroy; override;
@@ -248,14 +236,15 @@ type
   TPdfXRef = class(TObject)
   private
     FOffset: integer;
-    FObjet: TPdfDictionary;
+    FDict: TPdfDictionary;
     FStream: TPdfStream;
   protected
-    procedure WriteXRef(const AFlux: TStream);
+    procedure WriteXRef(const AStream: TStream);
   public
     constructor CreateXRef;
     destructor Destroy; override;
     property Offset: integer read FOffset write FOffset;
+    Property Dict: TPdfDictionary read FDict;
   end;
 
   TPageLayout = (lSingle, lTwo, lContinuous);
@@ -265,11 +254,11 @@ type
     FPreferences: Boolean;
     FPageLayout: TPageLayout;
     FZoomValue: string;
-    FXRefObjets: TList; // list of TPdfXRef
+    FGlobalXRefs: TList; // list of TPdfXRef
   protected
     function ElementParNom(const AValue: string): integer;
-    procedure WriteXRefTable(const AFlux: TStream);
-    procedure WriteObjet(const AObjet: integer; const AFlux: TStream);
+    procedure WriteXRefTable(const AStream: TStream);
+    procedure WriteObject(const AObject: integer; const AStream: TStream);
     procedure CreateRefTable;
     procedure CreateTrailer;
     function CreateCatalog: integer;
@@ -280,19 +269,19 @@ type
     function CreateOutlines: integer;
     function CreateOutline(Parent, SectNo, PageNo: integer; SectTitre: string): integer;
     procedure CreateStdFont(NomFonte: string; NumFonte: integer);
-    function LoadFont(NomFonte: string): string;
+    function LoadFont(AFontName: string): string;
     procedure CreateTtfFont(const NumFonte: integer);
     procedure CreateTp1Font(const NumFonte: integer);
     procedure CreateFontDescriptor(const NumFonte: integer);
     procedure CreateFontWidth;
     procedure CreateFontFile(const NumFonte: integer);
-    procedure CreateImage(ImgWidth, ImgHeight, NumImg: integer);
+    procedure CreateImage(ImgWidth, ImgHeight, ImgNumber: integer);
     function CreateContents: integer;
     procedure CreateStream(NumeroPage, PageNum: integer);
   public
     constructor CreateDocument(const ALayout: TPageLayout = lSingle; const AZoom: string = '100'; const APreferences: Boolean = True);
     destructor Destroy; override;
-    procedure WriteDocument(const AFlux: TStream);
+    procedure WriteDocument(const AStream: TStream);
     property PageLayout: TPageLayout read FPageLayout write FPageLayout default lSingle;
   end;
 
@@ -320,7 +309,7 @@ const
   PDF_FILE_END = '%%EOF';
   PDF_MAX_GEN_NUM = 65535;
   PDF_UNICODE_HEADER = 'FEFF001B%s001B';
-  PDF_LANG_STRING = 'fr';
+  PDF_LANG_STRING = 'en';
 
 var
   Document: TPdfDocument;
@@ -339,67 +328,47 @@ uses
   U_Command;
 
 var
-  Trailer: TPdfDictionary;
-  CurrentColor: string;
-  CurrentWidth: string;
-  Catalogue: integer;
-  FontDef: TFontDef;
-  Flux: TMemoryStream;
-  FontFiles: array of string;
+  uDictionary: TPdfDictionary;
+  uCurrentColor: string;
+  uCurrentWidth: string;
+  uCatalogue: integer;
+  uFontDef: TFontDef;
+  uStream: TMemoryStream;
+  uFontFiles: array of string;
 
 // utility functions
 
 function InsertEscape(const AValue: string): string;
 var
-  Chaine: string;
+  S: string;
 begin
   Result := '';
-  Chaine := AValue;
-  if Pos('\', Chaine) > 0 then
-    Chaine := AnsiReplaceStr(Chaine, '\', '\\');
-  if Pos('(', Chaine) > 0 then
-    Chaine := AnsiReplaceStr(Chaine, '(', '\(');
-  if Pos(')', Chaine) > 0 then
-    Chaine := AnsiReplaceStr(Chaine, ')', '\)');
-  Result := Chaine;
-  //while Pos('\',Chaine)> 0 do
-  //  begin
-  //  Result:= Result+Copy(Chaine,1,Pred(Pos('\',Chaine)))+'\\';
-  //  Chaine:= Copy(Chaine,Succ(Pos('\',Chaine)),Length(Chaine)-Pos('\',Chaine));
-  //  end;
-  //Chaine:= Result+Chaine;
-  //Result:= '';
-  //while Pos('(',Chaine)> 0 do
-  //  begin
-  //  Result:= Result+Copy(Chaine,1,Pred(Pos('(',Chaine)))+'\(';
-  //  Chaine:= Copy(Chaine,Succ(Pos('(',Chaine)),Length(Chaine)-Pos('(',Chaine));
-  //  end;
-  //Chaine:= Result+Chaine;
-  //Result:= '';
-  //while Pos(')',Chaine)> 0 do
-  //  begin
-  //  Result:= Result+Copy(Chaine,1,Pred(Pos(')',Chaine)))+'\)';
-  //  Chaine:= Copy(Chaine,Succ(Pos(')',Chaine)),Length(Chaine)-Pos(')',Chaine));
-  //  end;
-  //Result:= Result+Chaine;
+  S := AValue;
+  if Pos('\', S) > 0 then
+    S := AnsiReplaceStr(S, '\', '\\');
+  if Pos('(', S) > 0 then
+    S := AnsiReplaceStr(S, '(', '\(');
+  if Pos(')', S) > 0 then
+    S := AnsiReplaceStr(S, ')', '\)');
+  Result := S;
 end;
 
-procedure WriteChaine(const Valeur: string; AFlux: TStream);
+procedure WriteString(const AValue: string; AStream: TStream);
 begin
-  AFlux.Write(PChar(Valeur)^, Length(Valeur));
+  AStream.Write(PChar(AValue)^, Length(AValue));
 end;
 
-function IntToChaine(const Valeur: integer; const Long: integer): string;
+function IntToString(const AValue: integer; const ALength: integer): string;
 var
-  Chaine: string;
+  S: string;
   Cpt: integer;
 begin
   Result := '';
-  Chaine := IntToStr(Valeur);
-  if Length(Chaine) < Long then
-    for Cpt := Succ(Length(Chaine)) to Long do
+  S := IntToStr(AValue);
+  if Length(S) < ALength then
+    for Cpt := Succ(Length(S)) to ALength do
       Result := Result + '0';
-  Result := Result + Chaine;
+  Result := Result + S;
 end;
 
 function DateToPdfDate(const ADate: TDateTime): string;
@@ -431,22 +400,22 @@ end;
 
 // object methods
 
-constructor TPdfObjet.Create;
+constructor TPdfObject.Create;
 begin
-  // to be implemented by descendents
+  // to be implemented by descendants
 end;
 
-destructor TPdfObjet.Destroy;
+destructor TPdfObject.Destroy;
 begin
   inherited;
 end;
 
-procedure TPdfBoolean.WriteBoolean(const AFlux: TStream);
+procedure TPdfBoolean.WriteBoolean(const AStream: TStream);
 begin
   if FValue then
-    WriteChaine('true', AFlux)
+    WriteString('true', AStream)
   else
-    WriteChaine('false', AFlux);
+    WriteString('false', AStream);
 end;
 
 constructor TPdfBoolean.CreateBoolean(const AValue: Boolean);
@@ -455,14 +424,9 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfBoolean.Destroy;
+procedure TPdfInteger.WriteInteger(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfInteger.WriteInteger(const AFlux: TStream);
-begin
-  WriteChaine(IntToStr(FValue), AFlux);
+  WriteString(IntToStr(FValue), AStream);
 end;
 
 procedure TPdfInteger.IncrementeInteger;
@@ -476,14 +440,9 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfInteger.Destroy;
+procedure TPdfReference.WriteReference(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfReference.WriteReference(const AFlux: TStream);
-begin
-  WriteChaine(IntToStr(FValue) + ' 0 R', AFlux);
+  WriteString(IntToStr(FValue) + ' 0 R', AStream);
 end;
 
 constructor TPdfReference.CreateReference(const AValue: integer);
@@ -492,18 +451,13 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfReference.Destroy;
-begin
-  inherited;
-end;
-
-procedure TPdfName.WriteName(const AFlux: TStream);
+procedure TPdfName.WriteName(const AStream: TStream);
 begin
   if FValue <> '' then
     if Pos('Length1', FValue) > 0 then
-      WriteChaine('/Length1', AFlux)
+      WriteString('/Length1', AStream)
     else
-      WriteChaine('/' + FValue, AFlux);
+      WriteString('/' + FValue, AStream);
 end;
 
 constructor TPdfName.CreateName(const AValue: string);
@@ -512,14 +466,9 @@ begin
   FValue := AValue;
 end;
 
-destructor TPdfName.Destroy;
+procedure TPdfString.Write(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfString.WriteString(const AFlux: TStream);
-begin
-  WriteChaine('(' + Utf8ToAnsi(FValue) + ')', AFlux);
+  WriteString('(' + Utf8ToAnsi(FValue) + ')', AStream);
 end;
 
 constructor TPdfString.CreateString(const AValue: string);
@@ -530,31 +479,26 @@ begin
     FValue := InsertEscape(FValue);
 end;
 
-destructor TPdfString.Destroy;
-begin
-  inherited;
-end;
-
-procedure TPdfArray.WriteArray(const AFlux: TStream);
+procedure TPdfArray.WriteArray(const AStream: TStream);
 var
   Cpt: integer;
 begin
-  WriteChaine('[', AFlux);
+  WriteString('[', AStream);
   for Cpt := 0 to Pred(FArray.Count) do
   begin
     if Cpt > 0 then
-      WriteChaine(' ', AFlux);
-    if TPdfObjet(FArray[Cpt]) is TPdfInteger then
-      TPdfInteger(FArray[Cpt]).WriteInteger(AFlux);
-    if TPdfObjet(FArray[Cpt]) is TPdfReference then
-      TPdfReference(FArray[Cpt]).WriteReference(AFlux);
-    if TPdfObjet(FArray[Cpt]) is TPdfName then
-      TPdfName(FArray[Cpt]).WriteName(AFlux);
+      WriteString(' ', AStream);
+    if TPdfObject(FArray[Cpt]) is TPdfInteger then
+      TPdfInteger(FArray[Cpt]).WriteInteger(AStream);
+    if TPdfObject(FArray[Cpt]) is TPdfReference then
+      TPdfReference(FArray[Cpt]).WriteReference(AStream);
+    if TPdfObject(FArray[Cpt]) is TPdfName then
+      TPdfName(FArray[Cpt]).WriteName(AStream);
   end;
-  WriteChaine(']', AFlux);
+  WriteString(']', AStream);
 end;
 
-procedure TPdfArray.AddItem(const AValue: TPdfObjet);
+procedure TPdfArray.AddItem(const AValue: TPdfObject);
 begin
   FArray.Add(AValue);
 end;
@@ -571,42 +515,42 @@ var
 begin
   if FArray.Count > 0 then
     for Cpt := 0 to Pred(FArray.Count) do
-      if TPdfObjet(FArray[Cpt]) is TPdfInteger then
+      if TPdfObject(FArray[Cpt]) is TPdfInteger then
         TPdfInteger(FArray[Cpt]).Free
-      else if TPdfObjet(FArray[Cpt]) is TPdfReference then
+      else if TPdfObject(FArray[Cpt]) is TPdfReference then
         TPdfReference(FArray[Cpt]).Free
-      else if TPdfObjet(FArray[Cpt]) is TPdfName then
+      else if TPdfObject(FArray[Cpt]) is TPdfName then
         TPdfName(FArray[Cpt]).Free;
   FArray.Free;
   inherited;
 end;
 
-procedure TPdfStream.WriteStream(const AFlux: TStream);
+procedure TPdfStream.WriteStream(const AStream: TStream);
 var
   Cpt: integer;
 begin
   for Cpt := 0 to Pred(FStream.Count) do
   begin
-    if TPdfObjet(FStream[Cpt]) is TPdfFonte then
-      TPdfFonte(FStream[Cpt]).WriteFonte(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfColor then
-      TPdfColor(FStream[Cpt]).WriteColor(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfText then
-      TPdfText(FStream[Cpt]).WriteText(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfRectangle then
-      TPdfRectangle(FStream[Cpt]).WriteRectangle(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfLigne then
-      TPdfLigne(FStream[Cpt]).WriteLigne(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfLineStyle then
-      TPdfLineStyle(FStream[Cpt]).WriteLineStyle(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfSurface then
-      TPdfSurface(FStream[Cpt]).WriteSurface(AFlux);
-    if TPdfObjet(FStream[Cpt]) is TPdfImage then
-      TPdfImage(FStream[Cpt]).WriteImage(AFlux);
+    if TPdfObject(FStream[Cpt]) is TPdfEmbeddedFont then
+      TPdfEmbeddedFont(FStream[Cpt]).WriteFont(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfColor then
+      TPdfColor(FStream[Cpt]).WriteColor(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfText then
+      TPdfText(FStream[Cpt]).WriteText(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfRectangle then
+      TPdfRectangle(FStream[Cpt]).WriteRectangle(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfLineSegment then
+      TPdfLineSegment(FStream[Cpt]).WriteLineSegment(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfLineStyle then
+      TPdfLineStyle(FStream[Cpt]).WriteLineStyle(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfSurface then
+      TPdfSurface(FStream[Cpt]).WriteSurface(AStream);
+    if TPdfObject(FStream[Cpt]) is TPdfImage then
+      TPdfImage(FStream[Cpt]).WriteImage(AStream);
   end;
 end;
 
-procedure TPdfStream.AddItem(const AValue: TPdfObjet);
+procedure TPdfStream.AddItem(const AValue: TPdfObject);
 begin
   FStream.Add(AValue);
 end;
@@ -625,21 +569,21 @@ begin
   begin
     for Cpt := 0 to Pred(FStream.Count) do
     begin
-      if TPdfObjet(FStream[Cpt]) is TPdfFonte then
-        TPdfFonte(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfColor then
+      if TPdfObject(FStream[Cpt]) is TPdfEmbeddedFont then
+        TPdfEmbeddedFont(FStream[Cpt]).Free
+      else if TPdfObject(FStream[Cpt]) is TPdfColor then
         TPdfColor(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfText then
+      else if TPdfObject(FStream[Cpt]) is TPdfText then
         TPdfText(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfRectangle then
+      else if TPdfObject(FStream[Cpt]) is TPdfRectangle then
         TPdfRectangle(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfLigne then
-        TPdfLigne(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfLineStyle then
+      else if TPdfObject(FStream[Cpt]) is TPdfLineSegment then
+        TPdfLineSegment(FStream[Cpt]).Free
+      else if TPdfObject(FStream[Cpt]) is TPdfLineStyle then
         TPdfLineStyle(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfSurface then
+      else if TPdfObject(FStream[Cpt]) is TPdfSurface then
         TPdfSurface(FStream[Cpt]).Free
-      else if TPdfObjet(FStream[Cpt]) is TPdfImage then
+      else if TPdfObject(FStream[Cpt]) is TPdfImage then
         TPdfImage(FStream[Cpt]).Free;
     end;
   end;
@@ -647,43 +591,38 @@ begin
   inherited;
 end;
 
-procedure TPdfFonte.WriteFonte(const AFlux: TStream);
+procedure TPdfEmbeddedFont.WriteFont(const AStream: TStream);
 begin
-  WriteChaine('/F' + IntToStr(FTxtFont) + ' ' + FTxtSize + ' Tf' + CRLF, AFlux);
+  WriteString('/F' + IntToStr(FTxtFont) + ' ' + FTxtSize + ' Tf' + CRLF, AStream);
 end;
 
-function TPdfFonte.WriteFonteStream(const FFlux: TMemoryStream; const AFlux: TStream): int64;
+function TPdfEmbeddedFont.WriteEmbeddedFont(const ASrcStream: TMemoryStream; const AStream: TStream): int64;
 var
   BeginFlux, EndFlux: int64;
 begin
-  WriteChaine(CRLF + 'stream' + CRLF, AFlux);
-  BeginFlux := AFlux.Position;
-  FFlux.SaveToStream(AFlux);
-  EndFlux   := AFlux.Position;
+  WriteString(CRLF + 'stream' + CRLF, AStream);
+  BeginFlux := AStream.Position;
+  ASrcStream.SaveToStream(AStream);
+  EndFlux   := AStream.Position;
   Result    := EndFlux - BeginFlux;
-  WriteChaine(CRLF, AFlux);
-  WriteChaine('endstream', AFlux);
+  WriteString(CRLF, AStream);
+  WriteString('endstream', AStream);
 end;
 
-constructor TPdfFonte.CreateFonte(const AFont: integer; const ASize: string);
+constructor TPdfEmbeddedFont.CreateFont(const AFont: integer; const ASize: string);
 begin
   inherited Create;
   FTxtFont := AFont;
   FTxtSize := ASize;
 end;
 
-destructor TPdfFonte.Destroy;
+procedure TPdfText.WriteText(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfText.WriteText(const AFlux: TStream);
-begin
-  WriteChaine('BT' + CRLF, AFlux);
-  WriteChaine(FormatFloat('0.##', FTxtPosX) + ' ' + FormatFloat('0.##', FTxtPosY) + ' Td' + CRLF, AFlux);
-  TPdfString(FTxtText).WriteString(AFlux);
-  WriteChaine(' Tj' + CRLF, AFlux);
-  WriteChaine('ET' + CRLF, AFlux);
+  WriteString('BT' + CRLF, AStream);
+  WriteString(FormatFloat('0.##', FTxtPosX) + ' ' + FormatFloat('0.##', FTxtPosY) + ' Td' + CRLF, AStream);
+  TPdfString(FTxtText).Write(AStream);
+  WriteString(' Tj' + CRLF, AStream);
+  WriteString('ET' + CRLF, AStream);
 end;
 
 constructor TPdfText.CreateText(const APosX, APosY: single; const AText: string);
@@ -700,56 +639,51 @@ begin
   inherited;
 end;
 
-procedure TPdfLigne.WriteLigne(const AFlux: TStream);
+procedure TPdfLineSegment.WriteLineSegment(const AStream: TStream);
 begin
-  if (FormatFloat('0.##', FEpais) + ' w') <> CurrentWidth then
+  if (FormatFloat('0.##', FWidth) + ' w') <> uCurrentWidth then
   begin
-    WriteChaine('1 J' + CRLF, AFlux);
-    WriteChaine(FormatFloat('0.##', FEpais) + ' w' + CRLF, AFlux);
-    CurrentWidth := FormatFloat('0.##', FEpais) + ' w';
+    WriteString('1 J' + CRLF, AStream);
+    WriteString(FormatFloat('0.##', FWidth) + ' w' + CRLF, AStream);
+    uCurrentWidth := FormatFloat('0.##', FWidth) + ' w';
   end;
-  WriteChaine(FormatFloat('0.##', FStaX) + ' ' + FormatFloat('0.##', FStaY) + ' m' + CRLF, AFlux);
-  WriteChaine(FormatFloat('0.##', FEndX) + ' ' + FormatFloat('0.##', FEndY) + ' l' + CRLF, AFlux);
-  WriteChaine('S' + CRLF, AFlux);
+  WriteString(FormatFloat('0.##', FX1) + ' ' + FormatFloat('0.##', FY1) + ' m' + CRLF, AStream);
+  WriteString(FormatFloat('0.##', FX2) + ' ' + FormatFloat('0.##', FY2) + ' l' + CRLF, AStream);
+  WriteString('S' + CRLF, AStream);
 end;
 
-constructor TPdfLigne.CreateLigne(const AEpais, AStaX, AStaY, AEndX, AEndY: single);
+constructor TPdfLineSegment.CreateLineSegment(const AWidth, AX1, AY1, AX2, AY2: single);
 begin
   inherited Create;
-  FEpais := AEpais;
-  FStaX  := AStaX;
-  FStaY  := AStaY;
-  FEndX  := AEndX;
-  FEndY  := AEndY;
+  FWidth := AWidth;
+  FX1  := AX1;
+  FY1  := AY1;
+  FX2  := AX2;
+  FY2  := AY2;
 end;
 
-destructor TPdfLigne.Destroy;
-begin
-  inherited;
-end;
-
-procedure TPdfRectangle.WriteRectangle(const AFlux: TStream);
+procedure TPdfRectangle.WriteRectangle(const AStream: TStream);
 begin
   if FStroke then
   begin
-    if (FormatFloat('0.##', FEpais) + ' w') <> CurrentWidth then
+    if (FormatFloat('0.##', FLineWidth) + ' w') <> uCurrentWidth then
     begin
-      WriteChaine('1 J' + CRLF, AFlux);
-      WriteChaine(FormatFloat('0.##', FEpais) + ' w' + CRLF, AFlux);
-      CurrentWidth := FormatFloat('0.##', FEpais) + ' w';
+      WriteString('1 J' + CRLF, AStream);
+      WriteString(FormatFloat('0.##', FLineWidth) + ' w' + CRLF, AStream);
+      uCurrentWidth := FormatFloat('0.##', FLineWidth) + ' w';
     end;
   end;
-  WriteChaine(FormatFloat('0.##', FRecX) + ' ' + FormatFloat('0.##', FRecY) + ' ' + FormatFloat('0.##', FRecW) + ' ' + FormatFloat('0.##', FRecH) + ' re' + CRLF, AFlux);
+  WriteString(FormatFloat('0.##', FRecX) + ' ' + FormatFloat('0.##', FRecY) + ' ' + FormatFloat('0.##', FRecW) + ' ' + FormatFloat('0.##', FRecH) + ' re' + CRLF, AStream);
   if FStroke then
-    WriteChaine('S' + CRLF, AFlux);
+    WriteString('S' + CRLF, AStream);
   if FFill then
-    WriteChaine('f' + CRLF, AFlux);
+    WriteString('f' + CRLF, AStream);
 end;
 
-constructor TPdfRectangle.CreateRectangle(const AEpais, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
+constructor TPdfRectangle.CreateRectangle(const ALineWidth, APosX, APosY, AWidth, AHeight: single; const AFill, AStroke: Boolean);
 begin
   inherited Create;
-  FEpais  := AEpais;
+  FLineWidth  := ALineWidth;
   FRecX   := APosX;
   FRecY   := APosY;
   FRecW   := AWidth;
@@ -758,20 +692,15 @@ begin
   FStroke := AStroke;
 end;
 
-destructor TPdfRectangle.Destroy;
-begin
-  inherited;
-end;
-
-procedure TPdfSurface.WriteSurface(const AFlux: TStream);
+procedure TPdfSurface.WriteSurface(const AStream: TStream);
 var
   Cpt: integer;
 begin
-  WriteChaine(FormatFloat('0.##', FPoints[0].X) + ' ' + FormatFloat('0.##', FPoints[0].Y) + ' m' + CRLF, AFlux);
+  WriteString(FormatFloat('0.##', FPoints[0].X) + ' ' + FormatFloat('0.##', FPoints[0].Y) + ' m' + CRLF, AStream);
   for Cpt := 1 to Pred(Length(FPoints)) do
-    WriteChaine(FormatFloat('0.##', FPoints[Cpt].X) + ' ' + FormatFloat('0.##', FPoints[Cpt].Y) + ' l' + CRLF, AFlux);
-  WriteChaine('h' + CRLF, AFlux);
-  WriteChaine('f' + CRLF, AFlux);
+    WriteString(FormatFloat('0.##', FPoints[Cpt].X) + ' ' + FormatFloat('0.##', FPoints[Cpt].Y) + ' l' + CRLF, AStream);
+  WriteString('h' + CRLF, AStream);
+  WriteString('f' + CRLF, AStream);
 end;
 
 constructor TPdfSurface.CreateSurface(const APoints: T_Points);
@@ -780,39 +709,34 @@ begin
   FPoints := APoints;
 end;
 
-destructor TPdfSurface.Destroy;
-begin
-  inherited;
-end;
-
-function TPdfImage.WriteImageStream(const ANumber: integer; AFlux: TStream): int64;
+function TPdfImage.WriteImageStream(const ANumber: integer; AStream: TStream): int64;
 var
   CptW, CptH: integer;
   BeginFlux, EndFlux: int64;
 begin
-  WriteChaine(CRLF + 'stream' + CRLF, AFlux);
-  BeginFlux := AFlux.Position;
+  WriteString(CRLF + 'stream' + CRLF, AStream);
+  BeginFlux := AStream.Position;
   for CptH := 0 to Pred(TfpgImage(Images[ANumber]).Height) do
   begin
     for CptW := 0 to Pred(TfpgImage(Images[ANumber]).Width) do
     begin
-      AFlux.WriteByte(fpgGetRed(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
-      AFlux.WriteByte(fpgGetGreen(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
-      AFlux.WriteByte(fpgGetBlue(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
+      AStream.WriteByte(fpgGetRed(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
+      AStream.WriteByte(fpgGetGreen(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
+      AStream.WriteByte(fpgGetBlue(TfpgImage(Images[ANumber]).Colors[CptW, CptH]));
     end;
   end;
-  EndFlux := AFlux.Position;
+  EndFlux := AStream.Position;
   Result  := EndFlux - BeginFlux;
-  WriteChaine(CRLF, AFlux);
-  WriteChaine('endstream', AFlux);
+  WriteString(CRLF, AStream);
+  WriteString('endstream', AStream);
 end;
 
-procedure TPdfImage.WriteImage(const AFlux: TStream);
+procedure TPdfImage.WriteImage(const AStream: TStream);
 begin
-  WriteChaine('q' + CRLF, AFlux);
-  WriteChaine(IntToStr(FWidth) + ' 0 0 ' + IntToStr(FHeight) + ' ' + FormatFloat('0.##', FLeft) + ' ' + FormatFloat('0.##', FBottom) + ' cm' + CRLF, AFlux);
-  WriteChaine('/I' + IntToStr(FNumber) + ' Do ' + CRLF, AFlux);
-  WriteChaine('Q' + CRLF, AFlux);
+  WriteString('q' + CRLF, AStream);
+  WriteString(IntToStr(FWidth) + ' 0 0 ' + IntToStr(FHeight) + ' ' + FormatFloat('0.##', FLeft) + ' ' + FormatFloat('0.##', FBottom) + ' cm' + CRLF, AStream);
+  WriteString('/I' + IntToStr(FNumber) + ' Do ' + CRLF, AStream);
+  WriteString('Q' + CRLF, AStream);
 end;
 
 constructor TPdfImage.CreateImage(const ALeft, ABottom: single; AWidth, AHeight, ANumber: integer);
@@ -825,25 +749,20 @@ begin
   FHeight := AHeight;
 end;
 
-destructor TPdfImage.Destroy;
+procedure TPdfLineStyle.WriteLineStyle(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfLineStyle.WriteLineStyle(const AFlux: TStream);
-begin
-  WriteChaine('[', AFlux);
+  WriteString('[', AStream);
   case FDash of
     lsDash:
-      WriteChaine('5 5', AFlux);
+      WriteString('5 5', AStream);
     lsDot:
-      WriteChaine('2 2', AFlux);
+      WriteString('2 2', AStream);
     lsDashDot:
-      WriteChaine('5 2 2 2', AFlux);
+      WriteString('5 2 2 2', AStream);
     lsDashDotDot:
-      WriteChaine('5 2 2 2 2 2', AFlux);
+      WriteString('5 2 2 2 2 2', AStream);
   end;
-  WriteChaine('] ' + IntToStr(FPhase) + ' d' + CRLF, AFlux);
+  WriteString('] ' + IntToStr(FPhase) + ' d' + CRLF, AStream);
 end;
 
 constructor TPdfLineStyle.CreateLineStyle(ADash: TfpgLineStyle; APhase: integer);
@@ -853,25 +772,20 @@ begin
   FPhase := APhase;
 end;
 
-destructor TPdfLineStyle.Destroy;
-begin
-  inherited;
-end;
-
-procedure TPdfColor.WriteColor(const AFlux: TStream);
+procedure TPdfColor.WriteColor(const AStream: TStream);
 begin
   if FStroke then
   begin
-    if (FRed + ' ' + FGreen + ' ' + FBlue + ' rg') <> CurrentColor then
+    if (FRed + ' ' + FGreen + ' ' + FBlue + ' rg') <> uCurrentColor then
     begin
-      WriteChaine(FRed + ' ' + FGreen + ' ' + FBlue + ' rg' + CRLF, AFlux);
-      CurrentColor := FRed + ' ' + FGreen + ' ' + FBlue + ' rg';
+      WriteString(FRed + ' ' + FGreen + ' ' + FBlue + ' rg' + CRLF, AStream);
+      uCurrentColor := FRed + ' ' + FGreen + ' ' + FBlue + ' rg';
     end;
   end
-  else if (FRed + ' ' + FGreen + ' ' + FBlue + ' RG') <> CurrentColor then
+  else if (FRed + ' ' + FGreen + ' ' + FBlue + ' RG') <> uCurrentColor then
   begin
-    WriteChaine(FRed + ' ' + FGreen + ' ' + FBlue + ' RG' + CRLF, AFlux);
-    CurrentColor := FRed + ' ' + FGreen + ' ' + FBlue + ' RG';
+    WriteString(FRed + ' ' + FGreen + ' ' + FBlue + ' RG' + CRLF, AStream);
+    uCurrentColor := FRed + ' ' + FGreen + ' ' + FBlue + ' RG';
   end;
 end;
 
@@ -884,33 +798,28 @@ begin
   FStroke := AStroke;
 end;
 
-destructor TPdfColor.Destroy;
+procedure TPdfDicElement.WriteDicElement(const AStream: TStream);
 begin
-  inherited;
-end;
-
-procedure TPdfDicElement.WriteDicElement(const AFlux: TStream);
-begin
-  FKey.WriteName(AFlux);
-  WriteChaine(' ', AFlux);
+  FKey.WriteName(AStream);
+  WriteString(' ', AStream);
   if FValue is TPdfBoolean then
-    TPdfBoolean(FValue).WriteBoolean(AFlux);
+    TPdfBoolean(FValue).WriteBoolean(AStream);
   if FValue is TPdfInteger then
-    TPdfInteger(FValue).WriteInteger(AFlux);
+    TPdfInteger(FValue).WriteInteger(AStream);
   if FValue is TPdfReference then
-    TPdfReference(FValue).WriteReference(AFlux);
+    TPdfReference(FValue).WriteReference(AStream);
   if FValue is TPdfName then
-    TPdfName(FValue).WriteName(AFlux);
+    TPdfName(FValue).WriteName(AStream);
   if FValue is TPdfString then
-    TPdfString(FValue).WriteString(AFlux);
+    TPdfString(FValue).Write(AStream);
   if FValue is TPdfArray then
-    TPdfArray(FValue).WriteArray(AFlux);
+    TPdfArray(FValue).WriteArray(AStream);
   if FValue is TPdfDictionary then
-    TPdfDictionary(FValue).WriteDictionary(-1, AFlux);
-  WriteChaine(CRLF, AFlux);
+    TPdfDictionary(FValue).WriteDictionary(-1, AStream);
+  WriteString(CRLF, AStream);
 end;
 
-constructor TPdfDicElement.CreateDicElement(const AKey: string; const AValue: TPdfObjet);
+constructor TPdfDicElement.CreateDicElement(const AKey: string; const AValue: TPdfObject);
 begin
   inherited Create;
   FKey   := TPdfName.CreateName(AKey);
@@ -937,7 +846,7 @@ begin
   inherited;
 end;
 
-procedure TPdfDictionary.AddElement(const AKey: string; const AValue: TPdfObjet);
+procedure TPdfDictionary.AddElement(const AKey: string; const AValue: TPdfObject);
 var
   DicElement: TPdfDicElement;
 begin
@@ -958,20 +867,20 @@ begin
     end;
 end;
 
-procedure TPdfDictionary.WriteDictionary(const AObjet: integer; const AFlux: TStream);
+procedure TPdfDictionary.WriteDictionary(const AObjet: integer; const AStream: TStream);
 var
   Long: TPdfInteger;
   Cpt, NumImg, NumFnt: integer;
   Value: string;
 begin
   if TPdfName(TPdfDicElement(FElement[0]).FKey).FValue = '' then
-    TPdfDicElement(FElement[0]).WriteDicElement(AFlux)  // write a charwidth array of a font
+    TPdfDicElement(FElement[0]).WriteDicElement(AStream)  // write a charwidth array of a font
   else
   begin
-    WriteChaine('<<' + CRLF, AFlux);
+    WriteString('<<' + CRLF, AStream);
     if FElement.Count > 0 then
       for Cpt := 0 to Pred(FElement.Count) do
-        TPdfDicElement(FElement[Cpt]).WriteDicElement(AFlux);
+        TPdfDicElement(FElement[Cpt]).WriteDicElement(AStream);
     NumImg := -1;
     NumFnt := -1;
     if FElement.Count > 0 then
@@ -982,41 +891,41 @@ begin
         begin
           if (TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue = 'Name') then
           begin
-            if (TPdfObjet(TPdfDicElement(FElement[Cpt]).FValue) is TPdfName) and (TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue[1] = 'I') then
+            if (TPdfObject(TPdfDicElement(FElement[Cpt]).FValue) is TPdfName) and (TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue[1] = 'I') then
             begin
               NumImg        := StrToInt(Copy(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue, 2, Length(TPdfName(TPdfDicElement(FElement[Cpt]).FValue).FValue) - 1));
-              Flux          := TMemoryStream.Create;
-              Flux.Position := 0;
+              uStream          := TMemoryStream.Create;
+              uStream.Position := 0;
               // write image stream length in xobject dictionary
-              Long          := TPdfInteger.CreateInteger(TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg, Flux));
-              TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length', Long);
-              TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
-              Flux.Free;
-              WriteChaine('>>', AFlux);
+              Long          := TPdfInteger.CreateInteger(TPdfImage(TPdfXRef(Document.FGlobalXRefs[AObjet]).FDict).WriteImageStream(NumImg, uStream));
+              TPdfDictionary(TPdfXRef(Document.FGlobalXRefs[AObjet]).FDict).AddElement('Length', Long);
+              TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AStream);
+              uStream.Free;
+              WriteString('>>', AStream);
               // write image stream in xobject dictionary
-              TPdfImage(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).WriteImageStream(NumImg, AFlux);
+              TPdfImage(TPdfXRef(Document.FGlobalXRefs[AObjet]).FDict).WriteImageStream(NumImg, AStream);
             end;
           end;
           if Pos('Length1', TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue) > 0 then
           begin
-            Flux   := TMemoryStream.Create;
+            uStream   := TMemoryStream.Create;
             Value  := TPdfName(TPdfDicElement(FElement[Cpt]).FKey).FValue;
             NumFnt := StrToInt(Copy(Value, Succ(Pos(' ', Value)), Length(Value) - Pos(' ', Value)));
-            Flux.LoadFromFile(FontFiles[NumFnt]);
+            uStream.LoadFromFile(uFontFiles[NumFnt]);
             // write fontfile stream length in xobject dictionary
-            Long   := TPdfInteger.CreateInteger(Flux.Size);
-            TPdfDictionary(TPdfXRef(Document.FXRefObjets[AObjet]).FObjet).AddElement('Length', Long);
-            TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AFlux);
-            WriteChaine('>>', AFlux);
+            Long   := TPdfInteger.CreateInteger(uStream.Size);
+            TPdfDictionary(TPdfXRef(Document.FGlobalXRefs[AObjet]).FDict).AddElement('Length', Long);
+            TPdfDicElement(FElement[Pred(FElement.Count)]).WriteDicElement(AStream);
+            WriteString('>>', AStream);
             // write fontfile stream in xobject dictionary
-            TPdfFonte(TPdfXRef(Document.FXRefObjets[NumFnt]).FObjet).WriteFonteStream(Flux, AFlux);
-            Flux.Free;
+            TPdfEmbeddedFont(TPdfXRef(Document.FGlobalXRefs[NumFnt]).FDict).WriteEmbeddedFont(uStream, AStream);
+            uStream.Free;
           end;
         end;
       end; { for Cpt... }
     end; { if FElement.Count... }
     if (NumImg = -1) and (NumFnt = -1) then
-      WriteChaine('>>', AFlux);
+      WriteString('>>', AStream);
   end; { if/else }
 end;
 
@@ -1037,22 +946,22 @@ begin
   inherited;
 end;
 
-procedure TPdfXRef.WriteXRef(const AFlux: TStream);
+procedure TPdfXRef.WriteXRef(const AStream: TStream);
 begin
-  WriteChaine(IntToChaine(FOffset, 10) + ' ' + IntToChaine(0, 5) + ' n' + CRLF, AFlux);
+  WriteString(IntToString(FOffset, 10) + ' ' + IntToString(0, 5) + ' n' + CRLF, AStream);
 end;
 
 constructor TPdfXRef.CreateXRef;
 begin
   inherited Create;
   FOffset := 0;
-  FObjet  := TpdfDictionary.CreateDictionary;
+  FDict  := TpdfDictionary.CreateDictionary;
   FStream := nil;
 end;
 
 destructor TPdfXRef.Destroy;
 begin
-  FObjet.Free;
+  FDict.Free;
   FStream.Free;
   inherited;
 end;
@@ -1061,68 +970,68 @@ function TPdfDocument.ElementParNom(const AValue: string): integer;
 var
   Cpt: integer;
 begin
-  for Cpt := 1 to Pred(FXRefObjets.Count) do
-    if TPdfName(TPdfDicElement(TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet).FElement[0]).FValue).FValue = AValue then
+  for Cpt := 1 to Pred(FGlobalXRefs.Count) do
+    if TPdfName(TPdfDicElement(TPdfDictionary(TPdfXRef(FGlobalXRefs[Cpt]).FDict).FElement[0]).FValue).FValue = AValue then
       Result := Cpt;
 end;
 
-procedure TPdfDocument.WriteXRefTable(const AFlux: TStream);
+procedure TPdfDocument.WriteXRefTable(const AStream: TStream);
 var
   Cpt: integer;
 begin
-  if FXRefObjets.Count > 1 then
-    for Cpt := 1 to Pred(FXRefObjets.Count) do
-      TPdfXRef(FXRefObjets[Cpt]).WriteXRef(AFlux);
+  if FGlobalXRefs.Count > 1 then
+    for Cpt := 1 to Pred(FGlobalXRefs.Count) do
+      TPdfXRef(FGlobalXRefs[Cpt]).WriteXRef(AStream);
 end;
 
-procedure TPdfDocument.WriteObjet(const AObjet: integer; const AFlux: TStream);
+procedure TPdfDocument.WriteObject(const AObject: integer; const AStream: TStream);
 var
   Long: TPdfInteger;
   Flux: TMemoryStream;
 begin
-  WriteChaine(IntToStr(AObjet) + ' 0 obj' + CRLF, AFlux);
-  if TPdfXRef(FXRefObjets[AObjet]).FStream = nil then
-    TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).WriteDictionary(AObjet, AFlux)
+  WriteString(IntToStr(AObject) + ' 0 obj' + CRLF, AStream);
+  if TPdfXRef(FGlobalXRefs[AObject]).FStream = nil then
+    TPdfDictionary(TPdfXRef(FGlobalXRefs[AObject]).FDict).WriteDictionary(AObject, AStream)
   else
   begin
     Flux          := TMemoryStream.Create;
     Flux.Position := 0;
-    CurrentColor  := '';
-    CurrentWidth  := '';
-    TPdfXRef(FXRefObjets[AObjet]).FStream.WriteStream(Flux);
+    uCurrentColor  := '';
+    uCurrentWidth  := '';
+    TPdfXRef(FGlobalXRefs[AObject]).FStream.WriteStream(Flux);
     // write stream length element in contents dictionary
     Long          := TPdfInteger.CreateInteger(Flux.Size);
-    TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).AddElement('Length', Long);
+    TPdfDictionary(TPdfXRef(FGlobalXRefs[AObject]).FDict).AddElement('Length', Long);
     Flux.Free;
-    TPdfXRef(FXRefObjets[AObjet]).FObjet.WriteDictionary(-1, AFlux);
+    TPdfXRef(FGlobalXRefs[AObject]).FDict.WriteDictionary(-1, AStream);
     // write stream in contents dictionary
-    CurrentColor := '';
-    CurrentWidth := '';
-    WriteChaine(CRLF + 'stream' + CRLF, AFlux);
-    TPdfXRef(FXRefObjets[AObjet]).FStream.WriteStream(AFlux);
-    WriteChaine('endstream', AFlux);
+    uCurrentColor := '';
+    uCurrentWidth := '';
+    WriteString(CRLF + 'stream' + CRLF, AStream);
+    TPdfXRef(FGlobalXRefs[AObject]).FStream.WriteStream(AStream);
+    WriteString('endstream', AStream);
   end;
-  WriteChaine(CRLF + 'endobj' + CRLF + CRLF, AFlux);
+  WriteString(CRLF + 'endobj' + CRLF + CRLF, AStream);
 end;
 
 procedure TPdfDocument.CreateRefTable;
 var
   XRefObjet: TPdfXRef;
 begin
-  FXRefObjets := TList.Create;
+  FGlobalXRefs := TList.Create;
   // add first xref entry
   XRefObjet   := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(XRefObjet);
+  FGlobalXRefs.Add(XRefObjet);
 end;
 
 procedure TPdfDocument.CreateTrailer;
 var
   XRefObjets: TPdfInteger;
 begin
-  Trailer    := TPdfDictionary.CreateDictionary;
-  // add size trailer element
-  XRefObjets := TPdfInteger.CreateInteger(FXRefObjets.Count);
-  Trailer.AddElement('Size', XRefObjets);
+  uDictionary    := TPdfDictionary.CreateDictionary;
+  // add size uDictionary element
+  XRefObjets := TPdfInteger.CreateInteger(FGlobalXRefs.Count);
+  uDictionary.AddElement('Size', XRefObjets);
 end;
 
 function TPdfDocument.CreateCatalog: integer;
@@ -1134,13 +1043,13 @@ var
 begin
   // add xref entry
   Catalog    := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Catalog);
-  // add root trailer element
-  XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  Trailer.AddElement('Root', XRefObjets);
+  FGlobalXRefs.Add(Catalog);
+  // add root uDictionary element
+  XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  uDictionary.AddElement('Root', XRefObjets);
   // add type element to catalog dictionary
   Nom        := TPdfName.CreateName('Catalog');
-  Catalog.FObjet.AddElement('Type', Nom);
+  Catalog.FDict.AddElement('Type', Nom);
   // add pagelayout element to catalog dictionary
   case FPageLayout of
     lSingle:
@@ -1150,111 +1059,111 @@ begin
     lContinuous:
       Nom := TPdfName.CreateName('OneColumn');
   end;
-  Catalog.FObjet.AddElement('PageLayout', Nom);
+  Catalog.FDict.AddElement('PageLayout', Nom);
   // add openaction element to catalog dictionary
   Table  := TPdfArray.CreateArray;
-  Catalog.FObjet.AddElement('OpenAction', Table);
-  Result := Pred(FXRefObjets.Count);
+  Catalog.FDict.AddElement('OpenAction', Table);
+  Result := Pred(FGlobalXRefs.Count);
 end;
 
 procedure TPdfDocument.CreateInfo;
 var
   Info: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfString;
+  lName: TPdfString;
 begin
   // add xref entry
   Info       := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Info);
-  // add info trailer element
-  XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  Trailer.AddElement('Info', XRefObjets);
-  TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue := FXRefObjets.Count;
+  FGlobalXRefs.Add(Info);
+  // add info uDictionary element
+  XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  uDictionary.AddElement('Info', XRefObjets);
+  TPdfInteger(TPdfDicElement(uDictionary.FElement[uDictionary.ElementParCle('Size')]).FValue).FValue := FGlobalXRefs.Count;
   // add title element to info dictionary
-  Nom        := TPdfString.CreateString(Infos.Titre);
-  Info.FObjet.AddElement('Title', Nom);
+  lName        := TPdfString.CreateString(Infos.Title);
+  Info.FDict.AddElement('Title', lName);
   // add author element to info dictionary
-  Nom        := TPdfString.CreateString(Infos.Auteur);
-  Info.FObjet.AddElement('Author', Nom);
+  lName        := TPdfString.CreateString(Infos.Author);
+  Info.FDict.AddElement('Author', lName);
   // add creator element to info dictionary
-  Nom        := TPdfString.CreateString(ApplicationName);
-  Info.FObjet.AddElement('Creator', Nom);
+  lName        := TPdfString.CreateString(ApplicationName);
+  Info.FDict.AddElement('Creator', lName);
   // add producer element to info dictionary
-  Nom        := TPdfString.CreateString(fpGUIName + ' ' + FPGUI_VERSION);
-  Info.FObjet.AddElement('Producer', Nom);
+  lName        := TPdfString.CreateString(fpGUIName + ' ' + FPGUI_VERSION);
+  Info.FDict.AddElement('Producer', lName);
   // add creationdate element to info dictionary
-  Nom        := TPdfString.CreateString(DateToPdfDate(Now));
-  Info.FObjet.AddElement('CreationDate', Nom);
+  lName        := TPdfString.CreateString(DateToPdfDate(Now));
+  Info.FDict.AddElement('CreationDate', lName);
 end;
 
 procedure TPdfDocument.CreatePreferences;
 var
   Viewer: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Preference: TPdfBoolean;
 begin
   // add xref entry
   Viewer     := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Viewer);
+  FGlobalXRefs.Add(Viewer);
   // add type element to preferences dictionary
-  Nom        := TPdfName.CreateName('ViewerPreferences');
-  Viewer.FObjet.AddElement('Type', Nom);
+  lName        := TPdfName.CreateName('ViewerPreferences');
+  Viewer.FDict.AddElement('Type', lName);
   // add preference element to preferences dictionary
   Preference := TPdfBoolean.CreateBoolean(True);
-  Viewer.FObjet.AddElement('FitWindow', Preference);
+  Viewer.FDict.AddElement('FitWindow', Preference);
   // add preferences reference to catalog dictionary
-  XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  TPdfDictionary(TPdfXRef(FXRefObjets[ElementParNom('Catalog')]).FObjet).AddElement('ViewerPreferences', XRefObjets);
+  XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  TPdfDictionary(TPdfXRef(FGlobalXRefs[ElementParNom('Catalog')]).FDict).AddElement('ViewerPreferences', XRefObjets);
 end;
 
 function TPdfDocument.CreatePages(Parent: integer): integer;
 var
   Pages: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Dictionaire: TPdfDictionary;
   Table: TPdfArray;
   Count: TPdfInteger;
 begin
   // add xref entry
   Pages := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Pages);
+  FGlobalXRefs.Add(Pages);
   // add type element to pages dictionary
-  Nom   := TPdfName.CreateName('Pages');
-  Pages.FObjet.AddElement('Type', Nom);
+  lName   := TPdfName.CreateName('Pages');
+  Pages.FDict.AddElement('Type', lName);
   // add parent reference to pages dictionary if pages is not the root of the page tree
   if Parent > 0 then
   begin
     XRefObjets  := TPdfReference.CreateReference(Parent);
-    Pages.FObjet.AddElement('Parent', XRefObjets);
+    Pages.FDict.AddElement('Parent', XRefObjets);
     // increment count in parent pages dictionary
-    Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[Parent]).FObjet);
+    Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[Parent]).FDict);
     TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
     // add kid reference in parent pages dictionary
-    XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+    XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
     TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Kids')]).FValue).AddItem(XRefObjets);
   end
   else
   begin
     // add pages reference to catalog dictionary
-    XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-    TPdfDictionary(TPdfXRef(FXRefObjets[ElementParNom('Catalog')]).FObjet).AddElement('Pages', XRefObjets);
+    XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+    TPdfDictionary(TPdfXRef(FGlobalXRefs[ElementParNom('Catalog')]).FDict).AddElement('Pages', XRefObjets);
   end;
   // add kids element to pages dictionary
   Table  := TPdfArray.CreateArray;
-  Pages.FObjet.AddElement('Kids', Table);
+  Pages.FDict.AddElement('Kids', Table);
   // add count element to pages dictionary
   Count  := TPdfInteger.CreateInteger(0);
-  Pages.FObjet.AddElement('Count', Count);
-  Result := Pred(FXRefObjets.Count);
+  Pages.FDict.AddElement('Count', Count);
+  Result := Pred(FGlobalXRefs.Count);
 end;
 
 function TPdfDocument.CreatePage(Parent, Haut, Larg, PageNum: integer): integer;
 var
   Page: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Dictionaire: TPdfDictionary;
   Table: TPdfArray;
   Coord: TPdfInteger;
@@ -1262,24 +1171,24 @@ var
 begin
   // add xref entry
   Page        := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Page);
+  FGlobalXRefs.Add(Page);
   // add type element to page dictionary
-  Nom         := TPdfName.CreateName('Page');
-  Page.FObjet.AddElement('Type', Nom);
+  lName         := TPdfName.CreateName('Page');
+  Page.FDict.AddElement('Type', lName);
   // add parent reference to page dictionary
   XRefObjets  := TPdfReference.CreateReference(Parent);
-  Page.FObjet.AddElement('Parent', XRefObjets);
+  Page.FDict.AddElement('Parent', XRefObjets);
   // increment count in parent pages dictionary
-  Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[Parent]).FObjet);
+  Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[Parent]).FDict);
   TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
   // add kid reference in parent pages dictionary
-  XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+  XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
   TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Kids')]).FValue).AddItem(XRefObjets);
   // add mediabox element to page dictionary
   Table       := TPdfArray.CreateArray;
-  Page.FObjet.AddElement('MediaBox', Table);
+  Page.FDict.AddElement('MediaBox', Table);
   // add coordinates in page mediabox
-  Dictionaire := TPdfDictionary(TPdfXRef(Page).FObjet);
+  Dictionaire := TPdfDictionary(TPdfXRef(Page).FDict);
   Coord       := TPdfInteger.CreateInteger(0);
   TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
   Coord       := TPdfInteger.CreateInteger(0);
@@ -1290,15 +1199,15 @@ begin
   TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
   // add resources element to page dictionary
   Dictionaire := TPdfDictionary.CreateDictionary;
-  Page.FObjet.AddElement('Resources', Dictionaire);
+  Page.FDict.AddElement('Resources', Dictionaire);
   // add procset element in resources element to page dictionary
   Table       := TPdfArray.CreateArray;
-  TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('ProcSet', Table);
+  TPdfDictionary(TPdfDicElement(Page.FDict.FElement[Pred(Page.FDict.FElement.Count)]).FValue).AddElement('ProcSet', Table);
   // add font element in resources element to page dictionary
   if Fonts.Count > 0 then
   begin
     Dictionaire := TPdfDictionary.CreateDictionary;
-    TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('Font', Dictionaire);
+    TPdfDictionary(TPdfDicElement(Page.FDict.FElement[Pred(Page.FDict.FElement.Count)]).FValue).AddElement('Font', Dictionaire);
   end;
   for Cpt := 0 to Pred(PdfPage.Count) do
   begin
@@ -1308,40 +1217,40 @@ begin
       begin
         // add xobject element in resources element to page dictionary
         Dictionaire := TPdfDictionary.CreateDictionary;
-        TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue).AddElement('XObject', Dictionaire);
+        TPdfDictionary(TPdfDicElement(Page.FDict.FElement[Pred(Page.FDict.FElement.Count)]).FValue).AddElement('XObject', Dictionaire);
         Break;
       end;
     end;
   end;
   // add pdf element in procset array to page dictionary
-  Dictionaire := TPdfDictionary(TPdfDicElement(Page.FObjet.FElement[Pred(Page.FObjet.FElement.Count)]).FValue);
-  Nom         := TPdfName.CreateName('PDF');
-  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
+  Dictionaire := TPdfDictionary(TPdfDicElement(Page.FDict.FElement[Pred(Page.FDict.FElement.Count)]).FValue);
+  lName         := TPdfName.CreateName('PDF');
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(lName);
   // add text element in procset array to page dictionary
-  Nom         := TPdfName.CreateName('Text');
-  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
+  lName         := TPdfName.CreateName('Text');
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(lName);
   // add image element in procset array to page dictionary
-  Nom         := TPdfName.CreateName('ImageC');
-  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
-  Result      := Pred(FXRefObjets.Count);
+  lName         := TPdfName.CreateName('ImageC');
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(lName);
+  Result      := Pred(FGlobalXRefs.Count);
 end;
 
 function TPdfDocument.CreateOutlines: integer;
 var
   Outlines: TPdfXRef;
-  Nom: TPdfName;
+  lName: TPdfName;
   Count: TPdfInteger;
 begin
   // add xref entry
   Outlines := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Outlines);
+  FGlobalXRefs.Add(Outlines);
   // add type element to outlines dictionary
-  Nom      := TPdfName.CreateName('Outlines');
-  Outlines.FObjet.AddElement('Type', Nom);
+  lName      := TPdfName.CreateName('Outlines');
+  Outlines.FDict.AddElement('Type', lName);
   // add count element to outlines dictionary
   Count    := TPdfInteger.CreateInteger(0);
-  Outlines.FObjet.AddElement('Count', Count);
-  Result   := Pred(FXRefObjets.Count);
+  Outlines.FDict.AddElement('Count', Count);
+  Result   := Pred(FGlobalXRefs.Count);
 end;
 
 function TPdfDocument.CreateOutline(Parent, SectNo, PageNo: integer; SectTitre: string): integer;
@@ -1354,7 +1263,7 @@ var
 begin
   // add xref entry
   Outline := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Outline);
+  FGlobalXRefs.Add(Outline);
   // add title element to outline dictionary
   if PageNo > -1 then
   begin
@@ -1370,24 +1279,24 @@ begin
     else
       Titre := TPdfString.CreateString('Section ' + IntToStr(SectNo));
   end;
-  Outline.FObjet.AddElement('Title', Titre);
+  Outline.FDict.AddElement('Title', Titre);
   // add parent reference to outline dictionary
   XRefObjets := TPdfReference.CreateReference(Parent);
-  Outline.FObjet.AddElement('Parent', XRefObjets);
+  Outline.FDict.AddElement('Parent', XRefObjets);
   // add count element to outline dictionary
   Count  := TPdfInteger.CreateInteger(0);
-  Outline.FObjet.AddElement('Count', Count);
+  Outline.FDict.AddElement('Count', Count);
   // add dest element to outline dictionary
   Table  := TPdfArray.CreateArray;
-  Outline.FObjet.AddElement('Dest', Table);
-  Result := Pred(FXRefObjets.Count);
+  Outline.FDict.AddElement('Dest', Table);
+  Result := Pred(FGlobalXRefs.Count);
 end;
 
 procedure TPdfDocument.CreateStdFont(NomFonte: string; NumFonte: integer);
 var
   Fontes: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Dictionaire: TPdfDictionary;
   Cpt: integer;
 begin
@@ -1396,151 +1305,151 @@ begin
   //  AnsiReplaceText(NomFonte,'Italic','Oblique');
   // add xref entry
   Fontes := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Fontes);
+  FGlobalXRefs.Add(Fontes);
   // add type element to font dictionary
-  Nom := TPdfName.CreateName('Font');
-  Fontes.FObjet.AddElement('Type', Nom);
+  lName := TPdfName.CreateName('Font');
+  Fontes.FDict.AddElement('Type', lName);
   // add subtype element to font dictionary
-  Nom := TPdfName.CreateName('Type1');
-  Fontes.FObjet.AddElement('Subtype', Nom);
+  lName := TPdfName.CreateName('Type1');
+  Fontes.FDict.AddElement('Subtype', lName);
   // add encoding element to font dictionary
-  Nom := TPdfName.CreateName('WinAnsiEncoding');
-  Fontes.FObjet.AddElement('Encoding', Nom);
+  lName := TPdfName.CreateName('WinAnsiEncoding');
+  Fontes.FDict.AddElement('Encoding', lName);
   // add firstchar element to font dictionary
-  Nom := TPdfName.CreateName('32');
-  //Nom:= TPdfName.CreateName('0');
-  Fontes.FObjet.AddElement('FirstChar', Nom);
+  lName := TPdfName.CreateName('32');
+  //lName:= TPdfName.CreateName('0');
+  Fontes.FDict.AddElement('FirstChar', lName);
   // add lastchar element to font dictionary
-  Nom := TPdfName.CreateName('255');
-  Fontes.FObjet.AddElement('LastChar', Nom);
+  lName := TPdfName.CreateName('255');
+  Fontes.FDict.AddElement('LastChar', lName);
   // add basefont element to font dictionary
-  Nom := TPdfName.CreateName(NomFonte);
-  Fontes.FObjet.AddElement('BaseFont', Nom);
+  lName := TPdfName.CreateName(NomFonte);
+  Fontes.FDict.AddElement('BaseFont', lName);
   // add name element to font dictionary
-  Nom := TPdfName.CreateName('F' + IntToStr(NumFonte));
-  Fontes.FObjet.AddElement('Name', Nom);
+  lName := TPdfName.CreateName('F' + IntToStr(NumFonte));
+  Fontes.FDict.AddElement('Name', lName);
   // add font reference to all page dictionary
-  for Cpt := 1 to Pred(FXRefObjets.Count) do
+  for Cpt := 1 to Pred(FGlobalXRefs.Count) do
   begin
-    Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
+    Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[Cpt]).FDict);
     if Dictionaire.FElement.Count > 0 then
       if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue = 'Page' then
       begin
         Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
         Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Font')]).FValue);
-        XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-        Dictionaire.AddElement(TPdfName(Nom).FValue, XRefObjets);
+        XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+        Dictionaire.AddElement(TPdfName(lName).FValue, XRefObjets);
       end;
   end;
-  SetLength(FontFiles, Succ(Length(FontFiles)));
-  FontFiles[NumFonte] := '';
+  SetLength(uFontFiles, Succ(Length(uFontFiles)));
+  uFontFiles[NumFonte] := '';
 end;
 
-function TPdfDocument.LoadFont(NomFonte: string): string;
+function TPdfDocument.LoadFont(AFontName: string): string;
 var
   FileTxt: TextFile;
-  Ligne: WideString;
+  lLine: WideString;
 begin
-  if fpgFileExists(FontDirectory + NomFonte + '.fnt') then
+  if fpgFileExists(FontDirectory + AFontName + '.fnt') then
   begin
-    AssignFile(FileTxt, FontDirectory + NomFonte + '.fnt');
+    AssignFile(FileTxt, FontDirectory + AFontName + '.fnt');
     Reset(FileTxt);
     while not EOF(FileTxt) do
     begin
-      Readln(FileTxt, Ligne);
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'FontType' then
-        FontDef.FType         := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'FontName' then
-        FontDef.FName         := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'Ascent' then
-        FontDef.FAscent       := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'Descent' then
-        FontDef.FDescent      := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'CapHeight' then
-        FontDef.FCapHeight    := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'Flags' then
-        FontDef.FFlags        := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'FontBBox' then
-        FontDef.FFontBBox     := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'ItalicAngle' then
-        FontDef.FItalicAngle  := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'StemV' then
-        FontDef.FStemV        := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'MissingWidth' then
-        FontDef.FMissingWidth := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'Encoding' then
-        FontDef.FEncoding     := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'FontFile' then
-        FontDef.FFile         := FontDirectory + Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'OriginalSize' then
-        FontDef.FOriginalSize := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'Diffs' then
-        FontDef.FDiffs        := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
-      if Copy(Ligne, 1, Pred(Pos('=', Ligne))) = 'CharWidth' then
-        FontDef.FCharWidth    := Copy(Ligne, Succ(Pos('=', Ligne)), Length(Ligne) - Pos('=', Ligne));
+      Readln(FileTxt, lLine);
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'FontType' then
+        uFontDef.FType         := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'FontName' then
+        uFontDef.FName         := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'Ascent' then
+        uFontDef.FAscent       := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'Descent' then
+        uFontDef.FDescent      := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'CapHeight' then
+        uFontDef.FCapHeight    := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'Flags' then
+        uFontDef.FFlags        := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'FontBBox' then
+        uFontDef.FFontBBox     := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'ItalicAngle' then
+        uFontDef.FItalicAngle  := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'StemV' then
+        uFontDef.FStemV        := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'MissingWidth' then
+        uFontDef.FMissingWidth := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'Encoding' then
+        uFontDef.FEncoding     := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'FontFile' then
+        uFontDef.FFile         := FontDirectory + Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'OriginalSize' then
+        uFontDef.FOriginalSize := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'Diffs' then
+        uFontDef.FDiffs        := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
+      if Copy(lLine, 1, Pred(Pos('=', lLine))) = 'CharWidth' then
+        uFontDef.FCharWidth    := Copy(lLine, Succ(Pos('=', lLine)), Length(lLine) - Pos('=', lLine));
     end;
-    Result := FontDef.FType;
+    Result := uFontDef.FType;
   end
   else
-    ShowMessage(Format(rsErrReportFontFileMissing, [NomFonte]));
+    ShowMessage(Format(rsErrReportFontFileMissing, [AFontName]));
 end;
 
 procedure TPdfDocument.CreateTtfFont(const NumFonte: integer);
 var
   Fontes: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Dictionaire: TPdfDictionary;
   Value: TPdfInteger;
   Cpt: integer;
 begin
   // add xref entry
   Fontes := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Fontes);
+  FGlobalXRefs.Add(Fontes);
   // add type element to font dictionary
-  Nom    := TPdfName.CreateName('Font');
-  Fontes.FObjet.AddElement('Type', Nom);
+  lName    := TPdfName.CreateName('Font');
+  Fontes.FDict.AddElement('Type', lName);
   // add subtype element to font dictionary
-  Nom    := TPdfName.CreateName(FontDef.FType);
-  Fontes.FObjet.AddElement('Subtype', Nom);
+  lName    := TPdfName.CreateName(uFontDef.FType);
+  Fontes.FDict.AddElement('Subtype', lName);
   // add encoding element to font dictionary
-  Nom    := TPdfName.CreateName('WinAnsiEncoding');
-  Fontes.FObjet.AddElement('Encoding', Nom);
+  lName    := TPdfName.CreateName('WinAnsiEncoding');
+  Fontes.FDict.AddElement('Encoding', lName);
   // add firstchar element to font dictionary
   Value  := TPdfInteger.CreateInteger(32);
-  Fontes.FObjet.AddElement('FirstChar', Value);
+  Fontes.FDict.AddElement('FirstChar', Value);
   // add lastchar element to font dictionary
   Value  := TPdfInteger.CreateInteger(255);
-  Fontes.FObjet.AddElement('LastChar', Value);
+  Fontes.FDict.AddElement('LastChar', Value);
   // add basefont element to font dictionary
-  Nom    := TPdfName.CreateName(FontDef.FName);
-  Fontes.FObjet.AddElement('BaseFont', Nom);
+  lName    := TPdfName.CreateName(uFontDef.FName);
+  Fontes.FDict.AddElement('BaseFont', lName);
   // add name element to font dictionary
-  Nom    := TPdfName.CreateName('F' + IntToStr(NumFonte));
-  Fontes.FObjet.AddElement('Name', Nom);
+  lName    := TPdfName.CreateName('F' + IntToStr(NumFonte));
+  Fontes.FDict.AddElement('Name', lName);
   // add font reference to all page dictionary
-  for Cpt := 1 to Pred(FXRefObjets.Count) do
+  for Cpt := 1 to Pred(FGlobalXRefs.Count) do
   begin
-    Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
+    Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[Cpt]).FDict);
     if Dictionaire.FElement.Count > 0 then
       if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue = 'Page' then
       begin
         Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
         Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Font')]).FValue);
-        XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-        Dictionaire.AddElement(TPdfName(Nom).FValue, XRefObjets);
+        XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+        Dictionaire.AddElement(TPdfName(lName).FValue, XRefObjets);
       end;
   end;
   CreateFontDescriptor(NumFonte);
   // add fontdescriptor reference to font dictionary
-  XRefObjets          := TPdfReference.CreateReference(FXRefObjets.Count - 2);
-  Fontes.FObjet.AddElement('FontDescriptor', XRefObjets);
+  XRefObjets          := TPdfReference.CreateReference(FGlobalXRefs.Count - 2);
+  Fontes.FDict.AddElement('FontDescriptor', XRefObjets);
   CreateFontWidth;
   // add fontwidth reference to font dictionary
-  XRefObjets          := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  Fontes.FObjet.AddElement('Widths', XRefObjets);
-  SetLength(FontFiles, Succ(Length(FontFiles)));
-  FontFiles[NumFonte] := FontDef.FFile;
+  XRefObjets          := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  Fontes.FDict.AddElement('Widths', XRefObjets);
+  SetLength(uFontFiles, Succ(Length(uFontFiles)));
+  uFontFiles[NumFonte] := uFontDef.FFile;
 end;
 
 procedure TPdfDocument.CreateTp1Font(const NumFonte: integer);
@@ -1552,56 +1461,56 @@ procedure TPdfDocument.CreateFontDescriptor(const NumFonte: integer);
 var
   FtDesc: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
+  lName: TPdfName;
   Value: TPdfInteger;
   Table: TPdfArray;
   Dictionaire: TPdfDictionary;
 begin
   // add xref entry
   FtDesc := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(FtDesc);
+  FGlobalXRefs.Add(FtDesc);
   // add type element to fontdescriptor dictionary
-  Nom    := TPdfName.CreateName('FontDescriptor');
-  FtDesc.FObjet.AddElement('Type', Nom);
+  lName    := TPdfName.CreateName('FontDescriptor');
+  FtDesc.FDict.AddElement('Type', lName);
   // add fontname element to fontdescriptor dictionary
-  Nom    := TPdfName.CreateName(FontDef.FName);
-  FtDesc.FObjet.AddElement('FontName', Nom);
+  lName    := TPdfName.CreateName(uFontDef.FName);
+  FtDesc.FDict.AddElement('FontName', lName);
   // add ascent element to fontdescriptor dictionary
-  Value  := TPdfInteger.CreateInteger(StrToInt(FontDef.FAscent));
-  FtDesc.FObjet.AddElement('Ascent', Value);
+  Value  := TPdfInteger.CreateInteger(StrToInt(uFontDef.FAscent));
+  FtDesc.FDict.AddElement('Ascent', Value);
   // add descent element to fontdescriptor dictionary
-  Value  := TPdfInteger.CreateInteger(StrToInt(FontDef.FDescent));
-  FtDesc.FObjet.AddElement('Descent', Value);
+  Value  := TPdfInteger.CreateInteger(StrToInt(uFontDef.FDescent));
+  FtDesc.FDict.AddElement('Descent', Value);
   // add capheight element to fontdescriptor dictionary
-  Value  := TPdfInteger.CreateInteger(StrToInt(FontDef.FCapHeight));
-  FtDesc.FObjet.AddElement('CapHeight', Value);
+  Value  := TPdfInteger.CreateInteger(StrToInt(uFontDef.FCapHeight));
+  FtDesc.FDict.AddElement('CapHeight', Value);
   // add flags element to fontdescriptor dictionary
-  Value  := TPdfInteger.CreateInteger(StrToInt(FontDef.FFlags));
-  FtDesc.FObjet.AddElement('Flags', Value);
+  Value  := TPdfInteger.CreateInteger(StrToInt(uFontDef.FFlags));
+  FtDesc.FDict.AddElement('Flags', Value);
   // add fontbbox element to fontdescriptor dictionary
   Table  := TPdfArray.CreateArray;
-  FtDesc.FObjet.AddElement('FontBBox', Table);
+  FtDesc.FDict.AddElement('FontBBox', Table);
   // add coordinates in page fontbbox
-  while Pos(' ', FontDef.FFontBBox) > 0 do
+  while Pos(' ', uFontDef.FFontBBox) > 0 do
   begin
-    Dictionaire := TPdfDictionary(TPdfXRef(FtDesc).FObjet);
-    Value       := TPdfInteger.CreateInteger(StrToInt(Copy(FontDef.FFontBBox, 1, Pred(Pos(' ', FontDef.FFontBBox)))));
+    Dictionaire := TPdfDictionary(TPdfXRef(FtDesc).FDict);
+    Value       := TPdfInteger.CreateInteger(StrToInt(Copy(uFontDef.FFontBBox, 1, Pred(Pos(' ', uFontDef.FFontBBox)))));
     TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('FontBBox')]).FValue).AddItem(Value);
-    FontDef.FFontBBox := Copy(FontDef.FFontBBox, Succ(Pos(' ', FontDef.FFontBBox)), Length(FontDef.FFontBBox) - Pos(' ', FontDef.FFontBBox));
+    uFontDef.FFontBBox := Copy(uFontDef.FFontBBox, Succ(Pos(' ', uFontDef.FFontBBox)), Length(uFontDef.FFontBBox) - Pos(' ', uFontDef.FFontBBox));
   end;
   // add italicangle element to fontdescriptor dictionary
-  Value      := TPdfInteger.CreateInteger(StrToInt(FontDef.FItalicAngle));
-  FtDesc.FObjet.AddElement('ItalicAngle', Value);
+  Value      := TPdfInteger.CreateInteger(StrToInt(uFontDef.FItalicAngle));
+  FtDesc.FDict.AddElement('ItalicAngle', Value);
   // add stemv element to fontdescriptor dictionary
-  Value      := TPdfInteger.CreateInteger(StrToInt(FontDef.FStemV));
-  FtDesc.FObjet.AddElement('StemV', Value);
+  Value      := TPdfInteger.CreateInteger(StrToInt(uFontDef.FStemV));
+  FtDesc.FDict.AddElement('StemV', Value);
   // add missingwidth element to fontdescriptor dictionary
-  Value      := TPdfInteger.CreateInteger(StrToInt(FontDef.FMissingWidth));
-  FtDesc.FObjet.AddElement('MissingWidth', Value);
+  Value      := TPdfInteger.CreateInteger(StrToInt(uFontDef.FMissingWidth));
+  FtDesc.FDict.AddElement('MissingWidth', Value);
   CreateFontFile(NumFonte);
   // add fontfilereference to fontdescriptor dictionary
-  XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  FtDesc.FObjet.AddElement('FontFile2', XRefObjets);
+  XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  FtDesc.FDict.AddElement('FontFile2', XRefObjets);
 end;
 
 procedure TPdfDocument.CreateFontWidth;
@@ -1613,84 +1522,84 @@ var
 begin
   // add xref entry
   FtDesc := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(FtDesc);
+  FGlobalXRefs.Add(FtDesc);
   // add element to fontwidth dictionary
   Table  := TPdfArray.CreateArray;
-  FtDesc.FObjet.AddElement('', Table);
+  FtDesc.FDict.AddElement('', Table);
   // add width values in fontwidth array
-  while Pos(' ', FontDef.FCharWidth) > 0 do
+  while Pos(' ', uFontDef.FCharWidth) > 0 do
   begin
-    Dictionaire := TPdfDictionary(TPdfXRef(FtDesc).FObjet);
-    Value       := TPdfInteger.CreateInteger(StrToInt(Copy(FontDef.FCharWidth, 1, Pred(Pos(' ', FontDef.FCharWidth)))));
+    Dictionaire := TPdfDictionary(TPdfXRef(FtDesc).FDict);
+    Value       := TPdfInteger.CreateInteger(StrToInt(Copy(uFontDef.FCharWidth, 1, Pred(Pos(' ', uFontDef.FCharWidth)))));
     TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('')]).FValue).AddItem(Value);
-    FontDef.FCharWidth := Copy(FontDef.FCharWidth, Succ(Pos(' ', FontDef.FCharWidth)), Length(FontDef.FCharWidth) - Pos(' ', FontDef.FCharWidth));
+    uFontDef.FCharWidth := Copy(uFontDef.FCharWidth, Succ(Pos(' ', uFontDef.FCharWidth)), Length(uFontDef.FCharWidth) - Pos(' ', uFontDef.FCharWidth));
   end;
 end;
 
 procedure TPdfDocument.CreateFontFile(const NumFonte: integer);
 var
   FtDesc: TPdfXRef;
-  Nom: TPdfName;
+  lName: TPdfName;
   Value: TPdfInteger;
 begin
   // add xref entry
   FtDesc := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(FtDesc);
+  FGlobalXRefs.Add(FtDesc);
   // add filter element to fontfile dictionary
-  Nom    := TPdfName.CreateName('FlateDecode');
-  FtDesc.FObjet.AddElement('Filter', Nom);
+  lName    := TPdfName.CreateName('FlateDecode');
+  FtDesc.FDict.AddElement('Filter', lName);
   // add length1 element to fontfile dictionary
-  Value  := TPdfInteger.CreateInteger(StrToInt(FontDef.FOriginalSize));
-  FtDesc.FObjet.AddElement('Length1 ' + IntToStr(NumFonte), Value);
+  Value  := TPdfInteger.CreateInteger(StrToInt(uFontDef.FOriginalSize));
+  FtDesc.FDict.AddElement('Length1 ' + IntToStr(NumFonte), Value);
 end;
 
-procedure TPdfDocument.CreateImage(ImgWidth, ImgHeight, NumImg: integer);
+procedure TPdfDocument.CreateImage(ImgWidth, ImgHeight, ImgNumber: integer);
 var
   Images: TPdfXRef;
   XRefObjets: TPdfReference;
-  Nom: TPdfName;
-  Dictionaire: TPdfDictionary;
+  lName: TPdfName;
+  lDictionary: TPdfDictionary;
   Long: TPdfInteger;
-  Cpt: integer;
+  i: integer;
 begin
   // add xref entry
   Images := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Images);
+  FGlobalXRefs.Add(Images);
   // add type element to image dictionary
-  Nom    := TPdfName.CreateName('XObject');
-  Images.FObjet.AddElement('Type', Nom);
+  lName    := TPdfName.CreateName('XObject');
+  Images.FDict.AddElement('Type', lName);
   // add subtype element to image dictionary
-  Nom    := TPdfName.CreateName('Image');
-  Images.FObjet.AddElement('Subtype', Nom);
+  lName    := TPdfName.CreateName('Image');
+  Images.FDict.AddElement('Subtype', lName);
   // add width element to image dictionary
   Long   := TPdfInteger.CreateInteger(ImgWidth);
-  Images.FObjet.AddElement('Width', Long);
+  Images.FDict.AddElement('Width', Long);
   // add height element to image dictionary
   Long   := TPdfInteger.CreateInteger(ImgHeight);
-  Images.FObjet.AddElement('Height', Long);
+  Images.FDict.AddElement('Height', Long);
   // add color space element to image dictionary
-  Nom    := TPdfName.CreateName('DeviceRGB');
-  Images.FObjet.AddElement('ColorSpace', Nom);
+  lName    := TPdfName.CreateName('DeviceRGB');
+  Images.FDict.AddElement('ColorSpace', lName);
   // add bits per component element to image dictionary
   Long   := TPdfInteger.CreateInteger(8);
-  Images.FObjet.AddElement('BitsPerComponent', Long);
+  Images.FDict.AddElement('BitsPerComponent', Long);
   // add name element to image dictionary
-  Nom    := TPdfName.CreateName('I' + IntToStr(NumImg));
-  Images.FObjet.AddElement('Name', Nom);
+  lName    := TPdfName.CreateName('I' + IntToStr(ImgNumber));
+  Images.FDict.AddElement('Name', lName);
   // add image reference to page dictionary
-  for Cpt := 1 to Pred(FXRefObjets.Count) do
+  for i := 1 to Pred(FGlobalXRefs.Count) do
   begin
-    Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[Cpt]).FObjet);
-    if Dictionaire.FElement.Count > 0 then
+    lDictionary := TPdfDictionary(TPdfXRef(FGlobalXRefs[i]).FDict);
+    if lDictionary.FElement.Count > 0 then
     begin
-      if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue = 'Page' then
+      if TPdfName(TPdfDicElement(lDictionary.FElement[0]).FValue).FValue = 'Page' then
       begin
-        Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Resources')]).FValue);
-        if Dictionaire.ElementParCle('XObject') > -1 then
+        lDictionary := TPdfDictionary(TPdfDicElement(lDictionary.FElement[lDictionary.ElementParCle('Resources')]).FValue);
+        if lDictionary.ElementParCle('XObject') > -1 then
         begin
-          Dictionaire := TPdfDictionary(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('XObject')]).FValue);
-          XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          Dictionaire.AddElement(TPdfName(Nom).FValue, XRefObjets);
+          lDictionary := TPdfDictionary(TPdfDicElement(lDictionary.FElement[lDictionary.ElementParCle('XObject')]).FValue);
+          XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          lDictionary.AddElement(TPdfName(lName).FValue, XRefObjets);
         end;
       end;
     end;
@@ -1705,107 +1614,107 @@ var
 begin
   // add xref entry
   Contents   := TPdfXRef.CreateXRef;
-  FXRefObjets.Add(Contents);
+  FGlobalXRefs.Add(Contents);
   Stream     := TPdfStream.CreateStream;
-  TPdfXRef(FXRefObjets[Pred(FXRefObjets.Count)]).FStream := Stream;
+  TPdfXRef(FGlobalXRefs[Pred(FGlobalXRefs.Count)]).FStream := Stream;
   // add contents reference to page dictionary
-  XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-  TPdfDictionary(TPdfXRef(FXRefObjets[Pred(Pred(FXRefObjets.Count))]).FObjet).AddElement('Contents', XRefObjets);
-  Result     := Pred(FXRefObjets.Count);
+  XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+  TPdfDictionary(TPdfXRef(FGlobalXRefs[Pred(Pred(FGlobalXRefs.Count))]).FDict).AddElement('Contents', XRefObjets);
+  Result     := Pred(FGlobalXRefs.Count);
 end;
 
 procedure TPdfDocument.CreateStream(NumeroPage, PageNum: integer);
 var
-  Cpt: integer;
+  i: integer;
   Txt: TPdfText;
   Clr: TPdfColor;
-  Fnt: TPdfFonte;
+  Fnt: TPdfEmbeddedFont;
   Rct: TPdfRectangle;
-  Lin: TPdfLigne;
+  Lin: TPdfLineSegment;
   Srf: TPdfSurface;
   Sty: TPdfLineStyle;
   Img: TPdfImage;
 begin
-  for Cpt := 0 to Pred(PdfPage.Count) do
+  for i := 0 to Pred(PdfPage.Count) do
   begin
-    if TPdfElement(PdfPage[Cpt]) is TPdfTexte then
+    if TPdfElement(PdfPage[i]) is TPdfTexte then
     begin
-      if TPdfTexte(PdfPage[Cpt]).PageId = NumeroPage then
+      if TPdfTexte(PdfPage[i]).PageId = NumeroPage then
       begin
-        with TPdfTexte(PdfPage[Cpt]) do
+        with TPdfTexte(PdfPage[i]) do
         begin
           if FontName > -1 then
           begin
-            Fnt          := TPdfFonte.CreateFonte(FontName, FontSize);
+            Fnt          := TPdfEmbeddedFont.CreateFont(FontName, FontSize);
             // adjust font size to display device
             Fnt.FTxtSize := IntToStr(Round((StrToInt(FontSize) * fpgApplication.Screen_dpi_y) div 72));
-            TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Fnt);
+            TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Fnt);
             Clr          := TPdfColor.CreateColor(True, Couleur);
-            TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
+            TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Clr);
           end;
           Txt := TPdfText.CreateText(TextPosX, TextPosY, Writting);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Txt);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Txt);
         end;
       end;
     end;
-    if TPdfElement(PdfPage[Cpt]) is TPdfRect then
+    if TPdfElement(PdfPage[i]) is TPdfRect then
     begin
-      if TPdfRect(PdfPage[Cpt]).PageId = NumeroPage then
+      if TPdfRect(PdfPage[i]).PageId = NumeroPage then
       begin
-        with TPdfRect(PdfPage[Cpt]) do
+        with TPdfRect(PdfPage[i]) do
         begin
           Clr := TPdfColor.CreateColor(True, RectColor);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Clr);
           if RectStroke then
           begin
             Sty := TPdfLineStyle.CreateLineStyle(RectLineStyle, 0);
-            TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
+            TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Sty);
           end;
           Rct := TPdfRectangle.CreateRectangle(RectThickness, RectLeft, RectBottom, RectWidth, RectHeight, RectFill, RectStroke);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Rct);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Rct);
         end;
       end;
     end;
-    if TPdfElement(PdfPage[Cpt]) is TPdfLine then
+    if TPdfElement(PdfPage[i]) is TPdfLine then
     begin
-      if TPdfLine(PdfPage[Cpt]).PageId = NumeroPage then
+      if TPdfLine(PdfPage[i]).PageId = NumeroPage then
       begin
-        with TPdfLine(PdfPage[Cpt]) do
+        with TPdfLine(PdfPage[i]) do
         begin
           Clr := TPdfColor.CreateColor(False, LineColor);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Clr);
           Sty := TPdfLineStyle.CreateLineStyle(LineStyle, 0);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
-          Lin := TPdfLigne.CreateLigne(LineThikness, LineBeginX, LineBeginY, LineEndX, LineEndY);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Lin);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Sty);
+          Lin := TPdfLineSegment.CreateLineSegment(LineThikness, LineBeginX, LineBeginY, LineEndX, LineEndY);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Lin);
         end;
       end;
     end;
-    if TPdfElement(PdfPage[Cpt]) is TPdfSurf then
+    if TPdfElement(PdfPage[i]) is TPdfSurf then
     begin
-      if TPdfSurf(PdfPage[Cpt]).PageId = NumeroPage then
+      if TPdfSurf(PdfPage[i]).PageId = NumeroPage then
       begin
-        with TPdfSurf(PdfPage[Cpt]) do
+        with TPdfSurf(PdfPage[i]) do
         begin
           Clr := TPdfColor.CreateColor(True, SurfColor);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Clr);
           Srf := TPdfSurface.CreateSurface(Points);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Srf);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Srf);
         end;
       end;
     end;
-    if TPdfElement(PdfPage[Cpt]) is TPdfImg then
+    if TPdfElement(PdfPage[i]) is TPdfImg then
     begin
-      if TPdfImg(PdfPage[Cpt]).PageId = NumeroPage then
+      if TPdfImg(PdfPage[i]).PageId = NumeroPage then
       begin
-        with TPdfImg(PdfPage[Cpt]) do
+        with TPdfImg(PdfPage[i]) do
         begin
           Img := TPdfImage.CreateImage(ImgLeft, ImgBottom, ImgWidth, ImgHeight, ImgNumber);
-          TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Img);
+          TPdfStream(TPdfXRef(FGlobalXRefs[PageNum]).FStream).AddItem(Img);
         end;
       end;
     end;
-  end; { for Cpt... }
+  end; { for i... }
 end;
 
 constructor TPdfDocument.CreateDocument(const ALayout: TPageLayout; const AZoom: string; const APreferences: Boolean);
@@ -1823,7 +1732,7 @@ begin
   FZoomValue    := AZoom;
   CreateRefTable;
   CreateTrailer;
-  Catalogue     := CreateCatalog;
+  uCatalogue     := CreateCatalog;
   CreateInfo;
   CreatePreferences;
   ParentPage    := 0;
@@ -1834,11 +1743,11 @@ begin
     begin
       OutlineRoot := CreateOutlines;
       // add outline reference to catalog dictionary
-      XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-      TPdfDictionary(TPdfXRef(FXRefObjets[Catalogue]).FObjet).AddElement('Outlines', XRefObjets);
+      XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+      TPdfDictionary(TPdfXRef(FGlobalXRefs[uCatalogue]).FDict).AddElement('Outlines', XRefObjets);
       // add useoutline element to catalog dictionary
       Nom         := TPdfName.CreateName('UseOutlines');
-      TPdfDictionary(TPdfXRef(FXRefObjets[Catalogue]).FObjet).AddElement('PageMode', Nom);
+      TPdfDictionary(TPdfXRef(FGlobalXRefs[uCatalogue]).FDict).AddElement('PageMode', Nom);
     end;
     TreeRoot := CreatePages(ParentPage);
   end;
@@ -1850,29 +1759,29 @@ begin
       if Outline then
       begin
         ParentOutline := CreateOutline(OutlineRoot, Succ(CptSect), -1, T_Section(Sections[CptSect]).Title);
-        Dictionaire   := TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet);
+        Dictionaire   := TPdfDictionary(TPdfXRef(FGlobalXRefs[OutlineRoot]).FDict);
         TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
         if CptSect = 0 then
         begin
-          XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet).AddElement('First', XRefObjets);
+          XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[OutlineRoot]).FDict).AddElement('First', XRefObjets);
           NextSect   := ParentOutline;
-          PrevSect   := Pred(FXRefObjets.Count);
+          PrevSect   := Pred(FGlobalXRefs.Count);
         end
         else
         begin
-          XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[NextSect]).FObjet).AddElement('Next', XRefObjets);
+          XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[NextSect]).FDict).AddElement('Next', XRefObjets);
           XRefObjets := TPdfReference.CreateReference(PrevSect);
-          TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Prev', XRefObjets);
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[ParentOutline]).FDict).AddElement('Prev', XRefObjets);
           NextSect   := ParentOutline;
           if CptSect < Pred(Sections.Count) then
-            PrevSect := Pred(FXRefObjets.Count);
+            PrevSect := Pred(FGlobalXRefs.Count);
         end;
         if CptSect = Pred(Sections.Count) then
         begin
-          XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet).AddElement('Last', XRefObjets);
+          XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[OutlineRoot]).FDict).AddElement('Last', XRefObjets);
         end;
       end;
       ParentPage := CreatePages(TreeRoot);
@@ -1886,8 +1795,8 @@ begin
       // add zoom factor to catalog dictionary
       if (CptSect = 0) and (CptPage = 0) then
       begin
-        XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-        Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[ElementParNom('Catalog')]).FObjet);
+        XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+        Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[ElementParNom('Catalog')]).FDict);
         TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('OpenAction')]).FValue).AddItem(XRefObjets);
         Nom         := TPdfName.CreateName('XYZ null null ' + FormatFloat('0.##', StrToInt(FZoomValue) / 100));
         TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('OpenAction')]).FValue).AddItem(Nom);
@@ -1898,10 +1807,10 @@ begin
       if (Sections.Count > 1) and Outline then
       begin
         PageOutline := CreateOutline(ParentOutline, Succ(CptSect), Succ(Cptpage), T_Section(Sections[CptSect]).Title);
-        Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
+        Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[ParentOutline]).FDict);
         TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
         // add page reference to outline destination
-        Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet);
+        Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[PageOutline]).FDict);
         XRefObjets  := TPdfReference.CreateReference(NewPage);
         TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(XRefObjets);
         // add display control name to outline destination
@@ -1909,12 +1818,12 @@ begin
         TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(Nom);
         if CptPage = 0 then
         begin
-          XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('First', XRefObjets);
+          XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[ParentOutline]).FDict).AddElement('First', XRefObjets);
           NextOutline := PageOutline;
-          PrevOutline := Pred(FXRefObjets.Count);
+          PrevOutline := Pred(FGlobalXRefs.Count);
           // add page reference to parent outline destination
-          Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
+          Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[ParentOutline]).FDict);
           XRefObjets  := TPdfReference.CreateReference(NewPage);
           TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(XRefObjets);
           // add display control name to outline destination
@@ -1923,18 +1832,18 @@ begin
         end
         else
         begin
-          XRefObjets  := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[NextOutline]).FObjet).AddElement('Next', XRefObjets);
+          XRefObjets  := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[NextOutline]).FDict).AddElement('Next', XRefObjets);
           XRefObjets  := TPdfReference.CreateReference(PrevOutline);
-          TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet).AddElement('Prev', XRefObjets);
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[PageOutline]).FDict).AddElement('Prev', XRefObjets);
           NextOutline := PageOutline;
           if CptPage < Pred(T_Section(Sections[CptSect]).Pages.Count) then
-            PrevOutline := Pred(FXRefObjets.Count);
+            PrevOutline := Pred(FGlobalXRefs.Count);
         end;
         if CptPage = Pred(T_Section(Sections[CptSect]).Pages.Count) then
         begin
-          XRefObjets := TPdfReference.CreateReference(Pred(FXRefObjets.Count));
-          TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Last', XRefObjets);
+          XRefObjets := TPdfReference.CreateReference(Pred(FGlobalXRefs.Count));
+          TPdfDictionary(TPdfXRef(FGlobalXRefs[ParentOutline]).FDict).AddElement('Last', XRefObjets);
         end;
       end;
     end;
@@ -1942,7 +1851,7 @@ begin
   if Sections.Count > 1 then
   begin
     // update count in root parent pages dictionary
-    Dictionaire := TPdfDictionary(TPdfXRef(FXRefObjets[TreeRoot]).FObjet);
+    Dictionaire := TPdfDictionary(TPdfXRef(FGlobalXRefs[TreeRoot]).FDict);
     TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).Value := T_Section(Sections[CptSect]).TotPages;
   end;
   if FontDirectory = '' then
@@ -1973,46 +1882,46 @@ begin
   if Images.Count > 0 then
     for Cpt := 0 to Pred(Images.Count) do
       CreateImage(TfpgImage(Images[Cpt]).Width, TfpgImage(Images[Cpt]).Height, Cpt);
-  TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue := FXRefObjets.Count;
+  TPdfInteger(TPdfDicElement(uDictionary.FElement[uDictionary.ElementParCle('Size')]).FValue).FValue := FGlobalXRefs.Count;
 end;
 
 destructor TPdfDocument.Destroy;
 var
   Cpt: integer;
 begin
-  Trailer.Free;
-  if FXRefObjets.Count > 0 then
-    for Cpt := 0 to Pred(FXRefObjets.Count) do
-      TPdfXRef(FXRefObjets[Cpt]).Free;
-  FXRefObjets.Free;
+  uDictionary.Free;
+  if FGlobalXRefs.Count > 0 then
+    for Cpt := 0 to Pred(FGlobalXRefs.Count) do
+      TPdfXRef(FGlobalXRefs[Cpt]).Free;
+  FGlobalXRefs.Free;
   inherited;
 end;
 
-procedure TPdfDocument.WriteDocument(const AFlux: TStream);
+procedure TPdfDocument.WriteDocument(const AStream: TStream);
 var
   Cpt, XRefPos: integer;
 begin
-  AFlux.Position := 0;
-  WriteChaine(PDF_VERSION + CRLF, AFlux);
+  AStream.Position := 0;
+  WriteString(PDF_VERSION + CRLF, AStream);
   // write numbered indirect objects
-  for Cpt := 1 to Pred(FXRefObjets.Count) do
+  for Cpt := 1 to Pred(FGlobalXRefs.Count) do
   begin
-    XRefPos := AFlux.Position;
-    WriteObjet(Cpt, AFlux);
-    TPdfXRef(FXRefObjets[Cpt]).Offset := XRefPos;
+    XRefPos := AStream.Position;
+    WriteObject(Cpt, AStream);
+    TPdfXRef(FGlobalXRefs[Cpt]).Offset := XRefPos;
   end;
-  XRefPos := AFlux.Position;
+  XRefPos := AStream.Position;
   // write xref table
-  WriteChaine('xref' + CRLF + '0 ' + IntToStr(FXRefObjets.Count) + CRLF, AFlux);
-  with TPdfXRef(FXRefObjets[0]) do
-    WriteChaine(IntToChaine(Offset, 10) + ' ' + IntToChaine(PDF_MAX_GEN_NUM, 5) + ' f' + CRLF, AFlux);
-  WriteXRefTable(AFlux);
-  // write trailer
-  WriteChaine('trailer' + CRLF, AFlux);
-  Trailer.WriteDictionary(-1, AFlux);
+  WriteString('xref' + CRLF + '0 ' + IntToStr(FGlobalXRefs.Count) + CRLF, AStream);
+  with TPdfXRef(FGlobalXRefs[0]) do
+    WriteString(IntToString(Offset, 10) + ' ' + IntToString(PDF_MAX_GEN_NUM, 5) + ' f' + CRLF, AStream);
+  WriteXRefTable(AStream);
+  // write uDictionary
+  WriteString('trailer' + CRLF, AStream);
+  uDictionary.WriteDictionary(-1, AStream);
   // write offset of last xref table
-  WriteChaine(CRLF + 'startxref' + CRLF + IntToStr(XRefPos) + CRLF, AFlux);
-  WriteChaine(PDF_FILE_END, AFlux);
+  WriteString(CRLF + 'startxref' + CRLF + IntToStr(XRefPos) + CRLF, AStream);
+  WriteString(PDF_FILE_END, AStream);
 end;
 
 end.

@@ -4991,7 +4991,7 @@ for the class. Note that
 :li.When the class is instantiated, the default value is not automatically
 applied to the property, it is the responsability of the programmer to do
 this in the constructor of the class.
-:li.The value 2147483648 cannot be used as a default value, as it is used
+:li.The value 2,147,483,648 cannot be used as a default value, as it is used
 internally to denote 'nodefault'.
 :li.It is not possible to specify a default for array properties.
 :eol.

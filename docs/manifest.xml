@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <packages>
 <package name="fpgui">
- <version major="1" minor="4" micro="0" build="0"/>
- <filename>fpgui-1.4.0-0.zip</filename>
+ <version major="1" minor="4" micro="1" build="0"/>
+ <filename>fpgui-1.4.1-0.zip</filename>
  <author>Graeme Geldenhuys</author>
  <license>Modified LGPL</license>
  <email>graemeg@gmail.com</email>

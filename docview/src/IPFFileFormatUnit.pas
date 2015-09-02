@@ -239,7 +239,7 @@ const
 
   // FF XX
   ecSetLeftMargin = $02;
-  ecHighlight1 = $04; // hp1,2,3,5,6,7
+  ecHighlight1 = $04; // hp1,2,3,4,5,6,7
   ecLinkStart = $05;
   ecFootnoteLinkStart = $07;
   ecLinkEnd = $08;
@@ -260,7 +260,7 @@ const
   ecStartLinkByResourceID = $1d;
   ecExternalLink = $1f;
 
-  // Subescape codes of
+  // SubEscape codes of
   HPART_DEFINE = 0;
   HPART_PT_HDREF = 1;
   HPART_PT_FNREF = 2;

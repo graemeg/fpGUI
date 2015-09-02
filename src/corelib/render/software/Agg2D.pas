@@ -644,7 +644,7 @@ type
  function  BitmapAlphaTransparency(bitmap : TfpgImage; alpha : byte ) : boolean;
 
  function  fpgColor2AggColor(c: TfpgColor): TAggColor;
- 
+
 
 IMPLEMENTATION
 
@@ -995,7 +995,6 @@ end;
 function fpgColor2AggColor(c: TfpgColor): TAggColor;
 var
   t: TRGBTriple;
-  c1: TfpgColor;
 begin
   t := fpgColorToRGBTriple(c);
   Result.Construct(t.Red, t.Green, t.Blue, t.Alpha);
@@ -1137,7 +1136,7 @@ begin
       stride );
 
     { OK }
-     result:=true; 
+     result:=true;
 
     end;
 
@@ -3569,7 +3568,6 @@ end;
 {$ENDIF}
 {$IFDEF UNIX}
 var
-  s: TfpgString;
   i: integer;
   fnt: TFontCacheItem;
   lSize: double;
@@ -3841,4 +3839,4 @@ end;
 
 end.
 
- 
+

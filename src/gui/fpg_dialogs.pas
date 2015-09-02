@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -118,6 +118,7 @@ type
     procedure   SetupCaptions; virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -202,6 +203,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
     procedure   SetCurrentDirectory(const ADir: string);
+    procedure   SetupCaptions; override;
   public
     FileName: string;
     constructor Create(AOwner: TComponent); override;
@@ -250,7 +252,7 @@ uses
   fpg_widget,
   fpg_utils,
   fpg_stringutils
-  {$IFDEF MSWINDOWS}
+  {$IFDEF WINDOWS}
   ,Windows   // used by File Dialog & Select Dir Dialog
   {$ENDIF}
   ,DateUtils
@@ -603,6 +605,12 @@ begin
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
   btnOK.TabOrder  := 1;
+end;
+
+procedure TfpgBaseDialog.AfterCreate;
+begin
+  inherited AfterCreate;
+  SetupCaptions;
 end;
 
 
@@ -1101,6 +1109,8 @@ end;
 
 procedure TfpgFileDialog.InitializeComponents;
 begin
+  self.ShowHint := True;
+
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
@@ -1450,6 +1460,16 @@ begin
     edFilename.Clear;
 end;
 
+procedure TfpgFileDialog.SetupCaptions;
+begin
+  inherited SetupCaptions;
+  btnUpDir.Hint := rsGoToParentDirectory;
+  btnDirNew.Hint := rsCreateDirectory;
+  btnShowHidden.Hint := rsShowHidden;
+  btnGoHome.Hint := rsGoToHomeDirectory;
+  btnBookmark.Hint := rsBookmarks;
+end;
+
 function TfpgFileDialog.HighlightFile(const AFilename: string): boolean;
 var
   n: integer;
@@ -1469,7 +1489,6 @@ end;
 function TfpgFileDialog.CreatePopupMenu: TfpgPopupMenu;
 var
   i: integer;
-  s: TfpgString;
   lst: TStringList;
   mi: TfpgMenuItem;
 begin

@@ -1,9 +1,9 @@
 @echo off
 
 rem We use FPC to found out the Platform and OS to create a lib output path
-fpc -iTP > tmpvar
+fpc -Parm -Twince -iTP > tmpvar
 set /p myplatform= < tmpvar
-fpc -iTO > tmpvar
+fpc -Parm -Twince -iTO > tmpvar
 set /p myos= < tmpvar
 del tmpvar
 
@@ -18,5 +18,5 @@ echo "You've got the correct output lib directory"
 
 :end
 
-fpc -dGDI @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
+fpc -v0 -dGDI -Twince -Parm @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
 

@@ -70,6 +70,10 @@ msgstr ""
 msgid "Bold"
 msgstr ""
 
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr ""
+
 #: fpg_constants:rscancel
 msgid "Cancel"
 msgstr ""
@@ -210,6 +214,10 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
 #: fpg_constants:rskeyesc
 msgid "Esc"
 msgstr ""
@@ -280,6 +288,14 @@ msgstr ""
 
 #: fpg_constants:rslongfri
 msgid "Friday"
+msgstr ""
+
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr ""
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Got to home directory"
 msgstr ""
 
 #: fpg_constants:rscolorgreen

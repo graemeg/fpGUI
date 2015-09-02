@@ -48,6 +48,10 @@ msgstr "Все шрифты"
 msgid "Alt+"
 msgstr ""
 
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr "Сглаживание"
@@ -83,6 +87,10 @@ msgstr "Синий"
 #: fpg_constants:rsbold
 msgid "Bold"
 msgstr "Жирный"
+
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr ""
 
 #: fpg_constants:rscancel
 msgid "Cancel"
@@ -295,6 +303,14 @@ msgstr "Пт"
 #: fpg_constants:rslongfri
 msgid "Friday"
 msgstr "Пятница"
+
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr ""
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Got to home directory"
+msgstr ""
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
