@@ -48,3 +48,6 @@ Release notification
 5. Update Wikipedia (English and Afrikaans)
 
 6. Update FPC's wiki about fpGUI
+
+7. Post message to fpGUI newsgroup
+
