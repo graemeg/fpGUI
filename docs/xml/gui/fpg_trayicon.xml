@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_trayicon">
+<short>Provides an icon for an application in the system tray</short>
+<descr><printshort id="#fpgui.fpg_trayicon"/>.</descr>
+
+<element name="TfpgSystemTrayIcon">
+<short>The <var>TfpgSystemTrayIcon</var> class provides an icon for an application
+in the system tray</short>
+<descr><p><printshort id="TfpgSystemTrayIcon"/>.</p>
+<p>Modern operating systems usually provide a special area on the desktop,
+called the system tray or notification area, where long-running applications
+can display icons and short messages.</p>
+<img file="screenshots/fpgui_trayicon.png" />
+</descr>
+<example file="examples/fpg_trayicon_usage.pas"/>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>

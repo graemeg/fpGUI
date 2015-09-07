@@ -132,6 +132,7 @@
         <description file="xml/gui/fpg_form.xml"/>
         <description file="xml/gui/fpg_grid.xml"/>
         <description file="xml/gui/fpg_panel.xml"/>
+        <description file="xml/gui/fpg_trayicon.xml"/>
       </descriptions>
     </package>
   </packages>
@@ -143,17 +144,15 @@
     <option name="hide-protected" value="true"/>
     <option name="duplinkeddoc" value="true"/>
 <!--
-    ## Various output formats
-    <option name="format" value="ipf"/>
-    <option name="format" value="html"/>
-    <option name="format" value="rtf"/>
-    <option name="format" value="chm"/>
-
     ## Options for IPF output
+    <option name="format" value="ipf"/>
     <option name="hide-protected" value="true"/>
     <option name="duplinkeddoc" value="true"/>
 
     ## Options for HTML output
+    <option name="format" value="html"/>
+  or
+    <option name="format" value="chm"/>
     <option name="footer-date" value="yyyy-mm-dd"/>
     <option name="css-file" value="fpdoc.css"/>
     <option name="hide-protected" value="true"/>
