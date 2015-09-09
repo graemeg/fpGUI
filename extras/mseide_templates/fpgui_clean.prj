@@ -30,7 +30,7 @@ makeoptions=15
  -gh
  -B
  -O2 -XX -Xs -CX
- -FUunits/${TargetCPU}-${TargetOS}/
+ -FUunits/${Target}/
  -FUunits
  -dUseCThreads
  -dAGGCanvas
@@ -187,7 +187,7 @@ makeoptionson=15
  0
  63
  63
- 63
+ 62
  63
  0
  4
@@ -207,31 +207,16 @@ unitdirson=11
  196639
  65567
  65567
-macroon=5
- 25
- 11
- 6
- 4
- 16
-macronames=5
- TargetCPU
- TargetOS
- TargetCPU
- TargetOS
- TargetOS
-macrovalues=5
- x86_64
- linux
- i386
- win32
- freebsd
+macroon=0
+macronames=0
+macrovalues=0
 macrogroup=0
 groupcomments=6
- Linux 64-bit
- Linux 32-bit
- Windows 32-bit
- param based
- FreeBSD 64-bit
+ 
+ 
+ 
+ 
+ 
  
 toolsave=2
  -1
@@ -245,6 +230,9 @@ toolparse=2
 toolmessages=2
  0
  0
+toolshortcuts=2
+ -1
+ -1
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -338,7 +326,7 @@ beforeload=
 afterload=
 beforerun=
 sourcebase=
-sourcedirs=16
+sourcedirs=15
  ${FPGUI}/src/corelib/render/software/
  ${FPGUI}/src/reportengine/
  ${FPGUI}/src/corelib/${FPG_GFX}/
@@ -353,7 +341,6 @@ sourcedirs=16
  ${FPCDIR}src/rtl/unix/
  ${FPCDIR}src/rtl/linux/
  ${FPCDIR}src/rtl/inc/
- ../
  ./
 defines=0
 progparameters=
