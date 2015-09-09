@@ -95,8 +95,10 @@ type
   end;
 
 const
-  cLEDFont: array[0..0] of TLEDCharMask = (
-      (Col0: $00; Col1: $00; Col2: $1A; Col3: $1C; Col4: $00)    //  ,
+  cLEDFont: array[0..2] of TLEDCharMask = (
+      (Col0: $00; Col1: $00; Col2: $1A; Col3: $1C; Col4: $00),    //  ,
+      (Col0: $FE; Col1: $90; Col2: $90; Col3: $90; Col4: $6E),    //  R
+      (Col0: $40; Col1: $80; Col2: $9A; Col3: $90; Col4: $60)     //  ?
     );
 
 
