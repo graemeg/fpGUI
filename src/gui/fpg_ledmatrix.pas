@@ -12,7 +12,24 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      This unit defines a classic 5x7 LED Matrix display widget.
+      This unit defines a classic 5x7 LED Matrix display widget. The
+      layout of the matrix is as follows. Each column is represented by a Byte
+      data type. In the figure belowe we are representing a '?' symbol. The o
+      denotes the bit is not set. The x denotes the bit is set.
+
+            |  COLUMN
+            | 0 1 2 3 4
+       -----+----------
+          0 | o x x x o
+          1 | x o o o x
+       R  2 | o o o o x
+       O  3 | o o o x o
+       W  4 | o o x o o
+          5 | o o o o o
+          6 | o o x o o
+          7 | -unused-
+
+
 }
 unit fpg_ledmatrix;
 
