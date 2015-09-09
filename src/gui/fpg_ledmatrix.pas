@@ -68,16 +68,16 @@ uses
 type
 
   TLEDCharMask = record
+    Col0: byte;
     Col1: byte;
     Col2: byte;
     Col3: byte;
     Col4: byte;
-    Col5: byte;
   end;
 
 const
   cLEDFont: array[0..0] of TLEDCharMask = (
-      (Col1: $00; Col2: $00; Col3: $0D; Col4: $0E; Col5: $00)
+      (Col0: $00; Col1: $00; Col2: $1A; Col3: $1C; Col4: $00)    //  ,
     );
 
 
@@ -108,10 +108,10 @@ begin
   dx := AX;
   while dx < Width do
   begin
-    for c := 1 to 5 do
+    for c := 0 to 4 do  // 5 columns
     begin
       dy := AY;
-      for r := 1 to 7 do
+      for r := 0 to 6 do  // 7 rows
       begin
         Canvas.FillRectangle(dx, dy, LEDSize, LEDSize);
         inc(dy, LEDSize + LEDGap);
