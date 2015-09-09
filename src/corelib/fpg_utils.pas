@@ -44,7 +44,8 @@ function fpgConvertLineEndings(const s: TfpgString): TfpgString;
 function fpgGetToolkitConfigDir: TfpgString;
 function fpgAddColon(const AText: TfpgString): TfpgString;
 function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean; deprecated;
-function fpgGetBit(const AData: LongInt; ABit: Longint): boolean; inline;
+function fpgGetBit(const AData: LongInt; ABit: Longint): boolean; overload; inline;
+function fpgGetBit(const AData: Byte; ABit: byte): boolean; overload; inline;
 procedure fpgSetBit(var AData: Longint; ABit: Longint; const AValue: boolean); inline;
 function fpgIntToBin(AValue: uint64; ADigits: byte=64): string;
 
@@ -312,6 +313,11 @@ begin
 end;
 
 function fpgGetBit(const AData: LongInt; ABit: Longint): boolean;
+begin
+  Result := (AData and (1 shl ABit) <> 0);
+end;
+
+function fpgGetBit(const AData: Byte; ABit: Byte): boolean; inline;
 begin
   Result := (AData and (1 shl ABit) <> 0);
 end;
