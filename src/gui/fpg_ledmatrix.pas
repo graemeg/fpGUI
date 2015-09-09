@@ -30,6 +30,14 @@
           7 | -unused-
 
 
+    TODO:
+      * Support multiple font sets
+      * Ability for developer to add custom characters
+      * Scrolling text support
+      * Custom borders
+      * Various matrix size. eg: 5x8, 8x8
+      * Multi-line support
+
 }
 unit fpg_ledmatrix;
 
