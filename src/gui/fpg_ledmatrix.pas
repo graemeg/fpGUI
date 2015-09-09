@@ -84,18 +84,39 @@ uses
 
 type
 
-  TLEDCharMask = record
+  TLEDCharMask = object
     Col0: byte;
     Col1: byte;
     Col2: byte;
     Col3: byte;
     Col4: byte;
+    function GetMaskForColumn(const ACol: integer): Byte;
+    function IsBitSet(const ACol, ARow: integer): boolean;
   end;
 
 const
   cLEDFont: array[0..0] of TLEDCharMask = (
       (Col0: $00; Col1: $00; Col2: $1A; Col3: $1C; Col4: $00)    //  ,
     );
+
+
+{ TLEDCharMask }
+
+function TLEDCharMask.GetMaskForColumn(const ACol: integer): Byte;
+begin
+  case ACol of
+    0: Result := Col0;
+    1: Result := Col1;
+    2: Result := Col2;
+    3: Result := Col3;
+    4: Result := Col4;
+  end;
+end;
+
+function TLEDCharMask.IsBitSet(const ACol, ARow: integer): boolean;
+begin
+  Result := (GetMaskForColumn(ACol) and ($80 shr ARow)) <> 0;
+end;
 
 
 { TfpgLEDMatrix }
