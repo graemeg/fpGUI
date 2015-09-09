@@ -35,11 +35,13 @@ type
     FLEDOffColor: TfpgColor;
     FLEDSize: integer;
     FLEDGap: integer;
-    procedure    SetLEDOnColor(const avalue: TfpgColor);
-    procedure    SetLEDOffColor(const avalue: TfpgColor);
+    FText: TfpgString;
+    procedure   SetLEDOnColor(const avalue: TfpgColor);
+    procedure   SetLEDOffColor(const avalue: TfpgColor);
     procedure    PaintBackgroundLEDs;
-    procedure    SetLEDSize(const avalue: integer);
-    procedure    SetLEDGap(const avalue: integer);
+    procedure   SetLEDSize(const avalue: integer);
+    procedure   SetLEDGap(const avalue: integer);
+    procedure   SetText(const avalue: TfpgString);
   protected
     procedure   HandlePaint; override;
   public
@@ -52,6 +54,7 @@ type
     property    LEDSize: integer read FLEDSize write SetLEDSize default 2;
     property    LEDOnColor: TfpgColor read FLEDOnColor write SetLEDOnColor default TfpgColor($FFFFB539);
     property    LEDOffColor: TfpgColor read FLEDOffColor write SetLEDOffColor default TfpgColor($FF634210);
+    property    Text: TfpgString read FText write SetText;
     property    Width default 150;
   end;
 
@@ -78,10 +81,18 @@ const
 
 procedure TfpgLEDMatrix.SetLEDOnColor(const avalue: TfpgColor);
 begin
+  if FLEDOnColor = AValue then
+    Exit;
+  FLEDOnColor := AValue;
+  Repaint;
 end;
 
 procedure TfpgLEDMatrix.SetLEDOffColor(const avalue: TfpgColor);
 begin
+  if FLEDOffColor = AValue then
+    Exit;
+  FLEDOffColor := AValue;
+  Repaint;
 end;
 
 procedure TfpgLEDMatrix.PaintBackgroundLEDs;
@@ -142,6 +153,14 @@ procedure TfpgLEDMatrix.HandlePaint;
 begin
   inherited HandlePaint;
   PaintBackgroundLEDs;
+end;
+
+procedure TfpgLEDMatrix.SetText(const avalue: TfpgString);
+begin
+  if FText = AValue then
+    Exit;
+  FText := AValue;
+  RePaint;
 end;
 
 end.
