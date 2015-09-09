@@ -202,7 +202,10 @@ begin
   Canvas.Color := LEDOffColor;
   PaintBackgroundLEDs(dx, dy);
   for i := 0 to UTF8Length(Text)-1 do
+  begin
     DrawLEDChar(dx, dy, UTF8Copy(Text, i, 1));
+    inc(dx, (LEDSize+LEDGap) * 6);  // 6 is used because we want one empty column between characters
+  end;
 end;
 
 procedure TfpgLEDMatrix.SetText(const avalue: TfpgString);
