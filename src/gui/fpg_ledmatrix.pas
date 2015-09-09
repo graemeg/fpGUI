@@ -38,12 +38,13 @@ type
     FText: TfpgString;
     procedure   SetLEDOnColor(const avalue: TfpgColor);
     procedure   SetLEDOffColor(const avalue: TfpgColor);
-    procedure    PaintBackgroundLEDs;
     procedure   SetLEDSize(const avalue: integer);
     procedure   SetLEDGap(const avalue: integer);
     procedure   SetText(const avalue: TfpgString);
   protected
     procedure   HandlePaint; override;
+    procedure   PaintBackgroundLEDs(const AX, AY: TfpgCoord); virtual;
+    procedure   DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar); virtual;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -60,6 +61,9 @@ type
 
 
 implementation
+
+uses
+  fpg_stringutils;
 
 type
 
@@ -95,22 +99,18 @@ begin
   Repaint;
 end;
 
-procedure TfpgLEDMatrix.PaintBackgroundLEDs;
+procedure TfpgLEDMatrix.PaintBackgroundLEDs(const AX, AY: TfpgCoord);
 var
   c, r: integer;
-  lStartY: TfpgCoord;
-  rect: TfpgRect;
   dx, dy: TfpgCoord;
 begin
-  rect := GetClientRect;
-  lStartY := (rect.Height - (LEDSize * 7) - (LEDGap * 6)) div 2;
   Canvas.Color := LEDOffColor;
-  dx := LEDGap;
+  dx := AX;
   while dx < Width do
   begin
     for c := 1 to 5 do
     begin
-      dy := lStartY;
+      dy := AY;
       for r := 1 to 7 do
       begin
         Canvas.FillRectangle(dx, dy, LEDSize, LEDSize);
@@ -150,9 +150,19 @@ begin
 end;
 
 procedure TfpgLEDMatrix.HandlePaint;
+var
+  i: integer;
+  c: TfpgChar;
+  dx, dy: TfpgCoord;
+  lStartY: TfpgCoord;
 begin
   inherited HandlePaint;
-  PaintBackgroundLEDs;
+  dx := LEDGap;
+  dy := (GetClientRect.Height - (LEDSize * 7) - (LEDGap * 6)) div 2;
+  Canvas.Color := LEDOffColor;
+  PaintBackgroundLEDs(dx, dy);
+  for i := 0 to UTF8Length(Text)-1 do
+    DrawLEDChar(dx, dy, UTF8Copy(Text, i, 1));
 end;
 
 procedure TfpgLEDMatrix.SetText(const avalue: TfpgString);
@@ -161,6 +171,10 @@ begin
     Exit;
   FText := AValue;
   RePaint;
+end;
+
+procedure TfpgLEDMatrix.DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar);
+begin
 end;
 
 end.
