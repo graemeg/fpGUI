@@ -217,7 +217,27 @@ begin
 end;
 
 procedure TfpgLEDMatrix.DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar);
+var
+  c, r: integer;
+  dx, dy: TfpgCoord;
+  m: TLEDCharMask;
 begin
+  m := cLEDFont[0]; // TODO: retrieve mask record from array using AChar as lookup
+  dx := AX;
+  for c := 0 to 4 do  // 5 columns
+  begin
+    dy := AY;
+    for r := 0 to 6 do  // 7 rows
+    begin
+      if m.IsBitSet(c, r) then
+        Canvas.Color := LEDOnColor
+      else
+        Canvas.Color := LEDOffColor;
+      Canvas.FillRectangle(dx, dy, LEDSize, LEDSize);
+      inc(dy, LEDSize + LEDGap);
+    end;
+    inc(dx, LEDSize + LEDGap);
+  end;  { for }
 end;
 
 end.
