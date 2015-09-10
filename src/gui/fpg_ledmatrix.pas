@@ -37,6 +37,8 @@
       * Custom borders
       * Various matrix size. eg: 5x8, 8x8
       * Multi-line support
+      * Limit the matrix processing only to the characters that are actually
+        visible in the widget.
 
 }
 unit fpg_ledmatrix;
@@ -124,7 +126,7 @@ const
       (Col0: $00; Col1: $42; Col2: $FE; Col3: $02; Col4: $00 ),  // 1
       (Col0: $46; Col1: $8A; Col2: $92; Col3: $92; Col4: $62 ),  // 2
       (Col0: $44; Col1: $92; Col2: $92; Col3: $92; Col4: $6C ),  // 3
-      (Col0: $F0; Col1: $10; Col2: $10; Col3: $10; Col4: $FE ),  // 4
+      (Col0: $18; Col1: $28; Col2: $48; Col3: $FE; Col4: $08 ),  // 4
       (Col0: $F4; Col1: $92; Col2: $92; Col3: $92; Col4: $8C ),  // 5
       (Col0: $7C; Col1: $92; Col2: $92; Col3: $92; Col4: $4C ),  // 6
       (Col0: $C0; Col1: $80; Col2: $8E; Col3: $90; Col4: $E0 ),  // 7
