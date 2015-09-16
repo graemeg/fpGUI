@@ -317,9 +317,9 @@ type
     property    OnDoubleClick;
     property    OnMouseDown;
     property    OnMouseMove;
-    property    OnMouseScroll
+    property    OnMouseScroll;
     property    OnMouseUp;
-    property    OnResize
+    property    OnResize;
   end;
 
 
