@@ -77,9 +77,11 @@ type
     FOptions: TfpgComboOptions;
     FExtraHint: string;
     FReadOnly: Boolean;
+    function    GetExtraHintFontDesc: String;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
     procedure   SetExtraHintColor(AValue: TfpgColor);
+    procedure   SetExtraHintFontDesc(AValue: String);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetExtraHint(const AValue: string);
@@ -92,6 +94,7 @@ type
     FItems: TStringList;
     FBtnPressed: Boolean;
     FStoredShowHint: Boolean;
+    FExtraHintFont: TfpgFont;
     procedure   DisableShowHint;
     procedure   RestoreShowHint;
     procedure   SetMargin(const AValue: integer); virtual;
@@ -109,6 +112,7 @@ type
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
     property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
+    property    ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
@@ -159,6 +163,7 @@ type
     property    Enabled;
     property    ExtraHint;
     property    ExtraHintColor;
+    property    ExtraHintFontDesc;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -239,9 +244,25 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseComboBox.SetExtraHintFontDesc(AValue: String);
+begin
+  FExtraHintFont.Free;
+  FExtraHintFont := fpgGetFont(AValue);
+  if FAutoSize then
+  begin
+    Height := FExtraHintFont.Height + (FMargin * 2);
+  end;
+  RePaint;
+end;
+
 function TfpgBaseComboBox.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+function TfpgBaseComboBox.GetExtraHintFontDesc: String;
+begin
+  Result := FExtraHintFont.FontDesc;
 end;
 
 { Focusitem is 0 based like the Delphi ItemIndex property.
@@ -445,6 +466,7 @@ begin
   FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
   FFont := fpgGetFont('#List');
+  FExtraHintFont := fpgGetFont('#List');
   FOptions := [];
   FBtnPressed := False;
   FOnChange := nil;
@@ -456,6 +478,7 @@ end;
 destructor TfpgBaseComboBox.Destroy;
 begin
   FFont.Free;
+  FExtraHintFont.Free;
   FItems.Free;
   inherited Destroy;
 end;
@@ -618,10 +641,12 @@ begin
     Canvas.DrawText(ARect, Text, flags)
   else
   begin
+    Canvas.SetFont(FExtraHintFont);
     if FExtraHintColor=clDefault
     then Canvas.SetTextColor(clShadow1)
     else Canvas.SetTextColor(FExtraHintColor);
     Canvas.DrawText(ARect, ExtraHint, flags);
+    Canvas.SetFont(FFont);
   end;
 end;
 

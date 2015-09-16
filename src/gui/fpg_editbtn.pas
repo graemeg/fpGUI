@@ -42,8 +42,10 @@ type
     FReadOnly: Boolean;
     function GetExtraHintColor: TfpgColor;
     function GetExtraHintFocused: Boolean;
+    function GetExtraHintFontDesc: String;
     procedure SetExtraHintColor(AValue: TfpgColor);
     procedure SetExtraHintFocused(AValue: Boolean);
+    procedure SetExtraHintFontDesc(AValue: String);
     procedure SetReadOnly(const AValue: Boolean);
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
@@ -59,6 +61,7 @@ type
     property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
     property  ExtraHintFocused: Boolean read GetExtraHintFocused write SetExtraHintFocused;
     property  ExtraHintColor: TfpgColor read GetExtraHintColor write SetExtraHintColor;
+    property  ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
     property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   public
@@ -87,6 +90,7 @@ type
     property    ExtraHint;
     property    ExtraHintFocused;
     property    ExtraHintColor;
+    property    ExtraHintFontDesc;
     property    FileName: TfpgString read GetFileName write SetFileName;
     property    InitialDir: TfpgString read FInitialDir write FInitialDir;
     property    Filter: TfpgString read FFilter write SetFilter;
@@ -120,6 +124,7 @@ type
     property    ExtraHint;
     property    ExtraHintFocused;
     property    ExtraHintColor;
+    property    ExtraHintFontDesc;
     property    RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
     property    ReadOnly;
     property    TabOrder;
@@ -147,6 +152,7 @@ type
     property    ExtraHint;
     property    ExtraHintFocused;
     property    ExtraHintColor;
+    property    ExtraHintFontDesc;
     property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;
     property    ReadOnly;
     property    TabOrder;
@@ -168,6 +174,7 @@ type
     property    ExtraHint;
     property    ExtraHintFocused;
     property    ExtraHintColor;
+    property    ExtraHintFontDesc;
     property    ReadOnly;
     property    TabOrder;
     property    Text: TfpgString read GetText write SetText;
@@ -249,6 +256,11 @@ begin
   Result := FEdit.ExtraHintFocused;
 end;
 
+function TfpgBaseEditButton.GetExtraHintFontDesc: String;
+begin
+  Result := FEdit.ExtraHintFontDesc;
+end;
+
 function TfpgBaseEditButton.GetExtraHintColor: TfpgColor;
 begin
   Result := FEdit.ExtraHintColor;
@@ -262,6 +274,11 @@ end;
 procedure TfpgBaseEditButton.SetExtraHintFocused(AValue: Boolean);
 begin
   FEdit.ExtraHintFocused := AValue;
+end;
+
+procedure TfpgBaseEditButton.SetExtraHintFontDesc(AValue: String);
+begin
+  FEdit.ExtraHintFontDesc := AValue;
 end;
 
 function TfpgBaseEditButton.GetExtraHint: TfpgString;
