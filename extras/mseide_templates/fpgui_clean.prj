@@ -9,7 +9,7 @@ unitdirs=11
  ${TIOPF}/GUI/fpGUI
  ${TIOPF}/Options
  ${TIOPF}/Core
- ${FPGUI}/lib/${TargetCPU}-${TargetOS}
+ ${FPGUI}/lib/${Target}
  ${FPGUI}/src/reportengine
  ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
@@ -21,8 +21,9 @@ incpref=-Fi
 libpref=-Fl
 objpref=-Fo
 targpref=-o
-befcommand=1
- rm units/${TargetCPU}-${TargetOS}/*
+befcommand=2
+ rm units/${Target}/*
+ mkdir -p units/${Target}
 aftcommand=0
 makeoptions=15
  -l -Mobjfpc -Sh -Sc -Si
@@ -46,8 +47,8 @@ toolmenus=2
  fpGUI &UI Designer
  &DocView
 toolfiles=2
- ${FPGUI}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner
- ${FPGUI}/docview/src/units/${TargetCPU}-${TargetOS}/docview
+ ${FPGUI}/uidesigner/units/${Target}/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
 toolparams=2
  ${CURSOURCEFILE}
  ${HelpPath} -k ${cursword}
@@ -176,7 +177,8 @@ settingsautosave=0
 modulenames=0
 moduletypes=0
 modulefiles=0
-befcommandon=1
+befcommandon=2
+ 0
  0
 makeoptionson=15
  63
@@ -187,7 +189,7 @@ makeoptionson=15
  0
  63
  63
- 62
+ 60
  63
  0
  4
@@ -231,8 +233,8 @@ toolmessages=2
  0
  0
 toolshortcuts=2
- -1
- -1
+ 0
+ 1
 fontalias=0
 fontancestors=0
 fontheights=0
