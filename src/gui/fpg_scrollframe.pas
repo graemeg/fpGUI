@@ -71,11 +71,13 @@ type
     FVisibleArea: TfpgEmbeddingFrame;
     FHScrollBar: TfpgScrollBar;
     FVScrollBar: TfpgScrollBar;
+    FScrollBarWidth: integer;
     FScrollBarStyle: TfpgScrollStyle;
     function    GetXOffset: integer;
     function    GetYOffset: integer;
     procedure   SetXOffset(x: integer);
     procedure   SetYOffset(y: integer);
+    procedure   SetScrollBarWidth(const AValue: integer);
   protected
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -84,7 +86,6 @@ type
     procedure   HandlePaint; override;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
-    procedure   UpdateScrollbars; virtual;
     property    XOffset: integer read GetXOffset write SetXOffset; // these do not...
     property    YOffset: integer read GetYOffset write SetYOffset; // ...updatewindowposition
   public
@@ -92,7 +93,9 @@ type
     constructor Create (AOwner: TComponent; ContentFrameType: TfpgASFrameClass); virtual;
     procedure   AfterCreate; override;
     procedure   SetContentFrameType(AContentFrameType: TfpgASFrameClass);
+    procedure   UpdateScrollbars; virtual;
     property    ContentFrame: TfpgAutoSizingFrame read FContentFrame write FContentFrame;
+    property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
   end;
 
 
@@ -230,7 +233,16 @@ begin
   UpdateScrollbars;
 end;
 
-procedure TfpgScrollFrame.HandleMouseHorizScroll(x, y: integer; 
+procedure TfpgScrollFrame.SetScrollBarWidth(const AValue: integer);
+begin
+  if AValue = FScrollBarWidth then
+    Exit; //==>
+  FScrollBarWidth := AValue;
+  FVScrollBar.Width := FScrollBarWidth;
+  FHScrollBar.Height:= FScrollBarWidth;
+end;
+
+procedure TfpgScrollFrame.HandleMouseHorizScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 begin
   inherited HandleMouseHorizScroll(x, y, shiftstate, delta);
