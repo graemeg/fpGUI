@@ -396,6 +396,7 @@ begin
   wc.AddProperty('ExtraHintFocused', TPropertyBoolean, '');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('IgnoreMouseCursor', TPropertyBoolean, 'If True, then mouse pointer doesn''t change');
@@ -499,6 +500,7 @@ begin
   wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
@@ -910,6 +912,7 @@ begin
   wc.AddProperty('ExtraHintFocused', TPropertyBoolean, '');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FileName', TPropertyString, 'Preset filename in edit component');
   wc.AddProperty('Filter', TPropertyString, 'Filename filters used in the dialog');
   wc.AddProperty('InitialDir', TPropertyString, 'Initial starting directory of the dialog');
@@ -927,6 +930,7 @@ begin
   wc.AddProperty('ExtraHintFocused', TPropertyBoolean, '');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('RootDirectory', TPropertyString, 'Initial starting directory of the dialog');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editdirectory';
@@ -941,6 +945,7 @@ begin
   wc.AddProperty('ExtraHintFocused', TPropertyBoolean, '');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FontDesc', TPropertyString, 'Specify a preset font description');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editfont';
@@ -955,6 +960,7 @@ begin
   wc.AddProperty('ExtraHintFocused', TPropertyBoolean, '');
   wc.AddProperty('ExtraHintColor', TPropertyColor, '');
   wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Specify the initial text value');
   wc.WidgetIconName := 'vfd.editbutton';

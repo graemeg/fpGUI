@@ -69,6 +69,7 @@ type
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
+    FExtraHintAlignment: TAlignment;
     FExtraHintColor: TfpgColor;
     FFont: TfpgFont;
     FOnChange: TNotifyEvent;
@@ -80,6 +81,7 @@ type
     function    GetExtraHintFontDesc: String;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
+    procedure   SetExtraHintAlignment(AValue: TAlignment);
     procedure   SetExtraHintColor(AValue: TfpgColor);
     procedure   SetExtraHintFontDesc(AValue: String);
     procedure   SetFocusItem(const AValue: integer);
@@ -113,6 +115,7 @@ type
     property    ExtraHint: string read FExtraHint write SetExtraHint;
     property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
     property    ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
+    property    ExtraHintAlignment: TAlignment read FExtraHintAlignment write SetExtraHintAlignment;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
@@ -164,6 +167,7 @@ type
     property    ExtraHint;
     property    ExtraHintColor;
     property    ExtraHintFontDesc;
+    property    ExtraHintAlignment default taLeftJustify;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -234,6 +238,14 @@ begin
   if FDropDownCount = AValue then
     Exit;
   FDropDownCount := AValue;
+end;
+
+procedure TfpgBaseComboBox.SetExtraHintAlignment(AValue: TAlignment);
+begin
+  if FExtraHintAlignment = AValue then
+    Exit;
+  FExtraHintAlignment := AValue;
+  RePaint;
 end;
 
 procedure TfpgBaseComboBox.SetExtraHintColor(AValue: TfpgColor);
@@ -472,6 +484,7 @@ begin
   FOnChange := nil;
   FExtraHint := '';
   FExtraHintColor := clDefault;
+  FExtraHintAlignment := taLeftJustify;
   FStoredShowHint := ShowHint;
 end;
 
@@ -632,6 +645,7 @@ end;
 procedure TfpgBaseStaticCombo.DoDrawText(const ARect: TfpgRect);
 var
   flags: TfpgTextFlags;
+  r: TfpgRect;
 begin
   // Draw select item's text
   flags := [txtLeft, txtVCenter];
@@ -641,11 +655,23 @@ begin
     Canvas.DrawText(ARect, Text, flags)
   else
   begin
+    // Popup button offset
+    r := fpgRect(ARect.Left, ARect.Top, ARect.Width-FInternalBtnRect.Width, ARect.Height);
+
+    flags := [txtVCenter];
+    if not Enabled then
+      flags += [txtDisabled];
+    case FExtraHintAlignment of
+      taLeftJustify: flags += [txtLeft];
+      taCenter: flags += [txtHCenter];
+      taRightJustify: flags += [txtRight];
+    end;
+
     Canvas.SetFont(FExtraHintFont);
     if FExtraHintColor=clDefault
     then Canvas.SetTextColor(clShadow1)
     else Canvas.SetTextColor(FExtraHintColor);
-    Canvas.DrawText(ARect, ExtraHint, flags);
+    Canvas.DrawText(r, ExtraHint, flags);
     Canvas.SetFont(FFont);
   end;
 end;

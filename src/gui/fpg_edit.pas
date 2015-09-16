@@ -147,10 +147,12 @@ type
   TfpgBaseTextEdit = class(TfpgBaseEdit)
   private
     FExtraHint: string;
+    FExtraHintAlignment: TAlignment;
     FExtraHintColor: TfpgColor;
     FExtraHintFocused: Boolean;
     function    GetExtraHintFontDesc: String;
     procedure   SetExtraHint(const AValue: string);
+    procedure   SetExtraHintAlignment(AValue: TAlignment);
     procedure   SetExtraHintColor(AValue: TfpgColor);
     procedure   SetExtraHintFocused(AValue: Boolean);
     procedure   SetExtraHintFontDesc(AValue: String);
@@ -163,6 +165,7 @@ type
     property    ExtraHintFocused: Boolean read FExtraHintFocused write SetExtraHintFocused;
     property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
     property    ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
+    property    ExtraHintAlignment: TAlignment read FExtraHintAlignment write SetExtraHintAlignment;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -184,6 +187,7 @@ type
     property    ExtraHintFocused default False;
     property    ExtraHintColor default clDefault;
     property    ExtraHintFontDesc;
+    property    ExtraHintAlignment default taLeftJustify;
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
@@ -1507,13 +1511,20 @@ begin
 end;
 
 procedure TfpgBaseTextEdit.DrawExtraHint(constref ARect: TfpgRect);
+var x: Integer;
 begin
   Canvas.SetFont(FExtraHintFont);
   if FExtraHintColor=clDefault
   then Canvas.SetTextColor(clShadow1)
   else Canvas.SetTextColor(FExtraHintColor);
 
-  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, ARect.Top + FHeightMargin, FExtraHint, Enabled);
+  case FExtraHintAlignment of
+    taLeftJustify: x := -FDrawOffset + GetMarginAdjustment;
+    taCenter: x := ARect.Left + (ARect.Width div 2) - (FExtraHintFont.TextWidth(FExtraHint) div 2);
+    taRightJustify: x := ARect.Right - FExtraHintFont.TextWidth(FExtraHint) - FDrawOffset - GetMarginAdjustment;
+  end;
+
+  fpgStyle.DrawString(Canvas, x, ARect.Top + FHeightMargin, FExtraHint, Enabled);
 
   Canvas.SetFont(FFont);
 end;
@@ -1526,10 +1537,11 @@ end;
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FExtraHintFont := fpgGetFont('#Edit1');  // owned object !
-  FExtraHint := '';
-  FExtraHintFocused := False;
-  FExtraHintColor := clDefault;
+  FExtraHintFont      := fpgGetFont('#Edit1');  // owned object !
+  FExtraHint          := '';
+  FExtraHintFocused   := False;
+  FExtraHintColor     := clDefault;
+  FExtraHintAlignment := taLeftJustify;
 end;
 
 destructor TfpgBaseTextEdit.Destroy;
@@ -1544,6 +1556,14 @@ begin
     Exit; //==>
   FExtraHint := AValue;
   Repaint;
+end;
+
+procedure TfpgBaseTextEdit.SetExtraHintAlignment(AValue: TAlignment);
+begin
+  if FExtraHintAlignment = AValue then
+    Exit; //==>
+  FExtraHintAlignment := AValue;
+  RePaint;
 end;
 
 function TfpgBaseTextEdit.GetExtraHintFontDesc: String;

@@ -124,6 +124,7 @@ type
     property    ExtraHint;
     property    ExtraHintColor;
     property    ExtraHintFontDesc;
+    property    ExtraHintAlignment default taLeftJustify;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -730,7 +731,7 @@ procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
   rect: TRect;
-  tw, tw2, st, len: integer;
+  tw, tw2, st, len, x: integer;
   Texte: string;
 
   // paint selection rectangle
@@ -833,11 +834,17 @@ begin
       fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
     else
       begin
+      case ExtraHintAlignment of
+        taLeftJustify: x := FMargin+1;
+        taCenter: x := r.Left + (r.Width div 2) - (FExtraHintFont.TextWidth(ExtraHint) div 2);
+        taRightJustify: x := r.Right - FExtraHintFont.TextWidth(ExtraHint) - FMargin - 1;
+      end;
+
       Canvas.SetFont(FExtraHintFont);
       if ExtraHintColor=clDefault
       then Canvas.SetTextColor(clShadow1)
       else Canvas.SetTextColor(ExtraHintColor);
-      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
+      fpgStyle.DrawString(Canvas, x, FMargin, ExtraHint, Enabled);
       Canvas.SetFont(Font);
       end;
   end
