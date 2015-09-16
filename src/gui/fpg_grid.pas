@@ -87,8 +87,8 @@ type
   private
     FCells: TStringList;
   public
-	  constructor Create; override;
-	  destructor  Destroy; override;
+    constructor Create; override;
+    destructor  Destroy; override;
     property    Cells: TStringList read FCells write FCells;
   end;
 
