@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -26,8 +26,8 @@ uses
   x;
   
 type
-    TfpgWinHandle = TXID;
-    TfpgDCHandle  = TXID;
+  TfpgWinHandle = TXID;
+  TfpgDCHandle  = TXID;
 
 
 implementation
