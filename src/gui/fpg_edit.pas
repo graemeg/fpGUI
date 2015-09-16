@@ -142,13 +142,19 @@ type
   end;
 
 
+  { TfpgBaseTextEdit }
+
   TfpgBaseTextEdit = class(TfpgBaseEdit)
   private
     FExtraHint: string;
+    FExtraHintFocused: Boolean;
     procedure   SetExtraHint(const AValue: string);
+    procedure   SetExtraHintFocused(AValue: Boolean);
   protected
     procedure   HandlePaint; override;
+    function    CanDrawExtraHint: Boolean; virtual;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
+    property    ExtraHintFocused: Boolean read FExtraHintFocused write SetExtraHintFocused;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -166,6 +172,7 @@ type
     property    BorderStyle;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintFocused default False;
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
@@ -1463,7 +1470,7 @@ begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
-  if Enabled and (FVisibleText = '') and (not Focused) then
+  if CanDrawExtraHint then
   begin
     Canvas.SetTextColor(clShadow1);
     fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
@@ -1491,10 +1498,16 @@ begin
   end;
 end;
 
+function TfpgBaseTextEdit.CanDrawExtraHint: Boolean;
+begin
+  Result := Enabled and (FVisibleText = '') and (FExtraHintFocused or (not Focused));
+end;
+
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FExtraHint := '';
+  FExtraHintFocused := False;
 end;
 
 procedure TfpgBaseTextEdit.SetExtraHint(const AValue: string);
@@ -1502,6 +1515,14 @@ begin
   if FExtraHint = AValue then
     Exit; //==>
   FExtraHint := AValue;
+  Repaint;
+end;
+
+procedure TfpgBaseTextEdit.SetExtraHintFocused(AValue: Boolean);
+begin
+  if FExtraHintFocused = AValue then
+    Exit; //==>
+  FExtraHintFocused := AValue;
   Repaint;
 end;
 

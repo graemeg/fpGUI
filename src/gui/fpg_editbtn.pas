@@ -34,10 +34,14 @@ uses
 
 type
 
+  { TfpgBaseEditButton }
+
   TfpgBaseEditButton = class(TfpgAbstractPanel)
   private
     FOnButtonClick: TNotifyEvent;
     FReadOnly: Boolean;
+    function GetExtraHintFocused: Boolean;
+    procedure SetExtraHintFocused(AValue: Boolean);
     procedure SetReadOnly(const AValue: Boolean);
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
@@ -51,6 +55,7 @@ type
     procedure InternalButtonClick(Sender: TObject); virtual;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
     property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
+    property  ExtraHintFocused: Boolean read GetExtraHintFocused write SetExtraHintFocused;
     property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   public
@@ -77,6 +82,7 @@ type
     property    Align;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintFocused;
     property    FileName: TfpgString read GetFileName write SetFileName;
     property    InitialDir: TfpgString read FInitialDir write FInitialDir;
     property    Filter: TfpgString read FFilter write SetFilter;
@@ -108,6 +114,7 @@ type
     property    Directory: TfpgString read GetDirectory write SetDirectory;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintFocused;
     property    RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
     property    ReadOnly;
     property    TabOrder;
@@ -133,6 +140,7 @@ type
     property    Align;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintFocused;
     property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;
     property    ReadOnly;
     property    TabOrder;
@@ -152,6 +160,7 @@ type
     property    Align;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintFocused;
     property    ReadOnly;
     property    TabOrder;
     property    Text: TfpgString read GetText write SetText;
@@ -226,6 +235,16 @@ begin
   FReadOnly := AValue;
   FEdit.ReadOnly := FReadOnly;
   FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
+end;
+
+function TfpgBaseEditButton.GetExtraHintFocused: Boolean;
+begin
+  Result := FEdit.ExtraHintFocused;
+end;
+
+procedure TfpgBaseEditButton.SetExtraHintFocused(AValue: Boolean);
+begin
+  FEdit.ExtraHintFocused := AValue;
 end;
 
 function TfpgBaseEditButton.GetExtraHint: TfpgString;
