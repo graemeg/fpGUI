@@ -110,6 +110,7 @@ with EG_Grid do
   ADate:= IncDay(Now,RowCount);
   Dates[8]:= ADate;
   Cells[8,Pred(RowCount)]:= FormatDateTime(EG_Grid.GridDateFormat[8], Adate);
+  Cells[9,Pred(RowCount)]:= 'Row '+IntToStr(RowCount);
   end;
 end;
 
@@ -395,8 +396,11 @@ with EG_Grid do
   DayColor[Pred(ColumnCount)] := clBlue;
   HoliDayColor[Pred(ColumnCount)] := clRed;
   SingleClickSelect[Pred(ColumnCount)] := True;
-  DefaultRowHeight:= 20;
+  AddColumn('Text',100,etText);
+  DefaultRowHeight:= 18;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
+  AutoHeight:= True;
+  ScrollBarPage:= Pred(VisibleRows);
 //  Options:= [go_HideFocusRect];
   Options:= [go_AlternativeColor];
   OnKeyPress:= @EG_GridKeyPress;
