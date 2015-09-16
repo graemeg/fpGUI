@@ -64,9 +64,12 @@ type
   TfpgComboOptions = set of TfpgComboOption;
 
 
+  { TfpgBaseComboBox }
+
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
+    FExtraHintColor: TfpgColor;
     FFont: TfpgFont;
     FOnChange: TNotifyEvent;
     FOnCloseUp: TNotifyEvent;
@@ -76,6 +79,7 @@ type
     FReadOnly: Boolean;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
+    procedure   SetExtraHintColor(AValue: TfpgColor);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetExtraHint(const AValue: string);
@@ -104,6 +108,7 @@ type
     property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
+    property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
@@ -153,6 +158,7 @@ type
     property    DropDownCount;
     property    Enabled;
     property    ExtraHint;
+    property    ExtraHintColor;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -223,6 +229,14 @@ begin
   if FDropDownCount = AValue then
     Exit;
   FDropDownCount := AValue;
+end;
+
+procedure TfpgBaseComboBox.SetExtraHintColor(AValue: TfpgColor);
+begin
+  if FExtraHintColor = AValue then
+    Exit;
+  FExtraHintColor := AValue;
+  RePaint;
 end;
 
 function TfpgBaseComboBox.GetFontDesc: string;
@@ -435,6 +449,7 @@ begin
   FBtnPressed := False;
   FOnChange := nil;
   FExtraHint := '';
+  FExtraHintColor := clDefault;
   FStoredShowHint := ShowHint;
 end;
 
@@ -603,7 +618,9 @@ begin
     Canvas.DrawText(ARect, Text, flags)
   else
   begin
-    Canvas.SetTextColor(clShadow1);
+    if FExtraHintColor=clDefault
+    then Canvas.SetTextColor(clShadow1)
+    else Canvas.SetTextColor(FExtraHintColor);
     Canvas.DrawText(ARect, ExtraHint, flags);
   end;
 end;

@@ -147,14 +147,18 @@ type
   TfpgBaseTextEdit = class(TfpgBaseEdit)
   private
     FExtraHint: string;
+    FExtraHintColor: TfpgColor;
     FExtraHintFocused: Boolean;
     procedure   SetExtraHint(const AValue: string);
+    procedure   SetExtraHintColor(AValue: TfpgColor);
     procedure   SetExtraHintFocused(AValue: Boolean);
   protected
     procedure   HandlePaint; override;
+    procedure   DrawExtraHint(constref ARect: TfpgRect); virtual;
     function    CanDrawExtraHint: Boolean; virtual;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
     property    ExtraHintFocused: Boolean read FExtraHintFocused write SetExtraHintFocused;
+    property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -173,6 +177,7 @@ type
     property    Enabled;
     property    ExtraHint;
     property    ExtraHintFocused default False;
+    property    ExtraHintColor default clDefault;
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
@@ -1471,10 +1476,7 @@ begin
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
   if CanDrawExtraHint then
-  begin
-    Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
-  end
+    DrawExtraHint(r)
   else
   begin
     Canvas.SetTextColor(FTextColor);
@@ -1498,6 +1500,15 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.DrawExtraHint(constref ARect: TfpgRect);
+begin
+  if FExtraHintColor=clDefault
+  then Canvas.SetTextColor(clShadow1)
+  else Canvas.SetTextColor(FExtraHintColor);
+
+  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, ARect.Top + FHeightMargin, FExtraHint, Enabled);
+end;
+
 function TfpgBaseTextEdit.CanDrawExtraHint: Boolean;
 begin
   Result := Enabled and (FVisibleText = '') and (FExtraHintFocused or (not Focused));
@@ -1508,6 +1519,7 @@ begin
   inherited Create(AOwner);
   FExtraHint := '';
   FExtraHintFocused := False;
+  FExtraHintColor := clDefault;
 end;
 
 procedure TfpgBaseTextEdit.SetExtraHint(const AValue: string);
@@ -1516,6 +1528,15 @@ begin
     Exit; //==>
   FExtraHint := AValue;
   Repaint;
+end;
+
+procedure TfpgBaseTextEdit.SetExtraHintColor(AValue: TfpgColor);
+begin
+  if FExtraHintColor = AValue then
+    Exit; //==>
+
+  FExtraHintColor := AValue;
+  RePaint;
 end;
 
 procedure TfpgBaseTextEdit.SetExtraHintFocused(AValue: Boolean);

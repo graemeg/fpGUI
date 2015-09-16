@@ -122,6 +122,7 @@ type
     property    BackgroundColor;
     property    DropDownCount;
     property    ExtraHint;
+    property    ExtraHintColor;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -831,7 +832,9 @@ begin
       fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
     else
       begin
-      Canvas.SetTextColor(clShadow1);
+      if ExtraHintColor=clDefault
+      then Canvas.SetTextColor(clShadow1)
+      else Canvas.SetTextColor(ExtraHintColor);
       fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
       end;
   end
