@@ -65,6 +65,8 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
+  { TfpgBaseEditCombo }
+
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
@@ -99,6 +101,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
+    procedure   DrawPlaceholderText(constref ARect: TfpgRect); virtual;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
     property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
     property    BackgroundColor default clBoxColor;
@@ -369,6 +372,7 @@ begin
     begin
       FNewItem := False;
       FSelectedItem:= i;
+      FFocusItem := i;
       FText:= Items[i];
       Break;
     end;
@@ -587,7 +591,7 @@ begin
 end;
 
 procedure TfpgBaseEditCombo.HandleKeyPress(var keycode: word;
-    var shiftstate: TShiftState; var consumed: boolean);
+  var shiftstate: TShiftState; var consumed: Boolean);
 var
   hasChanged: boolean;
   i: integer;
@@ -728,7 +732,7 @@ procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
   rect: TRect;
-  tw, tw2, st, len: integer;
+  tw, tw2, st, len, x: integer;
   Texte: string;
 
   // paint selection rectangle
@@ -830,10 +834,7 @@ begin
     if HasText then
       fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
     else
-      begin
-      Canvas.SetTextColor(clShadow1);
-      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
-      end;
+      DrawPlaceholderText(fpgRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin));
   end
   else
   begin
@@ -874,6 +875,11 @@ begin
     else
       fpgCaret.UnSetCaret(Canvas);
   end;
+end;
+
+procedure TfpgBaseEditCombo.DrawPlaceholderText(constref ARect: TfpgRect);
+begin
+  fpgStyle.DrawPlaceholderText(Canvas, ARect, ExtraHint);
 end;
 
 constructor TfpgBaseEditCombo.Create(AOwner: TComponent);
