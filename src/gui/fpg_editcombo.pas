@@ -369,6 +369,7 @@ begin
     begin
       FNewItem := False;
       FSelectedItem:= i;
+      FFocusItem := i;
       FText:= Items[i];
       Break;
     end;
