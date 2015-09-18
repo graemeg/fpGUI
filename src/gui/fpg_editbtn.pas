@@ -40,14 +40,8 @@ type
   private
     FOnButtonClick: TNotifyEvent;
     FReadOnly: Boolean;
-    function GetExtraHintAlignment: TAlignment;
-    function GetExtraHintColor: TfpgColor;
-    function GetExtraHintFocused: Boolean;
-    function GetExtraHintFontDesc: String;
-    procedure SetExtraHintAlignment(AValue: TAlignment);
-    procedure SetExtraHintColor(AValue: TfpgColor);
-    procedure SetExtraHintFocused(AValue: Boolean);
-    procedure SetExtraHintFontDesc(AValue: String);
+    function GetEditOptions: TfpgTextEditOptions;
+    procedure SetEditOptions(AValue: TfpgTextEditOptions);
     procedure SetReadOnly(const AValue: Boolean);
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
@@ -61,10 +55,7 @@ type
     procedure InternalButtonClick(Sender: TObject); virtual;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
     property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
-    property  ExtraHintFocused: Boolean read GetExtraHintFocused write SetExtraHintFocused;
-    property  ExtraHintColor: TfpgColor read GetExtraHintColor write SetExtraHintColor;
-    property  ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
-    property  ExtraHintAlignment: TAlignment read GetExtraHintAlignment write SetExtraHintAlignment;
+    property  EditOptions: TfpgTextEditOptions read GetEditOptions write SetEditOptions;
     property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   public
@@ -89,12 +80,9 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
-    property    ExtraHintFocused;
-    property    ExtraHintColor;
-    property    ExtraHintFontDesc;
-    property    ExtraHintAlignment default taLeftJustify;
     property    FileName: TfpgString read GetFileName write SetFileName;
     property    InitialDir: TfpgString read FInitialDir write FInitialDir;
     property    Filter: TfpgString read FFilter write SetFilter;
@@ -124,12 +112,9 @@ type
   published
     property    Align;
     property    Directory: TfpgString read GetDirectory write SetDirectory;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
-    property    ExtraHintFocused;
-    property    ExtraHintColor;
-    property    ExtraHintFontDesc;
-    property    ExtraHintAlignment default taLeftJustify;
     property    RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
     property    ReadOnly;
     property    TabOrder;
@@ -153,12 +138,9 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
-    property    ExtraHintFocused;
-    property    ExtraHintColor;
-    property    ExtraHintFontDesc;
-    property    ExtraHintAlignment default taLeftJustify;
     property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;
     property    ReadOnly;
     property    TabOrder;
@@ -176,12 +158,9 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
-    property    ExtraHintFocused;
-    property    ExtraHintColor;
-    property    ExtraHintFontDesc;
-    property    ExtraHintAlignment default taLeftJustify;
     property    ReadOnly;
     property    TabOrder;
     property    Text: TfpgString read GetText write SetText;
@@ -258,44 +237,14 @@ begin
   FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
 end;
 
-function TfpgBaseEditButton.GetExtraHintFocused: Boolean;
+function TfpgBaseEditButton.GetEditOptions: TfpgTextEditOptions;
 begin
-  Result := FEdit.ExtraHintFocused;
+  Result := FEdit.Options;
 end;
 
-function TfpgBaseEditButton.GetExtraHintFontDesc: String;
+procedure TfpgBaseEditButton.SetEditOptions(AValue: TfpgTextEditOptions);
 begin
-  Result := FEdit.ExtraHintFontDesc;
-end;
-
-procedure TfpgBaseEditButton.SetExtraHintAlignment(AValue: TAlignment);
-begin
-  FEdit.ExtraHintAlignment := AValue;
-end;
-
-function TfpgBaseEditButton.GetExtraHintColor: TfpgColor;
-begin
-  Result := FEdit.ExtraHintColor;
-end;
-
-function TfpgBaseEditButton.GetExtraHintAlignment: TAlignment;
-begin
-  Result := FEdit.ExtraHintAlignment;
-end;
-
-procedure TfpgBaseEditButton.SetExtraHintColor(AValue: TfpgColor);
-begin
-  FEdit.ExtraHintColor := AValue;
-end;
-
-procedure TfpgBaseEditButton.SetExtraHintFocused(AValue: Boolean);
-begin
-  FEdit.ExtraHintFocused := AValue;
-end;
-
-procedure TfpgBaseEditButton.SetExtraHintFontDesc(AValue: String);
-begin
-  FEdit.ExtraHintFontDesc := AValue;
+  FEdit.Options := AValue;
 end;
 
 function TfpgBaseEditButton.GetExtraHint: TfpgString;

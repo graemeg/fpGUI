@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes
   { you can add units after this },
-  fpg_main, fpg_stylemanager, fpg_cmdlineparams, mainform;
+  fpg_main, fpg_stylemanager, fpg_cmdlineparams, mainform, customedits;
 
 procedure MainProc;
 var

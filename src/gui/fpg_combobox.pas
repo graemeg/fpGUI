@@ -69,8 +69,6 @@ type
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
-    FExtraHintAlignment: TAlignment;
-    FExtraHintColor: TfpgColor;
     FFont: TfpgFont;
     FOnChange: TNotifyEvent;
     FOnCloseUp: TNotifyEvent;
@@ -78,12 +76,8 @@ type
     FOptions: TfpgComboOptions;
     FExtraHint: string;
     FReadOnly: Boolean;
-    function    GetExtraHintFontDesc: String;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
-    procedure   SetExtraHintAlignment(AValue: TAlignment);
-    procedure   SetExtraHintColor(AValue: TfpgColor);
-    procedure   SetExtraHintFontDesc(AValue: String);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetExtraHint(const AValue: string);
@@ -96,7 +90,6 @@ type
     FItems: TStringList;
     FBtnPressed: Boolean;
     FStoredShowHint: Boolean;
-    FExtraHintFont: TfpgFont;
     procedure   DisableShowHint;
     procedure   RestoreShowHint;
     procedure   SetMargin(const AValue: integer); virtual;
@@ -113,9 +106,6 @@ type
     property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
-    property    ExtraHintColor: TfpgColor read FExtraHintColor write SetExtraHintColor;
-    property    ExtraHintFontDesc: String read GetExtraHintFontDesc write SetExtraHintFontDesc;
-    property    ExtraHintAlignment: TAlignment read FExtraHintAlignment write SetExtraHintAlignment;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
@@ -132,6 +122,8 @@ type
   end;
   
 
+  { TfpgBaseStaticCombo }
+
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
@@ -139,6 +131,7 @@ type
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
     procedure   DoDrawText(const ARect: TfpgRect); virtual;
+    procedure   DrawPlaceholderText(constref ARect: TfpgRect); virtual;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
@@ -165,9 +158,6 @@ type
     property    DropDownCount;
     property    Enabled;
     property    ExtraHint;
-    property    ExtraHintColor;
-    property    ExtraHintFontDesc;
-    property    ExtraHintAlignment default taLeftJustify;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -240,41 +230,9 @@ begin
   FDropDownCount := AValue;
 end;
 
-procedure TfpgBaseComboBox.SetExtraHintAlignment(AValue: TAlignment);
-begin
-  if FExtraHintAlignment = AValue then
-    Exit;
-  FExtraHintAlignment := AValue;
-  RePaint;
-end;
-
-procedure TfpgBaseComboBox.SetExtraHintColor(AValue: TfpgColor);
-begin
-  if FExtraHintColor = AValue then
-    Exit;
-  FExtraHintColor := AValue;
-  RePaint;
-end;
-
-procedure TfpgBaseComboBox.SetExtraHintFontDesc(AValue: String);
-begin
-  FExtraHintFont.Free;
-  FExtraHintFont := fpgGetFont(AValue);
-  if FAutoSize then
-  begin
-    Height := FExtraHintFont.Height + (FMargin * 2);
-  end;
-  RePaint;
-end;
-
 function TfpgBaseComboBox.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
-end;
-
-function TfpgBaseComboBox.GetExtraHintFontDesc: String;
-begin
-  Result := FExtraHintFont.FontDesc;
 end;
 
 { Focusitem is 0 based like the Delphi ItemIndex property.
@@ -478,20 +436,16 @@ begin
   FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
   FFont := fpgGetFont('#List');
-  FExtraHintFont := fpgGetFont('#List');
   FOptions := [];
   FBtnPressed := False;
   FOnChange := nil;
   FExtraHint := '';
-  FExtraHintColor := clDefault;
-  FExtraHintAlignment := taLeftJustify;
   FStoredShowHint := ShowHint;
 end;
 
 destructor TfpgBaseComboBox.Destroy;
 begin
   FFont.Free;
-  FExtraHintFont.Free;
   FItems.Free;
   inherited Destroy;
 end;
@@ -657,23 +611,13 @@ begin
   begin
     // Popup button offset
     r := fpgRect(ARect.Left, ARect.Top, ARect.Width-FInternalBtnRect.Width, ARect.Height);
-
-    flags := [txtVCenter];
-    if not Enabled then
-      flags += [txtDisabled];
-    case FExtraHintAlignment of
-      taLeftJustify: flags += [txtLeft];
-      taCenter: flags += [txtHCenter];
-      taRightJustify: flags += [txtRight];
-    end;
-
-    Canvas.SetFont(FExtraHintFont);
-    if FExtraHintColor=clDefault
-    then Canvas.SetTextColor(clShadow1)
-    else Canvas.SetTextColor(FExtraHintColor);
-    Canvas.DrawText(r, ExtraHint, flags);
-    Canvas.SetFont(FFont);
+    DrawPlaceholderText(r);
   end;
+end;
+
+procedure TfpgBaseStaticCombo.DrawPlaceholderText(constref ARect: TfpgRect);
+begin
+  fpgStyle.DrawPlaceholderText(Canvas, ARect, ExtraHint);
 end;
 
 procedure TfpgBaseStaticCombo.InternalBtnClick(Sender: TObject);
