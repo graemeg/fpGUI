@@ -189,19 +189,19 @@ begin
     '  method and clPlaceholderText color definition'+#10+
     '- To change ExtraHint visibility when edit is focused click checkbox bellow';
 
-  edit1.ExtraHint := edit1.Name;
+  edit1.ExtraHint := edit1.ClassName;
 
-  editColor.ExtraHint := editColor.Name;
-  editAl.ExtraHint := editAl.Name;
-  editFont.ExtraHint := editFont.Name;
-  editBtn1.ExtraHint := editBtn1.Name;
-  editDir1.ExtraHint := editDir1.Name;
+  editColor.ExtraHint := editColor.ClassName;
+  editAl.ExtraHint := editAl.ClassName;
+  editFont.ExtraHint := editFont.ClassName;
+  editBtn1.ExtraHint := editBtn1.ClassName;
+  editDir1.ExtraHint := editDir1.ClassName;
   editCombo1.Items.AddStrings(['Item 1', 'Item 2', 'Item 3']);
   //editCombo.AutoCompletion := True;
   editCombo1.AllowNew := anYes;
-  editCombo1.ExtraHint := editCombo1.Name;
+  editCombo1.ExtraHint := editCombo1.ClassName;
   combo1.Items.AddStrings(['Item 1', 'Item 2', 'Item 3']);
-  combo1.ExtraHint := combo1.Name;
+  combo1.ExtraHint := combo1.ClassName;
 
   btnQuit.OnClick := @QuitClicked;
   cbFocused.OnChange := @ChangeFocusState;
