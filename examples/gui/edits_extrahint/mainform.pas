@@ -42,9 +42,10 @@ implementation
 
 procedure TfrmMain.ChangeFocusState(Sender: TObject);
 begin
-  if cbFocused.Checked
-  then edit1.Options := edit1.Options + [eo_ExtraHintIfFocus]
-  else edit1.Options := edit1.Options - [eo_ExtraHintIfFocus];
+  if cbFocused.Checked then
+    edit1.Options := edit1.Options + [eo_ExtraHintIfFocus]
+  else
+    edit1.Options := edit1.Options - [eo_ExtraHintIfFocus];
 
   editColor.Options := edit1.Options;
   editAl.Options := edit1.Options;

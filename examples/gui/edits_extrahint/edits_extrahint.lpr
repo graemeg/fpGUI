@@ -3,12 +3,15 @@ program edits_extrahint;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  {$IFDEF UNIX}
   cthreads,
-  {$ENDIF}{$ENDIF}
-  Classes
-  { you can add units after this },
-  fpg_main, fpg_stylemanager, fpg_cmdlineparams, mainform, customedits;
+  {$ENDIF}
+  Classes,
+  fpg_main,
+  fpg_stylemanager,
+  fpg_cmdlineparams,
+  mainform,
+  customedits;
 
 procedure MainProc;
 var

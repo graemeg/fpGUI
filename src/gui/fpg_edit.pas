@@ -145,8 +145,6 @@ type
   end;
 
 
-  { TfpgBaseTextEdit }
-
   TfpgBaseTextEdit = class(TfpgBaseEdit)
   private
     FExtraHint: string;

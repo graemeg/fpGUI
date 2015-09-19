@@ -190,9 +190,6 @@ type
   { This is very basic for now, just to remind us of theming support. Later we
     will rework this to use a Style Manager like the previous fpGUI.
     Also support Bitmap based styles for easier theme implementations. }
-
-  { TfpgStyle }
-
   TfpgStyle = class(TObject)
   protected
     FDefaultFont: TfpgFont;
@@ -238,7 +235,7 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
-    procedure   DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect; constref AText: String); virtual;
+    procedure   DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect; constref AText: TfpgString); virtual;
     { Combobox }
     procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); virtual;
     procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
@@ -2515,8 +2512,7 @@ begin
   ACanvas.FillRectangle(r);
 end;
 
-procedure TfpgStyle.DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect;
-  constref AText: String);
+procedure TfpgStyle.DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect; constref AText: TfpgString);
 begin
   ACanvas.SetTextColor(clPlaceholderText);
   ACanvas.DrawText(r, AText, [txtLeft, txtVCenter]);
