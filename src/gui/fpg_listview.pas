@@ -220,6 +220,7 @@ type
   TfpgLVPainter = class(TObject)
   protected
     FListView: TfpgListView;
+    function    CalculateItemArea: TfpgSize; virtual; abstract;
     function    GetColumnFromX(AX: Integer): TfpgLVColumn;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; virtual; abstract;
     function    GetItemHeight: Integer; virtual; abstract;
@@ -237,6 +238,7 @@ type
 
   TfpgLVReportPainter = class(TfpgLVPainter)
   private
+    function    CalculateItemArea: TfpgSize; override;
     function    GetVisibleColumnsWidth: Integer;
     procedure   PaintHeaders(ACanvas: TfpgCanvas);
     procedure   PaintItems(ACanvas: TfpgCanvas);
@@ -257,6 +259,7 @@ type
     FIconSize: Integer;
     function    ItemsPerRow: Integer;
   protected
+    function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
     function    GetItemHeight: Integer; override;
     function    HeaderGetArea: TfpgRect; override;
@@ -463,6 +466,14 @@ begin
   if FListView.VScrollBar.Visible then
     Dec(ClientWidth, FListView.VScrollBar.Width);
   Result := ClientWidth div ItemHeight; // use the height as the width for now.
+  if Result < 1 then
+    Result := 1;
+end;
+
+function TfpgLVIconPainter.CalculateItemArea: TfpgSize;
+begin
+  Result.W:=ItemsPerRow*ItemWidth;
+  Result.H:=(FListView.Items.Count div ItemsPerRow) * ItemHeight;
 end;
 
 function TfpgLVIconPainter.GetColumnFromX(AX: Integer; out
@@ -690,6 +701,12 @@ begin
     Exit; // ==>
 
   Result := fpgRect(2, 2, GetVisibleColumnsWidth, HeaderHeight);
+end;
+
+function TfpgLVReportPainter.CalculateItemArea: TfpgSize;
+begin
+  Result.W := GetVisibleColumnsWidth;
+  Result.H := FListView.Items.Count * ItemHeight;
 end;
 
 function TfpgLVReportPainter.GetVisibleColumnsWidth: Integer;
@@ -2076,56 +2093,88 @@ end;
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
-  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or (wdfSize in FDirtyFlags);
+  FScrollBarNeedsUpdate:=True;
 end;
 
 procedure TfpgListView.UpdateScrollBarPositions;
+type
+  TScrollBarState = set of (sbVertical, sbHorizontal);
 var
   BevelSize: Integer;
   I: Integer;
   MaxH,
   MaxV: Integer;
+  ItemsTotalSize: TfpgSize;
+  VisibleItemArea: TfpgSize;
+  ScrollBarVisible,
+  ScrollBarVisibleOld: TScrollBarState;
+  SameCount: Integer = 0;
 begin
+  ScrollBarVisible:=[];
   MaxH := 0;
   MaxV := 0;
   BevelSize := 2;
-  
-  for I := 0 to Columns.Count -1 do
-  begin
-    if Columns.Column[I].Visible then
-      Inc(MaxH, Columns.Column[I].Width);
-  end;
-  
-  MaxV := (FItems.Count+2) * ItemHeight - (Height);
-  if ShowHeaders then
-    Inc(MaxV, HeaderHeight);
-  if FVScrollBar.Visible then
-    Inc(MaxH, FVScrollBar.Width);
-  
-  FHScrollBar.Top := Height - FHScrollBar.Height - (BevelSize );
-  FHScrollBar.Left := BevelSize;
-  FHScrollBar.Width := Width - (BevelSize * 2);
 
-  
-  FVScrollBar.Top := BevelSize;
-  FVScrollBar.Left := Width - FVScrollBar.Width - (BevelSize );
-  FVScrollBar.Height := Height - FVScrollBar.Top - BevelSize;
-  
-  if FVScrollBar.Visible and FHScrollBar.Visible then
-  begin
-    FHScrollBar.Width := FHScrollBar.Width - FVScrollBar.Width;
-    FVScrollBar.Height := FVScrollBar.Height - FHScrollBar.Height;
-  end;
+  ItemsTotalSize := FViewStyle.CalculateItemArea;
 
-  FHScrollBar.Max := MaxH-(Width-(BevelSize * 2));
-  FVScrollBar.Max := MaxV;
-  
+  // HeaderHeight is 0 if not visible
+  VisibleItemArea.SetSize(Width-BevelSize*2, Height-BevelSize*2-HeaderHeight);
+
+  repeat
+    ScrollBarVisibleOld := ScrollBarVisible;
+
+    MaxH := ItemsTotalSize.W - VisibleItemArea.W;
+    MaxV := ItemsTotalSize.H - VisibleItemArea.H;
+
+
+    VScrollBar.Visible := MaxV > 0;
+
+    HScrollBar.Visible := MaxH > 0;
+
+    if VScrollBar.Visible and not (sbVertical in ScrollBarVisibleOld) then
+    begin
+      Include(ScrollBarVisible, sbVertical);
+      Dec(VisibleItemArea.W, VScrollBar.Width);
+      SameCount := 0;
+    end;
+
+    if HScrollBar.Visible and (sbHorizontal in ScrollBarVisibleOld) then
+    begin
+      Include(ScrollBarVisible, sbHorizontal);
+      Dec(VisibleItemArea.H, VScrollBar.Height);
+      SameCount := 0;
+    end;
+
+    // Samecount is so that when scrollbars become visible or not, the other
+    // scrollbar has a chance to alter it's max value. When they both don't
+    // change twice then we are good to go.
+    if ScrollBarVisibleOld = ScrollBarVisible then
+      Inc(SameCount);
+
+  until SameCount = 2;
+
+  VScrollBar.Top := BevelSize + HeaderHeight;
+  VScrollBar.Left:= Width-BevelSize-VScrollBar.Width;
+  VScrollBar.Height:=Height-VScrollBar.Top-BevelSize;
+
+  if HScrollBar.Visible then
+    VScrollBar.Height:=VScrollBar.Height-HScrollBar.Height;
+
+  HScrollBar.Top:=Height-BevelSize*2-HScrollBar.Height;
+  HScrollBar.Left:=BevelSize;
+  HScrollBar.Width:=Width-BevelSize*2;
+
+  if VScrollBar.Visible then
+    HScrollBar.Width:=HScrollBar.Width-VScrollBar.Width;
+
+  HScrollBar.Max:=ItemsTotalSize.W-VisibleItemArea.W;
+  VScrollBar.Max:=ItemsTotalSize.H-VisibleItemArea.H;
   if FVScrollBar.Max = 0 then
     FVScrollBar.SliderSize := 1
   else
   begin
     if (FVScrollBar.Max + FVScrollBar.Height) > 0 then
-      FVScrollBar.SliderSize := FVScrollBar.Height / (FVScrollBar.Max + FVScrollBar.Height)
+      FVScrollBar.SliderSize := FVScrollBar.Height / (FVScrollBar.Max + FVScrollBar.Height{ - VScrollBar.Width*2})
     else
       FVScrollBar.SliderSize := 0.5;
   end;
