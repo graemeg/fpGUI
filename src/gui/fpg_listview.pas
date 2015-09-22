@@ -220,10 +220,13 @@ type
   TfpgLVPainter = class(TObject)
   protected
     FListView: TfpgListView;
+    function    GetColumnFromX(AX: Integer): TfpgLVColumn;
+    function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; virtual; abstract;
     function    GetItemHeight: Integer; virtual; abstract;
-    function    ItemGetRect(AIndex: Integer): TfpgRect; virtual; abstract;
-    function    ItemFromPoint(AX, AY: Integer): TfpgLVItem; virtual; abstract;
+    function    HeaderGetArea: TfpgRect; virtual; abstract;
     function    HeaderHeight: Integer; virtual; abstract;
+    function    ItemGetRect(AIndex: Integer): TfpgRect; virtual; abstract;
+    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; virtual; abstract;
     procedure   Paint(ACanvas: TfpgCanvas); virtual; abstract;
   public
     constructor Create(AListview: TfpgListView);
@@ -238,9 +241,11 @@ type
     procedure   PaintHeaders(ACanvas: TfpgCanvas);
     procedure   PaintItems(ACanvas: TfpgCanvas);
   protected
+    function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
     function    GetItemHeight: Integer; override;
+    function    HeaderGetArea: TfpgRect; override;
     function    HeaderHeight: Integer; override;
-    function    ItemFromPoint(AX, AY: Integer): TfpgLVItem; override;
+    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
     function    ItemGetRect(AIndex: Integer): TfpgRect; override;
     procedure   Paint( ACanvas: TfpgCanvas); override;
   end;
@@ -273,6 +278,7 @@ type
     FOnPaintItem: TfpgLVPaintItemEvent;
     FShowHeaders: Boolean;
     FResizingColumn: TfpgLVColumn;
+    FResizeColumnStartWidth: Integer;
     FMouseDownPoint: TPoint;
     FScrollBarNeedsUpdate: Boolean;
     FShiftIsPressed: Boolean;
@@ -306,7 +312,7 @@ type
     procedure   SelectionClear;
     function    ItemGetSelected(const AItem: TfpgLVItem): Boolean;
     procedure   ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
-    function    ItemGetFromPoint(const X, Y: Integer): TfpgLVItem;
+    function    ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
     function    ItemGetRect(AIndex: Integer): TfpgRect;
     function    ItemIndexFromY(Y: Integer): Integer;
     function    HeaderHeight: Integer;
@@ -433,6 +439,15 @@ begin
   Result := FListView.Canvas.Font.Height + 4;
 end;
 
+function TfpgLVReportPainter.HeaderGetArea: TfpgRect;
+begin
+  Result := fpgRect(0,0,0,0);
+  if HeaderHeight = 0 then
+    Exit; // ==>
+
+  Result := fpgRect(2, 2, GetVisibleColumnsWidth, HeaderHeight);
+end;
+
 function TfpgLVReportPainter.GetVisibleColumnsWidth: Integer;
 var
   I: Integer;
@@ -459,24 +474,24 @@ begin
   Result := FListView.Canvas.Font.Height + 10;
 end;
 
-function TfpgLVReportPainter.ItemFromPoint(AX, AY: Integer): TfpgLVItem;
+function TfpgLVReportPainter.ItemFromPoint(AX, AY: Integer; out
+  AItemIndex: Integer): TfpgLVItem;
 var
-  Index: Integer;
   ItemTop: Integer;
 begin
   Result := nil;
   ItemTop := (FListView.FVScrollBar.Position + AY) -2;
   if FListView.ShowHeaders then
     Dec(ItemTop, HeaderHeight);
-  Index := ItemTop div ItemHeight;
-  if Index < 0 then
+  AItemIndex := ItemTop div ItemHeight;
+  if AItemIndex < 0 then
     Exit;
-  if Index >= FListView.FItems.Count then
+  if AItemIndex >= FListView.FItems.Count then
     Exit;
   if FListView.FHScrollBar.Position - 2 + AX > GetVisibleColumnsWidth then
     Exit;
 
-  Result :=FListView.FItems.Item[Index];
+  Result :=FListView.FItems.Item[AItemIndex];
 
 end;
 
@@ -722,6 +737,43 @@ begin
 
 end;
 
+function TfpgLVReportPainter.GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn;
+var
+  cRect: TfpgRect;
+  curLeft, curRight: Integer;
+  I: Integer;
+  Column: TfpgLVColumn;
+  LastColumn: TfpgLVColumn = nil;
+  HeaderX: Integer;
+begin
+  Result := nil;
+  ResizeColumn := nil;
+
+  HeaderX := FListView.FHScrollBar.Position - 2 + ax;
+  curLeft := 0;
+
+  for I := 0 to FListview.FColumns.Count-1 do
+    begin
+      Column := FListview.FColumns.Column[I];
+      if Column.Visible then
+      begin
+        curRight := curLeft + Column.Width-1;
+        if (HeaderX <= curRight) and (HeaderX >= curLeft) then
+        begin
+          Result := Column;
+          // if Mouse is in resize position then set resize column
+          if Assigned(LastColumn) and (LastColumn.Resizable) and (HeaderX - curLeft < 5) then
+            ResizeColumn := LastColumn;
+
+          if Column.Resizable and (curRight - HeaderX < 5) then
+            ResizeColumn := Column;
+        end;
+        Inc(curLeft, Column.Width);
+      end;
+      LastColumn := Column;
+    end;
+end;
+
 procedure TfpgLVReportPainter.Paint(ACanvas: TfpgCanvas);
 begin
   PaintItems(ACanvas);
@@ -731,6 +783,13 @@ begin
 end;
 
 { TfpgLVPainter }
+
+function TfpgLVPainter.GetColumnFromX(AX: Integer): TfpgLVColumn;
+var
+  Dummy: TfpgLVColumn;
+begin
+  Result := GetColumnFromX(AX, Dummy);
+end;
 
 constructor TfpgLVPainter.Create(AListview: TfpgListView);
 begin
@@ -1314,9 +1373,11 @@ begin
     FOnSelectionChanged(Self, AItem, Items.IndexOf(AItem), AValue);
 end;
 
-function TfpgListView.ItemGetFromPoint(const X, Y: Integer): TfpgLVItem;
+function TfpgListView.ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
 begin
-  Result := FViewStyle.ItemFromPoint(X,Y);
+  Result := FViewStyle.ItemFromPoint(X,Y, AIndex);
+  if AIndex < -1 then
+    AIndex:=-1;
 end;
 
 function TfpgListView.ItemGetRect(AIndex: Integer): TfpgRect;
@@ -1371,61 +1432,25 @@ end;
 procedure TfpgListView.HandleHeaderMouseMove(x, y: Integer; btnstate: word;
   Shiftstate: TShiftState);
 var
-  I: Integer;
-  curLeft: Integer;
-  curRight: Integer;
-  Column: TfpgLVColumn;
-  LastColumn: TfpgLVColumn;
-  HeaderX: Integer; // this is X from the headers point of view
   NewMouseCursor: TMouseCursor;
+  ResizeColumn: TfpgLVColumn;
 begin
-  curLeft := 0;
+  FViewStyle.GetColumnFromX(X, ResizeColumn);
 
-  HeaderX := FHScrollBar.Position - 2 + X;
-  NewMouseCursor := MouseCursor;
-  LastColumn := nil;
-  for I := 0 to FColumns.Count-1 do
+  NewMouseCursor:=MouseCursor;
+
+  if FResizingColumn = nil then
   begin
-    Column := FColumns.Column[I];
-    if not Column.Visible then
-      Continue;
-    curRight := curLeft + Column.Width-1;
-    if Column.Resizable or (Assigned(LastColumn) and LastColumn.Resizable) then
-    begin
-      if (FResizingColumn <> nil) and (FResizingColumn = Column) then
-      begin
-        FResizingColumn.Width :=  (x + FHScrollBar.Position)- curLeft;
-        DoRepaint;
-        Break;
-      end
-      else begin
-        if (HeaderX >= curLeft) and (HeaderX <= curRight) then // we are within this columns space
-        begin
-          if ((LastColumn <> nil) and (LastColumn.Resizable) and (HeaderX - curLeft < 5))
-          or (Column.Resizable) and (curRight - HeaderX < 5)
-          then
-          begin
-            NewMouseCursor := mcSizeEW;
-            Break;
-          end;
-        end
-        else
-          NewMouseCursor := mcDefault;
-      end;
-    end;
-    LastColumn := Column;
-    Inc(curLeft, Column.Width);
+    NewMouseCursor := mcDefault;
+    if Assigned(ResizeColumn) and (btnstate = 0) then
+      NewMouseCursor:=mcSizeEW
+  end
+  else
+  begin
+    FResizingColumn.Width := FResizeColumnStartWidth + x - FMouseDownPoint.X;
+    DoRepaint;
   end;
-  if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
-    if (HeaderX - curLeft < 5) and (HeaderX - curLeft >= 0) then
-      NewMouseCursor := mcSizeEW;
-      
-  if FResizingColumn <> nil then
-    NewMouseCursor := mcSizeEW;
-  
-  if NewMouseCursor <> MouseCursor then
-    MouseCursor := NewMouseCursor;
-
+  MouseCursor:=NewMouseCursor;
 end;
 
 procedure TfpgListView.MsgPaint(var msg: TfpgMessageRec);
@@ -1442,8 +1467,8 @@ var
   cRect: TfpgRect;
 begin
   cRect := GetClientRect;
-  if FShowHeaders then
-    Inc(cRect.Top, HeaderHeight);
+  // HeaderHeight is 0 if ShowHeaders is false.
+  Inc(cRect.Top, HeaderHeight);
   if FHScrollBar.Visible then
     Dec(cRect.Height, FHScrollBar.Height);
   if FVScrollBar.Visible then
@@ -1460,11 +1485,12 @@ procedure TfpgListView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   Item: TfpgLVItem;
   cRect: TfpgRect;
-  curLeft, curRight: Integer;
-  I: Integer;
+//  curLeft, curRight: Integer;
+//  I: Integer;
   Column: TfpgLVColumn;
-  LastColumn: TfpgLVColumn;
-  HeaderX: Integer;
+//  LastColumn: TfpgLVColumn;
+//  HeaderX: Integer;
+  ResizeColumn: TfpgLVColumn;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   ShiftIsPressed := ssShift in shiftstate;
@@ -1474,46 +1500,32 @@ begin
   
   if not PtInRect(cRect, Point(X,Y)) then
     Exit;
-  
+
+  // Check if event is within headers
   if FShowHeaders then
   begin
-    if (Y < HeaderHeight + cRect.Top)  then
+    if PtInRect(FViewStyle.HeaderGetArea, Point(X, Y)) then
+    //if (Y < HeaderHeight + cRect.Top)  then
     begin
-      LastColumn := nil;
-      HeaderX := FHScrollBar.Position - 2 + x;
-
-      curLeft := 0;
-      for I := 0 to FColumns.Count-1 do
+      Column := FViewStyle.GetColumnFromX(X, ResizeColumn);
+      // below should be moved to viewstyle
+      if (MouseCursor = mcSizeEW) then
       begin
-        Column := FColumns.Column[I];
-        if Column.Visible then
-        begin
-          curRight := curLeft + Column.Width-1;
-          if (HeaderX <= curRight) and (HeaderX >= curLeft) then
-          begin
-            if (MouseCursor = mcSizeEW) then
-            begin
-              if Column.Resizable and (curRight - HeaderX < 5) then
-                FResizingColumn := Column
-              else
-                if Assigned(LastColumn) and LastColumn.Resizable and (HeaderX - curLeft < 5) then
-                  FResizingColumn := LastColumn
-            end
-            else // only perform a mouse click if we aren't resizing
-              DoColumnClick(Column, 1);
-          end;
-          Inc(curLeft, Column.Width);
-        end;
-        LastColumn := Column;
-      end;
-      if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
-        if (HeaderX - curLeft < 5) and (HeaderX - curLeft >= 0) then
-          FResizingColumn := LastColumn;
+        if Assigned(ResizeColumn) then
+        //if Column.Resizable and (curRight - HeaderX < 5) then
+          FResizingColumn := ResizeColumn;
+          FResizeColumnStartWidth:=ResizeColumn.Width;
+      end
+      else // only perform a mouse click if we aren't resizing
+        DoColumnClick(Column, 1);
+      Exit; // ==>
     end;
 
+    // Not within headers so adjust rect to exclude header area.
     Inc(cRect.Top, HeaderHeight);
   end;
-  
+
+  // Remove V and H scrollbars from posible area.
   if FHScrollBar.Visible then
     Dec(cRect.Height, FHScrollBar.Height);
   if FVScrollBar.Visible then
@@ -1522,7 +1534,8 @@ begin
   if not PtInRect(cRect, Point(X,Y)) then
     Exit;
 
-  Item := ItemGetFromPoint(X, Y);
+  // The only area left is the item area.
+  Item := ItemGetFromPoint(X, Y, FItemIndex);
   if not FMultiSelect then
     SelectionClear;
   if Item <> nil then
@@ -1550,8 +1563,6 @@ end;
 
 procedure TfpgListView.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 var
-  I: Integer;
-  cLeft, cRight: Integer;
   cRect: TfpgRect;
   Column: TfpgLVColumn;
 begin
@@ -1564,28 +1575,20 @@ begin
 
   if FShowHeaders then
   begin
-    if (Y < HeaderHeight + cRect.Top) then
+    if PtInRect(FViewStyle.HeaderGetArea, Point(X,Y)) then
     begin
-      cLeft := cRect.Left - FHScrollBar.Position;
-      for I := 0 to FColumns.Count-1 do
-      begin
-        Column := FColumns.Column[I];
-        if Column.Visible then
-        begin
-          cRight := cLeft + Column.Width-1;
-          if (X <= cRight) and (X >= cLeft) then
-            DoColumnClick(Column, 3);
-          Inc(cLeft, Column.Width);
-        end;
-      end;
+      Column := FViewStyle.GetColumnFromX(X);
+      if Assigned(Column) then
+        DoColumnClick(Column, 3);
     end;
-    Inc(cRect.Top, HeaderHeight);
   end;
-  
+
+  {  Maybe useful later for something else
   if FVScrollBar.Visible then
     Dec(cRect.Width, FVScrollBar.Width);
   if FHScrollBar.Visible then
     Dec(cRect.Height, FHScrollBar.Height);
+    }
 end;
 
 procedure TfpgListView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -1599,6 +1602,7 @@ begin
   end;
   
   FResizingColumn := nil;
+  FResizeColumnStartWidth:=0;
   DoRepaint;
 end;
 
@@ -1618,9 +1622,10 @@ procedure TfpgListView.HandleDoubleClick(x, y: integer; button: word;
   shiftstate: TShiftState);
 var
   Item: TfpgLVItem;
+  Dummy: Integer;
 begin
   inherited HandleDoubleClick(x, y, button, shiftstate);
-  Item := ItemGetFromPoint(x,y);
+  Item := ItemGetFromPoint(x,y, Dummy);
   if Assigned(Item) then
     DoItemActivate(Item);
 end;
@@ -1637,7 +1642,7 @@ begin
   if not PtInRect(cRect, Point(X,Y)) and (FResizingColumn = nil) then
     Exit;
 
-  if ((Y < (cRect.Top + HeaderHeight)) and ShowHeaders) or (FResizingColumn <> nil) then
+  if PtInRect(FViewStyle.HeaderGetArea, Point(x,y)) or Assigned(FResizingColumn) then
   begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
   end
