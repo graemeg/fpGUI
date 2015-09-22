@@ -229,7 +229,7 @@ type
     function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; virtual; abstract;
     procedure   Paint(ACanvas: TfpgCanvas); virtual; abstract;
   public
-    constructor Create(AListview: TfpgListView);
+    constructor Create(AListview: TfpgListView); virtual;
     property    ItemHeight: Integer read GetItemHeight;
   end;
 
@@ -248,6 +248,26 @@ type
     function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
     function    ItemGetRect(AIndex: Integer): TfpgRect; override;
     procedure   Paint( ACanvas: TfpgCanvas); override;
+  end;
+
+  { TfpgLVIconPainter }
+
+  TfpgLVIconPainter = class(TfpgLVPainter)
+  private
+    FIconSize: Integer;
+    function    ItemsPerRow: Integer;
+  protected
+    function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
+    function    GetItemHeight: Integer; override;
+    function    HeaderGetArea: TfpgRect; override;
+    function    HeaderHeight: Integer; override;
+    function    ItemGetRect(AIndex: Integer): TfpgRect; override;
+    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
+    procedure   Paint(ACanvas: TfpgCanvas); override;
+  public
+    constructor Create(AListView: TfpgListView); override;
+    property    IconSize: Integer read FIconSize write FIconSize;
+    property    ItemWidth: Integer read GetItemHeight; // use height for now
   end;
   
 
@@ -430,6 +450,230 @@ begin
   if AInt > Bint then
     Result := AInt
   else Result := BInt;
+end;
+
+{ TfpgLVIconPainter }
+
+function TfpgLVIconPainter.ItemsPerRow: Integer;
+var
+  ClientWidth: Integer;
+
+begin
+  ClientWidth := FListView.GetClientRect.Width;
+  if FListView.VScrollBar.Visible then
+    Dec(ClientWidth, FListView.VScrollBar.Width);
+  Result := ClientWidth div ItemHeight; // use the height as the width for now.
+end;
+
+function TfpgLVIconPainter.GetColumnFromX(AX: Integer; out
+  ResizeColumn: TfpgLVColumn): TfpgLVColumn;
+begin
+  Result := nil;
+end;
+
+function TfpgLVIconPainter.GetItemHeight: Integer;
+begin
+  Result := FIconSize + FListView.Canvas.Font.Height + 10;
+end;
+
+function TfpgLVIconPainter.HeaderGetArea: TfpgRect;
+begin
+  Result := fpgRect(0,0,0,0);
+end;
+
+function TfpgLVIconPainter.HeaderHeight: Integer;
+begin
+  Result := 0;
+end;
+
+function TfpgLVIconPainter.ItemGetRect(AIndex: Integer): TfpgRect;
+begin
+  Result.Top := 2 + ((AIndex div ItemsPerRow) * ItemHeight) - FListView.FVScrollBar.Position;
+  Inc(Result.Top, HeaderHeight);
+  Result.Height := ItemHeight;
+  Result.Left := 2 - FListView.FHScrollBar.Position + (AIndex mod ItemsPerRow) * ItemWidth;
+  Result.Width := ItemWidth;
+end;
+
+function TfpgLVIconPainter.ItemFromPoint(AX, AY: Integer; out
+  AItemIndex: Integer): TfpgLVItem;
+var
+  ItemTop: Integer;
+  ItemLeft: Integer;
+begin
+  Result := nil;
+  ItemTop := (FListView.FVScrollBar.Position + AY) -2;
+
+  Dec(ItemTop, HeaderHeight);
+
+  AItemIndex := ItemTop div ItemHeight div (ItemsPerRow * ItemWidth);
+  if AItemIndex < 0 then
+    Exit;
+  if AItemIndex >= FListView.FItems.Count then
+    Exit;
+  {if FListView.FHScrollBar.Position - 2 + AX > GetVisibleColumnsWidth then
+    Exit;}
+
+  Result :=FListView.FItems.Item[AItemIndex];
+end;
+
+procedure TfpgLVIconPainter.Paint(ACanvas: TfpgCanvas);
+var
+  FirstIndex,
+  LastIndex: Integer;
+  I: Integer;
+  PaintPart: TfpgLVItemPaintPart;
+  ItemRect: TfpgRect;
+  ItemState: TfpgLVItemState;
+  Item: TfpgLVItem;
+  TheText: String;
+  TheTextColor: TfpgColor;
+  oClipRect: TfpgRect;
+  iItemClipRect: TfpgRect;
+  //ColumnIndex: Integer;
+  cBottom: Integer;
+  vBottom: Integer;
+  tLeft,
+  tWidth,
+  tHeight: Integer;
+  Image, TmpImage: TfpgImage;
+  LV: TfpgListView;
+begin
+  LV := FListView;
+  FirstIndex := (LV.FVScrollBar.Position) div ItemHeight;
+  LastIndex := (LV.FVScrollBar.Position+LV.GetItemAreaHeight) div ItemHeight;
+
+  if LastIndex > LV.FItems.Count-1 then
+    LastIndex := LV.FItems.Count-1;
+
+  cBottom := 2 + ((LastIndex+1 - FirstIndex) * ItemHeight);
+
+  if LV.ShowHeaders then
+    Inc(cBottom, HeaderHeight);
+
+  oClipRect := ACanvas.GetClipRect;
+
+  for I := FirstIndex to LastIndex do
+  begin
+    ItemState := [];
+    Image := nil;
+    PaintPart := [lvppBackground, lvppIcon, lvppText];
+    ItemRect := ItemGetRect(I);  // check if this should be in the painter
+
+    if  (I = FirstIndex)
+    and (LV.ShowHeaders)
+    and (ItemRect.Top < 2 + HeaderHeight) then
+      Dec(cBottom, (2 + HeaderHeight) - ItemRect.Top);
+
+    Item := LV.FItems.Item[I];
+    if Item.Selected[LV] then
+      Include(ItemState, lisSelected);
+    if LV.FItemIndex = I then
+    begin
+      Include(ItemState, lisFocused);
+      Include(PaintPart, lvppFocused);
+    end;
+
+    if lisSelected in (ItemState) then
+    begin
+      if LV.Focused then
+        ACanvas.Color := clSelection
+      else
+        ACanvas.Color := clInactiveSel;
+    end
+    else
+      ACanvas.Color := clListBox;
+
+    ACanvas.FillRectangle(ItemRect);
+    Exclude(PaintPart, lvppBackground);
+    TheTextColor := ACanvas.TextColor;
+    if Assigned(LV.FOnPaintItem) then
+      LV.FOnPaintItem(LV, ACanvas, Item, I, ItemRect, PaintPart);
+
+    if (lvppFocused in PaintPart) and (LV.FShowFocusRect) then
+    begin
+      if lisSelected in ItemState then
+        ACanvas.Color := TfpgColor(not clSelection)
+      else
+        ACanvas.Color := clSelection;
+
+      ACanvas.SetLineStyle(1, lsDot);
+      ACanvas.DrawRectangle(ItemRect);
+    end;
+
+    if (lvppText in PaintPart) or (lvppIcon in PaintPart) then
+    begin
+      if lisSelected in ItemState then
+        ACanvas.TextColor := clSelectionText;
+
+      ACanvas.SetClipRect(ItemRect);
+      if lvppText in PaintPart then begin
+        TheText := Item.Caption
+      end;
+
+      tLeft := ItemRect.Left;
+
+      Image := LV.FindImageForState(I, 0, ItemState);
+      if (lvppIcon in PaintPart) and Assigned(Image) then
+      begin
+        TmpImage := Image;
+        if not LV.Enabled then
+          TmpImage := Image.CreateDisabledImage;
+        ACanvas.DrawImage(ItemRect.Left + ((ItemWidth-TmpImage.Width-5) div 2) ,ItemRect.Top + (ItemHeight - ACanvas.Font.Height) div 2, TmpImage);
+        if Not LV.Enabled then
+          TmpImage.Free;
+      end;
+
+
+      if lvppText in PaintPart then
+      begin
+        tWidth := ACanvas.Font.TextWidth(TheText);
+        tHeight := ACanvas.Font.Height;
+        Inc(tLeft, (ItemWidth - tWidth - 5) div 2);
+        fpgStyle.DrawString(ACanvas, tLeft, ItemRect.Bottom-5-tHeight, TheText, LV.Enabled);
+      end;
+    end;
+
+    ACanvas.SetClipRect(oClipRect);
+
+    ACanvas.TextColor := TheTextColor;
+  end;
+
+
+  vBottom := LV.Height - 2;
+  if LV.FHScrollBar.Visible then
+    Dec(vBottom, LV.FHScrollBar.Height);
+
+  // the painted items haven't fully covered the visible area
+  if vBottom > cBottom then
+  begin
+    ItemRect.Left := 2;
+    ItemRect.Top := cBottom;
+    ItemRect.SetBottom(vBottom);
+    ItemRect.Width := LV.Width - 4;
+    ACanvas.SetColor(clListBox);
+    ACanvas.FillRectangle(ItemRect);
+  end;
+  {if GetVisibleColumnsWidth < oClipRect.Width then
+  begin
+    ItemRect.Left := GetVisibleColumnsWidth+2;
+    ItemRect.SetRight(oClipRect.Right);
+    ItemRect.Top := oClipRect.Top;
+    ItemRect.Height := oClipRect.Height;
+    ACanvas.SetColor(clListBox);
+    ACanvas.FillRectangle(ItemRect);
+  end;}
+
+
+
+
+
+end;
+
+constructor TfpgLVIconPainter.Create(AListView: TfpgListView);
+begin
+  inherited Create(AListView);
+  FIconSize := 64;
 end;
 
 { TfpgLVReportPainter }

@@ -192,6 +192,8 @@ begin
     Align := alClient;
     //OnPaintItem := @PaintItem;
     Items := FListView.Items;
+    Images := FImageList;
+    ViewStyle := TfpgLVIconPainter.Create(FTmpListView);
   end;
 
   
