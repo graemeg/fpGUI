@@ -2110,7 +2110,6 @@ var
   ScrollBarVisibleOld: TScrollBarState;
   SameCount: Integer = 0;
 begin
-  ScrollBarVisible:=[];
   MaxH := 0;
   MaxV := 0;
   BevelSize := 2;
@@ -2120,6 +2119,8 @@ begin
   // HeaderHeight is 0 if not visible
   VisibleItemArea.SetSize(Width-BevelSize*2, Height-BevelSize*2-HeaderHeight);
 
+  // Start with the assumption that both scrollbars are hidden.
+  ScrollBarVisible:=[];
   repeat
     ScrollBarVisibleOld := ScrollBarVisible;
 
