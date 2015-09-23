@@ -238,11 +238,11 @@ type
 
   TfpgLVReportPainter = class(TfpgLVPainter)
   private
-    function    CalculateItemArea: TfpgSize; override;
     function    GetVisibleColumnsWidth: Integer;
     procedure   PaintHeaders(ACanvas: TfpgCanvas);
     procedure   PaintItems(ACanvas: TfpgCanvas);
   protected
+    function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
     function    GetItemHeight: Integer; override;
     function    HeaderGetArea: TfpgRect; override;
@@ -330,6 +330,7 @@ type
     //
     //function    GetVisibleColumnsWidth: Integer;
     function    GetItemAreaHeight: Integer;
+    function    GetItemClientArea: TfpgRect;
     procedure   SelectionSetRangeEnabled(AStart, AEnd: Integer; AValue: Boolean);
     procedure   SelectionToggleRange(AStart, AEnd: Integer; const ShiftState: TShiftState; IgnoreStartIndex: Boolean);
     procedure   SelectionClear;
@@ -474,6 +475,8 @@ function TfpgLVIconPainter.CalculateItemArea: TfpgSize;
 begin
   Result.W:=ItemsPerRow*ItemWidth;
   Result.H:=(FListView.Items.Count div ItemsPerRow) * ItemHeight;
+  if FListView.Items.Count mod ItemsPerRow > 0 then
+    Inc(Result.H, ItemHeight);
 end;
 
 function TfpgLVIconPainter.GetColumnFromX(AX: Integer; out
@@ -510,7 +513,6 @@ function TfpgLVIconPainter.ItemFromPoint(AX, AY: Integer; out
   AItemIndex: Integer): TfpgLVItem;
 var
   ItemTop: Integer;
-  ItemLeft: Integer;
 begin
   Result := nil;
   ItemTop := (FListView.FVScrollBar.Position + AY) -2;
@@ -522,8 +524,6 @@ begin
     Exit;
   if AItemIndex >= FListView.FItems.Count then
     Exit;
-  {if FListView.FHScrollBar.Position - 2 + AX > GetVisibleColumnsWidth then
-    Exit;}
 
   Result :=FListView.FItems.Item[AItemIndex];
 end;
@@ -541,28 +541,39 @@ var
   TheTextColor: TfpgColor;
   oClipRect: TfpgRect;
   iItemClipRect: TfpgRect;
-  //ColumnIndex: Integer;
   cBottom: Integer;
+  cRight: Integer;
   vBottom: Integer;
+  vRight: Integer;
   tLeft,
   tWidth,
   tHeight: Integer;
   Image, TmpImage: TfpgImage;
   LV: TfpgListView;
+  ItemAreaBounds: TfpgRect;
 begin
   LV := FListView;
-  FirstIndex := (LV.FVScrollBar.Position) div ItemHeight;
-  LastIndex := (LV.FVScrollBar.Position+LV.GetItemAreaHeight) div ItemHeight;
+  FirstIndex := (LV.FVScrollBar.Position) div ItemHeight * ItemsPerRow;
+  LastIndex := FirstIndex + LV.GetItemAreaHeight div ItemHeight * ItemsPerRow-1;
+
+  if LastIndex-FirstIndex div ItemsPerRow * ItemHeight < LV.GetItemAreaHeight then
+    Inc(LastIndex, ItemsPerRow);
+
+  if FListView.VScrollBar.Position mod ItemHeight > 0 then
+        Inc(LastIndex, ItemsPerRow);
 
   if LastIndex > LV.FItems.Count-1 then
     LastIndex := LV.FItems.Count-1;
 
-  cBottom := 2 + ((LastIndex+1 - FirstIndex) * ItemHeight);
+  cBottom:=HeaderHeight;
+  cRight := 2;
 
   if LV.ShowHeaders then
     Inc(cBottom, HeaderHeight);
 
-  oClipRect := ACanvas.GetClipRect;
+  ItemAreaBounds := FListView.GetItemClientArea;
+
+  UnionRect(oClipRect, ACanvas.GetClipRect, ItemAreaBounds);
 
   for I := FirstIndex to LastIndex do
   begin
@@ -570,6 +581,19 @@ begin
     Image := nil;
     PaintPart := [lvppBackground, lvppIcon, lvppText];
     ItemRect := ItemGetRect(I);  // check if this should be in the painter
+
+    iItemClipRect.Left := Max(ItemRect.Left, oClipRect.Left);
+    iItemClipRect.Top := Max(ItemRect.Top, oClipRect.Top);
+    iItemClipRect.SetRight(Min(ItemRect.Right, oClipRect.Right));
+    iItemClipRect.SetBottom(Min(ItemRect.Bottom, oClipRect.Bottom));
+
+    // keep track of how far down and right we've painted
+    if iItemClipRect.Bottom > cBottom then
+      cBottom:=iItemClipRect.Bottom;
+    if iItemClipRect.Right > cRight then
+      cRight:=iItemClipRect.Right;
+
+    ACanvas.SetClipRect(iItemClipRect);
 
     if  (I = FirstIndex)
     and (LV.ShowHeaders)
@@ -584,6 +608,8 @@ begin
       Include(ItemState, lisFocused);
       Include(PaintPart, lvppFocused);
     end;
+
+
 
     if lisSelected in (ItemState) then
     begin
@@ -617,7 +643,7 @@ begin
       if lisSelected in ItemState then
         ACanvas.TextColor := clSelectionText;
 
-      ACanvas.SetClipRect(ItemRect);
+      ACanvas.SetClipRect(iItemClipRect);
       if lvppText in PaintPart then begin
         TheText := Item.Caption
       end;
@@ -652,28 +678,43 @@ begin
 
 
   vBottom := LV.Height - 2;
+  vRight := LV.Width - 2;
   if LV.FHScrollBar.Visible then
     Dec(vBottom, LV.FHScrollBar.Height);
+  if LV.FVScrollBar.Visible then
+    Dec(vRight, LV.FVScrollBar.Width);
 
   // the painted items haven't fully covered the visible area
+  ACanvas.SetColor(clListBox);
+  // paint area below last items
   if vBottom > cBottom then
   begin
     ItemRect.Left := 2;
     ItemRect.Top := cBottom;
     ItemRect.SetBottom(vBottom);
     ItemRect.Width := LV.Width - 4;
-    ACanvas.SetColor(clListBox);
     ACanvas.FillRectangle(ItemRect);
   end;
-  {if GetVisibleColumnsWidth < oClipRect.Width then
+  // paint area to the right of the items
+  if vRight > cRight  then
   begin
-    ItemRect.Left := GetVisibleColumnsWidth+2;
+    ItemRect.Left := cRight;
     ItemRect.SetRight(oClipRect.Right);
     ItemRect.Top := oClipRect.Top;
     ItemRect.Height := oClipRect.Height;
-    ACanvas.SetColor(clListBox);
     ACanvas.FillRectangle(ItemRect);
-  end;}
+  end;
+  // paint area to right of last item that doesn't fill the row
+  I := (FListView.Items.Count) mod ItemsPerRow;
+  if (I > 0) and (LastIndex > FListView.Items.Count-ItemsPerRow+1) then
+  begin
+    //ACanvas.SetColor(clRed); // useful to debug
+    ItemRect.Left := I * ItemWidth;
+    ItemRect.SetRight(cRight);
+    ItemRect.Top := iItemClipRect.Top;
+    ItemRect.SetBottom(cBottom);
+    ACanvas.FillRectangle(ItemRect);
+  end;
 
 
 
@@ -1000,7 +1041,6 @@ end;
 
 function TfpgLVReportPainter.GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn;
 var
-  cRect: TfpgRect;
   curLeft, curRight: Integer;
   I: Integer;
   Column: TfpgLVColumn;
@@ -1535,6 +1575,20 @@ begin
     Dec(Result, HeaderHeight);
   if FHScrollBar.Visible then
     Dec(Result,FHScrollBar.Height);
+end;
+
+function TfpgListView.GetItemClientArea: TfpgRect;
+begin
+  Result := GetClientRect;
+  ////Result.SetRect(2,2,Width-4,Height-4-HeaderHeight);
+  Inc(Result.Left, 2);
+  Inc(Result.Top, 2);
+  Dec(Result.Width, 4);
+  Dec(Result.Height, 4+HeaderHeight);
+  if VScrollBar.Visible then
+    Dec(Result.Width, VScrollBar.Width);
+  if HScrollBar.Visible then
+    Dec(Result.Height, VScrollBar.Height);
 end;
 
 
@@ -2101,7 +2155,6 @@ type
   TScrollBarState = set of (sbVertical, sbHorizontal);
 var
   BevelSize: Integer;
-  I: Integer;
   MaxH,
   MaxV: Integer;
   ItemsTotalSize: TfpgSize;
