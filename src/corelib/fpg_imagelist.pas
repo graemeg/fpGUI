@@ -144,8 +144,8 @@ var
   i: integer;
 begin
   for i := FList.Count-1 downto 0 do
-    TfpgImageItem(FList[i]).Destroy;  // frees images
-  FList.Destroy;
+    TfpgImageItem(FList[i]).Free;  // frees images
+  FList.Free;
   inherited Destroy
 end;
 
