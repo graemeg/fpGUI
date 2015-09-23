@@ -595,9 +595,9 @@ begin
 
     // keep track of how far down and right we've painted
     if iItemClipRect.Bottom > cBottom then
-      cBottom:=iItemClipRect.Bottom;
+      cBottom:=iItemClipRect.Bottom+1;
     if iItemClipRect.Right > cRight then
-      cRight:=iItemClipRect.Right;
+      cRight:=iItemClipRect.Right+1;
 
     ACanvas.SetClipRect(iItemClipRect);
 
@@ -715,7 +715,7 @@ begin
   if (I > 0) and (LastIndex > FListView.Items.Count-ItemsPerRow+1) then
   begin
     //ACanvas.SetColor(clRed); // useful to debug
-    ItemRect.Left := I * ItemWidth;
+    ItemRect.Left := iItemClipRect.Right+1;
     ItemRect.SetRight(cRight);
     ItemRect.Top := iItemClipRect.Top;
     ItemRect.SetBottom(cBottom);
