@@ -39,6 +39,9 @@ type
   TfpgLVColumn    = class;
   
   TfpgLVColumnClickEvent = procedure(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer) of object;
+
+  ELVViewStyleError = class(Exception)
+  end;
   
 
   { TfpgLVColumn }
@@ -317,6 +320,7 @@ type
     procedure   SetShowFocusRect(AValue: Boolean);
     procedure   SetShowHeaders(const AValue: Boolean);
     procedure   SetShiftIsPressed(const AValue: Boolean);
+    procedure   SetViewStyle(AValue: TfpgLVPainter);
     function    SubItemGetImages(AIndex: integer): TfpgImageList;
     procedure   SubItemSetImages(AIndex: integer; const AValue: TfpgImageList);
     procedure   VScrollChange(Sender: TObject; Position: Integer);
@@ -384,7 +388,7 @@ type
     property    Hint;
     property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
     property    ParentShowHint;
-    property    ViewStyle: TfpgLVPainter read FViewStyle write FViewStyle;
+    property    ViewStyle: TfpgLVPainter read FViewStyle write SetViewStyle;
     property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
     property    SubItemImages: TfpgImageList index Ord(lisNoState) read SubItemGetImages write SubItemSetImages;
@@ -1495,6 +1499,16 @@ begin
     FSelectionShiftStart := -1;
     FOldSelected.Clear;
   end;
+end;
+
+procedure TfpgListView.SetViewStyle(AValue: TfpgLVPainter);
+begin
+  if FViewStyle = nil then
+    raise ELVViewStyleError.Create('ViewStyle cannot be nil!');
+  if FViewStyle=AValue then Exit;
+  if FViewStyle <> nil then
+    FreeAndNil(FViewStyle);
+  FViewStyle:=AValue;
 end;
 
 function TfpgListView.HasImages: Boolean;
