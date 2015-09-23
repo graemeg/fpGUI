@@ -93,7 +93,7 @@ uses
 
 const
   FPG_FONT_STYLE_REGULAR = 1 shl 0;     { Regular, Plain, Book }
-  FPG_FONT_STYLE_ITALIC = 1 shl 1;      { Itelic }
+  FPG_FONT_STYLE_ITALIC = 1 shl 1;      { Italic }
   FPG_FONT_STYLE_BOLD = 1 shl 2;        { Bold }
   FPG_FONT_STYLE_CONDENSED = 1 shl 3;   { Condensed }
   FPG_FONT_STYLE_EXTRALIGHT = 1 shl 4;  { ExtraLight }
@@ -200,6 +200,7 @@ begin
       end;
     until fpgFindNext(sr) <> 0;
   end;
+  FindClose(sr);
 end;
 
 function TFontCacheList.BuildFontCacheItem(const AFontFile: TfpgString): TFontCacheItem;
