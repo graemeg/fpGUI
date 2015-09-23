@@ -3587,6 +3587,7 @@ begin
   i := gFontCache.Find(fnt);
   if i > 0 then
     Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+  fnt.Free;
 end;
 {$ENDIF}
 
