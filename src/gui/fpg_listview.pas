@@ -342,7 +342,6 @@ type
     procedure   ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
     function    ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
     function    ItemGetRect(AIndex: Integer): TfpgRect;
-    function    ItemIndexFromY(Y: Integer): Integer;
     function    HeaderHeight: Integer;
     procedure   DoRepaint;
     procedure   DoItemActivate(AItem: TfpgLVItem);
@@ -517,13 +516,16 @@ function TfpgLVIconPainter.ItemFromPoint(AX, AY: Integer; out
   AItemIndex: Integer): TfpgLVItem;
 var
   ItemTop: Integer;
+  ItemLeft: Integer;
 begin
   Result := nil;
   ItemTop := (FListView.FVScrollBar.Position + AY) -2;
+  ItemLeft := (FListView.FHScrollBar.Position + AX) -2;
 
   Dec(ItemTop, HeaderHeight);
 
-  AItemIndex := ItemTop div ItemHeight div (ItemsPerRow * ItemWidth);
+  AItemIndex := (ItemLeft div ItemWidth) + (ItemTop div ItemHeight * ItemsPerRow);
+
   if AItemIndex < 0 then
     Exit;
   if AItemIndex >= FListView.FItems.Count then
@@ -1715,21 +1717,6 @@ begin
 
 end;
 
-function TfpgListView.ItemIndexFromY(Y: Integer): Integer;
-var
-  TopPos: Integer;
-begin
-  if ShowHeaders and (Y < HeaderHeight) then
-    Exit(-1);
-
-  TopPos := (FVScrollBar.Position + Y) - 2;
-  if ShowHeaders then
-    Dec(TopPos, HeaderHeight);
-  Result := TopPos div ItemHeight;
-  if Result > Fitems.Count-1 then
-    Result := -1;
-end;
-
 function TfpgListView.HeaderHeight: Integer;
 begin
   Result := FViewStyle.HeaderHeight;
@@ -1869,7 +1856,6 @@ begin
     SelectionClear;
   if Item <> nil then
   begin
-    FItemIndex := ItemIndexFromY(Y);
     MakeItemVisible(FItemIndex);
     if FMultiSelect then
     begin
