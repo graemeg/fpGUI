@@ -34,10 +34,14 @@ uses
 
 type
 
+  { TfpgBaseEditButton }
+
   TfpgBaseEditButton = class(TfpgAbstractPanel)
   private
     FOnButtonClick: TNotifyEvent;
     FReadOnly: Boolean;
+    function GetEditOptions: TfpgTextEditOptions;
+    procedure SetEditOptions(AValue: TfpgTextEditOptions);
     procedure SetReadOnly(const AValue: Boolean);
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
@@ -51,6 +55,7 @@ type
     procedure InternalButtonClick(Sender: TObject); virtual;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
     property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
+    property  EditOptions: TfpgTextEditOptions read GetEditOptions write SetEditOptions;
     property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   public
@@ -75,6 +80,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
     property    FileName: TfpgString read GetFileName write SetFileName;
@@ -106,6 +112,7 @@ type
   published
     property    Align;
     property    Directory: TfpgString read GetDirectory write SetDirectory;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
     property    RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
@@ -131,6 +138,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
     property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;
@@ -150,6 +158,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
+    property    EditOptions;
     property    Enabled;
     property    ExtraHint;
     property    ReadOnly;
@@ -226,6 +235,16 @@ begin
   FReadOnly := AValue;
   FEdit.ReadOnly := FReadOnly;
   FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
+end;
+
+function TfpgBaseEditButton.GetEditOptions: TfpgTextEditOptions;
+begin
+  Result := FEdit.Options;
+end;
+
+procedure TfpgBaseEditButton.SetEditOptions(AValue: TfpgTextEditOptions);
+begin
+  FEdit.Options := AValue;
 end;
 
 function TfpgBaseEditButton.GetExtraHint: TfpgString;

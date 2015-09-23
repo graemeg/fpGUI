@@ -226,6 +226,7 @@ type
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    procedure   DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect; constref AText: TfpgString); virtual;
     { Combobox }
     procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); virtual;
     procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
@@ -2096,6 +2097,7 @@ begin
   fpgSetNamedColor(clGridInactiveSelText, $FF000000);     // same as clInactiveSelText
   fpgSetNamedColor(clSplitterGrabBar, $FF839EFE);         // pale blue
   fpgSetNamedColor(clHyperLink, clBlue);
+  fpgSetNamedColor(clPlaceholderText, $FF848284);         // Same as clShadow1
 
 
   // Global Font Objects
@@ -2470,6 +2472,12 @@ begin
   else
     ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawPlaceholderText(ACanvas: TfpgCanvas; const r: TfpgRect; constref AText: TfpgString);
+begin
+  ACanvas.SetTextColor(clPlaceholderText);
+  ACanvas.DrawText(r, AText, [txtLeft, txtVCenter]);
 end;
 
 procedure TfpgStyle.DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect;

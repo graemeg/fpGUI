@@ -40,7 +40,6 @@
       <Unit1>
         <Filename Value="vfdmain.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdmain"/>
       </Unit1>
       <Unit2>
         <Filename Value="vfdresizer.pas"/>
@@ -49,32 +48,26 @@
       <Unit3>
         <Filename Value="vfdforms.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdforms"/>
       </Unit3>
       <Unit4>
         <Filename Value="vfddesigner.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfddesigner"/>
       </Unit4>
       <Unit5>
         <Filename Value="vfdfile.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdfile"/>
       </Unit5>
       <Unit6>
         <Filename Value="newformdesigner.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="newformdesigner"/>
       </Unit6>
       <Unit7>
         <Filename Value="vfdwidgets.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdwidgets"/>
       </Unit7>
       <Unit8>
         <Filename Value="vfdwidgetclass.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdwidgetclass"/>
       </Unit8>
       <Unit9>
         <Filename Value="vfdeditors.pas"/>
@@ -83,12 +76,10 @@
       <Unit10>
         <Filename Value="vfdformparser.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdformparser"/>
       </Unit10>
       <Unit11>
         <Filename Value="vfdprops.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdprops"/>
       </Unit11>
       <Unit12>
         <Filename Value="vfdutils.pas"/>
@@ -109,7 +100,6 @@
       <Unit16>
         <Filename Value="vfd_constants.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfd_constants"/>
       </Unit16>
     </Units>
   </ProjectOptions>

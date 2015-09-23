@@ -70,6 +70,7 @@
   clGridInactiveSelText = TfpgColor(cl_BaseNamedColor + 31);
   clSplitterGrabBar     = TfpgColor(cl_BaseNamedColor + 32);
   clHyperLink           = TfpgColor(cl_BaseNamedColor + 33);
+  clPlaceholderText     = TfpgColor(cl_BaseNamedColor + 34);
 
 
 

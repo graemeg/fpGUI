@@ -64,6 +64,8 @@ type
   TfpgComboOptions = set of TfpgComboOption;
 
 
+  { TfpgBaseComboBox }
+
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
@@ -120,6 +122,8 @@ type
   end;
   
 
+  { TfpgBaseStaticCombo }
+
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
@@ -127,6 +131,7 @@ type
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
     procedure   DoDrawText(const ARect: TfpgRect); virtual;
+    procedure   DrawPlaceholderText(constref ARect: TfpgRect); virtual;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
@@ -594,6 +599,7 @@ end;
 procedure TfpgBaseStaticCombo.DoDrawText(const ARect: TfpgRect);
 var
   flags: TfpgTextFlags;
+  r: TfpgRect;
 begin
   // Draw select item's text
   flags := [txtLeft, txtVCenter];
@@ -603,9 +609,15 @@ begin
     Canvas.DrawText(ARect, Text, flags)
   else
   begin
-    Canvas.SetTextColor(clShadow1);
-    Canvas.DrawText(ARect, ExtraHint, flags);
+    // Popup button offset
+    r := fpgRect(ARect.Left, ARect.Top, ARect.Width-FInternalBtnRect.Width, ARect.Height);
+    DrawPlaceholderText(r);
   end;
+end;
+
+procedure TfpgBaseStaticCombo.DrawPlaceholderText(constref ARect: TfpgRect);
+begin
+  fpgStyle.DrawPlaceholderText(Canvas, ARect, ExtraHint);
 end;
 
 procedure TfpgBaseStaticCombo.InternalBtnClick(Sender: TObject);

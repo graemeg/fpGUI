@@ -494,6 +494,9 @@ begin
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
+  wc.AddProperty('ExtraHintColor', TPropertyColor, '');
+  wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');

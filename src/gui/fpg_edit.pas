@@ -41,6 +41,9 @@ uses
 
 type
 
+  TfpgTextEditOption = (eo_ExtraHintIfFocus);
+  TfpgTextEditOptions = set of TfpgTextEditOption;
+
   TfpgBaseEdit = class(TfpgWidget)
   private
     FAutoSelect: Boolean;
@@ -145,10 +148,15 @@ type
   TfpgBaseTextEdit = class(TfpgBaseEdit)
   private
     FExtraHint: string;
+    FOptions: TfpgTextEditOptions;
     procedure   SetExtraHint(const AValue: string);
+    procedure   SetOptions(AValue: TfpgTextEditOptions);
   protected
     procedure   HandlePaint; override;
+    procedure   DrawPlaceholderText(constref ARect: TfpgRect); virtual;
+    function    CanDrawExtraHint: Boolean; virtual;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
+    property    Options: TfpgTextEditOptions read FOptions write SetOptions;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -180,6 +188,7 @@ type
     property    TabOrder;
     property    Text;
     property    TextColor;
+    property    Options;
     property    OnChange;
     property    OnDragEnter;
     property    OnDragLeave;
@@ -1463,11 +1472,13 @@ begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
-  if Enabled and (FVisibleText = '') and (not Focused) then
-  begin
-    Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
-  end
+  if CanDrawExtraHint then
+    DrawPlaceholderText(fpgRect(
+      r.Left - FDrawOffset + GetMarginAdjustment,
+      r.Top + FHeightMargin,
+      r.Width + FDrawOffset - GetMarginAdjustment,
+      r.Height - FHeightMargin
+      ))
   else
   begin
     Canvas.SetTextColor(FTextColor);
@@ -1491,10 +1502,22 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.DrawPlaceholderText(constref ARect: TfpgRect);
+begin
+  fpgStyle.DrawPlaceholderText(Canvas, ARect, FExtraHint);
+end;
+
+function TfpgBaseTextEdit.CanDrawExtraHint: Boolean;
+begin
+  Result := Enabled and (FVisibleText = '') and
+    ((eo_ExtraHintIfFocus in Options) or (not Focused));
+end;
+
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FExtraHint := '';
+  FExtraHint          := '';
+  FOptions            := [];
 end;
 
 procedure TfpgBaseTextEdit.SetExtraHint(const AValue: string);
@@ -1503,6 +1526,15 @@ begin
     Exit; //==>
   FExtraHint := AValue;
   Repaint;
+end;
+
+procedure TfpgBaseTextEdit.SetOptions(AValue: TfpgTextEditOptions);
+begin
+  if FOptions = AValue then
+    Exit;
+  FOptions := AValue;
+
+  RePaint;
 end;
 
 { TfpgBaseNumericEdit }
