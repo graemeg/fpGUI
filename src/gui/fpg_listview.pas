@@ -547,6 +547,7 @@ var
   TheTextColor: TfpgColor;
   oClipRect: TfpgRect;
   iItemClipRect: TfpgRect;
+  TmpRect: TfpgRect;
   cBottom: Integer;
   cRight: Integer;
   vBottom: Integer;
@@ -615,8 +616,20 @@ begin
       Include(PaintPart, lvppFocused);
     end;
 
+    // Set the text size and position now. It's useful for drawing selection and focus
+    TheText := Item.Caption;
+    tLeft := ItemRect.Left;
+    tWidth := ACanvas.Font.TextWidth(TheText);
+    tHeight := ACanvas.Font.Height;
+    Inc(tLeft, (ItemWidth - tWidth - 5) div 2);
+    // TmpRect is a rect a bit bigger than the text area.
+    TmpRect := fpgRect(tLeft-2,ItemRect.Top+ItemRect.Height-5-tHeight-2,tWidth+4,tHeight+4);
 
+    // Paint Item Background
+    ACanvas.Color := clListBox;
+    ACanvas.FillRectangle(ItemRect);
 
+    // Paint Item Selection
     if lisSelected in (ItemState) then
     begin
       if LV.Focused then
@@ -626,13 +639,15 @@ begin
     end
     else
       ACanvas.Color := clListBox;
-
-    ACanvas.FillRectangle(ItemRect);
+    ACanvas.FillRectangle(TmpRect);
     Exclude(PaintPart, lvppBackground);
+
+    // Call PaintEvent
     TheTextColor := ACanvas.TextColor;
     if Assigned(LV.FOnPaintItem) then
       LV.FOnPaintItem(LV, ACanvas, Item, I, ItemRect, PaintPart);
 
+    // Paint Focus Rect
     if (lvppFocused in PaintPart) and (LV.FShowFocusRect) then
     begin
       if lisSelected in ItemState then
@@ -641,21 +656,16 @@ begin
         ACanvas.Color := clSelection;
 
       ACanvas.SetLineStyle(1, lsDot);
-      ACanvas.DrawRectangle(ItemRect);
+      ACanvas.DrawRectangle(TmpRect);
     end;
 
+    // Paint Text or image
     if (lvppText in PaintPart) or (lvppIcon in PaintPart) then
     begin
       if lisSelected in ItemState then
         ACanvas.TextColor := clSelectionText;
 
-      ACanvas.SetClipRect(iItemClipRect);
-      if lvppText in PaintPart then begin
-        TheText := Item.Caption
-      end;
-
-      tLeft := ItemRect.Left;
-
+      // Paint Image
       Image := LV.FindImageForState(I, 0, ItemState);
       if (lvppIcon in PaintPart) and Assigned(Image) then
       begin
@@ -667,12 +677,9 @@ begin
           TmpImage.Free;
       end;
 
-
+      // Paint Text
       if lvppText in PaintPart then
       begin
-        tWidth := ACanvas.Font.TextWidth(TheText);
-        tHeight := ACanvas.Font.Height;
-        Inc(tLeft, (ItemWidth - tWidth - 5) div 2);
         fpgStyle.DrawString(ACanvas, tLeft, ItemRect.Bottom-5-tHeight, TheText, LV.Enabled);
       end;
     end;
