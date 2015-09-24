@@ -226,15 +226,15 @@ type
   TfpgLVPainter = class(TObject)
   protected
     FListView: TfpgListView;
-    function    CalculateItemArea: TfpgSize; virtual; abstract;
     function    GetColumnFromX(AX: Integer): TfpgLVColumn;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; virtual; abstract;
+    function    GetItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; virtual; abstract;
     function    GetItemHeight: Integer; virtual; abstract;
     function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; virtual; abstract;
-    function    HeaderGetArea: TfpgRect; virtual; abstract;
-    function    HeaderHeight: Integer; virtual; abstract;
-    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; virtual; abstract;
-    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; virtual; abstract;
+    function    GetItemRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; virtual; abstract;
+    function    GetItemsVirtualArea: TfpgSize; virtual; abstract;
+    function    GetHeaderArea: TfpgRect; virtual; abstract;
+    function    GetHeaderHeight: Integer; virtual; abstract;
     procedure   Paint(ACanvas: TfpgCanvas); virtual; abstract;
   public
     constructor Create(AListview: TfpgListView); virtual;
@@ -249,14 +249,14 @@ type
     procedure   PaintHeaders(ACanvas: TfpgCanvas);
     procedure   PaintItems(ACanvas: TfpgCanvas);
   protected
-    function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
+    function    GetItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
     function    GetItemHeight: Integer; override;
     function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; override;
-    function    HeaderGetArea: TfpgRect; override;
-    function    HeaderHeight: Integer; override;
-    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
-    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
+    function    GetItemRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
+    function    GetItemsVirtualArea: TfpgSize; override;
+    function    GetHeaderArea: TfpgRect; override;
+    function    GetHeaderHeight: Integer; override;
     procedure   Paint( ACanvas: TfpgCanvas); override;
   end;
 
@@ -267,14 +267,14 @@ type
     FIconSize: Integer;
     function    ItemsPerRow: Integer;
   protected
-    function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
+    function    GetItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
     function    GetItemHeight: Integer; override;
     function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; override;
-    function    HeaderGetArea: TfpgRect; override;
-    function    HeaderHeight: Integer; override;
-    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
-    function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
+    function    GetItemRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
+    function    GetItemsVirtualArea: TfpgSize; override;
+    function    GetHeaderArea: TfpgRect; override;
+    function    GetHeaderHeight: Integer; override;
     procedure   Paint(ACanvas: TfpgCanvas); override;
   public
     constructor Create(AListView: TfpgListView); override;
@@ -347,8 +347,8 @@ type
     function    ItemGetSelected(const AItem: TfpgLVItem): Boolean;
     procedure   ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
     function    ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
-    function    ItemGetRect(AIndex: Integer): TfpgRect;
-    function    HeaderHeight: Integer;
+    function    GetItemRect(AIndex: Integer): TfpgRect;
+    function    GetHeaderHeight: Integer;
     procedure   DoRepaint;
     procedure   DoItemActivate(AItem: TfpgLVItem);
     procedure   DoColumnClick(Column: TfpgLVColumn; Button: Integer);
@@ -480,7 +480,7 @@ begin
     Result := 1;
 end;
 
-function TfpgLVIconPainter.CalculateItemArea: TfpgSize;
+function TfpgLVIconPainter.GetItemsVirtualArea: TfpgSize;
 begin
   Result.W:=ItemsPerRow*ItemWidth;
   Result.H:=(FListView.Items.Count div ItemsPerRow) * ItemHeight;
@@ -492,6 +492,7 @@ function TfpgLVIconPainter.GetColumnFromX(AX: Integer; out
   ResizeColumn: TfpgLVColumn): TfpgLVColumn;
 begin
   Result := nil;
+  ResizeColumn := nil;
 end;
 
 function TfpgLVIconPainter.GetItemHeight: Integer;
@@ -541,17 +542,17 @@ begin
     Result := FListView.Items.Count-1;
 end;
 
-function TfpgLVIconPainter.HeaderGetArea: TfpgRect;
+function TfpgLVIconPainter.GetHeaderArea: TfpgRect;
 begin
   Result := fpgRect(0,0,0,0);
 end;
 
-function TfpgLVIconPainter.HeaderHeight: Integer;
+function TfpgLVIconPainter.GetHeaderHeight: Integer;
 begin
   Result := 0;
 end;
 
-function TfpgLVIconPainter.ItemGetRect(AIndex: Integer; InVirtualArea: Boolean
+function TfpgLVIconPainter.GetItemRect(AIndex: Integer; InVirtualArea: Boolean
   ): TfpgRect;
 begin
   Result.Top := (AIndex div ItemsPerRow) * ItemHeight;
@@ -566,7 +567,7 @@ begin
   end;
 end;
 
-function TfpgLVIconPainter.ItemFromPoint(AX, AY: Integer; out
+function TfpgLVIconPainter.GetItemFromPoint(AX, AY: Integer; out
   AItemIndex: Integer): TfpgLVItem;
 var
   ItemTop: Integer;
@@ -576,7 +577,7 @@ begin
   ItemTop := (FListView.FVScrollBar.Position + AY) -2;
   ItemLeft := (FListView.FHScrollBar.Position + AX) -2;
 
-  Dec(ItemTop, HeaderHeight);
+  Dec(ItemTop, GetHeaderHeight);
 
   AItemIndex := (ItemLeft div ItemWidth) + (ItemTop div ItemHeight * ItemsPerRow);
 
@@ -626,11 +627,11 @@ begin
   if LastIndex > LV.FItems.Count-1 then
     LastIndex := LV.FItems.Count-1;
 
-  cBottom:=HeaderHeight;
+  cBottom:=GetHeaderHeight;
   cRight := 2;
 
   if LV.ShowHeaders then
-    Inc(cBottom, HeaderHeight);
+    Inc(cBottom, GetHeaderHeight);
 
   ItemAreaBounds := FListView.GetItemClientArea;
 
@@ -641,7 +642,7 @@ begin
     ItemState := [];
     Image := nil;
     PaintPart := [lvppBackground, lvppIcon, lvppText];
-    ItemRect := ItemGetRect(I);  // check if this should be in the painter
+    ItemRect := GetItemRect(I);  // check if this should be in the painter
 
     iItemClipRect.Left := Max(ItemRect.Left, oClipRect.Left);
     iItemClipRect.Top := Max(ItemRect.Top, oClipRect.Top);
@@ -658,8 +659,8 @@ begin
 
     if  (I = FirstIndex)
     and (LV.ShowHeaders)
-    and (ItemRect.Top < 2 + HeaderHeight) then
-      Dec(cBottom, (2 + HeaderHeight) - ItemRect.Top);
+    and (ItemRect.Top < 2 + GetHeaderHeight) then
+      Dec(cBottom, (2 + GetHeaderHeight) - ItemRect.Top);
 
     Item := LV.FItems.Item[I];
     if Item.Selected[LV] then
@@ -833,16 +834,16 @@ begin
     Result := FListView.Items.Count-1;
 end;
 
-function TfpgLVReportPainter.HeaderGetArea: TfpgRect;
+function TfpgLVReportPainter.GetHeaderArea: TfpgRect;
 begin
   Result := fpgRect(0,0,0,0);
-  if HeaderHeight = 0 then
+  if GetHeaderHeight = 0 then
     Exit; // ==>
 
-  Result := fpgRect(2, 2, GetVisibleColumnsWidth, HeaderHeight);
+  Result := fpgRect(2, 2, GetVisibleColumnsWidth, GetHeaderHeight);
 end;
 
-function TfpgLVReportPainter.CalculateItemArea: TfpgSize;
+function TfpgLVReportPainter.GetItemsVirtualArea: TfpgSize;
 begin
   Result.W := GetVisibleColumnsWidth;
   Result.H := FListView.Items.Count * ItemHeight;
@@ -858,7 +859,7 @@ begin
       Inc(Result, FListView.FColumns.Column[I].Width);
 end;
 
-function TfpgLVReportPainter.ItemGetRect(AIndex: Integer; InVirtualArea: Boolean
+function TfpgLVReportPainter.GetItemRect(AIndex: Integer; InVirtualArea: Boolean
   ): TfpgRect;
 begin
   Result.Top:=AIndex*ItemHeight;
@@ -869,19 +870,19 @@ begin
   // if we want the area where the item is relative to the viewport
   if not InVirtualArea then
   begin
-    Result.Top := Result.Top + 2 - FListView.FVScrollBar.Position + HeaderHeight;
+    Result.Top := Result.Top + 2 - FListView.FVScrollBar.Position + GetHeaderHeight;
     Result.Left:= Result.Left + 2 - FListView.FHScrollBar.Position;
   end;
 end;
 
-function TfpgLVReportPainter.HeaderHeight: Integer;
+function TfpgLVReportPainter.GetHeaderHeight: Integer;
 begin
   if not FListView.ShowHeaders then
     Exit(0);
   Result := FListView.Canvas.Font.Height + 10;
 end;
 
-function TfpgLVReportPainter.ItemFromPoint(AX, AY: Integer; out
+function TfpgLVReportPainter.GetItemFromPoint(AX, AY: Integer; out
   AItemIndex: Integer): TfpgLVItem;
 var
   ItemTop: Integer;
@@ -889,7 +890,7 @@ begin
   Result := nil;
   ItemTop := (FListView.FVScrollBar.Position + AY) -2;
   if FListView.ShowHeaders then
-    Dec(ItemTop, HeaderHeight);
+    Dec(ItemTop, GetHeaderHeight);
   AItemIndex := ItemTop div ItemHeight;
   if AItemIndex < 0 then
     Exit;
@@ -918,7 +919,7 @@ begin
   cLeft := 2;
   ClipRect.Top := 2;
   ClipRect.Left := 2;
-  ClipRect.Height := HeaderHeight;
+  ClipRect.Height := GetHeaderHeight;
   ClipRect.Width := FListView.Width -4;
   ACanvas.SetClipRect(ClipRect);
 
@@ -934,7 +935,7 @@ begin
       cRect.Top := cTop;
       cRect.Left := cLeft;
       cRect.Width := Column.Width;
-      cRect.Height := HeaderHeight;
+      cRect.Height := GetHeaderHeight;
       fpgStyle.DrawButtonFace(ACanvas,cLeft, cRect.Top, cRect.Width, cRect.Height, Flags);
       PaintPart := [lvppText];
 
@@ -995,7 +996,7 @@ begin
   cBottom := 2 + ((LastIndex+1 - FirstIndex) * ItemHeight);
 
   if LV.ShowHeaders then
-    Inc(cBottom, HeaderHeight);
+    Inc(cBottom, GetHeaderHeight);
 
   oClipRect := ACanvas.GetClipRect;
 
@@ -1004,12 +1005,12 @@ begin
     ItemState := [];
     Image := nil;
     PaintPart := [lvppBackground, lvppIcon, lvppText];
-    ItemRect := ItemGetRect(I);  // check if this should be in the painter
+    ItemRect := GetItemRect(I);  // check if this should be in the painter
 
     if  (I = FirstIndex)
     and (LV.ShowHeaders)
-    and (ItemRect.Top < 2 + HeaderHeight) then
-      Dec(cBottom, (2 + HeaderHeight) - ItemRect.Top);
+    and (ItemRect.Top < 2 + GetHeaderHeight) then
+      Dec(cBottom, (2 + GetHeaderHeight) - ItemRect.Top);
 
     Item := LV.FItems.Item[I];
     if Item.Selected[LV] then
@@ -1687,7 +1688,7 @@ function TfpgListView.GetItemAreaHeight: Integer;
 begin
   Result := Height - 4;
   if ShowHeaders then
-    Dec(Result, HeaderHeight);
+    Dec(Result, GetHeaderHeight);
   if FHScrollBar.Visible then
     Dec(Result,FHScrollBar.Height);
 end;
@@ -1695,11 +1696,11 @@ end;
 function TfpgListView.GetItemClientArea: TfpgRect;
 begin
   Result := GetClientRect;
-  ////Result.SetRect(2,2,Width-4,Height-4-HeaderHeight);
+  ////Result.SetRect(2,2,Width-4,Height-4-GetHeaderHeight);
   Inc(Result.Left, 2);
   Inc(Result.Top, 2);
   Dec(Result.Width, 4);
-  Dec(Result.Height, 4+HeaderHeight);
+  Dec(Result.Height, 4+GetHeaderHeight);
   if VScrollBar.Visible then
     Dec(Result.Width, VScrollBar.Width);
   if HScrollBar.Visible then
@@ -1805,20 +1806,20 @@ end;
 
 function TfpgListView.ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
 begin
-  Result := FViewStyle.ItemFromPoint(X,Y, AIndex);
+  Result := FViewStyle.GetItemFromPoint(X,Y, AIndex);
   if AIndex < -1 then
     AIndex:=-1;
 end;
 
-function TfpgListView.ItemGetRect(AIndex: Integer): TfpgRect;
+function TfpgListView.GetItemRect(AIndex: Integer): TfpgRect;
 begin
-  Result := FViewStyle.ItemGetRect(AIndex);
+  Result := FViewStyle.GetItemRect(AIndex);
 
 end;
 
-function TfpgListView.HeaderHeight: Integer;
+function TfpgListView.GetHeaderHeight: Integer;
 begin
-  Result := FViewStyle.HeaderHeight;
+  Result := FViewStyle.GetHeaderHeight;
 end;
 
 procedure TfpgListView.DoRepaint;
@@ -1882,8 +1883,8 @@ var
   cRect: TfpgRect;
 begin
   cRect := GetClientRect;
-  // HeaderHeight is 0 if ShowHeaders is false.
-  Inc(cRect.Top, HeaderHeight);
+  // GetHeaderHeight is 0 if ShowHeaders is false.
+  Inc(cRect.Top, GetHeaderHeight);
   if FHScrollBar.Visible then
     Dec(cRect.Height, FHScrollBar.Height);
   if FVScrollBar.Visible then
@@ -1919,8 +1920,8 @@ begin
   // Check if event is within headers
   if FShowHeaders then
   begin
-    if PtInRect(FViewStyle.HeaderGetArea, Point(X, Y)) then
-    //if (Y < HeaderHeight + cRect.Top)  then
+    if PtInRect(FViewStyle.GetHeaderArea, Point(X, Y)) then
+    //if (Y < GetHeaderHeight + cRect.Top)  then
     begin
       Column := FViewStyle.GetColumnFromX(X, ResizeColumn);
       // below should be moved to viewstyle
@@ -1937,7 +1938,7 @@ begin
     end;
 
     // Not within headers so adjust rect to exclude header area.
-    Inc(cRect.Top, HeaderHeight);
+    Inc(cRect.Top, GetHeaderHeight);
   end;
 
   // Remove V and H scrollbars from posible area.
@@ -1989,7 +1990,7 @@ begin
 
   if FShowHeaders then
   begin
-    if PtInRect(FViewStyle.HeaderGetArea, Point(X,Y)) then
+    if PtInRect(FViewStyle.GetHeaderArea, Point(X,Y)) then
     begin
       Column := FViewStyle.GetColumnFromX(X);
       if Assigned(Column) then
@@ -2056,7 +2057,7 @@ begin
   if not PtInRect(cRect, Point(X,Y)) and (FResizingColumn = nil) then
     Exit;
 
-  if PtInRect(FViewStyle.HeaderGetArea, Point(x,y)) or Assigned(FResizingColumn) then
+  if PtInRect(FViewStyle.GetHeaderArea, Point(x,y)) or Assigned(FResizingColumn) then
   begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
   end
@@ -2071,7 +2072,6 @@ end;
 procedure TfpgListView.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
-  iIndex: Integer;
   OldIndex: Integer;
   procedure CheckMultiSelect;
   begin
@@ -2244,10 +2244,10 @@ begin
   MaxV := 0;
   BevelSize := 2;
 
-  ItemsTotalSize := FViewStyle.CalculateItemArea;
+  ItemsTotalSize := FViewStyle.GetItemsVirtualArea;
 
-  // HeaderHeight is 0 if not visible
-  VisibleItemArea.SetSize(Width-BevelSize*2, Height-BevelSize*2-HeaderHeight);
+  // GetHeaderHeight is 0 if not visible
+  VisibleItemArea.SetSize(Width-BevelSize*2, Height-BevelSize*2-GetHeaderHeight);
 
   // Start with the assumption that both scrollbars are hidden.
   ScrollBarVisible:=[];
@@ -2284,7 +2284,7 @@ begin
 
   until SameCount = 2;
 
-  VScrollBar.Top := BevelSize + HeaderHeight;
+  VScrollBar.Top := BevelSize + GetHeaderHeight;
   VScrollBar.Left:= Width-BevelSize-VScrollBar.Width;
   VScrollBar.Height:=Height-VScrollBar.Top-BevelSize;
 
@@ -2401,7 +2401,7 @@ begin
   if AIndex = -1 then
     Exit;
 
-  ItemPosition := FViewStyle.ItemGetRect(AIndex, True);
+  ItemPosition := FViewStyle.GetItemRect(AIndex, True);
 
   iTop := ItemPosition.Top;
   iBottom := ItemPosition.Bottom;
