@@ -2269,10 +2269,10 @@ begin
       SameCount := 0;
     end;
 
-    if HScrollBar.Visible and (sbHorizontal in ScrollBarVisibleOld) then
+    if HScrollBar.Visible and not (sbHorizontal in ScrollBarVisibleOld) then
     begin
       Include(ScrollBarVisible, sbHorizontal);
-      Dec(VisibleItemArea.H, VScrollBar.Height);
+      Dec(VisibleItemArea.H, HScrollBar.Height);
       SameCount := 0;
     end;
 
