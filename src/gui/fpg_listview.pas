@@ -114,6 +114,9 @@ type
 
   TfpgLVItemStates = (lisNoState, lisSelected, lisFocused, lisHotTrack);
   TfpgLVItemState = set of TfpgLVItemStates;
+
+  // used for the painter to recalculate which item is selected with the keyboard
+  TfpgLVMoveDirection = (mdUp, mdDown, mdRight, mdLeft, mdPageDown, mdPageUp, mdHome, mdEnd);
   
   TfpgLVItemPaintPart = set of (lvppBackground, lvppIcon, lvppText, lvppFocused);
   
@@ -227,9 +230,10 @@ type
     function    GetColumnFromX(AX: Integer): TfpgLVColumn;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; virtual; abstract;
     function    GetItemHeight: Integer; virtual; abstract;
+    function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; virtual; abstract;
     function    HeaderGetArea: TfpgRect; virtual; abstract;
     function    HeaderHeight: Integer; virtual; abstract;
-    function    ItemGetRect(AIndex: Integer): TfpgRect; virtual; abstract;
+    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; virtual; abstract;
     function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; virtual; abstract;
     procedure   Paint(ACanvas: TfpgCanvas); virtual; abstract;
   public
@@ -248,10 +252,11 @@ type
     function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
     function    GetItemHeight: Integer; override;
+    function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; override;
     function    HeaderGetArea: TfpgRect; override;
     function    HeaderHeight: Integer; override;
     function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
-    function    ItemGetRect(AIndex: Integer): TfpgRect; override;
+    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
     procedure   Paint( ACanvas: TfpgCanvas); override;
   end;
 
@@ -265,9 +270,10 @@ type
     function    CalculateItemArea: TfpgSize; override;
     function    GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn; override;
     function    GetItemHeight: Integer; override;
+    function    GetItemNeighbor(AStartIndex: Integer; ADirection : TfpgLVMoveDirection): Integer; override;
     function    HeaderGetArea: TfpgRect; override;
     function    HeaderHeight: Integer; override;
-    function    ItemGetRect(AIndex: Integer): TfpgRect; override;
+    function    ItemGetRect(AIndex: Integer; InVirtualArea: Boolean = False): TfpgRect; override;
     function    ItemFromPoint(AX, AY: Integer; out AItemIndex: Integer): TfpgLVItem; override;
     procedure   Paint(ACanvas: TfpgCanvas); override;
   public
@@ -493,6 +499,48 @@ begin
   Result := FIconSize + FListView.Canvas.Font.Height + 10;
 end;
 
+function TfpgLVIconPainter.GetItemNeighbor(AStartIndex: Integer;
+  ADirection: TfpgLVMoveDirection): Integer;
+
+   // if th new index is out of bounds then the original index is kept
+   function ValidateResult(ANewIndex: Integer): Integer;
+   begin
+     if (ANewIndex < 0) or (ANewIndex > FListView.Items.Count-1) then
+       Result := AStartIndex
+     else
+       Result := ANewIndex;
+
+   end;
+
+var
+  AreaHeight: Integer;
+begin
+  Result := AStartIndex;
+  case ADirection of
+    mdDown  : Result := ValidateResult(AStartIndex+ItemsPerRow);
+    mdUp    : Result := ValidateResult(AStartIndex-ItemsPerRow);
+    mdRight : Result := AStartIndex+1;
+    mdLeft  : Result := AStartIndex-1;
+    mdPageUp:
+    begin
+      AreaHeight:=FListView.GetItemAreaHeight;
+      Result := AStartIndex - (AreaHeight div GetItemHeight) * ItemsPerRow;
+    end;
+    mdPageDown:
+    begin
+      AreaHeight:=FListView.GetItemAreaHeight;
+      Result := AStartIndex + (AreaHeight div GetItemHeight) * ItemsPerRow
+    end;
+    mdHome: Result := 0;
+    mdEnd:  Result := MaxInt;
+  end;
+
+  if Result < 0 then
+    Result := 0;
+  if Result > FListView.Items.Count-1 then
+    Result := FListView.Items.Count-1;
+end;
+
 function TfpgLVIconPainter.HeaderGetArea: TfpgRect;
 begin
   Result := fpgRect(0,0,0,0);
@@ -503,13 +551,19 @@ begin
   Result := 0;
 end;
 
-function TfpgLVIconPainter.ItemGetRect(AIndex: Integer): TfpgRect;
+function TfpgLVIconPainter.ItemGetRect(AIndex: Integer; InVirtualArea: Boolean
+  ): TfpgRect;
 begin
-  Result.Top := 2 + ((AIndex div ItemsPerRow) * ItemHeight) - FListView.FVScrollBar.Position;
-  Inc(Result.Top, HeaderHeight);
-  Result.Height := ItemHeight;
-  Result.Left := 2 - FListView.FHScrollBar.Position + (AIndex mod ItemsPerRow) * ItemWidth;
-  Result.Width := ItemWidth;
+  Result.Top := (AIndex div ItemsPerRow) * ItemHeight;
+  Result.Left := (AIndex mod ItemsPerRow) * ItemWidth;
+  Result.Height:=ItemHeight;
+  Result.Width:=ItemWidth;
+
+  if not InVirtualArea then
+  begin
+    Result.Top := Result.Top + 2 - FListView.FVScrollBar.Position;
+    Result.Left:= Result.Left + 2 - FListView.FHScrollBar.Position;
+  end;
 end;
 
 function TfpgLVIconPainter.ItemFromPoint(AX, AY: Integer; out
@@ -748,6 +802,37 @@ begin
   Result := FListView.Canvas.Font.Height + 4;
 end;
 
+function TfpgLVReportPainter.GetItemNeighbor(AStartIndex: Integer;
+  ADirection: TfpgLVMoveDirection): Integer;
+var
+  AreaHeight: Integer;
+begin
+  Result := AStartIndex;
+  case ADirection of
+    mdDown: Result := AStartIndex+1;
+    mdUp: Result := AStartIndex-1;
+    mdRight,
+    mdLeft: ;
+    mdPageUp:
+    begin
+      AreaHeight:=FListView.GetItemAreaHeight;
+      Result := AStartIndex - AreaHeight div GetItemHeight;
+    end;
+    mdPageDown:
+    begin
+      AreaHeight:=FListView.GetItemAreaHeight;
+      Result := AStartIndex + AreaHeight div GetItemHeight;
+    end;
+    mdHome: Result := 0;
+    mdEnd:  Result := MaxInt;
+  end;
+
+  if Result < 0 then
+    Result := 0;
+  if Result > FListView.Items.Count-1 then
+    Result := FListView.Items.Count-1;
+end;
+
 function TfpgLVReportPainter.HeaderGetArea: TfpgRect;
 begin
   Result := fpgRect(0,0,0,0);
@@ -773,13 +858,20 @@ begin
       Inc(Result, FListView.FColumns.Column[I].Width);
 end;
 
-function TfpgLVReportPainter.ItemGetRect(AIndex: Integer): TfpgRect;
+function TfpgLVReportPainter.ItemGetRect(AIndex: Integer; InVirtualArea: Boolean
+  ): TfpgRect;
 begin
-  Result.Top := 2 + (AIndex * ItemHeight) - FListView.FVScrollBar.Position;
-  Inc(Result.Top, HeaderHeight);
-  Result.Height := ItemHeight;
-  Result.Left := 2 - FListView.FHScrollBar.Position;
-  Result.Width := GetVisibleColumnsWidth;
+  Result.Top:=AIndex*ItemHeight;
+  Result.Left:=0;
+  Result.Height:=ItemHeight;
+  Result.Width:=GetVisibleColumnsWidth;
+
+  // if we want the area where the item is relative to the viewport
+  if not InVirtualArea then
+  begin
+    Result.Top := Result.Top + 2 - FListView.FVScrollBar.Position + HeaderHeight;
+    Result.Left:= Result.Left + 2 - FListView.FHScrollBar.Position;
+  end;
 end;
 
 function TfpgLVReportPainter.HeaderHeight: Integer;
@@ -2002,75 +2094,53 @@ var
     if FSelectionFollowsFocus and (FItemIndex > -1) then
       ItemSetSelected(FItems.Item[FItemIndex], True);
   end;
+  function KeyCodeToMoveDirection(Code: word; out Direction: TfpgLVMoveDirection): Boolean;
+  begin
+    Result := True;
+    case Code of
+      keyUp       : Direction := mdUp;
+      keyDown     : Direction := mdDown;
+      keyLeft     : Direction := mdLeft;
+      keyRight    : Direction := mdRight;
+      keyPageUp   : Direction := mdPageUp;
+      keyPageDown : Direction := mdPageDown;
+      keyHome     : Direction := mdHome;
+      keyEnd      : Direction := mdEnd;
+    else
+      Result := False;
+    end;
+  end;
+
+var
+  MoveDirection: TfpgLVMoveDirection;
+
 begin
   consumed := True;
   OldIndex := FItemIndex;
   ShiftIsPressed := ssShift in shiftstate;
   //WriteLn('Got key: ',IntToHex(keycode, 4));
+
+  if KeyCodeToMoveDirection(keycode, MoveDirection) then
+  begin
+    ItemIndex := FViewStyle.GetItemNeighbor(ItemIndex, MoveDirection);
+    MakeItemVisible(ItemIndex);
+    if OldIndex <> ItemIndex then
+      CheckSelectionFocus
+    else
+    begin
+     { // Report view can scroll left and right with keypress when the item index hasn't changed
+      case MoveDirection of
+        mdLeft:  FHScrollBar.Position := FHScrollBar.Position - FHScrollBar.ScrollStep;
+        mdRight: FHScrollBar.Position := FHScrollBar.Position + FHScrollBar.ScrollStep;
+      end;}
+    end;
+
+    CheckMultiSelect;
+
+  end
+
+  else
   case keycode of
-    keyUp:
-    begin
-      if ItemIndex > 0 then
-        ItemIndex := ItemIndex-1;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect;
-    end;
-    keyDown:
-    begin
-      ItemIndex := ItemIndex+1;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect;
-    end;
-    keyLeft:
-    begin
-      FHScrollBar.Position := FHScrollBar.Position - FHScrollBar.ScrollStep;
-    end;
-    keyRight:
-    begin
-      FHScrollBar.Position := FHScrollBar.Position + FHScrollBar.ScrollStep;
-    end;
-    keyHome:
-    begin
-      ItemIndex := 0;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect;
-    end;
-    keyEnd:
-    begin
-      ItemIndex := FItems.Count-1;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect;
-    end;
-    keyPageUp:
-    begin
-      iIndex := ItemIndex - (GetItemAreaHeight div ItemHeight);
-      if iIndex < 0 then
-        iIndex := 0;
-      ItemIndex := iIndex;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect;
-    end;
-    keyPageDown:
-    begin
-      iIndex := ItemIndex + (GetItemAreaHeight div ItemHeight);
-      if iIndex > FItems.Count-1 then
-        iIndex := FItems.Count-1;
-      ItemIndex := iIndex;
-      MakeItemVisible(ItemIndex);
-      if OldIndex <> ItemIndex then
-        CheckSelectionFocus;
-      CheckMultiSelect
-    end;
     keyEnter:
     begin
       if shiftstate = [] then
@@ -2323,14 +2393,18 @@ end;
 
 procedure TfpgListView.MakeItemVisible(AIndex: Integer; PartialOK: Boolean);
 var
+  ItemPosition: TfpgRect;
   iTop,
   iBottom: integer;
   tVisible, bVisible: Boolean;
 begin
   if AIndex = -1 then
     Exit;
-  iTop := AIndex * ItemHeight;
-  iBottom := iTop + ItemHeight;
+
+  ItemPosition := FViewStyle.ItemGetRect(AIndex, True);
+
+  iTop := ItemPosition.Top;
+  iBottom := ItemPosition.Bottom;
 
   tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + GetItemAreaHeight);
   bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + GetItemAreaHeight);
