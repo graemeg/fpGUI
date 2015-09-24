@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -44,8 +44,6 @@ type
   end;
   
 
-  { TfpgLVColumn }
-
   TfpgLVColumn = class(TComponent)
   private
     FAlignment: TAlignment;
@@ -75,7 +73,6 @@ type
     procedure   SetWidth(const AValue: Integer);
   public
     constructor Create(AColumns: TfpgLVColumns); reintroduce;
-    destructor  Destroy; override;
     property    Caption: String read FCaption write SetCaption;
     property    CaptionAlignment: TAlignment read FCaptionAlignment write SetCaptionAlignment;
     property    Alignment: TAlignment read FAlignment write SetAlignment;
@@ -89,8 +86,6 @@ type
     property    Resizable: Boolean read FResizable write SetResizable;
   end;
   
-
-  { TfpgLVColumns }
 
   TfpgLVColumns = class(TPersistent)
   private
@@ -199,9 +194,9 @@ type
   private
     FList: TFPList;
     FOnChange: TNotifyEvent;
-    function GetImageIndex(ASubIndex: Integer): Integer;
-    procedure SetImageIndex(ASubIndex: Integer; const AValue: Integer);
-    procedure DoChange;
+    function    GetImageIndex(ASubIndex: Integer): Integer;
+    procedure   SetImageIndex(ASubIndex: Integer; const AValue: Integer);
+    procedure   DoChange;
   protected
     function    GetObject(Index: Integer): TObject; override;
     function    Get(Index: Integer): string; override;
@@ -218,7 +213,6 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
-  { TfpgLVPainter }
 
   TfpgLVPainter = class(TObject)
   protected
@@ -237,7 +231,6 @@ type
     property    ItemHeight: Integer read GetItemHeight;
   end;
 
-  { TfpgLVReportPainter }
 
   TfpgLVReportPainter = class(TfpgLVPainter)
   private
@@ -255,7 +248,6 @@ type
     procedure   Paint( ACanvas: TfpgCanvas); override;
   end;
 
-  { TfpgLVIconPainter }
 
   TfpgLVIconPainter = class(TfpgLVPainter)
   private
@@ -369,7 +361,7 @@ type
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   MakeItemVisible(AIndex: Integer; PartialOK: Boolean = False);
-    function    ItemAdd: TfpgLVItem; deprecated;
+    function    ItemAdd: TfpgLVItem; deprecated 'Use AddItem instead';
     function    AddItem: TfpgLVItem;
     function    NewItem: TfpgLVItem;
   published
@@ -429,14 +421,16 @@ type
 
 
 procedure CopyAVLTree(From, To_: TAVLTree; Clear: Boolean = False);
-            procedure AddNodeNodes(ANode: TAVLTreeNode);
-            begin
-              if ANode = nil then
-                Exit; // ==>
-              To_.Add(ANode.Data);
-              AddNodeNodes(ANode.Left);
-              AddNodeNodes(ANode.Right);
-            end;
+
+  procedure AddNodeNodes(ANode: TAVLTreeNode);
+  begin
+    if ANode = nil then
+      Exit; // ==>
+    To_.Add(ANode.Data);
+    AddNodeNodes(ANode.Left);
+    AddNodeNodes(ANode.Right);
+  end;
+
 begin
   if Clear then
     To_.Clear;
@@ -728,11 +722,6 @@ begin
     ItemRect.SetBottom(cBottom);
     ACanvas.FillRectangle(ItemRect);
   end;
-
-
-
-
-
 end;
 
 constructor TfpgLVIconPainter.Create(AListView: TfpgListView);
@@ -868,8 +857,6 @@ begin
     ACanvas.SetColor(clButtonFace);
     ACanvas.FillRectangle(cLeft, cTop, cLeft+(FListView.Width-3-cLeft), ACanvas.Font.Height+10);
   end;
-
-
 end;
 
 procedure TfpgLVReportPainter.PaintItems(ACanvas: TfpgCanvas);
@@ -1048,8 +1035,6 @@ begin
     ACanvas.SetColor(clListBox);
     ACanvas.FillRectangle(ItemRect);
   end;
-
-
 end;
 
 function TfpgLVReportPainter.GetColumnFromX(AX: Integer; out ResizeColumn: TfpgLVColumn): TfpgLVColumn;
@@ -1093,7 +1078,6 @@ begin
   PaintItems(ACanvas);
   if FListView.ShowHeaders then
     PaintHeaders(ACanvas);
-
 end;
 
 { TfpgLVPainter }
@@ -1384,7 +1368,6 @@ begin
     Invalidate;
 end;
   
-
 procedure TfpgListView.VScrollChange(Sender: TObject; Position: Integer);
 begin
   DoRepaint;
@@ -1528,7 +1511,6 @@ begin
   for State := lisNoState to lisHotTrack do
     if FImages[State] <> nil then
       Exit(True);
-
 end;
 
 function TfpgListView.GetItemHeight: Integer;
@@ -1614,7 +1596,6 @@ begin
     Dec(Result.Height, VScrollBar.Height);
 end;
 
-
 procedure TfpgListView.SelectionSetRangeEnabled(AStart, AEnd: Integer; AValue: Boolean);
 var
   TmpI: LongInt;
@@ -1675,7 +1656,6 @@ begin
   end;
 end;
 
-
 function TfpgListView.ItemGetSelected(const AItem: TfpgLVItem): Boolean;
 begin
   Result := FSelected.Find(Pointer(AItem)) <> nil;
@@ -1721,7 +1701,6 @@ end;
 function TfpgListView.ItemGetRect(AIndex: Integer): TfpgRect;
 begin
   Result := FViewStyle.ItemGetRect(AIndex);
-
 end;
 
 function TfpgListView.HeaderHeight: Integer;
@@ -2085,11 +2064,12 @@ begin
     Exit;
   end;
   DoRepaint;
-
 end;
 
-procedure TfpgListView.HandleKeyRelease(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgListView.HandleKeyRelease(
+    var keycode: word;
+    var shiftstate: TShiftState;
+    var consumed: boolean);
 var
   CacheShiftPressed: Boolean;
 begin
@@ -2098,7 +2078,6 @@ begin
   ShiftIsPressed := ssShift in shiftstate;
 
   consumed := CacheShiftPressed <> ShiftIsPressed;
-
 end;
 
 procedure TfpgListView.HandlePaint;
@@ -2457,7 +2436,6 @@ begin
   FCaptionAlignment:=AValue;
   if Assigned(FColumns) and Assigned(FColumns.FListView) then
     FColumns.FListView.DoRepaint;
-
 end;
 
 procedure TfpgLVColumn.SetColumnIndex(const AValue: Integer);
@@ -2532,11 +2510,6 @@ begin
   FClickable := True;
   FAlignment := taLeftJustify;
   FCaptionAlignment := taLeftJustify;
-end;
-
-destructor TfpgLVColumn.Destroy;
-begin
-  inherited Destroy;
 end;
 
 { TfpgListViewSubitems }
