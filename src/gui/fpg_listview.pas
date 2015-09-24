@@ -2128,11 +2128,11 @@ begin
       CheckSelectionFocus
     else
     begin
-     { // Report view can scroll left and right with keypress when the item index hasn't changed
+      // Report view can scroll left and right with keypress when the item index hasn't changed
       case MoveDirection of
         mdLeft:  FHScrollBar.Position := FHScrollBar.Position - FHScrollBar.ScrollStep;
         mdRight: FHScrollBar.Position := FHScrollBar.Position + FHScrollBar.ScrollStep;
-      end;}
+      end;
     end;
 
     CheckMultiSelect;
