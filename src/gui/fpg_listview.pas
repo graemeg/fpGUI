@@ -2293,7 +2293,7 @@ begin
   if HScrollBar.Visible then
     VScrollBar.Height:=VScrollBar.Height-HScrollBar.Height;
 
-  HScrollBar.Top:=Height-BevelSize*2-HScrollBar.Height;
+  HScrollBar.Top:=Height-BevelSize-HScrollBar.Height;
   HScrollBar.Left:=BevelSize;
   HScrollBar.Width:=Width-BevelSize*2;
 
