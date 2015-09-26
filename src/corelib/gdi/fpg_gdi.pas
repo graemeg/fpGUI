@@ -2399,6 +2399,8 @@ function TfpgGDICanvas.GetPixel(X, Y: integer): TfpgColor;
 var
   c: longword;
 begin
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   c := Windows.GetPixel(FWinGC, X, Y);
   {$IFDEF GDEBUG}
   if c = CLR_INVALID then
@@ -2409,6 +2411,8 @@ end;
 
 procedure TfpgGDICanvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
 begin
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   Windows.SetPixel(FDrawGC, X, Y, fpgColorToWin(AValue));
 end;
 
@@ -2426,6 +2430,8 @@ begin
   else
     Windows.SetArcDirection(FDrawGC, AD_COUNTERCLOCKWISE);
   {$ENDIF}
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Arc(FDrawGC, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -2446,6 +2452,8 @@ begin
   else
     Windows.SetArcDirection(FDrawGC, AD_COUNTERCLOCKWISE);
   {$ENDIF}
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Pie(FDrawGC, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -2453,10 +2461,18 @@ begin
 end;
 
 procedure TfpgGDICanvas.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
-//var
-//  pts: array of TPoint;
+var
+  PointArray: PPoint;
+  i: integer;
 begin
-  Windows.Polygon(FDrawGC, Points, NumPts);
+  { convert TPoint to TXPoint }
+  GetMem(PointArray, SizeOf(TPoint)*(NumPts+1)); // +1 for return line
+  for i := 0 to NumPts-1 do
+  begin
+    PointArray[i].x := Points[i].x+FDeltaX;
+    PointArray[i].y := Points[i].y+FDeltaY;
+  end;
+  Windows.Polygon(FDrawGC, PointArray, NumPts);
 end;
 
 function TfpgGDICanvas.GetBufferAllocated: Boolean;
@@ -2501,6 +2517,7 @@ end;
 
 procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
+  // Only the top level canvas pust the buffer to the screen so no delta needed
   if FBufferBitmap > 0 then
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
 end;
@@ -2509,12 +2526,12 @@ procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
 begin
-  rg           := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
+  {rg           := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
   FClipRect    := ARect;
   FClipRectSet := True;
   CombineRgn(FClipRegion, rg, FClipRegion, RGN_AND);
   SelectClipRgn(FDrawGC, FClipRegion);
-  DeleteObject(rg);
+  DeleteObject(rg);}
 end;
 
 procedure TfpgGDICanvas.DoClearClipRect;
@@ -2525,8 +2542,8 @@ end;
 
 procedure TfpgGDICanvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
-  Windows.MoveToEx(FDrawGC, x1, y1, nil);
-  Windows.LineTo(FDrawGC, x2, y2);
+  Windows.MoveToEx(FDrawGC, x1+FDeltaX, y1+FDeltaY, nil);
+  Windows.LineTo(FDrawGC, x2+FDeltaX, y2+FDeltaY);
 end;
 
 procedure TfpgGDICanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
@@ -2544,6 +2561,8 @@ end;
 {$ENDIF}
 
 begin
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   if FLineStyle = lsSolid then
   begin
     wr.Left   := x;
@@ -2573,6 +2592,8 @@ begin
   if UTF8Length(txt) < 1 then
     Exit; //==>
 
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   WideText := Utf8Decode(txt);
   {$ifdef wince}
   Windows.ExtTextOut(FDrawGC, x, y, ETO_CLIPPED, nil, PWideChar(WideText), Length(WideText), nil);
@@ -2585,6 +2606,8 @@ procedure TfpgGDICanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
 begin
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   wr.Left   := x;
   wr.Top    := y;
   wr.Right  := x + w;
@@ -2596,12 +2619,12 @@ procedure TfpgGDICanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of Windows.TPoint;
 begin
-  pts[1].X := x1;
-  pts[1].Y := y1;
-  pts[2].X := x2;
-  pts[2].Y := y2;
-  pts[3].X := x3;
-  pts[3].Y := y3;
+  pts[1].X := x1+FDeltaX;
+  pts[1].Y := y1+FDeltaY;
+  pts[2].X := x2+FDeltaX;
+  pts[2].Y := y2+FDeltaY;;
+  pts[3].X := x3+FDeltaX;
+  pts[3].Y := y3+FDeltaY;;
   Windows.Polygon(FDrawGC, pts, 3);
 end;
 
@@ -2624,11 +2647,13 @@ end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
 begin
+  {
   FClipRectSet := True;
   FClipRect    := ARect;
   DeleteObject(FClipRegion);
   FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
-  SelectClipRgn(FDrawGC, FClipRegion);
+  SelectClipRgn(FDrawGC, FClipRegion);}
+
 end;
 
 procedure TfpgGDICanvas.DoSetColor(cl: TfpgColor);
@@ -2745,6 +2770,9 @@ var
 begin
   if img = nil then
     Exit; //==>
+
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   tmpdc := CreateCompatibleDC(wapplication.display);
   SelectObject(tmpdc, TfpgGDIImage(img).BMPHandle);
 
@@ -2773,6 +2801,8 @@ begin
   SelectObject(FDrawGC, hb);
   SelectObject(FDrawGC, nullpen);
 
+  Inc(x, FDeltaX);
+  Inc(y, FDeltaY);
   Windows.Rectangle(FDrawGC, x, y, x + w + 1, y + h + 1);
 
   SetROP2(FDrawGC, R2_COPYPEN);
