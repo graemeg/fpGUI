@@ -2228,10 +2228,20 @@ var
   ScrollBarVisible,
   ScrollBarVisibleOld: TScrollBarState;
   SameCount: Integer = 0;
+  PrevVSliderSize,
+  PrevHSliderSize: Double;
+  PrevHMax,
+  PrevVMax: Integer;
 begin
   MaxH := 0;
   MaxV := 0;
   BevelSize := 2;
+
+  // Use these values to prevent the scrollbar from repainting if unneeded
+  PrevVSliderSize:=VScrollBar.SliderSize;
+  PrevHSliderSize:=HScrollBar.SliderSize;
+  PrevVMax:=VScrollBar.Max;
+  PrevHMax:=HScrollBar.Max;
 
   ItemsTotalSize := FViewStyle.GetItemsVirtualArea;
 
@@ -2301,7 +2311,8 @@ begin
     else
       FVScrollBar.SliderSize := 0.5;
   end;
-  FVScrollBar.RepaintSlider;
+  if PrevVSliderSize <> FVScrollBar.SliderSize then
+    FVScrollBar.RepaintSlider;
 
   if FHScrollBar.Max = 0 then
     FHScrollBar.SliderSize := 1
@@ -2312,12 +2323,13 @@ begin
     else
       FHScrollBar.SliderSize := 0.5;
   end;
-  FHScrollBar.RepaintSlider;
+  if PrevHSliderSize <> FHScrollBar.SliderSize then
+    FHScrollBar.RepaintSlider;
 
 
-  if FHScrollBar.Visible then
+  if FHScrollBar.Visible and (PrevHMax <> FHScrollBar.Max) then
     FHScrollBar.UpdatePosition;
-  if FVScrollBar.Visible then
+  if FVScrollBar.Visible and (PrevVMax <> FVScrollBar.Max) then
     FVScrollBar.UpdatePosition;
 
   FScrollBarNeedsUpdate := False;
