@@ -281,6 +281,7 @@ type
   private
     FImages: array[TfpgLVItemStates] of TfpgImageList;
     FOnItemActivate: TfpgLVItemActivateEvent;
+    FScrollBarStyle: TfpgScrollStyle;
     FShowFocusRect: Boolean;
     FSubitemImages: array[TfpgLVItemStates] of TfpgImageList;
     FItemIndex: Integer;
@@ -314,6 +315,7 @@ type
     procedure   SetItems(const AValue: TfpgLVItems);
     procedure   SetMultiSelect(const AValue: Boolean);
     procedure   SetOnColumnClick(const AValue: TfpgLVColumnClickEvent);
+    procedure   SetScrollBarStyle(AValue: TfpgScrollStyle);
     procedure   SetScrollBarWidth(const AValue: integer);
     procedure   SetShowFocusRect(AValue: Boolean);
     procedure   SetShowHeaders(const AValue: Boolean);
@@ -387,6 +389,7 @@ type
     property    ParentShowHint;
     property    ViewStyle: TfpgLVPainter read FViewStyle write SetViewStyle;
     property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
+    property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
     property    SubItemImages: TfpgImageList index Ord(lisNoState) read SubItemGetImages write SubItemSetImages;
     property    SubItemImagesSelected: TfpgImageList index Ord(lisSelected) read SubItemGetImages write SubItemSetImages;
@@ -1548,6 +1551,13 @@ begin
   FOnColumnClick:=AValue;
 end;
 
+procedure TfpgListView.SetScrollBarStyle(AValue: TfpgScrollStyle);
+begin
+  if FScrollBarStyle=AValue then Exit;
+  FScrollBarStyle:=AValue;
+  UpdateScrollBarPositions;
+end;
+
 procedure TfpgListView.SetScrollBarWidth(const AValue: integer);
 begin
   if AValue = FScrollBarWidth then
@@ -2230,6 +2240,7 @@ begin
 
   // Start with the assumption that both scrollbars are hidden.
   ScrollBarVisible:=[];
+
   repeat
     ScrollBarVisibleOld := ScrollBarVisible;
 
@@ -2237,9 +2248,11 @@ begin
     MaxV := ItemsTotalSize.H - VisibleItemArea.H;
 
 
-    VScrollBar.Visible := MaxV > 0;
+    VScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssHorizontal, ssHorizVisible])
+                          and ((MaxV > 0) or (FScrollBarStyle in [ssBothVisible, ssVertical, ssVertiVisible]));
 
-    HScrollBar.Visible := MaxH > 0;
+    HScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssVertical, ssVertiVisible])
+                          and ((MaxH > 0) or (FScrollBarStyle in [ssBothVisible, ssHorizontal, ssHorizVisible]));
 
     if VScrollBar.Visible and not (sbVertical in ScrollBarVisibleOld) then
     begin
@@ -2341,6 +2354,8 @@ begin
   FItemIndex := -1;
   FScrollBarNeedsUpdate := True;
   FScrollBarWidth := FVScrollBar.Width;
+  FHScrollBar.Height:=FScrollBarWidth;
+  FScrollBarStyle:=ssAutoBoth;
   FViewStyle := TfpgLVReportPainter.Create(Self);
 end;
 
