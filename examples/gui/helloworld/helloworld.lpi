@@ -28,7 +28,13 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <LaunchingApplication Use="True"/>
       </local>
+      <environment>
+        <UserOverrides Count="1">
+          <Variable0 Name="WINEDEBUG" Value="-all"/>
+        </UserOverrides>
+      </environment>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
@@ -51,6 +57,9 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <TargetOS Value="win32"/>
+    </CodeGeneration>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

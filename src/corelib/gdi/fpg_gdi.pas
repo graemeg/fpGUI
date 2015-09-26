@@ -123,8 +123,8 @@ type
     //FDrawWindow: TfpgGDIWindow;
     //Fgc: TfpgDCHandle;
     //FBufgc: TfpgDCHandle;
-    FDrawGC: TfpgDCHandle;
-    FWinGC: TfpgDCHandle;
+    FDrawGC: TfpgDCHandle;  // DC for buffer
+    FWinGC: TfpgDCHandle;   // DC for window
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgGDIFontResource;
     FClipRect: TfpgRect;
@@ -2331,9 +2331,10 @@ begin
 
   if not FDrawing then
   begin
+    if CanvasTarget = self then
+      FWinGC := Windows.GetDC(Winhandle);
     AllocateDC;
     //FDrawWindow := TfpgGDIWindow(awin);
-    //FWinGC      := Windows.GetDC(FDrawWindow.FWinHandle);
 
     if not GetBufferAllocated then
       DoAllocateBuffer;
@@ -2484,12 +2485,18 @@ procedure TfpgGDICanvas.DoAllocateBuffer;
 const
   BUFFER_RESIZE_SIZE = 50;
 begin
+  if FCanvasTarget<>Self then
+  begin
+    TfpgGDICanvas(FCanvasTarget).DoAllocateBuffer;
+    Exit;
+  end;
   if FBufferBitmap > 0 then
     TryFreeBackBuffer;
 
   FBufSize.W := FWidget.Width + BUFFER_RESIZE_SIZE;
   FBufSize.H := FWidget.Height + BUFFER_RESIZE_SIZE;
   FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, FBufSize.W, FBufSize.H);
+  SelectObject(FDrawGC, FBufferBitmap);
 end;
 
 procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
@@ -2697,24 +2704,33 @@ end;
 
 procedure TfpgGDICanvas.AllocateDC;
 begin
-  FDrawGC := CreateCompatibleDC(TfpgGDICanvas(FCanvasTarget).FWinGC);
+  // Seems multiple DC's cannot write to a bitmap.
+  FDrawGC :={CreateCompatibleDC}(TfpgGDICanvas(FCanvasTarget).FWinGC);
+  //FDrawGC:=CreateCompatibleDC(0);
   SelectObject(FDrawGC, DrawHandle);
 end;
 
 procedure TfpgGDICanvas.DeAllocateDC;
 begin
+  if FCanvasTarget <> Self then
+    DeleteDC(FDrawGC);
 
 end;
 
 function TfpgGDICanvas.WinHandle: TfpgWinHandle;
 begin
-  Result := TfpgGDIWindow(TfpgGDICanvas(FCanvasTarget).FWidget.Window).WinHandle;
+  Result := 0;
+  if (TfpgGDICanvas(FCanvasTarget) <> nil)
+  and (TfpgGDICanvas(FCanvasTarget).FWidget <> nil)
+  and (TfpgGDICanvas(FCanvasTarget).FWidget.Window <> nil) then
+    Result := TfpgGDIWindow(TfpgGDICanvas(FCanvasTarget).FWidget.Window).WinHandle;
 end;
 
 procedure TfpgGDICanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
     Exit; //==>
+
   FCurFontRes := TfpgGDIFontResource(fntres);
   Windows.SelectObject(FDrawGC, FCurFontRes.Handle);
 end;
@@ -2729,7 +2745,6 @@ var
 begin
   if img = nil then
     Exit; //==>
-
   tmpdc := CreateCompatibleDC(wapplication.display);
   SelectObject(tmpdc, TfpgGDIImage(img).BMPHandle);
 
