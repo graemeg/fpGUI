@@ -3459,6 +3459,14 @@ initialization
   {$ENDIF}
 
 finalization
+  {$IFDEF HAS_OPACITY}
+  if user32lib <> 0 then
+  begin
+    UnloadLibrary(user32lib);
+    if SetLayeredWindowAttributes <> nil then
+      SetLayeredWindowAttributes:=nil;
+  end;
+  {$ENDIF}
   if NeedToUnitialize then
     OleUninitialize;
 {$ENDIF}
