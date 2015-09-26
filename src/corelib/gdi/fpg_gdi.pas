@@ -33,6 +33,9 @@ unit fpg_gdi;
 // enable or disable DND support. Disabled by default while implementing AlienWindows.
 {.$define HAS_DND}
 
+// enable or disaple window opacity
+{$define HAS_OPACITY}
+
 {$IFDEF WINCE}
   // WinCE doesn't have DND support
   {$undefine HAS_DND}
@@ -52,6 +55,9 @@ uses
   {$ENDIF GDEBUG}
   {$IFDEF HAS_DND}
   ,fpg_OLEDragDrop
+  {$ENDIF}
+  {$IFDEF HAS_OPACITY}
+  ,dynlibs
   {$ENDIF}
   ;
 
@@ -375,6 +381,14 @@ var
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
   NeedToUnitialize: Boolean;
+  {$IFDEF HAS_OPACITY}
+  HasOpacity: Boolean; // false by default
+  user32lib: TLibHandle;
+  SetLayeredWindowAttributes: function (hwnd: Windows.HWND; crkey: Windows.COLORREF; bAlpha: Byte; dwFlags: DWord): Windows.BOOL; stdcall;
+const
+  WS_EX_LAYERED = $00080000;
+  GWL_EXSTYLE   = -20;
+  {$ENDIF}
 
 const
   BUFFER_RESIZE_SIZE = 50;
@@ -1912,6 +1926,10 @@ begin
     );
   {$ENDIF}
 
+  {$IFDEF HAS_OPACITY}
+  SetWindowOpacity(WindowOpacity);
+  {$ENDIF}
+
   if waScreenCenterPos in FWindowAttributes then
   begin
     FPosition.X := (wapplication.ScreenWidth - FSize.W) div 2;
@@ -2077,10 +2095,43 @@ begin
 end;
 
 procedure TfpgGDIWindow.SetWindowOpacity(AValue: Single);
+var
+ NeedsLayered: Boolean;
+ res: LongBool;
 begin
-  if AValue = WindowOpacity then
-    Exit;
+  // called in DoAllocateWindow so we need to be able to set value to current
+  //if AValue = WindowOpacity then
+  //  Exit; // ==>
+
+  NeedsLayered:=WindowOpacity = 1.0;
+
   inherited SetWindowOpacity(AValue);
+  if FWinHandle = 0 then
+    Exit; // ==>;
+
+  if HasOpacity then
+  begin
+    SetLastError(0);
+    // if Opacity is 1.0 then our window needs to be updated with SetWindowLong
+    if NeedsLayered and (AValue < 1.0) then
+      SetWindowLong(FWinHandle, GWL_EXSTYLE, GetWindowLong(FWinHandle, GWL_EXSTYLE) or WS_EX_LAYERED);
+
+    if GetLastError <> 0 then
+      Exit; // ==>
+
+    //exit;
+    //if Not NeedsLayered;
+    if AValue < 1 then
+    begin
+      Res := SetLayeredWindowAttributes(FWinHandle, RGB(255,255,255), Trunc(255 * WindowOpacity), LWA_COLORKEY or LWA_ALPHA);
+      if Res = False then // failed
+        inherited SetWindowOpacity(1.0); // totally opaque
+
+
+    end;
+
+  end;
+
 end;
 
 (*  // TODO: disabled for AlienWindows branch. We should fine a solution later.
@@ -3396,6 +3447,16 @@ initialization
       FontSmoothingType := CLEARTYPE_QUALITY
     else
       FontSmoothingType := ANTIALIASED_QUALITY;
+
+  {$IFDEF HAS_OPACITY}
+  user32lib:=LoadLibrary('user32');
+  if user32lib <> 0 then
+  begin
+    Pointer(SetLayeredWindowAttributes):=GetProcAddress(user32lib, 'SetLayeredWindowAttributes');
+    if SetLayeredWindowAttributes <> nil then
+      HasOpacity:=True;
+  end;
+  {$ENDIF}
 
 finalization
   if NeedToUnitialize then
