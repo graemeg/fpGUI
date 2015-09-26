@@ -169,6 +169,8 @@ type
   end;
 
 
+  { TfpgGDIWindow }
+
   TfpgGDIWindow = class(TfpgWindowBase)
   private
     {$IFDEF HAS_DND}
@@ -216,6 +218,7 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
     //procedure   DoDragStartDetected; override;
+    procedure   SetWindowOpacity(AValue: Single); override;
     function    GetWindowState: TfpgWindowState; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -2009,7 +2012,7 @@ begin
 end;
 }
 
-procedure TfpgGDIWindow.DoSetWindowTitle(const atitle: string);
+procedure TfpgGDIWindow.DoSetWindowTitle(const ATitle: string);
 begin
   {$ifdef wince}
   Windows.SetWindowText(WinHandle, PWideChar(Utf8Decode(ATitle)));
@@ -2071,6 +2074,13 @@ begin
     QueueAcceptDrops := False;
   end;
   {$ENDIF}
+end;
+
+procedure TfpgGDIWindow.SetWindowOpacity(AValue: Single);
+begin
+  if AValue = WindowOpacity then
+    Exit;
+  inherited SetWindowOpacity(AValue);
 end;
 
 (*  // TODO: disabled for AlienWindows branch. We should fine a solution later.

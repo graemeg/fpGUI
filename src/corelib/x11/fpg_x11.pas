@@ -266,6 +266,7 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
     function    GetWindowState: TfpgWindowState; override;
+    procedure   SetWindowOpacity(AValue: Single); override;
     procedure   TriggerSyncCounter;
   public
     constructor Create(AOwner: TComponent); override;
@@ -2540,6 +2541,9 @@ begin
     fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
 
+    // set stored opacity value
+    fpgApplication.netlayer.WindowSetAlpha(FWinHandle, WindowOpacity);
+
     // use this to synchronize painting the window with the window frame being redrawn
     FSyncCounter:=XSyncCreateCounter(xapplication.Display, FSyncValue);
     if FSyncCounter > 0 then
@@ -2912,6 +2916,16 @@ begin
 
   if data <> nil then
     XFree(data);
+end;
+
+procedure TfpgX11Window.SetWindowOpacity(AValue: Single);
+begin
+  if AValue = WindowOpacity then
+    Exit;
+  inherited SetWindowOpacity(AValue);
+
+  if FWinHandle <> 0 then
+     fpgApplication.netlayer.WindowSetAlpha(FWinHandle,AValue);
 end;
 
 procedure TfpgX11Window.TriggerSyncCounter;

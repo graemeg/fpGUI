@@ -545,6 +545,8 @@ type
   end;
 
 
+  { TfpgWindowBase }
+
   TfpgWindowBase = class(TfpgComponent)
   private
     FPassiveMouseCapture: TfpgWidgetBase;
@@ -553,6 +555,7 @@ type
     FWidget: TfpgWidgetBase;
     FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
+    FWindowOpacity: Single;
     LastMousePos: TfpgPoint; // point in the native window
     function    GetHeight: TfpgCoord;
     function    GetLeft: TfpgCoord;
@@ -586,6 +589,7 @@ type
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     function    GetWindowState: TfpgWindowState; virtual;
     procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
+    procedure   SetWindowOpacity(AValue: Single); virtual;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
     // alien windows methods
@@ -629,6 +633,7 @@ type
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
     property    WindowTitle: string write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState default wsNormal;
+    property    WindowOpacity: Single read FWindowOpacity write SetWindowOpacity default 1.0;
     property    Left: TfpgCoord read GetLeft;
     property    Top: TfpgCoord read GetTop;
     property    Width: TfpgCoord read GetWidth;
@@ -1665,6 +1670,11 @@ begin
     Exit; //==>
   FMouseCursor := AValue;
   DoSetMouseCursor;
+end;
+
+procedure TfpgWindowBase.SetWindowOpacity(AValue: Single);
+begin
+  FWindowOpacity:=AValue;
 end;
 
 function TfpgWindowBase.GetPrimaryWidget: TfpgWidgetBase;

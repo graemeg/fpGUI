@@ -70,6 +70,7 @@ type
                naWM_ICON_NAME,  // UTF8 String
                naWM_VISIBLE_ICON_NAME, // UTF8 String
                naWM_DESKTOP, // cardinal (index of the desktop of the window) $FFFFFFFF for all desktops
+               naWM_WINDOW_OPACITY, // cardinal value 0 for totally transparent $FFFFFFFF for completle opaque
                naWM_WINDOW_TYPE, // TAtom of the different types below
                naWM_WINDOW_TYPE_DESKTOP,
                naWM_WINDOW_TYPE_DOCK,
@@ -145,6 +146,7 @@ type
     procedure UpdateSupportedAtoms;
   public
     // window related functions
+    function    WindowSetAlpha(const AWindow: TWindow; AValue: Single): Boolean;
     function    WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
     function    WindowGetHidden(const AWindow: TWindow; out AValue: Boolean): Boolean;
     function    WindowSetHidden(const AWindow: TWindow; const AValue: Boolean): Boolean;
@@ -177,6 +179,7 @@ type
     function    ManagerGetActiveWindow(out AWindow: TWindow): Boolean;
     function    ManagerSetActiveWindow(const AWindow: TWindow): Boolean;
     function    ManagerIsValid: Boolean;
+    function    ManagerSupportsAtom(AAtom: TNetAtomEnum): Boolean;
     // desktop functions
     function    DesktopGetSize(out AWidth, AHeight: Integer): Boolean;
     function    DesktopGetCurrent(out AIndex: Integer): Boolean;
@@ -233,6 +236,7 @@ type
     '_NET_WM_ICON_NAME',
     '_NET_WM_VISIBLE_ICON_NAME',
     '_NET_WM_DESKTOP',
+    '_NET_WM_WINDOW_OPACITY',
     '_NET_WM_WINDOW_TYPE',
     '_NET_WM_WINDOW_TYPE_DESKTOP',
     '_NET_WM_WINDOW_TYPE_DOCK',
@@ -338,6 +342,29 @@ begin
   end;
   if AtomCount > 0 then
     XFree(Atoms);
+end;
+
+function TNETWindowLayer.WindowSetAlpha(const AWindow: TWindow; AValue: Single): Boolean;
+var
+  Alpha: Cardinal;
+begin
+  Result := ManagerSupportsAtom(naWM_WINDOW_OPACITY);
+
+  if AValue > 1 then
+    AValue:=1;
+  if AValue < 0 then
+    AValue := 0;
+
+  Alpha := Trunc(AValue * $FFFFFFFF);
+
+  Result := True; //????
+
+  // totally opaque so it's a normal window.
+  if AValue = 1 then
+    XDeleteProperty(FDisplay, AWindow, FNetAtoms[naWM_WINDOW_OPACITY])
+  else
+    WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_WINDOW_OPACITY], 1, @Alpha);
+
 end;
 
 function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
@@ -672,6 +699,11 @@ function TNETWindowLayer.ManagerIsValid: Boolean;
 begin
   // if the window manager changes we need to refresh the list of atoms supported by it
   Result := False;  // ?????  Todo
+end;
+
+function TNETWindowLayer.ManagerSupportsAtom(AAtom: TNetAtomEnum): Boolean;
+begin
+  Result := FAtomSupported[AAtom];
 end;
 
 procedure TNETWindowLayer.SendRootWindowMessage(AMessage: PXEvent);

@@ -36,9 +36,13 @@ uses
 type
 
   // Base class for all toplevel windows
+
+  { TfpgWindow }
+
   TfpgWindow = class(TfpgWidget)
   private
     FDNDEnabled: boolean;
+    FOpacity: Single;
     FWindowTitle: string;
     function GetWindowState: TfpgWindowState;
     procedure SetWindowState(AValue: TfpgWindowState);
@@ -47,6 +51,7 @@ type
     procedure   AdjustWindowStyle; virtual;
     procedure   SetWindowParameters; virtual;
     procedure   SetWindowTitle(const ATitle: string); virtual;
+    procedure   SetWindowOpacity(AValue: Single);
     procedure   DoAllocateWindowHandle; override;
     procedure   AllocateWindowHandle; override;
     procedure   DoDNDEnabled(const AValue: boolean); virtual;
@@ -56,6 +61,7 @@ type
     procedure   ActivateWindow;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState;
+    property    WindowOpacity: Single read FOpacity write SetWindowOpacity;
   end;
 
 implementation
@@ -94,10 +100,18 @@ begin
     Window.WindowTitle := ATitle;
 end;
 
+procedure TfpgWindow.SetWindowOpacity(AValue: Single);
+begin
+  FOpacity:=AValue;
+  if WindowAllocated then
+    Window.WindowOpacity:=AValue;
+end;
+
 procedure TfpgWindow.DoAllocateWindowHandle;
 begin
   inherited DoAllocateWindowHandle;
   Window.WindowType:=FWindowType;
+  Window.WindowOpacity:=FOpacity;
 end;
 
 procedure TfpgWindow.AllocateWindowHandle;
@@ -118,6 +132,7 @@ begin
   WindowType:=wtWindow;
   inherited Create(AOwner);
   HasOwnWindow:=True;
+  FOpacity:=1.0;
 end;
 
 procedure TfpgWindow.ActivateWindow;
