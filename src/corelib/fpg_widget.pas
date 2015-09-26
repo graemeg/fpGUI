@@ -1471,6 +1471,15 @@ begin
   if (Width < 1) or (Height < 1) then
     Exit;
 
+  // combine existing invalid rect with message rect if sent
+  if FInvalidRect.IsUnassigned then
+    FInvalidRect := msg.Params.rect
+  else
+    if not msg.Params.rect.IsUnassigned then
+      UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
+
+  HasInvalidRegion:=not FInvalidRect.IsUnassigned;
+
   Canvas.BeginDraw;
 
   HandlePaint;
@@ -1480,15 +1489,6 @@ begin
   {$IFDEF GDEBUG}
   Tmp := FInvalidRect; // for debugging
   {$ENDIF}
-
-  // combine existing invalid rect with message rect if sent
-  if FInvalidRect.IsUnassigned then
-    FInvalidRect := msg.Params.rect
-  else
-    if not msg.Params.rect.IsUnassigned then
-      UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
-
-  HasInvalidRegion:=not FInvalidRect.IsUnassigned;
 
   if HasOwnWindow then
   begin
