@@ -36,7 +36,7 @@ uses
 type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
-  TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssAutoBoth, ssHorizVisible, ssVertiVisible, ssBothVisible);
+  TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth);
   
   TfpgScrollBarPart = (sbpNone, sbpUpBack, sbpPageUpBack, sbpSlider, sbpDownForward, sbpPageDownForward);
 

@@ -2258,11 +2258,11 @@ begin
     MaxV := ItemsTotalSize.H - VisibleItemArea.H;
 
 
-    VScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssHorizontal, ssHorizVisible])
-                          and ((MaxV > 0) or (FScrollBarStyle in [ssBothVisible, ssVertical, ssVertiVisible]));
+    VScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssHorizontal, ssAutoHorizontal])
+                          and ((MaxV > 0) or (FScrollBarStyle in [ssBoth, ssVertical]));
 
-    HScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssVertical, ssVertiVisible])
-                          and ((MaxH > 0) or (FScrollBarStyle in [ssBothVisible, ssHorizontal, ssHorizVisible]));
+    HScrollBar.Visible := not(FScrollBarStyle in [ssNone, ssVertical, ssAutoVertical])
+                          and ((MaxH > 0) or (FScrollBarStyle in [ssBoth, ssHorizontal]));
 
     if VScrollBar.Visible and not (sbVertical in ScrollBarVisibleOld) then
     begin

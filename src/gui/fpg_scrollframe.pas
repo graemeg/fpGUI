@@ -352,7 +352,7 @@ begin
   // preliminary width/height calculations
   prevHideHsb := not FHScrollBar.Visible;
   prevHideVsb := not FVScrollBar.Visible;
-  showVsb := (FScrollBarStyle = ssBothVisible);
+  showVsb := (FScrollBarStyle = ssBoth);
   showHsb := showVsb;
   contentWidth := ContentFrame.Width;
   contentHeight := ContentFrame.Height;

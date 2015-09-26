@@ -816,19 +816,19 @@ begin
             getVisLines;
           end;
         end;
-    ssHorizVisible:
+    ssAutoHorizontal:
         begin
           hideScrollbar (FVScrollBar);
           showH := true;
           getVisLines;
         end;
-    ssVertiVisible:
+    ssAutoVertical:
         begin
           hideScrollbar (FHScrollBar);
           showV := true;
           getVisWidth;
         end;
-    ssBothVisible:
+    ssBoth:
         begin
           showV := true;
           showH := true;
