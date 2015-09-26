@@ -479,7 +479,7 @@ end;
 
 function TfpgLVIconPainter.GetItemsVirtualArea: TfpgSize;
 begin
-  Result.W:=ItemsPerRow*ItemWidth;
+  Result.W:=Min(ItemsPerRow, FListView.Items.Count)*ItemWidth;
   Result.H:=(FListView.Items.Count div ItemsPerRow) * ItemHeight;
   if FListView.Items.Count mod ItemsPerRow > 0 then
     Inc(Result.H, ItemHeight);
