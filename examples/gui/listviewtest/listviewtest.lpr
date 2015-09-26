@@ -22,6 +22,8 @@ type
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
     FShowFocus: TfpgCheckBox;
+    FImageList: TfpgImageList;
+    FSelectedImageList: TfpgImageList;
     procedure LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer);
     procedure CloseBttn(Sender: TObject);
     procedure AddBttn(Sender: TObject);
@@ -33,6 +35,7 @@ type
                                     ItemIndex: Integer; Selected: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   end;
 
 
@@ -61,13 +64,13 @@ end;
 procedure TMainForm.AddBttn(Sender: TObject);
 var
   Item: TfpgLVItem;
-  I: Integer;
+//  I: Integer;
 begin
   FListView.BeginUpdate;
   FTmpListView.BeginUpdate;
   //FListView.Items.Capacity := FListView.Items.Capacity + 2000000;
   //for I := 0 to 1999999 do begin
-    Item := FListView.ItemAdd;
+    Item := FListView.AddItem;
     Item.Caption := FEdit.Text + IntToStr(Random(1000));
     Item.SubItems.Add('c0');
     Item.SubItems.Add('c1');
@@ -125,8 +128,6 @@ var
   BottomPanel: TfpgPanel;
   IL: TStringList;
   i: Integer;
-  FImageList: TfpgImageList;
-  FSelectedImageList: TfpgImageList;
   TmpImage: TfpgImage;
 begin
   inherited Create(AOwner);
@@ -136,18 +137,15 @@ begin
   SetPosition(200, 200, 640, 480);
 
   IL := TStringList.Create;
-
-  fpgImages.ListImages(IL);
-
+  fpgImages.ListImages(IL); // just assigns image references
   FImageList := TfpgImageList.Create;
   FSelectedImageList := TfpgImageList.Create;
-
   for i := 0 to IL.Count-1 do
-    FImageList.AddImage(fpgImages.GetImage(IL.Strings[i]));
-
+    FImageList.AddImage(TfpgImage(IL.Objects[i]));  // just adds image references
   IL.Free;
 
-  // invert the items for the 'selected' images
+  { invert the items for the 'selected' images - this creates
+    new images which we must free later. }
   for i := 0 to FImageList.Count-1 do
   begin
     TmpImage := FImageList.Items[i].Image.ImageFromSource;
@@ -165,7 +163,6 @@ begin
   TopPanel.Align   := alClient;
   TopPanel.Parent  := Self;
   TopPanel.Text    := '';
-
 
   FListView := TfpgListView.Create(TopPanel);
   with FListView do begin
@@ -186,6 +183,7 @@ begin
     Parent := TopPanel;
     Align:=alLeft;
   end;
+
   FTmpListView := TfpgListView.Create(TopPanel);
   with FTmpListView do begin
     Parent := TopPanel;
@@ -195,7 +193,6 @@ begin
     Images := FImageList;
     ViewStyle := TfpgLVIconPainter.Create(FTmpListView);
   end;
-
   
   LVColumn := TfpgLVColumn.Create(FListView.Columns);
   LVColumn.Caption := 'Column 1';
@@ -233,8 +230,10 @@ begin
   with FEdit do begin
     Parent := BottomPanel;
     Top := 10;
-    Left := 10;
-    Width := 100;
+    Left := 8;
+    Width := 110;
+    ExtraHint := 'List item prefix';
+    Options := [eo_ExtraHintIfFocus];
   end;
 
   FAddButton := TfpgButton.Create(BottomPanel);
@@ -281,7 +280,19 @@ begin
     Text := 'Show Item Focus';
     OnChange:=@ShowFocusItemChange;
   end;
+end;
 
+destructor TMainForm.Destroy;
+var
+  i: integer;
+begin
+  // Must assign Image = nil otherwise TfpgImageList is going to try and free them
+  for i := 0 to FImageList.Count-1 do
+    FImageList[i].Image := nil;
+  FImageList.Free;
+
+  FSelectedImageList.Free;
+  inherited Destroy;
 end;
 
 begin
