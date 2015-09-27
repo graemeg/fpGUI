@@ -1142,6 +1142,8 @@ begin
 
           if (w2 is TfpgGDIWindow) then
           begin
+            // pt is in screen cooridnates
+            Windows.ScreenToClient(w2.WinHandle, pt);
             msgp.mouse.x := pt.x;
             msgp.mouse.y := pt.y;
             { calculate direction of the mouse wheel }
