@@ -42,14 +42,10 @@ type
   // forward declaration
   TfpgPageControl = class;
   
-  TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
-  TfpgTabPosition = (tpTop, tpBottom, tpLeft, tpRight, tpNone);
   TfpgTabOption   = (to_PMenuClose, to_PMenuShowAvailTabs);
 
   TfpgTabOptions = set of TfpgTabOption;
 
-
-  { TfpgTabSheet }
 
   TfpgTabSheet = class(TfpgWidget)
   private
