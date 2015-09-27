@@ -22,7 +22,6 @@ unit fpg_tab;
 {
   TODO:
     * Tab Styles (tab, button, flat button, angled)
-    * Better keyboard support
     * Focus rectangle drawn on tabs itself
     * FindNextPage() must be implemented
     * Popup menu for tab selection. Should occur with RClick on tabs.
@@ -424,9 +423,7 @@ procedure TfpgPageControl.PositionTabSheet(var APage: TfpgTabSheet);
 var
   r: TRect;
   w: integer;
-  wd: integer;  { width delta }
   h: integer;
-  hd: integer;  { height delta }
 begin
   // PageControl has bevelled edges in some themes
   r := fpgStyle.GetControlFrameBorders;
@@ -435,28 +432,22 @@ begin
   if TabPosition in [tpTop, tpBottom] then
   begin
     w := Width - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end
   else if TabPosition in [tpLeft, tpRight] then
   begin
     w := Width - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end
   else
   begin   // tpNone
     w := Width - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end;
 
@@ -681,7 +672,6 @@ end;
 procedure TfpgPageControl.DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const ASelected: Boolean = False);
 var
   r: TfpgRect;
-  border: TRect;
 
   procedure ApplyCorrectTabColorToCanvas;
   begin
@@ -696,7 +686,6 @@ begin
     raise Exception.Create('DrawTab parameter error. ATabSheet may not be nil.');
 
   r := rect;
-  border := fpgStyle.GetTabBorders;
 
   if ASelected then
   begin
@@ -868,7 +857,6 @@ var
   lp: integer;
   toffset: integer;
   lTxtFlags: TfpgTextFlags;
-  ActivePageVisible: Boolean;
 
   procedure ApplyCorrectTabTextColorToCanvas(ATab: TfpgTabSheet);
   begin
@@ -887,7 +875,6 @@ begin
 
   TabW := FixedTabWidth;
   TabH := FixedTabHeight;
-  ActivePageVisible := false;
   if TabH <= 1 then
     TabH := TAB_HEIGHT;
   h := TfpgTabSheet(FPages.First);
