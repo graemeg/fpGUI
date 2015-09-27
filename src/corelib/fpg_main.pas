@@ -243,6 +243,7 @@ type
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
     { PageControl & Tabs }
     function    GetTabBorders: TRect; virtual;
+    procedure   DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor); virtual;
     procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); virtual;
   end;
 
@@ -2572,6 +2573,11 @@ end;
 function TfpgStyle.GetTabBorders: TRect;
 begin
   Result := Rect(2, 2, 2, 2);
+end;
+
+procedure TfpgStyle.DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor);
+begin
+  ACanvas.Clear(ABGColor);
 end;
 
 procedure TfpgStyle.DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab);

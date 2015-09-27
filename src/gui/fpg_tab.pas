@@ -1090,7 +1090,7 @@ begin
   if SortPages then
     OrderSheets;
   Canvas.ClearClipRect;
-  Canvas.Clear(FBackgroundColor);
+  fpgStyle.DrawTabBackground(Canvas, BackgroundColor);
   
   // To make it more visible in the UI Designer
   if csDesigning in ComponentState then
