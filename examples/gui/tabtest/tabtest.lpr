@@ -95,6 +95,7 @@ begin
   WindowTitle := 'Tab control test';
   SetPosition(100, 100, 566, 350);
   ShowHint := True;
+  WindowPosition := wpOneThirdDown;
   
   btnQuit := CreateButton(self, 476, 320, 80, 'Quit', @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
