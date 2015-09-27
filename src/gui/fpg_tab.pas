@@ -682,6 +682,7 @@ function TfpgPageControl.DrawTab(const ATabSheet: TfpgTabSheet; const rect: Tfpg
   const Mode: Integer = 1): TfpgRect;
 var
   r: TfpgRect;
+  border: TRect;
 
   procedure ApplyCorrectTabColorToCanvas;
   begin
@@ -698,7 +699,8 @@ begin
   if Selected then
   begin
     Result := rect;
-    InflateRect(Result, 2, 2);
+    border := fpgStyle.GetTabBorders;
+    InflateRect(Result, border.Left, border.Top);
     Exit; //==>
   end;
 

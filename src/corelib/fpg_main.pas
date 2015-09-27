@@ -233,6 +233,8 @@ type
     { Checkbox }
     function    GetCheckBoxSize: integer; virtual;
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
+    { PageControl & Tabs }
+    function    GetTabBorders: TRect; virtual;
   end;
 
 
@@ -2555,6 +2557,11 @@ begin
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
   size := GetCheckBoxSize;
   ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
+end;
+
+function TfpgStyle.GetTabBorders: TRect;
+begin
+  Result := Rect(2, 2, 2, 2);
 end;
 
 
