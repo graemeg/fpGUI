@@ -1411,10 +1411,7 @@ begin
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
-var
-  TmpRect: TfpgRect;
 begin
-  TmpRect := fpgRect(FPrevLeft, FPrevTop, FPrevWidth, FPrevHeight);
   if FTop <> y then
   begin
     if not (csLoading in ComponentState) then
@@ -2539,7 +2536,7 @@ begin
       if FCanvasTarget = Self then
       begin
         finalrect.SetRect(x,y,w,h);
-        {r2 := finalrect;
+        (*r2 := finalrect;
         r := GetPutBufferItem;
         while Assigned(r) do
         begin
@@ -2548,7 +2545,7 @@ begin
             r2 := finalrect;}
           Dispose(r);
           r := GetPutBufferItem;
-        end;}
+        end;*)
         DoPutBufferToScreen(x, y, w, h);
       end
       else
@@ -2556,7 +2553,7 @@ begin
         FWidget.WidgetToWindow(x,y);
         FCanvasTarget.EndDraw(x, y, w, h);
       end;
-    end
+    end;
     //else
       //AddPutBufferItem(fpgRect(x,y,w,h));
 
