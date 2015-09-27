@@ -668,15 +668,7 @@ end;
 procedure TfpgPageControl.DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const ASelected: Boolean = False);
 var
   r: TfpgRect;
-
-  procedure ApplyCorrectTabColorToCanvas;
-  begin
-    if ActiveTabColor = clDefault then
-      Canvas.SetColor(ATabSheet.TabColor)
-    else
-      Canvas.SetColor(ActiveTabColor);
-  end;
-
+  lParams: TfpgStyleDrawTab;
 begin
   if not Assigned(ATabSheet) then
     raise Exception.Create('DrawTab parameter error. ATabSheet may not be nil.');
@@ -688,91 +680,13 @@ begin
     r.Height -= 1;
     if TabPosition = tpBottom then
       r.Top += 1;
-    ApplyCorrectTabColorToCanvas;
-  end
-  else
-    Canvas.SetColor(ATabSheet.TabColor);
+  end;
 
-  case TabPosition of
-    tpTop:
-      begin
-        Canvas.FillRectangle(r.Left+1, r.Top+1, r.Width-3, r.Height-2);     // fill tab background
-        Canvas.SetColor(clHilite2);
-        Canvas.DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
-        Canvas.DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
-        Canvas.DrawLine(r.Left+2,  r.Top, r.Right-1, r.Top);          // top edge
-        Canvas.SetColor(clShadow1);
-        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right inner edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);        // right rounded edge (1px)
-        Canvas.DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);       // right outer edge
-      end;
-
-    tpBottom:
-      begin
-        Canvas.FillRectangle(r.Left, r.Top, r.Width-1, r.Height-2);   // fill tab background
-        Canvas.SetColor(clHilite2);
-        Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
-        Canvas.SetColor(clShadow1);
-        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top-1);   // right inner edge
-        Canvas.DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
-        Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top-1);       // right outer edge
-        if ASelected then
-        begin
-          ApplyCorrectTabColorToCanvas;
-          Canvas.DrawLine(r.Left+1, r.Top-1, r.Right-1, r.Top-1);
-        end;
-      end;
-
-    tpLeft:
-      begin
-        if ASelected then
-        begin
-          r.Width  := r.Width - 1;
-          r.Height := r.Height + 2;
-        end;
-
-        with Canvas do
-        begin
-          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
-          SetColor(clHilite2);
-          DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
-          DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
-          DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
-          SetColor(clShadow1);
-          DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
-          SetColor(clShadow2);
-          DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
-          DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
-        end;
-      end;
-
-    tpRight:
-      begin
-        if ASelected then
-          r.Height := r.Height + 2;
-
-        with Canvas do
-        begin
-          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
-          SetColor(clHilite2);
-          DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
-          SetColor(clShadow1);
-          DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
-          DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
-          DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
-          DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
-          SetColor(clShadow2);
-          DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
-          DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
-          DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
-        end;
-      end;
-  end;  { case }
+  lParams.TabSheet := ATabSheet;
+  lParams.TabPosition := TabPosition;
+  lParams.TabRect := r;
+  lParams.IsSelected := ASelected;
+  fpgStyle.DrawPageControlTab(Canvas, lParams);
 end;
 
 procedure TfpgPageControl.pmCloseTab(Sender: TObject);

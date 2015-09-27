@@ -99,6 +99,14 @@ type
   end;
 
 
+  TfpgStyleDrawTab = record
+    TabSheet: TObject;
+    TabPosition: TfpgTabPosition;
+    TabRect: TfpgRect;
+    IsSelected: boolean;
+  end;
+
+
   TfpgFontResource = class(TfpgFontResourceImpl)
   protected
     FFontDesc: string;
@@ -235,6 +243,7 @@ type
     procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
     { PageControl & Tabs }
     function    GetTabBorders: TRect; virtual;
+    procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); virtual;
   end;
 
 
@@ -492,7 +501,8 @@ uses
   fpg_style_win2k,   // TODO: This needs to be removed!
   fpg_style_motif,   // TODO: This needs to be removed!
   fpg_style_carbon,
-  fpg_style_plastic;
+  fpg_style_plastic,
+  fpg_tab;
 
 var
   fpgTimers: TList;
@@ -2562,6 +2572,114 @@ end;
 function TfpgStyle.GetTabBorders: TRect;
 begin
   Result := Rect(2, 2, 2, 2);
+end;
+
+procedure TfpgStyle.DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab);
+var
+  r: TfpgRect;
+
+  procedure ApplyCorrectTabColorToCanvas;
+  begin
+    if TfpgTabSheet(AParams.TabSheet).PageControl.ActiveTabColor = clDefault then
+      ACanvas.SetColor(TfpgTabSheet(AParams.TabSheet).TabColor)
+    else
+      ACanvas.SetColor(TfpgTabSheet(AParams.TabSheet).PageControl.ActiveTabColor);
+  end;
+
+begin
+  r := AParams.TabRect;
+
+  if AParams.IsSelected then
+    ApplyCorrectTabColorToCanvas
+  else
+    ACanvas.SetColor(TfpgTabSheet(AParams.TabSheet).TabColor);
+
+  case AParams.TabPosition of
+    tpTop:
+      begin
+        with ACanvas do
+        begin
+          FillRectangle(r.Left+1, r.Top+1, r.Width-3, r.Height-2);     // fill tab background
+          SetColor(clHilite2);
+          DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
+          DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
+          DrawLine(r.Left+2,  r.Top, r.Right-1, r.Top);          // top edge
+          SetColor(clShadow1);
+          DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right inner edge
+          SetColor(clShadow2);
+          DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);        // right rounded edge (1px)
+          DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);       // right outer edge
+        end;
+      end;
+
+    tpBottom:
+      begin
+        with ACanvas do
+        begin
+          FillRectangle(r.Left, r.Top, r.Width-1, r.Height-2);   // fill tab background
+          SetColor(clHilite2);
+          DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
+          SetColor(clShadow2);
+          DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
+          SetColor(clShadow1);
+          DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top-1);   // right inner edge
+          DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
+          SetColor(clShadow2);
+          DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
+          DrawLine(r.Right, r.Bottom-2, r.Right, r.Top-1);       // right outer edge
+          if AParams.IsSelected then
+          begin
+            ApplyCorrectTabColorToCanvas;
+            DrawLine(r.Left+1, r.Top-1, r.Right-1, r.Top-1);
+          end;
+        end;
+      end;
+
+    tpLeft:
+      begin
+        if AParams.IsSelected then
+        begin
+          r.Width  := r.Width - 1;
+          r.Height := r.Height + 2;
+        end;
+
+        with ACanvas do
+        begin
+          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
+          SetColor(clHilite2);
+          DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
+          DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
+          DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
+          SetColor(clShadow1);
+          DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
+          SetColor(clShadow2);
+          DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
+          DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
+        end;
+      end;
+
+    tpRight:
+      begin
+        if AParams.IsSelected then
+          r.Height := r.Height + 2;
+
+        with ACanvas do
+        begin
+          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
+          SetColor(clHilite2);
+          DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
+          SetColor(clShadow1);
+          DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
+          DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
+          DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
+          DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
+          SetColor(clShadow2);
+          DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
+          DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
+          DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
+        end;
+      end;
+  end;  { case }
 end;
 
 
