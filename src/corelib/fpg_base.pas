@@ -77,6 +77,9 @@ type
 
   TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
 
+  TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
+  TfpgTabPosition = (tpTop, tpBottom, tpLeft, tpRight, tpNone);
+
   // in case we wanted to trap any fpGUI specific exceptions
   EfpGUIException = class(Exception);
 

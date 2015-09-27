@@ -22,7 +22,6 @@ unit fpg_tab;
 {
   TODO:
     * Tab Styles (tab, button, flat button, angled)
-    * Better keyboard support
     * Focus rectangle drawn on tabs itself
     * FindNextPage() must be implemented
     * Popup menu for tab selection. Should occur with RClick on tabs.
@@ -43,14 +42,10 @@ type
   // forward declaration
   TfpgPageControl = class;
   
-  TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
-  TfpgTabPosition = (tpTop, tpBottom, tpLeft, tpRight, tpNone);
   TfpgTabOption   = (to_PMenuClose, to_PMenuShowAvailTabs);
 
   TfpgTabOptions = set of TfpgTabOption;
 
-
-  { TfpgTabSheet }
 
   TfpgTabSheet = class(TfpgWidget)
   private
@@ -138,12 +133,13 @@ type
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
     procedure   DoPageChange(ATabSheet: TfpgTabSheet);
     procedure   DoTabSheetClosing(ATabSheet: TfpgTabSheet);
-    function    DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
+    procedure   DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const ASelected: Boolean = False);
     procedure   pmCloseTab(Sender: TObject);
     function    GetActiveTabColor: TfpgColor;
     procedure   SetActiveTabColor(AValue: TfpgColor);
     function    GetActiveTabTextColor: TfpgColor;
     procedure   SetActiveTabTextColor(AValue: TfpgColor);
+    function    CalcActiveTabRect(const ARect: TfpgRect): TfpgRect;
   protected
     procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
@@ -423,9 +419,7 @@ procedure TfpgPageControl.PositionTabSheet(var APage: TfpgTabSheet);
 var
   r: TRect;
   w: integer;
-  wd: integer;  { width delta }
   h: integer;
-  hd: integer;  { height delta }
 begin
   // PageControl has bevelled edges in some themes
   r := fpgStyle.GetControlFrameBorders;
@@ -434,28 +428,22 @@ begin
   if TabPosition in [tpTop, tpBottom] then
   begin
     w := Width - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end
   else if TabPosition in [tpLeft, tpRight] then
   begin
     w := Width - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end
   else
   begin   // tpNone
     w := Width - (FMargin*2) - r.Left - r.Right;
-    wd := APage.Width - w;
     APage.Width   := w;
     h := Height - (FMargin*2) - r.Top - r.Bottom;
-    hd := APage.Height - h;
     APage.Height  := h;
   end;
 
@@ -677,121 +665,28 @@ begin
     FOnClosingTabSheet(self, ATabSheet);
 end;
 
-{ Mode = 1 means the background tabs. Mode = 2 means the Active Tab }
-function TfpgPageControl.DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const Selected: Boolean = False;
-  const Mode: Integer = 1): TfpgRect;
+procedure TfpgPageControl.DrawTab(const ATabSheet: TfpgTabSheet; const rect: TfpgRect; const ASelected: Boolean = False);
 var
   r: TfpgRect;
-
-  procedure ApplyCorrectTabColorToCanvas;
-  begin
-    if ActiveTabColor = clDefault then
-      Canvas.SetColor(ATabSheet.TabColor)
-    else
-      Canvas.SetColor(ActiveTabColor);
-  end;
-
+  lParams: TfpgStyleDrawTab;
 begin
   if not Assigned(ATabSheet) then
     raise Exception.Create('DrawTab parameter error. ATabSheet may not be nil.');
-  r := rect;
-  if Selected then
-  begin
-    Result := rect;
-    InflateRect(Result, 2, 2);
-    Exit; //==>
-  end;
 
-  if Mode = 2 then
+  r := rect;
+
+  if ASelected then
   begin
     r.Height -= 1;
     if TabPosition = tpBottom then
       r.Top += 1;
-    ApplyCorrectTabColorToCanvas;
-  end
-  else
-    Canvas.SetColor(ATabSheet.TabColor);
+  end;
 
-  case TabPosition of
-    tpTop:
-      begin
-        Canvas.FillRectangle(r.Left+1, r.Top+1, r.Width-3, r.Height-2);     // fill tab background
-        Canvas.SetColor(clHilite2);
-        Canvas.DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
-        Canvas.DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
-        Canvas.DrawLine(r.Left+2,  r.Top, r.Right-1, r.Top);          // top edge
-        Canvas.SetColor(clShadow1);
-        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right inner edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);        // right rounded edge (1px)
-        Canvas.DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);       // right outer edge
-      end;
-
-    tpBottom:
-      begin
-        Canvas.FillRectangle(r.Left, r.Top, r.Width-1, r.Height-2);   // fill tab background
-        Canvas.SetColor(clHilite2);
-        Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
-        Canvas.SetColor(clShadow1);
-        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top-1);   // right inner edge
-        Canvas.DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
-        Canvas.SetColor(clShadow2);
-        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
-        Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top-1);       // right outer edge
-        if Mode = 2 then  { selected tab }
-        begin
-          ApplyCorrectTabColorToCanvas;
-          Canvas.DrawLine(r.Left+1, r.Top-1, r.Right-1, r.Top-1);
-        end;
-      end;
-
-    tpLeft:
-      begin
-        if Mode = 2 then  { selected tab }
-        begin
-          r.Width  := r.Width - 1;
-          r.Height := r.Height + 2;
-        end;
-        with Canvas do
-        begin
-          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
-          SetColor(clHilite2);
-          DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
-          DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
-          DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
-          SetColor(clShadow1);
-          DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
-          SetColor(clShadow2);
-          DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
-          DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
-        end;
-      end;
-
-    tpRight:
-      begin
-        if Mode = 2 then
-        begin
-          r.Height := r.Height + 2;
-        end;
-        with Canvas do
-        begin
-          FillRectangle(r.Left+1, r.Top+1, r.Width-2, r.Height-3);
-          SetColor(clHilite2);
-          DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
-          SetColor(clShadow1);
-          DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
-          DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
-          DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
-          DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
-          SetColor(clShadow2);
-          DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
-          DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
-          DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
-        end;
-      end;
-  end;  { case }
+  lParams.TabSheet := ATabSheet;
+  lParams.TabPosition := TabPosition;
+  lParams.TabRect := r;
+  lParams.IsSelected := ASelected;
+  fpgStyle.DrawPageControlTab(Canvas, lParams);
 end;
 
 procedure TfpgPageControl.pmCloseTab(Sender: TObject);
@@ -836,6 +731,15 @@ begin
   end;
 end;
 
+function TfpgPageControl.CalcActiveTabRect(const ARect: TfpgRect): TfpgRect;
+var
+  border: TRect;
+begin
+  border := fpgStyle.GetTabBorders;
+  Result := ARect;
+  InflateRect(Result, border.Left, border.Top);
+end;
+
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
 var
   lWasMatch: boolean;
@@ -853,8 +757,6 @@ begin
 end;
 
 procedure TfpgPageControl.RePaintTitles;
-const
-  TAB_HEIGHT = 21;
 var
   TabW, TabH: Integer;
   r2: TfpgRect;
@@ -863,7 +765,6 @@ var
   lp: integer;
   toffset: integer;
   lTxtFlags: TfpgTextFlags;
-  ActivePageVisible: Boolean;
 
   procedure ApplyCorrectTabTextColorToCanvas(ATab: TfpgTabSheet);
   begin
@@ -882,9 +783,8 @@ begin
 
   TabW := FixedTabWidth;
   TabH := FixedTabHeight;
-  ActivePageVisible := false;
   if TabH <= 1 then
-    TabH := TAB_HEIGHT;
+    TabH := fpgStyle.GetDefaultTabHeight;
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
@@ -992,7 +892,10 @@ begin
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
-          r3 := DrawTab(h, r2, h = ActivePage);
+          if h = ActivePage then
+            r3 := CalcActiveTabRect(r2)
+          else
+            DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
           begin
@@ -1016,7 +919,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
-        DrawTab(h, r3, false, 2);
+        DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
         Canvas.DrawText(r3.Left+4, r3.Top+5, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1041,7 +944,10 @@ begin
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
-          r3 := DrawTab(h, r2, h = ActivePage);
+          if h = ActivePage then
+            r3 := CalcActiveTabRect(r2)
+          else
+            DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
           begin
@@ -1065,7 +971,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
-        DrawTab(h, r3, false, 2);
+        DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
         Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1091,8 +997,10 @@ begin
             h.SetPosition(FMargin+2, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
           end;
           // paint tab button
-          r3 := DrawTab(h, r2, h = ActivePage);
-
+          if h = ActivePage then
+            r3 := CalcActiveTabRect(r2)
+          else
+            DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
           begin
@@ -1115,7 +1023,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
-        DrawTab(h, r3, false, 2);
+        DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1141,8 +1049,10 @@ begin
             h.SetPosition(FMargin+2+TabW, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
           end;
           // paint tab button
-          r3 := DrawTab(h, r2, h = ActivePage);
-
+          if h = ActivePage then
+            r3 := CalcActiveTabRect(r2)
+          else
+            DrawTab(h, r2, h = ActivePage);
           // paint text on non-active tabs
           if h <> ActivePage then
           begin
@@ -1165,7 +1075,7 @@ begin
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
-        DrawTab(h, r3, false, 2);
+        DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
         Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
@@ -1178,7 +1088,7 @@ begin
   if SortPages then
     OrderSheets;
   Canvas.ClearClipRect;
-  Canvas.Clear(FBackgroundColor);
+  fpgStyle.DrawTabBackground(Canvas, BackgroundColor);
   
   // To make it more visible in the UI Designer
   if csDesigning in ComponentState then
