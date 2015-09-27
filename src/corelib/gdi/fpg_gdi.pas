@@ -133,11 +133,10 @@ type
     FBrush: HBRUSH;
     FPen: HPEN;
     FClipRegion: HRGN;
-    FIntLineStyle: integer;
     FBufSize: TfpgSize;
     procedure   TryFreeBackBuffer;
     function    DrawHandle: TfpgDCHandle;
-    procedure   AllocateDC;
+    procedure   CheckAllocateDC;
     procedure   DeAllocateDC;
     function    WinHandle: TfpgWinHandle;
   protected
@@ -2283,6 +2282,7 @@ destructor TfpgGDICanvas.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
+  DeAllocateDC;
   TryFreeBackBuffer;
   inherited;
 end;
@@ -2316,7 +2316,7 @@ var
   ARect: TfpgRect;
   bmsize: Windows.TSIZE;
 begin
-  if FDrawing and {buffered and} (FBufferBitmap > 0) then
+  if FDrawing and {buffered and} (FBufferBitmap > 0) and (FCanvasTarget = Self) then
   begin
     // check if the dimensions are ok
     {$IFNDEF wince}
@@ -2331,9 +2331,7 @@ begin
 
   if not FDrawing then
   begin
-    if CanvasTarget = self then
-      FWinGC := Windows.GetDC(Winhandle);
-    AllocateDC;
+    CheckAllocateDC;
     //FDrawWindow := TfpgGDIWindow(awin);
 
     if not GetBufferAllocated then
@@ -2386,12 +2384,7 @@ begin
     DeleteObject(FPen);
     DeleteObject(FClipRegion);
 
-    TryFreeBackBuffer;
-
-    Windows.ReleaseDC(WinHandle, FWingc);
-
     FDrawing    := False;
-    //FDrawWindow := nil;
   end;
 end;
 
@@ -2506,6 +2499,7 @@ begin
     TfpgGDICanvas(FCanvasTarget).DoAllocateBuffer;
     Exit;
   end;
+
   if FBufferBitmap > 0 then
     TryFreeBackBuffer;
 
@@ -2513,25 +2507,29 @@ begin
   FBufSize.H := FWidget.Height + BUFFER_RESIZE_SIZE;
   FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, FBufSize.W, FBufSize.H);
   SelectObject(FDrawGC, FBufferBitmap);
+  SelectObject(FDrawGC, FPen);
+  SelectObject(FDrawGC, FBrush);
 end;
 
 procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
   // Only the top level canvas pust the buffer to the screen so no delta needed
   if FBufferBitmap > 0 then
+  begin
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
+  end;
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
 begin
-  {rg           := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
+  rg           := CreateRectRgn(ARect.Left+FDeltaX, ARect.Top+FDeltaY, ARect.Left+ARect.Width+FDeltaX, ARect.Top+ARect.Height+FDeltaY);
   FClipRect    := ARect;
   FClipRectSet := True;
   CombineRgn(FClipRegion, rg, FClipRegion, RGN_AND);
   SelectClipRgn(FDrawGC, FClipRegion);
-  DeleteObject(rg);}
+  DeleteObject(rg);
 end;
 
 procedure TfpgGDICanvas.DoClearClipRect;
@@ -2577,7 +2575,8 @@ begin
   end
   else
   begin
-    r.SetRect(x, y, w, h);
+    // DoDrawLine expects values without delta so exclude delta in the rect
+    r.SetRect(x-FDeltaX, y-FDeltaY, w, h);
     DoDrawLine(r.Left, r.Top, r.Right, r.Top);
     DoDrawLine(r.Right, r.Top, r.Right, r.Bottom);
     DoDrawLine(r.Right, r.Bottom, r.Left, r.Bottom);
@@ -2631,29 +2630,32 @@ end;
 function TfpgGDICanvas.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
+  Dec(Result.Top, FDeltaY);
+  Dec(Result.Left, FDeltaX);
 end;
 
 procedure TfpgGDICanvas.DoGetWinRect(out r: TfpgRect);
-var
-  wr: TRect;
+(*var
+  wr: TRect;*)
 begin
   {GetClientRect(FDrawWindow.FWinHandle, wr);
   r.Top     := wr.Top;
   r.Left    := wr.Left;
   r.Width   := wr.Right - wr.Left + 1;
   r.Height  := wr.Bottom - wr.Top + 1;}
+  // Widgets can be smaller than the window size.
   r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
 begin
-  {
   FClipRectSet := True;
   FClipRect    := ARect;
+  Inc(FClipRect.Top, FDeltaY);
+  Inc(FClipRect.Left, FDeltaX);
   DeleteObject(FClipRegion);
-  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
-  SelectClipRgn(FDrawGC, FClipRegion);}
-
+  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left+FClipRect.Width, FClipRect.Top+ARect.Height);
+  SelectClipRgn(FDrawGC, FClipRegion);
 end;
 
 procedure TfpgGDICanvas.DoSetColor(cl: TfpgColor);
@@ -2710,13 +2712,11 @@ end;
 
 procedure TfpgGDICanvas.TryFreeBackBuffer;
 begin
+  if FCanvasTarget <> Self then
+    Exit;
   if FBufferBitmap > 0 then
     DeleteObject(FBufferBitmap);
   FBufferBitmap := 0;
-
-  if FDrawGC > 0 then
-    DeleteDC(FDrawGC);
-  FDrawGC := 0;
 end;
 
 function TfpgGDICanvas.DrawHandle: TfpgDCHandle;
@@ -2727,19 +2727,35 @@ begin
     Result := TfpgGDICanvas(FCanvasTarget).DrawHandle;
 end;
 
-procedure TfpgGDICanvas.AllocateDC;
+procedure TfpgGDICanvas.CheckAllocateDC;
 begin
+  if FDrawGC <> 0 then
+    Exit;
   // Seems multiple DC's cannot write to a bitmap.
-  FDrawGC :={CreateCompatibleDC}(TfpgGDICanvas(FCanvasTarget).FWinGC);
-  //FDrawGC:=CreateCompatibleDC(0);
-  SelectObject(FDrawGC, DrawHandle);
+  if FCanvasTarget = Self then
+  begin
+    if FWinGC = 0 then
+      FWinGC := Windows.GetDC(Winhandle);
+
+    FDrawGC :=CreateCompatibleDC(TfpgGDICanvas(FCanvasTarget).FWinGC);
+    SelectObject(FDrawGC, DrawHandle);
+  end
+  else
+    FDrawGC:=TfpgGDICanvas(FCanvasTarget).FDrawGC;
+  // The bitmap we use as the back buffer cannot have more than one DC so all canvas's must share it.
 end;
 
 procedure TfpgGDICanvas.DeAllocateDC;
 begin
-  if FCanvasTarget <> Self then
-    DeleteDC(FDrawGC);
-
+  if FCanvasTarget = Self then
+  begin
+    if FDrawGC > 0 then
+      DeleteDC(FDrawGC);
+    if FWinGC > 0 then
+      Windows.ReleaseDC(WinHandle, FWinGC);
+    FDrawGC := 0;
+    FWinGC:=0;
+  end;
 end;
 
 function TfpgGDICanvas.WinHandle: TfpgWinHandle;
