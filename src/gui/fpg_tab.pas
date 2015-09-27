@@ -757,8 +757,6 @@ begin
 end;
 
 procedure TfpgPageControl.RePaintTitles;
-const
-  TAB_HEIGHT = 21;
 var
   TabW, TabH: Integer;
   r2: TfpgRect;
@@ -786,7 +784,7 @@ begin
   TabW := FixedTabWidth;
   TabH := FixedTabHeight;
   if TabH <= 1 then
-    TabH := TAB_HEIGHT;
+    TabH := fpgStyle.GetDefaultTabHeight;
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
