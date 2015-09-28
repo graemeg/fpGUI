@@ -133,6 +133,7 @@
         <description file="xml/gui/fpg_grid.xml"/>
         <description file="xml/gui/fpg_panel.xml"/>
         <description file="xml/gui/fpg_trayicon.xml"/>
+        <description file="xml/gui/fpg_scrollbar.xml"/>
       </descriptions>
     </package>
   </packages>
