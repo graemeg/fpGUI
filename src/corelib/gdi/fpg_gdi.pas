@@ -123,6 +123,7 @@ type
     //FDrawWindow: TfpgGDIWindow;
     //Fgc: TfpgDCHandle;
     //FBufgc: TfpgDCHandle;
+    FCachedWinHandle: TfpgWinHandle;
     FDrawGC: TfpgDCHandle;  // DC for buffer
     FWinGC: TfpgDCHandle;   // DC for window
     FBackgroundColor: TfpgColor;
@@ -2731,11 +2732,16 @@ end;
 
 procedure TfpgGDICanvas.CheckAllocateDC;
 begin
+  // if the window was hidden then FWinGC is for the old non existant window and must be reallocated
+  if (FCanvasTarget = Self) and (FCachedWinHandle <> WinHandle) then
+    DeAllocateDC;
+
   if FDrawGC <> 0 then
     Exit;
   // Seems multiple DC's cannot write to a bitmap.
   if FCanvasTarget = Self then
   begin
+    FCachedWinHandle:=WinHandle;
     if FWinGC = 0 then
       FWinGC := Windows.GetDC(Winhandle);
 
