@@ -31,11 +31,26 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="4">
       <Unit0>
         <Filename Value="makefonts.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="u_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_main"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="u_parsettf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_parsettf"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="u_data.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_data"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
