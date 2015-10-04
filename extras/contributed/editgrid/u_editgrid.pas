@@ -345,6 +345,7 @@ type
   published
     property    Align;
     property    AlternateBGColor;
+    property    AutoHeight;
     property    BackgroundColor;
     property    BorderStyle;
 //    property    ColResizing;
@@ -367,6 +368,8 @@ type
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowGrid;
     property    ShowHeader;
     property    ShowHint;
@@ -742,13 +745,20 @@ begin
       Enabled:= True;
       end;
     edColumn:
+      begin
       if FocusCol < Pred(ColumnCount) then
-        FocusCol := FocusCol + 1
+        if (Columns[Succ(FocusCol)].EditType<> etCheckBox) and (Columns[Succ(FocusCol)].EditType<> etCalendar) then
+          FocusCol := FocusCol + 1
+        else
+          repeat
+            FocusCol := FocusCol + 1
+          until (Columns[FocusCol].EditType<> etCheckBox) and (Columns[FocusCol].EditType<> etCalendar)
       else
         begin
         FEditing:= False;
         Enabled:= True;
         end;
+      end;
     edRow:
       if FocusRow < Pred(RowCount) then
         FocusRow := FocusRow + 1

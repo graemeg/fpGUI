@@ -310,6 +310,16 @@ type
     property    Image: TfpgImage read FImage write SetImage;
     property    OwnsImage: Boolean read FOwnsImage write FOwnsImage default False;
     property    ScaleImage: Boolean read FScaleImage write SetScaleImage default False;
+  published
+    property    OnClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnDoubleClick;
+    property    OnMouseDown;
+    property    OnMouseMove;
+    property    OnMouseScroll;
+    property    OnMouseUp;
+    property    OnResize;
   end;
 
 
