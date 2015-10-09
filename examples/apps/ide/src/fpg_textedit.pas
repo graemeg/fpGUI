@@ -491,10 +491,13 @@ begin
   FChrW := FFont.TextWidth('W');
   FChrH := FFont.Height;
   FVisLines := (GetClientRect.Height div FChrH) + 1;
-  if FGutterPan.Visible then
-    FVisCols := (GetClientRect.Width - FGutterPan.Width) div FChrW
-  else
-    FVisCols := GetClientRect.Width div FChrW;
+  if Assigned(FGutterPan) then
+  begin
+    if FGutterPan.Visible then
+      FVisCols := (GetClientRect.Width - FGutterPan.Width) div FChrW
+    else
+      FVisCols := GetClientRect.Width div FChrW;
+  end;
 end;
 
 { Re-order StartXXX and EndXXX if user is selecting backwards }
@@ -527,6 +530,8 @@ end;
 
 procedure TfpgBaseTextEdit.UpdateScrollBars;
 begin
+  if not Assigned(FVScrollBar) or not Assigned(FHScrollBar) then
+    Exit;
   FVScrollBar.Min := 0;
   FVScrollBar.PageSize := FVisLines - 4;
   FVScrollBar.Max := FLines.Count - FVisLines + 1;  // +1 is so the last line is completely visible
@@ -684,7 +689,7 @@ var
   r: TfpgRect;
 begin
   r := GetClientRect;
-  if FGutterPan.Visible then
+  if Assigned(FGutterPan) and FGutterPan.Visible then
     FGutterPan.SetPosition(r.Left, r.Top, FGutterPan.Width, r.Height);
 end;
 
