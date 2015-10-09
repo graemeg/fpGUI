@@ -2086,9 +2086,9 @@ function TfpgBaseTextEdit.GetClientRect: TfpgRect;
 begin
   // widget has a 2 pixel 3D border
   Result.SetRect(2, 2, Width-4, Height-4);
-  if FVScrollBar.Visible then
+  if Assigned(FVScrollBar) and FVScrollBar.Visible then
     Result.Width := Result.Width - FVScrollBar.Width;
-  if FHScrollBar.Visible then
+  if Assigned(FHScrollBar) and FHScrollBar.Visible then
     Result.Height := Result.Height - FHScrollBar.Height;
 end;
 
