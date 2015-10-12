@@ -79,6 +79,7 @@ type
     procedure   DefaultPopupCopy(Sender: TObject);
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
+    procedure   DefaultPopupSelectAll(Sender: TObject);
     procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
     procedure   SetReadOnly(const AValue: Boolean);
@@ -424,6 +425,7 @@ const
   ipmPaste      = 'miDefaultPaste';
   ipmClearAll   = 'miDefaultClearAll';
   ipmCharmap    = 'miDefaultCharmap';
+  ipmSelectAll  = 'miDefaultSelectAll';
 
   cPasswordChar = #$E2#$97#$8F;    // U+25CF BLACK CIRCLE
 
@@ -841,6 +843,16 @@ begin
     Consumed := False;
   end;
 
+  // select all
+  if not Consumed then
+  begin
+    if (keycode = 65 { letter A }) and (shiftstate = [ssCtrl]) then
+    begin
+      SelectAll;
+      Consumed := True;
+    end;
+  end;
+
   if not Consumed then
   begin
     // checking for movement keys:
@@ -1241,6 +1253,11 @@ begin
   Clear;
 end;
 
+procedure TfpgBaseEdit.DefaultPopupSelectAll(Sender: TObject);
+begin
+  SelectAll;
+end;
+
 procedure TfpgBaseEdit.DefaultPopupInsertFromCharmap(Sender: TObject);
 var
   s: TfpgString;
@@ -1271,6 +1288,8 @@ begin
         itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
       else if itm.Name = ipmClearAll then
         itm.Enabled := (not ReadOnly) and (Text <> '')
+      else if itm.Name = ipmSelectAll then
+        itm.Enabled := Text <> ''
       else if itm.Name = ipmCharmap then
         itm.Enabled := (not ReadOnly);
     end;
@@ -1318,16 +1337,18 @@ begin
   if not Assigned(FDefaultPopupMenu) then
   begin
     FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
-    itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
+    itm := FDefaultPopupMenu.AddMenuItem(rsCut, rsKeyCtrl+'X', @DefaultPopupCut);
     itm.Name := ipmCut;
-    itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
+    itm := FDefaultPopupMenu.AddMenuItem(rsCopy, rsKeyCtrl+'C', @DefaultPopupCopy);
     itm.Name := ipmCopy;
-    itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
+    itm := FDefaultPopupMenu.AddMenuItem(rsPaste, rsKeyCtrl+'V', @DefaultPopupPaste);
     itm.Name := ipmPaste;
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
     itm := FDefaultPopupMenu.AddMenuItem('-', '', nil);
     itm.Name := 'N1';
+    itm := FDefaultPopupMenu.AddMenuItem(rsSelectAll, rsKeyCtrl+'A', @DefaultPopupSelectAll);
+    itm.Name := ipmSelectAll;
     itm := FDefaultPopupMenu.AddMenuItem(rsInsertFromCharacterMap, '', @DefaultPopupInsertFromCharmap);
     itm.Name := ipmCharmap;
   end;
