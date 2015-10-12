@@ -1517,9 +1517,6 @@ begin
   if not WindowAllocated then
     Exit(AScreenPos); // ==>
 
-  WriteLn('Screen to widget');
-
-
   windowpos := Point(0,0);
   widgetpos := Point(0,0);
 
