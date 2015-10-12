@@ -1028,7 +1028,7 @@ end;
 procedure TfpgBaseEdit.HandleSetFocus;
 begin
   inherited HandleSetFocus;
-  if AutoSelect then
+  if AutoSelect and (FText <> '') then
     SelectAll;
 end;
 
