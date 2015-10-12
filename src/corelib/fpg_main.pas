@@ -2998,15 +2998,11 @@ begin
     FOnPaintPreview(Self, ACanvas);
 end;
 
-{type
-  TWidgetHack = class(TfpgWidget);}
-
 constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create;
   FSource := ASource;
   FPreviewWin := TfpgDNDWindow.Create(nil, Self);
-  //FOffset := TfpgWidget(ASource).FDragStartPos;
 end;
 
 destructor TfpgDrag.Destroy;
