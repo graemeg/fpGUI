@@ -67,18 +67,21 @@ begin
   SetPosition(610, 281, 636, 254);
   WindowTitle := 'Edits Extrahint';
   Hint := '';
-  IconName := '';
+  IconName := 'stdimg.fpgui';
+  WindowPosition := wpOneThirdDown;
 
   edit1 := TfpgEdit.Create(self);
   with edit1 do
   begin
     Name := 'edit1';
     SetPosition(8, 128, 236, 24);
+    AutoSelect := False;
     ExtraHint := '';
     FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 1;
     Text := '';
+    ExtraHint := ClassName;
   end;
 
   btnQuit := TfpgButton.Create(self);
@@ -92,6 +95,7 @@ begin
     Hint := '';
     ImageName := 'stdimg.close';
     TabOrder := 4;
+    OnClick := @QuitClicked;
   end;
 
   editCombo1 := TfpgEditCombo.Create(self);
@@ -99,6 +103,12 @@ begin
   begin
     Name := 'editCombo1';
     SetPosition(8, 224, 236, 24);
+    AllowNew := anAsk;
+    AutoCompletion := True;
+    Items.Add('Item 1');
+    Items.Add('Item 2');
+    Items.Add('Item 3');
+    ExtraHint := ClassName;
   end;
 
   editBtn1 := TfpgEditButton.Create(self);
@@ -109,6 +119,7 @@ begin
     ExtraHint := '';
     TabOrder := 6;
     Text := '';
+    ExtraHint := ClassName;
   end;
 
   editDir1 := TfpgDirectoryEdit.Create(self);
@@ -120,6 +131,7 @@ begin
     ExtraHint := '';
     RootDirectory := '';
     TabOrder := 8;
+    ExtraHint := ClassName;
   end;
 
   combo1 := TfpgComboBox.Create(self);
@@ -130,8 +142,12 @@ begin
     ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
+    Items.Add('Item 1');
+    Items.Add('Item 2');
+    Items.Add('Item 3');
     FocusItem := -1;
     TabOrder := 11;
+    ExtraHint := ClassName;
   end;
 
   labelInfo := TfpgLabel.Create(self);
@@ -155,6 +171,7 @@ begin
     Hint := '';
     TabOrder := 9;
     Text := 'Hints visible if focused';
+    OnChange := @ChangeFocusState;
   end;
 
   editColor := TCustomColorEdit.Create(self);
@@ -162,6 +179,7 @@ begin
   begin
     Name := 'editColor';
     SetPosition(252, 128, 236, 24);
+    ExtraHint := ClassName;
   end;
 
   editAl := TCustomAlignmentEdit.Create(self);
@@ -169,6 +187,7 @@ begin
   begin
     Name := 'editAl';
     SetPosition(8, 160, 236, 24);
+    ExtraHint := ClassName;
   end;
 
   editFont := TCustomFontEdit.Create(self);
@@ -176,12 +195,11 @@ begin
   begin
     Name := 'editFont';
     SetPosition(252, 160, 236, 24);
+    ExtraHint := ClassName;
   end;
 
   {@VFD_BODY_END: frmMain}
   {%endregion}
-
-  WindowPosition := wpScreenCenter;
 
   labelInfo.Text :=
     'This example shows how ExtraHints (placeholder texts) works:'+#10+
@@ -190,22 +208,6 @@ begin
     '  method and clPlaceholderText color definition'+#10+
     '- To change ExtraHint visibility when edit is focused click checkbox bellow';
 
-  edit1.ExtraHint := edit1.ClassName;
-
-  editColor.ExtraHint := editColor.ClassName;
-  editAl.ExtraHint := editAl.ClassName;
-  editFont.ExtraHint := editFont.ClassName;
-  editBtn1.ExtraHint := editBtn1.ClassName;
-  editDir1.ExtraHint := editDir1.ClassName;
-  editCombo1.Items.AddStrings(['Item 1', 'Item 2', 'Item 3']);
-  //editCombo.AutoCompletion := True;
-  editCombo1.AllowNew := anYes;
-  editCombo1.ExtraHint := editCombo1.ClassName;
-  combo1.Items.AddStrings(['Item 1', 'Item 2', 'Item 3']);
-  combo1.ExtraHint := combo1.ClassName;
-
-  btnQuit.OnClick := @QuitClicked;
-  cbFocused.OnChange := @ChangeFocusState;
 end;
 
 
