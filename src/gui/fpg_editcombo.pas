@@ -749,7 +749,7 @@ var
     else
     begin
       lcolor := clInactiveSel;
-      ltxtcolor := clText1;
+      ltxtcolor := clInactiveSelText;
     end;
 
     len := FSelOffset;
@@ -762,18 +762,14 @@ var
     tw  := Font.TextWidth(UTF8Copy(Items[FSelectedItem], 1, st));
     tw2 := Font.TextWidth(UTF8Copy(Items[FSelectedItem], 1, st + len));
 
-    // XOR on Anti-aliased text doesn't look to good. Lets try standard
-    // Blue & White like what was doen in TfpgEdit.
-   Canvas.SetColor(lcolor);
+    // Lets do the same as what was done in TfpgEdit.
+    Canvas.SetColor(lcolor);
     Canvas.FillRectangle(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
     r.SetRect(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
     Canvas.AddClipRect(r);
     Canvas.SetTextColor(ltxtcolor);
     fpgStyle.DrawString(Canvas, -FDrawOffset + FMargin + tw, 3, UTF8Copy(Items[FSelectedItem], Succ(st), Pred(len)), Enabled);
     Canvas.ClearClipRect;
-
-    //Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
-    //  -FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
   end;
 
 begin
