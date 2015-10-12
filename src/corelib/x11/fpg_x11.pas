@@ -1932,32 +1932,32 @@ begin
                 else
                   i := 1;
 
-        	      // Check for other mouse wheel messages in the queue
+                // Check for other mouse wheel messages in the queue
                 if ev.xbutton.button in [Button4,Button5] then
                   while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
                   begin
-      	            if NewEvent.xbutton.Button = 4 then
-      	              Dec(i)
+                    if NewEvent.xbutton.Button = 4 then
+                      Dec(i)
                     else if NewEvent.xbutton.Button = 5 then
-      	              Inc(i)
+                      Inc(i)
                     else
-            	      begin
-            	        XPutBackEvent(display, @NewEvent);
+                    begin
+                      XPutBackEvent(display, @NewEvent);
                       break;
-            	      end;
+                    end;
                   end
                 else // button is 6 or 7
                   while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
                   begin
-    	              if NewEvent.xbutton.Button = 6 then
-    	                Dec(i)
+                    if NewEvent.xbutton.Button = 6 then
+                      Dec(i)
                     else if NewEvent.xbutton.Button = 7 then
-    	                Inc(i)
+                      Inc(i)
                     else
-          	        begin
-          	          XPutBackEvent(display, @NewEvent);
+                    begin
+                      XPutBackEvent(display, @NewEvent);
                       break;
-          	        end;
+                    end;
                   end;
 
                 msgp.mouse.delta := i;
