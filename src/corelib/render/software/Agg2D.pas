@@ -3767,7 +3767,7 @@ end;
 
 function TAgg2D.GetPixel(X, Y: integer): TfpgColor;
 begin
-  Result := FImg.Colors[y, y];
+  Result := FImg.Colors[x, y];
 end;
 
 procedure TAgg2D.SetPixel(X, Y: integer; const AValue: TfpgColor);

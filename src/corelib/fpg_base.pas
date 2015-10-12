@@ -459,6 +459,8 @@ type
   TfpgWidgetDirtyFlags = set of TfpgWidgetDirtyFlag;
 
 
+  { TfpgWidgetBase }
+
   TfpgWidgetBase = class(TfpgComponent)
   private
     FHasOwnWindow: Boolean;
@@ -519,6 +521,7 @@ type
     procedure   UpdatePosition;
     procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
+    function    ScreenToWidget(const AScreenPos: TPoint): TPoint;
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
     procedure   WidgetToParent(var AX, AY: TfpgCoord);
@@ -1504,6 +1507,27 @@ begin
   Left := x;
   Top := y;
   UpdatePosition;
+end;
+
+function TfpgWidgetBase.ScreenToWidget(const AScreenPos: TPoint): TPoint;
+var
+  widgetpos: TPoint;
+  windowpos: TPoint;
+begin
+  if not WindowAllocated then
+    Exit(AScreenPos); // ==>
+
+  WriteLn('Screen to widget');
+
+
+  windowpos := Point(0,0);
+  widgetpos := Point(0,0);
+
+  WidgetToWindow(widgetpos.X, widgetpos.Y);
+  windowpos := Window.WindowToScreen(Window, windowpos);
+
+  Result.X:= AScreenPos.x - (windowpos.X + widgetpos.X);
+  Result.Y:= AScreenPos.y - (windowpos.Y + widgetpos.Y);
 end;
 
 function TfpgWidgetBase.WidgetToScreen(ASource: TfpgWidgetBase;

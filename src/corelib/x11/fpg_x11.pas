@@ -836,13 +836,14 @@ end;
 
 { find toplevel window that contains mouse co-ordinates x, y (co-ordinates are
   from root window) }
-function FindWindow(ARoot: TWindow; const x, y: cint): TWindow;
+function FindWindow(ARoot: TWindow; const x, y: cint; AIgnoreDNDPreview: Boolean = False): TWindow;
 var
   wattr: TXWindowAttributes;
   r, p: TWindow;
   children: PWindowArray = nil;
   numchildren: cuint = 0;
   i: integer;
+  w: TfpgX11Window;
 begin
   XGetWindowAttributes(xapplication.Display, ARoot, @wattr);
   if (wattr.map_state <> IsUnmapped) and
@@ -864,7 +865,14 @@ begin
           stacking order, from bottom-most (first) to top-most (last) }
         for i := numchildren-1 downto 0 do
         begin
-          r := FindWindow(children^[i], x - wattr.x, y - wattr.y);
+          if AIgnoreDNDPreview then
+          begin
+            w := FindWindowByHandle(children^[i]);
+            // the dnd preview window is not a valid drop target
+            if Assigned(w) and (w.PrimaryWidget.ClassName = 'TfpgDNDWindow') then
+              continue;
+          end;
+          r := FindWindow(children^[i], x - wattr.x, y - wattr.y, AIgnoreDNDPreview);
           if r <> None then
             break;
         end;
@@ -3197,8 +3205,7 @@ var
   x_Color: TXColor;
 begin
   Result := 0;
-
-  Image := XGetImage(xapplication.display, DrawHandle, X, Y, 1, 1, $FFFFFFFF, ZPixmap);
+  Image := XGetImage(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, X+FDeltaX, Y+FDeltaY, 1, 1, $FFFFFFFF, ZPixmap);
   if Image = nil then
     raise Exception.Create('fpGFX/X11: Invalid XImage');
 
@@ -3932,8 +3939,15 @@ end;
 procedure TfpgX11Drag.Dragging(ev: TXEvent);
 var
   lTarget: TWindow;
+  msg: TfpgMessageRec;
 begin
-  lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root);
+  msg.MsgCode:=FPGM_MOUSEMOVE;
+  msg.Params.mouse.x := ev.xmotion.x_root;
+  msg.Params.mouse.y := ev.xmotion.y_root;
+
+  Dispatch(msg);
+
+  lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root, True);
   if FLastTarget <> lTarget then
   begin
     if FLastTarget <> 0 then { meaning we had a target before }

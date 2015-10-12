@@ -357,18 +357,32 @@ type
   end;
 
 
+  TfpgDrag = class;
+
+  TfpgDragPaintEvent = procedure(ASender: TfpgDrag; ACanvas: TfpgCanvas) of object;
+
+  { TfpgDrag }
+
   TfpgDrag = class(TfpgDragImpl)
   private
+    FOnPaintPreview: TfpgDragPaintEvent;
+    FPreviewSize: TfpgSize;
     FTarget: TfpgWinHandle;
+    FPreviewWin: TfpgWidgetBase; // TfpgDNDWindow
     procedure   SetMimeData(const AValue: TfpgMimeDataBase);
+    procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
   protected
     function    GetSource: TfpgWidgetBase; reintroduce;
+    procedure   DoOnPaintPreview(ACanvas: TfpgCanvas);
   public
     constructor Create(ASource: TfpgWidgetBase);
+    destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
     property    Source: TfpgWidgetBase read GetSource;
     property    Target: TfpgWinHandle read FTarget write FTarget;
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
+    property    PreviewSize: TfpgSize read FPreviewSize write FPreviewSize;
+    property    OnPaintPreview: TfpgDragPaintEvent read FOnPaintPreview write FOnPaintPreview;
   end;
 
 
@@ -499,6 +513,7 @@ uses
   fpg_utils,
   fpg_cmdlineparams,
   fpg_imgutils,
+  fpg_dnd_window,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
   fpg_style_motif,   // TODO: This needs to be removed!
@@ -2959,15 +2974,46 @@ begin
   FMimeData := AValue;
 end;
 
+procedure TfpgDrag.MsgMouseMove(var msg: TfpgMessageRec);
+var
+  FOffset: TfpgPoint;
+begin
+  if TfpgDNDWindow(FPreviewWin).Visible then
+  begin
+    FOffset := TWidgetFriend(Source).FDragStartPos;
+
+    FPreviewWin.MoveWidget(msg.Params.mouse.x-FOffset.X, msg.Params.mouse.y-FOffset.Y);
+  end;
+end;
+
+
 function TfpgDrag.GetSource: TfpgWidgetBase;
 begin
   Result := TfpgWidgetBase(inherited GetSource);
 end;
 
+procedure TfpgDrag.DoOnPaintPreview(ACanvas: TfpgCanvas);
+begin
+  if Assigned(FOnPaintPreview) then
+    FOnPaintPreview(Self, ACanvas);
+end;
+
+{type
+  TWidgetHack = class(TfpgWidget);}
+
 constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create;
   FSource := ASource;
+  FPreviewWin := TfpgDNDWindow.Create(nil, Self);
+  //FOffset := TfpgWidget(ASource).FDragStartPos;
+end;
+
+destructor TfpgDrag.Destroy;
+begin
+  FPreviewWin.Free;
+
+  inherited Destroy;
 end;
 
 function TfpgDrag.Execute(const ADropActions: TfpgDropActions;
@@ -2980,6 +3026,8 @@ begin
     raise Exception.Create(ClassName + ': No Source window was specified before starting the drag');
   if ADropActions = [] then
     raise Exception.Create(ClassName + ': No Drop Action was specified');
+  if Assigned(FOnPaintPreview) then
+    TfpgDNDWindow(FPreviewWin).Show(FPreviewSize);
   Result := inherited Execute(ADropActions, ADefaultAction);
 end;
 

@@ -64,7 +64,6 @@ type
     FOnResize: TNotifyEvent;
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
-    FDragStartPos: TfpgPoint;
     alist: TList;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
@@ -89,6 +88,7 @@ type
     procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
     procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
+    FDragStartPos: TfpgPoint;
     FFormDesigner: TObject;
     FVisible: boolean;
     FEnabled: boolean;

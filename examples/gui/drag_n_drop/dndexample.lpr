@@ -12,7 +12,11 @@ uses
   fpg_label, fpg_edit, fpg_stdimages, fpg_checkbox;
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
+    procedure PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
   private
     {@VFD_HEAD_BEGIN: MainForm}
     Bevel1: TfpgPanel;
@@ -46,6 +50,12 @@ type
 
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
+begin
+  ACanvas.Clear(clWindowBackground);
+  ACanvas.DrawString(0,0, ASender.MimeData.Text);
+end;
 
 procedure TMainForm.CheckAcceptDropsChanged(Sender: TObject);
 begin
@@ -143,6 +153,9 @@ begin
 
   { TfpgDrag now takes ownership of TfpgMimeData }
   d.MimeData := m;
+
+  D.OnPaintPreview:=@PaintDragPreview;
+  D.PreviewSize := fpgSize(Canvas.Font.TextWidth(d.MimeData.Text), Canvas.Font.Height);
 
   { TfpgDrag instance will be freed later when DND action is completed }
   d.Execute([daCopy]);

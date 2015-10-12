@@ -28,7 +28,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1" Minor="5"/>
-    <Files Count="112">
+    <Files Count="113">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -477,6 +477,10 @@
         <Filename Value="../../gui/fpg_ledmatrix.pas"/>
         <UnitName Value="fpg_ledmatrix"/>
       </Item112>
+      <Item113>
+        <Filename Value="../../gui/fpg_dnd_window.pas"/>
+        <UnitName Value="fpg_dnd_window"/>
+      </Item113>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/gui"/>
     <RequiredPkgs Count="1">
