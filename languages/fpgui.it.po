@@ -568,6 +568,10 @@ msgstr ""
 msgid "Select"
 msgstr "Seleziona"
 
+#: fpg_constants:rsselectall
+msgid "Select All"
+msgstr ""
+
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
 msgstr "Selezionare una directory"

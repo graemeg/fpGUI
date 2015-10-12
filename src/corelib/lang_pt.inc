@@ -143,6 +143,7 @@ rssaveafile  =  'Salvar arquivo como';
 rssearch  =  'Pesquisar';
 rsreportsection  =  'Section';
 rsselect  =  'Selecionar';
+rsselectall  =  'Select All';
 rsselectadirectory  =  'Selecione um diretório';
 rsselectafont  =  'Selecione a fonte';
 rsshortsep  =  'Set';

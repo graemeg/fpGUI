@@ -143,6 +143,7 @@ rssaveafile  =  'Stoor ''n lêer as';
 rssearch  =  'Soek';
 rsreportsection  =  'Seksie';
 rsselect  =  'Kies';
+rsselectall  =  'Select All';
 rsselectadirectory  =  'Kies ''n lêergids';
 rsselectafont  =  'Kies ''n lettertipe';
 rsshortsep  =  'Sept';

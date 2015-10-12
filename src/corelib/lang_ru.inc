@@ -143,6 +143,7 @@ rssaveafile  =  'Сохранить файл как';
 rssearch  =  'Поиск';
 rsreportsection  =  'Section';
 rsselect  =  'Выбрать';
+rsselectall  =  'Select All';
 rsselectadirectory  =  'Выберите директорию';
 rsselectafont  =  'Выбор шрифта';
 rsshortsep  =  'Сен';

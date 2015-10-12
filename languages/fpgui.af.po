@@ -568,6 +568,10 @@ msgstr "Seksie"
 msgid "Select"
 msgstr "Kies"
 
+#: fpg_constants:rsselectall
+msgid "Select All"
+msgstr ""
+
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
 msgstr "Kies 'n lêergids"

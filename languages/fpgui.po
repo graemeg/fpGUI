@@ -34,6 +34,10 @@ msgstr ""
 msgid "Alt+"
 msgstr ""
 
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr ""
@@ -212,10 +216,6 @@ msgstr ""
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr ""
-
-#: fpg_constants:rserrunexpected
-msgid "An unexpected error occurred."
 msgstr ""
 
 #: fpg_constants:rskeyesc
@@ -556,6 +556,10 @@ msgstr ""
 
 #: fpg_constants:rsselect
 msgid "Select"
+msgstr ""
+
+#: fpg_constants:rsselectall
+msgid "Select All"
 msgstr ""
 
 #: fpg_constants:rsselectadirectory
