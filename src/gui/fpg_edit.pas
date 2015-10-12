@@ -715,13 +715,12 @@ begin
   else
   begin
     lcolor := clInactiveSel;
-    Canvas.SetTextColor(clText1);
+    Canvas.SetTextColor(clInactiveSelText);
   end;
 
   rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
   Canvas.SetColor(lcolor);
   Canvas.FillRectangle(rs);
-  Canvas.SetTextColor(clWhite);
   Canvas.SetClipRect(rs);
   fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
   Canvas.ClearClipRect;
