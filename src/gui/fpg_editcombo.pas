@@ -65,8 +65,6 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
-  { TfpgBaseEditCombo }
-
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
@@ -83,6 +81,7 @@ type
     procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
     procedure   DoPaste(const AText: TfpgString);
     procedure   SetDefaultPopupMenuItemsState;
+    function    CanDrawExtraHint: Boolean;
   protected
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
@@ -469,6 +468,11 @@ begin
   //end;
 end;
 
+function TfpgBaseEditCombo.CanDrawExtraHint: Boolean;
+begin
+  Result := Enabled and (Text = '') and (not Focused);
+end;
+
 procedure TfpgBaseEditCombo.SetText(const AValue: string);
 var
   i: integer;
@@ -825,13 +829,14 @@ begin
   end;
   Canvas.FillRectangle(r);
 
+  if CanDrawExtraHint then
+    DrawPlaceholderText(fpgRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin));
+
   // Draw select item's text
   if not AutoCompletion then
   begin
     if HasText then
-      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
-    else
-      DrawPlaceholderText(fpgRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin));
+      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
   end
   else
   begin
