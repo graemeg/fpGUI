@@ -722,7 +722,7 @@ begin
   Canvas.SetColor(lcolor);
   Canvas.FillRectangle(rs);
   Canvas.SetTextColor(clWhite);
-  Canvas.AddClipRect(rs);
+  Canvas.SetClipRect(rs);
   fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
   Canvas.ClearClipRect;
 end;
