@@ -44,6 +44,8 @@ type
   TfpgTextEditOption = (eo_ExtraHintIfFocus);
   TfpgTextEditOptions = set of TfpgTextEditOption;
 
+  { TfpgBaseEdit }
+
   TfpgBaseEdit = class(TfpgWidget)
   private
     FAutoSelect: Boolean;
@@ -66,6 +68,7 @@ type
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste(const AText: TfpgString);
+    procedure   PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
     procedure   SetAutoSelect(const AValue: Boolean);
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetHideSelection(const AValue: Boolean);
@@ -89,6 +92,8 @@ type
     FSideMargin: integer;
     FHeightMargin: integer;
     FMouseDragPos: integer;
+    FDNDMaybe: Boolean;
+    FDNDForSure: Boolean;
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: integer; // Caret position (characters)
@@ -101,12 +106,14 @@ type
     function    GetMarginAdjustment: integer; virtual;
     procedure   DrawSelection; virtual;
     procedure   DoOnChange; virtual;
+    procedure   DoDragStartDetected; override;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
@@ -492,6 +499,12 @@ end;
 
 
 { TfpgBaseEdit }
+
+procedure TfpgBaseEdit.PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
+begin
+  ACanvas.Clear(BackgroundColor);
+  ACanvas.DrawString(0,0, ASender.MimeData.Text);
+end;
 
 procedure TfpgBaseEdit.Adjust(UsePxCursorPos: boolean = false);
 begin
@@ -963,8 +976,13 @@ begin
 end;
 
 procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  sstart,
+  send: Integer;
+  wasfocused: Boolean;
 begin
   fpgApplication.HideHint;
+  wasfocused:=Focused;
   inherited HandleLMouseDown(x, y, shiftstate);
 
   FCursorPx := x;
@@ -974,10 +992,38 @@ begin
     FSelOffset := FCursorPos - FSelStart
   else
   begin
-    FSelStart  := FCursorPos;
-    FSelOffset := 0;
+
+    if FSelOffset < 0 then
+      sstart:=FSelStart-FSelOffset
+    else
+      sstart:=FSelStart;
+    send := sstart + (+FSelOffset);
+
+
+    if wasfocused and (FSelOffset <> 0) and (FMouseDragPos in [sstart..send]) then
+    begin
+      // Mouse is down inside selected text
+      FDNDMaybe := True
+    end
+    else
+    begin
+      // mouse is down outside selected text
+      FSelStart  := FCursorPos;
+      FSelOffset := 0;
+    end;
   end;
   AdjustDrawingInfo;
+  RePaint;
+end;
+
+procedure TfpgBaseEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+
+  if FDNDMaybe and not FDNDForSure then
+    FSelOffset:=0;
+  FDNDMaybe:=False;
+  FDNDForSure:=False;
   RePaint;
 end;
 
@@ -1000,14 +1046,17 @@ begin
     Exit; //==>
   end;
 
-  cp := FCursorPos;
-  FCursorPx := x;
-  AdjustTextOffset(True);
-  if FCursorPos <> cp then
+  if not FDNDMaybe then
   begin
-    FSelOffset := FCursorPos - FSelStart;
-    AdjustDrawingInfo;
-    Repaint;
+    cp := FCursorPos;
+    FCursorPx := x;
+    AdjustTextOffset(True);
+    if FCursorPos <> cp then
+    begin
+      FSelOffset := FCursorPos - FSelStart;
+      AdjustDrawingInfo;
+      Repaint;
+    end;
   end;
 end;
 
@@ -1327,6 +1376,28 @@ procedure TfpgBaseEdit.DoOnChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(self);
+end;
+
+procedure TfpgBaseEdit.DoDragStartDetected;
+var
+  Drag: TfpgDrag;
+begin
+  if Assigned(OnDragStartDetected) then
+    inherited DoDragStartDetected
+  else
+  begin
+    if FDNDMaybe then
+    begin
+      FDNDForSure:=True;
+      Drag := TfpgDrag.Create(Self);
+      Drag.MimeData := TfpgMimeData.Create;
+      Drag.MimeData.Text:=SelectionText;
+      Drag.PreviewSize := fpgSize(Canvas.Font.TextWidth(Drag.MimeData.Text), Canvas.Font.Height);
+      Drag.OnPaintPreview:=@PaintDragPreview;
+
+      Drag.Execute([daCopy]);
+    end;
+  end;
 end;
 
 procedure TfpgBaseEdit.ShowDefaultPopupMenu(const x, y: integer;
