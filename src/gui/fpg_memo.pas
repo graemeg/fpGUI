@@ -34,6 +34,8 @@ uses
 
 type
 
+  { TfpgMemo }
+
   TfpgMemo = class(TfpgWidget)
   private
     FBorderStyle: TfpgEditBorderStyle;
@@ -49,6 +51,8 @@ type
     FSelEndPos: integer;
     FSelecting: boolean;
     FMouseDragging: boolean;
+    FDrag: TfpgDrag;
+    FDNDMaybe: Boolean;
     FMouseDragPos: integer;
     FFont: TfpgFont;
     FDrawOffset: integer;
@@ -77,6 +81,7 @@ type
     function    GetCursorX: integer;
     procedure   SetCPByX(x: integer);
     function    CurrentLine: string;
+    procedure   CursorPosFromXY(X,Y: Integer; var ACursorLine: Integer; var ACursorPos: Integer);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
     procedure   VScrollBarMove(Sender: TObject; position: integer);
@@ -97,10 +102,13 @@ type
     procedure   SetCursorPos(const AValue: integer);
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
+    procedure   PaintPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
   protected
+    procedure   DoDragStartDetected; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
@@ -440,7 +448,7 @@ begin
   FSelStartPos    := FCursorPos;
   FSelEndPos      := FCursorPos;
   FSelStartLine   := FCursorLine;
-  FSelEndLine     := FCursorLine;
+  FSelEndLine     := -1; //FCursorLine;
   FMouseDragging  := False;
 end;
 
@@ -531,6 +539,60 @@ begin
     lw := FFont.TextWidth(getlinetext(n));
     if lw > FlongestLineWidth then
       FlongestLineWidth := lw;
+  end;
+end;
+
+procedure TfpgMemo.PaintPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
+var
+  DragLines: TStringList;
+  i,
+  x,
+  y: Integer;
+begin
+  ACanvas.Clear(BackgroundColor);
+  DragLines := TStringList.Create;
+  DragLines.Text:=FDrag.MimeData.Text;
+
+  x := 0;
+  y := 0;
+
+  for i := 0 to DragLines.Count -1 do
+  begin
+    ACanvas.DrawText(x,y, DragLines.Strings[i]);
+    Inc(y, ACanvas.Font.Height);
+  end;
+
+end;
+
+procedure TfpgMemo.DoDragStartDetected;
+var
+  WidestLine: Integer = 0;
+  SelLines: TStringList;
+  l: String;
+begin
+  if not FDNDMaybe then
+      Exit;
+
+  if Assigned(FOnDragStartDetected) then
+    inherited DoDragStartDetected
+  else
+  begin
+    FDrag := TfpgDrag.Create(Self);
+    FDrag.MimeData := TfpgMimeData.Create;
+    FDrag.MimeData.Text:=SelectionText;
+    FDrag.OnPaintPreview:=@PaintPreview;
+
+    // find out how wide the preview should be
+    SelLines := TStringList.Create;
+    SelLines.Text:=FDrag.MimeData.Text;
+    for l in SelLines do
+      if Canvas.Font.TextWidth(l) > WidestLine then
+        WidestLine:=Canvas.Font.TextWidth(l);
+
+    SelLines.Free;
+
+    FDrag.PreviewSize := fpgSize(WidestLine, Canvas.Font.Height * (FSelEndLine - FSelStartLine + 1));
+    FDrag.Execute([daCopy]);
   end;
 end;
 
@@ -853,6 +915,40 @@ end;
 function TfpgMemo.CurrentLine: string;
 begin
   Result := GetLineText(FCursorLine);
+end;
+
+procedure TfpgMemo.CursorPosFromXY(X, Y: Integer; var ACursorLine: Integer;
+  var ACursorPos: Integer);
+var
+  n: integer;
+  cpx: integer;
+  cp: integer;
+  cx: integer;
+  lnum: integer;
+  ls: string;
+begin
+
+  // searching the appropriate character position
+  lnum := FFirstLine + (y - FSideMargin) div LineHeight;
+  if lnum > (LineCount-1) then
+    lnum := LineCount-1;
+
+  ls  := GetLineText(lnum);
+  cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
+  cp  := FCursorPos;
+
+  for n := 0 to UTF8Length(ls) do
+  begin
+    cx := FFont.TextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
+    if abs(cx - x) < abs(cpx - x) then
+    begin
+      cpx := cx;
+      cp  := n;
+    end;
+  end;
+
+  ACursorLine := lnum;
+  ACursorPos  := cp;
 end;
 
 function TfpgMemo.VisibleLines: integer;
@@ -1358,54 +1454,96 @@ end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
-  n: integer;
-  cpx: integer;
-  cp: integer;
-  cx: integer;
-  lnum: integer;
-  ls: string;
+  cp: integer = 0;
+  lnum: integer = 0;
 begin
+  CursorPosFromXY(x,y, lnum, cp);
+
   inherited HandleLMouseDown(x, y, shiftstate);
-  ResetSelectionVariables;
 
-  // searching the appropriate character position
-  lnum := FFirstLine + (y - FSideMargin) div LineHeight;
-  if lnum > (LineCount-1) then
-    lnum := LineCount-1;
-
-  ls  := GetLineText(lnum);
-  cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  cp  := FCursorPos;
-
-  for n := 0 to UTF8Length(ls) do
+  // try to detect if we have pressed inside the existing selection area
+  if  (FSelEndLine > -1)
+  and (((lnum = FSelStartLine) and (cp >= FSelStartPos))
+      or (lnum > FSelStartLine))
+  and (((lnum = FSelEndLine) and (cp <= FSelEndPos))
+      or (lnum < FSelEndLine))
+  then
   begin
-    cx := FFont.TextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
-  end;
+    // the mouse is down inside the already selected text
+    FMouseDragging := False; // used to select text, so it's false since we are maybe dragging text.
+    FDNDMaybe := True; // we might drag the selection...
 
-  FMouseDragging := True;
-  FMouseDragPos  := cp;
-  FCursorPos     := cp;
-  FCursorLine    := lnum;
-
-  if (ssShift in shiftstate) then
-  begin
-    FSelEndLine := lnum;
-    FSelEndpos  := cp;
-    FSelecting := True;
+    // dodragestartdetected will be called when/if the mouse moves
   end
   else
   begin
-    FSelecting := False;
-    FSelStartLine := lnum;
-    FSelStartPos  := cp;
-    FSelEndLine   := -1;
+
+    // mouse is down outside already selected text.
+    ResetSelectionVariables;
+
+    FMouseDragging := True;
+    FMouseDragPos  := cp;
+    FCursorPos     := cp;
+    FCursorLine    := lnum;
+    FDNDMaybe      := False;
+
+    if (ssShift in shiftstate) then
+    begin
+      FSelEndLine := lnum;
+      FSelEndpos  := cp;
+      FSelecting := True;
+    end
+    else
+    begin
+      FSelecting := False;
+      FSelStartLine := lnum;
+      FSelStartPos  := cp;
+      FSelEndLine   := -1;
+    end;
+    Repaint;
   end;
-  Repaint;
+end;
+
+procedure TfpgMemo.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  cp: Integer = 0;
+  lnum: Integer = 0;
+  tmp: Integer;
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+
+  if (FSelEndLine > -1) then
+  begin
+    if (FSelStartLine > FSelEndLine) then
+    begin
+      tmp := FSelEndLine;
+      FSelEndLine:=FSelStartLine;
+      FSelStartLine:=tmp;
+      tmp := FSelStartPos;
+      FSelStartPos:=FSelEndPos;
+      FSelEndPos:=tmp;
+    end;
+    if (FSelStartLine = FSelEndLine) and (FSelEndPos < FSelStartPos) then
+    begin
+      tmp := FSelStartPos;
+      FSelStartPos:=FSelEndPos;
+      FSelEndPos:=tmp;
+    end;
+  end;
+
+  if FDNDMaybe and not Assigned(FDrag) then
+  begin
+    CursorPosFromXY(x,y, lnum, cp);
+    ResetSelectionVariables;
+    FCursorPos     := cp;
+    FCursorLine    := lnum;
+    RePaint;
+  end;
+
+
+  // FDrag gets freed by the application
+  FDrag := nil;
+  FDNDMaybe:=False;
 end;
 
 procedure TfpgMemo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -1458,6 +1596,7 @@ begin
     FSelEndPos  := cp;
     FCursorPos  := cp;
     FSelecting := True;
+
     Repaint;
   end;
 
