@@ -579,6 +579,9 @@ begin
     inherited DoDragStartDetected
   else
   begin
+    // it's safe to modify FDragStartPos now since it's used to detect for DoDragStartDetected
+    // FDragStartPos is used to set the position of the preview window from the mouse cursor
+    FDragStartPos := fpgPoint(-10,0);
     FDrag := TfpgDrag.Create(Self);
     FDrag.MimeData := TfpgMimeData.Create;
     FDrag.MimeData.Text:=SelectionText;

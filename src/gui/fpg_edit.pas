@@ -1388,6 +1388,9 @@ begin
   begin
     if FDNDMaybe then
     begin
+      // it's safe to modify FDragStartPos now since it's used to detect for DoDragStartDetected
+      // FDragStartPos is used to set the position of the preview window from the mouse cursor
+      FDragStartPos := fpgPoint(-10,0);
       FDNDForSure:=True;
       Drag := TfpgDrag.Create(Self);
       Drag.MimeData := TfpgMimeData.Create;
