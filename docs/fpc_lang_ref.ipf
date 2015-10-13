@@ -5364,10 +5364,68 @@ in the accumulator. In the case of floating point values, these depend
 on the target processor and emulation options.
 
 :h2.Object Pascal Grammar
-:p.This section describes the Object Pascal grammar in a EBNF
+.* Got the initial content from [http://delphi.wikia.com/wiki/Object_Pascal_Grammar]
+.* on Mar 2013, but has diverted from it since by adding FPC specific syntax (mode objfpc only).
+:p.
+This section describes the Object Pascal grammar in a EBNF
 (Extended Backus-Naur Form) like style. The syntax only covers the
-:hp1.ObjFPC:ehp1. mode of the &fpc. compiler.
+:hp1.objfpc:ehp1. mode of the &fpc. compiler.
 
+:p.
+EBNF syntax is described on WikiPedia at [https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form].
+
+:p.
+:hp2.Table of symbols used in EBNF:ehp2.
+:p.
+The following represents a proposed ISO/IEC 14977 standard, by R. S. Scowen, page 7, table 1.
+
+:table cols='25 15'.
+:row.
+:c.USAGE
+:c.NOTATION
+:row.
+:c.definition
+:c.=
+:row.
+:c.concatenation
+:c.,
+:row.
+:c.termination
+:c.;
+:row.
+:c.termination
+:c..
+:row.
+:c.alternation
+:c.|
+:row.
+:c.option
+:c.[ ... ]
+:row.
+:c.repetition
+:c.{ ... }
+:row.
+:c.grouping
+:c.( ... )
+:row.
+:c.terminal string
+:c." ... "
+:row.
+:c.terminal string
+:c.' ... '
+:row.
+:c.comment
+:c.(* ... *)
+:row.
+:c.special sequence
+:c.? ... ?
+:row.
+:c.exception
+:c.-
+:etable.
+
+:p.
+:hp2.Grammar:ehp2.
 :cgraphic.
 Goal -> (Program | Package | Library | Unit)
 Program -> [PROGRAM Ident ['(' IdentList ')'] ';']
@@ -5481,9 +5539,11 @@ FileType -> FILE OF TypeId [HintDirective]
 PointerType -> '^' TypeId [HintDirective]
 ProcedureType -> (ProcedureHeading | FunctionHeading) [OF OBJECT]
 VarSection -> VAR (VarDecl ';')...
-VarDecl
-  On Windows -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' ConstExpr] [HintDirective]
-  On Linux   -> IdentList ':' Type [ABSOLUTE (Ident) | '=' ConstExpr] [HintDirective]
+VarDecl -> IdentList ':' Type ['=' ConstExpr] [VarModifiers] [HintDirective]
+VarModifiers ->   ABSOLUTE (Ident | ConstExpr) ;
+                | ';' EXPORT ;
+                | ';' CVAR ;
+                | ';' EXTERNAL (ConstExpr | NAME ConstExpr) ;
 Expression -> SimpleExpression [RelOp SimpleExpression]...
 SimpleExpression -> ['+' | '-'] Term [AddOp Term]...
 Term -> Factor [MulOp Factor]...
@@ -5634,19 +5694,24 @@ InterfaceType -> INTERFACE [InterfaceHeritage]
                  [ClassPropertyList]
                  ...
                  END
-InterfaceHeritage -> '(' IdentList ')'
+InterfaceHeritage -> '(' Ident ')'
 RequiresClause -> REQUIRES IdentList... ';'
 ContainsClause -> CONTAINS IdentList... ';'
 IdentList -> Ident ','...
 QualId -> [UnitId '.'] Ident
 TypeId -> [UnitId '.'] <type-identifier>
-Ident -> <identifier>
+Ident -> alphabetic character, { alphabetic character | digit } ;
 ConstExpr -> <constant-expression>
-UnitId -> <unit-identifier>
-LabelId -> <label-identifier>
-Number -> <number>
-String -> <string>
-
+UnitId -> Ident
+LabelId -> Ident
+Number -> [ "-" ], digit, { digit } ;
+String ->  "'" , { all characters - "'" }, "'" ;
+alphabetic character ->  "A" | "B" | "C" | "D" | "E" | "F" | "G"
+                      | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+                      | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+                      | "V" | "W" | "X" | "Y" | "Z" ;
+digit ->  "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+all characters ->  ? all visible characters ? ;
 :ecgraphic.
 
 :euserdoc.
