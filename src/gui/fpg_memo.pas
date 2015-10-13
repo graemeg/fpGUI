@@ -562,6 +562,8 @@ begin
     Inc(y, ACanvas.Font.Height);
   end;
 
+  DragLines.Free;
+
 end;
 
 procedure TfpgMemo.DoDragStartDetected;
