@@ -6,7 +6,7 @@ uses
   SysUtils, Classes,
   fpg_base, fpg_main, fpg_form,
   fpg_button, //fpg_panel,
-  thumbchart;
+  fpg_chart;
 
 type
 
