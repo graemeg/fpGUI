@@ -5,7 +5,7 @@ program testthumbchart;
 uses
   SysUtils, Classes,
   fpg_base, fpg_main, fpg_form,
-  fpg_button, //fpg_panel,
+  fpg_button,
   fpg_chart;
 
 type
@@ -16,10 +16,10 @@ type
     btnmake:  TfpgButton;
     btnclear: TfpgButton;
     btnquit:  TfpgButton;
-    chart1: TChart;       // Bar
-    chart2: TChart;       // HBar
-    chart3: TChart;       // xyLine
-    chart4: TChart;       // Area
+    chart1: TfpgChart;       // Bar
+    chart2: TfpgChart;       // HBar
+    chart3: TfpgChart;       // xyLine
+    chart4: TfpgChart;       // Area
     {@VFD_HEAD_END: MainForm}
   public
     procedure AfterCreate; override;
@@ -153,7 +153,7 @@ begin
     OnClick:=@quitclick;
   end;
 
-  Chart1:=TChart.Create(self);
+  Chart1:=TfpgChart.Create(self);
   with Chart1 do
   begin
     Name := 'Chart1';
@@ -167,7 +167,7 @@ begin
     BackgroundColor:= clCream; // default=clCream
   end;
 
-  Chart2:=TChart.Create(self);
+  Chart2:=TfpgChart.Create(self);
   with Chart2 do
   begin
     Name := 'Chart2';
@@ -179,7 +179,7 @@ begin
     ChartType:=ctHBar;
   end;
 
-  Chart3:=TChart.Create(self);  // xy-line
+  Chart3:=TfpgChart.Create(self);  // xy-line
   with Chart3 do
   begin
     Name := 'Chart3';
@@ -192,7 +192,7 @@ begin
     ChartType:=ctArea;
   end;
 
-  Chart4:=TChart.Create(self);  // multi xy-line
+  Chart4:=TfpgChart.Create(self);  // multi xy-line
   with Chart4 do
   begin
     Name := 'Chart4';

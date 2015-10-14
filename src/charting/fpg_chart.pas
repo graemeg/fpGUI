@@ -43,27 +43,27 @@ interface
 
 uses
   Classes,
-  sysutils,
+  SysUtils,
   fpg_base,
   fpg_main,
   fpg_widget;
 
 type
-  TChart = class;  // forward declaration.
+  TfpgChart = class;  // forward declaration.
 
-  TChartType =( ctPie, ctBar, ctHBar, ctLine,  // using 1 dimensional array
-                ctScatter,            // using xy coordinates array[2,many]
-                ctxyLine, ctArea );  // using (x and many y coordinates
+  TfpgChartType = ( ctPie, ctBar, ctHBar, ctLine,  // using 1 dimensional array
+                    ctScatter,           // using xy coordinates array[2,many]
+                    ctxyLine, ctArea );  // using (x and many y coordinates
 
   // This is a minimalistic unit so we use only 1 method to store data:
   TDataset = array of array of integer;
 
 
-  Taxis = class(TObject)
+  TfpgAxis = class(TObject)
   private
-    FParent: TChart;
+    FParent: TfpgChart;
   protected
-    property    Parent: TChart read FParent write FParent;
+    property Parent: TfpgChart read FParent write FParent;
   public
     Low: integer;
     High: integer;
@@ -74,31 +74,31 @@ type
   end;
 
 
-  TXaxis = class(Taxis)
+  TfpgXAxis = class(TfpgAxis)
   public
     procedure Draw; override;
   end;
 
 
-  TYaxis = class(Taxis)
+  TfpgYAxis = class(TfpgAxis)
   public
     procedure Draw; override;
   end;
 
 
-  TChart=class(TfpgWidget)
+  TfpgChart = class(TfpgWidget)
   private
-    FText:      string;
-    Fxaxis:     TXaxis;
-    Fyaxis:     TYaxis;
+    FText:      TfpgString;
+    Fxaxis:     TfpgXAxis;
+    Fyaxis:     TfpgYAxis;
     FLineWidth: integer;
     FDataSet:   TDataSet;
-    FChartType: TChartType;
-    FColors:    array of Tfpgcolor;
+    FChartType: TfpgChartType;
+    FColors:    array of TfpgColor;
   protected
     procedure   HandlePaint; override;
     procedure   Draw;
-    procedure   SetText(const AValue: string);
+    procedure   SetText(const AValue: TfpgString);
     procedure   DrawPie;
     procedure   DrawBar;
     procedure   DrawHBar;
@@ -106,15 +106,15 @@ type
     procedure   DrawxyLine;
     procedure   DrawArea;
     procedure   DrawScatter;
-    function    color(i:Integer):TfpgColor; inline;
+    function    Color(i: Integer): TfpgColor; inline;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Xaxis: TXaxis read Fxaxis write Fxaxis;
-    property    Yaxis: TYaxis read Fyaxis write Fyaxis;
-    property    Text: String read FText write SetText;
+    property    Xaxis: TfpgXAxis read Fxaxis write Fxaxis;
+    property    Yaxis: TfpgYAxis read Fyaxis write Fyaxis;
+    property    Text: TfpgString read FText write SetText;
     property    DataSet: TDataSet read FDataSet write FDataSet;
-    property    ChartType: TChartType read FCharttype write FCharttype;
+    property    ChartType: TfpgChartType read FCharttype write FCharttype;
     property    Linewidth: integer read FLinewidth write FLineWidth;
     //procedure   AutoXYaxis;
     procedure   Clear;
@@ -152,22 +152,22 @@ implementation
 {$I chartsincos.inc}
 
 
-{ Taxis }
+{ TfpgAxis }
 
-constructor Taxis.Create(AOwner: TComponent);
+constructor TfpgAxis.Create(AOwner: TComponent);
 begin
   inherited Create;
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
-    Parent := TChart(AOwner);
+    Parent := TfpgChart(AOwner);
   Low:=0;  // set some sane defaults
   High:=100;
   Visible:=True;
   Color:=clBlack;
 end;
 
-{ TXaxis }
+{ TfpgXAxis }
 
-procedure TXaxis.Draw;
+procedure TfpgXAxis.Draw;
 var
   xend: integer;
 begin
@@ -179,9 +179,9 @@ begin
   end;
 end;
 
-{ TYaxis }
+{ TfpgYAxis }
 
-procedure TYaxis.Draw;
+procedure TfpgYAxis.Draw;
 var
   yend: integer;
 begin
@@ -193,9 +193,9 @@ begin
   end;
 end;
 
-{ TChart }
+{ TfpgChart }
 
-constructor TChart.Create(AOwner: TComponent);
+constructor TfpgChart.Create(AOwner: TComponent);
 var
   i: integer;
 begin
@@ -207,28 +207,28 @@ begin
   FChartType:=ctLine;
   BackgroundColor:= clCream;
   TextColor:= clBlack;
-  Xaxis:=TXaxis.Create(self);
-  Yaxis:=TYaxis.Create(self);
+  Xaxis:=TfpgXAxis.Create(self);
+  Yaxis:=TfpgYAxis.Create(self);
   Canvas.TextColor:=TextColor;
   SetLength(FColors,length(DefaultChartColors));
   for i := 0 to length(DefaultChartColors)-1 do
     FColors[i]:=DefaultChartColors[i];
 end;
 
-destructor TChart.Destroy;
+destructor TfpgChart.Destroy;
 begin
   Xaxis.Free;
   Yaxis.Free;
   inherited Destroy;
 end;
 
-procedure TChart.HandlePaint;
+procedure TfpgChart.HandlePaint;
 begin
   Canvas.Clear(BackgroundColor);
   Draw;
 end;
 
-procedure TChart.SetText(const AValue: string);
+procedure TfpgChart.SetText(const AValue: TfpgString);
 begin
   if FText <> AValue then
   begin
@@ -236,7 +236,7 @@ begin
   end;
 end;
 
-procedure TChart.Draw;
+procedure TfpgChart.Draw;
 begin
   Canvas.SetLineStyle(Linewidth,lsSolid);
   Xaxis.Draw;
@@ -265,7 +265,7 @@ begin
 end;
 
 // Filled pie like default google pie
-procedure TChart.DrawPie;
+procedure TfpgChart.DrawPie;
 var
   n,i,box : integer;
   a1,a2: double;
@@ -286,7 +286,7 @@ begin
   end;
 end;
 
-procedure TChart.DrawBar;
+procedure TfpgChart.DrawBar;
 var
   i, n, bw, bp: integer;
 begin
@@ -300,7 +300,7 @@ begin
     FillRectangle(i*bp,0,bw,FDataSet[i,0]);  // x,y,w,h
 end;
 
-procedure TChart.DrawHBar;
+procedure TfpgChart.DrawHBar;
 var
   i, n, bw, bp: integer;
 begin
@@ -312,7 +312,7 @@ begin
     //writeln('Hbar ',i,': ',0,' ',i*bp,' ',FDataSet[i,0],' ',bw);  // x,y,w,h
 end;
 
-procedure TChart.DrawLine;
+procedure TfpgChart.DrawLine;
 var
   i, n,bw,x1,y1,x2,y2: integer;
 begin
@@ -333,7 +333,7 @@ begin
   end;
 end;
 
-procedure TChart.DrawxyLine;
+procedure TfpgChart.DrawxyLine;
 var
   i,j,n,m,x1,y1,x2,y2: integer;
 begin
@@ -357,7 +357,7 @@ begin
   end;
 end;
 
-procedure TChart.DrawArea;
+procedure TfpgChart.DrawArea;
 var
   i,j,n,m,x1,y1,x2,y2: integer;
 begin
@@ -381,7 +381,7 @@ begin
   end;
 end;
 
-procedure TChart.DrawScatter;
+procedure TfpgChart.DrawScatter;
 var
   i,n,x1,y1: integer;
 begin
@@ -397,12 +397,12 @@ end;
 
 {.$INLINE ON}
 
-function TChart.color(i:Integer):TfpgColor; inline;
+function TfpgChart.Color(i: Integer): TfpgColor;
 begin
-  Result:=Fcolors[i mod 14];
+  Result := FColors[i mod 14];
 end;
 
-procedure TChart.DrawDot(x, y, d: integer; Acolor: TfpgColor); inline;
+procedure TfpgChart.DrawDot(x, y, d: integer; Acolor: TfpgColor);
 const
   dot5: array[-2..+2,-2..+2] of boolean =(
     (False, True, True, True, False),
@@ -443,14 +443,14 @@ begin
   end;
 end;
 
-procedure TChart.DrawRectangle(x,y,w,h: integer);  inline;
+procedure TfpgChart.DrawRectangle(x,y,w,h: integer);
 begin
   //writeln('h ',Height);
   Canvas.DrawRectangle(x,Height-h-y,w,h);
   //Canvas.DrawRectangle(x,y,w,h);
 end;
 
-procedure TChart.DrawTrapezoid( x1,y1,x2,y2: TfpgCoord); inline;
+procedure TfpgChart.DrawTrapezoid( x1,y1,x2,y2: TfpgCoord);
 var
   ya, yb, base: TfpgCoord;
 begin
@@ -462,36 +462,36 @@ begin
   //FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 end;
 
-procedure TChart.FillRectangle(x,y,w,h: integer);  inline;
+procedure TfpgChart.FillRectangle(x,y,w,h: integer);
 begin
   Canvas.FillRectangle(x,Height-h-y,w,h);
 end;
 
-procedure TChart.Drawline(x1,y1,x2,y2: integer); inline;
+procedure TfpgChart.Drawline(x1,y1,x2,y2: integer);
 begin
   Canvas.Drawline(x1,Height-y1-1,x2,Height-y2-1);
 end;
 {.$INLINE OFF}
 
-procedure TChart.Update;
+procedure TfpgChart.Update;
 begin
   Repaint;
 end;
 
-procedure TChart.Clear;
+procedure TfpgChart.Clear;
 begin
   Canvas.Clear(clYellow);
 end;
 
 {
-procedure TChart.Drawxline(x1,y1,x2,y2: integer);
+procedure TfpgChart.Drawxline(x1,y1,x2,y2: integer);
 begin
   //writeln('--',x1,' ',Height-y1-1,' x2y2: ',x2,' ',Height-y2-1,'--');
   Canvas.Drawline(x1,Height-y1-1,x2,Height-y2-1);
 end;
 }
 
-procedure TChart.DrawLinePolar(cx,cy,r,a: integer);
+procedure TfpgChart.DrawLinePolar(cx,cy,r,a: integer);
 var
   p,q,x2,y2: integer;
   s,c: double;

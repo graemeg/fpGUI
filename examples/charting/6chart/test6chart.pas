@@ -5,7 +5,7 @@ program testthumbchart;
 uses
   SysUtils, Classes,
   fpg_base, fpg_main, fpg_form,
-  fpg_button, //fpg_panel,
+  fpg_button,
   fpg_chart;
 
 type
@@ -16,12 +16,12 @@ type
     btnmake:  TfpgButton;
     btnclear: TfpgButton;
     btnquit:  TfpgButton;
-    chart1: TChart;       // Pie
-    chart2: TChart;       // Bar
-    chart3: TChart;       // Line
-    chart4: TChart;       // Scatter
-    chart5: TChart;       // xyLine
-    chart6: TChart;       // MultiLine
+    chart1: TfpgChart;       // Pie
+    chart2: TfpgChart;       // Bar
+    chart3: TfpgChart;       // Line
+    chart4: TfpgChart;       // Scatter
+    chart5: TfpgChart;       // xyLine
+    chart6: TfpgChart;       // MultiLine
     {@VFD_HEAD_END: MainForm}
   public
     procedure AfterCreate; override;
@@ -167,7 +167,7 @@ begin
     OnClick:=@quitclick;
   end;
 
-  Chart1:=TChart.Create(self);
+  Chart1:=TfpgChart.Create(self);
   with Chart1 do
   begin
     Name := 'Chart1';
@@ -181,7 +181,7 @@ begin
     BackgroundColor:= clCream; // default=clCream
   end;
 
-  Chart2:=TChart.Create(self);
+  Chart2:=TfpgChart.Create(self);
   with Chart2 do
   begin
     Name := 'Chart2';
@@ -193,7 +193,7 @@ begin
     ChartType:=ctBar;
   end;
 
-  Chart3:=TChart.Create(self);  // simple line
+  Chart3:=TfpgChart.Create(self);  // simple line
   with Chart3 do
   begin
     Name := 'Chart3';
@@ -204,7 +204,7 @@ begin
     ChartType:=ctLine;
   end;
 
-  Chart4:=TChart.Create(self);  // xy-line
+  Chart4:=TfpgChart.Create(self);  // xy-line
   with Chart4 do
   begin
     Name := 'Chart4';
@@ -213,11 +213,10 @@ begin
     TextColor := clRed;
     LineWidth:=2;
     Backgroundcolor:=clBlack;
-    writeln('clRed: ',clRed);
     ChartType:=ctxyLine;
   end;
 
-  Chart5:=TChart.Create(self);  // multi xy-line
+  Chart5:=TfpgChart.Create(self);  // multi xy-line
   with Chart5 do
   begin
     Name := 'Chart5';
@@ -227,7 +226,7 @@ begin
     ChartType:=ctxyLine;
   end;
 
-  Chart6:=TChart.Create(self);  // scatter
+  Chart6:=TfpgChart.Create(self);  // scatter
   with Chart6 do
   begin
     Name := 'Chart6';
