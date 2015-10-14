@@ -44,6 +44,7 @@ interface
 uses
   Classes,
   SysUtils,
+  contnrs,
   fpg_base,
   fpg_main,
   fpg_widget;
@@ -138,6 +139,36 @@ type
   procedure:   SetPosition is provided by TfpgWidget
 }
 
+  TfpgChartTypeAbs = class(TObject)
+  end;
+
+
+  // A class reference for the TfpgChartTypeAbs descendants
+  TfpgChartTypeClass = class of TfpgChartTypeAbs;
+
+
+  TfpgChartTypeClassMapping = class(TObject)
+  private
+    FMappingName: TfpgString;
+    FChartTypeClass: TfpgChartTypeClass;
+  public
+    constructor Create(const AMappingName: TfpgString; AChartTypeClass: TfpgChartTypeClass);
+    property    MappingName: string read FMappingName;
+    property    ChartTypeClass: TfpgChartTypeClass read FChartTypeClass;
+  end;
+
+
+  TfpgChartFactory = class(TObject)
+  private
+    FList: TObjectList;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    procedure   RegisterClass(const AChartTypeName: TfpgString; AChartTypeClass: TfpgChartTypeClass);
+    function    CreateInstance(const AChartTypeName: TfpgString): TfpgChartTypeAbs;
+  end;
+
+
 const
   DefaultChartColors: array[0..13] of TfpgColor= (
     clAqua, clBlue,  clDkGray, clFuchsia, clGreen,
@@ -145,11 +176,24 @@ const
     clRed,  clSilver, clTeal,  clYellow
     );
 
+// The ChartFactory is a singleton
+function fpgChartFactory: TfpgChartFactory;
+
 
 implementation
 
 
 {$I chartsincos.inc}
+
+var
+  uChartFactory: TfpgChartFactory;
+  
+function fpgChartFactory: TfpgChartFactory;
+begin
+  if not Assigned(uChartFactory) then
+    uChartFactory := TfpgChartFactory.Create;
+  Result := uChartFactory; 
+end;
 
 
 { TfpgAxis }
@@ -515,5 +559,64 @@ begin
   Canvas.Color := clBlack; //BackgroundColor;
   Drawline(cx,cy,cx+x2,cy+y2);
 end;
+
+{ TfpgChartTypeClassMapping }
+
+constructor TfpgChartTypeClassMapping.Create(const AMappingName: TfpgString; AChartTypeClass: TfpgChartTypeClass);
+begin
+  inherited Create;
+  FMappingName := AMappingName;
+  FChartTypeClass := AChartTypeClass;
+end;
+
+{ TfpgChartFactory }
+
+constructor TfpgChartFactory.Create;
+begin
+  inherited Create;
+  FList := TObjectList.Create;
+end;
+
+destructor TfpgChartFactory.Destroy;
+begin
+  FList.Free;
+  inherited Destroy;
+end;
+
+// Register a TfpgChartTypeClass class for creation by the factory
+procedure TfpgChartFactory.RegisterClass(const AChartTypeName: TfpgString; AChartTypeClass: TfpgChartTypeClass);
+var
+  i: integer;
+begin
+  for i := 0 to FList.Count - 1 do
+  begin
+    if UpperCase(TfpgChartTypeClassMapping(FList.Items[i]).MappingName) = UpperCase(AChartTypeName) then
+      Assert(false, Format('ChartType class <%s> already registered.', [AChartTypeName]));
+  end;
+  FList.Add(TfpgChartTypeClassMapping.Create(AChartTypeName, AChartTypeClass));
+end;
+
+function TfpgChartFactory.CreateInstance(const AChartTypeName: TfpgString): TfpgChartTypeAbs;
+var
+  i: integer;
+begin
+  result := nil;
+  for i := 0 to FList.Count-1 do
+  begin
+    if UpperCase(TfpgChartTypeClassMapping(FList.Items[i]).MappingName) = UpperCase(AChartTypeName) then
+    begin
+      result := TfpgChartTypeClassMapping(FList.Items[i]).ChartTypeClass.Create;
+      Break; //==>
+    end;
+  end;
+  Assert(result <> nil, Format('<%s> does not identify a registered chart type class.', [AChartTypeName]));
+end;
+
+
+initialization
+  uChartFactory := nil;
+
+finalization
+  uChartFactory.Free;
 
 end.
