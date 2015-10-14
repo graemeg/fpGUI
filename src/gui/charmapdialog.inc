@@ -80,15 +80,21 @@ procedure TCharMapForm.grdCharactersFocusChange(Sender: TObject; ARow, ACol: int
 var
   i: integer;
   tmp, tmp2: TfpgString;
+  p: PChar;
+  b1, b2, b3, b4: Byte;
+  CharLen: Integer;
+  unicode: cardinal;
 begin
   if (ARow > 0) and (ACol > 0) then
   begin
     tmp  := grdCharacters.Cells[ACol, ARow];
+    p := PChar(tmp);
+    unicode := UTF8CharToUnicode(p, CharLen);
     tmp2 := '';
-    // generate UTF-8 byte representation
-    for i := 1 to Length(tmp) do
-      tmp2 := tmp2 + '$' + IntToHex(Ord(tmp[i]), 2);
-    lblCharInfo.Text := 'U+' + inttohex(Ord(tmp[1]), 4) + ', UTF-8 = ' + tmp2;
+    // get individual UTF-8 byte values
+    for i := 0 to CharLen-1 do
+      tmp2 := tmp2 + '$' + IntToHex(Ord(p[i]), 2);
+    lblCharInfo.Text := 'U+' + IntToHex(unicode, 4) + ', UTF-8 = ' + tmp2;
     pnlChar.Text := tmp;
   end
   else
