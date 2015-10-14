@@ -49,6 +49,16 @@ uses
   fpg_main,
   fpg_widget;
 
+const
+  // Charting Type constants
+  cChartPie       = 'Pie';
+  cChartBar       = 'Bar';
+  cChartHBar      = 'Horizontal Bar';
+  cChartLine      = 'Line';
+  cChartXYLine    = 'XY Line';
+  cChartArea      = 'Area';
+  cChartScatter   = 'Scatter';
+
 type
   TfpgChart = class;  // forward declaration.
 
@@ -100,17 +110,16 @@ type
     procedure   HandlePaint; override;
     procedure   Draw;
     procedure   SetText(const AValue: TfpgString);
-    procedure   DrawPie;
     procedure   DrawBar;
     procedure   DrawHBar;
     procedure   DrawLine;
     procedure   DrawxyLine;
     procedure   DrawArea;
     procedure   DrawScatter;
-    function    Color(i: Integer): TfpgColor; inline;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    Color(i: Integer): TfpgColor; inline;
     property    Xaxis: TfpgXAxis read Fxaxis write Fxaxis;
     property    Yaxis: TfpgYAxis read Fyaxis write Fyaxis;
     property    Text: TfpgString read FText write SetText;
@@ -139,7 +148,10 @@ type
   procedure:   SetPosition is provided by TfpgWidget
 }
 
+
   TfpgChartTypeAbs = class(TObject)
+  public
+    procedure Draw(AWidget: TfpgWidget); virtual; abstract;
   end;
 
 
@@ -175,6 +187,7 @@ const
     clLime, clMaroon, clNavy,  clOlive,   clPurple,
     clRed,  clSilver, clTeal,  clYellow
     );
+
 
 // The ChartFactory is a singleton
 function fpgChartFactory: TfpgChartFactory;
@@ -281,6 +294,8 @@ begin
 end;
 
 procedure TfpgChart.Draw;
+var
+  lInst: TfpgChartTypeAbs;
 begin
   Canvas.SetLineStyle(Linewidth,lsSolid);
   Xaxis.Draw;
@@ -291,7 +306,14 @@ begin
   else
   begin
     case FChartType of
-      ctPie: DrawPie;
+      ctPie: begin
+               lInst := fpgChartFactory.CreateInstance('pie');
+               try
+                 lInst.Draw(self);
+               finally
+                 lInst.Free;
+               end;
+             end;
       ctBar: DrawBar;
       ctHBar: DrawHBar;
       ctLine: DrawLine;
@@ -309,27 +331,6 @@ begin
 end;
 
 // Filled pie like default google pie
-procedure TfpgChart.DrawPie;
-var
-  n,i,box : integer;
-  a1,a2: double;
-begin
-  if Width < Height then
-    box:=width
-  else
-    box:=Height;
-  n:=High(FDataset);
-  a1:=0;
-  for i:=0 to n do
-  begin
-    a2:=FDataSet[i,0];
-    //write('iya1a2c: ',i,' ',FDataset[i,0],' ',a1:4:1,' ',a2:4:1);
-    Canvas.Color := Color(i);
-    Canvas.FillArc(0,0,box,box,a1,a2);
-    a1:=a1+a2;
-  end;
-end;
-
 procedure TfpgChart.DrawBar;
 var
   i, n, bw, bp: integer;

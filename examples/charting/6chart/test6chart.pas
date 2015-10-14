@@ -6,7 +6,8 @@ uses
   SysUtils, Classes,
   fpg_base, fpg_main, fpg_form,
   fpg_button,
-  fpg_chart;
+  fpg_chart,
+  fpg_chart_pie;
 
 type
 
@@ -125,7 +126,8 @@ begin
   {@VFD_BODY_BEGIN: main}
   Name := 'mainform';
   SetPosition(323, 113, 480, 300);
-  WindowTitle := 'Main Chart Test';
+  WindowTitle := 'fpGUI Charting Demo';
+  WindowPosition := wpOneThirdDown;
   ShowHint := True;
 
   btnmake := TfpgButton.Create(self);
