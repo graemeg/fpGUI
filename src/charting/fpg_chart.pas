@@ -91,6 +91,7 @@ type
     function    color(i:Integer):TfpgColor; inline;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     property    Xaxis: TXaxis read Fxaxis write Fxaxis;
     property    Yaxis: TYaxis read Fyaxis write Fyaxis;
     property    Text: String read FText write SetText;
@@ -192,6 +193,13 @@ begin
   SetLength(FColors,length(DefaultChartColors));
   For i:=0 to length(DefaultChartColors) do
     FColors[i]:=DefaultChartColors[i];
+end;
+
+destructor TChart.Destroy;
+begin
+  Xaxis.Free;
+  Yaxis.Free;
+  inherited Destroy;
   //OnPaint:=@Paint;
 end;
 
