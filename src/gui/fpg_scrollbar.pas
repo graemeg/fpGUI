@@ -114,6 +114,7 @@ begin
   FScrollTimer.OnTimer := @ScrollTimer;
   Orientation   := orVertical;
   FWidth        := 16;  // TODO: This value should come from fpgStyle
+  FHeight       := 16;  // TODO: This value should come from fpgStyle
   FMin          := 0;
   FMax          := 100;
   FPosition     := 10;
