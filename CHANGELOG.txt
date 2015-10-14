@@ -2,6 +2,24 @@
   Release notes for fpGUI
   =======================
 
+v2.0 (unknown)
+  - Code breaking changes
+    * TfpgScrollStyle enums have changed names to make it more clear as to
+      what they do or mean.
+      ssHorizVisible, ssVertiVisible, ssBothVisible were deleted, and new
+      ssBoth, ssAutoHorizontal, ssAutoVertical types added.
+    * Widgets with 3D borders were cleaned up and refactored. Instead of them
+      descending directly from TfpgWidget, they now descend from TfpgBorderWidget.
+      So if you have custom written widgets, they might need some adjusting.
+    * AlienWindows branch got merged. This resulted in some code changes that
+      might need to be applied to your code:
+       - UpdateWindowPosition -> UpdatePosition
+       - HasHandle -> Window.HasHandle
+       - WindowToScreen() -> WidgetToScreen()
+    * PDF reporting classes and identifier names got translated from French to
+      English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
+    * Renamed TfpgRect.IsEmpty to TfpgRect.IsUnassigned. Added TfpgRect.Clear
+
 v1.0 (2013-04-09)
   - Docview improvements: Bookmark maintenance, keyboard shortcuts,
     image support in INF files, cross link support.
