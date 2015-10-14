@@ -30,7 +30,6 @@ uses
   sysutils,
   fpg_base,
   fpg_main,
-  fpg_panel,
   fpg_widget;
 
 type
@@ -41,9 +40,9 @@ type
                 ctxyLine, ctArea );  // using (x and many y coordinates
 
   // This is a minimalistic unit so we use only 1 method to store data:
-  TdataSet = array of array of integer;
+  TDataset = array of array of integer;
 
-  Taxis = class  // (TObject)
+  Taxis = class(TObject)
   private
     FParent: TChart;
   protected
@@ -127,14 +126,9 @@ const
     clRed,  clSilver, clTeal,  clYellow
     );
 
-//var
-//function
 
 implementation
 
-//type
-//var
-//function
 
 {$I chartsincos.inc}
 
@@ -200,15 +194,12 @@ begin
   Xaxis.Free;
   Yaxis.Free;
   inherited Destroy;
-  //OnPaint:=@Paint;
 end;
 
 procedure TChart.HandlePaint;
 begin
-  Canvas.BeginDraw;
   Canvas.Clear(BackgroundColor);
   Draw;
-  Canvas.EndDraw;
 end;
 
 procedure TChart.SetText(const AValue: string);
@@ -378,7 +369,7 @@ begin
     end;
 end;
 
-{$INLINE ON}
+{.$INLINE ON}
 
 function TChart.color(i:Integer):TfpgColor; inline;
 begin
@@ -454,7 +445,7 @@ procedure TChart.Drawline(x1,y1,x2,y2: integer); inline;
 begin
   Canvas.Drawline(x1,Height-y1-1,x2,Height-y2-1);
 end;
-{$INLINE OFF}
+{.$INLINE OFF}
 
 procedure TChart.Update;
 begin
