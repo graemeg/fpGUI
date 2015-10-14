@@ -191,7 +191,7 @@ begin
   Yaxis:=TYaxis.Create(self);
   Canvas.TextColor:=TextColor;
   SetLength(FColors,length(DefaultChartColors));
-  For i:=0 to length(DefaultChartColors) do
+  for i := 0 to length(DefaultChartColors)-1 do
     FColors[i]:=DefaultChartColors[i];
 end;
 
