@@ -1,9 +1,25 @@
-unit thumbchart;
+{
+    fpGUI  -  Free Pascal GUI Toolkit
 
-// draw small charts on fpGUI panels
-// intended for thumbs (128*96) but support any size
+    Copyright (C) 2013 - 2015 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      A new widget which can draw various small charts. It supports
+      the following chart types: Pie, Bar, HBar, Line, xyLine and Scatter
+      charts.
+}
+
+unit fpg_chart;
+
 // Features:
-// - Pie, Bar, HBar, Line, xyLine, Scatter
 // - set LineWidth.
 // - set drawing colors.
 // - set text color.
@@ -42,6 +58,7 @@ type
   // This is a minimalistic unit so we use only 1 method to store data:
   TDataset = array of array of integer;
 
+
   Taxis = class(TObject)
   private
     FParent: TChart;
@@ -56,17 +73,19 @@ type
     procedure   Draw; virtual; abstract;
   end;
 
+
   TXaxis = class(Taxis)
   public
     procedure Draw; override;
   end;
+
 
   TYaxis = class(Taxis)
   public
     procedure Draw; override;
   end;
 
-  //========= Chart ==========================
+
   TChart=class(TfpgWidget)
   private
     FText:      string;
@@ -132,7 +151,9 @@ implementation
 
 {$I chartsincos.inc}
 
-//========== AXIS ======================================
+
+{ Taxis }
+
 constructor Taxis.Create(AOwner: TComponent);
 begin
   inherited Create;
@@ -143,6 +164,8 @@ begin
   Visible:=True;
   Color:=clBlack;
 end;
+
+{ TXaxis }
 
 procedure TXaxis.Draw;
 var
@@ -156,6 +179,8 @@ begin
   end;
 end;
 
+{ TYaxis }
+
 procedure TYaxis.Draw;
 var
   yend: integer;
@@ -168,7 +193,8 @@ begin
   end;
 end;
 
-//========== CHART =====================================
+{ TChart }
+
 constructor TChart.Create(AOwner: TComponent);
 var
   i: integer;
@@ -210,7 +236,6 @@ begin
   end;
 end;
 
-//========== DRAW ==========================================
 procedure TChart.Draw;
 begin
   Canvas.SetLineStyle(Linewidth,lsSolid);
@@ -239,8 +264,9 @@ begin
   end;
 end;
 
-procedure TChart.DrawPie;  // ----PIE-----
-var                      // Filled pie like default google pie
+// Filled pie like default google pie
+procedure TChart.DrawPie;
+var
   n,i,box : integer;
   a1,a2: double;
 begin
@@ -260,7 +286,7 @@ begin
   end;
 end;
 
-procedure TChart.DrawBar;  //----BAR-----
+procedure TChart.DrawBar;
 var
   i, n, bw, bp: integer;
 begin
@@ -274,7 +300,7 @@ begin
     FillRectangle(i*bp,0,bw,FDataSet[i,0]);  // x,y,w,h
 end;
 
-procedure TChart.DrawHBar;  //----Horizontal BAR-----
+procedure TChart.DrawHBar;
 var
   i, n, bw, bp: integer;
 begin
@@ -286,7 +312,7 @@ begin
     //writeln('Hbar ',i,': ',0,' ',i*bp,' ',FDataSet[i,0],' ',bw);  // x,y,w,h
 end;
 
-procedure TChart.DrawLine;  //----LINE-----
+procedure TChart.DrawLine;
 var
   i, n,bw,x1,y1,x2,y2: integer;
 begin
