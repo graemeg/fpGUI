@@ -526,15 +526,9 @@ type
    procedure VerLineTo (const y : double );
    procedure VerLineRel(const dy : double );
 
-   procedure ArcTo(
-              rx ,ry ,angle : double;
-              largeArcFlag ,sweepFlag : boolean;
-              x ,y : double );
-
-   procedure ArcRel(
-              rx ,ry ,angle : double;
-              largeArcFlag ,sweepFlag : boolean;
-              dx ,dy : double );
+   procedure ArcTo(rx, ry, angle: double; largeArcFlag, sweepFlag: boolean; x, y: double);
+   procedure ArcRel(rx, ry, angle: double; largeArcFlag, sweepFlag: boolean; dx, dy: double);
+   procedure ArcPath(const cx, cy, rx, ry, start, sweep: double);
 
    procedure QuadricCurveTo (xCtrl ,yCtrl ,xTo ,yTo : double ); overload;
    procedure QuadricCurveRel(dxCtrl ,dyCtrl ,dxTo ,dyTo : double ); overload;
@@ -2552,7 +2546,6 @@ begin
  m_path.add_path(@ar ,0 ,false );
 
  DrawPath(AGG_StrokeOnly );
-
 end;
 
 { STAR }
@@ -2984,8 +2977,15 @@ procedure TAgg2D.ArcRel(
            largeArcFlag ,sweepFlag : boolean;
            dx ,dy : double );
 begin
- m_path.arc_rel(rx ,ry ,angle ,largeArcFlag ,sweepFlag ,dx ,dy );
+  m_path.arc_rel(rx ,ry ,angle ,largeArcFlag ,sweepFlag ,dx ,dy );
+end;
 
+procedure TAgg2D.ArcPath(const cx, cy, rx, ry, start, sweep: double);
+var
+  ar: agg_arc.arc;
+begin
+  ar.Construct(cx, cy, rx, ry, sweep, start, false);
+  m_path.add_path(@ar, 0, true);
 end;
 
 { QUADRICCURVETO }
