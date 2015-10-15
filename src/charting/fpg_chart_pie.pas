@@ -31,20 +31,23 @@ type
 
   TfpgPieChart = class(TfpgChartTypeAbs)
   public
-    procedure Draw(AWidget: TfpgWidget); override;
+    procedure DoDraw; override;
   end;
 
 implementation
 
+uses
+  Agg2D;
 
 { TfpgPieChart }
 
-procedure TfpgPieChart.Draw(AWidget: TfpgWidget);
+procedure TfpgPieChart.DoDraw;
 var
-  lChart: TfpgChart absolute AWidget;
+  lChart: TfpgChart;
   n,i,box : integer;
   a1,a2: double;
 begin
+  lChart := TfpgChart(FWidget);
   if lChart.Width < lChart.Height then
     box := lChart.Width
   else

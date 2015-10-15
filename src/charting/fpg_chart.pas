@@ -47,7 +47,8 @@ uses
   contnrs,
   fpg_base,
   fpg_main,
-  fpg_widget;
+  fpg_widget,
+  Agg2D;
 
 const
   // Charting Type constants
@@ -150,8 +151,16 @@ type
 
 
   TfpgChartTypeAbs = class(TObject)
+  protected
+    FWidget: TfpgWidget;
+    FImg: TfpgImage;
+    FAgg2D: TAgg2D;
+    procedure   InitComposedImage; virtual;
+    procedure   Draw(AWidget: TfpgWidget);
   public
-    procedure Draw(AWidget: TfpgWidget); virtual; abstract;
+    destructor  Destroy; override;
+    procedure   DoDraw; virtual; abstract;
+    property    VG: TAgg2D read FAgg2D;
   end;
 
 
@@ -559,6 +568,36 @@ begin
   //writeln('s c x2y2: ',s:4:2,' ',c:4:2,' ',cx+x2,' ',cy+y2);
   Canvas.Color := clBlack; //BackgroundColor;
   Drawline(cx,cy,cx+x2,cy+y2);
+end;
+
+{ TfpgChartTypeAbs }
+
+procedure TfpgChartTypeAbs.InitComposedImage;
+begin
+  FAgg2D := TAgg2D.Create(FWidget);
+  FImg := TfpgImage.Create;
+  FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
+  FAgg2D.Attach(FImg);
+end;
+
+destructor TfpgChartTypeAbs.Destroy;
+begin
+  FAgg2D.Free;
+  FImg.Free;
+  inherited Destroy;
+end;
+
+// This is all runs inside TfpgChart's HandlePaint - so it is safe to draw to the canvas
+procedure TfpgChartTypeAbs.Draw(AWidget: TfpgWidget);
+begin
+  FWidget := AWidget;
+  if not Assigned(FImg) then
+    InitComposedImage;
+  // let the descendants do the AggPas drawing
+  DoDraw;
+  // Finalise image internals, then paint it to the Window
+  FImg.UpdateImage;
+  FWidget.Canvas.DrawImage(0, 0, FImg);
 end;
 
 { TfpgChartTypeClassMapping }
