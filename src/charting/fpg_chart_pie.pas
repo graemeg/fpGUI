@@ -44,22 +44,45 @@ uses
 procedure TfpgPieChart.DoDraw;
 var
   lChart: TfpgChart;
-  n,i,box : integer;
+  i,box : integer;
   a1,a2: double;
+  c: TAggColor;
+  r: double;
+  startingAngle: double;
+  endingAngle: double;
+  arcSize: double;
+  centerX, centerY: double;
 begin
   lChart := TfpgChart(FWidget);
   if lChart.Width < lChart.Height then
     box := lChart.Width
   else
     box := lChart.Height;
-  n := High(lChart.Dataset);
-  a1 := 0;
-  for i := 0 to n do
+  r := (box / 2);
+  a1 := 0;  { starting angle is 0 degrees - 3 o'clock position }
+  centerX := lChart.Width / 2;
+  centerY := lChart.Height / 2;
+
+  for i := 0 to High(lChart.Dataset) do
   begin
     a2 := lChart.DataSet[i, 0];
     //write('iya1a2c: ',i,' ',FDataset[i,0],' ',a1:4:1,' ',a2:4:1);
-    lChart.Canvas.Color := lChart.Color(i);
-    lChart.Canvas.FillArc(0, 0, box, box, a1, a2);
+    c := fpgColor2AggColor(lChart.Color(i));
+    c.a := 100; { alpha channel - gives it a pastel colour feel }
+    
+    startingAngle := Deg2Rad(a1);
+    arcSize := a2;
+    endingAngle := startingAngle + Deg2Rad(arcSize);  { we are going clockwise }
+
+    VG.ResetPath;
+    VG.NoLine;
+    VG.FillColor(c);
+    VG.MoveTo(centerX, centerY);
+    VG.ArcPath(centerX, centerY, r, r, startingAngle, endingAngle);
+    VG.MoveTo(centerX, centerY);
+    VG.ClosePolygon;
+    VG.DrawPath;
+
     a1 := a1 + a2;
   end;
 end;
