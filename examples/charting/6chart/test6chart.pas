@@ -7,7 +7,8 @@ uses
   fpg_base, fpg_main, fpg_form,
   fpg_button,
   fpg_chart,
-  fpg_chart_pie;
+  fpg_chart_pie,
+  fpg_chart_bar;
 
 type
 

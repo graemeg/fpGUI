@@ -111,7 +111,6 @@ type
     procedure   HandlePaint; override;
     procedure   Draw;
     procedure   SetText(const AValue: TfpgString);
-    procedure   DrawBar;
     procedure   DrawHBar;
     procedure   DrawLine;
     procedure   DrawxyLine;
@@ -323,7 +322,14 @@ begin
                  lInst.Free;
                end;
              end;
-      ctBar: DrawBar;
+      ctBar: begin
+               lInst := fpgChartFactory.CreateInstance('bar');
+               try
+                 lInst.Draw(self);
+               finally
+                 lInst.Free;
+               end;
+             end;
       ctHBar: DrawHBar;
       ctLine: DrawLine;
       ctArea: DrawArea;
@@ -339,21 +345,7 @@ begin
   end;
 end;
 
-// Filled pie like default google pie
-procedure TfpgChart.DrawBar;
-var
-  i, n, bw, bp: integer;
-begin
-  n:=High(FDataset);
-  // avoid to creat insane no of bars
-  if n>(Width div 2) then
-    exit; //==>
-  bp:=Width div n;  // bar pitch
-  bw:=bp-LineWidth; // bar width (keep some space between bars)
-  for i:= 0 to  n-1 do
-    FillRectangle(i*bp,0,bw,FDataSet[i,0]);  // x,y,w,h
-end;
-
+// Draws a Horizontal Bar chart
 procedure TfpgChart.DrawHBar;
 var
   i, n, bw, bp: integer;
