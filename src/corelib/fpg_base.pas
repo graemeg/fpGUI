@@ -33,6 +33,7 @@ uses
   fpg_impl,
   syncobjs, // TCriticalSection usage
   variants,
+  fgl,
   contnrs;
 
 type
@@ -89,7 +90,6 @@ type
   TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encCP1250, encIBMGraph);
 
 
-
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 3;
@@ -117,8 +117,11 @@ const
   FPGM_FREEME      = 19;
   FPGM_DROPENTER   = 20;
   FPGM_DROPEXIT    = 21;
-  FPGM_HSCROLL     = 22;
-  FPGM_ABOUT       = 23;
+  FPGM_DROPMOVE    = 22;
+  FPGM_DROPDROP    = 23;
+  FPGM_HSCROLL     = 24;
+  FPGM_ABOUT       = 25;
+  FPGM_WINDOW_ALLOCATED = 26;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
@@ -142,7 +145,18 @@ const
   {$I predefinedcolors.inc}
 
 type
+
+  TfpgPoint = object  // not class for static allocations
+    X: integer;
+    Y: integer;
+    procedure SetPoint(AX, AY: integer);
+    function  ManhattanLength: integer;      { See URL for explanation http://en.wikipedia.org/wiki/Taxicab_geometry }
+    function  ManhattanLength(const PointB: TfpgPoint): integer;
+  end;
+
   PfpgRect = ^TfpgRect;
+
+  { TfpgRect }
 
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
@@ -155,18 +169,9 @@ type
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
     function  IsUnassigned: Boolean;
+    function  ContainsPoint(APoint: TfpgPoint): Boolean;
     procedure Clear;
   end;
-
-
-  TfpgPoint = object  // not class for static allocations
-    X: integer;
-    Y: integer;
-    procedure SetPoint(AX, AY: integer);
-    function  ManhattanLength: integer;      { See URL for explanation http://en.wikipedia.org/wiki/Taxicab_geometry }
-    function  ManhattanLength(const PointB: TfpgPoint): integer;
-  end;
-
 
   TfpgSize = object  // not class for static allocations
     W: integer;
@@ -191,6 +196,14 @@ type
     shiftstate: TShiftState;
   end;
 
+  TfpgDropBase = class;
+
+  TfpgMsgParmDrop = record
+    x: TfpgCoord;
+    y: TfpgCoord;
+    Drop: TfpgDropBase;
+  end;
+
 
   TfpgMsgParmUser = record
     Param1: Integer;
@@ -204,7 +217,8 @@ type
       0: (mouse: TfpgMsgParmMouse);
       1: (keyboard: TfpgMsgParmKeyboard);
       2: (rect: TfpgRect);
-      3: (user: TfpgMsgParmUser);
+      3: (drop: TfpgMsgParmDrop);
+      4: (user: TfpgMsgParmUser);
   end;
 
 
@@ -562,6 +576,7 @@ type
     FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
     FWindowOpacity: Single;
+    FDropableWidgets: TFPList;
     LastMousePos: TfpgPoint; // point in the native window
     function    GetHeight: TfpgCoord;
     function    GetLeft: TfpgCoord;
@@ -570,6 +585,7 @@ type
     function    GetWidget: TfpgWidgetBase;
     function    GetWidth: TfpgCoord;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
+    procedure   NotifyWidgetsWindowAllocated;
   protected
     FPosition,
     FNotifiedPosition: TfpgPoint;
@@ -633,6 +649,8 @@ type
     procedure   DefaultHandler(var message); override;
     function    FindWidgetFromWindowPoint(AX, AY: TfpgCoord): TfpgWidgetBase;
     procedure   NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
+    procedure   AddDropableWidget(AWidget: TfpgWidgetBase);
+    procedure   RemoveDropableWidget(AWidget: TfpgWidgetBase);
     property    MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
     property    CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property    WindowType: TWindowType read FWindowType write FWindowType;
@@ -795,6 +813,8 @@ type
     constructor Create(const AFormat: TfpgString; const AData: variant); reintroduce;
   end;
 
+  TfpgMimeDataItemList = specialize TFPGObjectList<TfpgMimeDataItem>;
+
 
   TfpgMimeDataBase = class(TObject)
   private
@@ -824,15 +844,70 @@ type
     property    Count: integer read GetCount;
   end;
 
+  { TfpgDragBase }
 
   TfpgDragBase = class(TObject)
   protected
+    FSource: TfpgWidgetBase;
     FDragging: Boolean;
     FMimeData: TfpgMimeDataBase;
   public
-    constructor Create;
+    constructor Create(ASource: TfpgWidgetBase);
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
+  end;
+
+  { TfpgDropBase }
+
+  TfpgDropBase = class(TObject)
+  protected
+    type
+        TDropStatus = (dsUnassigned, dsAccepted, dsRejected);
+  private
+    FCanDrop: Boolean;
+    FMimeChoice: TfpgString;
+    FMimetypes: TfpgMimeDataItemList;
+    FMousePos: TfpgPoint;
+    FSource: TfpgWinHandle;
+    //FTargetWin: TfpgWindowBase;
+    FTargetWidget: TfpgWidgetBase;
+    FTargetWindow: TfpgWindowBase;
+    procedure   SetTargetWidget(AValue: TfpgWidgetBase);
+    procedure   SetTargetWindow(AValue: TfpgWindowBase);
+  protected
+    FDropStatus: TDropStatus;
+    FWinMousePos: TfpgPoint;
+
+    FSourceWidget: TfpgWidgetBase;
+    FDropData: Variant;
+
+    procedure   Leave;
+    procedure   Enter;
+
+    // core calls these methods
+    procedure   SetPosition(AX, AY: Integer);
+    procedure   DataDropComplete;
+    procedure   SetDropData(AData: Variant);
+    // core implements these methods
+    function    GetDropAction: TfpgDropAction; virtual; abstract;
+    procedure   SetDropAction(AValue: TfpgDropAction); virtual; abstract;
+    function    GetWindowForDrop: TfpgWindowBase; virtual; abstract;
+
+    procedure   AcceptDrop; virtual;
+    procedure   RejectDrop; virtual;
+    property    DropStatus: TDropStatus read FDropStatus;
+    property    TargetWidget: TfpgWidgetBase read FTargetWidget write SetTargetWidget;
+    property    SourceWindow: TfpgWinHandle read FSource write FSource;
+  public
+    constructor Create(ASource: TfpgWinHandle); virtual;
+    destructor  Destroy; override;
+    property    Mimetypes: TfpgMimeDataItemList read FMimetypes;
+    property    MimeChoice: TfpgString read FMimeChoice write FMimeChoice;
+    property    DropAction: TfpgDropAction read GetDropAction write SetDropAction;
+    property    SourceWidget: TfpgWidgetBase read FSourceWidget;
+    property    Widget: TfpgWidgetBase read FTargetWidget;
+    property    MousePos: TfpgPoint read FMousePos;
+    property    CanDrop: Boolean read FCanDrop write FCanDrop;
   end;
 
 
@@ -862,6 +937,8 @@ type
 
 
 operator = (const r1,r2 : TfpgRect) b : boolean;
+operator = (const A, B: TfpgPoint): Boolean;
+operator in (const A: TfpgString; const B: array of TfpgString): Boolean;
 
 
 { ********  Helper functions  ******** }
@@ -912,6 +989,21 @@ const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
 
+operator in(const A: TfpgString; const B: array of TfpgString): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := Low(B) to High(B) do
+    if B[i] = A then
+      Exit(True);
+end;
+
+operator=(const A, B: TfpgPoint): Boolean;
+begin
+  Result := (A.X = B.X) and (A.Y = B.Y);
+end;
+
 operator=(const r1, r2: TfpgRect)b: boolean;
 begin
   Result := CompareMem(@r1, @r2, SizeOf(TfpgRect));
@@ -919,6 +1011,7 @@ end;
 
 type
   TWidgetHack = class(TfpgWidget);
+  TDropHandlerAccess = class(TfpgDropHandler);
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
@@ -1269,6 +1362,155 @@ begin
   end;
 end;
 
+{ TfpgDropBase }
+
+procedure TfpgDropBase.SetTargetWidget(AValue: TfpgWidgetBase);
+begin
+  if FTargetWidget=AValue then Exit;
+
+  // check if we need to notify an old widget if we
+  if Assigned(FTargetWidget) and (AValue <> FTargetWidget) then
+    Leave;
+
+  FTargetWidget:=AValue;
+
+  if Assigned(FTargetWidget) then
+    Enter;
+end;
+
+procedure TfpgDropBase.SetTargetWindow(AValue: TfpgWindowBase);
+begin
+  if FTargetWindow=AValue then Exit;
+
+  if Assigned(FTargetWindow) then
+    Leave;
+
+  FTargetWindow:=AValue;
+end;
+
+procedure TfpgDropBase.Leave;
+var
+  w: TWidgetHack;
+  msgp: TfpgMessageParams;
+begin
+  if FTargetWidget <> nil then { nil would be first time in, so there is no last window }
+  begin
+    msgp.drop.Drop := Self;
+    fpgSendMessage(nil, TargetWidget, FPGM_DROPEXIT, msgp);
+
+    w := TWidgetHack(FTargetWidget as TfpgWidget);
+
+    if Assigned(w.DropHandler) then
+      TDropHandlerAccess(w.DropHandler).Leave(TfpgDrop(Self));
+
+    FTargetWidget := nil;
+  end;
+end;
+
+procedure TfpgDropBase.Enter;
+var
+  w: TWidgetHack = nil;
+  msgp: TfpgMessageParams;
+begin
+  if FTargetWidget <> nil then
+  begin
+    msgp.drop.Drop := Self;
+    fpgSendMessage(nil, FTargetWidget, FPGM_DROPENTER, msgp);
+
+    w := TWidgetHack(FTargetWidget as TfpgWidget);
+
+    if Assigned(w.DropHandler) then
+      TDropHandlerAccess(w.DropHandler).Enter(TfpgDrop(Self));
+  end;
+end;
+
+procedure TfpgDropBase.SetPosition(AX, AY: Integer);
+var
+  win: TfpgWindowBase;
+  w: TWidgetHack;
+  msgp: TfpgMessageParams;
+begin
+  FDropStatus:=dsUnassigned;
+  FWinMousePos := fpgPoint(AX, AY);
+
+  win := GetWindowForDrop;
+
+  // Setting TargetWidget will trigger drag enter and leave events if needed.
+  // In OnEnter the widget will check the mimetypes for an acceptable type and reject or accept from that.
+  TargetWidget := TfpgWidget(win.FindWidgetFromWindowPoint(AX,AY));
+
+  w := TWidgetHack(TargetWidget);
+  // convert window cordinates to widget coordinates
+  w.WindowToWidget(AX, AY);
+
+  {$IFDEF DNDDEBUG}
+  writeln('dragging over widget: ', TargetWidget.ClassName, ' ',AX,':',AY);
+  {$ENDIF}
+  msgp.drop.Drop := Self;
+  msgp.drop.x:=AX;
+  msgp.drop.y:=AY;
+  fpgSendMessage(nil, TargetWidget, FPGM_DROPMOVE, msgp);
+  if Assigned(w.DropHandler) then
+  begin
+    FMousePos := fpgPoint(AX, AY);
+
+    TDropHandlerAccess(w.DropHandler).Move(TfpgDrop(Self), AX, AY);
+    // the Move handler should set CanDrop
+    if CanDrop then
+      AcceptDrop;
+  end;
+
+    // if it hasn't chosen or there's no handler then default to reject.
+  if DropStatus = dsUnassigned then
+      RejectDrop;
+end;
+
+procedure TfpgDropBase.DataDropComplete;
+var
+  w: TWidgetHack;
+  msgp: TfpgMessageParams;
+begin
+  if Assigned(TargetWidget) then
+  begin
+    w := TWidgetHack(TargetWidget);
+    if Assigned(w.DropHandler) and (DropStatus = dsAccepted) then
+    begin
+      msgp.drop.Drop := Self;
+      fpgSendMessage(nil, TargetWidget, FPGM_DROPDROP, msgp);
+      TDropHandlerAccess(w.DropHandler).Drop(TfpgDrop(Self), FDropData);
+    end;
+  end;
+end;
+
+procedure TfpgDropBase.SetDropData(AData: Variant);
+begin
+  FDropData := AData;
+end;
+
+constructor TfpgDropBase.Create(ASource: TfpgWinHandle);
+begin
+  FMimetypes:=TfpgMimeDataItemList.Create(True);
+  FSource := ASource;
+end;
+
+destructor TfpgDropBase.Destroy;
+begin
+  FDropData:=nil;
+  TargetWidget := nil; // sends leave event if needed
+  FreeAndNil(FMimetypes);
+  inherited Destroy;
+end;
+
+procedure TfpgDropBase.AcceptDrop;
+begin
+  FDropStatus:=dsAccepted;
+end;
+
+procedure TfpgDropBase.RejectDrop;
+begin
+  FDropStatus:=dsRejected;
+end;
+
 { TfpgWidgetBase }
 
 function TfpgWidgetBase.GetWindow: TfpgWindowBase;
@@ -1543,7 +1785,7 @@ var
   W: TfpgWidgetBase;
 begin
   W := Self;
-  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) do
+  while Assigned(W) and W.WindowAllocated and (not W.HasOwnWindow) and W.InheritsFrom(TfpgWidget) do
   begin
     AX := AX + W.Left;
     AY := AY + W.Top;
@@ -1646,6 +1888,11 @@ begin
   Result := (Left or Top or Width or Height) = 0;
 end;
 
+function TfpgRect.ContainsPoint(APoint: TfpgPoint): Boolean;
+begin
+  Result := (APoint.X >= Left) and (APoint.X <= Right) and (APoint.Y >= Top) and (APoint.Y <= Bottom);
+end;
+
 procedure TfpgRect.Clear;
 begin
   Top    := 0;
@@ -1691,6 +1938,14 @@ begin
     Exit; //==>
   FMouseCursor := AValue;
   DoSetMouseCursor;
+end;
+
+procedure TfpgWindowBase.NotifyWidgetsWindowAllocated;
+begin
+  if PrimaryWidget = nil then
+    Exit; // =>
+
+  fpgSendMessage(Self, PrimaryWidget, FPGM_WINDOW_ALLOCATED);
 end;
 
 procedure TfpgWindowBase.SetWindowOpacity(AValue: Single);
@@ -1746,6 +2001,8 @@ begin
     DoAllocateWindowHandle(nil);
   if FMouseCursorIsDirty then
     DoSetMouseCursor;
+
+  NotifyWidgetsWindowAllocated;
 end;
 
 procedure TfpgWindowBase.DefaultHandler(var message);
@@ -1785,6 +2042,9 @@ end;
 
 procedure TfpgWindowBase.NotifyWidgetDestroying(AWidget: TfpgWidgetBase);
 begin
+  if TfpgWidget(AWidget).DropHandler <> nil then
+    RemoveDropableWidget(AWidget);
+
   if FCurrentWidget = AWidget then
   begin
     FCurrentWidget := nil; // this prevents an exit message being sent to a destroyed object
@@ -1796,6 +2056,25 @@ begin
 
   if FPassiveMouseCapture = AWidget then
     FPassiveMouseCapture := nil;
+end;
+
+procedure TfpgWindowBase.AddDropableWidget(AWidget: TfpgWidgetBase);
+begin
+  if FDropableWidgets.IndexOf(AWidget) = -1 then
+    FDropableWidgets.Add(AWidget);
+
+  DoDNDEnabled(FDropableWidgets.Count > 0);
+end;
+
+procedure TfpgWindowBase.RemoveDropableWidget(AWidget: TfpgWidgetBase);
+var
+  i : Integer;
+begin
+  i := FDropableWidgets.IndexOf(AWidget);
+  if i > -1 then
+    FDropableWidgets.Delete(i);
+
+  DoDNDEnabled(FDropableWidgets.Count > 0);
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
@@ -1961,11 +2240,13 @@ begin
   FMouseCursor := mcDefault;
   FMouseCursorIsDirty := False;
   FWindowState := wsNormal;
+  FDropableWidgets := TFPList.Create;
 end;
 
 destructor TfpgWindowBase.Destroy;
 begin
   ReleaseWindowHandle;
+  FDropableWidgets.Free;
   inherited Destroy;
 end;
 
@@ -3890,10 +4171,11 @@ end;
 
 { TfpgDragBase }
 
-constructor TfpgDragBase.Create;
+constructor TfpgDragBase.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create;
   FDragging := False;
+  FSource := ASource;
 end;
 
 destructor TfpgDragBase.Destroy;

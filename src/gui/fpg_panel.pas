@@ -95,9 +95,6 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
-    property    OnDragDrop;
-    property    OnDragEnter;
-    property    OnDragLeave;
     property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
@@ -167,9 +164,6 @@ type
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
-    property    OnDragDrop;
-    property    OnDragEnter;
-    property    OnDragLeave;
     property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
@@ -227,9 +221,6 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
-    property    OnDragDrop;
-    property    OnDragEnter;
-    property    OnDragLeave;
     property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
@@ -277,9 +268,6 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
-    property    OnDragDrop;
-    property    OnDragEnter;
-    property    OnDragLeave;
     property    OnDragStartDetected;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;

@@ -37,6 +37,9 @@ type
 
   TfpgMemo = class(TfpgWidget)
   private
+    class var FDefaultDropHandler: TfpgDropHandler;
+    const Top_Margin = 3;
+  private
     FBorderStyle: TfpgEditBorderStyle;
     FLines: TStringList;
     FMaxLength: integer;
@@ -67,6 +70,7 @@ type
     FDefaultPopupMenu: TfpgPopupMenu;
     FReadOnly: Boolean;
     FUpdateCount: integer;
+    FCaretPosition: TfpgPoint;
     function    GetFontDesc: string;
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetFontDesc(const AValue: string);
@@ -79,6 +83,7 @@ type
     procedure   SetLineText(linenum: integer; Value: string);
     function    GetCursorX: integer;
     procedure   SetCPByX(x: integer);
+    procedure   SetCaretPosition(ALine, APosition: Integer);
     function    CurrentLine: string;
     procedure   CursorPosFromXY(X,Y: Integer; var ACursorLine: Integer; var ACursorPos: Integer);
     function    VisibleLines: integer;
@@ -102,8 +107,14 @@ type
     function    GetSelectionText: TfpgString;
     procedure   SetSelectionText(const AText: TfpgString);
     procedure   PaintPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
+    function    WithinSelection(ALine, APos: Integer): Boolean;
+    procedure   DropEnter(ADrop: TfpgDrop);
+    procedure   DropMove(ADrop: TfpgDrop; AX, AY: Integer);
+    procedure   DropLeave(ADrop: TfpgDrop);
+    procedure   DropDrop(ADrop: TfpgDrop; AData: Variant);
   protected
     procedure   DoDragStartDetected; override;
+    function    GetDefaultDropHandler: TfpgDropHandler; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -152,9 +163,6 @@ type
     property    TabOrder;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
@@ -203,6 +211,42 @@ type
     procedure   Insert(Index: Integer; const S: string); override;
   end;
 
+  { TMemoDropHandler }
+
+  TMemoDropHandler = class(TfpgDropHandler)
+  protected
+    procedure   Enter(ADrop: TfpgDrop); override;
+    procedure   Leave(ADrop: TfpgDrop); override;
+    procedure   Move(ADrop: TfpgDrop; AX, AY: Integer); override;
+    procedure   Drop(ADrop: TfpgDrop; AData: Variant); override;
+  end;
+
+var
+  lDefaultDropHandler: TMemoDropHandler;
+
+
+{ TMemoDropHandler }
+
+procedure TMemoDropHandler.Enter(ADrop: TfpgDrop);
+begin
+  TfpgMemo(ADrop.Widget).DropEnter(ADrop);
+end;
+
+procedure TMemoDropHandler.Leave(ADrop: TfpgDrop);
+begin
+  TfpgMemo(ADrop.Widget).DropLeave(ADrop);
+end;
+
+procedure TMemoDropHandler.Move(ADrop: TfpgDrop; AX, AY: Integer);
+begin
+  TfpgMemo(ADrop.Widget).DropMove(ADrop, AX, AY);
+end;
+
+procedure TMemoDropHandler.Drop(ADrop: TfpgDrop; AData: Variant);
+begin
+  TfpgMemo(ADrop.Widget).DropDrop(ADrop, AData);
+end;
+
 { TfpgMemoStrings }
 
 constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
@@ -240,6 +284,8 @@ begin
   if Assigned(Memo) then
     Memo.EndUpdate;
 end;
+
+
 
 
 { TfpgMemo }
@@ -524,6 +570,7 @@ begin
     FDefaultPopupMenu.Free;
   TfpgMemoStrings(FLines).Free;
   FFont.Free;
+  DropHandler := nil; // This frees the drophandler object
   inherited Destroy;
 end;
 
@@ -565,11 +612,141 @@ begin
 
 end;
 
+function TfpgMemo.WithinSelection(ALine, APos: Integer): Boolean;
+begin
+
+  Result :=
+   (FSelEndLine > -1)
+  and (((ALine = FSelStartLine) and (APos >= FSelStartPos))
+      or (ALine > FSelStartLine))
+  and (((ALine = FSelEndLine) and (APos <= FSelEndPos))
+      or (ALine < FSelEndLine))
+end;
+
+procedure TfpgMemo.DropEnter(ADrop: TfpgDrop);
+{$IFDEF DND_DEBUG}
+var
+  M : TfpgMimeDataItem;
+{$ENDIF}
+begin
+  {$IFDEF DND_DEBUG}
+  for M In ADrop.Mimetypes do
+    WriteLN(M.format);
+  {$ENDIF}
+  // Sets MimeChoice
+  ADrop.AcceptMimeType(['UTF8_STRING','text/plain']);
+  {$IFDEF DND_DEBUG}
+  WriteLn('Drop Enter. MimeChoice = ', ADrop.MimeChoice);
+  {$ENDIF}
+end;
+
+
+procedure TfpgMemo.DropMove(ADrop: TfpgDrop; AX, AY: Integer);
+var
+  Line: Integer;
+  Position: Integer;
+begin
+  if (ADrop.SourceWidget = self) and (WithinSelection(Line, Position)) then
+    Exit; // =>
+
+  if (ADrop.MimeChoice <> '') and GetClientRect.ContainsPoint(fpgPoint(AX, AY)) then
+  begin
+    CursorPosFromXY(AX, AY, Line, Position);
+    if ADrop.SourceWidget = Self then
+    begin
+      if WithinSelection(Line, Position) then
+      begin
+        ADrop.CanDrop:=False;
+        Exit;
+      end;
+      ADrop.DropAction:=daMove;
+    end;
+
+    ADrop.CanDrop := True;
+
+    // MoveCursor
+    // does not change cursor position or selection, only the caret is changed
+    SetCaretPosition(Line,Position);
+  end
+  else
+    ADrop.CanDrop := False;
+end;
+
+procedure TfpgMemo.DropLeave(ADrop: TfpgDrop);
+begin
+  // do nothing..?
+end;
+
+procedure TfpgMemo.DropDrop(ADrop: TfpgDrop; AData: Variant);
+var
+  S : String;
+  Line: Integer = 0;
+  Position: Integer = 0;
+  NewLines: TStringList;
+  PartBegin: String = '';
+  PartEnd: String = '';
+  i: Integer;
+begin
+  CursorPosFromXY(ADrop.MousePos.X, ADrop.MousePos.Y, Line, Position);
+  if (ADrop.SourceWidget = self) and (WithinSelection(Line, Position)) then
+    Exit; // =>
+
+  S := AData;
+
+  NewLines := TStringList.Create;
+  NewLines.Text:=s;
+
+  if ADrop.SourceWidget = Self then
+  begin
+    if Line < FSelStartLine then
+    begin
+      Inc(FSelStartLine, NewLines.Count-1);
+      Inc(FSelEndLine, NewLines.Count-1);
+    end;
+    if (Line = FSelStartLine) and (Position < FSelStartPos) then
+    begin
+      Inc(FSelStartLine, NewLines.Count-1);
+      Inc(FSelEndLine, NewLines.Count-1);
+      Inc(FSelStartPos, Length8(NewLines[NewLines.Count-1]))
+    end;
+  end;
+
+
+  // split the line we are dropping into
+  PartBegin:=Copy8(Lines.Strings[Line], 1, Position);
+  PartEnd  :=Copy8(Lines.Strings[Line], Position+1, Length8(Lines.Strings[Line]));
+
+  for i := 0 to NewLines.Count-1 do
+  begin
+    if i = 0 then
+      S := PartBegin + NewLines[0]
+    else
+      S := NewLines[i];
+
+    if i = NewLines.Count-1 then
+      S := S + PartEnd;
+
+    if i = 0 then
+      Lines.Delete(Line+i);
+    Lines.Insert(Line+i, S);
+
+  end;
+
+  SetCursorLine(Line+i);
+  SetCursorPos(Length8(S));
+
+  RePaint;
+
+  NewLines.Free;
+
+end;
+
 procedure TfpgMemo.DoDragStartDetected;
 var
   WidestLine: Integer = 0;
   SelLines: TStringList;
   l: String;
+  Action: TfpgDropAction;
 begin
   if not FDNDMaybe then
       Exit;
@@ -596,8 +773,20 @@ begin
     SelLines.Free;
 
     FDrag.PreviewSize := fpgSize(WidestLine, Canvas.Font.Height * (FSelEndLine - FSelStartLine + 1));
-    FDrag.Execute([daCopy]);
+    Action := FDrag.Execute([daCopy, daMove]);
+    case Action of
+      daCopy: ;
+      daMove: DeleteSelection;
+    end;
   end;
+end;
+
+function TfpgMemo.GetDefaultDropHandler: TfpgDropHandler;
+begin
+  if lDefaultDropHandler = nil then
+    lDefaultDropHandler := TMemoDropHandler.Create;
+
+  Result := lDefaultDropHandler;
 end;
 
 function TfpgMemo.GetFontDesc: string;
@@ -916,6 +1105,28 @@ begin
   FCursorPos := cp;
 end;
 
+procedure TfpgMemo.SetCaretPosition(ALine, APosition: Integer);
+var
+  tw: Integer;
+  yp: Integer;
+begin
+  tw := FFont.TextWidth(UTF8Copy(GetLineText(ALine), 1, APosition));
+  yp := Top_Margin + (LineHeight * (ALine - FFirstLine));
+
+  if (APosition <> FCaretPosition.X) or (ALine <> FCaretPosition.Y) then
+  begin
+    if fpgCaret.IsVisible(Canvas) and ((ALine <> FCursorLine) or (APosition <> FCursorPos)) then
+      fpgCaret.InvertCaret;
+
+    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.Height);
+  end;
+
+  if FCaretPosition = fpgPoint(ALine, APosition) then
+    fpgCaret.ResetTimeout;
+
+  FCaretPosition := fpgPoint(ALine, APosition);
+end;
+
 function TfpgMemo.CurrentLine: string;
 begin
   Result := GetLineText(FCursorLine);
@@ -1085,7 +1296,7 @@ begin
     selsp := FSelEndPos;
   end;
 
-  yp := 3;
+  yp := Top_Margin;
   for n := FFirstline to LineCount-1 do
   begin
     ls := GetLineText(n);
@@ -1135,8 +1346,7 @@ begin
       if FCursorLine = n then
       begin
         // drawing cursor
-        tw := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos));
-        fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.Height);
+        SetCaretPosition(FCursorLine, FCursorPos);
       end;
     end;  { if }
 
@@ -1147,7 +1357,8 @@ begin
 
   // Special case because it never entered the for loop above
   if (LineCount = 0) and Focused then
-    fpgCaret.SetCaret(Canvas, FSideMargin, 3, fpgCaret.Width, FFont.Height);
+    SetCaretPosition(0,0);
+    //fpgCaret.SetCaret(Canvas, FSideMargin, Top_Margin, fpgCaret.Width, FFont.Height);
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
@@ -1466,12 +1677,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
   // try to detect if we have pressed inside the existing selection area
-  if  (FSelEndLine > -1)
-  and (((lnum = FSelStartLine) and (cp >= FSelStartPos))
-      or (lnum > FSelStartLine))
-  and (((lnum = FSelEndLine) and (cp <= FSelEndPos))
-      or (lnum < FSelEndLine))
-  then
+  if WithinSelection(lnum, cp) then
   begin
     // the mouse is down inside the already selected text
     FMouseDragging := False; // used to select text, so it's false since we are maybe dragging text.
@@ -1859,6 +2065,10 @@ begin
   AdjustCursor;
   Repaint;
 end;
+
+finalization
+  if Assigned(lDefaultDropHandler) then
+    FreeAndNil(lDefaultDropHandler);
 
 end.
 

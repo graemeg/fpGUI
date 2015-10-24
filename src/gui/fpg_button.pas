@@ -166,9 +166,6 @@ type
     property    Top;
     property    Width;
     property    OnClick;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;

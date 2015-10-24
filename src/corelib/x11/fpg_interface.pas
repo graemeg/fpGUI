@@ -34,6 +34,7 @@ type
   TfpgFileListImpl      = class(TfpgX11FileList);
   TfpgMimeDataImpl      = class(TfpgX11MimeData);
   TfpgDragImpl          = class(TfpgX11Drag);
+  TfpgDropImpl          = class(TfpgX11Drop);
   TfpgTimerImpl         = class(TfpgX11Timer);
   TfpgSystemTrayHandler = class(TfpgX11SystemTrayHandler);
 

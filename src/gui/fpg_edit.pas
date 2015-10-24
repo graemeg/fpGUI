@@ -197,9 +197,6 @@ type
     property    TextColor;
     property    Options;
     property    OnChange;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;

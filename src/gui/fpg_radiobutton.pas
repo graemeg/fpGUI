@@ -76,9 +76,6 @@ type
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;

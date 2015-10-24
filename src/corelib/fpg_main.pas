@@ -336,9 +336,11 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   SetCaret(acanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
-    procedure   UnSetCaret(acanvas: TfpgCanvas);
+    procedure   SetCaret(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
+    procedure   UnSetCaret(ACanvas: TfpgCanvas);
     procedure   InvertCaret;
+    procedure   ResetTimeout;
+    function    IsVisible(acanvas: TfpgCanvas): Boolean;
     property    Width: integer read FWidth;
     property    Height: integer read FHeight;
   end;
@@ -382,6 +384,46 @@ type
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
     property    PreviewSize: TfpgSize read FPreviewSize write FPreviewSize;
     property    OnPaintPreview: TfpgDragPaintEvent read FOnPaintPreview write FOnPaintPreview;
+  end;
+
+  { TfpgDrop }
+
+  TfpgDrop = class(TfpgDropImpl)
+  public
+    function AcceptMimeType(const ACompatibleFormat: array of TfpgString): Boolean;
+  end;
+
+  TfpgDropCommonEvent = procedure(Drop: TfpgDrop) of object;
+  TfpgDropDropEvent = procedure(Drop: TfpgDrop; AData: Variant) of object;
+  TfpgDropMoveEvent = procedure(Drop: TfpgDrop; X, Y: TfpgCoord) of object;
+
+  TfpgDropHandler = class
+  protected
+    procedure   Enter(ADrop: TfpgDrop); virtual; abstract;
+    procedure   Leave(ADrop: TfpgDrop); virtual; abstract;
+    procedure   Move(ADrop: TfpgDrop; AX, AY: Integer); virtual; abstract;
+    procedure   Drop(ADrop: TfpgDrop; AData: Variant); virtual; abstract;
+  end;
+
+  { TfpgDropEventHandler }
+
+  TfpgDropEventHandler = class(TfpgDropHandler)
+  private
+    FOnDrop:  TfpgDropDropEvent;
+    FOnEnter: TfpgDropCommonEvent;
+    FOnLeave: TfpgDropCommonEvent;
+    FOnMove:  TfpgDropMoveEvent;
+  protected
+    procedure   Enter(ADrop: TfpgDrop); override;
+    procedure   Leave(ADrop: TfpgDrop); override;
+    procedure   Move(ADrop: TfpgDrop; AX, AY: Integer); override;
+    procedure   Drop(ADrop: TfpgDrop; AData: Variant); override;
+  public
+    constructor Create(AOnEnter, AOnLeave: TfpgDropCommonEvent; AOnDrop:TfpgDropDropEvent; AOnMove: TfpgDropMoveEvent);
+    property    OnEnter: TfpgDropCommonEvent read FOnEnter write FOnEnter;
+    property    OnLeave: TfpgDropCommonEvent read FOnLeave write FOnLeave;
+    property    OnDrop: TfpgDropDropEvent read FOnDrop write FOnDrop;
+    property    OnMove: TfpgDropMoveEvent read FOnMove write FOnMove;
   end;
 
 
@@ -551,6 +593,58 @@ type
 
 
   TWidgetFriend = class(TfpgWidget);
+
+{ TfpgDrop }
+
+function TfpgDrop.AcceptMimeType(const ACompatibleFormat: array of TfpgString
+  ): Boolean;
+var
+  MimeType: TfpgMimeDataItem;
+begin
+  Result := False;
+  for MimeType in Mimetypes do
+  begin
+    if MimeType.format in ACompatibleFormat then
+    begin
+      Result := True;
+      MimeChoice := MimeType.format;
+    end;
+  end;
+end;
+
+{ TfpgDropEventHandler }
+
+procedure TfpgDropEventHandler.Enter(ADrop: TfpgDrop);
+begin
+  if Assigned(FOnEnter) then
+    FOnEnter(ADrop);
+end;
+
+procedure TfpgDropEventHandler.Leave(ADrop: TfpgDrop);
+begin
+  if Assigned(FOnLeave) then
+    FOnLeave(ADrop);
+end;
+
+procedure TfpgDropEventHandler.Move(ADrop: TfpgDrop; AX, AY: Integer);
+begin
+  if Assigned(FOnMove) then
+    FOnMove(ADrop, AX, AY);
+end;
+
+procedure TfpgDropEventHandler.Drop(ADrop: TfpgDrop; AData: Variant);
+begin
+  if Assigned(FOnDrop) then
+    FOnDrop(ADrop, AData);
+end;
+
+constructor TfpgDropEventHandler.Create(AOnEnter, AOnLeave: TfpgDropCommonEvent; AOnDrop: TfpgDropDropEvent; AOnMove: TfpgDropMoveEvent);
+begin
+  FOnEnter := AOnEnter;
+  FOnLeave := AOnLeave;
+  FOnMove  := AOnMove;
+  FOnDrop  := AOnDrop;
+end;
 
 
 { TDebugMethodHelper }
@@ -2787,6 +2881,19 @@ begin
   end;
 end;
 
+procedure TfpgCaret.ResetTimeout;
+begin
+  if FVisible and FTimer.Enabled then
+  begin
+    FTimer.Reset;
+  end;
+end;
+
+function TfpgCaret.IsVisible(acanvas: TfpgCanvas): Boolean;
+begin
+  Result := FVisible and (FCanvas = acanvas);
+end;
+
 { TfpgImages }
 
 constructor TfpgImages.Create;
@@ -2999,7 +3106,7 @@ end;
 
 constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
-  inherited Create;
+  inherited Create(ASource);
   FSource := ASource;
   FPreviewWin := TfpgDNDWindow.Create(nil, Self);
 end;

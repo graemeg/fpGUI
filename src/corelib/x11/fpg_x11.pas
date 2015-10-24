@@ -143,6 +143,7 @@ type
   // forward declaration
   TfpgX11Window = class;
   TfpgX11Drag = class;
+  TfpgX11Drop = class;
 
 
   TfpgX11FontResource = class(TfpgFontResourceBase)
@@ -283,8 +284,6 @@ type
     FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
-    { XDND type list received from Source window }
-    FDNDTypeList: TObjectList;
     { all XDND atoms }
     XdndAware: TAtom;
     XdndTypeList: TAtom;
@@ -303,14 +302,8 @@ type
     XdndActionAsk: TAtom;
     XdndActionPrivate: TAtom;
     { XDND variables }
-    FActionType: TAtom;
-    FSrcWinHandle: TfpgWinHandle;
-    FDNDVersion: integer;
-    FDNDDataType: TAtom;
-    FSrcTimeStamp: clong;
-    FLastDropTarget: TfpgWidgetBase;
-    FDropPos: TPoint;
     FDrag: TfpgX11Drag;
+    FDrop: TfpgX11Drop;
     { X11 window grouping }
     FLeaderWindow: TfpgWinHandle;
     FClientLeaderAtom: TAtom;
@@ -321,7 +314,6 @@ type
     function    GetDropActionFromAtom(const AAtom: TAtom): TfpgDropAction;
     function    GetAtomFromDropAction(const AAction: TfpgDropAction): TAtom;
     procedure   XdndInit;
-    procedure   ResetDNDVariables;
     procedure   HandleDNDenter(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ev: TXEvent);
     procedure   HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
@@ -400,6 +392,8 @@ type
   end;
 
 
+  { TfpgX11Drag }
+
   TfpgX11Drag = class(TfpgDragBase)
   private
     FLastTarget: TfpgWinHandle;
@@ -409,6 +403,8 @@ type
     FDropAccepted: Boolean;
     FProposedAction: TAtom;
     FAcceptedAction: TAtom;
+    FResult : TfpgDropAction;
+    FFinished: Boolean;
     FMimeTypesArray: array of TAtom;
     xia_plain_text: TAtom;
     procedure   SetTypeListProperty;
@@ -420,13 +416,42 @@ type
     procedure   SendDNDPosition(ATarget: TWindow; x_root: cint; y_root: cint; AAction: TAtom; ATime: X.TTime);
     procedure   SendDNDDrop;
     procedure   HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
+    procedure   HandleDNDFinished(const ev: TXEvent);
     procedure   HandleSelectionRequest(ev: TXEvent);
+    procedure   QueueFree;
+    procedure   DropTimeout(Sender: TObject);
   protected
-    FSource: TfpgWidgetBase;
     function    GetSource: TfpgWidgetBase; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
+  end;
+
+  { TfpgX11Drop }
+
+  TfpgX11Drop = class(TfpgDropBase)
+  private
+    FTargetWindow: TfpgWindowBase;
+    FTopLevelWindow: TfpgX11Window;
+    { XDND type list received from Source window }
+    FDNDVersion: integer;
+    FDNDDataType: TAtom;
+    FActionType: TAtom;
+    function    GetWindowFromCoordinates(AX, AY: cint): TfpgX11Window;
+    procedure   RequestDropData(const ATimestamp: x.TTime);
+    procedure   ReadDropSelectionData(const ev: TXEvent);
+  protected
+    function    GetDropAction: TfpgDropAction; override;
+    procedure   SetDropAction(AValue: TfpgDropAction); override;
+    procedure   AcceptDrop; override;
+    procedure   RejectDrop; override;
+    function    GetWindowForDrop: TfpgWindowBase; override;
+    property    TopLevelWindow: TfpgX11Window read FTopLevelWindow;
+    property    TargetWindow: TfpgWindowBase read FTargetWindow write FTargetWindow;
+    property    SourceWindow;
+  public
+    constructor Create(ATopLevelWindow: TfpgWindowBase; ASource: TfpgWinHandle); reintroduce;
+    procedure   LoadSourceMimeTypes(ev: TXEvent);
   end;
 
 
@@ -485,20 +510,16 @@ uses
   keysym,
   math;
 
-type
-  TDNDSrcType = class(TObject)
-  public
-    Name: TfpgString;
-    ID: integer;
-  end;
-
 var
   xapplication: TfpgApplication;
-  uDragSource: TfpgWidget;  { points to the Source widget of the DND when drop is inside the same app }
 
 const
-  FPG_XDND_VERSION: culong = 4; // our supported XDND version
+  FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
   PIXMAP_RESIZE_SIZE = 50;
+
+
+type
+  TApplicationHelper = class(TfpgApplication);
 
  // some externals
 
@@ -917,6 +938,294 @@ begin
   Result := (FpReadLink(AFilename) <> '');
 end;
 
+{ TfpgX11Drop }
+
+function TfpgX11Drop.GetWindowFromCoordinates(AX, AY: cint): TfpgX11Window;
+var
+  dx, dy, dx2, dy2: cint;
+  child: TWindow;
+  prevchild: TWindow;
+  ret_child: TfpgWinHandle;
+begin
+  Result := nil;
+  // Find window under cursor, and position of cursor inside that window
+  XTranslateCoordinates(xapplication.Display, XDefaultRootWindow(xapplication.Display), TfpgX11Window(FTopLevelWindow).WinHandle,
+      AX, AY, @dx, @dy, @ret_child);
+  child := ret_child;
+  prevchild := TopLevelWindow.WinHandle;
+  while ret_child <> 0 do   // If we have chidren, iterate until we reach the top most child
+  begin
+    child :=  ret_child;
+    dx2 := dx;
+    dy2 := dy;
+    XTranslateCoordinates(xapplication.Display, prevchild, child,
+        dx2, dy2, @dx, @dy, @ret_child);
+    prevchild := child;
+  end;
+
+  if child <> 0 then
+    Result := FindWindowByHandle(child);
+
+  if Result = nil then
+    Result := TfpgX11Window(TargetWindow);
+
+  // There is almost no chance that this will change the result with alienwindows
+  TargetWindow := Result;
+end;
+
+procedure TfpgX11Drop.RequestDropData(const ATimestamp: x.TTime);
+var
+  Msg: TXEvent;
+  i: Integer;
+begin
+  // Tell the source wether or not to retrieve the drop data
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Drop.RetrieveDropData');
+  {$ENDIF}
+
+  FDNDDataType := None;
+  for i := 0 to Mimetypes.Count-1 do
+  begin
+    { This list must be from most specific to least specific }
+    if Mimetypes[i].format = MimeChoice then
+    begin
+      FDNDDataType := Mimetypes[i].data;
+      break;
+    end;
+  end;
+
+  { TODO: Must XConvertSelection always be called? }
+  if FDNDDataType <> None then
+    with xapplication do
+      XConvertSelection(Display, XdndSelection, FDNDDataType, XdndSelection, TopLevelWindow.FWinHandle, ATimestamp);
+
+  { send message to signal drop is finished }
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type            := ClientMessage;
+  Msg.xany.display          := xapplication.Display;
+  Msg.xclient.window        := SourceWindow; // source winhandle msg is going to
+  Msg.xclient.message_type  := xapplication.XdndFinished;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0] := TopLevelWindow.FWinHandle;  // winhandle of target window
+  if FDNDDataType = None then
+  begin
+    Msg.xclient.data.l[1] := 0; // drop NOT accepted
+    Msg.xclient.data.l[2] := None; // this should be the action we accepted
+  end
+  else
+  begin
+    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
+    Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
+  end;
+
+
+  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
+  // now we wait for a selection message with the drop data.....
+end;
+
+procedure TfpgX11Drop.ReadDropSelectionData(const ev: TXEvent);
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining, dummy: culong;
+  data: PChar;
+  wg: TfpgWidget;
+
+begin
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Drop.ReadDropData');
+  {$ENDIF}
+  if TargetWidget <> nil then { nil would be first time in, so there is no last window }
+  begin
+    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
+    wg := TfpgWidget(TargetWidget);
+    if not Assigned(wg.DropHandler) then
+      Exit;
+  end;
+
+  {if Assigned(SourceWidget) and Assigned(xapplication.FDrag) then
+  begin
+    TfpgDrag(xapplication.FDrag).MimeData.GetData(MimeChoice);
+  end
+  else}
+  begin
+
+    { do not get data yet, just see how much there is }
+    XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
+        ev.xselection._property, 0, 0,
+        TBool(false),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @remaining,
+        @data);
+
+    { we handle the DND selection here }
+      {$IFDEF DNDDEBUG}
+      s := XGetAtomName(FDisplay, actualtype);
+      writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
+      writeln('  Actualformat = ', ActualFormat);
+      writeln('  count = ', count);
+      writeln('  remaining = ', remaining);
+      writeln('-----------------');
+      {$ENDIF}
+
+    if remaining > 0 then   { we have data - now fetch it! }
+    begin
+      XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
+          ev.xselection._property, 0, remaining,
+          TBool(false),
+          AnyPropertyType,
+          @actualtype, @actualformat, @count, @dummy,
+          @data);
+      // write the data to the drop stream
+      SetDropData(data);
+    end;
+  end;
+end;
+
+function TfpgX11Drop.GetDropAction: TfpgDropAction;
+begin
+  Result := xapplication.GetDropActionFromAtom(FActionType);
+end;
+
+procedure TfpgX11Drop.SetDropAction(AValue: TfpgDropAction);
+begin
+  FActionType:= xapplication.GetAtomFromDropAction(AValue);
+end;
+
+function TfpgX11Drop.GetWindowForDrop: TfpgWindowBase;
+begin
+  Result := TargetWindow;
+end;
+
+constructor TfpgX11Drop.Create(ATopLevelWindow: TfpgWindowBase;
+  ASource: TfpgWinHandle);
+begin
+  inherited Create(ASource);
+  FTopLevelWindow := TfpgX11Window(ATopLevelWindow);
+  if Assigned(xapplication.FDrag) then
+    FSourceWidget := TfpgDrag(xapplication.FDrag).Source;
+end;
+
+procedure TfpgX11Drop.LoadSourceMimeTypes(ev: TXEvent);
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining: culong;
+  xdndtypes: PAtomArray;
+  i: integer;
+  s: TfpgString;
+  itm: TfpgMimeDataItem;
+begin
+  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
+
+  {$IFDEF DNDDEBUG}
+  writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
+      [ FDNDVersion,
+        BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
+        ev.xclient.data.l[0],
+        ev.xclient.data.l[1],
+        ev.xclient.data.l[2],
+        ev.xclient.data.l[3],
+        ev.xclient.data.l[4]  ]));
+  writeln(Format('  * We will be using XDND v%d protocol *', [FDNDVersion]));
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
+    writeln('  ** We need to fetch XdndTypeList (>3 types)');
+  {$ENDIF}
+  // read typelist
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
+  begin
+    // now fetch the data
+    XGetWindowProperty(xapplication.Display, SourceWindow,
+        xapplication.XdndTypeList, 0, 16000,
+        TBool(False),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @remaining,
+        @xdndtypes);
+
+    {$IFDEF DNDDEBUG}
+    s := XGetAtomName(xapplication.Display, actualtype);
+    writeln('Actual fetch -----------------------');
+    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
+    writeln('  Actualformat = ', ActualFormat);
+    writeln('  count = ', count);
+    writeln('  remaining = ', remaining);
+    {$ENDIF}
+
+    if (actualtype <> XA_ATOM) or (actualformat <> 32) then
+      count := 0;
+  end
+  else
+  begin
+    count := 3;
+    xdndtypes := @ev.xclient.data.l[2];
+  end;
+
+  for i := 0 to count-1 do
+  begin
+    if xdndtypes^[i] <> 0 then
+    begin
+      s := XGetAtomName(xapplication.Display, xdndtypes^[i]);
+      {$IFDEF DNDDEBUG}
+      writeln(Format('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]));
+      {$ENDIF}
+      // store each supported data type for later use
+      itm := TfpgMimeDataItem.Create(s, xdndtypes^[i]);
+      Mimetypes.Add(itm);
+    end;
+  end;
+  if count > 3 then
+    XFree(xdndtypes);
+end;
+
+procedure TfpgX11Drop.AcceptDrop;
+var
+  Msg: TXEvent;
+
+begin
+  inherited AcceptDrop;
+
+  // send message to confirm drop will be accepted in specified rectangle
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type      := ClientMessage;
+  Msg.xany.display    := xapplication.Display;
+  Msg.xclient.window  := SourceWindow; // source winhandle msg is going to
+  Msg.xclient.message_type  := xapplication.XdndStatus;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0]   := TopLevelWindow.WinHandle;  // always top-level window
+  Msg.xclient.data.l[1]   := 1;
+  Msg.xclient.data.l[4]   := FActionType;
+  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
+  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
+
+  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
+end;
+
+procedure TfpgX11Drop.RejectDrop;
+var
+  Msg: TXEvent;
+begin
+  inherited RejectDrop;
+
+  // send message to confirm drop will be accepted in specified rectangle
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type      := ClientMessage;
+  Msg.xany.display    := xapplication.Display;
+  Msg.xclient.window  := SourceWindow; // source winhandle msg is going to
+  Msg.xclient.message_type  := xapplication.XdndStatus;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0]   := TopLevelWindow.WinHandle;  // always top-level window
+  Msg.xclient.data.l[1] := 0;
+  Msg.xclient.data.l[4] := None;
+
+  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
+  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
+
+  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
+end;
+
 {$IFDEF GDEBUG}
 { EfpgX11Exception }
 
@@ -1104,100 +1413,20 @@ begin
   XdndActionPrivate := XInternAtom(FDisplay, 'XdndActionPrivate', False);
 end;
 
-procedure TfpgX11Application.ResetDNDVariables;
-var
-  msgp: TfpgMessageParams;
-begin
-  if FLastDropTarget <> nil then
-  begin
-    fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FLastDropTarget, FPGM_DROPEXIT, msgp);
-  end;
-  FDNDTypeList.Clear;
-  FActionType     := 0;
-  FSrcWinHandle   := 0;
-  FLastDropTarget := nil;
-  FDropPos.X := 0;
-  FDropPos.Y := 0;
-end;
-
 procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow; const ev: TXEvent);
-var
-  actualtype: TAtom;
-  actualformat: cint;
-  count, remaining: culong;
-  xdndtypes: PAtomArray;
-  i: integer;
-  s: TfpgString;
-  itm: TDNDSrcType;
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDenter');
   {$ENDIF}
-  ResetDNDVariables;
-  FSrcWinHandle := ASource;
-  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
-  {$IFDEF DNDDEBUG}
-  writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
-      [ FDNDVersion,
-        BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
-        ev.xclient.data.l[0],
-        ev.xclient.data.l[1],
-        ev.xclient.data.l[2],
-        ev.xclient.data.l[3],
-        ev.xclient.data.l[4]  ]));
-  writeln(Format('  * We will be using XDND v%d protocol *', [FDNDVersion]));
-  if fpgGetBit(ev.xclient.data.l[1], 0) then
-    writeln('  ** We need to fetch XdndTypeList (>3 types)');
-  {$ENDIF}
 
-  // read typelist
-  if fpgGetBit(ev.xclient.data.l[1], 0) then
-  begin
-    // now fetch the data
-    XGetWindowProperty(Display, FSrcWinHandle,
-        XdndTypeList, 0, 16000,
-        TBool(False),
-        AnyPropertyType,
-        @actualtype, @actualformat, @count, @remaining,
-        @xdndtypes);
+  if Assigned(FDrop) then
+    FDrop.Free;
 
-    {$IFDEF DNDDEBUG}
-    s := XGetAtomName(Display, actualtype);
-    writeln('Actual fetch -----------------------');
-    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
-    writeln('  Actualformat = ', ActualFormat);
-    writeln('  count = ', count);
-    writeln('  remaining = ', remaining);
-    {$ENDIF}
-
-    if (actualtype <> XA_ATOM) or (actualformat <> 32) then
-      count := 0;
-  end
-  else
-  begin
-    count := 3;
-    xdndtypes := @ev.xclient.data.l[2];
-  end;
-
-  for i := 0 to count-1 do
-  begin
-    if xdndtypes^[i] <> 0 then
-    begin
-      s := XGetAtomName(FDisplay, xdndtypes^[i]);
-      {$IFDEF DNDDEBUG}
-      writeln(Format('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]));
-      {$ENDIF}
-      // store each supported data type for later use
-      itm := TDNDSrcType.Create;
-      itm.Name := s;
-      itm.ID := xdndtypes^[i];
-      FDNDTypeList.Add(itm);
-    end;
-  end;
-  if count > 3 then
-    XFree(xdndtypes);
+  FDrop := TfpgDrop.Create(ATopLevelWindow, ASource);
+  FDrop.TargetWindow := ATopLevelWindow;
+  FDrop.SourceWindow := ASource;
+  FDrop.LoadSourceMimeTypes(ev);
 end;
 
 procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
@@ -1209,51 +1438,25 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDleave');
   {$ENDIF}
-  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
+  if Assigned(FDrop) then
   begin
-    wg := FLastDropTarget as TFpgWidget;
-
-    if wg.AcceptDrops then
-    begin
-      if Assigned(wg.OnDragLeave) then
-        wg.OnDragLeave(wg);
-    end;
+    FreeAndNil(FDrop);
   end;
-  ResetDNDVariables;
+
+
 end;
 
 procedure TfpgX11Application.HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow;
     const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
 var
-  Msg: TXEvent;
-  dx, dy, dx2, dy2: cint;
-  child: TWindow;
-  prevchild: TWindow;
-
-  ret_child: TfpgWinHandle;
-
-  i: integer;
   win: TfpgX11Window;
-  wg: TfpgWidget;
-  wg2: TfpgWidget;
-  swg: TfpgWidget;
-  msgp: TfpgMessageParams;
-  lDropAction: TfpgDropAction;
-  lAccept: Boolean;
-  lMimeChoice: TfpgString;
-  lMimeList: TStringList;
-  {$IFDEF DNDDEBUG}
-  s: pchar;
-  {$ENDIF}
+  dx: cint;
+  dy: cint;
+  cw: TWindow;
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDposition  (toplevel window = ', ATopLevelWindow.Name, ')');
   {$ENDIF}
-  lAccept := False;
-  FSrcWinHandle := ASource;
-  FActionType   := AAction;
-  FSrcTimeStamp := ATimeStamp;
-  lMimeChoice := 'text/plain';
 
   {$IFDEF DNDDEBUG}
   s := XGetAtomName(FDisplay, AAction);
@@ -1261,25 +1464,13 @@ begin
   writeln('  x_root: ', x_root, '  y_root: ', y_root);
   {$ENDIF}
 
-  // Find window under cursor, and position of cursor inside that window
-  XTranslateCoordinates(FDisplay, XDefaultRootWindow(FDisplay), ATopLevelWindow.WinHandle,
-      x_root, y_root, @dx, @dy, @ret_child);
-  child := ret_child;
-  prevchild := ATopLevelWindow.WinHandle;
-  while ret_child <> 0 do   // If we have chidren, iterate until we reach the top most child
-  begin
-    child :=  ret_child;
-    dx2 := dx;
-    dy2 := dy;
-    XTranslateCoordinates(FDisplay, prevchild, child,
-        dx2, dy2, @dx, @dy, @ret_child);
-    prevchild := child;
-  end;
+  // multiple parallel drop are not possible
+  if Assigned(FDrop) and (FDrop.SourceWindow <> ASource) then
+    Exit; // =>
 
-  if child <> 0 then
-    win := FindWindowByHandle(child)
-  else
-    win := ATopLevelWindow;
+
+  // Find window under cursor, and position of cursor inside that window
+  win := FDrop.GetWindowFromCoordinates(x_root, y_root);
 
   {$IFDEF DNDDEBUG}
   writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, win.WinHandle, win.WinHandle]));
@@ -1292,204 +1483,25 @@ begin
     {$ENDIF}
     if win is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      wg := TfpgWidget(win.FindWidgetFromWindowPoint(dx,dy));
-      {$IFDEF DNDDEBUG}
-      writeln('dragging over widget: ', wg.ClassName);
-      {$ENDIF}
-      if FLastDropTarget <> wg then
-      begin
-        wg2 := TfpgWidget(FLastDropTarget);
-        if wg2 <> nil then { 0 would be first time in, so there is no last window }
-        begin
-          if wg2.AcceptDrops then
-          begin
-            if Assigned(wg2.OnDragLeave) then
-              wg2.OnDragLeave(wg2);
-          end;
-          fillchar(msgp, sizeof(msgp), 0);
-          { Notify the widget so it can reset its looks if needed }
-          fpgPostMessage(nil, wg2, FPGM_DROPEXIT, msgp);
-        end;
-      end;
-      FLastDropTarget := wg;
-      if wg.AcceptDrops then
-      begin
-        if Assigned(wg.OnDragEnter) then
-        begin
-          lDropAction := GetDropActionFromAtom(AAction);
-          lMimeList := TStringList.Create;
-          for i := 0 to FDNDTypeList.Count-1 do
-            lMimeList.Add(TDNDSrcType(FDNDTypeList[i]).Name);
-
-          { Use the first mime-type as the default option presented. The mime-list
-            should always be from most specific to least specific. }
-          if lMimeList.Count > 0 then
-            lMimeChoice := lMimeList[0]
-          else
-            {$NOTE We need to replace this message with a resouce string }
-            raise Exception.Create('fpGUI/X11: no mime types available for DND operation');
-
-          { TODO: We need to populate the Source parameter. }
-          if Assigned(Drag) then
-            swg := TfpgWidget((TfpgDrag(Drag).Source as TfpgWidget).Owner)
-          else
-            swg := nil;
-          wg.OnDragEnter(wg, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
-          lMimeList.Free;
-          FActionType := GetAtomFromDropAction(lDropAction);
-        end;
-
-        { Notify widget of drag status, so it can update its look }
-        if lAccept then
-        begin
-          FDropPos.X := dx;
-          FDropPos.Y := dy;
-          fillchar(msgp, sizeof(msgp), 0);
-          msgp.mouse.x := dx;
-          msgp.mouse.y := dy;
-          fpgPostMessage(nil, win.Owner, FPGM_DROPENTER, msgp);
-        end;
-      end;
+      XTranslateCoordinates(FDisplay, XDefaultRootWindow(xapplication.Display), ATopLevelWindow.WinHandle, x_root, y_root, @dx, @dy, @cw);
+      FDrop.FActionType := AAction;
+      FDrop.SetPosition(dx, dy);
     end;
   end;
-
-  FDNDDataType := None;
-  for i := 0 to FDNDTypeList.Count-1 do
-  begin
-    { This list must be from most specific to least specific }
-    if TDNDSrcType(FDNDTypeList[i]).Name = lMimeChoice then
-    begin
-      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID;
-      break;
-    end;
-  end;
-
-  // send message to confirm drop will be accepted in specified rectangle
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type      := ClientMessage;
-  Msg.xany.display    := FDisplay;
-  Msg.xclient.window  := FSrcWinHandle; // source winhandle msg is going to
-  Msg.xclient.message_type  := XdndStatus;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0]   := ATopLevelWindow.WinHandle;  // always top-level window
-  if lAccept then
-  begin
-    Msg.xclient.data.l[1] := 1;
-    Msg.xclient.data.l[4] := FActionType;
-  end
-  else
-  begin
-    Msg.xclient.data.l[1] := 0;
-    Msg.xclient.data.l[4] := None;
-  end;
-  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
-  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
-
-  XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
 
 procedure TfpgX11Application.HandleDNDdrop(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow; const ATimestamp: x.TTime);
-var
-  Msg: TXEvent;
 begin
-  {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Application.HandleDNDdrop');
-  {$ENDIF}
-  { TODO: Must XConvertSelection always be called? }
-  if FDNDDataType <> None then
-    XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
-
-  { send message to signal drop is finished }
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type            := ClientMessage;
-  Msg.xany.display          := FDisplay;
-  Msg.xclient.window        := FSrcWinHandle; // source winhandle msg is going to
-  Msg.xclient.message_type  := XdndFinished;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0] := ATopLevelWindow.FWinHandle;  // winhandle of target window
-  if FDNDDataType = None then
-    Msg.xclient.data.l[1] := 0 // drop NOT accepted
-  else
-    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
-  Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
-
-  XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
+  if Assigned(FDrop) then
+    FDrop.RequestDropData(ATimeStamp);
 end;
 
 procedure TfpgX11Application.HandleDNDSelection(const ev: TXEvent);
-var
-  actualtype: TAtom;
-  actualformat: cint;
-  count, remaining, dummy: culong;
-  s: variant;
-  data: PChar;
-  wg: TfpgWidget;
-  swg: TfpgWidget; { source widget that started drag - if drag and drop occur in the same application }
 begin
-  {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Application.HandleDNDselection');
-  {$ENDIF}
-  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
-  begin
-    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
-    wg := TfpgWidget(FLastDropTarget);
-    if not wg.AcceptDrops then
-      Exit;
-  end;
-
-  { do not get data yet, just see how much there is }
-  XGetWindowProperty(FDisplay, ev.xselection.requestor,
-      ev.xselection._property, 0, 0,
-      TBool(false),
-      AnyPropertyType,
-      @actualtype, @actualformat, @count, @remaining,
-      @data);
-
-  { we handle the DND selection here }
-    {$IFDEF DNDDEBUG}
-    s := XGetAtomName(FDisplay, actualtype);
-    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
-    writeln('  Actualformat = ', ActualFormat);
-    writeln('  count = ', count);
-    writeln('  remaining = ', remaining);
-    writeln('-----------------');
-    {$ENDIF}
-
-  if remaining > 0 then   { we have data - now fetch it! }
-  begin
-    XGetWindowProperty(FDisplay, ev.xselection.requestor,
-        ev.xselection._property, 0, remaining,
-        TBool(false),
-        AnyPropertyType,
-        @actualtype, @actualformat, @count, @dummy,
-        @data);
-    s := data;
-  end;
-
-  if FLastDropTarget <> nil then { nil would be first time in, so there is no last window }
-  begin
-    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
-    wg := TfpgWidget(FLastDropTarget);
-    if wg.AcceptDrops then
-    begin
-      if Assigned(wg.OnDragDrop) then
-      begin
-        if Assigned(uDragSource) then
-          swg := uDragSource as TfpgWidget
-        else
-          swg := nil;
-        wg.OnDragDrop(wg, swg, FDropPos.X, FDropPos.Y, s);
-        uDragSource := nil; { reset variable for the next DND action }
-      end;
-    end;
-  end;
-  {$IFDEF DNDDEBUG}
-  writeln(' s = ', s);
-  {$ENDIF}
-  ResetDNDVariables;
+  FDrop.ReadDropSelectionData(ev);
+  FDrop.DataDropComplete;
+  FreeAndNil(FDrop);
 end;
 
 function TfpgX11Application.DoGetFontFaceList: TStringList;
@@ -1566,7 +1578,6 @@ begin
   xia_net_wm_icon       := XInternAtom(FDisplay, '_NET_WM_ICON', TBool(False));
 
   { initializa the XDND atoms }
-  FDNDTypeList := TObjectList.Create;
   XdndInit;
 
   netlayer := TNETWindowLayer.Create(FDisplay);
@@ -1587,7 +1598,6 @@ destructor TfpgX11Application.Destroy;
 begin
   netlayer.Free;
   XCloseDisplay(FDisplay);
-  FDNDTypeList.Free;
   inherited Destroy;
 end;
 
@@ -1775,7 +1785,6 @@ begin
       Exit; // nothing further to do here!
   end;
 
-
   // if the event filter returns true then it ate the message
   if Assigned(FEventFilter) and FEventFilter(ev) then
     exit; // no more processing required for that event
@@ -1903,12 +1912,12 @@ begin
           begin
             if Assigned(Drag) then    // button released
             begin
+              // SendDrop Sets a timeout that end's the drag if it's not acknowleged
               Drag.SendDNDDrop;
-              { TODO: Start timeout in case XdndFinished is not received, so we can free Drag }
-//              writeln('Freeing Drag Object');
               if not Drag.FDropAccepted then
               begin
-                FreeAndNil(FDrag);
+                Drag.QueueFree;
+                FDrag := nil;
               end;
             end;
           end;
@@ -2166,10 +2175,13 @@ begin
             {$ENDIF}
             if Assigned(Drag) then
             begin
+              Drag.HandleDNDFinished(ev);
               {$IFDEF DNDDEBUG}
-              writeln('Freeing Drag Object');
+              writeln('Queuing Free Drag Object');
               {$ENDIF}
-              FreeAndNil(FDrag);
+              //FreeAndNil(FDrag);
+              FDrag.QueueFree;
+              FDrag := nil;
             end;
           end;
         end;
@@ -2563,9 +2575,7 @@ begin
 
     { we need to set the XdndAware property }
     if QueueEnabledDrops then
-    begin
       DoDNDEnabled(True);
-    end;
 
     if xapplication.xia_net_wm_icon <> 0 then
       ApplyFormIcon;
@@ -2848,11 +2858,14 @@ end;
 
 procedure TfpgX11Window.DoDNDEnabled(const AValue: boolean);
 begin
+  QueueEnabledDrops:=False;
   // notify XDND protocol that we can handle DND
   if AValue then
   begin
     if HasHandle then
-      XChangeProperty(xapplication.Display, WinHandle, xapplication.XdndAware, XA_ATOM, 32, PropModeReplace, @FPG_XDND_VERSION, 1)
+    begin
+      XChangeProperty(xapplication.Display, WinHandle, xapplication.XdndAware, XA_ATOM, 32, PropModeReplace, @FPG_XDND_VERSION, 1);
+    end
     else
       QueueEnabledDrops := True; // we need to do this once we have a winhandle
   end
@@ -3902,6 +3915,17 @@ end;
 
 { TfpgX11Drag }
 
+procedure TfpgX11Drag.DropTimeout(Sender: TObject);
+var
+  timer: TfpgTimer absolute Sender;
+begin
+  timer.Enabled:=False;
+  FDropAccepted:=False;
+  FResult:=daIgnore;
+  FFinished:=True;
+  timer.Free;
+end;
+
 procedure TfpgX11Drag.SetTypeListProperty;
 begin
   XChangeProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle,
@@ -4094,6 +4118,7 @@ end;
 procedure TfpgX11Drag.SendDNDDrop;
 var
   xev: TXEvent;
+  timer: TfpgTimer;
 begin
   if FDropAccepted then
   begin
@@ -4113,12 +4138,14 @@ begin
 
     XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
 
-    uDragSource := FSource.Owner as TfpgWidget;
+    timer := TfpgTimer.Create(2000); // 2 seconds
+    timer.OnTimer:=@DropTimeout;
+
   end
   else
   begin
     SendDNDLeave(FLastTarget);
-    uDragSource := nil;
+    FFinished:=True;
   end;
   FSource.MouseCursor := mcDefault;
 end;
@@ -4143,6 +4170,12 @@ begin
     end;
   end;
   { TODO: If we waited to long, we have a timeout }
+end;
+
+procedure TfpgX11Drag.HandleDNDFinished(const ev: TXEvent);
+begin
+   FResult := xapplication.GetDropActionFromAtom(FAcceptedAction);
+   FFinished:=True;
 end;
 
 procedure TfpgX11Drag.HandleSelectionRequest(ev: TXEvent);
@@ -4181,6 +4214,11 @@ begin
   end;
 
   XSendEvent(xapplication.Display, e.requestor, false, NoEventMask, @e );
+end;
+
+procedure TfpgX11Drag.QueueFree;
+begin
+  fpgPostMessage(Self, Self, FPGM_KILLME);
 end;
 
 function TfpgX11Drag.GetSource: TfpgWidgetBase;
@@ -4224,6 +4262,11 @@ begin
     if FMimeData.Count > 3 then
       SetTypeListProperty;
   end;
+
+  While not FFinished do
+     TApplicationHelper(xApplication).WaitWindowMessage(200);
+
+  Result := FResult;
 end;
 
 { TfpgX11SystemTrayHandler }

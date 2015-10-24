@@ -34,9 +34,7 @@ type
 
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
-  TfpgDragEnterEvent = procedure(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean) of object;
-  TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
-
+  { TfpgWidget }
 
   TfpgWidget = class(TfpgWidgetBase)
   private
@@ -45,9 +43,6 @@ type
     FInvalidated: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
-    FOnDragDrop: TfpgDragDropEvent;
-    FOnDragEnter: TfpgDragEnterEvent;
-    FOnDragLeave: TNotifyEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnKeyChar: TfpgKeyCharEvent;
@@ -84,10 +79,17 @@ type
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
     procedure   MsgMouseHorizScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
-    procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
-    procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
+    procedure   MsgWindowAllocated(var msg: TfpgMessageRec); message FPGM_WINDOW_ALLOCATED;
+    //procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
+    //procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
+    //procedure   MsgDropMove(var msg: TfpgMessageRec); message FPGM_DROPMOVE;
+    //procedure   MsgDropDrop(var msg: TfpgMessageRec); message FPGM_DROPMOVE;
+    function    GetDefaultDropHandler: TfpgDropHandler; virtual;
+    function    GetDropHandler: TfpgDropHandler; virtual;
+    procedure   SetDropHandler(AValue: TfpgDropHandler); virtual;
   protected
     FDragStartPos: TfpgPoint;
+    FDropHandler: TfpgDropHandler;
     FFormDesigner: TObject;
     FVisible: boolean;
     FEnabled: boolean;
@@ -205,9 +207,7 @@ type
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
-    property    OnDragEnter: TfpgDragEnterEvent read FOnDragEnter write FOnDragEnter;
-    property    OnDragLeave: TNotifyEvent read FOnDragLeave write FOnDragLeave;
-    property    OnDragDrop: TfpgDragDropEvent read FOnDragDrop write FOnDragDrop;
+    property    DropHandler: TfpgDropHandler read GetDropHandler write SetDropHandler;
   end;
 
 
@@ -357,6 +357,25 @@ begin
   Result := not ParentShowHint;
 end;
 
+procedure TfpgWidget.SetDropHandler(AValue: TfpgDropHandler);
+var
+  OldHandler: TfpgDropHandler;
+begin
+  if FDropHandler = AValue then
+    Exit;
+
+  // see if the old handler was custom or a default handler a child class provides
+  OldHandler := FDropHandler;
+  FDropHandler := AValue;
+
+  // if the old handler is custom free it.
+  if Assigned(OldHandler) and (OldHandler <> GetDefaultDropHandler) then
+    OldHandler.Free;
+
+  if (FDropHandler = nil) and WindowAllocated then
+    Window.RemoveDropableWidget(Self);
+end;
+
 procedure TfpgWidget.SetFormDesigner(const AValue: TObject);
 var
   i: integer;
@@ -398,9 +417,7 @@ begin
   if Window.Owner = Self then
   begin
     Window.SetWindowVisible(Visible);
-    //Window;
   end;
-  //TfpgWindowHack(Window).DoAcceptDrops(True);
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -993,14 +1010,29 @@ begin
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
-procedure TfpgWidget.MsgDropEnter(var msg: TfpgMessageRec);
+procedure TfpgWidget.MsgWindowAllocated(var msg: TfpgMessageRec);
+var
+  i: Integer;
 begin
-  // do nothing
+  if DropHandler <> nil then
+    Window.AddDropableWidget(Self);
+
+  for i := 0 to ComponentCount-1 do
+    if Components[i].InheritsFrom(TfpgWidget) then
+      fpgSendMessage(msg.Sender, Components[i], FPGM_WINDOW_ALLOCATED);
 end;
 
-procedure TfpgWidget.MsgDropExit(var msg: TfpgMessageRec);
+function TfpgWidget.GetDefaultDropHandler: TfpgDropHandler;
 begin
-  // do nothing
+  Result := nil;
+end;
+
+function TfpgWidget.GetDropHandler: TfpgDropHandler;
+begin
+  if FDropHandler = nil then
+    FDropHandler := GetDefaultDropHandler;
+
+  Result := FDropHandler;
 end;
 
 function TfpgWidget.GetOnShowHint: THintEvent;

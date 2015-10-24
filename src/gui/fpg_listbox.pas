@@ -157,9 +157,6 @@ type
     property    TextColor;
     property    OnChange;
     property    OnDoubleClick;
-    property    OnDragDrop;
-    property    OnDragEnter;
-    property    OnDragLeave;
     property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
@@ -238,9 +235,6 @@ type
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
   end;
 

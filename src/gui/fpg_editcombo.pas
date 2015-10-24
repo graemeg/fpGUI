@@ -135,9 +135,6 @@ type
     property    Width;
     property    OnChange;
     property    OnCloseUp;
-    property    OnDragEnter;
-    property    OnDragLeave;
-    property    OnDragDrop;
     property    OnDragStartDetected;
     property    OnDropDown;
     property    OnEnter;
