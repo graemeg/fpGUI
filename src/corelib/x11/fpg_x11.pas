@@ -264,7 +264,6 @@ type
     procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
-    procedure   DoAcceptDrops(const AValue: boolean); override;
     function    GetWindowState: TfpgWindowState; override;
     procedure   SetWindowOpacity(AValue: Single); override;
     procedure   TriggerSyncCounter;
@@ -2871,11 +2870,6 @@ begin
   end
   else
     XDeleteProperty(xapplication.Display, WinHandle, xapplication.XdndAware);
-end;
-
-procedure TfpgX11Window.DoAcceptDrops(const AValue: boolean);
-begin
-  { TODO : Remove EnableDrops, then recurse from here to parent top level from, and set XDNDAware property for form. }
 end;
 
 function TfpgX11Window.GetWindowState: TfpgWindowState;

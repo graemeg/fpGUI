@@ -501,7 +501,6 @@ type
     FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
     FDirtyFlags: TfpgWidgetDirtyFlags;
-    FDoAcceptDrops: Boolean;
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
@@ -510,7 +509,6 @@ type
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
     //procedure   DoSetMouseCursor; virtual; abstract;
-    procedure   DoAcceptDrops(const AValue: boolean); virtual;
     procedure   DoDragStartDetected; virtual;
     procedure   AddChild(AChild: TfpgWidgetBase);
     procedure   RemoveChild(AChild: TfpgWidgetBase);
@@ -608,7 +606,6 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
-    procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     function    GetWindowState: TfpgWindowState; virtual;
     procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
     procedure   SetWindowOpacity(AValue: Single); virtual;
@@ -1581,13 +1578,6 @@ begin
     Result := MaxHeight;
   if Result < MinHeight then
     Result := MinHeight;
-end;
-
-procedure TfpgWidgetBase.DoAcceptDrops(const AValue: boolean);
-begin
-  FDoAcceptDrops:=AValue;
-  if WindowAllocated then
-    Window.DoAcceptDrops(AValue);
 end;
 
 procedure TfpgWidgetBase.DoDragStartDetected;

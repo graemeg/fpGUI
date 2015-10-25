@@ -59,6 +59,7 @@ type
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
     alist: TList;
+    function    GetAcceptDrops: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
@@ -110,7 +111,6 @@ type
     FIgnoreDblClicks: Boolean;
     procedure   DoAllocateWindowHandle; override;
     procedure   AllocateWindowHandle; virtual;
-    procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
@@ -189,7 +189,7 @@ type
     property    Window: TfpgNativeWindow read GetWindow;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
-    property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
+    property    AcceptDrops: boolean read GetAcceptDrops;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
     property    Canvas: TfpgCanvas read GetCanvas;
@@ -334,17 +334,14 @@ begin
     FActiveWidget.HandleSetFocus;
 end;
 
+function TfpgWidget.GetAcceptDrops: boolean;
+begin
+  Result := DropHandler <> nil;
+end;
+
 function TfpgWidget.GetWindow: TfpgNativeWindow;
 begin
   Result := TfpgNativeWindow(inherited GetWindow);
-end;
-
-procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
-begin
-  if FAcceptDrops = AValue then
-    exit;
-  FAcceptDrops := AValue;
-  DoAcceptDrops(AValue);
 end;
 
 function TfpgWidget.GetHint: TfpgString;
