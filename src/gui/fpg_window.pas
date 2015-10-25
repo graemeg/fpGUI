@@ -41,7 +41,6 @@ type
 
   TfpgWindow = class(TfpgWidget)
   private
-    FDNDEnabled: boolean;
     FOpacity: Single;
     FWindowTitle: string;
     function GetWindowState: TfpgWindowState;
@@ -53,8 +52,6 @@ type
     procedure   SetWindowTitle(const ATitle: string); virtual;
     procedure   SetWindowOpacity(AValue: Single);
     procedure   DoAllocateWindowHandle; override;
-    procedure   AllocateWindowHandle; override;
-    procedure   DoDNDEnabled(const AValue: boolean); virtual;
     property    WindowType: TWindowType read FWindowType write FWindowType;
   public
     constructor Create(AOwner: TComponent); override;
@@ -112,19 +109,6 @@ begin
   inherited DoAllocateWindowHandle;
   Window.WindowType:=FWindowType;
   Window.WindowOpacity:=FOpacity;
-end;
-
-procedure TfpgWindow.AllocateWindowHandle;
-begin
-  inherited AllocateWindowHandle;
-  TfpgWindowHack(Window).DoDNDEnabled(FDNDEnabled);
-end;
-
-procedure TfpgWindow.DoDNDEnabled(const AValue: boolean);
-begin
-  FDNDEnabled:=AValue;
-  if WindowAllocated then
-    TfpgWindowHack(Window).DoDNDEnabled(AValue);
 end;
 
 constructor TfpgWindow.Create(AOwner: TComponent);
