@@ -54,8 +54,6 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FOnHelp: TfpgHelpEvent;
-    FDNDEnabled: boolean;
-    procedure   SetDNDEnabled(const AValue: boolean);
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
@@ -77,7 +75,6 @@ type
     procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); override;
     procedure   DoAllocateWindowHandle; override;
     { -- properties -- }
-    property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
     property    IconName: string read FIconName write FIconName;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
@@ -113,7 +110,6 @@ type
   TfpgForm = class(TfpgBaseForm)
   published
     property    BackgroundColor;
-    property    DNDEnabled;
     property    FullScreen;
     property    Height;
     property    Hint;
@@ -194,13 +190,6 @@ begin
 end;
 
 { TfpgBaseForm }
-
-procedure TfpgBaseForm.SetDNDEnabled(const AValue: boolean);
-begin
-  if FDNDEnabled = AValue then exit;
-  FDNDEnabled := AValue;
-  DoDNDEnabled(AValue);
-end;
 
 procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
 begin
@@ -310,7 +299,6 @@ begin
   FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
-  FDNDEnabled      := False;
 end;
 
 destructor TfpgBaseForm.Destroy;
