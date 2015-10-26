@@ -1,15 +1,16 @@
 [projectoptions]
-mainfile=${PROJECTNAME}.lpr
+mainfile=${PROJECTNAME}.pas
 targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
-unitdirs=11
+unitdirs=12
  ${ONGUARD}/
  ${TIOPF}/GUI/fpGUI
  ${TIOPF}/Options
  ${TIOPF}/Core
- ${FPGUI}/lib/${TargetCPU}-${TargetOS}
+ ${FPGUI}/lib/${Target}
+ ${FPGUI}/src/charting
  ${FPGUI}/src/reportengine
  ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
@@ -21,8 +22,9 @@ incpref=-Fi
 libpref=-Fl
 objpref=-Fo
 targpref=-o
-befcommand=1
- rm units/${TargetCPU}-${TargetOS}/*
+befcommand=2
+ rm units/${Target}/*
+ mkdir units/${Target}
 aftcommand=0
 makeoptions=15
  -l -Mobjfpc -Sh -Sc -Si
@@ -30,7 +32,7 @@ makeoptions=15
  -gh
  -B
  -O2 -XX -Xs -CX
- -FUunits/${TargetCPU}-${TargetOS}/
+ -FUunits/${Target}/
  -FUunits
  -dUseCThreads
  -dAGGCanvas
@@ -46,8 +48,8 @@ toolmenus=2
  fpGUI &UI Designer
  &DocView
 toolfiles=2
- ${FPGUI}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner
- ${FPGUI}/docview/src/units/${TargetCPU}-${TargetOS}/docview
+ ${FPGUI}/uidesigner/uidesigner${exeext}
+ ${FPGUI}/docview/docview${exeext}
 toolparams=2
  ${CURSOURCEFILE}
  ${HelpPath} -k ${cursword}
@@ -86,8 +88,8 @@ newfonames=2
  Main Form
  Simple Form
 newfonamebases=2
- form
- form
+ 
+ 
 newfosources=2
  ${TEMPLATEDIR}fpgui/mainform.pas
  ${TEMPLATEDIR}fpgui/simpleform.pas
@@ -97,7 +99,7 @@ newfoforms=2
 forcezorder=0
 stripmessageesc=0
 copymessages=0
-closemessages=1
+closemessages=0
 checkmethods=1
 colorerror=-1610612712
 colorwarning=-1610612717
@@ -176,18 +178,19 @@ settingsautosave=0
 modulenames=0
 moduletypes=0
 modulefiles=0
-befcommandon=1
+befcommandon=2
+ 0
  0
 makeoptionson=15
  63
  7
  7
- 63
+ 62
  56
  0
  63
  63
- 63
+ 60
  63
  0
  4
@@ -195,43 +198,29 @@ makeoptionson=15
  63
  56
 aftcommandon=0
-unitdirson=11
+unitdirson=12
  196671
  65567
  65567
  196639
  65536
+ 196671
  65599
  196671
  131103
  196639
  65567
  65567
-macroon=5
- 25
- 11
- 6
- 4
- 16
-macronames=5
- TargetCPU
- TargetOS
- TargetCPU
- TargetOS
- TargetOS
-macrovalues=5
- x86_64
- linux
- i386
- win32
- freebsd
+macroon=0
+macronames=0
+macrovalues=0
 macrogroup=0
 groupcomments=6
- Linux 64-bit
- Linux 32-bit
- Windows 32-bit
- param based
- FreeBSD 64-bit
+ 
+ 
+ 
+ 
+ 
  
 toolsave=2
  -1
@@ -245,6 +234,9 @@ toolparse=2
 toolmessages=2
  0
  0
+toolshortcuts=2
+ 0
+ 1
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -338,8 +330,9 @@ beforeload=
 afterload=
 beforerun=
 sourcebase=
-sourcedirs=16
+sourcedirs=17
  ${FPGUI}/src/corelib/render/software/
+ ${FPGUI}/src/charting/
  ${FPGUI}/src/reportengine/
  ${FPGUI}/src/corelib/${FPG_GFX}/
  ${FPGUI}/src/gui/
