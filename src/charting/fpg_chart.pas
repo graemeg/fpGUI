@@ -112,7 +112,6 @@ type
     procedure   Draw;
     procedure   SetText(const AValue: TfpgString);
     procedure   DrawHBar;
-    procedure   DrawLine;
     procedure   DrawxyLine;
     procedure   DrawArea;
     procedure   DrawScatter;
@@ -306,32 +305,40 @@ var
   lInst: TfpgChartTypeAbs;
 begin
   Canvas.SetLineStyle(Linewidth,lsSolid);
-  Xaxis.Draw;
-  Yaxis.Draw;
   Canvas.Color := clGreen;
   if FDataSet=Nil then
     Canvas.DrawString(5, 5, 'No Data')
   else
   begin
     case FChartType of
-      ctPie: begin
-               lInst := fpgChartFactory.CreateInstance('pie');
-               try
-                 lInst.Draw(self);
-               finally
-                 lInst.Free;
-               end;
-             end;
-      ctBar: begin
-               lInst := fpgChartFactory.CreateInstance('bar');
-               try
-                 lInst.Draw(self);
-               finally
-                 lInst.Free;
-               end;
-             end;
+      ctPie:
+            begin
+              lInst := fpgChartFactory.CreateInstance('pie');
+              try
+                lInst.Draw(self);
+              finally
+                lInst.Free;
+              end;
+            end;
+      ctBar:
+            begin
+              lInst := fpgChartFactory.CreateInstance('bar');
+              try
+                lInst.Draw(self);
+              finally
+                lInst.Free;
+              end;
+            end;
       ctHBar: DrawHBar;
-      ctLine: DrawLine;
+      ctLine:
+            begin
+              lInst := fpgChartFactory.CreateInstance('line');
+              try
+                lInst.Draw(self);
+              finally
+                lInst.Free;
+              end;
+            end;
       ctArea: DrawArea;
       ctxyLine: DrawxyLine;
       ctScatter: DrawScatter;
@@ -343,6 +350,8 @@ begin
     Canvas.TextColor:=TextColor;
     Canvas.DrawString(5, 5, Text);
   end;
+  Xaxis.Draw;
+  Yaxis.Draw;
 end;
 
 // Draws a Horizontal Bar chart
@@ -356,27 +365,6 @@ begin
   for i:= 0 to  n-1 do
     FillRectangle(0,i*bp,FDataSet[i,0],bw);  // x,y,w,h
     //writeln('Hbar ',i,': ',0,' ',i*bp,' ',FDataSet[i,0],' ',bw);  // x,y,w,h
-end;
-
-procedure TfpgChart.DrawLine;
-var
-  i, n,bw,x1,y1,x2,y2: integer;
-begin
-  // the array is [0..many,0]
-  // only use the first element to draw lines
-  n:=High(FDataset);
-  bw:=Width div n; // block width
-  x1:=0;
-  y1:=FdataSet[0,0];
-  for i:= 1 to  n do
-  begin
-    y2:=FdataSet[i,0];
-    x2:=i*bw;
-    Drawline(x1,y1,x2,y2);
-    x1:=x2;
-    y1:=y2;
-    //writeln(x1,' ',y1,' ',x2,' ',y2);
-  end;
 end;
 
 procedure TfpgChart.DrawxyLine;

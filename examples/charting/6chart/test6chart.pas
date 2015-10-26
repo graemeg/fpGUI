@@ -8,7 +8,8 @@ uses
   fpg_button,
   fpg_chart,
   fpg_chart_pie,
-  fpg_chart_bar;
+  fpg_chart_bar,
+  fpg_chart_line;
 
 type
 
