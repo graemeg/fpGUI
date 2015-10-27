@@ -52,6 +52,7 @@ var
   lChart: TfpgChart;
   i, n,bw,x1,y1,x2,y2: integer;
 begin
+  VG.ClearAll(255, 255, 255);
   lChart := TfpgChart(FWidget);
   // the array is [0..many,0]
   // only use the first element to draw lines

@@ -53,6 +53,7 @@ var
   arcSize: double;
   centerX, centerY: double;
 begin
+  VG.ClearAll(255, 255, 255);
   lChart := TfpgChart(FWidget);
   if lChart.Width < lChart.Height then
     box := lChart.Width

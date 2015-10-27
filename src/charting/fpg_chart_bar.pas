@@ -49,6 +49,7 @@ var
   i, n, bw, bp: integer;
   x1, y1, x2, y2: double;
 begin
+  VG.ClearAll(255, 255, 255);
   lChart := TfpgChart(FWidget);
   n := High(lChart.Dataset)+1;  // number of bars needed
   // avoid to create insane no of bars
