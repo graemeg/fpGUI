@@ -57,8 +57,8 @@ begin
   // the array is [0..many,0]
   // only use the first element to draw lines
   n := High(lChart.Dataset);
-  bw := lChart.Width div n; // block width
-  x1 := 0;
+  bw := (lChart.Width-10) div n; // block width
+  x1 := 10;
   y1 := lChart.Height - lChart.Dataset[0,0];
   for i:= 1 to n do
   begin
@@ -80,6 +80,13 @@ begin
     y1 := y2;
     //writeln(x1,' ',y1,' ',x2,' ',y2);
   end;
+  // draw dot on final point
+  VG.ResetPath;
+  VG.LineWidth(0.75);
+  VG.LineColor(0, 0, 255);
+  VG.FillColor(0, 0, 255, 100);
+  VG.Ellipse(x2, y2, 3, 3);
+
 end;
 
 
