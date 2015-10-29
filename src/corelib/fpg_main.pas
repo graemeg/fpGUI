@@ -3114,7 +3114,7 @@ end;
 destructor TfpgDrag.Destroy;
 begin
   FPreviewWin.Free;
-
+  WriteLn('Drag.Free');
   inherited Destroy;
 end;
 

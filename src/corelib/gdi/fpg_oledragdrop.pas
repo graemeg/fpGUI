@@ -53,16 +53,21 @@ type
   end;
 
 
+  { TfpgOLEDropSource }
+
   TfpgOLEDropSource = class(TInterfacedObject, IDropSource)
   private
+    FDrag: TObject;
     { IDropSource }
     {$IF FPC_FULLVERSION>=20601}
-    function    QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD):HResult; StdCall;
+    function    QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD): HResult; Stdcall;
     function    GiveFeedback(dwEffect: DWORD): HResult; StdCall;
     {$ELSE}
     function    QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Longint): HResult; stdcall;
     function    GiveFeedback(dwEffect: longint): HResult; stdcall;
     {$ENDIF}
+  public
+    constructor Create(ADrag: TObject = nil);
   end;
 
 
@@ -202,7 +207,7 @@ function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 implementation
 
 uses
-  SysUtils, ShlObj, fpg_widget;
+  SysUtils, ShlObj, fpg_widget, fpg_gdi;
 
 var
   CF_FILENAMEMAP: Cardinal;
@@ -462,16 +467,35 @@ end;
 { TfpgOLEDropSource }
 
 {$IF FPC_FULLVERSION>=20601}
-function TfpgOLEDropSource.GiveFeedback(dwEffect: DWORD): HResult;
+function TfpgOLEDropSource.GiveFeedback(dwEffect: DWORD): HResult; StdCall;
 {$ELSE}
 function TfpgOLEDropSource.GiveFeedback(dwEffect: longint): HResult;
 {$ENDIF}
+var
+  Pt: TPoint;
+  msg: TfpgMessageRec;
+  msgp: TfpgMessageParams;
 begin
+  if Assigned(FDrag) and GetCursorPos(@Pt) then
+  begin
+    msgp.mouse.x := Pt.x;
+    msgp.mouse.y := Pt.y;
+    msg.MsgCode:=FPGM_MOUSEMOVE;
+    msg.Dest := FDrag;
+    msg.Params := msgp;
+    FDrag.Dispatch(msg);
+  end;
   Result := DRAGDROP_S_USEDEFAULTCURSORS;
 end;
 
+constructor TfpgOLEDropSource.Create(ADrag: TObject);
+begin
+  FDrag := ADrag;
+end;
+
 {$IF FPC_FULLVERSION>=20601}
-function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD):HResult;
+function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL;
+  grfKeyState: DWORD): HResult; Stdcall;
 {$ELSE}
 function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: LongInt): HResult;
 {$ENDIF}
@@ -815,14 +839,14 @@ end;
 
 procedure TfpgOLEDropTarget.RegisterDragDrop;
 begin
-  ActiveX.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, Self as IDropTarget);
+  ActiveX.RegisterDragDrop(TfpgGDIWindow(FDropTarget).WinHandle, Self as IDropTarget);
   FRegistered := True;
 end;
 
 procedure TfpgOLEDropTarget.RevokeDragDrop;
 begin
   FRegistered := False;
-  ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
+  ActiveX.RevokeDragDrop(TfpgGDIWindow(FDropTarget).WinHandle);
 end;
 
 destructor TfpgOLEDropTarget.Destroy;

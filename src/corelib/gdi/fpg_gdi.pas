@@ -30,7 +30,7 @@ unit fpg_gdi;
 {.$Define DEBUGKEYS}
 
 // enable or disable DND support. Disabled by default while implementing AlienWindows.
-{.$define HAS_DND}
+{$define HAS_DND}
 
 // enable or disaple window opacity
 {$define HAS_OPACITY}
@@ -77,6 +77,7 @@ type
   TfpgGDIWindow = class;
   TGDIDragManager = class;
   TfpgGDIDrag = class;
+  TfpgGDIDrop = class;
 
 
   TfpgGDIFontResource = class(TfpgFontResourceBase)
@@ -179,12 +180,8 @@ type
   TfpgGDIWindow = class(TfpgWindowBase)
   private
     {$IFDEF HAS_DND}
+    FDrop: TfpgGDIDrop;
     FDropManager: TfpgOLEDropTarget;
-    {$ENDIF}
-    FDropPos: TPoint;
-    FUserMimeSelection: TfpgString;
-    FUserAcceptDrag: Boolean;
-    {$IFDEF HAS_DND}
     procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
     function    GetDropManager: TfpgOLEDropTarget;
@@ -197,6 +194,7 @@ type
     FNonFullscreenStyle: longword;
     FFullscreenIsSet: boolean;
     FSkipResizeMessage: boolean;
+    FDNDEnabled: Boolean;
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
@@ -217,11 +215,10 @@ type
     procedure   DoUpdateWindowPosition; override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
+    procedure   DoDNDEnabled(const AValue: boolean); override;
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
-    procedure   DoDNDEnabled(const AValue: boolean); override;
-    procedure   DoAcceptDrops(const AValue: boolean); override;
     //procedure   DoDragStartDetected; override;
     procedure   SetWindowOpacity(AValue: Single); override;
     function    GetWindowState: TfpgWindowState; override;
@@ -316,11 +313,29 @@ type
   private
     function    StringToHandle(const AString: TfpgString): HGLOBAL;
   protected
-    FSource: TfpgWidgetBase;
     function    GetSource: TfpgWidgetBase; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
+  end;
+
+  { TfpgGDIDrop }
+
+  TfpgGDIDrop = class(TfpgDropBase)
+  private
+    FSource: IDataObject;
+    FDropAction: DWORD; // effect
+    procedure   LoadMimeTypes;
+    procedure   ReadDropData;
+    function    ActionAsOLEEffect: TfpgOLEDragDropEffect;
+  protected
+    function    GetDropAction: TfpgDropAction; override;
+    procedure   SetDropAction(AValue: TfpgDropAction); override;
+    function    GetWindowForDrop: TfpgWindowBase; override;
+    property    Source: IDataObject read FSource write FSource;
+  public
+    constructor Create(AWindow: TfpgWindowBase; ASource: IDataObject);
+    destructor  Destroy; override;
   end;
 
 
@@ -1288,6 +1303,90 @@ begin
   Result := 1;
 end;
 
+{ TfpgGDIDrop }
+
+procedure TfpgGDIDrop.LoadMimeTypes;
+var
+  lMimeList: TStringList;
+  Item: TfpgMimeDataItem;
+  i: Integer;
+begin
+
+  lMimeList := EnumDataToStringList(FSource);
+  for i := 0 to lMimeList.Count-1 do
+  begin
+    Item := TfpgMimeDataItem.Create(lMimeList[i], i);
+    Mimetypes.Add(Item);
+  end;
+
+  lMimeList.Free;
+end;
+
+procedure TfpgGDIDrop.ReadDropData;
+var
+  CF: DWORD;
+  FE: FORMATETC;
+  lIsTranslated: Boolean;
+  data: pchar;
+  stgmed: STGMEDIUM;
+begin
+  { construct a FORMATETC object }
+  CF := WindowsClipboardLookup(MimeChoice, lIsTranslated);
+  FE := GetFormatEtc(CF);
+
+  if FSource.QueryGetData(FE) = S_OK then
+  begin
+    if FSource.GetData(FE, stgmed) = S_OK then
+    begin
+      { Yippie! the data is there, so go get it! }
+      data := GlobalLock(stgmed.HGLOBAL);
+      SetDropData(data);
+      GlobalUnlock(stgmed.HGLOBAL);
+      { release the data using the COM API }
+      ReleaseStgMedium(stgmed);
+    end;
+  end;
+end;
+
+function TfpgGDIDrop.ActionAsOLEEffect: TfpgOLEDragDropEffect;
+begin
+  Result := deNone;
+  case DropAction of
+    daCopy:   Result := deCopy;
+    daMove:   Result := deMove;
+    daLink:   Result := deLink;
+    daIgnore: Result := deNone;
+    daAsk:    Result := deCopy; //?
+  end;
+end;
+
+function TfpgGDIDrop.GetDropAction: TfpgDropAction;
+begin
+  Result := TranslateToFPGDropAction(FDropAction);
+end;
+
+procedure TfpgGDIDrop.SetDropAction(AValue: TfpgDropAction);
+begin
+  FDropAction:=TranslateToWinDragEffect(AValue);
+end;
+
+function TfpgGDIDrop.GetWindowForDrop: TfpgWindowBase;
+begin
+  Result := TargetWindow;
+end;
+
+constructor TfpgGDIDrop.Create(AWindow: TfpgWindowBase; ASource: IDataObject);
+begin
+  inherited Create;
+  TargetWindow := AWindow;
+  FSource := ASource;
+end;
+
+destructor TfpgGDIDrop.Destroy;
+begin
+  inherited Destroy;
+end;
+
 function TfpgGDIApplication.DoGetFontFaceList: TStringList;
 var
   LFont: TLogFont;
@@ -1493,158 +1592,53 @@ var
 
 {$IFDEF HAS_DND}
 procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
-var
-  wg: TfpgWidget;
 begin
   {$IFDEF DND_DEBUG}
   SendDebug('TfpgGDIWindow.HandleDNDLeave ');
   {$ENDIF}
-  FUserMimeSelection := '';
-
-
-  wg := self as TfpgWidget;
-  if wg.AcceptDrops then  { if we get here, this should always be true anyway }
-  begin
-    if Assigned(wg.OnDragLeave) then
-      wg.OnDragLeave(nil);
-  end;
+  FDrop.TargetWidget := nil;
+  FreeAndNil(FDrop);
 end;
 
 procedure TfpgGDIWindow.HandleDNDEnter(Sender: TObject; DataObj: IDataObject;
     KeyState: Longint; PT: TPoint; var Effect: DWORD);
-var
-  wg: TfpgWidget;
-  swg: TfpgWidget;
-  lMimeList: TStringList;
-  lMimeChoice: TfpgString;
-  lAccept: Boolean;
-  lDropAction: TfpgDropAction;
-  EnumIntf: IEnumFORMATETC;
-  msgp: TfpgMessageParams;
 begin
   {$IFDEF DND_DEBUG}
   SendDebug('TfpgGDIWindow.HandleDNDEnter ');
   {$ENDIF}
-  wg := self as TfpgWidget;
-  if wg.AcceptDrops then
-  begin
-    lAccept := False;
+  if Assigned(FDrop) then
+    FreeAndNil(FDrop);
 
-    { enumerate the available formats and return them as a StringList }
-    lMimeList := EnumDataToStringList(DataObj);
-    try
-      if lMimeList.Count > 0 then
-        lMimeChoice := lMimeList[0]
-      else
-        {$NOTE We need to replace this message with a resouce string }
-        raise Exception.Create('fpGUI/GDI: no mime types available for DND operation');
+  FDrop := TfpgDrop.Create(Self, DataObj);
+  FDrop.FDropAction:=Effect;
+  FDrop.LoadMimeTypes;
+  // Triggers Enter
+  FDrop.SetPosition(Pt.x, PT.y);
 
-      lDropAction := TranslateToFPGDropAction(Effect);
-      if Assigned(wg.OnDragEnter) then
-      begin
-        if Assigned(uDragSource) then
-          swg := uDragSource as TfpgWidget
-        else
-          swg := nil;
-        wg.OnDragEnter(self, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
-      end;
-    finally
-      lMimeList.Free;
-    end;
-    if not lAccept then
-      Effect := DROPEFFECT_NONE
-    else
-    begin
-      Effect := TranslateToWinDragEffect(lDropAction);
-      FUserMimeSelection := lMimeChoice;
-      FUserAcceptDrag := True;
-    end;
-
-    { Notify widget of drag status, so it can update its look }
-    if lAccept then
-    begin
-      FDropPos.x := PT.x;
-      FDropPos.y := PT.y;
-      fillchar(msgp, sizeof(msgp), 0);
-      msgp.mouse.x := PT.x;
-      msgp.mouse.y := PT.y;
-      fpgPostMessage(nil, wg, FPGM_DROPENTER, msgp);
-    end;
-  end;
+  if not FDrop.CanDrop or (FDrop.MimeChoice = '') then
+    Effect := DROPEFFECT_NONE
+  else
+    Effect := FDrop.FDropAction;
 end;
 
 procedure TfpgGDIWindow.HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
-var
-  msgp: TfpgMessageParams;
-  wg: TfpgWidget;
 begin
-  wg := self as TfpgWidget;
-  { Notify widget of drag status, so it can update its look. We do the pos
-    check because OLE framework calls DragOver repeatedly even if the mouse
-    doesn't move, but simply because the mouse is over the widget. We don't
-    want that, for performance reasons. }
-  if FDropPos <> PT then
-  begin
-    {$IFDEF DND_DEBUG}
-    SendDebug('TfpgGDIWindow.HandleDNDPosition ');
-    {$ENDIF}
-    FDropPos.x := PT.x;
-    FDropPos.y := PT.y;
-    fillchar(msgp, sizeof(msgp), 0);
-    msgp.mouse.x := PT.x;
-    msgp.mouse.y := PT.y;
-    fpgPostMessage(nil, wg, FPGM_DROPENTER, msgp);
-  end;
+  FDrop.SetPosition(Pt.x, Pt.y);
+  if not FDrop.CanDrop or (FDrop.MimeChoice = '') then
+    Effect := deNone
+  else
+    Effect := FDrop.ActionAsOLEEffect;
 end;
 
 procedure TfpgGDIWindow.HandleDNDDrop(Sender: TObject; DataObj: IDataObject;
     KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
-var
-  FE: FORMATETC;
-  stgmed: STGMEDIUM;
-  data: pchar;
-  wg: TfpgWidget;
-  swg: TfpgWidget; { source widget }
-  CF: DWORD;
-  lIsTranslated: Boolean;
-  lPoint: Windows.Point;
 begin
-  if not FUserAcceptDrag then
-    exit;
-
   {$IFDEF DND_DEBUG}
   SendDebug('TfpgGDIWindow.HandleDNDDrop');
   {$ENDIF}
-
-  wg := self as TfpgWidget;
-  { construct a FORMATETC object }
-  CF := WindowsClipboardLookup(FUserMimeSelection, lIsTranslated);
-  FE := GetFormatEtc(CF);
-
-  if DataObj.QueryGetData(FE) = S_OK then
-  begin
-    if DataObj.GetData(FE, stgmed) = S_OK then
-    begin
-      { Yippie! the data is there, so go get it! }
-      data := GlobalLock(stgmed.HGLOBAL);
-      if Assigned(wg.OnDragDrop) then
-      begin
-        if Assigned(uDragSource) then
-          swg := uDragSource as TfpgWidget
-        else
-          swg := nil;
-        // convert mouse screen coordinates to widget coordinates
-        lPoint.x := pt.x;
-        lPoint.y := pt.y;
-        ScreenToClient(wg.WinHandle, lPoint);
-        wg.OnDragDrop(wg, swg, lPoint.x, lPoint.y, data);
-        uDragSource := nil;
-      end;
-      GlobalUnlock(stgmed.HGLOBAL);
-      { release the data using the COM API }
-      ReleaseStgMedium(stgmed);
-    end;
-  end;
+  FDrop.ReadDropData;
+  FDrop.DataDropComplete;
+  FreeAndNil(FDrop);
 end;
 
 function TfpgGDIWindow.GetDropManager: TfpgOLEDropTarget;
@@ -1954,7 +1948,7 @@ begin
 
   if QueueAcceptDrops then
   begin
-    DoAcceptDrops(True);
+    DoDNDEnabled(True);
   end;
 end;
 
@@ -2019,6 +2013,22 @@ begin
   ClientToScreen(TfpgGDIWindow(ASource).WinHandle, Result);
 end;
 
+procedure TfpgGDIWindow.DoDNDEnabled(const AValue: Boolean);
+begin
+  {$IFDEF HAS_DND}
+  QueueAcceptDrops:=False;
+  if HasHandle then
+  begin
+    if AValue then
+      DropManager.RegisterDragDrop
+    else
+      DropManager.RevokeDragDrop;
+  end
+  else
+    QueueAcceptDrops:=AValue;
+  {$ENDIF}
+end;
+
 {
 procedure TfpgGDIWindow.MoveToScreenCenter;
 var
@@ -2069,30 +2079,6 @@ begin
   end;
 
   SetCursor(hc);
-end;
-
-procedure TfpgGDIWindow.DoDNDEnabled(const AValue: boolean);
-begin
-  { GDI has nothing to do here }
-end;
-
-procedure TfpgGDIWindow.DoAcceptDrops(const AValue: boolean);
-begin
-  {$IFDEF HAS_DND}
-  if AValue then
-  begin
-    if HasHandle then
-        DropManager.RegisterDragDrop
-    else
-      QueueAcceptDrops := True; // we need to do this once we have a winhandle
-  end
-  else
-  begin
-    if HasHandle then
-      DropManager.RevokeDragDrop;
-    QueueAcceptDrops := False;
-  end;
-  {$ENDIF}
 end;
 
 procedure TfpgGDIWindow.SetWindowOpacity(AValue: Single);
@@ -2194,11 +2180,7 @@ begin
   {$IFDEF HAS_DND}
   FDropManager := nil;
   {$ENDIF}
-  FDropPos.x := 0;
-  FDropPos.y := 0;
   FFullscreenIsSet := false;
-  FUserMimeSelection := '';
-  FUserAcceptDrag := False;
 end;
 
 destructor TfpgGDIWindow.Destroy;
@@ -3352,7 +3334,7 @@ begin
 
     uDragSource := TfpgDrag(self).Source as TfpgWidget;
     { Now let OLE take over from here }
-    FDropSource := TfpgOLEDropSource.Create;
+    FDropSource := TfpgOLEDropSource.Create(Self);
     dwResult := ActiveX.DoDragDrop( FDataObject as IDataObject,
                                     FDropSource as IDropSource,
                                     lEffects,
@@ -3420,14 +3402,14 @@ end;
 procedure TGDIDragManager.RegisterDragDrop;
 begin
   {$IFDEF HAS_DND}
-  Activex.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, self as IDropTarget)
+  Activex.RegisterDragDrop(TfpgGDIWindow(FDropTarget).WinHandle, self as IDropTarget)
   {$ENDIF}
 end;
 
 procedure TGDIDragManager.RevokeDragDrop;
 begin
   {$IFDEF HAS_DND}
-  ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
+  ActiveX.RevokeDragDrop(TfpgGDIWindow(FDropTarget).WinHandle);
   {$ENDIF}
 end;
 

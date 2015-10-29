@@ -666,6 +666,9 @@ begin
   if Assigned(Window) then
     Window.NotifyWidgetDestroying(Self);
 
+  if Assigned(FDropHandler) then
+    DropHandler := nil;
+
   inherited Destroy;
 end;
 

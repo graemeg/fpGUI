@@ -859,13 +859,12 @@ type
   TfpgDropBase = class(TObject)
   protected
     type
-        TDropStatus = (dsUnassigned, dsAccepted, dsRejected);
+        TDropStatus = (dsUnassigned, dsAccepted, dsRejected, dsDropped);
   private
     FCanDrop: Boolean;
     FMimeChoice: TfpgString;
     FMimetypes: TfpgMimeDataItemList;
-    FMousePos: TfpgPoint;
-    FSource: TfpgWinHandle;
+    //FSource: TfpgWinHandle;
     //FTargetWin: TfpgWindowBase;
     FTargetWidget: TfpgWidgetBase;
     FTargetWindow: TfpgWindowBase;
@@ -873,8 +872,8 @@ type
     procedure   SetTargetWindow(AValue: TfpgWindowBase);
   protected
     FDropStatus: TDropStatus;
+    FMousePos: TfpgPoint;
     FWinMousePos: TfpgPoint;
-
     FSourceWidget: TfpgWidgetBase;
     FDropData: Variant;
 
@@ -894,9 +893,10 @@ type
     procedure   RejectDrop; virtual;
     property    DropStatus: TDropStatus read FDropStatus;
     property    TargetWidget: TfpgWidgetBase read FTargetWidget write SetTargetWidget;
-    property    SourceWindow: TfpgWinHandle read FSource write FSource;
+    property    TargetWindow: TfpgWindowBase read FTargetWindow write SetTargetWindow;
+    //property    SourceWindow: TfpgWinHandle read FSource write FSource;
   public
-    constructor Create(ASource: TfpgWinHandle); virtual;
+    constructor Create; virtual;
     destructor  Destroy; override;
     property    Mimetypes: TfpgMimeDataItemList read FMimetypes;
     property    MimeChoice: TfpgString read FMimeChoice write FMimeChoice;
@@ -1390,7 +1390,7 @@ var
   w: TWidgetHack;
   msgp: TfpgMessageParams;
 begin
-  if FTargetWidget <> nil then { nil would be first time in, so there is no last window }
+  if (FTargetWidget <> nil) and (DropStatus <> dsDropped) then { nil would be first time in, so there is no last window }
   begin
     msgp.drop.Drop := Self;
     fpgSendMessage(nil, TargetWidget, FPGM_DROPEXIT, msgp);
@@ -1427,7 +1427,12 @@ var
   w: TWidgetHack;
   msgp: TfpgMessageParams;
 begin
+  // See if the position has changed
+  if (FWinMousePos.X = AX) and (FWinMousePos.Y = AY) then
+    Exit;// =>
+
   FDropStatus:=dsUnassigned;
+
   FWinMousePos := fpgPoint(AX, AY);
 
   win := GetWindowForDrop;
@@ -1475,6 +1480,7 @@ begin
       msgp.drop.Drop := Self;
       fpgSendMessage(nil, TargetWidget, FPGM_DROPDROP, msgp);
       TDropHandlerAccess(w.DropHandler).Drop(TfpgDrop(Self), FDropData);
+      FDropStatus := dsDropped;
     end;
   end;
 end;
@@ -1484,10 +1490,10 @@ begin
   FDropData := AData;
 end;
 
-constructor TfpgDropBase.Create(ASource: TfpgWinHandle);
+constructor TfpgDropBase.Create;
 begin
+  FWinMousePos := fpgPoint(-1,-1);
   FMimetypes:=TfpgMimeDataItemList.Create(True);
-  FSource := ASource;
 end;
 
 destructor TfpgDropBase.Destroy;

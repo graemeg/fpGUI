@@ -34,6 +34,7 @@ type
   TfpgFileListImpl      = class(TfpgGDIFileList);
   TfpgMimeDataImpl      = class(TfpgGDIMimeDataBase);
   TfpgDragImpl          = class(TfpgGDIDrag);
+  TfpgDropImpl          = class(TfpgGDIDrop);
   TfpgTimerImpl         = class(TfpgGDITimer);
   TfpgSystemTrayHandler = class(TfpgGDISystemTrayIcon);
 
