@@ -436,6 +436,7 @@ type
     FDNDVersion: integer;
     FDNDDataType: TAtom;
     FActionType: TAtom;
+    FSource: TfpgWinHandle;
     function    GetWindowFromCoordinates(AX, AY: cint): TfpgX11Window;
     procedure   RequestDropData(const ATimestamp: x.TTime);
     procedure   ReadDropSelectionData(const ev: TXEvent);
@@ -447,7 +448,7 @@ type
     function    GetWindowForDrop: TfpgWindowBase; override;
     property    TopLevelWindow: TfpgX11Window read FTopLevelWindow;
     property    TargetWindow: TfpgWindowBase read FTargetWindow write FTargetWindow;
-    property    SourceWindow;
+    property    SourceWindow: TfpgWinHandle read FSource write FSource;
   public
     constructor Create(ATopLevelWindow: TfpgWindowBase; ASource: TfpgWinHandle); reintroduce;
     procedure   LoadSourceMimeTypes(ev: TXEvent);
@@ -1100,7 +1101,8 @@ end;
 constructor TfpgX11Drop.Create(ATopLevelWindow: TfpgWindowBase;
   ASource: TfpgWinHandle);
 begin
-  inherited Create(ASource);
+  inherited Create;
+  FSource := ASource;
   FTopLevelWindow := TfpgX11Window(ATopLevelWindow);
   if Assigned(xapplication.FDrag) then
     FSourceWidget := TfpgDrag(xapplication.FDrag).Source;

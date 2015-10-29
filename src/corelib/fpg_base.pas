@@ -864,7 +864,6 @@ type
     FCanDrop: Boolean;
     FMimeChoice: TfpgString;
     FMimetypes: TfpgMimeDataItemList;
-    //FSource: TfpgWinHandle;
     //FTargetWin: TfpgWindowBase;
     FTargetWidget: TfpgWidgetBase;
     FTargetWindow: TfpgWindowBase;
@@ -894,7 +893,6 @@ type
     property    DropStatus: TDropStatus read FDropStatus;
     property    TargetWidget: TfpgWidgetBase read FTargetWidget write SetTargetWidget;
     property    TargetWindow: TfpgWindowBase read FTargetWindow write SetTargetWindow;
-    //property    SourceWindow: TfpgWinHandle read FSource write FSource;
   public
     constructor Create; virtual;
     destructor  Destroy; override;
