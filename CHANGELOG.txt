@@ -22,8 +22,9 @@ v2.0 (unknown)
     * Removed OnDragEnter, OnDragLeave and OnDragDrop from TfpgWidget. Now a
       property DropHandler is used that expects a TfpgDropHandler descendant.
       TfpgDropEventHandler may be used as an object that accepts drop events.
-    * The FPGM_DROPMOVE message has changed. Before the message type was
-      TfpgMsgParmMouse now it is TfpgMsgParmDrop.
+    * The FPGM_DROPENTER message has changed. Before the message type was
+      TfpgMsgParmMouse now it is TfpgMsgParmDrop. FPGM_DROPMOVE has replaced part
+      of the functionality FPGM_DROPENTER used to fulfill.
 
 v1.0 (2013-04-09)
   - Docview improvements: Bookmark maintenance, keyboard shortcuts,
