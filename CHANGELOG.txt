@@ -19,6 +19,11 @@ v2.0 (unknown)
     * PDF reporting classes and identifier names got translated from French to
       English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
     * Renamed TfpgRect.IsEmpty to TfpgRect.IsUnassigned. Added TfpgRect.Clear
+    * Removed OnDragEnter, OnDragLeave and OnDragDrop from TfpgWidget. Now a
+      property DropHandler is used that expects a TfpgDropHandler descendant.
+      TfpgDropEventHandler may be used as an object that accepts drop events.
+    * The FPGM_DROPMOVE message has changed. Before the message type was
+      TfpgMsgParmMouse now it is TfpgMsgParmDrop.
 
 v1.0 (2013-04-09)
   - Docview improvements: Bookmark maintenance, keyboard shortcuts,
