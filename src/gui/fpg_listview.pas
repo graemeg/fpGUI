@@ -407,6 +407,7 @@ type
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
     property    OnSelectionChanged: TfpgLVItemSelectEvent read FOnSelectionChanged write FOnSelectionChanged;
     property    OnShowHint;
+    property    OnDragStartDetected;
   end;
   
   

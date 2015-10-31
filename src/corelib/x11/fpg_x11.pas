@@ -445,6 +445,7 @@ type
     procedure   SetDropAction(AValue: TfpgDropAction); override;
     procedure   AcceptDrop; override;
     procedure   RejectDrop; override;
+    procedure   DataDropComplete; override;
     function    GetWindowForDrop: TfpgWindowBase; override;
     property    TopLevelWindow: TfpgX11Window read FTopLevelWindow;
     property    TargetWindow: TfpgWindowBase read FTargetWindow write FTargetWindow;
@@ -999,28 +1000,6 @@ begin
     with xapplication do
       XConvertSelection(Display, XdndSelection, FDNDDataType, XdndSelection, TopLevelWindow.FWinHandle, ATimestamp);
 
-  { send message to signal drop is finished }
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type            := ClientMessage;
-  Msg.xany.display          := xapplication.Display;
-  Msg.xclient.window        := SourceWindow; // source winhandle msg is going to
-  Msg.xclient.message_type  := xapplication.XdndFinished;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0] := TopLevelWindow.FWinHandle;  // winhandle of target window
-  if FDNDDataType = None then
-  begin
-    Msg.xclient.data.l[1] := 0; // drop NOT accepted
-    Msg.xclient.data.l[2] := None; // this should be the action we accepted
-  end
-  else
-  begin
-    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
-    Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
-  end;
-
-
-  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
   // now we wait for a selection message with the drop data.....
 end;
 
@@ -1029,9 +1008,9 @@ var
   actualtype: TAtom;
   actualformat: cint;
   count, remaining, dummy: culong;
-  data: PChar;
+  data: pointer;
   wg: TfpgWidget;
-
+  strdata: String;
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Drop.ReadDropData');
@@ -1046,11 +1025,10 @@ begin
 
   {if Assigned(SourceWidget) and Assigned(xapplication.FDrag) then
   begin
-    TfpgDrag(xapplication.FDrag).MimeData.GetData(MimeChoice);
+    SetDropData(TfpgDrag(xapplication.FDrag).MimeData.GetData(MimeChoice));
   end
   else}
   begin
-
     { do not get data yet, just see how much there is }
     XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
         ev.xselection._property, 0, 0,
@@ -1077,8 +1055,11 @@ begin
           AnyPropertyType,
           @actualtype, @actualformat, @count, @dummy,
           @data);
+      SetLength(strdata, count);
+      // pchar type won't work for data since a nil char will end the string.
+      Move(data^, strdata[1], count);
       // write the data to the drop stream
-      SetDropData(data);
+      SetDropData(strdata)
     end;
   end;
 end;
@@ -1223,6 +1204,35 @@ begin
 
   Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
   Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
+
+  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
+end;
+
+procedure TfpgX11Drop.DataDropComplete;
+var
+  Msg: TXEvent;
+begin
+  inherited DataDropComplete;
+  { send message to signal drop is finished }
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type            := ClientMessage;
+  Msg.xany.display          := xapplication.Display;
+  Msg.xclient.window        := SourceWindow; // source winhandle msg is going to
+  Msg.xclient.message_type  := xapplication.XdndFinished;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0] := TopLevelWindow.FWinHandle;  // winhandle of target window
+  if FDNDDataType = None then
+  begin
+    Msg.xclient.data.l[1] := 0; // drop NOT accepted
+    Msg.xclient.data.l[2] := None; // this should be the action we accepted
+  end
+  else
+  begin
+    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
+    Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
+  end;
+
 
   XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
 end;
@@ -1915,11 +1925,6 @@ begin
             begin
               // SendDrop Sets a timeout that end's the drag if it's not acknowleged
               Drag.SendDNDDrop;
-              if not Drag.FDropAccepted then
-              begin
-                Drag.QueueFree;
-                FDrag := nil;
-              end;
             end;
           end;
 
@@ -4136,7 +4141,6 @@ begin
 
     timer := TfpgTimer.Create(2000); // 2 seconds
     timer.OnTimer:=@DropTimeout;
-
   end
   else
   begin
@@ -4227,6 +4231,8 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Drag.Destroy ');
   {$ENDIF}
+  if xapplication.FDrag = Self then
+    xapplication.FDrag := nil;
   FSource.MouseCursor := mcDefault;
   // Andrew Haines (April 1st 2014): Why are we deleting this property?
   // it was maybe harmless when each widget had a window

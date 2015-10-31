@@ -813,13 +813,17 @@ type
   TfpgMimeDataItemList = specialize TFPGObjectList<TfpgMimeDataItem>;
 
 
+  { TfpgMimeDataBase }
+
   TfpgMimeDataBase = class(TObject)
   private
     { TODO: This is wrong, we must have one Data Storage object }
     FDataList: TObjectList;
     FUrlList: TList;
     function    GetItem(AIndex: Integer): TfpgMimeDataItem;
+    function    GetObject: TObject;
     function    Geturls: TList;
+    procedure   SetObject(AValue: TObject);
     procedure   Seturls(const AValue: TList);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
@@ -838,6 +842,7 @@ type
     property    urls: TList read Geturls write Seturls;
     property    Text: TfpgString read GetText write SetText;
     property    HTML: TfpgString read GetHTML write SetHTML;
+    property    Obj: TObject read GetObject write SetObject;
     property    Count: integer read GetCount;
   end;
 
@@ -881,7 +886,7 @@ type
 
     // core calls these methods
     procedure   SetPosition(AX, AY: Integer);
-    procedure   DataDropComplete;
+    procedure   DataDropComplete; virtual;
     procedure   SetDropData(AData: Variant);
     // core implements these methods
     function    GetDropAction: TfpgDropAction; virtual; abstract;
@@ -3981,9 +3986,59 @@ begin
   Result := nil;
 end;
 
+procedure TfpgMimeDataBase.SetObject(AValue: TObject);
+var
+  i: integer;
+  r: TfpgMimeDataItem;
+begin
+  { remove existing MIME_OBJECT first }
+  for i := Count-1 downto 0 do
+  begin
+    r := Items[i];
+    if r.format = MIME_OBJECT then
+    begin
+      FDataList.Remove(r);
+      break;
+    end;
+  end;
+  { now add new structure }
+  {$IFDEF CPU64}
+  r := TfpgMimeDataItem.Create(MIME_OBJECT, QWord(Pointer(AValue)));
+  {$ENDIF}
+  {$IFDEF CPU32}
+  r := TfpgMimeDataItem.Create(MIME_OBJECT, DWord(Pointer(AValue)));
+  {$ENDIF}
+  FDataList.Add(r);
+
+
+end;
+
 function TfpgMimeDataBase.GetItem(AIndex: Integer): TfpgMimeDataItem;
 begin
   Result := TfpgMimeDataItem(FDataList[AIndex]);
+end;
+
+function TfpgMimeDataBase.GetObject: TObject;
+var
+  i: integer;
+  o: TObject;
+begin
+  Result := nil;
+  for i := 0 to Count-1 do
+  begin
+    if Items[i].format = MIME_OBJECT then
+    begin
+      {$IFDEF CPU64}
+      o := TObject(Pointer(QWord(Items[i].data)));
+      {$ENDIF}
+      {$IFDEF CPU32}
+      o := TObject(Pointer(DWord(Items[i].data)));
+      {$ENDIF}
+
+      Result := o;
+      break;
+    end;
+  end;
 end;
 
 procedure TfpgMimeDataBase.Seturls(const AValue: TList);
