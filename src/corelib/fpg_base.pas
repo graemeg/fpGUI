@@ -4008,7 +4008,7 @@ begin
   { TODO: if no text/plain, but we have HTML, we must strip all tags and return that }
   for i := 0 to Count-1 do
   begin
-    if Items[i].format = 'text/plain' then
+    if Items[i].format = MIME_TEXT_PLAIN then
     begin
       s := Items[i].data;
       Result := s;
@@ -4026,14 +4026,14 @@ begin
   for i := Count-1 downto 0 do
   begin
     r := Items[i];
-    if r.format = 'text/plain' then
+    if r.format = MIME_TEXT_PLAIN then
     begin
       FDataList.Remove(r);
       break;
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataItem.Create('text/plain', AValue);
+  r := TfpgMimeDataItem.Create(MIME_TEXT_PLAIN, AValue);
   FDataList.Add(r);
 end;
 
@@ -4045,7 +4045,7 @@ begin
   { TODO: if data was HTML, we must strip all tags - regex will make this easy }
   for i := 0 to Count-1 do
   begin
-    if Items[i].format = 'text/html' then
+    if Items[i].format = MIME_TEXT_HTML then
     begin
       s := Items[i].data;
       Result := s;
@@ -4063,14 +4063,14 @@ begin
   for i := Count-1 downto 0 do
   begin
     r := Items[i];
-    if r.format = 'text/html' then
+    if r.format = MIME_TEXT_HTML then
     begin
       FDataList.Remove(r);
       break;
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataItem.Create('text/html', AValue);
+  r := TfpgMimeDataItem.Create(MIME_TEXT_HTML, AValue);
   FDataList.Add(r);
 end;
 

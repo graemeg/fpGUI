@@ -219,15 +219,15 @@ function WindowsMimeLookup(const CFFormat: string): string;
 begin
   { replace known clipboard formats with mime types }
   if CFFormat = 'CF_TEXT' then
-    Result := 'text/plain'
+    Result := MIME_TEXT_PLAIN
   else if CFFormat = 'CF_UNICODETEXT' then
-    Result := 'text/plain'
+    Result := MIME_TEXT_PLAIN
   else if CFFormat = 'CF_OEMTEXT' then
-    Result := 'text/plain'
+    Result := MIME_TEXT_PLAIN
   else if CFFormat = 'CF_HDROP' then
-    Result := 'text/uri-list'
+    Result := MIME_TEXT_URI_LIST
   else if CFFormat = 'CF_RICHTEXT' then
-    Result := 'text/html'
+    Result := MIME_TEXT_HTML
   else
     Result := CFFormat;
 end;
@@ -235,12 +235,12 @@ end;
 function WindowsClipboardLookup(const AMime: string; var IsTranslated: Boolean): DWORD;
 begin
   { TODO: We need to improve this implementation }
-  if AMime = 'text/html' then
+  if AMime = MIME_TEXT_HTML then
   begin
     { We don't want duplicate CF_TEXT in DataObject, so register some of our
       known convenience types (from TfpgMimeData) as-is }
     IsTranslated := False;
-    Result := RegisterClipboardFormat('text/html');
+    Result := RegisterClipboardFormat(MIME_TEXT_HTML);
   end
   else if Pos('text/', AMime) = 1 then
   begin

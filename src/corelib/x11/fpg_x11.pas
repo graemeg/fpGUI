@@ -4190,10 +4190,10 @@ begin
   s := XGetAtomName(xapplication.Display, e.target);
   if FMimeData.HasFormat(s) then
   begin
-    if s = 'text/plain' then
+    if s = MIME_TEXT_PLAIN then
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
         8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text))
-    else if s = 'text/html' then
+    else if s = MIME_TEXT_HTML then
     begin
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
         8, PropModeReplace, PByte(@FMimeData.HTML[1]), Length(FMimeData.HTML))
@@ -4245,7 +4245,7 @@ begin
   else
   begin
     FDragging := True;
-    xia_plain_text := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
+    xia_plain_text := XInternAtom(xapplication.Display, MIME_TEXT_PLAIN, TBool(False));
     FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
     xapplication.Drag := self;
 

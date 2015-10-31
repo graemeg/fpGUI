@@ -634,7 +634,7 @@ begin
     WriteLN(M.format);
   {$ENDIF}
   // Sets MimeChoice
-  ADrop.AcceptMimeType(['UTF8_STRING','text/plain']);
+  ADrop.AcceptMimeType(['UTF8_STRING',MIME_TEXT_PLAIN]);
   {$IFDEF DND_DEBUG}
   WriteLn('Drop Enter. MimeChoice = ', ADrop.MimeChoice);
   {$ENDIF}

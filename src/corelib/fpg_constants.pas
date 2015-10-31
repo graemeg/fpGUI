@@ -100,6 +100,11 @@ const
 
   txtWordDelims: set of char = [' ', #9, #13, #10];
 
+  // MIMETYPES
+  MIME_TEXT_PLAIN    = 'text/plain';
+  MIME_TEXT_HTML     = 'text/html';
+  MIME_TEXT_URI_LIST = 'text/uri-list';
+  MIME_OBJECT        = 'x-fpc-object';
 
 
 implementation
