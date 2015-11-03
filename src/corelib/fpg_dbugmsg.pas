@@ -1,20 +1,19 @@
 {
-  fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-  Copyright (C) 2005 by Michael Van Canneyt, member of
-    the Free Pascal development team
-  Copyright (C) 2013 by Graeme Geldenhuys
+    Copyright (c) 2005 by Michael van Canneyt.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
-  See the file COPYING.modifiedLGPL, included in this distribution,
-  for details about redistributing fpGUI.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-  Description:
-    Originally from the Free Pascal FCL. Since then the code has
-    diverged and was customised for fpGUI usage.
+    Description:
+      Originally from the Free Pascal FCL. Since then the code has
+      diverged and was customised for fpGUI usage.
 }
 unit fpg_dbugmsg;
 

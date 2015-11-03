@@ -1,7 +1,19 @@
 {
-  This is based on the Command design pattern. Use Google if you don't
-  know what design patterns are. The Command pattern is very similar to
-  Delphi's TAction feature.
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This is based on the Command design pattern. Use Google if you don't
+      know what design patterns are. The Command pattern is very similar to
+      Delphi's TAction feature.
 }
 unit fpg_command_intf;
 

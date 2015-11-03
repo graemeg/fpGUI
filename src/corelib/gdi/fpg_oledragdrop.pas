@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.

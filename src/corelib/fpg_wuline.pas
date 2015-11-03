@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -12,7 +11,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-
       A Object Pascal implemenation of Wu Anti-Aliased Lines.
       For details about the algorithm have a look at:
         http://freespace.virgin.net/hugo.elias/graphics/x_wuline.htm

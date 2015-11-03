@@ -1,8 +1,8 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2013 by Rochi Abdelilah.
+    Copyright (c) 2014 - 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -13,8 +13,6 @@
 
     Description:
       Carbon fpGUI styles
-
-    Author: Rochdi Abdelilah
 }
 
 unit fpg_style_carbon;

@@ -1,3 +1,17 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2013 by Graeme Geldenhuys.
+    Copyright (c) 2014 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+}
 unit vlc;
 
 {$mode objfpc}{$H+}
@@ -8,8 +22,6 @@ uses
   Classes, SysUtils, ctypes, libvlc, syncobjs;
 
 Type
-
-  { TVLCLibrary }
 
   TVLCLibrary = class(TComponent)
   private
@@ -44,7 +56,6 @@ Type
   TCustomVLCMediaPlayer = Class;
   TVLCMediaItems = Class;
 
-  { TVLCMediaItem }
   TSnapShotFormat = (ssfPNG,ssfJPG);
   TDeinterlaceMode   = (dmBlend, dmDiscard, dmBob, dmLinear, dmMean, dmX, dmYadif, dmYadif2x);
 
@@ -108,7 +119,6 @@ Type
 
   TVLCMediaItemClass = Class of TVLCMediaItem;
 
-  { TVLCMediaItems }
   TVLCPlayMode = (pmNormal,pmLoop,pmRepeat);
 
   TVLCMediaItems = Class(TCollection)
@@ -134,13 +144,14 @@ Type
     Property ReadOnly : Boolean Read GetIsReadOnly;
   end;
 
-  { TCustomVLCMediaPlayer }
+
   TBooleanEvent = procedure(Sender : TObject; Const AValue : Boolean) of object;
   TTitleEvent = procedure(Sender : TObject; Const ATitle : Integer) of object;
   TSnapshotEvent = procedure(Sender : TObject; Const AfileName : string) of object;
   TErrorEvent = procedure(Sender : TObject; Const AError : string) of object;
   TTimeEvent = procedure(Sender : TObject; Const time : TDateTime) of object;
   TPositionEvent = procedure(Sender : TObject; Const APos : Double)  of object;
+
 
   TCustomVLCMediaPlayer = Class(TComponent)
   private
@@ -302,7 +313,9 @@ Type
     Property OnSnapshot : TSnapShotEvent Read FOnSnapShot Write FOnSnapShot;
   end;
 
+
   EVLC = Class(Exception);
+
 
   TVLCMediaPlayer = Class(TCustomVLCMediaPlayer)
   Public
@@ -353,7 +366,6 @@ Type
     Property OnSnapshot ;
   end;
 
-  { TCustomVLCMediaListPlayer }
 
   TCustomVLCMediaListPlayer = Class(TComponent)
   Private
@@ -389,6 +401,7 @@ Type
     procedure Prev;
   end;
 
+
   TVLCMediaListPlayer = Class(TCustomVLCMediaListPlayer)
   Public
     Property VLC;
@@ -409,7 +422,6 @@ Function VLCTimeToDateTime (T : libvlc_time_t) : TDateTime;
 
 implementation
 
-{ TVLCLibrary }
 Var
   LVLC : TVLCLibrary;
 

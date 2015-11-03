@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -13,7 +12,6 @@
 
     Description:
       Uses a Finite State Machine to parse CSV files.
-      Graeme Geldenhuys <graemeg@gmail.com>
 
       This unit shows how one could use the State Design Pattern to implement a
       FSM (Finite State Machine) to create a CSV Parser.  It handles invalid

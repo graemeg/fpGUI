@@ -1,3 +1,16 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2015 by Andrew Haines.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+}
 unit fpg_dnd_window;
 
 {$mode objfpc}{$H+}
@@ -11,8 +24,6 @@ uses
   fpg_window;
 
 type
-
-  { TfpgDNDWindow }
 
   TfpgDNDWindow = class(TfpgWindow)
   private

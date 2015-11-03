@@ -1,4 +1,16 @@
+{
+    This unit is part of the fpGUI Toolkit project.
 
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+}
 Const
   stdimg_edit : Array[0..821] of byte = (
       66, 77, 54,  3,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0, 40,  0,  0,

@@ -1,6 +1,21 @@
-{%mainunit fpg_main.pas}
+{
+    This unit is part of the fpGUI Toolkit project.
 
-// fpGUI internal message queue implementation
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      fpGUI internal message queue implementation
+
+}
+
+{%mainunit fpg_main.pas}
 
 type
   // a simlpe linked list implementation
@@ -106,7 +121,7 @@ begin
   UsedLastMessage  := nil;
   FreeFirstMessage := nil;
   FreeLastMessage  := nil;
-  
+
   uMsgQueueList := TList.Create;
 
   for n := 1 to cMessageQueueSize do

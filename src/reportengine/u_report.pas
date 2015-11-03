@@ -1,22 +1,22 @@
 {
-  fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-  Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
-  distribution, for details of the copyright.
+    Copyright (c) 2010 by Jean-Marc Levecque.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
-  See the file COPYING.modifiedLGPL, included in this distribution,
-  for details about redistributing fpGUI.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-  Description:
-    This unit form part of the PDF Reporting Engine. It interfaces with
-    the user program.
+    Description:
+      This unit form part of the PDF Reporting Engine. It interfaces with
+      the user program.
 
-    The PDF Reporting Engine was originally written by
-    Jean-Marc Levecque <jmarc.levecque@jmlesite.web4me.fr>
+      The PDF Reporting Engine was originally written by
+      Jean-Marc Levecque <jmarc.levecque@jmlesite.web4me.fr>
 }
 
 unit U_Report;

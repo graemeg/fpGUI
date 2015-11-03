@@ -1,23 +1,22 @@
 {
-  fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-  Copyright (C) 2005 by Michael Van Canneyt, member of
-    the Free Pascal development team
-  Copyright (C) 2013 by Graeme Geldenhuys
+    Copyright (c) 2005 by Michael van Canneyt.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
-  See the file COPYING.modifiedLGPL, included in this distribution,
-  for details about redistributing fpGUI.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-  Description:
-    Originally from the Free Pascal FCL. Since then the code has
-    diverged and was customised for fpGUI usage.
-    
-    This is the Client Interface for the debug server, which is
-    based on SimpleIPC.
+    Description:
+      Originally from the Free Pascal FCL. Since then the code has
+      diverged and was customised for fpGUI usage.
+
+      This is the Client Interface for the debug server, which is
+      based on SimpleIPC.
 }
 unit fpg_dbugintf;
 
@@ -26,7 +25,7 @@ unit fpg_dbugintf;
 interface
 
 uses
-  Classes, 
+  Classes,
   fpg_base;
 
 Type
@@ -68,22 +67,22 @@ ResourceString
 
 implementation
 
-Uses 
-  SysUtils, 
-  process, 
+Uses
+  SysUtils,
+  process,
   simpleipc,
   fpg_dbugmsg;
 
 const
   IndentChars    = 2;
-  
+
 var
   DebugClient : TSimpleIPCClient = nil;
   MsgBuffer : TMemoryStream = Nil;
   ServerID : Integer;
   DebugDisabled : Boolean = False;
   Indent : Integer = 0;
-  
+
 function RectToStr(const ARect: TRect): String;
 begin
   with ARect do
@@ -101,7 +100,7 @@ begin
   with APoint do
     Result := Format('(X: %d; Y: %d)', [X, Y]);
 end;
-  
+
 procedure WriteMessage(Const Msg : TDebugMessage);
 begin
   MsgBuffer.Seek(0, soFromBeginning);
@@ -267,9 +266,9 @@ begin
       Msg.Msg := Format(SProcessID,[ApplicationName]);
       WriteMessage(Msg);
       end;
-    if assigned(MsgBuffer) then 
+    if assigned(MsgBuffer) then
       FreeAndNil(MsgBuffer);
-    if assigned(DebugClient) then 
+    if assigned(DebugClient) then
       FreeAndNil(DebugClient);
   except
   end;

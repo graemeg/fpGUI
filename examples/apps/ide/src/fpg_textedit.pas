@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -12,7 +11,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      A new Memo component. It's actually more a TextEdit or MulitLineEdit
+      A new Memo-like component. It's actually more a TextEdit or MulitLineEdit
       component because it has a lot more features than simply a Memo. Features
       include: gutter, line numbers in gutter, right edge margin, syntax
       highlighting, much more optimised etc...
