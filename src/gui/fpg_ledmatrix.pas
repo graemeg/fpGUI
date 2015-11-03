@@ -13,7 +13,7 @@
     Description:
       This unit defines a classic 5x7 LED Matrix display widget. The
       layout of the matrix is as follows. Each column is represented by a Byte
-      data type. In the figure belowe we are representing a '?' symbol. The o
+      data type. In the figure below we are representing a '?' symbol. The o
       denotes the bit is not set. The x denotes the bit is set.
 
             |  COLUMN
