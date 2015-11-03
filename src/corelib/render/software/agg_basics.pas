@@ -51,7 +51,7 @@ type
 
   );
 
- agg_type = (agg_int ,agg_unsigned ,agg_double ); 
+ agg_type = (agg_int ,agg_unsigned ,agg_double );
 
  AGG_INT8  = shortint;
  AGG_INT8U = byte;
@@ -286,7 +286,7 @@ type
 
   end;
 
- unsigned_list_ptr = ^unsigned_list; 
+ unsigned_list_ptr = ^unsigned_list;
  unsigned_list = object
    function  array_operator(idx : unsigned ) : unsigned; virtual; abstract;
 
@@ -1219,7 +1219,7 @@ begin
 
     if (val < 0 ) and
        (add[1 ] <> '-' ) then
-     add:='-' + add; 
+     add:='-' + add;
 
    end;
 
