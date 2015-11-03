@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2013 - 2015 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -70,7 +69,7 @@ begin
     //write('iya1a2c: ',i,' ',FDataset[i,0],' ',a1:4:1,' ',a2:4:1);
     c := fpgColor2AggColor(lChart.Color(i));
     c.a := 100; { alpha channel - gives it a pastel colour feel }
-    
+
     startingAngle := Deg2Rad(a1);
     arcSize := a2;
     endingAngle := startingAngle + Deg2Rad(arcSize);  { we are going clockwise }

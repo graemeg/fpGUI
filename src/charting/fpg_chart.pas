@@ -1,8 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Toolkit
+    This unit is part of the fpGUI Toolkit project.
 
-    Copyright (C) 2013 - 2015 See the file AUTHORS.txt, included in this
-    distribution, for details of the copyright.
+    Copyright (c) 2015 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -15,6 +14,10 @@
       A new widget which can draw various small charts. It supports
       the following chart types: Pie, Bar, HBar, Line, xyLine and Scatter
       charts.
+
+      This code was based on the ideas from the ThumbChart project on
+      SourceForge.net, but has undergone a total rewrite since integrated
+      into fpGUI.
 }
 
 unit fpg_chart;
@@ -207,12 +210,12 @@ implementation
 
 var
   uChartFactory: TfpgChartFactory;
-  
+
 function fpgChartFactory: TfpgChartFactory;
 begin
   if not Assigned(uChartFactory) then
     uChartFactory := TfpgChartFactory.Create;
-  Result := uChartFactory; 
+  Result := uChartFactory;
 end;
 
 
