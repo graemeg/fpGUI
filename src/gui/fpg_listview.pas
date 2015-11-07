@@ -31,6 +31,10 @@ uses
   fpg_widget,
   fpg_scrollbar,
   fpg_imagelist;
+
+const
+  MIME_OBJECT_LISTVIEW_ITEM = 'x-fpc-object/fpg-lvitem';
+
   
 type
   TfpgListView    = class;
@@ -132,6 +136,8 @@ type
   end;
   
 
+  { TfpgLVItems }
+
   TfpgLVItems = class(TObject)
   private
     FUpdateCount: Integer;
@@ -159,6 +165,7 @@ type
     procedure   Delete(AIndex: Integer);
     function    IndexOf(AItem: TfpgLVItem): Integer;
     procedure   InsertItem(AItem: TfpgLVItem; AIndex: Integer);
+    procedure   MoveItem(AItemIndex, ANewIndex: Integer);
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   Sort(Compare: TListSortCompare);
@@ -340,7 +347,6 @@ type
     procedure   SelectionClear;
     function    ItemGetSelected(const AItem: TfpgLVItem): Boolean;
     procedure   ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
-    function    ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
     function    GetItemRect(AIndex: Integer): TfpgRect;
     function    GetHeaderHeight: Integer;
     procedure   DoRepaint;
@@ -372,6 +378,7 @@ type
     function    ItemAdd: TfpgLVItem; deprecated 'Use AddItem instead';
     function    AddItem: TfpgLVItem;
     function    NewItem: TfpgLVItem;
+    function    GetItemFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
   published
     property    Align;
     property    Columns: TfpgLVColumns read FColumns;
@@ -1352,6 +1359,11 @@ begin
     raise Exception.CreateFmt(rsErrItemOfWrongType, ['TfpgLVItem']);
 end;
 
+procedure TfpgLVItems.MoveItem(AItemIndex, ANewIndex: Integer);
+begin
+  FItems.Move(AItemIndex, ANewIndex);
+end;
+
 procedure TfpgLVItems.BeginUpdate;
 begin
   Inc(FUpdateCount);
@@ -1791,11 +1803,13 @@ begin
     FOnSelectionChanged(Self, AItem, Items.IndexOf(AItem), AValue);
 end;
 
-function TfpgListView.ItemGetFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
+function TfpgListView.GetItemFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
 begin
   Result := FViewStyle.GetItemFromPoint(X,Y, AIndex);
   if AIndex < -1 then
     AIndex:=-1;
+  if AIndex > FItems.Count-1 then
+    AIndex := FItems.Count-1;
 end;
 
 function TfpgListView.GetItemRect(AIndex: Integer): TfpgRect;
@@ -1937,7 +1951,7 @@ begin
     Exit;
 
   // The only area left is the item area.
-  Item := ItemGetFromPoint(X, Y, FItemIndex);
+  Item := GetItemFromPoint(X, Y, FItemIndex);
   if not FMultiSelect then
     SelectionClear;
   if Item <> nil then
@@ -2026,7 +2040,7 @@ var
   Dummy: Integer;
 begin
   inherited HandleDoubleClick(x, y, button, shiftstate);
-  Item := ItemGetFromPoint(x,y, Dummy);
+  Item := GetItemFromPoint(x,y, Dummy);
   if Assigned(Item) then
     DoItemActivate(Item);
 end;

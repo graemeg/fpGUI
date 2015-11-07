@@ -3104,6 +3104,7 @@ begin
     FOnPaintPreview(Self, ACanvas);
 end;
 
+
 constructor TfpgDrag.Create(ASource: TfpgWidgetBase);
 begin
   inherited Create(ASource);

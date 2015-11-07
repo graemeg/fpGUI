@@ -4145,6 +4145,7 @@ begin
   else
   begin
     SendDNDLeave(FLastTarget);
+    QueueFree;
     FFinished:=True;
   end;
   FSource.MouseCursor := mcDefault;

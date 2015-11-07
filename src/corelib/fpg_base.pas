@@ -821,9 +821,9 @@ type
     FDataList: TObjectList;
     FUrlList: TList;
     function    GetItem(AIndex: Integer): TfpgMimeDataItem;
-    function    GetObject: TObject;
+    function    GetObject(AMimeType: String): TObject;
     function    Geturls: TList;
-    procedure   SetObject(AValue: TObject);
+    procedure   SetObject(AMimeType: String; AValue: TObject);
     procedure   Seturls(const AValue: TList);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
@@ -842,7 +842,7 @@ type
     property    urls: TList read Geturls write Seturls;
     property    Text: TfpgString read GetText write SetText;
     property    HTML: TfpgString read GetHTML write SetHTML;
-    property    Obj: TObject read GetObject write SetObject;
+    property    Obj[AMimeType: String]: TObject read GetObject write SetObject; // defaults to MIME_OBJECT if blank
     property    Count: integer read GetCount;
   end;
 
@@ -3986,16 +3986,18 @@ begin
   Result := nil;
 end;
 
-procedure TfpgMimeDataBase.SetObject(AValue: TObject);
+procedure TfpgMimeDataBase.SetObject(AMimeType: String; AValue: TObject);
 var
   i: integer;
   r: TfpgMimeDataItem;
 begin
+  if AMimeType = '' then
+    AMimeType:=MIME_OBJECT;
   { remove existing MIME_OBJECT first }
   for i := Count-1 downto 0 do
   begin
     r := Items[i];
-    if r.format = MIME_OBJECT then
+    if r.format = AMimeType then
     begin
       FDataList.Remove(r);
       break;
@@ -4003,10 +4005,10 @@ begin
   end;
   { now add new structure }
   {$IFDEF CPU64}
-  r := TfpgMimeDataItem.Create(MIME_OBJECT, QWord(Pointer(AValue)));
+  r := TfpgMimeDataItem.Create(AMimeType, QWord(Pointer(AValue)));
   {$ENDIF}
   {$IFDEF CPU32}
-  r := TfpgMimeDataItem.Create(MIME_OBJECT, DWord(Pointer(AValue)));
+  r := TfpgMimeDataItem.Create(AMimeType, DWord(Pointer(AValue)));
   {$ENDIF}
   FDataList.Add(r);
 
@@ -4018,15 +4020,17 @@ begin
   Result := TfpgMimeDataItem(FDataList[AIndex]);
 end;
 
-function TfpgMimeDataBase.GetObject: TObject;
+function TfpgMimeDataBase.GetObject(AMimeType: String): TObject;
 var
   i: integer;
   o: TObject;
 begin
   Result := nil;
+  if AMimeType = '' then
+    AMimeType := MIME_OBJECT;
   for i := 0 to Count-1 do
   begin
-    if Items[i].format = MIME_OBJECT then
+    if Items[i].format = AMimeType then
     begin
       {$IFDEF CPU64}
       o := TObject(Pointer(QWord(Items[i].data)));
