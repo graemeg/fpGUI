@@ -4004,12 +4004,7 @@ begin
     end;
   end;
   { now add new structure }
-  {$IFDEF CPU64}
-  r := TfpgMimeDataItem.Create(AMimeType, QWord(Pointer(AValue)));
-  {$ENDIF}
-  {$IFDEF CPU32}
-  r := TfpgMimeDataItem.Create(AMimeType, DWord(Pointer(AValue)));
-  {$ENDIF}
+  r := TfpgMimeDataItem.Create(AMimeType, PtrUInt(Pointer(AValue)));
   FDataList.Add(r);
 
 
@@ -4032,13 +4027,7 @@ begin
   begin
     if Items[i].format = AMimeType then
     begin
-      {$IFDEF CPU64}
-      o := TObject(Pointer(QWord(Items[i].data)));
-      {$ENDIF}
-      {$IFDEF CPU32}
-      o := TObject(Pointer(DWord(Items[i].data)));
-      {$ENDIF}
-
+      o := TObject(Pointer(PtrUInt(Items[i].data)));
       Result := o;
       break;
     end;
