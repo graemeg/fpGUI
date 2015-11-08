@@ -67,6 +67,7 @@ uses
   fpg_splitter,
   fpg_hyperlink,
   fpg_toggle,
+  fpg_dialogs,
   vfdpropeditgrid,
   vfdmain;
 
@@ -124,7 +125,28 @@ begin
 end;
 
 procedure RegisterVFDWidget(awc: TVFDWidgetClass);
+var
+  Errors: String='';
+  Err: String='';
+  Box: TfpgMessageBox;
 begin
+  Errors := 'Encountered the following errors registering ' + awc.WidgetClass.ClassName+':';
+  while awc.GetError(Err) do
+    if Errors <> '' then
+      Errors:=Errors+LineEnding+Err
+    else
+      Errors:=Err;
+
+  if Err <>'' then
+  try
+    Box := TfpgMessageBox.Create(nil);
+    Box.WindowTitle:='Errors Registering Widget';
+    Box.SetMessage(Errors);
+    Box.ShowModal;
+  finally
+    Box.Free;
+  end;
+
   FVFDWidgets.Add(awc);
 end;
 
