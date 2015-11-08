@@ -664,7 +664,7 @@ var
   var
     i: integer;
   begin
-    if not Assigned(ADesignWidget.Widget) then  // safety check
+    if not Assigned(ADesignWidget) or not Assigned(ADesignWidget.Widget) then  // safety check
       Exit;
     if ADesignWidget.Widget.IsContainer and (ADesignWidget.Widget.ComponentCount > 0) then
     begin
