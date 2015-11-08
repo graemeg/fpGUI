@@ -24,6 +24,7 @@ uses
   SysUtils,
   Classes,
   fpg_base,
+  fpg_main,
   fpg_widget,
   fpg_form,
   fpg_label,
@@ -37,6 +38,9 @@ uses
   fpg_hyperlink,
   vfdwidgetclass,
   vfdwidgets;
+
+const
+  MIME_VFD_WIDGET_CLASS = 'x-object/fpgui-vfd-widgetclass';
 
 type
 
@@ -52,10 +56,14 @@ type
   end;
   
 
+  { TfrmMain }
+
   TfrmMain = class(TfpgForm)
   private
     FFileOpenRecent: TfpgMenuItem;
     procedure   FormShow(Sender: TObject);
+    procedure   OnPaletteDragStart(Sender: TObject);
+    procedure   PaintPaletteButtonForDrag(ASender: TfpgDrag; ACanvas: TfpgCanvas);
     procedure   PaletteBarResized(Sender: TObject);
     procedure   miHelpAboutClick(Sender: TObject);
     procedure   miHelpAboutGUI(Sender: TObject);
@@ -176,11 +184,11 @@ var
 implementation
 
 uses
-  fpg_main,
   fpg_iniutils,
   fpg_dialogs,
   fpg_constants,
   fpg_stylemanager,
+  fpg_window,
   vfdmain,
   vfd_constants;
 
@@ -504,6 +512,7 @@ begin
     btn.Hint      := wgc.WidgetClass.ClassName;
     btn.Focusable := False;
     btn.OnClick   := @OnPaletteClick;
+    btn.OnDragStartDetected:=@OnPaletteDragStart;
     btn.AllowDown := True;
     btn.AllowAllUp := True;
     chlPalette.Items.AddObject(wgc.WidgetClass.ClassName, wgc);
@@ -937,6 +946,36 @@ begin
   gINI.ReadFormState(self);
   UpdatePosition;
   SetupCaptions;
+end;
+
+type
+  TDragHack = class(TfpgDrag);
+  TWidgetHack = class(TfpgWidget);
+
+procedure TfrmMain.OnPaletteDragStart(Sender: TObject);
+var
+  Drag: TfpgDrag;
+  Preview: TfpgWindow;
+  Button: TwgPaletteButton absolute Sender;
+  Widget: TfpgWidget;
+begin
+  Drag := TfpgDrag.Create(Sender as TfpgWidget);
+  Preview := TDragHack(Drag).FPreviewWin as TfpgWindow;
+  Widget := Button.VFDWidget.CreateWidget(Preview);
+  // set the position of the preview window
+  TWidgetHack(Button).FDragStartPos := fpgPoint(0,0);
+  Drag.MimeData := TfpgMimeData.Create;
+  Drag.MimeData.Obj[MIME_VFD_WIDGET_CLASS] := Button.VFDWidget;
+  Drag.PreviewSize := fpgSize(Widget.Width,Widget.Height);
+  Drag.OnPaintPreview:=@PaintPaletteButtonForDrag;
+
+  Drag.Execute();
+  SelectedWidget := nil;
+end;
+
+procedure TfrmMain.PaintPaletteButtonForDrag(ASender: TfpgDrag; ACanvas: TfpgCanvas);
+begin
+  // Do Nothing, the widget paints itself
 end;
 
 procedure TfrmMain.PaletteBarResized(Sender: TObject);

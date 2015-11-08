@@ -369,10 +369,10 @@ type
     FOnPaintPreview: TfpgDragPaintEvent;
     FPreviewSize: TfpgSize;
     FTarget: TfpgWinHandle;
-    FPreviewWin: TfpgWidgetBase; // TfpgDNDWindow
     procedure   SetMimeData(const AValue: TfpgMimeDataBase);
     procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
   protected
+    FPreviewWin: TfpgWidgetBase; // TfpgDNDWindow
     function    GetSource: TfpgWidgetBase; reintroduce;
     procedure   DoOnPaintPreview(ACanvas: TfpgCanvas);
   public

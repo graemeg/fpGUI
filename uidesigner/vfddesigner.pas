@@ -90,9 +90,13 @@ type
   end;
 
 
+  { TFormDesigner }
+
   TFormDesigner = class(TObject)
   private
     FOneClickMove: boolean;
+    procedure DropDrop(Drop: TfpgDrop; AData: Variant);
+    procedure DropEnter(Drop: TfpgDrop);
   protected
     FWidgets: TList;
     FForm: TDesignedForm;
@@ -282,6 +286,21 @@ begin
 end;
 
 { TFormDesigner }
+
+procedure TFormDesigner.DropEnter(Drop: TfpgDrop);
+begin
+  //if the SourceWidget is not assigned then this is a drop from another process
+  //and the object pointer is invalid to us.
+  Drop.CanDrop:= Assigned(Drop.SourceWidget) and Drop.AcceptMimeType([MIME_VFD_WIDGET_CLASS]);
+end;
+
+procedure TFormDesigner.DropDrop(Drop: TfpgDrop; AData: Variant);
+var
+  wc: TVFDWidgetClass;
+begin
+  wc := TVFDWidgetClass(PtrUInt(AData));
+  InsertWidget(TfpgWidget(Drop.Widget), Drop.MousePos.X, Drop.MousePos.Y, wc);
+end;
 
 procedure TFormDesigner.MsgMouseDown(var msg: TfpgMessageRec);
 var
@@ -475,6 +494,7 @@ begin
   FForm.FormDesigner  := self;
   FForm.Name          := maindsgn.NewFormName;
   FForm.WindowTitle   := FForm.Name;
+  FForm.DropHandler   := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
   FFormOther          := '';
 end;
 
@@ -1479,6 +1499,7 @@ begin
     wgd          := AddWidget(wg, wgc);
     wg.SetPosition(x, y, wg.Width, wg.Height);
     wg.Visible   := True;
+    wg.DropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
     DeSelectAll;
     wgd.Selected := True;
     UpdatePropWin;
