@@ -113,6 +113,7 @@ begin
   PropInfo := GetPropInfo(WidgetClass, apropname);
   if not Assigned(PropInfo) then
   begin
+    Result := nil;
     FErrors.Add(Format('Invalid property: %s', [apropname]));
     Exit; // ==>
   end;
