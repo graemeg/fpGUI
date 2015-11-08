@@ -288,10 +288,18 @@ end;
 { TFormDesigner }
 
 procedure TFormDesigner.DropEnter(Drop: TfpgDrop);
+var
+  wgd: TWidgetDesigner;
 begin
   //if the SourceWidget is not assigned then this is a drop from another process
   //and the object pointer is invalid to us.
-  Drop.CanDrop:= Assigned(Drop.SourceWidget) and Drop.AcceptMimeType([MIME_VFD_WIDGET_CLASS]);
+  Drop.CanDrop := Assigned(Drop.SourceWidget) and Drop.AcceptMimeType([MIME_VFD_WIDGET_CLASS]);
+  if Drop.CanDrop then
+  begin
+    wgd := WidgetDesigner(TfpgWidget(Drop.Widget));
+    if Assigned(wgd) then
+      Drop.CanDrop := wgd.FVFDClass.Container;
+  end;
 end;
 
 procedure TFormDesigner.DropDrop(Drop: TfpgDrop; AData: Variant);
