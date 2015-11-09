@@ -38,6 +38,7 @@ type
 
   TfpgGutter = class(TfpgWidget)
   private
+    FAutoSize: Boolean;
     FLineGranularity: Integer;
     FOwner: TfpgBaseTextEdit; // convenience reference variable
     FDigits: Integer;
@@ -52,12 +53,14 @@ type
     procedure   SetStartNum(const AValue: Integer);
     procedure   DrawLineNums;
     procedure   SetZeroStart(const AValue: Boolean);
+    procedure   UpdateSize;
   protected
     procedure   HandlePaint; override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
   public
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
     function    GetClientRect: TfpgRect; override;
+    property    AutoSize: Boolean read FAutoSize write FAutoSize default True;
     property    LeadingDigits: Integer read FDigits write SetDigits default 0;
     property    LineGranularity: Integer read FLineGranularity write SetLineGranularity default 1;
     property    ShowNum: Boolean read FShowNum write SetShowNum default True;
@@ -78,6 +81,8 @@ type
 
   TfpgOnSearchEnd = procedure(Sender: TObject; FindIt, ReplaceMode: Boolean) of object;
 
+
+  { TfpgBaseTextEdit }
 
   TfpgBaseTextEdit = class(TfpgWidget)
   private
@@ -130,6 +135,7 @@ type
     function    GetVScrollPos: Integer;
     function    GetCaretPosH: Integer;
     function    GetCaretPosV: Integer;
+    procedure   LinesChanged(Sender: TObject);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
     procedure   SetGutterVisible(const AValue: Boolean);
@@ -338,6 +344,9 @@ begin
 //    writeln('i=', i);
     lNum:=FStartNum+i;
 
+    if lNum > FOwner.Lines.Count then
+      break;
+
     if (FLineGranularity = 1)
     or (lNum = 1)
     or (FOwner.CaretPos.Y = Pred(lnum))
@@ -360,6 +369,17 @@ procedure TfpgGutter.SetZeroStart(const AValue: Boolean);
 begin
   if FZeroStart=AValue then exit;
   FZeroStart:=AValue;
+end;
+
+procedure TfpgGutter.UpdateSize;
+var
+  NeededWidth: Integer;
+begin
+  if FAutoSize then
+  begin
+    NeededWidth := FOwner.FFont.TextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    Width:=NeededWidth;
+  end;
 end;
 
 procedure TfpgGutter.HandlePaint;
@@ -392,6 +412,7 @@ constructor TfpgGutter.CreateGutter(AOwner: TfpgBaseTextEdit);
 begin
   inherited Create(AOwner);
   FOwner := AOwner;
+  FAutoSize := True;
   FDigits := 0;
   FShowNum := True;
   FSpace := 2;
@@ -456,6 +477,11 @@ end;
 function TfpgBaseTextEdit.GetCaretPosV: Integer;
 begin
   Result := CaretPos.X;
+end;
+
+procedure TfpgBaseTextEdit.LinesChanged(Sender: TObject);
+begin
+  FGutterPan.UpdateSize;
 end;
 
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
@@ -714,7 +740,10 @@ var
 begin
   r := GetClientRect;
   if Assigned(FGutterPan) and FGutterPan.Visible then
+  begin
+    FGutterPan.UpdateSize;
     FGutterPan.SetPosition(r.Left, r.Top, FGutterPan.Width, r.Height);
+  end;
 end;
 
 { This procedure is used to set caret position on keyboard navigation and
@@ -2062,6 +2091,7 @@ begin
   Width         := 320;
   Height        := 240;
   FLines        := TStringList.Create;
+  TStringList(FLines).OnChange:=@LinesChanged;
   CaretPos.x    := 0;
   CaretPos.y    := 0;
   FTopLine      := 0;
@@ -2086,6 +2116,9 @@ begin
   FLastScrollEventTime := 0;
   FLastScrollEventTimeBefore := 0;
 
+  // do this first so scrollbars have the highest Z order
+  InitMemoObjects;
+
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.OnScroll := @VScrollBarMove;
@@ -2096,8 +2129,6 @@ begin
   FHScrollBar.OnScroll := @HScrollBarMove;
 //  FHScrollBar.ScrollStep := 5;
   FHScrollBar.Visible  := False;
-
-  InitMemoObjects;
 end;
 
 destructor TfpgBaseTextEdit.Destroy;
