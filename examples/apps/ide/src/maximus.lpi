@@ -46,7 +46,6 @@
       <Unit1>
         <Filename Value="frm_main.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
         <Filename Value="frm_configureide.pas"/>
@@ -55,12 +54,10 @@
       <Unit3>
         <Filename Value="ideconst.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ideconst"/>
       </Unit3>
       <Unit4>
         <Filename Value="idemacros.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="idemacros"/>
       </Unit4>
       <Unit5>
         <Filename Value="frm_debug.pas"/>
@@ -78,12 +75,10 @@
       <Unit8>
         <Filename Value="frm_projectoptions.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_projectoptions"/>
       </Unit8>
       <Unit9>
         <Filename Value="ideutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ideutils"/>
       </Unit9>
       <Unit10>
         <Filename Value="builderthread.pas"/>
@@ -105,7 +100,6 @@
       <Unit14>
         <Filename Value="filemonitor.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="filemonitor"/>
       </Unit14>
       <Unit15>
         <Filename Value="synregexpr.pas"/>
@@ -114,7 +108,6 @@
       <Unit16>
         <Filename Value="fpg_textedit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpg_textedit"/>
       </Unit16>
       <Unit17>
         <Filename Value="frm_find.pas"/>
@@ -128,7 +121,6 @@
       <Unit19>
         <Filename Value="mPasLex.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="mPasLex"/>
       </Unit19>
     </Units>
   </ProjectOptions>

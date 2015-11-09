@@ -34,8 +34,11 @@ type
 
   TfpgFindOptions = set of (foMatchCase, foWholeWords, foEntireScope);
 
+  { TfpgGutter }
+
   TfpgGutter = class(TfpgWidget)
   private
+    FLineGranularity: Integer;
     FOwner: TfpgBaseTextEdit; // convenience reference variable
     FDigits: Integer;
     FShowNum: Boolean;
@@ -43,6 +46,7 @@ type
     FStartNum: Integer;
     FZeroStart: Boolean;
     procedure   SetDigits(const AValue: Integer);
+    procedure   SetLineGranularity(AValue: Integer);
     procedure   SetShowNum(const AValue: Boolean);
     procedure   SetSpace(const AValue: Integer);
     procedure   SetStartNum(const AValue: Integer);
@@ -55,6 +59,7 @@ type
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
     function    GetClientRect: TfpgRect; override;
     property    LeadingDigits: Integer read FDigits write SetDigits default 0;
+    property    LineGranularity: Integer read FLineGranularity write SetLineGranularity default 1;
     property    ShowNum: Boolean read FShowNum write SetShowNum default True;
     property    Space: Integer read FSpace write SetSpace default 2;
     property    StartNum: Integer read FStartNum write SetStartNum default 1;
@@ -283,6 +288,15 @@ begin
   FDigits:=AValue;
 end;
 
+procedure TfpgGutter.SetLineGranularity(AValue: Integer);
+begin
+  if AValue < 1 then
+    AValue:=1;
+  if FLineGranularity=AValue then Exit;
+  FLineGranularity:=AValue;
+  Invalidate;
+end;
+
 procedure TfpgGutter.SetShowNum(const AValue: Boolean);
 begin
   if FShowNum=AValue then exit;
@@ -306,6 +320,7 @@ procedure TfpgGutter.DrawLineNums;
 var
   r: TfpgRect;
   I, MaxI, W, H, ZeroL: Integer;
+  lNum: Integer;
   s: TfpgString;
   ltxtflags: TfpgTextFlags;
 begin
@@ -321,12 +336,21 @@ begin
   for i := 0 to MaxI do
   begin
 //    writeln('i=', i);
-    if FZeroStart then
-      S := IntToStr(FStartNum + i - 1)
+    lNum:=FStartNum+i;
+
+    if (FLineGranularity = 1)
+    or (lNum = 1)
+    or (FOwner.CaretPos.Y = Pred(lnum))
+    or ((lNum) mod FLineGranularity = 0)
+    then
+    begin
+      S := IntToStr(lNum - (1 * ord(FZeroStart)));
+      for ZeroL := Length(S) to FDigits do
+        S := '0' + S;
+    end
     else
-      S := IntToStr(FStartNum + i);
-    for ZeroL := Length(S) to FDigits do
-      S := '0' + S;
+      S := '.';
+
     r.Top := i * h;
     Canvas.DrawText(r, S, ltxtflags);
   end;
@@ -373,6 +397,7 @@ begin
   FSpace := 2;
   FStartNum := 1;
   FZeroStart := False;
+  FLineGranularity:=1;
   Width := 35;
 end;
 
@@ -1133,6 +1158,7 @@ begin
   begin
     Left    := -Width - 1;
     Visible := False;
+    LineGranularity:=5;
   end;
 end;
 
