@@ -29,3 +29,21 @@ units/
 # Application bundle for Mac OS
 *.app/
 
+# Known Unix binaries to ignore (they don't have file extensions unfortunately)
+uidesigner
+maximus
+nanoedit
+docview
+dbugsrv
+docedit
+globe
+fpmake
+drawtest
+edittest
+themetest
+threedee
+makefonts
+
+# We should come up with a naming convension for demo binaries to exclude existing
+# and new future ones automatically.
+
