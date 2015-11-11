@@ -191,6 +191,8 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -347,10 +349,10 @@ end;
 
 function TfpgBaseTextEdit.TSelection.Contains(APoint: TfpgPoint): Boolean;
 begin
-  Result := ((APoint.Y > FStartPos.Y) and (APoint.Y < FEndPos.Y))
-         or ((APoint.Y = FStartPos.Y) and (APoint.X >= FStartPos.X)
-             and((FEndPos.Y > APoint.Y)
-                 or((FEndPos.Y = APoint.Y) and (FEndPos.X > APoint.X))));
+  Result := (((APoint.Y = FStartPos.Y) and (APoint.X >= FStartPos.X))
+      or (APoint.Y > FStartPos.Y))
+  and (((APoint.Y = FEndPos.Y) and (APoint.X <= FEndPos.X))
+      or (APoint.Y < FEndPos.Y));
 end;
 
 function TfpgBaseTextEdit.TSelection.ValidateEndOffset(const ALine: String): Boolean;
@@ -602,12 +604,12 @@ begin
   FTabWidth := AValue;
 end;
 
-procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: integer);
+procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: Integer);
 begin
   CaretPos.Y := AValue;
 end;
 
-procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: integer);
+procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
 begin
   CaretPos.X := AValue;
 end;
@@ -1346,6 +1348,30 @@ begin
     FSelected := True;
   end;
   Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  FSelMouseDwn:=False;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseMove(x, y: integer; btnstate: word;
+  shiftstate: TShiftState);
+var
+  RNo, CNo: Integer;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
+  begin
+    CaretPos.X := CNo;
+    CaretPos.Y := RNo;
+    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+    FSelection.StartPos := FSelection.Origin;
+    FSelection.EndPos := fpgPoint(CNo, RNo);
+    FSelected:=True;
+    Invalidate;
+  end;
 end;
 
 function TfpgBaseTextEdit.calcmousewheeldelta(var info: TfpgMsgParmMouse;
