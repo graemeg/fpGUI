@@ -87,17 +87,26 @@ type
   TfpgBaseTextEdit = class(TfpgWidget)
   private
   type
+
+    { TSelection }
+
     TSelection = object
     private
-      FReversed: Boolean; // May not be that useful
+      FOrigin: TfpgPoint;
       FStartPos: TfpgPoint;
       FEndPos: TfpgPoint;
       procedure SetEndPos(AValue: TfpgPoint);
       procedure SetStartPos(AValue: TfpgPoint);
     public
-      property StartPos: TfpgPoint read FStartPos write SetStartPos;
-      property EndPos: TfpgPoint read FEndPos write SetEndPos;
-      property Reversed: Boolean read FReversed;
+      function  HasContent: Boolean;
+      function  StartLine: Integer;
+      function  EndLine: Integer;
+      function  Contains(APoint: TfpgPoint): Boolean;
+      // Returns True if no changes. False if Line length was adjusted.
+      function  ValidateEndOffset(const ALine: String): Boolean;
+      property  StartPos: TfpgPoint read FStartPos write SetStartPos;
+      property  EndPos: TfpgPoint read FEndPos write SetEndPos;
+      property  Origin: TfpgPoint read FOrigin;
     end;
   private
     FFont: TfpgFont;
@@ -116,10 +125,8 @@ type
     FVisLines: Integer;
     FVisCols: Integer;
     StartNo, EndNo, StartOffs, EndOffs: Integer;
-    // Selection start and end line number
-    FSelStartNo, FSelEndNo: Integer;
-    // Selection start and end column
-    FSelStartOffs, FSelEndOffs: Integer;
+    // Selection start and end object.
+    FSelection: TSelection;
     FTabWidth: Integer;
     HPos, VPos, XSize, YSize: Integer;
     FMaxScrollH: Integer;
@@ -305,33 +312,57 @@ procedure TfpgBaseTextEdit.TSelection.SetEndPos(AValue: TfpgPoint);
 begin
   if FEndPos=AValue then Exit;
 
-  if (AValue.Y < FStartPos.Y) or ((AValue.Y = FStartPos.Y) and (AValue.X < FStartPos.X)) then
+  if (AValue.Y < FOrigin.Y) or ((AValue.Y = FOrigin.Y) and (AValue.X < FOrigin.X)) then
   begin
-    FEndPos := FStartPos;
     FStartPos := AValue;
-    FReversed:=True;
   end
   else
   begin
     FEndPos:=AValue;
-    FReversed:=False;
   end;
 end;
 
 procedure TfpgBaseTextEdit.TSelection.SetStartPos(AValue: TfpgPoint);
 begin
-  if FStartPos=AValue then Exit;
+  // Setting Start position begins selection
+  FStartPos := AValue;
+  FEndPos := AValue;
+  FOrigin := AValue;
+end;
 
-  if (AValue.Y > FEndPos.Y) or ((AValue.Y = FEndPos.Y) and (AValue.X > FEndPos.X)) then
+function TfpgBaseTextEdit.TSelection.HasContent: Boolean;
+begin
+  Result := (FStartPos.Y <> FEndPos.Y) or (FStartPos.X <> FEndPos.X);
+end;
+
+function TfpgBaseTextEdit.TSelection.StartLine: Integer;
+begin
+  Result := FStartPos.Y;
+end;
+
+function TfpgBaseTextEdit.TSelection.EndLine: Integer;
+begin
+  Result := FEndPos.Y;
+end;
+
+function TfpgBaseTextEdit.TSelection.Contains(APoint: TfpgPoint): Boolean;
+begin
+  Result := ((APoint.Y > FStartPos.Y) and (APoint.Y < FEndPos.Y))
+         or ((APoint.Y = FStartPos.Y) and (APoint.X >= FStartPos.X)
+             and((FEndPos.Y > APoint.Y)
+                 or((FEndPos.Y = APoint.Y) and (FEndPos.X > APoint.X))));
+end;
+
+function TfpgBaseTextEdit.TSelection.ValidateEndOffset(const ALine: String): Boolean;
+var
+  l: Integer;
+begin
+  Result := True;
+  l := UTF8Length(ALine);
+  if FEndPos.X > l then
   begin
-    FStartPos := FEndPos;
-    FEndPos := AValue;
-    FReversed:=True;
-  end
-  else
-  begin
-    FStartPos:=AValue;
-    FReversed:=False;
+    FEndPos.X := l - 1;
+    Result := False;
   end;
 end;
 
@@ -604,28 +635,10 @@ end;
 procedure TfpgBaseTextEdit.GetSelBounds(var AStartNo, AEndNo, AStartOffs,
   AEndOffs: Integer);
 begin
-  if FSelStartNo <= FSelEndNo then
-  begin
-    AStartNo := FSelStartNo;
-    AEndNo := FSelEndNo;
-    if not ((AStartNo = AEndNo) and (FSelStartOffs > FSelEndOffs)) then
-    begin
-      AStartOffs := FSelStartOffs;
-      AEndOffs := FSelEndOffs;
-    end
-    else
-    begin
-      AStartOffs := FSelEndOffs;
-      AEndOffs := FSelStartOffs;
-    end;
-  end
-  else
-  begin
-    AStartNo := FSelEndNo;
-    AEndNo := FSelStartNo;
-    AStartOffs := FSelEndOffs;
-    AEndOffs := FSelStartOffs;
-  end;
+  AStartNo   := FSelection.StartPos.Y;
+  AEndNo     := FSelection.EndPos.Y;
+  AStartOffs := FSelection.StartPos.X;
+  AEndOffs   := FSelection.EndPos.X;
 end;
 
 procedure TfpgBaseTextEdit.UpdateScrollBars;
@@ -810,16 +823,15 @@ var
     S := GetWordAtPos(CaretPos.X, CaretPos.Y, XB);
     if (S <> '') and (XB > -1) then
     begin
-      if FSelected then
-        FSelEndOffs := XB;
       CaretPos.X := XB;
     end
     else
     begin
-      if FSelected then
-        FSelEndOffs := 0;
       CaretPos.X := 0;
     end;
+    if FSelected then
+      FSelection.EndPos := CaretPos;
+
   end;
 
   procedure CtrlKeyRightKey;
@@ -874,8 +886,7 @@ begin
                   CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
                   if FSelected then
                   begin
-                    FSelEndNo := CaretPos.Y;
-                    FSelEndOffs := CaretPos.X;
+                    FSelection.EndPos := CaretPos;
                   end;
                   Exit;
                 end;
@@ -896,36 +907,30 @@ begin
                 if CaretPos.X > UTF8Length(FLines[CaretPos.Y]) then
                   CaretPos.X := UTF8Length(FLines[CaretPos.Y]) - 1;
               FSelected := True;
-              FSelStartNo := CaretPos.Y;
-              FSelStartOffs := CaretPos.X + 1;
-              FSelEndNo := CaretPos.Y;
+              FSelection.StartPos := fpgPoint(CaretPos.X+1, CaretPos.Y);
               if ssCtrl in ShiftState then
-                CtrlKeyLeftKey
-              else
-                FSelEndOffs := CaretPos.X;
+                CtrlKeyLeftKey;
+              FSelection.EndPos := CaretPos;
             end
             else
             begin
-              FSelEndNo := CaretPos.Y;
               if ssCtrl in ShiftState then
-                CtrlKeyLeftKey
-              else
-                FSelEndOffs := CaretPos.X;
-              if FSelEndNo <= (FLines.Count-1) then
+                CtrlKeyLeftKey;
+              FSelection.EndPos := CaretPos;
+              if FSelection.EndLine <= (FLines.Count-1) then
               begin
-                if FSelEndOffs > UTF8Length(FLines[FSelEndNo]) then
+                if not FSelection.ValidateEndOffset(FLines[FSelection.EndLine]) then
                 begin
-                  FSelEndOffs := UTF8Length(FLines[FSelEndNo]) - 1;
-                  CaretPos.X := FSelEndOffs;
+                  CaretPos.X := FSelection.EndPos.X;
                 end;
               end
               else
               begin
-                FSelEndOffs := 0;
                 CaretPos.X := 0;
+                FSelection.EndPos := CaretPos;
               end;
             end;
-            FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            FSelected := FSelection.HasContent;
             Exit;
           end;
           if FSelected then
@@ -936,8 +941,7 @@ begin
           begin
             CtrlKeyLeftKey;
           end;
-          FSelStartNo := CaretPos.Y;
-          FSelStartOffs := CaretPos.X;
+          FSelection.StartPos := CaretPos;
         end;
 
     keyRight:
@@ -953,21 +957,18 @@ begin
             if not FSelected then
             begin
               FSelected := True;
-              FSelStartNo := CaretPos.Y;
-              FSelStartOffs := CaretPos.X - 1;
+              FSelection.StartPos := fpgPoint(CaretPos.X-1, CaretPos.Y);
               if ssCtrl in ShiftState then
                 CtrlKeyRightKey;
-              FSelEndNo := CaretPos.Y;
-              FSelEndOffs := CaretPos.X;
+              FSelection.EndPos := CaretPos;
             end
             else
             begin
               if ssCtrl in ShiftState then
                 CtrlKeyRightKey;
-              FSelEndNo := CaretPos.Y;
-              FSelEndOffs := CaretPos.X;
+              FSelection.EndPos := CaretPos;
             end;
-            FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            FSelected := FSelection.HasContent;
             Exit;
           end;
           if FSelected then
@@ -978,8 +979,7 @@ begin
           begin
             CtrlKeyRightKey;
           end;
-          FSelStartNo := CaretPos.Y;
-          FSelStartOffs := CaretPos.X;
+          FSelection.StartPos := CaretPos;
         end;
 
     keyUp:
@@ -997,7 +997,7 @@ begin
               FSelected := False;
               Exit;
             end;
-            FSelStartNo := CaretPos.Y;
+            FSelection.StartPos := CaretPos;
             Exit;
           end
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
@@ -1005,7 +1005,7 @@ begin
             CaretPos.Y := CaretPos.Y - 1;
             if FVScrollBar.Visible then
               FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
-            FSelStartNo := CaretPos.Y;
+            FSelection.StartPos := CaretPos;
             Exit;
           end
           else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
@@ -1013,17 +1013,14 @@ begin
             CaretPos.Y := CaretPos.Y - 1;
             if not FSelected then
             begin
-              FSelStartNo := CaretPos.Y + 1;
-              FSelStartOffs := CaretPos.X;
-              FSelEndNo := CaretPos.Y;
-              FSelEndOffs := CaretPos.X;
+              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y +1);
+              FSelection.EndPos := CaretPos;
               FSelected := True;
             end
             else
             begin
-              FSelEndNo := CaretPos.Y;
-              FSelEndOffs := CaretPos.X;
-              FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+              FSelection.EndPos := CaretPos;
+              FSelected := FSelection.HasContent;
             end;
           end;
         end;
@@ -1043,7 +1040,7 @@ begin
               FSelected := False;
               Exit;
             end;
-            FSelStartNo := CaretPos.Y;
+            FSelection.StartPos := CaretPos;
             Exit;
           end
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
@@ -1051,7 +1048,7 @@ begin
             CaretPos.Y := CaretPos.Y + 1;
             if FVScrollBar.Visible then
               FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
-            FSelStartNo := CaretPos.Y;
+            FSelection.StartPos := CaretPos;
             Exit;
           end
           else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
@@ -1059,17 +1056,14 @@ begin
             CaretPos.Y := CaretPos.Y + 1;
             if not FSelected then
             begin
-              FSelStartNo   := CaretPos.Y - 1;
-              FSelStartOffs := CaretPos.X;
-              FSelEndNo     := CaretPos.Y;
-              FSelEndOffs   := CaretPos.X;
+              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y -1);
+              FSelection.EndPos := CaretPos;
               FSelected     := True;
             end
             else
             begin
-              FSelEndNo     := CaretPos.Y;
-              FSelEndOffs   := CaretPos.X;
-              FSelected     := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+              FSelection.EndPos := CaretPos;
+              FSelected     := FSelection.HasContent;
             end;
           end;
         end;
@@ -1091,14 +1085,12 @@ begin
             begin
               if not FSelected then
               begin
-                FSelStartNo := CaretPos.Y;
-                FSelStartOffs := CaretPos.X;
+                FSelection.StartPos := CaretPos;
                 FSelected := True;
               end;
               CaretPos.Y := 0;
               CaretPos.X := 0;
-              FSelEndNo := 0;
-              FSelEndOffs := 0;
+              FSelection.EndPos := CaretPos;
             end
             else
             begin
@@ -1113,15 +1105,13 @@ begin
           begin
             if not FSelected then
             begin
-              FSelStartNo := CaretPos.Y;
-              FSelStartOffs := CaretPos.X;
+              FSelection.StartPos := CaretPos;
               FSelected := True;
             end;
             CaretPos.X := 0;
-            FSelEndNo := CaretPos.Y;
-            FSelEndOffs := 0;
-            if FSelEndNo = FSelStartNo then
-              FSelected := (FSelStartOffs <> FSelEndOffs);
+            FSelection.EndPos := CaretPos;
+            if FSelection.StartLine = FSelection.EndLine then
+              FSelected := FSelection.HasContent;
           end;
         end;
 
@@ -1140,14 +1130,12 @@ begin
             begin
               if not FSelected then
               begin
-                FSelStartNo := CaretPos.Y;
-                FSelStartOffs := CaretPos.X;
+                FSelection.StartPos := CaretPos;
                 FSelected := True;
               end;
               CaretPos.Y := pred(FLines.Count);
               CaretPos.X := Length(FLines[CaretPos.Y]);
-              FSelEndNo := pred(FLines.Count);
-              FSelEndOffs := Length(FLines[CaretPos.Y]);
+              FSelection.EndPos := fpgPoint(Length(FLines[CaretPos.Y]), pred(FLines.Count));
             end else
             begin
               CaretPos.Y := pred(FLines.Count);
@@ -1161,21 +1149,19 @@ begin
           begin
             if not FSelected then
             begin
-              FSelStartNo := CaretPos.Y;
               if CaretPos.Y <= pred(FLines.Count) then
                 if CaretPos.X > Length(FLines[CaretPos.Y]) then
                   CaretPos.X := Length(FLines[CaretPos.Y]);
-              FSelStartOffs := CaretPos.X;
+              FSelection.StartPos := CaretPos;
               FSelected := True;
             end;
             if CaretPos.Y <= pred(FLines.Count) then
               CaretPos.X := Length(FLines[CaretPos.Y])
             else
               CaretPos.X := 0;
-            FSelEndNo := CaretPos.Y;
-            FSelEndOffs := CaretPos.X;
-            if FSelEndNo = FSelStartNo then
-              FSelected := (FSelStartOffs <> FSelEndOffs);
+            FSelection.EndPos := CaretPos;
+            if FSelection.EndLine = FSelection.StartLine then
+              FSelected := FSelection.HasContent;
           end;
         end;
 
@@ -1183,8 +1169,7 @@ begin
         begin
           if not FSelected then
           begin
-            FSelStartNo := CaretPos.Y;
-            FSelStartOffs := CaretPos.X;
+            FSelection.StartPos := CaretPos;
           end;
           SaveYCaretOffset := CaretPos.Y - FTopLine;
           if AKeyCode = keyPageUp then
@@ -1221,8 +1206,7 @@ begin
           end;
           if ssShift in ShiftState then
           begin
-            FSelEndNo := CaretPos.Y;
-            FSelEndOffs := CaretPos.X;
+            FSelection.EndPos := CaretPos;
             if not FSelected then
               FSelected := True;
           end;
@@ -1338,24 +1322,7 @@ begin
   GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
   CaretPos.X := CNo;
   CaretPos.Y := RNo;
-  FSelDrag := False;
-  if (RNo in [FSelStartNo..FSelEndNo]) or (RNo in [FSelEndNo..FSelStartNo]) then
-  begin
-    if (FSelStartNo = FSelEndNo) and ((CNo in [FSelStartOffs..FSelEndOffs]) or
-      (CNo in [FSelEndOffs..FSelStartOffs])) then FSelDrag := True;
-    if FSelStartNo <> FSelEndNo then
-    begin
-      FSelDrag := True;
-      if (RNo = FSelStartNo) and (FSelStartNo < FSelEndNo) and (CNo < FSelStartOffs) then
-        FSelDrag := False;
-      if (RNo = FSelStartNo) and (FSelStartNo > FSelEndNo) and (CNo > FSelStartOffs) then
-        FSelDrag := False;
-      if (RNo = FSelEndNo) and (FSelStartNo < FSelEndNo) and (CNo > FSelStartOffs) then
-        FSelDrag := False;
-      if (RNo = FSelEndNo) and (FSelStartNo > FSelEndNo) and (CNo < FSelStartOffs) then
-        FSelDrag := False;
-    end;
-  end;
+  FSelDrag := FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo));
   if FSelDrag then
   begin
 //    writeln('  SelDrag is True!!!!');
@@ -1368,17 +1335,14 @@ begin
       { Erase old selection, if any... }
       FSelected := False;
     end;
-    FSelStartNo := RNo;
-    FSelEndNo := FSelStartNo;
-    FSelStartOffs := CNo;
-    FSelEndOffs := FSelStartOffs;
+    FSelection.StartPos := fpgPoint(CNo, RNo);
 //    FSelected := True;
     FSelMouseDwn := True;
   end
   else
   begin
-    FSelEndNo := RNo;
-    FSelEndOffs := CNo;
+    FSelection.StartPos := FSelection.Origin;
+    FSelection.EndPos := fpgPoint(CNo, RNo);
     FSelected := True;
   end;
   Invalidate;
@@ -1508,10 +1472,8 @@ begin
               Continue;
             end;
         end;
-        FSelStartNo := I;
-        FSelEndNo := I;
-        Self.FSelStartOffs := FindPos.x - 1;
-        FSelEndOffs := FindPos.x + Length(SrcWord) - 1;
+        FSelection.StartPos := fpgPoint(FindPos.X -1, I);
+        FSelection.EndPos   := fpgPoint(FindPos.X + Length(SrcWord) - 1, I);
         FSelected := True;
         CaretPos.Y := I;
         CaretPos.X := FindPos.x + Length(SrcWord) - 1;
@@ -1590,10 +1552,8 @@ begin
               Continue;
             end;
         end;
-        FSelStartNo := I;
-        FSelEndNo := I;
-        Self.FSelStartOffs := FindPos.x - 1;
-        FSelEndOffs := FindPos.x + Length(SrcWord) - 1;
+        FSelection.StartPos := fpgPoint(FindPos.x - 1, I);
+        FSelection.EndPos   := fpgPoint(FindPos.x + Length(SrcWord) - 1, I);
         FSelected := True;
         CaretPos.Y := I;
         CaretPos.X := FindPos.x + Length(SrcWord) - 1;
@@ -1760,8 +1720,7 @@ begin
               CaretPos.X := 0;
             end;
           end;
-          FSelStartNo := CaretPos.Y;
-          FSelStartOffs := CaretPos.X;
+          FSelection.StartPos := CaretPos;
           consumed := True;
         end;
 
@@ -1771,8 +1730,7 @@ begin
           UTF8Insert(AddS, SLine, CaretPos.X);
           FLines[CaretPos.Y] := SLine;
           CaretPos.X := CaretPos.X + 2;
-          FSelStartNo := CaretPos.Y;
-          FSelStartOffs := CaretPos.X;
+          FSelection.StartPos := CaretPos;
           consumed := True;
         end;
 
@@ -1796,8 +1754,7 @@ begin
           CaretPos.Y := CaretPos.Y + 1;
           CaretPos.X := 0;
           CaretScroll:=True;
-          FSelStartNo := CaretPos.Y;
-          FSelStartOffs := CaretPos.X;
+          FSelection.StartPos := CaretPos;
           consumed := True;
         end;
 
@@ -1892,8 +1849,7 @@ begin
       UTF8Insert(AText, SLine, CaretPos.X + 1);
       FLines[CaretPos.Y] := SLine;
       CaretPos.X := CaretPos.X + 1;
-      FSelStartNo := CaretPos.Y;
-      FSelStartOffs := CaretPos.X;
+      FSelection.StartPos := CaretPos;
       consumed := True;
     end;
   end;
@@ -2129,8 +2085,7 @@ begin
 
   if not FSelected then
   begin
-    FSelStartNo := CaretPos.Y;
-    FSelStartOffs := CaretPos.X;
+    FSelection.StartPos := CaretPos;
   end;
 end;
 
@@ -2283,10 +2238,7 @@ begin
   CaretPos.x := 0;
   CaretPos.y := 0;
   ScrollTo(0, 0);
-  FSelStartNo := 0;
-  FSelStartOffs := 0;
-  FSelEndNo := 0;
-  FSelEndOffs := 0;
+  FSelection.StartPos := fpgPoint(0,0);
   FLines.Clear;
   FSelected := False;
   Invalidate;
@@ -2319,8 +2271,7 @@ begin
   if I > 0 then
   begin
     BufS := '';
-    FSelStartNo := Row;
-    FSelStartOffs := Length(BufS1);
+    FSelection.StartPos := fpgPoint(Length(BufS1), Row);
     while I > 0 do
     begin
       BufS := Copy(SLine, 1, I - 1);
@@ -2329,8 +2280,7 @@ begin
       I := pos(#13#10, SLine);
       CaretPos.Y := Row;
       CaretPos.X := Length(BufS);
-      FSelEndNo := Row;
-      FSelEndOffs := CaretPos.X;
+      FSelection.EndPos := CaretPos;
       Row := Row + 1;
     end;
     if SLine <> '' then
@@ -2338,8 +2288,7 @@ begin
       FLines[Row] := SLine;
       CaretPos.Y := Row;
       CaretPos.X := Length(SLine) - Length(BufS2);
-      FSelEndNo := Row;
-      FSelEndOffs := CaretPos.X;
+      FSelection.EndPos := CaretPos;
     end;
     Invalidate;
   end
@@ -2349,8 +2298,7 @@ begin
     if I > 0 then
     begin
       BufS := '';
-      FSelStartNo := Row;
-      FSelStartOffs := Length(BufS1);
+      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
       while I > 0 do
       begin
         BufS := Copy(SLine, 1, I - 1);
@@ -2359,8 +2307,7 @@ begin
         I := pos(#10, SLine);
         CaretPos.Y := Row;
         CaretPos.X := Length(BufS);
-        FSelEndNo := Row;
-        FSelEndOffs := CaretPos.X;
+        FSelection.EndPos := CaretPos;
         Row := Row + 1;
       end;
       if SLine <> '' then
@@ -2368,8 +2315,7 @@ begin
         FLines[Row] := SLine;
         CaretPos.Y := Row;
         CaretPos.X := Length(SLine) - Length(BufS2);
-        FSelEndNo := Row;
-        FSelEndOffs := CaretPos.X;
+        FSelection.EndPos := CaretPos;
       end;
       Invalidate;
     end else
@@ -2377,10 +2323,8 @@ begin
       CaretPos.Y := Row;
       FLines[Row] := SLine;
       CaretPos.X := Col + Length(S);
-      FSelStartNo := Row;
-      FSelEndNo := Row;
-      FSelStartOffs := Length(BufS1);
-      FSelEndOffs := CaretPos.X;
+      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+      FSelection.EndPos   := fpgPoint(CaretPos.X, Row);
       Invalidate;
     end;
   end;
@@ -2407,27 +2351,11 @@ var
   StartLine, StartPos, EndLine, EndPos, I, DelLine: Integer;
 begin
   if not FSelected then Exit;
-  if FSelStartNo > FSelEndNo then
-  begin
-    StartLine := FSelEndNo;
-    StartPos := FSelEndOffs;
-    EndLine := FSelStartNo;
-    EndPos := FSelStartOffs;
-  end
-  else if (FSelStartNo = FSelEndNo) and (FSelEndOffs < FSelStartOffs) then
-  begin
-    StartLine := FSelStartNo;
-    StartPos := FSelEndOffs;
-    EndLine := StartLine;
-    EndPos := FSelStartOffs;
-  end
-  else
-  begin
-    StartLine := FSelStartNo;
-    StartPos := FSelStartOffs;
-    EndLine := FSelEndNo;
-    EndPos := FSelEndOffs;
-  end;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+  StartPos  := FSelection.StartPos.X;
+  EndPos    := FSelection.EndPos.X;
 
   if StartLine > (FLines.Count-1) then
     Exit;
@@ -2459,31 +2387,12 @@ var
 begin
   Result := '';
   if not FSelected then Exit;
-  if not FSelected then Exit;
-  if FSelStartNo > FSelEndNo then
-  begin
-    StartLine := FSelEndNo;
-    StartPos := FSelEndOffs;
-    EndLine := FSelStartNo;
-    EndPos := FSelStartOffs;
-  end
-  else
-  begin
-    if (FSelStartNo = FSelEndNo) and (FSelEndOffs < FSelStartOffs) then
-    begin
-      StartLine := FSelStartNo;
-      StartPos := FSelEndOffs;
-      EndLine := StartLine;
-      EndPos := FSelStartOffs;
-    end
-    else
-    begin
-      StartLine := FSelStartNo;
-      StartPos := FSelStartOffs;
-      EndLine := FSelEndNo;
-      EndPos := FSelEndOffs;
-    end;
-  end;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+  StartPos  := FSelection.StartPos.X;
+  EndPos    := FSelection.EndPos.X;
+
   if StartLine > pred(FLines.Count) then Exit;
   if EndLine > pred(FLines.Count) then
     EndLine := pred(FLines.Count);

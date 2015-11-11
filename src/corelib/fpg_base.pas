@@ -938,6 +938,8 @@ type
 
 operator = (const r1,r2 : TfpgRect) b : boolean;
 operator = (const A, B: TfpgPoint): Boolean;
+operator := (const A: TfpgPoint): TPoint;
+operator := (const A: TPoint): TfpgPoint;
 operator in (const A: TfpgString; const B: array of TfpgString): Boolean;
 
 
@@ -988,6 +990,18 @@ uses
 const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
+
+operator:=(const A: TfpgPoint): TPoint;
+begin
+  Result.X:=A.X;
+  Result.Y:=A.Y;
+end;
+
+operator:=(const A: TPoint): TfpgPoint;
+begin
+  Result.X:=A.X;
+  Result.Y:=A.Y;
+end;
 
 operator in(const A: TfpgString; const B: array of TfpgString): Boolean;
 var
