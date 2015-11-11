@@ -25,6 +25,8 @@ uses
 
 type
 
+  { TfpgDNDWindow }
+
   TfpgDNDWindow = class(TfpgWindow)
   private
     FDrag: TfpgDrag;
@@ -33,6 +35,7 @@ type
   public
     constructor Create(AOwner: TComponent; ADrag: TfpgDrag);
     procedure   Show(ASize: TfpgSize);
+    function    HasWidgetChildren: Boolean;
   end;
 
 implementation
@@ -63,6 +66,16 @@ begin
 
   HandleShow;
   SetPosition(Left, Top, ASize.W, ASize.H);
+end;
+
+function TfpgDNDWindow.HasWidgetChildren: Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to ComponentCount-1 do
+    if Components[I].InheritsFrom(TfpgWidgetBase) then
+      Exit(True);
 end;
 
 end.

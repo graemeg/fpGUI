@@ -3128,7 +3128,7 @@ begin
     raise Exception.Create(ClassName + ': No Source window was specified before starting the drag');
   if ADropActions = [] then
     raise Exception.Create(ClassName + ': No Drop Action was specified');
-  if Assigned(FOnPaintPreview) then
+  if Assigned(FOnPaintPreview) or TfpgDNDWindow(FPreviewWin).HasWidgetChildren then
     TfpgDNDWindow(FPreviewWin).Show(FPreviewSize);
   Result := inherited Execute(ADropActions, ADefaultAction);
 end;
