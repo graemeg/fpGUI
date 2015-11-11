@@ -1745,6 +1745,7 @@ begin
                 FLines.Add(''); { ??? }
           CaretPos.Y := CaretPos.Y + 1;
           CaretPos.X := 0;
+          CaretScroll:=True;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
           consumed := True;
