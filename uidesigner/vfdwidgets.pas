@@ -223,32 +223,32 @@ begin
     'vfd.trackbar', @stdimg_vfd_trackbar,
     sizeof(stdimg_vfd_trackbar),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.gauge', @stdimg_vfd_gauge,
     sizeof(stdimg_vfd_gauge),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.menubar', @stdimg_vfd_menubar,
     sizeof(stdimg_vfd_menubar),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.listview', @stdimg_vfd_listview,
     sizeof(stdimg_vfd_listview),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.stringgrid', @stdimg_vfd_stringgrid,
     sizeof(stdimg_vfd_stringgrid),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.radiobutton', @stdimg_vfd_radiobutton,
     sizeof(stdimg_vfd_radiobutton),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.pagecontrol', @stdimg_vfd_pagecontrol,
     sizeof(stdimg_vfd_pagecontrol),
@@ -263,12 +263,12 @@ begin
     'vfd.newform', @stdimg_vfd_newform,
     sizeof(stdimg_vfd_newform),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.combodateedit', @stdimg_vfd_dateedit,
     sizeof(stdimg_vfd_dateedit),
     0, 0);
-    
+
   fpgImages.AddMaskedBMP(
     'vfd.bevel', @stdimg_vfd_bevel,
     sizeof(stdimg_vfd_bevel),
@@ -515,9 +515,6 @@ begin
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
-  wc.AddProperty('ExtraHintColor', TPropertyColor, '');
-  wc.AddProperty('ExtraHintFontDesc', TPropertyFontDesc, '');
-  wc.AddProperty('ExtraHintAlignment', TPropertyEnum, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
@@ -765,7 +762,7 @@ begin
   wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.treeview';
   RegisterVFDWidget(wc);
-  
+
   // PageControl
   wc          := TVFDPageControlWidgetClass.Create(TfpgPageControl);
   wc.NameBase := 'PageControl';
@@ -1061,6 +1058,6 @@ initialization
 finalization
     FVFDWidgets.Free;
     FVFDFormWidget.Free;
-    
+
 end.
 
