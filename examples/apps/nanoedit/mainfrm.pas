@@ -50,6 +50,9 @@ type
     procedure CheckIPCMessages(Sender: TObject);
     procedure IPCMessageReceived;
     procedure LoadFile(const AFileName: TfpgString);
+    procedure Bevel1DragEnter(Sender: TfpgDrop);
+    procedure Bevel1DragLeave(Sender: TfpgDrop);
+    procedure PanelDragDrop(Sender: TfpgDrop; AData: variant);
   public
     destructor Destroy; override;
     procedure AfterCreate; override;
@@ -352,6 +355,7 @@ begin
     FontDesc := '#edit2';
     GutterVisible := True;
     RightEdge := True;
+    DropHandler := TfpgDropEventHandler.Create(@Bevel1DragEnter, @Bevel1DragLeave, @PanelDragDrop, nil);
   end;
 
   btnGO := TfpgButton.Create(self);
@@ -394,6 +398,47 @@ begin
   menu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
   menu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
 end;
+
+procedure TMainForm.Bevel1DragEnter(Sender: TfpgDrop);
+var
+  s: string;
+begin
+//  ShowMimeList(Sender.Mimetypes);
+  { the mime type we want to accept }
+  s := 'text/uri-list';
+  { if we will accept the drop, set CanDrop to True }
+  Sender.CanDrop := Sender.AcceptMimeType([s]);
+  if Sender.CanDrop then
+  begin
+//    Bevel1.BackgroundColor := clRed;
+  end;
+end;
+
+procedure TMainForm.Bevel1DragLeave(Sender: TfpgDrop);
+begin
+//  Bevel1.BackgroundColor := clWindowBackground;
+end;
+
+procedure TMainForm.PanelDragDrop(Sender: TfpgDrop; AData: variant);
+var
+  s: string;
+begin
+  { TODO: handle multiple files in a single drop. }
+  s := AData;
+  if Pos('file:///', s) < 1 then
+  begin
+    exit
+  end
+  else
+  begin
+    s := StringReplace(s, 'file://', '', [rfReplaceAll]);
+    s := StringReplace(s, #10, '', [rfReplaceAll]);
+    s := StringReplace(s, #13, '', [rfReplaceAll]);
+    writeln('<'+s+'>');
+  end;
+  LoadFile(s);
+end;
+
 
 
 end.
