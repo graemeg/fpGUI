@@ -980,7 +980,7 @@ begin
 
     keyDown:
         begin
-          if CaretPos.Y >= FLines.Count then
+          if Succ(CaretPos.Y) >= FLines.Count then
             Exit;
           if ShiftState = [] then
           begin
