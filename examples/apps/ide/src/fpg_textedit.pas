@@ -86,6 +86,20 @@ type
 
   TfpgBaseTextEdit = class(TfpgWidget)
   private
+  type
+    TSelection = object
+    private
+      FReversed: Boolean; // May not be that useful
+      FStartPos: TfpgPoint;
+      FEndPos: TfpgPoint;
+      procedure SetEndPos(AValue: TfpgPoint);
+      procedure SetStartPos(AValue: TfpgPoint);
+    public
+      property StartPos: TfpgPoint read FStartPos write SetStartPos;
+      property EndPos: TfpgPoint read FEndPos write SetEndPos;
+      property Reversed: Boolean read FReversed;
+    end;
+  private
     FFont: TfpgFont;
     FFullRedraw: Boolean;
     FLines: TStrings;
@@ -283,6 +297,42 @@ begin
   if RetX < 1 then
     Result := False;
   PosX := RetX;
+end;
+
+{ TfpgBaseTextEdit.TSelection }
+
+procedure TfpgBaseTextEdit.TSelection.SetEndPos(AValue: TfpgPoint);
+begin
+  if FEndPos=AValue then Exit;
+
+  if (AValue.Y < FStartPos.Y) or ((AValue.Y = FStartPos.Y) and (AValue.X < FStartPos.X)) then
+  begin
+    FEndPos := FStartPos;
+    FStartPos := AValue;
+    FReversed:=True;
+  end
+  else
+  begin
+    FEndPos:=AValue;
+    FReversed:=False;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.TSelection.SetStartPos(AValue: TfpgPoint);
+begin
+  if FStartPos=AValue then Exit;
+
+  if (AValue.Y > FEndPos.Y) or ((AValue.Y = FEndPos.Y) and (AValue.X > FEndPos.X)) then
+  begin
+    FStartPos := FEndPos;
+    FEndPos := AValue;
+    FReversed:=True;
+  end
+  else
+  begin
+    FStartPos:=AValue;
+    FReversed:=False;
+  end;
 end;
 
 
