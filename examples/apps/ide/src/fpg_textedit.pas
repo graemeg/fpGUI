@@ -854,12 +854,14 @@ var
           CaretPos.X := I - 1;
           NotFindIt := False;
         end
-        else
+        else if CaretPos.Y < FLines.Count-1 then
         begin
           CaretPos.Y := CaretPos.Y + 1;
           CaretPos.X := 0;
           NotFindIt := False;
-        end;
+        end
+        else
+          NotFindIt := False;
         if CaretPos.Y > pred(FLines.Count) then
         begin
           NotFindIt := False;
@@ -946,7 +948,6 @@ begin
           begin
             FSelected := False;
             CaretPos := FSelection.StartPos;
-            FSelection.StartPos := CaretPos;
           end;
           if ssCtrl in ShiftState then
           begin
@@ -993,7 +994,6 @@ begin
           begin
             FSelected := False;
             CaretPos := FSelection.EndPos;
-            FSelection.StartPos := CaretPos;
           end;
           if ssCtrl in ShiftState then
           begin
