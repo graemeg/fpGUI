@@ -875,6 +875,13 @@ begin
   case AKeyCode of
     keyLeft:
         begin
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) and FSelected  then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.StartPos;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end;
           CaretPos.X := CaretPos.X - 1;
           if CaretPos.X < 0 then
           begin
@@ -938,6 +945,8 @@ begin
           if FSelected then
           begin
             FSelected := False;
+            CaretPos := FSelection.StartPos;
+            FSelection.StartPos := CaretPos;
           end;
           if ssCtrl in ShiftState then
           begin
@@ -948,6 +957,13 @@ begin
 
     keyRight:
         begin
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) and FSelected  then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.EndPos;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end;
           CaretPos.X := CaretPos.X + 1;
           if CaretPos.X > FMaxScrollH then
           begin
@@ -976,6 +992,8 @@ begin
           if FSelected then
           begin
             FSelected := False;
+            CaretPos := FSelection.EndPos;
+            FSelection.StartPos := CaretPos;
           end;
           if ssCtrl in ShiftState then
           begin
