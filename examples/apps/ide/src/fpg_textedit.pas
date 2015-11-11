@@ -1364,9 +1364,9 @@ begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
   if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
   begin
+    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
     CaretPos.X := CNo;
     CaretPos.Y := RNo;
-    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
     FSelection.StartPos := FSelection.Origin;
     FSelection.EndPos := fpgPoint(CNo, RNo);
     FSelected:=True;
