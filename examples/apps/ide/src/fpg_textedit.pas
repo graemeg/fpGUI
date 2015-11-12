@@ -205,7 +205,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
-    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
+    procedure   HandleMultiClick(count: Integer; x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     function    GetDefaultDropHandler: TfpgDropHandler; override;
@@ -1857,18 +1857,29 @@ begin
   fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
 end;
 
-procedure TfpgBaseTextEdit.HandleDoubleClick(x, y: integer; button: word;
-  shiftstate: TShiftState);
+procedure TfpgBaseTextEdit.HandleMultiClick(count: Integer; x, y: integer;
+  button: word; shiftstate: TShiftState);
 var
   WordStart: Integer;
   W: TfpgString;
 begin
-  inherited HandleDoubleClick(x, y, button, shiftstate);
-  W := GetWordAtPos(CaretPos.X, CaretPos.Y, WordStart);
-  if W <> '' then
+  case count of
+    2:  begin
+          W := GetWordAtPos(CaretPos.X, CaretPos.Y, WordStart);
+          if W <> '' then
+          begin
+            FSelection.StartPos := fpgPoint(WordStart, CaretPos.Y);
+            FSelection.EndPos   := fpgPoint(WordStart + Length8(W), CaretPos.Y);
+          end;
+        end;
+    3:  begin
+          FSelection.StartPos := fpgPoint(1, CaretPos.Y);
+          FSelection.EndPos := fpgPoint(Length8(FLines[CaretPos.Y]), CaretPos.Y);
+        end;
+    // 4: { select paragraph}
+  end;
+  if FSelection.HasContent then
   begin
-    FSelection.StartPos := fpgPoint(WordStart, CaretPos.Y);
-    FSelection.EndPos   := fpgPoint(WordStart + Length8(W), CaretPos.Y);
     FSelected:=True;
     Invalidate;
     FIsMultiClick:=True;
