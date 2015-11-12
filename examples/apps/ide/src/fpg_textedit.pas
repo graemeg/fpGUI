@@ -87,6 +87,7 @@ type
   TfpgBaseTextEdit = class(TfpgWidget)
   private
   type
+    TSelDrag = (sdNone, sdMightDrag, sdDragging ,sdDragged);
 
     { TSelection }
 
@@ -138,8 +139,9 @@ type
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     FTracking: Boolean;
-    FSelDrag: Boolean;
+    FSelDrag: TSelDrag;
     FSelected, FSelMouseDwn: Boolean;
+    FIsMultiClick: Boolean;
     FGutterPan: TfpgGutter;
     FRightEdge: Boolean;
     FRightEdgeCol: Integer;
@@ -203,6 +205,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     function    GetDefaultDropHandler: TfpgDropHandler; override;
@@ -563,8 +566,10 @@ var
   Edit: TfpgTextEdit;
   I: Integer;
 begin
-  if not FSelDrag or not FSelection.HasContent then
+  if (FSelDrag = sdNone) or not FSelection.HasContent then
     Exit; // ==>
+
+  FSelDrag := sdDragging;
 
   Drag := TDragHack.Create(Self);
   Drag.MimeData := TfpgMimeData.Create;
@@ -592,6 +597,7 @@ begin
   case Drag.Execute([daCopy, daMove]) of
     daMove: DeleteSelection;
   end;
+  FSelDrag := sdDragged;
 end;
 
 procedure TfpgBaseTextEdit.DropEnter(Drop: TfpgDrop);
@@ -1502,9 +1508,9 @@ begin
   GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
   CaretPos.X := CNo;
   CaretPos.Y := RNo;
-  FSelDrag := FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo));
-  if FSelDrag then
+  if FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo)) then
   begin
+    FSelDrag := sdMightDrag;
 //    writeln('  SelDrag is True!!!!');
     Exit; //==>
   end;
@@ -1532,10 +1538,18 @@ procedure TfpgBaseTextEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
-  if not (ssShift in shiftstate) and not FSelDrag and not FSelMouseDwn then
+  if not (ssShift in shiftstate) and (FSelDrag = sdMightDrag) and not FIsMultiClick and FSelected then
+  begin
     FSelection.StartPos := CaretPos;
+    FSelected := False;
+    Invalidate;
+  end;
+
+  if FSelDrag <= sdMightDrag then
+    FSelDrag:=sdNone;
 
   FSelMouseDwn:=False;
+  FIsMultiClick:=False;
 end;
 
 procedure TfpgBaseTextEdit.HandleMouseMove(x, y: integer; btnstate: word;
@@ -1841,6 +1855,24 @@ begin
   msg.mouse.delta := ldelta;
 
   fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
+end;
+
+procedure TfpgBaseTextEdit.HandleDoubleClick(x, y: integer; button: word;
+  shiftstate: TShiftState);
+var
+  WordStart: Integer;
+  W: TfpgString;
+begin
+  inherited HandleDoubleClick(x, y, button, shiftstate);
+  W := GetWordAtPos(CaretPos.X, CaretPos.Y, WordStart);
+  if W <> '' then
+  begin
+    FSelection.StartPos := fpgPoint(WordStart, CaretPos.Y);
+    FSelection.EndPos   := fpgPoint(WordStart + Length8(W), CaretPos.Y);
+    FSelected:=True;
+    Invalidate;
+    FIsMultiClick:=True;
+  end;
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
