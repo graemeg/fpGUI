@@ -1873,7 +1873,7 @@ begin
           end;
         end;
     3:  begin
-          FSelection.StartPos := fpgPoint(1, CaretPos.Y);
+          FSelection.StartPos := fpgPoint(0, CaretPos.Y);
           FSelection.EndPos := fpgPoint(Length8(FLines[CaretPos.Y]), CaretPos.Y);
         end;
     // 4: { select paragraph}
