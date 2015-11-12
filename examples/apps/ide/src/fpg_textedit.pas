@@ -168,6 +168,7 @@ type
     procedure   SetTabWidth(const AValue: Integer);
     procedure   SetVScrollPos(const AValue: Integer);
     procedure   UpdateCharBounds;
+    procedure   DragStartDetected(Sender: TObject);
     procedure   GetSelBounds(var AStartNo, AEndNo, AStartOffs, AEndOffs: Integer);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -525,6 +526,48 @@ begin
     Exit; //==>
   FScrollBarStyle := AValue;
   UpdateScrollBarCoords;
+end;
+
+type
+  TDragHack = class(TfpgDrag);
+  TWidgetHack = class(TfpgWidget);
+
+procedure TfpgBaseTextEdit.DragStartDetected(Sender: TObject);
+var
+  Drag: TDragHack;
+  Win: TfpgWidget;
+  Edit: TfpgTextEdit;
+  I: Integer;
+begin
+  if not (FSelDrag and FSelection.HasContent) then
+    Exit; // ==>
+
+  Drag := TDragHack.Create(Self);
+  Drag.MimeData := TfpgMimeData.Create;
+  Drag.MimeData.Text := GetSelectedText;
+
+  // we are cheating and using a widget in the preview window instead of painting it ourselves.
+  Win := TfpgWidget(Drag.FPreviewWin);
+  Edit := TfpgTextEdit.Create(Win);
+  Edit.Lines.Text := GetSelectedText;
+
+  // Trim the preview text so more can be seen.
+  for I := Edit.Lines.Count-1 downto 0 do
+    if Trim(Edit.Lines[I]) = '' then
+      Edit.Lines.Delete(I)
+    else
+      Edit.Lines[I] := Trim(Edit.Lines[I]);
+
+  Edit.FontDesc := FontDesc;
+
+  Drag.PreviewSize := fpgSize(Edit.Width, Edit.Height);
+
+  // Set the Preview Win Relative to the cursor.
+  TWidgetHack(Self).FDragStartPos := fpgPoint(-5,-5);
+
+  case Drag.Execute([daCopy, daMove]) of
+    daMove: DeleteSelection;
+  end;
 end;
 
 function TfpgBaseTextEdit.GetFontDesc: string;
@@ -1346,7 +1389,7 @@ begin
   if FSelDrag then
   begin
 //    writeln('  SelDrag is True!!!!');
-//    Exit; //==>
+    Exit; //==>
   end;
   if not (ssShift in ShiftState) then
   begin
@@ -1371,6 +1414,10 @@ end;
 procedure TfpgBaseTextEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+
+  if not (ssShift in shiftstate) and not FSelDrag and not FSelMouseDwn then
+    FSelection.StartPos := CaretPos;
+
   FSelMouseDwn:=False;
 end;
 
@@ -2142,6 +2189,7 @@ begin
   Height        := 240;
   FLines        := TStringList.Create;
   TStringList(FLines).OnChange:=@LinesChanged;
+  OnDragStartDetected:=@DragStartDetected;
   CaretPos.x    := 0;
   CaretPos.y    := 0;
   FTopLine      := 0;
