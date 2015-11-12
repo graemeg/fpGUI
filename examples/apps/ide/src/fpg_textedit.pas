@@ -163,6 +163,7 @@ type
     function    GetVScrollPos: Integer;
     function    GetCaretPosH: Integer;
     function    GetCaretPosV: Integer;
+    function    GetLineFirstCharPos(ALine: Integer): Integer;
     procedure   LinesChanged(Sender: TObject);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
@@ -718,6 +719,21 @@ begin
   Result := CaretPos.X;
 end;
 
+function TfpgBaseTextEdit.GetLineFirstCharPos(ALine: Integer): Integer;
+var
+  L: String;
+  I: Integer;
+begin
+  Result := 0;
+  L := FLines[ALine];
+  // We dont need to worry about utf8. We are testing for ' ' from the start.
+  for I := 1 to Length(L) do
+  begin
+    if L[I] <> ' ' then
+      Exit(I-1);
+  end;
+end;
+
 procedure TfpgBaseTextEdit.LinesChanged(Sender: TObject);
 begin
   FGutterPan.UpdateSize;
@@ -1248,7 +1264,10 @@ begin
         begin
           if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
-            CaretPos.X := 0;
+            if CaretPos.X = 0 then
+              CaretPos.X := GetLineFirstCharPos(CaretPos.Y)
+            else
+              CaretPos.X := 0;
             if FSelected then
             begin
               FSelected := False;
