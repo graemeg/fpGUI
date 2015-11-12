@@ -43,6 +43,7 @@ type
     FInvalidated: Boolean;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
+    FOnMultiClick: TMouseButtonMultiClickEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnKeyChar: TfpgKeyCharEvent;
@@ -142,6 +143,7 @@ type
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); virtual;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); virtual;
+    procedure   HandleMultiClick(count: integer; x, y: integer; button: word; shiftstate: TShiftState); virtual;
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
@@ -158,6 +160,7 @@ type
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
+    property    OnMultiClick: TMouseButtonMultiClickEvent read FOnMultiClick write FOnMultiClick;
     property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
     property    OnExit: TNotifyEvent read FOnExit write FOnExit;
     property    OnKeyChar: TfpgKeyCharEvent read FOnKeyChar write FOnKeyChar;
@@ -230,6 +233,7 @@ var
   uLastClickWidget: TfpgWidget;
   uLastClickPoint: TPoint;
   uLastClickTime: DWord;
+  uMultiClickCount: Integer; { how many clicks have occured in a row that happen faster than DOUBLECLICK_MS }
   uMouseDownSourceWidget: TfpgWidget; { widget Left MButton was pressed on }
 
 
@@ -886,12 +890,23 @@ begin
         uLastClickTime := fpgGetTickCount;
         if IsDblClick then
         begin
+          // set uMultiClickCount to a sane value
+          Inc(uMultiClickCount);
+          if uMultiClickCount < 2 then uMultiClickCount := 2;
+          if (uMultiClickCount > 4) then uMultiClickCount := 2;
+
           FOnClickPending := False; { When Double Click occurs we don't want single click }
           HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
                 Point(msg.Params.mouse.x, msg.Params.mouse.y));
-        end;
+          HandleMultiClick(uMultiClickCount, msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
+          if Assigned(FOnMultiClick) then
+            FOnMultiClick(self, mb, msg.Params.mouse.shiftstate,
+                Point(msg.Params.mouse.x, msg.Params.mouse.y), uMultiClickCount);
+        end
+        else
+          uMultiClickCount:=1;
 
         // The mouse up must still be handled even if we had a double click event.
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
@@ -1338,6 +1353,11 @@ end;
 procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
 begin
   // do nothing yet
+end;
+
+procedure TfpgWidget.HandleMultiClick(count: integer; x, y: integer; button: word; shiftstate: TShiftState);
+begin
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMouseEnter;
