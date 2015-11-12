@@ -92,6 +92,7 @@ type
 
     TSelection = object
     private
+      FEdit: TfpgBaseTextEdit;
       FOrigin: TfpgPoint;
       FStartPos: TfpgPoint;
       FEndPos: TfpgPoint;
@@ -102,13 +103,17 @@ type
       function  StartLine: Integer;
       function  EndLine: Integer;
       function  Contains(APoint: TfpgPoint): Boolean;
+      procedure AdjustLines(ADelta: Integer);
+      procedure AdjustStartX(ADelta: Integer);
       // Returns True if no changes. False if Line length was adjusted.
       function  ValidateEndOffset(const ALine: String): Boolean;
       property  StartPos: TfpgPoint read FStartPos write SetStartPos;
       property  EndPos: TfpgPoint read FEndPos write SetEndPos;
       property  Origin: TfpgPoint read FOrigin;
     end;
+  class procedure ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
   private
+    FDefaultDropHandler: TfpgDropEventHandler;
     FFont: TfpgFont;
     FFullRedraw: Boolean;
     FLines: TStrings;
@@ -169,6 +174,9 @@ type
     procedure   SetVScrollPos(const AValue: Integer);
     procedure   UpdateCharBounds;
     procedure   DragStartDetected(Sender: TObject);
+    procedure   DropDrop(Drop: TfpgDrop; AData: Variant);
+    procedure   DropEnter(Drop: TfpgDrop);
+    procedure   DropMove(Drop: TfpgDrop; X, Y: TfpgCoord);
     procedure   GetSelBounds(var AStartNo, AEndNo, AStartOffs, AEndOffs: Integer);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -197,6 +205,7 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
+    function    GetDefaultDropHandler: TfpgDropHandler; override;
     { -- local widget functions -- }
     procedure   DrawVisible; virtual;
     procedure   DrawLine(const ALineIndex, Y: Integer); virtual;
@@ -269,7 +278,7 @@ implementation
 
 uses
   fpg_dialogs,
-//  fpg_constants,
+  fpg_constants,
   fpg_stringutils,
   fpg_utils,
   math,
@@ -318,10 +327,12 @@ begin
   if (AValue.Y < FOrigin.Y) or ((AValue.Y = FOrigin.Y) and (AValue.X < FOrigin.X)) then
   begin
     FStartPos := AValue;
+    ValidateCaretPosition(FStartPos, FEdit.FLines);
   end
   else
   begin
     FEndPos:=AValue;
+    ValidateCaretPosition(FEndPos, FEdit.FLines);
   end;
 end;
 
@@ -354,6 +365,19 @@ begin
       or (APoint.Y > FStartPos.Y))
   and (((APoint.Y = FEndPos.Y) and (APoint.X <= FEndPos.X))
       or (APoint.Y < FEndPos.Y));
+end;
+
+procedure TfpgBaseTextEdit.TSelection.AdjustLines(ADelta: Integer);
+begin
+  FStartPos.Y := FStartPos.Y + ADelta;
+  FEndPos.Y := FEndPos.Y + ADelta;
+end;
+
+procedure TfpgBaseTextEdit.TSelection.AdjustStartX(ADelta: Integer);
+begin
+  FStartPos.X := FStartPos.X + ADelta;
+  if FStartPos.Y = FEndPos.Y then
+    FEndPos.Y := FEndPos.Y + ADelta;
 end;
 
 function TfpgBaseTextEdit.TSelection.ValidateEndOffset(const ALine: String): Boolean;
@@ -539,7 +563,7 @@ var
   Edit: TfpgTextEdit;
   I: Integer;
 begin
-  if not (FSelDrag and FSelection.HasContent) then
+  if not FSelDrag or not FSelection.HasContent then
     Exit; // ==>
 
   Drag := TDragHack.Create(Self);
@@ -568,6 +592,89 @@ begin
   case Drag.Execute([daCopy, daMove]) of
     daMove: DeleteSelection;
   end;
+end;
+
+procedure TfpgBaseTextEdit.DropEnter(Drop: TfpgDrop);
+begin
+  Drop.CanDrop := Drop.AcceptMimeType([MIME_TEXT_PLAIN]);
+end;
+
+procedure TfpgBaseTextEdit.DropMove(Drop: TfpgDrop; X, Y: TfpgCoord);
+var
+  CursorCaret: TfpgPoint;
+begin
+  if Drop.SourceWidget = Self then
+    Drop.DropAction := daMove;
+
+  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, CursorCaret.Y, CursorCaret.X);
+
+  ValidateCaretPosition(CursorCaret, FLines);
+
+  if CaretPos <> CursorCaret then
+    Invalidate;
+  CaretPos := CursorCaret;
+
+
+  Drop.CanDrop := not FSelection.Contains(CursorCaret);
+end;
+
+procedure TfpgBaseTextEdit.DropDrop(Drop: TfpgDrop; AData: Variant);
+var
+  S : String;
+  NewLines: TStringList;
+  PartBegin: String = '';
+  PartEnd: String = '';
+  i: Integer;
+begin
+  if (Drop.SourceWidget = self) and (FSelection.Contains(CaretPos)) then
+    Exit; // =>
+
+  S := AData;
+
+  NewLines := TStringList.Create;
+  NewLines.Text:=s;
+
+  if Drop.SourceWidget = Self then
+  begin
+    if CaretPos.Y < FSelection.StartLine then
+    begin
+      FSelection.AdjustLines(NewLines.Count-1);
+    end;
+    if (CaretPos.Y = FSelection.StartLine) and (CaretPos.X < FSelection.StartPos.X) then
+    begin
+      FSelection.AdjustLines(NewLines.Count-1);
+      FSelection.AdjustStartX(Length8(NewLines[0]));
+    end;
+  end;
+
+
+  // split the line we are dropping into
+  PartBegin:=Copy8(Lines.Strings[CaretPos.Y], 1, CaretPos.X);
+  PartEnd  :=Copy8(Lines.Strings[CaretPos.Y], CaretPos.X+1, Length8(Lines.Strings[CaretPos.Y]));
+
+  for i := 0 to NewLines.Count-1 do
+  begin
+    if i = 0 then
+      S := PartBegin + NewLines[0]
+    else
+      S := NewLines[i];
+
+    if i = NewLines.Count-1 then
+      S := S + PartEnd;
+
+    if i = 0 then
+      Lines.Delete(CaretPos.Y+i);
+    Lines.Insert(CaretPos.Y+i, S);
+
+  end;
+
+  //CaretPos := FSel;
+  Invalidate;
+
+  NewLines.Free;
+
+
+
 end;
 
 function TfpgBaseTextEdit.GetFontDesc: string;
@@ -1312,6 +1419,16 @@ begin
   end;
 end;
 
+class procedure TfpgBaseTextEdit.ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
+var
+  S: String;
+  L: PtrInt;
+begin
+  S := ALines[APoint.Y];
+  L := Length8(S);
+  APoint.X := Min(L, APoint.X);
+end;
+
 procedure TfpgBaseTextEdit.HandleShow;
 begin
   inherited HandleShow;
@@ -1954,6 +2071,14 @@ begin
   {$ENDIF}
 end;
 
+function TfpgBaseTextEdit.GetDefaultDropHandler: TfpgDropHandler;
+begin
+  if not Assigned(FDefaultDropHandler) then
+    FDefaultDropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, @DropMove);
+
+  Result := FDefaultDropHandler;
+end;
+
 procedure TfpgBaseTextEdit.DrawVisible;
 var
   I, Y, cntVis: Integer;
@@ -2200,6 +2325,7 @@ begin
   FTracking     := True;
   FFullRedraw   := False;
   FSelected     := False;
+  FSelection.FEdit := Self;
   FRightEdge    := False;
   FRightEdgeCol := 80;
   FLineChanged := -1;
@@ -2233,6 +2359,8 @@ destructor TfpgBaseTextEdit.Destroy;
 begin
   FLines.Free;
   FFont.Free;
+  if Assigned(FDefaultDropHandler) then
+    FDefaultDropHandler.Free;
   inherited Destroy;
 end;
 
