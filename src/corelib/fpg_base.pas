@@ -446,6 +446,7 @@ type
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
     property    LineStyle: TfpgLineStyle read FLineStyle;
+    property    Widget: TfpgBaseWidget read FWidget;
   end;
 
   TfpgCanvasBaseClass = class of TfpgCanvasBase;
