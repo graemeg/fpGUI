@@ -62,11 +62,16 @@ type
     FLEDSize: integer;
     FLEDGap: integer;
     FText: TfpgString;
+    FTimer: TfpgTimer;
+    FScrolling: boolean;
+    FCurrentStep: smallint;
     procedure   SetLEDOnColor(const avalue: TfpgColor);
     procedure   SetLEDOffColor(const avalue: TfpgColor);
     procedure   SetLEDSize(const avalue: integer);
     procedure   SetLEDGap(const avalue: integer);
+    procedure   SetScrolling(const avalue: boolean);
     procedure   SetText(const avalue: TfpgString);
+    procedure   TimerFired(Sender: TObject);
   protected
     procedure   HandlePaint; override;
     procedure   PaintBackgroundLEDs(const AX, AY: TfpgCoord); virtual;
@@ -83,6 +88,7 @@ type
     property    LEDOffColor: TfpgColor read FLEDOffColor write SetLEDOffColor default TfpgColor($FF634210);
     property    Text: TfpgString read FText write SetText;
     property    Width default 150;
+    property    Scrolling: boolean read FScrolling write SetScrolling default False;
   end;
 
 
@@ -401,6 +407,8 @@ begin
   FLEDOffColor := TfpgColor($FF634210);
   FLEDGap := 1;
   FLEDSize := 2;
+  FScrolling := False;
+  FCurrentStep := 0;
 end;
 
 procedure TfpgLEDMatrix.SetLEDSize(const avalue: integer);
@@ -419,17 +427,40 @@ begin
   Repaint;
 end;
 
+procedure TfpgLEDMatrix.SetScrolling(const avalue: boolean);
+begin
+  if FScrolling = AValue then
+    Exit;
+  FScrolling := AValue;
+  if FScrolling then
+  begin
+    FTimer := TfpgTimer.Create(100);
+    FTimer.OnTimer := @TimerFired;
+    FTimer.Enabled := True;
+  end
+  else
+  begin
+    FTimer.Enabled := False;
+    FreeAndNil(FTimer);
+  end;
+end;
+
 procedure TfpgLEDMatrix.HandlePaint;
 var
   i: integer;
   dx, dy: TfpgCoord;
+  lLen: integer;
 begin
   inherited HandlePaint;
   dx := LEDGap;
   dy := (GetClientRect.Height - (LEDSize * 7) - (LEDGap * 6)) div 2;
   Canvas.Color := LEDOffColor;
   PaintBackgroundLEDs(dx, dy);
-  for i := 1 to UTF8Length(Text) do
+  { When scrolling we want the text to start on the right of the widget }
+  if FScrolling then
+    dx := GetClientRect.Right - LEDGap - FCurrentStep;
+  lLen := UTF8Length(Text);
+  for i := 1 to lLen do
   begin
     DrawLEDChar(dx, dy, UTF8Copy(Text, i, 1));
     inc(dx, (LEDSize+LEDGap) * 6);  // 6 is used because we want one empty column between characters
@@ -442,6 +473,14 @@ begin
     Exit;
   FText := AValue;
   RePaint;
+end;
+
+procedure TfpgLEDMatrix.TimerFired(Sender: TObject);
+begin
+  Inc(FCurrentStep, LEDSize + LEDGap);
+  RePaint;
+  if FCurrentStep > GetClientRect.Width then
+    FCurrentStep := 0;
 end;
 
 procedure TfpgLEDMatrix.DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar);
