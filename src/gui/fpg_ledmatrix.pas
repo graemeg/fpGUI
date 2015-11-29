@@ -65,6 +65,7 @@ type
     FTimer: TfpgTimer;
     FScrolling: boolean;
     FCurrentStep: smallint;
+    FScrollLengthPixels: integer;
     procedure   SetLEDOnColor(const avalue: TfpgColor);
     procedure   SetLEDOffColor(const avalue: TfpgColor);
     procedure   SetLEDSize(const avalue: integer);
@@ -72,8 +73,10 @@ type
     procedure   SetScrolling(const avalue: boolean);
     procedure   SetText(const avalue: TfpgString);
     procedure   TimerFired(Sender: TObject);
+    procedure   CalcScrollLength;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); override;
     procedure   PaintBackgroundLEDs(const AX, AY: TfpgCoord); virtual;
     procedure   DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar); virtual;
   public
@@ -416,6 +419,8 @@ begin
   if FLEDSize = AValue then
     Exit;
   FLEDSize := AValue;
+  if FScrolling then
+    CalcScrollLength;
   Repaint;
 end;
 
@@ -424,6 +429,8 @@ begin
   if FLEDGap = AValue then
     Exit;
   FLEDGap := AValue;
+  if FScrolling then
+    CalcScrollLength;
   Repaint;
 end;
 
@@ -434,6 +441,7 @@ begin
   FScrolling := AValue;
   if FScrolling then
   begin
+    CalcScrollLength;
     FTimer := TfpgTimer.Create(100);
     FTimer.OnTimer := @TimerFired;
     FTimer.Enabled := True;
@@ -462,9 +470,18 @@ begin
   lLen := UTF8Length(Text);
   for i := 1 to lLen do
   begin
+    { TODO: optimise to only paint visible characters }
     DrawLEDChar(dx, dy, UTF8Copy(Text, i, 1));
     inc(dx, (LEDSize+LEDGap) * 6);  // 6 is used because we want one empty column between characters
   end;
+end;
+
+{ when the widget gets resized, this is called }
+procedure TfpgLEDMatrix.HandleAlignments(const dwidth, dheight: TfpgCoord);
+begin
+  inherited HandleAlignments(dwidth, dheight);
+  if FScrolling then
+    CalcScrollLength;
 end;
 
 procedure TfpgLEDMatrix.SetText(const avalue: TfpgString);
@@ -472,6 +489,8 @@ begin
   if FText = AValue then
     Exit;
   FText := AValue;
+  if FScrolling then
+    CalcScrollLength;
   RePaint;
 end;
 
@@ -479,8 +498,15 @@ procedure TfpgLEDMatrix.TimerFired(Sender: TObject);
 begin
   Inc(FCurrentStep, LEDSize + LEDGap);
   RePaint;
-  if FCurrentStep > GetClientRect.Width then
+  if FCurrentStep > FScrollLengthPixels then
     FCurrentStep := 0;
+end;
+
+{ This calculate by how much we must scroll all the text off the "screen". }
+procedure TfpgLEDMatrix.CalcScrollLength;
+begin
+                         { text characters ;   LED char size         ;  widget width }
+  FScrollLengthPixels := (UTF8Length(Text) * ((LEDSize+LEDGap) * 6)) + GetClientRect.Width;
 end;
 
 procedure TfpgLEDMatrix.DrawLEDChar(const AX, AY: TfpgCoord; const AChar: TfpgChar);
