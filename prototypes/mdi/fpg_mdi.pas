@@ -385,8 +385,8 @@ begin
   begin
     if csDestroying in TComponent(msg.Sender).ComponentState then
       Exit;
-    RemoveComponent(TfpgMDIChildForm(msg.Sender));
     i := FList.IndexOf(TfpgMDIChildForm(msg.Sender));
+    RemoveComponent(TfpgMDIChildForm(msg.Sender));
     if i = -1 then
       raise Exception.Create('Could not find MDI Child Form');
     FList.Delete(i);

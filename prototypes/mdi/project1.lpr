@@ -34,9 +34,11 @@ type
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.NewFormClicked(Sender: TObject);
+var
+  lChildForm: TChildForm;
 begin
-  ChildForm := MDIWorkArea.AddWindow(TChildForm) as TChildForm;
-  ChildForm.WindowTitle := Format('Child %d', [MDIWorkArea.ChildWindowCount]);
+  lChildForm := MDIWorkArea.AddWindow(TChildForm) as TChildForm;
+  lChildForm.WindowTitle := Format('Child %d', [MDIWorkArea.ChildWindowCount]);
 end;
 
 procedure TMainForm.miQuitClicked(Sender: TObject);
