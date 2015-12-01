@@ -20,7 +20,7 @@ type
   private
     FHorBar: TfpgScrollbar;
     FVerBar: TfpgScrollbar;
-    FList: TList;
+    FList: TFPList;
     FActiveWindow: TfpgMDIChildForm;
     FScrollingHorizonal: Boolean;
     FLastHorizonalPos: integer;
@@ -474,7 +474,6 @@ end;
 
 procedure TfpgMDIWorkArea.HorizontalScrollBarScrolled(Sender: TObject; position: integer);
 var
-  w: integer;
   i: integer;
   c: TfpgMDIChildForm;
 begin
@@ -539,7 +538,7 @@ begin
 
   PositionScrollBars;
 
-  FList := TList.Create;
+  FList := TFPList.Create;
   FActiveWindow := nil;
 end;
 
@@ -565,20 +564,18 @@ procedure TfpgMDIWorkArea.CascadeWindows;
 const
   GAP = 25;
 var
-  w: integer;
   i: integer;
   c: TfpgMDIChildForm;
   x, y: integer;
 begin
   x := 5;
   y := 5;
-  for i := 0 to ComponentCount -1 do
+  c := nil;
+  for i := 0 to FList.Count - 1 do
   begin
-    if Components[i] is TfpgScrollBar then
-      continue;
-    if Components[i] is TfpgMDIChildForm then
+    if TObject(FList[i]) is TfpgMDIChildForm then
     begin
-      c := Components[i] as TfpgMDIChildForm;
+      c := TfpgMDIChildForm(FList[i]);
       c.Left := x;
       x += GAP;
       c.Top := y;
@@ -587,7 +584,8 @@ begin
       c.BringToFront;
     end;
   end;
-  ActiveWindow := c;
+  if Assigned(c) then
+    ActiveWindow := c;
 end;
 
 end.
