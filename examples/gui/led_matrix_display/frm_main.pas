@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_ledmatrix,
-  fpg_edit, fpg_radiobutton, fpg_panel, fpg_label;
+  fpg_edit, fpg_radiobutton, fpg_panel, fpg_label, fpg_checkbox;
 
 type
 
@@ -22,9 +22,11 @@ type
     RadioButton4: TfpgRadioButton;
     RadioButton5: TfpgRadioButton;
     Label1: TfpgLabel;
+    chkScrolling: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure PresetChanged(Sender: TObject);
     procedure Edit1Changed(Sender: TObject);
+    procedure chkScrollingChanged(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -77,6 +79,11 @@ end;
 procedure TMainForm.Edit1Changed(Sender: TObject);
 begin
   LEDMatrix1.Text := Edit1.Text;
+end;
+
+procedure TMainForm.chkScrollingChanged(Sender: TObject);
+begin
+  LEDMatrix1.Scrolling := chkScrolling.Checked;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -200,6 +207,18 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Display text:';
+  end;
+
+  chkScrolling := TfpgCheckBox.Create(self);
+  with chkScrolling do
+  begin
+    Name := 'chkScrolling';
+    SetPosition(256, 72, 120, 19);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 5;
+    Text := 'Scrolling';
+    OnChange := @chkScrollingChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
