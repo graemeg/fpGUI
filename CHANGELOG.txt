@@ -14,7 +14,7 @@ v2.0 (unknown)
     * AlienWindows branch got merged. This resulted in some code changes that
       might need to be applied to your code:
        - UpdateWindowPosition -> UpdatePosition
-       - HasHandle -> Window.HasHandle
+       - HasHandle -> Window.HasHandle  or use  WindowAllocated
        - WindowToScreen() -> WidgetToScreen()
     * PDF reporting classes and identifier names got translated from French to
       English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
