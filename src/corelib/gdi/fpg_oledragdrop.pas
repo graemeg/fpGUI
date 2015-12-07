@@ -207,7 +207,7 @@ function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 implementation
 
 uses
-  SysUtils, ShlObj, fpg_widget, fpg_gdi;
+  SysUtils, ShlObj, fpg_widget, fpg_gdi, fpg_constants;
 
 var
   CF_FILENAMEMAP: Cardinal;
