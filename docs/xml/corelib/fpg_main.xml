@@ -2,76 +2,91 @@
 <fpdoc-descriptions>
   <package name="fpGUI">
     <module name="fpg_main">
-      <short>The main unit that ties everything together from CoreLib</short>
-      <descr>
-        <p>
-          <printshort id="fpg_main"/>. This unit contain the higher level classes that the end-user will use to build applications.
-</p>
-        <p>This unit also contains the global objects instances used to start an application, or helper functions used through a a fpGUI based application. eg: <link id="fpgApplication"/>, <link id="fpgClipboard"/>.</p>
-      </descr>
-      <!-- procedure Visibility: default -->
-      <element name="fpgPostMessage">
-        <short>Posts a message to the event queue</short>
-        <descr>fpgPostMessage posts a message to the event queue, but doesn't wait for it to compelete. It returns immediately.</descr>
-        <errors/>
-        <seealso>
-          <link id="fpg_main.fpgSendMessage"/>
-        </seealso>
-      </element>
-      <!-- procedure Visibility: default -->
-      <element name="fpgSendMessage">
-        <short>Sends a message to the event queue</short>
-        <descr>fpgSendMessage sends a message to the event queue and waits for it to complete before it returns.</descr>
-        <errors/>
-        <seealso>
-          <link id="fpg_main.fpgPostMessage"/>
-        </seealso>
-      </element>
-      <element name="fpgColorToRGB">
-        <short>Convert a color to the RGB values of that color</short>
-        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values are in RGB format.
-For example, you get "named" colors too (eg: clWindowBackground), which
+
+<short>The main unit that ties everything together from CoreLib</short>
+<descr>
+<p><printshort id="fpg_main"/>. This unit contain the higher level classes that the
+end-user will use to build applications.</p>
+<p>This unit also contains the global objects instances used to start an application,
+or helper functions used through a a fpGUI based application. eg: <link id="fpgApplication"/>,
+<link id="fpgClipboard"/>.</p>
+</descr>
+
+<element name="fpgPostMessage">
+<short>Posts a message to the event queue</short>
+<descr>fpgPostMessage posts a message to the event queue, but doesn't wait for it to
+compelete. It returns immediately. The internal event queue of fpGUI is thread safe,
+thus this method is thread safe too.</descr>
+<errors/>
+<seealso>
+<link id="fpg_main.fpgSendMessage"/>
+</seealso>
+</element>
+
+<element name="fpgSendMessage">
+<short>Sends a message to the event queue</short>
+<descr>fpgSendMessage sends a message to the event queue and waits for it to complete
+before it returns.</descr>
+<errors/>
+<seealso>
+<link id="fpg_main.fpgPostMessage"/>
+</seealso>
+</element>
+
+<element name="fpgColorToRGB">
+<short>Convert a color to the RGB values of that color</short>
+<descr><printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values
+are in RGB format. For example, you get "named" colors too (eg: clWindowBackground), which
 is simply an index value, but later translated to a real RGB value via the theming system.</descr>
-      </element>
-      <element name="fpgGetNamedColor">
-        <short>Returns a "named" TfpgColor based on a RGB color</short>
-      </element>
-      <element name="fpgSetNamedColor">
-        <short>Define a new "named" color</short>
-      </element>
-      <element name="fpgGetNamedFontList">
-        <short>Return a TStringList of "named" fonts</short>
-      </element>
-      <element name="fpgSetNamedFont">
-        <short>Defined a new "named" font</short>
-        <descr>
-          <printshort id="fpgSetNamedFont"/>. Because fpGUI is a cross-platform toolkit, the same fonts might not be available on all systems. For this reason fpGUI supports "named" or "alias names" for fonts. You can specify a font description, and then give that font description a name. Then any component that has a FontDesc property you can pass the full font description, or the "named" font name. An example of a named font is '#Edit1' which is the default font used for <link id="fpg_edit.TfpgEdit">TfpgEdit</link>.</descr>
-      </element>
-      <element name="TfpgCanvas">
-        <short>This is the drawing Canvas of each widget</short>
-        <descr><printshort id="TfpgCanvas"/>.</descr>
-      </element>
-      <element name="TfpgCanvas.DrawText">
-        <short>Output Text onto the Canvas</short>
-        <descr>
-          <printshort id="TfpgCanvas.DrawText"/>.</descr>
-      </element>
-      <element name="TfpgCanvas.StretchDraw" link="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">
-      </element>
-      <element name="PrintRect">
-        <short>Prints rectangle information to console</short>
-        <descr><printshort id="PrintRect"/>. This is a helper function for debugging purposes.</descr>
-        <seealso>
-          <link id="fpg_base.TfpgRect">TfpgRect</link>
-        </seealso>
-      </element>
-      <element name="TfpgStyle">
-        <short>This supplies very basic theming support for now</short>
-        <descr><p><printshort id="TfpgStyle"/>. At a later date the theming support in
+</element>
+
+<element name="fpgGetNamedColor">
+<short>Returns a "named" TfpgColor based on a RGB color</short>
+</element>
+
+<element name="fpgSetNamedColor">
+<short>Define a new "named" color</short>
+</element>
+
+<element name="fpgGetNamedFontList">
+<short>Return a TStringList of "named" fonts</short>
+</element>
+
+<element name="fpgSetNamedFont">
+<short>Defined a new "named" font</short>
+<descr>
+<printshort id="fpgSetNamedFont"/>. Because fpGUI is a cross-platform toolkit, the same fonts might not be available on all systems. For this reason fpGUI supports "named" or "alias names" for fonts. You can specify a font description, and then give that font description a name. Then any component that has a FontDesc property you can pass the full font description, or the "named" font name. An example of a named font is '#Edit1' which is the default font used for <link id="fpg_edit.TfpgEdit">TfpgEdit</link>.</descr>
+</element>
+
+<element name="TfpgCanvas">
+<short>This is the drawing Canvas of each widget</short>
+<descr><printshort id="TfpgCanvas"/>.</descr>
+</element>
+
+<element name="TfpgCanvas.DrawText">
+<short>Output Text onto the Canvas</short>
+<descr>
+<printshort id="TfpgCanvas.DrawText"/>.</descr>
+</element>
+
+<element name="TfpgCanvas.StretchDraw" link="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">
+</element>
+
+<element name="PrintRect">
+<short>Prints rectangle information to console</short>
+<descr><printshort id="PrintRect"/>. This is a helper function for debugging purposes.</descr>
+<seealso>
+<link id="fpg_base.TfpgRect">TfpgRect</link>
+</seealso>
+</element>
+
+<element name="TfpgStyle">
+<short>This supplies very basic theming support for now</short>
+<descr><p><printshort id="TfpgStyle"/>. At a later date the theming support in
 fpGUI will be totally reworked to supply built-in and image based theming.</p><p>See the
 document named <var>theming_spec.txt</var> in the "docs" folder for details of what is
 planned.</p></descr>
-      </element>
+</element>
 
 <element name="fpgRect">
 <seealso>
@@ -136,8 +151,6 @@ until the timer is disabled when the Enabled property is set to False.</descr>
 <short>Contains the pixel data of the image. The data format is in AARRGGBB format.</short>
 <descr><printshort id="TfpgImageBase.ImageData"/>.</descr>
 </element>
-
-
 
 
     </module>
