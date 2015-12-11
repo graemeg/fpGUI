@@ -36,9 +36,6 @@ uses
 type
 
   // Base class for all toplevel windows
-
-  { TfpgWindow }
-
   TfpgWindow = class(TfpgWidget)
   private
     FOpacity: Single;

@@ -564,8 +564,6 @@ type
   end;
 
 
-  { TfpgWindowBase }
-
   TfpgWindowBase = class(TfpgComponent)
   private
     FPassiveMouseCapture: TfpgWidgetBase;

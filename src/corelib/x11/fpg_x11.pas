@@ -236,9 +236,6 @@ type
   end;
 
 
-
-  { TfpgX11Window }
-
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
@@ -265,6 +262,7 @@ type
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
     function    GetWindowState: TfpgWindowState; override;
+    procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
     procedure   TriggerSyncCounter;
   public
@@ -2937,6 +2935,24 @@ begin
 
   if data <> nil then
     XFree(data);
+end;
+
+procedure TfpgX11Window.SetWindowState(const AValue: TfpgWindowState);
+begin
+  case AValue of
+    wsMaximized:
+      begin
+        xapplication.netlayer.WindowSetMaximizedState(FWinHandle, nmsBoth);
+      end;
+    wsMinimized:
+      begin
+        XIconifyWindow(xapplication.Display, FWinHandle, xapplication.DefaultScreen);
+      end;
+    wsNormal:
+      begin
+        // TODO:
+      end;
+  end; { case }
 end;
 
 procedure TfpgX11Window.SetWindowOpacity(AValue: Single);
