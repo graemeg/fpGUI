@@ -1088,23 +1088,21 @@ var
   i: longint;
 begin
   Writeln(stdout, ' Stack trace:');
-//  Dump_Stack(StdOut, get_frame);
-
-  Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
+  Writeln(stdout, 'An unhandled exception occurred at $', HexStr(Ptrint(ExceptAddr), sizeof(PtrInt)*2),' :');
   if ExceptObject is Exception then
    begin
-     lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
-     Writeln(stdout,lMessage);
+     lMessage := Exception(ExceptObject).ClassName + ' : ' + Exception(ExceptObject).Message;
+     Writeln(stdout, lMessage);
    end
   else
-   Writeln(stdout,'Exception object ',ExceptObject.ClassName,' is not of class Exception.');
-  Writeln(stdout,BackTraceStrFunc(ExceptAddr));
-  if (ExceptFrameCount>0) then
+   Writeln(stdout, 'Exception object ', ExceptObject.ClassName, ' is not of class Exception.');
+  Writeln(stdout, BackTraceStrFunc(ExceptAddr));
+  if (ExceptFrameCount > 0) then
     begin
       for i := 0 to ExceptFrameCount-1 do
-        Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
+        Writeln(stdout, BackTraceStrFunc(ExceptFrames[i]));
     end;
-  Writeln(stdout,'');
+  Writeln(stdout, '');
 end;
 
 procedure DumpStack(var AList: TStrings);
@@ -1113,16 +1111,16 @@ var
   i: longint;
 begin
   AList.Add(' Stack trace:');
-  AList.Add('An unhandled exception occurred at $' + HexStr(PtrInt(ExceptAddr),sizeof(PtrInt)*2) + ' :');
+  AList.Add('An unhandled exception occurred at $' + HexStr(PtrInt(ExceptAddr), sizeof(PtrInt)*2) + ' :');
   if ExceptObject is Exception then
   begin
-    lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
+    lMessage := Exception(ExceptObject).ClassName + ' : ' + Exception(ExceptObject).Message;
     AList.Add(lMessage);
   end
   else
     AList.Add('Exception object ' + ExceptObject.ClassName + ' is not of class Exception.');
   AList.Add(BackTraceStrFunc(ExceptAddr));
-  if (ExceptFrameCount>0) then
+  if (ExceptFrameCount > 0) then
   begin
     for i := 0 to ExceptFrameCount-1 do
       AList.Add(BackTraceStrFunc(ExceptFrames[i]));
