@@ -1087,7 +1087,7 @@ var
   lMessage: String;
   i: longint;
 begin
-  writeln(' Stack trace:');
+  Writeln(stdout, ' Stack trace:');
 //  Dump_Stack(StdOut, get_frame);
 
   Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
