@@ -1765,6 +1765,153 @@ In the table below, :hp1.P:ehp1. and :hp1.Q:ehp1. are of type :hp1.PChar:ehp1., 
 :ecgraphic.
 
 
+.* --------------------------------------------------------------
+:h3 name=character_and_string_types.Characters and string types
+:p.
+This section contains detailed information about the different character and
+string types supported by &fpc..
+
+:p.
+Free Pascal supports several character and string types. They range from 
+single ANSI characters to unicode strings and also include pointer types. 
+Differences also apply to encodings and reference counting. 
+
+:p.
+[Copy the content from
+http://wiki.freepascal.org/Character_and_string_types
+]
+
+:p.
+:hp2.ANSICHAR:ehp2.
+:p.
+A variable of type AnsiChar, also referred to as char, is exactly 1 byte in
+size, and contains one ANSI character.
+:cgraphic.
+ÚÄÄÄ¿
+³ a ³
+ÀÄÄÄÙ
+:ecgraphic.
+
+
+:p.
+:hp2.WIDECHAR:ehp2.
+:p.
+A variable of type WideChar, also referred to as UnicodeChar, is exactly 2
+bytes in size, and contains one (part of) Unicode character in UTF-16 encoding.
+:nt.It is impossible to encode all Unicode code points in 2 bytes. Therefore,
+2 WideChars may be needed to encode a single code point.:ent.
+:lm margin=1.
+
+:cgraphic.
+ÚÄÄÄÂÄÄÄ¿
+³   ³ a ³
+ÀÄÄÄÁÄÄÄÙ
+:ecgraphic.
+
+:p.
+:hp2.ARRAY OF CHAR:ehp2.
+:p.
+Early Pascal implementations that were in use before 1978 did not support a 
+string type (with the exception of string constants). The only possibility to 
+store strings in variables was the use of arrays of char. This approach has 
+many disadvantages and is no longer recommended. It is, however, still 
+supported to ensure backward-compatibility with ancient code.
+
+:p.
+:hp3.Static Array of Char:ehp3.
+:xmp.
+type
+  TOldString4 = array[0..3] of char;
+var
+  aOldString4: TOldString4; 
+begin
+  aOldString4[0] := 'a';
+  aOldString4[1] := 'b';
+  aOldString4[2] := 'c';
+  aOldString4[3] := 'd';
+end;
+:exmp.
+
+:p.
+The static array of char has now the content:
+
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄ¿
+³ a ³ b ³ c ³ d ³
+ÀÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÙ
+:ecgraphic.
+
+:nt.Unassigned chars can have any content, depending on what was just in
+memory when the memory for the array was made available.:ent.
+:lm margin=1.
+
+
+:p.
+:hp3.Dynamic Array of Char:ehp3.
+:xmp.
+var
+  aOldString: Array of Char; 
+begin
+  SetLength(aOldString, 5);
+  aOldString[0] := 'a';
+  aOldString[1] := 'b';
+  aOldString[2] := 'c';
+  aOldString[3] := 'd';
+end;
+:exmp.
+
+:p.
+The dynamic array of char now has the content:
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄ¿
+³ a ³ b ³ c ³ d ³ #0 ³
+ÀÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÄÙ
+:ecgraphic.
+
+:nt.Unassigned chars in dynamic arrays have a content #0, cause empty positions
+of all dynamic arrays are initially initialised with 0 (or #0, or nil, or ...)
+:ent.
+:lm margin=1.
+
+:p.
+:hp2.PCHAR:ehp2.
+:p.
+A variable of type PChar is basically a pointer to a Char type, but allows
+additional operations. PChars can be used to access C-style null-terminated
+strings, e.g. in interaction with certain OS libraries or third-party software.
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄ¿
+³ a ³ b ³ c ³ #0 ³
+ÃÄÄÄÅÄÄÄÁÄÄÄÁÄÄÄÄ´
+³ ^ ³            ³
+ÀÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÙ
+:ecgraphic.
+
+:p.
+:hp2.PWIDECHAR:ehp2.
+:p.
+A variable of type PWideChar is a pointer to a WideChar variable.
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄÂÄÄÄÄ¿
+³   ³ a ³   ³ b ³   ³ c ³ #0 ³ #0 ³
+ÃÄÄÄÅÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÄÁÄÄÄÄ´
+³ ^ ³                             ³
+ÀÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+:ecgraphic.
+
+
+:p.
+:hp2.STRING:ehp2.
+:p.
+The type String may refer to ShortString or AnsiString, depending from the
+{$H} switch. If the switch is off ({$H-}) then any string declaration will
+define a ShortString. Its size will be 255 chars, if not otherwise specified.
+If it is on ({$H+}) strings without a length specifier will define an AnsiString,
+otherwise a ShortString with specified length. In :hp1.mode delphiunicode:ehp1. String
+is UnicodeString. 
+
+
+
 
 .* --------------------------------------------------------------
 :h3 name=structured_types.Structured types
