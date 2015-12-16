@@ -606,15 +606,115 @@ create an empty implementation for now. The implementation looks as follows:
 
 
 
+:p.
+:hp2.Step 5 - create the trackbar widget:ehp2.
+:p.
+This step is near identical to what we did in Steps 3 & 4. We define a TrackBar
+field variable which will hold a reference of our trackbar. Then we create our
+TrackBar instance with the :color fc=darkred.CreateTrackBar():color fc=default. helper function.
+Next we assign our OnChange event handler. Again, all very simalar to what was done in Step 3.
+
+:p.
+We then define our event handler method in the Private section of our form, and
+define a empty implementation. We will implement this in the next step.
+
+:p.
+:hp2.Step 6 - implementation of both OnChange events:ehp2.
+:p.
+Inside the :color fc=darkred.SpinEditChanged:color fc=default. method - which
+gets triggered when the SpinEdit is changed - we are going to assign the
+:color fc=darkred.SpinEdit.Value:color fc=default. to the TrackBar widget, so
+they both display the same value.
+
+:p.
+Then inside the :color fc=darkred.TrackBarChanged:color fc=default. method, we do
+a similar thing - assign the :color fc=darkred.TrackBar.Value:color fc=default. to the SpinEdit.
+
+:p.
+And that is it! All our changes are now complete, and our application should
+behave as we intended.
 
 
 
 
 
 :h4 id=ch_using_documentation.Using the Class Documentation
+:cgraphic.
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+ Using the Class Documentation
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+It is not expected for any developer to know the complete class model of &fpg.
+or the &fpc. RTL (runtime library). Neither does this ebook cover all classes
+or functions. Not to mention that there are hundreds of classes, maybe even
+thousands! So as you will quickly realise, these frameworks are huge.
+
+:p.
+Luckily there is help on hand - excuse the pun! :-) The &fpg. project includes
+class reference documentation in the form on INF files. These files are viewable
+with a tool called &dv. (part of fpGUI - and the program you are using to view
+this ebook). &dv. is a very fast and feature complete help viewer. Incidentally
+the INF help format is also the official help format recommended for your
+applications created with fpGUI.
+
+:p.
+For convenience the reference documentation is also available in HTML format,
+and is what is also made available on the project website. The INF format is
+preferred though, as it is available offline, indexed and supports advanced
+searching via &dv..
+
+:p.
+Documenting every part of fpGUI is a ongoing process, but with every release there
+are more and more documentation added.
+
+:p.
+:artwork align=left name='images/ch1_docview.bmp'.
+:lines align=center.:hp2.Figure 4::ehp2. &dv. main window with INF help loaded:elines.
+
+:p.
+&dv. also supports many other useful features like being able to concatenate
+INF files at runtime, inline annotations (user comments) and bookmarks.
+
 
 
 :h3.Creating Dialogs
+:cgraphic.
+þþþþþþþþþþþþþþþþþþ
+ Creating Dialogs
+þþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+This chapter will teach you how to create a secondary window for your application,
+or as is more well known, a dialog. Dialogs are often used by applications to
+ask for more information before the application can continue with its next task.
+
+:p.
+We will create our first dialog purely by code, then later we will use the
+fpGUI Visual Forms Designer (known as UIDesigner). Using the visual forms designer
+is a lot faster, and allows you to quickly experiment with different designs
+and widget layouts. All done by using the mouse to drop widegts on a designer
+form, set properties and drag or resize them as needed.
+
+:h4.Subclassing TfpgForm
+:cgraphic.
+þþþþþþþþþþþþþþþþþþþþþþ
+ Subclassing TfpgForm
+þþþþþþþþþþþþþþþþþþþþþþ
+:ecgraphic.
+:p.
+Our first example will be to create a Find dialog, which will look like the
+following screenshot.
+
+:p.
+[ add Find dialog screenshot here ]
+
+:p.
+We will also add events to this dialog - treating it just like a normal class - which
+in terms of Object Pascal, is exactly what it is.
+
+
+
 :h3.Creating Main Windows
 :h3.Implementing Application Functionality
 :h3.Creating Custom Widgets
