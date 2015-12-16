@@ -4,12 +4,11 @@ targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
-unitdirs=11
+unitdirs=10
  ${ONGUARD}/
  ${TIOPF}/GUI/fpGUI
  ${TIOPF}/Options
  ${TIOPF}/Core
- ${FPGUI}/lib/${TargetCPU}-${TargetOS}
  ${FPGUI}/src/reportengine
  ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
@@ -30,7 +29,7 @@ makeoptions=15
  -gh
  -B
  -O2 -XX -Xs -CX
- -FUunits/${TargetCPU}-${TargetOS}/
+ -FUunits/${Target}/
  -FUunits
  -dUseCThreads
  -dAGGCanvas
@@ -46,8 +45,8 @@ toolmenus=2
  fpGUI &UI Designer
  &DocView
 toolfiles=2
- ${FPGUI}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner
- ${FPGUI}/docview/src/units/${TargetCPU}-${TargetOS}/docview
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
 toolparams=2
  ${CURSOURCEFILE}
  ${HelpPath} -k ${cursword}
@@ -86,8 +85,8 @@ newfonames=2
  Main Form
  Simple Form
 newfonamebases=2
- form
- form
+ 
+ 
 newfosources=2
  ${TEMPLATEDIR}fpgui/mainform.pas
  ${TEMPLATEDIR}fpgui/simpleform.pas
@@ -97,7 +96,7 @@ newfoforms=2
 forcezorder=0
 stripmessageesc=0
 copymessages=0
-closemessages=1
+closemessages=0
 checkmethods=1
 colorerror=-1610612712
 colorwarning=-1610612717
@@ -183,55 +182,39 @@ makeoptionson=15
  7
  7
  63
- 56
+ 24
  0
  63
  63
- 63
+ 32
  63
  0
  4
  0
  63
- 56
+ 24
 aftcommandon=0
-unitdirson=11
+unitdirson=10
  196671
  65567
  65567
  196639
- 65536
  65599
  196671
  131103
  196639
  65567
  65567
-macroon=5
- 25
- 11
- 6
- 4
- 16
-macronames=5
- TargetCPU
- TargetOS
- TargetCPU
- TargetOS
- TargetOS
-macrovalues=5
- x86_64
- linux
- i386
- win32
- freebsd
+macroon=0
+macronames=0
+macrovalues=0
 macrogroup=0
 groupcomments=6
- Linux 64-bit
- Linux 32-bit
- Windows 32-bit
- param based
- FreeBSD 64-bit
+ 
+ 
+ 
+ 
+ 
  
 toolsave=2
  -1
@@ -245,6 +228,9 @@ toolparse=2
 toolmessages=2
  0
  0
+toolshortcuts=2
+ 0
+ 1
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -274,7 +260,7 @@ sourcefilemasks=5
  "*.ipf"
  "*.sql"
 syntaxdeffiles=5
- ${SYNTAXDEFDIR}pascal_dark.sdef
+ ${SYNTAXDEFDIR}pascal_solarized_dark.sdef
  ${SYNTAXDEFDIR}cpp.sdef
  ${SYNTAXDEFDIR}objecttext.sdef
  ${SYNTAXDEFDIR}ipf2.sdef
@@ -320,6 +306,7 @@ editfontantialiased=0
 editmarkbrackets=1
 backupfilecount=0
 encoding=0
+trimtrailingwhitespace=1
 codetemplatedirs=1
  ${TEMPLATEDIR}
 debugcommand=${DEBUGGER}
@@ -385,6 +372,7 @@ exceptignore=2
  0
  1
 nodebugbeginend=0
+fpcgdbworkaround=1
 sigsettings=27
  1,1,T,F
  3,3,T,F
