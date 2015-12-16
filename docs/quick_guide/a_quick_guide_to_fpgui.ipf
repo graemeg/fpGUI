@@ -42,7 +42,7 @@ All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
 
 :p.
 :p.
-:table cols="13 20".
+:table cols='13 20'.
 :row.
 :c.Version
 :c.v0.1
@@ -394,7 +394,7 @@ You can now build the program, and when you run it, it should display a
 windows as can be seen in Figure 1. Your first fpGUI application!
 
 :p.
-:artwork align=center name='images/ch1_hello_world.bmp' align=center.
+:artwork align=center name='images/ch1_hello_world.bmp'.
 :lines align=center.:hp2.Figure 1::ehp2. Hello World application under
 FreeBSD:elines.
 
@@ -517,7 +517,7 @@ you click the button (or press the Spacebar key - which also "clicks" the
 button), the application terminates.
 
 :p.
-:artwork align=center name='images/ch1_closeme.bmp' align=center.
+:artwork align=center name='images/ch1_closeme.bmp'.
 :lines align=center.:hp2.Figure 2::ehp2. CloseMe application under
 FreeBSD:elines.
 
@@ -529,7 +529,7 @@ to our current program. We also need to enlarge our main form to make space
 for these new widgets. The end result will look like the program in Figure 3.
 
 :p.
-:artwork align=center name='images/ch1_closeme2.bmp' align=center.
+:artwork align=center name='images/ch1_closeme2.bmp'.
 :lines align=center.:hp2.Figure 3::ehp2. CloseMe application with two extra
 widgets:elines.
 
@@ -542,8 +542,7 @@ we are going to make them.
 :li.create the SpinEdit widget and store its reference
 :li.define spnEdit's OnChange event
 :li.create trackbar, but in a slightly different way. results is the same
-:li.define OnChange event for TrackBar.
-:li.now implement both OnChange events
+:li.implementation of both OnChange events
 :eol.
 
 :p.
