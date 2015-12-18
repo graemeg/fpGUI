@@ -181,8 +181,8 @@ begin
     end
     else // swap endian
     case AType of
-      bcS8: Result := IntToStr(swap(SInt8));
-      bcU8: Result := IntToStr(swap(UInt8));
+      bcS8: Result := IntToStr(SInt8);
+      bcU8: Result := IntToStr(UInt8);
       bcS16: Result := IntToStr(swap(SInt16));
       bcU16: Result := IntToStr(swap(UInt16));
       bcS32: Result := IntToStr(swap(SInt32));

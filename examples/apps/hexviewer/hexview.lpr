@@ -25,6 +25,7 @@ type
     procedure FileExitClick(Sender: TObject);
     procedure FileOpenClick(Sender: TObject);
     procedure OptionsSwapEndianClick(Sender: TObject);
+    procedure OpenFile(AFileName: String);
   private
     {@VFD_HEAD_BEGIN: MainForm}
     HexView: TfpgHexView;
@@ -78,20 +79,13 @@ begin
 end;
 
 procedure TMainForm.FileOpenClick(Sender: TObject);
-var
-  F: TFileStream;
 begin
   if FDialog.RunOpenFile then
   begin
     try
-      F := TFileStream.Create(FDialog.FileName, fmOpenRead or fmShareDenyNone);
-      HexView.Stream := F;
-      FFileClose.Enabled:=True;
-      WindowTitle := 'Hex Viewer - ' + ExtractFileName(FDialog.FileName);
-      FDialog.Close;
-      HexView.Cursor:=0;
+      OpenFile(FDialog.FileName);
     finally
-      // :)
+      FDialog.Close;
     end;
   end;
 end;
@@ -102,6 +96,17 @@ var
 begin
   Item.Checked := not Item.Checked;
   HexPanel.ReverseEndian:=Item.Checked;
+end;
+
+procedure TMainForm.OpenFile(AFileName: String);
+var
+  F: TFileStream;
+begin
+  if not FileExists(AFileName) then Exit;
+  F := TFileStream.Create(AFileName, fmOpenRead, fmShareDenyNone);
+  HexView.Stream := F;
+  FFileClose.Enabled:=True;
+  WindowTitle := 'Hex Viewer - ' + ExtractFileName(AFileName);
 end;
 
 procedure TMainForm.AfterCreate;
@@ -141,6 +146,9 @@ begin
   {%endregion}
   CreateMenu;
   FDialog := TfpgFileDialog.Create(Self);
+
+  if (ParamCount > 0) and (FileExists(ParamStr(1))) then
+      OpenFile(ParamStr(1));
 end;
 
 
