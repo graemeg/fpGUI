@@ -68,6 +68,7 @@ uses
   fpg_hyperlink,
   fpg_toggle,
   fpg_dialogs,
+  fpg_hexview,
   vfdpropeditgrid,
   vfdmain;
 
@@ -351,6 +352,16 @@ begin
   fpgImages.AddMaskedBMP(
     'vfd.toggle', @stdimg_vfd_toggle,
     sizeof(stdimg_vfd_toggle),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.hexview', @stdimg_vfd_hexview,
+    sizeof(stdimg_vfd_hexview),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.hexpanel', @stdimg_vfd_hexpanel,
+    sizeof(stdimg_vfd_hexpanel),
     0, 0);
 
 end;
@@ -1040,6 +1051,21 @@ begin
   wc.AddProperty('UnCheckedTextColor', TPropertyColor, '');
   wc.AddProperty('UseAnimation', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.toggle';
+  RegisterVFDWidget(wc);
+
+  // hexview
+  wc          := TVFDWidgetClass.Create(TfpgHexView);
+  wc.AddProperty('Align', TPropertyEnum, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('OwnsStream', TPropertyBoolean, 'If true the Stream property will be freed when changed or set to nil.');
+  wc.WidgetIconName := 'vfd.hexview';
+  RegisterVFDWidget(wc);
+
+  // hexpanel
+  wc          := TVFDWidgetClass.Create(TfpgHexPanel);
+  wc.AddProperty('Align', TPropertyEnum, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.hexpanel';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
