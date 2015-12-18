@@ -134,7 +134,7 @@ begin
     SetPosition(0, 244, 602, 100);
     Anchors := [anLeft,anBottom];
     TabOrder := 3;
-    HexView.AddEventListener(HexPanel);
+    HexView := Self.HexView;
   end;
 
   {@VFD_BODY_END: MainForm}

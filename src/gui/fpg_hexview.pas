@@ -29,12 +29,20 @@ type
   TfpgHexView = class;
 
   IfpgHexEventListener = interface
+    ['{257CE50F-22D4-4C75-A2A5-805972094CEE}']
     procedure HexCursorChanged(Sender: TfpgHexView; Data: QWord);
+  end;
+
+  IfpgHexView = interface
+    ['{DB19EE55-080F-450D-A596-65F528C04A70}']
+    procedure   AddEventListener(AListener: IfpgHexEventListener);
+    procedure   RemoveEventListener(AListener: IfpgHexEventListener);
+    procedure   MoveCursor(APos: Int64);
   end;
 
   { TfpgHexView }
 
-  TfpgHexView = class(TfpgWidget)
+  TfpgHexView = class(TfpgWidget, IfpgHexView)
   private
   const
     AddressSpace   = 2; // use an even number
@@ -66,18 +74,20 @@ type
     procedure   DoScroll(Sender: TObject; position: integer);
     procedure   UpdateScrollbar;
     procedure   MakeCursorVisible;
-    procedure   DoCursorChange(AData: QWord);
+    procedure   DoCursorChange;
   protected
     procedure   HandlePaint; override;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    // IfpgHexView
+    procedure   AddEventListener(AListener: IfpgHexEventListener);
+    procedure   RemoveEventListener(AListener: IfpgHexEventListener);
+    procedure   MoveCursor(APos: Int64);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   AddEventListener(AListener: IfpgHexEventListener);
-    procedure   RemoveEventListener(AListener: IfpgHexEventListener);
     property    Stream: TStream read FStream write SetStream;
     property    Font: TfpgFont read GetFont write SetFont; // Fixed width
     property    Cursor: Int64 read FCursor write SetCursor;
@@ -98,9 +108,11 @@ type
   private
     FCurrentVal: QWord;
     FFont: TfpgFont;
+    FHexView: IfpgHexView;
     FLabels: array[TIntType] of TfpgLabel;
     FEdits: array[TIntType] of TfpgEdit;
     FReverseEndian: Boolean;
+    procedure SetHexView(AValue: IfpgHexView);
     procedure SetReverseEndian(AValue: Boolean);
   protected
     // IfpgHexEvent
@@ -108,6 +120,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    property    HexView: IfpgHexView read FHexView write SetHexView;
   published
     property    Align;
     property    TabOrder;
@@ -193,6 +206,18 @@ begin
   HexCursorChanged(nil, FCurrentVal);
 end;
 
+procedure TfpgHexPanel.SetHexView(AValue: IfpgHexView);
+begin
+  if FHexView=AValue then Exit;
+
+  if Assigned(FHexView) then
+    FHexView.RemoveEventListener(Self as IfpgHexEventListener);
+
+  FHexView:=AValue;
+  if Assigned(FHexView) then
+    FHexView.AddEventListener(Self as IfpgHexEventListener);
+end;
+
 procedure TfpgHexPanel.HexCursorChanged(Sender: TfpgHexView; Data: QWord);
 var
   i: TIntType;
@@ -270,12 +295,18 @@ begin
   if Assigned(FStream) and FOwnsStream then
     FStream.Free;
   FStream:=AValue;
+  FCursor:=0;
+
+  if Assigned(FStream) then
+    MakeCursorVisible;
 
   if not (csDestroying in ComponentState) then
   begin
     UpdateScrollbar;
     Invalidate;
   end;
+
+  DoCursorChange;
 end;
 
 procedure TfpgHexView.DoScroll(Sender: TObject; position: integer);
@@ -309,14 +340,7 @@ begin
   MakeCursorVisible;
   Invalidate;
 
-  if Assigned(FStream) then
-  begin
-    FStream.Position:=FCursor;
-    FStream.Read(Data, 8);
-    DoCursorChange(Data);
-  end
-  else
-    DoCursorChange(Data);
+  DoCursorChange;
 end;
 
 procedure TfpgHexView.SetFont(AValue: TfpgFont);
@@ -536,13 +560,22 @@ begin
   FVScroll.RepaintSlider;
 end;
 
-procedure TfpgHexView.DoCursorChange(AData: QWord);
+procedure TfpgHexView.DoCursorChange;
 var
   I: IfpgHexEventListener;
+  Data: QWord;
 begin
+  if Assigned(FStream) then
+  begin
+    FStream.Position:=FCursor;
+    FStream.Read(Data, 8);
+  end
+  else
+    Data := 0;
+
   if not (csDestroying in ComponentState) then
     for I in FEventListenerList do
-      I.HexCursorChanged(Self, AData);
+      I.HexCursorChanged(Self, Data);
 end;
 
 procedure TfpgHexView.HandlePaint;
@@ -677,6 +710,11 @@ begin
    Index := FEventListenerList.IndexOf(AListener);
    if Index <> -1 then
       FEventListenerList.Delete(Index);
+end;
+
+procedure TfpgHexView.MoveCursor(APos: Int64);
+begin
+  Cursor:=APos;
 end;
 
 
