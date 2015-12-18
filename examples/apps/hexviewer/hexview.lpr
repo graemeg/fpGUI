@@ -24,6 +24,7 @@ type
     procedure FileCloseClick(Sender: TObject);
     procedure FileExitClick(Sender: TObject);
     procedure FileOpenClick(Sender: TObject);
+    procedure OptionsSwapEndianClick(Sender: TObject);
   private
     {@VFD_HEAD_BEGIN: MainForm}
     HexView: TfpgHexView;
@@ -52,6 +53,12 @@ begin
   FFileClose := MTop.SubMenu.AddMenuItem('&Close','', @FileCloseClick);
   MTop.SubMenu.AddMenuItem('-','', nil);
   MTop.SubMenu.AddMenuItem('E&xit','', @FileExitClick);
+
+  // Options
+  MTop := FMenu.AddMenuItem('&Options', nil);
+  MTop.SubMenu := TfpgPopupMenu.Create(MTop);
+  MTop.SubMenu.AddMenuItem('Swap Endian', '', @OptionsSwapEndianClick);
+
 
   FFileClose.Enabled:=False;
 
@@ -87,6 +94,14 @@ begin
       // :)
     end;
   end;
+end;
+
+procedure TMainForm.OptionsSwapEndianClick(Sender: TObject);
+var
+  Item: TfpgMenuItem absolute Sender;
+begin
+  Item.Checked := not Item.Checked;
+  HexPanel.ReverseEndian:=Item.Checked;
 end;
 
 procedure TMainForm.AfterCreate;

@@ -96,9 +96,12 @@ type
     function IntTypeToString(AType: TIntType): String;
     function GetValueString(AType: TIntType; const AValue): String;
   private
+    FCurrentVal: QWord;
     FFont: TfpgFont;
     FLabels: array[TIntType] of TfpgLabel;
     FEdits: array[TIntType] of TfpgEdit;
+    FReverseEndian: Boolean;
+    procedure SetReverseEndian(AValue: Boolean);
   protected
     // IfpgHexEvent
     procedure HexCursorChanged(Sender: TfpgHexView; Data: QWord);
@@ -108,6 +111,7 @@ type
   published
     property    Align;
     property    TabOrder;
+    property    ReverseEndian: Boolean read FReverseEndian write SetReverseEndian;
   end;
 
 implementation
@@ -147,6 +151,7 @@ var
   Float64: Double absolute AValue;
 begin
   try
+    if not FReverseEndian then
     case AType of
       bcS8: Result := IntToStr(SInt8);
       bcU8: Result := IntToStr(UInt8);
@@ -160,16 +165,39 @@ begin
       bcOctal: Result:= OctStr(UInt8, 3);
       bcFloat32: Result := FloatToStr(Float32);
       bcFloat64: Result := FloatToStr(Float64);
-    end;
+    end
+    else // swap endian
+    case AType of
+      bcS8: Result := IntToStr(swap(SInt8));
+      bcU8: Result := IntToStr(swap(UInt8));
+      bcS16: Result := IntToStr(swap(SInt16));
+      bcU16: Result := IntToStr(swap(UInt16));
+      bcS32: Result := IntToStr(swap(SInt32));
+      bcU32: Result := IntToStr(swap(UInt32));
+      bcS64: Result := IntToStr(swap(SInt64));
+      bcU64: Result := IntToStr(swap(UInt64));
+      bcBinary: Result := binStr(UInt8, 8);
+      bcOctal: Result:= OctStr(UInt8, 3);
+      bcFloat32: Result := FloatToStr(Single(swap(UInt32)));
+      bcFloat64: Result := FloatToStr(Single(swap(UInt64)));
+    end
   except
     Result := 'Err';
   end;
+end;
+
+procedure TfpgHexPanel.SetReverseEndian(AValue: Boolean);
+begin
+  if FReverseEndian=AValue then Exit;
+  FReverseEndian:=AValue;
+  HexCursorChanged(nil, FCurrentVal);
 end;
 
 procedure TfpgHexPanel.HexCursorChanged(Sender: TfpgHexView; Data: QWord);
 var
   i: TIntType;
 begin
+  FCurrentVal := Data;
   for i := Low(TIntType) to High(TIntType) do
   begin
     FEdits[i].Text:=GetValueString(i, Data);
