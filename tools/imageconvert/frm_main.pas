@@ -36,11 +36,9 @@ type
     btnCopy: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure miFileQuit(Sender: TObject);
-    procedure MemoDragEnter(Sender, Source: TObject; AMimeList: TStringList;
-      var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction;
-      var Accept: Boolean);
-    procedure MemoDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    function ConvertImage(const AFileName: string): string;
+    procedure MemoDragEnter(Drop: TfpgDrop);
+    procedure MemoDragDrop(Drop: TfpgDrop; AData: Variant);
+    function  ConvertImage(const AFileName: string): string;
     procedure btnClearClicked(Sender: TObject);
     procedure btnConvertClicked(Sender: TObject);
     procedure btnCopyClicked(Sender: TObject);
@@ -62,9 +60,7 @@ begin
   Close;
 end;
 
-procedure TMainForm.MemoDragEnter(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.MemoDragEnter(Drop: TfpgDrop);
 var
   s: string;
 begin
@@ -74,16 +70,11 @@ begin
   {$ELSE}
   s := 'text/uri-list';
   {$ENDIF}
-  Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
-  begin
-    if AMimeChoice <> s then
-      AMimeChoice := s;
-  end;
+
+  Drop.CanDrop := Drop.AcceptMimeType([s]);
 end;
 
-procedure TMainForm.MemoDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.MemoDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   fileName: string;
   sl: TStringList;
@@ -189,7 +180,6 @@ begin
   WindowTitle := 'Image Conversion Tool';
   Hint := '';
   ShowHint := True;
-  DNDEnabled := True;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
@@ -220,9 +210,7 @@ begin
     FontDesc := '#Edit2';
     Hint := '';
     TabOrder := 5;
-    AcceptDrops := True;
-    OnDragEnter  := @MemoDragEnter;
-    OnDragDrop  := @MemoDragDrop;
+    DropHandler := TfpgDropEventHandler.Create(@MemoDragEnter, nil, @MemoDragDrop, nil);
   end;
 
   Button1 := TfpgButton.Create(self);
