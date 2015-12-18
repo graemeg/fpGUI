@@ -24,7 +24,8 @@ uses
   U_Command, U_Pdf, U_Report, U_ReportImages, U_Visu, fpg_trayicon, Agg2D, 
   fpg_dbugintf, fpg_dbugmsg, fpg_fontcache, fpg_window, fpg_style_carbon, 
   fpg_style_plastic, fpg_style_win8, fpg_scrollframe, fpg_toggle, 
-  fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_dnd_window;
+  fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_dnd_window, 
+  fpg_hexview;
 
 implementation
 
