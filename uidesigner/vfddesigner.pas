@@ -315,7 +315,6 @@ end;
 function TFormDesigner.FindDesignerWidget(wg: TfpgWidget): TWidgetDesigner;
 var
   w: TfpgWidget;
-  prev: TfpgWidget;
 begin
   w := TfpgWidget(wg);
   Result := WidgetDesigner(w);
@@ -323,21 +322,16 @@ begin
   begin
 //    debugln('NOTE: Couldn''t find Designer Widget - lets try something else');
     { probably dealing with a Composite widget }
-    prev := w;
     while w <> nil do
     begin
 //      debugln(w.ClassName);
-      prev := w;
       w := w.Parent;
-      if w is TDesignedForm then  // we reached the top
-      begin
-        w := prev;
-        break;
-      end;
+      Result := WidgetDesigner(w);
+      if Result <> nil then
+        Exit;
     end;
   end;
 
-  Result := WidgetDesigner(w);
 //  if Result = nil then
 //    debugln('NOTE #2: Still couldn''t find Designer Widget - lets give up');
 end;
