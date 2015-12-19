@@ -320,7 +320,7 @@ begin
   repeat
     Result := WidgetDesigner(w);
     w := w.Parent;
-  until Result <> nil;
+  until Assigned(Result) or not Assigned(w);
 //  if Result = nil then
 //    debugln('NOTE #2: Still couldn''t find Designer Widget - lets give up');
 end;
