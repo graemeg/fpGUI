@@ -1068,6 +1068,7 @@ begin
   wc.NameBase := 'HexPanel';
   wc.AddProperty('Align', TPropertyEnum, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('HexView', TPropertyInterface, 'The view that updates our values');
   wc.WidgetIconName := 'vfd.hexpanel';
   RegisterVFDWidget(wc);
 

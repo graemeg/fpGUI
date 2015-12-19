@@ -120,11 +120,11 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    HexView: IfpgHexView read FHexView write SetHexView;
   published
     property    Align;
     property    TabOrder;
     property    ReverseEndian: Boolean read FReverseEndian write SetReverseEndian;
+    property    HexView: IfpgHexView read FHexView write SetHexView;
   end;
 
 implementation

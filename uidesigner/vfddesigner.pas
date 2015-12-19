@@ -125,6 +125,8 @@ type
     function    AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetDesigner;
     function    WidgetDesigner(wg: TfpgWidget): TWidgetDesigner;
     function    FindWidgetByName(const wgname: string): TfpgWidget;
+    function    FindWidgetsByClass(const aclass: TClass; out AList: TList): Boolean;
+    function    FindWidgetsByInterface(const AIID: String; AGUID:TGuid; out AList: TList): Boolean;
     procedure   DeSelectAll;
     procedure   SelectAll;
     procedure   SelectNextWidget(fw: boolean);
@@ -150,6 +152,8 @@ type
     property    FormOther: string read FFormOther write FFormOther;
   end;
 
+  function GetFormDesigner(wg: TfpgWidget): TFormDesigner;
+
 
 implementation
 
@@ -162,6 +166,11 @@ uses
 
 const
   cEditOrder: array[TfpgEditMode] of string = (rsDlgWidgetOrder, rsDlgTabOrder);
+
+function GetFormDesigner(wg: TfpgWidget): TFormDesigner;
+begin
+  Result := wg.FormDesigner as TFormDesigner;
+end;
   
 
 { TWidgetDesigner }
@@ -1562,6 +1571,56 @@ begin
       Exit;
     end;
   end;
+end;
+
+function TFormDesigner.FindWidgetsByClass(const aclass: TClass; out AList: TList): Boolean;
+var
+  n: integer;
+  cd: TWidgetDesigner;
+begin
+  Result   := False;
+  for n := 0 to FWidgets.Count - 1 do
+  begin
+    cd := TWidgetDesigner(FWidgets.Items[n]);
+    if cd.Widget.InheritsFrom(aclass) then
+    begin
+      if not Result then
+      begin
+        AList := TList.Create;
+        Result := True;
+      end;
+      AList.Add(cd.Widget);
+    end;
+  end;
+end;
+
+function TFormDesigner.FindWidgetsByInterface(const AIID: String; AGUID: TGuid;
+  out AList: TList): Boolean;
+var
+  n: integer;
+  cd: TWidgetDesigner;
+  o: TObject;
+begin
+  Result   := False;
+  for n := 0 to FWidgets.Count - 1 do
+  begin
+    cd := TWidgetDesigner(FWidgets.Items[n]);
+    // we need a string value to look up an interface
+
+    if (cd.Widget.GetInterface(AGUID, o) or cd.Widget.GetInterface(AIID, o)) then
+    begin
+      if not Result then
+      begin
+        AList := TList.Create;
+        Result := True;
+      end;
+      AList.Add(cd.Widget);
+    end;
+  end;
+  if Result then
+    WriteLn('Found interfaces! Count = ', AList.Count)
+  else
+    WriteLn('No found interfaces');
 end;
 
 { TDesignedForm }
