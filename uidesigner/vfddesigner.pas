@@ -317,21 +317,10 @@ var
   w: TfpgWidget;
 begin
   w := TfpgWidget(wg);
-  Result := WidgetDesigner(w);
-  if Result = nil then
-  begin
-//    debugln('NOTE: Couldn''t find Designer Widget - lets try something else');
-    { probably dealing with a Composite widget }
-    while w <> nil do
-    begin
-//      debugln(w.ClassName);
-      w := w.Parent;
-      Result := WidgetDesigner(w);
-      if Result <> nil then
-        Exit;
-    end;
-  end;
-
+  repeat
+    Result := WidgetDesigner(w);
+    w := w.Parent;
+  until Result <> nil;
 //  if Result = nil then
 //    debugln('NOTE #2: Still couldn''t find Designer Widget - lets give up');
 end;
