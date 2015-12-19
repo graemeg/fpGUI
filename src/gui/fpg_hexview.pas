@@ -210,6 +210,12 @@ procedure TfpgHexPanel.SetHexView(AValue: IfpgHexView);
 begin
   if FHexView=AValue then Exit;
 
+  if Assigned(FormDesigner) then
+  begin
+    FHexView:=AValue;
+    Exit;
+  end;
+
   if Assigned(FHexView) then
     FHexView.RemoveEventListener(Self as IfpgHexEventListener);
 
