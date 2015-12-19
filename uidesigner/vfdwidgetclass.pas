@@ -68,8 +68,6 @@ type
   TVFDPropertyClass = class of TVFDWidgetProperty;
 
 
-  { TVFDWidgetClass }
-
   TVFDWidgetClass = class(TObject)
   private
     FProps: TList;
@@ -79,6 +77,7 @@ type
     Description: string;
     WidgetIconName: string;
     NameBase: string;
+    { Can it accept other widgets on a drop }
     Container: boolean;
     BlockMouseMsg: boolean;
     constructor Create(aClass: TWidgetClass);

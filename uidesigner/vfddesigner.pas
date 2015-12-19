@@ -97,6 +97,7 @@ type
     FOneClickMove: boolean;
     procedure DropDrop(Drop: TfpgDrop; AData: Variant);
     procedure DropEnter(Drop: TfpgDrop);
+    function FindDesignerWidget(wg: TfpgWidget): TWidgetDesigner;
   protected
     FWidgets: TList;
     FForm: TDesignedForm;
@@ -302,6 +303,36 @@ begin
   end;
 end;
 
+function TFormDesigner.FindDesignerWidget(wg: TfpgWidget): TWidgetDesigner;
+var
+  w: TfpgWidget;
+  prev: TfpgWidget;
+begin
+  w := TfpgWidget(wg);
+  Result := WidgetDesigner(w);
+  if Result = nil then
+  begin
+//    debugln('NOTE: Couldn''t find Designer Widget - lets try something else');
+    { probably dealing with a Composite widget }
+    prev := w;
+    while w <> nil do
+    begin
+//      debugln(w.ClassName);
+      prev := w;
+      w := w.Parent;
+      if w is TDesignedForm then  // we reached the top
+      begin
+        w := prev;
+        break;
+      end;
+    end;
+  end;
+
+  Result := WidgetDesigner(w);
+//  if Result = nil then
+//    debugln('NOTE #2: Still couldn''t find Designer Widget - lets give up');
+end;
+
 procedure TFormDesigner.DropDrop(Drop: TfpgDrop; AData: Variant);
 var
   wc: TVFDWidgetClass;
@@ -325,7 +356,7 @@ begin
   if msg.dest = FForm then
     Exit;
 
-  wgd := WidgetDesigner(TfpgWidget(msg.dest));
+  wgd := FindDesignerWidget(TfpgWidget(msg.dest));
   if wgd = nil then
     Exit;
 
@@ -360,7 +391,7 @@ begin
 
   wgc := frmMain.SelectedWidget;
   pwg := TfpgWidget(msg.dest);
-  wgd := WidgetDesigner(TfpgWidget(msg.dest));
+  wgd := FindDesignerWidget(TfpgWidget(msg.dest));
   if wgd = nil then
     pwg := FForm
   else if not wgd.FVFDClass.Container then
@@ -398,7 +429,7 @@ begin
   end
   else
   begin
-    wgd := WidgetDesigner(TfpgWidget(msg.dest));
+    wgd := FindDesignerWidget(TfpgWidget(msg.dest));
     if wgd = nil then
     begin
       DeSelectAll;
@@ -446,7 +477,7 @@ begin
   dx := msg.Params.mouse.x - FDragPosX;
   dy := msg.Params.mouse.y - FDragPosY;
 
-  wgd := WidgetDesigner(TfpgWidget(msg.dest));
+  wgd := FindDesignerWidget(TfpgWidget(msg.dest));
   if (wgd = nil) or (not wgd.Selected) then
     Exit;
 
