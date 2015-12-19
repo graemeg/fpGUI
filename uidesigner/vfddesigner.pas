@@ -1617,10 +1617,6 @@ begin
       AList.Add(cd.Widget);
     end;
   end;
-  if Result then
-    WriteLn('Found interfaces! Count = ', AList.Count)
-  else
-    WriteLn('No found interfaces');
 end;
 
 { TDesignedForm }
