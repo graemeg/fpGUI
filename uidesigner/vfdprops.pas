@@ -104,6 +104,23 @@ type
     procedure OnExternalEdit(wg: TfpgWidget); override;
   end;
 
+  { TPropertyObject }
+
+  TPropertyObject = class(TVFDWidgetProperty)
+    function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    function  ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetValueText(wg: TfpgWidget): string; override;
+  end;
+
+  { TPropertyInterface }
+
+  TPropertyInterface = class(TPropertyObject)
+    function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetValueText(wg: TfpgWidget): string; override;
+  end;
+
 
   TGPEType = (gptInteger, gptString, gptFloat);
 
@@ -146,6 +163,20 @@ type
     procedure StoreValue(wg: TfpgWidget); override;
   end;
 
+  { TObjectPropertyEditor }
+
+  TObjectPropertyEditor = class(TChoicePropertyEditor)
+    procedure LoadValue(wg: TfpgWidget); override;
+    procedure StoreValue(wg: TfpgWidget); override;
+  end;
+
+  { TInterfacePropertyEditor }
+
+  TInterfacePropertyEditor = class(TChoicePropertyEditor)
+    procedure LoadValue(wg: TfpgWidget); override;
+    procedure StoreValue(wg: TfpgWidget); override;
+  end;
+
 
   TExternalPropertyEditor = class(TVFDPropertyEditor)
   protected
@@ -176,6 +207,7 @@ uses
   vfdformparser,
   vfdeditors,
   vfd_constants,
+  vfddesigner,
   fpg_dialogs;
 
 
@@ -214,6 +246,248 @@ begin
   finally
     sl.EndUpdate;
   end;
+end;
+
+{ TPropertyInterface }
+
+function TPropertyInterface.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TInterfacePropertyEditor.Create(AOwner, self);
+end;
+
+function TPropertyInterface.GetPropertySource(wg: TfpgWidget;
+  const ident: string): string;
+var
+  PropInfo: PPropInfo;
+  N: String;
+  I: IInterface;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+  begin
+    I := GetInterfaceProp(wg, Name);
+    N := TComponent(I as TComponent).Name;
+    if N = Name then
+       N := 'Self.'+N;
+    Result := ident + Name + ' := ' + N + ';' + LineEnding;
+  end
+  else
+    Result := '';
+end;
+
+function TPropertyInterface.GetValueText(wg: TfpgWidget): string;
+var
+  i: IInterface;
+  o: TObject;
+  n: String;
+begin
+  i := GetInterfaceProp(wg, Name);
+  if Assigned(i) then
+  begin
+    try
+      o := i as TObject;
+      Result := TComponent(o).Name
+    except
+      i := nil;
+      SetInterfaceProp(wg, Name, i);
+    end;
+  end
+  else
+  begin
+    n := GetPropInfo(wg, Name)^.PropType^.Name;
+    Result := '['+n+']';
+  end;
+end;
+
+{ TInterfacePropertyEditor }
+
+procedure TInterfacePropertyEditor.LoadValue(wg: TfpgWidget);
+var
+  FormD: TFormDesigner;
+  Items: TList = nil;
+  i: Integer;
+  index: Integer = 0;
+  intf: IInterface;
+  intfid: String;
+  intfguid: TGuid;
+  Info: PPropInfo;
+begin
+
+  Info := GetPropInfo(wg, Prop.Name);
+  intfid := GetTypeData(Info^.PropType)^.IIDStr;
+  intfguid := GetTypeData(Info^.PropType)^.GUID;
+  intf := GetInterfaceProp(wg, Prop.Name);
+
+  // add empty object
+  chl.Items.AddObject('(none)', nil);
+
+  try
+    FormD := GetFormDesigner(wg);
+    if FormD.FindWidgetsByInterface(intfid, intfguid, Items) then
+    begin
+      for i := 0 to Items.Count-1 do
+      begin
+        chl.Items.AddObject(TfpgComponent(Items[i]).Name, TObject(Items[i]));
+        if Assigned(intf) and (TObject(Items[i]) = (intf as TObject)) then
+          index := i+1; // +1 is for (none) above
+      end;
+    end;
+  finally
+    if Assigned(Items) then
+      Items.Free;
+  end;
+  // index is always good. 0 = (none)
+  chl.FocusItem:=index;
+end;
+
+procedure TInterfacePropertyEditor.StoreValue(wg: TfpgWidget);
+var
+  i: Integer;
+  Intf: IInterface = nil;
+  o: TObject;
+  TypeData: PTypeData;
+begin
+  i := chl.Items.IndexOf(chl.Text);
+  //SetObjectProp(wg,prop.Name, chl.Items.Objects[i]);
+  o := TObject(chl.Items.Objects[i]);
+
+  if Assigned(o) then
+  begin
+    TypeData := GetTypeData(GetPropInfo(wg, prop.Name)^.PropType);
+    o.GetInterface(TypeData^.GUID, Intf);
+    if Intf = nil then
+      o.GetInterface(TypeData^.IIDStr, Intf);
+  end;
+
+
+  SetInterfaceProp(wg,prop.Name, Intf);
+end;
+
+{ TPropertyObject }
+
+function TPropertyObject.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TObjectPropertyEditor.Create(AOwner, self);
+end;
+
+function TPropertyObject.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
+var
+  s, sval: string;
+  FormD: TFormDesigner;
+  o: TfpgWidget;
+begin
+  s      := line;
+  Result := False;
+  if UpperCase(GetIdentifier(s)) <> UpperCase(Name) then
+    Exit;
+
+  Result := CheckSymbol(s, ':=');
+  if Result then
+  begin
+    sval   := GetIdentifier(s);
+    // a property name can be the same as it's value.
+    // i.e. with Obj do Strings := Strings needs to be Self.Strings to get outside of Obj.
+    if (UpperCase(sval) = 'SELF') and (CheckSymbol(s, '.')) then
+      sval := GetIdentifier(s);
+    Result := CheckSymbol(s, ';');
+  end;
+
+  if Result then
+    try
+      FormD := GetFormDesigner(wg);
+      o := FormD.FindWidgetByName(sval);
+      if Self.ClassType = TPropertyObject then
+         SetObjectProp(wg, Name, o)
+      else if Self.ClassType = TPropertyInterface then
+        SetInterfaceProp(wg, Name, o);
+    except
+//      Writeln('invalid object value: "' + sval + '" for ' + Name);
+      Result := False;
+    end;
+end;
+
+function TPropertyObject.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+var
+  PropInfo: PPropInfo;
+  N: String;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+  begin
+    N := TComponent(GetObjectProp(wg, Name)).Name;
+    if N = Name then
+       N := 'Self.'+N;
+    Result := ident + Name + ' := ' + N + ';' + LineEnding;
+  end
+  else
+    Result := '';
+end;
+
+function TPropertyObject.GetValueText(wg: TfpgWidget): string;
+var
+  o: TObject;
+  c: TClass;
+begin
+  o := GetObjectProp(wg, Name);
+  if Assigned(o) then
+  begin
+    try
+      Result := TComponent(o).Name;
+    except
+      o := nil;
+      SetObjectProp(wg, Name, o);
+    end;
+  end
+  else
+  begin
+    c := GetObjectPropClass(wg, Name);
+    Result := '['+c.ClassName+']';
+  end;
+end;
+
+{ TObjectPropertyEditor }
+
+procedure TObjectPropertyEditor.LoadValue(wg: TfpgWidget);
+var
+  FormD: TFormDesigner;
+  Items: TList = nil;
+  i: Integer;
+  c: TClass;
+  index: Integer = 0;
+  o: TObject;
+begin
+
+  o := GetObjectProp(wg, prop.Name);
+  c := GetObjectPropClass(wg, prop.Name);
+
+  // add empty object
+  chl.Items.AddObject('(none)', nil);
+
+  try
+    FormD := GetFormDesigner(wg);
+    if Formd.FindWidgetsByClass(c, Items) then
+    begin
+      for i := 0 to Items.Count-1 do
+      begin
+        chl.Items.AddObject(TfpgComponent(Items[i]).Name, TObject(Items[i]));
+        if Assigned(o) and (TObject(Items[i]) = o) then
+          index := i+1 // +1 because we added a nil item at the start
+      end;
+    end;
+  finally
+    if Assigned(Items) then
+      Items.Free;
+  end;
+  // index is always good. 0 = (none)
+  chl.FocusItem:=index;
+end;
+
+procedure TObjectPropertyEditor.StoreValue(wg: TfpgWidget);
+var
+  i: Integer;
+begin
+  i := chl.Items.IndexOf(chl.Text);
+  SetObjectProp(wg,prop.Name, chl.Items.Objects[i]);
 end;
 
 { TPropertyString }
