@@ -1055,6 +1055,7 @@ begin
 
   // hexview
   wc          := TVFDWidgetClass.Create(TfpgHexView);
+  wc.NameBase := 'HexView';
   wc.AddProperty('Align', TPropertyEnum, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('OwnsStream', TPropertyBoolean, 'If true the Stream property will be freed when changed or set to nil.');
@@ -1063,6 +1064,7 @@ begin
 
   // hexpanel
   wc          := TVFDWidgetClass.Create(TfpgHexPanel);
+  wc.NameBase := 'HexPanel';
   wc.AddProperty('Align', TPropertyEnum, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.hexpanel';
