@@ -750,6 +750,7 @@ begin
     begin
       maindsgn.selectedform.Form.SetFocus;
       maindsgn.selectedform.Form.Window.ActivateWindow;
+      maindsgn.selectedform.Form.Window.BringToFront;
     end;
     consumed := True;
   end;
