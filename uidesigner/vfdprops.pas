@@ -258,14 +258,12 @@ end;
 function TPropertyInterface.GetPropertySource(wg: TfpgWidget;
   const ident: string): string;
 var
-  PropInfo: PPropInfo;
   N: String;
   I: IInterface;
 begin
-  PropInfo := GetPropInfo(wg.ClassType, Name);
-  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+  I := GetInterfaceProp(wg, Name);
+  if Assigned(I) then
   begin
-    I := GetInterfaceProp(wg, Name);
     N := TComponent(I as TComponent).Name;
     if N = Name then
        N := 'Self.'+N;
@@ -408,15 +406,15 @@ end;
 
 function TPropertyObject.GetPropertySource(wg: TfpgWidget; const ident: string): string;
 var
-  PropInfo: PPropInfo;
   N: String;
+  O: TObject;
 begin
-  PropInfo := GetPropInfo(wg.ClassType, Name);
-  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+  O := GetObjectProp(wg, Name);
+  if Assigned(O) then
   begin
-    N := TComponent(GetObjectProp(wg, Name)).Name;
+    N := TComponent(O).Name;
     if N = Name then
-       N := 'Self.'+N;
+      N := 'Self.'+N;
     Result := ident + Name + ' := ' + N + ';' + LineEnding;
   end
   else
