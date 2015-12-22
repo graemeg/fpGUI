@@ -109,7 +109,7 @@ type
   TPropertyObject = class(TVFDWidgetProperty)
     function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     function  ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
-    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string; out afterObject: TObject): string; override;
     function  GetValueText(wg: TfpgWidget): string; override;
   end;
 
@@ -117,7 +117,7 @@ type
 
   TPropertyInterface = class(TPropertyObject)
     function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
-    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string; out afterObject: TObject): string; override;
     function  GetValueText(wg: TfpgWidget): string; override;
   end;
 
@@ -256,21 +256,27 @@ begin
 end;
 
 function TPropertyInterface.GetPropertySource(wg: TfpgWidget;
-  const ident: string): string;
+  const ident: string; out afterObject: TObject): string;
 var
   N: String;
   I: IInterface;
+  O: TComponent;
 begin
   I := GetInterfaceProp(wg, Name);
   if Assigned(I) then
   begin
-    N := TComponent(I as TComponent).Name;
+    O := TComponent(I as TComponent);
+    N := O.Name;
     if N = Name then
        N := 'Self.'+N;
     Result := ident + Name + ' := ' + N + ';' + LineEnding;
+    afterObject := O;
   end
   else
+  begin
     Result := '';
+    afterObject := nil;
+  end;
 end;
 
 function TPropertyInterface.GetValueText(wg: TfpgWidget): string;
@@ -404,7 +410,8 @@ begin
     end;
 end;
 
-function TPropertyObject.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+function TPropertyObject.GetPropertySource(wg: TfpgWidget; const ident: string;
+  out afterObject: TObject): string;
 var
   N: String;
   O: TObject;
@@ -416,9 +423,13 @@ begin
     if N = Name then
       N := 'Self.'+N;
     Result := ident + Name + ' := ' + N + ';' + LineEnding;
+    afterObject := O;
   end
   else
+  begin
     Result := '';
+    afterObject := nil;
+  end;
 end;
 
 function TPropertyObject.GetValueText(wg: TfpgWidget): string;

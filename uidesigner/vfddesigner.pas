@@ -145,7 +145,7 @@ type
     procedure   RunWidgetEditor(wgd: TWidgetDesigner; wg: TfpgWidget);
     function    GetFormSourceDecl: string;
     function    GetFormSourceImpl: string;
-    function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
+    function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string; processed: TList; afterobjects: TStrings): string;
     // The widgets can be selected and dragged within one click
     property    OneClickMove: boolean read FOneClickMove write FOneClickMove;
     property    Form: TDesignedForm read FForm;
@@ -1221,6 +1221,8 @@ var
   t: TfpgString;
   i: integer;
   PropInfo: PPropInfo;
+  ProcessedObjects: TList;
+  AfterObjects: TStringList;
 begin
   s := '';
 
@@ -1296,6 +1298,9 @@ begin
 
   // FORM WIDGETS
 
+  ProcessedObjects := TList.Create;
+  AfterObjects := TStringList.Create;
+
   for n := 0 to FWidgets.Count - 1 do
   begin
     wd := TWidgetDesigner(FWidgets.Items[n]);
@@ -1312,20 +1317,43 @@ begin
     s := s + Ind(1) + wg.Name + ' := ' + wgclass + '.Create(' + pwgname + ');' + LineEnding +
       Ind(1) + 'with ' + wg.Name + ' do' + LineEnding +
       Ind(1) + 'begin' + LineEnding +
-      GetWidgetSourceImpl(wd, Ind(2)) +
-      Ind(1) + 'end;' + LineEnding + LineEnding;
+      GetWidgetSourceImpl(wd, Ind(2), ProcessedObjects, AfterObjects) +
+      Ind(1) + 'end;' + LineEnding;
+
+    ProcessedObjects.Add(wg);
+
+    i := 0;
+    while i < AfterObjects.Count do
+    begin
+      if AfterObjects.Objects[i] = wg then
+      begin
+        s := s + Ind(1) + Trim(AfterObjects.Strings[i])+ LineEnding;
+        AfterObjects.Delete(i);
+        continue;
+      end;
+      inc(i);
+    end;
+
+    s := s + LineEnding;
+
   end;
+
+  ProcessedObjects.Free;
+  AfterObjects.Free;
 
   Result := s;
 end;
 
-function TFormDesigner.GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
+function TFormDesigner.GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string;
+  processed: TList; afterobjects: TStrings): string;
 var
   ts, cs: string;
   s: string;
+  l: string;
   wg: TfpgWidget;
   wgc: TVFDWidgetClass;
   n: integer;
+  afterobject: TObject;
 
   procedure SaveItems(Name: string; sl: TStringList);
   var
@@ -1398,7 +1426,16 @@ begin
   end;
 
   for n := 0 to wgc.PropertyCount-1 do
-    s := s + wgc.GetProperty(n).GetPropertySource(wg, ident);
+  begin
+    l := wgc.GetProperty(n).GetPropertySource(wg, ident, afterobject);
+    if (afterobject <> nil) and (processed.IndexOf(afterobject) = -1)then
+    begin
+      l := wg.Name+'.'+Trim(l); // it's not going to be within 'with' so we need to use the name
+      afterobjects.AddObject(l, afterobject);
+    end
+    else
+      s := s + l;
+  end;
 
   {
   if wg is TwgMemo then

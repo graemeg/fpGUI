@@ -58,6 +58,7 @@ type
     constructor Create(aName: string); virtual;
     function    ParseSourceLine(wg: TfpgWidget; const line: string): boolean; virtual;
     function    GetPropertySource(wg: TfpgWidget; const ident: string): string; virtual;
+    function    GetPropertySource(wg: TfpgWidget; const ident: string; out dependsOnObject: TObject): string; virtual;
     function    GetValueText(wg: TfpgWidget): string; virtual;
     procedure   DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas; rect: TfpgRect; flags: integer); virtual;
     function    CreateEditor(AOwner: TComponent): TVFDPropertyEditor; virtual;
@@ -83,6 +84,7 @@ type
     constructor Create(aClass: TWidgetClass);
     destructor  Destroy; override;
     function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
+    function    HasProperty(apropname: string): Boolean;
     function    PropertyCount: integer;
     function    GetError(var AErr: String): Boolean;
     function    GetProperty(ind: integer): TVFDWidgetProperty;
@@ -119,6 +121,20 @@ begin
   Result := apropclass.Create(apropname);
   Result.Description := desc;
   FProps.Add(Result);
+end;
+
+function TVFDWidgetClass.HasProperty(apropname: string): Boolean;
+var
+  i: Integer;
+  n: string;
+begin
+  Result := False;
+  if apropname = '' then
+    Exit; // ==>
+  for i := 0 to FProps.Count-1 do
+    n := TVFDWidgetProperty(FProps.Items[i]).Name;
+    if Uppercase(TVFDWidgetProperty(FProps.Items[i]).Name) = (UpperCase(apropname)) then
+      Exit(True); // ==>
 end;
 
 constructor TVFDWidgetClass.Create(aClass: TWidgetClass);
@@ -186,6 +202,13 @@ end;
 function TVFDWidgetProperty.GetPropertySource(wg: TfpgWidget; const ident: string): string;
 begin
   Result := '';
+end;
+
+function TVFDWidgetProperty.GetPropertySource(wg: TfpgWidget;
+  const ident: string; out dependsOnObject: TObject): string;
+begin
+  Result := GetPropertySource(wg, ident);
+  dependsOnObject := nil;
 end;
 
 function TVFDWidgetProperty.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
