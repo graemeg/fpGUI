@@ -839,6 +839,7 @@ begin
       begin
         frmProperties.SetFocus;
         frmProperties.Window.ActivateWindow;
+        frmProperties.Window.BringToFront;
       end;
     else
       consumed := False;
