@@ -99,6 +99,33 @@ begin
   end;
 end;
 
+procedure fpgDeleteMessagesForTarget(Dest: TObject; MsgCode: integer);
+var
+  e: TMessageListElement;
+begin
+  if not Assigned(Dest) then
+    Exit; // ==>
+
+  fpgApplication.Lock;
+  try
+    e := UsedFirstMessage;
+    while (e <> nil) do
+    begin
+      if (e.msg.Dest = Dest) and ((MsgCode = -1) or (MsgCode = e.msg.MsgCode)) then
+      begin
+        //WriteLn(Format('fpgDeleteMessagesForTarget: Deleted message %d for %s', [e.msg.MsgCode, e.msg.Dest.ClassName]));
+        MsgListRemoveElement(e, UsedFirstMessage, UsedLastMessage);
+        MsgListInsertElement(e, FreeFirstMessage, FreeLastMessage);
+      end;
+      if e = UsedLastMessage then
+        break;
+      e := e.Next;
+    end;
+  finally
+    fpgApplication.Unlock;
+  end;
+end;
+
 function fpgGetFirstMessage: PfpgMessageRec;
 begin
   fpgApplication.Lock;

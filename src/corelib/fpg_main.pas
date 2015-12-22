@@ -454,6 +454,10 @@ procedure fpgDeliverMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
 procedure fpgDeleteFirstMessage;
 
+{ if MsgCode is -1 then all messages for the object will be deleted. otherwise
+  only messages matching MsgCode will be removed }
+procedure fpgDeleteMessagesForTarget(Dest: TObject; MsgCode: integer = -1);
+
 // Color & Font routines
 function  fpgColorToRGB(col: TfpgColor): TfpgColor;
 function  fpgGetNamedColor(col: TfpgColor): TfpgColor;

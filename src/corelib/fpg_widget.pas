@@ -660,6 +660,10 @@ begin
   {$ENDIF}
   FCanvas.Free;
   HandleHide;
+
+  if FInvalidated or not FInvalidRect.IsUnassigned then
+    fpgDeleteMessagesForTarget(Self, FPGM_PAINT);
+
   if Parent <> nil then
   begin
     if Parent.ActiveWidget = self then
