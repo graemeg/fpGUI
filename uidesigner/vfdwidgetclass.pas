@@ -126,13 +126,13 @@ end;
 function TVFDWidgetClass.HasProperty(apropname: string): Boolean;
 var
   i: Integer;
-  n: string;
+  //n: string;
 begin
   Result := False;
   if apropname = '' then
     Exit; // ==>
   for i := 0 to FProps.Count-1 do
-    n := TVFDWidgetProperty(FProps.Items[i]).Name;
+    //n := TVFDWidgetProperty(FProps.Items[i]).Name;
     if Uppercase(TVFDWidgetProperty(FProps.Items[i]).Name) = (UpperCase(apropname)) then
       Exit(True); // ==>
 end;
