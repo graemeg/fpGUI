@@ -38,55 +38,55 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="vfdmain.pas"/>
+        <Filename Value="vfd_main.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="vfdresizer.pas"/>
+        <Filename Value="vfd_resizer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="vfdforms.pas"/>
+        <Filename Value="vfd_forms.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="vfddesigner.pas"/>
+        <Filename Value="vfd_designer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="vfdfile.pas"/>
+        <Filename Value="vfd_file.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="newformdesigner.pas"/>
+        <Filename Value="frm_main.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="vfdwidgets.pas"/>
+        <Filename Value="vfd_widgets.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="vfdwidgetclass.pas"/>
+        <Filename Value="vfd_widgetclass.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="vfdeditors.pas"/>
+        <Filename Value="vfd_editors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="vfdformparser.pas"/>
+        <Filename Value="vfd_formparser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="vfdprops.pas"/>
+        <Filename Value="vfd_props.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="vfdutils.pas"/>
+        <Filename Value="vfd_utils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="vfdpropeditgrid.pas"/>
+        <Filename Value="vfd_propeditgrid.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
