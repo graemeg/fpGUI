@@ -14,7 +14,7 @@
       Main window functionality and designer class.
 }
 
-unit vfdwidgetclass;
+unit vfd_widgetclass;
 
 {$mode objfpc}{$H+}
 
@@ -97,7 +97,7 @@ implementation
 
 uses
   TypInfo;
-  
+
 
 type
   // used to get to SetDesigning() in Form Designer
@@ -236,7 +236,7 @@ begin
     on E: Exception do
       debugln('Detected an error: ', E.Message);
   end;
-  
+
   Canvas.BeginDraw;
   Canvas.DrawString(x + 1, fy, s);
   Canvas.EndDraw;

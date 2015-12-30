@@ -14,7 +14,7 @@
       Some property editors.
 }
 
-unit vfdeditors;
+unit vfd_editors;
 
 {$mode objfpc}{$H+}
 
@@ -27,7 +27,7 @@ uses
   fpg_label,
   fpg_button,
   fpg_memo,
-  vfdforms;
+  vfd_forms;
 
 type
 

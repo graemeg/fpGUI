@@ -14,7 +14,7 @@
       Property editors.
 }
 
-unit vfdprops;
+unit vfd_props;
 
 {$mode objfpc}{$H+}
 
@@ -26,7 +26,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  vfdwidgetclass,
+  vfd_widgetclass,
   fpg_edit,
   fpg_button,
   fpg_combobox;
@@ -86,14 +86,14 @@ type
     function GetValueText(wg: TfpgWidget): string; override;
     function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
   end;
-  
-  
+
+
   TPropertyFontDesc = class(TPropertyString)
     function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     procedure OnExternalEdit(wg: TfpgWidget); override;
   end;
-  
-  
+
+
   TPropertyColor = class(TVFDWidgetProperty)
   public
     procedure DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas; rect: TfpgRect; flags: integer); override;
@@ -155,8 +155,8 @@ type
     procedure StoreValue(wg: TfpgWidget); override;
     procedure SetFocus; override;
   end;
-  
-  
+
+
   TBooleanPropertyEditor = class(TChoicePropertyEditor)
   public
     procedure LoadValue(wg: TfpgWidget); override;
@@ -204,10 +204,10 @@ implementation
 
 uses
   TypInfo,
-  vfdformparser,
-  vfdeditors,
+  vfd_formparser,
+  vfd_editors,
   vfd_constants,
-  vfddesigner,
+  vfd_designer,
   fpg_dialogs;
 
 

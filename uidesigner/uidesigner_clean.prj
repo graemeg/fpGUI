@@ -1,6 +1,6 @@
 [projectoptions]
 mainfile=${PROJECTNAME}.lpr
-targetfile=units/${TARGET}/${PROJECTNAME}${EXEEXT}
+targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
@@ -25,7 +25,7 @@ makeoptions=6
  -B
  -O2 -XX -Xs -CX
  -vewinh
- -FEunits/${TARGET}/
+ -FUunits/${TARGET}/
 codetemplatedirs=1
  ${TEMPLATEDIR}
 toolmenus=3
@@ -207,6 +207,10 @@ toolmessages=3
  0
  0
  0
+toolshortcuts=3
+ -1
+ -1
+ -1
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -278,6 +282,7 @@ editfontantialiased=1
 editmarkbrackets=1
 backupfilecount=0
 encoding=0
+trimtrailingwhitespace=0
 codetemplatedirs=1
  ${TEMPLATEDIR}
 debugcommand=${DEBUGGER}
@@ -295,6 +300,7 @@ afterconnect=
 beforeload=
 afterload=
 beforerun=
+sourcebase=
 sourcedirs=7
  ${FPGUI}/src/reportengine/
  ${FPGUI}/src/corelib/render/software/
@@ -322,6 +328,7 @@ startupbkpt=0
 startupbkpton=0
 gdbsimulator=0
 gdbserverstartonce=0
+gdbloadtimeout=
 gdbserverwait=0
 nogdbserverexit=0
 gdbservertty=0
@@ -330,6 +337,7 @@ exceptclassnames=1
 exceptignore=1
  0
 nodebugbeginend=0
+fpcgdbworkaround=1
 sigsettings=27
  1,1,T,F
  3,3,T,F

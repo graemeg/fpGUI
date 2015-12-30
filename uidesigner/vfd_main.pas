@@ -11,10 +11,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Main window functionality and designer class.
+      Defines a class that manages the UI Designer main window functionality.
 }
 
-unit vfdmain;
+unit vfd_main;
 
 {$mode objfpc}{$H+}
 
@@ -27,11 +27,11 @@ uses
   fpg_main,
   fpg_widget,
   fpg_dialogs,
-  vfdprops,
-  vfdforms,
-  vfddesigner,
-  vfdfile,
-  newformdesigner;
+  vfd_props,
+  vfd_forms,
+  vfd_designer,
+  vfd_file,
+  frm_main;
 
 type
 
@@ -87,7 +87,7 @@ uses
   fpg_iniutils,
   fpg_utils,
   vfd_constants,
-  vfdformparser;
+  vfd_formparser;
 
 var
   DefaultPasExt : String = '.pas';
@@ -146,7 +146,7 @@ begin
     TFormDesigner(FDesigners[n]).Free;
   end;
   FDesigners.Clear;
-  
+
   if not fpgFileExists(fname) then
   begin
     ShowMessage(Format(rsErrUnitNotFound, [fname]), rsErrLoadingForm);
@@ -349,7 +349,7 @@ begin
   // options
   SaveComponentNames := True;
   LoadDefaults;
-  
+
   FEditedFileName := '';
 end;
 
@@ -361,7 +361,7 @@ begin
     TFormDesigner(FDesigners[n]).Free;
   FDesigners.Free;
   FFile.Free;
-  
+
   frmProperties.Free;
   frmMain.Free;
   inherited;

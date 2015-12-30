@@ -15,7 +15,7 @@
       marker searching.
 }
 
-unit vfdfile;
+unit vfd_file;
 
 {$mode objfpc}{$H+}
 
@@ -35,7 +35,7 @@ type
     Position: integer;
     Data: string;
   end;
-  
+
 
   TVFDFile = class
   private
@@ -60,13 +60,13 @@ type
     procedure   SetFormData(formname, headblock, bodyblock: string);
     procedure   NewFileSkeleton(AUnitname: string);
   end;
-  
+
 
 implementation
 
 uses
   fpg_iniutils,
-  vfdutils;
+  vfd_utils;
 
 const
   cBlockPrefix = '{@VFD_';

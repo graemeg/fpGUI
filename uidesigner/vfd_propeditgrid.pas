@@ -14,7 +14,7 @@
       Property editor for grid columns.
 }
 
-unit vfdpropeditgrid;
+unit vfd_propeditgrid;
 
 {$mode objfpc}{$H+}
 
@@ -33,9 +33,9 @@ uses
   fpg_customgrid,
   fpg_basegrid,
   fpg_grid,
-  vfdwidgetclass,
-  vfdprops,
-  vfdformparser;
+  vfd_widgetclass,
+  vfd_props,
+  vfd_formparser;
 
 type
 

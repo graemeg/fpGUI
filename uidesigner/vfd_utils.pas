@@ -14,7 +14,7 @@
       Some utility functions.
 }
 
-unit vfdutils;
+unit vfd_utils;
 
 {$mode objfpc}{$H+}
 

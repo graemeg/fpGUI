@@ -11,10 +11,11 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Essential classes used by the fpGUI Designer
+      Defines the UI Designer's main form and Object Inspector and
+      essential widgets (eg: Palette, Palette Button, Property List).
 }
 
-unit newformdesigner;
+unit frm_main;
 
 {$mode objfpc}{$H+}
 
@@ -36,8 +37,8 @@ uses
   fpg_menu,
   fpg_mru,
   fpg_hyperlink,
-  vfdwidgetclass,
-  vfdwidgets;
+  vfd_widgetclass,
+  vfd_widgets;
 
 const
   MIME_VFD_WIDGET_CLASS = 'x-object/fpgui-vfd-widgetclass';
@@ -55,8 +56,6 @@ type
     procedure HandlePaint; override;
   end;
   
-
-  { TfrmMain }
 
   TfrmMain = class(TfpgForm)
   private
@@ -189,7 +188,7 @@ uses
   fpg_constants,
   fpg_stylemanager,
   fpg_window,
-  vfdmain,
+  vfd_main,
   vfd_constants;
 
 

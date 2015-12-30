@@ -14,7 +14,7 @@
       Setting up of widgets, properties and images.
 }
 
-unit vfdwidgets;
+unit vfd_widgets;
 
 {$mode objfpc}{$H+}
 
@@ -24,8 +24,8 @@ uses
   SysUtils,
   Classes,
   contnrs,
-  vfdwidgetclass,
-  vfdprops,
+  vfd_widgetclass,
+  vfd_props,
   typinfo;
 
 procedure RegisterWidgets;
@@ -41,7 +41,7 @@ implementation
 
 uses
   fpg_main,
-  vfddesigner,
+  vfd_designer,
   fpg_widget,
   fpg_form,
   fpg_label,
@@ -70,8 +70,8 @@ uses
   fpg_dialogs,
   fpg_hexview,
   fpg_spinedit,
-  vfdpropeditgrid,
-  vfdmain;
+  vfd_propeditgrid,
+  vfd_main;
 
 type
   TVFDPageControlWidgetClass = class(TVFDWidgetClass)

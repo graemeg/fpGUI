@@ -15,7 +15,7 @@
       form .pas file.
 }
 
-unit vfdformparser;
+unit vfd_formparser;
 
 {$mode objfpc}{$H+}
 
@@ -28,9 +28,9 @@ uses
   fpg_main,
   fpg_widget,
   fpg_form,
-  vfddesigner,
-  vfdwidgetclass,
-  vfdwidgets;
+  vfd_designer,
+  vfd_widgetclass,
+  vfd_widgets;
 
 type
   TVFDFormParser = class(TObject)
@@ -154,7 +154,7 @@ begin
     Result := False
   else
     raise Exception.CreateFmt(rsErrFailedToParseBoolean, [s]);
-    
+
   if Result then
     Delete(s, 1, 4)
   else
@@ -388,7 +388,7 @@ begin
 
       wg.Name := wgname;
       wg.FormDesigner := ffd;
-      
+
       NextLine;
       s     := UpperCase(line);
       ident := GetIdentifier(s);

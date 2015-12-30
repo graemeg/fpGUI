@@ -14,7 +14,7 @@
       The resizer widget used in the form designer.
 }
 
-unit vfdresizer;
+unit vfd_resizer;
 
 {$mode objfpc}{$H+}
 
@@ -48,8 +48,8 @@ implementation
 
 
 uses
-  vfddesigner,
-  vfdmain;
+  vfd_designer,
+  vfd_main;
 
 { TwgResizer }
 

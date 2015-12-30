@@ -14,7 +14,7 @@
       This unit defines various forms/dialogs used in the UI Designer.
 }
 
-unit vfdforms;
+unit vfd_forms;
 
 {$mode objfpc}{$H+}
 
@@ -158,7 +158,7 @@ uses
   fpg_constants,
   fpg_utils,
   vfd_constants,
-  vfdprops; // used to get Object Inspector defaults
+  vfd_props; // used to get Object Inspector defaults
 
 
 { TInsertCustomForm }
@@ -407,7 +407,7 @@ begin
   lNode := Treeview1.Selection;
   if lNode = nil then
     exit;
-  
+
   if Sender = btnUp then
   begin
     if lNode.Prev = nil then
@@ -421,9 +421,9 @@ begin
     if (lNode.Next.Next = nil) then // the last node doesn't have a next
       lNode.MoveTo(lNode.Next, naAdd)
     else
-      lNode.MoveTo(lNode.Next.Next, naInsert);  
+      lNode.MoveTo(lNode.Next.Next, naInsert);
   end;
-  
+
   Treeview1.Invalidate;
 end;
 

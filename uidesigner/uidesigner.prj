@@ -82,7 +82,12 @@ replacedialog=15
  y=302
  cx=437
  cy=171
-options=99
+options=104
+ [projectoptionsfo.toolshortcuts]
+ dropdowncolwidths=3
+  70
+  70
+  70
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=653
  sortdescend0=0
@@ -95,6 +100,12 @@ options=99
  sortdescend5=0
  width6=227
  sortdescend6=0
+ width7=45
+ sortdescend7=0
+ width8=1
+ sortdescend8=0
+ width9=266
+ sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
  propcolwidthref=477
  width0=96
@@ -148,22 +159,16 @@ options=99
  sortdescend7=0
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=1
  [projectoptionsfo.exceptionsgrid]
- propcolwidthref=694
+ propcolwidthref=706
  width0=47
  sortdescend0=0
- width1=688
+ width1=700
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
  index=0
- [projectoptionsfo.grid]
- propcolwidthref=438
- width0=219
- sortdescend0=0
- width1=431
- sortdescend1=0
  [projectoptionsfo.filefiltergrid]
  propcolwidthref=545
  width0=112
@@ -216,7 +221,7 @@ settings=13
  active=1
  visible=1
 mainfile=${PROJECTNAME}.lpr
-targetfile=units/${TARGET}/${PROJECTNAME}${EXEEXT}
+targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
 makedir=
@@ -241,7 +246,7 @@ makeoptions=6
  -B
  -O2 -XX -Xs -CX
  -vewinh
- -FEunits/${TARGET}/
+ -FUunits/${TARGET}/
 codetemplatedirs=1
  ${TEMPLATEDIR}
 toolmenus=3
@@ -423,6 +428,10 @@ toolmessages=3
  0
  0
  0
+toolshortcuts=3
+ -1
+ -1
+ -1
 fontalias=0
 fontancestors=0
 fontheights=0
@@ -494,6 +503,7 @@ editfontantialiased=1
 editmarkbrackets=1
 backupfilecount=0
 encoding=0
+trimtrailingwhitespace=0
 codetemplatedirs=1
  ${TEMPLATEDIR}
 debugcommand=${DEBUGGER}
@@ -511,6 +521,7 @@ afterconnect=
 beforeload=
 afterload=
 beforerun=
+sourcebase=
 sourcedirs=7
  ${FPGUI}/src/reportengine/
  ${FPGUI}/src/corelib/render/software/
@@ -538,6 +549,7 @@ startupbkpt=0
 startupbkpton=0
 gdbsimulator=0
 gdbserverstartonce=0
+gdbloadtimeout=
 gdbserverwait=0
 nogdbserverexit=0
 gdbservertty=0
@@ -546,6 +558,7 @@ exceptclassnames=1
 exceptignore=1
  0
 nodebugbeginend=0
+fpcgdbworkaround=1
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -609,6 +622,7 @@ cx=704
 cy=473
 [progparams]
 progparamhistory=0
+workdirparamhistory=0
 envvarons=0
 [edit]
 hintwidth=462
@@ -625,20 +639,23 @@ findhistory=9
  sort
  uses
 findoptions=1
-editpos=14
+editpos=17
+ 0,14
+ 0,190
+ 0,36
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 0,33
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 6,27
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
+ 0,0
+ 0,43
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
@@ -655,10 +672,13 @@ bookmarks10=1
 bookmarks11=0
 bookmarks12=0
 bookmarks13=0
-sourcefiles=14
- /home/graemeg/programming/fpgui/uidesigner/vfdforms.pas
- /home/graemeg/programming/fpgui/uidesigner/vfdwidgets.pas
- /home/graemeg/programming/fpgui/uidesigner/vfdmain.pas
+bookmarks14=0
+bookmarks15=0
+bookmarks16=0
+sourcefiles=17
+ /data/devel/fpgui/uidesigner/vfd_main.pas
+ /data/devel/fpgui/uidesigner/frm_main.pas
+ /data/devel/fpgui/uidesigner/vfd_designer.pas
  /home/graemeg/programming/fpgui/uidesigner/newformdesigner.pas
  /data/devel/fpgui/uidesigner/vfddesigner.pas
  /data/devel/fpgui/src/gui/fpg_dialogs.pas
@@ -670,10 +690,13 @@ sourcefiles=14
  /data/devel/fpgui/src/corelib/fpg_stdimages.pas
  /data/devel/fpgui/src/corelib/stdimages.inc
  /data/devel/fpgui/src/corelib/fpg_imgfmt_png.pas
-relpaths=14
- vfdforms.pas
- vfdwidgets.pas
- vfdmain.pas
+ /data/devel/fpgui/uidesigner/vfd_forms.pas
+ /data/devel/fpgui/src/gui/fpg_form.pas
+ /data/devel/fpgui/src/gui/fpg_window.pas
+relpaths=17
+ vfd_main.pas
+ frm_main.pas
+ vfd_designer.pas
  newformdesigner.pas
  vfddesigner.pas
  ../src/gui/fpg_dialogs.pas
@@ -685,7 +708,13 @@ relpaths=14
  ../src/corelib/fpg_stdimages.pas
  ../src/corelib/stdimages.inc
  ../src/corelib/fpg_imgfmt_png.pas
-ismoduletexts=14
+ vfd_forms.pas
+ ../src/gui/fpg_form.pas
+ ../src/gui/fpg_window.pas
+ismoduletexts=17
+ 0
+ 0
+ 0
  0
  0
  0
@@ -705,10 +734,9 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.tabwidget]
-order=14
- 0
- 1
- 2
+order=17
+ 15
+ 16
  3
  4
  6
@@ -720,40 +748,28 @@ order=14
  10
  8
  9
+ 2
+ 14
+ 0
+ 1
 tabsize=152
 firsttab=0
-index=13
+index=14
 [layout]
-windowlayout=543
+windowlayout=527
  [mainfo.openform]
  filenames=1
   /data/devel/msegui/apps/ide/componentpaletteform.mfm
- filehistory=1
-  /data/devel/msegui/apps/ide/componentpaletteform.mfm
- filefilterindex=0
- filefilter=*.mfm
  filecolwidth=174
  x=0
  y=0
  cx=0
  cy=0
- [mainfo.projectfiledia]
- filenames=1
-  /data/devel/fpgui/uidesigner/uidesigner_clean.prj
- lastdir=/data/devel/fpgui/uidesigner/
- filehistory=10
-  /data/devel/fpgui/uidesigner/uidesigner_clean.prj
-  /data/devel/fpgui/uidesigner/uidesigner.prj
-  /data/devel/opensource/mseuniverse/tools/msegit/msegit.prj
-  /data/devel/QTS/csvimporter/src/csvimporter.prj
-  /data/devel/MasterMaths/m2_system/Source/tools/script_runner/sqleditor_clean.prj
-  /data/devel/MasterMaths/m2_system/Source/tutoradmin/tutoradmin.prj
-  /data/devel/msegui/apps/facedemo/facedemo.prj
-  /data/devel/opensoft/bugcollector/src/bugcollector.prj
-  /data/devel/msegui/apps/ide/mseide_gg.prj
-  /data/devel/msegui/apps/ide/mseide.prj
+ filehistory=1
+  /data/devel/msegui/apps/ide/componentpaletteform.mfm
  filefilterindex=0
- filefilter=*.prj
+ filefilter=*.mfm
+ [mainfo.projectfiledia]
  filecolwidth=174
  x=1444
  y=309
@@ -761,6 +777,11 @@ windowlayout=543
  cy=307
  [mainfo.openfile]
  filenames=0
+ filecolwidth=174
+ x=452
+ y=262
+ cx=588
+ cy=307
  filehistory=10
   /data/devel/fpgui/src/gui/messagedialog.inc
   /data/devel/fpgui/src/gui/fpg_style.pas
@@ -774,17 +795,12 @@ windowlayout=543
   /opt/msegui_svn/apps/ide/sourcepage.pas
  filefilterindex=4
  filefilter="*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
- filecolwidth=174
- x=452
- y=262
- cx=588
- cy=307
  [mainfo.basedock]
  splitdir=2
- useroptions=15488
+ useroptions=268450944
  [mainfo]
  splitdir=0
- useroptions=33554555
+ useroptions=301990011
  stackedunder=
  parent=
  mdistate=0
@@ -792,8 +808,8 @@ windowlayout=543
  ny=0
  ncx=0
  ncy=0
- x=384
- y=49
+ x=337
+ y=41
  cx=1266
  cy=1250
  rcx=0
@@ -803,7 +819,7 @@ windowlayout=543
  visible=1
  [targetconsolefo]
  splitdir=0
- useroptions=16489
+ useroptions=268451945
  parent=
  mdistate=0
  nx=0
@@ -821,7 +837,7 @@ windowlayout=543
  visible=0
  [threadsfo]
  splitdir=0
- useroptions=16489
+ useroptions=268451945
  parent=
  mdistate=0
  nx=0
@@ -839,7 +855,7 @@ windowlayout=543
  visible=0
  [memoryfo]
  splitdir=0
- useroptions=16507
+ useroptions=268451963
  stackedunder=cpui386fo
  parent=
  mdistate=0
@@ -866,7 +882,7 @@ windowlayout=543
  value=0
  [disassfo]
  splitdir=0
- useroptions=16491
+ useroptions=268451947
  stackedunder=objectinspectorfo
  parent=
  mdistate=0
@@ -885,7 +901,7 @@ windowlayout=543
  visible=0
  [findinfilefo]
  splitdir=0
- useroptions=16491
+ useroptions=268451947
  stackedunder=mainfo
  parent=
  mdistate=0
@@ -901,7 +917,7 @@ windowlayout=543
  rcy=0
  [projecttreefo]
  splitdir=0
- useroptions=49259
+ useroptions=268484715
  parent=mainfo.panel1.container
  visible=0
  mdistate=0
@@ -927,7 +943,7 @@ windowlayout=543
  rowheight=16
  [stackfo]
  splitdir=0
- useroptions=24681
+ useroptions=268460137
  parent=
  mdistate=0
  nx=0
@@ -945,7 +961,7 @@ windowlayout=543
  visible=0
  [watchpointsfo]
  splitdir=0
- useroptions=16489
+ useroptions=268451945
  parent=
  mdistate=0
  nx=0
@@ -982,7 +998,7 @@ windowlayout=543
  sortdescend6=0
  [breakpointsfo]
  splitdir=0
- useroptions=16491
+ useroptions=268451947
  stackedunder=componentpalettefo
  parent=
  mdistate=0
@@ -1003,7 +1019,7 @@ windowlayout=543
  value=1
  [objectinspectorfo]
  splitdir=0
- useroptions=16491
+ useroptions=268451947
  stackedunder=symbolfo
  parent=
  mdistate=0
@@ -1028,7 +1044,7 @@ windowlayout=543
  sortdescend1=0
  [symbolfo]
  splitdir=0
- useroptions=16507
+ useroptions=268451963
  stackedunder=breakpointsfo
  parent=
  mdistate=0
@@ -1055,7 +1071,7 @@ windowlayout=543
  [symbolfo.symbol]
  [watchfo]
  splitdir=0
- useroptions=24681
+ useroptions=268460137
  parent=mainfo.basedock
  visible=0
  mdistate=0
@@ -1098,7 +1114,7 @@ windowlayout=543
  value=1
  [messagefo]
  splitdir=0
- useroptions=82027
+ useroptions=268517483
  parent=mainfo.basedock
  visible=1
  mdistate=0
@@ -1114,7 +1130,7 @@ windowlayout=543
  rcy=0
  [componentstorefo]
  splitdir=0
- useroptions=24699
+ useroptions=268460155
  stackedunder=memoryfo
  parent=
  mdistate=0
@@ -1143,41 +1159,41 @@ windowlayout=543
  [componentstorefo.storefiledialog]
  filenames=1
   /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=/home/mse/test/msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.groupfiledialog]
  filenames=1
   /home/mse/test/msegui/apps/ide/compstore/
- lastdir=/home/mse/test/msegui/apps/ide/compstore/
- filehistory=0
- filefilterindex=0
- filefilter=
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ lastdir=/home/mse/test/msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.compfiledialog]
  filenames=0
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
  lastdir=
  filehistory=0
  filefilterindex=0
  filefilter=
- filecolwidth=0
- x=0
- y=0
- cx=0
- cy=0
  [componentpalettefo]
  splitdir=0
- useroptions=24683
+ useroptions=268460139
  stackedunder=componentstorefo
  parent=
  mdistate=0
@@ -1198,7 +1214,7 @@ windowlayout=543
  activetab=4
  [debuggerfo]
  splitdir=0
- useroptions=24683
+ useroptions=268460139
  parent=mainfo.basedock
  visible=1
  mdistate=0
@@ -1214,7 +1230,7 @@ windowlayout=543
  rcy=0
  [sourcefo]
  splitdir=0
- useroptions=16489
+ useroptions=268451945
  parent=mainfo.panel1.container
  visible=1
  mdistate=0
@@ -1234,7 +1250,7 @@ windowlayout=543
  checked=1
  [mainfo.panel1]
  splitdir=1
- useroptions=33652203
+ useroptions=838958571
  parent=mainfo.basedock
  visible=1
  mdistate=0
@@ -1251,7 +1267,7 @@ windowlayout=543
  [cpui386fo]
  irqoff=0
  splitdir=0
- useroptions=16491
+ useroptions=268451947
  stackedunder=findinfilefo
  parent=
  mdistate=0

@@ -15,7 +15,7 @@
 }
 
 
-unit vfddesigner;
+unit vfd_designer;
 
 {$mode objfpc}{$H+}
 
@@ -33,12 +33,12 @@ uses
   fpg_memo,
   fpg_combobox,
   fpg_menu,
-  vfdresizer,
-  vfdforms,
-  vfdeditors,
-  vfdwidgetclass,
-  vfdwidgets,
-  newformdesigner;
+  vfd_resizer,
+  vfd_forms,
+  vfd_editors,
+  vfd_widgetclass,
+  vfd_widgets,
+  frm_main;
 
 type
 
@@ -159,8 +159,8 @@ implementation
 
 uses
   TypInfo,
-  vfdmain,
-  vfdutils,
+  vfd_main,
+  vfd_utils,
   vfd_constants,
   fpg_tree;
 
@@ -171,7 +171,7 @@ function GetFormDesigner(wg: TfpgWidget): TFormDesigner;
 begin
   Result := wg.FormDesigner as TFormDesigner;
 end;
-  
+
 
 { TWidgetDesigner }
 
@@ -755,7 +755,7 @@ var
       end;
     end;
   end;
-  
+
 begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
@@ -772,7 +772,7 @@ begin
   else
     frm.Treeview1.Selection := frm.Treeview1.Rootnode.FirstSubNode;
   frm.Treeview1.SetFocus;
-    
+
   if frm.ShowModal = mrOK then
   begin
     n := 0;
@@ -788,7 +788,7 @@ begin
         if IsPublishedProp(TWidgetDesigner(lNode.Data).Widget, 'TabOrder') then
         begin
           TWidgetDesigner(lNode.Data).Widget.TabOrder := n;
-        end;        
+        end;
       end;
       lNode := frm.Treeview1.NextNode(lNode);
       n := n + 1;
