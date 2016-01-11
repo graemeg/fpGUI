@@ -3617,7 +3617,8 @@ end;
 
 procedure TAgg2D.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 begin
-//  LineWidth(awidth);
+  LineWidth(awidth);
+  { dashes and dots are relative to the line width }
   case astyle of
     lsSolid:
       begin
@@ -3627,22 +3628,25 @@ begin
     lsDash:
       begin
         m_convDash.remove_all_dashes;
-        m_convDash.add_dash(3, 3);
+        m_convDash.add_dash(2*awidth, 4*awidth);
       end;
     lsDot:
       begin
         m_convDash.remove_all_dashes;
-        m_convDash.add_dash(1, 1.5);
+        m_convDash.add_dash(awidth, 2*awidth);
       end;
     lsDashDot:
       begin
         m_convDash.remove_all_dashes;
-        m_convDash.add_dash(3, 1);
+        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
       end;
     lsDashDotDot:
       begin
-        m_convDash.add_dash(3, 1);
-        m_convDash.add_dash(1, 1);
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
       end;
   end;
 end;
