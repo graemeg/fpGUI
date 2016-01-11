@@ -2457,8 +2457,10 @@ begin
  m_path.line_to(lx1 ,ly2 );
  m_path.close_polygon;
 
- DrawPath(AGG_FillAndStroke );
-
+  if m_fillColor.a = 0 then
+    DrawPath(AGG_StrokeOnly)
+  else
+    DrawPath(AGG_FillAndStroke);
 end;
 
 { ROUNDEDRECT }
