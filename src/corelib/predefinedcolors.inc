@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -14,9 +14,9 @@
 
 {%mainunit fpg_base.pas}
 
-  // The following colors match the predefined Delphi Colors
+  // The following colors are similar to the predefined Delphi color constants
   // NOTE:
-  //   The format is always RRGGBB (Red, Green, Blue);
+  //   The format is always AARRGGBB (Alpha, Red, Green, Blue);
 
   clAqua          = TfpgColor($ff00FFFF);
   clBlack         = TfpgColor($ff000000);
@@ -84,13 +84,13 @@
   clGridInactiveSelText = TfpgColor(cl_BaseNamedColor + 31);
   clSplitterGrabBar     = TfpgColor(cl_BaseNamedColor + 32);
   clHyperLink           = TfpgColor(cl_BaseNamedColor + 33);
-  clPlaceholderText     = TfpgColor(cl_BaseNamedColor + 34);
+  clPlaceholderText     = TfpgColor(cl_BaseNamedColor + 34); // hint text color used in eg: TfpgEdit
 
 
 
-  // De-facto NS & MSIE recognized HTML (web) color names
+  // The de facto Netscape & IE recognized HTML (web) color names
   // NOTE:
-  //   The format is always RRGGBB (Red, Green, Blue);
+  //   The format is always AARRGGBB (Alpha, Red, Green, Blue);
 
   clAliceBlue           = TfpgColor($fff0f8ff);
   clAntiqueWhite        = TfpgColor($fffaebd7);
