@@ -55,7 +55,7 @@ applications.
    directory.
 
 When you create you own project, all you need to do is tell Lazarus to
-associate the 'fpgui_package.lpk' with your project and it will automatically
+associate the 'fpgui_toolkit.lpk' with your project and it will automatically
 find all the fpGUI compiled units and source for you.
 
  * Creating a new project. Select Project->New Project.  Select
@@ -63,7 +63,7 @@ find all the fpGUI compiled units and source for you.
  * Save the project in your preferred directory.
  * Associate fpGUI with your project. Select Project->Project Inspector.
    An new dialog will appear. Select Add then New Requirements. In the
-   Package Name combobox, select the 'fpgui_package' package and
+   Package Name combobox, select the 'fpgui_toolkit' package and
    click OK.
  * You can now write your program and use any fpGUI units. Lazarus will
    automatically include the paths to the fpGUI compiled units for you.
