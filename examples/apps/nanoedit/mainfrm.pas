@@ -30,6 +30,7 @@ type
     FIsForward: boolean;
     FFilename: TfpgString;
     procedure FormShow(Sender: TObject);
+    procedure miNewClick(Sender: TObject);
     procedure miOpenClick(Sender: TObject);
     procedure miSaveClick(Sender: TObject);
     procedure miSaveAsClick(Sender: TObject);
@@ -74,6 +75,13 @@ begin
   end;
 end;
 
+procedure TMainForm.miNewClick(Sender: TObject);
+begin
+  FFileName := '';
+  memEditor.Clear;
+  UpdateStatus('New file completed.');
+end;
+
 procedure TMainForm.miOpenClick(Sender: TObject);
 var
   dlg: TfpgFileDialog;
@@ -92,20 +100,15 @@ begin
 end;
 
 procedure TMainForm.miSaveClick(Sender: TObject);
-var
-  dlg: TfpgFileDialog;
 begin
-  dlg := TfpgFileDialog.Create(nil);
-  try
-    if FFilename <> '' then
-      dlg.FileName := FFilename;
-    if dlg.RunSaveFile then
-    begin
-      memEditor.SaveToFile(dlg.FileName);
-      UpdateStatus(Format('<%s> successfully saved.', [FFileName]));
-    end;
-  finally
-    dlg.Free;
+  if FFilename = '' then
+  begin
+    miSaveAsClick(nil);
+  end
+  else
+  begin
+    memEditor.SaveToFile(FFileName);
+    UpdateStatus(Format('<%s> successfully saved.', [FFileName]));
   end;
 end;
 
@@ -257,6 +260,7 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(340, 6, 120, 20);
+    AddMenuItem('New', 'Ctrl+N', @miNewClick);
     AddMenuItem('Open...', 'Ctrl+O', @miOpenClick);
     AddMenuItem('Save', 'Ctrl+S', @miSaveClick);
     AddMenuItem('Save as...', 'Ctrl+Shift+S', @miSaveAsClick);

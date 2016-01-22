@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -38,27 +38,22 @@
       <Unit0>
         <Filename Value="nanoedit.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="nanoedit"/>
       </Unit0>
       <Unit1>
         <Filename Value="mainfrm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="mainfrm"/>
       </Unit1>
       <Unit2>
         <Filename Value="elastictabstops.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="elastictabstops"/>
       </Unit2>
       <Unit3>
         <Filename Value="frm_find.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_find"/>
       </Unit3>
       <Unit4>
         <Filename Value="../ide/src/fpg_textedit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpg_textedit"/>
       </Unit4>
     </Units>
   </ProjectOptions>
@@ -77,11 +72,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CustomOptions Value="-FUunits"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>
