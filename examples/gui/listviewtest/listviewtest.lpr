@@ -14,15 +14,19 @@ type
   TMainForm = class(TfpgForm)
     procedure ShowFocusItemChange(Sender: TObject);
   private
-    FEdit: TfpgEdit;
-    FAddButton: TfpgButton;
+    {@VFD_HEAD_BEGIN: MainForm}
+    BottomPanel: TfpgPanel;
+    TopPanel: TfpgPanel;
     FListView: TfpgListView;
     FSplitter: TfpgSplitter;
     FTmpListView: TfpgListView;
+    FEdit: TfpgEdit;
+    FAddButton: TfpgButton;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
     FShowFocus: TfpgCheckBox;
-    FImageList: TfpgImageList;
+    {@VFD_HEAD_END: MainForm}
+    FImageList,
     FSelectedImageList: TfpgImageList;
     procedure LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer);
     procedure CloseBttn(Sender: TObject);
@@ -34,9 +38,192 @@ type
     procedure ItemSelectionChanged(ListView: TfpgListView; Item: TfpgLVItem;
                                     ItemIndex: Integer; Selected: Boolean);
   public
+    procedure AfterCreate; override;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
+
+{@VFD_NEWFORM_DECL}
+
+{@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.AfterCreate;
+var
+  LVColumn: TfpgLVColumn;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(622, 213, 640, 480);
+  WindowTitle := 'ListView Test';
+  Hint := '';
+  IconName := '';
+
+  BottomPanel := TfpgPanel.Create(self);
+  with BottomPanel do
+  begin
+    Name := 'BottomPanel';
+    SetPosition(0, 440, 640, 40);
+    Align := alBottom;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
+  end;
+
+  TopPanel := TfpgPanel.Create(self);
+  with TopPanel do
+  begin
+    Name := 'TopPanel';
+    SetPosition(0, 0, 640, 400);
+    Align := alClient;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
+  end;
+
+  FListView := TfpgListView.Create(TopPanel);
+  with FListView do
+  begin
+    Name := 'FListView';
+    SetPosition(2, 2, 320, 396);
+    Align := alLeft;
+    Hint := '';
+    MultiSelect := True;
+    ShowHeaders := True;
+    ShowHeaders := True;
+    TabOrder := 1;
+    ViewStyleClass := TfpgLVReportPainter;
+    OnPaintItem := @PaintItem;
+    OnSelectionChanged := @ItemSelectionChanged;
+    Images := FImageList;
+    SubItemImages := FImageList;
+    ImagesSelected := FSelectedImageList;
+    OnColumnClick  := @LVColumnClicked;
+  end;
+
+  FSplitter := TfpgSplitter.Create(TopPanel);
+  with FSplitter do
+  begin
+    Name := 'FSplitter';
+    SetPosition(252, 2, 8, 396);
+    Align := alLeft;
+  end;
+
+  FTmpListView := TfpgListView.Create(TopPanel);
+  with FTmpListView do
+  begin
+    Name := 'FTmpListView';
+    SetPosition(260, 2, 378, 396);
+    Align := alClient;
+    Hint := '';
+    MultiSelect := False;
+    ShowHeaders := True;
+    ShowHeaders := True;
+    TabOrder := 3;
+    ViewStyleClass := TfpgLVIconPainter;
+    Items := FListView.Items;
+    Images := FImageList;
+  end;
+
+  FEdit := TfpgEdit.Create(BottomPanel);
+  with FEdit do
+  begin
+    Name := 'FEdit';
+    SetPosition(5, 5, 120, 24);
+    ExtraHint := 'List item prefix';
+    FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 1;
+    Text := '';
+    Options := [eo_ExtraHintIfFocus];
+  end;
+
+  FAddButton := TfpgButton.Create(BottomPanel);
+  with FAddButton do
+  begin
+    Name := 'FAddButton';
+    SetPosition(130, 5, 85, 23);
+    Text := 'Add';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 2;
+    OnClick := @AddBttn;
+  end;
+
+  FQuitButton := TfpgButton.Create(BottomPanel);
+  with FQuitButton do
+  begin
+    Name := 'FQuitButton';
+    SetPosition(550, 5, 80, 23);
+    Anchors := [anRight,anBottom];
+    Text := 'Quit';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := 'stdimg.Quit';
+    TabOrder := 3;
+    OnClick := @CloseBttn;
+  end;
+
+  FCheck := TfpgCheckBox.Create(BottomPanel);
+  with FCheck do
+  begin
+    Name := 'FCheck';
+    SetPosition(220, 5, 120, 19);
+    Checked := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 4;
+    Text := 'Show Headers';
+    OnChange := @ShowHeadersChange;
+  end;
+
+  FShowFocus := TfpgCheckBox.Create(BottomPanel);
+  with FShowFocus do
+  begin
+    Name := 'FShowFocus';
+    SetPosition(330, 5, 125, 19);
+    Checked := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 5;
+    Text := 'Show Item Focus';
+    OnChange:=@ShowFocusItemChange;
+  end;
+
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 1';
+  LVColumn.Width := 150;
+  LVColumn.Height := 50;
+  LVColumn.Resizable := True;
+  LVColumn.Alignment := taLeftJustify;
+  LVColumn.ColumnIndex := 0;
+  FListView.Columns.Add(LVColumn);
+  FTmpListView.Columns.Add(LVColumn);
+
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 2';
+  LVColumn.Width := 100;
+  LVColumn.Height := 50;
+  LVColumn.Alignment := taCenter;
+  LVColumn.ColumnIndex := 1;
+  //LVColumn.Visible := False;
+  FListView.Columns.Add(LVColumn);
+  //FTmpListView.Columns.Add(LVColumn);
+
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 3';
+  LVColumn.Width := 200;
+  LVColumn.Height := 50;
+  //LVColumn.Visible := False;
+  LVColumn.Resizable := True;
+  LVColumn.Alignment := taRightJustify;
+  LVColumn.ColumnIndex := 2;
+  FListView.Columns.Add(LVColumn);
+  FTmpListView.Columns.Add(LVColumn);
+end;
 
 
 
@@ -123,9 +310,6 @@ end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 var
-  LVColumn: TfpgLVColumn;
-  TopPanel,
-  BottomPanel: TfpgPanel;
   IL: TStringList;
   i: Integer;
   TmpImage: TfpgImage;
@@ -133,8 +317,7 @@ begin
   inherited Create(AOwner);
   Randomize;
 
-  WindowTitle := 'ListView Test';
-  SetPosition(200, 200, 640, 480);
+
 
   IL := TStringList.Create;
   fpgImages.ListImages(IL); // just assigns image references
@@ -151,134 +334,6 @@ begin
     TmpImage := FImageList.Items[i].Image.ImageFromSource;
     TmpImage.Invert;
     FSelectedImageList.AddImage(TmpImage);
-  end;
-
-  BottomPanel := TfpgPanel.Create(Self);
-  BottomPanel.Align  := alBottom;
-  BottomPanel.Height := 40;
-  BottomPanel.Parent := Self;
-  BottomPanel.Text   := '';
-
-  TopPanel         := TfpgPanel.Create(Self);
-  TopPanel.Align   := alClient;
-  TopPanel.Parent  := Self;
-  TopPanel.Text    := '';
-
-  FListView := TfpgListView.Create(TopPanel);
-  with FListView do begin
-    Parent := TopPanel;
-    Align := alLeft;
-    Width := 320;
-    OnPaintItem := @PaintItem;
-    OnSelectionChanged := @ItemSelectionChanged;
-    MultiSelect := True;
-    Images := FImageList;
-    SubItemImages := FImageList;
-    ImagesSelected := FSelectedImageList;
-    OnColumnClick  := @LVColumnClicked;
-  end;
-
-  FSplitter := TfpgSplitter.Create(TopPanel);
-  with FSplitter do begin
-    Parent := TopPanel;
-    Align:=alLeft;
-  end;
-
-  FTmpListView := TfpgListView.Create(TopPanel);
-  with FTmpListView do begin
-    Parent := TopPanel;
-    Align := alClient;
-    //OnPaintItem := @PaintItem;
-    Items := FListView.Items;
-    Images := FImageList;
-    ViewStyle := TfpgLVIconPainter.Create(FTmpListView);
-  end;
-  
-  LVColumn := TfpgLVColumn.Create(FListView.Columns);
-  LVColumn.Caption := 'Column 1';
-  LVColumn.Width := 150;
-  LVColumn.Height := 50;
-  LVColumn.Resizable := True;
-  LVColumn.Alignment := taLeftJustify;
-  LVColumn.ColumnIndex := 0;
-  FListView.Columns.Add(LVColumn);
-  FTmpListView.Columns.Add(LVColumn);
-  
-  LVColumn := TfpgLVColumn.Create(FListView.Columns);
-  LVColumn.Caption := 'Column 2';
-  LVColumn.Width := 100;
-  LVColumn.Height := 50;
-  LVColumn.Alignment := taCenter;
-  LVColumn.ColumnIndex := 1;
-  //LVColumn.Visible := False;
-  FListView.Columns.Add(LVColumn);
-  //FTmpListView.Columns.Add(LVColumn);
-
-  LVColumn := TfpgLVColumn.Create(FListView.Columns);
-  LVColumn.Caption := 'Column 3';
-  LVColumn.Width := 200;
-  LVColumn.Height := 50;
-  //LVColumn.Visible := False;
-  LVColumn.Resizable := True;
-  LVColumn.Alignment := taRightJustify;
-  LVColumn.ColumnIndex := 2;
-  FListView.Columns.Add(LVColumn);
-  FTmpListView.Columns.Add(LVColumn);
-
-
-  FEdit := TfpgEdit.Create(BottomPanel);
-  with FEdit do begin
-    Parent := BottomPanel;
-    Top := 10;
-    Left := 8;
-    Width := 110;
-    ExtraHint := 'List item prefix';
-    Options := [eo_ExtraHintIfFocus];
-  end;
-
-  FAddButton := TfpgButton.Create(BottomPanel);
-  with FAddButton do begin
-    Parent := BottomPanel;
-    Top := 10;
-    Left := 120;
-    Width := 80;
-    Text := 'Add';
-    OnClick := @AddBttn;
-  end;
-
-  FQuitButton := TfpgButton.Create(BottomPanel);
-  with FQuitButton do begin
-    Parent := BottomPanel;
-    ImageName := 'stdimg.Quit';
-    ShowImage := True;
-    Top := 10;
-    Left := -10;
-    Width := 80;
-    Text := 'Quit';
-    Anchors := [anRight, anBottom];
-    OnClick := @CloseBttn;
-  end;
-  
-  FCheck := TfpgCheckBox.Create(BottomPanel);
-  with FCheck do begin
-    Parent := BottomPanel;
-    Top := 10;
-    Left := 205;
-    Width := 110;
-    Checked := True;
-    Text := 'Show Headers';
-    OnChange := @ShowHeadersChange;
-  end;
-
-  FShowFocus := TfpgCheckBox.Create(BottomPanel);
-  with FShowFocus do begin
-    Parent := BottomPanel;
-    Top := 10;
-    Left := 320;
-    Width := 130;
-    Checked := True;
-    Text := 'Show Item Focus';
-    OnChange:=@ShowFocusItemChange;
   end;
 end;
 
