@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  TypInfo, vfdprops;
+  TypInfo, vfd_props;
   
 
 type

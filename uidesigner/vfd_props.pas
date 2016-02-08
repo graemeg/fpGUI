@@ -392,6 +392,7 @@ function TVFDPropertyList.ParseSourceLine(wg: TfpgWidget; const line: string): b
 var
   s: string;
   pval: pointer;
+  sval: String;
 begin
   s      := line;
   Result := False;
@@ -401,9 +402,11 @@ begin
   Result := CheckSymbol(s, ':=');
   if Result then
   begin
-    pval   := TListPropertyEditorClass(EditorClass).GetItemFromString(List, s);
+    sval := GetIdentifier(s);
+    pval   := TListPropertyEditorClass(EditorClass).GetItemFromString(List, sval);
     Result := CheckSymbol(s, ';');
-    TListPropertyEditorClass(EditorClass).SetWidgetProperty(wg, Name, pval);
+    if Result then
+      TListPropertyEditorClass(EditorClass).SetWidgetProperty(wg, Name, pval);
   end;
 end;
 
