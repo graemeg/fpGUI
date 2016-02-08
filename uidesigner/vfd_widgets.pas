@@ -752,6 +752,7 @@ begin
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddListProperty('ViewStyleClass', TClassListPropertyEditor, 'The style to paint with', TfpgListView.PainterClasses);
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
 

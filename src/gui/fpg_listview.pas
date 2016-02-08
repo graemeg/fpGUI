@@ -223,7 +223,8 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
-
+  TfpgLVPainter = class;
+  TfpgLVPainterClass = class of TfpgLVPainter;
   TfpgLVPainter = class(TObject)
   protected
     FListView: TfpgListView;
@@ -286,6 +287,12 @@ type
 
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
   private
+    class var FPainterClasses: TList;
+  public
+    class procedure RegisterPainter(APainter: TfpgLVPainterClass);
+    class property PainterClasses: TList read FPainterClasses; // of TfpgLVPainter
+    class destructor Destroy;
+  private
     FImages: array[TfpgLVItemStates] of TfpgImageList;
     FOnItemActivate: TfpgLVItemActivateEvent;
     FScrollBarStyle: TfpgScrollStyle;
@@ -302,6 +309,7 @@ type
     FOldSelected: TAVLTree;
     FUpdateCount: Integer;
     FViewStyle: TfpgLVPainter;
+    FViewStyleClass: TfpgLVPainterClass;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     FScrollBarWidth: integer;
@@ -314,6 +322,7 @@ type
     FMouseDownPoint: TPoint;
     FScrollBarNeedsUpdate: Boolean;
     FShiftIsPressed: Boolean;
+    function    GetViewStyle: TfpgLVPainter;
     function    HasImages: Boolean;
     function    GetImages(AIndex: integer): TfpgImageList;
     function    GetItemHeight: Integer;
@@ -328,6 +337,7 @@ type
     procedure   SetShowHeaders(const AValue: Boolean);
     procedure   SetShiftIsPressed(const AValue: Boolean);
     procedure   SetViewStyle(AValue: TfpgLVPainter);
+    procedure   SetViewStyleClass(AValue: TfpgLVPainterClass);
     function    SubItemGetImages(AIndex: integer): TfpgImageList;
     procedure   SubItemSetImages(AIndex: integer; const AValue: TfpgImageList);
     procedure   VScrollChange(Sender: TObject; Position: Integer);
@@ -394,7 +404,8 @@ type
     property    Hint;
     property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
     property    ParentShowHint;
-    property    ViewStyle: TfpgLVPainter read FViewStyle write SetViewStyle;
+    property    ViewStyle: TfpgLVPainter read GetViewStyle write SetViewStyle;
+    property    ViewStyleClass: TfpgLVPainterClass read FViewStyleClass write SetViewStyleClass;
     property    ScrollBarWidth: Integer read FScrollBarWidth write SetScrollBarWidth;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
@@ -1619,6 +1630,34 @@ begin
   FViewStyle:=AValue;
 end;
 
+procedure TfpgListView.SetViewStyleClass(AValue: TfpgLVPainterClass);
+begin
+  if FViewStyleClass=AValue then Exit;
+  FViewStyleClass:=AValue;
+  if FViewStyle <> nil then
+    FreeAndNil(FViewStyle);
+
+  // the class cannot be nil.
+  if FViewStyleClass = nil then
+    FViewStyleClass:=TfpgLVReportPainter;
+
+  Invalidate;
+end;
+
+class procedure TfpgListView.RegisterPainter(APainter: TfpgLVPainterClass);
+begin
+  if FPainterClasses = nil then
+    FPainterClasses := TList.Create;
+  if FPainterClasses.IndexOf(APainter) = -1 then
+    FPainterClasses.Add(APainter);
+end;
+
+class destructor TfpgListView.Destroy;
+begin
+  if PainterClasses <> nil then
+    PainterClasses.Free;
+end;
+
 function TfpgListView.HasImages: Boolean;
 var
   State: TfpgLVItemStates;
@@ -1629,9 +1668,16 @@ begin
       Exit(True);
 end;
 
+function TfpgListView.GetViewStyle: TfpgLVPainter;
+begin
+  if FViewStyle = nil then
+    FViewStyle := FViewStyleClass.Create(Self);
+  Result := FViewStyle;
+end;
+
 function TfpgListView.GetItemHeight: Integer;
 begin
-  Result := FViewStyle.ItemHeight;
+  Result := ViewStyle.ItemHeight;
 end;
 
 function TfpgListView.GetImages(AIndex: integer): TfpgImageList;
@@ -1805,7 +1851,7 @@ end;
 
 function TfpgListView.GetItemFromPoint(const X, Y: Integer; out AIndex: Integer): TfpgLVItem;
 begin
-  Result := FViewStyle.GetItemFromPoint(X,Y, AIndex);
+  Result := ViewStyle.GetItemFromPoint(X,Y, AIndex);
   if AIndex < -1 then
     AIndex:=-1;
   if AIndex > FItems.Count-1 then
@@ -1814,12 +1860,12 @@ end;
 
 function TfpgListView.GetItemRect(AIndex: Integer): TfpgRect;
 begin
-  Result := FViewStyle.GetItemRect(AIndex);
+  Result := ViewStyle.GetItemRect(AIndex);
 end;
 
 function TfpgListView.GetHeaderHeight: Integer;
 begin
-  Result := FViewStyle.GetHeaderHeight;
+  Result := ViewStyle.GetHeaderHeight;
 end;
 
 procedure TfpgListView.DoRepaint;
@@ -1851,7 +1897,7 @@ var
   NewMouseCursor: TMouseCursor;
   ResizeColumn: TfpgLVColumn;
 begin
-  FViewStyle.GetColumnFromX(X, ResizeColumn);
+  ViewStyle.GetColumnFromX(X, ResizeColumn);
 
   NewMouseCursor:=MouseCursor;
 
@@ -1920,10 +1966,10 @@ begin
   // Check if event is within headers
   if FShowHeaders then
   begin
-    if PtInRect(FViewStyle.GetHeaderArea, Point(X, Y)) then
+    if PtInRect(ViewStyle.GetHeaderArea, Point(X, Y)) then
     //if (Y < GetHeaderHeight + cRect.Top)  then
     begin
-      Column := FViewStyle.GetColumnFromX(X, ResizeColumn);
+      Column := ViewStyle.GetColumnFromX(X, ResizeColumn);
       // below should be moved to viewstyle
       if (MouseCursor = mcSizeEW) then
       begin
@@ -1990,9 +2036,9 @@ begin
 
   if FShowHeaders then
   begin
-    if PtInRect(FViewStyle.GetHeaderArea, Point(X,Y)) then
+    if PtInRect(ViewStyle.GetHeaderArea, Point(X,Y)) then
     begin
-      Column := FViewStyle.GetColumnFromX(X);
+      Column := ViewStyle.GetColumnFromX(X);
       if Assigned(Column) then
         DoColumnClick(Column, 3);
     end;
@@ -2057,7 +2103,7 @@ begin
   if not PtInRect(cRect, Point(X,Y)) and (FResizingColumn = nil) then
     Exit;
 
-  if PtInRect(FViewStyle.GetHeaderArea, Point(x,y)) or Assigned(FResizingColumn) then
+  if PtInRect(ViewStyle.GetHeaderArea, Point(x,y)) or Assigned(FResizingColumn) then
   begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
   end
@@ -2122,7 +2168,7 @@ begin
 
   if KeyCodeToMoveDirection(keycode, MoveDirection) then
   begin
-    ItemIndex := FViewStyle.GetItemNeighbor(ItemIndex, MoveDirection);
+    ItemIndex := ViewStyle.GetItemNeighbor(ItemIndex, MoveDirection);
     MakeItemVisible(ItemIndex);
     if OldIndex <> ItemIndex then
       CheckSelectionFocus
@@ -2215,7 +2261,7 @@ begin
     
   Canvas.SetClipRect(ClipRect);
 
-  FViewStyle.Paint(Canvas);
+  ViewStyle.Paint(Canvas);
   //PaintItems;
   //if ShowHeaders then
   //  PaintHeaders;
@@ -2254,7 +2300,7 @@ begin
   PrevVMax:=VScrollBar.Max;
   PrevHMax:=HScrollBar.Max;
 
-  ItemsTotalSize := FViewStyle.GetItemsVirtualArea;
+  ItemsTotalSize := ViewStyle.GetItemsVirtualArea;
 
   // GetHeaderHeight is 0 if not visible
   VisibleItemArea.SetSize(Width-Border.Left-Border.Right, Height-Border.Top-Border.Bottom-GetHeaderHeight);
@@ -2379,7 +2425,7 @@ begin
   FScrollBarWidth := FVScrollBar.Width;
   FHScrollBar.Height:=FScrollBarWidth;
   FScrollBarStyle:=ssAutoBoth;
-  FViewStyle := TfpgLVReportPainter.Create(Self);
+  FViewStyleClass:=TfpgLVReportPainter;
 end;
 
 destructor TfpgListView.Destroy;
@@ -2388,7 +2434,8 @@ begin
   FSelected.Free;
   FOldSelected.Free;
   FColumns.Free;
-  FViewStyle.Free;
+  if Assigned(FViewStyle) then
+    FreeAndNil(FViewStyle);
   inherited Destroy;
 end;
 
@@ -2418,7 +2465,7 @@ begin
   if AIndex = -1 then
     Exit;
 
-  ItemPosition := FViewStyle.GetItemRect(AIndex, True);
+  ItemPosition := ViewStyle.GetItemRect(AIndex, True);
 
   iTop := ItemPosition.Top;
   iBottom := ItemPosition.Bottom;
@@ -2715,4 +2762,7 @@ begin
     Delete(i);
 end;
 
+initialization
+  TfpgListView.RegisterPainter(TfpgLVReportPainter);
+  TfpgListView.RegisterPainter(TfpgLVIconPainter);
 end.

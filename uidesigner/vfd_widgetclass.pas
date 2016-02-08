@@ -48,7 +48,7 @@ type
     procedure   StoreValue(wg: TfpgWidget); virtual;
     procedure   SetFocus; virtual;
   end;
-
+  TVFDPropertyEditorClass = class of TVFDPropertyEditor;
 
   TVFDWidgetProperty = class(TObject)
   public
@@ -69,6 +69,8 @@ type
   TVFDPropertyClass = class of TVFDWidgetProperty;
 
 
+  { TVFDWidgetClass }
+
   TVFDWidgetClass = class(TObject)
   private
     FProps: TList;
@@ -83,6 +85,7 @@ type
     BlockMouseMsg: boolean;
     constructor Create(aClass: TWidgetClass);
     destructor  Destroy; override;
+    function    AddListProperty(apropname: string; apropeditorclass: TVFDPropertyEditorClass; desc: string; AList: TList): TVFDWidgetProperty;
     function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
     function    HasProperty(apropname: string): Boolean;
     function    PropertyCount: integer;
@@ -96,8 +99,8 @@ type
 implementation
 
 uses
-  TypInfo;
-
+  TypInfo, vfdprops;
+  
 
 type
   // used to get to SetDesigning() in Form Designer
@@ -105,6 +108,23 @@ type
 
 
 { TVFDWidgetClass }
+
+function TVFDWidgetClass.AddListProperty(apropname: string; apropeditorclass: TVFDPropertyEditorClass;
+  desc: string; AList: TList): TVFDWidgetProperty;
+var
+  PropInfo: PPropInfo;
+begin
+  PropInfo := GetPropInfo(WidgetClass, apropname);
+  if not Assigned(PropInfo) then
+  begin
+    Result := nil;
+    FErrors.Add(Format('Invalid property: %s', [apropname]));
+    Exit; // ==>
+  end;
+  Result := TVFDPropertyList.Create(apropname, apropeditorclass, AList);
+  Result.Description := desc;
+  FProps.Add(Result);
+end;
 
 function TVFDWidgetClass.AddProperty(apropname: string; apropclass: TVFDPropertyClass;
   desc: string): TVFDWidgetProperty;

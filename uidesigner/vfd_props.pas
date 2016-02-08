@@ -121,6 +121,18 @@ type
     function  GetValueText(wg: TfpgWidget): string; override;
   end;
 
+  { TVFDPropertyList }
+
+  TVFDPropertyList = class(TVFDWidgetProperty)
+    List: TList;
+    EditorClass: TVFDPropertyEditorClass;
+    constructor Create(aName: string; alisteditorclass: TVFDPropertyEditorClass; AList: TList); virtual;
+    function    CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    function    ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function    GetPropertySource(wg: TfpgWidget; const ident: string; out afterObject: TObject): string; override;
+    function    GetValueText(wg: TfpgWidget): string; override;
+  end;
+
 
   TGPEType = (gptInteger, gptString, gptFloat);
 
@@ -173,6 +185,30 @@ type
   { TInterfacePropertyEditor }
 
   TInterfacePropertyEditor = class(TChoicePropertyEditor)
+    procedure LoadValue(wg: TfpgWidget); override;
+    procedure StoreValue(wg: TfpgWidget); override;
+  end;
+
+  { TListPropertyEditor }
+
+  TListPropertyEditor = class(TChoicePropertyEditor)
+  public
+    List: TList;
+    class function  GetItemString(AItem: Pointer): string; virtual;
+    class function  GetItemFromString(AList: TList; AValue: String): Pointer; virtual;
+    class procedure SetWidgetProperty(wg: TfpgWidget; PropName: String; PropValue: Pointer); virtual;
+    class function  GetWidgetProperty(wg: TfpgWidget; PropName: String): Pointer; virtual;
+    constructor Create(AOwner: TComponent; aprop: TVFDWidgetProperty; alist: TList); reintroduce;
+  end;
+  TListPropertyEditorClass = class of TListPropertyEditor;
+
+  { TClassListPropertyEditor }
+
+  TClassListPropertyEditor = class(TListPropertyEditor)
+    class function GetItemString(AItem: Pointer): string; override;
+    class function GetItemFromString(AList: TList; AValue: String): Pointer; override;
+    class procedure SetWidgetProperty(wg: TfpgWidget; PropName: String; PropValue: Pointer); override;
+    class function  GetWidgetProperty(wg: TfpgWidget; PropName: String): Pointer; override;
     procedure LoadValue(wg: TfpgWidget); override;
     procedure StoreValue(wg: TfpgWidget); override;
   end;
@@ -246,6 +282,160 @@ begin
   finally
     sl.EndUpdate;
   end;
+end;
+
+{ TListPropertyEditor }
+
+class function TListPropertyEditor.GetItemString(AItem: Pointer): string;
+begin
+  Result := '';
+end;
+
+class function TListPropertyEditor.GetItemFromString(AList: TList;
+  AValue: String): Pointer;
+begin
+  Result := nil;
+end;
+
+class procedure TListPropertyEditor.SetWidgetProperty(wg: TfpgWidget;
+  PropName: String; PropValue: Pointer);
+begin
+end;
+
+class function TListPropertyEditor.GetWidgetProperty(wg: TfpgWidget;
+  PropName: String): Pointer;
+begin
+end;
+
+constructor TListPropertyEditor.Create(AOwner: TComponent;
+  aprop: TVFDWidgetProperty; alist: TList);
+begin
+  inherited Create(AOwner, aprop);
+  List := alist;
+end;
+
+{ TClassListPropertyEditor }
+
+class function TClassListPropertyEditor.GetItemString(AItem: Pointer): string;
+begin
+  Result:=TClass(AItem).ClassName;
+end;
+
+class function TClassListPropertyEditor.GetItemFromString(AList: TList;
+  AValue: String): Pointer;
+var
+  p: Pointer;
+begin
+  for p in AList do
+    if LowerCase(TClass(p).ClassName) = Lowercase(AValue) then
+      Exit(p);
+  Result := nil;
+end;
+
+class procedure TClassListPropertyEditor.SetWidgetProperty(wg: TfpgWidget;
+  PropName: String; PropValue: Pointer);
+begin
+  SetObjectProp(wg, PropName, TObject(PropValue));
+end;
+
+class function TClassListPropertyEditor.GetWidgetProperty(wg: TfpgWidget;
+  PropName: String): Pointer;
+begin
+  Result := Pointer(GetObjectProp(wg, PropName));
+end;
+
+procedure TClassListPropertyEditor.LoadValue(wg: TfpgWidget);
+var
+  i: Integer;
+  c: TClass;
+  index: Integer = 0;
+  o: TObject;
+begin
+
+  c := TClass(GetObjectProp(wg, prop.Name));
+
+  for i := 0 to List.Count-1 do
+  begin
+    chl.Items.AddObject(TClass(List[i]).ClassName, TObject(List[i]));
+    if List[i] = Pointer(c) then
+      chl.FocusItem:=i;
+  end;
+
+  if chl.FocusItem = -1 then
+    chl.FocusItem := 0;
+end;
+
+procedure TClassListPropertyEditor.StoreValue(wg: TfpgWidget);
+begin
+  if chl.FocusItem = -1 then
+    chl.FocusItem := 0;
+
+  SetObjectProp(wg, prop.Name, TObject(chl.Items.Objects[chl.FocusItem]));
+end;
+
+{ TVFDPropertyList }
+
+constructor TVFDPropertyList.Create(aName: string;
+  alisteditorclass: TVFDPropertyEditorClass; AList: TList);
+begin
+  inherited Create(aName);
+  EditorClass := alisteditorclass;
+  List := AList;
+end;
+
+function TVFDPropertyList.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result:=TListPropertyEditorClass(EditorClass).Create(AOwner, Self, List);
+end;
+
+function TVFDPropertyList.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
+var
+  s: string;
+  pval: pointer;
+begin
+  s      := line;
+  Result := False;
+  if UpperCase(GetIdentifier(s)) <> UpperCase(Name) then
+    Exit;
+
+  Result := CheckSymbol(s, ':=');
+  if Result then
+  begin
+    pval   := TListPropertyEditorClass(EditorClass).GetItemFromString(List, s);
+    Result := CheckSymbol(s, ';');
+    TListPropertyEditorClass(EditorClass).SetWidgetProperty(wg, Name, pval);
+  end;
+end;
+
+function TVFDPropertyList.GetPropertySource(wg: TfpgWidget; const ident: string;
+  out afterObject: TObject): string;
+var
+  item: Pointer;
+  s: string;
+  PropInfo: PPropInfo;
+  Editor: TListPropertyEditorClass;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  if IsStoredProp(wg, PropInfo) then
+  begin
+    Editor := TListPropertyEditorClass(EditorClass);
+    item := Editor.GetWidgetProperty(wg, Name);
+    s := Editor.GetItemString(item);
+    if s <> '' then
+      Result := ident + Name + ' := ' + s + ';' + LineEnding
+    else
+      Result := '';
+  end;
+end;
+
+function TVFDPropertyList.GetValueText(wg: TfpgWidget): string;
+var
+  Editor: TListPropertyEditorClass;
+  item: Pointer;
+begin
+  Editor := TListPropertyEditorClass(EditorClass);
+  item := Editor.GetWidgetProperty(wg, Name);
+  Result := Editor.GetItemString(item);
 end;
 
 { TPropertyInterface }
