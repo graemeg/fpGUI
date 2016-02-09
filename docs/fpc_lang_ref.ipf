@@ -5847,7 +5847,7 @@ ContainsClause -> CONTAINS IdentList... ';'
 IdentList -> Ident ','...
 QualId -> [UnitId '.'] Ident
 TypeId -> [UnitId '.'] <type-identifier>
-Ident -> alphabetic character, { alphabetic character | digit } ;
+Ident -> alphabetic character, { alphabetic character | digit | "_" } ;
 ConstExpr -> <constant-expression>
 UnitId -> Ident
 LabelId -> Ident
