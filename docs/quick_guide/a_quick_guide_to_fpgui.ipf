@@ -179,20 +179,21 @@ riddled with IFDEF statements.
 :p.
 Then I stumbled across the Free Pascal and Lazarus projects. I thought this
 is it, the answer to all my cross platform development problems. Unfortunately
-after working with Lazarus for a few months I started finding more
-and more issues with the widget sets, though the IDE was great.
+after working with Lazarus for a few months I started finding more and more
+issues with the Lazarus Component Library (LCL), though the IDE was great.
 :p.
-The Lazarus LCL is a wrapper for each platforms native widget set. This
-brought with it the same issues I experienced with Kylix and Delphi. This
-got me thinking about how I could resolve this issue.
+The Lazarus LCL is a wrapper for each platform's native widget set. This
+brought with it the same issues I experienced with Kylix and Delphi - inconsistencies
+between platforms. This got me thinking again about how I could resolve this
+problem once and for all.
 :p.
-Then it hit me - implement the widgetset myself using Free Pascal! Painting
-the widgets myself to get a consistent look and implementing a consistent
+Then it hit me - implement the GUI toolkit myself using Free Pascal! Painting
+the widgets myself to get a consistent look, and implement a consistent
 behaviour. Instead of reinventing the wheel, I thought I would do some
 searching to see if there is another project I could contribute to, or that
-could give me head start.
+could give me a head start.
 :p.
-The first version of my widgetset was based around a heavily modified
+The first version of my GUI tolkit was based around a heavily modified
 version of the Light Pascal Toolkit [http://sourceforge.net/projects/lptk]. I
 then discovered the discontinued
 fpGUI and fpGFX projects. I tried to contact the original author to no
@@ -211,6 +212,8 @@ outstanding things which should get it to a usable level. I also added a lot of
 documentation as there was no documentation included with the
 original fpGUI and fpGFX projects. Documentation is important to attract
 other developers in using the widgetset.
+:p.
+And so fpGUI Toolkit was (re)born. ;-)
 
 :h2.Part I: Basic fpGUI
 :h3 id=ch_getting_started.Getting Started
