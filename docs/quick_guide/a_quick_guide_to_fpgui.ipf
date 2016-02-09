@@ -737,6 +737,8 @@ in terms of Object Pascal, is exactly what it is.
 .* fpGUI's event queue is thread safe, but is it really a good idea to use
 .* that for this purpose?
 
+:h3.Providing Help for Your Components
+.* Explain fpdoc usage.
 
 :h2 id=ch_installing_fpgui.Installing fpGUI
 
