@@ -137,7 +137,7 @@ begin
   n := tree.RootNode.AppendText('Node 2');
   n.ImageIndex := 0;
   n.AppendText('Node 2.1').ImageIndex := 1;
-  n := n.AppendText('Node 2.2 The quick brownfox jumps over the...');
+  n := n.AppendText('Node 2.2 The quick brown fox jumps over the...');
   n.ImageIndex := 1;
   for i := 1 to 3 do
   begin
