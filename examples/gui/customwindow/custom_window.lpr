@@ -174,7 +174,7 @@ var
   sgb: TStringGridBuilder;
 begin
   try
-    sgb := TStringGridBuilder.CreateCustom(Grid1, FilenameEdit1.FileName, CheckBox1.Checked);
+    sgb := TStringGridBuilder.Create(Grid1, FilenameEdit1.FileName, CheckBox1.Checked);
     sgb.Run;
   finally
     sgb.Free;

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -39,11 +39,12 @@ type
     procedure   InternalSetupData; virtual;
     procedure   InternalRepaintRow(const AData: TfpgString; const ARow: integer); virtual;
   public
-    constructor Create;
-    constructor CreateCustom(const AGrid: TfpgStringGrid; const ACSVFile: TfpgString; const AWithHeader: boolean = True); virtual;
+    constructor Create(const AGrid: TfpgStringGrid; const ACSVFile: TfpgString; const AWithHeader: boolean = True); reintroduce; virtual;
     destructor  Destroy; override;
     procedure   Run;
+    property    Filename: TfpgString read FCSVFile;
     property    Grid: TfpgStringGrid read FGrid;
+    property    HasHeader: boolean read FHasHeader;
   end;
 
 implementation
@@ -139,14 +140,9 @@ begin
   end;
 end;
 
-constructor TStringGridBuilder.Create;
+constructor TStringGridBuilder.Create(const AGrid: TfpgStringGrid; const ACSVFile: TfpgString; const AWithHeader: boolean);
 begin
   FData := TStringList.Create;
-end;
-
-constructor TStringGridBuilder.CreateCustom(const AGrid: TfpgStringGrid; const ACSVFile: TfpgString; const AWithHeader: boolean);
-begin
-  Create;
   FGrid := AGrid;
   FCSVFile := ACSVFile;
   FGrid.Clear;
@@ -164,7 +160,7 @@ end;
 procedure TStringGridBuilder.Run;
 begin
   if FCSVFile = '' then
-    raise Exception.Create('TStringGridBuilder: CSV filename is empty!');
+    raise Exception.Create('TStringGridBuilder: No CSV filename was specified.');
   if not fpgFileExists(FCSVFile) then
     raise Exception.CreateFmt('TStringGridBuilder: The CSV file <%s> does not exist.', [FCSVFile]);
   FData.LoadFromFile(fpgToOSEncoding(FCSVFile));
