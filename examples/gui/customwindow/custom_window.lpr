@@ -46,6 +46,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
+    procedure   AdjustWindowStyle; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -74,7 +75,7 @@ procedure TMainForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   FMouseTracked := True;
-  FLastPos := bvlTitle.WindowToScreen(self, AMousePos);
+  FLastPos := bvlTitle.WidgetToScreen(self, AMousePos);
   bvlTitle.CaptureMouse;
 end;
 
@@ -91,7 +92,7 @@ var
   dx, dy: integer;
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, AMousePos);
+  pt := WidgetToScreen(self, AMousePos);
   if not FMouseTracked then
   begin
     FLastPos := pt;
@@ -103,7 +104,7 @@ begin
   Left := Left + dx;
   Top := Top + dy;
   FLastPos := pt;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TMainForm.btnCloseClicked(Sender: TObject);
@@ -183,7 +184,6 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Include(FWindowAttributes, waBorderLess);  // borderless and steals focus like a normal form
   FMouseTracked := False;
 
   fpgSetNamedColor(clWindowBackground, cBackground);
@@ -322,6 +322,15 @@ begin
   btnResize.Image := fpgImages.GetImage('my.resize');
 end;
 
+procedure TMainForm.AdjustWindowStyle;
+var
+  attr: TWindowAttributes;
+begin
+  inherited AdjustWindowStyle;
+  attr := Window.WindowAttributes;
+  Include(attr, waBorderLess);  // borderless and steals focus like a normal form
+  Window.WindowAttributes := attr;
+end;
 
 procedure MainProc;
 var
