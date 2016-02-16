@@ -473,6 +473,7 @@ var
   s: string;
   r: TfpgRect;
   x: integer;
+  lClipRect: TfpgRect;  { keeps original widget clip rectangle }
 begin
   r := ARect;
   // Here we can implement a head style check
@@ -495,29 +496,26 @@ begin
           Canvas.DrawLine(r.Right, r.Bottom, r.Right, r.Top-1);  { right line }
         end;
   end;
-  Canvas.AddClipRect(r);  // text may not overshoot header border
-(*
-  // drawing grid lines
-  Canvas.SetColor(clGridLines);
-  Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1);  // horizontal bottom
-  Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1);    // vertical right
-
-  if (ACol mod 2) = 0 then
-    Canvas.SetColor(clGridHeader)
-  else
-    Canvas.SetColor(clMagenta);
-  Canvas.FillRectangle(ARect);
-*)
+  { store existing clip rect so we can restore it later }
+  lClipRect := Canvas.GetClipRect;
+  { Set new clip rect so text doesn't overshoot header borders }
+  Canvas.SetClipRect(r);
 
   Canvas.SetTextColor(clText1);
   s := GetHeaderText(ACol);
-  x := (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+  { centre the text }
+  x := (r.Left + (r.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+  if x < r.Left then
+    x := r.Left;
   if not (go_SmoothScroll in FOptions) then
   begin
     if x < 1 then
       x := 1;
   end;
-  fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
+  fpgStyle.DrawString(Canvas, x, r.Top, s, Enabled);
+
+  { restore original clip rectangle }
+  Canvas.SetClipRect(lClipRect);
 end;
 
 procedure TfpgBaseGrid.DrawGrid(ARow, ACol: Integer; ARect: TfpgRect;
@@ -1036,8 +1034,13 @@ begin
     for col := firstcol to lastcol do
     begin
       r.Width := cWidths[col];
-      Canvas.SetClipRect(clipr);
-      Canvas.AddClipRect(r);
+      r2 := GetClientRect;
+      // Adjust r.Width based on remaining client rectangle space. We don't want to draw outside widget boundries.
+      if r.Left + r.Width > r2.Right then
+        r.Width := r.Width - ((r.Left + r.Width) - r2.Right);
+      if r.Width < 4 then
+        // No point in drawing the header - it's too small
+        continue;
       DrawHeader(col, r, 0);
       inc(r.Left, r.Width);
     end;
