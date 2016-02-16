@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -1040,8 +1040,6 @@ begin
       Canvas.AddClipRect(r);
       DrawHeader(col, r, 0);
       inc(r.Left, r.Width);
-      //if r.Left >= clipr.Right then
-      //  Break;  // optimization made obsolete by lastcol
     end;
     inc(r.Top, r.Height);
   end;
@@ -1094,13 +1092,8 @@ begin
           DrawGrid(row, col, r, 0);
 
         inc(r.Left, r.Width);
-        //if r.Left >= clipr.Right then
-        //  Break;  // optimization made obsolete by lastcol
       end;
-//      Inc(r.Top, FDefaultRowHeight+1);
       inc(r.Top, r.Height);
-      //if r.Top >= clipr.Bottom then
-      //  break;  // optimization made obsolete by lastrow
     end;
   end; // item drawing
 
