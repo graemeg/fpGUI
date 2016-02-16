@@ -12,7 +12,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_button,
-  fpg_stylemanager, fpg_cmdlineparams, fpg_grid,
+  fpg_stylemanager, fpg_cmdlineparams, fpg_basegrid, fpg_grid,
   fpg_StringGridBuilder, fpg_editbtn, fpg_checkbox,
   fpg_panel, fpg_dialogs;
 
@@ -34,6 +34,8 @@ type
     {@VFD_HEAD_END: MainForm}
     FLastPos: TPoint;
     FMouseTracked: Boolean;
+    fntHead1: TfpgFont;
+    fntHead2: TfpgFont;
     procedure   TitleMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseMoved(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
@@ -45,6 +47,7 @@ type
     procedure   btnGoClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
     procedure   AdjustWindowStyle; override;
   end;
@@ -123,16 +126,16 @@ begin
 
     Canvas.TextColor := cBorder;
     // Output some sample text
-    Canvas.Font := fpgGetFont(cHeader1);
+    Canvas.Font := fntHead1;
     Canvas.DrawText(8, 10, 'Personal');
-    Canvas.Font := fpgGetFont(cHeader2);
+    Canvas.Font := fntHead2;
     Canvas.DrawText(20, 30, 'Home');
     Canvas.DrawText(20, 50, 'Documents');
     Canvas.DrawText(20, 70, 'Music');
     Canvas.DrawText(20, 90, 'Pictures');
-    Canvas.Font := fpgGetFont(cHeader1);
+    Canvas.Font := fntHead1;
     Canvas.DrawText(8, 110, 'Network');
-    Canvas.Font := fpgGetFont(cHeader2);
+    Canvas.Font := fntHead2;
     Canvas.DrawText(20, 130, 'Entire network');
   end;
 end;
@@ -153,7 +156,7 @@ begin
     Canvas.DrawRectangle(0, 0, Width, Height);
 
     Canvas.TextColor := cBorder;
-    Canvas.Font := fpgGetFont(cHeader1);
+    Canvas.Font := fntHead1;
     Canvas.DrawText(30, 8, Width-60, 20, WindowTitle, [txtHCenter, txtTop]);
   end;
 end;
@@ -197,6 +200,15 @@ begin
             'my.resize',
             @img_resize,
       sizeof(img_resize));
+  fntHead1 := fpgGetFont(cHeader1);
+  fntHead2 := fpgGetFont(cHeader2);
+end;
+
+destructor TMainForm.Destroy;
+begin
+  fntHead1.Free;
+  fntHead2.Free;
+  inherited Destroy;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -234,6 +246,7 @@ begin
     RowCount := 0;
     RowSelect := False;
     TabOrder := 2;
+    Options := [go_SmoothScroll];
   end;
 
   FilenameEdit1 := TfpgFileNameEdit.Create(self);
