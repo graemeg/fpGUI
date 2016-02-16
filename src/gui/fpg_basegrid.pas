@@ -1077,7 +1077,6 @@ begin
           Canvas.SetColor(GetBackgroundColor(row, col));
           Canvas.SetTextColor(ColumnTextColor[col]);
         end;
-        Canvas.AddClipRect(r);
         Canvas.FillRectangle(r);
         // setup drawstate
         if FFocused then
