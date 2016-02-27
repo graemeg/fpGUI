@@ -3263,7 +3263,7 @@ end;
 
 procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  XDrawArc(xapplication.display, DrawHandle, Fgc, x, y, w-1, h-1,
+  XDrawArc(xapplication.display, DrawHandle, Fgc, FDeltaX+x, FDeltaY+y, w-1, h-1,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
