@@ -1,5 +1,7 @@
 program WidgetTest;
 
+{$mode objfpc}{$h+}
+
 uses
   SysUtils
   ,Classes
@@ -195,7 +197,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
-  
+
 
   { TMenuForm }
 
@@ -213,8 +215,8 @@ type
     MenuBox: TFBoxLayout;
     Separator: TSeparator;
   end;
-  
-  
+
+
   TPanelForm = class(TTestForm)
   private
     procedure   RadioButtonClick(Sender: TObject);
@@ -229,7 +231,7 @@ type
     Panel: TFPanel;
     Separator: TSeparator;
   end;
-  
+
 
   TProgressBarForm = class(TTestForm)
   private
@@ -251,8 +253,8 @@ type
     Separator: TSeparator;
     btnRandom: TFButton;
   end;
-  
-  
+
+
   { TMemoForm }
 
   TMemoForm = class(TTestForm)
@@ -281,10 +283,10 @@ begin
   lblTitle.FontColor := clBlue;
   lblTitle.CanExpandWidth := True;
   BoxLayout.InsertChild(lblTitle);
-  
+
   Memo := TFMemo.Create(self);
   BoxLayout.InsertChild(Memo);
-  
+
   Memo.Lines.Text :=
     'constructor TMemoForm.Create(AOwner: TComponent);             ' + #10 +
     'begin                                                         ' + #10 +
@@ -346,10 +348,10 @@ begin
   inherited Create(AOwner);
   Name := 'MenuForm';
   Text := 'Menu Test';
-  
+
   BoxLayout := TFBoxLayout.Create(self);
   BoxLayout.Orientation := Vertical;
-  
+
   MainMenu := TFMenuBar.Create(self);
   BoxLayout.InsertChild(MainMenu);
 
@@ -365,7 +367,7 @@ begin
 
   Separator := TSeparator.Create(self);
   BoxLayout.InsertChild(Separator);
-  
+
   Title := TFLabel.Create(self);
   Title.CanExpandWidth := True;
   Title.Alignment := taCenter;
@@ -397,15 +399,15 @@ begin
 
   MainLayout := TFBoxLayout.Create(self);
   MainLayout.Orientation := Vertical;
-  
+
   StyleGroup := TFGroupBox.Create('Bevel Style:', self);
   StyleGroup.CanExpandWidth := True;
   MainLayout.InsertChild(StyleGroup);
-  
+
   VBox1 := TFBoxLayout.Create(self);
   VBox1.Orientation := Vertical;
   StyleGroup.InsertChild(VBox1);
-  
+
   rbPlain := TFRadioButton.Create('Plain', self);
   rbPlain.Tag := 1;
   rbPlain.OnClick := @RadioButtonClick;
@@ -419,13 +421,13 @@ begin
   VBox1.InsertChild(rbPlain);
   VBox1.InsertChild(rbLowered);
   VBox1.InsertChild(rbRaised);
-  
+
   Separator := TSeparator.Create(self);
   MainLayout.InsertChild(Separator);
 
   Panel := TFPanel.Create('My Panel', self);
   MainLayout.InsertChild(Panel);
-  
+
   Child := MainLayout;
 end;
 
@@ -465,10 +467,10 @@ begin
   MainLayout := TFGridLayout.Create(self);
   MainLayout.RowCount := 4;
   MainLayout.ColCount := 2;
-  
+
   VBox := TFBoxLayout.Create(self);
   VBox.Orientation := Vertical;
-  
+
   gbColor   := TFGroupBox.Create('Fill Color', self);
   rbRed           := TFRadioButton.Create('Red', self);
   rbRed.Tag       := 1;
@@ -494,18 +496,18 @@ begin
   cbShowPercent.OnClick := @cbShowPercentClick;
   cbShowPercent.CanExpandWidth := True;
   MainLayout.AddWidget(cbShowPercent, 1, 0, 1, 1);
-  
+
   btnRandom := TFButton.Create('Randomize', self);
   btnRandom.OnClick := @GeneratePercentage;
   MainLayout.AddWidget(btnRandom, 1, 1, 1, 1);
 
   Separator := TSeparator.Create(self);
   MainLayout.AddWidget(Separator, 0, 2, 2, 1);
-  
+
   PB := TFProgressBar.Create('', self);
   PB.Position := 75;
   MainLayout.AddWidget(PB, 0, 3, 2, 1);
-  
+
   Child := MainLayout;
 end;
 
@@ -860,7 +862,7 @@ begin
   for y := 0 to StringGrid.RowCount - 1 do
     for x := 0 to StringGrid.ColCount - 1 do
       StringGrid.Cells[x, y] := Format('%d, %d', [x, y]);
-      
+
   StringGrid.Cells[3, 3] := 'This is one long piece of text';
 end;
 
@@ -876,7 +878,7 @@ var
 begin
   WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
   GFApplication.Initialize;
-  
+
   MainForm := TMainForm.Create(GFApplication);
   try
     MainForm.Show;
