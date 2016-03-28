@@ -1,8 +1,8 @@
 {
     fpGUI  -  Free Pascal GUI Library
-    
+
     Grid class declarations
-    
+
     Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
@@ -130,6 +130,9 @@
     CellStrings: PCells;
     function    GetCells(ACol, ARow: Integer): String;
     procedure   SetCells(ACol, ARow: Integer; const AValue: String);
+    function    GetCols(AIndex: Integer): TStrings;
+    function    GetRows(AIndex: Integer): TStrings;
+    function    GetObjects(ACol, ARow: Integer): TObject;
   protected
     //function GetEditText(ACol, ARow: Integer): String; override;
     //procedure SetEditText(ACol, ARow: Integer; const AValue: String); override;
@@ -141,9 +144,9 @@
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    Cells[ACol, ARow: Integer]: String read GetCells write SetCells;
-    property    Cols[Index: Integer]: TStrings;
-    property    Objects[ACol, ARow: Integer]: TObject;
-    property    Rows[Index: Integer]: TStrings;
+    property    Cols[Index: Integer]: TStrings read GetCols;
+    property    Objects[ACol, ARow: Integer]: TObject read GetObjects;
+    property    Rows[Index: Integer]: TStrings read GetRows;
   end;
 
 {$ENDIF read_interface}
@@ -608,6 +611,24 @@ procedure TFStringGrid.SetCells(ACol, ARow: Integer; const AValue: String);
 begin
   if (ACol >= 0) and (ARow >= 0) and (ACol < ColCount) and (ARow < RowCount) then
     CellStrings^[ARow * ColCount + ACol] := AValue;
+end;
+
+function TFStringGrid.GetCols(AIndex: Integer): TStrings;
+begin
+  // TODO: this still needs to be implemented
+  Result := nil;
+end;
+
+function TFStringGrid.GetRows(AIndex: Integer): TStrings;
+begin
+  // TODO: this still needs to be implemented
+  Result := nil;
+end;
+
+function TFStringGrid.GetObjects(ACol, ARow: Integer): TObject;
+begin
+  // TODO: this still needs to be implemented
+  Result := nil;
 end;
 
 procedure TFStringGrid.SizeChanged(OldColCount, OldRowCount: Integer);
