@@ -1061,7 +1061,8 @@ the :hp1.qword:ehp1. and :hp1.int64:ehp1. types are not true ordinals, so
 some Pascal constructs will not work with these two integer types.
 
 :cgraphic.
- :hp2.Type                         Range                   Size in bytes:ehp2.
+:hp2.
+ Type                         Range                   Size in bytes:ehp2.
 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
  Byte                         0 .. 255                            1
  Shortint                  -128 .. 127                            1
@@ -1081,6 +1082,29 @@ The :hp1.integer:ehp1. type maps to the smallint type in the default
 &fpc. mode. It maps to either a longint in either Delphi or ObjFPC
 mode. The :hp1.cardinal:ehp1. type is currently always mapped to the
 longword type.
+
+:p.
+The following (U)Int<x> data types are independent of CPU targets, and
+more obvious to the developer in their data range and size. Because of
+this, it is often recommended to use them, especially in record structures
+used to read binary data files, instead of the more classic data types like
+SmallInt, Word etc.
+
+:cgraphic.
+:hp2.
+ Type                         Range                   Size in bytes:ehp2.
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+ Int8   = ShortInt        -128 .. 127                             1
+ Int16  = SmallInt      -32768 .. 32767                           2
+ Int32  = LongInt  -2147483648 .. 2147483647                      4
+ Int64    -9223372036854775808 .. 9223372036854775807             8
+
+ UInt8  = Byte               0 .. 255                             1
+ UInt16 = Word               0 .. 65535                           2
+ UInt32 = Cardinal           0 .. 4294967295                      4
+ UInt64 = QWord              0 .. 18446744073709551615            8
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+:ecgraphic.
 
 :nt.
 All decimal constants which do no fit within the -2147483648..2147483647 range
