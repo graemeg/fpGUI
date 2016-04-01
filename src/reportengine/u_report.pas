@@ -491,6 +491,7 @@ implementation
 
 uses
   fpg_constants,
+  FPReadJPEG,
   U_Visu;
 
 const
@@ -2682,7 +2683,7 @@ begin
         Scale := 1;
       end;
       if (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 3) = 'jpg') or (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 4) = 'jpeg') then
-        Image := LoadImage_JPG(ImgFileName, Scale);
+        Image := LoadImage_JPG(ImgFileName, jsFullSize);
       RefImage := ImageNames.Add(IntToStr(Scale) + ImgFileName);
       Images.Add(Image);
     end;
@@ -2701,8 +2702,7 @@ begin
     PaintImage(Horiz, Verti, ColNum, RefImage, zPage);
   end
   else
-    { TODO: localize this message }
-    ShowMessage('Image ' + ImgFileName + ' is missing');
+    ShowMessage(Format(rsErrReportImageFileMissing, [ImgFileName]));
 end;
 
 procedure T_Report.ImagePage(Horiz, Verti: single; ImgFileName: string; ColNum, Scale: integer);
@@ -2723,7 +2723,7 @@ begin
         Scale := 1;
       end;
       if (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 3) = 'jpg') or (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 4) = 'jpeg') then
-        Image := LoadImage_JPG(ImgFileName, Scale);
+        Image := LoadImage_JPG(ImgFileName, jsFullSize);
       RefImage := ImageNames.Add(IntToStr(Scale) + ImgFileName);
       Images.Add(Image);
     end;
@@ -2767,7 +2767,7 @@ begin
         Scale := 1;
       end;
       if (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 3) = 'jpg') or (Copy(ImgFileName, Succ(Pos('.', ImgFileName)), 4) = 'jpeg') then
-        Image := LoadImage_JPG(ImgFileName, Scale);
+        Image := LoadImage_JPG(ImgFileName, jsFullSize);
       RefImage := ImageNames.Add(IntToStr(Scale) + ImgFileName);
       Images.Add(Image);
     end;
