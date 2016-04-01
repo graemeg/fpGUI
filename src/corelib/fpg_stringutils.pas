@@ -52,6 +52,7 @@ function  fpgCharAt(const s: TfpgString; Index: PtrInt): TfpgChar;
 function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
 function  fpgTrimR(const AString, ATrim: TfpgString; ACaseSensitive: boolean = false): TfpgString;
+function  fpgTitleCase(const s: TfpgString): TfpgString;
 
 
 // Encoding conversions
@@ -415,6 +416,33 @@ begin
     Result := UTF8Copy(AString, 1, li - 1)
   else
     Result := AString;
+end;
+
+{ Uppercase the first letter of each word. }
+function fpgTitleCase(const s: TfpgString): TfpgString;
+var
+  s1, t: string;
+  i: integer;
+  newWord: boolean;
+begin
+  if s = '' then
+    exit;
+  s1 := lowercase(s);
+  t := uppercase(s);
+  newWord := true;
+  for i := 1 to length(s1) do
+  begin
+    if newWord and (s1[i] in ['a'..'z']) then
+    begin
+      s1[i] := t[i];
+      newWord := false;
+      continue;
+    end;
+    if s1[i] in ['a'..'z',''''] then
+      continue;
+    newWord := true;
+  end;
+  result := s1;
 end;
 
 const
