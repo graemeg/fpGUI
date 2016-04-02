@@ -271,6 +271,7 @@ type
     procedure   SetMaxValue(const AValue: integer); virtual;
     procedure   SetMinValue(const AValue: integer); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
     procedure   HandlePaint; override;
@@ -318,6 +319,7 @@ type
     procedure   SetDecimals(const AValue: integer);
     procedure   SetFixedDecimals(const AValue: integer);
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
     procedure   HandlePaint; override;
@@ -2048,22 +2050,6 @@ begin
     begin
       try
         Result := StrToInt(fText);
-        if FMaxLimit then
-        begin
-          if Result > FMaxValue then
-          begin
-            SetValue(FMaxValue);
-            Result := FMaxValue;
-          end;
-        end;
-        if FMinLimit then
-        begin
-          if Result < FMinValue then
-          begin
-            SetValue(FMinValue);
-            Result := FMinValue;
-          end;
-        end;
       except
         on E: EConvertError do
         begin
@@ -2080,33 +2066,13 @@ end;
 
 procedure TfpgEditInteger.SetValue(const AValue: integer);
 begin
-  if not FMaxLimit and not FMinLimit then
-    try
-      Text := IntToStr(AValue);
-      FormatEdit;
-    except
-      on E: EConvertError do
-        Text := '';
-    end
-  else
-  begin
-    if FMaxLimit and (AValue <= FMaxValue) then
-      try
-        Text := IntToStr(AValue);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
-    if FMinLimit and (AValue >= FMinValue) then
-      try
-        Text := IntToStr(AValue);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
-   end;
+  Text := IntToStr(AValue);
+  try
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
 end;
 
 procedure TfpgEditInteger.SetMaxValue(const AValue: integer);
@@ -2139,25 +2105,35 @@ begin
     Exit; //==>
 
   inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
 
-  if FMaxLimit then
-    if GetValue > FMaxValue then
-      SetValue(FMaxValue);
-  if FMinLimit then
-    if GetValue < FMinValue then
-      SetValue(FMinValue);
+procedure TfpgEditInteger.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  case keycode of
+    keyReturn, keyPEnter, keyTab:
+    begin
+      if FMaxLimit then
+        if GetValue > FMaxValue then
+          SetValue(FMaxValue);
+      if FMinLimit then
+        if GetValue < FMinValue then
+          SetValue(FMinValue);
+    end;
+  end;
 end;
 
 procedure TfpgEditInteger.HandleSetFocus;
 begin
   try
     if GetValue = 0 then
-      Text := ''
+      fText := ''
     else
-      Text := IntToStr(GetValue);
+      fText := IntToStr(GetValue);
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleSetFocus;
 end;
@@ -2165,11 +2141,17 @@ end;
 procedure TfpgEditInteger.HandleKillFocus;
 begin
   try
-    Text := IntToStr(GetValue);
+    if FMaxLimit then
+      if GetValue > FMaxValue then
+        SetValue(FMaxValue);
+    if FMinLimit then
+      if GetValue < FMinValue then
+        SetValue(FMinValue);
+    fText := IntToStr(GetValue);
     FormatEdit;
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleKillFocus;
 end;
@@ -2238,22 +2220,6 @@ begin
     begin
       try
         Result := StrToFloat(fText);
-        if FMaxLimit then
-        begin
-          if Result > FMaxValue then
-          begin
-            SetValue(FMaxValue);
-            Result := FMaxValue;
-          end;
-        end;
-        if FMinLimit then
-        begin
-          if Result < FMinValue then
-          begin
-            SetValue(FMinValue);
-            Result := FMinValue;
-          end;
-        end;
      except
         on E: EConvertError do
         begin
@@ -2270,44 +2236,16 @@ end;
 
 procedure TfpgEditFloat.SetValue(const AValue: extended);
 begin
-  if not FMaxLimit and not FMinLimit then
-    try
-      Text := FloatToStr(AValue);
-      if FFixedDecimals > -1 then
-        if UTF8Pos(FDecimalSeparator, Text) > 0 then
-          while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
-            Text := Text + '0';
-      FormatEdit;
-    except
-      on E: EConvertError do
-        Text := '';
-    end
-  else
-  begin
-    if FMaxLimit and (AValue <= FMaxValue) then
-      try
-        Text := FloatToStr(AValue);
-        if FFixedDecimals > -1 then
-          if UTF8Pos(FDecimalSeparator, Text) > 0 then
-            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
-              Text := Text + '0';
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
-    if FMinLimit and (AValue >= FMinValue) then
-      try
-        Text := FloatToStr(AValue);
-        if FFixedDecimals > -1 then
-          if UTF8Pos(FDecimalSeparator, Text) > 0 then
-            while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
-              Text := Text + '0';
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
+  Text := FloatToStr(AValue);
+  try
+    if FFixedDecimals > -1 then
+      if UTF8Pos(FDecimalSeparator, Text) > 0 then
+        while UTF8Length(Text)-UTF8Pos(FDecimalSeparator, Text) < FFixedDecimals do
+          Text := Text + '0';
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
   end;
 end;
 
@@ -2364,13 +2302,23 @@ begin
     Exit; //==>
 
   inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
 
-  if FMaxLimit then
-    if GetValue > FMaxValue then
-      SetValue(FMaxValue);
-  if FMinLimit then
-    if GetValue < FMinValue then
-      SetValue(FMinValue);
+procedure TfpgEditFloat.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  case keycode of
+    keyReturn, keyPEnter, keyTab:
+    begin
+      if FMaxLimit then
+        if GetValue > FMaxValue then
+          SetValue(FMaxValue);
+      if FMinLimit then
+        if GetValue < FMinValue then
+          SetValue(FMinValue);
+    end;
+  end;
 end;
 
 procedure TfpgEditFloat.HandleSetFocus;
@@ -2399,6 +2347,12 @@ end;
 procedure TfpgEditFloat.HandleKillFocus;
 begin
   try
+    if FMaxLimit then
+      if GetValue > FMaxValue then
+        SetValue(FMaxValue);
+    if FMinLimit then
+      if GetValue < FMinValue then
+        SetValue(FMinValue);
     fText := FloatToStr(GetValue);
     if FFixedDecimals > -1 then
     begin
@@ -2466,22 +2420,6 @@ begin
     if fText > '' then
     try
       Result := StrToCurr(fText);
-      if FMaxLimit then
-      begin
-        if Result > FMaxValue then
-        begin
-          SetValue(FMaxValue);
-          Result := FMaxValue;
-        end;
-      end;
-      if FMinLimit then
-      begin
-        if Result < FMinValue then
-        begin
-          SetValue(FMinValue);
-          Result := FMinValue;
-        end;
-      end;
     except
       on E: EConvertError do
       begin
@@ -2496,33 +2434,13 @@ end;
 
 procedure TfpgEditCurrency.SetValue(const AValue: Currency);
 begin
-  if not FMaxLimit and not FMinLimit then
-    try
-      Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
-      FormatEdit;
-    except
-      on E: EConvertError do
-        Text := '';
-    end
-  else
-  begin
-    if FMaxLimit and (AValue <= FMaxValue) then
-      try
-        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
-    if FMinLimit and (AValue >= FMinValue) then
-      try
-        Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
-        FormatEdit;
-      except
-        on E: EConvertError do
-          Text := '';
-      end;
-   end;
+  Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+  try
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
 end;
 
 procedure TfpgEditCurrency.SetMaxValue(const AValue: Currency);
@@ -2553,8 +2471,17 @@ end;
 
 procedure TfpgEditCurrency.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
 begin
+  inherited HandleKeyPress(keycode,shiftstate,consumed);
+
   case keycode of
     keyReturn, keyPEnter, keyTab:
+    begin
+      if FMaxLimit then
+        if GetValue > FMaxValue then
+          SetValue(FMaxValue);
+      if FMinLimit then
+        if GetValue < FMinValue then
+          SetValue(FMinValue);
       if FDecimals > 0 then
       begin
         if Pos(FDecimalSeparator, fText) = 0 then
@@ -2570,7 +2497,7 @@ begin
           end;
       end;
     end;
-  inherited HandleKeyPress(keycode,shiftstate,consumed);
+  end;
 end;
 
 procedure TfpgEditCurrency.HandleKeyChar(var AText: TfpgChar;
@@ -2586,25 +2513,18 @@ begin
     Exit; //==>
 
   inherited HandleKeyChar(AText, shiftstate, consumed);
-
-  if FMaxLimit then
-    if GetValue > FMaxValue then
-      SetValue(FMaxValue);
-  if FMinLimit then
-    if GetValue < FMinValue then
-      SetValue(FMinValue);
 end;
 
 procedure TfpgEditCurrency.HandleSetFocus;
 begin
   try
     if GetValue = 0 then
-      Text := ''
+      fText := ''
     else
-      Text := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
+      fText := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleSetFocus;
 end;
@@ -2612,11 +2532,17 @@ end;
 procedure TfpgEditCurrency.HandleKillFocus;
 begin
   try
-    Text := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
+    if FMaxLimit then
+      if GetValue > FMaxValue then
+        SetValue(FMaxValue);
+    if FMinLimit then
+      if GetValue < FMinValue then
+        SetValue(FMinValue);
+    fText := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
     FormatEdit;
   except
     on E: EConvertError do
-      Text := '';
+      fText := '';
   end;
   inherited HandleKillFocus;
 end;
