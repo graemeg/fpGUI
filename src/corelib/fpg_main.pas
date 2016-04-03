@@ -510,6 +510,7 @@ procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
+procedure DebugLnFmt(const Msg: string; const Args: array of const);
 function  DebugMethodEnter(const s1: TfpgString): IInterface;
 procedure DebugSeparator;
 
@@ -1170,6 +1171,11 @@ end;
 procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
 begin
   DebugLn(s1 + ' ' + s2 + ' ' + s3 + ' ' + s4 + ' ' + s5);
+end;
+
+procedure DebugLnFmt(const Msg: string; const Args: array of const);
+begin
+  DebugLn(Format(Msg,Args));
 end;
 
 function DebugMethodEnter(const s1: TfpgString): IInterface;
