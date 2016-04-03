@@ -49,9 +49,6 @@ uses
   ActiveX,
   fpg_base,
   fpg_impl
-  {$IFDEF GDEBUG}
-  ,fpg_dbugintf
-  {$ENDIF GDEBUG}
   {$IFDEF HAS_DND}
   ,fpg_OLEDragDrop
   {$ENDIF}
@@ -857,7 +854,7 @@ begin
 
   if not (w is TfpgGDIWindow) then
   begin
-    {$IFDEF GDEBUG} SendDebug('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
+    {$IFDEF GDEBUG} DebugLn('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     Exit; //==>
   end;
@@ -872,7 +869,7 @@ begin
     WM_KEYDOWN,
     WM_SYSKEYDOWN:
         begin
-          {$IFDEF DEBUGKEYS} SendDebug(w.ClassName + ': wm_char, wm_keyup, wm_keydown'); {$ENDIF}
+          {$IFDEF DEBUGKEYS} DebugLn(w.ClassName + ': wm_char, wm_keyup, wm_keydown'); {$ENDIF}
           kwg := FindKeyboardFocus;
           if kwg <> nil then
             w := kwg.Window;
@@ -940,7 +937,7 @@ begin
         begin
           {$IFDEF GDEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            SendDebug('fpGFX/GDI: Found a mouse button event');
+            DebugLn('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -950,15 +947,15 @@ begin
           if uMsg = WM_MOUSEMOVE then
           begin
             {$IFDEF GDEBUG}
-            SendDebugFmt('old x=%d  y=%d', [OldMousePos.x, OldMousePos.y]);
-            SendDebugFmt('new x=%d  y=%d', [msgp.mouse.x, msgp.mouse.y]);
+            DebugLnFmt('old x=%d  y=%d', [OldMousePos.x, OldMousePos.y]);
+            DebugLnFmt('new x=%d  y=%d', [msgp.mouse.x, msgp.mouse.y]);
             {$ENDIF}
             // Check for fake MouseMove messages - Windows sucks!
             if (OldMousePos.x = msgp.mouse.x) and
                (OldMousePos.y = msgp.mouse.y) then
             begin
               {$IFDEF GDEBUG}
-              SendDebug('We received fake MouseMove messages');
+              DebugLn('We received fake MouseMove messages');
               {$ENDIF}
               Exit; //==>
             end
@@ -1015,7 +1012,7 @@ begin
               WM_RBUTTONDOWN:
                   begin
                     {$IFDEF GDEBUG}
-                    SendDebug('fpGUI/GDI: ' + w.ClassName + ': MouseButtonDown event');
+                    DebugLn('fpGUI/GDI: ' + w.ClassName + ': MouseButtonDown event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.
@@ -1032,7 +1029,7 @@ begin
               WM_RBUTTONUP:
                   begin
                     {$IFDEF GDEBUG}
-                    SendDebug('fpGFX/GDI: '+ w.ClassName + ': MouseButtonUp event');
+                    DebugLn('fpGFX/GDI: '+ w.ClassName + ': MouseButtonUp event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.
@@ -1100,7 +1097,7 @@ begin
           msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
 
           {$IFDEF GDEBUG}
-            SendDebugFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
+          DebugLnFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
           {$ENDIF}
           // skip minimize...
           if lparam <> 0 then
@@ -1110,7 +1107,7 @@ begin
     WM_MOVE:
         begin
           {$IFDEF GDEBUG}
-          SendDebug(w.ClassName + ': WM_MOVE');
+          DebugLn(w.ClassName + ': WM_MOVE');
           {$ENDIF}
           // window decoration correction ...
           {$IFDEF CPU64}
@@ -1135,7 +1132,7 @@ begin
     WM_MOUSEWHEEL:
         begin
           {$IFDEF GDEBUG}
-            SendDebugFmt('%s: WM_MOUSEWHEEL: wp=%s  lp=%s', [w.ClassName, IntToHex(wparam,8), IntToHex(lparam,8)]);
+          DebugLnFmt('%s: WM_MOUSEWHEEL: wp=%s  lp=%s', [w.ClassName, IntToHex(wparam,8), IntToHex(lparam,8)]);
           {$ENDIF}
           pt.x := GET_X_LPARAM(lParam);
           pt.y := GET_Y_LPARAM(lParam);
@@ -1199,7 +1196,7 @@ begin
     WM_TIMECHANGE:
         begin
           {$IFDEF GDEBUG}
-          SendDebug(w.ClassName + ': WM_TIMECHANGE');
+          DebugLn(w.ClassName + ': WM_TIMECHANGE');
           {$ENDIF}
 //          writeln('fpGUI/GDI: ' + w.ClassName + ': WM_TIMECHANGE');
           fpgResetAllTimers;
@@ -1208,7 +1205,7 @@ begin
     WM_NCACTIVATE:
         begin
           {$IFDEF GDEBUG}
-            SendDebugFmt('%s: WM_NCACTIVATE wparam=%d', [w.ClassName, wParam]);
+          DebugLnFmt('%s: WM_NCACTIVATE wparam=%d', [w.ClassName, wParam]);
           {$ENDIF}
           if (wParam = 0) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
@@ -1218,7 +1215,7 @@ begin
           if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
           begin
             {$IFDEF GDEBUG}
-            SendDebug(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
+            DebugLn(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
             {$ENDIF}
             // This is ugly but needed for now to get TfpgCombobox to work
             if (PopupListFirst.ClassName <> 'TDropDownWindow') then
@@ -1251,7 +1248,7 @@ begin
     WM_CLOSE:
         begin
           {$IFDEF GDEBUG}
-            SendDebug(w.ClassName + ': WM_Close');
+          DebugLn(w.ClassName + ': WM_Close');
           {$ENDIF}
           fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
         end;
@@ -1259,7 +1256,7 @@ begin
     WM_PAINT:
         begin
           {$IFDEF GDEBUG}
-            SendDebug(w.ClassName + ': WM_PAINT');
+          DebugLn(w.ClassName + ': WM_PAINT');
           {$ENDIF}
           Windows.BeginPaint(w.WinHandle, @PaintStruct);
           fpgSendMessage(nil, w, FPGM_PAINT, msgp);
@@ -1590,7 +1587,7 @@ var
 procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 begin
   {$IFDEF DND_DEBUG}
-  SendDebug('TfpgGDIWindow.HandleDNDLeave ');
+  DebugLn('TfpgGDIWindow.HandleDNDLeave ');
   {$ENDIF}
   FDrop.TargetWidget := nil;
   FreeAndNil(FDrop);
@@ -1600,7 +1597,7 @@ procedure TfpgGDIWindow.HandleDNDEnter(Sender: TObject; DataObj: IDataObject;
     KeyState: Longint; PT: TPoint; var Effect: DWORD);
 begin
   {$IFDEF DND_DEBUG}
-  SendDebug('TfpgGDIWindow.HandleDNDEnter ');
+  DebugLn('TfpgGDIWindow.HandleDNDEnter ');
   {$ENDIF}
   if Assigned(FDrop) then
     FreeAndNil(FDrop);
@@ -1630,7 +1627,7 @@ procedure TfpgGDIWindow.HandleDNDDrop(Sender: TObject; DataObj: IDataObject;
     KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
 begin
   {$IFDEF DND_DEBUG}
-  SendDebug('TfpgGDIWindow.HandleDNDDrop');
+  DebugLn('TfpgGDIWindow.HandleDNDDrop');
   {$ENDIF}
   FDrop.ReadDropData;
   FDrop.DataDropComplete;
@@ -2377,7 +2374,7 @@ begin
   c := Windows.GetPixel(FWinGC, X, Y);
   {$IFDEF GDEBUG}
   if c = CLR_INVALID then
-    SendDebug('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
+    DebugLn('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
   {$ENDIF}
   Result := WinColorTofpgColor(c);
 end;
@@ -3241,7 +3238,7 @@ end;
 destructor TfpgGDIDrag.Destroy;
 begin
   {$IFDEF DND_DEBUG}
-  SendDebug('TfpgGDIDrag.Destroy ');
+  DebugLn('TfpgGDIDrag.Destroy ');
   {$ENDIF}
   inherited Destroy;
 end;
@@ -3266,14 +3263,14 @@ begin
   if FDragging then
   begin
     {$IFDEF DND_DEBUG}
-    SendDebug('TfpgGDIDrag.Execute (already dragging)');
+    DebugLn('TfpgGDIDrag.Execute (already dragging)');
     {$ENDIF}
     Result := daIgnore;
   end
   else
   begin
     {$IFDEF DND_DEBUG}
-    SendDebug('TfpgGDIDrag.Execute (new drag)');
+    DebugLn('TfpgGDIDrag.Execute (new drag)');
     {$ENDIF}
     FDragging := True;
     wapplication.Drag := self;
@@ -3288,7 +3285,7 @@ begin
       {$Note OLE DND: We are only handling strings at the moment, this needs to be extended to other types too }
       itm := FMimeData[i];
       {$IFDEF DND_DEBUG}
-      SendDebug('  Processing mime-type: ', itm.Format);
+      DebugLn('  Processing mime-type: ', itm.Format);
       {$ENDIF}
 
       { description of data we are sending }
