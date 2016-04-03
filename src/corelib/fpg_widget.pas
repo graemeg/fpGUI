@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -34,7 +34,6 @@ type
 
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
-  { TfpgWidget }
 
   TfpgWidget = class(TfpgWidgetBase)
   private
@@ -324,7 +323,7 @@ begin
     Exit; //==>
   if InDesigner then
     Exit; //==>
-  
+
   try
     if FActiveWidget <> nil then
       FActiveWidget.HandleKillFocus;
@@ -874,7 +873,7 @@ begin
 
   if not FEnabled then
     exit;   // Do we want this here?
-    
+
   IsDblClick := False;
 
   case msg.Params.mouse.Buttons of
@@ -1269,7 +1268,7 @@ begin
     Parent.ActiveWidget := self;
     Parent.SetFocus;
   end;
-  
+
   if Assigned(OnEnter) then
     OnEnter(self);
 end;
@@ -1281,7 +1280,7 @@ begin
 
   if ActiveWidget <> nil then
     ActiveWidget.KillFocus;
-    
+
   if Assigned(OnExit) then
     OnExit(self);
 end;
@@ -1387,9 +1386,13 @@ begin
 end;
 
 procedure TfpgWidget.HandleMouseExit;
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
   {$IFDEF CStackDebug}
-  writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
+  itf := DebugMethodEnter('TfpgWidget.HandleMouseExit - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if FShowHint then
     fpgApplication.HideHint;
@@ -1555,15 +1558,13 @@ begin
       FInvalidRect.Clear;
       FInvalidated:=False;
       {$IFDEF GDEBUG}
-      Writeln('Invalid Rect Detected!');
-      Write('MSG: '); PrintRect(msg.Params.rect);
-      Write('INV: '); PrintRect(Tmp);
+      DebugLn('Invalid Rect Detected!');
+      DebugWrite('MSG: '); PrintRect(msg.Params.rect);
+      DebugWrite('INV: '); PrintRect(Tmp);
       {$ENDIF}
       Exit;
     end;
   end;
-
-
 
   for i := 0 to ComponentCount-1 do
   begin
@@ -1581,9 +1582,9 @@ begin
           fpgSendMessage(Self, w, FPGM_PAINT, Params);
         end;
       end;
-    end;
+    end; { if w.InheritsFrom(...) }
+  end; { for i }
 
-  end;
   if HasInvalidRegion then
     Canvas.EndDraw(FInvalidRect)
   else
@@ -1656,13 +1657,13 @@ begin
   {$ENDIF}
   if (csLoading in ComponentState) then
   begin
-    {$IFDEF CStackDebug}
+    {$IFDEF gDebug}
     DebugLn('HandleAlignments ('+Name+'): csLoading detected, so we exit early');
     {$ENDIF}
     Exit;  //==>
   end;
 
-  {$IFDEF CStackDebug}
+  {$IFDEF gDebug}
   DebugLn(Format('dwidth=%d  dheight=%d  Classname=''%s''', [dwidth, dheight, ClassName]));
   {$ENDIF}
 
@@ -1732,7 +1733,9 @@ var
 {$ENDIF}
 begin
   {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.MoveAndResize');
+  itf := DebugMethodEnter('TfpgWidget.MoveAndResize - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
+  {$IFDEF gDebug}
   DebugLn(Format('Class:%s  t:%d  l:%d  w:%d  h:%d', [Classname, ATop, ALeft, AWidth, aHeight]));
   {$ENDIF}
   if not (csLoading in ComponentState) then
