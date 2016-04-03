@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -265,6 +265,7 @@ type
     procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
     procedure   TriggerSyncCounter;
+    property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
@@ -272,7 +273,6 @@ type
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
     procedure   BringToFront; override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
   end;
 
 

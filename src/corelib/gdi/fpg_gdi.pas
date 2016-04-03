@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -114,8 +114,6 @@ type
   end;
 
 
-  { TfpgGDICanvas }
-
   TfpgGDICanvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
@@ -175,8 +173,6 @@ type
   end;
 
 
-  { TfpgGDIWindow }
-
   TfpgGDIWindow = class(TfpgWindowBase)
   private
     {$IFDEF HAS_DND}
@@ -222,6 +218,7 @@ type
     //procedure   DoDragStartDetected; override;
     procedure   SetWindowOpacity(AValue: Single); override;
     function    GetWindowState: TfpgWindowState; override;
+    property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -230,7 +227,6 @@ type
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
     procedure   BringToFront; override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
   end;
 
 

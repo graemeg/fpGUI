@@ -207,7 +207,12 @@ function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 implementation
 
 uses
-  SysUtils, ShlObj, fpg_widget, fpg_gdi, fpg_constants;
+  SysUtils,
+  ShlObj,
+  fpg_main,
+  fpg_widget,
+  fpg_gdi,
+  fpg_constants;
 
 var
   CF_FILENAMEMAP: Cardinal;
@@ -839,14 +844,14 @@ end;
 
 procedure TfpgOLEDropTarget.RegisterDragDrop;
 begin
-  ActiveX.RegisterDragDrop(TfpgGDIWindow(FDropTarget).WinHandle, Self as IDropTarget);
+  ActiveX.RegisterDragDrop(TfpgNativeWindow(FDropTarget).WinHandle, Self as IDropTarget);
   FRegistered := True;
 end;
 
 procedure TfpgOLEDropTarget.RevokeDragDrop;
 begin
   FRegistered := False;
-  ActiveX.RevokeDragDrop(TfpgGDIWindow(FDropTarget).WinHandle);
+  ActiveX.RevokeDragDrop(TfpgNativeWindow(FDropTarget).WinHandle);
 end;
 
 destructor TfpgOLEDropTarget.Destroy;
