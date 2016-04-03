@@ -1,0 +1,22 @@
+[header]
+name=dbgme
+comment=Debug - Method  Enter
+select=0
+indent=0
+cursorcol=0
+cursorrow=8
+params=2
+ baseclass
+ method
+paramdefaults=2
+ *
+ *
+[]
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
+begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('${baseclass}.${method} - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
