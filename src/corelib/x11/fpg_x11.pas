@@ -205,7 +205,6 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(out r: TfpgRect); override;
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
@@ -3512,11 +3511,6 @@ procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
 begin
   FClipRectSet:=True;
   DoSetClipRectInternal(ARect);
-end;
-
-procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
-begin
-  r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);

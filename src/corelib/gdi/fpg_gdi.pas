@@ -140,7 +140,6 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(out r: TfpgRect); override;
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
@@ -2299,8 +2298,7 @@ begin
     {$IFNDEF wince}
     GetBitmapDimensionEx(FBufferBitmap, bmsize);
     {$ENDIF}
-    //FDrawWindow := TfpgGDIWindow(awin);
-    DoGetWinRect(ARect);
+    GetWinRect(ARect);
     if (bmsize.cx <> (ARect.Right-ARect.Left+1)) or
        (bmsize.cy <> (ARect.Bottom-ARect.Top+1)) then
       DoEndDraw;
@@ -2609,19 +2607,6 @@ begin
   Result := FClipRect;
   Dec(Result.Top, FDeltaY);
   Dec(Result.Left, FDeltaX);
-end;
-
-procedure TfpgGDICanvas.DoGetWinRect(out r: TfpgRect);
-(*var
-  wr: TRect;*)
-begin
-  {GetClientRect(FDrawWindow.FWinHandle, wr);
-  r.Top     := wr.Top;
-  r.Left    := wr.Left;
-  r.Width   := wr.Right - wr.Left + 1;
-  r.Height  := wr.Bottom - wr.Top + 1;}
-  // Widgets can be smaller than the window size.
-  r.SetRect(0,0,FWidget.Width, FWidget.Height);
 end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);

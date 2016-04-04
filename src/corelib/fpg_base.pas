@@ -372,11 +372,11 @@ type
     FPutBufferQueue: TFPList;
     procedure   AddPutBufferItem(ARect: TfpgRect);
     function    GetPutBufferItem: PfpgRect; // removes item when called
+    procedure   DoGetWinRect(out r: TfpgRect); virtual;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
-    procedure   DoGetWinRect(out r: TfpgRect); virtual; abstract;
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); virtual; abstract;
@@ -2143,8 +2143,6 @@ begin
   //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
   msg.Dest := w;
   w.Dispatch(msg);
-
-
 end;
 
 procedure TfpgWindowBase.DispatchKeyEvent(var msg: TfpgMessageRec);
@@ -2370,6 +2368,11 @@ begin
 
   if FPutBufferQueue.Count = 0 then
     FreeAndNil(FPutBufferQueue);
+end;
+
+procedure TfpgCanvasBase.DoGetWinRect(out r: TfpgRect);
+begin
+  r.SetRect(0, 0, FWidget.Width, FWidget.Height);
 end;
 
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
@@ -2714,7 +2717,7 @@ var
 begin
   lCol := FColor;
   DoSetColor(AColor);
-  DoGetWinRect(lWinRect);
+  GetWinRect(lWinRect);
   DoFillRectangle(0, 0, lWinRect.Width, lWinRect.Height);
   DoSetColor(lCol);
 end;
