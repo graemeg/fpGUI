@@ -761,7 +761,6 @@ var
   msgp: TfpgMessageParams;
   mcode: integer;
   wmsg: TMsg;
-  PaintStruct: TPaintStruct;
   TmpW: widestring;
   wheelpos: integer;
 
@@ -1257,9 +1256,10 @@ begin
           {$IFDEF GDEBUG}
           DebugLn(w.ClassName + ': WM_PAINT');
           {$ENDIF}
-          Windows.BeginPaint(w.WinHandle, @PaintStruct);
+          if GetUpdateRect(w.WinHandle, r, False) then
+            msgp.rect.SetRect(r.Left, r.Top, r.Right-r.Left, r.Bottom-r.Top);
+          ValidateRect(w.WinHandle, r);
           fpgSendMessage(nil, w, FPGM_PAINT, msgp);
-          Windows.EndPaint(w.WinHandle, @PaintStruct);
         end;
 
     WM_SYSCOMMAND:

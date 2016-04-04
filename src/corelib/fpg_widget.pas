@@ -633,6 +633,7 @@ begin
   FAcceptDrops    := False;
   FOnClickPending := False;
   FIgnoreDblClicks := False;
+  FInvalidRect.Clear;
 
   inherited Create(AOwner);
 
