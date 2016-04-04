@@ -156,7 +156,6 @@ type
 
   PfpgRect = ^TfpgRect;
 
-  { TfpgRect }
 
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
@@ -1462,7 +1461,7 @@ begin
   w.WindowToWidget(AX, AY);
 
   {$IFDEF DNDDEBUG}
-  writeln('dragging over widget: ', TargetWidget.ClassName, ' ',AX,':',AY);
+  DebugLn('dragging over widget: ', TargetWidget.ClassName, ' ',AX,':',AY);
   {$ENDIF}
   msgp.drop.Drop := Self;
   msgp.drop.x:=AX;
@@ -2840,14 +2839,11 @@ begin
 end;
 
 
-
 procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
 var
   r: PfpgRect;
   r2: TfpgRect;
-  finalrect: TfpgRect;
 begin
-
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
@@ -2855,7 +2851,6 @@ begin
     begin
       if FCanvasTarget = Self then
       begin
-        finalrect.SetRect(x,y,w,h);
         (*r2 := finalrect;
         r := GetPutBufferItem;
         while Assigned(r) do

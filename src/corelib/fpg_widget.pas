@@ -1114,7 +1114,7 @@ procedure TfpgWidget.RePaint;
 var
   P: TfpgMessageParams;
 begin
-  if WindowAllocated  and Window.HasHandle then
+  if WindowAllocated and Window.HasHandle then
   begin
     if not HasOwnWindow and Assigned(Parent) then
       Parent.InvalidateRect(GetBoundsRect)
@@ -1526,7 +1526,6 @@ begin
     Exit;//
   end;
 
-
   if (Width < 1) or (Height < 1) then
     Exit;
 
@@ -1537,7 +1536,7 @@ begin
     if not msg.Params.rect.IsUnassigned then
       UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
 
-  HasInvalidRegion:=not FInvalidRect.IsUnassigned;
+  HasInvalidRegion := not FInvalidRect.IsUnassigned;
 
   Canvas.BeginDraw;
 

@@ -19,9 +19,10 @@
 
 unit Agg2D;
 
+{$I agg_mode.inc }
+
 interface
 
-{$I agg_mode.inc }
 
 { With this define you can switch use of FreeType or Win32 TrueType font
   engine.

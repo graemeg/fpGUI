@@ -852,7 +852,7 @@ begin
 
   if not (w is TfpgGDIWindow) then
   begin
-    {$IFDEF GDEBUG} DebugLn('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
+    {$IFDEF GDEBUG} DebugLn('fpGUI/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     Exit; //==>
   end;
@@ -935,7 +935,7 @@ begin
         begin
           {$IFDEF GDEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            DebugLn('fpGFX/GDI: Found a mouse button event');
+            DebugLn('fpGUI/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -1027,7 +1027,7 @@ begin
               WM_RBUTTONUP:
                   begin
                     {$IFDEF GDEBUG}
-                    DebugLn('fpGFX/GDI: '+ w.ClassName + ': MouseButtonUp event');
+                    DebugLn('fpGUI/GDI: '+ w.ClassName + ': MouseButtonUp event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.
@@ -1246,7 +1246,7 @@ begin
     WM_CLOSE:
         begin
           {$IFDEF GDEBUG}
-          DebugLn(w.ClassName + ': WM_Close');
+          DebugLn(w.ClassName + ': WM_CLOSE');
           {$ENDIF}
           fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
         end;
@@ -2488,7 +2488,7 @@ end;
 
 procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
-  // Only the top level canvas pust the buffer to the screen so no delta needed
+  // Only the top level window canvas puts the buffer to the screen so no delta needed
   if FBufferBitmap > 0 then
   begin
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
