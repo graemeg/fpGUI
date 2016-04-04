@@ -3391,11 +3391,7 @@ begin
   {$ENDIF}
 end;
 
-{$IF FPC_FULLVERSION<20602}
-procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT; dwTime: DWORD); stdcall;
-{$ELSE}
 procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
-{$IFEND}
 begin
   { idEvent contains the handle to the timer that got triggered }
   fpgCheckTimers;
