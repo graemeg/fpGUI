@@ -1515,7 +1515,14 @@ var
   {$IFDEF GDEBUG}
   Tmp: TfpgRect;
   {$ENDIF}
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.MsgPaint - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
+
   if IsHidden then
     Exit;
 

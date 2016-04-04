@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2016 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,6 +23,7 @@ unit fpg_base;
 {.$define AGGCanvas}
 
 // For debug use only
+{.$Define CStackDebug}
 {.$define GDEBUG}
 
 interface
@@ -2843,7 +2844,14 @@ procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
 var
   r: PfpgRect;
   r2: TfpgRect;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(x,y,w,h) - ' + ClassName);
+  DebugLnFmt('x:%d  y:%d  w:%d  h:%d', [x,y,w,h]);
+  {$ENDIF}
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
@@ -2851,16 +2859,6 @@ begin
     begin
       if FCanvasTarget = Self then
       begin
-        (*r2 := finalrect;
-        r := GetPutBufferItem;
-        while Assigned(r) do
-        begin
-          //WriteLn('putting saved buffer pos');
-          {if UnionfpgRect(finalrect, r^, r2) then
-            r2 := finalrect;}
-          Dispose(r);
-          r := GetPutBufferItem;
-        end;*)
         DoPutBufferToScreen(x, y, w, h);
       end
       else
@@ -2869,19 +2867,30 @@ begin
         FCanvasTarget.EndDraw(x, y, w, h);
       end;
     end;
-    //else
-      //AddPutBufferItem(fpgRect(x,y,w,h));
-
   end;  { if }
 end;
 
 procedure TfpgCanvasBase.EndDraw(ARect: TfpgRect);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(rect) - ' + ClassName);
+  {$ENDIF}
   EndDraw(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
 end;
 
 procedure TfpgCanvasBase.EndDraw;
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
+  {$ENDIF}
   EndDraw(0, 0, FWidget.Width, FWidget.Height);
 end;
 
