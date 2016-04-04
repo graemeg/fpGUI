@@ -131,7 +131,7 @@ begin
   X11Handle := win.WinHandle;
   if X11Handle <= 0 then
   begin
-    debugln('    no winhandle available');
+    debugln('TAgg2D/X11 DoPutBufferToScreen:  No WinHandle available.');
     exit;
   end;
 

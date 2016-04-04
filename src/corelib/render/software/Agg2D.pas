@@ -3731,6 +3731,7 @@ begin
   Inc(R.Top, FDeltaY);
   Inc(R.Left, FDeltaX);
   ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+1);
+  m_rasterizer.m_clipping := True;
 end;
 
 function TAgg2D.DoGetClipRect: TfpgRect;

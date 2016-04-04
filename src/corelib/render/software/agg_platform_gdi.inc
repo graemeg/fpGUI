@@ -46,9 +46,10 @@ begin
   itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
   DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
   {$ENDIF}
+  // Only the top level window canvas puts the buffer to the screen so no delta needed
   if not FWidget.WindowAllocated or not FWidget.Window.HasHandle then
   begin
-    debugln('    no winhandle available');
+    debugln('TAgg2D/GDI DoPutBufferToScreen:  No WinHandle available.');
     exit;
   end;
 
@@ -56,7 +57,7 @@ begin
   destdc := Windows.GetDC(TfpgNativeWindow(FWidget.Window).WinHandle);
   srcdc := CreateCompatibleDC(fpgApplication.Display);
   SelectObject(srcdc, TImageHack(FImg).BMPHandle);
-  BitBlt(destdc, x, y, w, h, srcdc, 0, 0, SRCCOPY);
+  BitBlt(destdc, x, y, w, h, srcdc, x, y, SRCCOPY);
   DeleteDC(srcdc);
   ReleaseDC(TfpgNativeWindow(FWidget.Window).WinHandle, destdc);
 end;
