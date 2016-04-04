@@ -38,7 +38,14 @@ procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   srcdc: HDC;
   destdc: HDC;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
+  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
+  {$ENDIF}
   if not FWidget.WindowAllocated or not FWidget.Window.HasHandle then
   begin
     debugln('    no winhandle available');

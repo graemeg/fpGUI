@@ -21,6 +21,8 @@ unit Agg2D;
 
 {$I agg_mode.inc }
 
+{.$Define CStackDebug}
+
 interface
 
 

@@ -3209,7 +3209,14 @@ procedure TfpgX11Canvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
+  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
+  {$ENDIF}
   if (DrawHandle = FBufferPixmap) then
   begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);

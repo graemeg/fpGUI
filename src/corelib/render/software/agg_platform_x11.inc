@@ -119,7 +119,14 @@ var
   GcValues: TXGcValues;
   X11Handle: TfpgWinHandle;
   win: TfpgX11WindowHack;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
+  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
+  {$ENDIF}
   win := TfpgX11WindowHack(TfpgWidgetBase(FWidget).Window);
   X11Handle := win.WinHandle;
   if X11Handle <= 0 then

@@ -26,6 +26,7 @@ unit fpg_gdi;
 {$mode objfpc}{$H+}
 
 {.$Define GDEBUG}
+{.$Define CStackDebug}
 {.$Define DND_DEBUG}
 {.$Define DEBUGKEYS}
 
@@ -2487,12 +2488,18 @@ begin
 end;
 
 procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgGDICanvas.DoPutBufferToScreen - ' + ClassName);
+  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
+  {$ENDIF}
   // Only the top level window canvas puts the buffer to the screen so no delta needed
   if FBufferBitmap > 0 then
-  begin
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
-  end;
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
