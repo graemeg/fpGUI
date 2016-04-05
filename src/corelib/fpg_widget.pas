@@ -1113,17 +1113,46 @@ end;
 procedure TfpgWidget.RePaint;
 var
   P: TfpgMessageParams;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.RePaint - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
   if WindowAllocated and Window.HasHandle then
   begin
     if not HasOwnWindow and Assigned(Parent) then
+    begin
+      {$IFDEF CStackDebug}
+      DebugLn('RePaint:   not HasOwnWindow and Assigned(Parent)');
+      {$ENDIF}
       Parent.InvalidateRect(GetBoundsRect)
+    end
     else if not Invalidated then
     begin
+      {$IFDEF CStackDebug}
+      DebugLn('RePaint:   not Invalidated');
+      {$ENDIF}
       FInvalidated := True;
       P.rect := FInvalidRect;
       fpgPostMessage(self, self, FPGM_PAINT, P);
+    end
+    else
+    begin
+      {$IFDEF CStackDebug}
+      DebugLn('Repaint: fall through else option.');
+      {$ENDIF}
+      FInvalidated := False;
+      P.Rect := GetClientRect;
+      fpgPostMessage(self, self, FPGM_PAINT, P);
     end;
+  end
+  else
+  begin
+    {$IFDEF CStackDebug}
+    DebugLn('RePaint: Nothing to do here. No window allocated yet.');
+    {$ENDIF}
   end;
 end;
 
