@@ -2885,25 +2885,22 @@ begin
 
       if glyph.data_type = glyph_data_outline then
       begin
-       m_path.remove_all;
-       m_path.add_path(@tr ,0 ,false );
-
-       drawPath;
-
+        m_path.remove_all;
+        m_path.add_path(@tr ,0 ,false );
+        drawPath;
       end;
 
-     if glyph.data_type = glyph_data_gray8 then
+      if glyph.data_type = glyph_data_gray8 then
       begin
         Render(
           m_fontCacheManager.gray8_adaptor ,
           m_fontCacheManager.gray8_scanline );
       end;
 
-     start_x := start_x + glyph.advance_x;
-     start_y := start_y + glyph.advance_y;
-
+      start_x := start_x + glyph.advance_x;
+      start_y := start_y + glyph.advance_y;
     end;
-  end;
+  end;  { if glyph <> nil }
 end;
 {$ENDIF}
 
