@@ -118,7 +118,7 @@ end;
 {$I pf_gray8.inc }
 
 { PIXFMT_GRAY8 }
-procedure pixfmt_gray8;
+procedure pixfmt_gray8(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,1 ,0 );
 
@@ -158,7 +158,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_BGR24R }
-procedure pixfmt_gray8_bgr24r;
+procedure pixfmt_gray8_bgr24r(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,2 );
 
@@ -198,7 +198,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_BGR24G }
-procedure pixfmt_gray8_bgr24g;
+procedure pixfmt_gray8_bgr24g(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,1 );
 
@@ -238,7 +238,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_BGR24B }
-procedure pixfmt_gray8_bgr24b;
+procedure pixfmt_gray8_bgr24b(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,0 );
 
@@ -280,7 +280,7 @@ end;
 {$I pf_gray8_pre.inc }
 
 { PIXFMT_GRAY8_PRE }
-procedure pixfmt_gray8_pre;
+procedure pixfmt_gray8_pre(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,1 ,0 );
 
@@ -320,7 +320,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_PRE_BGR24R }
-procedure pixfmt_gray8_pre_bgr24r;
+procedure pixfmt_gray8_pre_bgr24r(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,2 );
 
@@ -360,7 +360,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_PRE_BGR24G }
-procedure pixfmt_gray8_pre_bgr24g;
+procedure pixfmt_gray8_pre_bgr24g(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,1 );
 
@@ -400,7 +400,7 @@ begin
 end;
 
 { PIXFMT_GRAY8_PRE_BGR24B }
-procedure pixfmt_gray8_pre_bgr24b;
+procedure pixfmt_gray8_pre_bgr24b(var pixf : pixel_formats; rb : rendering_buffer_ptr );
 begin
  pixf.Construct(rb ,3 ,0 );
 
