@@ -22,7 +22,8 @@ unit fpg_netlayer_x11;
 interface
 
 uses
-  Classes, SysUtils, X, XLib, XUtil, XAtom, ctypes;
+  Classes, SysUtils, X, XLib,
+  XAtom, ctypes;
   
 type
   TNetMaximizedState = (nmsNone, nmsHorz, nmsVert, nmsBoth);
