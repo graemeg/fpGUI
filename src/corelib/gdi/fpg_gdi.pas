@@ -466,7 +466,7 @@ begin
   {$IFDEF CPU64}
   wg := TfpgGDIWindow(Windows.GetWindowLongPtr(wh, GWL_USERDATA));
   if (wh <> 0) and (MainInstance = GetWindowLongPtr(wh, GWL_HINSTANCE))
-    and (wg is TfpgWidget)
+    and (wg is TfpgGDIWindow)
   {$ELSE}
   wg := TfpgGDIWindow(Windows.GetWindowLong(wh, GWL_USERDATA));
   if (wh <> 0) and (MainInstance = longword(GetWindowLong(wh, GWL_HINSTANCE)))
