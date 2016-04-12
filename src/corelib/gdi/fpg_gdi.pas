@@ -730,10 +730,10 @@ begin
   begin
     // write('Hooked HCBT_ACTIVATE at '+IntToStr(wParam)+': ');
     if (wapplication.TopModalForm <> nil) and
-       (wParam <> TfpgGDIWindow(wapplication.TopModalForm).FWinHandle) then
+       (wParam <> TfpgGDIWindow(wapplication.TopModalForm.Window).FWinHandle) then
     begin
       // writeln('stopped');
-      SetActiveWindow(TfpgGDIWindow(wapplication.TopModalForm).FWinHandle);
+      SetActiveWindow(TfpgGDIWindow(wapplication.TopModalForm.Window).FWinHandle);
       Result := 1;
     end else
     begin
@@ -1427,7 +1427,7 @@ begin
     Windows.RegisterClass(@HiddenWndClass);
 
     if MainForm <> nil then
-      lHandle := TfpgGDIWindow(MainForm).FWinHandle
+      lHandle := TfpgGDIWindow(MainForm.Window).FWinHandle
     else
       lHandle := 0;
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
