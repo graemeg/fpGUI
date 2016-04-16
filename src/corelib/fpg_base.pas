@@ -979,10 +979,6 @@ uses
   fpg_widget,// needed for ActiveWidget
   typinfo,
   process,
-  {$IFDEF GDEBUG}
-  fpg_dbugintf,
-  {$ENDIF}
-  math,
   dateutils;
 
 

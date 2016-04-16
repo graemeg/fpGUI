@@ -140,8 +140,7 @@ begin
 
   // finally dump the image to screen!
   XPutImage(fpgApplication.Display, X11Handle,
-      drawgc, TImageHack(FImg).XImage, x,y,x,y,
-      w, h);
+      drawgc, TImageHack(FImg).XImage, x,y,x,y, w, h);
 
   XFreeGc(fpgApplication.Display, drawgc);
   win.TriggerSyncCounter;

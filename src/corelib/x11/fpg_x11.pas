@@ -1008,9 +1008,12 @@ var
   data: pointer;
   wg: TfpgWidget;
   strdata: String;
+  {$IFDEF DNDDEBUG}
+  s: string;
+  {$ENDIF}
 begin
   {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Drop.ReadDropData');
+  DebugLn('TfpgX11Drop.ReadDropData');
   {$ENDIF}
   if TargetWidget <> nil then { nil would be first time in, so there is no last window }
   begin
@@ -1036,12 +1039,12 @@ begin
 
     { we handle the DND selection here }
       {$IFDEF DNDDEBUG}
-      s := XGetAtomName(FDisplay, actualtype);
-      writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
-      writeln('  Actualformat = ', ActualFormat);
-      writeln('  count = ', count);
-      writeln('  remaining = ', remaining);
-      writeln('-----------------');
+      s := XGetAtomName(xapplication.Display, actualtype);
+      DebugLn(Format('  ActualType: %s (%d)', [s, ActualType]));
+      DebugLn('  Actualformat = ' + IntToStr(ActualFormat));
+      DebugLn('  count = ' + IntToStr(count));
+      DebugLn('  remaining = ' + IntToStr(remaining));
+      DebugLn('-----------------');
       {$ENDIF}
 
     if remaining > 0 then   { we have data - now fetch it! }
@@ -1461,15 +1464,18 @@ var
   dx: cint;
   dy: cint;
   cw: TWindow;
+  {$IFDEF DNDDEBUG}
+  s: string;
+  {$ENDIF}
 begin
   {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Application.HandleDNDposition  (toplevel window = ', ATopLevelWindow.Name, ')');
+  DebugLnFmt('TfpgX11Application.HandleDNDposition  (toplevel window = %s)', [ATopLevelWindow.Name]);
   {$ENDIF}
 
   {$IFDEF DNDDEBUG}
-  s := XGetAtomName(FDisplay, AAction);
-  writeln(Format('  requested action: %s (%d)', [s, AAction]));
-  writeln('  x_root: ', x_root, '  y_root: ', y_root);
+  s := XGetAtomName(xapplication.Display, AAction);
+  DebugLnFmt('  requested action: %s (%d)', [s, AAction]);
+  DebugLnFmt('  x_root: %d  y_root: %d', [x_root, y_root]);
   {$ENDIF}
 
   // multiple parallel drop are not possible
@@ -1481,13 +1487,13 @@ begin
   win := FDrop.GetWindowFromCoordinates(x_root, y_root);
 
   {$IFDEF DNDDEBUG}
-  writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, win.WinHandle, win.WinHandle]));
+  DebugLnFmt('x:%d  y:%d  child:%d (%x)', [dx, dy, win.WinHandle, win.WinHandle]);
   {$ENDIF}
 
   if Assigned(win) then
   begin
     {$IFDEF DNDDEBUG}
-    writeln('dragging over window: ', win.ClassName);
+    DebugLn('dragging over window: ' + win.ClassName);
     {$ENDIF}
     if win is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
@@ -1743,8 +1749,7 @@ var
   procedure ReportLostWindow(const event: TXEvent);
   begin
     {$IFDEF GDEBUG}
-    writeln('fpGUI/X11: ', GetXEventName(event._type), ' can''t find <',
-        IntToHex(event.xany.window, 9), '>');
+    DebugLnFmt('fpGUI/X11: %s can''t find <%s>', [GetXEventName(event._type), IntToHex(event.xany.window, 9)]);
     {$ENDIF}
   end;
 
@@ -1813,9 +1818,9 @@ begin
   {$IFDEF GDEBUG}
   w := FindWindowByHandle(ev.xany.window);
   if not Assigned(w) then
-    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7))
+    DebugLnFmt('Event %s(%s) window: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7)])
   else
-    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7), ' name:', w.Name);
+    DebugLnFmt('Event %s(%s) window: %s  name: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7), w.Name]);
 //  PrintKeyEvent(ev);  { debug purposes only }
   {$ENDIF}
 
@@ -1863,7 +1868,7 @@ begin
           else
           begin
             {$IFDEF GDEBUG}
-            writeln('ERR: We couldn''t find keyboard focused window. Using event window instead!');
+            DebugLn('ERR: We couldn''t find keyboard focused window. Using event window instead!');
             {$ENDIF}
             w := FindWindowByHandle(ev.xkey.window);
             if not Assigned(w) then
@@ -1992,14 +1997,14 @@ begin
               if ev._type = X.ButtonRelease then
               begin
                 {$IFDEF GDEBUG}
-                writeln('****  PostMessage MouseUp ', w.ClassName, ' - ', w.Name);
+                DebugLnFmt('****  PostMessage MouseUp %s - %s', [w.ClassName, w.Name]);
                 {$ENDIF}
                 mcode := FPGM_MOUSEUP;
               end
               else
               begin
                 {$IFDEF GDEBUG}
-                writeln('**** PostMessage MouseDown ', w.ClassName, ' - ', w.Name);
+                DebugLnFmt('**** PostMessage MouseDown %s - %s', [w.ClassName, w.Name]);
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
               end;
@@ -2026,6 +2031,9 @@ begin
 
     X.GraphicsExpose:
         begin
+          {$IFDEF GDEBUG}
+          DebugLn(w.ClassName, ': X.GraphicsExpose');
+          {$ENDIF}
           repeat
             //
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
@@ -2042,6 +2050,9 @@ begin
 
     X.MotionNotify:
         begin
+          {$IFDEF GDEBUG}
+          DebugLn(w.ClassName, ': X.MotionNotify');
+          {$ENDIF}
           repeat
             //
           until not XCheckTypedWindowEvent(display, ev.xmotion.window, X.MotionNotify, @ev);
@@ -2116,7 +2127,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndEnter) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndEnter event received');
+            DebugLn('ClientMessage.XdndEnter event received');
             {$ENDIF}
             HandleDNDenter(w, ev.xclient.data.l[0], ev);
           end
@@ -2124,7 +2135,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndPosition) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndPosition event received');
+            DebugLn('ClientMessage.XdndPosition event received');
             {$ENDIF}
             HandleDNDposition(w,                            // top level window
                 ev.xclient.data.l[0],                       // Source window
@@ -2137,7 +2148,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndStatus) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndStatus event received');
+            DebugLn('ClientMessage.XdndStatus event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
@@ -2156,7 +2167,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndLeave) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndLeave event received');
+            DebugLn('ClientMessage.XdndLeave event received');
             {$ENDIF}
             HandleDNDleave(w, ev.xclient.data.l[0]);
           end
@@ -2164,9 +2175,9 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndDrop) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndDrop event received');
-            writeln('    ClassName = ', w.ClassName);
-            writeln('    Name = ', w.Name);
+            DebugLn('ClientMessage.XdndDrop event received');
+            DebugLn('    ClassName = ', w.ClassName);
+            DebugLn('    Name = ', w.Name);
             {$ENDIF}
             HandleDNDdrop(w, ev.xclient.data.l[0], ev.xclient.data.l[2]);
           end
@@ -2174,13 +2185,13 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndFinished) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('ClientMessage.XdndFinished event received');
+            DebugLn('ClientMessage.XdndFinished event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
               Drag.HandleDNDFinished(ev);
               {$IFDEF DNDDEBUG}
-              writeln('Queuing Free Drag Object');
+              DebugLn('Queuing Free Drag Object');
               {$ENDIF}
               //FreeAndNil(FDrag);
               FDrag.QueueFree;
@@ -2231,7 +2242,7 @@ begin
           if ev.xselection._property = XdndSelection then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('XdndSelection message received');
+            DebugLn('XdndSelection message received');
             {$ENDIF}
             HandleDNDSelection(ev);
           end
@@ -2244,7 +2255,7 @@ begin
           if ev.xselectionrequest.selection = XdndSelection then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('found a XdndSelection request');
+            DebugLn('found a XdndSelection request');
             {$ENDIF}
             if Assigned(Drag) then
               Drag.HandleSelectionRequest(ev);
@@ -2252,7 +2263,7 @@ begin
           else
           begin
             {$IFDEF GDEBUG}
-            writeln('found a clipboard selection request');
+            DebugLn('found a clipboard selection request');
             {$ENDIF}
             ProcessSelectionRequest(ev);
           end;
@@ -2338,7 +2349,7 @@ begin
         end;
 
     else
-      WriteLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
+      DebugLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
 end;
 
