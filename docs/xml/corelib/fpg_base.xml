@@ -1025,34 +1025,63 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
 </element>
 
 
-      <element name="TFileEntry">
-        <short>A simple data object representing a file</short>
-        <descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+<element name="TfpgCanvasBase.DrawPolygon">
+<short>Use <var>DrawPolygon</var> to draw a closed, many-sided shape on the canvas</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawPolygon"/>. When drawing, it
+uses the value of Canvas.Color. The shape is always filled.
+The Points parameter is an array of points that give the vertices of the
+polygon.
+<p>
+The first point is always connected to the last point.
+To draw a polygon on the canvas, without filling it, use the DrawPolyLine method,
+specifying the first point a second time at the end.
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.DrawPolyLine">TfpgCanvasBase.DrawPolyLine</link>
+</seealso>
+</element>
 
-      </element>
-      <element name="TFileEntry.Name">
-        <short>Name of a file</short>
-      </element>
+<element name="TfpgCanvasBase.DrawPolyLine">
+<short>Draws an open path consisting of an arbitrary number of linear segments</short>
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawPolyLine"/>. When drawing, it
+uses the value of Canvas.Color. The shape is not filled.
+The Points parameter is an array of points that define the linear segments to be drawn.
+<p>
+To draw a filled polygon on the canvas, use the <var>DrawPolygon</var> method.
+</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TfpgCanvasBase.DrawPolygon">TfpgCanvasBase.DrawPolygon</link>
+</seealso>
+</element>
 
-      <element name="TFileEntry.Extension">
-        <short>The extension of a file</short>
-      </element>
+<element name="TFileEntry">
+<short>A simple data object representing a file</short>
+<descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+</element>
 
-      <element name="TFileEntry.Size">
-        <short>Size of a file in bytes</short>
-      </element>
+<element name="TFileEntry.Name">
+<short>Name of a file</short>
+</element>
 
-      <element name="TFileEntry.IsLink">
-        <short>Is this item a symbolic link (on unix-type OSes)</short>
-      </element>
+<element name="TFileEntry.Extension">
+<short>The extension of a file</short>
+</element>
 
-      <element name="TFileEntry.LinkTarget">
-        <short>If it is a symbolic link, LinkTarget is what it points too</short>
-      </element>
+<element name="TFileEntry.Size">
+<short>Size of a file in bytes</short>
+</element>
 
-      <element name="TFileEntry.ModTime">
-        <short>Last modified timestamp</short>
-      </element>
+<element name="TFileEntry.IsLink">
+<short>Is this item a symbolic link (on unix-type OSes)</short>
+</element>
+
+<element name="TFileEntry.LinkTarget">
+<short>If it is a symbolic link, LinkTarget is what it points too</short>
+</element>
+
+<element name="TFileEntry.ModTime">
+<short>Last modified timestamp</short>
+</element>
 
 <element name="TFPColor">
 <short>A record structure holding the RGBA values of a color.</short>
