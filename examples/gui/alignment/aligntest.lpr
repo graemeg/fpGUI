@@ -18,7 +18,7 @@ type
   public
     procedure AfterCreate; override;
   end;
-  
+
 
 { TMainForm }
 
@@ -29,12 +29,18 @@ var
   n: integer;
   ColorArray: array[1..3] of TfpgColor;
 begin
+  SetPosition(3400, 960, 300, 300);
+  WindowTitle := 'fpGUI Align Example';
+  WindowPosition := wpScreenCenter;
+  MinWidth := 250;
+  MinHeight := 150;
+
   x := 10;
   y := 10;
   ColorArray[1] := clDodgerBlue;
   ColorArray[2] := clDeepSkyBlue;
   ColorArray[3] := clSkyBlue;
-  
+
   for n := low(lblTop) to high(lblTop) do
   begin
     lblTop[n] := CreateLabel(self, x, y, 'alTop '+IntToStr(n));
@@ -89,12 +95,6 @@ begin
   fpgApplication.Initialize;
 
   frm := TMainForm.Create(nil);
-  frm.WindowPosition := wpScreenCenter;
-  frm.Width       := 300;
-  frm.Height      := 300;
-  frm.MinWidth    := 250;
-  frm.MinHeight   := 150;
-  frm.WindowTitle := 'fpGUI Align Example';
   frm.Show;
 
   fpgApplication.Run;
