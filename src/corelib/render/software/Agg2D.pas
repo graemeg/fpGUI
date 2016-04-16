@@ -391,7 +391,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
+    procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
     // -------- TfpgCanvasBase  end  ---------------
@@ -3790,22 +3790,24 @@ begin
   Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
 end;
 
-procedure TAgg2D.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+procedure TAgg2D.DoDrawPolygon(const Points: array of TPoint);
 var
-  i: integer;
+  i, j: integer;
   poly: array of double;
 begin
-  SetLength(poly, (NumPts*2)+1); // dynamic arrays start at 0, but we want to use 1..NumPts
-  for i := 1 to NumPts do
+  SetLength(poly, (Length(Points)*2)+1); // dynamic arrays start at 0, but we want to use 1..NumPts
+  j := 1;
+  for i := Low(Points) to High(Points) do
   begin
-    poly[i * 2 - 1] := Points[i-1].X + 0.5;
-    poly[i * 2] := Points[i-1].Y + 0.5;
+    poly[j * 2 - 1] := Points[i].X + 0.5;
+    poly[j * 2] := Points[i].Y + 0.5;
+    inc(j);
   end;
   // Draw Polygon
   LineWidth(1);
   LineColor(LineColor);
   FillColor($00, $00, $00);  // clBlack for now
-  Polygon(@poly[1], NumPts);
+  Polygon(@poly[1], Length(Points));
 end;
 
 function TAgg2D.GetBufferAllocated: Boolean;

@@ -395,7 +395,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
-    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual; abstract;
+    procedure   DoDrawPolygon(const Points: array of TPoint); virtual; abstract;
     function    GetBufferAllocated: Boolean; virtual; abstract;
     procedure   DoAllocateBuffer; virtual; abstract;
   public
@@ -409,8 +409,6 @@ type
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
     procedure   DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
-    procedure   DrawPolygon(const Points: array of TPoint; Winding: Boolean; StartIndex: Integer = 0; NumPts: Integer = -1);
-    procedure   DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual;
     procedure   DrawPolygon(const Points: array of TPoint);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); virtual;
@@ -2510,44 +2508,11 @@ begin
   DoDrawArc(x, y, w, h, a1, a2);
 end;
 
-{ Use Polygon to draw a closed, many-sided shape on the canvas, using the value
-  of Canvas.Color. The shape is always filled.
-  The Points parameter is an array of points that give the vertices of the
-  polygon.
-  Winding determines how the polygon is filled. When Winding is True, Polygon
-  fills the shape using the Winding fill algorithm. When Winding is False,
-  Polygon uses the even-odd (alternative) fill algorithm.
-  StartIndex gives the index of the first point in the array to use. All points
-  before this are ignored.
-  NumPts indicates the number of points to use, starting at StartIndex.
-  If NumPts is -1 (the default), Polygon uses all points from StartIndex to the
-  end of the array.
-  The first point is always connected to the last point.
-  To draw a polygon on the canvas, without filling it, use the Polyline method,
-  specifying the first point a second time at the end. }
-procedure TfpgCanvasBase.DrawPolygon(const Points: array of TPoint;
-  Winding: Boolean; StartIndex: Integer; NumPts: Integer);
-var
-  NPoints: integer;
-begin
-  if NumPts<0 then
-    NPoints:=High(Points)-StartIndex+1
-  else
-    NPoints:=NumPts;
-  if NPoints<=0 then exit;
-  DrawPolygon(@Points[StartIndex],NPoints,Winding);
-end;
-
-procedure TfpgCanvasBase.DrawPolygon(Points: PPoint; NumPts: Integer;
-  Winding: boolean);
-begin
-  if NumPts<=0 then exit;
-  DoDrawPolygon(Points,NumPts,Winding);
-end;
-
 procedure TfpgCanvasBase.DrawPolygon(const Points: array of TPoint);
 begin
-  DrawPolygon(Points, True, Low(Points), High(Points) - Low(Points) + 1);
+  if Length(Points) < 3 then
+    exit; { not enough points to draw a polygon }
+  DoDrawPolygon(Points);
 end;
 
 procedure TfpgCanvasBase.StretchDraw(x, y, w, h: TfpgCoord; ASource: TfpgImageBase);

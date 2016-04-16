@@ -159,7 +159,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
+    procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
     property    DCHandle: TfpgDCHandle read FDrawGC;
@@ -2429,14 +2429,14 @@ begin
   {$ENDIF}
 end;
 
-procedure TfpgGDICanvas.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+procedure TfpgGDICanvas.DoDrawPolygon(const Points: array of TPoint);
 var
   PointArray: PPoint;
   i: integer;
 begin
   { convert TPoint to TXPoint }
-  GetMem(PointArray, SizeOf(TPoint)*(NumPts+1)); // +1 for return line
-  for i := 0 to NumPts-1 do
+  GetMem(PointArray, SizeOf(TPoint)*(Length(Points)+1)); // +1 for return line
+  for i := Low(Points) to High(Points) do
   begin
     PointArray[i].x := Points[i].x+FDeltaX;
     PointArray[i].y := Points[i].y+FDeltaY;

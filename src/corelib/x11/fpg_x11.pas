@@ -224,7 +224,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
+    procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
     property    DCHandle: TfpgDCHandle read DrawHandle;
@@ -3290,20 +3290,19 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoDrawPolygon(Points: PPoint; NumPts: Integer;
-  Winding: boolean);
+procedure TfpgX11Canvas.DoDrawPolygon(const Points: array of TPoint);
 var
   PointArray: PXPoint;
   i: integer;
 begin
   { convert TPoint to TXPoint }
-  GetMem(PointArray, SizeOf(TXPoint)*(NumPts+1)); // +1 for return line
-  for i := 0 to NumPts-1 do
+  GetMem(PointArray, SizeOf(TXPoint)*(Length(Points)+1)); // +1 for return line
+  for i := Low(Points) to High(Points) do
   begin
     PointArray[i].x := Points[i].x+FDeltaX;
     PointArray[i].y := Points[i].y+FDeltaY;
   end;
-  XFillPolygon(xapplication.display, DrawHandle, Fgc, PointArray, NumPts, CoordModeOrigin, X.Complex);
+  XFillPolygon(xapplication.display, DrawHandle, Fgc, PointArray, Length(Points), CoordModeOrigin, X.Complex);
   if PointArray <> nil then
     FreeMem(PointArray);
 end;
