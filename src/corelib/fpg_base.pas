@@ -383,6 +383,7 @@ type
     procedure   DrawPolygon(const Points: array of TPoint; Winding: Boolean; StartIndex: Integer = 0; NumPts: Integer = -1);
     procedure   DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); virtual;
     procedure   DrawPolygon(const Points: array of TPoint);
+    procedure   DrawPolyLine(const Points: array of TPoint);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); virtual;
     // x,y is the top/left corner of where the text output will start.
@@ -1625,6 +1626,16 @@ end;
 procedure TfpgCanvasBase.DrawPolygon(const Points: array of TPoint);
 begin
   DrawPolygon(Points, True, Low(Points), High(Points) - Low(Points) + 1);
+end;
+
+procedure TfpgCanvasBase.DrawPolyLine(const Points: array of TPoint);
+var
+  i: integer;
+begin
+  if Length(Points) < 2 then
+    Exit; { not enough points to draw a line }
+  for i := Low(Points)+1 to High(Points) do
+    DrawLine(Points[i-1].X, Points[i-1].Y, Points[i].X, Points[i].Y);
 end;
 
 procedure TfpgCanvasBase.StretchDraw(x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
