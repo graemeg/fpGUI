@@ -365,11 +365,11 @@ begin
     Name := 'btnGO';
     SetPosition(260, 26, 75, 24);
     Text := 'ET';
+    Enabled := False;
     FontDesc := '#Label1';
     Hint := 'Used for testing Elastic Tabstops implementation.';
     ImageName := '';
     TabOrder := 4;
-    Enabled := False;
     OnClick := @btnGOClick;
   end;
 
@@ -398,7 +398,8 @@ begin
   with pcEditor do
   begin
     Name := 'pcEditor';
-    SetPosition(0, 52, 717, 284);
+    SetPosition(0, 52, 717, 332);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     Hint := '';
     ParentShowHint := False;
     ShowHint := True;
@@ -410,7 +411,7 @@ begin
   with TabSheet1 do
   begin
     Name := 'TabSheet1';
-    SetPosition(3, 24, 711, 257);
+    SetPosition(3, 24, 711, 305);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'Untitled';
     ShowHint := True;
@@ -420,7 +421,7 @@ begin
   with memEditor do
   begin
     Name := 'memEditor';
-    SetPosition(0, 0, 710, 256);
+    SetPosition(0, 0, 710, 304);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#edit2';
     GutterVisible := True;
