@@ -2619,7 +2619,10 @@ procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
 begin
   CaretPos.X := 0;
   CaretPos.Y := ALine;
-  ScrollPos_V := ALine-5;  // scrolling a few lines short so cursor is not on top line
+  if ALine > 5 then
+    ScrollPos_V := ALine-5  // scrolling a few lines short so cursor is not on top line
+  else
+    ScrollPos_V := ALine;
   UpdateScrollBars;
 end;
 
