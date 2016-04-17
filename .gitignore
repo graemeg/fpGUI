@@ -29,20 +29,20 @@ units/
 # Application bundle for Mac OS
 *.app/
 
-# Known Unix binaries to ignore (they don't have file extensions unfortunately)
-uidesigner
-maximus
-nanoedit
-docview
-dbugsrv
-docedit
-globe
-fpmake
-drawtest
-edittest
-themetest
-threedee
-makefonts
+# Known application binaries to ignore
+uidesigner.exe
+maximus.exe
+nanoedit.exe
+docview.exe
+dbugsrv.exe
+docedit.exe
+globe.exe
+fpmake.exe
+drawtest.exe
+edittest.exe
+themetest.exe
+threedee.exe
+makefonts.exe
 
 # We should come up with a naming convension for demo binaries to exclude existing
 # and new future ones automatically.
