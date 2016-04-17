@@ -1,0 +1,417 @@
+[projectoptions]
+mainfile=${projectname}.lpr
+targetfile=${projectname}${EXEEXT}
+messageoutputfile=
+makecommand=${COMPILER}
+makedir=
+unitdirs=14
+ ${FPGUI}/examples/apps/ide/src
+ ${EPIKTMR}
+ ${FPTEST}/fpGUI
+ ${FPTEST}
+ ${ONGUARD}/
+ ${TIOPF}/GUI/fpGUI
+ ${TIOPF}/Options
+ ${TIOPF}/Core
+ ${FPGUI}/src/reportengine
+ ${FPGUI}/src/corelib/render/software
+ ${FPGUI}/src
+ ${FPGUI}/src/corelib/${FPG_GFX}
+ ${FPGUI}/src/gui
+ ${FPGUI}/src/corelib
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+befcommand=2
+ rm units/${TargetCPU}-${TargetOS}/*
+ rm -f units/*
+aftcommand=0
+makeoptions=13
+ -l -Mobjfpc -Sh -Sc -Si
+ -gl -O-
+ -gh
+ -B
+ -O2 -XX -Xs -CX
+ -FUunits
+ -dUseCThreads
+ -dAGGCanvas
+ -viewnh
+ -dDEBUG
+ -Sa -Cr -Ci -Co -b-
+ -WG
+ -Cr
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+toolmenus=2
+ fpGUI &UI Designer
+ &DocView
+toolfiles=2
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath} -k ${cursword}
+fontnames=0
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=5
+ ${TEMPLATEDIR}fpgui/project.pas
+ ${TEMPLATEDIR}fpgui/frm_main.pas
+ ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
+newprojectfilesdest=5
+ ${%PROJECTNAME%}.pas
+ 
+ ${%PROJECTDIR%}units/i386-linux/placeholder.txt
+ ${%PROJECTDIR%}units/i386-win32/placeholder.txt
+ ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
+newfinames=3
+ Program
+ Unit
+ Main Form
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ pas
+newfisources=3
+ ${TEMPLATEDIR}default/program.pas
+ ${TEMPLATEDIR}default/unit.pas
+ ${TEMPLATEDIR}fpgui/mainform.pas
+newfonames=2
+ Main Form
+ Simple Form
+newfonamebases=2
+ form
+ form
+newfosources=2
+ ${TEMPLATEDIR}fpgui/mainform.pas
+ ${TEMPLATEDIR}fpgui/simpleform.pas
+newfoforms=2
+ 
+ 
+forcezorder=0
+stripmessageesc=0
+copymessages=0
+closemessages=0
+checkmethods=1
+colorerror=-1610612712
+colorwarning=-1610612717
+colornote=-1610612716
+usercolors=30
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+usercolorcomment=30
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+formatmacronames=0
+formatmacrovalues=0
+settingsfile=${projectname}_clean.prj
+settingseditor=1
+settingsdebugger=1
+settingsstorage=1
+settingsprojecttree=0
+settingsautoload=0
+settingsautosave=0
+modulenames=0
+moduletypes=0
+modulefiles=0
+befcommandon=2
+ 0
+ 34
+makeoptionson=13
+ 63
+ 7
+ 4
+ 62
+ 32
+ 63
+ 63
+ 0
+ 63
+ 0
+ 0
+ 24
+ 0
+aftcommandon=0
+unitdirson=14
+ 65599
+ 65599
+ 65599
+ 196671
+ 196671
+ 65599
+ 65599
+ 196671
+ 65599
+ 196671
+ 131135
+ 196671
+ 65599
+ 65599
+macroon=0
+macronames=0
+macrovalues=0
+macrogroup=0
+groupcomments=6
+ 
+ 
+ 
+ 
+ 
+ 
+toolsave=2
+ -1
+ 0
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmessages=2
+ 0
+ 0
+toolshortcuts=2
+ 0
+ 1
+fontalias=0
+fontancestors=0
+fontheights=0
+fontwidths=0
+fontoptions=0
+fontxscales=0
+expandprojectfilemacros=5
+ 1
+ 1
+ -1
+ -1
+ -1
+loadprojectfile=5
+ 1
+ 1
+ 0
+ 0
+ 0
+newinheritedforms=2
+ 0
+ 0
+uid=0
+sourcefilemasks=5
+ "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+ "*.ipf"
+ "*.sql"
+syntaxdeffiles=5
+ ${SYNTAXDEFDIR}pascal_dark.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+ ${SYNTAXDEFDIR}ipf2.sdef
+ ${SYNTAXDEFDIR}sql.sdef
+filemasknames=7
+ Source
+ Forms
+ Include Files
+ Text
+ IPF help
+ XML & fpdoc
+ All Files
+filemasks=7
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
+ "frm_*.pas"
+ *.inc
+ *.txt
+ *.ipf
+ *.xml
+ *
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+noformdesignerdocking=0
+gridsizex=8
+gridsizey=8
+autoindent=1
+blockindent=2
+linenumberson=1
+rightmarginon=1
+rightmarginchars=80
+scrollheight=0
+tabstops=2
+spacetabs=1
+showtabs=1
+tabindent=0
+editfontname=Raize
+editfontheight=16
+editfontwidth=0
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
+pairmarkcolor=-1610612712
+editfontantialiased=1
+editmarkbrackets=0
+editmarkpairwords=0
+backupfilecount=0
+encoding=0
+trimtrailingwhitespace=1
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+runcommand=
+xtermcommand=xterm -S${PTSN}/${PTSH}
+remoteconnection=
+uploadcommand=
+gdbprocessor=Auto
+gdbservercommand=
+gdbservercommandattach=
+beforeconnect=
+afterconnect=
+beforeload=
+afterload=
+beforerun=
+sourcebase=
+sourcedirs=19
+ ${EPIKTMR}/
+ ${FPTEST}/fpGUI/
+ ${FPTEST}/
+ ${FPGUI}/src/corelib/render/software/
+ ${FPGUI}/src/reportengine/
+ ${FPGUI}/src/corelib/${FPG_GFX}/
+ ${FPGUI}/src/gui/
+ ${FPGUI}/src/corelib/
+ ${FPGUI}/src/
+ ${TIOPF}/GUI/fpGUI/
+ ${TIOPF}/Options/
+ ${TIOPF}/Core/
+ ${FPCDIR}src/packages/fcl-base/src/
+ ${FPCDIR}src/rtl/objpas/*/
+ ${FPCDIR}src/rtl/unix/
+ ${FPCDIR}src/rtl/linux/
+ ${FPCDIR}src/rtl/inc/
+ ${FPGUI}/examples/apps/ide/src/
+ ./
+defines=0
+progparameters=
+progworkingdirectory=
+envvarnames=0
+envvarvalues=0
+defineson=0
+stoponexception=1
+valuehints=1
+activateonbreak=1
+raiseonbreak=1
+showconsole=1
+externalconsole=0
+settty=1
+gdbdownload=0
+downloadalways=0
+startupbkpt=0
+startupbkpton=0
+gdbsimulator=0
+gdbserverstartonce=0
+gdbloadtimeout=
+gdbserverwait=0
+nogdbserverexit=0
+gdbservertty=0
+exceptclassnames=2
+ EConvertError
+ EAbort
+exceptignore=2
+ 0
+ 1
+nodebugbeginend=0
+fpcgdbworkaround=1
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+defaultmake=1
