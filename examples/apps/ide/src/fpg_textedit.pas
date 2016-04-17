@@ -82,37 +82,33 @@ type
   TfpgOnSearchEnd = procedure(Sender: TObject; FindIt, ReplaceMode: Boolean) of object;
 
 
-  { TfpgBaseTextEdit }
-
   TfpgBaseTextEdit = class(TfpgWidget)
   private
-  type
-    TSelDrag = (sdNone, sdMightDrag, sdDragging ,sdDragged);
+    type
+      TSelDrag = (sdNone, sdMightDrag, sdDragging ,sdDragged);
 
-    { TSelection }
-
-    TSelection = object
-    private
-      FEdit: TfpgBaseTextEdit;
-      FOrigin: TfpgPoint;
-      FStartPos: TfpgPoint;
-      FEndPos: TfpgPoint;
-      procedure SetEndPos(AValue: TfpgPoint);
-      procedure SetStartPos(AValue: TfpgPoint);
-    public
-      function  HasContent: Boolean;
-      function  StartLine: Integer;
-      function  EndLine: Integer;
-      function  Contains(APoint: TfpgPoint): Boolean;
-      procedure AdjustLines(ADelta: Integer);
-      procedure AdjustStartX(ADelta: Integer);
-      // Returns True if no changes. False if Line length was adjusted.
-      function  ValidateEndOffset(const ALine: String): Boolean;
-      property  StartPos: TfpgPoint read FStartPos write SetStartPos;
-      property  EndPos: TfpgPoint read FEndPos write SetEndPos;
-      property  Origin: TfpgPoint read FOrigin;
-    end;
-  class procedure ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
+      TSelection = object
+      private
+        FEdit: TfpgBaseTextEdit;
+        FOrigin: TfpgPoint;
+        FStartPos: TfpgPoint;
+        FEndPos: TfpgPoint;
+        procedure SetEndPos(AValue: TfpgPoint);
+        procedure SetStartPos(AValue: TfpgPoint);
+      public
+        function  HasContent: Boolean;
+        function  StartLine: Integer;
+        function  EndLine: Integer;
+        function  Contains(APoint: TfpgPoint): Boolean;
+        procedure AdjustLines(ADelta: Integer);
+        procedure AdjustStartX(ADelta: Integer);
+        // Returns True if no changes. False if Line length was adjusted.
+        function  ValidateEndOffset(const ALine: String): Boolean;
+        property  StartPos: TfpgPoint read FStartPos write SetStartPos;
+        property  EndPos: TfpgPoint read FEndPos write SetEndPos;
+        property  Origin: TfpgPoint read FOrigin;
+      end;
+    class procedure ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
   private
     FDefaultDropHandler: TfpgDropEventHandler;
     FFont: TfpgFont;
