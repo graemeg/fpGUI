@@ -1111,49 +1111,8 @@ begin
 end;
 
 procedure TfpgWidget.RePaint;
-var
-  P: TfpgMessageParams;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.RePaint - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
-  if WindowAllocated and Window.HasHandle then
-  begin
-    if not HasOwnWindow and Assigned(Parent) then
-    begin
-      {$IFDEF CStackDebug}
-      DebugLn('RePaint:   not HasOwnWindow and Assigned(Parent)');
-      {$ENDIF}
-      Parent.InvalidateRect(GetBoundsRect)
-    end
-    else if not Invalidated then
-    begin
-      {$IFDEF CStackDebug}
-      DebugLn('RePaint:   not Invalidated');
-      {$ENDIF}
-      FInvalidated := True;
-      P.rect := FInvalidRect;
-      fpgPostMessage(self, self, FPGM_PAINT, P);
-    end
-    else
-    begin
-      {$IFDEF CStackDebug}
-      DebugLn('Repaint: fall through else option.');
-      {$ENDIF}
-      FInvalidated := False;
-      P.Rect := GetClientRect;
-      fpgPostMessage(self, self, FPGM_PAINT, P);
-    end;
-  end
-  else
-  begin
-    {$IFDEF CStackDebug}
-    DebugLn('RePaint: Nothing to do here. No window allocated yet.');
-    {$ENDIF}
-  end;
+  Invalidate;
 end;
 
 procedure TfpgWidget.SetFocus;
@@ -1905,26 +1864,41 @@ end;
 
 procedure TfpgWidget.Invalidate;
 begin
-  RePaint;
+  InvalidateRect(GetClientRect);
 end;
 
 procedure TfpgWidget.InvalidateRect(ARect: TfpgRect);
+var
+  Params: TfpgMessageParams;
 begin
   if not HasOwnWindow then
   begin
+    if not Assigned(Parent) then
+      Exit;
     // If we don't have our own window then call invalidate on the parent
     WidgetToParent(ARect.Left, ARect.Top);
-    if Assigned(Parent) then
-      Parent.InvalidateRect(ARect);
+    Parent.InvalidateRect(ARect);
+    FInvalidated := True;
     Exit;
+  end
+  else // HasOwnWindow
+  begin
+
+    if (not WindowAllocated) or ((ARect.Width <= 0) or (ARect.Height <= 0)) then
+      Exit;
+
+    if FInvalidRect.IsUnassigned then
+      FInvalidRect := ARect
+    else
+      UnionRect(FInvalidRect, FInvalidRect, ARect);
+
+    if not FInvalidated then
+    begin
+      Params.rect := FInvalidRect;
+      fpgPostMessage(Self, Self, FPGM_PAINT, Params);
+      FInvalidated:=True;
+    end;
   end;
-
-  if FInvalidRect.IsUnassigned then
-    FInvalidRect := ARect
-  else
-    UnionRect(FInvalidRect, FInvalidRect, ARect);
-
-  Invalidate;
 end;
 
 
