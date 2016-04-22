@@ -36,11 +36,11 @@ uses
   fpg_widget,
   fpg_button,
   fpg_menu;
-  
+
 type
   // forward declaration
   TfpgPageControl = class;
-  
+
   TfpgTabOption   = (to_PMenuClose, to_PMenuShowAvailTabs);
 
   TfpgTabOptions = set of TfpgTabOption;
@@ -83,8 +83,8 @@ type
 
   TTabSheetChange = procedure(Sender: TObject; NewActiveSheet: TfpgTabSheet) of object;
   TTabSheetClosing = procedure(Sender: TObject; ATabSheet: TfpgTabSheet) of object;
-  
-  
+
+
   TfpgPageControl = class(TfpgWidget)
   private
     FActivePage: TfpgTabSheet;
@@ -353,15 +353,15 @@ begin
     Exit; // ==>
   if FPages.Count =0 then
     Exit; // ==>
-  
-  if FPages.Count > 1 then              
+
+  if FPages.Count > 1 then
   begin
      i:=FPages.IndexOf(APage);
      FPages.Remove(APage);
     APage.PageControl:=nil;
     APage.Visible:=false;
     if i = ActivePageIndex then
-    begin	    
+    begin
       if i > FPages.Count-1 then
          ActivePage:=TfpgTabSheet(FPages.Last)
       else if i = 0 then
@@ -370,8 +370,8 @@ begin
         ActivePage:=TfpgTabSheet(FPages[i]);
     end
     else if i < ActivePageIndex then
-      ActivePage:=TfpgTabSheet(Pages[i-1]);	      
-  end      
+      ActivePage:=TfpgTabSheet(Pages[i-1]);
+  end
   else
   begin
     FPages.Remove(APage);
@@ -484,7 +484,7 @@ var
 begin
   {$IFDEF DEBUG}writeln(Classname + '.MaxButtonWidthSum');{$ENDIF}
   Result := 0;
-  
+
   for i := 0 to FPages.Count-1 do
   begin
     t := TfpgTabSheet(FPages[i]);
@@ -776,7 +776,7 @@ var
 begin
   if not WindowAllocated then
     Exit; //==>
-    
+
   if PageCount = 0 then
     Exit; //==>
 
@@ -787,7 +787,7 @@ begin
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
-  
+
   Canvas.SetTextColor(TextColor);
   lTxtFlags := [];
   if not Enabled then
@@ -1088,7 +1088,7 @@ begin
     OrderSheets;
   Canvas.ClearClipRect;
   fpgStyle.DrawTabBackground(Canvas, BackgroundColor);
-  
+
   // To make it more visible in the UI Designer
   if csDesigning in ComponentState then
   begin
@@ -1118,9 +1118,9 @@ begin
   ts := TfpgTabSheet(FPages.First);
   if ts = nil then
     exit; //==>  { This means there are no tabs }
-  
+
   ts := TabSheetAtPos(x, y);
-  
+
   if Assigned(ts) then
     ActivePage := ts;
 
@@ -1145,7 +1145,7 @@ begin
       s := Format('Close "%s" Tab', [ts.Text])
     else
       s := 'Close Tab';
-      
+
     if not Assigned(FPopupMenu) then
     begin
       FPopupMenu := TfpgPopupMenu.Create(self);
