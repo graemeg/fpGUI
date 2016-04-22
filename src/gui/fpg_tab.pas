@@ -1352,6 +1352,7 @@ end;
 procedure TfpgPageControl.RemoveTabSheet(ATabSheet: TfpgTabSheet);
 begin
   RemovePage(ATabSheet);
+  DoTabSheetClosing(ATabSheet);
 end;
 
 end.
