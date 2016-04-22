@@ -90,6 +90,7 @@ type
     procedure   miFileNewUnit(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
+    procedure   miFileClose(Sender: TObject);
     procedure   miEditCutClicked(Sender: TObject);
     procedure   miEditCopyClicked(Sender: TObject);
     procedure   miEditPasteClicked(Sender: TObject);
@@ -245,6 +246,21 @@ begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+end;
+
+procedure TMainForm.miFileClose(Sender: TObject);
+var
+  ts: TfpgTabSheet;
+  i: integer;
+begin
+  pcEditor.BeginUpdate;
+  try
+    ts := pcEditor.ActivePage;
+    pcEditor.RemoveTabSheet(ts);
+    ts.Free;
+  finally
+    pcEditor.EndUpdate;
+  end;
 end;
 
 procedure TMainForm.miEditCutClicked(Sender: TObject);
@@ -1586,6 +1602,7 @@ begin
     AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('Save All', rsKeyCtrl+rsKeyShift+'S', nil).Enabled := False;
     AddSeparator;
+    AddMenuItem('Close', rsKeyCtrl+'F4', @miFileClose);
     AddMenuItem('Quit', rsKeyCtrl+'Q', @btnQuitClicked);
   end;
 
