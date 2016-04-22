@@ -1578,13 +1578,14 @@ begin
     Name := 'mnuFile';
     SetPosition(476, 61, 172, 20);
     miFile := AddMenuItem('New...', rsKeyCtrl+'N', @miFileNewUnit);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
     AddMenuItem('Open Recent', '', nil).Enabled := False;
+    AddSeparator;
     AddMenuItem('Save', rsKeyCtrl+'S', @miFileSave);
     AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('Save All', rsKeyCtrl+rsKeyShift+'S', nil).Enabled := False;
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Quit', rsKeyCtrl+'Q', @btnQuitClicked);
   end;
 
@@ -1596,7 +1597,7 @@ begin
     AddMenuItem('Cut', rsKeyCtrl+'X', @miEditCutClicked);
     AddMenuItem('Copy', rsKeyCtrl+'C', @miEditCopyClicked);
     AddMenuItem('Paste', rsKeyCtrl+'V', @miEditPasteClicked);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Indent selection', rsKeyCtrl+'I', nil).Enabled := False;
     AddMenuItem('Unindent selection', rsKeyCtrl+'U', nil).Enabled := False;
     AddMenuItem('Insert $IFDEF...', rsKeyCtrl+rsKeyShift+'D', nil).Enabled := False;
@@ -1612,7 +1613,7 @@ begin
     AddMenuItem('Find Previous', rsKeyShift+'F3', @miFindPrevClicked);
     AddMenuItem('Find in Files...', rsKeyCtrl+rsKeyShift+'F', nil).Enabled := False;
     AddMenuItem('Replace...', rsKeyCtrl+'R', nil).Enabled := False;
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
   end;
@@ -1632,14 +1633,14 @@ begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
     AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'F11', @miProjectOptions);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
     AddMenuItem('Open...', '', @miProjectOpen);
     miRecentProjects := AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save', rsKeyCtrl+rsKeyAlt+'S', @miProjectSave);
     AddMenuItem('Save As...', '', @miProjectSaveAs);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('View Source', '', nil);
     AddMenuItem('Add editor file to Project', rsKeyCtrl+rsKeyShift+'A', @miProjectAddUnitToProject);
   end;
@@ -1655,7 +1656,7 @@ begin
     AddMenuItem('Make 2', rsKeyCtrl+rsKeyAlt+'2', @miRunMake2);
     AddMenuItem('Make 3', rsKeyCtrl+rsKeyAlt+'3', @miRunMake3);
     AddMenuItem('Make 4', rsKeyCtrl+rsKeyAlt+'4', @miRunMake4);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Run', 'F9', nil);
     AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);
   end;
@@ -1683,7 +1684,7 @@ begin
     Name := 'mnuHelp';
     SetPosition(476, 224, 172, 20);
     AddMenuItem('Contents...', '', nil);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('About fpGUI Toolkit...', '', @miAboutFPGuiClicked);
     AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
   end;
