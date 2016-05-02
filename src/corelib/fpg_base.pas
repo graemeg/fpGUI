@@ -3584,15 +3584,22 @@ begin
     if fpgFileExists(HelpFile) then
     begin
       if AHelpContext = 0 then
-        p.CommandLine := GetHelpViewer + ' ' + HelpFile
+      begin
+        p.Executable := GetHelpViewer;
+        p.Parameters.Add(HelpFile);
+      end
       else
-        p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -n ' + IntToStr(AHelpContext);
+      begin
+        p.Executable := GetHelpViewer;
+        p.Parameters.Add(HelpFile);
+        p.Parameters.Add('-n ' + IntToStr(AHelpContext));
         {$ifdef GDEBUG}
-        DebugLn(p.CommandLine);
+        DebugLn(p.Parameters.Text);
         {$endif}
+      end;
     end
     else
-      p.CommandLine := GetHelpViewer;
+      p.Executable := GetHelpViewer;
     Result := True;
     p.Execute;
   finally
