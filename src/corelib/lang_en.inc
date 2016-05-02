@@ -177,3 +177,7 @@ rsaddnewitem  =  'Would you like to add the new item <%s> to the list?';
 rsyes  =  'Yes';
 rsyestoall  =  'Yes to All';
 rsreportpageof  =  'of';
+SErrInvalidOption = 'Invalid option at position %d: "%s"';
+SErrNoOptionAllowed = 'Option at position %d does not allow an argument: %s';
+SErrOptionNeeded = 'Option at position %d needs an argument : %s';
+
