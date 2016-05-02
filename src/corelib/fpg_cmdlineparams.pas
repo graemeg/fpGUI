@@ -39,7 +39,7 @@ type
     function    WordCount(const AStrToProcess: string; ADelims: string): integer;
     function    WordPosition(const AN: integer; const AStr: string; ADelims: string): integer;
     function    ExtractChar(const AValue: string; const APos: integer): char;
-    function    CharInStr(const AChr: char; const AStr: string): boolean;
+    function    CharInStr(const AChr: char; const AStr: string): Boolean;
     function    StripLeadingDelims(const AStrToProcess: string; ADelims: string): string;
     function    StripTrailingDelims(const AStrToProcess: string; ADelims: string): string;
     function    NumToken(const AValue, AToken: string): integer;
@@ -48,8 +48,8 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    function    IsParam(const AParam: string): boolean; overload;
-    function    IsParam(const AParams: array of string): boolean; overload;
+    function    IsParam(const AParam: string): Boolean; overload;
+    function    IsParam(const AParams: array of string): Boolean; overload;
     function    GetParam(const AParam: string): string;
     property    Params: TStringList read FslParams;
     property    AsString: string read FsParams;
@@ -73,7 +73,7 @@ function gCommandLineParams: TfpgCommandLineParams;
 begin
   if uCommandLineParams = nil then
     uCommandLineParams := TfpgCommandLineParams.Create;
-  result := uCommandLineParams;
+  Result := uCommandLineParams;
 end;
 
 { TfpgCommandLineParams }
@@ -85,7 +85,7 @@ begin
   ReadParams;
 end;
 
-destructor TfpgCommandLineParams.destroy;
+destructor TfpgCommandLineParams.Destroy;
 begin
   FslParams.Free;
   inherited;
@@ -93,31 +93,31 @@ end;
 
 function TfpgCommandLineParams.GetParam(const AParam: string): string;
 begin
-  result := FslParams.Values[ upperCase(AParam)];
+  Result := FslParams.Values[upperCase(AParam)];
 end;
 
-function TfpgCommandLineParams.IsParam(const AParam: string): boolean;
+function TfpgCommandLineParams.IsParam(const AParam: string): Boolean;
 var
   i: integer;
 begin
-  result := false;
-  for i := 0 to FslParams.Count - 1 do begin
-    if FslParams.Names[i] = upperCase(AParam) then begin
-      result := true;
+  Result := False;
+  for i := 0 to FslParams.Count - 1 do
+    if FslParams.Names[i] = upperCase(AParam) then
+    begin
+      Result := True;
       break; //==>
     end;
-  end;
 end;
 
-function TfpgCommandLineParams.IsParam(const AParams: array of string): boolean;
+function TfpgCommandLineParams.IsParam(const AParams: array of string): Boolean;
 var
   i: integer;
 begin
-  result := false;
+  Result := False;
   for i := Low(AParams) to High(AParams) do
     if IsParam(AParams[i]) then
     begin
-      result := true;
+      Result := True;
       Exit; //==>
     end;
 end;
@@ -132,24 +132,27 @@ var
 const
   cDelim = ' ';
 begin
-  lsValue := '';
+  lsValue  := '';
   FsParams := '';
-  j := ParamCount;
-  for i := 1 to j do begin
-    if FsParams <> '' then FsParams := FsParams + cDelim;
+  j        := ParamCount;
+  for i := 1 to j do
+  begin
+    if FsParams <> '' then
+      FsParams := FsParams + cDelim;
     FsParams := FsParams + ParamStr(i);
-  end ;
+  end;
 
   j := WordCount(FsParams, ctiCommandLineParamPrefix);
-  for i := 1 to j do begin
+  for i := 1 to j do
+  begin
     lsNameValue := WordExtract(FsParams, i, ctiCommandLineParamPrefix);
-    lsName := Token(lsNameValue, cDelim, 1);
-    lsValue := copy(lsNameValue, length(lsName) + 1,
-                     length(FsParams) - length(lsValue));
+    lsName      := Token(lsNameValue, cDelim, 1);
+    lsValue     := copy(lsNameValue, Length(lsName) + 1,
+      Length(FsParams) - Length(lsValue));
 
     lsValue := Trim(lsValue);
-    lsName := StrTran(lsName, ctiCommandLineParamPrefix, '');
-    lsName := upperCase(lsName);
+    lsName  := StrTran(lsName, ctiCommandLineParamPrefix, '');
+    lsName  := upperCase(lsName);
 
     FslParams.Add(lsName + '=' + lsValue);
   end;
@@ -160,16 +163,16 @@ var
   i: integer;
   sToChange: string;
 begin
-  result := '';
+  Result    := '';
   sToChange := AValue;
-  i := pos(ADel, sToChange);
+  i         := pos(ADel, sToChange);
   while i <> 0 do
   begin
-    result := result + copy(sToChange, 1, i-1) + AIns;
-    delete(sToChange, 1, i+length(ADel)-1);
-    i := pos(ADel, sToChange);
+    Result := Result + copy(sToChange, 1, i - 1) + AIns;
+    Delete(sToChange, 1, i + Length(ADel) - 1);
+    i      := pos(ADel, sToChange);
   end;
-  result := result + sToChange;
+  Result := Result + sToChange;
 end;
 
 function TfpgCommandLineParams.NumToken(const AValue, AToken: string): integer;
@@ -177,153 +180,136 @@ var
   i, iCount: integer;
   lsValue: string;
 begin
-  result := 0;
+  Result := 0;
   if AValue = '' then
     Exit; //==>
 
-  iCount := 0;
+  iCount  := 0;
   lsValue := AValue;
-  i := pos(AToken, lsValue);
+  i       := pos(AToken, lsValue);
   while i <> 0 do
   begin
-    delete(lsValue, i, length(AToken));
-    inc(iCount);
+    Delete(lsValue, i, Length(AToken));
+    Inc(iCount);
     i := pos(AToken, lsValue);
   end;
-  result := iCount + 1;
+  Result := iCount + 1;
 end;
 
-function TfpgCommandLineParams.Token(const AValue, AToken: string;
-    const APos: integer): string;
+function TfpgCommandLineParams.Token(const AValue, AToken: string; const APos: integer): string;
 var
   i, iCount, iNumToken: integer;
   lsValue: string;
 begin
-  result := '';
+  Result := '';
 
   iNumToken := NumToken(AValue, AToken);
   if APos = 1 then
   begin
     if pos(AToken, AValue) = 0 then
-      result := AValue
+      Result := AValue
     else
-      result := copy(AValue, 1, pos(AToken, AValue)-1);
+      Result := copy(AValue, 1, pos(AToken, AValue) - 1);
   end
-  else if (iNumToken < APos-1) or (APos<1) then
-  begin
-    result := '';
-  end
+  else if (iNumToken < APos - 1) or (APos < 1) then
+    Result  := ''
   else
   begin
     { Remove leading blocks }
-    iCount := 1;
+    iCount  := 1;
     lsValue := AValue;
-    i := pos(AToken, lsValue);
-    while (i<>0) and (iCount<APos) do
+    i       := pos(AToken, lsValue);
+    while (i <> 0) and (iCount < APos) do
     begin
-      delete(lsValue, 1, i + length(AToken) - 1);
-      inc(iCount);
+      Delete(lsValue, 1, i + Length(AToken) - 1);
+      Inc(iCount);
       i := pos(AToken, lsValue);
     end;
 
-    if (i=0) and (iCount=APos) then
-      result := lsValue
-    else if (i=0) and (iCount<>APos) then
-      result := ''
+    if (i = 0) and (iCount = APos) then
+      Result := lsValue
+    else if (i = 0) and (iCount <> APos) then
+      Result := ''
     else
-      result := copy(lsValue, 1, i-1);
+      Result := copy(lsValue, 1, i - 1);
   end;
 end;
 
-function TfpgCommandLineParams.WordExtract(const AInput: string;
-    const APos: integer; const ADelims: string): string;
+function TfpgCommandLineParams.WordExtract(const AInput: string; const APos: integer; const ADelims: string): string;
 var
   iStart: integer;
   i: integer;
-	iLen: integer;
+  iLen: integer;
 begin
-  result := '';
+  Result := '';
 
   // Find the starting pos of the Nth word
   iStart := WordPosition(APos, AInput, ADelims);
 
   if iStart <> 0 then
   begin
-    i := iStart;
-    iLen := length(AInput);
+    i    := iStart;
+    iLen := Length(AInput);
     // Build up result until we come to our next wordDelim
     // while (i <= iLen) and not(S[i] in ADelims) do begin
-    while (i <= iLen) and not(CharInStr(ExtractChar(AInput, i), ADelims)) do
+    while (i <= iLen) and not (CharInStr(ExtractChar(AInput, i), ADelims)) do
     begin
-      result := result + ExtractChar(AInput, i);
-      inc(i);
+      Result := Result + ExtractChar(AInput, i);
+      Inc(i);
     end;
   end;
 end;
 
-function TfpgCommandLineParams.WordPosition(const AN: integer;
-    const AStr: string; ADelims: string): integer;
+function TfpgCommandLineParams.WordPosition(const AN: integer; const AStr: string; ADelims: string): integer;
 var
   lCount: integer;
-  lI: Word;
+  lI: word;
   lSLen: integer;
 begin
-  lCount  := 0;
-  lI      := 1;
-  Result  := 0;
-  lSLen   := length(AStr);
+  lCount := 0;
+  lI     := 1;
+  Result := 0;
+  lSLen  := Length(AStr);
 
   while (lI <= lSLen) and (lCount <> AN) do
   begin
     while (lI <= lSLen) and (CharInStr(ExtractChar(AStr, lI), ADelims)) do
-    begin
       Inc(lI);
-    end;
 
     // if we're not beyond end of S, we're at the start of a word
     if lI <= lSLen then
-    begin
       Inc(lCount);
-    end;
 
     // if not finished, find the end of the current word
     if lCount <> AN then
-    begin
-      while (lI <= lSLen) and not(CharInStr(ExtractChar(AStr, lI), ADelims)) do
-      begin
-        Inc(lI);
-      end;
-    end
+      while (lI <= lSLen) and not (CharInStr(ExtractChar(AStr, lI), ADelims)) do
+        Inc(lI)
     else
-    begin
       Result := lI;
-    end;
   end;
 end;
 
-function TfpgCommandLineParams.ExtractChar(const AValue: string;
-    const APos: integer): char;
+function TfpgCommandLineParams.ExtractChar(const AValue: string; const APos: integer): char;
 var
   lResult: string;
 begin
-  if APos > length(AValue) then
+  if APos > Length(AValue) then
   begin
-    result := ' ';
-    exit;
-   end;
+    Result := ' ';
+    Exit;
+  end;
   lResult := copy(AValue, APos, 1);
-  result := lResult[1];
+  Result  := lResult[1];
 end;
 
-function TfpgCommandLineParams.StripLeadingDelims(const AStrToProcess: string;
-    ADelims: string): string;
+function TfpgCommandLineParams.StripLeadingDelims(const AStrToProcess: string; ADelims: string): string;
 var
   i: integer;
   lCharCurrent: char;
 begin
-  result := AStrToProcess;
+  Result := AStrToProcess;
   // Loop through each char in the string
-  for i := 1 to length(AStrToProcess) do
+  for i := 1 to Length(AStrToProcess) do
   begin
     // Extract the current character
     lCharCurrent := ExtractChar(AStrToProcess, i);
@@ -331,32 +317,26 @@ begin
     // Is this character a NON word delim?, then we have found the body of the string.
     if not CharInStr(lCharCurrent, ADelims) then
     begin
-      result := copy(AStrToProcess, i,
-                      length(AStrToProcess) - i + 1);
-      exit; //==>
-    // The current char is a word delim, but we are at the end of the string -
-    // so no words
+      Result := copy(AStrToProcess, i,
+        Length(AStrToProcess) - i + 1);
+      Exit; //==>
+      // The current char is a word delim, but we are at the end of the string -
+      // so no words
     end
-    else
-    begin
-      if i = length(AStrToProcess) then
-      begin
-        result := '';
-      end;
-    end;
+    else if i = Length(AStrToProcess) then
+      Result := '';
   end;
 end;
 
 // Strip any trailing ADelims
-function TfpgCommandLineParams.StripTrailingDelims(const AStrToProcess: string;
-    ADelims: string): string;
+function TfpgCommandLineParams.StripTrailingDelims(const AStrToProcess: string; ADelims: string): string;
 var
   i: integer;
   lCharCurrent: char;
 begin
-  result := AStrToProcess;
+  Result := AStrToProcess;
   // Loop through each char in the string
-  for i := length(AStrToProcess) downto 1 do
+  for i := Length(AStrToProcess) downto 1 do
   begin
     // Extract the current character
     lCharCurrent := ExtractChar(AStrToProcess, i);
@@ -364,24 +344,18 @@ begin
     // Is this character a NON word delim?, then we have found the body of the string.
     if not CharInStr(lCharCurrent, ADelims) then
     begin
-      result := copy(AStrToProcess, 1, i);
-      exit; //==>
-    // The current char is a word delim, but we are at the beginning of the string -
-    // so no words
+      Result := copy(AStrToProcess, 1, i);
+      Exit; //==>
+      // The current char is a word delim, but we are at the beginning of the string -
+      // so no words
     end
-    else
-    begin
-      if i = length(AStrToProcess) then
-      begin
-        result := '';
-      end;
-    end;
+    else if i = Length(AStrToProcess) then
+      Result := '';
   end;
 end;
 
 // Given a set of word delimiters, return number of words in S
-function TfpgCommandLineParams.WordCount(const AStrToProcess: string;
-    ADelims: string): integer;
+function TfpgCommandLineParams.WordCount(const AStrToProcess: string; ADelims: string): integer;
 var
   i: integer;
   lCharLast: char;
@@ -395,7 +369,7 @@ begin
   // If lStrToProcess is empty, then there are no words
   if lStrToProcess = '' then
   begin
-    result := 0;
+    Result := 0;
     Exit; //==>
   end;
 
@@ -403,18 +377,16 @@ begin
   // Every wordDelim we find equals another word:
   // 0 word delim := 1 word
   // 1 word delim := 2 words...
-  result := 1;
+  Result := 1;
 
   // lCharLast is used to check for more than 1 wordDelim together
   lCharLast := #0;
 
-  for i := 1 to length(lStrToProcess) do
+  for i := 1 to Length(lStrToProcess) do
   begin
     lCharCurrent := ExtractChar(lStrToProcess, i);
-    if CharInStr(lCharCurrent, ADelims) and not(CharInStr(lCharLast, ADelims)) then
-    begin
-      inc(result);
-    end;
+    if CharInStr(lCharCurrent, ADelims) and not (CharInStr(lCharLast, ADelims)) then
+      Inc(Result);
     lCharLast := lCharCurrent;
   end;
 end;
