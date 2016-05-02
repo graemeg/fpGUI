@@ -1,4 +1,4 @@
-  OS/2 2.0 Information Presentation Facility (IPF) Data Format - version 2
+  OS/2 2.0 Information Presentation Facility (IPF) Data Format - version 5
   ------------------------------------------------------------------------
 
   *** introduction to version 1 ***
@@ -520,7 +520,7 @@
   **** The extended data block ****
 
       Not yet decoded.  This block has a size of 64 bytes and contains various
-      pointers to font names, names of externel databases etc.
+      pointers to font names, names of external databases etc.
 
 
   **** The full text search table ****
