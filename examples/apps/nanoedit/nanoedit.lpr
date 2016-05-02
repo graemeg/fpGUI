@@ -4,7 +4,12 @@ program nanoedit;
 {$ifdef mswindows} {$apptype gui} {$endif}
 
 uses
-  Classes, fpg_main, mainfrm, simpleipc;
+  Classes,
+  SysUtils,
+  fpg_main,
+  fpg_cmdlineparams,
+  mainfrm,
+  simpleipc;
 
 function AnotherInstance: Boolean;
 var
@@ -49,9 +54,21 @@ begin
   end;
 end;
 
+var
+  cmd: ICmdLineParams;
 begin
-  if not AnotherInstance then
-    MainProc;
+  if Supports(fpgApplication, ICmdLineParams, cmd) then
+  begin
+    if cmd.HasOption('n', 'newinstance') then
+      MainProc
+    else if not AnotherInstance then
+      MainProc;
+  end
+  else
+  begin
+    if not AnotherInstance then
+      MainProc;
+  end;
 end.
 
 

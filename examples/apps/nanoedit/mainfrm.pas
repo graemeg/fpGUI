@@ -29,6 +29,8 @@ type
     FFindOptions: TfpgFindOptions;
     FIsForward: boolean;
     FIPCServer: TSimpleIPCServer;
+    { don't use an existing instance of NanoEdit, and don't use IPC at all. }
+    FNewInstance: boolean;
     procedure   FormCreate(Sender: TObject);
     procedure   FormShow(Sender: TObject);
     procedure   miNewClick(Sender: TObject);
@@ -69,29 +71,59 @@ type
 implementation
 
 uses
-  elastictabstops,
+//  elastictabstops,
   fpg_dialogs,
   fpg_utils,
+  fpg_cmdlineparams,
   frm_find,
   base64;
 
+
+const
+  cShortOpts = 'n';
+  cDefaultLongOpts: array[1..1] of string = ('newinstance');
+
 {$I images.inc}
+
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.FormCreate(Sender: TObject);
+var
+  CmdIntf: ICmdLineParams;
 begin
-  StartIPCServer;
+  if Supports(fpgApplication, ICmdLineParams, CmdIntf) then
+    FNewInstance := CmdIntf.HasOption('n', 'newinstance');
+  if not FNewInstance then
+    StartIPCServer;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 var
   s: string;
+  i: integer;
+  CmdIntf: ICmdLineParams;
 begin
-  if ParamCount > 0 then
+  Supports(fpgApplication, ICmdLineParams, CmdIntf);
+  if CmdIntf.ParamCount > 0 then
   begin
-//    ShowMessage(ParamStr(1));
-    s := ParamStr(1);
+    for i := 1 to CmdIntf.ParamCount do
+    begin
+      writeln('Found: ', CmdIntf.Params[i]);
+      if (CmdIntf.Params[i] <> '--newinstance') and (CmdIntf.Params[i] <> '-n') then
+      begin
+        s := CmdIntf.Params[i];
+        writeln('using: ', s);
+        Break;
+      end;
+    end;
+
+    if s = '' then
+    begin
+      miNewClick(nil);
+      Exit;
+    end;
+
     if Pos('file://', s) > 0 then
       s := StringReplace(s, 'file://', '', []);
     LoadFile(s);
