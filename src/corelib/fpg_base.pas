@@ -35,7 +35,8 @@ uses
   syncobjs, // TCriticalSection usage
   variants,
   fgl,
-  contnrs;
+  contnrs,
+  fpg_cmdlineparams;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -469,11 +470,10 @@ type
     property    HelpType: THelpType read FHelpType write FHelpType default htKeyword;
   end;
 
+
   TfpgWidgetDirtyFlag = (wdfPosition, wdfSize, wdfConstraints, wdfMouseCursor);
   TfpgWidgetDirtyFlags = set of TfpgWidgetDirtyFlag;
 
-
-  { TfpgWidgetBase }
 
   TfpgWidgetBase = class(TfpgComponent)
   private
@@ -662,17 +662,21 @@ type
   end;
 
 
-  TfpgApplicationBase = class(TfpgComponent)
+  TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
+  private
   private
     FMainForm: TfpgWidgetBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
     FHelpKey: word;
     FHelpFile: TfpgString;
+    FCmdLineParams: TfpgCmdLineParams;
     function    GetForm(Index: Integer): TfpgWidgetBase;
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWidgetBase;
     function    GetHelpFile: TfpgString;
+    function    GetCmdLineParamsInterface: ICmdLineParams;
+    property    CmdLineParams: ICmdLineParams read GetCmdLineParamsInterface implements ICmdLineParams;
   protected
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
@@ -3389,6 +3393,13 @@ begin
   //end;
 end;
 
+function TfpgApplicationBase.GetCmdLineParamsInterface: ICmdLineParams;
+begin
+  if not Assigned(FCmdLineParams) then
+    FCmdLineParams := TfpgCmdLineParams.Create;
+  Result := FCmdLineParams; // compiler does an implicit: FCmdLineParams as ICmdLineParams
+end;
+
 function TfpgApplicationBase.GetHelpViewer: TfpgString;
 var
   ext: TfpgString;
@@ -3411,6 +3422,7 @@ end;
 destructor TfpgApplicationBase.Destroy;
 begin
   FCritSect.Free;
+  FCmdLineParams.Free;
   inherited Destroy;
 end;
 
