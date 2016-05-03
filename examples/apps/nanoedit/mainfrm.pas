@@ -19,8 +19,6 @@ type
     bevStatusBar: TfpgBevel;
     lblStatusText: TfpgLabel;
     pcEditor: TfpgPageControl;
-    TabSheet1: TfpgTabSheet;
-    memEditor: TfpgTextEdit;
     mnuFile: TfpgPopupMenu;
     mnuEdit: TfpgPopupMenu;
     mnuSearch: TfpgPopupMenu;
@@ -97,6 +95,12 @@ begin
     if Pos('file://', s) > 0 then
       s := StringReplace(s, 'file://', '', []);
     LoadFile(s);
+    ActiveEditor.SetFocus;
+  end
+  else
+  begin
+    if pcEditor.PageCount = 0 then
+      miNewClick(nil);
   end;
 end;
 
@@ -259,7 +263,7 @@ begin
       ShowMessage(e.Message);
   end;
 }
-  memEditor.HasOwnWindow:=not memEditor.HasOwnWindow;
+//  memEditor.HasOwnWindow:=not memEditor.HasOwnWindow;
 end;
 
 procedure TMainForm.memEditorChanged(Sender: TObject);
@@ -398,28 +402,6 @@ begin
     ShowHint := True;
     TabOrder := 9;
     Options := Options + [to_PMenuClose];
-  end;
-
-  TabSheet1 := TfpgTabSheet.Create(pcEditor);
-  with TabSheet1 do
-  begin
-    Name := 'TabSheet1';
-    SetPosition(3, 24, 711, 305);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'Untitled';
-    ShowHint := True;
-  end;
-
-  memEditor := TfpgTextEdit.Create(TabSheet1);
-  with memEditor do
-  begin
-    Name := 'memEditor';
-    SetPosition(0, 0, 710, 304);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#edit2';
-    GutterVisible := True;
-    RightEdge := True;
-    DropHandler := TfpgDropEventHandler.Create(@Bevel1DragEnter, @Bevel1DragLeave, @PanelDragDrop, nil);
   end;
 
   mnuFile := TfpgPopupMenu.Create(self);
@@ -631,8 +613,7 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  fpgImages.AddBMP(
-    'mainicon', @nanoedit_icon, sizeof(nanoedit_icon));
+  fpgImages.AddBMP('mainicon', @nanoedit_icon, sizeof(nanoedit_icon));
 end;
 
 
