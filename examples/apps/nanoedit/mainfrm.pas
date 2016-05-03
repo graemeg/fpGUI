@@ -103,6 +103,7 @@ end;
 procedure TMainForm.miNewClick(Sender: TObject);
 begin
   OpenEditorPage('Untitled');
+  ActiveEditor.SetFocus;
 //  memEditor.Clear;
 //  UpdateStatus('New file completed.');
 end;
