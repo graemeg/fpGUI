@@ -15,15 +15,17 @@ type
   private
     {@VFD_HEAD_BEGIN: MainFrom}
     menu: TfpgMenuBar;
-    mnuFile: TfpgPopupMenu;
-    mnuEdit: TfpgPopupMenu;
-    mnuSearch: TfpgPopupMenu;
     btnGO: TfpgButton;
     bevStatusBar: TfpgBevel;
     lblStatusText: TfpgLabel;
     pcEditor: TfpgPageControl;
     TabSheet1: TfpgTabSheet;
     memEditor: TfpgTextEdit;
+    mnuFile: TfpgPopupMenu;
+    mnuEdit: TfpgPopupMenu;
+    mnuSearch: TfpgPopupMenu;
+    mnuConvert: TfpgPopupMenu;
+    mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainFrom}
     FTextToFind: TfpgString;
     FFindOptions: TfpgFindOptions;
@@ -42,6 +44,8 @@ type
     procedure   miCutClicked(Sender: TObject);
     procedure   miCopyClicked(Sender: TObject);
     procedure   miPasteClicked(Sender: TObject);
+    procedure   miConvertB64Encode(Sender: TObject);
+    procedure   miConvertB64Decode(Sender: TObject);
     procedure   btnGOClick(Sender: TObject);
     procedure   memEditorChanged(Sender: TObject);
     procedure   UpdateStatus(const AMessage: TfpgString);
@@ -70,7 +74,8 @@ uses
   elastictabstops,
   fpg_dialogs,
   fpg_utils,
-  frm_find;
+  frm_find,
+  base64;
 
 {$I images.inc}
 
@@ -214,9 +219,31 @@ begin
   ActiveEditor.PasteFromClipboard;
 end;
 
-procedure TMainForm.btnGOClick(Sender: TObject);
+procedure TMainForm.miConvertB64Encode(Sender: TObject);
 var
-  ftr: TElasticTabstopsDocFilter;
+  s: TfpgString;
+begin
+  s := ActiveEditor.GetSelectedText;
+  try
+    EncodeStringBase64(s);
+  except
+    on E: Exception do
+      ShowMessage(E.Message);
+  end;
+  ActiveEditor.DeleteSelection;
+  ActiveEditor.InsertTextAtPos(s, ActiveEditor.CaretPos_H, ActiveEditor.CaretPos_V);
+end;
+
+procedure TMainForm.miConvertB64Decode(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  DecodeStringBase64(s);
+end;
+
+procedure TMainForm.btnGOClick(Sender: TObject);
+//var
+//  ftr: TElasticTabstopsDocFilter;
 begin
 {
   ftr := TElasticTabstopsDocFilter.Create(memEditor);
@@ -235,8 +262,8 @@ begin
 end;
 
 procedure TMainForm.memEditorChanged(Sender: TObject);
-var
-  ftr: TElasticTabstopsDocFilter;
+//var
+//  ftr: TElasticTabstopsDocFilter;
 begin
 {
   ftr := TElasticTabstopsDocFilter.Create(memEditor);
@@ -324,41 +351,6 @@ begin
     Anchors := [anLeft,anRight,anTop];
   end;
 
-  mnuFile := TfpgPopupMenu.Create(self);
-  with mnuFile do
-  begin
-    Name := 'mnuFile';
-    SetPosition(340, 6, 120, 20);
-    AddMenuItem('New', 'Ctrl+N', @miNewClick);
-    AddMenuItem('Open...', 'Ctrl+O', @miOpenClick);
-    AddMenuItem('Save', 'Ctrl+S', @miSaveClick);
-    AddMenuItem('Save as...', 'Ctrl+Shift+S', @miSaveAsClick);
-    AddMenuItem('-', '', nil);
-    AddMenuItem('Quit', 'Ctrl+Q', @miQuitClick);
-  end;
-
-  mnuEdit := TfpgPopupMenu.Create(self);
-  with mnuEdit do
-  begin
-    Name := 'mnuEdit';
-    SetPosition(340, 44, 120, 20);
-    AddMenuItem('Cut', 'Ctrl+X', @miCutClicked);
-    AddMenuItem('Copy', 'Ctrl+C', @miCopyClicked);
-    AddMenuItem('Paste', 'Ctrl+V', @miPasteClicked);
-  end;
-
-  mnuSearch := TfpgPopupMenu.Create(self);
-  with mnuSearch do
-  begin
-    Name := 'mnuSearch';
-    SetPosition(340, 25, 120, 20);
-    AddMenuItem('Find...', 'Ctrl+F', @miFindClick);
-    AddMenuItem('Find next', 'F3', @miFindNextClick);
-    AddMenuItem('Replace', 'Ctrl+R', nil).Enabled := False;
-    AddMenuitem('-', '', nil);
-    AddMenuItem('Go to line...', 'Ctrl+G', @miGoToLineClick);
-  end;
-
   btnGO := TfpgButton.Create(self);
   with btnGO do
   begin
@@ -429,11 +421,66 @@ begin
     DropHandler := TfpgDropEventHandler.Create(@Bevel1DragEnter, @Bevel1DragLeave, @PanelDragDrop, nil);
   end;
 
+  mnuFile := TfpgPopupMenu.Create(self);
+  with mnuFile do
+  begin
+    Name := 'mnuFile';
+    SetPosition(348, 6, 120, 20);
+    AddMenuItem('New', 'Ctrl+N', @miNewClick);
+    AddMenuItem('Open...', 'Ctrl+O', @miOpenClick);
+    AddMenuItem('Save', 'Ctrl+S', @miSaveClick);
+    AddMenuItem('Save as...', 'Ctrl+Shift+S', @miSaveAsClick);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Quit', 'Ctrl+Q', @miQuitClick);
+  end;
+
+  mnuEdit := TfpgPopupMenu.Create(self);
+  with mnuEdit do
+  begin
+    Name := 'mnuEdit';
+    SetPosition(348, 25, 120, 20);
+    AddMenuItem('Cut', 'Ctrl+X', @miCutClicked);
+    AddMenuItem('Copy', 'Ctrl+C', @miCopyClicked);
+    AddMenuItem('Paste', 'Ctrl+V', @miPasteClicked);
+  end;
+
+  mnuSearch := TfpgPopupMenu.Create(self);
+  with mnuSearch do
+  begin
+    Name := 'mnuSearch';
+    SetPosition(348, 44, 120, 20);
+    AddMenuItem('Find...', 'Ctrl+F', @miFindClick);
+    AddMenuItem('Find next', 'F3', @miFindNextClick);
+    AddMenuItem('Replace', 'Ctrl+R', nil).Enabled := False;
+    AddMenuitem('-', '', nil);
+    AddMenuItem('Go to line...', 'Ctrl+G', @miGoToLineClick);
+  end;
+
+  mnuConvert := TfpgPopupMenu.Create(self);
+  with mnuConvert do
+  begin
+    Name := 'mnuConvert';
+    SetPosition(348, 63, 120, 20);
+    AddMenuItem('Base64 Encode', '', @miConvertB64Encode);
+    AddMenuItem('Base64 Decode', '', @miConvertB64Decode);
+  end;
+
+  mnuHelp := TfpgPopupMenu.Create(self);
+  with mnuHelp do
+  begin
+    Name := 'mnuHelp';
+    SetPosition(348, 82, 120, 20);
+    AddMenuItem('About fpGUI Toolkit...', '', nil);
+    AddMenuItem('Product Information...', '', nil);
+  end;
+
   {@VFD_BODY_END: MainFrom}
 
   menu.AddMenuItem('&File', nil).SubMenu := mnuFile;
   menu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
   menu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
+  menu.AddMenuItem('&Convert', nil).SubMenu := mnuConvert;
+  menu.AddMenuItem('&Help', nil).SubMenu := mnuHelp;
 end;
 
 procedure TMainForm.Bevel1DragEnter(Sender: TfpgDrop);
