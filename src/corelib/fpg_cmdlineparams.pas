@@ -30,6 +30,7 @@ const
   ctiCommandLineParamPrefix = '-';
 
 type
+  TStringArray = Array of string;
 
   TfpgCommandLineParams = class(TObject)
   private
@@ -60,9 +61,11 @@ type
   ICmdLineParams = interface
     ['{EDF51E67-1119-11E6-B131-C86000E37EB0}']
     { main interaction functions }
-    function    FindOptionIndex(const S: string; var Longopt: Boolean): integer;
+    function    GetOptionAtIndex(AIndex: Integer; IsLong: Boolean): string;
+    function    FindOptionIndex(const S: string; var LongOpt: Boolean; StartAt: Integer = -1): Integer;
     function    GetOptionValue(const S: string): string;
     function    GetOptionValue(const C: char; const S: string): string;
+    function    GetOptionValues(const C: Char; const S: string): TStringArray;
     function    HasOption(const S: string): Boolean;
     function    HasOption(const C: char; const S: string): Boolean;
     function    CheckOptions(const ShortOptions: string; const Longopts: TStrings; Opts, NonOpts: TStrings; AllErrors: Boolean = False): string;
@@ -70,6 +73,8 @@ type
     function    CheckOptions(const ShortOptions: string; const Longopts: TStrings; AllErrors: Boolean = False): string;
     function    CheckOptions(const ShortOptions: string; const LongOpts: array of string; AllErrors: Boolean = False): string;
     function    CheckOptions(const ShortOptions: string; const LongOpts: string; AllErrors: Boolean = False): string;
+    function    GetNonOptions(const ShortOptions: string; const LongOpts: Array of string): TStringArray;
+    procedure   GetNonOptions(const ShortOptions: string; const LongOpts: Array of string; NonOptions: TStrings);
     { property getters and setters }
     function    GetCaseSensitiveOptions: Boolean;
     function    GetOptionChar: char;
@@ -90,9 +95,11 @@ type
     FOptionChar: char;
     FCaseSensitiveOptions: Boolean;
     { main interaction functions }
-    function    FindOptionIndex(const S: string; var Longopt: Boolean): integer;
+    function    GetOptionAtIndex(AIndex: Integer; IsLong: Boolean): string;
+    function    FindOptionIndex(const S: string; var LongOpt: Boolean; StartAt: Integer = -1): Integer;
     function    GetOptionValue(const S: string): string;
     function    GetOptionValue(const C: char; const S: string): string;
+    function    GetOptionValues(const C: Char; const S: string): TStringArray;
     function    HasOption(const S: string): Boolean;
     function    HasOption(const C: char; const S: string): Boolean;
     function    CheckOptions(const ShortOptions: string; const Longopts: TStrings; Opts, NonOpts: TStrings; AllErrors: Boolean = False): string;
@@ -100,6 +107,8 @@ type
     function    CheckOptions(const ShortOptions: string; const Longopts: TStrings; AllErrors: Boolean = False): string;
     function    CheckOptions(const ShortOptions: string; const LongOpts: array of string; AllErrors: Boolean = False): string;
     function    CheckOptions(const ShortOptions: string; const LongOpts: string; AllErrors: Boolean = False): string;
+    function    GetNonOptions(const ShortOptions: string; const LongOpts: Array of string): TStringArray;
+    procedure   GetNonOptions(const ShortOptions: string; const LongOpts: Array of string; NonOptions: TStrings);
     { property getters and setters }
     function    GetCaseSensitiveOptions: Boolean;
     function    GetOptionChar: char;
@@ -461,7 +470,32 @@ end;
 
 { TfpgCmdLineParams }
 
-function TfpgCmdLineParams.FindOptionIndex(const S: string; var Longopt: Boolean): integer;
+function TfpgCmdLineParams.GetOptionAtIndex(AIndex: Integer; IsLong: Boolean): string;
+var
+  P: Integer;
+  O: String;
+begin
+  Result := '';
+  If (AIndex = -1) then
+    Exit;
+  If IsLong then
+  begin // Long options have form --option=value
+    O := Params[AIndex];
+    P := Pos('=', O);
+    if (P = 0) then
+      P := Length(O);
+    Delete(O, 1, P);
+    Result := O;
+  end
+  else
+  begin // short options have form '-o value'
+    if (AIndex<ParamCount) then
+      if (Copy(Params[AIndex+1], 1, 1) <> '-') then
+        Result := Params[AIndex+1];
+  end;
+end;
+
+function TfpgCmdLineParams.FindOptionIndex(const S: string; var LongOpt: Boolean; StartAt: Integer): Integer;
 var
   SO, O: string;
   I, P: integer;
@@ -471,11 +505,14 @@ begin
   else
     SO := S;
   Result := -1;
-  I := ParamCount;
+  I := StartAt;
+  if (I = -1) then
+    I := ParamCount;
   while (Result = -1) and (I > 0) do
   begin
     O := Params[i];
-    if (Length(O) > 0) and (O[1] = FOptionChar) then
+    // - must be seen as an option value
+    if (Length(O) > 1) and (O[1] = FOptionChar) then
     begin
       Delete(O, 1, 1);
       LongOpt := (Length(O) > 0) and (O[1] = FOptionChar);
@@ -529,6 +566,53 @@ begin
     end;
 end;
 
+function TfpgCmdLineParams.GetOptionValues(const C: Char; const S: string): TStringArray;
+var
+  I, Cnt: Integer;
+  B: Boolean;
+begin
+  SetLength(Result, ParamCount);
+  Cnt := 0;
+  Repeat
+    I := FindOptionIndex(C, B, I);
+    If I<>-1 then
+    begin
+      Inc(Cnt);
+      Dec(I);
+    end;
+  Until I = -1;
+  Repeat
+    I := FindOptionIndex(S, B,I );
+    If I <> -1 then
+    begin
+      Inc(Cnt);
+      Dec(I);
+    end;
+  Until I = -1;
+  SetLength(Result, Cnt);
+  Cnt := 0;
+  I := -1;
+  Repeat
+    I := FindOptionIndex(C, B, I);
+    If (I <> -1) then
+    begin
+      Result[Cnt] := GetOptionAtIndex(I, False);
+      Inc(Cnt);
+      Dec(i);
+    end;
+  Until (I = -1);
+  I := -1;
+  Repeat
+    I := FindOptionIndex(S, B, I);
+    If I <> -1 then
+    begin
+      Result[Cnt] := GetOptionAtIndex(I, True);
+      Inc(Cnt);
+      Dec(i);
+    end;
+  Until (I = -1);
+end;
+
 function TfpgCmdLineParams.HasOption(const S: string): Boolean;
 var
   B: Boolean;
@@ -543,6 +627,11 @@ var
 begin
   B := False;
   Result := (FindOptionIndex(C, B) <> -1) or (FindOptionIndex(S, B) <> -1);
+end;
+
+function TfpgCmdLineParams.CheckOptions(const ShortOptions: string; const Longopts: TStrings; AllErrors: Boolean): string;
+begin
+  Result := CheckOptions(ShortOptions, LongOpts, nil, nil, AllErrors);
 end;
 
 function TfpgCmdLineParams.CheckOptions(const ShortOptions: string; const Longopts: TStrings; Opts, NonOpts: TStrings; AllErrors: Boolean): string;
@@ -596,77 +685,85 @@ begin
       if Assigned(NonOpts) then
         NonOpts.Add(O);
     end
-    else if (Length(O) < 2) then
-      AddToResult(Format(SErrInvalidOption, [i, O]))
     else
-    begin
-      HaveArg := False;
-      OV      := '';
-      // Long option ?
-      if (O[2] = FOptionChar) then
+	  begin
+      if (Length(O) < 2) then
+        AddToResult(Format(SErrInvalidOption, [i, O]))
+      else
       begin
-        Delete(O, 1, 2);
-        J := Pos('=', O);
-        if J <> 0 then
+        HaveArg := False;
+        OV      := '';
+        // Long option ?
+        if (O[2] = FOptionChar) then
         begin
-          HaveArg := True;
-          OV      := O;
-          Delete(OV, 1, J);
-          O       := Copy(O, 1, J - 1);
-        end;
-        // Switch Option
-        if FindLongopt(O) then
-        begin
-          if HaveArg then
-            AddToResult(Format(SErrNoOptionAllowed, [I, O]));
-        end
-        else
-        begin // Required argument
-          if FindLongOpt(O + ':') then
+          Delete(O, 1, 2);
+          J := Pos('=', O);
+          if J <> 0 then
           begin
-            if not HaveArg then
-              AddToResult(Format(SErrOptionNeeded, [I, O]));
-          end
-          else if not FindLongOpt(O + '::') then
-            AddToResult(Format(SErrInvalidOption, [I, O]))// Optional Argument.
-          ;
-        end;
-      end
-      else // Short Option.
-      begin
-        HaveArg := (I < ParamCount) and (Length(ParamStr(I + 1)) > 0) and (ParamStr(I + 1)[1] <> FOptionChar);
-        UsedArg := False;
-        if HaveArg then
-          OV := ParamStr(I + 1);
-        if not CaseSensitiveOptions then
-          O := LowerCase(O);
-        L := Length(O);
-        J := 2;
-        while ((Result = '') or AllErrors) and (J <= L) do
-        begin
-          P := Pos(O[J], ShortOptions);
-          if (P = 0) or (O[j] = ':') then
-            AddToResult(Format(SErrInvalidOption, [I, O[J]]))
-          else if (P < Length(ShortOptions)) and (Shortoptions[P + 1] = ':') then
-          begin
-            // Required argument
-            if ((P + 1) = Length(ShortOptions)) or (Shortoptions[P + 2] <> ':') then
-              if (J < L) or not haveArg then // Must be last in multi-opt !!
-                AddToResult(Format(SErrOptionNeeded, [I, O[J]]));
-            O       := O[j]; // O is added to arguments.
-            UsedArg := True;
+            HaveArg := True;
+            OV      := O;
+            Delete(OV, 1, J);
+            O       := Copy(O, 1, J - 1);
           end;
-          Inc(J);
-        end;
-        if HaveArg and UsedArg then
+          // Switch Option
+          if FindLongopt(O) then
+          begin
+            if HaveArg then
+              AddToResult(Format(SErrNoOptionAllowed, [I, O]));
+          end
+          else
+          begin // Required argument
+            if FindLongOpt(O + ':') then
+            begin
+              if not HaveArg then
+                AddToResult(Format(SErrOptionNeeded, [I, O]));
+            end
+            else
+            begin // Optional Argument.
+              if not FindLongOpt(O + '::') then
+                AddToResult(Format(SErrInvalidOption, [I, O]));
+            end;
+          end;
+        end
+        else // Short Option.
         begin
-          Inc(I); // Skip argument.
-          O := O[Length(O)]; // O is added to arguments !
+          HaveArg := (I < ParamCount) and (Length(ParamStr(I + 1)) > 0) and (ParamStr(I + 1)[1] <> FOptionChar);
+          UsedArg := False;
+          if HaveArg then
+            OV := ParamStr(I + 1);
+          if not CaseSensitiveOptions then
+            O := LowerCase(O);
+          L := Length(O);
+          J := 2;
+          while ((Result = '') or AllErrors) and (J <= L) do
+          begin
+            P := Pos(O[J], ShortOptions);
+            if (P = 0) or (O[j] = ':') then
+              AddToResult(Format(SErrInvalidOption, [I, O[J]]))
+            else
+            begin
+		          if (P < Length(ShortOptions)) and (Shortoptions[P + 1] = ':') then
+			        begin
+                // Required argument
+                if ((P + 1) = Length(ShortOptions)) or (Shortoptions[P + 2] <> ':') then
+                  if (J < L) or not haveArg then // Must be last in multi-opt !!
+                    AddToResult(Format(SErrOptionNeeded, [I, O[J]]));
+                O := O[j]; // O is added to arguments.
+                UsedArg := True;
+              end;
+            end;
+            Inc(J);
+          end;
+          if HaveArg and UsedArg then
+          begin
+            Inc(I); // Skip argument.
+            O := O[Length(O)]; // O is added to arguments !
+          end;
         end;
+        if HaveArg and ((Result = '') or AllErrors) then
+          if Assigned(Opts) then
+            Opts.Add(O + '=' + OV);
       end;
-      if HaveArg and ((Result = '') or AllErrors) then
-        if Assigned(Opts) then
-          Opts.Add(O + '=' + OV);
     end;
     Inc(I);
   end;
@@ -685,11 +782,6 @@ begin
   finally
     L.Free;
   end;
-end;
-
-function TfpgCmdLineParams.CheckOptions(const ShortOptions: string; const Longopts: TStrings; AllErrors: Boolean): string;
-begin
-  Result := CheckOptions(ShortOptions, LongOpts, nil, nil, AllErrors);
 end;
 
 function TfpgCmdLineParams.CheckOptions(const ShortOptions: string; const LongOpts: array of string; AllErrors: Boolean): string;
@@ -733,6 +825,31 @@ begin
   finally
     L.Free;
   end;
+end;
+
+function TfpgCmdLineParams.GetNonOptions(const ShortOptions: string; const LongOpts: array of string): TStringArray;
+var
+  NO : TStrings;
+  I : Integer;
+begin
+  NO := TStringList.Create;
+  try
+    GetNonOptions(ShortOptions, LongOpts, No);
+    SetLength(Result, NO.Count);
+    For I := 0 to NO.Count-1 do
+      Result[I] := NO[i];
+  finally
+    NO.Free;
+  end;
+end;
+
+procedure TfpgCmdLineParams.GetNonOptions(const ShortOptions: string; const LongOpts: array of string; NonOptions: TStrings);
+var
+  S: String;
+begin
+  S := CheckOptions(ShortOptions, LongOpts, Nil, NonOptions, true);
+  if (S <> '') then
+    Raise EListError.Create(S);
 end;
 
 function TfpgCmdLineParams.GetCaseSensitiveOptions: Boolean;
