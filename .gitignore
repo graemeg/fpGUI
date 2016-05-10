@@ -1,3 +1,16 @@
+# ignore all
+*
+
+# un-ignore all with extensions
+!*.*
+
+# un-ignore all directories
+!*/
+
+### Above combination will ignore all files without extensions.
+
+### Now apply the usuage ignored files.
+
 # Lazarus compiler-generated binaries (safe to delete)
 *.exe
 *.dll
@@ -29,20 +42,6 @@ units/
 # Application bundle for Mac OS
 *.app/
 
-# Known application binaries to ignore
-uidesigner.exe
-maximus.exe
-nanoedit.exe
-docview.exe
-dbugsrv.exe
-docedit.exe
-globe.exe
-fpmake.exe
-drawtest.exe
-edittest.exe
-themetest.exe
-threedee.exe
-makefonts.exe
 
 # We should come up with a naming convension for demo binaries to exclude existing
 # and new future ones automatically.
