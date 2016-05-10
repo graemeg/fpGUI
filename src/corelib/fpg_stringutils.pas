@@ -48,7 +48,7 @@ function  Pos8(const SearchForText, SearchInText: string): PtrInt;
 procedure Delete8(var S: string; Index, Size: PtrInt);
 procedure Insert8(const Source: string; var S: string; Index: PtrInt);
 
-function  fpgCharAt(const s: TfpgString; Index: PtrInt): TfpgChar;
+function  fpgCharAt(const s: TfpgString; Index: PtrInt): TfpgChar; inline;
 function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
 function  fpgTrimR(const AString, ATrim: TfpgString; ACaseSensitive: boolean = false): TfpgString;
