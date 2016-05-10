@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -508,7 +508,7 @@ var
   msg: TfpgMessageParams;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  FillMem(@msg, sizeof(msg), 0);  // zero out the record - initialize it
   msg.mouse.x := x;
   msg.mouse.y := y;
   msg.mouse.shiftstate := shiftstate;
@@ -1856,7 +1856,7 @@ var
   ldelta: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  FillMem(@msg, sizeof(msg), 0);  // zero out the record - initialize it
   msg.mouse.x := x;
   msg.mouse.y := y;
   msg.mouse.shiftstate := shiftstate;
@@ -2424,6 +2424,7 @@ end;
 
 function TfpgBaseTextEdit.GetClientRect: TfpgRect;
 begin
+  FillMem(@Result, SizeOf(TfpgRect), 0);
   // widget has a 2 pixel 3D border
   Result.SetRect(2, 2, Width-4, Height-4);
   if Assigned(FVScrollBar) and FVScrollBar.Visible then
@@ -2740,6 +2741,7 @@ procedure TfpgBaseTextEdit.FindText(TextToFind: TfpgString; FindOptions: TfpgFin
 var
   Rep, SrcRes: Boolean;
 begin
+  Rep := False;
   SrcRes := FindReplaceProc(TextToFind, FindOptions, Backward, False, Rep);
   if Assigned(FOnSearchEnd) then
     FOnSearchEnd(Self, SrcRes, False);
