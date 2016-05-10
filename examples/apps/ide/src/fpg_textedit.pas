@@ -554,7 +554,6 @@ end;
 
 type
   TDragHack = class(TfpgDrag);
-  TWidgetHack = class(TfpgWidget);
 
 procedure TfpgBaseTextEdit.DragStartDetected(Sender: TObject);
 var
@@ -589,7 +588,7 @@ begin
   Drag.PreviewSize := fpgSize(Edit.Width, Edit.Height);
 
   // Set the Preview Win Relative to the cursor.
-  TWidgetHack(Self).FDragStartPos := fpgPoint(-5,-5);
+  FDragStartPos := fpgPoint(-5,-5);
 
   case Drag.Execute([daCopy, daMove]) of
     daMove: DeleteSelection;
