@@ -96,7 +96,8 @@ uses
   nvUtilities,
   Math,
   LZWDecompress,
-  fpg_imgfmt_bmp;
+  fpg_imgfmt_bmp,
+  fpg_utils;
 
 const
   BFT_bMAP =$4d62; // 'bM'

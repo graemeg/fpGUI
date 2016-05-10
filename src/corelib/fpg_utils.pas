@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -75,6 +75,8 @@ function fpgGetAppConfigFile(const Global: Boolean; const SubDir: Boolean): Tfpg
 function fpgGetExecutableName: TfpgString;
 function fpgRenameFile(const OldName, NewName: TfpgString): Boolean;
 
+{ resolves the compiler warning about record variables not being initialized. }
+procedure FillMem(Dest: pointer; Size: longint; Data: Byte);
 
 implementation
 
@@ -217,6 +219,11 @@ end;
 function fpgRenameFile(const OldName, NewName: TfpgString): Boolean;
 begin
   Result := RenameFile(fpgToOSEncoding(OldName), fpgToOSEncoding(NewName));
+end;
+
+procedure FillMem(Dest: pointer; Size: longint; Data: Byte);
+begin
+  FillChar( Dest^, Size, Data );
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
