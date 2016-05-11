@@ -2370,7 +2370,6 @@ begin
   Width         := 320;
   Height        := 240;
   FLines        := TStringList.Create;
-  TStringList(FLines).OnChange:=@LinesChanged;
   OnDragStartDetected:=@DragStartDetected;
   CaretPos.x    := 0;
   CaretPos.y    := 0;
@@ -2399,6 +2398,7 @@ begin
 
   // do this first so scrollbars have the highest Z order
   InitMemoObjects;
+  TStringList(FLines).OnChange := @LinesChanged;
 
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
