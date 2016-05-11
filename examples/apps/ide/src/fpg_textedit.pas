@@ -110,6 +110,7 @@ type
       end;
     class procedure ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
   private
+    FAutoIndent: boolean;
     FDefaultDropHandler: TfpgDropEventHandler;
     FFont: TfpgFont;
     FFullRedraw: Boolean;
@@ -212,6 +213,7 @@ type
     procedure   FormatLine(const ALineIndex, X, Y: Integer);
     procedure   DrawCaret(const X, Y: Integer); virtual;
     { -- to be published --}
+    property    AutoIndent: boolean read FAutoIndent write FAutoIndent default True;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    FullRedraw: Boolean read FFullRedraw write FFullRedraw default False;
     property    GutterVisible: Boolean read GetGutterVisible write SetGutterVisible default False;
@@ -282,6 +284,7 @@ uses
   fpg_stringutils,
   fpg_utils,
   math,
+  strutils,
   dbugintf;
 
 
@@ -1904,9 +1907,11 @@ procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TSh
 var
   SLine: TfpgString;
   AddS: TfpgString;
+  lStrLen: PtrInt;
   Y: Integer;
   X: Integer;
   CaretScroll: Boolean;
+  lIndentOffset: integer;
 begin
   {$IFDEF gDEBUG}
   SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress')
@@ -2008,16 +2013,32 @@ begin
             Delete(SLine, CaretPos.X + 1, Length(SLine) - CaretPos.X);
             FLines[CaretPos.Y] := SLine;
           end;
+
+          lIndentOffset := 0;
+          if AutoIndent then
+          begin
+            { find first non whitespace character }
+            lStrLen := UTF8Length(SLine);
+            for x := 1 to lStrLen do
+            begin
+              if AnsiMatchStr(fpgCharAt(SLine, x), [#9, ' ']) then
+                Continue
+              else
+                Break;
+            end;
+            lIndentOffset := x-1;
+          end;
+
           if CaretPos.Y = pred(FLines.Count) then
-            FLines.Add(AddS)
+            FLines.Add(DupeString(' ', lIndentOffset) + AddS)
           else
-            if CaretPos.Y < pred(FLines.Count) then
-              FLines.Insert(CaretPos.Y + 1, AddS)
-            else
-              if CaretPos.Y > FLines.Count then
-                FLines.Add(''); { ??? }
+            FLines.Insert(CaretPos.Y + 1, DupeString(' ', lIndentOffset) + AddS);
+
           CaretPos.Y := CaretPos.Y + 1;
-          CaretPos.X := 0;
+          if AutoIndent then
+            CaretPos.X := lIndentOffset
+          else
+            CaretPos.X := 0;
           CaretScroll:=True;
           FSelection.StartPos := CaretPos;
           consumed := True;
@@ -2385,6 +2406,7 @@ begin
   FRightEdge    := False;
   FRightEdgeCol := 80;
   FLineChanged := -1;
+  FAutoIndent := True;
 
   fmousewheelfrequmin := 1;
   fmousewheelfrequmax := 100;
