@@ -73,6 +73,8 @@ type
     procedure   miPasteClicked(Sender: TObject);
     procedure   miConvertB64Encode(Sender: TObject);
     procedure   miConvertB64Decode(Sender: TObject);
+    procedure   HelpAboutFPGui(Sender: TObject);
+    procedure   HelpProductInfo(Sender: TObject);
     procedure   btnGOClick(Sender: TObject);
     procedure   memEditorChanged(Sender: TObject);
     procedure   UpdateStatus(const AMessage: TfpgString);
@@ -305,6 +307,19 @@ begin
   DecodeStringBase64(s);
 end;
 
+procedure TMainForm.HelpAboutFPGui(Sender: TObject);
+begin
+  TfpgMessageDialog.AboutFPGUI();
+end;
+
+procedure TMainForm.HelpProductInfo(Sender: TObject);
+begin
+  TfpgMessageDialog.Information('Product Information',
+    'fpGUI''s nanoedit text editor' + LineEnding + LineEnding +
+    Format('Copyright (c) 2013-%d, Graeme Geldenhuys', [CurrentYear]) + LineEnding +
+    'Nanoedit is distributed under the Simplified BSD License');
+end;
+
 procedure TMainForm.btnGOClick(Sender: TObject);
 //var
 //  ftr: TElasticTabstopsDocFilter;
@@ -512,8 +527,8 @@ begin
   begin
     Name := 'mnuHelp';
     SetPosition(348, 82, 120, 20);
-    AddMenuItem('About fpGUI Toolkit...', '', nil);
-    AddMenuItem('Product Information...', '', nil);
+    AddMenuItem('About fpGUI Toolkit...', '', @HelpAboutFPGui);
+    AddMenuItem('Product Information...', '', @HelpProductInfo);
   end;
 
   {@VFD_BODY_END: MainFrom}
