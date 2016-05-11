@@ -51,6 +51,7 @@ type
     mnuSearch: TfpgPopupMenu;
     mnuConvert: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
+    mnuOptions: TfpgPopupMenu;
     {@VFD_HEAD_END: MainFrom}
     FTextToFind: TfpgString;
     FFindOptions: TfpgFindOptions;
@@ -75,6 +76,8 @@ type
     procedure   miConvertB64Decode(Sender: TObject);
     procedure   HelpAboutFPGui(Sender: TObject);
     procedure   HelpProductInfo(Sender: TObject);
+    procedure   miOptionsAutoIndentClicked(Sender: TObject);
+    procedure   miOptionsLineNumbersClicked(Sender: TObject);
     procedure   btnGOClick(Sender: TObject);
     procedure   memEditorChanged(Sender: TObject);
     procedure   UpdateStatus(const AMessage: TfpgString);
@@ -320,6 +323,32 @@ begin
     'Nanoedit is distributed under the Simplified BSD License');
 end;
 
+procedure TMainForm.miOptionsAutoIndentClicked(Sender: TObject);
+var
+  i: integer;
+  editor: TfpgTextEdit;
+begin
+  TfpgMenuItem(Sender).Checked := not TfpgMenuItem(Sender).Checked;
+  for i := 0 to pcEditor.PageCount-1 do
+  begin
+    editor := TfpgTextEdit(pcEditor.Pages[i].Components[0]);
+    editor.AutoIndent := TfpgMenuItem(Sender).Checked;
+  end;
+end;
+
+procedure TMainForm.miOptionsLineNumbersClicked(Sender: TObject);
+var
+  i: integer;
+  editor: TfpgTextEdit;
+begin
+  TfpgMenuItem(Sender).Checked := not TfpgMenuItem(Sender).Checked;
+  for i := 0 to pcEditor.PageCount-1 do
+  begin
+    editor := TfpgTextEdit(pcEditor.Pages[i].Components[0]);
+    editor.GutterVisible := TfpgMenuItem(Sender).Checked;
+  end;
+end;
+
 procedure TMainForm.btnGOClick(Sender: TObject);
 //var
 //  ftr: TElasticTabstopsDocFilter;
@@ -520,6 +549,7 @@ begin
     SetPosition(348, 63, 120, 20);
     AddMenuItem('Base64 Encode', '', @miConvertB64Encode);
     AddMenuItem('Base64 Decode', '', @miConvertB64Decode);
+    AddMenuItem('Typography', '', nil).Enabled := False;
   end;
 
   mnuHelp := TfpgPopupMenu.Create(self);
@@ -531,12 +561,22 @@ begin
     AddMenuItem('Product Information...', '', @HelpProductInfo);
   end;
 
+  mnuOptions := TfpgPopupMenu.Create(self);
+  with mnuOptions do
+  begin
+    Name := 'mnuOptions';
+    SetPosition(348, 100, 120, 20);
+    AddMenuItem('Auto Indent', '', @miOptionsAutoIndentClicked).Checked := True;
+    AddMenuItem('Line Numbers', '', @miOptionsLineNumbersClicked).Checked := True;
+  end;
+
   {@VFD_BODY_END: MainFrom}
 
   menu.AddMenuItem('&File', nil).SubMenu := mnuFile;
   menu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
   menu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
   menu.AddMenuItem('&Convert', nil).SubMenu := mnuConvert;
+  menu.AddMenuItem('&Options', nil).SubMenu := mnuOptions;
   menu.AddMenuItem('&Help', nil).SubMenu := mnuHelp;
 end;
 
