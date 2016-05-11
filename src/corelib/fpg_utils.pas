@@ -323,7 +323,7 @@ begin
   Result := (AData and (1 shl ABit) <> 0);
 end;
 
-function fpgGetBit(const AData: Byte; ABit: Byte): boolean; inline;
+function fpgGetBit(const AData: Byte; ABit: byte): boolean;
 begin
   Result := (AData and (1 shl ABit) <> 0);
 end;
