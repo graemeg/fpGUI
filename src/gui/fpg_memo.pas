@@ -1636,9 +1636,11 @@ begin
                 DeleteSelection
               else} if FCursorPos < UTF8Length(ls) then
               begin
-                UTF8Insert(#9, ls, FCursorPos);
+                UTF8Insert(#9, ls, FCursorPos+1);
                 SetLineText(FCursorLine, ls);
-              end;
+              end
+              else if FCursorPos = UTF8Length(ls) then
+                SetLineText(FCursorLine, ls + #9);
 {
               else if FCursorLine < LineCount then
               begin
