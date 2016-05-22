@@ -977,7 +977,7 @@ uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
-  fpg_window,// needed f0r SetParameters
+  fpg_window,// needed for SetParameters
   fpg_form,  // needed for fpgApplication.CreateForms()
   fpg_widget,// needed for ActiveWidget
   typinfo,
