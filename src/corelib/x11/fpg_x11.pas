@@ -1533,6 +1533,8 @@ begin
     Exit; //==>
 
   Result := TStringList.Create;
+  Result.Sorted := True;
+  Result.Duplicates := dupIgnore;
 
   GetMem(pc, 128);
   n := 0;
@@ -1547,8 +1549,6 @@ begin
   end;
   FreeMem(pc);
   FcFontSetDestroy(pfs);
-
-  Result.Sort;
 end;
 
 constructor TfpgX11Application.Create(const AParams: string);
