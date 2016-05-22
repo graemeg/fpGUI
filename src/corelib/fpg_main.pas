@@ -1095,18 +1095,18 @@ begin
   Writeln(stdout, ' Stack trace:');
   Writeln(stdout, 'An unhandled exception occurred at $', HexStr(Ptrint(ExceptAddr), sizeof(PtrInt)*2),' :');
   if ExceptObject is Exception then
-   begin
-     lMessage := Exception(ExceptObject).ClassName + ' : ' + Exception(ExceptObject).Message;
-     Writeln(stdout, lMessage);
-   end
+  begin
+    lMessage := Exception(ExceptObject).ClassName + ' : ' + Exception(ExceptObject).Message;
+    Writeln(stdout, lMessage);
+  end
   else
-   Writeln(stdout, 'Exception object ', ExceptObject.ClassName, ' is not of class Exception.');
+    Writeln(stdout, 'Exception object ', ExceptObject.ClassName, ' is not of class Exception.');
   Writeln(stdout, BackTraceStrFunc(ExceptAddr));
   if (ExceptFrameCount > 0) then
-    begin
-      for i := 0 to ExceptFrameCount-1 do
-        Writeln(stdout, BackTraceStrFunc(ExceptFrames[i]));
-    end;
+  begin
+    for i := 0 to ExceptFrameCount-1 do
+      Writeln(stdout, BackTraceStrFunc(ExceptFrames[i]));
+  end;
   Writeln(stdout, '');
 end;
 
