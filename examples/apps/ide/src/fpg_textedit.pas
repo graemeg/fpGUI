@@ -460,7 +460,7 @@ begin
 
     if (FLineGranularity = 1)
     or (lNum = 1)
-    or (FOwner.CaretPos.Y = Pred(lnum))
+    or (FOwner.CaretPos.Y = Pred(lNum))
     or ((lNum) mod FLineGranularity = 0)
     then
     begin
@@ -472,6 +472,10 @@ begin
       S := '.';
 
     r.Top := i * h;
+    if (FOwner.CaretPos.Y = Pred(lNum)) then
+      Canvas.TextColor := clRed
+    else
+      Canvas.TextColor := clBlack;
     Canvas.DrawText(r, S, ltxtflags);
   end;
 end;
