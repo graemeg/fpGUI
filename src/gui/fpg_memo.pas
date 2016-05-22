@@ -77,6 +77,7 @@ type
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
+    procedure   DoOnChange;
     procedure   AdjustCursor;
     function    LineCount: integer;
     function    GetLineText(linenum: integer): string;
@@ -877,6 +878,12 @@ begin
   fpgClipboard.Text := SelectionText;
 end;
 
+procedure TfpgMemo.DoOnChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self);
+end;
+
 procedure TfpgMemo.SetSelectionText(const AText: TfpgString);
 var
   s: TfpgString;
@@ -1227,7 +1234,7 @@ begin
   if FFirstLine <> position then
   begin
     FFirstLine := position;
-    repaint;
+    Repaint;
   end;
 end;
 
@@ -1411,8 +1418,7 @@ begin
     end;
 
     if prevval <> Text then
-      if Assigned(FOnChange) then
-        FOnChange(self);
+      DoOnChange;
   end; { if not ReadOnly }
 
   if consumed then
@@ -1660,8 +1666,7 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
-    if Assigned(FOnChange) then
-      FOnChange(self);
+    DoOnChange;
 
   if Consumed then
     RePaint;
