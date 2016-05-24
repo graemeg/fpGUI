@@ -34,6 +34,7 @@ uses
  agg_conv_stroke ,
  agg_conv_transform ,
  agg_conv_curve ,
+ agg_conv_dash ,
  agg_rendering_buffer ,
  agg_renderer_base ,
  agg_renderer_scanline ,
@@ -190,6 +191,13 @@ type
   RasterFontCache ,
   VectorFontCache );
 
+ LineStyle = (
+  stySolid,
+  styDash,
+  styDot,
+  styDashDot,
+  styDashDotDot );
+
  Transformations_ptr = ^Transformations_;
  Transformations_ = record
    affineMatrix : array[0..5 ] of double;
@@ -288,6 +296,7 @@ type
 
    m_convCurve  : conv_curve;
    m_convStroke : conv_stroke;
+   m_convDash: conv_dash;
 
    m_pathTransform ,m_strokeTransform : conv_transform;
 
@@ -393,6 +402,8 @@ type
 
    procedure fillEvenOdd(evenOddFlag : boolean ); overload;
    function  fillEvenOdd : boolean; overload;
+
+   procedure SetLineStyle(awidth: double; astyle: LineStyle);
 
   // Transformations
    function  transformations : Transformations_; overload;
@@ -792,11 +803,15 @@ begin
  m_path.Construct;
  m_transform.Construct;
 
- m_convCurve.Construct (@m_path );
- m_convStroke.Construct(@m_convCurve );
+ m_convCurve.Construct(@m_path);
+ m_convDash.Construct(@m_convCurve);
+ m_convStroke.Construct(@m_convDash);
 
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
+
+ m_convDash.remove_all_dashes;
+ m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
 
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
@@ -830,8 +845,9 @@ begin
  m_imageFilterLut.Destruct;
  m_path.Destruct;
 
- m_convCurve.Destruct;
  m_convStroke.Destruct;
+ m_convDash.Destruct;
+ m_convCurve.Destruct;
 
 {$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.Destruct;
@@ -1703,6 +1719,42 @@ function Agg2D.fillEvenOdd : boolean;
 begin
  result:=m_evenOddFlag;
 
+end;
+
+procedure Agg2D.SetLineStyle(awidth: double; astyle: LineStyle);
+begin
+  LineWidth(awidth);
+  { dashes and dots are relative to the line width }
+  case astyle of
+    stySolid:
+      begin
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+      end;
+    styDash:
+      begin
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(2*awidth, 4*awidth);
+      end;
+    styDot:
+      begin
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(awidth, 2*awidth);
+      end;
+    styDashDot:
+      begin
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
+      end;
+    styDashDotDot:
+      begin
+        m_convDash.remove_all_dashes;
+        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(awidth, 2*awidth);
+      end;
+  end;
 end;
 
 { TRANSFORMATIONS }
