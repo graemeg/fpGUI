@@ -173,7 +173,7 @@ type
 //------------------------------------------------font_engine_freetype_int16
 // This class uses values of type int16 (10.6 format) for the vector cache.
 // The vector cache is compact, but when rendering glyphs of height
-// more that 200 there integer overflow can occur.
+// more that 200 then integer overflow can occur.
  font_engine_freetype_int16 = object(font_engine_freetype_base )
    constructor Construct(max_faces : unsigned = 32 );
 
