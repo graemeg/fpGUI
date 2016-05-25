@@ -810,8 +810,7 @@ begin
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
 
- m_convDash.remove_all_dashes;
- m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+ SetLineStyle(m_lineWidth, stySolid);
 
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
@@ -833,7 +832,6 @@ end;
 destructor Agg2D.Destruct;
 begin
  m_rbuf.Destruct;
-
  m_allocator.Destruct;
 
  m_scanline.Destruct;
@@ -843,11 +841,12 @@ begin
  m_lineGradient.Destruct;
 
  m_imageFilterLut.Destruct;
- m_path.Destruct;
 
  m_convStroke.Destruct;
  m_convDash.Destruct;
  m_convCurve.Destruct;
+
+ m_path.Destruct;
 
 {$IFNDEF AGG2D_NO_FONT}
  m_fontEngine.Destruct;
@@ -856,7 +855,6 @@ begin
 {$IFDEF AGG2D_USE_WINFONTS }
  ReleaseDC(0 ,m_fontDC );
 {$ENDIF }
-
 end;
 
 { ATTACH }
@@ -1725,36 +1723,37 @@ procedure Agg2D.SetLineStyle(awidth: double; astyle: LineStyle);
 begin
   LineWidth(awidth);
   { dashes and dots are relative to the line width }
+  m_convDash.remove_all_dashes;
   case astyle of
     stySolid:
       begin
-        m_convDash.remove_all_dashes;
         m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
       end;
     styDash:
       begin
-        m_convDash.remove_all_dashes;
         m_convDash.add_dash(2*awidth, 4*awidth);
       end;
     styDot:
       begin
-        m_convDash.remove_all_dashes;
         m_convDash.add_dash(awidth, 2*awidth);
       end;
     styDashDot:
       begin
-        m_convDash.remove_all_dashes;
         m_convDash.add_dash(2*awidth, 4*awidth);
         m_convDash.add_dash(awidth, 2*awidth);
       end;
     styDashDotDot:
       begin
-        m_convDash.remove_all_dashes;
         m_convDash.add_dash(2*awidth, 4*awidth);
         m_convDash.add_dash(awidth, 2*awidth);
         m_convDash.add_dash(awidth, 2*awidth);
       end;
   end;
+  // add or remove dash generator from rendering pipeline
+  if astyle = stySolid then
+    m_convStroke.set_source(@m_convCurve)
+  else
+    m_convStroke.set_source(@m_convDash);
 end;
 
 { TRANSFORMATIONS }
