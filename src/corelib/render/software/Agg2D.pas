@@ -3714,7 +3714,7 @@ procedure TAgg2D.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
   DoSetTextColor(FTextColor);
   NoLine;
-  TextHints(True);
+  TextHints(False);
   Text(x, y+FontHeight, txt);
 end;
 
