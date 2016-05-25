@@ -1727,26 +1727,26 @@ begin
   case astyle of
     stySolid:
       begin
-        m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+        // do nothing here
       end;
     styDash:
       begin
-        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(3 * awidth, 4 * awidth);
       end;
     styDot:
       begin
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(0.5 * awidth, 3 * awidth);
       end;
     styDashDot:
       begin
-        m_convDash.add_dash(2*awidth, 4*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(4 * awidth, 3 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 4 * awidth);
       end;
     styDashDotDot:
       begin
-        m_convDash.add_dash(2*awidth, 4*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(4 * awidth, 2 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 2 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 4 * awidth);
       end;
   end;
   // add or remove dash generator from rendering pipeline
