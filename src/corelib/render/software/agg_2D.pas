@@ -15,15 +15,30 @@
 // warranty, and with no claim as to its suitability for any purpose.
 //
 
-unit
- agg_2D ;
-
-INTERFACE
+unit agg_2D ;
 
 {$I agg_mode.inc }
 
-// With this define uncommented you can use FreeType font engine
-{ $DEFINE AGG2D_USE_FREETYPE }
+{.$Define CStackDebug}
+
+interface
+
+
+{ With this define you can switch use of FreeType or Win32 TrueType font
+  engine.
+
+  NOTE:
+  The FreeType font engine is recommended, even under Windows - simply
+  because it has more functionality and generates better looking text. If
+  enabled under Windows, your application will require the freetype.dll
+  though. The freetype.dll is included in the fpGUI repository for your
+  convenience. }
+
+{.$DEFINE AGG2D_USE_FREETYPE }
+
+{$IFDEF AGG2D_USE_FREETYPE}
+  {$UNDEF AGG2D_USE_WINFONTS}
+{$ENDIF}
 
 uses
  agg_basics ,
