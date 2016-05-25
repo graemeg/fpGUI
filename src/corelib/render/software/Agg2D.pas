@@ -14,8 +14,6 @@
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
-//
-//
 
 unit Agg2D;
 
@@ -1289,15 +1287,14 @@ begin
  m_path.Construct;
  m_transform.Construct;
 
- m_convCurve.Construct (@m_path );
+ m_convCurve.Construct(@m_path);
  m_convDash.Construct(@m_convCurve);
- m_convStroke.Construct(@m_convDash );
+ m_convStroke.Construct(@m_convDash);
 
  m_pathTransform.Construct  (@m_convCurve ,@m_transform );
  m_strokeTransform.Construct(@m_convStroke ,@m_transform );
 
- m_convDash.remove_all_dashes;
- m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+ DoSetLineStyle(1, lsSolid);
 
 {$IFDEF AGG2D_USE_FREETYPE }
  m_fontEngine.Construct;
@@ -3617,36 +3614,37 @@ procedure TAgg2D.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 begin
   LineWidth(awidth);
   { dashes and dots are relative to the line width }
+  m_convDash.remove_all_dashes;
   case astyle of
     lsSolid:
       begin
-        m_convDash.remove_all_dashes;
-        m_convDash.add_dash(600, 0);  {$NOTE Find a better way to prevent dash generation }
+        // do nothing here
       end;
     lsDash:
       begin
-        m_convDash.remove_all_dashes;
-        m_convDash.add_dash(2*awidth, 4*awidth);
+        m_convDash.add_dash(3 * awidth, 4 * awidth);
       end;
     lsDot:
       begin
-        m_convDash.remove_all_dashes;
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(0.5 * awidth, 3 * awidth);
       end;
     lsDashDot:
       begin
-        m_convDash.remove_all_dashes;
-        m_convDash.add_dash(2*awidth, 4*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(4 * awidth, 3 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 4 * awidth);
       end;
     lsDashDotDot:
       begin
-        m_convDash.remove_all_dashes;
-        m_convDash.add_dash(2*awidth, 4*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
-        m_convDash.add_dash(awidth, 2*awidth);
+        m_convDash.add_dash(4 * awidth, 2 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 2 * awidth);
+        m_convDash.add_dash(0.5 * awidth, 4 * awidth);
       end;
   end;
+  // add or remove dash generator from rendering pipeline
+  if astyle = lsSolid then
+    m_convStroke.set_source(@m_convCurve)
+  else
+    m_convStroke.set_source(@m_convDash);
 end;
 
 procedure TAgg2D.DoFillRectangle(x, y, w, h: TfpgCoord);
