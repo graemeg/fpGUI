@@ -3715,7 +3715,8 @@ begin
   DoSetTextColor(FTextColor);
   NoLine;
   TextHints(False);
-  Text(x, y+FontHeight, txt);
+  TextAlignment(AGG_AlignLeft, AGG_AlignTop);
+  Text(x, y+3{+FontHeight}, txt);
 end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
