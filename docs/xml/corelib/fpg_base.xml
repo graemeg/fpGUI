@@ -745,13 +745,13 @@ it seems that the active window is always brought to the front too.</descr>
         <descr/>
       </element>
 
-      <!-- procedure Visibility: public -->
-      <element name="TfpgImageBase.Invert">
-        <short>Inverts the Image</short>
-        <descr><printshort id="#fpgui.fpg_base.TfpgImageBase.Invert"/>. This changes the actual
+<!-- procedure Visibility: public -->
+<element name="TfpgImageBase.Invert">
+<short>Inverts the Image</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgImageBase.Invert"/>. This changes the actual
 data of the image. There is no undo function. So if you want to undo this action,
 you must keep copy of the original image before you call <var>Invert</var>.</descr>
-      </element>
+</element>
 
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.AllocateImage">
@@ -765,11 +765,11 @@ you must keep copy of the original image before you call <var>Invert</var>.</des
         <descr/>
       </element>
 
-      <!-- procedure Visibility: public -->
-      <element name="TfpgImageBase.CreateMaskFromSample">
-        <short>Creates a mask based on the sample point presented by X and Y parameters</short>
-        <descr/>
-      </element>
+<!-- procedure Visibility: public -->
+<element name="TfpgImageBase.CreateMaskFromSample">
+<short>Creates a mask based on the sample point presented by X and Y parameters</short>
+<descr/>
+</element>
 
 <element name="TfpgImageBase.UpdateImage">
 <short>Updates the internal image resources and OS resources from image data</short>
@@ -809,16 +809,16 @@ the ImageData values.</descr>
         <descr/>
       </element>
       <!-- property Visibility: public -->
-      <element name="TfpgImageBase.ColorDepth">
-        <short>Color depth of the image. Currently 24/32-bit is all that is supported.</short>
-        <descr/>
-      </element>
+<element name="TfpgImageBase.ColorDepth">
+<short>Color depth of the image. Currently 24/32-bit is all that is supported.</short>
+<descr/>
+</element>
 
-      <!-- property Visibility: public -->
-      <element name="TfpgImageBase.Colors">
-        <short>Array property to access a specific color of the image based on X and Y co-ordinates</short>
-        <descr/>
-      </element>
+<!-- property Visibility: public -->
+<element name="TfpgImageBase.Colors">
+<short>Array property to access a specific color of the image based on X and Y co-ordinates</short>
+<descr/>
+</element>
 
       <!-- object Visibility: default -->
       <element name="TfpgFontResourceBase">
@@ -843,14 +843,14 @@ Gaussian, Sinc etc... These decendant filters are used in the
         <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawRectangle"/> You can specify the size of the rectangle via X, Y, Width and Height parameters or via a TfpgRect parameter.</descr>
       </element>
 
-      <!-- procedure Visibility: public -->
-      <element name="TfpgCanvasBase.DrawLine">
-        <short>Draws a line</short>
-        <descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLine"/>. This method
+<!-- procedure Visibility: public -->
+<element name="TfpgCanvasBase.DrawLine">
+<short>Draws a line</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLine"/>. This method
 draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported
 backends follow the Microsoft API and doesn't draw the last pixel. This optimises
 consecutive lines being drawn without overlapping pixels.</descr>
-      </element>
+</element>
 
 <element name="TfpgCanvasBase.StretchDraw">
 <short>Allows you to draw a bitmap, stretched or shrunken from its original size</short>
@@ -860,91 +860,86 @@ but others (found in <link id="#fpgui.fpg_extinterpolation">fpg_extinterpolation
 be used too, by using the <link id="#fpgui.fpg_base.TfpgCanvasBase.InterpolationFilter">InterpolationFilter</link> property of the Canvas.</descr>
 </element>
 
-      <!-- function Visibility: default -->
-      <element name="KeycodeToText">
-        <short>Returns the text representation of a keycode.</short>
-        <descr>This is mainly used for debugging, but could also be used for Menu Item keyboard
-shortcuts etc.
-</descr>
-      </element>
+<!-- function Visibility: default -->
+<element name="KeycodeToText">
+<short>Returns the text representation of a keycode.</short>
+<descr>This is mainly used for debugging, but could also be used for Menu Item keyboard
+shortcuts etc.</descr>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="CheckClipboardKey">
-        <short>Detects if the pressed keys represent a Clipboard key shortcut</short>
-        <descr>Detects if the pressed keys represent a Clipboard key shortcut. If it does, it
-returns the correct enum type detected.
-</descr>
-      </element>
+<!-- function Visibility: default -->
+<element name="CheckClipboardKey">
+<short>Detects if the pressed keys represent a Clipboard key shortcut</short>
+<descr><printshort id="#fpgui.fpgbase.CheckClipboardKey"/>. If it does, it
+returns the correct enum type detected.</descr>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="fpgColorToRGBTriple">
-        <short>Converts the TfpgColor to TRGBTriple type</short>
-        <descr>This function converts the given TfpgColor into a TRGBTriple type.</descr>
-        <seealso>
-          <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
-        </seealso>
-      </element>
+<!-- function Visibility: default -->
+<element name="fpgColorToRGBTriple">
+<short>Converts the TfpgColor to TRGBTriple type</short>
+<descr>This function converts the given TfpgColor into a TRGBTriple type.</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
+</seealso>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="RGBTripleTofpgColor">
-        <short>Converts the TRGBTriple to TfpgColor type</short>
-        <descr>This function converts the given TRGBTriple into a TfpgColor type.
-</descr>
-        <seealso>
-          <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
-        </seealso>
-      </element>
-      <!-- function Visibility: default -->
-      <element name="fpgGetRed">
-        <short>Returns the Red portion of a color value.</short>
-        <descr/>
-      </element>
 
-      <!-- function Visibility: default -->
-      <element name="fpgGetGreen">
-        <short>Returns the Green portion of a color value.</short>
-        <descr/>
-      </element>
-      <!-- function Visibility: default -->
-      <element name="fpgGetBlue">
-        <short>Returns the Blue portion of a color value.</short>
-        <descr/>
-      </element>
+<element name="RGBTripleTofpgColor">
+<short>Converts the TRGBTriple to TfpgColor type</short>
+<descr>This function converts the given TRGBTriple into a TfpgColor type.</descr>
+<seealso>
+  <link id="#fpgui.fpg_base.TRGBTriple">TRGBTriple</link>
+</seealso>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="fpgGetAlpha">
-        <short>Returns the Alpha portion of a color value.</short>
-        <descr/>
-      </element>
+<element name="fpgGetRed">
+<short>Returns the Red portion of a color value.</short>
+<descr/>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="fpgGetAvgColor">
-        <short>Calculates the average color using the two supplied</short>
-        <descr>This function calculates and returns the average color by using AColor1
+
+<element name="fpgGetGreen">
+<short>Returns the Green portion of a color value.</short>
+<descr/>
+</element>
+
+<element name="fpgGetBlue">
+<short>Returns the Blue portion of a color value.</short>
+<descr/>
+</element>
+
+<element name="fpgGetAlpha">
+<short>Returns the Alpha portion of a color value.</short>
+<descr/>
+</element>
+
+
+<element name="fpgGetAvgColor">
+<short>Calculates the average color using the two supplied</short>
+<descr>This function calculates and returns the average color by using AColor1
 and AColor2. The Alpha value also gets taken into account.
 </descr>
-      </element>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="PtInRect">
-        <short>Returns true if APoint is inside ARect rectangle</short>
-        <descr>This function is used to detect if the point APoint is inside the given
+<!-- function Visibility: default -->
+<element name="PtInRect">
+<short>Returns true if APoint is inside ARect rectangle</short>
+<descr>This function is used to detect if the point APoint is inside the given
 rectangle ARect.  If it is, the function returns True, otherwise False.
 </descr>
-      </element>
+</element>
 
-      <!-- procedure Visibility: default -->
-      <element name="SortRect">
-        <short>Fixes the Top, Bottom and Left, Right to always represent a valid rectangle</short>
-        <descr>This function fixes a rectangle so that the Left point is always smaller than the
-Right. And the Top is always smaller than the Bottom.
-</descr>
-      </element>
+<!-- procedure Visibility: default -->
+<element name="SortRect">
+<short>Fixes the Top, Bottom and Left, Right to always represent a valid rectangle</short>
+<descr>This function fixes a rectangle so that the Left point is always
+smaller than the Right. And the Top is always smaller than the Bottom.</descr>
+</element>
 
 <element name="TfpgCanvasBase.DrawLineClipped">
 <short>Draws a line inside a clip rectangle</short>
-<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLineClipped"/>. This procedure
-clips a line to the AClipRect boundaries and
+<descr><p><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawLineClipped"/>. This
+procedure clips a line to the AClipRect boundaries and
 then calls the DrawLine procedure with the clipped coordinates.  If the line
 lies completely outside of the clip boundary, then the Line routine is not
 called.  This procedure uses the well known Cohen-Sutherland line clipping
@@ -1136,11 +1131,12 @@ the streets of Manhattan.</p>
 <short>A descendant of the FPC TComponent class</short>
 <descr><p><printshort id="#fpgui.fpg_base.TfpgComponent"/>. It adds a location where we can extend
 the TComponent, without having to make changes to each and every class in fpGUI.</p>
-<p>For example: We added the TagPointer property (which is now largely obsolete) because
-a while back the Tag property of TComponent could only store a 32bit value.
-Many developers used it to store a pointer reference to a object under 32-bit system, but
-this was not possible under 64-bit systems. After some time, FPC finally updated
-the type of the Tag property to support 64-bit addresses too.</p></descr>
+<p>For example: We added the TagPointer property (which is now largely obsolete)
+because a while back the Tag property of TComponent could only store a 32bit value.
+Many developers used it to store a pointer reference to a object under 32-bit
+system, but this was not possible under 64-bit systems. After some time, FPC
+finally updated the type of the Tag property to support 64-bit addresses
+too.</p></descr>
 </element>
 
 <element name="fpgComponent.HelpContext">
