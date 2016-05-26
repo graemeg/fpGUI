@@ -479,10 +479,10 @@ type
 
    function  textHints : boolean; overload;
    procedure textHints(hints : boolean ); overload;
-   function  textWidth(str : char_ptr ) : double;
+   function  textWidth(str : AnsiString ) : double;
 
    procedure text(
-              x ,y : double; str : char_ptr;
+              x ,y : double; str : AnsiString;
               roundOff : boolean = false;
               ddx : double = 0.0;
               ddy : double = 0.0 );
@@ -644,9 +644,61 @@ type
  function  Agg2DUsesWin32TrueType : boolean;
 
 IMPLEMENTATION
+
 { LOCAL VARIABLES & CONSTANTS }
 var
  g_approxScale : double = 2.0;
+
+{ copied from the "fpg_stringutils" unit. }
+function UTF8CharToUnicode(p: PChar; out CharLen: longint): Cardinal;
+begin
+  if p=nil then begin
+    Result:=0;
+    CharLen:=0;
+    exit;
+  end;
+  if ord(p^) < $C0 then begin
+    // regular single byte character (#0 is a normal char, this is pascal ;)
+  end
+  else if ((ord(p^) and $E0) = $C0) then begin
+    // could be double byte character
+    if (ord(p[1]) and $C0) = $80 then begin
+      Result:=((ord(p^) and $1F) shl 6)
+              or (ord(p[1]) and $3F);
+      CharLen:=2;
+      exit;
+    end;
+  end
+  else if ((ord(p^) and $F0) = $E0) then begin
+    // could be triple byte character
+    if ((ord(p[1]) and $C0) = $80)
+    and ((ord(p[2]) and $C0) = $80) then begin
+      Result:=((ord(p^) and $1F) shl 12)
+              or ((ord(p[1]) and $3F) shl 6)
+              or (ord(p[2]) and $3F);
+      CharLen:=3;
+      exit;
+    end;
+  end
+  else if ((ord(p^) and $F8) = $F0) then begin
+    // could be 4 byte character
+    if ((ord(p[1]) and $C0) = $80)
+    and ((ord(p[2]) and $C0) = $80)
+    and ((ord(p[3]) and $C0) = $80) then begin
+      Result:=((ord(p^) and $0F) shl 18)
+              or ((ord(p[1]) and $3F) shl 12)
+              or ((ord(p[2]) and $3F) shl 6)
+              or (ord(p[3]) and $3F);
+      CharLen:=4;
+      exit;
+    end;
+  end
+  else begin
+    // invalid character
+  end;
+  Result:=ord(p^);
+  CharLen:=1;
+end;
 
 { UNIT IMPLEMENTATION }
 { CONSTRUCT }
@@ -2267,26 +2319,29 @@ begin
 end;
 
 { TEXTWIDTH }
-function Agg2D.textWidth(str : char_ptr ) : double;
+function Agg2D.textWidth(str : AnsiString ) : double;
 {$IFDEF AGG2D_NO_FONT}
 begin
-  Result:=0;
+  Result := 0;
 end;
 {$ELSE}
 var
  x ,y  : double;
  first : boolean;
  glyph : glyph_cache_ptr;
+ str_  : PChar;
 
 begin
+ if str = '' then exit(0);
  x:=0;
  y:=0;
 
  first:=true;
+ str_ := PChar(str);
 
- while str^ <> #0 do
+ while str_^ <> #0 do
   begin
-   glyph:=m_fontCacheManager.glyph(int32u(str^ ) );
+   glyph:=m_fontCacheManager.glyph(int32u(str_^ ) );
 
    if glyph <> NIL then
     begin
@@ -2296,11 +2351,11 @@ begin
      x:=x + glyph.advance_x;
      y:=y + glyph.advance_y;
 
-     first:=false; {!}
+     first:=false;
 
     end;
 
-   inc(ptrcomp(str ) );
+   inc(ptrcomp(str_ ) );
 
   end;
 
@@ -2314,7 +2369,7 @@ end;
 
 { TEXT }
 procedure Agg2D.text(
-           x ,y : double; str : char_ptr;
+           x ,y : double; str : AnsiString;
            roundOff : boolean = false;
            ddx : double = 0.0;
            ddy : double = 0.0 );
@@ -2329,15 +2384,19 @@ var
  glyph : glyph_cache_ptr;
 
  mtx : trans_affine;
-
- i : int;
+ str_ : PChar;
 
  tat : trans_affine_translation;
  tar : trans_affine_rotation;
 
- tr : conv_transform;
+  tr : conv_transform;
+  charlen: int;
+  char_id: int32u;
+  First: Boolean;
 
 begin
+ if Str='' then exit;
+
  dx:=0.0;
  dy:=0.0;
 
@@ -2377,11 +2436,10 @@ begin
  start_y:=y + dy;
 
  if roundOff then
-  begin
+ begin
    start_x:=Trunc(start_x );
    start_y:=Trunc(start_y );
-
-  end;
+ end;
 
  start_x:=start_x + ddx;
  start_y:=start_y + ddy;
@@ -2398,47 +2456,45 @@ begin
  tr.Construct(m_fontCacheManager.path_adaptor ,@mtx );
 
  if m_fontCacheType = RasterFontCache then
-  worldToScreen(@start_x ,@start_y );
+   WorldToScreen(@start_x ,@start_y );
 
- i:=0;
+  str_:=@str[1 ];
+  First:=true;
 
- while char_ptr(ptrcomp(str ) + i * sizeof(char ) )^ <> #0 do
+  while str_^ <> #0 do
   begin
-   glyph:=m_fontCacheManager.glyph(int32u(char_ptr(ptrcomp(str ) + i * sizeof(char ) )^ ) );
+    char_id := UTF8CharToUnicode(str_, charlen);
+    inc(str_, charlen);
+    glyph := m_fontCacheManager.glyph(char_id);
 
-   if glyph <> NIL then
+    if glyph <> NIL then
     begin
-     if i <> 0 then
-      m_fontCacheManager.add_kerning(@x ,@y );
-
-     m_fontCacheManager.init_embedded_adaptors(glyph ,start_x ,start_y );
-
-     if glyph.data_type = glyph_data_outline then
+      if First then
       begin
-       m_path.remove_all;
-       m_path.add_path(@tr ,0 ,false );
-
-       drawPath;
-
+        m_fontCacheManager.add_kerning(@x ,@y );
+        First:=false;
       end;
 
-     if glyph.data_type = glyph_data_gray8 then
-      begin
-       render(
-        m_fontCacheManager.gray8_adaptor ,
-        m_fontCacheManager.gray8_scanline );
+      m_fontCacheManager.init_embedded_adaptors(glyph ,start_x ,start_y );
 
+      if glyph.data_type = glyph_data_outline then
+      begin
+        m_path.remove_all;
+        m_path.add_path(@tr ,0 ,false );
+        drawPath;
       end;
 
-     start_x:=start_x + glyph.advance_x;
-     start_y:=start_y + glyph.advance_y;
+      if glyph.data_type = glyph_data_gray8 then
+      begin
+        Render(
+          m_fontCacheManager.gray8_adaptor ,
+          m_fontCacheManager.gray8_scanline );
+      end;
 
+      start_x := start_x + glyph.advance_x;
+      start_y := start_y + glyph.advance_y;
     end;
-
-   inc(i );
-
-  end;
-
+  end;  { if glyph <> nil }
 end;
 {$ENDIF}
 
