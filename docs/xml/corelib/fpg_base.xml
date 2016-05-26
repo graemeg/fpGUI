@@ -33,11 +33,18 @@ underlying type in the future. Example to floating points.
 </element>
 
 <element name="TfpgColor">
-<short>Represents a color in integer format.</short>
+<short>Represents a color stored in a UInt32 type.</short>
 <descr>
 <p>TfpgColor is always in AARRGGBB (Alpha, Red, Green, Blue) format, no matter the
-operating system.
-</p>
+operating system.</p>
+<pre>.
+        Each pixel is a 32 bit UInt32
+     11110011 11110001 00001101 11001100
+        |         |        |        |
+      Alpha       |      Green      |
+                 Red               Blue
+</pre>
+
 <p>The <var>fpg_base</var> unit also contains definitions of many useful color
 constants. It defines the standard predefined Delphi colors (like clRed,
 clMagenta etc.), the 140 web safe colors using the defacto standard names as
