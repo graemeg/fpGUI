@@ -169,6 +169,9 @@ begin
   AProject.MainFile.SetSourceText(NewSource);
   AProject.AddPackageDependency('fpgui_toolkit');
   // compiler options
+  AProject.LazCompilerOptions.UnitOutputDirectory := 'units';
+  AProject.LazCompilerOptions.TargetFilename := 'project1';
+  AProject.LazCompilerOptions.TargetFilenameApplyConventions := True;
   AProject.LazCompilerOptions.UseLineInfoUnit := True;
 
   Result := mrOK;
@@ -318,6 +321,9 @@ begin
   AProject.MainFile.SetSourceText(NewSource);
   AProject.AddPackageDependency('fpgui_toolkit');
   // compiler options
+  AProject.LazCompilerOptions.UnitOutputDirectory := 'units';
+  AProject.LazCompilerOptions.TargetFilename := 'project1';
+  AProject.LazCompilerOptions.TargetFilenameApplyConventions := True;
   AProject.LazCompilerOptions.UseLineInfoUnit := True;
 
   Result := mrOK;
