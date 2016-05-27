@@ -44,6 +44,7 @@ type
     function InitProject(AProject: TLazProject): TModalResult; override;
   end;
   
+
   TfpGUIAgg2dApplicationDescriptor = class(TProjectDescriptor)
   public
     constructor Create; override;
@@ -52,9 +53,20 @@ type
     function InitProject(AProject: TLazProject): TModalResult; override;
   end;
 
+
+  TConsoleAgg2dApplicationDescriptor = class(TProjectDescriptor)
+  public
+    constructor Create; override;
+    function GetLocalizedName: string; override;
+    function GetLocalizedDescription: string; override;
+    function InitProject(AProject: TLazProject): TModalResult; override;
+  end;
+
+
 var
   ProjectDescriptorfpGUIApplication: TfpGUIApplicationDescriptor;
   ProjectDescriptorfpGUIAgg2dApplication: TfpGUIAgg2dApplicationDescriptor;
+  ProjectDescriptorConsoleAgg2dApplication: TConsoleAgg2dApplicationDescriptor;
 
 
 procedure Register;
@@ -73,6 +85,9 @@ begin
 
   ProjectDescriptorfpGUIAgg2dApplication := TfpGUIAgg2dApplicationDescriptor.Create;
   RegisterProjectDescriptor(ProjectDescriptorfpGUIAgg2dApplication);
+
+  ProjectDescriptorConsoleAgg2dApplication := TConsoleAgg2dApplicationDescriptor.Create;
+  RegisterProjectDescriptor(ProjectDescriptorConsoleAgg2dApplication);
 end;
 
 { TfpGUIApplicationDescriptor }
@@ -321,6 +336,184 @@ begin
   AProject.MainFile.SetSourceText(NewSource);
   AProject.AddPackageDependency('fpgui_toolkit');
   // compiler options
+  AProject.LazCompilerOptions.UnitOutputDirectory := 'units';
+  AProject.LazCompilerOptions.TargetFilename := 'project1';
+  AProject.LazCompilerOptions.TargetFilenameApplyConventions := True;
+  AProject.LazCompilerOptions.UseLineInfoUnit := True;
+
+  Result := mrOK;
+end;
+
+{ TConsoleAgg2dApplicationDescriptor }
+
+constructor TConsoleAgg2dApplicationDescriptor.Create;
+begin
+  inherited Create;
+  Name := 'Console Agg2D Application';
+end;
+
+function TConsoleAgg2dApplicationDescriptor.GetLocalizedName: string;
+begin
+  Result := 'Console Agg2D Application';
+end;
+
+function TConsoleAgg2dApplicationDescriptor.GetLocalizedDescription: string;
+begin
+  Result := 'Console Agg2D Application'+le+le
+           +'A console application that uses AggPas'+le
+           +'via the Agg2D object to render to an image buffer, then' +le
+           +'saves the output to a PNG file. Great for quick demos.';
+end;
+
+function TConsoleAgg2dApplicationDescriptor.InitProject(AProject: TLazProject): TModalResult;
+var
+  NewSource: String;
+  MainFile: TLazProjectFile;
+begin
+  inherited InitProject(AProject);
+
+  MainFile := AProject.CreateProjectFile('project1.lpr');
+  MainFile.IsPartOfProject := true;
+  AProject.AddFile(MainFile, false);
+  AProject.MainFileID := 0;
+
+  // create program source
+  NewSource :=
+    'program project1; ' + le +
+    ' ' + le +
+    '{$mode objfpc}{$H+} ' + le +
+    ' ' + le +
+    'uses ' + le +
+    '  Classes, ' + le +
+    '  SysUtils, ' + le +
+    '  agg_2D, ' + le +
+    '  FPImage, ' + le +
+    '  FPWritePNG; ' + le +
+    ' ' + le +
+    'type ' + le +
+    ' ' + le +
+    '  TMyApp = class(TObject) ' + le +
+    '  private ' + le +
+    '    VG: Agg2D; ' + le +
+    '    FRenderBuffer: TBytes; ' + le +
+    '    procedure SetupRenderBuffer; ' + le +
+    '    procedure DoAggPainting; ' + le +
+    '    procedure ImageBufferToFile; ' + le +
+    '  public ' + le +
+    '    constructor Create; ' + le +
+    '    destructor Destroy; override; ' + le +
+    '    procedure Run; ' + le +
+    '  end; ' + le +
+    ' ' + le +
+    'const ' + le +
+    '  cImgWidth = 400; ' + le +
+    '  cImgHeight = 300; ' + le +
+    '  RGBA_Width = 4; // 4 bytes to represent a pixel color (RGBA) value ' + le +
+    ' ' + le +
+    '{ TMyApp } ' + le +
+    ' ' + le +
+    'procedure TMyApp.SetupRenderBuffer; ' + le +
+    'var ' + le +
+    '  lStride: Integer; ' + le +
+    'begin ' + le +
+    '  SetLength(FRenderBuffer, cImgWidth * cImgHeight * RGBA_Width); ' + le +
+    '  lStride := (cImgWidth * RGBA_Width) * -1; // -1 is to flip the image ' + le +
+    '  VG.Attach(@FRenderBuffer[0], cImgWidth, cImgHeight, lStride); ' + le +
+    '  VG.flipText(True); ' + le +
+    '  VG.textHints(False);  // Gives much more true-to-life glyph shapes as the font designers intended. No pixel grid fitting nonsense. ' + le +
+    'end; ' + le +
+    ' ' + le +
+    'procedure TMyApp.DoAggPainting; ' + le +
+    'begin ' + le +
+    '  // **** DO YOUR AGG2D PAINTING HERE **** ' + le +
+    ' ' + le +
+    '  // Paint composed image white ' + le +
+    '  VG.ClearAll(255, 255, 255); ' + le +
+    ' ' + le +
+    '  VG.LineWidth(10); ' + le +
+    '  VG.LineColor($32, $cd, $32); ' + le +
+    '  VG.fillColor(84, 140, 164); ' + le +
+    '  VG.star(100, 100, 50, 75, 0, 15); ' + le +
+    ' ' + le +
+    '  VG.LineWidth(4); ' + le +
+    '  VG.fillColor(0, 200, 200, 100); ' + le +
+    '  VG.lineColor(0, 10, 230); ' + le +
+    '  VG.roundedRect(100, 100, 200, 210, 20); ' + le +
+    'end; ' + le +
+    ' ' + le +
+    ' ' + le +
+    'procedure TMyApp.ImageBufferToFile; ' + le +
+    'var ' + le +
+    '  image: TFPCustomImage; ' + le +
+    '  writer: TFPWriterPNG; ' + le +
+    '  x, y: Integer; ' + le +
+    '  c: TFPColor; ' + le +
+    ' ' + le +
+    '  function getBufItemAsWord(aDelta: byte): Word; ' + le +
+    '  var ' + le +
+    '    actualY: Integer; ' + le +
+    '  begin ' + le +
+    '    actualY := cImgHeight - y - 1; ' + le +
+    '    result := Word(FRenderBuffer[x * RGBA_Width + actualY * cImgWidth * RGBA_Width + aDelta] shl 8) or Word(128); ' + le +
+    '  end; ' + le +
+    ' ' + le +
+    'begin ' + le +
+    '  image := TFPMemoryImage.Create(cImgWidth, cImgHeight); ' + le +
+    '  try ' + le +
+    '    for x := 0 to cImgWidth - 1 do ' + le +
+    '      for y := 0 to cImgHeight - 1 do ' + le +
+    '      begin ' + le +
+    '        // TFPMemoryImage.FData is in BGRA format ' + le +
+    '        c.blue  := getBufItemAsWord(0); ' + le +
+    '        c.green := getBufItemAsWord(1); ' + le +
+    '        c.red   := getBufItemAsWord(2); ' + le +
+    '        c.alpha := getBufItemAsWord(3); ' + le +
+    '        image.Colors[x, y] := c; ' + le +
+    '      end; ' + le +
+    ' ' + le +
+    '    writer := TFPWriterPNG.Create; ' + le +
+    '    try ' + le +
+    '      image.SaveToFile(ApplicationName + ''.png'', writer); ' + le +
+    '    finally ' + le +
+    '      writer.Free; ' + le +
+    '    end; ' + le +
+    '  finally ' + le +
+    '    image.Free; ' + le +
+    '  end; ' + le +
+    'end; ' + le +
+    ' ' + le +
+    'constructor TMyApp.Create; ' + le +
+    'begin ' + le +
+    '  VG.Construct; ' + le +
+    'end; ' + le +
+    ' ' + le +
+    'destructor TMyApp.Destroy; ' + le +
+    'begin ' + le +
+    '  VG.Destruct; ' + le +
+    '  inherited Destroy; ' + le +
+    'end; ' + le +
+    ' ' + le +
+    'procedure TMyApp.Run; ' + le +
+    'begin ' + le +
+    '  SetupRenderBuffer; ' + le +
+    '  DoAggPainting; ' + le +
+    '  ImageBufferToFile; ' + le +
+    'end; ' + le +
+    ' ' + le +
+    'var ' + le +
+    '  o: TMyApp; ' + le +
+    'begin ' + le +
+    '  o := TMyApp.Create; ' + le +
+    '  try ' + le +
+    '    o.Run; ' + le +
+    '  finally ' + le +
+    '    o.Free; ' + le +
+    '  end; ' + le +
+    'end. ' ;
+
+  AProject.MainFile.SetSourceText(NewSource);
+  // compiler options
+  AProject.LazCompilerOptions.OtherUnitFiles := '<fpgui>/src/corelib/render/software/';
   AProject.LazCompilerOptions.UnitOutputDirectory := 'units';
   AProject.LazCompilerOptions.TargetFilename := 'project1';
   AProject.LazCompilerOptions.TargetFilenameApplyConventions := True;
