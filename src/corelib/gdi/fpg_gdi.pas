@@ -2441,7 +2441,7 @@ begin
     PointArray[i].x := Points[i].x+FDeltaX;
     PointArray[i].y := Points[i].y+FDeltaY;
   end;
-  Windows.Polygon(FDrawGC, PointArray, NumPts);
+  Windows.Polygon(FDrawGC, PointArray, Length(Points)+1);
 end;
 
 function TfpgGDICanvas.GetBufferAllocated: Boolean;
