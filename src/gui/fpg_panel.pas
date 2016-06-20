@@ -1081,7 +1081,6 @@ var
   y: integer;
 begin
   inherited HandlePaint;
-  Canvas.Clear(BackgroundColor);
   if Assigned(FImage) then
   begin
     x := (Width - FImage.Width) div 2;
