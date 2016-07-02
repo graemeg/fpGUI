@@ -356,6 +356,10 @@ msgstr "Insertar"
 msgid "Insert from Character Map"
 msgstr ""
 
+#: fpg_constants:serrinvalidoption
+msgid "Invalid option at position %d: \"%s\""
+msgstr ""
+
 #: fpg_constants:rsitalic
 msgid "Italic"
 msgstr "Italica"
@@ -475,6 +479,14 @@ msgstr "Abrir"
 #: fpg_constants:rsopenafile
 msgid "Open a file"
 msgstr "Abrir un archivo"
+
+#: fpg_constants:serrnooptionallowed
+msgid "Option at position %d does not allow an argument: %s"
+msgstr ""
+
+#: fpg_constants:serroptionneeded
+msgid "Option at position %d needs an argument : %s"
+msgstr ""
 
 #: fpg_constants:rsfileowner
 msgid "Owner"

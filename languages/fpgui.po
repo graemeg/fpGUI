@@ -694,3 +694,15 @@ msgstr ""
 msgid "of"
 msgstr ""
 
+#: fpg_constants:serrinvalidoption
+msgid "Invalid option at position %d: \"%s\""
+msgstr ""
+
+#: fpg_constants:serrnooptionallowed
+msgid "Option at position %d does not allow an argument: %s"
+msgstr ""
+
+#: fpg_constants:serroptionneeded
+msgid "Option at position %d needs an argument : %s"
+msgstr ""
+
