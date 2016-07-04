@@ -358,7 +358,7 @@ msgstr "Insérer depuis la table de caractères"
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: \"%s\""
-msgstr ""
+msgstr "option non valide à la position %d: \"%s\""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -482,11 +482,11 @@ msgstr "Ouvrir un fichier"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
-msgstr ""
+msgstr "L'option à la position %d n'accepte pas d'argument: %s"
 
 #: fpg_constants:serroptionneeded
 msgid "Option at position %d needs an argument : %s"
-msgstr ""
+msgstr "L'option à la position %d nécessite un argument: %s"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
@@ -715,4 +715,5 @@ msgstr "Oui à tous"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr "de"
+
 
