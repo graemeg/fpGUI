@@ -94,11 +94,13 @@ type
   private
     FItems: TStringList;
     FDropDownCount: integer;
+    FScrollBarWidth: integer;
   public
     constructor Create;
     destructor  Destroy; override;
     property    Items: TStringList read FItems write FItems;
     property    DropDownCount: integer read FDropDownCount write FDropDownCount;
+    property    ScrollBarWidth: integer read FScrollBarWidth write FScrollBarWidth;
   end;
 
   TfpgEditComboColumn = class(TfpgColumnData)
@@ -107,6 +109,7 @@ type
     FAutoComplete: boolean;
     FAllowNew: TAllowNew;
     FDropDownCount: integer;
+    FScrollBarWidth: integer;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -114,6 +117,7 @@ type
     property    AutoComplete: boolean read FAutoComplete write FAutoComplete;
     property    AllowNew: TAllowNew read FAllowNew write FAllowNew;
     property    DropDownCount: integer read FDropDownCount write FDropDownCount;
+    property    ScrollBarWidth: integer read FScrollBarWidth write FScrollBarWidth;
   end;
 
   TfpgCheckBoxColumn = class(TfpgColumnData)
@@ -244,6 +248,8 @@ type
         var Consumed: boolean);
     function    GetComboBoxDropDownCount(AIndex: integer): integer;
     procedure   SetComboBoxDropDownCount(AIndex: integer; AValue: integer);
+    function    GetComboBoxScrollBarWidth(AIndex: integer): integer;
+    procedure   SetComboBoxScrollBarWidth(AIndex: integer; AValue: integer);
     procedure   IniEditComboCell;
     procedure   FCellEditComboKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -253,6 +259,8 @@ type
     procedure   SetAllowNew(AIndex: integer; AValue: TAllowNew);
     function    GetEditComboDropDownCount(AIndex: integer): integer;
     procedure   SetEditComboDropDownCount(AIndex: integer; AValue: integer);
+    function    GetEditComboScrollBarWidth(AIndex: integer): integer;
+    procedure   SetEditComboScrollBarWidth(AIndex: integer; AValue: integer);
     procedure   IniCheckBoxCell;
     procedure   FCellCheckBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState;
         var Consumed: boolean);
@@ -318,10 +326,12 @@ type
     property    MinCurrValue[AIndex: integer]: currency read GetMinCurrValue write SetMinCurrValue;
     procedure   AddComboItem(AIndex: integer; const AValue: string);
     property    ComboBoxDropDownCount[AIndex: integer]: integer read GetComboBoxDropDownCount write SetComboBoxDropDownCount;
+    property    ComboBoxScrollBarWidth[AIndex: integer]: integer read GetComboBoxScrollBarWidth write SetComboBoxScrollBarWidth;
     procedure   AddEditComboItem(AIndex: integer; const AValue: string);
     property    AutoComplete[AIndex: integer]: boolean read GetAutoComplete write SetAutoComplete;
     property    AllowNew[AIndex: integer]: TAllowNew read GetAllowNew write SetAllowNew;
     property    EditComboDropDownCount[AIndex: integer]: integer read GetEditComboDropDownCount write SetEditComboDropDownCount;
+    property    EditComboScrollBarWidth[AIndex: integer]: integer read GetEditComboScrollBarWidth write SetEditComboScrollBarWidth;
     property    BoxCheckedText[AIndex: integer]: string read GetBoxCheckedText write SetBoxCheckedText;
     property    BoxUncheckedText[AIndex: integer]: string read GetBoxUncheckedText write SetBoxUncheckedText;
     property    BoxDisplayText[AIndex: integer]: string read GetBoxDisplayText write SetBoxDisplayText;
@@ -1226,6 +1236,7 @@ begin
       if Items[i] = Cells[FocusCol, FocusRow] then
         Text := Items[i];
     DropDownCount := TfpgComboBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).DropDownCount;
+    ScrollBarWidth := TfpgComboBoxColumn(TfpgEditColumn(Columns[FocusCol]).Data).ScrollBarWidth;
     OnKeyPress := @FCellComboBoxKeyPress;
     SetFocus;
   end;
@@ -1270,6 +1281,16 @@ begin
   TfpgComboBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount := AValue;
 end;
 
+function TfpgCustomEditGrid.GetComboBoxScrollBarWidth(AIndex: integer): integer;
+begin
+  Result := TfpgComboBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).ScrollBarWidth;
+end;
+
+procedure TfpgCustomEditGrid.SetComboBoxScrollBarWidth(AIndex: integer; AValue: integer);
+begin
+  TfpgComboBoxColumn(TfpgEditColumn(Columns[AIndex]).Data).ScrollBarWidth := AValue;
+end;
+
 procedure TfpgCustomEditGrid.IniEditComboCell;
 var
   Pt: TPoint;
@@ -1293,6 +1314,7 @@ begin
     AutoCompletion := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AutoComplete;
     AllowNew := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).AllowNew;
     DropDownCount := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).DropDownCount;
+    ScrollBarWidth := TfpgEditComboColumn(TfpgEditColumn(Columns[FocusCol]).Data).ScrollBarWidth;
     OnKeyPress := @FCellEditComboKeyPress;
     SetFocus;
   end;
@@ -1357,6 +1379,16 @@ end;
 procedure TfpgCustomEditGrid.SetEditComboDropDownCount(AIndex: integer; AValue: integer);
 begin
   TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).DropDownCount := AValue;
+end;
+
+function TfpgCustomEditGrid.GetEditComboScrollBarWidth(AIndex: integer): integer;
+begin
+  Result := TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).ScrollBarWidth;
+end;
+
+procedure TfpgCustomEditGrid.SetEditComboScrollBarWidth(AIndex: integer; AValue: integer);
+begin
+  TfpgEditComboColumn(TfpgEditColumn(Columns[AIndex]).Data).ScrollBarWidth := AValue;
 end;
 
 procedure TfpgCustomEditGrid.IniCheckBoxCell;
