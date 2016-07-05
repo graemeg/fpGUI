@@ -674,7 +674,7 @@ end;
 
 procedure TfpgPanel.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
+  FreeAndNil(FFont);
   FFont := fpgGetFont(AValue);
   Repaint;
 end;
@@ -808,7 +808,7 @@ end;
 destructor TfpgPanel.Destroy;
 begin
   FText := '';
-  FFont.Free;
+  FreeAndNil(FFont);
   inherited Destroy;
 end;
 
@@ -857,7 +857,7 @@ end;
 
 procedure TfpgGroupBox.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
+  FreeAndNil(FFont);
   FFont := fpgGetFont(AValue);
   Repaint;
 end;
@@ -880,6 +880,8 @@ function TfpgGroupBox.GetClientRect: TfpgRect;
 var
   h: integer;
 begin
+  if not Assigned(FFont) then
+    exit;
   h := FFont.Height + 4;
   Result.SetRect(2, h, Width - 4, Height - (h + 2));
 end;
@@ -1052,7 +1054,7 @@ end;
 
 destructor TfpgGroupBox.Destroy;
 begin
-  FFont.Free;
+  FreeAndNil(FFont);
   inherited Destroy;
 end;
 
@@ -1061,7 +1063,7 @@ end;
 procedure TfpgImagePanel.SetImage(const AValue: TfpgImage);
 begin
   if FOwnsImage and Assigned(FImage) then
-    FImage.Free;
+    FreeAndNil(FImage);
   FImage := AValue;
   Repaint;
 end;
@@ -1103,7 +1105,7 @@ end;
 destructor TfpgImagePanel.Destroy;
 begin
   if FOwnsImage then
-    FImage.Free;
+    FreeAndNil(FImage);
   inherited Destroy;
 end;
 
