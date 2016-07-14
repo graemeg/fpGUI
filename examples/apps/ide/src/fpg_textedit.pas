@@ -34,7 +34,6 @@ type
 
   TfpgFindOptions = set of (foMatchCase, foWholeWords, foEntireScope);
 
-  { TfpgGutter }
 
   TfpgGutter = class(TfpgWidget)
   private
@@ -260,6 +259,7 @@ type
 
   TfpgTextEdit = class(TfpgBaseTextEdit)
   published
+    property    AutoIndent;
     property    FontDesc;
     property    FullRedraw;
     property    GutterVisible;
