@@ -2804,7 +2804,6 @@ begin
   WindowPosition := wpUser;
   MinWidth := 430;
   MinHeight := 300;
-  DNDEnabled := True;
   OnCloseQuery  := @MainFormCloseQuery;
 
   bvlStatusBar := TfpgBevel.Create(self);
@@ -2879,11 +2878,7 @@ begin
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
-    AcceptDrops := True;
     OnChange  := @tvContentsChange;
-    //OnDoubleClick  := @tvContentsDoubleClick;
-    OnDragEnter := @tvContentsDragEntered;
-    OnDragDrop := @tvContentsDragDrop;
   end;
 
   btnGo := TfpgButton.Create(tsContents);
@@ -3257,12 +3252,9 @@ begin
     SetPosition(77, 188, 244, 92);
     TabOrder := 2;
     Align := alClient;
-    AcceptDrops := True;
     OnOverLink  := @RichViewOverLink;
     OnNotOverLink  := @RichViewNotOverLink;
     OnClickLink := @RichViewClickLink;
-    OnDragEnter := @tvContentsDragEntered;
-    OnDragDrop := @RichViewDragDrop;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
