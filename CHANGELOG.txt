@@ -16,6 +16,7 @@ v2.0 (unknown)
        - UpdateWindowPosition -> UpdatePosition
        - HasHandle -> Window.HasHandle  or use  WindowAllocated
        - WindowToScreen() -> WidgetToScreen()
+       - WinHandle -> Window.WinHandle
     * PDF reporting classes and identifier names got translated from French to
       English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
     * Renamed TfpgRect.IsEmpty to TfpgRect.IsUnassigned. Added TfpgRect.Clear

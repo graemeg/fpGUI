@@ -675,7 +675,7 @@ begin
   end;
   // This is just for fun! ;-)
   {$IFDEF ABOUT_SYSMENU}
-  hSysMenu := GetSystemMenu(self.WinHandle, false);
+  hSysMenu := GetSystemMenu(self.Window.WinHandle, false);
   AppendMenu(hSysMenu, MF_SEPARATOR, 0, nil);
   AppendMenu(hSysMenu, MF_STRING, ID_ABOUT, PChar('&About fpGUI Toolkit...'));
   {$ENDIF}
