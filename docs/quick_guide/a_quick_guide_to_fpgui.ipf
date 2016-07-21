@@ -2,7 +2,7 @@
 .* :encoding=IBM850:wrap=hard:tabSize=2:noTabs=true:
 
 .* =============================================
-.* Copyright (c) 2015 by Graeme Geldenhuys
+.* Copyright (c) 2016 by Graeme Geldenhuys
 .* =============================================
 
 :userdoc.
@@ -36,7 +36,7 @@ Written by Graeme Geldenhuys
 :artwork align=center name='images/wizard_pink.bmp'.
 .br
 .br
-All Rights Reserved. Copyright (c) 2015 by Graeme Geldenhuys
+All Rights Reserved. Copyright (c) 2015-2016 by Graeme Geldenhuys
 .br
 :elines.
 
@@ -193,7 +193,7 @@ behaviour. Instead of reinventing the wheel, I thought I would do some
 searching to see if there is another project I could contribute to, or that
 could give me a head start.
 :p.
-The first version of my GUI tolkit was based around a heavily modified
+The first version of my GUI toqlkit was based around a heavily modified
 version of the Light Pascal Toolkit [http://sourceforge.net/projects/lptk]. I
 then discovered the discontinued
 fpGUI and fpGFX projects. I tried to contact the original author to no
