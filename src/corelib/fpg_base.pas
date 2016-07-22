@@ -28,11 +28,15 @@ unit fpg_base;
 interface
 
 uses
+  {$IFDEF WINDOWS}Windows,{$ENDIF}
   Classes,
   SysUtils,
   fpg_impl,
   syncobjs, // TCriticalSection usage
   variants, contnrs;
+
+function ScaleX(const SizeX, FromDPI: integer): integer;
+function ScaleY(const SizeY, FromDPI: integer): integer;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -798,6 +802,19 @@ const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
 
+function ScaleX(const SizeX, FromDPI: integer): integer;
+begin
+  {$IFDEF WINDOWS}
+  Result := MulDiv(SizeX, fpgApplication.Screen_dpi_x, FromDPI);
+  {$ENDIF}
+end;
+
+function ScaleY(const SizeY, FromDPI: integer): integer;
+begin
+  {$IFDEF WINDOWS}
+  Result := MulDiv(SizeY, fpgApplication.Screen_dpi_y, FromDPI);
+  {$ENDIF}
+end;
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
@@ -3241,7 +3258,11 @@ begin
   end;
 end;
 
-
+initialization
+{$IFDEF WINDOWS}
+FPG_DEFAULT_FONT_DESC:= 'Arial-'+IntToStr(ScaleY(8, 96))+':antialias=true';
+FPG_DEFAULT_FIXED_FONT_DESC:= 'Courier New-'+IntToStr(ScaleY(10, 96));
+{$ENDIF}
 
 end.
 
