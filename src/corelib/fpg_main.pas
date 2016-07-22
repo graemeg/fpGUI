@@ -2093,8 +2093,8 @@ begin
   fpgSetNamedFont('Edit1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Edit2', FPG_DEFAULT_FIXED_FONT_DESC);
   fpgSetNamedFont('List', FPG_DEFAULT_FONT_DESC);
-  fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-9');
-  fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-9:bold');
+  fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-' + IntToStr(ScaleY(9, 96)));
+  fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-' + IntToStr(ScaleY(9, 96)) + ':bold');
   fpgSetNamedFont('Menu', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':underline');
   fpgSetNamedFont('MenuDisabled', FPG_DEFAULT_FONT_DESC);
