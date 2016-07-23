@@ -206,7 +206,7 @@ begin
   begin
     { Kind specific Bacground }
     case FKind of
-      { Currently Text doesn't require additional Bacground }
+      { Currently Text doesn't require additional Background }
       { And so horizontal and vertical bar - Unless style requires it}
       gkHorizontalBar,
       gkVerticalBar:
