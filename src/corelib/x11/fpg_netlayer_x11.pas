@@ -31,7 +31,8 @@ type
                     nwtDialog, nwtDropdownMenu, nwtPopupMenu, nwtToolTip,
                     nwtNotification, nwtCombo, nwtDND, nwtNormal);
   TNetWindowTypes = set of TNetWindowType;
-  
+
+  // Order of state enums must match the order of TNetWindowState for some typecasts
   TNetWindowState = (nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
                      nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn);
   TNetWindowStates = set of TNetWindowState;
@@ -88,6 +89,7 @@ type
                naWM_WINDOW_TYPE_COMBO,
                naWM_WINDOW_TYPE_DND,
                naWM_STATE, // array of TAtoms. Possible members are listed below. others should be ignored
+               // Order of state enums must match the order of TNetWindowState for some typecasts
                naWM_STATE_MODAL,
                naWM_STATE_STICKY,
                naWM_STATE_MAXIMIZED_VERT,
@@ -145,12 +147,16 @@ type
     function GetNetAtom(AAtom: TNetAtomEnum): TNetAtom;
     procedure InitNetAtoms;
     procedure UpdateSupportedAtoms;
+    function    WindowSetStateAtom(const AWindow: TWindow; const AValue: Boolean; const  AState: TNetWindowState): Boolean;
+    function    WindowGetStateAtom(const AWindow: TWindow; out AValue: Boolean;  AState: TNetWindowState): Boolean;
   public
     // window related functions
     function    WindowSetAlpha(const AWindow: TWindow; AValue: Single): Boolean;
     function    WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
     function    WindowGetHidden(const AWindow: TWindow; out AValue: Boolean): Boolean;
     function    WindowSetHidden(const AWindow: TWindow; const AValue: Boolean): Boolean;
+    function    WindowGetAbove(const AWindow: TWindow; out AValue: Boolean): Boolean;
+    function    WindowSetAbove(const AWindow: TWindow; const AValue: Boolean): Boolean;
     function    WindowGetMaximizedState(const AWindow: TWindow; out AValue: TNetMaximizedState): Boolean;
     function    WindowSetMaximizedState(const AWindow: TWindow; const AValue: TNetMaximizedState): Boolean;
     function    WindowSetFullscreen(const AWindow: TWindow; const AValue: Boolean): Boolean;
@@ -345,6 +351,37 @@ begin
     XFree(Atoms);
 end;
 
+function TNETWindowLayer.WindowSetStateAtom(const AWindow: TWindow;
+  const AValue: Boolean; const AState: TNetWindowState): Boolean;
+var
+  Msg: TXClientMessageEvent;
+begin
+  Result := FAtomSupported[naWM_STATE] and FAtomSupported[TNetAtomEnum(PtrUInt(naWM_STATE_MODAL)+Ord(AState))];
+  if Result = False then Exit;
+  Result := True;
+  FillChar(Msg, SizeOf(Msg), 0);
+
+  Msg.message_type := FNetAtoms[naWM_STATE];
+  Msg.window := AWindow;
+  Msg.data.l[0] := Ord(AValue);
+  Msg.data.l[1] := FNetAtoms[TNetAtomEnum(PtrUInt(naWM_STATE_MODAL)+Ord(AState))];
+  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
+
+  SendRootWindowClientMessage(@Msg);
+end;
+
+function TNETWindowLayer.WindowGetStateAtom(const AWindow: TWindow; out
+  AValue: Boolean; AState: TNetWindowState): Boolean;
+var
+  WinState: TNetWindowStates;
+begin
+  Result := FAtomSupported[naWM_STATE] and FAtomSupported[TNetAtomEnum(PtrUInt(naWM_STATE_MODAL)+Ord(AState))]
+  and WindowGetState(AWindow, WinState);
+  if not Result then Exit;
+  AValue := AState in WinState;
+end;
+
+
 function TNETWindowLayer.WindowSetAlpha(const AWindow: TWindow; AValue: Single): Boolean;
 var
   Alpha: Cardinal;
@@ -400,6 +437,18 @@ begin
   Msg.data.l[3] := _NET_SOURCE_APPLICATION;
   
   SendRootWindowClientMessage(@Msg);
+end;
+
+function TNETWindowLayer.WindowGetAbove(const AWindow: TWindow; out
+  AValue: Boolean): Boolean;
+begin
+  Result := WindowGetStateAtom(AWindow, AValue, nwsAbove);
+end;
+
+function TNETWindowLayer.WindowSetAbove(const AWindow: TWindow;
+  const AValue: Boolean): Boolean;
+begin
+  Result := WindowSetStateAtom(AWindow, AValue, nwsAbove);
 end;
 
 function TNETWindowLayer.WindowGetMaximizedState(const AWindow: TWindow; out
