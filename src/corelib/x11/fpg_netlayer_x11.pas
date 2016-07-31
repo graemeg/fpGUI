@@ -630,30 +630,15 @@ end;
 
 function TNETWindowLayer.WindowSetSticky(const AWindow: TWindow;
   const AValue: Boolean): Boolean;
-var
-  Msg: TXClientMessageEvent;
 begin
-  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_STICKY];
-  if Result = False then Exit;
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.window := AWindow;
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.data.l[0] := Ord(AValue);
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_STICKY];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-
-  SendRootWindowClientMessage(@Msg);
+  Result := WindowSetStateAtom(AWindow, AValue, nwsSticky);
 end;
 
-function TNETWindowLayer.WindowGetSticky(const AWindow: TWindow; out AValue: Boolean
-  ): Boolean;
+function TNETWindowLayer.WindowGetSticky(const AWindow: TWindow; out AValue: Boolean): Boolean;
 var
   WinState: TNetWindowStates;
 begin
-  Result := WindowGetState(AWindow, WinState);
-
-  if Result then AValue := nwsSticky in WinState;
+  Result := WindowGetStateAtom(AWindow, AValue, nwsSticky);
 end;
 
 procedure TNETWindowLayer.WindowSetPID(const AWindow: TWindow; const APID: Cardinal);
@@ -1010,55 +995,20 @@ begin
 end;
 
 procedure TNETWindowLayer.WindowDemandsAttention(const AWindow: TWindow);
-var
-  Msg: TXClientMessageEvent;
 begin
-  if FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_DEMANDS_ATTENTION] = False then Exit;
-
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.window := AWindow;
-  Msg.data.l[0] := _NET_WM_STATE_ADD;
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_DEMANDS_ATTENTION];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-
-  SendRootWindowClientMessage(@Msg);
+  WindowSetStateAtom(AWindow, True, nwsDemandsAttn);
 end;
 
 procedure TNETWindowLayer.WindowSetSkipTaskbar(const AWindow: TWindow;
   const AValue: Boolean);
-var
-  Msg: TXClientMessageEvent;
 begin
-  if FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_SKIP_TASKBAR] = False then Exit;
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.window := AWindow;
-  Msg.data.l[0] := Ord(AValue);
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_SKIP_TASKBAR];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-
-  SendRootWindowClientMessage(@Msg);
+  WindowSetStateAtom(AWindow, AValue, nwsSkipTaskBar);
 end;
 
 procedure TNETWindowLayer.WindowSetSkipPager(const AWindow: TWindow;
   const AValue: Boolean);
-var
-  Msg: TXClientMessageEvent;
 begin
-  if FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_SKIP_PAGER] = False then Exit;
-
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.window := AWindow;
-  Msg.data.l[0] := Ord(AValue);
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_SKIP_PAGER];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-
-  SendRootWindowClientMessage(@Msg);
+  WindowSetStateAtom(AWindow, AValue, nwsSkipPager);
 end;
 
 function TNETWindowLayer.WindowGetType(const AWindow: TWindow; out
