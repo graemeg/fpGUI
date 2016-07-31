@@ -157,6 +157,10 @@ type
     function    WindowSetHidden(const AWindow: TWindow; const AValue: Boolean): Boolean;
     function    WindowGetAbove(const AWindow: TWindow; out AValue: Boolean): Boolean;
     function    WindowSetAbove(const AWindow: TWindow; const AValue: Boolean): Boolean;
+    function    WindowGetBelow(const AWindow: TWindow; out AValue: Boolean): Boolean;
+    function    WindowSetBelow(const AWindow: TWindow; const AValue: Boolean): Boolean;
+    function    WindowGetShaded(const AWindow: TWindow; out AValue: Boolean): Boolean;
+    function    WindowSetShaded(const AWindow: TWindow; const AValue: Boolean): Boolean;
     function    WindowGetMaximizedState(const AWindow: TWindow; out AValue: TNetMaximizedState): Boolean;
     function    WindowSetMaximizedState(const AWindow: TWindow; const AValue: TNetMaximizedState): Boolean;
     function    WindowSetFullscreen(const AWindow: TWindow; const AValue: Boolean): Boolean;
@@ -431,6 +435,31 @@ function TNETWindowLayer.WindowSetAbove(const AWindow: TWindow;
   const AValue: Boolean): Boolean;
 begin
   Result := WindowSetStateAtom(AWindow, AValue, nwsAbove);
+end;
+
+function TNETWindowLayer.WindowGetBelow(const AWindow: TWindow; out
+  AValue: Boolean): Boolean;
+begin
+  Result := WindowGetStateAtom(AWindow, AValue, nwsBelow);
+end;
+
+function TNETWindowLayer.WindowSetBelow(const AWindow: TWindow;
+  const AValue: Boolean): Boolean;
+begin
+  Result := WindowSetStateAtom(AWindow, AValue, nwsBelow);
+end;
+
+function TNETWindowLayer.WindowGetShaded(const AWindow: TWindow; out
+  AValue: Boolean): Boolean;
+begin
+  Result := WindowGetStateAtom(AWindow, AValue, nwsShaded);
+end;
+
+function TNETWindowLayer.WindowSetShaded(const AWindow: TWindow;
+  const AValue: Boolean): Boolean;
+begin
+  Result := WindowSetStateAtom(AWindow, AValue, nwsShaded);
+
 end;
 
 function TNETWindowLayer.WindowGetMaximizedState(const AWindow: TWindow; out
