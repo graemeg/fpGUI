@@ -412,31 +412,13 @@ begin
 end;
 
 function TNETWindowLayer.WindowGetHidden(const AWindow: TWindow; out AValue: Boolean): Boolean;
-var
-  WinState: TNetWindowStates;
 begin
-  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_HIDDEN]
-  and WindowGetState(AWindow, WinState);
-  if not Result then Exit;
-  AValue := nwsHidden in WinState;
+  Result := WindowGetStateAtom(AWindow, AValue, nwsHidden);
 end;
 
 function TNETWindowLayer.WindowSetHidden(const AWindow: TWindow; const AValue: Boolean): Boolean;
-var
-  Msg: TXClientMessageEvent;
 begin
-  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_HIDDEN];
-  if Result = False then Exit;
-  Result := True;
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.window := AWindow;
-  Msg.data.l[0] := Ord(AValue);
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_HIDDEN];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-  
-  SendRootWindowClientMessage(@Msg);
+  Result := WindowSetStateAtom(AWindow, AValue, nwsHidden);
 end;
 
 function TNETWindowLayer.WindowGetAbove(const AWindow: TWindow; out
@@ -513,33 +495,14 @@ end;
 
 function TNETWindowLayer.WindowSetFullscreen(const AWindow: TWindow;
   const AValue: Boolean): Boolean;
-var
-  Msg: TXClientMessageEvent;
 begin
-  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_FULLSCREEN];
-  if Result = False then Exit;
-  FillChar(Msg, SizeOf(Msg), 0);
-
-  Msg.message_type := FNetAtoms[naWM_STATE];
-  Msg.window := AWindow;
-  if AValue then
-    Msg.data.l[0] := _NET_WM_STATE_ADD
-  else
-    Msg.data.l[0] := _NET_WM_STATE_REMOVE;
-  Msg.data.l[1] := FNetAtoms[naWM_STATE_FULLSCREEN];
-  Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-
-  SendRootWindowClientMessage(@Msg);
+  Result := WindowSetStateAtom(AWindow, AValue, nwsFullScreen);
 end;
 
 function TNETWindowLayer.WindowGetFullscreen(const AWindow: TWindow; out
   AValue: Boolean): Boolean;
-var
-  WinState: TNetWindowStates;
 begin
-  Result := WindowGetState(AWindow, WinState);
-
-  if Result then AValue := nwsFullScreen in WinState;
+  Result := WindowGetStateAtom(AWindow, AValue, nwsFullScreen);
 end;
 
 function TNETWindowLayer.WindowSetDesktop(const AWindow: TWindow;
@@ -635,8 +598,6 @@ begin
 end;
 
 function TNETWindowLayer.WindowGetSticky(const AWindow: TWindow; out AValue: Boolean): Boolean;
-var
-  WinState: TNetWindowStates;
 begin
   Result := WindowGetStateAtom(AWindow, AValue, nwsSticky);
 end;
@@ -988,10 +949,7 @@ end;
 function TNETWindowLayer.WindowSetModal(const AWindow: TWindow;
   const AValue: Boolean): Boolean;
 begin
-  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_MODAL];
-  if not Result then
-    Exit;
-  WindowAppendPropertyAtom(AWindow, FNetAtoms[naWM_STATE], 1, @FNetAtoms[naWM_STATE_MODAL]);
+  Result := WindowSetStateAtom(AWindow, AValue, nwsModal);
 end;
 
 procedure TNETWindowLayer.WindowDemandsAttention(const AWindow: TWindow);
