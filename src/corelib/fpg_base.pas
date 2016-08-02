@@ -57,7 +57,7 @@ type
 
   TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos);
+      waOneThirdDownPos, waSystemStayOnTop);
   TWindowAttributes = set of TWindowAttribute;
 
   TfpgWindowState = (wsNormal, wsMinimized, wsMaximized);
@@ -609,6 +609,7 @@ type
     procedure   SetWindowOpacity(AValue: Single); virtual;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
+    procedure   SetWindowAttributes(const AAttributes: TWindowAttributes); virtual;
     // alien windows methods
     procedure   DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
     procedure   DispatchKeyEvent(var msg: TfpgMessageRec);
@@ -649,7 +650,7 @@ type
     property    MouseCapture: TfpgWidgetBase read FMouseCapture write FMouseCapture;
     property    CurrentWidget: TfpgWidgetBase read FCurrentWidget write SetCurrentWidget;
     property    WindowType: TWindowType read FWindowType write FWindowType;
-    property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
+    property    WindowAttributes: TWindowAttributes read FWindowAttributes write SetWindowAttributes;
     property    WindowTitle: string write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState default wsNormal;
     property    WindowOpacity: Single read FWindowOpacity write SetWindowOpacity default 1.0;
@@ -2100,6 +2101,11 @@ end;
 procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);
 begin
   DoSetWindowTitle(ATitle);
+end;
+
+procedure  TfpgWindowBase.SetWindowAttributes(const AAttributes: TWindowAttributes);
+begin
+  FWindowAttributes := AAttributes;
 end;
 
 procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);

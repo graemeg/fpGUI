@@ -242,6 +242,7 @@ type
     FSyncValue: TXSyncValue;
     FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
+    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
@@ -263,6 +264,7 @@ type
     function    GetWindowState: TfpgWindowState; override;
     procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
+    procedure   SetWindowAttributes(const AAttributes: TWindowAttributes); override;
     procedure   TriggerSyncCounter;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
@@ -2480,12 +2482,8 @@ var
   lmwh: TfpgWinHandle;
   attr: TXSetWindowAttributes;
   mask: longword;
-  hints: TXSizeHints;
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
-  prop: TAtom;
-  mwmhints: TMWMHints;
-  w: TfpgWidgetBase;
   IsToplevel: Boolean;
 begin
   if HandleIsValid then
@@ -2496,8 +2494,6 @@ begin
     pwh := TfpgX11Window(AParent.Window).WinHandle
   else
     pwh := xapplication.RootWindow;
-
-  w := PrimaryWidget;
 
   FillChar(attr, sizeof(attr), 0);
   mask := 0;
@@ -2595,52 +2591,6 @@ begin
       ApplyFormIcon;
   end;
 
-  FillChar(hints, sizeof(hints), 0);
-  hints.flags := 0;
-
-  if not (waAutoPos in FWindowAttributes) then
-    hints.flags := hints.flags or PPosition;
-
-  if waScreenCenterPos in FWindowAttributes then
-  begin
-    hints.flags := hints.flags or PPosition;
-    FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  else if waOneThirdDownPos in FWindowAttributes then
-  begin
-    hints.flags := hints.flags or PPosition;
-    FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end;
-
-  if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
-  begin
-    hints.flags      := hints.flags or PMinSize or PMaxSize;
-    hints.min_width  := w.MinWidth;
-    hints.min_height := w.MinHeight;
-    if w.MaxWidth > 0 then
-      hints.max_width := w.MaxWidth
-    else
-      hints.max_width := xapplication.ScreenWidth;
-    if w.MaxHeight > 0 then
-      hints.max_height := w.MaxHeight
-    else
-      hints.max_height := xapplication.ScreenHeight;
-  end
-  else
-  begin
-    hints.flags      := hints.flags or PMinSize or PMaxSize;
-    hints.min_width  := FSize.W;
-    hints.min_height := FSize.H;
-    hints.max_width  := FSize.W;
-    hints.max_height := FSize.H;
-  end;
-
-  XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
-
   if FWindowType <> wtChild then
     // send close event instead of quiting the whole application...
     fpgApplication.netlayer.WindowAddProtocol(FWinHandle, xapplication.xia_wm_delete_window);
@@ -2673,34 +2623,8 @@ begin
     end;
   end;
 
-  if (FWindowType = wtPopup) and (waStayOnTop in FWindowAttributes) then
-    // we have a Splash screen
-    fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash]);
+  DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
 
-  // process Borderless forms
-  if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) and not (waX11SkipWMHints in FWindowAttributes) then
-  begin
-    prop := X.None;
-    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', TBool(False));
-    if prop = X.None then
-    begin
-//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
-      // Set Override Redirect here!
-      mwmhints.flags := 0;
-    end
-    else
-    begin
-      mwmhints.flags := MWM_HINTS_DECORATIONS;
-      mwmhints.decorations := 0;
-
-      if xapplication.xia_motif_wm_hints <> X.None then
-      begin
-
-        prop := xapplication.xia_motif_wm_hints;
-        XChangeProperty(xapplication.display, FWinHandle, prop, prop, 32, PropModeReplace, @mwmhints, PROP_MWM_HINTS_ELEMENTS);
-      end;
-    end;
-  end;
 
   { TODO : We could optimise this for non-focusable widgets }
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
@@ -2973,6 +2897,148 @@ begin
 
   if FWinHandle <> 0 then
      fpgApplication.netlayer.WindowSetAlpha(FWinHandle,AValue);
+end;
+
+procedure TfpgX11Window.SetWindowAttributes(const AAttributes: TWindowAttributes);
+var
+  OldAttrs: TWindowAttributes;
+begin
+  OldAttrs:=FWindowAttributes;
+  inherited SetWindowAttributes(AAttributes);
+
+  if not HasHandle then
+    Exit; // ==>
+
+  DoSetWindowAttributes(OldAttrs, AAttributes, False);
+end;
+
+procedure TfpgX11Window.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
+var
+  hints: TXSizeHints;
+  Changed: TWindowAttributes = [];
+  attr: TWindowAttribute;
+  prop: TAtom;
+  mwmhints: TMWMHints;
+  w: TfpgWidgetBase;
+begin
+  // currently unhandled (here) attributes. Some are only set when the window is created.
+  {waFullScreen,
+   waUnblockableMessages,
+   waX11SkipWMHints}
+
+  if FWinHandle = 0 then
+    Exit; // ==>
+
+  if AForceAll then
+    Changed := ANewAttributes
+  else
+    for attr in TWindowAttribute do
+      if (attr in AOldAtributes) <> (attr in ANewAttributes) then
+        Include(Changed, attr);
+
+  w := PrimaryWidget;
+
+  FillChar(hints, SizeOf(hints), 0);
+
+  // if the window is mapped then this stuff is irrelevant
+  if not (xwsfMapped in FWinFlags) or AForceAll then
+  begin
+    // waAutoPos
+    if not (waAutoPos in ANewAttributes) then
+      hints.flags := hints.flags or PPosition;
+
+    // waScreenCenterPos;
+    if (waScreenCenterPos in ANewAttributes) then
+    begin
+      hints.flags := hints.flags or PPosition;
+      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
+      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
+      DoMoveWindow(FPosition.X, FPosition.Y);
+    end
+    // waOneThirdDownPos
+    else if waOneThirdDownPos in ANewAttributes then
+    begin
+      hints.flags := hints.flags or PPosition;
+      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
+      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
+      DoMoveWindow(FPosition.X, FPosition.Y);
+    end;
+  end;
+
+  // waSizeable;
+  if waSizeable in Changed then
+  begin
+    if (FWindowType <> wtChild) and (waSizeable in ANewAttributes) then
+    begin
+      hints.flags      := hints.flags or PMinSize or PMaxSize;
+      hints.min_width  := w.MinWidth;
+      hints.min_height := w.MinHeight;
+      if w.MaxWidth > 0 then
+        hints.max_width := w.MaxWidth
+      else
+        hints.max_width := xapplication.ScreenWidth;
+      if w.MaxHeight > 0 then
+        hints.max_height := w.MaxHeight
+      else
+        hints.max_height := xapplication.ScreenHeight;
+    end
+    else // not waSizeable
+    begin
+      hints.flags      := hints.flags or PMinSize or PMaxSize;
+      hints.min_width  := FSize.W;
+      hints.min_height := FSize.H;
+      hints.max_width  := FSize.W;
+      hints.max_height := FSize.H;
+    end;
+  end;
+
+  if hints.flags <> 0 then
+      XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
+
+
+  // waStayOnTop
+  if (FWindowType = wtPopup) and (waStayOnTop in Changed) then
+  begin
+    if (waStayOnTop in ANewAttributes) then // we have a Splash screen
+      fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash])
+    else
+      fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtPopupMenu]);
+  end;
+
+  // waSystemStayOnTop
+  if (waSystemStayOnTop in Changed) and (FWindowType in [wtWindow, wtModalForm]) then
+    if (waSystemStayOnTop in ANewAttributes) and (waSystemStayOnTop in Changed) then
+      fpgApplication.netlayer.WindowSetAbove(FWinHandle, True)
+    else
+      fpgApplication.netlayer.WindowSetAbove(FWinHandle, False);
+
+  // waBorderless
+  // process Borderless forms
+  if (waBorderless in Changed) and (FWindowType in [wtWindow, wtModalForm]) and not (waX11SkipWMHints in ANewAttributes) then
+  begin
+    prop := X.None;
+    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', TBool(False));
+    if prop = X.None then
+    begin
+//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
+      // Set Override Redirect here!
+      mwmhints.flags := 0;
+    end
+    else
+    begin
+      mwmhints.flags := MWM_HINTS_DECORATIONS;
+      if (waBorderless in ANewAttributes) then
+        mwmhints.decorations := 0 // no decorations
+      else
+        mwmhints.decorations := MWM_DECOR_ALL; // all decorations
+
+      if xapplication.xia_motif_wm_hints <> X.None then
+      begin
+        prop := xapplication.xia_motif_wm_hints;
+        XChangeProperty(xapplication.display, FWinHandle, prop, prop, 32, PropModeReplace, @mwmhints, PROP_MWM_HINTS_ELEMENTS);
+      end;
+    end;
+  end;
 end;
 
 procedure TfpgX11Window.TriggerSyncCounter;
