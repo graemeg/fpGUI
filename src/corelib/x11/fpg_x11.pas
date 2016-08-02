@@ -2922,9 +2922,11 @@ var
   w: TfpgWidgetBase;
 begin
   // currently unhandled (here) attributes. Some are only set when the window is created.
-  {waFullScreen,
-   waUnblockableMessages,
-   waX11SkipWMHints}
+  {
+   waFullScreen,          Set in DoSetWindowVisible
+   waUnblockableMessages, Handled in DoWaitWindowMessage
+   waX11SkipWMHints       Mostly Handled in DoAllocateWindowHandle
+  }
 
   if FWinHandle = 0 then
     Exit; // ==>
@@ -2994,7 +2996,6 @@ begin
 
   if hints.flags <> 0 then
       XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
-
 
   // waStayOnTop
   if (FWindowType = wtPopup) and (waStayOnTop in Changed) then
