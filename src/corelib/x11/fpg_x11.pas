@@ -21,7 +21,7 @@ unit fpg_x11;
 {.$Define GDEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 {.$Define X11CanvasDEBUG}
-{$Define DEBUG_NETWMSTATE} // // Debug _NET_WM_STATE property messages
+{.$Define DEBUG_NETWMSTATE} // // Debug _NET_WM_STATE property messages
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
