@@ -191,6 +191,8 @@ type
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
+    procedure   HandleWM_STYLECHANGED(styletype: longint; style: PSTYLESTRUCT);
+    procedure   HandleWM_WINDOWPOSCHANGED(winpos: PWINDOWPOS);
     {$IFDEF HAS_DND}
     property    DropManager: TfpgOLEDropTarget read GetDropManager;
     {$ENDIF}
@@ -380,6 +382,7 @@ uses
   fpg_popupwindow,
   fpg_stringutils,
   fpg_form,
+  fpg_window,
   math;
 
 
@@ -1129,6 +1132,21 @@ begin
           fpgSendMessage(nil, w, FPGM_MOVE, msgp);
         end;
 
+    WM_STYLECHANGED:
+        begin
+          {$IFDEF GDEBUG}
+          DebugLnFmt('%s: WM_STYLECHANGED' , [w.ClassName]);
+          {$ENDIF}
+          w.HandleWM_STYLECHANGED(wParam, Pointer(lParam));
+        end;
+    WM_WINDOWPOSCHANGED:
+        begin
+          {$IFDEF GDEBUG}
+          DebugLnFmt('%s: WM_STYLECHANGED' , [w.ClassName]);
+          {$ENDIF}
+          w.HandleWM_WINDOWPOSCHANGED(Pointer(lParam));
+        end;
+
     WM_MOUSEWHEEL:
         begin
           {$IFDEF GDEBUG}
@@ -1780,6 +1798,43 @@ begin
       UpdateWindowPosition;
   end;
   FFullscreenIsSet := aFullScreen;
+end;
+
+type
+  TfpgWindowAccess = class(TfpgWindow);
+
+procedure TfpgGDIWindow.HandleWM_STYLECHANGED(styletype: longint; style: PSTYLESTRUCT);
+var
+  ChangedAttrs: TWindowAttributes = [];
+  Attr: TWindowAttribute;
+begin
+  if styletype = GWL_EXSTYLE then
+  begin
+    if (waSystemStayOnTop in FWindowAttributes) <> (style^.styleNew and WS_EX_TOPMOST <> 0) then
+      Include(ChangedAttrs, waSystemStayOnTop);
+  end;
+
+   // Update FWindowAttributes with the changes
+  for Attr in TWindowAttributes do
+    if Attr in ChangedAttrs then
+      if Attr in FWindowAttributes then
+        Exclude(FWindowAttributes, Attr)
+      else
+        Include(FWindowAttributes, Attr);
+
+  // now notify the app of the changes if they are listening.
+  if PrimaryWidget.InheritsFrom(TfpgWindow) then
+  if Assigned(TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange) then
+    TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange(Self, ChangedAttrs);
+end;
+
+procedure TfpgGDIWindow.HandleWM_WINDOWPOSCHANGED(winpos: PWINDOWPOS);
+//var
+//  Changed: TWindowAttributes = [];
+begin
+ { if (waFullScreen in FWindowAttributes) <> (winpos^.flags and ) then
+      Include(Changed waSystemStayOnTop);
+  }
 end;
 
 procedure TfpgGDIWindow.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
