@@ -599,6 +599,7 @@ type
     procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
     procedure   DoRemoveWindowLookup; virtual; abstract;
+    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean); virtual; abstract;
     procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
     //procedure   DoSetWindowConstraints(AMinWidth, AMinHeight, AMaxWidth, AMaxHeight: TfpgCoord); virtual; abstract;
@@ -2106,8 +2107,16 @@ begin
 end;
 
 procedure  TfpgWindowBase.SetWindowAttributes(const AAttributes: TWindowAttributes);
+var
+  OldAttrs: TWindowAttributes;
 begin
-  FWindowAttributes := AAttributes;
+  OldAttrs:=FWindowAttributes;
+  FWindowAttributes:=AAttributes;
+
+  if not HasHandle then
+    Exit; // ==>
+
+  DoSetWindowAttributes(OldAttrs, AAttributes, False);
 end;
 
 procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);

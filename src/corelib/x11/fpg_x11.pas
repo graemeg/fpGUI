@@ -243,7 +243,6 @@ type
     FSyncValue: TXSyncValue;
     FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
-    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
     procedure   DoWindowNetStateChanged;
   protected
     FWinFlags: TXWindowStateFlags;
@@ -255,6 +254,7 @@ type
     procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); override;
     procedure   DoReleaseWindowHandle; override;
     procedure   DoRemoveWindowLookup; override;
+    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean); override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;

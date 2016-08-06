@@ -203,6 +203,7 @@ type
     procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); override;
     procedure   DoReleaseWindowHandle; override;
     procedure   DoRemoveWindowLookup; override;
+    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean); override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoUpdateWindowPosition; override;
@@ -1931,14 +1932,7 @@ begin
     DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 
-  if waStayOnTop in FWindowAttributes then
-    SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
-      SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
-
-  // The same as waStayOnTop for now
-  if waSystemStayOnTop in FWindowAttributes then
-    SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
-      SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
+  DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
 
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
@@ -1961,6 +1955,46 @@ end;
 procedure TfpgGDIWindow.DoRemoveWindowLookup;
 begin
   // Nothing to do here
+end;
+
+procedure TfpgGDIWindow.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
+var
+  Changed: TWindowAttributes = [];
+  attr: TWindowAttribute;
+begin
+  if FWinHandle = 0 then
+    Exit; // ==>
+
+  if AForceAll then
+    Changed := ANewAttributes
+  else
+    for attr in TWindowAttribute do
+      if (attr in AOldAtributes) <> (attr in ANewAttributes) then
+        Include(Changed, attr);
+
+  // waFullScreen
+  // only updated if forceall is false.
+  if (waFullScreen in Changed) then
+    WindowSetFullscreen(waFullScreen in FWindowAttributes, not AForceAll);
+
+  // waStayOnTop
+  if (waStayOnTop in Changed) and (FWindowType in [wtWindow, wtModalForm]) then
+    if (waStayOnTop in ANewAttributes) and (waSystemStayOnTop in Changed) then
+      SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
+        SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE)
+    else
+      SetWindowPos(FWinHandle, HWND_NOTOPMOST, 0, 0, 0, 0,
+        SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
+
+  // The same as waStayOnTop for now
+  // waSystemStayOnTop
+  if (waSystemStayOnTop in Changed) and (FWindowType in [wtWindow, wtModalForm]) then
+    if (waSystemStayOnTop in ANewAttributes) and (waSystemStayOnTop in Changed) then
+      SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
+        SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE)
+    else
+      SetWindowPos(FWinHandle, HWND_NOTOPMOST, 0, 0, 0, 0,
+        SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
 end;
 
 procedure TfpgGDIWindow.DoSetWindowVisible(const AValue: Boolean);
