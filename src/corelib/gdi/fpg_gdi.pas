@@ -1935,6 +1935,11 @@ begin
     SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
       SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
 
+  // The same as waStayOnTop for now
+  if waSystemStayOnTop in FWindowAttributes then
+    SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
+      SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
+
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
   FSkipResizeMessage := False;
