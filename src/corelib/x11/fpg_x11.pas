@@ -266,7 +266,6 @@ type
     function    GetWindowState: TfpgWindowState; override;
     procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
-    procedure   SetWindowAttributes(const AAttributes: TWindowAttributes); override;
     procedure   TriggerSyncCounter;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
@@ -2909,19 +2908,6 @@ begin
 
   if FWinHandle <> 0 then
      fpgApplication.netlayer.WindowSetAlpha(FWinHandle,AValue);
-end;
-
-procedure TfpgX11Window.SetWindowAttributes(const AAttributes: TWindowAttributes);
-var
-  OldAttrs: TWindowAttributes;
-begin
-  OldAttrs:=FWindowAttributes;
-  inherited SetWindowAttributes(AAttributes);
-
-  if not HasHandle then
-    Exit; // ==>
-
-  DoSetWindowAttributes(OldAttrs, AAttributes, False);
 end;
 
 procedure TfpgX11Window.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
