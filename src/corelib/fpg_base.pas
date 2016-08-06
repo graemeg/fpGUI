@@ -60,6 +60,8 @@ type
       waOneThirdDownPos, waSystemStayOnTop);
   TWindowAttributes = set of TWindowAttribute;
 
+  TfpgWindowAttributeChanged = procedure(Sender: TObject; ChangedAttributes: TWindowAttributes) of object;
+
   TfpgWindowState = (wsNormal, wsMinimized, wsMaximized);
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,

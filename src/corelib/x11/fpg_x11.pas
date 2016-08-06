@@ -21,6 +21,7 @@ unit fpg_x11;
 {.$Define GDEBUG}      // general debugging - mostly OS messages though
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 {.$Define X11CanvasDEBUG}
+{$Define DEBUG_NETWMSTATE} // // Debug _NET_WM_STATE property messages
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
@@ -243,6 +244,7 @@ type
     FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
     procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
+    procedure   DoWindowNetStateChanged;
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
@@ -500,6 +502,7 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
+  fpg_window,       // used for window attributes changed callback
   fpg_stringutils,  // used for GetTextWidth
   fpg_utils,
   fpg_form,         // for modal event support
@@ -2350,6 +2353,15 @@ begin
           // We are not interrested in this event yet
         end;
 
+    X.PropertyNotify:
+        begin
+          if ev.xproperty.atom = netlayer.NetAtom[naWM_STATE] then
+          begin
+            w := FindWindowByHandle(ev.xproperty.window);
+            w.DoWindowNetStateChanged;
+          end;
+        end
+
     else
       DebugLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
@@ -2632,7 +2644,7 @@ begin
       EnterWindowMask or LeaveWindowMask or
       ButtonMotionMask or PointerMotionMask or
       ExposureMask or FocusChangeMask or
-      StructureNotifyMask);
+      StructureNotifyMask or PropertyChangeMask);
 
   SetWindowParameters;
 
@@ -3040,6 +3052,57 @@ begin
       end;
     end;
   end;
+end;
+
+type
+  TfpgWindowAccess = class(TfpgWindow);
+
+procedure TfpgX11Window.DoWindowNetStateChanged;
+var
+  States: TNetWindowStates;
+  ChangedAttrs: TWindowAttributes = [];
+  Attr: TWindowAttribute;
+begin
+  {waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
+      waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
+      waOneThirdDownPos, waSystemStayOnTop}
+
+  {nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
+                     nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn}
+  if not xapplication.netlayer.WindowGetState(WinHandle, States) then
+    Exit; // ==>
+
+  // make a list of window attributes that have changed that are affected by the
+  // _NET_WM_STATE property. Only changes that differ from current attributes
+  // are added to the changed list. If we have initiated the change then it wont
+  // be included since as far as we are concerned it is already true.
+
+  if (nwsAbove in States) <> (waSystemStayOnTop in FWindowAttributes) then
+    Include(ChangedAttrs, waSystemStayOnTop);
+  if (nwsFullScreen in States) <> (waFullScreen in FWindowAttributes) then
+    Include(ChangedAttrs, waFullScreen);
+
+  // Update FWindowAttributes with the changes
+  for Attr in TWindowAttributes do
+    if Attr in ChangedAttrs then
+      if Attr in FWindowAttributes then
+        Exclude(FWindowAttributes, Attr)
+      else
+        Include(FWindowAttributes, Attr);
+
+  {$IFDEF DEBUG_NETWMSTATE}
+  for Attr in TWindowAttribute do
+    if Attr in ChangedAttrs then
+      WriteLn('X11: _NET_WM_STATE changed: ', Attr);
+  if ChangedAttrs = [] then
+    WriteLn('X11: _NET_WM_STATE changed:  Unhandled state or change already made.');
+  {$ENDIF}
+
+  // now notify the app of the changes if they are listening.
+  if PrimaryWidget.InheritsFrom(TfpgWindow) then
+  if Assigned(TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange) then
+    TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange(Self, ChangedAttrs);
+
 end;
 
 procedure TfpgX11Window.TriggerSyncCounter;

@@ -44,6 +44,7 @@ type
     procedure SetWindowState(AValue: TfpgWindowState);
   protected
     FWindowType: TWindowType;
+    FOnWindowAttributesChange: TfpgWindowAttributeChanged;
     procedure   AdjustWindowStyle; virtual;
     procedure   SetWindowParameters; virtual;
     procedure   SetWindowTitle(const ATitle: string); virtual;
@@ -53,6 +54,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow;
+    property    OnWindowAttributesChange: TfpgWindowAttributeChanged read FOnWindowAttributesChange write FOnWindowAttributesChange;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    WindowState: TfpgWindowState read GetWindowState write SetWindowState;
     property    WindowOpacity: Single read FOpacity write SetWindowOpacity;
