@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -525,6 +525,7 @@ begin
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
   wc.AddProperty('AutoSize', TPropertyBoolean, 'Change Height based on FontDesc being set');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('DropDownCount', TPropertyInteger, 'Number of visible items is the dropdown list.');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
