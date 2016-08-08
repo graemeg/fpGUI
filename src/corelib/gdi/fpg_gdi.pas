@@ -2528,14 +2528,13 @@ var
   PointArray: PPoint;
   i: integer;
 begin
-  { convert TPoint to TXPoint }
-  GetMem(PointArray, SizeOf(TPoint)*(Length(Points)+1)); // +1 for return line
+  GetMem(PointArray, SizeOf(TPoint) * Length(Points));
   for i := Low(Points) to High(Points) do
   begin
     PointArray[i].x := Points[i].x+FDeltaX;
     PointArray[i].y := Points[i].y+FDeltaY;
   end;
-  Windows.Polygon(FDrawGC, PointArray, Length(Points)+1);
+  Windows.Polygon(FDrawGC, PointArray, Length(Points));
 end;
 
 function TfpgGDICanvas.GetBufferAllocated: Boolean;
