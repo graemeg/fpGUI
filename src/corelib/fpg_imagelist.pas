@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -82,6 +82,7 @@ implementation
 
 uses
   fpg_imgfmt_bmp,
+  fpg_imgfmt_png,
   fpg_utils;
 
 { TfpgImageList }
@@ -292,7 +293,13 @@ begin
   {$ENDIF}
   if FImage <> nil then
     FImage.Destroy;
-  FImage := LoadImage_BMP(AFileName);
+  if Lowercase(fpgExtractFileExt(AFileName)) = '.png' then
+    FImage := LoadImage_PNG(AFileName)
+  else if Lowercase(fpgExtractFileExt(AFileName)) = '.bmp' then
+    FImage := LoadImage_BMP(AFileName)
+  else
+    { the default BMP fallback - might changes this to PNG at some point }
+    FImage := LoadImage_BMP(AFileName);
 end;
 
 end.
