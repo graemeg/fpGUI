@@ -628,7 +628,7 @@ begin
     if FDown then
      OffsetRect(r, offset.x, offset.y);
 
-    lTextFlags := [txtHCenter, txtVCenter];
+    lTextFlags := [txtHCenter, txtVCenter, txtWrap];
     if not Enabled then
       lTextFlags += [txtDisabled];
     Canvas.DrawText(r, Text, lTextFlags);  { DrawText does use fpgStyle }
