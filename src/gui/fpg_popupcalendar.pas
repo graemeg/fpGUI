@@ -221,21 +221,21 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    Align;
-    property    BackgroundColor;
+    property    BackgroundColor default clWindowBackground;
     { Clicking on calendar Today button will close the popup calendar by default }
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    DateFormat: string read FDateFormat write SetDateFormat;
     property    DateValue: TDateTime read FDate write SetDateValue;
-    property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    DayColor: TfpgColor read FDayColor write SetDayColor default clBlack;
     property    Enabled;
     property    FontDesc;
     property    Hint;
-    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
+    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor default clBlack;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    ParentShowHint;
     property    ReadOnly;
-    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
+    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor default clBlack;
     property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
     property    ShowHint;
     property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
@@ -1416,6 +1416,9 @@ begin
   FCloseOnSelect := True;
   FSingleClickSelect := False;
   DateFormat := ShortDateFormat;
+  FSelectedColor := clBlack;
+  FHolidayColor := clBlack;
+  FDayColor := clBlack;
 end;
 
 procedure TfpgCalendarCombo.InternalOnValueSet(Sender: TObject;
