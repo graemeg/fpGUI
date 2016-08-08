@@ -92,18 +92,19 @@ begin
   SetPosition(335, 206, 484, 250);
   WindowTitle := 'Testing Custom Styles';
   Hint := '';
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
 
   btnName1 := TfpgButton.Create(self);
   with btnName1 do
   begin
     Name := 'btnName1';
-    SetPosition(24, 56, 80, 24);
-    Text := 'Button1';
+    SetPosition(24, 48, 104, 48);
+    Text := 'Button1 line 1' + LineEnding + 'and line 2.';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 1;
+    AllowMultiLineText := True;
   end;
 
   lblName1 := TfpgLabel.Create(self);
