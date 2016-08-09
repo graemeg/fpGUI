@@ -378,17 +378,19 @@ with EG_Grid do
   for Cpt:= 0 to Pred(ComboBoxListe.Count) do
     AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
   ComboBoxDropDownCount[Pred(ColumnCount)] := 6;
+  ComboBoxScrollBarWidth[Pred(ColumnCount)] := 12;
   AddColumn('EditCombo',120,etEditCombo);
   AutoComplete[Pred(ColumnCount)] := True;
   AllowNew[Pred(ColumnCount)] := anAsk;
   EditComboDropDownCount[Pred(ColumnCount)] := 4;
+  EditComboScrollBarWidth[Pred(ColumnCount)] := 12;
   AddColumn('CheckBox',100,etCheckBox,taCenter);
   BoxCheckedText[Pred(ColumnCount)] := 'True';
   BoxUncheckedText[Pred(ColumnCount)] := 'False';
   BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
   AddColumn('Calendar',120,etCalendar,taCenter);
-  GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
-  CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
+  GridDateFormat[Pred(ColumnCount)] := DefaultFormatSettings.LongDateFormat;
+  CalendarDateFormat[Pred(ColumnCount)] := DefaultFormatSettings.ShortDateFormat;
   DateValue[Pred(ColumnCount)] := Now;
   WeekStartDay[Pred(ColumnCount)] := 1;
   WeeklyHoliday[Pred(ColumnCount)] := 7;

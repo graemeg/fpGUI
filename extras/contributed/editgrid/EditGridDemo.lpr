@@ -3,9 +3,8 @@ program EditGridDemo;
 {$mode objfpc}{$H+}
 
 uses
-  Classes,fpgui_toolkit
-  { you can add units after this },
-  fpg_main, u_demo, u_editgrid;
+  Classes,
+  fpg_main, u_demo;
 
 procedure MainProc;
 begin
