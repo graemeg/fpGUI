@@ -189,7 +189,7 @@ type
     procedure   Update;
     procedure   BeginUpdate;
     procedure   EndUpdate;
-    procedure   MouseToCell(X, Y: Integer; var ACol, ARow: Integer);
+    procedure   MouseToCell(X, Y: Integer; out ACol, ARow: Integer);
     function    GetClientRect: TfpgRect; override;
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
@@ -1772,7 +1772,7 @@ begin
   end;
 end;
 
-procedure TfpgBaseGrid.MouseToCell(X, Y: Integer; var ACol, ARow: Integer);
+procedure TfpgBaseGrid.MouseToCell(X, Y: Integer; out ACol, ARow: Integer);
 var
   hh: integer;
   cw: integer;
