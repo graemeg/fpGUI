@@ -378,10 +378,12 @@ with EG_Grid do
   for Cpt:= 0 to Pred(ComboBoxListe.Count) do
     AddComboItem(Pred(ColumnCount),ComboBoxListe[Cpt]);
   ComboBoxDropDownCount[Pred(ColumnCount)] := 6;
+  ComboBoxScrollBarWidth[Pred(ColumnCount)] := 12;
   AddColumn('EditCombo',120,etEditCombo);
   AutoComplete[Pred(ColumnCount)] := True;
   AllowNew[Pred(ColumnCount)] := anAsk;
   EditComboDropDownCount[Pred(ColumnCount)] := 4;
+  EditComboScrollBarWidth[Pred(ColumnCount)] := 12;
   AddColumn('CheckBox',100,etCheckBox,taCenter);
   BoxCheckedText[Pred(ColumnCount)] := 'True';
   BoxUncheckedText[Pred(ColumnCount)] := 'False';
@@ -397,6 +399,7 @@ with EG_Grid do
   SingleClickSelect[Pred(ColumnCount)] := True;
   DefaultRowHeight:= 20;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
+  ScrollBarWidth:= 12;
 //  Options:= [go_HideFocusRect];
   Options:= [go_AlternativeColor];
   OnKeyPress:= @EG_GridKeyPress;
