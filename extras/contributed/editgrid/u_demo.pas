@@ -389,8 +389,8 @@ with EG_Grid do
   BoxUncheckedText[Pred(ColumnCount)] := 'False';
   BoxDisplayText[Pred(ColumnCount)] := 'CheckBox';
   AddColumn('Calendar',120,etCalendar,taCenter);
-  GridDateFormat[Pred(ColumnCount)] := LongDateFormat;
-  CalendarDateFormat[Pred(ColumnCount)] := ShortDateFormat;
+  GridDateFormat[Pred(ColumnCount)] := DefaultFormatSettings.LongDateFormat;
+  CalendarDateFormat[Pred(ColumnCount)] := DefaultFormatSettings.ShortDateFormat;
   DateValue[Pred(ColumnCount)] := Now;
   WeekStartDay[Pred(ColumnCount)] := 1;
   WeeklyHoliday[Pred(ColumnCount)] := 7;
@@ -399,7 +399,6 @@ with EG_Grid do
   SingleClickSelect[Pred(ColumnCount)] := True;
   DefaultRowHeight:= 20;
   HeaderFontDesc:= 'bitstream vera sans-10:bold';
-  ScrollBarWidth:= 12;
 //  Options:= [go_HideFocusRect];
   Options:= [go_AlternativeColor];
   OnKeyPress:= @EG_GridKeyPress;

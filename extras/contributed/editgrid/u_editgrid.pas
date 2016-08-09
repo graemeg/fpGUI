@@ -10,7 +10,6 @@ uses
   fpg_base,
   fpg_main,
   fpg_basegrid,
-  fpg_customgrid,
   fpg_grid,
   fpg_edit,
   fpg_combobox,
@@ -198,7 +197,7 @@ type
         const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     function    GetColumnEditType(AIndex: integer): TEditType;
     function    GetTextColor(AIndex: integer): TfpgColor;
-    procedure   SetTextColor(AIndex: integer; const AValue: TfpgColor);
+    procedure   SetTextColor(AIndex: integer; const AValue: TfpgColor); reintroduce;
     procedure   SetEditCell;
     procedure   CloseEditCell;
     procedure   SetReturnWay;
