@@ -2357,7 +2357,10 @@ begin
           if ev.xproperty.atom = netlayer.NetAtom[naWM_STATE] then
           begin
             w := FindWindowByHandle(ev.xproperty.window);
-            w.DoWindowNetStateChanged;
+            if not Assigned(w) then
+              ReportLostWindow(ev)
+            else
+              w.DoWindowNetStateChanged;
           end;
         end
 
