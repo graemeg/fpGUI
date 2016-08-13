@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2015 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006 - 2016 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -41,7 +41,8 @@ program fpmake;
 {$mode objfpc}
 {$h+}
 
-uses sysutils, fpmkunit;
+uses
+  sysutils, fpmkunit;
 
 const
   {$I VERSION_FILE.inc}
@@ -55,7 +56,7 @@ begin
     P.Version := FPGUI_VERSION;
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
-    P.License := 'LGPL with linking exception';
+    P.License := 'LGPL with static linking exception';
     P.Description := 'fpGUI Toolkit - a custom written GUI toolkit for Free Pascal.';
 
 //    P.Dependencies.Add('fcl');
@@ -66,7 +67,7 @@ begin
       if we set the package name to fpgui as above.  This base install dir
       can be overridden by passing -B to fpmake.  The line below will cause
       the units to be output in ../lib/<cpu-os>/fpgui  }
-//    Defaults.UnitInstallDir := Format('../lib/%s-%s/', [CurrentCPU, CurrentOS]);
+    Defaults.UnitInstallDir := Format('../lib/%s-%s/', [CurrentCPU, CurrentOS]);
 
     { If you installed FPC to a non-standard location, you need to specify
       where fpmake can find the compiler and RTL units. You can pass that
@@ -135,11 +136,11 @@ begin
     T := P.Targets.AddUnit('fpg_cmdlineparams.pas');
     T := P.Targets.AddUnit('fpg_imgfmt_bmp.pas');
     T := P.Targets.AddUnit('fpg_imgfmt_jpg.pas');
+    T := P.Targets.AddUnit('fpg_imgfmt_png.pas');
     T := P.Targets.AddUnit('fpg_stdimages.pas');
       T.Dependencies.AddInclude('stdimages.inc');
     T := P.Targets.AddUnit('fpg_utils.pas');
-      T.Dependencies.AddInclude('fpg_utils_impl.inc', AllUnixOSes);
-      T.Dependencies.AddInclude('fpg_utils_impl.inc', AllWindowsOSes);
+      T.Dependencies.AddInclude('fpg_utils_impl.inc');
     T := P.Targets.AddUnit('fpg_imgutils.pas');
     T := P.Targets.AddUnit('fpg_command_intf.pas');
     T := P.Targets.AddUnit('fpg_main.pas');
@@ -222,11 +223,23 @@ begin
     T := P.Targets.AddUnit('fpg_label.pas');
     T := P.Targets.AddUnit('fpg_menu.pas');
     T := P.Targets.AddUnit('fpg_progressbar.pas');
+    T := P.Targets.AddUnit('fpg_stylemanager.pas');
     T := P.Targets.AddUnit('fpg_style.pas');
     T := P.Targets.AddUnit('fpg_spinedit.pas');
     T := P.Targets.AddUnit('fpg_colorwheel.pas');
     T := P.Targets.AddUnit('fpg_colormapping.pas');
     T := P.Targets.AddUnit('fpg_editbtn.pas');
+    T := P.Targets.AddUnit('fpg_dnd_window.pas');
+    T := P.Targets.AddUnit('fpg_hexview.pas');
+    T := P.Targets.AddUnit('fpg_ledmatrix.pas');
+    T := P.Targets.AddUnit('fpg_window.pas');
+    T := P.Targets.AddUnit('fpg_trayicon.pas');
+    T := P.Targets.AddUnit('fpg_toggle.pas');
+    T := P.Targets.AddUnit('fpg_style_plastic.pas');
+    T := P.Targets.AddUnit('fpg_style_win2k.pas');
+    T := P.Targets.AddUnit('fpg_style_win8.pas');
+    T := P.Targets.AddUnit('fpg_style_motif.pas');
+    T := P.Targets.AddUnit('fpg_style_carbon.pas');
 
     { PDF report engine }
     T := P.Targets.AddUnit('u_reportimages.pas');
