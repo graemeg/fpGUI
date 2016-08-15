@@ -18,6 +18,7 @@
 unit fpg_base;
 
 {$mode objfpc}{$H+}
+{$interfaces corba}
 
 // To enable the AggPas powered Canvas
 {.$define AGGCanvas}
@@ -667,7 +668,6 @@ type
 
 
   TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
-  private
   private
     FMainForm: TfpgWidgetBase;
     FTerminated: boolean;
@@ -2259,8 +2259,6 @@ begin
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
-var
-  w: TfpgWidget absolute AOwner;
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
@@ -2834,10 +2832,8 @@ end;
 
 
 procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
-var
-  r: PfpgRect;
-  r2: TfpgRect;
 {$IFDEF CStackDebug}
+var
   itf: IInterface;
 {$ENDIF}
 begin
@@ -4034,8 +4030,6 @@ begin
   { now add new structure }
   r := TfpgMimeDataItem.Create(AMimeType, PtrUInt(Pointer(AValue)));
   FDataList.Add(r);
-
-
 end;
 
 function TfpgMimeDataBase.GetItem(AIndex: Integer): TfpgMimeDataItem;
