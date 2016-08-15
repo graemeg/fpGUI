@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -17,6 +17,7 @@
 unit fpg_main;
 
 {$mode objfpc}{$H+}
+{$interfaces corba}
 
 {.$Define GDEBUG}
 
@@ -1793,13 +1794,16 @@ begin
 end;
 
 procedure TfpgApplication.InternalInit;
+var
+  cmd: ICmdLineParams;
 begin
   fpgInitTimers;
   fpgNamedFonts := TList.Create;
 
   { If the end-user passed in a style, try and create an instance of it }
-  if gCommandLineParams.IsParam('style') then
-    fpgStyleManager.SetStyle(gCommandLineParams.GetParam('style'));
+  if Supports(self, ICmdLineParams, cmd) then
+    if cmd.HasOption('style') then
+      fpgStyleManager.SetStyle(cmd.GetOptionValue('style'));
   fpgStyle := fpgStyleManager.Style;
 
   fpgCaret      := TfpgCaret.Create;
@@ -1814,7 +1818,6 @@ begin
 
   FHintTimer := TfpgTimer.Create(HintPause);
   FHintTimer.OnTimer := @HintTimerFired;
-
 end;
 
 procedure TfpgApplication.Flush;
