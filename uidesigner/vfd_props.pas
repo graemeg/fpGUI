@@ -126,7 +126,8 @@ type
   TVFDPropertyList = class(TVFDWidgetProperty)
     List: TList;
     EditorClass: TVFDPropertyEditorClass;
-    constructor Create(aName: string; alisteditorclass: TVFDPropertyEditorClass; AList: TList); virtual;
+  public
+    constructor Create(aName: string; alisteditorclass: TVFDPropertyEditorClass; AList: TList); reintroduce; virtual;
     function    CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     function    ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
     function    GetPropertySource(wg: TfpgWidget; const ident: string; out afterObject: TObject): string; override;
@@ -291,20 +292,19 @@ begin
   Result := '';
 end;
 
-class function TListPropertyEditor.GetItemFromString(AList: TList;
-  AValue: String): Pointer;
+class function TListPropertyEditor.GetItemFromString(AList: TList; AValue: String): Pointer;
 begin
   Result := nil;
 end;
 
-class procedure TListPropertyEditor.SetWidgetProperty(wg: TfpgWidget;
-  PropName: String; PropValue: Pointer);
+class procedure TListPropertyEditor.SetWidgetProperty(wg: TfpgWidget; PropName: String; PropValue: Pointer);
 begin
+  //
 end;
 
-class function TListPropertyEditor.GetWidgetProperty(wg: TfpgWidget;
-  PropName: String): Pointer;
+class function TListPropertyEditor.GetWidgetProperty(wg: TfpgWidget; PropName: String): Pointer;
 begin
+  Result := nil;
 end;
 
 constructor TListPropertyEditor.Create(AOwner: TComponent;
