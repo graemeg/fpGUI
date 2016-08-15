@@ -4019,7 +4019,7 @@ begin
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataItem.Create(AMimeType, PtrUInt(Pointer(AValue)));
+  r := TfpgMimeDataItem.Create(AMimeType, PtrUInt(AValue));
   FDataList.Add(r);
 end;
 
@@ -4040,7 +4040,7 @@ begin
   begin
     if Items[i].format = AMimeType then
     begin
-      o := TObject(Pointer(PtrUInt(Items[i].data)));
+      o := TObject(PtrUInt(Items[i].data));
       Result := o;
       break;
     end;
