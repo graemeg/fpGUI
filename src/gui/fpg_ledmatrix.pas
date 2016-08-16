@@ -82,16 +82,29 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Anchors;
+    property    Align;
     property    BackgroundColor default clBlack;
 //    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    Height default 30;
+    property    Hint;
     property    LEDGap: integer read FLEDGap write SetLEDGap default 1;
     property    LEDSize: integer read FLEDSize write SetLEDSize default 2;
     property    LEDOnColor: TfpgColor read FLEDOnColor write SetLEDOnColor default TfpgColor($FFFFB539);
     property    LEDOffColor: TfpgColor read FLEDOffColor write SetLEDOffColor default TfpgColor($FF634210);
+    property    TabOrder;
     property    Text: TfpgString read FText write SetText;
     property    Width default 150;
     property    Scrolling: boolean read FScrolling write SetScrolling default False;
+    property    OnClick;
+    property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
