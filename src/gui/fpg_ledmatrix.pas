@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -403,8 +403,8 @@ end;
 constructor TfpgLEDMatrix.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth := 30;
-  FHeight := 150;
+  FWidth := 150;
+  FHeight := 30;
   FBackgroundColor := clBlack;
   FLEDOnColor := TfpgColor($FFFFB539);
   FLEDOffColor := TfpgColor($FF634210);
