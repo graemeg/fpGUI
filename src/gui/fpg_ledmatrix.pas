@@ -478,7 +478,7 @@ begin
   Canvas.Color := LEDOffColor;
   PaintBackgroundLEDs(dx, dy);
   { When scrolling we want the text to start on the right of the widget }
-  if FScrolling then
+  if FScrolling and not (csDesigning in ComponentState) then
     dx := GetClientRect.Right - LEDGap - FCurrentStep;
   lLen := UTF8Length(Text);
   for i := 1 to lLen do
