@@ -70,6 +70,7 @@ uses
   fpg_dialogs,
   fpg_hexview,
   fpg_spinedit,
+  fpg_ledmatrix,
   vfd_propeditgrid,
   vfd_main;
 
@@ -365,6 +366,10 @@ begin
     sizeof(stdimg_vfd_hexpanel),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.ledmatrix', @stdimg_vfd_ledmatrix,
+    sizeof(stdimg_vfd_ledmatrix),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -1072,6 +1077,23 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('HexView', TPropertyInterface, 'The view that updates our values');
   wc.WidgetIconName := 'vfd.hexpanel';
+  RegisterVFDWidget(wc);
+
+ // LEDMatrix
+  wc          := TVFDWidgetClass.Create(TfpgLEDMatrix);
+  wc.NameBase := 'LEDMatrix';
+  wc.AddProperty('Align', TPropertyEnum, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('LEDOnColor', TPropertyColor, '');
+  wc.AddProperty('LEDOffColor', TPropertyColor, '');
+  wc.AddProperty('LEDGap', TPropertyInteger, '');
+  wc.AddProperty('LEDSize', TPropertyInteger, '');
+  wc.AddProperty('Width', TPropertyInteger, '');
+  wc.AddProperty('Height', TPropertyInteger, '');
+  wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('Scrolling', TPropertyBoolean, '');
+  wc.WidgetIconName := 'vfd.ledmatrix';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...

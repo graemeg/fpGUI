@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -82,16 +82,29 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Anchors;
+    property    Align;
     property    BackgroundColor default clBlack;
 //    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    Height default 30;
+    property    Hint;
     property    LEDGap: integer read FLEDGap write SetLEDGap default 1;
     property    LEDSize: integer read FLEDSize write SetLEDSize default 2;
     property    LEDOnColor: TfpgColor read FLEDOnColor write SetLEDOnColor default TfpgColor($FFFFB539);
     property    LEDOffColor: TfpgColor read FLEDOffColor write SetLEDOffColor default TfpgColor($FF634210);
+    property    TabOrder;
     property    Text: TfpgString read FText write SetText;
     property    Width default 150;
     property    Scrolling: boolean read FScrolling write SetScrolling default False;
+    property    OnClick;
+    property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
@@ -403,8 +416,8 @@ end;
 constructor TfpgLEDMatrix.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth := 30;
-  FHeight := 150;
+  FWidth := 150;
+  FHeight := 30;
   FBackgroundColor := clBlack;
   FLEDOnColor := TfpgColor($FFFFB539);
   FLEDOffColor := TfpgColor($FF634210);
@@ -465,7 +478,7 @@ begin
   Canvas.Color := LEDOffColor;
   PaintBackgroundLEDs(dx, dy);
   { When scrolling we want the text to start on the right of the widget }
-  if FScrolling then
+  if FScrolling and not (csDesigning in ComponentState) then
     dx := GetClientRect.Right - LEDGap - FCurrentStep;
   lLen := UTF8Length(Text);
   for i := 1 to lLen do
