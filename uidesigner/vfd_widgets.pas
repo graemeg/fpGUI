@@ -1081,18 +1081,20 @@ begin
 
  // LEDMatrix
   wc          := TVFDWidgetClass.Create(TfpgLEDMatrix);
-  wc.NameBase := 'LEDMatrix';
   wc.AddProperty('Align', TPropertyEnum, '');
-  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
-  wc.AddProperty('LEDOnColor', TPropertyColor, '');
-  wc.AddProperty('LEDOffColor', TPropertyColor, '');
-  wc.AddProperty('LEDGap', TPropertyInteger, '');
-  wc.AddProperty('LEDSize', TPropertyInteger, '');
-  wc.AddProperty('Width', TPropertyInteger, '');
-  wc.AddProperty('Height', TPropertyInteger, '');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
-  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('Height', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('LEDGap', TPropertyInteger, '');
+  wc.AddProperty('LEDOffColor', TPropertyColor, '');
+  wc.AddProperty('LEDOnColor', TPropertyColor, '');
+  wc.AddProperty('LEDSize', TPropertyInteger, '');
   wc.AddProperty('Scrolling', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('Width', TPropertyInteger, '');
+  wc.NameBase := 'LEDMatrix';
   wc.WidgetIconName := 'vfd.ledmatrix';
   RegisterVFDWidget(wc);
 

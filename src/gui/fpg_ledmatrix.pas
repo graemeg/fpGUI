@@ -96,6 +96,7 @@ type
     property    Text: TfpgString read FText write SetText;
     property    Width default 150;
     property    Scrolling: boolean read FScrolling write SetScrolling default False;
+    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
     property    OnEnter;
