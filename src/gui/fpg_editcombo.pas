@@ -224,6 +224,9 @@ begin
     if keycode = keyEscape then
     begin
       consumed := True;
+      // FPGM_KEYCHAR is coming next for the Native Window which gets destroyed by
+      // .Close. So we remove the message from the queue.
+      fpgDeleteMessagesForTarget(Window, FPGM_KEYCHAR);
       Close;
     end;
   end;
