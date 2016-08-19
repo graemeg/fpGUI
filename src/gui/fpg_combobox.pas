@@ -499,10 +499,6 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if KeyCode = keyEscape then
   begin
-    // FPGM_KEYCHAR message is next but it is sent to the native window which
-    // gets freed during HandleHide for the popupwindow. So delete the message.
-    // Possibly fpgDeleteFirstMessage could be used instead.
-    fpgDeleteMessagesForTarget(Window, FPGM_KEYCHAR);
     Close;
   end
 end;

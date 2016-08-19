@@ -1105,6 +1105,8 @@ begin
 
   if HasOwnWindow then
   begin
+    // delete all queued messages for the soon to be invalid window
+    fpgDeleteMessagesForTarget(FWindow);
     FWindow.Free;
     FWindow := nil;
   end;
