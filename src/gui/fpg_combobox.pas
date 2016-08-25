@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -23,7 +23,7 @@ unit fpg_combobox;
 { TODO: When combobox Items changes, the combobox needs to refresh. We need a
       custom StringItems class to notify us of changes. See TfpgListBox for
       an example. }
-      
+
 { TODO: Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
       the items list. }
 
@@ -122,7 +122,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   end;
-  
+
 
   { TfpgBaseStaticCombo }
 
@@ -188,7 +188,7 @@ type
     property    OnMouseUp;
     property    OnShowHint;
   end;
-  
+
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
       h: TfpgCoord = 24): TfpgComboBox;
@@ -202,7 +202,7 @@ uses
   fpg_dbugintf,
   {$ENDIF}
   math;
-  
+
 
 type
   { This is the class representing the dropdown window of the combo box. }
@@ -218,7 +218,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   SetScrollBarWidth(const AValue: integer);
   public
-    constructor Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo); reintroduce;
+    constructor Create(ACallerWidget: TfpgBaseStaticCombo); reintroduce;
     property    ListBox: TfpgListBox read FListBox;
     property    ScrollBarWidth: integer read FScrollBarWidth write SetScrollBarWidth;
   end;
@@ -473,7 +473,7 @@ begin
   else if (ListBox.ItemCount - (ListBox.FocusItem+1)) < FCallerWidget.DropDownCount then
     ListBox.SetFirstItem(ListBox.ItemCount - FCallerWidget.DropDownCount)
   else
-  // Try and centre FocusItem in the drow down window
+    // Try and centre FocusItem in the drop down window
     ListBox.SetFirstItem(ListBox.FocusItem - (FCallerWidget.DropDownCount div 2));
 end;
 
@@ -487,10 +487,12 @@ end;
 
 procedure TComboboxDropdownWindow.HandleShow;
 begin
-  ListBox.SetPosition(0, 0, Width, Height);
+  FListBox.SetPosition(0, 0, Width, Height);
+  FListBox.Items.Assign(FCallerWidget.Items);
+  FListBox.FocusItem := FCallerWidget.FocusItem;
   inherited HandleShow;
   SetFirstItem;
-  ListBox.SetFocus;
+  FListBox.SetFocus;
 end;
 
 procedure TComboboxDropdownWindow.HandleKeyPress(var keycode: word;
@@ -509,7 +511,7 @@ begin
     FScrollBarWidth := AValue;
 end;
 
-constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo);
+constructor TComboboxDropdownWindow.Create(ACallerWidget: TfpgBaseStaticCombo);
 begin
   inherited Create(nil);
   Name := '_ComboboxDropdownWindow';
@@ -520,8 +522,6 @@ begin
   FListBox := CreateListBox(self, 0, 0, 80, 100);
   FListbox.Name := '_ComboboxDropdownWindowListBox';
   FListBox.PopupFrame := True;
-  FListBox.Items.Assign(FCallerWidget.Items);
-  FListBox.FocusItem := FCallerWidget.FocusItem;
   FListBox.OnSelect := @ListBoxSelect;
 end;
 
@@ -580,8 +580,12 @@ begin
     FreeAndNil(FDropDown);
     DisableShowHint;  // disable hints while dropdown is visible
 
-    FDropDown := TComboboxDropdownWindow.Create(nil, self);
+    FDropDown := TComboboxDropdownWindow.Create(self);
     ddw := TComboboxDropdownWindow(FDropDown);
+
+    if (FItems.Count > 0) then
+      DoOnDropDown;
+    ddw.OnClose := @InternalOnClose;
 
     // adjust the height of the dropdown
     rowcount := FItems.Count;
@@ -596,11 +600,7 @@ begin
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     r := GetDropDownPos(Parent, self, ddw);  // find suitable position
     ddw.Height := r.Height;  // in case GetDropDownPos resized us
-    
-    if (FItems.Count > 0) then
-      DoOnDropDown;
-    ddw.OnClose := @InternalOnClose;
-    
+
     ddw.ShowAt(Parent, r.Left, r.Top);
   end
   else
@@ -712,10 +712,10 @@ begin
 
   if NewIndex > Items.Count-1 then
     NewIndex := Items.Count-1;
-    
+
   if NewIndex < 0 then
     NewIndex := 0;
-    
+
   if NewIndex <> FocusItem then
   begin
     FocusItem := NewIndex;
