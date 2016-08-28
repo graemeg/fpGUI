@@ -99,6 +99,7 @@ type
     property    OnMouseExit;
     property    OnMouseMove;
     property    OnMouseUp;
+    property    OnMultiClick;
     property    OnShowHint;
   end;
 
