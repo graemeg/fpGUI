@@ -25,6 +25,7 @@ type
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
     FShowFocus: TfpgCheckBox;
+    FShowLastButton: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     FImageList,
     FSelectedImageList: TfpgImageList;
@@ -37,10 +38,12 @@ type
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart);
     procedure ItemSelectionChanged(ListView: TfpgListView; Item: TfpgLVItem;
                                     ItemIndex: Integer; Selected: Boolean);
+    procedure ShowLastButtonClick(Sender: TObject);
   public
     procedure AfterCreate; override;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -54,7 +57,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(622, 213, 640, 480);
+  SetPosition(568, 197, 676, 480);
   WindowTitle := 'ListView Test';
   Hint := '';
   IconName := '';
@@ -63,7 +66,7 @@ begin
   with BottomPanel do
   begin
     Name := 'BottomPanel';
-    SetPosition(0, 440, 640, 40);
+    SetPosition(0, 440, 676, 40);
     Align := alBottom;
     FontDesc := '#Label1';
     Hint := '';
@@ -74,7 +77,7 @@ begin
   with TopPanel do
   begin
     Name := 'TopPanel';
-    SetPosition(0, 0, 640, 400);
+    SetPosition(0, 0, 676, 440);
     Align := alClient;
     FontDesc := '#Label1';
     Hint := '';
@@ -85,7 +88,7 @@ begin
   with FListView do
   begin
     Name := 'FListView';
-    SetPosition(2, 2, 320, 396);
+    SetPosition(2, 2, 320, 436);
     Align := alLeft;
     Hint := '';
     MultiSelect := True;
@@ -105,7 +108,7 @@ begin
   with FSplitter do
   begin
     Name := 'FSplitter';
-    SetPosition(252, 2, 8, 396);
+    SetPosition(322, 2, 8, 436);
     Align := alLeft;
   end;
 
@@ -113,7 +116,7 @@ begin
   with FTmpListView do
   begin
     Name := 'FTmpListView';
-    SetPosition(260, 2, 378, 396);
+    SetPosition(330, 2, 344, 436);
     Align := alClient;
     Hint := '';
     MultiSelect := False;
@@ -142,7 +145,7 @@ begin
   with FAddButton do
   begin
     Name := 'FAddButton';
-    SetPosition(130, 5, 85, 23);
+    SetPosition(130, 5, 80, 23);
     Text := 'Add';
     FontDesc := '#Label1';
     Hint := '';
@@ -155,7 +158,7 @@ begin
   with FQuitButton do
   begin
     Name := 'FQuitButton';
-    SetPosition(550, 5, 80, 23);
+    SetPosition(586, 5, 80, 23);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -169,7 +172,7 @@ begin
   with FCheck do
   begin
     Name := 'FCheck';
-    SetPosition(220, 5, 120, 19);
+    SetPosition(310, 5, 120, 19);
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
@@ -182,13 +185,28 @@ begin
   with FShowFocus do
   begin
     Name := 'FShowFocus';
-    SetPosition(330, 5, 125, 19);
+    SetPosition(440, 5, 125, 19);
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 5;
     Text := 'Show Item Focus';
     OnChange:=@ShowFocusItemChange;
+  end;
+
+  FShowLastButton := TfpgButton.Create(BottomPanel);
+  with FShowLastButton do
+  begin
+    Name := 'FShowLastButton';
+    SetPosition(215, 5, 80, 23);
+    Text := 'Show Last';
+    FontDesc := '#Label1';
+    Hint := 'Make the last Item visible';
+    ImageName := '';
+    ParentShowHint := False;
+    ShowHint := True;
+    TabOrder := 6;
+    OnClick:=@ShowLastButtonClick;
   end;
 
   {@VFD_BODY_END: MainForm}
@@ -348,6 +366,11 @@ begin
 
   FSelectedImageList.Free;
   inherited Destroy;
+end;
+
+procedure TMainForm.ShowLastButtonClick(Sender: TObject);
+begin
+  FListView.MakeItemVisible(FListView.Items.Count-1);
 end;
 
 begin
