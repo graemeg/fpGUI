@@ -2461,6 +2461,7 @@ var
   iTop,
   iBottom: integer;
   tVisible, bVisible: Boolean;
+  hScrollBarHeight: Integer;
 begin
   if AIndex = -1 then
     Exit;
@@ -2470,8 +2471,11 @@ begin
   iTop := ItemPosition.Top;
   iBottom := ItemPosition.Bottom;
 
-  tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + GetItemAreaHeight);
-  bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + GetItemAreaHeight);
+  // either 0 or FHScrollBar.Height depending on it's visibility
+  hScrollBarHeight := FHScrollBar.Height * Ord(FHScrollBar.Visible);
+
+  tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + GetItemAreaHeight - hScrollBarHeight);
+  bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + GetItemAreaHeight - hScrollBarHeight);
 
   if PartialOK and (bVisible or tVisible) then
     Exit;
@@ -2480,9 +2484,11 @@ begin
     Exit;
   
   if (iBottom >= FVScrollBar.Position + GetItemAreaHeight) then
-    FVScrollBar.Position := iBottom - GetItemAreaHeight
+    FVScrollBar.Position := iBottom - GetItemAreaHeight + hScrollBarHeight
   else
     FVScrollBar.Position := iTop;
+
+  Invalidate;
 end;
 
 function TfpgListView.ItemAdd: TfpgLVItem;
