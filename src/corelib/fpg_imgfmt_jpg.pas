@@ -57,7 +57,7 @@ begin
     for j := 0 to xlocal - 1 do
     begin
       colorA := ASource.Colors[j, i];
-      colorB := ((colorA.Blue and $FF00) shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF00) shl 8);// or ((colorA.Alpha and $FF) shl 16); Alpha not working
+      colorB := ((colorA.Blue and $FF00) shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF00) shl 8) or $FF000000;
       Result.Colors[j, i] := colorB;
     end;
   Result.UpdateImage;
