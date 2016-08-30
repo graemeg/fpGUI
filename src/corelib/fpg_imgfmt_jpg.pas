@@ -42,7 +42,7 @@ uses
 function FPImageToFPG(ASource: TFPCustomImage): TfpgImage;
 var
   i, j: integer;
-  colorA: TFPColor;   // struct Red, Green, Blue, Alpha: word
+  colorA: TFPColor;   // struct Alpha, Red, Green, Blue: word
   colorB: TfpgColor;  // ONE long 32-bit-word
   xlocal, ylocal: integer;
 begin
@@ -57,7 +57,7 @@ begin
     for j := 0 to xlocal - 1 do
     begin
       colorA := ASource.Colors[j, i];
-      colorB := (colorA.Blue shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF) shl 16) or ((colorA.Alpha and $FF) shl 24);
+      colorB := ((colorA.Blue and $FF00) shr 8) or (colorA.Green and $FF00) or ((colorA.Red and $FF00) shl 8) or $FF000000;
       Result.Colors[j, i] := colorB;
     end;
   Result.UpdateImage;
