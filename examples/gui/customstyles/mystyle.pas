@@ -53,6 +53,11 @@ type
     { Menus }
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); override;
     procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); override;
+    { listbox }
+    procedure DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean;
+      const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); override;
+    procedure DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean;
+      const HasFocus: Boolean); override;
   end;
 
 
@@ -148,6 +153,48 @@ begin
   // outer bottom line
   ACanvas.SetColor(clWhite);
   ACanvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
+end;
+
+procedure TMyStyle.DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean;
+  const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor);
+var
+  c1, c2: TfpgColor;
+begin
+  if IsEnabled and not IsReadOnly then
+  begin
+    c1 := fpgDarker(ABackgroundColor);
+    c2 := fpgLighter(ABackgroundColor);
+  end
+  else
+  begin
+    c1 := fpgDarker(fpgColorToRGB(clWindowBackground));
+    c2 := fpgLighter(fpgColorToRGB(clWindowBackground));
+  end;
+  ACanvas.GradientFill(r, c1, c2, gdHorizontal);
+end;
+
+procedure TMyStyle.DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean;
+  const HasFocus: Boolean);
+var
+  c1, c2: TfpgColor;
+begin
+  if IsFocusedItem then
+  begin
+    if HasFocus then
+    begin
+      c1 := clSelection;
+      c2 := fpgLighter(fpgColorToRGB(clSelection));
+      ACanvas.SetTextColor(clSelectionText);
+    end
+    else
+    begin
+      c1 := clInactiveSel;
+      c2 := fpgLighter(fpgColorToRGB(clInactiveSel));
+      ACanvas.SetColor(clInactiveSel);
+      ACanvas.SetTextColor(clInactiveSelText);
+    end;
+    ACanvas.GradientFill(r, c2, c1, gdHorizontal);
+  end;
 end;
 
 

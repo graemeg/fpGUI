@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2013 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2016 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,7 +32,9 @@ uses
   fpg_label,
   fpg_button,
   fpg_menu,
-  fpg_memo;
+  fpg_memo,
+  fpg_combobox,
+  fpg_listbox;
 
 type
 
@@ -56,6 +58,9 @@ type
     pmSubMenu1: TfpgPopupMenu;
     memStyles: TfpgMemo;
     Label1: TfpgLabel;
+    ComboBox1: TfpgComboBox;
+    ListBox1: TfpgListBox;
+    ColorListBox1: TfpgColorListBox;
     {@VFD_HEAD_END: TestForm}
     procedure CloseClicked(Sender: TObject);
     procedure HelpAboutClicked(Sender: TObject);
@@ -89,9 +94,10 @@ var
 begin
   {@VFD_BODY_BEGIN: TestForm}
   Name := 'TestForm';
-  SetPosition(335, 206, 484, 250);
+  SetPosition(602, 274, 484, 393);
   WindowTitle := 'Testing Custom Styles';
   Hint := '';
+  IconName := '';
   WindowPosition := wpOneThirdDown;
 
   btnName1 := TfpgButton.Create(self);
@@ -99,11 +105,12 @@ begin
   begin
     Name := 'btnName1';
     SetPosition(24, 48, 104, 48);
-    Text := 'Button1 line 1' + LineEnding + 'and line 2.';
+    Text := 'Button';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 1;
+    Text := 'Button1 line 1' + LineEnding + 'and line 2.';
     AllowMultiLineText := True;
   end;
 
@@ -202,7 +209,7 @@ begin
   with btnClose do
   begin
     Name := 'btnClose';
-    SetPosition(396, 216, 80, 24);
+    SetPosition(396, 359, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Close';
     FontDesc := '#Label1';
@@ -283,6 +290,48 @@ begin
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Registered Styles:';
+  end;
+
+  ComboBox1 := TfpgComboBox.Create(self);
+  with ComboBox1 do
+  begin
+    Name := 'ComboBox1';
+    SetPosition(24, 212, 164, 24);
+    DropDownCount := 3;
+    ExtraHint := '';
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('line 1');
+    Items.Add('line 2');
+    Items.Add('line 3');
+    Items.Add('line 4');
+    Items.Add('line 5');
+    FocusItem := -1;
+    TabOrder := 19;
+  end;
+
+  ListBox1 := TfpgListBox.Create(self);
+  with ListBox1 do
+  begin
+    Name := 'ListBox1';
+    SetPosition(24, 248, 160, 76);
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('line 1');
+    Items.Add('line 2');
+    Items.Add('line 3');
+    TabOrder := 20;
+  end;
+
+  ColorListBox1 := TfpgColorListBox.Create(self);
+  with ColorListBox1 do
+  begin
+    Name := 'ColorListBox1';
+    SetPosition(208, 248, 160, 76);
+    Color := TfpgColor($FF00FFFF);
+    FontDesc := '#List';
+    Hint := '';
+    TabOrder := 21;
   end;
 
   {@VFD_BODY_END: TestForm}
