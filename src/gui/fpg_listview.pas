@@ -349,6 +349,7 @@ type
     procedure   ItemChanged(AIndex: Integer);
     procedure   ItemsUpdated;
     //
+    procedure   UpdateView;
     //function    GetVisibleColumnsWidth: Integer;
     function    GetItemAreaHeight: Integer;
     function    GetItemClientArea: TfpgRect;
@@ -1707,23 +1708,29 @@ end;
 procedure TfpgListView.ItemDeleted(AIndex: Integer);
 begin
   if FUpdateCount = 0 then
-    DoRePaint;
+    UpdateView;
 end;
 
 procedure TfpgListView.ItemAdded(AIndex: Integer);
 begin
   if FUpdateCount = 0 then
-    DoRePaint;
+    UpdateView;
 end;
 
 procedure TfpgListView.ItemChanged(AIndex: Integer);
 begin
   if FUpdateCount = 0 then
-    DoRePaint;
+    UpdateView;
 end;
 
 procedure TfpgListView.ItemsUpdated;
 begin
+  UpdateView;
+end;
+
+procedure TfpgListView.UpdateView;
+begin
+  UpdateScrollBarPositions;
   DoRepaint;
 end;
 
@@ -2452,7 +2459,7 @@ begin
   if FUpdateCount < 0 then
     FUpdateCount := 0;
   if FUpdateCount = 0 then
-    DoRePaint;
+    UpdateView;
 end;
 
 procedure TfpgListView.MakeItemVisible(AIndex: Integer; PartialOK: Boolean);
@@ -2461,7 +2468,6 @@ var
   iTop,
   iBottom: integer;
   tVisible, bVisible: Boolean;
-  hScrollBarHeight: Integer;
 begin
   if AIndex = -1 then
     Exit;
@@ -2469,13 +2475,10 @@ begin
   ItemPosition := ViewStyle.GetItemRect(AIndex, True);
 
   iTop := ItemPosition.Top;
-  iBottom := ItemPosition.Bottom;
+  iBottom := iTop + ItemPosition.Height + 1;
 
-  // either 0 or FHScrollBar.Height depending on it's visibility
-  hScrollBarHeight := FHScrollBar.Height * Ord(FHScrollBar.Visible);
-
-  tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + GetItemAreaHeight - hScrollBarHeight);
-  bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + GetItemAreaHeight - hScrollBarHeight);
+  tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + GetItemAreaHeight);
+  bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + GetItemAreaHeight);
 
   if PartialOK and (bVisible or tVisible) then
     Exit;
@@ -2484,7 +2487,7 @@ begin
     Exit;
   
   if (iBottom >= FVScrollBar.Position + GetItemAreaHeight) then
-    FVScrollBar.Position := iBottom - GetItemAreaHeight + hScrollBarHeight
+    FVScrollBar.Position := iBottom - GetItemAreaHeight
   else
     FVScrollBar.Position := iTop;
 
