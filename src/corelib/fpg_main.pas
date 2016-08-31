@@ -247,6 +247,9 @@ type
     function    GetDefaultTabHeight: TfpgCoord; virtual;
     procedure   DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor); virtual;
     procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); virtual;
+    { Listbox }
+    procedure   DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
+    procedure   DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean; const HasFocus: Boolean); virtual;
   end;
 
 
@@ -2812,6 +2815,35 @@ begin
         end;
       end;
   end;  { case }
+end;
+
+procedure TfpgStyle.DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean;
+  const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor);
+begin
+  if IsEnabled and not IsReadOnly then
+    ACanvas.SetColor(ABackgroundColor)
+  else
+    ACanvas.SetColor(clWindowBackground);
+  ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean;
+  const HasFocus: Boolean);
+begin
+  if IsFocusedItem then
+  begin
+    if HasFocus then
+    begin
+      ACanvas.SetColor(clSelection);
+      ACanvas.SetTextColor(clSelectionText);
+    end
+    else
+    begin
+      ACanvas.SetColor(clInactiveSel);
+      ACanvas.SetTextColor(clInactiveSelText);
+    end;
+    ACanvas.FillRectangle(r);
+  end;
 end;
 
 

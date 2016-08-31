@@ -45,6 +45,7 @@ type
   // Not sure if it is actually going to work.
   TfpgBaseListBox = class(TfpgWidget)
   private
+    FBorderStyle: TfpgEditBorderStyle;
     FHotTrack: boolean;
     FDragToReorder: boolean;
     FOnChange: TNotifyEvent;
@@ -52,11 +53,14 @@ type
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
     FAutoHeight: boolean;
+    FReadOnly: Boolean;
     FUpdateCount: Integer;
     function    GetFontDesc: string;
+    procedure   SetBorderStyle(AValue: TfpgEditBorderStyle);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
+    procedure   SetReadOnly(AValue: Boolean);
     procedure   UpdateScrollbarCoords;
     procedure   SetAutoHeight(const AValue: boolean);
     function    GetScrollBarPage: integer;
@@ -89,12 +93,14 @@ type
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
+    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    ScrollBarPage: Integer read GetScrollBarPage write SetScrollBarPage;
     property    ScrollBarWidth: Integer read GetScrollBarWidth write SetScrollBarWidth;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HotTrack: boolean read FHotTrack write FHotTrack default False;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame default False;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    DragToReorder: boolean read FDragToReorder write FDragToReorder default False;
   public
     constructor Create(AOwner: TComponent); override;
@@ -102,6 +108,7 @@ type
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   Update;
+    function    GetClientRect: TfpgRect; override;
     function    ItemCount: integer; virtual;
     function    RowHeight: integer; virtual;
     procedure   SetFirstItem(item: integer);
@@ -140,6 +147,7 @@ type
     property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
+    property    BorderStyle;
     property    DragToReorder;
     property    Enabled;
     property    FocusItem;
@@ -149,6 +157,7 @@ type
     property    Items;
     property    ParentShowHint;
     property    PopupFrame;
+    property    ReadOnly;
     property    ScrollBarPage;
     property    ScrollBarWidth;
     property    ShowHint;
@@ -351,6 +360,14 @@ begin
   result := FFont.FontDesc;
 end;
 
+procedure TfpgBaseListBox.SetBorderStyle(AValue: TfpgEditBorderStyle);
+begin
+  if FBorderStyle = AValue then
+    exit;
+  FBorderStyle := AValue;
+  RePaint;
+end;
+
 procedure TfpgBaseListBox.SetFocusItem(const AValue: integer);
 var
   old: integer;
@@ -394,6 +411,14 @@ begin
     Exit; //==>
   FPopupFrame := AValue;
   RePaint;
+end;
+
+procedure TfpgBaseListBox.SetReadOnly(AValue: Boolean);
+begin
+  if FReadOnly = AValue then
+    Exit;
+  FReadOnly := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseListBox.UpdateScrollbarCoords;
@@ -512,6 +537,19 @@ end;
 function TfpgBaseListBox.PageLength: integer;
 begin
   result := (ListHeight div RowHeight)-1; // component height minus 1 line
+end;
+
+function TfpgBaseListBox.GetClientRect: TfpgRect;
+var
+  rect: TRect;
+begin
+  Result := inherited GetClientRect;
+  rect := fpgStyle.GetControlFrameBorders;
+  case BorderStyle of
+//    ebsNone:      // nothing to do
+    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    InflateRect(Result, -1, -1);
+  end;
 end;
 
 procedure TfpgBaseListBox.ScrollBarMove(Sender: TObject; APosition: integer);
@@ -692,14 +730,8 @@ procedure TfpgBaseListBox.HandlePaint;
 var
   n: integer;
   r: TfpgRect;
-  rect: TRect;
 begin
-  //if FUpdateCount > 0 then
-  //  Exit; //==>
-
   inherited HandlePaint;
-  Canvas.ClearClipRect;
-  
   r.SetRect(0, 0, Width, Height);
 
   if popupframe then
@@ -712,13 +744,11 @@ begin
   else
   begin
     fpgStyle.DrawControlFrame(Canvas, r);
-    rect := fpgStyle.GetControlFrameBorders;
-    InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    r := GetClientRect;
   end;
 
   Canvas.SetClipRect(r);
-  Canvas.SetColor(FBackgroundColor);
-  Canvas.FillRectangle(r);
+  fpgStyle.DrawListBox(Canvas, r, Enabled, ReadOnly, FBackgroundColor);
   Canvas.SetFont(FFont);
 
   r.SetRect(0, 0, Width-ScrollBarWidth, Height);
@@ -734,51 +764,12 @@ begin
     FFirstItem := 0;
   for n := FFirstItem to ItemCount-1 do
   begin
-    if n = FFocusItem then
-    begin
-      if FFocused then
-      begin
-        Canvas.SetColor(clSelection);
-        Canvas.SetTextColor(clSelectionText);
-      end
-      else
-      begin
-        Canvas.SetColor(clInactiveSel);
-        Canvas.SetTextColor(clInactiveSelText);
-      end;
-    end
-    else
-    begin
-      Canvas.SetColor(FBackgroundColor);
+    fpgStyle.DrawListBoxItem(Canvas, r, n = FFocusItem, FFocused);
+    if n <> FFocusItem then
       Canvas.SetTextColor(FTextColor);
-    end;  { if/else }
-    Canvas.FillRectangle(r);
 
-    {$IFNDEF BlueCurve}
-    if (n = FFocusItem) and FFocused then
-    begin
-      if n = FFocusItem then
-      begin
-        if FFocused then
-        begin
-          Canvas.SetColor(clSelection);
-          Canvas.SetTextColor(clSelectionText);
-        end
-        else
-        begin
-          Canvas.SetColor(clInactiveSel);
-          Canvas.SetTextColor(clInactiveSelText);
-        end;
-      end
-      else
-      begin
-        Canvas.SetColor(FBackgroundColor);
-        Canvas.SetTextColor(clText1);
-      end;  { if/else }
-      Canvas.FillRectangle(r);
-    end;
-    {$ELSE}
-
+    { draw focused item with widget focused. }
+    {$IFDEF BlueCurve}
     // This is just a test.
     // Bluecurve theme  :)
     if (n = FFocusItem) and FFocused then
@@ -812,12 +803,12 @@ begin
   end;  { for }
 
   // clearing after the last row
-  if r.Top <= Height then
-  begin
-    Canvas.SetColor(FBackgroundColor);
-    r.SetBottom(Height - FMargin);
-    Canvas.FillRectangle(r);
-  end;
+  //if r.Top <= Height then
+  //begin
+  //  Canvas.SetColor(FBackgroundColor);
+  //  r.SetBottom(Height - FMargin);
+  //  Canvas.FillRectangle(r);
+  //end;
   UpdateScrollBar;
 end;
 
@@ -825,9 +816,7 @@ constructor TfpgBaseListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FFont := fpgGetFont('#List');
-  FBackgroundColor    := clListBox;
-  FTextColor          := Parent.TextColor;
-
+  FBackgroundColor := clListBox;
   FFocusable      := True;
   FFocusItem      := -1;
   FFirstItem      := 0;
@@ -840,6 +829,8 @@ begin
   FHotTrack       := False;
   FAutoHeight     := False;
   FDragToReorder  := False;
+  FReadOnly       := False;
+  FBorderStyle    := ebsDefault;
 
   FScrollBar      := TfpgScrollBar.Create(self);
   FScrollBar.Name := '_BaseListBoxScrollBar';
