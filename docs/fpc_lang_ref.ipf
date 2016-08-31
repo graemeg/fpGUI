@@ -5633,9 +5633,8 @@ ImplementationSection -> IMPLEMENTATION
                          [DeclSection]...
                          [ExportsStmt]...
 Block -> [DeclSection]
-         [ExportsStmt]...
          CompoundStmt
-         [ExportsStmt]...
+         [ExportsStmt]
 ExportsStmt -> EXPORTS ExportsItem [, ExportsItem]...
 ExportsItem -> Ident [NAME|INDEX "'" ConstExpr "'"]
                      [INDEX|NAME "'" ConstExpr "'"]
@@ -5764,7 +5763,7 @@ StructStmt -> CompoundStmt
            -> TryFinallyStmt
            -> RaiseStmt
            -> AssemblerStmt
-CompoundStmt -> BEGIN StmtList END
+CompoundStmt -> BEGIN StmtList END [';']
 ConditionalStmt -> IfStmt
                 -> CaseStmt
 IfStmt -> IF Expression THEN Statement [ELSE Statement]
@@ -5784,18 +5783,18 @@ TryExceptStmt -> TRY
                    Statement...
                  EXCEPT
                    ExceptionBlock
-                 END
+                 END [';']
 ExceptionBlock -> [ON [Ident ':'] TypeID DO Statement]...
                   [ELSE Statement...]
 TryFinallyStmt -> TRY
                     Statement
                   FINALLY
                     Statement
-                  END
+                  END [';']
 RaiseStmt -> RAISE [object] [AT address]
 AssemblerStatement -> ASM
                    -> <assemblylanguage>
-                   -> END
+                   -> END [';']
 ProcedureDeclSection -> ProcedureDecl
                      -> FunctionDecl
 ProcedureDecl -> ProcedureHeading ';' [Directive] [HintDirective]
