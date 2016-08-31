@@ -754,16 +754,14 @@ begin
     ebsDefault:
         begin
           fpgStyle.DrawControlFrame(Canvas, r);
-          rect := fpgStyle.GetControlFrameBorders;
-          InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
         end;
     ebsSingle:
         begin
           Canvas.SetColor(clShadow2);
           Canvas.DrawRectangle(r);
-          InflateRect(r, -1, -1);
         end;
   end;
+  r := GetClientRect;
   Canvas.SetClipRect(r);
 
   fpgStyle.DrawEditBox(Canvas, r, Enabled, ReadOnly, FBackgroundColor);
