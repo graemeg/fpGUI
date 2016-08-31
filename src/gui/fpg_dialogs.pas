@@ -145,8 +145,8 @@ type
     procedure   CreateFontAliasList;
     procedure   SetupUI(AMode: Byte);
   protected
-    function    GetFontDesc: string;
-    procedure   SetFontDesc(Desc: string);
+    function    GetFontDesc: string; virtual;
+    procedure   SetFontDesc(Desc: string); virtual;
     procedure   SetupCaptions; override;
   public
     constructor Create(AOwner: TComponent); override;
