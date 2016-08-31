@@ -36,7 +36,6 @@
       <Unit0>
         <Filename Value="fontselect.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fontselect"/>
       </Unit0>
     </Units>
   </ProjectOptions>
@@ -53,8 +52,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

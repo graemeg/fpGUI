@@ -3,10 +3,8 @@ program fontselect;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
-  {$ENDIF}{$ENDIF}
   Classes,
+  fpg_base,
   fpg_main,
   fpg_form,
   fpg_dialogs,
@@ -14,27 +12,25 @@ uses
   fpg_listbox,
   fpg_edit,
   fpg_label,
-  fpg_constants;
+  fpg_constants,
+  fpg_trackbar;
   
   
-resourcestring
-  rsMyTitle = 'Font selection test';
-  rsMyFontList = 'Font List';
-
-
 type
   TMainForm = class(TfpgForm)
   private
-    btnQuit: TfpgButton;
+    {@VFD_HEAD_BEGIN: MainForm}
     btnSelectFont: TfpgButton;
-    lbFontList: TfpgListBox;
     edFontDesc: TfpgEdit;
     lblFontList: TfpgLabel;
+    lbFontList: TfpgListBox;
+    btnQuit: TfpgButton;
+    {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnSelectFontClick(Sender: TObject);
     procedure   CreateFontList;
   public
-    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -66,38 +62,80 @@ begin
   fl.Free;
 end;
 
-constructor TMainForm.Create(AOwner: TComponent);
+procedure TMainForm.AfterCreate;
 begin
-  inherited Create(AOwner);
-  WindowTitle := rsMyTitle;
-  SetPosition(100, 100, 500, 400);
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(430, 283, 500, 400);
+  WindowTitle := 'Font selection test';
+  Hint := '';
+  IconName := '';
   WindowPosition:= wpOneThirdDown;
-  
-  btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);
 
-  edFontDesc := CreateEdit(self, 10, 45, Width - 20, 24);
-  edFontDesc.Text := 'Bitstream Vera Sans-9';
+  btnSelectFont := TfpgButton.Create(self);
+  with btnSelectFont do
+  begin
+    Name := 'btnSelectFont';
+    SetPosition(10, 10, 110, 24);
+    Text := 'Select a font...';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 1;
+    OnClick := @btnSelectFontClick;
+  end;
 
-  lblFontList := CreateLabel(self, 10, 80, rsMyFontList + ':');
+  edFontDesc := TfpgEdit.Create(self);
+  with edFontDesc do
+  begin
+    Name := 'edFontDesc';
+    SetPosition(10, 45, 480, 24);
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 2;
+    Text := 'Bitstream Vera Sans-9';
+  end;
+
+  lblFontList := TfpgLabel.Create(self);
+  with lblFontList do
+  begin
+    Name := 'lblFontList';
+    SetPosition(10, 84, 160, 15);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Font List:';
+  end;
+
   lbFontList := TfpgListBox.Create(self);
   with lbFontList do
   begin
     Name := 'lbFontList';
     SetPosition(10, 100, 232, 236);
+    FontDesc := '#List';
+    Hint := '';
+    TabOrder := 4;
     Items.Clear;
   end;
 
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(415, 370, 80, 24);
+    Anchors := [anRight,anBottom];
+    Text := 'Quit';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := 'stdimg.Quit';
+    TabOrder := 5;
+    OnClick := @btnQuitClick;
+  end;
+
+
+  {@VFD_BODY_END: MainForm}
+
   CreateFontList;
-
-  btnQuit := CreateButton(self, 415, 370, 80, rsExit, @btnQuitClick);
-  btnQuit.ImageName := 'stdimg.Quit';
-  btnQuit.ShowImage := True;
-  btnQuit.Anchors := [anRight, anBottom];
-
-  btnSelectFont.TabOrder := 1;
-  edFontDesc.TabOrder := 2;
-  lbFontList.TabOrder := 3;
-  btnQuit.TabOrder := 4;
 end;
 
 procedure MainProc;
