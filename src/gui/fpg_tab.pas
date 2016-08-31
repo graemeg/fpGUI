@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -107,7 +107,9 @@ type
     FUpdateCount: Integer;
     FActiveTabColor: TfpgColor;
     FActiveTabTextColor: TfpgColor;
+    FFont: TfpgFont;
     function    GetActivePageIndex: integer;
+    function    GetFontDesc: string;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
     procedure   InsertPage(var APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
@@ -127,6 +129,7 @@ type
     procedure   LeftButtonClick(Sender: TObject);
     procedure   RightButtonClick(Sender: TObject);
     function    FindNextPage(ACurrent: TfpgTabSheet; AForward: boolean): TfpgTabSheet;
+    procedure   SetFontDesc(AValue: string);
     procedure   SetSortPages(const AValue: boolean);
     procedure   SetStyle(const AValue: TfpgTabStyle);
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
@@ -139,6 +142,7 @@ type
     function    GetActiveTabTextColor: TfpgColor;
     procedure   SetActiveTabTextColor(AValue: TfpgColor);
     function    CalcActiveTabRect(const ARect: TfpgRect): TfpgRect;
+    function    GetFont: TfpgFont;
   protected
     procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
@@ -159,6 +163,7 @@ type
     procedure   RemoveTabSheet(ATabSheet: TfpgTabSheet);
     property    PageCount: Integer read GetPageCount;
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
+    property    Font: TfpgFont read FFont;
     property    Pages[AIndex: integer]: TfpgTabSheet read GetPage;
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
     property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
@@ -171,6 +176,7 @@ type
     property    Enabled;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Hint;
     property    Options: TfpgTabOptions read FTabOptions write FTabOptions;
     property    ParentShowHint;
@@ -314,6 +320,14 @@ end;
 function TfpgPageControl.GetActivePageIndex: integer;
 begin
   Result := FActivePageIndex;
+end;
+
+function TfpgPageControl.GetFontDesc: string;
+begin
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := fpgStyle.TabFont.FontDesc;
 end;
 
 function TfpgPageControl.GetPage(AIndex: integer): TfpgTabSheet;
@@ -615,6 +629,13 @@ begin
   result := nil;
 end;
 
+procedure TfpgPageControl.SetFontDesc(AValue: string);
+begin
+  FreeAndNil(FFont);
+  FFont := fpgGetFont(AValue);
+  RePaint;
+end;
+
 procedure TfpgPageControl.SetSortPages(const AValue: boolean);
 begin
   if FSortPages = AValue then
@@ -739,6 +760,14 @@ begin
   InflateRect(Result, border.Left, border.Top);
 end;
 
+function TfpgPageControl.GetFont: TfpgFont;
+begin
+  if Assigned(FFont) then
+    Result := FFont
+  else
+    Result := fpgStyle.TabFont;
+end;
+
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
 var
   lWasMatch: boolean;
@@ -789,7 +818,7 @@ begin
     Exit; //==>
 
   Canvas.SetTextColor(TextColor);
-  Canvas.SetFont(fpgStyle.TabFont);
+  Canvas.SetFont(GetFont);
   lTxtFlags := [];
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
@@ -1204,7 +1233,7 @@ begin
   FIsContainer := True;
   FTabOptions  := [];
   FActivePageIndex := 0;
-
+  FFont := nil;
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FActiveTabColor   := clDefault;
@@ -1241,6 +1270,7 @@ begin
   FPages.Free;
   ActiveWidget := nil;
   FFirstTabButton := nil;
+  FreeAndNil(FFont);
   inherited Destroy;
 end;
 
