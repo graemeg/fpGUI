@@ -290,7 +290,7 @@ begin
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
               Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
-              InflateRect(FClientRect, -1, -1);
+              InflateRect(-1, -1);
               Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdVertical);
             end;  { if }
           end;
@@ -312,7 +312,7 @@ begin
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
               Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
-              InflateRect(FClientRect, -1, -1);
+              InflateRect(-1, -1);
               Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdHorizontal);
             end;
           end;  { if }
