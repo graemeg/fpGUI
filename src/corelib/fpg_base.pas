@@ -994,7 +994,8 @@ uses
   fpg_widget,// needed for ActiveWidget
   typinfo,
   process,
-  dateutils;
+  dateutils,
+  math;
 
 
 const
@@ -1944,7 +1945,7 @@ begin
   ARect.SetRight(Min(Right, r2.Right));
 
   if ARect.IsRectEmpty then
-    Result := False;
+    Result := False
   else
     Result := True;
 end;
@@ -1990,7 +1991,7 @@ begin
   ARect.SetRight(Max(Right, r2.Right));
 
   if ARect.IsRectEmpty then
-    Result := False;
+    Result := False
   else
     Result := True;
 end;
