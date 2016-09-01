@@ -483,18 +483,18 @@ function  fpgGetTickCount: DWord;
 procedure fpgPause(MilliSeconds: Cardinal);
 
 // Rectangle, Point & Size routines
-function  CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
+function  CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean; deprecated 'Use TfpgRect.CopyRect() instead.';
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
-function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
-function  IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean;
-function  IsRectEmpty(const ARect: TfpgRect): Boolean;
+function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean; deprecated 'Use TfpgRect.InflateRect() instead.';
+function  IntersectRect(out ARect: TfpgRect; const r1, r2: TfpgRect): Boolean; deprecated 'Use TfpgRect.IntersectRect() instead.';
+function  IsRectEmpty(const ARect: TfpgRect): Boolean; deprecated 'Use TfpgRect.IsRectEmpty() instead.';
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
-function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
-function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
-function  UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean;
+function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean; deprecated 'Use TfpgRect.OffsetRect() instead.';
+function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean; deprecated 'Use TfpgRect.PointInRect() instead.';
+function  UnionRect(out ARect: TfpgRect; const R1, R2: TfpgRect): Boolean; deprecated 'Use TfpgRect.UnionRect() instead.';
 function  CenterPoint(const Rect: TRect): TPoint;
-function  CenterPoint(const Rect: TfpgRect): TPoint;
-function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
+function  CenterPoint(const Rect: TfpgRect): TPoint; deprecated 'Use TfpgRect.CenterPoint() instead.';
+function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect; deprecated 'Use TfpgRect.SetRect() instead.';
 function  fpgRectToRect(const ARect: TfpgRect): TRect;
 function  fpgPoint(const AX, AY: integer): TfpgPoint;
 function  fpgSize(const AWidth, AHeight: integer): TfpgSize;

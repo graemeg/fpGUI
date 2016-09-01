@@ -167,13 +167,21 @@ type
     Left: TfpgCoord;
     Width: TfpgCoord;
     Height: TfpgCoord;
-    procedure SetRect(aleft, atop, awidth, aheight: TfpgCoord);
+    procedure SetRect(const aleft, atop, awidth, aheight: TfpgCoord);
     function  Bottom: TfpgCoord;
     function  Right: TfpgCoord;
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
+    function  CenterPoint: TPoint;
+    function  CopyRect(out Dest: TfpgRect): Boolean;
+    function  InflateRect(const dx: Integer; const dy: Integer): Boolean;
+    function  IntersectRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
+    function  IsRectEmpty: Boolean;
     function  IsUnassigned: Boolean;
     function  ContainsPoint(APoint: TfpgPoint): Boolean;
+    function  OffsetRect(const dx: Integer; const dy: Integer): Boolean;
+    function  PointInRect(const APoint: TPoint): Boolean;
+    function  UnionRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
     procedure Clear;
   end;
 
@@ -1870,7 +1878,7 @@ end;
 
 { TfpgRect }
 
-procedure TfpgRect.SetRect(aleft, atop, awidth, aheight: TfpgCoord);
+procedure TfpgRect.SetRect(const aleft, atop, awidth, aheight: TfpgCoord);
 begin
   Left   := aleft;
   Top    := atop;
@@ -1898,6 +1906,54 @@ begin
   Width := Value - Left + 1;
 end;
 
+function TfpgRect.CenterPoint: TPoint;
+begin
+  Result.X := (Left + Right) div 2;
+  Result.Y := (Top + Bottom) div 2;
+end;
+
+function TfpgRect.CopyRect(out Dest: TfpgRect): Boolean;
+begin
+  Dest := Self;
+  if Dest.IsRectEmpty then
+  begin
+    FillChar(Dest, SizeOf(Dest), 0);
+    Result := False;
+  end
+  else
+    Result := True;
+end;
+
+function TfpgRect.InflateRect(const dx: Integer; const dy: Integer): Boolean;
+begin
+  Result := False;
+  dec(Left, dx);
+  dec(Top, dy);
+  inc(Width, 2*dx);
+  inc(Height, 2*dy);
+  Result := True;
+end;
+
+function TfpgRect.IntersectRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
+begin
+  FillChar(ARect, SizeOf(ARect), 0);
+  ARect := Self;
+  ARect.Left := Max(Left, r2.Left);
+  ARect.Top := Max(Top, r2.Top);
+  ARect.SetBottom(Min(Bottom, r2.Bottom));
+  ARect.SetRight(Min(Right, r2.Right));
+
+  if ARect.IsRectEmpty then
+    Result := False;
+  else
+    Result := True;
+end;
+
+function TfpgRect.IsRectEmpty: Boolean;
+begin
+  Result := (Width <= 0) or (Height <= 0);
+end;
+
 function TfpgRect.IsUnassigned: Boolean;
 begin
   Result := (Left or Top or Width or Height) = 0;
@@ -1906,6 +1962,37 @@ end;
 function TfpgRect.ContainsPoint(APoint: TfpgPoint): Boolean;
 begin
   Result := (APoint.X >= Left) and (APoint.X <= Right) and (APoint.Y >= Top) and (APoint.Y <= Bottom);
+end;
+
+function TfpgRect.OffsetRect(const dx: Integer; const dy: Integer): Boolean;
+begin
+  Result := False;
+  inc(Left, dx);
+  inc(Top, dy);
+  Result := True;
+end;
+
+function TfpgRect.PointInRect(const APoint: TPoint): Boolean;
+begin
+  Result := (APoint.x >= Left) and
+            (APoint.y >= Top) and
+            (APoint.x <= Right) and
+            (APoint.y <= Bottom);
+end;
+
+function TfpgRect.UnionRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
+begin
+  FillChar(ARect, SizeOf(ARect), 0);
+  ARect := Self;
+  ARect.Left := Min(Left, r2.Left);
+  ARect.Top := Min(Top, r2.Top);
+  ARect.SetBottom(Max(Bottom, r2.Bottom));
+  ARect.SetRight(Max(Right, r2.Right));
+
+  if ARect.IsRectEmpty then
+    Result := False;
+  else
+    Result := True;
 end;
 
 procedure TfpgRect.Clear;
