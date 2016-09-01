@@ -25,20 +25,20 @@ uses
 
 type
 
-  { TfpgDNDWindow }
-
   TfpgDNDWindow = class(TfpgWindow)
   private
     FDrag: TfpgDrag;
   protected
     procedure   HandlePaint; override;
   public
-    constructor Create(AOwner: TComponent; ADrag: TfpgDrag);
+    constructor Create(AOwner: TComponent; ADrag: TfpgDrag); reintroduce;
     procedure   Show(ASize: TfpgSize);
     function    HasWidgetChildren: Boolean;
   end;
 
+
 implementation
+
 
 { TfpgDNDWindow }
 
@@ -54,16 +54,15 @@ end;
 constructor TfpgDNDWindow.Create(AOwner: TComponent; ADrag: TfpgDrag);
 begin
   inherited Create(AOwner);
-  WindowType:=wtPopup;
-  WindowOpacity:=0.4;
-  Focusable:=False;
+  WindowType := wtPopup;
+  WindowOpacity := 0.4;
+  Focusable := False;
   FDrag := ADrag;
 end;
 
 procedure TfpgDNDWindow.Show(ASize: TfpgSize);
 begin
   FVisible:=True;
-
   HandleShow;
   SetPosition(Left, Top, ASize.W, ASize.H);
 end;
