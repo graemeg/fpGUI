@@ -76,7 +76,7 @@ type
     procedure   DialDraw; virtual;
     procedure   HandlePaint; override;
     property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
-    property    Color: TfpgColor read FColor write FColor default TfpgColor($c4c4c4);
+    property    Color: TfpgColor read FColor write FColor default TfpgColor($FFc4c4c4);
     property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
     property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
     property    MaxValue: Longint read FMax write SetMax default 100;
@@ -197,7 +197,7 @@ begin
   Canvas.ClearClipRect;
   Canvas.Clear(Color);
   { This must be adjusted according the selected style }
-  Canvas.SetColor(TfpgColor($999999));
+  Canvas.SetColor(TfpgColor($FF999999));
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawRectangle(FClientRect);
   { This must be completed and adjusted with border style }
@@ -217,28 +217,28 @@ begin
           begin
             { Round frame for the Pie }
             Canvas.SetLineStyle(2, lsSolid);
-            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.SetColor(TfpgColor($FF98b2ed));
             Canvas.DrawArc(Left, Top, Width, Height, 0, 360);
           end;
       gkNeedle:
           begin
             { Half a filled circle background for needle }
-            FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($425d9b),TfpgColor($98b2ed));
+            FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
             Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
-            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.SetColor(TfpgColor($FF98b2ed));
             Canvas.DrawArc(Left, Top, Width, Height * 2 - 1, 0, 180);
             Canvas.SetLineStyle(1, lsSolid);
-            Canvas.SetColor(TfpgColor($3b4c71));
+            Canvas.SetColor(TfpgColor($FF3b4c71));
             Canvas.DrawLine(Left, Bottom,Left + Width, Bottom);
           end;
       gkDial:
           begin
-            { 270° pie shaped background for Dial }
-            FillArcGradient (Canvas,Left, Top, Width, Height , 225, -270 ,TfpgColor($425d9b),TfpgColor($98b2ed));
+            { 270Â° pie shaped background for Dial }
+            FillArcGradient (Canvas,Left, Top, Width, Height , 225, -270 ,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
             Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
-            Canvas.SetColor(TfpgColor($98b2ed));
+            Canvas.SetColor(TfpgColor($FF98b2ed));
             Canvas.DrawArc(Left,Top,Width,Height,225,-270);
           end;
     end;
@@ -282,16 +282,16 @@ begin
                 BarLength := Width;
               Width := BarLength;
               // left top
-              Canvas.SetColor(TfpgColor($98b2ed));
+              Canvas.SetColor(TfpgColor($FF98b2ed));
               Canvas.DrawLine(Left, Bottom, Left, Top);  // left
               Canvas.DrawLine(Left, Top, Right, Top);    // top
               // right bottom
-              Canvas.SetColor(TfpgColor($3b4c71));
+              Canvas.SetColor(TfpgColor($FF3b4c71));
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
               Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
               InflateRect(-1, -1);
-              Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdVertical);
+              Canvas.GradientFill(FClientRect, TfpgColor($FF425d9b), TfpgColor($FF97b0e8), gdVertical);
             end;  { if }
           end;
       gkVerticalBar:
@@ -304,16 +304,16 @@ begin
               Top := Height - BarLength+1;
               Height := BarLength;
               // left top
-              Canvas.SetColor(TfpgColor($98b2ed));
+              Canvas.SetColor(TfpgColor($FF98b2ed));
               Canvas.DrawLine(Left, Bottom, Left, Top);  // left
               Canvas.DrawLine(Left, Top, Right, Top);    // top
               // right bottom
-              Canvas.SetColor(TfpgColor($3b4c71));
+              Canvas.SetColor(TfpgColor($FF3b4c71));
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
               Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
               InflateRect(-1, -1);
-              Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdHorizontal);
+              Canvas.GradientFill(FClientRect, TfpgColor($FF425d9b), TfpgColor($FF97b0e8), gdHorizontal);
             end;
           end;  { if }
     end;  { case }
@@ -329,8 +329,8 @@ begin
   begin
     Angle := Percentage;
     Angle := Angle * 3.6; // Percentage to degrees
-    Canvas.SetColor(TfpgColor($425d9b));
-    FillArcGradient (Canvas,Left, Top, Width, Height , 90, -Angle,TfpgColor($425d9b),TfpgColor($98b2ed));
+    Canvas.SetColor(TfpgColor($FF425d9b));
+    FillArcGradient (Canvas,Left, Top, Width, Height , 90, -Angle,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
   end;
 end;
 
@@ -389,9 +389,9 @@ end;
 procedure TfpgBaseGauge.HandlePaint;
 begin
   inherited HandlePaint;
-//  Canvas.BeginDraw(True);
   {Paint Background and adjust FClientRect according style and BorderStyle}
   BackgroundDraw;
+
   {Paint foreground according selected Kind}
   case FKind of
     gkHorizontalBar,
@@ -407,7 +407,6 @@ begin
   {Add Text if required}
   if ShowText then
     TextDraw;
-//  Canvas.EndDraw;
 end;
 
 procedure TfpgBaseGauge.SetGaugeKind(AValue: TGaugeKind);
@@ -537,7 +536,7 @@ begin
   FKind         := gkHorizontalBar;
   FSecondColor  := clWhite;
   FFirstColor   := clBlack;
-  FColor        := TfpgColor($c4c4c4); //clInactiveWgFrame;
+  FColor        := TfpgColor($FFc4c4c4); //clInactiveWgFrame;
   FMax          := 100;
   FMin          := 0;
   FPosition     := 0;
