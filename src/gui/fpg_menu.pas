@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -24,7 +24,6 @@ unit fpg_menu;
   TODO:
     * Refactor the HotKey painting code into Canvas.DrawString so that other
       widgets like TfpgButton could also use it.
-    * Global keyboard activation of menu items are still missing.
 }
 
 interface
@@ -38,21 +37,21 @@ uses
   fpg_popupwindow,
   fpg_stringutils,
   fpg_command_intf;
-  
+
 type
   TfpgHotKeyDef = string;
-  
+
   TfpgMenuOption = (mnuo_autoopen,          // auto open menus when mouse over menubar
                     mnuo_nofollowingmouse   // don't auto open new menus as mouse moves over menubar
                     );
-  
+
   TfpgMenuOptions = set of TfpgMenuOption;
-  
+
   // forward declarations
   TfpgPopupMenu = class;
   TfpgMenuBar = class;
-  
-  
+
+
   TfpgMenuItem = class(TfpgComponent, ICommandHolder)
   private
     FCommand: ICommand;
@@ -89,8 +88,8 @@ type
     property    SubMenu: TfpgPopupMenu read FSubMenu write FSubMenu;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
-  
-  
+
+
   // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
   TfpgPopupMenu = class(TfpgPopupWindow)
@@ -136,8 +135,8 @@ type
     function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
-  
-  
+
+
   // Actual Menu Items are stored in TComponents Components property
   // Visible only items are stored in FItems just before a paint
   TfpgMenuBar = class(TfpgWidget)
@@ -191,14 +190,14 @@ function CreateMenuBar(AOwner: TfpgWidget): TfpgMenuBar; overload;
 
 
 implementation
-  
+
 var
   uFocusedPopupMenu: TfpgPopupMenu;
 
 const
   cImgWidth: integer = 16;
 
-  
+
 function CreateMenuBar(AOwner: TfpgWidget; x, y, w, h: TfpgCoord): TfpgMenuBar;
 begin
   if AOwner = nil then
@@ -460,10 +459,10 @@ var
   newf: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
-  
+
   if ComponentCount = 0 then
     Exit; // We have no menu items in MainMenu.
-    
+
   newf := CalcMouseCol(x);
   if newf = VisibleCount then
     Exit; //mouse points over the last item
@@ -877,7 +876,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
   r.SetRect(0, 0, Width, Height);
-  if not PtInRect(r, Point(x, y)) then
+  if not r.PointInRect(Point(x, y)) then
   begin
     ClosePopups;
     Exit; //==>
@@ -950,7 +949,7 @@ begin
           if i >= 0 then
             FFocusItem := i;
         end;
-        
+
     keyDown:
         begin // down
           trycnt := 2;
@@ -967,7 +966,7 @@ begin
           if i < VisibleCount then
             FFocusItem := i;
         end;
-        
+
     keyReturn:
         begin
           DoSelect;
@@ -1275,7 +1274,7 @@ begin
 
   FHeight := FMargin*2 + h;
   FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
-  
+
   uFocusedPopupMenu := self;
 end;
 
@@ -1326,7 +1325,7 @@ begin
     Exit
   else
     n := 0;
-    
+
   while (h <= y) and (n < VisibleCount) do
   begin
     Result := n;
@@ -1435,6 +1434,6 @@ end;
 
 initialization
   uFocusedPopupMenu := nil;
-  
+
 end.
 
