@@ -200,7 +200,7 @@ begin
     Exit; //==>
   if CharCount = 0 then
     Exit; //==>
-    
+
   StartBytePos := UTF8CharStart(PChar(s),length(s),StartCharIndex-1);
   if StartBytePos = nil then
     Result := ''
@@ -2095,7 +2095,7 @@ begin
       end;
     end;
   end;
-  SetLength(Result, PtrUInt(Dest)-PtrUInt(Result));
+  SetLength(Result, {%H-}PtrUInt(Dest)-PtrUInt(Result));
 end;
 
 function ConvertTextToUTF8(const AEncoding: TfpgTextEncoding; const AText: AnsiString): TfpgString;
