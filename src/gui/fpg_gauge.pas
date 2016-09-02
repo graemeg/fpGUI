@@ -340,36 +340,22 @@ var
   Radius: TPoint;
   Angle: Double;
 begin
-  with FClientRect do
-  begin
-    if Percentage > 0 then
-    begin
-      { Compute the center }
-      Center := CenterPoint(Rect(Left,Top,Width,Height));
-      { Make needle 4 pixel shorter than gauge radius to accomodate border }
-      Radius.X := Center.X - 4;
-      Radius.Y := (Bottom - 4);
-      Canvas.SetLineStyle(2,lsSolid);
-      Angle := (Pi * ((Percentage / 100.0))); // percentage to radiants
-      Canvas.SetColor(TfpgColor($3b4c71));
-      Canvas.SetLineStyle(2,lsSolid);
-      //Canvas.DrawLine(Center.X, FClientRect.Bottom,
-          //Integer(round(Center.X - (Radius.X * Cos(Angle)))),
-          //Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle)))));
-          
-      { *** Experimental *** }
-      WuLine(Canvas,
-          Point(Center.X, FClientRect.Bottom),
-          Point(Integer(round(Center.X - (Radius.X * Cos(Angle)))),
-                Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle))))),
-          Canvas.Color);
-      WuLine(Canvas,
-          Point(Center.X+1, FClientRect.Bottom),
-          Point(Integer(round(Center.X+1 - (Radius.X * Cos(Angle)))),
-                Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle))))),
-          Canvas.Color);
-    end;
-  end;
+  if Percentage <= 0 then
+    Exit;  // nothing to do
+
+  { Compute the center }
+  Center := FClientRect.CenterPoint;
+
+  { Make needle 4 pixel shorter than gauge radius to accomodate border }
+  Radius.X := Center.X - 4;
+  Radius.Y := (FClientRect.Bottom - 4);
+  Canvas.SetLineStyle(2,lsSolid);
+  Angle := (Pi * ((Percentage / 100.0))); // percentage to radiants
+  Canvas.SetColor(TfpgColor($FF3b4c71));
+  Canvas.SetLineStyle(2,lsSolid);
+  Canvas.DrawLine(Center.X, FClientRect.Bottom,
+      Integer(round(Center.X - (Radius.X * Cos(Angle)))),
+      Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle)))));
 end;
 
 procedure TfpgBaseGauge.DialDraw;
@@ -379,42 +365,25 @@ var
   Angle: Double;
   CenterDot: Integer;
 begin
-  with FClientRect do
-  begin
-    if Percentage >= 0 then
-    begin
-      { Compute the center }
-      Center := CenterPoint(Rect(Left,Top,Width,Height));
-      { Make needle 3 pixel shorter than gauge radius }
-      Radius.X := Center.X -3;
-      Radius.Y := Center.Y -3;
-      {compute centre circle size}
-      CenterDot := (Width + Height) div 40; // approx. scaled to 1/10 of widget size:
-      if CenterDot < 2 then
-        CenterDot := 2;
-      { draw needle centre circle }
-      Canvas.SetColor(TfpgColor($3b4c71));
-      Canvas.FillArc(Center.X - CenterDot, Center.Y - CenterDot,CenterDot * 2, CenterDot * 2,0,360);
-      { draw needle }
-      Angle := (Pi * ((Percentage / (100 * 2 / 3)) + -0.25));
-      Canvas.SetLineStyle(2,lsSolid);
-      //Canvas.DrawLine(Center.X, Center.Y,
-          //Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
-          //Integer(round((Center.Y) - (Radius.Y * Sin(Angle)))));
+  { Compute the center }
+  Center := FClientRect.CenterPoint;
 
-      { *** Experimental *** }
-      WuLine(Canvas,
-          Point(Center.X, Center.Y),
-          Point(Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
-                Integer(round((Center.Y) - (Radius.Y * Sin(Angle))))),
-          Canvas.Color);
-      WuLine(Canvas,
-          Point(Center.X+1, Center.Y),
-          Point(Integer(round(Center.X+1  - ( Radius.X * cos(Angle)))),
-                Integer(round((Center.Y) - (Radius.Y * Sin(Angle))))),
-          Canvas.Color);
-    end;  { if }
-  end;  { with }
+  { Make needle 3 pixel shorter than gauge radius }
+  Radius.X := Center.X -3;
+  Radius.Y := Center.Y -3;
+  {compute centre circle size}
+  CenterDot := (Width + Height) div 40; // approx. scaled to 1/10 of widget size:
+  if CenterDot < 2 then
+    CenterDot := 2;
+  { draw needle centre circle }
+  Canvas.SetColor(TfpgColor($FF3b4c71));
+  Canvas.FillArc(Center.X - CenterDot, Center.Y - CenterDot,CenterDot * 2, CenterDot * 2,0,360);
+  { draw needle }
+  Angle := (Pi * ((Percentage / (100 * 2 / 3)) + -0.25));
+  Canvas.SetLineStyle(2,lsSolid);
+  Canvas.DrawLine(Center.X, Center.Y,
+      Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
+      Integer(round((Center.Y) - (Radius.Y * Sin(Angle)))));
 end;
 
 procedure TfpgBaseGauge.HandlePaint;
