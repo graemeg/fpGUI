@@ -28,10 +28,8 @@ interface
 uses
   Classes,
   SysUtils,
-  fpg_main,
   fpg_base,
-  fpg_widget,
-  fpg_interface;
+  fpg_widget;
 
 type
 
