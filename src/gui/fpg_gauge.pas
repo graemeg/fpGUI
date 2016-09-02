@@ -234,7 +234,7 @@ begin
           end;
       gkDial:
           begin
-            { 270° pie shaped background for Dial }
+            { 270Â° pie shaped background for Dial }
             FillArcGradient (Canvas,Left, Top, Width, Height , 225, -270 ,TfpgColor($425d9b),TfpgColor($98b2ed));
             Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
@@ -345,7 +345,7 @@ begin
     if Percentage > 0 then
     begin
       { Compute the center }
-      Center := CenterPoint(Rect(Left,Top,Width,Height));
+      Center := TfpgRect(Rect(Left,Top,Width,Height)).CenterPoint;
       { Make needle 4 pixel shorter than gauge radius to accomodate border }
       Radius.X := Center.X - 4;
       Radius.Y := (Bottom - 4);
@@ -384,7 +384,7 @@ begin
     if Percentage >= 0 then
     begin
       { Compute the center }
-      Center := CenterPoint(Rect(Left,Top,Width,Height));
+      Center := TfpgRect(Rect(Left,Top,Width,Height)).CenterPoint;
       { Make needle 3 pixel shorter than gauge radius }
       Radius.X := Center.X -3;
       Radius.Y := Center.Y -3;
