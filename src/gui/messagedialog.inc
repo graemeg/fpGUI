@@ -334,24 +334,24 @@ begin
         end;
   else
     if keycode = keyEscape then   // Esc cancels the dialog
+    begin
+      consumed := True;
       ModalResult := mrCancel
+    end
     else if keycode = keyLeft then
     begin
       // fake the Shift+Tab key press
       keycode := keyTab;
       shiftstate := [ssShift];
-      inherited HandleKeyPress(keycode, shiftstate, consumed);
     end
     else if keycode = keyRight then
     begin
       // fake the Tab key press
       keycode := keyTab;
       shiftstate := [];
-      inherited HandleKeyPress(keycode, shiftstate, consumed);
-    end
-    else
-      inherited HandleKeyPress(keycode, shiftstate, consumed);
+    end;
   end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgMessageDialog.PrepareLayout;

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -567,8 +567,11 @@ procedure TfpgBaseDialog.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then   // Esc cancels the dialog
-    btnCancelClick(nil)
-  else
+  begin
+    btnCancelClick(nil);
+    consumed := True;
+  end;
+
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
@@ -1289,8 +1292,7 @@ begin
       end;
     end;
   end;
-  if not consumed then
-    inherited HandleKeyPress(keycode, shiftstate, consumed);
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgFileDialog.btnOKClick(Sender: TObject);
