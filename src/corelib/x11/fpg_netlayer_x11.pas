@@ -318,9 +318,9 @@ var
   ANetAtom: TNetAtomEnum;
 begin
   for ANetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
-    FNetAtoms[ANetAtom] := XInternAtom(FDisplay, PChar(NetAtomStr[ANetAtom]), True)
+    FNetAtoms[ANetAtom] := XInternAtom(FDisplay, PChar(NetAtomStr[ANetAtom]), False)
   end;
-  UTF8_STRING := XInternAtom(FDisplay, 'UTF8_STRING', True);
+  UTF8_STRING := XInternAtom(FDisplay, 'UTF8_STRING', False);
 end;
 
 function TNETWindowLayer.GetNetAtom(AAtom: TNetAtomEnum): TNetAtom;
@@ -657,7 +657,7 @@ end;
 
 procedure TNETWindowLayer.WindowSetSupportPING(const AWindow: TWindow);
 begin
-  //WM_PROTOCOLS := XInternAtom(FDisplay, 'WM_PROTOCOLS', True);
+  //WM_PROTOCOLS := XInternAtom(FDisplay, 'WM_PROTOCOLS', False);
   WindowAddProtocol(AWindow, FNetAtoms[naWM_PING]);
   //WindowAppendPropertyAtom(AWindow, WM_PROTOCOLS, 1, @FNetAtoms[naWM_PING]);
 end;
