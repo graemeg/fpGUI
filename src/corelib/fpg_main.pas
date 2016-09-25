@@ -777,7 +777,7 @@ end;
 function CopyRect(out Dest: TfpgRect; const Src: TfpgRect): Boolean;
 begin
   Dest := Src;
-  if IsRectEmpty(Dest) then
+  if Dest.IsRectEmpty then
   begin
     FillChar(Dest, SizeOf(Dest), 0);
     Result := false;
@@ -827,7 +827,7 @@ begin
   TmpRect.SetBottom(Min(R1.Bottom, R2.Bottom));
   TmpRect.SetRight(Min(R1.Right, R2.Right));
 
-  if IsRectEmpty(TmpRect) then
+  if TmpRect.IsRectEmpty then
   begin
     FillChar(ARect, SizeOf(ARect), 0);
     Result := false;
@@ -895,7 +895,7 @@ begin
   TmpRect.SetBottom(Max(R1.Bottom, R2.Bottom));
   TmpRect.SetRight (Max(R1.Right, R2.Right));
 
-  if IsRectEmpty(TmpRect) then
+  if TmpRect.IsRectEmpty then
   begin
     FillChar(ARect, SizeOf(ARect), 0);
     Result := false;
