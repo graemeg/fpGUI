@@ -1493,8 +1493,7 @@ begin
   if Assigned(FHintWindow) then
   begin
     HideHint;
-    FHintWindow.Free;
-    FHintWindow := nil;
+    FreeAndNil(FHintWindow);
   end;
   FHintTimer.Enabled := False;
   FHintTimer.OnTimer := nil;
@@ -1593,7 +1592,7 @@ begin
   { prevents hint from going off the right screen edge }
   if (APos.X + w) > ScreenWidth then
   begin
-    APos.X:= ScreenWidth - w;
+    APos.X := ScreenWidth - w;
     // just a few more sanity checks
     if APos.X < 0 then
       APos.X := 0;
