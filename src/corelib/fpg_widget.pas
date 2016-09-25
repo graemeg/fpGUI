@@ -225,7 +225,8 @@ uses
   fpg_constants,
   fpg_menu,
   fpg_form,   { for OnKeyPress handling }
-  fpg_window; { for Finding the Toplevel Window }
+  fpg_window, { for Finding the Toplevel Window }
+  fpg_utils;
 
 
 var
@@ -1326,7 +1327,7 @@ procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: 
 var
   msgp: TfpgMessageParams;
 begin
-  fillchar(msgp, sizeof(msgp), 0);
+  FillMem(@msgp, sizeof(msgp), 0);
   msgp.user.Param1 := 2;
   msgp.user.Param2 := x+10;
   msgp.user.Param3 := y+2;
@@ -1365,7 +1366,7 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.HandleMouseEnter - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-  fillchar(msgp, sizeof(msgp), 0);
+  FillMem(@msgp, sizeof(msgp), 0);
 
   if Assigned(Parent) then
     b := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.ShowHint)) and (FHint <> '')
@@ -1812,9 +1813,7 @@ procedure TfpgWidget.DoShowHint(var AHint: TfpgString);
 begin
   AHint := Hint;
   if Assigned(FOnShowHint) then
-  begin
     FOnShowHint(self, AHint);
-  end;
 end;
 
 procedure TfpgWidget.DoKeyShortcut(const AOrigin: TfpgWidget;
