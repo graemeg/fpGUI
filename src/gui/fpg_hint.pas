@@ -117,7 +117,7 @@ var
 
 procedure TfpgHintWindow.FormShow(Sender: TObject);
 begin
-  FTimer.Enabled:= True;
+  FTimer.Enabled := True;
 end;
 
 procedure TfpgHintWindow.FormHide(Sender: TObject);
@@ -195,14 +195,18 @@ begin
 end;
 
 procedure TfpgHintWindow.HandlePaint;
+var
+  r: TfpgRect;
 begin
   inherited HandlePaint;  // background is set
-  Canvas.ClearClipRect;
   Canvas.Font := FFont;
   // Do we need to resize?
   PaintBorder;
   if FBorder > 0 then
-    Canvas.SetClipRect(fpgRect(FBorder, FBorder, Width-(FBorder*2), Height-(FBorder*2)));
+  begin
+    r.SetRect(FBorder, FBorder, Width-(FBorder*2), Height-(FBorder*2));
+    Canvas.SetClipRect(r);
+  end;
   PaintHintText;
 end;
 
