@@ -735,7 +735,7 @@ begin
   if fpgTimers = nil then
     Exit;
   // returns -1 if no timers are pending
-  dt := ctime + amaxtime * ONE_MILISEC;
+  dt := ctime + amaxtime * ONE_MILLISEC;
   tb := False;
 
   for i := 0 to fpgTimers.Count-1 do
@@ -750,7 +750,7 @@ begin
 
   if tb then
   begin
-    Result := trunc(0.5 + (dt - ctime) / ONE_MILISEC);
+    Result := trunc(0.5 + (dt - ctime) / ONE_MILLISEC);
     if Result < 0 then
       Result := 0;
   end

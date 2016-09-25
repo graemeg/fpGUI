@@ -4333,7 +4333,7 @@ end;
 procedure TfpgBaseTimer.SetInterval(const AValue: integer);
 begin
   FInterval := AValue;
-  FNextAlarm := Now + (FInterval * ONE_MILISEC);
+  FNextAlarm := Now + (FInterval * ONE_MILLISEC);
 end;
 
 procedure TfpgBaseTimer.SetEnabled(const AValue: boolean);
@@ -4341,7 +4341,7 @@ begin
   if AValue and (FInterval <= 0) then
      Exit;
   if (not FEnabled) and AValue then
-    FNextAlarm := now + (interval * ONE_MILISEC);
+    FNextAlarm := now + (interval * ONE_MILLISEC);
   FEnabled := AValue;
 end;
 
@@ -4369,7 +4369,7 @@ begin
     // set the next alarm point
     if Interval > 0 then
       while FNextAlarm <= ACurrentTime do
-        FNextAlarm += (Interval * ONE_MILISEC);
+        FNextAlarm += (Interval * ONE_MILLISEC);
 
     if Assigned(FOnTimer) then
       FOnTimer(self);
