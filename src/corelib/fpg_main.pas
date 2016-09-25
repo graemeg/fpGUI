@@ -271,7 +271,7 @@ type
     FStopOnException: Boolean;
     FHintWindow: TfpgWidgetBase;
     FHintTimer: TfpgTimer;
-    FHintWidget: TfpgNativeWindow;
+    FHintWidget: TfpgWidgetBase;
     FHintPos: TPoint;
     FOnKeyPress: TKeyPressEvent;
     FStartDragDistance: integer;
@@ -1610,8 +1610,7 @@ begin
   if Assigned(FHintWindow) then
   begin
     HideHint;
-    FHintWindow.Free;
-    FHintWindow := nil;
+    FreeAndNil(FHintWindow);
   end;
   CreateHintWindow;
 end;
@@ -1725,14 +1724,14 @@ begin
   begin
     { MouseEnter occured }
     FHintTimer.Enabled := Boolean(msg.Params.user.Param1);
-    FHintWidget := TfpgNativeWindow(msg.Sender);
+    FHintWidget := TfpgWidget(msg.Sender);
   end
   else
   begin
     { Handle mouse move information }
     FHintPos.X := msg.Params.user.Param2;
     FHintPos.Y := msg.Params.user.Param3;
-    FHintWidget := TfpgNativeWindow(msg.Sender);
+    FHintWidget := TfpgWidget(msg.Sender);
     if FHintTimer.Enabled then
       FHintTimer.Reset    // keep reseting to prevent hint from showing
     else
@@ -1756,6 +1755,7 @@ var
 begin
   w := nil;
   w := TfpgWidget(FHintWidget);
+  lHint := '';
   try
     if Assigned(w) then
     begin
