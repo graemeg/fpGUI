@@ -756,7 +756,7 @@ var
   r: TfpgRect;
 begin
   r := GetClientRect;
-  InflateRect(r, -Border, -Border);
+  r.InflateRect(-Border, -Border);
   Canvas.GradientFill(r, clLavender, clWhite, gdVertical);
   img := fpgImages.GetImage('stdimg.dlg.info');
   Canvas.TextColor := clMagenta;
