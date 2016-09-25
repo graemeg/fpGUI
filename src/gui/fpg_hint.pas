@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -31,9 +31,7 @@ uses
   
 type
 
-  { TfpgHintWindow }
-
-  TfpgHintWindow = class(TfpgBaseForm)
+  TfpgHintWindow = class(TfpgForm)
   private
     FFont: TfpgFont;
     FTime: Integer;
@@ -242,9 +240,9 @@ begin
   Name := 'F_Hint';
   WindowPosition := wpUser;
   Sizeable := False;
-  BackgroundColor:= clHintWindow; //clBlack;  // This becomes the hint border so don't set to clHintWindow
+  BackgroundColor := clHintWindow;
   FFont := fpgGetFont('#Label1');
-  FMargin := 3;
+  FMargin := 2;
   FBorder := 1;
   FShadow := 0; // no shadow by default
   FTime := 5000; // show hint for 5 seconds then close
@@ -264,6 +262,9 @@ begin
   inherited Destroy;
   uShadowForm.Free;
 end;
+
+
+{ TfpgHintShadow }
 
 procedure TfpgHintShadow.DoAllocateWindowHandle;
 begin
