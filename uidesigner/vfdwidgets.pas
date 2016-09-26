@@ -923,7 +923,7 @@ begin
 
   // Font Edit
   wc          := TVFDWidgetClass.Create(TfpgFontEdit);
-  wc.NameBase := 'DirectoryEdit';
+  wc.NameBase := 'FontEdit';
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('ExtraHint', TPropertyString, '');
