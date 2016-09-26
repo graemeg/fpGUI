@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -33,12 +33,11 @@ uses
 
 type
 
-  { TfpgBaseEditButton }
-
   TfpgBaseEditButton = class(TfpgAbstractPanel)
   private
     FOnButtonClick: TNotifyEvent;
     FReadOnly: Boolean;
+    FOnChange: TNotifyEvent;
     function GetEditOptions: TfpgTextEditOptions;
     procedure SetEditOptions(AValue: TfpgTextEditOptions);
     procedure SetReadOnly(const AValue: Boolean);
@@ -53,15 +52,19 @@ type
     function  GetHint: TfpgString; override;
     procedure InternalButtonClick(Sender: TObject); virtual;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure DoOnChange; virtual;
     property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
     property  EditOptions: TfpgTextEditOptions read GetEditOptions write SetEditOptions;
     property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
+    property  OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
+
   TFilenameSetEvent = procedure(Sender: TObject; const AOldValue, ANewValue: TfpgString) of object;
+
 
   TfpgFileNameEdit = class(TfpgBaseEditButton)
   private
@@ -88,6 +91,7 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnChange;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
@@ -118,6 +122,7 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnChange;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
@@ -144,6 +149,7 @@ type
     property    ReadOnly;
     property    TabOrder;
     property    OnButtonClick;
+    property    OnChange;
     property    OnShowHint;
   end;
 
@@ -305,6 +311,12 @@ begin
   end;
 end;
 
+procedure TfpgBaseEditButton.DoOnChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self);
+end;
+
 constructor TfpgBaseEditButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -432,7 +444,10 @@ begin
   end;
   inherited InternalButtonClick(Sender);
   if old <> FEdit.Text then
+  begin
     DoFilenameSet(old, FEdit.Text);
+    DoOnChange;
+  end;
 end;
 
 
@@ -487,7 +502,9 @@ end;
 procedure TfpgDirectoryEdit.InternalButtonClick(Sender: TObject);
 var
   dlg: TfpgSelectDirDialog;
+  prev: TfpgString;
 begin
+  prev := FEdit.Text;
   dlg := TfpgSelectDirDialog.Create(nil);
   try
     if FRootDirectory <> '' then
@@ -495,12 +512,14 @@ begin
     dlg.SelectedDir := Directory;
     if dlg.ShowModal = mrOK then
     begin
-      FEdit.Text:= dlg.SelectedDir;
+      FEdit.Text := dlg.SelectedDir;
     end;
   finally
     dlg.Free;
   end;
   inherited InternalButtonClick(Sender);
+  if prev <> FEdit.Text then
+    DoOnChange;
 end;
 
 
@@ -541,11 +560,14 @@ end;
 procedure TfpgFontEdit.InternalButtonClick(Sender: TObject);
 var
   f: TfpgString;
+  prev: TfpgString;
 begin
   f := FontDesc;
   if SelectFontDialog(f) then
     FontDesc := f;
   inherited InternalButtonClick(Sender);
+  if prev <> f then
+    DoOnChange;
 end;
 
 constructor TfpgFontEdit.Create(AOwner: TComponent);
