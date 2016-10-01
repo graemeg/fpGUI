@@ -33,6 +33,7 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgHorzScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -199,6 +200,14 @@ var
 begin
   delta := msg.Params.mouse.delta;
   Writeln('Mouse scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+end;
+
+procedure TMainForm.MsgHorzScroll(var msg: TfpgMessageRec);
+var
+  delta: Integer;
+begin
+  delta := msg.Params.mouse.delta;
+  Writeln('Mouse horizontal scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
