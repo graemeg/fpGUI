@@ -1857,7 +1857,7 @@ end;
 :exmp.
 
 :p.
-The static array of char has now the content:
+The static array of char now has the content:
 
 :cgraphic.
 ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄ¿
@@ -1892,7 +1892,7 @@ The dynamic array of char now has the content:
 ÀÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÄÙ
 :ecgraphic.
 
-:nt.Unassigned chars in dynamic arrays have a content #0, cause empty positions
+:nt.Unassigned chars in dynamic arrays have the content #0, cause empty positions
 of all dynamic arrays are initially initialised with 0 (or #0, or nil, or ...)
 :ent.
 :lm margin=1.
