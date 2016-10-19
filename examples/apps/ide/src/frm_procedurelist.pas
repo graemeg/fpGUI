@@ -127,7 +127,7 @@ const
   SUnknown = 'Unknown';
   SImplementationNotFound = 'Implementation section not found (parser error?)';
   SInvalidIndex = 'Invalid index number';
-  SParseStatistics = 'Procedures processed in %g seconds';
+  SParseStatistics = 'Procedures processed in %.4g seconds';
 
 
 {$I proclistimages.inc}
