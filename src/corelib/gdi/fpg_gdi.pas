@@ -1276,7 +1276,8 @@ end;
 procedure TfpgGDIApplication.DoWakeMainThread(Sender: TObject);
 begin
   // WakeMainThread is called during TThread.Synchronize.
-  Windows.PostMessage(TfpgGDIWindow(MainForm).WinHandle, WM_NULL, 0, 0);
+  if Assigned(MainForm) then
+    Windows.PostMessage(TfpgGDIWindow(MainForm).WinHandle, WM_NULL, 0, 0);
 end;
 
 procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
