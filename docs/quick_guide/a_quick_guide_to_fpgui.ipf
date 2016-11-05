@@ -694,9 +694,9 @@ ask for more information before the application can continue with its next task.
 
 :p.
 We will create our first dialog purely by code, then later we will use the
-fpGUI Visual Forms Designer (known as UIDesigner). Using the visual forms designer
+fpGUI Visual Forms Designer (known as UIDesigner). Using the UIDesigner
 is a lot faster, and allows you to quickly experiment with different designs
-and widget layouts. All done by using the mouse to drop widegts on a designer
+and widget layouts - all done by using the mouse to drop widgets on a designer
 form, set properties and drag or resize them as needed.
 
 :h4.Subclassing TfpgForm
