@@ -257,6 +257,7 @@ type
     procedure   OnBookmarksChanged(Sender: TObject);
     procedure   BuildBookmarksMenu;
     procedure   NavigateToBookmark(Bookmark: TBookmark);
+    procedure   ShowMimeList(AMimeList: TfpgMimeDataItemList);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -4089,6 +4090,21 @@ begin
   DisplayTopic(Bookmark.ContentsTopic);
 end;
 
+{ for debug purposes, output the various mime types supported by the source }
+procedure TMainForm.ShowMimeList(AMimeList: TfpgMimeDataItemList);
+var
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  try
+    for i := 0 to AMimeList.Count-1 do
+      sl.Add(Format('%2d  %s', [i, AMimeList.Items[i].Format]));
+    ShowMessage(sl.Text);
+  finally
+    sl.Free;
+  end;
+end;
 
 
 end.
