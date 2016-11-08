@@ -77,7 +77,7 @@ finddialog=8
  y=205
  cx=331
  cy=116
-options=104
+options=107
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
   70
@@ -102,15 +102,15 @@ options=104
  width9=178
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=550
+ propcolwidthref=552
  width0=96
  sortdescend0=0
  sortdescend1=0
  width2=73
  sortdescend2=0
- width3=263
+ width3=264
  sortdescend3=0
- width4=277
+ width4=278
  sortdescend4=0
  sorted=0
  col=-1073741823
@@ -154,7 +154,7 @@ options=104
  sortdescend7=0
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=1
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=710
  width0=47
@@ -172,14 +172,17 @@ options=104
  sortdescend1=0
  [projectoptionsfo.ttabwidget2]
  firsttab=0
+ index=1
+ [projectoptionsfo.ttabwidget3]
+ firsttab=0
  index=0
  [projectoptionsfo.tabwidget]
  firsttab=0
  index=2
  [projectoptionsfo]
  stackedunder=
- x=2375
- y=240
+ x=645
+ y=208
  cx=759
  cy=568
 programparameters=18
@@ -203,33 +206,159 @@ programparameters=18
  cy=348
 settings=19
  [settingsfo.macrogrid]
- propcolwidthref=347
- width0=183
+ propcolwidthref=390
+ width0=109
  sortdescend0=0
- width1=157
+ width1=274
  sortdescend1=0
  [settingsfo.tsplitter2]
- x=226
+ x=242
  y=16
  xprop=0.57879656160458
  yprop=1
  [settingsfo]
  x=100
  y=106
- cx=408
- cy=593
+ cx=436
+ cy=805
  wsize=0
  active=1
  visible=1
+colordialog=5
+ [colordialogfo]
+ x=140
+ y=234
+ cx=338
+ cy=298
+sourcefilemasks=5
+ "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+ "*.ipf"
+ "*.sql"
+syntaxdeffiles=5
+ ${SYNTAXDEFDIR}pascal_dark.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+ ${SYNTAXDEFDIR}ipf2.sdef
+ ${SYNTAXDEFDIR}sql.sdef
+filemasknames=5
+ Source
+ Forms
+ Text
+ IPF help
+ All Files
+filemasks=5
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
+ frm_*.pas
+ *.txt
+ *.ipf
+ *
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+noformdesignerdocking=0
+componenthints=1
+gridsizex=8
+gridsizey=8
+autoindent=1
+blockindent=2
+linenumberson=1
+rightmarginon=1
+rightmarginchars=80
+scrollheight=0
+tabstops=2
+spacetabs=1
+showtabs=0
+tabindent=0
+editfontname=Raize
+editfontheight=16
+editfontwidth=0
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
+pairmarkcolor=16777179
+editfontantialiased=0
+editmarkbrackets=1
+editmarkpairwords=1
+backupfilecount=0
+encoding=0
+eolstyle=1
+trimtrailingwhitespace=1
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+runcommand=
+xtermcommand=xterm -S${PTSN}/${PTSH}
+remoteconnection=
+uploadcommand=
+gdbprocessor=x86_64
+gdbservercommand=
+gdbservercommandattach=
+beforeconnect=
+afterconnect=
+beforeload=
+afterload=
+beforerun=
+sourcebase=
+sourcedirs=16
+ ../components/richtext/
+ ${FPCDIR}src/rtl/${TargetCPU}/
+ ${FPCDIR}src/rtl/inc/
+ ${FPCDIR}src/rtl/linux/${TargetCPU}/
+ ${FPCDIR}src/rtl/linux/
+ ${FPCDIR}src/rtl/unix/
+ ${FPCDIR}src/rtl/objpas/sysutils/
+ ${FPCDIR}src/rtl/objpas/classes/
+ ${FPCDIR}src/rtl/objpas/
+ ${FPTest}/
+ ${tiOPF}Options/
+ ${tiOPF}Core/
+ ${FPGUI}/src/corelib/gdi/X/
+ ${FPGUI}/src/corelib/x11/
+ ${FPGUI}/src/*/
+ ./
+defines=0
+progparameters=/data/devel/fpgui/docview/docs/IPFREF_v4.INF
+progworkingdirectory=
+envvarnames=0
+envvarvalues=0
+defineson=0
+stoponexception=0
+valuehints=1
+activateonbreak=1
+raiseonbreak=1
+showconsole=1
+externalconsole=0
+settty=1
+gdbdownload=0
+downloadalways=0
+startupbkpt=0
+startupbkpton=0
+gdbsimulator=0
+gdbserverstartonce=0
+gdbloadtimeout=
+gdbserverwait=0
+nogdbserverexit=0
+gdbservertty=0
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+nodebugbeginend=0
+fpcgdbworkaround=1
 mainfile=docview.lpr
 targetfile=../${PROJECTNAME}${EXEEXT}
-messageoutputfile=
 makecommand=${COMPILER}
 makedir=
-unitdirs=7
+unitdirs=8
  ../components/richtext
  ${FPTest}3rdparty/epiktimer/
  ${FPTest}src/
+ ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
  ${FPGUI}/src/corelib/${FPG_GFX}
  ${FPGUI}/src/gui
@@ -241,71 +370,77 @@ objpref=-Fo
 targpref=-o
 befcommand=1
  rm units/${TargetCPU}-${TargetOS}/*
-aftcommand=0
-makeoptions=6
- -l -Mobjfpc -Sh
- -gl -O-
+aftcommand=1
+ 
+makeoptions=10
+ -l -Mobjfpc -Sch
+ -gwl -O- -godwarfsets -godwarfmethodclassprefix
  -B
  -O2 -XX -Xs -CX
  -FUunits/${TargetCPU}-${TargetOS}/
  -gh
-codetemplatedirs=1
- ${TEMPLATEDIR}
-toolmenus=1
- fpGUI &UI Designer
-toolfiles=1
- ${FPGUI}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner${EXEEXT}
-toolparams=1
- ${CURSOURCEFILE}
+ -gt
+ -gc
+ -Criot
+ -dAggCanvas
+reversepathorder=0
+befcommandon=1
+ 0
+makeoptionson=10
+ 63
+ 31
+ 34
+ 32
+ 63
+ 30
+ 28
+ 0
+ 4
+ 0
+aftcommandon=1
+ 0
+unitdirson=8
+ 65599
+ 65599
+ 65599
+ 196671
+ 196671
+ 196671
+ 65583
+ 196647
+uid=0
+macroon=5
+ 9
+ 3
+ 6
+ 4
+ 8
+macronames=5
+ TargetCPU
+ TargetOS
+ TargetCPU
+ TargetOS
+ TargetOS
+macrovalues=5
+ x86_64
+ linux
+ i386
+ win32
+ freebsd
+groupcomments=6
+ Linux 64-bit
+ Linux 32-bit
+ Windows 32-bit
+ FreeBSD 64-bit
+ 
+ 
+fontalias=0
 fontnames=0
-scriptbeforecopy=
-scriptaftercopy=
-newprojectfiles=4
- ${TEMPLATEDIR}/fptest/program.pas
- ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
-newprojectfilesdest=4
- ${%PROJECTNAME%}.pas
- ${%PROJECTDIR%}units/i386-linux/placeholder.txt
- ${%PROJECTDIR%}units/i386-win32/placeholder.txt
- ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
-newfinames=3
- Program
- Test Unit
- Textfile
-newfifilters=3
- "*.pas" "*.pp"
- "*.pas" "*.pp"
- 
-newfiexts=3
- pas
- pas
- 
-newfisources=3
- ${TEMPLATEDIR}fptest/program.pas
- ${TEMPLATEDIR}fptest/unit.pas
- 
-newfonames=2
- Mainform
- Simple Form
-newfonamebases=2
- 
- 
-newfosources=2
- ${TEMPLATEDIR}fpgui/mainform.pas
- ${TEMPLATEDIR}fpgui/simpleform.pas
-newfoforms=2
- 
- 
-forcezorder=0
-stripmessageesc=0
-copymessages=0
-closemessages=0
-checkmethods=1
-colorerror=-1610612712
-colorwarning=-1610612717
-colornote=-1610612716
+fontancestors=0
+fontoptions=0
+fontheights=0
+fontwidths=0
+fontxscales=0
 usercolors=30
  0
  0
@@ -370,82 +505,46 @@ usercolorcomment=30
  
 formatmacronames=0
 formatmacrovalues=0
-settingsfile=docview_clean.prj
-settingseditor=1
-settingsdebugger=1
-settingsstorage=1
-settingsprojecttree=0
-settingsautoload=0
-settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
-befcommandon=1
- 63
-makeoptionson=6
- 63
- 31
- 34
- 32
- 63
- 31
-aftcommandon=0
-unitdirson=7
- 65599
- 65599
- 65599
- 196671
- 196671
- 65583
- 196647
-macroon=7
- 9
- 3
- 6
- 4
- 8
- 63
- 63
-macronames=7
- TargetCPU
- TargetOS
- TargetCPU
- TargetOS
- TargetOS
- HelpPath
- FPTest
-macrovalues=7
- x86_64
- linux
- i386
- win32
- freebsd
- /data/devel/FPC_Docs/inf/
- /data/devel/fptest/
-macrogroup=3
-groupcomments=6
- Linux 64-bit
- Linux 32-bit
- Windows 32-bit
- FreeBSD 64-bit
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=4
+ ${TEMPLATEDIR}/fptest/program.pas
+ ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ ${%PROJECTDIR%}units/i386-linux/placeholder.txt
+ ${%PROJECTDIR%}units/i386-win32/placeholder.txt
+ ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
+newfinames=3
+ Program
+ Test Unit
+ Textfile
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}fptest/program.pas
+ ${TEMPLATEDIR}fptest/unit.pas
+ 
+newfonames=2
+ Mainform
+ Simple Form
+newfonamebases=2
  
  
-toolsave=1
- -1
-toolhide=1
- 0
-toolparse=1
- 0
-toolmessages=1
- 0
-toolshortcuts=1
- 0
-fontalias=0
-fontancestors=0
-fontheights=0
-fontwidths=0
-fontoptions=0
-fontxscales=0
+newfosources=2
+ ${TEMPLATEDIR}fpgui/mainform.pas
+ ${TEMPLATEDIR}fpgui/simpleform.pas
+newfoforms=2
+ 
+ 
 expandprojectfilemacros=4
  1
  -1
@@ -459,125 +558,59 @@ loadprojectfile=4
 newinheritedforms=2
  0
  0
-uid=0
-sourcefilemasks=5
- "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
- "*.c" "*.cc" "*.h"
- "*.mfm"
- "*.ipf"
- "*.sql"
-syntaxdeffiles=5
- ${SYNTAXDEFDIR}pascal_dark.sdef
- ${SYNTAXDEFDIR}cpp.sdef
- ${SYNTAXDEFDIR}objecttext.sdef
- ${SYNTAXDEFDIR}ipf2.sdef
- ${SYNTAXDEFDIR}sql.sdef
-filemasknames=5
- Source
- Forms
- Text
- IPF help
- All Files
-filemasks=5
- "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
- frm_*.pas
- *.txt
- *.ipf
- *
-showgrid=1
-snaptogrid=1
-moveonfirstclick=1
-noformdesignerdocking=0
-gridsizex=8
-gridsizey=8
-autoindent=1
-blockindent=2
-linenumberson=1
-rightmarginon=1
-rightmarginchars=80
-scrollheight=0
-tabstops=2
-spacetabs=1
-showtabs=0
-tabindent=0
-editfontname=Raize
-editfontheight=16
-editfontwidth=0
-editfontextraspace=0
-editfontcolor=-1879048183
-editbkcolor=-1879048186
-statementcolor=14745599
-pairmarkcolor=-1610612712
-editfontantialiased=1
-editmarkbrackets=1
-editmarkpairwords=1
-backupfilecount=0
-encoding=0
-trimtrailingwhitespace=0
-codetemplatedirs=1
- ${TEMPLATEDIR}
-debugcommand=${DEBUGGER}
-debugoptions=
-debugtarget=
-runcommand=
-xtermcommand=xterm -S${PTSN}/${PTSH}
-remoteconnection=
-uploadcommand=
-gdbprocessor=x86_64
-gdbservercommand=
-gdbservercommandattach=
-beforeconnect=
-afterconnect=
-beforeload=
-afterload=
-beforerun=
-sourcebase=
-sourcedirs=16
- ../components/richtext/
- ${FPCDIR}src/rtl/${TargetCPU}/
- ${FPCDIR}src/rtl/inc/
- ${FPCDIR}src/rtl/linux/${TargetCPU}/
- ${FPCDIR}src/rtl/linux/
- ${FPCDIR}src/rtl/unix/
- ${FPCDIR}src/rtl/objpas/sysutils/
- ${FPCDIR}src/rtl/objpas/classes/
- ${FPCDIR}src/rtl/objpas/
- ${FPTest}/
- ${tiOPF}Options/
- ${tiOPF}Core/
- ${FPGUI}/src/corelib/gdi/X/
- ${FPGUI}/src/corelib/x11/
- ${FPGUI}/src/*/
- ./
-defines=0
-progparameters=/data/devel/fpgui/docview/docs/IPFREF_v4.INF
-progworkingdirectory=
-envvarnames=0
-envvarvalues=0
-defineson=0
-stoponexception=0
-valuehints=1
-activateonbreak=1
-raiseonbreak=1
-showconsole=1
-externalconsole=0
-settty=1
-gdbdownload=0
-downloadalways=0
-startupbkpt=0
-startupbkpton=0
-gdbsimulator=0
-gdbserverstartonce=0
-gdbloadtimeout=
-gdbserverwait=0
-nogdbserverexit=0
-gdbservertty=0
-exceptclassnames=1
- EconvertError
-exceptignore=1
+toolmenus=2
+ fpGUI &UI Designer
+ &DocView
+toolfiles=2
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath} -k ${cursword}
+toolsave=2
+ -1
  0
-nodebugbeginend=0
-fpcgdbworkaround=1
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmessages=2
+ 0
+ 0
+toolshortcuts=2
+ 0
+ 1
+settingsfile=/data/devel/tiopf/Demos/fpGUI/Demo_21_AdrsBook_MGM/demo_adrsbook_mgm.prj
+settingsautoload=0
+settingsautosave=0
+settingseditor=0
+settingsdebugger=0
+settingsmake=0
+settingsmacros=0
+settingsfontalias=0
+settingsusercolors=0
+settingsformatmacros=0
+settingstemplates=0
+settingstools=1
+settingsstorage=0
+settingscomponentstore=0
+settingsprojecttree=0
+settingslayout=0
+messageoutputfile=
+modulenames=0
+moduletypes=0
+modulefiles=0
+macrogroup=3
+forcezorder=0
+stripmessageesc=0
+copymessages=0
+closemessages=0
+checkmethods=1
+colorerror=-1610612712
+colorwarning=-1610612717
+colornote=-1610612716
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -606,7 +639,7 @@ sigsettings=27
  28,28,T,F
  29,29,T,F
  30,30,T,F
-defaultmake=4
+defaultmake=1
 [breakpoints]
 on=1
  -1
@@ -654,8 +687,10 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=FTabWidth
-findhistory=10
+finddtext=FImages
+findhistory=12
+ FImages
+ tvContentsDragEntered
  FTabWidth
  .Create
  filedir(mainfo.projectname);
@@ -667,75 +702,67 @@ findhistory=10
  dirsetvalue
  ShowConfigForm
 findoptions=1
-editpos=15
+editpos=13
+ 0,0
+ 0,0
+ 0,152
+ 0,2668
+ 0,526
  0,-1073741823
+ 0,1066
  0,-1073741823
- 0,-1073741823
- 0,2887
+ 0,826
  0,0
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,140
- 0,21
- 6,199
+ 0,1758
+ 0,142
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-bookmarks3=1
- 760,2
+bookmarks3=5
+ 377,2
+ 653,5
+ 2668,6
+ 2881,1
+ 4093,3
 bookmarks4=0
 bookmarks5=0
 bookmarks6=0
 bookmarks7=0
 bookmarks8=0
-bookmarks9=2
- 126,3
- 152,1
+bookmarks9=0
 bookmarks10=0
 bookmarks11=0
 bookmarks12=0
-bookmarks13=0
-bookmarks14=0
-sourcefiles=15
+sourcefiles=13
  /data/devel/fpgui/docview/src/nvUtilities.pas
  /data/devel/fpgui/docview/src/docview.lpr
- /data/devel/fpgui/docview/src/HelpBitmap.pas
+ /data/devel/fpgui/examples/gui/drag_n_drop/dndexample.lpr
  /data/devel/fpgui/docview/src/frm_main.pas
- /data/devel/fpgui/src/corelib/fpg_imgfmt_bmp.pas
- /data/devel/fpgui/src/corelib/fpg_base.pas
+ /data/devel/fpgui/src/corelib/fpg_main.pas
+ /data/devel/fpgui/src/corelib/x11/fpg_interface.pas
  /data/devel/fpgui/docview/src/HelpFile.pas
- /data/devel/fpgui/src/corelib/fpg_imagelist.pas
- /data/devel/fpgui/docview/src/lzwdecompress.pas
+ /data/devel/fpgui/src/corelib/x11/fpg_x11.pas
+ /data/devel/fpgui/src/corelib/fpg_base.pas
  /data/devel/fpgui/docview/src/frm_configuration.pas
- /data/devel/fpgui/src/corelib/x11/fpg_impl.pas
- /data/devel/lazarus/components/synedit/synedit.pp
- /data/devel/lazarus/components/synedit/synedittexttabexpander.pas
- /data/devel/fpgui/src/corelib/fpg_imgfmt_jpg.pas
  /data/devel/fpgui/src/corelib/fpg_widget.pas
-relpaths=15
+ /data/devel/fpgui/src/corelib/render/software/agg_rasterizer_scanline_aa.pas
+ /data/devel/fpgui/src/corelib/fpg_imagelist.pas
+relpaths=13
  nvUtilities.pas
  docview.lpr
- HelpBitmap.pas
+ ../../examples/gui/drag_n_drop/dndexample.lpr
  frm_main.pas
- ../../src/corelib/fpg_imgfmt_bmp.pas
- ../../src/corelib/fpg_base.pas
+ ../../src/corelib/fpg_main.pas
+ ../../src/corelib/x11/fpg_interface.pas
  HelpFile.pas
- ../../src/corelib/fpg_imagelist.pas
- lzwdecompress.pas
+ ../../src/corelib/x11/fpg_x11.pas
+ ../../src/corelib/fpg_base.pas
  frm_configuration.pas
- ../../src/corelib/x11/fpg_impl.pas
- ../../../lazarus/components/synedit/synedit.pp
- ../../../lazarus/components/synedit/synedittexttabexpander.pas
- ../../src/corelib/fpg_imgfmt_jpg.pas
  ../../src/corelib/fpg_widget.pas
-ismoduletexts=15
- 0
- 0
+ ../../src/corelib/render/software/agg_rasterizer_scanline_aa.pas
+ ../../src/corelib/fpg_imagelist.pas
+ismoduletexts=13
  0
  0
  0
@@ -754,27 +781,25 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.tabwidget]
-order=15
+order=13
  0
  1
- 9
- 3
- 14
- 10
  2
- 8
- 5
+ 3
+ 12
  4
- 13
+ 11
+ 5
  6
  7
- 11
- 12
+ 8
+ 9
+ 10
 tabsize=190
 firsttab=0
 index=4
 [layout]
-windowlayout=527
+windowlayout=529
  [mainfo.openform]
  filenames=1
   /data/devel/msegui/lib/common/dialogs/msefiledialogres.mfm
@@ -796,11 +821,13 @@ windowlayout=527
  [mainfo.openfile]
  filenames=0
  filecolwidth=201
- x=2576
- y=386
+ x=841
+ y=385
  cx=587
  cy=307
- filehistory=10
+ filehistory=12
+  /data/home_dir/.mseide/syntaxdefs/pascal_dark.sdef
+  /data/devel/fpgui/examples/gui/drag_n_drop/dndexample.lpr
   /data/devel/fpgui/src/corelib/fpg_imgfmt_jpg.pas
   /data/devel/msegui/apps/ide/findinfilepage.pas
   /data/devel/fpgui/docview/src/frm_main.pas
@@ -818,54 +845,54 @@ windowlayout=527
  useroptions=268450944
  [mainfo]
  splitdir=0
- useroptions=301990011
- stackedunder=
+ useroptions=838860923
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=2112
+ x=380
  y=24
- cx=466
+ cx=1177
  cy=65
  rcx=0
  rcy=0
  wsize=0
- active=1
+ active=0
  visible=1
  [targetconsolefo]
  splitdir=0
- useroptions=268451945
+ useroptions=805322857
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=1228
- y=1045
+ x=1592
+ y=1056
  cx=624
  cy=347
  rcx=0
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
- useroptions=268451945
+ useroptions=805322857
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=37
- y=270
- cx=349
- cy=276
+ x=0
+ y=0
+ cx=0
+ cy=0
  rcx=0
  rcy=0
  wsize=0
@@ -873,8 +900,8 @@ windowlayout=527
  visible=0
  [memoryfo]
  splitdir=0
- useroptions=268451963
- stackedunder=componentstorefo
+ useroptions=805322875
+ stackedunder=cpuc86_64fo
  parent=
  mdistate=0
  nx=0
@@ -900,8 +927,8 @@ windowlayout=527
  value=0
  [disassfo]
  splitdir=0
- useroptions=268451947
- stackedunder=findinfilefo
+ useroptions=805322859
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -920,7 +947,7 @@ windowlayout=527
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo.panel1
+ stackedunder=symbolfo
  parent=
  mdistate=0
  nx=0
@@ -935,7 +962,7 @@ windowlayout=527
  rcy=0
  [projecttreefo]
  splitdir=0
- useroptions=268451947
+ useroptions=805322859
  stackedunder=memoryfo
  parent=
  mdistate=0
@@ -964,7 +991,7 @@ windowlayout=527
  rowheight=16
  [stackfo]
  splitdir=0
- useroptions=268460137
+ useroptions=805331049
  parent=
  mdistate=0
  nx=0
@@ -982,7 +1009,7 @@ windowlayout=527
  visible=0
  [watchpointsfo]
  splitdir=0
- useroptions=268451945
+ useroptions=805322857
  parent=
  mdistate=0
  nx=0
@@ -999,14 +1026,14 @@ windowlayout=527
  active=0
  visible=0
  [watchpointsfo.grid]
- propcolwidthref=352
+ propcolwidthref=332
  sortdescend0=0
  values1=0
  values1_ci=-1
  width1=33
  sortdescend1=0
  values2=0
- width2=239
+ width2=225
  sortdescend2=0
  width4=34
  sortdescend4=0
@@ -1015,12 +1042,12 @@ windowlayout=527
  width5=38
  sortdescend5=0
  values6=0
- width6=103
+ width6=96
  sortdescend6=0
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=disassfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1040,8 +1067,8 @@ windowlayout=527
  value=1
  [objectinspectorfo]
  splitdir=0
- useroptions=268451947
- stackedunder=
+ useroptions=805322859
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -1065,8 +1092,8 @@ windowlayout=527
  sortdescend1=0
  [symbolfo]
  splitdir=0
- useroptions=268451963
- stackedunder=breakpointsfo
+ useroptions=805322875
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
@@ -1092,7 +1119,7 @@ windowlayout=527
  [symbolfo.symbol]
  [watchfo]
  splitdir=0
- useroptions=268460137
+ useroptions=805331049
  parent=
  mdistate=0
  nx=0
@@ -1109,7 +1136,7 @@ windowlayout=527
  active=0
  visible=0
  [watchfo.grid]
- propcolwidthref=1001
+ propcolwidthref=999
  values0=0
  values0_ci=-1
  sortdescend0=0
@@ -1129,7 +1156,7 @@ windowlayout=527
  value=1
  [messagefo]
  splitdir=0
- useroptions=268484715
+ useroptions=805355627
  parent=mainfo.panel1.container
  visible=1
  mdistate=0
@@ -1139,14 +1166,14 @@ windowlayout=527
  ncy=0
  x=0
  y=1118
- cx=1116
+ cx=1195
  cy=168
  rcx=0
  rcy=0
  [componentstorefo]
  splitdir=0
- useroptions=268460155
- stackedunder=symbolfo
+ useroptions=805331067
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -1208,8 +1235,8 @@ windowlayout=527
  filefilter=
  [componentpalettefo]
  splitdir=0
- useroptions=268460139
- stackedunder=cpuc86_64fo
+ useroptions=805331051
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -1239,13 +1266,13 @@ windowlayout=527
  ncy=0
  x=0
  y=0
- cx=456
+ cx=1167
  cy=29
  rcx=0
  rcy=0
  [sourcefo]
  splitdir=0
- useroptions=268451945
+ useroptions=805322857
  parent=mainfo.panel1.container
  visible=1
  mdistate=0
@@ -1255,7 +1282,7 @@ windowlayout=527
  ncy=0
  x=0
  y=0
- cx=1116
+ cx=1195
  cy=1115
  rcx=0
  rcy=0
@@ -1267,7 +1294,7 @@ windowlayout=527
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -1286,21 +1313,21 @@ windowlayout=527
  [mainfo.panel1]
  splitdir=2
  useroptions=838893035
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=2104
- y=118
- cx=1126
+ x=377
+ y=117
+ cx=1205
  cy=1286
  rcx=0
  rcy=0
  wsize=0
- active=0
+ active=1
  visible=1
 [targetconsole]
 finddtext=
