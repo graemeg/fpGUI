@@ -403,7 +403,8 @@ type
   TfpgDropDropEvent = procedure(Drop: TfpgDrop; AData: Variant) of object;
   TfpgDropMoveEvent = procedure(Drop: TfpgDrop; X, Y: TfpgCoord) of object;
 
-  TfpgDropHandler = class
+
+  TfpgDropHandler = class(TObject)
   protected
     procedure   Enter(ADrop: TfpgDrop); virtual; abstract;
     procedure   Leave(ADrop: TfpgDrop); virtual; abstract;
