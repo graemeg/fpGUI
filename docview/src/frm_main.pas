@@ -2726,8 +2726,6 @@ begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
   fpgApplication.HelpFile := cDocViewHelpFile;
-  OnShow  := @MainFormShow;
-  OnDestroy := @MainFormDestroy;
 //  Files := TList.Create;
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
@@ -2806,6 +2804,8 @@ begin
   MinWidth := 430;
   MinHeight := 300;
   OnCloseQuery  := @MainFormCloseQuery;
+  OnShow := @MainFormShow;
+  OnDestroy := @MainFormDestroy;
 
   bvlStatusBar := TfpgBevel.Create(self);
   with bvlStatusBar do
