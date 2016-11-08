@@ -370,7 +370,6 @@ type
 
   TfpgDragPaintEvent = procedure(ASender: TfpgDrag; ACanvas: TfpgCanvas) of object;
 
-  { TfpgDrag }
 
   TfpgDrag = class(TfpgDragImpl)
   private
@@ -394,12 +393,12 @@ type
     property    OnPaintPreview: TfpgDragPaintEvent read FOnPaintPreview write FOnPaintPreview;
   end;
 
-  { TfpgDrop }
 
   TfpgDrop = class(TfpgDropImpl)
   public
     function AcceptMimeType(const ACompatibleFormat: array of TfpgString): Boolean;
   end;
+
 
   TfpgDropCommonEvent = procedure(Drop: TfpgDrop) of object;
   TfpgDropDropEvent = procedure(Drop: TfpgDrop; AData: Variant) of object;
@@ -413,7 +412,6 @@ type
     procedure   Drop(ADrop: TfpgDrop; AData: Variant); virtual; abstract;
   end;
 
-  { TfpgDropEventHandler }
 
   TfpgDropEventHandler = class(TfpgDropHandler)
   private

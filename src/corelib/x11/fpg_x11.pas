@@ -426,7 +426,6 @@ type
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
   end;
 
-  { TfpgX11Drop }
 
   TfpgX11Drop = class(TfpgDropBase)
   private
