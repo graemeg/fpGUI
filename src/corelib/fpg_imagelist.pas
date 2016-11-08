@@ -29,13 +29,13 @@ uses
   SysUtils,
   fpg_base,
   fpg_main;
-  
+
 type
 
   EItemExists = class(Exception);
 
   TfpgImageList = class;  // forward declaration
-  
+
 
   TfpgImageItem = class(TObject)
   private
@@ -76,7 +76,7 @@ type
     property    Count: integer read GetCount;
   end;
 
-  
+
 
 implementation
 
@@ -120,10 +120,10 @@ procedure TfpgImageList.SetItem(AIndex: integer; AItem: TfpgImageItem);
 begin
   if AItem = nil then
     Exit; //==>
-    
+
   if GetItem(AIndex) = AItem then
     Exit; //==>
-    
+
   RemoveIndex(AIndex);      // delete existing Item
   AItem.Index := AIndex;
   FList.Add(AItem);
@@ -140,11 +140,8 @@ begin
 end;
 
 destructor TfpgImageList.Destroy;
-var
-  i: integer;
 begin
-  for i := FList.Count-1 downto 0 do
-    TfpgImageItem(FList[i]).Free;  // frees images
+  Clear;
   FList.Free;
   inherited Destroy
 end;
@@ -156,10 +153,10 @@ begin
   {$IFDEF GDEBUG}
   writeln('TfpgImageList.AddItemFromFile');
   {$ENDIF}
-  
+
   if not fpgFileExists(AFileName) then
     Exit; //==>
-  
+
   AImageItem := TfpgImageItem.Create;
   AImageItem.LoadFromFile(AFileName);
   if AIndex > -1 then
@@ -210,7 +207,11 @@ begin
 end;
 
 procedure TfpgImageList.Clear;
+var
+  i: integer;
 begin
+  for i := FList.Count-1 downto 0 do
+    TfpgImageItem(FList[i]).Free;  // frees images
   FList.Clear;
 end;
 
