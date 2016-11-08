@@ -130,6 +130,7 @@ type
   // forward declaration
   TfpgCanvas = class;
   TfpgTimer = class;
+  TfpgDrag = class;
 
 
   TfpgNativeWindow = class(TfpgWindowImpl)
@@ -365,8 +366,6 @@ type
   TfpgMimeData = class(TfpgMimeDataImpl)
   end;
 
-
-  TfpgDrag = class;
 
   TfpgDragPaintEvent = procedure(ASender: TfpgDrag; ACanvas: TfpgCanvas) of object;
 
