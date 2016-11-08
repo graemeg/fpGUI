@@ -113,8 +113,8 @@ type
     BookmarksMenuItems: TList;
 
     procedure   RichViewDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    procedure   tvContentsDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    procedure   tvContentsDragEntered(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
+    procedure   tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
+    procedure   tvContentsDragEntered(Drop: TfpgDrop);
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
     procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
@@ -367,8 +367,7 @@ begin
   end;
 end;
 
-procedure TMainForm.tvContentsDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   s: string;
   i: integer;
@@ -392,22 +391,21 @@ begin
   end;
 end;
 
-procedure TMainForm.tvContentsDragEntered(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.tvContentsDragEntered(Drop: TfpgDrop);
 var
   i: integer;
   s: string;
 begin
+//  ShowMimeList(Drop.MimeTypes);
   { the mime type we want to accept }
   s := 'text/uri-list';
   { if we wil accept the drop, set Accept to True }
-  Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
+  Drop.CanDrop := Drop.AcceptMimeType([s]);
+  if Drop.CanDrop then
   begin
     { If the offered mime type is different, request our preference }
-    if AMimeChoice <> s then
-      AMimeChoice := s;
+    if Drop.MimeChoice <> s then
+      Drop.MimeChoice := s;
   end;
 end;
 
@@ -2880,6 +2878,7 @@ begin
     ShowImages := True;
     TabOrder := 0;
     OnChange  := @tvContentsChange;
+    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @tvContentsDragDrop, nil);
   end;
 
   btnGo := TfpgButton.Create(tsContents);
