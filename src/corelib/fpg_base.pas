@@ -827,8 +827,6 @@ type
   TfpgMimeDataItemList = specialize TFPGObjectList<TfpgMimeDataItem>;
 
 
-  { TfpgMimeDataBase }
-
   TfpgMimeDataBase = class(TObject)
   private
     { TODO: This is wrong, we must have one Data Storage object }
@@ -860,7 +858,6 @@ type
     property    Count: integer read GetCount;
   end;
 
-  { TfpgDragBase }
 
   TfpgDragBase = class(TObject)
   protected
@@ -873,7 +870,6 @@ type
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
   end;
 
-  { TfpgDropBase }
 
   TfpgDropBase = class(TObject)
   protected
@@ -894,10 +890,8 @@ type
     FWinMousePos: TfpgPoint;
     FSourceWidget: TfpgWidgetBase;
     FDropData: Variant;
-
     procedure   Leave;
     procedure   Enter;
-
     // core calls these methods
     procedure   SetPosition(AX, AY: Integer);
     procedure   DataDropComplete; virtual;
@@ -906,7 +900,7 @@ type
     function    GetDropAction: TfpgDropAction; virtual; abstract;
     procedure   SetDropAction(AValue: TfpgDropAction); virtual; abstract;
     function    GetWindowForDrop: TfpgWindowBase; virtual; abstract;
-
+    //
     procedure   AcceptDrop; virtual;
     procedure   RejectDrop; virtual;
     property    DropStatus: TDropStatus read FDropStatus;
@@ -924,8 +918,6 @@ type
     property    CanDrop: Boolean read FCanDrop write FCanDrop;
   end;
 
-
-  { TfpgBaseTimer }
 
   TfpgBaseTimer = class(TObject)
   private
