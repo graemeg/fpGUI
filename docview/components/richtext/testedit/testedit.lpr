@@ -19,21 +19,13 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   fpg_imagelist,
   fpg_imgfmt_bmp,
   fpg_imgfmt_png,
-  fpg_imgfmt_jpg;
+  fpg_imgfmt_jpg,
+  fpg_utils;
 
 type
 
-  {@VFD_NEWFORM_DECL}
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
-    FMenu : TfpgMenuBar;
-    MFile: TfpgMenuItem;
-    MNew: TfpgMenuItem;
-    MOpen: TfpgMenuItem;
-    MSave: TfpgMenuItem;
-    MQuit: TfpgMenuItem;
     FFileName : string;
     procedure DoNewFile(Sender: TObject);
     procedure DoOpenFile(Sender: TObject);
@@ -43,12 +35,14 @@ type
     procedure SaveFile(const AFileName: String);
   public
     {@VFD_HEAD_BEGIN: MainForm}
-    FEdit : TRichTextEditFrame;
+    FMenu: TfpgMenuBar;
+    pmFile: TfpgPopupMenu;
+    Fedit: TRichTextEditFrame;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
 
-
+  {@VFD_NEWFORM_DECL}
 
   {@VFD_NEWFORM_IMPL}
 
@@ -121,10 +115,6 @@ begin
 end;
 
 procedure TMainForm.AfterCreate;
-var
-  I, J: integer;
-  img: tfpgimage;
-  S: string;
 begin
   {%region 'Auto-generated GUI code' }
 
@@ -133,38 +123,53 @@ begin
   SetPosition(496, 295, 739, 502);
   WindowTitle := 'Editing new file';
   Hint := '';
+  IconName := '';
   ShowHint := True;
+
+  FMenu := TfpgMenuBar.Create(self);
+  with FMenu do
+  begin
+    Name := 'FMenu';
+    SetPosition(0, 0, 739, 24);
+    Align := alTop;
+  end;
+
+  pmFile := TfpgPopupMenu.Create(self);
+  with pmFile do
+  begin
+    Name := 'pmFile';
+    SetPosition(556, 36, 164, 20);
+    AddMenuItem('&New',  'Ctrl+N', @DoNewFile);
+    AddMenuItem('&Open', 'Ctrl+O', @DoOpenFile);
+    AddMenuItem('&Save', 'Ctrl+S', @DoSaveFile);
+    AddMenuItem('&Quit', 'Ctrl+Q', @DoQuit);
+  end;
+
+  Fedit := TRichTextEditFrame.Create(self);
+  with Fedit do
+  begin
+    Name := 'Fedit';
+    SetPosition(32, 80, 371, 334);
+    Align := alClient;
+  end;
 
   {@VFD_BODY_END: MainForm}
   {%endregion}
 
-  FMenu:=TfpgMenuBar.Create(Self);
-  FMenu.SetPosition(0,0,Self.width,30);
-  FMenu.align:=alTop;
-  MFile:=FMenu.AddMenuItem('File',Nil);
-  MFile.SubMenu:=TfpgPopupMenu.Create(MFile);
-  MNew:=MFile.SubMenu.AddMenuItem('&New','ctrl-n',@DoNewFile);
-  MOpen:=MFile.SubMenu.AddMenuItem('&Open','ctrl-o',@DoOpenFile);
-  MSave:=MFile.SubMenu.AddMenuItem('&Save','ctrl-s',@DoSaveFile);
-  MQuit:=MFile.SubMenu.AddMenuItem('&Quit','ctrl-q',@DoQuit);
-  Fedit:=TRichTextEditFrame.Create(Self);
-  Fedit.SetPosition(0,FMenu.Height,Self.width,Self.Height-FMenu.Height);
-  Fedit.align:=alClient;
+  FMenu.AddMenuItem('File', nil).SubMenu := pmFile;
 end;
-
 
 
 procedure MainProc;
 var
   frm: TMainForm;
-
 begin
   fpgApplication.Initialize;
   RegisterStdRichTextImages;
   frm := TMainForm.Create(nil);
   try
     frm.Show;
-    if (ParamCount=1) and FileExists(ParamStr(1)) then
+    if (ParamCount=1) and fpgFileExists(ParamStr(1)) then
       frm.LoadFile(Paramstr(1));
     fpgApplication.Run;
   finally
