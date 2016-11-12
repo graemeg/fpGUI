@@ -27,21 +27,21 @@ type
   { TMainForm }
 
   TMainForm = class(TfpgForm)
+  private
+    FMenu : TfpgMenuBar;
+    MFile: TfpgMenuItem;
+    MNew: TfpgMenuItem;
+    MOpen: TfpgMenuItem;
+    MSave: TfpgMenuItem;
+    MQuit: TfpgMenuItem;
+    FFileName : string;
     procedure DoNewFile(Sender: TObject);
     procedure DoOpenFile(Sender: TObject);
     procedure DoQuit(Sender: TObject);
     procedure DoSaveFile(Sender: TObject);
-  private
     procedure LoadFile(const AFileName: String);
     procedure SaveFile(const AFileName: String);
   public
-    FMenu : TfpgMenuBar;
-    MFile,
-    MNew,
-    MOpen,
-    MSave,
-    MQuit: TfpgMenuItem;
-    FFileName : string;
     {@VFD_HEAD_BEGIN: MainForm}
     FEdit : TRichTextEditFrame;
     {@VFD_HEAD_END: MainForm}
@@ -126,6 +126,18 @@ var
   img: tfpgimage;
   S: string;
 begin
+  {%region 'Auto-generated GUI code' }
+
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(496, 295, 739, 502);
+  WindowTitle := 'Editing new file';
+  Hint := '';
+  ShowHint := True;
+
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+
   FMenu:=TfpgMenuBar.Create(Self);
   FMenu.SetPosition(0,0,Self.width,30);
   FMenu.align:=alTop;
@@ -138,16 +150,6 @@ begin
   Fedit:=TRichTextEditFrame.Create(Self);
   Fedit.SetPosition(0,FMenu.Height,Self.width,Self.Height-FMenu.Height);
   Fedit.align:=alClient;
-  {%region 'Auto-generated GUI code' }
-
-  {@VFD_BODY_BEGIN: MainForm}
-  Name := 'MainForm';
-  SetPosition(496, 295, 739, 502);
-  WindowTitle := 'Editing new file';
-  Hint := '';
-
-  {@VFD_BODY_END: MainForm}
-  {%endregion}
 end;
 
 
