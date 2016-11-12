@@ -1,25 +1,24 @@
-unit frarichtextedit;
+unit fraRichTextEdit;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
+  Classes,
+  SysUtils,
   fpg_base,
   fpg_tab,
   fpg_button,
   fpg_panel,
   fpg_main,
   fpg_memo,
-  fpg_form,
   fpg_dialogs,
-  fpg_stdimages,
   RichTextView,
   fpg_imagelist,
   fpg_imgfmt_bmp,
   fpg_imgfmt_png,
-  fpg_imgfmt_jpg,
-  Classes, SysUtils;
+  fpg_imgfmt_jpg;
 
 type
 
@@ -74,6 +73,7 @@ type
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   Public
+    destructor Destroy; override;
     Property ImageNames : TStrings Read GetImageNames Write SetImageNames;
     Property RichText : String Read GetRichText Write SetRichText;
   end;
@@ -550,15 +550,21 @@ begin
   BLink := TBButton(L,T,TBLink,'BLink',BILink,'', 'Link');
   BCheck := TBButton(L,T,TBCheck,'BCheck',BICheck,'', 'Check');
 
-  FImageList:=TfpgImageList.Create;
-  FImageNames:=TStringList.Create;
-  RTVPreview.Images:=FImageList;
+  FImageList := TfpgImageList.Create;
+  FImageNames := TStringList.Create;
+  RTVPreview.Images := FImageList;
   RTVPreview.RichTextSettings.Heading1Font := fpgGetFont('Arial-18:bold');
   RTVPreview.RichTextSettings.Heading2Font := fpgGetFont('Arial-14:bold');
   RTVPreview.RichTextSettings.Heading3Font := fpgGetFont('Arial-12:bold');
   RTVPreview.RichTextSettings.NormalFont := fpgGetFont(FPG_DEFAULT_FONT_DESC);
   RTVPreview.RichTextSettings.FixedFont := fpgGetFont('Courier New-10:antialiased=true');
+end;
 
+destructor TRichTextEditFrame.Destroy;
+begin
+  FImageList.Free;
+  FImageNames.Free;
+  inherited Destroy;
 end;
 
 Procedure RegisterStdRichTextImages;
