@@ -1,25 +1,17 @@
-program testboard;
+program testedit;
 
 {$mode objfpc}{$H+}
 
-uses {$IFDEF UNIX} {$IFDEF UseCThreads}
-  cthreads, {$ENDIF} {$ENDIF}
+uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_tab,
-  fpg_button,
-  fpg_panel,
   fpg_main,
   fpg_memo,
   fpg_form,
   fpg_dialogs,
   fpg_menu,
-  RichTextView, frarichtextedit,
-  fpg_imagelist,
-  fpg_imgfmt_bmp,
-  fpg_imgfmt_png,
-  fpg_imgfmt_jpg,
+  frarichtextedit,
   fpg_utils;
 
 type
@@ -37,65 +29,63 @@ type
     {@VFD_HEAD_BEGIN: MainForm}
     FMenu: TfpgMenuBar;
     pmFile: TfpgPopupMenu;
-    Fedit: TRichTextEditFrame;
+    FEdit: TRichTextEditFrame;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
 
   {@VFD_NEWFORM_DECL}
 
+resourcestring
+  rsEditingCaption = 'Editing %s';
+
+
   {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.DoNewFile(Sender: TObject);
 begin
-  FEdit.RichText:='';
-  FFileName:='';
-  WindowTitle:='Editing new file';
+  FEdit.RichText := '';
+  FFileName := '';
+  WindowTitle := Format(rsEditingCaption, ['new file']);
 end;
 
 procedure TMainForm.LoadFile(COnst AFileName :String);
-
-Var
-  L : TStrings;
-
+var
+  L: TStrings;
 begin
   FFileName:=AFileName;
-  L:=TstringList.Create;
+  L := TStringList.Create;
   try
     L.LoadFromFile(AFileName);
-    fedit.RichText:=l.text;
+    FEdit.RichText := L.Text;
   finally
     L.Free;
   end;
-  WindowTitle:='Editing '+AFileName;
+  WindowTitle := Format(rsEditingCaption, [AFileName]);
 end;
 
 procedure TMainForm.SaveFile(COnst AFileName :String);
-
-Var
-  L : TStrings;
-
+var
+  L: TStrings;
 begin
-  FFileName:=AFileName;
-  L:=TstringList.Create;
+  FFileName := AFileName;
+  L := TStringList.Create;
   try
-    l.text:=fedit.RichText;
+    L.Text := FEdit.RichText;
     L.SaveToFile(AFileName);
   finally
     L.Free;
   end;
-  WindowTitle:='Editing '+AFileName;
+  WindowTitle := Format(rsEditingCaption, [AFileName]);
 end;
 
 
 procedure TMainForm.DoOpenFile(Sender: TObject);
-
-Var
-  FN : String;
-
+var
+  FN: String;
 begin
-  FN:=SelectFileDialog(sfdOpen,'text files|*.txt|All files|'+AllFilesMask,'');
-  if (FN<>'') then
+  FN := SelectFileDialog(sfdOpen, 'Text files|*.txt|All files|'+AllFilesMask, '');
+  if (FN <> '') then
     LoadFile(FN);
 end;
 
@@ -105,12 +95,11 @@ begin
 end;
 
 procedure TMainForm.DoSaveFile(Sender: TObject);
-Var
-  FN : String;
-
+var
+  FN: String;
 begin
-  FN:=SelectFileDialog(sfdSave,'text files|*.txt|All files|'+AllFilesMask,'');
-  if (FN<>'') then
+  FN := SelectFileDialog(sfdSave, 'Text files|*.txt|All files|'+AllFilesMask, '');
+  if (FN <> '') then
     SaveFile(FN);
 end;
 
@@ -145,10 +134,10 @@ begin
     AddMenuItem('&Quit', 'Ctrl+Q', @DoQuit);
   end;
 
-  Fedit := TRichTextEditFrame.Create(self);
-  with Fedit do
+  FEdit := TRichTextEditFrame.Create(self);
+  with FEdit do
   begin
-    Name := 'Fedit';
+    Name := 'FEdit';
     SetPosition(32, 80, 371, 334);
     Align := alClient;
   end;
