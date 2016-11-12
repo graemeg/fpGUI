@@ -482,6 +482,7 @@ begin
   RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
   RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
   RichView.ScrollDistance := Settings.ScrollDistance;
+  RichView.BackgroundColor := Settings.Colors[TopicBackgroundColorIndex];
 end;
 
 procedure TMainForm.btnBackHistClick(Sender: TObject);

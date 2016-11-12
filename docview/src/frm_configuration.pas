@@ -24,6 +24,7 @@ type
     Label2: TfpgLabel;
     pnlSearchHighlight: TfpgPanel;
     pnlNotesColor: TfpgPanel;
+    pnlPageColor: TfpgPanel;
     lblIndexStyle: TfpgLabel;
     lblSearchDirs: TfpgLabel;
     btnSearchDirAdd: TfpgButton;
@@ -34,6 +35,7 @@ type
     chkOpenTOC: TfpgCheckBox;
     btnColorHighlight: TfpgButton;
     btnColorNotes: TfpgButton;
+    btnPageColor: TfpgButton;
     btnResetColors: TfpgButton;
     edtFixedFont: TfpgFontEdit;
     edtNormalFont: TfpgFontEdit;
@@ -53,6 +55,7 @@ type
     procedure btnSearchDirAddClicked(Sender: TObject);
     procedure btnSearchHighlightClicked(Sender: TObject);
     procedure btnNotesColorClicked(Sender: TObject);
+    procedure btnPageColorClicked(Sender: TObject);
     procedure ResetColorsButtonOnClick(Sender: TObject);
     procedure SettingsToGui;
     procedure GuiToSettings;
@@ -142,6 +145,11 @@ begin
   pnlNotesColor.BackgroundColor := fpgSelectColorDialog(pnlNotesColor.BackgroundColor);
 end;
 
+procedure TConfigurationForm.btnPageColorClicked(Sender: TObject);
+begin
+  pnlPageColor.BackgroundColor := fpgSelectColorDialog(pnlPageColor.BackgroundColor);
+end;
+
 procedure TConfigurationForm.ResetColorsButtonOnClick(Sender: TObject);
 var
   i: longint;
@@ -189,6 +197,7 @@ begin
   Settings.FixedFontDesc := edtFixedFont.FontDesc;
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
   Settings.Colors[NotesTextColorIndex] := pnlNotesColor.BackgroundColor;
+  Settings.Colors[TopicBackgroundColorIndex] := pnlPageColor.BackgroundColor;
   // Index
   if rbIndexOrig.Checked then
     Settings.IndexStyle := isFileOnly
@@ -202,6 +211,7 @@ procedure TConfigurationForm.UpdateColorPanels;
 begin
   pnlSearchHighlight.BackgroundColor := Settings.Colors[SearchHighlightTextColorIndex];
   pnlNotesColor.BackgroundColor := Settings.Colors[NotesTextColorIndex];
+  pnlPageColor.BackgroundColor := Settings.Colors[TopicBackgroundColorIndex];
 end;
 
 constructor TConfigurationForm.Create(AOwner: TComponent);
@@ -330,6 +340,17 @@ begin
     Text := 'Notes/Annotations Color';
   end;
 
+  pnlPageColor := TfpgPanel.Create(tsFontsColor);
+  with pnlPageColor do
+  begin
+    Name := 'pnlPageColor';
+    SetPosition(12, 164, 360, 24);
+    FontDesc := '#Label1';
+    Hint := '';
+    Style := bsLowered;
+    Text := 'Page Color';
+  end;
+
   lblIndexStyle := TfpgLabel.Create(tsIndex);
   with lblIndexStyle do
   begin
@@ -447,6 +468,19 @@ begin
     ImageName := '';
     TabOrder := 15;
     OnClick := @btnNotesColorClicked;
+  end;
+
+  btnPageColor := TfpgButton.Create(tsFontsColor);
+  with btnPageColor do
+  begin
+    Name := 'btnPageColor';
+    SetPosition(384, 164, 80, 24);
+    Text := 'Color';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 15;
+    OnClick := @btnPageColorClicked;
   end;
 
   btnResetColors := TfpgButton.Create(tsFontsColor);

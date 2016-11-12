@@ -152,6 +152,7 @@ Type
     procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure SetBackgroundColor(const AValue: TfpgColor); override;
 
     //procedure ScanEvent( Var KeyCode: TKeyCode;
     //                     RepeatCount: Byte ); override;
@@ -876,6 +877,12 @@ begin
     MouseCursor := mcHand
   else
     MouseCursor := mcDefault;   // TODO: later this should be IBeam when RichView supports editing
+end;
+
+procedure TRichTextView.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  RichTextSettings.DefaultBackgroundColor := AValue;
+  RePaint;
 end;
 
 Destructor TRichTextView.Destroy;
