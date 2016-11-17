@@ -1728,7 +1728,10 @@ begin
   if not OpenAdditionalFile then
     CloseFile;
 
-  AssignList(tmpHelpFiles, CurrentOpenFiles );
+  if OpenAdditionalFile then
+    AddList(tmpHelpFiles, CurrentOpenFiles)
+  else
+    AssignList(tmpHelpFiles, CurrentOpenFiles );
 
   if CurrentOpenFiles.Count = 0 then
    exit; // no help files found - nothing further to do
