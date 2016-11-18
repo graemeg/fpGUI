@@ -49,13 +49,13 @@ type
   public
     VFDWidget: TVFDWidgetClass;
   end;
-  
+
 
   TwgPalette = class(TfpgWidget)
   protected
     procedure HandlePaint; override;
   end;
-  
+
 
   TfrmMain = class(TfpgForm)
   private
@@ -140,16 +140,34 @@ type
 
 
   TfrmProperties = class(TfpgForm)
+  private
+    procedure   FormShow(Sender: TObject);
   protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
-    l1, l2, l3, l4, l5, l6, l7, l8: TfpgLabel;
+    {@VFD_HEAD_BEGIN: frmProperties}
+    l1: TfpgLabel;
     lbClass: TfpgLabel;
+    l2: TfpgLabel;
     edName: TfpgEdit;
-    edOther: TfpgMemo;
-    btnTop, btnLeft, btnWidth, btnHeight: TfpgButton;
-    btnAnLeft, btnAnTop, btnAnRight, btnAnBottom: TfpgButton;
     lstProps: TwgPropertyList;
+    l3: TfpgLabel;
+    btnLeft: TfpgButton;
+    l4: TfpgLabel;
+    btnTop: TfpgButton;
+    l5: TfpgLabel;
+    btnWidth: TfpgButton;
+    l6: TfpgLabel;
+    btnHeight: TfpgButton;
+    l8: TfpgLabel;
+    btnAnLeft: TfpgButton;
+    btnAnTop: TfpgButton;
+    btnAnBottom: TfpgButton;
+    btnAnRight: TfpgButton;
+    l7: TfpgLabel;
+    edOther: TfpgMemo;
+    {@VFD_HEAD_END: frmProperties}
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
   end;
@@ -462,7 +480,7 @@ begin
   with helpmenu do
   begin
     Name := 'helpmenu';
-    SetPosition(328, 52, 120, 20);
+    SetPosition(336, 49, 120, 20);
     AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutGUI);
     AddMenuItem('Product Information...', '', @miHelpAboutClick);
   end;
@@ -471,7 +489,7 @@ begin
   with previewmenu do
   begin
     Name := 'previewmenu';
-    SetPosition(324, 36, 120, 20);
+    SetPosition(336, 30, 120, 20);
   end;
 
   btnGrid := TfpgButton.Create(self);
@@ -532,7 +550,7 @@ begin
   MainMenu.AddMenuItem('Fo&rm', nil).SubMenu     := formmenu;
   MainMenu.AddMenuItem('&Preview', nil).SubMenu  := previewmenu;
   MainMenu.AddMenuItem('&Help', nil).SubMenu     := helpmenu;
-  
+
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
 
   mru := TfpgMRU.Create(self);
@@ -567,171 +585,287 @@ end;
 
 { TfrmProperties }
 
+procedure TfrmProperties.FormShow(Sender: TObject);
+begin
+  gINI.ReadFormState(self);
+end;
+
 procedure TfrmProperties.AfterCreate;
 var
   x, x2, w, y, gap: integer;
 begin
   {%region 'Auto-generated GUI code' -fold}
-  inherited;
+  {@VFD_BODY_BEGIN: frmProperties}
   Name := 'frmProperties';
-  WindowPosition := wpUser;
-  WindowTitle := 'Properties';
   SetPosition(43, 150, 250, 450);
-  gINI.ReadFormState(self);
+  WindowTitle := 'Properties';
+  Hint := '';
+  IconName := '';
+  WindowPosition := wpUser;
+  OnShow := @FormShow;
 
-  fpgImages.AddMaskedBMP(
-    'vfd.anchorleft', @vfd_anchorleft,
-    sizeof(vfd_anchorleft), 0, 0);
+  l1 := TfpgLabel.Create(self);
+  with l1 do
+  begin
+    Name := 'l1';
+    SetPosition(3, 3, 50, 15);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Class:';
+  end;
 
-  fpgImages.AddMaskedBMP(
-    'vfd.anchorright', @vfd_anchorright,
-    sizeof(vfd_anchorright), 0, 0);
+  lbClass := TfpgLabel.Create(self);
+  with lbClass do
+  begin
+    Name := 'lbClass';
+    SetPosition(53, 3, 197, 15);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'CLASS';
+  end;
 
-  fpgImages.AddMaskedBMP(
-    'vfd.anchortop', @vfd_anchortop,
-    sizeof(vfd_anchortop), 0, 0);
+  l2 := TfpgLabel.Create(self);
+  with l2 do
+  begin
+    Name := 'l2';
+    SetPosition(3, 27, 50, 15);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Name:';
+  end;
 
-  fpgImages.AddMaskedBMP(
-    'vfd.anchorbottom', @vfd_anchorbottom,
-    sizeof(vfd_anchorbottom), 0, 0);
+  edName := TfpgEdit.Create(self);
+  with edName do
+  begin
+    Name := 'edName';
+    SetPosition(53, 23, 195, 24);
+    Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    FontDesc := '#Label2';
+    Hint := '';
+    TabOrder := 4;
+    Text := 'NAME';
+    OnChange := @(maindsgn.OnPropNameChange);
+  end;
 
-  x     := 3;
-  x2    := x + 50;
-  gap   := 20;
-  w     := Width - x2;
-  y     := 3;
+  lstProps := TwgPropertyList.Create(self);
+  with lstProps do
+  begin
+    Name := 'lstProps';
+    SetPosition(0, 50, 250, 180);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Props := PropList;
+    Props.Widget := edName;
+  end;
 
-  l1      := CreateLabel(self, 0, y, 'Class:');
-  lbClass := CreateLabel(self, x2, y, 'CLASS');
-  lbClass.Width := w;
-  lbClass.FontDesc := '#Label2';
-  lbClass.Anchors := [anLeft, anRight, anTop];
-  Inc(y, gap);
+  l3 := TfpgLabel.Create(self);
+  with l3 do
+  begin
+    Name := 'l3';
+    SetPosition(3, 236, 50, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Left:';
+  end;
 
-  l2           := CreateLabel(self, 0, y + 1, 'Name:');
-  edName       := CreateEdit(self, x2, y, w, 0);
-  edName.Text  := 'NAME';
-  edName.Anchors := [anLeft, anRight, anTop];
-  edName.OnChange := @(maindsgn.OnPropNameChange);
-
-  Inc(y, gap + 5);
-
-  lstProps         := TwgPropertyList.Create(self);
-  lstProps.SetPosition(0, y, Width, self.Height - y - 220);
-  lstProps.Anchors := AllAnchors;
-  lstProps.Props   := PropList;
-  lstProps.Props.Widget := edName;
-
-  y := lstProps.Bottom + 5;
-
-  //inc(y, gap+5);
-
-  l3         := CreateLabel(self, 3, y + 1, 'Left:');
-  l3.Anchors := [anLeft, anBottom];
-  btnLeft    := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
+  btnLeft := TfpgButton.Create(self);
   with btnLeft do
   begin
-    Height        := 22;
-    Anchors       := [anLeft, anBottom];
-    Focusable     := False;
+    Name := 'btnLeft';
+    SetPosition(50, 233, 50, 22);
+    Anchors := [anLeft,anBottom];
+    Text := '1234';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
+    Focusable := False;
+    OnClick := @(maindsgn.OnPropPosEdit);
   end;
-  l4 := CreateLabel(self, 110, y, 'Top:');
-  l4.Anchors := [anLeft, anBottom];
-  btnTop     := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
+
+  l4 := TfpgLabel.Create(self);
+  with l4 do
+  begin
+    Name := 'l4';
+    SetPosition(110, 236, 50, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Top:';
+  end;
+
+  btnTop := TfpgButton.Create(self);
   with btnTop do
   begin
-    Height        := 22;
-    Anchors       := [anLeft, anBottom];
-    Focusable     := False;
+    Name := 'btnTop';
+    SetPosition(160, 233, 50, 22);
+    Anchors := [anLeft,anBottom];
+    Text := '1234';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 9;
+    Focusable := False;
+    OnClick := @(maindsgn.OnPropPosEdit);
   end;
-  Inc(y, gap + 5);
-  l5         := CreateLabel(self, 3, y + 1, 'Width:');
-  l5.Anchors := [anLeft, anBottom];
-  btnWidth   := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
+
+  l5 := TfpgLabel.Create(self);
+  with l5 do
+  begin
+    Name := 'l5';
+    SetPosition(3, 260, 50, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Width:';
+  end;
+
+  btnWidth := TfpgButton.Create(self);
   with btnWidth do
   begin
-    Height        := 22;
-    Anchors       := [anLeft, anBottom];
-    Focusable     := False;
+    Name := 'btnWidth';
+    SetPosition(50, 257, 50, 22);
+    Anchors := [anLeft,anBottom];
+    Text := '1234';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 11;
+    Focusable := False;
+    OnClick := @(maindsgn.OnPropPosEdit);
   end;
-  l6 := CreateLabel(self, 110, y, 'Height:');
-  l6.Anchors := [anLeft, anBottom];
-  btnHeight  := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
+
+  l6 := TfpgLabel.Create(self);
+  with l6 do
+  begin
+    Name := 'l6';
+    SetPosition(110, 260, 50, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Height:';
+  end;
+
+  btnHeight := TfpgButton.Create(self);
   with btnHeight do
   begin
-    Height        := 22;
-    Anchors       := [anLeft, anBottom];
-    Focusable     := False;
+    Name := 'btnHeight';
+    SetPosition(160, 257, 50, 22);
+    Anchors := [anLeft,anBottom];
+    Text := '1234';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 13;
+    Focusable := False;
+    OnClick := @(maindsgn.OnPropPosEdit);
   end;
-  Inc(y, gap + 5);
 
-  l8         := CreateLabel(self, 3, y + 1, 'Anchors:');
-  l8.Anchors := [anLeft, anBottom];
+  l8 := TfpgLabel.Create(self);
+  with l8 do
+  begin
+    Name := 'l8';
+    SetPosition(3, 287, 50, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Anchors:';
+  end;
 
-  x := 64;
-
-  btnAnLeft := CreateButton(self, x, y - 2, 26, '', nil);
+  btnAnLeft := TfpgButton.Create(self);
   with btnAnLeft do
   begin
-    ImageName  := 'vfd.anchorleft';
-    ShowImage  := True;
+    Name := 'btnAnLeft';
+    SetPosition(64, 283, 26, 25);
+    Anchors := [anLeft,anBottom];
+    Text := '';
     AllowAllUp := True;
+    FontDesc := '#Label1';
     GroupIndex := 1;
-    Focusable  := False;
-    Anchors    := [anLeft, anBottom];
-    OnClick    := @(maindsgn.OnAnchorChange);
+    Hint := '';
+    ImageName := 'vfd.anchorleft';
+    TabOrder := 15;
+    Focusable := False;
+    OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  Inc(x, 30);
-  btnAnTop := CreateButton(self, x, y - 2, 26, '', nil);
+  btnAnTop := TfpgButton.Create(self);
   with btnAnTop do
   begin
-    ImageName  := 'vfd.anchortop';
-    ShowImage  := True;
+    Name := 'btnAnTop';
+    SetPosition(94, 283, 26, 25);
+    Anchors := [anLeft,anBottom];
+    Text := '';
     AllowAllUp := True;
+    FontDesc := '#Label1';
     GroupIndex := 2;
-    Focusable  := False;
-    Anchors    := [anLeft, anBottom];
-    OnClick    := @(maindsgn.OnAnchorChange);
+    Hint := '';
+    ImageName := 'vfd.anchortop';
+    TabOrder := 16;
+    Focusable := False;
+    OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  Inc(x, 30);
-  btnAnBottom := CreateButton(self, x, y - 2, 26, '', nil);
+  btnAnBottom := TfpgButton.Create(self);
   with btnAnBottom do
   begin
-    ImageName  := 'vfd.anchorbottom';
-    ShowImage  := True;
+    Name := 'btnAnBottom';
+    SetPosition(124, 283, 26, 25);
+    Anchors := [anLeft,anBottom];
+    Text := '';
     AllowAllUp := True;
+    FontDesc := '#Label1';
     GroupIndex := 3;
-    Focusable  := False;
-    Anchors    := [anLeft, anBottom];
-    OnClick    := @(maindsgn.OnAnchorChange);
+    Hint := '';
+    ImageName := 'vfd.anchorbottom';
+    TabOrder := 17;
+    Focusable := False;
+    OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  Inc(x, 30);
-  btnAnRight := CreateButton(self, x, y - 2, 26, '', nil);
+  btnAnRight := TfpgButton.Create(self);
   with btnAnRight do
   begin
-    ImageName  := 'vfd.anchorright';
-    ShowImage  := True;
+    Name := 'btnAnRight';
+    SetPosition(154, 283, 26, 25);
+    Anchors := [anLeft,anBottom];
+    Text := '';
     AllowAllUp := True;
+    FontDesc := '#Label1';
     GroupIndex := 4;
-    Focusable  := False;
-    Anchors    := [anLeft, anBottom];
-    OnClick    := @(maindsgn.OnAnchorChange);
+    Hint := '';
+    ImageName := 'vfd.anchorright';
+    TabOrder := 18;
+    Focusable := False;
+    OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  y := btnAnRight.Bottom + 5;
+  l7 := TfpgLabel.Create(self);
+  with l7 do
+  begin
+    Name := 'l7';
+    SetPosition(3, 313, 200, 15);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Unknown lines:';
+  end;
 
-  l7         := CreateLabel(self, 0, y, 'Unknown lines:');
-  l7.Anchors := [anLeft, anBottom];
-  Inc(y, 16);
+  edOther := TfpgMemo.Create(self);
+  with edOther do
+  begin
+    Name := 'edOther';
+    SetPosition(0, 328, 250, 122);
+    Anchors := [anLeft,anRight,anBottom];
+    FontDesc := '#Edit2';
+    Hint := '';
+    TabOrder := 20;
+    OnChange := @(maindsgn.OnOtherChange);
+  end;
 
-  edOther          := TfpgMemo.Create(self);
-  edOther.SetPosition(0, y, self.Width, self.Height - y);
-  edOther.Anchors  := [anLeft, anRight, anBottom];
-  edOther.FontDesc := '#Edit2';
-  edOther.OnChange := @(maindsgn.OnOtherChange);
+  {@VFD_BODY_END: frmProperties}
   {%endregion}
 end;
 
@@ -754,6 +888,27 @@ begin
     consumed := True;
   end;
   inherited;
+end;
+
+constructor TfrmProperties.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.anchorleft', @vfd_anchorleft,
+    sizeof(vfd_anchorleft), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.anchorright', @vfd_anchorright,
+    sizeof(vfd_anchorright), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.anchortop', @vfd_anchortop,
+    sizeof(vfd_anchortop), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.anchorbottom', @vfd_anchorbottom,
+    sizeof(vfd_anchorbottom), 0, 0);
 end;
 
 { TPropertyList }
