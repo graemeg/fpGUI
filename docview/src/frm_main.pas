@@ -112,7 +112,7 @@ type
     Bookmarks: TList;
     BookmarksMenuItems: TList;
 
-    procedure   RichViewDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure   RichViewDragDrop(Drop: TfpgDrop; AData: Variant);
     procedure   tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
     procedure   tvContentsDragEntered(Drop: TfpgDrop);
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -343,8 +343,7 @@ end;
 { If you drop on RichView, only load the first INF file (closing all others
   first. If you want multiple files or add more files, drop on Contents
   TreeView. }
-procedure TMainForm.RichViewDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.RichViewDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   s: string;
   i: integer;
@@ -352,6 +351,7 @@ var
 begin
   sl := TStringList.Create;
   sl.Text := Trim(AData);
+  OpenAdditionalFile := False;
   try
     for i := 0 to sl.Count-1 do
     begin
@@ -3259,6 +3259,7 @@ begin
     OnOverLink  := @RichViewOverLink;
     OnNotOverLink  := @RichViewNotOverLink;
     OnClickLink := @RichViewClickLink;
+    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @RichViewDragDrop, nil);
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
