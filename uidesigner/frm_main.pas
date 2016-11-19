@@ -37,6 +37,9 @@ uses
   fpg_menu,
   fpg_mru,
   fpg_hyperlink,
+  fpg_panel,
+  fpg_tree,
+  fpg_splitter,
   vfd_widgetclass,
   vfd_widgets;
 
@@ -142,10 +145,16 @@ type
   TfrmProperties = class(TfpgForm)
   private
     procedure   FormShow(Sender: TObject);
+    procedure   FormResized(Sender: TObject);
+    procedure   SetHierarchyMaxHeight;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     {@VFD_HEAD_BEGIN: frmProperties}
+    Bevel1: TfpgBevel;
+    TreeView1: TfpgTreeView;
+    Splitter1: TfpgSplitter;
+    bvlOI: TfpgBevel;
     l1: TfpgLabel;
     lbClass: TfpgLabel;
     l2: TfpgLabel;
@@ -170,6 +179,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
+    procedure   UpdateWidgetHierachyTreeview(AMainComp, ASelected: TComponent);
   end;
 
 
@@ -590,21 +600,67 @@ begin
   gINI.ReadFormState(self);
 end;
 
+procedure TfrmProperties.FormResized(Sender: TObject);
+begin
+  SetHierarchyMaxHeight;
+end;
+
+procedure TfrmProperties.SetHierarchyMaxHeight;
+begin
+  Bevel1.MaxHeight := Round(Height * 0.4); // no more than 40% of window height
+end;
+
 procedure TfrmProperties.AfterCreate;
-var
-  x, x2, w, y, gap: integer;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: frmProperties}
   Name := 'frmProperties';
-  SetPosition(43, 150, 250, 450);
+  SetPosition(43, 150, 250, 533);
   WindowTitle := 'Properties';
   Hint := '';
   IconName := '';
   WindowPosition := wpUser;
+  MinHeight := 435;
   OnShow := @FormShow;
+  OnResize := @FormResized;
 
-  l1 := TfpgLabel.Create(self);
+  Bevel1 := TfpgBevel.Create(self);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(0, 0, 250, 100);
+    Hint := '';
+    Shape := bsSpacer;
+  end;
+
+  TreeView1 := TfpgTreeView.Create(Bevel1);
+  with TreeView1 do
+  begin
+    Name := 'TreeView1';
+    SetPosition(4, 4, 242, 92);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 1;
+  end;
+
+  Splitter1 := TfpgSplitter.Create(self);
+  with Splitter1 do
+  begin
+    Name := 'Splitter1';
+    SetPosition(0, 100, 250, 8);
+  end;
+
+  bvlOI := TfpgBevel.Create(self);
+  with bvlOI do
+  begin
+    Name := 'bvlOI';
+    SetPosition(0, 108, 250, 461);
+    Hint := '';
+    Shape := bsSpacer;
+  end;
+
+  l1 := TfpgLabel.Create(bvlOI);
   with l1 do
   begin
     Name := 'l1';
@@ -614,7 +670,7 @@ begin
     Text := 'Class:';
   end;
 
-  lbClass := TfpgLabel.Create(self);
+  lbClass := TfpgLabel.Create(bvlOI);
   with lbClass do
   begin
     Name := 'lbClass';
@@ -625,7 +681,7 @@ begin
     Text := 'CLASS';
   end;
 
-  l2 := TfpgLabel.Create(self);
+  l2 := TfpgLabel.Create(bvlOI);
   with l2 do
   begin
     Name := 'l2';
@@ -635,7 +691,7 @@ begin
     Text := 'Name:';
   end;
 
-  edName := TfpgEdit.Create(self);
+  edName := TfpgEdit.Create(bvlOI);
   with edName do
   begin
     Name := 'edName';
@@ -649,32 +705,32 @@ begin
     OnChange := @(maindsgn.OnPropNameChange);
   end;
 
-  lstProps := TwgPropertyList.Create(self);
+  lstProps := TwgPropertyList.Create(bvlOI);
   with lstProps do
   begin
     Name := 'lstProps';
-    SetPosition(0, 50, 250, 180);
+    SetPosition(0, 50, 250, 192);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Props := PropList;
     Props.Widget := edName;
   end;
 
-  l3 := TfpgLabel.Create(self);
+  l3 := TfpgLabel.Create(bvlOI);
   with l3 do
   begin
     Name := 'l3';
-    SetPosition(3, 236, 50, 15);
+    SetPosition(3, 248, 50, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Left:';
   end;
 
-  btnLeft := TfpgButton.Create(self);
+  btnLeft := TfpgButton.Create(bvlOI);
   with btnLeft do
   begin
     Name := 'btnLeft';
-    SetPosition(50, 233, 50, 22);
+    SetPosition(50, 245, 50, 22);
     Anchors := [anLeft,anBottom];
     Text := '1234';
     FontDesc := '#Label1';
@@ -685,22 +741,22 @@ begin
     OnClick := @(maindsgn.OnPropPosEdit);
   end;
 
-  l4 := TfpgLabel.Create(self);
+  l4 := TfpgLabel.Create(bvlOI);
   with l4 do
   begin
     Name := 'l4';
-    SetPosition(110, 236, 50, 15);
+    SetPosition(110, 248, 50, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Top:';
   end;
 
-  btnTop := TfpgButton.Create(self);
+  btnTop := TfpgButton.Create(bvlOI);
   with btnTop do
   begin
     Name := 'btnTop';
-    SetPosition(160, 233, 50, 22);
+    SetPosition(160, 245, 50, 22);
     Anchors := [anLeft,anBottom];
     Text := '1234';
     FontDesc := '#Label1';
@@ -711,22 +767,22 @@ begin
     OnClick := @(maindsgn.OnPropPosEdit);
   end;
 
-  l5 := TfpgLabel.Create(self);
+  l5 := TfpgLabel.Create(bvlOI);
   with l5 do
   begin
     Name := 'l5';
-    SetPosition(3, 260, 50, 15);
+    SetPosition(3, 272, 50, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Width:';
   end;
 
-  btnWidth := TfpgButton.Create(self);
+  btnWidth := TfpgButton.Create(bvlOI);
   with btnWidth do
   begin
     Name := 'btnWidth';
-    SetPosition(50, 257, 50, 22);
+    SetPosition(50, 269, 50, 22);
     Anchors := [anLeft,anBottom];
     Text := '1234';
     FontDesc := '#Label1';
@@ -737,22 +793,22 @@ begin
     OnClick := @(maindsgn.OnPropPosEdit);
   end;
 
-  l6 := TfpgLabel.Create(self);
+  l6 := TfpgLabel.Create(bvlOI);
   with l6 do
   begin
     Name := 'l6';
-    SetPosition(110, 260, 50, 15);
+    SetPosition(110, 272, 50, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Height:';
   end;
 
-  btnHeight := TfpgButton.Create(self);
+  btnHeight := TfpgButton.Create(bvlOI);
   with btnHeight do
   begin
     Name := 'btnHeight';
-    SetPosition(160, 257, 50, 22);
+    SetPosition(160, 269, 50, 22);
     Anchors := [anLeft,anBottom];
     Text := '1234';
     FontDesc := '#Label1';
@@ -763,22 +819,22 @@ begin
     OnClick := @(maindsgn.OnPropPosEdit);
   end;
 
-  l8 := TfpgLabel.Create(self);
+  l8 := TfpgLabel.Create(bvlOI);
   with l8 do
   begin
     Name := 'l8';
-    SetPosition(3, 287, 50, 15);
+    SetPosition(3, 299, 50, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Anchors:';
   end;
 
-  btnAnLeft := TfpgButton.Create(self);
+  btnAnLeft := TfpgButton.Create(bvlOI);
   with btnAnLeft do
   begin
     Name := 'btnAnLeft';
-    SetPosition(64, 283, 26, 25);
+    SetPosition(64, 295, 26, 25);
     Anchors := [anLeft,anBottom];
     Text := '';
     AllowAllUp := True;
@@ -791,11 +847,11 @@ begin
     OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  btnAnTop := TfpgButton.Create(self);
+  btnAnTop := TfpgButton.Create(bvlOI);
   with btnAnTop do
   begin
     Name := 'btnAnTop';
-    SetPosition(94, 283, 26, 25);
+    SetPosition(94, 295, 26, 25);
     Anchors := [anLeft,anBottom];
     Text := '';
     AllowAllUp := True;
@@ -808,11 +864,11 @@ begin
     OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  btnAnBottom := TfpgButton.Create(self);
+  btnAnBottom := TfpgButton.Create(bvlOI);
   with btnAnBottom do
   begin
     Name := 'btnAnBottom';
-    SetPosition(124, 283, 26, 25);
+    SetPosition(124, 295, 26, 25);
     Anchors := [anLeft,anBottom];
     Text := '';
     AllowAllUp := True;
@@ -825,11 +881,11 @@ begin
     OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  btnAnRight := TfpgButton.Create(self);
+  btnAnRight := TfpgButton.Create(bvlOI);
   with btnAnRight do
   begin
     Name := 'btnAnRight';
-    SetPosition(154, 283, 26, 25);
+    SetPosition(154, 295, 26, 25);
     Anchors := [anLeft,anBottom];
     Text := '';
     AllowAllUp := True;
@@ -842,22 +898,22 @@ begin
     OnClick := @(maindsgn.OnAnchorChange);
   end;
 
-  l7 := TfpgLabel.Create(self);
+  l7 := TfpgLabel.Create(bvlOI);
   with l7 do
   begin
     Name := 'l7';
-    SetPosition(3, 313, 200, 15);
+    SetPosition(3, 325, 200, 15);
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Unknown lines:';
   end;
 
-  edOther := TfpgMemo.Create(self);
+  edOther := TfpgMemo.Create(bvlOI);
   with edOther do
   begin
     Name := 'edOther';
-    SetPosition(0, 328, 250, 122);
+    SetPosition(0, 340, 250, 122);
     Anchors := [anLeft,anRight,anBottom];
     FontDesc := '#Edit2';
     Hint := '';
@@ -867,12 +923,55 @@ begin
 
   {@VFD_BODY_END: frmProperties}
   {%endregion}
+
+  Bevel1.Align := alTop;
+  Splitter1.Align := alTop;
+  bvlOI.Align := alClient;
 end;
 
 procedure TfrmProperties.BeforeDestruction;
 begin
   gINI.WriteFormState(self);
   inherited BeforeDestruction;
+end;
+
+procedure TfrmProperties.UpdateWidgetHierachyTreeview(AMainComp: TComponent; ASelected: TComponent);
+
+  procedure AddAllChildren(APar: TComponent; MainNode: TfpgTreeNode);
+  var
+    f: integer;
+    fcd: TComponent;
+    subNode: TfpgTreeNode;
+  begin
+    fcd := APar;
+    for f := 0 to fcd.ComponentCount-1 do
+    begin
+      if (fcd.Components[f].Name = '') or (fcd.Components[f].ClassName = 'TwgResizer') then
+        Continue;
+      subNode := mainNode.AppendText(fcd.Components[f].Name + ': ' + fcd.Components[f].ClassName);
+      if fcd.Components[f] = ASelected then
+        TreeView1.Selection := subNode;
+      if fcd.Components[f].ComponentCount > 0 then
+        AddAllChildren(fcd.Components[f],subNode);
+    end;
+  end;
+
+var
+  s:string;
+begin
+  TreeView1.RootNode.Clear;
+  if Assigned(AMainComp) then
+  begin
+    if AMainComp.ClassName = 'TDesignedForm' then
+      s := AMainComp.Name + ': ' + 'TfpgForm'
+    else
+      s := AMainComp.Name + ': ' + AMainComp.ClassName;
+
+    AddAllChildren(AMainComp, TreeView1.RootNode.AppendText(s));
+    TreeView1.FullExpand;
+  end
+  else
+    TreeView1.Invalidate;
 end;
 
 procedure TfrmProperties.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
