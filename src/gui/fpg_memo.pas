@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -32,8 +32,6 @@ uses
   fpg_menu;
 
 type
-
-  { TfpgMemo }
 
   TfpgMemo = class(TfpgWidget)
   private
@@ -1268,13 +1266,13 @@ begin
     ebsDefault:
         begin
           fpgStyle.DrawControlFrame(Canvas, r);
-          InflateRect(r, -2, -2);
+          r.InflateRect(-2, -2);
         end;
     ebsSingle:
         begin
           Canvas.SetColor(clShadow2);
           Canvas.DrawRectangle(r);
-          InflateRect(r, -1, -1);
+          r.InflateRect(-1, -1);
         end;
   end;
   Canvas.SetClipRect(r);
