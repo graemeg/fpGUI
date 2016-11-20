@@ -758,6 +758,13 @@ begin
 
   r.Height := RowHeight;
 
+  if (ItemCount = 0) and (csDesigning in ComponentState) then
+  begin
+    // Simply to distinguish between a empty Memo, ListBox and StringGrid
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Name + ': ' + ClassName);
+  end;
+
   if ItemCount = 0 then
     Exit; //==>
   if FFirstItem = -1 then

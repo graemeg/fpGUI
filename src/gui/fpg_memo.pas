@@ -1280,6 +1280,13 @@ begin
   Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(FFont);
 
+  if (LineCount = 0) and (csDesigning in ComponentState) then
+  begin
+    // Simply to distinguish between a empty Memo, ListBox and StringGrid
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Name + ': ' + ClassName);
+  end;
+
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
   begin
     selsl := FSelStartLine;

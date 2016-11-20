@@ -1131,6 +1131,13 @@ begin
                          FVScrollBar.Width,
                          FHScrollBar.Height);
   end;
+
+  if (RowCount = 0) and (ColumnCount = 0) and (csDesigning in ComponentState) then
+  begin
+    // Simply to distinguish between a empty Memo, ListBox and StringGrid
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Name + ': ' + ClassName);
+  end;
 end;
 
 procedure TfpgBaseGrid.HandleShow;
