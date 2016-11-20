@@ -84,7 +84,7 @@ type
     procedure   SetCPByX(x: integer);
     procedure   SetCaretPosition(ALine, APosition: Integer);
     function    CurrentLine: string;
-    procedure   CursorPosFromXY(X,Y: Integer; var ACursorLine: Integer; var ACursorPos: Integer);
+    procedure   CursorPosFromXY(X,Y: Integer; out ACursorLine: Integer; out ACursorPos: Integer);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
     procedure   VScrollBarMove(Sender: TObject; position: integer);
@@ -608,18 +608,13 @@ begin
   end;
 
   DragLines.Free;
-
 end;
 
 function TfpgMemo.WithinSelection(ALine, APos: Integer): Boolean;
 begin
-
-  Result :=
-   (FSelEndLine > -1)
-  and (((ALine = FSelStartLine) and (APos >= FSelStartPos))
-      or (ALine > FSelStartLine))
-  and (((ALine = FSelEndLine) and (APos <= FSelEndPos))
-      or (ALine < FSelEndLine))
+  Result := (FSelEndLine > -1)
+    and (((ALine = FSelStartLine) and (APos >= FSelStartPos)) or (ALine > FSelStartLine))
+    and (((ALine = FSelEndLine) and (APos <= FSelEndPos)) or (ALine < FSelEndLine))
 end;
 
 procedure TfpgMemo.DropEnter(ADrop: TfpgDrop);
@@ -639,12 +634,13 @@ begin
   {$ENDIF}
 end;
 
-
 procedure TfpgMemo.DropMove(ADrop: TfpgDrop; AX, AY: Integer);
 var
   Line: Integer;
   Position: Integer;
 begin
+  Line := 0;
+  Position := 0;
   if (ADrop.SourceWidget = self) and (WithinSelection(Line, Position)) then
     Exit; // =>
 
@@ -1137,8 +1133,7 @@ begin
   Result := GetLineText(FCursorLine);
 end;
 
-procedure TfpgMemo.CursorPosFromXY(X, Y: Integer; var ACursorLine: Integer;
-  var ACursorPos: Integer);
+procedure TfpgMemo.CursorPosFromXY(X, Y: Integer; out ACursorLine: Integer; out ACursorPos: Integer);
 var
   n: integer;
   cpx: integer;
@@ -1147,7 +1142,6 @@ var
   lnum: integer;
   ls: string;
 begin
-
   // searching the appropriate character position
   lnum := FFirstLine + (y - FSideMargin) div LineHeight;
   if lnum > (LineCount-1) then
