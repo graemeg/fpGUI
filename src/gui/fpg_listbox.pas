@@ -61,7 +61,6 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
     procedure   SetReadOnly(AValue: Boolean);
-    procedure   UpdateScrollbarCoords;
     procedure   SetAutoHeight(const AValue: boolean);
     function    GetScrollBarPage: integer;
     procedure   SetScrollBarPage(const AValue: integer);
@@ -76,6 +75,7 @@ type
     FMargin: integer;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   UpdateScrollBar;
+    procedure   UpdateScrollbarCoords;
     procedure   FollowFocus;
     function    ListHeight: TfpgCoord;
     function    PageLength: integer;
@@ -1283,6 +1283,7 @@ begin
   FItems := TList.Create;
   // default Delphi colors
   FColorPalette := cpStandardColors;
+  UpdateScrollbarCoords;
   SetupColorPalette;
 end;
 
