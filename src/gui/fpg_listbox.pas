@@ -547,8 +547,8 @@ begin
   rect := fpgStyle.GetControlFrameBorders;
   case BorderStyle of
 //    ebsNone:      // nothing to do
-    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
-    ebsSingle:    InflateRect(Result, -1, -1);
+    ebsDefault:   Result.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    Result.InflateRect(-1, -1);
   end;
 end;
 
@@ -739,7 +739,7 @@ begin
     Canvas.SetLineStyle(1, lsSolid);
     Canvas.SetColor(clWidgetFrame);
     Canvas.DrawRectangle(r);
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
   end
   else
   begin
@@ -752,7 +752,7 @@ begin
   Canvas.SetFont(FFont);
 
   r.SetRect(0, 0, Width-ScrollBarWidth, Height);
-  InflateRect(r, -FMargin, -FMargin);
+  r.InflateRect(-FMargin, -FMargin);
 //  r.SetRect(FMargin, FMargin, Width-ScrollBarWidth-(FMargin*2), Height - (FMargin*2));
   Canvas.SetClipRect(r);
 
