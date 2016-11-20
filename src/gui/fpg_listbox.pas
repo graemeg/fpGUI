@@ -138,7 +138,7 @@ type
     function    ItemCount: integer; override;
     property    Text: string read GetText write SetText stored False;
   end;
-  
+
 
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
@@ -179,8 +179,8 @@ type
     property    OnSelect;
     property    OnShowHint;
   end;
-  
-  
+
+
   // simple data class containing color information
   TColorItem = class(TObject)
   public
@@ -192,7 +192,7 @@ type
 
   TfpgColorPalette = (cpStandardColors, cpSystemColors, cpWebColors, cpUserDefined);
 
-  
+
   TfpgBaseColorListBox = class(TfpgBaseListBox)
   private
     FColorBoxWidth: TfpgCoord;
@@ -219,8 +219,8 @@ type
     destructor  Destroy; override;
     function    ItemCount: integer; override;
   end;
-  
-  
+
+
   TfpgColorListBox = class(TfpgBaseColorListBox)
   published
     property    AcceptDrops;
@@ -383,13 +383,13 @@ begin
     FFocusItem := ItemCount-1
   else
     FFocusItem := AValue;
-    
+
   if FFocusItem = old then
     Exit; //==>
-    
+
   if FFocusItem <= 0 then
     FFirstItem := 0;
-    
+
   FollowFocus;
   UpdateScrollbar;
   RePaint;
@@ -523,7 +523,7 @@ begin
       end;
     end;
   end;
-  
+
   if FFirstItem < 0 then
     FFirstItem := 0;
   UpdateScrollBar;
@@ -583,7 +583,7 @@ begin
           if FFocusItem > 0 then
             FocusItem := FFocusItem - 1;
         end;
-           
+
     keyDown:
         begin
           if FFocusItem < (ItemCount-1) then
@@ -640,7 +640,7 @@ begin
 
   if ItemCount < 1 then
     Exit; //==>
-    
+
   FocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
   FMouseDragging := True;
 end;
@@ -650,7 +650,7 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
   if ItemCount < 1 then
     Exit; //==>
-    
+
   FMouseDragging := False;
   DoSelect;
 end;
@@ -809,6 +809,7 @@ begin
   //  r.SetBottom(Height - FMargin);
   //  Canvas.FillRectangle(r);
   //end;
+
   UpdateScrollBar;
 end;
 
@@ -835,6 +836,7 @@ begin
   FScrollBar      := TfpgScrollBar.Create(self);
   FScrollBar.Name := '_BaseListBoxScrollBar';
   FScrollBar.OnScroll := @ScrollBarMove;
+  FScrollBar.Visible := False;
 
   FOnChange := nil;
   FOnSelect := nil;
