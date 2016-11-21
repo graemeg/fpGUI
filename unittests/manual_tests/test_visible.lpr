@@ -233,13 +233,13 @@ begin
     SetPosition(248, 4, 320, 232);
     Hint := '';
     Lines.Add('This apps tests the .Visible property of components.');
-    Lines.Add('At startup, all TEdit componts should be invisible.');
+    Lines.Add('At startup, all TEdit components should be invisible.');
     Lines.Add('When you click the "Is Visible" checkbox for the first');
     Lines.Add('time, then the Edit1 (top left) should become visible.');
     Lines.Add('');
     Lines.Add('All sub-sequent clicks of the "Is Visble" checkbox will');
-    Lines.Add('toggle the Edit1 and Panel1 visibility. Not other');
-    Lines.Add('components like Lable or Checbox inside Panel1');
+    Lines.Add('toggle the Edit1 and Panel1 visibility. Other');
+    Lines.Add('components, like Label or CheckBox inside Panel1,');
     Lines.Add('should always stay Visible = True.');
     Lines.Add('');
     Lines.Add('Console output at runtime will show .Visible status of');
@@ -288,4 +288,3 @@ end;
 begin
   MainProc;
 end.
-
