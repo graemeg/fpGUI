@@ -928,10 +928,7 @@ begin
     edOther.Visible := (wgcnt < 2);
 
     lstProps.Update;
-  end;
 
-  with frmProperties do
-  begin
     btnLeft.Text    := IntToStr(wg.Left);
     btnTop.Text     := IntToStr(wg.Top);
     btnWidth.Text   := IntToStr(wg.Width);
@@ -941,6 +938,8 @@ begin
     btnAnTop.Down    := anTop in wg.Anchors;
     btnAnRight.Down  := anRight in wg.Anchors;
     btnAnBottom.Down := anBottom in wg.Anchors;
+
+    UpdateWidgetHierachyTreeview(FForm, wg);
   end;
 end;
 
