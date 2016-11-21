@@ -5,7 +5,10 @@ unit tcTreeview;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, fpg_tree;
+  Classes,
+  SysUtils,
+  TestFramework,
+  fpg_tree;
 
 type
 
@@ -22,9 +25,21 @@ type
     procedure TestPrev;
     procedure TestAppendText;
     procedure TestFindSubNode_Text;
-  end; 
+  end;
+
+
+procedure RegisterTests;
+
 
 implementation
+
+
+procedure RegisterTests;
+begin
+  TestFramework.RegisterTest(TTestTreeview.Suite);
+end;
+
+{ TTestTreeview }
 
 procedure TTestTreeview.SetUp;
 begin
@@ -159,10 +174,6 @@ begin
   AssertTrue('Failed on 14', FTree.RootNode.FindSubNode('n2.1.1', False) = nil);
   AssertTrue('Failed on 15', FTree.RootNode.FindSubNode('n2.1.1', True) = r);
 end;
-
-
-initialization
-  RegisterTest(TTestTreeview);
   
 end.
 
