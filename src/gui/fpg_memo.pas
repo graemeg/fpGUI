@@ -2036,6 +2036,7 @@ begin
     Dec(FUpdateCount);
   if FUpdateCount <= 0 then
   begin
+    DoOnChange;
     Invalidate;
     RecalcLongestLine;
     UpdateScrollBars;
