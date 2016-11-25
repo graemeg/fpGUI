@@ -150,6 +150,12 @@ const
   {$I predefinedcolors.inc}
 
 type
+  // forward declarations
+  TfpgDropBase = class;
+  TfpgWindowBase = class;
+  TfpgCanvasBase = class;
+  TfpgWidgetBase = class;
+
 
   TfpgPoint = object  // not class for static allocations
     X: integer;
@@ -158,8 +164,6 @@ type
     function  ManhattanLength: integer;      { See URL for explanation http://en.wikipedia.org/wiki/Taxicab_geometry }
     function  ManhattanLength(const PointB: TfpgPoint): integer;
   end;
-
-  PfpgRect = ^TfpgRect;
 
 
   TfpgRect = object  // not class for static allocations
@@ -184,6 +188,8 @@ type
     function  UnionRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
     procedure Clear;
   end;
+  PfpgRect = ^TfpgRect;
+
 
   TfpgSize = object  // not class for static allocations
     W: integer;
@@ -208,7 +214,6 @@ type
     shiftstate: TShiftState;
   end;
 
-  TfpgDropBase = class;
 
   TfpgMsgParmDrop = record
     x: TfpgCoord;
@@ -252,12 +257,6 @@ type
 
 
   TfpgLineStyle = (lsSolid, lsDash, lsDot, lsDashDot, lsDashDotDot);
-
-
-  // forward declaration
-  TfpgWindowBase = class;
-  TfpgCanvasBase = class;
-  TfpgWidgetBase = class;
 
 
   TfpgImageBase = class(TObject)
