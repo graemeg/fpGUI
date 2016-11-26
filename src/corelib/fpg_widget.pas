@@ -1532,7 +1532,7 @@ begin
     FInvalidRect := msg.Params.rect
   else
     if not msg.Params.rect.IsUnassigned then
-      UnionRect(FInvalidRect, FInvalidRect, msg.Params.rect);
+      FInvalidRect.UnionRect(FInvalidRect, msg.Params.rect);
 
   HasInvalidRegion := not FInvalidRect.IsUnassigned;
 
