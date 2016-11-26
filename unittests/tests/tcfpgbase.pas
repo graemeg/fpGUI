@@ -24,6 +24,7 @@ type
     procedure TestRight;
     procedure TestSetBottom;
     procedure TestUnionRect_Old_vs_New;
+    procedure TestUnionRect;
   end;
 
 
@@ -178,6 +179,18 @@ begin
 
   r1.UnionRect(lResult, r2);
   CheckEqualsRect(lRef, lResult, 'Failed on 2');
+end;
+
+procedure TTestFPGRect.TestUnionRect;
+var
+  r1, r2: TfpgRect;
+  lRef: TfpgRect;
+begin
+  r1.SetRect(10, 10, 50, 50);
+  r2.SetRect(20, 20, 50, 50);
+  lRef.SetRect(10, 10, 60, 60);
+  r1.UnionRect(r1, r2);
+  CheckEqualsRect(lRef, r1, 'Failed on 1');
 end;
 
 

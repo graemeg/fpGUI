@@ -1974,7 +1974,6 @@ end;
 
 function TfpgRect.UnionRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
 begin
-  FillChar(ARect, SizeOf(ARect), 0);
   ARect := Self;
   ARect.Left := Min(Left, r2.Left);
   ARect.Top := Min(Top, r2.Top);
@@ -2862,9 +2861,7 @@ begin
       CanvasTarget.BeginDraw;
     end;
 
-
     DoBeginDraw(FWidget, CanvasTarget);
-
 
     if GetClipRect.IsUnassigned then
       ClearClipRect//SetClipRect(FWidget.GetClientRect)
