@@ -3721,7 +3721,7 @@ end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
 var
- R: TfpgRect;
+  R: TfpgRect;
 begin
   R := ARect;
   Inc(R.Top, FDeltaY);
@@ -3738,8 +3738,11 @@ begin
 end;
 
 procedure TAgg2D.DoAddClipRect(const ARect: TfpgRect);
+var
+  NewRect: TfpgRect;
 begin
-  {$NOTE TAgg2D.DoAddClipRect must still be implemented }
+  DoGetClipRect.UnionRect(NewRect, ARect);
+  DoSetClipRect(NewRect);
 end;
 
 procedure TAgg2D.DoClearClipRect;
