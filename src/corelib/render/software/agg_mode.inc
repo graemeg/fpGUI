@@ -50,7 +50,6 @@
  {$ENDIF}
 {$ENDIF }
 
-{$Warning Experimental FreeBSD support - totally untested! }
 {$IFDEF FREEBSD }
  {$DEFINE AGG_LINUX }
  {$IFNDEF AGG2D_NO_FONT}
