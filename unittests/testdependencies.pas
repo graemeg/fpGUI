@@ -10,11 +10,13 @@ interface
 
 uses
   tctreeview
+  ,tcfpgbase
   ;
 
 implementation
 
 initialization
   tctreeview.RegisterTests;
+  tcfpgbase.RegisterTests;
 
 end.

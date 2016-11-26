@@ -36,7 +36,7 @@ implementation
 
 procedure RegisterTests;
 begin
-  TestFramework.RegisterTest(TTestTreeview.Suite);
+  TestFramework.RegisterTest('fpg_tree', TTestTreeview.Suite);
 end;
 
 { TTestTreeview }
