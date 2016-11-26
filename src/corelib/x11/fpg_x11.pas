@@ -3733,8 +3733,6 @@ begin
 end;
 
 procedure TfpgX11Canvas.DoClearClipRect;
-var
-  r: TfpgRect;
 begin
   FClipRectSet := False;
   DoSetClipRectInternal(fpgRect(0,0,0,0));
