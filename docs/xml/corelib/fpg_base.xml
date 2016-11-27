@@ -369,16 +369,16 @@ the first time.</short>
         <short>The default base font used in fpGUI</short>
         <descr/>
       </element>
-      <!-- object Visibility: default -->
-      <element name="TfpgRect">
-        <short>A graphical (pixel based) rectangle structure used throughout fpGUI.</short>
-        <descr>
-          <p>Note that this structure is not a class, so static allocations are
+
+<element name="TfpgRect">
+<short>A graphical (pixel based) rectangle structure used throughout fpGUI.</short>
+<descr>
+<p>Note that this structure is not a class, so static allocations are
 allowed. This makes it much easier to use in Widgets and in fpGUI internal
 messages.</p>
-          <p>Think of the pixel screen/grid like the grid of a spreadsheet (or as a magnified look of the top corner of your screen).
+<p>Think of the pixel screen/grid like the grid of a spreadsheet (or as a magnified look of the top corner of your screen).
 </p>
-          <pre>.
+<pre>.
      0   1
    +---+---+---
 0  | x |   |
@@ -389,15 +389,15 @@ messages.</p>
    +---+---+---
    |   |   |
 </pre>
-          <p>x is at (0,0). A pixel is always 1x1, you don't get smaller (we are not using sub-pixels like on LCD screens, because they don't apply to all screens).
+<p>x is at (0,0). A pixel is always 1x1, you don't get smaller (we are not using sub-pixels like on LCD screens, because they don't apply to all screens).
 </p>
-          <p>So with that example, Width = 1 pixel and Height = 1 pixel. In the case of
+<p>So with that example, Width = 1 pixel and Height = 1 pixel. In the case of
 Classes.Bounds() the Right and Bottom values are (1,1) which looking at the
 above image will be wrong, the pixel only covers one block, so in a screen/pixel
 environment, Right, Bottom is also (0,0), the same as Top/Left. This is what
 TfpgRect.Right and TfpgRect.Bottom will report.
 </p>
-          <pre>.
+<pre>.
      0   1
    +---+---+---
 0  | x | x |
@@ -408,15 +408,15 @@ TfpgRect.Right and TfpgRect.Bottom will report.
    +---+---+---
    |   |   |
 </pre>
-          <p>In this example we have a rectangle. Top/Left = (0,0) and Bottom/Right = (1,1).
+<p>In this example we have a rectangle. Top/Left = (0,0) and Bottom/Right = (1,1).
 This means Width = 2 pixels and Height = 2 pixels. Clearly visible in the image
 above.
 </p>
-          <p>But if we call Classes.Bounds(0,0,2,2) it reports Bottom/Right as (2,2) which
+<p>But if we call Classes.Bounds(0,0,2,2) it reports Bottom/Right as (2,2) which
 is wrong (again looking at the image above as reference). This is my point.
 Bounds() cannot be used in this case in a graphical environment.
 </p>
-          <p>The reason I don't use a grid layout as shown below, is
+<p>The reason I don't use a grid layout as shown below, is
 because if the mouse is over the rectangle containing x, the OS (graphics system) reports its
 position as (0,0). You don't have to have the mouse pointer over the intersecting
 lines at (0,0) as indicated in the image below. The whole square containing
@@ -424,7 +424,7 @@ the x is referenced as (0,0), hence the grid layout as show in the images above,
 and what fpGUI uses. The same grid layout as used in TfpgStringGrid or any
 Spreadsheet program etc.
 </p>
-          <pre>.
+<pre>.
    0   1   2
 0  +---+---+---
    | x |   |
@@ -435,49 +435,38 @@ Spreadsheet program etc.
 3  +---+---+---
    |   |   |
 </pre>
-        </descr>
-        <errors/>
-        <seealso/>
-      </element>
+</descr>
+</element>
 
-      <!-- procedure Visibility: default -->
-      <element name="TfpgRect.SetRect">
-        <short>A convenience function to quickly set a rectangle structure.</short>
-        <descr/>
-      </element>
 
-      <!-- function Visibility: default -->
-      <element name="TfpgRect.Bottom">
-        <short>Calculates and returns the bottom position of the rectangle.</short>
-        <descr/>
-      </element>
+<element name="TfpgRect.SetRect">
+<short>A convenience function to quickly set a rectangle structure.</short>
+</element>
 
-      <!-- function Visibility: default -->
-      <element name="TfpgRect.Right">
-        <short>Calculates and returns the Right most position of the rectangle.</short>
-        <descr/>
-      </element>
+<element name="TfpgRect.Bottom">
+<short>Calculates and returns the bottom position of the rectangle.</short>
+</element>
 
-      <!-- procedure Visibility: default -->
-      <element name="TfpgRect.SetBottom">
-        <short>Sets the bottom value and recalculates the Height value.</short>
-        <descr/>
-      </element>
+<element name="TfpgRect.Right">
+<short>Calculates and returns the Right most position of the rectangle.</short>
+</element>
 
-      <!-- procedure Visibility: default -->
-      <element name="TfpgRect.SetRight">
-        <short>Sets the Right value and recalculates the Width value.</short>
-        <descr/>
-      </element>
+<element name="TfpgRect.SetBottom">
+<short>Sets the bottom value and recalculates the Height value.</short>
+</element>
 
-      <!-- object Visibility: default -->
-      <element name="TfpgWindowBase">
-        <short>Abstract class use for representing a Window or Widget</short>
-        <descr>fpGUI is a <i>Windowed</i> toolkit. By that we mean that every
+<element name="TfpgRect.SetRight">
+<short>Sets the Right value and recalculates the Width value.</short>
+</element>
+
+
+<element name="TfpgWindowBase">
+<short>Abstract class use for representing a Window or Widget</short>
+<descr>fpGUI is a <i>Windowed</i> toolkit. By that we mean that every
 widget has a window handle. Widgets are essentially embedded windows without
 titlebars or borders, inside a parent window.
 </descr>
-      </element>
+</element>
 
 <element name="TfpgWindowBase.UpdateWindowPosition">
 <short>Forces fpGUI to act on window position and size properties</short>
