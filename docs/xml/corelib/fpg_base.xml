@@ -459,6 +459,14 @@ Spreadsheet program etc.
 <short>Sets the Right value and recalculates the Width value.</short>
 </element>
 
+<element name="TfpgRect.IntersectRect">
+<short>Returns the overlapping area of two rectangles.</short>
+</element>
+
+<element name="TfpgRect.UnionRect">
+<short>Returns the smallest rectangle that can hold both rectangles.</short>
+</element>
+
 
 <element name="TfpgWindowBase">
 <short>Abstract class use for representing a Window or Widget</short>
