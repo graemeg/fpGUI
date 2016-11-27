@@ -1927,22 +1927,17 @@ begin
 end;
 
 function TfpgRect.IntersectRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
-var
-  TmpRect: TfpgRect; // use tmp because if ARect *is* Self then we get zeroes from FillChar(ARect);
 begin
-  FillChar(TmpRect, SizeOf(ARect), 0);
-  TmpRect := Self;
-  TmpRect.Left := Max(Left, r2.Left);
-  TmpRect.Top := Max(Top, r2.Top);
-  TmpRect.SetBottom(Min(Bottom, r2.Bottom));
-  TmpRect.SetRight(Min(Right, r2.Right));
+  ARect := Self;
+  ARect.Left := Max(Left, r2.Left);
+  ARect.Top := Max(Top, r2.Top);
+  ARect.SetBottom(Min(Bottom, r2.Bottom));
+  ARect.SetRight(Min(Right, r2.Right));
 
-  if TmpRect.IsRectEmpty then
+  if ARect.IsRectEmpty then
     Result := False
   else
     Result := True;
-
-  ARect := TmpRect;
 end;
 
 function TfpgRect.IsRectEmpty: Boolean;
