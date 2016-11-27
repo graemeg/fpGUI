@@ -3765,11 +3765,23 @@ var
   gc2: Tgc;
   drawgc: Tgc;
   GcValues: TXGcValues;
+  OriginalSize,
+  ClippedSize: TfpgRect;
+  SourcePos: TfpgPoint;
 begin
   if img = nil then
     Exit; //==>
   if img.Masked then
   begin
+    // calculate a clipmask since we will use a new gc with none set.
+    OriginalSize.SetRect(x,y,w,h);
+    OriginalSize.IntersectRect(ClippedSize, FClipRect);
+    SourcePos := fpgPoint(xi+(ClippedSize.Left-OriginalSize.Left), yi+(ClippedSize.Top-OriginalSize.Top));
+
+    // if the rect is empty (clipped out) then there is nothing to do
+    if ClippedSize.IsRectEmpty then
+      Exit; // ==>
+
     // rendering the mask
     msk := XCreatePixmap(xapplication.display, XDefaultRootWindow(xapplication.display), w, h, 1);
     GcValues.foreground := 1;
@@ -3787,7 +3799,11 @@ begin
     XSetClipMask(xapplication.display, drawgc, msk);
     XSetClipOrigin(xapplication.display, drawgc, x+FDeltaX, y+FDeltaY);
 
-    XPutImage(xapplication.display, DrawHandle, drawgc, TfpgX11Image(img).XImage, xi, yi, x+FDeltaX, y+FDeltaY, w, h);
+
+    XPutImage(xapplication.display, DrawHandle, drawgc, TfpgX11Image(img).XImage,
+          SourcePos.X, SourcePos.Y,
+          ClippedSize.Left+FDeltaX, ClippedSize.Top+FDeltaY, ClippedSize.Width, ClippedSize.Height);
+
     XFreePixmap(xapplication.display, msk);
     XFreeGc(xapplication.display, drawgc);
     XFreeGc(xapplication.display, gc2);
