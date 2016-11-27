@@ -201,6 +201,7 @@ type
     procedure   DeAllocateDC(Force: Boolean);
     function    DrawHandle: TfpgDCHandle;
     function    WeAreTargetCanvas: Boolean;
+    function    GetWidgetWindowRect: TfpgRect; // returns parent's intersected rect
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -3569,6 +3570,27 @@ begin
   Result := FCanvasTarget = Self;
 end;
 
+function TfpgX11Canvas.GetWidgetWindowRect: TfpgRect;
+var
+  ParentsRect: TfpgRect;
+  ParentsRectSet: Boolean = False;
+begin
+  // This gets the widgets rect inside the native window and intersects with it's
+  // parent, resulting in the smallest cliprect allowed.
+
+  ParentsRect.Clear;
+  if not FWidget.HasOwnWindow and (FWidget.Parent <> nil) then
+  begin
+    ParentsRect := TfpgX11Canvas(FWidget.Parent.Canvas).GetWidgetWindowRect;
+    ParentsRectSet := True;
+  end;
+
+  Result.SetRect(FDeltaX,FDeltaY,FWidget.Width, FWidget.Height);
+
+  if ParentsRectSet then
+    Result.IntersectRect(Result, ParentsRect);
+end;
+
 procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
@@ -3692,26 +3714,25 @@ procedure TfpgX11Canvas.DoSetClipRectInternal(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
+  TmpRect: TfpgRect;
 begin
   FClipRect := ARect;
 
   if FClipRectSet then
   begin
-    r.x      := FClipRect.Left+FDeltaX;
-    r.y      := FClipRect.Top+FDeltaY;
-    r.Width  := FClipRect.Width;
-    r.Height := FClipRect.Height;
+    TmpRect := FClipRect;
+    TmpRect.OffsetRect(FDeltaX, FDeltaY);
+    TmpRect.IntersectRect(TmpRect, GetWidgetWindowRect);
   end
   else
-  begin
-    r.x := FDeltaX;
-    r.y := FDeltaY;
-    r.width := FWidget.Width;
-    r.height := FWidget.Height;
-  end;
+    TmpRect := GetWidgetWindowRect;
+
+  r.x      := TmpRect.Left;
+  r.y      := TmpRect.Top;
+  r.Width  := TmpRect.Width;
+  r.Height := TmpRect.Height;
 
   rg := XCreateRegion;
-
   XUnionRectWithRegion(@r, rg, rg);
   XSetRegion(xapplication.display, Fgc, rg);
   XftDrawSetClip(FXftDraw, rg);
