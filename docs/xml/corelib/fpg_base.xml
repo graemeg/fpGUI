@@ -476,7 +476,7 @@ titlebars or borders, inside a parent window.
 </descr>
 </element>
 
-<element name="TfpgWindowBase.UpdateWindowPosition">
+<element name="TfpgWindowBase.UpdatePosition">
 <short>Forces fpGUI to act on window position and size properties</short>
 <descr><p>fpGUI implements what is called "delayed resource allocation". It delays
 some action until everything is ready to go. This delayed action applies to setting
@@ -504,6 +504,13 @@ calculations and screen redraws.</p>
 </descr>
 </element>
 
+<element name="TfpgWindowBase.UpdateWindowPosition">
+<short>Deprecated - please see UpdatePosition instead.</short>
+<seealso>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">TfpgWindowBase.UpdatePosition</link>
+</seealso>
+</element>
+
 <element name="TfpgWindowBase.Left">
 <short>Specifies the horizontal coordinate of the left edge of a component relative to its parent</short>
 <descr><p><printshort id="#fpgui.fpg_base.TfpgWindowBase.Left"/>. Use the Left property to determine where the left side
@@ -511,10 +518,10 @@ of the control begins or to reposition the left side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
 <var>UpdateWindowPosition</var> method is called. For more information on why this is so,
-see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">UpdatePosition</link>
 help.</remark></descr>
 <seealso>
-<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">TfpgWindowBase.UpdatePosition</link>
 </seealso>
 </element>
 
@@ -525,10 +532,10 @@ of the control begins or to reposition the top side of the control.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
 <var>UpdateWindowPosition</var> method is called. For more information on why this
-is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">UpdatePosition</link>
 help.</remark></descr>
 <seealso>
-<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">TfpgWindowBase.UpdatePosition</link>
 </seealso>
 </element>
 
@@ -541,10 +548,10 @@ this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
 <var>UpdateWindowPosition</var> method is called. For more information on why this is so,
-see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">UpdatePosition</link>
 help.</remark></descr>
 <seealso>
-<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">TfpgWindowBase.UpdatePosition</link>
 </seealso>
 </element>
 
@@ -557,10 +564,10 @@ this property at runtime has no effect.
 </p>
 <remark>fpGUI delays acting on the Top, Left, Width and Height properties of a control until the
 <var>UpdateWindowPosition</var> method is called. For more information on why this
-is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+is so, see <link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">UpdatePosition</link>
 help.</remark></descr>
 <seealso>
-<link id="#fpgui.fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+<link id="#fpgui.fpg_base.TfpgWindowBase.UpdatePosition">TfpgWindowBase.UpdatePosition</link>
 </seealso>
 </element>
 
