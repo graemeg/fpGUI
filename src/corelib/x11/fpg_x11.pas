@@ -201,7 +201,6 @@ type
     procedure   DeAllocateDC(Force: Boolean);
     function    DrawHandle: TfpgDCHandle;
     function    WeAreTargetCanvas: Boolean;
-    function    GetWidgetWindowRect: TfpgRect; // returns parent's intersected rect
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -3568,27 +3567,6 @@ end;
 function TfpgX11Canvas.WeAreTargetCanvas: Boolean;
 begin
   Result := FCanvasTarget = Self;
-end;
-
-function TfpgX11Canvas.GetWidgetWindowRect: TfpgRect;
-var
-  ParentsRect: TfpgRect;
-  ParentsRectSet: Boolean = False;
-begin
-  // This gets the widgets rect inside the native window and intersects with it's
-  // parent, resulting in the smallest cliprect allowed.
-
-  ParentsRect.Clear;
-  if not FWidget.HasOwnWindow and (FWidget.Parent <> nil) then
-  begin
-    ParentsRect := TfpgX11Canvas(FWidget.Parent.Canvas).GetWidgetWindowRect;
-    ParentsRectSet := True;
-  end;
-
-  Result.SetRect(FDeltaX,FDeltaY,FWidget.Width, FWidget.Height);
-
-  if ParentsRectSet then
-    Result.IntersectRect(Result, ParentsRect);
 end;
 
 procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);

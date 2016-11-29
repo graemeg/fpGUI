@@ -3726,6 +3726,7 @@ begin
   R := ARect;
   Inc(R.Top, FDeltaY);
   Inc(R.Left, FDeltaX);
+  R.IntersectRect(R, GetWidgetWindowRect);
   ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+1);
   m_rasterizer.m_clipping := True;
 end;
@@ -3746,9 +3747,14 @@ begin
 end;
 
 procedure TAgg2D.DoClearClipRect;
+var
+ R: TfpgRect;
 begin
-  ClipBox(FDeltaX, FDeltaY, FDeltaX+FWidget.width, FDeltaY+FWidget.height);
-  m_rasterizer.m_clipping := false;
+  R := GetWidgetWindowRect;
+  ClipBox(R.Left, R.Top, r.Right+1, r.Bottom+1);
+
+  //we have to do clipping still if we are an alien widget.
+  m_rasterizer.m_clipping := not WeAreTopLevelCanvas;
 end;
 
 procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);

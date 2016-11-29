@@ -381,6 +381,8 @@ type
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
     FPutBufferQueue: TFPList;
+    function    GetWidgetWindowRect: TfpgRect; // returns parent's intersected rect
+    function    WeAreTopLevelCanvas: Boolean; // if this canvas is the canvas of the toplevel native surface
     procedure   AddPutBufferItem(ARect: TfpgRect);
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoGetWinRect(out r: TfpgRect); virtual;
@@ -2433,6 +2435,32 @@ procedure TfpgCanvasBase.SetInterpolation(const AValue: TfpgCustomInterpolation)
 begin
   FInterpolation.Free;
   FInterpolation := AValue;
+end;
+
+function TfpgCanvasBase.GetWidgetWindowRect: TfpgRect;
+var
+  ParentsRect: TfpgRect;
+  ParentsRectSet: Boolean = False;
+begin
+  // This gets the widgets rect inside the native window and intersects with it's
+  // parent, resulting in the smallest cliprect allowed.
+
+  ParentsRect.Clear;
+  if not FWidget.HasOwnWindow and (FWidget.Parent <> nil) then
+  begin
+    ParentsRect := FWidget.Parent.Canvas.GetWidgetWindowRect;
+    ParentsRectSet := True;
+  end;
+
+  Result.SetRect(FDeltaX,FDeltaY,FWidget.Width, FWidget.Height);
+
+  if ParentsRectSet then
+    Result.IntersectRect(Result, ParentsRect);
+end;
+
+function TfpgCanvasBase.WeAreTopLevelCanvas: Boolean;
+begin
+  Result := FCanvasTarget = self;
 end;
 
 procedure TfpgCanvasBase.AddPutBufferItem(ARect: TfpgRect);
