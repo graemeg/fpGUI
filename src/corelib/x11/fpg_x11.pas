@@ -200,7 +200,6 @@ type
     procedure   AllocateDC;
     procedure   DeAllocateDC(Force: Boolean);
     function    DrawHandle: TfpgDCHandle;
-    function    WeAreTargetCanvas: Boolean;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -3524,7 +3523,7 @@ end;
 
 procedure TfpgX11Canvas.DeAllocateDC(Force: Boolean);
 begin
-  if not FDrawing or (WeAreTargetCanvas) or Force then
+  if not FDrawing or (WeAreTopLevelCanvas) or Force then
   begin
     if FXftDraw <> nil then
     begin
@@ -3562,11 +3561,6 @@ begin
     if Result <> 0 then
       AllocateDC;
   end;
-end;
-
-function TfpgX11Canvas.WeAreTargetCanvas: Boolean;
-begin
-  Result := FCanvasTarget = Self;
 end;
 
 procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);
