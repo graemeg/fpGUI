@@ -2609,8 +2609,18 @@ begin
 end;
 
 procedure TfpgGDICanvas.DoClearClipRect;
+var
+  R: TfpgRect;
 begin
-  SelectClipRgn(FDrawGC, 0);
+  if WeAreTopLevelCanvas then
+    SelectClipRgn(FDrawGC, 0)
+  else
+  begin
+    DeleteObject(FClipRegion);
+    R := GetWidgetWindowRect;
+    FClipRegion  := CreateRectRgn(R.Left, R.Top, R.Left+R.Width, R.Top+R.Height);
+    SelectClipRgn(FDrawGC, FClipRegion);
+  end;
   FClipRectSet := False;
 end;
 
@@ -2716,8 +2726,10 @@ begin
   FClipRect    := ARect;
   Inc(FClipRect.Top, FDeltaY);
   Inc(FClipRect.Left, FDeltaX);
+  if not WeAreTopLevelCanvas then
+    FClipRect.IntersectRect(FClipRect, GetWidgetWindowRect);
   DeleteObject(FClipRegion);
-  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left+FClipRect.Width, FClipRect.Top+ARect.Height);
+  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left+FClipRect.Width, FClipRect.Top+FClipRect.Height);
   SelectClipRgn(FDrawGC, FClipRegion);
 end;
 
