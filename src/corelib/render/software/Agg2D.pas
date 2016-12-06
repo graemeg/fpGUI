@@ -399,7 +399,9 @@ type
    destructor  Destroy; override;
 
   // Vector Graphics Engine Initialization
-   function  Attach(bitmap : TfpgImage; flip_y : boolean = false ) : boolean;
+   function  Attach(bitmap: TfpgImage; const aWidth, aHeight: integer; const aStride: integer; const aOffset: integer = 0): boolean; overload;
+   function  Attach(bitmap: TfpgImage; flip_y: boolean = false ): boolean; overload;
+   function  AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
 
    procedure ClearAll(c : TAggColor ); overload;
    procedure ClearAll(r ,g ,b : byte; a : byte = 255 ); overload;
@@ -1346,35 +1348,58 @@ begin
 end;
 
 { ATTACH }
-function TAgg2D.Attach(bitmap : TfpgImage; flip_y : boolean = false ) : boolean;
+function TAgg2D.Attach(bitmap: TfpgImage; flip_y: boolean = false): boolean;
 var
- buffer : pointer;
- stride : integer;
-
+ stride: integer;
 begin
- result:=false;
+  stride := Integer(bitmap.ScanLine[1] - bitmap.ScanLine[0]);
 
- if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) then
+  if flip_y then
+    stride := stride * -1;
+
+  Result := Attach(bitmap, bitmap.Width, bitmap.Height, stride, 0);
+end;
+
+function TAgg2D.AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
+var
+  stride: integer;
+  OffsetIntoImage: integer;
+begin
+  stride := Integer(bitmap.ScanLine[1] - bitmap.ScanLine[0]);
+  OffsetIntoImage := ARect.Left * 4 + ARect.Top * stride;
+
+  Result := Attach(bitmap, ARect.Width, ARect.Height, stride, OffsetIntoImage);
+end;
+
+function TAgg2D.Attach(bitmap: TfpgImage; const aWidth, aHeight: integer; const aStride: integer;
+    const aOffset: integer): boolean;
+var
+  buffer: pointer;
+begin
+  Result := false;
+
+  if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) then
   case bitmap.ColorDepth of
    24,
    32:
     begin
     { Rendering Buffer }
-     stride:=integer(bitmap.ScanLine[1 ] ) - integer(bitmap.ScanLine[0 ] );
-
-     if stride < 0 then
-      buffer:=bitmap.ScanLine[bitmap.Height - 1 ]
+     if aStride < 0 then
+     begin
+       buffer := bitmap.ScanLine[aHeight - 1];
+       buffer -= aOffset;
+     end
      else
-      buffer:=bitmap.ScanLine[0 ];
-
-     if flip_y then
-      stride:=stride * -1;
+     begin
+       buffer := bitmap.ScanLine[0];
+       buffer += aOffset;
+     end;
 
      m_rbuf.attach(
       buffer ,
-      bitmap.Width ,
-      bitmap.Height ,
-      stride );
+      aWidth ,
+      aHeight ,
+      aStride );
 
      { Pixel Format }
      m_pixf :=  ColorDepthToPixelFormat(bitmap.ColorDepth);
@@ -1384,7 +1409,6 @@ begin
        begin
         pixfmt_rgb24(m_pixFormat ,@m_rbuf );
         pixfmt_rgb24(m_pixFormatPre ,@m_rbuf );
-
        end;
 
       pf32bit :
@@ -1393,9 +1417,7 @@ begin
         pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
         pixfmt_rgba32           (m_pixFormatPre ,@m_rbuf );
         pixfmt_custom_blend_rgba(m_pixFormatCompPre ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
-
        end;
-
      end;
 
     { Reset state }
@@ -1412,7 +1434,7 @@ begin
 
      TextAlignment(AGG_AlignLeft ,AGG_AlignBottom );
 
-     ClipBox (0 ,0 ,bitmap.Width ,bitmap.Height );
+     ClipBox (0 ,0 ,aWidth ,aHeight );
      LineCap (AGG_CapRound );
      LineJoin(AGG_JoinRound );
      FlipText(false );
@@ -1436,12 +1458,10 @@ begin
      ImageResample(AGG_NoResample );
 
     { OK }
-     result:=true;
+     Result := true;
 
-    end;
-
-  end;
-
+    end;  { 24 & 32-bit colordepth }
+  end;  { case }
 end;
 
 { CLIPBOX }
