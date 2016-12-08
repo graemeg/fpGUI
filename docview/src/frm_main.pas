@@ -914,6 +914,7 @@ begin
   RichView.Clear;
   RichView.AddParagraph(PChar(LGetEnvVarValue(BookshelfEnvironmentVar)));
   RichView.AddParagraph(PChar(LGetEnvVarValue(HelpPathEnvironmentVar)));
+  RichView.AddParagraph(PChar('Current Directory = ' + GetCurrentDir));
 end;
 
 procedure TMainForm.miTopicPropertiesClicked(Sender: TObject);

@@ -603,7 +603,7 @@ begin
   // Don't make it a link if we didn't find a
   // overall link code, i.e. degrade gracefully.
   if LinkTopicIndex > -1 then
-  begin    
+  begin
     if CreateLink( State.LinkIndex, Link, TInternalHelpLink ) then
     begin
       TInternalHelpLink(Link).TopicIndex := LinkTopicIndex;
