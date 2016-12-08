@@ -49,9 +49,9 @@ only applies to &fpg. v1.5 and later.
 
 :h2.Canvas Basics / Background
 :cgraphic.
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþ
  Canvas Basics / Background
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
 Currently &fpg. uses a single native window surface for each window with it's 
@@ -74,9 +74,9 @@ other canvases.
 
 :h2.Life Cycle of a Canvas
 :cgraphic.
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþ
  Life Cycle of a Canvas
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþþþþþþþþþþþþþþþ
 :ecgraphic.
 :p.
 :hp2.Created in the widgets constructor:ehp2.
@@ -155,9 +155,9 @@ resources should be freed.
 
 :h2.Clipping
 :cgraphic.
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþ
  Clipping
-þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ
+þþþþþþþþþþ
 :ecgraphic.
 :p.
 With each child sharing a single surface clipping is a little more difficult. 
