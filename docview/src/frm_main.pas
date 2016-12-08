@@ -534,6 +534,7 @@ procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
 var
   LinkDetails: TfpgString;
   LinkIndex: integer;
+  LinkTopic: string;
   lLink: THelpLink;
   lHelp: THelpFile;
   f: THelpFile;
@@ -543,6 +544,7 @@ var
   lFound: Boolean;
   lURL: TfpgString;
   lNoteIndex: integer;
+  lPath: TfpgString;
 begin
   if pos(PARAM_LINK_NOTE, Link) > 0 then
   begin
@@ -557,12 +559,14 @@ begin
   else if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
     LinkDetails := StrRightFrom( Link, 10 );    // 10 is starting pos of data, after 'external '
-    LinkIndex := StrToInt( ExtractNextValue( LinkDetails, ' ' ) );
+    LinkIndex := StrToInt(ExtractNextValue(LinkDetails, ' '));
+    LinkTopic := ExtractNextValue( LinkDetails, ' ');
+
     lHelp := CurrentTopic.HelpFile as THelpFile;
 
     lHelpFileName := lHelp.ReferencedFiles[ LinkIndex ];
 
-    { Only open the external file once. So see if it is already openned. }
+    { Only open the external file once. So see if it is already opened. }
     lFound := False;
     for i := 0 to CurrentOpenFiles.Count-1 do
     begin
@@ -572,13 +576,20 @@ begin
     end;
     if not lFound then
     begin
+      // try what DocView considers the Current Directory
+      if not fpgFileExists(lHelpFileName) then
+      begin
+        // try the path of the INF file of the current topic.
+        lPath := fpgExtractFilePath(lHelp.Filename);
+        lHelpFileName := lPath + fpgExtractFileName(lHelpFileName);
+      end;
       OpenAdditionalFile := True;
-      OpenFile(lHelpFileName, '', false);
+      OpenFile(lHelpFileName, '', true);
       OpenAdditionalFile := False;
     end;
 
     { Not sure if we have an ID or Resource Name, so lets try both if possible }
-    if TryStrToInt(LinkDetails, i) then
+    if TryStrToInt(LinkTopic, i) then
       DisplayTopicByResourceID(i)
     else
       DisplayTopicByName(LinkDetails);
