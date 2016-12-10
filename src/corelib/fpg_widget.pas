@@ -509,8 +509,6 @@ begin
   end
   else if Parent <> nil then
   begin
-    Invalidate;
-
     if (dw < 0) or (dh < 0) then
     begin
       r2.SetRect(FLeft, FTop, FPrevWidth, FPrevHeight);
@@ -523,10 +521,13 @@ begin
       r2.SetRect(FPrevLeft, FPrevTop, FWidth, FHeight); // previous PaintRect
       PaintRect.UnionRect(PaintRect, r2);
 
+      // normalise the PaintRect
+      if PaintRect.Left < 0 then
+        PaintRect.Left := 0;
+
       PaintRect.Width:=PaintRect.Width+5;
       PaintRect.Height:=PaintRect.Height+5;
       Parent.InvalidateRect(PaintRect);
-
     end;
   end;
 
