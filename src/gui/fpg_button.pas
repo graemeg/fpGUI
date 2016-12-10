@@ -116,8 +116,8 @@ type
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
     property    Font: TfpgFont read FFont;
   end;
-  
-  
+
+
   { A standard push button component.
 
     If you want toolbar style buttons you need to set the following properties:
@@ -526,8 +526,7 @@ var
   img: TfpgImage;
   lTextFlags: TfpgTextFlags;
 begin
-//  inherited HandlePaint;
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
 
   r.SetRect(0, 0, Width, Height);
   border := fpgStyle.GetButtonBorders;
