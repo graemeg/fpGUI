@@ -1687,7 +1687,9 @@ begin
 
     if FTop <> FPrevTop then
       Include(FDirtyFlags, wdfPosition);
-  end;
+  end
+  else
+    FPrevTop := FTop;
 
   if FLeft <> x then
   begin
@@ -1699,7 +1701,9 @@ begin
 
     if FLeft <> FPrevLeft then
       Include(FDirtyFlags, wdfPosition);
-  end;
+  end
+  else
+    FPrevLeft := FLeft;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
