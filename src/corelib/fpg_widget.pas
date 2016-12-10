@@ -477,6 +477,7 @@ var
   dh: integer;
   ParentLeft, ParentTop: TfpgCoord;
   PaintRect: TfpgRect;
+  r2: TfpgRect;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -511,13 +512,16 @@ begin
     Invalidate;
 
     if (dw < 0) or (dh < 0) then
-      Parent.InvalidateRect(fpgRect(FLeft, FTop, FPrevWidth, FPrevHeight));
+    begin
+      r2.SetRect(FLeft, FTop, FPrevWidth, FPrevHeight);
+      Parent.InvalidateRect(r2);
+    end;
+
     if wdfPosition in FDirtyFlags then
     begin
-      PaintRect := fpgRect(FLeft, FTop, FWidth, FHeight);
-      UnionRect(PaintRect, fpgRect(FPrevLeft, FPrevTop, FWidth, FHeight), PaintRect);
-      //PaintRect.Width:=PaintRect.Width+(FPrevLeft-FLeft);
-      //PaintRect.Height:=PaintRect.Height+(FPrevTop-FTop);
+      PaintRect.SetRect(FLeft, FTop, FWidth, FHeight);
+      r2.SetRect(FPrevLeft, FPrevTop, FWidth, FHeight); // previous PaintRect
+      PaintRect.UnionRect(PaintRect, r2);
 
       PaintRect.Width:=PaintRect.Width+5;
       PaintRect.Height:=PaintRect.Height+5;
@@ -1891,7 +1895,7 @@ begin
     if FInvalidRect.IsUnassigned then
       FInvalidRect := ARect
     else
-      UnionRect(FInvalidRect, FInvalidRect, ARect);
+      FInvalidRect.UnionRect(FInvalidRect, ARect);
 
     if not FInvalidated then
     begin
