@@ -524,6 +524,8 @@ begin
       // normalise the PaintRect
       if PaintRect.Left < 0 then
         PaintRect.Left := 0;
+      if PaintRect.Top < 0 then
+        PaintRect.Top := 0;
 
       PaintRect.Width:=PaintRect.Width+5;
       PaintRect.Height:=PaintRect.Height+5;
