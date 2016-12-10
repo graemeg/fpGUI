@@ -37,7 +37,6 @@ type
     procedure   SetDefaultButton(const AValue: TfpgMsgDlgBtn);
     procedure   SetInformativeText(const AValue: string);
     procedure   SetText(const AValue: string);
-    procedure   pnlIconPaint(Sender: TObject);
     procedure   PrepareIcon;
     procedure   PrepareText;
     procedure   PrepareButtons;
@@ -51,7 +50,6 @@ type
   public
     {@VFD_HEAD_BEGIN: fpgMessageDialog}
     lblName1: TfpgLabel;
-    pnlIcon: TfpgBevel;
     {@VFD_HEAD_END: fpgMessageDialog}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -123,14 +121,6 @@ begin
     Exit; //==>
   FText := AValue;
   lblName1.Text := FText;
-end;
-
-procedure TfpgMessageDialog.pnlIconPaint(Sender: TObject);
-var
-  wg: TfpgBevel;
-begin
-  wg := TfpgBevel(Sender);
-  wg.Visible := False;
 end;
 
 procedure TfpgMessageDialog.PrepareIcon;
@@ -548,16 +538,6 @@ begin
     Text := '';
     FontDesc := '#Label2';
   end;
-
-  pnlIcon := TfpgBevel.Create(self);
-  with pnlIcon do
-  begin
-    Name := 'pnlIcon';
-    SetPosition(12, 12, 80, 80);
-    Shape := bsSpacer;
-    OnPaint := @pnlIconPaint;
-  end;
-
   {@VFD_BODY_END: fpgMessageDialog}
 end;
 
