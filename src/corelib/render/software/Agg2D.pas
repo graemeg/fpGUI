@@ -352,6 +352,7 @@ type
    m_ifSpline16    : image_filter_spline16;
    m_ifSpline36    : image_filter_spline36;
    m_ifBlackman144 : image_filter_blackman144;
+   FPaintCaret: boolean;
   protected
     FImg: TfpgImage;
 
@@ -1197,6 +1198,7 @@ constructor TAgg2D.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
 
+  FPaintCaret := True;
   FLineWidth := 1;
  m_rbuf.Construct;
 
@@ -3688,7 +3690,12 @@ end;
 
 procedure TAgg2D.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
-
+  if FPaintCaret then
+    DoSetColor(clTextCursor)
+  else
+    DoSetColor(clListBox);
+  DoFillRectangle(x, y, w, h);
+  FPaintCaret := not FPaintCaret;
 end;
 
 procedure TAgg2D.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
