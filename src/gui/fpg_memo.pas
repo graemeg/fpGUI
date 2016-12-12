@@ -1250,7 +1250,7 @@ var
   c: integer;
   s: string;
 begin
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
   case BorderStyle of
     ebsNone:

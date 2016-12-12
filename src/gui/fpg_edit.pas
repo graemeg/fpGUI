@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -43,7 +43,6 @@ type
   TfpgTextEditOption = (eo_ExtraHintIfFocus);
   TfpgTextEditOptions = set of TfpgTextEditOption;
 
-  { TfpgBaseEdit }
 
   TfpgBaseEdit = class(TfpgWidget)
   private
@@ -744,7 +743,7 @@ var
   r: TfpgRect;
   rect: TRect;
 begin
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
   case BorderStyle of
     ebsNone:
