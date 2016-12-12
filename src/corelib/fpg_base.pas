@@ -187,6 +187,7 @@ type
     function  PointInRect(const APoint: TPoint): Boolean;
     function  UnionRect(out ARect: TfpgRect; const r2: TfpgRect): Boolean;
     procedure Clear;
+    function  ToString: TfpgString;
   end;
   PfpgRect = ^TfpgRect;
 
@@ -1997,6 +1998,11 @@ begin
   Left   := 0;
   Width  := 0;
   Height := 0;
+end;
+
+function TfpgRect.ToString: TfpgString;
+begin
+  Result := Format('Rect left=%d top=%d right=%d bottom=%d width=%d height=%d', [Left, Top, Right, Bottom, Width, Height]);
 end;
 
 

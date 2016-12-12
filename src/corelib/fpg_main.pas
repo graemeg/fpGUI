@@ -1017,7 +1017,7 @@ end;
 
 procedure PrintRect(const Rect: TfpgRect);
 begin
-  DebugLn(Format('Rect left=%d top=%d right=%d bottom=%d width=%d height=%d', [Rect.Left, Rect.Top, Rect.Right, Rect.Bottom, Rect.Width, Rect.Height]));
+  DebugLn(Rect.ToString);
 end;
 
 procedure PrintCoord(const x, y: TfpgCoord);
