@@ -1455,7 +1455,7 @@ begin
      m_rasterizer.gamma(@m_gammaNone );
 
      FillEvenOdd(false );
-     BlendMode  (AGG_BlendAlpha );
+     BlendMode(m_blendMode);
 
      FlipText(false );
      ResetPath;
