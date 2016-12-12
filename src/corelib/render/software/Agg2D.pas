@@ -353,6 +353,8 @@ type
    m_ifSpline36    : image_filter_spline36;
    m_ifBlackman144 : image_filter_blackman144;
    FPaintCaret: boolean;
+   FCaretImg: TfpgImage;
+   FCaretPos: TfpgPoint;
   protected
     FImg: TfpgImage;
 
@@ -1345,8 +1347,10 @@ begin
  ReleaseDC(0 ,m_fontDC );
  {$ENDIF }
 
- if Assigned(FImg) then
-   FImg.Free;
+  if Assigned(FImg) then
+    FImg.Free;
+  if Assigned(FCaretImg) then
+    FCaretImg.Free;
 end;
 
 { ATTACH }
@@ -3689,14 +3693,42 @@ begin
     Rectangle(x, y, x+w-1, y+h-1, True);
 end;
 
+{ We can't use XOR functionality from BlendMode() because that is a global
+  setting, not per rectangle. So what we do is grab a image of where the
+  caret is going to be, then draw our caret. When the caret is hidden, we
+  restore the previously saved image. During restoring, we also need to double
+  check that the new (x,y) is the same as the original capture (x,y) - if they
+  are not, it means the caret has moved since the last capture, so we disregard
+  that stored image. }
 procedure TAgg2D.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+var
+  r: TfpgRect;
 begin
   if FPaintCaret then
-    DoSetColor(clTextCursor)
+  begin
+    //DebugLn('true - DoXORFillRectangle');
+    r := FWidget.WidgetBoundsInWindow;
+    r.Left := r.Left + x;
+    r.Top := r.Top + y;
+    r.Width := w;
+    r.Height := h;
+    FCaretPos.SetPoint(x, y);
+    FCaretImg := TAgg2D(FCanvasTarget).FImg.ImageFromRect(r);
+    DoSetColor(clTextCursor);
+    DoFillRectangle(x, y, w, h);
+    FPaintCaret := False
+  end
   else
-    DoSetColor(clListBox);
-  DoFillRectangle(x, y, w, h);
-  FPaintCaret := not FPaintCaret;
+  begin
+    //DebugLn('false - DoXORFillRectangle');
+    if Assigned(FCaretImg) then
+    begin
+      if (FCaretPos.x = x) and (FCaretPos.y = y) then
+        DrawImage(x, y, FCaretImg);
+      FCaretImg.Free;
+    end;
+    FPaintCaret := True
+  end;
 end;
 
 procedure TAgg2D.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
