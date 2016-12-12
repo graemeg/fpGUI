@@ -3586,29 +3586,30 @@ begin
 end;
 
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
-{$IFDEF WINDOWS}
+{$IFDEF UNIX}
+var
+  i: integer;
+  fnt: TFontCacheItem;
+  lSize: double;
+{$ENDIF}
 begin
+{$IFDEF WINDOWS}
  {$IFDEF AGG2D_USE_FREETYPE }
    Font(GetWindowsFontDir + 'arial.ttf', 10);
  {$ENDIF }
  {$IFDEF AGG2D_USE_WINFONTS}
   Font('Arial', 13);
  {$ENDIF }
-end;
-{$ENDIF}
+{$ENDIF}  // windows
+
 {$IFDEF UNIX}
-var
-  i: integer;
-  fnt: TFontCacheItem;
-  lSize: double;
-begin
   fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
   i := gFontCache.Find(fnt);
   if i > 0 then
     Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
   fnt.Free;
+{$ENDIF}  // unix
 end;
-{$ENDIF}
 
 procedure TAgg2D.DoSetTextColor(cl: TfpgColor);
 var
