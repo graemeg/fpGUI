@@ -2452,7 +2452,7 @@ var
   ParentsRect: TfpgRect;
   ParentsRectSet: Boolean = False;
 begin
-  // This gets the widgets rect inside the native window and intersects with it's
+  // This gets the widgets rect inside the native window and intersects with its
   // parent, resulting in the smallest cliprect allowed.
 
   ParentsRect.Clear;
@@ -2462,7 +2462,7 @@ begin
     ParentsRectSet := True;
   end;
 
-  Result.SetRect(FDeltaX,FDeltaY,FWidget.Width, FWidget.Height);
+  Result.SetRect(FDeltaX, FDeltaY, FWidget.Width, FWidget.Height);
 
   if ParentsRectSet then
     Result.IntersectRect(Result, ParentsRect);
