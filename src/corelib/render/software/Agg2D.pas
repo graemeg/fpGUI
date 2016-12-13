@@ -3784,18 +3784,15 @@ var
   R: TfpgRect;
 begin
   R := ARect;
-  Inc(R.Top, FDeltaY);
-  Inc(R.Left, FDeltaX);
-  R.IntersectRect(R, GetWidgetWindowRect);
-  ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+1);
+  { TODO: still not sure why these +2 and +3 values are needed. But using
+    TfpgEdit with text selection, you can see it is required. }
+  ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+2);
   m_rasterizer.m_clipping := True;
 end;
 
 function TAgg2D.DoGetClipRect: TfpgRect;
 begin
   Result.SetRect(Round(ClipBox.x1), Round(ClipBox.y1), Round(ClipBox.x2 - ClipBox.x1), Round(ClipBox.y2 - ClipBox.y1));
-  Dec(Result.Left, FDeltaX);
-  Dec(Result.Top, FDeltaY);
 end;
 
 procedure TAgg2D.DoAddClipRect(const ARect: TfpgRect);
@@ -3807,30 +3804,32 @@ begin
 end;
 
 procedure TAgg2D.DoClearClipRect;
-var
- R: TfpgRect;
 begin
-  R := GetWidgetWindowRect;
-  ClipBox(R.Left, R.Top, r.Right+1, r.Bottom+1);
+  m_renBase.reset_clipping       (true );
+  m_renBaseComp.reset_clipping   (true );
+  m_renBasePre.reset_clipping    (true );
+  m_renBaseCompPre.reset_clipping(true );
+  ClipBox(0, 0, FWidget.Width, FWidget.Height);
 
   //we have to do clipping still if we are an alien widget.
   m_rasterizer.m_clipping := not WeAreTopLevelCanvas;
 end;
 
 procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
+var
+  R: TfpgRect;
 begin
   if CanvasTarget <> Self then
   begin
     // let this TAgg2D attach to the Native Window's Canvas.FImg
-    Attach(TAgg2D(CanvasTarget).FImg);
-    Translate(FDeltaX, FDeltaY);
+    R := GetWidgetWindowRect;
+    AttachPartialImage(TAgg2D(CanvasTarget).FImg, R);
   end;
 end;
 
 procedure TAgg2D.DoEndDraw;
 begin
   FCanvasTarget := nil;
-  Translate(-FDeltaX, -FDeltaY);
 end;
 
 function TAgg2D.GetPixel(X, Y: integer): TfpgColor;
