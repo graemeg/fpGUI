@@ -595,8 +595,9 @@ begin
   colxft.color.green := (c and $0000FF00);
   colxft.color.red   := (c and $00FF0000) shr 8;
 
-  colxft.color.alpha := (c and $7F000000) shr 15;
-  colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 means not translucent
+  colxft.color.alpha := (c and $FF000000) shr 16;
+  if colxft.color.alpha = 0 then
+    colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 means not translucent
 
   colxft.pixel := 0;
 end;
