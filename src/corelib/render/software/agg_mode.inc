@@ -40,7 +40,7 @@
  {$ENDIF}
 {$ENDIF }
 
-{$Warning fpGUI supports other *nix flavours too (FreeBSD, Solaris etc), so this
+{$NOTE fpGUI supports other *nix flavours too (FreeBSD, Solaris etc), so this
    needs to be extended at some point. }
 
 {$IFDEF LINUX }
