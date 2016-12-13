@@ -3771,6 +3771,9 @@ end;
 
 procedure TAgg2D.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
+  if Length(txt) < 1 then
+    Exit; //==>
+
   DoSetTextColor(FTextColor);
   NoLine;
   TextHints(False);
