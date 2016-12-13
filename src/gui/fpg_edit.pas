@@ -717,7 +717,9 @@ var
   rs: TfpgRect;
   r: TfpgRect;
 begin
-  r := Canvas.GetClipRect;  // contains adjusted size based on borders
+  r := GetClientRect;  // contains adjusted size based on borders
+  r.Height :=  r.Height-2;
+  r.Top := r.Top + 1;
 
   if Focused then
   begin
@@ -730,11 +732,11 @@ begin
     Canvas.SetTextColor(clInactiveSelText);
   end;
 
-  rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
+  rs.SetRect(FVisSelStartPx, r.Top, FVisSelEndPx - FVisSelStartPx, r.height{FFont.Height});
   Canvas.SetColor(lcolor);
   Canvas.FillRectangle(rs);
   Canvas.SetClipRect(rs);
-  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top {+ FHeightMargin}, FVisibleText, Enabled);
   Canvas.ClearClipRect;
 end;
 
