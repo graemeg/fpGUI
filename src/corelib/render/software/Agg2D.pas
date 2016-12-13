@@ -19,7 +19,7 @@ unit Agg2D;
 
 {$I agg_mode.inc }
 
-{.$Define CStackDebug}
+{.$define CStackDebug}
 
 interface
 
@@ -1347,10 +1347,9 @@ begin
  ReleaseDC(0 ,m_fontDC );
  {$ENDIF }
 
+  FreeAndNil(FCaretImg);
   if Assigned(FImg) then
     FImg.Free;
-  if Assigned(FCaretImg) then
-    FCaretImg.Free;
 end;
 
 { ATTACH }
@@ -3725,7 +3724,7 @@ begin
     begin
       if (FCaretPos.x = x) and (FCaretPos.y = y) then
         DrawImage(x, y, FCaretImg);
-      FCaretImg.Free;
+      FreeAndNil(FCaretImg);
     end;
     FPaintCaret := True
   end;
