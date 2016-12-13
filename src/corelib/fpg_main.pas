@@ -1367,7 +1367,7 @@ end;
 function fpgColorToRGB(col: TfpgColor): TfpgColor;
 begin
   if (((col shr 24) and $FF) = $80) and ((col and $FFFFFF) <= $FF) then
-    Result := fpgNamedColors[col and $FF] or (col and $7F000000)// named color keeping alpha
+    Result := fpgNamedColors[col and $FF]
   else
     Result := col;
 end;
