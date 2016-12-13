@@ -281,6 +281,7 @@ begin
   FBackgroundColor := Parent.BackgroundColor;
   FTabColor  := Parent.BackgroundColor;
   FTextColor := Parent.TextColor;
+  FTabTextColor := Parent.TextColor;
   FIsContainer := True;
 end;
 
@@ -1114,9 +1115,9 @@ end;
 
 procedure TfpgPageControl.HandlePaint;
 begin
+  inherited HandlePaint;
   if SortPages then
     OrderSheets;
-  Canvas.ClearClipRect;
   fpgStyle.DrawTabBackground(Canvas, BackgroundColor);
 
   // To make it more visible in the UI Designer
