@@ -909,7 +909,7 @@ const
 
   cDefines1 = '\{\$[^\{]*\}';
 
-  cString1 = '''.*''';
+  cString1 =  '''[^''\r\n]*''';
 
   cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
   cHexadecimal = '\$[A-F0-9]+\b';
