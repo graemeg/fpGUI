@@ -912,7 +912,7 @@ const
   cString1 = '''.*''';
 
   cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
-  cHexadecimal = '\$[0-9a-fA-F]+';
+  cHexadecimal = '\$[A-F0-9]+\b';
 var
   oldfont: TfpgFont;
   s: TfpgString;  // copy of ALineText we work with
