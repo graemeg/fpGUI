@@ -2667,9 +2667,13 @@ var
 begin
   FreeInterpolation := not Assigned(FInterpolation);
   if FreeInterpolation then
-    IP := TfpgMitchelInterpolation.Create
+  begin
+    FreeAndNil(FInterpolation);
+    IP := TfpgMitchelInterpolation.Create;
+  end
   else
     IP := FInterpolation;
+
   try
     IP.Initialize(ASource, self);
     IP.Execute(x, y, w, h);
@@ -3210,8 +3214,11 @@ end;
 
 procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
 begin
-  tempimage := TfpgImage.Create;
-  tempimage.AllocateImage(image.ColorDepth, w, image.Height);
+  if not Assigned(tempimage) then
+  begin
+    tempimage := TfpgImage.Create;
+    tempimage.AllocateImage(image.ColorDepth, w, image.Height);
+  end;
 
   xfactor   := image.Width / w;
   yfactor   := image.Height / h;
