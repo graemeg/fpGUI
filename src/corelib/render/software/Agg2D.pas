@@ -330,15 +330,6 @@ type
 
    m_imageFlip : boolean;
 
-  {$IFDEF AGG2D_USE_WINFONTS }
-   m_fontDC : HDC;
-  {$ENDIF }
-
-  {$IFNDEF AGG2D_NO_FONT}
-   m_fontEngine       : TAggFontEngine;
-   m_fontCacheManager : font_cache_manager;
-  {$ENDIF}
-
   // Other Pascal-specific members
    m_gammaNone  : gamma_none;
    m_gammaAgg2D : TAggRasterizerGamma;
@@ -357,6 +348,14 @@ type
    FCaretPos: TfpgPoint;
   protected
     FImg: TfpgImage;
+  {$IFDEF AGG2D_USE_WINFONTS }
+   m_fontDC : HDC;
+  {$ENDIF }
+
+  {$IFNDEF AGG2D_NO_FONT}
+   m_fontEngine       : TAggFontEngine;
+   m_fontCacheManager : font_cache_manager;
+  {$ENDIF}
 
   {$undef uses_interface}
   {$define agg_platform_interface}
@@ -373,7 +372,9 @@ type
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
+  public
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
+  protected
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
