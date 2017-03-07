@@ -56,6 +56,7 @@ type
     property    HeaderFont;
   published
     property    Align;
+    property    AutoHeight;
     property    BorderStyle;
     property    ColumnCount;
     property    Columns;
@@ -65,8 +66,11 @@ type
     property    Options;
     property    RowCount;
     property    ScrollBarStyle;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    TabOrder;
     property    TopRow;
+    property    VisibleRows;
     property    OnClick;
     property    OnDoubleClick;
     property    OnEnter;
@@ -86,8 +90,8 @@ type
   private
     FCells: TStringList;
   public
-	  constructor Create; override;
-	  destructor  Destroy; override;
+    constructor Create; override;
+    destructor  Destroy; override;
     property    Cells: TStringList read FCells write FCells;
   end;
 

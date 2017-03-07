@@ -338,7 +338,6 @@ type
     netlayer: TNETWindowLayer;
     InputMethod: PXIM;
     InputContext: PXIC;
-    FLastKeySym: TKeySym;   // Used for KeyRelease event
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
@@ -1855,12 +1854,15 @@ begin
 //                    writeln('KeyPress - XLookupBoth');
                   end;
             end;
-            FLastKeySym := KeySym   // save it for KeyRelease event
           end
           else
-            KeySym := FLastKeySym;  // restore saved KeySym
+          begin
+            { We are only interested in KeySym, not actual characters (string) generated,
+              so we don't need to use the UTF8 version or StartComposing(). }
+            xlookupstring(@ev.xkey, nil, 0, @KeySym, nil);
+          end;
 
-          msgp.keyboard.keycode     := KeySymToKeycode(KeySym);
+          msgp.keyboard.keycode := KeySymToKeycode(KeySym);
           msgp.keyboard.shiftstate  := ConvertShiftState(ev.xkey.state);
 
           // By default X11 sends keyboard event to window under mouse cursor.

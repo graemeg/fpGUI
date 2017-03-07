@@ -4,21 +4,22 @@ program EditGridDemo;
 
 uses
   Classes,
-  fpg_main, u_demo;
+  fpg_main,
+  u_demo;
 
 procedure MainProc;
 begin
-fpgApplication.Initialize;
-F_Demo:= TF_Demo.Create(nil);
-try
-  F_Demo.Show;
-  fpgApplication.Run;
-finally
-  F_Demo.Free;
+  fpgApplication.Initialize;
+  F_Demo := TF_Demo.Create(nil);
+  try
+    F_Demo.Show;
+    fpgApplication.Run;
+  finally
+    F_Demo.Free;
   end;
 end;
 
 begin
-MainProc;
+  MainProc;
 end.
 

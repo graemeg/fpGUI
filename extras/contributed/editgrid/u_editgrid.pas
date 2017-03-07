@@ -354,6 +354,7 @@ type
   published
     property    Align;
     property    AlternateBGColor;
+    property    AutoHeight;
     property    BackgroundColor;
     property    BorderStyle;
 //    property    ColResizing;
@@ -376,6 +377,8 @@ type
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
+    property    ScrollBarPage;
+    property    ScrollBarWidth;
     property    ShowGrid;
     property    ShowHeader;
     property    ShowHint;
@@ -693,52 +696,52 @@ begin
     case Columns[i].EditType of
       etText:
         if Assigned(FCellEditText) then
-          begin
+        begin
           FCellEditText.Text := '';
           FCellEditText.Visible := False;
-          end;
+        end;
       etInteger:
         if Assigned(FCellEditInteger) then
-          begin
+        begin
           FCellEditInteger.Text := '';
           FCellEditInteger.Visible := False;
-          end;
+        end;
       etFloat:
         if Assigned(FCellEditFloat) then
-          begin
+        begin
           FCellEditFloat.Text := '';
           FCellEditFloat.Visible := False;
-          end;
+        end;
       etCurrency:
         if Assigned(FCellEditCurrency) then
-          begin
+        begin
           FCellEditCurrency.Text := '';
           FCellEditCurrency.Visible := False;
-          end;
+        end;
       etComboBox:
         if Assigned(FCellComboBox) then
-          begin
+        begin
           FCellComboBox.Text := '';
           FCellComboBox.Visible := False;
-          end;
+        end;
       etEditCombo:
         if Assigned(FCellEditCombo) then
-          begin
+        begin
           FCellEditCombo.Text := '';
           FCellEditCombo.Visible := False;
-          end;
+        end;
       etCheckBox:
         if Assigned(FCellCheckBox) then
-          begin
+        begin
           FCellCheckBox.Text := '';
           FCellCheckBox.Visible := False;
-          end;
+        end;
       etCalendar:
         if Assigned(FCellCalendar) then
-          begin
+        begin
 //          FCellCalendar.Text := '';
           FCellCalendar.Visible := False;
-          end;
+        end;
     end;
 end;
 
@@ -747,26 +750,39 @@ begin
   case FEditWay of
     edNone:
       begin
-      FEditing:= False;
-      Enabled:= True;
+        FEditing := False;
+        Enabled := True;
       end;
     edColumn:
-      if FocusCol < Pred(ColumnCount) then
-        FocusCol := FocusCol + 1
-      else
+      begin
+        if FocusCol < Pred(ColumnCount) then
         begin
-        FEditing:= False;
-        Enabled:= True;
+          if (Columns[Succ(FocusCol)].EditType<> etCheckBox) and (Columns[Succ(FocusCol)].EditType<> etCalendar) then
+            FocusCol := FocusCol + 1
+          else
+          begin
+            repeat
+              FocusCol := FocusCol + 1
+            until (Columns[FocusCol].EditType<> etCheckBox) and (Columns[FocusCol].EditType<> etCalendar)
+          end;
+        end
+        else
+        begin
+          FEditing := False;
+          Enabled := True;
         end;
+      end;
     edRow:
-      if FocusRow < Pred(RowCount) then
-        FocusRow := FocusRow + 1
-      else
+      begin
+        if FocusRow < Pred(RowCount) then
+          FocusRow := FocusRow + 1
+        else
         begin
-        FEditing:= False;
-        Enabled:= True;
+          FEditing := False;
+          Enabled := True;
         end;
-  end;
+      end;
+  end; { case }
   SetFocus;
   if FEditing then
     SetEditCell;
@@ -814,7 +830,7 @@ begin
   if FCellEditText.Visible then
     case KeyCode of
       KeyReturn, KeyPEnter:
-          begin
+        begin
           Cells[FocusCol, FocusRow] := FCellEditText.Text;
           FCellEditText.Text := '';
           FCellEditText.Visible := False;
@@ -828,11 +844,11 @@ begin
         end;
       KeyEscape:
         begin
-        FCellEditText.Text := '';
-        FCellEditText.Visible := False;
-        FEditing := False;
-        Enabled:= True;
-        SetFocus;
+          FCellEditText.Text := '';
+          FCellEditText.Visible := False;
+          FEditing := False;
+          Enabled:= True;
+          SetFocus;
         end;
     end;
 end;

@@ -1,7 +1,8 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -25,8 +26,8 @@ uses
   x;
   
 type
-    TfpgWinHandle = TXID;
-    TfpgDCHandle  = TXID;
+  TfpgWinHandle = TXID;
+  TfpgDCHandle  = TXID;
 
 
 implementation

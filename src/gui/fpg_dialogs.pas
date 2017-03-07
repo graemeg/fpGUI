@@ -1022,6 +1022,7 @@ begin
     Text := FSampleText;
     Anchors := [anLeft, anTop, anRight, anBottom];
     OnChange := @OnSampleTextChanged;
+    Name := 'MemoSample';
   end;
 
   CreateFontList;
@@ -1117,6 +1118,7 @@ begin
   begin
     SetPosition(8, 12, 484, 24);
     Anchors := [anLeft, anRight, anTop];
+    Name := 'chlDir';
     FontDesc := '#List';
     OnChange := @DirChange;
   end;
@@ -1129,6 +1131,7 @@ begin
     Options := [go_AlternativeColor, go_SmoothScroll];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
+    Name := 'grid';
   end;
 
   btnUpDir := TfpgButton.Create(self);
@@ -1137,6 +1140,7 @@ begin
     SetPosition(500, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
+    Name := 'btnUpDir';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderup';   // Do NOT localize
     Focusable := False;
@@ -1151,6 +1155,7 @@ begin
     SetPosition(526, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
+    Name := 'btnDirNew';
     FontDesc := '#Label1';
     ImageName := 'stdimg.foldernew';    // Do NOT localize
     Focusable := False;
@@ -1165,6 +1170,7 @@ begin
     SetPosition(552, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
+    Name := 'btnShowHidden';
     FontDesc := '#Label1';
     ImageName := 'stdimg.hidden';   // Do NOT localize
     Focusable := False;
@@ -1181,6 +1187,7 @@ begin
     SetPosition(578, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
+    Name := 'btnGoHome';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderhome';    // Do NOT localize
     Focusable := False;
@@ -1195,6 +1202,7 @@ begin
     SetPosition(604, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
+    Name := 'btnBookmark';
     FontDesc := '#Label1';
     ImageName := 'stdimg.bookmark';    // Do NOT localize
     Focusable := False;
@@ -1223,6 +1231,7 @@ begin
     SetPosition(8, 301, 624, 22);
     Anchors := [anLeft, anRight, anBottom];
     Text := '';
+    Name := 'edFilename';
     FontDesc := '#Edit1';
     OnChange := @edFilenameChanged;
     OnKeyPress := @edFilenameKeyPressed;
@@ -1237,6 +1246,7 @@ begin
     Anchors := [anLeft, anRight, anBottom];
     FontDesc := '#List';
     OnChange := @FilterChange;
+    Name := 'chlFilter';
   end;
 
   lb1 := TfpgLabel.Create(self);
