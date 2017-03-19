@@ -711,6 +711,52 @@ begin
     Result := CallNextHookEx(wapplication.ActivationHook, nCode, wParam, lParam);
 end;
 
+function GetEventName(Event: UINT): string;
+begin
+  case Event of
+    WM_CREATE: Result := 'WM_CREATE';
+    WM_RENDERALLFORMATS: Result := 'WM_RENDERALLFORMATS';
+    WM_RENDERFORMAT: Result := 'WM_RENDERFORMAT';
+    WM_CHAR: Result := 'WM_CHAR';
+    WM_KEYUP: Result := 'WM_KEYUP';
+    WM_SYSKEYUP: Result := 'WM_SYSKEYUP';
+    WM_KEYDOWN: Result := 'WM_KEYDOWN';
+    WM_SYSKEYDOWN: Result := 'WM_SYSKEYDOWN';
+    WM_SETCURSOR: Result := 'WM_SETCURSOR';
+    WM_LBUTTONDBLCLK: Result := 'WM_LBUTTONDBLCLK';
+    WM_MOUSEMOVE: Result := 'WM_MOUSEMOVE';
+    WM_LBUTTONDOWN: Result := 'WM_LBUTTONDOWN';
+    WM_LBUTTONUP: Result := 'WM_LBUTTONUP';
+    WM_MBUTTONDOWN: Result := 'WM_MBUTTONDOWN';
+    WM_MBUTTONUP: Result := 'WM_MBUTTONUP';
+    WM_RBUTTONDOWN: Result := 'WM_RBUTTONDOWN';
+    WM_RBUTTONUP: Result := 'WM_RBUTTONUP';
+    WM_GETMINMAXINFO: Result := 'WM_GETMINMAXINFO';
+    WM_SIZE: Result := 'WM_SIZE';
+    WM_MOVE: Result := 'WM_MOVE';
+    WM_STYLECHANGED: Result := 'WM_STYLECHANGED';
+    WM_WINDOWPOSCHANGED: Result := 'WM_WINDOWPOSCHANGED';
+    WM_MOUSEWHEEL: Result := 'WM_MOUSEWHEEL';
+    WM_TIMER: Result := 'WM_TIMER';
+    WM_TIMECHANGE: Result := 'WM_TIMECHANGE';
+    WM_NCACTIVATE: Result := 'WM_NCACTIVATE';
+    WM_CLOSE: Result := 'WM_CLOSE';
+    WM_PAINT: Result := 'WM_PAINT';
+    WM_SYSCOMMAND: Result := 'WM_SYSCOMMAND';
+    WM_ERASEBKGND: Result := 'WM_ERASEBKGND';
+    WM_SIZING: Result := 'WM_SIZING';
+    WM_NCCALCSIZE: Result := 'WM_NCCALCSIZE';
+    WM_NCPAINT: Result := 'WM_NCPAINT';
+    WM_GETTEXT: Result := 'WM_GETTEXT';
+    WM_CAPTURECHANGED: Result := 'WM_CAPTURECHANGED';
+    WM_EXITSIZEMOVE: Result := 'WM_EXITSIZEMOVE';
+    WM_NCMOUSEMOVE: Result := 'WM_NCMOUSEMOVE';
+    WM_WINDOWPOSCHANGING: Result := 'WM_WINDOWPOSCHANGING';
+    else
+      Result := '#' + IntToStr(Event);
+  end;
+end;
+
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgGDIWindow;
@@ -767,6 +813,9 @@ var
   end;
 
 begin
+  // Use for deep debugging only - as it floods the console output with info
+  // Writeln('Event: ' + GetEventName(uMsg));
+
   if uMsg = WM_CREATE then
   begin
     w := TfpgGDIWindow(PCreateStruct(lParam)^.lpCreateParams);
