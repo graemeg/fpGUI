@@ -886,7 +886,7 @@ begin
         begin
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
           //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
-          if (lParam and $FFFF) <= 1 then
+          if Lo(lParam) <= 1 then
             w.DoSetMouseCursor
           else
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -1058,8 +1058,8 @@ begin
 
           // note that WM_SIZING allows some control on sizing
           //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
-          msgp.rect.Width  := smallint(lParam and $FFFF);
-          msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
+          msgp.rect.Width  := Lo(lParam);
+          msgp.rect.Height := Hi(lParam);
 
           {$IFDEF DEBUG}
             SendDebugFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
@@ -1087,8 +1087,8 @@ begin
           end
           else
           begin
-            msgp.rect.Left := smallint(lParam and $FFFF);
-            msgp.rect.Top  := smallint((lParam and $FFFF0000) shr 16);
+            msgp.rect.Left := Lo(lParam);
+            msgp.rect.Top  := Hi(lParam);
           end;
 
           fpgSendMessage(nil, w, FPGM_MOVE, msgp);
