@@ -814,6 +814,7 @@ var
   wmsg: TMsg;
   TmpW: widestring;
   wheelpos: integer;
+  lprc: LPRECT;
 
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
@@ -1151,8 +1152,24 @@ begin
           {$IFDEF GDEBUG}
           DebugLnFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
           {$ENDIF}
-          // skip minimize...
-          if lparam <> 0 then
+          // skip minimize & restore
+          if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+            fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+        end;
+
+
+    WM_SIZING:
+        begin
+          { **** NOTE ****
+            This is only here, because WM_SIZE is not working correctly for some
+            odd reason. So this is only a work-around, until I can figure out what
+            is going on with WM_SIZE. }
+          lprc := LPRECT(lparam);
+          PrintRect(lprc^);
+          msgp.rect.Width  := lprc^.Right - lprc^.Left + 1;
+          msgp.rect.Height := lprc^.Bottom - lprc^.Top + 1;
+
+          if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
         end;
 
