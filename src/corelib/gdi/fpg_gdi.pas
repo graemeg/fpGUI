@@ -799,8 +799,8 @@ var
     if (w = nil) {or not (w is TfpgForm)} then
       Exit; //==>
     SetWin32SizePoint(w.PrimaryWidget.MinWidth, w.PrimaryWidget.MinHeight, MinMaxInfo.ptMinTrackSize);
-//    SetWin32SizePoint(MaxWidth, MaxHeight, MinMaxInfo.ptMaxSize);
-//    SetWin32SizePoint(MaxWidth, MaxHeight, MinMaxInfo.ptMaxTrackSize);
+    SetWin32SizePoint(w.PrimaryWidget.MaxWidth, w.PrimaryWidget.MaxHeight, MinMaxInfo.ptMaxSize);
+    SetWin32SizePoint(w.PrimaryWidget.MaxWidth, w.PrimaryWidget.MaxHeight, MinMaxInfo.ptMaxTrackSize);
   end;
 
 begin
