@@ -1503,7 +1503,7 @@ begin
     with HiddenWndClass do
     begin
       style         := 0;
-      lpfnWndProc   := WndProc(@DefWindowProc);
+      lpfnWndProc   := @DefWindowProc;
       hInstance     := MainInstance;
       hIcon         := 0;
       hCursor       := 0;
@@ -1532,7 +1532,7 @@ begin
   with WindowClass do
   begin
     style         := CS_HREDRAW or CS_VREDRAW or CS_OWNDC or CS_DBLCLKS;
-    lpfnWndProc   := WndProc(@fpgWindowProc);
+    lpfnWndProc   := @fpgWindowProc;
     hInstance     := MainInstance;
     // hIcon         := LoadIcon(0, IDI_APPLICATION);
     hIcon         := LoadIcon(hInstance, 'MAINICON');
@@ -1545,7 +1545,7 @@ begin
   with WidgetClass do
   begin
     style         := CS_OWNDC or CS_DBLCLKS;
-    lpfnWndProc   := WndProc(@fpgWindowProc);
+    lpfnWndProc   := @fpgWindowProc;
     hInstance     := MainInstance;
     hIcon         := 0;
     hCursor       := 0;
