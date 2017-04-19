@@ -81,7 +81,7 @@ const
 type
 
   TfpgMessageBox = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: MessageBox}
     FButton: TfpgButton;
     {@VFD_HEAD_END: MessageBox}
@@ -123,7 +123,7 @@ type
 
 
   TfpgFontSelectDialog = class(TfpgBaseDialog)
-  private
+  protected
     FSampleText: string;
     FMode: Byte;    // 1 - Normal Fonts;  2 - Alias Fonts
     lblLabel1: TfpgLabel;
@@ -145,7 +145,6 @@ type
     procedure   CreateFontList;
     procedure   CreateFontAliasList;
     procedure   SetupUI(AMode: Byte);
-  protected
     function    GetFontDesc: string;
     procedure   SetFontDesc(Desc: string);
     procedure   SetupCaptions; override;
@@ -156,7 +155,7 @@ type
 
 
   TfpgFileDialog = class(TfpgBaseDialog)
-  private
+  protected
     chlDir: TfpgComboBox;
     grid: TfpgFileGrid;
     btnUpDir: TfpgButton;
@@ -199,7 +198,6 @@ type
     function    CreatePopupMenu: TfpgPopupMenu;
     procedure   BookmarkItemClicked(Sender: TObject);
     procedure   ShowConfigureBookmarks;
-  protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
     procedure   SetCurrentDirectory(const ADir: string);
@@ -1688,4 +1686,3 @@ end;
 
 
 end.
-
