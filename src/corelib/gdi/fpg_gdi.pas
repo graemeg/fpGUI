@@ -33,13 +33,13 @@ unit fpg_gdi;
 // enable or disable DND support. Disabled by default while implementing AlienWindows.
 {$define HAS_DND}
 
-// enable or disaple window opacity
+// enable or disaple window opacity support
 {$define HAS_OPACITY}
 
 {$IFDEF WINCE}
   // WinCE doesn't have DND support
   {$UNDEF HAS_DND}
-  // this needs work before it can be enabled again
+  // It was reporting this is buggy under WinCE - so disable it for now.
   {$UNDEF HAS_OPACITY}
 {$ENDIF}
 
@@ -324,8 +324,8 @@ type
   TfpgGDIDrop = class(TfpgDropBase)
   private
     FSource: IDataObject;
-    FDropAction: DWORD; // effect              
-    {$IFDEF HAS_DND} //Fixed WinCE compilation errors
+    FDropAction: DWORD; // effect
+    {$IFDEF HAS_DND}
     procedure   LoadMimeTypes;
     procedure   ReadDropData;
     function    ActionAsOLEEffect: TfpgOLEDragDropEffect;
@@ -800,7 +800,7 @@ begin
   end;
 end;
 
-function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
 var
   w,
   w2: TfpgGDIWindow;
@@ -1389,7 +1389,7 @@ end;
 
 { TfpgGDIDrop }
 
-{$IFDEF HAS_DND}//Fixes WinCE compilation errors
+{$IFDEF HAS_DND}
 procedure TfpgGDIDrop.LoadMimeTypes;
 var
   lMimeList: TStringList;
