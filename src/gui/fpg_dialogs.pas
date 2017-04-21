@@ -205,6 +205,7 @@ type
   public
     FileName: string;
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
     destructor  Destroy; override;
     function    RunOpenFile: boolean;
     function    RunSaveFile: boolean;
@@ -1335,6 +1336,39 @@ begin
   btnCancel.Top   := Height - btnCancel.Height - FSpacing;
   btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
   btnOK.Top       := btnCancel.Top;
+end;
+
+{ adjust layout for small screens if needed }
+procedure TfpgFileDialog.AfterConstruction;
+var
+	w, h: integer;
+	nl, nt, nw, nh: integer;
+begin
+  inherited AfterConstruction;
+  w:=fpgApplication.ScreenWidth;
+  h:=fpgApplication.ScreenHeight;
+  nw:=width;
+  nh:=height;
+  nl:=left;
+  nt:=top;
+  if width>w then begin
+    if MinWidth<w then MinWidth:=w;
+    nl:=0;
+    nw:=w;
+  end;
+  if height>h then begin
+    if MinHeight>h then begin
+      MinHeight:=h;
+      { if height challenged we can hide the pnlFileInfo with little reduction
+        in usability }
+      grid.height:=pnlFileInfo.top+pnlFileInfo.height-grid.top;
+      pnlFileInfo.visible:=false;
+    end;
+    nt:=0;
+    nh:=h;
+  end;
+  if (nl<>left) and (nt<>top) then WindowPosition:=wpUser;
+  if (nw<>width) and (nh<>height) then SetPosition(nl, nt, nw, nh);
 end;
 
 destructor TfpgFileDialog.Destroy;
