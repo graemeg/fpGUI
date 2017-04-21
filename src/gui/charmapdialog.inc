@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,7 +23,7 @@
 {$IFDEF read_interface}
 
   TCharMapForm = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: CharMapForm}
     grdCharacters: TfpgStringGrid;
     btnClose: TfpgButton;

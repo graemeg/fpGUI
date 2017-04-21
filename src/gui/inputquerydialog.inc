@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -22,7 +22,7 @@
 type
 
   TfpgQueryDialog = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: fpgQueryDialog}
     lblText: TfpgLabel;
     edtText: TfpgEdit;
@@ -31,7 +31,6 @@ type
     {@VFD_HEAD_END: fpgQueryDialog}
     procedure SetupCaptions;
     procedure edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
-  protected
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     procedure AfterCreate; override;

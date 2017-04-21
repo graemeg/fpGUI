@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -45,7 +45,7 @@ type
   end;
 
   TfpgColorSelectDialog = class(TfpgBaseDialog)
-  private
+  protected
     {@VFD_HEAD_BEGIN: ColorSelectDialog}
     pcColorSelect: TfpgPageControl;
     tsColorWheel: TfpgTabSheet;
@@ -80,7 +80,6 @@ type
     procedure   PopulatePaletteColorCombo;
     procedure   cbColorPaletteChange(Sender: TObject);
     procedure   OnTabChange(Sender: TObject; tab:TfpgTabSheet);
-  protected
     procedure   SetupCaptions; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -572,7 +571,7 @@ begin
   btnCancel.Top   := Height - btnCancel.Height - FSpacing;
   btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
   btnOK.Top       := btnCancel.Top;
-  
+
   PopulatePaletteColorCombo;
 end;
 

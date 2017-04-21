@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2012 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -22,7 +22,7 @@
 type
 
   TfpgMessageDialog = class(TfpgForm)
-  private
+  protected
     FInformativeText: TStringList;
     FText: string;
     FButtons: TfpgMsgDlgButtons;
@@ -42,7 +42,6 @@ type
     procedure   PrepareIcon;
     procedure   PrepareText;
     procedure   PrepareButtons;
-  protected
     procedure   SetWindowTitle(const ATitle: string); override;
     procedure   HandleClose; override;
     procedure   HandlePaint; override;
