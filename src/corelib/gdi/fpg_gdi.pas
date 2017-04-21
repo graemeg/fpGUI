@@ -1488,7 +1488,7 @@ procedure TfpgGDIApplication.DoWakeMainThread(Sender: TObject);
 begin
   // WakeMainThread is called during TThread.Synchronize.
   if Assigned(MainForm) then
-    Windows.PostMessage(TfpgGDIWindow(MainForm).WinHandle, WM_NULL, 0, 0);
+    Windows.PostMessage(TfpgGDIWindow(MainForm.Window).WinHandle, WM_NULL, 0, 0);
 end;
 
 procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
@@ -1933,7 +1933,7 @@ begin
   wcname      := 'FPGWIN';
 
   if AParent <> nil then
-    FParentWinHandle := TfpgGDIWindow(AParent).WinHandle
+    FParentWinHandle := TfpgGDIWindow(AParent.Window).WinHandle
   else
     FParentWinHandle := 0;
 
