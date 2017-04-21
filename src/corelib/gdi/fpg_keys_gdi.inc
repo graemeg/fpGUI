@@ -294,13 +294,33 @@ end;
 
 
 function GetKeyboardShiftState: TShiftState;
+{$ifndef wince}
 var
   State: array[Byte] of Byte;
+{$endif}
 begin
-  {$ifndef wince}
-  Windows.GetKeyboardState(State);
-  {$endif}
   Result := [];
+  {$ifdef wince}
+  if Windows.GetKeyState(VK_SHIFT) < 0 then
+    Include(Result, ssShift);
+  if Windows.GetKeyState(VK_MENU) < 0 then
+    Include(Result, ssAlt);
+  if Windows.GetKeyState(VK_CONTROL) < 0 then
+    Include(Result, ssCtrl);
+  if Windows.GetKeyState(VK_LBUTTON) < 0 then
+    Include(Result, ssLeft);
+  if Windows.GetKeyState(VK_RBUTTON) < 0 then
+    Include(Result, ssRight);
+  if Windows.GetKeyState(VK_MBUTTON) < 0 then
+    Include(Result, ssMiddle);
+  if Windows.GetKeyState(VK_CAPITAL) < 0 then
+    Include(Result, ssCaps);
+  if Windows.GetKeyState(VK_NUMLOCK) < 0 then
+    Include(Result, ssNum);
+  if Windows.GetKeyState(VK_SCROLL) < 0 then
+    Include(Result, ssScroll);
+  {$else}
+  Windows.GetKeyboardState(State);
   if (State[VK_SHIFT] and 128) <> 0 then
     Include(Result, ssShift);
   if (State[VK_MENU] and 128) <> 0 then
@@ -319,6 +339,7 @@ begin
     Include(Result, ssNum);
   if (State[VK_SCROLL] and 1) <> 0 then
     Include(Result, ssScroll);
+  {$endif}
 end;
 
 

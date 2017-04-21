@@ -33,12 +33,14 @@ unit fpg_gdi;
 // enable or disable DND support. Disabled by default while implementing AlienWindows.
 {$define HAS_DND}
 
-// enable or disaple window opacity
+// enable or disaple window opacity support
 {$define HAS_OPACITY}
 
 {$IFDEF WINCE}
   // WinCE doesn't have DND support
-  {$undefine HAS_DND}
+  {$UNDEF HAS_DND}
+  // It was reporting this is buggy under WinCE - so disable it for now.
+  {$UNDEF HAS_OPACITY}
 {$ENDIF}
 
 interface
@@ -216,7 +218,9 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     //procedure   DoDragStartDetected; override;
+    {$IFDEF HAS_OPACITY}
     procedure   SetWindowOpacity(AValue: Single); override;
+    {$ENDIF}
     function    GetWindowState: TfpgWindowState; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
@@ -321,9 +325,11 @@ type
   private
     FSource: IDataObject;
     FDropAction: DWORD; // effect
+    {$IFDEF HAS_DND}
     procedure   LoadMimeTypes;
     procedure   ReadDropData;
     function    ActionAsOLEEffect: TfpgOLEDragDropEffect;
+    {$ENDIF}
   protected
     function    GetDropAction: TfpgDropAction; override;
     procedure   SetDropAction(AValue: TfpgDropAction); override;
@@ -794,7 +800,7 @@ begin
   end;
 end;
 
-function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
 var
   w,
   w2: TfpgGDIWindow;
@@ -1383,6 +1389,7 @@ end;
 
 { TfpgGDIDrop }
 
+{$IFDEF HAS_DND}
 procedure TfpgGDIDrop.LoadMimeTypes;
 var
   lMimeList: TStringList;
@@ -1437,6 +1444,7 @@ begin
     daAsk:    Result := deCopy; //?
   end;
 end;
+{$ENDIF}
 
 function TfpgGDIDrop.GetDropAction: TfpgDropAction;
 begin
@@ -2235,6 +2243,7 @@ begin
   SetCursor(hc);
 end;
 
+{$IFDEF HAS_OPACITY}
 procedure TfpgGDIWindow.SetWindowOpacity(AValue: Single);
 var
  NeedsLayered: Boolean;
@@ -2274,6 +2283,7 @@ begin
   end;
 
 end;
+{$ENDIF}
 
 (*  // TODO: disabled for AlienWindows branch. We should fine a solution later.
 procedure TfpgGDIWindow.DoDragStartDetected;
