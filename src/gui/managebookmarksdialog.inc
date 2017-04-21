@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,7 +21,7 @@
 {$IFDEF read_interface}
 
   TConfigureBookmarksForm = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: ConfigureBookmarksForm}
     grdBookmarks: TfpgStringGrid;
     btnChangeTitle: TfpgButton;
@@ -97,7 +97,7 @@ begin
   s := grdBookmarks.Cells[0, grdBookmarks.FocusRow];
   if fpgInputQuery('Bookmark', 'Enter new bookmark name', s) then
   begin
-    s := StringReplace(s, '=', '-', [rfReplaceAll]); // don't allow '=' sign in name (ini file requirement)  
+    s := StringReplace(s, '=', '-', [rfReplaceAll]); // don't allow '=' sign in name (ini file requirement)
     grdBookmarks.Cells[0, grdBookmarks.FocusRow] := s;
   end;
 end;
