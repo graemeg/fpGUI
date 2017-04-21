@@ -807,9 +807,7 @@ var
   pw: TfpgWidgetBase;
   kwg: TfpgWidget;
   mw: TfpgWidgetBase;
-  kcode: integer;
   i: integer;
-  sstate: integer;
   h: THANDLE;
   p: PChar;
   pt: TPOINT;
@@ -1396,14 +1394,12 @@ var
   Item: TfpgMimeDataItem;
   i: Integer;
 begin
-
   lMimeList := EnumDataToStringList(FSource);
   for i := 0 to lMimeList.Count-1 do
   begin
     Item := TfpgMimeDataItem.Create(lMimeList[i], i);
     Mimetypes.Add(Item);
   end;
-
   lMimeList.Free;
 end;
 
@@ -2276,12 +2272,8 @@ begin
       Res := SetLayeredWindowAttributes(FWinHandle, RGB(255,255,255), Trunc(255 * WindowOpacity), LWA_COLORKEY or LWA_ALPHA);
       if Res = False then // failed
         inherited SetWindowOpacity(1.0); // totally opaque
-
-
     end;
-
   end;
-
 end;
 {$ENDIF}
 
@@ -3667,7 +3659,7 @@ initialization
   begin
     Pointer(SetLayeredWindowAttributes):=GetProcAddress(user32lib, 'SetLayeredWindowAttributes');
     if SetLayeredWindowAttributes <> nil then
-      HasOpacity:=True;
+      HasOpacity := True;
   end;
   {$ENDIF}
 
