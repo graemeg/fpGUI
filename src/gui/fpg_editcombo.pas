@@ -129,6 +129,7 @@ type
     property    Items;
     property    Margin;
     property    ReadOnly;
+    property    ScrollBarWidth;
     property    Text;
     property    TextColor;
     property    Width;
@@ -179,15 +180,18 @@ type
   private
     FCallerWidget: TfpgWidget;
     ListBox:    TfpgListBox;
+    FScrollBarWidth: integer;
   protected
     procedure   HandlePaint; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
+    procedure   SetScrollBarWidth(const AValue: integer);
   public
     constructor Create(AOwner: TComponent); override;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
+    property    ScrollBarWidth: integer read FScrollBarWidth write SetScrollBarWidth;
   end;
 
 
@@ -244,6 +248,12 @@ begin
   if Assigned(CallerWidget) then
     CallerWidget.SetFocus;
   inherited HandleHide;
+end;
+
+procedure TDropDownWindow.SetScrollBarWidth(const AValue: integer);
+begin
+  if FScrollBarWidth <> AValue then
+    FScrollBarWidth := AValue;
 end;
 
 constructor TDropDownWindow.Create(AOwner: TComponent);
@@ -330,6 +340,7 @@ begin
     if rowcount < 1 then
       rowcount := 1;
     ddw.Height := (ddw.ListBox.RowHeight * rowcount) + 4;
+    ddw.ListBox.ScrollBarWidth:= FScrollBarWidth;
     ddw.ListBox.Height := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
 
     // set default focusitem
@@ -369,6 +380,7 @@ begin
     begin
       FNewItem := False;
       FSelectedItem:= i;
+      FFocusItem := i;
       FText:= Items[i];
       Break;
     end;

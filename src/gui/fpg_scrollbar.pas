@@ -428,7 +428,7 @@ begin
 
   // Paint the slider button
   if Orientation = orVertical then
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded])
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded,btfIsVertical])
   else
     Canvas.DrawButtonFace(Height + FSliderPos, 0, FSliderLength, Height, [btfIsEmbedded]);
 end;
