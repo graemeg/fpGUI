@@ -38,7 +38,9 @@ unit fpg_gdi;
 
 {$IFDEF WINCE}
   // WinCE doesn't have DND support
-  {$undefine HAS_DND}
+  {$UNDEF HAS_DND}
+  // this needs work before it can be enabled again
+  {$UNDEF HAS_OPACITY}
 {$ENDIF}
 
 interface
@@ -216,7 +218,9 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     //procedure   DoDragStartDetected; override;
+    {$IFDEF HAS_OPACITY}
     procedure   SetWindowOpacity(AValue: Single); override;
+    {$ENDIF}
     function    GetWindowState: TfpgWindowState; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
@@ -320,10 +324,12 @@ type
   TfpgGDIDrop = class(TfpgDropBase)
   private
     FSource: IDataObject;
-    FDropAction: DWORD; // effect
+    FDropAction: DWORD; // effect              
+    {$IFDEF HAS_DND} //Fixed WinCE compilation errors
     procedure   LoadMimeTypes;
     procedure   ReadDropData;
     function    ActionAsOLEEffect: TfpgOLEDragDropEffect;
+    {$ENDIF}
   protected
     function    GetDropAction: TfpgDropAction; override;
     procedure   SetDropAction(AValue: TfpgDropAction); override;
@@ -1383,6 +1389,7 @@ end;
 
 { TfpgGDIDrop }
 
+{$IFDEF HAS_DND}//Fixes WinCE compilation errors
 procedure TfpgGDIDrop.LoadMimeTypes;
 var
   lMimeList: TStringList;
@@ -1437,6 +1444,7 @@ begin
     daAsk:    Result := deCopy; //?
   end;
 end;
+{$ENDIF}
 
 function TfpgGDIDrop.GetDropAction: TfpgDropAction;
 begin
@@ -2235,6 +2243,7 @@ begin
   SetCursor(hc);
 end;
 
+{$IFDEF HAS_OPACITY}
 procedure TfpgGDIWindow.SetWindowOpacity(AValue: Single);
 var
  NeedsLayered: Boolean;
@@ -2274,6 +2283,7 @@ begin
   end;
 
 end;
+{$ENDIF}
 
 (*  // TODO: disabled for AlienWindows branch. We should fine a solution later.
 procedure TfpgGDIWindow.DoDragStartDetected;
