@@ -336,7 +336,7 @@ type
     function    GetWindowForDrop: TfpgWindowBase; override;
     property    Source: IDataObject read FSource write FSource;
   public
-    constructor Create(AWindow: TfpgWindowBase; ASource: IDataObject);
+    constructor Create(AWindow: TfpgWindowBase; ASource: IDataObject); reintroduce;
     destructor  Destroy; override;
   end;
 
