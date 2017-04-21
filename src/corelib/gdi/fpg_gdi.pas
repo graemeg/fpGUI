@@ -2476,8 +2476,8 @@ begin
     if not GetBufferAllocated then
       DoAllocateBuffer;
 
-
-    {//if buffered then
+    (*
+    //if buffered then
     begin
       DoGetWinRect(ARect);
       if (FastDoubleBuffer = False) or (FBufferBitmap = 0)
@@ -2495,9 +2495,8 @@ begin
     begin
       FBufferBitmap := 0;
       Fgc           := FWinGC;
-    end;}}
-
-
+    end;}
+    *)
 
     SetTextAlign(FDrawGC, TA_TOP);
     SetBkMode(FDrawGC, TRANSPARENT);
