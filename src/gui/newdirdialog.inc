@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -19,7 +19,7 @@
 {$IFDEF read_interface}
 
   TfpgNewDirDialog = class(TfpgBaseDialog)
-  private
+  protected
     lblTitle: TfpgLabel;
     edDirectory: TfpgEdit;
     function    GetDirectory: TfpgString;
@@ -51,7 +51,7 @@ begin
   Height    := 97;
   MinWidth  := 286;
   MinHeight := 97;
-  
+
   lblTitle := CreateLabel(self, 8, 8, rsEnterNewDirectory);
   edDirectory := CreateEdit(self, 8, 28, 270, 0);
   edDirectory.Anchors := [anLeft, anTop, anRight];
@@ -61,7 +61,7 @@ begin
   btnCancel.Top   := Height - FSpacing - btnCancel.Height;
   btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
   btnOK.Top       := btnCancel.Top;
-  
+
   // now reset tab order
   edDirectory.TabOrder  := 1;
   btnOK.TabOrder        := 2;

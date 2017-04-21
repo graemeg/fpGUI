@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -21,7 +21,7 @@
 type
 
   TfpgQueryDialog = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: fpgQueryDialog}
     lblText: TfpgLabel;
     edtText: TfpgEdit;
@@ -30,7 +30,6 @@ type
     {@VFD_HEAD_END: fpgQueryDialog}
     procedure SetupCaptions;
     procedure edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
-  protected
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     procedure AfterCreate; override;

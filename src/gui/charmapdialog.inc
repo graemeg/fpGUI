@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -22,7 +22,7 @@
 {$IFDEF read_interface}
 
   TCharMapForm = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: CharMapForm}
     grdCharacters: TfpgStringGrid;
     btnClose: TfpgButton;

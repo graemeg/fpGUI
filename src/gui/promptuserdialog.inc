@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2008 by Antonio Sanguigni.
-    Copyright (c) 2009 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2009 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -11,6 +11,8 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+    Description:
+      This unit contains the username/password dialog.
 }
 
 {%mainunit fpg_dialogs.pas}
@@ -19,15 +21,14 @@
 
 
   TfpgPromptUserDialog = class(TfpgBaseDialog)
-  private
+  protected
     lblTitle: TfpgLabel;
     lblTitlePw: TfpgLabel;
-    function    GetUserID: TfpgString;
-    function    GetUserPassword: TfpgString;
-    procedure SetUserID(const AValue: TfpgString);
-  protected
     edUserID: TfpgEdit;
     edPassword: TfpgEdit;
+    function    GetUserID: TfpgString;
+    function    GetUserPassword: TfpgString;
+    procedure   SetUserID(const AValue: TfpgString);
     procedure   btnOKClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -41,9 +42,8 @@
 
 
   TfpgPromptUserDbDialog = class(TfpgPromptUserDialog)
-  private
-    lblDatabases: TfpgLabel;
   protected
+    lblDatabases: TfpgLabel;
     aStringList: TStringList;
     cbDatabases: TfpgComboBox;
     function    GetSelectedDatabase: TfpgString; virtual;
@@ -93,7 +93,7 @@ begin
   Height    := 140;
   MinWidth  := 200;
   MinHeight := 140;
-  
+
   lblTitle := CreateLabel(self, 8, 8, rsUserName);
   edUserID := CreateEdit(self, 8, 28, 184, 0);
   edUserID.Anchors := [anLeft, anTop, anRight];
@@ -108,7 +108,7 @@ begin
   btnCancel.Top   := Height - FSpacing - btnCancel.Height;
   btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
   btnOK.Top       := btnCancel.Top;
-  
+
   // now reset tab order
   edUserID.TabOrder     := 1;
   edPassword.TabOrder   := 2;
@@ -173,7 +173,7 @@ begin
   cbDatabases.TabOrder  := 3;
   btnOK.TabOrder        := 5;
   btnCancel.TabOrder    := 6;
-  
+
   PopulateComboDb;
 end;
 

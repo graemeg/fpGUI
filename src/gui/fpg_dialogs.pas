@@ -80,7 +80,7 @@ const
 type
 
   TfpgMessageBox = class(TfpgForm)
-  private
+  protected
     {@VFD_HEAD_BEGIN: MessageBox}
     FButton: TfpgButton;
     {@VFD_HEAD_END: MessageBox}
@@ -122,7 +122,7 @@ type
 
 
   TfpgFontSelectDialog = class(TfpgBaseDialog)
-  private
+  protected
     FSampleText: string;
     FMode: Byte;    // 1 - Normal Fonts;  2 - Alias Fonts
     lblLabel1: TfpgLabel;
@@ -144,10 +144,8 @@ type
     procedure   CreateFontList;
     procedure   CreateFontAliasList;
     procedure   SetupUI(AMode: Byte);
-  protected
     function    GetFontDesc: string; virtual;
     procedure   SetFontDesc(Desc: string); virtual;
-    procedure   SetupCaptions; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   SetSampleText(AText: string);
@@ -155,7 +153,7 @@ type
 
 
   TfpgFileDialog = class(TfpgBaseDialog)
-  private
+  protected
     chlDir: TfpgComboBox;
     grid: TfpgFileGrid;
     btnUpDir: TfpgButton;
@@ -198,7 +196,6 @@ type
     function    CreatePopupMenu: TfpgPopupMenu;
     procedure   BookmarkItemClicked(Sender: TObject);
     procedure   ShowConfigureBookmarks;
-  protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
     procedure   SetCurrentDirectory(const ADir: string);
@@ -863,11 +860,6 @@ begin
   end;
 
   OnParamChange(self);
-end;
-
-procedure TfpgFontSelectDialog.SetupCaptions;
-begin
-  inherited SetupCaptions;
 end;
 
 constructor TfpgFontSelectDialog.Create(AOwner: TComponent);
@@ -1688,4 +1680,3 @@ end;
 
 
 end.
-

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -10,6 +10,8 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+    Description:
+      This unit contains the Select Directory dialog.
 }
 
 {%mainunit fpg_dialogs.pas}
@@ -17,7 +19,7 @@
 {$IFDEF read_interface}
 
   TfpgSelectDirDialog = class(TfpgBaseDialog)
-  private
+  protected
     tv: TfpgTreeView;
     FRootDir: TfpgString;
     FShowHidden: Boolean;

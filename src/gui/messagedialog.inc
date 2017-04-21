@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -21,7 +21,7 @@
 type
 
   TfpgMessageDialog = class(TfpgForm)
-  private
+  protected
     FInformativeText: TStringList;
     FText: string;
     FButtons: TfpgMsgDlgButtons;
@@ -40,7 +40,6 @@ type
     procedure   PrepareIcon;
     procedure   PrepareText;
     procedure   PrepareButtons;
-  protected
     procedure   SetWindowTitle(const ATitle: string); override;
     procedure   HandleClose; override;
     procedure   HandlePaint; override;
