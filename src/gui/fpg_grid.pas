@@ -35,7 +35,7 @@ uses
   fpg_main,
   fpg_basegrid,
   fpg_customgrid;
-  
+
 type
 
   TfpgFileGrid = class(TfpgCustomGrid)
@@ -75,6 +75,7 @@ type
     property    OnDoubleClick;
     property    OnEnter;
     property    OnExit;
+    property    OnHeaderClick;
     property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseEnter;
@@ -254,7 +255,7 @@ begin
           x := ARect.Left + picture_width;
           s := e.Name;
         end;
-        
+
     1:  begin
           if e.EntryType = etDir then
             s := ''
@@ -276,13 +277,13 @@ begin
           Canvas.SetFont(FixedFont);
         end;
   end;
-  
+
   if FFileList.HasFileMode then // unix
     case ACol of
       4:  s := e.Owner;
       5:  s := e.Group;
     end;
-  
+
   // centre text in row height
   y := y + ((DefaultRowHeight - Canvas.Font.Height) div 2);
   Canvas.DrawString(x, y, s);
@@ -295,7 +296,7 @@ begin
   ColumnCount := 0;
   RowCount := 0;
   FFixedFont := fpgGetFont('Courier New-9');
-  
+
   if FFileList.HasFileMode then
     AddColumn(rsName, 220)  // save space for file mode, owner and group
   else
@@ -303,7 +304,7 @@ begin
 
   AddColumn(rsSize, 80);
   AddColumn(rsFileModifiedTime, 108);
-  
+
   if FFileList.HasFileMode then
   begin
     AddColumn(rsFileRights, 78);
@@ -312,7 +313,7 @@ begin
   end
   else
     AddColumn(rsFileAttributes, 78);
-    
+
   RowSelect := True;
   DefaultRowHeight := fpgImages.GetImage('stdimg.document').Height + 2;
 end;
@@ -518,7 +519,7 @@ begin
       taRightJustify:
           Include(Flags,txtRight);
     end;  { case }
-    
+
     case Columns[ACol].Layout of
       tlTop:
           Include(Flags,txtTop);
@@ -563,7 +564,7 @@ begin
     Result.TextColor := TextColor
   else
     Result.TextColor:= ATextColor;
-    
+
   if UpdateCount = 0 then
     Updated;  // if we called .BeginUpdate then don't clear csUpdating here
 end;
