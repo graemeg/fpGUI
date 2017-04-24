@@ -3729,9 +3729,12 @@ begin
 end;
 
 procedure TfpgX11Canvas.DoClearClipRect;
+var
+  r: TfpgRect;
 begin
   FClipRectSet := False;
-  DoSetClipRectInternal(fpgRect(0,0,0,0));
+  r.SetRect(0,0,0,0);
+  DoSetClipRectInternal(r);
 end;
 
 procedure TfpgX11Canvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);

@@ -758,7 +758,7 @@ var
 begin
   border := fpgStyle.GetTabBorders;
   Result := ARect;
-  InflateRect(Result, border.Left, border.Top);
+  Result.InflateRect(border.Left, border.Top);
 end;
 
 function TfpgPageControl.GetFont: TfpgFont;
