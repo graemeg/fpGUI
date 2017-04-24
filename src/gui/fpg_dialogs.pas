@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -153,6 +153,8 @@ type
 
 
   TfpgFileDialog = class(TfpgBaseDialog)
+  private
+    FLastSortOrder: TFileListSortOrder;
   protected
     chlDir: TfpgComboBox;
     grid: TfpgFileGrid;
@@ -180,7 +182,8 @@ type
     procedure   SetShowHidden(const Value: boolean);
     procedure   ListChanged(Sender: TObject; ARow: Integer);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure   InitializeComponents;
+    procedure   GridHeaderClicked(Sender: TObject; ACol: Integer);
+    procedure   InitializeComponents; virtual;
     procedure   ProcessFilterString;
     function    GetFileFilter: string;
     procedure   FilterChange(Sender: TObject);
@@ -1067,6 +1070,19 @@ begin
     btnOKClick(Sender);
 end;
 
+procedure TfpgFileDialog.GridHeaderClicked(Sender: TObject; ACol: Integer);
+begin
+  if ACol > 2 then
+    Exit;
+  case ACol of
+    0: FLastSortOrder := soFileName;
+    1: FLastSortOrder := soSize;
+    2: FLastSortOrder := soTime;
+  end;
+  Grid.FileList.Sort(FLastSortOrder);
+  Grid.Invalidate;
+end;
+
 procedure TfpgFileDialog.SetFilter(const Value: string);
 begin
   FFilter := Value;
@@ -1123,6 +1139,7 @@ begin
     Options := [go_AlternativeColor, go_SmoothScroll];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
+    OnHeaderClick := @GridHeaderClicked;
     Name := 'grid';
   end;
 
@@ -1329,6 +1346,7 @@ begin
   Height      := 410;
   WindowPosition := wpOneThirdDown;
   FSpacing    := 10;
+  FLastSortOrder := soFileName;
 
   FFilterList := TStringList.Create;
 
@@ -1378,7 +1396,7 @@ begin
         grid.FileList.FileMask := GetFileFilter;
         grid.FileList.ShowHidden := ShowHidden;
         grid.FileList.ReadDirectory();
-        grid.FileList.Sort(soFileName);
+        grid.FileList.Sort(FLastSortOrder);
         grid.Invalidate;
       end;
     end;
@@ -1442,7 +1460,7 @@ begin
     Exit; //==>
   end;
 
-  grid.FileList.Sort(soFileName);
+  Grid.FileList.Sort(FLastSortOrder);
 
   // we don't want chlDir to call DirChange while populating items
   chlDir.OnChange := nil;
