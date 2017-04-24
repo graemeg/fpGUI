@@ -12,8 +12,7 @@ uses
   fpg_form,
   fpg_dialogs,
   fpg_button,
-  fpg_edit,
-  fpg_label;
+  fpg_edit;
 
 
 type
@@ -42,7 +41,7 @@ type
   public
     procedure   AfterCreate; override;
   end;
-  
+
 
   TMyDBLoginDlg = class(TfpgPromptUserDbDialog)
   private
