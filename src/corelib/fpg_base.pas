@@ -866,6 +866,8 @@ type
     FSource: TfpgWidgetBase;
     FDragging: Boolean;
     FMimeData: TfpgMimeDataBase;
+  protected
+    function	GetSource: TfpgWidgetBase; virtual;
   public
     constructor Create(ASource: TfpgWidgetBase);
     destructor  Destroy; override;
@@ -4359,6 +4361,11 @@ begin
   inherited Destroy;
 end;
 
+function TfpgDragBase.GetSource: TfpgWidgetBase;
+begin
+  Result := FSource;
+end;
+
 
 { TfpgBaseTimer }
 
@@ -4425,4 +4432,3 @@ end;
 
 
 end.
-

@@ -417,8 +417,6 @@ type
     procedure   HandleSelectionRequest(ev: TXEvent);
     procedure   QueueFree;
     procedure   DropTimeout(Sender: TObject);
-  protected
-    function    GetSource: TfpgWidgetBase; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
@@ -4380,11 +4378,6 @@ begin
   fpgPostMessage(Self, Self, FPGM_KILLME);
 end;
 
-function TfpgX11Drag.GetSource: TfpgWidgetBase;
-begin
-  Result := FSource;
-end;
-
 destructor TfpgX11Drag.Destroy;
 begin
   {$IFDEF DNDDEBUG}
@@ -4521,4 +4514,3 @@ finalization
 {$ENDIF}
 
 end.
-

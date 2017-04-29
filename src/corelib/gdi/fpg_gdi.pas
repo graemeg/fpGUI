@@ -312,8 +312,6 @@ type
   TfpgGDIDrag = class(TfpgDragBase)
   private
     function    StringToHandle(const AString: TfpgString): HGLOBAL;
-  protected
-    function    GetSource: TfpgWidgetBase; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
@@ -3395,11 +3393,6 @@ begin
   Result := dest;
 end;
 
-function TfpgGDIDrag.GetSource: TfpgWidgetBase;
-begin
-  Result := FSource;
-end;
-
 destructor TfpgGDIDrag.Destroy;
 begin
   {$IFDEF DND_DEBUG}
@@ -3676,4 +3669,3 @@ finalization
 {$ENDIF}
 
 end.
-
