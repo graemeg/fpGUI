@@ -379,7 +379,6 @@ type
     procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
   protected
     FPreviewWin: TfpgWidgetBase; // TfpgDNDWindow
-    function    GetSource: TfpgWidgetBase; reintroduce;
     procedure   DoOnPaintPreview(ACanvas: TfpgCanvas);
   public
     constructor Create(ASource: TfpgWidgetBase);
@@ -3146,11 +3145,6 @@ begin
 end;
 
 
-function TfpgDrag.GetSource: TfpgWidgetBase;
-begin
-  Result := TfpgWidgetBase(inherited GetSource);
-end;
-
 procedure TfpgDrag.DoOnPaintPreview(ACanvas: TfpgCanvas);
 begin
   if Assigned(FOnPaintPreview) then
@@ -3210,4 +3204,3 @@ finalization
   FinalizeDebugOutput;
 
 end.
-
