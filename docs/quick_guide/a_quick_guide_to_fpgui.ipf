@@ -726,7 +726,86 @@ in terms of Object Pascal, is exactly what it is.
 :h3.Event Processing
 :h3.2D Graphics with AggPas
 :h3.Drag and Drop
+
 :h3.Databases
+:p.A frequently asked question is: Where are the DB-aware widgets
+in fpGUI?
+
+:p.
+fpGUI has had brilliant database support for many years - it is
+accomplished via the tiOPF framework. If you haven't heard of tiOPF
+(Techinsite Object Persistence Framework), it became open source since
+1999 and supports both Delphi and Free Pascal compilers. It has been
+used in commercial environments before then, and still used today.
+
+:p.
+tiOPF abstracts away the technicals of database work and frees up the
+dependency on a specific set of database components (eg: SqlDB, ZEOS,
+IBX etc). tiOPF also gives you an OOP (Object Oriented Programming) interface
+into data persistence.
+
+:p.
+The tiOPF homepage:  http://www.tiopf.com
+
+:p.
+Adding to that, tiOPF had from the very early days its own set of
+advanced GUI controls to allow the end-user to interact with the data. I
+got tried of port that code between VCL, CLX (Kylix) and LCL, and at the
+time LCL's compatibility with VCL was not very good. So I came up with a
+new solution - using yet more Design Patterns. The Mediator and Observer
+design patterns to be specific.
+
+:p.
+I implemented what I called Model-GUI-Mediator (MGM for short). It's an
+interface that allows any no-DB components to become "object aware" and
+allows for bi-directional updates. All without needing to create yet
+more descendant components. Because most of the MGM implementation is
+actually non-GUI code, it is also very well unit tested - like the rest
+of the tiOPF framework (1800+ unit tests run every 3 hours, 24/7).
+Anyway, I also implemented VCL, LCL and fpGUI support for
+Model-GUI-Mediator - a very thin layer, so very easy to add new
+components or other toolkit support.
+
+:p.
+So simple component like Edit, ComboBox or even TreeView, StringGrid etc
+can now observe data objects and do bi-directional updates.
+
+:p.
+As I mentioned, tiOPF also hides the details of specific database
+components. So once you wrote your application with tiOPF, if you wanted
+to switch between SqlDB components to ZEOS components, simply change one
+compiler define and recompile your project. There is NO other code
+changes necessary.
+
+:p.
+And there is ever more. tiOPF also supports 3-tier database access.
+Again, simply change one compiler define and recompile your project, and
+then suddenly your program changes from a Client/Server design to a
+3-tier design. tiOPF includes is own generic Application Server
+application, which uses Indy for HTTP support. Data and queries get
+wrapped in XML and compressed before it is sent over the wire.
+Encryption can be enabled too. I've tested and used this between
+continents, and the remote persistence performance is very impressive.
+
+:p.
+I've been using tiOPF in many commercial environments for 15 years now,
+and it works brilliantly.
+
+:p.
+If you want to find out more about tiOPF, have a look at the website,
+and post any questions in the tiopf.support newsgroup. Myself and others
+will be happy to answer any questions.
+
+:p.
+Anyway, this is the reason why you don't see any DB-aware components in
+tiOPF. It simply isn't needed, and a much better solution exists - in
+the form of tiOPF and MGM.
+
+:p.
+Detailed tiOPF plus MGM examples for fpGUI can be found in the tiOPF
+code repository.
+
+
 :h3.Internationalization
 :h3.Providing Online Help
 :h3.Multithreading
