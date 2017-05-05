@@ -3197,6 +3197,11 @@ initialization
 {$else}
   DefaultCanvasClass := TfpgCanvas;
 {$endif}
+  {$IF FPC_FULLVERSION >= 30000}
+  // This switches RTL, FCL and String data type to UTF-8. Many of fpg_utils functions will not be needed any more.
+  DefaultSystemCodePage := CP_UTF8;
+  SetMultiByteRTLFileSystemCodePage(CP_UTF8);
+  {$IFEND}
 
 finalization
   uClipboard.Free;
