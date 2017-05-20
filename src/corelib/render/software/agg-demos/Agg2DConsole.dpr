@@ -93,6 +93,7 @@ procedure TPainter.DrawStuff(agg: Agg2D_ptr);
 var
   i: Integer;
   x, y, px, py, d: Double;
+  c1, c2: Color;
 begin
   // draw a full screen graph with grid
   agg^.clearAll(0, 0, 0);
@@ -133,6 +134,20 @@ begin
     px := x;
     py := y;
   end;
+
+  // Star shape
+  agg^.LineCap(CapRound);
+  agg^.LineWidth(5);
+  agg^.LineColor($32 ,$cd ,$32 );
+  c1.Construct(0, 0 , 255, 200);
+  c2.Construct(0, 0, 255, 50);
+  agg^.FillLinearGradient(100, 100, 150, 150, c1, c2);
+  agg^.Star(100 ,150 ,30 ,70 ,55 ,5 );
+
+  // Draw Arc from 45 degrees to 270 degrees
+  agg^.LineColor($4C, $6C, $9C);
+  agg^.LineWidth(5 );
+  agg^.Arc(300 ,320 ,80 ,50 ,Deg2Rad(45 ) ,Deg2Rad(270 ) );
 end;
 
 
