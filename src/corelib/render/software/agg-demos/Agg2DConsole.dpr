@@ -13,7 +13,7 @@ program console_aggpas_2;
 uses
   sysutils,
   FPimage,
-  FPWriteJPEG,
+  FPWritePNG,
   agg_2D,
   agg_basics;
 
@@ -42,7 +42,7 @@ var
   agg: Agg2D_ptr;
   buf: array of int8;
   image: TFPMemoryImage;
-  writer: TFPWriterJPEG;
+  writer: TFPWriterPNG;
   x, y: Integer;
   c: TFPColor;
   time, totalTime: TDateTime;
@@ -79,10 +79,8 @@ begin
   time := Now - time;
 //  WriteLn('Image copy: time spent: ' + DateTimeToString(time));
   time := Now;
-  writer := TFPWriterJPEG.Create;
-  writer.CompressionQuality := $FF div 3; // bad quality plz
-  writer.ProgressiveEncoding := True;
-  image.SaveToFile('test.jpeg', writer);
+  writer := TFPWriterPNG.Create;
+  image.SaveToFile('test.png', writer);
   image.Free;
   writer.Free;
   time := Now - time;
@@ -96,11 +94,12 @@ var
   i: Integer;
   x, y, px, py, d: Double;
 begin
+  // draw a full screen graph with grid
   agg^.clearAll(0, 0, 0);
   agg^.lineColor(0, 0, 0, 255);
   agg^.lineWidth(3);
   agg^.rectangle(0, 0, ImageWidth, ImageHeight);
-  agg^.font(fontfile, 16);
+//  agg^.font(fontfile, 16);
   d := ImageWidth / LineCount;
   agg^.lineColor(0, 0, 0, 100);
   agg^.lineWidth(1);
@@ -130,7 +129,7 @@ begin
     if y >= ImageHeight then
       y := ImageHeight - ImageHeight / 6;
     agg^.line(px, py, x, y);
-    agg^.text(x, y, char_ptr(IntToStr(i) + ' point'{' шта?'}));
+//    agg^.text(x, y, char_ptr(IntToStr(i) + ' point'));
     px := x;
     py := y;
   end;
