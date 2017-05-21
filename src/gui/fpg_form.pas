@@ -163,13 +163,12 @@ uses
   fpg_main,
   fpg_popupwindow,
   fpg_menu,
-  fpg_basegrid;
+  fpg_toolbox;
 
 type
   // to access protected methods
   TfpgMenuBarFriend = class(TfpgMenuBar);
   TfpgWidgetFriend = class(TfpgWidget);
-  TfpgGridFriend = class(TfpgBaseGrid);
 
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 var
@@ -188,76 +187,6 @@ begin
   Result := nil;
 end;
 
-function MathRound(AValue: ValReal): Int64; inline;
-begin
-  if AValue >= 0 then
-    Result := Trunc(AValue + 0.5)
-  else
-    Result := Trunc(AValue - 0.5);
-end;
-
-function MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;
-begin
-  if nDenominator = 0 then
-    Result := -1
-  else
-    Result := MathRound(int64(nNumber) * int64(nNumerator) / nDenominator);
-end;
-
-function ScaleX(const SizeX, FromDPI: Integer): Integer;
-begin
-  Result := MulDiv(SizeX, fpgApplication.Screen_dpi_x, FromDPI);
-end;
-
-function ScaleY(const SizeY, FromDPI: Integer): Integer;
-begin
-  Result := MulDiv(SizeY, fpgApplication.Screen_dpi_y, FromDPI);
-end;
-
-procedure uScaleDPI(Control: TComponent; FromDPI: Integer);
-var
-  n: integer;
-  c: integer;
-  widget: TfpgWidget;
-begin
-  if Control is TfpgWidget then
-  begin
-    widget := TfpgWidget(Control);
-    TfpgWidgetFriend(widget).Loading;
-    with widget do
-    begin
-      Left := ScaleX(Left,FromDPI);
-      Top := ScaleY(Top,FromDPI);
-      Width := ScaleX(Width,FromDPI);
-      Height := ScaleY(Height,FromDPI);
-
-      MinWidth := ScaleX(MinWidth, FromDPI);
-      MinHeight := ScaleY(MinHeight, FromDPI);
-      MaxWidth := ScaleX(MaxWidth, FromDPI);
-      MaxHeight := ScaleY(MaxHeight, FromDPI);
-
-      // grids get special treatment
-      if (widget is TfpgBaseGrid) then
-      begin
-        for c := 0 to TfpgGridFriend(widget).ColumnCount-1 do
-          TfpgGridFriend(widget).ColumnWidth[c] := ScaleX(TfpgGridFriend(widget).ColumnWidth[c], FromDPI);
-      end;
-    end;
-    TfpgWidgetFriend(widget).Loaded;
-    // process children
-    if widget.ComponentCount > 0 then
-    begin
-      for n := 0 to widget.ComponentCount-1 do
-      begin
-        if widget.Components[n] is TfpgWidget then
-        begin
-          uScaleDPI(widget.Components[n], FromDPI);
-        end;
-      end;
-    end;
-    widget.UpdatePosition;
-  end; { if Control }
-end;
 
 { TfpgBaseForm }
 
@@ -396,13 +325,13 @@ end;
 
 procedure TfpgBaseForm.ScaleDPI(AFromDPI: integer);
 begin
-  // should we default to the global Applicatien DPI value
+  // should we default to the global Application DPI value
   if AFromDPI = 0 then
     AFromDPI := fpgApplication.DesignedDPI;
   // do we actually need to do any scaling?
   if AFromDPI = fpgApplication.Screen_dpi then
     Exit; //==>
-  uScaleDPI(self, AFromDPI);
+  fpg_toolbox.ScaleDPI(self, AFromDPI);
 end;
 
 procedure TfpgBaseForm.Show;
