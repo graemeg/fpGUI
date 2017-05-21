@@ -31,7 +31,7 @@
     lblText: TfpgLabel;
     pnlChar: TfpgPanel;
     {@VFD_HEAD_END: CharMapForm}
-    procedure   FormShow(Sender: TObject);
+    procedure   FormCreate(Sender: TObject);
     procedure   grdCharactersFocusChange(Sender: TObject; ARow, ACol: integer);
     procedure   grdCharactersDrawCell(Sender: TObject; const ARow, ACol: integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   grdCharactersCanSelectCell(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean);
@@ -70,7 +70,7 @@ end;
 
 { TCharMapForm }
 
-procedure TCharMapForm.FormShow(Sender: TObject);
+procedure TCharMapForm.FormCreate(Sender: TObject);
 begin
   FillCharMap;
 end;
@@ -207,7 +207,7 @@ begin
   WindowTitle := 'Character Map';
   Hint := '';
   WindowPosition := wpOneThirdDown;
-  OnShow  := @FormShow;
+  OnCreate := @FormCreate;
 
   grdCharacters := TfpgStringGrid.Create(self);
   with grdCharacters do
