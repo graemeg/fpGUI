@@ -1,4 +1,15 @@
 {
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
     Description:
       This unit has helper function to help you create high dpi applications,
       scalling the UI as needed.
@@ -10,7 +21,9 @@ unit fpg_toolbox;
 interface
 
 uses
-  Classes, SysUtils, fpg_main, fpg_widget;
+  Classes,
+  SysUtils,
+  fpg_main;
 
 
 procedure ScaleDPI(Control: TComponent; FromDPI: Integer);
@@ -22,28 +35,45 @@ function  MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;
 
 implementation
 
+uses
+  fpg_widget,
+  fpg_basegrid;
+
+type
+  // to access protected methods
+  TfpgWidgetFriend = class(TfpgWidget);
+  TfpgGridFriend = class(TfpgBaseGrid);
 
 procedure ScaleDPI(Control: TComponent; FromDPI: Integer);
 var
-  n: Integer;
+  n: integer;
+  c: integer;
   widget: TfpgWidget;
 begin
   if Control is TfpgWidget then
   begin
     widget := TfpgWidget(Control);
+    TfpgWidgetFriend(widget).Loading;
     with widget do
-    begin
-      Left := ScaleX(Left,FromDPI);
+    begin      Left := ScaleX(Left,FromDPI);
       Top := ScaleY(Top,FromDPI);
       Width := ScaleX(Width,FromDPI);
       Height := ScaleY(Height,FromDPI);
-      UpdateWindowPosition;
-//      Font.Size := ScaleY(Font.Size,FromDPI);
+
+      MinWidth := ScaleX(MinWidth, FromDPI);
+      MinHeight := ScaleY(MinHeight, FromDPI);
+      MaxWidth := ScaleX(MaxWidth, FromDPI);
+      MaxHeight := ScaleY(MaxHeight, FromDPI);
+
+      // grids get special treatment
+      if (widget is TfpgBaseGrid) then
+      begin
+        for c := 0 to TfpgGridFriend(widget).ColumnCount-1 do
+          TfpgGridFriend(widget).ColumnWidth[c] := ScaleX(TfpgGridFriend(widget).ColumnWidth[c], FromDPI);
+      end;
     end;
-  end;
-  if Control is TfpgWidget then
-  begin
-    widget := TfpgWidget(Control);
+    TfpgWidgetFriend(widget).Loaded;
+    // process children
     if widget.ComponentCount > 0 then
     begin
       for n := 0 to widget.ComponentCount-1 do
@@ -54,7 +84,8 @@ begin
         end;
       end;
     end;
-  end;
+    widget.UpdatePosition;
+  end; { if Control }
 end;
 
 function ScaleX(const SizeX, FromDPI: Integer): Integer;
