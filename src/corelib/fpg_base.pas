@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2016 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -685,6 +685,7 @@ type
     FHelpKey: word;
     FHelpFile: TfpgString;
     FCmdLineParams: TfpgCmdLineParams;
+    FDesignedDPI: integer;
     function    GetForm(Index: Integer): TfpgWidgetBase;
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWidgetBase;
@@ -722,6 +723,7 @@ type
     procedure   InvokeHelp;
     function    ContextHelp(const AHelpContext: THelpContext): Boolean;
     function    KeywordHelp(const AHelpKeyword: string): Boolean;
+    property    DesignedDPI: integer read FDesignedDPI write FDesignedDPI default 96;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWidgetBase read GetForm;
     property    HelpContext;
@@ -3552,6 +3554,7 @@ begin
   FCritSect := TCriticalSection.Create;
   FHelpKey := keyF1;
   FHelpType := htContext;
+  FDesignedDPI := 96;
 end;
 
 destructor TfpgApplicationBase.Destroy;
