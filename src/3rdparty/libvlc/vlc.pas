@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2013 by Graeme Geldenhuys.
-    Copyright (c) 2014 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2014 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -10,6 +10,9 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This is a OOP wrapper around the VLC libraries.
 
 }
 unit vlc;
@@ -19,9 +22,13 @@ unit vlc;
 interface
 
 uses
-  Classes, SysUtils, ctypes, libvlc, syncobjs;
+  Classes,
+  SysUtils,
+  ctypes,
+  libvlc,
+  syncobjs;
 
-Type
+type
 
   TVLCLibrary = class(TComponent)
   private
@@ -34,7 +41,7 @@ Type
     Function GetCompiler : String;
     Function GetChangeSet : String;
     Procedure SetLibraryPath(Const AValue : String);
-  Protected
+  protected
     Function GetInstance : plibvlc_instance_t; virtual;
     property Instance : plibvlc_instance_t read GetInstance;
   public
@@ -51,15 +58,15 @@ Type
     Property Initialized : Boolean Read GetI;
   end;
 
-  TVLCLibraryClass = Class of TVLCLibrary;
+  TVLCLibraryClass = class of TVLCLibrary;
 
-  TCustomVLCMediaPlayer = Class;
-  TVLCMediaItems = Class;
+  TCustomVLCMediaPlayer = class;
+  TVLCMediaItems = class;
 
   TSnapShotFormat = (ssfPNG,ssfJPG);
   TDeinterlaceMode   = (dmBlend, dmDiscard, dmBob, dmLinear, dmMean, dmX, dmYadif, dmYadif2x);
 
-  TVLCMediaItem = Class(TCollectionItem)
+  TVLCMediaItem = class(TCollectionItem)
   private
     FDIM: TDeinterlaceMode;
     FInstance : plibvlc_media_t;
@@ -81,7 +88,7 @@ Type
     procedure SetUD(AValue: Pointer);
     function GetState : libvlc_state_t;
     function GetDuration : TDateTime;
-  Protected
+  protected
     Procedure RegisterInstance;
     Procedure UnRegisterInstance;
     procedure SetMRL(AValue: String); virtual;
@@ -91,7 +98,7 @@ Type
     function GetEventManager : plibvlc_event_manager_t;
     Procedure SetInstance( Avalue : plibvlc_media_t);
     Property Instance : plibvlc_media_t Read GetInstance;
-  Public
+  public
     Destructor Destroy; override;
     Procedure AddOption(Const AValue : String);
     procedure Parse;
@@ -121,7 +128,7 @@ Type
 
   TVLCPlayMode = (pmNormal,pmLoop,pmRepeat);
 
-  TVLCMediaItems = Class(TCollection)
+  TVLCMediaItems = class(TCollection)
   Private
     FPlayer: TCustomVLCMediaPlayer;
     FPlayMode: TVLCPlayMode;
@@ -131,9 +138,9 @@ Type
     function GetInstance: Plibvlc_media_list_t;
     function GetIsReadOnly: Boolean;
     procedure SetI(AIndex : Integer; AValue: TVLCMediaItem);
-  Protected
+  protected
     Function GetVLC : TVLCLibrary; virtual;
-  Public
+  public
     Constructor Create(ALibrary : TVLCLibrary;AItemClass: TVLCMediaItemClass = Nil); overload;
     Constructor Create(AInstance : Plibvlc_media_list_t;AItemClass: TVLCMediaItemClass = Nil); overload;
     Procedure Lock;
@@ -153,7 +160,7 @@ Type
   TPositionEvent = procedure(Sender : TObject; Const APos : Double)  of object;
 
 
-  TCustomVLCMediaPlayer = Class(TComponent)
+  TCustomVLCMediaPlayer = class(TComponent)
   private
     FFitWindow: Boolean;
     FOnBackward: TNotifyEvent;
@@ -219,7 +226,7 @@ Type
     procedure SetVideoFractional(AValue: Double);
     procedure SetVideoPos(AValue: Int64);
     procedure SetVideoScale(AValue: Double);
-  Protected
+  protected
     function GetInstance: Plibvlc_media_player_t; virtual;
     // Called to set parent window. Descendents must override this.
     Procedure SetParentWindow; virtual;
@@ -249,7 +256,7 @@ Type
     Property VLC : TVLCLibrary Read GetVLC Write FVLC;
     Property Instance : Plibvlc_media_player_t Read GetInstance;
     Property HaveInstance : Boolean Read GetHaveInstance;
-  Public
+  public
     Destructor Destroy; override;
     procedure Play;
     procedure SetMedia(M: TVLCMediaItem);
@@ -263,7 +270,7 @@ Type
     function Snapshot(Const AFileName: String; AWidth, AHeight: Cardinal): Boolean;
     function GetVideoSize(Var AWidth, AHeight: Cardinal): Boolean;
   // These can be made public/published in descendents
-  Protected
+  protected
     Property Playable : Boolean Read GetPlayable;
     Property Pausable : Boolean Read GetPausable;
     Property Seekable : Boolean Read GetSeekable;

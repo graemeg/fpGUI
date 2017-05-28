@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2013 by Michael van Canneyt.
-    Copyright (c) 2014 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2014 - 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -26,23 +26,23 @@ uses
 {$PACKRECORDS C}
 {$ENDIF}
 
-Const
-
+const
 {$ifdef unix}
-  libname = 'libvlc.so';
+  libname = 'libvlc.so.5';
 {$else}
 {$ifdef windows}
-  DefaultlibPath = 'C:\Program files\Videolan\VLC\';
   corelibname    = 'libvlccore.dll';
   libname        = 'libvlc.dll';
+var
+  DefaultlibPath: String;
 {$endif}
 {$endif}
 
-  Type
+type
   _bool = cint;
    Ppcchar = ^Pcchar;
 
-  // Opaque types.  
+  // Opaque types.
   libvlc_event_manager_t = record end;
   Libvlc_instance_t = record end;
   Libvlc_log_iterator_t = record end;
@@ -53,7 +53,7 @@ Const
   Libvlc_media_list_t = record end;
   Libvlc_media_player_t = record end;
   Libvlc_media_t = record end;
-  
+
   Plibvlc_audio_output_t  = ^libvlc_audio_output_t;
   Plibvlc_event_manager_t  = ^libvlc_event_manager_t;
   Plibvlc_event_t  = ^libvlc_event_t;
@@ -75,31 +75,32 @@ Const
   int8_t = cschar;
   int16_t = csint;
   int32_t = cint;
-  int64_t = clong;
+  int64_t = cint64;
   uint8_t = cuchar;
   uint16_t = csint;
   uint32_t = cuint;
-  uint64_t = culong;
+  uint64_t = cuint64;
   int_least8_t = cschar;
   int_least16_t = csint;
   int_least32_t = cint;
-  int_least64_t = clong;
+  int_least64_t = cint64;
   uint_least8_t = cuchar;
   uint_least16_t = csint;
   uint_least32_t = cuint;
-  uint_least64_t = culong;
+  uint_least64_t = cuint64;
   int_fast8_t = cschar;
   int_fast16_t = clong;
   int_fast32_t = clong;
-  int_fast64_t = clong;
+  int_fast64_t = cint64;
   uint_fast8_t = cuchar;
   uint_fast16_t = culong;
   uint_fast32_t = culong;
-  uint_fast64_t = culong;
-  intptr_t = clong;
-  uintptr_t = culong;
-  intmax_t = clong;
-  uintmax_t = culong;
+  uint_fast64_t = cuint64;
+
+  intptr_t = PtrInt;
+  uintptr_t = PtrUInt;
+  intmax_t = cint64;
+  uintmax_t = cuint64;
 
   libvlc_time_t = int64_t;
   libvlc_log_message_t = record
@@ -569,7 +570,7 @@ Var
     libvlc_video_get_marquee_string : function(p_mi:Plibvlc_media_player_t; option:cunsigned):pcchar; cdecl;
     libvlc_video_set_marquee_int : procedure(p_mi:Plibvlc_media_player_t; option:cunsigned; i_val:cint); cdecl;
     libvlc_video_set_marquee_string : procedure(p_mi:Plibvlc_media_player_t; option:cunsigned; psz_text:pcchar); cdecl;
-    libvlc_audio_set_callbacks : procedure(mp:Plibvlc_media_player_t; play:libvlc_audio_play_cb; pause:libvlc_audio_pause_cb; resume:libvlc_audio_resume_cb; flush:libvlc_audio_flush_cb; 
+    libvlc_audio_set_callbacks : procedure(mp:Plibvlc_media_player_t; play:libvlc_audio_play_cb; pause:libvlc_audio_pause_cb; resume:libvlc_audio_resume_cb; flush:libvlc_audio_flush_cb;
       drain:libvlc_audio_drain_cb; opaque:pointer); cdecl;
     libvlc_audio_set_volume_callback : procedure(mp:Plibvlc_media_player_t; set_volume:libvlc_audio_set_volume_cb); cdecl;
     libvlc_video_set_callbacks : procedure(mp:Plibvlc_media_player_t; lock:libvlc_video_lock_cb; unlock:libvlc_video_unlock_cb; display:libvlc_video_display_cb; opaque:pointer); cdecl;
@@ -590,9 +591,9 @@ Var
     libvlc_media_discoverer_event_manager : function(p_mdis:Plibvlc_media_discoverer_t):plibvlc_event_manager_t; cdecl;
     libvlc_media_discoverer_is_running : function(p_mdis:Plibvlc_media_discoverer_t):cint; cdecl;
     libvlc_vlm_release : procedure(p_instance:Plibvlc_instance_t); cdecl;
-    libvlc_vlm_add_broadcast : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; psz_output:pcchar; i_options:cint; 
+    libvlc_vlm_add_broadcast : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; psz_output:pcchar; i_options:cint;
       ppsz_options:Ppcchar; b_enabled:cint; b_loop:cint):cint; cdecl;
-    libvlc_vlm_add_vod : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; i_options:cint; ppsz_options:Ppcchar; 
+    libvlc_vlm_add_vod : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; i_options:cint; ppsz_options:Ppcchar;
       b_enabled:cint; psz_mux:pcchar):cint; cdecl;
     libvlc_vlm_del_media : function(p_instance:Plibvlc_instance_t; psz_name:pcchar):cint; cdecl;
     libvlc_vlm_set_enabled : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; b_enabled:cint):cint; cdecl;
@@ -601,7 +602,7 @@ Var
     libvlc_vlm_add_input : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar):cint; cdecl;
     libvlc_vlm_set_loop : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; b_loop:cint):cint; cdecl;
     libvlc_vlm_set_mux : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_mux:pcchar):cint; cdecl;
-    libvlc_vlm_change_media : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; psz_output:pcchar; i_options:cint; 
+    libvlc_vlm_change_media : function(p_instance:Plibvlc_instance_t; psz_name:pcchar; psz_input:pcchar; psz_output:pcchar; i_options:cint;
       ppsz_options:Ppcchar; b_enabled:cint; b_loop:cint):cint; cdecl;
     libvlc_vlm_play_media : function(p_instance:Plibvlc_instance_t; psz_name:pcchar):cint; cdecl;
     libvlc_vlm_stop_media : function(p_instance:Plibvlc_instance_t; psz_name:pcchar):cint; cdecl;
@@ -617,14 +618,24 @@ Var
 
 Procedure Freelibvlc;
 Procedure Loadlibvlc(lib : AnsiString; CheckProcNames : Boolean = False);
+{$IFDEF WINDOWS}
+function GetVLCLibPath: String;
+{$ENDIF WINDOWS}
 
 implementation
 
 uses
-  SysUtils, dynlibs;
+  SysUtils,
+ {$IFDEF WINDOWS}
+  windows,
+ {$ENDIF}
+  dynlibs;
 
 var
   hlib : tlibhandle;
+  {$IFDEF WINDOWS}
+  hclib : tlibhandle;
+  {$ENDIF}
   LibRefCount : Integer;
 
 procedure Freelibvlc;
@@ -635,6 +646,11 @@ begin
   if LibRefCount>0 then
     exit;
   FreeLibrary(hlib);
+  hlib:=NilHandle;
+{$IFDEF WINDOWS}
+  FreeLibrary(hclib);
+  hclib:=NilHandle;
+{$ENDIF}
   libvlc_errmsg:=nil;
   libvlc_clearerr:=nil;
   libvlc_printerr:=nil;
@@ -876,19 +892,45 @@ begin
   libvlc_playlist_play:=nil;
 end;
 
+{$IFDEF WINDOWS}
+function GetVLCLibPath: String;
+var
+  Handle: HKEY;
+  RegType: Integer;
+  DataSize: Cardinal;
+  Key: PWideChar;
+  res: WideString;
+begin
+  Result := '';
+  try
+    Key := 'Software\VideoLAN\VLC';
+    if RegOpenKeyExW(HKEY_LOCAL_MACHINE, Key, 0, KEY_READ, Handle) = ERROR_SUCCESS then
+    begin
+      if RegQueryValueExW(Handle, 'InstallDir', nil, @RegType, nil, @DataSize) = ERROR_SUCCESS then
+        begin
+        SetLength(res, DataSize div 2);
+        RegQueryValueExW(Handle, 'InstallDir', nil, @RegType, PByte(@res[1]), @DataSize);
+        res[DataSize div 2] := '\';
+        end;
+      RegCloseKey(Handle);
+      Result := UTF8Encode(res);
+    end;
+  except
+    // Ignore errors.
+  end;
+end;
+{$ENDIF}
 
 Procedure Loadlibvlc(lib : AnsiString; CheckProcNames : Boolean = False);
 
   Function GetProcAddress(h : TLibHandle; Name : AnsiString) : Pointer;
-  
   begin
     Result:=dynlibs.GetProcAddress(h,Name);
     If (Result=Nil) and CheckProcNames then
       raise Exception.CreateFmt('Could not find procedure address: %s ',[Name]);
   end;
-  
+
   Procedure EM(FN : String);
-  
   begin
     {$ifndef VER2_6}
     Raise Exception.CreateFmt('Could not load library "%s": %s',[FN,GetLoadErrorStr]);
@@ -896,36 +938,57 @@ Procedure Loadlibvlc(lib : AnsiString; CheckProcNames : Boolean = False);
     raise Exception.CreateFmt('Could not load library "%s"',[FN]);
     {$endif}
   end;
-  
-  
-  
-Var
+
+  Function TryLoadLib(ALib : String) : TLibHandle;
+  // On Windows, the vlccore lib must be loaded first.
+  // If it is not in the PATH then this will fail when specifying an arbitrary path.
+  // So we load it explicitly from the same directory first
+  {$IFDEF WINDOWS}
+  var
+    ADir : String;
+  {$endif}
+  begin
+    {$IFDEF WINDOWS}
+    Result:=NilHandle;
+    ADir:=ExtractFilePath(ALib);
+    if ADir<>'' then
+      ADir:=IncludeTrailingPathDelimiter(ADir);
+    hclib:=LoadLibrary(ADir+corelibname);
+    if (HCLib<>Nilhandle) then
+    {$ENDIF}
+      Result:=LoadLibrary(ALib);
+  end;
+
+{$IFDEF WINDOWS}
+var
   D : String;
-  
+{$endif}
 begin
   if (hLib<>NilHandle) then
-    begin
+  begin
     Inc(LibRefCount);
     Exit;
-    end;
-  D:=ExtractFilePath(lib);
+  end;
+  hlib:=TryLoadLib(lib);
   {$ifdef windows}
-  if (LoadLibrary(d+corelibname)=NilHandle) then
-    if (d='') and (LoadLibrary(DefaultlibPath+corelibname)=NilHandle) then
-      EM(DefaultlibPath+corelibname);
-  {$endif}
-  hlib:=LoadLibrary(lib);
+  // MVC: This automatism is highly questionable; The end user should in fact determine the library.
   if (hlib=NilHandle) then
-{$ifndef windows}
-    EM(Lib);
-{$else}
-    if (d='') then
-      begin
-      hlib:=LoadLibrary(DefaultlibPath+ExtractFileName(Lib));
-      if (hlib=NilHandle) then
-        EM(Lib);
-      end;
+  begin
+    D:=ExtractFilePath(lib);
+    // Try default name in same directiory.
+    hlib:=TryLoadLib(d+libname);
+    if (hLib=NilHandle) and (d='') then
+    begin
+      // No directory specified, try default name in installation directory.
+      if (DefaultlibPath='') then
+        DefaultLibPath:=GetVLCLibPath;
+      if (DefaultLibPath<>'') then
+        hLib:=TryLoadLib(IncludeTrailingPathDelimiter(DefaultlibPath)+libname);
+    end;
+  end;
 {$endif}
+  if (hLib=NilHandle) then
+    EM(Lib);
   Inc(LibRefCount);
   pointer(libvlc_errmsg):=GetProcAddress(hlib,'libvlc_errmsg');
   pointer(libvlc_clearerr):=GetProcAddress(hlib,'libvlc_clearerr');
