@@ -40,6 +40,13 @@ interface
   {$UNDEF AGG2D_USE_WINFONTS}
 {$ENDIF}
 
+{ With this define you can switch to an experimental version that is more 
+  compatible with freepascal console graphics units such as Graph and ptcgraph
+  
+  ToDo: red and blue are reversed and need to be fixed }
+
+{.$Define AGG2D_USE_RGB565}
+
 uses
  agg_basics ,
  agg_array ,
@@ -68,6 +75,9 @@ uses
  agg_font_engine ,
  agg_font_cache_manager ,
  agg_pixfmt ,
+{$IFDEF AGG2D_USE_RGB565 }
+ agg_pixfmt_rgb_packed , 
+{$ENDIF } 
  agg_pixfmt_rgba ,
  agg_color ,
  agg_math_stroke ,
@@ -338,7 +348,11 @@ type
    m_ifBlackman144 : image_filter_blackman144;
 
   public
+{$IFDEF AGG2D_USE_RGB565 }
+   constructor Construct(pixfmt:define_pixfmt);   
+{$ELSE }
    constructor Construct;
+{$ENDIF }
    destructor  Destruct;
 
   // Setup
@@ -781,13 +795,22 @@ begin
 end;
 
 { CONSTRUCT }
+{$IFDEF AGG2D_USE_RGB565 }
+constructor Agg2D.Construct(pixfmt:define_pixfmt);
+{$ELSE }
 constructor Agg2D.Construct;
+{$ENDIF }
 begin
  m_rbuf.Construct;
 
+{$IFDEF AGG2D_USE_RGB565 }
+ pixfmt                  (m_pixFormat ,@m_rbuf );
+ pixfmt                  (m_pixFormatPre ,@m_rbuf );
+{$ELSE }
  pixfmt_rgba32           (m_pixFormat ,@m_rbuf );
- pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
  pixfmt_rgba32           (m_pixFormatPre ,@m_rbuf );
+{$ENDIF }
+ pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
  pixfmt_custom_blend_rgba(m_pixFormatCompPre ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
 
  m_renBase.Construct       (@m_pixFormat );
