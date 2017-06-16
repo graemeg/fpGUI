@@ -15,7 +15,7 @@
 // warranty, and with no claim as to its suitability for any purpose.
 //
 
-unit agg_2D ;
+unit agg_2D_RGB565 ;
 
 {$I agg_mode.inc }
 
@@ -68,6 +68,7 @@ uses
  agg_font_engine ,
  agg_font_cache_manager ,
  agg_pixfmt ,
+ agg_pixfmt_rgb_packed ,
  agg_pixfmt_rgba ,
  agg_color ,
  agg_math_stroke ,
@@ -338,7 +339,7 @@ type
    m_ifBlackman144 : image_filter_blackman144;
 
   public
-   constructor Construct;
+   constructor Construct(pixfmt:define_pixfmt);
    destructor  Destruct;
 
   // Setup
@@ -781,13 +782,13 @@ begin
 end;
 
 { CONSTRUCT }
-constructor Agg2D.Construct;
+constructor Agg2D.Construct(pixfmt:define_pixfmt);
 begin
  m_rbuf.Construct;
 
- pixfmt_rgba32           (m_pixFormat ,@m_rbuf );
+ pixfmt                  (m_pixFormat ,@m_rbuf );
  pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
- pixfmt_rgba32           (m_pixFormatPre ,@m_rbuf );
+ pixfmt                  (m_pixFormatPre ,@m_rbuf );
  pixfmt_custom_blend_rgba(m_pixFormatCompPre ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
 
  m_renBase.Construct       (@m_pixFormat );
