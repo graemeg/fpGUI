@@ -43,7 +43,8 @@ interface
 { With this define you can switch to an experimental version that is more 
   compatible with freepascal console graphics units such as Graph and ptcgraph
   
-  ToDo: red and blue are reversed and need to be fixed }
+  ToDo: red and blue are reversed and need to be fixed 
+       - temporarily patched See notes in agg_color.pas}
 
 {.$Define AGG2D_USE_RGB565}
 
