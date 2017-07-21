@@ -1,19 +1,27 @@
-//----------------------------------------------------------------------------
-// Agg2D - Version 1.0
+{
+    This unit is part of the fpGUI Toolkit project. The AggPas code was
+    forked from the original AggPas 2.4 RM3 release, but has had many
+    modifications and improvements since. See the repository log for details.
+
+    Description:
+      This unit implements a fpGUI Canvas that uses AggPas for all 2D
+      rendering. Thus this unit has a fpGUI Toolkit dependency because
+      it descends from the TfpgCanvasBase class.
+}
+
+
+//-------------------[ original copyright notice ]----------------------------
 // Based on Anti-Grain Geometry
 // Copyright (C) 2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// TAgg2D - Version 1.0 Release Milano 3 (AggPas 2.4 RM3)
-// Pascal Port By: Milan Marusinec alias Milano
-//                 milan@marusinec.sk
-//                 http://www.aggpas.org
+// Pascal Port By: Milan Marusinec alias Milano (milan@marusinec.sk)
 // Copyright (c) 2007 - 2008
 //
 // Permission to copy, use, modify, sell and distribute this software
 // is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
-//
+//----------------------------------------------------------------------------
 
 unit Agg2D;
 
