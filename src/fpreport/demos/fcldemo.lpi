@@ -113,11 +113,6 @@
       <OtherUnitFiles Value="polygon"/>
       <UnitOutputDirectory Value="units/"/>
     </SearchPaths>
-    <Linking>
-      <Debugging>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
-    </Linking>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">
