@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="fpguireport"/>
+    <Type Value="RunTimeOnly"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Description Value="fpReport for fpGUI Toolkit"/>
+    <License Value="LGPL v2 with static linking exception."/>
+    <Version Major="1"/>
+    <Files Count="19">
+      <Item1>
+        <Filename Value="fpreport.pp"/>
+        <UnitName Value="fpreport"/>
+      </Item1>
+      <Item2>
+        <Filename Value="fpreport_export_fpgui.pas"/>
+        <UnitName Value="fpreport_export_fpgui"/>
+      </Item2>
+      <Item3>
+        <Filename Value="fpextfuncs.pp"/>
+        <UnitName Value="fpExtFuncs"/>
+      </Item3>
+      <Item4>
+        <Filename Value="fpjsonreport.pp"/>
+        <UnitName Value="fpjsonreport"/>
+      </Item4>
+      <Item5>
+        <Filename Value="fprepexprpars.pp"/>
+        <UnitName Value="fprepexprpars"/>
+      </Item5>
+      <Item6>
+        <Filename Value="fpreportcanvashelper.pp"/>
+        <UnitName Value="fpreportcanvashelper"/>
+      </Item6>
+      <Item7>
+        <Filename Value="fpreportcheckbox.inc"/>
+        <Type Value="Include"/>
+      </Item7>
+      <Item8>
+        <Filename Value="fpreportcontnr.pp"/>
+        <UnitName Value="fpreportcontnr"/>
+      </Item8>
+      <Item9>
+        <Filename Value="fpreportdb.pp"/>
+        <UnitName Value="fpreportdb"/>
+      </Item9>
+      <Item10>
+        <Filename Value="fpreportdom.pp"/>
+        <UnitName Value="fpreportdom"/>
+      </Item10>
+      <Item11>
+        <Filename Value="fpreportfpimageexport.pp"/>
+        <UnitName Value="fpreportfpimageexport"/>
+      </Item11>
+      <Item12>
+        <Filename Value="fpreporthtmlexport.pp"/>
+        <UnitName Value="fpreporthtmlexport"/>
+      </Item12>
+      <Item13>
+        <Filename Value="fpreporthtmlparser.pp"/>
+        <UnitName Value="fpReportHTMLParser"/>
+      </Item13>
+      <Item14>
+        <Filename Value="fpreporthtmlutil.pp"/>
+        <UnitName Value="fpreporthtmlutil"/>
+      </Item14>
+      <Item15>
+        <Filename Value="fpreportjson.pp"/>
+        <UnitName Value="fpreportjson"/>
+      </Item15>
+      <Item16>
+        <Filename Value="fpreportpdfexport.pp"/>
+        <UnitName Value="fpreportpdfexport"/>
+      </Item16>
+      <Item17>
+        <Filename Value="fpreportstreamer.pp"/>
+        <UnitName Value="fpReportStreamer"/>
+      </Item17>
+      <Item18>
+        <Filename Value="fpreport_export_aggpas.pas"/>
+        <UnitName Value="fpreport_export_aggpas"/>
+      </Item18>
+      <Item19>
+        <Filename Value="fpreport_export_preview.pas"/>
+        <UnitName Value="fpreport_export_preview"/>
+      </Item19>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
