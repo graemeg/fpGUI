@@ -1,7 +1,7 @@
 program fcldemo;
 
 uses
-  udapp, regreports;
+  udapp, fpextfuncs, regreports;
 
 Var
   Application : TReportDemoApplication;
@@ -12,5 +12,3 @@ begin
   Application.Run;
   Application.Free;
 end.
-
-

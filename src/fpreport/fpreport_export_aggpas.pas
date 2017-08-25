@@ -51,7 +51,7 @@ type
   protected
     FRenderBuffer: TBytes;
     FAgg: Agg2D;
-    Procedure RenderImage(aPos : TFPReportRect; var AImage: TFPCustomImage) ; override;
+    Procedure   RenderImage(aPos : TFPReportRect; var AImage: TFPCustomImage) ; override;
     procedure   BufferToFile(const APageNo: integer); virtual;
     procedure   DoExecute(const ARTObjects: TFPList); override;
     procedure   SetupRenderBuffer(const APage: TFPReportPage); virtual;
@@ -156,16 +156,15 @@ begin
   Result := (AColor shr 24) and $FF;
 end;
 
-Class function TFPReportExportAggPas.ColorToRGBTriple(const AColor: UInt32): TRGBTriple;
-
+class function TFPReportExportAggPas.ColorToRGBTriple(const AColor: UInt32): TRGBTriple;
 begin
   with Result do
-    begin
+  begin
     Red   := GetRed(AColor);
     Green := GetGreen(AColor);
     Blue  := GetBlue(AColor);
     Alpha := GetAlpha(AColor);
-    end
+  end
 end;
 
 
@@ -195,10 +194,8 @@ begin
 end;
 
 procedure TFPReportExportAggPas.RenderElement(ABand: TFPReportCustomBand; AElement: TFPReportElement);
-
-Var
+var
   C : TFPReportPoint;
-
 begin
   if AElement is TFPReportCustomMemo then
     RenderMemo(ABand, TFPReportCustomMemo(AElement))
@@ -209,15 +206,14 @@ begin
   else if AElement is TFPReportCustomCheckbox then
     RenderCheckbox(ABand, TFPReportCustomCheckbox(AElement))
   else
-    begin
+  begin
     C.Left := ABand.RTLayout.Left + aElement.RTLayout.Left;
     C.Top := ABand.RTLayout.Top + aElement.RTLayout.Top ; // + Element.RTLayout.Height;
-    RenderFrame(ABand, aElement.Frame, C, aElement.RTLayout.Width, aElement.RTLayout.Height);
-    C.Left:=aband.RTLayout.Left;
-    C.Top:=aband.RTLayout.Top;
-    RenderUnknownElement(C,aElement,DPI);
-    end;
-
+    RenderFrame(ABand, AElement.Frame, C, AElement.RTLayout.Width, AElement.RTLayout.Height);
+    C.Left := ABand.RTLayout.Left;
+    C.Top := ABand.RTLayout.Top;
+    RenderUnknownElement(C, AElement, DPI);
+  end;
 end;
 
 procedure TFPReportExportAggPas.RenderImage(aPos: TFPReportRect; var AImage: TFPCustomImage);
@@ -225,7 +221,6 @@ var
   lPt: TFPReportPoint;
   img: TFPImageFriend;
   lAggImg: Image;
-
 begin
   img := TFPImageFriend(AImage);  { for access to Protected methods }
   lPt.Left := aPos.Left;
@@ -697,6 +692,7 @@ begin
   FImageWidth := 0;
   FImageHeight := 0;
   FTextHinting := False;
+  SetLength(FRenderBuffer, 0);
 
   // store the original DPI, we will restore it later
   FOldFontDPI := gTTFontCache.DPI;

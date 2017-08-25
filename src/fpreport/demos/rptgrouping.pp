@@ -131,7 +131,7 @@ begin
 
   GroupHeader := TFPReportGroupHeaderBand.Create(p);
   GroupHeader.Layout.Height := 15;
-  GroupHeader.GroupCondition := 'copy(''[country]'',1,1)';
+  GroupHeader.GroupCondition := 'copy(country,1,1)';
   {$ifdef ColorBands}
   GroupHeader.Frame.Shape := fsRectangle;
   GroupHeader.Frame.BackgroundColor := clGroupHeaderFooter;
@@ -152,20 +152,42 @@ begin
   DataBand.Frame.Shape := fsRectangle;
   DataBand.Frame.BackgroundColor := clDataBand;
   {$endif}
+  //DataBand.VisibleExpr := 'StrToFloat(''[population]'') > 50000000';
 
   Memo := TFPReportMemo.Create(DataBand);
   Memo.Layout.Left := 15;
-  Memo.Layout.Top := 0;
+  Memo.Layout.Top := 2;
   Memo.Layout.Width := 50;
   Memo.Layout.Height := 5;
   Memo.Text := '[country]';
 
   Memo := TFPReportMemo.Create(DataBand);
   Memo.Layout.Left := 70;
-  Memo.Layout.Top := 0;
+  Memo.Layout.Top := 2;
   Memo.Layout.Width := 30;
   Memo.Layout.Height := 5;
   Memo.Text := '[formatfloat(''#,##0'', StrToFloat(population))]';
+  //Memo.VisibleExpr := 'StrToFloat(''[population]'') > 50000000';
+
+  Memo := TFPReportMemo.Create(DataBand);
+  Memo.Layout.Left := 105;
+  Memo.Layout.Top := 2;
+  Memo.Layout.Width := 50;
+  Memo.Layout.Height := 5;
+  Memo.Text := '> Germany';
+  Memo.UseParentFont := false;
+  Memo.Font.Color := clGreen;
+  Memo.VisibleExpr := 'StrToFloat(population) > 80890000';
+
+  Memo := TFPReportMemo.Create(DataBand);
+  Memo.Layout.Left := 105;
+  Memo.Layout.Top := 2;
+  Memo.Layout.Width := 50;
+  Memo.Layout.Height := 5;
+  Memo.Text := '< Germany';
+  Memo.UseParentFont := false;
+  Memo.Font.Color := clRed;
+  Memo.VisibleExpr := 'StrToFloat(population) < 80890000';
 
 
   PageFooter := TFPReportPageFooterBand.Create(p);

@@ -665,7 +665,6 @@ Function TFPReportExportfpImage.CreateHTMLFileForImage(Const ImageFile: String; 
 
 Var
   PageDiv : THTMLElement;
-  ImgEl : THTMLElement;
 
 begin
   Result:=ChangeFileExt(ImageFile,'.html');

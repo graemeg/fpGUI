@@ -594,10 +594,7 @@ type
   end;
 
 
-  // Anything that must be drawn as part of the report descends from this.
-
-  { TFPReportElement }
-
+  { Anything that must be drawn as part of the report descends from this. }
   TFPReportElement = class(TFPReportComponent)
   private
     FFrame: TFPReportFrame;
@@ -608,11 +605,17 @@ type
     FRTLayout: TFPReportLayout;
     FOnBeforePrint: TFPReportBeforePrintEvent;
     FStretchMode: TFPReportStretchMode;
+    FVisibleExpr: String;
     function GetReport: TFPCustomReport;
     procedure SetFrame(const AValue: TFPReportFrame);
     procedure SetLayout(const AValue: TFPReportLayout);
     procedure SetVisible(const AValue: boolean);
+    procedure SetVisibleExpr(AValue: String);
   protected
+    function GetDateTimeFormat: String; virtual;
+    function ExpandMacro(const s: String; const AIsExpr: boolean): TFPReportString; virtual;
+    function GetReportBand: TFPReportCustomBand; virtual;
+    function GetReportPage: TFPReportCustomPage; virtual;
     Procedure SaveDataToNames; virtual;
     Procedure RestoreDataFromNames; virtual;
     function CreateFrame: TFPReportFrame; virtual;
@@ -627,10 +630,14 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     { triggers OnBeforePrint event }
     procedure BeforePrint; virtual;
+    function EvaluateExpression(const AExpr: String; out Res: TFPExpressionResult): Boolean;
+    function EvaluateExpressionAsText(const AExpr: String): String;
     { this is run against the runtime (RT) version of this element, and before BeforePrint is called. }
     procedure RecalcLayout; virtual; abstract;
     property  StretchMode: TFPReportStretchMode read FStretchMode write FStretchMode default smDontStretch;
     property  OnBeforePrint: TFPReportBeforePrintEvent read FOnBeforePrint write FOnBeforePrint;
+    property Page: TFPReportCustomPage read GetReportPage;
+    property Band: TFPReportCustomBand read GetReportBand;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -641,6 +648,7 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure BeginUpdate;
     procedure EndUpdate;
+    function EvaluateVisibility : boolean;
     property Parent: TFPReportElement read FParent write SetParent;
     Property Report : TFPCustomReport read GetReport;
     { Runtime Layout - populated when layouting of report is calculated. }
@@ -649,10 +657,9 @@ type
     property Layout: TFPReportLayout read FLayout write SetLayout;
     property Frame: TFPReportFrame read FFrame write SetFrame;
     property Visible: boolean read FVisible write SetVisible;
+    property VisibleExpr: String read FVisibleExpr write SetVisibleExpr;
   end;
 
-
-  { TFPReportElementWithChildren }
 
   TFPReportElementWithChildren = class(TFPReportElement)
   private
@@ -732,9 +739,6 @@ type
     That means that top/left equals top/left margin
      Width/Height is equals to page height/width minus margins
      Page orientation is taken into consideration. }
-
-  { TFPReportCustomPage }
-
   TFPReportCustomPage = class(TFPReportElementWithChildren)
   private
     FData: TFPReportData;
@@ -762,6 +766,8 @@ type
     procedure SetColumnCount(AValue: Byte);
     procedure SetColumnGap(AValue: TFPReportUnits);
   protected
+    function GetReportPage: TFPReportCustomPage; override;
+    function GetReportBand: TFPReportCustomBand; override;
     Procedure SaveDataToNames; override;
     Procedure RestoreDataFromNames; override;
     procedure RemoveChild(const AChild: TFPReportElement); override;
@@ -776,7 +782,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    Function  PageIndex : Integer;
+    Function    PageIndex : Integer;
     procedure   Assign(Source: TPersistent); override;
     procedure   ReadElement(AReader: TFPReportStreamer); override;
     function    FindBand(ABand: TFPReportBandClass): TFPReportCustomBand;
@@ -808,8 +814,6 @@ type
   end;
 
 
-  { TFPReportCustomBand }
-
   TFPReportCustomBand = class(TFPReportElementWithChildren)
   private
     FChildBand: TFPReportChildBand;
@@ -817,7 +821,6 @@ type
     FVisibleOnPage: TFPReportVisibleOnPage;
     FFont: TFPReportFont;
     function    GetFont: TFPReportFont;
-    function    GetReportPage: TFPReportCustomPage;
     function    IsStringValueZero(const AValue: string): boolean;
     procedure   SetChildBand(AValue: TFPReportChildBand);
     procedure   ApplyStretchMode;
@@ -825,10 +828,10 @@ type
     procedure   SetUseParentFont(AValue: boolean);
     procedure   SetVisibleOnPage(AValue: TFPReportVisibleOnPage);
   protected
+    function    GetReportPage: TFPReportCustomPage; override;
     function    GetReportBandName: string; virtual;
     function    GetData: TFPReportData; virtual;
     procedure   SetDataFromName(AName : String); virtual;
-    function    ExpandMacro(const s: String; const AIsExpr: boolean): TFPReportString; virtual;
     procedure   SetParent(const AValue: TFPReportElement); override;
     procedure   CreateRTLayout; override;
     procedure   PrepareObjects; override;
@@ -847,7 +850,6 @@ type
     Class Function ReportBandType : TFPReportBandType; virtual;
     procedure   WriteElement(AWriter: TFPReportStreamer; AOriginal: TFPReportElement = nil); override;
     procedure   ReadElement(AReader: TFPReportStreamer); override;
-    property    Page: TFPReportCustomPage read GetReportPage;
   end;
   TFPReportCustomBandClass = Class of TFPReportCustomBand;
 
@@ -1006,8 +1008,11 @@ type
   end;
 
 
+  { TFPReportCustomGroupHeaderBand }
+
   TFPReportCustomGroupHeaderBand = class(TFPReportCustomBandWithData)
   private
+    FConditionValue: string;
     FGroupHeader: TFPReportCustomGroupHeaderBand;
     FChildGroupHeader: TFPReportCustomGroupHeaderBand;
     FGroupFooter: TFPReportCustomGroupFooterBand;
@@ -1015,6 +1020,7 @@ type
     procedure   SetGroupHeader(AValue: TFPReportCustomGroupHeaderBand);
   protected
     function    GetReportBandName: string; override;
+    Procedure   CalcGroupConditionValue;
     procedure   DoWriteLocalProperties(AWriter: TFPReportStreamer; AOriginal: TFPReportElement = nil); override;
     procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     { This property defines the hierarchy of nested groups. For the top most group, this property will be nil. }
@@ -1023,6 +1029,8 @@ type
     property    GroupFooter: TFPReportCustomGroupFooterBand read FGroupFooter;
     { can be a field name or an expression }
     property    GroupCondition: string read FCondition write FCondition;
+    { Run-time calculated value }
+    property    GroupConditionValue : string read FConditionValue write FConditionValue;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Assign(Source: TPersistent); override;
@@ -2592,7 +2600,6 @@ Var
 
 
 begin
-  Result := nil;
   D:=GetDefaultBandType(aBandtype);
   N:=GetEnumName(TypeInfo(TFPReportBandType),Ord(ABandType));
   if (D=Nil) then
@@ -2607,6 +2614,7 @@ end;
 function TFPReportBandFactory.RegisterPageClass(aClass: TFPReportCustomPageClass
   ): TFPReportCustomPageClass;
 begin
+  Result := nil;  // TODO: Why is this a function if no Result is ever returned?
   If Not AClass.InheritsFrom(TFPReportCustomPage) then
     raise EReportError.CreateFmt(SErrPageClassMustDescendFrom, [
       TFPReportCustomPageClass.ClassName]);
@@ -2656,13 +2664,9 @@ begin
     FList.Delete(i);
 end;
 
-function TFPReportExportManager.ConfigExporter(AExporter: TFPReportExporter
-  ): Boolean;
-
+function TFPReportExportManager.ConfigExporter(AExporter: TFPReportExporter): Boolean;
 Var
   H : TFPReportExporterConfigHandler;
-  I : Integer;
-
 begin
   H:=ExporterConfigHandler(TFPReportExporterClass(AExporter.ClassType));
   if (H=Nil) then
@@ -3783,7 +3787,7 @@ var
   lBand: TFPReportCustomBand;
   lMemo: TFPReportCustomMemo;
 begin
-  if not self.Visible then
+  if not self.EvaluateVisibility then
     Exit;
   if Parent is TFPReportCustomBand then
   begin
@@ -4003,7 +4007,7 @@ var
   lBand: TFPReportCustomBand;
   lShape: TFPReportCustomShape;
 begin
-  if not self.Visible then
+  if not self.EvaluateVisibility then
     Exit;
   if Parent is TFPReportCustomBand then
     begin
@@ -4172,7 +4176,7 @@ var
   lBand: TFPReportCustomBand;
   lImage: TFPReportCustomImage;
 begin
-  if not self.Visible then
+  if not self.EvaluateVisibility then
     Exit;
   if Parent is TFPReportCustomBand then
   begin
@@ -4352,7 +4356,7 @@ var
   lBand: TFPReportCustomBand;
   lCB: TFPReportCustomCheckbox;
 begin
-  if not self.Visible then
+  if not self.EvaluateVisibility then
     Exit;
   if Parent is TFPReportCustomBand then
   begin
@@ -4614,6 +4618,11 @@ begin
   Result := 'GroupHeaderBand';
 end;
 
+procedure TFPReportCustomGroupHeaderBand.CalcGroupConditionValue;
+begin
+  GroupConditionValue:=Evaluate;
+end;
+
 procedure TFPReportCustomGroupHeaderBand.DoWriteLocalProperties(AWriter: TFPReportStreamer; AOriginal: TFPReportElement);
 begin
   inherited DoWriteLocalProperties(AWriter, AOriginal);
@@ -4649,7 +4658,7 @@ end;
 
 function TFPReportCustomGroupHeaderBand.Evaluate: string;
 begin
-  Result := ExpandMacro(GroupCondition, True);
+  Result := EvaluateExpressionAsText(GroupCondition);
 end;
 
 class function TFPReportCustomGroupHeaderBand.ReportBandType: TFPReportBandType;
@@ -5191,6 +5200,34 @@ begin
     Result:=TFPReportCustomPage(el).Report;
 end;
 
+function TFPReportElement.GetReportBand: TFPReportCustomBand;
+begin
+  if (Self is TFPReportCustomBand) then
+    Result := Self as TFPReportCustomBand
+  else if (Parent is TFPReportCustomBand) then
+    Result := Parent as TFPReportCustomBand
+  else
+    Result := nil;
+end;
+
+function TFPReportElement.EvaluateVisibility: boolean;
+
+var
+  Res : TFPExpressionResult;
+
+begin
+  Result := Visible;
+  if Result and (FVisibleExpr <> '') then 
+    begin
+    if EvaluateExpression(FVisibleExpr,res) then
+      if (res.ResultType=rtBoolean) then // We may need to change this.
+        Result:= Res.ResBoolean;
+    {$ifdef gdebug}
+    writeln('TFPReportElement.EvaluateVisibility: VisibleExpr=' , FVisibleExpr , '=' , Res.ResultType,' : ',Res.ResBoolean);
+    {$endif}
+    end;
+end;
+
 procedure TFPReportElement.SetLayout(const AValue: TFPReportLayout);
 begin
   if FLayout = AValue then
@@ -5226,6 +5263,110 @@ begin
     Exit;
   FVisible := AValue;
   Changed;
+end;
+
+procedure TFPReportElement.SetVisibleExpr(AValue: String);
+begin
+  if FVisibleExpr=AValue then Exit;
+  FVisibleExpr:=AValue;
+  Changed;
+end;
+
+function TFPReportElement.ExpandMacro(const s: String; const AIsExpr: boolean): TFPReportString;
+
+var
+  pstart: integer;
+  pend: integer;
+  len: integer;
+  m: string;  // macro
+  mv: string; // macro value
+  r: string;
+  lFoundMacroInMacro: boolean;
+
+begin
+  r := s;
+  lFoundMacroInMacro := False;
+  pstart := Pos('[', r);
+  while (pstart > 0) or lFoundMacroInMacro do
+  begin
+    if lFoundMacroInMacro then
+    begin
+      pstart := Pos('[', r);
+      lFoundMacroInMacro := False;
+    end;
+    len := Length(r);
+    pend := pstart + 2;
+    while pend < len do
+    begin
+      if r[pend] = '[' then  // a macro inside a macro
+      begin
+        lFoundMacroInMacro := True;
+        pstart := pend;
+      end;
+      if r[pend] = ']' then
+        break
+      else
+        inc(pend);
+    end;
+
+    m := Copy(r, pstart, (pend-pstart)+1);
+    if (m = '[PAGECOUNT]') and Page.Report.TwoPass and Page.Report.IsFirstPass then
+    begin
+      // replace macro with a non-marco marker. We'll replace the marker in the second pass of the report.
+      r := StringReplace(r, m, cPageCountMarker, [rfReplaceAll, rfIgnoreCase]);
+      // look for more macros
+      pstart := Pos('[', r);
+      Continue;
+    end;
+
+    len := Length(m);
+    try
+      if Assigned(Band.GetData) then
+      begin
+        try
+          mv := Band.GetData.FieldValues[Copy(m, 2, len-2)];
+        except
+          on e: EVariantTypeCastError do  // maybe we have an expression not data field
+          begin
+            mv := EvaluateExpressionAsText(Copy(m, 2, len-2));
+          end;
+        end;
+      end
+      else
+      begin // No Data assigned, but maybe we have an expression
+        mv := EvaluateExpressionAsText(Copy(m, 2, len-2));
+      end;
+    except
+      on e: EVariantTypeCastError do    // ReportData.OnGetValue did not handle all macros, so handle this gracefully
+        mv := SErrUnknownMacro+': '+copy(m,2,len-2);
+      on e: EExprParser do
+        mv := SErrUnknownMacro+': '+copy(m,2,len-2);
+    end;
+    r := StringReplace(r, m, mv, [rfReplaceAll, rfIgnoreCase]);
+    // look for more macros
+    pstart := PosEx('[', r,PStart+Length(mv));
+  end;
+  { This extra check is mostly for ReportGroupHeader expression processing }
+  if (pstart = 0) and Assigned(Band.GetData) and AIsExpr then
+  begin
+    try
+      r := EvaluateExpressionAsText(r);
+    except
+      on E: Exception do
+      begin
+        { $ifdef gdebug}
+        writeln('ERROR in expression: ', E.Message);
+        { $endif}
+        // do nothing - move on as we probably handled the expression a bit earlier in this code
+      end;
+    end;
+  end;
+  Result := r;
+end;
+
+function TFPReportElement.GetReportPage: TFPReportCustomPage;
+begin
+  Result := Band.Page;
 end;
 
 procedure TFPReportElement.SaveDataToNames;
@@ -5271,7 +5412,7 @@ var
   EL : TFPReportElement;
 
 begin
-  if not self.Visible then
+  if not self.EvaluateVisibility then
     Exit;
   if Parent is TFPReportCustomBand then
     begin
@@ -5339,11 +5480,49 @@ begin
     FOnBeforePrint(self);
 end;
 
+function TFPReportElement.EvaluateExpression(const AExpr: String; Out Res: TFPExpressionResult) : Boolean;
+
+var
+  lExpr: TFPExpressionParser;
+
+begin
+  Result:=Assigned(Report);
+  if not Result then
+    exit;
+  lExpr := Report.FExpr;
+  lExpr.Expression := AExpr;
+  Res:=lExpr.Evaluate;
+end;
+
+Function TFPReportElement.GetDateTimeFormat : String;
+
+begin
+  Result:='yyyy-mm-dd';
+end;
+
+function TFPReportElement.EvaluateExpressionAsText(const AExpr: String): String;
+
+Var
+  Res : TFPExpressionResult;
+
+begin
+  Result:='';
+  if EvaluateExpression(AExpr,Res) then
+    case Res.ResultType of
+      rtString  : Result := Res.ResString;
+      rtInteger : Result := IntToStr(Res.ResInteger);
+      rtFloat   : Result := FloatToStr(Res.ResFloat);
+      rtBoolean : Result := BoolToStr(Res.resBoolean, True);
+      rtDateTime : Result := FormatDateTime(GetDateTimeFormat, Res.resDateTime);
+    end;
+end;
+
+
 function TFPReportElement.Equals(AElement: TFPReportElement): boolean;
 begin
   Result := (AElement = Self) or ((AElement.ClassType = AElement.ClassType) and
     (AElement.Frame.Equals(Self.Frame)) and (AElement.Layout.Equals(Self.Layout))
-    and (AElement.Visible = Self.Visible));
+    and (AElement.Visible = Self.Visible) and (AElement.VisibleExpr = Self.VisibleExpr));
 end;
 
 procedure TFPReportElement.WriteElement(AWriter: TFPReportStreamer; AOriginal: TFPReportElement);
@@ -5380,6 +5559,7 @@ begin
     end;
   end;
   AWriter.WriteBoolean('Visible', FVisible);
+  AWriter.WriteString('VisibleExpr', FVisibleExpr);
   AWriter.WriteString('StretchMode', StretchModeToString(StretchMode));
   DoWriteLocalProperties(AWriter, AOriginal);
 end;
@@ -5410,6 +5590,7 @@ begin
     end;
   end;
   FVisible := AReader.ReadBoolean('Visible', Visible);
+  FVisibleExpr := AReader.ReadString('VisibleExpr', FVisibleExpr);
   FStretchMode := StringToStretchMode(AReader.ReadString('StretchMode', 'smDontStretch'));
   // TODO: implement reading OnBeforePrint information
 end;
@@ -5427,6 +5608,7 @@ begin
     Layout.Assign(E.Layout);
     FParent := E.Parent;
     Visible := E.Visible;
+    VisibleExpr := VisibleExpr;
     StretchMode := E.StretchMode;
     OnBeforePrint := E.OnBeforePrint;
   end;
@@ -5675,6 +5857,16 @@ begin
   RecalcLayout;
 end;
 
+function TFPReportCustomPage.GetReportPage: TFPReportCustomPage;
+begin
+  Result := nil;
+end;
+
+function TFPReportCustomPage.GetReportBand: TFPReportCustomBand;
+begin
+  Result := nil;
+end;
+
 procedure TFPReportCustomPage.SaveDataToNames;
 begin
   inherited ;
@@ -5829,9 +6021,6 @@ end;
 procedure TFPReportCustomPage.ReadElement(AReader: TFPReportStreamer);
 var
   E: TObject;
-  N : String;
-  D : TFPReportDataItem;
-
 begin
   inherited ReadElement(AReader);
   E := AReader.FindChild('Margins');
@@ -6036,7 +6225,7 @@ begin
   for i := ABand.ChildCount-1 downto 0 do
   begin
     e := ABand.Child[i];
-    if not e.Visible then
+    if not e.EvaluateVisibility then
     begin
       ABand.RemoveChild(e);
       FreeAndNil(e);
@@ -6608,7 +6797,7 @@ var
   begin
     lLastDsgnDataBand := ADsgnBand;
     CommonRuntimeBandProcessing(ADsgnBand);
-    if lRTBand.Visible then
+    if lRTBand.EvaluateVisibility then
     begin
       lLastDataBand := lRTBand;
       RecalcBandLayout(lRTBand);
@@ -6638,7 +6827,7 @@ var
       while lDsgnChildBand <> nil do
       begin
         CommonRuntimeBandProcessing(lDsgnChildBand);
-        if lRTBand.Visible then
+        if lRTBand.EvaluateVisibility then
         begin
           RecalcBandLayout(lRTBand);
           UpdateSpaceRemaining(lRTBand);
@@ -6686,7 +6875,7 @@ var
       Exit; // nothing further to do
 
     CommonRuntimeBandProcessing(ADsgnBand);
-    if lRTBand.Visible then
+    if lRTBand.EvaluateVisibility then
     begin
       lDataHeaderPrinted := True;
       UpdateSpaceRemaining(lRTBand);
@@ -6722,7 +6911,7 @@ var
   procedure ShowDataFooterBand(const ADsgnBand: TFPReportCustomDataFooterBand);
   begin
     CommonRuntimeBandProcessing(ADsgnBand);
-    if lRTBand.Visible then
+    if lRTBand.EvaluateVisibility then
     begin
       UpdateSpaceRemaining(lRTBand);
       if NoSpaceRemaining then
@@ -6940,7 +7129,9 @@ begin
               { group header }
               if lDsgnBand is TFPReportCustomGroupHeaderBand then
               begin
+                // Writeln('Found group with expr: ',TFPReportCustomGroupHeaderBand(lDsgnBand).GroupCondition);
                 s := TFPReportCustomGroupHeaderBand(lDsgnBand).Evaluate;
+                // Writeln('Group new ? "',lLastGroupCondition,'" <> "', s,'"');
                 if (lLastGroupCondition <> s) then
                 begin
                   lNewGroupHeader := True;
@@ -6970,8 +7161,8 @@ begin
                   ClearDataBandLastTextValues(lLastDsgnDataBand);
 
                 CommonRuntimeBandProcessing(lDsgnBand);
-                lLastGroupCondition := TFPReportGroupHeaderBand(lRTBand).GroupCondition;
-                if lDsgnBand.Visible = False then
+                lLastGroupCondition := TFPReportGroupHeaderBand(lRTBand).GroupConditionValue;
+                if lDsgnBand.EvaluateVisibility = False then
                 begin
                   lRTPage.RemoveChild(lRTBand);
                   lRTBand.Free;
@@ -7733,113 +7924,6 @@ begin
   // Do nothing
 end;
 
-function TFPReportCustomBand.ExpandMacro(const s: String; const AIsExpr: boolean): TFPReportString;
-var
-  pstart: integer;
-  pend: integer;
-  len: integer;
-  m: string;  // macro
-  mv: string; // macro value
-  r: string;
-  lFoundMacroInMacro: boolean;
-
-  function EvaluateExpression(const AExpr: String): String;
-  var
-    lExpr: TFPExpressionParser;
-  begin
-    Result := '';
-    lExpr := Page.Report.FExpr;
-    lExpr.Expression := AExpr;
-    case lExpr.ResultType of
-      rtString  : Result := lExpr.AsString;
-      rtInteger : Result := IntToStr(lExpr.AsInteger);
-      rtFloat   : Result := FloatToStr(lExpr.AsFloat);
-      rtBoolean : Result := BoolToStr(lExpr.AsBoolean, True);
-      rtDateTime : Result := FormatDateTime('yyyy-mm-dd', lExpr.AsDateTime);
-    end;
-  end;
-
-begin
-  r := s;
-  lFoundMacroInMacro := False;
-  pstart := Pos('[', r);
-  while (pstart > 0) or lFoundMacroInMacro do
-  begin
-    if lFoundMacroInMacro then
-    begin
-      pstart := Pos('[', r);
-      lFoundMacroInMacro := False;
-    end;
-    len := Length(r);
-    pend := pstart + 2;
-    while pend < len do
-    begin
-      if r[pend] = '[' then  // a macro inside a macro
-      begin
-        lFoundMacroInMacro := True;
-        pstart := pend;
-      end;
-      if r[pend] = ']' then
-        break
-      else
-        inc(pend);
-    end;
-
-    m := Copy(r, pstart, (pend-pstart)+1);
-    if (m = '[PAGECOUNT]') and Page.Report.TwoPass and Page.Report.IsFirstPass then
-    begin
-      // replace macro with a non-marco marker. We'll replace the marker in the second pass of the report.
-      r := StringReplace(r, m, cPageCountMarker, [rfReplaceAll, rfIgnoreCase]);
-      // look for more macros
-      pstart := Pos('[', r);
-      Continue;
-    end;
-
-    len := Length(m);
-    try
-      if Assigned(GetData) then
-      begin
-        try
-          mv := GetData.FieldValues[Copy(m, 2, len-2)];
-        except
-          on e: EVariantTypeCastError do  // maybe we have an expression not data field
-          begin
-            mv := EvaluateExpression(Copy(m, 2, len-2));
-          end;
-        end;
-      end
-      else
-      begin // No Data assigned, but maybe we have an expression
-        mv := EvaluateExpression(Copy(m, 2, len-2));
-      end;
-    except
-      on e: EVariantTypeCastError do    // ReportData.OnGetValue did not handle all macros, so handle this gracefully
-        mv := SErrUnknownMacro+': '+copy(m,2,len-2);
-      on e: EExprParser do
-        mv := SErrUnknownMacro+': '+copy(m,2,len-2);
-    end;
-    r := StringReplace(r, m, mv, [rfReplaceAll, rfIgnoreCase]);
-    // look for more macros
-    pstart := PosEx('[', r,PStart+Length(mv));
-  end;
-  { This extra check is mostly for ReportGroupHeader expression processing }
-  if (pstart = 0) and Assigned(GetData) and AIsExpr then
-  begin
-    try
-      r := EvaluateExpression(r);
-    except
-      on E: Exception do
-      begin
-        {$ifdef gdebug}
-        writeln('ERROR in expression: ', E.Message);
-        {$endif}
-        // do nothing - move on as we probably handled the expression a bit earlier in this code
-      end;
-    end;
-  end;
-  Result := r;
-end;
-
 procedure TFPReportCustomBand.SetParent(const AValue: TFPReportElement);
 begin
   if not ((AValue = nil) or (AValue is TFPReportCustomPage)) then
@@ -7854,6 +7938,7 @@ begin
 end;
 
 procedure TFPReportCustomBand.PrepareObjects;
+
 var
   lRTPage: TFPReportCustomPage;
   i: integer;
@@ -7864,6 +7949,7 @@ var
   c: integer;
   n: TFPExprNode;
   nIdx: integer;
+
 begin
   i := Page.Report.FRTCurPageIdx;
   if Assigned(Page.Report.RTObjects[i]) then
@@ -7877,11 +7963,7 @@ begin
   inherited PrepareObjects;
 
   if self is TFPReportGroupHeaderBand then
-  begin
-    s := TFPReportGroupHeaderBand(Page.Report.FRTCurBand).GroupCondition;
-    s := ExpandMacro(s, True);
-    TFPReportCustomGroupHeaderBand(Page.Report.FRTCurBand).GroupCondition := s;
-  end;
+    TFPReportGroupHeaderBand(Page.Report.FRTCurBand).CalcGroupConditionValue;
 
   if Assigned(FChildren) then
   begin
@@ -9512,6 +9594,7 @@ initialization
 
 finalization
   DoneReporting;
+  uBandFactory.Free;
   uElementFactory.Free;
   EM.Free;
 

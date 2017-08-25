@@ -236,10 +236,15 @@ procedure TReportRunner.RunReport(AFileName : string);
 begin
   // specify what directories should be used to find TrueType fonts
   gTTFontCache.SearchPath.Add(Location+'/fonts/');
-{$IFDEF UNIX}
+{$IFDEF LINUX}
   gTTFontCache.SearchPath.Add(GetUserDir + '.fonts/');
   gTTFontCache.SearchPath.Add('/usr/share/fonts/truetype/ubuntu-font-family/');
   gTTFontCache.SearchPath.Add('/usr/share/fonts/truetype/dejavu/');
+{$ENDIF}
+{$IFDEF FREEBSD}
+  gTTFontCache.SearchPath.Add(GetUserDir + '.fonts/');
+  gTTFontCache.SearchPath.Add('/usr/local/share/fonts/truetype/ubuntu-font-family/');
+  gTTFontCache.SearchPath.Add('/usr/local/share/fonts/truetype/dejavu/');
 {$ENDIF}
   // ask to generate the font cache
   gTTFontCache.BuildFontCache;
@@ -324,7 +329,6 @@ begin
   Writeln('');
   Writeln('Known demos for this binary: ');
   ListReports(True);
-  //Free;
   //Halt(ExitCode);
 end;
 
