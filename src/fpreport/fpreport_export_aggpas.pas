@@ -35,8 +35,6 @@ type
   end;
 
 
-  { TFPReportExportAggPas }
-
   TFPReportExportAggPas = class(TFPReportExporter)
   private
     FBaseFileName: string;
@@ -455,14 +453,18 @@ begin
 
   rptimg := TFPImageFriend(img.Image);
   rptimg.ReversePixelColorOrder;
-  lAggImg.Construct(@rptimg.FData[0], img.Image.Width, img.Image.Height, img.Image.Width * Sizeof(UInt32));
+  try
+    lAggImg.Construct(@rptimg.FData[0], img.Image.Width, img.Image.Height, img.Image.Width * Sizeof(UInt32));
 
-  if img.Stretched then
-    FAgg.transformImage(@lAggImg, mmToPixels(lPt.Left), mmToPixels(lPt.Top), mmToPixels(lPt.Left+AImage.RTLayout.Width), mmToPixels(lPt.Top+AImage.RTLayout.Height))
-  else
-    FAgg.copyImage(@lAggImg, mmToPixels(lPt.Left), mmToPixels(lPt.Top));
+    if img.Stretched then
+      FAgg.transformImage(@lAggImg, mmToPixels(lPt.Left), mmToPixels(lPt.Top), mmToPixels(lPt.Left+AImage.RTLayout.Width), mmToPixels(lPt.Top+AImage.RTLayout.Height))
+    else
+      FAgg.copyImage(@lAggImg, mmToPixels(lPt.Left), mmToPixels(lPt.Top));
 
-  lAggImg.Destruct;
+    lAggImg.Destruct;
+  finally
+    rptimg.ReversePixelColorOrder; // undo what we did earlier
+  end;
 end;
 
 procedure TFPReportExportAggPas.RenderCheckbox(const ABand: TFPReportCustomBand; const ACheckbox: TFPReportCustomCheckbox);
