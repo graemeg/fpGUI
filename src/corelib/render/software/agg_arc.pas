@@ -155,7 +155,7 @@ end;
 { VERTEX }
 function arc.vertex;
 var
- pf : unsigned;
+ pf : unsigned; // currently defined as int32u
 
 begin
  if is_stop(m_path_cmd ) then

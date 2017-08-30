@@ -2153,7 +2153,7 @@ var
 begin
  m_path.remove_all;
 
- ar.Construct(cx ,cy ,rx ,ry ,start ,sweep ,false );
+ ar.Construct(cx ,cy ,rx ,ry ,sweep, start,false );
 
  m_path.add_path(@ar ,0 ,false );
 
