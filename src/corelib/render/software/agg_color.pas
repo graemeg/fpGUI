@@ -125,25 +125,18 @@ type
   end;
 
 { GLOBAL PROCEDURES }
- function  rgb8_packed    (v : unsigned ) : rgba8;
+ function  rgb8_packed(v: unsigned): rgba8;
 
 IMPLEMENTATION
 { LOCAL VARIABLES & CONSTANTS }
 { UNIT IMPLEMENTATION }
 { CONSTRUCT }
-constructor rgba8.Construct;
+constructor rgba8.Construct(r_ ,g_ ,b_ : unsigned; a_ : unsigned);
 begin
-{$IFDEF AGG2D_USE_RGB565 }
- b{*}:=int8u(b_ );
- g:=int8u(g_ );
  r:=int8u(r_ );
-{$ELSE }
- b{*}:=int8u(r_ );
  g:=int8u(g_ );
- r:=int8u(b_ );
-{$ENDIF }
+ b:=int8u(b_ );
  a:=int8u(a_ );
-
 end;
 
 { NO_COLOR }
@@ -514,17 +507,15 @@ begin
  r:=int8u(gamma_.dir(r ) );
  g:=int8u(gamma_.dir(g ) );
  b:=int8u(gamma_.dir(b ) );
-
 end;
 
 { RGB8_PACKED }
-function rgb8_packed;
+function rgb8_packed(v: unsigned): rgba8;
 begin
  result.r:=(v shr 16) and $FF;
  result.g:=(v shr 8) and $FF;
  result.b:=v and $FF;
  result.a:=base_mask;
-
 end;
 
 END.

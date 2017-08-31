@@ -162,10 +162,10 @@ begin
   result:=path_cmd_stop
 
  else
-  if (m_angle < m_end - m_da / 4 ) <> m_ccw then
+  if (m_angle < (m_end - (m_da / 4)) ) <> m_ccw then
    begin
-    x^:=m_x + Cos(m_end ) * m_rx;
-    y^:=m_y + Sin(m_end ) * m_ry;
+    x^:=m_x + (Cos(m_end ) * m_rx);
+    y^:=m_y + (Sin(m_end ) * m_ry);
 
     m_path_cmd:=path_cmd_stop;
 
