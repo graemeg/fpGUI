@@ -40,18 +40,6 @@ INTERFACE
 {$Q- }
 {$R- }
 
-{ The Following define resets the colors back to be correct for use with 
-  RGB565 pixelformat
-  The original was reversed for unknown reasons but came out with red
-  and blue being reversed.  Note that all functions and procedures which 
-  specify a red, green, and blue channel, red and blue are normally REVERSED.
-  They are correct with the following define, but since I don't know the extent
-  to which the color reversal needed to be implemented the safest thing for now
-  is to correct it with the following define.
-}
-
-{.$Define AGG2D_USE_RGB565}
-
 uses
  Math ,
  agg_basics ;
