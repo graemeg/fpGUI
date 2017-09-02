@@ -31,10 +31,21 @@ var
     Result := Result + St + LineEnding;
   end;
 
+  function sanitize(const s: string): string;
+  var
+    x: integer;
+  begin
+    result:=s;
+    for x:=1 to length(result) do
+      if not (result[x] in ['0'..'9', 'A'..'Z', 'a'..'z', '_']) then
+        result[x]:='_';
+  end;
+
 begin
+  result:='';
   InStream := TFileStream.Create(AFileName, fmOpenRead);
   try
-    ConstName := 'newimg_' + ChangeFileExt(fpgExtractFileName(AFileName), '');
+    ConstName := 'newimg_' + sanitize(ChangeFileExt(fpgExtractFileName(AFileName), ''));
     WriteStrLn('');
     WriteStrLn('const');
 
