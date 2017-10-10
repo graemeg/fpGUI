@@ -3403,15 +3403,16 @@ end;
 procedure TfpgImageBase.CreateMaskFromSample(x, y: TfpgCoord);
 var
   p: ^longword;
-  pmsk: ^byte;
   c: longword;
+  {$ifdef AGGCanvas}
+  row, col: integer;
+  n: longword;
+  {$else}
+  pmsk: ^byte;
   linecnt: integer;
   pixelcnt: integer;
   bit: byte;
   msklinelen: integer;
-  {$ifdef AGGCanvas}
-  row, col: integer;
-  n: longword;
   {$endif}
 begin
   if FColorDepth = 1 then
