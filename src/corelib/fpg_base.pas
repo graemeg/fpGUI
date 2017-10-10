@@ -367,7 +367,6 @@ type
 
   TfpgCanvasBase = class(TObject)
   private
-    FFastDoubleBuffer: Boolean;
     FInterpolation: TfpgCustomInterpolation;
     procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
@@ -581,8 +580,6 @@ type
     FPassiveMouseCapture: TfpgWidgetBase;
     FMouseCapture: TfpgWidgetBase;
     FCurrentWidget: TfpgWidgetBase;
-    FWidget: TfpgWidgetBase;
-    FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
     FWindowOpacity: Single;
     FDropableWidgets: TFPList;
