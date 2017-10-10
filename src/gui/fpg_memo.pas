@@ -35,7 +35,6 @@ type
 
   TfpgMemo = class(TfpgWidget)
   private
-    class var FDefaultDropHandler: TfpgDropHandler;
     const Top_Margin = 3;
   private
     FBorderStyle: TfpgEditBorderStyle;
