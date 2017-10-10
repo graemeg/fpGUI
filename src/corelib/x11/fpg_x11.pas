@@ -192,8 +192,6 @@ type
     FXftDraw: PXftDraw;
     FXftDrawHandle: TfpgDCHandle;
     FColorTextXft: TXftColor;
-    FPixHeight,
-    FPixWidth: Integer;
     FBufferFreeTimer: TObject;
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
@@ -3431,15 +3429,14 @@ var
   y: integer;
   rw: TXID;
   d: TXID;
-  w, wp: longword;
-  h, hp: longword;
+  wp: longword;
+  hp: longword;
   bw: longword;
 begin
   if FCanvasTarget <> Self then
     Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
   else
   begin
-
     Result := FBufferPixmap > 0;
     if Result then
     begin
@@ -3451,7 +3448,6 @@ begin
       end;
     end;
   end;
-
 end;
 
 procedure TfpgX11Canvas.DoAllocateBuffer;
