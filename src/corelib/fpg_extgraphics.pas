@@ -822,6 +822,8 @@ begin
 end;
 
 procedure PaintHalfEllipse(Canvas: TfpgCanvas; const PaintRect: TRect; AHalfEllipseDirection: TShapeDirection);
+begin
+(*
 var
   Ex1, Ex2, Ey1, Ey2, Sx, Sy, Ex, Ey, i: integer;
 begin
@@ -883,9 +885,10 @@ begin
       end;
   end;
 
+  Canvas.DrawPie(Ex1,Ey1,Ex2,Ey2,Sx,Sy,Ex,Ey);os
+*)
   { TODO : Implement Canvas.DrawPie() }
   raise Exception.Create('Canvas.DrawPie() is not implemented yet');
-//   Canvas.DrawPie(Ex1,Ey1,Ex2,Ey2,Sx,Sy,Ex,Ey);
 end;
 
 procedure PaintFivePointLineStar(Canvas: TfpgCanvas; const PaintRect: TRect);
