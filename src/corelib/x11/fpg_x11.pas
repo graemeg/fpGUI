@@ -971,7 +971,6 @@ end;
 
 procedure TfpgX11Drop.RequestDropData(const ATimestamp: x.TTime);
 var
-  Msg: TXEvent;
   i: Integer;
 begin
   // Tell the source wether or not to retrieve the drop data
@@ -1438,11 +1437,7 @@ begin
   FDrop.LoadSourceMimeTypes(ev);
 end;
 
-procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
-    const ASource: TWindow);
-var
-  wg: TfpgWidget;
-
+procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
 begin
   {$IFDEF DNDDEBUG}
   DebugLn('TfpgX11Application.HandleDNDleave');
