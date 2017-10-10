@@ -743,7 +743,6 @@ end;
 procedure TfpgBaseEdit.HandlePaint;
 var
   r: TfpgRect;
-  rect: TRect;
 begin
   inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
