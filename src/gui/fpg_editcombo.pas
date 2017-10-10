@@ -168,9 +168,6 @@ const
   //ipmClearAll   = 'miDefaultClearAll';
   ipmCharmap    = 'miDefaultCharmap';
 
-var
-  OriginalFocusRoot: TfpgWidget;
-
 type
   { This is the class representing the dropdown window of the combo box. }
   TDropDownWindow = class(TfpgPopupWindow)
@@ -312,7 +309,6 @@ begin
   if (not Assigned(FDropDown)) or (not FDropDown.WindowAllocated) then
   begin
     FreeAndNil(FDropDown);
-    OriginalFocusRoot := FocusRootWidget;
     FDropDown := TDropDownWindow.Create(nil);
     ddw := TDropDownWindow(FDropDown);
     ddw.Width := Width;
@@ -741,7 +737,7 @@ procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
   rect: TRect;
-  tw, tw2, st, len, x: integer;
+  tw, tw2, st, len: integer;
   Texte: string;
 
   // paint selection rectangle
