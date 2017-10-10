@@ -329,8 +329,6 @@ begin
 end;
 
 procedure TfpgHexView.SetCursor(AValue: Int64);
-var
-  Data: QWord = 0;
 begin
   if AValue < 0 then
     Avalue := 0;
