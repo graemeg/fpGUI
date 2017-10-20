@@ -2508,6 +2508,7 @@ end;
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
 begin
   FWidget := awidget;
+  FFont := nil;
 end;
 
 destructor TfpgCanvasBase.Destroy;
