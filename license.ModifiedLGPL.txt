@@ -1,10 +1,9 @@
+This is the file License.ModifiedLGPL, it applies to all fpGUI sources 
+distributed by members of the fpGUI Development Team, unless explicity
+mentioned otherwise in a sub-directory or unit header comment.
 
-This is the file COPYING.modifiedLGPL, it applies to all fpGUI sources 
-distributed by members of the fpGUI Development Team.
-All files contains headers showing the appropriate license. 
-
-These files are distributed under the GNU Library Public License
-(see the file COPYING.txt) with the following modification:
+These files are distributed under the Lesser General Public License
+(see the file License.LGPL2) with the following modification:
 
 As a special exception, the copyright holders of this library give you
 permission to link this library with independent modules to produce an
@@ -18,7 +17,7 @@ you are not obligated to do so. If you do not wish to do so, delete this
 exception statement from your version.
 
 
-If you didn't receive a copy of the file COPYING.txt, contact:
+If you didn't receive a copy of the file License.LGPL2, contact:
       Free Software Foundation, Inc.,
       675 Mass Ave
       Cambridge, MA  02139
