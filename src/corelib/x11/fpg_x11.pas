@@ -3116,6 +3116,7 @@ begin
   FBackupWinHandle := 0;
   QueueEnabledDrops := False;
   FSyncValue.lo:=1;
+  FHasSyncValue := False;
 end;
 
 procedure TfpgX11Window.ActivateWindow;
