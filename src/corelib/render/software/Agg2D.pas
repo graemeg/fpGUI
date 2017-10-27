@@ -77,7 +77,7 @@ uses
   agg_font_cache_manager ,
   agg_pixfmt ,
   agg_pixfmt_rgb ,
-  agg_pixfmt_rgba ,
+  agg_pixfmt_rgba,
   agg_color ,
   agg_math_stroke ,
   agg_image_filters ,
@@ -2577,17 +2577,12 @@ end;
 { ARC }
 procedure TAgg2D.Arc(const cx ,cy ,rx ,ry ,start ,sweep : double );
 var
- ar : {bezier_}agg_arc.arc;
-
+  ar: agg_arc.arc;
 begin
- m_path.remove_all;
-
- ar.Construct(cx ,cy ,rx ,ry ,sweep ,start ,false );
-
- m_path.add_path(@ar ,0 ,false );
-
- DrawPath(AGG_StrokeOnly );
-
+  m_path.remove_all;
+  ar.Construct(cx ,cy ,rx ,ry ,sweep ,start ,false );
+  m_path.add_path(@ar ,0 ,false );
+  DrawPath(AGG_FillAndStroke);
 end;
 
 { STAR }
@@ -3862,9 +3857,8 @@ end;
 
 procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  {$Note AggPas's Arc only does stroking, not filling. Make another plan }
-  NoFill;
   LineColor(LineColor);
+  FillColor(LineColor);
   Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
 end;
 

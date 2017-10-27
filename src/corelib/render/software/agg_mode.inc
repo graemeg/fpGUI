@@ -40,17 +40,8 @@
  {$ENDIF}
 {$ENDIF }
 
-{$NOTE fpGUI supports other *nix flavours too (FreeBSD, Solaris etc), so this
-   needs to be extended at some point. }
-
-{$IFDEF LINUX }
- {$DEFINE AGG_LINUX }
- {$IFNDEF AGG2D_NO_FONT}
-  {$DEFINE AGG2D_USE_FREETYPE}
- {$ENDIF}
-{$ENDIF }
-
-{$IFDEF FREEBSD }
+// Linux, FreeBSD, Solaris etc.
+{$if defined(UNIX) and not defined(DARWIN)}
  {$DEFINE AGG_LINUX }
  {$IFNDEF AGG2D_NO_FONT}
   {$DEFINE AGG2D_USE_FREETYPE}

@@ -80,7 +80,6 @@ var
   i: integer;
   tmp, tmp2: TfpgString;
   p: PChar;
-  b1, b2, b3, b4: Byte;
   CharLen: Integer;
   unicode: cardinal;
 begin

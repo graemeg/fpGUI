@@ -281,8 +281,16 @@ var
 begin
   SetLength(FRenderBuffer, 0);
 
-  ImageWidth := Round(mmToPixels(APage.PageSize.Width));
-  ImageHeight := Round(mmToPixels(APage.PageSize.Height));
+  if APage.Orientation = poLandscape then
+  begin
+    ImageWidth := Round(mmToPixels(APage.PageSize.Height));
+    ImageHeight := Round(mmToPixels(APage.PageSize.Width));
+  end
+  else
+  begin
+    ImageWidth := Round(mmToPixels(APage.PageSize.Width));
+    ImageHeight := Round(mmToPixels(APage.PageSize.Height));
+  end;
 
   SetLength(FRenderBuffer, ImageWidth * ImageHeight * RGBA_Width);
 

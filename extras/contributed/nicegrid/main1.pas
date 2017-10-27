@@ -91,7 +91,7 @@ begin
     BeginUpdate;  // JP
     with Columns.Add do
     begin
-      Title := 'Merged;Multilined|Merged;Multilined';
+      Title := 'Merged;Multilined';
       Footer := 'Footer 0';
       Font:='Arial-8';
       FontColor:=clBlack;

@@ -367,7 +367,6 @@ type
 
   TfpgCanvasBase = class(TObject)
   private
-    FFastDoubleBuffer: Boolean;
     FInterpolation: TfpgCustomInterpolation;
     procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
@@ -581,8 +580,6 @@ type
     FPassiveMouseCapture: TfpgWidgetBase;
     FMouseCapture: TfpgWidgetBase;
     FCurrentWidget: TfpgWidgetBase;
-    FWidget: TfpgWidgetBase;
-    FWindow: TfpgWindowBase;
     FMsg: PfpgMessageRec;
     FWindowOpacity: Single;
     FDropableWidgets: TFPList;
@@ -2511,6 +2508,7 @@ end;
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
 begin
   FWidget := awidget;
+  FFont := nil;
 end;
 
 destructor TfpgCanvasBase.Destroy;
@@ -3406,15 +3404,16 @@ end;
 procedure TfpgImageBase.CreateMaskFromSample(x, y: TfpgCoord);
 var
   p: ^longword;
-  pmsk: ^byte;
   c: longword;
+  {$ifdef AGGCanvas}
+  row, col: integer;
+  n: longword;
+  {$else}
+  pmsk: ^byte;
   linecnt: integer;
   pixelcnt: integer;
   bit: byte;
   msklinelen: integer;
-  {$ifdef AGGCanvas}
-  row, col: integer;
-  n: longword;
   {$endif}
 begin
   if FColorDepth = 1 then

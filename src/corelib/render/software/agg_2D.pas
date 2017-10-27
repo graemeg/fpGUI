@@ -2181,7 +2181,7 @@ begin
 
  m_path.add_path(@ar ,0 ,false );
 
- drawPath(StrokeOnly );
+ drawPath(FillAndStroke );
 
 end;
 

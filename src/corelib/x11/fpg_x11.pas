@@ -192,8 +192,6 @@ type
     FXftDraw: PXftDraw;
     FXftDrawHandle: TfpgDCHandle;
     FColorTextXft: TXftColor;
-    FPixHeight,
-    FPixWidth: Integer;
     FBufferFreeTimer: TObject;
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
@@ -673,7 +671,7 @@ begin
     p := p^.Next;
   end;
   {$IFDEF GDEBUG}
-  writeln('fpGUI/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
+  DebugLnFmt('fpGUI/X11: FindWindowByHandle failed to find <%>', [IntToHex(wh, 9)]);
   {$ENDIF}
   Result := nil;
 end;
@@ -693,7 +691,7 @@ begin
     p := p^.Next;
   end;
   {$IFDEF GDEBUG}
-  writeln('fpGUI/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
+  DebugFmt('fpGUI/X11: FindWindowByBackupHandle failed to find <%s>', [IntToHex(wh, 9)]);
   {$ENDIF}
   Result := nil;
 end;
@@ -973,12 +971,11 @@ end;
 
 procedure TfpgX11Drop.RequestDropData(const ATimestamp: x.TTime);
 var
-  Msg: TXEvent;
   i: Integer;
 begin
   // Tell the source wether or not to retrieve the drop data
   {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Drop.RetrieveDropData');
+  DebugLn('TfpgX11Drop.RetrieveDropData');
   {$ENDIF}
 
   FDNDDataType := None;
@@ -1102,17 +1099,17 @@ begin
   FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
 
   {$IFDEF DNDDEBUG}
-  writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
+  DebugLnFmt('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
       [ FDNDVersion,
         BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
         ev.xclient.data.l[0],
         ev.xclient.data.l[1],
         ev.xclient.data.l[2],
         ev.xclient.data.l[3],
-        ev.xclient.data.l[4]  ]));
-  writeln(Format('  * We will be using XDND v%d protocol *', [FDNDVersion]));
+        ev.xclient.data.l[4]  ]);
+  DebugLnFmt('  * We will be using XDND v%d protocol *', [FDNDVersion]);
   if fpgGetBit(ev.xclient.data.l[1], 0) then
-    writeln('  ** We need to fetch XdndTypeList (>3 types)');
+    DebugLn('  ** We need to fetch XdndTypeList (>3 types)');
   {$ENDIF}
   // read typelist
   if fpgGetBit(ev.xclient.data.l[1], 0) then
@@ -1127,11 +1124,11 @@ begin
 
     {$IFDEF DNDDEBUG}
     s := XGetAtomName(xapplication.Display, actualtype);
-    writeln('Actual fetch -----------------------');
-    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
-    writeln('  Actualformat = ', ActualFormat);
-    writeln('  count = ', count);
-    writeln('  remaining = ', remaining);
+    DebugLn('Actual fetch -----------------------');
+    DebugLnFmt('  ActualType: %s (%d)', [s, ActualType]);
+    DebugLn('  Actualformat = ' + ActualFormat);
+    DebugLn('  count = ' + count);
+    DebugLn('  remaining = ' + remaining);
     {$ENDIF}
 
     if (actualtype <> XA_ATOM) or (actualformat <> 32) then
@@ -1149,7 +1146,7 @@ begin
     begin
       s := XGetAtomName(xapplication.Display, xdndtypes^[i]);
       {$IFDEF DNDDEBUG}
-      writeln(Format('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]));
+      DebugLnFmt('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]);
       {$ENDIF}
       // store each supported data type for later use
       itm := TfpgMimeDataItem.Create(s, xdndtypes^[i]);
@@ -1359,7 +1356,7 @@ begin
 
 {$IFDEF GDebug}
   if Result = keyNIL then
-    WriteLn('fpGFX/X11: Unknown KeySym: $', IntToHex(KeySym, 4));
+    DebugLn('fpGFX/X11: Unknown KeySym: $' + IntToHex(KeySym, 4));
 {$ENDIF}
 end;
 
@@ -1428,7 +1425,7 @@ procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow; const ev: TXEvent);
 begin
   {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Application.HandleDNDenter');
+  DebugLn('TfpgX11Application.HandleDNDenter');
   {$ENDIF}
 
   if Assigned(FDrop) then
@@ -1440,21 +1437,13 @@ begin
   FDrop.LoadSourceMimeTypes(ev);
 end;
 
-procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
-    const ASource: TWindow);
-var
-  wg: TfpgWidget;
-
+procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
 begin
   {$IFDEF DNDDEBUG}
-  writeln('TfpgX11Application.HandleDNDleave');
+  DebugLn('TfpgX11Application.HandleDNDleave');
   {$ENDIF}
   if Assigned(FDrop) then
-  begin
     FreeAndNil(FDrop);
-  end;
-
-
 end;
 
 procedure TfpgX11Application.HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow;
@@ -3127,6 +3116,7 @@ begin
   FBackupWinHandle := 0;
   QueueEnabledDrops := False;
   FSyncValue.lo:=1;
+  FHasSyncValue := False;
 end;
 
 procedure TfpgX11Window.ActivateWindow;
@@ -3431,15 +3421,14 @@ var
   y: integer;
   rw: TXID;
   d: TXID;
-  w, wp: longword;
-  h, hp: longword;
+  wp: longword;
+  hp: longword;
   bw: longword;
 begin
   if FCanvasTarget <> Self then
     Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
   else
   begin
-
     Result := FBufferPixmap > 0;
     if Result then
     begin
@@ -3451,7 +3440,6 @@ begin
       end;
     end;
   end;
-
 end;
 
 procedure TfpgX11Canvas.DoAllocateBuffer;

@@ -311,6 +311,10 @@ type
 
 
 implementation
+
+uses
+  fpg_utils;
+
 { TNETWindowLayer }
 
 procedure TNETWindowLayer.InitNetAtoms;
@@ -561,7 +565,8 @@ begin
   if Result = False then Exit;
   
   ADesktopIndex := Index^;
-  if Count > 0 then XFree(Index);
+  if Count > 0 then
+    XFree(Index);
 end;
 
 function TNETWindowLayer.WindowMoveResize(const AWindow: TWindow; const AX, AY,
@@ -573,13 +578,12 @@ const
   HSet      = 1 shl 6;
   XSet      = 1 shl 5;
   YSet      = 1 shl 4;
-
-  FromPager = 1 shl 1;
+  // FromPager = 1 shl 1;
   FromApp   = 1 shl 0;
 begin
   Result := FAtomSupported[naMOVERESIZE_WINDOW];
   if Result = False then Exit;
-  FillChar(Msg, SizeOf(Msg), 0);
+  FillMem(@Msg, SizeOf(Msg), 0);
 
   Msg.message_type := FNetAtoms[naMOVERESIZE_WINDOW];
   Msg.window := AWindow;
@@ -596,16 +600,16 @@ function TNETWindowLayer.WindowMove(const AWindow: TWindow; const AX, AY: Intege
 var
   Msg: TXClientMessageEvent;
 const
-  WSet      = 1 shl 7;
-  HSet      = 1 shl 6;
+  // WSet      = 1 shl 7;
+  // HSet      = 1 shl 6;
   XSet      = 1 shl 5;
   YSet      = 1 shl 4;
   FromApp   = 1 shl 0;
-  FromPager = 1 shl 1;
+  // FromPager = 1 shl 1;
 begin
   Result := FAtomSupported[naMOVERESIZE_WINDOW];
   if Result = False then Exit;
-  FillChar(Msg, SizeOf(Msg), 0);
+  FillMem(@Msg, SizeOf(Msg), 0);
 
   Msg.message_type := FNetAtoms[naMOVERESIZE_WINDOW];
   Msg.window := AWindow;
@@ -1109,12 +1113,13 @@ var
   Number: PLongWord;
 begin
   Result := FAtomSupported[naNUMBER_OF_DESKTOPS]
-              and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naNUMBER_OF_DESKTOPS], Count, Number);
+            and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naNUMBER_OF_DESKTOPS], Count, Number);
   if not Result then Exit;
 
   Desktops := PLongInt(Number)^;
 
-  if Count > 0 then XFree(Number);
+  if Count > 0 then
+    XFree(Number);
 end;
 
 function TNETWindowLayer.DesktopIsShowing: Boolean;
@@ -1123,12 +1128,14 @@ var
   Showing: PLongWord;
 begin
   Result := FAtomSupported[naSHOWING_DESKTOP]
-  and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naSHOWING_DESKTOP], Count, Showing);
-  if not Result then Exit;
+            and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naSHOWING_DESKTOP], Count, Showing);
+  if not Result then
+    Exit;
 
   Result := Showing^ = 1;
 
-  if Count > 0 then XFree(Showing);
+  if Count > 0 then
+    XFree(Showing);
 end;
 
 function TNETWindowLayer.SendMessage(AWindow: TWindow; APropagate: Boolean;

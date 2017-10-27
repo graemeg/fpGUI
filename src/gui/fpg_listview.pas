@@ -366,6 +366,7 @@ type
     procedure   HandleHeaderMouseMove(x, y: Integer; btnstate: word; Shiftstate: TShiftState);
     property    ShiftIsPressed: Boolean read FShiftIsPressed write SetShiftIsPressed;
   protected
+    FFont: TfpgFont;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -394,6 +395,7 @@ type
     property    Align;
     property    Columns: TfpgLVColumns read FColumns;
     property    Enabled;
+    property    Font: TfpgFont read FFont;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    Images: TfpgImageList index Ord(lisNoState) read GetImages write SetImages;
     property    ImagesSelected: TfpgImageList index Ord(lisSelected) read GetImages write SetImages;
@@ -812,7 +814,7 @@ end;
 
 function TfpgLVReportPainter.GetItemHeight: Integer;
 begin
-  Result := FListView.Canvas.Font.Height + 4;
+  Result := FListView.Font.Height + 4;
 end;
 
 function TfpgLVReportPainter.GetItemNeighbor(AStartIndex: Integer;
@@ -891,7 +893,7 @@ function TfpgLVReportPainter.GetHeaderHeight: Integer;
 begin
   if not FListView.ShowHeaders then
     Exit(0);
-  Result := FListView.Canvas.Font.Height + 10;
+  Result := FListView.Font.Height + 10;
 end;
 
 function TfpgLVReportPainter.GetItemFromPoint(AX, AY: Integer; out
@@ -2229,6 +2231,7 @@ var
   ClipRect: TfpgRect;
   rect: TRect;
 begin
+  Canvas.SetFont(FFont);
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
   Canvas.ClearClipRect;
@@ -2407,6 +2410,7 @@ begin
   Focusable := True;
   FShowHeaders := True;
   FShowFocusRect := True;
+  FFont         := fpgGetFont('#Label1');
 
   FVScrollBar := TfpgScrollBar.Create(Self);
   FVScrollBar.Orientation := orVertical;
@@ -2443,6 +2447,7 @@ begin
   FColumns.Free;
   if Assigned(FViewStyle) then
     FreeAndNil(FViewStyle);
+  FFont.Free;
   inherited Destroy;
 end;
 
