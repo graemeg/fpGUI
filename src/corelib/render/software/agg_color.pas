@@ -121,9 +121,9 @@ IMPLEMENTATION
 { CONSTRUCT }
 constructor rgba8.Construct(r_ ,g_ ,b_ : unsigned; a_ : unsigned);
 begin
- r:=int8u(r_ );
+ b:=int8u(r_ );
  g:=int8u(g_ );
- b:=int8u(b_ );
+ r:=int8u(b_ );
  a:=int8u(a_ );
 end;
 
