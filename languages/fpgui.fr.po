@@ -1,24 +1,29 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# 
+# Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009
+# Stéphane Aulery <lkppo@free.fr>, 2017
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:56+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Afrikaans <en@li.org>\n"
+"PO-Revision-Date: 2017-11-01 14:00+0100\n"
+"Last-Translator: Stéphane Aulery <lkppo@free.fr>\n"
+"Language-Team: French <traduc@traduc.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: "
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> n''est pas assigné"
+msgstr "<%s> n'est pas assigné"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Un nouvel item a été détecté"
+msgstr "Un nouvel élément a été détecté."
 
 #: fpg_constants:rsabort
 msgid "Abort"
@@ -42,7 +47,7 @@ msgstr "Tous les fichiers"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr "Toutes les polices"
+msgstr "Toutes les polices de caractères"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
@@ -50,15 +55,15 @@ msgstr "Alt+"
 
 #: fpg_constants:rserrunexpected
 msgid "An unexpected error occurred."
-msgstr ""
+msgstr "Une erreur inattendue s'est produite."
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "Anti alias"
+msgstr "Echantillonnage"
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr "Avr"
+msgstr "Avr."
 
 #: fpg_constants:rslongapr
 msgid "April"
@@ -70,7 +75,7 @@ msgstr "Attributs"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr "Aoû"
+msgstr "Août"
 
 #: fpg_constants:rslongaug
 msgid "August"
@@ -114,7 +119,7 @@ msgstr "Table de caractères"
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
-msgstr "Cliquer le Picker et le maintenir => relacher pour avoir la couleur"
+msgstr "Cliquer sur la pipette et le maintenir le bouton => relâcher pour copier la couleur"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -126,7 +131,7 @@ msgstr "Collection"
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr "Roue des couleurs"
+msgstr "Cercle chromatique"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
@@ -150,7 +155,7 @@ msgstr "Copier"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "Le répertoire <%s> n''a pas pu être ouvert"
+msgstr "Le répertoire <%s> n'a pas pu être ouvert"
 
 #: fpg_constants:rscreate
 msgid "Create"
@@ -178,7 +183,7 @@ msgstr "Base de données"
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr "Déc"
+msgstr "Déc."
 
 #: fpg_constants:rslongdec
 msgid "December"
@@ -238,19 +243,19 @@ msgstr "Echap"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr "Texte exemple"
+msgstr "Texte d'exemple"
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "Sortir"
+msgstr "Quitter"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "Le répertoire <%s> n''a pas pu être ouvert"
+msgstr "Le répertoire <%s> n'a pas pu être ouvert"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "Visualiseur d'aide non trouvé"
+msgstr "Visionneuse d'aide introuvable."
 
 #: fpg_constants:rsfalse
 msgid "False"
@@ -262,7 +267,7 @@ msgstr "Favoris"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr "Fév"
+msgstr "Févr."
 
 #: fpg_constants:rslongfeb
 msgid "February"
@@ -270,11 +275,11 @@ msgstr "Février"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "Sélection fichier"
+msgstr "Sélection de fichier"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr "Nom de fichier"
+msgstr "Nom du fichier"
 
 #: fpg_constants:rsfiles
 msgid "Files"
@@ -290,7 +295,7 @@ msgstr "Longueur fixe"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "Alias"
+msgstr "Alias de polices de caractères"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
@@ -310,7 +315,7 @@ msgstr "Aller au répertoire parent"
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Got to home directory"
-msgstr "Aller au répertoire origine"
+msgstr "Aller au répertoire d'origine"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -358,7 +363,7 @@ msgstr "Insérer depuis la table de caractères"
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: \"%s\""
-msgstr "option non valide à la position %d: \"%s\""
+msgstr "Option non valide à la position %d : \"%s\""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -366,11 +371,11 @@ msgstr "Italique"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr "L''item n''est pas du type <%s>!"
+msgstr "L'élément n'est pas du type <%s> !"
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr "Jan"
+msgstr "Janv."
 
 #: fpg_constants:rslongjan
 msgid "January"
@@ -378,7 +383,7 @@ msgstr "Janvier"
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr "Jul"
+msgstr "Juill."
 
 #: fpg_constants:rslongjul
 msgid "July"
@@ -386,7 +391,7 @@ msgstr "Juillet"
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr "Jun"
+msgstr "Juin"
 
 #: fpg_constants:rslongjun
 msgid "June"
@@ -402,7 +407,7 @@ msgstr "La liste doit être vide"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr "Mar"
+msgstr "Mars"
 
 #: fpg_constants:rslongmar
 msgid "March"
@@ -454,7 +459,7 @@ msgstr "Non à tous"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr "Nov"
+msgstr "Nov."
 
 #: fpg_constants:rslongnov
 msgid "November"
@@ -466,7 +471,7 @@ msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr "Oct"
+msgstr "Oct."
 
 #: fpg_constants:rslongoct
 msgid "October"
@@ -482,11 +487,11 @@ msgstr "Ouvrir un fichier"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
-msgstr "L'option à la position %d n'accepte pas d'argument: %s"
+msgstr "L'option à la position %d n'accepte pas d'argument : %s"
 
 #: fpg_constants:serroptionneeded
 msgid "Option at position %d needs an argument : %s"
-msgstr "L'option à la position %d nécessite un argument: %s"
+msgstr "L'option à la position %d nécessite un argument : %s"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
@@ -578,11 +583,11 @@ msgstr "Section"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "Selectionner"
+msgstr "Sélectionner"
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr ""
+msgstr "Tout sélectionner"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
@@ -590,11 +595,11 @@ msgstr "Sélectionner un répertoire"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "Choisir la police"
+msgstr "Choisir la police de caractères"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr "Sep"
+msgstr "Sep."
 
 #: fpg_constants:rslongsep
 msgid "September"
@@ -654,7 +659,7 @@ msgstr "Jeudi"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "Aujourd''hui"
+msgstr "Aujourd'hui"
 
 #: fpg_constants:rstrue
 msgid "True"
@@ -686,7 +691,7 @@ msgstr "Haut"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "Nom utilisateur"
+msgstr "Nom d'utilisateur"
 
 #: fpg_constants:rswarning
 msgid "Warning"
@@ -702,7 +707,7 @@ msgstr "Mercredi"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "Voulez-vous ajouter l''item <%s> à la liste?"
+msgstr "Voulez-vous ajouter l'élément <%s> à la liste ?"
 
 #: fpg_constants:rsyes
 msgid "Yes"
