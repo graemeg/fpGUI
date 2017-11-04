@@ -42,10 +42,10 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="modalformstests"/>
+      <Filename Value="modalforms"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -53,7 +53,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FEbin"/>
     </Other>
   </CompilerOptions>
 </CONFIG>

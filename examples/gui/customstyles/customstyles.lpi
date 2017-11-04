@@ -51,10 +51,10 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="customstyles_test"/>
+      <Filename Value="customstyles"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

@@ -7,9 +7,9 @@ do
   LPRNAME=`basename $PROJECT .lpr`
   echo Doing $LPRNAME in $DIR
   cd $DIR
-  if [ ! -d units ]; then
-    echo 'Missing units dir'
-    mkdir units
+  if [ ! -d bin ]; then
+    echo 'Missing bin dir'
+    mkdir bin
   fi
   $FPC @extrafpc.cfg $PROJECT;
   cd ..

@@ -46,7 +46,7 @@
       <Filename Value="filegrid"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

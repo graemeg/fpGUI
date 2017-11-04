@@ -45,7 +45,7 @@
       <Filename Value="filedialog"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -53,7 +53,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FEbin"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
