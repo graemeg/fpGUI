@@ -503,16 +503,19 @@ begin
 
   Canvas.SetTextColor(clText1);
   s := GetHeaderText(ACol);
-  { centre the text }
-  x := (r.Left + (r.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
-  if x < r.Left then
-    x := r.Left;
-  if not (go_SmoothScroll in FOptions) then
+  if Length(s) > 0 then
   begin
-    if x < 1 then
-      x := 1;
+    { centre the text }
+    x := (r.Left + (r.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+    if x < r.Left then
+      x := r.Left;
+    if not (go_SmoothScroll in FOptions) then
+    begin
+      if x < 1 then
+        x := 1;
+    end;
+    fpgStyle.DrawString(Canvas, x, r.Top, s, Enabled);
   end;
-  fpgStyle.DrawString(Canvas, x, r.Top, s, Enabled);
 
   { restore original clip rectangle }
   Canvas.SetClipRect(lClipRect);
