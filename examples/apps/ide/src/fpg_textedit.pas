@@ -1912,7 +1912,6 @@ var
   SLine: TfpgString;
   AddS: TfpgString;
   lStrLen: PtrInt;
-  Y: Integer;
   X: Integer;
   CaretScroll: Boolean;
   lIndentOffset: integer;
