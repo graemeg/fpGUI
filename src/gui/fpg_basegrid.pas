@@ -692,10 +692,9 @@ procedure TfpgBaseGrid.UpdateScrollBars;
 var
   HWidth: integer;
   VHeight: integer;
-  vw: integer;
-  cw: integer;
+  lVisibleWidth: integer;
+  lTotalColWidth: integer;
   vl: integer;
-  i: integer;
   hmax: integer;
   vmax: integer;
   Hfits, showH : boolean;
@@ -703,7 +702,7 @@ var
   crect: TfpgRect;
   borders: TRect;
 
-  procedure hideScrollbar (sb : TfpgScrollBar);
+  procedure hideScrollbar(sb: TfpgScrollBar);
   begin
     with sb do
       if Visible then
@@ -716,10 +715,10 @@ var
   procedure getVisWidth;
   begin
     if showV then
-      vw := HWidth - (FVScrollBar.Width-1)
+      lVisibleWidth := HWidth - (FVScrollBar.Width-1)
     else
-      vw := HWidth;
-    Hfits := vw >= cw;
+      lVisibleWidth := HWidth;
+    Hfits := lVisibleWidth >= lTotalColWidth;
   end;
 
   procedure getVisLines;
@@ -877,7 +876,7 @@ begin
     FHScrollBar.Min         := 0;
     if go_SmoothScroll in FOptions then
     begin
-      hmax := cw - vw;
+      hmax := lTotalColWidth - lVisibleWidth;
       FHScrollBar.Max := hmax;
       if FXOffset>hmax then
         FXOffset:=hmax;
