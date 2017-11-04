@@ -1704,7 +1704,7 @@ begin
   FRowSelect  := False;
   FScrollBarStyle := ssAutoBoth;
   FUpdateCount    := 0;
-  FOptions    := [];
+  FOptions    := [go_SmoothScroll];
   FHeaderStyle := ghsButton;
   FBorderStyle := ebsDefault;
 
