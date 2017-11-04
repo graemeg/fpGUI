@@ -764,9 +764,7 @@ begin
   crect := GetClientRect;
   VHeight := crect.Height;
   HWidth  := crect.Width;
-  cw := 0;
-  for i := 0 to ColumnCount-1 do
-    cw := cw + ColumnWidth[i];
+  lTotalColWidth := GetTotalColumnWidth;
   showV := False;
   showH := False;
   getVisWidth;
@@ -889,7 +887,7 @@ begin
       FHScrollBar.Position := FFirstCol;
       FHScrollBar.PageSize := 1;
     end;
-    FHScrollBar.SliderSize := HWidth / TotalColumnWidth;
+    FHScrollBar.SliderSize := HWidth / lTotalColWidth;
     FHScrollBar.RepaintSlider;
     FHScrollBar.Top     := Height - FHScrollBar.Height - borders.Bottom;
     FHScrollBar.Left    := borders.Left;
