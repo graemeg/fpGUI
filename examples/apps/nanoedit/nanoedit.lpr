@@ -1,5 +1,5 @@
 {
-  Copyright (c) 2013-2016, Graeme Geldenhuys
+  Copyright (c) 2013-2017, Graeme Geldenhuys
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,11 @@ uses
   mainfrm,
   simpleipc;
 
-function AnotherInstance: Boolean;
+function NotifyAnotherInstance(CmdIntf: ICmdLineParams): Boolean;
 var
   aClient: TSimpleIPCClient;
 begin
-  if (ParamCount > 0) then
+  if (CmdIntf.ParamCount > 0) then
   begin
     aClient := TSimpleIPCClient.Create(nil);
     try
@@ -54,7 +54,7 @@ begin
       begin
         aClient.Connect;
         try
-          aClient.SendStringMessage(1, ParamStr(1));
+          aClient.SendStringMessage(1, CmdIntf.Params[1]);
         finally
           aClient.Disconnect;
         end;
@@ -73,7 +73,6 @@ procedure MainProc;
 var
   frm: TMainForm;
 begin
-  fpgApplication.Initialize;
   frm := TMainForm.Create(nil);
   try
     frm.Show;
@@ -86,17 +85,22 @@ end;
 var
   cmd: ICmdLineParams;
 begin
+  fpgApplication.Initialize;
+  // We should always be getting a ICmdLineParams interface
   if Supports(fpgApplication, ICmdLineParams, cmd) then
   begin
     if cmd.HasOption('n', 'newinstance') then
       MainProc
-    else if not AnotherInstance then
-      MainProc;
-  end
-  else
-  begin
-    if not AnotherInstance then
-      MainProc;
+    else
+    begin
+      if cmd.ParamCount > 0 then
+      begin
+        if not NotifyAnotherInstance(cmd) then
+          MainProc; // there is no other instance, so run as normal
+      end
+      else
+        MainProc;
+    end;
   end;
 end.
 

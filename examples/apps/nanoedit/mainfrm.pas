@@ -1,5 +1,5 @@
 {
-  Copyright (c) 2013-2016, Graeme Geldenhuys
+  Copyright (c) 2013-2017, Graeme Geldenhuys
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,9 @@
 unit mainfrm;
 
 {$mode objfpc}{$H+}
+
+// Enable for more debug output
+{.$define gDEBUG}
 
 interface
 
@@ -111,10 +114,6 @@ uses
   base64;
 
 
-const
-  cShortOpts = 'n';
-  cDefaultLongOpts: array[1..1] of string = ('newinstance');
-
 {$I images.inc}
 
 
@@ -136,36 +135,42 @@ var
   i: integer;
   CmdIntf: ICmdLineParams;
 begin
-  Supports(fpgApplication, ICmdLineParams, CmdIntf);
-  if CmdIntf.ParamCount > 0 then
+  // we should always be getting back a interface reference
+  if Supports(fpgApplication, ICmdLineParams, CmdIntf) then
   begin
-    for i := 1 to CmdIntf.ParamCount do
+    if CmdIntf.ParamCount > 0 then
     begin
-      writeln('Found: ', CmdIntf.Params[i]);
-      if (CmdIntf.Params[i] <> '--newinstance') and (CmdIntf.Params[i] <> '-n') then
+      for i := 1 to CmdIntf.ParamCount do
       begin
-        s := CmdIntf.Params[i];
-        writeln('using: ', s);
-        Break;
+        {$IFDEF gDEBUG}
+        DebugLn('Found: ', CmdIntf.Params[i]);
+        {$ENDIF}
+        if (CmdIntf.Params[i] <> '--newinstance') and (CmdIntf.Params[i] <> '-n') then
+        begin
+          s := CmdIntf.Params[i];
+          {$IFDEF gDEBUG}
+          DebugLn('using: ', s);
+          {$ENDIF}
+          Break;
+        end;
       end;
-    end;
 
-    if s = '' then
-    begin
+      if s = '' then
+      begin
+        miNewClick(nil);
+        Exit;
+      end;
+
+      if Pos('file://', s) > 0 then
+        s := StringReplace(s, 'file://', '', []);
+      LoadFile(s);
+      ActiveEditor.SetFocus;
+    end
+    else
       miNewClick(nil);
-      Exit;
-    end;
-
-    if Pos('file://', s) > 0 then
-      s := StringReplace(s, 'file://', '', []);
-    LoadFile(s);
-    ActiveEditor.SetFocus;
   end
   else
-  begin
-    if pcEditor.PageCount = 0 then
-      miNewClick(nil);
-  end;
+    DebugLn('Error: something bad happened and we can''t process command line parameters');
 end;
 
 procedure TMainForm.miNewClick(Sender: TObject);
@@ -228,6 +233,7 @@ var
   sValue: string;
   i: integer;
 begin
+  sValue := '';
   if fpgInputQuery('Go to line', 'Go to line number?', sValue) then
   begin
     try
@@ -307,7 +313,15 @@ procedure TMainForm.miConvertB64Decode(Sender: TObject);
 var
   s: TfpgString;
 begin
-  DecodeStringBase64(s);
+  s := ActiveEditor.GetSelectedText;
+  try
+    DecodeStringBase64(s);
+  except
+    on E: Exception do
+      ShowMessage(E.Message);
+  end;
+  ActiveEditor.DeleteSelection;
+  ActiveEditor.InsertTextAtPos(s, ActiveEditor.CaretPos_H, ActiveEditor.CaretPos_V);
 end;
 
 procedure TMainForm.HelpAboutFPGui(Sender: TObject);
