@@ -744,10 +744,9 @@ var
     for i := 0 to ColumnCount-1 do
     begin
       w := w + ColumnWidth[i];
-      if w > Width then
+      if w >= lVisibleWidth then
         inc(Result);
     end;
-    inc(Result);
   end;
 
 begin
@@ -883,7 +882,7 @@ begin
     end
     else
     begin
-      FHScrollBar.Max := ColMax;
+      FHScrollBar.Max := ColMax-1;
       FHScrollBar.Position := FFirstCol;
       FHScrollBar.PageSize := 1;
     end;
