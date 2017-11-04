@@ -311,6 +311,11 @@ end;
 
 function TfpgCustomGrid.GetHeaderText(ACol: Integer): string;
 begin
+  if ACol > FColumns.Count then
+  begin
+    Result := '';
+    Exit;
+  end;
   Result := TfpgGridColumn(FColumns[ACol]).Title;
 end;
 
