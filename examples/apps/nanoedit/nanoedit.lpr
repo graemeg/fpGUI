@@ -30,6 +30,7 @@ program nanoedit;
 
 {$mode objfpc}{$H+}
 {$ifdef mswindows} {$apptype gui} {$endif}
+{$interfaces corba}
 
 uses
   Classes,

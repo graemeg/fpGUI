@@ -687,8 +687,8 @@ type
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWidgetBase;
     function    GetHelpFile: TfpgString;
-    function    GetCmdLineParamsInterface: ICmdLineParams;
-    property    CmdLineParams: ICmdLineParams read GetCmdLineParamsInterface implements ICmdLineParams;
+    function    GetCmdLineParamsInterface: TfpgCmdLineParams;
+    property    CmdLineParams: TfpgCmdLineParams read GetCmdLineParamsInterface implements ICmdLineParams;
   protected
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
@@ -3529,11 +3529,11 @@ begin
   //end;
 end;
 
-function TfpgApplicationBase.GetCmdLineParamsInterface: ICmdLineParams;
+function TfpgApplicationBase.GetCmdLineParamsInterface: TfpgCmdLineParams;
 begin
   if not Assigned(FCmdLineParams) then
     FCmdLineParams := TfpgCmdLineParams.Create;
-  Result := FCmdLineParams; // compiler does an implicit: FCmdLineParams as ICmdLineParams
+  Result := FCmdLineParams;
 end;
 
 function TfpgApplicationBase.GetHelpViewer: TfpgString;
