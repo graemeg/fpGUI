@@ -316,8 +316,8 @@ end;
 
 constructor TfpgCustomGrid.Create(AOwner: TComponent);
 begin
-  FColumns := TFPList.Create;
   inherited Create(AOwner);
+  FColumns := TFPList.Create;
   ColumnCount := 0;
   RowCount    := 0;
 end;
@@ -327,9 +327,7 @@ var
   i: integer;
 begin
   for i := FColumns.Count-1 downto 0 do
-  begin
     TfpgGridColumn(FColumns.Items[i]).Free;
-  end;
   FColumns.Free;
   inherited Destroy;
 end;
