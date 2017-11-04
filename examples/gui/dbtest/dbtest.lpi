@@ -53,7 +53,7 @@
       <Filename Value="dbtest"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

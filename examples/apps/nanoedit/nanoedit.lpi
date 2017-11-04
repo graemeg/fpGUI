@@ -72,7 +72,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FEbin"/>
     </Other>
   </CompilerOptions>
 </CONFIG>

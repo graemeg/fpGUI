@@ -55,7 +55,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="bin"/>
     </SearchPaths>
     <Other>
       <CompilerMessages>
