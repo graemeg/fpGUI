@@ -134,7 +134,11 @@ begin
 end;
 
 procedure TfpgScrollBar.HandlePaint;
+var
+  r: TfpgRect;
 begin
+  r.SetRect(0, 0, Width, Height);
+  Canvas.SetClipRect(r);
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
