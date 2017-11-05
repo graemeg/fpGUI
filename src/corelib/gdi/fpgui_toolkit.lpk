@@ -30,7 +30,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1" Minor="5"/>
-    <Files Count="109">
+    <Files Count="110">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -446,29 +446,33 @@
         <UnitName Value="fpg_style_win8"/>
       </Item103>
       <Item104>
-        <Filename Value="..\..\gui\inputquerydialog.inc"/>
-        <Type Value="Include"/>
+        <Filename Value="..\..\gui\fpg_scrollframe.pas"/>
+        <UnitName Value="fpg_scrollframe"/>
       </Item104>
       <Item105>
-        <Filename Value="..\..\gui\fpg_toggle.pas"/>
-        <UnitName Value="fpg_toggle"/>
+        <Filename Value="..\..\gui\inputquerydialog.inc"/>
+        <Type Value="Include"/>
       </Item105>
       <Item106>
-        <Filename Value="..\..\gui\fpg_stringgridbuilder.pas"/>
-        <UnitName Value="fpg_StringGridBuilder"/>
+        <Filename Value="..\..\gui\fpg_toggle.pas"/>
+        <UnitName Value="fpg_toggle"/>
       </Item106>
       <Item107>
-        <Filename Value="..\fpg_csvparser.pas"/>
-        <UnitName Value="fpg_CSVParser"/>
+        <Filename Value="..\..\gui\fpg_stringgridbuilder.pas"/>
+        <UnitName Value="fpg_StringGridBuilder"/>
       </Item107>
       <Item108>
-        <Filename Value="..\..\gui\fpg_ledmatrix.pas"/>
-        <UnitName Value="fpg_ledmatrix"/>
+        <Filename Value="..\fpg_csvparser.pas"/>
+        <UnitName Value="fpg_CSVParser"/>
       </Item108>
       <Item109>
+        <Filename Value="..\..\gui\fpg_ledmatrix.pas"/>
+        <UnitName Value="fpg_ledmatrix"/>
+      </Item109>
+      <Item110>
         <Filename Value="..\..\gui\fpg_hexview.pas"/>
         <UnitName Value="fpg_hexview"/>
-      </Item109>
+      </Item110>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="2">
