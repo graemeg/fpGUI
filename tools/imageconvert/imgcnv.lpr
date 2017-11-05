@@ -20,7 +20,10 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_base, fpg_main, fpgui_toolkit, frm_main;
+  Classes,
+  fpg_base,
+  fpg_main,
+  frm_main;
 
 
 procedure MainProc;
