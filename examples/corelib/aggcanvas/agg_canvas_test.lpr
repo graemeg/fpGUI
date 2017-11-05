@@ -311,7 +311,8 @@ begin
   ac.FillLinearGradient(100, 100, 150, 150, c1, c2);
   ac.Star(100 ,150 ,30 ,70 ,55 ,5 );
 
-  // Draw Arc from 45 degrees to 270 degrees 
+  // Draw Arc from 45 degrees to 270 degrees
+  ac.NoFill;
   ac.LineColor($FF ,$00 ,$00 );
   ac.LineWidth(5 );
   ac.Arc(300 ,320 ,80 ,50 ,Deg2Rad(45 ) ,Deg2Rad(270 ) );
