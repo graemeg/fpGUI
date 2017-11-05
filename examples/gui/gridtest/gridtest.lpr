@@ -426,6 +426,7 @@ begin
     Hint := '';
     TabOrder := 14;
     Text := 'Smooth Scroll';
+    Checked := True;
     OnChange := @chkSmoothScrollChange;
   end;
 
