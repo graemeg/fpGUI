@@ -50,7 +50,7 @@ type
 implementation
 
 uses
-  fpg_utils, bin2pas;
+  bin2pas;
 
 {@VFD_NEWFORM_IMPL}
 

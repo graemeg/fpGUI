@@ -42,6 +42,7 @@ var
   end;
 
 begin
+  b := Byte(0);
   result:='';
   InStream := TFileStream.Create(AFileName, fmOpenRead);
   try
