@@ -45,6 +45,12 @@ required packages too.
   $ sudo apt-get install libX11-dev
   $ sudo apt-get install libXft-dev
 
+NOTE:
+  On some Linux systems (eg: Ubuntu 17.04) those package names are now
+  in all lower-case.
+
+    $ sudo apt-get install libx11-dev
+    $ sudo apt-get install libxft-dev
 
 
 System requirements under *BSD, OpenSolaris
