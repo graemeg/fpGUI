@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -13,6 +13,8 @@
 
     Description:
       A simple hello world application that only uses canvas painting.
+      NOTE: This is not how you would normally create an application. This
+            is simply to test some core fpGUI functionality.
 }
 
 program HelloWorld;
@@ -22,6 +24,7 @@ program HelloWorld;
 uses
   Classes,
   fpg_base,
+  fpg_window,
   fpg_main;
 
 const
@@ -33,12 +36,17 @@ type
 
   TMainWindow = class(TfpgWindow)
   private
+    FLargeFont: TfpgFont;
+    FSmallFont: TfpgFont;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
     procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
+  protected
+    procedure DoAllocateWindowHandle; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     procedure   Show;
   end;
   
@@ -48,59 +56,51 @@ begin
   inherited Create(AOwner);
   FWidth    := 350;
   FHeight   := 200;
-  WindowAttributes := [waSizeable, waScreenCenterPos];
+  FLargeFont := fpgGetFont('Arial-20');
+  FSmallFont := fpgGetFont('Arial-10');
+end;
+
+destructor TMainWindow.Destroy;
+begin
+  FLargeFont.Free;
+  FSmallFont.Free;
+  inherited Destroy;
 end;
 
 procedure TMainWindow.Show;
 begin
-  AllocateWindowHandle;
-  DoSetWindowVisible(True);
-  // We can't set a title if we don't have a window handle. So we do that here
-  // and not in the constructor.
-  SetWindowTitle('fpGUI Hello World');
+  HandleShow;
+  WindowTitle := 'fpGUI Hello World';
 end;
 
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
 var
   r: TfpgRect;
-  i: Integer;
-  fnt: TfpgFont;
 begin
   Canvas.BeginDraw;  // begin double buffering
 
   r.SetRect(0, 0, Width, Height);
   Canvas.GradientFill(r, clBlue, clBlack, gdVertical);
 
-  fnt := fpgGetFont('Arial-20');
-  try
-    Canvas.Font := fnt;
+  Canvas.Font := FLargeFont;
+  Canvas.SetTextColor(clBlack);
+  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
+    (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
 
-    Canvas.SetTextColor(clBlack);
-    Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
-      (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
+  Canvas.SetTextColor(clWhite);
+  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
+    (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
 
-    Canvas.SetTextColor(clWhite);
-    Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
-      (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
-  finally
-    fnt.Free;
-  end;
 
-  fnt := fpgGetFont('Arial-10');
-  try
-    Canvas.Font := fnt;
-    Canvas.DrawString((Width - Canvas.Font.TextWidth(ClickToClose)) div 2 - 1,
-      Height - (Canvas.Font.Height*2), ClickToClose);
-  finally
-    fnt.Free;
-  end;
+  Canvas.Font := FSmallFont;
+  Canvas.DrawString((Width - Canvas.Font.TextWidth(ClickToClose)) div 2 - 1,
+    Height - (Canvas.Font.Height*2), ClickToClose);
 
   Canvas.EndDraw;
 end;
 
 procedure TMainWindow.MsgClose(var msg: TfpgMessageRec);
 begin
-  ReleaseWindowHandle;
   fpgApplication.Terminate;
 end;
 
@@ -113,6 +113,16 @@ end;
 procedure TMainWindow.MsgMouseUp(var msg: TfpgMessageRec);
 begin
   MsgClose(msg);
+end;
+
+procedure TMainWindow.DoAllocateWindowHandle;
+var
+  WindowAttributes: TWindowAttributes;
+begin
+  inherited DoAllocateWindowHandle;
+  WindowAttributes := Window.WindowAttributes;
+  Include(WindowAttributes, waOneThirdDownPos);
+  Window.WindowAttributes := WindowAttributes;
 end;
 
 
