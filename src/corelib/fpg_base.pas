@@ -2588,21 +2588,20 @@ begin
     // do nothing - we are hoping docview is in the system PATH
   end
   else if not fpgFileExists(GetHelpViewer) then
-    raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
+    raise EfpGUIUserFeedbackException.Create(rsFailedToFindHelpViewer);
+
   p := TProcess.Create(nil);
   try
+    p.Executable := GetHelpViewer;
     if fpgFileExists(HelpFile) then
     begin
-      if AHelpContext = 0 then
-        p.CommandLine := GetHelpViewer + ' ' + HelpFile
-      else
-        p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -n ' + IntToStr(AHelpContext);
-        {$ifdef GDEBUG}
-        senddebug(p.CommandLine);
-        {$endif}
-    end
-    else
-      p.CommandLine := GetHelpViewer;
+      p.Parameters.Add(HelpFile);
+      if AHelpContext > 0 then
+      begin
+        p.Parameters.Add('-n');
+        p.Parameters.Add(IntToStr(AHelpContext));
+      end;
+    end;
     Result := True;
     p.Execute;
   finally
@@ -2623,15 +2622,13 @@ begin
     raise EfpGUIUserFeedbackException.Create(rsfailedtofindhelpviewer);
   p := TProcess.Create(nil);
   try
+    p.Executable := GetHelpViewer;
     if fpgFileExists(HelpFile) then
     begin
-      p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -s ' + AHelpKeyword;
-      {$ifdef GDEBUG}
-      senddebug(p.CommandLine);
-      {$endif}
-    end
-    else
-      p.CommandLine := GetHelpViewer;
+      p.Parameters.Add(HelpFile);
+      p.Parameters.Add('-s');
+      p.Parameters.Add(AHelpKeyword);
+    end;
     Result := True;
     p.Execute;
   finally
