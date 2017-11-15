@@ -2776,6 +2776,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
+    newcolor.Alpha  := 255;
     SetColor(RGBTripleTofpgColor(newcolor));
 
     // We have to overshoot by 1 pixel as DrawLine paints 1 pixel short (by design)
