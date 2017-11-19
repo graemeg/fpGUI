@@ -32,8 +32,6 @@ uses
 
 type
 
-  { TFPReportExportPDF }
-
   TFPReportExportPDF = class(TFPReportExporter)
   private
     FCurrentPage: TPDFPage;
@@ -43,7 +41,7 @@ type
     FDocument: TPDFDocument;
     FAutoSave: boolean;
   protected
-    procedure RenderElement(pg: TPDFPage; ABand: TFPReportCustomBand; el: TFPReportElement); virtual;
+    procedure   RenderElement(pg: TPDFPage; ABand: TFPReportCustomBand; el: TFPReportElement); virtual;
     Procedure   RenderImage(aRect : TFPReportRect; var AImage: TFPCustomImage) ; override;
     procedure   DoExecute(const ARTObjects: TFPList); override;
     procedure   SetupPDFDocument; virtual;
@@ -65,7 +63,7 @@ type
     Class Function Name : String; override;
     Class Function Description : String; override;
     Class Function DefaultExtension: String; override;
-    Procedure SetFileName(const aFileName: String); override;
+    Procedure   SetFileName(const aFileName: String); override;
     function    FindFontIndex(const ADoc: TPDFDocument; const AFontName: string): integer;
     procedure   SaveToFile;
     property    Document: TPDFDocument read FDocument;
@@ -279,12 +277,16 @@ begin
   APage.SetColor(clblack, True);
   APage.SetColor(clblack, False);
 
+  { PDF origin coordinate is Bottom-Left, and Report Layout is Top-Left }
   lPt1.X := ABand.RTLayout.Left + AShape.RTLayout.Left;
-  lPt1.Y := ABand.RTLayout.Top + AShape.RTLayout.Top;
+  lPt1.Y := ABand.RTLayout.Top + AShape.RTLayout.Top + AShape.RTLayout.Height;
 
-  { Frame must be drawn before the text as it could have a fill color. }
+  { Frame must be drawn before the shape as it could have a fill color. }
   RenderFrame(APage, ABand, AShape.Frame, lPt1, AShape.RTLayout.Width, AShape.RTLayout.Height);
-  RenderShape(APage, lPt1, AShape);
+  { Only render shape when color is set and color is different to frame background color. }
+  if (TFPReportShape(AShape).Color <> clNone) and
+  (TFPReportShape(AShape).Color <> AShape.Frame.BackgroundColor) then
+    RenderShape(APage, lPt1, AShape);
 end;
 
 type
@@ -444,11 +446,11 @@ begin
   begin
     ldx := 0;
     ldy := (ALayout.Height - ALayout.Width) / 2;
-    lw := ALayout.Height;
+    lw := ALayout.Width;
   end;
   { PDF origin coordinate is Bottom-Left, and Report Layout is Top-Left }
   lPt2.X := lPt1.X + ldx;
-  lPt2.Y := lPt1.Y + ldy;
+  lPt2.Y := lPt1.Y - ldy;
   APage.DrawEllipse(lPt2, lw, lw, 1, False, True);
 end;
 
@@ -516,11 +518,11 @@ begin
   begin
     ldx := 0;
     ldy := (ALayout.Height - ALayout.Width) / 2;
-    lw := ALayout.Height;
+    lw := ALayout.Width;
   end;
   P.X := lPt1.X + ldx;
   { PDF origin coordinate is Bottom-Left, and Report Layout is Top-Left }
-  P.Y := lPt1.Y + ldy;
+  P.Y := lPt1.Y - ldy;
   APage.DrawRect(P, lw, lw, 1, False, True);
 end;
 
@@ -715,12 +717,13 @@ begin
     end;  { case PaperName }
     pg.UnitOfMeasure := uomMillimeters; { report measurements are always in millimeter units }
 
+    // This must appear before configuring the pg.Matrix
+    if rpage.Orientation = poLandscape then
+      pg.Orientation := ppoLandscape;
+
     // Convert from the Cartesian coordinate system to the Screen coordinate system
     pg.Matrix.SetYScalation(-1);
     pg.Matrix.SetYTranslation(pg.GetPaperHeight);
-
-    if rpage.Orientation = poLandscape then
-      pg.Orientation := ppoLandscape;
 
     for b := 0 to (rpage.BandCount - 1) do
       begin
@@ -760,7 +763,8 @@ begin
     lPt.Y := ABand.RTLayout.Top + el.RTLayout.Top + el.RTLayout.Height;
     RenderFrame(pg, ABand, el.Frame, lPt, el.RTLayout.Width, el.RTLayout.Height);
     C.Left:=aband.RTLayout.Left;
-    C.Top:=aband.RTLayout.Top;
+    // Compensate for add of height which RenderUnknownElement will do
+    C.Top:=aband.RTLayout.Top + el.RTLayout.Height;
     RenderUnknownElement(C,El,72);
     end;
 end;

@@ -77,8 +77,8 @@ function TFPReportCanvasHelper.CoordToRect(const APos: TFPReportPoint;
 begin
   Result.Left:=mmToPixels(APos.Left);
   Result.Top:=mmToPixels(APos.Top);
-  Result.Right:=mmToPixels(APos.Left+AWidth);
-  Result.Bottom:=mmToPixels(APos.Top+AHeight);
+  Result.Right:=mmToPixels(APos.Left+AWidth)-1;
+  Result.Bottom:=mmToPixels(APos.Top+AHeight)-1;
 end;
 
 function TFPReportCanvasHelper.CoordToPoint(const APos: TFPReportPoint;
@@ -132,6 +132,10 @@ begin
   Canvas.Pen.FPColor:=ColorToRGBTriple(TFPReportShape(AShape).Color);
   Canvas.Pen.Style:=psSolid;
   Canvas.Pen.Width:=1;
+  { exit if Shape will not be visible. }
+  if (TFPReportShape(AShape).Color = clNone)
+  or (TFPReportShape(AShape).Color = TFPReportShape(AShape).Frame.BackgroundColor) then
+    exit;
   case TFPReportShape(AShape).ShapeType of
     stEllipse: RenderShapeEllipse(lpt1,AShape.RTLayout);
     stCircle: RenderShapeCircle(lpt1,AShape.RTLayout);

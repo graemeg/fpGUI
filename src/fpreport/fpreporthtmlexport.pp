@@ -188,6 +188,7 @@ Type
     Class Function Name : String; override;
     Class Function Description : String; override;
     Class Function DefaultExtension: String; override;
+    Class Function MultiFile: Boolean; override;
     Procedure SetFileName(const aFileName: String); override;
     // Helper for color strings
     // Current element DIV
@@ -302,6 +303,11 @@ end;
 class function TFPReportExportHTML.DefaultExtension: String;
 begin
   Result:='.html';
+end;
+
+class function TFPReportExportHTML.MultiFile: Boolean;
+begin
+  Result:=True;
 end;
 
 procedure TFPReportExportHTML.SetFileName(const aFileName: String);

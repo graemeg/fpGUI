@@ -124,6 +124,7 @@ type
     Class Function Name : String; override;
     Class Function Description : String; override;
     Class Function DefaultExtension: String; override;
+    Class Function MultiFile: Boolean; override;
     Procedure GenerateHTML(ImageFiles : TStrings);
     Procedure SetFileName(const aFileName: String); override;
     function GetFont(const AFontName: String): TFPCustomFont;
@@ -248,8 +249,16 @@ begin
   FreeAndNil(FCanvas);
   FreeAndNil(FHelper);
   FreeAndNil(FImage);
-  FImageWidth := mmToPixels(APage.PageSize.Width);
-  FImageHeight := mmToPixels(APage.PageSize.Height);
+  if APage.Orientation = poLandscape then
+  begin
+    FImageWidth := mmToPixels(APage.PageSize.Height);
+    FImageHeight := mmToPixels(APage.PageSize.Width);
+  end
+  else
+  begin
+    FImageWidth := mmToPixels(APage.PageSize.Width);
+    FImageHeight := mmToPixels(APage.PageSize.Height);
+  end;
   FImage:=CreateImage(FImageWidth,FImageHeight);
   FCanvas:=CreateCanvas(FImage);
   FHelper:=TFPReportCanvasHelper.Create(FCanvas,DPI);
@@ -563,6 +572,11 @@ end;
 class function TFPReportExportfpImage.DefaultExtension: String;
 begin
   Result:='.png';
+end;
+
+class function TFPReportExportfpImage.MultiFile: Boolean;
+begin
+  Result:=True
 end;
 
 function TFPReportExportfpImage.SetupHTMLPageRender(const APage: TFPReportPage): THTMLElement;
