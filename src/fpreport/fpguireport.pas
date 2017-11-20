@@ -11,7 +11,7 @@ uses
   fpreport, fpreport_export_fpgui, fpExtFuncs, fpjsonreport, fprepexprpars, fpreportcanvashelper, 
   fpreportcontnr, fpreportdb, fpreportdom, fpreportfpimageexport, fpreporthtmlexport, fpReportHTMLParser, 
   fpreporthtmlutil, fpreportjson, fpreportpdfexport, fpReportStreamer, fpreport_export_aggpas, 
-  fpreport_export_preview;
+  fpreport_export_preview, fpreportbarcode, fpreportqrcode, fpimgbarcode, fpbarcode, fpimgqrcode, fpqrcodegen;
 
 implementation
 

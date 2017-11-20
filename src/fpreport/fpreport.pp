@@ -31,11 +31,7 @@ uses
   fpCanvas,
   fpImage,
   fpreportstreamer,
-{$IF FPC_FULLVERSION>=30101}
-  fpexprpars,
-{$ELSE}
   fprepexprpars,
-{$ENDIF}
   fpReportHTMLParser;
 
 type

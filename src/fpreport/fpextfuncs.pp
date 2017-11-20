@@ -24,7 +24,7 @@ uses
   SysUtils,
   StrUtils,
   DateUtils,
-  fpexprpars;
+  fprepexprpars;
 
 
 procedure RegisterExtraFunctions;

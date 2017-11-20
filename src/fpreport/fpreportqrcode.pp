@@ -20,7 +20,7 @@ unit fpreportqrcode;
 interface
 
 uses
-  Classes, fpimage, fpexprpars, fpimgqrcode, fpqrcodegen, fpreport, fpreportstreamer;
+  Classes, fpimage, fprepexprpars, fpimgqrcode, fpqrcodegen, fpreport, fpreportstreamer;
 
 Type
 

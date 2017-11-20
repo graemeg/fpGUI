@@ -25,17 +25,17 @@ uses
 Type
   // tokens
   TTokenType = (ttPlus, ttMinus, ttLessThan, ttLargerThan, ttEqual, ttDiv,
-                ttMul, ttLeft, ttRight, ttLessThanEqual, ttLargerThanEqual,
-                ttunequal, ttNumber, ttString, ttIdentifier,
-                ttComma, ttand, ttOr,ttXor,ttTrue,ttFalse,ttnot,ttif,
-                ttCase,ttEOF);
+                ttMod, ttMul, ttLeft, ttRight, ttLessThanEqual,
+                ttLargerThanEqual, ttunequal, ttNumber, ttString, ttIdentifier,
+                ttComma, ttAnd, ttOr, ttXor, ttTrue, ttFalse, ttNot, ttif,
+                ttCase, ttPower, ttEOF); // keep ttEOF last
 
   TExprFloat = Double;
 
 Const
   ttDelimiters = [ttPlus, ttMinus, ttLessThan, ttLargerThan, ttEqual, ttDiv,
                   ttMul, ttLeft, ttRight, ttLessThanEqual, ttLargerThanEqual,
-                  ttunequal];
+                  ttunequal, ttPower];
   ttComparisons = [ttLargerThan,ttLessthan,
                    ttLargerThanEqual,ttLessthanEqual,
                    ttEqual,ttUnequal];
@@ -329,6 +329,27 @@ Type
     Procedure GetNodeValue(var Result : TFPExpressionResult); override;
   end;
 
+  { TFPModuloOperation }
+
+  TFPModuloOperation = Class(TMathOperation)
+  Public
+    Procedure Check; override;
+    Function AsString : string ; override;
+    Function NodeType : TResultType; override;
+    Procedure GetNodeValue(var Result : TFPExpressionResult); override;
+  end;
+
+
+  { TFPPowerOperation }
+  TFPPowerOperation = class(TMathOperation)
+  public
+    Procedure Check; override;
+    Function AsString : string ; override;
+    Function NodeType : TResultType; override;
+    Procedure GetNodeValue(var Result : TFPExpressionResult); override;
+  end;
+
+
   { TFPUnaryOperator }
 
   TFPUnaryOperator = Class(TFPExprNode)
@@ -557,6 +578,9 @@ Type
     Procedure Check; override;
     Constructor CreateFunction(AID : TFPExprIdentifierDef; Const Args : TExprArgumentArray); virtual;
     Destructor Destroy; override;
+    Procedure InitAggregate; override;
+    Procedure UpdateAggregate; override;
+    Function HasAggregate : Boolean; override;
     Property ArgumentNodes : TExprArgumentArray Read FArgumentNodes;
     Property ArgumentParams : TExprParameterArray Read FArgumentParams;
     Function AsString : String; override;
@@ -567,7 +591,6 @@ Type
   TAggregateExpr = Class(TFPExprFunction)
   Protected
     FResult : TFPExpressionResult;
-  Public
     Class Function IsAggregate : Boolean; override;
     Procedure GetNodeValue(var Result : TFPExpressionResult);  override;
   end;
@@ -674,6 +697,7 @@ Type
     Function Level4 : TFPExprNode;
     Function Level5 : TFPExprNode;
     Function Level6 : TFPExprNode;
+    Function Level7 : TFPExprNode;
     Function Primitive : TFPExprNode;
     function GetToken: TTokenType;
     Function TokenType : TTokenType;
@@ -687,7 +711,7 @@ Type
     Destructor Destroy; override;
     Function IdentifierByName(const AName : ShortString) : TFPExprIdentifierDef; virtual;
     Procedure Clear;
-    Procedure EvaluateExpression(out Result : TFPExpressionResult);
+    Procedure EvaluateExpression(Var Result : TFPExpressionResult);
     function ExtractNode(var N: TFPExprNode): Boolean;
     Function Evaluate : TFPExpressionResult;
     Function ResultType : TResultType;
@@ -760,9 +784,9 @@ const
 
   Digits        = ['0'..'9','.'];
   WhiteSpace    = [' ',#13,#10,#9];
-  Operators     = ['+','-','<','>','=','/','*'];
+  Operators     = ['+','-','<','>','=','/','*','^'];
   Delimiters    = Operators+[',','(',')'];
-  Symbols       = ['%','^']+Delimiters;
+  Symbols       = ['%']+Delimiters;
   WordDelimiters = WhiteSpace + Symbols;
 
 Resourcestring
@@ -789,6 +813,7 @@ Resourcestring
   SErrNoNegation = 'Cannot negate expression of type %s : %s';
   SErrNoNOTOperation = 'Cannot perform "not" on expression of type %s: %s';
   SErrTypesDoNotMatch = 'Type mismatch: %s<>%s for expressions "%s" and "%s".';
+  SErrTypesIncompatible = 'Incompatible types: %s<>%s for expressions "%s" and "%s".';
   SErrNoNodeToCheck = 'Internal error: No node to check !';
   SInvalidNodeType = 'Node type (%s) not in allowed types (%s) for expression: %s';
   SErrUnterminatedExpression = 'Badly terminated expression. Found token at position %d : %s';
@@ -798,6 +823,7 @@ Resourcestring
   SErrInvalidArgumentType = 'Invalid type for argument %d: Expected %s, got %s';
   SErrInvalidResultType = 'Invalid result type: %s';
   SErrNotVariable = 'Identifier %s is not a variable';
+  SErrInactive = 'Operation not allowed while an expression is active';
   SErrIFNeedsBoolean = 'First argument to IF must be of type boolean: %s';
   SErrCaseNeeds3 = 'Case statement needs to have at least 4 arguments';
   SErrCaseEvenCount = 'Case statement needs to have an even number of arguments';
@@ -859,6 +885,37 @@ Procedure FreeBuiltIns;
 
 begin
   FreeAndNil(Builtins);
+end;
+
+{ TFPModuloOperation }
+
+procedure TFPModuloOperation.Check;
+begin
+  CheckNodeType(Left,[rtInteger]);
+  CheckNodeType(Right,[rtInteger]);
+  inherited Check;
+end;
+
+function TFPModuloOperation.AsString: string;
+begin
+  Result:=Left.AsString+' mod '+Right.asString;
+end;
+
+function TFPModuloOperation.NodeType: TResultType;
+begin
+  Result:=rtInteger;
+end;
+
+procedure TFPModuloOperation.GetNodeValue(var Result: TFPExpressionResult);
+
+Var
+  RRes : TFPExpressionResult;
+
+begin
+  Left.GetNodeValue(Result);
+  Right.GetNodeValue(RRes);
+  Result.ResInteger:=Result.ResInteger mod RRes.ResInteger;
+  Result.ResultType:=rtInteger;
 end;
 
 { TAggregateMax }
@@ -1106,6 +1163,7 @@ begin
       '(' : Result := ttLeft;
       ')' : Result := ttRight;
       ',' : Result := ttComma;
+      '^' : Result := ttPower;
     else
       ScanError(Format(SUnknownDelimiter,[D]));
     end;
@@ -1168,7 +1226,7 @@ Var
 begin
   C:=CurrentChar;
   prevC := #0;
-  while (not IsWordDelim(C) or (prevC='E')) and (C<>cNull) do
+  while (not IsWordDelim(C) or (prevC in ['E','-','+'])) and (C<>cNull) do
     begin
     If Not ( IsDigit(C)
              or ((FToken<>'') and (Upcase(C)='E'))
@@ -1227,6 +1285,8 @@ begin
     Result:=ttif
   else if (S='case') then
     Result:=ttcase
+  else if (S='mod') then
+    Result:=ttMod
   else
     Result:=ttIdentifier;
 end;
@@ -1349,7 +1409,7 @@ begin
   FIdentifiers.Assign(AValue)
 end;
 
-procedure TFPExpressionParser.EvaluateExpression(Out Result: TFPExpressionResult);
+procedure TFPExpressionParser.EvaluateExpression(var Result: TFPExpressionResult);
 begin
   If (FExpression='') then
     ParserError(SErrInExpressionEmpty);
@@ -1375,8 +1435,6 @@ begin
 end;
 
 function TFPExpressionParser.ConvertNode(Todo : TFPExprNode; ToType : TResultType): TFPExprNode;
-
-
 begin
   Result:=ToDo;
   Case ToDo.NodeType of
@@ -1609,7 +1667,7 @@ begin
 {$ifdef debugexpr}  Writeln('Level 4 ',TokenName(TokenType),': ',CurrentToken);{$endif debugexpr}
   Result:=Level5;
   try
-    while (TokenType in [ttMul,ttDiv]) do
+    while (TokenType in [ttMul,ttDiv,ttMod]) do
       begin
       tt:=TokenType;
       GetToken;
@@ -1618,6 +1676,7 @@ begin
       Case tt of
         ttMul : Result:=TFPMultiplyOperation.Create(Result,Right);
         ttDiv : Result:=TFPDivideOperation.Create(Result,Right);
+        ttMod : Result:=TFPModuloOperation.Create(Result,Right);
       end;
       end;
   Except
@@ -1645,8 +1704,28 @@ begin
 end;
 
 function TFPExpressionParser.Level6: TFPExprNode;
+var
+  right: TFPExprNode;
 begin
-{$ifdef debugexpr}  Writeln('Level 6 ',TokenName(TokenType),': ',CurrentToken);{$endif debugexpr}
+{$ifdef debugexpr} Writeln('Level 6 ',TokenName(TokenType),': ',CurrentToken);{$endif debugexpr}
+  Result := Level7;
+  try
+    while (TokenType = ttPower) do
+    begin
+      GetToken;
+      right := Level5;           // Accept '(', unary '+', '-' as next tokens
+      CheckNodes(Result, right);
+      Result := TFPPowerOperation.Create(Result, right);
+    end;
+  except
+    Result.Free;
+    Raise;
+  end;
+end;
+
+function TFPExpressionParser.Level7: TFPExprNode;
+begin
+{$ifdef debugexpr}  Writeln('Level 7 ',TokenName(TokenType),': ',CurrentToken);{$endif debugexpr}
   if (TokenType=ttLeft) then
     begin
     GetToken;
@@ -2012,10 +2091,7 @@ begin
   if FName=AValue then exit;
   If (AValue<>'') then
     If Assigned(Collection) and (TFPExprIdentifierDefs(Collection).IndexOfIdentifier(AValue)<>-1) then
-      begin
-      Writeln('Setting',AValue,'Index ',Index,' found at ',TFPExprIdentifierDefs(Collection).IndexOfIdentifier(AValue));
       RaiseParserError(SErrDuplicateIdentifier,[AValue]);
-      end;
   FName:=AValue;
 end;
 
@@ -3194,6 +3270,55 @@ begin
   Result.ResultType:=rtFloat;
 end;
 
+{ TFPPowerOperation }
+
+procedure TFPPowerOperation.Check;
+const
+  AllowedTypes = [rtInteger, rtFloat];
+begin
+  CheckNodeType(Left, AllowedTypes);
+  CheckNodeType(Right, AllowedTypes);
+end;
+
+function TFPPowerOperation.AsString: String;
+begin
+  Result := Left.AsString + '^' + Right.AsString;
+end;
+
+function TFPPowerOperation.NodeType: TResultType;
+begin
+  Result := rtFloat;
+end;
+
+function power(base,exponent: TExprFloat): TExprFloat;
+// Adapted from unit "math"
+var
+  ex: Integer;
+begin
+  if Exponent = 0.0 then
+    result := 1.0
+  else if (base = 0.0) and (exponent > 0.0) then
+    result := 0.0
+  else if (base < 0.0) and (frac(exponent) = 0.0) then
+  begin
+    ex := round(exponent);
+    result := exp( exponent * ln(-base));
+    if odd(ex) then result := -result;
+  end
+  else
+    result := exp( exponent * ln(base) );
+end;
+
+procedure TFPPowerOperation.GetNodeValue(var Result: TFPExpressionResult);
+var
+  RRes: TFPExpressionResult;
+begin
+  Left.GetNodeValue(Result);
+  Right.GetNodeValue(RRes);
+  Result.ResFloat := power(ArgToFloat(Result), ArgToFloat(RRes));
+  Result.ResultType := rtFloat;
+end;
+
 { TFPConvertNode }
 
 function TFPConvertNode.AsString: String;
@@ -3305,6 +3430,19 @@ begin
     end;
 end;
 
+function TFPExprFunction.HasAggregate: Boolean;
+var
+  I: Integer;
+begin
+  Result := true;
+  if IsAggregate then
+    exit;
+  For I:=0 to Length(FArgumentNodes)-1 do
+    if FArgumentNodes[I].HasAggregate then
+      exit;
+  Result := false;
+end;
+
 procedure TFPExprFunction.Check;
 
 Var
@@ -3349,6 +3487,22 @@ begin
   For I:=0 to Length(FArgumentNodes)-1 do
     FreeAndNil(FArgumentNodes[I]);
   inherited Destroy;
+end;
+
+procedure TFPExprFunction.InitAggregate;
+var
+  I: Integer;
+begin
+  For I:=0 to Length(FArgumentNodes)-1 do
+    FArgumentNodes[i].InitAggregate;
+end;
+
+procedure TFPExprFunction.UpdateAggregate;
+var
+  I: Integer;
+begin
+  For I:=0 to Length(FArgumentNodes)-1 do
+    FArgumentNodes[i].UpdateAggregate;
 end;
 
 function TFPExprFunction.AsString: String;

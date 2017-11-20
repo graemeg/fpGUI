@@ -13,7 +13,7 @@
     <Description Value="fpReport for fpGUI Toolkit"/>
     <License Value="LGPL v2 with static linking exception."/>
     <Version Major="1"/>
-    <Files Count="19">
+    <Files Count="25">
       <Item1>
         <Filename Value="fpreport.pp"/>
         <UnitName Value="fpreport"/>
@@ -90,6 +90,30 @@
         <Filename Value="fpreport_export_preview.pas"/>
         <UnitName Value="fpreport_export_preview"/>
       </Item19>
+      <Item20>
+        <Filename Value="fpreportbarcode.pp"/>
+        <UnitName Value="fpreportbarcode"/>
+      </Item20>
+      <Item21>
+        <Filename Value="fpreportqrcode.pp"/>
+        <UnitName Value="fpreportqrcode"/>
+      </Item21>
+      <Item22>
+        <Filename Value="fpimgbarcode.pp"/>
+        <UnitName Value="fpimgbarcode"/>
+      </Item22>
+      <Item23>
+        <Filename Value="fpbarcode.pp"/>
+        <UnitName Value="fpbarcode"/>
+      </Item23>
+      <Item24>
+        <Filename Value="fpimgqrcode.pp"/>
+        <UnitName Value="fpimgqrcode"/>
+      </Item24>
+      <Item25>
+        <Filename Value="fpqrcodegen.pp"/>
+        <UnitName Value="fpqrcodegen"/>
+      </Item25>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

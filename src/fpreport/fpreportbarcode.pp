@@ -20,7 +20,7 @@ unit fpreportbarcode;
 interface
 
 uses
-  Classes, fpimage, fpexprpars, fpimgbarcode, fpbarcode, fpreport, fpreportstreamer;
+  Classes, fpimage, fprepexprpars, fpimgbarcode, fpbarcode, fpreport, fpreportstreamer;
 
 Type
 
