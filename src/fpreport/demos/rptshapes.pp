@@ -29,6 +29,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -87,7 +88,8 @@ var
   Poly : TReportPolygon;
 {$ENDIF}
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 6 - Shapes';
 
@@ -222,6 +224,10 @@ begin
   inherited Destroy;
 end;
 
+class function TShapesDemo.Description: string;
+begin
+  Result:='Demo showing support for shapes';
+end;
 
 
 end.

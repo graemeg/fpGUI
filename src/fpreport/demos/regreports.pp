@@ -22,6 +22,9 @@ uses
 {$ENDIF}
   rptjson,
   rptcontnr,
+  rptnestedgroups,
+  rptBarcode,
+  rptQRcode,
   udapp
   ;
 
@@ -55,6 +58,9 @@ begin
   R('jsondata',TJSONDemo);
   R('collectiondata',TCollectionDemo);
   R('objectlistdata',TObjectListDemo);
+  R('nestedgroups',TNestedGroupsDemo);
+  R('barcode',TBarcodeDemo);
+  R('QRCode',TQRcodeDemo);
 end;
 
 initialization

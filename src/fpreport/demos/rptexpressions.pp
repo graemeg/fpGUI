@@ -30,6 +30,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -96,7 +97,7 @@ var
   PageFooter: TFPReportPageFooterBand;
   DataHeader: TFPReportDataHeaderBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
 
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 2 - Expression Evaluation';
@@ -253,6 +254,10 @@ begin
   inherited Destroy;
 end;
 
+class function TExpressionsDemo.Description: string;
+begin
+  Result:='Demo with expressions in Memos';
+end;
 
 
 end.

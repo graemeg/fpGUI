@@ -29,6 +29,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -95,7 +96,8 @@ var
   Memo: TFPReportMemo;
   PageFooter: TFPReportPageFooterBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 5 - TrueType Fonts';
   rpt.TwoPass := True;
@@ -229,6 +231,11 @@ begin
   FreeAndNil(lReportData);
   FreeAndNil(sl);
   inherited Destroy;
+end;
+
+class function TTTFDemo.Description: string;
+begin
+  Result:='Demo showing TrueType Font support';
 end;
 
 end.

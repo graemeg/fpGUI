@@ -24,6 +24,7 @@ type
   public
     constructor Create(AOWner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
     procedure GetReportDataNames(Sender: TObject; List: TStrings);
   end;
 
@@ -74,7 +75,8 @@ var
   Image: TFPReportImage;
   Checkbox: TFPReportCheckbox;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 7 - Images and Checkboxes';
 
@@ -231,6 +233,11 @@ begin
   FreeAndNil(lReportData);
   FreeAndNil(sl);
   inherited Destroy;
+end;
+
+class function TImagesDemo.Description: string;
+begin
+  Result:='Demo showing image support';
 end;
 
 procedure TImagesDemo.GetReportDataNames(Sender: TObject; List: TStrings);

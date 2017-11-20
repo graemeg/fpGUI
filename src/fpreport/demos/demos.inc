@@ -5,7 +5,7 @@
 {$define ExportHTML}
 {.$define USEFIREBIRD}
 
-{.$DEFINE USEPOLYGON}
+{.$define USEPOLYGON}
 
 { Enable if you want LCL preview window support. To compile you will also
   have to add the LCL packages to your project dependencies. }

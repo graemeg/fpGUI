@@ -40,7 +40,7 @@
         <PackageName Value="fpguireport"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="18">
       <Unit0>
         <Filename Value="fcldemo.pp"/>
         <IsPartOfProject Value="True"/>
@@ -101,6 +101,19 @@
         <Filename Value="rptcontnr.pp"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="rptnestedgroups.pp"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="rptbarcode.pp"/>
+        <IsPartOfProject Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="rptqrcode.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="rptQRCode"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -113,6 +126,11 @@
       <OtherUnitFiles Value="polygon"/>
       <UnitOutputDirectory Value="units/"/>
     </SearchPaths>
+    <Linking>
+      <Debugging>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+    </Linking>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

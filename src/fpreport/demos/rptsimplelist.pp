@@ -27,6 +27,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -89,9 +90,10 @@ var
   PageFooter: TFPReportPageFooterBand;
   SummaryBand: TFPReportSummaryBand;
 begin
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 1 - Simple Listing';
-  PaperManager.RegisterStandardSizes;
 
   p := TFPReportPage.Create(rpt);
   p.Orientation := poPortrait;
@@ -185,6 +187,10 @@ begin
   inherited Destroy;
 end;
 
+class function TSimpleListDemo.Description: string;
+begin
+  Result:='Simple list of countries';
+end;
 
 end.
 

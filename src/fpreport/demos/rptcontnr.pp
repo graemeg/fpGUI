@@ -44,6 +44,7 @@ type
     procedure   InitialiseData; override;
   Public
     constructor Create(AOWner :TComponent); override;
+    Class function Description : string; override;
   end;
 
   { TObjectListDemo }
@@ -53,6 +54,7 @@ type
     procedure   InitialiseData; override;
   Public
     constructor Create(AOWner :TComponent); override;
+    Class function Description : string; override;
   end;
 
 
@@ -101,6 +103,11 @@ begin
   TFPReportObjectListData(FReportData).OwnsList:=True;
 end;
 
+class function TObjectListDemo.Description: string;
+begin
+  Result:='Demo to show support for object Lists as data loop';
+end;
+
 
 procedure TContnrDemo.CreateReportDesign;
 var
@@ -112,7 +119,7 @@ var
   PageFooter: TFPReportPageFooterBand;
 
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 12 - JSON Data';
 
@@ -242,6 +249,11 @@ begin
   inherited;
   FReportData := TFPReportCollectionData.Create(nil);
   TFPReportCollectionData(FReportData).OwnsCollection:=True;
+end;
+
+class function TCollectionDemo.Description: string;
+begin
+  Result:='Demo showing native support for collections as data loop';
 end;
 
 { TCollectionDemo }

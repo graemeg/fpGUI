@@ -41,6 +41,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -171,7 +172,8 @@ var
   Detail2DataBand: TFPReportDataBand;
   Memo: TFPReportMemo;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 10 - Master/Detail using userdata';
 
@@ -315,6 +317,10 @@ begin
   inherited Destroy;
 end;
 
+class function TMasterDetailDemo.Description: string;
+begin
+  Result:='Demo of Master/Detail data loop support';
+end;
 
 end.
 

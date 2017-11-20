@@ -28,6 +28,7 @@ type
   public
     constructor Create(AOwner : TComponent) ; override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -99,7 +100,8 @@ var
   ReportSummary: TFPReportSummaryBand;
   PageHeader: TFPReportPageHeaderBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 4 - Frames and Fonts';
 
@@ -292,6 +294,10 @@ begin
   inherited Destroy;
 end;
 
+class function TFramesDemo.Description: string;
+begin
+  Result:='Demo showing frames around elements';
+end;
 
 end.
 

@@ -23,6 +23,7 @@ type
     procedure   InitialiseData; override;
   public
     constructor Create(AOwner : TComponent); override;
+    Class function Description : string; override;
     destructor  Destroy; override;
   end;
 
@@ -45,7 +46,8 @@ var
   Image: TFPReportImage;
   PageFooter: TFPReportPageFooterBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 8 - Datasets';
 
@@ -126,13 +128,16 @@ var
   fields: TDbfFieldDefs;
   lDataSet : TDBF;
 begin
-  lDataSet := TDBF.Create(Self);
-  lDataSet.TableName := 'test.dbf';
-  Dataset:=lDataset;
-  lReportData.DataSet:= DataSet;
 
   if FileExists('test.dbf') then
-    exit;
+  begin
+    DeleteFile('test.dbf');
+    DeleteFile('test.dbt');
+  end;
+
+  lDataSet := TDBF.Create(Self);
+  lDataSet.TableName := 'test.dbf';
+
   // If you wanted to create a new DBF table
   fields := TDbfFieldDefs.Create(nil);
   fields.Add('Name', ftString, 50);
@@ -140,6 +145,7 @@ begin
   fields.Add('Age', ftInteger);
   fields.Add('Photo', ftBlob);
   lDataSet.CreateTableEx(fields); // <== Now we have an empty db table
+  fields.Free;
 
   lDataSet.Open;
 
@@ -147,44 +153,50 @@ begin
   lDataSet.FieldByName('Name').AsString := 'Kimi Raikkonen';
   lDataSet.FieldByName('Address').AsString := 'kimi@nospam.net';
   lDataSet.FieldByName('Age').AsInteger := 35;
-  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('../common/pictures/man01.png'));
+  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('pictures/man01.png'));
   lDataSet.Post;
 
   lDataSet.Insert;
   lDataSet.FieldByName('Name').AsString := 'Michael Schumacher';
   lDataSet.FieldByName('Address').AsString := 'michael@schumacher.org';
   lDataSet.FieldByName('Age').AsInteger := 28;
-  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('../common/pictures/man02.png'));
+  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('pictures/man02.png'));
   lDataSet.Post;
 
   lDataSet.Insert;
   lDataSet.FieldByName('Name').AsString := 'Alain Prost';
   lDataSet.FieldByName('Address').AsString := 'alain@prost.com';
   lDataSet.FieldByName('Age').AsInteger := 64;
-  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('../common/pictures/man03.png'));
+  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('pictures/man03.png'));
   lDataSet.Post;
 
   lDataSet.Insert;
   lDataSet.FieldByName('Name').AsString := 'Jenson Button';
   lDataSet.FieldByName('Address').AsString := 'jenson@button.info';
   lDataSet.FieldByName('Age').AsInteger := 50;
-  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('../common/pictures/man04.png'));
+  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('pictures/man04.png'));
   lDataSet.Post;
 
   lDataSet.Insert;
   lDataSet.FieldByName('Name').AsString := 'Fernando Allonso';
   lDataSet.FieldByName('Address').AsString := 'fernando@allonso-team.net';
   lDataSet.FieldByName('Age').AsInteger := 47;
-  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('../common/pictures/man05.png'));
+  TBlobField(lDataSet.FieldByName('Photo')).LoadFromFile(ExpandFileName('pictures/man05.png'));
   lDataSet.Post;
 
-  fields.Free;
+  Dataset := lDataset;
+  lReportData.DataSet := DataSet;
 end;
 
 constructor TDatasetDemo.Create(AOwner : TComponent);
 begin
   Inherited;
   lReportData := TFPReportDatasetData.Create(nil);
+end;
+
+class function TDatasetDemo.Description: string;
+begin
+  Result:='Demo showing dataset support';
 end;
 
 destructor TDatasetDemo.Destroy;

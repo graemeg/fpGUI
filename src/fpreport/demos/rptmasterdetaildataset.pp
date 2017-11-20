@@ -35,6 +35,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -60,7 +61,8 @@ var
   DataHeader: TFPReportDataHeaderBand;
   BudgetDataHeader: TFPReportDataHeaderBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
+
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 11 - Master/Detail using datasets';
   p := TFPReportPage.Create(rpt);
@@ -340,6 +342,10 @@ begin
   inherited Destroy;
 end;
 
+class function TMasterDetailDatasetDemo.Description: string;
+begin
+  Result:='Demo for support of master-detail relations with datasets';
+end;
 
 
 end.

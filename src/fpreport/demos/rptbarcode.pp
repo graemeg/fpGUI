@@ -1,4 +1,5 @@
-unit rptjson;
+unit rptbarcode;
+
 
 {$mode objfpc}{$H+}
 {$I demos.inc}
@@ -9,24 +10,44 @@ uses
   Classes,
   SysUtils,
   fpreport,
-  fpreportjson,
+  fpreportcontnr,
+  fpreportbarcode,
+  contnrs,
   udapp;
 
 type
 
-  TJSONDemo = class(TReportDemoApp)
+  { TCountry }
+
+  TCountry = Class(TCollectionItem)
   private
-    FReportData : TFPReportJSONData;
+    FName: String;
+    FPopulation: Int64;
+  Published
+    Property Name : String Read FName Write FName;
+    Property Population : Int64 Read FPopulation Write FPopulation;
+  end;
+
+  { TCollectionDemo }
+
+  { TBarcodeDemo }
+
+  TBarcodeDemo = class(TReportDemoApp)
+  private
+    procedure SetBarcodeValue(Sender: TFPReportElement);
   Protected
+    FReportData : TFPReportObjectData;
+    FBarcode: TFPReportBarcode;
+  public
     procedure   InitialiseData; override;
+    constructor Create(AOWner :TComponent); override;
+    Class function Description : string; override;
     procedure   CreateReportDesign;override;
     procedure   LoadDesignFromFile(const AFilename: string);
     procedure   HookupData(const AComponentName: string; const AData: TFPReportData);
-  public
-    constructor Create(AOWner :TComponent); override;
     destructor  Destroy; override;
-    Class function Description : string; override;
   end;
+
 
 
 implementation
@@ -37,15 +58,7 @@ uses
   fpJSON,
   jsonparser;
 
-{ TJSONDemo }
-
-procedure TJSONDemo.InitialiseData;
-begin
-  FReportData.Path:='Data';
-  FReportData.LoadFromFile('countries.json');
-end;
-
-procedure TJSONDemo.CreateReportDesign;
+procedure TBarcodeDemo.CreateReportDesign;
 var
   p: TFPReportPage;
   TitleBand: TFPReportTitleBand;
@@ -55,10 +68,9 @@ var
   PageFooter: TFPReportPageFooterBand;
 
 begin
-  inherited CreateReportDesign;
-
-  rpt.Author := 'Graeme Geldenhuys';
-  rpt.Title := 'FPReport Demo 12 - JSON Data';
+  Inherited;
+  rpt.Author := 'Michael Van Canneyt';
+  rpt.Title := 'FPReport Demo : Barcodes';
 
   p :=  TFPReportPage.Create(rpt);
   p.Orientation := poPortrait;
@@ -111,17 +123,27 @@ begin
 
   Memo := TFPReportMemo.Create(DataBand);
   Memo.Layout.Left := 15;
-  Memo.Layout.Top := 0;
+  Memo.Layout.Top := 1;
   Memo.Layout.Width := 50;
   Memo.Layout.Height := 5;
   Memo.Text := '[Name]';
 
   Memo := TFPReportMemo.Create(DataBand);
   Memo.Layout.Left := 70;
-  Memo.Layout.Top := 0;
+  Memo.Layout.Top := 1;
   Memo.Layout.Width := 30;
   Memo.Layout.Height := 5;
   Memo.Text := '[formatfloat(''#,##0'', Population)]';
+
+  FBarcode := TFPReportBarcode.Create(DataBand);
+  FBarcode.Layout.Left := 100;
+  FBarcode.Layout.Top := 1;
+  FBarcode.Layout.Width := 50;
+  FBarcode.Layout.Height := 5;
+  FBarCode.PadLength:=12;
+  // Only one of the 2 ways must be used: either set expression, either use callback.
+  FBarcode.Expression:='Population';
+  // Databand.OnBeforePrint:=@SetBarcodeValue;
 
 
   PageFooter := TFPReportPageFooterBand.Create(p);
@@ -141,7 +163,7 @@ begin
   Memo.TextAlignment.Horizontal := taRightJustified;
 end;
 
-procedure TJSONDemo.LoadDesignFromFile(const AFilename: string);
+procedure TBarcodeDemo.LoadDesignFromFile(const AFilename: string);
 var
   rs: TFPReportJSONStreamer;
   fs: TFileStream;
@@ -151,14 +173,12 @@ begin
     Exit;
   if not FileExists(AFilename) then
     raise Exception.CreateFmt('The file "%s" can not be found', [AFilename]);
-
   fs := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
   try
     lJSON := TJSONObject(GetJSON(fs));
   finally
     fs.Free;
   end;
-
   rs := TFPReportJSONStreamer.Create(nil);
   rs.JSON := lJSON; // rs takes ownership of lJSON
   try
@@ -168,7 +188,7 @@ begin
   end;
 end;
 
-procedure TJSONDemo.HookupData(const AComponentName: string; const AData: TFPReportData);
+procedure TBarcodeDemo.HookupData(const AComponentName: string; const AData: TFPReportData);
 var
   b: TFPReportCustomBandWithData;
 begin
@@ -177,21 +197,58 @@ begin
     b.Data := AData;
 end;
 
-constructor TJSONDemo.Create(AOwner: TComponent);
-begin
-  inherited;
-  FReportData := TFPReportJSONData.Create(nil);
-end;
-
-destructor TJSONDemo.Destroy;
+destructor TBarcodeDemo.Destroy;
 begin
   FreeAndNil(FReportData);
   inherited Destroy;
 end;
 
-class function TJSONDemo.Description: string;
+constructor TBarcodeDemo.Create(AOWner: TComponent);
 begin
-  Result:='Demo of native JSON data support';
+  inherited;
+  FReportData := TFPReportCollectionData.Create(nil);
+  TFPReportCollectionData(FReportData).OwnsCollection:=True;
+end;
+
+class function TBarcodeDemo.Description: string;
+begin
+  Result:='Demo showing native support for barcodes';
+end;
+
+{ TBarcodeDemo }
+
+procedure TBarcodeDemo.SetBarcodeValue(Sender: TFPReportElement);
+
+begin
+  FBarcode.Value:=FReportData.FieldValues['Population'];
+end;
+
+procedure TBarcodeDemo.InitialiseData;
+
+Var
+  SL : TStringList;
+  i : Integer;
+  N,V : String;
+  C : TCountry;
+  Coll : TCollection;
+
+begin
+  Coll:=TCollection.Create(TCountry);
+  TFPReportCollectionData(FReportData).Collection:=coll;
+  SL:=TStringList.Create;
+  try
+    {$I countries.inc}
+    SL.Sort;
+    For I:=0 to SL.Count-1 do
+      begin
+      C:=Coll.Add As TCountry;
+      SL.GetNameValue(I,N,V);
+      C.Name:=N;
+      C.Population:=StrToInt64Def(V,0);
+      end;
+  finally
+    SL.Free;
+  end;
 end;
 
 end.

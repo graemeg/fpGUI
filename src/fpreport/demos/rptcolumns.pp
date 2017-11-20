@@ -32,6 +32,7 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    Class function Description : string; override;
   end;
 
 
@@ -101,7 +102,7 @@ var
   DataFooter: TFPReportDataFooterBand;
   ChildBand: TFPReportChildBand;
 begin
-  PaperManager.RegisterStandardSizes;
+  inherited CreateReportDesign;
   rpt.Author := 'Graeme Geldenhuys';
   rpt.Title := 'FPReport Demo 9 - Multi Columns';
 
@@ -260,13 +261,33 @@ begin
   Memo.TextAlignment.Horizontal := taLeftJustified;
   Memo.TextAlignment.Vertical := tlCenter;
 
+  DataFooter := TFPReportDataFooterBand.Create(p);
+  DataFooter.Layout.Height := 10;
+  DataFooter.Frame.Shape := fsRectangle;
+  DataFooter.Frame.BackgroundColor := TFPReportColor($ffa500);
+  DataFooter.UseParentFont := False;
+  DataFooter.Font.Name := 'LiberationSans-Bold';
+  DataFooter.Font.Color := clWhite;
+
+  Memo := TFPReportMemo.Create(DataFooter);
+  Memo.Layout.Left := 5;
+  Memo.Layout.Top := 1.5;
+  Memo.Layout.Width := 50;
+  Memo.Layout.Height := 8;
+  Memo.Text := 'DataFooter Band';
+  Memo.TextAlignment.Horizontal := taLeftJustified;
+  Memo.TextAlignment.Vertical := tlCenter;
+
   DataBand := TFPReportDataBand.Create(p);
   DataBand.Layout.Height := 10;
   DataBand.Data := FDataPage2;
+  DataBand.KeepTogetherWithChildren := False;
   DataBand.Frame.Shape := fsRectangle;
   DataBand.Frame.BackgroundColor := clDataBand;
   { associated DataHeader band }
   DataBand.HeaderBand := DataHeader;
+  { associated DataFooter band }
+  DataBand.FooterBand := DataFooter;
 
   Memo := TFPReportMemo.Create(DataBand);
   Memo.Layout.Left := 5;
@@ -288,23 +309,6 @@ begin
   Memo.Text := 'ChildBand - [p2element]';
 
   DataBand.ChildBand := ChildBand;
-
-  DataFooter := TFPReportDataFooterBand.Create(p);
-  DataFooter.Layout.Height := 10;
-  DataFooter.Frame.Shape := fsRectangle;
-  DataFooter.Frame.BackgroundColor := TFPReportColor($ffa500);
-  DataFooter.UseParentFont := False;
-  DataFooter.Font.Name := 'LiberationSans-Bold';
-  DataFooter.Font.Color := clWhite;
-
-  Memo := TFPReportMemo.Create(DataFooter);
-  Memo.Layout.Left := 5;
-  Memo.Layout.Top := 1.5;
-  Memo.Layout.Width := 50;
-  Memo.Layout.Height := 8;
-  Memo.Text := 'DataFooter Band';
-  Memo.TextAlignment.Horizontal := taLeftJustified;
-  Memo.TextAlignment.Vertical := tlCenter;
 
   ColumnFooter := TFPReportColumnFooterBand.Create(p);
   ColumnFooter.Layout.Height := 15;
@@ -361,6 +365,11 @@ begin
   FreeAndNil(FStringListPage1);
   FreeAndNil(FStringListPage2);
   inherited Destroy;
+end;
+
+class function TColumnsDemo.Description: string;
+begin
+  Result:='Demo showing support for multiple columns';
 end;
 
 procedure TColumnsDemo.GetReportDataPage2Names(Sender: TObject; List: TStrings);
