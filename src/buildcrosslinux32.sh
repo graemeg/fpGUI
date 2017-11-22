@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ###########################################################################
 # NOTE:  
 #  Cross compiling is from Linux 64-bit to Linux 32-bit only.
