@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 fpcbin=fpc
 fpctarget=`$fpcbin -iTP`-`$fpcbin -iTO`

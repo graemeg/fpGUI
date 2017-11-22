@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # NOTE:  Cross compiling is from Linux to Windows 32-bit only
 
