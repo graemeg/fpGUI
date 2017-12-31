@@ -85,6 +85,7 @@
         <unit file="../src/gui/fpg_style_win8.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_stylemanager.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_tab.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_toolbox.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_trackbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_trayicon.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_window.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
