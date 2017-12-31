@@ -87,6 +87,7 @@
         <unit file="../src/gui/fpg_tab.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_trackbar.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/gui/fpg_trayicon.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
+        <unit file="../src/gui/fpg_window.pas" options="-Fi../src -Fu../src/gui/ -Fu../src/corelib/"/>
         <unit file="../src/reportengine/u_command.pas" options="-Fu../src/gui/reportengine/"/>
         <unit file="../src/reportengine/u_pdf.pas" options="-Fu../src/gui/reportengine/"/>
         <unit file="../src/reportengine/u_report.pas" options="-Fu../src/gui/reportengine/"/>
