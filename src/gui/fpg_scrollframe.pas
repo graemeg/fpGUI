@@ -332,7 +332,7 @@ var
   procedure getVisWidth;
   begin
     if showVsb then
-      visWidth := Width - (FVScrollBar.Width-1)
+      visWidth := Width - (FVScrollBar.Width)
     else
       visWidth := Width;
     Hfits := visWidth >= contentWidth
@@ -341,7 +341,7 @@ var
   procedure getVisHeight;
   begin
     if showHsb then
-      visHeight := Height - (FHScrollBar.Height-1)
+      visHeight := Height - (FHScrollBar.Height)
     else
       visHeight := Height;
     Vfits := visHeight >= contentHeight;
