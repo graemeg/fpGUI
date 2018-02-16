@@ -96,7 +96,7 @@ begin
     ACanvas.SetColor(TfpgColor($7b7b7b));
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
     Exclude(AFlags, btfIsDefault);
     fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>
@@ -115,7 +115,7 @@ begin
   ACanvas.DrawRectangle(r);
 
   // so we don't paint over the border
-  InflateRect(r, -1, -1);
+  r.InflateRect(-1, -1);
   // now paint the face of the button
   if (btfIsPressed in AFlags) then
   begin
