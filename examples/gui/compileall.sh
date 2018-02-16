@@ -1,6 +1,6 @@
 #!/bin/sh
 FPC=fpc 
-for f in `find -name '*.lpr'`
+for f in `find ./ -name '*.lpr'`
 do
   DIR=`dirname $f`
   PROJECT=`basename $f`
