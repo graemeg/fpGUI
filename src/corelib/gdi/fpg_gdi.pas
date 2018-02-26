@@ -184,12 +184,10 @@ type
     procedure   HandleDNDDrop(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
     {$ENDIF}
   private
-    FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
     FNonFullscreenStyle: longword;
     FFullscreenIsSet: boolean;
     FSkipResizeMessage: boolean;
-    FDNDEnabled: Boolean;
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
@@ -1596,7 +1594,6 @@ end;
 procedure TfpgGDIApplication.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
-  mp: boolean;
 begin
   if (atimeoutms >= 0) and (not MessagesPending) then
   begin
@@ -2811,7 +2808,6 @@ const
   cDot: array[1..2] of DWORD = (1, 1);
   cDash: array[1..4] of DWORD = (4, 2, 4, 2);
 var
-  lw: integer;
   logBrush: TLogBrush;
 begin
   FLineWidth := awidth;
