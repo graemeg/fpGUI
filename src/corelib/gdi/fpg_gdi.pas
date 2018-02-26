@@ -392,7 +392,6 @@ uses
 
 var
   wapplication: TfpgApplication;
-  uDragSource: TfpgWidget;  { points to the Source widget of the DND when drop is inside the same app }
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
   NeedToUnitialize: Boolean;
@@ -3483,7 +3482,6 @@ begin
       end;
     end;
 
-    uDragSource := TfpgDrag(self).Source as TfpgWidget;
     { Now let OLE take over from here }
     FDropSource := TfpgOLEDropSource.Create(Self);
     dwResult := ActiveX.DoDragDrop( FDataObject as IDataObject,

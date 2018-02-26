@@ -290,7 +290,6 @@ var
 	EnumFormats: IEnumFORMATETC;
 	num: integer;
   lname: string;
-  lMimeName: string;
   FormatName: array[0..MAX_PATH] of Char;
   i: integer;
 begin
