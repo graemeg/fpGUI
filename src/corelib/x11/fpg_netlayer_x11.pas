@@ -24,7 +24,7 @@ interface
 uses
   Classes, SysUtils, X, XLib,
   XAtom, ctypes;
-  
+
 type
   TNetMaximizedState = (nmsNone, nmsHorz, nmsVert, nmsBoth);
   TNetWindowType = (nwtDesktop, nwtDock, nwtToolBar, nwtMenu, nwtUtility, nwtSplash,
@@ -36,15 +36,15 @@ type
   TNetWindowState = (nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
                      nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn);
   TNetWindowStates = set of TNetWindowState;
-  
+
   TNetWindowAction = (nwaMove, nwaResize, nwaMinimize, nwaShade, nwaStick, nwaMaxHorz,
                       nwaMaxVert, nwaFullscreen, nwaChangeDesktop, nwaClose);
-                      
+
   TNetWindowActions = set of TNetWindowAction;
-  
+
   PNetAtom = ^TNetAtom;
   TNetAtom = TAtom;
-  
+
   TNetAtomEnum = (
                naSUPPORTED,
                naCLIENT_LIST, // array of TWindow
@@ -217,10 +217,10 @@ type
 
     constructor Create(ADisplay: PXDisplay);
     destructor  Destroy; override;
-    
+
     property    NetAtom[AAtom: TNetAtomEnum]: TNetAtom read GetNetAtom;
   end;
-  
+
   const
     NetAtomStr: array[TNetAtomEnum] of String = (
     '_NET_SUPPORTED',
@@ -277,7 +277,7 @@ type
     '_NET_WM_STATE_ABOVE',
     '_NET_WM_STATE_BELOW',
     '_NET_WM_STATE_DEMANDS_ATTENTION',
-    
+
     '_NET_WM_ALLOWED_ACTIONS',
     '_NET_WM_ACTION_MOVE',
     '_NET_WM_ACTION_RESIZE',
@@ -289,7 +289,7 @@ type
     '_NET_WM_ACTION_FULLSCREEN',
     '_NET_WM_ACTION_CHANGE_DESKTOP',
     '_NET_WM_ACTION_CLOSE',
-    
+
     '_NET_WM_STRUT',
     '_NET_WM_STRUT_PARTIAL',
     '_NET_WM_ICON_GEOMETRY',
@@ -304,7 +304,7 @@ type
 
   _NET_SOURCE_APPLICATION = 1;
   _NET_SOURCE_PAGER       = 2;
-  
+
   _NET_WM_STATE_REMOVE       = 0;    // remove/unset property
   _NET_WM_STATE_ADD          = 1;    // add/set property
   _NET_WM_STATE_TOGGLE       = 2;    // toggle property
@@ -495,11 +495,11 @@ begin
 
   Msg.message_type := FNetAtoms[naWM_STATE];
   Msg.window := AWindow;
-  
+
   if AValue <> nmsNone then begin
     Msg.data.l[0] := _NET_WM_STATE_ADD;
     Msg.data.l[3] := _NET_SOURCE_APPLICATION;
-  
+
     if AValue = nmsHorz then Msg.data.l[1] := FNetAtoms[naWM_STATE_MAXIMIZED_HORZ];
     if AValue = nmsVert then Msg.data.l[1] := FNetAtoms[naWM_STATE_MAXIMIZED_VERT];
     if AValue = nmsBoth then begin
@@ -550,7 +550,7 @@ begin
   Msg.window := AWindow;
   Msg.data.l[0] := ADesktopIndex;
   Msg.data.l[1] := _NET_SOURCE_APPLICATION;
-  
+
   SendRootWindowClientMessage(@Msg);
 end;
 
@@ -563,7 +563,7 @@ begin
   Result := FAtomSupported[naWM_DESKTOP]
   and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naWM_DESKTOP], Count, Index);
   if Result = False then Exit;
-  
+
   ADesktopIndex := Index^;
   if Count > 0 then
     XFree(Index);
@@ -685,12 +685,12 @@ begin
   Result := FAtomSupported[naCLOSE_WINDOW];
   if Result =False then Exit;
   FillChar(Msg, SizeOf(Msg), 0);
-  
+
   Msg.window := AWindow;
   Msg.message_type := FNetAtoms[naCLOSE_WINDOW];
   Msg.data.l[0] := FTimeStamp;
   Msg.data.l[1] := _NET_SOURCE_APPLICATION;
-  
+
   SendRootWindowClientMessage(@Msg);
 end;
 
@@ -869,8 +869,8 @@ begin
   XChangeProperty(FDisplay, AWindow, AProperty, UTF8_STRING, 8, PropModeReplace, @UTF8Text[1], ALength);
 end;
 
-function TNETWindowLayer.WindowGetPropertyCardinal(const AWindow: TWindow;
-  AProperty: TAtom; var Count: Integer; var Cards: PLongWord): Boolean;
+function TNETWindowLayer.WindowGetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom;
+  var Count: Integer; var Cards: PLongWord): Boolean;
 var
   atomtype: TAtom;
   format: cint;
@@ -878,7 +878,7 @@ var
   bytes_after: culong;
 begin
   Result := False;
-  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
+  XGetWindowProperty(FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Cards);
 
   if (atomtype = XA_CARDINAL) and (format = 32) then begin
@@ -928,7 +928,7 @@ begin
   if Result = False then Exit;
   if WindowGetPropertyAtom(AWindow, FNetAtoms[naWM_ALLOWED_ACTIONS], AtomCount, ActionAtoms) = False then Exit(False);
   AActions := [];
-  
+
   //WriteLn('Getting Allowed Actions. ', AtomCount);
 
   for I := 0 to AtomCount-1 do begin
@@ -958,7 +958,7 @@ begin
   if Result = False then Exit;
   if WindowGetPropertyAtom(AWindow, FNetAtoms[naWM_STATE], AtomCount, StateAtoms) = False then
     Exit(False);
-    
+
   AWindowState := [];
 
   for I := 0 to AtomCount-1 do begin
@@ -1012,7 +1012,7 @@ begin
   Result := FAtomSupported[naWM_WINDOW_TYPE]
   and WindowGetPropertyAtom(AWindow, FNetAtoms[naWM_WINDOW_TYPE], Count, WindowTypes);
   if not Result then Exit;
-  
+
   AWindowType := [];
   for I := 0 to Count -1 do begin
     if WindowTypes[I] = FNetAtoms[naWM_WINDOW_TYPE_DESKTOP] then Include(AWindowType, nwtDesktop)
@@ -1030,7 +1030,7 @@ begin
     else if WindowTypes[I] = FNetAtoms[naWM_WINDOW_TYPE_COMBO] then Include(AWindowType, nwtCombo)
     else if WindowTypes[I] = FNetAtoms[naWM_WINDOW_TYPE_DND] then Include(AWindowType, nwtDND);
   end;
-  
+
 
 
 end;
@@ -1086,9 +1086,9 @@ begin
   Result := FAtomSupported[naCURRENT_DESKTOP]
   and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naCURRENT_DESKTOP], Count, Index);
   if not Result then Exit;
-  
+
   AIndex := Index^;
-  
+
   if Count > 0 then XFree(Index);
 end;
 
