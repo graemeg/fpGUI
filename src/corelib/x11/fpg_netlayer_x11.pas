@@ -395,6 +395,8 @@ var
   Alpha: Cardinal;
 begin
   Result := ManagerSupportsAtom(naWM_WINDOW_OPACITY);
+  if not Result then
+    Exit;
 
   if AValue > 1 then
     AValue:=1;
@@ -402,8 +404,6 @@ begin
     AValue := 0;
 
   Alpha := Trunc(AValue * $FFFFFFFF);
-
-  Result := True; //????
 
   // totally opaque so it's a normal window.
   if AValue = 1 then
