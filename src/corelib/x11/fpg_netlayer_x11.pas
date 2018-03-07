@@ -392,7 +392,7 @@ end;
 
 function TNETWindowLayer.WindowSetAlpha(const AWindow: TWindow; AValue: Single): Boolean;
 var
-  Alpha: Cardinal;
+  Alpha: LongWord;
 begin
   Result := ManagerSupportsAtom(naWM_WINDOW_OPACITY);
   if not Result then
@@ -403,14 +403,14 @@ begin
   if AValue < 0 then
     AValue := 0;
 
-  Alpha := Trunc(AValue * $FFFFFFFF);
-
   // totally opaque so it's a normal window.
   if AValue = 1 then
     XDeleteProperty(FDisplay, AWindow, FNetAtoms[naWM_WINDOW_OPACITY])
   else
-
+  begin
+    Alpha := Trunc($FFFFFFFF * AValue);;
     WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_WINDOW_OPACITY], 1, Alpha);
+  end;
 end;
 
 function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
