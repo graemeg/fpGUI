@@ -2580,7 +2580,7 @@ begin
     if FSyncCounter > 0 then
     begin
       fpgApplication.netlayer.WindowSetSupportSyncRequest(FWinHandle);
-      fpgApplication.netlayer.WindowSetPropertyCardinal(FWinHandle, fpgApplication.netlayer.NetAtom[naWM_SYNC_REQUEST_COUNTER], 1, @FSyncCounter);
+      fpgApplication.netlayer.WindowSetPropertyCardinal(FWinHandle, fpgApplication.netlayer.NetAtom[naWM_SYNC_REQUEST_COUNTER], 1, FSyncCounter);
     end;
 
     XFree(WMHints);

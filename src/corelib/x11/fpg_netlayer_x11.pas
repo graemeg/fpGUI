@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2007 by Andrew Haines.
-    Copyright (c) 2008 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2008 - 2018 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -209,7 +209,7 @@ type
     procedure   WindowSetPropertyAtom(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Atoms: PAtom);
     procedure   WindowAppendPropertyAtom(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Atoms: PAtom);
     function    WindowGetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Cards: PLongWord): Boolean;
-    procedure   WindowSetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Cards: PLongInt);
+    procedure   WindowSetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Cards: LongWord);
     function    WindowGetPropertyWindow(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Windows: PWindow): Boolean;
     procedure   WindowSetPropertyWindow(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Windows: PWindow);
     function    WindowGetPropertyUTF8(const AWindow: TWindow; AProperty: TAtom; var ALength: Integer; var UTF8Text: String): Boolean;
@@ -409,8 +409,8 @@ begin
   if AValue = 1 then
     XDeleteProperty(FDisplay, AWindow, FNetAtoms[naWM_WINDOW_OPACITY])
   else
-    WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_WINDOW_OPACITY], 1, @Alpha);
 
+    WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_WINDOW_OPACITY], 1, Alpha);
 end;
 
 function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar): Boolean;
@@ -637,7 +637,7 @@ end;
 
 procedure TNETWindowLayer.WindowSetPID(const AWindow: TWindow; const APID: Cardinal);
 begin
-  WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_PID], 1, @APID);
+  WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_PID], 1, APID);
 end;
 
 function TNETWindowLayer.WindowGetFrameExtents(const AWindow: TWindow; out
@@ -811,10 +811,10 @@ begin
     WindowSetPropertyAtom(AWindow, AProperty, NewCount, @NewAtoms[0]);
 end;
 
-procedure TNETWindowLayer.WindowSetPropertyCardinal(const AWindow: TWindow;
-  AProperty: TAtom; Count: Integer; Cards: PLongInt);
+procedure TNETWindowLayer.WindowSetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; Count: Integer;
+  Cards: LongWord);
 begin
-  XChangeProperty(FDisplay, AWindow, AProperty, XA_CARDINAL, 32, PropModeReplace, Pointer(Cards), Count);
+  XChangeProperty(FDisplay, AWindow, AProperty, XA_CARDINAL, 32, PropModeReplace, @Cards, Count);
 end;
 
 function TNETWindowLayer.WindowGetPropertyWindow(const AWindow: TWindow;
