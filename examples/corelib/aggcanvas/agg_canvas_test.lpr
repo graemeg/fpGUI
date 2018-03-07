@@ -1,7 +1,7 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
+  Copyright (C) 2006 - 2018 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -16,8 +16,8 @@
     class. In this demo the AggPas TAgg2D canvas does all the painting.
 
     *** IMPORTANT ***
-      For this demo to work, the fpGUI Toolkit MUST be compiled with
-      the AggCanvas compiler define enabled.
+      For this demo to work fully, the fpGUI Toolkit MUST be compiled
+      with the AggCanvas compiler define enabled.
 }
 
 program agg_canvas_test;
@@ -163,12 +163,7 @@ var
   
   end;
 begin
-  // casting so we have full access to the Agg2D canvas functions
-  ac := TAgg2D(Canvas);
-
-  ac.LineWidth(1.0);
-//  ac.ClearAll($ed, $ed, $ed); // mac os x window background color
-  ac.ClearAll(255, 255, 255);
+  Canvas.Clear(clWhite);
 
   // Testing Rectangles
   Canvas.SetColor(clBlack);
@@ -207,7 +202,7 @@ begin
   Canvas.FillTriangle(200, 150, 175, 175, 275, 175);
 
   // Testing line drawing
-  ac.NoFill;
+//  ac.NoFill;
   Canvas.SetColor(clBlue);
   Canvas.DrawLine(5, 5, 54, 54);
   Canvas.DrawLine(54, 5, 5, 54);
@@ -268,92 +263,113 @@ begin
   y := y + Canvas.Font.Height;
   fpgStyle.DrawControlFrame(Canvas, 5, y, 150, 23);
 
-  // A Vector Text example
-  //----------------------
-  ac.LineWidth(1 );
-  ac.TextAlignment(AGG_AlignLeft ,AGG_AlignBottom );
-  // Normal Text
-  ac.LineColor($00 ,$00 ,$8B );
-  ac.FillColor($1E ,$90 ,$FF );
-  ac.Font('times.ttf' ,45);
-  ac.Text(20 ,250 , 'Vectors are cool !' );
-  // Upside-down Text
-  ac.FlipText(true );
-  ac.LineColor($C0 ,$C0 ,$C0 );
-  ac.FillColor($C0 ,$C0 ,$C0 );
-  ac.Text(20 ,255 ,'Vectors are cool !' );
+  // casting so we have full access to the Agg2D canvas functions
+  ac := nil;
+  if DefaultCanvasClass = TAgg2D then
+    ac := TAgg2D(Canvas);
 
-  // reset the text flip effect
-  ac.FlipText(False);
-
-  // Cool new button styles are now possible
-  DrawMacLionButton(65, 300, 0, 'Normal');
-  DrawMacLionButton(65, 330, 1, 'Hover');
-  DrawMacLionButton(65, 360, 2, 'Clicked');
-  // nice display of virtical text
-  c1.Construct(0,0,0);
-  ac.FillColor(c1);
-  ac.TextHints(true);
-  ac.NoLine;
-  ac.Font('arial.ttf', 13, false,
-     false, AGG_VectorFontCache, 45.0);
-  ac.Text(190, 310, 'Mac OS X Lion buttons', true ,0.0 ,0.0 );
-  // reset text alignment to normal behaviour
-  ac.TextAlignment(AGG_AlignLeft ,AGG_AlignBottom );
-
-  
-  // Star shape
-  ac.LineCap(AGG_CapRound);
-  ac.LineWidth(5);
-  ac.LineColor($32 ,$cd ,$32 );
-  c1.Construct(0, 0 , 255, 200);
-  c2.Construct(0, 0, 255, 50);
-  ac.FillLinearGradient(100, 100, 150, 150, c1, c2);
-  ac.Star(100 ,150 ,30 ,70 ,55 ,5 );
-
-  // Draw Arc from 45 degrees to 270 degrees
-  ac.NoFill;
-  ac.LineColor($FF ,$00 ,$00 );
-  ac.LineWidth(5 );
-  ac.Arc(300 ,320 ,80 ,50 ,Deg2Rad(45 ) ,Deg2Rad(270 ) );
-
-
-  // Lines at various thicknesses & coordinate translation
-  ac.LineColor(0, 0, 0);
-  ac.LineCap(AGG_CapRound);
-  d := 0.1;
-  for i := 1 to 10 do
+  if Assigned(ac) then
   begin
-    ac.LineWidth(d);
-    ac.Line(350, 240, 410, 180);
-    ac.Translate(8, 0);
-    d := d + 0.3;
+    ac.LineWidth(1.0);
+  //  ac.ClearAll($ed, $ed, $ed); // mac os x window background color
+  //  ac.ClearAll(255, 255, 255);
+
+
+    // A Vector Text example
+    //----------------------
+    ac.LineWidth(1 );
+    ac.TextAlignment(AGG_AlignLeft ,AGG_AlignBottom );
+    // Normal Text
+    ac.LineColor($00 ,$00 ,$8B );
+    ac.FillColor($1E ,$90 ,$FF );
+    ac.Font('times.ttf' ,45);
+    ac.Text(20 ,250 , 'Vectors are cool !' );
+    // Upside-down Text
+    ac.FlipText(true );
+    ac.LineColor($C0 ,$C0 ,$C0 );
+    ac.FillColor($C0 ,$C0 ,$C0 );
+    ac.Text(20 ,255 ,'Vectors are cool !' );
+
+    // reset the text flip effect
+    ac.FlipText(False);
+
+    // Cool new button styles are now possible
+    DrawMacLionButton(65, 300, 0, 'Normal');
+    DrawMacLionButton(65, 330, 1, 'Hover');
+    DrawMacLionButton(65, 360, 2, 'Clicked');
+    // nice display of virtical text
+    c1.Construct(0,0,0);
+    ac.FillColor(c1);
+    ac.TextHints(true);
+    ac.NoLine;
+    ac.Font('arial.ttf', 13, false,
+       false, AGG_VectorFontCache, 45.0);
+    ac.Text(190, 310, 'Mac OS X Lion buttons', true ,0.0 ,0.0 );
+
+    // reset text alignment to normal behaviour
+    ac.TextAlignment(AGG_AlignLeft ,AGG_AlignBottom );
+    // reset the font - only needed for this weird demo
+    ac.Font('arial.ttf', 10, false, false, AGG_VectorFontCache, 0);
+
+
+    // Star shape
+    ac.LineCap(AGG_CapRound);
+    ac.LineWidth(5);
+    ac.LineColor($32 ,$cd ,$32 );
+    c1.Construct(0, 0 , 255, 200);
+    c2.Construct(0, 0, 255, 50);
+    ac.FillLinearGradient(100, 100, 150, 150, c1, c2);
+    ac.Star(100 ,150 ,30 ,70 ,55 ,5 );
+
+    // Draw Arc from 45 degrees to 270 degrees
+    ac.NoFill;
+    ac.LineColor($FF ,$00 ,$00 );
+    ac.LineWidth(5 );
+    ac.Arc(300 ,320 ,80 ,50 ,Deg2Rad(45 ) ,Deg2Rad(270 ) );
+
+
+    // Lines at various thicknesses & coordinate translation
+    ac.LineColor(0, 0, 0);
+    ac.LineCap(AGG_CapRound);
+    d := 0.1;
+    for i := 1 to 10 do
+    begin
+      ac.LineWidth(d);
+      ac.Line(350, 240, 410, 180);
+      ac.Translate(8, 0);
+      d := d + 0.3;
+    end;
+    ac.ResetTransformations;
+
+    ac.LineWidth(20 );
+    ac.ResetPath;
+    ac.MoveTo(360 ,310 );
+    ac.LineTo(400 ,270 );
+    ac.LineTo(440 ,310 );
+
+    // Default AGG_JoinRound
+    ac.Translate(10 ,-10 );
+    ac.DrawPath(AGG_StrokeOnly );
+
+    // Change to AGG_JoinMiter
+    ac.LineJoin (AGG_JoinMiter );
+    ac.Translate(0 ,50 );
+    ac.DrawPath (AGG_StrokeOnly );
+
+    // Change to AGG_JoinBevel
+    ac.LineJoin (AGG_JoinBevel );
+    ac.Translate(0 ,50 );
+    ac.DrawPath (AGG_StrokeOnly );
+
+    ac.ResetTransformations;
+  end  // if Assigned(ac)
+  else
+  begin
+    Canvas.Font := fpgStyle.DefaultFont;
+    Canvas.DrawString(75, 275, 'AggCanvas was NOT enabled, so the remaining advanced');
+    Canvas.DrawString(75, 295, 'rendering will not display here.');
+
   end;
-  ac.ResetTransformations;
-
-  
-  
-  ac.LineWidth(20 );
-  ac.ResetPath;
-  ac.MoveTo(360 ,310 );
-  ac.LineTo(400 ,270 );
-  ac.LineTo(440 ,310 );
-
-  // Default AGG_JoinRound
-  ac.Translate(10 ,-10 );
-  ac.DrawPath(AGG_StrokeOnly );
-
-  // Change to AGG_JoinMiter
-  ac.LineJoin (AGG_JoinMiter );
-  ac.Translate(0 ,50 );
-  ac.DrawPath (AGG_StrokeOnly );
-
-  // Change to AGG_JoinBevel
-  ac.LineJoin (AGG_JoinBevel );
-  ac.Translate(0 ,50 );
-  ac.DrawPath (AGG_StrokeOnly );
-
-  ac.ResetTransformations;
 end;
 
 procedure TMainForm.AfterCreate;
