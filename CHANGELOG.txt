@@ -27,6 +27,28 @@ v2.0 (unknown)
       TfpgMsgParmMouse now it is TfpgMsgParmDrop. FPGM_DROPMOVE has replaced part
       of the functionality FPGM_DROPENTER used to fulfill.
 
+
+v1.4.1 (2015-09-02)
+  This was a maintenance release. We had 71 commits made by 5 contributors.
+  Run the following command to see all the changes:
+
+    git shortlog v1.4..v1.4.1
+
+
+v1.4 (2015-04-09)
+  We had 172 commits made by 6 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.2..v1.4
+
+
+v1.2 (2014-08-20)
+  We had 375 commits made by 8 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.0..v1.2
+
+
 v1.0 (2013-04-09)
   - Docview improvements: Bookmark maintenance, keyboard shortcuts,
     image support in INF files, cross link support.
