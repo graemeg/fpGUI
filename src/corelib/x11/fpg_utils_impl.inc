@@ -15,7 +15,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Unix, BaseUnix, fpg_constants, fpg_stringutils;
+  Unix, BaseUnix, process, fpg_constants, fpg_stringutils;
 
 // X11 specific filesystem implementations of encoding functions
 
@@ -54,8 +54,13 @@ begin
   else if fpsystem('which chromium') = 0 then
      Helper := 'chromium';
 
-  if Helper <> '' then
-    fpSystem(Helper + ' ' + aURL + '&');
+  if Helper <> '' then with TProcess.create(nil) do try
+    executable:=Helper;
+    parameters.add(aURL);
+    execute;
+  finally
+    free;
+  end;
 end;
 
 function fpgFileSize(const AFilename: TfpgString): integer;
