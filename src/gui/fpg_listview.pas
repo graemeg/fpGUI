@@ -2722,7 +2722,8 @@ end;
 
 procedure TfpgListViewSubitems.Put(Index: Integer; const S: string);
 begin
-  PfpgLVSubitemRec(FList.Items[Index])^.AText:=S;
+  PfpgLVSubitemRec(FList.Items[Index])^.AText := S;
+  DoChange;
 end;
 
 procedure TfpgListViewSubitems.PutObject(Index: Integer; AObject: TObject);
