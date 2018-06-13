@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
@@ -22,10 +22,18 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
         <CommandLineParams Value="/data/devel/tests/inf_test/test2.inf"/>
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <CommandLineParams Value="/data/devel/tests/inf_test/test2.inf"/>
+            <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
@@ -36,47 +44,38 @@
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="docview"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
         <Filename Value="IPFEscapeCodes.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="IPFEscapeCodes"/>
       </Unit2>
       <Unit3>
         <Filename Value="HelpTopic.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpTopic"/>
       </Unit3>
       <Unit4>
         <Filename Value="HelpFile.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpFile"/>
       </Unit4>
       <Unit5>
         <Filename Value="CompareWordUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CompareWordUnit"/>
       </Unit5>
       <Unit6>
         <Filename Value="SearchTable.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SearchTable"/>
       </Unit6>
       <Unit7>
         <Filename Value="TextSearchQuery.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="TextSearchQuery"/>
       </Unit7>
       <Unit8>
         <Filename Value="nvUtilities.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="nvUtilities"/>
       </Unit8>
       <Unit9>
         <Filename Value="../docs/inf04.txt"/>
@@ -85,57 +84,46 @@
       <Unit10>
         <Filename Value="SearchUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SearchUnit"/>
       </Unit10>
       <Unit11>
         <Filename Value="../components/richtext/RichTextStyleUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RichTextStyleUnit"/>
       </Unit11>
       <Unit12>
         <Filename Value="../components/richtext/CanvasFontManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CanvasFontManager"/>
       </Unit12>
       <Unit13>
         <Filename Value="../components/richtext/ACLStringUtility.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ACLStringUtility"/>
       </Unit13>
       <Unit14>
         <Filename Value="../components/richtext/RichTextDocumentUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RichTextDocumentUnit"/>
       </Unit14>
       <Unit15>
         <Filename Value="../components/richtext/RichTextView.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RichTextView"/>
       </Unit15>
       <Unit16>
         <Filename Value="../components/richtext/RichTextLayoutUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RichTextLayoutUnit"/>
       </Unit16>
       <Unit17>
         <Filename Value="../components/richtext/RichTextDisplayUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RichTextDisplayUnit"/>
       </Unit17>
       <Unit18>
         <Filename Value="IPFFileFormatUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="IPFFileFormatUnit"/>
       </Unit18>
       <Unit19>
         <Filename Value="HelpWindowDimensions.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpWindowDimensions"/>
       </Unit19>
       <Unit20>
         <Filename Value="SettingsUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SettingsUnit"/>
       </Unit20>
       <Unit21>
         <Filename Value="dvconstants.pas"/>
@@ -145,12 +133,10 @@
       <Unit22>
         <Filename Value="dvHelpers.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="dvHelpers"/>
       </Unit22>
       <Unit23>
         <Filename Value="HelpWindow.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpWindow"/>
       </Unit23>
       <Unit24>
         <Filename Value="../TODO.txt"/>
@@ -159,7 +145,6 @@
       <Unit25>
         <Filename Value="frm_configuration.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_configuration"/>
       </Unit25>
       <Unit26>
         <Filename Value="arrows.inc"/>
@@ -168,7 +153,6 @@
       <Unit27>
         <Filename Value="HelpBitmap.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpBitmap"/>
       </Unit27>
       <Unit28>
         <Filename Value="missing.inc"/>
@@ -177,7 +161,6 @@
       <Unit29>
         <Filename Value="frm_text.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_text"/>
       </Unit29>
       <Unit30>
         <Filename Value="docview.rc"/>
@@ -190,22 +173,18 @@
       <Unit32>
         <Filename Value="frm_note.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_note"/>
       </Unit32>
       <Unit33>
         <Filename Value="HelpNote.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpNote"/>
       </Unit33>
       <Unit34>
         <Filename Value="HelpBookmark.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpBookmark"/>
       </Unit34>
       <Unit35>
         <Filename Value="frm_bookmarks.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_bookmarks"/>
       </Unit35>
       <Unit36>
         <Filename Value="lzwdecompress.pas"/>
@@ -238,11 +217,7 @@
       </Optimizations>
     </CodeGeneration>
     <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CustomOptions Value="-O-"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>
