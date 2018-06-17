@@ -42,8 +42,10 @@ type
     FOnClose: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FPopupFrame: boolean;
+    FPopupWidget: TfpgWidget;
     procedure   SetPopupFrame(const AValue: boolean);
     function    GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
+    procedure SetPopupWidget(AValue: TfpgWidget);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandleClose; virtual;
@@ -63,6 +65,7 @@ type
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
+    Property    PopupWidget: TfpgWidget read FPopupWidget write SetPopupWidget;
   end;
 
 
@@ -232,6 +235,12 @@ begin
     Result.x := Result.x - self.Width;
 end;
 
+procedure TfpgPopupWindow.SetPopupWidget(AValue: TfpgWidget);
+begin
+  if FPopupWidget = AValue then Exit;
+  FPopupWidget := AValue;
+end;
+
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
 begin
   {$IFDEF DEBUG}
@@ -350,7 +359,8 @@ begin
     Left  := x;
     Top   := y;
   end;
-  
+
+  FPopupWidget := AWidget;
   // and show
   HandleShow;
 end;
