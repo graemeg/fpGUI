@@ -1,16 +1,17 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# Russian translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:59+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Afrikaans <en@li.org>\n"
+"POT-Creation-Date: 2014-10-16 16:16+0300\n"
+"PO-Revision-Date: 2014-10-16 16:16+0300\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>\n"
+"Language-Team: Russian <loginov.alex.valer@gmail.com>\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: "
+"Plural-Forms: \n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
@@ -46,11 +47,7 @@ msgstr "Все шрифты"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
-msgstr ""
-
-#: fpg_constants:rserrunexpected
-msgid "An unexpected error occurred."
-msgstr ""
+msgstr "Alt+"
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
@@ -78,19 +75,11 @@ msgstr "Август"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr ""
-
-#: fpg_constants:rscolorblue
-msgid "Blue"
-msgstr "Синий"
+msgstr "BkSp"
 
 #: fpg_constants:rsbold
 msgid "Bold"
 msgstr "Жирный"
-
-#: fpg_constants:rsbookmarks
-msgid "Bookmarks"
-msgstr ""
 
 #: fpg_constants:rscancel
 msgid "Cancel"
@@ -106,15 +95,11 @@ msgstr "Изменить"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr "Изменить Заголовок"
+msgstr "Изменить"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr ""
-
-#: fpg_constants:rscolorpickerhint
-msgid "Click on Picker and maintain click => release to get the color"
-msgstr ""
+msgstr "Таблица символов"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -124,13 +109,9 @@ msgstr "Закрыть"
 msgid "Collection"
 msgstr "Группа"
 
-#: fpg_constants:rstabsheetcolorwheel
-msgid "Color Wheel"
-msgstr ""
-
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "Настроить Закладки"
+msgstr "Конфигурировать закладки"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -139,10 +120,6 @@ msgstr "Подтвердить"
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
 msgstr "Подтверждение"
-
-#: fpg_constants:rscontinuous
-msgid "Continuous"
-msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -166,7 +143,7 @@ msgstr "Критическая ошибка"
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
-msgstr ""
+msgstr "Ctrl+"
 
 #: fpg_constants:rscut
 msgid "Cut"
@@ -186,7 +163,7 @@ msgstr "Декабрь"
 
 #: fpg_constants:rskeydel
 msgid "Del"
-msgstr ""
+msgstr "Del"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
@@ -202,7 +179,7 @@ msgstr "Директория"
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr ""
+msgstr "Вниз"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -214,7 +191,7 @@ msgstr "Редактировать"
 
 #: fpg_constants:rskeyend
 msgid "End"
-msgstr ""
+msgstr "End"
 
 #: fpg_constants:rslanguage
 msgid "English"
@@ -222,11 +199,11 @@ msgstr "Русский"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
-msgstr ""
+msgstr "Enter"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr "Укажите имя новой директории"
+msgstr "Введите имя новой директории"
 
 #: fpg_constants:rserror
 msgid "Error"
@@ -234,7 +211,7 @@ msgstr "Ошибка"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
-msgstr ""
+msgstr "Esc"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
@@ -250,11 +227,11 @@ msgstr "Невозможно создать директорию <%s>"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr ""
+msgstr "Не удалось найти просмотрщик справки."
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "ложный"
+msgstr "False"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
@@ -304,18 +281,6 @@ msgstr "Пт"
 msgid "Friday"
 msgstr "Пятница"
 
-#: fpg_constants:rsgotoparentdirectory
-msgid "Go to parent directory"
-msgstr ""
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr ""
-
-#: fpg_constants:rscolorgreen
-msgid "Green"
-msgstr ""
-
 #: fpg_constants:rsfilegroup
 msgid "Group"
 msgstr "Группа"
@@ -324,13 +289,9 @@ msgstr "Группа"
 msgid "Help"
 msgstr "Справка"
 
-#: fpg_constants:rshexadecimal
-msgid "Hexadecimal"
-msgstr ""
-
 #: fpg_constants:rskeyhome
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
@@ -338,7 +299,7 @@ msgstr "Пропустить"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "Изображение <%s> не найдено"
+msgstr "Изображение <%s> отсутствует"
 
 #: fpg_constants:rsinformation
 msgid "Information"
@@ -346,7 +307,7 @@ msgstr "Информация"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
-msgstr ""
+msgstr "Ins"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
@@ -354,7 +315,7 @@ msgstr "Вставка"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Вставить из таблицы символов"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -390,7 +351,7 @@ msgstr "Июнь"
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr ""
+msgstr "Влево"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
@@ -404,6 +365,10 @@ msgstr "Мар"
 msgid "March"
 msgstr "Март"
 
+#: fpg_constants:rslongmay
+msgid "May"
+msgstr "Май"
+
 #: fpg_constants:rsshortmay
 msgid "May"
 msgstr "Май"
@@ -414,7 +379,7 @@ msgstr "Сообщение"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
-msgstr ""
+msgstr "Мета+"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -430,11 +395,11 @@ msgstr "Понедельник"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr ""
+msgstr "Вниз"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr ""
+msgstr "Вверх"
 
 #: fpg_constants:rsname
 msgid "Name"
@@ -482,11 +447,11 @@ msgstr "Владелец"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr "PDF Документы"
+msgstr "Документы PDF"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Страница"
 
 #: fpg_constants:rspassword
 msgid "Password"
@@ -498,27 +463,19 @@ msgstr "Вставить"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
-msgstr ""
+msgstr "PgDn"
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
-msgstr ""
-
-#: fpg_constants:rstabpredefined
-msgid "Predefined"
-msgstr ""
+msgstr "PgUp"
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Предпросмотр"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Ранее использованные"
-
-#: fpg_constants:rscolorred
-msgid "Red"
-msgstr ""
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -530,7 +487,7 @@ msgstr "Повторить"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr ""
+msgstr "Вправо"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -562,7 +519,7 @@ msgstr "Поиск"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Секция"
 
 #: fpg_constants:rsselect
 msgid "Select"
@@ -590,7 +547,7 @@ msgstr "Serif"
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
-msgstr ""
+msgstr "Shift+"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
@@ -602,7 +559,7 @@ msgstr "Размер"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Пробел"
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -618,11 +575,11 @@ msgstr "Воскресенье"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr ""
+msgstr "Tab"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr ""
+msgstr "Вставить текст"
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
@@ -642,7 +599,7 @@ msgstr "Сегодня"
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr "верный"
+msgstr "True"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
@@ -666,7 +623,7 @@ msgstr "Подчеркнутый"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr ""
+msgstr "Вверх"
 
 #: fpg_constants:rsusername
 msgid "User name"
@@ -698,5 +655,377 @@ msgstr "Да для всех"
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr ""
+msgstr "из"
+
+#: vfd_constants:rsopenformfile
+msgid "Open form file"
+msgstr "Открыть файл формы"
+
+#: vfd_constants:rspascalsourcefiles
+msgid "Pascal source files"
+msgstr "Исходные файлы Pascal"
+
+#: vfd_constants:rssaveformfile
+msgid "Save form source"
+msgstr "Сохранить исходник формы"
+
+#: vfd_constants:rsversion
+msgid "Version: %s"
+msgstr "Версия:  %s"
+
+#: vfd_constants:rswrittenby
+msgid "Written by %s"
+msgstr "Автор: %s"
+
+#: vfd_constants:rscompiledon
+msgid "Compiled on:  %s"
+msgstr "Дата компиляции:  %s"
+
+#: vfd_constants:rsnewunnamedform
+msgid "new"
+msgstr "Новый"
+
+#: vfd_constants:rsdesignerhelp1
+msgid "F11: switch to Properties"
+msgstr "F11: переключить на Свойства"
+
+#: vfd_constants:rsdesignerhelp2
+msgid "TAB, SHIFT+TAB: select next widget"
+msgstr "TAB, SHIFT+TAB: выбрать следующий виджет"
+
+#: vfd_constants:rsdesignerhelp3
+msgid "F2: edit widget order"
+msgstr "F2: править порядок виджетов"
+
+#: vfd_constants:rsdesignerquickhelp
+msgid "Quick Help"
+msgstr "Быстрая справка"
+
+#: vfd_constants:rsleft
+msgid "Left"
+msgstr "Слева"
+
+#: vfd_constants:rstop
+msgid "Top"
+msgstr "Сверху"
+
+#: vfd_constants:rswidth
+msgid "Width"
+msgstr "Ширина"
+
+#: vfd_constants:rsheight
+msgid "Height"
+msgstr "Высота"
+
+#: vfd_constants:rsnewclassname
+msgid "Class name"
+msgstr "Имя класса"
+
+#: vfd_constants:rsnewformname
+msgid "Form name"
+msgstr "Имя формы"
+
+#: vfd_constants:rsposition
+msgid "Position"
+msgstr "Позиция"
+
+#: vfd_constants:rsformtitle
+msgid "Form %s"
+msgstr "Форма %s"
+
+#: vfd_constants:rsup
+msgid "Up"
+msgstr "Вверх"
+
+#: vfd_constants:rsdown
+msgid "Down"
+msgstr "Вниз"
+
+#: vfd_constants:rsgridresolution
+msgid "Grid resolution"
+msgstr "Разрешен. сетки"
+
+#: vfd_constants:rsrecentfilescount
+msgid "Recent files count"
+msgstr "Кол-во посл.файлов"
+
+#: vfd_constants:rsshowfullpathname
+msgid "Show the full file path"
+msgstr "Показ. полный путь файла"
+
+#: vfd_constants:rsformdesigner
+msgid "Form designer"
+msgstr "Дизайнер форм"
+
+#: vfd_constants:rsopenrecentsettings
+msgid "Open Recent menu settings"
+msgstr "Настройки \"Открыть последний\""
+
+#: vfd_constants:rsvarious
+msgid "Various"
+msgstr "Разное"
+
+#: vfd_constants:rsundoonpropertyexit
+msgid "Undo on property editor exit"
+msgstr "Отменять св-во при выходе"
+
+#: vfd_constants:rsoneclickselectandmove
+msgid "One click select and move"
+msgstr "Выбир. и перем. одним щелчком"
+
+#: vfd_constants:rsdefaultfileext
+msgid "Default file extension"
+msgstr "Расшир. по умолч."
+
+#: vfd_constants:rsusecoderegions
+msgid "Use code-folding regions in auto-generated code"
+msgstr "Использовать регионы сложенного кода в автокоде"
+
+#: vfd_constants:rsindenttype
+msgid "Indent Type for generated code"
+msgstr "Тип отступа для автокода"
+
+#: vfd_constants:rsdlgproductinfo
+msgid "Product Information"
+msgstr "Информация о продукте"
+
+#: vfd_constants:rsdlgsetup
+msgid "General Settings"
+msgstr "Общие опции"
+
+#: vfd_constants:rsdlginsertcustomwidget
+msgid "Insert Custom Widget"
+msgstr "Вставить виджет вручную"
+
+#: vfd_constants:rsdlgnewform
+msgid "New Form"
+msgstr "Новая форма"
+
+#: vfd_constants:rsdlgeditformposition
+msgid "Form Position"
+msgstr "Позиция формы"
+
+#: vfd_constants:rsdlgwidgetorder
+msgid "Widget Order"
+msgstr "Порядок виджетов"
+
+#: vfd_constants:rsdlgtaborder
+msgid "Tab Order"
+msgstr "Порядок обхода по Tab"
+
+#: vfd_constants:rserrunitnotfound
+msgid "The unit <%s> was not found"
+msgstr "Модуль <%s> не был найден"
+
+#: vfd_constants:rserrloadingform
+msgid "Error loading form"
+msgstr "Ошибка загрузки формы"
+
+#: vfd_constants:rserrfailedtofinddesignerform
+msgid "Failed to find Designer Form"
+msgstr "Ошибка поиска Дизайнера Формы"
+
+#: vfd_constants:rserrformsaveioerror
+msgid "Form save I/O failure in <%s>"
+msgstr "Ошибка ввода/вывода при сохранении формы <%s>"
+
+#: vfd_constants:rserrnameconflict
+msgid "Name Conflict"
+msgstr "Конфликт имён"
+
+#: vfd_constants:rserrnostringsproperty
+msgid "Failed to find TStrings type property"
+msgstr "Ошибка поиска свойства для типа TStrings"
+
+#: vfd_constants:rserrfailedtoparseboolean
+msgid "Failed to parse Boolean value <%s>"
+msgstr "Ошибка разбора булевой переменной <%s>"
+
+#: vfd_constants:rsclass
+msgid "Class"
+msgstr "Класс"
+
+#: vfd_constants:rsname
+msgid "Name"
+msgstr "Имя"
+
+#: vfd_constants:rsproperties
+msgid "Properties"
+msgstr "Свойства"
+
+#: vfd_constants:rsanchors
+msgid "Anchors"
+msgstr "Привязки"
+
+#: vfd_constants:rsunknownlines
+msgid "Unknown lines"
+msgstr "Неизвестные строки"
+
+#: vfd_constants:rsfile
+msgid "&File"
+msgstr "&Файл"
+
+#: vfd_constants:rssettings
+msgid "&Settings"
+msgstr "&Опции"
+
+#: vfd_constants:rsform
+msgid "Fo&rm"
+msgstr "Фо&рма"
+
+#: vfd_constants:rspreview
+msgid "&Preview"
+msgstr "&Предпросмотр"
+
+#: vfd_constants:rshelp
+msgid "&Help"
+msgstr "&Справка"
+
+#: vfd_constants:rscreatenewfile
+msgid "Create New File"
+msgstr "Создать новый файл"
+
+#: vfd_constants:rsopen
+msgid "Open"
+msgstr "Открыть"
+
+#: vfd_constants:rsopenrecent
+msgid "Open Recent"
+msgstr "Открыть последний"
+
+#: vfd_constants:rssave
+msgid "Save"
+msgstr "Сохранить"
+
+#: vfd_constants:rssaveasnewtemplateunit
+msgid "Save As New Template Unit"
+msgstr "Сохранить как новый шаблонный модуль"
+
+#: vfd_constants:rsaddnewformtounit
+msgid "Add New Form to Unit"
+msgstr "Добавить новую форму в модуль"
+
+#: vfd_constants:rsexit
+msgid "Exit"
+msgstr "Выход"
+
+#: vfd_constants:rsgeneraloptions
+msgid "General options"
+msgstr "Общие опции"
+
+#: vfd_constants:rseditspecial
+msgid "Edit special"
+msgstr "Особое редактирование"
+
+#: vfd_constants:rsaboutfpguitoolkit
+msgid "About fpGUI Toolkit"
+msgstr "Информация о fpGUI Toolkit"
+
+#: vfd_constants:rssavecurrentformdesign
+msgid "Save the current form design"
+msgstr "Сохранить текущий дизайн формы"
+
+#: vfd_constants:rsclose
+msgid "Close"
+msgstr "Закрыть"
+
+#: vfd_constants:rscancel
+msgid "Cancel"
+msgstr "Отмена"
+
+#: vfd_constants:rsok
+msgid "OK"
+msgstr "ОК"
+
+#: vfd_constants:rsappliestonewformdialogsonly
+msgid "Applies to new form/dialogs only"
+msgstr "Применяется только для новых форм/диалогов"
+
+#: vfd_constants:rsspacecharacters
+msgid "Space characters"
+msgstr "Символы пробела"
+
+#: vfd_constants:rstabcharacters
+msgid "Tab characters"
+msgstr "Символы табуляции"
+
+#: vfd_constants:rsitems
+msgid "Items"
+msgstr "Пункты"
+
+#: vfd_constants:rsclear
+msgid "Clear"
+msgstr "Очистить"
+
+#: vfd_constants:rspos
+msgid "Pos"
+msgstr "Поз."
+
+#: vfd_constants:rsformnameexists
+msgid "The form name already exists in the current unit, please try again"
+msgstr "Имя формы уже существует в текущем модуле, пожалуйста, попробуйте снова"
+
+#: vfd_constants:rscolumneditor
+msgid "Column editor"
+msgstr "Редактор столбцов"
+
+#: vfd_constants:rsstringgridcolumns
+msgid "String Grid columns"
+msgstr "Столбцы в сетке строк"
+
+#: vfd_constants:rscolumn
+msgid "Column"
+msgstr "Столбец"
+
+#: vfd_constants:rstitle
+msgid "Title"
+msgstr "Название"
+
+#: vfd_constants:rscolumnwidth
+msgid "Column width"
+msgstr "Ширина столбца"
+
+#: vfd_constants:rsalignment
+msgid "Alignment"
+msgstr "Выравнивание"
+
+#: vfd_constants:rsright
+msgid "Right"
+msgstr "Справа"
+
+#: vfd_constants:rscenter
+msgid "Center"
+msgstr "Слева"
+
+#: vfd_constants:rsnew
+msgid "New"
+msgstr "Новый"
+
+#: vfd_constants:rsdelete
+msgid "Delete"
+msgstr "Удалить"
+
+#: vfd_constants:rsupuppercase
+msgid "UP"
+msgstr "ВВЕРХ"
+
+#: vfd_constants:rsdownuppercase
+msgid "DOWN"
+msgstr "ВНИЗ"
+
+#: vfd_constants:rscol
+msgid "Col."
+msgstr "Кол."
+
+#: vfd_constants:rsalign
+msgid "Align"
+msgstr "Выравн."
+
+#: vfd_constants:rsaddtab
+msgid "Add Tab"
+msgstr "Добавить Tab"
+
+#: vfd_constants:rsdeletetab
+msgid "Delete Tab"
+msgstr "Удалить Tab"
 
