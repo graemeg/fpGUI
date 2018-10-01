@@ -96,6 +96,8 @@ type
 
 implementation
 
+uses
+  vfd_constants;
 
 procedure EditStringGridColumns(agrid: TfpgStringGrid);
 var
@@ -116,7 +118,7 @@ begin
   {@VFD_BODY_BEGIN: ColumnEditForm}
   Name := 'ColumnEditForm';
   SetPosition(270, 267, 511, 269);
-  WindowTitle := 'Column editor';
+  WindowTitle := rsColumnEditor;
   Sizeable := False;
 
   lbLabel1 := TfpgLabel.Create(self);
@@ -124,7 +126,7 @@ begin
   begin
     Name := 'lbLabel1';
     SetPosition(8, 4, 110, 16);
-    Text := 'String Grid columns:';
+    Text := rsStringGridColumns + ':';
     FontDesc := '#Label1';
     AutoSize := True;
   end;
@@ -142,7 +144,7 @@ begin
   begin
     Name := 'lbLabel2';
     SetPosition(344, 24, 56, 16);
-    Text := 'Column:';
+    Text := rsColumn + ':';
     FontDesc := '#Label1';
     AutoSize := True;
   end;
@@ -152,7 +154,7 @@ begin
   begin
     Name := 'lbLabel3';
     SetPosition(344, 56, 34, 16);
-    Text := 'Title:';
+    Text := rsTitle + ':';
     FontDesc := '#Label1';
     AutoSize := True;
   end;
@@ -162,7 +164,7 @@ begin
   begin
     Name := 'lbLabel6';
     SetPosition(344, 100, 88, 16);
-    Text := 'Column width:';
+    Text := rsColumnWidth + ':';
     FontDesc := '#Label1';
     AutoSize := True;
   end;
@@ -172,7 +174,7 @@ begin
   begin
     Name := 'lbLabel5';
     SetPosition(344, 144, 83, 16);
-    Text := 'Alignment:';
+    Text := rsAlignment + ':';
     FontDesc := '#Label1';
     AutoSize := True;
   end;
@@ -212,9 +214,9 @@ begin
   begin
     Name := 'chlALIGN';
     SetPosition(344, 162, 160, 22);
-    Items.Add('Left');
-    Items.Add('Right');
-    Items.Add('Center');
+    Items.Add(rsLeft);
+    Items.Add(rsRight);
+    Items.Add(rsCenter);
     FontDesc := '#List';
     OnChange := @EditChange;
   end;
@@ -224,7 +226,7 @@ begin
   begin
     Name := 'btnNew';
     SetPosition(8, 236, 75, 24);
-    Text := 'New';
+    Text := rsNew;
     FontDesc := '#Label1';
     ImageName := '';
     OnClick := @NewButtonClick;
@@ -235,7 +237,7 @@ begin
   begin
     Name := 'btnDelete';
     SetPosition(86, 236, 75, 24);
-    Text := 'Delete';
+    Text := rsDelete;
     FontDesc := '#Label1';
     ImageName := '';
     OnClick := @DeleteButtonClick;
@@ -246,7 +248,7 @@ begin
   begin
     Name := 'btnUP';
     SetPosition(182, 236, 75, 24);
-    Text := 'UP';
+    Text := rsUpUpperCase;
     FontDesc := '#Label1';
     ImageName := '';
     OnClick := @UpDownButtonClick;
@@ -257,7 +259,7 @@ begin
   begin
     Name := 'btnDOWN';
     SetPosition(260, 236, 75, 24);
-    Text := 'DOWN';
+    Text := rsDownUpperCase;
     FontDesc := '#Label1';
     ImageName := '';
     OnClick := @UpDownButtonClick;
@@ -268,7 +270,7 @@ begin
   begin
     Name := 'btnClose';
     SetPosition(428, 236, 75, 24);
-    Text := 'Close';
+    Text := rsClose;
     FontDesc := '#Label1';
     ImageName := 'stdimg.close';
     OnClick := @CloseButtonClick;
@@ -343,7 +345,7 @@ end;
 
 procedure TColumnEditForm.NewButtonClick(Sender: TObject);
 begin
-  dbgrid.AddColumn('New', 50, taLeftJustify);
+  dbgrid.AddColumn(rsNew, 50, taLeftJustify);
   grid.FocusRow := grid.RowCount;
   grid.Update;
   GridRowChange(Sender, grid.FocusRow);
@@ -414,11 +416,11 @@ begin
     2:  s := IntToStr(c.Width);
     3:  case c.Alignment of
           taRightJustify:
-              s := 'Right';
+              s := rsRight;
           taCenter:
-              s := 'Center';
+              s := rsCenter;
           else
-              s := 'Left';
+              s := rsLeft;
         end;
     else
       s := '?';
@@ -433,10 +435,10 @@ begin
   RowSelect := True;
   ColumnCount := 0;
   RowCount := 0;
-  AddColumn('Col.', 30);
-  AddColumn('Title', 80);
-  AddColumn('Width', 40);
-  AddColumn('Align', 50);
+  AddColumn(rsCol, 30);
+  AddColumn(rsTitle, 80);
+  AddColumn(rsWidth, 40);
+  AddColumn(rsAlign, 50);
 end;
 
 { TPropertyDBColumns }

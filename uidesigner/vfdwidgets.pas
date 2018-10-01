@@ -69,6 +69,7 @@ uses
   fpg_hyperlink,
   fpg_toggle,
   vfdpropeditgrid,
+  vfd_constants,
   vfdmain;
 
 type
@@ -101,8 +102,8 @@ begin
   Result := TfpgPopupMenu.Create(nil);
   { TODO : These are disabled for now, because a TabSheet component are used
            instead of a menu item - for adding tabs. }
-  Result.AddMenuItem('Add Tab', '', @AddTabSClicked).Enabled := False;
-  Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked).Enabled := False;
+  Result.AddMenuItem(rsAddTab, '', @AddTabSClicked).Enabled := False;
+  Result.AddMenuItem(rsDeleteTab, '', @DeleteTabClicked).Enabled := False;
 end;
 
 var

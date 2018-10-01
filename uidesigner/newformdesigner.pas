@@ -217,7 +217,7 @@ begin
   {@VFD_BODY_BEGIN: frmAbout}
   Name := 'frmAbout';
   SetPosition(378, 267, 276, 180);
-  WindowTitle := 'Product Information...';
+  WindowTitle := rsDlgProductInfo + '...';
   Hint := '';
   WindowPosition := wpScreenCenter;
   OnShow := @FormShow;
@@ -229,7 +229,7 @@ begin
     SetPosition(12, 16, 255, 31);
     FontDesc := 'Arial-20';
     Hint := '';
-    Text := 'fpGUI UI Designer';
+    Text := cAppName;
   end;
 
   lblVersion := TfpgLabel.Create(self);
@@ -240,7 +240,7 @@ begin
     Alignment := taRightJustify;
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Version:  %s';
+    Text := Format(rsVersion, [cAppVersion]);
   end;
 
   btnClose := TfpgButton.Create(self);
@@ -249,7 +249,7 @@ begin
     Name := 'btnClose';
     SetPosition(194, 148, 75, 24);
     Anchors := [anRight,anBottom];
-    Text := 'Close';
+    Text := rsClose;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.close';
@@ -264,7 +264,7 @@ begin
     SetPosition(12, 100, 241, 14);
     FontDesc := 'Arial-9';
     Hint := '';
-    Text := 'Written by Graeme Geldenhuys';
+    Text := Format(rsWrittenBy, ['Graeme Geldenhuys']);
   end;
 
   lblURL := TfpgHyperlink.Create(self);
@@ -288,7 +288,7 @@ begin
     SetPosition(12, 132, 191, 13);
     FontDesc := 'Arial-8';
     Hint := '';
-    Text := 'Compiled on:  %s';
+    Text := Format(rsCompiledOn, [{$I %date%} + ' ' + {$I %time%}]);
   end;
 
   {@VFD_BODY_END: frmAbout}
@@ -341,7 +341,7 @@ begin
     SetPosition(4, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
-    Hint := 'Add New Form to Unit';
+    Hint := rsAddNewFormToUnit;
     ImageMargin := -1;
     ImageName := 'vfd.newform';
     ImageSpacing := 0;
@@ -373,7 +373,7 @@ begin
     SetPosition(56, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
-    Hint := 'Save the current form design';
+    Hint := rsSaveCurrentFormDesign;
     ImageMargin := -1;
     ImageName := 'stdimg.save';
     ImageSpacing := 0;
@@ -413,17 +413,17 @@ begin
   begin
     Name := 'filemenu';
     SetPosition(464, 64, 120, 20);
-    AddMenuItem('Create New File...', 'Ctrl+N', @(maindsgn.OnNewFile));
-    AddMenuItem('Open...', 'Ctrl+O', @(maindsgn.OnLoadFile));
-    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
+    AddMenuItem(rsCreateNewFile + '...', 'Ctrl+N', @(maindsgn.OnNewFile));
+    AddMenuItem(rsOpen + '...', 'Ctrl+O', @(maindsgn.OnLoadFile));
+    FFileOpenRecent := AddMenuItem(rsOpenRecent + '...', '', nil);
     AddMenuItem('-', '', nil);
-    mi := AddMenuItem('Save', 'Ctrl+S', @(maindsgn.OnSaveFile));
+    mi := AddMenuItem(rsSave, 'Ctrl+S', @(maindsgn.OnSaveFile));
     mi.Tag := 10;
-    AddMenuItem('Save As New Template Unit...', 'Ctrl+Shift+S', @(maindsgn.OnSaveFile));
+    AddMenuItem(rsSaveAsNewTemplateUnit + '...', 'Ctrl+Shift+S', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
-    AddMenuItem('Add New Form to Unit...', '', @(maindsgn.OnNewForm));
+    AddMenuItem(rsAddNewFormToUnit + '...', '', @(maindsgn.OnNewForm));
     AddMenuItem('-', '', nil);
-    AddMenuItem('Exit', 'Ctrl+Q', @(maindsgn.OnExit));
+    AddMenuItem(rsExit, 'Ctrl+Q', @(maindsgn.OnExit));
   end;
 
   formmenu := TfpgPopupMenu.Create(self);
@@ -431,10 +431,10 @@ begin
   begin
     Name := 'formmenu';
     SetPosition(464, 48, 120, 20);
-    AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
-    AddMenuItem('Tab Order...', '', @(maindsgn.OnEditTabOrder));
+    AddMenuItem(rsDlgWidgetOrder + '...', '', @(maindsgn.OnEditWidgetOrder));
+    AddMenuItem(rsDlgTabOrder + '...', '', @(maindsgn.OnEditTabOrder));
     AddMenuItem('-', '', nil);
-    AddMenuItem('Edit special...', '', nil).Enabled := False; // TODO
+    AddMenuItem(rsEditSpecial + '...', '', nil).Enabled := False; // TODO
   end;
 
   setmenu := TfpgPopupMenu.Create(self);
@@ -442,7 +442,7 @@ begin
   begin
     Name := 'setmenu';
     SetPosition(464, 29, 120, 20);
-    AddMenuItem('General options...', '', @(maindsgn.OnOptionsClick));
+    AddMenuItem(rsGeneralOptions + '...', '', @(maindsgn.OnOptionsClick));
   end;
 
   miOpenRecentMenu := TfpgPopupMenu.Create(self);
@@ -457,8 +457,8 @@ begin
   begin
     Name := 'helpmenu';
     SetPosition(328, 52, 120, 20);
-    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutGUI);
-    AddMenuItem('Product Information...', '', @miHelpAboutClick);
+    AddMenuItem(rsAboutFpGuiToolkit + '...', '', @miHelpAboutGUI);
+    AddMenuItem(rsDlgProductInfo + '...', '', @miHelpAboutClick);
   end;
 
   previewmenu := TfpgPopupMenu.Create(self);
@@ -520,11 +520,11 @@ begin
   BuildThemePreviewMenu;
 
   chlPalette.Items.Sort;
-  MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
-  MainMenu.AddMenuItem('&Settings', nil).SubMenu := setmenu;
-  MainMenu.AddMenuItem('Fo&rm', nil).SubMenu     := formmenu;
-  MainMenu.AddMenuItem('&Preview', nil).SubMenu  := previewmenu;
-  MainMenu.AddMenuItem('&Help', nil).SubMenu     := helpmenu;
+  MainMenu.AddMenuItem(rsFile, nil).SubMenu     := filemenu;
+  MainMenu.AddMenuItem(rsSettings, nil).SubMenu := setmenu;
+  MainMenu.AddMenuItem(rsForm, nil).SubMenu     := formmenu;
+  MainMenu.AddMenuItem(rsPreview, nil).SubMenu  := previewmenu;
+  MainMenu.AddMenuItem(rsHelp, nil).SubMenu     := helpmenu;
   
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
 
@@ -568,7 +568,7 @@ begin
   inherited;
   Name := 'frmProperties';
   WindowPosition := wpUser;
-  WindowTitle := 'Properties';
+  WindowTitle := rsProperties;
   SetPosition(43, 150, 250, 450);
   gINI.ReadFormState(self);
 
@@ -594,14 +594,14 @@ begin
   w     := Width - x2;
   y     := 3;
 
-  l1      := CreateLabel(self, 0, y, 'Class:');
+  l1      := CreateLabel(self, 0, y, rsClass + ':');
   lbClass := CreateLabel(self, x2, y, 'CLASS');
   lbClass.Width := w;
   lbClass.FontDesc := '#Label2';
   lbClass.Anchors := [anLeft, anRight, anTop];
   Inc(y, gap);
 
-  l2           := CreateLabel(self, 0, y + 1, 'Name:');
+  l2           := CreateLabel(self, 0, y + 1, rsName + ':');
   edName       := CreateEdit(self, x2, y, w, 0);
   edName.Text  := 'NAME';
   edName.Anchors := [anLeft, anRight, anTop];
@@ -619,7 +619,7 @@ begin
 
   //inc(y, gap+5);
 
-  l3         := CreateLabel(self, 3, y + 1, 'Left:');
+  l3         := CreateLabel(self, 3, y + 1, rsLeft + ':');
   l3.Anchors := [anLeft, anBottom];
   btnLeft    := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
   with btnLeft do
@@ -628,7 +628,7 @@ begin
     Anchors       := [anLeft, anBottom];
     Focusable     := False;
   end;
-  l4 := CreateLabel(self, 110, y, 'Top:');
+  l4 := CreateLabel(self, 110, y, rsTop + ':');
   l4.Anchors := [anLeft, anBottom];
   btnTop     := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
   with btnTop do
@@ -638,7 +638,7 @@ begin
     Focusable     := False;
   end;
   Inc(y, gap + 5);
-  l5         := CreateLabel(self, 3, y + 1, 'Width:');
+  l5         := CreateLabel(self, 3, y + 1, rsWidth + ':');
   l5.Anchors := [anLeft, anBottom];
   btnWidth   := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
   with btnWidth do
@@ -647,7 +647,7 @@ begin
     Anchors       := [anLeft, anBottom];
     Focusable     := False;
   end;
-  l6 := CreateLabel(self, 110, y, 'Height:');
+  l6 := CreateLabel(self, 110, y, rsHeight + ':');
   l6.Anchors := [anLeft, anBottom];
   btnHeight  := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
   with btnHeight do
@@ -658,7 +658,7 @@ begin
   end;
   Inc(y, gap + 5);
 
-  l8         := CreateLabel(self, 3, y + 1, 'Anchors:');
+  l8         := CreateLabel(self, 3, y + 1, rsAnchors + ':');
   l8.Anchors := [anLeft, anBottom];
 
   x := 64;
@@ -716,7 +716,7 @@ begin
 
   y := btnAnRight.Bottom + 5;
 
-  l7         := CreateLabel(self, 0, y, 'Unknown lines:');
+  l7         := CreateLabel(self, 0, y, rsUnknownLines + ':');
   l7.Anchors := [anLeft, anBottom];
   Inc(y, 16);
 

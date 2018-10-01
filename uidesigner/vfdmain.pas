@@ -312,7 +312,7 @@ begin
     begin
       if DoesNameAlreadyExist(nfrm.edName.Text) then
       begin
-        TfpgMessageDialog.Critical(rsErrNameConflict,'The form name already exists in the current unit, please try again');
+        TfpgMessageDialog.Critical(rsErrNameConflict,rsFormNameExists);
         exit;
       end;
       fd := TFormDesigner.Create;
