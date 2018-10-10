@@ -19,7 +19,7 @@ msgstr "Значение <%s> не определено"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Обнаружен новый элемент"
+msgstr "Обнаружен новый элемент."
 
 #: fpg_constants:rsabort
 msgid "Abort"
@@ -383,7 +383,7 @@ msgstr "Мета+"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr "Изменен"
+msgstr "Изменён"
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
@@ -995,7 +995,7 @@ msgstr "Справа"
 
 #: vfd_constants:rscenter
 msgid "Center"
-msgstr "Слева"
+msgstr "Центр"
 
 #: vfd_constants:rsnew
 msgid "New"
@@ -1029,3 +1029,66 @@ msgstr "Добавить Tab"
 msgid "Delete Tab"
 msgstr "Удалить Tab"
 
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr "Синий"
+
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr "Закладки"
+
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr "Нажмите пипетку и, управляя, щёлкните => отпустите, чтобы получить цвет"
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
+msgstr "Цветовой круг"
+
+#: fpg_constants:rscontinuous
+msgid "Continuous"
+msgstr "Непрерывный"
+
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr "Произошла непредвиденная ошибка."
+
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr "Перейти в родительский каталог"
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Got to home directory"
+msgstr "Перейти в домашний каталог"
+
+#: fpg_constants:rscolorgreen
+msgid "Green"
+msgstr "Зелёный"
+
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr "Шестнадцатеричный"
+
+#: fpg_constants:rskeyleft
+msgid "Left"
+msgstr "Влево"
+
+#: fpg_constants:rsname
+msgid "Name"
+msgstr "Имя"
+
+#: fpg_constants:rsok
+msgid "OK"
+msgstr "ОК"
+
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr "Предопределённый"
+
+#: fpg_constants:rscolorred
+msgid "Red"
+msgstr "Красный"
+
+#: fpg_constants:rskeyright
+msgid "Right"
+msgstr "Вправо"
