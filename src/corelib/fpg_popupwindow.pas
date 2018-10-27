@@ -42,10 +42,10 @@ type
     FOnClose: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FPopupFrame: boolean;
-    FPopupWidget: TfpgWidget;
+{AJG}    FPopupWidget: TfpgWidget;
     procedure   SetPopupFrame(const AValue: boolean);
     function    GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
-    procedure SetPopupWidget(AValue: TfpgWidget);
+{AJG}    procedure SetPopupWidget(AValue: TfpgWidget);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandleClose; virtual;
@@ -65,7 +65,7 @@ type
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
-    Property    PopupWidget: TfpgWidget read FPopupWidget write SetPopupWidget;
+{AJG}    Property    PopupWidget: TfpgWidget read FPopupWidget write SetPopupWidget;
   end;
 
 
@@ -236,6 +236,7 @@ begin
 end;
 
 procedure TfpgPopupWindow.SetPopupWidget(AValue: TfpgWidget);
+{AJG}
 begin
   if FPopupWidget = AValue then Exit;
   FPopupWidget := AValue;
