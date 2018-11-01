@@ -1284,7 +1284,6 @@ begin
   FItems := TList.Create;
   // default Delphi colors
   FColorPalette := cpStandardColors;
-  UpdateScrollbarCoords;
   SetupColorPalette;
 end;
 
