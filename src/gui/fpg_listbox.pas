@@ -817,7 +817,6 @@ begin
   //  Canvas.FillRectangle(r);
   //end;
 
-  UpdateScrollBar;
 end;
 
 constructor TfpgBaseListBox.Create(AOwner: TComponent);
