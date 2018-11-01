@@ -121,7 +121,7 @@ type
   end;
 
 
-  // Listbox containg strings - the normal listbox as we know it. Used by
+  // Listbox containing strings - the normal listbox as we know it. Used by
   // component developers.
   TfpgTextListBox = class(TfpgBaseListBox)
   protected
