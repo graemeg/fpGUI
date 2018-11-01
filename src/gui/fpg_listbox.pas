@@ -487,6 +487,7 @@ var
 begin
   if not WindowAllocated then
     Exit; //==>
+
   pn := PageLength;
   FScrollBar.Visible := PageLength < ItemCount-1;
 
@@ -1008,7 +1009,7 @@ end;
 
 function TfpgBaseColorListBox.GetColor: TfpgColor;
 begin
-  Result := TColorItem(FItems.Items[FocusItem]).ColorValue;
+  Result := TColorItem(FItems.Items[FFocusItem]).ColorValue;
 end;
 
 procedure TfpgBaseColorListBox.SetColor(const AValue: TfpgColor);
@@ -1236,7 +1237,7 @@ begin
           FItems.Add(TColorItem.Create('clYellowGreen', clYellowGreen));
         end;
   end;
-  FocusItem := 0;
+  FFocusItem := 0;
   FollowFocus;
   UpdateScrollbar;
 end;
@@ -1275,6 +1276,7 @@ end;
 constructor TfpgBaseColorListBox.Create(AOwner: TComponent);
 begin
   inherited Create (AOwner );
+  FFocusItem := -1;
   FColorBoxWidth := 35;
   FColorBoxHeight := 10;
   FShowColorNames := True;
