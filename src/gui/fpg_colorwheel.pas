@@ -17,7 +17,7 @@
 
 unit fpg_ColorWheel;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

@@ -17,9 +17,7 @@
 
 unit fpg_form;
 
-{$mode objfpc}{$H+}
-
-{.$Define CStackDebug}
+{$I fpg_defines.inc}
 
 interface
 

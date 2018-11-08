@@ -17,15 +17,7 @@
 
 unit fpg_base;
 
-{$mode objfpc}{$H+}
-{$interfaces corba}
-
-// To enable the AggPas powered Canvas
-{.$define AGGCanvas}
-
-// For debug use only
-{.$Define CStackDebug}
-{.$define GDEBUG}
+{$I fpg_defines.inc}
 
 interface
 

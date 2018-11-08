@@ -15,6 +15,13 @@
       Plastic fpGUI styles
 }
 
+
+unit fpg_style_plastic;
+
+{$I fpg_defines.inc}
+
+
+// TODO: Remove all these defines. We like them all. ;-)
 {$define RegPlasticDark}
 {$define RegPlasticDarkGray}
 {$define RegPlasticMediumGray}
@@ -27,9 +34,6 @@
   {$define RegPlasticDark}
 {$ifend}
 
-unit fpg_style_plastic;
-
-{$mode objfpc}{$H+}
 
 interface
 

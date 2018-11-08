@@ -17,7 +17,7 @@
 
 unit fpg_listbox;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   TODO:

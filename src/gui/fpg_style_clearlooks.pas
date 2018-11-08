@@ -13,7 +13,7 @@
 }
 unit fpg_style_clearlooks; 
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

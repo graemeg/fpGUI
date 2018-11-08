@@ -16,7 +16,7 @@
 
 unit fpg_scrollbar;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   TODO:

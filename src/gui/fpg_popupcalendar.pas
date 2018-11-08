@@ -17,9 +17,7 @@
 
 unit fpg_popupcalendar;
 
-{$mode objfpc}{$H+}
-
-{.$Define DEBUG} // while developing the component
+{$I fpg_defines.inc}
 
 {
     *****************************************************************

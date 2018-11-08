@@ -22,7 +22,7 @@
 
 unit fpg_extinterpolation;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

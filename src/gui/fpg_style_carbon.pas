@@ -17,7 +17,7 @@
 
 unit fpg_style_carbon;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

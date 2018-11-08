@@ -19,7 +19,3 @@ echo "You've got the correct output lib directory"
 :end
 
 fpc -dGDI @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
-
-rem Experimental AggPas enabled Canvas under Windows
-rem fpc -dGDI -dAGGCanvas @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
-

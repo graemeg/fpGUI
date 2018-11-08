@@ -13,7 +13,7 @@
 }
 unit fpg_style_bluecurve; 
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

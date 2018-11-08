@@ -18,7 +18,7 @@
 }
 unit fpg_scrollframe;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

@@ -17,7 +17,7 @@
 
 unit fpg_stringutils;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

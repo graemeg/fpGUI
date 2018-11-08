@@ -17,9 +17,7 @@
 
 unit fpg_popupwindow;
 
-{$mode objfpc}{$H+}
-
-{.$Define DEBUG}
+{$I fpg_defines.inc}
 
 interface
 

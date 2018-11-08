@@ -17,7 +17,7 @@
 }
 unit fpg_dbugmsg;
 
-{$mode objfpc}{$h+}
+{$I fpg_defines.inc}
 
 interface
 

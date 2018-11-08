@@ -17,6 +17,7 @@
 }
 unit fpg_OLEDragDrop;
 
+// Leave this unit as MODE DELPHI
 {$mode delphi}{$H+}
 
 interface

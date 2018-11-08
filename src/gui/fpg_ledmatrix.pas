@@ -1,4 +1,4 @@
-{
+﻿{
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
@@ -42,7 +42,7 @@
 }
 unit fpg_ledmatrix;
 
-{$mode objfpc}{$h+}
+{$I fpg_defines.inc}
 
 interface
 

@@ -1,4 +1,4 @@
-{
+﻿{
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2007 by Giuliano Colla.
@@ -18,7 +18,7 @@
 
 unit fpg_gauge;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

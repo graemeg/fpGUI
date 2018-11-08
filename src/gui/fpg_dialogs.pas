@@ -16,15 +16,13 @@
 
 unit fpg_dialogs;
 
-{$mode objfpc}{$H+}
-
 {
   TODO:
     * Try and refactor the code to remove all IFDEF's
     * Implement MessageDlg with icons and buttons [Work-In-Progress]
 }
 
-{.$Define DEBUG}
+{$I fpg_defines.inc}
 
 interface
 

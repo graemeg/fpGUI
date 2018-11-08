@@ -16,7 +16,7 @@
 
 unit fpg_memo;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
   { TODO : Started a implementation for Tab support. It is still very experimental and should not be used yet. }
 

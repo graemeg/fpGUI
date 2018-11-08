@@ -16,10 +16,7 @@
 
 unit fpg_widget;
 
-{$mode objfpc}{$H+}
-
-{.$Define GDEBUG}
-{.$Define CStackDebug}
+{$I fpg_defines.inc}
 
 interface
 

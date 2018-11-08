@@ -16,8 +16,6 @@
 
 unit fpg_grid;
 
-{$mode objfpc}{$H+}
-
 {
   TODO:
     * TCustomStringGrid: Col[] and Row[] properties need to be implemented,
@@ -25,6 +23,8 @@ unit fpg_grid;
     * File Grid: Introduce support for images based on file types. User must
       be able to override the default images with their own.
 }
+
+{$I fpg_defines.inc}
 
 interface
 

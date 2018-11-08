@@ -15,7 +15,7 @@
 }
 unit fpg_style_motif;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

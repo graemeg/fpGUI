@@ -19,7 +19,7 @@
 
 unit fpg_hyperlink;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

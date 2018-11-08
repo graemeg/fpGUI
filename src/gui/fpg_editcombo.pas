@@ -16,10 +16,6 @@
 
 unit fpg_editcombo;
 
-{$mode objfpc}{$H+}
-
-{.$Define DEBUG}
-
 {
     ***********************************************************
     **********   This is still under development!   ***********
@@ -47,6 +43,8 @@ You need a mono font to see the correct layout.
                        |
                  TfpgColorComboBox
 }
+
+{$I fpg_defines.inc}
 
 interface
 

@@ -16,14 +16,12 @@
 
 unit fpg_customgrid;
 
-{$mode objfpc}{$H+}
-
 {
   TODO:
     * Column text alignment needs to be implemented. Currently always Centre.
 }
 
-{.$Define DEBUG}
+{$I fpg_defines.inc}
 
 interface
 

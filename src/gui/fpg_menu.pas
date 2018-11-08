@@ -16,9 +16,7 @@
 
 unit fpg_menu;
 
-{$mode objfpc}{$H+}
-
-{.$Define DEBUG}
+{$I fpg_defines.inc}
 
 {
   TODO:

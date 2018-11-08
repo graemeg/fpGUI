@@ -16,7 +16,7 @@
 
 unit fpg_imgfmt_png;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

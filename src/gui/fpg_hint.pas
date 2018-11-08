@@ -16,9 +16,7 @@
 
 unit fpg_hint;
 
-{$mode objfpc}{$H+}
-
-{.$Define Debug}
+{$I fpg_defines.inc}
 
 interface
 

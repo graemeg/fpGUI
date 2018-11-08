@@ -16,13 +16,7 @@
 
 unit fpg_main;
 
-{$mode objfpc}{$H+}
-{$interfaces corba}
-
-{.$Define GDEBUG}
-
-// To enable the AggPas powered Canvas
-{.$define AGGCanvas}
+{$I fpg_defines.inc}
 
 { TODO : Implement font size adjustments for each platform. eg: linux=10pt & windows=8pt }
 

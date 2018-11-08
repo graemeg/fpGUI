@@ -13,7 +13,7 @@
 }
 unit fpg_style_bitmap; 
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

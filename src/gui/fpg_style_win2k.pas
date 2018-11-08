@@ -16,7 +16,7 @@
 }
 unit fpg_style_win2k;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

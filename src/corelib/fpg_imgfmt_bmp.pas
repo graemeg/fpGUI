@@ -17,7 +17,7 @@
 
 unit fpg_imgfmt_bmp;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

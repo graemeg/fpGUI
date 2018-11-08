@@ -16,7 +16,7 @@
 
 unit fpg_splitter;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

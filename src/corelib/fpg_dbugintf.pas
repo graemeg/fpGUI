@@ -20,7 +20,7 @@
 }
 unit fpg_dbugintf;
 
-{$mode objfpc}{$h+}
+{$I fpg_defines.inc}
 
 interface
 

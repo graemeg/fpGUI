@@ -18,9 +18,7 @@
 
 unit fpg_imagelist;
 
-{$mode objfpc}{$H+}
-
-{.$define DEBUG}
+{$I fpg_defines.inc}
 
 interface
 

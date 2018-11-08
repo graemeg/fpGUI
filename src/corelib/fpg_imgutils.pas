@@ -17,7 +17,7 @@
 
 unit fpg_imgutils;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 { TODO : Make the conversion matrix a plugable architecture. Similar to the
          interpolation handling in TfpgCanvas. }

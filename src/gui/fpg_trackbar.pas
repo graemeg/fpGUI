@@ -16,7 +16,7 @@
 
 unit fpg_trackbar;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   TODO:

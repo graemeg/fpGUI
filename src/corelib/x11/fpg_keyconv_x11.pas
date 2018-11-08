@@ -17,12 +17,10 @@
 
 unit fpg_keyconv_x11;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 
-//
-  
 // This conversion was taken from the OpenOffice 1.0.1 source code.
 procedure KeySymToUnicode(ks: longword; res: PWord);
 

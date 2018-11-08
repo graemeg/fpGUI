@@ -19,7 +19,7 @@
 }
 unit fpg_wuline;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

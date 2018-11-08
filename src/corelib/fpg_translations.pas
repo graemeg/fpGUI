@@ -16,9 +16,7 @@
 
 unit fpg_translations;
 
-{$mode objfpc}{$H+}
-
-{.$Define GDEBUG}
+{$I fpg_defines.inc}
 
 interface
 

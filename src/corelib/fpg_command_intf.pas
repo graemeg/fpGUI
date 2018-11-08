@@ -17,7 +17,7 @@
 }
 unit fpg_command_intf;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

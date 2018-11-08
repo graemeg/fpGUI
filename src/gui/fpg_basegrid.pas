@@ -17,9 +17,7 @@
 
 unit fpg_basegrid;
 
-{$mode objfpc}{$H+}
-
-{.$Define GDEBUG}
+{$I fpg_defines.inc}
 
 interface
 

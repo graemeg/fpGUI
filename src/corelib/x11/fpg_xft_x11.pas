@@ -16,7 +16,8 @@
 
 unit fpg_xft_x11;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
+
 {$linklib Xft}
 
 interface

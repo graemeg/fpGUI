@@ -44,9 +44,8 @@
 
 unit fpg_pofiles;
 
-{$mode objfpc}{$H+}{$INLINE ON}
-
-{.$Define GDEBUG}
+{$I fpg_defines.inc}
+{$INLINE ON}
 
 interface
 

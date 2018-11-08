@@ -18,7 +18,7 @@
 
 unit fpg_tree;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   TODO:

@@ -18,8 +18,7 @@
 
 unit fpg_cmdlineparams;
 
-{$mode objfpc}{$H+}
-{$interfaces corba}
+{$I fpg_defines.inc}
 
 interface
 

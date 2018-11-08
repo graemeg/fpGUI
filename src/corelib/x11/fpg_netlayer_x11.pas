@@ -17,7 +17,7 @@
 
 unit fpg_netlayer_x11;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

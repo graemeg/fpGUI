@@ -16,7 +16,7 @@
 
 unit fpg_tab;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   TODO:

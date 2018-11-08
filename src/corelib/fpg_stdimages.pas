@@ -17,7 +17,7 @@
 
 unit fpg_stdimages;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

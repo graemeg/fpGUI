@@ -23,18 +23,7 @@
 
 unit fpg_gdi;
 
-{$mode objfpc}{$H+}
-
-{.$Define GDEBUG}
-{.$Define CStackDebug}
-{.$Define DND_DEBUG}
-{.$Define DEBUGKEYS}
-
-// enable or disable DND support. Disabled by default while implementing AlienWindows.
-{$define HAS_DND}
-
-// enable or disaple window opacity support
-{$define HAS_OPACITY}
+{$I fpg_defines.inc}
 
 {$IFDEF WINCE}
   // WinCE doesn't have DND support

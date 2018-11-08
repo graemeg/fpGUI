@@ -16,7 +16,7 @@
 
 unit fpg_radiobutton;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

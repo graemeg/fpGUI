@@ -16,10 +16,6 @@
 
 unit fpg_combobox;
 
-{$mode objfpc}{$H+}
-
-{.$Define DEBUG}
-
 { TODO: When combobox Items changes, the combobox needs to refresh. We need a
       custom StringItems class to notify us of changes. See TfpgListBox for
       an example. }
@@ -46,6 +42,8 @@ You need a mono font to see the correct layout.
                        |
                  TfpgColorComboBox
 }
+
+{$I fpg_defines.inc}
 
 interface
 
