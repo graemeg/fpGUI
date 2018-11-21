@@ -21,391 +21,391 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: vfd_constants.pas:1
-msgid "Open form file"
-msgstr "Открыть файл формы"
-
-#: vfd_constants.pas:2
-msgid "Pascal source files"
-msgstr "Исходные файлы Pascal"
-
-#: vfd_constants.pas:3
-msgid "Save form source"
-msgstr "Сохранить исходник формы"
-
-#: vfd_constants.pas:4
-msgid "Version: %s"
-msgstr "Версия:  %s"
-
-#: vfd_constants.pas:5
-msgid "Written by %s"
-msgstr "Автор: %s"
-
-#: vfd_constants.pas:6
-msgid "Compiled on: %s"
-msgstr "Скомпилировано: %s"
-
-#: vfd_constants.pas:7
-msgid "new"
-msgstr "Новый"
-
-#: vfd_constants.pas:8
-msgid "F11: switch to Properties"
-msgstr "F11: переключить на Свойства"
-
-#: vfd_constants.pas:9
-msgid "TAB, SHIFT+TAB: select next widget"
-msgstr "TAB, SHIFT+TAB: выбрать следующий виджет"
-
-#: vfd_constants.pas:10
-msgid "F2: edit widget order"
-msgstr "F2: править порядок виджетов"
-
-#: vfd_constants.pas:11
-msgid "Quick Help"
-msgstr "Быстрая справка"
-
-#: vfd_constants.pas:12
-msgid "Left"
-msgstr "Слева"
-
-#: vfd_constants.pas:13
-msgid "Top"
-msgstr "Сверху"
-
-#: vfd_constants.pas:14
-msgid "Width"
-msgstr "Ширина"
-
-#: vfd_constants.pas:15
-msgid "Height"
-msgstr "Высота"
-
-#: vfd_constants.pas:16
-msgid "Class name"
-msgstr "Имя класса"
-
-#: vfd_constants.pas:17
-msgid "Form name"
-msgstr "Имя формы"
-
-#: vfd_constants.pas:18
-msgid "Position"
-msgstr "Позиция"
-
-#: vfd_constants.pas:19
-msgid "Form %s"
-msgstr "Форма %s"
-
-#: vfd_constants.pas:20
-msgid "Up"
-msgstr "Вверх"
-
-#: vfd_constants.pas:21
-msgid "Down"
-msgstr "Вниз"
-
-#: vfd_constants.pas:22
-msgid "Grid resolution"
-msgstr "Разреш. сетки"
-
-#: vfd_constants.pas:23
-msgid "Recent files count"
-msgstr "Кол-во посл.файлов"
-
-#: vfd_constants.pas:24
-msgid "Show the full file path"
-msgstr "Показ. полный путь файла"
-
-#: vfd_constants.pas:25
-msgid "Form designer"
-msgstr "Дизайнер форм"
-
-#: vfd_constants.pas:26
-msgid "Open Recent menu settings"
-msgstr "Настройки \"Открыть последний\""
-
-#: vfd_constants.pas:27
-msgid "Various"
-msgstr "Разное"
-
-#: vfd_constants.pas:28
-msgid "Undo on property editor exit"
-msgstr "Отменять св-во при выходе"
-
-#: vfd_constants.pas:29
-msgid "One click select and move"
-msgstr "Выбир. и перем. одним щелчком"
-
-#: vfd_constants.pas:30
-msgid "Default file extension"
-msgstr "Расшир. по умолч."
-
-#: vfd_constants.pas:31
-msgid "Use code-folding regions in auto-generated code"
-msgstr "Использовать регионы сложенного кода в автокоде"
-
-#: vfd_constants.pas:32
-msgid "Indent Type for generated code"
-msgstr "Тип отступа для автокода"
-
-#: vfd_constants.pas:34
-msgid "Product Information"
-msgstr "О продукте"
-
-#: vfd_constants.pas:35
-msgid "General Settings"
-msgstr "Общие опции"
-
-#: vfd_constants.pas:36
-msgid "Insert Custom Widget"
-msgstr "Вставить виджет вручную"
-
-#: vfd_constants.pas:37
-msgid "New Form"
-msgstr "Новая форма"
-
-#: vfd_constants.pas:38
-msgid "Form Position"
-msgstr "Позиция формы"
-
-#: vfd_constants.pas:39
-msgid "Widget Order"
-msgstr "Порядок виджетов"
-
-#: vfd_constants.pas:40
-msgid "Tab Order"
-msgstr "Порядок обхода по Tab"
-
-#: vfd_constants.pas:42
-msgid "The unit <%s> was not found"
-msgstr "Модуль <%s> не был найден"
-
-#: vfd_constants.pas:43
-msgid "Error loading form"
-msgstr "Ошибка загрузки формы"
-
-#: vfd_constants.pas:44
-msgid "Failed to find Designer Form"
-msgstr "Ошибка поиска Дизайнера Формы"
-
-#: vfd_constants.pas:45
-msgid "Form save I/O failure in <%s>"
-msgstr "Ошибка ввода/вывода при сохранении формы <%s>"
-
-#: vfd_constants.pas:46
-msgid "Name Conflict"
-msgstr "Конфликт имён"
-
-#: vfd_constants.pas:47
-msgid "Failed to find TStrings type property"
-msgstr "Ошибка поиска свойства для типа TStrings"
-
-#: vfd_constants.pas:48
-msgid "Failed to parse Boolean value <%s>"
-msgstr "Ошибка разбора булевой переменной <%s>"
-
-#: vfd_constants.pas:50
-msgid "Class"
-msgstr "Класс"
-
-#: vfd_constants.pas:51
-msgid "Name"
-msgstr "Имя"
-
-#: vfd_constants.pas:52
-msgid "Properties"
-msgstr "Свойства"
-
-#: vfd_constants.pas:53
-msgid "Anchors"
-msgstr "Якоря"
-
-#: vfd_constants.pas:54
-msgid "Unknown lines"
-msgstr "Неизвестные строки"
-
-#: vfd_constants.pas:55
+#: vfd_constants:rsfile
 msgid "&File"
 msgstr "&Файл"
 
-#: vfd_constants.pas:56
-msgid "&Settings"
-msgstr "&Опции"
-
-#: vfd_constants.pas:57
-msgid "Fo&rm"
-msgstr "Фо&рма"
-
-#: vfd_constants.pas:58
-msgid "&Preview"
-msgstr "&Предпросмотр"
-
-#: vfd_constants.pas:59
+#: vfd_constants:rshelp
 msgid "&Help"
 msgstr "&Справка"
 
-#: vfd_constants.pas:60
-msgid "Create New File"
-msgstr "Создать новый файл"
+#: vfd_constants:rspreview
+msgid "&Preview"
+msgstr "&Предпросмотр"
 
-#: vfd_constants.pas:61
-msgid "Open"
-msgstr "Открыть"
+#: vfd_constants:rssettings
+msgid "&Settings"
+msgstr "&Опции"
 
-#: vfd_constants.pas:62
-msgid "Open Recent"
-msgstr "Открыть последний"
-
-#: vfd_constants.pas:63
-msgid "Save"
-msgstr "Сохранить"
-
-#: vfd_constants.pas:64
-msgid "Save As New Template Unit"
-msgstr "Сохранить как новый шаблонный модуль"
-
-#: vfd_constants.pas:65
-msgid "Add New Form to Unit"
-msgstr "Добавить новую форму в модуль"
-
-#: vfd_constants.pas:66
-msgid "Exit"
-msgstr "Выход"
-
-#: vfd_constants.pas:67
-msgid "General options"
-msgstr "Общие опции"
-
-#: vfd_constants.pas:68
-msgid "Edit special"
-msgstr "Особое редактирование"
-
-#: vfd_constants.pas:69
+#: vfd_constants:rsaboutfpguitoolkit
 msgid "About fpGUI Toolkit"
 msgstr "Информация о fpGUI Toolkit"
 
-#: vfd_constants.pas:70
-msgid "Save the current form design"
-msgstr "Сохранить текущий дизайн формы"
+#: vfd_constants:rsaddnewformtounit
+msgid "Add New Form to Unit"
+msgstr "Добавить новую форму в модуль"
 
-#: vfd_constants.pas:71
-msgid "Close"
-msgstr "Закрыть"
-
-#: vfd_constants.pas:72
-msgid "Cancel"
-msgstr "Отмена"
-
-#: vfd_constants.pas:73
-msgid "OK"
-msgstr "OK"
-
-#: vfd_constants.pas:74
-msgid "Applies to new form/dialogs only"
-msgstr "Применяется только для новых форм/диалогов"
-
-#: vfd_constants.pas:75
-msgid "Space characters"
-msgstr "Символы пробела"
-
-#: vfd_constants.pas:76
-msgid "Tab characters"
-msgstr "Символы табуляции"
-
-#: vfd_constants.pas:77
-msgid "Items"
-msgstr "Пункты"
-
-#: vfd_constants.pas:78
-msgid "Clear"
-msgstr "Очистить"
-
-#: vfd_constants.pas:79
-msgid "Pos"
-msgstr "Поз."
-
-#: vfd_constants.pas:80
-msgid "The form name already exists in the current unit, please try again"
-msgstr ""
-"Имя формы уже существует в текущем модуле, пожалуйста, попробуйте снова"
-
-#: vfd_constants.pas:81
-msgid "Column editor"
-msgstr "Редактор столбцов"
-
-#: vfd_constants.pas:82
-msgid "String Grid columns"
-msgstr "Столбцы в сетке строк"
-
-#: vfd_constants.pas:83
-msgid "Column"
-msgstr "Столбец"
-
-#: vfd_constants.pas:84
-msgid "Title"
-msgstr "Название"
-
-#: vfd_constants.pas:85
-msgid "Column width"
-msgstr "Ширина столбца"
-
-#: vfd_constants.pas:86
-msgid "Alignment"
-msgstr "Выравнивание"
-
-#: vfd_constants.pas:87
-msgid "Right"
-msgstr "Вправо"
-
-#: vfd_constants.pas:88
-msgid "Center"
-msgstr "Влево"
-
-#: vfd_constants.pas:89
-msgid "New"
-msgstr "Новый"
-
-#: vfd_constants.pas:90
-msgid "Delete"
-msgstr "Удалить"
-
-#: vfd_constants.pas:91
-msgid "UP"
-msgstr "ВВЕРХ"
-
-#: vfd_constants.pas:92
-msgid "DOWN"
-msgstr "ВНИЗ"
-
-#: vfd_constants.pas:93
-msgid "Col."
-msgstr "Кол."
-
-#: vfd_constants.pas:94
-msgid "Align"
-msgstr "Выравн."
-
-#: vfd_constants.pas:95
+#: vfd_constants:rsaddtab
 msgid "Add Tab"
 msgstr "Добавить Tab"
 
-#: vfd_constants.pas:96
+#: vfd_constants:rsalign
+msgid "Align"
+msgstr "Выравн"
+
+#: vfd_constants:rsalignment
+msgid "Alignment"
+msgstr "Выравнивание"
+
+#: vfd_constants:rsanchors
+msgid "Anchors"
+msgstr "Якоря"
+
+#: vfd_constants:rsappliestonewformdialogsonly
+msgid "Applies to new form/dialogs only"
+msgstr "Применяется только для новых форм/диалогов"
+
+#: vfd_constants:rsclassuppercase
+msgid "CLASS"
+msgstr "Класс"
+
+#: vfd_constants:rscancel
+msgid "Cancel"
+msgstr "Отмена"
+
+#: vfd_constants:rscenter
+msgid "Center"
+msgstr "Влево"
+
+#: vfd_constants:rsclass
+msgid "Class"
+msgstr "Класс"
+
+#: vfd_constants:rsnewclassname
+msgid "Class name"
+msgstr "Имя класса"
+
+#: vfd_constants:rsclear
+msgid "Clear"
+msgstr "Очистить"
+
+#: vfd_constants:rsclose
+msgid "Close"
+msgstr "Закрыть"
+
+#: vfd_constants:rscol
+msgid "Col."
+msgstr "Кол."
+
+#: vfd_constants:rscolumn
+msgid "Column"
+msgstr "Столбец"
+
+#: vfd_constants:rscolumneditor
+msgid "Column editor"
+msgstr "Редактор столбцов"
+
+#: vfd_constants:rscolumnwidth
+msgid "Column width"
+msgstr "Ширина столбца"
+
+#: vfd_constants:rscompiledon
+msgid "Compiled on: %s"
+msgstr "Скомпилировано: %s"
+
+#: vfd_constants:rscreatenewfile
+msgid "Create New File"
+msgstr "Создать новый файл"
+
+#: vfd_constants:rsdownuppercase
+msgid "DOWN"
+msgstr "Вниз"
+
+#: vfd_constants:rsdefaultfileext
+msgid "Default file extension"
+msgstr "Расшир. по умолч."
+
+#: vfd_constants:rsdelete
+msgid "Delete"
+msgstr "Удалить"
+
+#: vfd_constants:rsdeletetab
 msgid "Delete Tab"
 msgstr "Удалить Tab"
 
-#: vfd_constants.pas:97
-msgid "Toggle designer grid"
-msgstr "Переключить сетку дизайнера"
+#: vfd_constants:rsdown
+msgid "Down"
+msgstr "Вниз"
 
-#: vfd_constants.pas:98
-msgid "CLASS"
-msgstr "КЛАСС"
+#: vfd_constants:rseditspecial
+msgid "Edit special"
+msgstr "Особое редактирование"
 
-#: vfd_constants.pas:99
+#: vfd_constants:rserrloadingform
+msgid "Error loading form"
+msgstr "Ошибка загрузки формы"
+
+#: vfd_constants:rserrorsregisteringwidget
+msgid "Errors Registering Widget"
+msgstr "Ошибки регистрации виджета"
+
+#: vfd_constants:rsexit
+msgid "Exit"
+msgstr "Выход"
+
+#: vfd_constants:rsdesignerhelp1
+msgid "F11: switch to Properties"
+msgstr "F11: переключить на Свойства"
+
+#: vfd_constants:rsdesignerhelp3
+msgid "F2: edit widget order"
+msgstr "F2: править порядок виджетов"
+
+#: vfd_constants:rserrfailedtofinddesignerform
+msgid "Failed to find Designer Form"
+msgstr "Ошибка поиска Дизайнера Формы"
+
+#: vfd_constants:rserrnostringsproperty
+msgid "Failed to find TStrings type property"
+msgstr "Ошибка поиска свойства для типа TStrings"
+
+#: vfd_constants:rserrfailedtoparseboolean
+msgid "Failed to parse Boolean value <%s>"
+msgstr "Ошибка разбора булевой переменной <%s>"
+
+#: vfd_constants:rsform
+msgid "Fo&rm"
+msgstr "Фо&рма"
+
+#: vfd_constants:rsformtitle
+msgid "Form %s"
+msgstr "Форма %s"
+
+#: vfd_constants:rsdlgeditformposition
+msgid "Form Position"
+msgstr "Позиция формы"
+
+#: vfd_constants:rsformdesigner
+msgid "Form designer"
+msgstr "Дизайнер форм"
+
+#: vfd_constants:rsnewformname
+msgid "Form name"
+msgstr "Имя формы"
+
+#: vfd_constants:rserrformsaveioerror
+msgid "Form save I/O failure in <%s>"
+msgstr "Ошибка ввода/вывода при сохранении формы <%s>"
+
+#: vfd_constants:rsdlgsetup
+msgid "General Settings"
+msgstr "Общие опции"
+
+#: vfd_constants:rsgeneraloptions
+msgid "General options"
+msgstr "Общие опции"
+
+#: vfd_constants:rsgridresolution
+msgid "Grid resolution"
+msgstr "Разреш. сетки"
+
+#: vfd_constants:rsheight
+msgid "Height"
+msgstr "Высота"
+
+#: vfd_constants:rsindenttype
+msgid "Indent Type for generated code"
+msgstr "Тип отступа для автокода"
+
+#: vfd_constants:rsdlginsertcustomwidget
+msgid "Insert Custom Widget"
+msgstr "Вставить виджет вручную"
+
+#: vfd_constants:rsitems
+msgid "Items"
+msgstr "Пункты"
+
+#: vfd_constants:rsleft
+msgid "Left"
+msgstr "Слева"
+
+#: vfd_constants:rsnameuppercase
 msgid "NAME"
 msgstr "ИМЯ"
 
-#: vfd_constants.pas:100
-msgid "Errors Registering Widget"
-msgstr "Ошибки регистрации виджета"
+#: vfd_constants:rsname
+msgid "Name"
+msgstr ""
+
+#: vfd_constants:rserrnameconflict
+msgid "Name Conflict"
+msgstr "Конфликт имён"
+
+#: vfd_constants:rsnew
+msgid "New"
+msgstr "Новый"
+
+#: vfd_constants:rsdlgnewform
+msgid "New Form"
+msgstr "Новая форма"
+
+#: vfd_constants:rsok
+msgid "OK"
+msgstr "OK"
+
+#: vfd_constants:rsoneclickselectandmove
+msgid "One click select and move"
+msgstr "Выбир. и перем. одним щелчком"
+
+#: vfd_constants:rsopen
+msgid "Open"
+msgstr "Открыть"
+
+#: vfd_constants:rsopenrecent
+msgid "Open Recent"
+msgstr "Открыть последний"
+
+#: vfd_constants:rsopenrecentsettings
+msgid "Open Recent menu settings"
+msgstr "Настройки Открыть последний"
+
+#: vfd_constants:rsopenformfile
+msgid "Open form file"
+msgstr "Открыть файл формы"
+
+#: vfd_constants:rspascalsourcefiles
+msgid "Pascal source files"
+msgstr "Исходные файлы Pascal"
+
+#: vfd_constants:rspos
+msgid "Pos"
+msgstr "Поз."
+
+#: vfd_constants:rsposition
+msgid "Position"
+msgstr "Позиция"
+
+#: vfd_constants:rsdlgproductinfo
+msgid "Product Information"
+msgstr "О продукте"
+
+#: vfd_constants:rsproperties
+msgid "Properties"
+msgstr "Свойства"
+
+#: vfd_constants:rsdesignerquickhelp
+msgid "Quick Help"
+msgstr "Быстрая справка"
+
+#: vfd_constants:rsrecentfilescount
+msgid "Recent files count"
+msgstr "Кол-во посл.файлов"
+
+#: vfd_constants:rsright
+msgid "Right"
+msgstr "Вправо"
+
+#: vfd_constants:rssave
+msgid "Save"
+msgstr "Сохранить"
+
+#: vfd_constants:rssaveasnewtemplateunit
+msgid "Save As New Template Unit"
+msgstr "Сохранить как новый шаблонный модуль"
+
+#: vfd_constants:rssaveformfile
+msgid "Save form source"
+msgstr "Сохранить исходник формы"
+
+#: vfd_constants:rssavecurrentformdesign
+msgid "Save the current form design"
+msgstr "Сохранить текущий дизайн формы"
+
+#: vfd_constants:rsshowfullpathname
+msgid "Show the full file path"
+msgstr "Показ. полный путь файла"
+
+#: vfd_constants:rsspacecharacters
+msgid "Space characters"
+msgstr "Символы пробела"
+
+#: vfd_constants:rsstringgridcolumns
+msgid "String Grid columns"
+msgstr "Столбцы в сетке строк"
+
+#: vfd_constants:rsdesignerhelp2
+msgid "TAB, SHIFT+TAB: select next widget"
+msgstr "TAB, SHIFT+TAB: выбрать следующий виджет"
+
+#: vfd_constants:rsdlgtaborder
+msgid "Tab Order"
+msgstr "Порядок обхода по Tab"
+
+#: vfd_constants:rstabcharacters
+msgid "Tab characters"
+msgstr "Символы табуляции"
+
+#: vfd_constants:rsformnameexists
+msgid "The form name already exists in the current unit, please try again"
+msgstr "Имя формы уже существует в текущем модуле, пожалуйста, попробуйте снова"
+
+#: vfd_constants:rserrunitnotfound
+msgid "The unit <%s> was not found"
+msgstr "Модуль <%s> не был найден"
+
+#: vfd_constants:rstitle
+msgid "Title"
+msgstr "Название"
+
+#: vfd_constants:rstoggledesignergrid
+msgid "Toggle designer grid"
+msgstr "Переключить сетку дизайнера"
+
+#: vfd_constants:rstop
+msgid "Top"
+msgstr "Сверху"
+
+#: vfd_constants:rsupuppercase
+msgid "UP"
+msgstr "Вверх"
+
+#: vfd_constants:rsundoonpropertyexit
+msgid "Undo on property editor exit"
+msgstr "Отменять св-во при выходе"
+
+#: vfd_constants:rsunknownlines
+msgid "Unknown lines"
+msgstr "Неизвестные строки"
+
+#: vfd_constants:rsup
+msgid "Up"
+msgstr "Вверх"
+
+#: vfd_constants:rsusecoderegions
+msgid "Use code-folding regions in auto-generated code"
+msgstr "Использовать регионы сложенного кода в автокоде"
+
+#: vfd_constants:rsvarious
+msgid "Various"
+msgstr "Разное"
+
+#: vfd_constants:rsversion
+msgid "Version: %s"
+msgstr "Версия:  %s"
+
+#: vfd_constants:rsdlgwidgetorder
+msgid "Widget Order"
+msgstr "Порядок виджетов"
+
+#: vfd_constants:rswidth
+msgid "Width"
+msgstr "Ширина"
+
+#: vfd_constants:rswrittenby
+msgid "Written by %s"
+msgstr "Автор: %s"
+
+#: vfd_constants:rsnewunnamedform
+msgid "new"
+msgstr "Новый"
+
