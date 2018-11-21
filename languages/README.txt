@@ -15,7 +15,7 @@ The <fpGUIdir>/languages directory contains all the stuff for
 internationalization of the fpGUI Toolkit.
 
 All language files can easily be updated with the
-<fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat (coming soon) 
+<fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat
 script.
 
 All text and messages used in the toolkit should be placed into the  
@@ -27,8 +27,8 @@ Since this is a fpc-only format it must be converted with the rstconv program:
 cd <fpGUIdir>/languages
 rstconv -i ../lib/fpg_constants.rst -o fpgui.po
 
-Hint: 
-This is automatically done by <fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat.
+HINT:
+  This is automatically done by localize.sh or localize.bat scripts.
 
 This will create the file fpgui.po, which should be translated in all
 required languages to a fpgui.xx.po file. For the xx see the gettext unit
