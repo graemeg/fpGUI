@@ -6,7 +6,7 @@ Type=Application
 Exec=uidesigner
 Icon=uidesigner
 Terminal=false
-Categories=IDE;Development; 
+Categories=IDE;Development;
 Keywords=fpc;pascal;fpgui;
 
 
