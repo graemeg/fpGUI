@@ -1,718 +1,714 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# Translators:
+# AlexL <loginov.alex.valer@gmail.com>, 2018
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: FPGUI\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:59+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Afrikaans <en@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: "
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2018\n"
+"Language-Team: Russian (https://www.transifex.com/Magic/teams/44238/ru/)\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: fpg_constants:rserrnotassigned
+#: fpg_constantsrserrnotassigned
 msgid "<%s> not assigned"
 msgstr "Значение <%s> не определено"
 
-#: fpg_constants:rsnewitemdetected
+#: fpg_constantsrsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Обнаружен новый элемент"
+msgstr "Обнаружен новый элемент."
 
-#: fpg_constants:rsabort
+#: fpg_constantsrsabort
 msgid "Abort"
 msgstr "Прервать"
 
-#: fpg_constants:rsabout
+#: fpg_constantsrsabout
 msgid "About %s"
 msgstr "Информация о %s"
 
-#: fpg_constants:rsaddcurrentdirectory
+#: fpg_constantsrsaddcurrentdirectory
 msgid "Add current directory"
 msgstr "Добавить текущую директорию"
 
-#: fpg_constants:rsall
+#: fpg_constantsrsall
 msgid "All"
 msgstr "Все"
 
-#: fpg_constants:rsallfiles
+#: fpg_constantsrsallfiles
 msgid "All Files"
 msgstr "Все файлы"
 
-#: fpg_constants:rscollectionallfonts
+#: fpg_constantsrscollectionallfonts
 msgid "All Fonts"
 msgstr "Все шрифты"
 
-#: fpg_constants:rskeyalt
+#: fpg_constantsrskeyalt
 msgid "Alt+"
-msgstr ""
+msgstr "Alt+"
 
-#: fpg_constants:rserrunexpected
+#: fpg_constantsrserrunexpected
 msgid "An unexpected error occurred."
-msgstr ""
+msgstr "Произошла непредвиденная ошибка."
 
-#: fpg_constants:rsantialiasing
+#: fpg_constantsrsantialiasing
 msgid "Anti aliasing"
 msgstr "Сглаживание"
 
-#: fpg_constants:rsshortapr
+#: fpg_constantsrsshortapr
 msgid "Apr"
 msgstr "Апр"
 
-#: fpg_constants:rslongapr
+#: fpg_constantsrslongapr
 msgid "April"
 msgstr "Апрель"
 
-#: fpg_constants:rsfileattributes
+#: fpg_constantsrsfileattributes
 msgid "Attributes"
 msgstr "Атрибуты"
 
-#: fpg_constants:rsshortaug
+#: fpg_constantsrsshortaug
 msgid "Aug"
 msgstr "Авг"
 
-#: fpg_constants:rslongaug
+#: fpg_constantsrslongaug
 msgid "August"
 msgstr "Август"
 
-#: fpg_constants:rskeybksp
+#: fpg_constantsrskeybksp
 msgid "BkSp"
-msgstr ""
+msgstr "BkSp"
 
-#: fpg_constants:rscolorblue
+#: fpg_constantsrscolorblue
 msgid "Blue"
 msgstr "Синий"
 
-#: fpg_constants:rsbold
+#: fpg_constantsrsbold
 msgid "Bold"
 msgstr "Жирный"
 
-#: fpg_constants:rsbookmarks
+#: fpg_constantsrsbookmarks
 msgid "Bookmarks"
-msgstr ""
+msgstr "Закладки"
 
-#: fpg_constants:rscancel
+#: fpg_constantsrscancel
 msgid "Cancel"
 msgstr "Отмена"
 
-#: fpg_constants:rscannotcreatedir
+#: fpg_constantsrscannotcreatedir
 msgid "Cannot create directory"
 msgstr "Невозможно создать директорию"
 
-#: fpg_constants:rschange
+#: fpg_constantsrschange
 msgid "Change"
 msgstr "Изменить"
 
-#: fpg_constants:rschangetitle
+#: fpg_constantsrschangetitle
 msgid "Change Title"
-msgstr "Изменить Заголовок"
+msgstr "Изменить заголовок"
 
-#: fpg_constants:rscharactermap
+#: fpg_constantsrscharactermap
 msgid "Character Map"
-msgstr ""
+msgstr "Таблица символов"
 
-#: fpg_constants:rscolorpickerhint
+#: fpg_constantsrscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
 msgstr ""
+"Нажмите пипетку и поддерживайте щелчок => отпустите, чтобы получить цвет"
 
-#: fpg_constants:rsclose
+#: fpg_constantsrsclose
 msgid "Close"
 msgstr "Закрыть"
 
-#: fpg_constants:rscollection
+#: fpg_constantsrscollection
 msgid "Collection"
 msgstr "Группа"
 
-#: fpg_constants:rstabsheetcolorwheel
+#: fpg_constantsrstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr ""
+msgstr "Цветовой круг"
 
-#: fpg_constants:rsconfigurebookmarks
+#: fpg_constantsrsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "Настроить Закладки"
+msgstr "Конфигурировать закладки"
 
-#: fpg_constants:rsconfirm
+#: fpg_constantsrsconfirm
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: fpg_constants:rsconfirmation
+#: fpg_constantsrsconfirmation
 msgid "Confirmation"
 msgstr "Подтверждение"
 
-#: fpg_constants:rscontinuous
+#: fpg_constantsrscontinuous
 msgid "Continuous"
-msgstr ""
+msgstr "Непрерывный"
 
-#: fpg_constants:rscopy
+#: fpg_constantsrscopy
 msgid "Copy"
 msgstr "Копировать"
 
-#: fpg_constants:rserrcouldnotopendir
+#: fpg_constantsrserrcouldnotopendir
 msgid "Could not open the directory <%s>"
 msgstr "Невозможно открыть директорию <%s>"
 
-#: fpg_constants:rscreate
+#: fpg_constantsrscreate
 msgid "Create"
 msgstr "Создать"
 
-#: fpg_constants:rscreatedirectory
+#: fpg_constantsrscreatedirectory
 msgid "Create directory"
 msgstr "Создать директорию"
 
-#: fpg_constants:rscriticalerror
+#: fpg_constantsrscriticalerror
 msgid "Critical Error"
 msgstr "Критическая ошибка"
 
-#: fpg_constants:rskeyctrl
+#: fpg_constantsrskeyctrl
 msgid "Ctrl+"
-msgstr ""
+msgstr "Ctrl+"
 
-#: fpg_constants:rscut
+#: fpg_constantsrscut
 msgid "Cut"
 msgstr "Вырезать"
 
-#: fpg_constants:rsdatabase
+#: fpg_constantsrsdatabase
 msgid "Database"
 msgstr "База данных"
 
-#: fpg_constants:rsshortdec
+#: fpg_constantsrsshortdec
 msgid "Dec"
 msgstr "Дек"
 
-#: fpg_constants:rslongdec
+#: fpg_constantsrslongdec
 msgid "December"
 msgstr "Декабрь"
 
-#: fpg_constants:rskeydel
+#: fpg_constantsrskeydel
 msgid "Del"
-msgstr ""
+msgstr "Del"
 
-#: fpg_constants:rsdelete
+#: fpg_constantsrsdelete
 msgid "Delete"
 msgstr "Удалить"
 
-#: fpg_constants:rsdirectories
+#: fpg_constantsrsdirectories
 msgid "Directories"
 msgstr "Директории"
 
-#: fpg_constants:rsdirectory
+#: fpg_constantsrsdirectory
 msgid "Directory"
 msgstr "Директория"
 
-#: fpg_constants:rskeydown
+#: fpg_constantsrskeydown
 msgid "Down"
-msgstr ""
+msgstr "Вниз"
 
-#: fpg_constants:rsdrive
+#: fpg_constantsrsdrive
 msgid "Drive"
 msgstr "Диск"
 
-#: fpg_constants:rsedit
+#: fpg_constantsrsedit
 msgid "Edit"
 msgstr "Редактировать"
 
-#: fpg_constants:rskeyend
+#: fpg_constantsrskeyend
 msgid "End"
-msgstr ""
+msgstr "End"
 
-#: fpg_constants:rslanguage
+#: fpg_constantsrslanguage
 msgid "English"
 msgstr "Русский"
 
-#: fpg_constants:rskeyenter
+#: fpg_constantsrskeyenter
 msgid "Enter"
-msgstr ""
+msgstr "Enter"
 
-#: fpg_constants:rsenternewdirectory
+#: fpg_constantsrsenternewdirectory
 msgid "Enter new directory name"
-msgstr "Укажите имя новой директории"
+msgstr "Введите имя новой директории"
 
-#: fpg_constants:rserror
+#: fpg_constantsrserror
 msgid "Error"
 msgstr "Ошибка"
 
-#: fpg_constants:rskeyesc
+#: fpg_constantsrskeyesc
 msgid "Esc"
-msgstr ""
+msgstr "Esc"
 
-#: fpg_constants:rsexampletext
+#: fpg_constantsrsexampletext
 msgid "Example Text"
 msgstr "Пример текста"
 
-#: fpg_constants:rsexit
+#: fpg_constantsrsexit
 msgid "Exit"
 msgstr "Выход"
 
-#: fpg_constants:rserrfailedtocreatedir
+#: fpg_constantsrserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
 msgstr "Невозможно создать директорию <%s>"
 
-#: fpg_constants:rsfailedtofindhelpviewer
+#: fpg_constantsrsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr ""
+msgstr "Не удалось найти просмотрщик справки."
 
-#: fpg_constants:rsfalse
+#: fpg_constantsrsfalse
 msgid "False"
-msgstr "ложный"
+msgstr "False"
 
-#: fpg_constants:rscollectionfavourites
+#: fpg_constantsrscollectionfavourites
 msgid "Favourites"
 msgstr "Избранные"
 
-#: fpg_constants:rsshortfeb
+#: fpg_constantsrsshortfeb
 msgid "Feb"
 msgstr "Фев"
 
-#: fpg_constants:rslongfeb
+#: fpg_constantsrslongfeb
 msgid "February"
 msgstr "Февраль"
 
-#: fpg_constants:rsfileselection
+#: fpg_constantsrsfileselection
 msgid "File Selection"
 msgstr "Выбор файла"
 
-#: fpg_constants:rsfilename
+#: fpg_constantsrsfilename
 msgid "Filename"
 msgstr "Имя файла"
 
-#: fpg_constants:rsfiles
+#: fpg_constantsrsfiles
 msgid "Files"
 msgstr "Файлы"
 
-#: fpg_constants:rsfind
+#: fpg_constantsrsfind
 msgid "Find"
 msgstr "Найти"
 
-#: fpg_constants:rscollectionfixedwidth
+#: fpg_constantsrscollectionfixedwidth
 msgid "Fixed Width"
 msgstr "Моноширинные"
 
-#: fpg_constants:rscollectionfontaliases
+#: fpg_constantsrscollectionfontaliases
 msgid "Font Aliases"
 msgstr "Псевдонимы шрифтов"
 
-#: fpg_constants:rserrreportfontfilemissing
+#: fpg_constantsrserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
 msgstr "Файл шрифта <%s.fnt> не найден"
 
-#: fpg_constants:rsshortfri
+#: fpg_constantsrsshortfri
 msgid "Fri"
 msgstr "Пт"
 
-#: fpg_constants:rslongfri
+#: fpg_constantsrslongfri
 msgid "Friday"
 msgstr "Пятница"
 
-#: fpg_constants:rsgotoparentdirectory
+#: fpg_constantsrsgotoparentdirectory
 msgid "Go to parent directory"
-msgstr ""
+msgstr "Перейти в родительский каталог"
 
-#: fpg_constants:rsgotohomedirectory
+#: fpg_constantsrsgotohomedirectory
 msgid "Got to home directory"
-msgstr ""
+msgstr "Перейти в домашний каталог"
 
-#: fpg_constants:rscolorgreen
+#: fpg_constantsrscolorgreen
 msgid "Green"
-msgstr ""
+msgstr "Зелёный"
 
-#: fpg_constants:rsfilegroup
+#: fpg_constantsrsfilegroup
 msgid "Group"
 msgstr "Группа"
 
-#: fpg_constants:rshelp
+#: fpg_constantsrshelp
 msgid "Help"
 msgstr "Справка"
 
-#: fpg_constants:rshexadecimal
+#: fpg_constantsrshexadecimal
 msgid "Hexadecimal"
-msgstr ""
+msgstr "Шестнадцатеричный"
 
-#: fpg_constants:rskeyhome
+#: fpg_constantsrskeyhome
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
-#: fpg_constants:rsignore
+#: fpg_constantsrsignore
 msgid "Ignore"
 msgstr "Пропустить"
 
-#: fpg_constants:rserrreportimagefilemissing
+#: fpg_constantsrserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "Изображение <%s> не найдено"
+msgstr "Изображение <%s> отсутствует"
 
-#: fpg_constants:rsinformation
+#: fpg_constantsrsinformation
 msgid "Information"
 msgstr "Информация"
 
-#: fpg_constants:rskeyins
+#: fpg_constantsrskeyins
 msgid "Ins"
-msgstr ""
+msgstr "Ins"
 
-#: fpg_constants:rsinsert
+#: fpg_constantsrsinsert
 msgid "Insert"
 msgstr "Вставка"
 
-#: fpg_constants:rsinsertfromcharactermap
+#: fpg_constantsrsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Вставить из таблицы символов"
 
-#: fpg_constants:serrinvalidoption
-msgid "Invalid option at position %d: \"%s\""
-msgstr ""
-
-#: fpg_constants:rsitalic
+#: fpg_constantsrsitalic
 msgid "Italic"
 msgstr "Курсив"
 
-#: fpg_constants:rserritemofwrongtype
+#: fpg_constantsrserritemofwrongtype
 msgid "Item is not of <%s> type!"
 msgstr "Тип элемента отличается от <%s>!"
 
-#: fpg_constants:rsshortjan
+#: fpg_constantsrsshortjan
 msgid "Jan"
 msgstr "Янв"
 
-#: fpg_constants:rslongjan
+#: fpg_constantsrslongjan
 msgid "January"
 msgstr "Январь"
 
-#: fpg_constants:rsshortjul
+#: fpg_constantsrsshortjul
 msgid "Jul"
 msgstr "Июл"
 
-#: fpg_constants:rslongjul
+#: fpg_constantsrslongjul
 msgid "July"
 msgstr "Июль"
 
-#: fpg_constants:rsshortjun
+#: fpg_constantsrsshortjun
 msgid "Jun"
 msgstr "Июн"
 
-#: fpg_constants:rslongjun
+#: fpg_constantsrslongjun
 msgid "June"
 msgstr "Июнь"
 
-#: fpg_constants:rskeyleft
+#: fpg_constantsrskeyleft
 msgid "Left"
-msgstr ""
+msgstr "Влево"
 
-#: fpg_constants:rserrlistmustbeempty
+#: fpg_constantsrserrlistmustbeempty
 msgid "List must be empty"
 msgstr "Список должен быть пустым"
 
-#: fpg_constants:rsshortmar
+#: fpg_constantsrsshortmar
 msgid "Mar"
 msgstr "Мар"
 
-#: fpg_constants:rslongmar
+#: fpg_constantsrslongmar
 msgid "March"
 msgstr "Март"
 
-#: fpg_constants:rsshortmay
+#: fpg_constantsrsshortmay
 msgid "May"
 msgstr "Май"
 
-#: fpg_constants:rsmessage
+#: fpg_constantsrsmessage
 msgid "Message"
 msgstr "Сообщение"
 
-#: fpg_constants:rskeymeta
+#: fpg_constantsrskeymeta
 msgid "Meta+"
-msgstr ""
+msgstr "Мета+"
 
-#: fpg_constants:rsfilemodifiedtime
+#: fpg_constantsrsfilemodifiedtime
 msgid "Mod. Time"
-msgstr "Изменен"
+msgstr "Изменён"
 
-#: fpg_constants:rsshortmon
+#: fpg_constantsrsshortmon
 msgid "Mon"
 msgstr "Пн"
 
-#: fpg_constants:rslongmon
+#: fpg_constantsrslongmon
 msgid "Monday"
 msgstr "Понедельник"
 
-#: fpg_constants:rsmovedown
+#: fpg_constantsrsmovedown
 msgid "Move Down"
-msgstr ""
+msgstr "Вниз"
 
-#: fpg_constants:rsmoveup
+#: fpg_constantsrsmoveup
 msgid "Move Up"
-msgstr ""
+msgstr "Вверх"
 
-#: fpg_constants:rsname
+#: fpg_constantsrsname
 msgid "Name"
-msgstr "Название"
+msgstr "Имя"
 
-#: fpg_constants:rsno
+#: fpg_constantsrsno
 msgid "No"
 msgstr "Нет"
 
-#: fpg_constants:rsnotoall
+#: fpg_constantsrsnotoall
 msgid "No to All"
 msgstr "Нет для всех"
 
-#: fpg_constants:rsshortnov
+#: fpg_constantsrsshortnov
 msgid "Nov"
 msgstr "Ноя"
 
-#: fpg_constants:rslongnov
+#: fpg_constantsrslongnov
 msgid "November"
 msgstr "Ноябрь"
 
-#: fpg_constants:rsok
+#: fpg_constantsrsok
 msgid "OK"
 msgstr "OK"
 
-#: fpg_constants:rsshortoct
+#: fpg_constantsrsshortoct
 msgid "Oct"
 msgstr "Окт"
 
-#: fpg_constants:rslongoct
+#: fpg_constantsrslongoct
 msgid "October"
 msgstr "Октябрь"
 
-#: fpg_constants:rsopen
+#: fpg_constantsrsopen
 msgid "Open"
 msgstr "Открыть"
 
-#: fpg_constants:rsopenafile
+#: fpg_constantsrsopenafile
 msgid "Open a file"
 msgstr "Открыть файл"
 
-#: fpg_constants:serrnooptionallowed
-msgid "Option at position %d does not allow an argument: %s"
-msgstr ""
-
-#: fpg_constants:serroptionneeded
-msgid "Option at position %d needs an argument : %s"
-msgstr ""
-
-#: fpg_constants:rsfileowner
+#: fpg_constantsrsfileowner
 msgid "Owner"
 msgstr "Владелец"
 
-#: fpg_constants:rsfiletypepdf
+#: fpg_constantsrsfiletypepdf
 msgid "PDF Documents"
-msgstr "PDF Документы"
+msgstr "Документы PDF"
 
-#: fpg_constants:rsreportpage
+#: fpg_constantsrsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Страница"
 
-#: fpg_constants:rspassword
+#: fpg_constantsrspassword
 msgid "Password"
 msgstr "Пароль"
 
-#: fpg_constants:rspaste
+#: fpg_constantsrspaste
 msgid "Paste"
 msgstr "Вставить"
 
-#: fpg_constants:rskeypgdn
+#: fpg_constantsrskeypgdn
 msgid "PgDn"
-msgstr ""
+msgstr "PgDn"
 
-#: fpg_constants:rskeypgup
+#: fpg_constantsrskeypgup
 msgid "PgUp"
-msgstr ""
+msgstr "PgUp"
 
-#: fpg_constants:rstabpredefined
+#: fpg_constantsrstabpredefined
 msgid "Predefined"
-msgstr ""
+msgstr "Предопределённый"
 
-#: fpg_constants:rsreportpreview
+#: fpg_constantsrsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Предпросмотр"
 
-#: fpg_constants:rscollectionrecentlyused
+#: fpg_constantsrscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Ранее использованные"
 
-#: fpg_constants:rscolorred
+#: fpg_constantsrscolorred
 msgid "Red"
-msgstr ""
+msgstr "Красный"
 
-#: fpg_constants:rsreplace
+#: fpg_constantsrsreplace
 msgid "Replace"
 msgstr "Заменить"
 
-#: fpg_constants:rsretry
+#: fpg_constantsrsretry
 msgid "Retry"
 msgstr "Повторить"
 
-#: fpg_constants:rskeyright
+#: fpg_constantsrskeyright
 msgid "Right"
-msgstr ""
+msgstr "Вправо"
 
-#: fpg_constants:rsfilerights
+#: fpg_constantsrsfilerights
 msgid "Rights"
 msgstr "Права"
 
-#: fpg_constants:rscollectionsans
+#: fpg_constantsrscollectionsans
 msgid "Sans"
 msgstr "Sans"
 
-#: fpg_constants:rsshortsat
+#: fpg_constantsrsshortsat
 msgid "Sat"
 msgstr "Суб"
 
-#: fpg_constants:rslongsat
+#: fpg_constantsrslongsat
 msgid "Saturday"
 msgstr "Суббота"
 
-#: fpg_constants:rssave
+#: fpg_constantsrssave
 msgid "Save"
 msgstr "Сохранить"
 
-#: fpg_constants:rssaveafile
+#: fpg_constantsrssaveafile
 msgid "Save file as"
 msgstr "Сохранить файл как"
 
-#: fpg_constants:rssearch
+#: fpg_constantsrssearch
 msgid "Search"
 msgstr "Поиск"
 
-#: fpg_constants:rsreportsection
+#: fpg_constantsrsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Секция"
 
-#: fpg_constants:rsselect
+#: fpg_constantsrsselect
 msgid "Select"
 msgstr "Выбрать"
 
-#: fpg_constants:rsselectall
+#: fpg_constantsrsselectall
 msgid "Select All"
-msgstr ""
+msgstr "Выбрать все"
 
-#: fpg_constants:rsselectadirectory
+#: fpg_constantsrsselectadirectory
 msgid "Select a Directory"
 msgstr "Выберите директорию"
 
-#: fpg_constants:rsselectafont
+#: fpg_constantsrsselectafont
 msgid "Select a font"
 msgstr "Выбор шрифта"
 
-#: fpg_constants:rsshortsep
+#: fpg_constantsrsshortsep
 msgid "Sep"
 msgstr "Сен"
 
-#: fpg_constants:rslongsep
+#: fpg_constantsrslongsep
 msgid "September"
 msgstr "Сентябрь"
 
-#: fpg_constants:rscollectionserif
+#: fpg_constantsrscollectionserif
 msgid "Serif"
 msgstr "Serif"
 
-#: fpg_constants:rskeyshift
+#: fpg_constantsrskeyshift
 msgid "Shift+"
-msgstr ""
+msgstr "Shift+"
 
-#: fpg_constants:rsshowhidden
+#: fpg_constantsrsshowhidden
 msgid "Show hidden files"
 msgstr "Показывать скрытые файлы"
 
-#: fpg_constants:rssize
+#: fpg_constantsrssize
 msgid "Size"
 msgstr "Размер"
 
-#: fpg_constants:rskeyspace
+#: fpg_constantsrskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Пробел"
 
-#: fpg_constants:rsstyle
+#: fpg_constantsrsstyle
 msgid "Style"
 msgstr "Стиль"
 
-#: fpg_constants:rsshortsun
+#: fpg_constantsrsshortsun
 msgid "Sun"
 msgstr "Вс"
 
-#: fpg_constants:rslongsun
+#: fpg_constantsrslongsun
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: fpg_constants:rskeytab
+#: fpg_constantsrskeytab
 msgid "Tab"
-msgstr ""
+msgstr "Tab"
 
-#: fpg_constants:rstexttoinsert
+#: fpg_constantsrstexttoinsert
 msgid "Text to Insert"
-msgstr ""
+msgstr "Вставить текст"
 
-#: fpg_constants:rserrreportnopagestoprint
+#: fpg_constantsrserrreportnopagestoprint
 msgid "There are no pages to print"
 msgstr "Нет страниц для печати"
 
-#: fpg_constants:rsshortthu
+#: fpg_constantsrsshortthu
 msgid "Thu"
 msgstr "Чт"
 
-#: fpg_constants:rslongthu
+#: fpg_constantsrslongthu
 msgid "Thursday"
 msgstr "Четверг"
 
-#: fpg_constants:rstoday
+#: fpg_constantsrstoday
 msgid "Today"
 msgstr "Сегодня"
 
-#: fpg_constants:rstrue
+#: fpg_constantsrstrue
 msgid "True"
-msgstr "верный"
+msgstr "True"
 
-#: fpg_constants:rsshorttue
+#: fpg_constantsrsshorttue
 msgid "Tue"
 msgstr "Вт"
 
-#: fpg_constants:rslongtue
+#: fpg_constantsrslongtue
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: fpg_constants:rsfiletype
+#: fpg_constantsrsfiletype
 msgid "Type of file"
 msgstr "Тип файла"
 
-#: fpg_constants:rstypeface
+#: fpg_constantsrstypeface
 msgid "Typeface"
 msgstr "Начертание"
 
-#: fpg_constants:rsunderscore
+#: fpg_constantsrsunderscore
 msgid "UnderScore"
-msgstr "Подчеркнутый"
+msgstr "Подчёркнутый"
 
-#: fpg_constants:rskeyup
+#: fpg_constantsrskeyup
 msgid "Up"
-msgstr ""
+msgstr "Вверх"
 
-#: fpg_constants:rsusername
+#: fpg_constantsrsusername
 msgid "User name"
 msgstr "Имя пользователя"
 
-#: fpg_constants:rswarning
+#: fpg_constantsrswarning
 msgid "Warning"
 msgstr "Внимание"
 
-#: fpg_constants:rsshortwed
+#: fpg_constantsrsshortwed
 msgid "Wed"
 msgstr "Ср"
 
-#: fpg_constants:rslongwed
+#: fpg_constantsrslongwed
 msgid "Wednesday"
 msgstr "Среда"
 
-#: fpg_constants:rsaddnewitem
+#: fpg_constantsrsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
 msgstr "Добавить новый элемент <%s> в список?"
 
-#: fpg_constants:rsyes
+#: fpg_constantsrsyes
 msgid "Yes"
 msgstr "Да"
 
-#: fpg_constants:rsyestoall
+#: fpg_constantsrsyestoall
 msgid "Yes to All"
 msgstr "Да для всех"
 
-#: fpg_constants:rsreportpageof
+#: fpg_constantsrsreportpageof
 msgid "of"
-msgstr ""
+msgstr "из"
 
+#: fpg_constantsserrinvalidoption
+msgid "Invalid option at position %d: \"%s\""
+msgstr "Недопустимый параметр в позиции: %d: \"%s\""
+
+#: fpg_constantsserrnooptionallowed
+msgid "Option at position %d does not allow an argument: %s"
+msgstr "Опция в позиции %d не допускает аргумента: %s"
+
+#: fpg_constantsserroptionneeded
+msgid "Option at position %d needs an argument : %s"
+msgstr "Опция в позиции %d требует аргумента: %s"
