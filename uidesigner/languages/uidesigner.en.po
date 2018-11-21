@@ -6,401 +6,402 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: UIDesigner\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-11-21 15:34+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2018-11-21 15:34+0300\n"
+"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
+"Language-Team: English\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: "
 
-#: vfd_constants.pas:1
+#: vfd_constants:rsopenformfile
 msgid "Open form file"
 msgstr ""
 
-#: vfd_constants.pas:2
+#: vfd_constants:rspascalsourcefiles
 msgid "Pascal source files"
 msgstr ""
 
-#: vfd_constants.pas:3
+#: vfd_constants:rssaveformfile
 msgid "Save form source"
 msgstr ""
 
-#: vfd_constants.pas:4
+#: vfd_constants:rsversion
 msgid "Version: %s"
 msgstr ""
 
-#: vfd_constants.pas:5
+#: vfd_constants:rswrittenby
 msgid "Written by %s"
 msgstr ""
 
-#: vfd_constants.pas:6
+#: vfd_constants:rscompiledon
 msgid "Compiled on: %s"
 msgstr ""
 
-#: vfd_constants.pas:7
+#: vfd_constants:rsnewunnamedform
 msgid "new"
 msgstr ""
 
-#: vfd_constants.pas:8
+#: vfd_constants:rsdesignerhelp1
 msgid "F11: switch to Properties"
 msgstr ""
 
-#: vfd_constants.pas:9
+#: vfd_constants:rsdesignerhelp2
 msgid "TAB, SHIFT+TAB: select next widget"
 msgstr ""
 
-#: vfd_constants.pas:10
+#: vfd_constants:rsdesignerhelp3
 msgid "F2: edit widget order"
 msgstr ""
 
-#: vfd_constants.pas:11
+#: vfd_constants:rsdesignerquickhelp
 msgid "Quick Help"
 msgstr ""
 
-#: vfd_constants.pas:12
+#: vfd_constants:rsleft
 msgid "Left"
 msgstr ""
 
-#: vfd_constants.pas:13
+#: vfd_constants:rstop
 msgid "Top"
 msgstr ""
 
-#: vfd_constants.pas:14
+#: vfd_constants:rswidth
 msgid "Width"
 msgstr ""
 
-#: vfd_constants.pas:15
+#: vfd_constants:rsheight
 msgid "Height"
 msgstr ""
 
-#: vfd_constants.pas:16
+#: vfd_constants:rsnewclassname
 msgid "Class name"
 msgstr ""
 
-#: vfd_constants.pas:17
+#: vfd_constants:rsnewformname
 msgid "Form name"
 msgstr ""
 
-#: vfd_constants.pas:18
+#: vfd_constants:rsposition
 msgid "Position"
 msgstr ""
 
-#: vfd_constants.pas:19
+#: vfd_constants:rsformtitle
 msgid "Form %s"
 msgstr ""
 
-#: vfd_constants.pas:20
+#: vfd_constants:rsup
 msgid "Up"
 msgstr ""
 
-#: vfd_constants.pas:21
+#: vfd_constants:rsdown
 msgid "Down"
 msgstr ""
 
-#: vfd_constants.pas:22
+#: vfd_constants:rsgridresolution
 msgid "Grid resolution"
 msgstr ""
 
-#: vfd_constants.pas:23
+#: vfd_constants:rsrecentfilescount
 msgid "Recent files count"
 msgstr ""
 
-#: vfd_constants.pas:24
+#: vfd_constants:rsshowfullpathname
 msgid "Show the full file path"
 msgstr ""
 
-#: vfd_constants.pas:25
+#: vfd_constants:rsformdesigner
 msgid "Form designer"
 msgstr ""
 
-#: vfd_constants.pas:26
+#: vfd_constants:rsopenrecentsettings
 msgid "Open Recent menu settings"
 msgstr ""
 
-#: vfd_constants.pas:27
+#: vfd_constants:rsvarious
 msgid "Various"
 msgstr ""
 
-#: vfd_constants.pas:28
+#: vfd_constants:rsundoonpropertyexit
 msgid "Undo on property editor exit"
 msgstr ""
 
-#: vfd_constants.pas:29
+#: vfd_constants:rsoneclickselectandmove
 msgid "One click select and move"
 msgstr ""
 
-#: vfd_constants.pas:30
+#: vfd_constants:rsdefaultfileext
 msgid "Default file extension"
 msgstr ""
 
-#: vfd_constants.pas:31
+#: vfd_constants:rsusecoderegions
 msgid "Use code-folding regions in auto-generated code"
 msgstr ""
 
-#: vfd_constants.pas:32
+#: vfd_constants:rsindenttype
 msgid "Indent Type for generated code"
 msgstr ""
 
-#: vfd_constants.pas:34
+#: vfd_constants:rsdlgproductinfo
 msgid "Product Information"
 msgstr ""
 
-#: vfd_constants.pas:35
+#: vfd_constants:rsdlgsetup
 msgid "General Settings"
 msgstr ""
 
-#: vfd_constants.pas:36
+#: vfd_constants:rsdlginsertcustomwidget
 msgid "Insert Custom Widget"
 msgstr ""
 
-#: vfd_constants.pas:37
+#: vfd_constants:rsdlgnewform
 msgid "New Form"
 msgstr ""
 
-#: vfd_constants.pas:38
+#: vfd_constants:rsdlgeditformposition
 msgid "Form Position"
 msgstr ""
 
-#: vfd_constants.pas:39
+#: vfd_constants:rsdlgwidgetorder
 msgid "Widget Order"
 msgstr ""
 
-#: vfd_constants.pas:40
+#: vfd_constants:rsdlgtaborder
 msgid "Tab Order"
 msgstr ""
 
-#: vfd_constants.pas:42
+#: vfd_constants:rserrunitnotfound
 msgid "The unit <%s> was not found"
 msgstr ""
 
-#: vfd_constants.pas:43
+#: vfd_constants:rserrloadingform
 msgid "Error loading form"
 msgstr ""
 
-#: vfd_constants.pas:44
+#: vfd_constants:rserrfailedtofinddesignerform
 msgid "Failed to find Designer Form"
 msgstr ""
 
-#: vfd_constants.pas:45
+#: vfd_constants:rserrformsaveioerror
 msgid "Form save I/O failure in <%s>"
 msgstr ""
 
-#: vfd_constants.pas:46
+#: vfd_constants:rserrnameconflict
 msgid "Name Conflict"
 msgstr ""
 
-#: vfd_constants.pas:47
+#: vfd_constants:rserrnostringsproperty
 msgid "Failed to find TStrings type property"
 msgstr ""
 
-#: vfd_constants.pas:48
+#: vfd_constants:rserrfailedtoparseboolean
 msgid "Failed to parse Boolean value <%s>"
 msgstr ""
 
-#: vfd_constants.pas:50
+#: vfd_constants:rsclass
 msgid "Class"
 msgstr ""
 
-#: vfd_constants.pas:51
+#: vfd_constants:rsname
 msgid "Name"
 msgstr ""
 
-#: vfd_constants.pas:52
+#: vfd_constants:rsproperties
 msgid "Properties"
 msgstr ""
 
-#: vfd_constants.pas:53
+#: vfd_constants:rsanchors
 msgid "Anchors"
 msgstr ""
 
-#: vfd_constants.pas:54
+#: vfd_constants:rsunknownlines
 msgid "Unknown lines"
 msgstr ""
 
-#: vfd_constants.pas:55
+#: vfd_constants:rsfile
 msgid "&File"
 msgstr ""
 
-#: vfd_constants.pas:56
+#: vfd_constants:rssettings
 msgid "&Settings"
 msgstr ""
 
-#: vfd_constants.pas:57
+#: vfd_constants:rsform
 msgid "Fo&rm"
 msgstr ""
 
-#: vfd_constants.pas:58
+#: vfd_constants:rspreview
 msgid "&Preview"
 msgstr ""
 
-#: vfd_constants.pas:59
+#: vfd_constants:rshelp
 msgid "&Help"
 msgstr ""
 
-#: vfd_constants.pas:60
+#: vfd_constants:rscreatenewfile
 msgid "Create New File"
 msgstr ""
 
-#: vfd_constants.pas:61
+#: vfd_constants:rsopen
 msgid "Open"
 msgstr ""
 
-#: vfd_constants.pas:62
+#: vfd_constants:rsopenrecent
 msgid "Open Recent"
 msgstr ""
 
-#: vfd_constants.pas:63
+#: vfd_constants:rssave
 msgid "Save"
 msgstr ""
 
-#: vfd_constants.pas:64
+#: vfd_constants:rssaveasnewtemplateunit
 msgid "Save As New Template Unit"
 msgstr ""
 
-#: vfd_constants.pas:65
+#: vfd_constants:rsaddnewformtounit
 msgid "Add New Form to Unit"
 msgstr ""
 
-#: vfd_constants.pas:66
+#: vfd_constants:rsexit
 msgid "Exit"
 msgstr ""
 
-#: vfd_constants.pas:67
+#: vfd_constants:rsgeneraloptions
 msgid "General options"
 msgstr ""
 
-#: vfd_constants.pas:68
+#: vfd_constants:rseditspecial
 msgid "Edit special"
 msgstr ""
 
-#: vfd_constants.pas:69
+#: vfd_constants:rsaboutfpguitoolkit
 msgid "About fpGUI Toolkit"
 msgstr ""
 
-#: vfd_constants.pas:70
+#: vfd_constants:rssavecurrentformdesign
 msgid "Save the current form design"
 msgstr ""
 
-#: vfd_constants.pas:71
+#: vfd_constants:rsclose
 msgid "Close"
 msgstr ""
 
-#: vfd_constants.pas:72
+#: vfd_constants:rscancel
 msgid "Cancel"
 msgstr ""
 
-#: vfd_constants.pas:73
+#: vfd_constants:rsok
 msgid "OK"
 msgstr ""
 
-#: vfd_constants.pas:74
+#: vfd_constants:rsappliestonewformdialogsonly
 msgid "Applies to new form/dialogs only"
 msgstr ""
 
-#: vfd_constants.pas:75
+#: vfd_constants:rsspacecharacters
 msgid "Space characters"
 msgstr ""
 
-#: vfd_constants.pas:76
+#: vfd_constants:rstabcharacters
 msgid "Tab characters"
 msgstr ""
 
-#: vfd_constants.pas:77
+#: vfd_constants:rsitems
 msgid "Items"
 msgstr ""
 
-#: vfd_constants.pas:78
+#: vfd_constants:rsclear
 msgid "Clear"
 msgstr ""
 
-#: vfd_constants.pas:79
+#: vfd_constants:rspos
 msgid "Pos"
 msgstr ""
 
-#: vfd_constants.pas:80
+#: vfd_constants:rsformnameexists
 msgid "The form name already exists in the current unit, please try again"
 msgstr ""
 
-#: vfd_constants.pas:81
+#: vfd_constants:rscolumneditor
 msgid "Column editor"
 msgstr ""
 
-#: vfd_constants.pas:82
+#: vfd_constants:rsstringgridcolumns
 msgid "String Grid columns"
 msgstr ""
 
-#: vfd_constants.pas:83
+#: vfd_constants:rscolumn
 msgid "Column"
 msgstr ""
 
-#: vfd_constants.pas:84
+#: vfd_constants:rstitle
 msgid "Title"
 msgstr ""
 
-#: vfd_constants.pas:85
+#: vfd_constants:rscolumnwidth
 msgid "Column width"
 msgstr ""
 
-#: vfd_constants.pas:86
+#: vfd_constants:rsalignment
 msgid "Alignment"
 msgstr ""
 
-#: vfd_constants.pas:87
+#: vfd_constants:rsright
 msgid "Right"
 msgstr ""
 
-#: vfd_constants.pas:88
+#: vfd_constants:rscenter
 msgid "Center"
 msgstr ""
 
-#: vfd_constants.pas:89
+#: vfd_constants:rsnew
 msgid "New"
 msgstr ""
 
-#: vfd_constants.pas:90
+#: vfd_constants:rsdelete
 msgid "Delete"
 msgstr ""
 
-#: vfd_constants.pas:91
+#: vfd_constants:rsupuppercase
 msgid "UP"
 msgstr ""
 
-#: vfd_constants.pas:92
+#: vfd_constants:rsdownuppercase
 msgid "DOWN"
 msgstr ""
 
-#: vfd_constants.pas:93
+#: vfd_constants:rscol
 msgid "Col."
 msgstr ""
 
-#: vfd_constants.pas:94
+#: vfd_constants:rsalign
 msgid "Align"
 msgstr ""
 
-#: vfd_constants.pas:95
+#: vfd_constants:rsaddtab
 msgid "Add Tab"
 msgstr ""
 
-#: vfd_constants.pas:96
+#: vfd_constants:rsdeletetab
 msgid "Delete Tab"
 msgstr ""
 
-#: vfd_constants.pas:97
+#: vfd_constants:rstoggledesignergrid
 msgid "Toggle designer grid"
 msgstr ""
 
-#: vfd_constants.pas:98
+#: vfd_constants:rsclassuppercase
 msgid "CLASS"
 msgstr ""
 
-#: vfd_constants.pas:99
+#: vfd_constants:rsnameuppercase
 msgid "NAME"
 msgstr ""
 
-#: vfd_constants.pas:100
+#: vfd_constants:rserrorsregisteringwidget
 msgid "Errors Registering Widget"
 msgstr ""
+
