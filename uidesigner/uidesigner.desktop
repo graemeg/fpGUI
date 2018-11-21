@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=fpGUI UI Designer
+GenericName=Designer forms for fpGUI
+Comment=fpGUI's Visual User Interface Designer
+Type=Application
+Exec=uidesigner
+Icon=uidesigner
+Terminal=false
+Categories=IDE;Development; 
+Keywords=fpc;pascal;fpgui;
+
+
+# Translations
+Comment[ru]=Визуальный дизайнер интерфейса пользователя для fpGUI
+Name[ru]=Дизайнер интерфейса для fpGUI
+GenericName[ru]=Дизайнер форм для fpGUI
