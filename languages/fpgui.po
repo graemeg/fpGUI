@@ -394,10 +394,6 @@ msgstr ""
 msgid "May"
 msgstr ""
 
-#: fpg_constants:rslongmay
-msgid "May"
-msgstr ""
-
 #: fpg_constants:rsmessage
 msgid "Message"
 msgstr ""

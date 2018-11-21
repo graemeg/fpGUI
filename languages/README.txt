@@ -46,4 +46,4 @@ french:            fpgui.fr.po
 italian:           fpgui.it.po
 afrikaans:         fpgui.af.po
 portuguese:        fpgui.pt.po
-
+ukrainian:         fpgui.uk.po
