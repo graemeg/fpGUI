@@ -179,10 +179,10 @@ begin
   WindowTitle := 'TInsertCustomForm';
   SetPosition(0, 0, 300, 100);
 
-  l1        := CreateLabel(self, 8, 4, 'Class name:');
+  l1        := CreateLabel(self, 8, 4, rsNewClassName + ':');
   edClass   := CreateEdit(self, 8, 24, 150, 0);
   edClass.Text := 'Tfpg';
-  l2        := CreateLabel(self, 8, 48, 'Name:');
+  l2        := CreateLabel(self, 8, 48, rsName + ':');
   edName    := CreateEdit(self, 8, 68, 150, 0);
   btnOK     := CreateButton(self, 180, 20, 100, rsOK, @OnButtonClick);
   btnCancel := CreateButton(self, 180, 52, 100, rsCancel, @OnButtonClick);
@@ -220,7 +220,7 @@ begin
   SetPosition(0, 0, 286, 66);
   WindowTitle := 'TNewFormForm';
 
-  l1           := CreateLabel(self, 8, 8, 'Form name:');
+  l1           := CreateLabel(self, 8, 8, rsNewFormName + ':');
   edName       := CreateEdit(self, 8, 28, 180, 0);
   edName.Text  := '';
   edName.OnKeyPress := @OnedNameKeyPressed;
@@ -261,7 +261,7 @@ begin
   WindowTitle := 'TEditPositionForm';
   Sizeable := False;
 
-  lbPos           := CreateLabel(self, 8, 8, 'Pos:');
+  lbPos           := CreateLabel(self, 8, 8, rsPos + ':');
   edPos           := CreateEdit(self, 8, 28, 80, 0);
   edPos.OnKeyPress := @edPosKeyPressed;
   btnOK           := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
@@ -327,7 +327,7 @@ begin
     SetPosition(4, 4, 248, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Form: %s';
+    Text := rsFormTitle + ':';
   end;
 
   btnOK := TfpgButton.Create(self);
@@ -336,7 +336,7 @@ begin
     Name := 'btnOK';
     SetPosition(346, 24, 75, 24);
     Anchors := [anRight,anTop];
-    Text := 'OK';
+    Text := rsOK;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.ok';
@@ -350,7 +350,7 @@ begin
     Name := 'btnCancel';
     SetPosition(346, 52, 75, 24);
     Anchors := [anRight,anTop];
-    Text := 'Cancel';
+    Text := rsCancel;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.cancel';
@@ -364,7 +364,7 @@ begin
     Name := 'btnUp';
     SetPosition(346, 108, 75, 24);
     Anchors := [anRight,anTop];
-    Text := 'Up';
+    Text := rsUp;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -378,7 +378,7 @@ begin
     Name := 'btnDown';
     SetPosition(346, 136, 75, 24);
     Anchors := [anRight,anTop];
-    Text := 'Down';
+    Text := rsDown;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -522,7 +522,7 @@ begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
   SetPosition(392, 386, 398, 346);
-  WindowTitle := 'General settings';
+  WindowTitle := rsDlgSetup;
   Hint := '';
   ShowHint := True;
   WindowPosition := wpScreenCenter;
@@ -536,7 +536,7 @@ begin
     SetPosition(24, 32, 112, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Grid resolution:';
+    Text := rsGridResolution + ':';
   end;
 
   btnOK := TfpgButton.Create(self);
@@ -545,7 +545,7 @@ begin
     Name := 'btnOK';
     SetPosition(238, 316, 75, 24);
     Anchors := [anRight,anBottom];
-    Text := 'OK';
+    Text := rsOK;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.ok';
@@ -559,7 +559,7 @@ begin
     Name := 'btnCancel';
     SetPosition(317, 316, 75, 24);
     Anchors := [anRight,anBottom];
-    Text := 'Cancel';
+    Text := rsCancel;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.cancel';
@@ -574,7 +574,7 @@ begin
     SetPosition(24, 132, 124, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Recent files count:';
+    Text := rsRecentFilesCount + ':';
   end;
 
   tbMRUFileCount := TfpgTrackBar.Create(self);
@@ -598,7 +598,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 4;
-    Text := 'Show the full file path';
+    Text := rsShowFullPathName;
   end;
 
   lblName1 := TfpgLabel.Create(self);
@@ -608,7 +608,7 @@ begin
     SetPosition(8, 8, 176, 16);
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Form designer';
+    Text := rsFormDesigner;
   end;
 
   lblName2 := TfpgLabel.Create(self);
@@ -618,7 +618,7 @@ begin
     SetPosition(8, 108, 232, 16);
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Open Recent menu settings';
+    Text := rsOpenRecentSettings;
   end;
 
   edtDefaultExt := TfpgEdit.Create(self);
@@ -640,7 +640,7 @@ begin
     SetPosition(12, 192, 60, 16);
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Various';
+    Text := rsVarious;
   end;
 
   chkUndoOnExit := TfpgCheckBox.Create(self);
@@ -651,7 +651,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 2;
-    Text := 'Undo on property editor exit';
+    Text := rsUndoOnPropertyExit;
   end;
 
   chkOneClick := TfpgCheckBox.Create(self);
@@ -663,7 +663,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 12;
-    Text := 'One click select and move';
+    Text := rsOneClickSelectAndMove;
   end;
 
   Label1 := TfpgLabel.Create(self);
@@ -673,7 +673,7 @@ begin
     SetPosition(24, 220, 132, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Default file extension:';
+    Text := rsDefaultFileExt + ':';
   end;
 
   chkCodeRegions := TfpgCheckBox.Create(self);
@@ -682,9 +682,9 @@ begin
     Name := 'chkCodeRegions';
     SetPosition(24, 244, 360, 20);
     FontDesc := '#Label1';
-    Hint := 'Applies to new form/dialogs only';
+    Hint := rsAppliesToNewFormDialogsOnly;
     TabOrder := 18;
-    Text := 'Use code-folding regions in auto-generated code';
+    Text := rsUseCodeRegions;
   end;
 
   cbIndentationType := TfpgComboBox.Create(self);
@@ -695,8 +695,8 @@ begin
     ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
-    Items.Add('Space characters');
-    Items.Add('Tab characters');
+    Items.Add(rsSpaceCharacters);
+    Items.Add(rsTabCharacters);
     FocusItem := 0;
     TabOrder := 16;
   end;
@@ -708,7 +708,7 @@ begin
     SetPosition(24, 268, 192, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Indent Type for generated code:';
+    Text := rsIndentType + ':';
   end;
 
   edtGridX := TfpgEditInteger.Create(self);

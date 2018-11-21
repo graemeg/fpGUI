@@ -1,0 +1,406 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-11-21 15:34+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: vfd_constants.pas:1
+msgid "Open form file"
+msgstr ""
+
+#: vfd_constants.pas:2
+msgid "Pascal source files"
+msgstr ""
+
+#: vfd_constants.pas:3
+msgid "Save form source"
+msgstr ""
+
+#: vfd_constants.pas:4
+msgid "Version: %s"
+msgstr ""
+
+#: vfd_constants.pas:5
+msgid "Written by %s"
+msgstr ""
+
+#: vfd_constants.pas:6
+msgid "Compiled on: %s"
+msgstr ""
+
+#: vfd_constants.pas:7
+msgid "new"
+msgstr ""
+
+#: vfd_constants.pas:8
+msgid "F11: switch to Properties"
+msgstr ""
+
+#: vfd_constants.pas:9
+msgid "TAB, SHIFT+TAB: select next widget"
+msgstr ""
+
+#: vfd_constants.pas:10
+msgid "F2: edit widget order"
+msgstr ""
+
+#: vfd_constants.pas:11
+msgid "Quick Help"
+msgstr ""
+
+#: vfd_constants.pas:12
+msgid "Left"
+msgstr ""
+
+#: vfd_constants.pas:13
+msgid "Top"
+msgstr ""
+
+#: vfd_constants.pas:14
+msgid "Width"
+msgstr ""
+
+#: vfd_constants.pas:15
+msgid "Height"
+msgstr ""
+
+#: vfd_constants.pas:16
+msgid "Class name"
+msgstr ""
+
+#: vfd_constants.pas:17
+msgid "Form name"
+msgstr ""
+
+#: vfd_constants.pas:18
+msgid "Position"
+msgstr ""
+
+#: vfd_constants.pas:19
+msgid "Form %s"
+msgstr ""
+
+#: vfd_constants.pas:20
+msgid "Up"
+msgstr ""
+
+#: vfd_constants.pas:21
+msgid "Down"
+msgstr ""
+
+#: vfd_constants.pas:22
+msgid "Grid resolution"
+msgstr ""
+
+#: vfd_constants.pas:23
+msgid "Recent files count"
+msgstr ""
+
+#: vfd_constants.pas:24
+msgid "Show the full file path"
+msgstr ""
+
+#: vfd_constants.pas:25
+msgid "Form designer"
+msgstr ""
+
+#: vfd_constants.pas:26
+msgid "Open Recent menu settings"
+msgstr ""
+
+#: vfd_constants.pas:27
+msgid "Various"
+msgstr ""
+
+#: vfd_constants.pas:28
+msgid "Undo on property editor exit"
+msgstr ""
+
+#: vfd_constants.pas:29
+msgid "One click select and move"
+msgstr ""
+
+#: vfd_constants.pas:30
+msgid "Default file extension"
+msgstr ""
+
+#: vfd_constants.pas:31
+msgid "Use code-folding regions in auto-generated code"
+msgstr ""
+
+#: vfd_constants.pas:32
+msgid "Indent Type for generated code"
+msgstr ""
+
+#: vfd_constants.pas:34
+msgid "Product Information"
+msgstr ""
+
+#: vfd_constants.pas:35
+msgid "General Settings"
+msgstr ""
+
+#: vfd_constants.pas:36
+msgid "Insert Custom Widget"
+msgstr ""
+
+#: vfd_constants.pas:37
+msgid "New Form"
+msgstr ""
+
+#: vfd_constants.pas:38
+msgid "Form Position"
+msgstr ""
+
+#: vfd_constants.pas:39
+msgid "Widget Order"
+msgstr ""
+
+#: vfd_constants.pas:40
+msgid "Tab Order"
+msgstr ""
+
+#: vfd_constants.pas:42
+msgid "The unit <%s> was not found"
+msgstr ""
+
+#: vfd_constants.pas:43
+msgid "Error loading form"
+msgstr ""
+
+#: vfd_constants.pas:44
+msgid "Failed to find Designer Form"
+msgstr ""
+
+#: vfd_constants.pas:45
+msgid "Form save I/O failure in <%s>"
+msgstr ""
+
+#: vfd_constants.pas:46
+msgid "Name Conflict"
+msgstr ""
+
+#: vfd_constants.pas:47
+msgid "Failed to find TStrings type property"
+msgstr ""
+
+#: vfd_constants.pas:48
+msgid "Failed to parse Boolean value <%s>"
+msgstr ""
+
+#: vfd_constants.pas:50
+msgid "Class"
+msgstr ""
+
+#: vfd_constants.pas:51
+msgid "Name"
+msgstr ""
+
+#: vfd_constants.pas:52
+msgid "Properties"
+msgstr ""
+
+#: vfd_constants.pas:53
+msgid "Anchors"
+msgstr ""
+
+#: vfd_constants.pas:54
+msgid "Unknown lines"
+msgstr ""
+
+#: vfd_constants.pas:55
+msgid "&File"
+msgstr ""
+
+#: vfd_constants.pas:56
+msgid "&Settings"
+msgstr ""
+
+#: vfd_constants.pas:57
+msgid "Fo&rm"
+msgstr ""
+
+#: vfd_constants.pas:58
+msgid "&Preview"
+msgstr ""
+
+#: vfd_constants.pas:59
+msgid "&Help"
+msgstr ""
+
+#: vfd_constants.pas:60
+msgid "Create New File"
+msgstr ""
+
+#: vfd_constants.pas:61
+msgid "Open"
+msgstr ""
+
+#: vfd_constants.pas:62
+msgid "Open Recent"
+msgstr ""
+
+#: vfd_constants.pas:63
+msgid "Save"
+msgstr ""
+
+#: vfd_constants.pas:64
+msgid "Save As New Template Unit"
+msgstr ""
+
+#: vfd_constants.pas:65
+msgid "Add New Form to Unit"
+msgstr ""
+
+#: vfd_constants.pas:66
+msgid "Exit"
+msgstr ""
+
+#: vfd_constants.pas:67
+msgid "General options"
+msgstr ""
+
+#: vfd_constants.pas:68
+msgid "Edit special"
+msgstr ""
+
+#: vfd_constants.pas:69
+msgid "About fpGUI Toolkit"
+msgstr ""
+
+#: vfd_constants.pas:70
+msgid "Save the current form design"
+msgstr ""
+
+#: vfd_constants.pas:71
+msgid "Close"
+msgstr ""
+
+#: vfd_constants.pas:72
+msgid "Cancel"
+msgstr ""
+
+#: vfd_constants.pas:73
+msgid "OK"
+msgstr ""
+
+#: vfd_constants.pas:74
+msgid "Applies to new form/dialogs only"
+msgstr ""
+
+#: vfd_constants.pas:75
+msgid "Space characters"
+msgstr ""
+
+#: vfd_constants.pas:76
+msgid "Tab characters"
+msgstr ""
+
+#: vfd_constants.pas:77
+msgid "Items"
+msgstr ""
+
+#: vfd_constants.pas:78
+msgid "Clear"
+msgstr ""
+
+#: vfd_constants.pas:79
+msgid "Pos"
+msgstr ""
+
+#: vfd_constants.pas:80
+msgid "The form name already exists in the current unit, please try again"
+msgstr ""
+
+#: vfd_constants.pas:81
+msgid "Column editor"
+msgstr ""
+
+#: vfd_constants.pas:82
+msgid "String Grid columns"
+msgstr ""
+
+#: vfd_constants.pas:83
+msgid "Column"
+msgstr ""
+
+#: vfd_constants.pas:84
+msgid "Title"
+msgstr ""
+
+#: vfd_constants.pas:85
+msgid "Column width"
+msgstr ""
+
+#: vfd_constants.pas:86
+msgid "Alignment"
+msgstr ""
+
+#: vfd_constants.pas:87
+msgid "Right"
+msgstr ""
+
+#: vfd_constants.pas:88
+msgid "Center"
+msgstr ""
+
+#: vfd_constants.pas:89
+msgid "New"
+msgstr ""
+
+#: vfd_constants.pas:90
+msgid "Delete"
+msgstr ""
+
+#: vfd_constants.pas:91
+msgid "UP"
+msgstr ""
+
+#: vfd_constants.pas:92
+msgid "DOWN"
+msgstr ""
+
+#: vfd_constants.pas:93
+msgid "Col."
+msgstr ""
+
+#: vfd_constants.pas:94
+msgid "Align"
+msgstr ""
+
+#: vfd_constants.pas:95
+msgid "Add Tab"
+msgstr ""
+
+#: vfd_constants.pas:96
+msgid "Delete Tab"
+msgstr ""
+
+#: vfd_constants.pas:97
+msgid "Toggle designer grid"
+msgstr ""
+
+#: vfd_constants.pas:98
+msgid "CLASS"
+msgstr ""
+
+#: vfd_constants.pas:99
+msgid "NAME"
+msgstr ""
+
+#: vfd_constants.pas:100
+msgid "Errors Registering Widget"
+msgstr ""

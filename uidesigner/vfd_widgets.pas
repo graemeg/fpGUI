@@ -26,6 +26,7 @@ uses
   contnrs,
   vfd_widgetclass,
   vfd_props,
+  vfd_constants,
   typinfo;
 
 procedure RegisterWidgets;
@@ -104,8 +105,8 @@ begin
   Result := TfpgPopupMenu.Create(nil);
   { TODO : These are disabled for now, because a TabSheet component are used
            instead of a menu item - for adding tabs. }
-  Result.AddMenuItem('Add Tab', '', @AddTabSClicked).Enabled := False;
-  Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked).Enabled := False;
+  Result.AddMenuItem(rsAddTab, '', @AddTabSClicked).Enabled := False;
+  Result.AddMenuItem(rsDeleteTab, '', @DeleteTabClicked).Enabled := False;
 end;
 
 var
@@ -143,7 +144,7 @@ begin
   if Err <>'' then
   try
     Box := TfpgMessageBox.Create(nil);
-    Box.WindowTitle:='Errors Registering Widget';
+    Box.WindowTitle:=rsErrorsRegisteringWidget;
     Box.SetMessage(Errors);
     Box.ShowModal;
   finally
