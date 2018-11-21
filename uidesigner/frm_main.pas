@@ -469,7 +469,7 @@ begin
     AddMenuItem(rsDlgWidgetOrder + '...', '', @(maindsgn.OnEditWidgetOrder));
     AddMenuItem(rsDlgTabOrder + '...', '', @(maindsgn.OnEditTabOrder));
     AddMenuItem('-', '', nil);
-    AddMenuItem(rsEditSpecial + '...', '', nil).Enabled := False; // TOD
+    AddMenuItem(rsEditSpecial + '...', '', nil).Enabled := False; // TODO
   end;
 
   setmenu := TfpgPopupMenu.Create(self);
