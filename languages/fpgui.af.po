@@ -294,7 +294,7 @@ msgstr "Font Kenname"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "Font lêer" <%s.fnt> is nie gevind nie"
+msgstr "Font lêer <%s.fnt> is nie gevind nie"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
