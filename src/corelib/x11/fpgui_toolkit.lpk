@@ -6,7 +6,7 @@
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
-        <IncludeFiles Value="../..;../render/software"/>
+        <IncludeFiles Value="..;../..;../render/software"/>
         <OtherUnitFiles Value="..;../../gui;../../gui/db;../render/software;../../reportengine"/>
         <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
@@ -423,6 +423,7 @@
       </Item98>
       <Item99>
         <Filename Value="../render/software/Agg2D.pas"/>
+	<AddToUsesPkgSection Value="False"/>
         <UnitName Value="Agg2D"/>
       </Item99>
       <Item100>
