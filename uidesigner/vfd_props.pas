@@ -348,8 +348,6 @@ procedure TClassListPropertyEditor.LoadValue(wg: TfpgWidget);
 var
   i: Integer;
   c: TClass;
-  index: Integer = 0;
-  o: TObject;
 begin
 
   c := TClass(GetObjectProp(wg, prop.Name));
@@ -1349,11 +1347,11 @@ end;
 
 function TPropertyColor.GetValueText(wg: TfpgWidget): string;
 var
-  PropInfo: PPropInfo;
+  //PropInfo: PPropInfo;
   i: integer;
   c: TfpgColor;
 begin
-  PropInfo := GetPropInfo(wg.ClassType, Name);
+  //PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);
   c := fpgColorToRGB(TfpgColor(i));
   Result := '$' + IntToHex(c, 6);
@@ -1366,11 +1364,11 @@ end;
 
 procedure TPropertyColor.OnExternalEdit(wg: TfpgWidget);
 var
-  PropInfo: PPropInfo;
+  //PropInfo: PPropInfo;
   i: integer;
   c: TfpgColor;
 begin
-  PropInfo := GetPropInfo(wg.ClassType, Name);
+  //PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);
   c := fpgColorToRGB(TfpgColor(i));
   c := fpgSelectColorDialog(c);

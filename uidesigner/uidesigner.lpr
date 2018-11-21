@@ -28,19 +28,10 @@ uses
   fpg_main,
   fpg_utils,
   vfd_main,
-  vfd_resizer,
-  vfd_forms,
-  vfd_file,
   frm_main,
   vfd_widgets,
-  vfd_formparser,
-  vfd_editors,
-  vfd_widgetclass,
   vfd_utils,
-  vfd_props,
-  vfd_designer,
-  vfd_propeditgrid,
-  vfd_constants;
+  vfd_designer;
 
 
 procedure MainProc;

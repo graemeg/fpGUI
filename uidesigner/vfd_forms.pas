@@ -155,7 +155,6 @@ implementation
 uses
   fpg_main,
   fpg_iniutils,
-  fpg_constants,
   fpg_utils,
   vfd_constants,
   vfd_props; // used to get Object Inspector defaults
