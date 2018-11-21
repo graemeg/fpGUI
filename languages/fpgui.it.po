@@ -357,7 +357,7 @@ msgid "Insert from Character Map"
 msgstr ""
 
 #: fpg_constants:serrinvalidoption
-msgid "Invalid option at position %d: \"%s\""
+msgid "Invalid option at position %d: %s"
 msgstr ""
 
 #: fpg_constants:rsitalic
@@ -485,7 +485,7 @@ msgid "Option at position %d does not allow an argument: %s"
 msgstr ""
 
 #: fpg_constants:serroptionneeded
-msgid "Option at position %d needs an argument : %s"
+msgid "Option at position %d needs an argument: %s"
 msgstr ""
 
 #: fpg_constants:rsfileowner

@@ -1,8 +1,4 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
-# 
-# Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009
-# Stéphane Aulery <lkppo@free.fr>, 2017
-#
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.        Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009 Stéphane Aulery <lkppo@free.fr>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
@@ -362,8 +358,8 @@ msgid "Insert from Character Map"
 msgstr "Insérer depuis la table de caractères"
 
 #: fpg_constants:serrinvalidoption
-msgid "Invalid option at position %d: \"%s\""
-msgstr "Option non valide à la position %d : \"%s\""
+msgid "Invalid option at position %d: %s"
+msgstr "Option non valide à la position %d: %s"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -490,8 +486,8 @@ msgid "Option at position %d does not allow an argument: %s"
 msgstr "L'option à la position %d n'accepte pas d'argument : %s"
 
 #: fpg_constants:serroptionneeded
-msgid "Option at position %d needs an argument : %s"
-msgstr "L'option à la position %d nécessite un argument : %s"
+msgid "Option at position %d needs an argument: %s"
+msgstr "L'option à la position %d nécessite un argument: %s"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
@@ -720,5 +716,4 @@ msgstr "Oui à tous"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr "de"
-
 
