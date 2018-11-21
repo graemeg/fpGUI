@@ -27,6 +27,7 @@ uses
   fpg_label,
   fpg_button,
   fpg_memo,
+  vfd_constants,
   vfd_forms;
 
 type
@@ -57,10 +58,10 @@ procedure TItemEditorForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
   inherited;
-  WindowTitle := 'Items';
+  WindowTitle := rsItems;
   SetPosition(0, 0, 360, 230);
 
-  l1 := CreateLabel(self, 8, 4, 'Items:');
+  l1 := CreateLabel(self, 8, 4, rsItems + ':');
 
   edItems := TfpgMemo.Create(self);
   with edItems do
@@ -69,13 +70,13 @@ begin
     Anchors := AllAnchors;
   end;
 
-  btnClear := CreateButton(self, 8, 200, 80, 'Clear', @btnClearClicked);
+  btnClear := CreateButton(self, 8, 200, 80, rsClear, @btnClearClicked);
   btnClear.Anchors := [anLeft, anBottom];
 
-  btnOK         := CreateButton(self, Width-168, 200, 80, 'OK', @OnButtonClick);
+  btnOK         := CreateButton(self, Width-168, 200, 80, rsOK, @OnButtonClick);
   btnOK.Anchors := [anRight, anBottom];
 
-  btnCancel     := CreateButton(self, Width-84, 200, 80, 'Cancel', @OnButtonClick);
+  btnCancel     := CreateButton(self, Width-84, 200, 80, rsCancel, @OnButtonClick);
   btnCancel.Anchors := [anRight, anBottom];
   {%endregion}
 end;

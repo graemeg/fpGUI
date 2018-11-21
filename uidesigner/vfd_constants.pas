@@ -36,11 +36,11 @@ const
 
 resourcestring
   rsOpenFormFile = 'Open form file';
-  rsPascalSourceFiles = 'Pascal source filess';
+  rsPascalSourceFiles = 'Pascal source files';
   rsSaveFormFile = 'Save form source';
   rsVersion = 'Version: %s';
   rsWrittenBy = 'Written by %s';
-  rsCompiledOn = 'Compiled on:  %s';
+  rsCompiledOn = 'Compiled on: %s';
   rsNewUnnamedForm = 'new';
   rsDesignerHelp1 = 'F11: switch to Properties';
   rsDesignerHelp2 = 'TAB, SHIFT+TAB: select next widget';
@@ -76,13 +76,65 @@ resourcestring
   rsDlgWidgetOrder = 'Widget Order';
   rsDlgTabOrder = 'Tab Order';
 
-  rsErrUnitNotFound = 'The unit <%s> was not found.';
+  rsErrUnitNotFound = 'The unit <%s> was not found';
   rsErrLoadingForm = 'Error loading form';
   rsErrFailedToFindDesignerForm = 'Failed to find Designer Form';
-  rsErrFormSaveIOError = 'Form save I/O failure in <%s>.';
+  rsErrFormSaveIOError = 'Form save I/O failure in <%s>';
   rsErrNameConflict = 'Name Conflict';
-  rsErrNoStringsProperty = 'Failed to find TStrings type property.';
+  rsErrNoStringsProperty = 'Failed to find TStrings type property';
   rsErrFailedToParseBoolean = 'Failed to parse Boolean value <%s>';
+
+  rsClass = 'Class';
+  rsName = 'Name';
+  rsProperties = 'Properties';
+  rsAnchors = 'Anchors';
+  rsUnknownLines = 'Unknown lines';
+  rsFile = '&File';
+  rsSettings = '&Settings';
+  rsForm = 'Fo&rm';
+  rsPreview = '&Preview';
+  rsHelp = '&Help';
+  rsCreateNewFile = 'Create New File';
+  rsOpen = 'Open';
+  rsOpenRecent = 'Open Recent';
+  rsSave = 'Save';
+  rsSaveAsNewTemplateUnit = 'Save As New Template Unit';
+  rsAddNewFormToUnit = 'Add New Form to Unit';
+  rsExit = 'Exit';
+  rsGeneralOptions = 'General options';
+  rsEditSpecial = 'Edit special';
+  rsAboutFpGuiToolkit = 'About fpGUI Toolkit';
+  rsSaveCurrentFormDesign = 'Save the current form design';
+  rsClose = 'Close';
+  rsCancel = 'Cancel';
+  rsOK = 'OK';
+  rsAppliesToNewFormDialogsOnly = 'Applies to new form/dialogs only';
+  rsSpaceCharacters = 'Space characters';
+  rsTabCharacters = 'Tab characters';
+  rsItems = 'Items';
+  rsClear = 'Clear';
+  rsPos = 'Pos';
+  rsFormNameExists = 'The form name already exists in the current unit, please try again';
+  rsColumnEditor = 'Column editor';
+  rsStringGridColumns = 'String Grid columns';
+  rsColumn = 'Column';
+  rsTitle = 'Title';
+  rsColumnWidth = 'Column width';
+  rsAlignment = 'Alignment';
+  rsRight = 'Right';
+  rsCenter = 'Center';
+  rsNew = 'New';
+  rsDelete = 'Delete';
+  rsUpUpperCase = 'UP';
+  rsDownUpperCase = 'DOWN';
+  rsCol = 'Col.';
+  rsAlign = 'Align';
+  rsAddTab = 'Add Tab';
+  rsDeleteTab = 'Delete Tab';
+  rsToggleDesignerGrid = 'Toggle designer grid';
+  rsClassUpperCase = 'CLASS';
+  rsNameUpperCase = 'NAME';
+  rsErrorsRegisteringWidget = 'Errors Registering Widget';
 
 implementation
 
