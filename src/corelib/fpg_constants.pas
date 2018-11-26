@@ -45,6 +45,8 @@ resourcestring
 {.$DEFINE it}     // Italian
 {.$DEFINE es}     // Spanish
 {.$DEFINE uk}     // Ukrainian
+{.$DEFINE ms}     // Malay
+{.$DEFINE zh_CN}  // Chinese
 
 
 
@@ -71,6 +73,12 @@ resourcestring
 
 {$ELSEIF defined(uk)}
   {$I lang_uk.inc}
+
+{$ELSEIF defined(ms)}
+  {$I lang_ms.inc}
+
+{$ELSEIF defined(zh_CN)}
+  {$I lang_zh_CN.inc}
 
 {$ELSE}
   {$I lang_en.inc}
