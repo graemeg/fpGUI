@@ -1,4 +1,6 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.        Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009 Stéphane Aulery <lkppo@free.fr>, 2017
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
+# Graeme Geldenhuys <graemeg@gmail.com>, 2008-2009
+# Stéphane Aulery <lkppo@free.fr>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
