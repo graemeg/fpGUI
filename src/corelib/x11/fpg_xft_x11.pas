@@ -33,11 +33,11 @@ const
   {$IF Defined(DARWIN)}
     libXft = 'libXft.dylib';
     {$LINKLIB libXft}
-// fclib = 'libfontconfig.dylib'; // not used
+   // fclib = 'libfontconfig.dylib';
     {$LINKLIB libfontconfig}
   {$ELSE}
     libXft = 'libXft.so';
-// fclib = 'fontconfig';  // not used
+  //  fclib = 'fontconfig';
   {$IFEND}
 
   
@@ -169,7 +169,7 @@ function  XftNameUnparse(pat : PFcPattern; dest : PChar; destlen : integer) : bo
 
 // Not used
 // procedure FcFontSetDestroy(fsp : PFcFontSet); cdecl; external fclib;
-// function FcFontList(config: PFcConfig; p:PFcPattern; os:PFcObjectSet): PFcFontSet;cdecl; external fclib name 'FcFontList';
+//function FcFontList(config: PFcConfig; p:PFcPattern; os:PFcObjectSet): PFcFontSet;cdecl; external fclib name 'FcFontList';
 
 
 implementation

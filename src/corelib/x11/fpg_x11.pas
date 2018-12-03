@@ -1,7 +1,8 @@
 {
-    This unit is part of the fpGUI Toolkit project.
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -16,7 +17,10 @@
 
 unit fpg_x11;
 
-{$I fpg_defines.inc}
+{$mode objfpc}{$H+}
+
+{.$Define DEBUG}      // general debugging - mostly OS messages though
+{.$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 { TODO : Under Compiz restoring a window position moves the window down/right the width and height
@@ -31,15 +35,11 @@ uses
   X,
   Xlib,
   XUtil,
-  //xrender,
   ctypes,
   fpg_xft_x11,
   fpg_netlayer_x11,
   fpg_base,
   fpg_impl;
-
-{$LINKLIB Xext} // for xsync functions
-
 
 const
   IconBitmapWidth = 16;
@@ -90,12 +90,6 @@ type
     status: culong;
   end;
 
-  // XSync extension types
-  TXSyncCounter = TXID;
-  TXSyncValue = record
-    hi: cint;
-    lo: cunsigned;
-  end;
 
 const
 // Motif window hints
@@ -139,7 +133,6 @@ type
   // forward declaration
   TfpgX11Window = class;
   TfpgX11Drag = class;
-  TfpgX11Drop = class;
 
 
   TfpgX11FontResource = class(TfpgFontResourceBase)
@@ -178,6 +171,7 @@ type
   TfpgX11Canvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
+    FDrawWindow: TfpgX11Window;
     FBufferPixmap: TfpgDCHandle;
     FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
@@ -185,19 +179,19 @@ type
     FClipRect: TfpgRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
-    FXftDrawHandle: TfpgDCHandle;
     FColorTextXft: TXftColor;
+    FClipRegion: TRegion;
+    FPixHeight,
+    FPixWidth: Integer;
     FBufferFreeTimer: TObject;
     procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
-    procedure   AllocateDC;
-    procedure   DeAllocateDC(Force: Boolean);
-    function    DrawHandle: TfpgDCHandle;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
+    procedure   DoGetWinRect(out r: TfpgRect); override;
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
@@ -205,24 +199,21 @@ type
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
-    procedure   DoSetClipRectInternal(const ARect: TfpgRect);
     procedure   DoSetClipRect(const ARect: TfpgRect); override;
     function    DoGetClipRect: TfpgRect; override;
     procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
-    procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
+    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoDrawPolygon(const Points: array of TPoint); override;
-    function    GetBufferAllocated: Boolean; override;
-    procedure   DoAllocateBuffer; override;
-    property    DCHandle: TfpgDCHandle read DrawHandle;
+    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
+    property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
-    constructor Create(awidget: TfpgWidgetBase); override;
+    constructor Create(awin: TfpgWindowBase); override;
     destructor  Destroy; override;
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
   end;
@@ -231,22 +222,15 @@ type
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
-    FSyncCounter: TXSyncCounter;
-    FSyncValue: TXSyncValue;
-    FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
-    procedure   DoWindowNetStateChanged;
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
-    FGroupLeader: TfpgWinHandle;
-    FSpecialClassHint: PXClassHint;
     FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
     FModalForWin: TfpgX11Window;
-    procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); override;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
     procedure   DoRemoveWindowLookup; override;
-    procedure   DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean); override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
@@ -255,15 +239,13 @@ type
     procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
-    function    GetWindowState: TfpgWindowState; override;
-    procedure   SetWindowState(const AValue: TfpgWindowState); override;
-    procedure   SetWindowOpacity(AValue: Single); override;
-    procedure   TriggerSyncCounter;
+    procedure   DoAcceptDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
+    function    GetWindowState: TfpgWindowState; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
-    procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
+    procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
     procedure   BringToFront; override;
@@ -275,6 +257,8 @@ type
     FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
+    { XDND type list received from Source window }
+    FDNDTypeList: TObjectList;
     { all XDND atoms }
     XdndAware: TAtom;
     XdndTypeList: TAtom;
@@ -293,8 +277,14 @@ type
     XdndActionAsk: TAtom;
     XdndActionPrivate: TAtom;
     { XDND variables }
+    FActionType: TAtom;
+    FSrcWinHandle: TfpgWinHandle;
+    FDNDVersion: integer;
+    FDNDDataType: TAtom;
+    FSrcTimeStamp: clong;
+    FLastDropTarget: TfpgWinHandle;
+    FDropPos: TPoint;
     FDrag: TfpgX11Drag;
-    FDrop: TfpgX11Drop;
     { X11 window grouping }
     FLeaderWindow: TfpgWinHandle;
     FClientLeaderAtom: TAtom;
@@ -305,6 +295,7 @@ type
     function    GetDropActionFromAtom(const AAtom: TAtom): TfpgDropAction;
     function    GetAtomFromDropAction(const AAction: TfpgDropAction): TAtom;
     procedure   XdndInit;
+    procedure   ResetDNDVariables;
     procedure   HandleDNDenter(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ev: TXEvent);
     procedure   HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
@@ -382,8 +373,6 @@ type
   end;
 
 
-  { TfpgX11Drag }
-
   TfpgX11Drag = class(TfpgDragBase)
   private
     FLastTarget: TfpgWinHandle;
@@ -393,8 +382,6 @@ type
     FDropAccepted: Boolean;
     FProposedAction: TAtom;
     FAcceptedAction: TAtom;
-    FResult : TfpgDropAction;
-    FFinished: Boolean;
     FMimeTypesArray: array of TAtom;
     xia_plain_text: TAtom;
     procedure   SetTypeListProperty;
@@ -406,41 +393,13 @@ type
     procedure   SendDNDPosition(ATarget: TWindow; x_root: cint; y_root: cint; AAction: TAtom; ATime: X.TTime);
     procedure   SendDNDDrop;
     procedure   HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
-    procedure   HandleDNDFinished(const ev: TXEvent);
     procedure   HandleSelectionRequest(ev: TXEvent);
-    procedure   QueueFree;
-    procedure   DropTimeout(Sender: TObject);
+  protected
+    FSource: TfpgX11Window;
+    function    GetSource: TfpgX11Window; virtual;
   public
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
-  end;
-
-
-  TfpgX11Drop = class(TfpgDropBase)
-  private
-    FTargetWindow: TfpgWindowBase;
-    FTopLevelWindow: TfpgX11Window;
-    { XDND type list received from Source window }
-    FDNDVersion: integer;
-    FDNDDataType: TAtom;
-    FActionType: TAtom;
-    FSource: TfpgWinHandle;
-    function    GetWindowFromCoordinates(AX, AY: cint): TfpgX11Window;
-    procedure   RequestDropData(const ATimestamp: x.TTime);
-    procedure   ReadDropSelectionData(const ev: TXEvent);
-  protected
-    function    GetDropAction: TfpgDropAction; override;
-    procedure   SetDropAction(AValue: TfpgDropAction); override;
-    procedure   AcceptDrop; override;
-    procedure   RejectDrop; override;
-    procedure   DataDropComplete; override;
-    function    GetWindowForDrop: TfpgWindowBase; override;
-    property    TopLevelWindow: TfpgX11Window read FTopLevelWindow;
-    property    TargetWindow: TfpgWindowBase read FTargetWindow write FTargetWindow;
-    property    SourceWindow: TfpgWinHandle read FSource write FSource;
-  public
-    constructor Create(ATopLevelWindow: TfpgWindowBase; ASource: TfpgWinHandle); reintroduce;
-    procedure   LoadSourceMimeTypes(ev: TXEvent);
   end;
 
 
@@ -464,16 +423,6 @@ type
     function    SupportsMessages: boolean;
   end;
 
-  {$IFDEF GDEBUG}
-  { EfpgX11Exception }
-
-  EfpgX11Exception = class(Exception)
-    Display: PXDisplay;
-    ErrorEv: PXErrorEvent;
-    constructor Create(ADisplay: PXDisplay; AErrorEv: PXErrorEvent);
-  end;
-  {$ENDIF}
-
 
 function fpgColorToX(col: TfpgColor): longword;
 
@@ -489,7 +438,6 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
-  fpg_window,       // used for window attributes changed callback
   fpg_stringutils,  // used for GetTextWidth
   fpg_utils,
   fpg_form,         // for modal event support
@@ -500,16 +448,19 @@ uses
   keysym,
   math;
 
+type
+  TDNDSrcType = class(TObject)
+  public
+    Name: TfpgString;
+    ID: integer;
+  end;
+
 var
   xapplication: TfpgApplication;
+  uDragSource: TfpgWidget;  { points to the Source widget of the DND when drop is inside the same app }
 
 const
-  FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
-  PIXMAP_RESIZE_SIZE = 50;
-
-
-type
-  TApplicationHelper = class(TfpgApplication);
+  FPG_XDND_VERSION: culong = 4; // our supported XDND version
 
  // some externals
 
@@ -528,11 +479,6 @@ function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandl
 
 function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external;
 function XCreateIC(para1: PXIM; para2: array of const): PXIC; cdecl; external;
-
-// XSync functions
-function XSyncCreateCounter(dpy: PXDisplay; initial_value: TXSyncValue): TXSyncCounter; cdecl; external;
-function XSyncSetCounter(dpy: PXDisplay; counter: TXSyncCounter; value: TXSyncValue): TStatus; cdecl; external;
-function XSyncDestroyCounter(dpy: PXDisplay; counter: TXSyncCounter ): TStatus; cdecl; external;
 
 const
   AltGrMask = 1 shl 13;  // missing from X unit
@@ -585,9 +531,8 @@ begin
   colxft.color.green := (c and $0000FF00);
   colxft.color.red   := (c and $00FF0000) shr 8;
 
-  colxft.color.alpha := (c and $FF000000) shr 16;
-  if colxft.color.alpha = 0 then
-    colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 means not translucent
+  colxft.color.alpha := (c and $7F000000) shr 15;
+  colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 means not translucent
 
   colxft.pixel := 0;
 end;
@@ -665,8 +610,8 @@ begin
     end;
     p := p^.Next;
   end;
-  {$IFDEF GDEBUG}
-  DebugLnFmt('fpGUI/X11: FindWindowByHandle failed to find <%>', [IntToHex(wh, 9)]);
+  {$IFDEF DEBUG}
+  writeln('fpGUI/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
 end;
@@ -685,8 +630,8 @@ begin
     end;
     p := p^.Next;
   end;
-  {$IFDEF GDEBUG}
-  DebugFmt('fpGUI/X11: FindWindowByBackupHandle failed to find <%s>', [IntToHex(wh, 9)]);
+  {$IFDEF DEBUG}
+  writeln('fpGUI/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
 end;
@@ -847,14 +792,13 @@ end;
 
 { find toplevel window that contains mouse co-ordinates x, y (co-ordinates are
   from root window) }
-function FindWindow(ARoot: TWindow; const x, y: cint; AIgnoreDNDPreview: Boolean = False): TWindow;
+function FindWindow(ARoot: TWindow; const x, y: cint): TWindow;
 var
   wattr: TXWindowAttributes;
   r, p: TWindow;
   children: PWindowArray = nil;
   numchildren: cuint = 0;
   i: integer;
-  w: TfpgX11Window;
 begin
   XGetWindowAttributes(xapplication.Display, ARoot, @wattr);
   if (wattr.map_state <> IsUnmapped) and
@@ -876,14 +820,7 @@ begin
           stacking order, from bottom-most (first) to top-most (last) }
         for i := numchildren-1 downto 0 do
         begin
-          if AIgnoreDNDPreview then
-          begin
-            w := FindWindowByHandle(children^[i]);
-            // the dnd preview window is not a valid drop target
-            if Assigned(w) and (w.PrimaryWidget.ClassName = 'TfpgDNDWindow') then
-              continue;
-          end;
-          r := FindWindow(children^[i], x - wattr.x, y - wattr.y, AIgnoreDNDPreview);
+          r := FindWindow(children^[i], x - wattr.x, y - wattr.y);
           if r <> None then
             break;
         end;
@@ -902,15 +839,10 @@ begin
     Result := None;
 end;
 
-procedure SetWindowGroup(AWindow: TfpgWinHandle; PassClassHint: PXClassHint = nil);
+procedure SetWindowGroup(AWindow: TfpgWinHandle);
 var
   ClassHint: PXClassHint;
 begin
-  if assigned (PassClassHint) then
-  begin
-    XSetClassHint(xapplication.display, AWindow, PassClassHint);
-    exit;
-  end;
   ClassHint := XAllocClassHint;
   ClassHint^.res_name := PChar(fpgGetExecutableName);
   ClassHint^.res_class := PChar(ApplicationName);
@@ -929,322 +861,6 @@ begin
   Result := (FpReadLink(AFilename) <> '');
 end;
 
-{ TfpgX11Drop }
-
-function TfpgX11Drop.GetWindowFromCoordinates(AX, AY: cint): TfpgX11Window;
-var
-  dx, dy, dx2, dy2: cint;
-  child: TWindow;
-  prevchild: TWindow;
-  ret_child: TfpgWinHandle;
-begin
-  Result := nil;
-  // Find window under cursor, and position of cursor inside that window
-  XTranslateCoordinates(xapplication.Display, XDefaultRootWindow(xapplication.Display), TfpgX11Window(FTopLevelWindow).WinHandle,
-      AX, AY, @dx, @dy, @ret_child);
-  child := ret_child;
-  prevchild := TopLevelWindow.WinHandle;
-  while ret_child <> 0 do   // If we have chidren, iterate until we reach the top most child
-  begin
-    child :=  ret_child;
-    dx2 := dx;
-    dy2 := dy;
-    XTranslateCoordinates(xapplication.Display, prevchild, child,
-        dx2, dy2, @dx, @dy, @ret_child);
-    prevchild := child;
-  end;
-
-  if child <> 0 then
-    Result := FindWindowByHandle(child);
-
-  if Result = nil then
-    Result := TfpgX11Window(TargetWindow);
-
-  // There is almost no chance that this will change the result with alienwindows
-  TargetWindow := Result;
-end;
-
-procedure TfpgX11Drop.RequestDropData(const ATimestamp: x.TTime);
-var
-  i: Integer;
-begin
-  // Tell the source wether or not to retrieve the drop data
-  {$IFDEF DNDDEBUG}
-  DebugLn('TfpgX11Drop.RetrieveDropData');
-  {$ENDIF}
-
-  FDNDDataType := None;
-  for i := 0 to Mimetypes.Count-1 do
-  begin
-    { This list must be from most specific to least specific }
-    if Mimetypes[i].format = MimeChoice then
-    begin
-      FDNDDataType := Mimetypes[i].data;
-      break;
-    end;
-  end;
-
-  { TODO: Must XConvertSelection always be called? }
-  if FDNDDataType <> None then
-    with xapplication do
-      XConvertSelection(Display, XdndSelection, FDNDDataType, XdndSelection, TopLevelWindow.FWinHandle, ATimestamp);
-
-  // now we wait for a selection message with the drop data.....
-end;
-
-procedure TfpgX11Drop.ReadDropSelectionData(const ev: TXEvent);
-var
-  actualtype: TAtom;
-  actualformat: cint;
-  count, remaining, dummy: culong;
-  data: pointer;
-  wg: TfpgWidget;
-  strdata: String;
-  {$IFDEF DNDDEBUG}
-  s: string;
-  {$ENDIF}
-begin
-  {$IFDEF DNDDEBUG}
-  DebugLn('TfpgX11Drop.ReadDropData');
-  {$ENDIF}
-  if TargetWidget <> nil then { nil would be first time in, so there is no last window }
-  begin
-    //wg := TfpgWidget((FindWindowByHandle(FLastDropTarget) as TfpgX11Window).Owner);
-    wg := TfpgWidget(TargetWidget);
-    if not Assigned(wg.DropHandler) then
-      Exit;
-  end;
-
-  {if Assigned(SourceWidget) and Assigned(xapplication.FDrag) then
-  begin
-    SetDropData(TfpgDrag(xapplication.FDrag).MimeData.GetData(MimeChoice));
-  end
-  else}
-  begin
-    { do not get data yet, just see how much there is }
-    XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
-        ev.xselection._property, 0, 0,
-        TBool(false),
-        AnyPropertyType,
-        @actualtype, @actualformat, @count, @remaining,
-        @data);
-
-    { we handle the DND selection here }
-      {$IFDEF DNDDEBUG}
-      s := XGetAtomName(xapplication.Display, actualtype);
-      DebugLn(Format('  ActualType: %s (%d)', [s, ActualType]));
-      DebugLn('  Actualformat = ' + IntToStr(ActualFormat));
-      DebugLn('  count = ' + IntToStr(count));
-      DebugLn('  remaining = ' + IntToStr(remaining));
-      DebugLn('-----------------');
-      {$ENDIF}
-
-    if remaining > 0 then   { we have data - now fetch it! }
-    begin
-      XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
-          ev.xselection._property, 0, remaining,
-          TBool(false),
-          AnyPropertyType,
-          @actualtype, @actualformat, @count, @dummy,
-          @data);
-      SetLength(strdata, count);
-      // pchar type won't work for data since a nil char will end the string.
-      Move(data^, strdata[1], count);
-      // write the data to the drop stream
-      SetDropData(strdata)
-    end;
-  end;
-end;
-
-function TfpgX11Drop.GetDropAction: TfpgDropAction;
-begin
-  Result := xapplication.GetDropActionFromAtom(FActionType);
-end;
-
-procedure TfpgX11Drop.SetDropAction(AValue: TfpgDropAction);
-begin
-  FActionType:= xapplication.GetAtomFromDropAction(AValue);
-end;
-
-function TfpgX11Drop.GetWindowForDrop: TfpgWindowBase;
-begin
-  Result := TargetWindow;
-end;
-
-constructor TfpgX11Drop.Create(ATopLevelWindow: TfpgWindowBase;
-  ASource: TfpgWinHandle);
-begin
-  inherited Create;
-  FSource := ASource;
-  FTopLevelWindow := TfpgX11Window(ATopLevelWindow);
-  if Assigned(xapplication.FDrag) then
-    FSourceWidget := TfpgDrag(xapplication.FDrag).Source;
-end;
-
-procedure TfpgX11Drop.LoadSourceMimeTypes(ev: TXEvent);
-var
-  actualtype: TAtom;
-  actualformat: cint;
-  count, remaining: culong;
-  xdndtypes: PAtomArray;
-  i: integer;
-  s: TfpgString;
-  itm: TfpgMimeDataItem;
-begin
-  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
-
-  {$IFDEF DNDDEBUG}
-  DebugLnFmt('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
-      [ FDNDVersion,
-        BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
-        ev.xclient.data.l[0],
-        ev.xclient.data.l[1],
-        ev.xclient.data.l[2],
-        ev.xclient.data.l[3],
-        ev.xclient.data.l[4]  ]);
-  DebugLnFmt('  * We will be using XDND v%d protocol *', [FDNDVersion]);
-  if fpgGetBit(ev.xclient.data.l[1], 0) then
-    DebugLn('  ** We need to fetch XdndTypeList (>3 types)');
-  {$ENDIF}
-  // read typelist
-  if fpgGetBit(ev.xclient.data.l[1], 0) then
-  begin
-    // now fetch the data
-    XGetWindowProperty(xapplication.Display, SourceWindow,
-        xapplication.XdndTypeList, 0, 16000,
-        TBool(False),
-        AnyPropertyType,
-        @actualtype, @actualformat, @count, @remaining,
-        @xdndtypes);
-
-    {$IFDEF DNDDEBUG}
-    s := XGetAtomName(xapplication.Display, actualtype);
-    DebugLn('Actual fetch -----------------------');
-    DebugLnFmt('  ActualType: %s (%d)', [s, ActualType]);
-    DebugLn('  Actualformat = ' + ActualFormat);
-    DebugLn('  count = ' + count);
-    DebugLn('  remaining = ' + remaining);
-    {$ENDIF}
-
-    if (actualtype <> XA_ATOM) or (actualformat <> 32) then
-      count := 0;
-  end
-  else
-  begin
-    count := 3;
-    xdndtypes := @ev.xclient.data.l[2];
-  end;
-
-  for i := 0 to count-1 do
-  begin
-    if xdndtypes^[i] <> 0 then
-    begin
-      s := XGetAtomName(xapplication.Display, xdndtypes^[i]);
-      {$IFDEF DNDDEBUG}
-      DebugLnFmt('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]);
-      {$ENDIF}
-      // store each supported data type for later use
-      itm := TfpgMimeDataItem.Create(s, xdndtypes^[i]);
-      Mimetypes.Add(itm);
-    end;
-  end;
-  if count > 3 then
-    XFree(xdndtypes);
-end;
-
-procedure TfpgX11Drop.AcceptDrop;
-var
-  Msg: TXEvent;
-
-begin
-  inherited AcceptDrop;
-
-  // send message to confirm drop will be accepted in specified rectangle
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type      := ClientMessage;
-  Msg.xany.display    := xapplication.Display;
-  Msg.xclient.window  := SourceWindow; // source winhandle msg is going to
-  Msg.xclient.message_type  := xapplication.XdndStatus;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0]   := TopLevelWindow.WinHandle;  // always top-level window
-  Msg.xclient.data.l[1]   := 1;
-  Msg.xclient.data.l[4]   := FActionType;
-  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
-  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
-
-  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
-end;
-
-procedure TfpgX11Drop.RejectDrop;
-var
-  Msg: TXEvent;
-begin
-  inherited RejectDrop;
-
-  // send message to confirm drop will be accepted in specified rectangle
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type      := ClientMessage;
-  Msg.xany.display    := xapplication.Display;
-  Msg.xclient.window  := SourceWindow; // source winhandle msg is going to
-  Msg.xclient.message_type  := xapplication.XdndStatus;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0]   := TopLevelWindow.WinHandle;  // always top-level window
-  Msg.xclient.data.l[1] := 0;
-  Msg.xclient.data.l[4] := None;
-
-  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
-  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
-
-  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
-end;
-
-procedure TfpgX11Drop.DataDropComplete;
-var
-  Msg: TXEvent;
-begin
-  inherited DataDropComplete;
-  { send message to signal drop is finished }
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.xany._type            := ClientMessage;
-  Msg.xany.display          := xapplication.Display;
-  Msg.xclient.window        := SourceWindow; // source winhandle msg is going to
-  Msg.xclient.message_type  := xapplication.XdndFinished;
-  Msg.xclient.format        := 32;
-
-  Msg.xclient.data.l[0] := TopLevelWindow.FWinHandle;  // winhandle of target window
-  if FDNDDataType = None then
-  begin
-    Msg.xclient.data.l[1] := 0; // drop NOT accepted
-    Msg.xclient.data.l[2] := None; // this should be the action we accepted
-  end
-  else
-  begin
-    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
-    Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
-  end;
-
-
-  XSendEvent(xapplication.Display, SourceWindow, False, NoEventMask, @Msg);
-end;
-
-{$IFDEF GDEBUG}
-{ EfpgX11Exception }
-
-constructor EfpgX11Exception.Create(ADisplay: PXDisplay; AErrorEv: PXErrorEvent);
-var
-  ErrText: array[0..511] of char;
-begin
-  Display:=ADisplay;
-  ErrorEv:=AErrorEv;
-
-  FillChar(ErrText,0, SizeOf(ErrText));
-  XGetErrorText(Display, ErrorEv^.error_code, @ErrText, SizeOf(ErrText));
-
-  inherited Create(ErrText);
-end;
-{$ENDIF}
 
 { TfpgX11Application }
 
@@ -1349,9 +965,9 @@ begin
     Result := keyNIL;
   end;
 
-{$IFDEF GDebug}
+{$IFDEF Debug}
   if Result = keyNIL then
-    DebugLn('fpGFX/X11: Unknown KeySym: $' + IntToHex(KeySym, 4));
+    WriteLn('fpGFX/X11: Unknown KeySym: $', IntToHex(KeySym, 4));
 {$ENDIF}
 end;
 
@@ -1416,90 +1032,385 @@ begin
   XdndActionPrivate := XInternAtom(FDisplay, 'XdndActionPrivate', False);
 end;
 
-procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
-    const ASource: TWindow; const ev: TXEvent);
+procedure TfpgX11Application.ResetDNDVariables;
+var
+  msgp: TfpgMessageParams;
 begin
-  {$IFDEF DNDDEBUG}
-  DebugLn('TfpgX11Application.HandleDNDenter');
-  {$ENDIF}
-
-  if Assigned(FDrop) then
-    FDrop.Free;
-
-  FDrop := TfpgDrop.Create(ATopLevelWindow, ASource);
-  FDrop.TargetWindow := ATopLevelWindow;
-  FDrop.SourceWindow := ASource;
-  FDrop.LoadSourceMimeTypes(ev);
+  if FLastDropTarget <> 0 then
+  begin
+    fillchar(msgp, sizeof(msgp), 0);
+    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
+  end;
+  FDNDTypeList.Clear;
+  FActionType     := 0;
+  FSrcWinHandle   := 0;
+  FLastDropTarget := 0;
+  FDropPos.X := 0;
+  FDropPos.Y := 0;
 end;
 
-procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
+procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
+    const ASource: TWindow; const ev: TXEvent);
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining: culong;
+  xdndtypes: PAtomArray;
+  i: integer;
+  s: TfpgString;
+  itm: TDNDSrcType;
 begin
   {$IFDEF DNDDEBUG}
-  DebugLn('TfpgX11Application.HandleDNDleave');
+  writeln('TfpgX11Application.HandleDNDenter');
   {$ENDIF}
-  if Assigned(FDrop) then
-    FreeAndNil(FDrop);
+  ResetDNDVariables;
+  FSrcWinHandle := ASource;
+  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
+  {$IFDEF DNDDEBUG}
+  writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
+      [ FDNDVersion,
+        BoolToStr(fpgGetBit(ev.xclient.data.l[1], 0), True),
+        ev.xclient.data.l[0],
+        ev.xclient.data.l[1],
+        ev.xclient.data.l[2],
+        ev.xclient.data.l[3],
+        ev.xclient.data.l[4]  ]));
+  writeln(Format('  * We will be using XDND v%d protocol *', [FDNDVersion]));
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
+    writeln('  ** We need to fetch XdndTypeList (>3 types)');
+  {$ENDIF}
+
+  // read typelist
+  if fpgGetBit(ev.xclient.data.l[1], 0) then
+  begin
+    // now fetch the data
+    XGetWindowProperty(Display, FSrcWinHandle,
+        XdndTypeList, 0, 16000,
+        TBool(False),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @remaining,
+        @xdndtypes);
+
+    {$IFDEF DNDDEBUG}
+    s := XGetAtomName(Display, actualtype);
+    writeln('Actual fetch -----------------------');
+    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
+    writeln('  Actualformat = ', ActualFormat);
+    writeln('  count = ', count);
+    writeln('  remaining = ', remaining);
+    {$ENDIF}
+
+    if (actualtype <> XA_ATOM) or (actualformat <> 32) then
+      count := 0;
+  end
+  else
+  begin
+    count := 3;
+    xdndtypes := @ev.xclient.data.l[2];
+  end;
+
+  for i := 0 to count-1 do
+  begin
+    if xdndtypes^[i] <> 0 then
+    begin
+      s := XGetAtomName(FDisplay, xdndtypes^[i]);
+      {$IFDEF DNDDEBUG}
+      writeln(Format('  Format #%d = %s (%d)', [i+1, s, xdndtypes^[i]]));
+      {$ENDIF}
+      // store each supported data type for later use
+      itm := TDNDSrcType.Create;
+      itm.Name := s;
+      itm.ID := xdndtypes^[i];
+      FDNDTypeList.Add(itm);
+    end;
+  end;
+  if count > 3 then
+    XFree(xdndtypes);
+end;
+
+procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
+    const ASource: TWindow);
+var
+  wg: TfpgWidget;
+begin
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Application.HandleDNDleave');
+  {$ENDIF}
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if wg.AcceptDrops then
+    begin
+      if Assigned(wg.OnDragLeave) then
+        wg.OnDragLeave(wg);
+    end;
+  end;
+  ResetDNDVariables;
 end;
 
 procedure TfpgX11Application.HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow;
     const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
 var
-  win: TfpgX11Window;
-  dx: cint;
-  dy: cint;
-  cw: TWindow;
-  {$IFDEF DNDDEBUG}
-  s: string;
-  {$ENDIF}
+  Msg: TXEvent;
+  dx, dy, dx2, dy2: cint;
+  child: TWindow;
+  prevchild: TWindow;
+
+  ret_child: TfpgWinHandle;
+
+  i: integer;
+  lTargetWinHandle: TWindow;
+  w: TfpgX11Window;
+  wg: TfpgWidget;
+  wg2: TfpgWidget;
+  swg: TfpgWidget;
+  msgp: TfpgMessageParams;
+  lDropAction: TfpgDropAction;
+  lAccept: Boolean;
+  lMimeChoice: TfpgString;
+  lMimeList: TStringList;
 begin
   {$IFDEF DNDDEBUG}
-  DebugLnFmt('TfpgX11Application.HandleDNDposition  (toplevel window = %s)', [ATopLevelWindow.Name]);
+  writeln('TfpgX11Application.HandleDNDposition  (toplevel window = ', ATopLevelWindow.Name, ')');
   {$ENDIF}
+  lAccept := False;
+  FSrcWinHandle := ASource;
+  FActionType   := AAction;
+  FSrcTimeStamp := ATimeStamp;
+  lTargetWinHandle := ATopLevelWindow.WinHandle;
+  lMimeChoice := 'text/plain';
 
   {$IFDEF DNDDEBUG}
-  s := XGetAtomName(xapplication.Display, AAction);
-  DebugLnFmt('  requested action: %s (%d)', [s, AAction]);
-  DebugLnFmt('  x_root: %d  y_root: %d', [x_root, y_root]);
+  s := XGetAtomName(FDisplay, AAction);
+  writeln(Format('  requested action: %s (%d)', [s, AAction]));
+  writeln('  x_root: ', x_root, '  y_root: ', y_root);
   {$ENDIF}
-
-  // multiple parallel drop are not possible
-  if Assigned(FDrop) and (FDrop.SourceWindow <> ASource) then
-    Exit; // =>
-
 
   // Find window under cursor, and position of cursor inside that window
-  win := FDrop.GetWindowFromCoordinates(x_root, y_root);
+  XTranslateCoordinates(FDisplay, XDefaultRootWindow(FDisplay), ATopLevelWindow.WinHandle,
+      x_root, y_root, @dx, @dy, @ret_child);
+  child := ret_child;
+  prevchild := ATopLevelWindow.WinHandle;
+  while ret_child <> 0 do   // If we have chidren, iterate until we reach the top most child
+  begin
+    child :=  ret_child;
+    dx2 := dx;
+    dy2 := dy;
+    XTranslateCoordinates(FDisplay, prevchild, child,
+        dx2, dy2, @dx, @dy, @ret_child);
+    prevchild := child;
+  end;
+
+  if child <> 0 then
+    w := FindWindowByHandle(child)
+  else
+    w := ATopLevelWindow;
 
   {$IFDEF DNDDEBUG}
-  DebugLnFmt('x:%d  y:%d  child:%d (%x)', [dx, dy, win.WinHandle, win.WinHandle]);
+  writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, w.WinHandle, w.WinHandle]));
   {$ENDIF}
 
-  if Assigned(win) then
+  if Assigned(w) then
   begin
+    lTargetWinHandle := w.WinHandle;
     {$IFDEF DNDDEBUG}
-    DebugLn('dragging over window: ' + win.ClassName);
+    writeln('dragging over window: ', w.Name);
     {$ENDIF}
-    if win is TfpgX11Window then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+    if w is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      XTranslateCoordinates(FDisplay, XDefaultRootWindow(xapplication.Display), ATopLevelWindow.WinHandle, x_root, y_root, @dx, @dy, @cw);
-      FDrop.FActionType := AAction;
-      FDrop.SetPosition(dx, dy);
+      wg := TfpgWidget(w);
+      if FLastDropTarget <> lTargetWinHandle then
+      begin
+        if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+        begin
+          wg2 := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+          if wg2.AcceptDrops then
+          begin
+            if Assigned(wg2.OnDragLeave) then
+              wg2.OnDragLeave(wg2);
+          end;
+          fillchar(msgp, sizeof(msgp), 0);
+          { Notify the widget so it can reset its looks if needed }
+          fpgPostMessage(nil, wg2, FPGM_DROPEXIT, msgp);
+        end;
+      end;
+      FLastDropTarget := lTargetWinHandle;
+      if wg.AcceptDrops then
+      begin
+        if Assigned(wg.OnDragEnter) then
+        begin
+          lDropAction := GetDropActionFromAtom(AAction);
+          lMimeList := TStringList.Create;
+          for i := 0 to FDNDTypeList.Count-1 do
+            lMimeList.Add(TDNDSrcType(FDNDTypeList[i]).Name);
+
+          { Use the first mime-type as the default option presented. The mime-list
+            should always be from most specific to least specific. }
+          if lMimeList.Count > 0 then
+            lMimeChoice := lMimeList[0]
+          else
+            {$NOTE We need to replace this message with a resouce string }
+            raise Exception.Create('fpGUI/X11: no mime types available for DND operation');
+
+          { TODO: We need to populate the Source parameter. }
+          if Assigned(Drag) then
+            swg := TfpgDrag(Drag).Source as TfpgWidget
+          else
+            swg := nil;
+          wg.OnDragEnter(wg, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
+          lMimeList.Free;
+          FActionType := GetAtomFromDropAction(lDropAction);
+        end;
+
+        { Notify widget of drag status, so it can update its look }
+        if lAccept then
+        begin
+          FDropPos.X := dx;
+          FDropPos.Y := dy;
+          fillchar(msgp, sizeof(msgp), 0);
+          msgp.mouse.x := dx;
+          msgp.mouse.y := dy;
+          fpgPostMessage(nil, w, FPGM_DROPENTER, msgp);
+        end;
+      end;
     end;
   end;
+
+  FDNDDataType := None;
+  for i := 0 to FDNDTypeList.Count-1 do
+  begin
+    { This list must be from most specific to least specific }
+    if TDNDSrcType(FDNDTypeList[i]).Name = lMimeChoice then
+    begin
+      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID;
+      break;
+    end;
+  end;
+
+  // send message to confirm drop will be accepted in specified rectangle
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type      := ClientMessage;
+  Msg.xany.display    := FDisplay;
+  Msg.xclient.window  := FSrcWinHandle; // source winhandle msg is going to
+  Msg.xclient.message_type  := XdndStatus;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0]   := ATopLevelWindow.WinHandle;  // always top-level window
+  if lAccept then
+  begin
+    Msg.xclient.data.l[1] := 1;
+    Msg.xclient.data.l[4] := FActionType;
+  end
+  else
+  begin
+    Msg.xclient.data.l[1] := 0;
+    Msg.xclient.data.l[4] := None;
+  end;
+  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
+  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
+
+  XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
 
 procedure TfpgX11Application.HandleDNDdrop(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow; const ATimestamp: x.TTime);
+var
+  Msg: TXEvent;
 begin
-  if Assigned(FDrop) then
-    FDrop.RequestDropData(ATimeStamp);
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Application.HandleDNDdrop');
+  {$ENDIF}
+  { TODO: Must XConvertSelection always be called? }
+  if FDNDDataType <> None then
+    XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
+
+  { send message to signal drop is finished }
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type            := ClientMessage;
+  Msg.xany.display          := FDisplay;
+  Msg.xclient.window        := FSrcWinHandle; // source winhandle msg is going to
+  Msg.xclient.message_type  := XdndFinished;
+  Msg.xclient.format        := 32;
+
+  Msg.xclient.data.l[0] := ATopLevelWindow.FWinHandle;  // winhandle of target window
+  if FDNDDataType = None then
+    Msg.xclient.data.l[1] := 0 // drop NOT accepted
+  else
+    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
+  Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
+
+  XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
 
 procedure TfpgX11Application.HandleDNDSelection(const ev: TXEvent);
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining, dummy: culong;
+  s: variant;
+  data: PChar;
+  wg: TfpgWidget;
+  swg: TfpgWidget; { source widget that started drag - if drag and drop occur in the same application }
 begin
-  FDrop.ReadDropSelectionData(ev);
-  FDrop.DataDropComplete;
-  FreeAndNil(FDrop);
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Application.HandleDNDselection');
+  {$ENDIF}
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if not wg.AcceptDrops then
+      Exit;
+  end;
+
+  { do not get data yet, just see how much there is }
+  XGetWindowProperty(FDisplay, ev.xselection.requestor,
+      ev.xselection._property, 0, 0,
+      TBool(false),
+      AnyPropertyType,
+      @actualtype, @actualformat, @count, @remaining,
+      @data);
+
+  { we handle the DND selection here }
+    {$IFDEF DNDDEBUG}
+    s := XGetAtomName(FDisplay, actualtype);
+    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
+    writeln('  Actualformat = ', ActualFormat);
+    writeln('  count = ', count);
+    writeln('  remaining = ', remaining);
+    writeln('-----------------');
+    {$ENDIF}
+
+  if remaining > 0 then   { we have data - now fetch it! }
+  begin
+    XGetWindowProperty(FDisplay, ev.xselection.requestor,
+        ev.xselection._property, 0, remaining,
+        TBool(false),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @dummy,
+        @data);
+    s := data;
+  end;
+
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if wg.AcceptDrops then
+    begin
+      if Assigned(wg.OnDragDrop) then
+      begin
+        if Assigned(uDragSource) then
+          swg := uDragSource as TfpgWidget
+        else
+          swg := nil;
+        wg.OnDragDrop(wg, swg, FDropPos.X, FDropPos.Y, s);
+        uDragSource := nil; { reset variable for the next DND action }
+      end;
+    end;
+  end;
+  {$IFDEF DNDDEBUG}
+  writeln(' s = ', s);
+  {$ENDIF}
+  ResetDNDVariables;
 end;
 
 function TfpgX11Application.DoGetFontFaceList: TStringList;
@@ -1517,8 +1428,6 @@ begin
     Exit; //==>
 
   Result := TStringList.Create;
-  Result.Sorted := True;
-  Result.Duplicates := dupIgnore;
 
   GetMem(pc, 128);
   n := 0;
@@ -1532,7 +1441,9 @@ begin
     inc(n);
   end;
   FreeMem(pc);
-  // FcFontSetDestroy(pfs); // not needed.
+  // FcFontSetDestroy(pfs); // not used
+
+  Result.Sort;
 end;
 
 constructor TfpgX11Application.Create(const AParams: string);
@@ -1576,6 +1487,7 @@ begin
   xia_net_wm_icon       := XInternAtom(FDisplay, '_NET_WM_ICON', TBool(False));
 
   { initializa the XDND atoms }
+  FDNDTypeList := TObjectList.Create;
   XdndInit;
 
   netlayer := TNETWindowLayer.Create(FDisplay);
@@ -1596,6 +1508,7 @@ destructor TfpgX11Application.Destroy;
 begin
   netlayer.Free;
   XCloseDisplay(FDisplay);
+  FDNDTypeList.Free;
   inherited Destroy;
 end;
 
@@ -1685,7 +1598,6 @@ var
   blockmsg: boolean;
   w: TfpgX11Window;
   ew: TfpgX11Window;
-  mw: TfpgWidgetBase;
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
@@ -1696,7 +1608,6 @@ var
   KeySym: TKeySym;
   Popup: TfpgWidget;
   needToWait: boolean;
-  eformwidget: TfpgForm;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -1732,8 +1643,9 @@ var
   // Debug info only
   procedure ReportLostWindow(const event: TXEvent);
   begin
-    {$IFDEF GDEBUG}
-    DebugLnFmt('fpGUI/X11: %s can''t find <%s>', [GetXEventName(event._type), IntToHex(event.xany.window, 9)]);
+    {$IFDEF DEBUG}
+    writeln('fpGUI/X11: ', GetXEventName(event._type), ' can''t find <',
+        IntToHex(event.xany.window, 9), '>');
     {$ENDIF}
   end;
 
@@ -1782,6 +1694,7 @@ begin
       Exit; // nothing further to do here!
   end;
 
+
   // if the event filter returns true then it ate the message
   if Assigned(FEventFilter) and FEventFilter(ev) then
     exit; // no more processing required for that event
@@ -1799,12 +1712,12 @@ begin
   Popup := PopupListFirst;
 
 
-  {$IFDEF GDEBUG}
+  {$IFDEF DEBUG}
   w := FindWindowByHandle(ev.xany.window);
   if not Assigned(w) then
-    DebugLnFmt('Event %s(%s) window: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7)])
+    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7))
   else
-    DebugLnFmt('Event %s(%s) window: %s  name: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7), w.Name]);
+    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7), ' name:', w.Name);
 //  PrintKeyEvent(ev);  { debug purposes only }
   {$ENDIF}
 
@@ -1851,11 +1764,11 @@ begin
           // We need to get the corrected "focused" widget instead.
           kwg := FindKeyboardFocus;
           if kwg <> nil then
-            w := kwg.Window
+            w := kwg
           else
           begin
-            {$IFDEF GDEBUG}
-            DebugLn('ERR: We couldn''t find keyboard focused window. Using event window instead!');
+            {$IFDEF DEBUG}
+            writeln('ERR: We couldn''t find keyboard focused window. Using event window instead!');
             {$ENDIF}
             w := FindWindowByHandle(ev.xkey.window);
             if not Assigned(w) then
@@ -1897,12 +1810,12 @@ begin
           begin
             if (Popup <> nil) then
             begin
-              mw := w.FindWidgetFromWindowPoint(ev.xbutton.x, ev.xbutton.y);
-              while (w <> nil) and (w.PrimaryWidget.Parent <> nil) do
-                w := TfpgX11Window(w.PrimaryWidget.Parent.Window);
+              ew := w;
+              while (w <> nil) and (w.Parent <> nil) do
+                w := TfpgX11Window(w.Parent);
 
               if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
-                 (not PopupDontCloseWidget(TfpgWidget(mw))) then
+                 (not PopupDontCloseWidget(TfpgWidget(ew))) then
               begin
                 ClosePopups;
               end;
@@ -1912,20 +1825,21 @@ begin
           begin
             if Assigned(Drag) then    // button released
             begin
-              // SendDrop Sets a timeout that end's the drag if it's not acknowleged
               Drag.SendDNDDrop;
+              { TODO: Start timeout in case XdndFinished is not received, so we can free Drag }
+//              writeln('Freeing Drag Object');
+              if not Drag.FDropAccepted then
+              begin
+                FreeAndNil(FDrag);
+              end;
             end;
           end;
 
           w := FindWindowByHandle(ev.xbutton.window); // restore w
           if xapplication.TopModalForm <> nil then
           begin
-            eformwidget := WidgetParentForm(TfpgWidget(w.Owner));
-            if eformwidget <> nil then
-              ew := TfpgX11Window(eformwidget.Window)
-            else
-              ew := nil;
-            if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
 
@@ -1943,32 +1857,32 @@ begin
                 else
                   i := 1;
 
-                // Check for other mouse wheel messages in the queue
+        	      // Check for other mouse wheel messages in the queue
                 if ev.xbutton.button in [Button4,Button5] then
                   while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
                   begin
-                    if NewEvent.xbutton.Button = 4 then
-                      Dec(i)
+      	            if NewEvent.xbutton.Button = 4 then
+      	              Dec(i)
                     else if NewEvent.xbutton.Button = 5 then
-                      Inc(i)
+      	              Inc(i)
                     else
-                    begin
-                      XPutBackEvent(display, @NewEvent);
+            	      begin
+            	        XPutBackEvent(display, @NewEvent);
                       break;
-                    end;
+            	      end;
                   end
                 else // button is 6 or 7
                   while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
                   begin
-                    if NewEvent.xbutton.Button = 6 then
-                      Dec(i)
+    	              if NewEvent.xbutton.Button = 6 then
+    	                Dec(i)
                     else if NewEvent.xbutton.Button = 7 then
-                      Inc(i)
+    	                Inc(i)
                     else
-                    begin
-                      XPutBackEvent(display, @NewEvent);
+          	        begin
+          	          XPutBackEvent(display, @NewEvent);
                       break;
-                    end;
+          	        end;
                   end;
 
                 msgp.mouse.delta := i;
@@ -1983,15 +1897,15 @@ begin
             begin
               if ev._type = X.ButtonRelease then
               begin
-                {$IFDEF GDEBUG}
-                DebugLnFmt('****  PostMessage MouseUp %s - %s', [w.ClassName, w.Name]);
+                {$IFDEF DEBUG}
+                writeln('****  PostMessage MouseUp ', w.ClassName, ' - ', w.Name);
                 {$ENDIF}
                 mcode := FPGM_MOUSEUP;
               end
               else
               begin
-                {$IFDEF GDEBUG}
-                DebugLnFmt('**** PostMessage MouseDown %s - %s', [w.ClassName, w.Name]);
+                {$IFDEF DEBUG}
+                writeln('**** PostMessage MouseDown ', w.ClassName, ' - ', w.Name);
                 {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
               end;
@@ -2002,44 +1916,28 @@ begin
 
     X.Expose:
         begin
-          with ev.xexpose do
-            msgp.rect := fpgRect(x, y, width, height);
-          while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
-            with ev.xexpose do
-              UnionRect(msgp.rect, msgp.rect, fpgRect(x, y, width, height));
+          repeat
+            //
+          until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            w := FindWindowByHandle(ev.xexpose.window);
-            // use invalidate if a FPGM_PAINT message is already queued
-            if Assigned(w) then
-              TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window), FPGM_PAINT);
           end;
         end;
 
     X.GraphicsExpose:
         begin
-          {$IFDEF GDEBUG}
-          DebugLn(w.ClassName, ': X.GraphicsExpose');
-          {$ENDIF}
           repeat
             //
           until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
           if ev.xgraphicsexpose.count = 0 then
           begin
-            with ev.xgraphicsexpose do
-              msgp.rect := fpgRect(x, y, width, height);
-            w := FindWindowByHandle(ev.xexpose.window);
-            // use invalidate in case a FPGM_PAINT message is already queued
-            if Assigned(w) then
-              TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable), FPGM_PAINT);
           end;
         end;
 
     X.MotionNotify:
         begin
-          {$IFDEF GDEBUG}
-          DebugLn(w.ClassName, ': X.MotionNotify');
-          {$ENDIF}
           repeat
             //
           until not XCheckTypedWindowEvent(display, ev.xmotion.window, X.MotionNotify, @ev);
@@ -2055,12 +1953,8 @@ begin
             end;
             if xapplication.TopModalForm <> nil then
             begin
-              eformwidget := WidgetParentForm(TfpgWidget(w.Owner));
-              if eformwidget <> nil then
-                ew := TfpgX11Window(eformwidget.Window)
-              else
-                ew := nil;
-              if (ew <> nil) and (xapplication.TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+              ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+              if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                 blockmsg := true;
             end;
             if not blockmsg then
@@ -2094,27 +1988,20 @@ begin
               if xapplication.TopModalForm <> nil then
               begin
                 // This is ugly!!!!!!!!!!!!!!!
-                ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w.Owner)).Window);
-                if (ew <> nil) and (TopModalForm.Window <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+                ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+                if (ew <> nil) and (TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
 
               if not blockmsg then
                 fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
-            end
-            else if ev.xclient.data.l[0] = netlayer.NetAtom[naWM_SYNC_REQUEST] then
-            begin
-              w := TfpgX11Window(FindWindowByHandle(ev.xclient.window));
-              w.FSyncValue.lo := ev.xclient.data.l[2];
-              w.FSyncValue.hi := ev.xclient.data.l[3];
-              w.FHasSyncValue:=True;
-            end;
+             end;
           end
           { XDND protocol - XdndEnter }
           else if Assigned(w) and (ev.xclient.message_type = XdndEnter) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndEnter event received');
+            writeln('ClientMessage.XdndEnter event received');
             {$ENDIF}
             HandleDNDenter(w, ev.xclient.data.l[0], ev);
           end
@@ -2122,7 +2009,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndPosition) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndPosition event received');
+            writeln('ClientMessage.XdndPosition event received');
             {$ENDIF}
             HandleDNDposition(w,                            // top level window
                 ev.xclient.data.l[0],                       // Source window
@@ -2135,7 +2022,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndStatus) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndStatus event received');
+            writeln('ClientMessage.XdndStatus event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
@@ -2154,7 +2041,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndLeave) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndLeave event received');
+            writeln('ClientMessage.XdndLeave event received');
             {$ENDIF}
             HandleDNDleave(w, ev.xclient.data.l[0]);
           end
@@ -2162,9 +2049,9 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndDrop) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndDrop event received');
-            DebugLn('    ClassName = ', w.ClassName);
-            DebugLn('    Name = ', w.Name);
+            writeln('ClientMessage.XdndDrop event received');
+            writeln('    ClassName = ', w.ClassName);
+            writeln('    Name = ', w.Name);
             {$ENDIF}
             HandleDNDdrop(w, ev.xclient.data.l[0], ev.xclient.data.l[2]);
           end
@@ -2172,17 +2059,14 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndFinished) then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('ClientMessage.XdndFinished event received');
+            writeln('ClientMessage.XdndFinished event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
-              Drag.HandleDNDFinished(ev);
               {$IFDEF DNDDEBUG}
-              DebugLn('Queuing Free Drag Object');
+              writeln('Freeing Drag Object');
               {$ENDIF}
-              //FreeAndNil(FDrag);
-              FDrag.QueueFree;
-              FDrag := nil;
+              FreeAndNil(FDrag);
             end;
           end;
         end;
@@ -2215,10 +2099,10 @@ begin
               end;
             end;
 
-            if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+            if (w.FWidth <> msgp.rect.Width) or (w.FHeight <> msgp.rect.Height) then
               fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
 
-            if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
+            if (w.FLeft <> msgp.rect.Left) or (w.FTop <> msgp.rect.Top) then
               fpgPostMessage(nil, w, FPGM_MOVE, msgp);
           end;
         end;
@@ -2229,7 +2113,7 @@ begin
           if ev.xselection._property = XdndSelection then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('XdndSelection message received');
+            writeln('XdndSelection message received');
             {$ENDIF}
             HandleDNDSelection(ev);
           end
@@ -2242,15 +2126,15 @@ begin
           if ev.xselectionrequest.selection = XdndSelection then
           begin
             {$IFDEF DNDDEBUG}
-            DebugLn('found a XdndSelection request');
+            writeln('found a XdndSelection request');
             {$ENDIF}
             if Assigned(Drag) then
               Drag.HandleSelectionRequest(ev);
           end
           else
           begin
-            {$IFDEF GDEBUG}
-            DebugLn('found a clipboard selection request');
+            {$IFDEF DEBUG}
+            writeln('found a clipboard selection request');
             {$ENDIF}
             ProcessSelectionRequest(ev);
           end;
@@ -2297,7 +2181,7 @@ begin
           //  msgp.rect.Top    := w.Top;
           //  msgp.rect.Width  := w.Width;
           //  msgp.rect.Height := w.Height;
-          //  fpgPostMessage(nil, w.owner, FPGM_RESIZE, msgp);
+          //  fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
           //end;
         end;
 
@@ -2335,20 +2219,8 @@ begin
           // We are not interrested in this event yet
         end;
 
-    X.PropertyNotify:
-        begin
-          if ev.xproperty.atom = netlayer.NetAtom[naWM_STATE] then
-          begin
-            w := FindWindowByHandle(ev.xproperty.window);
-            if not Assigned(w) then
-              ReportLostWindow(ev)
-            else
-              w.DoWindowNetStateChanged;
-          end;
-        end
-
     else
-      DebugLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
+      WriteLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
 end;
 
@@ -2424,7 +2296,7 @@ end;
 function TfpgX11Application.Screen_dpi: integer;
 begin
   Result := Screen_dpi_y;
-  {$IFDEF GDEBUG}
+  {$IFDEF DEBUG}
   writeln('Display width in mm: ', DisplayWidthMM(Display, DefaultScreen));
   writeln('Display height in mm: ', DisplayHeightMM(Display, DefaultScreen));
   writeln('Display dpi: ', Result);
@@ -2443,8 +2315,8 @@ var
   i: integer;
   iconName: string;
 begin
-    if PrimaryWidget.InheritsFrom(TfpgForm) then
-      iconName := TfpgForm(PrimaryWidget).IconName;
+    if self is TfpgForm then
+      iconName := TfpgForm(self).IconName;
     if iconName = '' then
       Exit;
     ico := fpgImages.GetImage(iconName);
@@ -2472,15 +2344,18 @@ begin
     {$endif}
 end;
 
-procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
+procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   pwh: TfpgWinHandle;
   wh: TfpgWinHandle;
   lmwh: TfpgWinHandle;
   attr: TXSetWindowAttributes;
   mask: longword;
-  IconPixmap: TPixmap;
+  hints: TXSizeHints;
+  //IconPixmap: TPixmap;
   WMHints: PXWMHints;
+  prop: TAtom;
+  mwmhints: TMWMHints;
   IsToplevel: Boolean;
 begin
   if HandleIsValid then
@@ -2488,7 +2363,7 @@ begin
 
   IsToplevel := (AParent = nil) or (FWindowType in [wtModalForm, wtPopup]);
   if not IsToplevel then
-    pwh := TfpgX11Window(AParent.Window).WinHandle
+    pwh := TfpgX11Window(AParent).WinHandle
   else
     pwh := xapplication.RootWindow;
 
@@ -2500,7 +2375,7 @@ begin
     mask := CWOverrideRedirect;
   end;
 
-  //AdjustWindowStyle;
+  AdjustWindowStyle;
 
   if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
   begin
@@ -2513,21 +2388,12 @@ begin
     end;
   end;
 
-  if FSize.W = 0 then
-    FSize.W := 1;
-
-  if FSize.H = 0 then
-    FSize.H := 1;
-
-
   wh := XCreateWindow(xapplication.Display, pwh,
-    FPosition.X, FPosition.Y, FSize.W, FSize.H, 0,
+    FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,
     InputOutput,
     xapplication.DefaultVisual,
     mask, @attr);
-
-  FNotifiedSize := FSize;
 
   if wh = 0 then
     raise Exception.Create('fpGUI/X11: Failed to create window ' + ClassName);
@@ -2539,18 +2405,19 @@ begin
   begin
     { setup a window icon }
 
-    IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
-      @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
+   // IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
+   //   @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
 
     WMHints := XAllocWMHints;
-    WMHints^.icon_pixmap := IconPixmap;
-    WMHints^.flags := IconPixmapHint;
+   //    WMHints^.icon_pixmap := IconPixmap;
+   
+   //  WMHints^.flags := IconPixmapHint;
+
     { setup window grouping posibilities }
-    if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
       WMHints^.flags := WMHints^.flags or WindowGroupHint;
-      WMHints^.window_group := FGroupLeader;
+      WMHints^.window_group := xapplication.FLeaderWindow;
     end;
 
     XSetWMProperties(xapplication.display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
@@ -2558,35 +2425,71 @@ begin
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
     begin
       { set class group hint per top-level window }
-      SetWindowGroup(FWinHandle, FSpecialClassHint);
+      SetWindowGroup(FWinHandle);
       XChangeProperty(xapplication.display, FWinHandle, xapplication.FClientLeaderAtom, 33, 32,
-        PropModeReplace, @FGroupLeader, 1);
+        PropModeReplace, @xapplication.FLeaderWindow, 1);
     end;
 
     { so newish window manager can close unresponsive programs }
     fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
 
-    // set stored opacity value
-    fpgApplication.netlayer.WindowSetAlpha(FWinHandle, WindowOpacity);
-
-    // use this to synchronize painting the window with the window frame being redrawn
-    FSyncCounter:=XSyncCreateCounter(xapplication.Display, FSyncValue);
-    if FSyncCounter > 0 then
-    begin
-      fpgApplication.netlayer.WindowSetSupportSyncRequest(FWinHandle);
-      fpgApplication.netlayer.WindowSetPropertyCardinal(FWinHandle, fpgApplication.netlayer.NetAtom[naWM_SYNC_REQUEST_COUNTER], 1, FSyncCounter);
-    end;
-
     XFree(WMHints);
 
     { we need to set the XdndAware property }
     if QueueEnabledDrops then
+    begin
       DoDNDEnabled(True);
+    end;
 
-    if xapplication.xia_net_wm_icon <> 0 then
-      ApplyFormIcon;
+  if xapplication.xia_net_wm_icon <> 0 then  ApplyFormIcon;
   end;
+
+  FillChar(hints, sizeof(hints), 0);
+  hints.flags := 0;
+
+  if not (waAutoPos in FWindowAttributes) then
+    hints.flags := hints.flags or PPosition;
+
+  if waScreenCenterPos in FWindowAttributes then
+  begin
+    hints.flags := hints.flags or PPosition;
+    FLeft := (xapplication.ScreenWidth - FWidth) div 2;
+    FTop  := (xapplication.ScreenHeight - FHeight) div 2;
+    DoMoveWindow(FLeft, FTop);
+  end
+  else if waOneThirdDownPos in FWindowAttributes then
+  begin
+    hints.flags := hints.flags or PPosition;
+    FLeft := (xapplication.ScreenWidth - FWidth) div 2;
+    FTop  := (xapplication.ScreenHeight - FHeight) div 3;
+    DoMoveWindow(FLeft, FTop);
+  end;
+
+  if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
+  begin
+    hints.flags      := hints.flags or PMinSize or PMaxSize;
+    hints.min_width  := FMinWidth;
+    hints.min_height := FMinHeight;
+    if FMaxWidth > 0 then
+      hints.max_width := FMaxWidth
+    else
+      hints.max_width := xapplication.ScreenWidth;
+    if FMaxHeight > 0 then
+      hints.max_height := FMaxHeight
+    else
+      hints.max_height := xapplication.ScreenHeight;
+  end
+  else
+  begin
+    hints.flags      := hints.flags or PMinSize or PMaxSize;
+    hints.min_width  := FWidth;
+    hints.min_height := FHeight;
+    hints.max_width  := FWidth;
+    hints.max_height := FHeight;
+  end;
+
+  XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
 
   if FWindowType <> wtChild then
     // send close event instead of quiting the whole application...
@@ -2608,10 +2511,9 @@ begin
   This code was originally introduced in commit 2ffdd747. I'm looking for an
   alternative solution to the original problem. }
 //      else if FocusRootWidget <> nil then
-//        lmwh := TfpgX11Window(FocusRootWidget.Window).WinHandle // <-- alienwindows
-////        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
+//        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
       else if fpgApplication.MainForm <> nil then
-        lmwh := TfpgX11Window(fpgApplication.MainForm.Window).WinHandle;
+        lmwh := TfpgX11Window(fpgApplication.MainForm).WinHandle;
       if lmwh <> 0 then
       begin
         XSetTransientForHint(xapplication.display, FWinHandle, lmwh);
@@ -2620,8 +2522,34 @@ begin
     end;
   end;
 
-  DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
+  if (FWindowType = wtPopup) and (waStayOnTop in FWindowAttributes) then
+    // we have a Splash screen
+    fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash]);
 
+  // process Borderless forms
+  if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) and not (waX11SkipWMHints in FWindowAttributes) then
+  begin
+    prop := X.None;
+    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', TBool(False));
+    if prop = X.None then
+    begin
+//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
+      // Set Override Redirect here!
+      mwmhints.flags := 0;
+    end
+    else
+    begin
+      mwmhints.flags := MWM_HINTS_DECORATIONS;
+      mwmhints.decorations := 0;
+
+      if xapplication.xia_motif_wm_hints <> X.None then
+      begin
+
+        prop := xapplication.xia_motif_wm_hints;
+        XChangeProperty(xapplication.display, FWinHandle, prop, prop, 32, PropModeReplace, @mwmhints, PROP_MWM_HINTS_ELEMENTS);
+      end;
+    end;
+  end;
 
   { TODO : We could optimise this for non-focusable widgets }
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
@@ -2629,7 +2557,7 @@ begin
       EnterWindowMask or LeaveWindowMask or
       ButtonMotionMask or PointerMotionMask or
       ExposureMask or FocusChangeMask or
-      StructureNotifyMask or PropertyChangeMask);
+      StructureNotifyMask);
 
   SetWindowParameters;
 
@@ -2644,10 +2572,6 @@ begin
   if HandleIsValid then
   begin
 //    PrintCallTraceDbgLn('XDestroyWindow');
-    if FSyncCounter > 0 then
-      XSyncDestroyCounter(xapplication.Display, FSyncCounter);
-    FSyncCounter:=0;
-
     XDestroyWindow(xapplication.Display, FWinHandle);
   end
   else
@@ -2715,41 +2639,19 @@ procedure TfpgX11Window.DoUpdateWindowPosition;
 var
   w: longword;
   h: longword;
-  hints: TXSizeHints;
-  widget: TfpgWidgetBase;
 begin
   if HasHandle then
   begin
-    if FSize.W > 1 then
-      w := FSize.W
+    if FWidth > 1 then
+      w := FWidth
     else
       w := 1;
-    if FSize.H > 1 then
-      h := FSize.H
+    if FHeight > 1 then
+      h := FHeight
     else
       h := 1;
 
-    XMoveResizeWindow(xapplication.display, FWinHandle, FPosition.X, FPosition.Y, w, h);
-
-    widget := PrimaryWidget;
-    hints.flags:=0;
-    if (FWindowType <> wtChild) and (waSizeable in FWindowAttributes) then
-    begin
-      hints.flags      := hints.flags or PMinSize;
-      hints.min_width  := widget.MinWidth;
-      hints.min_height := widget.MinHeight;
-    end
-    else
-    begin
-      hints.flags      := hints.flags or PMinSize or PMaxSize;
-      hints.min_width  := widget.MinWidth;
-      hints.min_height := widget.MinHeight;
-      hints.max_width  := widget.MaxWidth;
-      hints.max_height := widget.MaxHeight;
-    end;
-
-  XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
-
+    XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
   end;
 end;
 
@@ -2793,19 +2695,21 @@ end;
 
 procedure TfpgX11Window.DoDNDEnabled(const AValue: boolean);
 begin
-  QueueEnabledDrops:=False;
   // notify XDND protocol that we can handle DND
   if AValue then
   begin
     if HasHandle then
-    begin
-      XChangeProperty(xapplication.Display, WinHandle, xapplication.XdndAware, XA_ATOM, 32, PropModeReplace, @FPG_XDND_VERSION, 1);
-    end
+      XChangeProperty(xapplication.Display, WinHandle, xapplication.XdndAware, XA_ATOM, 32, PropModeReplace, @FPG_XDND_VERSION, 1)
     else
       QueueEnabledDrops := True; // we need to do this once we have a winhandle
   end
   else
     XDeleteProperty(xapplication.Display, WinHandle, xapplication.XdndAware);
+end;
+
+procedure TfpgX11Window.DoAcceptDrops(const AValue: boolean);
+begin
+  { TODO : Remove EnableDrops, then recurse from here to parent top level from, and set XDNDAware property for form. }
 end;
 
 function TfpgX11Window.GetWindowState: TfpgWindowState;
@@ -2868,222 +2772,6 @@ begin
     XFree(data);
 end;
 
-procedure TfpgX11Window.SetWindowState(const AValue: TfpgWindowState);
-begin
-  case AValue of
-    wsMaximized:
-      begin
-        xapplication.netlayer.WindowSetMaximizedState(FWinHandle, nmsBoth);
-      end;
-    wsMinimized:
-      begin
-        XIconifyWindow(xapplication.Display, FWinHandle, xapplication.DefaultScreen);
-      end;
-    wsNormal:
-      begin
-        // TODO:
-      end;
-  end; { case }
-end;
-
-procedure TfpgX11Window.SetWindowOpacity(AValue: Single);
-begin
-  if AValue = WindowOpacity then
-    Exit;
-  inherited SetWindowOpacity(AValue);
-
-  if FWinHandle <> 0 then
-     fpgApplication.netlayer.WindowSetAlpha(FWinHandle,AValue);
-end;
-
-procedure TfpgX11Window.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
-var
-  hints: TXSizeHints;
-  Changed: TWindowAttributes = [];
-  attr: TWindowAttribute;
-  prop: TAtom;
-  mwmhints: TMWMHints;
-  w: TfpgWidgetBase;
-begin
-  // currently unhandled (here) attributes. Some are only set when the window is created.
-  {
-   waFullScreen,          Set in DoSetWindowVisible
-   waUnblockableMessages, Handled in DoWaitWindowMessage
-   waX11SkipWMHints       Mostly Handled in DoAllocateWindowHandle
-  }
-
-  if FWinHandle = 0 then
-    Exit; // ==>
-
-  if AForceAll then
-    Changed := ANewAttributes
-  else
-    for attr in TWindowAttribute do
-      if (attr in AOldAtributes) <> (attr in ANewAttributes) then
-        Include(Changed, attr);
-
-  w := PrimaryWidget;
-
-  FillChar(hints, SizeOf(hints), 0);
-
-  // if the window is mapped then this stuff is irrelevant
-  if not (xwsfMapped in FWinFlags) or AForceAll then
-  begin
-    // waAutoPos
-    if not (waAutoPos in ANewAttributes) then
-      hints.flags := hints.flags or PPosition;
-
-    // waScreenCenterPos;
-    if (waScreenCenterPos in ANewAttributes) then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end
-    // waOneThirdDownPos
-    else if waOneThirdDownPos in ANewAttributes then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end;
-  end;
-
-  // waSizeable;
-  if waSizeable in Changed then
-  begin
-    if (FWindowType <> wtChild) and (waSizeable in ANewAttributes) then
-    begin
-      hints.flags      := hints.flags or PMinSize or PMaxSize;
-      hints.min_width  := w.MinWidth;
-      hints.min_height := w.MinHeight;
-      if w.MaxWidth > 0 then
-        hints.max_width := w.MaxWidth
-      else
-        hints.max_width := xapplication.ScreenWidth;
-      if w.MaxHeight > 0 then
-        hints.max_height := w.MaxHeight
-      else
-        hints.max_height := xapplication.ScreenHeight;
-    end
-    else // not waSizeable
-    begin
-      hints.flags      := hints.flags or PMinSize or PMaxSize;
-      hints.min_width  := FSize.W;
-      hints.min_height := FSize.H;
-      hints.max_width  := FSize.W;
-      hints.max_height := FSize.H;
-    end;
-  end;
-
-  if hints.flags <> 0 then
-      XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
-
-  // waStayOnTop
-  if (FWindowType = wtPopup) and (waStayOnTop in Changed) then
-  begin
-    if (waStayOnTop in ANewAttributes) then // we have a Splash screen
-      fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash])
-    else
-      fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtPopupMenu]);
-  end;
-
-  // waSystemStayOnTop
-  if (waSystemStayOnTop in Changed) and (FWindowType in [wtWindow, wtModalForm]) then
-    if (waSystemStayOnTop in ANewAttributes) and (waSystemStayOnTop in Changed) then
-      fpgApplication.netlayer.WindowSetAbove(FWinHandle, True)
-    else
-      fpgApplication.netlayer.WindowSetAbove(FWinHandle, False);
-
-  // waBorderless
-  // process Borderless forms
-  if (waBorderless in Changed) and (FWindowType in [wtWindow, wtModalForm]) and not (waX11SkipWMHints in ANewAttributes) then
-  begin
-    prop := X.None;
-    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', TBool(False));
-    if prop = X.None then
-    begin
-//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
-      // Set Override Redirect here!
-      mwmhints.flags := 0;
-    end
-    else
-    begin
-      mwmhints.flags := MWM_HINTS_DECORATIONS;
-      if (waBorderless in ANewAttributes) then
-        mwmhints.decorations := 0 // no decorations
-      else
-        mwmhints.decorations := MWM_DECOR_ALL; // all decorations
-
-      if xapplication.xia_motif_wm_hints <> X.None then
-      begin
-        prop := xapplication.xia_motif_wm_hints;
-        XChangeProperty(xapplication.display, FWinHandle, prop, prop, 32, PropModeReplace, @mwmhints, PROP_MWM_HINTS_ELEMENTS);
-      end;
-    end;
-  end;
-end;
-
-type
-  TfpgWindowAccess = class(TfpgWindow);
-
-procedure TfpgX11Window.DoWindowNetStateChanged;
-var
-  States: TNetWindowStates;
-  ChangedAttrs: TWindowAttributes = [];
-  Attr: TWindowAttribute;
-begin
-  {waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
-      waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop}
-
-  {nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
-                     nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn}
-  if not xapplication.netlayer.WindowGetState(WinHandle, States) then
-    Exit; // ==>
-
-  // make a list of window attributes that have changed that are affected by the
-  // _NET_WM_STATE property. Only changes that differ from current attributes
-  // are added to the changed list. If we have initiated the change then it wont
-  // be included since as far as we are concerned it is already true.
-
-  if (nwsAbove in States) <> (waSystemStayOnTop in FWindowAttributes) then
-    Include(ChangedAttrs, waSystemStayOnTop);
-  if (nwsFullScreen in States) <> (waFullScreen in FWindowAttributes) then
-    Include(ChangedAttrs, waFullScreen);
-
-  // Update FWindowAttributes with the changes
-  for Attr in TWindowAttributes do
-    if Attr in ChangedAttrs then
-      if Attr in FWindowAttributes then
-        Exclude(FWindowAttributes, Attr)
-      else
-        Include(FWindowAttributes, Attr);
-
-  {$IFDEF DEBUG_NETWMSTATE}
-  for Attr in TWindowAttribute do
-    if Attr in ChangedAttrs then
-      WriteLn('X11: _NET_WM_STATE changed: ', Attr);
-  if ChangedAttrs = [] then
-    WriteLn('X11: _NET_WM_STATE changed:  Unhandled state or change already made.');
-  {$ENDIF}
-
-  // now notify the app of the changes if they are listening.
-  if PrimaryWidget.InheritsFrom(TfpgWindow) then
-  if Assigned(TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange) then
-    TfpgWindowAccess(PrimaryWidget).FOnWindowAttributesChange(Self, ChangedAttrs);
-
-end;
-
-procedure TfpgX11Window.TriggerSyncCounter;
-begin
-  if FHasSyncValue then
-    XSyncSetCounter(xapplication.Display, FSyncCounter, FSyncValue);
-  FHasSyncValue:=False;
-end;
-
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
 var
   tp: TXTextProperty;
@@ -3110,8 +2798,6 @@ begin
   FWinHandle := 0;
   FBackupWinHandle := 0;
   QueueEnabledDrops := False;
-  FSyncValue.lo:=1;
-  FHasSyncValue := False;
 end;
 
 procedure TfpgX11Window.ActivateWindow;
@@ -3119,9 +2805,8 @@ begin
   XSetInputFocus(xapplication.Display, FWinHandle, RevertToParent, CurrentTime);
 end;
 
-procedure TfpgX11Window.CaptureMouse(AForWidget: TfpgWidgetBase);
+procedure TfpgX11Window.CaptureMouse;
 begin
-  MouseCapture := AForWidget;
   XGrabPointer(xapplication.Display, FWinHandle,
       TBool(False),
       ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask
@@ -3136,7 +2821,6 @@ end;
 
 procedure TfpgX11Window.ReleaseMouse;
 begin
-  MouseCapture := nil;
   XUngrabPointer(xapplication.display, CurrentTime);
 end;
 
@@ -3226,44 +2910,26 @@ begin
 end;
 
 { TfpgX11Canvas }
-{$IFDEF X11CanvasDEBUG}
-var
-  CanvasCount: INteger = 0;
-{$ENDIF}
 
-constructor TfpgX11Canvas.Create(awidget: TfpgWidgetBase);
+constructor TfpgX11Canvas.Create(awin: TfpgWindowBase);
 begin
-  inherited Create(awidget);
-
-  {$IFDEF X11CanvasDEBUG}
-  Inc(CanvasCount);
-  WriteLn('Creating Canvas#: ', CanvasCount);
-  WriteLn('CreatingCanvas: 0x', hexStr(Pointer(Self)));
-  {$ENDIF}
+  inherited Create(awin);
   FDrawing    := False;
+  FDrawWindow := nil;
 
   FBufferPixmap := 0;
-  //FDrawHandle   := 0;
+  FDrawHandle   := 0;
   Fgc           := nil;
   FXftDraw      := nil;
+  FClipRegion   := nil;
 end;
 
 destructor TfpgX11Canvas.Destroy;
 begin
-
-  {$IFDEF X11CanvasDEBUG}
-  Dec(CanvasCount);
-  WriteLn('Destroying Canvas#: ', CanvasCount);
-  WriteLn('Destroying: 0x', hexStr(Pointer(Self)));
-  {$ENDIF}
-
   if FDrawing then
     DoEndDraw;
-
-
   FreeAndNil(FBufferFreeTimer);
   TryFreePixmap;
-  DeAllocateDC(True);
   inherited Destroy;
 end;
 
@@ -3271,10 +2937,10 @@ procedure TfpgX11Canvas.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCa
     var ASrcRect: TfpgRect);
 begin
   SortRect(ASrcRect);
-  XCopyArea(xapplication.Display, TfpgX11Canvas(ASrcCanvas).DrawHandle, DrawHandle, Fgc, ASrcRect.Left, ASrcRect.Top, ASrcRect.Width, ASrcRect.Height, ADest_x, ADest_y);
+  XCopyArea(xapplication.Display, TfpgX11Canvas(ASrcCanvas).FDrawHandle, FDrawHandle, Fgc, ASrcRect.Left, ASrcRect.Top, ASrcRect.Width, ASrcRect.Height, ADest_x, ADest_y);
 end;
 
-procedure TfpgX11Canvas.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
+procedure TfpgX11Canvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   x: integer;
   y: integer;
@@ -3285,36 +2951,86 @@ var
   bw: longword;
   pmw: longword;
   pmh: longword;
+  GcValues: TXGcValues;
 begin
-  if Assigned(awidget) then
+  if Assigned(TfpgX11Window(awin)) then
   begin
     // This occurs every now and again with TfpgMemo and InvertCaret painting!
     // Investigate this.
-    if not AWidget.WindowAllocated and not TfpgX11Window(awidget.Window).HasHandle then
+    if not TfpgX11Window(awin).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
 
-  //XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
-  h := FWidget.Height;
-  w := FWidget.Width;
+  XGetGeometry(xapplication.display, TfpgX11Window(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
 
-  {if FDrawing and buffered and (FBufferPixmap > 0) then
+  if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
     begin
       // check if the dimensions are ok
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
-      if (pmw < w) or (pmh < h) then
+      if (pmw <> w) or (pmh <> h) then
         DoEndDraw;
-    end;}
-  if FDrawing and (FBufferPixmap > 0) then // only
-  begin
-    XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @pmw, @pmh, @bw, @d);
-    if (pmw < w) or (pmh < h) then
-      DoEndDraw;
-  end;
+    end;
 
   if not FDrawing then
-    AllocateDC;
+  begin
+    FDrawWindow := TfpgX11Window(awin);
+
+    if buffered then
+    begin
+      if (FBufferPixmap = 0)
+      or (FastDoubleBuffer = False)
+      or (FastDoubleBuffer and (w > FPixWidth) or (h > FPixHeight))
+      or ((FastDoubleBuffer = False) and ((w <> FPixWidth) or (h <> FPixHeight)))
+      then
+      begin
+        if FastDoubleBuffer and ((w > FPixWidth) or (h > FPixHeight)) then
+        begin
+          FPixHeight := h + 30;
+          FPixWidth  := w + 30;
+        end
+        else begin
+          FPixHeight := h;
+          FPixWidth  := w;
+        end;
+        TryFreePixmap;
+        FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
+      end;
+      if FastDoubleBuffer then
+      begin
+        // Rapid paint events reuse the double buffer which resets a delay
+        // After the delay the double buffer is freed, letting the OS use video
+        // memory if needed.
+        // Things like scrolling and resizing are fast
+
+        // Reset the timers next trigger
+        if FBufferFreeTimer = nil then
+        begin
+          FBufferFreeTimer := TfpgTimer.Create(500);
+          TfpgTimer(FBufferFreeTimer).OnTimer := @BufferFreeTimer;
+        end
+        else
+          TfpgTimer(FBufferFreeTimer).Enabled := False;
+        TfpgTimer(FBufferFreeTimer).Enabled := True;
+      end;
+      FDrawHandle   := FBufferPixmap;
+    end
+    else
+    begin
+      TryFreePixmap;
+      FDrawHandle   := FDrawWindow.FWinHandle;
+    end;
+
+    Fgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
+    // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
+    XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
+
+    FXftDraw := XftDrawCreate(xapplication.display, FDrawHandle,
+      XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
+      XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
+
+    FClipRegion := XCreateRegion;
+  end;
 
   FDrawing := True;
 end;
@@ -3323,28 +3039,29 @@ procedure TfpgX11Canvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
-  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
-  {$ENDIF}
-  if (DrawHandle = FBufferPixmap) then
+  if FBufferPixmap > 0 then
   begin
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
-    XCopyArea(xapplication.Display, FBufferPixmap, TfpgX11Window(FWidget.Window).WinHandle, cgc, x+FDeltaX, y+FDeltaY, w, h, x+FDeltaX, y+FDeltaY);
+    XCopyArea(xapplication.Display, FBufferPixmap, FDrawWindow.FWinHandle, cgc, x, y, w, h, x, y);
     XFreeGc(xapplication.display, cgc);
-    TfpgX11Window(FWidget.Window).TriggerSyncCounter;
   end;
 end;
 
 procedure TfpgX11Canvas.DoEndDraw;
 begin
-  FCanvasTarget := nil;
-  FDrawing    := False;
-  DeAllocateDC(True);
+  if FDrawing then
+  begin
+    XDestroyRegion(FClipRegion);
+    XftDrawDestroy(FXftDraw);
+    XFreeGc(xapplication.display, Fgc);
+
+    if FastDoubleBuffer = False then
+      TryFreePixmap;
+
+    FDrawing    := False;
+    FDrawWindow := nil;
+  end;
 end;
 
 function TfpgX11Canvas.GetPixel(X, Y: integer): TfpgColor;
@@ -3354,7 +3071,8 @@ var
   x_Color: TXColor;
 begin
   Result := 0;
-  Image := XGetImage(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, X+FDeltaX, Y+FDeltaY, 1, 1, $FFFFFFFF, ZPixmap);
+
+  Image := XGetImage(xapplication.display, FDrawHandle, X, Y, 1, 1, $FFFFFFFF, ZPixmap);
   if Image = nil then
     raise Exception.Create('fpGFX/X11: Invalid XImage');
 
@@ -3377,77 +3095,43 @@ var
 begin
   oldColor := Color;
   SetColor(AValue);
-  XDrawPoint(xapplication.display, DrawHandle, Fgc, X, Y);
+  XDrawPoint(xapplication.display, FDrawHandle, Fgc, X, Y);
   SetColor(oldColor);
 end;
 
 procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  XDrawArc(xapplication.display, DrawHandle, Fgc, FDeltaX+x, FDeltaY+y, w-1, h-1,
+  XDrawArc(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
 procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  XFillArc(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h,
+  XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoDrawPolygon(const Points: array of TPoint);
+procedure TfpgX11Canvas.DoDrawPolygon(Points: PPoint; NumPts: Integer;
+  Winding: boolean);
 var
   PointArray: PXPoint;
   i: integer;
 begin
   { convert TPoint to TXPoint }
-  GetMem(PointArray, SizeOf(TXPoint)*(Length(Points)+1)); // +1 for return line
-  for i := Low(Points) to High(Points) do
+  GetMem(PointArray, SizeOf(TXPoint)*(NumPts+1)); // +1 for return line
+  for i := 0 to NumPts-1 do
   begin
-    PointArray[i].x := Points[i].x+FDeltaX;
-    PointArray[i].y := Points[i].y+FDeltaY;
+    PointArray[i].x := Points[i].x;
+    PointArray[i].y := Points[i].y;
   end;
-  XFillPolygon(xapplication.display, DrawHandle, Fgc, PointArray, Length(Points), CoordModeOrigin, X.Complex);
+  XFillPolygon(xapplication.display, FDrawHandle, Fgc, PointArray, NumPts, CoordModeOrigin, X.Complex);
   if PointArray <> nil then
     FreeMem(PointArray);
 end;
 
-function TfpgX11Canvas.GetBufferAllocated: Boolean;
-var
-  x: integer;
-  y: integer;
-  rw: TXID;
-  d: TXID;
-  wp: longword;
-  hp: longword;
-  bw: longword;
-begin
-  if FCanvasTarget <> Self then
-    Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
-  else
-  begin
-    Result := FBufferPixmap > 0;
-    if Result then
-    begin
-      XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
-      if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
-      begin
-        TryFreePixmap;
-        Result := False;
-      end;
-    end;
-  end;
-end;
-
-procedure TfpgX11Canvas.DoAllocateBuffer;
-begin
-  if FBufferPixmap <> 0 then
-    TryFreePixmap;
-  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+PIXMAP_RESIZE_SIZE, FWidget.Height+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
-  FDrawHandle:=FBufferPixmap;
-end;
-
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
 begin
-  {$IFDEF GDEBUG}
+  {$IFDEF DEBUG}
   WriteLn('fpGFX/X11: Freeing Buffer w=', FPixWidth, ' h=', FPixHeight);
   {$ENDIF}
   TryFreePixmap;
@@ -3459,92 +3143,6 @@ begin
   if FBufferPixmap > 0 then
     XFreePixmap(xapplication.Display, FBufferPixmap);
   FBufferPixmap := 0;
-end;
-
-{$IFDEF X11CanvasDEBUG}
-var
-  GCCount: Integer = 0;
-{$ENDIF}
-
-procedure TfpgX11Canvas.AllocateDC;
-var
-  GcValues: TXGcValues;
-  ResetCliprect: Boolean;
-begin
-    {$IFDEF X11CanvasDEBUG}
-    Inc(GCCount);
-    WriteLn('Alloc GC Count = ', GCCount);
-    {$ENDIF}
-
-    // Allocating a GC for the window handle allow us to use it with the pixbuf which has the same
-    // root and depth. http://www.x.org/archive/X11R7.5/doc/man/man3/XFreeGC.3.html
-    // this saves us from getting errors when we free and reallocate the pixbuf for a new size
-    if not Assigned(Fgc) then
-      Fgc := XCreateGc(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, 0, @GcValues);
-
-    // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
-    XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
-
-    ResetCliprect:=False;
-    // if the targetcanvas has resized and a new buffer is created then the
-    // drawhandle FXftDraw was created with is invalid
-    if Assigned(FXftDraw) and (FXftDrawHandle <> DrawHandle) then
-    begin
-      ResetCliprect := True;
-      XftDrawDestroy(FXftDraw);
-      FXftDraw:=nil;
-    end;
-
-    FXftDrawHandle := DrawHandle;
-    if not Assigned(FXftDraw) then
-      FXftDraw := XftDrawCreate(xapplication.display,
-                                FXftDrawHandle,
-                                XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
-                                XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
-    if ResetCliprect then
-      DoSetClipRectInternal(FClipRect);
-end;
-
-procedure TfpgX11Canvas.DeAllocateDC(Force: Boolean);
-begin
-  if not FDrawing or (WeAreTopLevelCanvas) or Force then
-  begin
-    if FXftDraw <> nil then
-    begin
-      XftDrawDestroy(FXftDraw);
-      FXftDraw := nil;
-    end;
-    if Fgc <> nil then
-    begin
-      XFreeGc(xapplication.display, Fgc);
-      Fgc := nil;
-      {$IFDEF X11CanvasDEBUG}
-      Dec(GCCount);
-      WriteLn('DE alloc GC Count = ', GCCount);
-      {$ENDIF}
-    end;
-  end
-  {$IFDEF X11CanvasDEBUG}
-  else
-  begin
-    WriteLn('Asked to DeallocateDC but didn''t!');
-  end;
-  {$ENDIF}
-
-end;
-
-function TfpgX11Canvas.DrawHandle: TfpgDCHandle;
-begin
-  if FCanvasTarget <> Self then
-    Result := TfpgX11Canvas(FCanvasTarget).DrawHandle
-  else
-    Result := FDrawHandle;
-  if FDrawHandle <> Result then
-  begin
-    FDrawHandle:=Result;
-    if Result <> 0 then
-      AllocateDC;
-  end;
 end;
 
 procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);
@@ -3580,6 +3178,7 @@ begin
   //  aCapStyle := CapButt;
   if awidth = 1 then
     awidth := 0;  // switch to hardware algorithm
+
   case AStyle of
     lsDot:
         begin
@@ -3616,26 +3215,34 @@ begin
   if Length(txt) < 1 then
     Exit; //==>
 
-  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x+FDeltaX,
-    y+FDeltaY + FCurFontRes.GetAscent, PChar(txt), Length(txt));
+  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x,
+    y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
-procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
+procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
+var
+  rw: TfpgWinHandle;
+  x: integer;
+  y: integer;
+  bw: longword;
+  d: longword;
 begin
-  FClipRectSet:=True;
-  DoSetClipRectInternal(ARect);
+  r.Left    := 0;
+  r.Top     := 0;
+  XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y,
+      @(r.width), @(r.height), @bw, @d);
 end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
-  XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
 end;
 
 procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
-  XFillRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
   XSetForeGround(xapplication.display, Fgc, 0);
   XSetFunction(xapplication.display, Fgc, GXcopy);
 end;
@@ -3644,10 +3251,11 @@ procedure TfpgX11Canvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of TXPoint;
 begin
-  pts[1].x := x1+FDeltaX;   pts[1].y := y1+FDeltaY;
-  pts[2].x := x2+FDeltaX;   pts[2].y := y2+FDeltaY;
-  pts[3].x := x3+FDeltaX;   pts[3].y := y3+FDeltaY;
-  XFillPolygon(xapplication.display, DrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
+  pts[1].x := x1;   pts[1].y := y1;
+  pts[2].x := x2;   pts[2].y := y2;
+  pts[3].x := x3;   pts[3].y := y3;
+
+  XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
 procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
@@ -3657,42 +3265,33 @@ begin
   if (w = 1) and (h = 1) then // a dot
     DoDrawLine(x, y, x+w, y+w)
   else
-    XDrawRectangle(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, w-1, h-1);
+    XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
 procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   // Same behavior as Windows. See documentation for reason.
-  XDrawLine(xapplication.display, DrawHandle, Fgc, x1+FDeltaX, y1+FDeltaY, x2+FDeltaX, y2+FDeltaY);
+  XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
 end;
 
-procedure TfpgX11Canvas.DoSetClipRectInternal(const ARect: TfpgRect);
+procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
-  TmpRect: TfpgRect;
 begin
-  FClipRect := ARect;
-
-  if FClipRectSet then
-  begin
-    TmpRect := FClipRect;
-    TmpRect.OffsetRect(FDeltaX, FDeltaY);
-    TmpRect.IntersectRect(TmpRect, GetWidgetWindowRect);
-  end
-  else
-    TmpRect := GetWidgetWindowRect;
-
-  r.x      := TmpRect.Left;
-  r.y      := TmpRect.Top;
-  r.Width  := TmpRect.Width;
-  r.Height := TmpRect.Height;
+  r.x      := ARect.Left;
+  r.y      := ARect.Top;
+  r.Width  := ARect.Width;
+  r.Height := ARect.Height;
 
   rg := XCreateRegion;
-  XUnionRectWithRegion(@r, rg, rg);
-  XSetRegion(xapplication.display, Fgc, rg);
-  XftDrawSetClip(FXftDraw, rg);
 
+  XUnionRectWithRegion(@r, rg, FClipRegion);
+  XSetRegion(xapplication.display, Fgc, FClipRegion);
+  XftDrawSetClip(FXftDraw, FClipRegion);
+
+  FClipRect    := ARect;
+  FClipRectSet := True;
   XDestroyRegion(rg);
 end;
 
@@ -3703,19 +3302,33 @@ end;
 
 procedure TfpgX11Canvas.DoAddClipRect(const ARect: TfpgRect);
 var
-  NewRect: TfpgRect;
+  r: TXRectangle;
+  rg: TRegion;
 begin
-  UnionRect(NewRect, FClipRect, ARect);
-  DoSetClipRect(NewRect);
+  r.x      := ARect.Left;
+  r.y      := ARect.Top;
+  r.Width  := ARect.Width;
+  r.Height := ARect.Height;
+
+  rg := XCreateRegion;
+  XUnionRectWithRegion(@r, rg, rg);
+  XIntersectRegion(FClipRegion, rg, FClipRegion);
+  XSetRegion(xapplication.display, Fgc, FClipRegion);
+
+  FClipRect    := ARect;    // Double check this, it might be wrong!!
+  FClipRectSet := True;
+
+  XftDrawSetClip(FXftDraw, FClipRegion);
+  XDestroyRegion(rg);
 end;
 
 procedure TfpgX11Canvas.DoClearClipRect;
 var
   r: TfpgRect;
 begin
+  DoGetWinRect(r);
+  DoSetClipRect(r);
   FClipRectSet := False;
-  r.SetRect(0,0,0,0);
-  DoSetClipRectInternal(r);
 end;
 
 procedure TfpgX11Canvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
@@ -3724,23 +3337,12 @@ var
   gc2: Tgc;
   drawgc: Tgc;
   GcValues: TXGcValues;
-  OriginalSize,
-  ClippedSize: TfpgRect;
-  SourcePos: TfpgPoint;
 begin
   if img = nil then
     Exit; //==>
+
   if img.Masked then
   begin
-    // calculate a clipmask since we will use a new gc with none set.
-    OriginalSize.SetRect(x,y,w,h);
-    OriginalSize.IntersectRect(ClippedSize, FClipRect);
-    SourcePos := fpgPoint(xi+(ClippedSize.Left-OriginalSize.Left), yi+(ClippedSize.Top-OriginalSize.Top));
-
-    // if the rect is empty (clipped out) then there is nothing to do
-    if ClippedSize.IsRectEmpty then
-      Exit; // ==>
-
     // rendering the mask
     msk := XCreatePixmap(xapplication.display, XDefaultRootWindow(xapplication.display), w, h, 1);
     GcValues.foreground := 1;
@@ -3754,21 +3356,17 @@ begin
     XSetForeground(xapplication.display, gc2, 1);
     XPutImage(xapplication.display, msk, gc2, TfpgX11Image(img).XImageMask, xi, yi, 0, 0, w, h);
 
-    drawgc := XCreateGc(xapplication.display, DrawHandle, 0, @GcValues);
+    drawgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     XSetClipMask(xapplication.display, drawgc, msk);
-    XSetClipOrigin(xapplication.display, drawgc, x+FDeltaX, y+FDeltaY);
+    XSetClipOrigin(xapplication.display, drawgc, x, y);
 
-
-    XPutImage(xapplication.display, DrawHandle, drawgc, TfpgX11Image(img).XImage,
-          SourcePos.X, SourcePos.Y,
-          ClippedSize.Left+FDeltaX, ClippedSize.Top+FDeltaY, ClippedSize.Width, ClippedSize.Height);
-
+    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgX11Image(img).XImage, xi, yi, x, y, w, h);
     XFreePixmap(xapplication.display, msk);
     XFreeGc(xapplication.display, drawgc);
     XFreeGc(xapplication.display, gc2);
   end
   else
-    XPutImage(xapplication.display, DrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x+FDeltaX, y+FDeltaY, w, h);
+    XPutImage(xapplication.display, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
 end;
 
 { TfpgX11Image }
@@ -3898,6 +3496,7 @@ begin
                     FClipboardWndHandle,
                     CurrentTime);
 
+  XSync(xapplication.Display, False);
 
   StartTime := fpgGetTickCount;
   // now wait for the manager to get the clipboard
@@ -4055,20 +3654,9 @@ end;
 
 { TfpgX11Drag }
 
-procedure TfpgX11Drag.DropTimeout(Sender: TObject);
-var
-  timer: TfpgTimer absolute Sender;
-begin
-  timer.Enabled:=False;
-  FDropAccepted:=False;
-  FResult:=daIgnore;
-  FFinished:=True;
-  timer.Free;
-end;
-
 procedure TfpgX11Drag.SetTypeListProperty;
 begin
-  XChangeProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle,
+  XChangeProperty(xapplication.Display, FSource.WinHandle,
       xapplication.XdndTypeList, XA_ATOM, 32,
       PropModeReplace, @FMimeTypesArray[0], Length(FMimeTypesArray));
 end;
@@ -4102,15 +3690,8 @@ end;
 procedure TfpgX11Drag.Dragging(ev: TXEvent);
 var
   lTarget: TWindow;
-  msg: TfpgMessageRec;
 begin
-  msg.MsgCode:=FPGM_MOUSEMOVE;
-  msg.Params.mouse.x := ev.xmotion.x_root;
-  msg.Params.mouse.y := ev.xmotion.y_root;
-
-  Dispatch(msg);
-
-  lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root, True);
+  lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root);
   if FLastTarget <> lTarget then
   begin
     if FLastTarget <> 0 then { meaning we had a target before }
@@ -4182,7 +3763,7 @@ begin
   xev.xclient.message_type := xapplication.XdndLeave;
   xev.xclient.format    := 32;
 
-  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
+  xev.xclient.data.l[0] := FSource.WinHandle;
   xev.xclient.data.l[1] := 0;
 
   xev.xclient.data.l[2] := 0;
@@ -4203,7 +3784,7 @@ begin
   xev.xclient.message_type := xapplication.XdndEnter;
   xev.xclient.format   := 32;
 
-  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
+  xev.xclient.data.l[0] := FSource.WinHandle;
 
   n := FMimeData.Count;
 
@@ -4245,7 +3826,7 @@ begin
   xev.xclient.message_type := xapplication.XdndPosition;
   xev.xclient.format   := 32;
 
-  xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;
+  xev.xclient.data.l[0] := FSource.WinHandle;
   xev.xclient.data.l[1] := 0;
 
   xev.xclient.data.l[2] := (x_root shl 16) or y_root;    // root coordinates
@@ -4258,7 +3839,6 @@ end;
 procedure TfpgX11Drag.SendDNDDrop;
 var
   xev: TXEvent;
-  timer: TfpgTimer;
 begin
   if FDropAccepted then
   begin
@@ -4270,7 +3850,7 @@ begin
     xev.xclient.message_type := xapplication.XdndDrop;
     xev.xclient.format  := 32;
 
-    xev.xclient.data.l[0] := TfpgX11Window(FSource.Window).WinHandle;    // from
+    xev.xclient.data.l[0] := FSource.WinHandle;    // from
     xev.xclient.data.l[1] := 0;                // reserved
     xev.xclient.data.l[2] := CurrentTime;       // timestamp
     xev.xclient.data.l[3] := 0;
@@ -4278,14 +3858,12 @@ begin
 
     XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
 
-    timer := TfpgTimer.Create(2000); // 2 seconds
-    timer.OnTimer:=@DropTimeout;
+    uDragSource := FSource as TfpgWidget;
   end
   else
   begin
     SendDNDLeave(FLastTarget);
-    QueueFree;
-    FFinished:=True;
+    uDragSource := nil;
   end;
   FSource.MouseCursor := mcDefault;
 end;
@@ -4312,12 +3890,6 @@ begin
   { TODO: If we waited to long, we have a timeout }
 end;
 
-procedure TfpgX11Drag.HandleDNDFinished(const ev: TXEvent);
-begin
-   FResult := xapplication.GetDropActionFromAtom(FAcceptedAction);
-   FFinished:=True;
-end;
-
 procedure TfpgX11Drag.HandleSelectionRequest(ev: TXEvent);
 var
   e: TXSelectionEvent;
@@ -4334,10 +3906,10 @@ begin
   s := XGetAtomName(xapplication.Display, e.target);
   if FMimeData.HasFormat(s) then
   begin
-    if s = MIME_TEXT_PLAIN then
+    if s = 'text/plain' then
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
         8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text))
-    else if s = MIME_TEXT_HTML then
+    else if s = 'text/html' then
     begin
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
         8, PropModeReplace, PByte(@FMimeData.HTML[1]), Length(FMimeData.HTML))
@@ -4356,9 +3928,9 @@ begin
   XSendEvent(xapplication.Display, e.requestor, false, NoEventMask, @e );
 end;
 
-procedure TfpgX11Drag.QueueFree;
+function TfpgX11Drag.GetSource: TfpgX11Window;
 begin
-  fpgPostMessage(Self, Self, FPGM_KILLME);
+  Result := FSource;
 end;
 
 destructor TfpgX11Drag.Destroy;
@@ -4366,13 +3938,9 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Drag.Destroy ');
   {$ENDIF}
-  if xapplication.FDrag = Self then
-    xapplication.FDrag := nil;
   FSource.MouseCursor := mcDefault;
-  // Andrew Haines (April 1st 2014): Why are we deleting this property?
-  // it was maybe harmless when each widget had a window
-  //XDeleteProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle, xapplication.XdndAware);
-  XDeleteProperty(xapplication.Display, TfpgX11Window(FSource.Window).WinHandle, xapplication.XdndTypeList);
+  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndAware);
+  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndTypeList);
   SetLength(FMimeTypesArray, 0);
   inherited Destroy;
 end;
@@ -4386,24 +3954,19 @@ begin
   else
   begin
     FDragging := True;
-    xia_plain_text := XInternAtom(xapplication.Display, MIME_TEXT_PLAIN, TBool(False));
+    xia_plain_text := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
     FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
     xapplication.Drag := self;
 
-    XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, TfpgX11Window(FSource.Window).WinHandle, CurrentTime);
+    XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
     win := XGetSelectionOwner(xapplication.Display, xapplication.XdndSelection);
-    if win <> TfpgX11Window(FSource.Window).WinHandle then
+    if win <> FSource.WinHandle then
       raise Exception.Create('fpGUI/X11: Application failed to aquire selection owner status');
 
     InitializeMimeTypesToAtoms;
     if FMimeData.Count > 3 then
       SetTypeListProperty;
   end;
-
-  While not FFinished do
-     TApplicationHelper(xApplication).WaitWindowMessage(200);
-
-  Result := FResult;
 end;
 
 { TfpgX11SystemTrayHandler }
@@ -4477,23 +4040,9 @@ begin
   Result := True;
 end;
 
-{$IFDEF GDEBUG}
-var
-  OldXErrorHandler: TXErrorHandler;
-
-function fpgXErrorHandler(Display: PDisplay; Error: PXErrorEvent):cint;cdecl;
-begin
-  Result := 0;
-  raise EfpgX11Exception.Create(Display, Error);
-end;
-{$ENDIF}
 
 initialization
   xapplication := nil;
-{$IFDEF GDEBUG}
-  OldXErrorHandler:=XSetErrorHandler(@fpgXErrorHandler);
-finalization
-  XSetErrorHandler(OldXErrorHandler);
-{$ENDIF}
 
 end.
+
