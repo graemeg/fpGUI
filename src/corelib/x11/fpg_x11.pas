@@ -2537,14 +2537,18 @@ begin
 
   if IsToplevel then // is a toplevel window
   begin
-    { setup a window icon }
-
-    IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
-      @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
-
     WMHints := XAllocWMHints;
-    WMHints^.icon_pixmap := IconPixmap;
-    WMHints^.flags := IconPixmapHint;
+
+    { setup a window icon }
+    if not fpgApplication.netlayer.ManagerSupportsAtom(naWM_ICON) then
+    begin
+      IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
+        @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
+
+      WMHints^.icon_pixmap := IconPixmap;
+      WMHints^.flags := IconPixmapHint;
+    end;
+
     { setup window grouping posibilities }
     if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
