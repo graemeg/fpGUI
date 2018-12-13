@@ -330,11 +330,14 @@ begin
             'stdimg.preview',
             @stdimg_preview,
       sizeof(stdimg_preview), 0,0);
-
   fpgImages.AddBMP(
             'stdimg.windowicon',
             @stdimg_windowicon_16,
       sizeof(stdimg_windowicon_16));
+  fpgImages.AddMaskedBMP(
+            'stdimg.fpguiicon',
+            @stdimg_fpguiicon,
+      sizeof(stdimg_fpguiicon), 0,0);
 
 {
   Here is a template for more images

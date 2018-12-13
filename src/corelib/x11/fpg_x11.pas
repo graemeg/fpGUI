@@ -46,9 +46,25 @@ const
   IconBitmapHeight = 16;
 
   IconBitmapBits: packed array[1..32] of Byte = (
-     $00, $00, $78, $07, $08, $09, $38, $09, $08, $07, $08, $01,
-     $08, $01, $00, $00, $00, $00, $98, $74, $a4, $24, $84, $24,
-     $b4, $24, $a4, $24, $18, $73, $00, $00);
+     $00, $00,
+     $78, $07,
+     $08, $09,
+     $38, $09,
+
+     $08, $07,
+     $08, $01,
+     $08, $01,
+     $00, $00,
+
+     $00, $00,
+     $98, $74,
+     $a4, $24,
+     $84, $24,
+
+     $b4, $24,
+     $a4, $24,
+     $18, $73,
+     $00, $00);
 
 type
 
@@ -228,6 +244,8 @@ type
   end;
 
 
+  { TfpgX11Window }
+
   TfpgX11Window = class(TfpgWindowBase)
   private
     QueueEnabledDrops: boolean;
@@ -235,6 +253,7 @@ type
     FSyncValue: TXSyncValue;
     FHasSyncValue: Boolean;
     procedure   ApplyFormIcon;
+    procedure   ApplyFormIconfromImage(AIcon: TfpgImageBase);
     procedure   DoWindowNetStateChanged;
   protected
     FWinFlags: TXWindowStateFlags;
@@ -2468,11 +2487,6 @@ end;
 procedure TfpgX11Window.ApplyFormIcon;
 var
   ico: TfpgImage;
-  ar1: array of longword; // 32 bit CPU's
-  ar2: array of qword;    // 64 bit CPU's
-  ps: pbyte;
-  pd: ^TRGBTriple;
-  i: integer;
   iconName: string;
 begin
     if PrimaryWidget.InheritsFrom(TfpgForm) then
@@ -2481,16 +2495,78 @@ begin
       Exit;
     ico := fpgImages.GetImage(iconName);
     if Assigned(ico) then
+      ApplyFormIconfromImage(ico);
+end;
+
+procedure TfpgX11Window.ApplyFormIconfromImage(AIcon: TfpgImageBase);
+var
+  ar1: array of longword; // 32 bit CPU's
+  ar2: array of qword;    // 64 bit CPU's
+  ps: pbyte;
+  pd: ^TRGBTriple;
+  i: integer;
+  mask: byte;
+  maskdata: Pbyte;
+  maskp: Pbyte;
+  masked: Boolean;
+  pixel, j, k, msklinelen: integer;
+begin
+    if not Assigned(AIcon) then
     begin
-      SetLength(ar1, 2 + (ico.Width * ico.Height));
-      ar1[0] := ico.Width;
-      ar1[1] := ico.Height;
-      pd := @ar1[2];
-      ps := ico.ImageData;
-      move(ps^,pd^, ico.ImageDataSize);
+      // remove the icon property
+      XDeleteProperty(xapplication.Display, FWinHandle, xapplication.xia_net_wm_icon);
+      Exit;
     end
     else
-      exit; // we don't have a icon to set
+    begin
+      AIcon.CreateMaskFromSample(0,0);
+      SetLength(ar1, 2 + (AIcon.Width * AIcon.Height));
+      ar1[0] := AIcon.Width;
+      ar1[1] := AIcon.Height;
+      pd := @ar1[2];
+      ps := AIcon.ImageData;
+      move(ps^,pd^, AIcon.ImageDataSize);
+    end;
+
+    msklinelen := AIcon.Width div 32;
+    if (AIcon.Width and $1F) > 0 then
+      Inc(msklinelen);
+
+    msklinelen := msklinelen shl 2;
+
+    WriteLn(AIcon.MaskDataSize);
+    maskdata:=AIcon.MaskData;
+    pixel := 0;
+    for i := 0 to AIcon.Height-1 do
+    begin
+      maskp := @maskdata[i*msklinelen];
+      j := 0;
+      while j < AIcon.Width do
+      begin
+        mask := maskp^;
+        for k := 0 to 7 do
+        begin
+          if mask and $80 = $80 then
+            pd[pixel].Alpha:=$FF
+          else
+            pd[pixel].Alpha:=$00;
+          Inc(pixel);
+          //if pixel mod 16 = 0 then Inc(pixel, 16);
+          mask := mask shl 1;
+          Inc(j);
+        end;
+        inc(maskp);
+      end;
+
+
+
+      {if i mod 2 = 0 then
+        masked := maskdata[i] and $F0 <> 0
+      else
+        masked := maskdata[i] and $0F <> 0;
+
+      pd[(i*2) + i mod 2].Alpha := ord(masked) * $FF;}
+    end;
 
     {$ifdef cpu64}
     setlength(ar2,length(ar1));
@@ -2514,6 +2590,7 @@ var
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
   IsToplevel: Boolean;
+  ico: TfpgImage;
 begin
   if HandleIsValid then
     Exit; //==>
@@ -2579,6 +2656,14 @@ begin
 
       WMHints^.icon_pixmap := IconPixmap;
       WMHints^.flags := IconPixmapHint;
+    end
+    else
+    begin
+      //ico := TfpgImage.Create;
+      //ico.DoInitImage(1,16,16, @IconBitmapBits);
+      //ApplyFormIconfromImage(ico);
+      //ico.Free;
+      ApplyFormIconfromImage(fpgImages.GetImage('stdimg.fpguiicon'));
     end;
 
     { New style - uses TfpgForm.IconName to set the window icon. We use both

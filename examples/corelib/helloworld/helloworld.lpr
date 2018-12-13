@@ -68,9 +68,14 @@ begin
 end;
 
 procedure TMainWindow.Show;
+var
+  l: TStringList;
 begin
   HandleShow;
   WindowTitle := 'fpGUI Hello World';
+  l := TStringList.Create;
+  fpgImages.ListImages(l)  ;
+  WriteLn(l.Text);
 end;
 
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
