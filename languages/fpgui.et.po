@@ -1,6 +1,6 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
-# 玉堂白鹤 <yjwork@qq.com>, 2018
+# Rivo Zängov <eraser@eraser.ee>, 2018
 # 
 msgid ""
 msgstr ""
@@ -8,113 +8,113 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
-"Last-Translator: 玉堂白鹤 <yjwork@qq.com>, 2018\n"
-"Language-Team: Chinese (China) (https://www.transifex.com/Magic/teams/44238/zh_CN/)\n"
+"Last-Translator: Rivo Zängov <eraser@eraser.ee>, 2018\n"
+"Language-Team: Estonian (https://www.transifex.com/Magic/teams/44238/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: et\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> 未分配"
+msgstr "<%s> pole määratud"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "已检测到新项目。"
+msgstr "Tuvastati uus kirje."
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr "退出"
+msgstr "Katkesta"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr "关于%s"
+msgstr ""
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr "添加当前目录"
+msgstr "Lisa praegune kaust"
 
 #: fpg_constants:rsall
 msgid "All"
-msgstr "全部"
+msgstr "Kõik"
 
 #: fpg_constants:rsallfiles
 msgid "All Files"
-msgstr "所有文件"
+msgstr "Kõik failid"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr "所有字体"
+msgstr "Kõik fondid"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
-msgstr "Alt+"
+msgstr ""
 
 #: fpg_constants:rserrunexpected
 msgid "An unexpected error occurred."
-msgstr "发生了意外错误。"
+msgstr ""
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "抗锯齿"
+msgstr ""
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr "四月"
+msgstr "Apr"
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr "四月"
+msgstr "Aprill"
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Omadused"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr "八月"
+msgstr "Aug"
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr "八月"
+msgstr "August"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr "BkSp"
+msgstr ""
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr "蓝色"
+msgstr "Sinine"
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr "粗体"
+msgstr "Rasvane"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr "书签"
+msgstr "Järjehoidjad"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
-msgstr "取消"
+msgstr "Loobu"
 
 #: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr "无法创建目录"
+msgstr "Kausta ei saa luua"
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr "更改"
+msgstr "Muuda"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr "更改标题"
+msgstr "Muuda pealkirja"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr "字符映射"
+msgstr ""
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
@@ -122,51 +122,51 @@ msgstr ""
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr "关闭"
+msgstr "Sulge"
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr ""
+msgstr "Kogu"
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr "色轮"
+msgstr "Värviratas"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "配置书签"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr "确认"
+msgstr "Kinnita"
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr "确认"
+msgstr "Kinnitus"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
-msgstr "连续"
+msgstr "Jätkuv"
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr "复制"
+msgstr "Kopeeri"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "无法打开目录 <%s>"
+msgstr ""
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr "创建"
+msgstr "Loo"
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr "创建目录"
+msgstr "Loo kaust"
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
-msgstr "关键错误"
+msgstr "Kriitiline viga"
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
@@ -174,39 +174,39 @@ msgstr "Ctrl+"
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr "剪切"
+msgstr "Lõika"
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr "数据库"
+msgstr "Andmebaas"
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr "十二月"
+msgstr "Dets"
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr "十二月"
+msgstr "Detsember"
 
 #: fpg_constants:rskeydel
 msgid "Del"
-msgstr "Del"
+msgstr "Kustuta"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr "删除"
+msgstr "Kustuta"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr "目录"
+msgstr "Kaustad"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr "目录"
+msgstr "Kaust"
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr "Down"
+msgstr "All"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -214,7 +214,7 @@ msgstr ""
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "编辑"
+msgstr "Muuda"
 
 #: fpg_constants:rskeyend
 msgid "End"
@@ -222,19 +222,19 @@ msgstr "End"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr ""
+msgstr "Inglise"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
-msgstr "Enter"
+msgstr "Sisestusklahv"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr "输入新目录名称"
+msgstr "Sisesta uus kausta nimi"
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr "错误"
+msgstr "Viga"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
@@ -242,111 +242,111 @@ msgstr "Esc"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr "示例文本"
+msgstr "Näidistekst"
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "退出"
+msgstr "Välju"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "无法创建目录 <%s>"
+msgstr ""
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "无法找到帮助查看器。"
+msgstr ""
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "假"
+msgstr ""
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr "收藏"
+msgstr "Lemmikud"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr "二月"
+msgstr "Veebr"
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr "二月"
+msgstr "Veebruar"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "选择文件"
+msgstr "Faili valimine"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr "文件名"
+msgstr "Failinimi"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr "文件"
+msgstr "Failid"
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr "查找"
+msgstr "Otsi"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr "固定宽度"
+msgstr "Fikseeritud laius"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "字体别名"
+msgstr ""
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "字体文件 <%s.fnt> 未被发现"
+msgstr ""
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr "周五"
+msgstr "Reede"
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr "星期五"
+msgstr "Reede"
 
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
-msgstr "转到父目录"
+msgstr "Mine ülemisse kausta"
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Got to home directory"
-msgstr "转到主目录"
+msgstr "Mine kodukausta"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr "绿色"
+msgstr "Roheline"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr ""
+msgstr "Grupeeri"
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr "帮助"
+msgstr "Abiinfo"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
-msgstr "十六进制"
+msgstr ""
 
 #: fpg_constants:rskeyhome
 msgid "Home"
-msgstr ""
+msgstr "Avaleht"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr "忽略"
+msgstr "Ignoreeri"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "图像 <%s> 缺失"
+msgstr ""
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr "信息"
+msgstr "Info"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
@@ -354,19 +354,19 @@ msgstr "Ins"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr "插入"
+msgstr "Sisesta"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr "从字符映射表插入"
+msgstr ""
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: %s"
-msgstr ""
+msgstr "Vigane valik kohas %d: %s"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr "斜体"
+msgstr "Kaldkiri"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
@@ -374,51 +374,51 @@ msgstr ""
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr "一月"
+msgstr "Jan"
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr "一月"
+msgstr "Jaanuar"
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr "七月"
+msgstr "Juul"
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr "七月"
+msgstr "Juuli"
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr "六月"
+msgstr "Juun"
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr "六月"
+msgstr "Juuni"
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr "Left"
+msgstr "Vasakul"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr "列表必须为空"
+msgstr "Nimekiri peab olema tühi"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr "三月"
+msgstr "Märts"
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr "三月"
+msgstr "Märts"
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr "五月 "
+msgstr ""
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr "信息"
+msgstr "Sõnum"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
@@ -430,59 +430,59 @@ msgstr ""
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr "周一"
+msgstr "Esmasp"
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr "星期一"
+msgstr "Esmaspäev"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr "下移"
+msgstr "Liiguta alla"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr "上移"
+msgstr "Liiguta üles"
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr "名称:"
+msgstr "Nimi"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr "否"
+msgstr ""
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
-msgstr "全部选否"
+msgstr "MItte kõigile"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr "十一月"
+msgstr "Nov"
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr "十一月"
+msgstr "November"
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr "好"
+msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr "十月"
+msgstr "Okt"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr "十月"
+msgstr "Oktoober"
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr "打开"
+msgstr "Ava"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr "打开一个文件"
+msgstr "Ava fail"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
@@ -494,27 +494,27 @@ msgstr ""
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr "所有者"
+msgstr "Omanik"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr "PDF文档"
+msgstr "PDf dokumendid"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Lehekülg"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr "密码"
+msgstr "Parool"
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr "粘贴"
+msgstr "Aseta"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
-msgstr "PgDn"
+msgstr ""
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
@@ -522,35 +522,35 @@ msgstr "PgUp"
 
 #: fpg_constants:rstabpredefined
 msgid "Predefined"
-msgstr "预定义"
+msgstr "Eelmääratud"
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr "预览"
+msgstr "Eelvaade"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr "最近使用过"
+msgstr "Hiljuti kasutatud"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr "红色"
+msgstr "Punane"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr "替换"
+msgstr "Asenda"
 
 #: fpg_constants:rsretry
 msgid "Retry"
-msgstr "重试"
+msgstr "Proovi uuesti"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr "Right"
+msgstr "Paremal"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr ""
+msgstr "Õigused"
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
@@ -558,51 +558,51 @@ msgstr "Sans"
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr "周六"
+msgstr "Laup"
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr "星期六"
+msgstr "Laupäev"
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr "保存"
+msgstr "Salvesta"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr "将文件另存为"
+msgstr "Salvesta fail kui"
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "搜索"
+msgstr "Otsi"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Sektsioon"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "选择"
+msgstr "Vali"
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr "全选"
+msgstr "Vali kõik"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
-msgstr "选择一个目录"
+msgstr "Vali kaust"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "选择一种字体"
+msgstr "Vali font"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr "九月"
+msgstr ""
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr "九月"
+msgstr "September"
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
@@ -614,27 +614,27 @@ msgstr "Shift+"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr "显示隐藏文件"
+msgstr "Näita peidetud faile"
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr "大小 "
+msgstr "Suurus"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr "Space"
+msgstr "Tühik"
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr "样式"
+msgstr "Stiil"
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
-msgstr "周日"
+msgstr "Pühap"
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
-msgstr "星期日"
+msgstr "Pühapäev"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
@@ -642,79 +642,79 @@ msgstr "Tab"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr "要插入的文本"
+msgstr ""
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr "没有要打印的页面"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr "周四"
+msgstr "Neljap"
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr "星期四"
+msgstr "Neljapäev"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "今天"
+msgstr "Täna"
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr "真"
+msgstr "Tõene"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr "周二"
+msgstr "Teisip"
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr "星期二"
+msgstr "Teisipäev"
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr "文件类型"
+msgstr ""
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
-msgstr "字体"
+msgstr ""
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr "下划线"
+msgstr "Alakriips"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr "Up"
+msgstr "Üles"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "用户名"
+msgstr "Kasutaja nimi"
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr "警告"
+msgstr "Hoiatus"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr "周三"
+msgstr "Kolmap"
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr "星期三"
+msgstr "Kolmapäev"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "是否要将新项目<%s>添加到列表中？"
+msgstr ""
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr "是"
+msgstr "Jah"
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
-msgstr "全部选是"
+msgstr "Jah kõigile"
 
 #: fpg_constants:rsreportpageof
 msgid "of"

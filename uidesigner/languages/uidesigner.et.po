@@ -1,0 +1,410 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Rivo Zängov <eraser@eraser.ee>, 2018
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: UIDesigner\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-11-21 15:34+0300\n"
+"PO-Revision-Date: 2018-11-21 02:25+0000\n"
+"Last-Translator: Rivo Zängov <eraser@eraser.ee>, 2018\n"
+"Language-Team: Estonian (https://www.transifex.com/Magic/teams/44238/et/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: et\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: vfd_constants:rsopenformfile
+msgid "Open form file"
+msgstr "Ava vormi fail"
+
+#: vfd_constants:rspascalsourcefiles
+msgid "Pascal source files"
+msgstr ""
+
+#: vfd_constants:rssaveformfile
+msgid "Save form source"
+msgstr "Salvesta lähtekoodist"
+
+#: vfd_constants:rsversion
+msgid "Version: %s"
+msgstr "Versioon: %s"
+
+#: vfd_constants:rswrittenby
+msgid "Written by %s"
+msgstr ""
+
+#: vfd_constants:rscompiledon
+msgid "Compiled on: %s"
+msgstr ""
+
+#: vfd_constants:rsnewunnamedform
+msgid "new"
+msgstr "uus"
+
+#: vfd_constants:rsdesignerhelp1
+msgid "F11: switch to Properties"
+msgstr ""
+
+#: vfd_constants:rsdesignerhelp2
+msgid "TAB, SHIFT+TAB: select next widget"
+msgstr ""
+
+#: vfd_constants:rsdesignerhelp3
+msgid "F2: edit widget order"
+msgstr "F2: muuda vidinate järjekorda"
+
+#: vfd_constants:rsdesignerquickhelp
+msgid "Quick Help"
+msgstr "Kiire abiinfo"
+
+#: vfd_constants:rsleft
+msgid "Left"
+msgstr "Vasakul"
+
+#: vfd_constants:rstop
+msgid "Top"
+msgstr "Üleval"
+
+#: vfd_constants:rswidth
+msgid "Width"
+msgstr "Laius"
+
+#: vfd_constants:rsheight
+msgid "Height"
+msgstr "Kõrgus"
+
+#: vfd_constants:rsnewclassname
+msgid "Class name"
+msgstr "Klassi nimi"
+
+#: vfd_constants:rsnewformname
+msgid "Form name"
+msgstr "Vormi nimi"
+
+#: vfd_constants:rsposition
+msgid "Position"
+msgstr "Asukoht"
+
+#: vfd_constants:rsformtitle
+msgid "Form %s"
+msgstr ""
+
+#: vfd_constants:rsup
+msgid "Up"
+msgstr ""
+
+#: vfd_constants:rsdown
+msgid "Down"
+msgstr "All"
+
+#: vfd_constants:rsgridresolution
+msgid "Grid resolution"
+msgstr "Võrgustiku resolutsioon"
+
+#: vfd_constants:rsrecentfilescount
+msgid "Recent files count"
+msgstr ""
+
+#: vfd_constants:rsshowfullpathname
+msgid "Show the full file path"
+msgstr ""
+
+#: vfd_constants:rsformdesigner
+msgid "Form designer"
+msgstr "Vormi looja"
+
+#: vfd_constants:rsopenrecentsettings
+msgid "Open Recent menu settings"
+msgstr ""
+
+#: vfd_constants:rsvarious
+msgid "Various"
+msgstr "Erinevad"
+
+#: vfd_constants:rsundoonpropertyexit
+msgid "Undo on property editor exit"
+msgstr ""
+
+#: vfd_constants:rsoneclickselectandmove
+msgid "One click select and move"
+msgstr "Ühe klikiga valimine ja liigutamine"
+
+#: vfd_constants:rsdefaultfileext
+msgid "Default file extension"
+msgstr "Vaikimisi faililaiend"
+
+#: vfd_constants:rsusecoderegions
+msgid "Use code-folding regions in auto-generated code"
+msgstr ""
+
+#: vfd_constants:rsindenttype
+msgid "Indent Type for generated code"
+msgstr ""
+
+#: vfd_constants:rsdlgproductinfo
+msgid "Product Information"
+msgstr "Toote info"
+
+#: vfd_constants:rsdlgsetup
+msgid "General Settings"
+msgstr "Üldised seaded"
+
+#: vfd_constants:rsdlginsertcustomwidget
+msgid "Insert Custom Widget"
+msgstr "Sisesta kohandatud vidin"
+
+#: vfd_constants:rsdlgnewform
+msgid "New Form"
+msgstr "Uus vorm"
+
+#: vfd_constants:rsdlgeditformposition
+msgid "Form Position"
+msgstr "Vormi asukoht"
+
+#: vfd_constants:rsdlgwidgetorder
+msgid "Widget Order"
+msgstr "Vidinate järjekord"
+
+#: vfd_constants:rsdlgtaborder
+msgid "Tab Order"
+msgstr "Vahekaartide järjekord"
+
+#: vfd_constants:rserrunitnotfound
+msgid "The unit <%s> was not found"
+msgstr ""
+
+#: vfd_constants:rserrloadingform
+msgid "Error loading form"
+msgstr "Viga vormi laadimisel"
+
+#: vfd_constants:rserrfailedtofinddesignerform
+msgid "Failed to find Designer Form"
+msgstr ""
+
+#: vfd_constants:rserrformsaveioerror
+msgid "Form save I/O failure in <%s>"
+msgstr ""
+
+#: vfd_constants:rserrnameconflict
+msgid "Name Conflict"
+msgstr "Nime konflikt"
+
+#: vfd_constants:rserrnostringsproperty
+msgid "Failed to find TStrings type property"
+msgstr ""
+
+#: vfd_constants:rserrfailedtoparseboolean
+msgid "Failed to parse Boolean value <%s>"
+msgstr ""
+
+#: vfd_constants:rsclass
+msgid "Class"
+msgstr "Klass"
+
+#: vfd_constants:rsname
+msgid "Name"
+msgstr "Nimi"
+
+#: vfd_constants:rsproperties
+msgid "Properties"
+msgstr "Omadused"
+
+#: vfd_constants:rsanchors
+msgid "Anchors"
+msgstr "Ankrud"
+
+#: vfd_constants:rsunknownlines
+msgid "Unknown lines"
+msgstr "Tundmatud read"
+
+#: vfd_constants:rsfile
+msgid "&File"
+msgstr "&Fail"
+
+#: vfd_constants:rssettings
+msgid "&Settings"
+msgstr "&Seaded"
+
+#: vfd_constants:rsform
+msgid "Fo&rm"
+msgstr "Vo&rm"
+
+#: vfd_constants:rspreview
+msgid "&Preview"
+msgstr "&Eelvaade"
+
+#: vfd_constants:rshelp
+msgid "&Help"
+msgstr "&Abiinfo"
+
+#: vfd_constants:rscreatenewfile
+msgid "Create New File"
+msgstr "Loo uus fail"
+
+#: vfd_constants:rsopen
+msgid "Open"
+msgstr "Ava"
+
+#: vfd_constants:rsopenrecent
+msgid "Open Recent"
+msgstr "Ava hiljutine"
+
+#: vfd_constants:rssave
+msgid "Save"
+msgstr "Salvesta"
+
+#: vfd_constants:rssaveasnewtemplateunit
+msgid "Save As New Template Unit"
+msgstr ""
+
+#: vfd_constants:rsaddnewformtounit
+msgid "Add New Form to Unit"
+msgstr ""
+
+#: vfd_constants:rsexit
+msgid "Exit"
+msgstr "Välju"
+
+#: vfd_constants:rsgeneraloptions
+msgid "General options"
+msgstr "Üldised valikud"
+
+#: vfd_constants:rseditspecial
+msgid "Edit special"
+msgstr ""
+
+#: vfd_constants:rsaboutfpguitoolkit
+msgid "About fpGUI Toolkit"
+msgstr ""
+
+#: vfd_constants:rssavecurrentformdesign
+msgid "Save the current form design"
+msgstr "Salvesta praegune vormi kujundus"
+
+#: vfd_constants:rsclose
+msgid "Close"
+msgstr "Sulge"
+
+#: vfd_constants:rscancel
+msgid "Cancel"
+msgstr "Loobu"
+
+#: vfd_constants:rsok
+msgid "OK"
+msgstr "OK"
+
+#: vfd_constants:rsappliestonewformdialogsonly
+msgid "Applies to new form/dialogs only"
+msgstr ""
+
+#: vfd_constants:rsspacecharacters
+msgid "Space characters"
+msgstr ""
+
+#: vfd_constants:rstabcharacters
+msgid "Tab characters"
+msgstr ""
+
+#: vfd_constants:rsitems
+msgid "Items"
+msgstr "Kirjed"
+
+#: vfd_constants:rsclear
+msgid "Clear"
+msgstr "Tühjenda"
+
+#: vfd_constants:rspos
+msgid "Pos"
+msgstr ""
+
+#: vfd_constants:rsformnameexists
+msgid "The form name already exists in the current unit, please try again"
+msgstr ""
+
+#: vfd_constants:rscolumneditor
+msgid "Column editor"
+msgstr "Veergude muutmine"
+
+#: vfd_constants:rsstringgridcolumns
+msgid "String Grid columns"
+msgstr ""
+
+#: vfd_constants:rscolumn
+msgid "Column"
+msgstr "Veerg"
+
+#: vfd_constants:rstitle
+msgid "Title"
+msgstr "Pealkiri"
+
+#: vfd_constants:rscolumnwidth
+msgid "Column width"
+msgstr "Veeru laius"
+
+#: vfd_constants:rsalignment
+msgid "Alignment"
+msgstr "Joondus"
+
+#: vfd_constants:rsright
+msgid "Right"
+msgstr "Paremal"
+
+#: vfd_constants:rscenter
+msgid "Center"
+msgstr "Keskel"
+
+#: vfd_constants:rsnew
+msgid "New"
+msgstr "Uus"
+
+#: vfd_constants:rsdelete
+msgid "Delete"
+msgstr "Kustuta"
+
+#: vfd_constants:rsupuppercase
+msgid "UP"
+msgstr "ÜLEVAL"
+
+#: vfd_constants:rsdownuppercase
+msgid "DOWN"
+msgstr "ALL"
+
+#: vfd_constants:rscol
+msgid "Col."
+msgstr "Veerg"
+
+#: vfd_constants:rsalign
+msgid "Align"
+msgstr "Joondus"
+
+#: vfd_constants:rsaddtab
+msgid "Add Tab"
+msgstr "Lisa vahekaart"
+
+#: vfd_constants:rsdeletetab
+msgid "Delete Tab"
+msgstr "Kustuta vahekaart"
+
+#: vfd_constants:rstoggledesignergrid
+msgid "Toggle designer grid"
+msgstr ""
+
+#: vfd_constants:rsclassuppercase
+msgid "CLASS"
+msgstr "KLASS"
+
+#: vfd_constants:rsnameuppercase
+msgid "NAME"
+msgstr "NIMI"
+
+#: vfd_constants:rserrorsregisteringwidget
+msgid "Errors Registering Widget"
+msgstr ""
