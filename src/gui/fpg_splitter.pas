@@ -66,7 +66,6 @@ type
     Procedure   DrawGrabBar(ARect: TfpgRect); virtual;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
   published
     property    Align;
     property    AutoSnap: boolean read FAutoSnap write FAutoSnap default True;
@@ -498,11 +497,6 @@ begin
   FOldSize := -1;
   FMouseOver := False;
   FColorGrabBar := clSplitterGrabBar;
-end;
-
-destructor TfpgSplitter.Destroy;
-begin
-  inherited Destroy;
 end;
 
 end.
