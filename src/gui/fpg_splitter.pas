@@ -220,7 +220,9 @@ begin
 
   FControl := FindControl;
   FDownPos := Point(X, Y);
-  
+
+  { Not the best way, but here we calculate the FMaxSize value, which is the maximum
+    size that the splitter can move (opposite direction of the snap control). }
   if Assigned(FControl) then
   begin
     if Align in [alLeft, alRight] then
@@ -230,7 +232,7 @@ begin
       begin
         wg := TfpgWidget(Parent.Components[i]);
         if wg.Visible and (wg.Align in [alLeft, alRight]) then
-          Dec(FMaxSize, Width);
+          Dec(FMaxSize, wg.Width);
       end;
       Inc(FMaxSize, FControl.Width);
     end
@@ -241,7 +243,7 @@ begin
       begin
         wg := TfpgWidget(Parent.Components[i]);
         if (wg.Align in [alTop, alBottom]) then
-          Dec(FMaxSize, Height);
+          Dec(FMaxSize, wg.Height);
       end;
       Inc(FMaxSize, FControl.Height);
     end;
