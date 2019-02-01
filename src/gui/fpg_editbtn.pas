@@ -562,7 +562,8 @@ var
   f: TfpgString;
   prev: TfpgString;
 begin
-  f := FontDesc;
+  prev := FontDesc;
+  f := prev;
   if SelectFontDialog(f) then
     FontDesc := f;
   inherited InternalButtonClick(Sender);
