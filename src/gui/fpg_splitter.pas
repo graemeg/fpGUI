@@ -26,7 +26,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget;
-  
+
 
 type
   NaturalNumber = 1..High(Integer);
@@ -159,7 +159,8 @@ begin
           Dec(r.Top)
         else
           Inc(r.Height);
-      if PtInRect(r, p) then Exit;
+      if r.PointInRect(p) then
+        Exit;
     end;
   end;
   Result := nil;
@@ -220,7 +221,7 @@ begin
 
   FControl := FindControl;
   FDownPos := Point(X, Y);
-  
+
   if Assigned(FControl) then
   begin
     if Align in [alLeft, alRight] then
@@ -403,7 +404,7 @@ begin
   if FMouseOver then
   begin
     lFillRect := ARect;
-    InflateRect(lFillRect, -1, -1);
+    lFillRect.InflateRect(-1, -1);
     Canvas.Color := FColorGrabBar;
     Canvas.FillRectangle(lFillRect);
   end;

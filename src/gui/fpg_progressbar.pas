@@ -26,7 +26,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget;
-  
+
 type
   TfpgCustomProgressBar = class(TfpgWidget)
   private
@@ -55,8 +55,8 @@ type
     procedure   StepBy(AStep: integer);
     property    Font: TfpgFont read FFont;
   end;
-  
-  
+
+
   TfpgProgressBar = class(TfpgCustomProgressBar)
   published
     property    Align;
@@ -157,7 +157,7 @@ begin
   inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
-  
+
   Canvas.Clear(BackgroundColor);
 //  Canvas.SetColor(clInactiveWgFrame);
 
@@ -172,7 +172,7 @@ begin
   Canvas.SetColor(TfpgColor($999999));
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawRectangle(r);
-  InflateRect(r, -1, -1);
+  r.InflateRect(-1, -1);
   r.Width := pos;
   if FPosition > 0 then
   begin
@@ -185,7 +185,7 @@ begin
     Canvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
     Canvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom);   // bottom
     // inside gradient fill
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
     Canvas.GradientFill(r, TfpgColor($425d9b), TfpgColor($97b0e8), gdVertical);
   end;
   // paint percentage if required
