@@ -40,7 +40,8 @@ resourcestring
 {.$DEFINE de}     // German
 {.$DEFINE ru}     // Russian
 {.$DEFINE fr}     // French
-{.$DEFINE pt}     // Portuguese (Brazil)
+{.$DEFINE pt}     // Portuguese (Portugal)
+{.$DEFINE pt_BR}  // Portuguese (Brazil)
 {.$DEFINE af}     // Afrikaans
 {.$DEFINE it}     // Italian
 {.$DEFINE es}     // Spanish
@@ -64,7 +65,10 @@ resourcestring
   
 {$ELSEIF defined(pt)}
   {$I lang_pt.inc}
-  
+
+{$ELSEIF defined(pt_BR)}
+  {$I lang_pt_BR.inc}
+
 {$ELSEIF defined(af)}
   {$I lang_af.inc}
 
