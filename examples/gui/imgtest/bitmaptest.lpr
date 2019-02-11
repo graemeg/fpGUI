@@ -39,7 +39,7 @@ begin
     // populate the bitmap with pretty colors :-)
     for j := 0 to 255 do
       for i := 0 to 255 do
-        PLongWord(img.ImageData)[j * 256 + i] := (i shl 16) or (j shl 8);
+        PLongWord(img.ImageData)[j * 256 + i] := (255 shl 24) or (i shl 16) or (j shl 8);
     img.UpdateImage; // now only do we allocate OS resources
   end;
   Canvas.DrawImage(0, 0, img);
