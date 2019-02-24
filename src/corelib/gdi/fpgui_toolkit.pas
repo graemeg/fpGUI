@@ -4,6 +4,7 @@
 
 unit fpgui_toolkit;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -23,7 +24,7 @@ uses
   fpg_style_bitmap, fpg_readonly, fpg_imgfmt_png, U_Command, U_Pdf, U_Report,
   U_ReportImages, U_Visu, fpg_trayicon, fpg_dbugintf, fpg_dbugmsg,
   fpg_style_carbon, fpg_style_plastic, fpg_style_win8, fpg_scrollframe, fpg_toggle,
-  fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_hexview;
+  fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_hexview, SynRegExpr;
 
 implementation
 

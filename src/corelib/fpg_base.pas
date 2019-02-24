@@ -982,7 +982,8 @@ uses
   typinfo,
   process,
   dateutils,
-  math;
+  math,
+  synregexpr;
 
 
 const
@@ -3766,43 +3767,30 @@ begin
 end;
 
 // Helper functions for TFileEntry and TfpgFileListBase
-
 function StringMatches(const astr, apat: string): boolean;
 var
   pati, si: longint;
+  lRegex: TRegExpr;
+  s: string;
 begin
-  result := True;
-  pati := 1;
-  si := 1;
-  while result and (si <= length(astr)) and (pati <= length(apat)) do
-  begin
-    if (apat[pati] = '?') or (apat[pati] = astr[si]) then
-    begin
-      inc(si);
-      inc(pati);
-    end
-    else if (apat[pati] = '*') then
-    begin
-      while (pati <= length(apat)) and (apat[pati] in ['?','*']) do
-        inc(pati);
-      if pati > length(apat) then
-      begin
-        si := length(astr)+1;
-        Break;   // * at the end
-      end;
+  lRegex := TRegExpr.Create;
+  try
+    lRegex.ModifierI := True;
 
-      while (si <= length(astr)) and (astr[si] <> apat[pati]) do
-        inc(si);
-      if si > length(astr) then
-        result := False;
-    end
-    else
-    begin
-      result := False;
-    end;
+    // replace single '?' with a regex equivalent
+    s := StringReplace(apat, '?', '[a-zA-Z0-9_\-]', [rfReplaceAll]);
+    // replace literal '.' with an escaped regex version
+    s := StringReplace(s, '.', '\.', [rfReplaceAll]);
+    // replace single '*' with a regex equivalent
+    s := StringReplace(s, '*', '.+', [rfReplaceAll]);
+    // tell regex that expression must match from begining of line to end of line
+    s := '^' + s + '$';
+
+    lRegex.Expression := s;
+    result := lRegex.Exec(astr);
+  finally
+    lRegex.Free;
   end;
-
-  result := result and (si > length(astr));
 end;
 
 // multiple patterns separated with ;
@@ -3811,9 +3799,7 @@ var
   cpat: string;
   p: integer;
   s: string;
-  astrupper: string;
 begin
-  astrupper := UpperCase(astr);
   result := False;
   s := apats;
   repeat
@@ -3829,9 +3815,9 @@ begin
       cpat := s;
       s := '';
     end;  { if/else }
-    cpat := UpperCase(trim(cpat));
+    cpat := trim(cpat);
     if cpat <> '' then
-      result := StringMatches(astrupper, cpat);
+      result := StringMatches(astr, cpat);
   until result or (cpat = '');
 end;
 
