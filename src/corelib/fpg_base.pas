@@ -2271,7 +2271,7 @@ begin
       continue;
     if Assigned(w) and w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible and not w.IsHidden then
     begin
-      if PtInRect(w.WidgetBoundsInWindow, Point(AX, AY)) then
+      if w.WidgetBoundsInWindow.PointInRect(Point(AX, AY)) then
       begin
         Result := (FindWidgetForMouseEvent(w, AX, AY));
         break;
@@ -2876,6 +2876,8 @@ begin
 end;
 
 procedure TfpgCanvasBase.BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer);
+var
+  r: TfpgRect;
 begin
   if FBeginDrawCount < 1 then
   begin
@@ -2903,7 +2905,10 @@ begin
     if GetClipRect.IsUnassigned then
       ClearClipRect//SetClipRect(FWidget.GetClientRect)
     else
-      SetClipRect(fpgRect(0,0, FWidget.Width, FWidget.Height));
+    begin
+      r.SetRect(0,0, FWidget.Width, FWidget.Height);
+      SetClipRect(r);
+    end;
 
     SetColor(clText1);
     SetTextColor(clText1);
