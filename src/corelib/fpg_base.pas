@@ -3782,12 +3782,12 @@ begin
   try
     lRegex.ModifierI := True;
 
-    // replace single '?' with a regex equivalent
-    s := StringReplace(apat, '?', '[a-zA-Z0-9_\-]', [rfReplaceAll]);
+    // replace single '?' with a regex equivalent (any single character except path delimiters)
+    s := StringReplace(apat, '?', '[^\\/]', [rfReplaceAll]);
     // replace literal '.' with an escaped regex version
     s := StringReplace(s, '.', '\.', [rfReplaceAll]);
-    // replace single '*' with a regex equivalent
-    s := StringReplace(s, '*', '.+', [rfReplaceAll]);
+    // replace single '*' with a regex equivalent (matches any characters zero or more times)
+    s := StringReplace(s, '*', '.*', [rfReplaceAll]);
     // tell regex that expression must match from begining of line to end of line
     s := '^' + s + '$';
 
