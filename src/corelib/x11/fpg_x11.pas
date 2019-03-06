@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2014 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2019 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -2413,7 +2413,9 @@ begin
 
       WMHints^.icon_pixmap := IconPixmap;
       WMHints^.flags := IconPixmapHint;
-    end;
+    end
+    else
+      ApplyFormIcon;  // uses TfpgForm.IconName to set the window icon
 
     { setup window grouping posibilities }
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
@@ -2443,9 +2445,6 @@ begin
     begin
       DoDNDEnabled(True);
     end;
-
-    if xapplication.xia_net_wm_icon <> 0 then
-      ApplyFormIcon;
   end;
 
   FillChar(hints, sizeof(hints), 0);
