@@ -11,9 +11,17 @@ Keywords=fpc;pascal;fpgui;
 
 
 # Translations
-Comment[ru]=Визуальный дизайнер интерфейса пользователя для fpGUI
+GenericName[pl]=Projektant formularzy dla fpGUI
+Name[pt]=Designer de interfaces de utilizador fpGUI
+Comment[pt]=Designer de interface de utilizador visual fpGUI's
+GenericName[pt]=Desenho de formulários para o fpGUI
 Name[ru]=Дизайнер интерфейса для fpGUI
+Comment[ru]=Визуальный дизайнер интерфейса пользователя для fpGUI
 GenericName[ru]=Дизайнер форм для fpGUI
-Comment[uk]=Візуальний засіб розробки інтерфейсів fpGUI
+Name[et]=fpGUI UI Designer
 Name[uk]=Засіб розробки інтерфейсу fpGUI
+Comment[uk]=Візуальний засіб розробки інтерфейсів fpGUI
 GenericName[uk]=Засіб розробки форм для fpGUI
+Name[ms]=Pereka Bentuk UI fpGUi
+Comment[ms]=Pereka Antaramuka Pengguna Visual fpGUI
+GenericName[ms]=Bentuk pereka bentuk untuk fpGUI

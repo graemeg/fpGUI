@@ -6,7 +6,7 @@ How to translate your own fpGUI-based applications
    toggle fpGUI's default language too - this is optional though.
    If you do want to change fpGUI's default language, then edit the
    fpg_constants.pas unit, and enable the language define for the
-   language you want. fpGUI supports 9 languages out of the box.
+   language you want. fpGUI supports 12 languages out of the box.
    Then simply recompile fpGUI.
 
 2) Now for your application. Simply create a myconstants.pas unit

@@ -40,11 +40,17 @@ resourcestring
 {.$DEFINE de}     // German
 {.$DEFINE ru}     // Russian
 {.$DEFINE fr}     // French
-{.$DEFINE pt}     // Portuguese (Brazil)
+{.$DEFINE pt}     // Portuguese (Portugal)
+{.$DEFINE pt_BR}  // Portuguese (Brazil)
 {.$DEFINE af}     // Afrikaans
 {.$DEFINE it}     // Italian
 {.$DEFINE es}     // Spanish
 {.$DEFINE uk}     // Ukrainian
+{.$DEFINE pl}     // Polish
+{.$DEFINE et}     // Estonian
+{.$DEFINE ms}     // Malay
+{.$DEFINE zh_CN}  // Chinese
+{.$DEFINE lo}     // Lao
 
 
 
@@ -59,7 +65,10 @@ resourcestring
   
 {$ELSEIF defined(pt)}
   {$I lang_pt.inc}
-  
+
+{$ELSEIF defined(pt_BR)}
+  {$I lang_pt_BR.inc}
+
 {$ELSEIF defined(af)}
   {$I lang_af.inc}
 
@@ -71,6 +80,21 @@ resourcestring
 
 {$ELSEIF defined(uk)}
   {$I lang_uk.inc}
+
+{$ELSEIF defined(pl)}
+  {$I lang_pl.inc}
+
+{$ELSEIF defined(et)}
+  {$I lang_et.inc}
+
+{$ELSEIF defined(ms)}
+  {$I lang_ms.inc}
+
+{$ELSEIF defined(zh_CN)}
+  {$I lang_zh_CN.inc}
+
+{$ELSEIF defined(lo)}
+  {$I lang_lo.inc}
 
 {$ELSE}
   {$I lang_en.inc}

@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Yuri Chornoivan <yurchor@ukr.net>, 2018
+# Waldemar Stoczkowski, 2018
 # 
 #, fuzzy
 msgid ""
@@ -13,399 +13,398 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-11-21 15:34+0300\n"
 "PO-Revision-Date: 2018-11-21 02:25+0000\n"
-"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>, 2018\n"
-"Language-Team: Ukrainian (https://www.transifex.com/Magic/teams/44238/uk/)\n"
+"Last-Translator: Waldemar Stoczkowski, 2018\n"
+"Language-Team: Polish (https://www.transifex.com/Magic/teams/44238/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #: vfd_constants:rsopenformfile
 msgid "Open form file"
-msgstr "Відкрити файл форми"
+msgstr "Otwórz plik formularza"
 
 #: vfd_constants:rspascalsourcefiles
 msgid "Pascal source files"
-msgstr "файли з кодом мовою Pascal"
+msgstr "Pliki źródłowe Pascala"
 
 #: vfd_constants:rssaveformfile
 msgid "Save form source"
-msgstr "Зберегти джерело форми"
+msgstr "Zapisz źródło formularza"
 
 #: vfd_constants:rsversion
 msgid "Version: %s"
-msgstr "Версія: %s"
+msgstr "Wersja: %s"
 
 #: vfd_constants:rswrittenby
 msgid "Written by %s"
-msgstr "Автор — %s"
+msgstr "Napisane przez %s"
 
 #: vfd_constants:rscompiledon
 msgid "Compiled on: %s"
-msgstr "Зібрано у %s"
+msgstr "Opracowano na: %s"
 
 #: vfd_constants:rsnewunnamedform
 msgid "new"
-msgstr "нова"
+msgstr "nowy"
 
 #: vfd_constants:rsdesignerhelp1
 msgid "F11: switch to Properties"
-msgstr "F11: перемкнутися на «Властивості»"
+msgstr "F11: przełącz na Właściwości"
 
 #: vfd_constants:rsdesignerhelp2
 msgid "TAB, SHIFT+TAB: select next widget"
-msgstr "TAB, SHIFT+TAB: вибрати наступний віджет"
+msgstr "TAB, SHIFT + TAB: wybierz następny widżet"
 
 #: vfd_constants:rsdesignerhelp3
 msgid "F2: edit widget order"
-msgstr "F2: редагувати порядок віджетів"
+msgstr "F2: edytuj kolejność widżetów"
 
 #: vfd_constants:rsdesignerquickhelp
 msgid "Quick Help"
-msgstr "Швидка довідка"
+msgstr ""
 
 #: vfd_constants:rsleft
 msgid "Left"
-msgstr "Ліворуч"
+msgstr ""
 
 #: vfd_constants:rstop
 msgid "Top"
-msgstr "Згори"
+msgstr ""
 
 #: vfd_constants:rswidth
 msgid "Width"
-msgstr "Ширина"
+msgstr ""
 
 #: vfd_constants:rsheight
 msgid "Height"
-msgstr "Висота"
+msgstr ""
 
 #: vfd_constants:rsnewclassname
 msgid "Class name"
-msgstr "Назва класу"
+msgstr ""
 
 #: vfd_constants:rsnewformname
 msgid "Form name"
-msgstr "Назва форми"
+msgstr ""
 
 #: vfd_constants:rsposition
 msgid "Position"
-msgstr "Розташування"
+msgstr ""
 
 #: vfd_constants:rsformtitle
 msgid "Form %s"
-msgstr "Форма %s"
+msgstr ""
 
 #: vfd_constants:rsup
 msgid "Up"
-msgstr "Вище"
+msgstr ""
 
 #: vfd_constants:rsdown
 msgid "Down"
-msgstr "Нижче"
+msgstr ""
 
 #: vfd_constants:rsgridresolution
 msgid "Grid resolution"
-msgstr "Роздільність ґратки"
+msgstr ""
 
 #: vfd_constants:rsrecentfilescount
 msgid "Recent files count"
-msgstr "Кількість нещодавніх файлів"
+msgstr ""
 
 #: vfd_constants:rsshowfullpathname
 msgid "Show the full file path"
-msgstr "Показувати шлях до файла повністю"
+msgstr ""
 
 #: vfd_constants:rsformdesigner
 msgid "Form designer"
-msgstr "Засіб для розробки форм"
+msgstr ""
 
 #: vfd_constants:rsopenrecentsettings
 msgid "Open Recent menu settings"
-msgstr "Параметри меню відкриття нещодавніх файлів"
+msgstr ""
 
 #: vfd_constants:rsvarious
 msgid "Various"
-msgstr "Інше"
+msgstr ""
 
 #: vfd_constants:rsundoonpropertyexit
 msgid "Undo on property editor exit"
-msgstr "Скасування при виході з редактора властивостей"
+msgstr ""
 
 #: vfd_constants:rsoneclickselectandmove
 msgid "One click select and move"
-msgstr "Одинарне клацання для позначення і пересування"
+msgstr ""
 
 #: vfd_constants:rsdefaultfileext
 msgid "Default file extension"
-msgstr "Типовий суфікс назв файлів"
+msgstr ""
 
 #: vfd_constants:rsusecoderegions
 msgid "Use code-folding regions in auto-generated code"
-msgstr "Використовувати області згортання у автоствореному коді"
+msgstr ""
 
 #: vfd_constants:rsindenttype
 msgid "Indent Type for generated code"
-msgstr "Тип відступів у створеному коді"
+msgstr ""
 
 #: vfd_constants:rsdlgproductinfo
 msgid "Product Information"
-msgstr "Відомості щодо продукту"
+msgstr ""
 
 #: vfd_constants:rsdlgsetup
 msgid "General Settings"
-msgstr "Загальні параметри"
+msgstr ""
 
 #: vfd_constants:rsdlginsertcustomwidget
 msgid "Insert Custom Widget"
-msgstr "Вставити нетиповий віджет"
+msgstr ""
 
 #: vfd_constants:rsdlgnewform
 msgid "New Form"
-msgstr "Нова форма"
+msgstr ""
 
 #: vfd_constants:rsdlgeditformposition
 msgid "Form Position"
-msgstr "Розташування форми"
+msgstr ""
 
 #: vfd_constants:rsdlgwidgetorder
 msgid "Widget Order"
-msgstr "Порядок віджетів"
+msgstr ""
 
 #: vfd_constants:rsdlgtaborder
 msgid "Tab Order"
-msgstr "Порядок вкладок"
+msgstr ""
 
 #: vfd_constants:rserrunitnotfound
 msgid "The unit <%s> was not found"
-msgstr "Не знайдено модуля <%s>"
+msgstr ""
 
 #: vfd_constants:rserrloadingform
 msgid "Error loading form"
-msgstr "Помилка під час спроби завантажити форму"
+msgstr ""
 
 #: vfd_constants:rserrfailedtofinddesignerform
 msgid "Failed to find Designer Form"
-msgstr "Не вдалося знайти форму дизайнера"
+msgstr ""
 
 #: vfd_constants:rserrformsaveioerror
 msgid "Form save I/O failure in <%s>"
-msgstr "Помилка введення-виведення під час спроби зберегти форму у <%s>"
+msgstr ""
 
 #: vfd_constants:rserrnameconflict
 msgid "Name Conflict"
-msgstr "Конфлікт назв"
+msgstr ""
 
 #: vfd_constants:rserrnostringsproperty
 msgid "Failed to find TStrings type property"
-msgstr "Не вдалося знайти властивість типу TStrings"
+msgstr ""
 
 #: vfd_constants:rserrfailedtoparseboolean
 msgid "Failed to parse Boolean value <%s>"
-msgstr "Не вдалося обробити булеве значення <%s>"
+msgstr ""
 
 #: vfd_constants:rsclass
 msgid "Class"
-msgstr "Клас"
+msgstr ""
 
 #: vfd_constants:rsname
 msgid "Name"
-msgstr "Назва"
+msgstr ""
 
 #: vfd_constants:rsproperties
 msgid "Properties"
-msgstr "Властивості"
+msgstr ""
 
 #: vfd_constants:rsanchors
 msgid "Anchors"
-msgstr "Прив’язки"
+msgstr ""
 
 #: vfd_constants:rsunknownlines
 msgid "Unknown lines"
-msgstr "Невідомі рядки"
+msgstr ""
 
 #: vfd_constants:rsfile
 msgid "&File"
-msgstr "&Файл"
+msgstr ""
 
 #: vfd_constants:rssettings
 msgid "&Settings"
-msgstr "П&араметри"
+msgstr ""
 
 #: vfd_constants:rsform
 msgid "Fo&rm"
-msgstr "&Форма"
+msgstr ""
 
 #: vfd_constants:rspreview
 msgid "&Preview"
-msgstr "&Перегляд"
+msgstr ""
 
 #: vfd_constants:rshelp
 msgid "&Help"
-msgstr "&Довідка"
+msgstr ""
 
 #: vfd_constants:rscreatenewfile
 msgid "Create New File"
-msgstr "Створити файл"
+msgstr ""
 
 #: vfd_constants:rsopen
 msgid "Open"
-msgstr "Відкрити"
+msgstr ""
 
 #: vfd_constants:rsopenrecent
 msgid "Open Recent"
-msgstr "Відкрити недавні"
+msgstr ""
 
 #: vfd_constants:rssave
 msgid "Save"
-msgstr "Зберегти"
+msgstr ""
 
 #: vfd_constants:rssaveasnewtemplateunit
 msgid "Save As New Template Unit"
-msgstr "Зберегти як новий шаблон модуля"
+msgstr ""
 
 #: vfd_constants:rsaddnewformtounit
 msgid "Add New Form to Unit"
-msgstr "Додати до модуля нову форму"
+msgstr ""
 
 #: vfd_constants:rsexit
 msgid "Exit"
-msgstr "Вийти"
+msgstr ""
 
 #: vfd_constants:rsgeneraloptions
 msgid "General options"
-msgstr "Загальні параметри"
+msgstr ""
 
 #: vfd_constants:rseditspecial
 msgid "Edit special"
-msgstr "Спеціальне редагування"
+msgstr ""
 
 #: vfd_constants:rsaboutfpguitoolkit
 msgid "About fpGUI Toolkit"
-msgstr "Про набір інструментів fpGUI"
+msgstr ""
 
 #: vfd_constants:rssavecurrentformdesign
 msgid "Save the current form design"
-msgstr "Зберегти поточне компонування форми"
+msgstr ""
 
 #: vfd_constants:rsclose
 msgid "Close"
-msgstr "Закрити"
+msgstr ""
 
 #: vfd_constants:rscancel
 msgid "Cancel"
-msgstr "Скасувати"
+msgstr ""
 
 #: vfd_constants:rsok
 msgid "OK"
-msgstr "Гаразд"
+msgstr ""
 
 #: vfd_constants:rsappliestonewformdialogsonly
 msgid "Applies to new form/dialogs only"
-msgstr "Застосовувати лише до нових форм і вікон"
+msgstr ""
 
 #: vfd_constants:rsspacecharacters
 msgid "Space characters"
-msgstr "Символи пробілів"
+msgstr ""
 
 #: vfd_constants:rstabcharacters
 msgid "Tab characters"
-msgstr "Символи табуляції"
+msgstr ""
 
 #: vfd_constants:rsitems
 msgid "Items"
-msgstr "Записи"
+msgstr ""
 
 #: vfd_constants:rsclear
 msgid "Clear"
-msgstr "Спорожнити"
+msgstr ""
 
 #: vfd_constants:rspos
 msgid "Pos"
-msgstr "Позиція"
+msgstr ""
 
 #: vfd_constants:rsformnameexists
 msgid "The form name already exists in the current unit, please try again"
 msgstr ""
-"У поточному модулі вже є форма з такою назвою. Будь ласка, виберіть іншу."
 
 #: vfd_constants:rscolumneditor
 msgid "Column editor"
-msgstr "Редактор стовпчиків"
+msgstr ""
 
 #: vfd_constants:rsstringgridcolumns
 msgid "String Grid columns"
-msgstr "Стовпчики ґратки рядків"
+msgstr ""
 
 #: vfd_constants:rscolumn
 msgid "Column"
-msgstr "Стовпчик"
+msgstr ""
 
 #: vfd_constants:rstitle
 msgid "Title"
-msgstr "Заголовок"
+msgstr ""
 
 #: vfd_constants:rscolumnwidth
 msgid "Column width"
-msgstr "Ширина стовпчика"
+msgstr ""
 
 #: vfd_constants:rsalignment
 msgid "Alignment"
-msgstr "Вирівнювання"
+msgstr ""
 
 #: vfd_constants:rsright
 msgid "Right"
-msgstr "Праворуч"
+msgstr ""
 
 #: vfd_constants:rscenter
 msgid "Center"
-msgstr "За центром"
+msgstr ""
 
 #: vfd_constants:rsnew
 msgid "New"
-msgstr "Створити"
+msgstr ""
 
 #: vfd_constants:rsdelete
 msgid "Delete"
-msgstr "Вилучити"
+msgstr ""
 
 #: vfd_constants:rsupuppercase
 msgid "UP"
-msgstr "Вище"
+msgstr ""
 
 #: vfd_constants:rsdownuppercase
 msgid "DOWN"
-msgstr "Нижче"
+msgstr ""
 
 #: vfd_constants:rscol
 msgid "Col."
-msgstr "Ст."
+msgstr ""
 
 #: vfd_constants:rsalign
 msgid "Align"
-msgstr "Вирівнювання"
+msgstr ""
 
 #: vfd_constants:rsaddtab
 msgid "Add Tab"
-msgstr "Додати вкладку"
+msgstr ""
 
 #: vfd_constants:rsdeletetab
 msgid "Delete Tab"
-msgstr "Вилучити вкладку"
+msgstr ""
 
 #: vfd_constants:rstoggledesignergrid
 msgid "Toggle designer grid"
-msgstr "Увімкнути або вимкнути ґратку компонування"
+msgstr ""
 
 #: vfd_constants:rsclassuppercase
 msgid "CLASS"
-msgstr "КЛАС"
+msgstr ""
 
 #: vfd_constants:rsnameuppercase
 msgid "NAME"
-msgstr "НАЗВА"
+msgstr ""
 
 #: vfd_constants:rserrorsregisteringwidget
 msgid "Errors Registering Widget"
-msgstr "Помилки під час спроби зареєструвати віджет"
+msgstr ""

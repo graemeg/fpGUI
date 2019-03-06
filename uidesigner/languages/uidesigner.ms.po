@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Yuri Chornoivan <yurchor@ukr.net>, 2018
+# abuyop <abuyop@gmail.com>, 2018
 # 
 #, fuzzy
 msgid ""
@@ -13,399 +13,398 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-11-21 15:34+0300\n"
 "PO-Revision-Date: 2018-11-21 02:25+0000\n"
-"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>, 2018\n"
-"Language-Team: Ukrainian (https://www.transifex.com/Magic/teams/44238/uk/)\n"
+"Last-Translator: abuyop <abuyop@gmail.com>, 2018\n"
+"Language-Team: Malay (https://www.transifex.com/Magic/teams/44238/ms/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Language: ms\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: vfd_constants:rsopenformfile
 msgid "Open form file"
-msgstr "Відкрити файл форми"
+msgstr "Buka fail bentuk"
 
 #: vfd_constants:rspascalsourcefiles
 msgid "Pascal source files"
-msgstr "файли з кодом мовою Pascal"
+msgstr "Fail sumber Pascal"
 
 #: vfd_constants:rssaveformfile
 msgid "Save form source"
-msgstr "Зберегти джерело форми"
+msgstr "Simpan sumber bentuk"
 
 #: vfd_constants:rsversion
 msgid "Version: %s"
-msgstr "Версія: %s"
+msgstr "Versi: %s"
 
 #: vfd_constants:rswrittenby
 msgid "Written by %s"
-msgstr "Автор — %s"
+msgstr "Ditulis oleh %s"
 
 #: vfd_constants:rscompiledon
 msgid "Compiled on: %s"
-msgstr "Зібрано у %s"
+msgstr "Dikompil pada: %s"
 
 #: vfd_constants:rsnewunnamedform
 msgid "new"
-msgstr "нова"
+msgstr "baharu"
 
 #: vfd_constants:rsdesignerhelp1
 msgid "F11: switch to Properties"
-msgstr "F11: перемкнутися на «Властивості»"
+msgstr "F11: beralih ke Sifat"
 
 #: vfd_constants:rsdesignerhelp2
 msgid "TAB, SHIFT+TAB: select next widget"
-msgstr "TAB, SHIFT+TAB: вибрати наступний віджет"
+msgstr "TAB, SHIFT+TAB: pilih widget berikutnya"
 
 #: vfd_constants:rsdesignerhelp3
 msgid "F2: edit widget order"
-msgstr "F2: редагувати порядок віджетів"
+msgstr "F2: sunting tertib widget"
 
 #: vfd_constants:rsdesignerquickhelp
 msgid "Quick Help"
-msgstr "Швидка довідка"
+msgstr "Bantuan Pantas"
 
 #: vfd_constants:rsleft
 msgid "Left"
-msgstr "Ліворуч"
+msgstr "Kiri"
 
 #: vfd_constants:rstop
 msgid "Top"
-msgstr "Згори"
+msgstr "Atas"
 
 #: vfd_constants:rswidth
 msgid "Width"
-msgstr "Ширина"
+msgstr "Lebar"
 
 #: vfd_constants:rsheight
 msgid "Height"
-msgstr "Висота"
+msgstr "Tinggi"
 
 #: vfd_constants:rsnewclassname
 msgid "Class name"
-msgstr "Назва класу"
+msgstr "Nama kelas"
 
 #: vfd_constants:rsnewformname
 msgid "Form name"
-msgstr "Назва форми"
+msgstr "Nama bentuk"
 
 #: vfd_constants:rsposition
 msgid "Position"
-msgstr "Розташування"
+msgstr "Kedudukan"
 
 #: vfd_constants:rsformtitle
 msgid "Form %s"
-msgstr "Форма %s"
+msgstr "Bentuk %s"
 
 #: vfd_constants:rsup
 msgid "Up"
-msgstr "Вище"
+msgstr "Atas"
 
 #: vfd_constants:rsdown
 msgid "Down"
-msgstr "Нижче"
+msgstr "Bawah"
 
 #: vfd_constants:rsgridresolution
 msgid "Grid resolution"
-msgstr "Роздільність ґратки"
+msgstr "Resolusi grid"
 
 #: vfd_constants:rsrecentfilescount
 msgid "Recent files count"
-msgstr "Кількість нещодавніх файлів"
+msgstr "Kiraan fail baru-baru ini"
 
 #: vfd_constants:rsshowfullpathname
 msgid "Show the full file path"
-msgstr "Показувати шлях до файла повністю"
+msgstr "Tunjuk laluan fail penuh"
 
 #: vfd_constants:rsformdesigner
 msgid "Form designer"
-msgstr "Засіб для розробки форм"
+msgstr "Pereka bentuk"
 
 #: vfd_constants:rsopenrecentsettings
 msgid "Open Recent menu settings"
-msgstr "Параметри меню відкриття нещодавніх файлів"
+msgstr "Buka tetapan menu Baru-baru ini"
 
 #: vfd_constants:rsvarious
 msgid "Various"
-msgstr "Інше"
+msgstr "Pelbagai"
 
 #: vfd_constants:rsundoonpropertyexit
 msgid "Undo on property editor exit"
-msgstr "Скасування при виході з редактора властивостей"
+msgstr "Buat asal ketika penyunting sifat keluar"
 
 #: vfd_constants:rsoneclickselectandmove
 msgid "One click select and move"
-msgstr "Одинарне клацання для позначення і пересування"
+msgstr "Satu klik pilih dan alih"
 
 #: vfd_constants:rsdefaultfileext
 msgid "Default file extension"
-msgstr "Типовий суфікс назв файлів"
+msgstr "Sambungan fail lalai"
 
 #: vfd_constants:rsusecoderegions
 msgid "Use code-folding regions in auto-generated code"
-msgstr "Використовувати області згортання у автоствореному коді"
+msgstr "Guna wilayah lipatan-kod dalam kod auto-terjana"
 
 #: vfd_constants:rsindenttype
 msgid "Indent Type for generated code"
-msgstr "Тип відступів у створеному коді"
+msgstr "Jenis inden untuk kod terjana"
 
 #: vfd_constants:rsdlgproductinfo
 msgid "Product Information"
-msgstr "Відомості щодо продукту"
+msgstr "Maklumat Produk"
 
 #: vfd_constants:rsdlgsetup
 msgid "General Settings"
-msgstr "Загальні параметри"
+msgstr "Tetapan Am"
 
 #: vfd_constants:rsdlginsertcustomwidget
 msgid "Insert Custom Widget"
-msgstr "Вставити нетиповий віджет"
+msgstr "Sisip Widget Suai"
 
 #: vfd_constants:rsdlgnewform
 msgid "New Form"
-msgstr "Нова форма"
+msgstr "Bentuk Baharu"
 
 #: vfd_constants:rsdlgeditformposition
 msgid "Form Position"
-msgstr "Розташування форми"
+msgstr "Kedudukan Bentuk"
 
 #: vfd_constants:rsdlgwidgetorder
 msgid "Widget Order"
-msgstr "Порядок віджетів"
+msgstr "Tertib Widget"
 
 #: vfd_constants:rsdlgtaborder
 msgid "Tab Order"
-msgstr "Порядок вкладок"
+msgstr "Tertib Tab"
 
 #: vfd_constants:rserrunitnotfound
 msgid "The unit <%s> was not found"
-msgstr "Не знайдено модуля <%s>"
+msgstr "Unit <%s> tidak ditemui"
 
 #: vfd_constants:rserrloadingform
 msgid "Error loading form"
-msgstr "Помилка під час спроби завантажити форму"
+msgstr "Ralat memuatkan bentuk"
 
 #: vfd_constants:rserrfailedtofinddesignerform
 msgid "Failed to find Designer Form"
-msgstr "Не вдалося знайти форму дизайнера"
+msgstr "Gagal mencari Bentuk Pereka Bentuk"
 
 #: vfd_constants:rserrformsaveioerror
 msgid "Form save I/O failure in <%s>"
-msgstr "Помилка введення-виведення під час спроби зберегти форму у <%s>"
+msgstr "Kegagalan I/O simpan bentuk dalam <%s>"
 
 #: vfd_constants:rserrnameconflict
 msgid "Name Conflict"
-msgstr "Конфлікт назв"
+msgstr "Konflik Nama"
 
 #: vfd_constants:rserrnostringsproperty
 msgid "Failed to find TStrings type property"
-msgstr "Не вдалося знайти властивість типу TStrings"
+msgstr "Gagal mencari sifat jenis TStrings"
 
 #: vfd_constants:rserrfailedtoparseboolean
 msgid "Failed to parse Boolean value <%s>"
-msgstr "Не вдалося обробити булеве значення <%s>"
+msgstr "Gagal menghurai nilai Boolean <%s>"
 
 #: vfd_constants:rsclass
 msgid "Class"
-msgstr "Клас"
+msgstr "Kelas"
 
 #: vfd_constants:rsname
 msgid "Name"
-msgstr "Назва"
+msgstr "Nama"
 
 #: vfd_constants:rsproperties
 msgid "Properties"
-msgstr "Властивості"
+msgstr "Sifat"
 
 #: vfd_constants:rsanchors
 msgid "Anchors"
-msgstr "Прив’язки"
+msgstr "Penambat"
 
 #: vfd_constants:rsunknownlines
 msgid "Unknown lines"
-msgstr "Невідомі рядки"
+msgstr "Baris tidak diketahui"
 
 #: vfd_constants:rsfile
 msgid "&File"
-msgstr "&Файл"
+msgstr "&Fail"
 
 #: vfd_constants:rssettings
 msgid "&Settings"
-msgstr "П&араметри"
+msgstr "&Tetapan"
 
 #: vfd_constants:rsform
 msgid "Fo&rm"
-msgstr "&Форма"
+msgstr "Be&ntuk"
 
 #: vfd_constants:rspreview
 msgid "&Preview"
-msgstr "&Перегляд"
+msgstr "&Pratonton"
 
 #: vfd_constants:rshelp
 msgid "&Help"
-msgstr "&Довідка"
+msgstr "&Bantuan"
 
 #: vfd_constants:rscreatenewfile
 msgid "Create New File"
-msgstr "Створити файл"
+msgstr "Cipta Fail Baharu"
 
 #: vfd_constants:rsopen
 msgid "Open"
-msgstr "Відкрити"
+msgstr "Buka"
 
 #: vfd_constants:rsopenrecent
 msgid "Open Recent"
-msgstr "Відкрити недавні"
+msgstr "Buka Baru-Baru Ini"
 
 #: vfd_constants:rssave
 msgid "Save"
-msgstr "Зберегти"
+msgstr "Simpan"
 
 #: vfd_constants:rssaveasnewtemplateunit
 msgid "Save As New Template Unit"
-msgstr "Зберегти як новий шаблон модуля"
+msgstr "Simpan Sebagai Unit Templat Baharu"
 
 #: vfd_constants:rsaddnewformtounit
 msgid "Add New Form to Unit"
-msgstr "Додати до модуля нову форму"
+msgstr "Tambah Bentuk Baharu ke dalam Unit"
 
 #: vfd_constants:rsexit
 msgid "Exit"
-msgstr "Вийти"
+msgstr "Keluar"
 
 #: vfd_constants:rsgeneraloptions
 msgid "General options"
-msgstr "Загальні параметри"
+msgstr "Pilihan am"
 
 #: vfd_constants:rseditspecial
 msgid "Edit special"
-msgstr "Спеціальне редагування"
+msgstr "Sunting khas"
 
 #: vfd_constants:rsaboutfpguitoolkit
 msgid "About fpGUI Toolkit"
-msgstr "Про набір інструментів fpGUI"
+msgstr "Perihal Kit Alat fpGUI"
 
 #: vfd_constants:rssavecurrentformdesign
 msgid "Save the current form design"
-msgstr "Зберегти поточне компонування форми"
+msgstr "Simpan reka bentuk semasa"
 
 #: vfd_constants:rsclose
 msgid "Close"
-msgstr "Закрити"
+msgstr "Tutup"
 
 #: vfd_constants:rscancel
 msgid "Cancel"
-msgstr "Скасувати"
+msgstr "Batal"
 
 #: vfd_constants:rsok
 msgid "OK"
-msgstr "Гаразд"
+msgstr "OK"
 
 #: vfd_constants:rsappliestonewformdialogsonly
 msgid "Applies to new form/dialogs only"
-msgstr "Застосовувати лише до нових форм і вікон"
+msgstr "Dilaksana pada bentuk/dialog sahaja"
 
 #: vfd_constants:rsspacecharacters
 msgid "Space characters"
-msgstr "Символи пробілів"
+msgstr "Aksara jarak"
 
 #: vfd_constants:rstabcharacters
 msgid "Tab characters"
-msgstr "Символи табуляції"
+msgstr "Aksara tab"
 
 #: vfd_constants:rsitems
 msgid "Items"
-msgstr "Записи"
+msgstr "Item"
 
 #: vfd_constants:rsclear
 msgid "Clear"
-msgstr "Спорожнити"
+msgstr "Kosongkan"
 
 #: vfd_constants:rspos
 msgid "Pos"
-msgstr "Позиція"
+msgstr "Pos"
 
 #: vfd_constants:rsformnameexists
 msgid "The form name already exists in the current unit, please try again"
-msgstr ""
-"У поточному модулі вже є форма з такою назвою. Будь ласка, виберіть іншу."
+msgstr "Nama bentuk sudah wujud dalam unit semasa, cuba sekali lagi"
 
 #: vfd_constants:rscolumneditor
 msgid "Column editor"
-msgstr "Редактор стовпчиків"
+msgstr "Penyunting lajur"
 
 #: vfd_constants:rsstringgridcolumns
 msgid "String Grid columns"
-msgstr "Стовпчики ґратки рядків"
+msgstr "Lajur Grid Rentetan"
 
 #: vfd_constants:rscolumn
 msgid "Column"
-msgstr "Стовпчик"
+msgstr "Lajur"
 
 #: vfd_constants:rstitle
 msgid "Title"
-msgstr "Заголовок"
+msgstr "Tajuk"
 
 #: vfd_constants:rscolumnwidth
 msgid "Column width"
-msgstr "Ширина стовпчика"
+msgstr "Lebar lajur"
 
 #: vfd_constants:rsalignment
 msgid "Alignment"
-msgstr "Вирівнювання"
+msgstr "Jajaran"
 
 #: vfd_constants:rsright
 msgid "Right"
-msgstr "Праворуч"
+msgstr "Kanan"
 
 #: vfd_constants:rscenter
 msgid "Center"
-msgstr "За центром"
+msgstr "Tengah"
 
 #: vfd_constants:rsnew
 msgid "New"
-msgstr "Створити"
+msgstr "Baharu"
 
 #: vfd_constants:rsdelete
 msgid "Delete"
-msgstr "Вилучити"
+msgstr "Padam"
 
 #: vfd_constants:rsupuppercase
 msgid "UP"
-msgstr "Вище"
+msgstr "ATAS"
 
 #: vfd_constants:rsdownuppercase
 msgid "DOWN"
-msgstr "Нижче"
+msgstr "BAWAH"
 
 #: vfd_constants:rscol
 msgid "Col."
-msgstr "Ст."
+msgstr "Col."
 
 #: vfd_constants:rsalign
 msgid "Align"
-msgstr "Вирівнювання"
+msgstr "Jajar"
 
 #: vfd_constants:rsaddtab
 msgid "Add Tab"
-msgstr "Додати вкладку"
+msgstr "Tambah Tab"
 
 #: vfd_constants:rsdeletetab
 msgid "Delete Tab"
-msgstr "Вилучити вкладку"
+msgstr "Padam Tab"
 
 #: vfd_constants:rstoggledesignergrid
 msgid "Toggle designer grid"
-msgstr "Увімкнути або вимкнути ґратку компонування"
+msgstr "Togol grid pereka bentuk"
 
 #: vfd_constants:rsclassuppercase
 msgid "CLASS"
-msgstr "КЛАС"
+msgstr "KELAS"
 
 #: vfd_constants:rsnameuppercase
 msgid "NAME"
-msgstr "НАЗВА"
+msgstr "NAMA"
 
 #: vfd_constants:rserrorsregisteringwidget
 msgid "Errors Registering Widget"
-msgstr "Помилки під час спроби зареєструвати віджет"
+msgstr "Ralat Mendaftar Widget"

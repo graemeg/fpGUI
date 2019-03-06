@@ -1,6 +1,6 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
-# Yuri Chornoivan <yurchor@ukr.net>, 2018
+# Waldemar Stoczkowski, 2018
 # 
 msgid ""
 msgstr ""
@@ -8,45 +8,45 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
-"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2018\n"
-"Language-Team: Ukrainian (https://www.transifex.com/Magic/teams/44238/uk/)\n"
+"Last-Translator: Waldemar Stoczkowski, 2018\n"
+"Language-Team: Polish (https://www.transifex.com/Magic/teams/44238/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> не прив’язано"
+msgstr "<%s> nie przypisano"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Виявлено новий запис."
+msgstr "Wykryto nowy element."
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr "Перервати"
+msgstr ""
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr "Про %s"
+msgstr "O %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr "Додати поточний каталог"
+msgstr "Dodaj bieżący katalog"
 
 #: fpg_constants:rsall
 msgid "All"
-msgstr "Усі"
+msgstr "Wszystkie"
 
 #: fpg_constants:rsallfiles
 msgid "All Files"
-msgstr "Усі файли"
+msgstr "Wszystkie pliki"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr "Усі шрифти"
+msgstr "Wszystkie czcionki"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
@@ -54,671 +54,668 @@ msgstr "Alt+"
 
 #: fpg_constants:rserrunexpected
 msgid "An unexpected error occurred."
-msgstr "Сталася неочікувана помилка."
+msgstr "Wystąpił nieoczekiwany błąd."
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "Згладжування"
+msgstr ""
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr "кві"
+msgstr ""
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr "квітень"
+msgstr ""
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr "Атрибути"
+msgstr ""
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr "сер"
+msgstr ""
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr "серпень"
+msgstr ""
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr "BkSp"
+msgstr ""
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr "Синій"
+msgstr ""
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr "Жирний"
+msgstr ""
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr "Закладки"
+msgstr ""
 
 #: fpg_constants:rscancel
 msgid "Cancel"
-msgstr "Скасувати"
+msgstr "Anuluj"
 
 #: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr "Не вдалося створити каталог"
+msgstr ""
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr "Змінити"
+msgstr ""
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr "Змінити заголовок"
+msgstr ""
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr "Таблиця символів"
+msgstr ""
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
 msgstr ""
-"Натисніть кнопку піпетки і не відпускайте кнопку миші => відпустіть її над "
-"крапкою з кольором"
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr "Закрити"
+msgstr ""
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr "Збірка"
+msgstr ""
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr "Кольорове коло"
+msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "Налаштувати закладки"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr "Підтвердити"
+msgstr ""
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr "Підтвердження"
+msgstr ""
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
-msgstr "Неперервний"
+msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr "Копіювати"
+msgstr ""
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "Не вдалося відкрити каталог <%s>"
+msgstr ""
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr "Створити"
+msgstr ""
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr "Створити каталог"
+msgstr ""
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
-msgstr "Критична помилка"
+msgstr ""
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
-msgstr "Ctrl+"
+msgstr ""
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr "Вирізати"
+msgstr ""
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr "База даних"
+msgstr ""
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr "гру"
+msgstr ""
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr "грудень"
+msgstr ""
 
 #: fpg_constants:rskeydel
 msgid "Del"
-msgstr "Del"
+msgstr ""
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr "Вилучити"
+msgstr ""
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr "Каталоги"
+msgstr ""
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr "Каталог"
+msgstr ""
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr "Вниз"
+msgstr ""
 
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr "Диск"
+msgstr ""
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "Змінити"
+msgstr ""
 
 #: fpg_constants:rskeyend
 msgid "End"
-msgstr "End"
+msgstr ""
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "англійська"
+msgstr ""
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
-msgstr "Enter"
+msgstr ""
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr "Введіть назву нового каталогу"
+msgstr ""
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr "Помилка"
+msgstr ""
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
-msgstr "Esc"
+msgstr ""
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr "Текст прикладу"
+msgstr ""
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "Вийти"
+msgstr ""
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "Не вдалося створити каталог <%s>"
+msgstr ""
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "Не вдалося знайти засіб перегляду довідки."
+msgstr ""
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "Ні"
+msgstr ""
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr "Вибрані"
+msgstr ""
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr "лют"
+msgstr ""
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr "лютий"
+msgstr ""
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "Вибір файла"
+msgstr ""
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr "Назва файла"
+msgstr ""
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr "Файли"
+msgstr ""
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr "Знайти"
+msgstr ""
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr "Фіксована ширина"
+msgstr ""
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "Інші назви шрифту"
+msgstr ""
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "Файл шрифту <%s.fnt> не знайдено"
+msgstr ""
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr "Пт"
+msgstr ""
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr "п'ятниця"
+msgstr ""
 
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
-msgstr "До батьківського каталогу"
+msgstr ""
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Got to home directory"
-msgstr "Перейти до домашнього каталогу"
+msgstr ""
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr "Зелений"
+msgstr ""
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr "Група"
+msgstr ""
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr "Довідка"
+msgstr ""
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
-msgstr "Шістнадцяткове"
+msgstr ""
 
 #: fpg_constants:rskeyhome
 msgid "Home"
-msgstr "Home"
+msgstr ""
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr "Ігнорувати"
+msgstr ""
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "Не вистачає зображення <%s>"
+msgstr ""
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr "Відомості"
+msgstr ""
 
 #: fpg_constants:rskeyins
 msgid "Ins"
-msgstr "Ins"
+msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr "Вставити"
+msgstr ""
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr "Вставити із таблиці символів"
+msgstr ""
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: %s"
-msgstr "Некоректний параметр на позиції %d: %s"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr "Курсив"
+msgstr ""
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr "Запис не належить до типу <%s>!"
+msgstr ""
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr "січ"
+msgstr ""
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr "січень"
+msgstr ""
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr "лип"
+msgstr ""
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr "липень"
+msgstr ""
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr "чер"
+msgstr ""
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr "червень"
+msgstr ""
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr "Ліворуч"
+msgstr ""
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr "Список має бути порожнім"
+msgstr ""
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr "бер"
+msgstr ""
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr "березень"
+msgstr ""
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr "травень"
+msgstr ""
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr "Повідомлення"
+msgstr ""
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
-msgstr "Meta+"
+msgstr ""
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr "Час зміни"
+msgstr ""
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr "Пн"
+msgstr ""
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr "понеділок"
+msgstr ""
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr "Пересунути нижче"
+msgstr ""
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr "Пересунути вище"
+msgstr ""
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr "Назва"
+msgstr ""
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr "Ні"
+msgstr ""
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
-msgstr "Ні для всіх"
+msgstr ""
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr "лис"
+msgstr ""
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr "листопад"
+msgstr ""
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr "Гаразд"
+msgstr ""
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr "жов"
+msgstr ""
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr "жовтень"
+msgstr ""
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr "Відкрити"
+msgstr ""
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr "Відкрити файл"
+msgstr ""
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
-msgstr "Параметр у позиції %d не передбачає аргументів: %s"
+msgstr ""
 
 #: fpg_constants:serroptionneeded
 msgid "Option at position %d needs an argument: %s"
-msgstr "Параметр на позиції %d потребує аргументу: %s"
+msgstr ""
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr "Власник"
+msgstr ""
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr "документи PDF"
+msgstr ""
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr "Сторінка"
+msgstr ""
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr "Пароль"
+msgstr ""
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr "Вставити"
+msgstr ""
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
-msgstr "PgDn"
+msgstr ""
 
 #: fpg_constants:rskeypgup
 msgid "PgUp"
-msgstr "PgUp"
+msgstr ""
 
 #: fpg_constants:rstabpredefined
 msgid "Predefined"
-msgstr "Стандартне"
+msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr "Перегляд"
+msgstr ""
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr "Нещодавно використані"
+msgstr ""
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr "Червоний"
+msgstr ""
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr "Замінити"
+msgstr ""
 
 #: fpg_constants:rsretry
 msgid "Retry"
-msgstr "Повторити"
+msgstr ""
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr "Праворуч"
+msgstr ""
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr "Права"
+msgstr ""
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
-msgstr "Без засічок"
+msgstr ""
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr "Сбт"
+msgstr ""
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr "субота"
+msgstr ""
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr "Зберегти"
+msgstr ""
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr "Зберегти файл як"
+msgstr ""
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "Пошук"
+msgstr ""
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr "Розділ"
+msgstr ""
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "Позначити"
+msgstr ""
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr "Позначити все"
+msgstr ""
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
-msgstr "Виберіть каталог"
+msgstr ""
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "Виберіть шрифт"
+msgstr ""
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr "вер"
+msgstr ""
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr "вересень"
+msgstr ""
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
-msgstr "З засічками"
+msgstr ""
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
-msgstr "Shift+"
+msgstr ""
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr "Показувати приховані файли"
+msgstr ""
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr "Розмір"
+msgstr ""
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr "Пробіл"
+msgstr ""
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr "Стиль"
+msgstr ""
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
-msgstr "Нд"
+msgstr ""
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
-msgstr "неділя"
+msgstr ""
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr "Табуляція"
+msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr "Тест, який слід вставити"
+msgstr ""
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr "Немає сторінок для друку"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr "Чтв"
+msgstr ""
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr "четвер"
+msgstr ""
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "Сьогодні"
+msgstr ""
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr "Так"
+msgstr ""
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr "Вт"
+msgstr ""
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr "вівторок"
+msgstr ""
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr "Тип файла"
+msgstr ""
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
-msgstr "Гарнітура"
+msgstr ""
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr "Підкреслений"
+msgstr ""
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr "Вище"
+msgstr ""
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "Ім'я користувача"
+msgstr ""
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr "Попередження"
+msgstr ""
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr "Ср"
+msgstr ""
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr "середа"
+msgstr ""
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "Хочете додати новий запис <%s> до списку?"
+msgstr ""
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr "Так"
+msgstr ""
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
-msgstr "Так для всіх"
+msgstr ""
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr "з"
-
+msgstr ""
