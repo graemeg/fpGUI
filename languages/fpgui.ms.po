@@ -1,6 +1,6 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
-# Yuri Chornoivan <yurchor@ukr.net>, 2018
+# abuyop <abuyop@gmail.com>, 2018
 # 
 msgid ""
 msgstr ""
@@ -8,45 +8,45 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
-"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2018\n"
-"Language-Team: Ukrainian (https://www.transifex.com/Magic/teams/44238/uk/)\n"
+"Last-Translator: abuyop <abuyop@gmail.com>, 2018\n"
+"Language-Team: Malay (https://www.transifex.com/Magic/teams/44238/ms/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Language: ms\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> не прив’язано"
+msgstr "<%s> tidak diumpuk"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "Виявлено новий запис."
+msgstr "Satu item baharu telah dikesan."
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr "Перервати"
+msgstr "Henti Paksa"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr "Про %s"
+msgstr "Perihal %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr "Додати поточний каталог"
+msgstr "Tambah direktori semasa"
 
 #: fpg_constants:rsall
 msgid "All"
-msgstr "Усі"
+msgstr "Semua"
 
 #: fpg_constants:rsallfiles
 msgid "All Files"
-msgstr "Усі файли"
+msgstr "Semua Fail"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr "Усі шрифти"
+msgstr "Semua Fon"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
@@ -54,31 +54,31 @@ msgstr "Alt+"
 
 #: fpg_constants:rserrunexpected
 msgid "An unexpected error occurred."
-msgstr "Сталася неочікувана помилка."
+msgstr "Satu ralat tidak dijangka berlaku."
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "Згладжування"
+msgstr "Anti alias"
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr "кві"
+msgstr "Apr"
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr "квітень"
+msgstr "April"
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr "Атрибути"
+msgstr "Atribut"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr "сер"
+msgstr "Ogo"
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr "серпень"
+msgstr "Ogos"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
@@ -86,89 +86,87 @@ msgstr "BkSp"
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr "Синій"
+msgstr "Biru"
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr "Жирний"
+msgstr "Tebal"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr "Закладки"
+msgstr "Tanda Buku"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
-msgstr "Скасувати"
+msgstr "Batal"
 
 #: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr "Не вдалося створити каталог"
+msgstr "Tidak dapat cipta direktori"
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr "Змінити"
+msgstr "Ubah"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr "Змінити заголовок"
+msgstr "Ubah Tajuk"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr "Таблиця символів"
+msgstr "Peta Aksara"
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
-msgstr ""
-"Натисніть кнопку піпетки і не відпускайте кнопку миші => відпустіть її над "
-"крапкою з кольором"
+msgstr "Klik pada Pemilih dan kekalkan klik => lepas untuk peroleh warna"
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr "Закрити"
+msgstr "Tutup"
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr "Збірка"
+msgstr "Koleksi"
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
-msgstr "Кольорове коло"
+msgstr "Roda Warna"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "Налаштувати закладки"
+msgstr "Konfigur Tanda Buku"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr "Підтвердити"
+msgstr "Sahkan"
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr "Підтвердження"
+msgstr "Pengesahan"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
-msgstr "Неперервний"
+msgstr "Berterusan"
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr "Копіювати"
+msgstr "Salin"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "Не вдалося відкрити каталог <%s>"
+msgstr "Tidak dapat buka direktori <%s>"
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr "Створити"
+msgstr "Cipta"
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr "Створити каталог"
+msgstr "Cipta direktori"
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
-msgstr "Критична помилка"
+msgstr "Ralat Kritikal"
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
@@ -176,19 +174,19 @@ msgstr "Ctrl+"
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr "Вирізати"
+msgstr "Potong"
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr "База даних"
+msgstr "Pangkalan Data"
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr "гру"
+msgstr "Dis"
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr "грудень"
+msgstr "Disember"
 
 #: fpg_constants:rskeydel
 msgid "Del"
@@ -196,27 +194,27 @@ msgstr "Del"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr "Вилучити"
+msgstr "Padam"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr "Каталоги"
+msgstr "Direktori"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr "Каталог"
+msgstr "Direktori"
 
 #: fpg_constants:rskeydown
 msgid "Down"
-msgstr "Вниз"
+msgstr "Bawah"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr "Диск"
+msgstr "Pacu"
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "Змінити"
+msgstr "Sunting"
 
 #: fpg_constants:rskeyend
 msgid "End"
@@ -224,7 +222,7 @@ msgstr "End"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "англійська"
+msgstr "Inggeris"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
@@ -232,11 +230,11 @@ msgstr "Enter"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr "Введіть назву нового каталогу"
+msgstr "Masukkan nama direktori baharu"
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr "Помилка"
+msgstr "Ralat"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
@@ -244,95 +242,95 @@ msgstr "Esc"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr "Текст прикладу"
+msgstr "Teks Contoh"
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "Вийти"
+msgstr "Keluar"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "Не вдалося створити каталог <%s>"
+msgstr "Gagal mencipta direktori <%s>"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "Не вдалося знайти засіб перегляду довідки."
+msgstr "Gagal mencari pelihat bantuan."
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "Ні"
+msgstr "Palsu"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr "Вибрані"
+msgstr "Kegemaran"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr "лют"
+msgstr "Feb"
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr "лютий"
+msgstr "Februari"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "Вибір файла"
+msgstr "Pemilihan Fail"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr "Назва файла"
+msgstr "Nama Fail"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr "Файли"
+msgstr "Fail"
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr "Знайти"
+msgstr "Cari"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr "Фіксована ширина"
+msgstr "Lebar Tetap"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "Інші назви шрифту"
+msgstr "Alias Fon"
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "Файл шрифту <%s.fnt> не знайдено"
+msgstr "Fail fon <%s.fnt> tidak ditemui"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr "Пт"
+msgstr "Jum"
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr "п'ятниця"
+msgstr "Jumaat"
 
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
-msgstr "До батьківського каталогу"
+msgstr "Pergi ke direktori induk"
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Got to home directory"
-msgstr "Перейти до домашнього каталогу"
+msgstr "Pergi ke direktori rumah"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr "Зелений"
+msgstr "Hijau"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr "Група"
+msgstr "Kumpulan"
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr "Довідка"
+msgstr "Bantuan"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
-msgstr "Шістнадцяткове"
+msgstr "Heksadesimal"
 
 #: fpg_constants:rskeyhome
 msgid "Home"
@@ -340,15 +338,15 @@ msgstr "Home"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr "Ігнорувати"
+msgstr "Abai"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "Не вистачає зображення <%s>"
+msgstr "Imej <%s> hilang"
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr "Відомості"
+msgstr "Maklumat"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
@@ -356,71 +354,71 @@ msgstr "Ins"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr "Вставити"
+msgstr "Sisip"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr "Вставити із таблиці символів"
+msgstr "Sisip dari Peta Aksara"
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: %s"
-msgstr "Некоректний параметр на позиції %d: %s"
+msgstr "Pilihan tidak sah pada kedudukan %d: %s"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr "Курсив"
+msgstr "Condong"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr "Запис не належить до типу <%s>!"
+msgstr "Item bukan dari jenis <%s>!"
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr "січ"
+msgstr "Jan"
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr "січень"
+msgstr "Januari"
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr "лип"
+msgstr "Jul"
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr "липень"
+msgstr "Julai"
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr "чер"
+msgstr "Jun"
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr "червень"
+msgstr "Jun"
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr "Ліворуч"
+msgstr "Kiri"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr "Список має бути порожнім"
+msgstr "Senarai mesti kosong"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr "бер"
+msgstr "Mac"
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr "березень"
+msgstr "Mac"
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr "травень"
+msgstr "Mei"
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr "Повідомлення"
+msgstr "Mesej"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
@@ -428,91 +426,91 @@ msgstr "Meta+"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr "Час зміни"
+msgstr "Masa Mod."
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr "Пн"
+msgstr "Isn"
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr "понеділок"
+msgstr "Isnin"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr "Пересунути нижче"
+msgstr "Alih Bawah"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr "Пересунути вище"
+msgstr "Alih Atas"
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr "Назва"
+msgstr "Nama"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr "Ні"
+msgstr "Tidak"
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
-msgstr "Ні для всіх"
+msgstr "Tidak Semua"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr "лис"
+msgstr "Nov"
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr "листопад"
+msgstr "November"
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr "Гаразд"
+msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr "жов"
+msgstr "Okt"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr "жовтень"
+msgstr "Oktober"
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr "Відкрити"
+msgstr "Buka"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr "Відкрити файл"
+msgstr "Buka satu fail"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
-msgstr "Параметр у позиції %d не передбачає аргументів: %s"
+msgstr "Pilihan pada kedudukan %d tidak membenarkan argumen: %s"
 
 #: fpg_constants:serroptionneeded
 msgid "Option at position %d needs an argument: %s"
-msgstr "Параметр на позиції %d потребує аргументу: %s"
+msgstr "Pilihan pada kedudukan %d perlukan argumen: %s"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr "Власник"
+msgstr "Pemilik"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr "документи PDF"
+msgstr "Dokumen PDF"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr "Сторінка"
+msgstr "Halaman"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr "Пароль"
+msgstr "Kata Laluan"
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr "Вставити"
+msgstr "Tampal"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
@@ -524,91 +522,91 @@ msgstr "PgUp"
 
 #: fpg_constants:rstabpredefined
 msgid "Predefined"
-msgstr "Стандартне"
+msgstr "Pratakrif"
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr "Перегляд"
+msgstr "Pratonton"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr "Нещодавно використані"
+msgstr "Diguna Baru-Baru Ini"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr "Червоний"
+msgstr "Merah"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr "Замінити"
+msgstr "Ganti"
 
 #: fpg_constants:rsretry
 msgid "Retry"
-msgstr "Повторити"
+msgstr "Cuba Lagi"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr "Праворуч"
+msgstr "Kanan"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr "Права"
+msgstr "Hak"
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
-msgstr "Без засічок"
+msgstr "Sans"
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr "Сбт"
+msgstr "Sab"
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr "субота"
+msgstr "Sabtu"
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr "Зберегти"
+msgstr "Simpan"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr "Зберегти файл як"
+msgstr "Simpan fail sebagai"
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "Пошук"
+msgstr "Gelintar"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr "Розділ"
+msgstr "Seksyen"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "Позначити"
+msgstr "Pilih"
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr "Позначити все"
+msgstr "Pilih Semua"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
-msgstr "Виберіть каталог"
+msgstr "Pilih satu Direktori"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "Виберіть шрифт"
+msgstr "Pilih satu fon"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr "вер"
+msgstr "Sep"
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr "вересень"
+msgstr "September"
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
-msgstr "З засічками"
+msgstr "Serif"
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
@@ -616,109 +614,108 @@ msgstr "Shift+"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr "Показувати приховані файли"
+msgstr "Tunjuk fail tersembunyi"
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr "Розмір"
+msgstr "Saiz"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr "Пробіл"
+msgstr "Space"
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr "Стиль"
+msgstr "Gaya"
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
-msgstr "Нд"
+msgstr "Ahd"
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
-msgstr "неділя"
+msgstr "Ahad"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr "Табуляція"
+msgstr "Tab"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr "Тест, який слід вставити"
+msgstr "Teks untuk disisip"
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr "Немає сторінок для друку"
+msgstr "Tiada halaman hendak dicetak"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr "Чтв"
+msgstr "Kha"
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr "четвер"
+msgstr "Khamis"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "Сьогодні"
+msgstr "Hari ini"
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr "Так"
+msgstr "Benar"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr "Вт"
+msgstr "Sel"
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr "вівторок"
+msgstr "Selasa"
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr "Тип файла"
+msgstr "Jenis fail"
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
-msgstr "Гарнітура"
+msgstr "Rupa Taip"
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr "Підкреслений"
+msgstr "UnderScore"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr "Вище"
+msgstr "Naik"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "Ім'я користувача"
+msgstr "Nama pengguna"
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr "Попередження"
+msgstr "Amaran"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr "Ср"
+msgstr "Rab"
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr "середа"
+msgstr "Rabu"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "Хочете додати новий запис <%s> до списку?"
+msgstr "Anda mahu tambah item baharu <%s> ke dalam senarai?"
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr "Так"
+msgstr "Ya"
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
-msgstr "Так для всіх"
+msgstr "Ya Semua"
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr "з"
-
+msgstr "dari"
