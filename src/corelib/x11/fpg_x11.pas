@@ -1,7 +1,8 @@
 {
-    This unit is part of the fpGUI Toolkit project.
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (C) 2006 - 2019 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -2547,7 +2548,9 @@ begin
 
       WMHints^.icon_pixmap := IconPixmap;
       WMHints^.flags := IconPixmapHint;
-    end;
+    end
+    else
+      ApplyFormIcon;  // uses TfpgForm.IconName to set the window icon
 
     { setup window grouping posibilities }
     if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
@@ -2587,9 +2590,6 @@ begin
     { we need to set the XdndAware property }
     if QueueEnabledDrops then
       DoDNDEnabled(True);
-
-    if xapplication.xia_net_wm_icon <> 0 then
-      ApplyFormIcon;
   end;
 
   if FWindowType <> wtChild then
