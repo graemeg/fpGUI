@@ -1452,6 +1452,9 @@ end;
 
 constructor TfpgApplication.Create(const AParams: string);
 begin
+  InitializeDebugOutput;
+  fpgInitMsgQueue;
+
   FFontResList    := TList.Create;
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
@@ -3184,8 +3187,7 @@ initialization
   fpgCaret        := nil;
   fpgImages       := nil;
   iCallTrace      := -1;
-  InitializeDebugOutput;
-  fpgInitMsgQueue;
+
 {$ifdef AGGCanvas}
   DefaultCanvasClass := TAgg2D;
 {$else}
