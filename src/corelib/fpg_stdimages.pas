@@ -1,7 +1,8 @@
 {
-    This unit is part of the fpGUI Toolkit project.
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (C) 2006 - 2019 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -329,6 +330,11 @@ begin
             'stdimg.preview',
             @stdimg_preview,
       sizeof(stdimg_preview), 0,0);
+
+  fpgImages.AddBMP(
+            'stdimg.windowicon',
+            @stdimg_windowicon_16,
+      sizeof(stdimg_windowicon_16));
 
 {
   Here is a template for more images
