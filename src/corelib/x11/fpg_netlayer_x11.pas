@@ -175,6 +175,7 @@ type
     function    ManagerGetActiveWindow(out AWindow: TWindow): Boolean;
     function    ManagerSetActiveWindow(const AWindow: TWindow): Boolean;
     function    ManagerIsValid: Boolean;
+    function    ManagerSupportsAtom(AAtom: TNetAtomEnum): Boolean;
     // desktop functions
     function    DesktopGetSize(out AWidth, AHeight: Integer): Boolean;
     function    DesktopGetCurrent(out AIndex: Integer): Boolean;
@@ -664,6 +665,11 @@ function TNETWindowLayer.ManagerIsValid: Boolean;
 begin
   // if the window manager changes we need to refresh the list of atoms supported by it
   Result := False;  // ?????  Todo
+end;
+
+function TNETWindowLayer.ManagerSupportsAtom(AAtom: TNetAtomEnum): Boolean;
+begin
+  Result := FAtomSupported[AAtom];
 end;
 
 procedure TNETWindowLayer.SendRootWindowMessage(AMessage: PXEvent);
