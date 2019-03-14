@@ -1424,8 +1424,12 @@ begin
 end;
 
 procedure TfpgMemo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+const
+  // symbols and whitespace. Skip '_' since its often used in computery names.
+  // This treats all unicode chars above ASCII as "word" chars
+  noword = [#0..'/', ':'..'@', '['..'^', '`', '{'..'~'];
 var
-  cx: integer;
+  cx, l: integer;
   ls: string;
   ls2: string;
   hasChanged: boolean;
@@ -1469,30 +1473,49 @@ begin
         if FCursorPos > 0 then
         begin
           Dec(FCursorPos);
-          if (ssCtrl in shiftstate) then
+          if (ssCtrl in shiftstate) then begin
             // word search...
-            (*
-                    while (FCursorPos > 0) and not pgfIsAlphaNum(copy(CurrentLine,FCursorPos,1))
-                      do Dec(FCursorPos);
-
-                    while (FCursorPos > 0) and pgfIsAlphaNum(copy(CurrentLine,FCursorPos,1))
-                      do Dec(FCursorPos);
-            *);
+            ls:=CurrentLine;
+            while (FCursorPos > 0) and (ls[FCursorPos] in noword)
+              do Dec(FCursorPos);
+            if FCursorPos=0 then begin
+              if FCursorLine>0 then begin
+                dec(FCursorLine);
+                FCursorPos:=UTF8Length(CurrentLine);
+              end;
+            end else
+              while (FCursorPos > 0) and not (ls[FCursorPos] in noword)
+                do Dec(FCursorPos);
+          end;// ...word search
+        end
+        else if FCursorLine > 0 then
+        begin
+          Dec(FCursorline);
+          FCursorPos:=UTF8Length(CurrentLine);
         end;// left
 
       keyRight:
         if FCursorPos < UTF8Length(CurrentLine) then
         begin
           Inc(FCursorPos);
-          if (ssCtrl in shiftstate) then
+          if (ssCtrl in shiftstate) then begin
             // word search...
-            (*
-                    while (FCursorPos < length(CurrentLine)) and pgfIsAlphaNum(copy(CurrentLine,FCursorPos+1,1))
-                      do Inc(FCursorPos);
-
-                    while (FCursorPos < length(CurrentLine)) and not pgfIsAlphaNum(copy(CurrentLine,FCursorPos+1,1))
-                      do Inc(FCursorPos);
-              *);
+            ls:=CurrentLine;
+            l:=length(ls);
+            while (FCursorPos < l) and (ls[FCursorPos] in noword)
+              do Inc(FCursorPos);
+            while (FCursorPos < l) and not (ls[FCursorPos] in noword)
+              do Inc(FCursorPos);
+            if (FCursorPos=UTF8Length(ls)) and (FCursorLine<LineCount-1) then begin
+              Inc(FCursorLine);
+              FCursorPos:=0;
+            end;
+          end;// ...word search
+        end
+        else if FCursorLine < (LineCount-1) then
+        begin
+          FCursorPos:=0;
+          inc(FCursorLine);
         end;// right
 
       keyUp:
@@ -1551,6 +1574,22 @@ begin
         end;
       end;
 
+      ord('A'):
+      begin
+        if [ssShift, ssAlt, ssCtrl]*shiftstate = [ssCtrl] then begin
+          if LineCount>0 then begin
+            FSelStartLine:=0;
+            FSelStartPos:=0;
+            FSelEndLine:=LineCount-1;
+            FSelEndPos:=UTF8Length(GetLineText(FSelEndLine));
+            FCursorLine:=FSelEndLine;
+            FCursorPos:=FSelEndPos;
+            FSelecting:=true;
+          end;
+        end else
+          consumed:=false;
+      end;
+
       else
         Consumed := False;
     end;
@@ -1588,7 +1627,9 @@ begin
 
       keyBackSpace:
           begin
-            if FCursorPos > 0 then
+            if SelectionText <> '' then
+              DeleteSelection
+            else if FCursorPos > 0 then
             begin
               ls := GetLineText(FCursorLine);
               UTF8Delete(ls, FCursorPos, 1);
