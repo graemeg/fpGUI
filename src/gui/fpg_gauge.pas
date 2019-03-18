@@ -1,4 +1,4 @@
-﻿{
+{
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2007 by Giuliano Colla.
