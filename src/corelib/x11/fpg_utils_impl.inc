@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2019 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -15,7 +15,11 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Unix, BaseUnix, process, fpg_constants, fpg_stringutils;
+  Unix,
+  BaseUnix,
+  process,
+  fpg_constants,
+  fpg_stringutils;
 
 // X11 specific filesystem implementations of encoding functions
 
@@ -32,9 +36,10 @@ end;
 procedure fpgOpenURL(const aURL: TfpgString);
 var
   Helper: string;
+  p: TProcess;
 begin
-//TODO: Catch "which" command output to run the browser from there
   Helper := '';
+  //TODO: Catch "which" command output to run the browser from there
   if fpsystem('which xdg-open') = 0 then
     Helper := 'xdg-open'
   else if FileExists('/usr/bin/sensible-browser') then
@@ -54,13 +59,17 @@ begin
   else if fpsystem('which chromium') = 0 then
      Helper := 'chromium';
 
-  if Helper <> '' then with TProcess.create(nil) do try
-    executable:=Helper;
-    parameters.add(aURL);
-    execute;
-  finally
-    free;
-  end;
+  if Helper <> '' then
+  begin
+    p := TProcess.create(nil);
+    try
+      p.Executable := Helper;
+      p.Parameters.Add(aURL);
+      p.Execute;
+    finally
+      p.Free;
+    end;
+  end
 end;
 
 function fpgFileSize(const AFilename: TfpgString): integer;
