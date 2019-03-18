@@ -6,11 +6,11 @@
 	  <descr><printshort id="fpg_form"/>.</descr>
 
 <element name="TWindowPosition.wpUser">
-<short>OS or Desktop/Window manager decides the position.</short>
+<short>Window gets placed in exact x,y coordinates set by developer.</short>
 </element>
 
 <element name="TWindowPosition.wpAuto">
-<short>Window gets placed in exact x,y coordinates set by developer.</short>
+<short>OS or Desktop/Window manager decides the position.</short>
 </element>
 
 <element name="TWindowPosition.wpScreenCenter">
