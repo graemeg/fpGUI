@@ -19,8 +19,6 @@ unit fpg_memo;
 
 {$mode objfpc}{$H+}
 
-  { TODO : Started a implementation for Tab support. It is still very experimental and should not be used yet. }
-
 interface
 
 uses
@@ -67,6 +65,7 @@ type
     function    GetFontDesc: string;
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetFontDesc(const AValue: string);
+    function    TabbedTextWidth(const AText: TfpgString): integer;
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -520,6 +519,34 @@ begin
   inherited Destroy;
 end;
 
+function TfpgMemo.TabbedTextWidth(const AText: TfpgString): integer;
+var
+  tstop, p, i: integer;
+begin
+  result := 0;
+  if AText = '' then exit;
+  tstop := FFont.TextWidth('+') * FTabWidth;
+  p := 1;
+  for i := 1 to length(AText) do
+  begin
+    if AText[i] = #9 then
+    begin
+      if p <> i then
+        inc(result, FFont.TextWidth(copy(AText, p, i - p)));
+      inc(result, tstop - (result mod tstop));
+      p := i + 1;
+    end;
+  end;
+  // fpc exits FOR with i = length(AText)
+  if p <= i then
+  begin
+    if p > 1 then
+      inc(result, FFont.TextWidth(copy(AText, p, i - p + 1)))
+    else // more efficient if we don't have to make another string
+      result := FFont.TextWidth(AText);
+  end;
+end;
+
 procedure TfpgMemo.RecalcLongestLine;
 var
   n: integer;
@@ -528,7 +555,7 @@ begin
   FLongestLineWidth := 0;
   for n := 0 to LineCount-1 do
   begin
-    lw := FFont.TextWidth(getlinetext(n));
+    lw := TabbedTextWidth(getlinetext(n));
     if lw > FlongestLineWidth then
       FlongestLineWidth := lw;
   end;
@@ -697,7 +724,7 @@ var
 begin
   // horizontal adjust
   RecalcLongestLine;
-  tw := FFont.TextWidth(UTF8Copy(CurrentLine, 1, FCursorPos));
+  tw := TabbedTextWidth(UTF8Copy(CurrentLine, 1, FCursorPos));
 
   if tw - FDrawOffset > VisibleWidth - 2 then
     FDrawOffset := tw - VisibleWidth + 2
@@ -818,7 +845,7 @@ end;
 
 function TfpgMemo.GetCursorX: integer;
 begin
-  Result := FFont.TextWidth(copy(CurrentLine, 1, FCursorPos));
+  Result := TabbedTextWidth(UTF8copy(CurrentLine, 1, FCursorPos));
 end;
 
 // Set cursor position by X
@@ -832,14 +859,14 @@ var
 begin
   // searching the appropriate character position
   ls  := CurrentLine;
-  cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)); // + FDrawOffset + FSideMargin;
+  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)); // + FDrawOffset + FSideMargin;
   cp  := FCursorPos;
   if cp > UTF8Length(ls) then
     cp := UTF8Length(ls);
 
   for n := 0 to UTF8Length(ls) do
   begin
-    cx := FFont.TextWidth(UTF8Copy(ls, 1, n)); // + FDrawOffset + FSideMargin;
+    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)); // + FDrawOffset + FSideMargin;
     if abs(cx - x) < abs(cpx - x) then
     begin
       cpx := cx;
@@ -932,7 +959,7 @@ end;
 procedure TfpgMemo.HandlePaint;
 var
   n: integer;
-  tw, tw2, st, len: integer;
+  tw, tw2, st, len, tstop: integer;
   yp, xp: integer;
   ls: string;
   r: TfpgRect;
@@ -986,6 +1013,7 @@ begin
   end;
 
   yp := 3;
+  tstop := -1; // init tab stop cache
   for n := FFirstline to LineCount-1 do
   begin
     ls := GetLineText(n);
@@ -998,8 +1026,13 @@ begin
         if ls[c] = #9 then
         begin
           if s <> '' then
+          begin
             Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
-          xp := xp + Canvas.Font.TextWidth(' ') * FTabWidth;
+            inc(xp, Canvas.Font.TextWidth(s));
+          end;
+          if tstop = -1 then
+            tstop := TabbedTextWidth(#9);
+          inc(xp, tstop-(xp mod tstop));
           s := '';
         end
         else
@@ -1025,8 +1058,8 @@ begin
         else
           len := selep - st;
 
-        tw  := FFont.TextWidth(UTF8Copy(ls, 1, st));
-        tw2 := FFont.TextWidth(UTF8Copy(ls, 1, st + len));
+        tw  := TabbedTextWidth(UTF8Copy(ls, 1, st));
+        tw2 := TabbedTextWidth(UTF8Copy(ls, 1, st + len));
         Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, -FDrawOffset +
           FSideMargin + tw, yp, tw2 - tw, LineHeight);
       end;
@@ -1035,7 +1068,7 @@ begin
       if FCursorLine = n then
       begin
         // drawing cursor
-        tw := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos));
+        tw := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos));
         fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.Height);
       end;
     end;  { if }
@@ -1314,22 +1347,12 @@ begin
           begin
             if FUseTabs then
             begin
+              if SelectionText <> '' then
+                DeleteSelection;
               ls := GetLineText(FCursorLine);
-{              if FSelEndLine > 0 then
-                DeleteSelection
-              else} if FCursorPos < UTF8Length(ls) then
-              begin
-                UTF8Insert(#9, ls, FCursorPos);
-                SetLineText(FCursorLine, ls);
-              end;
-{
-              else if FCursorLine < LineCount then
-              begin
-                ls2 := FLines.Strings[FCursorLine];
-                FLines.Delete(FCursorLine);
-                FLines.Strings[FCursorLine - 1] := ls + ls2;
-              end;
-}
+              inc(FCursorPos);
+              UTF8Insert(#9, ls, FCursorPos);
+              SetLineText(FCursorLine, ls);
               hasChanged := True;
             end
             else
@@ -1374,12 +1397,12 @@ begin
     lnum := LineCount-1;
 
   ls  := GetLineText(lnum);
-  cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
+  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp  := FCursorPos;
 
   for n := 0 to UTF8Length(ls) do
   begin
-    cx := FFont.TextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
+    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
     if abs(cx - x) < abs(cpx - x) then
     begin
       cpx := cx;
@@ -1438,12 +1461,12 @@ begin
     lnum := LineCount-1;
 
   ls  := GetLineText(lnum);
-  cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
+  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp  := FCursorPos;
 
   for n := 0 to UTF8Length(ls) do
   begin
-    cx := FFont.TextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
+    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
     if abs(cx - x) < abs(cpx - x) then
     begin
       cpx := cx;
