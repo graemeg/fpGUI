@@ -74,6 +74,7 @@ type
     function    GetLineText(linenum: integer): string;
     procedure   SetLineText(linenum: integer; Value: string);
     function    GetCursorX: integer;
+    function    CurPosByX(x: integer; const line: string): integer;
     procedure   SetCPByX(x: integer);
     function    CurrentLine: string;
     function    VisibleLines: integer;
@@ -848,33 +849,35 @@ begin
   Result := TabbedTextWidth(UTF8copy(CurrentLine, 1, FCursorPos));
 end;
 
-// Set cursor position by X
-procedure TfpgMemo.SetCPByX(x: integer);
+function TfpgMemo.CurPosByX(x: integer; const line: string): integer;
 var
-  n: integer;
-  cpx: integer;
-  cp: integer;
-  cx: integer;
-  ls: string;
+  tstop, cpx, adj, cw: integer;
+  ls, c: string;
 begin
   // searching the appropriate character position
-  ls  := CurrentLine;
-  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)); // + FDrawOffset + FSideMargin;
-  cp  := FCursorPos;
-  if cp > UTF8Length(ls) then
-    cp := UTF8Length(ls);
-
-  for n := 0 to UTF8Length(ls) do
+  cpx := 0;
+  adj := -FDrawOffset + FSideMargin;
+  tstop := TabbedTextWidth(#9);
+  for result := 0 to UTF8Length(line)-1 do
   begin
-    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)); // + FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
+    c:=UTF8Copy(line, result+1, 1);
+    if c=#9 then
+      cw:=tstop - (cpx mod tstop)
+    else
+      cw := FFont.TextWidth(c);
+    // "shr 1" is fastest "div 2"
+    if x <= adj + (cw shr 1) then exit;
+    inc(cpx, cw);
+    inc(adj, cw);
   end;
+  // not found. so x > the middle of the last char
+  inc(result);
+end;
 
-  FCursorPos := cp;
+// Set cursor position by X
+procedure TfpgMemo.SetCPByX(x: integer);
+begin
+  FCursorPos := CurPosByX(x, CurrentLine);
 end;
 
 function TfpgMemo.CurrentLine: string;
@@ -1381,12 +1384,7 @@ end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
-  n: integer;
-  cpx: integer;
-  cp: integer;
-  cx: integer;
   lnum: integer;
-  ls: string;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   ResetSelectionVariables;
@@ -1396,36 +1394,22 @@ begin
   if lnum > (LineCount-1) then
     lnum := LineCount-1;
 
-  ls  := GetLineText(lnum);
-  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  cp  := FCursorPos;
-
-  for n := 0 to UTF8Length(ls) do
-  begin
-    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
-  end;
-
   FMouseDragging := True;
-  FMouseDragPos  := cp;
-  FCursorPos     := cp;
+  FMouseDragPos  := CurPosByX(x, GetLineText(lnum));
+  FCursorPos     := FMouseDragPos;
   FCursorLine    := lnum;
 
   if (ssShift in shiftstate) then
   begin
     FSelEndLine := lnum;
-    FSelEndpos  := cp;
+    FSelEndpos  := FMouseDragPos;
     FSelecting := True;
   end
   else
   begin
     FSelecting := False;
     FSelStartLine := lnum;
-    FSelStartPos  := cp;
+    FSelStartPos  := FMouseDragPos;
     FSelEndLine   := -1;
   end;
   Repaint;
@@ -1442,12 +1426,8 @@ end;
 
 procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
-  n: integer;
-  cpx: integer;
   cp: integer;
-  cx: integer;
   lnum: integer;
-  ls: string;
 begin
   if not FMouseDragging or ((btnstate and 1) = 0) then
   begin
@@ -1459,21 +1439,7 @@ begin
   lnum := FFirstLine + (y - FSideMargin) div LineHeight;
   if lnum > LineCount-1 then
     lnum := LineCount-1;
-
-  ls  := GetLineText(lnum);
-  cpx := TabbedTextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  cp  := FCursorPos;
-
-  for n := 0 to UTF8Length(ls) do
-  begin
-    cx := TabbedTextWidth(UTF8Copy(ls, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
-  end;
-
+  cp := CurPosByX(x, GetLineText(lnum));
   if (cp <> FCursorPos) or (lnum <> FCursorLine) then
   begin
     FCursorLine := lnum;
