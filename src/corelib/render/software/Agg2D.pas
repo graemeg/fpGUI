@@ -23,7 +23,7 @@
 // warranty, and with no claim as to its suitability for any purpose.
 //----------------------------------------------------------------------------
 
-unit Agg2D;
+unit Agg2D ;
 
 {$I agg_mode.inc }
 
@@ -104,8 +104,12 @@ uses
   {$IFDEF AGG_WINDOWS}
     {$I agg_platform_gdi.inc}
   {$ENDIF}
-  {$IFDEF AGG_LINUX}
-    {$I agg_platform_x11.inc}
+  {$IFDEF AGG_LINUX}    
+    {$IFDEF wayland}
+      {$I agg_platform_wayland.inc}
+    {$ELSE}
+      {$I agg_platform_x11.inc}
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF AGG_MACOSX}
     {$I agg_platform_cocoa.inc}
@@ -271,8 +275,10 @@ type
 
   end;
 
+ { TAgg2D }
+
  TAgg2D = class(TfpgCanvasBase)
-  private
+  protected
    m_rbuf : rendering_buffer;
    m_pixf : TPixelFormat;
 
@@ -376,7 +382,11 @@ type
       {$I agg_platform_gdi.inc}
     {$ENDIF}
     {$IFDEF AGG_LINUX}
-      {$I agg_platform_x11.inc}
+      {$IFDEF wayland}
+        {$I agg_platform_wayland.inc}
+      {$ELSE}
+        {$I agg_platform_x11.inc}
+      {$ENDIF}
     {$ENDIF}
     {$IFDEF AGG_MACOSX}
       {$I agg_platform_cocoa.inc}
@@ -419,6 +429,7 @@ type
   // Vector Graphics Engine Initialization
    function  Attach(bitmap: TfpgImage; const aWidth, aHeight: integer; const aStride: integer; const aOffset: integer = 0): boolean; overload;
    function  Attach(bitmap: TfpgImage; flip_y: boolean = false ): boolean; overload;
+   function  Attach(imagedata: pointer; aformat: TPixelFormat; const aWidth, aHeight: integer; const aStride: integer; const aOffset: integer = 0): boolean; overload;
    function  AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
 
    procedure ClearAll(c : TAggColor ); overload;
@@ -682,7 +693,11 @@ uses
     {$I agg_platform_gdi.inc}
   {$ENDIF}
   {$IFDEF AGG_LINUX}
-    {$I agg_platform_x11.inc}
+    {$IFDEF wayland}
+      {$I agg_platform_wayland.inc}    
+    {$ELSE}
+      {$I agg_platform_x11.inc}
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF AGG_MACOSX}
     {$I agg_platform_cocoa.inc}
@@ -1210,7 +1225,11 @@ end;
   {$I agg_platform_gdi.inc}
 {$ENDIF}
 {$IFDEF AGG_LINUX}
-  {$I agg_platform_x11.inc}
+  {$IFDEF wayland}
+    {$I agg_platform_wayland.inc}  
+  {$ELSE}
+    {$I agg_platform_x11.inc}
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF AGG_MACOSX}
   {$I agg_platform_cocoa.inc}
@@ -1387,49 +1406,17 @@ begin
   Result := Attach(bitmap, bitmap.Width, bitmap.Height, stride, 0);
 end;
 
-function TAgg2D.AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
-var
-  stride: integer;
-  OffsetIntoImage: integer;
+function TAgg2D.Attach(imagedata: pointer; aformat: TPixelFormat; const aWidth,
+  aHeight: integer; const aStride: integer; const aOffset: integer): boolean;
 begin
-  stride := Integer(bitmap.ScanLine[1] - bitmap.ScanLine[0]);
-  OffsetIntoImage := ARect.Left * 4 + ARect.Top * stride;
-
-  Result := Attach(bitmap, ARect.Width, ARect.Height, stride, OffsetIntoImage);
-end;
-
-function TAgg2D.Attach(bitmap: TfpgImage; const aWidth, aHeight: integer; const aStride: integer;
-    const aOffset: integer): boolean;
-var
-  buffer: pointer;
-begin
-  Result := false;
-
-  if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) then
-  case bitmap.ColorDepth of
-   24,
-   32:
-    begin
-    { Rendering Buffer }
-     if aStride < 0 then
-     begin
-       buffer := bitmap.ScanLine[aHeight - 1];
-       buffer -= aOffset;
-     end
-     else
-     begin
-       buffer := bitmap.ScanLine[0];
-       buffer += aOffset;
-     end;
-
-     m_rbuf.attach(
-      buffer ,
+   m_rbuf.attach(
+      imagedata ,
       aWidth ,
       aHeight ,
       aStride );
 
      { Pixel Format }
-     m_pixf :=  ColorDepthToPixelFormat(bitmap.ColorDepth);
+     m_pixf := aformat;
 
      case m_pixf of
       pf24bit :
@@ -1486,6 +1473,44 @@ begin
 
     { OK }
      Result := true;
+end;
+
+function TAgg2D.AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
+var
+  stride: integer;
+  OffsetIntoImage: integer;
+begin
+  stride := Integer(bitmap.ScanLine[1] - bitmap.ScanLine[0]);
+  OffsetIntoImage := ARect.Left * 4 + ARect.Top * stride;
+
+  Result := Attach(bitmap, ARect.Width, ARect.Height, stride, OffsetIntoImage);
+end;
+
+function TAgg2D.Attach(bitmap: TfpgImage; const aWidth, aHeight: integer; const aStride: integer;
+    const aOffset: integer): boolean;
+var
+  buffer: pointer;
+begin
+  Result := false;
+
+  if Assigned(bitmap ) and (bitmap.ImageDataSize <> 0) then
+  case bitmap.ColorDepth of
+   24,
+   32:
+    begin
+    { Rendering Buffer }
+     if aStride < 0 then
+     begin
+       buffer := bitmap.ScanLine[aHeight - 1];
+       buffer -= aOffset;
+     end
+     else
+     begin
+       buffer := bitmap.ScanLine[0];
+       buffer += aOffset;
+     end;
+
+     Result := Attach(buffer, ColorDepthToPixelFormat(bitmap.ColorDepth), aWidth, aHeight, aStride, aOffset);
 
     end;  { 24 & 32-bit colordepth }
   end;  { case }
@@ -3625,7 +3650,7 @@ begin
 {$IFDEF UNIX}
   fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
   i := gFontCache.Find(fnt);
-  if i > 0 then
+  if i > -1 then
     Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
   fnt.Free;
 {$ENDIF}  // unix
@@ -3741,6 +3766,7 @@ begin
     begin
       if (FCaretPos.x = x) and (FCaretPos.y = y) then
         DrawImage(x, y, FCaretImg);
+
       FreeAndNil(FCaretImg);
     end;
     FPaintCaret := True

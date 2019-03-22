@@ -1923,18 +1923,32 @@ begin
 end;
 
 procedure TfpgApplication.WaitWindowMessage(atimeoutms: integer);
+var
+  lTimeout: Integer;
 begin
   if IsMultiThread then
     CheckSynchronize;  // execute the to-be synchronized method
 
-  DoWaitWindowMessage(fpgClosestTimer(now, atimeoutms));
+  // fpgClosestTimer will return -1 if there are no timers present. This time
+  // can cause us to wait for an event from the window manager when possibly
+  // there are messages in our app waiting to be handled!
+  lTimeout := fpgClosestTimer(now, atimeoutms);
+
+  // dont wait for a messages from the underling system when we already have some waiting
+  if UsedFirstMessage <> nil then
+    lTimeout:=1;
+
+  if lTimeout = -1 then
+    lTimeout := atimeoutms;
+
+  DoWaitWindowMessage(atimeoutms);
   fpgDeliverMessages;
   fpgCheckTimers;
 end;
 
 procedure TfpgApplication.RunMessageLoop;
 begin
-  WaitWindowMessage(2000);
+  WaitWindowMessage(200);
 end;
 
 { TfpgFont }

@@ -273,8 +273,8 @@ type
     constructor Create;
     destructor  Destroy; override;
     procedure   Invert(IncludeMask: Boolean = False);
-    procedure   FreeImage;
-    procedure   AllocateImage(acolordepth, awidth, aheight: integer);
+    procedure   FreeImage; virtual;
+    procedure   AllocateImage(acolordepth, awidth, aheight: integer); virtual;
     procedure   AllocateMask;
     procedure   CreateMaskFromSample(x, y: TfpgCoord);
     { Must always be called AFTER you populated the ImageData array. Then only does it allocate OS resources. }
