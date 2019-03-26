@@ -969,10 +969,10 @@ begin
 end;
 </code>
 <p>
-Accuracy is traded for speed. This is a useful, and quick to calculate, approximation to the
+Accuracy is traded for speed. This is a useful and quick to calculate approximation to the
 true length:</p>
 <code>
-    TrueLength := sqrt(power(X, 2) + power(Y, 2));
+  TrueLength := sqrt(power(X1 - X2, 2) + power(Y1 - Y2, 2));
 </code>
 <p>
 The tradition of "Manhattan length" arises because such distances
