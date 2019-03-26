@@ -509,8 +509,8 @@ begin
       if RCount = 0 then
         Exit;
 
-      CharPos := fpgRect(HexLeft+(x*(CharSize.W+CharSpacing)),PaintTop+y*CharSize.H, CharSize.W, CharSize.H);
-      TextPos:=  fpgRect(TextLeft+x*CharWidth,PaintTop+y*CharSize.H, CharWidth, CharSize.H);
+      CharPos.SetRect(HexLeft+(x*(CharSize.W+CharSpacing)),PaintTop+y*CharSize.H, CharSize.W, CharSize.H);
+      TextPos.SetRect(TextLeft+x*CharWidth,PaintTop+y*CharSize.H, CharWidth, CharSize.H);
 
       if FStream.Position-1 = FCursor then
       begin
@@ -590,10 +590,14 @@ end;
 procedure TfpgHexView.HandlePaint;
 var
   StartRow: Integer;
+  r: TfpgRect;
 begin
   UpdateScrollbar;
-  fpgStyle.DrawBevel(Canvas,0,0,Width,Height, False);
-  Canvas.SetClipRect(fpgRect(0,0,Width-fpgStyle.GetBevelWidth*2, Height-fpgStyle.GetBevelWidth*2));
+  fpgStyle.DrawBevel(Canvas, 0, 0, Width, Height, False);
+
+  r.SetRect(0, 0, Width - fpgStyle.GetBevelWidth * 2, Height - fpgStyle.GetBevelWidth * 2);
+  Canvas.SetClipRect(r);
+
   Canvas.Font := Font;
 
   StartRow:= FVScroll.Position;
