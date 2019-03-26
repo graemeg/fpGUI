@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2018 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2019 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -41,7 +41,6 @@ type
     FPopupWidget: TfpgWidget;
     procedure   SetPopupFrame(const AValue: boolean);
     function    GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
-    procedure   SetPopupWidget(AValue: TfpgWidget);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandleClose; virtual;
@@ -59,7 +58,7 @@ type
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
-    property    PopupWidget: TfpgWidget read FPopupWidget write SetPopupWidget;
+    property    PopupWidget: TfpgWidget read FPopupWidget;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
@@ -229,12 +228,6 @@ begin
   // popup window will not fit to right of (x,y) so we place it to left of (x,y)
   if (Result.x + self.Width) > fpgApplication.ScreenWidth then
     Result.x := Result.x - self.Width;
-end;
-
-procedure TfpgPopupWindow.SetPopupWidget(AValue: TfpgWidget);
-begin
-  if FPopupWidget = AValue then Exit;
-  FPopupWidget := AValue;
 end;
 
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
