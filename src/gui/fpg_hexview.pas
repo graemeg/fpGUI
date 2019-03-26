@@ -129,6 +129,11 @@ type
 
 implementation
 
+
+type
+  // to get access to protected methods
+  TScrollbarFriend = class(TfpgScrollBar);
+
 { TfpgHexPanel }
 
 function TfpgHexPanel.IntTypeToString(AType: TIntType): String;
@@ -646,8 +651,7 @@ end;
 
 procedure TfpgHexView.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 begin
-  // casting is safe since it's a virtual function. This is to access HandleMouseScroll.
-  TfpgHexView(FVScroll).HandleMouseScroll(x, y, shiftstate, delta);
+  TScrollbarFriend(FVScroll).HandleMouseScroll(x, y, shiftstate, delta);
 end;
 
 procedure TfpgHexView.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
