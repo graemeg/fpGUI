@@ -129,6 +129,11 @@ type
 
 implementation
 
+
+type
+  // to get access to protected methods
+  TScrollbarFriend = class(TfpgScrollBar);
+
 { TfpgHexPanel }
 
 function TfpgHexPanel.IntTypeToString(AType: TIntType): String;
@@ -504,8 +509,8 @@ begin
       if RCount = 0 then
         Exit;
 
-      CharPos := fpgRect(HexLeft+(x*(CharSize.W+CharSpacing)),PaintTop+y*CharSize.H, CharSize.W, CharSize.H);
-      TextPos:=  fpgRect(TextLeft+x*CharWidth,PaintTop+y*CharSize.H, CharWidth, CharSize.H);
+      CharPos.SetRect(HexLeft+(x*(CharSize.W+CharSpacing)),PaintTop+y*CharSize.H, CharSize.W, CharSize.H);
+      TextPos.SetRect(TextLeft+x*CharWidth,PaintTop+y*CharSize.H, CharWidth, CharSize.H);
 
       if FStream.Position-1 = FCursor then
       begin
@@ -569,13 +574,12 @@ var
   I: IfpgHexEventListener;
   Data: QWord;
 begin
+  Data := 0;
   if Assigned(FStream) then
   begin
     FStream.Position:=FCursor;
     FStream.Read(Data, 8);
-  end
-  else
-    Data := 0;
+  end;
 
   if not (csDestroying in ComponentState) then
     for I in FEventListenerList do
@@ -585,10 +589,14 @@ end;
 procedure TfpgHexView.HandlePaint;
 var
   StartRow: Integer;
+  r: TfpgRect;
 begin
   UpdateScrollbar;
-  fpgStyle.DrawBevel(Canvas,0,0,Width,Height, False);
-  Canvas.SetClipRect(fpgRect(0,0,Width-fpgStyle.GetBevelWidth*2, Height-fpgStyle.GetBevelWidth*2));
+  fpgStyle.DrawBevel(Canvas, 0, 0, Width, Height, False);
+
+  r.SetRect(0, 0, Width - fpgStyle.GetBevelWidth * 2, Height - fpgStyle.GetBevelWidth * 2);
+  Canvas.SetClipRect(r);
+
   Canvas.Font := Font;
 
   StartRow:= FVScroll.Position;
@@ -646,8 +654,7 @@ end;
 
 procedure TfpgHexView.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 begin
-  // casting is safe since it's a virtual function. This is to access HandleMouseScroll.
-  TfpgHexView(FVScroll).HandleMouseScroll(x, y, shiftstate, delta);
+  TScrollbarFriend(FVScroll).HandleMouseScroll(x, y, shiftstate, delta);
 end;
 
 procedure TfpgHexView.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
