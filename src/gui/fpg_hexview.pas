@@ -574,13 +574,12 @@ var
   I: IfpgHexEventListener;
   Data: QWord;
 begin
+  Data := 0;
   if Assigned(FStream) then
   begin
     FStream.Position:=FCursor;
     FStream.Read(Data, 8);
-  end
-  else
-    Data := 0;
+  end;
 
   if not (csDestroying in ComponentState) then
     for I in FEventListenerList do
