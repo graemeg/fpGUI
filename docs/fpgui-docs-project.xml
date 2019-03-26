@@ -117,7 +117,7 @@
         <description file="xml/corelib/fpg_extinterpolation.xml"/>
 <!--        <description file="xml/corelib/fpg_stdimages.xml"/> -->
 <!--        <description file="xml/corelib/fpg_stringutils.xml"/> -->
-<!--        <description file="xml/corelib/fpg_popupwindow.xml"/> -->
+        <description file="xml/corelib/fpg_popupwindow.xml"/>
 <!--        <description file="xml/corelib/fpg_imagelist.xml"/> -->
 <!--        <description file="xml/corelib/fpg_pofiles.xml"/> -->
 <!--        <description file="xml/corelib/fpg_translations.xml"/> -->

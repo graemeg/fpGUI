@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2019 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -32,14 +32,13 @@ uses
   
 type
 
-  { TfpgPopupWindow }
-
   TfpgPopupWindow = class(TfpgWindow)
   private
     FDontCloseWidget: TfpgWidget;
     FOnClose: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FPopupFrame: boolean;
+    FPopupWidget: TfpgWidget;
     procedure   SetPopupFrame(const AValue: boolean);
     function    GetDisplayPos(AReferenceWindow: TfpgWidget; const x, y: integer): TPoint;
   protected
@@ -59,6 +58,7 @@ type
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    PopupWidget: TfpgWidget read FPopupWidget;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
@@ -348,7 +348,8 @@ begin
     Left  := x;
     Top   := y;
   end;
-  
+
+  FPopupWidget := AWidget;
   // and show
   HandleShow;
 end;
