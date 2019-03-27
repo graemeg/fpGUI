@@ -1,7 +1,8 @@
 {
-    This unit is part of the fpGUI Toolkit project.
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (C) 2006 - 2019 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -2537,14 +2538,20 @@ begin
 
   if IsToplevel then // is a toplevel window
   begin
-    { setup a window icon }
-
-    IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
-      @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
-
     WMHints := XAllocWMHints;
-    WMHints^.icon_pixmap := IconPixmap;
-    WMHints^.flags := IconPixmapHint;
+
+    { setup a window icon }
+    if not fpgApplication.netlayer.ManagerSupportsAtom(naWM_ICON) then
+    begin
+      IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
+        @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
+
+      WMHints^.icon_pixmap := IconPixmap;
+      WMHints^.flags := IconPixmapHint;
+    end
+    else
+      ApplyFormIcon;  // uses TfpgForm.IconName to set the window icon
+
     { setup window grouping posibilities }
     if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
     if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
@@ -2583,9 +2590,6 @@ begin
     { we need to set the XdndAware property }
     if QueueEnabledDrops then
       DoDNDEnabled(True);
-
-    if xapplication.xia_net_wm_icon <> 0 then
-      ApplyFormIcon;
   end;
 
   if FWindowType <> wtChild then

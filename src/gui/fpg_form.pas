@@ -287,6 +287,7 @@ begin
   inherited Create(AOwner);
   FWindowPosition  := wpAuto;
   FWindowTitle     := '';
+  FIconName        := 'stdimg.windowicon';
   FSizeable        := True;
   FParentForm      := nil;
   FBackgroundColor := clWindowBackground;
