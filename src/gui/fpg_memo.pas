@@ -482,7 +482,7 @@ begin
   FTextColor  := Parent.TextColor;
   FBackgroundColor := clBoxColor;
   FUseTabs    := False;
-  FTabWidth   := 4;
+  FTabWidth   := 8;
   FMinWidth   := 20;
   FMinHeight  := 30;
   FPopupMenu  := nil;
@@ -1020,32 +1020,27 @@ begin
   for n := FFirstline to LineCount-1 do
   begin
     ls := GetLineText(n);
-    if FUseTabs then
+    xp := 0;
+    s := '';
+    for c := 1 to Length(ls) do
     begin
-      xp := 0;
-      s := '';
-      for c := 1 to Length(ls) do
+      if ls[c] = #9 then
       begin
-        if ls[c] = #9 then
+        if s <> '' then
         begin
-          if s <> '' then
-          begin
-            Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
-            inc(xp, Canvas.Font.TextWidth(s));
-          end;
-          if tstop = -1 then
-            tstop := TabbedTextWidth(#9);
-          inc(xp, tstop-(xp mod tstop));
-          s := '';
-        end
-        else
-          s := s + ls[c];
-      end;
-      if s <> '' then
-        Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
-    end
-    else
-      Canvas.DrawString(-FDrawOffset + FSideMargin, yp, ls);
+          Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
+          inc(xp, Canvas.Font.TextWidth(s));
+        end;
+        if tstop = -1 then
+          tstop := TabbedTextWidth(#9);
+        inc(xp, tstop-(xp mod tstop));
+        s := '';
+      end
+      else
+        s := s + ls[c];
+    end;
+    if s <> '' then
+      Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
 
     if Focused then
     begin
