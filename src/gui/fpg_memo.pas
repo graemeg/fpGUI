@@ -1109,10 +1109,6 @@ begin
 end;
 
 procedure TfpgMemo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-const
-  // symbols and whitespace. Skip '_' since its often used in computery names.
-  // This treats all unicode chars above ASCII as "word" chars
-  noword = [#0..'/', ':'..'@', '['..'^', '`', '{'..'~'];
 var
   cx, l: integer;
   ls: string;
@@ -1161,7 +1157,7 @@ begin
           if (ssCtrl in shiftstate) then begin
             // word search...
             ls:=CurrentLine;
-            while (FCursorPos > 0) and (ls[FCursorPos] in noword)
+            while (FCursorPos > 0) and (ls[FCursorPos] in not_word)
               do Dec(FCursorPos);
             if FCursorPos=0 then begin
               if FCursorLine>0 then begin
@@ -1169,7 +1165,7 @@ begin
                 FCursorPos:=UTF8Length(CurrentLine);
               end;
             end else
-              while (FCursorPos > 0) and not (ls[FCursorPos] in noword)
+              while (FCursorPos > 0) and not (ls[FCursorPos] in not_word)
                 do Dec(FCursorPos);
           end;// ...word search
         end
@@ -1187,9 +1183,9 @@ begin
             // word search...
             ls:=CurrentLine;
             l:=length(ls);
-            while (FCursorPos < l) and (ls[FCursorPos] in noword)
+            while (FCursorPos < l) and (ls[FCursorPos] in not_word)
               do Inc(FCursorPos);
-            while (FCursorPos < l) and not (ls[FCursorPos] in noword)
+            while (FCursorPos < l) and not (ls[FCursorPos] in not_word)
               do Inc(FCursorPos);
             if (FCursorPos=UTF8Length(ls)) and (FCursorLine<LineCount-1) then begin
               Inc(FCursorLine);

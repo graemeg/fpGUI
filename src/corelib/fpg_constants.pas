@@ -50,16 +50,16 @@ resourcestring
 
 {$IF defined(de)}
   {$I lang_de.inc}
-  
+
 {$ELSEIF defined(ru)}
   {$I lang_ru.inc}
-  
+
 {$ELSEIF defined(fr)}
   {$I lang_fr.inc}
-  
+
 {$ELSEIF defined(pt)}
   {$I lang_pt.inc}
-  
+
 {$ELSEIF defined(af)}
   {$I lang_af.inc}
 
@@ -90,7 +90,7 @@ const
   FPG_CONFIG_DIR = 'fpgui_toolkit' + PathDelim;
   FPG_BOOKMARKS_FILE = 'bookmarks.ini';
   FPG_BOOKMARK_SECTION = 'bookmarks';
-  
+
   // Used for the internal message queue
   cMessageQueueSize = 2048;
 
@@ -102,6 +102,10 @@ const
   txtWordDelims: set of char = [' ', #9, #13, #10];
 
 
+  { wordbreak symbols and whitespace. Skip '_' since its often used in
+    computery names. This treats all unicode chars above ASCII as "word"
+    chars. }
+  not_word = [#0..'/', ':'..'@', '['..'^', '`', '{'..'~'];
 
 implementation
 

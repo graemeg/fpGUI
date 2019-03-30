@@ -794,8 +794,6 @@ begin
 end;
 
 procedure TfpgBaseEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-const { TODO: put this some place global }
-  noword = [#0..'/', ':'..'@', '['..'^', '`', '{'..'~'];
 var
   hasChanged: boolean;
   l: integer;
@@ -849,9 +847,9 @@ begin
           if (ssCtrl in shiftstate) then
           begin
             // word search...
-            while (FCursorPos > 0) and (FText[FCursorPos] in noword) do
+            while (FCursorPos > 0) and (FText[FCursorPos] in not_word) do
               Dec(FCursorPos);
-            while (FCursorPos > 0) and not (FText[FCursorPos] in noword) do
+            while (FCursorPos > 0) and not (FText[FCursorPos] in not_word) do
                 Dec(FCursorPos);
           end;
         end;
@@ -866,9 +864,9 @@ begin
           begin
             // word search...
             l:=length(FText);
-            while (FCursorPos < l) and (FText[FCursorPos] in noword) do
+            while (FCursorPos < l) and (FText[FCursorPos] in not_word) do
               Inc(FCursorPos);
-            while (FCursorPos < l) and not (FText[FCursorPos] in noword) do
+            while (FCursorPos < l) and not (FText[FCursorPos] in not_word) do
               Inc(FCursorPos);
           end;
         end;
