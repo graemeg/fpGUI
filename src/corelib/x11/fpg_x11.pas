@@ -1092,7 +1092,7 @@ var
   s: TfpgString;
   itm: TfpgMimeDataItem;
 begin
-  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
+  FDNDVersion := min(FPG_XDND_VERSION, QWORD((ev.xclient.data.l[1] and $FF000000) shr 24));
 
   {$IFDEF DNDDEBUG}
   DebugLnFmt('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
