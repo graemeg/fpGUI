@@ -286,8 +286,8 @@ constructor TfpgBaseForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWindowPosition  := wpAuto;
-  FWindowTitle     := '';
-  FIconName        := 'stdimg.windowicon';
+  FWindowTitle     := fpgApplication.app_name;
+  FIconName        := fpgApplication.app_icon;
   FSizeable        := True;
   FParentForm      := nil;
   FBackgroundColor := clWindowBackground;

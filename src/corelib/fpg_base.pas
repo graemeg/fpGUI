@@ -690,6 +690,18 @@ type
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
   public
+
+    {*** SAMPLE METADATA ***}
+    app_name,
+    app_ver,
+    app_author,
+    app_copyright,
+    app_site,   // The visiable site name for the app to show in about
+    app_url,    // The URL to launch if clicked.
+    app_icon:   TfpgString;
+    app_lic_topic: integer; // INF topic ID for the license page within HelpFile.
+    {*** END SAMPLE METADATA ***}
+
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
     function    GetFontFaceList: TStringList;
@@ -3553,6 +3565,12 @@ begin
   FHelpKey := keyF1;
   FHelpType := htContext;
   FDesignedDPI := 96;
+
+  {*** SAMPLE METADATA ***}
+  app_name := 'fpGUI Application'; // could just leave this ''
+  app_icon := 'stdimg.windowicon';
+  {*** END SAMPLE METADATA ***}
+
 end;
 
 destructor TfpgApplicationBase.Destroy;
