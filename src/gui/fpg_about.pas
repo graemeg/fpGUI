@@ -55,7 +55,7 @@ type
     procedure   CopyrightSet(const s: string);
     function    SiteGet: string;
     procedure   SiteSet(const s: string);
-public
+  public
     constructor create(AOwner: TComponent); override;
     property    title: string read TitleGet write TitleSet;
     property    author: string read AuthorGet write AuthorSet;
@@ -65,7 +65,7 @@ public
 
 
 
-procedure AboutDlg;
+function AboutDlg: TfpgModalResult; // Not sure why. But why not?
 
 
 
@@ -76,12 +76,19 @@ uses fpg_utils;
  *********************************************************************}
 
 constructor TfpgAbout.create(AOwner: TComponent);
+const
+  w = 300; // form width;
+  h = 150; // form height
 var
   s: string;
 begin
   inherited create(AOwner);
   {@VFD_BODY_BEGIN: fpgAbout}
   Name := 'fpgAbout';
+  MinWidth:=w;
+  Width:=w;
+  MinHeight:=h;
+  Height:=h;
   WindowTitle := 'About';
   Hint := '';
   OnShow:=@FormShow;
@@ -90,7 +97,8 @@ begin
   with lTitle do
   begin
     Name := 'lTitle';
-    SetPosition(0, 4, 368, 22);
+    SetPosition(0, 8, w, 22);
+    anchors:=[anLeft, anTop, anRight];
     Alignment := taCenter;
     FontDesc := '#Label1';
     Hint := '';
@@ -101,7 +109,8 @@ begin
   with lAuthor do
   begin
     Name := 'lAuthor';
-    SetPosition(0, 28, 368, 22);
+    SetPosition(0, 32, w, 22);
+    anchors:=[anLeft, anTop, anRight];
     Alignment := taCenter;
     FontDesc := '#Label1';
     Hint := '';
@@ -112,7 +121,8 @@ begin
   with lCopyright do
   begin
     Name := 'lCopyright';
-    SetPosition(0, 52, 368, 22);
+    anchors:=[anLeft, anTop, anRight];
+    SetPosition(0, 56, w, 22);
     Alignment := taCenter;
     FontDesc := '#Label1';
     Hint := '';
@@ -124,7 +134,8 @@ begin
   with lSite do
   begin
     Name := 'lSite';
-    SetPosition(0, 76, 368, 22);
+    SetPosition(0, 80, w, 22);
+    anchors:=[anLeft, anTop, anRight];
     Alignment := taCenter;
     FontDesc := '#Label1';
     Hint := '';
@@ -135,16 +146,24 @@ begin
   lUsing := TfpgLabel.create(self);
   with lUsing do begin
     name:='lUsing';
-    SetPosition(0, 100, 360, 22);
+    SetPosition(0, 104, w, 22);
+    anchors:=[anLeft, anTop, anRight];
     Alignment := taCenter;
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'fpGUI v'+FPGUI_VERSION;;
+    Text := 'Built with fpGUI v'+FPGUI_VERSION;;
   end;
-
   {@VFD_BODY_END: fpgAbout}
 
+  { fix up buttons }
+
   btnCancel.visible:=false;
+  btnOK.left:=(w-btnOK.width) shr 1;
+  btnOK.height:=24;
+  btnOK.top:=h-24-8;
+
+  { additional meta handling }
+
   s := fpgApplication.app_ver;
   if s<>'' then
     lTitle.text:=fpgApplication.app_name+' v'+s
@@ -266,10 +285,10 @@ end;
 
 
 
-procedure AboutDlg;
+function AboutDlg: TfpgModalResult;
 begin
   with TfpgAbout.create(nil) do try
-    ShowModal;
+    result:=ShowModal;
   finally
     free;
   end;

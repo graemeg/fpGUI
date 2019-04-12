@@ -56,7 +56,7 @@ end;
 
 procedure TfrmMain.clicked(sender: TObject);
 begin
-  AboutDlg;
+  if AboutDlg=mrOK then close;
 end;
 
 
