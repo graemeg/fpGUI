@@ -33,13 +33,13 @@ const
 type
   TfpgAbout = class(TfpgBaseDialog)
   protected
-    {@VFD_HEAD_BEGIN: dlgAbout}
+    {@VFD_HEAD_BEGIN: fpgAbout}
     lTitle: TfpgLabel;
     lAuthor: TfpgLabel;
     lCopyright: TfpgLabel;
     lSite: TfpgLabel;
     lUsing: TfpgLabel;
-    {@VFD_HEAD_END: dlgAbout}
+    {@VFD_HEAD_END: fpgAbout}
     url: string;
     CopyrightID: integer; // INF ID of copyright page
 
@@ -80,7 +80,7 @@ var
   s: string;
 begin
   inherited create(AOwner);
-  {@VFD_BODY_BEGIN: dlgAbout}
+  {@VFD_BODY_BEGIN: fpgAbout}
   Name := 'fpgAbout';
   WindowTitle := 'About';
   Hint := '';
@@ -142,7 +142,7 @@ begin
     Text := 'fpGUI v'+FPGUI_VERSION;;
   end;
 
-  {@VFD_BODY_END: about}
+  {@VFD_BODY_END: fpgAbout}
 
   btnCancel.visible:=false;
   s := fpgApplication.app_ver;
