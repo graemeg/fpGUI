@@ -78,7 +78,7 @@ uses fpg_utils;
 constructor TfpgAbout.create(AOwner: TComponent);
 const
   w = 300; // form width;
-  h = 150; // form height
+  h = 160; // form height
 var
   s: string;
 begin
