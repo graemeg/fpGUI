@@ -38,15 +38,19 @@ in UTF-8 encoding.
 
 fpGUI Toolkit currently supports the following translations:
 ------------------------------------------------------------
-english:           fpgui.en.po
-german:            fpgui.de.po
-russian:           fpgui.ru.po
-spanish:           fpgui.es.po
-french:            fpgui.fr.po
-italian:           fpgui.it.po
-afrikaans:         fpgui.af.po
-portuguese:        fpgui.pt.po
-ukrainian:         fpgui.uk.po
-malay:             fpgui.ms.po
-chinese:           fpgui.zh_CN.po
-lao:               fpgui.lo.po
+afrikaans:              fpgui.af.po
+german:                 fpgui.de.po
+english:                fpgui.en.po
+spanish:                fpgui.es.po
+estonian:               fpgui.et.po
+french:                 fpgui.fr.po
+hebrew:                 fpgui.he.po
+italian:                fpgui.it.po
+lao:                    fpgui.lo.po
+malay:                  fpgui.ms.po
+polish:                 fpgui.pl.po
+portuguese(Brazil):     fpgui.pt_BR.po
+portuguese(Portugal):   fpgui.pt.po
+russian:                fpgui.ru.po
+ukrainian:              fpgui.uk.po
+chinese:                fpgui.zh_CN.po

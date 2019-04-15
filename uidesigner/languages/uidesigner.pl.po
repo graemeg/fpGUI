@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Waldemar Stoczkowski, 2018
+# AlexL <loginov.alex.valer@gmail.com>, 2019
 # 
 #, fuzzy
 msgid ""
@@ -13,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-11-21 15:34+0300\n"
 "PO-Revision-Date: 2018-11-21 02:25+0000\n"
-"Last-Translator: Waldemar Stoczkowski, 2018\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/Magic/teams/44238/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -67,19 +68,19 @@ msgstr ""
 
 #: vfd_constants:rsleft
 msgid "Left"
-msgstr ""
+msgstr "Lewa"
 
 #: vfd_constants:rstop
 msgid "Top"
-msgstr ""
+msgstr "Góra"
 
 #: vfd_constants:rswidth
 msgid "Width"
-msgstr ""
+msgstr "Szerokość"
 
 #: vfd_constants:rsheight
 msgid "Height"
-msgstr ""
+msgstr "Wyskość"
 
 #: vfd_constants:rsnewclassname
 msgid "Class name"
@@ -91,7 +92,7 @@ msgstr ""
 
 #: vfd_constants:rsposition
 msgid "Position"
-msgstr ""
+msgstr " Pozycja"
 
 #: vfd_constants:rsformtitle
 msgid "Form %s"
@@ -155,7 +156,7 @@ msgstr ""
 
 #: vfd_constants:rsdlgsetup
 msgid "General Settings"
-msgstr ""
+msgstr "Ustawienia główne"
 
 #: vfd_constants:rsdlginsertcustomwidget
 msgid "Insert Custom Widget"
@@ -163,7 +164,7 @@ msgstr ""
 
 #: vfd_constants:rsdlgnewform
 msgid "New Form"
-msgstr ""
+msgstr "Nowy formularz"
 
 #: vfd_constants:rsdlgeditformposition
 msgid "Form Position"
@@ -171,7 +172,7 @@ msgstr ""
 
 #: vfd_constants:rsdlgwidgetorder
 msgid "Widget Order"
-msgstr ""
+msgstr "Kolejność widżetów"
 
 #: vfd_constants:rsdlgtaborder
 msgid "Tab Order"
@@ -207,19 +208,19 @@ msgstr ""
 
 #: vfd_constants:rsclass
 msgid "Class"
-msgstr ""
+msgstr "Klasa"
 
 #: vfd_constants:rsname
 msgid "Name"
-msgstr ""
+msgstr "Nazwa"
 
 #: vfd_constants:rsproperties
 msgid "Properties"
-msgstr ""
+msgstr "Właściwości"
 
 #: vfd_constants:rsanchors
 msgid "Anchors"
-msgstr ""
+msgstr "Kotwice"
 
 #: vfd_constants:rsunknownlines
 msgid "Unknown lines"
@@ -227,11 +228,11 @@ msgstr ""
 
 #: vfd_constants:rsfile
 msgid "&File"
-msgstr ""
+msgstr "&Plik"
 
 #: vfd_constants:rssettings
 msgid "&Settings"
-msgstr ""
+msgstr "&Ustawienia"
 
 #: vfd_constants:rsform
 msgid "Fo&rm"
@@ -239,19 +240,19 @@ msgstr ""
 
 #: vfd_constants:rspreview
 msgid "&Preview"
-msgstr ""
+msgstr "&Podgląd"
 
 #: vfd_constants:rshelp
 msgid "&Help"
-msgstr ""
+msgstr "&Pomoc"
 
 #: vfd_constants:rscreatenewfile
 msgid "Create New File"
-msgstr ""
+msgstr "Utwórz nowy plik"
 
 #: vfd_constants:rsopen
 msgid "Open"
-msgstr ""
+msgstr "Otwórz"
 
 #: vfd_constants:rsopenrecent
 msgid "Open Recent"
@@ -259,7 +260,7 @@ msgstr ""
 
 #: vfd_constants:rssave
 msgid "Save"
-msgstr ""
+msgstr " Zapisz"
 
 #: vfd_constants:rssaveasnewtemplateunit
 msgid "Save As New Template Unit"
@@ -271,11 +272,11 @@ msgstr ""
 
 #: vfd_constants:rsexit
 msgid "Exit"
-msgstr ""
+msgstr "Wyjście"
 
 #: vfd_constants:rsgeneraloptions
 msgid "General options"
-msgstr ""
+msgstr "Główne ustawienia"
 
 #: vfd_constants:rseditspecial
 msgid "Edit special"
@@ -291,11 +292,11 @@ msgstr ""
 
 #: vfd_constants:rsclose
 msgid "Close"
-msgstr ""
+msgstr "Zamknij"
 
 #: vfd_constants:rscancel
 msgid "Cancel"
-msgstr ""
+msgstr "Anuluj"
 
 #: vfd_constants:rsok
 msgid "OK"
@@ -319,7 +320,7 @@ msgstr ""
 
 #: vfd_constants:rsclear
 msgid "Clear"
-msgstr ""
+msgstr "Czyść"
 
 #: vfd_constants:rspos
 msgid "Pos"
@@ -339,11 +340,11 @@ msgstr ""
 
 #: vfd_constants:rscolumn
 msgid "Column"
-msgstr ""
+msgstr "Kolumna"
 
 #: vfd_constants:rstitle
 msgid "Title"
-msgstr ""
+msgstr "Tytuł"
 
 #: vfd_constants:rscolumnwidth
 msgid "Column width"
@@ -351,23 +352,23 @@ msgstr ""
 
 #: vfd_constants:rsalignment
 msgid "Alignment"
-msgstr ""
+msgstr "Wyrównanie"
 
 #: vfd_constants:rsright
 msgid "Right"
-msgstr ""
+msgstr "Prawo"
 
 #: vfd_constants:rscenter
 msgid "Center"
-msgstr ""
+msgstr "Środek"
 
 #: vfd_constants:rsnew
 msgid "New"
-msgstr ""
+msgstr "Nowy"
 
 #: vfd_constants:rsdelete
 msgid "Delete"
-msgstr ""
+msgstr "Usuń"
 
 #: vfd_constants:rsupuppercase
 msgid "UP"
@@ -383,7 +384,7 @@ msgstr ""
 
 #: vfd_constants:rsalign
 msgid "Align"
-msgstr ""
+msgstr "Wyrównaj"
 
 #: vfd_constants:rsaddtab
 msgid "Add Tab"
