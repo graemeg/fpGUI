@@ -1,13 +1,15 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
-#
+# Translators:
+# AlexL <loginov.alex.valer@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:51+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Afrikaans <en@li.org>\n"
+"PO-Revision-Date: 2018-11-21 04:13+0000\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
+"Language-Team: Afrikaans (https://www.transifex.com/Magic/teams/44238/af/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -92,7 +94,7 @@ msgstr "Vetdruk"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr ""
+msgstr "Boekmerke"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
@@ -544,7 +546,7 @@ msgstr "Herprobeer"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr ""
+msgstr "Regte"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -636,7 +638,7 @@ msgstr "Sondag"
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr ""
+msgstr "Keep"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
@@ -717,4 +719,3 @@ msgstr "Ja vir Alles"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr "van"
-
