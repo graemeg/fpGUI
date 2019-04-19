@@ -3774,7 +3774,6 @@ end;
 // Helper functions for TFileEntry and TfpgFileListBase
 function StringMatches(const astr, apat: string): boolean;
 var
-  pati, si: longint;
   lRegex: TRegExpr;
   s: string;
 begin
