@@ -1,6 +1,7 @@
 // common compiler options
 {$mode objfpc}{$H+}
 {$interfaces corba}
+{$WARN 5024 off : Parameter "$1" not used}
 
 
 // To enable the AggPas powered Canvas class
