@@ -2540,7 +2540,7 @@ begin
   begin
     WMHints := XAllocWMHints;
 
-    { setup a window icon }
+    { setup a window icon - old style }
     if not fpgApplication.netlayer.ManagerSupportsAtom(naWM_ICON) then
     begin
       IconPixMap := XCreateBitmapFromData(xapplication.display, FWinHandle,
@@ -2548,9 +2548,13 @@ begin
 
       WMHints^.icon_pixmap := IconPixmap;
       WMHints^.flags := IconPixmapHint;
-    end
-    else
-      ApplyFormIcon;  // uses TfpgForm.IconName to set the window icon
+    end;
+
+    { New style - uses TfpgForm.IconName to set the window icon. We use both
+      methods of setting icons, because Window Managers are very inconsistent
+      with what they support. }
+    if xapplication.xia_net_wm_icon <> 0 then
+      ApplyFormIcon;
 
     { setup window grouping posibilities }
     if FGroupLeader=0 then FGroupLeader := xapplication.FLeaderWindow;
