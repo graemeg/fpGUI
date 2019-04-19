@@ -1,264 +1,4 @@
 [projectoptions]
-mainfile=${projectname}.lpr
-targetfile=${projectname}${EXEEXT}
-messageoutputfile=
-makecommand=${COMPILER}
-makedir=
-unitdirs=14
- ${FPGUI}/examples/apps/ide/src
- ${EPIKTMR}
- ${FPTEST}/fpGUI
- ${FPTEST}
- ${ONGUARD}/
- ${TIOPF}/GUI/fpGUI
- ${TIOPF}/Options
- ${TIOPF}/Core
- ${FPGUI}/src/reportengine
- ${FPGUI}/src/corelib/render/software
- ${FPGUI}/src
- ${FPGUI}/src/corelib/${FPG_GFX}
- ${FPGUI}/src/gui
- ${FPGUI}/src/corelib
-unitpref=-Fu
-incpref=-Fi
-libpref=-Fl
-objpref=-Fo
-targpref=-o
-befcommand=2
- rm units/${TargetCPU}-${TargetOS}/*
- rm -f units/*
-aftcommand=0
-makeoptions=13
- -l -Mobjfpc -Sh -Sc -Si
- -gl -O-
- -gh
- -B
- -O2 -XX -Xs -CX
- -FUunits
- -dUseCThreads
- -dAGGCanvas
- -viewnh
- -dDEBUG
- -Sa -Cr -Ci -Co -b-
- -WG
- -Cr
-codetemplatedirs=1
- ${TEMPLATEDIR}
-toolmenus=2
- fpGUI &UI Designer
- &DocView
-toolfiles=2
- ${FPGUI}/uidesigner/uidesigner${EXEEXT}
- ${FPGUI}/docview/docview${EXEEXT}
-toolparams=2
- ${CURSOURCEFILE}
- ${HelpPath} -k ${cursword}
-fontnames=0
-scriptbeforecopy=
-scriptaftercopy=
-newprojectfiles=5
- ${TEMPLATEDIR}fpgui/project.pas
- ${TEMPLATEDIR}fpgui/frm_main.pas
- ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
-newprojectfilesdest=5
- ${%PROJECTNAME%}.pas
- 
- ${%PROJECTDIR%}units/i386-linux/placeholder.txt
- ${%PROJECTDIR%}units/i386-win32/placeholder.txt
- ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
-newfinames=3
- Program
- Unit
- Main Form
-newfifilters=3
- "*.pas" "*.pp"
- "*.pas" "*.pp"
- 
-newfiexts=3
- pas
- pas
- pas
-newfisources=3
- ${TEMPLATEDIR}default/program.pas
- ${TEMPLATEDIR}default/unit.pas
- ${TEMPLATEDIR}fpgui/mainform.pas
-newfonames=2
- Main Form
- Simple Form
-newfonamebases=2
- form
- form
-newfosources=2
- ${TEMPLATEDIR}fpgui/mainform.pas
- ${TEMPLATEDIR}fpgui/simpleform.pas
-newfoforms=2
- 
- 
-forcezorder=0
-stripmessageesc=0
-copymessages=0
-closemessages=0
-checkmethods=1
-colorerror=-1610612712
-colorwarning=-1610612717
-colornote=-1610612716
-usercolors=30
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
-usercolorcomment=30
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-formatmacronames=0
-formatmacrovalues=0
-settingsfile=${projectname}_clean.prj
-settingseditor=1
-settingsdebugger=1
-settingsstorage=1
-settingsprojecttree=0
-settingsautoload=0
-settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
-befcommandon=2
- 0
- 34
-makeoptionson=13
- 63
- 7
- 4
- 62
- 32
- 63
- 63
- 0
- 63
- 0
- 0
- 24
- 0
-aftcommandon=0
-unitdirson=14
- 65599
- 65599
- 65599
- 196671
- 196671
- 65599
- 65599
- 196671
- 65599
- 196671
- 131135
- 196671
- 65599
- 65599
-macroon=0
-macronames=0
-macrovalues=0
-macrogroup=0
-groupcomments=6
- 
- 
- 
- 
- 
- 
-toolsave=2
- -1
- 0
-toolhide=2
- 0
- 0
-toolparse=2
- 0
- 0
-toolmessages=2
- 0
- 0
-toolshortcuts=2
- 0
- 1
-fontalias=0
-fontancestors=0
-fontheights=0
-fontwidths=0
-fontoptions=0
-fontxscales=0
-expandprojectfilemacros=5
- 1
- 1
- -1
- -1
- -1
-loadprojectfile=5
- 1
- 1
- 0
- 0
- 0
-newinheritedforms=2
- 0
- 0
-uid=0
 sourcefilemasks=5
  "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
  "*.c" "*.cc" "*.h"
@@ -287,10 +27,13 @@ filemasks=7
  *.ipf
  *.xml
  *
+codetemplatedirs=1
+ ${TEMPLATEDIR}
 showgrid=1
 snaptogrid=1
 moveonfirstclick=1
 noformdesignerdocking=0
+componenthints=1
 gridsizex=8
 gridsizey=8
 autoindent=1
@@ -303,8 +46,8 @@ tabstops=2
 spacetabs=1
 showtabs=1
 tabindent=0
-editfontname=Raize
-editfontheight=16
+editfontname=DejaVu Sans Mono
+editfontheight=14
 editfontwidth=0
 editfontextraspace=0
 editfontcolor=-1879048183
@@ -316,9 +59,8 @@ editmarkbrackets=0
 editmarkpairwords=0
 backupfilecount=0
 encoding=0
+eolstyle=1
 trimtrailingwhitespace=1
-codetemplatedirs=1
- ${TEMPLATEDIR}
 debugcommand=${DEBUGGER}
 debugoptions=
 debugtarget=
@@ -386,6 +128,218 @@ exceptignore=2
  1
 nodebugbeginend=0
 fpcgdbworkaround=1
+mainfile=${projectname}.lpr
+targetfile=${projectname}${EXEEXT}
+makecommand=${COMPILER}
+makedir=
+unitdirs=15
+ ${FPGUI}/examples/apps/ide/src
+ ${EPIKTMR}
+ ${FPTEST}/fpGUI
+ ${FPTEST}
+ ${ONGUARD}/
+ ${TIOPF}/GUI/fpGUI
+ ${TIOPF}/Options
+ ${TIOPF}/Core
+ ${FPGUI}/src/3rdparty/regex
+ ${FPGUI}/src/reportengine
+ ${FPGUI}/src/corelib/render/software
+ ${FPGUI}/src
+ ${FPGUI}/src/corelib/${FPG_GFX}
+ ${FPGUI}/src/gui
+ ${FPGUI}/src/corelib
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+befcommand=2
+ rm units/${TargetCPU}-${TargetOS}/*
+ rm -f units/*
+aftcommand=0
+makeoptions=13
+ -l -Mobjfpc -Sh -Sc -Si
+ -gl -O-
+ -gh
+ -B
+ -O2 -XX -Xs -CX
+ -FUunits
+ -dUseCThreads
+ -dAGGCanvas
+ -viewnh
+ -dDEBUG
+ -Sa -Cr -Ci -Co -b-
+ -WG
+ -Cr
+reversepathorder=0
+makeoptpurpose=13
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+befcommandon=2
+ 0
+ 32
+makeoptionson=13
+ 63
+ 7
+ 4
+ 62
+ 32
+ 63
+ 63
+ 3
+ 63
+ 0
+ 0
+ 24
+ 0
+aftcommandon=0
+unitdirson=15
+ 65599
+ 65599
+ 65599
+ 196671
+ 196671
+ 65599
+ 65599
+ 196671
+ 65599
+ 65599
+ 196671
+ 131135
+ 196671
+ 65599
+ 196671
+uid=0
+macroon=4
+ 1
+ 2
+ 4
+ 8
+macronames=4
+ FPCVER
+ FPCVER
+ FPCVER
+ FPCVER
+macrovalues=4
+ 2.6.4
+ 3.0.4
+ 3.2.0
+ 3.3.1
+groupcomments=6
+ FPC 2.6.4
+ FPC 3.0.4
+ FPC 3.2.0
+ FPC 3.3.1
+ 
+ 
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=5
+ ${TEMPLATEDIR}fpgui/project.pas
+ ${TEMPLATEDIR}fpgui/frm_main.pas
+ ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
+newprojectfilesdest=5
+ ${%PROJECTNAME%}.pas
+ 
+ ${%PROJECTDIR%}units/i386-linux/placeholder.txt
+ ${%PROJECTDIR%}units/i386-win32/placeholder.txt
+ ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
+newfinames=3
+ Program
+ Unit
+ Main Form
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ pas
+newfisources=3
+ ${TEMPLATEDIR}default/program.pas
+ ${TEMPLATEDIR}default/unit.pas
+ ${TEMPLATEDIR}fpgui/mainform.pas
+newfonames=2
+ Main Form
+ Simple Form
+newfonamebases=2
+ form
+ form
+newfosources=2
+ ${TEMPLATEDIR}fpgui/mainform.pas
+ ${TEMPLATEDIR}fpgui/simpleform.pas
+newfoforms=2
+ 
+ 
+expandprojectfilemacros=5
+ 1
+ 1
+ -1
+ -1
+ -1
+loadprojectfile=5
+ 1
+ 1
+ 0
+ 0
+ 0
+newinheritedforms=2
+ 0
+ 0
+toolmenus=2
+ fpGUI &UI Designer
+ &DocView
+toolfiles=2
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath} -k ${cursword}
+toolsave=2
+ -1
+ 0
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmessages=2
+ 0
+ 0
+toolshortcuts=2
+ 0
+ 1
+settingsfile=${projectname}_clean.prj
+settingsautoload=0
+settingsautosave=0
+settingseditor=1
+settingsdebugger=1
+settingsmake=1
+settingsmacros=1
+settingsfontalias=0
+settingsusercolors=0
+settingsformatmacros=0
+settingstemplates=1
+settingstools=1
+settingsstorage=1
+settingscomponentstore=0
+settingsprojecttree=0
+settingslayout=0
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -414,4 +368,3 @@ sigsettings=27
  28,28,T,F
  29,29,T,F
  30,30,T,F
-defaultmake=1
