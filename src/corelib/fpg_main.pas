@@ -80,7 +80,7 @@ type
   TMouseMoveEvent = procedure(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint) of object;
   TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
   { Painting }
-  TPaintEvent = procedure(Sender: TObject{; const ARect: TfpgRect}) of object;
+  TPaintEvent = procedure(Sender: TObject) of object;
   { Exceptions }
   TExceptionEvent = procedure(Sender: TObject; E: Exception) of object;
 
