@@ -227,6 +227,7 @@ begin
   ClosePopups;
   if ActiveWidget <> nil then
     ActiveWidget.KillFocus;
+  if FocusRootWidget=self then FocusRootWidget:=nil;
   if Assigned(FOnDeactivate) then
     FOnDeactivate(self);
 end;
