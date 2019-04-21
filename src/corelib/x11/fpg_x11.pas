@@ -1065,7 +1065,7 @@ begin
   {$ENDIF}
   ResetDNDVariables;
   FSrcWinHandle := ASource;
-  FDNDVersion := min(FPG_XDND_VERSION, (ev.xclient.data.l[1] and $FF000000) shr 24);
+  FDNDVersion := min(Int64(FPG_XDND_VERSION), Int64((ev.xclient.data.l[1] and $FF000000) shr 24));
   {$IFDEF DNDDEBUG}
   writeln(Format('  ver(%d) check-XdndTypeList(%s) data=%xh,%d,%d,%d,%d',
       [ FDNDVersion,
