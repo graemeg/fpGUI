@@ -1544,8 +1544,8 @@ begin
   rect := fpgStyle.GetControlFrameBorders;
   case BorderStyle of
 //    ebsNone:      // nothing to do
-    ebsDefault:   InflateRect(Result, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
-    ebsSingle:    InflateRect(Result, -1, -1);
+    ebsDefault:   Result.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    ebsSingle:    Result.InflateRect(-1, -1);
   end;
 end;
 
