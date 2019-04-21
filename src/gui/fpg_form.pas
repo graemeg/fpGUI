@@ -33,7 +33,7 @@ uses
 type
   TWindowPosition = (wpUser, wpAuto, wpScreenCenter, wpOneThirdDown);
   TCloseAction = (caNone, caHide, caFree{, caMinimize});
-  
+
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
   TfpgHelpEvent = function(AHelpType: THelpType; AHelpContext: THelpContext;
@@ -108,8 +108,8 @@ type
     procedure   Close;
     function    CloseQuery: boolean; virtual;
   end;
-  
-  
+
+
   TfpgForm = class(TfpgBaseForm)
   published
     property    BackgroundColor;
@@ -166,7 +166,7 @@ uses
   fpg_main,
   fpg_popupwindow,
   fpg_menu;
-  
+
 type
   // to access protected methods
   TfpgMenuBarFriend = class(TfpgMenuBar)
@@ -219,7 +219,7 @@ begin
     DebugLn('Inside if block');
     {$ENDIF}
     FocusRootWidget := self;
-    
+
     if FFormDesigner <> nil then
     begin
       FFormDesigner.Dispatch(msg);
@@ -275,7 +275,7 @@ begin
     Include(FWindowAttributes, waSizeable)
   else
     Exclude(FWindowAttributes, waSizeable);
-    
+
   if FFullScreen then
     Include(FWindowAttributes, waFullScreen)
   else
@@ -373,7 +373,7 @@ begin
     fpgApplication.PopModalForm;
     Result := ModalResult;
   end;  { try..finally }
-  
+
   if ModalResult <> mrNone then
   begin
     lCloseAction := caHide; // Dummy variable - we do nothing with it
