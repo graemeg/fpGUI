@@ -418,6 +418,7 @@ function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord;
 implementation
 
 uses
+  Math,
   fpg_stringutils,
   fpg_constants,
   fpg_dialogs;
@@ -1581,7 +1582,7 @@ begin
     if FSelOffset <> 0 then
       DrawSelection;
     // drawing cursor
-    fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
+    fpgCaret.SetCaret(Canvas, Max(FCursorPx, r.Left), r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
   end
   else
   begin
