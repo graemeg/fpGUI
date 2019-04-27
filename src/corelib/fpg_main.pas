@@ -44,7 +44,7 @@ type
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover, btfDisabled);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
-    mifEnabled, mifChecked, mifSubMenu);
+    mifEnabled, mifChecked, mifSubMenu, mifHeader);
 
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
@@ -185,7 +185,11 @@ type
   { This is very basic for now, just to remind us of theming support. Later we
     will rework this to use a Style Manager like the previous fpGUI.
     Also support Bitmap based styles for easier theme implementations. }
+
   TfpgStyle = class(TObject)
+  private
+    FMenuHeaderFont: TfpgFont;
+    procedure SetMenuHeaderFont(AValue: TfpgFont);
   protected
     FDefaultFont: TfpgFont;
     FFixedFont: TfpgFont;
@@ -206,6 +210,7 @@ type
     property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
     property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
     property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
+    property    MenuHeaderFont: TfpgFont read FMenuHeaderFont write SetMenuHeaderFont;
     property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
     property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
     property    TabFont: TfpgFont read FTabFont write SetTabFont;
@@ -2146,6 +2151,13 @@ end;
 
 { TfpgStyle }
 
+procedure TfpgStyle.SetMenuHeaderFont(AValue: TfpgFont);
+begin
+  if FMenuHeaderFont=AValue then Exit;
+  FMenuHeaderFont.Free;
+  FMenuHeaderFont:=AValue;
+end;
+
 procedure TfpgStyle.SetDefaultFont(AValue: TfpgFont);
 begin
   if FDefaultFont = AValue then Exit;
@@ -2199,6 +2211,7 @@ begin
   fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-9');
   fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-9:bold');
   fpgSetNamedFont('Menu', FPG_DEFAULT_FONT_DESC);
+  fpgSetNamedFont('MenuHeader', FPG_DEFAULT_FONT_DESC+':bold');
   fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':underline');
   fpgSetNamedFont('MenuDisabled', FPG_DEFAULT_FONT_DESC);
 
@@ -2245,6 +2258,7 @@ begin
   FFixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
   FMenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
   FMenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
+  FMenuHeaderFont   := fpgGetFont(fpgGetNamedFontDesc('MenuHeader'));
   FMenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
   FTabFont          := fpgGetFont(fpgGetNamedFontdesc('Label1'));
 end;

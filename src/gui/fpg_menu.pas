@@ -49,6 +49,9 @@ type
   TfpgPopupMenu = class;
   TfpgMenuBar = class;
 
+  TfpgMenuItemType = (mitText, mitSeparator, mitHeader);
+
+  { TfpgMenuItem }
 
   TfpgMenuItem = class(TfpgComponent, ICommandHolder)
   private
@@ -57,17 +60,22 @@ type
     FHint: TfpgString;
     FHotKeyDef: TfpgHotKeyDef;
     FOnClick: TNotifyEvent;
-    FSeparator: boolean;
     FSubMenu: TfpgPopupMenu;
     FText: TfpgString;
     FVisible: boolean;
     FChecked: boolean;
+    FItemType: TfpgMenuItemType;
+    function    GetItemType: TfpgMenuItemType;
+    function    ReadItemType(AIndex: Integer): boolean;
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetHotKeyDef(const AValue: TfpgHotKeyDef);
-    procedure   SetSeparator(const AValue: boolean);
+    procedure   SetItemType(AValue: TfpgMenuItemType);
     procedure   SetText(const AValue: TfpgString);
     procedure   SetVisible(const AValue: boolean);
     procedure   SetChecked(const AValue: boolean);
+    procedure   WriteItemType(AIndex: Integer; AValue: boolean);
+  protected
+    property    ItemType: TfpgMenuItemType read GetItemType write SetItemType;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Click;
@@ -80,7 +88,8 @@ type
     property    Text: TfpgString read FText write SetText;
     property    Hint: TfpgString read FHint write FHint;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
-    property    Separator: boolean read FSeparator write SetSeparator;
+    property    Separator: boolean index Ord(mitSeparator) read ReadItemType write WriteItemType;
+    property    Header: boolean index Ord(mitHeader) read ReadItemType write WriteItemType;
     property    Visible: boolean read FVisible write SetVisible;
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    SubMenu: TfpgPopupMenu read FSubMenu write FSubMenu;
@@ -90,6 +99,9 @@ type
 
   // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
+
+  { TfpgPopupMenu }
+
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBeforeShow: TNotifyEvent;
@@ -129,6 +141,7 @@ type
     procedure   Close; override;
     function    AddMenuItem(const AMenuName: TfpgString; const hotkeydef: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
     procedure   AddSeparator;
+    procedure   AddHeader(AHeaderName: TfpgString);
     function    MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
     function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
@@ -238,10 +251,23 @@ begin
   FChecked := AValue;
 end;
 
+procedure TfpgMenuItem.WriteItemType(AIndex: Integer; AValue: boolean);
+begin
+  if AValue then
+    ItemType := TfpgMenuItemType(AIndex)
+  else // default to mitText if a value is unset
+    ItemType:=mitText;
+end;
+
 procedure TfpgMenuItem.SetHotKeyDef(const AValue: TfpgHotKeyDef);
 begin
   if FHotKeyDef=AValue then exit;
   FHotKeyDef:=AValue;
+end;
+
+procedure TfpgMenuItem.SetItemType(AValue: TfpgMenuItemType);
+begin
+  FItemType:=AValue;
 end;
 
 procedure TfpgMenuItem.SetEnabled(const AValue: boolean);
@@ -250,10 +276,14 @@ begin
   FEnabled:=AValue;
 end;
 
-procedure TfpgMenuItem.SetSeparator(const AValue: boolean);
+function TfpgMenuItem.GetItemType: TfpgMenuItemType;
 begin
-  if FSeparator=AValue then exit;
-  FSeparator:=AValue;
+  Result := FItemType;
+end;
+
+function TfpgMenuItem.ReadItemType(AIndex: Integer): boolean;
+begin
+  Result := FItemType = TfpgMenuItemType(AIndex);
 end;
 
 constructor TfpgMenuItem.Create(AOwner: TComponent);
@@ -261,7 +291,7 @@ begin
   inherited Create(AOwner);
   Text := '';
   HotKeyDef := '';
-  FSeparator := False;
+  FItemType := mitText;
   FVisible := True;
   FEnabled := True;
   FChecked := False;
@@ -279,7 +309,7 @@ end;
 
 function TfpgMenuItem.Selectable: boolean;
 begin
-  Result := Enabled and Visible and (not Separator);
+  Result := Enabled and Visible and (ItemType = mitText);
 end;
 
 function TfpgMenuItem.GetAccelChar: string;
@@ -304,7 +334,10 @@ begin
   if not Enabled then
     ACanvas.SetFont(fpgStyle.MenuDisabledFont)
   else
-    ACanvas.SetFont(fpgStyle.MenuFont);
+    case ItemType of
+      mitText   : ACanvas.SetFont(fpgStyle.MenuFont);
+      mitHeader : ACanvas.SetFont(fpgStyle.MenuHeaderFont);
+    end;
 
   achar := '&';
   s := Text;
@@ -770,7 +803,7 @@ begin
   Result.Text       := AMenuTitle;
   Result.HotKeyDef  := '';
   Result.OnClick    := OnClickProc;
-  Result.Separator  := False;
+  Result.ItemType   := mitText;
 end;
 
 function TfpgMenuBar.MenuItem(const AMenuPos: integer): TfpgMenuItem;
@@ -959,7 +992,7 @@ begin
               Break;  //==>
             i := 0;
             dec(trycnt);
-          until trycnt > 0;
+          until trycnt = 0;
 
           if i < VisibleCount then
             FFocusItem := i;
@@ -1067,13 +1100,7 @@ var
   s: string;
   x: integer;
   lFlags: TfpgMenuItemFlags;
-begin
-  lFlags := AFlags;
-  if mi.Separator then
-  begin
-    fpgStyle.DrawMenuItemSeparator(Canvas, rect);
-  end
-  else
+  procedure DrawItemText;
   begin
     // process Check mark if needed
     if mi.Checked then
@@ -1103,6 +1130,38 @@ begin
       lFlags := lFlags - [mifSubMenu];
     end;
   end;
+
+  procedure DrawItemHeader;
+  var
+    lTextX: Integer;
+    lTextWidth: Integer;
+    lLineY: Integer;
+  begin
+    lTextWidth := fpgStyle.MenuHeaderFont.TextWidth(mi.Text);
+    lTextX := rect.CenterPoint.X - (lTextWidth div 2);
+
+
+    Canvas.SetColor(clShadow1);
+    lLineY := Rect.CenterPoint.y;
+    Canvas.DrawLine(rect.Left+FTextMargin, lLineY, lTextX-FTextMargin, lLineY);
+    Canvas.DrawLine(lTextX+lTextWidth+FTextMargin, lLineY, rect.Right-FTextMargin, lLineY);
+
+    Canvas.SetColor(clHilite1);
+    Inc(lLineY);
+    Canvas.DrawLine(rect.Left+FTextMargin, lLineY, lTextX-FTextMargin, lLineY);
+    Canvas.DrawLine(lTextX+lTextWidth+FTextMargin, lLineY, rect.Right-FTextMargin, lLineY);
+
+    Canvas.SetTextColor(clShadow1);  // reset text default color
+    mi.DrawText(Canvas, lTextX , rect.top, 0);
+  end;
+
+begin
+  lFlags := AFlags;
+  case mi.ItemType of
+    mitSeparator: fpgStyle.DrawMenuItemSeparator(Canvas, rect);
+    mitText: DrawItemText;
+    mitHeader: DrawItemHeader;
+  end;
 end;
 
 procedure TfpgPopupMenu.DrawRow(line: integer; const AItemFocused: boolean);
@@ -1122,11 +1181,14 @@ begin
 
     if line = n then
     begin
-      if AItemFocused then
+      if AItemFocused and (mi.Selectable) then
         lFlags := [mifSelected];     // refering to menu item in active popup menu
-      if mi.Separator then
-        lFlags := lFlags + [mifSeparator];
-      if AItemFocused and (not mi.Separator) then
+      case mi.ItemType of
+        mitSeparator: lFlags := lFlags + [mifSeparator];
+        mitHeader   : lFlags := lFlags + [mifHeader];
+      end;
+
+      if AItemFocused and (mi.ItemType = mitText) then
       begin
         if MenuFocused then          // refering to popup menu window
         begin
@@ -1146,7 +1208,7 @@ begin
           Canvas.SetTextColor(clInactiveSelText);
         end;
       end
-      else
+      else // not focused or is a separator/header
       begin
         if mi.Enabled then
         begin
@@ -1407,6 +1469,14 @@ end;
 procedure TfpgPopupMenu.AddSeparator;
 begin
   AddMenuitem('-', '', nil);
+end;
+
+procedure TfpgPopupMenu.AddHeader(AHeaderName: TfpgString);
+var
+  lItem: TfpgMenuItem;
+begin
+  lItem := AddMenuitem(AHeaderName, '', nil);
+  lItem.Header:=True;
 end;
 
 function TfpgPopupMenu.MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
