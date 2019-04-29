@@ -2271,6 +2271,7 @@ begin
   FMenuAccelFont.Free;
   FMenuDisabledFont.Free;
   FTabFont.Free;
+  FMenuHeaderFont.Free;
   inherited Destroy;
 end;
 
