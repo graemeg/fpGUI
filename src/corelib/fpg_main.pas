@@ -290,23 +290,23 @@ type
     FFontResList: TList;
     FMessageHookList: TFPList;
     procedure   FreeFontRes(afontres: TfpgFontResource);
-    procedure   InternalInit;
-    procedure   RunMessageLoop;
-    procedure   WaitWindowMessage(atimeoutms: integer);
+    procedure   InternalInit; virtual;
+    procedure   RunMessageLoop; virtual;
+    procedure   WaitWindowMessage(atimeoutms: integer); virtual;
   public
     constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
     function    GetFont(const afontdesc: TfpgString): TfpgFont;
-    procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
-    procedure   RecreateHintWindow;
+    procedure   ActivateHint(APos: TPoint; AHint: TfpgString); virtual;
+    procedure   RecreateHintWindow; virtual;
     procedure   Flush;
-    procedure   HandleException(Sender: TObject);
-    procedure   HideHint;
-    procedure   Initialize;
-    procedure   ProcessMessages;
-    procedure   Run;
+    procedure   HandleException(Sender: TObject); virtual;
+    procedure   HideHint; virtual;
+    procedure   Initialize; virtual;
+    procedure   ProcessMessages; virtual;
+    procedure   Run; virtual;
     procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
-    procedure   ShowException(E: Exception);
+    procedure   ShowException(E: Exception); virtual;
     procedure   ShowBacktrace(sender: TObject; E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    HintPause: Integer read FHintPause write SetHintPause;
@@ -319,6 +319,7 @@ type
     property    OnException: TExceptionEvent read FOnException write FOnException;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   end;
+  TfpgApplicationClass = class of TfpgApplication;
 
 
   TfpgTimer = class(TfpgTimerImpl)
@@ -440,6 +441,7 @@ var
   DefaultCanvasClass: TfpgCanvasBaseClass = nil;
 
 // Application & Clipboard singletons
+procedure UseApplicationClass(appClass: TfpgApplicationClass);
 function  fpgApplication: TfpgApplication;
 function  fpgClipboard: TfpgClipboard;
 
@@ -577,6 +579,7 @@ var
   fpgTimers: TList;
   fpgNamedColors: array[0..255] of TfpgColor;
   fpgNamedFonts: TList;
+  fpgApplicationClass: TfpgApplicationClass = TfpgApplication;
   uApplication: TfpgApplication;
   uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
@@ -1348,10 +1351,21 @@ begin
 end;
 
 
+procedure UseApplicationClass(appClass: TfpgApplicationClass);
+begin
+  if uApplication<>nil then
+  begin
+    // JIC notice to programmer
+    raise EfpGUIexception.create('Can''t set application class after the '+
+      'fpgApplication object has been created.');
+  end;
+  fpgApplicationClass:=appClass;
+end;
+
 function fpgApplication: TfpgApplication;
 begin
   if not Assigned(uApplication) then
-    uApplication := TfpgApplication.Create;
+    fpgApplicationClass.Create;
   result := uApplication;
 end;
 
@@ -1476,6 +1490,8 @@ begin
 
   try
     inherited Create(AParams);
+    fpgApplicationClass:=TfpgApplicationClass(ClassType);
+    uApplication:=self;
     if IsInitialized then
     begin
       FScreenWidth  := GetScreenWidth;
