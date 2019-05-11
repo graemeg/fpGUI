@@ -57,7 +57,7 @@ uses
 
 type
   // widget options
-  TfpgComboOption = (wo_FocusItemTriggersOnChange, wo_AllowUserBlank);
+  TfpgComboOption = (wo_FocusItemTriggersOnChange, wo_AllowUserBlank, wo_NoControlFrame);
   TfpgComboOptions = set of TfpgComboOption;
 
 
@@ -331,8 +331,14 @@ begin
 end;
 
 procedure TfpgBaseComboBox.CalculateInternalButtonRect;
+var
+  lBorder: Integer;
 begin
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+  if wo_NoControlFrame in Options then
+    lBorder := 0
+  else
+    lBorder := 2;
+  FInternalBtnRect.SetRect(Width - Min(Height, 20), lBorder, Min(Height, 20)-lBorder, Height-lBorder*2);
 end;
 
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
@@ -729,9 +735,12 @@ begin
   inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
-  rect := fpgStyle.GetControlFrameBorders;
-  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
-  Canvas.SetClipRect(r);
+  if not(wo_NoControlFrame in Options) then
+  begin
+    rect := fpgStyle.GetControlFrameBorders;
+    InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    Canvas.SetClipRect(r);
+  end;
 
   fpgStyle.DrawStaticComboBox(Canvas, r, Enabled, Focused, ReadOnly, FBackgroundColor, FInternalBtnRect, FBtnPressed);
 
