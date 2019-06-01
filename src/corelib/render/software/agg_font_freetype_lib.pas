@@ -41,7 +41,11 @@ type
 
 const
 {$IFDEF WINDOWS }
-  ft_lib = 'freetype.dll';
+{$IFDEF CPU64 }
+  ft_lib = 'freetype64.dll';
+{$Else }
+  ft_lib = 'freetype32.dll';
+{$ENDIF }
 {$ENDIF }
 
 // Linux, FreeBSD etc.
