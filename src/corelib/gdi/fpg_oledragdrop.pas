@@ -126,7 +126,7 @@ type
     function    GetDataHere(const formatetc: TFormatEtc; out medium: TStgMedium): HResult; stdcall;
     function    QueryGetData(const formatetc: TFormatEtc): HResult; stdcall;
     function    GetCanonicalFormatEtc(const formatetc: TFormatEtc; out formatetcOut: TFormatEtc): HResult; stdcall;
-    function    SetData(const formatetc: TFormatEtc; const medium: TStgMedium; fRelease: BOOL): HResult; stdcall;
+    Function    SetData (Const pformatetc : FORMATETC;var medium:STGMEDIUM;FRelease : BOOL):HRESULT; StdCall;
     function    EnumFormatEtc(dwDirection: DWORD; out enumFormatEtc: IEnumFormatEtc): HResult; stdcall;
     function    DAdvise(const formatetc: TFormatEtc; advf: DWORD; const advSink: IAdviseSink; out dwConnection: DWORD): HResult; stdcall;
     function    DUnadvise(dwConnection: DWORD): HResult; stdcall;
@@ -629,8 +629,8 @@ begin
   end;
 end;
 
-function TfpgOLEDataObject.SetData(const formatetc: TFormatEtc;
-  const medium: TStgMedium; fRelease: BOOL): HResult;
+function TfpgOLEDataObject.SetData (Const pformatetc : FORMATETC;
+  var medium:STGMEDIUM;FRelease : BOOL):HRESULT; StdCall;
 begin
   Result := E_NOTIMPL;
 end;
