@@ -1,15 +1,16 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
 # Joerg Braun <jb@toolbox-mag.de>, 2009
-#
+# AlexL <loginov.alex.valer@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:53+0200\n"
-"Last-Translator: Joerg Braun <jb@toolbox-mag.de>\n"
-"Language-Team: German <jb@toolbox-mag.de>\n"
+"PO-Revision-Date: 2018-11-21 04:13+0000\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
+"Language-Team: German (https://www.transifex.com/Magic/teams/44238/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -86,7 +87,7 @@ msgstr ""
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "Blau"
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -202,7 +203,7 @@ msgstr "Verzeichnisse"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Verzeichnis"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -222,7 +223,7 @@ msgstr ""
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "Englisch"
+msgstr "Deutsch"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
@@ -308,17 +309,17 @@ msgstr "Fre"
 msgid "Friday"
 msgstr "Freitag"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr ""
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr ""
 
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr ""
-
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr ""
+msgstr "Grün"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
@@ -498,11 +499,11 @@ msgstr "Eigentümer"
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr ""
+msgstr "PDF Dokumente"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Seite"
 
 #: fpg_constants:rspassword
 msgid "Password"
@@ -526,7 +527,7 @@ msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Vorschau"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -534,7 +535,7 @@ msgstr "Zuletzt verwendet"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr ""
+msgstr "Rot"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -578,7 +579,7 @@ msgstr "Suchen"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Abschnitt"
 
 #: fpg_constants:rsselect
 msgid "Select"
@@ -586,7 +587,7 @@ msgstr "Ausgewählte"
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr ""
+msgstr "Alle auswählen"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
@@ -622,7 +623,7 @@ msgstr "Größe"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Leerzeichen"
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -686,7 +687,7 @@ msgstr "Unterstrichen"
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr ""
+msgstr "Auf"
 
 #: fpg_constants:rsusername
 msgid "User name"

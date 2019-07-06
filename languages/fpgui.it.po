@@ -1,12 +1,15 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
+# Translators:
+# AlexL <loginov.alex.valer@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2009-06-26 14:57+0200\n"
-"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
-"Language-Team: Italian <en@li.org>\n"
+"PO-Revision-Date: 2018-11-21 04:13+0000\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
+"Language-Team: Italian (https://www.transifex.com/Magic/teams/44238/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -199,7 +202,7 @@ msgstr "Cartelle"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Cartella"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -305,12 +308,12 @@ msgstr "Ven"
 msgid "Friday"
 msgstr "Venerdì"
 
-#: fpg_constants:rsgotoparentdirectory
-msgid "Go to parent directory"
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
 msgstr ""
 
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
 msgstr ""
 
 #: fpg_constants:rscolorgreen

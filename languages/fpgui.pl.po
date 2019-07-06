@@ -1,6 +1,7 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
 # Waldemar Stoczkowski, 2018
+# AlexL <loginov.alex.valer@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
@@ -8,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
-"Last-Translator: Waldemar Stoczkowski, 2018\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/Magic/teams/44238/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,7 +27,7 @@ msgstr "Wykryto nowy element."
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr ""
+msgstr "Przerwij"
 
 #: fpg_constants:rsabout
 msgid "About %s"
@@ -70,7 +71,7 @@ msgstr ""
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Atrybuty"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
@@ -86,11 +87,11 @@ msgstr ""
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "Niebieski"
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr ""
+msgstr "Pogrubienie"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
@@ -106,7 +107,7 @@ msgstr ""
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr ""
+msgstr "Zmiana"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
@@ -122,7 +123,7 @@ msgstr ""
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr ""
+msgstr "Zamknij"
 
 #: fpg_constants:rscollection
 msgid "Collection"
@@ -138,11 +139,11 @@ msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr ""
+msgstr "Potwierdź"
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr ""
+msgstr "Potwierdzenie"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
@@ -150,7 +151,7 @@ msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr ""
+msgstr "Kopiuj"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
@@ -158,11 +159,11 @@ msgstr ""
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr ""
+msgstr "Utwórz"
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr ""
+msgstr "Utwórz folder"
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
@@ -174,7 +175,7 @@ msgstr ""
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr ""
+msgstr "Wytnij"
 
 #: fpg_constants:rsdatabase
 msgid "Database"
@@ -194,7 +195,7 @@ msgstr ""
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr ""
+msgstr "Usuń"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
@@ -202,7 +203,7 @@ msgstr ""
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Katalog"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -214,7 +215,7 @@ msgstr ""
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr ""
+msgstr "Edycja"
 
 #: fpg_constants:rskeyend
 msgid "End"
@@ -222,7 +223,7 @@ msgstr ""
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr ""
+msgstr "Polski"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
@@ -234,7 +235,7 @@ msgstr ""
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr ""
+msgstr "Błąd"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
@@ -246,11 +247,11 @@ msgstr ""
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr ""
+msgstr "Wyjście"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Katalog nie został utworzony <%s>"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
@@ -258,7 +259,7 @@ msgstr ""
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr ""
+msgstr "Fałsz"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
@@ -278,15 +279,15 @@ msgstr ""
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr ""
+msgstr "Nazwa pliku"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr ""
+msgstr "Pliki"
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr ""
+msgstr "Znajdź"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
@@ -308,25 +309,25 @@ msgstr ""
 msgid "Friday"
 msgstr ""
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr ""
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr ""
 
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr ""
-
 #: fpg_constants:rscolorgreen
 msgid "Green"
-msgstr ""
+msgstr "Zielony"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr ""
+msgstr "Grupa"
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr ""
+msgstr "Pomoc"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
@@ -338,7 +339,7 @@ msgstr ""
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr ""
+msgstr "Zignoruj"
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
@@ -346,7 +347,7 @@ msgstr ""
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr ""
+msgstr "Informacje"
 
 #: fpg_constants:rskeyins
 msgid "Ins"
@@ -354,7 +355,7 @@ msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr ""
+msgstr "Wstaw"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
@@ -366,7 +367,7 @@ msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr ""
+msgstr "Kursywa"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
@@ -418,7 +419,7 @@ msgstr ""
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr ""
+msgstr "Komunikat"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
@@ -446,11 +447,11 @@ msgstr ""
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr ""
+msgstr "Nazwa"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr ""
+msgstr "Nie"
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
@@ -478,11 +479,11 @@ msgstr ""
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr ""
+msgstr "Otwórz"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr ""
+msgstr "Otwórz plik"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
@@ -498,19 +499,19 @@ msgstr ""
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr ""
+msgstr "PDF dokumenty"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr ""
+msgstr "Strona"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr ""
+msgstr "Hasło"
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr ""
+msgstr "Wklej"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
@@ -526,7 +527,7 @@ msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr ""
+msgstr "Podgląd"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -534,11 +535,11 @@ msgstr ""
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr ""
+msgstr "Czerwony"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr ""
+msgstr "Zamień"
 
 #: fpg_constants:rsretry
 msgid "Retry"
@@ -546,11 +547,11 @@ msgstr ""
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr ""
+msgstr "Prawo"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr ""
+msgstr "Prawa"
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
@@ -566,7 +567,7 @@ msgstr ""
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr ""
+msgstr " Zapisz"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
@@ -574,23 +575,23 @@ msgstr ""
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr ""
+msgstr "Szukaj"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr ""
+msgstr "Sekcja"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr ""
+msgstr "Wybierz"
 
 #: fpg_constants:rsselectall
 msgid "Select All"
-msgstr ""
+msgstr "Zaznacz wszystko"
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
-msgstr ""
+msgstr "Wybierz katalog"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
@@ -618,15 +619,15 @@ msgstr ""
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr ""
+msgstr "Rozmiar"
 
 #: fpg_constants:rskeyspace
 msgid "Space"
-msgstr ""
+msgstr "Spacja"
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr ""
+msgstr "Styl"
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
@@ -662,7 +663,7 @@ msgstr ""
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr ""
+msgstr "Prawda"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
@@ -694,7 +695,7 @@ msgstr ""
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr ""
+msgstr "Ostrzeżenie"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
@@ -710,7 +711,7 @@ msgstr ""
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr ""
+msgstr "Tak"
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
@@ -719,3 +720,4 @@ msgstr ""
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr ""
+

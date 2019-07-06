@@ -310,13 +310,13 @@ msgstr "Sex"
 msgid "Friday"
 msgstr "Sexta-feira"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Ir para o diretório inicial"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Ir para o diretório pai"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Ir para o diretório inicial"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -721,3 +721,4 @@ msgstr "Sim para todos"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr "de"
+

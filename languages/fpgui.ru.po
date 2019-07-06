@@ -309,13 +309,13 @@ msgstr "Пт"
 msgid "Friday"
 msgstr "Пятница"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Перейти в домашний каталог"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Перейти в родительский каталог"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Перейти в домашний каталог"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"

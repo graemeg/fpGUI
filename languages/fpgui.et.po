@@ -1,6 +1,7 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
 # Rivo Zängov <eraser@eraser.ee>, 2018
+# AlexL <loginov.alex.valer@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
@@ -8,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
-"Last-Translator: Rivo Zängov <eraser@eraser.ee>, 2018\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
 "Language-Team: Estonian (https://www.transifex.com/Magic/teams/44238/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,7 +31,7 @@ msgstr "Katkesta"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr ""
+msgstr "Teave %s kohta"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
@@ -222,7 +223,7 @@ msgstr "End"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "Inglise"
+msgstr "Eesti"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
@@ -250,7 +251,7 @@ msgstr "Välju"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Tõrge kataloogi <%s> loomisel"
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
@@ -258,7 +259,7 @@ msgstr ""
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr ""
+msgstr "Väär"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
@@ -308,13 +309,13 @@ msgstr "Reede"
 msgid "Friday"
 msgstr "Reede"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Mine kodukausta"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Mine ülemisse kausta"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Mine kodukausta"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -450,7 +451,7 @@ msgstr "Nimi"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr ""
+msgstr "Ei"
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
@@ -719,3 +720,4 @@ msgstr "Jah kõigile"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr ""
+

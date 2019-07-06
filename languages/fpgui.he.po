@@ -1,5 +1,6 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
 # Translators:
+# Yaron Shahrabani <sh.yaron@gmail.com>, 2018
 # AlexL <loginov.alex.valer@gmail.com>, 2019
 # 
 msgid ""
@@ -9,112 +10,112 @@ msgstr ""
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2018-11-21 04:13+0000\n"
 "Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
-"Language-Team: Afrikaans (https://www.transifex.com/Magic/teams/44238/af/)\n"
+"Language-Team: Hebrew (https://www.transifex.com/Magic/teams/44238/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: af\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: he\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr "<%s> is nie toegewys nie"
+msgstr "<%s> לא הוקצה"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr "'n Nuwe item is opgespoor."
+msgstr "התגלה פריט חדש."
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr "Staak"
+msgstr "ביטול"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr "Aangaande %s"
+msgstr "על אודות %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr ""
+msgstr "הוספת התיקייה הנוכחית"
 
 #: fpg_constants:rsall
 msgid "All"
-msgstr "Alles"
+msgstr "הכול"
 
 #: fpg_constants:rsallfiles
 msgid "All Files"
-msgstr "Alle Lêers"
+msgstr "כל הקבצים"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr "Alle Lettertipes"
+msgstr "כל הגופנים"
 
 #: fpg_constants:rskeyalt
 msgid "Alt+"
-msgstr ""
+msgstr "Alt+"
 
 #: fpg_constants:rserrunexpected
 msgid "An unexpected error occurred."
-msgstr ""
+msgstr "אירעה שגיאה בלתי צפויה."
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr "Anti-aliasing"
+msgstr "החלקת קצוות"
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr "Apr"
+msgstr "אפר׳"
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr "April"
+msgstr "אפריל"
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr "Eienskape"
+msgstr "מאפיינים"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr "Aug"
+msgstr "אוג׳"
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr "Augustus"
+msgstr "אוגוסט"
 
 #: fpg_constants:rskeybksp
 msgid "BkSp"
-msgstr ""
+msgstr "BkSp"
 
 #: fpg_constants:rscolorblue
 msgid "Blue"
-msgstr ""
+msgstr "כחול"
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr "Vetdruk"
+msgstr "מודגש"
 
 #: fpg_constants:rsbookmarks
 msgid "Bookmarks"
-msgstr "Boekmerke"
+msgstr "סימניות"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
-msgstr "Kanselleer"
+msgstr "ביטול"
 
 #: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr "Kan nie die lêergids skep nie"
+msgstr "לא ניתן ליצור תיקייה"
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr "Verander"
+msgstr "שינוי"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr "Verander Titel"
+msgstr "שינוי כותרת"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr "Karakter Kaart"
+msgstr "מפת תווים"
 
 #: fpg_constants:rscolorpickerhint
 msgid "Click on Picker and maintain click => release to get the color"
@@ -122,11 +123,11 @@ msgstr ""
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr "Sluit"
+msgstr "סגירה"
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr "Versameling"
+msgstr ""
 
 #: fpg_constants:rstabsheetcolorwheel
 msgid "Color Wheel"
@@ -134,15 +135,15 @@ msgstr ""
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr "Instel Boekmerke"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr "Bevestig"
+msgstr ""
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr "Bevestiging"
+msgstr "וידוא"
 
 #: fpg_constants:rscontinuous
 msgid "Continuous"
@@ -150,23 +151,23 @@ msgstr ""
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr "Kopieer"
+msgstr "העתקה"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr "Kon nie die lêergids <%s> oop maak nie"
+msgstr ""
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr "Skep"
+msgstr ""
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr "Skep 'n lêergids"
+msgstr ""
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
-msgstr "Kritiese Fout"
+msgstr ""
 
 #: fpg_constants:rskeyctrl
 msgid "Ctrl+"
@@ -174,19 +175,19 @@ msgstr ""
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr "Sny"
+msgstr ""
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr "Databasis"
+msgstr ""
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr "Des"
+msgstr ""
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr "Desember"
+msgstr ""
 
 #: fpg_constants:rskeydel
 msgid "Del"
@@ -194,15 +195,15 @@ msgstr ""
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr "Skrap"
+msgstr "מחיקה"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr "Lêergidse"
+msgstr ""
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr "Lêergids"
+msgstr "תיקייה"
 
 #: fpg_constants:rskeydown
 msgid "Down"
@@ -210,11 +211,11 @@ msgstr ""
 
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr "Dryf"
+msgstr ""
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr "Redigeer"
+msgstr "עריכה"
 
 #: fpg_constants:rskeyend
 msgid "End"
@@ -222,7 +223,7 @@ msgstr ""
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr "Afrikaans"
+msgstr "עברית"
 
 #: fpg_constants:rskeyenter
 msgid "Enter"
@@ -230,11 +231,11 @@ msgstr ""
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr "Geen 'n nuwe lêergids naam"
+msgstr ""
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr "Fout"
+msgstr "שגיאה"
 
 #: fpg_constants:rskeyesc
 msgid "Esc"
@@ -242,71 +243,71 @@ msgstr ""
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr "Teks Voorbeeld"
+msgstr ""
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr "Staak"
+msgstr ""
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr "Kon nie die lêergids <%s> skep nie"
+msgstr ""
 
 #: fpg_constants:rsfailedtofindhelpviewer
 msgid "Failed to find the help viewer."
-msgstr "Kon nie die help program find nie."
+msgstr ""
 
 #: fpg_constants:rsfalse
 msgid "False"
-msgstr "Onwaar"
+msgstr ""
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr "Gunstelinge"
+msgstr ""
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr "Feb"
+msgstr ""
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr "Februarie"
+msgstr ""
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr "Lêer seleksie"
+msgstr ""
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr "Lêer naam"
+msgstr "שם קובץ"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr "Lêers"
+msgstr ""
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr "Vind"
+msgstr "חיפוש"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr "Vaste wydte"
+msgstr ""
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr "Font Kenname"
+msgstr ""
 
 #: fpg_constants:rserrreportfontfilemissing
 msgid "Font file <%s.fnt> not found"
-msgstr "Font lêer <%s.fnt> is nie gevind nie"
+msgstr ""
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr "Vr"
+msgstr ""
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr "Vrydag"
+msgstr ""
 
 #: fpg_constants:rsgotohomedirectory
 msgid "Go to home directory"
@@ -322,11 +323,11 @@ msgstr ""
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr "Groep"
+msgstr ""
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr "Help"
+msgstr "עזרה"
 
 #: fpg_constants:rshexadecimal
 msgid "Hexadecimal"
@@ -338,15 +339,15 @@ msgstr ""
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr "Ignoreer"
+msgstr ""
 
 #: fpg_constants:rserrreportimagefilemissing
 msgid "Image <%s> is missing"
-msgstr "Beeld-lêer <%s> is vermis"
+msgstr ""
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr "Informasie"
+msgstr ""
 
 #: fpg_constants:rskeyins
 msgid "Ins"
@@ -354,11 +355,11 @@ msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr "Invoeg"
+msgstr ""
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr "Voeg in van Karakter Kaart"
+msgstr ""
 
 #: fpg_constants:serrinvalidoption
 msgid "Invalid option at position %d: %s"
@@ -366,123 +367,123 @@ msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr "Kursief"
+msgstr ""
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr "Die item is nie van <%s> tiepe nie!"
+msgstr ""
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr "Jan"
+msgstr ""
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr "Januarie"
+msgstr ""
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr "Jul"
+msgstr ""
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr "Julie"
+msgstr ""
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr "Jun"
+msgstr ""
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr "Junie"
+msgstr ""
 
 #: fpg_constants:rskeyleft
 msgid "Left"
-msgstr ""
+msgstr "שמאל"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr "Lys moet leeg wees"
+msgstr "הרשימה חייבת להיות ריקה"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr "Mar"
+msgstr "מרץ"
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr "Maart"
+msgstr "מרץ"
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr "Mei"
+msgstr "מאי"
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr "Boodskap"
+msgstr "הודעה"
 
 #: fpg_constants:rskeymeta
 msgid "Meta+"
-msgstr ""
+msgstr "מטא+"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr "Wysigings Tyd"
+msgstr "זמן מעודכן"
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr "Ma"
+msgstr "יום ב׳"
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr "Maandag"
+msgstr "שני"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr "Skyf Af"
+msgstr "הורדה למטה"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr "Skyf Op"
+msgstr "העלאה למעלה"
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr "Naam"
+msgstr "שם"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr "Nee"
+msgstr "לא"
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
-msgstr "Nee vir Alles"
+msgstr "לא להכול"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr "Nov"
+msgstr "נוב׳"
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr "November"
+msgstr "נובמבר"
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr "Goed"
+msgstr "אישור"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr "Okt"
+msgstr "אוק׳"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr "Oktober"
+msgstr "אוקטובר"
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr "Open"
+msgstr "פתיחה"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr "Maak 'n leêr op"
+msgstr "פתיחת קובץ"
 
 #: fpg_constants:serrnooptionallowed
 msgid "Option at position %d does not allow an argument: %s"
@@ -494,23 +495,23 @@ msgstr ""
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr "Eienaar"
+msgstr ""
 
 #: fpg_constants:rsfiletypepdf
 msgid "PDF Documents"
-msgstr "PDF Dokumente"
+msgstr "מסמכי PDF"
 
 #: fpg_constants:rsreportpage
 msgid "Page"
-msgstr "Bladsy"
+msgstr "עמוד"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr "Wagwoord"
+msgstr "ססמה"
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr "Plak"
+msgstr "הדבקה"
 
 #: fpg_constants:rskeypgdn
 msgid "PgDn"
@@ -526,63 +527,63 @@ msgstr ""
 
 #: fpg_constants:rsreportpreview
 msgid "Preview"
-msgstr "Voorskou"
+msgstr ""
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr "Onlangs gebruik"
+msgstr ""
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr "Rooi"
+msgstr "אדום"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr "Vervang"
+msgstr "החלפה"
 
 #: fpg_constants:rsretry
 msgid "Retry"
-msgstr "Herprobeer"
+msgstr "ניסיון חוזר"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr "Regs"
+msgstr ""
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr "Regte"
+msgstr ""
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
-msgstr "Sans"
+msgstr ""
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr "Sa"
+msgstr ""
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr "Saterdag"
+msgstr ""
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr "Stoor"
+msgstr "שמירה"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr "Stoor 'n lêer as"
+msgstr ""
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "Soek"
+msgstr "חיפוש"
 
 #: fpg_constants:rsreportsection
 msgid "Section"
-msgstr "Seksie"
+msgstr ""
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr "Kies"
+msgstr ""
 
 #: fpg_constants:rsselectall
 msgid "Select All"
@@ -590,23 +591,23 @@ msgstr ""
 
 #: fpg_constants:rsselectadirectory
 msgid "Select a Directory"
-msgstr "Kies 'n lêergids"
+msgstr ""
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr "Kies 'n lettertipe"
+msgstr ""
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr "Sept"
+msgstr ""
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr "September"
+msgstr ""
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
-msgstr "Serif"
+msgstr ""
 
 #: fpg_constants:rskeyshift
 msgid "Shift+"
@@ -614,11 +615,11 @@ msgstr ""
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr "Wys versteekte lêers"
+msgstr ""
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr "Groote"
+msgstr ""
 
 #: fpg_constants:rskeyspace
 msgid "Space"
@@ -626,96 +627,97 @@ msgstr ""
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr "Steil"
+msgstr ""
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
-msgstr "So"
+msgstr ""
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
-msgstr "Sondag"
+msgstr ""
 
 #: fpg_constants:rskeytab
 msgid "Tab"
-msgstr "Keep"
+msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr "Teks om in te voeg"
+msgstr ""
 
 #: fpg_constants:rserrreportnopagestoprint
 msgid "There are no pages to print"
-msgstr "Daar is geen bladsye om te druk nie"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr "Do"
+msgstr ""
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr "Donderdag"
+msgstr ""
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr "Vandag"
+msgstr "היום"
 
 #: fpg_constants:rstrue
 msgid "True"
-msgstr "Waar"
+msgstr ""
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr "Di"
+msgstr ""
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr "Dinsdag"
+msgstr ""
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr "Tipe Leêr"
+msgstr "סוג הקובץ"
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
-msgstr "Letterbeeld"
+msgstr ""
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr "Onderstreep"
+msgstr ""
 
 #: fpg_constants:rskeyup
 msgid "Up"
-msgstr ""
+msgstr "למעלה"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr "Gebruikers naam"
+msgstr "שם משתמש"
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr "Waarskuwing"
+msgstr "אזהרה"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr "Wo"
+msgstr "יום ד׳"
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr "Woensdag"
+msgstr "רביעי"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr "Wil jy die nuwe item <%s> in die lys bylas?"
+msgstr "להוסיף פריט חדש <%s> לרשימה?"
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr "Ja"
+msgstr "כן"
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
-msgstr "Ja vir Alles"
+msgstr "כן להכול"
 
 #: fpg_constants:rsreportpageof
 msgid "of"
-msgstr "van"
+msgstr "מתוך"
+
