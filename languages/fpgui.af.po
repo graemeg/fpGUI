@@ -534,7 +534,7 @@ msgstr "Onlangs gebruik"
 
 #: fpg_constants:rscolorred
 msgid "Red"
-msgstr ""
+msgstr "Rooi"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -546,7 +546,7 @@ msgstr "Herprobeer"
 
 #: fpg_constants:rskeyright
 msgid "Right"
-msgstr "Regte"
+msgstr "Regs"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
