@@ -308,13 +308,13 @@ msgstr "Ven"
 msgid "Friday"
 msgstr "Vendredi"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Aller au répertoire d'origine"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Aller au répertoire parent"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Aller au répertoire d'origine"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"

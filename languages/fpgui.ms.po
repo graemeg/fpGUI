@@ -309,13 +309,13 @@ msgstr "Jum"
 msgid "Friday"
 msgstr "Jumaat"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Pergi ke direktori rumah"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Pergi ke direktori induk"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Pergi ke direktori rumah"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -720,3 +720,4 @@ msgstr "Ya Semua"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr "dari"
+

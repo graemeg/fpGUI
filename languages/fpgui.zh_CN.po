@@ -309,13 +309,13 @@ msgstr "周五"
 msgid "Friday"
 msgstr "星期五"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "转到主目录"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "转到父目录"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "转到主目录"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -720,3 +720,4 @@ msgstr "全部选是"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr ""
+

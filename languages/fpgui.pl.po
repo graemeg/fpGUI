@@ -309,12 +309,12 @@ msgstr ""
 msgid "Friday"
 msgstr ""
 
-#: fpg_constants:rsgotoparentdirectory
-msgid "Go to parent directory"
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
 msgstr ""
 
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
 msgstr ""
 
 #: fpg_constants:rscolorgreen
@@ -720,3 +720,4 @@ msgstr ""
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr ""
+

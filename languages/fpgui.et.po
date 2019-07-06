@@ -309,13 +309,13 @@ msgstr "Reede"
 msgid "Friday"
 msgstr "Reede"
 
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Mine kodukausta"
+
 #: fpg_constants:rsgotoparentdirectory
 msgid "Go to parent directory"
 msgstr "Mine ülemisse kausta"
-
-#: fpg_constants:rsgotohomedirectory
-msgid "Got to home directory"
-msgstr "Mine kodukausta"
 
 #: fpg_constants:rscolorgreen
 msgid "Green"
@@ -720,3 +720,4 @@ msgstr "Jah kõigile"
 #: fpg_constants:rsreportpageof
 msgid "of"
 msgstr ""
+
