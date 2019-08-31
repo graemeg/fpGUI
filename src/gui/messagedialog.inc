@@ -88,7 +88,7 @@ begin
 
   WrapText(AValue, FInformativeText, FFont, FMaxLineWidth, outw);
   // adjust dialog's height
-  Height := lblName1.Bottom + (FLineHeight*FInformativeText.Count) + FTextY + 35;
+  Height := lblName1.Bottom + (FLineHeight*FInformativeText.Count) + FTextY + 45;
 end;
 
 procedure TfpgMessageDialog.SetButtons(const AValue: TfpgMsgDlgButtons);
@@ -205,7 +205,7 @@ begin
 
   // position buttons
   if Assigned(FInformativeText) then
-    ltop := lblName1.Bottom + 50 + (FLineHeight*FInformativeText.Count) + 15
+    ltop := lblName1.Bottom + FTextY + (FLineHeight*FInformativeText.Count) + 15
   else
     ltop := lblName1.Bottom + 15;
 

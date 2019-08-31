@@ -2273,7 +2273,7 @@ begin
     begin
       if w.WidgetBoundsInWindow.PointInRect(Point(AX, AY)) then
       begin
-        Result := (FindWidgetForMouseEvent(w, AX, AY));
+        Result := (FindWidgetForMouseEvent(w, AX, AY, AInvalidWidget));
         break;
       end;
     end;
