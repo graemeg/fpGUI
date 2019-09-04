@@ -118,6 +118,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -1785,6 +1786,8 @@ begin
       FSelStartPos:=FSelEndPos;
       FSelEndPos:=tmp;
     end;
+    { Its traditional to set the global selection in X11 }
+    fpgApplication.selection.Text := GetSelectionText;
   end;
 
   if FDNDMaybe and not Assigned(FDrag) then
@@ -1809,6 +1812,22 @@ begin
     PopupMenu.ShowAt(self, x, y)
   else
     ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
+procedure TfpgMemo.HandleMMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  cp: integer = 0;
+  lnum: integer = 0;
+begin
+  inherited HandleMMouseDown(x, y, shiftstate);
+  CursorPosFromXY(x,y, lnum, cp);
+  ResetSelectionVariables;
+  FCursorPos     := cp;
+  FCursorLine    := lnum;
+  FSelStartLine  := lnum;
+  FSelStartPos   := cp;
+  FSelEndLine    := -1;
+  SetSelectionText(fpgApplication.selection.Text);
 end;
 
 procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);

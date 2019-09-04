@@ -666,6 +666,18 @@ type
   end;
 
 
+  TfpgClipboardBase = class(TObject)
+  protected
+    FClipboardWndHandle: TfpgWinHandle;
+    function    DoGetText: TfpgString; virtual; abstract;
+    procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
+    procedure   InitClipboard; virtual; abstract;
+  public
+    constructor Create; virtual;
+    property    Text: TfpgString read DoGetText write DoSetText;
+  end;
+
+
   TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
   private
     FMainForm: TfpgWidgetBase;
@@ -685,6 +697,7 @@ type
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
     FModalFormStack: TList;
+    FSelection: TfpgClipboardBase;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
     procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
     function    MessagesPending: boolean; virtual; abstract;
@@ -723,18 +736,7 @@ type
     property    MainForm: TfpgWidgetBase read FMainForm write FMainForm;
     property    Terminated: boolean read FTerminated write FTerminated;
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
-  end;
-
-
-  TfpgClipboardBase = class(TObject)
-  protected
-    FClipboardWndHandle: TfpgWinHandle;
-    function    DoGetText: TfpgString; virtual; abstract;
-    procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
-    procedure   InitClipboard; virtual; abstract;
-  public
-    constructor Create; virtual;
-    property    Text: TfpgString read DoGetText write DoSetText;
+    property    selection: TfpgClipboardBase read FSelection;
   end;
 
 

@@ -113,6 +113,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
@@ -1018,7 +1019,9 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
   if FDNDMaybe and not FDNDForSure then
-    FSelOffset:=0;
+    FSelOffset := 0;
+  if FSelOffset <> 0 then
+    fpgApplication.selection.Text := SelectionText;
   FDNDMaybe:=False;
   FDNDForSure:=False;
   RePaint;
@@ -1031,6 +1034,18 @@ begin
     PopupMenu.ShowAt(self, x, y)
   else
     ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
+procedure TfpgBaseEdit.HandleMMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleMMouseDown(x, y, shiftstate);
+  inherited HandleSetFocus; // we want the focus but don't want to alter the selection.
+  FCursorPx := x;
+  AdjustTextOffset(True);
+  FSelStart  := FCursorPos;
+  FSelOffset := 0;
+  AdjustDrawingInfo;
+  DoPaste(fpgApplication.selection.Text);
 end;
 
 procedure TfpgBaseEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
