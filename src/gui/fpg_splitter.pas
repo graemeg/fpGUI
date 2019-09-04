@@ -128,41 +128,16 @@ function TfpgSplitter.FindControl: TfpgWidget;
 var
   i: Integer;
   wg: TfpgWidget;
-  p: TPoint;
-  r: TfpgRect;
 begin
   Result := nil;
-  case Align of
-    alLeft:   p := Point(Left-2, Top + (Height div 2));
-    alRight:  p := Point(Right+2, Top + (Height div 2));
-    alTop:    p := Point(Left + (Width div 2), Top-2);
-    alBottom: p := Point(Left + (Width div 2), Bottom+2);
-  else
-    Exit;
-  end;
-
-  for i := 0 to Parent.ComponentCount-1 do
-  begin
+  for i := 0 to Parent.ComponentCount-1 do begin
     wg := TfpgWidget(Parent.Components[i]);
-    if (wg <> nil) and wg.Visible and wg.Enabled then
-    begin
-      Result := wg;
-      r := Result.GetBoundsRect;
-      if (r.Width = 0) then
-        if Align in [alTop, alLeft] then
-          Dec(r.Left)
-        else
-          Inc(r.Width);
-      if (r.Height = 0) then
-        if Align in [alTop, alLeft] then
-          Dec(r.Top)
-        else
-          Inc(r.Height);
-      if r.PointInRect(p) then
-        Exit;
-    end;
+    if wg=self then break; // we either found it or not.
+    if (wg <> nil) and (wg is TfpgWidget) and wg.Visible and (wg.align = align)
+      then result := wg;
   end;
-  Result := nil;
+  // if not enabled we don't want to change it?
+  if (result <> nil) and (not result.enabled) then result := nil;
 end;
 
 procedure TfpgSplitter.SetColorGrabBar(const AValue: TfpgColor);
