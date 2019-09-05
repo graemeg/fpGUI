@@ -13,7 +13,7 @@ uses
   fpg_form,
   fpg_button,
   fpg_memo;
-  
+
 type
   TMainForm = class(TfpgForm)
   private
@@ -47,14 +47,15 @@ begin
     Name := 'memo';
     SetPosition(10, 40, 280, 150);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    Lines.Add('Memo Test0');
+    Lines.Add(#9'Memo Test0');
     Lines.Add('Memo Test1');
-    Lines.Add('Memo Test2');
+    Lines.Add('Memo'#9'Test2');
     Lines.Add('Memo Test3');
-    Lines.Add('Memo Test4');
+    Lines.Add('Memo Test'#9'4');
     FontDesc := '#Edit1';
     TabOrder := 0;
     Lines.Insert(1, '0 Before 1 after');
+    UseTabs := true;
   end;
 
   btnQuit := TfpgButton.Create(self);
