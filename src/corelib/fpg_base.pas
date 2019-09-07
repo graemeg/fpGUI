@@ -702,6 +702,15 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
+  public { METADATA }
+    AppTitle,
+    AppVersion,
+    AppAuthor,
+    AppCopyright,
+    AppSiteName,          // The app's friendly site name to show in about
+    AppSiteURL,           // The URL to launch if clicked.
+    AppIcon:     TfpgString;
+    AppLicTopic: integer; // INF topic ID for the license page within HelpFile.
   public
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
@@ -3555,6 +3564,7 @@ begin
   FHelpKey := keyF1;
   FHelpType := htContext;
   FDesignedDPI := 96;
+  AppIcon := '';
 end;
 
 destructor TfpgApplicationBase.Destroy;
