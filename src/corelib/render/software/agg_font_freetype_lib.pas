@@ -50,8 +50,14 @@ const
 {$ENDIF }
 
 // Mac OS X
-{$ifdef darwin}
-  ft_lib = 'libfreetype';
+{$if defined(UNIX) and defined(darwin)}
+  ft_lib = 'libfreetype.dylib';
+  {$linklib freetype}   // This one seems to be the important part.
+                        // But you also need to pass to FPC
+                        // the following command:
+                        //  -k-L/usr/local/lib
+                        // or another place where it can find
+                        // libfreetype.dylib
 {$ENDIF }
 
  FT_CURVE_TAG_ON    = 1;
