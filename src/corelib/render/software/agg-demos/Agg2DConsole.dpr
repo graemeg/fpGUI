@@ -23,7 +23,7 @@ const
   RGBA_Width = 4;
   LineCount = 30;
   {$IFDEF Unix}
-  FontFile = '../../arial.ttf';
+  FontFile = 'arial.ttf';
   {$ENDIF}
   {$IFDEF Windows}
   FontFile = 'Arial';
@@ -148,6 +148,11 @@ begin
   agg^.LineColor($4C, $6C, $9C);
   agg^.LineWidth(5 );
   agg^.Arc(300 ,320 ,80 ,50 ,Deg2Rad(45 ) ,Deg2Rad(270 ) );
+  
+  agg^.Font(FontFile, 25, false, false, VectorFontCache, Deg2Rad(270));
+  agg^.Text(200, 200, 'Hello World!');
+  
+  
 end;
 
 
