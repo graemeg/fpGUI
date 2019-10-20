@@ -50,6 +50,9 @@
 
 {$IFDEF DARWIN }
  {$DEFINE AGG_MACOSX }
+ {$IFNDEF AGG2D_NO_FONT}
+  {$DEFINE AGG2D_USE_FREETYPE}
+ {$ENDIF}
 {$ENDIF }
 
 //----------------------------------------------------------------------------
