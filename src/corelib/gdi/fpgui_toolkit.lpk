@@ -478,7 +478,7 @@
         <UnitName Value="SynRegExpr"/>
       </Item111>
     </Files>
-    <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
+    <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\corelib\cocoa;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="aggpas"/>

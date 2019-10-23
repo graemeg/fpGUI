@@ -299,6 +299,7 @@ type
     function    GetDescent: integer; virtual; abstract;
     function    GetHeight: integer; virtual; abstract;
     function    GetTextWidth(const txt: string): integer; virtual; abstract;
+    function    HandleIsValid: boolean; virtual; abstract;
   end;
 
 
