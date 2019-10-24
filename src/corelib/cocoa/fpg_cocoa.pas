@@ -33,6 +33,7 @@ type
 
   TfpgCocoaFontResource = class(TfpgFontResourceBase)
   public
+    constructor Create(const afontdesc: string); override;
     function    GetAscent: integer; override;
     function    GetDescent: integer; override;
     function    GetHeight: integer; override;
@@ -83,6 +84,7 @@ type
   private
     FWinHandle: TfpgWinHandle;
   protected
+    FModalForWin: TfpgCocoaWindow;
     function    HandleIsValid: boolean; override;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoAllocateWindowHandle(AParent: TfpgWidgetBase); override;
@@ -104,6 +106,7 @@ type
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
+    procedure   DoFlush; override;
   public
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
@@ -131,6 +134,8 @@ type
   
   
   TfpgCocoaDrag = class(TfpgDragBase)
+  public
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
   end;
   
   
@@ -146,7 +151,12 @@ type
   end;
   
 
-  TfpgCocoaSystemTrayHandler = class(TfpgComponent)
+  TfpgCocoaSystemTrayHandler = class(TfpgSystemTrayHandlerBase)
+  public
+    procedure   Show; override;
+    procedure   Hide; override;
+    function    IsSystemTrayAvailable: boolean; override;
+    function    SupportsMessages: boolean; override;
   end;
   
   
@@ -165,7 +175,13 @@ uses
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
   fpg_constants; 
-  
+
+{ TfpgCocoaFontResource }
+
+constructor TfpgCocoaFontResource.Create(const afontdesc: string);
+begin
+end;
+
 function    TfpgCocoaFontResource.GetAscent: integer;
 begin
 end;
@@ -186,6 +202,7 @@ function    TfpgCocoaFontResource.HandleIsValid: boolean;
 begin
 end;
 
+{ TfpgCocoaImage }
 
 procedure   TfpgCocoaImage.DoFreeImage;
 begin
@@ -199,6 +216,7 @@ procedure   TfpgCocoaImage.DoInitImageMask(awidth, aheight: integer; aimgdata: P
 begin
 end;
 
+{ TfpgCocoaWindow }
   
 function    TfpgCocoaWindow.HandleIsValid: boolean;
 begin
@@ -248,6 +266,8 @@ procedure   TfpgCocoaWindow.DoDNDEnabled(const AValue: boolean);
 begin
 end;
 
+{ TfpgCocoaApplication }
+
 function    TfpgCocoaApplication.DoGetFontFaceList: TStringList;
 begin
 end;
@@ -257,6 +277,10 @@ begin
 end;
 
 function    TfpgCocoaApplication.MessagesPending: boolean;
+begin
+end;
+
+procedure   TfpgCocoaApplication.DoFlush;
 begin
 end;
 
@@ -284,6 +308,7 @@ function    TfpgCocoaApplication.Screen_dpi: integer;
 begin
 end;
 
+{ TfpgCocoaClipboard }
 
 function    TfpgCocoaClipboard.DoGetText: TfpgString;
 begin
@@ -297,6 +322,14 @@ procedure   TfpgCocoaClipboard.InitClipboard;
 begin
 end;
 
+{ TfpgCocoaDrag }
+
+function    TfpgCocoaDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction;
+begin
+end;
+
+{ TfpgCocoaDrop }
+
 function    TfpgCocoaDrop.GetDropAction: TfpgDropAction;
 begin
 end;
@@ -309,6 +342,7 @@ function    TfpgCocoaDrop.GetWindowForDrop: TfpgWindowBase;
 begin
 end;
 
+{ TfpgCocoaCanvas }
 
 procedure   TfpgCocoaCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
@@ -410,5 +444,22 @@ procedure   TfpgCocoaCanvas.DoAllocateBuffer;
 begin
 end;
 
-    
+{ TfpgCocoaSystemTrayHandler }
+
+procedure   TfpgCocoaSystemTrayHandler.Show;
+begin
 end;
+
+procedure   TfpgCocoaSystemTrayHandler.Hide;
+begin
+end;
+
+function    TfpgCocoaSystemTrayHandler.IsSystemTrayAvailable: boolean;
+begin
+end;
+
+function    TfpgCocoaSystemTrayHandler.SupportsMessages: boolean;
+begin
+end;
+
+end.

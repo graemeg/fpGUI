@@ -151,7 +151,7 @@ type
   protected
     property    Handle: PXftFont read FFontData;
   public
-    constructor Create(const afontdesc: string);
+    constructor Create(const afontdesc: string); override;
     destructor  Destroy; override;
     function    HandleIsValid: boolean;
     function    GetAscent: integer; override;
@@ -336,10 +336,10 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
     function    GetHelpViewer: TfpgString; override;
+    procedure   DoFlush; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
-    procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -449,7 +449,7 @@ type
   end;
 
 
-  TfpgX11SystemTrayHandler = class(TfpgComponent)
+  TfpgX11SystemTrayHandler = class(TfpgSystemTrayHandlerBase)
   private
     FTrayIconParent: TWindow;
     FTrayWidget: TfpgWindowBase;
@@ -459,10 +459,10 @@ type
     property    TrayIconParent: TWindow read GetTrayIconParent;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure   Show;
-    procedure   Hide;
-    function    IsSystemTrayAvailable: boolean;
-    function    SupportsMessages: boolean;
+    procedure   Show; override;
+    procedure   Hide; override;
+    function    IsSystemTrayAvailable: boolean; override;
+    function    SupportsMessages: boolean; override;
   end;
 
   {$IFDEF GDEBUG}
