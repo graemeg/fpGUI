@@ -31,8 +31,8 @@ begin
   appName := NSSTR('Simple Window 2 demo 2');
   quitTitle := NSSTR('Quit ').stringByAppendingString(appName);
   quitMenuItem := NSMenuItem.alloc.initWithTitle_action_keyEquivalent(quitTitle,
-  sel_registerName(PChar('terminate:')),
-  NSSTR('q'));
+    sel_registerName(PChar('terminate:')),
+    NSSTR('q'));
   appMenu.addItem(quitMenuItem);
   appMenuitem.setSubmenu(appMenu);
   window := NSWindow.alloc.initWithContentRect_styleMask_backing_defer(NSMakeRect(0, 0, 200, 200),
