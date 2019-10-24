@@ -10,8 +10,8 @@ INTERFACE
 {$I agg_mode.inc }
 {$I- }
 uses
- agg_basics ,
- Carbon ;
+ agg_basics ;
+// Carbon ;
 
 { TYPES DEFINITION }
 type

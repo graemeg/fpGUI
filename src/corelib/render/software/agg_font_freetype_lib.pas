@@ -40,17 +40,17 @@ type
   FT_Encoding = array[0..3] of char;
 
 const
-{$IFDEF WINDOWS }
+{$IFDEF AGG_WINDOWS}
   ft_lib = 'freetype.dll';
 {$ENDIF }
 
 // Linux, FreeBSD etc.
-{$if defined(UNIX) and not defined(darwin)}
+{$IFDEF AGG_LINUX}
   ft_lib = 'freetype';
 {$ENDIF }
 
 // Mac OS X
-{$if defined(UNIX) and defined(darwin)}
+{$IFDEF AGG_MACOSX}
   ft_lib = 'libfreetype.dylib';
   {$linklib freetype}   // This one seems to be the important part.
                         // But you also need to pass to FPC

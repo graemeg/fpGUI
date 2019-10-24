@@ -39,8 +39,9 @@ backup/
 lib/
 units/
 
-# Application bundle for Mac OS
+# Application bundle for Mac OS and other related OSX files
 *.app/
+.DS_Store
 
 
 # We should come up with a naming convension for demo binaries to exclude existing

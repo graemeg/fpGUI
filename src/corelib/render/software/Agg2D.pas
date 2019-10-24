@@ -101,11 +101,14 @@ uses
   {$undef agg_platform_interface}
   {$undef uses_implementation}
   {$undef agg_platform_implementation}
-  {$IFDEF WINDOWS}
+  {$IFDEF AGG_WINDOWS}
     {$I agg_platform_gdi.inc}
   {$ENDIF}
-  {$IFDEF UNIX}
+  {$IFDEF AGG_LINUX}
     {$I agg_platform_x11.inc}
+  {$ENDIF}
+  {$IFDEF AGG_MACOSX}
+    {$I agg_platform_cocoa.inc}
   {$ENDIF}
 
   fpg_base,
@@ -369,11 +372,14 @@ type
   {$define agg_platform_interface}
   {$undef uses_implementation}
   {$undef agg_platform_implementation}
-    {$IFDEF WINDOWS}
+    {$IFDEF AGG_WINDOWS}
       {$I agg_platform_gdi.inc}
     {$ENDIF}
-    {$IFDEF UNIX}
+    {$IFDEF AGG_LINUX}
       {$I agg_platform_x11.inc}
+    {$ENDIF}
+    {$IFDEF AGG_MACOSX}
+      {$I agg_platform_cocoa.inc}
     {$ENDIF}
 
     // ------ TfpgCanvasBase implementation requirements ---------
@@ -672,12 +678,16 @@ uses
   {$undef agg_platform_interface}
   {$define uses_implementation}
   {$undef agg_platform_implementation}
-  {$IFDEF WINDOWS}
+  {$IFDEF AGG_WINDOWS}
     {$I agg_platform_gdi.inc}
   {$ENDIF}
-  {$IFDEF UNIX}
+  {$IFDEF AGG_LINUX}
     {$I agg_platform_x11.inc}
   {$ENDIF}
+  {$IFDEF AGG_MACOSX}
+    {$I agg_platform_cocoa.inc}
+  {$ENDIF}
+
   fpg_stringutils;
 
 { LOCAL VARIABLES & CONSTANTS }
@@ -1196,11 +1206,14 @@ end;
 {$undef agg_platform_interface}
 {$undef uses_implementation}
 {$define agg_platform_implementation}
-{$IFDEF WINDOWS}
+{$IFDEF AGG_WINDOWS}
   {$I agg_platform_gdi.inc}
 {$ENDIF}
-{$IFDEF UNIX}
+{$IFDEF AGG_LINUX}
   {$I agg_platform_x11.inc}
+{$ENDIF}
+{$IFDEF AGG_MACOSX}
+  {$I agg_platform_cocoa.inc}
 {$ENDIF}
 
 
@@ -3600,7 +3613,7 @@ var
   lSize: double;
 {$ENDIF}
 begin
-{$IFDEF WINDOWS}
+{$IFDEF AGG_WINDOWS}
  {$IFDEF AGG2D_USE_FREETYPE }
    Font(GetWindowsFontDir + 'arial.ttf', 10);
  {$ENDIF }

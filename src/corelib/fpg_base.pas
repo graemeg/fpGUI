@@ -295,10 +295,12 @@ type
 
   TfpgFontResourceBase = class(TObject)
   public
+    constructor Create(const afontdesc: string); virtual; abstract;
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
     function    GetHeight: integer; virtual; abstract;
     function    GetTextWidth(const txt: string): integer; virtual; abstract;
+    function    HandleIsValid: boolean; virtual; abstract;
   end;
 
 
@@ -689,6 +691,7 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
+    procedure   DoFlush; virtual; abstract;
   public
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
@@ -934,6 +937,15 @@ type
     { Interval is in milliseconds. }
     property    Interval: integer read FInterval write SetInterval;
     property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
+  end;
+  
+  
+  TfpgSystemTrayHandlerBase = class(TfpgComponent)
+  public
+    procedure   Show; virtual; abstract;
+    procedure   Hide; virtual; abstract;
+    function    IsSystemTrayAvailable: boolean; virtual; abstract;
+    function    SupportsMessages: boolean; virtual; abstract;
   end;
 
 

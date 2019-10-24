@@ -1,6 +1,10 @@
 // common compiler options
 {$mode objfpc}{$H+}
 {$interfaces corba}
+{$if defined(darwin)}
+  {$define AggCanvas}
+  {$modeswitch objectivec2}
+{$endif}
 {$WARN 5024 off : Parameter "$1" not used}
 
 

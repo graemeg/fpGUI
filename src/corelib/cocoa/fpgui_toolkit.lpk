@@ -22,7 +22,7 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
-        <CustomOptions Value="-dAggCanvasX"/>
+        <CustomOptions Value="-dAggCanvas"/>
       </Other>
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
@@ -154,21 +154,9 @@
         <Type Value="Include"/>
       </Item31>
       <Item32>
-        <Filename Value="fpg_x11.pas"/>
-        <UnitName Value="fpg_x11"/>
+        <Filename Value="fpg_cocoa.pas"/>
+        <UnitName Value="fpg_cocoa"/>
       </Item32>
-      <Item33>
-        <Filename Value="fpg_netlayer_x11.pas"/>
-        <UnitName Value="fpg_netlayer_x11"/>
-      </Item33>
-      <Item34>
-        <Filename Value="fpg_keyconv_x11.pas"/>
-        <UnitName Value="fpg_keyconv_x11"/>
-      </Item34>
-      <Item35>
-        <Filename Value="fpg_xft_x11.pas"/>
-        <UnitName Value="fpg_xft_x11"/>
-      </Item35>
       <Item36>
         <Filename Value="../../gui/promptuserdialog.inc"/>
         <Type Value="Include"/>

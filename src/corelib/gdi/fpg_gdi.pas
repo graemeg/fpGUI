@@ -77,7 +77,7 @@ type
     function    OpenFontByDesc(const desc: string): HFONT;
     property    Handle: HFONT read FFontData;
   public
-    constructor Create(const afontdesc: string);
+    constructor Create(const afontdesc: string); override;
     destructor  Destroy; override;
     function    HandleIsValid: boolean;
     function    GetAscent: integer; override;
@@ -257,10 +257,10 @@ type
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
+    procedure   DoFlush; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
-    procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -358,10 +358,10 @@ type
   TfpgGDISystemTrayIcon = class(TfpgComponent)
   public
     constructor Create(AOwner: TComponent); override;
-    procedure   Show;
-    procedure   Hide;
-    function    IsSystemTrayAvailable: boolean;
-    function    SupportsMessages: boolean;
+    procedure   Show; override;
+    procedure   Hide; override;
+    function    IsSystemTrayAvailable: boolean; override;
+    function    SupportsMessages: boolean; override;
   end;
 
 
