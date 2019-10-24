@@ -12,5 +12,8 @@ if [ ! -d $libpath ]; then
   echo ' '
 fi
 
-# Default build
-$fpcbin -dX11 @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+# LINUX & FREEBSD
+#$fpcbin -dX11 @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+
+# OSX
+$fpcbin -dCocoa @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
