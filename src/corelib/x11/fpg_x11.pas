@@ -28,7 +28,6 @@ interface
 uses
   Classes,
   SysUtils,
-  contnrs,
   X,
   Xlib,
   XUtil,
@@ -3773,13 +3772,12 @@ begin
     // calculate a clipmask since we will use a new gc with none set.
     OriginalSize.SetRect(x,y,w,h);
     OriginalSize.IntersectRect(ClippedSize, FClipRect);
-    SourcePos := fpgPoint(xi+(ClippedSize.Left-OriginalSize.Left), yi+(ClippedSize.Top-OriginalSize.Top));
-
     // if the rect is empty (clipped out) then there is nothing to do
-    if ClippedSize.IsRectEmpty then
+    if FClipRectSet and ClippedSize.IsRectEmpty then
       Exit; // ==>
 
     // rendering the mask
+    SourcePos := fpgPoint(xi+(ClippedSize.Left-OriginalSize.Left), yi+(ClippedSize.Top-OriginalSize.Top));
     msk := XCreatePixmap(xapplication.display, XDefaultRootWindow(xapplication.display), w, h, 1);
     GcValues.foreground := 1;
     GcValues.background := 0;

@@ -253,7 +253,6 @@ begin
   case FDialogType of
     mtAbout:
         begin
-          Canvas.Clear(BackgroundColor);
           logo := CreateImage_BMP(@stdimg_fpgui_logo, SizeOf(stdimg_fpgui_logo));
           Canvas.SetColor(clBlack);
           Canvas.DrawRectangle(12, 12, logo.Width+2, logo.Height+2);
