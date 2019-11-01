@@ -141,7 +141,7 @@ destructor TfpgImageList.Destroy;
 begin
   Clear;
   FList.Free;
-  inherited Destroy
+  inherited Destroy;
 end;
 
 procedure TfpgImageList.AddItemFromFile(AFileName: TfpgString; AIndex: integer);
