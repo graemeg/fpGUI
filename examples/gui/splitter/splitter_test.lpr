@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   SysUtils, Classes, fpg_base, fpg_main,
-  fpg_form, fpg_memo, fpg_listbox,
+  fpg_form, fpg_menu, fpg_memo, fpg_listbox,
   fpg_panel, fpg_progressbar, fpg_splitter, fpg_checkbox;
 
 type
@@ -18,18 +18,25 @@ type
     procedure CheckBoxChanged(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmSplitterTest}
+    menu: TfpgMenuBar;
+    pnlStatus: TfpgPanel;
+    pnlLeft: TfpgPanel;
+    pnlRight: TfpgPanel;
     lstChoice: TfpgListBox;
     spl1: TfpgSplitter;
     mmSource: TfpgMemo;
     spl2: TfpgSplitter;
     mmDest: TfpgMemo;
+    pnlRigth: TfpgPanel;
     pnlName1: TfpgPanel;
     spl3: TfpgSplitter;
     pbName1: TfpgProgressBar;
     spl4: TfpgSplitter;
     cbShowGrabBar: TfpgCheckBox;
     {@VFD_HEAD_END: frmSplitterTest}
+    bogus: TComponent; // for testing FindControl
     procedure AfterCreate; override;
+    procedure MenuExitClick(sender: TObject);
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -43,16 +50,52 @@ end;
 
 procedure TfrmSplitterTest.AfterCreate;
 begin
+  // put something for TfpgSplitter.FindControl to /trip/ over
+  bogus := TComponent.create(self);
+  bogus.name := 'bogus';
+
   {@VFD_BODY_BEGIN: frmSplitterTest}
   Name := 'frmSplitterTest';
   SetPosition(292, 184, 553, 290);
   WindowTitle := 'Splitter Demo';
 
+  menu:=TfpgMenuBar.create(self);
+  with menu do begin
+    name:='menu';
+    SetPosition(0, 0, 553, 24);
+    align:=alTop;
+    AddMenuItem('E&xit', @MenuExitClick);
+  end;
+
+  pnlStatus:=TfpgPanel.create(self);
+  with pnlStatus do begin
+    name:='pnlStatus';
+    SetPosition(0, 266, 553, 24);
+    align:=alBottom;
+    text:='Status Bar';
+  end;
+
+  pnlLeft:=TfpgPanel.create(self);
+  with pnlLeft do begin
+    name:='pnlLeft';
+    SetPosition(0, 24, 24, 242);
+    align:=alLeft;
+    text:='b1';
+  end;
+
+  pnlRight:=TfpgPanel.create(self);
+  with pnlRight do begin
+    name:='pnlRight';
+    SetPosition(505, 24, 24, 242);
+    align:=alRight;
+    text:='b2';
+  end;
+
   lstChoice := TfpgListBox.Create(self);
   with lstChoice do
   begin
     Name := 'lstChoice';
-    SetPosition(-1, 0, 160, 211);
+    SetPosition(24, 24, 136, 242);
     FontDesc := '#List';
     Items.Add('List item #1');
     Items.Add('List item #2');
@@ -64,7 +107,7 @@ begin
   with spl1 do
   begin
     Name := 'spl1';
-    SetPosition(159, 0, 8, 212);
+    SetPosition(160, 24, 8, 224);
     Align := alLeft;
   end;
 
@@ -72,7 +115,7 @@ begin
   with mmSource do
   begin
     Name := 'mmSource';
-    SetPosition(164, 0, 257, 90);
+    SetPosition(164, 24, 257, 90);
     Lines.Add('Memo has a MinHeight=30 so the splitter');
     Lines.Add('snap effect will not take affect - as expected.');
     FontDesc := '#Edit1';
@@ -96,7 +139,7 @@ begin
     Text := 'Panel';
     Align := alRight;
   end;
-  
+
   cbShowGrabBar := TfpgCheckBox.Create(pnlName1);
   with cbShowGrabBar do
   begin
@@ -145,6 +188,11 @@ begin
   end;
 
   {@VFD_BODY_END: frmSplitterTest}
+end;
+
+procedure TfrmSplitterTest.MenuExitClick(sender: TObject);
+begin
+  close;
 end;
 
 procedure MainProc;

@@ -113,6 +113,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
@@ -816,6 +817,7 @@ end;
 procedure TfpgBaseEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   hasChanged: boolean;
+  l: integer;
 
   procedure StopSelection;
   begin
@@ -874,29 +876,29 @@ begin
           Dec(FCursorPos);
 
           if (ssCtrl in shiftstate) then
+          begin
             // word search...
-            //                    while (FCursorPos > 0) and not ptkIsAlphaNum(copy(FText,FCursorPos,1))
-            //                      do Dec(FCursorPos);
-            //                    while (FCursorPos > 0) and ptkIsAlphaNum(copy(FText,FCursorPos,1))
-            //                      do Dec(FCursorPos);
-          ;
-
+            while (FCursorPos > 0) and (FText[FCursorPos] in not_word) do
+              Dec(FCursorPos);
+            while (FCursorPos > 0) and not (FText[FCursorPos] in not_word) do
+                Dec(FCursorPos);
+          end;
         end;
 
       keyRight:
+        if FCursorPos < UTF8Length(FText) then
         begin
           consumed := True;
-          if FCursorPos < UTF8Length(FText) then
-          begin
-            Inc(FCursorPos);
+          Inc(FCursorPos);
 
-            if (ssCtrl in shiftstate) then
-              // word search...
-              //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-              //                      do Inc(FCursorPos);
-              //                    while (FCursorPos < Length(FText)) and not ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-              //                      do Inc(FCursorPos);
-            ;
+          if (ssCtrl in shiftstate) then
+          begin
+            // word search...
+            l:=length(FText);
+            while (FCursorPos < l) and (FText[FCursorPos] in not_word) do
+              Inc(FCursorPos);
+            while (FCursorPos < l) and not (FText[FCursorPos] in not_word) do
+              Inc(FCursorPos);
           end;
         end;
 
@@ -911,7 +913,8 @@ begin
           consumed := True;
           FCursorPos := UTF8Length(FText);
         end;
-    end;
+
+   end;
 
     if Consumed then
     begin
@@ -925,6 +928,13 @@ begin
       Adjust;
     end;
   end; // movement key checking
+
+  // ^A - select all
+  if (not consumed) and (keycode = ord('A')) and ((shiftstate * [ssCtrl, ssAlt, ssShift]) = [ssCtrl]) then
+  begin
+    consumed := True;
+    SelectAll;
+  end;
 
   if not Consumed then
   begin
@@ -1018,7 +1028,9 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
   if FDNDMaybe and not FDNDForSure then
-    FSelOffset:=0;
+    FSelOffset := 0;
+  if FSelOffset <> 0 then
+    fpgApplication.selection.Text := SelectionText;
   FDNDMaybe:=False;
   FDNDForSure:=False;
   RePaint;
@@ -1031,6 +1043,18 @@ begin
     PopupMenu.ShowAt(self, x, y)
   else
     ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
+procedure TfpgBaseEdit.HandleMMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleMMouseDown(x, y, shiftstate);
+  inherited HandleSetFocus; // we want the focus but don't want to alter the selection.
+  FCursorPx := x;
+  AdjustTextOffset(True);
+  FSelStart  := FCursorPos;
+  FSelOffset := 0;
+  AdjustDrawingInfo;
+  DoPaste(fpgApplication.selection.Text);
 end;
 
 procedure TfpgBaseEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);

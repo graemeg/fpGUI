@@ -33,37 +33,54 @@ begin
   Result := aString;
 end;
 
+var
+  fpgOpenURLhelper: string = '';
 procedure fpgOpenURL(const aURL: TfpgString);
 var
-  Helper: string;
   p: TProcess;
+  s: string;
+  function which(const name: string; var pname: string): integer;
+  var
+    pipe: TextFile;
+  begin
+    result:=-1; // indicates failure to shell out
+    try
+        popen(pipe, 'which '''+StringReplace(name, '''', '''\''', [rfReplaceAll])+'''', 'r');
+        try
+          ReadLn(pipe, pname);
+        finally
+          result := pclose(pipe);
+        end;
+    except end;
+  end;
 begin
-  Helper := '';
-  //TODO: Catch "which" command output to run the browser from there
-  if fpsystem('which xdg-open') = 0 then
-    Helper := 'xdg-open'
-  else if FileExists('/usr/bin/sensible-browser') then
-    Helper := '/usr/bin/sensible-browser'
-  else if FileExists('/etc/alternatives/x-www-browser') then
-    Helper := '/etc/alternatives/x-www-browser'
-  else if fpsystem('which firefox') = 0 then
-    Helper := 'firefox'
-  else if fpsystem('which konqueror') = 0 then
-    Helper := 'konqueror'
-  else if fpsystem('which opera') = 0 then
-    Helper := 'opera'
-  else if fpsystem('which mozilla') = 0 then
-     Helper := 'mozilla'
-  else if fpsystem('which chrome') = 0 then
-     Helper := 'chrome'
-  else if fpsystem('which chromium') = 0 then
-     Helper := 'chromium';
-
-  if Helper <> '' then
+  if fpgOpenURLhelper='' then begin
+    // if cache not set then determine helper
+    s := '';
+    if which('xdg-open', s) = 0 then
+      fpgOpenURLhelper := s
+    else if FileExists('/usr/bin/sensible-browser') then
+      fpgOpenURLhelper := '/usr/bin/sensible-browser'
+    else if FileExists('/etc/alternatives/x-www-browser') then
+      fpgOpenURLhelper := '/etc/alternatives/x-www-browser'
+    else if which('firefox', s) = 0 then
+      fpgOpenURLhelper := s
+    else if which('konqueror', s) = 0 then
+      fpgOpenURLhelper := s
+    else if which('opera', s) = 0 then
+      fpgOpenURLhelper := s
+    else if which('mozilla', s) = 0 then
+       fpgOpenURLhelper := s
+    else if which('chrome', s) = 0 then
+       fpgOpenURLhelper := s
+    else if which('chromium', s) = 0 then
+       fpgOpenURLhelper := s;
+  end;
+  if fpgOpenURLhelper <> '' then
   begin
     p := TProcess.create(nil);
     try
-      p.Executable := Helper;
+      p.Executable := fpgOpenURLhelper;
       p.Parameters.Add(aURL);
       p.Execute;
     finally

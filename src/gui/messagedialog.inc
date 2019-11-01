@@ -53,7 +53,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
-    class procedure About(const ATitle: string; const AText: string);
+    class procedure About(const ATitle: string = ''; const AText: string = '');
     class procedure AboutFPGui(const ATitle: string = '');
     { ACloseButton is when the user cancels the dialog via the Esc key or the X window button }
     class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton; ACloseButton: TfpgMsgDlgBtn = mbCancel): TfpgMsgDlgBtn;
@@ -88,7 +88,7 @@ begin
 
   WrapText(AValue, FInformativeText, FFont, FMaxLineWidth, outw);
   // adjust dialog's height
-  Height := lblName1.Bottom + (FLineHeight*FInformativeText.Count) + FTextY + 35;
+  Height := lblName1.Bottom + (FLineHeight*FInformativeText.Count) + FTextY + 45;
 end;
 
 procedure TfpgMessageDialog.SetButtons(const AValue: TfpgMsgDlgButtons);
@@ -205,7 +205,7 @@ begin
 
   // position buttons
   if Assigned(FInformativeText) then
-    ltop := lblName1.Bottom + 50 + (FLineHeight*FInformativeText.Count) + 15
+    ltop := lblName1.Bottom + FTextY + (FLineHeight*FInformativeText.Count) + 15
   else
     ltop := lblName1.Bottom + 15;
 
@@ -253,7 +253,6 @@ begin
   case FDialogType of
     mtAbout:
         begin
-          Canvas.Clear(BackgroundColor);
           logo := CreateImage_BMP(@stdimg_fpgui_logo, SizeOf(stdimg_fpgui_logo));
           Canvas.SetColor(clBlack);
           Canvas.DrawRectangle(12, 12, logo.Width+2, logo.Height+2);
@@ -370,9 +369,45 @@ begin
   inherited Destroy;
 end;
 
-class procedure TfpgMessageDialog.About(const ATitle: string; const AText: string);
+class procedure TfpgMessageDialog.About(const ATitle: string = '';
+	const AText: string = '');
+var
+  dlg: TfpgMessageDialog;
+  a: TfpgApplication;
+  s: string;
 begin
-  writeln('** Implement TfpgMessageDialog.About');
+  a:=fpgApplication;
+  dlg := TfpgMessageDialog.Create(nil);
+  try
+    dlg.FDialogType := mtAbout;
+    if ATitle <> '' then
+      dlg.WindowTitle := ATitle
+    else if fpgApplication.AppTitle <> '' then
+    begin
+      if a.AppVersion='' then
+        dlg.WindowTitle := fpgApplication.AppTitle
+      else
+        dlg.WindowTitle := fpgApplication.AppTitle+' v'+a.AppVersion;
+    end
+    else
+      dlg.WindowTitle := Format(rsAbout, [fpGUIName]);
+    dlg.Buttons := [mbOK];
+    dlg.DefaultButton := mbOK;
+    dlg.Text := dlg.WindowTitle;
+    s:='';
+    if a.AppAuthor<>''    then s+=a.AppAuthor+LineEnding;
+    if a.AppCopyright<>'' then s+=a.AppCopyright+LineEnding;
+    if a.AppSiteName<>''  then s+=a.AppSiteName+LineEnding;
+    if AText<>''          then s:=TrimLeft(s+LineEnding+AText+LineEnding);
+    if s<>''              then begin
+      SetLength(s, length(s)-1);
+      dlg.InformativeText := LineEnding+LineEnding+s;
+    end;
+    dlg.PrepareLayout;
+    dlg.ShowModal;
+  finally
+    dlg.Free;
+  end;
 end;
 
 class procedure TfpgMessageDialog.AboutFPGui(const ATitle: string);
@@ -382,10 +417,12 @@ begin
   dlg := TfpgMessageDialog.Create(nil);
   try
     dlg.FDialogType := mtAbout;
-    if ATitle = '' then
-      dlg.WindowTitle := Format(rsAbout, [fpGUIName])
+    if ATitle <> '' then
+      dlg.WindowTitle := ATitle
+    else if fpgApplication.AppTitle <> '' then
+      dlg.WindowTitle := fpgApplication.AppTitle
     else
-      dlg.WindowTitle := ATitle;
+      dlg.WindowTitle := Format(rsAbout, [fpGUIName]);
     dlg.Buttons := [mbOK];
     dlg.DefaultButton := mbOK;
     dlg.Text := dlg.WindowTitle;

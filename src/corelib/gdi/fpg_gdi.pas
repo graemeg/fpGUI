@@ -221,6 +221,14 @@ type
   end;
 
 
+  TfpgGDISelection = class(TfpgClipboardBase)
+  protected
+    function    DoGetText: TfpgString; override;
+    procedure   DoSetText(const AValue: TfpgString); override; // NOP
+    procedure   InitClipboard; override; // NOP
+  end;
+
+
   TfpgGDIApplication = class(TfpgApplicationBase)
   private
     FDrag: TfpgGDIDrag;
@@ -268,7 +276,7 @@ type
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
     property    Display: HDC read FDisplay;
-  end;
+ end;
 
 
   TfpgGDIClipboard = class(TfpgClipboardBase)
@@ -1453,6 +1461,21 @@ begin
   inherited Destroy;
 end;
 
+function TfpgGDISelection.DoGetText: TfpgString;
+begin
+  result:=fpgClipboard.text;
+end;
+
+procedure TfpgGDISelection.DoSetText(const AValue: TfpgString);
+begin
+  { this procedure intentionally left blank. nothing to do on windoze }
+end;
+
+procedure TfpgGDISelection.InitClipboard;
+begin
+  { this procedure intentionally left blank. nothing to do on windoze }
+end;
+
 function TfpgGDIApplication.DoGetFontFaceList: TStringList;
 var
   LFont: TLogFont;
@@ -1555,6 +1578,7 @@ begin
   hcr_wait      := LoadCursor(0, IDC_WAIT);
   hcr_hand      := LoadCursor(0, IDC_HAND);
 
+  FSelection := TfpgGDISelection.create;
   FHiddenWindow := 0;
 
   ActivationHook := SetWindowsHookEx(WH_CBT, HOOKPROC(@fpgCBTProc), 0, GetCurrentThreadId);
@@ -1562,6 +1586,7 @@ begin
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
   WakeMainThread := @DoWakeMainThread;
+
 end;
 
 destructor TfpgGDIApplication.Destroy;
@@ -1570,6 +1595,7 @@ begin
   if Assigned(FDrag) then
     FDrag.Free;
   UnhookWindowsHookEx(ActivationHook);
+  FSelection.free;
   inherited Destroy;
 end;
 

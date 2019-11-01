@@ -135,8 +135,10 @@ type
     procedure   HandleKillFocus; virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); virtual;
     procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleMMouseDown(x, y: integer; shiftstate: TShiftState); virtual;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleMMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); virtual;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); virtual;
     procedure   HandleMultiClick(count: integer; x, y: integer; button: word; shiftstate: TShiftState); virtual;
@@ -856,6 +858,7 @@ begin
     MOUSE_MIDDLE:
       begin
         mb := mbMiddle;
+        HandleMMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
   end;
   if Assigned(FOnMouseDown) then
@@ -932,6 +935,7 @@ begin
     MOUSE_MIDDLE:
       begin
         mb := mbMiddle;
+        HandleMMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
   end;
   if Assigned(FOnMouseUp) then // and not IsDblClick then
@@ -1310,6 +1314,12 @@ begin
     HandleRMouseUp(x, y, []);
 end;
 
+procedure TfpgWidget.HandleMMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  if FShowHint then
+    fpgApplication.HideHint;
+end;
+
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   r: TfpgRect;
@@ -1323,6 +1333,11 @@ begin
 end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  // do nothing yet
+end;
+
+procedure TfpgWidget.HandleMMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;

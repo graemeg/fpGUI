@@ -307,6 +307,7 @@ type
     procedure   Run;
     procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   ShowException(E: Exception);
+    procedure   ShowBacktrace(sender: TObject; E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    HintPause: Integer read FHintPause write SetHintPause;
     property    HintWindow: TfpgWidgetBase read FHintWindow;
@@ -1905,6 +1906,20 @@ end;
 procedure TfpgApplication.ShowException(E: Exception);
 begin
   TfpgMessageDialog.Critical(rsErrUnexpected, E.Message);
+end;
+
+procedure TfpgApplication.ShowBacktrace(sender: TObject; E: Exception);
+var
+  m: string;
+  i: Integer;
+  frames: PPointer;
+begin
+  m:='Backtrace:'#10;
+  m+='   * '+BackTraceStrFunc(ExceptAddr)+#10;
+  frames:=ExceptFrames;
+  for i:=0 to ExceptFrameCount-1 do m+='   * '+BackTraceStrFunc(frames[i])+#10;
+  fpgClipboard.text:=m;
+  TfpgMessageDialog.Critical('Exception '+E.ClassName+': '+E.message, m);
 end;
 
 procedure TfpgApplication.WaitWindowMessage(atimeoutms: integer);

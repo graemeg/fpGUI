@@ -287,8 +287,8 @@ constructor TfpgBaseForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWindowPosition  := wpAuto;
-  FWindowTitle     := '';
-  FIconName        := 'stdimg.windowicon';
+  FWindowTitle     := fpgApplication.AppTitle;
+  FIconName        := fpgApplication.AppIcon;
   FSizeable        := True;
   FParentForm      := nil;
   FBackgroundColor := clWindowBackground;
@@ -298,6 +298,7 @@ begin
   FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
+  if FIconName = '' then FIconName := 'stdimg.windowicon';
 end;
 
 destructor TfpgBaseForm.Destroy;

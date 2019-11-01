@@ -668,6 +668,18 @@ type
   end;
 
 
+  TfpgClipboardBase = class(TObject)
+  protected
+    FClipboardWndHandle: TfpgWinHandle;
+    function    DoGetText: TfpgString; virtual; abstract;
+    procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
+    procedure   InitClipboard; virtual; abstract;
+  public
+    constructor Create; virtual;
+    property    Text: TfpgString read DoGetText write DoSetText;
+  end;
+
+
   TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
   private
     FMainForm: TfpgWidgetBase;
@@ -687,11 +699,20 @@ type
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
     FModalFormStack: TList;
+    FSelection: TfpgClipboardBase;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
     procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
     procedure   DoFlush; virtual; abstract;
+  public { METADATA }
+    AppTitle: TfpgString;
+    AppVersion: TfpgString;
+    AppAuthor: TfpgString;
+    AppCopyright: TfpgString;
+    AppSiteName: TfpgString;    // The app's friendly site name to show in about
+    AppSiteURL: TfpgString;     // The URL to launch if clicked.
+    AppIcon: TfpgString;
   public
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
@@ -726,18 +747,7 @@ type
     property    MainForm: TfpgWidgetBase read FMainForm write FMainForm;
     property    Terminated: boolean read FTerminated write FTerminated;
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
-  end;
-
-
-  TfpgClipboardBase = class(TObject)
-  protected
-    FClipboardWndHandle: TfpgWinHandle;
-    function    DoGetText: TfpgString; virtual; abstract;
-    procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
-    procedure   InitClipboard; virtual; abstract;
-  public
-    constructor Create; virtual;
-    property    Text: TfpgString read DoGetText write DoSetText;
+    property    selection: TfpgClipboardBase read FSelection;
   end;
 
 
@@ -938,8 +948,8 @@ type
     property    Interval: integer read FInterval write SetInterval;
     property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
   end;
-  
-  
+
+
   TfpgSystemTrayHandlerBase = class(TfpgComponent)
   public
     procedure   Show; virtual; abstract;
@@ -2285,7 +2295,7 @@ begin
     begin
       if w.WidgetBoundsInWindow.PointInRect(Point(AX, AY)) then
       begin
-        Result := (FindWidgetForMouseEvent(w, AX, AY));
+        Result := (FindWidgetForMouseEvent(w, AX, AY, AInvalidWidget));
         break;
       end;
     end;
@@ -3565,6 +3575,7 @@ begin
   FHelpKey := keyF1;
   FHelpType := htContext;
   FDesignedDPI := 96;
+  AppIcon := 'stdimg.windowicon';
 end;
 
 destructor TfpgApplicationBase.Destroy;
