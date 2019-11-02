@@ -15,9 +15,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 }
-{$mode objfpc}{$H+}
 program aboutdialog;
-uses SysUtils, Classes, fpg_constants,
+
+{$mode objfpc}{$H+}
+
+uses
+  SysUtils, Classes, fpg_constants,
   fpg_base, fpg_main, fpg_form, fpg_button,
   fAbout;
 
@@ -93,6 +96,7 @@ begin
     when the license statement is clicked:
   app.AppLicTopic  := 0;
   app.HelpFile     := 'myhelp.inf'; }
+  app.HelpContext := 10;
   main := TfrmMain.create(nil);
   try
     main.show;

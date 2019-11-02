@@ -15,12 +15,16 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 }
-{$mode objfpc}{$H+}
 unit fAbout;
+
+{$mode objfpc}{$H+}
+
 interface
-uses SysUtils, classes,
-    fpg_constants, fpg_base, fpg_main, fpg_widget, fpg_button, fpg_dialogs,
-    fpg_label;
+
+uses
+  SysUtils, classes,
+  fpg_constants, fpg_base, fpg_main, fpg_widget, fpg_button, fpg_dialogs,
+  fpg_label;
 
 
 
@@ -81,7 +85,12 @@ function AboutDlg: TfpgModalResult; // Not sure why. But why not?
 
 
 implementation
-uses fpg_utils, fpg_imgfmt_bmp;
+
+uses
+ fpg_utils
+ //,fpg_imgfmt_bmp
+ ;
+
 {*********************************************************************
  * TfpgAbout                                                         *
  *********************************************************************}
@@ -179,8 +188,8 @@ begin
     lTitle.text:=fpgApplication.AppTitle+' v'+s
   else
     lTitle.text := fpgApplication.AppTitle;
-  url:=fpgApplication.AppSiteURL;
-  CopyrightID:=fpgApplication.AppLicTopic;
+  url := fpgApplication.AppSiteURL;
+  CopyrightID := fpgApplication.HelpContext;
 end;
 
 
@@ -208,10 +217,12 @@ begin
   inherited DoKeyShortcut(aorigin, key, shift, consumed, IsChildOfOrigin);
   if consumed then exit;
   ssht:=shift-ssKeyOnly;
-  if ssht=[] then begin
-    if (key=27) or (key=13) or (key=57869{numpad}) then begin
+  if ssht=[] then
+  begin
+    if (key = keyEscape) or (key = keyEnter) or (key = keyPEnter) then
+    begin
       consumed:=true;
-      if key=27 then
+      if key = keyEscape then
         ModalResult:=mrCancel
       else
         ModalResult:=mrOK;
