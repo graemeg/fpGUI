@@ -1151,9 +1151,11 @@ end;
 
 procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
     var consumed: boolean);
+type
+  TFocusDirection = (fdBackward, fdForward);
 var
   wg: TfpgWidget;
-  dir: integer;
+  direction: TFocusDirection;
 begin
   if Assigned(OnKeyPress) and FFocusable then
     OnKeyPress(self, keycode, shiftstate, consumed);
@@ -1161,9 +1163,9 @@ begin
   if consumed then
     Exit; //==>
 
-  dir := 0;
+  direction := fdForward;
 
-  if not consumed and (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
+  if (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
   begin
     if fpgApplication.HelpFile <> '' then
     begin
@@ -1175,31 +1177,21 @@ begin
   case keycode of
     keyTab:
         if (ssShift in shiftstate) then
-          dir := -1
+          direction := fdBackward
         else
-          dir := 1;
-{
-    keyReturn,
-    keyDown,
-    keyRight:
-        dir := 1;
+          direction := fdForward;
 
-    keyUp,
-    keyLeft:
-        dir := -1;
-}
-      keyMenu:
-        begin
-          // ssExtra1 is a signal that keyMenu was used.
-          HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
-          consumed := True;
-        end;
+    keyMenu:
+      begin
+        // ssExtra1 is a signal that keyMenu was used.
+        HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
+        consumed := True;
+      end;
   end;
 
   {$Note Optimize this code. Constantly setting ActiveWidget causes RePaint to be called!}
-  if dir = 1 then
+  if direction = fdForward then
   begin
-    // forward
     wg           := FindFocusWidget(ActiveWidget, fsdNext);
     ActiveWidget := wg;
     if wg <> nil then
@@ -1214,9 +1206,8 @@ begin
       end;
     end;
   end
-  else if dir = -1 then
+  else
   begin
-    // backward
     wg           := FindFocusWidget(ActiveWidget, fsdPrev);
     ActiveWidget := wg;
     if wg <> nil then
