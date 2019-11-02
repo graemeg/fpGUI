@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2019 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -363,7 +363,7 @@ type
   end;
 
 
-  TfpgGDISystemTrayIcon = class(TfpgComponent)
+  TfpgGDISystemTrayIcon = class(TfpgSystemTrayHandlerBase)
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Show; override;
