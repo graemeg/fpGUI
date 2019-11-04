@@ -1152,7 +1152,7 @@ end;
 procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
     var consumed: boolean);
 type
-  TFocusDirection = (fdBackward, fdForward);
+  TFocusDirection = (fdNone, fdBackward, fdForward);
 var
   wg: TfpgWidget;
   direction: TFocusDirection;
@@ -1163,7 +1163,7 @@ begin
   if consumed then
     Exit; //==>
 
-  direction := fdForward;
+  direction := fdNone;
 
   if (keycode = fpgApplication.HelpKey) and (shiftstate=[]) then
   begin
@@ -1206,7 +1206,7 @@ begin
       end;
     end;
   end
-  else
+  else if direction = fdBackward then
   begin
     wg           := FindFocusWidget(ActiveWidget, fsdPrev);
     ActiveWidget := wg;
