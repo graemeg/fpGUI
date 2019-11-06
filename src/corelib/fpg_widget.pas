@@ -1181,7 +1181,8 @@ begin
         else
           direction := fdForward;
 
-    keyMenu:
+    keyMenu, keyF10:
+      if (keycode=keyMenu) or (shiftstate*[ssShift, ssAlt, ssCtrl]=[ssShift]) then
       begin
         // ssExtra1 is a signal that keyMenu was used.
         HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
