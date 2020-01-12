@@ -56,9 +56,30 @@ menu.</p>
 <link id="fpg_form.TfpgBaseForm.OnCloseQuery">OnCloseQuery</link>
 </seealso></element>
 
+<element name="TfpgBaseForm.OnKeyChar">
+<short>Event that generates a Char based on a key press</short>
+<descr><p><printshort id="TfpgBaseForm.OnKeyChar"/>.</p>
+<remark>It is important to note that
+Forms will not generate OnKeyXXX events until you set Focusable = True.</remark></descr>
+<seealso>
+<link id="fpg_widget.TfpgWidget.Focusable">TfpgWidget.Focusable</link>
+</seealso></element>
+
+<element name="TfpgBaseForm.OnKeyPress">
+<short>Event that when any key is pressed</short>
+<descr><p><printshort id="TfpgBaseForm.OnKeyPress"/>.</p>
+<remark>It is important to note that
+Forms will not generate OnKeyXXX events until you set Focusable = True.</remark></descr>
+<seealso>
+<link id="fpg_widget.TfpgWidget.Focusable">TfpgWidget.Focusable</link>
+</seealso></element>
+
+
 <!-- inherited docs -->
 <element name="TfpgForm.OnCloseQuery" link="#fpgui.fpg_form.TfpgBaseForm.OnCloseQuery"></element>
 <element name="TfpgForm.OnClose" link="#fpgui.fpg_form.TfpgBaseForm.OnClose"></element>
+<element name="TfpgForm.OnKeyChar" link="#fpgui.fpg_form.TfpgBaseForm.OnKeyChar"></element>
+<element name="TfpgForm.OnKeyPress" link="#fpgui.fpg_form.TfpgBaseForm.OnKeyPress"></element>
 
     </module>
   </package>
