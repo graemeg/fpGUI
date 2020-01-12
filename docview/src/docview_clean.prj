@@ -1,241 +1,4 @@
 [projectoptions]
-mainfile=docview.lpr
-targetfile=${PROJECTNAME}${EXEEXT}
-messageoutputfile=
-makecommand=${COMPILER}
-makedir=
-unitdirs=8
- ../components/richtext
- ${FPTest}3rdparty/epiktimer/
- ${FPTest}src/
- ${FPGUI}/src
- ${FPGUI}/src/corelib/gdi
- ${FPGUI}/src/corelib/x11
- ${FPGUI}/src/gui
- ${FPGUI}/src/corelib
-unitpref=-Fu
-incpref=-Fi
-libpref=-Fl
-objpref=-Fo
-targpref=-o
-befcommand=0
-aftcommand=0
-makeoptions=6
- -l -Mobjfpc -Sh
- -gl -O-
- -B
- -O2 -XX -Xs -CX
- -FUunits/${TargetCPU}-${TargetOS}/
- -gh
-codetemplatedirs=1
- ${TEMPLATEDIR}
-toolmenus=1
- fpGUI &UI Designer
-toolfiles=1
- ${FPGUI_DIR}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner${EXEEXT}
-toolparams=1
- ${CURSOURCEFILE}
-fontnames=0
-scriptbeforecopy=
-scriptaftercopy=
-newprojectfiles=4
- ${TEMPLATEDIR}/fptest/program.pas
- ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
- ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
-newprojectfilesdest=4
- ${%PROJECTNAME%}.pas
- ${%PROJECTDIR%}units/i386-linux/placeholder.txt
- ${%PROJECTDIR%}units/i386-win32/placeholder.txt
- ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
-newfinames=3
- Program
- Test Unit
- Textfile
-newfifilters=3
- "*.pas" "*.pp"
- "*.pas" "*.pp"
- 
-newfiexts=3
- pas
- pas
- 
-newfisources=3
- ${TEMPLATEDIR}fptest/program.pas
- ${TEMPLATEDIR}fptest/unit.pas
- 
-newfonames=2
- Mainform
- Simple Form
-newfonamebases=2
- 
- 
-newfosources=2
- ${TEMPLATEDIR}fpgui/mainform.pas
- ${TEMPLATEDIR}fpgui/simpleform.pas
-newfoforms=2
- 
- 
-forcezorder=0
-stripmessageesc=0
-copymessages=0
-closemessages=0
-checkmethods=1
-colorerror=-1610612712
-colorwarning=-1610612717
-colornote=-1610612716
-usercolors=30
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
-usercolorcomment=30
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-formatmacronames=0
-formatmacrovalues=0
-settingsfile=docview_clean.prj
-settingseditor=1
-settingsdebugger=1
-settingsstorage=1
-settingsprojecttree=0
-settingsautoload=0
-settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
-befcommandon=0
-makeoptionson=6
- 63
- 31
- 34
- 32
- 63
- 60
-aftcommandon=0
-unitdirson=8
- 65599
- 65599
- 65599
- 196671
- 196640
- 196639
- 65581
- 196647
-macroon=7
- 9
- 3
- 6
- 4
- 8
- 63
- 63
-macronames=7
- TargetCPU
- TargetOS
- TargetCPU
- TargetOS
- TargetOS
- HelpPath
- FPTest
-macrovalues=7
- x86_64
- linux
- i386
- win32
- freebsd
- /data/devel/FPC_Docs/inf/
- /data/devel/fptest/
-macrogroup=3
-groupcomments=6
- Linux 64-bit
- Linux 32-bit
- Windows 32-bit
- FreeBSD 64-bit
- 
- 
-toolsave=1
- -1
-toolhide=1
- 0
-toolparse=1
- 0
-toolmessages=1
- 0
-fontalias=0
-fontancestors=0
-fontheights=0
-fontwidths=0
-fontoptions=0
-fontxscales=0
-expandprojectfilemacros=4
- 1
- -1
- -1
- -1
-loadprojectfile=4
- 1
- 0
- 0
- 0
-newinheritedforms=2
- 0
- 0
-uid=0
 sourcefilemasks=5
  "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
  "*.c" "*.cc" "*.h"
@@ -260,10 +23,13 @@ filemasks=5
  *.txt
  *.ipf
  *
+codetemplatedirs=1
+ ${TEMPLATEDIR}
 showgrid=1
 snaptogrid=1
 moveonfirstclick=1
 noformdesignerdocking=0
+componenthints=1
 gridsizex=8
 gridsizey=8
 autoindent=1
@@ -276,19 +42,22 @@ tabstops=2
 spacetabs=1
 showtabs=0
 tabindent=0
-editfontname=Raize
-editfontheight=16
+editfontname=DejaVu Sans Mono
+editfontheight=14
 editfontwidth=0
 editfontextraspace=0
 editfontcolor=-1879048183
 editbkcolor=-1879048186
 statementcolor=14745599
-editfontantialiased=1
+pairmarkcolor=16777179
+pairmaxrowcount=100
+editfontantialiased=0
 editmarkbrackets=1
+editmarkpairwords=1
 backupfilecount=0
 encoding=0
-codetemplatedirs=1
- ${TEMPLATEDIR}
+eolstyle=1
+trimtrailingwhitespace=1
 debugcommand=${DEBUGGER}
 debugoptions=
 debugtarget=
@@ -337,6 +106,7 @@ externalconsole=0
 settty=1
 gdbdownload=0
 downloadalways=0
+restartgdbbeforeload=0
 startupbkpt=0
 startupbkpton=0
 gdbsimulator=0
@@ -350,6 +120,128 @@ exceptclassnames=1
 exceptignore=1
  0
 nodebugbeginend=0
+fpcgdbworkaround=1
+mainfile=docview.lpr
+targetfile=../${PROJECTNAME}${EXEEXT}
+makecommand=${COMPILER}
+makedir=
+unitdirs=9
+ ../components/richtext
+ ${FPTest}3rdparty/epiktimer/
+ ${FPTest}src/
+ ${FPGUI}src/3rdparty/regex
+ ${FPGUI}/src/corelib/render/software
+ ${FPGUI}/src
+ ${FPGUI}/src/corelib/${FPG_GFX}
+ ${FPGUI}/src/gui
+ ${FPGUI}/src/corelib
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+befcommand=1
+ rm units/${TargetCPU}-${TargetOS}/*
+aftcommand=1
+ 
+makeoptions=10
+ -l -Mobjfpc -Sch
+ -gwl -O- -godwarfsets -godwarfmethodclassprefix
+ -B
+ -O2 -XX -Xs -CX
+ -FUunits/${TargetCPU}-${TargetOS}/
+ -gh
+ -gt
+ -gc
+ -Criot
+ -dAggCanvas
+reversepathorder=0
+makeoptpurpose=10
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+befcommandon=1
+ 0
+makeoptionson=10
+ 63
+ 31
+ 34
+ 32
+ 63
+ 30
+ 28
+ 0
+ 4
+ 0
+aftcommandon=1
+ 0
+unitdirson=9
+ 65599
+ 65599
+ 65599
+ 65599
+ 196671
+ 196671
+ 196671
+ 65583
+ 196647
+uid=0
+macroon=5
+ 9
+ 3
+ 6
+ 4
+ 8
+macronames=5
+ TargetCPU
+ TargetOS
+ TargetCPU
+ TargetOS
+ TargetOS
+macrovalues=5
+ x86_64
+ linux
+ i386
+ win32
+ freebsd
+groupcomments=6
+ Linux 64-bit
+ Linux 32-bit
+ Windows 32-bit
+ FreeBSD 64-bit
+ 
+ 
+toolmenus=2
+ fpGUI &UI Designer
+ &DocView
+toolfiles=2
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath} -k ${cursword}
+toolsave=2
+ -1
+ 0
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmessages=2
+ 0
+ 0
+toolshortcuts=2
+ 0
+ 1
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -378,4 +270,3 @@ sigsettings=27
  28,28,T,F
  29,29,T,F
  30,30,T,F
-defaultmake=4
