@@ -368,6 +368,7 @@ begin
       repeat
         fpgWaitWindowMessage;
       until (ModalResult <> mrNone) or (not Visible);
+      visible := false; // for when ModalResult causes completion
     except
       on E: Exception do
       begin
