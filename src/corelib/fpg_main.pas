@@ -548,6 +548,7 @@ implementation
 uses
   strutils,
   math,
+  process,
 {$ifdef AGGCanvas}
   Agg2D,
 {$endif}
@@ -1933,8 +1934,22 @@ begin
 end;
 
 procedure TfpgApplication.RunMessageLoop;
+var
+  c: TComponent;
+  i: integer;
 begin
   WaitWindowMessage(2000);
+
+  { reap Zombies made by fpGUI tools. Mostly needed for *nix. This works
+    because TProcess will read the ExitCode after the process stopped.
+    But the TProcess object needs to persist until the child exits. }
+  for i:=ComponentCount-1 downto 0 do
+  begin
+    c:=components[i];
+    if (c is TProcess) and not TProcess(c).running then
+      c.free;
+  end;
+
 end;
 
 { TfpgFont }

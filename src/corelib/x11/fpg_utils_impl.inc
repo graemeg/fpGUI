@@ -19,7 +19,8 @@ uses
   BaseUnix,
   process,
   fpg_constants,
-  fpg_stringutils;
+  fpg_stringutils,
+  fpg_main;
 
 // X11 specific filesystem implementations of encoding functions
 
@@ -78,13 +79,15 @@ begin
   end;
   if fpgOpenURLhelper <> '' then
   begin
-    p := TProcess.create(nil);
+    p := TProcess.create(fpgApplication);
     try
       p.Executable := fpgOpenURLhelper;
       p.Parameters.Add(aURL);
       p.Execute;
-    finally
+      // this object gets free'd in the event loop.
+    except
       p.Free;
+      raise;
     end;
   end
 end;

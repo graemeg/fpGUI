@@ -3739,7 +3739,7 @@ begin
   else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsFailedToFindHelpViewer);
 
-  p := TProcess.Create(nil);
+  p := TProcess.Create(fpgApplication);
   try
     p.Executable := GetHelpViewer;
     if fpgFileExists(HelpFile) then
@@ -3753,8 +3753,10 @@ begin
     end;
     Result := True;
     p.Execute;
-  finally
+    // this object gets free'd in the event loop.
+  except
     p.Free;
+    raise;
   end;
 end;
 
