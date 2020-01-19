@@ -2103,10 +2103,13 @@ begin
         begin
           w := FindWindowByHandle(ev.xclient.window);
           if not Assigned(w) then
+          begin
             ReportLostWindow(ev);
+            exit;
+          end;
 
           // WM_PROTOCOLS message
-          if Assigned(w) and (ev.xclient.message_type = xia_wm_protocols) then
+          if (ev.xclient.message_type = xia_wm_protocols) then
           begin
             if (ev.xclient.data.l[0] = netlayer.NetAtom[naWM_PING]) then
             begin
@@ -2124,18 +2127,17 @@ begin
               end;
 
               if not blockmsg then
-                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
+                fpgPostMessage(nil, w, FPGM_CLOSE);
             end
             else if ev.xclient.data.l[0] = netlayer.NetAtom[naWM_SYNC_REQUEST] then
             begin
-              w := TfpgX11Window(FindWindowByHandle(ev.xclient.window));
               w.FSyncValue.lo := ev.xclient.data.l[2];
               w.FSyncValue.hi := ev.xclient.data.l[3];
-              w.FHasSyncValue:=True;
+              w.FHasSyncValue := True;
             end;
           end
           { XDND protocol - XdndEnter }
-          else if Assigned(w) and (ev.xclient.message_type = XdndEnter) then
+          else if (ev.xclient.message_type = XdndEnter) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndEnter event received');
@@ -2143,7 +2145,7 @@ begin
             HandleDNDenter(w, ev.xclient.data.l[0], ev);
           end
           { XDND protocol - XdndPosition }
-          else if Assigned(w) and (ev.xclient.message_type = XdndPosition) then
+          else if (ev.xclient.message_type = XdndPosition) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndPosition event received');
@@ -2156,7 +2158,7 @@ begin
                 ev.xclient.data.l[3]);                      // timestamp
           end
           { XDND protocol - XdndStatus }
-          else if Assigned(w) and (ev.xclient.message_type = XdndStatus) then
+          else if (ev.xclient.message_type = XdndStatus) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndStatus event received');
@@ -2175,7 +2177,7 @@ begin
             end;
           end
           { XDND protocol - XdndLeave }
-          else if Assigned(w) and (ev.xclient.message_type = XdndLeave) then
+          else if (ev.xclient.message_type = XdndLeave) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndLeave event received');
@@ -2183,7 +2185,7 @@ begin
             HandleDNDleave(w, ev.xclient.data.l[0]);
           end
           { XDND protocol - XdndDrop }
-          else if Assigned(w) and (ev.xclient.message_type = XdndDrop) then
+          else if (ev.xclient.message_type = XdndDrop) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndDrop event received');
@@ -2193,7 +2195,7 @@ begin
             HandleDNDdrop(w, ev.xclient.data.l[0], ev.xclient.data.l[2]);
           end
           { XDND protocol - XdndFinished }
-          else if Assigned(w) and (ev.xclient.message_type = XdndFinished) then
+          else if (ev.xclient.message_type = XdndFinished) then
           begin
             {$IFDEF DNDDEBUG}
             DebugLn('ClientMessage.XdndFinished event received');
