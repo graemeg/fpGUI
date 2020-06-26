@@ -1,3 +1,476 @@
+[breakpoints]
+panels=1
+ panel1
+[layout]
+windowlayout=468
+ [mainfo.openform]
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [mainfo.projectfiledia]
+ filecolwidth=156
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [mainfo.openfile]
+ filecolwidth=201
+ x=841
+ y=385
+ cx=587
+ cy=307
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=268450944
+ [mainfo]
+ splitdir=0
+ useroptions=301990011
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=380
+ y=54
+ cx=1177
+ cy=65
+ rcx=0
+ rcy=0
+ wsize=0
+ active=1
+ visible=1
+ [targetconsolefo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=1592
+ y=1056
+ cx=624
+ cy=347
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [threadsfo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=cpuc86_64fo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=453
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo.add]
+ [memoryfo.memon]
+ [memoryfo.bitwidth]
+ [memoryfo.cnt]
+ [disassfo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=1230
+ y=531
+ cx=564
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=symbolfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=1680
+ y=57
+ cx=835
+ cy=344
+ rcx=0
+ rcy=0
+ [projecttreefo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=memoryfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=321
+ y=101
+ cx=698
+ cy=413
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [projecttreefo.grid]
+ propcolwidthref=547
+ width0=141
+ sortdescend0=0
+ width1=541
+ sortdescend1=0
+ sorted=0
+ col=0
+ row=-1073741823
+ rowheight=17
+ [stackfo]
+ splitdir=0
+ useroptions=268460137
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=537
+ y=26
+ cx=483
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ propcolwidthref=332
+ sortdescend0=0
+ width1=33
+ sortdescend1=0
+ width2=225
+ sortdescend2=0
+ width4=34
+ sortdescend4=0
+ width5=38
+ sortdescend5=0
+ width6=96
+ sortdescend6=0
+ [breakpointsfo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=1862
+ y=1198
+ cx=477
+ cy=128
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=breakpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=670
+ y=179
+ cx=450
+ cy=484
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [objectinspectorfo.grid]
+ propcolwidthref=440
+ width0=245
+ sortdescend0=0
+ width1=189
+ sortdescend1=0
+ [symbolfo]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=componentstorefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=142
+ y=257
+ cx=660
+ cy=137
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [symbolfo.grid]
+ propcolwidthref=521
+ width0=111
+ sortdescend0=0
+ width1=328
+ sortdescend1=0
+ [symbolfo.symbol]
+ [watchfo]
+ splitdir=0
+ useroptions=268460137
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=1351
+ y=804
+ cx=1206
+ cy=239
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchfo.grid]
+ propcolwidthref=999
+ sortdescend0=0
+ width1=152
+ sortdescend1=0
+ sortdescend3=0
+ width4=13
+ sortdescend4=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ [messagefo]
+ splitdir=0
+ useroptions=268484715
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=1118
+ cx=1195
+ cy=168
+ rcx=0
+ rcy=0
+ [componentstorefo]
+ splitdir=0
+ useroptions=268460155
+ stackedunder=disassfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=445
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [componentstorefo.grid]
+ propcolwidthref=435
+ width0=111
+ sortdescend0=0
+ sortdescend1=0
+ width2=160
+ sortdescend2=0
+ width3=185
+ sortdescend3=0
+ [componentstorefo.storefiledialog]
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentstorefo.groupfiledialog]
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentstorefo.compfiledialog]
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ [componentpalettefo]
+ splitdir=0
+ useroptions=268460139
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=843
+ y=20
+ cx=719
+ cy=129
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [componentpalettefo.componentpages]
+ activetab=1
+ [debuggerfo]
+ splitdir=0
+ useroptions=268460139
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=1167
+ cy=27
+ rcx=0
+ rcy=0
+ [sourcefo]
+ splitdir=0
+ useroptions=268451945
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=1195
+ cy=1115
+ rcx=0
+ rcy=0
+ [actionsmo.watchesonact]
+ [actionsmo.bluedotsonact]
+ [cpuc86_64fo]
+ irqoff=0
+ splitdir=0
+ useroptions=268451947
+ stackedunder=componentpalettefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=183
+ y=113
+ cx=352
+ cy=277
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=302022123
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=422
+ y=149
+ cx=1205
+ cy=1286
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [projectoptions]
 sourcefilemasks=5
  "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
@@ -42,7 +515,7 @@ tabstops=2
 spacetabs=1
 showtabs=0
 tabindent=0
-editfontname=DejaVu Sans Mono
+editfontname=DeJaVu Sans Mono
 editfontheight=14
 editfontwidth=0
 editfontextraspace=0
@@ -125,11 +598,10 @@ mainfile=docview.lpr
 targetfile=../${PROJECTNAME}${EXEEXT}
 makecommand=${COMPILER}
 makedir=
-unitdirs=9
+unitdirs=8
  ../components/richtext
  ${FPTest}3rdparty/epiktimer/
  ${FPTest}src/
- ${FPGUI}src/3rdparty/regex
  ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
  ${FPGUI}/src/corelib/${FPG_GFX}
@@ -182,8 +654,7 @@ makeoptionson=10
  0
 aftcommandon=1
  0
-unitdirson=9
- 65599
+unitdirson=8
  65599
  65599
  65599
@@ -218,6 +689,62 @@ groupcomments=6
  FreeBSD 64-bit
  
  
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=4
+ ${TEMPLATEDIR}/fptest/program.pas
+ ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ ${%PROJECTDIR%}units/i386-linux/placeholder.txt
+ ${%PROJECTDIR%}units/i386-win32/placeholder.txt
+ ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
+newfinames=3
+ Program
+ Test Unit
+ Textfile
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}fptest/program.pas
+ ${TEMPLATEDIR}fptest/unit.pas
+ 
+newfonames=2
+ Mainform
+ Simple Form
+newfonamebases=2
+ 
+ 
+newfoformsuffixes=2
+ 
+ 
+newfosources=2
+ ${TEMPLATEDIR}fpgui/mainform.pas
+ ${TEMPLATEDIR}fpgui/simpleform.pas
+newfoforms=2
+ 
+ 
+expandprojectfilemacros=4
+ 1
+ -1
+ -1
+ -1
+loadprojectfile=4
+ 1
+ 0
+ 0
+ 0
+newinheritedforms=2
+ 0
+ 0
 toolmenus=2
  fpGUI &UI Designer
  &DocView
@@ -242,6 +769,22 @@ toolmessages=2
 toolshortcuts=2
  0
  1
+settingsfile=${PROJECTNAME}_clean.prj
+settingsautoload=0
+settingsautosave=1
+settingseditor=1
+settingsdebugger=1
+settingsmake=1
+settingsmacros=1
+settingsfontalias=0
+settingsusercolors=0
+settingsformatmacros=0
+settingstemplates=1
+settingstools=1
+settingsstorage=1
+settingscomponentstore=0
+settingsprojecttree=0
+settingslayout=1
 sigsettings=27
  1,1,T,F
  3,3,T,F
