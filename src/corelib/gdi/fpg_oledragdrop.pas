@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2020 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -499,8 +499,7 @@ begin
 end;
 
 {$IF FPC_FULLVERSION>=20601}
-function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL;
-  grfKeyState: DWORD): HResult; Stdcall;
+function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD): HResult; Stdcall;
 {$ELSE}
 function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: LongInt): HResult;
 {$ENDIF}
