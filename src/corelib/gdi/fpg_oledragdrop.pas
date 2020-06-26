@@ -285,7 +285,6 @@ var
 	EnumFormats: IEnumFORMATETC;
 	num: integer;
   lname: string;
-  lMimeName: string;
   FormatName: array[0..MAX_PATH] of Char;
   i: integer;
 begin
@@ -720,11 +719,12 @@ end;
 
 procedure TfpgOLEStgMediumList.Notify(Ptr: Pointer; Action: TListNotification);
 begin
-  if Action = lnDeleted then begin
-    if PStgMedium(Ptr)^.hGlobal <> 0 then begin
+  if Action = lnDeleted then
+  begin
+    if PStgMedium(Ptr)^.hGlobal <> 0 then
+    begin
       GlobalFree(PStgMedium(Ptr)^.hGlobal);
     end;
-    Dispose(Ptr);
   end;
   inherited;
 end;
@@ -881,10 +881,10 @@ const
 var
   StgMedium: TStgMedium;
   DropHandle: HDROP;
-  EnumFormatEtc: IEnumFORMATETC;
-  FE: TFormatEtc;
-  FetchedCount: Longint;
-  FormatName: array[0..MAX_PATH] of Char;
+//  EnumFormatEtc: IEnumFORMATETC;
+//  FE: TFormatEtc;
+//  FetchedCount: Longint;
+//  FormatName: array[0..MAX_PATH] of Char;
   FileGroupDescriptor: PFileGroupDescriptorA;
   I, Count: Integer;
   FileDescriptor: TFileDescriptorA;
