@@ -121,7 +121,11 @@ type
     function    GetDataHere(const formatetc: TFormatEtc; out medium: TStgMedium): HResult; stdcall;
     function    QueryGetData(const formatetc: TFormatEtc): HResult; stdcall;
     function    GetCanonicalFormatEtc(const formatetc: TFormatEtc; out formatetcOut: TFormatEtc): HResult; stdcall;
-    function    SetData(const formatetc: TFormatEtc; const medium: TStgMedium; fRelease: BOOL): HResult; stdcall;
+    {$IF FPC_FULLVERSION >= 30200}
+    function    SetData(const formatetc: TFormatEtc; var medium: TStgMedium; fRelease: bool): HResult; stdcall;
+    {$ELSE}
+    function    SetData(const formatetc: TFormatEtc; const medium: TStgMedium; fRelease: bool): HResult; stdcall;
+    {$ENDIF}
     function    EnumFormatEtc(dwDirection: DWORD; out enumFormatEtc: IEnumFormatEtc): HResult; stdcall;
     function    DAdvise(const formatetc: TFormatEtc; advf: DWORD; const advSink: IAdviseSink; out dwConnection: DWORD): HResult; stdcall;
     function    DUnadvise(dwConnection: DWORD): HResult; stdcall;
@@ -601,8 +605,13 @@ begin
   end;
 end;
 
+{$IF FPC_FULLVERSION >= 30200}
 function TfpgOLEDataObject.SetData(const formatetc: TFormatEtc;
-  const medium: TStgMedium; fRelease: BOOL): HResult;
+  var medium: TStgMedium; fRelease: bool): HResult;
+{$ELSE}
+function TfpgOLEDataObject.SetData(const formatetc: TFormatEtc;
+  const medium: TStgMedium; fRelease: bool): HResult;
+{$ENDIF}
 begin
   Result := E_NOTIMPL;
 end;
