@@ -527,7 +527,6 @@ var
   lTextFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
-
   r.SetRect(0, 0, Width, Height);
   border := fpgStyle.GetButtonBorders;
 

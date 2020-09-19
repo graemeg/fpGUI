@@ -1,31 +1,33 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="12"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
         <LRSInOutputDirectory Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
     </General>
-    <VersionInfo>
-      <StringTable ProductVersion=""/>
-    </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
-      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
-      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
@@ -36,22 +38,18 @@
       <Unit0>
         <Filename Value="docedit.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="docedit"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
         <Filename Value="frm_options.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_options"/>
       </Unit2>
       <Unit3>
         <Filename Value="model.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="model"/>
       </Unit3>
       <Unit4>
         <Filename Value="fpdeutil.pas"/>
@@ -61,12 +59,10 @@
       <Unit5>
         <Filename Value="doceditmsg.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="doceditmsg"/>
       </Unit5>
       <Unit6>
         <Filename Value="doceditopts.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="doceditopts"/>
       </Unit6>
     </Units>
   </ProjectOptions>
@@ -83,8 +79,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

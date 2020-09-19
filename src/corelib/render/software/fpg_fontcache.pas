@@ -212,6 +212,7 @@ begin
   FT_New_Face(m_library, PChar(AFontFile), 0, face_ptr);
   Result := TFontCacheItem.Create(AFontFile);
   Result.FamilyName := face_ptr^.family_name;
+  //WriteLn('FontCache: ', AFontFile, ' ' , Result.FamilyName);
 
   // extract simple styles first
 //  if (face_ptr^.face_flags and FT_FACE_FLAG_FIXED_WIDTH) <> 0 then
@@ -331,6 +332,23 @@ begin
     begin
       Result := i;
       exit;
+    end;
+  end;
+
+  if AFontCacheItem.FamilyName = 'Courier New' then
+  begin
+    for i := 0 to Count-1 do
+    begin
+      if (
+           (Items[i].FamilyName = 'Bitstream Vera Sans Mono')
+        or (Items[i].FamilyName = 'Liberation Mono')
+
+      )
+      and (Items[i].StyleFlags = AFontCacheItem.StyleFlags) then
+      begin
+        Result := i;
+        exit;
+      end;
     end;
   end;
 end;

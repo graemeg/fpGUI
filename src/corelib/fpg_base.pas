@@ -3943,7 +3943,7 @@ begin
     if aDirectory[n] = DirectorySeparator then
     begin
       Inc(i);
-      FSpecialDirs.Insert(i, Copy(aDirectory, 1, n-1));
+      FSpecialDirs.Insert(i-1, Copy(aDirectory, 1, n-1));
     end;
     Inc(n);
   end;
@@ -3951,7 +3951,7 @@ begin
   if (n > sp) then
   begin
     Inc(i);
-    FSpecialDirs.Insert(i, ExcludeTrailingPathDelimiter(aDirectory))
+    FSpecialDirs.Insert(i-1, ExcludeTrailingPathDelimiter(aDirectory))
   end;
 
   FCurrentSpecialDir := i;
