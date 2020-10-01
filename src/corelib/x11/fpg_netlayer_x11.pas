@@ -866,6 +866,8 @@ end;
 procedure TNETWindowLayer.WindowSetPropertyUTF8(const AWindow: TWindow;
   AProperty: TAtom; ALength: Integer; UTF8Text: String);
 begin
+  if UTF8Text = '' then
+    Exit;
   XChangeProperty(FDisplay, AWindow, AProperty, UTF8_STRING, 8, PropModeReplace, @UTF8Text[1], ALength);
 end;
 
