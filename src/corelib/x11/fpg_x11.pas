@@ -3113,7 +3113,7 @@ end;
 
 procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
-  XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
+  XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, Max(w,0), Max(h,0),
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
@@ -3241,14 +3241,14 @@ end;
 
 procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, Max(w,0), Max(h,0));
 end;
 
 procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, Max(w,0), Max(h,0));
   XSetForeGround(xapplication.display, Fgc, 0);
   XSetFunction(xapplication.display, Fgc, GXcopy);
 end;
@@ -3357,7 +3357,7 @@ begin
     // clear mask
     gc2 := XCreateGc(xapplication.display, msk, GCForeground or GCBackground, @GcValues);
     XSetForeground(xapplication.display, gc2, 0);
-    XFillRectangle(xapplication.display, msk, gc2, 0, 0, w, h);
+    XFillRectangle(xapplication.display, msk, gc2, 0, 0, Max(w,0), Max(h,0));
 
     XSetForeground(xapplication.display, gc2, 1);
     XPutImage(xapplication.display, msk, gc2, TfpgX11Image(img).XImageMask, xi, yi, 0, 0, w, h);
