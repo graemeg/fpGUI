@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <docproject>
+  <options>
+    <!-- All command-line options can be specified here with the same name
+         and value as on the actual command-line. Boolean options must have
+         a value of 'true', '1' or 'yes' -->
+    <option name="format" value="ipf"/>
+    <option name="hide-protected" value="true"/>
+    <option name="duplinkeddoc" value="true"/>
+<!--
+    ## Options for IPF output
+    <option name="format" value="ipf"/>
+    <option name="hide-protected" value="true"/>
+    <option name="duplinkeddoc" value="true"/>
+
+    ## Options for HTML output
+    <option name="format" value="html"/>
+  or
+    <option name="format" value="chm"/>
+    <option name="footer-date" value="yyyy-mm-dd"/>
+    <option name="css-file" value="fpdoc.css"/>
+    <option name="hide-protected" value="true"/>
+-->
+  </options>
   <packages>
     <!-- Multiple packages can be entered.
          If only one is specified, it is selected.
          "name" is a mandatory attribute
          a "units" tag is required, and a "descriptions" tag as well
     -->
-    <package name="fpgui" output="fpgui.ipf" contentfile="fpgui.cnt">
+    <package name="fpgui" output="fpgui.ipf">
 <!--
     <package name="fpgui" output="fpgui.ipf" contentfile="fpgui.cnt">
     <package name="fpgui" output="html/" contentfile="fpgui.cnt">
 -->
+
       <!-- All input files, one "unit" tag per unit -->
       <units>
         <!-- "file" is a mandatory attribute, "options" is not mandatory -->
@@ -139,26 +162,4 @@
       </descriptions>
     </package>
   </packages>
-  <options>
-    <!-- All command-line options can be specified here with the same name
-         and value as on the actual command-line. Boolean options must have
-         a value of 'true', '1' or 'yes' -->
-    <option name="format" value="ipf"/>
-    <option name="hide-protected" value="true"/>
-    <option name="duplinkeddoc" value="true"/>
-<!--
-    ## Options for IPF output
-    <option name="format" value="ipf"/>
-    <option name="hide-protected" value="true"/>
-    <option name="duplinkeddoc" value="true"/>
-
-    ## Options for HTML output
-    <option name="format" value="html"/>
-  or
-    <option name="format" value="chm"/>
-    <option name="footer-date" value="yyyy-mm-dd"/>
-    <option name="css-file" value="fpdoc.css"/>
-    <option name="hide-protected" value="true"/>
--->
-  </options>
 </docproject>
