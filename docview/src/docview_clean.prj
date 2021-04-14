@@ -598,10 +598,11 @@ mainfile=docview.lpr
 targetfile=../${PROJECTNAME}${EXEEXT}
 makecommand=${COMPILER}
 makedir=
-unitdirs=8
+unitdirs=9
  ../components/richtext
  ${FPTest}3rdparty/epiktimer/
  ${FPTest}src/
+ ${FPGUI}/src/3rdparty/regex
  ${FPGUI}/src/corelib/render/software
  ${FPGUI}/src
  ${FPGUI}/src/corelib/${FPG_GFX}
