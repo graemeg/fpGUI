@@ -18,9 +18,20 @@ can display icons and short messages.</p>
 <example file="examples/fpg_trayicon_usage.pas"/>
 </element>
 
+<element name="TfpgSystemTrayIcon.Create">
+<short>The constructor for <var>TfpgSystemTrayIcon</var></short>
+<descr><p><printshort id="TfpgSystemTrayIcon"/>.</p>
+<p>Modern operating systems usually provide a special area on the desktop,
+called the system tray or notification area, where long-running applications
+can display icons and short messages.</p>
+</descr>
+<example file="examples/fpg_trayicon_usage.pas"/>
+</element>
+
+
 <element name="TfpgSystemTrayIcon.OnPaint">
 <short>Allows custom painting of the tray icon</short>
-<descr><printshort id="#fpgui.TfpgSystemTrayIcon.OnPaint"/>. If you need more
+<descr><printshort id="TfpgSystemTrayIcon.OnPaint"/>. If you need more
 that simply a icon, you can use the <var>OnPaint</var> event to do any custom painting
 of the tray area.</descr>
 </element>
@@ -32,7 +43,7 @@ of the tray area.</descr>
 
 <element name="TfpgSystemTrayIcon.PopupMenu">
 <short>Sets the specified menu to be the context menu for the system tray icon</short>
-<descr><printshort id="#fpgui.TfpgSystemTrayIcon.PopupMenu"/>. The menu will
+<descr><printshort id="TfpgSystemTrayIcon.PopupMenu"/>. The menu will
 pop up when the user requests the context menu for the system tray icon by
 clicking the mouse button.</descr>
 </element>
