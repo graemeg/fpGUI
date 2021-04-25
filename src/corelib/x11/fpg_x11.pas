@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2019 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2021 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1551,7 +1551,6 @@ begin
     inc(n);
   end;
   FreeMem(pc);
-  FcFontSetDestroy(pfs);
 end;
 
 constructor TfpgX11Application.Create(const AParams: string);
