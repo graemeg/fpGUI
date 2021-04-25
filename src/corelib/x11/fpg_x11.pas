@@ -1441,7 +1441,6 @@ begin
     inc(n);
   end;
   FreeMem(pc);
-  FcFontSetDestroy(pfs);
 
   Result.Sort;
 end;
