@@ -3573,9 +3573,13 @@ var
   lSize: double;
 begin
   fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
-  i := gFontCache.Find(fnt);
-  if i > 0 then
-    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+  try
+    i := gFontCache.Find(fnt);
+    if i > 0 then
+      Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+  finally
+    fnt.Free;
+  end;
 end;
 {$ENDIF}
 
