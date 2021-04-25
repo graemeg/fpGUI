@@ -201,6 +201,7 @@ begin
       end;
     until fpgFindNext(sr) <> 0;
   end;
+  FindClose(sr);
 end;
 
 function TFontCacheList.BuildFontCacheItem(const AFontFile: TfpgString): TFontCacheItem;
