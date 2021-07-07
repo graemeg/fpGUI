@@ -6,11 +6,11 @@ do
   PROJECT=`basename $f`
   LPRNAME=`basename $PROJECT .lpr`
   echo Doing $LPRNAME in $DIR
-  cd $DIR
+  pushd $DIR > /dev/null
   if [ ! -d units ]; then
     echo 'Missing units dir'
     mkdir units
   fi
   $FPC @extrafpc.cfg $PROJECT;
-  cd ..
+  popd > /dev/null
 done
