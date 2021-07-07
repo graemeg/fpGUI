@@ -147,7 +147,7 @@ begin
     end;
   end;
 
-  Assert(FDefaultStyleType <> AStyleName,
+  Assert(FDefaultStyleType = AStyleName,
       Format('<%s> does not identify a registered style class.', [AStyleName]));
 end;
 
