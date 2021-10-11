@@ -17,7 +17,7 @@ type
     procedure ButtonClick(Sender: TObject);
   private
     Button: TfpgButton;
-  protected
+  public
     procedure AfterCreate; override;
   end;
 

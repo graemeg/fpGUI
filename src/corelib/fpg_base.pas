@@ -142,6 +142,200 @@ const
   {$I predefinedcolors.inc}
 
 type
+  TfpgIdentMapEntry = record
+    Value: longword;
+    Name: string;
+  end;
+
+const
+  fpgColors: array[0..184] of TfpgIdentMapEntry = (
+    (Value: clAqua; Name: 'clAqua'),
+    (Value: clBlack; Name: 'clBlack'),
+    (Value: clBlue; Name: 'clBlue'),
+    (Value: clCream; Name: 'clCream'),
+    (Value: clDkGray; Name: 'clDkGray'),
+    (Value: clFuchsia; Name: 'clFuchsia'),
+    (Value: clGray; Name: 'clGray'),
+    (Value: clGreen; Name: 'clGreen'),
+    (Value: clLime; Name: 'clLime'),
+    (Value: clLtGray; Name: 'clLtGray'),
+    (Value: clMaroon; Name: 'clMaroon'),
+    (Value: clNavy; Name: 'clNavy'),
+    (Value: clOlive; Name: 'clOlive'),
+    (Value: clPurple; Name: 'clPurple'),
+    (Value: clRed; Name: 'clRed'),
+    (Value: clSilver; Name: 'clSilver'),
+    (Value: clTeal; Name: 'clTeal'),
+    (Value: clWhite; Name: 'clWhite'),
+    (Value: clYellow; Name: 'clYellow'),
+    (Value: clNone; Name: 'clNone'),
+    (Value: clDefault; Name: 'clDefault'),
+    (Value: clMoneyGreen; Name: 'clMoneyGreen'),
+    (Value: clSkyBlue; Name: 'clSkyBlue'),
+    (Value: clMedGray; Name: 'clMedGray'),
+    (Value: clUIDesignerGreen; Name: 'clUIDesignerGreen'),
+    (Value: cl_BaseNamedColor; Name: 'cl_BaseNamedColor'),
+    (Value: clWindowBackground; Name: 'clWindowBackground'),
+    (Value: clBoxColor; Name: 'clBoxColor'),
+    (Value: clButtonFace; Name: 'clButtonFace'),
+    (Value: clShadow1; Name: 'clShadow1'),
+    (Value: clShadow2; Name: 'clShadow2'),
+    (Value: clHilite1; Name: 'clHilite1'),
+    (Value: clHilite2; Name: 'clHilite2'),
+    (Value: clText1; Name: 'clText1'),
+    (Value: clText2; Name: 'clText2'),
+    (Value: clText3; Name: 'clText3'),
+    (Value: clText4; Name: 'clText4'),
+    (Value: clSelection; Name: 'clSelection'),
+    (Value: clSelectionText; Name: 'clSelectionText'),
+    (Value: clInactiveSel; Name: 'clInactiveSel'),
+    (Value: clInactiveSelText; Name: 'clInactiveSelText'),
+    (Value: clScrollBar; Name: 'clScrollBar'),
+    (Value: clListBox; Name: 'clListBox'),
+    (Value: clGridLines; Name: 'clGridLines'),
+    (Value: clGridHeader; Name: 'clGridHeader'),
+    (Value: clWidgetFrame; Name: 'clWidgetFrame'),
+    (Value: clInactiveWgFrame; Name: 'clInactiveWgFrame'),
+    (Value: clTextCursor; Name: 'clTextCursor'),
+    (Value: clChoiceListBox; Name: 'clChoiceListBox'),
+    (Value: clUnset; Name: 'clUnset'),
+    (Value: clMenuText; Name: 'clMenuText'),
+    (Value: clMenuDisabled; Name: 'clMenuDisabled'),
+    (Value: clHintWindow; Name: 'clHintWindow'),
+    (Value: clGridSelection; Name: 'clGridSelection'),
+    (Value: clGridSelectionText; Name: 'clGridSelectionText'),
+    (Value: clGridInactiveSel; Name: 'clGridInactiveSel'),
+    (Value: clGridInactiveSelText; Name: 'clGridInactiveSelText'),
+    (Value: clSplitterGrabBar; Name: 'clSplitterGrabBar'),
+    (Value: clHyperLink; Name: 'clHyperLink'),
+    (Value: clPlaceholderText; Name: 'clPlaceholderText'),
+    (Value: clAliceBlue; Name: 'clAliceBlue'),
+    (Value: clAntiqueWhite; Name: 'clAntiqueWhite'),
+    (Value: clAquamarine; Name: 'clAquamarine'),
+    (Value: clAzure; Name: 'clAzure'),
+    (Value: clBeige; Name: 'clBeige'),
+    (Value: clBisque; Name: 'clBisque'),
+    (Value: clBlanchedAlmond; Name: 'clBlanchedAlmond'),
+    (Value: clBlueViolet; Name: 'clBlueViolet'),
+    (Value: clBrown; Name: 'clBrown'),
+    (Value: clBurlyWood; Name: 'clBurlyWood'),
+    (Value: clCadetBlue; Name: 'clCadetBlue'),
+    (Value: clChartreuse; Name: 'clChartreuse'),
+    (Value: clChocolate; Name: 'clChocolate'),
+    (Value: clCoral; Name: 'clCoral'),
+    (Value: clCornflowerBlue; Name: 'clCornflowerBlue'),
+    (Value: clCornsilk; Name: 'clCornsilk'),
+    (Value: clCrimson; Name: 'clCrimson'),
+    (Value: clCyan; Name: 'clCyan'),
+    (Value: clDarkBlue; Name: 'clDarkBlue'),
+    (Value: clDarkCyan; Name: 'clDarkCyan'),
+    (Value: clDarkGoldenrod; Name: 'clDarkGoldenrod'),
+    (Value: clDarkGray; Name: 'clDarkGray'),
+    (Value: clDarkGreen; Name: 'clDarkGreen'),
+    (Value: clDarkKhaki; Name: 'clDarkKhaki'),
+    (Value: clDarkMagenta; Name: 'clDarkMagenta'),
+    (Value: clDarkOliveGreen; Name: 'clDarkOliveGreen'),
+    (Value: clDarkOrange; Name: 'clDarkOrange'),
+    (Value: clDarkOrchid; Name: 'clDarkOrchid'),
+    (Value: clDarkRed; Name: 'clDarkRed'),
+    (Value: clDarkSalmon; Name: 'clDarkSalmon'),
+    (Value: clDarkSeaGreen; Name: 'clDarkSeaGreen'),
+    (Value: clDarkSlateBlue; Name: 'clDarkSlateBlue'),
+    (Value: clDarkSlateGray; Name: 'clDarkSlateGray'),
+    (Value: clDarkTurquoise; Name: 'clDarkTurquoise'),
+    (Value: clDarkViolet; Name: 'clDarkViolet'),
+    (Value: clDeepPink; Name: 'clDeepPink'),
+    (Value: clDeepSkyBlue; Name: 'clDeepSkyBlue'),
+    (Value: clDimGray; Name: 'clDimGray'),
+    (Value: clDodgerBlue; Name: 'clDodgerBlue'),
+    (Value: clFireBrick; Name: 'clFireBrick'),
+    (Value: clFloralWhite; Name: 'clFloralWhite'),
+    (Value: clForestGreen; Name: 'clForestGreen'),
+    (Value: clGainsboro; Name: 'clGainsboro'),
+    (Value: clGhostWhite; Name: 'clGhostWhite'),
+    (Value: clGold; Name: 'clGold'),
+    (Value: clGoldenrod; Name: 'clGoldenrod'),
+    (Value: clGreenYellow; Name: 'clGreenYellow'),
+    (Value: clHoneydew; Name: 'clHoneydew'),
+    (Value: clHotPink; Name: 'clHotPink'),
+    (Value: clIndianRed; Name: 'clIndianRed'),
+    (Value: clIndigo; Name: 'clIndigo'),
+    (Value: clIvory; Name: 'clIvory'),
+    (Value: clKhaki; Name: 'clKhaki'),
+    (Value: clLavender; Name: 'clLavender'),
+    (Value: clLavenderBlush; Name: 'clLavenderBlush'),
+    (Value: clLawnGreen; Name: 'clLawnGreen'),
+    (Value: clLemonChiffon; Name: 'clLemonChiffon'),
+    (Value: clLightBlue; Name: 'clLightBlue'),
+    (Value: clLightCoral; Name: 'clLightCoral'),
+    (Value: clLightCyan; Name: 'clLightCyan'),
+    (Value: clLightGoldenrodYellow; Name: 'clLightGoldenrodYellow'),
+    (Value: clLightGreen; Name: 'clLightGreen'),
+    (Value: clLightGray; Name: 'clLightGray'),
+    (Value: clLightPink; Name: 'clLightPink'),
+    (Value: clLightSalmon; Name: 'clLightSalmon'),
+    (Value: clLightSeaGreen; Name: 'clLightSeaGreen'),
+    (Value: clLightSkyBlue; Name: 'clLightSkyBlue'),
+    (Value: clLightSlateGray; Name: 'clLightSlateGray'),
+    (Value: clLightSteelBlue; Name: 'clLightSteelBlue'),
+    (Value: clLightYellow; Name: 'clLightYellow'),
+    (Value: clLimeGreen; Name: 'clLimeGreen'),
+    (Value: clLinen; Name: 'clLinen'),
+    (Value: clMagenta; Name: 'clMagenta'),
+    (Value: clMediumAquamarine; Name: 'clMediumAquamarine'),
+    (Value: clMediumBlue; Name: 'clMediumBlue'),
+    (Value: clMediumOrchid; Name: 'clMediumOrchid'),
+    (Value: clMediumPurple; Name: 'clMediumPurple'),
+    (Value: clMediumSeaGreen; Name: 'clMediumSeaGreen'),
+    (Value: clMediumSlateBlue; Name: 'clMediumSlateBlue'),
+    (Value: clMediumSpringGreen; Name: 'clMediumSpringGreen'),
+    (Value: clMediumTurquoise; Name: 'clMediumTurquoise'),
+    (Value: clMediumVioletRed; Name: 'clMediumVioletRed'),
+    (Value: clMidnightBlue; Name: 'clMidnightBlue'),
+    (Value: clMintCream; Name: 'clMintCream'),
+    (Value: clMistyRose; Name: 'clMistyRose'),
+    (Value: clMoccasin; Name: 'clMoccasin'),
+    (Value: clNavajoWhite; Name: 'clNavajoWhite'),
+    (Value: clOldLace; Name: 'clOldLace'),
+    (Value: clOliveDrab; Name: 'clOliveDrab'),
+    (Value: clOrange; Name: 'clOrange'),
+    (Value: clOrangeRed; Name: 'clOrangeRed'),
+    (Value: clOrchid; Name: 'clOrchid'),
+    (Value: clPaleGoldenrod; Name: 'clPaleGoldenrod'),
+    (Value: clPaleGreen; Name: 'clPaleGreen'),
+    (Value: clPaleTurquoise; Name: 'clPaleTurquoise'),
+    (Value: clPaleVioletRed; Name: 'clPaleVioletRed'),
+    (Value: clPaleBlue; Name: 'clPaleBlue'),
+    (Value: clPapayaWhip; Name: 'clPapayaWhip'),
+    (Value: clPeachPuff; Name: 'clPeachPuff'),
+    (Value: clPeru; Name: 'clPeru'),
+    (Value: clPink; Name: 'clPink'),
+    (Value: clPlum; Name: 'clPlum'),
+    (Value: clPowderBlue; Name: 'clPowderBlue'),
+    (Value: clRosyBrown; Name: 'clRosyBrown'),
+    (Value: clRoyalBlue; Name: 'clRoyalBlue'),
+    (Value: clSaddleBrown; Name: 'clSaddleBrown'),
+    (Value: clSalmon; Name: 'clSalmon'),
+    (Value: clSandyBrown; Name: 'clSandyBrown'),
+    (Value: clSeaGreen; Name: 'clSeaGreen'),
+    (Value: clSeashell; Name: 'clSeashell'),
+    (Value: clSienna; Name: 'clSienna'),
+    (Value: clSkyBlue2; Name: 'clSkyBlue2'),
+    (Value: clSlateBlue; Name: 'clSlateBlue'),
+    (Value: clSlateGray; Name: 'clSlateGray'),
+    (Value: clSnow; Name: 'clSnow'),
+    (Value: clSpringGreen; Name: 'clSpringGreen'),
+    (Value: clSteelBlue; Name: 'clSteelBlue'),
+    (Value: clTan; Name: 'clTan'),
+    (Value: clThistle; Name: 'clThistle'),
+    (Value: clTomato; Name: 'clTomato'),
+    (Value: clTurquoise; Name: 'clTurquoise'),
+    (Value: clViolet; Name: 'clViolet'),
+    (Value: clWheat; Name: 'clWheat'),
+    (Value: clWhiteSmoke; Name: 'clWhiteSmoke'),
+    (Value: clYellowGreen; Name: 'clYellowGreen'));
+
+type
   // forward declarations
   TfpgDropBase = class;
   TfpgWindowBase = class;
@@ -983,6 +1177,8 @@ function  fpgColor(const ARed, AGreen, ABlue: byte): TfpgColor;
 function  fpgColor(const ARed, AGreen, ABlue, AAlpha: byte): TfpgColor;
 function  fpgDarker(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
 function  fpgLighter(const AColor: TfpgColor; APercent: Byte = 50): TfpgColor;
+function  fpgColorToString(const AColor: TfpgColor): ansistring;
+function  StringTofpgColor(const AColor: string): TfpgColor;
 
 
 { Points }
@@ -1328,6 +1524,42 @@ begin
   lColor.Green := Round((lColor.Green*APercent/100) + (255 - APercent/100*255));
   lColor.Blue := Round((lColor.Blue*APercent/100) + (255 - APercent/100*255));
   Result := RGBTripleTofpgColor(lColor);
+end;
+
+function fpgColorToString(const AColor: TfpgColor): ansistring;
+var
+  i: integer;
+begin
+  for i := Low(fpgColors) to High(fpgColors) do
+    if fpgColors[i].Value = AColor then
+    begin
+      Result := fpgColors[i].Name;
+      exit;
+    end;
+
+  Result := '$' + HexStr(AColor, 8);
+end;
+
+function StringTofpgColor(const AColor: string): TfpgColor;
+var
+  i: integer;
+  HexStr: string;
+begin
+  Result := clDefault;
+
+  for i := Low(fpgColors) to High(fpgColors) do
+    if fpgColors[i].Name = AColor then
+    begin
+      Result := fpgColors[i].Value;
+      exit;
+    end;
+
+  if Pos('$', AColor) = 0 then
+    HexStr := '$' + AColor
+  else
+    HexStr := AColor;
+
+  Result := StrToDWord(HexStr);
 end;
 
 procedure SortRect(var ARect: TRect);
