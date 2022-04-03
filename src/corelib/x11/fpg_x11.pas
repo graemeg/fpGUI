@@ -2795,7 +2795,6 @@ procedure TfpgX11Window.DoSetMouseCursor;
 var
   xc: TCursor;
   shape: integer;
-  cursor1: Tcursor;
   color: PXColor;
   bmp: QWord;
 begin
