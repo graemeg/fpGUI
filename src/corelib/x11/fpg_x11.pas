@@ -2795,6 +2795,9 @@ procedure TfpgX11Window.DoSetMouseCursor;
 var
   xc: TCursor;
   shape: integer;
+  cursor1: Tcursor;
+  color: PXColor;
+  bmp: QWord;
 begin
   if not HasHandle then
   begin
@@ -2818,11 +2821,18 @@ begin
     mcHand:       shape := XC_hand2;
     mcDrag:       shape := XC_target;
     mcNoDrop:     shape := XC_pirate;
-  else
+    mcNone:       begin
+                  fillchar(color,sizeof(color),0);
+                  bmp:= xcreatebitmapfromdata(xapplication.Display,FWinHandle,@color,1,1); //dummy data
+                  xc:= xcreatepixmapcursor(xapplication.Display,bmp,bmp,@color,@color,0,0);
+                  xfreepixmap(xapplication.Display,bmp);
+                  end;
+      
+    else
     shape := XC_left_ptr; //XC_arrow;
   end;
-
-  xc := XCreateFontCursor(xapplication.Display, shape);
+ 
+  if FMouseCursor <> mcNone then xc := XCreateFontCursor(xapplication.Display, shape);
   XDefineCursor(xapplication.Display, FWinHandle, xc);
   XFreeCursor(xapplication.Display, xc);
 
