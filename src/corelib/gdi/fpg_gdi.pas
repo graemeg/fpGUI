@@ -2070,6 +2070,7 @@ begin
     mcCross:      hc := wapplication.hcr_crosshair;
     mcHourGlass:  hc := wapplication.hcr_wait;
     mcHand:       hc := wapplication.hcr_hand;
+    mcNone:       hc := 0;
   else
     hc := wapplication.hcr_default;
   end;
