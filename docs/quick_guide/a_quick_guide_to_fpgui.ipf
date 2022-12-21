@@ -745,12 +745,12 @@ IBX etc). tiOPF also gives you an OOP (Object Oriented Programming) interface
 into data persistence.
 
 :p.
-The tiOPF homepage:  http://www.tiopf.com
+The tiOPF homepage:  http://tiopf.sourceforge.net
 
 :p.
 Adding to that, tiOPF had from the very early days its own set of
 advanced GUI controls to allow the end-user to interact with the data. I
-got tried of port that code between VCL, CLX (Kylix) and LCL, and at the
+got tired of porting that code between VCL (Delphi), CLX (Kylix) and LCL (Lazarus), and at the
 time LCL's compatibility with VCL was not very good. So I came up with a
 new solution - using yet more Design Patterns. The Mediator and Observer
 design patterns to be specific.
@@ -767,8 +767,8 @@ Model-GUI-Mediator - a very thin layer, so very easy to add new
 components or other toolkit support.
 
 :p.
-So simple component like Edit, ComboBox or even TreeView, StringGrid etc
-can now observe data objects and do bi-directional updates.
+Component like Edit, ComboBox or even TreeView and StringGrid etc
+can now observe data objects and do bi-directional updates (optional).
 
 :p.
 As I mentioned, tiOPF also hides the details of specific database
