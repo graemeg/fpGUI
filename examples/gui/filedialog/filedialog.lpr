@@ -91,10 +91,9 @@ begin
     if dlg.ShowModal = mrOK then
     begin
       TfpgMessageDialog.Information('User Results',
-          'User=' + dlg.UserID + #13 +
-          'Pass=' + dlg.Password +  #13 +
+          'User=' + dlg.UserID + LineEnding +
+          'Pass=' + dlg.Password +  LineEnding +
           'Database=' + dlg.Database, [mbOK]);
-//      fpgApplication.ProcessMessages;
     end;
   finally
     dlg.Free;
