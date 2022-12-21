@@ -3626,7 +3626,9 @@ begin
   fnt := FontCacheItemFromFontDesc(TfpgFontResource(fntres).FontDesc, lSize);
   i := gFontCache.Find(fnt);
   if i > 0 then
-    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle));
+    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle))
+  else
+    DebugLn('ERROR: Failed to find font: ' + TfpgFontResource(fntres).FontDesc);
   fnt.Free;
 {$ENDIF}  // unix
 end;
