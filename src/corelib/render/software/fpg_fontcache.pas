@@ -291,6 +291,7 @@ begin
     lPathList.Add('/usr/share/cups/fonts/');
     lPathList.Add('/usr/share/fonts/truetype/');
     lPathList.Add('/usr/local/lib/X11/fonts/');
+    lPathList.Add('/usr/local/share/fonts/');
     lPathList.Add(GetUserDir + '.fonts/');
     for i := 0 to lPathList.Count-1 do
     begin

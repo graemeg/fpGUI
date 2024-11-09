@@ -3960,7 +3960,7 @@ end;
 constructor TfpgFileListBase.Create;
 begin
   FEntries := TList.Create;
-  FFileMask := '*';
+  FFileMask :=  AllFilesMask;
   FDirectoryName := '';
   FSpecialDirs := TStringList.Create;
   FSearchMode := smAny;

@@ -172,6 +172,7 @@ type
     FInitialDir: string;
     FBookmarkMenu: TfpgPopupMenu;
     FIni: TfpgIniFile;
+    FOriginalCurrentDirectory: TfpgString;
     procedure   SetFilter(const Value: string);
     function    GetFontDesc: string;
     function    GetShowHidden: boolean;
@@ -1345,6 +1346,7 @@ begin
   WindowPosition := wpOneThirdDown;
   FSpacing    := 10;
   FLastSortOrder := soFileName;
+  FOriginalCurrentDirectory := fpgGetCurrentDir;
 
   FFilterList := TStringList.Create;
 
@@ -1362,6 +1364,7 @@ begin
   FIni.Free;
   FBookmarkMenu.Free;
   FFilterList.Free;
+  fpgSetCurrentDir(FOriginalCurrentDirectory);
   inherited Destroy;
 end;
 

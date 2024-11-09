@@ -36,8 +36,17 @@ How to compile fpGUI
 
 
 
-System requirements under Linux
-===============================
+System requirements
+===================
+
+a) Fonts
+
+If the AggCanvas rendering is enabled, then make sure you have the
+Liberation Sans font installed under Linux and FreeBSD. Under Windows,
+AggCanvas will use the Arial font, already included with Windows.
+
+b) Linux
+
 To be able to compile and link fpGUI based applications you need to install
 the following library dependencies. The packages will pull in all the other
 required packages too.
@@ -52,13 +61,13 @@ NOTE:
     $ sudo apt-get install libx11-dev
     $ sudo apt-get install libxft-dev
 
+c) FreeBSD, OpenSolaris
 
-System requirements under *BSD, OpenSolaris
-===========================================
-Pretty much the same as under Linux.
+Pretty much the same as under Linux. Also, if Liberation Sans font is not
+available, it can be installed as follows:
+
+  $ pkg install liberation-fonts-ttf
 
 
-Regards,
- - Graeme Geldenhuys -
 
-                   ============================================
+                ============================================
