@@ -15,7 +15,7 @@ can be run from any location on your computer. I'll also assume your global
 fpc.cfg file has been setup correctly so the FPC compiler can find the RTL and
 FCL units.
 
-Under Linux, *BSD, OpenSolaris and MacOSX run:
+Under Linux, *BSD, OpenSolaris and MacOS run:
    cd <fpgui>/src
    build.sh
 
@@ -73,7 +73,7 @@ Building fpGUI from the Free Pascal Text IDE
 ════════════════════════════════════════════
 
 First you would need to setup the 'fp' IDE to find the related files.
-As far as I understand the text mode IDE has it's own built-in compiler
+As far as I understand the text mode IDE has its own built-in compiler
 so doesn't read the standard fpc.cfg file.
 
  * Run the text mode IDE from the command line:  fp
@@ -82,16 +82,18 @@ so doesn't read the standard fpc.cfg file.
  * Now enter the following directories replacing the relevant parts with
    your actual full paths for fpGUI.
    
-   For Linux:
+   For Unix-like systems (Linux, *BSD, OpenSolaris and MacOS):
+   -----------------------------------------------------------
    full_path_to/fpGUI/src/corelib
-   full_path_to/fpGUI/src/corelib/x11  \\for linux
+   full_path_to/fpGUI/src/corelib/x11
    full_path_to/fpGUI/src/gui
    full_path_to/fpGUI/src/gui/db
    full_path_to/fpGUI/src/3rdparty/regex
 
    For Windows:
+   -----------
    full_path_to\fpGUI\src\corelib
-   full_path_to\fpGUI\src\corelib\gdi  \\for windows
+   full_path_to\fpGUI\src\corelib\gdi
    full_path_to\fpGUI\src\gui
    full_path_to\fpGUI\src\gui\db
    full_path_to\fpGUI\src\3rdparty\regex
@@ -100,15 +102,17 @@ so doesn't read the standard fpc.cfg file.
    Again change the paths to point to your actual directories and
    X11 or GDI corelib backend.
 
-    For Linux:
+    For Unix-like systems (Linux, *BSD, OpenSolaris and MacOS):
+    -----------------------------------------------------------
     full_path_to/fpGUI/src
     full_path_to/fpGUI/src/corelib
-    full_path_to/fpGUI/src/corelib/x11  \\for linux
+    full_path_to/fpGUI/src/corelib/x11
 
     For Windows:
+    -----------
     full_path_to\fpGUI\src
     full_path_to\fpGUI\src\corelib
-    full_path_to\fpGUI\src\corelib\gdi  \\for windows
+    full_path_to\fpGUI\src\corelib\gdi
 
  * Now changes to 'Miscellaneous' tab, PPU output directory. Type in
    the edit box:  full_path_to\units
@@ -121,39 +125,40 @@ so doesn't read the standard fpc.cfg file.
 
  * To create all the units for fpGUI, 
    compile one of the following:
-     full_path_to/fpGUI/src/corelib/x11/fpgui_toolkit.pas  //for linux
-     full_path_to\fpGUI\src\corelib\gdi\fpgui_toolkit.pas  //for windows
+     full_path_to/fpGUI/src/corelib/x11/fpgui_toolkit.pas  // for Unix-like systems
+     full_path_to\fpGUI\src\corelib\gdi\fpgui_toolkit.pas  // for Windows
 
- * Now you can restore your freepascal configuration by:
-     remove all the directories added in the Units Tab
-     remove the directories added in Include Files Tab
-     remove units from the Miscellaneous tab
+ * Now you can restore your Free Pascal configuration by:
+     - remove all the directories added in the Units Tab
+     - remove the directories added in Include Files Tab
+     - remove units from the Miscellaneous tab
    
- * Add the directory to the newly created units in the units tab
+ * Add the directory to the newly created units in the Units tab
      full_path_to\units
    
-   you are ready to open your projects main program unit (F3) and
-   compiling it by pressing (F9).
+You are ready to open your project's main program unit (F3) and
+compiling it by pressing (F9).
+
 
 Compiling any of the examples from the Command Line
 ═══════════════════════════════════════════════════
 
-You need to compile fpGUI first as mentioned above!
-Every project in the ../examples directory has it's own extrafpc.cfg file.
+You need to compile fpGUI first, as mentioned above!
+Every project in the `examples` directory has its own `extrafpc.cfg` file.
 You only need to specify that config file and the project unit to compile
 it.
 
-fpc @extrafpc.cfg <project unit>
+fpc @extrafpc.cfg <project_unit>
 
 Example:
   fpc @extrafpc.cfg docedit.lpr
 
 
-Mac OSX instructions and known issues
-═════════════════════════════════════
+MacOS instructions and known issues
+═══════════════════════════════════
 
 NOTE #1:
-  MacOSX is still an unsupported platform, but users have reported
+  MacOS is still an unsupported platform, but users have reported
   that it works, so I decided to add some of their notes here for any other
   Mac users that want to try fpGUI.
 
@@ -162,8 +167,8 @@ NOTE #2:
   install X11 Server support by downloading it from the open source project
   named XQuartz [http://xquartz.macosforge.org/landing/].
 
-To compile and run fpGUI based application under MacOSX, you use the X11 backend.
-X11 is included with all recent MacOSX versions (in older OSX versions it was a
+To compile and run fpGUI based application under MacOS, you use the X11 backend.
+X11 is included with all recent MacOS versions (in older OSX versions it was a
 separate install - but included on the install DVD).
 
 An example workflow to work with any fpgui app is:
@@ -179,11 +184,11 @@ d) type ./appname to start the application "appname"
    apps under OSX as well. eg: Gimp, any GTK2 app etc.. Alternatively, start it
    from a X11 console, then it runs first time.
 
- * This issue is more about FPC then fpGUI specific, but it's handy to know. In
+ * This issue is more about FPC than fpGUI specifically, but it's handy to know. In
    many standard Xcode + X11 installation, the linker can't find the X11
-   libraries. So changing the fpc.cfg by adding
+   libraries. So change the fpc.cfg by adding
       -Fl/usr/X11/lib
-   in the search library path solved the problem. Mac usually doesn't let you
+   in the search library path solved the problem. MacOS usually doesn't let you
    choose the path during installation, so probably other OSX users will
    have to double check the correct X11 library path.
 
