@@ -80,24 +80,38 @@ so doesn't read the standard fpc.cfg file.
  * Navigate the menus to: Options|Directories and select the 'Units'
    tab.
  * Now enter the following directories replacing the relevant parts with
-   your actual paths. The example below is valid on my system only.
-   I was using FPC 2.2.0 under Linux and the X11 corelib backend.
+   your actual full paths for fpGUI.
+   
+   For Linux:
+   full_path_to/fpGUI/src/corelib
+   full_path_to/fpGUI/src/corelib/x11  \\for linux
+   full_path_to/fpGUI/src/gui
+   full_path_to/fpGUI/src/gui/db
+   full_path_to/fpGUI/src/3rdparty/regex
 
-    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/*
-    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/rtl
-    /home/graemeg/programming/fpGUI/src/corelib
-    /home/graemeg/programming/fpGUI/src/corelib/x11
-    /home/graemeg/programming/fpGUI/src/gui
+   For Windows:
+   full_path_to\fpGUI\src\corelib
+   full_path_to\fpGUI\src\corelib\gdi  \\for windows
+   full_path_to\fpGUI\src\gui
+   full_path_to\fpGUI\src\gui\db
+   full_path_to\fpGUI\src\3rdparty\regex
 
  * Now select the 'Include files' tab and enter the following paths.
    Again change the paths to point to your actual directories and
    X11 or GDI corelib backend.
 
-    /home/graemeg/programming/fpGUI/src/corelib
-    /home/graemeg/programming/fpGUI/src/corelib/x11
+    For Linux:
+    full_path_to/fpGUI/src
+    full_path_to/fpGUI/src/corelib
+    full_path_to/fpGUI/src/corelib/x11  \\for linux
+
+    For Windows:
+    full_path_to\fpGUI\src
+    full_path_to\fpGUI\src\corelib
+    full_path_to\fpGUI\src\corelib\gdi  \\for windows
 
  * Now changes to 'Miscellaneous' tab, PPU output directory. Type in
-   the edit box:  units
+   the edit box:  full_path_to\units
 
    NOTE:
    This will place all the compiled *.ppu and *.o files into a 'units'
@@ -105,9 +119,21 @@ so doesn't read the standard fpc.cfg file.
    before you try to compile for the first time. FPC doesn't create
    directories for you!
 
- * Now you are ready to open your projects main program unit (F3) and
-   compiling it by pressing (F9).
+ * To create all the units for fpGUI, 
+   compile one of the following:
+     full_path_to/fpGUI/src/corelib/x11/fpgui_toolkit.pas  //for linux
+     full_path_to\fpGUI\src\corelib\gdi\fpgui_toolkit.pas  //for windows
 
+ * Now you can restore your freepascal configuration by:
+     remove all the directories added in the Units Tab
+     remove the directories added in Include Files Tab
+     remove units from the Miscellaneous tab
+   
+ * Add the directory to the newly created units in the units tab
+     full_path_to\units
+   
+   you are ready to open your projects main program unit (F3) and
+   compiling it by pressing (F9).
 
 Compiling any of the examples from the Command Line
 ═══════════════════════════════════════════════════
