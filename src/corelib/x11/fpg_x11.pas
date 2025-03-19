@@ -1258,7 +1258,7 @@ begin
   Display:=ADisplay;
   ErrorEv:=AErrorEv;
 
-  FillChar(ErrText,0, SizeOf(ErrText));
+  FillChar(ErrText, SizeOf(ErrText), 0);
   XGetErrorText(Display, ErrorEv^.error_code, @ErrText, SizeOf(ErrText));
 
   inherited Create(ErrText);
