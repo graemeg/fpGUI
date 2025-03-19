@@ -60,7 +60,7 @@ type
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
       mcSizeNWSE, mcSizeNESW, mcSizeSWNE, mcSizeSENW, mcMove, mcHourGlass,
-      mcHand, mcDrag, mcNoDrop);
+      mcHand, mcDrag, mcNoDrop, mcNone);
 
   TGradientDirection = (gdVertical,     // Fill vertical
                         gdHorizontal);  // Fill Horizontal
