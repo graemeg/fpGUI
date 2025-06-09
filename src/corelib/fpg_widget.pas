@@ -1288,10 +1288,13 @@ procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 begin
 //  writeln('TfpgWidget.MsgPaint - ', Classname);
   Canvas.BeginDraw;
-  HandlePaint;
-  if Assigned(FOnPaint) then
-    FOnPaint(Self);
-  Canvas.EndDraw;
+  try
+    HandlePaint;
+    if Assigned(FOnPaint) then
+      FOnPaint(Self);
+  finally
+    Canvas.EndDraw;
+  end;
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);

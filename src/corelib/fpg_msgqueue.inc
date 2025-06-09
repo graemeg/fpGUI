@@ -108,6 +108,7 @@ begin
   FreeLastMessage  := nil;
   
   uMsgQueueList := TList.Create;
+  uMsgQueueList.Capacity := cMessageQueueSize;
 
   for n := 1 to cMessageQueueSize do
   begin
@@ -199,7 +200,7 @@ var
   i: integer;
 begin
   if msg.MsgCode = FPGM_KILLME then
-    msg.Dest.Free
+    FreeAndNil(msg.Dest)
   else
   begin
     msg.Dest.Dispatch(msg);
