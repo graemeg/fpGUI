@@ -1548,56 +1548,57 @@ begin
   HasInvalidRegion := not FInvalidRect.IsUnassigned;
 
   Canvas.BeginDraw;
+  try
+    HandlePaint;
+    if Assigned(FOnPaint) then
+      FOnPaint(Self);
 
-  HandlePaint;
-  if Assigned(FOnPaint) then
-    FOnPaint(Self);
+    {$IFDEF GDEBUG}
+    Tmp := FInvalidRect; // for debugging
+    {$ENDIF}
 
-  {$IFDEF GDEBUG}
-  Tmp := FInvalidRect; // for debugging
-  {$ENDIF}
-
-  if HasOwnWindow then
-  begin
-    //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
-    //Write('Main ClipRect: '); PrintRect(FInvalidRect);
-    if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
+    if HasOwnWindow then
     begin
-      Canvas.EndDraw;
-      FInvalidRect.Clear;
-      FInvalidated:=False;
-      {$IFDEF GDEBUG}
-      DebugLn('Invalid Rect Detected!');
-      DebugWrite('MSG: '); PrintRect(msg.Params.rect);
-      DebugWrite('INV: '); PrintRect(Tmp);
-      {$ENDIF}
-      Exit;
-    end;
-  end;
-
-  for i := 0 to ComponentCount-1 do
-  begin
-    w := TfpgWidget(Components[i]);
-    if w.InheritsFrom(TfpgWidget) then
-    begin
-      if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
+      //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
+      //Write('Main ClipRect: '); PrintRect(FInvalidRect);
+      if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
       begin
-        if not HasInvalidRegion or IntersectRect(Params.rect, FInvalidRect, w.GetBoundsRect) then
-        begin
-          if HasInvalidRegion then
-            w.ParentToWidget(Params.rect.Left, Params.rect.Top)
-          else
-            Params.rect.Clear;
-          fpgSendMessage(Self, w, FPGM_PAINT, Params);
-        end;
+        Canvas.EndDraw;
+        FInvalidRect.Clear;
+        FInvalidated:=False;
+        {$IFDEF GDEBUG}
+        DebugLn('Invalid Rect Detected!');
+        DebugWrite('MSG: '); PrintRect(msg.Params.rect);
+        DebugWrite('INV: '); PrintRect(Tmp);
+        {$ENDIF}
+        Exit;
       end;
-    end; { if w.InheritsFrom(...) }
-  end; { for i }
+    end;
 
-  if HasInvalidRegion then
-    Canvas.EndDraw(FInvalidRect)
-  else
-    Canvas.EndDraw;
+    for i := 0 to ComponentCount-1 do
+    begin
+      w := TfpgWidget(Components[i]);
+      if w.InheritsFrom(TfpgWidget) then
+      begin
+        if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
+        begin
+          if not HasInvalidRegion or IntersectRect(Params.rect, FInvalidRect, w.GetBoundsRect) then
+          begin
+            if HasInvalidRegion then
+              w.ParentToWidget(Params.rect.Left, Params.rect.Top)
+            else
+              Params.rect.Clear;
+            fpgSendMessage(Self, w, FPGM_PAINT, Params);
+          end;
+        end;
+      end; { if w.InheritsFrom(...) }
+    end; { for i }
+  finally
+    if HasInvalidRegion then
+      Canvas.EndDraw(FInvalidRect)
+    else
+      Canvas.EndDraw;
+  end;
 
   FInvalidRect.Clear;
   FInvalidated:=False;
