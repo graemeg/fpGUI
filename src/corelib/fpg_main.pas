@@ -1817,7 +1817,7 @@ begin
   fpgCreateStandardImages;
 
   // This will process Application and fpGUI Toolkit translation (*.po) files
-  TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
+  TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)){$IFDEF USE_LANGUAGES_FOLDER} + 'languages' + DirectorySeparator{$ENDIF}, '');
   SetupLocalizationStrings;
   CreateHintWindow;
 
