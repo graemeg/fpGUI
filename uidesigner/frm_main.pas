@@ -262,7 +262,7 @@ begin
   begin
     Name := 'lblAppName';
     SetPosition(12, 16, 255, 31);
-    FontDesc := 'Arial-20';
+    FontDesc := FPG_DEFAULT_SANS + '-20';
     Hint := '';
     Text := cAppName;
   end;
@@ -297,7 +297,7 @@ begin
   begin
     Name := 'lblWrittenBy';
     SetPosition(12, 100, 241, 14);
-    FontDesc := 'Arial-9';
+    FontDesc := FPG_DEFAULT_SANS + '-9';
     Hint := '';
     Text := Format(rsWrittenBy, ['Graeme Geldenhuys']);
   end;
@@ -307,10 +307,10 @@ begin
   begin
     Name := 'lblURL';
     SetPosition(12, 116, 246, 14);
-    FontDesc := 'Arial-9:underline';
+    FontDesc := FPG_DEFAULT_SANS + '-9:underline';
     Hint := '';
     HotTrackColor := clBlue;
-    HotTrackFont := 'Arial-9:underline';
+    HotTrackFont := FPG_DEFAULT_SANS + '-9:underline';
     Text := 'http://fpgui.sourceforge.net';
     TextColor := clRoyalBlue;
     URL := 'http://fpgui.sourceforge.net';
@@ -321,7 +321,7 @@ begin
   begin
     Name := 'lblCompiled';
     SetPosition(12, 132, 191, 13);
-    FontDesc := 'Arial-8';
+    FontDesc := '#Label1';
     Hint := '';
     Text := Format(rsCompiledOn, [{$I %date%} + ' ' + {$I %time%}]);
   end;
@@ -1084,7 +1084,6 @@ begin
   OnScroll        := @OnScrolling;
   BackgroundColor := clWindowBackground;
   NameDrag        := False;
-  //FontName := 'arial-10:antialias=false';
 end;
 
 procedure TwgPropertyList.OnRowChange(Sender: TObject);
