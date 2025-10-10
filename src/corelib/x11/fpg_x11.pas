@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2021 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -695,7 +695,7 @@ begin
     p := p^.Next;
   end;
   {$IFDEF GDEBUG}
-  DebugFmt('fpGUI/X11: FindWindowByBackupHandle failed to find <%s>', [IntToHex(wh, 9)]);
+  DebugLnFmt('fpGUI/X11: FindWindowByBackupHandle failed to find <%s>', [IntToHex(wh, 9)]);
   {$ENDIF}
   Result := nil;
 end;
@@ -1818,18 +1818,7 @@ begin
   if ev._type < 2 then
     exit;
 
-
   Popup := PopupListFirst;
-
-
-  {$IFDEF GDEBUG}
-  w := FindWindowByHandle(ev.xany.window);
-  if not Assigned(w) then
-    DebugLnFmt('Event %s(%s) window: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7)])
-  else
-    DebugLnFmt('Event %s(%s) window: %s  name: %s', [GetXEventName(ev._type), ev._type, IntToHex(ev.xany.window,7), w.Name]);
-//  PrintKeyEvent(ev);  { debug purposes only }
-  {$ENDIF}
 
   case ev._type of
     X.KeyPress,
@@ -2826,11 +2815,11 @@ begin
                   xc:= xcreatepixmapcursor(xapplication.Display,bmp,bmp,@color,@color,0,0);
                   xfreepixmap(xapplication.Display,bmp);
                   end;
-      
+
     else
     shape := XC_left_ptr; //XC_arrow;
   end;
- 
+
   if FMouseCursor <> mcNone then xc := XCreateFontCursor(xapplication.Display, shape);
   XDefineCursor(xapplication.Display, FWinHandle, xc);
   XFreeCursor(xapplication.Display, xc);
@@ -3495,7 +3484,7 @@ end;
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
 begin
   {$IFDEF GDEBUG}
-  WriteLn('fpGFX/X11: Freeing Buffer w=', FPixWidth, ' h=', FPixHeight);
+  WriteLn('fpGFX/X11: Freeing Buffer w=', FWidget.Width, ' h=', FWidget.Height);
   {$ENDIF}
   TryFreePixmap;
   FreeAndNil(FBufferFreeTimer);
