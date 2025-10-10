@@ -548,7 +548,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.ok';
-    TabOrder := 6;
+    TabOrder := 9;
     OnClick := @btnOKClick;
   end;
 
@@ -563,7 +563,7 @@ begin
     Hint := '';
     ImageName := 'stdimg.cancel';
     ModalResult := mrCancel;
-    TabOrder := 7;
+    TabOrder := 10;
   end;
 
   lblRecentFiles := TfpgLabel.Create(self);
@@ -586,7 +586,7 @@ begin
     Min := 2;
     Position := 4;
     ShowPosition := True;
-    TabOrder := 3;
+    TabOrder := 4;
   end;
 
   chkFullPath := TfpgCheckBox.Create(self);
@@ -596,7 +596,7 @@ begin
     SetPosition(24, 156, 204, 20);
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 4;
+    TabOrder := 5;
     Text := rsShowFullPathName;
   end;
 
@@ -628,7 +628,7 @@ begin
     ExtraHint := '';
     FontDesc := '#Edit1';
     Hint := '';
-    TabOrder := 5;
+    TabOrder := 6;
     Text := '';
   end;
 
@@ -661,7 +661,7 @@ begin
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 12;
+    TabOrder := 3;
     Text := rsOneClickSelectAndMove;
   end;
 
@@ -682,7 +682,7 @@ begin
     SetPosition(24, 244, 360, 20);
     FontDesc := '#Label1';
     Hint := rsAppliesToNewFormDialogsOnly;
-    TabOrder := 18;
+    TabOrder := 7;
     Text := rsUseCodeRegions;
   end;
 
@@ -697,7 +697,7 @@ begin
     Items.Add(rsSpaceCharacters);
     Items.Add(rsTabCharacters);
     FocusItem := 0;
-    TabOrder := 16;
+    TabOrder := 8;
   end;
 
   lblIndentType := TfpgLabel.Create(self);
@@ -719,7 +719,7 @@ begin
     Hint := '';
     MaxValue := 10;
     MinValue := 1;
-    TabOrder := 18;
+    TabOrder := 1;
     Value := 4;
   end;
 
