@@ -582,6 +582,8 @@ type
               angle : double = 0.0 );
 
    function  FontHeight : double;
+   function  FontAscent : double;
+   function  FontDescent : double;
 
    procedure TextAlignment(alignX ,alignY : TAggTextAlignment );
 
@@ -2671,7 +2673,6 @@ begin
 
 end;
 
-{ POLYLINE }
 procedure TAgg2D.Polyline(const xy : PDouble; numPoints : integer );
 begin
  m_path.remove_all;
@@ -2681,7 +2682,6 @@ begin
 
 end;
 
-{ FLIPTEXT }
 procedure TAgg2D.FlipText(const flip : boolean );
 begin
   {$IFNDEF AGG2D_NO_FONT}
@@ -2689,7 +2689,6 @@ begin
   {$ENDIF}
 end;
 
-{ FONT }
 procedure TAgg2D.Font(
            fileName : AnsiString; height : double;
            bold : boolean = false;
@@ -2733,29 +2732,32 @@ begin
 {$ENDIF }
 end;
 
-{ FONTHEIGHT }
 function TAgg2D.FontHeight : double;
 begin
- result:=m_fontHeight;
-
+ result := m_fontHeight;
 end;
 
-{ TEXTALIGNMENT }
+function TAgg2D.FontAscent : double;
+begin
+ result := m_fontAscent;
+end;
+
+function TAgg2D.FontDescent : double;
+begin
+ result := m_fontDescent;
+end;
+
 procedure TAgg2D.TextAlignment(alignX ,alignY : TAggTextAlignment );
 begin
- m_textAlignX:=alignX;
- m_textAlignY:=alignY;
-
+ m_textAlignX := alignX;
+ m_textAlignY := alignY;
 end;
 
-{ TEXTHINTS }
 function TAgg2D.TextHints : boolean;
 begin
- result:=m_textHints;
-
+ result := m_textHints;
 end;
 
-{ TEXTHINTS }
 procedure TAgg2D.TextHints(hints : boolean );
 begin
  m_textHints:=hints;
@@ -2764,7 +2766,6 @@ begin
  {$ENDIF}
 end;
 
-{ TEXTWIDTH }
 function TAgg2D.TextWidth(str : AnsiString ) : double;
 {$IFDEF AGG2D_NO_FONT}
 begin
