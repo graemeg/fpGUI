@@ -28,6 +28,7 @@ uses
 
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
+  TFocusDirection = (fdNone, fdBackward, fdForward);
 
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
@@ -185,7 +186,7 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
-    procedure   Invalidate; // double check this works as developers expect????
+    procedure   Invalidate;
     procedure   InvalidateRect(ARect: TfpgRect);
     property    Window: TfpgNativeWindow read GetWindow;
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
@@ -1151,8 +1152,6 @@ end;
 
 procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
     var consumed: boolean);
-type
-  TFocusDirection = (fdNone, fdBackward, fdForward);
 var
   wg: TfpgWidget;
   direction: TFocusDirection;
@@ -1176,10 +1175,10 @@ begin
 
   case keycode of
     keyTab:
-        if (ssShift in shiftstate) then
-          direction := fdBackward
-        else
-          direction := fdForward;
+      if (ssShift in shiftstate) then
+        direction := fdBackward
+      else
+        direction := fdForward;
 
     keyMenu, keyF10:
       if (keycode=keyMenu) or (shiftstate*[ssShift, ssAlt, ssCtrl]=[ssShift]) then
@@ -1190,42 +1189,60 @@ begin
       end;
   end;
 
-  {$Note Optimize this code. Constantly setting ActiveWidget causes RePaint to be called!}
   if direction = fdForward then
   begin
-    wg           := FindFocusWidget(ActiveWidget, fsdNext);
-    ActiveWidget := wg;
+    wg := FindFocusWidget(ActiveWidget, fsdNext);
     if wg <> nil then
-      consumed := True
-    else
     begin
-      if Parent = nil then
-      begin
-        wg           := FindFocusWidget(ActiveWidget, fsdFirst);
+      if ActiveWidget <> wg then
         ActiveWidget := wg;
-        consumed     := True;
+      consumed := True;
+    end
+    else // wg is nil, we're at the end of this container's list
+    begin
+      if ActiveWidget <> nil then
+        ActiveWidget := nil; // Reset this container's focus state
+      if Parent = nil then // Top-level, so wrap
+      begin
+        wg := FindFocusWidget(nil, fsdFirst);
+        if ActiveWidget <> wg then
+          ActiveWidget := wg;
+        consumed := True;
       end;
     end;
   end
   else if direction = fdBackward then
   begin
-    wg           := FindFocusWidget(ActiveWidget, fsdPrev);
-    ActiveWidget := wg;
+    wg := FindFocusWidget(ActiveWidget, fsdPrev);
     if wg <> nil then
     begin
+      if ActiveWidget <> wg then
+        ActiveWidget := wg;
       consumed := True;
       // we must find the last one!
       while wg <> nil do
       begin
-        wg.ActiveWidget := wg.FindFocusWidget(ActiveWidget, fsdLast);
+        wg.ActiveWidget := wg.FindFocusWidget(nil, fsdLast);
         wg := wg.ActiveWidget;
       end;
     end
-    else if Parent = nil then
+    else // wg is nil, we're at the start of this container's list
     begin
-      wg           := FindFocusWidget(ActiveWidget, fsdLast);
-      ActiveWidget := wg;
-      consumed     := True;
+      if ActiveWidget <> nil then
+        ActiveWidget := nil; // Reset this container's focus state
+      if Parent = nil then // Top-level, so wrap
+      begin
+        wg := FindFocusWidget(nil, fsdLast);
+        if ActiveWidget <> wg then
+          ActiveWidget := wg;
+        consumed := True;
+        // Also need to drill down on wrap
+        while wg <> nil do
+        begin
+          wg.ActiveWidget := wg.FindFocusWidget(nil, fsdLast);
+          wg := wg.ActiveWidget;
+        end;
+      end;
     end;
   end;
 end;
