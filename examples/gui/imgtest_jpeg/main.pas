@@ -49,8 +49,9 @@ begin
   Name := 'frmMain';
   SetPosition(321, 289, 330, 380);
   WindowTitle := 'JPEG Image Test';
-  WindowPosition := wpOneThirdDown;
   Hint := '';
+  IconName := 'stdimg.windowicon';
+  WindowPosition := wpOneThirdDown;
 
   Panel1 := TfpgPanel.Create(self);
   with Panel1 do
@@ -85,7 +86,7 @@ begin
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
-    TabOrder := 1;
+    TabOrder := 2;
     Text := '1/2 size';
     Tag:=2;
     OnChange := @rbChanged;
@@ -99,7 +100,7 @@ begin
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
-    TabOrder := 2;
+    TabOrder := 3;
     Text := '1/4 size';
     Tag:=3;
     OnChange := @rbChanged;
@@ -113,7 +114,7 @@ begin
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
-    TabOrder := 3;
+    TabOrder := 4;
     Text := '1/8 size';
     Tag:=4;
     OnChange := @rbChanged;
@@ -128,7 +129,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 2;
+    TabOrder := 1;
     OnClick:=@Btn1Click;
   end;
 
@@ -141,7 +142,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 3;
+    TabOrder := 2;
     OnClick:=@Btn2Click;
   end;
 
