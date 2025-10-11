@@ -86,6 +86,9 @@ type
 
   TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encCP1250, encIBMGraph);
 
+  TfpgFontAttribute = (fpgFontBold, fpgFontItalic, fpgFontUnderline);
+  TfpgFontAttributes = set of TfpgFontAttribute;
+
 
 const
   MOUSE_LEFT       = 1;
@@ -294,6 +297,16 @@ type
   end;
 
 
+{ Font engine abstraction for metric calculations }
+  IFontEngine = interface
+    ['{8A3F5F01-7B4E-4C2A-9D6F-E5C8A7B3F2D1}']
+    function GetTextWidth(const AText: string): integer;
+    function GetAscent: integer;
+    function GetDescent: integer;
+    function GetHeight: integer;
+  end;
+
+
   TfpgFontResourceBase = class(TObject)
   public
     constructor Create(const afontdesc: string); virtual; abstract;
@@ -305,12 +318,35 @@ type
   end;
 
 
+  { Represents font properties without rendering engine dependency }
+  TfpgFontDefinition = class(TObject)
+  private
+    FFontDesc: string;
+    FFaceName: string;
+    FSize: integer;
+    FAttributes: TfpgFontAttributes;
+    FAntiAliased: boolean;
+    procedure ParseFontDesc;
+  public
+    constructor Create(const AFontDesc: string);
+    property FontDesc: string read FFontDesc;
+    property FaceName: string read FFaceName;
+    property Size: integer read FSize;
+    property Attributes: TfpgFontAttributes read FAttributes;
+    property AntiAliased: boolean read FAntiAliased;
+  end;
+
+
   TfpgFontBase = class(TObject)
   protected
     FFontDesc: string;
-    FFontRes: TfpgFontResourceBase;
+    FFontRes: TfpgFontResourceBase;        // KEEP temporarily for compatibility
+    FFontEngine: IFontEngine;              // NEW
+    FFontDefinition: TfpgFontDefinition;   // NEW
     function    GetIsFixedWidth: boolean; virtual;
   public
+    constructor Create(const AFontDesc: string);
+    destructor  Destroy; override;
     function    TextWidth(const txt: TfpgString): integer;
     function    Ascent: integer;
     function    Descent: integer;
@@ -3033,7 +3069,108 @@ begin
   FBeginDrawCount := 0;
 end;
 
+{ TfpgFontDefinition }
+
+constructor TfpgFontDefinition.Create(const AFontDesc: string);
+begin
+  inherited Create;
+  FFontDesc := AFontDesc;
+  ParseFontDesc;
+end;
+
+procedure TfpgFontDefinition.ParseFontDesc;
+var
+  cp: integer;
+  token: string;
+  prop: string;
+  propval: string;
+begin
+  cp := 1;
+  FFaceName := '';
+  FSize := 10;  // default
+  FAttributes := [];
+  FAntiAliased := True;  // default
+
+  // Extract face name (everything before '-' or ':')
+  while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> '-') and (FFontDesc[cp] <> ':') do
+  begin
+    FFaceName := FFaceName + FFontDesc[cp];
+    Inc(cp);
+  end;
+
+  // Extract size (number after '-')
+  if (cp <= Length(FFontDesc)) and (FFontDesc[cp] = '-') then
+  begin
+    Inc(cp);
+    token := '';
+    while (cp <= Length(FFontDesc)) and (FFontDesc[cp] >= '0') and (FFontDesc[cp] <= '9') do
+    begin
+      token := token + FFontDesc[cp];
+      Inc(cp);
+    end;
+    if token <> '' then
+      FSize := StrToIntDef(token, 10);
+  end;
+
+  // Parse attributes (after ':')
+  while cp <= Length(FFontDesc) do
+  begin
+    if FFontDesc[cp] = ':' then
+    begin
+      Inc(cp);
+      prop := '';
+      propval := '';
+
+      // Extract property name
+      while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> '=') and (FFontDesc[cp] <> ':') do
+      begin
+        prop := prop + LowerCase(FFontDesc[cp]);
+        Inc(cp);
+      end;
+
+      // Extract property value if present
+      if (cp <= Length(FFontDesc)) and (FFontDesc[cp] = '=') then
+      begin
+        Inc(cp);
+        while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> ':') do
+        begin
+          propval := propval + LowerCase(FFontDesc[cp]);
+          Inc(cp);
+        end;
+      end;
+
+      // Apply property
+      if prop = 'bold' then
+        FAttributes := FAttributes + [fpgFontBold]
+      else if prop = 'italic' then
+        FAttributes := FAttributes + [fpgFontItalic]
+      else if prop = 'underline' then
+        FAttributes := FAttributes + [fpgFontUnderline]
+      else if prop = 'antialias' then
+        FAntiAliased := (propval <> 'false');
+    end
+    else
+      Inc(cp);
+  end;
+end;
+
 { TfpgFontBase }
+
+constructor TfpgFontBase.Create(const AFontDesc: string);
+begin
+  inherited Create;
+  FFontDesc := AFontDesc;
+  FFontDefinition := TfpgFontDefinition.Create(AFontDesc);
+  FFontEngine := nil;  // Will be set by canvas
+  // FFontRes will be set by subclass as before
+end;
+
+destructor TfpgFontBase.Destroy;
+begin
+  FFontDefinition.Free;
+  FFontEngine := nil;  // Interface will be ref-counted
+  inherited Destroy;
+end;
 
 function TfpgFontBase.GetIsFixedWidth: boolean;
 begin
