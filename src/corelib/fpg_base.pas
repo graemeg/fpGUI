@@ -307,9 +307,10 @@ type
   end;
 
 
-  TfpgFontResourceBase = class(TObject)
+  TfpgFontResourceBase = class(TInterfacedObject, IFontEngine)
   public
     constructor Create(const afontdesc: string); virtual; abstract;
+    // IFontEngine implementation (methods already exist!)
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
     function    GetHeight: integer; virtual; abstract;
