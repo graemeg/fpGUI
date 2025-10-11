@@ -1966,8 +1966,8 @@ end;
 
 constructor TfpgFont.Create(afontres: TfpgFontResource; const afontdesc: string);
 begin
+  inherited Create(afontdesc);
   FFontRes  := afontres;
-  FFontDesc := afontdesc;
   afontres.IncRefCount;
 end;
 
