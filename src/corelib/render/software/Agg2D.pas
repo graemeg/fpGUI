@@ -2777,39 +2777,40 @@ var
  first : boolean;
  glyph : glyph_cache_ptr;
  str_  : PChar;
-
+ char_id: int32u;
+ charlen: int;
 begin
- if str = '' then exit(0);
- x:=0;
- y:=0;
+ if str = '' then
+   exit(0);
+ x := 0;
+ y := 0;
 
- first:=true;
+ first := true;
  str_ := PChar(str);
 
  while str_^ <> #0 do
-  begin
-   glyph:=m_fontCacheManager.glyph(int32u(str_^ ) );
+ begin
+   char_id := UTF8CharToUnicode(str_, charlen);
+   glyph := m_fontCacheManager.glyph(char_id);
 
    if glyph <> NIL then
-    begin
+   begin
      if not first then
       m_fontCacheManager.add_kerning(@x ,@y );
 
-     x:=x + glyph.advance_x;
-     y:=y + glyph.advance_y;
+     x := x + glyph.advance_x;
+     y := y + glyph.advance_y;
 
      first:=false;
+   end;
 
-    end;
-
-   inc(ptrcomp(str_ ) );
-
-  end;
+   inc(str_, charlen);
+ end;
 
  if m_fontCacheType = AGG_VectorFontCache then
-  result:=x
+   result := x
  else
-  result:=ScreenToWorld(x );
+   result := ScreenToWorld(x );
 end;
 {$ENDIF}
 
@@ -2852,7 +2853,6 @@ begin
 
   AGG_AlignRight :
    dx:=-textWidth(str );
-
  end;
 
  asc  :=fontHeight;
@@ -2870,7 +2870,6 @@ begin
 
   AGG_AlignTop :
    dy:=-asc;
-
  end;
 
  if m_fontEngine._flip_y then
@@ -2915,11 +2914,10 @@ begin
 
     if glyph <> NIL then
     begin
-      if First then
-      begin
-        m_fontCacheManager.add_kerning(@x ,@y );
-        First:=false;
-      end;
+      if not First then
+        m_fontCacheManager.add_kerning(@start_x, @start_y)
+      else
+        First := false;
 
       m_fontCacheManager.init_embedded_adaptors(glyph ,start_x ,start_y );
 
@@ -2939,8 +2937,8 @@ begin
 
       start_x := start_x + glyph.advance_x;
       start_y := start_y + glyph.advance_y;
-    end;
-  end;  { if glyph <> nil }
+   end; { if glyph <> nil }
+ end;
 end;
 {$ENDIF}
 
