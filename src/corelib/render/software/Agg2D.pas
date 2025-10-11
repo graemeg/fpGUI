@@ -384,6 +384,8 @@ type
 
     // ------ TfpgCanvasBase implementation requirements ---------
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
+    { Configure font to use Agg2D/FreeType engine }
+    procedure   ConfigureFontEngine(AFont: TfpgFontBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
   public
@@ -3657,6 +3659,16 @@ begin
  else
   Agg2DRenderer_renderImage(self ,img ,@m_renBaseCompPre ,@interpolator );
 
+end;
+
+procedure TAgg2D.ConfigureFontEngine(AFont: TfpgFontBase);
+begin
+  // Create Agg-specific font engine that uses FreeType for metrics
+  if Assigned(AFont) and Assigned(AFont.FontDefinition) then
+  begin
+    // Font engine holds weak reference to Self (this TAgg2D canvas)
+    AFont.FontEngine := TAgg2DFontEngine.Create(Self, AFont.FontDefinition);
+  end;
 end;
 
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);

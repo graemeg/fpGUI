@@ -356,6 +356,9 @@ type
     property    FontRes: TfpgFontResourceBase read FFontRes;
     property    Handle: TfpgFontResourceBase read FFontRes;
     property    IsFixedWidth: boolean read GetIsFixedWidth;
+    { NEW: Font engine interface for metric calculations }
+    property    FontEngine: IFontEngine read FFontEngine write FFontEngine;
+    property    FontDefinition: TfpgFontDefinition read FFontDefinition;
   end;
 
 
@@ -419,6 +422,8 @@ type
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoGetWinRect(out r: TfpgRect); virtual;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
+    { Configure font's engine based on canvas type }
+    procedure   ConfigureFontEngine(AFont: TfpgFontBase); virtual;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
@@ -2915,6 +2920,13 @@ begin
   DoSetLineStyle(FLineWidth, FLineStyle);
 end;
 
+procedure TfpgCanvasBase.ConfigureFontEngine(AFont: TfpgFontBase);
+begin
+  // Default implementation: use platform-specific font resource as engine
+  if Assigned(AFont) and Assigned(AFont.FontRes) then
+    AFont.FontEngine := AFont.FontRes as IFontEngine;
+end;
+
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
   if AFont = nil then
@@ -2922,6 +2934,8 @@ begin
   if FFont = AFont then
     exit;
   FFont := AFont;
+  // Configure the font engine for this canvas type
+  ConfigureFontEngine(AFont);
   DoSetFontRes(AFont.FFontRes);
 end;
 
