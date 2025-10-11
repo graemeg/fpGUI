@@ -412,6 +412,7 @@ type
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
     FFont: TfpgFontBase;
+    FOwnedFont: TfpgFontBase;
     FDeltaX,
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
@@ -2543,6 +2544,7 @@ begin
 
   if not Assigned(FPutBufferQueue) then
     FPutBufferQueue := TFPList.Create;
+  FOwnedFont := nil;
 
   FPutBufferQueue.Add(n);
 end;
@@ -2558,6 +2560,7 @@ begin
 
   if FPutBufferQueue.Count = 0 then
     FreeAndNil(FPutBufferQueue);
+  FOwnedFont.Free;
 end;
 
 procedure TfpgCanvasBase.DoGetWinRect(out r: TfpgRect);
@@ -2928,14 +2931,20 @@ end;
 
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
-  if AFont = nil then
-    exit;
   if FFont = AFont then
-    exit;
+    Exit;
+
+  if AFont <> FOwnedFont then
+  begin
+    FOwnedFont.Free;
+    FOwnedFont := nil;
+  end;
+
   FFont := AFont;
-  // Configure the font engine for this canvas type
+
   ConfigureFontEngine(AFont);
-  DoSetFontRes(AFont.FFontRes);
+
+  DoSetFontRes(AFont.FontRes);
 end;
 
 procedure TfpgCanvasBase.SetFontDefinition(AFontDef: TfpgFontDefinition);
@@ -2945,8 +2954,15 @@ begin
   if not Assigned(AFontDef) then
     Exit;
 
-  // Get or create font instance
+  if Assigned(FOwnedFont) and (FOwnedFont.FontDesc = AFontDef.FontDesc) then
+  begin
+    SetFont(FOwnedFont);
+    Exit;
+  end;
+
   LFont := fpgGetFont(AFontDef.FontDesc);
+  FOwnedFont.Free;
+  FOwnedFont := LFont;
   SetFont(LFont);
 end;
 

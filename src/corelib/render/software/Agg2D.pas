@@ -1248,7 +1248,7 @@ end;
 destructor TAgg2DFontEngine.Destroy;
 begin
   // Note: FAgg2DRef is a weak reference, do NOT free it
-  FFontDefinition.Free;
+//  FFontDefinition.Free;
   inherited Destroy;
 end;
 
