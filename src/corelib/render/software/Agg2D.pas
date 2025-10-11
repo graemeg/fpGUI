@@ -659,6 +659,21 @@ type
 
   end;
 
+ { Font engine that delegates to TAgg2D for FreeType-based metric calculations }
+ TAgg2DFontEngine = class(TInterfacedObject, IFontEngine)
+ private
+   FAgg2DRef: TAgg2D;  // Weak reference - NOT owned
+   FFontDefinition: TfpgFontDefinition;
+ public
+   constructor Create(AAgg2D: TAgg2D; AFontDef: TfpgFontDefinition);
+   destructor Destroy; override;
+   // IFontEngine implementation
+   function GetTextWidth(const AText: string): integer;
+   function GetAscent: integer;
+   function GetDescent: integer;
+   function GetHeight: integer;
+ end;
+
 { GLOBAL PROCEDURES }
 // Standalone API
  function  Deg2Rad(v : double ) : double;
@@ -1218,6 +1233,46 @@ end;
   {$I agg_platform_cocoa.inc}
 {$ENDIF}
 
+
+{ TAgg2DFontEngine }
+
+constructor TAgg2DFontEngine.Create(AAgg2D: TAgg2D; AFontDef: TfpgFontDefinition);
+begin
+  inherited Create;
+  FAgg2DRef := AAgg2D;  // Weak reference - NOT owned
+  FFontDefinition := AFontDef;
+end;
+
+destructor TAgg2DFontEngine.Destroy;
+begin
+  // Note: FAgg2DRef is a weak reference, do NOT free it
+  FFontDefinition.Free;
+  inherited Destroy;
+end;
+
+function TAgg2DFontEngine.GetTextWidth(const AText: string): integer;
+begin
+  // Delegate to TAgg2D's FreeType-based measurement
+  Result := Round(FAgg2DRef.TextWidth(AText));
+end;
+
+function TAgg2DFontEngine.GetAscent: integer;
+begin
+  // TAgg2D uses FreeType metrics
+  Result := Round(FAgg2DRef.FontAscent);
+end;
+
+function TAgg2DFontEngine.GetDescent: integer;
+begin
+  // TAgg2D uses FreeType metrics
+  Result := Round(FAgg2DRef.FontDescent);
+end;
+
+function TAgg2DFontEngine.GetHeight: integer;
+begin
+  // Height is typically ascent + descent
+  Result := GetAscent + GetDescent;
+end;
 
 { CREATE }
 constructor TAgg2D.Create(awidget: TfpgWidgetBase);
