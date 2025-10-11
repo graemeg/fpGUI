@@ -188,8 +188,25 @@ type
 
   TfpgStyle = class(TObject)
   private
+    { OLD font object fields }
     FMenuHeaderFont: TfpgFont;
+    { NEW: Font definition fields }
+    FDefaultFontDef: TfpgFontDefinition;
+    FFixedFontDef: TfpgFontDefinition;
+    FMenuFontDef: TfpgFontDefinition;
+    FMenuHeaderFontDef: TfpgFontDefinition;
+    FMenuAccelFontDef: TfpgFontDefinition;
+    FMenuDisabledFontDef: TfpgFontDefinition;
+    FTabFontDef: TfpgFontDefinition;
+    { Methods }
     procedure SetMenuHeaderFont(AValue: TfpgFont);
+    { Lazy getters for backward compatibility }
+    function GetDefaultFont: TfpgFont;
+    function GetFixedFont: TfpgFont;
+    function GetMenuFont: TfpgFont;
+    function GetMenuAccelFont: TfpgFont;
+    function GetMenuDisabledFont: TfpgFont;
+    function GetTabFont: TfpgFont;
   protected
     FDefaultFont: TfpgFont;
     FFixedFont: TfpgFont;
@@ -206,14 +223,22 @@ type
   public
     constructor Create; virtual;
     destructor  Destroy; override;
-    { font objects }
-    property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
-    property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
-    property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
-    property    MenuHeaderFont: TfpgFont read FMenuHeaderFont write SetMenuHeaderFont;
-    property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
-    property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
-    property    TabFont: TfpgFont read FTabFont write SetTabFont;
+    { OLD font objects - deprecated, use font definitions instead }
+    property    DefaultFont: TfpgFont read GetDefaultFont write SetDefaultFont; deprecated 'Use DefaultFontDef with Canvas.SetFontDefinition';
+    property    FixedFont: TfpgFont read GetFixedFont write SetFixedFont; deprecated 'Use FixedFontDef with Canvas.SetFontDefinition';
+    property    MenuFont: TfpgFont read GetMenuFont write SetMenuFont; deprecated 'Use MenuFontDef with Canvas.SetFontDefinition';
+    property    MenuHeaderFont: TfpgFont read FMenuHeaderFont write SetMenuHeaderFont; deprecated 'Use MenuHeaderFontDef with Canvas.SetFontDefinition';
+    property    MenuAccelFont: TfpgFont read GetMenuAccelFont write SetMenuAccelFont; deprecated 'Use MenuAccelFontDef with Canvas.SetFontDefinition';
+    property    MenuDisabledFont: TfpgFont read GetMenuDisabledFont write SetMenuDisabledFont; deprecated 'Use MenuDisabledFontDef with Canvas.SetFontDefinition';
+    property    TabFont: TfpgFont read GetTabFont write SetTabFont; deprecated 'Use TabFontDef with Canvas.SetFontDefinition';
+    { NEW font definitions - recommended way }
+    property    DefaultFontDef: TfpgFontDefinition read FDefaultFontDef;
+    property    FixedFontDef: TfpgFontDefinition read FFixedFontDef;
+    property    MenuFontDef: TfpgFontDefinition read FMenuFontDef;
+    property    MenuHeaderFontDef: TfpgFontDefinition read FMenuHeaderFontDef;
+    property    MenuAccelFontDef: TfpgFontDefinition read FMenuAccelFontDef;
+    property    MenuDisabledFontDef: TfpgFontDefinition read FMenuDisabledFontDef;
+    property    TabFontDef: TfpgFontDefinition read FTabFontDef;
     { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
@@ -2166,6 +2191,50 @@ end;
 
 { TfpgStyle }
 
+{ Lazy getters for backward compatibility - create font objects on demand }
+
+function TfpgStyle.GetDefaultFont: TfpgFont;
+begin
+  if not Assigned(FDefaultFont) then
+    FDefaultFont := fpgGetFont(FDefaultFontDef.FontDesc);
+  Result := FDefaultFont;
+end;
+
+function TfpgStyle.GetFixedFont: TfpgFont;
+begin
+  if not Assigned(FFixedFont) then
+    FFixedFont := fpgGetFont(FFixedFontDef.FontDesc);
+  Result := FFixedFont;
+end;
+
+function TfpgStyle.GetMenuFont: TfpgFont;
+begin
+  if not Assigned(FMenuFont) then
+    FMenuFont := fpgGetFont(FMenuFontDef.FontDesc);
+  Result := FMenuFont;
+end;
+
+function TfpgStyle.GetMenuAccelFont: TfpgFont;
+begin
+  if not Assigned(FMenuAccelFont) then
+    FMenuAccelFont := fpgGetFont(FMenuAccelFontDef.FontDesc);
+  Result := FMenuAccelFont;
+end;
+
+function TfpgStyle.GetMenuDisabledFont: TfpgFont;
+begin
+  if not Assigned(FMenuDisabledFont) then
+    FMenuDisabledFont := fpgGetFont(FMenuDisabledFontDef.FontDesc);
+  Result := FMenuDisabledFont;
+end;
+
+function TfpgStyle.GetTabFont: TfpgFont;
+begin
+  if not Assigned(FTabFont) then
+    FTabFont := fpgGetFont(FTabFontDef.FontDesc);
+  Result := FTabFont;
+end;
+
 procedure TfpgStyle.SetMenuHeaderFont(AValue: TfpgFont);
 begin
   if FMenuHeaderFont=AValue then Exit;
@@ -2217,6 +2286,24 @@ end;
 
 constructor TfpgStyle.Create;
 begin
+  // Create font definitions with default descriptors
+  FDefaultFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FFixedFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FIXED_FONT_DESC);
+  FMenuFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FMenuHeaderFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC + ':bold');
+  FMenuAccelFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC + ':underline');
+  FMenuDisabledFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FTabFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+
+  // OLD font objects - created lazily in getters for backward compatibility
+  FDefaultFont := nil;
+  FFixedFont := nil;
+  FMenuFont := nil;
+  FMenuHeaderFont := nil;
+  FMenuAccelFont := nil;
+  FMenuDisabledFont := nil;
+  FTabFont := nil;
+
   // Setup font aliases
   fpgSetNamedFont('Label1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Label2', FPG_DEFAULT_FONT_DESC + ':bold');
@@ -2280,13 +2367,31 @@ end;
 
 destructor TfpgStyle.Destroy;
 begin
-  FDefaultFont.Free;
-  FFixedFont.Free;
-  FMenuFont.Free;
-  FMenuAccelFont.Free;
-  FMenuDisabledFont.Free;
-  FTabFont.Free;
-  FMenuHeaderFont.Free;
+  // Free font definitions
+  FDefaultFontDef.Free;
+  FFixedFontDef.Free;
+  FMenuFontDef.Free;
+  FMenuHeaderFontDef.Free;
+  FMenuAccelFontDef.Free;
+  FMenuDisabledFontDef.Free;
+  FTabFontDef.Free;
+
+  // Free old font objects if they were created
+  if Assigned(FDefaultFont) then
+    FDefaultFont.Free;
+  if Assigned(FFixedFont) then
+    FFixedFont.Free;
+  if Assigned(FMenuFont) then
+    FMenuFont.Free;
+  if Assigned(FMenuAccelFont) then
+    FMenuAccelFont.Free;
+  if Assigned(FMenuDisabledFont) then
+    FMenuDisabledFont.Free;
+  if Assigned(FTabFont) then
+    FTabFont.Free;
+  if Assigned(FMenuHeaderFont) then
+    FMenuHeaderFont.Free;
+
   inherited Destroy;
 end;
 

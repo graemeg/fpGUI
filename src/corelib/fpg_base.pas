@@ -483,6 +483,8 @@ type
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
     procedure   SetFont(AFont: TfpgFontBase);
+    { NEW: Convenience method to set font from definition }
+    procedure   SetFontDefinition(AFontDef: TfpgFontDefinition);
     procedure   BeginDraw; overload;
     procedure   BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
@@ -2934,6 +2936,18 @@ begin
   // Configure the font engine for this canvas type
   ConfigureFontEngine(AFont);
   DoSetFontRes(AFont.FFontRes);
+end;
+
+procedure TfpgCanvasBase.SetFontDefinition(AFontDef: TfpgFontDefinition);
+var
+  LFont: TfpgFont;
+begin
+  if not Assigned(AFontDef) then
+    Exit;
+
+  // Get or create font instance
+  LFont := fpgGetFont(AFontDef.FontDesc);
+  SetFont(LFont);
 end;
 
 procedure TfpgCanvasBase.BeginDraw;
