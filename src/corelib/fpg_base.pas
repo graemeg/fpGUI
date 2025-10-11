@@ -996,6 +996,9 @@ procedure SortRect(var left, top, right, bottom: integer);
 implementation
 
 uses
+{$IFDEF AggCanvas}
+  Agg2D,
+{$ENDIF}
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
@@ -3046,23 +3049,71 @@ end;
 function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
 begin
   if Length(txt) = 0 then
-    Result := 0
-  else
-    Result := FFontRes.GetTextWidth(txt);
+  begin
+    Result := 0;
+    exit;
+  end;
+
+  {$IFDEF AggCanvas}
+  // HACK: When AggCanvas is used, the FFontRes.GetTextWidth points to the
+  // native platform's implementation, not the Agg one, leading to a
+  // mismatch in metrics. To fix this, we need a canvas to perform the
+  // calculation. We assume the ActiveForm's canvas is representative.
+  // This is not perfect but is the only way without major refactoring.
+  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
+     (fpgApplication.MainForm.Canvas <> nil) then
+  begin
+    fpgApplication.MainForm.Canvas.SetFont(Self);
+    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).TextWidth(txt));
+    exit;
+  end;
+  {$ENDIF}
+
+  Result := FFontRes.GetTextWidth(txt);
 end;
 
 function TfpgFontBase.Ascent: integer;
 begin
+  {$IFDEF AggCanvas}
+  // HACK: When AggCanvas is used. Will be improved soon.
+  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
+     (fpgApplication.MainForm.Canvas <> nil) then
+  begin
+    fpgApplication.MainForm.Canvas.SetFont(Self);
+    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontAscent);
+    exit;
+  end;
+  {$ENDIF}
   Result := FFontRes.GetAscent;
 end;
 
 function TfpgFontBase.Descent: integer;
 begin
+  {$IFDEF AggCanvas}
+  // HACK: When AggCanvas is used. Will be improved soon.
+  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
+     (fpgApplication.MainForm.Canvas <> nil) then
+  begin
+    fpgApplication.MainForm.Canvas.SetFont(Self);
+    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontDescent);
+    exit;
+  end;
+  {$ENDIF}
   Result := FFontRes.GetDescent;
 end;
 
 function TfpgFontBase.Height: integer;
 begin
+  {$IFDEF AggCanvas}
+  // HACK: When AggCanvas is used. Will be improved soon.
+  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
+     (fpgApplication.MainForm.Canvas <> nil) then
+  begin
+    fpgApplication.MainForm.Canvas.SetFont(Self);
+    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontHeight);
+    exit;
+  end;
+  {$ENDIF}
   Result := FFontRes.GetHeight;
 end;
 
