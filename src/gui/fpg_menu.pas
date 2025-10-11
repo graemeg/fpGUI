@@ -331,12 +331,13 @@ var
   p: integer;
   achar: string;
 begin
+  // Set appropriate font definition based on state
   if not Enabled then
-    ACanvas.SetFont(fpgStyle.MenuDisabledFont)
+    ACanvas.SetFontDefinition(fpgStyle.MenuDisabledFontDef)
   else
     case ItemType of
-      mitText   : ACanvas.SetFont(fpgStyle.MenuFont);
-      mitHeader : ACanvas.SetFont(fpgStyle.MenuHeaderFont);
+      mitText   : ACanvas.SetFontDefinition(fpgStyle.MenuFontDef);
+      mitHeader : ACanvas.SetFontDefinition(fpgStyle.MenuHeaderFontDef);
     end;
 
   achar := '&';
@@ -349,22 +350,23 @@ begin
       // first part of text before the & sign
       fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
 
-      inc(x, fpgStyle.MenuFont.TextWidth(UTF8Copy(s, 1, p-1)));
+      // Use Canvas.Font for metrics - font engine is configured correctly
+      inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
         fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
-        inc(x, fpgStyle.MenuFont.TextWidth(achar));
+        inc(x, ACanvas.Font.TextWidth(achar));
       end
       else
       begin
         // Draw the HotKey text
         if Enabled then
-          ACanvas.SetFont(fpgStyle.MenuAccelFont);
+          ACanvas.SetFontDefinition(fpgStyle.MenuAccelFontDef);
         fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
         inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
-          ACanvas.SetFont(fpgStyle.MenuFont);
+          ACanvas.SetFontDefinition(fpgStyle.MenuFontDef);
       end;
       s := UTF8Copy(s, p+2, UTF8Length(s));
     end;  { if }
