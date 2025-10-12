@@ -674,6 +674,8 @@ type
    function GetAscent: integer;
    function GetDescent: integer;
    function GetHeight: integer;
+   function GetCanvasRef: TObject;
+   property Canvas: TAgg2D read FAgg2DRef;
  end;
 
 { GLOBAL PROCEDURES }
@@ -1248,6 +1250,8 @@ end;
 destructor TAgg2DFontEngine.Destroy;
 begin
   // Note: FAgg2DRef is a weak reference, do NOT free it
+  // FFontDefinition is also a weak reference, do NOT free it.
+  // It is owned by TfpgFontBase.
 //  FFontDefinition.Free;
   inherited Destroy;
 end;
@@ -1274,6 +1278,11 @@ function TAgg2DFontEngine.GetHeight: integer;
 begin
   // Height is typically ascent + descent
   Result := GetAscent + GetDescent;
+end;
+
+function TAgg2DFontEngine.GetCanvasRef: TObject;
+begin
+  Result := FAgg2DRef;
 end;
 
 { CREATE }
@@ -3663,6 +3672,12 @@ end;
 
 procedure TAgg2D.ConfigureFontEngine(AFont: TfpgFontBase);
 begin
+  // Check if the existing engine is already a TAgg2DFontEngine for this canvas
+  if (AFont.FontEngine <> nil) and (AFont.FontEngine.GetCanvasRef = Self) then
+  begin
+    Exit; // Already has the correct engine.
+  end;
+
   // Create Agg-specific font engine that uses FreeType for metrics
   if Assigned(AFont) and Assigned(AFont.FontDefinition) then
   begin

@@ -304,6 +304,7 @@ type
     function GetAscent: integer;
     function GetDescent: integer;
     function GetHeight: integer;
+    function GetCanvasRef: TObject;
   end;
 
 
@@ -316,6 +317,7 @@ type
     function    GetHeight: integer; virtual; abstract;
     function    GetTextWidth(const txt: string): integer; virtual; abstract;
     function    HandleIsValid: boolean; virtual; abstract;
+    function    GetCanvasRef: TObject; virtual;
   end;
 
 
@@ -3108,6 +3110,11 @@ procedure TfpgCanvasBase.FreeResources;
 begin
   DoEndDraw;
   FBeginDrawCount := 0;
+end;
+
+function TfpgFontResourceBase.GetCanvasRef: TObject;
+begin
+  Result := nil;
 end;
 
 { TfpgFontDefinition }
