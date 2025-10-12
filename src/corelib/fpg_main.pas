@@ -1580,7 +1580,7 @@ begin
     if TfpgFontResource(FFontResList[n]).FontDesc = fdesc then
     begin
       fr     := TfpgFontResource(FFontResList[n]);
-      Inc(fr.FUsageCount);
+//      Inc(fr.FUsageCount);
       Result := TfpgFont.Create(fr, afontdesc);
       Exit; //==>
     end;
