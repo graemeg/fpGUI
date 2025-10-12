@@ -827,7 +827,6 @@ begin
   Result.Text       := AMenuTitle;
   Result.HotKeyDef  := '';
   Result.OnClick    := OnClickProc;
-  Result.ItemType   := mitText;
 end;
 
 function TfpgMenuBar.MenuItem(const AMenuPos: integer): TfpgMenuItem;
