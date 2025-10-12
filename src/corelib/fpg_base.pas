@@ -2544,7 +2544,6 @@ begin
 
   if not Assigned(FPutBufferQueue) then
     FPutBufferQueue := TFPList.Create;
-  FOwnedFont := nil;
 
   FPutBufferQueue.Add(n);
 end;
@@ -2560,7 +2559,6 @@ begin
 
   if FPutBufferQueue.Count = 0 then
     FreeAndNil(FPutBufferQueue);
-  FOwnedFont.Free;
 end;
 
 procedure TfpgCanvasBase.DoGetWinRect(out r: TfpgRect);
@@ -2576,6 +2574,7 @@ end;
 
 destructor TfpgCanvasBase.Destroy;
 begin
+  FOwnedFont.Free;
   FInterpolation.Free;
   inherited Destroy;
 end;
