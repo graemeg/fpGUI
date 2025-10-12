@@ -293,6 +293,10 @@ begin
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
     lPathList.Add(GetUserDir + '.fonts/');
+    {$IFDEF Darwin}
+    lPathList.Add(GetUserDir + '/Library/Fonts/');
+    {$ENDIF}
+
     for i := 0 to lPathList.Count-1 do
     begin
       lPath := lPathList[i];
