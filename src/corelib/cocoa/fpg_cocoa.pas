@@ -108,6 +108,7 @@ type
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
   public
+    constructor Create(const AParams: string); override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -267,6 +268,12 @@ begin
 end;
 
 { TfpgCocoaApplication }
+
+constructor TfpgCocoaApplication.Create(const AParams: string);
+begin
+  inherited Create(AParams);
+  FIsInitialized := True;
+end;
 
 function    TfpgCocoaApplication.DoGetFontFaceList: TStringList;
 begin
