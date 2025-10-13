@@ -1083,6 +1083,27 @@ begin
 end;
 ----
 
+**Update:**
+
+Successfully completed the migration of TfpgLabel, TfpgEdit (including all numeric edit variants and
+fpg_spinedit), and TfpgMemo. All three widgets have been migrated to use TfpgFontResourceBase from the FontManager,
+and all commits have been created successfully.
+
+The migration is progressing well. I'm now ready to continue with TfpgListBox as indicated by the "in_progress"
+status in the todo list. The established migration pattern is working smoothly:
+
+1. Change FFont field from TfpgFont to TfpgFontResourceBase
+2. Update property declarations
+3. Use fpgApplication.FontManager.GetFont() instead of fpgGetFont()
+4. Use FFont := nil instead of FFont.Free for cleanup
+5. Add safe typecasting in GetFontDesc
+6. Change all TextWidth() calls to GetTextWidth()
+7. Change all Height property accesses to GetHeight method calls
+8. Keep Canvas.Font.Height and Canvas.Font.TextWidth() unchanged (they use the TfpgFont wrapper)
+
+
+
+
 **Testing for Each Widget:**
 
 * Visual inspection in examples
