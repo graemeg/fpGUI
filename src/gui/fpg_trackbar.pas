@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -109,7 +109,7 @@ type
     function    GetTextWidth: TfpgCoord;
     procedure   SetSliderLength(AValue: integer);
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FSliderPos: TfpgCoord;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -431,7 +431,7 @@ end;
 function TfpgTrackBar.GetTextWidth: TfpgCoord;
 begin
   if FShowPosition then
-    Result := FFont.TextWidth(IntToStr(Max)) + 4
+    Result := FFont.GetTextWidth(IntToStr(Max)) + 4
   else
     Result := 0;
 end;
@@ -599,7 +599,7 @@ begin
     if FShowPosition then
     begin
       Canvas.SetTextColor(TextColor);
-      fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.Height) div 2, IntToStr(Position), Enabled);
+      fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.GetHeight) div 2, IntToStr(Position), Enabled);
     end;
   end;
 end;
@@ -614,12 +614,12 @@ begin
   FSliderLength := 11;
   FScrollStep   := 1;
   FShowPosition := False;
-  FFont         := fpgGetFont('#Grid');
+  FFont         := fpgApplication.FontManager.GetFont('#Grid');
 end;
 
 destructor TfpgTrackBar.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
 end;
 
