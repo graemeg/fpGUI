@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -35,7 +35,7 @@ type
     FPosition: longint;
     FShowCaption: boolean;
     FStep: longint;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     procedure   SetMax(const AValue: longint);
     procedure   SetMin(const AValue: longint);
     procedure   SetPBPosition(const AValue: longint);
@@ -53,7 +53,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   StepIt;
     procedure   StepBy(AStep: integer);
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -192,8 +192,8 @@ begin
   if FShowCaption then
   begin
     txt := IntToStr(percent) + '%';
-    x := (Width - FFont.TextWidth(txt)) div 2;
-    y := (Height - FFont.Height) div 2;
+    x := (Width - FFont.GetTextWidth(txt)) div 2;
+    y := (Height - FFont.GetHeight) div 2;
     Canvas.SetTextColor(TextColor);
     Canvas.Font := FFont;
     Canvas.DrawString(x, y, txt);
@@ -213,7 +213,7 @@ begin
   FBackgroundColor := TfpgColor($c4c4c4); // clListBox;
   FTextColor := Parent.TextColor;
   FShowCaption := False;
-  FFont     := fpgStyle.DefaultFont;
+  FFont     := fpgStyle.DefaultFont.FontRes;
 end;
 
 procedure TfpgCustomProgressBar.StepIt;
