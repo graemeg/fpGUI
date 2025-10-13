@@ -50,7 +50,7 @@ case $OSinput in
 		;;
     "M"|"m")
 		echo "Compiling for OSX Cocoa"
-		$fpcbin -dCocoa @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
+		$fpcbin -dX11 -dAGGCanvas @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
 		;;
 	*)
 		echo "Unknown option - doing nothing!"

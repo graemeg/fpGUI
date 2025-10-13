@@ -28,7 +28,8 @@ uses
   fpg_constants,
   fpg_base,
   fpg_interface,
-  fpg_impl;
+  fpg_impl,
+  fpg_fontmanager;
 
 type
   TOrientation = (orVertical, orHorizontal);
@@ -111,6 +112,7 @@ type
     function    IncRefCount: integer;
     function    DecRefCount: integer;
     property    FontDesc: string read FFontDesc;
+    property    UsageCount: integer read FUsageCount;  // For debugging/statistics
   end;
 
 
@@ -312,7 +314,8 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
-    FFontResList: TList;
+    FFontResList: TList;  // OLD - will be phased out
+    FFontManager: TfpgFontManager;  // NEW - centralized font management
     FMessageHookList: TFPList;
     procedure   FreeFontRes(afontres: TfpgFontResource);
     procedure   InternalInit;
@@ -338,6 +341,7 @@ type
     property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
+    property    FontManager: TfpgFontManager read FFontManager;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
     property    StartDragDistance: integer read FStartDragDistance write SetStartDragDistance default 5;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
@@ -1486,7 +1490,8 @@ begin
   InitializeDebugOutput;
   fpgInitMsgQueue;
 
-  FFontResList    := TList.Create;
+  FFontResList    := TList.Create;  // OLD - keep for compatibility
+  FFontManager    := TfpgFontManager.Create;  // NEW - create font manager
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
@@ -1540,6 +1545,10 @@ begin
       TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
 
+  // NEW: Free font manager first (will free all cached fonts)
+  FFontManager.Free;
+
+  // OLD: Keep for compatibility during transition
   for i := FFontResList.Count-1 downto 0 do
   begin
     TfpgFontResource(FFontResList[i]).Free;

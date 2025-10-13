@@ -49,7 +49,12 @@
 {$ENDIF }
 
 {$IFDEF DARWIN }
- {$DEFINE AGG_MACOSX }
+ // If X11 is explicitly defined, treat Darwin as Linux/X11 system (for XQuartz)
+ {$IFDEF X11}
+  {$DEFINE AGG_LINUX }
+ {$ELSE}
+  {$DEFINE AGG_MACOSX }
+ {$ENDIF}
  {$IFNDEF AGG2D_NO_FONT}
   {$DEFINE AGG2D_USE_FREETYPE}
  {$ENDIF}
