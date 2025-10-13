@@ -2,7 +2,7 @@
 :toc: left
 :toclevels: 4
 :sectnums:
-:source-highlighter: pygments
+:source-highlighter: rouge
 :icons: font
 
 == Executive Summary
