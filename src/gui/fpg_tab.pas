@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -107,7 +107,7 @@ type
     FUpdateCount: Integer;
     FActiveTabColor: TfpgColor;
     FActiveTabTextColor: TfpgColor;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     function    GetActivePageIndex: integer;
     function    GetFontDesc: string;
     function    GetPage(AIndex: integer): TfpgTabSheet;
@@ -142,7 +142,7 @@ type
     function    GetActiveTabTextColor: TfpgColor;
     procedure   SetActiveTabTextColor(AValue: TfpgColor);
     function    CalcActiveTabRect(const ARect: TfpgRect): TfpgRect;
-    function    GetFont: TfpgFont;
+    function    GetFont: TfpgFontResourceBase;
   protected
     procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   OrderSheets; // currently using bubblesort
@@ -163,7 +163,7 @@ type
     procedure   RemoveTabSheet(ATabSheet: TfpgTabSheet);
     property    PageCount: Integer read GetPageCount;
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    Pages[AIndex: integer]: TfpgTabSheet read GetPage;
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
     property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
@@ -325,8 +325,8 @@ end;
 
 function TfpgPageControl.GetFontDesc: string;
 begin
-  if Assigned(FFont) then
-    Result := FFont.FontDesc
+  if Assigned(FFont) and (FFont is TfpgFontResource) then
+    Result := TfpgFontResource(FFont).FontDesc
   else
     Result := fpgStyle.TabFont.FontDesc;
 end;
@@ -632,8 +632,8 @@ end;
 
 procedure TfpgPageControl.SetFontDesc(AValue: string);
 begin
-  FreeAndNil(FFont);
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -761,12 +761,12 @@ begin
   Result.InflateRect(border.Left, border.Top);
 end;
 
-function TfpgPageControl.GetFont: TfpgFont;
+function TfpgPageControl.GetFont: TfpgFontResourceBase;
 begin
   if Assigned(FFont) then
     Result := FFont
   else
-    Result := fpgStyle.TabFont;
+    Result := fpgStyle.TabFont.FontRes;
 end;
 
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
@@ -1271,7 +1271,7 @@ begin
   FPages.Free;
   ActiveWidget := nil;
   FFirstTabButton := nil;
-  FreeAndNil(FFont);
+  FFont := nil;
   inherited Destroy;
 end;
 
