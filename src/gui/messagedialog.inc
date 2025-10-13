@@ -570,7 +570,7 @@ begin
   with lblName1 do
   begin
     Name := 'lblName1';
-    SetPosition(116, 20, 312, Font.Height);
+    SetPosition(116, 20, 312, Font.GetHeight);
     Text := '';
     FontDesc := '#Label2';
   end;
