@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -154,7 +154,7 @@ type
     FDefaultColumnWidth: word;
     FIndentNodeWithNoImage: boolean;
     FFirstColumn: PfpgTreeColumnWidth; // the list for column widths
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FHScrollbar: TfpgScrollbar;
     FMoving: boolean;
     FMovingCol: integer;
@@ -240,7 +240,7 @@ type
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     procedure   BeginUpdate;
     procedure   EndUpdate;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
@@ -858,7 +858,10 @@ end;
 
 function TfpgTreeview.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 function TfpgTreeview.GetRootNode: TfpgTreeNode;
@@ -886,8 +889,8 @@ end;
 
 procedure TfpgTreeview.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -1082,7 +1085,7 @@ end;
 
 function TfpgTreeview.GetNodeHeight: integer;
 begin
-  Result := FFont.Height + 2;
+  Result := FFont.GetHeight + 2;
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
@@ -1096,7 +1099,7 @@ begin
     Result := 0
   else
   begin
-    Result := FFont.TextWidth(ANode.Text) + 4;
+    Result := FFont.GetTextWidth(ANode.Text) + 4;
     if ShowImages and ((ImageList <> nil) or (StateImageList <> nil)) then
     begin
       if ImageList <> nil then
@@ -2192,7 +2195,7 @@ begin
   FShowColumns  := False;
   FDefaultColumnWidth := 15;
   FFirstColumn  := nil;
-  FFont := fpgGetFont('#Label1');
+  FFont := fpgApplication.FontManager.GetFont('#Label1');
   Width := 150;
   Height := 100;
   FUpdateCount := 0;
@@ -2218,7 +2221,7 @@ begin
   FMoving           := False;
   FXOffset          := 0;
   FYOffset          := 0;
-  FColumnHeight     := FFont.Height + 2;
+  FColumnHeight     := FFont.GetHeight + 2;
   FScrollWheelDelta := 15;
   FNoImageIndent    := 16;
   FIndentNodeWithNoImage := True;
@@ -2231,7 +2234,7 @@ begin
     ClearColumnLeft;
     FColumnLeft.Free;
   end;
-  FFont.Free;
+  FFont := nil;
   FreeAllTreeNodes;
   FRootNode.Free;
   inherited Destroy;
