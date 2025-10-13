@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -72,7 +72,7 @@ type
     FDown: Boolean;
     FImage: TfpgImage;
     FText: string;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FDefault: boolean;
     FState: integer;  // 0 - normal  // 1 - hover
     FAllowMultiLineText: boolean;
@@ -114,7 +114,7 @@ type
     procedure   Click;
     function    GetCommand: ICommand;   // ICommandHolder interface
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -233,8 +233,8 @@ begin
   end
   else
   begin
-    textWidth := FFont.TextWidth (Text);
-    textHeight := FFont.Height;
+    textWidth := FFont.GetTextWidth(Text);
+    textHeight := FFont.GetHeight;
     // Only single line texts will be placed correctly.
     // Normally FFont.TextHeight should be used (not yet implemented)
   end;
@@ -425,7 +425,11 @@ end;
 
 function TfpgBaseButton.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  // Cast to TfpgFontResource to access FontDesc property
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgBaseButton.SetDefault(const AValue: boolean);
@@ -471,8 +475,8 @@ end;
 
 procedure TfpgBaseButton.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -480,8 +484,8 @@ constructor TfpgBaseButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText         := 'Button';
-  FFont         := fpgGetFont('#Label1');
-  Height        := FFont.Height + 8;
+  FFont         := fpgApplication.FontManager.GetFont('#Label1');
+  Height        := FFont.GetHeight + 8;
   Width         := 80;
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
@@ -511,7 +515,7 @@ destructor TfpgBaseButton.Destroy;
 begin
   FImage := nil;
   FText  := '';
-  FFont.Free;
+  FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
 end;
 

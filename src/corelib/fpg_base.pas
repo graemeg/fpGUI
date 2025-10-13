@@ -485,7 +485,8 @@ type
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
-    procedure   SetFont(AFont: TfpgFontBase);
+    procedure   SetFont(AFont: TfpgFontBase); overload;
+    procedure   SetFont(AFont: TfpgFontResourceBase); overload;  // NEW: direct font resource
     { NEW: Convenience method to set font from definition }
     procedure   SetFontDefinition(AFontDef: TfpgFontDefinition);
     procedure   BeginDraw; overload;
@@ -2946,6 +2947,33 @@ begin
   ConfigureFontEngine(AFont);
 
   DoSetFontRes(AFont.FontRes);
+end;
+
+// NEW: Overload to accept TfpgFontResourceBase directly
+procedure TfpgCanvasBase.SetFont(AFont: TfpgFontResourceBase);
+var
+  LFontDesc: string;
+begin
+  // TRANSITIONAL: During Phase 2 migration, we still need TfpgFont wrapper for Canvas compatibility
+  // In Phase 3, we'll remove TfpgFont completely and Canvas will work directly with TfpgFontResourceBase
+
+  // Get the font descriptor if available
+  if AFont is TfpgFontResource then
+    LFontDesc := TfpgFontResource(AFont).FontDesc
+  else
+    LFontDesc := '';
+
+  // Create a temporary TfpgFont wrapper that Canvas will own
+  // This is needed because Canvas code accesses Font.FontDesc and other properties
+  FOwnedFont.Free;
+  if AFont is TfpgFontResource then
+    FOwnedFont := TfpgFont.Create(TfpgFontResource(AFont), LFontDesc)
+  else
+    FOwnedFont := nil;
+
+  FFont := FOwnedFont;
+
+  DoSetFontRes(AFont);
 end;
 
 procedure TfpgCanvasBase.SetFontDefinition(AFontDef: TfpgFontDefinition);
