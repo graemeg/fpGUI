@@ -277,7 +277,7 @@ begin
   P_Panel.Layout := tlCenter;
   P_Panel.TextColor := clRed;
   P_Panel.Text   := 'This is to try a long text on a panel' + #13 + 'including a line feed';
-  P_Panel.FontDesc := 'bitstream vera sans-12:bold:italic';
+  P_Panel.FontDesc := FPG_DEFAULT_SANS + '-12:bold:italic';
   P_Panel.LineSpace := 2;
   P_Panel.Margin := 2;
   P_Panel.WrapText := True;
@@ -288,7 +288,7 @@ begin
   G_GroupBox.TextColor := clGreen;
   G_GroupBox.Text := 'This is a groupbox';
   G_GroupBox.Margin := 2;
-  G_GroupBox.FontDesc := 'bitstream vera sans-10:italic';
+  G_GroupBox.FontDesc := FPG_DEFAULT_SANS + '-10:italic';
   L_GLabel       := CreateLabel(G_GroupBox, 10, 20, 'A simple label on a groupbox');
   B_Align        := CreateBevel(Self, 400, 270, 180, 100, bsBox, bsRaised);
   RB_Left        := CreateRadioButton(B_Align, 20, 20, 'Align left');

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -126,7 +126,7 @@ type
     function    GetWrapText: boolean;
     procedure   SetWrapText(const AValue: boolean);
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     function    GetFontDesc: string; virtual;
     procedure   SetFontDesc(const AValue: string); virtual;
     procedure   HandlePaint; override;
@@ -134,7 +134,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    GetClientRect: TfpgRect; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   published
     property    AcceptDrops;
     property    Align;
@@ -189,13 +189,13 @@ type
     function    GetMargin: integer;
     procedure   SetMargin(const AValue: integer);
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    GetClientRect: TfpgRect; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   published
     property    AcceptDrops;
     property    Align;
@@ -679,13 +679,16 @@ end;
 
 function TfpgPanel.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgPanel.SetFontDesc(const AValue: string);
 begin
-  FreeAndNil(FFont);
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   Repaint;
 end;
 
@@ -804,7 +807,7 @@ constructor TfpgPanel.Create(Aowner: TComponent);
 begin
   inherited Create(AOwner);
   FText             := 'Panel';
-  FFont             := fpgGetFont('#Label1');
+  FFont             := fpgApplication.FontManager.GetFont('#Label1');
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
@@ -818,7 +821,7 @@ end;
 destructor TfpgPanel.Destroy;
 begin
   FText := '';
-  FreeAndNil(FFont);
+  FFont := nil;
   inherited Destroy;
 end;
 
@@ -862,13 +865,16 @@ end;
 
 function TfpgGroupBox.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgGroupBox.SetFontDesc(const AValue: string);
 begin
-  FreeAndNil(FFont);
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   Repaint;
 end;
 
@@ -892,7 +898,7 @@ var
 begin
   if not Assigned(FFont) then
     exit;
-  h := FFont.Height + 4;
+  h := FFont.GetHeight + 4;
   Result.SetRect(2, h, Width - 4, Height - (h + 2));
 end;
 
@@ -954,8 +960,8 @@ begin
   case FAlignment of
     taLeftJustify:
       begin
-        w := FFont.TextWidth(FText) + FMargin * 2;
-        r.SetRect(5, 0, w, FFont.Height + FMargin);
+        w := FFont.GetTextWidth(FText) + FMargin * 2;
+        r.SetRect(5, 0, w, FFont.GetHeight + FMargin);
         Canvas.SetClipRect(r);
         Canvas.Clear(FBackgroundColor);
 
@@ -985,8 +991,8 @@ begin
       end;
     taRightJustify:
       begin
-        w := Width - FFont.TextWidth(FText) - (FMargin * 2) - 5;
-        r.SetRect(w, 0, FFont.TextWidth(FText) + FMargin * 2, FFont.Height + FMargin);
+        w := Width - FFont.GetTextWidth(FText) - (FMargin * 2) - 5;
+        r.SetRect(w, 0, FFont.GetTextWidth(FText) + FMargin * 2, FFont.GetHeight + FMargin);
         Canvas.SetClipRect(r);
         Canvas.Clear(FBackgroundColor);
 
@@ -1012,12 +1018,12 @@ begin
           Canvas.SetColor(clHilite2);
 
         Canvas.DrawLine(Width - 6, 0, Width - 6, 6);
-        Canvas.DrawText(Width - FFont.TextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
+        Canvas.DrawText(Width - FFont.GetTextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
       end;
     taCenter:
       begin
-        w := (Width - FFont.TextWidth(FText) - FMargin * 2) div 2;
-        r.SetRect(w, 0, FFont.TextWidth(FText) + FMargin * 2, FFont.Height + FMargin);
+        w := (Width - FFont.GetTextWidth(FText) - FMargin * 2) div 2;
+        r.SetRect(w, 0, FFont.GetTextWidth(FText) + FMargin * 2, FFont.GetHeight + FMargin);
         Canvas.SetClipRect(r);
         Canvas.Clear(FBackgroundColor);
 
@@ -1028,12 +1034,12 @@ begin
 
         if FPanelBorder = bsSingle then
         begin
-          Canvas.DrawLine(w, 0, w + FFont.TextWidth(FText) + FMargin * 2, 0);
+          Canvas.DrawLine(w, 0, w + FFont.GetTextWidth(FText) + FMargin * 2, 0);
           Canvas.DrawLine(w, 0, w, 6);
         end
         else
         begin
-          Canvas.DrawLine(w, 1, w + FFont.TextWidth(FText) + FMargin * 2, 1);
+          Canvas.DrawLine(w, 1, w + FFont.GetTextWidth(FText) + FMargin * 2, 1);
           Canvas.DrawLine(w + 1, 0, w + 1, 7);
         end;
 
@@ -1042,7 +1048,7 @@ begin
         else
           Canvas.SetColor(clHilite2);
 
-        Canvas.DrawLine(w + FFont.TextWidth(FText) + FMargin * 2 - 1, 0, w + FFont.TextWidth(FText) + FMargin * 2 - 1, 6);
+        Canvas.DrawLine(w + FFont.GetTextWidth(FText) + FMargin * 2 - 1, 0, w + FFont.GetTextWidth(FText) + FMargin * 2 - 1, 6);
         Canvas.DrawText(w + FMargin, 0, FText, lTxtFlags);
       end;
     end;
@@ -1052,7 +1058,7 @@ constructor TfpgGroupBox.Create(Aowner: TComponent);
 begin
   inherited Create(AOwner);
   FText             := 'Group box';
-  FFont             := fpgGetFont('#Label1');
+  FFont             := fpgApplication.FontManager.GetFont('#Label1');
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
@@ -1064,7 +1070,7 @@ end;
 
 destructor TfpgGroupBox.Destroy;
 begin
-  FreeAndNil(FFont);
+  FFont := nil;
   inherited Destroy;
 end;
 
