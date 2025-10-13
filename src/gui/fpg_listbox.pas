@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -67,7 +67,7 @@ type
     function    GetScrollBarWidth: integer;
     procedure   SetScrollBarWidth(const AValue: integer);
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FScrollBar: TfpgScrollBar;
     FFocusItem: integer;
     FMouseDragging: boolean;
@@ -112,7 +112,7 @@ type
     function    ItemCount: integer; virtual;
     function    RowHeight: integer; virtual;
     procedure   SetFirstItem(item: integer);
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    VisibleItems: integer read PageLength;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnKeyPress; // to allow to detect return or tab key has been pressed
@@ -357,7 +357,11 @@ end;
 
 function TfpgBaseListBox.GetFontDesc: string;
 begin
-  result := FFont.FontDesc;
+  // Cast to TfpgFontResource to access FontDesc property
+  if FFont is TfpgFontResource then
+    result := TfpgFontResource(FFont).FontDesc
+  else
+    result := '';
 end;
 
 procedure TfpgBaseListBox.SetBorderStyle(AValue: TfpgEditBorderStyle);
@@ -398,8 +402,8 @@ end;
 
 procedure TfpgBaseListBox.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   if FAutoHeight then
     Height:= ((Height - 6) div RowHeight) * RowHeight + 6;
   RePaint;
@@ -823,7 +827,7 @@ end;
 constructor TfpgBaseListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont := fpgGetFont('#List');
+  FFont := fpgApplication.FontManager.GetFont('#List');
   FBackgroundColor := clListBox;
   FFocusable      := True;
   FFocusItem      := -1;
@@ -852,7 +856,7 @@ end;
 
 destructor TfpgBaseListBox.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
 end;
 
@@ -886,7 +890,7 @@ end;
 
 function TfpgBaseListBox.RowHeight: integer;
 begin
-  result := FFont.Height+2;
+  result := FFont.GetHeight+2;
 end;
 
 procedure TfpgBaseListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
