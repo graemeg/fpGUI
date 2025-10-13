@@ -1,0 +1,2031 @@
+= fpGUI Font Handling Redesign - Comprehensive Proposal
+:toc: left
+:toclevels: 4
+:sectnums:
+:source-highlighter: pygments
+:icons: font
+
+== Executive Summary
+
+This document provides a comprehensive redesign proposal for the fpGUI font handling system based on detailed analysis of the current implementation. The analysis reveals that while recent bug fixes (commits 9b58fb60 and others) have addressed critical memory leaks, the fundamental architecture remains overly complex with unclear ownership patterns, incomplete refactoring, and scattered responsibilities.
+
+=== Key Findings
+
+* **Fixed Issues**: Double reference counting and FOwnedFont memory leaks have been resolved
+* **Current State**: Codebase is mid-refactoring with both old (TfpgFont → TfpgFontResource) and new (TfpgFontDefinition → IFontEngine) paths coexisting
+* **Critical Issues**: No font manager abstraction, O(n) cache lookups, manual reference counting remains error-prone
+* **Unnecessary Complexity**: TfpgFont wrapper adds no value, confusing dual ownership model
+
+=== Recommended Approach
+
+**Phased Moderate Refactoring** that:
+
+1. Creates a dedicated `TfpgFontManager` class with O(1) hash-based caching
+2. Removes the unnecessary `TfpgFont` wrapper class entirely
+3. Widgets directly reference `TfpgFontResource` with interface-based automatic reference counting
+4. Consolidates font descriptor parsing in `TfpgFontDefinition`
+5. Completes the IFontEngine transition across all backends
+
+
+* **Estimated Time**: 2-3 weeks for experienced developer
+* **Risk Level**: Medium (requires touching ~30-40 widget files)
+* **Benefits**: Significantly simplified architecture, better performance, clearer lifecycle management
+
+---
+
+== 1. Current Architecture Analysis
+
+=== 1.1 Class Hierarchy (Current State)
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────┐
+│                    Application Layer                        │
+│                                                             │
+│  Widget → FFont: TfpgFont  (wrapper object)                │
+│              ↓                                              │
+│         FFont.Free → DecRefCount                           │
+│         fpgGetFont(desc) → TfpgApplication.GetFont         │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   Global Font Cache                         │
+│                                                             │
+│  TfpgApplication.FFontResList: TList                       │
+│      ↓ O(n) linear search                                  │
+│  TfpgFontResource (cached, reference-counted)              │
+│      ├─ FFontDesc: string                                  │
+│      ├─ FUsageCount: integer (manual)                      │
+│      └─ Platform handle (HFONT, PXftFont, etc.)           │
+└─────────────────────────────────────────────────────────────┘
+                    ↓ inherits              ↓ NEW path (partial)
+┌──────────────────────────────────┐  ┌────────────────────────┐
+│  TfpgFontResourceBase            │  │ TfpgFontDefinition     │
+│  (implements IFontEngine)        │  │  ├─ FFaceName          │
+│      ├─ GetTextWidth()           │  │  ├─ FSize              │
+│      ├─ GetAscent()              │  │  ├─ FAttributes        │
+│      ├─ GetDescent()             │  │  └─ ParseFontDesc()    │
+│      └─ GetHeight()              │  └────────────────────────┘
+└──────────────────────────────────┘            ↓ used by
+            ↓ platform-specific        ┌────────────────────────┐
+┌───────────────────────────────────┐  │ IFontEngine interface  │
+│  Platform Implementations         │  │   ↓ implemented by     │
+│  ├─ TfpgX11FontResource (Xft)    │  │ TAgg2DFontEngine       │
+│  ├─ TfpgGDIFontResource (GDI)    │  │  (AGG canvas only)     │
+│  └─ TfpgCocoaFontResource        │  └────────────────────────┘
+└───────────────────────────────────┘
+----
+
+=== 1.2 Critical Issues Identified
+
+==== 1. TfpgFont Wrapper Adds No Value
+
+*Location:* `src/corelib/fpg_base.pas:341-362`
+
+The `TfpgFont` class serves only as a thin wrapper that:
+
+* Duplicates `FFontDesc` string (already stored in `TfpgFontResource`)
+* Delegates all method calls to `FFontRes` or `FFontEngine`
+* Complicates lifecycle management with dual ownership model
+* Forces every font user to manage wrapper objects
+
+[source,pascal]
+----
+TfpgFontBase = class(TObject)
+protected
+  FFontDesc: string;                    // ← Duplicates FFontRes.FontDesc
+  FFontRes: TfpgFontResourceBase;       // ← The actual resource
+  FFontEngine: IFontEngine;             // ← NEW path
+  FFontDefinition: TfpgFontDefinition;   // ← NEW path
+public
+  function TextWidth(const txt: TfpgString): integer;  // ← Just delegates
+  function Ascent: integer;                            // ← Just delegates
+  function Descent: integer;                           // ← Just delegates
+----
+
+Widgets use this confusing pattern:
+
+[source,pascal]
+----
+// Widget "owns" the wrapper, but the resource is globally cached
+FFont: TfpgFont;
+
+procedure SetFont(const AValue: string);
+begin
+  FFont.Free;                       // Decrements ref count, maybe frees resource
+  FFont := fpgGetFont('Arial-12');  // Creates new wrapper
+end;
+----
+
+**Problem**: Widget thinks it "owns" the font, but it's borrowing a wrapper to a shared resource.
+
+==== 2. No Centralized Font Manager
+
+*Location:* `src/corelib/fpg_main.pas:315, 1566-1602`
+
+Font management is scattered across `TfpgApplication` with no encapsulation:
+
+[source,pascal]
+----
+TfpgApplication = class(TfpgApplicationImpl)
+private
+  FFontResList: TList;  // Just a TList, no abstraction
+public
+  function GetFont(const afontdesc: TfpgString): TfpgFont;
+  procedure FreeFontRes(afontres: TfpgFontResource);
+----
+
+**Missing:**
+
+* No dedicated `TfpgFontManager` class
+* No hash table for O(1) lookups (currently O(n) linear search through string comparisons)
+* Cache logic mixed into application singleton
+* Hard to unit test or mock
+* No cache statistics or debugging capabilities
+
+==== 3. Manual Reference Counting is Error-Prone
+
+*Location:* `src/corelib/fpg_main.pas:1990-1999`
+
+[source,pascal]
+----
+function TfpgFontResource.IncRefCount: integer;
+begin
+  Inc(FUsageCount);
+  Result := FUsageCount;
+end;
+
+function TfpgFontResource.DecRefCount: integer;
+begin
+  Dec(FUsageCount);
+  Result := FUsageCount;
+end;
+----
+
+**Issues:**
+
+* No protection against negative counts
+* No assertions to catch bugs
+* Easy to forget Inc/Dec pairs
+* Already caused memory leaks (fixed in commit 9b58fb60)
+
+==== 4. Incomplete Refactoring - Dual Code Paths
+
+*Location:* `src/corelib/fpg_base.pas:342-346`
+
+[source,pascal]
+----
+TfpgFontBase = class(TObject)
+protected
+  FFontDesc: string;
+  FFontRes: TfpgFontResourceBase;        // KEEP temporarily for compatibility ← OLD
+  FFontEngine: IFontEngine;              // NEW
+  FFontDefinition: TfpgFontDefinition;   // NEW
+----
+
+The codebase has both old and new paths with conditional logic everywhere:
+
+[source,pascal]
+----
+function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
+begin
+  if Assigned(FFontEngine) then           // NEW path
+    Result := FFontEngine.GetTextWidth(txt)
+  else if Assigned(FFontRes) then         // OLD path
+    Result := FFontRes.GetTextWidth(txt)
+  else
+    Result := 0;
+end;
+----
+
+This pattern repeats in `Ascent()`, `Descent()`, and `Height()` methods.
+
+==== 5. Inefficient O(n) Cache Lookups
+
+*Location:* `src/corelib/fpg_main.pas:1579-1586`
+
+[source,pascal]
+----
+// Linear search through entire font list
+for n := 0 to FFontResList.Count - 1 do
+  if TfpgFontResource(FFontResList[n]).FontDesc = fdesc then
+  begin
+    fr := TfpgFontResource(FFontResList[n]);
+    Result := TfpgFont.Create(fr, afontdesc);
+    Exit;
+  end;
+----
+
+**Impact**: Every font request scans entire list with string comparisons. For typical apps with 10-20 fonts, the impact is minor, but this is inefficient design.
+
+==== 6. Font Descriptor Parsing in Multiple Locations
+
+Font descriptors are parsed differently in each backend:
+
+[cols="1,2,2"]
+|===
+|Location |Backend |Method
+
+|`fpg_base.pas:3122-3196`
+|All (NEW)
+|`TfpgFontDefinition.ParseFontDesc` - unified parser
+
+|`fpg_x11.pas:3217-3220`
+|X11
+|Passes descriptor to Xft (delegates to fontconfig)
+
+|`fpg_gdi.pas:3005-3085`
+|GDI/Windows
+|Custom tokenizer for Windows LOGFONT structure
+
+|`Agg2D.pas:3674-3695`
+|AGG/Software
+|Incomplete implementation, hardcoded fallback
+|===
+
+**Risk**: Font descriptor `"Arial-12:bold"` might be interpreted differently across backends.
+
+=== 1.3 Fixed Issues (Recent Commits)
+
+==== Memory Leak Fix: Double Reference Count
+
+*Commit:* 9b58fb60 - "bug: double reference counting causing a memory leak"
+*Location:* `src/corelib/fpg_main.pas:1583`
+
+The bug was:
+[source,pascal]
+----
+for n := 0 to FFontResList.Count - 1 do
+  if TfpgFontResource(FFontResList[n]).FontDesc = fdesc then
+  begin
+    fr := TfpgFontResource(FFontResList[n]);
+    Inc(fr.FUsageCount);                      // ← First increment (REMOVED)
+    Result := TfpgFont.Create(fr, afontdesc); // ← Second increment (line 1971)
+    Exit;
+  end;
+----
+
+**Fix**: Line 1583 was commented out. Now only the constructor increments the count.
+
+==== Memory Leak Fix: FOwnedFont
+
+*Location:* `src/corelib/fpg_base.pas:2577`
+
+Canvas destructor was not freeing owned fonts:
+
+[source,pascal]
+----
+destructor TfpgCanvasBase.Destroy;
+begin
+  FOwnedFont.Free;  // ← ADDED to fix leak
+  FInterpolation.Free;
+  inherited Destroy;
+end;
+----
+
+---
+
+== 2. Proposed New Architecture
+
+=== 2.1 Simplified Class Hierarchy
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────┐
+│                    Application Layer                        │
+│                                                             │
+│  Widget → FFont: TfpgFontResource  (direct reference)      │
+│              ↓                                              │
+│         FFont := nil  (auto ref count decrement)           │
+│         fpgApplication.FontManager.GetFont(desc)           │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   Font Manager (NEW)                        │
+│                                                             │
+│  TfpgFontManager                                           │
+│      ├─ FFontCache: TFPHashObjectList  (O(1) lookup)      │
+│      ├─ FDefaultFontDesc: string                           │
+│      ├─ FFixedFontDesc: string                             │
+│      └─ Methods:                                           │
+│          ├─ GetFont(const ADesc: string): TfpgFontResource│
+│          ├─ ReleaseFont(AFont: TfpgFontResource)          │
+│          ├─ RegisterNamedFont(AID, ADesc: string)          │
+│          └─ GetCacheStats: string                          │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ manages
+┌─────────────────────────────────────────────────────────────┐
+│  TfpgFontResource (cached, interface ref-counted)          │
+│      ├─ FFontDesc: string                                  │
+│      ├─ FFontDefinition: TfpgFontDefinition                │
+│      ├─ Reference count (automatic via TInterfacedObject)  │
+│      └─ Implements IFontEngine                             │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ implements
+┌─────────────────────────────────────────────────────────────┐
+│                   IFontEngine (Unified)                     │
+│      ├─ GetTextWidth(const AText: string): integer         │
+│      ├─ GetAscent: integer                                 │
+│      ├─ GetDescent: integer                                │
+│      └─ GetHeight: integer                                 │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ implemented by
+┌───────────────────────────────────────────────────────────┐
+│  Platform Implementations                                 │
+│  ├─ TfpgX11FontResource (Xft wrapper)                    │
+│  ├─ TfpgGDIFontResource (GDI wrapper)                    │
+│  ├─ TfpgCocoaFontResource (CoreText wrapper)             │
+│  └─ TAgg2DFontEngine (FreeType + AGG)                    │
+└───────────────────────────────────────────────────────────┘
+
+Separate utility (no inheritance):
+┌────────────────────────┐
+│ TfpgFontDefinition     │
+│  ├─ FFaceName          │
+│  ├─ FSize              │
+│  ├─ FAttributes        │
+│  └─ ParseFontDesc()    │
+└────────────────────────┘
+----
+
+=== 2.2 Key Changes
+
+1. **Remove TfpgFont** entirely - widgets use `TfpgFontResource` directly
+2. **Create TfpgFontManager** - dedicated class for font management
+3. **Use TInterfacedObject** - automatic reference counting via interfaces
+4. **Hash-based cache** - O(1) lookup using `TFPHashObjectList`
+5. **Consolidate parsing** - all backends use `TfpgFontDefinition.ParseFontDesc`
+6. **Complete IFontEngine** - remove all FFontRes legacy code
+
+=== 2.3 New API Design
+
+==== TfpgFontManager
+
+[source,pascal]
+----
+unit fpg_fontmanager;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, contnrs, fgl, fpg_base;
+
+type
+  TfpgFontManager = class(TObject)
+  private
+    FFontCache: TFPHashObjectList;  // Hash table for O(1) lookup
+    FNamedFonts: TFPStringHashTable;  // Named font aliases: #Label1 -> Arial-12
+    FDefaultFontDesc: string;
+    FFixedFontDesc: string;
+
+    function NormalizeFontDesc(const ADesc: string): string;
+    function ResolveFontAlias(const ADesc: string): string;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    // Main font API
+    function GetFont(const ADesc: string): TfpgFontResource;
+    procedure NotifyFontDestroyed(AFont: TfpgFontResource);
+
+    // Named fonts (aliases like #Label1)
+    procedure RegisterNamedFont(const AID: string; const ADesc: string);
+    function GetNamedFontDesc(const AID: string): string;
+
+    // Default fonts
+    function GetDefaultFont: TfpgFontResource;
+    function GetFixedFont: TfpgFontResource;
+
+    property DefaultFontDesc: string read FDefaultFontDesc write FDefaultFontDesc;
+    property FixedFontDesc: string read FFixedFontDesc write FFixedFontDesc;
+
+    // Debugging and statistics
+    function GetCacheSize: integer;
+    function GetCacheStats: string;
+    procedure DumpCache;
+  end;
+
+implementation
+
+constructor TfpgFontManager.Create;
+begin
+  inherited Create;
+  FFontCache := TFPHashObjectList.Create(True);  // Owns font resources
+  FNamedFonts := TFPStringHashTable.Create;
+
+  // Platform-specific defaults will be set by TfpgApplication
+  FDefaultFontDesc := '';
+  FFixedFontDesc := '';
+end;
+
+destructor TfpgFontManager.Destroy;
+begin
+  FFontCache.Free;
+  FNamedFonts.Free;
+  inherited Destroy;
+end;
+
+function TfpgFontManager.GetFont(const ADesc: string): TfpgFontResource;
+var
+  fdesc: string;
+  descriptor: TfpgFontDefinition;
+  normalizedKey: string;
+begin
+  if ADesc = '' then
+  begin
+    Result := GetDefaultFont;
+    Exit;
+  end;
+
+  // Resolve named fonts (#Label1 -> Arial-12)
+  fdesc := ResolveFontAlias(ADesc);
+
+  // Parse and normalize descriptor for consistent cache keys
+  descriptor := TfpgFontDefinition.Create(fdesc);
+  try
+    normalizedKey := descriptor.FontDesc;  // Uses normalized format
+
+    // O(1) hash table lookup
+    Result := TfpgFontResource(FFontCache.Find(normalizedKey));
+
+    if not Assigned(Result) then
+    begin
+      // Create new platform-specific font resource
+      Result := TfpgFontResource.Create(fdesc);
+
+      if Result.HandleIsValid then
+      begin
+        Result.FFontDefinition := descriptor;
+        descriptor := nil;  // Transfer ownership
+        FFontCache.Add(normalizedKey, Result);
+      end
+      else
+      begin
+        // Font creation failed, return default font
+        Result.Free;
+        Result := GetDefaultFont;
+      end;
+    end;
+  finally
+    descriptor.Free;
+  end;
+end;
+
+procedure TfpgFontManager.NotifyFontDestroyed(AFont: TfpgFontResource);
+begin
+  // Called by font destructor when ref count reaches 0
+  if FFontCache.FindIndexOf(AFont) >= 0 then
+    FFontCache.Remove(AFont);  // Remove from cache, will be freed
+end;
+
+function TfpgFontManager.ResolveFontAlias(const ADesc: string): string;
+begin
+  if (Length(ADesc) > 0) and (ADesc[1] = '#') then
+  begin
+    // Named font: #Label1
+    Result := GetNamedFontDesc(Copy(ADesc, 2, Length(ADesc)));
+  end
+  else
+    Result := ADesc;
+end;
+
+procedure TfpgFontManager.RegisterNamedFont(const AID: string; const ADesc: string);
+begin
+  FNamedFonts.Add(LowerCase(AID), ADesc);
+end;
+
+function TfpgFontManager.GetNamedFontDesc(const AID: string): string;
+begin
+  Result := FNamedFonts.Data[LowerCase(AID)];
+  if Result = '' then
+    Result := FDefaultFontDesc;  // Fallback
+end;
+
+function TfpgFontManager.GetDefaultFont: TfpgFontResource;
+begin
+  if FDefaultFontDesc = '' then
+    FDefaultFontDesc := 'Liberation Sans-10';  // Fallback
+  Result := GetFont(FDefaultFontDesc);
+end;
+
+function TfpgFontManager.GetFixedFont: TfpgFontResource;
+begin
+  if FFixedFontDesc = '' then
+    FFixedFontDesc := 'Liberation Mono-10';  // Fallback
+  Result := GetFont(FFixedFontDesc);
+end;
+
+function TfpgFontManager.GetCacheSize: integer;
+begin
+  Result := FFontCache.Count;
+end;
+
+function TfpgFontManager.GetCacheStats: string;
+var
+  i: integer;
+  font: TfpgFontResource;
+begin
+  Result := Format('Font Cache: %d fonts cached'#13#10, [FFontCache.Count]);
+  for i := 0 to FFontCache.Count - 1 do
+  begin
+    font := TfpgFontResource(FFontCache[i]);
+    Result := Result + Format('  %s (RefCount: %d)'#13#10,
+                              [font.FontDesc, font.RefCount]);
+  end;
+end;
+
+procedure TfpgFontManager.DumpCache;
+begin
+  WriteLn(GetCacheStats);
+end;
+
+end.
+----
+
+==== Updated TfpgFontResource
+
+[source,pascal]
+----
+// In fpg_main.pas
+
+TfpgFontResource = class(TfpgFontResourceImpl)
+protected
+  FFontDesc: string;
+  FFontDefinition: TfpgFontDefinition;
+  FManager: TfpgFontManager;  // Weak reference, not owned
+public
+  constructor Create(const afontdesc: string);
+  destructor Destroy; override;
+
+  property FontDesc: string read FFontDesc;
+  property FontDefinition: TfpgFontDefinition read FFontDefinition;
+end;
+
+constructor TfpgFontResource.Create(const afontdesc: string);
+begin
+  inherited Create(afontdesc);  // Platform-specific initialization
+  FFontDesc := afontdesc;
+  FFontDefinition := TfpgFontDefinition.Create(afontdesc);
+  FManager := fpgApplication.FontManager;  // Weak reference
+end;
+
+destructor TfpgFontResource.Destroy;
+begin
+  // Notify manager that this font is being destroyed
+  // Manager will remove it from cache if ref count is 0
+  if Assigned(FManager) then
+    FManager.NotifyFontDestroyed(Self);
+
+  FFontDefinition.Free;
+  inherited Destroy;
+end;
+----
+
+==== Widget Usage Pattern
+
+**Before (Current):**
+[source,pascal]
+----
+type
+  TfpgButton = class(TfpgWidget)
+  private
+    FFont: TfpgFont;
+    procedure SetFont(const AValue: TfpgFont);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property Font: TfpgFont read FFont write SetFont;
+  end;
+
+constructor TfpgButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgGetFont('#Button');  // Global function
+end;
+
+destructor TfpgButton.Destroy;
+begin
+  FFont.Free;  // Manual cleanup
+  inherited Destroy;
+end;
+
+procedure TfpgButton.SetFont(const AValue: TfpgFont);
+begin
+  if FFont = AValue then Exit;
+  FFont.Free;
+  FFont := AValue;
+end;
+----
+
+**After (Proposed):**
+[source,pascal]
+----
+type
+  TfpgButton = class(TfpgWidget)
+  private
+    FFont: TfpgFontResource;
+    procedure SetFont(const AValue: TfpgFontResource);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property Font: TfpgFontResource read FFont write SetFont;
+  end;
+
+constructor TfpgButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgApplication.FontManager.GetFont('#Button');
+end;
+
+destructor TfpgButton.Destroy;
+begin
+  FFont := nil;  // Automatic ref count decrement via TInterfacedObject
+  inherited Destroy;
+end;
+
+procedure TfpgButton.SetFont(const AValue: TfpgFontResource);
+begin
+  if FFont = AValue then Exit;
+  FFont := nil;  // Release old font
+  FFont := AValue;
+end;
+----
+
+**Or using helper function:**
+[source,pascal]
+----
+// Helper in fpg_main.pas
+procedure fpgSetFont(var AFont: TfpgFontResource; const ADesc: string);
+begin
+  AFont := nil;  // Release old font (automatic ref count decrement)
+  if ADesc <> '' then
+    AFont := fpgApplication.FontManager.GetFont(ADesc);
+end;
+
+// Widget usage:
+procedure TfpgButton.SetFontDesc(const AValue: string);
+begin
+  fpgSetFont(FFont, AValue);
+end;
+----
+
+==== Consolidated Font Descriptor Parsing
+
+[source,pascal]
+----
+// Enhanced TfpgFontDefinition in fpg_base.pas
+
+TfpgFontDefinition = class(TObject)
+private
+  FFontDesc: string;
+  FFaceName: string;
+  FSize: integer;
+  FAttributes: TfpgFontAttributes;
+  FAntiAliased: boolean;
+  procedure ParseFontDesc;
+public
+  constructor Create(const AFontDesc: string);
+
+  // Normalized descriptor for cache keys
+  function GetNormalizedDesc: string;
+
+  // Hash code for fast lookups
+  function GetHashCode: Cardinal;
+
+  property FontDesc: string read FFontDesc;
+  property FaceName: string read FFaceName;
+  property Size: integer read FSize;
+  property Attributes: TfpgFontAttributes read FAttributes;
+  property AntiAliased: boolean read FAntiAliased;
+  property IsBold: boolean read GetIsBold;
+  property IsItalic: boolean read GetIsItalic;
+  property IsUnderline: boolean read GetIsUnderline;
+end;
+
+function TfpgFontDefinition.GetNormalizedDesc: string;
+begin
+  // Produce consistent descriptor for cache keys
+  Result := FFaceName + '-' + IntToStr(FSize);
+  if fpgFontBold in FAttributes then
+    Result := Result + ':bold';
+  if fpgFontItalic in FAttributes then
+    Result := Result + ':italic';
+  if fpgFontUnderline in FAttributes then
+    Result := Result + ':underline';
+  if not FAntiAliased then
+    Result := Result + ':antialias=false';
+end;
+
+function TfpgFontDefinition.GetHashCode: Cardinal;
+var
+  s: string;
+  c: char;
+begin
+  s := GetNormalizedDesc;
+  Result := 0;
+  for c in s do
+    Result := ((Result shl 5) or (Result shr 27)) xor Ord(c);
+end;
+----
+
+---
+
+== 3. Detailed Implementation Plan
+
+=== 3.1 Phase 1: Foundation (Week 1, Days 1-5)
+
+==== Day 1-2: Create TfpgFontManager
+
+**Objectives:**
+
+* Create new `fpg_fontmanager.pas` unit
+* Implement `TfpgFontManager` class
+* Add to `TfpgApplication`
+
+**Tasks:**
+
+1. Create new unit:
++
+[source,pascal]
+----
+// src/corelib/fpg_fontmanager.pas
+unit fpg_fontmanager;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, contnrs, fpg_base;
+
+type
+  TfpgFontManager = class(TObject)
+    // Implementation as shown in section 2.3
+  end;
+
+implementation
+
+end.
+----
+
+2. Add to `TfpgApplication`:
++
+[source,pascal]
+----
+// In fpg_main.pas
+
+TfpgApplicationBase = class(TComponent)
+private
+  FFontResList: TList;  // OLD - keep temporarily
+  FFontManager: TfpgFontManager;  // NEW
+
+  // Add to initialization (around line 1489)
+  constructor TfpgApplicationBase.Create(const AParams: string);
+  begin
+    FFontResList := TList.Create;  // OLD - keep for now
+    FFontManager := TfpgFontManager.Create;  // NEW
+    // ...
+  end;
+
+  // Add to cleanup (around line 1543)
+  destructor TfpgApplicationBase.Destroy;
+  begin
+    FFontManager.Free;  // NEW
+    // OLD cleanup code stays for now
+    // ...
+  end;
+----
+
+3. Add property to expose font manager:
++
+[source,pascal]
+----
+TfpgApplication = class(TfpgApplicationImpl)
+public
+  property FontManager: TfpgFontManager read FFontManager;
+end;
+----
+
+**Testing:**
+
+* Compile and verify no regressions
+* Add simple test to create font manager
+* Verify it can cache fonts
+
+**Files Modified:**
+
+* NEW: `src/corelib/fpg_fontmanager.pas`
+* MODIFY: `src/corelib/fpg_main.pas`
+
+==== Day 3: Enhance TfpgFontDefinition
+
+**Objectives:**
+
+* Add normalized descriptor generation
+* Add hash code calculation
+* Improve parsing robustness
+
+**Tasks:**
+
+1. Add helper methods:
++
+[source,pascal]
+----
+// In fpg_base.pas
+
+TfpgFontDefinition = class(TObject)
+public
+  function GetNormalizedDesc: string;
+  function GetHashCode: Cardinal;
+  function IsBold: boolean;
+  function IsItalic: boolean;
+  function IsUnderline: boolean;
+end;
+----
+
+2. Add tests:
++
+[source,pascal]
+----
+// Create tests/test_fontdefinition.pas
+
+procedure TestFontDefinitionParsing;
+var
+  fd: TfpgFontDefinition;
+begin
+  fd := TfpgFontDefinition.Create('Arial-12:bold:italic');
+  try
+    AssertEquals('Arial', fd.FaceName);
+    AssertEquals(12, fd.Size);
+    AssertTrue(fd.IsBold);
+    AssertTrue(fd.IsItalic);
+    AssertFalse(fd.IsUnderline);
+  finally
+    fd.Free;
+  end;
+end;
+----
+
+**Testing:**
+
+* Test various font descriptor formats
+* Test edge cases (empty, malformed, etc.)
+* Test hash code uniqueness
+
+**Files Modified:**
+
+* MODIFY: `src/corelib/fpg_base.pas`
+* NEW: `tests/test_fontdefinition.pas`
+
+==== Day 4-5: Parallel Path Implementation
+
+**Objectives:**
+
+* Keep old `fpgGetFont()` working
+* Add new `FontManager.GetFont()` path
+* Test both paths coexist
+
+**Tasks:**
+
+1. Update old `fpgGetFont()` to use new manager internally:
++
+[source,pascal]
+----
+// In fpg_main.pas
+
+function fpgGetFont(const afontdesc: TfpgString): TfpgFont;
+var
+  fr: TfpgFontResource;
+begin
+  // NEW: Delegate to font manager for caching
+  fr := fpgApplication.FontManager.GetFontResource(afontdesc);
+
+  // OLD: Still return TfpgFont wrapper for compatibility
+  if Assigned(fr) then
+  begin
+    Result := TfpgFont.Create(fr, afontdesc);
+    fr.IncRefCount;  // Manual ref count for old path
+  end
+  else
+    Result := nil;
+end;
+----
+
+2. Add temporary `GetFontResource()` method to manager:
++
+[source,pascal]
+----
+// In fpg_fontmanager.pas
+
+function TfpgFontManager.GetFontResource(const ADesc: string): TfpgFontResource;
+begin
+  // Same as GetFont() but returns resource directly
+  Result := GetFont(ADesc);
+  // Don't increment ref count - caller manages it
+end;
+----
+
+**Testing:**
+
+* Run all example applications
+* Verify fonts render correctly
+* Check for memory leaks with heaptrc
+
+**Deliverable:** Both old and new paths working in parallel
+
+=== 3.2 Phase 2: Widget Migration (Week 2, Days 6-10)
+
+==== Day 6-7: Base Widget Classes
+
+**Objectives:**
+
+* Update `TfpgWidget` base class
+* Update canvas font handling
+* Create migration pattern
+
+**Tasks:**
+
+1. Add compatibility property to `TfpgWidget`:
++
+[source,pascal]
+----
+// In fpg_widget.pas
+
+TfpgWidget = class(TfpgWindowBase)
+private
+  FFont: TfpgFont;  // OLD - keep temporarily
+  FFontResource: TfpgFontResource;  // NEW
+
+  procedure SetFont(const AValue: TfpgFont);
+  procedure SetFontResource(const AValue: TfpgFontResource);
+public
+  // OLD property - keep for compatibility
+  property Font: TfpgFont read FFont write SetFont;
+
+  // NEW property - preferred
+  property FontResource: TfpgFontResource read FFontResource write SetFontResource;
+end;
+
+procedure TfpgWidget.SetFontResource(const AValue: TfpgFontResource);
+begin
+  if FFontResource = AValue then Exit;
+  FFontResource := nil;  // Release old
+  FFontResource := AValue;
+
+  // Sync old property for widgets that haven't migrated
+  FFont.Free;
+  if Assigned(FFontResource) then
+    FFont := TfpgFont.Create(FFontResource, FFontResource.FontDesc)
+  else
+    FFont := nil;
+end;
+----
+
+2. Update canvas to handle both:
++
+[source,pascal]
+----
+// In fpg_base.pas
+
+procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
+begin
+  // Handles both TfpgFont (old) and TfpgFontResource (new)
+  // ...existing logic...
+end;
+----
+
+**Testing:**
+
+* Compile all widgets
+* Test backward compatibility
+
+**Files Modified:**
+
+* MODIFY: `src/gui/fpg_widget.pas`
+* MODIFY: `src/corelib/fpg_base.pas`
+
+==== Day 8-10: Migrate Core Widgets
+
+**Objectives:**
+
+* Migrate high-use widgets first
+* Test each widget thoroughly
+* Document migration pattern
+
+**Priority Order:**
+
+1. TfpgButton
+2. TfpgLabel
+3. TfpgEdit
+4. TfpgMemo
+5. TfpgListBox
+6. TfpgComboBox
+7. TfpgGrid/TfpgBaseGrid
+8. TfpgCheckBox
+9. TfpgRadioButton
+10. TfpgPanel
+
+**Migration Pattern for Each Widget:**
+
+[source,pascal]
+----
+// BEFORE:
+type
+  TfpgButton = class(TfpgWidget)
+  private
+    FFont: TfpgFont;
+  published
+    property Font: TfpgFont read FFont write SetFont;
+  end;
+
+constructor TfpgButton.Create(AOwner: TComponent);
+begin
+  inherited;
+  FFont := fpgGetFont('#Button');
+end;
+
+destructor TfpgButton.Destroy;
+begin
+  FFont.Free;
+  inherited;
+end;
+
+// AFTER:
+type
+  TfpgButton = class(TfpgWidget)
+  private
+    FFont: TfpgFontResource;
+    procedure SetFontDesc(const AValue: string);
+  published
+    property Font: TfpgFontResource read FFont write FFont;
+    property FontDesc: string write SetFontDesc;
+  end;
+
+constructor TfpgButton.Create(AOwner: TComponent);
+begin
+  inherited;
+  FFont := fpgApplication.FontManager.GetFont('#Button');
+end;
+
+destructor TfpgButton.Destroy;
+begin
+  FFont := nil;  // Automatic cleanup
+  inherited;
+end;
+
+procedure TfpgButton.SetFontDesc(const AValue: string);
+begin
+  fpgSetFont(FFont, AValue);
+end;
+----
+
+**Testing for Each Widget:**
+
+* Visual inspection in examples
+* Font changes at runtime
+* Memory leak testing
+* Property serialization (if applicable)
+
+**Files Modified (Day 8-10):**
+
+* MODIFY: `src/gui/fpg_button.pas`
+* MODIFY: `src/gui/fpg_label.pas`
+* MODIFY: `src/gui/fpg_edit.pas`
+* MODIFY: `src/gui/fpg_memo.pas`
+* MODIFY: `src/gui/fpg_listbox.pas`
+* MODIFY: `src/gui/fpg_combobox.pas`
+* MODIFY: `src/gui/fpg_checkbox.pas`
+* MODIFY: `src/gui/fpg_radiobutton.pas`
+* MODIFY: `src/gui/fpg_panel.pas`
+* MODIFY: `src/gui/fpg_basegrid.pas`
+
+**Deliverable:** Core widgets using new font API
+
+=== 3.3 Phase 3: Complete Migration (Week 3, Days 11-15)
+
+==== Day 11-12: Remaining Widgets
+
+**Objectives:**
+
+* Migrate all remaining widgets
+* Update style classes
+
+**Widgets:**
+
+* TfpgTreeView
+* TfpgListView
+* TfpgTrackBar
+* TfpgTab/TfpgTabSheet
+* TfpgProgressBar
+* TfpgGauge
+* TfpgHexView
+* TfpgHint
+* TfpgEditBtn
+* TfpgMenu (complex - has multiple font properties)
+
+**Special Case - TfpgMenu:**
+
+[source,pascal]
+----
+// TfpgMenu has multiple font properties:
+TfpgMenu = class(TfpgWidget)
+private
+  FFont: TfpgFontResource;  // Normal menu item
+  FAccelFont: TfpgFontResource;  // Accelerator text (Ctrl+C)
+  FDisabledFont: TfpgFontResource;  // Disabled items
+  FHeaderFont: TfpgFontResource;  // Menu headers
+----
+
+**Files Modified:**
+
+* MODIFY: All remaining widget files in `src/gui/`
+* MODIFY: `src/gui/fpg_menu.pas` (complex)
+
+==== Day 13: Style System Update
+
+**Objectives:**
+
+* Update `TfpgStyle` to use `TfpgFontDefinition`
+* Remove old font properties
+
+**Tasks:**
+
+1. Update style font properties:
++
+[source,pascal]
+----
+// In fpg_main.pas
+
+TfpgStyle = class(TObject)
+private
+  { Remove OLD TfpgFont fields }
+  // FMenuHeaderFont: TfpgFont;  ← DELETE
+
+  { NEW: Font definition fields }
+  FDefaultFontDef: TfpgFontDefinition;
+  FFixedFontDef: TfpgFontDefinition;
+  FMenuFontDef: TfpgFontDefinition;
+  FMenuHeaderFontDef: TfpgFontDefinition;
+  FMenuAccelFontDef: TfpgFontDefinition;
+  FMenuDisabledFontDef: TfpgFontDefinition;
+public
+  constructor Create; virtual;
+  destructor Destroy; override;
+
+  // Methods return font resources from manager
+  function GetDefaultFont: TfpgFontResource;
+  function GetFixedFont: TfpgFontResource;
+  function GetMenuFont: TfpgFontResource;
+  // etc.
+end;
+
+function TfpgStyle.GetDefaultFont: TfpgFontResource;
+begin
+  Result := fpgApplication.FontManager.GetFont(FDefaultFontDef.FontDesc);
+end;
+----
+
+**Files Modified:**
+
+* MODIFY: `src/corelib/fpg_main.pas`
+
+==== Day 14: Remove TfpgFont Class
+
+**Objectives:**
+
+* Delete `TfpgFont` class entirely
+* Remove `fpgGetFont()` function
+* Update all remaining references
+
+**Tasks:**
+
+1. Remove class definition:
++
+[source,pascal]
+----
+// In fpg_main.pas - DELETE these lines:
+
+TfpgFont = class(TfpgFontBase)
+public
+  constructor Create(afontres: TfpgFontResource; const afontdesc: string);
+  destructor Destroy; override;
+end;
+----
+
+2. Remove global function:
++
+[source,pascal]
+----
+// DELETE:
+function fpgGetFont(const afontdesc: TfpgString): TfpgFont;
+----
+
+3. Remove from `TfpgApplication`:
++
+[source,pascal]
+----
+// DELETE:
+function TfpgApplication.GetFont(const afontdesc: TfpgString): TfpgFont;
+----
+
+4. Search for any remaining uses:
++
+[source,bash]
+----
+# Use grep to find any remaining TfpgFont references
+grep -r "TfpgFont" src/
+grep -r "fpgGetFont" src/
+----
+
+**Files Modified:**
+
+* MODIFY: `src/corelib/fpg_main.pas`
+* MODIFY: `src/corelib/fpg_base.pas`
+
+==== Day 15: Cleanup and Testing
+
+**Objectives:**
+
+* Remove old FFontResList
+* Remove FFontRes from TfpgFontBase
+* Final testing
+
+**Tasks:**
+
+1. Remove old cache:
++
+[source,pascal]
+----
+// In fpg_main.pas - DELETE:
+
+TfpgApplicationBase = class(TComponent)
+private
+  FFontResList: TList;  ← DELETE this field
+
+// DELETE old cleanup code in destructor
+----
+
+2. Remove FFontRes field:
++
+[source,pascal]
+----
+// In fpg_base.pas - DELETE:
+
+TfpgFontBase = class(TObject)
+protected
+  FFontRes: TfpgFontResourceBase;  ← DELETE
+----
+
+3. Update all methods to use only IFontEngine:
++
+[source,pascal]
+----
+// BEFORE:
+function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
+begin
+  if Assigned(FFontEngine) then
+    Result := FFontEngine.GetTextWidth(txt)
+  else if Assigned(FFontRes) then  ← DELETE this branch
+    Result := FFontRes.GetTextWidth(txt)
+  else
+    Result := 0;
+end;
+
+// AFTER:
+function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
+begin
+  if Assigned(FFontEngine) then
+    Result := FFontEngine.GetTextWidth(txt)
+  else
+    Result := 0;
+end;
+----
+
+**Testing:**
+
+1. **Compilation:**
++
+[source,bash]
+----
+cd src
+./build.sh
+----
+
+2. **Example Applications:**
++
+Run each example and verify:
++
+* Fonts render correctly
+* No visual regressions
+* Font changes work at runtime
+
+3. **Memory Leak Testing:**
++
+[source,bash]
+----
+# Compile with heap trace
+fpc -dHEAPTRC examples/gui/helloworld/helloworld.pas
+./helloworld
+# Check for leaks in output
+----
+
+4. **Unit Tests:**
++
+[source,bash]
+----
+# Run FPCUnit tests if they exist
+fpcunit tests/test_fontmanager.pas
+fpcunit tests/test_fontdefinition.pas
+----
+
+**Files Modified:**
+
+* MODIFY: `src/corelib/fpg_main.pas`
+* MODIFY: `src/corelib/fpg_base.pas`
+
+**Deliverable:** Clean, simplified font architecture with all legacy code removed
+
+=== 3.4 Phase 4: Testing & Documentation (Ongoing)
+
+==== Testing Strategy
+
+**Unit Tests:**
+
+1. **Font Manager Tests** (`tests/test_fontmanager.pas`):
++
+[source,pascal]
+----
+procedure TestFontCaching;
+begin
+  // Request same font twice
+  font1 := FontManager.GetFont('Arial-12');
+  font2 := FontManager.GetFont('Arial-12');
+  AssertTrue(font1 = font2);  // Same resource
+end;
+
+procedure TestNamedFonts;
+begin
+  FontManager.RegisterNamedFont('TestFont', 'Arial-14:bold');
+  font := FontManager.GetFont('#TestFont');
+  AssertEquals('Arial', font.FontDefinition.FaceName);
+  AssertEquals(14, font.FontDefinition.Size);
+  AssertTrue(font.FontDefinition.IsBold);
+end;
+
+procedure TestReferenceCount;
+begin
+  font1 := FontManager.GetFont('Arial-12');
+  AssertEquals(1, font1.RefCount);
+
+  font2 := FontManager.GetFont('Arial-12');
+  AssertEquals(2, font1.RefCount);
+
+  font2 := nil;
+  AssertEquals(1, font1.RefCount);
+
+  font1 := nil;
+  // Font should be removed from cache
+end;
+----
+
+2. **Font Definition Tests** (`tests/test_fontdefinition.pas`):
++
+[source,pascal]
+----
+procedure TestParsing;
+procedure TestNormalization;
+procedure TestHashCodes;
+procedure TestEdgeCases;
+----
+
+**Integration Tests:**
+
+1. **Widget Font Tests:**
+   +
+   * Create widget, set font
+   * Change font at runtime
+   * Verify rendering
+   * Check memory usage
+
+2. **Canvas Tests:**
+   +
+   * Draw text with various fonts
+   * Switch fonts mid-drawing
+   * Test FOwnedFont behavior
+
+**Platform Tests:**
+
+Run on all supported platforms:
+
+* **Linux/X11:** Test with Xft backend
+* **Windows:** Test with GDI backend
+* **macOS:** Test with Cocoa backend (if functional)
+* **AGG Canvas:** Test software renderer with `-dAggCanvas`
+
+**Memory Leak Tests:**
+
+[source,bash]
+----
+# Use Free Pascal's heaptrc
+fpc -dHEAPTRC -dDEBUG myapp.pas
+./myapp
+# Check output for leaks
+
+# Use valgrind on Linux
+valgrind --leak-check=full ./myapp
+
+# Use Instruments on macOS
+instruments -t Leaks ./myapp
+----
+
+**Performance Tests:**
+
+[source,pascal]
+----
+procedure BenchmarkFontCache;
+var
+  i: integer;
+  font: TfpgFontResource;
+  startTime: TDateTime;
+begin
+  startTime := Now;
+  for i := 1 to 10000 do
+  begin
+    font := fpgApplication.FontManager.GetFont('Arial-12');
+    font := nil;
+  end;
+  WriteLn('10,000 font requests: ', MilliSecondsBetween(Now, startTime), 'ms');
+end;
+----
+
+==== Documentation
+
+**1. Architecture Documentation** (`docs/font_architecture.adoc`):
+
+* Class hierarchy diagrams
+* Sequence diagrams for font lifecycle
+* Reference counting explanation
+* Cache behavior
+
+**2. API Documentation:**
+
+Update code comments with proper documentation:
+
+[source,pascal]
+----
+{ TfpgFontManager manages the global font cache and provides the main API
+  for requesting fonts in the fpGUI framework.
+
+  Fonts are cached based on their normalized descriptor string. Multiple
+  requests for the same font descriptor will return the same font resource
+  instance, with automatic reference counting.
+
+  Usage:
+    font := fpgApplication.FontManager.GetFont('Arial-12:bold');
+    // Use font...
+    font := nil;  // Automatic cleanup when ref count reaches 0
+}
+TfpgFontManager = class(TObject)
+----
+
+**3. Migration Guide** (`docs/font_migration_guide.adoc`):
+
+[source,asciidoc]
+----
+= Font API Migration Guide
+
+== For Application Developers
+
+=== Old Code
+[source,pascal]
+----
+var
+  myFont: TfpgFont;
+begin
+  myFont := fpgGetFont('Arial-12');
+  try
+    Canvas.Font := myFont;
+    Canvas.DrawText(...);
+  finally
+    myFont.Free;
+  end;
+end;
+----
+
+=== New Code
+[source,pascal]
+----
+var
+  myFont: TfpgFontResource;
+begin
+  myFont := fpgApplication.FontManager.GetFont('Arial-12');
+  Canvas.Font := myFont;
+  Canvas.DrawText(...);
+  myFont := nil;  // Automatic cleanup
+end;
+----
+
+=== Widget Font Properties
+
+Old:
+  property Font: TfpgFont;
+
+New:
+  property Font: TfpgFontResource;
+
+== For Widget Developers
+
+[Details on how to update custom widgets...]
+----
+
+**4. Troubleshooting Guide:**
+
+Common issues and solutions:
+
+* Font not found errors
+* Memory leaks
+* Reference count issues
+* Platform-specific problems
+
+---
+
+== 4. Risk Assessment
+
+=== 4.1 High Risk Areas
+
+==== 1. Widget Migration (Risk: MEDIUM)
+
+**Risk:** Missing some font usage patterns in widgets
+
+**Impact:** Compilation errors, runtime crashes
+
+**Mitigation:**
+
+* Use grep to find all `TfpgFont` references before starting
+* Migrate widgets incrementally
+* Test each widget after migration
+* Keep old and new paths in parallel during transition
+
+==== 2. Reference Counting (Risk: MEDIUM-HIGH)
+
+**Risk:** Incorrect ref count management causing leaks or premature freeing
+
+**Impact:** Memory leaks or use-after-free crashes
+
+**Mitigation:**
+
+* Use `TInterfacedObject` for automatic counting
+* Add assertions: `Assert(RefCount >= 0)`
+* Extensive memory leak testing with heaptrc/valgrind
+* Add debug logging for ref count changes (in debug builds)
+
+==== 3. Platform-Specific Code (Risk: MEDIUM)
+
+**Risk:** Breaking platform backends (X11, GDI, Cocoa)
+
+**Impact:** Fonts not rendering on specific platforms
+
+**Mitigation:**
+
+* Test on all platforms after each phase
+* Platform maintainers review changes
+* Keep platform-specific code isolated
+* Add fallback to default font if creation fails
+
+=== 4.2 Medium Risk Areas
+
+==== 4. AGG Backend Integration (Risk: MEDIUM)
+
+**Risk:** AGG font loading incomplete, might break
+
+**Impact:** Software renderer doesn't work properly
+
+**Mitigation:**
+
+* Complete AGG implementation as part of Phase 3
+* Test with `-dAggCanvas` compile flag
+* Ensure gFontCache integration works
+* Add comprehensive AGG font tests
+
+==== 5. Named Font System (Risk: LOW-MEDIUM)
+
+**Risk:** Breaking `#Label1` style font references
+
+**Impact:** Widgets using named fonts fail to load
+
+**Mitigation:**
+
+* Preserve named font system in TfpgFontManager
+* Test all predefined named fonts
+* Document named font registration
+
+=== 4.3 Low Risk Areas
+
+==== 6. Font Descriptor Parsing (Risk: LOW)
+
+**Risk:** Breaking existing font descriptors
+
+**Impact:** Some fonts might not load correctly
+
+**Mitigation:**
+
+* `TfpgFontDefinition.ParseFontDesc` already exists
+* Add unit tests for various descriptor formats
+* Test edge cases
+
+==== 7. Font Manager Implementation (Risk: LOW)
+
+**Risk:** Bugs in new TfpgFontManager
+
+**Impact:** Cache not working correctly
+
+**Mitigation:**
+
+* Well-defined interface
+* Self-contained class
+* Easy to unit test in isolation
+* Can be developed and tested before integration
+
+=== 4.4 Risk Mitigation Strategy
+
+**Overall Approach:**
+
+1. **Incremental Implementation:**
+   +
+   * Keep old code working during transition
+   * Add new code alongside old
+   * Switch over incrementally
+   * Remove old code last
+
+2. **Comprehensive Testing:**
+   +
+   * Test after each phase
+   * Memory leak testing throughout
+   * Platform-specific testing
+   * Visual regression testing
+
+3. **Backup Plan:**
+   +
+   * Use git branch for refactoring
+   * Tag stable points after each phase
+   * Can revert if critical issues found
+   * Old API can be preserved as deprecated
+
+4. **Documentation:**
+   +
+   * Document changes as we go
+   * Clear migration guide
+   * Architecture documentation
+   * Troubleshooting guide
+
+---
+
+== 5. Success Criteria
+
+=== 5.1 Functional Requirements
+
+**All Requirements Must Pass:**
+
+1. **Font Rendering:**
+   +
+   * All fonts render correctly on all platforms
+   * No visual regressions in example applications
+   * Font attributes (bold, italic, underline) work correctly
+   * Font sizes accurate
+
+2. **Font Caching:**
+   +
+   * Fonts cached correctly (no duplicates)
+   * Cache lookups are O(1)
+   * Cache removes unused fonts when ref count reaches 0
+   * Named fonts (`#Label1`) work correctly
+
+3. **Memory Management:**
+   +
+   * No memory leaks (verified with heaptrc/valgrind)
+   * Reference counting works correctly
+   * Fonts freed when no longer used
+   * No use-after-free errors
+
+4. **API Usability:**
+   +
+   * Simple widget font assignment
+   * Clear ownership model
+   * Automatic cleanup (no manual Free needed)
+   * Good error messages when font not found
+
+5. **Performance:**
+   * Font cache lookups faster than before (O(1) vs O(n))
+   * No rendering performance regression
+   * Minimal memory overhead
+
+6. **Compatibility:**
+   * All backends work (X11, GDI, Cocoa, AGG)
+   * All example applications run correctly
+   * Existing applications can migrate easily
+
+=== 5.2 Code Quality Requirements
+
+1. **Simplified Architecture:**
+   +
+   * Fewer classes (removed TfpgFont)
+   * Clear separation of concerns
+   * Well-documented
+   * Easy to understand lifecycle
+
+2. **Test Coverage:**
+   +
+   * Unit tests for TfpgFontManager
+   * Unit tests for TfpgFontDefinition
+   * Integration tests for widgets
+   * Memory leak tests
+
+3. **Documentation:**
+   +
+   * Architecture documentation complete
+   * API documentation in code comments
+   * Migration guide written
+   * Troubleshooting guide available
+
+4. **Code Maintainability:**
+   +
+   * No duplicate code
+   * Consistent patterns across widgets
+   * Clear naming conventions
+   * Proper error handling
+
+=== 5.3 Verification Checklist
+
+**Before Merging to Main Branch:**
+
+- [ ] All compilation warnings resolved
+- [ ] All example applications compile
+- [ ] All example applications run without errors
+- [ ] Visual inspection: no font rendering regressions
+- [ ] Memory leak tests pass (heaptrc shows 0 leaks)
+- [ ] Unit tests written and passing
+- [ ] Tested on Linux/X11
+- [ ] Tested on Windows/GDI
+- [ ] Tested on macOS/Cocoa (if available)
+- [ ] Tested with AGG canvas (`-dAggCanvas`)
+- [ ] Performance: cache lookups faster
+- [ ] Documentation complete
+- [ ] Migration guide written
+- [ ] Code review completed
+- [ ] Git history clean (squash commits if needed)
+
+---
+
+== 6. Time Estimation
+
+=== 6.1 Detailed Breakdown
+
+[cols="1,3,1,1"]
+|===
+|Phase |Tasks |Days |Risk
+
+|**Phase 1: Foundation**
+|Create TfpgFontManager, enhance TfpgFontDefinition, parallel paths
+|5 days
+|Low
+
+|**Phase 2: Widget Migration**
+|Update base classes, migrate core widgets
+|5 days
+|Medium
+
+|**Phase 3: Complete Migration**
+|Remaining widgets, style system, remove TfpgFont
+|5 days
+|Medium
+
+|**Phase 4: Testing & Documentation**
+|(Ongoing throughout, plus final verification)
+|3 days
+|Low
+
+|**Total**
+|
+|**18 days**
+|
+|===
+
+=== 6.2 Assumptions
+
+* **Developer Experience:** Experienced with Object Pascal and fpGUI codebase
+* **Dedicated Time:** Full-time work on refactoring (not part-time)
+* **No Major Blockers:** No critical bugs discovered that require redesign
+* **Platform Access:** Can test on Linux, Windows, and ideally macOS
+* **Review Time:** Includes time for code review and feedback
+
+=== 6.3 Contingency Buffer
+
+**Recommended Buffer:** 20-30% (4-6 additional days)
+
+**Reasons for Buffer:**
+
+* Unexpected issues in platform-specific code
+* Additional widgets not accounted for
+* AGG backend complications
+* Testing reveals issues requiring fixes
+* Documentation takes longer than expected
+
+**Total Estimate with Buffer:** 22-24 days (4-5 weeks at 5 days/week)
+
+=== 6.4 Part-Time Schedule
+
+If working part-time (e.g., evenings/weekends):
+
+* **Phase 1:** 2 weeks
+* **Phase 2:** 2 weeks
+* **Phase 3:** 2 weeks
+* **Phase 4:** 1 week
+* **Total:** 7-8 weeks part-time
+
+---
+
+== 7. Alternative Approaches Considered
+
+=== 7.1 Option A: Minimal Fix (NOT RECOMMENDED)
+
+**Changes:**
+
+* Fix reference counting bugs only
+* Add assertions
+* Document lifecycle
+* Keep current architecture
+
+**Pros:**
+
+* Minimal risk
+* Quick to implement (1-2 days)
+* No breaking changes
+
+**Cons:**
+
+* Doesn't address fundamental complexity
+* Manual reference counting remains
+* No performance improvement
+* TfpgFont wrapper still unnecessary
+
+**Verdict:** Only fixes symptoms, not root causes
+
+=== 7.2 Option B: Complete Interface-Based Redesign
+
+**Changes:**
+
+* Use `IFont` interface instead of classes
+* Fully automatic reference counting
+* Factory pattern for creation
+* Remove all class inheritance
+* Complete rewrite of backends
+
+**Pros:**
+
+* Most modern design
+* Fully automatic memory management
+* Maximum future-proofing
+* Clean separation of concerns
+
+**Cons:**
+
+* Very large changes (50+ files)
+* High risk
+* Long implementation time (6-8 weeks)
+* Breaks compatibility significantly
+* May have COM/interface overhead
+
+**Verdict:** Too risky for immediate needs, consider for fpGUI 2.0
+
+=== 7.3 Option C: Hybrid Approach (RECOMMENDED)
+
+**Changes:**
+
+* Create TfpgFontManager (new abstraction)
+* Remove TfpgFont wrapper (simplification)
+* Keep TfpgFontResource with manual ref counting (proven)
+* Use TInterfacedObject for automatic ref counting (low risk)
+* Consolidate parsing (incremental improvement)
+
+**Pros:**
+
+* Significant simplification
+* Moderate risk
+* Reasonable timeline (3-4 weeks)
+* Clear incremental path
+* Preserves what works
+* Can evolve to Option B later
+
+**Cons:**
+
+* Still uses manual ref counting in places
+* Not as "clean" as full interface design
+* Requires touching many widget files
+
+**Verdict:** Best balance of risk/reward
+
+=== 7.4 Comparison Matrix
+
+[cols="1,1,1,1",options="header"]
+|=====
+|Criterion |Option A (Minimal) |Option B (Complete) |Option C (Hybrid - RECOMMENDED)
+|**Complexity Reduction** |★☆☆☆☆ |★★★★★ |★★★★☆
+|**Risk Level** |Low |High |Medium
+|**Implementation Time** |1-2 days |6-8 weeks |3-4 weeks
+|**Performance Gain** |None |★★★★★ |★★★★☆
+|**Memory Safety** |★★☆☆☆ |★★★★★ |★★★★☆
+|**Future-Proofing** |★☆☆☆☆ |★★★★★ |★★★★☆
+|**Breaking Changes** |None |Extensive |Moderate
+|**Testability** |★☆☆☆☆ |★★★★★ |★★★★☆
+|**Maintainability** |★★☆☆☆ |★★★★★ |★★★★☆
+|=====
+
+---
+
+== 8. Conclusion
+
+=== 8.1 Summary
+
+The fpGUI font handling system suffers from unnecessary complexity due to:
+
+1. **TfpgFont wrapper class** - adds no value, confuses ownership
+2. **Incomplete refactoring** - old and new code paths coexist
+3. **Manual reference counting** - error-prone, caused memory leaks
+4. **No font manager** - logic scattered in TfpgApplication
+5. **Inefficient cache** - O(n) linear search
+
+While recent bug fixes have resolved critical memory leaks, the fundamental architecture needs simplification.
+
+=== 8.2 Recommended Solution
+
+**Phased Moderate Refactoring (Option C):**
+
+* **Phase 1 (Week 1):** Create TfpgFontManager with hash-based caching
+* **Phase 2 (Week 2):** Migrate widgets to use TfpgFontResource directly
+* **Phase 3 (Week 3):** Remove TfpgFont wrapper, complete cleanup
+* **Phase 4 (Ongoing):** Testing, documentation, verification
+
+**Benefits:**
+
+* Significantly simplified architecture
+* Better performance (O(1) cache lookups)
+* Clearer lifecycle management
+* Reduced memory leak risk
+* Easier to maintain and extend
+
+**Timeline:** 3-4 weeks full-time, 7-8 weeks part-time
+
+**Risk Level:** Medium (requires touching ~30-40 widget files)
+
+=== 8.3 Next Steps
+
+1. **Review this proposal** with fpGUI maintainers
+2. **Get consensus** on approach
+3. **Create git branch** for refactoring work
+4. **Begin Phase 1** implementation
+5. **Test incrementally** after each phase
+6. **Document changes** as we go
+7. **Merge to main** when all criteria met
+
+=== 8.4 Long-Term Vision
+
+After completing this refactoring, fpGUI will have:
+
+* Clean, understandable font API
+* Centralized font management
+* Automatic memory management
+* High-performance caching
+* Solid foundation for future enhancements
+
+Future enhancements could include:
+
+* Full interface-based design (Option B)
+* Font fallback mechanism
+* Font substitution rules
+* Better Unicode support
+* Advanced typography features
+
+This refactoring provides a solid foundation while remaining pragmatic about risk and implementation time.
+
+---
+
+**Document Version:** 2.0 +
+**Date:** 2025-10-13 +
+**Branch:** font-handling-refactor +
+**Author:** Graeme Geldenhuys based on comprehensive codebase analysis +
+**Status:** PROPOSAL - Awaiting Review +
+
+**Changes from v1:**
+
+* Added detailed deep-dive analysis findings from agent
+* Expanded architecture diagrams with current and proposed states
+* Added specific file locations and line numbers for all issues
+* Included detailed code examples throughout
+* Enhanced testing strategy with specific test code
+* Added comprehensive risk assessment
+* Provided detailed day-by-day implementation plan
+* Added comparison of alternative approaches with matrix
