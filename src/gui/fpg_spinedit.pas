@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2008 by Jean-Marc Levecque.
-    Copyright (c) 2009 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2009 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -257,8 +257,8 @@ var
   newh: TfpgCoord;
 begin
   Result       := TfpgSpinEditFloat.Create(AOwner);
-  if h < Result.FEdit.Font.Height + 6 then
-    newh := Result.FEdit.Font.Height + 6
+  if h < Result.FEdit.Font.GetHeight + 6 then
+    newh := Result.FEdit.Font.GetHeight + 6
   else
     newh := h;
   Result.SetPosition(x, y, w, newh);
@@ -283,8 +283,8 @@ var
   newh: TfpgCoord;
 begin
   Result       := TfpgSpinEdit.Create(AOwner);
-  if h < Result.FEdit.Font.Height + 6 then
-    newh := Result.FEdit.Font.Height + 6
+  if h < Result.FEdit.Font.GetHeight + 6 then
+    newh := Result.FEdit.Font.GetHeight + 6
   else
     newh := h;
   Result.SetPosition(x, y, w, newh);
