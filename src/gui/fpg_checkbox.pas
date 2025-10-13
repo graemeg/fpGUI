@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -35,7 +35,7 @@ type
     FOnChange: TNotifyEvent;
     FReadOnly: Boolean;
     FText: string;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FBoxLayout: TBoxLayout;
     FBoxSize: integer;
     FImgTextSpacing: integer;
@@ -63,7 +63,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -114,7 +114,7 @@ begin
   Result.Top    := y;
   Result.Left   := x;
   Result.Text   := AText;
-  Result.Width  := Result.Font.TextWidth(Result.Text) + 24;
+  Result.Width  := Result.Font.GetTextWidth(Result.Text) + 24;
 end;
 
 { TfpgBaseCheckBox }
@@ -139,7 +139,10 @@ end;
 
 function TfpgBaseCheckBox.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgBaseCheckBox.SetBoxLayout(const AValue: TBoxLayout);
@@ -152,8 +155,8 @@ end;
 
 procedure TfpgBaseCheckBox.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   { TODO: Implement AutoSize property, then adjust width here if True }
   RePaint;
 end;
@@ -291,8 +294,8 @@ constructor TfpgBaseCheckBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText       := 'CheckBox';
-  FFont       := fpgGetFont('#Label1');
-  FHeight     := FFont.Height + 4;
+  FFont       := fpgApplication.FontManager.GetFont('#Label1');
+  FHeight     := FFont.GetHeight + 4;
   FWidth      := 120;
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
@@ -308,7 +311,7 @@ end;
 
 destructor TfpgBaseCheckBox.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
 end;
 
