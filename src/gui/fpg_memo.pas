@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -51,7 +51,7 @@ type
     FDrag: TfpgDrag;
     FDNDMaybe: Boolean;
     FMouseDragPos: integer;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FDrawOffset: integer;
     FLineHeight: integer;
     FFirstLine: integer;
@@ -140,7 +140,7 @@ type
     procedure   EndUpdate;
     property    CursorPos: integer read FCursorPos write SetCursorPos;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    LineHeight: integer read FLineHeight;
     property    MaxLength: integer read FMaxLength write FMaxLength;
     property    TabWidth: integer read FTabWidth write FTabWidth;
@@ -523,10 +523,10 @@ constructor TfpgMemo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable   := True;
-  FFont       := fpgGetFont('#Edit1');
-  FHeight     := FFont.Height * 3 + 4;
+  FFont       := fpgApplication.FontManager.GetFont('#Edit1');
+  FHeight     := FFont.GetHeight * 3 + 4;
   FWidth      := 120;
-  FLineHeight := FFont.Height + 2;
+  FLineHeight := FFont.GetHeight + 2;
   FSideMargin := 3;
   FMaxLength  := 0;
   FWrapping   := False;
@@ -568,7 +568,7 @@ begin
   if Assigned(FDefaultPopupMenu) then
     FDefaultPopupMenu.Free;
   TfpgMemoStrings(FLines).Free;
-  FFont.Free;
+  FFont := nil;  // Automatic ref count decrement and cleanup
   DropHandler := nil; // This frees the drophandler object
   inherited Destroy;
 end;
@@ -579,14 +579,14 @@ var
 begin
   result := 0;
   if AText = '' then exit;
-  tstop := FFont.TextWidth('+') * FTabWidth;
+  tstop := FFont.GetTextWidth('+') * FTabWidth;
   p := 1;
   for i := 1 to length(AText) do
   begin
     if AText[i] = #9 then
     begin
       if p <> i then
-        inc(result, FFont.TextWidth(copy(AText, p, i - p)));
+        inc(result, FFont.GetTextWidth(copy(AText, p, i - p)));
       inc(result, tstop - (result mod tstop));
       p := i + 1;
     end;
@@ -595,9 +595,9 @@ begin
   if p <= i then
   begin
     if p > 1 then
-      inc(result, FFont.TextWidth(copy(AText, p, i - p + 1)))
+      inc(result, FFont.GetTextWidth(copy(AText, p, i - p + 1)))
     else // more efficient if we don't have to make another string
-      result := FFont.TextWidth(AText);
+      result := FFont.GetTextWidth(AText);
   end;
 end;
 
@@ -818,7 +818,11 @@ end;
 
 function TfpgMemo.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  // Cast to TfpgFontResource to access FontDesc property
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgMemo.SetBorderStyle(const AValue: TfpgEditBorderStyle);
@@ -1096,8 +1100,8 @@ end;
 
 procedure TfpgMemo.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -1127,7 +1131,7 @@ begin
     if c=#9 then
       cw:=tstop - (cpx mod tstop)
     else
-      cw := FFont.TextWidth(c);
+      cw := FFont.GetTextWidth(c);
     // "shr 1" is fastest "div 2"
     if x <= adj + (cw shr 1) then exit;
     inc(cpx, cw);
@@ -1156,7 +1160,7 @@ begin
     if fpgCaret.IsVisible(Canvas) and ((ALine <> FCursorLine) or (APosition <> FCursorPos)) then
       fpgCaret.InvertCaret;
 
-    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.Height);
+    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.GetHeight);
   end;
 
   if FCaretPosition = fpgPoint(ALine, APosition) then
