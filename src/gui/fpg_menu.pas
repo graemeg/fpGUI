@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -604,7 +604,7 @@ end;
 
 constructor TfpgMenuBar.Create(AOwner: TComponent);
 var
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   inherited Create(AOwner);
   FItems := TList.Create;
@@ -618,12 +618,9 @@ begin
   FTextColor        := Parent.TextColor;
   // calculate the best height based on font
   // Need temp font since no canvas available yet in constructor
-  lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-  try
-    FHeight := lFont.Height + 6; // 3px margin top and bottom
-  finally
-    lFont.Free;
-  end;
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  FHeight := lFont.GetHeight + 6; // 3px margin top and bottom
+  lFont := nil;  // Release font (automatic ref count decrement)
   FMenuOptions := [];
   FMouseIsOver := False;
   FIsContainer := True;
@@ -637,15 +634,12 @@ end;
 
 function TfpgMenuBar.ItemWidth(mi: TfpgMenuItem): integer;
 var
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   // Need temp font since this is called outside paint context
-  lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-  try
-    Result := lFont.TextWidth(mi.Text) + (2*6);
-  finally
-    lFont.Free;
-  end;
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  Result := lFont.GetTextWidth(mi.Text) + (2*6);
+  lFont := nil;  // Release font (automatic ref count decrement)
 end;
 
 procedure TfpgMenuBar.InternalReset;
@@ -732,7 +726,7 @@ end;
 procedure TfpgMenuBar.DoSelect;
 var
   mi: TfpgMenuItem;
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   mi := VisibleItem(FocusItem);
   CloseSubMenus;  // deactivates menubar!
@@ -741,12 +735,9 @@ begin
   begin
     ActivateMenu;
     // showing the submenu - need temp font for height calculation
-    lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-    try
-      mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, lFont.Height+4);
-    finally
-      lFont.Free;
-    end;
+    lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+    mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, lFont.GetHeight+4);
+    lFont := nil;  // Release font (automatic ref count decrement)
     mi.SubMenu.OpenerPopup      := nil;
     mi.SubMenu.OpenerMenuBar    := self;
     mi.SubMenu.DontCloseWidget  := self;
@@ -1258,18 +1249,15 @@ end;
 
 function TfpgPopupMenu.ItemHeight(mi: TfpgMenuItem): integer;
 var
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   if mi.Separator then
     Result := 5
   else
   begin
-    lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-    try
-      Result := lFont.Height + 2;
-    finally
-      lFont.Free;
-    end;
+    lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+    Result := lFont.GetHeight + 2;
+    lFont := nil;  // Release font (automatic ref count decrement)
   end;
 end;
 
@@ -1324,7 +1312,7 @@ var
   hkw: integer;
   x: integer;
   mi: TfpgMenuItem;
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   if Assigned(FBeforeShow) then
     BeforeShow(self);
@@ -1343,37 +1331,34 @@ begin
   end;
 
   // Measuring sizes - need temp font for calculations
-  lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-  try
-    h             := 0;   // height
-    tw            := 0;   // text width
-    hkw           := 0;   // hotkey width
-    FSymbolWidth  := 0;
-    for n := 0 to VisibleCount-1 do
-    begin
-      mi  := VisibleItem(n);
-      x   := ItemHeight(mi);
-      inc(h, x);
-      x := lFont.TextWidth(mi.Text);
-      if tw < x then
-        tw := x;
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  h             := 0;   // height
+  tw            := 0;   // text width
+  hkw           := 0;   // hotkey width
+  FSymbolWidth  := 0;
+  for n := 0 to VisibleCount-1 do
+  begin
+    mi  := VisibleItem(n);
+    x   := ItemHeight(mi);
+    inc(h, x);
+    x := lFont.GetTextWidth(mi.Text);
+    if tw < x then
+      tw := x;
 
-      if mi.SubMenu <> nil then
-        x := lFont.Height
-      else
-        x := lFont.TextWidth(mi.HotKeyDef);
-      if hkw < x then
-        hkw := x;
-    end;
-
-    if hkw > 0 then
-      hkw := hkw + 10; // spacing between text and hotkey text
-
-    FHeight := FMargin*2 + h;
-    FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
-  finally
-    lFont.Free;
+    if mi.SubMenu <> nil then
+      x := lFont.GetHeight
+    else
+      x := lFont.GetTextWidth(mi.HotKeyDef);
+    if hkw < x then
+      hkw := x;
   end;
+
+  if hkw > 0 then
+    hkw := hkw + 10; // spacing between text and hotkey text
+
+  FHeight := FMargin*2 + h;
+  FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
+  lFont := nil;  // Release font (automatic ref count decrement)
 
   uFocusedPopupMenu := self;
 end;
@@ -1436,7 +1421,7 @@ end;
 
 constructor TfpgPopupMenu.Create(AOwner: TComponent);
 var
-  lFont: TfpgFont;
+  lFont: TfpgFontResourceBase;
 begin
   FWindowType:=wtPopup;
   inherited Create(AOwner);
@@ -1444,12 +1429,9 @@ begin
   FTextMargin := 3;
   FItems      := TList.Create;
 
-  lFont := fpgGetFont(fpgStyle.MenuFontDef.FontDesc);
-  try
-    FSymbolWidth      := lFont.Height+2;
-  finally
-    lFont.Free;
-  end;
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  FSymbolWidth := lFont.GetHeight+2;
+  lFont := nil;  // Release font (automatic ref count decrement)
 
   FBeforeShow   := nil;
   FFocusItem    := -1;
