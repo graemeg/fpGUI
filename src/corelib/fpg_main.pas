@@ -1621,8 +1621,8 @@ begin
     Exit; //==>  Nothing to do
 
   wnd.Text := AHint;
-  w := wnd.Font.TextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
-  h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
+  w := wnd.Font.GetTextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
+  h := wnd.Font.GetHeight + (wnd.Border * 2) + (wnd.Margin * 2);
   { prevents hint from going off the right screen edge }
   if (APos.X + w) > ScreenWidth then
   begin

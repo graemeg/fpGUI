@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -31,7 +31,7 @@ type
 
   TfpgHintWindow = class(TfpgForm)
   private
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FTime: Integer;
     FShadow: Integer;
     FBorder: Integer;
@@ -59,7 +59,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    Text: TfpgString read GetText write SetText;
     property    Shadow: Integer read FShadow write SetShadow default 0;
     property    Border: Integer read FBorder write SetBorder default 1;
@@ -170,13 +170,16 @@ end;
 
 function TfpgHintWindow.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgHintWindow.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
 end;
 
 procedure TfpgHintWindow.HandleShow;
@@ -239,7 +242,7 @@ begin
   WindowPosition := wpUser;
   Sizeable := False;
   BackgroundColor := clHintWindow;
-  FFont := fpgGetFont('#Label1');
+  FFont := fpgApplication.FontManager.GetFont('#Label1');
   FMargin := 2;
   FBorder := 1;
   FShadow := 0; // no shadow by default
@@ -256,7 +259,7 @@ end;
 destructor TfpgHintWindow.Destroy;
 begin
   FTimer.Free;
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
   uShadowForm.Free;
 end;
