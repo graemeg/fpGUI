@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -70,8 +70,8 @@ type
     FFirstRow: Integer;
     FFirstCol: Integer;
     FXOffset: integer;  // used for go_SmoothScroll
-    FFont: TfpgFont;
-    FHeaderFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
+    FHeaderFont: TfpgFontResourceBase;
     FRowSelect: boolean;
     FScrollBarStyle: TfpgScrollStyle;
     FShowGrid: boolean;
@@ -149,9 +149,9 @@ type
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    HeaderFont: TfpgFont read FHeaderFont;
+    property    HeaderFont: TfpgFontResourceBase read FHeaderFont;
     property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
     property    FocusCol: Integer read FFocusCol write SetFocusCol default -1;
     property    FocusRow: Integer read FFocusRow write SetFocusRow default -1;
@@ -224,12 +224,18 @@ end;
 
 function TfpgBaseGrid.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if FFont is TfpgFontResource then
+    Result := TfpgFontResource(FFont).FontDesc
+  else
+    Result := '';
 end;
 
 function TfpgBaseGrid.GetHeaderFontDesc: string;
 begin
-  Result := FHeaderFont.FontDesc;
+  if FHeaderFont is TfpgFontResource then
+    Result := TfpgFontResource(FHeaderFont).FontDesc
+  else
+    Result := '';
 end;
 
 function TfpgBaseGrid.GetScrollBarWidth: Integer;
@@ -274,25 +280,25 @@ end;
 
 procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
-  if DefaultRowHeight < FFont.Height + 2 then
-    DefaultRowHeight := FFont.Height + 2;
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
+  if DefaultRowHeight < FFont.GetHeight + 2 then
+    DefaultRowHeight := FFont.GetHeight + 2;
   RePaint;
 end;
 
 procedure TfpgBaseGrid.SetHeaderFontDesc(const AValue: string);
 begin
-  FHeaderFont.Free;
-  FHeaderFont := fpgGetFont(AValue);
-  if FHeaderHeight < FHeaderFont.Height + 2 then
-    FHeaderHeight := FHeaderFont.Height + 2;
+  FHeaderFont := nil;  // Release old font (automatic ref count decrement)
+  FHeaderFont := fpgApplication.FontManager.GetFont(AValue);
+  if FHeaderHeight < FHeaderFont.GetHeight + 2 then
+    FHeaderHeight := FHeaderFont.GetHeight + 2;
   RePaint;
 end;
 
 procedure TfpgBaseGrid.SetHeaderHeight(const AValue: integer);
 begin
-  if AValue >= FHeaderFont.Height + 2 then
+  if AValue >= FHeaderFont.GetHeight + 2 then
     FHeaderHeight := AValue;
   Repaint;
 end;
@@ -504,7 +510,7 @@ begin
   if Length(s) > 0 then
   begin
     { centre the text }
-    x := (r.Left + (r.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+    x := (r.Left + (r.Width div 2)) - (FHeaderFont.GetTextWidth(s) div 2);
     if x < r.Left then
       x := r.Left;
     if not (go_SmoothScroll in FOptions) then
@@ -1707,13 +1713,13 @@ begin
 
   borders := GetAdjustedBorderSizes;
 
-  FFont       := fpgGetFont('#Grid');
-  FHeaderFont := fpgGetFont('#GridHeader');
+  FFont       := fpgApplication.FontManager.GetFont('#Grid');
+  FHeaderFont := fpgApplication.FontManager.GetFont('#GridHeader');
 
   FTemp             := 50;  // Just to prove that ColumnWidth does adjust.
   FDefaultColWidth  := 64;
-  FDefaultRowHeight := FFont.Height + 2;
-  FHeaderHeight     := FHeaderFont.Height + 2;
+  FDefaultRowHeight := FFont.GetHeight + 2;
+  FHeaderHeight     := FHeaderFont.GetHeight + 2;
   FBackgroundColor  := clBoxColor;
   FAlternativeBGColor := clHilite1;
   FColResizing      := False;
@@ -1737,8 +1743,8 @@ destructor TfpgBaseGrid.Destroy;
 begin
   FOnRowChange := nil;
   FOnFocusChange := nil;
-  FFont.Free;
-  FHeaderFont.Free;
+  FFont := nil;
+  FHeaderFont := nil;
   inherited Destroy;
 end;
 
