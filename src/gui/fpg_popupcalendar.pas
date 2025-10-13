@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -155,7 +155,7 @@ type
     procedure   SetSingleClickSelect(const AValue: boolean);
     procedure   ClosePopupMenusWindows;
   protected
-    FntNorm, FntBold: TfpgFont;
+    FntNorm, FntBold: TfpgFontResourceBase;
     FOrigFocusWin: TfpgWidget;
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -1115,8 +1115,8 @@ end;
 constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
-  FntNorm:= fpgApplication.GetFont('arial-9');
-  FntBold:= fpgApplication.GetFont('arial-9:bold');
+  FntNorm:= fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-9');
+  FntBold:= fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-9:bold');
 
   FOrigFocusWin := AOrigFocusWin;
   AfterCreate;
@@ -1138,8 +1138,8 @@ begin
     FMonthsPopupMenu.Free;
   if Assigned(FYearPopupWindow) then
     FYearPopupWindow.Free;
-  FntBold.Free;
-  FntNorm.Free;
+  FntBold := nil;  // Release font (automatic ref count decrement)
+  FntNorm := nil;  // Release font (automatic ref count decrement)
   inherited Destroy;
 end;
 
