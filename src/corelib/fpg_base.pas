@@ -133,11 +133,13 @@ var
   {$IFDEF WINDOWS}
   FPG_DEFAULT_FONT_DESC: string = 'Arial-8:antialias=true';
   FPG_DEFAULT_SANS: string = 'Arial';
+  FPG_DEFAULT_FIXED: string = 'Courier New';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
   {$ENDIF}
   {$IFDEF UNIX}
   FPG_DEFAULT_FONT_DESC: string = 'Liberation Sans-10:antialias=true';
   FPG_DEFAULT_SANS: string = 'Liberation Sans';
+  FPG_DEFAULT_FIXED: string = 'Liberation Mono';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Liberation Mono-10';
   {$ENDIF}
 
