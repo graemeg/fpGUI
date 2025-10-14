@@ -492,14 +492,7 @@ var
 begin
   if FAutoSize then
   begin
-    // Use Canvas.Font if available (for AggCanvas compatibility), otherwise owner's FFont
-    if WindowAllocated and Assigned(Canvas) then
-    begin
-      Canvas.SetFont(FOwner.FFont);
-      NeededWidth := Canvas.Font.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
-    end
-    else
-      NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
     Width:=NeededWidth;
   end;
 end;
@@ -806,26 +799,27 @@ end;
 
 procedure TfpgBaseTextEdit.UpdateCharBounds;
 begin
-  // Use Canvas.Font if available (for AggCanvas compatibility), otherwise FFont
-  if WindowAllocated and Assigned(Canvas) then
-  begin
-    Canvas.SetFont(FFont);
-    FChrW := Canvas.Font.GetTextWidth('W');
-    FChrH := Canvas.Font.GetHeight;
-  end
+  if not Assigned(FFont) or not FFont.HandleIsValid then exit;
+
+  FChrW := FFont.GetTextWidth('W');
+  FChrH := FFont.GetHeight;
+
+  if FChrH > 0 then
+    FVisLines := (GetClientRect.Height div FChrH) + 1
   else
-  begin
-    FChrW := FFont.GetTextWidth('W');
-    FChrH := FFont.GetHeight;
-  end;
-  FVisLines := (GetClientRect.Height div FChrH) + 1;
-  if Assigned(FGutterPan) then
+    FVisLines := 0;
+
+  if Assigned(FGutterPan) and (FChrW > 0) then
   begin
     if FGutterPan.Visible then
       FVisCols := (GetClientRect.Width - FGutterPan.Width) div FChrW
     else
       FVisCols := GetClientRect.Width div FChrW;
-  end;
+  end
+  else if FChrW > 0 then
+    FVisCols := GetClientRect.Width div FChrW
+  else
+    FVisCols := 0;
 end;
 
 { Re-order StartXXX and EndXXX if user is selecting backwards }

@@ -11,6 +11,12 @@ uses
   fpg_base;
 
 type
+  TfpgFontResourceClass = class of TfpgFontResourceBase;
+
+var
+  AggFontResourceClass: TfpgFontResourceClass = nil;
+
+type
   { TfpgFontManager - Centralized font resource management with caching }
   TfpgFontManager = class(TObject)
   private
@@ -45,7 +51,7 @@ type
 implementation
 
 uses
-  fpg_main;  // For TfpgFontResource
+  fpg_main;
 
 { TfpgFontManager }
 
@@ -106,7 +112,14 @@ begin
     if not Assigned(Result) then
     begin
       // Cache miss - create new platform-specific font resource
+      {$IFDEF AGGCANVAS}
+      if Assigned(AggFontResourceClass) then
+        Result := AggFontResourceClass.Create(fdesc)
+      else
+        Result := TfpgFontResource.Create(fdesc); // Fallback if not registered
+      {$ELSE}
       Result := TfpgFontResource.Create(fdesc);
+      {$ENDIF}
 
       if Result.HandleIsValid then
       begin

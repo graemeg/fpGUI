@@ -28,6 +28,8 @@
 type
   // to get access to protected methods (seeing that FPC doesn't support Friend-classes)
   TImageHack = class(TfpgImage);
+  TfpgX11WindowHack = class(TfpgX11Window);
+
 
 function FontCacheItemFromFontDesc(const desc: string; var asize: double): TFontCacheItem;
 var
@@ -109,9 +111,6 @@ begin
 //        lf.lfQuality := DEFAULT_QUALITY;
   end;
 end;
-
-type
-  TfpgX11WindowHack = class(TfpgX11Window);
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var

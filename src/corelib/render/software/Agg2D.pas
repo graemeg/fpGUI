@@ -360,7 +360,7 @@ type
    FPaintCaret: boolean;
    FCaretImg: TfpgImage;
    FCaretPos: TfpgPoint;
-   FAgg2DFontRes: TfpgAgg2DFontResource;  // Owned - current Agg2D font resource
+
   protected
     FImg: TfpgImage;
   {$IFDEF AGG2D_USE_WINFONTS }
@@ -666,38 +666,35 @@ type
 
   end;
 
- { Font engine that delegates to TAgg2D for FreeType-based metric calculations }
- TAgg2DFontEngine = class(TInterfacedObject, IFontEngine)
- private
-   FAgg2DRef: TAgg2D;  // Weak reference - NOT owned
-   FFontDefinition: TfpgFontDefinition;
- public
-   constructor Create(AAgg2D: TAgg2D; AFontDef: TfpgFontDefinition);
-   destructor Destroy; override;
-   // IFontEngine implementation
-   function GetTextWidth(const AText: string): integer;
-   function GetAscent: integer;
-   function GetDescent: integer;
-   function GetHeight: integer;
-   function GetCanvasRef: TObject;
-   property Canvas: TAgg2D read FAgg2DRef;
- end;
-
- { Font resource that uses TAgg2D/FreeType for all metrics }
+ { Font resource that uses its own FreeType engine for all metrics }
  TfpgAgg2DFontResource = class(TfpgFontResourceBase)
  private
-   FAgg2DEngine: TAgg2DFontEngine;  // Owned
    FFontDesc: string;
+   FFontPath: string;
+   FFontSize: double;
+   FBold: boolean;
+   FItalic: boolean;
+   FAscent: Integer;
+   FDescent: Integer;
+   FHeight: Integer;
+   FValid: Boolean;
+   {$IFNDEF AGG2D_NO_FONT}
+   m_fontEngine       : TAggFontEngine;
+   m_fontCacheManager : font_cache_manager;
+   {$ENDIF}
  public
    constructor Create(const AFontDesc: string); override;
    destructor Destroy; override;
-   procedure SetAgg2DCanvas(AAgg2D: TAgg2D);
    function HandleIsValid: boolean; override;
    function GetAscent: integer; override;
    function GetDescent: integer; override;
    function GetHeight: integer; override;
    function GetTextWidth(const txt: string): integer; override;
    function GetCanvasRef: TObject; override;
+   property FontPath: string read FFontPath;
+   property Size: double read FFontSize;
+   property IsBold: boolean read FBold;
+   property IsItalic: boolean read FItalic;
  end;
 
 { GLOBAL PROCEDURES }
@@ -731,7 +728,9 @@ uses
     {$I agg_platform_cocoa.inc}
   {$ENDIF}
 
-  fpg_stringutils;
+  fpg_stringutils,
+  fpg_fontmanager;
+
 
 { LOCAL VARIABLES & CONSTANTS }
 var
@@ -1260,124 +1259,136 @@ end;
 {$ENDIF}
 
 
-{ TAgg2DFontEngine }
-
-constructor TAgg2DFontEngine.Create(AAgg2D: TAgg2D; AFontDef: TfpgFontDefinition);
-begin
-  inherited Create;
-  FAgg2DRef := AAgg2D;  // Weak reference - NOT owned
-  FFontDefinition := AFontDef;
-end;
-
-destructor TAgg2DFontEngine.Destroy;
-begin
-  // Note: FAgg2DRef is a weak reference, do NOT free it
-  // FFontDefinition is also a weak reference, do NOT free it.
-  // It is owned by TfpgFontBase.
-//  FFontDefinition.Free;
-  inherited Destroy;
-end;
-
-function TAgg2DFontEngine.GetTextWidth(const AText: string): integer;
-begin
-  // Delegate to TAgg2D's FreeType-based measurement
-  Result := Round(FAgg2DRef.TextWidth(AText));
-end;
-
-function TAgg2DFontEngine.GetAscent: integer;
-begin
-  // TAgg2D uses FreeType metrics
-  Result := Round(FAgg2DRef.FontAscent);
-end;
-
-function TAgg2DFontEngine.GetDescent: integer;
-begin
-  // TAgg2D uses FreeType metrics
-  Result := Round(FAgg2DRef.FontDescent);
-end;
-
-function TAgg2DFontEngine.GetHeight: integer;
-begin
-  // Height is typically ascent + descent
-  Result := GetAscent + GetDescent;
-end;
-
-function TAgg2DFontEngine.GetCanvasRef: TObject;
-begin
-  Result := FAgg2DRef;
-end;
-
 { TfpgAgg2DFontResource }
 
 constructor TfpgAgg2DFontResource.Create(const AFontDesc: string);
+var
+  fnt: TFontCacheItem;
+  i: integer;
+  lSize: double;
+  {$IFDEF AGG2D_USE_WINFONTS}
+  m_fontDC: HDC;
+  {$ENDIF}
 begin
-  // TfpgFontResourceBase.Create is abstract, so we don't call it
-  // Just initialize our fields
   FFontDesc := AFontDesc;
-  FAgg2DEngine := nil;  // Will be set via SetAgg2DCanvas
+  FValid := False;
+
+  fnt := FontCacheItemFromFontDesc(AFontDesc, lSize);
+  FFontSize := lSize;
+  FBold := fnt.IsBold;
+  FItalic := fnt.IsItalic;
+
+  i := gFontCache.Find(fnt);
+  if i >= 0 then
+    FFontPath := gFontCache.Items[i].FileName
+  else
+    FFontPath := '';
+  fnt.Free;
+
+  if FFontPath = '' then
+  begin
+    // Fallback for font not in cache
+    fnt := FontCacheItemFromFontDesc('Liberation Sans-10', lSize);
+    i := gFontCache.Find(fnt);
+    if i >= 0 then
+      FFontPath := gFontCache.Items[i].FileName;
+    fnt.Free;
+  end;
+
+  {$IFNDEF AGG2D_NO_FONT}
+  {$IFDEF AGG2D_USE_FREETYPE}
+  m_fontEngine.Construct;
+  {$ENDIF}
+  {$IFDEF AGG2D_USE_WINFONTS}
+  m_fontDC := GetDC(0);
+  m_fontEngine.Construct(m_fontDC);
+  {$ENDIF}
+  m_fontCacheManager.Construct(@m_fontEngine);
+  {$ENDIF}
+
+  if FFontPath <> '' then
+  begin
+    m_fontEngine.load_font(PChar(FFontPath), 0, glyph_ren_agg_gray8);
+    m_fontEngine.height_(FFontSize * fpgApplication.Screen_dpi / 72);
+    m_fontEngine.flip_y_(True);
+    m_fontEngine.hinting_(True);
+
+    FAscent := round(m_fontEngine._ascender);
+    FDescent := round(abs(m_fontEngine._descender));
+    FHeight := FAscent + FDescent;
+    FValid := True;
+  end;
 end;
 
 destructor TfpgAgg2DFontResource.Destroy;
 begin
-  FAgg2DEngine := nil;  // Interface will be ref-counted
+  {$IFNDEF AGG2D_NO_FONT}
+  m_fontEngine.Destruct;
+  m_fontCacheManager.Destruct;
+  {$ENDIF}
+  {$IFDEF AGG2D_USE_WINFONTS}
+  ReleaseDC(0, m_fontDC);
+  {$ENDIF}
   inherited Destroy;
-end;
-
-procedure TfpgAgg2DFontResource.SetAgg2DCanvas(AAgg2D: TAgg2D);
-var
-  lFontDef: TfpgFontDefinition;
-begin
-  lFontDef := TfpgFontDefinition.Create(FFontDesc);
-  try
-    FAgg2DEngine := TAgg2DFontEngine.Create(AAgg2D, lFontDef);
-  finally
-    lFontDef.Free;
-  end;
 end;
 
 function TfpgAgg2DFontResource.HandleIsValid: boolean;
 begin
-  Result := Assigned(FAgg2DEngine);
+  Result := FValid;
 end;
 
 function TfpgAgg2DFontResource.GetAscent: integer;
 begin
-  if Assigned(FAgg2DEngine) then
-    Result := FAgg2DEngine.GetAscent
-  else
-    Result := 0;
+  Result := FAscent;
 end;
 
 function TfpgAgg2DFontResource.GetDescent: integer;
 begin
-  if Assigned(FAgg2DEngine) then
-    Result := FAgg2DEngine.GetDescent
-  else
-    Result := 0;
+  Result := FDescent;
 end;
 
 function TfpgAgg2DFontResource.GetHeight: integer;
 begin
-  if Assigned(FAgg2DEngine) then
-    Result := FAgg2DEngine.GetHeight
-  else
-    Result := 0;
+  Result := FHeight;
 end;
 
 function TfpgAgg2DFontResource.GetTextWidth(const txt: string): integer;
+var
+  w: double;
+  i: integer;
+  p: PChar;
+  glyph: glyph_cache_ptr;
+  x, y: double;
 begin
-  if Assigned(FAgg2DEngine) then
-    Result := FAgg2DEngine.GetTextWidth(txt)
-  else
+  if not FValid or (txt = '') then
+  begin
     Result := 0;
+    exit;
+  end;
+
+  w := 0;
+  x := 0;
+  y := 0;
+  p := PChar(txt);
+  for i := 1 to Length(txt) do
+  begin
+    glyph := m_fontCacheManager.glyph(Ord(p^));
+    if Assigned(glyph) then
+    begin
+      if i > 1 then
+      begin
+         m_fontCacheManager.add_kerning(@x, @y);
+      end;
+      w := w + glyph^.advance_x;
+    end;
+    Inc(p);
+  end;
+  Result := round(w + x);
 end;
 
 function TfpgAgg2DFontResource.GetCanvasRef: TObject;
 begin
-  if Assigned(FAgg2DEngine) then
-    Result := FAgg2DEngine.GetCanvasRef
-  else
-    Result := nil;
+  Result := nil;
 end;
 
 { CREATE }
@@ -1385,7 +1396,6 @@ constructor TAgg2D.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
 
-  FAgg2DFontRes := nil;
   FPaintCaret := True;
   FLineWidth := 1;
  m_rbuf.Construct;
@@ -1533,7 +1543,6 @@ begin
  ReleaseDC(0 ,m_fontDC );
  {$ENDIF }
 
-  FreeAndNil(FAgg2DFontRes);
   FreeAndNil(FCaretImg);
   if Assigned(FImg) then
     FImg.Free;
@@ -3799,46 +3808,21 @@ end;
 }
 
 procedure TAgg2D.DoSetFontRes(fntres: TfpgFontResourceBase);
-{$IFDEF UNIX}
 var
-  i: integer;
-  fnt: TFontCacheItem;
-  lSize: double;
-{$ENDIF}
-  lFontDesc: string;
+  aggFont: TfpgAgg2DFontResource;
 begin
-  // Get font descriptor
-  if fntres is TfpgFontResource then
-    lFontDesc := TfpgFontResource(fntres).FontDesc
-  else
-    lFontDesc := '';
+  if not Assigned(fntres) then
+    exit;
 
-{$IFDEF AGG_WINDOWS}
- {$IFDEF AGG2D_USE_FREETYPE }
-   Font(GetWindowsFontDir + 'arial.ttf', 10);
- {$ENDIF }
- {$IFDEF AGG2D_USE_WINFONTS}
-  Font('Arial', 13);
- {$ENDIF }
-{$ENDIF}  // windows
+  if not (fntres is TfpgAgg2DFontResource) then
+    exit; // Should not happen with the font manager change
 
-{$IFDEF UNIX}
-  fnt := FontCacheItemFromFontDesc(lFontDesc, lSize);
-  i := gFontCache.Find(fnt);
-  if i > 0 then
-    Font(gFontCache.Items[i].FileName, lSize, fnt.IsBold, fnt.IsItalic, AGG_VectorFontCache, Deg2Rad(fnt.Angle))
-  else
-    DebugLn('ERROR: Failed to find font: ' + lFontDesc);
-  fnt.Free;
-{$ENDIF}  // unix
+  aggFont := fntres as TfpgAgg2DFontResource;
 
-  // Create Agg2D-specific font resource that uses FreeType metrics
-  FreeAndNil(FAgg2DFontRes);
-  FAgg2DFontRes := TfpgAgg2DFontResource.Create(lFontDesc);
-  FAgg2DFontRes.SetAgg2DCanvas(Self);
-
-  // Assign to canvas font so widgets get correct metrics
-  FFont := FAgg2DFontRes;
+  if aggFont.FontPath <> '' then
+  begin
+    Font(aggFont.FontPath, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_VectorFontCache);
+  end;
 end;
 
 procedure TAgg2D.DoSetTextColor(cl: TfpgColor);
@@ -4179,6 +4163,11 @@ begin
    result:=true;
  end;
 end;
+
+initialization
+  {$IFDEF AGGCANVAS}
+  AggFontResourceClass := TfpgAgg2DFontResource;
+  {$ENDIF}
 
 end.
 
