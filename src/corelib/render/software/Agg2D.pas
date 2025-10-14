@@ -647,6 +647,7 @@ type
 
    procedure CopyImage(bitmap : TfpgImage; dstX ,dstY : double ); overload;
    procedure Blur(rx ,ry : unsigned);
+   procedure GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection); override;
 
   private
    procedure render(fillColor_ : boolean ); overload;
@@ -3976,6 +3977,20 @@ begin
   LineColor(LineColor);
   FillColor($00, $00, $00);  // clBlack for now
   Polygon(@poly[1], Length(Points));
+end;
+
+procedure TAgg2D.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor;
+  ADirection: TGradientDirection);
+var
+  c1, c2: TAggColor;
+begin
+  c1 := fpgColor2AggColor(AStart);
+  c2 := fpgColor2AggColor(AStop);
+  if ADirection = gdVertical then
+    FillLinearGradient(ARect.Left, ARect.Top, ARect.Left, ARect.Bottom, c1, c2)
+  else
+    FillLinearGradient(ARect.Left, ARect.Top, ARect.Right, ARect.Top, c1, c2);
+  Rectangle(ARect.Left, ARect.Top, ARect.Right, ARect.Bottom);
 end;
 
 function TAgg2D.GetBufferAllocated: Boolean;
