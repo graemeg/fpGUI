@@ -225,7 +225,12 @@ begin
 
   // if nothing found, use default font of fpGUI
   if FontDesc = '' then
-    FontDesc := fpgStyle.DefaultFont.FontDesc;
+  begin
+    if fpgStyle.GetDefaultFont is TfpgFontResource then
+      FontDesc := TfpgFontResource(fpgStyle.GetDefaultFont).FontDesc
+    else
+      FontDesc := DefaultTopicFont;
+  end;
 end;
 
 
@@ -243,7 +248,7 @@ end;
 
 destructor TCanvasFontManager.Destroy;
 begin
-  FCanvas.Font := fpgStyle.DefaultFont;
+  FCanvas.SetFont(fpgStyle.GetDefaultFont);
   FDefaultFont := nil;  // Release font (automatic ref count decrement)
   inherited Destroy;
 end;

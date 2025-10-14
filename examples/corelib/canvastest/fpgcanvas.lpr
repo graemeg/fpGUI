@@ -96,7 +96,7 @@ begin
   // Testing Text and Fonts
   y := 60;
   Canvas.SetTextColor(clBlack);
-  Canvas.DrawString(5, y, 'This text must be black and default font (' + fpgStyle.DefaultFont.FontDesc + ')');
+  Canvas.DrawString(5, y, 'This text must be black and default font');
 
   // red dot indicates top/left corner of where previous text was started
   Canvas.Pixels[5,y] := clRed;
@@ -117,7 +117,7 @@ begin
 
 
   // Testing basic style drawings
-  Canvas.SetFont(fpgStyle.DefaultFont);
+  Canvas.SetFont(fpgStyle.GetDefaultFont);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);

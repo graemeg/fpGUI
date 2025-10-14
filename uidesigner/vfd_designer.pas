@@ -46,7 +46,7 @@ type
 
   TOtherWidget = class(TfpgWidget)
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     procedure   HandlePaint; override;
   public
     wgClassName: string;
@@ -1715,7 +1715,7 @@ begin
   inherited;
   wgClassName := 'TfpgWidget';
   FBackgroundColor := clUIDesignerGreen;
-  FFont   := fpgStyle.DefaultFont;
+  FFont   := fpgStyle.GetDefaultFont;
   FWidth  := 120;
   FHeight := 32;
 end;

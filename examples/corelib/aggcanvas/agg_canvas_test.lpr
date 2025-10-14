@@ -240,7 +240,7 @@ begin
 
 
   // Testing basic style drawings
-  Canvas.SetFont(fpgStyle.DefaultFont);
+  Canvas.SetFont(fpgStyle.GetDefaultFont);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);
@@ -365,7 +365,7 @@ begin
   end  // if Assigned(ac)
   else
   begin
-    Canvas.SetFont(fpgStyle.DefaultFont);
+    Canvas.SetFont(fpgStyle.GetDefaultFont);
     Canvas.DrawString(75, 275, 'AggCanvas was NOT enabled, so the remaining advanced');
     Canvas.DrawString(75, 295, 'rendering will not display here.');
 

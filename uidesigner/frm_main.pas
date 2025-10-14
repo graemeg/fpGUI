@@ -1111,7 +1111,7 @@ begin
 
   x  := rect.left;
   y  := rect.top;
-  fy := y + rect.Height div 2 - FFont.Height div 2;
+  fy := y + rect.Height div 2 - FFont.GetHeight div 2;
 
   s := prop.Name;
   Canvas.DrawString(x + 1, fy, s);
