@@ -328,7 +328,7 @@ begin
   if Assigned(FFont) and (FFont is TfpgFontResource) then
     Result := TfpgFontResource(FFont).FontDesc
   else
-    Result := fpgStyle.TabFont.FontDesc;
+    Result := fpgStyle.TabFontDef.FontDesc;
 end;
 
 function TfpgPageControl.GetPage(AIndex: integer): TfpgTabSheet;
@@ -534,19 +534,29 @@ begin
 end;
 
 function TfpgPageControl.ButtonHeight: integer;
+var
+  f: TfpgFontResourceBase;
 begin
   if FFixedTabHeight > 0 then
     result := FFixedTabHeight
   else
-    result := fpgStyle.TabFont.Height + 10;   { TODO: correct this }
+  begin
+    f := fpgStyle.GetTabFont;
+    result := f.GetHeight + 10;   { TODO: correct this }
+  end;
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
+var
+  f: TfpgFontResourceBase;
 begin
   if FFixedTabWidth > 0 then
     result := FFixedTabWidth
   else
-    result := fpgStyle.TabFont.TextWidth(AText) + 10;
+  begin
+    f := fpgStyle.GetTabFont;
+    result := f.GetTextWidth(AText) + 10;
+  end;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
@@ -575,6 +585,7 @@ function TfpgPageControl.GetTabText(AText: string): string;
 var
   s, s1: string;
   i: integer;
+  f: TfpgFontResourceBase;
 begin
   {$IFDEF DEBUG}writeln(Classname + '.GetTabText');{$ENDIF}
   Result  := AText;
@@ -583,14 +594,15 @@ begin
   i       := 1;
   if FFixedTabWidth > 0 then
   begin
-    while fpgStyle.TabFont.TextWidth(s1) < (FFixedTabWidth-10) do
+    f := fpgStyle.GetTabFont;
+    while f.GetTextWidth(s1) < (FFixedTabWidth-10) do
     begin
       if Length(s1) = Length(s) then
         Break;
       s1 := UTF8Copy(s, 1, i);
       inc(i);
     end;
-    if fpgStyle.TabFont.TextWidth(s1) > (FFixedTabWidth-10) then
+    if f.GetTextWidth(s1) > (FFixedTabWidth-10) then
       UTF8Delete(s1, UTF8Length(s1), 1);
     if Length(s1) > 0 then
       s1 := Trim(s1);
@@ -766,7 +778,7 @@ begin
   if Assigned(FFont) then
     Result := FFont
   else
-    Result := fpgStyle.TabFont.FontRes;
+    Result := fpgStyle.GetTabFont;
 end;
 
 procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
@@ -930,7 +942,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.TabFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.GetTabFont.GetTextWidth(GetTabText(h.Text)) div 2,
                 Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
@@ -982,7 +994,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.TabFont.TextWidth(GetTabText(h.Text)) div 2,
+            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.GetTabFont.GetTextWidth(GetTabText(h.Text)) div 2,
                 FMargin+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;

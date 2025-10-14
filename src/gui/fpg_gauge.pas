@@ -542,7 +542,7 @@ begin
   FPosition     := 0;
   FShowText     := True;
   FBorderStyle  := bsNone;
-  FFont         := fpgStyle.DefaultFont.FontRes;
+  FFont         := fpgStyle.GetDefaultFont;
 end;
 
 procedure TfpgBaseGauge.AddProgress(AValue: Longint);

@@ -213,7 +213,7 @@ begin
   FBackgroundColor := TfpgColor($c4c4c4); // clListBox;
   FTextColor := Parent.TextColor;
   FShowCaption := False;
-  FFont     := fpgStyle.DefaultFont.FontRes;
+  FFont     := fpgStyle.GetDefaultFont;
 end;
 
 procedure TfpgCustomProgressBar.StepIt;

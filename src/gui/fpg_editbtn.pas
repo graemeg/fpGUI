@@ -207,7 +207,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgStyle.DefaultFont);
+    Canvas.SetFont(fpgStyle.GetDefaultFont);
     if Text <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -394,7 +394,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgStyle.DefaultFont);
+    Canvas.SetFont(fpgStyle.GetDefaultFont);
     if Filename <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -482,7 +482,7 @@ begin
     Canvas.Clear(clBoxColor);
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
-    Canvas.SetFont(fpgStyle.DefaultFont);
+    Canvas.SetFont(fpgStyle.GetDefaultFont);
     if Directory <> '' then
     begin
       Canvas.TextColor := clText3;
@@ -549,7 +549,7 @@ begin
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
     Canvas.TextColor := clShadow1;
-    Canvas.SetFont(fpgStyle.DefaultFont);
+    Canvas.SetFont(fpgStyle.GetDefaultFont);
     Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
     img := fpgImages.GetImage('stdimg.font'); // don't free the img instance - we only got a reference
     if img <> nil then

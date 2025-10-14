@@ -3047,7 +3047,7 @@ begin
 
     SetColor(clText1);
     SetTextColor(clText1);
-    SetFont(fpgStyle.DefaultFont);
+    SetFont(fpgStyle.GetDefaultFont);
     SetLineStyle(0, lsSolid);
 
     FBeginDrawCount := 0;
