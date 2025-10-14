@@ -1,7 +1,7 @@
 {
   fpGUI  -  Free Pascal GUI Toolkit
 
-  Copyright (C) 2006 - 2018 See the file AUTHORS.txt, included in this
+  Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
   distribution, for details of the copyright.
 
   See the file COPYING.modifiedLGPL, included in this distribution,
@@ -70,7 +70,7 @@ end;
 procedure TMainForm.CustomPaintJob;
 var
   r: TfpgRect;
-  fnt: TfpgFont;
+  fnt: TfpgFontResourceBase;
   y: integer;
   ac: TAgg2D;
   c1, c2: TAggColor;
@@ -233,14 +233,14 @@ begin
   y := y + Canvas.Font.Height;
   Canvas.DrawString(5, y, 'Russian (UTF-8) text: Невозможно создать директорию');
   y := y + Canvas.Font.Height;
-  fnt := fpgApplication.GetFont('Times-14:bold');
-  Canvas.Font := fnt;
-  Canvas.DrawString(5, y, 'Font used is ' + Canvas.Font.FontDesc);
-  y := y + Canvas.Font.Height;
+  fnt := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-14:bold');
+  Canvas.SetFont(fnt);
+  Canvas.DrawString(5, y, 'Font used is ' + FPG_DEFAULT_SANS + '-14:bold');
+  y := y + fnt.GetHeight;
 
 
   // Testing basic style drawings
-  Canvas.Font := fpgStyle.DefaultFont;
+  Canvas.SetFont(fpgStyle.DefaultFont);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);
@@ -365,7 +365,7 @@ begin
   end  // if Assigned(ac)
   else
   begin
-    Canvas.Font := fpgStyle.DefaultFont;
+    Canvas.SetFont(fpgStyle.DefaultFont);
     Canvas.DrawString(75, 275, 'AggCanvas was NOT enabled, so the remaining advanced');
     Canvas.DrawString(75, 295, 'rendering will not display here.');
 

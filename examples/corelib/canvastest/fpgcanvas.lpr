@@ -41,7 +41,7 @@ end;
 procedure TMainForm.CustomPaintJob;
 var
   r: TfpgRect;
-  fnt: TfpgFont;
+  fnt: TfpgFontResourceBase;
   y: integer;
   c: TfpgColor;
   lImage: TfpgImage;
@@ -110,14 +110,14 @@ begin
   y := y + Canvas.Font.Height;
   Canvas.DrawString(5, y, 'Russian (UTF-8) text -> Òåñò');
   y := y + Canvas.Font.Height;
-  fnt := fpgApplication.GetFont('Times-14:bold');
-  Canvas.Font := fnt;
-  Canvas.DrawString(5, y, 'Font used is ' + Canvas.Font.FontDesc);
-  y := y + Canvas.Font.Height;
+  fnt := fpgApplication.FontManager.GetFont('Times-14:bold');
+  Canvas.SetFont(fnt);
+  Canvas.DrawString(5, y, 'Font used is Times-14:bold');
+  y := y + fnt.GetHeight;
 
 
   // Testing basic style drawings
-  Canvas.Font := fpgStyle.DefaultFont;
+  Canvas.SetFont(fpgStyle.DefaultFont);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);

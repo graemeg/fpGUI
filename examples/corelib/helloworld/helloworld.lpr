@@ -36,8 +36,8 @@ type
 
   TMainWindow = class(TfpgWindow)
   private
-    FLargeFont: TfpgFont;
-    FSmallFont: TfpgFont;
+    FLargeFont: TfpgFontResourceBase;
+    FSmallFont: TfpgFontResourceBase;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -56,14 +56,14 @@ begin
   inherited Create(AOwner);
   FWidth    := 350;
   FHeight   := 200;
-  FLargeFont := fpgGetFont('Arial-20');
-  FSmallFont := fpgGetFont('Arial-10');
+  FLargeFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-20');
+  FSmallFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-10');
 end;
 
 destructor TMainWindow.Destroy;
 begin
-  FLargeFont.Free;
-  FSmallFont.Free;
+  FLargeFont := nil;
+  FSmallFont := nil;
   inherited Destroy;
 end;
 
@@ -82,19 +82,19 @@ begin
   r.SetRect(0, 0, Width, Height);
   Canvas.GradientFill(r, clBlue, clBlack, gdVertical);
 
-  Canvas.Font := FLargeFont;
+  Canvas.SetFont(FLargeFont);
   Canvas.SetTextColor(clBlack);
-  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
-    (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
+  Canvas.DrawString((Width - FLargeFont.GetTextWidth(HelloWorldString)) div 2 + 1,
+    (Height - FLargeFont.GetHeight) div 2 + 1, HelloWorldString);
 
   Canvas.SetTextColor(clWhite);
-  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
-    (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
+  Canvas.DrawString((Width - FLargeFont.GetTextWidth(HelloWorldString)) div 2 - 1,
+    (Height - FLargeFont.GetHeight) div 2 - 1, HelloWorldString);
 
 
-  Canvas.Font := FSmallFont;
-  Canvas.DrawString((Width - Canvas.Font.TextWidth(ClickToClose)) div 2 - 1,
-    Height - (Canvas.Font.Height*2), ClickToClose);
+  Canvas.SetFont(FSmallFont);
+  Canvas.DrawString((Width - FSmallFont.GetTextWidth(ClickToClose)) div 2 - 1,
+    Height - (FSmallFont.GetHeight*2), ClickToClose);
 
   Canvas.EndDraw;
 end;

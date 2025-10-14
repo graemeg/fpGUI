@@ -77,7 +77,7 @@ type
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
-    FKeywordFont: TfpgFont;
+    FKeywordFont: TfpgFontResourceBase;
     FFileMonitor: TFileMonitor;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
@@ -914,7 +914,7 @@ const
   cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
   cHexadecimal = '\$[A-F0-9]+\b';
 var
-  oldfont: TfpgFont;
+  oldfont: TfpgFontResourceBase;
   s: TfpgString;  // copy of ALineText we work with
   i, j, c: integer;  // i = position of reserved word; c = last character pos
   iLength: integer; // length of reserved word
@@ -927,7 +927,7 @@ begin
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
 
-  oldfont := TfpgFont(ACanvas.Font);
+  oldfont := TfpgFontResourceBase(ACanvas.Font);
   ACanvas.Color := clWhite;
 
   { draw the plain text first }
@@ -939,8 +939,8 @@ begin
 
   { syntax highlighting for: keywords }
   if not Assigned(FKeywordFont) then
-    FKeywordFont := fpgGetFont(edt.FontDesc + ':bold');
-  ACanvas.Font := FKeywordFont;
+    FKeywordFont := fpgApplication.FontManager.GetFont(edt.FontDesc + ':bold');
+  ACanvas.SetFont(FKeywordFont);
   ACanvas.Color := clWhite;
   FRegex.Expression := cKeywords1;
   FRegex.ModifierI := True;
@@ -958,7 +958,7 @@ begin
     until not FRegex.ExecNext;
   end;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 
   { syntax highlighting for: cDecimal }
   ACanvas.TextColor := clNavy;
@@ -1066,7 +1066,7 @@ begin
     ACanvas.DrawText(r, s);
   end;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 //  writeln('------');
 end;
 
@@ -1081,7 +1081,7 @@ const
   cHunk = '^\@\@.*';                        // starts with "@@" symbols
   cStartOfFile = '^(diff|index) .*';        // starts with "diff " or "index " symbols
 var
-  oldfont: TfpgFont;
+  oldfont: TfpgFontResourceBase;
   s: TfpgString;  // copy of ALineText we work with
   i, j, c: integer;  // i = position of reserved word; c = last character pos
   iLength: integer; // length of reserved word
@@ -1093,7 +1093,7 @@ begin
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
 
-  oldfont := TfpgFont(ACanvas.Font);
+  oldfont := TfpgFontResourceBase(ACanvas.Font);
   ACanvas.Color := clWhite;
 
   { draw the plain text first }
@@ -1207,7 +1207,7 @@ begin
   end;
   ACanvas.Color := clWhite;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 end;
 
 procedure TMainForm.SetupEditorPreference;
@@ -1216,7 +1216,6 @@ var
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
-  FKeywordFont.Free;
   FKeywordFont := nil;
   for i := 0 to pcEditor.PageCount-1 do
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
@@ -1277,7 +1276,7 @@ begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
   FRegex.Free;
-  FKeywordFont.Free;
+  FKeywordFont := nil;
   inherited Destroy;
 end;
 
