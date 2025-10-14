@@ -1,4 +1,17 @@
 (*
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
   A very quick and basic style implementation. It took all of 10 minutes.
   To apply this style, follow these instructions:
 
@@ -72,7 +85,7 @@ uses
 constructor TMyStyle.Create;
 begin
   inherited Create;
-  fpgSetNamedColor(clWindowBackground, TfpgColor($eeeeec));
+  fpgSetNamedColor(clWindowBackground, fpgColor(Byte($ee), Byte($ee), Byte($ec)));
 end;
 
 procedure TMyStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
@@ -93,7 +106,7 @@ begin
 
   if btfIsDefault in AFlags then
   begin
-    ACanvas.SetColor(TfpgColor($7b7b7b));
+    ACanvas.SetColor(fpgColor(Byte($7b), Byte($7b), Byte($7b)));
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
     r.InflateRect(-1, -1);
@@ -111,7 +124,7 @@ begin
 
   // outer rectangle
   ACanvas.SetLineStyle(1, lsSolid);
-  ACanvas.SetColor(TfpgColor($a6a6a6));
+  ACanvas.SetColor(fpgColor(Byte($a6), Byte($a6), Byte($a6)));
   ACanvas.DrawRectangle(r);
 
   // so we don't paint over the border
@@ -119,12 +132,12 @@ begin
   // now paint the face of the button
   if (btfIsPressed in AFlags) then
   begin
-    ACanvas.GradientFill(r, TfpgColor($cccccc), TfpgColor($e4e4e4), gdVertical);
+    ACanvas.GradientFill(r, fpgColor(Byte($cc), Byte($cc), Byte($cc)), fpgColor(Byte($e4), Byte($e4), Byte($e4)), gdVertical);
   end
   else
   begin
-    ACanvas.GradientFill(r, TfpgColor($fafafa), TfpgColor($e2e2e2), gdVertical);
-    ACanvas.SetColor(TfpgColor($cccccc));
+    ACanvas.GradientFill(r, fpgColor(Byte($fa), Byte($fa), Byte($fa)), fpgColor(Byte($e2), Byte($e2), Byte($e2)), gdVertical);
+    ACanvas.SetColor(fpgColor(Byte($cc), Byte($cc), Byte($cc)));
     ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
     ACanvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom);   // bottom
   end;
@@ -134,7 +147,7 @@ procedure TMyStyle.DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMen
 begin
   inherited DrawMenuRow(ACanvas, r, AFlags);
   if (mifSelected in AFlags) and not (mifSeparator in AFlags) then
-    ACanvas.GradientFill(r, TfpgColor($fec475), TfpgColor($fb9d24), gdVertical);
+    ACanvas.GradientFill(r, fpgColor(Byte($fe), Byte($c4), Byte($75)), fpgColor(Byte($fb), Byte($9d), Byte($24)), gdVertical);
 end;
 
 procedure TMyStyle.DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor);
@@ -143,8 +156,8 @@ var
   FDarkColor: TfpgColor;
 begin
   // a possible future theme option
-  FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
-  FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
+  FLightColor := fpgColor(Byte($f0), Byte($ec), Byte($e3));  // color at top of menu bar
+  FDarkColor  := fpgColor(Byte($be), Byte($b8), Byte($a4));  // color at bottom of menu bar
   ACanvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
 
   // inner bottom line

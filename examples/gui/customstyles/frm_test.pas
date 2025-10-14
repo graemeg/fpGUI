@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2016 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -328,7 +328,7 @@ begin
   begin
     Name := 'ColorListBox1';
     SetPosition(208, 248, 160, 76);
-    Color := TfpgColor($FF00FFFF);
+    Color := fpgColor(Byte($00), Byte($FF), Byte($FF));
     FontDesc := '#List';
     Hint := '';
     TabOrder := 21;
