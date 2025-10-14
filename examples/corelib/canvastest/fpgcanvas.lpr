@@ -104,12 +104,12 @@ begin
 //  Canvas.DrawLine(1,y, 10, y);
 
   Canvas.SetTextColor(clRed);
-  y := y + Canvas.Font.Height;  // fonts are different sizes on differet OS's
+  y := y + Canvas.Font.GetHeight();  // fonts are different sizes on differet OS's
   Canvas.DrawString(5, y, 'This text must be red.');
   Canvas.SetTextColor(clBlack);
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
   Canvas.DrawString(5, y, 'Russian (UTF-8) text -> Òåñò');
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
   fnt := fpgApplication.FontManager.GetFont('Times-14:bold');
   Canvas.SetFont(fnt);
   Canvas.DrawString(5, y, 'Font used is Times-14:bold');
@@ -137,7 +137,7 @@ begin
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
 
   Canvas.DrawString(45, y, 'DrawControlFrame():');
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
   fpgStyle.DrawControlFrame(Canvas, 5, y, 200, 23);
 
 
