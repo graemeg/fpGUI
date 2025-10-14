@@ -492,7 +492,14 @@ var
 begin
   if FAutoSize then
   begin
-    NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    // Use Canvas.Font if available (for AggCanvas compatibility), otherwise owner's FFont
+    if WindowAllocated and Assigned(Canvas) then
+    begin
+      Canvas.SetFont(FOwner.FFont);
+      NeededWidth := Canvas.Font.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    end
+    else
+      NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
     Width:=NeededWidth;
   end;
 end;
@@ -799,8 +806,18 @@ end;
 
 procedure TfpgBaseTextEdit.UpdateCharBounds;
 begin
-  FChrW := FFont.GetTextWidth('W');
-  FChrH := FFont.GetHeight;
+  // Use Canvas.Font if available (for AggCanvas compatibility), otherwise FFont
+  if WindowAllocated and Assigned(Canvas) then
+  begin
+    Canvas.SetFont(FFont);
+    FChrW := Canvas.Font.GetTextWidth('W');
+    FChrH := Canvas.Font.GetHeight;
+  end
+  else
+  begin
+    FChrW := FFont.GetTextWidth('W');
+    FChrH := FFont.GetHeight;
+  end;
   FVisLines := (GetClientRect.Height div FChrH) + 1;
   if Assigned(FGutterPan) then
   begin
