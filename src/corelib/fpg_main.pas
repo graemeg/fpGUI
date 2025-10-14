@@ -283,10 +283,8 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
-    FFontResList: TList;  // OLD - will be phased out
-    FFontManager: TfpgFontManager;  // NEW - centralized font management
+    FFontManager: TfpgFontManager;  // centralized font management
     FMessageHookList: TFPList;
-    procedure   FreeFontRes(afontres: TfpgFontResource);
     procedure   InternalInit;
     procedure   RunMessageLoop;
     procedure   WaitWindowMessage(atimeoutms: integer);
@@ -1450,8 +1448,7 @@ begin
   InitializeDebugOutput;
   fpgInitMsgQueue;
 
-  FFontResList    := TList.Create;  // OLD - keep for compatibility
-  FFontManager    := TfpgFontManager.Create;  // NEW - create font manager
+  FFontManager    := TfpgFontManager.Create;
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
@@ -1505,16 +1502,8 @@ begin
       TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
 
-  // NEW: Free font manager first (will free all cached fonts)
+  // Free font manager (will free all cached fonts)
   FFontManager.Free;
-
-  // OLD: Keep for compatibility during transition
-  for i := FFontResList.Count-1 downto 0 do
-  begin
-    TfpgFontResource(FFontResList[i]).Free;
-    FFontResList.Delete(i);
-  end;
-  FFontResList.Free;
 
   FreeAndNil(FModalFormStack);
 
@@ -1739,19 +1728,6 @@ begin
     FStartDragDistance := 0
   else
     FStartDragDistance := AValue;
-end;
-
-procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
-var
-  n: integer;
-begin
-  for n := FFontResList.Count-1 downto 0 do
-    if FFontResList[n] = Pointer(afontres) then
-    begin
-      TfpgFontResource(FFontResList[n]).Free;
-      FFontResList.Delete(n);
-      Exit; //==>
-    end;
 end;
 
 procedure TfpgApplication.InternalInit;

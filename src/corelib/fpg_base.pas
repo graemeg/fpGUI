@@ -345,9 +345,8 @@ type
   TfpgFontBase = class(TObject)
   protected
     FFontDesc: string;
-    FFontRes: TfpgFontResourceBase;        // KEEP temporarily for compatibility
-    FFontEngine: IFontEngine;              // NEW
-    FFontDefinition: TfpgFontDefinition;   // NEW
+    FFontEngine: IFontEngine;
+    FFontDefinition: TfpgFontDefinition;
     function    GetIsFixedWidth: boolean; virtual;
   public
     constructor Create(const AFontDesc: string);
@@ -357,10 +356,8 @@ type
     function    Descent: integer;
     function    Height: integer;
     property    FontDesc: string read FFontDesc;
-    property    FontRes: TfpgFontResourceBase read FFontRes;
-    property    Handle: TfpgFontResourceBase read FFontRes;
     property    IsFixedWidth: boolean read GetIsFixedWidth;
-    { NEW: Font engine interface for metric calculations }
+    { Font engine interface for metric calculations }
     property    FontEngine: IFontEngine read FFontEngine write FFontEngine;
     property    FontDefinition: TfpgFontDefinition read FFontDefinition;
   end;
@@ -3240,7 +3237,6 @@ begin
   FFontDesc := AFontDesc;
   FFontDefinition := TfpgFontDefinition.Create(AFontDesc);
   FFontEngine := nil;  // Will be set by canvas
-  // FFontRes will be set by subclass as before
 end;
 
 destructor TfpgFontBase.Destroy;
@@ -3269,11 +3265,8 @@ begin
     Exit;
   end;
 
-  // Use font engine if configured by canvas
   if Assigned(FFontEngine) then
     Result := FFontEngine.GetTextWidth(txt)
-  else if Assigned(FFontRes) then
-    Result := FFontRes.GetTextWidth(txt)  // Fallback for compatibility
   else
     Result := 0;
 end;
@@ -3282,8 +3275,6 @@ function TfpgFontBase.Ascent: integer;
 begin
   if Assigned(FFontEngine) then
     Result := FFontEngine.GetAscent
-  else if Assigned(FFontRes) then
-    Result := FFontRes.GetAscent
   else
     Result := 0;
 end;
@@ -3292,8 +3283,6 @@ function TfpgFontBase.Descent: integer;
 begin
   if Assigned(FFontEngine) then
     Result := FFontEngine.GetDescent
-  else if Assigned(FFontRes) then
-    Result := FFontRes.GetDescent
   else
     Result := 0;
 end;
@@ -3302,8 +3291,6 @@ function TfpgFontBase.Height: integer;
 begin
   if Assigned(FFontEngine) then
     Result := FFontEngine.GetHeight
-  else if Assigned(FFontRes) then
-    Result := FFontRes.GetHeight
   else
     Result := 0;
 end;
