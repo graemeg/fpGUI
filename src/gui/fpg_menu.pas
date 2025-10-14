@@ -351,12 +351,12 @@ begin
       fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
 
       // Use Canvas.Font for metrics - font engine is configured correctly
-      inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, 1, p-1)));
+      inc(x, ACanvas.Font.GetTextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
         fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
-        inc(x, ACanvas.Font.TextWidth(achar));
+        inc(x, ACanvas.Font.GetTextWidth(achar));
       end
       else
       begin
@@ -364,7 +364,7 @@ begin
         if Enabled then
           ACanvas.SetFontDefinition(fpgStyle.MenuAccelFontDef);
         fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
-        inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
+        inc(x, ACanvas.Font.GetTextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
           ACanvas.SetFontDefinition(fpgStyle.MenuFontDef);
       end;
@@ -1134,7 +1134,7 @@ var
     begin
       s := mi.HotKeyDef;
       Canvas.SetFontDefinition(fpgStyle.MenuFontDef);
-      fpgStyle.DrawString(Canvas, rect.Right-Canvas.Font.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
+      fpgStyle.DrawString(Canvas, rect.Right-Canvas.Font.GetTextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
     end;
 
     // process menu item submenu arrow image
@@ -1153,7 +1153,7 @@ var
     lLineY: Integer;
   begin
     Canvas.SetFontDefinition(fpgStyle.MenuHeaderFontDef);
-    lTextWidth := Canvas.Font.TextWidth(mi.Text);
+    lTextWidth := Canvas.Font.GetTextWidth(mi.Text);
     lTextX := rect.CenterPoint.X - (lTextWidth div 2);
 
 

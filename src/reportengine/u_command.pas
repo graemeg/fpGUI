@@ -153,7 +153,7 @@ type
   PPage     = ^T_Page;
   PLigne    = ^T_WriteLine;
   PCommande = ^T_Command;
-  PFont     = ^TfpgFont;
+  PFont     = ^TfpgFontResourceBase;
 
   T_WriteText = class(T_Command)
   private
@@ -254,14 +254,14 @@ type
 
   T_Font = class(T_Command)
   private
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FColor: TfpgColor;
     FSize: string;
   public
     constructor Create(AFont: string; AColor: TfpgColor); virtual;
     destructor Destroy; override;
     function GetHeight: integer;
-    property GetFont: TfpgFont read FFont;
+    property GetFont: TfpgFontResourceBase read FFont;
     property GetColor: TfpgColor read FColor;
     property GetSize: string read FSize;
   end;
@@ -756,20 +756,20 @@ end;
 constructor T_Font.Create(AFont: string; AColor: TfpgColor);
 begin
   inherited Create;
-  FFont  := fpgApplication.GetFont(AFont);
+  FFont  := fpgApplication.FontManager.GetFont(AFont);
   FColor := AColor;
   FSize  := ExtractFontSize(AFont);
 end;
 
 destructor T_Font.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
 end;
 
 function T_Font.GetHeight: integer;
 begin
-  Result := TfpgFont(FFont).Height;
+  Result := FFont.GetHeight();
 end;
 
 constructor T_LineSpace.Create(ASup, AInt, AInf: single);

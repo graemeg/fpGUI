@@ -195,7 +195,7 @@ begin
     x := (Width - FFont.GetTextWidth(txt)) div 2;
     y := (Height - FFont.GetHeight) div 2;
     Canvas.SetTextColor(TextColor);
-    Canvas.Font := FFont;
+    Canvas.SetFont(FFont);
     Canvas.DrawString(x, y, txt);
   end;
 end;

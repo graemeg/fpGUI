@@ -618,19 +618,19 @@ begin
     if FWeeklyHoliday >= FWeekStartDay then
       if ACol = FWeeklyHoliday - FWeekStartDay then
       begin
-        Canvas.Font := FntBold;
+        Canvas.SetFont(FntBold);
         Canvas.SetTextColor(FHolidayColor);
       end
       else
-        Canvas.Font := FntNorm
+        Canvas.SetFont(FntNorm)
     else
       if (FWeeklyHoliday > -1) and (ACol = FWeeklyHoliday - FWeekStartDay + 7) then
       begin
-        Canvas.Font := FntBold;
+        Canvas.SetFont(FntBold);
         Canvas.SetTextColor(FHolidayColor);
       end
       else
-        Canvas.Font := FntNorm;
+        Canvas.SetFont(FntNorm);
   end;
 end;
 

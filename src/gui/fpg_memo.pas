@@ -632,7 +632,7 @@ begin
   for i := 0 to DragLines.Count -1 do
   begin
     ACanvas.DrawText(x,y, DragLines.Strings[i]);
-    Inc(y, ACanvas.Font.Height);
+    Inc(y, ACanvas.Font.GetHeight());
   end;
 
   DragLines.Free;
@@ -799,7 +799,7 @@ begin
 
     SelLines.Free;
 
-    FDrag.PreviewSize := fpgSize(WidestLine, Canvas.Font.Height * (FSelEndLine - FSelStartLine + 1));
+    FDrag.PreviewSize := fpgSize(WidestLine, Canvas.Font.GetHeight() * (FSelEndLine - FSelStartLine + 1));
     Action := FDrag.Execute([daCopy, daMove]);
     case Action of
       daCopy: ;
@@ -1337,7 +1337,7 @@ begin
         if s <> '' then
         begin
           Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
-          inc(xp, Canvas.Font.TextWidth(s));
+          inc(xp, Canvas.Font.GetTextWidth(s));
         end;
         if tstop = -1 then
           tstop := TabbedTextWidth(#9); // tabstop width

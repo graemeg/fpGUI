@@ -415,8 +415,8 @@ type
     FTextColor: TfpgColor;
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
-    FFont: TfpgFontBase;
-    FOwnedFont: TfpgFontBase;
+    FFont: TfpgFontResourceBase;
+    FOwnedFont: TfpgFontResourceBase;
     FDeltaX,
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
@@ -427,8 +427,8 @@ type
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoGetWinRect(out r: TfpgRect); virtual;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
-    { Configure font's engine based on canvas type }
-    procedure   ConfigureFontEngine(AFont: TfpgFontBase); virtual;
+    { Configure font's engine based on canvas type - REMOVED: No longer needed }
+    // procedure   ConfigureFontEngine(AFont: TfpgFontBase); virtual;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
@@ -487,8 +487,8 @@ type
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
-    procedure   SetFont(AFont: TfpgFontBase); overload;
-    procedure   SetFont(AFont: TfpgFontResourceBase); overload;  // NEW: direct font resource
+    // procedure   SetFont(AFont: TfpgFontBase); overload;  // REMOVED: TfpgFontBase being phased out
+    procedure   SetFont(AFont: TfpgFontResourceBase); overload;  // Direct font resource
     { NEW: Convenience method to set font from definition }
     procedure   SetFontDefinition(AFontDef: TfpgFontDefinition);
     procedure   BeginDraw; overload;
@@ -499,7 +499,7 @@ type
     procedure   FreeResources;
     property    Color: TfpgColor read FColor write SetColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
-    property    Font: TfpgFontBase read FFont write SetFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
     property    LineStyle: TfpgLineStyle read FLineStyle;
@@ -2579,7 +2579,7 @@ end;
 
 destructor TfpgCanvasBase.Destroy;
 begin
-  FOwnedFont.Free;
+  FOwnedFont := nil;  // Reference-counted, will be freed automatically
   FInterpolation.Free;
   inherited Destroy;
 end;
@@ -2774,21 +2774,27 @@ end;
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);
 var
   underline: integer;
+  fontdesc: string;
 begin
   DoDrawString(x, y, txt);
 
   { What was not handled: underline }
-  if Pos('UNDERLINE', UpperCase(Font.FontDesc)) > 0 then
+  if Font is TfpgFontResource then
+    fontdesc := TfpgFontResource(Font).FontDesc
+  else
+    fontdesc := '';
+
+  if Pos('UNDERLINE', UpperCase(fontdesc)) > 0 then
   begin
-    underline := (Font.Descent div 2) + 1;
+    underline := (Font.GetDescent() div 2) + 1;
     if underline = 0 then
       underline := 1;
-    if underline >= Font.Descent then
-      underline := Font.Descent - 1;
+    if underline >= Font.GetDescent() then
+      underline := Font.GetDescent() - 1;
 
     DoSetLineStyle(1, lsSolid);
     DoSetColor(TextColor);
-    DoDrawLine(x, y+Font.Height-underline, x+Font.TextWidth(txt), y+Font.Height-underline);
+    DoDrawLine(x, y+Font.GetHeight()-underline, x+Font.GetTextWidth(txt), y+Font.GetHeight()-underline);
   end;
 end;
 
@@ -2926,13 +2932,18 @@ begin
   DoSetLineStyle(FLineWidth, FLineStyle);
 end;
 
+{ Removed - no longer needed as we work directly with TfpgFontResourceBase }
+{
 procedure TfpgCanvasBase.ConfigureFontEngine(AFont: TfpgFontBase);
 begin
   // Default implementation: use platform-specific font resource as engine
   if Assigned(AFont) and Assigned(AFont.FontRes) then
     AFont.FontEngine := AFont.FontRes as IFontEngine;
 end;
+}
 
+{ Removed - TfpgFontBase is being phased out in favor of TfpgFontResourceBase }
+{
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
   if FFont = AFont then
@@ -2950,49 +2961,38 @@ begin
 
   DoSetFontRes(AFont.FontRes);
 end;
+}
 
 // NEW: Overload to accept TfpgFontResourceBase directly
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontResourceBase);
-var
-  LFontDesc: string;
 begin
-  // TRANSITIONAL: During Phase 2 migration, we still need TfpgFont wrapper for Canvas compatibility
-  // In Phase 3, we'll remove TfpgFont completely and Canvas will work directly with TfpgFontResourceBase
+  // Phase 3: TfpgFont wrapper removed, Canvas now works directly with TfpgFontResourceBase
 
-  // Get the font descriptor if available
-  if AFont is TfpgFontResource then
-    LFontDesc := TfpgFontResource(AFont).FontDesc
-  else
-    LFontDesc := '';
+  if FFont = AFont then
+    Exit;
 
-  // Create a temporary TfpgFont wrapper that Canvas will own
-  // This is needed because Canvas code accesses Font.FontDesc and other properties
-  FOwnedFont.Free;
-  if AFont is TfpgFontResource then
-    FOwnedFont := TfpgFont.Create(TfpgFontResource(AFont), LFontDesc)
-  else
-    FOwnedFont := nil;
+  // Release old owned font if it's different
+  if AFont <> FOwnedFont then
+  begin
+    FOwnedFont := nil;  // Reference-counted, will be freed automatically
+  end;
 
-  FFont := FOwnedFont;
+  FFont := AFont;
+  FOwnedFont := nil;  // Canvas doesn't own fonts passed via SetFont
 
   DoSetFontRes(AFont);
 end;
 
 procedure TfpgCanvasBase.SetFontDefinition(AFontDef: TfpgFontDefinition);
 var
-  LFont: TfpgFont;
+  LFont: TfpgFontResourceBase;
 begin
   if not Assigned(AFontDef) then
     Exit;
 
-  if Assigned(FOwnedFont) and (FOwnedFont.FontDesc = AFontDef.FontDesc) then
-  begin
-    SetFont(FOwnedFont);
-    Exit;
-  end;
+  LFont := fpgApplication.FontManager.GetFont(AFontDef.FontDesc);
 
-  LFont := fpgGetFont(AFontDef.FontDesc);
-  FOwnedFont.Free;
+  // Canvas will take ownership of this font
   FOwnedFont := LFont;
   SetFont(LFont);
 end;

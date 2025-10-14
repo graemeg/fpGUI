@@ -598,7 +598,7 @@ begin
   r.SetRect(0, 0, Width - fpgStyle.GetBevelWidth * 2, Height - fpgStyle.GetBevelWidth * 2);
   Canvas.SetClipRect(r);
 
-  Canvas.Font := Font;
+  Canvas.SetFont(Font);
 
   StartRow:= FVScroll.Position;
   PaintAddressGutter(StartRow*GetCharsPerRow);

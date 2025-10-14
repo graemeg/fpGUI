@@ -1862,7 +1862,10 @@ begin
   begin
     for Cpt := 0 to Pred(Fonts.Count) do
     begin
-      FontName := ExtractBaseFontName(T_Font(Fonts[Cpt]).GetFont.FontDesc);
+      if T_Font(Fonts[Cpt]).GetFont is TfpgFontResource then
+        FontName := ExtractBaseFontName(TfpgFontResource(T_Font(Fonts[Cpt]).GetFont).FontDesc)
+      else
+        FontName := '';
       if Pos('-', FontName) > 0 then
         FtName := Copy(FontName, 1, Pred(Pos('-', FontName)))
       else

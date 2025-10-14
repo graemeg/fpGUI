@@ -260,7 +260,7 @@ begin
   end;
 { If contrast is poor we might use a Xor function }
   Canvas.SetTextColor(FirstColor);
-  Canvas.Font := FFont;
+  Canvas.SetFont(FFont);
   Canvas.DrawString(x, y, S);
 end;
 

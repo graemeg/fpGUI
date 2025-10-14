@@ -116,13 +116,6 @@ type
   end;
 
 
-  TfpgFont = class(TfpgFontBase)
-  public
-    constructor Create(afontres: TfpgFontResource; const afontdesc: string);
-    destructor  Destroy; override;
-  end;
-
-
   // forward declaration
   TfpgCanvas = class;
   TfpgTimer = class;
@@ -300,7 +293,6 @@ type
   public
     constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
-    function    GetFont(const afontdesc: TfpgString): TfpgFont;
     procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
     procedure   RecreateHintWindow;
     procedure   Flush;
@@ -447,9 +439,6 @@ var
 // Application & Clipboard singletons
 function  fpgApplication: TfpgApplication;
 function  fpgClipboard: TfpgClipboard;
-
-// Fonts (easy access function)
-function  fpgGetFont(const afontdesc: TfpgString): TfpgFont;
 
 // Message Queue  (easy access function)
 procedure fpgWaitWindowMessage;
@@ -1456,11 +1445,6 @@ begin
   fpgApplication.WaitWindowMessage(500);
 end;
 
-function fpgGetFont(const afontdesc: TfpgString): TfpgFont;
-begin
-  Result := fpgApplication.GetFont(afontdesc);
-end;
-
 constructor TfpgApplication.Create(const AParams: string);
 begin
   InitializeDebugOutput;
@@ -1546,44 +1530,6 @@ begin
   uMsgQueueList.Free;
 
   inherited Destroy;
-end;
-
-function TfpgApplication.GetFont(const afontdesc: TfpgString): TfpgFont;
-var
-  fr: TfpgFontResource;
-  n: integer;
-  fdesc: TfpgString;
-begin
-  fdesc := afontdesc;
-
-  if copy(fdesc, 1, 1) = '#' then   // A # (hash) denotes a named font
-    fdesc := fpgGetNamedFontDesc(copy(afontdesc, 2, length(afontdesc)));
-
-  Result := nil;
-
-  for n := 0 to FFontResList.Count - 1 do
-    if TfpgFontResource(FFontResList[n]).FontDesc = fdesc then
-    begin
-      fr     := TfpgFontResource(FFontResList[n]);
-//      Inc(fr.FUsageCount);
-      Result := TfpgFont.Create(fr, afontdesc);
-      Exit; //==>
-    end;
-
-  fr := TfpgFontResource.Create(fdesc);
-
-  if fr.HandleIsValid then
-  begin
-    FFontResList.Add(fr);
-    Result := TfpgFont.Create(fr, afontdesc);
-  end
-  else
-  begin
-    fr.Free;
-    {$IFDEF GDEBUG}
-    SendDebug('fpGFX: Error opening font.');
-    {$ENDIF}
-  end;
 end;
 
 procedure TfpgApplication.ActivateHint(APos: TPoint; AHint: TfpgString);
@@ -1947,22 +1893,6 @@ begin
   WaitWindowMessage(2000);
 end;
 
-{ TfpgFont }
-
-constructor TfpgFont.Create(afontres: TfpgFontResource; const afontdesc: string);
-begin
-  inherited Create(afontdesc);
-  FFontRes  := afontres;
-  afontres.IncRefCount;
-end;
-
-destructor TfpgFont.Destroy;
-begin
-  if TfpgFontResource(FFontRes).DecRefCount <= 0 then
-    fpgApplication.FreeFontRes(TfpgFontResource(FFontRes));
-  inherited Destroy;
-end;
-
 { TfpgFontResource }
 
 constructor TfpgFontResource.Create(const afontdesc: string);
@@ -2018,7 +1948,7 @@ begin
         i := ls+1;
       end;
     end;
-    tw := Font.TextWidth(sub);            // wrap if needed
+    tw := Font.GetTextWidth(sub);            // wrap if needed
     if (lw + tw > aMaxLineWidth) and (lw > 0) then
     begin
       lw := tw;
@@ -2096,7 +2026,7 @@ begin
     buf := ExtractSubstr(AText, i, txtWordDelims);
     while buf <> '' do
     begin
-      wtxt := Max(wtxt, Font.TextWidth(buf));
+      wtxt := Max(wtxt, Font.GetTextWidth(buf));
       buf := ExtractSubstr(AText, i, txtWordDelims);
     end;
   end;
@@ -2113,13 +2043,13 @@ begin
     wraplst.Text := wraplst.Text;
   end;
 
-  htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
+  htxt := (Font.GetHeight() * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
 
   // Now paint the actual text
   for i := 0 to wraplst.Count-1 do
   begin
-    l :=  (Font.Height + ALineSpace) * i;
-    wtxt := Font.TextWidth(wraplst[i]);
+    l :=  (Font.GetHeight() + ALineSpace) * i;
+    wtxt := Font.GetTextWidth(wraplst[i]);
 
     // horizontal alignment
     if (txtRight in AFlags) then

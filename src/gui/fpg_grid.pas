@@ -285,7 +285,7 @@ begin
     end;
 
   // centre text in row height
-  y := y + ((DefaultRowHeight - Canvas.Font.Height) div 2);
+  y := y + ((DefaultRowHeight - Canvas.Font.GetHeight()) div 2);
   Canvas.DrawString(x, y, s);
 end;
 

@@ -35,7 +35,7 @@ type
   private
     FWidget: TfpgWidget;
     FCanvas: TfpgCanvasBase;
-    function    GetCurrentFont: TfpgFont;
+    function    GetCurrentFont: TfpgFontResourceBase;
     procedure   SetDefaultFont(const AValue: TfpgFontResourceBase);
   protected
     FDefaultFont: TfpgFontResourceBase;
@@ -52,7 +52,7 @@ type
     procedure   DrawString(var Point: TPoint; const Length: longint; const S: PChar);
     procedure   SetFont(const AFontDesc: TfpgString);
     property    Canvas: TfpgCanvasBase read FCanvas;
-    property    CurrentFont: TfpgFont read GetCurrentFont;
+    property    CurrentFont: TfpgFontResourceBase read GetCurrentFont;
     property    DefaultFont: TfpgFontResourceBase read FDefaultFont write SetDefaultFont;
     property    Widget: TfpgWidget read FWidget;
   end;
@@ -261,9 +261,9 @@ begin
   FDefaultFont := AValue;
 end;
 
-function TCanvasFontManager.GetCurrentFont: TfpgFont;
+function TCanvasFontManager.GetCurrentFont: TfpgFontResourceBase;
 begin
-  Result := FCanvas.Font as TfpgFont;
+  Result := FCanvas.Font;
 end;
 
 // Set the current font for the canvas to match the given
@@ -272,8 +272,15 @@ procedure TCanvasFontManager.SetFont(const AFontDesc: TfpgString);
 var
   lFontDesc: string;
   lFont: TfpgFontResourceBase;
+  lCurFontDesc: string;
 begin
-  if FCanvas.Font.FontDesc = AFontDesc then
+  // Get current font descriptor safely
+  if FCanvas.Font is TfpgFontResource then
+    lCurFontDesc := TfpgFontResource(FCanvas.Font).FontDesc
+  else
+    lCurFontDesc := '';
+
+  if lCurFontDesc = AFontDesc then
     Exit; // nothing to do so exit
 
   if FDefaultFont is TfpgFontResource then
@@ -295,37 +302,38 @@ end;
 
 function TCanvasFontManager.CharWidth( const C: TfpgChar ): longint;
 begin
-  Result := FCanvas.Font.TextWidth(C);
+  Result := FCanvas.Font.GetTextWidth(C);
 end;
 
 function TCanvasFontManager.AverageCharWidth: longint;
 begin
-  Result := FCanvas.Font.TextWidth('c');
+  Result := FCanvas.Font.GetTextWidth('c');
 end;
 
 function TCanvasFontManager.CharAscender: longint;
 begin
-  Result := FCanvas.Font.Ascent;
+  Result := FCanvas.Font.GetAscent();
 end;
 
 function TCanvasFontManager.MaximumCharWidth: longint;
 begin
-  Result := FCanvas.Font.TextWidth('W');
+  Result := FCanvas.Font.GetTextWidth('W');
 end;
 
 function TCanvasFontManager.CharHeight: longint;
 begin
-  Result := FCanvas.Font.Height;
+  Result := FCanvas.Font.GetHeight();
 end;
 
 function TCanvasFontManager.CharDescender: longint;
 begin
-  Result := FCanvas.Font.Descent;
+  Result := FCanvas.Font.GetDescent();
 end;
 
 function TCanvasFontManager.IsFixed: boolean;
 begin
-  Result := FCanvas.Font.IsFixedWidth;
+  // Check if font is fixed-width by comparing character widths
+  Result := FCanvas.Font.GetTextWidth('i') = FCanvas.Font.GetTextWidth('W');
 end;
 
 procedure TCanvasFontManager.DrawString(var Point: TPoint; const Length: longint; const S: PChar);
@@ -334,7 +342,7 @@ var
 begin
   t := s;
   FCanvas.DrawString(Point.X, Point.Y, t);
-  Point.x := Point.X + Canvas.Font.TextWidth(t);
+  Point.x := Point.X + Canvas.Font.GetTextWidth(t);
 end;
 
 

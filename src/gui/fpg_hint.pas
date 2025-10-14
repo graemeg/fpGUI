@@ -198,7 +198,7 @@ var
   r: TfpgRect;
 begin
   inherited HandlePaint;  // background is set
-  Canvas.Font := FFont;
+  Canvas.SetFont(FFont);
   // Do we need to resize?
   PaintBorder;
   if FBorder > 0 then

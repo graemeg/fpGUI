@@ -678,14 +678,18 @@ Var
     oldf := '';
     if AFontDesc <> '' then
     begin
-      oldf := Canvas.Font.FontDesc; // save original font
-      Canvas.Font := fpgGetFont(AFontDesc); // set new font
+      // save original font descriptor
+      if Canvas.Font is TfpgFontResource then
+        oldf := TfpgFontResource(Canvas.Font).FontDesc
+      else
+        oldf := '';
+      Canvas.SetFont(fpgApplication.FontManager.GetFont(AFontDesc)); // set new font
     end;
     Canvas.TextColor := AColor; // set new color
     Canvas.DrawString(x, 10, AText);
-    x := x + Canvas.Font.TextWidth(AText);  // calc x offset for next text
+    x := x + Canvas.Font.GetTextWidth(AText);  // calc x offset for next text
     if oldf <> '' then
-      Canvas.Font := fpgGetFont(oldf);  // restore original font
+      Canvas.SetFont(fpgApplication.FontManager.GetFont(oldf));  // restore original font
   end;
 
 begin

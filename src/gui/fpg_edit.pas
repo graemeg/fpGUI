@@ -1420,7 +1420,7 @@ begin
       Drag := TfpgDrag.Create(Self);
       Drag.MimeData := TfpgMimeData.Create;
       Drag.MimeData.Text:=SelectionText;
-      Drag.PreviewSize := fpgSize(Canvas.Font.TextWidth(Drag.MimeData.Text), Canvas.Font.Height);
+      Drag.PreviewSize := fpgSize(Canvas.Font.GetTextWidth(Drag.MimeData.Text), Canvas.Font.GetHeight());
       Drag.OnPaintPreview:=@PaintDragPreview;
 
       Drag.Execute([daCopy]);
