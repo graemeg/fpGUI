@@ -33,9 +33,9 @@ This document provides a comprehensive redesign proposal for the fpGUI font hand
 
 ---
 
-== 1. Current Architecture Analysis
+== Current Architecture Analysis
 
-=== 1.1 Class Hierarchy (Current State)
+=== Class Hierarchy (Current State)
 
 [source]
 ----
@@ -76,9 +76,9 @@ This document provides a comprehensive redesign proposal for the fpGUI font hand
 └───────────────────────────────────┘
 ----
 
-=== 1.2 Critical Issues Identified
+=== Critical Issues Identified
 
-==== 1. TfpgFont Wrapper Adds No Value
+==== TfpgFont Wrapper Adds No Value
 
 *Location:* `src/corelib/fpg_base.pas:341-362`
 
@@ -119,7 +119,7 @@ end;
 
 **Problem**: Widget thinks it "owns" the font, but it's borrowing a wrapper to a shared resource.
 
-==== 2. No Centralized Font Manager
+==== No Centralized Font Manager
 
 *Location:* `src/corelib/fpg_main.pas:315, 1566-1602`
 
@@ -143,7 +143,7 @@ public
 * Hard to unit test or mock
 * No cache statistics or debugging capabilities
 
-==== 3. Manual Reference Counting is Error-Prone
+==== Manual Reference Counting is Error-Prone
 
 *Location:* `src/corelib/fpg_main.pas:1990-1999`
 
@@ -169,7 +169,7 @@ end;
 * Easy to forget Inc/Dec pairs
 * Already caused memory leaks (fixed in commit 9b58fb60)
 
-==== 4. Incomplete Refactoring - Dual Code Paths
+==== Incomplete Refactoring - Dual Code Paths
 
 *Location:* `src/corelib/fpg_base.pas:342-346`
 
@@ -200,7 +200,7 @@ end;
 
 This pattern repeats in `Ascent()`, `Descent()`, and `Height()` methods.
 
-==== 5. Inefficient O(n) Cache Lookups
+==== Inefficient O(n) Cache Lookups
 
 *Location:* `src/corelib/fpg_main.pas:1579-1586`
 
@@ -218,7 +218,7 @@ for n := 0 to FFontResList.Count - 1 do
 
 **Impact**: Every font request scans entire list with string comparisons. For typical apps with 10-20 fonts, the impact is minor, but this is inefficient design.
 
-==== 6. Font Descriptor Parsing in Multiple Locations
+==== Font Descriptor Parsing in Multiple Locations
 
 Font descriptors are parsed differently in each backend:
 
@@ -245,7 +245,7 @@ Font descriptors are parsed differently in each backend:
 
 **Risk**: Font descriptor `"Arial-12:bold"` might be interpreted differently across backends.
 
-=== 1.3 Fixed Issues (Recent Commits)
+=== Fixed Issues (Recent Commits)
 
 ==== Memory Leak Fix: Double Reference Count
 
@@ -285,9 +285,9 @@ end;
 
 ---
 
-== 2. Proposed New Architecture
+== Proposed New Architecture
 
-=== 2.1 Simplified Class Hierarchy
+=== Simplified Class Hierarchy
 
 [source]
 ----
@@ -348,16 +348,16 @@ Separate utility (no inheritance):
 └────────────────────────┘
 ----
 
-=== 2.2 Key Changes
+=== Key Changes
 
-1. **Remove TfpgFont** entirely - widgets use `TfpgFontResource` directly
-2. **Create TfpgFontManager** - dedicated class for font management
-3. **Use TInterfacedObject** - automatic reference counting via interfaces
-4. **Hash-based cache** - O(1) lookup using `TFPHashObjectList`
-5. **Consolidate parsing** - all backends use `TfpgFontDefinition.ParseFontDesc`
-6. **Complete IFontEngine** - remove all FFontRes legacy code
+. **Remove TfpgFont** entirely - widgets use `TfpgFontResource` directly
+. **Create TfpgFontManager** - dedicated class for font management
+. **Use TInterfacedObject** - automatic reference counting via interfaces
+. **Hash-based cache** - O(1) lookup using `TFPHashObjectList`
+. **Consolidate parsing** - all backends use `TfpgFontDefinition.ParseFontDesc`
+. **Complete IFontEngine** - remove all FFontRes legacy code
 
-=== 2.3 New API Design
+=== New API Design
 
 ==== TfpgFontManager
 
@@ -734,9 +734,9 @@ end;
 
 ---
 
-== 3. Detailed Implementation Plan
+== Detailed Implementation Plan
 
-=== 3.1 Phase 1: Foundation (Week 1, Days 1-5)
+=== Phase 1: Foundation (Week 1, Days 1-5)
 
 ==== Day 1-2: Create TfpgFontManager
 
@@ -937,7 +937,7 @@ end;
 
 **Deliverable:** Both old and new paths working in parallel
 
-=== 3.2 Phase 2: Widget Migration (Week 2, Days 6-10)
+=== Phase 2: Widget Migration (Week 2, Days 6-10)
 
 ==== Day 6-7: Base Widget Classes
 
@@ -1126,7 +1126,7 @@ status in the todo list. The established migration pattern is working smoothly:
 
 **Deliverable:** Core widgets using new font API
 
-=== 3.3 Phase 3: Complete Migration (Week 3, Days 11-15)
+=== Phase 3: Complete Migration (Week 3, Days 11-15)
 
 ==== Day 11-12: Remaining Widgets
 
@@ -1370,7 +1370,7 @@ fpcunit tests/test_fontdefinition.pas
 
 **Deliverable:** Clean, simplified font architecture with all legacy code removed
 
-=== 3.4 Phase 4: Testing & Documentation (Ongoing)
+=== Phase 4: Testing & Documentation (Ongoing)
 
 ==== Testing Strategy
 
@@ -1574,11 +1574,11 @@ Common issues and solutions:
 
 ---
 
-== 4. Risk Assessment
+== Risk Assessment
 
-=== 4.1 High Risk Areas
+=== High Risk Areas
 
-==== 1. Widget Migration (Risk: MEDIUM)
+==== Widget Migration (Risk: MEDIUM)
 
 **Risk:** Missing some font usage patterns in widgets
 
@@ -1591,7 +1591,7 @@ Common issues and solutions:
 * Test each widget after migration
 * Keep old and new paths in parallel during transition
 
-==== 2. Reference Counting (Risk: MEDIUM-HIGH)
+==== Reference Counting (Risk: MEDIUM-HIGH)
 
 **Risk:** Incorrect ref count management causing leaks or premature freeing
 
@@ -1604,7 +1604,7 @@ Common issues and solutions:
 * Extensive memory leak testing with heaptrc/valgrind
 * Add debug logging for ref count changes (in debug builds)
 
-==== 3. Platform-Specific Code (Risk: MEDIUM)
+==== Platform-Specific Code (Risk: MEDIUM)
 
 **Risk:** Breaking platform backends (X11, GDI, Cocoa)
 
@@ -1617,9 +1617,9 @@ Common issues and solutions:
 * Keep platform-specific code isolated
 * Add fallback to default font if creation fails
 
-=== 4.2 Medium Risk Areas
+=== Medium Risk Areas
 
-==== 4. AGG Backend Integration (Risk: MEDIUM)
+==== AGG Backend Integration (Risk: MEDIUM)
 
 **Risk:** AGG font loading incomplete, might break
 
@@ -1632,7 +1632,7 @@ Common issues and solutions:
 * Ensure gFontCache integration works
 * Add comprehensive AGG font tests
 
-==== 5. Named Font System (Risk: LOW-MEDIUM)
+==== Named Font System (Risk: LOW-MEDIUM)
 
 **Risk:** Breaking `#Label1` style font references
 
@@ -1644,9 +1644,9 @@ Common issues and solutions:
 * Test all predefined named fonts
 * Document named font registration
 
-=== 4.3 Low Risk Areas
+=== Low Risk Areas
 
-==== 6. Font Descriptor Parsing (Risk: LOW)
+==== Font Descriptor Parsing (Risk: LOW)
 
 **Risk:** Breaking existing font descriptors
 
@@ -1658,7 +1658,7 @@ Common issues and solutions:
 * Add unit tests for various descriptor formats
 * Test edge cases
 
-==== 7. Font Manager Implementation (Risk: LOW)
+==== Font Manager Implementation (Risk: LOW)
 
 **Risk:** Bugs in new TfpgFontManager
 
@@ -1671,7 +1671,7 @@ Common issues and solutions:
 * Easy to unit test in isolation
 * Can be developed and tested before integration
 
-=== 4.4 Risk Mitigation Strategy
+=== Risk Mitigation Strategy
 
 **Overall Approach:**
 
@@ -1705,9 +1705,9 @@ Common issues and solutions:
 
 ---
 
-== 5. Success Criteria
+== Success Criteria
 
-=== 5.1 Functional Requirements
+=== Functional Requirements
 
 **All Requirements Must Pass:**
 
@@ -1749,7 +1749,7 @@ Common issues and solutions:
    * All example applications run correctly
    * Existing applications can migrate easily
 
-=== 5.2 Code Quality Requirements
+=== Code Quality Requirements
 
 1. **Simplified Architecture:**
    +
@@ -1779,7 +1779,7 @@ Common issues and solutions:
    * Clear naming conventions
    * Proper error handling
 
-=== 5.3 Verification Checklist
+=== Verification Checklist
 
 **Before Merging to Main Branch:**
 
@@ -1801,9 +1801,9 @@ Common issues and solutions:
 
 ---
 
-== 6. Time Estimation
+== Time Estimation
 
-=== 6.1 Detailed Breakdown
+=== Detailed Breakdown
 
 [cols="1,3,1,1"]
 |===
@@ -1835,7 +1835,7 @@ Common issues and solutions:
 |
 |===
 
-=== 6.2 Assumptions
+=== Assumptions
 
 * **Developer Experience:** Experienced with Object Pascal and fpGUI codebase
 * **Dedicated Time:** Full-time work on refactoring (not part-time)
@@ -1843,7 +1843,7 @@ Common issues and solutions:
 * **Platform Access:** Can test on Linux, Windows, and ideally macOS
 * **Review Time:** Includes time for code review and feedback
 
-=== 6.3 Contingency Buffer
+=== Contingency Buffer
 
 **Recommended Buffer:** 20-30% (4-6 additional days)
 
@@ -1857,7 +1857,7 @@ Common issues and solutions:
 
 **Total Estimate with Buffer:** 22-24 days (4-5 weeks at 5 days/week)
 
-=== 6.4 Part-Time Schedule
+=== Part-Time Schedule
 
 If working part-time (e.g., evenings/weekends):
 
@@ -1869,9 +1869,9 @@ If working part-time (e.g., evenings/weekends):
 
 ---
 
-== 7. Alternative Approaches Considered
+== Alternative Approaches Considered
 
-=== 7.1 Option A: Minimal Fix (NOT RECOMMENDED)
+=== Option A: Minimal Fix (NOT RECOMMENDED)
 
 **Changes:**
 
@@ -1895,7 +1895,7 @@ If working part-time (e.g., evenings/weekends):
 
 **Verdict:** Only fixes symptoms, not root causes
 
-=== 7.2 Option B: Complete Interface-Based Redesign
+=== Option B: Complete Interface-Based Redesign
 
 **Changes:**
 
@@ -1922,7 +1922,7 @@ If working part-time (e.g., evenings/weekends):
 
 **Verdict:** Too risky for immediate needs, consider for fpGUI 2.0
 
-=== 7.3 Option C: Hybrid Approach (RECOMMENDED)
+=== Option C: Hybrid Approach (RECOMMENDED)
 
 **Changes:**
 
@@ -1949,7 +1949,7 @@ If working part-time (e.g., evenings/weekends):
 
 **Verdict:** Best balance of risk/reward
 
-=== 7.4 Comparison Matrix
+=== Comparison Matrix
 
 [cols="1,1,1,1",options="header"]
 |=====
@@ -1967,9 +1967,9 @@ If working part-time (e.g., evenings/weekends):
 
 ---
 
-== 8. Conclusion
+== Conclusion
 
-=== 8.1 Summary
+=== Summary
 
 The fpGUI font handling system suffers from unnecessary complexity due to:
 
@@ -1981,7 +1981,7 @@ The fpGUI font handling system suffers from unnecessary complexity due to:
 
 While recent bug fixes have resolved critical memory leaks, the fundamental architecture needs simplification.
 
-=== 8.2 Recommended Solution
+=== Recommended Solution
 
 **Phased Moderate Refactoring (Option C):**
 
@@ -2002,7 +2002,7 @@ While recent bug fixes have resolved critical memory leaks, the fundamental arch
 
 **Risk Level:** Medium (requires touching ~30-40 widget files)
 
-=== 8.3 Next Steps
+=== Next Steps
 
 1. **Review this proposal** with fpGUI maintainers
 2. **Get consensus** on approach
@@ -2012,7 +2012,7 @@ While recent bug fixes have resolved critical memory leaks, the fundamental arch
 6. **Document changes** as we go
 7. **Merge to main** when all criteria met
 
-=== 8.4 Long-Term Vision
+=== Long-Term Vision
 
 After completing this refactoring, fpGUI will have:
 
