@@ -1,0 +1,1152 @@
+= fpGUI Font API Migration Guide
+:toc: left
+:toclevels: 4
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== Overview
+
+This guide helps developers migrate from the old fpGUI font API (pre-October 2025) to the new streamlined architecture. The refactoring removed the `TfpgFont` wrapper class in favor of direct `TfpgFontResourceBase` usage with automatic reference counting.
+
+=== What Changed
+
+[cols="1,1",options="header"]
+|===
+|Old API (Deprecated) |New API (Current)
+
+|`TfpgFont` wrapper class
+|Direct `TfpgFontResourceBase` usage
+
+|`fpgGetFont()` global function
+|`fpgApplication.FontManager.GetFont()`
+
+|`FFont.Free` manual cleanup
+|`FFont := nil` automatic cleanup
+
+|`FFontRes` internal field
+|Removed (no wrapper needed)
+
+|O(n) linear font cache
+|O(1) hash-based cache
+
+|Manual reference counting
+|Automatic via TInterfacedObject
+|===
+
+=== Why Migrate?
+
+**Benefits:**
+
+* **Simpler code** - No wrapper object management
+* **Fewer bugs** - Automatic reference counting prevents leaks
+* **Better performance** - O(1) font cache lookups
+* **Cleaner API** - Direct resource usage without indirection
+
+**Compatibility:**
+
+The old API has been completely removed. All code must migrate to the new API.
+
+---
+
+== For Application Developers
+
+=== Basic Font Usage
+
+==== Old Code
+
+[source,pascal]
+----
+uses
+  fpg_base, fpg_main;
+
+var
+  myFont: TfpgFont;
+begin
+  // Get font using global function
+  myFont := fpgGetFont('Arial-12:bold');
+  try
+    // Use font
+    Canvas.Font := myFont;
+    Canvas.DrawText(10, 10, 'Hello World');
+  finally
+    myFont.Free;  // Manual cleanup
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+uses
+  fpg_base, fpg_main;
+
+var
+  myFont: TfpgFontResourceBase;
+begin
+  // Get font from font manager
+  myFont := fpgApplication.FontManager.GetFont('Arial-12:bold');
+
+  // Use font
+  Canvas.SetFont(myFont);
+  Canvas.DrawText(10, 10, 'Hello World');
+
+  myFont := nil;  // Automatic cleanup (reference counting)
+end;
+----
+
+**Key Changes:**
+
+1. Type changed: `TfpgFont` → `TfpgFontResourceBase`
+2. Get font: `fpgGetFont()` → `fpgApplication.FontManager.GetFont()`
+3. Cleanup: `FFont.Free` → `FFont := nil`
+4. Canvas: `Canvas.Font :=` → `Canvas.SetFont()`
+
+=== Named Fonts
+
+Named fonts (like `#Label1`, `#Button`) work the same way:
+
+==== Old Code
+
+[source,pascal]
+----
+myFont := fpgGetFont('#Button');
+----
+
+==== New Code
+
+[source,pascal]
+----
+myFont := fpgApplication.FontManager.GetFont('#Button');
+----
+
+The font manager automatically resolves named font aliases.
+
+=== Local Variables
+
+When using fonts as local variables:
+
+==== Old Code
+
+[source,pascal]
+----
+procedure DrawText;
+var
+  boldFont: TfpgFont;
+begin
+  boldFont := fpgGetFont('Arial-12:bold');
+  try
+    Canvas.Font := boldFont;
+    Canvas.DrawText(10, 10, 'Bold Text');
+  finally
+    boldFont.Free;
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+procedure DrawText;
+var
+  boldFont: TfpgFontResourceBase;
+begin
+  boldFont := fpgApplication.FontManager.GetFont('Arial-12:bold');
+  Canvas.SetFont(boldFont);
+  Canvas.DrawText(10, 10, 'Bold Text');
+  // No explicit cleanup needed - automatic when variable goes out of scope
+end;
+----
+
+**Note:** When the procedure exits, `boldFont` goes out of scope and the reference is automatically released.
+
+=== Font Properties
+
+Getting font metrics:
+
+==== Old Code
+
+[source,pascal]
+----
+var
+  font: TfpgFont;
+  width, height: integer;
+begin
+  font := fpgGetFont('Arial-12');
+  try
+    width := font.TextWidth('Hello');
+    height := font.Height;
+  finally
+    font.Free;
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+var
+  font: TfpgFontResourceBase;
+  width, height: integer;
+begin
+  font := fpgApplication.FontManager.GetFont('Arial-12');
+  width := font.GetTextWidth('Hello');
+  height := font.GetHeight;
+  font := nil;  // Or let it go out of scope
+end;
+----
+
+**Method Name Changes:**
+
+* `TextWidth()` → `GetTextWidth()`
+* `Height` property → `GetHeight()` method
+* `Ascent` property → `GetAscent()` method
+* `Descent` property → `GetDescent()` method
+
+---
+
+== For Widget Developers
+
+=== Basic Widget Pattern
+
+==== Old Code
+
+[source,pascal]
+----
+type
+  TMyWidget = class(TfpgWidget)
+  private
+    FFont: TfpgFont;
+    procedure SetFont(const AValue: TfpgFont);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property Font: TfpgFont read FFont write SetFont;
+  end;
+
+constructor TMyWidget.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgGetFont('#Widget');  // Get default widget font
+end;
+
+destructor TMyWidget.Destroy;
+begin
+  FFont.Free;  // Manual cleanup
+  inherited Destroy;
+end;
+
+procedure TMyWidget.SetFont(const AValue: TfpgFont);
+begin
+  if FFont = AValue then Exit;
+  FFont.Free;
+  FFont := AValue;
+  Invalidate;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+type
+  TMyWidget = class(TfpgWidget)
+  private
+    FFont: TfpgFontResourceBase;
+    procedure SetFont(const AValue: TfpgFontResourceBase);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property Font: TfpgFontResourceBase read FFont write SetFont;
+  end;
+
+constructor TMyWidget.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgApplication.FontManager.GetFont('#Widget');
+end;
+
+destructor TMyWidget.Destroy;
+begin
+  FFont := nil;  // Automatic cleanup
+  inherited Destroy;
+end;
+
+procedure TMyWidget.SetFont(const AValue: TfpgFontResourceBase);
+begin
+  if FFont = AValue then Exit;
+  FFont := nil;     // Release old font
+  FFont := AValue;  // Acquire new font (automatic AddRef)
+  Invalidate;
+end;
+----
+
+**Migration Steps:**
+
+1. Change field type: `FFont: TfpgFont` → `FFont: TfpgFontResourceBase`
+2. Update constructor: `fpgGetFont()` → `fpgApplication.FontManager.GetFont()`
+3. Update destructor: `FFont.Free` → `FFont := nil`
+4. Update setter: Keep same pattern but use `nil` assignment
+5. Update property declaration: `TfpgFont` → `TfpgFontResourceBase`
+
+=== GetFontDesc Pattern
+
+Many widgets need to expose a FontDesc property:
+
+==== Old Code
+
+[source,pascal]
+----
+function TMyWidget.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TMyWidget.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+function TMyWidget.GetFontDesc: string;
+begin
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := '';
+end;
+
+procedure TMyWidget.SetFontDesc(const AValue: string);
+begin
+  FFont := nil;  // Release old
+  FFont := fpgApplication.FontManager.GetFont(AValue);
+  Invalidate;
+end;
+----
+
+**Note:** The `FontDesc` property is now available directly on `TfpgFontResourceBase`, so no typecast is needed.
+
+=== Paint Method
+
+==== Old Code
+
+[source,pascal]
+----
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  try
+    Canvas.Clear(BackgroundColor);
+    Canvas.Font := FFont;
+    Canvas.DrawText(10, 10, 'Hello');
+  finally
+    Canvas.EndDraw;
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  try
+    Canvas.Clear(BackgroundColor);
+    Canvas.SetFont(FFont);  // Use SetFont method
+    Canvas.DrawText(10, 10, 'Hello');
+  finally
+    Canvas.EndDraw;
+  end;
+end;
+----
+
+**Change:** `Canvas.Font := FFont` → `Canvas.SetFont(FFont)`
+
+=== Metrics Calculation
+
+Widgets often need to calculate sizes based on font metrics:
+
+==== Old Code
+
+[source,pascal]
+----
+procedure TMyWidget.UpdateSizes;
+begin
+  FTextWidth := FFont.TextWidth('Sample Text');
+  FTextHeight := FFont.Height;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+procedure TMyWidget.UpdateSizes;
+begin
+  FTextWidth := FFont.GetTextWidth('Sample Text');
+  FTextHeight := FFont.GetHeight;
+end;
+----
+
+**Method Name Changes:**
+
+* `TextWidth()` → `GetTextWidth()`
+* `Height` → `GetHeight()`
+* `Ascent` → `GetAscent()`
+* `Descent` → `GetDescent()`
+
+---
+
+== Common Patterns
+
+=== Temporary Font Usage
+
+When you need a font temporarily for calculations:
+
+==== Old Code
+
+[source,pascal]
+----
+function CalculateTextSize(const AText: string): TfpgSize;
+var
+  tempFont: TfpgFont;
+begin
+  tempFont := fpgGetFont('Arial-12');
+  try
+    Result.W := tempFont.TextWidth(AText);
+    Result.H := tempFont.Height;
+  finally
+    tempFont.Free;
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+function CalculateTextSize(const AText: string): TfpgSize;
+var
+  tempFont: TfpgFontResourceBase;
+begin
+  tempFont := fpgApplication.FontManager.GetFont('Arial-12');
+  Result.W := tempFont.GetTextWidth(AText);
+  Result.H := tempFont.GetHeight;
+  // Automatic cleanup when function exits
+end;
+----
+
+=== Multiple Fonts
+
+Widgets with multiple fonts (like TfpgMenu):
+
+==== Old Code
+
+[source,pascal]
+----
+type
+  TfpgMenu = class(TfpgWidget)
+  private
+    FFont: TfpgFont;           // Normal text
+    FAccelFont: TfpgFont;      // Accelerator keys
+    FHeaderFont: TfpgFont;     // Menu headers
+  end;
+
+destructor TfpgMenu.Destroy;
+begin
+  FFont.Free;
+  FAccelFont.Free;
+  FHeaderFont.Free;
+  inherited Destroy;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+type
+  TfpgMenu = class(TfpgWidget)
+  private
+    FFont: TfpgFontResourceBase;           // Normal text
+    FAccelFont: TfpgFontResourceBase;      // Accelerator keys
+    FHeaderFont: TfpgFontResourceBase;     // Menu headers
+  end;
+
+destructor TfpgMenu.Destroy;
+begin
+  FFont := nil;
+  FAccelFont := nil;
+  FHeaderFont := nil;
+  inherited Destroy;
+end;
+----
+
+=== Conditional Font Assignment
+
+==== Old Code
+
+[source,pascal]
+----
+procedure TMyWidget.UpdateFont;
+begin
+  if FUseBoldFont then
+  begin
+    FFont.Free;
+    FFont := fpgGetFont('Arial-12:bold');
+  end
+  else
+  begin
+    FFont.Free;
+    FFont := fpgGetFont('Arial-12');
+  end;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+procedure TMyWidget.UpdateFont;
+begin
+  FFont := nil;  // Release current font
+  if FUseBoldFont then
+    FFont := fpgApplication.FontManager.GetFont('Arial-12:bold')
+  else
+    FFont := fpgApplication.FontManager.GetFont('Arial-12');
+end;
+----
+
+---
+
+== Special Cases
+
+=== Canvas Owned Fonts
+
+Some canvases own temporary fonts:
+
+==== Old Code
+
+[source,pascal]
+----
+type
+  TfpgCanvasBase = class(TObject)
+  private
+    FOwnedFont: TfpgFont;
+  end;
+
+destructor TfpgCanvasBase.Destroy;
+begin
+  FOwnedFont.Free;
+  inherited Destroy;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+type
+  TfpgCanvasBase = class(TObject)
+  private
+    FOwnedFont: TfpgFontResourceBase;
+  end;
+
+destructor TfpgCanvasBase.Destroy;
+begin
+  FOwnedFont := nil;
+  inherited Destroy;
+end;
+----
+
+=== Font Comparison
+
+Comparing fonts:
+
+==== Old Code
+
+[source,pascal]
+----
+if Font1 = Font2 then  // Compares wrapper objects
+  WriteLn('Same font');
+----
+
+==== New Code
+
+[source,pascal]
+----
+if Font1 = Font2 then  // Compares actual font resources
+  WriteLn('Same font resource');
+----
+
+**Note:** Now comparison checks if both variables reference the **same cached font resource**, not wrapper objects.
+
+=== Font Descriptor Access
+
+==== Old Code
+
+[source,pascal]
+----
+var
+  font: TfpgFont;
+  desc: string;
+begin
+  font := fpgGetFont('Arial-12:bold');
+  desc := font.FontDesc;  // Direct property access
+  font.Free;
+end;
+----
+
+==== New Code
+
+[source,pascal]
+----
+var
+  font: TfpgFontResourceBase;
+  desc: string;
+begin
+  font := fpgApplication.FontManager.GetFont('Arial-12:bold');
+  desc := font.FontDesc;  // Direct property access (now in base class)
+  font := nil;
+end;
+----
+
+---
+
+== Migration Checklist
+
+Use this checklist when migrating a widget or application:
+
+=== Code Search and Replace
+
+[cols="1,2,2",options="header"]
+|===
+|Search Pattern |Replace With |Notes
+
+|`TfpgFont`
+|`TfpgFontResourceBase`
+|Type declarations
+
+|`fpgGetFont(`
+|`fpgApplication.FontManager.GetFont(`
+|Font creation
+
+|`.Free;` (on font variables)
+|`:= nil;`
+|Font cleanup
+
+|`.TextWidth(`
+|`.GetTextWidth(`
+|Method name change
+
+|`.Height` (font property)
+|`.GetHeight`
+|Property → Method
+
+|`.Ascent`
+|`.GetAscent`
+|Property → Method
+
+|`.Descent`
+|`.GetDescent`
+|Property → Method
+
+|`Canvas.Font :=`
+|`Canvas.SetFont(`
+|Canvas font assignment
+|===
+
+=== Per-Widget Checklist
+
+For each widget:
+
+- [ ] Change `FFont` field type to `TfpgFontResourceBase`
+- [ ] Update constructor: use `FontManager.GetFont()`
+- [ ] Update destructor: change `Free` to `nil` assignment
+- [ ] Update font setter: use `nil` assignment pattern
+- [ ] Update `GetFontDesc`: use direct property access (no typecast needed)
+- [ ] Change all `TextWidth()` to `GetTextWidth()`
+- [ ] Change all `Height` property to `GetHeight()` method
+- [ ] Change all `Canvas.Font :=` to `Canvas.SetFont()`
+- [ ] Update property declarations
+- [ ] Test visually and check for memory leaks
+
+=== Compilation Checklist
+
+After migration:
+
+- [ ] Code compiles without errors
+- [ ] No warnings about deprecated types
+- [ ] All widgets display correctly
+- [ ] Font changes work at runtime
+- [ ] No memory leaks (test with `-gh` heaptrc)
+
+=== Testing Checklist
+
+Functional tests:
+
+- [ ] Widget displays with correct font
+- [ ] Font can be changed via property
+- [ ] Font descriptor can be read
+- [ ] Text metrics are correct
+- [ ] Named fonts work (`#Button`, etc.)
+- [ ] Multiple font changes don't leak memory
+- [ ] Widget cleanup doesn't crash
+
+---
+
+== Migration Examples
+
+=== Example 1: Simple Label Widget
+
+**Before:**
+
+[source,pascal]
+----
+unit fpg_label;
+
+type
+  TfpgLabel = class(TfpgWidget)
+  private
+    FFont: TfpgFont;
+    procedure SetFontDesc(const AValue: string);
+    function GetFontDesc: string;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure HandlePaint; override;
+  published
+    property FontDesc: string read GetFontDesc write SetFontDesc;
+  end;
+
+constructor TfpgLabel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgGetFont('#Label1');
+end;
+
+destructor TfpgLabel.Destroy;
+begin
+  FFont.Free;
+  inherited Destroy;
+end;
+
+function TfpgLabel.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TfpgLabel.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  Invalidate;
+end;
+
+procedure TfpgLabel.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  Canvas.Font := FFont;
+  Canvas.DrawText(0, 0, 'Label Text');
+  Canvas.EndDraw;
+end;
+----
+
+**After:**
+
+[source,pascal]
+----
+unit fpg_label;
+
+type
+  TfpgLabel = class(TfpgWidget)
+  private
+    FFont: TfpgFontResourceBase;
+    procedure SetFontDesc(const AValue: string);
+    function GetFontDesc: string;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure HandlePaint; override;
+  published
+    property FontDesc: string read GetFontDesc write SetFontDesc;
+  end;
+
+constructor TfpgLabel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFont := fpgApplication.FontManager.GetFont('#Label1');
+end;
+
+destructor TfpgLabel.Destroy;
+begin
+  FFont := nil;
+  inherited Destroy;
+end;
+
+function TfpgLabel.GetFontDesc: string;
+begin
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := '';
+end;
+
+procedure TfpgLabel.SetFontDesc(const AValue: string);
+begin
+  FFont := nil;
+  FFont := fpgApplication.FontManager.GetFont(AValue);
+  Invalidate;
+end;
+
+procedure TfpgLabel.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  Canvas.SetFont(FFont);
+  Canvas.DrawText(0, 0, 'Label Text');
+  Canvas.EndDraw;
+end;
+----
+
+=== Example 2: Button with Metrics Calculation
+
+**Before:**
+
+[source,pascal]
+----
+procedure TfpgButton.UpdateTextBounds;
+begin
+  FTextWidth := FFont.TextWidth(FText);
+  FTextHeight := FFont.Height;
+  FTextAscent := FFont.Ascent;
+end;
+----
+
+**After:**
+
+[source,pascal]
+----
+procedure TfpgButton.UpdateTextBounds;
+begin
+  FTextWidth := FFont.GetTextWidth(FText);
+  FTextHeight := FFont.GetHeight;
+  FTextAscent := FFont.GetAscent;
+end;
+----
+
+=== Example 3: Custom Drawing with Temporary Font
+
+**Before:**
+
+[source,pascal]
+----
+procedure TMyWidget.DrawSpecialText;
+var
+  oldFont: TfpgFont;
+  specialFont: TfpgFont;
+begin
+  oldFont := FFont;
+  specialFont := fpgGetFont('Arial-14:bold');
+  try
+    Canvas.Font := specialFont;
+    Canvas.DrawText(10, 10, 'Special');
+  finally
+    specialFont.Free;
+    Canvas.Font := oldFont;
+  end;
+end;
+----
+
+**After:**
+
+[source,pascal]
+----
+procedure TMyWidget.DrawSpecialText;
+var
+  specialFont: TfpgFontResourceBase;
+begin
+  specialFont := fpgApplication.FontManager.GetFont('Arial-14:bold');
+  Canvas.SetFont(specialFont);
+  Canvas.DrawText(10, 10, 'Special');
+  Canvas.SetFont(FFont);  // Restore original
+  // specialFont automatically cleaned up
+end;
+----
+
+---
+
+== Common Mistakes
+
+=== Mistake 1: Calling Free Directly
+
+**Wrong:**
+
+[source,pascal]
+----
+FFont.Free;  // Don't do this!
+----
+
+**Correct:**
+
+[source,pascal]
+----
+FFont := nil;  // Automatic reference counting
+----
+
+**Why it's wrong:** Calling `Free` directly breaks reference counting and can cause use-after-free if other references exist.
+
+=== Mistake 2: Not Checking for Nil Font
+
+**Wrong:**
+
+[source,pascal]
+----
+desc := FFont.FontDesc;  // May crash if FFont is nil
+----
+
+**Correct:**
+
+[source,pascal]
+----
+if Assigned(FFont) then
+  desc := FFont.FontDesc
+else
+  desc := '';
+----
+
+=== Mistake 3: Using Old Method Names
+
+**Wrong:**
+
+[source,pascal]
+----
+width := FFont.TextWidth('Hello');  // Method doesn't exist
+height := FFont.Height;              // Not a property anymore
+----
+
+**Correct:**
+
+[source,pascal]
+----
+width := FFont.GetTextWidth('Hello');  // Method name changed
+height := FFont.GetHeight;             // Now a method
+----
+
+=== Mistake 4: Mixing Old and New API
+
+**Wrong:**
+
+[source,pascal]
+----
+FFont := fpgGetFont('Arial-12');  // Old function doesn't exist
+----
+
+**Correct:**
+
+[source,pascal]
+----
+FFont := fpgApplication.FontManager.GetFont('Arial-12');
+----
+
+=== Mistake 5: Not Releasing Old Font Before Assignment
+
+**Inefficient (but works):**
+
+[source,pascal]
+----
+FFont := fpgApplication.FontManager.GetFont('Arial-12');
+FFont := fpgApplication.FontManager.GetFont('Arial-14');  // Old font still referenced
+----
+
+**Efficient:**
+
+[source,pascal]
+----
+FFont := nil;  // Release old font first
+FFont := fpgApplication.FontManager.GetFont('Arial-14');
+----
+
+---
+
+== Performance Considerations
+
+=== Font Caching is Automatic
+
+The new font manager caches all fonts automatically:
+
+[source,pascal]
+----
+// These two calls return the SAME font resource object
+font1 := fpgApplication.FontManager.GetFont('Arial-12');
+font2 := fpgApplication.FontManager.GetFont('Arial-12');
+Assert(font1 = font2);  // True - same object
+----
+
+**Benefits:**
+
+* No need to cache fonts manually in your code
+* Memory efficient - one font resource shared by all widgets
+* Fast lookups - O(1) hash table
+
+=== Avoid Repeated GetFont Calls
+
+**Inefficient:**
+
+[source,pascal]
+----
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.SetFont(fpgApplication.FontManager.GetFont('Arial-12'));
+  Canvas.DrawText(10, 10, 'Line 1');
+
+  Canvas.SetFont(fpgApplication.FontManager.GetFont('Arial-12'));
+  Canvas.DrawText(10, 30, 'Line 2');
+end;
+----
+
+**Efficient:**
+
+[source,pascal]
+----
+// Get font once in constructor, reuse it
+constructor TMyWidget.Create(AOwner: TComponent);
+begin
+  inherited;
+  FFont := fpgApplication.FontManager.GetFont('Arial-12');
+end;
+
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.SetFont(FFont);
+  Canvas.DrawText(10, 10, 'Line 1');
+  Canvas.DrawText(10, 30, 'Line 2');
+end;
+----
+
+---
+
+== Troubleshooting Migration Issues
+
+=== Compilation Errors
+
+**Error:** `Identifier not found "fpgGetFont"`
+
+**Fix:** Replace with `fpgApplication.FontManager.GetFont()`
+
+---
+
+**Error:** `Incompatible type for arg no. 1: Got "TfpgFontResourceBase", expected "TfpgFont"`
+
+**Fix:** Update parameter type to `TfpgFontResourceBase`
+
+---
+
+**Error:** `identifier idents no member "FontDesc"`
+
+**Fix:** This error should not occur anymore as `FontDesc` is now in the base class. If you see this, ensure you're using the latest code where `FontDesc` was moved to `TfpgFontResourceBase`.
+
+---
+
+**Error:** `identifier idents no member "TextWidth"`
+
+**Fix:** Change `TextWidth()` to `GetTextWidth()`
+
+=== Runtime Issues
+
+**Issue:** Memory leaks reported by heaptrc
+
+**Check:**
+
+* All `FFont` fields set to `nil` in destructor?
+* No direct `Free` calls on fonts?
+* Canvas owned fonts released?
+
+**Debug:**
+
+[source,bash]
+----
+fpc -gh myapp.pas
+./myapp
+# Check heap trace output
+----
+
+---
+
+**Issue:** Font appears incorrect or default
+
+**Check:**
+
+* Font descriptor string correct?
+* Font available on system?
+* Check `HandleIsValid` property
+
+**Debug:**
+
+[source,pascal]
+----
+font := fpgApplication.FontManager.GetFont('MyFont-12');
+if not font.HandleIsValid then
+  WriteLn('Font not found: MyFont-12');
+----
+
+---
+
+**Issue:** Crash when accessing font
+
+**Check:**
+
+* Font not nil before use?
+* Font not freed manually?
+* Reference kept alive while needed?
+
+---
+
+== Getting Help
+
+If you encounter issues during migration:
+
+1. **Check this guide** - Most common scenarios covered
+2. **Review examples** - Look at migrated widgets in `src/gui/`
+3. **Check git history** - Commits show migration patterns
+4. **Ask on forum** - fpGUI community at https://forum.lazarus.freepascal.org/
+
+---
+
+== Summary
+
+**Key Points:**
+
+✓ Use `TfpgFontResourceBase` instead of `TfpgFont`
+
+✓ Get fonts via `fpgApplication.FontManager.GetFont()`
+
+✓ Release with `FFont := nil` (not `Free`)
+
+✓ Update method names: `TextWidth()` → `GetTextWidth()`, etc.
+
+✓ Use `Canvas.SetFont()` instead of `Canvas.Font :=`
+
+✓ Add typecasts for `FontDesc` property access
+
+✓ Test thoroughly and check for memory leaks
+
+The new API is simpler, safer, and faster. Most migrations are straightforward search-and-replace operations.
+
+---
+
+**Document Version:** 1.0
+**Date:** 2025-10-15
+**Branch:** font-handling-refactor
+**Author:** Graeme Geldenhuys
