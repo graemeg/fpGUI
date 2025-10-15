@@ -1106,9 +1106,9 @@ If issues persist after trying these solutions:
 2. **Search issue tracker:**
    * https://github.com/graemeg/fpGUI/issues
 
-3. **Ask on forum:**
-   * https://forum.lazarus.freepascal.org/
-   * fpGUI subforum
+3. **Ask in the support group:**
+   * fpGUI community newsgroup (web browser) http://geldenhuys.co.uk/webnews
+   * or with a news client via news://geldenhuys.co.uk port 119
 
 4. **Provide details when asking:**
    * Platform (Linux/Windows/macOS)
