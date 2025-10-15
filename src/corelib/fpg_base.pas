@@ -311,8 +311,11 @@ type
 
 
   TfpgFontResourceBase = class(TInterfacedObject, IFontEngine)
+  protected
+    FFontDesc: string;
   public
-    constructor Create(const afontdesc: string); virtual; abstract;
+    constructor Create(const afontdesc: string); virtual;
+    property FontDesc: string read FFontDesc;
     // IFontEngine implementation (methods already exist!)
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
@@ -3096,6 +3099,15 @@ function TfpgFontResourceBase.GetCanvasRef: TObject;
 begin
   Result := nil;
 end;
+
+{ TfpgFontResourceBase }
+
+constructor TfpgFontResourceBase.Create(const afontdesc: string);
+begin
+  inherited Create;
+  FFontDesc := afontdesc;
+end;
+
 
 { TfpgFontDefinition }
 

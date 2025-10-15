@@ -104,15 +104,8 @@ type
 
 
   TfpgFontResource = class(TfpgFontResourceImpl)
-  protected
-    FFontDesc: string;
-    FUsageCount: integer;  // Renamed from FRefCount to avoid conflict with TInterfacedObject
   public
     constructor Create(const afontdesc: string);
-    function    IncRefCount: integer;
-    function    DecRefCount: integer;
-    property    FontDesc: string read FFontDesc;
-    property    UsageCount: integer read FUsageCount;  // For debugging/statistics
   end;
 
 
@@ -1874,20 +1867,6 @@ end;
 constructor TfpgFontResource.Create(const afontdesc: string);
 begin
   inherited Create(afontdesc);
-  FFontDesc := afontdesc;
-  FUsageCount := 0;
-end;
-
-function TfpgFontResource.DecRefCount: integer;
-begin
-  Dec(FUsageCount);
-  Result := FUsageCount;
-end;
-
-function TfpgFontResource.IncRefCount: integer;
-begin
-  Inc(FUsageCount);
-  Result := FUsageCount;
 end;
 
 { TfpgCanvas }
