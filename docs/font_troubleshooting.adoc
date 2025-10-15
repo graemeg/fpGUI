@@ -206,17 +206,17 @@ valgrind --leak-check=full --show-leak-kinds=all ./myapp
 WriteLn('Fonts still in cache:');
 fpgApplication.FontManager.DumpCache;
 
-// Expected: Only fonts that are still referenced
-// If cache has fonts with RefCount > 0, there's a leak
+// Expected: All fonts used by the application
+// Cache persists until font manager is destroyed
 ----
 
 ==== Common Causes
 
-1. **Forgot to release font**
+1. **Forgot to clear font pointer**
 +
 [source,pascal]
 ----
-// BAD: Font never released
+// BAD: Pointer never cleared (not a leak, but poor practice)
 constructor TMyWidget.Create;
 begin
   inherited;
@@ -234,10 +234,10 @@ end;
 +
 [source,pascal]
 ----
-// BAD: Breaks reference counting
+// BAD: Font is owned by cache
 FFont.Free;  // Don't do this!
 
-// GOOD: Use nil assignment
+// GOOD: Use nil assignment to clear pointer
 FFont := nil;
 ----
 
@@ -263,7 +263,7 @@ type
 ----
 destructor TMyWidget.Destroy;
 begin
-  DoSomethingThatMightRaise;  // If this raises, FFont never released
+  DoSomethingThatMightRaise;  // If this raises, FFont never cleared
   FFont := nil;
   inherited;
 end;
@@ -271,7 +271,7 @@ end;
 // Better:
 destructor TMyWidget.Destroy;
 begin
-  FFont := nil;  // Release early
+  FFont := nil;  // Clear early
   try
     DoSomethingThatMightRaise;
   except
@@ -283,7 +283,7 @@ end;
 
 ==== Solutions
 
-**Solution 1: Audit font releases**
+**Solution 1: Audit font pointer cleanup**
 
 Search for all font field declarations:
 
@@ -292,13 +292,13 @@ Search for all font field declarations:
 grep -r "FFont.*TfpgFontResourceBase" src/
 ----
 
-For each, verify destructor releases it:
+For each, verify destructor clears it:
 
 [source,pascal]
 ----
 destructor TMyWidget.Destroy;
 begin
-  FFont := nil;  // Must be present
+  FFont := nil;  // Good practice to clear pointer
   inherited;
 end;
 ----
@@ -312,7 +312,7 @@ destructor TMyWidget.Destroy;
 begin
   if Assigned(FFont) then
   begin
-    WriteLn(ClassName, ': Releasing font');
+    WriteLn(ClassName, ': Clearing font pointer');
     WriteLn('  FontDesc: ', FFont.FontDesc);
   end;
   FFont := nil;
@@ -333,7 +333,7 @@ begin
   try
     // Use font...
   finally
-    tempFont := nil;  // Guaranteed cleanup
+    tempFont := nil;  // Guaranteed pointer clear
   end;
 end;
 ----
@@ -664,7 +664,7 @@ end;
 
 [source,pascal]
 ----
-WriteLn(fpgApplication.FontManager.GetCacheStats);
+WriteLn(fpgApplication.FontManager.GetCacheStats());
 ----
 
 **Monitor cache growth:**
@@ -793,8 +793,8 @@ end;
 procedure TMyApp.Destroy;
 begin
   WriteLn('Final font cache state:');
-  WriteLn(fpgApplication.FontManager.GetCacheStats);
-  // Check for fonts with high RefCount that might indicate leaks
+  WriteLn(fpgApplication.FontManager.GetCacheStats());
+  // Shows all fonts that were created during application lifetime
   inherited;
 end;
 {$ENDIF}
@@ -934,7 +934,6 @@ begin
   begin
     WriteLn('[FontManager] Returned font, HandleValid=', Result.HandleIsValid);
     WriteLn('[FontManager] FontDesc=', Result.FontDesc);
-    WriteLn('[FontManager] RefCount=', Result.GetRefCount);
   end;
 end;
 {$ENDIF}
@@ -1028,27 +1027,27 @@ WriteLn('Font descriptor: ', FFont.FontDesc);
 
 === "Memory leak: TfpgFontResource"
 
-**Meaning:** Font not released, reference count never reached zero
+**Meaning:** Font cache not destroyed (typically only at application exit)
 
 **Check:**
 
-1. All font fields set to `nil` in destructors?
-2. No direct `Free` calls breaking reference counting?
-3. No circular references?
+1. Is this at application shutdown? (Expected - fonts live until exit)
+2. Is FontManager being destroyed properly?
+3. Any manual `Free` calls on fonts?
 
-**Fix:** Audit destructors, add `FFont := nil` everywhere
+**Fix:** Font cache persists until application exit by design. This is not a leak unless fonts survive after fpgApplication is destroyed.
 
 ---
 
 == Best Practices
 
-=== Always Release Fonts
+=== Clear Font Pointers in Destructors
 
 [source,pascal]
 ----
 destructor TMyWidget.Destroy;
 begin
-  FFont := nil;  // ALWAYS release
+  FFont := nil;  // Good practice: clear pointer
   inherited;
 end;
 ----
@@ -1130,7 +1129,7 @@ When encountering font issues:
 - [ ] Check font name spelling and format
 - [ ] Verify font installed on system
 - [ ] Ensure `HandleIsValid` is true
-- [ ] Check font released in destructor (`:= nil`)
+- [ ] Clear font pointers in destructor (`:= nil`)
 - [ ] No direct `Free` calls on fonts
 - [ ] Canvas font set before drawing
 - [ ] Test with platform default fonts
