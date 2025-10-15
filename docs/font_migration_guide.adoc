@@ -7,7 +7,7 @@
 
 == Overview
 
-This guide helps developers migrate from the old fpGUI font API (pre-October 2025) to the new streamlined architecture. The refactoring removed the `TfpgFont` wrapper class in favor of direct `TfpgFontResourceBase` usage with automatic reference counting.
+This guide helps developers migrate from the old fpGUI font API (pre-October 2025) to the new streamlined architecture. The refactoring removed the `TfpgFont` wrapper class in favor of direct `TfpgFontResourceBase` usage with a persistent font cache.
 
 === What Changed
 
@@ -22,7 +22,7 @@ This guide helps developers migrate from the old fpGUI font API (pre-October 202
 |`fpgApplication.FontManager.GetFont()`
 
 |`FFont.Free` manual cleanup
-|`FFont := nil` automatic cleanup
+|`FFont := nil` clears pointer
 
 |`FFontRes` internal field
 |Removed (no wrapper needed)
@@ -30,8 +30,8 @@ This guide helps developers migrate from the old fpGUI font API (pre-October 202
 |O(n) linear font cache
 |O(1) hash-based cache
 
-|Manual reference counting
-|Automatic via TInterfacedObject
+|Fonts freed when unused
+|Fonts persist until app exit
 |===
 
 === Why Migrate?
@@ -39,7 +39,7 @@ This guide helps developers migrate from the old fpGUI font API (pre-October 202
 **Benefits:**
 
 * **Simpler code** - No wrapper object management
-* **Fewer bugs** - Automatic reference counting prevents leaks
+* **Fewer bugs** - Persistent cache simplifies memory management
 * **Better performance** - O(1) font cache lookups
 * **Cleaner API** - Direct resource usage without indirection
 
@@ -92,7 +92,7 @@ begin
   Canvas.SetFont(myFont);
   Canvas.DrawText(10, 10, 'Hello World');
 
-  myFont := nil;  // Automatic cleanup (reference counting)
+  myFont := nil;  // Clear pointer (font stays in cache)
 end;
 ----
 
@@ -156,11 +156,11 @@ begin
   boldFont := fpgApplication.FontManager.GetFont('Arial-12:bold');
   Canvas.SetFont(boldFont);
   Canvas.DrawText(10, 10, 'Bold Text');
-  // No explicit cleanup needed - automatic when variable goes out of scope
+  // No explicit cleanup needed - font stays in cache
 end;
 ----
 
-**Note:** When the procedure exits, `boldFont` goes out of scope and the reference is automatically released.
+**Note:** Setting `boldFont := nil` is optional for local variables. The font remains cached regardless.
 
 === Font Properties
 
@@ -273,15 +273,14 @@ end;
 
 destructor TMyWidget.Destroy;
 begin
-  FFont := nil;  // Automatic cleanup
+  FFont := nil;  // Clear pointer (font stays in cache)
   inherited Destroy;
 end;
 
 procedure TMyWidget.SetFont(const AValue: TfpgFontResourceBase);
 begin
   if FFont = AValue then Exit;
-  FFont := nil;     // Release old font
-  FFont := AValue;  // Acquire new font (automatic AddRef)
+  FFont := AValue;  // Store new font pointer
   Invalidate;
 end;
 ----
@@ -328,7 +327,6 @@ end;
 
 procedure TMyWidget.SetFontDesc(const AValue: string);
 begin
-  FFont := nil;  // Release old
   FFont := fpgApplication.FontManager.GetFont(AValue);
   Invalidate;
 end;
@@ -444,7 +442,7 @@ begin
   tempFont := fpgApplication.FontManager.GetFont('Arial-12');
   Result.W := tempFont.GetTextWidth(AText);
   Result.H := tempFont.GetHeight;
-  // Automatic cleanup when function exits
+  // Font stays in cache (no cleanup needed)
 end;
 ----
 
@@ -521,7 +519,6 @@ end;
 ----
 procedure TMyWidget.UpdateFont;
 begin
-  FFont := nil;  // Release current font
   if FUseBoldFont then
     FFont := fpgApplication.FontManager.GetFont('Arial-12:bold')
   else
@@ -881,7 +878,7 @@ begin
   Canvas.SetFont(specialFont);
   Canvas.DrawText(10, 10, 'Special');
   Canvas.SetFont(FFont);  // Restore original
-  // specialFont automatically cleaned up
+  // Font stays in cache (no cleanup needed)
 end;
 ----
 
@@ -902,10 +899,10 @@ FFont.Free;  // Don't do this!
 
 [source,pascal]
 ----
-FFont := nil;  // Automatic reference counting
+FFont := nil;  // Clear pointer only
 ----
 
-**Why it's wrong:** Calling `Free` directly breaks reference counting and can cause use-after-free if other references exist.
+**Why it's wrong:** Calling `Free` directly tries to free a font owned by the cache, which can cause crashes since other widgets may still reference it.
 
 === Mistake 2: Not Checking for Nil Font
 
@@ -960,23 +957,24 @@ FFont := fpgGetFont('Arial-12');  // Old function doesn't exist
 FFont := fpgApplication.FontManager.GetFont('Arial-12');
 ----
 
-=== Mistake 5: Not Releasing Old Font Before Assignment
+=== Mistake 5: Unnecessary Nil Assignment
 
-**Inefficient (but works):**
-
-[source,pascal]
-----
-FFont := fpgApplication.FontManager.GetFont('Arial-12');
-FFont := fpgApplication.FontManager.GetFont('Arial-14');  // Old font still referenced
-----
-
-**Efficient:**
+**Unnecessary:**
 
 [source,pascal]
 ----
-FFont := nil;  // Release old font first
+FFont := nil;  // Not needed
 FFont := fpgApplication.FontManager.GetFont('Arial-14');
 ----
+
+**Simpler:**
+
+[source,pascal]
+----
+FFont := fpgApplication.FontManager.GetFont('Arial-14');
+----
+
+**Note:** With the persistent cache model, setting `FFont := nil` before assignment is unnecessary since fonts aren't freed anyway.
 
 ---
 
