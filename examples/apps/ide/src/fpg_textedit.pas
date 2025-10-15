@@ -688,10 +688,7 @@ end;
 
 function TfpgBaseTextEdit.GetFontDesc: string;
 begin
-  if FFont is TfpgFontResource then
-    Result := TfpgFontResource(FFont).FontDesc
-  else
-    Result := '';
+  Result := FFont.FontDesc;
 end;
 
 function TfpgBaseTextEdit.GetGutterShowLineNumbers: Boolean;
