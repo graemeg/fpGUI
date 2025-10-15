@@ -32,9 +32,6 @@ type
     { Main font API - retrieves font from cache or creates new one }
     function GetFont(const ADesc: string): TfpgFontResourceBase;
 
-    { Called by font resource when it's being destroyed }
-    procedure NotifyFontDestroyed(AFont: TfpgFontResourceBase);
-
     { Default fonts }
     function GetDefaultFont: TfpgFontResourceBase;
     function GetFixedFont: TfpgFontResourceBase;
@@ -138,19 +135,6 @@ begin
   end;
 end;
 
-procedure TfpgFontManager.NotifyFontDestroyed(AFont: TfpgFontResourceBase);
-var
-  idx: integer;
-begin
-  // Called by font destructor when ref count reaches 0
-  // Remove font from cache (but don't free it - cache owns it)
-  if not Assigned(AFont) then Exit;
-
-  idx := FFontCache.FindIndexOf(AFont.FontDesc);
-  if idx >= 0 then
-    FFontCache.Delete(idx);  // Remove from cache without freeing (already being destroyed)
-end;
-
 function TfpgFontManager.GetDefaultFont: TfpgFontResourceBase;
 begin
   if FDefaultFontDesc = '' then
@@ -202,8 +186,8 @@ begin
     for i := 0 to FFontCache.Count - 1 do
     begin
       fontBase := TfpgFontResourceBase(FFontCache[i]);
-      Result := Result + Format('  [%d] %s (RefCount: %d)'#13#10,
-                                [i, fontBase.FontDesc, fontBase.GetRefCount]);
+      Result := Result + Format('  [%d] %s'#13#10,
+                                [i, fontBase.FontDesc]);
     end;
   end;
 end;

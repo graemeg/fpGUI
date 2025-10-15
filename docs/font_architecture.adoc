@@ -22,7 +22,7 @@ The fpGUI font system provides a clean, efficient abstraction layer for cross-pl
 
 1. **Simplicity** - Direct font resource usage without wrapper objects
 2. **Performance** - Fast cache lookups and minimal overhead
-3. **Safety** - Automatic reference counting prevents memory leaks
+3. **Safety** - Persistent cache model simplifies memory management
 4. **Flexibility** - Support multiple rendering backends transparently
 
 ---
@@ -38,7 +38,7 @@ The fpGUI font system provides a clean, efficient abstraction layer for cross-pl
 │                                                             │
 │  Widget → FFont: TfpgFontResourceBase                       │
 │              ↓                                              │
-│         FFont := nil  (auto ref count decrement)            │
+│         FFont := nil  (release reference)                   │
 │         fpgApplication.FontManager.GetFont(desc)            │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -58,7 +58,6 @@ The fpGUI font system provides a clean, efficient abstraction layer for cross-pl
 ┌─────────────────────────────────────────────────────────────┐
 │  TfpgFontResourceBase (abstract base)                       │
 │      ├─ FFontDesc: string (stored here, not in subclass)    │
-│      ├─ Reference count (automatic via TInterfacedObject)   │
 │      └─ Implements IFontEngine interface                    │
 │          ├─ GetTextWidth(txt): integer                      │
 │          ├─ GetAscent(): integer                            │
@@ -96,7 +95,7 @@ Utility Class (separate):
 
 * Manages global font cache using hash table (O(1) lookups)
 * Creates platform-appropriate font resources
-* Tracks font reference counts
+* Owns all font resources until application shutdown
 * Provides default and fixed-width font access
 * Handles font descriptor normalization
 
@@ -117,8 +116,8 @@ function GetFixedFont: TfpgFontResourceBase;
 
 * Abstract base class for all font resources
 * Defines IFontEngine interface contract
-* Provides reference counting via TInterfacedObject
 * Platform-agnostic font metrics API
+* Inherits from TInterfacedObject (for future extensibility)
 
 **Key Methods:**
 
@@ -290,8 +289,7 @@ property Attributes: TfpgFontAttributes read FAttributes;
    ├─▶ Hash table lookup (O(1))
    │
    ├─▶ Cache HIT:
-   │   ├─▶ Return cached TfpgFontResourceBase
-   │   └─▶ Reference count automatically incremented
+   │   └─▶ Return cached TfpgFontResourceBase (same object)
    │
    └─▶ Cache MISS:
        ├─▶ Create platform-specific font resource:
@@ -301,31 +299,32 @@ property Attributes: TfpgFontAttributes read FAttributes;
        │     TfpgFontResource.Create()       → Native (Xft/GDI/CoreText)
        │   {$ENDIF}
        ├─▶ Validate font loaded successfully
-       ├─▶ Add to cache with normalized key
-       └─▶ Return new font resource (RefCount = 1)
+       ├─▶ Add to cache with normalized key (cache owns it)
+       └─▶ Return new font resource
 
 3. Widget stores font:
    └─▶ FFont := <returned font resource>
-       └─▶ Compiler generates AddRef() call (interface reference counting)
 ----
 
-=== Reference Counting
+=== Memory Management (Persistent Cache Model)
 
-fpGUI uses **automatic reference counting** via Free Pascal's interface mechanism:
+fpGUI uses a **persistent cache** model where fonts are owned by the font manager and live until application shutdown:
 
-[source,pascal]
-----
-type
-  TfpgFontResourceBase = class(TInterfacedObject, IFontEngine)
-  // TInterfacedObject provides automatic _AddRef() and _Release()
-----
+**Key Characteristics:**
 
-**Key Points:**
+* Font manager owns all font resources via `FFontCache: TFPHashObjectList`
+* Fonts are created once and cached permanently
+* Multiple requests for the same font return the **same object** from cache
+* Fonts are never freed until `TfpgFontManager.Destroy` is called (application exit)
+* Widget font fields (`FFont: TfpgFontResourceBase`) hold **direct pointers** to cached fonts
+* Setting `FFont := nil` simply clears the widget's pointer; font remains in cache
 
-* Assignment increases reference count: `FFont := SomeFont;` → `_AddRef()` called
-* Nil assignment decreases: `FFont := nil;` → `_Release()` called
-* Going out of scope auto-releases: destructor calls `_Release()`
-* When RefCount reaches 0, object is automatically freed
+**Design Rationale:**
+
+* Font resources are small (~5-10 KB each including platform data)
+* Most applications use 5-20 unique fonts (~100 KB total)
+* Disk I/O cost of loading fonts far exceeds memory cost of caching them
+* Persistent cache eliminates repeated font loading, improving performance
 
 **Example:**
 
@@ -336,7 +335,7 @@ var
   font1, font2: TfpgFontResourceBase;
 begin
   font1 := fpgApplication.FontManager.GetFont('Arial-12');
-  // Font added to cache on first request
+  // Font created and added to cache on first request
 
   font2 := fpgApplication.FontManager.GetFont('Arial-12');
   // Cache hit - returns same object
@@ -345,27 +344,30 @@ begin
 
   font1 := nil;
   font2 := nil;
-  // Font stays in cache for future requests (persistent cache model)
+  // Font STAYS in cache for future requests
 
-  // Later requests will still return the cached font:
+  // Later requests return the cached font (no disk I/O):
   font1 := fpgApplication.FontManager.GetFont('Arial-12');
-  // Cache hit again - no disk I/O needed
+  // Cache hit - instant return of same object
 end;
 ----
 
-=== Destruction Flow (Persistent Cache Model)
+=== Destruction Flow
 
 [source]
 ----
-1. Widget releases reference:
-   └─▶ FFont := nil
-       └─▶ Compiler calls _Release()
-           └─▶ Reference count decrements
-               └─▶ Font STAYS in cache (persistent cache model)
+1. During application lifetime:
+   ├─▶ Widget destructor: FFont := nil
+   │   └─▶ Clears pointer only; font remains in cache
+   │
+   ├─▶ Multiple widgets can reference same font
+   │   └─▶ All hold pointers to same cached object
+   │
+   └─▶ Cache size stays constant (fonts never removed)
 
 2. Application shutdown:
    └─▶ FontManager.Destroy called
-       └─▶ FFontCache.Free
+       └─▶ FFontCache.Free (owns all fonts)
            └─▶ All cached fonts freed
                ├─▶ X11: XftFontClose(FFontData)
                ├─▶ GDI: DeleteObject(FFontHandle)
@@ -373,7 +375,7 @@ end;
                └─▶ Agg: FreeType cleanup
 ----
 
-**Key Point:** Fonts are NOT removed from cache when widget references are released. The cache maintains ownership until the font manager itself is destroyed (typically at application exit). This provides optimal performance by avoiding repeated font loading from disk.
+**Key Point:** Fonts live in cache from creation until application exit. Widget destructors setting `FFont := nil` do **not** free the font - they only clear the widget's pointer. The font manager is the sole owner and is responsible for cleanup at application shutdown.
 
 ---
 
@@ -588,16 +590,22 @@ For debugging, the font manager provides statistics:
 function TfpgFontManager.GetCacheStats: string;
 var
   i: integer;
-  font: TfpgFontResource;
+  fontBase: TfpgFontResourceBase;
 begin
   Result := Format('Font Cache Statistics:'#13#10, []);
   Result := Result + Format('  Total cached fonts: %d'#13#10, [FFontCache.Count]);
+  Result := Result + Format('  Default font: %s'#13#10, [FDefaultFontDesc]);
+  Result := Result + Format('  Fixed font: %s'#13#10#13#10, [FFixedFontDesc]);
 
-  for i := 0 to FFontCache.Count - 1 do
+  if FFontCache.Count > 0 then
   begin
-    font := TfpgFontResource(FFontCache[i]);
-    Result := Result + Format('  [%d] %s (RefCount: %d)'#13#10,
-                              [i, font.FontDesc, font.UsageCount]);
+    Result := Result + 'Cached fonts:'#13#10;
+    for i := 0 to FFontCache.Count - 1 do
+    begin
+      fontBase := TfpgFontResourceBase(FFontCache[i]);
+      Result := Result + Format('  [%d] %s'#13#10,
+                                [i, fontBase.FontDesc]);
+    end;
   end;
 end;
 
@@ -609,12 +617,16 @@ WriteLn(fpgApplication.FontManager.GetCacheStats);
 
 ----
 Font Cache Statistics:
-  Total cached fonts: 5
-  [0] Liberation Sans-10 (RefCount: 3)
-  [1] Liberation Sans-10:bold (RefCount: 1)
-  [2] Liberation Mono-10 (RefCount: 2)
-  [3] Arial-12:bold:italic (RefCount: 1)
-  [4] Verdana-11 (RefCount: 1)
+  Total cached fonts: 10
+  Default font: Liberation Sans-10
+  Fixed font: Liberation Mono-10
+
+Cached fonts:
+  [0] Liberation Sans-10:antialias=true
+  [1] Liberation Sans-10:antialias=true:bold
+  [2] Liberation Mono-11:antialias=true
+  [3] Liberation Sans-9:bold
+  [4] Liberation Sans-9:bold
 ----
 
 ---
@@ -643,15 +655,14 @@ end;
 
 destructor TfpgButton.Destroy;
 begin
-  FFont := nil;  // Automatic reference count decrement
+  FFont := nil;  // Clear pointer (font stays in cache)
   inherited Destroy;
 end;
 
 procedure TfpgButton.SetFont(const AValue: TfpgFontResourceBase);
 begin
   if FFont = AValue then Exit;
-  FFont := nil;        // Release old font
-  FFont := AValue;     // Acquire new font (automatic AddRef)
+  FFont := AValue;     // Store pointer to cached font
   Invalidate;          // Request repaint
 end;
 
@@ -728,13 +739,13 @@ end;
 |O(m)
 |m = string length (glyph iteration)
 
-|Reference count inc/dec
+|Font pointer assignment
 |O(1)
-|Simple integer operation
+|Simple pointer copy
 
-|Cache removal
-|O(1)
-|Hash table removal
+|Cache cleanup (shutdown)
+|O(n)
+|n = number of cached fonts
 |===
 
 === Memory Usage
@@ -760,15 +771,15 @@ end;
 **Old Architecture (pre-refactoring):**
 
 * O(n) linear search through font list
-* Double reference counting overhead
-* TfpgFont wrapper allocation per widget
+* TfpgFont wrapper object allocation per widget
+* Complex manual reference counting
 * Typical font lookup: ~200ns for 10 fonts
 
 **New Architecture (post-refactoring):**
 
 * O(1) hash table lookup
-* Single automatic reference counting
-* Direct font resource usage
+* Direct font resource usage (no wrappers)
+* Simple persistent cache model
 * Typical font lookup: ~50ns (4x faster)
 
 ---
@@ -780,16 +791,16 @@ end;
 **Implications:**
 
 * Font manager must only be accessed from main GUI thread
-* Font resources are not protected by mutexes
-* Reference counting is not atomic
+* Font cache operations are not protected by mutexes
+* Font pointer assignments in widgets are not thread-safe
 
 **Future Work:**
 
 If thread-safe font access is needed:
 
 1. Add `TCriticalSection` to `TfpgFontManager`
-2. Protect cache operations with locks
-3. Use atomic reference counting (via InterlockedIncrement)
+2. Protect cache lookup/creation operations with locks
+3. Document thread-safe usage patterns
 
 **Example (not currently implemented):**
 
@@ -824,27 +835,6 @@ WriteLn('Cached fonts: ', fpgApplication.FontManager.GetCacheSize);
 WriteLn(fpgApplication.FontManager.GetCacheStats);
 ----
 
-=== Reference Count Tracking
-
-Add debug logging to track reference counting issues:
-
-[source,pascal]
-----
-{$IFDEF DEBUG}
-procedure TfpgFontResourceBase.AddRef;
-begin
-  inherited;
-  WriteLn(Format('AddRef: %s RefCount=%d', [FontDesc, RefCount]));
-end;
-
-procedure TfpgFontResourceBase.Release;
-begin
-  WriteLn(Format('Release: %s RefCount=%d', [FontDesc, RefCount]));
-  inherited;
-end;
-{$ENDIF}
-----
-
 === Memory Leak Detection
 
 Use Free Pascal's heaptrc to detect font-related leaks:
@@ -873,15 +863,15 @@ if not font.HandleIsValid then
   WriteLn('Warning: Could not load font, using default');
 ----
 
-**Reference count mismatch:**
+**Attempting to free cached font:**
 
 [source,pascal]
 ----
 // BAD: Calling Free directly
-FFont.Free;  // Don't do this! Breaks reference counting
+FFont.Free;  // Don't do this! Font is owned by cache
 
 // GOOD: Use nil assignment
-FFont := nil;  // Automatic reference count handling
+FFont := nil;  // Clears pointer only; font stays in cache
 ----
 
 **AggCanvas font not loaded:**
@@ -927,29 +917,30 @@ Widget              FontManager           TfpgFontDefinition    Platform (Xft/GD
   |<--FontResource-------|                        |                     |
   |                      |                        |                     |
   |--Store in FFont      |                        |                     |
-  |  (AddRef called)     |                        |                     |
+  |  (pointer copy)      |                        |                     |
 ----
 
-=== Font Destruction (RefCount → 0)
+=== Font Cleanup (Application Shutdown)
 
 [source]
 ----
-Widget              FontManager           TfpgFontResource      Platform (Xft/GDI)
+Application         FontManager           TfpgFontResource      Platform (Xft/GDI)
   |                      |                        |                     |
-  |--FFont := nil        |                        |                     |
-  |  (Release called)    |                        |                     |
-  |                      |                        |--RefCount--        |
-  |                      |                        |  reaches 0          |
+  |--Shutdown---------->|                        |                     |
   |                      |                        |                     |
-  |                      |<--NotifyFontDestroyed--|                     |
+  |                      |--Destroy()             |                     |
   |                      |                        |                     |
-  |                      |--Remove from cache---->|                     |
+  |                      |--FFontCache.Free----->|                     |
   |                      |                        |                     |
-  |                      |                        |--Destroy---------->|
+  |                      |                        |--Destroy (font 1)-->|
   |                      |                        |                     |--XftFontClose()
   |                      |                        |<-------------------|
   |                      |                        |                     |
-  |                      |<--Font freed-----------|                     |
+  |                      |                        |--Destroy (font 2)-->|
+  |                      |                        |                     |--XftFontClose()
+  |                      |                        |<-------------------|
+  |                      |                        |                     |
+  |                      |<--All fonts freed------|                     |
 ----
 
 ---
@@ -959,13 +950,13 @@ Widget              FontManager           TfpgFontResource      Platform (Xft/GD
 The fpGUI font architecture provides:
 
 ✓ **Clean API** - Direct font resource usage without wrappers
-✓ **High Performance** - O(1) hash-based caching
-✓ **Memory Safety** - Automatic reference counting
+✓ **High Performance** - O(1) hash-based caching with persistent cache model
+✓ **Memory Safety** - Simple ownership model (cache owns all fonts)
 ✓ **Multi-Backend** - Seamless native and AggCanvas support
 ✓ **Cross-Platform** - Consistent API across X11, GDI, Cocoa
 ✓ **Maintainable** - Clear separation of concerns
 
-This architecture serves as a solid foundation for future enhancements while remaining pragmatic and efficient.
+This architecture trades a small amount of memory (~100 KB for typical applications) for significantly improved performance by eliminating repeated font loading from disk.
 
 ---
 

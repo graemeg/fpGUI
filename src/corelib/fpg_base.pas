@@ -324,7 +324,6 @@ type
     function    GetCanvasRef: TObject; virtual;
     // IFontEngine end
     function    HandleIsValid: boolean; virtual; abstract;
-    function    GetRefCount: integer;
     property    FontDesc: string read FFontDesc;
   end;
 
@@ -3118,11 +3117,6 @@ begin
   // Font manager owns font resources and handles cleanup
   // No need to notify - cache will free fonts when destroyed
   inherited Destroy;
-end;
-
-function TfpgFontResourceBase.GetRefCount: integer;
-begin
-  Result := RefCount;
 end;
 
 
