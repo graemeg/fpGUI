@@ -141,18 +141,12 @@ end;
 procedure TfpgFontManager.NotifyFontDestroyed(AFont: TfpgFontResourceBase);
 var
   idx: integer;
-  fontDesc: string;
 begin
   // Called by font destructor when ref count reaches 0
   // Remove font from cache (but don't free it - cache owns it)
+  if not Assigned(AFont) then Exit;
 
-  // Get the font descriptor before trying to find it
-  if AFont is TfpgFontResource then
-    fontDesc := TfpgFontResource(AFont).FontDesc
-  else
-    Exit;  // Can't identify font without descriptor
-
-  idx := FFontCache.FindIndexOf(fontDesc);
+  idx := FFontCache.FindIndexOf(AFont.FontDesc);
   if idx >= 0 then
     FFontCache.Delete(idx);  // Remove from cache without freeing (already being destroyed)
 end;
