@@ -960,7 +960,7 @@ This architecture trades a small amount of memory (~100 KB for typical applicati
 
 ---
 
-**Document Version:** 1.0
-**Date:** 2025-10-15
-**Branch:** font-handling-refactor & develop (from Oct 2025)
+**Document Version:** 1.0 +
+**Date:** 2025-10-15 +
+**Branch:** font-handling-refactor & develop (from Oct 2025) +
 **Author:** Graeme Geldenhuys
