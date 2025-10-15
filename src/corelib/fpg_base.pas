@@ -405,7 +405,7 @@ type
     procedure   DoGetWinRect(out r: TfpgRect); virtual;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     { Configure font's engine based on canvas type - REMOVED: No longer needed }
-    // procedure   ConfigureFontEngine(AFont: TfpgFontBase); virtual;
+
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
@@ -464,7 +464,7 @@ type
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
-    // procedure   SetFont(AFont: TfpgFontBase); overload;  // REMOVED: TfpgFontBase being phased out
+
     procedure   SetFont(AFont: TfpgFontResourceBase); overload;  // Direct font resource
     { NEW: Convenience method to set font from definition }
     procedure   SetFontDefinition(AFontDef: TfpgFontDefinition);
@@ -2909,36 +2909,9 @@ begin
   DoSetLineStyle(FLineWidth, FLineStyle);
 end;
 
-{ Removed - no longer needed as we work directly with TfpgFontResourceBase }
-{
-procedure TfpgCanvasBase.ConfigureFontEngine(AFont: TfpgFontBase);
-begin
-  // Default implementation: use platform-specific font resource as engine
-  if Assigned(AFont) and Assigned(AFont.FontRes) then
-    AFont.FontEngine := AFont.FontRes as IFontEngine;
-end;
-}
 
-{ Removed - TfpgFontBase is being phased out in favor of TfpgFontResourceBase }
-{
-procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
-begin
-  if FFont = AFont then
-    Exit;
 
-  if AFont <> FOwnedFont then
-  begin
-    FOwnedFont.Free;
-    FOwnedFont := nil;
-  end;
 
-  FFont := AFont;
-
-  ConfigureFontEngine(AFont);
-
-  DoSetFontRes(AFont.FontRes);
-end;
-}
 
 // NEW: Overload to accept TfpgFontResourceBase directly
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontResourceBase);
