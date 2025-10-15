@@ -104,6 +104,11 @@ build_project "maximus" \
               "$SCRIPT_DIR/examples/apps/ide/src" \
               "fpc @extrafpc.cfg maximus.lpr"
 
+# Build 5: unittests
+build_project "unittests" \
+              "$SCRIPT_DIR/unittests" \
+              "fpc -dX11 -dAGGCanvas @extrafpc.cfg fpgui_unittests_console.lpr"
+
 echo ""
 
 # Print summary

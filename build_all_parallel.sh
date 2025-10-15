@@ -117,6 +117,10 @@ build_project_async "maximus" \
                     "$SCRIPT_DIR/examples/apps/ide/src" \
                     "fpc @extrafpc.cfg maximus.lpr"
 
+build_project_async "unittests" \
+                    "$SCRIPT_DIR/unittests" \
+                    "fpc -dX11 -dAGGCanvas @extrafpc.cfg fpgui_unittests_console.lpr"
+
 echo ""
 print_info "Waiting for parallel builds to complete..."
 echo ""

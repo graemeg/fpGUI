@@ -1,3 +1,9 @@
+{
+  Console test runner>
+
+  Usage:  ./fpgui_unittests_console -a --format=plain
+
+}
 program fpgui_unittests_console;
 
 {$mode objfpc}{$H+}

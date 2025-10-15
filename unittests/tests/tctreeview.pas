@@ -7,7 +7,8 @@ interface
 uses
   Classes,
   SysUtils,
-  TestFramework,
+  //TestFramework,
+  fpcunit, testutils, testregistry,
   fpg_tree;
 
 type
@@ -16,8 +17,8 @@ type
   private
     FTree: TfpgTreeview;
   protected
-    procedure SetUp; override; 
-    procedure TearDown; override; 
+    procedure SetUp; override;
+    procedure TearDown; override;
   published
     procedure TestCount;
     procedure TestCountRecursive;
@@ -33,20 +34,28 @@ procedure RegisterTests;
 
 implementation
 
+uses
+  fpg_main;
+
 
 procedure RegisterTests;
 begin
-  TestFramework.RegisterTest('fpg_tree', TTestTreeview.Suite);
+  //TestFramework.RegisterTest('fpg_tree', TTestTreeview.Suite);
+  RegisterTest(TTestTreeview);
 end;
 
 { TTestTreeview }
 
 procedure TTestTreeview.SetUp;
 begin
-  FTree := TfpgTreeview.Create(nil);
-end; 
+    { Initialize fpGUI application once - calling fpgApplication creates it if needed }
+  if not fpgApplication.IsInitialized then
+    fpgApplication.Initialize;
 
-procedure TTestTreeview.TearDown; 
+  FTree := TfpgTreeview.Create(nil);
+end;
+
+procedure TTestTreeview.TearDown;
 begin
   FTree.Free;
 end;
@@ -161,7 +170,7 @@ begin
   r := n2.AppendText('n2.2');
   AssertTrue('Failed on 8', FTree.RootNode.FindSubNode('n2.2', False) = nil);
   AssertTrue('Failed on 9', FTree.RootNode.FindSubNode('n2.2', True) = r);
-  
+
   n3 := FTree.RootNode.AppendText('n3');
   AssertTrue('Failed on 10', FTree.RootNode.FindSubNode('n3', False) = n3);
   AssertTrue('Failed on 11', FTree.RootNode.FindSubNode('n3', True) = n3);
@@ -174,6 +183,6 @@ begin
   AssertTrue('Failed on 14', FTree.RootNode.FindSubNode('n2.1.1', False) = nil);
   AssertTrue('Failed on 15', FTree.RootNode.FindSubNode('n2.1.1', True) = r);
 end;
-  
+
 end.
 
