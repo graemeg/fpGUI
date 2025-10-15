@@ -950,11 +950,17 @@ Application         FontManager           TfpgFontResource      Platform (Xft/GD
 The fpGUI font architecture provides:
 
 ✓ **Clean API** - Direct font resource usage without wrappers
+
 ✓ **High Performance** - O(1) hash-based caching with persistent cache model
+
 ✓ **Memory Safety** - Simple ownership model (cache owns all fonts)
+
 ✓ **Multi-Backend** - Seamless native and AggCanvas support
+
 ✓ **Cross-Platform** - Consistent API across X11, GDI, Cocoa
+
 ✓ **Maintainable** - Clear separation of concerns
+
 
 This architecture trades a small amount of memory (~100 KB for typical applications) for significantly improved performance by eliminating repeated font loading from disk.
 
