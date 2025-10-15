@@ -315,6 +315,7 @@ type
     FFontDesc: string;
   public
     constructor Create(const afontdesc: string); virtual;
+    destructor  Destroy; override;
     // IFontEngine implementation (methods already exist!)
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
@@ -337,6 +338,8 @@ type
     FAttributes: TfpgFontAttributes;
     FAntiAliased: boolean;
     procedure ParseFontDesc;
+    procedure BuildNormalizedFontDesc;
+    function NormalizeFaceName(const AFaceName: string): string;
   public
     constructor Create(const AFontDesc: string);
     property FontDesc: string read FFontDesc;
@@ -3110,6 +3113,13 @@ begin
   FFontDesc := afontdesc;
 end;
 
+destructor TfpgFontResourceBase.Destroy;
+begin
+  // Font manager owns font resources and handles cleanup
+  // No need to notify - cache will free fonts when destroyed
+  inherited Destroy;
+end;
+
 function TfpgFontResourceBase.GetRefCount: integer;
 begin
   Result := RefCount;
@@ -3121,8 +3131,9 @@ end;
 constructor TfpgFontDefinition.Create(const AFontDesc: string);
 begin
   inherited Create;
-  FFontDesc := AFontDesc;
+  FFontDesc := Trim(AFontDesc);  // Store original (will be replaced with normalized)
   ParseFontDesc;
+  BuildNormalizedFontDesc;  // Rebuild FFontDesc in normalized form
 end;
 
 procedure TfpgFontDefinition.ParseFontDesc;
@@ -3137,6 +3148,13 @@ begin
   FSize := 10;  // default
   FAttributes := [];
   FAntiAliased := True;  // default
+
+  // Handle empty descriptor - use platform default
+  if Trim(FFontDesc) = '' then
+  begin
+    FFaceName := FPG_DEFAULT_SANS;
+    Exit;
+  end;
 
   // Extract face name (everything before '-' or ':')
   while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> '-') and (FFontDesc[cp] <> ':') do
@@ -3199,6 +3217,84 @@ begin
     else
       Inc(cp);
   end;
+end;
+
+function TfpgFontDefinition.NormalizeFaceName(const AFaceName: string): string;
+var
+  i: integer;
+  capitalizeNext: boolean;
+begin
+  Result := '';
+  capitalizeNext := True;
+
+  for i := 1 to Length(AFaceName) do
+  begin
+    if AFaceName[i] = ' ' then
+    begin
+      Result := Result + ' ';
+      capitalizeNext := True;
+    end
+    else if capitalizeNext then
+    begin
+      Result := Result + UpCase(AFaceName[i]);
+      capitalizeNext := False;
+    end
+    else
+      Result := Result + LowerCase(AFaceName[i]);
+  end;
+end;
+
+procedure TfpgFontDefinition.BuildNormalizedFontDesc;
+var
+  attrList: array[0..2] of string;
+  attrCount: integer;
+  i, j: integer;
+  temp: string;
+begin
+  // Normalize face name: "arial" -> "Arial", "COURIER NEW" -> "Courier New"
+  FFaceName := Trim(NormalizeFaceName(FFaceName));
+
+  // Build normalized descriptor: FaceName-Size:attr1:attr2:...
+  FFontDesc := FFaceName + '-' + IntToStr(FSize);
+
+  // Add attributes in sorted order (alphabetical)
+  attrCount := 0;
+
+  if fpgFontBold in FAttributes then
+  begin
+    attrList[attrCount] := 'bold';
+    Inc(attrCount);
+  end;
+
+  if fpgFontItalic in FAttributes then
+  begin
+    attrList[attrCount] := 'italic';
+    Inc(attrCount);
+  end;
+
+  if fpgFontUnderline in FAttributes then
+  begin
+    attrList[attrCount] := 'underline';
+    Inc(attrCount);
+  end;
+
+  // Simple bubble sort for consistency (only 3 items max)
+  for i := 0 to attrCount - 2 do
+    for j := i + 1 to attrCount - 1 do
+      if attrList[i] > attrList[j] then
+      begin
+        temp := attrList[i];
+        attrList[i] := attrList[j];
+        attrList[j] := temp;
+      end;
+
+  // Append sorted attributes
+  for i := 0 to attrCount - 1 do
+    FFontDesc := FFontDesc + ':' + attrList[i];
+
+  // Add antialiasing if explicitly set to false
+  if not FAntiAliased then
+    FFontDesc := FFontDesc + ':antialias=false';
 end;
 
 

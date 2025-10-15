@@ -11,7 +11,9 @@ interface
 uses
 //  tctreeview
 //  ,tcfpgbase
-  tcfontmanager
+  tcfontmanager,
+  tcfontcacheremoval,
+  tcfontdefinition
   ;
 
 implementation
@@ -20,5 +22,7 @@ initialization
 //  tctreeview.RegisterTests;
 // tcfpgbase.RegisterTests;
   tcfontmanager.RegisterTests;
+  tcfontcacheremoval.RegisterTests;
+  tcfontdefinition.RegisterTests;
 
 end.

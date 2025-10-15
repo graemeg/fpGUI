@@ -217,7 +217,7 @@ begin
 
   CheckNotNull(font, 'Valid descriptor should return font');
   CheckTrue(font.HandleIsValid, 'Font should have valid handle');
-  CheckEquals(descriptor, TfpgFontResource(font).FontDesc, 'Font descriptor should match');
+  CheckEquals(descriptor, font.FontDesc, 'Font descriptor should match');
 end;
 
 procedure TTestFontManager.TestGetCacheStats;

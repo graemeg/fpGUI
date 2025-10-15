@@ -181,6 +181,7 @@ uses
 
 constructor TfpgCocoaFontResource.Create(const afontdesc: string);
 begin
+  inherited Create(afontdesc);  // Call base constructor to set FFontDesc
 end;
 
 function    TfpgCocoaFontResource.GetAscent: integer;

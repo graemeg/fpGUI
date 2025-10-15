@@ -669,7 +669,6 @@ type
  { Font resource that uses its own FreeType engine for all metrics }
  TfpgAgg2DFontResource = class(TfpgFontResourceBase)
  private
-   FFontDesc: string;
    FFontPath: string;
    FFontSize: double;
    FBold: boolean;
@@ -1270,7 +1269,7 @@ var
   m_fontDC: HDC;
   {$ENDIF}
 begin
-  FFontDesc := AFontDesc;
+  inherited Create(AFontDesc);  // Call base constructor to set FFontDesc
   FValid := False;
 
   fnt := FontCacheItemFromFontDesc(AFontDesc, lSize);

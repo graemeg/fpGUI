@@ -3216,6 +3216,7 @@ end;
 
 constructor TfpgX11FontResource.Create(const afontdesc: string);
 begin
+  inherited Create(afontdesc);  // Call base constructor to set FFontDesc
   FFontData := XftFontOpenName(xapplication.display, xapplication.DefaultScreen, PChar(afontdesc));
 end;
 
