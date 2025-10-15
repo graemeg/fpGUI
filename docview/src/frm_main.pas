@@ -868,6 +868,7 @@ begin
       Add('<b>String resource id count:</b> ' + IntToStr(f.StringResourceIDCount));
       Add('<b>Numeric resource id count:</b> ' + IntToStr(f.NumericResourceIDCount));
       Add(' ');
+      Add(fpgApplication.FontManager.GetCacheStats());
       //Add('Dictionary contents:');
       //for i := 0 to f.DictionaryCount-1 do
       //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
