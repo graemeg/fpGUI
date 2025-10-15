@@ -195,7 +195,6 @@ end;
 function TfpgFontManager.GetCacheStats: string;
 var
   i: integer;
-  font: TfpgFontResource;
   fontBase: TfpgFontResourceBase;
 begin
   Result := Format('Font Cache Statistics:'#13#10, []);
@@ -209,12 +208,8 @@ begin
     for i := 0 to FFontCache.Count - 1 do
     begin
       fontBase := TfpgFontResourceBase(FFontCache[i]);
-      if fontBase is TfpgFontResource then
-      begin
-        font := TfpgFontResource(fontBase);
-        Result := Result + Format('  [%d] %s (RefCount: %d)'#13#10,
-                                  [i, font.FontDesc, font.UsageCount]);
-      end;
+      Result := Result + Format('  [%d] %s (RefCount: %d)'#13#10,
+                                [i, fontBase.FontDesc, fontBase.GetRefCount]);
     end;
   end;
 end;

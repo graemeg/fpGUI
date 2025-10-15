@@ -315,14 +315,16 @@ type
     FFontDesc: string;
   public
     constructor Create(const afontdesc: string); virtual;
-    property FontDesc: string read FFontDesc;
     // IFontEngine implementation (methods already exist!)
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
     function    GetHeight: integer; virtual; abstract;
     function    GetTextWidth(const txt: string): integer; virtual; abstract;
-    function    HandleIsValid: boolean; virtual; abstract;
     function    GetCanvasRef: TObject; virtual;
+    // IFontEngine end
+    function    HandleIsValid: boolean; virtual; abstract;
+    function    GetRefCount: integer;
+    property    FontDesc: string read FFontDesc;
   end;
 
 
@@ -3106,6 +3108,11 @@ constructor TfpgFontResourceBase.Create(const afontdesc: string);
 begin
   inherited Create;
   FFontDesc := afontdesc;
+end;
+
+function TfpgFontResourceBase.GetRefCount: integer;
+begin
+  Result := RefCount;
 end;
 
 
