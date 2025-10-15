@@ -42,21 +42,21 @@ This document provides a comprehensive redesign proposal for the fpGUI font hand
 ┌─────────────────────────────────────────────────────────────┐
 │                    Application Layer                        │
 │                                                             │
-│  Widget → FFont: TfpgFont  (wrapper object)                │
+│  Widget → FFont: TfpgFont  (wrapper object)                 │
 │              ↓                                              │
-│         FFont.Free → DecRefCount                           │
-│         fpgGetFont(desc) → TfpgApplication.GetFont         │
+│         FFont.Free → DecRefCount                            │
+│         fpgGetFont(desc) → TfpgApplication.GetFont          │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                   Global Font Cache                         │
 │                                                             │
-│  TfpgApplication.FFontResList: TList                       │
-│      ↓ O(n) linear search                                  │
-│  TfpgFontResource (cached, reference-counted)              │
-│      ├─ FFontDesc: string                                  │
-│      ├─ FUsageCount: integer (manual)                      │
-│      └─ Platform handle (HFONT, PXftFont, etc.)           │
+│  TfpgApplication.FFontResList: TList                        │
+│      ↓ O(n) linear search                                   │
+│  TfpgFontResource (cached, reference-counted)               │
+│      ├─ FFontDesc: string                                   │
+│      ├─ FUsageCount: integer (manual)                       │
+│      └─ Platform handle (HFONT, PXftFont, etc.)             │
 └─────────────────────────────────────────────────────────────┘
                     ↓ inherits              ↓ NEW path (partial)
 ┌──────────────────────────────────┐  ┌────────────────────────┐
@@ -70,9 +70,9 @@ This document provides a comprehensive redesign proposal for the fpGUI font hand
             ↓ platform-specific        ┌────────────────────────┐
 ┌───────────────────────────────────┐  │ IFontEngine interface  │
 │  Platform Implementations         │  │   ↓ implemented by     │
-│  ├─ TfpgX11FontResource (Xft)    │  │ TAgg2DFontEngine       │
-│  ├─ TfpgGDIFontResource (GDI)    │  │  (AGG canvas only)     │
-│  └─ TfpgCocoaFontResource        │  └────────────────────────┘
+│  ├─ TfpgX11FontResource (Xft)     │  │ TAgg2DFontEngine       │
+│  ├─ TfpgGDIFontResource (GDI)     │  │  (AGG canvas only)     │
+│  └─ TfpgCocoaFontResource         │  └────────────────────────┘
 └───────────────────────────────────┘
 ----
 
@@ -294,48 +294,48 @@ end;
 ┌─────────────────────────────────────────────────────────────┐
 │                    Application Layer                        │
 │                                                             │
-│  Widget → FFont: TfpgFontResource  (direct reference)      │
+│  Widget → FFont: TfpgFontResource  (direct reference)       │
 │              ↓                                              │
-│         FFont := nil  (auto ref count decrement)           │
-│         fpgApplication.FontManager.GetFont(desc)           │
+│         FFont := nil  (auto ref count decrement)            │
+│         fpgApplication.FontManager.GetFont(desc)            │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                   Font Manager (NEW)                        │
 │                                                             │
-│  TfpgFontManager                                           │
-│      ├─ FFontCache: TFPHashObjectList  (O(1) lookup)      │
-│      ├─ FDefaultFontDesc: string                           │
-│      ├─ FFixedFontDesc: string                             │
-│      └─ Methods:                                           │
-│          ├─ GetFont(const ADesc: string): TfpgFontResource│
-│          ├─ ReleaseFont(AFont: TfpgFontResource)          │
-│          ├─ RegisterNamedFont(AID, ADesc: string)          │
-│          └─ GetCacheStats: string                          │
+│  TfpgFontManager                                            │
+│      ├─ FFontCache: TFPHashObjectList  (O(1) lookup)        │
+│      ├─ FDefaultFontDesc: string                            │
+│      ├─ FFixedFontDesc: string                              │
+│      └─ Methods:                                            │
+│          ├─ GetFont(const ADesc: string): TfpgFontResource  │
+│          ├─ ReleaseFont(AFont: TfpgFontResource)            │
+│          ├─ RegisterNamedFont(AID, ADesc: string)           │
+│          └─ GetCacheStats: string                           │
 └─────────────────────────────────────────────────────────────┘
                               ↓ manages
 ┌─────────────────────────────────────────────────────────────┐
-│  TfpgFontResource (cached, interface ref-counted)          │
-│      ├─ FFontDesc: string                                  │
-│      ├─ FFontDefinition: TfpgFontDefinition                │
-│      ├─ Reference count (automatic via TInterfacedObject)  │
-│      └─ Implements IFontEngine                             │
+│  TfpgFontResource (cached, interface ref-counted)           │
+│      ├─ FFontDesc: string                                   │
+│      ├─ FFontDefinition: TfpgFontDefinition                 │
+│      ├─ Reference count (automatic via TInterfacedObject)   │
+│      └─ Implements IFontEngine                              │
 └─────────────────────────────────────────────────────────────┘
                               ↓ implements
 ┌─────────────────────────────────────────────────────────────┐
 │                   IFontEngine (Unified)                     │
-│      ├─ GetTextWidth(const AText: string): integer         │
-│      ├─ GetAscent: integer                                 │
-│      ├─ GetDescent: integer                                │
-│      └─ GetHeight: integer                                 │
+│      ├─ GetTextWidth(const AText: string): integer          │
+│      ├─ GetAscent: integer                                  │
+│      ├─ GetDescent: integer                                 │
+│      └─ GetHeight: integer                                  │
 └─────────────────────────────────────────────────────────────┘
                               ↓ implemented by
 ┌───────────────────────────────────────────────────────────┐
 │  Platform Implementations                                 │
-│  ├─ TfpgX11FontResource (Xft wrapper)                    │
-│  ├─ TfpgGDIFontResource (GDI wrapper)                    │
-│  ├─ TfpgCocoaFontResource (CoreText wrapper)             │
-│  └─ TAgg2DFontEngine (FreeType + AGG)                    │
+│  ├─ TfpgX11FontResource (Xft wrapper)                     │
+│  ├─ TfpgGDIFontResource (GDI wrapper)                     │
+│  ├─ TfpgCocoaFontResource (CoreText wrapper)              │
+│  └─ TAgg2DFontEngine (FreeType + AGG)                     │
 └───────────────────────────────────────────────────────────┘
 
 Separate utility (no inheritance):
@@ -2037,8 +2037,8 @@ This refactoring provides a solid foundation while remaining pragmatic about ris
 **Document Version:** 2.0 +
 **Date:** 2025-10-13 +
 **Branch:** font-handling-refactor +
-**Author:** Graeme Geldenhuys based on comprehensive codebase analysis +
-**Status:** PROPOSAL - Awaiting Review +
+**Author:** Graeme Geldenhuys based on comprehensive codebase analysis
+
 
 **Changes from v1:**
 
