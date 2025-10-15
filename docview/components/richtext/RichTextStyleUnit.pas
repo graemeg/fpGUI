@@ -170,58 +170,40 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
 
     ttFixedWidthOn:
       begin
-        if ASettings.FixedFont is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.FixedFont).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.FixedFont.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttFixedWidthOff:
       begin
-        if ASettings.NormalFont is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.NormalFont).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.NormalFont.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttHeading1:
       begin
-        if ASettings.Heading1Font is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.Heading1Font).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.Heading1Font.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttHeading2:
       begin
-        if ASettings.Heading2Font is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.Heading2Font).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.Heading2Font.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttHeading3:
       begin
-        if ASettings.Heading3Font is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.Heading3Font).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.Heading3Font.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttHeading1Off,
     ttHeading2Off,
     ttHeading3Off:
       begin
-        if ASettings.NormalFont is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.NormalFont).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.NormalFont.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttFont:
@@ -258,11 +240,8 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
       begin
         { TODO: Restore to previous font, not NormalFont, because previous font could have
            been something different to NormalFont }
-        if ASettings.NormalFont is TfpgFontResource then
-        begin
-          Style.FontNameSize := TfpgFontResource(ASettings.NormalFont).FontDesc;
-          Style.FontAttributes := [];  // attributes are already in FontDesc
-        end;
+        Style.FontNameSize := ASettings.NormalFont.FontDesc;
+        Style.FontAttributes := [];  // attributes are already in FontDesc
       end;
 
     ttColor:
@@ -362,8 +341,8 @@ end;
 function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  if (ASettings.NormalFont <> nil) and (ASettings.NormalFont is TfpgFontResource) then
-    Result.FontNameSize := TfpgFontResource(ASettings.NormalFont).FontDesc
+  if (ASettings.NormalFont <> nil) then
+    Result.FontNameSize := ASettings.NormalFont.FontDesc
   else
     Result.FontNameSize := DefaultTopicFont;  // fallback to default
   Result.FontAttributes := [];

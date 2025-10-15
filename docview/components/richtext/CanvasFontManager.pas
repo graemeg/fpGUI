@@ -109,8 +109,8 @@ var
 begin
   Result := [];
   cp := 0;
-  if AFont is TfpgFontResource then
-    lDesc := TfpgFontResource(AFont).FontDesc
+  if Assigned(AFont) then
+    lDesc := AFont.FontDesc
   else
     lDesc := '';
 
@@ -226,8 +226,8 @@ begin
   // if nothing found, use default font of fpGUI
   if FontDesc = '' then
   begin
-    if fpgStyle.GetDefaultFont is TfpgFontResource then
-      FontDesc := TfpgFontResource(fpgStyle.GetDefaultFont).FontDesc
+    if Assigned(fpgStyle.GetDefaultFont) then
+      FontDesc := fpgStyle.GetDefaultFont.FontDesc
     else
       FontDesc := DefaultTopicFont;
   end;
@@ -249,7 +249,7 @@ end;
 destructor TCanvasFontManager.Destroy;
 begin
   FCanvas.SetFont(fpgStyle.GetDefaultFont);
-  FDefaultFont := nil;  // Release font (automatic ref count decrement)
+  FDefaultFont := nil;  // Clear pointer (font persists in cache)
   inherited Destroy;
 end;
 
@@ -257,7 +257,7 @@ procedure TCanvasFontManager.SetDefaultFont(const AValue: TfpgFontResourceBase);
 begin
   if FDefaultFont = AValue then
     exit;
-  FDefaultFont := nil;  // Release old font (automatic ref count decrement)
+  FDefaultFont := nil;  // Clear old pointer (font persists in cache)
   FDefaultFont := AValue;
 end;
 
@@ -274,17 +274,17 @@ var
   lFont: TfpgFontResourceBase;
   lCurFontDesc: string;
 begin
-  // Get current font descriptor safely
-  if FCanvas.Font is TfpgFontResource then
-    lCurFontDesc := TfpgFontResource(FCanvas.Font).FontDesc
+  // Get current font descriptor - FontDesc is in TfpgFontResourceBase
+  if Assigned(FCanvas.Font) then
+    lCurFontDesc := FCanvas.Font.FontDesc
   else
     lCurFontDesc := '';
 
   if lCurFontDesc = AFontDesc then
     Exit; // nothing to do so exit
 
-  if FDefaultFont is TfpgFontResource then
-    lFontDesc := TfpgFontResource(FDefaultFont).FontDesc
+  if Assigned(FDefaultFont) then
+    lFontDesc := FDefaultFont.FontDesc
   else
     lFontDesc := '';
 

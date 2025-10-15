@@ -679,10 +679,7 @@ Var
     if AFontDesc <> '' then
     begin
       // save original font descriptor
-      if Canvas.Font is TfpgFontResource then
-        oldf := TfpgFontResource(Canvas.Font).FontDesc
-      else
-        oldf := '';
+      oldf := Canvas.Font.FontDesc;
       Canvas.SetFont(fpgApplication.FontManager.GetFont(AFontDesc)); // set new font
     end;
     Canvas.TextColor := AColor; // set new color

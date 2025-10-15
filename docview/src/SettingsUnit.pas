@@ -346,8 +346,7 @@ begin
         WriteBool( FontsSection, FontName + 'Customised', Fonts[ FontIndex ] <> nil );
         if Fonts[ FontIndex ] <> nil then
         begin
-          if Fonts[ FontIndex ] is TfpgFontResource then
-            WriteString( FontsSection, FontName + 'Desc', TfpgFontResource(Fonts[ FontIndex ]).FontDesc );
+          WriteString( FontsSection, FontName + 'Desc', Fonts[ FontIndex ].FontDesc );
         end;
       end;
 
