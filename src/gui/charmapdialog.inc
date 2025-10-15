@@ -281,7 +281,7 @@ begin
     Name := 'pnlChar';
     SetPosition(292, 304, 60, 48);
     Anchors := [anRight,anBottom];
-    FontDesc := 'Arial-16:antialias=true';
+    FontDesc := FPG_DEFAULT_SANS + '-16:antialias=true';
     Hint := '';
     Style := bsLowered;
     Text := '';

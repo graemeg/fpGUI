@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -265,8 +265,8 @@ begin
   Result.Focusable := True;
   Result.AutoCompletion := ACompletion;
   Result.AllowNew       := ANew;
-  if h < TfpgEditCombo(Result).Font.Height + (Result.FMargin * 2) then
-    Result.Height := TfpgEditCombo(Result).Font.Height + (Result.FMargin * 2)
+  if h < TfpgEditCombo(Result).Font.GetHeight + (Result.FMargin * 2) then
+    Result.Height := TfpgEditCombo(Result).Font.GetHeight + (Result.FMargin * 2)
   else
     Result.Height:= h;
 
@@ -761,13 +761,13 @@ var
       st  := st + len;
       len := -len;
     end;
-    tw  := Font.TextWidth(UTF8Copy(Items[FFocusItem], 1, st));
-    tw2 := Font.TextWidth(UTF8Copy(Items[FFocusItem], 1, st + len));
+    tw  := Font.GetTextWidth(UTF8Copy(Items[FFocusItem], 1, st));
+    tw2 := Font.GetTextWidth(UTF8Copy(Items[FFocusItem], 1, st + len));
 
     // Lets do the same as what was done in TfpgEdit.
     Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
-    r.SetRect(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.Height);
+    Canvas.FillRectangle(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.GetHeight);
+    r.SetRect(-FDrawOffset + FMargin + tw, 3, tw2 - tw, Font.GetHeight);
     Canvas.AddClipRect(r);
     Canvas.SetTextColor(ltxtcolor);
     fpgStyle.DrawString(Canvas, -FDrawOffset + FMargin + tw, 3, UTF8Copy(Items[FFocusItem], Succ(st), Pred(len)), Enabled);
@@ -849,7 +849,7 @@ begin
       if Texte <> '' then
         if FFocusItem > -1 then
         begin
-          FSelOffset := Font.TextWidth(UTF8Copy(Items[FFocusItem], UTF8Length(FText) + 1,
+          FSelOffset := Font.GetTextWidth(UTF8Copy(Items[FFocusItem], UTF8Length(FText) + 1,
             UTF8Length(Items[FFocusItem]) - UTF8Length(FText)));
           fpgStyle.DrawString(Canvas, FMargin+1, FMargin, FText + UTF8Copy(Items[FFocusItem],
             UTF8Length(FText) + 1, UTF8Length(Items[FFocusItem]) - UTF8Length(FText)), Enabled);
@@ -869,8 +869,8 @@ begin
 
       // drawing cursor
       FCursorPos:= UTF8Length(FText);
-      tw := Font.TextWidth(UTF8Copy(FText, 1, FCursorPos));
-      fpgCaret.SetCaret(Canvas, -FDrawOffset + FMargin + tw, FMargin, fpgCaret.Width, Font.Height);
+      tw := Font.GetTextWidth(UTF8Copy(FText, 1, FCursorPos));
+      fpgCaret.SetCaret(Canvas, -FDrawOffset + FMargin + tw, FMargin, fpgCaret.Width, Font.GetHeight);
     end
     else
       fpgCaret.UnSetCaret(Canvas);
@@ -888,7 +888,7 @@ begin
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
   FWidth            := 120;
-  FHeight           := Font.Height + 6;
+  FHeight           := Font.GetHeight + 6;
   FMargin           := 3;
   FFocusable        := True;
   FAutocompletion   := False;

@@ -479,8 +479,8 @@ end;
 
 procedure TMainForm.UpdateRichViewFromSettings;
 begin
-  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
-  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
+  RichView.RichTextSettings.NormalFont := fpgApplication.FontManager.GetFont(Settings.NormalFontDesc);
+  RichView.RichTextSettings.FixedFont := fpgApplication.FontManager.GetFont(Settings.FixedFontDesc);
   RichView.ScrollDistance := Settings.ScrollDistance;
   RichView.BackgroundColor := Settings.Colors[TopicBackgroundColorIndex];
 end;
@@ -868,6 +868,7 @@ begin
       Add('<b>String resource id count:</b> ' + IntToStr(f.StringResourceIDCount));
       Add('<b>Numeric resource id count:</b> ' + IntToStr(f.NumericResourceIDCount));
       Add(' ');
+      Add(fpgApplication.FontManager.GetCacheStats());
       //Add('Dictionary contents:');
       //for i := 0 to f.DictionaryCount-1 do
       //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');

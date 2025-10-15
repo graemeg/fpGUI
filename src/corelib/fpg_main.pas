@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2019 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -28,7 +28,8 @@ uses
   fpg_constants,
   fpg_base,
   fpg_interface,
-  fpg_impl;
+  fpg_impl,
+  fpg_fontmanager;
 
 type
   TOrientation = (orVertical, orHorizontal);
@@ -103,21 +104,8 @@ type
 
 
   TfpgFontResource = class(TfpgFontResourceImpl)
-  protected
-    FFontDesc: string;
-    FRefCount: integer;
   public
     constructor Create(const afontdesc: string);
-    function    IncRefCount: integer;
-    function    DecRefCount: integer;
-    property    FontDesc: string read FFontDesc;
-  end;
-
-
-  TfpgFont = class(TfpgFontBase)
-  public
-    constructor Create(afontres: TfpgFontResource; const afontdesc: string);
-    destructor  Destroy; override;
   end;
 
 
@@ -188,32 +176,33 @@ type
 
   TfpgStyle = class(TObject)
   private
-    FMenuHeaderFont: TfpgFont;
-    procedure SetMenuHeaderFont(AValue: TfpgFont);
-  protected
-    FDefaultFont: TfpgFont;
-    FFixedFont: TfpgFont;
-    FMenuAccelFont: TfpgFont;
-    FMenuDisabledFont: TfpgFont;
-    FMenuFont: TfpgFont;
-    FTabFont: TfpgFont;
-    procedure   SetDefaultFont(AValue: TfpgFont);
-    procedure   SetFixedFont(AValue: TfpgFont);
-    procedure   SetMenuAccelFont(AValue: TfpgFont);
-    procedure   SetMenuDisabledFont(AValue: TfpgFont);
-    procedure   SetMenuFont(AValue: TfpgFont);
-    procedure   SetTabFont(AValue: TfpgFont);
+    { Font definition fields }
+    FDefaultFontDef: TfpgFontDefinition;
+    FFixedFontDef: TfpgFontDefinition;
+    FMenuFontDef: TfpgFontDefinition;
+    FMenuHeaderFontDef: TfpgFontDefinition;
+    FMenuAccelFontDef: TfpgFontDefinition;
+    FMenuDisabledFontDef: TfpgFontDefinition;
+    FTabFontDef: TfpgFontDefinition;
   public
     constructor Create; virtual;
     destructor  Destroy; override;
-    { font objects }
-    property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
-    property    FixedFont: TfpgFont read FFixedFont write SetFixedFont;
-    property    MenuFont: TfpgFont read FMenuFont write SetMenuFont;
-    property    MenuHeaderFont: TfpgFont read FMenuHeaderFont write SetMenuHeaderFont;
-    property    MenuAccelFont: TfpgFont read FMenuAccelFont write SetMenuAccelFont;
-    property    MenuDisabledFont: TfpgFont read FMenuDisabledFont write SetMenuDisabledFont;
-    property    TabFont: TfpgFont read FTabFont write SetTabFont;
+    { Font definitions }
+    property    DefaultFontDef: TfpgFontDefinition read FDefaultFontDef;
+    property    FixedFontDef: TfpgFontDefinition read FFixedFontDef;
+    property    MenuFontDef: TfpgFontDefinition read FMenuFontDef;
+    property    MenuHeaderFontDef: TfpgFontDefinition read FMenuHeaderFontDef;
+    property    MenuAccelFontDef: TfpgFontDefinition read FMenuAccelFontDef;
+    property    MenuDisabledFontDef: TfpgFontDefinition read FMenuDisabledFontDef;
+    property    TabFontDef: TfpgFontDefinition read FTabFontDef;
+    { Helper methods to get font resources from font manager }
+    function    GetDefaultFont: TfpgFontResourceBase;
+    function    GetFixedFont: TfpgFontResourceBase;
+    function    GetMenuFont: TfpgFontResourceBase;
+    function    GetMenuHeaderFont: TfpgFontResourceBase;
+    function    GetMenuAccelFont: TfpgFontResourceBase;
+    function    GetMenuDisabledFont: TfpgFontResourceBase;
+    function    GetTabFont: TfpgFontResourceBase;
     { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
@@ -287,16 +276,14 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
-    FFontResList: TList;
+    FFontManager: TfpgFontManager;  // centralized font management
     FMessageHookList: TFPList;
-    procedure   FreeFontRes(afontres: TfpgFontResource);
     procedure   InternalInit;
     procedure   RunMessageLoop;
     procedure   WaitWindowMessage(atimeoutms: integer);
   public
     constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
-    function    GetFont(const afontdesc: TfpgString): TfpgFont;
     procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
     procedure   RecreateHintWindow;
     procedure   Flush;
@@ -313,6 +300,7 @@ type
     property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
+    property    FontManager: TfpgFontManager read FFontManager;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
     property    StartDragDistance: integer read FStartDragDistance write SetStartDragDistance default 5;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
@@ -442,9 +430,6 @@ var
 // Application & Clipboard singletons
 function  fpgApplication: TfpgApplication;
 function  fpgClipboard: TfpgClipboard;
-
-// Fonts (easy access function)
-function  fpgGetFont(const afontdesc: TfpgString): TfpgFont;
 
 // Message Queue  (easy access function)
 procedure fpgWaitWindowMessage;
@@ -1451,17 +1436,12 @@ begin
   fpgApplication.WaitWindowMessage(500);
 end;
 
-function fpgGetFont(const afontdesc: TfpgString): TfpgFont;
-begin
-  Result := fpgApplication.GetFont(afontdesc);
-end;
-
 constructor TfpgApplication.Create(const AParams: string);
 begin
   InitializeDebugOutput;
   fpgInitMsgQueue;
 
-  FFontResList    := TList.Create;
+  FFontManager    := TfpgFontManager.Create;
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
@@ -1515,12 +1495,8 @@ begin
       TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
 
-  for i := FFontResList.Count-1 downto 0 do
-  begin
-    TfpgFontResource(FFontResList[i]).Free;
-    FFontResList.Delete(i);
-  end;
-  FFontResList.Free;
+  // Free font manager (will free all cached fonts)
+  FFontManager.Free;
 
   FreeAndNil(FModalFormStack);
 
@@ -1538,44 +1514,6 @@ begin
   inherited Destroy;
 end;
 
-function TfpgApplication.GetFont(const afontdesc: TfpgString): TfpgFont;
-var
-  fr: TfpgFontResource;
-  n: integer;
-  fdesc: TfpgString;
-begin
-  fdesc := afontdesc;
-
-  if copy(fdesc, 1, 1) = '#' then   // A # (hash) denotes a named font
-    fdesc := fpgGetNamedFontDesc(copy(afontdesc, 2, length(afontdesc)));
-
-  Result := nil;
-
-  for n := 0 to FFontResList.Count - 1 do
-    if TfpgFontResource(FFontResList[n]).FontDesc = fdesc then
-    begin
-      fr     := TfpgFontResource(FFontResList[n]);
-      Inc(fr.FRefCount);
-      Result := TfpgFont.Create(fr, afontdesc);
-      Exit; //==>
-    end;
-
-  fr := TfpgFontResource.Create(fdesc);
-
-  if fr.HandleIsValid then
-  begin
-    FFontResList.Add(fr);
-    Result := TfpgFont.Create(fr, afontdesc);
-  end
-  else
-  begin
-    fr.Free;
-    {$IFDEF GDEBUG}
-    SendDebug('fpGFX: Error opening font.');
-    {$ENDIF}
-  end;
-end;
-
 procedure TfpgApplication.ActivateHint(APos: TPoint; AHint: TfpgString);
 var
   wnd: TfpgHintWindow;
@@ -1587,8 +1525,8 @@ begin
     Exit; //==>  Nothing to do
 
   wnd.Text := AHint;
-  w := wnd.Font.TextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
-  h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
+  w := wnd.Font.GetTextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
+  h := wnd.Font.GetHeight + (wnd.Border * 2) + (wnd.Margin * 2);
   { prevents hint from going off the right screen edge }
   if (APos.X + w) > ScreenWidth then
   begin
@@ -1785,19 +1723,6 @@ begin
     FStartDragDistance := AValue;
 end;
 
-procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
-var
-  n: integer;
-begin
-  for n := FFontResList.Count-1 downto 0 do
-    if FFontResList[n] = Pointer(afontres) then
-    begin
-      TfpgFontResource(FFontResList[n]).Free;
-      FFontResList.Delete(n);
-      Exit; //==>
-    end;
-end;
-
 procedure TfpgApplication.InternalInit;
 var
   cmd: ICmdLineParams;
@@ -1937,41 +1862,11 @@ begin
   WaitWindowMessage(2000);
 end;
 
-{ TfpgFont }
-
-constructor TfpgFont.Create(afontres: TfpgFontResource; const afontdesc: string);
-begin
-  FFontRes  := afontres;
-  FFontDesc := afontdesc;
-  afontres.IncRefCount;
-end;
-
-destructor TfpgFont.Destroy;
-begin
-  if TfpgFontResource(FFontRes).DecRefCount <= 0 then
-    fpgApplication.FreeFontRes(TfpgFontResource(FFontRes));
-  inherited Destroy;
-end;
-
 { TfpgFontResource }
 
 constructor TfpgFontResource.Create(const afontdesc: string);
 begin
   inherited Create(afontdesc);
-  FFontDesc := afontdesc;
-  FRefCount := 0;
-end;
-
-function TfpgFontResource.DecRefCount: integer;
-begin
-  Dec(FRefCount);
-  Result := FRefCount;
-end;
-
-function TfpgFontResource.IncRefCount: integer;
-begin
-  Inc(FRefCount);
-  Result := FRefCount;
 end;
 
 { TfpgCanvas }
@@ -2008,7 +1903,7 @@ begin
         i := ls+1;
       end;
     end;
-    tw := Font.TextWidth(sub);            // wrap if needed
+    tw := Font.GetTextWidth(sub);            // wrap if needed
     if (lw + tw > aMaxLineWidth) and (lw > 0) then
     begin
       lw := tw;
@@ -2086,7 +1981,7 @@ begin
     buf := ExtractSubstr(AText, i, txtWordDelims);
     while buf <> '' do
     begin
-      wtxt := Max(wtxt, Font.TextWidth(buf));
+      wtxt := Max(wtxt, Font.GetTextWidth(buf));
       buf := ExtractSubstr(AText, i, txtWordDelims);
     end;
   end;
@@ -2103,13 +1998,13 @@ begin
     wraplst.Text := wraplst.Text;
   end;
 
-  htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
+  htxt := (Font.GetHeight() * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
 
   // Now paint the actual text
   for i := 0 to wraplst.Count-1 do
   begin
-    l :=  (Font.Height + ALineSpace) * i;
-    wtxt := Font.TextWidth(wraplst[i]);
+    l :=  (Font.GetHeight() + ALineSpace) * i;
+    wtxt := Font.GetTextWidth(wraplst[i]);
 
     // horizontal alignment
     if (txtRight in AFlags) then
@@ -2166,57 +2061,54 @@ end;
 
 { TfpgStyle }
 
-procedure TfpgStyle.SetMenuHeaderFont(AValue: TfpgFont);
+{ Lazy getters for backward compatibility - create font objects on demand }
+
+function TfpgStyle.GetDefaultFont: TfpgFontResourceBase;
 begin
-  if FMenuHeaderFont=AValue then Exit;
-  FMenuHeaderFont.Free;
-  FMenuHeaderFont:=AValue;
+  Result := fpgApplication.FontManager.GetFont(FDefaultFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetDefaultFont(AValue: TfpgFont);
+function TfpgStyle.GetFixedFont: TfpgFontResourceBase;
 begin
-  if FDefaultFont = AValue then Exit;
-  FDefaultFont.Free;
-  FDefaultFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FFixedFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetFixedFont(AValue: TfpgFont);
+function TfpgStyle.GetMenuFont: TfpgFontResourceBase;
 begin
-  if FFixedFont = AValue then Exit;
-  FFixedFont.Free;
-  FFixedFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FMenuFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetMenuAccelFont(AValue: TfpgFont);
+function TfpgStyle.GetMenuHeaderFont: TfpgFontResourceBase;
 begin
-  if FMenuAccelFont = AValue then Exit;
-  FMenuAccelFont.Free;
-  FMenuAccelFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FMenuHeaderFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetMenuDisabledFont(AValue: TfpgFont);
+function TfpgStyle.GetMenuAccelFont: TfpgFontResourceBase;
 begin
-  if FMenuDisabledFont = AValue then Exit;
-  FMenuDisabledFont.Free;
-  FMenuDisabledFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FMenuAccelFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetMenuFont(AValue: TfpgFont);
+function TfpgStyle.GetMenuDisabledFont: TfpgFontResourceBase;
 begin
-  if FMenuFont = AValue then Exit;
-  FMenuFont.Free;
-  FMenuFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FMenuDisabledFontDef.FontDesc);
 end;
 
-procedure TfpgStyle.SetTabFont(AValue: TfpgFont);
+function TfpgStyle.GetTabFont: TfpgFontResourceBase;
 begin
-  if FTabFont = AValue then Exit;
-  FTabFont.Free;
-  FTabFont := AValue;
+  Result := fpgApplication.FontManager.GetFont(FTabFontDef.FontDesc);
 end;
 
 constructor TfpgStyle.Create;
 begin
+  // Create font definitions with default descriptors
+  FDefaultFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FFixedFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FIXED_FONT_DESC);
+  FMenuFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FMenuHeaderFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC + ':bold');
+  FMenuAccelFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC + ':underline');
+  FMenuDisabledFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+  FTabFontDef := TfpgFontDefinition.Create(FPG_DEFAULT_FONT_DESC);
+
   // Setup font aliases
   fpgSetNamedFont('Label1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Label2', FPG_DEFAULT_FONT_DESC + ':bold');
@@ -2266,27 +2158,19 @@ begin
   fpgSetNamedColor(clSplitterGrabBar, $FF839EFE);         // pale blue
   fpgSetNamedColor(clHyperLink, clBlue);
   fpgSetNamedColor(clPlaceholderText, $FF848284);         // Same as clShadow1
-
-
-  // Global Font Objects
-  FDefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
-  FFixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
-  FMenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
-  FMenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
-  FMenuHeaderFont   := fpgGetFont(fpgGetNamedFontDesc('MenuHeader'));
-  FMenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
-  FTabFont          := fpgGetFont(fpgGetNamedFontdesc('Label1'));
 end;
 
 destructor TfpgStyle.Destroy;
 begin
-  FDefaultFont.Free;
-  FFixedFont.Free;
-  FMenuFont.Free;
-  FMenuAccelFont.Free;
-  FMenuDisabledFont.Free;
-  FTabFont.Free;
-  FMenuHeaderFont.Free;
+  // Free font definitions
+  FDefaultFontDef.Free;
+  FFixedFontDef.Free;
+  FMenuFontDef.Free;
+  FMenuHeaderFontDef.Free;
+  FMenuAccelFontDef.Free;
+  FMenuDisabledFontDef.Free;
+  FTabFontDef.Free;
+
   inherited Destroy;
 end;
 

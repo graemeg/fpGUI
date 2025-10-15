@@ -116,7 +116,7 @@ begin
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
   pcMain.ActiveTabColor:= clOrangeRed;
   pcMain.ActiveTabTextColor:= clYellow;
-  fpgStyle.TabFont:= fpgGetFont(FPG_DEFAULT_FIXED_FONT_DESC);
+  pcMain.FontDesc := FPG_DEFAULT_FIXED_FONT_DESC;
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One

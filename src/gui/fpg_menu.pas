@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -331,12 +331,13 @@ var
   p: integer;
   achar: string;
 begin
+  // Set appropriate font definition based on state
   if not Enabled then
-    ACanvas.SetFont(fpgStyle.MenuDisabledFont)
+    ACanvas.SetFontDefinition(fpgStyle.MenuDisabledFontDef)
   else
     case ItemType of
-      mitText   : ACanvas.SetFont(fpgStyle.MenuFont);
-      mitHeader : ACanvas.SetFont(fpgStyle.MenuHeaderFont);
+      mitText   : ACanvas.SetFontDefinition(fpgStyle.MenuFontDef);
+      mitHeader : ACanvas.SetFontDefinition(fpgStyle.MenuHeaderFontDef);
     end;
 
   achar := '&';
@@ -349,22 +350,23 @@ begin
       // first part of text before the & sign
       fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
 
-      inc(x, fpgStyle.MenuFont.TextWidth(UTF8Copy(s, 1, p-1)));
+      // Use Canvas.Font for metrics - font engine is configured correctly
+      inc(x, ACanvas.Font.GetTextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
         fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
-        inc(x, fpgStyle.MenuFont.TextWidth(achar));
+        inc(x, ACanvas.Font.GetTextWidth(achar));
       end
       else
       begin
         // Draw the HotKey text
         if Enabled then
-          ACanvas.SetFont(fpgStyle.MenuAccelFont);
+          ACanvas.SetFontDefinition(fpgStyle.MenuAccelFontDef);
         fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
-        inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
+        inc(x, ACanvas.Font.GetTextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
-          ACanvas.SetFont(fpgStyle.MenuFont);
+          ACanvas.SetFontDefinition(fpgStyle.MenuFontDef);
       end;
       s := UTF8Copy(s, p+2, UTF8Length(s));
     end;  { if }
@@ -601,6 +603,8 @@ begin
 end;
 
 constructor TfpgMenuBar.Create(AOwner: TComponent);
+var
+  lFont: TfpgFontResourceBase;
 begin
   inherited Create(AOwner);
   FItems := TList.Create;
@@ -613,7 +617,10 @@ begin
   FBackgroundColor  := Parent.BackgroundColor;
   FTextColor        := Parent.TextColor;
   // calculate the best height based on font
-  FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
+  // Need temp font since no canvas available yet in constructor
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  FHeight := lFont.GetHeight + 6; // 3px margin top and bottom
+  lFont := nil;  // Release font (automatic ref count decrement)
   FMenuOptions := [];
   FMouseIsOver := False;
   FIsContainer := True;
@@ -626,8 +633,13 @@ begin
 end;
 
 function TfpgMenuBar.ItemWidth(mi: TfpgMenuItem): integer;
+var
+  lFont: TfpgFontResourceBase;
 begin
-  Result := fpgStyle.MenuFont.TextWidth(mi.Text) + (2*6);
+  // Need temp font since this is called outside paint context
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  Result := lFont.GetTextWidth(mi.Text) + (2*6);
+  lFont := nil;  // Release font (automatic ref count decrement)
 end;
 
 procedure TfpgMenuBar.InternalReset;
@@ -714,6 +726,7 @@ end;
 procedure TfpgMenuBar.DoSelect;
 var
   mi: TfpgMenuItem;
+  lFont: TfpgFontResourceBase;
 begin
   mi := VisibleItem(FocusItem);
   CloseSubMenus;  // deactivates menubar!
@@ -721,8 +734,10 @@ begin
   if mi.SubMenu <> nil then
   begin
     ActivateMenu;
-    // showing the submenu
-    mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, fpgStyle.MenuFont.Height+4);
+    // showing the submenu - need temp font for height calculation
+    lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+    mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, lFont.GetHeight+4);
+    lFont := nil;  // Release font (automatic ref count decrement)
     mi.SubMenu.OpenerPopup      := nil;
     mi.SubMenu.OpenerMenuBar    := self;
     mi.SubMenu.DontCloseWidget  := self;
@@ -803,7 +818,6 @@ begin
   Result.Text       := AMenuTitle;
   Result.HotKeyDef  := '';
   Result.OnClick    := OnClickProc;
-  Result.ItemType   := mitText;
 end;
 
 function TfpgMenuBar.MenuItem(const AMenuPos: integer): TfpgMenuItem;
@@ -1119,7 +1133,8 @@ var
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
-      fpgStyle.DrawString(Canvas, rect.Right-fpgStyle.MenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
+      Canvas.SetFontDefinition(fpgStyle.MenuFontDef);
+      fpgStyle.DrawString(Canvas, rect.Right-Canvas.Font.GetTextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
     end;
 
     // process menu item submenu arrow image
@@ -1137,7 +1152,8 @@ var
     lTextWidth: Integer;
     lLineY: Integer;
   begin
-    lTextWidth := fpgStyle.MenuHeaderFont.TextWidth(mi.Text);
+    Canvas.SetFontDefinition(fpgStyle.MenuHeaderFontDef);
+    lTextWidth := Canvas.Font.GetTextWidth(mi.Text);
     lTextX := rect.CenterPoint.X - (lTextWidth div 2);
 
 
@@ -1232,11 +1248,17 @@ begin
 end;
 
 function TfpgPopupMenu.ItemHeight(mi: TfpgMenuItem): integer;
+var
+  lFont: TfpgFontResourceBase;
 begin
   if mi.Separator then
     Result := 5
   else
-    Result := fpgStyle.MenuFont.Height + 2;
+  begin
+    lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+    Result := lFont.GetHeight + 2;
+    lFont := nil;  // Release font (automatic ref count decrement)
+  end;
 end;
 
 function TfpgPopupMenu.MenuFocused: boolean;
@@ -1290,6 +1312,7 @@ var
   hkw: integer;
   x: integer;
   mi: TfpgMenuItem;
+  lFont: TfpgFontResourceBase;
 begin
   if Assigned(FBeforeShow) then
     BeforeShow(self);
@@ -1307,7 +1330,8 @@ begin
     end;
   end;
 
-  // Measuring sizes
+  // Measuring sizes - need temp font for calculations
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
   h             := 0;   // height
   tw            := 0;   // text width
   hkw           := 0;   // hotkey width
@@ -1317,14 +1341,14 @@ begin
     mi  := VisibleItem(n);
     x   := ItemHeight(mi);
     inc(h, x);
-    x := fpgStyle.MenuFont.TextWidth(mi.Text);
+    x := lFont.GetTextWidth(mi.Text);
     if tw < x then
       tw := x;
 
     if mi.SubMenu <> nil then
-      x := fpgStyle.MenuFont.Height
+      x := lFont.GetHeight
     else
-      x := fpgStyle.MenuFont.TextWidth(mi.HotKeyDef);
+      x := lFont.GetTextWidth(mi.HotKeyDef);
     if hkw < x then
       hkw := x;
   end;
@@ -1334,6 +1358,7 @@ begin
 
   FHeight := FMargin*2 + h;
   FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
+  lFont := nil;  // Release font (automatic ref count decrement)
 
   uFocusedPopupMenu := self;
 end;
@@ -1395,6 +1420,8 @@ begin
 end;
 
 constructor TfpgPopupMenu.Create(AOwner: TComponent);
+var
+  lFont: TfpgFontResourceBase;
 begin
   FWindowType:=wtPopup;
   inherited Create(AOwner);
@@ -1402,7 +1429,9 @@ begin
   FTextMargin := 3;
   FItems      := TList.Create;
 
-  FSymbolWidth      := fpgStyle.MenuFont.Height+2;
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  FSymbolWidth := lFont.GetHeight+2;
+  lFont := nil;  // Release font (automatic ref count decrement)
 
   FBeforeShow   := nil;
   FFocusItem    := -1;

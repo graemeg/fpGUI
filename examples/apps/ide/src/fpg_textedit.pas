@@ -111,7 +111,7 @@ type
   private
     FAutoIndent: boolean;
     FDefaultDropHandler: TfpgDropEventHandler;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
@@ -492,7 +492,7 @@ var
 begin
   if FAutoSize then
   begin
-    NeededWidth := FOwner.FFont.TextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
     Width:=NeededWidth;
   end;
 end;
@@ -743,8 +743,9 @@ end;
 
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;
+  FFont := fpgApplication.FontManager.GetFont(AValue);
+  UpdateCharBounds;
   Invalidate;
 end;
 
@@ -795,16 +796,27 @@ end;
 
 procedure TfpgBaseTextEdit.UpdateCharBounds;
 begin
-  FChrW := FFont.TextWidth('W');
-  FChrH := FFont.Height;
-  FVisLines := (GetClientRect.Height div FChrH) + 1;
-  if Assigned(FGutterPan) then
+  if not Assigned(FFont) or not FFont.HandleIsValid then exit;
+
+  FChrW := FFont.GetTextWidth('W');
+  FChrH := FFont.GetHeight;
+
+  if FChrH > 0 then
+    FVisLines := (GetClientRect.Height div FChrH) + 1
+  else
+    FVisLines := 0;
+
+  if Assigned(FGutterPan) and (FChrW > 0) then
   begin
     if FGutterPan.Visible then
       FVisCols := (GetClientRect.Width - FGutterPan.Width) div FChrW
     else
       FVisCols := GetClientRect.Width div FChrW;
-  end;
+  end
+  else if FChrW > 0 then
+    FVisCols := GetClientRect.Width div FChrW
+  else
+    FVisCols := 0;
 end;
 
 { Re-order StartXXX and EndXXX if user is selecting backwards }
@@ -1487,7 +1499,7 @@ begin
   // normal house keeping
   Canvas.Clear(clBoxColor);
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
-  Canvas.Font := FFont;
+  Canvas.SetFont(FFont);
   Canvas.SetClipRect(GetClientRect);
 
   // do the actual drawing
@@ -2376,7 +2388,7 @@ begin
     //Pen.Mode := pmCopy;
   //end;
   if Focused then
-    fpgCaret.SetCaret(Canvas, Xp, Yp, fpgCaret.Width, FFont.Height)
+    fpgCaret.SetCaret(Canvas, Xp, Yp, fpgCaret.Width, FFont.GetHeight)
   else
     fpgCaret.UnSetCaret(Canvas);
 
@@ -2390,7 +2402,7 @@ constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable     := True;
-  FFont         := fpgGetFont('#Edit1');
+  FFont         := fpgApplication.FontManager.GetFont('#Edit1');
   Width         := 320;
   Height        := 240;
   FLines        := TStringList.Create;
@@ -2440,7 +2452,7 @@ end;
 destructor TfpgBaseTextEdit.Destroy;
 begin
   FLines.Free;
-  FFont.Free;
+  FFont := nil;
   if Assigned(FDefaultDropHandler) then
     FDefaultDropHandler.Free;
   inherited Destroy;

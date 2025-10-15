@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -86,6 +86,9 @@ type
 
   TfpgTextEncoding = (encUTF8, encCP437, encCP850, encCP866, encCP1250, encIBMGraph);
 
+  TfpgFontAttribute = (fpgFontBold, fpgFontItalic, fpgFontUnderline);
+  TfpgFontAttributes = set of TfpgFontAttribute;
+
 
 const
   MOUSE_LEFT       = 1;
@@ -130,11 +133,13 @@ var
   {$IFDEF WINDOWS}
   FPG_DEFAULT_FONT_DESC: string = 'Arial-8:antialias=true';
   FPG_DEFAULT_SANS: string = 'Arial';
+  FPG_DEFAULT_FIXED: string = 'Courier New';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
   {$ENDIF}
   {$IFDEF UNIX}
   FPG_DEFAULT_FONT_DESC: string = 'Liberation Sans-10:antialias=true';
   FPG_DEFAULT_SANS: string = 'Liberation Sans';
+  FPG_DEFAULT_FIXED: string = 'Liberation Mono';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Liberation Mono-10';
   {$ENDIF}
 
@@ -294,32 +299,55 @@ type
   end;
 
 
-  TfpgFontResourceBase = class(TObject)
+{ Font engine abstraction for metric calculations }
+  IFontEngine = interface
+    ['{8A3F5F01-7B4E-4C2A-9D6F-E5C8A7B3F2D1}']
+    function GetTextWidth(const AText: string): integer;
+    function GetAscent: integer;
+    function GetDescent: integer;
+    function GetHeight: integer;
+    function GetCanvasRef: TObject;
+  end;
+
+
+  TfpgFontResourceBase = class(TInterfacedObject, IFontEngine)
+  protected
+    FFontDesc: string;
   public
-    constructor Create(const afontdesc: string); virtual; abstract;
+    constructor Create(const afontdesc: string); virtual;
+    destructor  Destroy; override;
+    // IFontEngine implementation (methods already exist!)
     function    GetAscent: integer; virtual; abstract;
     function    GetDescent: integer; virtual; abstract;
     function    GetHeight: integer; virtual; abstract;
     function    GetTextWidth(const txt: string): integer; virtual; abstract;
+    function    GetCanvasRef: TObject; virtual;
+    // IFontEngine end
     function    HandleIsValid: boolean; virtual; abstract;
-  end;
-
-
-  TfpgFontBase = class(TObject)
-  protected
-    FFontDesc: string;
-    FFontRes: TfpgFontResourceBase;
-    function    GetIsFixedWidth: boolean; virtual;
-  public
-    function    TextWidth(const txt: TfpgString): integer;
-    function    Ascent: integer;
-    function    Descent: integer;
-    function    Height: integer;
     property    FontDesc: string read FFontDesc;
-    property    FontRes: TfpgFontResourceBase read FFontRes;
-    property    Handle: TfpgFontResourceBase read FFontRes;
-    property    IsFixedWidth: boolean read GetIsFixedWidth;
   end;
+
+
+  { Represents font properties without rendering engine dependency }
+  TfpgFontDefinition = class(TObject)
+  private
+    FFontDesc: string;
+    FFaceName: string;
+    FSize: integer;
+    FAttributes: TfpgFontAttributes;
+    FAntiAliased: boolean;
+    procedure ParseFontDesc;
+    procedure BuildNormalizedFontDesc;
+    function NormalizeFaceName(const AFaceName: string): string;
+  public
+    constructor Create(const AFontDesc: string);
+    property FontDesc: string read FFontDesc;
+    property FaceName: string read FFaceName;
+    property Size: integer read FSize;
+    property Attributes: TfpgFontAttributes read FAttributes;
+    property AntiAliased: boolean read FAntiAliased;
+  end;
+
 
 
   TfpgCustomInterpolation = class(TObject)
@@ -371,7 +399,8 @@ type
     FTextColor: TfpgColor;
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
-    FFont: TfpgFontBase;
+    FFont: TfpgFontResourceBase;
+    FOwnedFont: TfpgFontResourceBase;
     FDeltaX,
     FDeltaY: TfpgCoord; // offset used when painting 'alien' widgets
     FCanvasTarget: TfpgCanvasBase;
@@ -382,6 +411,8 @@ type
     function    GetPutBufferItem: PfpgRect; // removes item when called
     procedure   DoGetWinRect(out r: TfpgRect); virtual;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
+    { Configure font's engine based on canvas type - REMOVED: No longer needed }
+
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
@@ -427,7 +458,7 @@ type
     procedure   FillRectangle(r: TfpgRect); overload;
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
     procedure   FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
-    procedure   GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection);
+    procedure   GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection); virtual;
     procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); overload;
     procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
     procedure   SetClipRect(const ARect: TfpgRect);
@@ -440,7 +471,10 @@ type
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
-    procedure   SetFont(AFont: TfpgFontBase);
+
+    procedure   SetFont(AFont: TfpgFontResourceBase); overload;  // Direct font resource
+    { NEW: Convenience method to set font from definition }
+    procedure   SetFontDefinition(AFontDef: TfpgFontDefinition);
     procedure   BeginDraw; overload;
     procedure   BeginDraw(CanvasTarget: TfpgCanvasBase; XDelta, YDelta: Integer); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
@@ -449,7 +483,7 @@ type
     procedure   FreeResources;
     property    Color: TfpgColor read FColor write SetColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
-    property    Font: TfpgFontBase read FFont write SetFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
     property    LineStyle: TfpgLineStyle read FLineStyle;
@@ -996,9 +1030,6 @@ procedure SortRect(var left, top, right, bottom: integer);
 implementation
 
 uses
-{$IFDEF AggCanvas}
-  Agg2D,
-{$ENDIF}
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
@@ -2532,6 +2563,7 @@ end;
 
 destructor TfpgCanvasBase.Destroy;
 begin
+  FOwnedFont := nil;  // Reference-counted, will be freed automatically
   FInterpolation.Free;
   inherited Destroy;
 end;
@@ -2726,21 +2758,27 @@ end;
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);
 var
   underline: integer;
+  fontdesc: string;
 begin
   DoDrawString(x, y, txt);
 
   { What was not handled: underline }
-  if Pos('UNDERLINE', UpperCase(Font.FontDesc)) > 0 then
+  if Assigned(Font) then
+    fontdesc := Font.FontDesc
+  else
+    fontdesc := '';
+
+  if Pos('UNDERLINE', UpperCase(fontdesc)) > 0 then
   begin
-    underline := (Font.Descent div 2) + 1;
+    underline := (Font.GetDescent() div 2) + 1;
     if underline = 0 then
       underline := 1;
-    if underline >= Font.Descent then
-      underline := Font.Descent - 1;
+    if underline >= Font.GetDescent() then
+      underline := Font.GetDescent() - 1;
 
     DoSetLineStyle(1, lsSolid);
     DoSetColor(TextColor);
-    DoDrawLine(x, y+Font.Height-underline, x+Font.TextWidth(txt), y+Font.Height-underline);
+    DoDrawLine(x, y+Font.GetHeight()-underline, x+Font.GetTextWidth(txt), y+Font.GetHeight()-underline);
   end;
 end;
 
@@ -2878,14 +2916,42 @@ begin
   DoSetLineStyle(FLineWidth, FLineStyle);
 end;
 
-procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
+
+
+
+
+// NEW: Overload to accept TfpgFontResourceBase directly
+procedure TfpgCanvasBase.SetFont(AFont: TfpgFontResourceBase);
 begin
-  if AFont = nil then
-    exit;
+  // Phase 3: TfpgFont wrapper removed, Canvas now works directly with TfpgFontResourceBase
+
   if FFont = AFont then
-    exit;
+    Exit;
+
+  // Release old owned font if it's different
+  if AFont <> FOwnedFont then
+  begin
+    FOwnedFont := nil;  // Reference-counted, will be freed automatically
+  end;
+
   FFont := AFont;
-  DoSetFontRes(AFont.FFontRes);
+  FOwnedFont := nil;  // Canvas doesn't own fonts passed via SetFont
+
+  DoSetFontRes(AFont);
+end;
+
+procedure TfpgCanvasBase.SetFontDefinition(AFontDef: TfpgFontDefinition);
+var
+  LFont: TfpgFontResourceBase;
+begin
+  if not Assigned(AFontDef) then
+    Exit;
+
+  LFont := fpgApplication.FontManager.GetFont(AFontDef.FontDesc);
+
+  // Canvas will take ownership of this font
+  FOwnedFont := LFont;
+  SetFont(LFont);
 end;
 
 procedure TfpgCanvasBase.BeginDraw;
@@ -2938,7 +3004,7 @@ begin
 
     SetColor(clText1);
     SetTextColor(clText1);
-    SetFont(fpgStyle.DefaultFont);
+    SetFont(fpgStyle.GetDefaultFont);
     SetLineStyle(0, lsSolid);
 
     FBeginDrawCount := 0;
@@ -3033,89 +3099,199 @@ begin
   FBeginDrawCount := 0;
 end;
 
-{ TfpgFontBase }
-
-function TfpgFontBase.GetIsFixedWidth: boolean;
+function TfpgFontResourceBase.GetCanvasRef: TObject;
 begin
-  // very crude but handy as a fallback option
-  if (Pos('mono', Lowercase(FFontDesc)) > 0) or
-     (Pos('courier', Lowercase(FFontDesc)) > 0) or
-     (Pos('fixed', Lowercase(FFontDesc)) > 0) then
-    Result := True
-  else
-    Result := False;
+  Result := nil;
 end;
 
-function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
+{ TfpgFontResourceBase }
+
+constructor TfpgFontResourceBase.Create(const afontdesc: string);
 begin
-  if Length(txt) = 0 then
-  begin
-    Result := 0;
-    exit;
-  end;
-
-  {$IFDEF AggCanvas}
-  // HACK: When AggCanvas is used, the FFontRes.GetTextWidth points to the
-  // native platform's implementation, not the Agg one, leading to a
-  // mismatch in metrics. To fix this, we need a canvas to perform the
-  // calculation. We assume the ActiveForm's canvas is representative.
-  // This is not perfect but is the only way without major refactoring.
-  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
-     (fpgApplication.MainForm.Canvas <> nil) then
-  begin
-    fpgApplication.MainForm.Canvas.SetFont(Self);
-    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).TextWidth(txt));
-    exit;
-  end;
-  {$ENDIF}
-
-  Result := FFontRes.GetTextWidth(txt);
+  inherited Create;
+  FFontDesc := afontdesc;
 end;
 
-function TfpgFontBase.Ascent: integer;
+destructor TfpgFontResourceBase.Destroy;
 begin
-  {$IFDEF AggCanvas}
-  // HACK: When AggCanvas is used. Will be improved soon.
-  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
-     (fpgApplication.MainForm.Canvas <> nil) then
-  begin
-    fpgApplication.MainForm.Canvas.SetFont(Self);
-    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontAscent);
-    exit;
-  end;
-  {$ENDIF}
-  Result := FFontRes.GetAscent;
+  // Font manager owns font resources and handles cleanup
+  // No need to notify - cache will free fonts when destroyed
+  inherited Destroy;
 end;
 
-function TfpgFontBase.Descent: integer;
+
+{ TfpgFontDefinition }
+
+constructor TfpgFontDefinition.Create(const AFontDesc: string);
 begin
-  {$IFDEF AggCanvas}
-  // HACK: When AggCanvas is used. Will be improved soon.
-  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
-     (fpgApplication.MainForm.Canvas <> nil) then
-  begin
-    fpgApplication.MainForm.Canvas.SetFont(Self);
-    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontDescent);
-    exit;
-  end;
-  {$ENDIF}
-  Result := FFontRes.GetDescent;
+  inherited Create;
+  FFontDesc := Trim(AFontDesc);  // Store original (will be replaced with normalized)
+  ParseFontDesc;
+  BuildNormalizedFontDesc;  // Rebuild FFontDesc in normalized form
 end;
 
-function TfpgFontBase.Height: integer;
+procedure TfpgFontDefinition.ParseFontDesc;
+var
+  cp: integer;
+  token: string;
+  prop: string;
+  propval: string;
 begin
-  {$IFDEF AggCanvas}
-  // HACK: When AggCanvas is used. Will be improved soon.
-  if (fpgApplication <> nil) and (fpgApplication.MainForm <> nil) and
-     (fpgApplication.MainForm.Canvas <> nil) then
+  cp := 1;
+  FFaceName := '';
+  FSize := 10;  // default
+  FAttributes := [];
+  FAntiAliased := True;  // default
+
+  // Handle empty descriptor - use platform default
+  if Trim(FFontDesc) = '' then
   begin
-    fpgApplication.MainForm.Canvas.SetFont(Self);
-    Result := Round(TAgg2D(fpgApplication.MainForm.Canvas).FontHeight);
-    exit;
+    FFaceName := FPG_DEFAULT_SANS;
+    Exit;
   end;
-  {$ENDIF}
-  Result := FFontRes.GetHeight;
+
+  // Extract face name (everything before '-' or ':')
+  while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> '-') and (FFontDesc[cp] <> ':') do
+  begin
+    FFaceName := FFaceName + FFontDesc[cp];
+    Inc(cp);
+  end;
+
+  // Extract size (number after '-')
+  if (cp <= Length(FFontDesc)) and (FFontDesc[cp] = '-') then
+  begin
+    Inc(cp);
+    token := '';
+    while (cp <= Length(FFontDesc)) and (FFontDesc[cp] >= '0') and (FFontDesc[cp] <= '9') do
+    begin
+      token := token + FFontDesc[cp];
+      Inc(cp);
+    end;
+    if token <> '' then
+      FSize := StrToIntDef(token, 10);
+  end;
+
+  // Parse attributes (after ':')
+  while cp <= Length(FFontDesc) do
+  begin
+    if FFontDesc[cp] = ':' then
+    begin
+      Inc(cp);
+      prop := '';
+      propval := '';
+
+      // Extract property name
+      while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> '=') and (FFontDesc[cp] <> ':') do
+      begin
+        prop := prop + LowerCase(FFontDesc[cp]);
+        Inc(cp);
+      end;
+
+      // Extract property value if present
+      if (cp <= Length(FFontDesc)) and (FFontDesc[cp] = '=') then
+      begin
+        Inc(cp);
+        while (cp <= Length(FFontDesc)) and (FFontDesc[cp] <> ':') do
+        begin
+          propval := propval + LowerCase(FFontDesc[cp]);
+          Inc(cp);
+        end;
+      end;
+
+      // Apply property
+      if prop = 'bold' then
+        FAttributes := FAttributes + [fpgFontBold]
+      else if prop = 'italic' then
+        FAttributes := FAttributes + [fpgFontItalic]
+      else if prop = 'underline' then
+        FAttributes := FAttributes + [fpgFontUnderline]
+      else if prop = 'antialias' then
+        FAntiAliased := (propval <> 'false');
+    end
+    else
+      Inc(cp);
+  end;
 end;
+
+function TfpgFontDefinition.NormalizeFaceName(const AFaceName: string): string;
+var
+  i: integer;
+  capitalizeNext: boolean;
+begin
+  Result := '';
+  capitalizeNext := True;
+
+  for i := 1 to Length(AFaceName) do
+  begin
+    if AFaceName[i] = ' ' then
+    begin
+      Result := Result + ' ';
+      capitalizeNext := True;
+    end
+    else if capitalizeNext then
+    begin
+      Result := Result + UpCase(AFaceName[i]);
+      capitalizeNext := False;
+    end
+    else
+      Result := Result + LowerCase(AFaceName[i]);
+  end;
+end;
+
+procedure TfpgFontDefinition.BuildNormalizedFontDesc;
+var
+  attrList: array[0..2] of string;
+  attrCount: integer;
+  i, j: integer;
+  temp: string;
+begin
+  // Normalize face name: "arial" -> "Arial", "COURIER NEW" -> "Courier New"
+  FFaceName := Trim(NormalizeFaceName(FFaceName));
+
+  // Build normalized descriptor: FaceName-Size:attr1:attr2:...
+  FFontDesc := FFaceName + '-' + IntToStr(FSize);
+
+  // Add attributes in sorted order (alphabetical)
+  attrCount := 0;
+
+  if fpgFontBold in FAttributes then
+  begin
+    attrList[attrCount] := 'bold';
+    Inc(attrCount);
+  end;
+
+  if fpgFontItalic in FAttributes then
+  begin
+    attrList[attrCount] := 'italic';
+    Inc(attrCount);
+  end;
+
+  if fpgFontUnderline in FAttributes then
+  begin
+    attrList[attrCount] := 'underline';
+    Inc(attrCount);
+  end;
+
+  // Simple bubble sort for consistency (only 3 items max)
+  for i := 0 to attrCount - 2 do
+    for j := i + 1 to attrCount - 1 do
+      if attrList[i] > attrList[j] then
+      begin
+        temp := attrList[i];
+        attrList[i] := attrList[j];
+        attrList[j] := temp;
+      end;
+
+  // Append sorted attributes
+  for i := 0 to attrCount - 1 do
+    FFontDesc := FFontDesc + ':' + attrList[i];
+
+  // Add antialiasing if explicitly set to false
+  if not FAntiAliased then
+    FFontDesc := FFontDesc + ':antialias=false';
+end;
+
+
 
 { TfpgCustomInterpolation }
 

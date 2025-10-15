@@ -248,7 +248,7 @@ var
 begin
   x  := rect.left;
   y  := rect.top;
-  fy := y + rect.Height div 2 - Canvas.Font.Height div 2;
+  fy := y + rect.Height div 2 - Canvas.Font.GetHeight() div 2;
 
   try
     s := GetValueText(wg);

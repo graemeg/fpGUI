@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -66,7 +66,7 @@ type
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FOnChange: TNotifyEvent;
     FOnCloseUp: TNotifyEvent;
     FOnDropDown: TNotifyEvent;
@@ -118,7 +118,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -233,7 +233,10 @@ end;
 
 function TfpgBaseComboBox.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := '';
 end;
 
 { Focusitem is 0 based like the Delphi ItemIndex property.
@@ -260,11 +263,11 @@ end;
 
 procedure TfpgBaseComboBox.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   if FAutoSize then
   begin
-    Height := FFont.Height + (FMargin * 2);
+    Height := FFont.GetHeight + (FMargin * 2);
   end;
   RePaint;
 end;
@@ -310,7 +313,7 @@ begin
     Exit; //=>
   FMargin := AValue;
   if FAutoSize then
-    Height := FFont.Height + (FMargin * 2);
+    Height := FFont.GetHeight + (FMargin * 2);
   Repaint;
 end;
 
@@ -324,7 +327,7 @@ begin
   if FAutoSize then
   begin
     r := fpgStyle.GetControlFrameBorders;
-    FHeight := FFont.Height + (Margin*2) + (r.Top+r.Bottom);
+    FHeight := FFont.GetHeight + (Margin*2) + (r.Top+r.Bottom);
     CalculateInternalButtonRect;
     UpdatePosition;
   end;
@@ -451,7 +454,7 @@ begin
   FReadOnly       := False;
   FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
-  FFont := fpgGetFont('#List');
+  FFont := fpgApplication.FontManager.GetFont('#List');
   FOptions := [];
   FBtnPressed := False;
   FOnChange := nil;
@@ -461,7 +464,7 @@ end;
 
 destructor TfpgBaseComboBox.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;  // Automatic ref count decrement and cleanup
   FItems.Free;
   inherited Destroy;
 end;
@@ -542,7 +545,7 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  lh := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2);
+  lh := TfpgComboBox(Result).FFont.GetHeight + (Result.FMargin * 2);
   if h < lh then
     Result.Height := lh
   else

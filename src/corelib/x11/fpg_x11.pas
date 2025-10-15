@@ -152,7 +152,7 @@ type
   public
     constructor Create(const afontdesc: string); override;
     destructor  Destroy; override;
-    function    HandleIsValid: boolean;
+    function    HandleIsValid: boolean; override;
     function    GetAscent: integer; override;
     function    GetDescent: integer; override;
     function    GetHeight: integer; override;
@@ -3216,6 +3216,7 @@ end;
 
 constructor TfpgX11FontResource.Create(const afontdesc: string);
 begin
+  inherited Create(afontdesc);  // Call base constructor to set FFontDesc
   FFontData := XftFontOpenName(xapplication.display, xapplication.DefaultScreen, PChar(afontdesc));
 end;
 

@@ -70,8 +70,8 @@ type
     FDefaultFile: string;
     function Dim2Pixels(Value: single): single;
     function Pixels2Dim(Value: single): single;
-    function AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
-    function TxtHeight(AWid: integer; const ATxt: TfpgString; AFnt: TfpgFont; ALSpace: integer = 2): integer;
+    function AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFontResourceBase): string;
+    function TxtHeight(AWid: integer; const ATxt: TfpgString; AFnt: TfpgFontResourceBase; ALSpace: integer = 2): integer;
     function Convert2Alpha(Valeur: integer): string;
     function GetPaperHeight: integer;
     function GetPaperWidth: integer;
@@ -513,7 +513,7 @@ begin
     Result := Value / PPI;
 end;
 
-function T_Report.AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
+function T_Report.AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFontResourceBase): string;
 var
   i, n, ls: integer;
   sub: string;
@@ -544,7 +544,7 @@ begin
         i   := ls + 1;
       end;
     end;
-    tw := AFnt.TextWidth(sub);            // wrap if needed
+    tw := AFnt.GetTextWidth(sub);            // wrap if needed
     if (lw + tw > aMaxLineWidth) and (lw > 0) then
     begin
       lw     := tw;
@@ -556,7 +556,7 @@ begin
   end;
 end;
 
-function T_Report.TxtHeight(AWid: integer; const ATxt: TfpgString; AFnt: TfpgFont; ALSpace: integer = 2): integer;
+function T_Report.TxtHeight(AWid: integer; const ATxt: TfpgString; AFnt: TfpgFontResourceBase; ALSpace: integer = 2): integer;
 var
   Cpt: integer;
   Wraplst: TStringList;
@@ -566,7 +566,7 @@ begin
   for Cpt := 0 to Pred(Wraplst.Count) do
     Wraplst[Cpt] := AddLineBreaks(Wraplst[Cpt], AWid, AFnt);
   Wraplst.Text := Wraplst.Text;
-  Result := (AFnt.Height * Wraplst.Count) + (ALSpace * Pred(Wraplst.Count));
+  Result := (AFnt.GetHeight() * Wraplst.Count) + (ALSpace * Pred(Wraplst.Count));
   WrapLst.Free;
 end;
 
@@ -915,7 +915,7 @@ var
   PosH, PosV, LnSpInt, LnSpSup, LnSpInf, ThickLine: single;
   HTxt, HeighTxt, Half, ColorLine, Cpt: integer;
   EndOfLine, UseCurFont: Boolean;
-  Fnt: TfpgFont;
+  Fnt: TfpgFontResourceBase;
   StyleLine: TfpgLineStyle;
   Wraplst: TStringList;
 begin
@@ -964,8 +964,8 @@ begin
           if HTxt < HeighTxt then
             HTxt := HeighTxt;
         end
-        else if HTxt < Fnt.Height then
-          HTxt := Fnt.Height;
+        else if HTxt < Fnt.GetHeight() then
+          HTxt := Fnt.GetHeight();
         case Zone of
           zHeader:
             FPosRef.Y := FCurrentMargin.T + FHeaderHeight;
@@ -1066,9 +1066,9 @@ begin
           begin
             PosH := T_Column(Columns[ColDefaut]).GetTextPos;
             if (txtRight in TxtFlags) then
-              PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[Text]) - T_Column(Columns[ColDefaut]).ColMargin;
+              PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[Text]) - T_Column(Columns[ColDefaut]).ColMargin;
             if (txtHCenter in TxtFlags) then
-              PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[Text])) / 2;
+              PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[Text])) / 2;
           end
         else if PosX > 0 then
         begin
@@ -1081,11 +1081,11 @@ begin
         begin
           PosH := T_Column(Columns[Column]).GetTextPos;
           if (txtRight in TxtFlags) then
-            PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[Text]) - T_Column(Columns[Column]).ColMargin;
+            PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[Text]) - T_Column(Columns[Column]).ColMargin;
           if (txtHCenter in TxtFlags) then
-            PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[Text])) / 2;
+            PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[Text])) / 2;
         end;
-        FPosRef.X := PosH + Fnt.TextWidth(Texts[Text] + ' ');
+        FPosRef.X := PosH + Fnt.GetTextWidth(Texts[Text] + ' ');
         VWriteLine.LoadText(PosH, PosV, Column, Text, FontNum, HTxt, BkColorNum, BordNum, SpLine, UseCurFont, TxtFlags);
         Result := Pixels2Dim(FPosRef.Y);
         if EndOfLine then
@@ -1098,7 +1098,7 @@ begin
       begin
         with FCanvas do
         begin
-          Font := T_Font(Fonts[FontNum]).GetFont;
+          SetFont(T_Font(Fonts[FontNum]).GetFont);
           SetTextColor(T_Font(Fonts[FontNum]).GetColor);
           if Column > -1 then
             with T_Column(Columns[Column]) do
@@ -1125,7 +1125,7 @@ begin
               DrawText(Round(GetTextPos), Round(PosY), Round(GetTextWidth), 0, Texts[Text], TxtFlags, Round(LnSpInt));
             end
           else
-            DrawText(Round(PosX), Round(PosY) - Fnt.Ascent, Round(Paper.W - PosX), 0, Texts[Text], TxtFlags);
+            DrawText(Round(PosX), Round(PosY) - Fnt.GetAscent(), Round(Paper.W - PosX), 0, Texts[Text], TxtFlags);
         end;
       end;
       ppPdfFile:
@@ -1223,7 +1223,7 @@ begin
                   PdfPage.Add(PdfLine);
                 end;
               end;
-            if Fnt.TextWidth(Texts[Text]) < GetTextWidth then
+            if Fnt.GetTextWidth(Texts[Text]) < GetTextWidth then
             begin
               PdfTexte := TPdfTexte.Create;
               with PdfTexte do
@@ -1234,10 +1234,10 @@ begin
                 FColor   := T_Font(Fonts[FontNum]).GetColor;
                 TextPosX := GetTextPos;
                 if (txtRight in TxtFlags) then
-                  TextPosX := ColPos + ColWidth - ColMargin - Fnt.TextWidth(Texts[Text]);
+                  TextPosX := ColPos + ColWidth - ColMargin - Fnt.GetTextWidth(Texts[Text]);
                 if (txtHCenter in TxtFlags) then
-                  TextPosX := GetTextPos + (ColWidth - Fnt.TextWidth(Texts[Text])) / 2;
-                TextPosY := Paper.H - PosY - Fnt.Ascent;
+                  TextPosX := GetTextPos + (ColWidth - Fnt.GetTextWidth(Texts[Text])) / 2;
+                TextPosY := Paper.H - PosY - Fnt.GetAscent();
                 TextWidt := ColWidth;
                 Writting := Texts[Text];
               end;
@@ -1261,10 +1261,10 @@ begin
                   FColor   := T_Font(Fonts[FontNum]).GetColor;
                   TextPosX := GetTextPos;
                   if (txtRight in TxtFlags) then
-                    TextPosX := ColPos + ColWidth - ColMargin - Fnt.TextWidth(Wraplst[Cpt]);
+                    TextPosX := ColPos + ColWidth - ColMargin - Fnt.GetTextWidth(Wraplst[Cpt]);
                   if (txtHCenter in TxtFlags) then
-                    TextPosX := GetTextPos + (ColWidth - Fnt.TextWidth(Wraplst[Cpt])) / 2;
-                  TextPosY := Paper.H - PosY - Fnt.Ascent - (Fnt.Height + LnSpInt) * Cpt;
+                    TextPosX := GetTextPos + (ColWidth - Fnt.GetTextWidth(Wraplst[Cpt])) / 2;
+                  TextPosY := Paper.H - PosY - Fnt.GetAscent() - (Fnt.GetHeight() + LnSpInt) * Cpt;
                   TextWidt := ColWidth;
                   Writting := Wraplst[Cpt];
                 end;
@@ -1273,7 +1273,7 @@ begin
               WrapLst.Free;
             end;
           end
-        else if Fnt.TextWidth(Texts[Text]) < Paper.W - PosX then
+        else if Fnt.GetTextWidth(Texts[Text]) < Paper.W - PosX then
         begin
           PdfTexte := TPdfTexte.Create;
           with PdfTexte do
@@ -1306,7 +1306,7 @@ begin
               FSize  := T_Font(Fonts[FontNum]).GetSize;
               FColor := T_Font(Fonts[FontNum]).GetColor;
               FPosX  := PosX;
-              FPosY  := Paper.H - PosY - Fnt.Ascent - (Fnt.Height + LnSpInt) * Cpt;
+              FPosY  := Paper.H - PosY - Fnt.GetAscent() - (Fnt.GetHeight() + LnSpInt) * Cpt;
               FWidth := Paper.W;
               FText  := Wraplst[Cpt];
             end;
@@ -1362,7 +1362,7 @@ var
   PosH, PosV, LnSpInt, LnSpSup, LnSpInf, ThickLine: single;
   HTxt, HeighTxt, Half, ColorLine: integer;
   EndOfLine, UseCurFont: Boolean;
-  Fnt: TfpgFont;
+  Fnt: TfpgFontResourceBase;
   StyleLine: TfpgLineStyle;
   Chaine: string;
 begin
@@ -1409,8 +1409,8 @@ begin
           if HTxt < HeighTxt then
             HTxt := HeighTxt;
         end
-        else if HTxt < Fnt.Height then
-          HTxt := Fnt.Height;
+        else if HTxt < Fnt.GetHeight() then
+          HTxt := Fnt.GetHeight();
         case Zone of
           zHeader:
             FPosRef.Y := FCurrentMargin.T + FHeaderHeight;
@@ -1456,14 +1456,14 @@ begin
             PosH := T_Column(Columns[ColDefaut]).GetTextPos - T_Column(Columns[0]).ColMargin;
             if (txtRight in TxtFlags) then
               if Total then
-                PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ') - T_Column(Columns[ColDefaut]).ColMargin
+                PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ') - T_Column(Columns[ColDefaut]).ColMargin
               else
-                PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ') - T_Column(Columns[ColDefaut]).ColMargin;
+                PosH := PosH + T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ') - T_Column(Columns[ColDefaut]).ColMargin;
             if (txtHCenter in TxtFlags) then
               if Total then
-                PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ')) / 2
+                PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ')) / 2
               else
-                PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ')) / 2;
+                PosH := PosH + (T_Column(Columns[ColDefaut]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ')) / 2;
           end
         else if PosX > 0 then
           if (PosX < T_Column(Columns[Column]).GetTextPos) or (PosX > (T_Column(Columns[Column]).GetTextPos + T_Column(Columns[Column]).GetTextWidth)) then
@@ -1475,16 +1475,16 @@ begin
           PosH := T_Column(Columns[Column]).GetTextPos - T_Column(Columns[Column]).ColMargin;
           if (txtRight in TxtFlags) then
             if Total then
-              PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ') - T_Column(Columns[Column]).ColMargin
+              PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ') - T_Column(Columns[Column]).ColMargin
             else
-              PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ') - T_Column(Columns[Column]).ColMargin;
+              PosH := PosH + T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ') - T_Column(Columns[Column]).ColMargin;
           if (txtHCenter in TxtFlags) then
             if Total then
-              PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ')) / 2
+              PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ')) / 2
             else
-              PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.TextWidth(Texts[TextNum] + ' 0 ')) / 2;
+              PosH := PosH + (T_Column(Columns[Column]).ColWidth - Fnt.GetTextWidth(Texts[TextNum] + ' 0 ')) / 2;
         end;
-        FPosRef.X := PosH + Fnt.TextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ');
+        FPosRef.X := PosH + Fnt.GetTextWidth(Texts[TextNum] + ' 0 ' + Texts[TextTot] + ' 0 ');
         VWriteLine.LoadNumber(PosH, PosV, Column, TextNum, TextTot, FontNum, HTxt, BkColorNum, BordNum, SpLine, UseCurFont, TxtFlags, Total, Alpha, SPNum);
         Result := Pixels2Dim(FPosRef.Y);
         if EndOfLine then
@@ -1498,7 +1498,7 @@ begin
         with FCanvas do
         begin
           Chaine := BuildChaine;
-          Font   := T_Font(Fonts[FontNum]).GetFont;
+          SetFont(T_Font(Fonts[FontNum]).GetFont);
           SetTextColor(T_Font(Fonts[FontNum]).GetColor);
           if Column > -1 then
             with T_Column(Columns[Column]) do
@@ -1633,10 +1633,10 @@ begin
               FColor   := T_Font(Fonts[FontNum]).GetColor;
               TextPosX := GetTextPos;
               if (txtRight in TxtFlags) then
-                TextPosX := ColPos + ColWidth - ColMargin - Fnt.TextWidth(Chaine);
+                TextPosX := ColPos + ColWidth - ColMargin - Fnt.GetTextWidth(Chaine);
               if (txtHCenter in TxtFlags) then
-                TextPosX := GetTextPos + (ColWidth - Fnt.TextWidth(Chaine)) / 2;
-              TextPosY := Paper.H - PosY - Fnt.Ascent;
+                TextPosX := GetTextPos + (ColWidth - Fnt.GetTextWidth(Chaine)) / 2;
+              TextPosY := Paper.H - PosY - Fnt.GetAscent();
               TextWidt := ColWidth;
               Writting := Chaine;
             end;
@@ -1652,7 +1652,7 @@ begin
             FSize  := T_Font(Fonts[FontNum]).GetSize;
             FColor := T_Font(Fonts[FontNum]).GetColor;
             FPosX  := PosX;
-            FPosY  := PosY - Fnt.Ascent;
+            FPosY  := PosY - Fnt.GetAscent();
             FWidth := Paper.W;
             FText  := Chaine;
           end;

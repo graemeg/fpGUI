@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -83,7 +83,7 @@ type
     FButton: TfpgButton;
     {@VFD_HEAD_END: MessageBox}
     FLines: TStringList;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FTextY: integer;
     FLineHeight: integer;
     FMaxLineWidth: integer;
@@ -257,7 +257,7 @@ uses
   ;
 
 
-procedure WrapText(const AText: String; ALines: TStrings; AFont: TfpgFont;
+procedure WrapText(const AText: String; ALines: TStrings; AFont: TfpgFontResourceBase;
     const ALineWidth: Integer; out AWidth: Integer);
 var
   maxw: integer;
@@ -272,7 +272,7 @@ var
     m: integer;
   begin
     s2  := s;
-    w   := AFont.TextWidth(s2);
+    w   := AFont.GetTextWidth(s2);
     if w > ALineWidth then
     begin
       while w > ALineWidth do
@@ -281,7 +281,7 @@ var
         repeat
           Dec(m);
           s2  := UTF8Copy(s,1,m);
-          w   := AFont.TextWidth(s2);
+          w   := AFont.GetTextWidth(s2);
         until w <= ALineWidth;
         if w > maxw then
           maxw := w;
@@ -296,7 +296,7 @@ var
         ALines.Add(s2);
         s   := UTF8Copy(s, m+1, UTF8length(s));
         s2  := s;
-        w   := AFont.TextWidth(s2);
+        w   := AFont.GetTextWidth(s2);
       end; { while }
       if all then
       begin
@@ -435,7 +435,7 @@ begin
   y := FTextY;
   for n := 0 to FLines.Count-1 do
   begin
-    tw := FFont.TextWidth(FLines[n]);
+    tw := FFont.GetTextWidth(FLines[n]);
     if CentreText then
       Canvas.DrawString(Width div 2 - tw div 2, y, FLines[n])
     else
@@ -469,13 +469,16 @@ end;
 
 function TfpgMessageBox.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgMessageBox.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -483,16 +486,16 @@ constructor TfpgMessageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FLines        := TStringList.Create;
-  FFont         := fpgGetFont('#Label1');
+  FFont         := fpgApplication.FontManager.GetFont('#Label1');
   FTextY        := 10;
-  FLineHeight   := FFont.Height + 4;
+  FLineHeight   := FFont.GetHeight + 4;
   FMaxLineWidth := 500;
   FCentreText   := False;
 end;
 
 destructor TfpgMessageBox.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;  // Release font (automatic ref count decrement)
   FLines.Free;
   inherited Destroy;
 end;

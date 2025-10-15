@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -29,7 +29,7 @@ type
     FDialogType: TfpgMsgDlgType;
     FButtonList: TList; // pointers to buttons
     FMaxLineWidth: Integer;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FTextY: Integer;
     FLineHeight: Integer;
     function    GetInformativeText: string;
@@ -355,14 +355,14 @@ begin
 
   FButtonList := TList.Create;
   FMaxLineWidth := 400;
-  FFont         := fpgGetFont('#Label1');
+  FFont         := fpgApplication.FontManager.GetFont('#Label1');
   FTextY        := 60;
-  FLineHeight   := FFont.Height + 4;
+  FLineHeight   := FFont.GetHeight + 4;
 end;
 
 destructor TfpgMessageDialog.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;  // Release font (automatic ref count decrement)
   FButtonList.Clear;
   FButtonList.Free;
   FInformativeText.Free;
@@ -570,7 +570,7 @@ begin
   with lblName1 do
   begin
     Name := 'lblName1';
-    SetPosition(116, 20, 312, Font.Height);
+    SetPosition(116, 20, 312, Font.GetHeight);
     Text := '';
     FontDesc := '#Label2';
   end;

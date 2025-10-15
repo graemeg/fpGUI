@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2015 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -293,6 +293,10 @@ begin
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
     lPathList.Add(GetUserDir + '.fonts/');
+    {$IFDEF Darwin}
+    lPathList.Add(GetUserDir + '/Library/Fonts/');
+    {$ENDIF}
+
     for i := 0 to lPathList.Count-1 do
     begin
       lPath := lPathList[i];

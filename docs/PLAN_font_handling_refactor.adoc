@@ -1,0 +1,426 @@
+== PLAN: Refactoring fpGUI Font Metric Handling
+
+=== Summary of the Problem
+
+The fpGUI framework currently suffers from a fundamental design flaw in
+its font metric handling, particularly when the `AggCanvas` backend is
+enabled. This leads to inconsistent text layout and rendering,
+manifesting as incorrect spacing and kerning.
+
+The core issue is a ``two-engine'' problem:
+
+. *Text Drawing:* When
+`AggCanvas` is active, text is rendered using the `TAgg2D` canvas, which
+employs the FreeType font engine.
+. *Text Measurement:* However, font
+metric methods (such as `TextWidth`, `Ascent`, `Descent`, `Height`) on
+`TfpgFontBase` (and its underlying `FFontRes` font resource) continue to
+delegate to the *platform-native font engine* (e.g., X11's font system
+on Linux, GDI on Windows).
+
+This discrepancy means that the layout engine calculates text dimensions
+based on one set of metrics (native), while the rendering engine draws
+the text using a different set (FreeType). This mismatch results in:
+
+* Incorrect spacing between UI elements (e.g., menu items being too wide).
+* Inaccurate vertical alignment.
+* Subtle kerning issues, even when the drawing engine itself is corrected.
+
+My previous ``hack'' fix involved directly redirecting `TfpgFontBase`'s
+metric calls to `TAgg2D`'s methods, using
+`fpgApplication.MainForm.Canvas` as a temporary reference. While this
+resolved the immediate visual issues, it is not a robust or maintainable
+long-term solution.
+
+The goal of this plan is to outline design solutions that address this
+fundamental problem, ensuring consistency, maintainability, and,
+ideally, backward compatibility.
+
+---
+
+=== Design Solution 1: Canvas-Aware `TfpgFontBase` with Active Canvas Management
+
+This solution aims to formalize and improve upon the existing ``hack''
+by making the `TfpgFontBase` object explicitly aware of the currently
+active canvas. Instead of relying on `fpgApplication.MainForm.Canvas`,
+we introduce a more robust mechanism for `TfpgFontBase` to access the
+correct `TAgg2D` instance for metric calculations.
+
+==== Description
+
+[arabic]
+. *Global Active Canvas Reference:* Introduce a global variable or a
+static property, e.g., `TfpgCanvasBase.ActiveCanvas`, which always
+points to the canvas currently being drawn upon.
+. *Managed by `BeginDraw`/`EndDraw`:* The `TfpgCanvasBase.BeginDraw`
+method would set `TfpgCanvasBase.ActiveCanvas` to `Self`, and
+`TfpgCanvasBase.EndDraw` would restore the previous active canvas (or
+set it to `nil`). This ensures the `ActiveCanvas` always reflects the
+correct drawing context.
+. *`TfpgFontBase` Delegation:* The `TfpgFontBase` methods (`TextWidth`,
+`Ascent`, `Descent`, `Height`) would then check
+`TfpgCanvasBase.ActiveCanvas`. If `ActiveCanvas` is assigned and is an
+instance of `TAgg2D` (and `AggCanvas` is defined), they would delegate
+the metric calculation to the `ActiveCanvas`'s corresponding methods.
+Otherwise, they would fall back to the `FFontRes` object.
+
+==== Pros
+
+* *Least Invasive Refactoring:* This approach requires relatively
+localized changes, primarily within `TfpgCanvasBase` and `TfpgFontBase`.
+* *High Backward Compatibility:* Existing applications that don't rely
+on `AggCanvas` will be unaffected. Applications using `AggCanvas` will
+automatically benefit from the correct metric calculations without
+needing code changes.
+* *Clearer Intent:* Formalizes the connection between the font and the
+canvas it's being used with for metric purposes. This aligns with
+patterns seen in other robust GUI toolkits like Qt, where font metrics
+are explicitly tied to a painting device context.
+* *Removes Brittle Hack:* Eliminates the reliance on
+`fpgApplication.MainForm.Canvas`, which is not always the correct
+canvas.
+
+==== Cons
+
+* *Global State:* Introducing a global `ActiveCanvas` variable can
+sometimes lead to subtle bugs in complex multi-threaded or deeply nested
+drawing scenarios if not managed carefully. However, given fpGUI's
+single-threaded nature for UI, this risk is mitigated.
+* *Implicit Dependency:* `TfpgFontBase` gains an implicit dependency on
+`TfpgCanvasBase`'s active state.
+* *Limited Extensibility:* While it fixes the `AggCanvas` problem, it
+doesn't provide a generic mechanism for other custom canvas types to
+inject their font metrics without similar conditional logic.
+
+==== Implementation Steps
+
+* ☐ *Modify `TfpgCanvasBase`:*
+** ☐ Add a `class var` (static variable)
+`FActiveCanvas: TfpgCanvasBase;` to `TfpgCanvasBase`.
+** ☐ Add `class function GetActiveCanvas: TfpgCanvasBase;` and
+`class procedure SetActiveCanvas(ACanvas: TfpgCanvasBase);` to manage
+`FActiveCanvas`. This should ideally use a stack to handle nested
+`BeginDraw`/`EndDraw` calls.
+** ☐ In `TfpgCanvasBase.BeginDraw`, push the current `FActiveCanvas`
+onto a stack and set `FActiveCanvas := Self;`.
+** ☐ In `TfpgCanvasBase.EndDraw`, pop the previous `FActiveCanvas` from
+the stack.
+* ☐ *Modify `TfpgFontBase`:*
+** ☐ Update `TextWidth`, `Ascent`, `Descent`, `Height` methods to use
+`TfpgCanvasBase.GetActiveCanvas` instead of
+`fpgApplication.MainForm.Canvas`.
+** ☐ Ensure proper type-casting to `TAgg2D` and `{$IFDEF AggCanvas}`
+checks remain.
+* ☐ *Review and Test:*
+** ☐ Thoroughly test all drawing and layout scenarios with `AggCanvas`
+enabled and disabled.
+** ☐ Pay special attention to nested drawing operations and custom
+canvas implementations.
+
+---
+
+=== Design Solution 2: Unified Font Engine Abstraction
+
+This solution represents a more fundamental redesign, introducing a new
+abstraction layer for font engines. It aims for a cleaner, more
+extensible architecture by completely decoupling font metric calculation
+from platform-specific font resources and canvas implementations.
+
+==== Description
+
+[arabic]
+. *`IFontEngine` Interface:* Define a new interface, `IFontEngine`, with
+methods for `GetTextWidth`, `GetAscent`, `GetDescent`, `GetHeight`, and
+potentially `SetFont` (or `LoadFont`).
+. *`TfpgFontResource` Implements `IFontEngine`:* The existing
+platform-specific `TfpgFontResource` classes (e.g.,
+`TfpgX11FontResource`, `TfpgGDIFontResource`) would be refactored to
+implement this `IFontEngine` interface.
+. *`TAgg2DFontEngine` Implements `IFontEngine`:* Create a new class,
+`TAgg2DFontEngine`, which wraps `TAgg2D`'s FreeType capabilities and
+implements `IFontEngine`. This class would hold a reference to the
+`TAgg2D` instance.
+. *`TfpgFontBase` Holds `IFontEngine`:* `TfpgFontBase` would no longer
+hold a `FFontRes` (which is a `TfpgFontResourceBase`), but rather an
+`IFontEngine` reference.
+. *Dynamic Engine Assignment:* When a `TfpgFont` is created or assigned
+to a canvas:
+* If `AggCanvas` is active, `TfpgFontBase`'s `IFontEngine` would be set
+to an instance of `TAgg2DFontEngine` (initialized with the current
+`TAgg2D` canvas).
+* Otherwise, it would be set to the appropriate platform-specific
+`TfpgFontResource` instance.
+. *Simplified `TfpgFontBase` Methods:* `TfpgFontBase`'s `TextWidth`,
+`Ascent`, `Descent`, `GetHeight` methods would simply delegate to its
+`IFontEngine` reference, removing all conditional `{$IFDEF AggCanvas}`
+logic.
+
+==== Pros
+
+* *Cleanest Design:* Achieves true separation of concerns. The font
+object deals with an abstract font engine, not specific canvas types or
+platform resources. This aligns well with the explicit metric context
+approach seen in toolkits like Qt.
+* *Highly Extensible:* Easily allows for the integration of new font
+rendering backends (e.g., DirectWrite, CoreText) by simply implementing
+the `IFontEngine` interface.
+* *Improved Maintainability:* Code becomes easier to understand, test,
+and modify due to clear interfaces and responsibilities.
+* *Removes Conditional Compilation:* Eliminates `{$IFDEF AggCanvas}`
+from `TfpgFontBase` methods, making the core logic cleaner.
+
+==== Cons
+
+* *Most Invasive Refactoring:* Requires significant changes across
+`TfpgFontBase`, `TfpgFontResource` hierarchy, `TAgg2D`, and potentially
+`TfpgApplication` (for font creation).
+* *High Potential for Breaking Changes:* Introducing new interfaces and
+changing class hierarchies will almost certainly break existing
+applications that directly interact with `TfpgFontResource` or assume
+its concrete type.
+* *Increased Complexity (Initial):* More classes and interfaces to
+manage initially.
+
+==== Implementation Steps
+
+* ☐ *Define `IFontEngine` Interface:*
+** ☐ Create `IFontEngine` with `GetTextWidth`, `GetAscent`,
+`GetDescent`, `GetHeight` methods.
+* ☐ *Refactor `TfpgFontResourceBase`:*
+** ☐ Modify `TfpgFontResourceBase` to implement `IFontEngine`.
+** ☐ Update all platform-specific `TfpgFontResource` implementations
+(X11, GDI, Cocoa) to implement `IFontEngine`.
+* ☐ *Create `TAgg2DFontEngine`:*
+** ☐ Implement `TAgg2DFontEngine` class that takes a `TAgg2D` instance
+in its constructor and implements `IFontEngine` by delegating to
+`TAgg2D`'s methods.
+* ☐ *Introduce `TfpgFontDefinition`:*
+** ☐ Create a new class, `TfpgFontDefinition`, that encapsulates only
+font properties (name, size, style, color) but has no metric calculation
+capabilities and no `IFontEngine` reference.
+* ☐ *Refactor `fpgStyle` Font Properties:*
+** ☐ Change all font properties within `fpgStyle` (e.g., `MenuFont`,
+`DefaultFont`, `CaptionFont`) to be instances of `TfpgFontDefinition`
+instead of `TfpgFont`.
+* ☐ *Refactor `TfpgFont`:*
+** ☐ Modify `TfpgFont` to internally hold a `TfpgFontDefinition` and an
+`IFontEngine`.
+** ☐ Update `TfpgFont`'s constructor (or add a factory method) to take a
+`TfpgFontDefinition` and an `IFontEngine` (or a canvas context from
+which to derive an `IFontEngine`).
+* ☐ *Modify Font Creation/Assignment:*
+** ☐ Update `TfpgApplication.GetFont` and `TfpgCanvasBase.SetFont` (or
+related methods) to correctly instantiate and assign the appropriate
+`IFontEngine` (either a platform-specific `TfpgFontResource` or a
+`TAgg2DFontEngine`).
+** ☐ Introduce a new
+`TfpgCanvasBase.SetFontDefinition(ADefinition: TfpgFontDefinition)`
+method. This method would internally create or retrieve a `TfpgFont`
+instance (with the correct `IFontEngine` for that canvas) and set it as
+`Canvas.Font`.
+* ☐ *Review and Test:*
+** ☐ Comprehensive testing across all platforms and `AggCanvas` states.
+
+---
+
+=== Backward Compatibility and Migration Guide
+
+==== Impact
+
+* *Solution 1 (Canvas-Aware `TfpgFontBase`):*
+** *High Backward Compatibility:* This solution is designed to be
+largely backward compatible. Existing applications should continue to
+compile and run, benefiting from the corrected metrics.
+** *Potential Edge Cases:* Applications that directly manipulate
+`TfpgCanvasBase.FActiveCanvas` (unlikely) or have very unusual drawing
+contexts might need review.
+* *Solution 2 (Unified Font Engine Abstraction):*
+** *Low Backward Compatibility:* This solution involves significant
+changes to core font-related classes and interfaces. Applications that
+directly reference `TfpgFontResource` types, or rely on the specific
+class hierarchy of `TfpgFontBase`'s internal font resource, will likely
+break.
+
+==== Migration Guide (for Solution 2, if chosen)
+
+If Solution 2 (Unified Font Engine Abstraction) is implemented,
+developers upgrading fpGUI will need to make the following changes:
+
+[arabic]
+. *Update Font Resource References:*
+* Any code that directly declares variables or casts objects to
+`TfpgFontResourceBase` or specific platform implementations (e.g.,
+`TfpgX11FontResource`) will need to be updated.
+* Instead, use the new `IFontEngine` interface where appropriate. This
+is similar to how Qt's `QFontMetrics` provides an abstraction over
+device-specific font measurements.
+* Example: `var MyFontRes: TfpgX11FontResource;` becomes
+`var MyFontEngine: IFontEngine;`.
+. *Font Creation/Assignment:*
+* Review any custom font creation or assignment logic. Ensure that
+`IFontEngine` instances are correctly created and assigned to
+`TfpgFontBase` objects, taking into account whether `AggCanvas` is
+active.
+* The standard `TfpgApplication.GetFont` and `TfpgCanvasBase.SetFont`
+methods should handle most cases, but custom code might need adjustment.
+. *Metric Access:*
+* Accessing font metrics (width, ascent, descent, height) through
+`TfpgFontBase` methods (`Font.TextWidth`, `Font.Ascent`, etc.) will
+remain the same, as these methods will now delegate to the
+`IFontEngine`.
+* Direct calls to `FFontRes.GetTextWidth` (or similar) will no longer be
+valid and must be replaced with calls to the `IFontEngine` methods.
+. *`fpgStyle` Font Property Usage:*
+* Code that directly accesses `fpgStyle.SomeFont.TextWidth` (or other
+metric methods) will no longer compile or function correctly.
+* Instead, developers must first apply the `TfpgFontDefinition` from
+`fpgStyle` to the canvas, and then use the canvas's font for metric
+calculations:
++
+[source,pascal]
+----
+// Old way (will be removed/changed):
+// MyWidth := fpgStyle.MenuFont.TextWidth('Item');
+
+// New recommended way:
+Canvas.SetFontDefinition(fpgStyle.MenuFont);
+MyWidth := Canvas.Font.TextWidth('Item');
+----
+
+---
+
+=== Other Considerations
+
+* *Performance:* Both solutions should have minimal performance impact.
+Solution 1 might introduce a slight overhead due to the `ActiveCanvas`
+management, but this is typically negligible compared to drawing
+operations. Solution 2's interface calls might have a tiny overhead, but
+modern Pascal compilers optimize interface calls well.
+* *Thread Safety:* If fpGUI ever moves towards multi-threaded rendering
+contexts, the `TfpgCanvasBase.ActiveCanvas` (Solution 1) would need to
+be thread-local or protected by a mutex. Solution 2's `IFontEngine`
+approach is inherently more thread-safe as each `TfpgFont` instance
+would hold its own engine.
+* *DPI Scaling:* Ensure that font metrics returned by `TAgg2D`
+(FreeType) are correctly scaled according to the application's DPI
+settings, just as native font metrics are. This is crucial for
+consistent rendering across different display densities.
+* *Font Hinting:* The `TAgg2D.TextHints(False)` call was noted earlier.
+This plan focuses on metric consistency. A separate task might be to
+investigate and properly enable font hinting in `Agg2D` for improved
+text clarity.
+* *Testing:* Comprehensive unit and integration tests will be essential
+for either solution, especially for Solution 2 due to its invasive
+nature. Tests should cover:
+** Metric consistency between `AggCanvas` and native backends.
+** Correct layout and rendering in various UI components.
+** Behavior with different font sizes and types.
+** Correct `ActiveCanvas` management (for Solution 1).
+
+=== Testing Strategy with Free Pascal's Unit Testing Framework
+
+Free Pascal's built-in unit testing framework (`fpcunit`) is a suitable
+choice for implementing tests. The key is to isolate components and
+verify their behavior.
+
+==== Unit Testing
+
+* *Focus:* Isolate `TfpgFontBase`, `TAgg2D`, and `TfpgCanvasBase`.
+* *Mocking/Stubs:*
+** For `TfpgFontBase` tests, mock `FFontRes` (or `IFontEngine` in
+Solution 2) to control its behavior and verify interactions.
+** For `TAgg2D` tests, consider mocking underlying AGG library calls if
+direct rendering is too complex to test at the unit level.
+* *Test Cases:*
+** *Metric Consistency:*
+*** Create a `TfpgFont` instance and set it to a `TAgg2D` canvas.
+*** Verify that `Font.TextWidth`, `Font.Ascent`, `Font.Descent`,
+`Font.Height` (accessed via `TfpgFontBase` methods) return values
+consistent (or approximately equal, due to rounding) with `TAgg2D`'s
+direct methods (`FCanvas.TextWidth`, `FCanvas.FontAscent`, etc.) for
+known text and font sizes.
+** *Fallback Behavior:* Test that when `AggCanvas` is _not_ defined,
+`TfpgFontBase` correctly delegates to the platform-native `FFontRes`
+object. This might require separate test builds or advanced mocking.
+** *Edge Cases:* Test with empty strings, very large/small font sizes,
+and special characters.
+** *`ActiveCanvas` Management (for Solution 1):* Test that
+`TfpgCanvasBase.ActiveCanvas` is correctly pushed and popped during
+nested `BeginDraw`/`EndDraw` calls to ensure the correct canvas context
+is always available.
+
+==== Integration Testing
+
+* *Layout Verification:* Create simple UI components (e.g., `TfpgLabel`,
+`TfpgButton`, `TfpgMenu`) with known text and font settings. After
+rendering, assert that their `Width` and `Height` properties (which rely
+on font metrics) are within expected ranges.
+* *Visual Regression (Advanced):* While `fpcunit` doesn't directly
+support visual regression, it can be integrated with external tools.
+Render a known UI state to an image, save it, and in subsequent test
+runs, compare the newly rendered image pixel-by-pixel against the
+baseline. This is more complex but provides strong visual guarantees.
+* *Cross-Backend Comparison:* Run the same integration tests with
+`AggCanvas` enabled and disabled, and compare the resulting layout
+metrics. They should be consistent.
+
+=== Interaction with `fpgStyle` and UI Components (e.g., `fpg_menu.pas`)
+
+A critical consideration for font metric handling is how UI components,
+particularly those involved in theming (like `fpg_menu.pas` using
+`fpgStyle.Font`), interact with the canvas's font.
+
+==== Problem Statement
+
+Currently, `fpg_menu.pas` (and potentially other UI components)
+retrieves font metrics directly from `fpgStyle.Font` rather than the
+`Canvas.Font` property. While `fpgStyle` is a valid mechanism for
+defining application-wide default fonts for theming, relying solely on
+`fpgStyle.Font` for metric calculation can lead to inconsistencies if:
+1. The `TfpgFont` instance from `fpgStyle` is not the exact font
+currently set on the canvas for drawing. 2. The `fpgStyle.Font`
+instance, even if it's a `TfpgFont`, doesn't have its internal
+`IFontEngine` (as per Solution 2) correctly configured for the
+_specific_ canvas it's being drawn on.
+
+This can reintroduce the ``two-engine'' problem, where metrics are
+calculated by one context (potentially a generic `fpgStyle` font) but
+drawing occurs with another (the actual `Canvas.Font`).
+
+==== Recommended Pattern for UI Components
+
+To ensure consistency and leverage Solution 2 effectively, UI components
+should follow this pattern:
+
+[arabic]
+. *Retrieve Desired Font:* Obtain the desired font from `fpgStyle.Font`
+(or any other source, like a component's own `Font` property).
+. *Apply to Canvas:* Explicitly set this font on the canvas being used
+for drawing: `Canvas.Font := DesiredFont;`. This step is crucial as it
+allows the canvas to configure the `TfpgFont`'s internal `IFontEngine`
+based on the canvas's type (e.g., `TAgg2DFontEngine` for `TAgg2D`).
+. *Calculate Metrics:* Then, use the `Canvas.Font` property (or `Canvas`
+methods that implicitly use `Canvas.Font`) for all metric calculations:
+`Canvas.Font.TextWidth(...)`, `Canvas.Font.Ascent`,
+`Canvas.Font.Descent`, `Canvas.Font.Height`.
+
+This pattern guarantees that the font metrics used for layout are always
+derived from the exact font that will be used for rendering on that
+specific canvas, thus maintaining consistency.
+
+==== Impact of Solution 2
+
+Solution 2 (Unified Font Engine Abstraction) is vital for this pattern
+to work seamlessly. When `Canvas.Font := DesiredFont;` is executed, the
+`TfpgCanvasBase.SetFont` (or equivalent) method must be intelligent
+enough to:
+
+* Take the `DesiredFont` (a `TfpgFont` instance).
+* Inspect the canvas's own type (e.g., `TAgg2D`).
+* Configure the `DesiredFont`'s internal `IFontEngine` to be appropriate for that canvas (e.g., assign a
+`TAgg2DFontEngine` instance to `DesiredFont.FFontEngine` if the canvas
+is `TAgg2D`).
+
+This ensures that any subsequent calls to `Canvas.Font.TextWidth` (which
+delegates to `DesiredFont.FFontEngine.GetTextWidth`) will correctly use
+the canvas's rendering engine.

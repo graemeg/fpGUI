@@ -553,11 +553,11 @@ begin
   FImageList := TfpgImageList.Create;
   FImageNames := TStringList.Create;
   RTVPreview.Images := FImageList;
-  RTVPreview.RichTextSettings.Heading1Font := fpgGetFont('Arial-18:bold');
-  RTVPreview.RichTextSettings.Heading2Font := fpgGetFont('Arial-14:bold');
-  RTVPreview.RichTextSettings.Heading3Font := fpgGetFont('Arial-12:bold');
-  RTVPreview.RichTextSettings.NormalFont := fpgGetFont(FPG_DEFAULT_FONT_DESC);
-  RTVPreview.RichTextSettings.FixedFont := fpgGetFont('Courier New-10:antialiased=true');
+  RTVPreview.RichTextSettings.Heading1Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-18:bold');
+  RTVPreview.RichTextSettings.Heading2Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-14:bold');
+  RTVPreview.RichTextSettings.Heading3Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-12:bold');
+  RTVPreview.RichTextSettings.NormalFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FONT_DESC);
+  RTVPreview.RichTextSettings.FixedFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED_FONT_DESC);
 end;
 
 destructor TRichTextEditFrame.Destroy;

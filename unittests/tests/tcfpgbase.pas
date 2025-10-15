@@ -7,7 +7,8 @@ interface
 uses
   Classes,
   SysUtils,
-  TestFramework,
+  //TestFramework,
+  fpcunit, testutils, testregistry,
   fpg_base;
 
 type
@@ -40,7 +41,8 @@ uses
 
 procedure RegisterTests;
 begin
-  TestFramework.RegisterTest('fpg_base', TTestFPGRect.Suite);
+  // TestFramework.RegisterTest('fpg_base', TTestFPGRect.Suite);
+  RegisterTest(TTestFPGRect);
 end;
 
 

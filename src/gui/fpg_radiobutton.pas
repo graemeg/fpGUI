@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -33,7 +33,7 @@ type
   private
     FAutoSize: boolean;
     FChecked: boolean;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FGroupIndex: integer;
     FOnChange: TNotifyEvent;
     FText: string;
@@ -59,7 +59,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   published
     property    Align;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
@@ -100,7 +100,7 @@ begin
   Result.Top    := y;
   Result.Left   := x;
   Result.Text   := AText;
-  Result.Width  := Result.Font.TextWidth(Result.Text) + 24;
+  Result.Width  := Result.Font.GetTextWidth(Result.Text) + 24;
 end;
 
 { TfpgRadioButton }
@@ -112,7 +112,10 @@ end;
 
 function TfpgRadioButton.GetFontDesc: string;
 begin
-  Result := FFont.FontDesc;
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
+  else
+    Result := '';
 end;
 
 procedure TfpgRadioButton.SetBoxLayout(const AValue: TBoxLayout);
@@ -165,8 +168,8 @@ end;
 
 procedure TfpgRadioButton.SetFontDesc(const AValue: string);
 begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
+  FFont := nil;  // Release old font (automatic ref count decrement)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
   RePaint;
 end;
 
@@ -184,7 +187,7 @@ procedure TfpgRadioButton.DoAdjustWidth;
 begin
   if AutoSize then
   begin
-    Width := Font.TextWidth(FText) + 24; // 24 is extra padding for image
+    Width := Font.GetTextWidth(FText) + 24; // 24 is extra padding for image
     UpdatePosition;
   end;
 end;
@@ -401,8 +404,8 @@ constructor TfpgRadioButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText       := 'RadioButton';
-  FFont       := fpgGetFont('#Label1');
-  FHeight     := FFont.Height + 4;
+  FFont       := fpgApplication.FontManager.GetFont('#Label1');
+  FHeight     := FFont.GetHeight + 4;
   FWidth      := 120;
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
@@ -419,7 +422,7 @@ end;
 
 destructor TfpgRadioButton.Destroy;
 begin
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
 end;
 

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -41,7 +41,7 @@ type
   TfpgFileGrid = class(TfpgCustomGrid)
   private
     FFileList: TfpgFileList;
-    FFixedFont: TfpgFont;
+    FFixedFont: TfpgFontResourceBase;
   protected
     function    GetRowCount: Integer; override;
     procedure   DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
@@ -49,7 +49,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    CurrentEntry: TFileEntry;
-    property    FixedFont: TfpgFont read FFixedFont;
+    property    FixedFont: TfpgFontResourceBase read FFixedFont;
     property    FileList: TfpgFileList read FFileList;
     property    DefaultRowHeight;
     property    Font;
@@ -261,7 +261,7 @@ begin
             s := ''
           else
             s := FormatFloat('### ### ### ##0', e.Size);
-          x := ARect.Right - Font.TextWidth(s) - 1;
+          x := ARect.Right - Font.GetTextWidth(s) - 1;
           if x < (ARect.Left + 2) then
             x := ARect.Left + 2;
         end;
@@ -285,7 +285,7 @@ begin
     end;
 
   // centre text in row height
-  y := y + ((DefaultRowHeight - Canvas.Font.Height) div 2);
+  y := y + ((DefaultRowHeight - Canvas.Font.GetHeight()) div 2);
   Canvas.DrawString(x, y, s);
 end;
 
@@ -295,7 +295,7 @@ begin
   inherited Create(AOwner);
   ColumnCount := 0;
   RowCount := 0;
-  FFixedFont := fpgGetFont('Courier New-9');
+  FFixedFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED_FONT_DESC);
 
   if FFileList.HasFileMode then
     AddColumn(rsName, 220)  // save space for file mode, owner and group
@@ -321,7 +321,7 @@ end;
 destructor TfpgFileGrid.Destroy;
 begin
   OnRowChange := nil;
-  FFixedFont.Free;
+  FFixedFont := nil;
   FFileList.Free;
   inherited Destroy;
 end;

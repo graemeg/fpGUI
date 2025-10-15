@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
     Copyright (c) 2015 by Andrew Haines.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -53,12 +53,12 @@ type
     FCursor: Int64;
     FOwnsStream: Boolean;
     FStream: TStream;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FVScroll: TfpgScrollBar;
     FEventListenerList: TEventList;
-    function    GetFont: TfpgFont;
+    function    GetFont: TfpgFontResourceBase;
     procedure   SetCursor(AValue: Int64);
-    procedure   SetFont(AValue: TfpgFont);
+    procedure   SetFont(AValue: TfpgFontResourceBase);
     procedure   SetStream(AValue: TStream);
     function    GetHexCharSize: TfpgSize;
     function    GetHexAreaWidth: Integer;
@@ -89,7 +89,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    Stream: TStream read FStream write SetStream;
-    property    Font: TfpgFont read GetFont write SetFont; // Fixed width
+    property    Font: TfpgFontResourceBase read GetFont write SetFont; // Fixed width
     property    Cursor: Int64 read FCursor write SetCursor;
   published
     property    Align;
@@ -107,7 +107,7 @@ type
     function GetValueString(AType: TIntType; const AValue): String;
   private
     FCurrentVal: QWord;
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FHexView: IfpgHexView;
     FLabels: array[TIntType] of TfpgLabel;
     FEdits: array[TIntType] of TfpgEdit;
@@ -250,9 +250,9 @@ begin
   inherited Create(AOwner);
   FWidth := 300;
   FHeight := 100;
-  FFont := fpgGetFont('#Label1');
+  FFont := fpgApplication.FontManager.GetFont('#Label1');
 
-  LabelWidths := FFont.TextWidth(IntTypeToString(bcU64));
+  LabelWidths := FFont.GetTextWidth(IntTypeToString(bcU64));
 
   X := 0;
   Y := 0;
@@ -271,7 +271,8 @@ begin
     FLabels[i].Left:=X;
     FLabels[i].Top:=Y+5;
     FLabels[i].Width:= LabelWidths;
-    FLabels[i].FontDesc:=FFont.FontDesc;
+    if Assigned(FFont) then
+      FLabels[i].FontDesc:=FFont.FontDesc;
     FLabels[i].Alignment:=taRightJustify;
 
     FEdits[i] := TfpgEdit.Create(Self);
@@ -293,8 +294,8 @@ end;
 
 destructor TfpgHexPanel.Destroy;
 begin
+  FFont := nil;
   inherited Destroy;
-  FFont.Free;
 end;
 
 { TfpgHexView }
@@ -325,10 +326,10 @@ begin
   Invalidate;
 end;
 
-function TfpgHexView.GetFont: TfpgFont;
+function TfpgHexView.GetFont: TfpgFontResourceBase;
 begin
   if FFont = nil then
-    FFont := fpgGetFont('Courier New-12');
+    FFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED + '-12');
 
   Result := FFont;
 end;
@@ -352,7 +353,7 @@ begin
   DoCursorChange;
 end;
 
-procedure TfpgHexView.SetFont(AValue: TfpgFont);
+procedure TfpgHexView.SetFont(AValue: TfpgFontResourceBase);
 begin
   if FFont <> AValue then
     FFont := AValue;
@@ -360,8 +361,8 @@ end;
 
 function TfpgHexView.GetHexCharSize: TfpgSize;
 begin
-  Result.H := Font.Height;
-  Result.W := Font.TextWidth('AZ');
+  Result.H := Font.GetHeight;
+  Result.W := Font.GetTextWidth('AZ');
 end;
 
 function TfpgHexView.GetHexAreaWidth: Integer;
@@ -384,7 +385,7 @@ begin
   W := Width - GetAddressWidth - BevelsWidth - BordersWidth;
   Result := W div (CSize.W + CharSpacing);
 
-  CharWidth:=Font.TextWidth('X');
+  CharWidth:=Font.GetTextWidth('X');
 
   while (Result * (CSize.W + CharSpacing)) + (Result * CharWidth) > W do
     Dec(Result);
@@ -396,7 +397,7 @@ var
 begin
   // H is not affected by a scrollbar. We only scroll up and down
   H := Height - fpgStyle.GetBevelWidth * 2;
-  Result := H div Font.Height;
+  Result := H div Font.GetHeight;
 end;
 
 function TfpgHexView.GetAddressChars: Integer;
@@ -418,12 +419,12 @@ end;
 
 function TfpgHexView.GetAddressWidth: Integer;
 begin
-  Result := GetAddressChars * Font.TextWidth('X')+AddressSpace;
+  Result := GetAddressChars * Font.GetTextWidth('X')+AddressSpace;
 end;
 
 function TfpgHexView.GetTextWidth: Integer;
 begin
-  Result := GetCharsPerRow * Font.TextWidth('X');
+  Result := GetCharsPerRow * Font.GetTextWidth('X');
 end;
 
 function TfpgHexView.GetTextLeft: Integer;
@@ -444,7 +445,7 @@ begin
   Y := fpgStyle.GetBevelWidth;
   CharsPerRow:=GetCharsPerRow;
   Pos := AStartAddress;
-  CharWidth:=Font.TextWidth('X');
+  CharWidth:=Font.GetTextWidth('X');
   AddressChars:=GetAddressChars;
 
   Canvas.Color:=clDarkGray;
@@ -456,11 +457,11 @@ begin
   while (Y < Height) and (Pos <= FStream.Size) do
   begin
     Address := hexStr(Pos, AddressChars);
-    AddressWidth := Font.TextWidth(Address);
+    AddressWidth := Font.GetTextWidth(Address);
     X := AddressChars * CharWidth - AddressWidth + (AddressSpace div 2);
     Canvas.DrawText(X,Y, Address);
 
-    Inc(Y, Font.Height);
+    Inc(Y, Font.GetHeight);
     Inc(Pos, CharsPerRow);
   end;
 end;
@@ -479,7 +480,7 @@ var
   TextPos: TfpgRect;
 begin
   CharSize := GetHexCharSize;
-  CharWidth:=Font.TextWidth('X');
+  CharWidth:=Font.GetTextWidth('X');
 
   // get some useful values
   PaintTop := fpgStyle.GetBevelWidth;
@@ -597,7 +598,7 @@ begin
   r.SetRect(0, 0, Width - fpgStyle.GetBevelWidth * 2, Height - fpgStyle.GetBevelWidth * 2);
   Canvas.SetClipRect(r);
 
-  Canvas.Font := Font;
+  Canvas.SetFont(Font);
 
   StartRow:= FVScroll.Position;
   PaintAddressGutter(StartRow*GetCharsPerRow);
@@ -633,8 +634,8 @@ begin
   if X > GetTextLeft then
   begin
     // we clicked in the text area
-    Row := (y - BS) div Font.Height + FVScroll.Position;
-    Col := (x - GetTextLeft) div Font.TextWidth('X');
+    Row := (y - BS) div Font.GetHeight + FVScroll.Position;
+    Col := (x - GetTextLeft) div Font.GetTextWidth('X');
     NewPos := Row * GetCharsPerRow + Col;
     Cursor := NewPos;
   end
@@ -701,10 +702,9 @@ end;
 destructor TfpgHexView.Destroy;
 begin
   FEventListenerList.Clear;
-  Stream := nil; // Frees the stream if OnwsStream is true
+  Stream := nil; // Frees the stream if OwnsStream is true
   FreeAndNil(FEventListenerList);
-  if Assigned(FFont) then
-    FreeAndNil(FFont);
+  FFont := nil;
   inherited Destroy;
 end;
 

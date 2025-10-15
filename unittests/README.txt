@@ -3,9 +3,25 @@
  Over time the test suite will be extended to cover many parts of CoreLib
  and the GUI components (where possible).
 
-  Reguirements:
-    * FPTest testing framework (http://github.com/graemeg/fptest)
+  Reguirements
+  ------------
+
+    * FPCUnit testing framework - included with FPC
+    * [disabled by default] FPTest testing framework (http://github.com/graemeg/fptest)
 
 
-  Regards,
-    Graeme.
+  Running the tests
+  -----------------
+
+    > ./fpgui_unittests_console -a --format=plain
+
+
+  Known errors
+  ------------
+
+    * The "EAccessViolation: Access violation" when the test runner terminates
+      is known and expected. It's simply not shutting down the fpgApplication
+      correctly.
+
+
+

@@ -27,7 +27,7 @@ type
 
   TCustomFontEdit = class(TfpgEdit)
   protected
-    FExtraHintFont: TfpgFont;
+    FExtraHintFont: TfpgFontResourceBase;
     procedure DrawPlaceholderText(constref ARect: TfpgRect); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -50,12 +50,12 @@ constructor TCustomFontEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FExtraHintFont := fpgGetFont('DejaVu Sans-10:bold:italic:antialias=true:underline');
+  FExtraHintFont := fpgApplication.FontManager.GetFont('DejaVu Sans-10:bold:italic:antialias=true:underline');
 end;
 
 destructor TCustomFontEdit.Destroy;
 begin
-  FExtraHintFont.Free;
+  FExtraHintFont := nil;
   inherited Destroy;
 end;
 

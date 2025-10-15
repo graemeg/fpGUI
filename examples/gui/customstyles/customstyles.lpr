@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2016 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -16,9 +16,9 @@
       to use it. Styles can be changed at runtime via the --style parameter.
       eg:
 
-        $ ./customestyle --style='Demo Style'
-        $ ./customestyle --style=Win2000
-        $ ./customestyle --style='demo style'
+        $ ./customstyles --style='Demo Style'
+        $ ./customstyles --style=Win2000
+        $ ./customstyles --style='demo style'
 
       Note that the style name is not case sensitive. Also if the style
       name consists of more than one word, in needs to be between single

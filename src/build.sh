@@ -1,15 +1,20 @@
 #!/bin/sh
 
-echo "Which platform are you building for?"
-echo " "
-echo "  L - Linux"
-echo "  1 - Linux + AggCanvas"
-echo "  F - FreeBSD"
-echo "  2 - FreeBSD + AggCanvas"
-echo "  M - Mac OSX"
-echo " "
+# Check if platform argument provided on command line
+if [ -n "$1" ]; then
+  OSinput="$1"
+else
+  echo "Which platform are you building for?"
+  echo " "
+  echo "  L - Linux"
+  echo "  1 - Linux + AggCanvas"
+  echo "  F - FreeBSD"
+  echo "  2 - FreeBSD + AggCanvas"
+  echo "  M - Mac OSX"
+  echo " "
 
-read -p "Enter a letter or Ctrl+C to quit: " OSinput
+  read -p "Enter a letter or Ctrl+C to quit: " OSinput
+fi
 
 
 
@@ -45,7 +50,7 @@ case $OSinput in
 		;;
     "M"|"m")
 		echo "Compiling for OSX Cocoa"
-		$fpcbin -dCocoa @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
+		$fpcbin -dX11 -dAGGCanvas @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
 		;;
 	*)
 		echo "Unknown option - doing nothing!"

@@ -9,14 +9,19 @@ unit testdependencies;
 interface
 
 uses
-  tctreeview
-  ,tcfpgbase
-  ;
+  tctreeview,
+  tcfpgbase,
+  tcfontmanager,
+  tcfontcacheremoval,
+  tcfontdefinition;
 
 implementation
 
 initialization
-  tctreeview.RegisterTests;
-  tcfpgbase.RegisterTests;
+//  tctreeview.RegisterTests;
+ tcfpgbase.RegisterTests;
+  tcfontmanager.RegisterTests;
+  tcfontcacheremoval.RegisterTests;
+  tcfontdefinition.RegisterTests;
 
 end.

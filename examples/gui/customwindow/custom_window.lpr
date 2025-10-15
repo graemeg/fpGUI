@@ -34,8 +34,8 @@ type
     {@VFD_HEAD_END: MainForm}
     FLastPos: TPoint;
     FMouseTracked: Boolean;
-    fntHead1: TfpgFont;
-    fntHead2: TfpgFont;
+    fntHead1: TfpgFontResourceBase;
+    fntHead2: TfpgFontResourceBase;
     procedure   TitleMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseMoved(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
@@ -126,16 +126,16 @@ begin
 
     Canvas.TextColor := cBorder;
     // Output some sample text
-    Canvas.Font := fntHead1;
+    Canvas.SetFont(fntHead1);
     Canvas.DrawText(8, 10, 'Personal');
-    Canvas.Font := fntHead2;
+    Canvas.SetFont(fntHead2);
     Canvas.DrawText(20, 30, 'Home');
     Canvas.DrawText(20, 50, 'Documents');
     Canvas.DrawText(20, 70, 'Music');
     Canvas.DrawText(20, 90, 'Pictures');
-    Canvas.Font := fntHead1;
+    Canvas.SetFont(fntHead1);
     Canvas.DrawText(8, 110, 'Network');
-    Canvas.Font := fntHead2;
+    Canvas.SetFont(fntHead2);
     Canvas.DrawText(20, 130, 'Entire network');
   end;
 end;
@@ -156,7 +156,7 @@ begin
     Canvas.DrawRectangle(0, 0, Width, Height);
 
     Canvas.TextColor := cBorder;
-    Canvas.Font := fntHead1;
+    Canvas.SetFont(fntHead1);
     Canvas.DrawText(30, 8, Width-60, 20, WindowTitle, [txtHCenter, txtTop]);
   end;
 end;
@@ -200,14 +200,14 @@ begin
             'my.resize',
             @img_resize,
       sizeof(img_resize));
-  fntHead1 := fpgGetFont(cHeader1);
-  fntHead2 := fpgGetFont(cHeader2);
+  fntHead1 := fpgApplication.FontManager.GetFont(cHeader1);
+  fntHead2 := fpgApplication.FontManager.GetFont(cHeader2);
 end;
 
 destructor TMainForm.Destroy;
 begin
-  fntHead1.Free;
-  fntHead2.Free;
+  fntHead1 := nil;
+  fntHead2 := nil;
   inherited Destroy;
 end;
 

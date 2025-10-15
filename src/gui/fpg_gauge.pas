@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2007 by Giuliano Colla.
-    Copyright (c) 2008 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2008 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -38,7 +38,7 @@ type
 
   TfpgBaseGauge = class(TfpgWidget)
   private
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     FMin: Longint;
     FMax: Longint;
     FPosition: Longint;
@@ -88,7 +88,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   AddProgress(AValue: Longint);
     property    Percentage: Longint read GetPercentage;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -251,16 +251,16 @@ var
   X, Y: Integer;
 begin
   S := Format('%d%%', [Percentage]);
-  with FClientRect do 
+  with FClientRect do
   begin
-    X := (Width - FFont.TextWidth(S)) div 2;
-    Y := (Height - FFont.Height) div 2;
+    X := (Width - FFont.GetTextWidth(S)) div 2;
+    Y := (Height - FFont.GetHeight) div 2;
     if Kind = gkDial then 
       Y := Y + (Y div 2);
   end;
 { If contrast is poor we might use a Xor function }
   Canvas.SetTextColor(FirstColor);
-  Canvas.Font := FFont;
+  Canvas.SetFont(FFont);
   Canvas.DrawString(x, y, S);
 end;
 
@@ -542,7 +542,7 @@ begin
   FPosition     := 0;
   FShowText     := True;
   FBorderStyle  := bsNone;
-  FFont         := fpgStyle.DefaultFont;
+  FFont         := fpgStyle.GetDefaultFont;
 end;
 
 procedure TfpgBaseGauge.AddProgress(AValue: Longint);

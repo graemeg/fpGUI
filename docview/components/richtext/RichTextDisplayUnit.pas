@@ -104,8 +104,8 @@ ProfileEvent('DEBUG:  DrawRichTextString >>>');
   end;
   if FontManager.Canvas.Color <> Layout.FRichTextSettings.DefaultBackgroundColor then
     FontManager.Canvas.FillRectangle(x, y,
-        FontManager.Canvas.Font.TextWidth(s),
-        FontManager.Canvas.Font.Height);
+        FontManager.Canvas.Font.GetTextWidth(s),
+        FontManager.Canvas.Font.GetHeight());
   FontManager.DrawString( Point, Len, S );
   X := Point.X;
 ProfileEvent('DEBUG:  DrawRichTextString <<<');

@@ -2,7 +2,7 @@
     This unit is part of the fpGUI Toolkit project.
 
     Copyright (c) 2007 by Andrew Haines.
-    Copyright (c) 2008 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2008 - 2025 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -366,7 +366,7 @@ type
     procedure   HandleHeaderMouseMove(x, y: Integer; btnstate: word; Shiftstate: TShiftState);
     property    ShiftIsPressed: Boolean read FShiftIsPressed write SetShiftIsPressed;
   protected
-    FFont: TfpgFont;
+    FFont: TfpgFontResourceBase;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -395,7 +395,7 @@ type
     property    Align;
     property    Columns: TfpgLVColumns read FColumns;
     property    Enabled;
-    property    Font: TfpgFont read FFont;
+    property    Font: TfpgFontResourceBase read FFont;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    Images: TfpgImageList index Ord(lisNoState) read GetImages write SetImages;
     property    ImagesSelected: TfpgImageList index Ord(lisSelected) read GetImages write SetImages;
@@ -516,7 +516,7 @@ end;
 
 function TfpgLVIconPainter.GetItemHeight: Integer;
 begin
-  Result := FIconSize + FListView.Canvas.Font.Height + 10;
+  Result := FIconSize + FListView.Canvas.Font.GetHeight() + 10;
 end;
 
 function TfpgLVIconPainter.GetItemNeighbor(AStartIndex: Integer;
@@ -693,8 +693,8 @@ begin
     // Set the text size and position now. It's useful for drawing selection and focus
     TheText := Item.Caption;
     tLeft := ItemRect.Left;
-    tWidth := ACanvas.Font.TextWidth(TheText);
-    tHeight := ACanvas.Font.Height;
+    tWidth := ACanvas.Font.GetTextWidth(TheText);
+    tHeight := ACanvas.Font.GetHeight();
     Inc(tLeft, (ItemWidth - tWidth - 5) div 2);
     // TmpRect is a rect a bit bigger than the text area.
     TmpRect := fpgRect(tLeft-2,ItemRect.Top+ItemRect.Height-5-tHeight-2,tWidth+4,tHeight+4);
@@ -746,7 +746,7 @@ begin
         TmpImage := Image;
         if not LV.Enabled then
           TmpImage := Image.CreateDisabledImage;
-        ACanvas.DrawImage(ItemRect.Left + ((ItemWidth-TmpImage.Width-5) div 2) ,ItemRect.Top + (ItemHeight - ACanvas.Font.Height) div 2, TmpImage);
+        ACanvas.DrawImage(ItemRect.Left + ((ItemWidth-TmpImage.Width-5) div 2) ,ItemRect.Top + (ItemHeight - ACanvas.Font.GetHeight()) div 2, TmpImage);
         if Not LV.Enabled then
           TmpImage.Free;
       end;
@@ -814,7 +814,7 @@ end;
 
 function TfpgLVReportPainter.GetItemHeight: Integer;
 begin
-  Result := FListView.Font.Height + 4;
+  Result := FListView.Font.GetHeight + 4;
 end;
 
 function TfpgLVReportPainter.GetItemNeighbor(AStartIndex: Integer;
@@ -893,7 +893,7 @@ function TfpgLVReportPainter.GetHeaderHeight: Integer;
 begin
   if not FListView.ShowHeaders then
     Exit(0);
-  Result := FListView.Font.Height + 10;
+  Result := FListView.Font.GetHeight + 10;
 end;
 
 function TfpgLVReportPainter.GetItemFromPoint(AX, AY: Integer; out
@@ -959,7 +959,7 @@ begin
       if lvppText in PaintPart then
       begin
         tLeft := cLeft;
-        tWidth := ACanvas.Font.TextWidth(Column.Caption);
+        tWidth := ACanvas.Font.GetTextWidth(Column.Caption);
         case Column.CaptionAlignment of
           taRightJustify: Inc(tLeft, Column.Width - tWidth - 5);
           taCenter: Inc(tLeft, (Column.Width - tWidth - 5) div 2);
@@ -973,7 +973,7 @@ begin
   if cLeft < FListView.FWidth-fpgStyle.GetControlFrameBorders.Right then
   begin
     ACanvas.SetColor(clButtonFace);
-    ACanvas.FillRectangle(cLeft, cTop, cLeft+(FListView.Width-3-cLeft), ACanvas.Font.Height+10);
+    ACanvas.FillRectangle(cLeft, cTop, cLeft+(FListView.Width-3-cLeft), ACanvas.Font.GetHeight()+10);
   end;
 end;
 
@@ -1102,7 +1102,7 @@ begin
 
           if lvppText in PaintPart then
           begin
-            tWidth := ACanvas.Font.TextWidth(TheText);
+            tWidth := ACanvas.Font.GetTextWidth(TheText);
             case LV.FColumns.Column[J].Alignment of
               taRightJustify:
                   Inc(tLeft, LV.FColumns.Column[J].Width - tWidth - 5);
@@ -2410,7 +2410,7 @@ begin
   Focusable := True;
   FShowHeaders := True;
   FShowFocusRect := True;
-  FFont         := fpgGetFont('#Label1');
+  FFont         := fpgApplication.FontManager.GetFont('#Label1');
 
   FVScrollBar := TfpgScrollBar.Create(Self);
   FVScrollBar.Orientation := orVertical;
@@ -2447,7 +2447,7 @@ begin
   FColumns.Free;
   if Assigned(FViewStyle) then
     FreeAndNil(FViewStyle);
-  FFont.Free;
+  FFont := nil;
   inherited Destroy;
 end;
 

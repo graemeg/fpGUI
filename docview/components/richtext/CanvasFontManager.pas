@@ -11,12 +11,12 @@ uses
   ,fpg_widget
   ;
 
-Const
+var
   // This defines the fraction of a pixel that
   // font character widths will be given in
-  DefaultTopicFontName = 'Arial';
+  DefaultTopicFontName: string;
   DefaultTopicFontSize: integer = 10;
-  DefaultTopicFixedFontName = 'Courier New';
+  DefaultTopicFixedFontName: string;
   DefaultTopicFixedFontSize: integer = 10;
 
 var
@@ -35,11 +35,10 @@ type
   private
     FWidget: TfpgWidget;
     FCanvas: TfpgCanvasBase;
-    FFontCache: TFPList;
-    function    GetCurrentFont: TfpgFont;
-    procedure   SetDefaultFont(const AValue: TfpgFont);
+    function    GetCurrentFont: TfpgFontResourceBase;
+    procedure   SetDefaultFont(const AValue: TfpgFontResourceBase);
   protected
-    FDefaultFont: TfpgFont;
+    FDefaultFont: TfpgFontResourceBase;
   public
     constructor Create(ACanvas: TfpgCanvasBase; AWidget: TfpgWidget); reintroduce;
     destructor  Destroy; override;
@@ -53,15 +52,15 @@ type
     procedure   DrawString(var Point: TPoint; const Length: longint; const S: PChar);
     procedure   SetFont(const AFontDesc: TfpgString);
     property    Canvas: TfpgCanvasBase read FCanvas;
-    property    CurrentFont: TfpgFont read GetCurrentFont;
-    property    DefaultFont: TfpgFont read FDefaultFont write SetDefaultFont;
+    property    CurrentFont: TfpgFontResourceBase read GetCurrentFont;
+    property    DefaultFont: TfpgFontResourceBase read FDefaultFont write SetDefaultFont;
     property    Widget: TfpgWidget read FWidget;
   end;
 
 
 // Get the font attributes of a fpGUI font
-function GetFPGuiFontAttributes(const AFont: TfpgFont): TFontAttributes;
-function GetFPGuiFont(const AFontNameSize: string; const Attrs: TFontAttributes): TfpgFont;
+function GetFPGuiFontAttributes(const AFont: TfpgFontResourceBase): TFontAttributes;
+function GetFPGuiFont(const AFontNameSize: string; const Attrs: TFontAttributes): TfpgFontResourceBase;
 procedure ApplyFontAttributes(var AFontDesc: string; const Attrs: TFontAttributes);
 
 
@@ -76,7 +75,7 @@ uses
   ;
 
 
-function GetFPGuiFontAttributes(const AFont: TfpgFont): TFontAttributes;
+function GetFPGuiFontAttributes(const AFont: TfpgFontResourceBase): TFontAttributes;
 var
   s: string;
   facename: string;
@@ -110,7 +109,10 @@ var
 begin
   Result := [];
   cp := 0;
-  lDesc := AFont.FontDesc;
+  if Assigned(AFont) then
+    lDesc := AFont.FontDesc
+  else
+    lDesc := '';
 
   // find fontface
   NextC;
@@ -151,13 +153,13 @@ begin
   end;
 end;
 
-function GetFPGuiFont(const AFontNameSize: string; const Attrs: TFontAttributes): TfpgFont;
+function GetFPGuiFont(const AFontNameSize: string; const Attrs: TFontAttributes): TfpgFontResourceBase;
 var
   s: string;
 begin
   s := AFontNameSize;
   ApplyFontAttributes(s, Attrs);
-  Result := fpgGetFont(s);
+  Result := fpgApplication.FontManager.GetFont(s);
 end;
 
 // Add attributes to font name
@@ -223,7 +225,12 @@ begin
 
   // if nothing found, use default font of fpGUI
   if FontDesc = '' then
-    FontDesc := fpgStyle.DefaultFont.FontDesc;
+  begin
+    if Assigned(fpgStyle.GetDefaultFont) then
+      FontDesc := fpgStyle.GetDefaultFont.FontDesc
+    else
+      FontDesc := DefaultTopicFont;
+  end;
 end;
 
 
@@ -234,110 +241,99 @@ begin
   inherited Create;
   FCanvas := ACanvas;
   FWidget := AWidget;
-  FDefaultFont := fpgGetFont(DefaultTopicFont);
-  FCanvas.Font := FDefaultFont;
-  FFontCache := TFPList.Create;
+  FDefaultFont := fpgApplication.FontManager.GetFont(DefaultTopicFont);
+  // Use SetFont overload that accepts TfpgFontResourceBase
+  FCanvas.SetFont(FDefaultFont);
 end;
 
 destructor TCanvasFontManager.Destroy;
-var
-  i: Integer;
 begin
-  FCanvas.Font := fpgStyle.DefaultFont;
-  FDefaultFont.Free;
-
-  for i := 0 to FFontCache.Count-1 do
-    TObject(FFontCache.Items[i]).Free;
-  FFontCache.Free;
-
+  FCanvas.SetFont(fpgStyle.GetDefaultFont);
+  FDefaultFont := nil;  // Clear pointer (font persists in cache)
   inherited Destroy;
 end;
 
-procedure TCanvasFontManager.SetDefaultFont(const AValue: TfpgFont);
+procedure TCanvasFontManager.SetDefaultFont(const AValue: TfpgFontResourceBase);
 begin
   if FDefaultFont = AValue then
     exit;
-  FDefaultFont.Free;
+  FDefaultFont := nil;  // Clear old pointer (font persists in cache)
   FDefaultFont := AValue;
 end;
 
-function TCanvasFontManager.GetCurrentFont: TfpgFont;
+function TCanvasFontManager.GetCurrentFont: TfpgFontResourceBase;
 begin
-  Result := FCanvas.Font as TfpgFont;
+  Result := FCanvas.Font;
 end;
 
 // Set the current font for the canvas to match the given
-// spec, creating or re-using fonts as needed.
+// spec, using centralized font manager for caching.
 procedure TCanvasFontManager.SetFont(const AFontDesc: TfpgString);
-const
-  MAX_FONT_CACHE = 10;
 var
-  i: Integer;
-  Tmp: TfpgFont;
+  lFontDesc: string;
+  lFont: TfpgFontResourceBase;
+  lCurFontDesc: string;
 begin
-  if FCanvas.Font.FontDesc = AFontDesc then
+  // Get current font descriptor - FontDesc is in TfpgFontResourceBase
+  if Assigned(FCanvas.Font) then
+    lCurFontDesc := FCanvas.Font.FontDesc
+  else
+    lCurFontDesc := '';
+
+  if lCurFontDesc = AFontDesc then
     Exit; // nothing to do so exit
 
-  if FDefaultFont.FontDesc = AFontDesc then
+  if Assigned(FDefaultFont) then
+    lFontDesc := FDefaultFont.FontDesc
+  else
+    lFontDesc := '';
+
+  if lFontDesc = AFontDesc then
   begin
-    FCanvas.Font := FDefaultFont;
+    // Use SetFont overload that accepts TfpgFontResourceBase
+    FCanvas.SetFont(FDefaultFont);
     Exit;
   end;
 
-  for i := 0 to FFontCache.Count-1 do
-  begin
-    Tmp := TfpgFont(FFontCache.Items[i]);
-    if Tmp.FontDesc = AFontDesc then
-    begin
-      FFontCache.Move(i, 0);
-      FCanvas.Font := Tmp;
-      Exit;
-    end;
-  end;
-
-  Tmp := fpgGetFont(AFontDesc);
-  FFontCache.Insert(0, Tmp);
-  if FFontCache.Count > MAX_FONT_CACHE then
-  begin
-    TObject(FFontCache.Items[MAX_FONT_CACHE]).Free;
-    FFontCache.Delete(MAX_FONT_CACHE);
-  end;
-  FCanvas.Font := Tmp;
+  // Use centralized font manager for caching, then SetFont overload
+  lFont := fpgApplication.FontManager.GetFont(AFontDesc);
+  FCanvas.SetFont(lFont);
 end;
 
 function TCanvasFontManager.CharWidth( const C: TfpgChar ): longint;
 begin
-  Result := FCanvas.Font.TextWidth(C);
+  Result := FCanvas.Font.GetTextWidth(C);
 end;
 
 function TCanvasFontManager.AverageCharWidth: longint;
 begin
-  Result := FCanvas.Font.TextWidth('c');
+  Result := FCanvas.Font.GetTextWidth('c');
 end;
 
 function TCanvasFontManager.CharAscender: longint;
 begin
-  Result := FCanvas.Font.Ascent;
+  Result := FCanvas.Font.GetAscent();
 end;
 
 function TCanvasFontManager.MaximumCharWidth: longint;
 begin
-  Result := FCanvas.Font.TextWidth('W');
+  Result := FCanvas.Font.GetTextWidth('W');
 end;
 
 function TCanvasFontManager.CharHeight: longint;
 begin
-  Result := FCanvas.Font.Height;
+  Result := FCanvas.Font.GetHeight();
 end;
 
 function TCanvasFontManager.CharDescender: longint;
 begin
-  Result := FCanvas.Font.Descent;
+  Result := FCanvas.Font.GetDescent();
 end;
 
 function TCanvasFontManager.IsFixed: boolean;
 begin
-  Result := FCanvas.Font.IsFixedWidth;
+  // Check if font is fixed-width by comparing character widths
+  Result := FCanvas.Font.GetTextWidth('i') = FCanvas.Font.GetTextWidth('W');
 end;
 
 procedure TCanvasFontManager.DrawString(var Point: TPoint; const Length: longint; const S: PChar);
@@ -346,11 +342,13 @@ var
 begin
   t := s;
   FCanvas.DrawString(Point.X, Point.Y, t);
-  Point.x := Point.X + Canvas.Font.TextWidth(t);
+  Point.x := Point.X + Canvas.Font.GetTextWidth(t);
 end;
 
 
 initialization
+  DefaultTopicFontName := FPG_DEFAULT_SANS;
+  DefaultTopicFixedFontName := FPG_DEFAULT_FIXED;
   DefaultTopicFont := DefaultTopicFontName + '-' + IntToStr(DefaultTopicFontSize);
   DefaultTopicFixedFont := DefaultTopicFixedFontName + '-' + IntToStr(DefaultTopicFixedFontSize);
 

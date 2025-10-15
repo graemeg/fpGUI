@@ -81,7 +81,7 @@ type
     Colors: array[ 0..NumColorSettings - 1 ] of TfpgColor;
     NormalFontDesc: TfpgString;
     FixedFontDesc: TfpgString;
-    Fonts: array[ 0..NumFontSettings - 1 ] of TfpgFont;
+    Fonts: array[ 0..NumFontSettings - 1 ] of TfpgFontResourceBase;
     FixedFontSubstitution: boolean;
     FixedFontSubstitutes: string;  // semi-colon seperated list of INF fonts eg: 'Courier 10x12;Mono 8x10'
     IndexStyle: TIndexStyle;
@@ -218,7 +218,7 @@ begin
         FontName := 'Font' + IntToStr( i );
         Fonts[ i ] := nil;
         if ReadBool( FontsSection, FontName + 'Customised', false ) then
-          Fonts[ i ] := fpgGetFont(ReadString(FontsSection, FontName + 'Desc', DefaultTopicFont));
+          Fonts[ i ] := fpgApplication.FontManager.GetFont(ReadString(FontsSection, FontName + 'Desc', DefaultTopicFont));
       end;
 
       FixedFontSubstitution := ReadBool( FontsSection, 'FixedFontSubstitution', true );
@@ -345,7 +345,9 @@ begin
         FontName := 'Font' + IntToStr( FontIndex );
         WriteBool( FontsSection, FontName + 'Customised', Fonts[ FontIndex ] <> nil );
         if Fonts[ FontIndex ] <> nil then
+        begin
           WriteString( FontsSection, FontName + 'Desc', Fonts[ FontIndex ].FontDesc );
+        end;
       end;
 
       WriteBool( FontsSection, 'FixedFontSubstitution', FixedFontSubstitution );

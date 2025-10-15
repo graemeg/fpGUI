@@ -108,6 +108,7 @@ type
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
   public
+    constructor Create(const AParams: string); override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -180,6 +181,7 @@ uses
 
 constructor TfpgCocoaFontResource.Create(const afontdesc: string);
 begin
+  inherited Create(afontdesc);  // Call base constructor to set FFontDesc
 end;
 
 function    TfpgCocoaFontResource.GetAscent: integer;
@@ -267,6 +269,12 @@ begin
 end;
 
 { TfpgCocoaApplication }
+
+constructor TfpgCocoaApplication.Create(const AParams: string);
+begin
+  inherited Create(AParams);
+  FIsInitialized := True;
+end;
 
 function    TfpgCocoaApplication.DoGetFontFaceList: TStringList;
 begin
