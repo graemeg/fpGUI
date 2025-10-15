@@ -1011,7 +1011,7 @@ WriteLn('Font descriptor: ', FFont.FontDesc);
 
 ---
 
-=### "Access violation" when accessing font
+=== "Access violation" when accessing font
 
 **Meaning:** Font object freed prematurely or never assigned
 
@@ -1148,5 +1148,5 @@ Most issues fall into one of these categories:
 
 **Document Version:** 1.0
 **Date:** 2025-10-15
-**Branch:** font-handling-refactor
+**Branch:** font-handling-refactor & develop (from Oct 2025)
 **Author:** Graeme Geldenhuys

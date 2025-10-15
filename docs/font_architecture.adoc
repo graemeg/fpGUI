@@ -894,30 +894,30 @@ if not Assigned(AggFontResourceClass) then
 [source]
 ----
 Widget              FontManager           TfpgFontDefinition    Platform (Xft/GDI)
-  |                      |                        |                     |
+  |                       |                        |                     |
   |--GetFont('Arial-12')->|                        |                     |
-  |                      |                        |                     |
-  |                      |--Create('Arial-12')-->|                     |
-  |                      |                        |--ParseFontDesc()-->|
-  |                      |<--FontDefinition------|                     |
-  |                      |                        |                     |
-  |                      |--Normalize()--------->|                     |
-  |                      |<--"Arial-12"----------|                     |
-  |                      |                        |                     |
-  |                      |--Hash lookup------->|                     |
-  |                      |<--NOT FOUND---------|                     |
-  |                      |                        |                     |
-  |                      |--TfpgFontResource.Create()----------------->|
-  |                      |                        |                     |--XftFontOpen()
-  |                      |                        |                     |<--PXftFont
-  |                      |<--FontResource-----------------------------|
-  |                      |                        |                     |
-  |                      |--Add to cache-------->|                     |
-  |                      |                        |                     |
-  |<--FontResource-------|                        |                     |
-  |                      |                        |                     |
-  |--Store in FFont      |                        |                     |
-  |  (pointer copy)      |                        |                     |
+  |                       |                        |                     |
+  |                       |--Create('Arial-12')--->|                     |
+  |                       |                        |--ParseFontDesc()--->|
+  |                       |<--FontDefinition-------|                     |
+  |                       |                        |                     |
+  |                       |--Normalize()---------->|                     |
+  |                       |<--"Arial-12"-----------|                     |
+  |                       |                        |                     |
+  |                       |--Hash lookup---------->|                     |
+  |                       |<--NOT FOUND------------|                     |
+  |                       |                        |                     |
+  |                       |--TfpgFontResource.Create()------------------>|
+  |                       |                        |                     |---XftFontOpen()
+  |                       |                        |                     |<--PXftFont
+  |                       |<--FontResource-------------------------------|
+  |                       |                        |                     |
+  |                       |--Add to cache--------->|                     |
+  |                       |                        |                     |
+  |<--FontResource--------|                        |                     |
+  |                       |                        |                     |
+  |--Store in FFont       |                        |                     |
+  |  (pointer copy)       |                        |                     |
 ----
 
 === Font Cleanup (Application Shutdown)
@@ -926,19 +926,19 @@ Widget              FontManager           TfpgFontDefinition    Platform (Xft/GD
 ----
 Application         FontManager           TfpgFontResource      Platform (Xft/GDI)
   |                      |                        |                     |
-  |--Shutdown---------->|                        |                     |
+  |--Shutdown----------->|                        |                     |
   |                      |                        |                     |
   |                      |--Destroy()             |                     |
   |                      |                        |                     |
-  |                      |--FFontCache.Free----->|                     |
+  |                      |--FFontCache.Free------>|                     |
   |                      |                        |                     |
   |                      |                        |--Destroy (font 1)-->|
   |                      |                        |                     |--XftFontClose()
-  |                      |                        |<-------------------|
+  |                      |                        |<--------------------|
   |                      |                        |                     |
   |                      |                        |--Destroy (font 2)-->|
   |                      |                        |                     |--XftFontClose()
-  |                      |                        |<-------------------|
+  |                      |                        |<--------------------|
   |                      |                        |                     |
   |                      |<--All fonts freed------|                     |
 ----
@@ -962,5 +962,5 @@ This architecture trades a small amount of memory (~100 KB for typical applicati
 
 **Document Version:** 1.0
 **Date:** 2025-10-15
-**Branch:** font-handling-refactor
+**Branch:** font-handling-refactor & develop (from Oct 2025)
 **Author:** Graeme Geldenhuys

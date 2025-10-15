@@ -1118,7 +1118,7 @@ If you encounter issues during migration:
 1. **Check this guide** - Most common scenarios covered
 2. **Review examples** - Look at migrated widgets in `src/gui/`
 3. **Check git history** - Commits show migration patterns
-4. **Ask on forum** - fpGUI community at https://forum.lazarus.freepascal.org/
+4. **Ask in the support group** - fpGUI community newsgroup at http://geldenhuys.co.uk/webnews or with a news client via news://geldenhuys.co.uk port 119.
 
 ---
 
@@ -1146,5 +1146,5 @@ The new API is simpler, safer, and faster. Most migrations are straightforward s
 
 **Document Version:** 1.0
 **Date:** 2025-10-15
-**Branch:** font-handling-refactor
+**Branch:** font-handling-refactor & develop (from Oct 2025)
 **Author:** Graeme Geldenhuys
