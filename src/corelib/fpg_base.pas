@@ -342,26 +342,6 @@ type
   end;
 
 
-  TfpgFontBase = class(TObject)
-  protected
-    FFontDesc: string;
-    FFontEngine: IFontEngine;
-    FFontDefinition: TfpgFontDefinition;
-    function    GetIsFixedWidth: boolean; virtual;
-  public
-    constructor Create(const AFontDesc: string);
-    destructor  Destroy; override;
-    function    TextWidth(const txt: TfpgString): integer;
-    function    Ascent: integer;
-    function    Descent: integer;
-    function    Height: integer;
-    property    FontDesc: string read FFontDesc;
-    property    IsFixedWidth: boolean read GetIsFixedWidth;
-    { Font engine interface for metric calculations }
-    property    FontEngine: IFontEngine read FFontEngine write FFontEngine;
-    property    FontDefinition: TfpgFontDefinition read FFontDefinition;
-  end;
-
 
   TfpgCustomInterpolation = class(TObject)
   private
@@ -3229,71 +3209,7 @@ begin
   end;
 end;
 
-{ TfpgFontBase }
 
-constructor TfpgFontBase.Create(const AFontDesc: string);
-begin
-  inherited Create;
-  FFontDesc := AFontDesc;
-  FFontDefinition := TfpgFontDefinition.Create(AFontDesc);
-  FFontEngine := nil;  // Will be set by canvas
-end;
-
-destructor TfpgFontBase.Destroy;
-begin
-  FFontDefinition.Free;
-  FFontEngine := nil;  // Interface will be ref-counted
-  inherited Destroy;
-end;
-
-function TfpgFontBase.GetIsFixedWidth: boolean;
-begin
-  // very crude but handy as a fallback option
-  if (Pos('mono', Lowercase(FFontDesc)) > 0) or
-     (Pos('courier', Lowercase(FFontDesc)) > 0) or
-     (Pos('fixed', Lowercase(FFontDesc)) > 0) then
-    Result := True
-  else
-    Result := False;
-end;
-
-function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
-begin
-  if Length(txt) = 0 then
-  begin
-    Result := 0;
-    Exit;
-  end;
-
-  if Assigned(FFontEngine) then
-    Result := FFontEngine.GetTextWidth(txt)
-  else
-    Result := 0;
-end;
-
-function TfpgFontBase.Ascent: integer;
-begin
-  if Assigned(FFontEngine) then
-    Result := FFontEngine.GetAscent
-  else
-    Result := 0;
-end;
-
-function TfpgFontBase.Descent: integer;
-begin
-  if Assigned(FFontEngine) then
-    Result := FFontEngine.GetDescent
-  else
-    Result := 0;
-end;
-
-function TfpgFontBase.Height: integer;
-begin
-  if Assigned(FFontEngine) then
-    Result := FFontEngine.GetHeight
-  else
-    Result := 0;
-end;
 
 { TfpgCustomInterpolation }
 
