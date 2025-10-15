@@ -271,8 +271,8 @@ begin
     FLabels[i].Left:=X;
     FLabels[i].Top:=Y+5;
     FLabels[i].Width:= LabelWidths;
-    if FFont is TfpgFontResource then
-      FLabels[i].FontDesc:=TfpgFontResource(FFont).FontDesc;
+    if Assigned(FFont) then
+      FLabels[i].FontDesc:=FFont.FontDesc;
     FLabels[i].Alignment:=taRightJustify;
 
     FEdits[i] := TfpgEdit.Create(Self);

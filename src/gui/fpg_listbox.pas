@@ -357,9 +357,8 @@ end;
 
 function TfpgBaseListBox.GetFontDesc: string;
 begin
-  // Cast to TfpgFontResource to access FontDesc property
-  if FFont is TfpgFontResource then
-    result := TfpgFontResource(FFont).FontDesc
+  if Assigned(FFont) then
+    result := FFont.FontDesc
   else
     result := '';
 end;

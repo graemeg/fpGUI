@@ -1862,8 +1862,8 @@ begin
   begin
     for Cpt := 0 to Pred(Fonts.Count) do
     begin
-      if T_Font(Fonts[Cpt]).GetFont is TfpgFontResource then
-        FontName := ExtractBaseFontName(TfpgFontResource(T_Font(Fonts[Cpt]).GetFont).FontDesc)
+      if Assigned(T_Font(Fonts[Cpt]).GetFont) then
+        FontName := ExtractBaseFontName(T_Font(Fonts[Cpt]).GetFont.FontDesc)
       else
         FontName := '';
       if Pos('-', FontName) > 0 then

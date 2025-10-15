@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2017 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -2761,8 +2761,8 @@ begin
   DoDrawString(x, y, txt);
 
   { What was not handled: underline }
-  if Font is TfpgFontResource then
-    fontdesc := TfpgFontResource(Font).FontDesc
+  if Assigned(Font) then
+    fontdesc := Font.FontDesc
   else
     fontdesc := '';
 

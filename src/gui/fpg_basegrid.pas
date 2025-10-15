@@ -224,16 +224,16 @@ end;
 
 function TfpgBaseGrid.GetFontDesc: string;
 begin
-  if FFont is TfpgFontResource then
-    Result := TfpgFontResource(FFont).FontDesc
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
   else
     Result := '';
 end;
 
 function TfpgBaseGrid.GetHeaderFontDesc: string;
 begin
-  if FHeaderFont is TfpgFontResource then
-    Result := TfpgFontResource(FHeaderFont).FontDesc
+  if Assigned(FHeaderFont) then
+    Result := FHeaderFont.FontDesc
   else
     Result := '';
 end;

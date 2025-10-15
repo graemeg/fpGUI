@@ -679,8 +679,8 @@ end;
 
 function TfpgPanel.GetFontDesc: string;
 begin
-  if FFont is TfpgFontResource then
-    Result := TfpgFontResource(FFont).FontDesc
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
   else
     Result := '';
 end;
@@ -865,8 +865,8 @@ end;
 
 function TfpgGroupBox.GetFontDesc: string;
 begin
-  if FFont is TfpgFontResource then
-    Result := TfpgFontResource(FFont).FontDesc
+  if Assigned(FFont) then
+    Result := FFont.FontDesc
   else
     Result := '';
 end;
