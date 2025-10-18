@@ -193,7 +193,7 @@ behaviour. Instead of reinventing the wheel, I thought I would do some
 searching to see if there is another project I could contribute to, or that
 could give me a head start.
 :p.
-The first version of my GUI toqlkit was based around a heavily modified
+The first version of my GUI toolkit was based around a heavily modified
 version of the Light Pascal Toolkit [http://sourceforge.net/projects/lptk]. I
 then discovered the discontinued
 fpGUI and fpGFX projects. I tried to contact the original author to no
