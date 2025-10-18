@@ -284,8 +284,8 @@ type
     property    CustomThousandSeparator;
     property    Enabled;
     property    Hint;
-    property    MaxValue: integer read FMaxValue write SetMaxValue;
-    property    MinValue: integer read FMinValue write SetMinValue;
+    property    MaxValue: integer read FMaxValue write SetMaxValue default 100;
+    property    MinValue: integer read FMinValue write SetMinValue default 0;
     property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
@@ -293,7 +293,7 @@ type
     property    ShowThousand default True;
     property    TabOrder;
     property    TextColor;
-    property    Value: integer read GetValue write SetValue;
+    property    Value: integer read GetValue write SetValue default 0;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -2197,6 +2197,9 @@ constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := 0;
+  FValue := 0;
+  FMaxValue := 100;
+  FMinValue := 0;
 end;
 
 { TfpgEditFloat }
