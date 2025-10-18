@@ -95,6 +95,7 @@ type
     SearchDirectories: TStringList;
     IPFTopicSaveAsEscaped: boolean;
     Encoding: TfpgTextEncoding;
+    ExtraLineSpacing: integer;
   end;
 
 
@@ -172,6 +173,8 @@ begin
       ShowLeftPanel := ReadBool( GeneralSection, 'ShowLeftPanel', true );
 
       ScrollDistance := ReadInteger(GeneralSection, 'ScrollDistance', 75);
+      ExtraLineSpacing := ReadInteger(GeneralSection, 'ExtraLineSpacing', 5);
+
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -308,6 +311,8 @@ begin
 
       WriteBool( GeneralSection, 'ShowLeftPanel', ShowLeftPanel);
       WriteInteger(GeneralSection, 'ScrollDistance', ScrollDistance);
+      WriteInteger(GeneralSection, 'ExtraLineSpacing', ExtraLineSpacing);
+
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do

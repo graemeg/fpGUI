@@ -479,10 +479,13 @@ end;
 
 procedure TMainForm.UpdateRichViewFromSettings;
 begin
+  RichView.RichTextSettings.BeginUpdate;
   RichView.RichTextSettings.NormalFont := fpgApplication.FontManager.GetFont(Settings.NormalFontDesc);
   RichView.RichTextSettings.FixedFont := fpgApplication.FontManager.GetFont(Settings.FixedFontDesc);
+  RichView.RichTextSettings.EndUpdate;
   RichView.ScrollDistance := Settings.ScrollDistance;
   RichView.BackgroundColor := Settings.Colors[TopicBackgroundColorIndex];
+  RichView.Invalidate;
 end;
 
 procedure TMainForm.btnBackHistClick(Sender: TObject);

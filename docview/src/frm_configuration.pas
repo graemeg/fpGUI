@@ -45,6 +45,9 @@ type
     lblScrollDistance: TfpgLabel;
     edtScrollDistance: TfpgEditInteger;
     lblPixels: TfpgLabel;
+    lblExtraLineSpacing: TfpgLabel;
+    edtExtraLineSpacing: TfpgEditInteger;
+    lblPixels2: TfpgLabel;
     {@VFD_HEAD_END: ConfigurationForm}
     btnHelp: TfpgButton;
     procedure ConfigurationFormShow(Sender: TObject);
@@ -170,6 +173,7 @@ begin
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
   chkStartupHelp.Checked  := Settings.StartupHelp;
   chkOpenTOC.Checked      := Settings.OpenWithExpandedContents;
+  edtExtraLineSpacing.Value := Settings.ExtraLineSpacing;
   // Fonts & Color
   edtNormalFont.FontDesc  := Settings.NormalFontDesc;
   edtFixedFont.FontDesc   := Settings.FixedFontDesc;
@@ -192,12 +196,15 @@ begin
   Settings.IPFTopicSaveAsEscaped := chkEscapeIPFSymbols.Checked;
   Settings.StartupHelp := chkStartupHelp.Checked;
   Settings.OpenWithExpandedContents := chkOpenTOC.Checked;
+  Settings.ExtraLineSpacing := edtExtraLineSpacing.Value;
+
   // Fonts & Color
   Settings.NormalFontDesc := edtNormalFont.FontDesc;
   Settings.FixedFontDesc := edtFixedFont.FontDesc;
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
   Settings.Colors[NotesTextColorIndex] := pnlNotesColor.BackgroundColor;
   Settings.Colors[TopicBackgroundColorIndex] := pnlPageColor.BackgroundColor;
+
   // Index
   if rbIndexOrig.Checked then
     Settings.IndexStyle := isFileOnly
@@ -569,9 +576,11 @@ begin
   with edtScrollDistance do
   begin
     Name := 'edtScrollDistance';
-    SetPosition(12, 32, 72, 24);
+    SetPosition(12, 32, 45, 24);
     FontDesc := '#Edit1';
     Hint := '';
+    MaxValue := 200;
+    MinValue := 0;
     TabOrder := 2;
     Value := 0;
   end;
@@ -580,7 +589,40 @@ begin
   with lblPixels do
   begin
     Name := 'lblPixels';
-    SetPosition(88, 36, 80, 17);
+    SetPosition(64, 36, 80, 17);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '(pixels)';
+  end;
+
+  lblExtraLineSpacing := TfpgLabel.Create(tsGeneral);
+  with lblExtraLineSpacing do
+  begin
+    Name := 'lblExtraLineSpacing';
+    SetPosition(12, 324, 116, 20);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Extra Line Spacing:';
+  end;
+
+  edtExtraLineSpacing := TfpgEditInteger.Create(tsGeneral);
+  with edtExtraLineSpacing do
+  begin
+    Name := 'edtExtraLineSpacing';
+    SetPosition(136, 320, 45, 24);
+    FontDesc := '#Edit1';
+    Hint := '';
+    MaxValue := 50;
+    MinValue := 0;
+    TabOrder := 11;
+    Value := 0;
+  end;
+
+  lblPixels2 := TfpgLabel.Create(tsGeneral);
+  with lblPixels2 do
+  begin
+    Name := 'lblPixels2';
+    SetPosition(188, 324, 80, 20);
     FontDesc := '#Label1';
     Hint := '';
     Text := '(pixels)';

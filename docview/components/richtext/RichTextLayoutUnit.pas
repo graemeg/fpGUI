@@ -130,7 +130,9 @@ uses
   SysUtils,
   ACLStringUtility,
   nvUtilities,
-  fpg_main;
+  fpg_main,
+  SettingsUnit
+  ;
 
 
 { TLayoutLineList }
@@ -248,7 +250,7 @@ begin
   Descender := FFontManager.CharDescender;
 
   if FontHeight > Line.Height then
-    Line.Height := FontHeight;
+    Line.Height := FontHeight + Settings.ExtraLineSpacing;
 
   if FontHeight > Line.MaxTextHeight then
     Line.MaxTextHeight := FontHeight;
