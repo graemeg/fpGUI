@@ -14,7 +14,8 @@ uses
   tcfontmanager,
   tcfontcacheremoval,
   tcfontdefinition,
-  tclayoutmanager;
+  tclayoutmanager,
+  tcflowlayout;
 
 implementation
 
@@ -25,4 +26,5 @@ initialization
   tcfontcacheremoval.RegisterTests;
   tcfontdefinition.RegisterTests;
   tclayoutmanager.RegisterTests;
+  tcflowlayout.RegisterTests;
 end.
