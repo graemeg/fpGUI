@@ -21,14 +21,18 @@ interface
 
 uses
   Classes, SysUtils,
+  Generics.Collections,
   fpg_base,
-  fpg_layoutmanager;
+  fpg_layoutmanager, fpg_layouttypes;
 
 type
+  TLayoutPair = specialize TPair<TfpgWidgetBase, TfpgLayoutConstraint>;
+
   TfpgFlowLayoutManager = class(TfpgBaseLayoutManager)
   protected
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+    function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
   end;
 
 implementation
@@ -40,9 +44,9 @@ uses
 
 procedure TfpgFlowLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 var
-  i: Integer;
-  w: TfpgWidget;
+  w: TfpgWidgetBase;
   x, y: TfpgCoord;
+  Pair: TLayoutPair;
 begin
   writeln('TfpgFlowLayoutManager.DoLayout');
   if not (AContainer is TfpgWidget) then Exit;
@@ -50,27 +54,29 @@ begin
   x := 0;
   y := 0;
 
-  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
+  for Pair in FConstraints do
   begin
-    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
+    w := Pair.Key;
+    if (w is TfpgWidget) and TfpgWidget(w).Visible then
     begin
-      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
-      if w.Visible then
-      begin
-        writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
-        w.SetPosition(x, y, w.Width, w.Height);
-        x := x + w.Width;
-      end;
+      writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
+      TfpgWidget(w).SetPosition(x, y, w.Width, w.Height);
+      x := x + w.Width;
     end;
   end;
 end;
 
+function TfpgFlowLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
+begin
+  Result := TfpgLayoutConstraint.Create;
+end;
+
 function TfpgFlowLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
 var
-  i: Integer;
-  w: TfpgWidget;
+  w: TfpgWidgetBase;
   totalWidth: TfpgCoord;
   maxHeight: TfpgCoord;
+  Pair: TLayoutPair;
 begin
   if not (AContainer is TfpgWidget) then
   begin
@@ -81,17 +87,14 @@ begin
   totalWidth := 0;
   maxHeight := 0;
 
-  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
+  for Pair in FConstraints do
   begin
-    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
+    w := Pair.Key;
+    if (w is TfpgWidget) and TfpgWidget(w).Visible then
     begin
-      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
-      if w.Visible then
-      begin
-        totalWidth := totalWidth + w.Width;
-        if w.Height > maxHeight then
-          maxHeight := w.Height;
-      end;
+      totalWidth := totalWidth + w.Width;
+      if w.Height > maxHeight then
+        maxHeight := w.Height;
     end;
   end;
 

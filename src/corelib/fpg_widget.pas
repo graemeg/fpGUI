@@ -59,6 +59,7 @@ type
     FOnShowHint: THintEvent;
     alist: TList;
     FLayoutManager: ILayoutManager;
+    FLayoutConstraint: TfpgLayoutConstraint;
     function    GetAcceptDrops: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
@@ -190,6 +191,7 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
+    procedure   SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
     procedure   Invalidate;
     procedure   InvalidateRect(ARect: TfpgRect);
     property    Window: TfpgNativeWindow read GetWindow;
@@ -695,6 +697,7 @@ begin
   {$IFDEF GDEBUG}
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
+  FLayoutConstraint.Free;
   FCanvas.Free;
   HandleHide;
 
@@ -1926,6 +1929,17 @@ begin
   {$ENDIF}
   if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
     MoveAndResize(aleft, atop, awidth, aheight);
+end;
+
+procedure TfpgWidget.SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
+begin
+  if FLayoutConstraint <> AConstraint then
+  begin
+    FLayoutConstraint.Free;
+    FLayoutConstraint := AConstraint;
+    if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+      Parent.LayoutManager.InvalidateLayout(Parent);
+  end;
 end;
 
 procedure TfpgWidget.Invalidate;

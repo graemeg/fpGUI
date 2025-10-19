@@ -29,10 +29,11 @@ type
 
   TfpgBaseLayoutManager = class(TInterfacedObject, ILayoutManager)
   private
-    FConstraints: TLayoutConstraints;
     FLayoutDirty: Boolean;
     FCachedPreferredSize: TfpgSize;
     FCachedMinimumSize: TfpgSize;
+  protected
+    FConstraints: TLayoutConstraints;
   protected
     // Override these in subclasses
     procedure DoLayout(AContainer: TfpgWidgetBase); virtual; abstract;
@@ -41,6 +42,8 @@ type
 
     // Helper methods for subclasses
     function GetConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
+    function GetConstraintOrDefault(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
+    function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -124,7 +127,23 @@ end;
 
 function TfpgBaseLayoutManager.GetConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
 begin
-  Result := FConstraints.Items[AWidget];
+  if not FConstraints.TryGetValue(AWidget, Result) then
+    Result := nil;
+end;
+
+function TfpgBaseLayoutManager.GetConstraintOrDefault(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
+begin
+  Result := GetConstraint(AWidget);
+  if not Assigned(Result) then
+  begin
+    Result := CreateDefaultConstraint(AWidget);
+    FConstraints.Add(AWidget, Result);
+  end;
+end;
+
+function TfpgBaseLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
+begin
+  Result := TfpgLayoutConstraint.Create;
 end;
 
 function TfpgBaseLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
