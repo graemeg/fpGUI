@@ -26,7 +26,6 @@ uses
   fpg_layoutmanager, fpg_layouttypes;
 
 type
-  TLayoutPair = specialize TPair<TfpgWidgetBase, TfpgLayoutConstraint>;
 
   TfpgFlowLayoutManager = class(TfpgBaseLayoutManager)
   protected
