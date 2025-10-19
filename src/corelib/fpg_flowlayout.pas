@@ -44,9 +44,9 @@ uses
 
 procedure TfpgFlowLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 var
-  w: TfpgWidgetBase;
+  i: Integer;
+  w: TfpgWidget;
   x, y: TfpgCoord;
-  Pair: TLayoutPair;
 begin
   writeln('TfpgFlowLayoutManager.DoLayout');
   if not (AContainer is TfpgWidget) then Exit;
@@ -54,14 +54,17 @@ begin
   x := 0;
   y := 0;
 
-  for Pair in FConstraints do
+  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
   begin
-    w := Pair.Key;
-    if (w is TfpgWidget) and TfpgWidget(w).Visible then
+    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
     begin
-      writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
-      TfpgWidget(w).SetPosition(x, y, w.Width, w.Height);
-      x := x + w.Width;
+      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
+      if FConstraints.ContainsKey(w) and w.Visible then
+      begin
+        writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
+        w.SetPosition(x, y, w.Width, w.Height);
+        x := x + w.Width;
+      end;
     end;
   end;
 end;
@@ -73,10 +76,10 @@ end;
 
 function TfpgFlowLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
 var
-  w: TfpgWidgetBase;
+  i: Integer;
+  w: TfpgWidget;
   totalWidth: TfpgCoord;
   maxHeight: TfpgCoord;
-  Pair: TLayoutPair;
 begin
   if not (AContainer is TfpgWidget) then
   begin
@@ -87,14 +90,17 @@ begin
   totalWidth := 0;
   maxHeight := 0;
 
-  for Pair in FConstraints do
+  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
   begin
-    w := Pair.Key;
-    if (w is TfpgWidget) and TfpgWidget(w).Visible then
+    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
     begin
-      totalWidth := totalWidth + w.Width;
-      if w.Height > maxHeight then
-        maxHeight := w.Height;
+      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
+      if FConstraints.ContainsKey(w) and w.Visible then
+      begin
+        totalWidth := totalWidth + w.Width;
+        if w.Height > maxHeight then
+          maxHeight := w.Height;
+      end;
     end;
   end;
 
