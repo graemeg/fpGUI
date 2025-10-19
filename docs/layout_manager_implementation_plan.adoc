@@ -1,0 +1,1827 @@
+= Layout Manager Implementation Plan for fpGUI
+:toc: left
+:toclevels: 3
+:numbered:
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== Executive Summary
+
+This document provides a comprehensive plan for implementing a pluggable layout manager system in fpGUI, inspired by Java Swing's LayoutManager architecture. The goal is to enable powerful layout managers like MigLayout while maintaining backward compatibility with fpGUI's existing Align/Anchors system.
+
+**Key Design Principles:**
+
+* **Pluggable Architecture**: Layout managers are separate, replaceable objects
+* **Backward Compatibility**: Existing Align/Anchors system continues to work
+* **Flexible Constraints**: Per-widget layout hints stored as constraint objects
+* **Zero-Cost Abstraction**: No performance penalty when not using layout managers
+
+== Background: Current fpGUI Layout System
+
+=== Overview
+
+fpGUI currently implements layout through two complementary mechanisms:
+
+1. **TAlign Enum**: Widgets can align to parent edges (alTop, alBottom, alLeft, alRight, alClient)
+2. **TAnchors Set**: Widgets maintain fixed distances to parent edges during resize
+
+=== TAlign System
+
+Defined in `src/corelib/fpg_main.pas`:
+
+[source,pascal]
+----
+TAlign = (alNone, alTop, alBottom, alLeft, alRight, alClient);
+----
+
+Widgets with `Align` set are positioned by the parent's `HandleAlignments` method (`src/corelib/fpg_widget.pas:1669`):
+
+[source,pascal]
+----
+procedure TfpgWidget.HandleAlignments(const dwidth, dheight: TfpgCoord);
+var
+  alist: TList;
+  n: integer;
+  w: TfpgWidget;
+begin
+  FAlignRect := GetClientRect;
+  alist := TList.Create;
+  try
+    // Collect all widgets with Align property
+    for n := 0 to ComponentCount - 1 do
+    begin
+      w := TfpgWidget(Components[n]);
+      if (w.Align <> alNone) and (w.Visible) then
+        alist.Add(w);
+    end;
+    DoAlignment(alist);  // Process alignment
+  finally
+    alist.Free;
+  end;
+
+  // Handle anchors for alNone widgets...
+end;
+----
+
+The `DoAlignment` method processes widgets in order:
+
+[source,pascal]
+----
+procedure TfpgWidget.DoAlignment(AAlign: TAlign);
+begin
+  for n := 0 to alist.Count - 1 do
+  begin
+    w := TfpgWidget(alist[n]);
+    case w.Align of
+      alTop:    // Dock to top, shrink FAlignRect
+      alBottom: // Dock to bottom, shrink FAlignRect
+      alLeft:   // Dock to left, shrink FAlignRect
+      alRight:  // Dock to right, shrink FAlignRect
+      alClient: // Fill remaining FAlignRect
+    end;
+  end;
+end;
+----
+
+=== TAnchors System
+
+Defined in `src/corelib/fpg_main.pas`:
+
+[source,pascal]
+----
+TAnchor = (anLeft, anRight, anTop, anBottom);
+TAnchors = set of TAnchor;
+----
+
+Anchors work for widgets with `Align = alNone`. During parent resize, widgets maintain fixed distances to anchored edges. If both opposite edges are anchored (e.g., `[anLeft, anRight]`), the widget resizes to maintain both distances.
+
+=== Limitations of Current System
+
+1. **Limited Flexibility**: Only edge-based docking and anchoring
+2. **No Relative Sizing**: Cannot size widgets as percentages of container
+3. **No Grid Layouts**: Cannot create responsive grids
+4. **No Flow Layouts**: Cannot wrap widgets automatically
+5. **No Gap Management**: Manual spacing between widgets
+6. **No Constraints**: Cannot express complex relationships (e.g., "same width as sibling")
+
+== Java Swing LayoutManager Architecture
+
+=== Core Concepts
+
+Java Swing separates layout logic from container components through the `LayoutManager` interface:
+
+[source,java]
+----
+public interface LayoutManager {
+    void addLayoutComponent(String name, Component comp);
+    void removeLayoutComponent(Component comp);
+    Dimension preferredLayoutSize(Container parent);
+    Dimension minimumLayoutSize(Container parent);
+    void layoutContainer(Container parent);
+}
+----
+
+**Key Features:**
+
+* **Container delegates to LayoutManager**: Container calls `layoutContainer()` to position children
+* **Constraints per widget**: Each widget can have layout-specific constraints
+* **Size calculation**: Layout manager calculates preferred/minimum sizes
+* **Pluggable**: Containers can change layout managers at runtime
+
+=== MigLayout Overview
+
+MigLayout is a powerful constraint-based layout manager that uses string-based constraints:
+
+[source,java]
+----
+panel.setLayout(new MigLayout(
+    "wrap 3",  // Layout constraints: 3-column grid with auto-wrap
+    "[100]10[200]10[fill,grow]",  // Column constraints
+    "[]10[]"   // Row constraints
+));
+
+panel.add(new JLabel("Name:"), "");
+panel.add(nameField, "span 2, growx");  // Component constraints
+panel.add(new JLabel("Address:"), "");
+panel.add(addressField, "span 2, growx, wrap");
+----
+
+**MigLayout Features:**
+
+* **Grid-based**: Implicit grid structure
+* **Flexible constraints**: String-based constraint language
+* **Relative sizing**: Percentage widths, grow factors
+* **Gaps and alignment**: Built-in gap management
+* **Spanning**: Widgets can span multiple grid cells
+* **Docking**: Similar to fpGUI's Align but more flexible
+
+== Proposed Architecture: ILayoutManager Interface
+
+=== Design Goals
+
+1. **Coexist with Align/Anchors**: Layout managers are optional; existing code works unchanged
+2. **Zero runtime cost if unused**: No performance penalty for applications not using layout managers
+3. **Pluggable**: Easy to implement custom layout managers using interfaces
+4. **Constraint objects**: Type-safe, extensible constraint system
+5. **Size negotiation**: Support preferred/minimum/maximum sizes
+6. **Java Swing compatibility**: Follow Java's interface-based design pattern
+
+=== Base Classes and Interfaces
+
+==== TfpgLayoutConstraint
+
+Base class for layout-specific constraints:
+
+[source,pascal]
+----
+type
+  TfpgLayoutConstraint = class(TPersistent)
+  private
+    FOwner: TfpgWidget;
+  public
+    constructor Create(AOwner: TfpgWidget); virtual;
+    procedure Assign(Source: TPersistent); override;
+    property Owner: TfpgWidget read FOwner;
+  end;
+----
+
+**Purpose**: Each layout manager can define its own constraint subclass.
+
+**Example** (for a simple dock layout):
+
+[source,pascal]
+----
+type
+  TfpgDockConstraint = class(TfpgLayoutConstraint)
+  private
+    FDockSide: TDockSide;  // dsTop, dsBottom, dsLeft, dsRight, dsFill
+    FSize: Integer;  // Fixed size (for non-fill)
+  published
+    property DockSide: TDockSide read FDockSide write FDockSide;
+    property Size: Integer read FSize write FSize;
+  end;
+----
+
+==== ILayoutManager Interface
+
+Core interface that all layout managers must implement (analogous to Java's `LayoutManager`):
+
+[source,pascal]
+----
+type
+  ILayoutManager = interface
+    ['{3F2504E0-4F89-11D3-9A0C-0305E82C3301}']
+
+    // Core layout methods
+    procedure LayoutContainer(AContainer: TfpgWidget);
+    function GetPreferredSize(AContainer: TfpgWidget): TfpgSize;
+    function GetMinimumSize(AContainer: TfpgWidget): TfpgSize;
+
+    // Constraint management
+    procedure AddLayoutComponent(AWidget: TfpgWidget; AConstraint: TfpgLayoutConstraint);
+    procedure RemoveLayoutComponent(AWidget: TfpgWidget);
+
+    // Invalidation
+    procedure InvalidateLayout(AContainer: TfpgWidget);
+  end;
+----
+
+**Key Methods (matching Java's LayoutManager):**
+
+* `LayoutContainer`: Position and size all child widgets (equivalent to Java's `layoutContainer`)
+* `GetPreferredSize`: Calculate preferred size of container (equivalent to Java's `preferredLayoutSize`)
+* `GetMinimumSize`: Calculate minimum size of container (equivalent to Java's `minimumLayoutSize`)
+* `AddLayoutComponent`: Called when widget added with constraint (equivalent to Java's `addLayoutComponent`)
+* `RemoveLayoutComponent`: Called when widget removed (equivalent to Java's `removeLayoutComponent`)
+* `InvalidateLayout`: Mark layout as dirty, needs recalculation
+
+==== TfpgBaseLayoutManager
+
+Helper base class providing common implementation (optional, but recommended):
+
+[source,pascal]
+----
+type
+  TfpgBaseLayoutManager = class(TInterfacedObject, ILayoutManager)
+  private
+    FConstraints: TObjectDictionary<TfpgWidget, TfpgLayoutConstraint>;
+    FLayoutDirty: Boolean;
+    FCachedPreferredSize: TfpgSize;
+    FCachedMinimumSize: TfpgSize;
+  protected
+    // Override these in subclasses
+    procedure DoLayout(AContainer: TfpgWidget); virtual; abstract;
+    function DoGetPreferredSize(AContainer: TfpgWidget): TfpgSize; virtual; abstract;
+    function DoGetMinimumSize(AContainer: TfpgWidget): TfpgSize; virtual;
+    function CreateDefaultConstraint(AWidget: TfpgWidget): TfpgLayoutConstraint; virtual; abstract;
+
+    // Helper methods for subclasses
+    function GetConstraint(AWidget: TfpgWidget): TfpgLayoutConstraint;
+    function GetConstraintOrDefault(AWidget: TfpgWidget): TfpgLayoutConstraint;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    // ILayoutManager implementation
+    procedure LayoutContainer(AContainer: TfpgWidget); virtual;
+    function GetPreferredSize(AContainer: TfpgWidget): TfpgSize; virtual;
+    function GetMinimumSize(AContainer: TfpgWidget): TfpgSize; virtual;
+    procedure AddLayoutComponent(AWidget: TfpgWidget; AConstraint: TfpgLayoutConstraint); virtual;
+    procedure RemoveLayoutComponent(AWidget: TfpgWidget); virtual;
+    procedure InvalidateLayout(AContainer: TfpgWidget); virtual;
+  end;
+----
+
+**Purpose**: Provides common implementation for:
+
+* Constraint storage in dictionary
+* Layout invalidation and caching
+* Default constraint creation
+* Constraint lookup with automatic default creation
+
+**Subclasses only need to implement:**
+
+* `DoLayout`: The actual layout algorithm
+* `DoGetPreferredSize`: Preferred size calculation
+* `CreateDefaultConstraint`: Factory for constraint objects
+* (Optional) `DoGetMinimumSize`: Minimum size calculation
+
+==== Why Interface + Base Class Pattern?
+
+**Advantages of Interface:**
+
+1. **True pluggability**: Any class can implement `ILayoutManager`, not just descendants of a base class
+2. **Multiple interfaces**: Classes could theoretically implement multiple layout behaviors
+3. **Loose coupling**: Container only depends on interface, not implementation
+4. **Java compatibility**: Mirrors Java Swing's design philosophy
+
+**Advantages of Base Class:**
+
+1. **Code reuse**: Common constraint management, caching, invalidation
+2. **Convenience**: Most layout managers can extend `TfpgBaseLayoutManager`
+3. **Reduces boilerplate**: Subclasses focus on layout algorithm, not infrastructure
+
+**Best of Both Worlds:**
+
+* Interface defines the contract
+* Base class provides optional convenience implementation
+* Advanced users can implement `ILayoutManager` directly if needed
+
+=== Integration with TfpgWidget
+
+==== New Fields
+
+Add to `TfpgWidget` class:
+
+[source,pascal]
+----
+type
+  TfpgWidget = class(TfpgWidgetBase)
+  private
+    // Existing fields...
+    FAlign: TAlign;
+    FAnchors: TAnchors;
+
+    // NEW: Layout manager support (interface reference)
+    FLayoutManager: ILayoutManager;
+    FLayoutConstraint: TfpgLayoutConstraint;
+
+    // NEW: Preferred/minimum size hints
+    FPreferredWidth: Integer;
+    FPreferredHeight: Integer;
+    FMinWidth: Integer;
+    FMinHeight: Integer;
+
+    procedure SetLayoutManager(const AValue: ILayoutManager);
+  public
+    destructor Destroy; override;
+
+    // Constraint helper for fluent API
+    procedure SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
+  published
+    // NEW: Published properties
+    property LayoutManager: ILayoutManager read FLayoutManager write SetLayoutManager;
+    property PreferredWidth: Integer read FPreferredWidth write FPreferredWidth;
+    property PreferredHeight: Integer read FPreferredHeight write FPreferredHeight;
+  end;
+----
+
+**Key Changes:**
+
+* `FLayoutManager` is an interface reference (`ILayoutManager`), not a class reference
+* Interface references are automatically reference counted
+* `SetLayoutConstraint` helper method for fluent API (optional convenience)
+
+==== Modified HandleAlignments
+
+The key integration point - modify `HandleAlignments` to delegate to layout manager if present:
+
+[source,pascal]
+----
+procedure TfpgWidget.HandleAlignments(const dwidth, dheight: TfpgCoord);
+var
+  alist: TList;
+  n: integer;
+  w: TfpgWidget;
+begin
+  // NEW: If this container has a layout manager, delegate to it
+  if Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.LayoutContainer(Self);  // Pass container to interface
+    Exit;  // Layout manager handles everything
+  end;
+
+  // EXISTING: Original Align/Anchors logic
+  FAlignRect := GetClientRect;
+  alist := TList.Create;
+  try
+    for n := 0 to ComponentCount - 1 do
+    begin
+      w := TfpgWidget(Components[n]);
+      if (w.Align <> alNone) and (w.Visible) then
+        alist.Add(w);
+    end;
+    DoAlignment(alist);
+  finally
+    alist.Free;
+  end;
+
+  // Handle anchors...
+end;
+----
+
+**Backward Compatibility**: If `FLayoutManager` is `nil`, the original Align/Anchors logic runs unchanged.
+
+**Interface Usage**: Container passes `Self` to layout manager's `LayoutContainer` method, following the stateless interface pattern.
+
+==== Component Notification
+
+Integrate with TfpgWidget's component management to notify layout manager:
+
+[source,pascal]
+----
+procedure TfpgWidget.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+
+  // NEW: Notify layout manager of component changes
+  if (Operation = opRemove) and (AComponent is TfpgWidget) and Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.RemoveLayoutComponent(TfpgWidget(AComponent));
+    FLayoutManager.InvalidateLayout(Self);
+  end;
+end;
+----
+
+**Purpose**: Automatically clean up constraint storage when widgets are removed.
+
+=== Coexistence Strategy
+
+The layout manager system **coexists** with Align/Anchors through a simple priority rule:
+
+1. **If container has LayoutManager**: Use it, ignore Align/Anchors on children
+2. **If container has no LayoutManager**: Use traditional Align/Anchors (current behavior)
+
+**Per-Widget Behavior:**
+
+* Widgets with `LayoutManager = nil` use Align/Anchors (default, backward compatible)
+* Widgets with `LayoutManager` assigned use layout manager for their children
+
+**Mixed Usage**: A widget can use a layout manager for its children while itself being positioned by its parent's Align/Anchors:
+
+[source,pascal]
+----
+// Panel uses Align to dock to top
+Panel.Align := alTop;
+Panel.Height := 200;
+
+// Panel's children use MigLayout
+Panel.LayoutManager := TfpgMigLayoutManager.Create;
+TfpgMigLayoutManager(Panel.LayoutManager).LayoutConstraints := 'wrap 3';
+----
+
+
+=== AddLayoutComponent vs. TfpgWidget Constructor
+
+There might be some confusion here, and that is understandable and touches on a key design point. The AOwner
+parameter in a widget's constructor establishes the parent-child ownership relationship, which is fundamental to
+TComponent's memory management.
+
+However, the layout manager introduces a parallel, but distinct, relationship for layout management.
+
+* `TfpgWidget.Create(AOwner)`: This tells the widget "who owns it". The owner is responsible for freeing the
+widget when the owner is destroyed. This is about object lifetime.
+
+* `ILayoutManager.AddLayoutComponent(...)`: This tells the layout manager "I am a widget you need to manage, and
+here are my specific layout rules". This is about object positioning and sizing.
+
+The key reason we need AddLayoutComponent is to associate a widget with its layout constraint. The standard
+Components array of a parent widget has no place to store this extra, layout-specific data (e.g., span 2, 
+growx). The layout manager needs to maintain its own list or dictionary of the widgets it controls and their
+corresponding constraints, as shown in the TfpgBaseLayoutManager implementation in the plan.
+
+The example code for the MigLayout login form confirms this two-step process:
+1. edtUsername := TfpgEdit.Create(Form); (Establishes ownership)
+2. mig.AddLayoutComponent(edtUsername, mig.ParseComponentConstraint('growx')); (Establishes layout control and
+provides constraints)
+
+RemoveLayoutComponent is the necessary counterpart, ensuring that when a widget is removed from a container, the
+layout manager also stops trying to manage it. This plan correctly specifies this should be called automatically
+from TfpgWidget.Notification.
+
+=== Not all TfpgWidgets are containers
+
+We took the "Pragmatic" Approach in this plan. Add the property to the common base class (TfpgWidget). This makes
+the property available on all widgets, even those that can't act as containers. The cost is minimal (a single
+interface pointer per widget), and it simplifies the class structure. It relies on the developer to use the
+feature correctly—only assigning a layout manager to a widget that will actually contain children.
+
+
+== MigLayout Implementation Design
+
+=== Overview
+
+MigLayout is complex. This section outlines a pragmatic implementation strategy focusing on the most valuable features.
+
+=== Phase 1: Core Grid Layout
+
+Implement basic grid functionality without full MigLayout syntax:
+
+==== TfpgMigLayoutManager
+
+[source,pascal]
+----
+type
+  TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
+  private
+    FColumnCount: Integer;
+    FRowGap: Integer;
+    FColumnGap: Integer;
+    FColumnSizes: array of TfpgMigColumnSize;
+  protected
+    // TfpgBaseLayoutManager overrides
+    function CreateDefaultConstraint(AWidget: TfpgWidget): TfpgLayoutConstraint; override;
+    procedure DoLayout(AContainer: TfpgWidget); override;
+    function DoGetPreferredSize(AContainer: TfpgWidget): TfpgSize; override;
+  public
+    constructor Create; override;
+  published
+    property ColumnCount: Integer read FColumnCount write FColumnCount default 1;
+    property RowGap: Integer read FRowGap write FRowGap default 6;
+    property ColumnGap: Integer read FColumnGap write FColumnGap default 6;
+  end;
+----
+
+**Key Changes:**
+
+* Inherits from `TfpgBaseLayoutManager` (which implements `ILayoutManager`)
+* No longer needs container parameter in constructor (interface design is stateless)
+* Container passed to methods when needed (`DoLayout`, `DoGetPreferredSize`)
+
+==== TfpgMigConstraint
+
+[source,pascal]
+----
+type
+  TfpgMigConstraint = class(TfpgLayoutConstraint)
+  private
+    FSpanX: Integer;  // Column span
+    FSpanY: Integer;  // Row span
+    FGrowX: Boolean;  // Grow horizontally
+    FGrowY: Boolean;  // Grow vertically
+    FAlignX: TfpgMigAlign;  // maLeft, maCenter, maRight, maFill
+    FAlignY: TfpgMigAlign;  // maTop, maCenter, maBottom, maFill
+  published
+    property SpanX: Integer read FSpanX write FSpanX default 1;
+    property SpanY: Integer read FSpanY write FSpanY default 1;
+    property GrowX: Boolean read FGrowX write FGrowX default False;
+    property GrowY: Boolean read FGrowY write FGrowY default False;
+    property AlignX: TfpgMigAlign read FAlignX write FAlignX default maLeft;
+    property AlignY: TfpgMigAlign read FAlignY write FAlignY default maTop;
+  end;
+----
+
+==== Layout Algorithm (Simplified)
+
+[source,pascal]
+----
+procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidget);
+var
+  grid: TfpgMigGrid;
+  i, row, col: Integer;
+  w: TfpgWidget;
+  constraint: TfpgMigConstraint;
+  cellRect: TfpgRect;
+begin
+  // 1. Build grid structure
+  grid := TfpgMigGrid.Create(FColumnCount);
+  try
+    row := 0;
+    col := 0;
+
+    // Place widgets in grid cells
+    for i := 0 to AContainer.ComponentCount - 1 do
+    begin
+      if AContainer.Components[i] is TfpgWidget then
+      begin
+        w := TfpgWidget(AContainer.Components[i]);
+        if not w.Visible then
+          Continue;
+
+        constraint := GetConstraintOrDefault(w) as TfpgMigConstraint;
+
+        // Add to grid
+        grid.AddWidget(w, row, col, constraint.SpanX, constraint.SpanY);
+
+        // Advance grid position
+        Inc(col, constraint.SpanX);
+        if col >= FColumnCount then
+        begin
+          col := 0;
+          Inc(row);
+        end;
+      end;
+    end;
+
+    // 2. Calculate column widths and row heights
+    grid.CalculateColumnWidths(AContainer.Width - LeftPadding - RightPadding, FColumnGap);
+    grid.CalculateRowHeights(AContainer.Height - TopPadding - BottomPadding, FRowGap);
+
+    // 3. Position widgets within cells
+    for i := 0 to grid.CellCount - 1 do
+    begin
+      cellRect := grid.GetCellRect(i);
+      w := grid.GetWidget(i);
+      constraint := GetConstraintOrDefault(w) as TfpgMigConstraint;
+
+      // Apply alignment and growth
+      PositionWidgetInCell(w, cellRect, constraint);
+    end;
+
+  finally
+    grid.Free;
+  end;
+end;
+----
+
+**Key Changes:**
+
+* `AContainer` parameter: Container reference passed from interface method
+* Uses `GetConstraintOrDefault`: Automatically creates default constraints if needed
+* Stateless design: All state in `FColumnCount`, `FRowGap`, etc. - no stored container reference
+
+==== Detailed DoLayout Implementation
+
+The `DoLayout` method is the heart of the layout manager. Here's a detailed breakdown with complete implementation:
+
+===== Step 1: Helper Classes
+
+First, we need supporting classes for grid management:
+
+[source,pascal]
+----
+type
+  // Represents a single cell in the grid
+  TfpgMigCell = class
+  private
+    FWidget: TfpgWidget;
+    FRow, FCol: Integer;
+    FSpanX, FSpanY: Integer;
+    FConstraint: TfpgMigConstraint;
+  public
+    property Widget: TfpgWidget read FWidget;
+    property Row: Integer read FRow;
+    property Col: Integer read FCol;
+    property SpanX: Integer read FSpanX;
+    property SpanY: Integer read FSpanY;
+    property Constraint: TfpgMigConstraint read FConstraint;
+  end;
+
+  // Column/Row sizing information
+  TfpgMigDimension = record
+    MinSize: Integer;      // Minimum size (from widget constraints)
+    PrefSize: Integer;     // Preferred size (from widget preferred sizes)
+    MaxSize: Integer;      // Maximum size (from widget constraints)
+    GrowPriority: Integer; // Priority for growing (higher = grows first)
+    Size: Integer;         // Calculated actual size
+    Position: Integer;     // Calculated position
+  end;
+
+  // Grid structure manager
+  TfpgMigGrid = class
+  private
+    FColumnCount: Integer;
+    FRowCount: Integer;
+    FCells: TObjectList<TfpgMigCell>;
+    FColumns: array of TfpgMigDimension;
+    FRows: array of TfpgMigDimension;
+  public
+    constructor Create(AColumnCount: Integer);
+    destructor Destroy; override;
+
+    procedure AddWidget(AWidget: TfpgWidget; ARow, ACol, ASpanX, ASpanY: Integer;
+                       AConstraint: TfpgMigConstraint);
+
+    procedure CalculateColumnWidths(AAvailableWidth, AGap: Integer);
+    procedure CalculateRowHeights(AAvailableHeight, AGap: Integer);
+
+    function GetCellRect(ACell: TfpgMigCell): TfpgRect;
+    function GetCell(AIndex: Integer): TfpgMigCell;
+
+    property CellCount: Integer read GetCellCount;
+    property RowCount: Integer read FRowCount;
+  end;
+----
+
+===== Step 2: Grid Cell Management
+
+[source,pascal]
+----
+procedure TfpgMigGrid.AddWidget(AWidget: TfpgWidget; ARow, ACol, ASpanX, ASpanY: Integer;
+  AConstraint: TfpgMigConstraint);
+var
+  cell: TfpgMigCell;
+begin
+  cell := TfpgMigCell.Create;
+  cell.FWidget := AWidget;
+  cell.FRow := ARow;
+  cell.FCol := ACol;
+  cell.FSpanX := ASpanX;
+  cell.FSpanY := ASpanY;
+  cell.FConstraint := AConstraint;
+
+  FCells.Add(cell);
+
+  // Track maximum row count
+  if ARow + ASpanY > FRowCount then
+    FRowCount := ARow + ASpanY;
+end;
+----
+
+===== Step 3: Column Width Calculation
+
+This is the critical algorithm for distributing available space:
+
+[source,pascal]
+----
+procedure TfpgMigGrid.CalculateColumnWidths(AAvailableWidth, AGap: Integer);
+var
+  i, cell_idx: Integer;
+  cell: TfpgMigCell;
+  totalGaps: Integer;
+  remainingWidth: Integer;
+  totalMinWidth: Integer;
+  totalPrefWidth: Integer;
+  growableColumns: TList<Integer>;
+  totalGrowPriority: Integer;
+  extraSpace: Integer;
+begin
+  // Initialize column dimensions
+  SetLength(FColumns, FColumnCount);
+  for i := 0 to FColumnCount - 1 do
+  begin
+    FColumns[i].MinSize := 0;
+    FColumns[i].PrefSize := 0;
+    FColumns[i].MaxSize := MaxInt;
+    FColumns[i].GrowPriority := 0;
+  end;
+
+  // Phase 1: Calculate minimum and preferred sizes from widgets
+  for cell_idx := 0 to FCells.Count - 1 do
+  begin
+    cell := FCells[cell_idx];
+
+    // For single-column widgets, update column directly
+    if cell.SpanX = 1 then
+    begin
+      // Get widget's preferred width
+      if cell.Widget.PreferredWidth > 0 then
+        FColumns[cell.Col].PrefSize := Max(FColumns[cell.Col].PrefSize,
+                                            cell.Widget.PreferredWidth)
+      else
+        FColumns[cell.Col].PrefSize := Max(FColumns[cell.Col].PrefSize,
+                                            cell.Widget.Width);
+
+      // Get widget's minimum width
+      if cell.Widget.MinWidth > 0 then
+        FColumns[cell.Col].MinSize := Max(FColumns[cell.Col].MinSize,
+                                          cell.Widget.MinWidth)
+      else
+        FColumns[cell.Col].MinSize := Max(FColumns[cell.Col].MinSize, 20); // default min
+
+      // Check if column should grow
+      if cell.Constraint.GrowX then
+        FColumns[cell.Col].GrowPriority := Max(FColumns[cell.Col].GrowPriority, 100);
+    end;
+    // For multi-column widgets, distribute size across spanned columns
+    // (More complex algorithm - omitted for brevity, but would proportionally
+    //  distribute widget's preferred size across spanned columns)
+  end;
+
+  // Phase 2: Calculate total required width
+  totalGaps := (FColumnCount - 1) * AGap;
+  totalMinWidth := totalGaps;
+  totalPrefWidth := totalGaps;
+
+  for i := 0 to FColumnCount - 1 do
+  begin
+    totalMinWidth := totalMinWidth + FColumns[i].MinSize;
+    totalPrefWidth := totalPrefWidth + FColumns[i].PrefSize;
+  end;
+
+  // Phase 3: Distribute available width
+  remainingWidth := AAvailableWidth - totalGaps;
+
+  if remainingWidth <= totalMinWidth then
+  begin
+    // Not enough space - use minimum sizes (may cause clipping)
+    for i := 0 to FColumnCount - 1 do
+      FColumns[i].Size := FColumns[i].MinSize;
+  end
+  else if remainingWidth <= totalPrefWidth then
+  begin
+    // Between min and preferred - scale proportionally
+    for i := 0 to FColumnCount - 1 do
+    begin
+      if totalPrefWidth > 0 then
+        FColumns[i].Size := FColumns[i].MinSize +
+          Round((FColumns[i].PrefSize - FColumns[i].MinSize) *
+                (remainingWidth - totalMinWidth) / (totalPrefWidth - totalMinWidth))
+      else
+        FColumns[i].Size := remainingWidth div FColumnCount;
+    end;
+  end
+  else
+  begin
+    // More than preferred - grow columns with GrowPriority
+    growableColumns := TList<Integer>.Create;
+    try
+      totalGrowPriority := 0;
+
+      // Start with preferred sizes
+      for i := 0 to FColumnCount - 1 do
+      begin
+        FColumns[i].Size := FColumns[i].PrefSize;
+        if FColumns[i].GrowPriority > 0 then
+        begin
+          growableColumns.Add(i);
+          totalGrowPriority := totalGrowPriority + FColumns[i].GrowPriority;
+        end;
+      end;
+
+      // Distribute extra space to growable columns
+      extraSpace := remainingWidth - totalPrefWidth;
+
+      if (growableColumns.Count > 0) and (totalGrowPriority > 0) then
+      begin
+        for i in growableColumns do
+        begin
+          FColumns[i].Size := FColumns[i].Size +
+            Round(extraSpace * FColumns[i].GrowPriority / totalGrowPriority);
+        end;
+      end;
+
+    finally
+      growableColumns.Free;
+    end;
+  end;
+
+  // Phase 4: Calculate column positions
+  FColumns[0].Position := 0;
+  for i := 1 to FColumnCount - 1 do
+    FColumns[i].Position := FColumns[i-1].Position + FColumns[i-1].Size + AGap;
+end;
+----
+
+===== Step 4: Row Height Calculation
+
+Similar algorithm for rows (omitted for brevity - same logic as columns):
+
+[source,pascal]
+----
+procedure TfpgMigGrid.CalculateRowHeights(AAvailableHeight, AGap: Integer);
+begin
+  // Same algorithm as CalculateColumnWidths, but for vertical dimension
+  // Uses widget.PreferredHeight, widget.MinHeight, constraint.GrowY
+  // ... (implementation similar to above)
+end;
+----
+
+===== Step 5: Widget Positioning Within Cells
+
+[source,pascal]
+----
+function TfpgMigGrid.GetCellRect(ACell: TfpgMigCell): TfpgRect;
+var
+  i: Integer;
+  totalWidth, totalHeight: Integer;
+begin
+  // Calculate total width of spanned columns
+  totalWidth := 0;
+  for i := ACell.Col to ACell.Col + ACell.SpanX - 1 do
+  begin
+    totalWidth := totalWidth + FColumns[i].Size;
+    if i < ACell.Col + ACell.SpanX - 1 then
+      totalWidth := totalWidth + FColumnGap;  // Add gaps between columns
+  end;
+
+  // Calculate total height of spanned rows
+  totalHeight := 0;
+  for i := ACell.Row to ACell.Row + ACell.SpanY - 1 do
+  begin
+    totalHeight := totalHeight + FRows[i].Size;
+    if i < ACell.Row + ACell.SpanY - 1 then
+      totalHeight := totalHeight + FRowGap;  // Add gaps between rows
+  end;
+
+  // Set cell rectangle
+  Result.SetRect(
+    FColumns[ACell.Col].Position,
+    FRows[ACell.Row].Position,
+    totalWidth,
+    totalHeight
+  );
+end;
+----
+
+===== Step 6: Applying Alignment and Growth
+
+[source,pascal]
+----
+procedure TfpgMigLayoutManager.PositionWidgetInCell(AWidget: TfpgWidget;
+  const ACellRect: TfpgRect; AConstraint: TfpgMigConstraint);
+var
+  widgetRect: TfpgRect;
+  widgetWidth, widgetHeight: Integer;
+begin
+  widgetRect := ACellRect;
+
+  // Calculate widget width based on constraint
+  case AConstraint.AlignX of
+    maFill:
+      widgetWidth := ACellRect.Width;  // Fill entire cell width
+    else
+      // Use preferred width or current width
+      if AWidget.PreferredWidth > 0 then
+        widgetWidth := AWidget.PreferredWidth
+      else
+        widgetWidth := AWidget.Width;
+
+      // Apply horizontal alignment
+      case AConstraint.AlignX of
+        maLeft:
+          widgetRect.Left := ACellRect.Left;
+        maCenter:
+          widgetRect.Left := ACellRect.Left + (ACellRect.Width - widgetWidth) div 2;
+        maRight:
+          widgetRect.Left := ACellRect.Right - widgetWidth;
+      end;
+
+      widgetRect.Width := widgetWidth;
+  end;
+
+  // Calculate widget height based on constraint (similar to width)
+  case AConstraint.AlignY of
+    maFill:
+      widgetHeight := ACellRect.Height;
+    else
+      if AWidget.PreferredHeight > 0 then
+        widgetHeight := AWidget.PreferredHeight
+      else
+        widgetHeight := AWidget.Height;
+
+      case AConstraint.AlignY of
+        maTop:
+          widgetRect.Top := ACellRect.Top;
+        maCenter:
+          widgetRect.Top := ACellRect.Top + (ACellRect.Height - widgetHeight) div 2;
+        maBottom:
+          widgetRect.Top := ACellRect.Bottom - widgetHeight;
+      end;
+
+      widgetRect.Height := widgetHeight;
+  end;
+
+  // Apply calculated bounds to widget
+  AWidget.SetPosition(widgetRect.Left, widgetRect.Top, widgetRect.Width, widgetRect.Height);
+end;
+----
+
+===== Complete DoLayout with All Steps
+
+[source,pascal]
+----
+procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidget);
+var
+  grid: TfpgMigGrid;
+  i, row, col: Integer;
+  w: TfpgWidget;
+  constraint: TfpgMigConstraint;
+  cellRect: TfpgRect;
+  cell: TfpgMigCell;
+  containerRect: TfpgRect;
+  availWidth, availHeight: Integer;
+begin
+  // Get container's client area
+  containerRect := AContainer.GetClientRect;
+
+  // Account for padding
+  availWidth := containerRect.Width - FPaddingLeft - FPaddingRight;
+  availHeight := containerRect.Height - FPaddingTop - FPaddingBottom;
+
+  // Create grid structure
+  grid := TfpgMigGrid.Create(FColumnCount);
+  try
+    row := 0;
+    col := 0;
+
+    // STEP 1: Build grid and place widgets in cells
+    for i := 0 to AContainer.ComponentCount - 1 do
+    begin
+      if AContainer.Components[i] is TfpgWidget then
+      begin
+        w := TfpgWidget(AContainer.Components[i]);
+        if not w.Visible then
+          Continue;  // Skip invisible widgets
+
+        constraint := GetConstraintOrDefault(w) as TfpgMigConstraint;
+
+        // Add widget to grid at current position
+        grid.AddWidget(w, row, col, constraint.SpanX, constraint.SpanY, constraint);
+
+        // Advance to next grid position
+        Inc(col, constraint.SpanX);
+        if col >= FColumnCount then
+        begin
+          col := 0;
+          Inc(row);
+        end;
+      end;
+    end;
+
+    // STEP 2: Calculate column widths
+    // This distributes available width across columns based on:
+    // - Widget preferred/minimum widths
+    // - Growth priorities
+    // - Available space
+    grid.CalculateColumnWidths(availWidth, FColumnGap);
+
+    // STEP 3: Calculate row heights
+    // Similar to column calculation, but for vertical dimension
+    grid.CalculateRowHeights(availHeight, FRowGap);
+
+    // STEP 4: Position and size each widget
+    for i := 0 to grid.CellCount - 1 do
+    begin
+      cell := grid.GetCell(i);
+
+      // Get the rectangle for this cell (accounting for spans)
+      cellRect := grid.GetCellRect(cell);
+
+      // Offset by container padding
+      cellRect.Left := cellRect.Left + FPaddingLeft;
+      cellRect.Top := cellRect.Top + FPaddingTop;
+
+      // Position widget within cell based on alignment constraints
+      PositionWidgetInCell(cell.Widget, cellRect, cell.Constraint);
+    end;
+
+  finally
+    grid.Free;
+  end;
+end;
+----
+
+===== Key Algorithms Explained
+
+**Column Width Distribution Algorithm:**
+
+1. **Phase 1 - Measure**: Calculate min/pref sizes from all widgets
+2. **Phase 2 - Check Available Space**:
+   - If `available < totalMin`: Use minimum sizes (widgets may clip)
+   - If `totalMin <= available <= totalPref`: Scale proportionally between min and pref
+   - If `available > totalPref`: Use preferred sizes, distribute extra to growable columns
+3. **Phase 3 - Growth Distribution**: Extra space distributed proportionally by GrowPriority
+4. **Phase 4 - Position**: Calculate absolute positions from accumulated sizes
+
+**Widget Positioning Algorithm:**
+
+1. Calculate cell bounds from grid (handling spans)
+2. Apply widget's alignment within cell:
+   - `Fill`: Widget fills entire cell
+   - `Left/Top`: Widget at start of cell with preferred size
+   - `Center`: Widget centered in cell with preferred size
+   - `Right/Bottom`: Widget at end of cell with preferred size
+3. Set widget bounds using `SetPosition`
+
+**Time Complexity:**
+
+- Column/Row calculation: O(n) where n = number of widgets
+- Widget positioning: O(n)
+- Overall: O(n) - linear in number of widgets
+
+=== Phase 2: String-Based Constraints
+
+Add parsing for MigLayout's string constraint syntax:
+
+[source,pascal]
+----
+type
+  TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
+  private
+    FLayoutConstraints: string;  // "wrap 3, fillx"
+    FColumnConstraints: string;  // "[100]10[200]10[fill,grow]"
+    FRowConstraints: string;     // "[]10[]"
+
+    procedure ParseLayoutConstraints(const AConstraints: string);
+    procedure ParseColumnConstraints(const AConstraints: string);
+    procedure ParseRowConstraints(const AConstraints: string);
+    procedure SetLayoutConstraints(const AValue: string);
+    procedure SetColumnConstraints(const AValue: string);
+    procedure SetRowConstraints(const AValue: string);
+  published
+    property LayoutConstraints: string read FLayoutConstraints write SetLayoutConstraints;
+    property ColumnConstraints: string read FColumnConstraints write SetColumnConstraints;
+    property RowConstraints: string read FRowConstraints write SetRowConstraints;
+  end;
+----
+
+==== Constraint Parser
+
+Implement a simple recursive descent parser for MigLayout constraint strings:
+
+[source,pascal]
+----
+type
+  TfpgMigConstraintParser = class
+  private
+    FInput: string;
+    FPos: Integer;
+
+    function NextToken: string;
+    function ParseUnit: TfpgMigUnit;  // Handles "100px", "50%", "100lp", etc.
+    function ParseBoundSize: TfpgMigBoundSize;  // Handles "min:pref:max"
+  public
+    function ParseLayoutConstraints(const AConstraints: string): TfpgMigLayoutOptions;
+    function ParseColumnConstraints(const AConstraints: string): TfpgMigColumnSizes;
+    function ParseComponentConstraints(const AConstraints: string): TfpgMigConstraint;
+  end;
+----
+
+**Example Usage:**
+
+[source,pascal]
+----
+// Code-based approach (Phase 1)
+var
+  mig: TfpgMigLayoutManager;
+  constraint: TfpgMigConstraint;
+begin
+  mig := TfpgMigLayoutManager.Create;
+  mig.ColumnCount := 3;
+  mig.RowGap := 10;
+  mig.ColumnGap := 10;
+  Panel.LayoutManager := mig;  // Interface reference, auto ref-counted
+
+  constraint := TfpgMigConstraint.Create(Button);
+  constraint.SpanX := 2;
+  constraint.GrowX := True;
+  mig.AddLayoutComponent(Button, constraint);
+end;
+
+// String-based approach (Phase 2)
+var
+  mig: TfpgMigLayoutManager;
+  constraint: TfpgMigConstraint;
+begin
+  mig := TfpgMigLayoutManager.Create;
+  mig.LayoutConstraints := 'wrap 3';
+  mig.ColumnConstraints := '[100]10[200]10[fill,grow]';
+  Panel.LayoutManager := mig;
+
+  // Helper method to parse string and create constraint
+  constraint := mig.ParseComponentConstraint('span 2, growx');
+  mig.AddLayoutComponent(Button, constraint);
+end;
+----
+
+**Key Points:**
+
+* No container parameter in `Create` (interface is stateless)
+* Use `AddLayoutComponent` (interface method) instead of `SetConstraint`
+* Interface reference automatically reference counted when assigned to `Panel.LayoutManager`
+
+=== Phase 3: Advanced Features
+
+Additional features to implement incrementally:
+
+1. **Docking**: Support `dock north/south/east/west` for edge docking
+2. **Absolute positioning**: Support `pos x y w h` for explicit positioning
+3. **Percentage sizing**: Support `width 50%` for relative sizing
+4. **Size groups**: Support `sg groupname` for same-size widgets
+5. **Hide mode**: Support automatic gap collapse when widgets hidden
+6. **Flow mode**: Support automatic line wrapping
+
+== Implementation Phases
+
+=== Phase 1: Foundation (2-3 weeks)
+
+**Goal**: Establish core architecture, prove coexistence with Align/Anchors
+
+**Tasks:**
+
+1. Define `ILayoutManager` interface
+2. Implement `TfpgLayoutConstraint` base class
+3. Implement `TfpgBaseLayoutManager` helper class (implements `ILayoutManager`)
+4. Add `LayoutManager: ILayoutManager` property to `TfpgWidget`
+5. Modify `HandleAlignments` to delegate to layout manager interface
+6. Add component notification to call `RemoveLayoutComponent`
+7. Create test cases verifying Align/Anchors still work
+8. Create test cases verifying interface reference counting works correctly
+
+**Deliverables:**
+
+* Working infrastructure with layout manager support
+* Unit tests verifying backward compatibility
+* Simple example demonstrating layout manager concept
+
+=== Phase 2: Simple Layout Managers (2-3 weeks)
+
+**Goal**: Implement simple layout managers to validate API
+
+**Tasks:**
+
+1. Implement `TfpgFlowLayoutManager` (left-to-right flow with wrapping)
+2. Implement `TfpgBoxLayoutManager` (single row or column, like HBox/VBox)
+3. Implement `TfpgBorderLayoutManager` (5-region: north, south, east, west, center)
+4. Create examples demonstrating each layout manager
+
+**Deliverables:**
+
+* Three working layout managers
+* Examples showing practical usage
+* Documentation for each layout manager
+
+=== Phase 3: MigLayout Core (4-6 weeks)
+
+**Goal**: Implement basic grid-based MigLayout without string parsing
+
+**Tasks:**
+
+1. Implement `TfpgMigLayoutManager` with property-based configuration
+2. Implement `TfpgMigConstraint` with properties (SpanX, SpanY, GrowX, GrowY, etc.)
+3. Implement grid calculation algorithm
+4. Implement cell positioning with alignment
+5. Add gap management (row gaps, column gaps)
+6. Create comprehensive test suite
+7. Create examples demonstrating grid layouts
+
+**Deliverables:**
+
+* Working MigLayout implementation (property-based)
+* Examples: form layouts, calculator layout, complex grids
+* Unit tests for grid calculation
+* Performance tests
+
+=== Phase 4: String Constraint Parser (3-4 weeks)
+
+**Goal**: Add string-based constraint syntax
+
+**Tasks:**
+
+1. Design constraint string grammar
+2. Implement tokenizer/lexer
+3. Implement parser for layout constraints
+4. Implement parser for column/row constraints
+5. Implement parser for component constraints
+6. Add error handling and diagnostics
+7. Create examples using string constraints
+
+**Deliverables:**
+
+* Working string constraint parser
+* Examples converted from property-based to string-based
+* Documentation of constraint syntax
+* Parser error messages and diagnostics
+
+=== Phase 5: Advanced Features (4-6 weeks)
+
+**Goal**: Implement advanced MigLayout features
+
+**Tasks:**
+
+1. Implement docking support
+2. Implement absolute positioning
+3. Implement percentage sizing
+4. Implement size groups
+5. Implement hide mode with gap collapse
+6. Implement flow mode with wrapping
+7. Performance optimization
+8. Memory leak testing
+
+**Deliverables:**
+
+* Feature-complete MigLayout implementation
+* Comprehensive examples covering all features
+* Performance benchmarks
+* Memory profiling results
+
+=== Phase 6: Polish and Documentation (2-3 weeks)
+
+**Goal**: Production-ready release
+
+**Tasks:**
+
+1. Create comprehensive documentation
+2. Create tutorial/quick start guide
+3. Convert examples to use layout managers where appropriate
+4. Create migration guide from Align/Anchors
+5. Performance optimization
+6. Bug fixing based on testing
+
+**Deliverables:**
+
+* Complete documentation
+* Migration guide
+* Polished examples
+* Release notes
+
+**Total Estimated Time**: 17-25 weeks (4-6 months)
+
+== Example Code
+
+=== Before: Using Align/Anchors
+
+[source,pascal]
+----
+procedure CreateLoginForm;
+begin
+  Form := TfpgForm.Create(nil);
+  Form.Width := 400;
+  Form.Height := 200;
+
+  // Username label
+  lblUsername := TfpgLabel.Create(Form);
+  lblUsername.Left := 10;
+  lblUsername.Top := 10;
+  lblUsername.Width := 100;
+  lblUsername.Text := 'Username:';
+
+  // Username edit
+  edtUsername := TfpgEdit.Create(Form);
+  edtUsername.Left := 120;
+  edtUsername.Top := 10;
+  edtUsername.Width := 270;
+  edtUsername.Anchors := [anLeft, anTop, anRight];
+
+  // Password label
+  lblPassword := TfpgLabel.Create(Form);
+  lblPassword.Left := 10;
+  lblPassword.Top := 40;
+  lblPassword.Width := 100;
+  lblPassword.Text := 'Password:';
+
+  // Password edit
+  edtPassword := TfpgEdit.Create(Form);
+  edtPassword.Left := 120;
+  edtPassword.Top := 40;
+  edtPassword.Width := 270;
+  edtPassword.Anchors := [anLeft, anTop, anRight];
+
+  // Button panel
+  pnlButtons := TfpgPanel.Create(Form);
+  pnlButtons.Align := alBottom;
+  pnlButtons.Height := 50;
+
+  // OK button
+  btnOK := TfpgButton.Create(pnlButtons);
+  btnOK.Left := pnlButtons.Width - 180;
+  btnOK.Top := 10;
+  btnOK.Width := 80;
+  btnOK.Text := 'OK';
+  btnOK.Anchors := [anTop, anRight];
+
+  // Cancel button
+  btnCancel := TfpgButton.Create(pnlButtons);
+  btnCancel.Left := pnlButtons.Width - 90;
+  btnCancel.Top := 10;
+  btnCancel.Width := 80;
+  btnCancel.Text := 'Cancel';
+  btnCancel.Anchors := [anTop, anRight];
+end;
+----
+
+**Issues:**
+
+* Manual calculation of positions
+* Hard to maintain consistent spacing
+* Anchors required for resize behavior
+* Buttons must know parent width
+
+=== After: Using MigLayout
+
+[source,pascal]
+----
+procedure CreateLoginForm;
+var
+  mig, migButtons: TfpgMigLayoutManager;
+begin
+  Form := TfpgForm.Create(nil);
+  Form.Width := 400;
+  Form.Height := 200;
+
+  // Set up MigLayout
+  mig := TfpgMigLayoutManager.Create;
+  mig.LayoutConstraints := 'wrap 2, fillx';  // 2 columns, fill width
+  mig.ColumnConstraints := '[100][fill,grow]';  // Label column, edit column
+  Form.LayoutManager := mig;  // Interface assignment
+
+  // Username
+  lblUsername := TfpgLabel.Create(Form);
+  lblUsername.Text := 'Username:';
+  mig.AddLayoutComponent(lblUsername, mig.ParseComponentConstraint(''));
+
+  edtUsername := TfpgEdit.Create(Form);
+  mig.AddLayoutComponent(edtUsername, mig.ParseComponentConstraint('growx'));
+
+  // Password
+  lblPassword := TfpgLabel.Create(Form);
+  lblPassword.Text := 'Password:';
+  mig.AddLayoutComponent(lblPassword, mig.ParseComponentConstraint(''));
+
+  edtPassword := TfpgEdit.Create(Form);
+  mig.AddLayoutComponent(edtPassword, mig.ParseComponentConstraint('growx'));
+
+  // Button panel with its own layout
+  pnlButtons := TfpgPanel.Create(Form);
+  mig.AddLayoutComponent(pnlButtons, mig.ParseComponentConstraint('span 2, growx, dock south'));
+
+  migButtons := TfpgMigLayoutManager.Create;
+  migButtons.LayoutConstraints := 'fillx, right';  // Right-align buttons
+  migButtons.ColumnConstraints := '[80][80]';  // Two 80px columns
+  pnlButtons.LayoutManager := migButtons;
+
+  btnOK := TfpgButton.Create(pnlButtons);
+  btnOK.Text := 'OK';
+  migButtons.AddLayoutComponent(btnOK, migButtons.ParseComponentConstraint(''));
+
+  btnCancel := TfpgButton.Create(pnlButtons);
+  btnCancel.Text := 'Cancel';
+  migButtons.AddLayoutComponent(btnCancel, migButtons.ParseComponentConstraint(''));
+end;
+----
+
+**Benefits:**
+
+* No manual position calculations
+* Automatic spacing management
+* Automatic resize behavior
+* Declarative constraints
+* Easy to maintain
+
+=== Hybrid Approach: Mixing Systems
+
+[source,pascal]
+----
+// Main form uses traditional docking
+MainPanel := TfpgPanel.Create(Form);
+MainPanel.Align := alClient;  // Fill form
+
+ToolbarPanel := TfpgPanel.Create(Form);
+ToolbarPanel.Align := alTop;
+ToolbarPanel.Height := 40;
+
+StatusBar := TfpgPanel.Create(Form);
+StatusBar.Align := alBottom;
+StatusBar.Height := 24;
+
+// But MainPanel uses MigLayout for its content
+mig := TfpgMigLayoutManager.Create;
+mig.LayoutConstraints := 'wrap 3, fill';
+MainPanel.LayoutManager := mig;
+
+// Add content to MainPanel with MigLayout constraints...
+----
+
+**Use Case**: Gradually migrate to layout managers without rewriting entire application.
+
+== Migration Strategy
+
+=== Gradual Migration Path
+
+1. **Phase 1: Infrastructure**
+   - Add layout manager support to codebase
+   - Existing applications continue using Align/Anchors
+   - Zero impact on existing code
+
+2. **Phase 2: New Code**
+   - New forms/dialogs use layout managers
+   - Existing forms unchanged
+   - Mixed approach in same application
+
+3. **Phase 3: Selective Migration**
+   - Migrate complex forms to layout managers
+   - Keep simple forms with Align/Anchors
+   - No forced migration
+
+4. **Phase 4: Best Practices**
+   - Recommend layout managers for new projects
+   - Document when to use each approach
+   - Maintain both systems indefinitely
+
+=== When to Use Layout Managers vs Align/Anchors
+
+**Use Layout Managers When:**
+
+* Creating forms with many controls
+* Needs responsive layout (resize-friendly)
+* Complex grid layouts
+* Need consistent spacing/gaps
+* Localization (text expansion)
+* Dynamic UI (adding/removing controls)
+
+**Use Align/Anchors When:**
+
+* Simple docking scenarios (toolbar, statusbar)
+* Fixed-size dialogs
+* Single control in container
+* Legacy code maintenance
+* Performance-critical scenarios
+
+=== Deprecation Policy
+
+**Align/Anchors will NOT be deprecated**. Both systems will coexist indefinitely because:
+
+1. **Backward Compatibility**: Millions of lines of existing fpGUI code
+2. **Simplicity**: Align/Anchors is simpler for basic layouts
+3. **Performance**: Zero overhead for simple cases
+4. **Learning Curve**: New users can start with Align/Anchors
+
+== Testing Strategy
+
+=== Unit Tests
+
+Create comprehensive unit tests for:
+
+1. **TfpgLayoutManager base class**
+   - Constraint storage/retrieval
+   - Size calculation
+   - Container communication
+
+2. **Each layout manager implementation**
+   - Grid cell calculation
+   - Widget positioning
+   - Gap management
+   - Spanning behavior
+   - Growth factors
+   - Alignment options
+
+3. **Constraint parser**
+   - Valid syntax parsing
+   - Error handling
+   - Edge cases
+
+4. **Backward compatibility**
+   - Verify Align/Anchors unaffected
+   - Verify mixed usage scenarios
+
+=== Integration Tests
+
+Create integration tests for:
+
+1. **Nested layouts**: Layout managers within layout managers
+2. **Resize behavior**: Dynamic resizing maintains layout
+3. **Show/Hide**: Hidden widgets don't affect layout
+4. **Dynamic addition/removal**: Adding/removing widgets triggers relayout
+5. **Performance**: Layout speed for large widget counts
+
+=== Visual Tests
+
+Create visual regression tests:
+
+1. **Reference screenshots**: Capture correct layouts
+2. **Automated comparison**: Detect rendering differences
+3. **Cross-platform**: Test on X11, Windows, macOS
+
+== Performance Considerations
+
+=== Layout Calculation Caching
+
+Implement caching to avoid redundant calculations (in `TfpgBaseLayoutManager`):
+
+[source,pascal]
+----
+type
+  TfpgBaseLayoutManager = class(TInterfacedObject, ILayoutManager)
+  private
+    FLayoutDirty: Boolean;
+    FCachedPreferredSize: TfpgSize;
+    FCachedMinimumSize: TfpgSize;
+  public
+    procedure LayoutContainer(AContainer: TfpgWidget); virtual;
+    procedure InvalidateLayout(AContainer: TfpgWidget); virtual;
+  end;
+
+procedure TfpgBaseLayoutManager.LayoutContainer(AContainer: TfpgWidget);
+begin
+  if not FLayoutDirty then
+    Exit;  // Use cached layout
+
+  DoLayout(AContainer);  // Call abstract method
+  FLayoutDirty := False;
+end;
+
+procedure TfpgBaseLayoutManager.InvalidateLayout(AContainer: TfpgWidget);
+begin
+  FLayoutDirty := True;
+  FCachedPreferredSize.SetSize(0, 0);
+  FCachedMinimumSize.SetSize(0, 0);
+  // Trigger container relayout
+  AContainer.HandleAlignments(0, 0);
+end;
+----
+
+**Note**: Caching is implemented in the base class, so all layout managers get it automatically.
+
+=== Lazy Evaluation
+
+Only recalculate layout when necessary:
+
+* Widget added/removed
+* Widget visibility changed
+* Container resized
+* Constraints modified
+
+=== Benchmarking Targets
+
+Performance goals for layout calculation:
+
+* **Small layouts** (< 20 widgets): < 1ms
+* **Medium layouts** (20-100 widgets): < 5ms
+* **Large layouts** (100-500 widgets): < 20ms
+
+Layout calculation should be fast enough for smooth resize animations (< 16ms for 60 FPS).
+
+== Documentation Requirements
+
+=== API Documentation
+
+1. **Class reference**: Document all public methods and properties
+2. **Code examples**: Include usage examples for each layout manager
+3. **Migration guide**: How to convert from Align/Anchors
+4. **Constraint syntax**: Complete reference for string constraints
+
+=== Tutorial Documentation
+
+1. **Quick start**: 10-minute introduction
+2. **Layout manager comparison**: When to use each type
+3. **MigLayout guide**: Comprehensive constraint reference
+4. **Custom layout managers**: How to implement your own
+
+=== Example Applications
+
+Create complete example applications:
+
+1. **Form builder**: Demonstrates form layout with MigLayout
+2. **Calculator**: Grid layout example
+3. **Contact manager**: List/detail layout
+4. **Settings dialog**: Tab-based layout with nested managers
+
+== Open Questions
+
+=== 1. Size Negotiation Protocol
+
+How should parent containers negotiate sizes with children using layout managers?
+
+**Option A**: Simple preferred/minimum size queries
+**Option B**: Full constraint-based negotiation (like Java's GridBagLayout)
+
+**Recommendation**: Start with Option A, add Option B if needed.
+
+=== 2. Constraint Storage
+
+Where should constraints be stored?
+
+**Option A**: In layout manager (separate map)
+**Option B**: In widget (FLayoutConstraint field)
+
+**Recommendation**: Option B for type safety and simplicity.
+
+=== 3. UID Designer Support
+
+How should the UI Designer support layout managers?
+
+**Options:**
+
+* Visual drag-and-drop with automatic constraint generation
+* Property editor for constraints
+* String editor for MigLayout constraints
+* Mixed approach
+
+**Recommendation**: Phase 1 - property editor. Phase 2 - visual editor.
+
+=== 4. Constraint Validation
+
+Should constraints be validated at design time or runtime?
+
+**Recommendation**: Both. Validate in property setters and during layout.
+
+== Interface Design: Key Benefits
+
+=== Why Interfaces Over Abstract Classes?
+
+The interface-based design (`ILayoutManager`) provides several advantages:
+
+==== 1. True Separation of Concerns
+
+Container only depends on interface contract, not implementation details:
+
+[source,pascal]
+----
+// Container doesn't care HOW layout is performed
+if Assigned(FLayoutManager) then
+  FLayoutManager.LayoutContainer(Self);
+----
+
+==== 2. Reference Counting Benefits
+
+Interface references in Object Pascal are automatically reference counted:
+
+[source,pascal]
+----
+Panel.LayoutManager := TfpgMigLayoutManager.Create;  // Ref count = 1
+// When Panel destroyed, interface ref count decrements
+// When ref count = 0, layout manager instance freed automatically
+----
+
+No need for manual memory management!
+
+==== 3. Multiple Interface Implementation (Future)
+
+A single class could implement multiple layout interfaces:
+
+[source,pascal]
+----
+type
+  ILayoutManager2 = interface(ILayoutManager)
+    // Extended protocol for advanced size negotiation
+    function GetMaximumSize(AContainer: TfpgWidget): TfpgSize;
+  end;
+
+  TfpgMigLayoutManager = class(TfpgBaseLayoutManager, ILayoutManager2)
+    // Implements both ILayoutManager and ILayoutManager2
+  end;
+----
+
+==== 4. Flexibility for Advanced Users
+
+While most developers use `TfpgBaseLayoutManager`:
+
+[source,pascal]
+----
+type
+  TMyLayoutManager = class(TfpgBaseLayoutManager)
+    // Convenient, provides infrastructure
+  end;
+----
+
+Advanced users can implement `ILayoutManager` directly:
+
+[source,pascal]
+----
+type
+  TCustomLayoutManager = class(TInterfacedObject, ILayoutManager)
+    // Full control, no base class restrictions
+  end;
+----
+
+==== 5. Testing and Mocking
+
+Interfaces make unit testing easier:
+
+[source,pascal]
+----
+type
+  TMockLayoutManager = class(TInterfacedObject, ILayoutManager)
+    // Mock implementation for testing
+    FLayoutCalled: Boolean;
+    procedure LayoutContainer(AContainer: TfpgWidget);
+    begin
+      FLayoutCalled := True;
+    end;
+  end;
+----
+
+=== Comparison: Interface vs Class
+
+|===
+|Aspect |Interface Design |Abstract Class Design
+
+|Flexibility
+|Any class can implement
+|Must inherit from base
+
+|Reference Counting
+|Automatic
+|Manual (nil assignment)
+
+|Multiple Inheritance
+|Possible (multiple interfaces)
+|Impossible (single inheritance)
+
+|Code Reuse
+|Via helper base class
+|Built into hierarchy
+
+|Type Safety
+|Via interface GUID
+|Via class hierarchy
+
+|Java Compatibility
+|Matches Java's design
+|Diverges from Java
+
+|fpGUI Convention
+|Less common pattern
+|More common pattern
+|===
+
+**Decision**: Interface-based design wins for flexibility and Java compatibility, with `TfpgBaseLayoutManager` providing convenience for common cases.
+
+== Conclusion
+
+This plan provides a comprehensive roadmap for implementing a pluggable layout manager system in fpGUI that:
+
+1. **Uses interface-based design** following Java Swing's `LayoutManager` pattern
+2. **Coexists** with existing Align/Anchors system (no breaking changes)
+3. **Enables MigLayout** and other powerful layout managers
+4. **Maintains backward compatibility** with all existing fpGUI code
+5. **Provides clear migration path** for developers who want to adopt layout managers
+6. **Allows gradual adoption** without forcing rewrites
+7. **Leverages automatic reference counting** for clean memory management
+
+The interface-based approach provides maximum flexibility while the `TfpgBaseLayoutManager` helper class ensures convenience for common implementations.
+
+The phased approach allows incremental development and validation, with each phase delivering working functionality that can be tested and refined before moving to the next phase.
+
+**Estimated Timeline**: 4-6 months for complete implementation including MigLayout
+
+**Next Steps**:
+
+1. Review and approve this plan
+2. Begin Phase 1 implementation (foundation)
+   - Define `ILayoutManager` interface
+   - Implement `TfpgBaseLayoutManager`
+   - Integrate with `TfpgWidget`
+3. Create proof-of-concept with simple layout manager
+4. Validate API design with real-world usage
+5. Proceed with remaining phases
+
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2025-10-16 +
+**Branch:** feature/layout-manager-phase-1 +
+**Author:** Graeme Geldenhuys
