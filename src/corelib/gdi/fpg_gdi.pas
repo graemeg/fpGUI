@@ -1536,7 +1536,6 @@ end;
 constructor TfpgGDIApplication.Create(const AParams: string);
 begin
   inherited Create(AParams);
-  FIsInitialized  := False;
   FDisplay        := Windows.GetDC(0);
   Terminated := False;
 

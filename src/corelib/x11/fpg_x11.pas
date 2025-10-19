@@ -1558,7 +1558,6 @@ var
   s: string;
 begin
   inherited Create(AParams);
-  FIsInitialized    := False;
 
   if gCommandLineParams.IsParam('display') then
   begin

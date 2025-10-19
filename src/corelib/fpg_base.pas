@@ -3803,6 +3803,7 @@ begin
   FHelpKey := keyF1;
   FHelpType := htContext;
   FDesignedDPI := 96;
+  FIsInitialized := False;
   AppIcon := 'stdimg.windowicon';
 end;
 
