@@ -2197,7 +2197,6 @@ constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDecimals := 0;
-  FValue := 0;
   FMaxValue := 100;
   FMinValue := 0;
 end;
