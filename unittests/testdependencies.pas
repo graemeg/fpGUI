@@ -13,7 +13,8 @@ uses
   tcfpgbase,
   tcfontmanager,
   tcfontcacheremoval,
-  tcfontdefinition;
+  tcfontdefinition,
+  tclayoutmanager;
 
 implementation
 
@@ -23,5 +24,5 @@ initialization
   tcfontmanager.RegisterTests;
   tcfontcacheremoval.RegisterTests;
   tcfontdefinition.RegisterTests;
-
+  tclayoutmanager.RegisterTests;
 end.
