@@ -72,7 +72,6 @@ begin
       rowMaxHeight := 0;
     end;
 
-    writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
     w.SetPosition(x, y, w.Width, w.Height);
 
     x := x + w.Width;

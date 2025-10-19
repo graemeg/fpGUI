@@ -1658,23 +1658,24 @@ var
   dw: integer;
   dh: integer;
   _w, _h: integer;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
   _w := FWidth;
   _h := FHeight;
   { Width and Height might not be what came through in the msg because of
-    size constraints, so we calculate the delta diffs after HandleResize }
+    size constraints, so we calculate the delta diffs after HandleResize.
+    NOTE: For TfpgBaseForm, this also triggers closing popup windows. }
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
-  //dw      := msg.Params.rect.Width - FWidth;
-  //dh      := msg.Params.rect.Height - FHeight;
   dw := FWidth - _w;
   dh := FHeight - _h;
+
+  // If a layout manager is assigned, invalidate it to trigger recalculation
+  if Assigned(FLayoutManager) then
+    FLayoutManager.InvalidateLayout(Self);
+
+  // Always call HandleAlignments. It will either delegate to the layout manager
+  // (which will now be dirty) or handle Align/Anchors with the correct deltas.
   HandleAlignments(dw, dh);
+
   if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
