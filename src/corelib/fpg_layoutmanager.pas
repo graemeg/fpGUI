@@ -55,12 +55,67 @@ type
     procedure AddLayoutComponent(AWidget: TfpgWidgetBase; AConstraint: TfpgLayoutConstraint); virtual;
     procedure RemoveLayoutComponent(AWidget: TfpgWidgetBase); virtual;
     procedure InvalidateLayout(AContainer: TfpgWidgetBase); virtual;
+    function GetIterator(AContainer: TfpgWidgetBase): ILayoutIterator; virtual;
   end;
 
 implementation
 
 uses
   fpg_widget;
+
+type
+  TLayoutIterator = class(TInterfacedObject, ILayoutIterator)
+  private
+    FContainer: TfpgWidget;
+    FConstraints: TLayoutConstraints;
+    FCurrentIndex: Integer;
+    FNextWidget: TfpgWidgetBase;
+    procedure FindNext;
+  public
+    constructor Create(AContainer: TfpgWidget; AConstraints: TLayoutConstraints);
+    function HasNext: Boolean;
+    function Next: TfpgWidgetBase;
+  end;
+
+{ TLayoutIterator }
+
+constructor TLayoutIterator.Create(AContainer: TfpgWidget; AConstraints: TLayoutConstraints);
+begin
+  inherited Create;
+  FContainer := AContainer;
+  FConstraints := AConstraints;
+  FCurrentIndex := 0;
+  FindNext; // Find the first valid widget
+end;
+
+procedure TLayoutIterator.FindNext;
+var
+  w: TfpgWidget;
+begin
+  FNextWidget := nil;
+  while (FCurrentIndex < FContainer.ComponentCount) and (FNextWidget = nil) do
+  begin
+    if FContainer.Components[FCurrentIndex] is TfpgWidget then
+    begin
+      w := FContainer.Components[FCurrentIndex] as TfpgWidget;
+      // Filter by managed AND visible
+      if FConstraints.ContainsKey(w) and w.Visible then
+        FNextWidget := w;
+    end;
+    Inc(FCurrentIndex);
+  end;
+end;
+
+function TLayoutIterator.HasNext: Boolean;
+begin
+  Result := Assigned(FNextWidget);
+end;
+
+function TLayoutIterator.Next: TfpgWidgetBase;
+begin
+  Result := FNextWidget;
+  FindNext; // Prepare for the next call
+end;
 
 { TfpgBaseLayoutManager }
 
@@ -149,6 +204,14 @@ end;
 function TfpgBaseLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
 begin
   Result := DoGetPreferredSize(AContainer);
+end;
+
+function TfpgBaseLayoutManager.GetIterator(AContainer: TfpgWidgetBase): ILayoutIterator;
+begin
+  if AContainer is TfpgWidget then
+    Result := TLayoutIterator.Create(AContainer as TfpgWidget, FConstraints)
+  else
+    Result := nil;
 end;
 
 end.

@@ -44,28 +44,20 @@ uses
 
 procedure TfpgFlowLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 var
-  i: Integer;
+  Iterator: ILayoutIterator;
   w: TfpgWidget;
   x, y: TfpgCoord;
 begin
-  writeln('TfpgFlowLayoutManager.DoLayout');
   if not (AContainer is TfpgWidget) then Exit;
 
-  x := 0;
+    Iterator := GetIterator(AContainer);  x := 0;
   y := 0;
-
-  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
+  while Iterator.HasNext do
   begin
-    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
-    begin
-      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
-      if FConstraints.ContainsKey(w) and w.Visible then
-      begin
-        writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
-        w.SetPosition(x, y, w.Width, w.Height);
-        x := x + w.Width;
-      end;
-    end;
+    w := Iterator.Next as TfpgWidget;
+    writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
+    w.SetPosition(x, y, w.Width, w.Height);
+    x := x + w.Width;
   end;
 end;
 
@@ -76,7 +68,7 @@ end;
 
 function TfpgFlowLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
 var
-  i: Integer;
+  Iterator: ILayoutIterator;
   w: TfpgWidget;
   totalWidth: TfpgCoord;
   maxHeight: TfpgCoord;
@@ -87,21 +79,15 @@ begin
     Exit;
   end;
 
+  Iterator := GetIterator(AContainer);
   totalWidth := 0;
   maxHeight := 0;
-
-  for i := 0 to TfpgWidget(AContainer).ComponentCount - 1 do
+  while Iterator.HasNext do
   begin
-    if TfpgWidget(AContainer).Components[i] is TfpgWidget then
-    begin
-      w := TfpgWidget(TfpgWidget(AContainer).Components[i]);
-      if FConstraints.ContainsKey(w) and w.Visible then
-      begin
-        totalWidth := totalWidth + w.Width;
-        if w.Height > maxHeight then
-          maxHeight := w.Height;
-      end;
-    end;
+    w := Iterator.Next as TfpgWidget;
+    totalWidth := totalWidth + w.Width;
+    if w.Height > maxHeight then
+      maxHeight := w.Height;
   end;
 
   Result.SetSize(totalWidth, maxHeight);

@@ -42,6 +42,12 @@ type
     procedure InvalidateLayout(AContainer: TfpgWidgetBase);
   end;
 
+  ILayoutIterator = interface
+    ['{B4D41C22-E8B9-4B4A-80E8-53436157051E}']
+    function HasNext: Boolean;
+    function Next: TfpgWidgetBase;
+  end;
+
 implementation
 
 end.
