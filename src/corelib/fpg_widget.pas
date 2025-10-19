@@ -66,6 +66,7 @@ type
     procedure   SetAlign(const AValue: TAlign);
     procedure   SetLayoutManager(const AValue: ILayoutManager);
   protected
+    procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -260,6 +261,17 @@ begin
   end;
 end;
 
+procedure TfpgWidget.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+
+  // NEW: Notify layout manager of component changes
+  if (Operation = opRemove) and (AComponent is TfpgWidget) and Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.RemoveLayoutComponent(TfpgWidget(AComponent));
+  end;
+end;
+
 function CompareInts(i1, i2: integer): integer;
 begin
   if i1 < i2 then
@@ -450,6 +462,9 @@ begin
       HandleHide;
       FOnScreen := True;
     end;
+  // NEW: If visibility changes, the parent's layout might need to be recalculated
+  if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+    Parent.Realign;
 end;
 
 procedure TfpgWidget.SetShowHint(const AValue: boolean);
@@ -608,6 +623,8 @@ end;
 
 procedure TfpgWidget.Realign;
 begin
+  if Assigned(FLayoutManager) then
+    FLayoutManager.InvalidateLayout(Self);
   HandleAlignments(0, 0);
   RePaint;
 end;
@@ -1700,6 +1717,13 @@ begin
     DebugLn('HandleAlignments ('+Name+'): csLoading detected, so we exit early');
     {$ENDIF}
     Exit;  //==>
+  end;
+
+  // NEW: If this container has a layout manager, delegate to it
+  if Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.LayoutContainer(Self);  // Pass container to interface
+    Exit;  // Layout manager handles everything
   end;
 
   {$IFDEF gDebug}

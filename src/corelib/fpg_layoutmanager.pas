@@ -120,8 +120,6 @@ begin
   FLayoutDirty := True;
   FCachedPreferredSize.SetSize(0, 0);
   FCachedMinimumSize.SetSize(0, 0);
-  if Assigned(AContainer) and (AContainer is TfpgWidget) then
-    TfpgWidget(AContainer).Realign;
 end;
 
 function TfpgBaseLayoutManager.GetConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
