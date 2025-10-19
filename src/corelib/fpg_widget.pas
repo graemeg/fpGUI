@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -24,7 +24,8 @@ uses
   Classes,
   SysUtils,
   fpg_main,
-  fpg_base;
+  fpg_base,
+  fpg_layouttypes;
 
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
@@ -57,11 +58,13 @@ type
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
     alist: TList;
+    FLayoutManager: ILayoutManager;
     function    GetAcceptDrops: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
+    procedure   SetLayoutManager(const AValue: ILayoutManager);
   protected
     function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
@@ -210,6 +213,7 @@ type
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    DropHandler: TfpgDropHandler read GetDropHandler write SetDropHandler;
+    property    LayoutManager: ILayoutManager read FLayoutManager write SetLayoutManager;
   end;
 
 
@@ -396,6 +400,14 @@ begin
   FAlign := AValue;
   if Parent <> nil then
     Parent.Realign;
+end;
+
+procedure TfpgWidget.SetLayoutManager(const AValue: ILayoutManager);
+begin
+  if FLayoutManager = AValue then
+    Exit;
+  FLayoutManager := AValue;
+  Realign;
 end;
 
 procedure TfpgWidget.DoAllocateWindowHandle;
