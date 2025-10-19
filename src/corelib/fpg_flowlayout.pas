@@ -50,8 +50,6 @@ var
 begin
   if not (AContainer is TfpgWidget) then Exit;
 
-  writeln('TfpgFlowLayoutManager.DoLayout');
-
   Iterator := GetIterator(AContainer);
   if not Assigned(Iterator) then Exit;
 
