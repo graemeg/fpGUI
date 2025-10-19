@@ -59,10 +59,10 @@ begin
   w3.Name := 'w3';
   w3.SetPosition(0, 0, 50, 20);
 
-//  lm.AddLayoutComponent(w1, lm.ParseComponentConstraint(''));
-//  lm.AddLayoutComponent(w2, lm.ParseComponentConstraint(''));
-//  lm.AddLayoutComponent(w3, lm.ParseComponentConstraint(''));
-//  lm.InvalidateLayout(container);
+  lm.AddLayoutComponent(w1, TfpgLayoutConstraint.Create);
+  lm.AddLayoutComponent(w2, TfpgLayoutConstraint.Create);
+  lm.AddLayoutComponent(w3, TfpgLayoutConstraint.Create);
+
   container.Realign;
 
   CheckEquals(0, w1.Left, 'w1.Left');
