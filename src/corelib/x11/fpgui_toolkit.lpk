@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="4">
+  <Package Version="5">
     <Name Value="fpgui_toolkit"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
@@ -28,7 +28,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1" Minor="5"/>
-    <Files Count="115">
+    <Files Count="119">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -490,7 +490,24 @@
         <Filename Value="../../3rdparty/regex/synregexpr.pas"/>
         <UnitName Value="SynRegExpr"/>
       </Item115>
+      <Item116>
+        <Filename Value="../fpg_flowlayout.pas"/>
+        <UnitName Value="fpg_flowlayout"/>
+      </Item116>
+      <Item117>
+        <Filename Value="../fpg_layoutmanager.pas"/>
+        <UnitName Value="fpg_layoutmanager"/>
+      </Item117>
+      <Item118>
+        <Filename Value="../fpg_layouttypes.pas"/>
+        <UnitName Value="fpg_layouttypes"/>
+      </Item118>
+      <Item119>
+        <Filename Value="../fpg_defines.inc"/>
+        <Type Value="Include"/>
+      </Item119>
     </Files>
+    <CompatibilityMode Value="True"/>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/corelib/cocoa;../../../docs/xml/gui"/>
     <RequiredPkgs Count="2">
       <Item1>

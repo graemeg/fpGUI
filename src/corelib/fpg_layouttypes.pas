@@ -27,8 +27,7 @@ type
   end;
 
   ILayoutManager = interface
-    ['{3F2504E0-4F89-11D3-9A0C-0305E82C3301}']
-
+    ['{D462F3B7-51ED-411D-AA8E-9F08A1DE2072}']
     // Core layout methods
     procedure LayoutContainer(AContainer: TfpgWidgetBase);
     function GetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;

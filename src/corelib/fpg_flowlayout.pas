@@ -21,7 +21,6 @@ interface
 
 uses
   Classes, SysUtils,
-  Generics.Collections,
   fpg_base,
   fpg_layoutmanager, fpg_layouttypes;
 
@@ -46,17 +45,39 @@ var
   Iterator: ILayoutIterator;
   w: TfpgWidget;
   x, y: TfpgCoord;
+  rowMaxHeight: TfpgCoord;
+  ContainerWidth: TfpgCoord;
 begin
   if not (AContainer is TfpgWidget) then Exit;
 
-    Iterator := GetIterator(AContainer);  x := 0;
+  writeln('TfpgFlowLayoutManager.DoLayout');
+
+  Iterator := GetIterator(AContainer);
+  if not Assigned(Iterator) then Exit;
+
+  x := 0;
   y := 0;
+  rowMaxHeight := 0;
+  ContainerWidth := (AContainer as TfpgWidget).Width;
+
   while Iterator.HasNext do
   begin
     w := Iterator.Next as TfpgWidget;
+
+    // Wrap to next row if needed
+    if (x > 0) and (x + w.Width > ContainerWidth) then
+    begin
+      y := y + rowMaxHeight;
+      x := 0;
+      rowMaxHeight := 0;
+    end;
+
     writeln('  - Placing widget ', w.Name, ' at ', x, ',', y);
     w.SetPosition(x, y, w.Width, w.Height);
+
     x := x + w.Width;
+    if w.Height > rowMaxHeight then
+      rowMaxHeight := w.Height;
   end;
 end;
 
