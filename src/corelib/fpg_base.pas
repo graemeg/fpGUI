@@ -722,14 +722,14 @@ type
     FCritSect: TCriticalSection;
     FHelpKey: word;
     FHelpFile: TfpgString;
-    FCmdLineParams: TfpgCmdLineParams;
+    FCmdLineParams: ICmdLineParams;
     FDesignedDPI: integer;
     function    GetForm(Index: Integer): TfpgWidgetBase;
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWidgetBase;
     function    GetHelpFile: TfpgString;
-    function    GetCmdLineParamsInterface: TfpgCmdLineParams;
-    property    CmdLineParams: TfpgCmdLineParams read GetCmdLineParamsInterface implements ICmdLineParams;
+    function    GetCmdLineParamsInterface: ICmdLineParams;
+    property    CmdLineParams: ICmdLineParams read GetCmdLineParamsInterface implements ICmdLineParams;
   protected
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
@@ -3778,7 +3778,7 @@ begin
   //end;
 end;
 
-function TfpgApplicationBase.GetCmdLineParamsInterface: TfpgCmdLineParams;
+function TfpgApplicationBase.GetCmdLineParamsInterface: ICmdLineParams;
 begin
   if not Assigned(FCmdLineParams) then
     FCmdLineParams := TfpgCmdLineParams.Create;
@@ -3809,7 +3809,7 @@ end;
 destructor TfpgApplicationBase.Destroy;
 begin
   FCritSect.Free;
-  FCmdLineParams.Free;
+  FCmdLineParams := nil;
   inherited Destroy;
 end;
 

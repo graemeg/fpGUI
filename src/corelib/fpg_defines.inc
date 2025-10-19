@@ -1,6 +1,6 @@
 // common compiler options
 {$mode objfpc}{$H+}
-{$interfaces corba}
+{$interfaces com}
 {$if defined(darwin)}
   {$define AggCanvas}
   {$modeswitch objectivec2}

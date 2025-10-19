@@ -129,6 +129,7 @@ type
   
   
   IfpgLVItemViewer = interface
+    ['{E527AD90-FB1C-4806-85EF-AFA914749CEA}']
     procedure ItemDeleted(AIndex: Integer);
     procedure ItemAdded(AIndex: Integer);
     procedure ItemChanged(AIndex: Integer);

@@ -89,7 +89,7 @@ type
   end;
 
 
-  TfpgCmdLineParams = class(TObject, ICmdLineParams)
+  TfpgCmdLineParams = class(TInterfacedObject, ICmdLineParams)
   private
     FOptionChar: char;
     FCaseSensitiveOptions: Boolean;
