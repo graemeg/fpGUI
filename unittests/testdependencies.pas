@@ -19,7 +19,7 @@ implementation
 
 initialization
 //  tctreeview.RegisterTests;
- tcfpgbase.RegisterTests;
+  tcfpgbase.RegisterTests;
   tcfontmanager.RegisterTests;
   tcfontcacheremoval.RegisterTests;
   tcfontdefinition.RegisterTests;

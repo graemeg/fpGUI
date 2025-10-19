@@ -1475,9 +1475,12 @@ begin
     HideHint;
     FreeAndNil(FHintWindow);
   end;
-  FHintTimer.Enabled := False;
-  FHintTimer.OnTimer := nil;
-  FHintTimer.Free;
+  if Assigned(FHintTimer) then
+  begin
+    FHintTimer.Enabled := False;
+    FHintTimer.OnTimer := nil;
+    FHintTimer.Free;
+  end;
 
   DestroyComponents;  // while message queue is still active
 

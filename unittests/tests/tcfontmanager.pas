@@ -60,11 +60,6 @@ end;
 procedure TTestFontManager.SetUp;
 begin
   inherited SetUp;
-
-  { Initialize fpGUI application once - calling fpgApplication creates it if needed }
-  if not fpgApplication.IsInitialized then
-    fpgApplication.Initialize;
-
   FFontManager := TfpgFontManager.Create;
 
   { Set reasonable defaults for testing }

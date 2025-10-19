@@ -15,12 +15,15 @@ uses
   Classes,
   SysUtils,
   consoletestrunner,
-  testdependencies;
+  testdependencies,
+  fpg_main;
 
 var
   Application: TTestRunner;
 
 begin
+  fpgApplication.Initialize; // some tests need it
+
   Application := TTestRunner.Create(nil);
   try
     Application.Initialize;
