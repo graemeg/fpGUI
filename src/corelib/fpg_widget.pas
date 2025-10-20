@@ -522,6 +522,9 @@ begin
     {$IFDEF CStackDebug}
     DebugLn(Format('  Alignment deltas  w: %d  h: %d', [dw, dh]));
     {$ENDIF}
+    // If a layout manager is assigned, invalidate it to trigger recalculation
+    if Assigned(FLayoutManager) then
+      FLayoutManager.InvalidateLayout(Self);
     HandleAlignments(dw, dh);
   end;
 
