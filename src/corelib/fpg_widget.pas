@@ -267,7 +267,7 @@ procedure TfpgWidget.Notification(AComponent: TComponent; Operation: TOperation)
 begin
   inherited Notification(AComponent, Operation);
 
-  // NEW: Notify layout manager of component changes
+  // Notify layout manager of component changes
   if (Operation = opRemove) and (AComponent is TfpgWidget) and Assigned(FLayoutManager) then
   begin
     FLayoutManager.RemoveLayoutComponent(TfpgWidget(AComponent));
@@ -309,12 +309,12 @@ var
 begin
   Result := nil;
   if AWidget = nil then
-    exit; // ==>
+    exit;
   w := AWidget;
   while Assigned(w) do
   begin
     if w is TfpgWindow then
-      Exit(TfpgWindow(w)); // ==>
+      Exit(TfpgWindow(w));
     w := w.Parent;
   end;
 end;
@@ -326,7 +326,7 @@ var
   i: integer;
 begin
   if FEnabled = AValue then
-    Exit; //==>
+    Exit;
   FEnabled := AValue;
   for i := 0 to ComponentCount - 1 do
   begin
@@ -339,9 +339,9 @@ end;
 procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
-    Exit; //==>
+    Exit;
   if InDesigner then
-    Exit; //==>
+    Exit;
 
   try
     if FActiveWidget <> nil then
@@ -450,21 +450,19 @@ end;
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
   if FVisible = AValue then
-    Exit; //==>
+    Exit;
   FVisible := AValue;
   if FOnScreen then
     if FVisible then
     begin
-//      writeln('DEBUG:  TfpgWidget.SetVisible - handleshow');
       HandleShow;
     end
     else
     begin
-//      writeln('DEBUG:  TfpgWidget.SetVisible - handlehide');
       HandleHide;
       FOnScreen := True;
     end;
-  // NEW: If visibility changes, the parent's layout might need to be recalculated
+  // If visibility changes, the parent's layout might need to be recalculated
   if Assigned(Parent) and Assigned(Parent.LayoutManager) then
     Parent.Realign;
 end;
@@ -536,7 +534,6 @@ begin
     begin
       Parent.WidgetToWindow(ParentLeft, ParentTop);
     end;
-    //WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
     Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
@@ -611,13 +608,13 @@ begin
       if HelpKeyword <> '' then
       begin
         fpgApplication.KeywordHelp(HelpKeyword);
-        Exit; //==>
+        Exit;
       end;
     htContext:
       if HelpContext <> 0 then
       begin
         fpgApplication.ContextHelp(HelpContext);
-        Exit; //==>
+        Exit;
       end;
   end;
   if Parent <> nil then
@@ -654,8 +651,6 @@ end;
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
-
-  //HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
@@ -867,7 +862,6 @@ var
 begin
   if InDesigner then
   begin
-    // dispatching message to designer
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
       Exit;
@@ -907,7 +901,6 @@ var
   mb: TMouseButton;
   IsDblClick: boolean;
 begin
-  //writeln('>> TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
   FDragActive := False;
   if InDesigner then
   begin
@@ -977,7 +970,6 @@ begin
   if Assigned(FOnMouseUp) then // and not IsDblClick then
     FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
-  //writeln('<< TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
 end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
@@ -1195,7 +1187,7 @@ begin
     OnKeyPress(self, keycode, shiftstate, consumed);
 
   if consumed then
-    Exit; //==>
+    Exit;
 
   direction := fdNone;
 
@@ -1378,12 +1370,12 @@ end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -1410,7 +1402,7 @@ end;
 
 procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMultiClick(count: integer; x, y: integer; button: word; shiftstate: TShiftState);
@@ -1611,8 +1603,6 @@ begin
 
     if HasOwnWindow then
     begin
-      //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
-      //Write('Main ClipRect: '); PrintRect(FInvalidRect);
       if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
       begin
         Canvas.EndDraw;
@@ -1726,10 +1716,10 @@ begin
     Exit;  //==>
   end;
 
-  // NEW: If this container has a layout manager, delegate to it
+  // If this container has a layout manager, delegate to it
   if Assigned(FLayoutManager) then
   begin
-    FLayoutManager.LayoutContainer(Self);  // Pass container to interface
+    FLayoutManager.LayoutContainer(Self);
     Exit;  // Layout manager handles everything
   end;
 
@@ -1751,11 +1741,6 @@ begin
     end;
 
     DoAlignment;
-    //DoAlign(alTop);
-    //DoAlign(alBottom);
-    //DoAlign(alLeft);
-    //DoAlign(alRight);
-    //DoAlign(alClient);
   finally
     alist.Free;
   end;
@@ -1790,8 +1775,6 @@ begin
           dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
-        //Write(wg.ClassName + ': ');
-        //PrintRect(wg.WidgetBoundsInWindow);
       end;
     end;  { if }
 end;
@@ -1838,7 +1821,6 @@ var
   w: TfpgWidget;
   n: integer;
 begin
-  // and process this list in order
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
@@ -1871,7 +1853,7 @@ begin
 
       alClient:
         w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, FAlignRect.Height);
-    end; { case }
+    end;
   end;
 end;
 
@@ -1895,14 +1877,12 @@ var
   wg: TfpgWidget;
   i: integer;
 begin
-  //writeln(Classname, ' - ', Name, '.DoKeyShortcut() - ' + KeycodeToText(keycode, shiftstate));
   { process children of self }
   for i := 0 to ComponentCount-1 do
   begin
     c := TfpgComponent(Components[i]);
     if not (c is TfpgWidget) then
     begin
-      //writeln('** skipped ', Classname, ' - ', Name);
       continue;
     end
     else
