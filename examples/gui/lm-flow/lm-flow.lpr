@@ -9,11 +9,26 @@ uses
   fpg_main,
   fpg_form,
   fpg_button,
-  fpg_flowlayout,
-  fpg_layouttypes;
+  frm_simple,
+  frm_containers;
+
+
+{@VFD_NEWFORM_DECL}
+
+{@VFD_NEWFORM_IMPL}
+
 
 type
   TMainForm = class(TfpgForm)
+  private
+    {@VFD_HEAD_BEGIN: MainForm}
+    btnSimple: TfpgButton;
+    btnContainers: TfpgButton;
+    btnQuit: TfpgButton;
+    {@VFD_HEAD_END: MainForm}
+    procedure btnSimpleClicked(Sender: TObject);
+    procedure btnContainersClicked(Sender: TObject);
+    procedure btnQuitClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -33,30 +48,77 @@ begin
   end;
 end;
 
-procedure TMainForm.AfterCreate;
+procedure TMainForm.btnSimpleClicked(Sender: TObject);
 var
-  FlowLayout: ILayoutManager;
-  Btn: TfpgButton;
-  i: Integer;
+  frm: TSimpleFlowForm;
 begin
+  frm := TSimpleFlowForm.Create(nil);
+  frm.ShowModal;
+end;
+
+procedure TMainForm.btnContainersClicked(Sender: TObject);
+var
+  frm: TFlowWithContainers;
+begin
+  frm := TFlowWithContainers.Create(nil);
+  frm.ShowModal;
+end;
+
+procedure TMainForm.btnQuitClicked(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMainForm.AfterCreate;
+begin
+  inherited AfterCreate;
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(474, 349, 175, 250);
   WindowTitle := 'Flow Layout Example';
-  Name := 'TMainForm';
-  SetPosition(100, 100, 300, 250);
+  Hint := '';
+  IconName := 'stdimg.windowicon';
 
-  // Create the FlowLayoutManager and assign it to the form
-  FlowLayout := TfpgFlowLayoutManager.Create as ILayoutManager;
-  LayoutManager := FlowLayout;
-
-  // Add some buttons to demonstrate wrapping
-  for i := 1 to 10 do
+  btnSimple := TfpgButton.Create(self);
+  with btnSimple do
   begin
-    Btn := TfpgButton.Create(Self);
-    Btn.Name := 'Btn' + IntToStr(i);
-    Btn.Text := Format('Button %d', [i]);
-    Btn.Width := 60 + (i * 5); // Vary width to force wrapping
-    Btn.Height := 30;
-    FlowLayout.AddLayoutComponent(Btn, TfpgLayoutConstraint.Create());
+    Name := 'btnSimple';
+    SetPosition(12, 12, 150, 35);
+    Text := 'Simple Flow';
+    FontDesc := 'Liberation Sans-10:antialias=true';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 2;
+    OnClick := @btnSimpleClicked;
   end;
+
+  btnContainers := TfpgButton.Create(self);
+  with btnContainers do
+  begin
+    Name := 'btnContainers';
+    SetPosition(12, 52, 150, 35);
+    Text := 'Flow with Containers';
+    FontDesc := 'Liberation Sans-10:antialias=true';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 3;
+    OnClick := @btnContainersClicked;
+  end;
+
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(12, 124, 150, 35);
+    Text := 'Quit';
+    FontDesc := 'Liberation Sans-10:antialias=true';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 4;
+    OnClick := @btnQuitClicked;
+  end;
+
+  {@VFD_BODY_END: MainForm}
 end;
 
 begin
