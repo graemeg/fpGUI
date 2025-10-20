@@ -10,7 +10,8 @@ else
   echo "  1 - Linux + AggCanvas"
   echo "  F - FreeBSD"
   echo "  2 - FreeBSD + AggCanvas"
-  echo "  M - Mac OSX"
+  echo "  M - Mac OSX (Cocoa)"
+  echo "  X - Mac OSX (X11)"
   echo " "
 
   read -p "Enter a letter or Ctrl+C to quit: " OSinput
@@ -48,13 +49,16 @@ case $OSinput in
 		echo "Compiling for FreeBSD + AggCanvas"
 		$fpcbin -dX11 -dAGGCanvas @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
 		;;
-    "M"|"m")
+	"M"|"m")
 		echo "Compiling for OSX Cocoa"
-		$fpcbin -dX11 -dAGGCanvas @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
+		$fpcbin -dCocoa -dAGGCanvas @extrafpc.cfg corelib/cocoa/fpgui_toolkit.pas
 		;;
-	*)
-		echo "Unknown option - doing nothing!"
-		;;
+	"X"|"x")
+		echo "Compiling for OSX X11"
+		$fpcbin -dX11 -dAGGCanvasX @extrafpc.cfg corelib/x11/fpgui_toolkit.pas
+		;;	*)
+	echo "Unknown option - doing nothing!"
+	;;
 esac
 
 # LINUX & FREEBSD
