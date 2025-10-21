@@ -151,10 +151,8 @@ begin
     w := Iterator.Next as TfpgWidget;
     w.GetPreferredSize(prefSize);
 
-    if (Rows[rowIdx].Width > 0) and (Rows[rowIdx].Width + FHGap + prefSize.W > ContainerWidth) then
+    if (Rows[rowIdx].Width > 0) and (Rows[rowIdx].Width + FHGap + prefSize.W > ContainerWidth - FHGap * 2) then
     begin
-      // Remove trailing HGap from row width
-      Rows[rowIdx].Width := Rows[rowIdx].Width - FHGap;
       Inc(rowIdx);
       SetLength(Rows, rowIdx + 1);
       Rows[rowIdx].Width := 0;
@@ -162,30 +160,30 @@ begin
       Rows[rowIdx].ComponentCount := 0;
     end;
 
-    Rows[rowIdx].Width := Rows[rowIdx].Width + prefSize.W + FHGap;
+    if Rows[rowIdx].Width > 0 then
+      Rows[rowIdx].Width := Rows[rowIdx].Width + FHGap;
+    Rows[rowIdx].Width := Rows[rowIdx].Width + prefSize.W;
     if prefSize.H > Rows[rowIdx].Height then
       Rows[rowIdx].Height := prefSize.H;
     Inc(Rows[rowIdx].ComponentCount);
   end;
-  // Remove trailing HGap from last row
-  if Rows[rowIdx].Width > 0 then
-    Rows[rowIdx].Width := Rows[rowIdx].Width - FHGap;
 
   // Calculate total height for vertical alignment
   totalRowHeight := 0;
   for i := 0 to rowIdx do
     totalRowHeight := totalRowHeight + Rows[i].Height;
-  totalRowHeight := totalRowHeight + rowIdx * FVGap;
+  if rowIdx > 0 then
+    totalRowHeight := totalRowHeight + rowIdx * FVGap;
 
   // Determine starting Y position
   case FVAlignment of
-    flvaTop: startY := 0;
+    flvaTop: startY := FVGap;
     flvaCenter: startY := (AContainer.Height - totalRowHeight) div 2;
-    flvaBottom: startY := AContainer.Height - totalRowHeight;
+    flvaBottom: startY := AContainer.Height - totalRowHeight - FVGap;
   else
-    startY := 0;
+    startY := FVGap;
   end;
-  if startY < 0 then startY := 0;
+  if startY < FVGap then startY := FVGap;
 
   // Second pass: Position components
   Iterator := GetIterator(AContainer); // get new iterator for second pass
@@ -196,15 +194,15 @@ begin
 
     // Determine starting X for the row based on alignment
     case FAlignment of
-      flaLeft: rowStartX := 0;
+      flaLeft: rowStartX := FHGap;
       flaCenter: rowStartX := (ContainerWidth - rowWidth) div 2;
-      flaRight: rowStartX := ContainerWidth - rowWidth;
+      flaRight: rowStartX := ContainerWidth - rowWidth - FHGap;
       //flaLeading: rowStartX := 0; // Assuming LTR for now
       //flaTrailing: rowStartX := ContainerWidth - rowWidth; // Assuming LTR
     else
-      rowStartX := 0;
+      rowStartX := FHGap;
     end;
-    if rowStartX < 0 then rowStartX := 0;
+    if rowStartX < FHGap then rowStartX := FHGap;
 
     x := rowStartX;
     rowMaxHeight := Rows[i].Height;
@@ -254,7 +252,7 @@ begin
       maxHeight := prefSize.H;
   end;
 
-  Result.SetSize(totalWidth, maxHeight + FVGap);
+  Result.SetSize(totalWidth + FHGap * 2, maxHeight + FVGap * 2);
 end;
 
 end.
