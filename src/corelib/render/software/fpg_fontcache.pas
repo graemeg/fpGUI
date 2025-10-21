@@ -294,7 +294,10 @@ begin
     lPathList.Add('/usr/local/share/fonts/');
     lPathList.Add(GetUserDir + '.fonts/');
     {$IFDEF Darwin}
-    lPathList.Add(GetUserDir + '/Library/Fonts/');
+    { As per Apple Support page: https://support.apple.com/en-us/HT201722 }
+    lPathList.Add('/System/Library/Fonts/');
+    lPathList.Add('/Library/Fonts/');
+    lPathList.Add(GetUserDir + 'Library/Fonts/');
     {$ENDIF}
 
     for i := 0 to lPathList.Count-1 do
