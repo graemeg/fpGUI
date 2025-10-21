@@ -29,9 +29,9 @@ type
   TfpgFlowLayoutAlignment = (
     flaLeft,
     flaCenter,
-    flaRight,
-    flaLeading,
-    flaTrailing
+    flaRight//,
+    //flaLeading,
+    //flaTrailing
   );
 
   TfpgFlowLayoutVAlignment = (
@@ -199,8 +199,8 @@ begin
       flaLeft: rowStartX := 0;
       flaCenter: rowStartX := (ContainerWidth - rowWidth) div 2;
       flaRight: rowStartX := ContainerWidth - rowWidth;
-      flaLeading: rowStartX := 0; // Assuming LTR for now
-      flaTrailing: rowStartX := ContainerWidth - rowWidth; // Assuming LTR
+      //flaLeading: rowStartX := 0; // Assuming LTR for now
+      //flaTrailing: rowStartX := ContainerWidth - rowWidth; // Assuming LTR
     else
       rowStartX := 0;
     end;
