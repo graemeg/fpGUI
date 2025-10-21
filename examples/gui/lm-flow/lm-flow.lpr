@@ -10,7 +10,8 @@ uses
   fpg_form,
   fpg_button,
   frm_simple,
-  frm_containers;
+  frm_containers,
+  frm_advanced;
 
 
 {@VFD_NEWFORM_DECL}
@@ -24,10 +25,12 @@ type
     {@VFD_HEAD_BEGIN: MainForm}
     btnSimple: TfpgButton;
     btnContainers: TfpgButton;
+    btnAdvanced: TfpgButton;
     btnQuit: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure btnSimpleClicked(Sender: TObject);
     procedure btnContainersClicked(Sender: TObject);
+    procedure btnAdvancedClicked(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
@@ -64,6 +67,14 @@ begin
   frm.ShowModal;
 end;
 
+procedure TMainForm.btnAdvancedClicked(Sender: TObject);
+var
+  frm: TAdvancedFlowForm;
+begin
+  frm := TAdvancedFlowForm.Create(nil);
+  frm.ShowModal;
+end;
+
 procedure TMainForm.btnQuitClicked(Sender: TObject);
 begin
   Close;
@@ -74,7 +85,7 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(474, 349, 175, 250);
+  SetPosition(474, 349, 175, 234);
   WindowTitle := 'Flow Layout Example';
   Hint := '';
   IconName := 'stdimg.windowicon';
@@ -105,16 +116,29 @@ begin
     OnClick := @btnContainersClicked;
   end;
 
-  btnQuit := TfpgButton.Create(self);
-  with btnQuit do
+  btnAdvanced := TfpgButton.Create(self);
+  with btnAdvanced do
   begin
-    Name := 'btnQuit';
-    SetPosition(12, 124, 150, 35);
-    Text := 'Quit';
+    Name := 'btnAdvanced';
+    SetPosition(12, 92, 150, 35);
+    Text := 'Advanced';
     FontDesc := 'Liberation Sans-10:antialias=true';
     Hint := '';
     ImageName := '';
     TabOrder := 4;
+    OnClick := @btnAdvancedClicked;
+  end;
+
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(12, 192, 150, 35);
+    Text := 'Quit';
+    FontDesc := 'Liberation Sans-10:antialias=true';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 5;
     OnClick := @btnQuitClicked;
   end;
 

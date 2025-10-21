@@ -549,6 +549,7 @@ type
     // TODO: Maybe rename this to DoAllocateNativeWindow() or DoCreateNativeWindow() - it will be more accurate
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
+    procedure   DoGetPreferredSize(var ASize: TfpgSize); virtual;
     //procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDragStartDetected; virtual;
     procedure   AddChild(AChild: TfpgWidgetBase);
@@ -573,6 +574,7 @@ type
     function    Bottom: TfpgCoord;
     procedure   UpdatePosition;
     procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
+    procedure   GetPreferredSize(var ASize: TfpgSize);
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     function    ScreenToWidget(const AScreenPos: TPoint): TPoint;
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
@@ -1810,6 +1812,16 @@ end;
 procedure TfpgWidgetBase.UpdatePosition;
 begin
   DoUpdatePosition;
+end;
+
+procedure TfpgWidgetBase.GetPreferredSize(var ASize: TfpgSize);
+begin
+  DoGetPreferredSize(ASize);
+end;
+
+procedure TfpgWidgetBase.DoGetPreferredSize(var ASize: TfpgSize);
+begin
+  ASize.SetSize(FWidth, FHeight);
 end;
 
 procedure TfpgWidgetBase.UpdateWindowPosition;
