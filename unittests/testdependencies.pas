@@ -16,7 +16,8 @@ uses
   tcfontdefinition,
   tclayoutmanager,
   tcflowlayout,
-  tcborderlayout;
+  tcborderlayout,
+  tcmiglayout;
 
 implementation
 
@@ -29,4 +30,5 @@ initialization
   tclayoutmanager.RegisterTests;
   tcflowlayout.RegisterTests;
   tcborderlayout.RegisterTests;
+  tcmiglayout.RegisterTests;
 end.
