@@ -56,7 +56,6 @@ type
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
   public
     constructor Create; override; overload;
-    constructor Create(const gap: integer); overload;
     constructor Create(const hgap: integer; const vgap: integer); overload;
     property Alignment: TfpgFlowLayoutAlignment read FAlignment write SetAlignment default flaLeft;
     property VAlignment: TfpgFlowLayoutVAlignment read FVAlignment write SetVAlignment default flvaTop;
@@ -85,13 +84,6 @@ begin
   FVAlignment := flvaTop;
   FHGap := 5;
   FVGap := 5;
-end;
-
-constructor TfpgFlowLayoutManager.Create(const gap: integer);
-begin
-  Create;
-  FHGap := gap;
-  FVGap := gap;
 end;
 
 constructor TfpgFlowLayoutManager.Create(const hgap: integer; const vgap: integer);

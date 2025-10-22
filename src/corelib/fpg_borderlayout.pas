@@ -63,7 +63,6 @@ type
     function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
   public
     constructor Create; override; overload;
-    constructor Create(const gap: integer); overload;
     constructor Create(const hgap: integer; const vgap: integer); overload;
   published
     property HGap: integer read FHGap write SetHGap default 0;
@@ -88,13 +87,6 @@ begin
   inherited Create;
   FHGap := 0;
   FVGap := 0;
-end;
-
-constructor TfpgBorderLayoutManager.Create(const gap: integer);
-begin
-  Create;
-  FHGap := gap;
-  FVGap := gap;
 end;
 
 constructor TfpgBorderLayoutManager.Create(const hgap: integer; const vgap: integer);
