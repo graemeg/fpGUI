@@ -4,7 +4,7 @@
     <Version Value="11"/>
     <General>
       <MainUnit Value="0"/>
-      <Title Value="lm_border"/>
+      <Title Value="lm-border"/>
       <ResourceType Value="res"/>
     </General>
     <BuildModes Count="1">
@@ -20,7 +20,7 @@
     </RunParams>
     <Units Count="1">
       <Unit0>
-        <Filename Value="lm_border.lpr"/>
+        <Filename Value="lm-border.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
     </Units>

@@ -1,4 +1,4 @@
-program lm_border;
+program lm-border;
 
 {$mode objfpc}{$H+}
 
