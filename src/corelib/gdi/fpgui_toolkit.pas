@@ -25,7 +25,7 @@ uses
   U_ReportImages, U_Visu, fpg_trayicon, fpg_dbugintf, fpg_dbugmsg,
   fpg_style_carbon, fpg_style_plastic, fpg_style_win8, fpg_scrollframe, fpg_toggle,
   fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_hexview, SynRegExpr,
-  fpg_flowlayout, fpg_layoutmanager, fpg_layouttypes;
+  fpg_flowlayout, fpg_layoutmanager, fpg_layouttypes, fpg_borderlayout;
 
 implementation
 

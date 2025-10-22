@@ -28,7 +28,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1" Minor="5"/>
-    <Files Count="119">
+    <Files Count="120">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -506,6 +506,10 @@
         <Filename Value="../fpg_defines.inc"/>
         <Type Value="Include"/>
       </Item119>
+      <Item120>
+        <Filename Value="../fpg_borderlayout.pas"/>
+        <UnitName Value="fpg_borderlayout"/>
+      </Item120>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/corelib/cocoa;../../../docs/xml/gui"/>
