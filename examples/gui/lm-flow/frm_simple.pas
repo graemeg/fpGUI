@@ -55,6 +55,10 @@ begin
     Btn.Text := Format('Button %d', [i]);
     Btn.Width := 60 + (i * 5); // Vary width to force wrapping
     Btn.Height := 30;
+
+    if i = 5 then
+      Btn.PreferredSize := fpgSize(200, 15);
+
     FlowLayout.AddLayoutComponent(Btn, TfpgLayoutConstraint.Create());
   end;
 end;
