@@ -55,11 +55,13 @@ type
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
   public
-    constructor Create; override;
-    property Alignment: TfpgFlowLayoutAlignment read FAlignment write SetAlignment;
-    property VAlignment: TfpgFlowLayoutVAlignment read FVAlignment write SetVAlignment;
-    property HGap: TfpgCoord read FHGap write SetHGap;
-    property VGap: TfpgCoord read FVGap write SetVGap;
+    constructor Create; override; overload;
+    constructor Create(const gap: integer); overload;
+    constructor Create(const hgap: integer; const vgap: integer); overload;
+    property Alignment: TfpgFlowLayoutAlignment read FAlignment write SetAlignment default flaLeft;
+    property VAlignment: TfpgFlowLayoutVAlignment read FVAlignment write SetVAlignment default flvaTop;
+    property HGap: TfpgCoord read FHGap write SetHGap default 5;
+    property VGap: TfpgCoord read FVGap write SetVGap default 5;
   end;
 
 implementation
@@ -83,6 +85,20 @@ begin
   FVAlignment := flvaTop;
   FHGap := 5;
   FVGap := 5;
+end;
+
+constructor TfpgFlowLayoutManager.Create(const gap: integer);
+begin
+  Create;
+  FHGap := gap;
+  FVGap := gap;
+end;
+
+constructor TfpgFlowLayoutManager.Create(const hgap: integer; const vgap: integer);
+begin
+  Create;
+  FHGap := hgap;
+  FVGap := vgap;
 end;
 
 procedure TfpgFlowLayoutManager.SetAlignment(AValue: TfpgFlowLayoutAlignment);

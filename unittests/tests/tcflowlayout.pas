@@ -21,6 +21,7 @@ type
 
   TTestFlowLayout = class(TTestCase)
   published
+    procedure TestDefaults;
     procedure TestSimpleFlow;
     procedure TestWrappingFlow;
   end;
@@ -35,6 +36,19 @@ begin
 end;
 
 { TTestFlowLayout }
+
+procedure TTestFlowLayout.TestDefaults;
+var
+  lm: TfpgFlowLayoutManager;
+begin
+  lm := TfpgFlowLayoutManager.Create;
+  try
+    CheckEquals(5, lm.HGap, 'HGap default');
+    CheckEquals(5, lm.VGap, 'VGap default');
+  finally
+    FreeAndNil(lm);
+  end;
+end;
 
 procedure TTestFlowLayout.TestSimpleFlow;
 var
@@ -66,14 +80,14 @@ begin
 
   container.Realign;
 
-  CheckEquals(0, w1.Left, 'w1.Left');
-  CheckEquals(0, w1.Top, 'w1.Top');
+  CheckEquals(5, w1.Left, 'w1.Left');
+  CheckEquals(5, w1.Top, 'w1.Top');
 
-  CheckEquals(50, w2.Left, 'w2.Left');
-  CheckEquals(0, w2.Top, 'w2.Top');
+  CheckEquals(60, w2.Left, 'w2.Left');
+  CheckEquals(5, w2.Top, 'w2.Top');
 
-  CheckEquals(100, w3.Left, 'w3.Left');
-  CheckEquals(0, w3.Top, 'w3.Top');
+  CheckEquals(115, w3.Left, 'w3.Left');
+  CheckEquals(5, w3.Top, 'w3.Top');
 
   container.Free;
 end;
@@ -87,7 +101,7 @@ begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
   container.SetPosition(0, 0, 120, 200); // Narrow container
-  lm := TfpgFlowLayoutManager.Create as ILayoutManager;
+  lm := TfpgFlowLayoutManager.Create(0, 0) as ILayoutManager;
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
