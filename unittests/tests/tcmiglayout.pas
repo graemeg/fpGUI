@@ -28,6 +28,7 @@ type
     procedure TestTwoColumnLayout;
     procedure TestColumnWidthCalculation;
     procedure TestCellAlignment;
+    procedure TestColumnSpan;
   end;
 
 procedure RegisterTests;
@@ -222,6 +223,43 @@ begin
   // The cell is the whole container, so widget should be at the bottom right
   CheckEquals(200 - 50 - 6, w1.Left, 'w1.Left');
   CheckEquals(200 - 20 - 6, w1.Top, 'w1.Top');
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestColumnSpan;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  w1, w2: TfpgWidget;
+  c: TfpgMigConstraint;
+begin
+  container := TfpgWidget.Create(nil);
+  container.Name := 'container';
+  container.SetPosition(0, 0, 200, 200);
+  lm := TfpgMigLayoutManager.Create;
+  lm.ColumnCount := 2;
+  container.LayoutManager := lm;
+
+  w1 := TfpgWidget.Create(container);
+  w1.Name := 'w1';
+  w1.SetPosition(0, 0, 100, 20);
+  c := TfpgMigConstraint.Create;
+  c.SpanX := 2;
+  lm.AddLayoutComponent(w1, c);
+
+  w2 := TfpgWidget.Create(container);
+  w2.Name := 'w2';
+  w2.SetPosition(0, 0, 50, 20);
+  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+
+  container.Realign;
+
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
+
+  CheckEquals(6, w2.Left, 'w2.Left');
+  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (gap) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;

@@ -282,7 +282,7 @@ begin
       constraint := GetConstraint(widget) as TfpgMigConstraint;
       grid.AddWidget(widget, row, column, constraint.SpanX, constraint.SpanY, constraint);
 
-      Inc(column);
+      Inc(column, constraint.SpanX);
       if column >= FColumnCount then
       begin
         column := 0;
