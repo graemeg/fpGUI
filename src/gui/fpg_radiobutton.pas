@@ -155,7 +155,7 @@ begin
         if (wg <> nil) and (wg <> self) and (wg is TfpgRadioButton) and
             (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
         begin
-          TfpgRadioButton(wg).Checked := False;
+          TfpgRadioButton(wg).FChecked := False;
         end;
       end;  { if }
   end;  { if }

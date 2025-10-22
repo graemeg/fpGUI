@@ -1,0 +1,231 @@
+unit tcborderlayout;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, fpcunit, testutils, testregistry,
+  fpg_base, fpg_main, fpg_widget, fpg_panel, fpg_button,
+  fpg_layouttypes, fpg_borderlayout;
+
+type
+
+  TTestBorderLayout = class(TTestCase)
+  published
+    procedure TestLayout;
+    procedure TestGaps;
+    procedure TestPreferredSize;
+    procedure TestMinimumSize;
+  end;
+
+procedure RegisterTests;
+
+implementation
+
+uses
+  fpg_layoutmanager;
+
+procedure RegisterTests;
+begin
+  RegisterTest(TTestBorderLayout);
+end;
+
+{ TTestBorderLayout }
+
+procedure TTestBorderLayout.TestLayout;
+var
+  container: TfpgWidget;
+  lm: TfpgBorderLayoutManager;
+  wNorth, wSouth, wEast, wWest, wCenter: TfpgWidget;
+  c: TfpgBorderLayoutConstraint;
+  ps: TfpgSize;
+begin
+  container := TfpgWidget.Create(nil);
+  container.Name := 'container';
+  container.SetPosition(0, 0, 200, 200);
+  lm := TfpgBorderLayoutManager.Create;
+  container.LayoutManager := lm;
+
+  wNorth := TfpgWidget.Create(container);
+  wNorth.Name := 'north';
+  ps.SetSize(200, 20);
+  wNorth.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrNorth;
+  lm.AddLayoutComponent(wNorth, c);
+
+  wSouth := TfpgWidget.Create(container);
+  wSouth.Name := 'south';
+  ps.SetSize(200, 20);
+  wSouth.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrSouth;
+  lm.AddLayoutComponent(wSouth, c);
+
+  wEast := TfpgWidget.Create(container);
+  wEast.Name := 'east';
+  ps.SetSize(20, 160);
+  wEast.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrEast;
+  lm.AddLayoutComponent(wEast, c);
+
+  wWest := TfpgWidget.Create(container);
+  wWest.Name := 'west';
+  ps.SetSize(20, 160);
+  wWest.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrWest;
+  lm.AddLayoutComponent(wWest, c);
+
+  wCenter := TfpgWidget.Create(container);
+  wCenter.Name := 'center';
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrCenter;
+  lm.AddLayoutComponent(wCenter, c);
+
+  container.Realign;
+
+  CheckEquals(0, wNorth.Top, 'wNorth.Top');
+  CheckEquals(0, wNorth.Left, 'wNorth.Left');
+  CheckEquals(200, wNorth.Width, 'wNorth.Width');
+  CheckEquals(20, wNorth.Height, 'wNorth.Height');
+
+  CheckEquals(180, wSouth.Top, 'wSouth.Top');
+  CheckEquals(0, wSouth.Left, 'wSouth.Left');
+  CheckEquals(200, wSouth.Width, 'wSouth.Width');
+  CheckEquals(20, wSouth.Height, 'wSouth.Height');
+
+  CheckEquals(20, wWest.Top, 'wWest.Top');
+  CheckEquals(0, wWest.Left, 'wWest.Left');
+  CheckEquals(20, wWest.Width, 'wWest.Width');
+  CheckEquals(160, wWest.Height, 'wWest.Height');
+
+  CheckEquals(20, wEast.Top, 'wEast.Top');
+  CheckEquals(180, wEast.Left, 'wEast.Left');
+  CheckEquals(20, wEast.Width, 'wEast.Width');
+  CheckEquals(160, wEast.Height, 'wEast.Height');
+
+  CheckEquals(20, wCenter.Top, 'wCenter.Top');
+  CheckEquals(20, wCenter.Left, 'wCenter.Left');
+  CheckEquals(160, wCenter.Width, 'wCenter.Width');
+  CheckEquals(160, wCenter.Height, 'wCenter.Height');
+
+  container.Free;
+end;
+
+procedure TTestBorderLayout.TestGaps;
+var
+  container: TfpgPanel;
+  lm: ILayoutManager;
+  wNorth, wSouth, wWest: TfpgButton;
+  c: TfpgBorderLayoutConstraint;
+  ps: TfpgSize;
+begin
+  container := TfpgPanel.Create(nil);
+  container.Name := 'container';
+  container.SetPosition(0, 0, 200, 200);
+  lm := TfpgBorderLayoutManager.Create(5, 10);
+  container.LayoutManager := lm;
+
+  wNorth := TfpgButton.Create(container);
+  wNorth.Name := 'north';
+  wNorth.PreferredSize := fpgSize(200, 20);
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrNorth;
+  lm.AddLayoutComponent(wNorth, c);
+
+  wSouth := TfpgButton.Create(container);
+  wSouth.Name := 'south';
+  wSouth.PreferredSize := fpgSize(200, 20);
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrSouth;
+  lm.AddLayoutComponent(wSouth, c);
+
+  wWest := TfpgButton.Create(container);
+  wWest.Name := 'west';
+  wWest.PreferredSize := fpgSize(20, 160);
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrWest;
+  lm.AddLayoutComponent(wWest, c);
+
+  container.Realign;
+
+  CheckEquals(12, wNorth.Top, 'wNorth.Top with gap');
+  CheckEquals(42, wWest.Top, 'wWest.Top with gap');
+  CheckEquals(168, wSouth.Top, 'wSouth.Top with gap');
+  CheckEquals(7, wWest.Left, 'wWest.Left with gap');
+
+  container.Free;
+end;
+
+procedure TTestBorderLayout.TestPreferredSize;
+var
+  container: TfpgWidget;
+  lm: ILayoutManager;
+  wNorth, wCenter: TfpgWidget;
+  c: TfpgBorderLayoutConstraint;
+  ps, pref: TfpgSize;
+begin
+  container := TfpgWidget.Create(nil);
+  lm := TfpgBorderLayoutManager.Create;
+  container.LayoutManager := lm;
+
+  wNorth := TfpgWidget.Create(container);
+  ps.SetSize(100, 20);
+  wNorth.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrNorth;
+  lm.AddLayoutComponent(wNorth, c);
+
+  wCenter := TfpgWidget.Create(container);
+  ps.SetSize(50, 50);
+  wCenter.PreferredSize := ps;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrCenter;
+  lm.AddLayoutComponent(wCenter, c);
+
+  pref := lm.GetPreferredSize(container);
+
+  CheckEquals(100, pref.W, 'PreferredWidth');
+  CheckEquals(70, pref.H, 'PreferredHeight');
+
+  container.Free;
+end;
+
+procedure TTestBorderLayout.TestMinimumSize;
+var
+  container: TfpgWidget;
+  lm: ILayoutManager;
+  wNorth, wCenter: TfpgWidget;
+  c: TfpgBorderLayoutConstraint;
+  min: TfpgSize;
+begin
+  container := TfpgWidget.Create(nil);
+  lm := TfpgBorderLayoutManager.Create;
+  container.LayoutManager := lm;
+
+  wNorth := TfpgWidget.Create(container);
+  wNorth.MinWidth := 80;
+  wNorth.MinHeight := 15;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrNorth;
+  lm.AddLayoutComponent(wNorth, c);
+
+  wCenter := TfpgWidget.Create(container);
+  wCenter.MinWidth := 40;
+  wCenter.MinHeight := 40;
+  c := TfpgBorderLayoutConstraint.Create;
+  c.Region := blrCenter;
+  lm.AddLayoutComponent(wCenter, c);
+
+  min := lm.GetMinimumSize(container);
+
+  CheckEquals(80, min.W, 'MinimumWidth');
+  CheckEquals(55, min.H, 'MinimumHeight');
+
+  container.Free;
+end;
+
+end.

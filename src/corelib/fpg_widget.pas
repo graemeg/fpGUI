@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -24,7 +24,8 @@ uses
   Classes,
   SysUtils,
   fpg_main,
-  fpg_base;
+  fpg_base,
+  fpg_layouttypes;
 
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
@@ -57,12 +58,18 @@ type
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
     alist: TList;
+    FLayoutManager: ILayoutManager;
+    FLayoutConstraint: TfpgLayoutConstraint;
     function    GetAcceptDrops: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
+    procedure   SetLayoutManager(const AValue: ILayoutManager);
+    function    GetPreferredSize: TfpgSize;
+    procedure   SetPreferredSize(const AValue: TfpgSize);
   protected
+    procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     function    GetWindow: TfpgNativeWindow; reintroduce;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -105,6 +112,7 @@ type
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    FPreferredSize: TfpgSize;
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
     procedure   DoAllocateWindowHandle; override;
@@ -124,6 +132,7 @@ type
     function    GetCanvas: TfpgCanvas; reintroduce;
     function    CreateCanvas: TfpgCanvasBase; virtual;
     procedure   DoUpdatePosition; override;
+    procedure   DoGetPreferredSize(var ASize: TfpgSize); override;
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
@@ -186,6 +195,7 @@ type
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
+    procedure   SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
     procedure   Invalidate;
     procedure   InvalidateRect(ARect: TfpgRect);
     property    Window: TfpgNativeWindow read GetWindow;
@@ -210,6 +220,8 @@ type
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    DropHandler: TfpgDropHandler read GetDropHandler write SetDropHandler;
+    property    LayoutManager: ILayoutManager read FLayoutManager write SetLayoutManager;
+    property    PreferredSize: TfpgSize read GetPreferredSize write SetPreferredSize;
   end;
 
 
@@ -227,6 +239,29 @@ uses
   fpg_form,   { for OnKeyPress handling }
   fpg_window, { for Finding the Toplevel Window }
   fpg_utils;
+
+function TfpgWidget.GetPreferredSize: TfpgSize;
+begin
+  Result := FPreferredSize;
+end;
+
+procedure TfpgWidget.SetPreferredSize(const AValue: TfpgSize);
+begin
+  if (FPreferredSize.W <> AValue.W) or (FPreferredSize.H <> AValue.H) then
+  begin
+    FPreferredSize := AValue;
+    if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+      Parent.LayoutManager.InvalidateLayout(Parent);
+  end;
+end;
+
+procedure TfpgWidget.DoGetPreferredSize(var ASize: TfpgSize);
+begin
+  if (FPreferredSize.W > 0) and (FPreferredSize.H > 0) then
+    ASize := FPreferredSize
+  else
+    inherited DoGetPreferredSize(ASize);
+end;
 
 
 var
@@ -253,6 +288,17 @@ begin
     Result := FocusRootWidget;
     while (Result <> nil) and (Result.ActiveWidget <> nil) do
       Result := Result.ActiveWidget;
+  end;
+end;
+
+procedure TfpgWidget.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+
+  // Notify layout manager of component changes
+  if (Operation = opRemove) and (AComponent is TfpgWidget) and Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.RemoveLayoutComponent(TfpgWidget(AComponent));
   end;
 end;
 
@@ -291,12 +337,12 @@ var
 begin
   Result := nil;
   if AWidget = nil then
-    exit; // ==>
+    exit;
   w := AWidget;
   while Assigned(w) do
   begin
     if w is TfpgWindow then
-      Exit(TfpgWindow(w)); // ==>
+      Exit(TfpgWindow(w));
     w := w.Parent;
   end;
 end;
@@ -308,7 +354,7 @@ var
   i: integer;
 begin
   if FEnabled = AValue then
-    Exit; //==>
+    Exit;
   FEnabled := AValue;
   for i := 0 to ComponentCount - 1 do
   begin
@@ -321,9 +367,9 @@ end;
 procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
-    Exit; //==>
+    Exit;
   if InDesigner then
-    Exit; //==>
+    Exit;
 
   try
     if FActiveWidget <> nil then
@@ -398,6 +444,14 @@ begin
     Parent.Realign;
 end;
 
+procedure TfpgWidget.SetLayoutManager(const AValue: ILayoutManager);
+begin
+  if FLayoutManager = AValue then
+    Exit;
+  FLayoutManager := AValue;
+  Realign;
+end;
+
 procedure TfpgWidget.DoAllocateWindowHandle;
 begin
   if HasOwnWindow then
@@ -424,20 +478,21 @@ end;
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
   if FVisible = AValue then
-    Exit; //==>
+    Exit;
   FVisible := AValue;
   if FOnScreen then
     if FVisible then
     begin
-//      writeln('DEBUG:  TfpgWidget.SetVisible - handleshow');
       HandleShow;
     end
     else
     begin
-//      writeln('DEBUG:  TfpgWidget.SetVisible - handlehide');
       HandleHide;
       FOnScreen := True;
     end;
+  // If visibility changes, the parent's layout might need to be recalculated
+  if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+    Parent.Realign;
 end;
 
 procedure TfpgWidget.SetShowHint(const AValue: boolean);
@@ -493,6 +548,9 @@ begin
     {$IFDEF CStackDebug}
     DebugLn(Format('  Alignment deltas  w: %d  h: %d', [dw, dh]));
     {$ENDIF}
+    // If a layout manager is assigned, invalidate it to trigger recalculation
+    if Assigned(FLayoutManager) then
+      FLayoutManager.InvalidateLayout(Self);
     HandleAlignments(dw, dh);
   end;
 
@@ -504,7 +562,6 @@ begin
     begin
       Parent.WidgetToWindow(ParentLeft, ParentTop);
     end;
-    //WriteLn(ClassName,' resizing ', Left,':',Top,':',Width,':', Height);
     Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
   end
   else if Parent <> nil then
@@ -579,13 +636,13 @@ begin
       if HelpKeyword <> '' then
       begin
         fpgApplication.KeywordHelp(HelpKeyword);
-        Exit; //==>
+        Exit;
       end;
     htContext:
       if HelpContext <> 0 then
       begin
         fpgApplication.ContextHelp(HelpContext);
-        Exit; //==>
+        Exit;
       end;
   end;
   if Parent <> nil then
@@ -596,6 +653,8 @@ end;
 
 procedure TfpgWidget.Realign;
 begin
+  if Assigned(FLayoutManager) then
+    FLayoutManager.InvalidateLayout(Self);
   HandleAlignments(0, 0);
   RePaint;
 end;
@@ -620,8 +679,6 @@ end;
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   Loading;
-
-  //HasOwnWindow:=True;
 
   FIsContainer    := False;
   FOnScreen       := False;
@@ -666,6 +723,7 @@ begin
   {$IFDEF GDEBUG}
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
+  FLayoutConstraint.Free;
   FCanvas.Free;
   HandleHide;
 
@@ -832,7 +890,6 @@ var
 begin
   if InDesigner then
   begin
-    // dispatching message to designer
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
       Exit;
@@ -872,7 +929,6 @@ var
   mb: TMouseButton;
   IsDblClick: boolean;
 begin
-  //writeln('>> TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
   FDragActive := False;
   if InDesigner then
   begin
@@ -942,7 +998,6 @@ begin
   if Assigned(FOnMouseUp) then // and not IsDblClick then
     FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
-  //writeln('<< TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
 end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
@@ -1160,7 +1215,7 @@ begin
     OnKeyPress(self, keycode, shiftstate, consumed);
 
   if consumed then
-    Exit; //==>
+    Exit;
 
   direction := fdNone;
 
@@ -1343,12 +1398,12 @@ end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -1375,7 +1430,7 @@ end;
 
 procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  // do nothing
 end;
 
 procedure TfpgWidget.HandleMultiClick(count: integer; x, y: integer; button: word; shiftstate: TShiftState);
@@ -1576,8 +1631,6 @@ begin
 
     if HasOwnWindow then
     begin
-      //WriteLn('WINDOW PAINT ==============>>>>>>>>>>>>>');
-      //Write('Main ClipRect: '); PrintRect(FInvalidRect);
       if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
       begin
         Canvas.EndDraw;
@@ -1626,23 +1679,24 @@ var
   dw: integer;
   dh: integer;
   _w, _h: integer;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
   _w := FWidth;
   _h := FHeight;
   { Width and Height might not be what came through in the msg because of
-    size constraints, so we calculate the delta diffs after HandleResize }
+    size constraints, so we calculate the delta diffs after HandleResize.
+    NOTE: For TfpgBaseForm, this also triggers closing popup windows. }
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
-  //dw      := msg.Params.rect.Width - FWidth;
-  //dh      := msg.Params.rect.Height - FHeight;
   dw := FWidth - _w;
   dh := FHeight - _h;
+
+  // If a layout manager is assigned, invalidate it to trigger recalculation
+  if Assigned(FLayoutManager) then
+    FLayoutManager.InvalidateLayout(Self);
+
+  // Always call HandleAlignments. It will either delegate to the layout manager
+  // (which will now be dirty) or handle Align/Anchors with the correct deltas.
   HandleAlignments(dw, dh);
+
   if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
@@ -1690,6 +1744,13 @@ begin
     Exit;  //==>
   end;
 
+  // If this container has a layout manager, delegate to it
+  if Assigned(FLayoutManager) then
+  begin
+    FLayoutManager.LayoutContainer(Self);
+    Exit;  // Layout manager handles everything
+  end;
+
   {$IFDEF gDebug}
   DebugLn(Format('dwidth=%d  dheight=%d  Classname=''%s''', [dwidth, dheight, ClassName]));
   {$ENDIF}
@@ -1708,11 +1769,6 @@ begin
     end;
 
     DoAlignment;
-    //DoAlign(alTop);
-    //DoAlign(alBottom);
-    //DoAlign(alLeft);
-    //DoAlign(alRight);
-    //DoAlign(alClient);
   finally
     alist.Free;
   end;
@@ -1747,8 +1803,6 @@ begin
           dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
-        //Write(wg.ClassName + ': ');
-        //PrintRect(wg.WidgetBoundsInWindow);
       end;
     end;  { if }
 end;
@@ -1795,7 +1849,6 @@ var
   w: TfpgWidget;
   n: integer;
 begin
-  // and process this list in order
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
@@ -1828,7 +1881,7 @@ begin
 
       alClient:
         w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, FAlignRect.Height);
-    end; { case }
+    end;
   end;
 end;
 
@@ -1852,14 +1905,12 @@ var
   wg: TfpgWidget;
   i: integer;
 begin
-  //writeln(Classname, ' - ', Name, '.DoKeyShortcut() - ' + KeycodeToText(keycode, shiftstate));
   { process children of self }
   for i := 0 to ComponentCount-1 do
   begin
     c := TfpgComponent(Components[i]);
     if not (c is TfpgWidget) then
     begin
-      //writeln('** skipped ', Classname, ' - ', Name);
       continue;
     end
     else
@@ -1890,6 +1941,17 @@ begin
   {$ENDIF}
   if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
     MoveAndResize(aleft, atop, awidth, aheight);
+end;
+
+procedure TfpgWidget.SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
+begin
+  if FLayoutConstraint <> AConstraint then
+  begin
+    FLayoutConstraint.Free;
+    FLayoutConstraint := AConstraint;
+    if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+      Parent.LayoutManager.InvalidateLayout(Parent);
+  end;
 end;
 
 procedure TfpgWidget.Invalidate;
