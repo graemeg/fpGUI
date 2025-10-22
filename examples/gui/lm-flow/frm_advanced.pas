@@ -19,7 +19,7 @@ type
     pnlControls: TfpgPanel;
     splVertical: TfpgSplitter;
     pnlFlow: TfpgPanel;
-    GroupBox1: TfpgGroupBox;
+    rgAlignment: TfpgGroupBox;
     rbAlignmentL: TfpgRadioButton;
     rbAlignmentC: TfpgRadioButton;
     rbAlignmentR: TfpgRadioButton;
@@ -88,15 +88,15 @@ begin
     TextColor := TfpgColor($FF808080);
   end;
 
-  GroupBox1 := TfpgGroupBox.Create(pnlControls);
-  with GroupBox1 do
+  rgAlignment := TfpgGroupBox.Create(pnlControls);
+  with rgAlignment do
   begin
-    Name := 'GroupBox1';
+    Name := 'rgAlignment';
     SetPosition(8, 8, 160, 110);
-    Text := 'Alignments';
+    Text := 'Alignment';
   end;
 
-  rbAlignmentL := TfpgRadioButton.Create(GroupBox1);
+  rbAlignmentL := TfpgRadioButton.Create(rgAlignment);
   with rbAlignmentL do
   begin
     Name := 'rbAlignmentL';
@@ -109,7 +109,7 @@ begin
     OnChange := @AlignmentChanged;
   end;
 
-  rbAlignmentC := TfpgRadioButton.Create(GroupBox1);
+  rbAlignmentC := TfpgRadioButton.Create(rgAlignment);
   with rbAlignmentC do
   begin
     Name := 'rbAlignmentC';
@@ -121,7 +121,7 @@ begin
     OnChange := @AlignmentChanged;
   end;
 
-  rbAlignmentR := TfpgRadioButton.Create(GroupBox1);
+  rbAlignmentR := TfpgRadioButton.Create(rgAlignment);
   with rbAlignmentR do
   begin
     Name := 'rbAlignmentR';
@@ -185,7 +185,7 @@ begin
     SetPosition(8, 264, 50, 25);
     BackgroundColor := TfpgColor($FFD5D2CD);
     Text := 'HGap';
-    TextColor := TfpgColor($FF808080);
+    TextColor := clBlack;
   end;
 
   seHGap := TfpgSpinEdit.Create(pnlControls);
@@ -204,7 +204,7 @@ begin
     Name := 'lblVGap';
     SetPosition(8, 296, 50, 25);
     Text := 'VGap';
-    TextColor := TfpgColor($FF808080);
+    TextColor := clBlack;
   end;
 
   seVGap := TfpgSpinEdit.Create(pnlControls);
