@@ -2,7 +2,7 @@
 Compiling:
 
 - Run-time package: 
-  lclfpreport.lpk
+  fpguireport.lpk
 - Demos: demos/fcldemo.lpr
 
 fpReport Demos can be found in the "demos" directory.

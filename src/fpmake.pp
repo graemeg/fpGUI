@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 - 2016 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -42,7 +42,11 @@ program fpmake;
 {$h+}
 
 uses
-  sysutils, fpmkunit;
+  {$ifdef unix}
+  cthreads,
+  {$endif}
+  sysutils,
+  fpmkunit;
 
 const
   {$I VERSION_FILE.inc}
@@ -51,16 +55,20 @@ var
   T: TTarget;
   P: TPackage;
 begin
-  with Installer do begin
+  with Installer do
+  begin
     P := AddPackage('fpgui');
     P.Version := FPGUI_VERSION;
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
     P.License := 'LGPL with static linking exception';
+    P.HomepageURL := 'fpgui.sourceforge.net';
     P.Description := 'fpGUI Toolkit - a custom written GUI toolkit for Free Pascal.';
 
-//    P.Dependencies.Add('fcl');
-    { Fill in more package details here }
+    P.Dependencies.Add('fcl-base');
+    P.NeedLibC := false;
+    P.OSes := [linux, win32, win64, wince, darwin, freebsd, netbsd, openbsd, solaris];
+
 
     { This shouldn't really be here.  fpmake will install to the local
       fpc installation, i.e. /usr/[local]/lib/fpc/<version>/units/<cpu-os>/fpgui
@@ -83,7 +91,7 @@ begin
       Defaults.Options.Add('-dGDI');
 
     { to try the experimental AggPas-enabled Canvas class }
-//    Defaults.Options.Add('-dAGGCanvas');
+    Defaults.Options.Add('-dAGGCanvas');
 
     P.SourcePath.Add('corelib');
     P.SourcePath.Add('corelib/x11', AllUnixOSes);
@@ -91,6 +99,9 @@ begin
     P.SourcePath.Add('gui');
     P.SourcePath.Add('gui/db');
     P.SourcePath.Add('reportengine');
+    P.SourcePath.Add('corelib/render/software');
+    P.SourcePath.Add('3rdparty/regex');
+    P.Sources.AddSrcFiles('*.pas', 'corlib/render/software', false);
 
     P.UnitPath.Add('corelib');
     P.UnitPath.Add('corelib/x11', AllUnixOSes);
@@ -98,12 +109,14 @@ begin
     P.UnitPath.Add('gui');
     P.UnitPath.Add('gui/db');
     P.UnitPath.Add('reportengine');
-    P.UnitPath.Add('corelib/render/software/');
+    P.UnitPath.Add('corelib/render/software');
+    P.UnitPath.Add('3rdparty/regex');
 
     P.IncludePath.Add('.');
     P.IncludePath.Add('corelib');
     P.IncludePath.Add('corelib/x11', AllUnixOSes);
     P.IncludePath.Add('corelib/gdi', AllWindowsOSes);
+//    P.IncludePath.Add('corelib/cocoa', MacOSX);
     P.IncludePath.Add('gui');
 
     { todo: add unit and include dependency for all }
@@ -154,6 +167,13 @@ begin
     T := P.Targets.AddUnit('fpg_pofiles.pas');
     T := P.Targets.AddUnit('fpg_stringutils.pas');
     T := P.Targets.AddUnit('fpg_extgraphics.pas');
+    T := P.Targets.AddUnit('fpg_hexview.pas');
+    T := P.Targets.AddUnit('fpg_csvparser.pas');
+
+    T := P.Targets.AddUnit('fpg_layouttypes.pas');
+    T := P.Targets.AddUnit('fpg_layoutmanager.pas');
+    T := P.Targets.AddUnit('fpg_flowlayout.pas');
+    T := P.Targets.AddUnit('fpg_borderlayout.pas');
 
 
     { corelib/x11 }
@@ -240,6 +260,7 @@ begin
     T := P.Targets.AddUnit('fpg_style_win8.pas');
     T := P.Targets.AddUnit('fpg_style_motif.pas');
     T := P.Targets.AddUnit('fpg_style_carbon.pas');
+    T := P.Targets.AddUnit('fpg_scrollframe.pas');
 
     { PDF report engine }
     T := P.Targets.AddUnit('u_reportimages.pas');
