@@ -29,6 +29,8 @@ type
     procedure TestColumnWidthCalculation;
     procedure TestCellAlignment;
     procedure TestColumnSpan;
+    procedure TestRowSpan;
+    procedure TestGrow;
   end;
 
 procedure RegisterTests;
@@ -221,8 +223,9 @@ begin
   container.Realign;
 
   // The cell is the whole container, so widget should be at the bottom right
-  CheckEquals(200 - 50 - 6, w1.Left, 'w1.Left');
-  CheckEquals(200 - 20 - 6, w1.Top, 'w1.Top');
+
+  CheckEquals(container.Right - 50 - 6, w1.Left, 'w1.Left');  // 50 width, 6 padding
+  CheckEquals(container.Bottom - 20 - 6, w1.Top, 'w1.Top');   // 20 height, 6 padding
 
   container.Free;
 end;
@@ -260,6 +263,90 @@ begin
 
   CheckEquals(6, w2.Left, 'w2.Left');
   CheckEquals(32, w2.Top, 'w2.Top'); // 6 (gap) + 20 (w1.height) + 6 (gap)
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestRowSpan;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  w1, w2, w3: TfpgWidget;
+  c: TfpgMigConstraint;
+begin
+  container := TfpgWidget.Create(nil);
+  container.Name := 'container';
+  container.SetPosition(0, 0, 200, 200);
+  lm := TfpgMigLayoutManager.Create;
+  lm.ColumnCount := 2;
+  container.LayoutManager := lm;
+
+  w1 := TfpgWidget.Create(container);
+  w1.Name := 'w1';
+  w1.SetPosition(0, 0, 50, 50);
+  c := TfpgMigConstraint.Create;
+  c.SpanY := 2;
+  lm.AddLayoutComponent(w1, c);
+
+  w2 := TfpgWidget.Create(container);
+  w2.Name := 'w2';
+  w2.SetPosition(0, 0, 50, 20);
+  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+
+  w3 := TfpgWidget.Create(container);
+  w3.Name := 'w3';
+  w3.SetPosition(0, 0, 50, 20);
+  lm.AddLayoutComponent(w3, TfpgMigConstraint.Create());
+
+  container.Realign;
+
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
+
+  CheckEquals(62, w2.Left, 'w2.Left');
+  CheckEquals(6, w2.Top, 'w2.Top');
+
+  CheckEquals(62, w3.Left, 'w3.Left');
+  CheckEquals(32, w3.Top, 'w3.Top');
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestGrow;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  w1, w2: TfpgWidget;
+  c1, c2: TfpgMigConstraint;
+begin
+  container := TfpgWidget.Create(nil);
+  container.Name := 'container';
+  container.SetPosition(0, 0, 200, 100);
+  lm := TfpgMigLayoutManager.Create;
+  lm.ColumnCount := 2;
+  container.LayoutManager := lm;
+
+  w1 := TfpgWidget.Create(container);
+  w1.Name := 'w1';
+  w1.SetPosition(0, 0, 50, 20);
+  c1 := TfpgMigConstraint.Create;
+  lm.AddLayoutComponent(w1, c1);
+
+  w2 := TfpgWidget.Create(container);
+  w2.Name := 'w2';
+  w2.SetPosition(0, 0, 50, 20);
+  c2 := TfpgMigConstraint.Create;
+  c2.GrowX := 1;
+  c2.AlignX := axFill;
+  lm.AddLayoutComponent(w2, c2);
+
+  container.Realign;
+
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(50, w1.Width, 'w1.Width');
+
+  CheckEquals(62, w2.Left, 'w2.Left');
+  CheckEquals(132, w2.Width, 'w2.Width');
 
   container.Free;
 end;
