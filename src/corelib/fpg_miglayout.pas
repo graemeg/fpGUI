@@ -269,35 +269,56 @@ var
   iter: ILayoutIterator;
   widget: TfpgWidget;
   constraint: TfpgMigConstraint;
-  i, column, row: Integer;
+  i, col, row: Integer;
+  cellRect: TfpgRect;
 begin
+  // 1. Build the grid cells
   grid := TfpgMigGrid.Create(FColumnCount);
   try
-    iter := GetIterator(AContainer);
-    column := 0;
     row := 0;
+    col := 0;
+
+    // place widgets in grid cells
+    iter := GetIterator(AContainer);
     while iter.HasNext do
     begin
-      widget := iter.Next as TfpgWidget;
-      constraint := GetConstraint(widget) as TfpgMigConstraint;
-      grid.AddWidget(widget, row, column, constraint.SpanX, constraint.SpanY, constraint);
+      // Find next available cell
+      //while (row < grid.FRowCount) and (grid.FGrid[column, row] <> nil) do
+      //begin
+      //  Inc(column);
+      //  if column >= FColumnCount then
+      //  begin
+      //    column := 0;
+      //    Inc(row);
+      //  end;
+      //end;
 
-      Inc(column, constraint.SpanX);
-      if column >= FColumnCount then
+      widget := iter.Next as TfpgWidget;
+      constraint := GetConstraintOrDefault(widget) as TfpgMigConstraint;
+      grid.AddWidget(widget, row, col, constraint.SpanX, constraint.SpanY, constraint);
+
+      // Advance grid position
+      inc(col, constraint.SpanX);
+      if col >= FColumnCount then
       begin
-        column := 0;
-        Inc(row);
+        col := 0;
+        inc(row);
       end;
     end;
 
+    // 2. Calculate column widths and row heights
     grid.CalculateColumnWidths(AContainer.Width, FColumnGap);
     grid.CalculateRowHeights(AContainer.Height, FRowGap);
 
+    // 3. Position widgets within cells
     for i := 0 to grid.CellCount - 1 do
     begin
+      cellRect := grid.GetCellRect(grid.GetCell(i));
       widget := grid.GetCell(i).Widget;
-      with grid.GetCellRect(grid.GetCell(i)) do
-        widget.SetPosition(Left, Top, Width, Height);
+      constraint := GetConstraintOrDefault(widget) as TfpgMigConstraint;
+
+      // Apply alignment and growth
+      PositionWidgetInCell(widget, cellRect, constraint);
     end;
 
   finally
