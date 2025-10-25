@@ -1116,9 +1116,13 @@ type
   end;
 ----
 
-==== Step 2.4: Port CC (Component Constraints) (4-5 days)
+==== Step 2.4: Port CC (Component Constraints) ✓ COMPLETED
 
-**File:** `CC.java` → Extend `fpg_migconstraint.pas`
+**Status:** Complete - Widget-level constraints with 79 fluent API methods
+
+**Commit:** 8c07189c
+
+**File:** `CC.java` → `fpg_mig_cc.pas` (TfpgMigCC)
 
 Widget-level constraints. This is the most complex constraint class.
 
