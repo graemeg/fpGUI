@@ -27,6 +27,152 @@ This document outlines the plan to port MigLayout v11.4.2 from Java to Object Pa
 * Use interfaces and generics where beneficial (FPC 3.2+ support)
 * Maintain compatibility with Java MigLayout behavior
 
+== Session Continuation Guide
+
+=== Prompt Template for Continuing Implementation
+
+When starting a new session to continue implementation, use this prompt:
+
+----
+I'm continuing the MigLayout v11 port for fpGUI. Please read the implementation plan:
+
+docs/miglayout_v11_port_plan.adoc
+
+Current status:
+- Branch: feature/miglayout-v11-port
+- Last completed: [PHASE X, STEP X.X - description]
+- Next task: [PHASE X, STEP X.X - description]
+
+Please:
+1. Review the implementation plan starting from the "Getting Started" section
+2. Check git status to see what's been done
+3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests)
+4. Continue with [NEXT STEP]
+5. Follow test-as-you-go approach (write tests alongside implementation)
+6. Make regular commits after each completed subtask
+7. Update this document with checkmarks as steps are completed
+----
+
+**Example usage:**
+
+----
+I'm continuing the MigLayout v11 port for fpGUI. Please read the implementation plan:
+
+docs/miglayout_v11_port_plan.adoc
+
+Current status:
+- Branch: feature/miglayout-v11-port
+- Last completed: Phase 1, Step 1.2 - Ported UnitValue class with tests
+- Next task: Phase 1, Step 1.3 - Port BoundSize
+
+Please:
+1. Review the implementation plan starting from the "Getting Started" section
+2. Check git status to see what's been done
+3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests)
+4. Continue with Step 1.3: Port BoundSize
+5. Follow test-as-you-go approach (write tests alongside implementation)
+6. Make regular commits after each completed subtask
+7. Update this document with checkmarks as steps are completed
+----
+
+=== Commit Guidelines During Implementation
+
+**Commit frequency:**
+
+* After each completed subtask (e.g., "Implement UnitValue.Parse for pixel units")
+* After each passing test (e.g., "Add test for UnitValue percentage conversion")
+* After each completed step (e.g., "Complete Step 1.2: Port UnitValue")
+* Before breaks or end of session
+
+**Commit message format:**
+
+----
+<scope>: <brief description>
+
+<optional detailed explanation>
+----
+
+**Examples:**
+
+----
+mig: Add TfpgMigUnitValue class structure
+
+Ported from UnitValue.java (v11.4.2)
+- Added unit type enum
+- Added Parse class method stub
+- Added GetPixels method stub
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+test: Add UnitValue parsing tests for absolute units
+
+Tests for px, mm, cm, inch, pt unit types.
+All tests passing.
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+mig: Implement UnitValue.GetPixels for absolute units
+
+Conversion logic for px, mm, cm, inch, pt.
+Uses PlatformDefaults for DPI.
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+docs: Mark Step 1.2 complete in implementation plan
+
+UnitValue class fully ported and tested.
+12 tests passing (3 new for UnitValue).
+----
+
+**Don't commit:**
+
+* Broken/non-compiling code
+* Failing tests (unless documenting known issue)
+* Commented-out debugging code
+* Temporary test files
+
+**Do commit:**
+
+* Working incremental progress
+* Passing tests (even incomplete feature)
+* Documentation updates
+* Step completion markers
+
+=== Tracking Progress in This Document
+
+As you complete each step, update the document with checkmarks:
+
+**Before:**
+----
+==== Step 1.2: Port UnitValue (3-4 days)
+----
+
+**After:**
+----
+==== Step 1.2: Port UnitValue ✓ COMPLETED (3 days actual)
+----
+
+**For partially completed steps, use:**
+----
+==== Step 1.3: Port BoundSize (2-3 days) - IN PROGRESS
+
+Progress:
+☑ Class structure ported
+☑ Constructor implemented
+☑ Basic tests written and passing
+☐ Null handling implementation
+☐ Edge case tests
+☐ Complete
+----
+
+This allows quick visual scanning to see what's done and what's next.
+
 == Getting Started
 
 === Prerequisites
