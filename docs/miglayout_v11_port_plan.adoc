@@ -1038,11 +1038,14 @@ type
   end;
 ----
 
-==== Step 2.2: Port AC (Axis Constraints) (3-4 days)
+==== Step 2.2: Port AC (Axis Constraints) ✓ COMPLETED
 
 **File:** `AC.java` → `fpg_mig_ac.pas`
 
 Constraints for entire axis (all rows or all columns).
+
+**Status:** Complete - Fluent API with all constraint methods implemented
+**Commit:** bb850441
 
 [source,pascal]
 ----
