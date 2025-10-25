@@ -17,11 +17,24 @@ interface
 uses
   Classes, SysUtils, fpg_mig_boundsize, fpg_mig_unitvalue;
 
+type
+  { Array type for insets parsing }
+  TfpgMigUnitValueArray = array of TfpgMigUnitValue;
+
 { Parse a BoundSize from a string like "100px" or "50:100:200" }
 function ParseBoundSize(const AStr: string; AIsGap, AIsGapPushable: Boolean): TfpgMigBoundSize;
 
 { Parse alignment keywords like "left", "right", "top", "bottom", "center", etc. }
 function ParseAlignKeywords(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValue;
+
+{ Parse a single UnitValue from a string }
+function ParseUnitValue(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValue;
+
+{ Parse UnitValue or alignment keyword }
+function ParseUnitValueOrAlign(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValue;
+
+{ Parse insets from a string like "10" or "10 20" or "10 20 30 40" }
+function ParseInsets(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValueArray;
 
 implementation
 
@@ -63,6 +76,32 @@ begin
 
   // Return nil if not recognized
   Result := nil;
+end;
+
+function ParseUnitValue(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValue;
+begin
+  // TODO: Implement full UnitValue parsing
+  // For now, just return nil
+  Result := nil;
+end;
+
+function ParseUnitValueOrAlign(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValue;
+begin
+  // Try alignment keywords first
+  Result := ParseAlignKeywords(AStr, AIsHorizontal);
+  if Result = nil then
+    Result := ParseUnitValue(AStr, AIsHorizontal);
+end;
+
+function ParseInsets(const AStr: string; AIsHorizontal: Boolean): TfpgMigUnitValueArray;
+begin
+  // TODO: Implement insets parsing
+  // For now, return empty array with 4 nils
+  SetLength(Result, 4);
+  Result[0] := nil;
+  Result[1] := nil;
+  Result[2] := nil;
+  Result[3] := nil;
 end;
 
 end.
