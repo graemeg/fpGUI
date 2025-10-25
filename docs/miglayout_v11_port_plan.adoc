@@ -46,7 +46,7 @@ Current status:
 Please:
 1. Review the implementation plan starting from the "Getting Started" section
 2. Check git status to see what's been done
-3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests)
+3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
 4. Continue with [NEXT STEP]
 5. Follow test-as-you-go approach (write tests alongside implementation)
 6. Make regular commits after each completed subtask
@@ -68,7 +68,7 @@ Current status:
 Please:
 1. Review the implementation plan starting from the "Getting Started" section
 2. Check git status to see what's been done
-3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests)
+3. Verify existing tests still pass (cd unittests && fpc -dX11 @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
 4. Continue with Step 1.3: Port BoundSize
 5. Follow test-as-you-go approach (write tests alongside implementation)
 6. Make regular commits after each completed subtask
@@ -278,8 +278,8 @@ cd src
 [source,bash]
 ----
 cd unittests
-fpc @extrafpc.cfg fpgui_unittests.lpr
-./fpgui_unittests
+./build.sh 1
+./fpgui_unittests_console --all --format=plain 2>&1 | tail -5
 ----
 
 **Build a specific example:**
@@ -297,8 +297,8 @@ Before starting Phase 1, verify:
 
 * ☐ FPC 3.2+ installed and working
 * ☐ Current branch is `feature/miglayout-v11-port`
-* ☐ All 9 existing tests pass (`cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests`)
 * ☐ Framework builds successfully (`cd src && ./build.sh 1`)
+* ☐ All 9 existing tests pass (`cd unittests && ./build.sh 1 && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5`)
 * ☐ Java source files accessible in `prototypes/miglayout/mig-java-latest/`
 * ☐ Read Executive Summary and understand API-first + test-as-you-go approach
 
@@ -761,7 +761,7 @@ String osName = System.getProperty("os.name");
 
 **Goal:** Port basic data structures and types
 
-==== Step 1.0: Update Base Class (1 day)
+==== Step 1.0: Update Base Class ✓ COMPLETED
 
 **Critical prerequisite for fluent API support**
 
@@ -780,11 +780,14 @@ end;
 
 **Testing:**
 
-* Verify all existing layout managers still compile
-* Verify existing flow layout examples still work
-* Run existing unit tests to ensure backward compatibility
+* ✓ All existing layout managers still compile
+* ✓ Framework builds successfully
+* ✓ All 68 unit tests pass (0 errors, 0 failures)
+* ✓ All 9 MigLayout tests pass
 
-**Deliverable:** Updated base class with reference counting support
+**Deliverable:** ✓ Updated base class with reference counting support
+
+**Committed:** 1b483892
 
 ==== Step 1.1: Port Enums and Simple Types (2-3 days)
 
