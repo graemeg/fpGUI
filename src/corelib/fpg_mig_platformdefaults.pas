@@ -49,6 +49,7 @@ type
     { Predefined UnitValues for common gaps }
     class var FLPX6, FLPX7, FLPX11, FLPX12, FLPX16, FLPX18, FLPX20: TfpgMigUnitValue;
     class var FLPY6, FLPY7, FLPY11, FLPY12, FLPY16, FLPY18, FLPY20: TfpgMigUnitValue;
+    class var FLPX70, FLPX75: TfpgMigUnitValue;  // Button widths
 
     { Gap values }
     class var FRelatedX, FRelatedY: TfpgMigBoundSize;
@@ -160,6 +161,10 @@ begin
   FLPY16 := TfpgMigUnitValue.Create(16, utLPY, '16lpy');
   FLPY18 := TfpgMigUnitValue.Create(18, utLPY, '18lpy');
   FLPY20 := TfpgMigUnitValue.Create(20, utLPY, '20lpy');
+
+  { Create predefined button widths }
+  FLPX70 := TfpgMigUnitValue.Create(70, utLPX, '70lpx');
+  FLPX75 := TfpgMigUnitValue.Create(75, utLPX, '75lpx');
 end;
 
 class function TfpgMigPlatformDefaults.GetCurrentPlatform: Integer;
@@ -183,7 +188,7 @@ begin
       SetRelatedGap(FLPX7, FLPY7);
       SetUnrelatedGap(FLPX11, FLPY11);
       SetGridCellGap(FLPX7, FLPY7);
-      SetMinimumButtonWidth(TfpgMigUnitValue.Create(75, utLPX, '75lpx'));
+      SetMinimumButtonWidth(FLPX75);
     end;
 
     PLATFORM_MAC_OSX:
@@ -191,7 +196,7 @@ begin
       SetRelatedGap(FLPX7, FLPY7);
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX7, FLPY7);
-      SetMinimumButtonWidth(TfpgMigUnitValue.Create(70, utLPX, '70lpx'));
+      SetMinimumButtonWidth(FLPX70);
     end;
 
     PLATFORM_GNOME:
@@ -199,7 +204,7 @@ begin
       SetRelatedGap(FLPX6, FLPY6);
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX6, FLPY6);
-      SetMinimumButtonWidth(TfpgMigUnitValue.Create(70, utLPX, '70lpx'));
+      SetMinimumButtonWidth(FLPX70);
     end;
   end;
 end;
@@ -321,9 +326,15 @@ begin
     Initialize;
 
   if AX <> nil then
+  begin
+    FreeAndNil(FRelatedX);
     FRelatedX := TfpgMigBoundSize.Create(AX, AX, nil);
+  end;
   if AY <> nil then
+  begin
+    FreeAndNil(FRelatedY);
     FRelatedY := TfpgMigBoundSize.Create(AY, AY, nil);
+  end;
 
   Inc(FModCount);
 end;
@@ -334,9 +345,15 @@ begin
     Initialize;
 
   if AX <> nil then
+  begin
+    FreeAndNil(FUnrelatedX);
     FUnrelatedX := TfpgMigBoundSize.Create(AX, AX, nil);
+  end;
   if AY <> nil then
+  begin
+    FreeAndNil(FUnrelatedY);
     FUnrelatedY := TfpgMigBoundSize.Create(AY, AY, nil);
+  end;
 
   Inc(FModCount);
 end;
@@ -347,9 +364,15 @@ begin
     Initialize;
 
   if AX <> nil then
+  begin
+    FreeAndNil(FDefHGap);
     FDefHGap := TfpgMigBoundSize.Create(AX, AX, nil);
+  end;
   if AY <> nil then
+  begin
+    FreeAndNil(FDefVGap);
     FDefVGap := TfpgMigBoundSize.Create(AY, AY, nil);
+  end;
 
   Inc(FModCount);
 end;
@@ -400,6 +423,7 @@ class procedure TfpgMigPlatformDefaults.SetMinimumButtonWidth(AWidth: TfpgMigUni
 begin
   if FInstance = nil then
     Initialize;
+  // Note: We don't free the old value as we don't own it
   FMinButtonWidth := AWidth;
   Inc(FModCount);
 end;
@@ -415,6 +439,7 @@ class procedure TfpgMigPlatformDefaults.SetMinimumButtonPadding(APadding: TfpgMi
 begin
   if FInstance = nil then
     Initialize;
+  // Note: We don't free the old value as we don't own it
   FMinButtonPadding := APadding;
   Inc(FModCount);
 end;
@@ -449,6 +474,8 @@ finalization
   FreeAndNil(TfpgMigPlatformDefaults.FLPY16);
   FreeAndNil(TfpgMigPlatformDefaults.FLPY18);
   FreeAndNil(TfpgMigPlatformDefaults.FLPY20);
+  FreeAndNil(TfpgMigPlatformDefaults.FLPX70);
+  FreeAndNil(TfpgMigPlatformDefaults.FLPX75);
 
   // Free gap values
   FreeAndNil(TfpgMigPlatformDefaults.FRelatedX);
@@ -458,9 +485,8 @@ finalization
   FreeAndNil(TfpgMigPlatformDefaults.FDefHGap);
   FreeAndNil(TfpgMigPlatformDefaults.FDefVGap);
 
-  // Free button defaults (if they were created)
-  FreeAndNil(TfpgMigPlatformDefaults.FMinButtonWidth);
-  FreeAndNil(TfpgMigPlatformDefaults.FMinButtonPadding);
+  // Note: FMinButtonWidth and FMinButtonPadding are not freed here as they are
+  // either references to predefined values (FLPX70, FLPX75) or externally owned
 
   FreeAndNil(TfpgMigPlatformDefaults.FInstance);
 
