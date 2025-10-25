@@ -23,7 +23,8 @@ uses
   tcmig_platformdefaults,
   tcmig_dimconstraint,
   tcmig_ac,
-  tcmig_lc;
+  tcmig_lc,
+  tcmig_cc;
 
 implementation
 

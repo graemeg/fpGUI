@@ -179,10 +179,9 @@ begin
 
     dc.SetSize(bs);
     AssertSame('Size should be set value', bs, dc.GetSize);
+    // Note: bs and uv are now owned by dc, don't free them
   finally
-    bs.Free;
-    uv.Free;
-    dc.Free;
+    dc.Free;  // This will free bs and uv
   end;
 end;
 
@@ -205,8 +204,10 @@ begin
         exceptionRaised := True;
     end;
     AssertTrue('Should raise exception for linked size', exceptionRaised);
+    // Since SetSize raised exception, bs was not transferred to dc
+    // so test still owns it
   finally
-    bs.Free;
+    bs.Free;  // Still owned by test since SetSize failed
     uv.Free;
     dc.Free;
   end;
@@ -228,10 +229,9 @@ begin
     dc.SetGapBefore(gap);
     AssertTrue('Should have gap before after setting', dc.HasGapBefore);
     AssertSame('Gap before should be set value', gap, dc.GetGapBefore);
+    // Note: gap and uv are now owned by dc, don't free them
   finally
-    gap.Free;
-    uv.Free;
-    dc.Free;
+    dc.Free;  // This will free gap and uv
   end;
 end;
 
@@ -251,10 +251,9 @@ begin
     AssertTrue('Should have gap after after setting', dc.HasGapAfter);
     AssertTrue('Should be push gap', dc.IsGapAfterPush);
     AssertSame('Gap after should be set value', gap, dc.GetGapAfter);
+    // Note: gap and uv are now owned by dc, don't free them
   finally
-    gap.Free;
-    uv.Free;
-    dc.Free;
+    dc.Free;  // This will free gap and uv
   end;
 end;
 

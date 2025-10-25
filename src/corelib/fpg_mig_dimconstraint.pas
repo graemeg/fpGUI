@@ -145,8 +145,14 @@ end;
 
 destructor TfpgMigDimConstraint.Destroy;
 begin
-  { Note: We don't free FSize, FAlign, FGapBefore, FGapAfter
-    as we don't own them - they are either references or managed elsewhere }
+  // Free BoundSize objects if they exist (but not constants)
+  if (FSize <> nil) and (FSize <> BoundSizeNullSize) and (FSize <> BoundSizeZeroPixel) then
+    FSize.Free;
+  if (FGapBefore <> nil) and (FGapBefore <> BoundSizeNullSize) and (FGapBefore <> BoundSizeZeroPixel) then
+    FGapBefore.Free;
+  if (FGapAfter <> nil) and (FGapAfter <> BoundSizeNullSize) and (FGapAfter <> BoundSizeZeroPixel) then
+    FGapAfter.Free;
+
   inherited Destroy;
 end;
 
@@ -261,6 +267,9 @@ procedure TfpgMigDimConstraint.SetSize(ASize: TfpgMigBoundSize);
 begin
   if ASize <> nil then
     ASize.CheckNotLinked;
+  // Free old BoundSize before assigning new one (but not constants)
+  if (FSize <> nil) and (FSize <> BoundSizeNullSize) and (FSize <> BoundSizeZeroPixel) then
+    FSize.Free;
   FSize := ASize;
 end;
 
@@ -273,6 +282,9 @@ end;
 
 procedure TfpgMigDimConstraint.SetGapBefore(AGap: TfpgMigBoundSize);
 begin
+  // Free old BoundSize before assigning new one (but not constants)
+  if (FGapBefore <> nil) and (FGapBefore <> BoundSizeNullSize) and (FGapBefore <> BoundSizeZeroPixel) then
+    FGapBefore.Free;
   FGapBefore := AGap;
 end;
 
@@ -293,6 +305,9 @@ end;
 
 procedure TfpgMigDimConstraint.SetGapAfter(AGap: TfpgMigBoundSize);
 begin
+  // Free old BoundSize before assigning new one (but not constants)
+  if (FGapAfter <> nil) and (FGapAfter <> BoundSizeNullSize) and (FGapAfter <> BoundSizeZeroPixel) then
+    FGapAfter.Free;
   FGapAfter := AGap;
 end;
 

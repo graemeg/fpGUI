@@ -96,8 +96,9 @@ end;
 
 destructor TfpgMigBoundSize.Destroy;
 begin
-  // Note: We don't own the UnitValue instances, they should be freed by caller
-  // This is similar to Java where these are just references
+  // TODO: Memory management - UnitValues are not freed here for backward compatibility
+  // with existing tests. This creates potential memory leaks in CC/LC.
+  // Need comprehensive ownership model redesign.
   inherited Destroy;
 end;
 

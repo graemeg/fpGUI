@@ -28,7 +28,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Major="1" Minor="5"/>
-    <Files Count="130">
+    <Files Count="131">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -547,9 +547,13 @@
         <UnitName Value="fpg_mig_lc"/>
       </Item129>
       <Item130>
+        <Filename Value="../fpg_mig_cc.pas"/>
+        <UnitName Value="fpg_mig_cc"/>
+      </Item130>
+      <Item131>
         <Filename Value="../fpg_mig_constraintparser.pas"/>
         <UnitName Value="fpg_mig_constraintparser"/>
-      </Item129>
+      </Item131>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/corelib/cocoa;../../../docs/xml/gui"/>
