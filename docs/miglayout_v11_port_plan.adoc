@@ -789,21 +789,32 @@ end;
 
 **Committed:** 1b483892
 
-==== Step 1.1: Port Enums and Simple Types (2-3 days)
+==== Step 1.1: Port Enums and Simple Types ✓ COMPLETED
 
-1. **AlignX.java, AlignY.java** → Extend existing alignment enums
-2. **HideMode.java** → `fpg_mig_hidemode.pas`
-3. Add any missing alignment modes
+1. ✓ **AlignX.java, AlignY.java** → Extended existing alignment enums
+2. ✓ **HideMode.java** → `fpg_mig_hidemode.pas`
 
 [source,pascal]
 ----
 type
-  // Extend existing types
-  TfpgMigAlignX = (axLeft, axCenter, axRight, axFill, axLeading, axTrailing, axBaseline);
-  TfpgMigAlignY = (ayTop, ayCenter, ayBottom, ayFill, ayLeading, ayTrailing, ayBaseline);
+  // Extended alignment enums
+  TfpgMigAlignX = (axLeft, axCenter, axRight, axFill);
+    // Note: axLeading, axTrailing commented out (no BiDi support yet)
 
-  TfpgMigHideMode = (hmNormal, hmDisregard, hmDisregardWithGaps);
+  TfpgMigAlignY = (ayTop, ayCenter, ayBottom, ayFill, ayBaseline);
+
+  // New HideMode enum
+  TfpgMigHideMode = (hmNormal, hmSize0RetainGaps, hmSize0Gaps0, hmDisregard);
 ----
+
+**Deliverables:**
+
+* ✓ fpg_mig_hidemode.pas created with all 4 hide modes
+* ✓ TfpgMigAlignY extended with ayBaseline
+* ✓ Framework builds successfully
+* ✓ All 68 unit tests pass
+
+**Committed:** daafee85
 
 ==== Step 1.2: Port UnitValue (3-4 days)
 
