@@ -21,7 +21,8 @@ uses
   tcmig_unitvalue,
   tcmig_boundsize,
   tcmig_platformdefaults,
-  tcmig_dimconstraint;
+  tcmig_dimconstraint,
+  tcmig_ac;
 
 implementation
 

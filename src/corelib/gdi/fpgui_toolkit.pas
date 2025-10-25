@@ -27,7 +27,8 @@ uses
   fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_hexview, SynRegExpr,
   fpg_flowlayout, fpg_layoutmanager, fpg_layouttypes, fpg_borderlayout,
   fpg_miglayout, fpg_migconstraint, fpg_mig_hidemode, fpg_mig_unitvalue,
-  fpg_mig_boundsize, fpg_mig_platformdefaults, fpg_mig_dimconstraint;
+  fpg_mig_boundsize, fpg_mig_platformdefaults, fpg_mig_dimconstraint,
+  fpg_mig_ac, fpg_mig_constraintparser;
 
 implementation
 
