@@ -1,8 +1,8 @@
 = MigLayout v11 Port Implementation Plan for fpGUI
 :toc: left
 :toclevels: 3
-:numbered:
-:sectnums:
+# :numbered:
+# :sectnums:
 :source-highlighter: rouge
 :icons: font
 
@@ -1008,11 +1008,14 @@ Create `unittests/tests/tcmig_platformdefaults.pas` with tests for:
 
 **Goal:** Port constraint classes (LC, AC, CC, DimConstraint)
 
-==== Step 2.1: Port DimConstraint (3-4 days)
+==== Step 2.1: Port DimConstraint ✓ COMPLETED
 
 **File:** `DimConstraint.java` → `fpg_mig_dimconstraint.pas`
 
 Constraints for a single dimension (row or column).
+
+**Status:** Complete - All functionality ported and tested
+**Commit:** 6af963ce
 
 [source,pascal]
 ----
