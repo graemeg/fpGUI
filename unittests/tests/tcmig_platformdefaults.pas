@@ -210,8 +210,8 @@ begin
 
     AssertNotNull('Related gap X should not be nil', gapX);
     AssertNotNull('Related gap Y should not be nil', gapY);
-    AssertSame('Related gap X min should be set value', uv, gapX.Min);
-    AssertSame('Related gap Y min should be set value', uv, gapY.Min);
+    AssertTrue('Related gap X min should have same content', gapX.Min.ContentEquals(uv));
+    AssertTrue('Related gap Y min should have same content', gapY.Min.ContentEquals(uv));
   finally
     uv.Free;
   end;
@@ -234,8 +234,8 @@ begin
 
     AssertNotNull('Unrelated gap X should not be nil', gapX);
     AssertNotNull('Unrelated gap Y should not be nil', gapY);
-    AssertSame('Unrelated gap X min should be set value', uv, gapX.Min);
-    AssertSame('Unrelated gap Y min should be set value', uv, gapY.Min);
+    AssertTrue('Unrelated gap X min should have same content', gapX.Min.ContentEquals(uv));
+    AssertTrue('Unrelated gap Y min should have same content', gapY.Min.ContentEquals(uv));
   finally
     uv.Free;
   end;
@@ -258,8 +258,8 @@ begin
 
     AssertNotNull('Grid cell gap X should not be nil', gapX);
     AssertNotNull('Grid cell gap Y should not be nil', gapY);
-    AssertSame('Grid cell gap X min should be set value', uv, gapX.Min);
-    AssertSame('Grid cell gap Y min should be set value', uv, gapY.Min);
+    AssertTrue('Grid cell gap X min should have same content', gapX.Min.ContentEquals(uv));
+    AssertTrue('Grid cell gap Y min should have same content', gapY.Min.ContentEquals(uv));
   finally
     uv.Free;
   end;
@@ -278,7 +278,7 @@ begin
     TfpgMigPlatformDefaults.SetMinimumButtonWidth(uv);
 
     width := TfpgMigPlatformDefaults.GetMinimumButtonWidth;
-    AssertSame('Button width should be set value', uv, width);
+    AssertTrue('Button width should have same content', width.ContentEquals(uv));
   finally
     uv.Free;
   end;
@@ -297,7 +297,7 @@ begin
     TfpgMigPlatformDefaults.SetMinimumButtonPadding(uv);
 
     padding := TfpgMigPlatformDefaults.GetMinimumButtonPadding;
-    AssertSame('Button padding should be set value', uv, padding);
+    AssertTrue('Button padding should have same content', padding.ContentEquals(uv));
   finally
     uv.Free;
   end;

@@ -72,9 +72,9 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px);
   try
-    AssertSame('Min should equal input', FUV10px, bs.Min);
-    AssertSame('Pref should equal input', FUV10px, bs.Preferred);
-    AssertSame('Max should equal input', FUV10px, bs.Max);
+    AssertTrue('Min should have same content as input', bs.Min.ContentEquals(FUV10px));
+    AssertTrue('Pref should have same content as input', bs.Preferred.ContentEquals(FUV10px));
+    AssertTrue('Max should have same content as input', bs.Max.ContentEquals(FUV10px));
     AssertFalse('GapPush should be false', bs.GapPush);
   finally
     bs.Free;
@@ -87,9 +87,9 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px);
   try
-    AssertSame('Min should be 10px', FUV10px, bs.Min);
-    AssertSame('Pref should be 20px', FUV20px, bs.Preferred);
-    AssertSame('Max should be 30px', FUV30px, bs.Max);
+    AssertTrue('Min should be 10px', bs.Min.ContentEquals(FUV10px));
+    AssertTrue('Pref should be 20px', bs.Preferred.ContentEquals(FUV20px));
+    AssertTrue('Max should be 30px', bs.Max.ContentEquals(FUV30px));
     AssertFalse('GapPush should be false', bs.GapPush);
   finally
     bs.Free;
@@ -102,9 +102,9 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px, True);
   try
-    AssertSame('Min should be 10px', FUV10px, bs.Min);
-    AssertSame('Pref should be 20px', FUV20px, bs.Preferred);
-    AssertSame('Max should be 30px', FUV30px, bs.Max);
+    AssertTrue('Min should be 10px', bs.Min.ContentEquals(FUV10px));
+    AssertTrue('Pref should be 20px', bs.Preferred.ContentEquals(FUV20px));
+    AssertTrue('Max should be 30px', bs.Max.ContentEquals(FUV30px));
     AssertTrue('GapPush should be true', bs.GapPush);
   finally
     bs.Free;
@@ -311,9 +311,9 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px, True);
   try
-    AssertSame('Min property should return correct value', FUV10px, bs.Min);
-    AssertSame('Preferred property should return correct value', FUV20px, bs.Preferred);
-    AssertSame('Max property should return correct value', FUV30px, bs.Max);
+    AssertTrue('Min property should return correct value', bs.Min.ContentEquals(FUV10px));
+    AssertTrue('Preferred property should return correct value', bs.Preferred.ContentEquals(FUV20px));
+    AssertTrue('Max property should return correct value', bs.Max.ContentEquals(FUV30px));
     AssertTrue('GapPush property should return true', bs.GapPush);
   finally
     bs.Free;

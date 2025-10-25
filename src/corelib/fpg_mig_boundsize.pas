@@ -88,17 +88,44 @@ end;
 constructor TfpgMigBoundSize.Create(AMin, APref, AMax: TfpgMigUnitValue; AGapPush: Boolean);
 begin
   inherited Create;
-  FMin := AMin;
-  FPref := APref;
-  FMax := AMax;
+
+  // Clone UnitValues to take ownership, but don't clone global constants
+  if (AMin = nil) or (AMin = UnitValueZero) or (AMin = UnitValueInf) or
+     (AMin = UnitValueLeading) or (AMin = UnitValueCenter) or (AMin = UnitValueBaselineIdentity) then
+    FMin := AMin
+  else
+    FMin := AMin.Clone;
+
+  if (APref = nil) or (APref = UnitValueZero) or (APref = UnitValueInf) or
+     (APref = UnitValueLeading) or (APref = UnitValueCenter) or (APref = UnitValueBaselineIdentity) then
+    FPref := APref
+  else
+    FPref := APref.Clone;
+
+  if (AMax = nil) or (AMax = UnitValueZero) or (AMax = UnitValueInf) or
+     (AMax = UnitValueLeading) or (AMax = UnitValueCenter) or (AMax = UnitValueBaselineIdentity) then
+    FMax := AMax
+  else
+    FMax := AMax.Clone;
+
   FGapPush := AGapPush;
 end;
 
 destructor TfpgMigBoundSize.Destroy;
 begin
-  // TODO: Memory management - UnitValues are not freed here for backward compatibility
-  // with existing tests. This creates potential memory leaks in CC/LC.
-  // Need comprehensive ownership model redesign.
+  // Free owned UnitValues, but do not free the global constants
+  if (FMin <> nil) and (FMin <> UnitValueZero) and (FMin <> UnitValueInf) and
+     (FMin <> UnitValueLeading) and (FMin <> UnitValueCenter) and (FMin <> UnitValueBaselineIdentity) then
+    FMin.Free;
+
+  if (FPref <> nil) and (FPref <> UnitValueZero) and (FPref <> UnitValueInf) and
+     (FPref <> UnitValueLeading) and (FPref <> UnitValueCenter) and (FPref <> UnitValueBaselineIdentity) then
+    FPref.Free;
+
+  if (FMax <> nil) and (FMax <> UnitValueZero) and (FMax <> UnitValueInf) and
+     (FMax <> UnitValueLeading) and (FMax <> UnitValueCenter) and (FMax <> UnitValueBaselineIdentity) then
+    FMax.Free;
+
   inherited Destroy;
 end;
 

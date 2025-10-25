@@ -681,8 +681,12 @@ var
   newSize: TfpgMigBoundSize;
 begin
   minVal := ParseUnitValue(ASize, True);
-  newSize := TfpgMigBoundSize.Create(minVal, FHor.GetSize.Preferred, FHor.GetSize.Max, FHor.GetSize.GapPush);
-  FHor.SetSize(newSize);
+  try
+    newSize := TfpgMigBoundSize.Create(minVal, FHor.GetSize.Preferred, FHor.GetSize.Max, FHor.GetSize.GapPush);
+    FHor.SetSize(newSize);
+  finally
+    minVal.Free;
+  end;
   Result := Self;
 end;
 
@@ -698,8 +702,12 @@ var
   newSize: TfpgMigBoundSize;
 begin
   maxVal := ParseUnitValue(ASize, True);
-  newSize := TfpgMigBoundSize.Create(FHor.GetSize.Min, FHor.GetSize.Preferred, maxVal, FHor.GetSize.GapPush);
-  FHor.SetSize(newSize);
+  try
+    newSize := TfpgMigBoundSize.Create(FHor.GetSize.Min, FHor.GetSize.Preferred, maxVal, FHor.GetSize.GapPush);
+    FHor.SetSize(newSize);
+  finally
+    maxVal.Free;
+  end;
   Result := Self;
 end;
 
@@ -828,8 +836,12 @@ var
   newSize: TfpgMigBoundSize;
 begin
   minVal := ParseUnitValue(ASize, False);
-  newSize := TfpgMigBoundSize.Create(minVal, FVer.GetSize.Preferred, FVer.GetSize.Max, FVer.GetSize.GapPush);
-  FVer.SetSize(newSize);
+  try
+    newSize := TfpgMigBoundSize.Create(minVal, FVer.GetSize.Preferred, FVer.GetSize.Max, FVer.GetSize.GapPush);
+    FVer.SetSize(newSize);
+  finally
+    minVal.Free;
+  end;
   Result := Self;
 end;
 
@@ -845,8 +857,12 @@ var
   newSize: TfpgMigBoundSize;
 begin
   maxVal := ParseUnitValue(ASize, False);
-  newSize := TfpgMigBoundSize.Create(FVer.GetSize.Min, FVer.GetSize.Preferred, maxVal, FVer.GetSize.GapPush);
-  FVer.SetSize(newSize);
+  try
+    newSize := TfpgMigBoundSize.Create(FVer.GetSize.Min, FVer.GetSize.Preferred, maxVal, FVer.GetSize.GapPush);
+    FVer.SetSize(newSize);
+  finally
+    maxVal.Free;
+  end;
   Result := Self;
 end;
 

@@ -172,16 +172,17 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   uv := TfpgMigUnitValue.Create(100, utPixel, '100px');
-  bs := TfpgMigBoundSize.Create(uv, uv, nil);
+  bs := TfpgMigBoundSize.Create(uv, uv, nil); // bs clones uv
+  uv.Free; // Original uv is no longer needed
+
   try
     AssertSame('Default size should be NULL_SIZE',
       BoundSizeNullSize, dc.GetSize);
 
-    dc.SetSize(bs);
+    dc.SetSize(bs); // dc takes ownership of bs
     AssertSame('Size should be set value', bs, dc.GetSize);
-    // Note: bs and uv are now owned by dc, don't free them
   finally
-    dc.Free;  // This will free bs and uv
+    dc.Free;  // This will free bs and the cloned uv
   end;
 end;
 
@@ -222,16 +223,17 @@ begin
   dc := TfpgMigDimConstraint.Create;
   uv := TfpgMigUnitValue.Create(10, utPixel, '10px');
   gap := TfpgMigBoundSize.Create(uv, uv, nil);
+  uv.Free; // Original uv is no longer needed
+
   try
     AssertFalse('Should not have gap before initially', dc.HasGapBefore);
     AssertFalse('Should not be push gap initially', dc.IsGapBeforePush);
 
-    dc.SetGapBefore(gap);
+    dc.SetGapBefore(gap); // dc takes ownership of gap
     AssertTrue('Should have gap before after setting', dc.HasGapBefore);
     AssertSame('Gap before should be set value', gap, dc.GetGapBefore);
-    // Note: gap and uv are now owned by dc, don't free them
   finally
-    dc.Free;  // This will free gap and uv
+    dc.Free;  // This will free gap and the cloned uv
   end;
 end;
 
@@ -244,16 +246,17 @@ begin
   dc := TfpgMigDimConstraint.Create;
   uv := TfpgMigUnitValue.Create(10, utPixel, '10px');
   gap := TfpgMigBoundSize.Create(uv, uv, nil, True);  // True = gap push
+  uv.Free; // Original uv is no longer needed
+
   try
     AssertFalse('Should not have gap after initially', dc.HasGapAfter);
 
-    dc.SetGapAfter(gap);
+    dc.SetGapAfter(gap); // dc takes ownership of gap
     AssertTrue('Should have gap after after setting', dc.HasGapAfter);
     AssertTrue('Should be push gap', dc.IsGapAfterPush);
     AssertSame('Gap after should be set value', gap, dc.GetGapAfter);
-    // Note: gap and uv are now owned by dc, don't free them
   finally
-    dc.Free;  // This will free gap and uv
+    dc.Free;  // This will free gap and the cloned uv
   end;
 end;
 
