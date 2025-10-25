@@ -23,7 +23,7 @@ uses
   Classes, SysUtils, fpg_base;
 
 type
-  TfpgLayoutConstraint = class(TPersistent)
+  TfpgLayoutConstraint = class(TInterfacedObject)
   end;
 
   ILayoutManager = interface
