@@ -18,7 +18,8 @@ uses
   tcflowlayout,
   tcborderlayout,
   tcmiglayout,
-  tcmig_unitvalue;
+  tcmig_unitvalue,
+  tcmig_boundsize;
 
 implementation
 
