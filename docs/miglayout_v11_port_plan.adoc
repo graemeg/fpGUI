@@ -267,6 +267,15 @@ Java MigLayout v11.4.2 source files to port:
 
 **Build fpGUI framework:**
 
+Make sure any new units created, have been added to the following files:
+
+* src/corelib/cocoa/fpgui_toolkit.pas
+* src/corelib/cocoa/fpgui_toolkit.lpk
+* src/corelib/x11/fpgui_toolkit.pas
+* src/corelib/x11/fpgui_toolkit.lpk
+* src/corelib/gdi/fpgui_toolkit.pas
+* src/corelib/gdi/fpgui_toolkit.lpk
+
 [source,bash]
 ----
 cd src
@@ -816,7 +825,25 @@ type
 
 **Committed:** daafee85
 
-==== Step 1.2: Port UnitValue (3-4 days)
+==== Step 1.2: Port UnitValue ✓ COMPLETED
+
+**Status:** ✓ Complete
+
+**Summary:**
+
+* Created fpg_mig_unitvalue.pas with TfpgMigUnitValue class
+* Ported all unit types from Java (pixel, mm, cm, inch, pt, %, lp, sp, etc.)
+* Ported operation types (static, add, sub, mul, div, min, max, mid)
+* Implemented comprehensive unit string parsing including link syntax
+* Added IsAbsolute and IsLinked helper methods
+* Created 22 unit tests in tcmig_unitvalue.pas
+* All 90 unit tests pass (0 errors, 0 failures)
+
+**Note:** Full GetPixels conversion with reference values will be implemented when needed in later phases.
+
+**Committed:** 0af37e41
+
+==== Step 1.2: Port UnitValue (3-4 days) - ORIGINAL PLAN
 
 **File:** `UnitValue.java` → `fpg_mig_unitvalue.pas`
 
