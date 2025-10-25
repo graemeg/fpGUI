@@ -12,6 +12,8 @@ This document outlines the plan to port MigLayout v11.4.2 from Java to Object Pa
 
 **Source:** `prototypes/miglayout/mig-java-latest/` (MigLayout v11.4.2 for Java)
 
+**Branch:** `feature/miglayout-v11-port`
+
 **Key Strategy:**
 
 * Port proven v11.4.2 algorithms while keeping fpGUI architecture
@@ -24,6 +26,181 @@ This document outlines the plan to port MigLayout v11.4.2 from Java to Object Pa
 * Native HiDPI support via logic units
 * Use interfaces and generics where beneficial (FPC 3.2+ support)
 * Maintain compatibility with Java MigLayout behavior
+
+== Getting Started
+
+=== Prerequisites
+
+**Required:**
+
+* Free Pascal Compiler 3.2+ (for generics support)
+* fpGUI source code on `feature/miglayout-v11-port` branch
+* Java MigLayout v11.4.2 source in `prototypes/miglayout/mig-java-latest/`
+
+**Verify setup:**
+
+[source,bash]
+----
+# Check FPC version
+fpc -iV  # Should be 3.2.0 or higher
+
+# Verify Java source exists
+ls prototypes/miglayout/mig-java-latest/pom.xml
+# Should show version 11.4.2
+
+# Check current branch
+git branch --show-current
+# Should be: feature/miglayout-v11-port
+----
+
+=== Current Baseline
+
+**Existing fpGUI MigLayout implementation:**
+
+* `src/corelib/fpg_miglayout.pas` - Current v3-based implementation
+* `src/corelib/fpg_migconstraint.pas` - Current constraint classes
+* `src/corelib/fpg_layoutmanager.pas` - ILayoutManager interface
+* `src/corelib/fpg_layouttypes.pas` - TfpgLayoutConstraint base class
+* `unittests/tests/tcmiglayout.pas` - 9 existing tests (all passing)
+
+**Existing test suite (baseline):**
+
+* TestCreateMigLayout ✓
+* TestSingleWidgetLayout ✓
+* TestTwoWidgetsLayout ✓
+* TestTwoColumnLayout ✓
+* TestColumnWidthCalculation ✓
+* TestCellAlignment ✓
+* TestColumnSpan ✓
+* TestRowSpan ✓
+* TestGrow ✓
+
+=== Java Source File Reference
+
+Java MigLayout v11.4.2 source files to port:
+
+[cols="2,3", options="header"]
+|===
+|Component |Java Source Path
+
+|UnitValue
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/UnitValue.java`
+
+|BoundSize
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/BoundSize.java`
+
+|LC (Layout Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LC.java`
+
+|AC (Axis Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/AC.java`
+
+|CC (Component Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/CC.java`
+
+|DimConstraint
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/DimConstraint.java`
+
+|Grid
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/Grid.java`
+
+|LayoutUtil
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LayoutUtil.java`
+
+|PlatformDefaults
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/PlatformDefaults.java`
+
+|HideMode
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/HideMode.java`
+
+|LayoutCallback
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LayoutCallback.java`
+|===
+
+=== Build and Test Commands
+
+**Build fpGUI framework:**
+
+[source,bash]
+----
+cd src
+./build.sh 1
+----
+
+**Build and run unit tests:**
+
+[source,bash]
+----
+cd unittests
+fpc @extrafpc.cfg fpgui_unittests.lpr
+./fpgui_unittests
+----
+
+**Build a specific example:**
+
+[source,bash]
+----
+cd examples/gui/lm-flow
+fpc @extrafpc.cfg lm_flow_demo.lpr
+./lm_flow_demo
+----
+
+=== First Steps Checklist
+
+Before starting Phase 1, verify:
+
+☐ FPC 3.2+ installed and working
+☐ Current branch is `feature/miglayout-v11-port`
+☐ All 9 existing tests pass (`cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests`)
+☐ Framework builds successfully (`cd src && ./build.sh 1`)
+☐ Java source files accessible in `prototypes/miglayout/mig-java-latest/`
+☐ Read Executive Summary and understand API-first + test-as-you-go approach
+
+=== Quick Reference
+
+**FPC objfpc mode generics syntax:**
+
+[source,pascal]
+----
+type
+  // MUST use specialize keyword
+  TMyList = specialize TObjectList<TMyClass>;
+
+var
+  list: TMyList;
+begin
+  list := TMyList.Create(True); // True = owns objects
+  try
+    list.Add(TMyClass.Create);
+  finally
+    list.Free;
+  end;
+end;
+----
+
+**Interface reference counting pattern:**
+
+[source,pascal]
+----
+type
+  IMyInterface = interface
+    ['{GUID}']
+    function DoSomething: IMyInterface; // Fluent API
+  end;
+
+  TMyClass = class(TInterfacedObject, IMyInterface)
+  public
+    function DoSomething: IMyInterface; // Return Self as interface
+  end;
+
+// Usage - automatic cleanup
+var
+  obj: IMyInterface;
+begin
+  obj := TMyClass.Create.DoSomething;
+  // No need to Free - reference counting handles it
+end;
+----
 
 == Rationale for Porting vs TDD
 
