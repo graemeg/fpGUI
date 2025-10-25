@@ -17,7 +17,8 @@ uses
   tclayoutmanager,
   tcflowlayout,
   tcborderlayout,
-  tcmiglayout;
+  tcmiglayout,
+  tcmig_unitvalue;
 
 implementation
 
@@ -31,4 +32,5 @@ initialization
   tcflowlayout.RegisterTests;
   tcborderlayout.RegisterTests;
   tcmiglayout.RegisterTests;
+  // tcmig_unitvalue registers automatically via testregistry
 end.

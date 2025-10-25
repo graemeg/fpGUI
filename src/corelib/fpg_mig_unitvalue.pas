@@ -1,0 +1,324 @@
+unit fpg_mig_unitvalue;
+
+{
+  MigLayout v11 UnitValue for fpGUI
+
+  Ported from: net.miginfocom.layout.UnitValue.java (v11.4.2)
+
+  Represents a value with an associated unit type (px, mm, %, etc.)
+  and supports arithmetic operations between unit values.
+}
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils;
+
+type
+  { Unit types - from Java constants PIXEL, LPX, MM, etc. }
+  TfpgMigUnitType = (
+    utPixel = 0,        // px - Physical pixels
+    utLPX = 1,          // lpx - Logical horizontal pixels
+    utLPY = 2,          // lpy - Logical vertical pixels
+    utMM = 3,           // mm - Millimeters
+    utCM = 4,           // cm - Centimeters
+    utInch = 5,         // in - Inches
+    utPercent = 6,      // % - Percentage of reference value
+    utPT = 7,           // pt - Points (1/72 inch)
+    utSPX = 8,          // spx - Screen percentage width
+    utSPY = 9,          // spy - Screen percentage height
+    utAlign = 12,       // al - Alignment
+    utMinSize = 13,     // min/minimum - Minimum size
+    utPrefSize = 14,    // p/pref - Preferred size
+    utMaxSize = 15,     // max/maximum - Maximum size
+    utButton = 16,      // button - Button size
+    utLinkX = 18,       // Link to x (first link type)
+    utLinkY = 19,       // Link to y
+    utLinkW = 20,       // Link to width
+    utLinkH = 21,       // Link to height
+    utLinkX2 = 22,      // Link to x2
+    utLinkY2 = 23,      // Link to y2
+    utLinkXPos = 24,    // Link to x position on screen
+    utLinkYPos = 25,    // Link to y position on screen (last link type)
+    utLookup = 26,      // Custom lookup
+    utLabelAlign = 27   // label - Label alignment
+    // Note: Java has IDENTITY = -1 for baseline, but Pascal enums must be ascending
+    // We'll handle this separately if needed
+  );
+
+  { Operation types - from Java constants STATIC, ADD, SUB, etc. }
+  TfpgMigOperation = (
+    opStatic = 100,     // Static value (no operation)
+    opAdd = 101,        // Addition of two sub-units
+    opSub = 102,        // Subtraction of two sub-units
+    opMul = 103,        // Multiplication of two sub-units
+    opDiv = 104,        // Division of two sub-units
+    opMin = 105,        // Minimum of two sub-units
+    opMax = 106,        // Maximum of two sub-units
+    opMid = 107         // Middle (average) of two sub-units
+  );
+
+  { TfpgMigUnitValue - Represents a value with unit and optional operations
+
+    This is a simplified implementation for Phase 1. Full implementation will include:
+    - Parsing from constraint strings
+    - Conversion to pixels with reference values
+    - Support for arithmetic operations between unit values
+    - Link handling for component relationships
+  }
+  TfpgMigUnitValue = class
+  private
+    FValue: Single;
+    FUnit: TfpgMigUnitType;
+    FOperation: TfpgMigOperation;
+    FIsHorizontal: Boolean;
+    FUnitString: string;
+    FLinkId: string;
+    FSubUnits: array of TfpgMigUnitValue;
+
+    function ParseUnitString: TfpgMigUnitType;
+  public
+    constructor Create(AValue: Single); overload;
+    constructor Create(AValue: Single; AUnit: TfpgMigUnitType; const ACreateString: string); overload;
+    constructor Create(AValue: Single; const AUnitStr: string; AIsHorizontal: Boolean;
+                      AOper: TfpgMigOperation; const ACreateString: string); overload;
+    destructor Destroy; override;
+
+    { Checks if the unit type is absolute (not relative to parent/component) }
+    function IsAbsolute: Boolean;
+
+    { Checks if this value links to another component }
+    function IsLinked: Boolean;
+
+    property Value: Single read FValue;
+    property UnitType: TfpgMigUnitType read FUnit;
+    property Operation: TfpgMigOperation read FOperation;
+    property IsHorizontal: Boolean read FIsHorizontal;
+    property UnitString: string read FUnitString;
+    property LinkTargetId: string read FLinkId;
+  end;
+
+  { Helper functions for unit string parsing }
+  function ParseUnitType(const AUnitStr: string): TfpgMigUnitType;
+
+  { Predefined constant unit values - matching Java static fields }
+  function UnitValueZero: TfpgMigUnitValue;
+  function UnitValueInf: TfpgMigUnitValue;
+
+implementation
+
+const
+  // Constant for infinity (large value)
+  LAYOUT_INF = 2097051;  // LayoutUtil.INF from Java
+
+var
+  // Cached constant unit values
+  _UnitValueZero: TfpgMigUnitValue = nil;
+  _UnitValueInf: TfpgMigUnitValue = nil;
+
+{ Unit string to type mapping }
+function ParseUnitType(const AUnitStr: string): TfpgMigUnitType;
+var
+  s: string;
+begin
+  s := LowerCase(AUnitStr);
+
+  if s = 'px' then
+    Result := utPixel
+  else if s = 'lpx' then
+    Result := utLPX
+  else if s = 'lpy' then
+    Result := utLPY
+  else if s = '%' then
+    Result := utPercent
+  else if s = 'cm' then
+    Result := utCM
+  else if s = 'in' then
+    Result := utInch
+  else if s = 'spx' then
+    Result := utSPX
+  else if s = 'spy' then
+    Result := utSPY
+  else if s = 'al' then
+    Result := utAlign
+  else if s = 'mm' then
+    Result := utMM
+  else if s = 'pt' then
+    Result := utPT
+  else if (s = 'min') or (s = 'minimum') then
+    Result := utMinSize
+  else if (s = 'p') or (s = 'pref') then
+    Result := utPrefSize
+  else if (s = 'max') or (s = 'maximum') then
+    Result := utMaxSize
+  else if s = 'button' then
+    Result := utButton
+  else if s = 'label' then
+    Result := utLabelAlign
+  else
+    raise Exception.CreateFmt('Unknown unit string: %s', [AUnitStr]);
+end;
+
+{ TfpgMigUnitValue }
+
+constructor TfpgMigUnitValue.Create(AValue: Single);
+begin
+  inherited Create;
+  FValue := AValue;
+  FUnit := utPixel;
+  FOperation := opStatic;
+  FIsHorizontal := True;
+  FUnitString := '';
+  FLinkId := '';
+  SetLength(FSubUnits, 0);
+end;
+
+constructor TfpgMigUnitValue.Create(AValue: Single; AUnit: TfpgMigUnitType;
+  const ACreateString: string);
+begin
+  inherited Create;
+  FValue := AValue;
+  FUnit := AUnit;
+  FOperation := opStatic;
+  FIsHorizontal := True;  // If hor/ver doesn't matter
+  FUnitString := '';
+  FLinkId := '';
+  SetLength(FSubUnits, 0);
+end;
+
+constructor TfpgMigUnitValue.Create(AValue: Single; const AUnitStr: string;
+  AIsHorizontal: Boolean; AOper: TfpgMigOperation; const ACreateString: string);
+begin
+  inherited Create;
+  FValue := AValue;
+  FUnitString := AUnitStr;
+  FIsHorizontal := AIsHorizontal;
+  FOperation := AOper;
+  FLinkId := '';
+  SetLength(FSubUnits, 0);
+
+  // Parse unit string to determine unit type
+  if AUnitStr <> '' then
+    FUnit := ParseUnitString
+  else
+    FUnit := utPixel;  // Default to pixels
+end;
+
+destructor TfpgMigUnitValue.Destroy;
+var
+  i: Integer;
+begin
+  // Free sub-units if any
+  for i := 0 to High(FSubUnits) do
+    FSubUnits[i].Free;
+  SetLength(FSubUnits, 0);
+
+  inherited Destroy;
+end;
+
+function TfpgMigUnitValue.ParseUnitString: TfpgMigUnitType;
+var
+  s: string;
+  dotPos: Integer;
+  linkTarget, linkProp: string;
+begin
+  s := LowerCase(FUnitString);
+
+  // Empty string means use default unit (we'll use pixels for now)
+  if s = '' then
+    Exit(utPixel);
+
+  // Handle "lp" which maps to LPX or LPY depending on orientation
+  if s = 'lp' then
+  begin
+    if FIsHorizontal then
+      Exit(utLPX)
+    else
+      Exit(utLPY);
+  end;
+
+  // Handle "sp" which maps to SPX or SPY depending on orientation
+  if s = 'sp' then
+  begin
+    if FIsHorizontal then
+      Exit(utSPX)
+    else
+      Exit(utSPY);
+  end;
+
+  // Try standard unit parsing
+  try
+    Result := ParseUnitType(s);
+    Exit;
+  except
+    on E: Exception do
+      ; // Continue to check for link syntax
+  end;
+
+  // Check for link syntax: "componentId.property"
+  dotPos := Pos('.', s);
+  if dotPos > 0 then
+  begin
+    linkTarget := Copy(s, 1, dotPos - 1);
+    linkProp := Copy(s, dotPos + 1, Length(s));
+    FLinkId := linkTarget;
+
+    if linkProp = 'x' then
+      Exit(utLinkX)
+    else if linkProp = 'y' then
+      Exit(utLinkY)
+    else if (linkProp = 'w') or (linkProp = 'width') then
+      Exit(utLinkW)
+    else if (linkProp = 'h') or (linkProp = 'height') then
+      Exit(utLinkH)
+    else if linkProp = 'x2' then
+      Exit(utLinkX2)
+    else if linkProp = 'y2' then
+      Exit(utLinkY2)
+    else if linkProp = 'xpos' then
+      Exit(utLinkXPos)
+    else if linkProp = 'ypos' then
+      Exit(utLinkYPos);
+  end;
+
+  raise Exception.CreateFmt('Unknown keyword: %s', [FUnitString]);
+end;
+
+function TfpgMigUnitValue.IsAbsolute: Boolean;
+begin
+  case FUnit of
+    utPixel, utLPX, utLPY, utMM, utCM, utInch, utPT:
+      Result := True;
+    else
+      Result := False;
+  end;
+end;
+
+function TfpgMigUnitValue.IsLinked: Boolean;
+begin
+  Result := FLinkId <> '';
+end;
+
+{ Predefined constant values }
+
+function UnitValueZero: TfpgMigUnitValue;
+begin
+  if _UnitValueZero = nil then
+    _UnitValueZero := TfpgMigUnitValue.Create(0, utPixel, '0px');
+  Result := _UnitValueZero;
+end;
+
+function UnitValueInf: TfpgMigUnitValue;
+begin
+  if _UnitValueInf = nil then
+    _UnitValueInf := TfpgMigUnitValue.Create(LAYOUT_INF, utPixel, 'inf');
+  Result := _UnitValueInf;
+end;
+
+finalization
+  FreeAndNil(_UnitValueZero);
+  FreeAndNil(_UnitValueInf);
+
+end.
