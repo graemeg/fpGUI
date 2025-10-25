@@ -29,7 +29,8 @@ uses
   fpg_miglayout, fpg_migconstraint, fpg_mig_hidemode, fpg_mig_unitvalue,
   fpg_mig_boundsize, fpg_mig_platformdefaults, fpg_mig_dimconstraint,
   fpg_mig_ac, fpg_mig_lc, fpg_mig_cc, fpg_mig_constraintparser,
-  fpg_mig_resizeconstraint, fpg_mig_layoutcallback, fpg_mig_gapprovider, fpg_mig_linkhandler;
+  fpg_mig_resizeconstraint, fpg_mig_layoutcallback, fpg_mig_gapprovider, fpg_mig_linkhandler,
+  fpg_mig_layoututil;
 
 implementation
 
