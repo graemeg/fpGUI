@@ -295,12 +295,12 @@ fpc @extrafpc.cfg lm_flow_demo.lpr
 
 Before starting Phase 1, verify:
 
-☐ FPC 3.2+ installed and working
-☐ Current branch is `feature/miglayout-v11-port`
-☐ All 9 existing tests pass (`cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests`)
-☐ Framework builds successfully (`cd src && ./build.sh 1`)
-☐ Java source files accessible in `prototypes/miglayout/mig-java-latest/`
-☐ Read Executive Summary and understand API-first + test-as-you-go approach
+* ☐ FPC 3.2+ installed and working
+* ☐ Current branch is `feature/miglayout-v11-port`
+* ☐ All 9 existing tests pass (`cd unittests && fpc @extrafpc.cfg fpgui_unittests.lpr && ./fpgui_unittests`)
+* ☐ Framework builds successfully (`cd src && ./build.sh 1`)
+* ☐ Java source files accessible in `prototypes/miglayout/mig-java-latest/`
+* ☐ Read Executive Summary and understand API-first + test-as-you-go approach
 
 === Quick Reference
 
