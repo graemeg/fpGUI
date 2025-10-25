@@ -105,6 +105,9 @@ type
     property LinkTargetId: string read FLinkId;
   end;
 
+  { Array type for arrays of UnitValues }
+  TfpgMigUnitValueArray = array of TfpgMigUnitValue;
+
   { Helper functions for unit string parsing }
   function ParseUnitType(const AUnitStr: string): TfpgMigUnitType;
 

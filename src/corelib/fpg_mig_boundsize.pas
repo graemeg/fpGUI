@@ -59,6 +59,9 @@ type
     property GapPush: Boolean read FGapPush;
   end;
 
+  { Array type for arrays of BoundSizes }
+  TfpgMigBoundSizeArray = array of TfpgMigBoundSize;
+
   { Predefined constant bound sizes }
   function BoundSizeNullSize: TfpgMigBoundSize;
   function BoundSizeZeroPixel: TfpgMigBoundSize;

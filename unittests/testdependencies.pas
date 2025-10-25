@@ -24,7 +24,9 @@ uses
   tcmig_dimconstraint,
   tcmig_ac,
   tcmig_lc,
-  tcmig_cc;
+  tcmig_cc,
+  tcmig_resizeconstraint,
+  tcmig_linkhandler;
 
 implementation
 
