@@ -60,6 +60,9 @@ type
     class var FMinButtonWidth: TfpgMigUnitValue;
     class var FMinButtonPadding: TfpgMigUnitValue;
 
+    { Row alignment }
+    class var FDefaultRowAlignmentBaseline: Boolean;
+
     class procedure Initialize;
     class procedure CreatePredefinedValues;
     class procedure SetPlatformDefaults(APlatform: Integer);
@@ -110,6 +113,10 @@ type
     class procedure SetMinimumButtonPadding(APadding: TfpgMigUnitValue);
     class function GetMinimumButtonPadding: TfpgMigUnitValue;
 
+    { Row alignment }
+    class function GetDefaultRowAlignmentBaseline: Boolean;
+    class procedure SetDefaultRowAlignmentBaseline(AValue: Boolean);
+
     { Modification counter for cache invalidation }
     class function GetModCount: Integer;
   end;
@@ -134,6 +141,7 @@ begin
   FVerScale := 1.0;
   FDefHUnit := Ord(utLPX);
   FDefVUnit := Ord(utLPY);
+  FDefaultRowAlignmentBaseline := True;  // Default since v3.5
 
   CreatePredefinedValues;
 
@@ -456,6 +464,23 @@ begin
   if FInstance = nil then
     Initialize;
   Result := FModCount;
+end;
+
+{ Row alignment }
+
+class function TfpgMigPlatformDefaults.GetDefaultRowAlignmentBaseline: Boolean;
+begin
+  if FInstance = nil then
+    Initialize;
+  Result := FDefaultRowAlignmentBaseline;
+end;
+
+class procedure TfpgMigPlatformDefaults.SetDefaultRowAlignmentBaseline(AValue: Boolean);
+begin
+  if FInstance = nil then
+    Initialize;
+  FDefaultRowAlignmentBaseline := AValue;
+  Inc(FModCount);
 end;
 
 finalization

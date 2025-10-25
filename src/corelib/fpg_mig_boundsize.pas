@@ -49,6 +49,9 @@ type
     { Returns true if all bounds are absolute (not relative) }
     function IsAbsolute: Boolean;
 
+    { Raises exception if this BoundSize contains links }
+    procedure CheckNotLinked;
+
     { Getters for the bounds }
     property Min: TfpgMigUnitValue read FMin;
     property Preferred: TfpgMigUnitValue read FPref;
@@ -128,6 +131,12 @@ begin
   Result := ((FMin = nil) or FMin.IsAbsolute) and
             ((FPref = nil) or FPref.IsAbsolute) and
             ((FMax = nil) or FMax.IsAbsolute);
+end;
+
+procedure TfpgMigBoundSize.CheckNotLinked;
+begin
+  if IsLinked then
+    raise Exception.Create('Size may not contain links');
 end;
 
 { Predefined constant values }

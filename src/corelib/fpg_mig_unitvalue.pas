@@ -106,6 +106,9 @@ type
   { Predefined constant unit values - matching Java static fields }
   function UnitValueZero: TfpgMigUnitValue;
   function UnitValueInf: TfpgMigUnitValue;
+  function UnitValueLeading: TfpgMigUnitValue;
+  function UnitValueCenter: TfpgMigUnitValue;
+  function UnitValueBaselineIdentity: TfpgMigUnitValue;
 
 implementation
 
@@ -117,6 +120,9 @@ var
   // Cached constant unit values
   _UnitValueZero: TfpgMigUnitValue = nil;
   _UnitValueInf: TfpgMigUnitValue = nil;
+  _UnitValueLeading: TfpgMigUnitValue = nil;
+  _UnitValueCenter: TfpgMigUnitValue = nil;
+  _UnitValueBaselineIdentity: TfpgMigUnitValue = nil;
 
 { Unit string to type mapping }
 function ParseUnitType(const AUnitStr: string): TfpgMigUnitType;
@@ -177,6 +183,8 @@ end;
 
 constructor TfpgMigUnitValue.Create(AValue: Single; AUnit: TfpgMigUnitType;
   const ACreateString: string);
+var
+  dotPos: Integer;
 begin
   inherited Create;
   FValue := AValue;
@@ -186,6 +194,14 @@ begin
   FUnitString := '';
   FLinkId := '';
   SetLength(FSubUnits, 0);
+
+  // If this is a link type and we have a create string, extract the link ID
+  if (AUnit >= utLinkX) and (AUnit <= utLinkYPos) and (ACreateString <> '') then
+  begin
+    dotPos := Pos('.', ACreateString);
+    if dotPos > 0 then
+      FLinkId := Copy(ACreateString, 1, dotPos - 1);
+  end;
 end;
 
 constructor TfpgMigUnitValue.Create(AValue: Single; const AUnitStr: string;
@@ -317,8 +333,33 @@ begin
   Result := _UnitValueInf;
 end;
 
+function UnitValueLeading: TfpgMigUnitValue;
+begin
+  if _UnitValueLeading = nil then
+    _UnitValueLeading := TfpgMigUnitValue.Create(0, utAlign, 'leading');
+  Result := _UnitValueLeading;
+end;
+
+function UnitValueCenter: TfpgMigUnitValue;
+begin
+  if _UnitValueCenter = nil then
+    _UnitValueCenter := TfpgMigUnitValue.Create(50, utPercent, 'center');
+  Result := _UnitValueCenter;
+end;
+
+function UnitValueBaselineIdentity: TfpgMigUnitValue;
+begin
+  if _UnitValueBaselineIdentity = nil then
+    // Note: -1 value for baseline identity (special case)
+    _UnitValueBaselineIdentity := TfpgMigUnitValue.Create(-1, utAlign, 'baseline');
+  Result := _UnitValueBaselineIdentity;
+end;
+
 finalization
   FreeAndNil(_UnitValueZero);
   FreeAndNil(_UnitValueInf);
+  FreeAndNil(_UnitValueLeading);
+  FreeAndNil(_UnitValueCenter);
+  FreeAndNil(_UnitValueBaselineIdentity);
 
 end.
