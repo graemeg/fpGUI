@@ -46,7 +46,7 @@ Current status:
 Please:
 1. Review the implementation plan starting from the "Getting Started" section
 2. Check git status to see what's been done
-3. Verify existing tests still pass (cd unittests && fpc @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
+3. Verify existing tests still pass (cd unittests && fpc -dX11 @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
 4. Continue with [NEXT STEP]
 5. Follow test-as-you-go approach (write tests alongside implementation)
 6. Make regular commits after each completed subtask
@@ -1073,7 +1073,10 @@ type
   end;
 ----
 
-==== Step 2.3: Port LC (Layout Constraints) (3-4 days)
+==== Step 2.3: Port LC (Layout Constraints) ✓ COMPLETED
+
+**Status:** Complete - Container-level layout constraints with fluent API
+**Commit:** dde3d127
 
 **File:** `LC.java` → `fpg_mig_lc.pas`
 
