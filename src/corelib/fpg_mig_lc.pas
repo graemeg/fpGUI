@@ -233,6 +233,20 @@ end;
 
 destructor TfpgMigLC.Destroy;
 begin
+  // Free BoundSize objects if they're not constants
+  if (FWidth <> nil) and (FWidth <> BoundSizeNullSize) then
+    FWidth.Free;
+  if (FHeight <> nil) and (FHeight <> BoundSizeNullSize) then
+    FHeight.Free;
+  if (FPackW <> nil) and (FPackW <> BoundSizeNullSize) then
+    FPackW.Free;
+  if (FPackH <> nil) and (FPackH <> BoundSizeNullSize) then
+    FPackH.Free;
+  if FGridGapX <> nil then
+    FGridGapX.Free;
+  if FGridGapY <> nil then
+    FGridGapY.Free;
+
   inherited Destroy;
 end;
 
@@ -302,6 +316,9 @@ end;
 
 procedure TfpgMigLC.SetGridGapX(AValue: TfpgMigBoundSize);
 begin
+  // Free old BoundSize if it exists
+  if FGridGapX <> nil then
+    FGridGapX.Free;
   FGridGapX := AValue;
 end;
 
@@ -312,6 +329,9 @@ end;
 
 procedure TfpgMigLC.SetGridGapY(AValue: TfpgMigBoundSize);
 begin
+  // Free old BoundSize if it exists
+  if FGridGapY <> nil then
+    FGridGapY.Free;
   FGridGapY := AValue;
 end;
 
@@ -323,7 +343,12 @@ end;
 procedure TfpgMigLC.SetWidth(AValue: TfpgMigBoundSize);
 begin
   if AValue <> nil then
-    FWidth := AValue
+  begin
+    // Free old BoundSize if it's not a constant
+    if (FWidth <> nil) and (FWidth <> BoundSizeNullSize) then
+      FWidth.Free;
+    FWidth := AValue;
+  end
   else
     FWidth := BoundSizeNullSize;
 end;
@@ -336,7 +361,12 @@ end;
 procedure TfpgMigLC.SetHeight(AValue: TfpgMigBoundSize);
 begin
   if AValue <> nil then
-    FHeight := AValue
+  begin
+    // Free old BoundSize if it's not a constant
+    if (FHeight <> nil) and (FHeight <> BoundSizeNullSize) then
+      FHeight.Free;
+    FHeight := AValue;
+  end
   else
     FHeight := BoundSizeNullSize;
 end;
@@ -349,7 +379,12 @@ end;
 procedure TfpgMigLC.SetPackWidth(AValue: TfpgMigBoundSize);
 begin
   if AValue <> nil then
-    FPackW := AValue
+  begin
+    // Free old BoundSize if it's not a constant
+    if (FPackW <> nil) and (FPackW <> BoundSizeNullSize) then
+      FPackW.Free;
+    FPackW := AValue;
+  end
   else
     FPackW := BoundSizeNullSize;
 end;
@@ -362,7 +397,12 @@ end;
 procedure TfpgMigLC.SetPackHeight(AValue: TfpgMigBoundSize);
 begin
   if AValue <> nil then
-    FPackH := AValue
+  begin
+    // Free old BoundSize if it's not a constant
+    if (FPackH <> nil) and (FPackH <> BoundSizeNullSize) then
+      FPackH.Free;
+    FPackH := AValue;
+  end
   else
     FPackH := BoundSizeNullSize;
 end;
