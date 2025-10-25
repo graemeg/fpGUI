@@ -19,7 +19,8 @@ uses
   tcborderlayout,
   tcmiglayout,
   tcmig_unitvalue,
-  tcmig_boundsize;
+  tcmig_boundsize,
+  tcmig_platformdefaults;
 
 implementation
 
