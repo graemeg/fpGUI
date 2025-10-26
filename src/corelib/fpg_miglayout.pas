@@ -73,6 +73,9 @@ type
     function GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Integer; AIsHor: Boolean;
                      AUseVP: Boolean; ASizeHint: Integer): Integer;
     procedure MergeGapSizes(const ASizes: array of Integer; AIsHor, AIsTL: Boolean);
+    procedure CalcGaps(ABefore: TfpgWidgetBase; ABeforeCC: TfpgMigCC;
+                       AAfter: TfpgWidgetBase; AAfterCC: TfpgMigCC;
+                       const ATag: string; AFlowX, AIsLTR: Boolean);
   public
     constructor Create(AComp: TfpgWidgetBase; ACC: TfpgMigCC; AEHideMode: Integer; AUseVisualPadding: Boolean);
     destructor Destroy; override;
@@ -411,6 +414,78 @@ begin
     FGaps[gapIx][SIZE_MAX] := Min(ASizes[SIZE_MAX], FGaps[gapIx][SIZE_MAX]);
 end;
 
+procedure TfpgMigCompWrap.CalcGaps(ABefore: TfpgWidgetBase; ABeforeCC: TfpgMigCC;
+  AAfter: TfpgWidgetBase; AAfterCC: TfpgMigCC; const ATag: string; AFlowX,
+  AIsLTR: Boolean);
+var
+  par: TfpgWidgetBase;
+  parW, parH: Integer;
+  befGap, aftGap: TfpgMigBoundSize;
+  gaps: TfpgMigGapArray;
+begin
+  // Get parent dimensions
+  par := FComp.Parent;
+  if par = nil then
+    Exit;
+
+  parW := par.Width;
+  parH := par.Height;
+
+  // Get gap constraints from adjacent components
+  if ABefore <> nil then
+  begin
+    if AFlowX then
+      befGap := ABeforeCC.Horizontal.GetGapAfter
+    else
+      befGap := ABeforeCC.Vertical.GetGapAfter;
+  end
+  else
+    befGap := nil;
+
+  if AAfter <> nil then
+  begin
+    if AFlowX then
+      aftGap := AAfterCC.Horizontal.GetGapBefore
+    else
+      aftGap := AAfterCC.Vertical.GetGapBefore;
+  end
+  else
+    aftGap := nil;
+
+  // Calculate and merge gaps for all four sides
+  // Top gap (vertical, before)
+  if AFlowX then
+    gaps := FCC.Vertical.GetComponentGaps(par, FComp, befGap, nil, ATag, parH, 0, AIsLTR)
+  else
+    gaps := FCC.Vertical.GetComponentGaps(par, FComp, befGap, ABefore, ATag, parH, 0, AIsLTR);
+  if Length(gaps) > 0 then
+    MergeGapSizes(gaps, False, True);
+
+  // Left gap (horizontal, before)
+  if AFlowX then
+    gaps := FCC.Horizontal.GetComponentGaps(par, FComp, befGap, ABefore, ATag, parW, 1, AIsLTR)
+  else
+    gaps := FCC.Horizontal.GetComponentGaps(par, FComp, befGap, nil, ATag, parW, 1, AIsLTR);
+  if Length(gaps) > 0 then
+    MergeGapSizes(gaps, True, True);
+
+  // Bottom gap (vertical, after)
+  if AFlowX then
+    gaps := FCC.Vertical.GetComponentGaps(par, FComp, aftGap, nil, ATag, parH, 2, AIsLTR)
+  else
+    gaps := FCC.Vertical.GetComponentGaps(par, FComp, aftGap, AAfter, ATag, parH, 2, AIsLTR);
+  if Length(gaps) > 0 then
+    MergeGapSizes(gaps, False, False);
+
+  // Right gap (horizontal, after)
+  if AFlowX then
+    gaps := FCC.Horizontal.GetComponentGaps(par, FComp, aftGap, AAfter, ATag, parW, 3, AIsLTR)
+  else
+    gaps := FCC.Horizontal.GetComponentGaps(par, FComp, aftGap, nil, ATag, parW, 3, AIsLTR);
+  if Length(gaps) > 0 then
+    MergeGapSizes(gaps, True, False);
+end;
+
 function TfpgMigCompWrap.Filter(ASizeType, ASize: Integer): Integer;
 begin
   if ASize = NOT_SET then
@@ -465,9 +540,35 @@ begin
 end;
 
 function TfpgMigCompWrap.IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
+var
+  dc: TfpgMigDimConstraint;
+  bs: TfpgMigBoundSize;
+  mask: Integer;
 begin
-  // TODO: Implement gap push detection
-  Result := False;
+  // Check for forced push gaps (bitwise: 1=before, 2=after)
+  if AIsHor then
+  begin
+    if AIsBefore then
+      mask := 1
+    else
+      mask := 2;
+
+    if (mask and FForcedPushGaps) <> 0 then
+      Exit(True);
+  end;
+
+  // Get dimension constraint and gap bound size
+  if AIsHor then
+    dc := FCC.Horizontal
+  else
+    dc := FCC.Vertical;
+
+  if AIsBefore then
+    bs := dc.GetGapBefore
+  else
+    bs := dc.GetGapAfter;
+
+  Result := (bs <> nil) and bs.GapPush;
 end;
 
 procedure TfpgMigCompWrap.SetDimBounds(AStart, ASize: Integer; AIsHor: Boolean);

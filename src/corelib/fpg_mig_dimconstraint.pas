@@ -14,7 +14,13 @@ unit fpg_mig_dimconstraint;
 interface
 
 uses
-  Classes, SysUtils, fpg_mig_unitvalue, fpg_mig_boundsize;
+  Classes, SysUtils,
+  fpg_base,
+  fpg_mig_unitvalue, fpg_mig_boundsize;
+
+type
+  { Dynamic array type for gap sizes [min, pref, max] }
+  TfpgMigGapArray = array of Integer;
 
 const
   { Default grow/shrink priorities }
@@ -93,6 +99,21 @@ type
     function HasGapAfter: Boolean;
     function IsGapAfterPush: Boolean;
 
+    { Get component gap sizes for layout calculation
+      @param AParent The parent container
+      @param AComp The component this constraint is for
+      @param AAdjGap Gap from adjacent component (may be nil)
+      @param AAdjacentComp The adjacent component (may be nil)
+      @param ATag Tag string from component constraints (may be '')
+      @param ARefSize Reference size for pixel calculation
+      @param AAdjacentSide Which side: 0=top, 1=left, 2=bottom, 3=right
+      @param AIsLTR Left-to-right layout flag
+      @returns [min,pref,max] array or empty if no gap }
+    function GetComponentGaps(AParent: TfpgWidgetBase; AComp: TfpgWidgetBase;
+                             AAdjGap: TfpgMigBoundSize; AAdjacentComp: TfpgWidgetBase;
+                             const ATag: string; ARefSize, AAdjacentSide: Integer;
+                             AIsLTR: Boolean): TfpgMigGapArray;
+
     { Grouping }
     function GetSizeGroup: string;
     procedure SetSizeGroup(const AGroup: string);
@@ -109,7 +130,7 @@ type
 implementation
 
 uses
-  fpg_mig_platformdefaults;
+  fpg_mig_platformdefaults, fpg_mig_layoututil;
 
 { TfpgMigDimConstraint }
 
@@ -319,6 +340,77 @@ end;
 function TfpgMigDimConstraint.IsGapAfterPush: Boolean;
 begin
   Result := (FGapAfter <> nil) and FGapAfter.GapPush;
+end;
+
+function TfpgMigDimConstraint.GetComponentGaps(AParent: TfpgWidgetBase;
+  AComp: TfpgWidgetBase; AAdjGap: TfpgMigBoundSize;
+  AAdjacentComp: TfpgWidgetBase; const ATag: string; ARefSize,
+  AAdjacentSide: Integer; AIsLTR: Boolean): TfpgMigGapArray;
+var
+  gap: TfpgMigBoundSize;
+  hasGap: Boolean;
+  i: Integer;
+  uv: TfpgMigUnitValue;
+begin
+  // Determine which gap to use based on side (0=top, 1=left are "before", 2=bottom, 3=right are "after")
+  if AAdjacentSide < 2 then
+    gap := FGapBefore
+  else
+    gap := FGapAfter;
+
+  hasGap := (gap <> nil) and gap.GapPush;
+
+  // If no gap is set, use platform defaults
+  // TODO: Implement full GetDefaultComponentGap with component type detection
+  if ((gap = nil) or gap.IsUnset) and ((AAdjGap = nil) or AAdjGap.IsUnset) and (AComp <> nil) then
+  begin
+    // For now, use related gap as default (horizontal for left/right, vertical for top/bottom)
+    if AAdjacentSide in [1, 3] then  // left=1, right=3
+      gap := TfpgMigPlatformDefaults.GetRelatedGapX
+    else  // top=0, bottom=2
+      gap := TfpgMigPlatformDefaults.GetRelatedGapY;
+  end;
+
+  // If still no gap, return nil or zeros with push
+  if gap = nil then
+  begin
+    if hasGap then
+    begin
+      SetLength(Result, 3);
+      Result[0] := 0;
+      Result[1] := 0;
+      Result[2] := NOT_SET;  // NOT_SET constant should be imported
+    end
+    else
+      SetLength(Result, 0);  // Return empty array (nil equivalent)
+    Exit;
+  end;
+
+  // Convert BoundSize to [min, pref, max] array
+  SetLength(Result, 3);
+
+  // Get min value
+  uv := gap.Min;
+  if uv <> nil then
+    Result[0] := Round(uv.Value)
+  else
+    Result[0] := NOT_SET;
+
+  // Get preferred value
+  uv := gap.Preferred;
+  if uv <> nil then
+    Result[1] := Round(uv.Value)
+  else
+    Result[1] := NOT_SET;
+
+  // Get max value
+  uv := gap.Max;
+  if uv <> nil then
+    Result[2] := Round(uv.Value)
+  else
+    Result[2] := NOT_SET;
+
+  // TODO: Use full UnitValue.GetPixels(ARefSize, AParent, nil) instead of uv.Value
 end;
 
 { Grouping }
