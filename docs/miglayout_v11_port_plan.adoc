@@ -1254,15 +1254,18 @@ Critical utility class with core algorithms:
 
 This is mathematically complex - needs careful testing.
 
-==== Step 3.3: Port Grid.java Core Structure (7-10 days)
+==== Step 3.3: Port Grid.java Core Structure (7-10 days) - IN PROGRESS
 
 **File:** `Grid.java` → Refactor `fpg_miglayout.pas`
+
+**Simplified Approach:** Work directly with `TfpgWidgetBase` - no wrapper classes needed since we only support fpGUI (unlike Java MigLayout which supports Swing, SWT, JavaFX).
 
 Strategy:
 
 1. Keep existing `TfpgMigLayoutManager` shell
 2. Port `Grid` as internal class `TfpgMigGrid`
-3. Port inner classes: `Cell`, `CompWrap`, `FlowSizeSpec`, `LinkedDimGroup`
+3. Port inner classes: `Cell`, `CompWrap`, `FlowSizeSpec`, `LinkedDimGroup`, `AboveBelow`, `WeakCell`
+4. Use `TfpgWidgetBase` directly throughout (same as support classes in Step 3.1)
 
 [source,pascal]
 ----
@@ -1304,13 +1307,16 @@ Key methods to port:
 * `divideIntoLinkedGroups()` - baseline/grouped components
 * Size calculation methods
 
-==== Step 3.4: Port Component/Container Wrappers (3-4 days)
+==== Step 3.4: Port Component/Container Wrappers - NOT NEEDED ✓ SKIPPED
 
-We already have widget access via `TfpgWidget`, but need to adapt to MigLayout's wrapper interface expectations:
+**Decision:** Wrapper classes are not needed for fpGUI implementation.
 
-* Component wrapper interface (minimal - mostly pass-through to TfpgWidget)
-* Container wrapper interface (similar)
-* Unit converter implementation (pixel conversion, DPI handling)
+Unlike Java MigLayout which must support multiple toolkits (Swing, SWT, JavaFX), our fpGUI implementation only needs to support one toolkit. Therefore:
+
+* Work directly with `TfpgWidgetBase` throughout Grid implementation
+* No ComponentWrapper or ContainerWrapper abstraction needed
+* Simpler, more idiomatic fpGUI code
+* Better performance (no wrapper allocation overhead)
 
 **Testing Throughout Phase 3:**
 
