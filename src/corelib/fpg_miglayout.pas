@@ -175,6 +175,13 @@ type
     FWidth, FHeight: array[0..2] of Integer;
     FColFlowSpecs, FRowFlowSpecs: TfpgMigFlowSizeSpec;
 
+    { Build row and column index lists from grid }
+    procedure BuildIndexes;
+
+    { Grid position encoding/decoding helpers }
+    class function EncodeCellKey(AX, AY: Integer): Integer;
+    class procedure DecodeCellKey(AKey: Integer; out AX, AY: Integer);
+
     { Helper methods for size calculations }
     class function GetTotalSizeParallel(const ACompWraps: TfpgMigCompWrapList;
                                        ASizeType: Integer; AIsHor: Boolean): Integer;
@@ -762,6 +769,17 @@ end;
 
 constructor TfpgMigGrid.Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
   ARowConstr, AColConstr: TfpgMigAC; const ACCMap: TfpgMigCCMap);
+var
+  i, childCount: Integer;
+  child: TfpgWidgetBase;
+  cc: TfpgMigCC;
+  cw: TfpgMigCompWrap;
+  flowX: Boolean;
+  wrap: Integer;
+  cellX, cellY: Integer;
+  spanX, spanY: Integer;
+  cellKey: Integer;
+  cell: TfpgMigCell;
 begin
   inherited Create;
   FContainer := AContainer;
@@ -773,8 +791,191 @@ begin
   FRowIndexes := TfpgMigIntegerList.Create;
   FColIndexes := TfpgMigIntegerList.Create;
 
-  // TODO: Build grid from container's widgets and CC map
-  // This is where the complex grid building logic goes
+  // Determine flow direction and wrap setting
+  if ALC <> nil then
+  begin
+    flowX := ALC.IsFlowX;
+    wrap := ALC.GetWrapAfter;
+  end
+  else
+  begin
+    flowX := True;
+    wrap := -1;  // No wrap
+  end;
+
+  // First pass: Create CompWraps for all child widgets
+  cellX := 0;
+  cellY := 0;
+
+  childCount := AContainer.ComponentCount;
+  for i := 0 to childCount - 1 do
+  begin
+    child := TfpgWidgetBase(AContainer.Components[i]);
+
+    // Skip if not a widget
+    if child = nil then
+      Continue;
+
+    // TODO: Handle visibility check when we determine correct property
+
+    // Get component constraints from map
+    cc := nil;
+    if (ACCMap <> nil) and ACCMap.ContainsKey(child) then
+      cc := ACCMap[child];
+
+    // Create CompWrap for this widget
+    cw := TfpgMigCompWrap.Create(child, cc, 0, False);
+
+    // Determine grid position
+    // TODO: Handle explicit grid coordinates from CC
+    // For now, use simple flow placement
+
+    // Get span from CC if available
+    spanX := 1;
+    spanY := 1;
+    if cc <> nil then
+    begin
+      // TODO: Get span from CC.GridCell or CC.Span properties
+      // For now, default to 1x1
+    end;
+
+    // Encode grid position as integer key
+    cellKey := EncodeCellKey(cellX, cellY);
+
+    // Get or create cell at this position
+    if not FGrid.TryGetValue(cellKey, cell) then
+    begin
+      cell := TfpgMigCell.Create;
+      FGrid.Add(cellKey, cell);
+    end;
+
+    // Add CompWrap to cell
+    cell.CompWraps.Add(cw);
+
+    // Advance to next cell based on flow direction
+    if flowX then
+    begin
+      // Horizontal flow
+      cellX := cellX + spanX;
+      // Check for wrap
+      if (wrap > 0) and (cellX >= wrap) then
+      begin
+        cellX := 0;
+        cellY := cellY + 1;
+      end;
+    end
+    else
+    begin
+      // Vertical flow
+      cellY := cellY + spanY;
+      // Check for wrap
+      if (wrap > 0) and (cellY >= wrap) then
+      begin
+        cellY := 0;
+        cellX := cellX + 1;
+      end;
+    end;
+  end;
+
+  // Second pass: Build row and column indexes
+  BuildIndexes;
+
+  // Third pass: Create dimension groups
+  // TODO: Handle size groups, end groups, etc.
+
+  // TODO: Calculate gaps between components
+  // TODO: Create flow specs
+end;
+
+{ Grid position encoding/decoding }
+
+class function TfpgMigGrid.EncodeCellKey(AX, AY: Integer): Integer;
+begin
+  // Encode (x, y) as single integer: key = (y << 16) | x
+  // Supports grid positions up to 65535 x 65535
+  Result := (AY shl 16) or (AX and $FFFF);
+end;
+
+class procedure TfpgMigGrid.DecodeCellKey(AKey: Integer; out AX, AY: Integer);
+begin
+  // Decode integer key back to (x, y)
+  AX := AKey and $FFFF;
+  AY := AKey shr 16;
+end;
+
+procedure TfpgMigGrid.BuildIndexes;
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cellKey: Integer;
+  cellX, cellY: Integer;
+  i, j: Integer;
+  found: Boolean;
+  tempRow, tempCol: Integer;
+begin
+  // Clear existing indexes
+  FRowIndexes.Clear;
+  FColIndexes.Clear;
+
+  // Collect unique row and column indexes from grid cells
+  for pair in FGrid do
+  begin
+    cellKey := pair.Key;
+    DecodeCellKey(cellKey, cellX, cellY);
+
+    // Add row index if not already present
+    found := False;
+    for i := 0 to FRowIndexes.Count - 1 do
+    begin
+      if FRowIndexes[i] = cellY then
+      begin
+        found := True;
+        Break;
+      end;
+    end;
+    if not found then
+      FRowIndexes.Add(cellY);
+
+    // Add column index if not already present
+    found := False;
+    for i := 0 to FColIndexes.Count - 1 do
+    begin
+      if FColIndexes[i] = cellX then
+      begin
+        found := True;
+        Break;
+      end;
+    end;
+    if not found then
+      FColIndexes.Add(cellX);
+  end;
+
+  // Sort row indexes using bubble sort (simple for small lists)
+  for i := 0 to FRowIndexes.Count - 2 do
+  begin
+    for j := i + 1 to FRowIndexes.Count - 1 do
+    begin
+      if FRowIndexes[i] > FRowIndexes[j] then
+      begin
+        tempRow := FRowIndexes[i];
+        FRowIndexes[i] := FRowIndexes[j];
+        FRowIndexes[j] := tempRow;
+      end;
+    end;
+  end;
+
+  // Sort column indexes using bubble sort
+  for i := 0 to FColIndexes.Count - 2 do
+  begin
+    for j := i + 1 to FColIndexes.Count - 1 do
+    begin
+      if FColIndexes[i] > FColIndexes[j] then
+      begin
+        tempCol := FColIndexes[i];
+        FColIndexes[i] := FColIndexes[j];
+        FColIndexes[j] := tempCol;
+      end;
+    end;
+  end;
 end;
 
 destructor TfpgMigGrid.Destroy;
