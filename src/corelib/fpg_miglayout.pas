@@ -1407,12 +1407,22 @@ begin
       for i := 0 to cell.CompWraps.Count - 1 do
       begin
         cw := cell.CompWraps[i];
-        if cw = nil then
+        if (cw = nil) or (cw.Comp = nil) then
           Continue;
 
-        // Set bounds for this component using its preferred size
-        cw.SetDimBounds(colPositions[cellX], colWidths[cellX], True);   // horizontal
-        cw.SetDimBounds(rowPositions[cellY], rowHeights[cellY], False);  // vertical
+        // Get component's actual size
+        maxWidth := cw.Comp.Width;
+        maxHeight := cw.Comp.Height;
+
+        // Calculate position within cell based on alignment
+        // TODO: Get actual alignment from CC.Horizontal.GetAlign / CC.Vertical.GetAlign
+        // For now, components use their preferred size at cell top-left
+        compX := colPositions[cellX];
+        compY := rowPositions[cellY];
+
+        // Set bounds for this component
+        cw.SetDimBounds(compX, maxWidth, True);   // horizontal
+        cw.SetDimBounds(compY, maxHeight, False);  // vertical
         cw.TransferBounds(False);
       end;
     end;
