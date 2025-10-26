@@ -16,6 +16,7 @@ interface
 
 uses
   Classes, SysUtils,
+  fpg_layouttypes,  // For TfpgLayoutConstraint
   fpg_mig_boundsize, fpg_mig_unitvalue, fpg_mig_dimconstraint,
   fpg_mig_constraintparser;
 
@@ -30,7 +31,7 @@ type
   TfpgMigDockSide = (dsNone = -1, dsNorth = 0, dsWest = 1, dsSouth = 2, dsEast = 3);
 
   { Component Constraints - widget-level layout constraints }
-  TfpgMigCC = class
+  TfpgMigCC = class(TfpgLayoutConstraint)
   private
     // Docking
     FDock: Integer;  // -1 = no dock, 0=north, 1=west, 2=south, 3=east

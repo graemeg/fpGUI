@@ -2,15 +2,33 @@ unit fpg_miglayout;
 
 {$mode objfpc}{$H+}
 
+{
+  MigLayout v11 Port for fpGUI
+
+  This is a port of MigLayout v11.4.2 from Java to Object Pascal.
+  Unlike the Java version which supports multiple toolkits (Swing, SWT, JavaFX),
+  this implementation works directly with TfpgWidgetBase - no wrapper abstraction needed.
+
+  Based on: prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/Grid.java
+}
+
 interface
 
 uses
-  Classes, SysUtils, Generics.Collections,
+  Classes, SysUtils, Math, Generics.Collections,
   fpg_base,
   fpg_widget,
   fpg_layouttypes,
   fpg_layoutmanager,
-  fpg_migconstraint;
+  fpg_migconstraint,
+  fpg_mig_lc,
+  fpg_mig_ac,
+  fpg_mig_cc,
+  fpg_mig_dimconstraint,
+  fpg_mig_boundsize,
+  fpg_mig_unitvalue,
+  fpg_mig_resizeconstraint,
+  fpg_mig_layoututil;
 
 type
   TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
@@ -18,7 +36,6 @@ type
     FColumnCount: Integer;
     FRowGap: Integer;
     FColumnGap: Integer;
-    procedure PositionWidgetInCell(AWidget: TfpgWidget; const ACellRect: TfpgRect; AConstraint: TfpgMigConstraint);
   protected
     // TfpgBaseLayoutManager overrides
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
@@ -35,327 +52,450 @@ type
 implementation
 
 type
+  { Forward declarations for inner classes }
+  TfpgMigCompWrap = class;
+  TfpgMigCell = class;
+  TfpgMigLinkedDimGroup = class;
+  TfpgMigFlowSizeSpec = class;
+  TfpgMigGrid = class;
+
+  { Specialized lists and arrays }
+  TfpgMigCompWrapList = specialize TObjectList<TfpgMigCompWrap>;
+  TfpgMigCellList = specialize TObjectList<TfpgMigCell>;
+  TfpgMigLinkedDimGroupList = specialize TObjectList<TfpgMigLinkedDimGroup>;
+  TfpgMigCellMap = specialize TDictionary<Integer, TfpgMigCell>;
+  TfpgMigIntegerList = specialize TList<Integer>;
+  TfpgMigIntArray = array of Integer;
+  TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
+
+  { AboveBelow - helper record for baseline calculations }
+  TfpgMigAboveBelow = record
+    MaxAbove: Integer;
+    MaxBelow: Integer;
+  end;
+
+  { Cell - holds component wraps in a grid cell
+    Simple container for CompWraps, potentially spanning multiple cells }
   TfpgMigCell = class
   private
-    FWidget: TfpgWidget;
-    FRow, FCol: Integer;
     FSpanX, FSpanY: Integer;
-    FConstraint: TfpgMigConstraint;
+    FFlowX: Boolean;
+    FCompWraps: TfpgMigCompWrapList;
+    FHasTagged: Boolean;  // If one or more components have tags and need sorting
   public
-    property Widget: TfpgWidget read FWidget;
-    property Row: Integer read FRow;
-    property Col: Integer read FCol;
-    property SpanX: Integer read FSpanX;
-    property SpanY: Integer read FSpanY;
-    property Constraint: TfpgMigConstraint read FConstraint;
-  end;
-
-  TfpgMigCellList = specialize TObjectList<TfpgMigCell>;
-
-  // Column/Row sizing information
-  TfpgMigDimension = record
-    MinSize: Integer;      // Minimum size (from widget constraints)
-    PrefSize: Integer;     // Preferred size (from widget preferred sizes)
-    MaxSize: Integer;      // Maximum size (from widget constraints)
-    GrowPriority: Integer; // Priority for growing (higher = grows first)
-    Size: Integer;         // Calculated actual size
-    Position: Integer;     // Calculated position
-  end;
-
-  // Grid structure manager
-  TfpgMigGrid = class
-  private
-    FColumnCount: Integer;
-    FRowCount: Integer;
-    FCells: TfpgMigCellList;
-    FGrid: array of array of TfpgMigCell;
-    FColumnGap, FRowGap: Integer;
-    FColumns: array of TfpgMigDimension;
-    FRows: array of TfpgMigDimension;
-    function GetCellCount: Integer;
-  public
-    constructor Create(AColumnCount: Integer);
+    constructor Create(ACompWrap: TfpgMigCompWrap); overload;
+    constructor Create(ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
+    constructor Create(ACompWrap: TfpgMigCompWrap; ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
     destructor Destroy; override;
 
-    procedure AddWidget(AWidget: TfpgWidget; ARow, ACol, ASpanX, ASpanY: Integer;
-                       AConstraint: TfpgMigConstraint);
-
-    procedure CalculateColumnWidths(AAvailableWidth, AGap: Integer);
-    procedure CalculateRowHeights(AAvailableHeight, AGap: Integer);
-
-    function GetCellRect(ACell: TfpgMigCell): TfpgRect;
-    function GetCell(AIndex: Integer): TfpgMigCell;
-
-    property CellCount: Integer read GetCellCount;
-    property RowCount: Integer read FRowCount;
+    property SpanX: Integer read FSpanX;
+    property SpanY: Integer read FSpanY;
+    property FlowX: Boolean read FFlowX;
+    property CompWraps: TfpgMigCompWrapList read FCompWraps;
+    property HasTagged: Boolean read FHasTagged write FHasTagged;
   end;
+
+  { CompWrap - wraps a TfpgWidgetBase with its CC constraint
+    Caches min/pref/max sizes and gap information }
+  TfpgMigCompWrap = class
+  private
+    FComp: TfpgWidgetBase;
+    FCC: TfpgMigCC;
+    FEHideMode: Integer;  // Effective hide mode (<=0 means visible)
+    FUseVisualPadding: Boolean;
+    FSizesOk: Boolean;
+    FIsAbsolute: Boolean;
+
+    FGaps: array[0..3] of array[0..2] of Integer;  // [top,left,bottom,right][min,pref,max]
+    FHasGaps: Boolean;
+
+    FHorSizes: array[0..2] of Integer;  // [min,pref,max]
+    FVerSizes: array[0..2] of Integer;
+
+    FX, FY, FW, FH: Integer;  // Bounds
+
+    FForcedPushGaps: Integer;  // 1=before, 2=after (bitwise)
+
+    procedure ValidateSize;
+    function GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Integer; AIsHor: Boolean;
+                     AUseVP: Boolean; ASizeHint: Integer): Integer;
+    procedure CorrectMinMax(var ASizes: array of Integer);
+    function GetGapIx(AIsHor, AIsTL: Boolean): Integer;
+    procedure MergeGapSizes(const ASizes: array of Integer; AIsHor, AIsTL: Boolean);
+    function Filter(ASizeType, ASize: Integer): Integer;
+    function ConstrainSize(ASize: Integer): Integer;
+  public
+    constructor Create(AComp: TfpgWidgetBase; ACC: TfpgMigCC; AEHideMode: Integer; AUseVisualPadding: Boolean);
+    destructor Destroy; override;
+
+    function GetSizes(AIsHor: Boolean): PInteger;  // Returns pointer to [min,pref,max] array
+    procedure InvalidateSizes;
+    function GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
+    function GetGapBefore(ASizeType: Integer; AIsHor: Boolean): Integer;
+    function GetGapAfter(ASizeType: Integer; AIsHor: Boolean): Integer;
+    function IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
+    procedure SetDimBounds(AStart, ASize: Integer; AIsHor: Boolean);
+    procedure TransferBounds(AAddVisualPadding: Boolean);
+
+    property Comp: TfpgWidgetBase read FComp;
+    property CC: TfpgMigCC read FCC;
+    property X: Integer read FX write FX;
+    property Y: Integer read FY write FY;
+    property Width: Integer read FW write FW;
+    property Height: Integer read FH write FH;
+  end;
+
+  { LinkedDimGroup - components sharing layout properties in one dimension }
+  TfpgMigLinkedDimGroup = class
+  private
+    const
+      TYPE_SERIAL = 0;
+      TYPE_PARALLEL = 1;
+      TYPE_BASELINE = 2;
+  private
+    FLinkCtx: string;
+    FSpan: Integer;
+    FLinkType: Integer;
+    FIsHor, FFromEnd: Boolean;
+    FCompWraps: TfpgMigCompWrapList;
+    FLStart, FLSize: Integer;  // For debug painting
+  public
+    constructor Create(const ALinkCtx: string; ASpan, ALinkType: Integer; AIsHor, AFromEnd: Boolean);
+    destructor Destroy; override;
+
+    procedure AddCompWrap(ACompWrap: TfpgMigCompWrap);
+    function GetMinPrefMax: TfpgMigIntArray;  // Returns [min,pref,max]
+  end;
+
+  { FlowSizeSpec - size specifications for flow layout }
+  TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
+
+  TfpgMigFlowSizeSpec = class
+  private
+    FSizes: array of TfpgMigSizeArray;  // [row/col][min,pref,max]
+    FResConstsInclGaps: array of TfpgMigResizeConstraint;
+  public
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+  { Grid - the main layout engine (port of Grid.java) }
+  TfpgMigGrid = class
+  private
+    FLC: TfpgMigLC;
+    FRowConstr, FColConstr: TfpgMigAC;
+    FContainer: TfpgWidgetBase;
+    FGrid: TfpgMigCellMap;  // [(y<<16)+x] -> Cell; nil key for absolute positioned
+    FRowIndexes, FColIndexes: TfpgMigIntegerList;  // Sorted unique row/col indexes
+    FColGroupLists, FRowGroupLists: array of TfpgMigLinkedDimGroupList;
+    FWidth, FHeight: array[0..2] of Integer;  // [min,pref,max]
+    FColFlowSpecs, FRowFlowSpecs: TfpgMigFlowSizeSpec;
+  public
+    constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
+                       ARowConstr, AColConstr: TfpgMigAC;
+                       const ACCMap: TfpgMigCCMap);
+    destructor Destroy; override;
+  end;
+
+{ Implementation of inner classes }
+
+{ TfpgMigCell }
+
+constructor TfpgMigCell.Create(ACompWrap: TfpgMigCompWrap);
+begin
+  Create(ACompWrap, 1, 1, True);
+end;
+
+constructor TfpgMigCell.Create(ASpanX, ASpanY: Integer; AFlowX: Boolean);
+begin
+  Create(nil, ASpanX, ASpanY, AFlowX);
+end;
+
+constructor TfpgMigCell.Create(ACompWrap: TfpgMigCompWrap; ASpanX, ASpanY: Integer; AFlowX: Boolean);
+begin
+  inherited Create;
+  FSpanX := ASpanX;
+  FSpanY := ASpanY;
+  FFlowX := AFlowX;
+  FCompWraps := TfpgMigCompWrapList.Create(False);  // Don't own CompWraps
+  if ACompWrap <> nil then
+    FCompWraps.Add(ACompWrap);
+  FHasTagged := False;
+end;
+
+destructor TfpgMigCell.Destroy;
+begin
+  FCompWraps.Free;
+  inherited Destroy;
+end;
+
+{ TfpgMigCompWrap }
+
+constructor TfpgMigCompWrap.Create(AComp: TfpgWidgetBase; ACC: TfpgMigCC;
+  AEHideMode: Integer; AUseVisualPadding: Boolean);
+begin
+  inherited Create;
+  FComp := AComp;
+  FCC := ACC;
+  FEHideMode := AEHideMode;
+  FUseVisualPadding := AUseVisualPadding;
+  FSizesOk := False;
+  FIsAbsolute := False;  // TODO: Check if horizontal and vertical sizes are absolute
+  FHasGaps := False;
+
+  FX := NOT_SET;
+  FY := NOT_SET;
+  FW := NOT_SET;
+  FH := NOT_SET;
+
+  FForcedPushGaps := 0;
+end;
+
+destructor TfpgMigCompWrap.Destroy;
+begin
+  // FComp and FCC are not owned - don't free
+  inherited Destroy;
+end;
+
+procedure TfpgMigCompWrap.ValidateSize;
+begin
+  // TODO: Implement size validation and calculation
+  // This is complex - involves content bias, callbacks, visual padding
+  FSizesOk := True;
+end;
+
+function TfpgMigCompWrap.GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Integer;
+  AIsHor: Boolean; AUseVP: Boolean; ASizeHint: Integer): Integer;
+begin
+  // TODO: Implement size calculation from BoundSize
+  Result := 0;
+end;
+
+procedure TfpgMigCompWrap.CorrectMinMax(var ASizes: array of Integer);
+begin
+  // Ensure min <= pref <= max
+  if ASizes[SIZE_PREF] < ASizes[SIZE_MIN] then
+    ASizes[SIZE_PREF] := ASizes[SIZE_MIN];
+  if ASizes[SIZE_MAX] < ASizes[SIZE_PREF] then
+    ASizes[SIZE_MAX] := ASizes[SIZE_PREF];
+end;
+
+function TfpgMigCompWrap.GetSizes(AIsHor: Boolean): PInteger;
+begin
+  ValidateSize;
+  if AIsHor then
+    Result := @FHorSizes[0]
+  else
+    Result := @FVerSizes[0];
+end;
+
+procedure TfpgMigCompWrap.InvalidateSizes;
+begin
+  FSizesOk := False;
+end;
+
+function TfpgMigCompWrap.GetGapIx(AIsHor, AIsTL: Boolean): Integer;
+begin
+  if AIsHor then
+    Result := IfThen(AIsTL, 1, 3)
+  else
+    Result := IfThen(AIsTL, 0, 2);
+end;
+
+procedure TfpgMigCompWrap.MergeGapSizes(const ASizes: array of Integer; AIsHor, AIsTL: Boolean);
+var
+  gapIx: Integer;
+begin
+  if Length(ASizes) = 0 then
+    Exit;
+
+  gapIx := GetGapIx(AIsHor, AIsTL);
+  FHasGaps := True;
+
+  // Initialize if not set
+  if FGaps[gapIx][SIZE_MIN] = 0 then
+  begin
+    FGaps[gapIx][SIZE_MIN] := 0;
+    FGaps[gapIx][SIZE_PREF] := 0;
+    FGaps[gapIx][SIZE_MAX] := INF;
+  end;
+
+  // Merge: max of min/pref, min of max
+  if Length(ASizes) > SIZE_MIN then
+    FGaps[gapIx][SIZE_MIN] := Max(ASizes[SIZE_MIN], FGaps[gapIx][SIZE_MIN]);
+  if Length(ASizes) > SIZE_PREF then
+    FGaps[gapIx][SIZE_PREF] := Max(ASizes[SIZE_PREF], FGaps[gapIx][SIZE_PREF]);
+  if Length(ASizes) > SIZE_MAX then
+    FGaps[gapIx][SIZE_MAX] := Min(ASizes[SIZE_MAX], FGaps[gapIx][SIZE_MAX]);
+end;
+
+function TfpgMigCompWrap.Filter(ASizeType, ASize: Integer): Integer;
+begin
+  if ASize = NOT_SET then
+  begin
+    if ASizeType <> SIZE_MAX then
+      Result := 0
+    else
+      Result := INF;
+  end
+  else
+    Result := ConstrainSize(ASize);
+end;
+
+function TfpgMigCompWrap.ConstrainSize(ASize: Integer): Integer;
+begin
+  // TODO: Apply size constraints
+  Result := ASize;
+end;
+
+function TfpgMigCompWrap.GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
+begin
+  Result := Filter(ASizeType, GetGapBefore(ASizeType, AIsHor) +
+                   GetSizes(AIsHor)[ASizeType] + GetGapAfter(ASizeType, AIsHor));
+end;
+
+function TfpgMigCompWrap.GetGapBefore(ASizeType: Integer; AIsHor: Boolean): Integer;
+var
+  gapIx: Integer;
+begin
+  if not FHasGaps then
+    Exit(0);
+  gapIx := GetGapIx(AIsHor, True);
+  Result := Filter(ASizeType, FGaps[gapIx][ASizeType]);
+end;
+
+function TfpgMigCompWrap.GetGapAfter(ASizeType: Integer; AIsHor: Boolean): Integer;
+var
+  gapIx: Integer;
+begin
+  if not FHasGaps then
+    Exit(0);
+  gapIx := GetGapIx(AIsHor, False);
+  Result := Filter(ASizeType, FGaps[gapIx][ASizeType]);
+end;
+
+function TfpgMigCompWrap.IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
+begin
+  // TODO: Implement gap push detection
+  Result := False;
+end;
+
+procedure TfpgMigCompWrap.SetDimBounds(AStart, ASize: Integer; AIsHor: Boolean);
+begin
+  if AIsHor then
+  begin
+    if (AStart <> FX) or (ASize <> FW) then
+    begin
+      FX := AStart;
+      FW := ASize;
+      // TODO: Invalidate sizes if component has horizontal content bias
+    end;
+  end
+  else
+  begin
+    if (AStart <> FY) or (ASize <> FH) then
+    begin
+      FY := AStart;
+      FH := ASize;
+      // TODO: Invalidate sizes if component has vertical content bias
+    end;
+  end;
+end;
+
+procedure TfpgMigCompWrap.TransferBounds(AAddVisualPadding: Boolean);
+begin
+  // TODO: Transfer calculated bounds to the widget
+  if FCC.IsExternal then
+    Exit;
+
+  // For now, simple transfer
+  if (FX <> NOT_SET) and (FY <> NOT_SET) and
+     (FW <> NOT_SET) and (FH <> NOT_SET) then
+  begin
+    FComp.SetPosition(FX, FY, FW, FH);
+  end;
+end;
+
+{ TfpgMigLinkedDimGroup }
+
+constructor TfpgMigLinkedDimGroup.Create(const ALinkCtx: string; ASpan, ALinkType: Integer;
+  AIsHor, AFromEnd: Boolean);
+begin
+  inherited Create;
+  FLinkCtx := ALinkCtx;
+  FSpan := ASpan;
+  FLinkType := ALinkType;
+  FIsHor := AIsHor;
+  FFromEnd := AFromEnd;
+  FCompWraps := TfpgMigCompWrapList.Create(False);  // Don't own
+  FLStart := 0;
+  FLSize := 0;
+end;
+
+destructor TfpgMigLinkedDimGroup.Destroy;
+begin
+  FCompWraps.Free;
+  inherited Destroy;
+end;
+
+procedure TfpgMigLinkedDimGroup.AddCompWrap(ACompWrap: TfpgMigCompWrap);
+begin
+  FCompWraps.Add(ACompWrap);
+end;
+
+function TfpgMigLinkedDimGroup.GetMinPrefMax: TfpgMigIntArray;
+begin
+  // TODO: Calculate min/pref/max based on link type (serial/parallel/baseline)
+  SetLength(Result, 3);
+  Result[SIZE_MIN] := 0;
+  Result[SIZE_PREF] := 0;
+  Result[SIZE_MAX] := INF;
+end;
+
+{ TfpgMigFlowSizeSpec }
+
+constructor TfpgMigFlowSizeSpec.Create;
+begin
+  inherited Create;
+  // TODO: Initialize with sizes and constraints when needed
+end;
+
+destructor TfpgMigFlowSizeSpec.Destroy;
+begin
+  inherited Destroy;
+end;
 
 { TfpgMigGrid }
 
-constructor TfpgMigGrid.Create(AColumnCount: Integer);
-var
-  c, r: Integer;
+constructor TfpgMigGrid.Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
+  ARowConstr, AColConstr: TfpgMigAC; const ACCMap: TfpgMigCCMap);
 begin
-  FColumnCount := AColumnCount;
-  FCells := TfpgMigCellList.Create(True);
-  FRowCount := 1;
-  SetLength(FGrid, FColumnCount, FRowCount);
+  inherited Create;
+  FContainer := AContainer;
+  FLC := ALC;
+  FRowConstr := ARowConstr;
+  FColConstr := AColConstr;
 
-  // Initialize grid to nil
-  for c := 0 to FColumnCount - 1 do
-    for r := 0 to FRowCount - 1 do
-      FGrid[c, r] := nil;
+  FGrid := TfpgMigCellMap.Create;
+  FRowIndexes := TfpgMigIntegerList.Create;
+  FColIndexes := TfpgMigIntegerList.Create;
+
+  // TODO: Build grid from container's widgets and CC map
+  // This is where the complex grid building logic goes
 end;
 
 destructor TfpgMigGrid.Destroy;
 begin
-  FCells.Free;
+  FGrid.Free;
+  FRowIndexes.Free;
+  FColIndexes.Free;
+  // TODO: Free group lists
+  FColFlowSpecs.Free;
+  FRowFlowSpecs.Free;
   inherited Destroy;
 end;
 
-procedure TfpgMigGrid.AddWidget(AWidget: TfpgWidget; ARow, ACol, ASpanX, ASpanY: Integer; AConstraint: TfpgMigConstraint);
-var
-  cell: TfpgMigCell;
-  r, c: Integer;
-  oldRowCount: Integer;
-begin
-  cell := TfpgMigCell.Create;
-  cell.FWidget := AWidget;
-  cell.FRow := ARow;
-  cell.FCol := ACol;
-  cell.FSpanX := ASpanX;
-  cell.FSpanY := ASpanY;
-  cell.FConstraint := AConstraint;
-
-  FCells.Add(cell);
-
-  // Resize grid if needed
-  if ARow + ASpanY > FRowCount then
-  begin
-    oldRowCount := FRowCount;
-    FRowCount := ARow + ASpanY;
-    SetLength(FGrid, FColumnCount, FRowCount);
-
-    // Initialize new rows to nil
-    for c := 0 to FColumnCount - 1 do
-      for r := oldRowCount to FRowCount - 1 do
-        FGrid[c, r] := nil;
-  end;
-
-  // Mark cells as occupied
-  for r := ARow to ARow + ASpanY - 1 do
-  begin
-    for c := ACol to ACol + ASpanX - 1 do
-    begin
-      FGrid[c, r] := cell;
-    end;
-  end;
-end;
-
-procedure TfpgMigGrid.CalculateColumnWidths(AAvailableWidth, AGap: Integer);
-var
-  i, col: Integer;
-  cell: TfpgMigCell;
-  maxWidth: Integer;
-  totalPrefWidth, totalGrow: Integer;
-  extraSpace, growFactor: Double;
-begin
-  SetLength(FColumns, FColumnCount);
-
-  if FColumnCount = 1 then
-  begin
-    FColumns[0].PrefSize := AAvailableWidth - (2 * AGap);
-  end
-  else
-  begin
-    // Calculate preferred width and grow weight for each column
-    totalPrefWidth := 0;
-    totalGrow := 0;
-    for col := 0 to FColumnCount - 1 do
-    begin
-      maxWidth := 0;
-      FColumns[col].GrowPriority := 0;
-      for i := 0 to CellCount - 1 do
-      begin
-        cell := GetCell(i);
-        if cell.Col = col then
-        begin
-          if cell.Widget.Width > maxWidth then
-            maxWidth := cell.Widget.Width;
-          if cell.Constraint.GrowX > FColumns[col].GrowPriority then
-            FColumns[col].GrowPriority := cell.Constraint.GrowX;
-        end;
-      end;
-      FColumns[col].PrefSize := maxWidth;
-      totalPrefWidth := totalPrefWidth + maxWidth;
-      totalGrow := totalGrow + FColumns[col].GrowPriority;
-    end;
-
-    // Distribute extra space
-    extraSpace := AAvailableWidth - totalPrefWidth - (FColumnCount + 1) * AGap;
-    if (extraSpace > 0) and (totalGrow > 0) then
-    begin
-      growFactor := extraSpace / totalGrow;
-      for col := 0 to FColumnCount - 1 do
-      begin
-        if FColumns[col].GrowPriority > 0 then
-          FColumns[col].PrefSize := FColumns[col].PrefSize + round(FColumns[col].GrowPriority * growFactor);
-      end;
-    end;
-  end;
-
-  // Set position for each column
-  FColumns[0].Position := AGap;
-  for col := 1 to FColumnCount - 1 do
-  begin
-    FColumns[col].Position := FColumns[col-1].Position + FColumns[col-1].PrefSize + AGap;
-  end;
-end;
-
-procedure TfpgMigGrid.CalculateRowHeights(AAvailableHeight, AGap: Integer);
-var
-  i, row: Integer;
-  cell: TfpgMigCell;
-  maxHeight: Integer;
-  totalPrefHeight, totalGrow: Integer;
-  extraSpace, growFactor: Double;
-  spanningHeight: Integer;
-begin
-  SetLength(FRows, FRowCount);
-
-  if FRowCount = 1 then
-  begin
-    FRows[0].PrefSize := AAvailableHeight - (2 * AGap);
-  end
-  else
-  begin
-    // Calculate preferred height and grow weight for each row
-    totalPrefHeight := 0;
-    totalGrow := 0;
-    for row := 0 to FRowCount - 1 do
-    begin
-      maxHeight := 0;
-      FRows[row].GrowPriority := 0;
-      for i := 0 to CellCount - 1 do
-      begin
-        cell := GetCell(i);
-        // Only consider single-row widgets for initial calculation
-        if (cell.Row = row) and (cell.SpanY = 1) then
-        begin
-          if cell.Widget.Height > maxHeight then
-            maxHeight := cell.Widget.Height;
-          if cell.Constraint.GrowY > FRows[row].GrowPriority then
-            FRows[row].GrowPriority := cell.Constraint.GrowY;
-        end;
-      end;
-      FRows[row].PrefSize := maxHeight;
-      totalPrefHeight := totalPrefHeight + maxHeight;
-      totalGrow := totalGrow + FRows[row].GrowPriority;
-    end;
-
-    // Handle multi-row spanning widgets
-    // Only expand rows if the total spanned height is less than what single-span widgets need
-    // Spanning widgets adapt to available space rather than forcing expansion
-    // Note: Full MigLayout would use "eagerness" levels here for more sophisticated expansion
-    for i := 0 to CellCount - 1 do
-    begin
-      cell := GetCell(i);
-      if cell.SpanY > 1 then
-      begin
-        // Calculate total height of spanned rows (including gaps)
-        spanningHeight := 0;
-        for row := cell.Row to cell.Row + cell.SpanY - 1 do
-          spanningHeight := spanningHeight + FRows[row].PrefSize;
-        spanningHeight := spanningHeight + (cell.SpanY - 1) * AGap;
-
-        // Only expand if there are no other constraints preventing it
-        // In this simplified implementation, we don't automatically expand for spanning widgets
-        // The widget will be sized to fit the available spanned space
-        // To force expansion, use GrowY constraint
-      end;
-    end;
-
-    // Distribute extra space
-    extraSpace := AAvailableHeight - totalPrefHeight - (FRowCount + 1) * AGap;
-    if (extraSpace > 0) and (totalGrow > 0) then
-    begin
-      growFactor := extraSpace / totalGrow;
-      for row := 0 to FRowCount - 1 do
-      begin
-        if FRows[row].GrowPriority > 0 then
-          FRows[row].PrefSize := FRows[row].PrefSize + round(FRows[row].GrowPriority * growFactor);
-      end;
-    end;
-  end;
-
-  // Set position for each row
-  if FRowCount > 0 then
-  begin
-    FRows[0].Position := AGap;
-    for row := 1 to FRowCount - 1 do
-    begin
-      FRows[row].Position := FRows[row-1].Position + FRows[row-1].PrefSize + AGap;
-    end;
-  end;
-end;
-
-function TfpgMigGrid.GetCellRect(ACell: TfpgMigCell): TfpgRect;
-var
-  cellX, cellY, cellW, cellH: Integer;
-  widgetW, widgetH: Integer;
-  newX, newY: Integer;
-  i: Integer;
-begin
-  cellX := FColumns[ACell.Col].Position;
-  cellY := FRows[ACell.Row].Position;
-
-  cellW := 0;
-  for i := ACell.Col to ACell.Col + ACell.SpanX - 1 do
-    cellW := cellW + FColumns[i].PrefSize;
-  cellW := cellW + (ACell.SpanX - 1) * FColumnGap;
-
-  cellH := 0;
-  for i := ACell.Row to ACell.Row + ACell.SpanY - 1 do
-    cellH := cellH + FRows[i].PrefSize;
-  cellH := cellH + (ACell.SpanY - 1) * FRowGap;
-
-  widgetW := ACell.Widget.Width;
-  widgetH := ACell.Widget.Height;
-
-  // Handle horizontal alignment
-  case ACell.Constraint.AlignX of
-    axLeft: newX := cellX;
-    axCenter: newX := cellX + (cellW - widgetW) div 2;
-    axRight: newX := cellX + cellW - widgetW;
-    axFill: newX := cellX;
-  end;
-
-  // Handle vertical alignment
-  case ACell.Constraint.AlignY of
-    ayTop: newY := cellY;
-    ayCenter: newY := cellY + (cellH - widgetH) div 2;
-    ayBottom: newY := cellY + cellH - widgetH;
-    ayFill: newY := cellY;
-  end;
-
-  if ACell.Constraint.AlignX = axFill then widgetW := cellW;
-  if ACell.Constraint.AlignY = ayFill then widgetH := cellH;
-
-  Result.SetRect(newX, newY, widgetW, widgetH);
-end;
-
-function TfpgMigGrid.GetCell(AIndex: Integer): TfpgMigCell;
-begin
-  Result := FCells[AIndex];
-end;
-
-function TfpgMigGrid.GetCellCount: Integer;
-begin
-  Result := FCells.Count;
-end;
-
-
-{ TfpgMigLayoutManager }
+{ TfpgMigLayoutManager - Public API }
 
 constructor TfpgMigLayoutManager.Create;
 begin
@@ -367,134 +507,22 @@ end;
 
 function TfpgMigLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
 begin
-  Result := TfpgMigConstraint.Create;
+  Result := TfpgMigCC.Create;  // Use new v11 CC class
 end;
 
 procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
-var
-  grid: TfpgMigGrid;
-  iter: ILayoutIterator;
-  widget: TfpgWidget;
-  constraint: TfpgMigConstraint;
-  i, col, row: Integer;
-  cellRect: TfpgRect;
 begin
-  // 1. Build the grid cells
-  grid := TfpgMigGrid.Create(FColumnCount);
-  try
-    row := 0;
-    col := 0;
-
-    // place widgets in grid cells
-    iter := GetIterator(AContainer);
-    while iter.HasNext do
-    begin
-      // Find next available cell
-      while (row < grid.FRowCount) and (grid.FGrid[col, row] <> nil) do
-      begin
-        Inc(col);
-        if col >= FColumnCount then
-        begin
-          col := 0;
-          Inc(row);
-        end;
-      end;
-
-      widget := iter.Next as TfpgWidget;
-      constraint := GetConstraintOrDefault(widget) as TfpgMigConstraint;
-      grid.AddWidget(widget, row, col, constraint.SpanX, constraint.SpanY, constraint);
-
-      // Advance grid position
-      inc(col, constraint.SpanX);
-      if col >= FColumnCount then
-      begin
-        col := 0;
-        inc(row);
-      end;
-    end;
-
-    // 2. Calculate column widths and row heights
-    grid.CalculateColumnWidths(AContainer.Width, FColumnGap);
-    grid.CalculateRowHeights(AContainer.Height, FRowGap);
-
-    // 3. Position widgets within cells
-    for i := 0 to grid.CellCount - 1 do
-    begin
-      cellRect := grid.GetCellRect(grid.GetCell(i));
-      widget := grid.GetCell(i).Widget;
-      constraint := GetConstraintOrDefault(widget) as TfpgMigConstraint;
-
-      // Apply alignment and growth
-      PositionWidgetInCell(widget, cellRect, constraint);
-    end;
-
-  finally
-    grid.Free;
-  end;
-end;
-
-procedure TfpgMigLayoutManager.PositionWidgetInCell(AWidget: TfpgWidget;
-  const ACellRect: TfpgRect; AConstraint: TfpgMigConstraint);
-var
-  widgetRect: TfpgRect;
-  widgetWidth, widgetHeight: Integer;
-begin
-  widgetRect := ACellRect;
-
-  // Calculate widget width based on constraint
-  case AConstraint.AlignX of
-    axFill:
-      widgetWidth := ACellRect.Width;  // Fill entire cell width
-    else
-      // Use preferred width or current width
-      if AWidget.Width > 0 then
-        widgetWidth := AWidget.Width
-      else
-        widgetWidth := AWidget.Width;
-
-      // Apply horizontal alignment
-      case AConstraint.AlignX of
-        axLeft:
-          widgetRect.Left := ACellRect.Left;
-        axCenter:
-          widgetRect.Left := ACellRect.Left + (ACellRect.Width - widgetWidth) div 2;
-        axRight:
-          widgetRect.Left := ACellRect.Right - widgetWidth;
-      end;
-
-      widgetRect.Width := widgetWidth;
-  end;
-
-  // Calculate widget height based on constraint (similar to width)
-  case AConstraint.AlignY of
-    ayFill:
-      widgetHeight := ACellRect.Height;
-    else
-      if AWidget.Height > 0 then
-        widgetHeight := AWidget.Height
-      else
-        widgetHeight := AWidget.Height;
-
-      case AConstraint.AlignY of
-        ayTop:
-          widgetRect.Top := ACellRect.Top;
-        ayCenter:
-          widgetRect.Top := ACellRect.Top + (ACellRect.Height - widgetHeight) div 2;
-        ayBottom:
-          widgetRect.Top := ACellRect.Bottom - widgetHeight;
-      end;
-
-      widgetRect.Height := widgetHeight;
-  end;
-
-  // Apply calculated bounds to widget
-  AWidget.SetPosition(widgetrect.Left, widgetrect.Top, widgetrect.Width, widgetrect.Height);
-//  AWidget.SetBoundsRect(widgetRect);
+  // TODO: Implement using TfpgMigGrid
+  // This will:
+  // 1. Build CC map from widgets and their constraints
+  // 2. Create TfpgMigGrid instance
+  // 3. Call Grid.layout() method
+  // 4. Transfer bounds to widgets
 end;
 
 function TfpgMigLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
 begin
-  // To be implemented
+  // TODO: Use Grid.getWidth/getHeight for preferred size
   Result.SetSize(0, 0);
 end;
 

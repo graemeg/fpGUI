@@ -576,6 +576,8 @@ type
     procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
     procedure   GetPreferredSize(var ASize: TfpgSize);
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
+    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+    procedure   SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord); virtual;
     function    ScreenToWidget(const AScreenPos: TPoint): TPoint;
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
@@ -1834,6 +1836,32 @@ begin
   Left := x;
   Top := y;
   UpdatePosition;
+end;
+
+procedure TfpgWidgetBase.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+begin
+  if not (csLoading in ComponentState) then
+  begin
+    if (ALeft <> FLeft) or (ATop <> FTop) then
+      HandleMove(ALeft, ATop);
+    if (AWidth <> FWidth) or (AHeight <> FHeight) then
+      HandleResize(AWidth, AHeight);
+  end
+  else
+  begin
+    // When the widget is created, its position will be applied
+    Left   := ALeft;
+    Top    := ATop;
+    Width  := AWidth;
+    Height := AHeight;
+  end;
+  UpdatePosition;
+end;
+
+procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+begin
+  if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
+    MoveAndResize(ALeft, ATop, AWidth, AHeight);
 end;
 
 function TfpgWidgetBase.ScreenToWidget(const AScreenPos: TPoint): TPoint;
