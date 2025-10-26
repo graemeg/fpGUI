@@ -178,6 +178,9 @@ type
     { Build row and column index lists from grid }
     procedure BuildIndexes;
 
+    { Build dimension groups from component constraints }
+    procedure BuildDimensionGroups;
+
     { Grid position encoding/decoding helpers }
     class function EncodeCellKey(AX, AY: Integer): Integer;
     class procedure DecodeCellKey(AKey: Integer; out AX, AY: Integer);
@@ -880,8 +883,8 @@ begin
   // Second pass: Build row and column indexes
   BuildIndexes;
 
-  // Third pass: Create dimension groups
-  // TODO: Handle size groups, end groups, etc.
+  // Third pass: Create dimension groups for size groups and end groups
+  BuildDimensionGroups;
 
   // TODO: Calculate gaps between components
   // TODO: Create flow specs
@@ -901,6 +904,210 @@ begin
   // Decode integer key back to (x, y)
   AX := AKey and $FFFF;
   AY := AKey shr 16;
+end;
+
+procedure TfpgMigGrid.BuildDimensionGroups;
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  i, j: Integer;
+  cw: TfpgMigCompWrap;
+  cc: TfpgMigCC;
+  dc: TfpgMigDimConstraint;
+  groupName: string;
+  groupList: TfpgMigLinkedDimGroupList;
+  group: TfpgMigLinkedDimGroup;
+  found: Boolean;
+begin
+  // Initialize group arrays - one list per row/column
+  SetLength(FRowGroupLists, FRowIndexes.Count);
+  SetLength(FColGroupLists, FColIndexes.Count);
+
+  for i := 0 to High(FRowGroupLists) do
+    FRowGroupLists[i] := TfpgMigLinkedDimGroupList.Create(True);
+  for i := 0 to High(FColGroupLists) do
+    FColGroupLists[i] := TfpgMigLinkedDimGroupList.Create(True);
+
+  // Scan all cells and build groups
+  for pair in FGrid do
+  begin
+    cell := pair.Value;
+    if cell = nil then
+      Continue;
+
+    for i := 0 to cell.CompWraps.Count - 1 do
+    begin
+      cw := cell.CompWraps[i];
+      cc := cw.CC;
+
+      if cc = nil then
+        Continue;
+
+      // Process horizontal dimension groups (columns)
+      dc := cc.Horizontal;
+      if dc <> nil then
+      begin
+        // Size group
+        groupName := dc.GetSizeGroup;
+        if groupName <> '' then
+        begin
+          // Find or create group across all columns
+          group := nil;
+          for j := 0 to High(FColGroupLists) do
+          begin
+            groupList := FColGroupLists[j];
+            found := False;
+
+            // Search for existing group with this name
+            if groupList <> nil then
+            begin
+              for group in groupList do
+              begin
+                if group.FLinkCtx = groupName then
+                begin
+                  found := True;
+                  Break;
+                end;
+              end;
+            end;
+
+            if found then
+              Break;
+          end;
+
+          // Create group if not found
+          if not found then
+          begin
+            group := TfpgMigLinkedDimGroup.Create(groupName, 1, TfpgMigLinkedDimGroup.TYPE_PARALLEL, True, False);
+            // Add to first column's group list
+            if FColGroupLists[0] <> nil then
+              FColGroupLists[0].Add(group);
+          end;
+
+          // Add CompWrap to group
+          if group <> nil then
+            group.AddCompWrap(cw);
+        end;
+
+        // End group
+        groupName := dc.GetEndGroup;
+        if groupName <> '' then
+        begin
+          // Similar logic for end groups
+          group := nil;
+          for j := 0 to High(FColGroupLists) do
+          begin
+            groupList := FColGroupLists[j];
+            found := False;
+
+            if groupList <> nil then
+            begin
+              for group in groupList do
+              begin
+                if group.FLinkCtx = groupName then
+                begin
+                  found := True;
+                  Break;
+                end;
+              end;
+            end;
+
+            if found then
+              Break;
+          end;
+
+          if not found then
+          begin
+            group := TfpgMigLinkedDimGroup.Create(groupName, 1, TfpgMigLinkedDimGroup.TYPE_PARALLEL, True, True);
+            if FColGroupLists[0] <> nil then
+              FColGroupLists[0].Add(group);
+          end;
+
+          if group <> nil then
+            group.AddCompWrap(cw);
+        end;
+      end;
+
+      // Process vertical dimension groups (rows)
+      dc := cc.Vertical;
+      if dc <> nil then
+      begin
+        // Size group
+        groupName := dc.GetSizeGroup;
+        if groupName <> '' then
+        begin
+          group := nil;
+          for j := 0 to High(FRowGroupLists) do
+          begin
+            groupList := FRowGroupLists[j];
+            found := False;
+
+            if groupList <> nil then
+            begin
+              for group in groupList do
+              begin
+                if group.FLinkCtx = groupName then
+                begin
+                  found := True;
+                  Break;
+                end;
+              end;
+            end;
+
+            if found then
+              Break;
+          end;
+
+          if not found then
+          begin
+            group := TfpgMigLinkedDimGroup.Create(groupName, 1, TfpgMigLinkedDimGroup.TYPE_PARALLEL, False, False);
+            if FRowGroupLists[0] <> nil then
+              FRowGroupLists[0].Add(group);
+          end;
+
+          if group <> nil then
+            group.AddCompWrap(cw);
+        end;
+
+        // End group
+        groupName := dc.GetEndGroup;
+        if groupName <> '' then
+        begin
+          group := nil;
+          for j := 0 to High(FRowGroupLists) do
+          begin
+            groupList := FRowGroupLists[j];
+            found := False;
+
+            if groupList <> nil then
+            begin
+              for group in groupList do
+              begin
+                if group.FLinkCtx = groupName then
+                begin
+                  found := True;
+                  Break;
+                end;
+              end;
+            end;
+
+            if found then
+              Break;
+          end;
+
+          if not found then
+          begin
+            group := TfpgMigLinkedDimGroup.Create(groupName, 1, TfpgMigLinkedDimGroup.TYPE_PARALLEL, False, True);
+            if FRowGroupLists[0] <> nil then
+              FRowGroupLists[0].Add(group);
+          end;
+
+          if group <> nil then
+            group.AddCompWrap(cw);
+        end;
+      end;
+    end;
+  end;
 end;
 
 procedure TfpgMigGrid.BuildIndexes;
@@ -979,11 +1186,22 @@ begin
 end;
 
 destructor TfpgMigGrid.Destroy;
+var
+  i: Integer;
 begin
   FGrid.Free;
   FRowIndexes.Free;
   FColIndexes.Free;
-  // TODO: Free group lists
+
+  // Free group lists
+  for i := 0 to High(FRowGroupLists) do
+    FRowGroupLists[i].Free;
+  SetLength(FRowGroupLists, 0);
+
+  for i := 0 to High(FColGroupLists) do
+    FColGroupLists[i].Free;
+  SetLength(FColGroupLists, 0);
+
   FColFlowSpecs.Free;
   FRowFlowSpecs.Free;
   inherited Destroy;
