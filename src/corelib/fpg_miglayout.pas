@@ -232,6 +232,9 @@ end;
 
 constructor TfpgMigCompWrap.Create(AComp: TfpgWidgetBase; ACC: TfpgMigCC;
   AEHideMode: Integer; AUseVisualPadding: Boolean);
+var
+  hBS, vBS: TfpgMigBoundSize;
+  i: Integer;
 begin
   inherited Create;
   FComp := AComp;
@@ -248,6 +251,33 @@ begin
   FH := NOT_SET;
 
   FForcedPushGaps := 0;
+
+  // Calculate sizes if visible
+  if AEHideMode <= 0 then
+  begin
+    hBS := ACC.Horizontal.GetSize;
+    vBS := ACC.Vertical.GetSize;
+
+    for i := SIZE_MIN to SIZE_MAX do
+    begin
+      FHorSizes[i] := GetSize(hBS, i, True, AUseVisualPadding, -1);
+      FVerSizes[i] := GetSize(vBS, i, False, AUseVisualPadding, -1);
+    end;
+
+    CorrectMinMax(FHorSizes);
+    CorrectMinMax(FVerSizes);
+  end;
+
+  // Initialize gaps if hide mode > 1
+  if AEHideMode > 1 then
+  begin
+    for i := 0 to 3 do
+    begin
+      FGaps[i][SIZE_MIN] := 0;
+      FGaps[i][SIZE_PREF] := 0;
+      FGaps[i][SIZE_MAX] := INF;
+    end;
+  end;
 end;
 
 destructor TfpgMigCompWrap.Destroy;
@@ -265,9 +295,57 @@ end;
 
 function TfpgMigCompWrap.GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Integer;
   AIsHor: Boolean; AUseVP: Boolean; ASizeHint: Integer): Integer;
+var
+  uv: TfpgMigUnitValue;
+  sz: TfpgSize;
 begin
-  // TODO: Implement size calculation from BoundSize
-  Result := 0;
+  // Get the UnitValue for this size type
+  uv := nil;
+  if ABoundSize <> nil then
+  begin
+    case ASizeType of
+      SIZE_MIN: uv := ABoundSize.Min;
+      SIZE_PREF: uv := ABoundSize.Preferred;
+      SIZE_MAX: uv := ABoundSize.Max;
+    end;
+  end;
+
+  // If no UnitValue, use widget's intrinsic size
+  if uv = nil then
+  begin
+    case ASizeType of
+      SIZE_MIN:
+        if AIsHor then
+          Result := IfThen(FComp.MinWidth > 0, FComp.MinWidth, 0)
+        else
+          Result := IfThen(FComp.MinHeight > 0, FComp.MinHeight, 0);
+
+      SIZE_PREF:
+        begin
+          sz.W := 0;
+          sz.H := 0;
+          FComp.GetPreferredSize(sz);
+          if AIsHor then
+            Result := sz.W
+          else
+            Result := sz.H;
+        end;
+
+      SIZE_MAX:
+        if AIsHor then
+          Result := IfThen(FComp.MaxWidth > 0, FComp.MaxWidth, INF)
+        else
+          Result := IfThen(FComp.MaxHeight > 0, FComp.MaxHeight, INF);
+    else
+      Result := 0;
+    end;
+  end
+  else
+  begin
+    // TODO: Implement full GetPixels with parent size, relative units, etc.
+    // For now, just use the value directly (assumes pixels)
+    Result := Round(uv.Value);
+  end;
 end;
 
 procedure TfpgMigCompWrap.CorrectMinMax(var ASizes: array of Integer);
