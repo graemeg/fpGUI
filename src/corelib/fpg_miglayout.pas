@@ -1344,12 +1344,15 @@ begin
         rowHeights[cellY] := maxHeight;
     end;
 
-    // Calculate positions for each column and row
+    // Calculate positions for each column and row (with gaps between them)
     compX := containerX;
     for i := 0 to FColIndexes.Count - 1 do
     begin
       colPositions[i] := compX;
       compX := compX + colWidths[i];
+      // Add gap after each column (except the last)
+      if i < FColIndexes.Count - 1 then
+        compX := compX + 6;  // TODO: Get gap from LC GridGap
     end;
 
     compY := containerY;
@@ -1357,6 +1360,9 @@ begin
     begin
       rowPositions[i] := compY;
       compY := compY + rowHeights[i];
+      // Add gap after each row (except the last)
+      if i < FRowIndexes.Count - 1 then
+        compY := compY + 6;  // TODO: Get gap from LC GridGap
     end;
 
     // Position all components using calculated sizes
