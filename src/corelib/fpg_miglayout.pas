@@ -602,17 +602,47 @@ begin
 end;
 
 procedure TfpgMigCompWrap.TransferBounds(AAddVisualPadding: Boolean);
+var
+  compX, compY, compW, compH: Integer;
 begin
-  // TODO: Transfer calculated bounds to the widget
+  // Can't transfer bounds without component or constraint
+  if (FComp = nil) or (FCC = nil) then
+    Exit;
+
+  // Don't transfer bounds for external components
   if FCC.IsExternal then
     Exit;
 
-  // For now, simple transfer
-  if (FX <> NOT_SET) and (FY <> NOT_SET) and
-     (FW <> NOT_SET) and (FH <> NOT_SET) then
+  // Ensure all bounds are set before transferring
+  if (FX = NOT_SET) or (FY = NOT_SET) or (FW = NOT_SET) or (FH = NOT_SET) then
+    Exit;
+
+  compX := FX;
+  compY := FY;
+  compW := FW;
+  compH := FH;
+
+  // TODO: Implement visual padding support when needed
+  // Visual padding allows components to have extra space for shadows, borders, etc.
+  // that shouldn't be counted in layout calculations. fpGUI doesn't currently
+  // expose visual padding, but this could be added through a custom interface.
+  //
+  // Java MigLayout implementation:
+  //   int[] visualPadding = comp.getVisualPadding();
+  //   if (visualPadding != null) {  // [top, left, bottom, right]
+  //     compX -= visualPadding[1];     // Adjust for left padding
+  //     compY -= visualPadding[0];     // Adjust for top padding
+  //     compW += visualPadding[1] + visualPadding[3];  // left + right
+  //     compH += visualPadding[0] + visualPadding[2];  // top + bottom
+  //   }
+  if AAddVisualPadding then
   begin
-    FComp.SetPosition(FX, FY, FW, FH);
+    // Visual padding not yet implemented in fpGUI
+    // When implemented, adjust compX, compY, compW, compH here
   end;
+
+  // Transfer calculated bounds to the widget
+  FComp.SetPosition(compX, compY, compW, compH);
 end;
 
 { TfpgMigLinkedDimGroup }
