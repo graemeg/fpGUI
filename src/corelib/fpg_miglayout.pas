@@ -209,9 +209,9 @@ type
 
   TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
   private
-    FColumnCount: Integer;
-    FRowGap: Integer;
-    FColumnGap: Integer;
+    FLC: TfpgMigLC;
+    FRowConstr: TfpgMigAC;
+    FColConstr: TfpgMigAC;
   protected
     // TfpgBaseLayoutManager overrides
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
@@ -219,10 +219,12 @@ type
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
   public
     constructor Create; override;
-  published
-    property ColumnCount: Integer read FColumnCount write FColumnCount default 1;
-    property RowGap: Integer read FRowGap write FRowGap default 6;
-    property ColumnGap: Integer read FColumnGap write FColumnGap default 6;
+    destructor Destroy; override;
+
+    { MigLayout v11 constraint properties }
+    property LC: TfpgMigLC read FLC write FLC;
+    property RowConstraints: TfpgMigAC read FRowConstr write FRowConstr;
+    property ColumnConstraints: TfpgMigAC read FColConstr write FColConstr;
   end;
 
 implementation
@@ -1226,9 +1228,11 @@ var
   cw: TfpgMigCompWrap;
   cellKey: Integer;
   cellX, cellY: Integer;
-  cellWidth, cellHeight: Integer;
   compX, compY: Integer;
   insets: array[0..3] of Integer;  // top, left, bottom, right
+  colWidths, rowHeights: array of Integer;
+  colPositions, rowPositions: array of Integer;
+  maxWidth, maxHeight: Integer;
 begin
   Result := False;
 
@@ -1262,17 +1266,21 @@ begin
   FWidth[SIZE_PREF] := containerW;
   FHeight[SIZE_PREF] := containerH;
 
-  // TODO: Implement full layoutInOneDim for both dimensions
-  // For now, implement a simple grid layout to get tests passing
-
-  // Simple layout: distribute available space equally across grid cells
+  // Calculate preferred sizes for each column and row
   if (FColIndexes.Count > 0) and (FRowIndexes.Count > 0) then
   begin
-    // Calculate cell sizes (equal distribution for now)
-    cellWidth := containerW div FColIndexes.Count;
-    cellHeight := containerH div FRowIndexes.Count;
+    SetLength(colWidths, FColIndexes.Count);
+    SetLength(rowHeights, FRowIndexes.Count);
+    SetLength(colPositions, FColIndexes.Count);
+    SetLength(rowPositions, FRowIndexes.Count);
 
-    // Position all components
+    // Initialize with zeros
+    for i := 0 to FColIndexes.Count - 1 do
+      colWidths[i] := 0;
+    for i := 0 to FRowIndexes.Count - 1 do
+      rowHeights[i] := 0;
+
+    // Calculate preferred size for each column and row based on components
     for pair in FGrid do
     begin
       cellKey := pair.Key;
@@ -1281,10 +1289,9 @@ begin
       if cell = nil then
         Continue;
 
-      // Decode cell position
       DecodeCellKey(cellKey, cellX, cellY);
 
-      // Find column index (position in sorted list)
+      // Find column and row indexes
       j := -1;
       for i := 0 to FColIndexes.Count - 1 do
       begin
@@ -1296,11 +1303,8 @@ begin
       end;
       if j < 0 then
         Continue;
+      cellX := j;  // Now cellX is the index, not the grid position
 
-      // Calculate component X position
-      compX := containerX + (j * cellWidth);
-
-      // Find row index
       j := -1;
       for i := 0 to FRowIndexes.Count - 1 do
       begin
@@ -1312,9 +1316,86 @@ begin
       end;
       if j < 0 then
         Continue;
+      cellY := j;  // Now cellY is the index
 
-      // Calculate component Y position
-      compY := containerY + (j * cellHeight);
+      // Get maximum preferred size for this cell
+      maxWidth := 0;
+      maxHeight := 0;
+      for i := 0 to cell.CompWraps.Count - 1 do
+      begin
+        cw := cell.CompWraps[i];
+        if cw = nil then
+          Continue;
+
+        // Get component's preferred size
+        if cw.Comp <> nil then
+        begin
+          if cw.Comp.Width > maxWidth then
+            maxWidth := cw.Comp.Width;
+          if cw.Comp.Height > maxHeight then
+            maxHeight := cw.Comp.Height;
+        end;
+      end;
+
+      // Update column and row sizes
+      if maxWidth > colWidths[cellX] then
+        colWidths[cellX] := maxWidth;
+      if maxHeight > rowHeights[cellY] then
+        rowHeights[cellY] := maxHeight;
+    end;
+
+    // Calculate positions for each column and row
+    compX := containerX;
+    for i := 0 to FColIndexes.Count - 1 do
+    begin
+      colPositions[i] := compX;
+      compX := compX + colWidths[i];
+    end;
+
+    compY := containerY;
+    for i := 0 to FRowIndexes.Count - 1 do
+    begin
+      rowPositions[i] := compY;
+      compY := compY + rowHeights[i];
+    end;
+
+    // Position all components using calculated sizes
+    for pair in FGrid do
+    begin
+      cellKey := pair.Key;
+      cell := pair.Value;
+
+      if cell = nil then
+        Continue;
+
+      DecodeCellKey(cellKey, cellX, cellY);
+
+      // Find column and row indexes
+      j := -1;
+      for i := 0 to FColIndexes.Count - 1 do
+      begin
+        if FColIndexes[i] = cellX then
+        begin
+          j := i;
+          Break;
+        end;
+      end;
+      if j < 0 then
+        Continue;
+      cellX := j;
+
+      j := -1;
+      for i := 0 to FRowIndexes.Count - 1 do
+      begin
+        if FRowIndexes[i] = cellY then
+        begin
+          j := i;
+          Break;
+        end;
+      end;
+      if j < 0 then
+        Continue;
+      cellY := j;
 
       // Position all CompWraps in this cell
       for i := 0 to cell.CompWraps.Count - 1 do
@@ -1323,10 +1404,9 @@ begin
         if cw = nil then
           Continue;
 
-        // Set bounds for this component
-        // TODO: Apply proper sizing and alignment from CC
-        cw.SetDimBounds(compX, cellWidth, True);   // horizontal
-        cw.SetDimBounds(compY, cellHeight, False);  // vertical
+        // Set bounds for this component using its preferred size
+        cw.SetDimBounds(colPositions[cellX], colWidths[cellX], True);   // horizontal
+        cw.SetDimBounds(rowPositions[cellY], rowHeights[cellY], False);  // vertical
         cw.TransferBounds(False);
       end;
     end;
@@ -1477,9 +1557,21 @@ end;
 constructor TfpgMigLayoutManager.Create;
 begin
   inherited Create;
-  FColumnCount := 1;
-  FRowGap := 6;
-  FColumnGap := 6;
+  // Create default constraints - user can replace or modify
+  FLC := TfpgMigLC.Create;
+  FLC.SetFlowX(True);  // Default to horizontal flow with wrap
+  FLC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
+
+  FRowConstr := TfpgMigAC.Create;
+  FColConstr := TfpgMigAC.Create;
+end;
+
+destructor TfpgMigLayoutManager.Destroy;
+begin
+  FLC.Free;
+  FRowConstr.Free;
+  FColConstr.Free;
+  inherited Destroy;
 end;
 
 function TfpgMigLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
@@ -1490,8 +1582,6 @@ end;
 procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 var
   ccMap: TfpgMigCCMap;
-  lc: TfpgMigLC;
-  rowConstr, colConstr: TfpgMigAC;
   grid: TfpgMigGrid;
   bounds: array[0..3] of Integer;
   i: Integer;
@@ -1520,37 +1610,21 @@ begin
       end;
     end;
 
-    // 2. Create layout constraints (use defaults for now)
-    lc := TfpgMigLC.Create;
+    // 2. Create Grid instance using stored constraints
+    grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
     try
-      lc.SetFlowX(True);  // Horizontal flow by default
+      // 3. Setup bounds for layout
+      bounds[0] := 0;  // x
+      bounds[1] := 0;  // y
+      bounds[2] := AContainer.Width;   // width
+      bounds[3] := AContainer.Height;  // height
 
-      // 3. Create AC constraints (use defaults)
-      rowConstr := TfpgMigAC.Create;
-      colConstr := TfpgMigAC.Create;
-      try
-        // 4. Create Grid instance
-        grid := TfpgMigGrid.Create(AContainer, lc, rowConstr, colConstr, ccMap);
-        try
-          // 5. Setup bounds for layout
-          bounds[0] := 0;  // x
-          bounds[1] := 0;  // y
-          bounds[2] := AContainer.Width;   // width
-          bounds[3] := AContainer.Height;  // height
+      // 4. Perform layout
+      grid.Layout(bounds, nil, nil, False);
 
-          // 6. Perform layout
-          grid.Layout(bounds, nil, nil, False);
-
-          // Bounds are transferred to widgets inside Layout method
-        finally
-          grid.Free;
-        end;
-      finally
-        rowConstr.Free;
-        colConstr.Free;
-      end;
+      // Bounds are transferred to widgets inside Layout method
     finally
-      lc.Free;
+      grid.Free;
     end;
   finally
     ccMap.Free;

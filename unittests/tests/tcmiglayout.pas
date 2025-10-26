@@ -51,9 +51,11 @@ begin
   mig := TfpgMigLayoutManager.Create;
   try
     CheckNotNull(mig, 'MigLayout should be created');
-    CheckEquals(1, mig.ColumnCount, 'Default ColumnCount should be 1');
-    CheckEquals(6, mig.RowGap, 'Default RowGap should be 6');
-    CheckEquals(6, mig.ColumnGap, 'Default ColumnGap should be 6');
+    CheckNotNull(mig.LC, 'LC should be created');
+    CheckNotNull(mig.RowConstraints, 'Row constraints should be created');
+    CheckNotNull(mig.ColumnConstraints, 'Column constraints should be created');
+    CheckTrue(mig.LC.IsFlowX, 'Default flow should be horizontal');
+    CheckEquals(1, mig.LC.GetWrapAfter, 'Default wrap should be 1 (vertical stacking)');
   finally
     mig.Free;
   end;
@@ -128,7 +130,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 200);
   lm := TfpgMigLayoutManager.Create;
-  lm.ColumnCount := 2;
+  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -162,7 +164,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 300, 200);
   lm := TfpgMigLayoutManager.Create;
-  lm.ColumnCount := 2;
+  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -240,7 +242,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 200);
   lm := TfpgMigLayoutManager.Create;
-  lm.ColumnCount := 2;
+  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -277,7 +279,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 200);
   lm := TfpgMigLayoutManager.Create;
-  lm.ColumnCount := 2;
+  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -322,7 +324,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 100);
   lm := TfpgMigLayoutManager.Create;
-  lm.ColumnCount := 2;
+  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
