@@ -31,28 +31,7 @@ uses
   fpg_mig_layoututil;
 
 type
-  TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
-  private
-    FColumnCount: Integer;
-    FRowGap: Integer;
-    FColumnGap: Integer;
-  protected
-    // TfpgBaseLayoutManager overrides
-    function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
-    procedure DoLayout(AContainer: TfpgWidgetBase); override;
-    function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
-  public
-    constructor Create; override;
-  published
-    property ColumnCount: Integer read FColumnCount write FColumnCount default 1;
-    property RowGap: Integer read FRowGap write FRowGap default 6;
-    property ColumnGap: Integer read FColumnGap write FColumnGap default 6;
-  end;
-
-implementation
-
-type
-  { Forward declarations for inner classes }
+  { Forward declarations for Grid inner classes }
   TfpgMigCompWrap = class;
   TfpgMigCell = class;
   TfpgMigLinkedDimGroup = class;
@@ -67,33 +46,7 @@ type
   TfpgMigIntegerList = specialize TList<Integer>;
   TfpgMigIntArray = array of Integer;
   TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
-
-  { AboveBelow - helper record for baseline calculations }
-  TfpgMigAboveBelow = record
-    MaxAbove: Integer;
-    MaxBelow: Integer;
-  end;
-
-  { Cell - holds component wraps in a grid cell
-    Simple container for CompWraps, potentially spanning multiple cells }
-  TfpgMigCell = class
-  private
-    FSpanX, FSpanY: Integer;
-    FFlowX: Boolean;
-    FCompWraps: TfpgMigCompWrapList;
-    FHasTagged: Boolean;  // If one or more components have tags and need sorting
-  public
-    constructor Create(ACompWrap: TfpgMigCompWrap); overload;
-    constructor Create(ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
-    constructor Create(ACompWrap: TfpgMigCompWrap; ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
-    destructor Destroy; override;
-
-    property SpanX: Integer read FSpanX;
-    property SpanY: Integer read FSpanY;
-    property FlowX: Boolean read FFlowX;
-    property CompWraps: TfpgMigCompWrapList read FCompWraps;
-    property HasTagged: Boolean read FHasTagged write FHasTagged;
-  end;
+  TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
 
   { CompWrap - wraps a TfpgWidgetBase with its CC constraint
     Caches min/pref/max sizes and gap information }
@@ -119,15 +72,16 @@ type
     procedure ValidateSize;
     function GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Integer; AIsHor: Boolean;
                      AUseVP: Boolean; ASizeHint: Integer): Integer;
-    procedure CorrectMinMax(var ASizes: array of Integer);
-    function GetGapIx(AIsHor, AIsTL: Boolean): Integer;
     procedure MergeGapSizes(const ASizes: array of Integer; AIsHor, AIsTL: Boolean);
-    function Filter(ASizeType, ASize: Integer): Integer;
-    function ConstrainSize(ASize: Integer): Integer;
   public
     constructor Create(AComp: TfpgWidgetBase; ACC: TfpgMigCC; AEHideMode: Integer; AUseVisualPadding: Boolean);
     destructor Destroy; override;
 
+    { Public for testing }
+    procedure CorrectMinMax(var ASizes: array of Integer);
+    function ConstrainSize(ASize: Integer): Integer;
+    function GetGapIx(AIsHor, AIsTL: Boolean): Integer;
+    function Filter(ASizeType, ASize: Integer): Integer;
     function GetSizes(AIsHor: Boolean): PInteger;  // Returns pointer to [min,pref,max] array
     procedure InvalidateSizes;
     function GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
@@ -145,7 +99,27 @@ type
     property Height: Integer read FH write FH;
   end;
 
-  { LinkedDimGroup - components sharing layout properties in one dimension }
+  { Cell - holds component wraps in a grid cell }
+  TfpgMigCell = class
+  private
+    FSpanX, FSpanY: Integer;
+    FFlowX: Boolean;
+    FCompWraps: TfpgMigCompWrapList;
+    FHasTagged: Boolean;
+  public
+    constructor Create(ACompWrap: TfpgMigCompWrap); overload;
+    constructor Create(ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
+    constructor Create(ACompWrap: TfpgMigCompWrap; ASpanX, ASpanY: Integer; AFlowX: Boolean); overload;
+    destructor Destroy; override;
+
+    property SpanX: Integer read FSpanX;
+    property SpanY: Integer read FSpanY;
+    property FlowX: Boolean read FFlowX;
+    property CompWraps: TfpgMigCompWrapList read FCompWraps;
+    property HasTagged: Boolean read FHasTagged write FHasTagged;
+  end;
+
+  { LinkedDimGroup - components sharing layout properties }
   TfpgMigLinkedDimGroup = class
   private
     const
@@ -158,43 +132,68 @@ type
     FLinkType: Integer;
     FIsHor, FFromEnd: Boolean;
     FCompWraps: TfpgMigCompWrapList;
-    FLStart, FLSize: Integer;  // For debug painting
+    FLStart, FLSize: Integer;
   public
     constructor Create(const ALinkCtx: string; ASpan, ALinkType: Integer; AIsHor, AFromEnd: Boolean);
     destructor Destroy; override;
 
     procedure AddCompWrap(ACompWrap: TfpgMigCompWrap);
-    function GetMinPrefMax: TfpgMigIntArray;  // Returns [min,pref,max]
+    function GetMinPrefMax: TfpgMigIntArray;
   end;
 
   { FlowSizeSpec - size specifications for flow layout }
-  TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
-
   TfpgMigFlowSizeSpec = class
   private
-    FSizes: array of TfpgMigSizeArray;  // [row/col][min,pref,max]
+    FSizes: array of TfpgMigSizeArray;
     FResConstsInclGaps: array of TfpgMigResizeConstraint;
   public
     constructor Create;
     destructor Destroy; override;
   end;
 
-  { Grid - the main layout engine (port of Grid.java) }
+  { Grid - the main layout engine }
   TfpgMigGrid = class
   private
     FLC: TfpgMigLC;
     FRowConstr, FColConstr: TfpgMigAC;
     FContainer: TfpgWidgetBase;
-    FGrid: TfpgMigCellMap;  // [(y<<16)+x] -> Cell; nil key for absolute positioned
-    FRowIndexes, FColIndexes: TfpgMigIntegerList;  // Sorted unique row/col indexes
+    FGrid: TfpgMigCellMap;
+    FRowIndexes, FColIndexes: TfpgMigIntegerList;
     FColGroupLists, FRowGroupLists: array of TfpgMigLinkedDimGroupList;
-    FWidth, FHeight: array[0..2] of Integer;  // [min,pref,max]
+    FWidth, FHeight: array[0..2] of Integer;
     FColFlowSpecs, FRowFlowSpecs: TfpgMigFlowSizeSpec;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
                        const ACCMap: TfpgMigCCMap);
     destructor Destroy; override;
+  end;
+
+  TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
+  private
+    FColumnCount: Integer;
+    FRowGap: Integer;
+    FColumnGap: Integer;
+  protected
+    // TfpgBaseLayoutManager overrides
+    function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
+    procedure DoLayout(AContainer: TfpgWidgetBase); override;
+    function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+  public
+    constructor Create; override;
+  published
+    property ColumnCount: Integer read FColumnCount write FColumnCount default 1;
+    property RowGap: Integer read FRowGap write FRowGap default 6;
+    property ColumnGap: Integer read FColumnGap write FColumnGap default 6;
+  end;
+
+implementation
+
+type
+  { AboveBelow - helper record for baseline calculations }
+  TfpgMigAboveBelow = record
+    MaxAbove: Integer;
+    MaxBelow: Integer;
   end;
 
 { Implementation of inner classes }
