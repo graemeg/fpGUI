@@ -255,8 +255,8 @@ begin
 
   FForcedPushGaps := 0;
 
-  // Calculate sizes if visible
-  if AEHideMode <= 0 then
+  // Calculate sizes if visible and CC is provided
+  if (AEHideMode <= 0) and (ACC <> nil) then
   begin
     hBS := ACC.Horizontal.GetSize;
     vBS := ACC.Vertical.GetSize;
@@ -423,6 +423,10 @@ var
   befGap, aftGap: TfpgMigBoundSize;
   gaps: TfpgMigGapArray;
 begin
+  // Can't calculate gaps without CC
+  if FCC = nil then
+    Exit;
+
   // Get parent dimensions
   par := FComp.Parent;
   if par = nil then
@@ -556,6 +560,10 @@ begin
     if (mask and FForcedPushGaps) <> 0 then
       Exit(True);
   end;
+
+  // If no CC, can't check gap push
+  if FCC = nil then
+    Exit(False);
 
   // Get dimension constraint and gap bound size
   if AIsHor then
