@@ -38,6 +38,12 @@ type
   TfpgMigFlowSizeSpec = class;
   TfpgMigGrid = class;
 
+  { Helper record for baseline calculations }
+  TfpgMigAboveBelow = record
+    MaxAbove: Integer;
+    MaxBelow: Integer;
+  end;
+
   { Specialized lists and arrays }
   TfpgMigCompWrapList = specialize TObjectList<TfpgMigCompWrap>;
   TfpgMigCellList = specialize TObjectList<TfpgMigCell>;
@@ -87,9 +93,12 @@ type
     function Filter(ASizeType, ASize: Integer): Integer;
     function GetSizes(AIsHor: Boolean): PInteger;  // Returns pointer to [min,pref,max] array
     procedure InvalidateSizes;
+    function GetSize(ASizeType: Integer; AIsHor: Boolean): Integer;  // Size without gaps
     function GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
     function GetGapBefore(ASizeType: Integer; AIsHor: Boolean): Integer;
     function GetGapAfter(ASizeType: Integer; AIsHor: Boolean): Integer;
+    function GetBaseline(ASizeType: Integer): Integer;
+    function HasBaseline: Boolean;
     function IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
     procedure SetDimBounds(AStart, ASize: Integer; AIsHor: Boolean);
     procedure TransferBounds(AAddVisualPadding: Boolean);
@@ -165,6 +174,14 @@ type
     FColGroupLists, FRowGroupLists: array of TfpgMigLinkedDimGroupList;
     FWidth, FHeight: array[0..2] of Integer;
     FColFlowSpecs, FRowFlowSpecs: TfpgMigFlowSizeSpec;
+
+    { Helper methods for size calculations }
+    class function GetTotalSizeParallel(const ACompWraps: TfpgMigCompWrapList;
+                                       ASizeType: Integer; AIsHor: Boolean): Integer;
+    class function GetTotalSizeSerial(const ACompWraps: TfpgMigCompWrapList;
+                                     ASizeType: Integer; AIsHor: Boolean): Integer;
+    class function GetBaselineAboveBelow(const ACompWraps: TfpgMigCompWrapList;
+                                        ASizeType: Integer; ACenterBaseline: Boolean): TfpgMigAboveBelow;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -191,13 +208,6 @@ type
   end;
 
 implementation
-
-type
-  { AboveBelow - helper record for baseline calculations }
-  TfpgMigAboveBelow = record
-    MaxAbove: Integer;
-    MaxBelow: Integer;
-  end;
 
 { Implementation of inner classes }
 
@@ -517,6 +527,11 @@ begin
     Result := 0;
 end;
 
+function TfpgMigCompWrap.GetSize(ASizeType: Integer; AIsHor: Boolean): Integer;
+begin
+  Result := Filter(ASizeType, GetSizes(AIsHor)[ASizeType]);
+end;
+
 function TfpgMigCompWrap.GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
 begin
   Result := Filter(ASizeType, GetGapBefore(ASizeType, AIsHor) +
@@ -541,6 +556,23 @@ begin
     Exit(0);
   gapIx := GetGapIx(AIsHor, False);
   Result := Filter(ASizeType, FGaps[gapIx][ASizeType]);
+end;
+
+function TfpgMigCompWrap.GetBaseline(ASizeType: Integer): Integer;
+begin
+  // TODO: fpGUI doesn't currently support baseline positioning
+  // Baseline is used for aligning text components on their text baseline
+  // For now, return 0 (top of component)
+  // When implemented: return comp.getBaseline(width, height)
+  Result := 0;
+end;
+
+function TfpgMigCompWrap.HasBaseline: Boolean;
+begin
+  // TODO: fpGUI doesn't currently support baseline queries
+  // When implemented, check if component supports baseline alignment
+  // (typically true for text components like labels, buttons with text)
+  Result := False;
 end;
 
 function TfpgMigCompWrap.IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
@@ -673,11 +705,43 @@ begin
 end;
 
 function TfpgMigLinkedDimGroup.GetMinPrefMax: TfpgMigIntArray;
+var
+  sType: Integer;
+  aboveBelow: TfpgMigAboveBelow;
 begin
-  // TODO: Calculate min/pref/max based on link type (serial/parallel/baseline)
   SetLength(Result, 3);
-  Result[SIZE_MIN] := 0;
-  Result[SIZE_PREF] := 0;
+
+  // If no components, return zeros with INF max
+  if FCompWraps.Count = 0 then
+  begin
+    Result[SIZE_MIN] := 0;
+    Result[SIZE_PREF] := 0;
+    Result[SIZE_MAX] := INF;
+    Exit;
+  end;
+
+  // Calculate min and pref sizes based on link type
+  for sType := SIZE_MIN to SIZE_PREF do
+  begin
+    case FLinkType of
+      TYPE_PARALLEL:
+        // Parallel: components side-by-side, use maximum size
+        Result[sType] := TfpgMigGrid.GetTotalSizeParallel(FCompWraps, sType, FIsHor);
+
+      TYPE_BASELINE:
+        begin
+          // Baseline: align text on baseline, sum above + below
+          aboveBelow := TfpgMigGrid.GetBaselineAboveBelow(FCompWraps, sType, False);
+          Result[sType] := aboveBelow.MaxAbove + aboveBelow.MaxBelow;
+        end;
+
+      else  // TYPE_SERIAL
+        // Serial: components in sequence, sum sizes
+        Result[sType] := TfpgMigGrid.GetTotalSizeSerial(FCompWraps, sType, FIsHor);
+    end;
+  end;
+
+  // Max is always INF
   Result[SIZE_MAX] := INF;
 end;
 
@@ -722,6 +786,127 @@ begin
   FColFlowSpecs.Free;
   FRowFlowSpecs.Free;
   inherited Destroy;
+end;
+
+{ TfpgMigGrid - Helper methods }
+
+class function TfpgMigGrid.GetTotalSizeParallel(const ACompWraps: TfpgMigCompWrapList;
+  ASizeType: Integer; AIsHor: Boolean): Integer;
+var
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  cwSize: Integer;
+begin
+  // For parallel layout (components side-by-side):
+  // - For MIN/PREF: return maximum size
+  // - For MAX: return minimum size (or INF if any component is INF)
+  if ASizeType = SIZE_MAX then
+    Result := INF
+  else
+    Result := 0;
+
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+    cwSize := cw.GetSizeInclGaps(ASizeType, AIsHor);
+
+    if cwSize >= INF then
+      Exit(INF);
+
+    if ASizeType = SIZE_MAX then
+    begin
+      if cwSize < Result then
+        Result := cwSize;
+    end
+    else
+    begin
+      if cwSize > Result then
+        Result := cwSize;
+    end;
+  end;
+
+  Result := TfpgMigLayoutUtil.Clamp(Result, 0, INF);
+end;
+
+class function TfpgMigGrid.GetTotalSizeSerial(const ACompWraps: TfpgMigCompWrapList;
+  ASizeType: Integer; AIsHor: Boolean): Integer;
+var
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  gapBef, lastGapAfter: Integer;
+  totSize: Integer;
+begin
+  // For serial layout (components in sequence):
+  // Sum all component sizes plus gaps between them
+  totSize := 0;
+  lastGapAfter := 0;
+
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+
+    // Get gap before this component
+    gapBef := cw.GetGapBefore(ASizeType, AIsHor);
+    // Only add the gap if it's larger than the previous component's gap after
+    if gapBef > lastGapAfter then
+      totSize := totSize + (gapBef - lastGapAfter);
+
+    // Add component size
+    totSize := totSize + cw.GetSize(ASizeType, AIsHor);
+
+    // Add gap after this component and remember it
+    lastGapAfter := cw.GetGapAfter(ASizeType, AIsHor);
+    totSize := totSize + lastGapAfter;
+
+    // Check for overflow
+    if totSize >= INF then
+      Exit(INF);
+  end;
+
+  Result := TfpgMigLayoutUtil.Clamp(totSize, 0, INF);
+end;
+
+class function TfpgMigGrid.GetBaselineAboveBelow(const ACompWraps: TfpgMigCompWrapList;
+  ASizeType: Integer; ACenterBaseline: Boolean): TfpgMigAboveBelow;
+var
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  height, baseline, above: Integer;
+  maxAbove, maxBelow: Integer;
+begin
+  // For baseline alignment (text components aligned on text baseline):
+  // Calculate maximum distance above and below the baseline
+  maxAbove := Low(Integer);
+  maxBelow := Low(Integer);
+
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+    height := cw.GetSize(ASizeType, False);  // Vertical size
+
+    if height >= INF then
+    begin
+      Result.MaxAbove := INF div 2;
+      Result.MaxBelow := INF div 2;
+      Exit;
+    end;
+
+    baseline := cw.GetBaseline(ASizeType);
+    above := baseline + cw.GetGapBefore(ASizeType, False);
+
+    if above > maxAbove then
+      maxAbove := above;
+
+    if (height - baseline + cw.GetGapAfter(ASizeType, False)) > maxBelow then
+      maxBelow := height - baseline + cw.GetGapAfter(ASizeType, False);
+
+    // If centering baseline, set component bounds to align baselines
+    if ACenterBaseline then
+      cw.SetDimBounds(-baseline, height, False);
+  end;
+
+  Result.MaxAbove := maxAbove;
+  Result.MaxBelow := maxBelow;
 end;
 
 { TfpgMigLayoutManager - Public API }
