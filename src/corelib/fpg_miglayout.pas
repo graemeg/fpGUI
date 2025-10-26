@@ -197,6 +197,14 @@ type
                        ARowConstr, AColConstr: TfpgMigAC;
                        const ACCMap: TfpgMigCCMap);
     destructor Destroy; override;
+
+    { Main layout method - positions and sizes all components }
+    function Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
+                    ADebug: Boolean): Boolean;
+
+    { Get calculated dimensions }
+    function GetWidth: TfpgMigIntArray;
+    function GetHeight: TfpgMigIntArray;
   end;
 
   TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
@@ -848,7 +856,7 @@ begin
     // Get or create cell at this position
     if not FGrid.TryGetValue(cellKey, cell) then
     begin
-      cell := TfpgMigCell.Create;
+      cell := TfpgMigCell.Create(spanX, spanY, flowX);
       FGrid.Add(cellKey, cell);
     end;
 
@@ -1207,6 +1215,142 @@ begin
   inherited Destroy;
 end;
 
+function TfpgMigGrid.Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
+  ADebug: Boolean): Boolean;
+var
+  containerX, containerY, containerW, containerH: Integer;
+  lc: TfpgMigLC;
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  i, j: Integer;
+  cw: TfpgMigCompWrap;
+  cellKey: Integer;
+  cellX, cellY: Integer;
+  cellWidth, cellHeight: Integer;
+  compX, compY: Integer;
+  insets: array[0..3] of Integer;  // top, left, bottom, right
+begin
+  Result := False;
+
+  // Extract bounds
+  if Length(ABounds) < 4 then
+    Exit;
+
+  containerX := ABounds[0];
+  containerY := ABounds[1];
+  containerW := ABounds[2];
+  containerH := ABounds[3];
+
+  // Get layout constraints
+  lc := FLC;
+
+  // Apply insets from LC if present
+  insets[0] := 6;  // top - default inset
+  insets[1] := 6;  // left
+  insets[2] := 6;  // bottom
+  insets[3] := 6;  // right
+
+  // TODO: Extract actual insets from LC.GetInsets
+
+  // Adjust container bounds for insets
+  containerX := containerX + insets[1];
+  containerY := containerY + insets[0];
+  containerW := containerW - insets[1] - insets[3];
+  containerH := containerH - insets[0] - insets[2];
+
+  // Store container dimensions for layout calculations
+  FWidth[SIZE_PREF] := containerW;
+  FHeight[SIZE_PREF] := containerH;
+
+  // TODO: Implement full layoutInOneDim for both dimensions
+  // For now, implement a simple grid layout to get tests passing
+
+  // Simple layout: distribute available space equally across grid cells
+  if (FColIndexes.Count > 0) and (FRowIndexes.Count > 0) then
+  begin
+    // Calculate cell sizes (equal distribution for now)
+    cellWidth := containerW div FColIndexes.Count;
+    cellHeight := containerH div FRowIndexes.Count;
+
+    // Position all components
+    for pair in FGrid do
+    begin
+      cellKey := pair.Key;
+      cell := pair.Value;
+
+      if cell = nil then
+        Continue;
+
+      // Decode cell position
+      DecodeCellKey(cellKey, cellX, cellY);
+
+      // Find column index (position in sorted list)
+      j := -1;
+      for i := 0 to FColIndexes.Count - 1 do
+      begin
+        if FColIndexes[i] = cellX then
+        begin
+          j := i;
+          Break;
+        end;
+      end;
+      if j < 0 then
+        Continue;
+
+      // Calculate component X position
+      compX := containerX + (j * cellWidth);
+
+      // Find row index
+      j := -1;
+      for i := 0 to FRowIndexes.Count - 1 do
+      begin
+        if FRowIndexes[i] = cellY then
+        begin
+          j := i;
+          Break;
+        end;
+      end;
+      if j < 0 then
+        Continue;
+
+      // Calculate component Y position
+      compY := containerY + (j * cellHeight);
+
+      // Position all CompWraps in this cell
+      for i := 0 to cell.CompWraps.Count - 1 do
+      begin
+        cw := cell.CompWraps[i];
+        if cw = nil then
+          Continue;
+
+        // Set bounds for this component
+        // TODO: Apply proper sizing and alignment from CC
+        cw.SetDimBounds(compX, cellWidth, True);   // horizontal
+        cw.SetDimBounds(compY, cellHeight, False);  // vertical
+        cw.TransferBounds(False);
+      end;
+    end;
+  end;
+
+  Result := True;
+end;
+
+function TfpgMigGrid.GetWidth: TfpgMigIntArray;
+begin
+  SetLength(Result, 3);
+  Result[SIZE_MIN] := FWidth[SIZE_MIN];
+  Result[SIZE_PREF] := FWidth[SIZE_PREF];
+  Result[SIZE_MAX] := FWidth[SIZE_MAX];
+end;
+
+function TfpgMigGrid.GetHeight: TfpgMigIntArray;
+begin
+  SetLength(Result, 3);
+  Result[SIZE_MIN] := FHeight[SIZE_MIN];
+  Result[SIZE_PREF] := FHeight[SIZE_PREF];
+  Result[SIZE_MAX] := FHeight[SIZE_MAX];
+end;
+
 { TfpgMigGrid - Helper methods }
 
 class function TfpgMigGrid.GetTotalSizeParallel(const ACompWraps: TfpgMigCompWrapList;
@@ -1344,13 +1488,73 @@ begin
 end;
 
 procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
+var
+  ccMap: TfpgMigCCMap;
+  lc: TfpgMigLC;
+  rowConstr, colConstr: TfpgMigAC;
+  grid: TfpgMigGrid;
+  bounds: array[0..3] of Integer;
+  i: Integer;
+  child: TfpgWidgetBase;
+  constraint: TfpgLayoutConstraint;
+  cc: TfpgMigCC;
 begin
-  // TODO: Implement using TfpgMigGrid
-  // This will:
+  if AContainer = nil then
+    Exit;
+
   // 1. Build CC map from widgets and their constraints
-  // 2. Create TfpgMigGrid instance
-  // 3. Call Grid.layout() method
-  // 4. Transfer bounds to widgets
+  ccMap := TfpgMigCCMap.Create;
+  try
+    for i := 0 to AContainer.ComponentCount - 1 do
+    begin
+      child := TfpgWidgetBase(AContainer.Components[i]);
+      if child = nil then
+        Continue;
+
+      // Get layout constraint if it exists
+      constraint := GetConstraint(child);
+      if (constraint <> nil) and (constraint is TfpgMigCC) then
+      begin
+        cc := TfpgMigCC(constraint);
+        ccMap.Add(child, cc);
+      end;
+    end;
+
+    // 2. Create layout constraints (use defaults for now)
+    lc := TfpgMigLC.Create;
+    try
+      lc.SetFlowX(True);  // Horizontal flow by default
+
+      // 3. Create AC constraints (use defaults)
+      rowConstr := TfpgMigAC.Create;
+      colConstr := TfpgMigAC.Create;
+      try
+        // 4. Create Grid instance
+        grid := TfpgMigGrid.Create(AContainer, lc, rowConstr, colConstr, ccMap);
+        try
+          // 5. Setup bounds for layout
+          bounds[0] := 0;  // x
+          bounds[1] := 0;  // y
+          bounds[2] := AContainer.Width;   // width
+          bounds[3] := AContainer.Height;  // height
+
+          // 6. Perform layout
+          grid.Layout(bounds, nil, nil, False);
+
+          // Bounds are transferred to widgets inside Layout method
+        finally
+          grid.Free;
+        end;
+      finally
+        rowConstr.Free;
+        colConstr.Free;
+      end;
+    finally
+      lc.Free;
+    end;
+  finally
+    ccMap.Free;
+  end;
 end;
 
 function TfpgMigLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
