@@ -14,7 +14,7 @@ uses
   fpg_layoutmanager,
   fpg_layouttypes,
   fpg_miglayout,
-  fpg_migconstraint;
+  fpg_mig_cc;
 
 type
 
@@ -75,7 +75,7 @@ begin
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
 
-  lm.AddLayoutComponent(w1, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -100,12 +100,12 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w1, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -134,12 +134,12 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w1, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -168,17 +168,17 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w1, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
   w3.SetPosition(0, 0, 100, 20);
-  lm.AddLayoutComponent(w3, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w3, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -203,7 +203,7 @@ var
   container: TfpgWidget;
   lm: TfpgMigLayoutManager;
   w1: TfpgWidget;
-  c: TfpgMigConstraint;
+  c: TfpgMigCC;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
@@ -215,9 +215,8 @@ begin
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
 
-  c := TfpgMigConstraint.Create;
-  c.AlignX := axRight;
-  c.AlignY := ayBottom;
+  c := TfpgMigCC.Create;
+  c.AlignX('right').AlignY('bottom');
   lm.AddLayoutComponent(w1, c);
 
   container.Realign;
@@ -235,7 +234,7 @@ var
   container: TfpgWidget;
   lm: TfpgMigLayoutManager;
   w1, w2: TfpgWidget;
-  c: TfpgMigConstraint;
+  c: TfpgMigCC;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
@@ -247,14 +246,14 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 100, 20);
-  c := TfpgMigConstraint.Create;
-  c.SpanX := 2;
+  c := TfpgMigCC.Create;
+  c.SpanX(2);
   lm.AddLayoutComponent(w1, c);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -272,7 +271,7 @@ var
   container: TfpgWidget;
   lm: TfpgMigLayoutManager;
   w1, w2, w3: TfpgWidget;
-  c: TfpgMigConstraint;
+  c: TfpgMigCC;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
@@ -284,19 +283,19 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 50);
-  c := TfpgMigConstraint.Create;
-  c.SpanY := 2;
+  c := TfpgMigCC.Create;
+  c.SpanY(2);
   lm.AddLayoutComponent(w1, c);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w2, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
   w3.SetPosition(0, 0, 50, 20);
-  lm.AddLayoutComponent(w3, TfpgMigConstraint.Create());
+  lm.AddLayoutComponent(w3, TfpgMigCC.Create());
 
   container.Realign;
 
@@ -317,7 +316,7 @@ var
   container: TfpgWidget;
   lm: TfpgMigLayoutManager;
   w1, w2: TfpgWidget;
-  c1, c2: TfpgMigConstraint;
+  c1, c2: TfpgMigCC;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
@@ -329,15 +328,14 @@ begin
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
   w1.SetPosition(0, 0, 50, 20);
-  c1 := TfpgMigConstraint.Create;
+  c1 := TfpgMigCC.Create;
   lm.AddLayoutComponent(w1, c1);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
   w2.SetPosition(0, 0, 50, 20);
-  c2 := TfpgMigConstraint.Create;
-  c2.GrowX := 1;
-  c2.AlignX := axFill;
+  c2 := TfpgMigCC.Create;
+  c2.GrowX.AlignX('fill');
   lm.AddLayoutComponent(w2, c2);
 
   container.Realign;
