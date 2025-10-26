@@ -274,10 +274,15 @@ end;
 procedure TfpgMigCompWrap.CorrectMinMax(var ASizes: array of Integer);
 begin
   // Ensure min <= pref <= max
+  // Since MAX is almost always explicitly set, use that as the limit
+  if ASizes[SIZE_MIN] > ASizes[SIZE_MAX] then
+    ASizes[SIZE_MIN] := ASizes[SIZE_MAX];
+
   if ASizes[SIZE_PREF] < ASizes[SIZE_MIN] then
     ASizes[SIZE_PREF] := ASizes[SIZE_MIN];
-  if ASizes[SIZE_MAX] < ASizes[SIZE_PREF] then
-    ASizes[SIZE_MAX] := ASizes[SIZE_PREF];
+
+  if ASizes[SIZE_PREF] > ASizes[SIZE_MAX] then
+    ASizes[SIZE_PREF] := ASizes[SIZE_MAX];
 end;
 
 function TfpgMigCompWrap.GetSizes(AIsHor: Boolean): PInteger;
@@ -344,8 +349,16 @@ end;
 
 function TfpgMigCompWrap.ConstrainSize(ASize: Integer): Integer;
 begin
-  // TODO: Apply size constraints
-  Result := ASize;
+  // Constrain size to valid range: 0 to INF
+  if ASize > 0 then
+  begin
+    if ASize < INF then
+      Result := ASize
+    else
+      Result := INF;
+  end
+  else
+    Result := 0;
 end;
 
 function TfpgMigCompWrap.GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
