@@ -140,7 +140,7 @@ begin
 
   { Initialize resize properties }
   FGrowPriority := DEFAULT_PRIORITY;
-  FGrowWeight := 0.0;
+  FGrowWeight := 0.0;  // No grow by default (Java MigLayout v11 behavior)
   FHasGrowWeight := False;
 
   FShrinkPriority := DEFAULT_PRIORITY;

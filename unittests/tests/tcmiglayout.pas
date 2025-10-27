@@ -55,7 +55,8 @@ begin
     CheckNotNull(mig.RowConstraints, 'Row constraints should be created');
     CheckNotNull(mig.ColumnConstraints, 'Column constraints should be created');
     CheckTrue(mig.LC.IsFlowX, 'Default flow should be horizontal');
-    CheckEquals(1, mig.LC.GetWrapAfter, 'Default wrap should be 1 (vertical stacking)');
+    // Default wrap is INF (no wrapping) - consistent with Java MigLayout
+    CheckTrue(mig.LC.GetWrapAfter > 1000000, 'Default should be no wrap (large value)');
   finally
     mig.Free;
   end;
@@ -90,13 +91,14 @@ end;
 procedure TTestMigLayout.TestTwoWidgetsLayout;
 var
   container: TfpgWidget;
-  lm: ILayoutManager;
+  lm: TfpgMigLayoutManager;
   w1, w2: TfpgWidget;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 200);
-  lm := TfpgMigLayoutManager.Create as ILayoutManager;
+  lm := TfpgMigLayoutManager.Create;
+  lm.LC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -211,6 +213,7 @@ begin
   container.Name := 'container';
   container.SetPosition(0, 0, 200, 200);
   lm := TfpgMigLayoutManager.Create;
+  lm.LC.Fill;  // Make cells fill container (Java MigLayout v11 way)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -325,6 +328,7 @@ begin
   container.SetPosition(0, 0, 200, 100);
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.FillX;  // Make columns fill container width (Java MigLayout v11 way)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);

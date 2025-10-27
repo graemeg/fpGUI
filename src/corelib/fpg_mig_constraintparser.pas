@@ -57,7 +57,7 @@ begin
     if (s = 'left') or (s = 'leading') then
       Exit(UnitValueLeading);
     if (s = 'right') or (s = 'trailing') then
-      Exit(UnitValueLeading);  // TODO: Should be trailing
+      Exit(TfpgMigUnitValue.Create(100, utPercent, 'trailing'));
     if s = 'center' then
       Exit(UnitValueCenter);
   end
@@ -67,7 +67,7 @@ begin
     if s = 'top' then
       Exit(UnitValueLeading);
     if s = 'bottom' then
-      Exit(UnitValueLeading);  // TODO: Should be trailing
+      Exit(TfpgMigUnitValue.Create(100, utPercent, 'trailing'));
     if s = 'center' then
       Exit(UnitValueCenter);
     if (s = 'baseline') or (s = 'base') then

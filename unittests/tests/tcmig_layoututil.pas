@@ -485,29 +485,36 @@ end;
 procedure TTestLayoutUtil.TestDerive_AllNewValues;
 var
   base: TfpgMigBoundSize;
+  newMin1, newPref1, newMax1: TfpgMigUnitValue;
   newMin, newPref, newMax: TfpgMigUnitValue;
   result: TfpgMigBoundSize;
 begin
-  base := TfpgMigBoundSize.Create(
-    TfpgMigUnitValue.Create(50),
-    TfpgMigUnitValue.Create(100),
-    TfpgMigUnitValue.Create(200)
-  );
+  newMin1 := TfpgMigUnitValue.Create(50);
+  newPref1 := TfpgMigUnitValue.Create(100);
+  newMax1 := TfpgMigUnitValue.Create(200);
+  try
+     base := TfpgMigBoundSize.Create(newMin1, newPref1, newMax1);
+  finally
+    newMin1.Free;
+    newPref1.Free;
+    newMax1.Free;
+  end;
 
   newMin := TfpgMigUnitValue.Create(60);
   newPref := TfpgMigUnitValue.Create(110);
   newMax := TfpgMigUnitValue.Create(210);
-
-  result := TfpgMigLayoutUtil.Derive(base, newMin, newPref, newMax);
-
+  try
+     result := TfpgMigLayoutUtil.Derive(base, newMin, newPref, newMax);
+  finally
+    newMin.Free;
+    newPref.Free;
+    newMax.Free;
+  end;
   AssertEquals('New min value', 60, result.Min.Value);
   AssertEquals('New pref value', 110, result.Preferred.Value);
   AssertEquals('New max value', 210, result.Max.Value);
 
   // Cleanup - BoundSize clones UnitValues, so we must free originals
-  newMin.Free;
-  newPref.Free;
-  newMax.Free;
   base.Free;
   result.Free;
 end;

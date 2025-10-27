@@ -28,7 +28,8 @@ uses
   fpg_mig_boundsize,
   fpg_mig_unitvalue,
   fpg_mig_resizeconstraint,
-  fpg_mig_layoututil;
+  fpg_mig_layoututil,
+  fpg_mig_platformdefaults;
 
 type
   { Forward declarations for Grid inner classes }
@@ -53,6 +54,8 @@ type
   TfpgMigIntArray = array of Integer;
   TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
   TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
+  TfpgMigBooleanArray = array of Boolean;
+  TfpgMigSizeArrayArray = array of TfpgMigSizeArray;  // For return values
 
   { CompWrap - wraps a TfpgWidgetBase with its CC constraint
     Caches min/pref/max sizes and gap information }
@@ -153,14 +156,20 @@ type
     function GetMinPrefMax: TfpgMigIntArray;
   end;
 
-  { FlowSizeSpec - size specifications for flow layout }
+  { FlowSizeSpec - size specifications for flow layout
+    Holds alternating [gap, component, gap, component...] sizes and resize constraints
+    Matches: Grid.FlowSizeSpec in Grid.java }
   TfpgMigFlowSizeSpec = class
   private
-    FSizes: array of TfpgMigSizeArray;
-    FResConstsInclGaps: array of TfpgMigResizeConstraint;
+    FSizes: array of TfpgMigSizeArray;  // Alternating gap and component sizes [min,pref,max]
+    FResConstsInclGaps: array of TfpgMigResizeConstraint;  // Alternating gap and component constraints
   public
-    constructor Create;
+    constructor Create(ASizes: array of TfpgMigSizeArray; AResConstr: array of TfpgMigResizeConstraint);
     destructor Destroy; override;
+
+    function GetSizes: Pointer;  // Returns pointer to FSizes array for CalculateSerial
+    function GetResizeConstraints: Pointer;  // Returns pointer to FResConstsInclGaps array
+    function GetCount: Integer;  // Returns length of arrays
   end;
 
   { Grid - the main layout engine }
@@ -192,6 +201,48 @@ type
                                      ASizeType: Integer; AIsHor: Boolean): Integer;
     class function GetBaselineAboveBelow(const ACompWraps: TfpgMigCompWrapList;
                                         ASizeType: Integer; ACenterBaseline: Boolean): TfpgMigAboveBelow;
+
+    { Calculate final dimension sizes using LayoutUtil.CalculateSerial }
+    function CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
+                                     const APrefSizes: array of Integer;
+                                     AAC: TfpgMigAC; ABounds: Integer;
+                                     AIsHor: Boolean): TfpgMigIntegerArray;
+
+    { Aggregate component grow/shrink into dimension constraints }
+    procedure AggregateComponentConstraints(AResConstr: TfpgMigResizeConstraint;
+                                           ADimIndex: Integer; AIsHor: Boolean);
+
+    { Port of Grid.java calcRowsOrColsSizes() - line 1059
+      Calculates Min, Preferred and Max size for the columns OR rows.
+      @param AGroupsLists Array of LinkedDimGroup lists for each row/col
+      @param ADefGrow Default grow weight if specs don't have grow (from push in CC)
+      @param ARefSize Reference size for pixel calculations
+      @param AIsHor True for columns, False for rows
+      @returns FlowSizeSpec with alternating gap/component sizes and resize constraints }
+    function CalcRowsOrColsSizes(AGroupsLists: array of TfpgMigLinkedDimGroupList;
+                                 ADefGrow: TfpgMigFloatArray; ARefSize: Integer;
+                                 AIsHor: Boolean): TfpgMigFlowSizeSpec;
+
+    { Port of Grid.java mergeSizesGapsAndResConstrs() - line 2074
+      Merges row/col sizes, gaps, and resize constraints into FlowSizeSpec }
+    function MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
+                                         AGapPush: array of Boolean;
+                                         AMinPrefMaxSizes: array of TfpgMigSizeArray;
+                                         AGapSizes: array of TfpgMigSizeArray;
+                                         ARefSize: Integer): TfpgMigFlowSizeSpec;
+
+    { Port of Grid.java getRowGaps() - line 1224
+      Returns the row gaps in pixel sizes. One more than there are specs sent in. }
+    function GetRowGaps(ASpecs: array of TfpgMigDimConstraint; ARefSize: Integer;
+                       AIsHor: Boolean; var AFillInPushGaps: TfpgMigBooleanArray): TfpgMigSizeArrayArray;
+
+    { Port of Grid.java correctMinMax() - line 2135
+      Corrects a size array so min <= pref <= max }
+    class procedure CorrectMinMax(var ASizes: TfpgMigSizeArray);
+
+    { Port of Grid.java mergeSizes() - line 2104
+      Merges two size arrays (takes max for each element) }
+    class function MergeSizes(AOldValues, ANewValues: TfpgMigSizeArray): TfpgMigSizeArray;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -767,15 +818,55 @@ end;
 
 { TfpgMigFlowSizeSpec }
 
-constructor TfpgMigFlowSizeSpec.Create;
+constructor TfpgMigFlowSizeSpec.Create(ASizes: array of TfpgMigSizeArray;
+  AResConstr: array of TfpgMigResizeConstraint);
+var
+  i: Integer;
 begin
   inherited Create;
-  // TODO: Initialize with sizes and constraints when needed
+
+  // Copy size arrays
+  SetLength(FSizes, Length(ASizes));
+  for i := 0 to High(ASizes) do
+    FSizes[i] := ASizes[i];
+
+  // Copy resize constraints
+  SetLength(FResConstsInclGaps, Length(AResConstr));
+  for i := 0 to High(AResConstr) do
+    FResConstsInclGaps[i] := AResConstr[i];
 end;
 
 destructor TfpgMigFlowSizeSpec.Destroy;
+var
+  i: Integer;
 begin
+  // Free resize constraints
+  for i := 0 to High(FResConstsInclGaps) do
+    if FResConstsInclGaps[i] <> nil then
+      FResConstsInclGaps[i].Free;
+
   inherited Destroy;
+end;
+
+function TfpgMigFlowSizeSpec.GetSizes: Pointer;
+begin
+  if Length(FSizes) > 0 then
+    Result := @FSizes[0]
+  else
+    Result := nil;
+end;
+
+function TfpgMigFlowSizeSpec.GetResizeConstraints: Pointer;
+begin
+  if Length(FResConstsInclGaps) > 0 then
+    Result := @FResConstsInclGaps[0]
+  else
+    Result := nil;
+end;
+
+function TfpgMigFlowSizeSpec.GetCount: Integer;
+begin
+  Result := Length(FSizes);
 end;
 
 { TfpgMigGrid }
@@ -1217,6 +1308,435 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgMigGrid.AggregateComponentConstraints(AResConstr: TfpgMigResizeConstraint;
+  ADimIndex: Integer; AIsHor: Boolean);
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  cellKey: Integer;
+  cellX, cellY: Integer;
+  i, dimPos: Integer;
+  cw: TfpgMigCompWrap;
+  compDim: TfpgMigDimConstraint;
+  growPrio, shrinkPrio: Integer;
+  growWeight, shrinkWeight: Single;
+begin
+  // Get actual grid position from index
+  if AIsHor then
+    dimPos := FColIndexes[ADimIndex]
+  else
+    dimPos := FRowIndexes[ADimIndex];
+
+  // Iterate through all cells to find components in this dimension
+  for pair in FGrid do
+  begin
+    cellKey := pair.Key;
+    cell := pair.Value;
+    if cell = nil then
+      Continue;
+
+    DecodeCellKey(cellKey, cellX, cellY);
+
+    // Check if this cell is in the dimension we're aggregating
+    if AIsHor and (cellX <> dimPos) then
+      Continue;
+    if not AIsHor and (cellY <> dimPos) then
+      Continue;
+
+    // Check all components in this cell
+    for i := 0 to cell.CompWraps.Count - 1 do
+    begin
+      cw := cell.CompWraps[i];
+      if (cw = nil) or (cw.FCC = nil) then
+        Continue;
+
+      // Get component's dimension constraint
+      if AIsHor then
+        compDim := cw.FCC.Horizontal
+      else
+        compDim := cw.FCC.Vertical;
+
+      if compDim = nil then
+        Continue;
+
+      // Aggregate grow priority and weight (use max)
+      growPrio := compDim.GetGrowPriority;
+      if growPrio > AResConstr.GrowPrio then
+        AResConstr.GrowPrio := growPrio;
+
+      if compDim.HasGrowWeight then
+      begin
+        growWeight := compDim.GetGrowWeight;
+        if IsNaN(AResConstr.Grow) or (growWeight > AResConstr.Grow) then
+          AResConstr.Grow := growWeight;
+      end;
+
+      // Aggregate shrink priority and weight (use max)
+      shrinkPrio := compDim.GetShrinkPriority;
+      if shrinkPrio > AResConstr.ShrinkPrio then
+        AResConstr.ShrinkPrio := shrinkPrio;
+
+      if compDim.HasShrinkWeight then
+      begin
+        shrinkWeight := compDim.GetShrinkWeight;
+        if IsNaN(AResConstr.Shrink) or (shrinkWeight > AResConstr.Shrink) then
+          AResConstr.Shrink := shrinkWeight;
+      end;
+    end;
+  end;
+end;
+
+{ Port of Grid.java correctMinMax() - line 2135 }
+class procedure TfpgMigGrid.CorrectMinMax(var ASizes: TfpgMigSizeArray);
+begin
+  if ASizes[SIZE_MIN] > ASizes[SIZE_MAX] then
+    ASizes[SIZE_MIN] := ASizes[SIZE_MAX];  // Since MAX is almost always explicitly set use that
+
+  if ASizes[SIZE_PREF] < ASizes[SIZE_MIN] then
+    ASizes[SIZE_PREF] := ASizes[SIZE_MIN];
+
+  if ASizes[SIZE_PREF] > ASizes[SIZE_MAX] then
+    ASizes[SIZE_PREF] := ASizes[SIZE_MAX];
+end;
+
+{ Port of Grid.java mergeSizes(int oldValue, int newValue, boolean toMax) - line 2119 }
+class function TfpgMigGrid.MergeSizes(AOldValues, ANewValues: TfpgMigSizeArray): TfpgMigSizeArray;
+var
+  i: Integer;
+  oldVal, newVal: Integer;
+begin
+  // TfpgMigSizeArray is a fixed-size array[0..2], no SetLength needed
+  for i := 0 to 2 do
+  begin
+    oldVal := AOldValues[i];
+    newVal := ANewValues[i];
+
+    if (oldVal = NOT_SET) or (oldVal = newVal) then
+      Result[i] := newVal
+    else if newVal = NOT_SET then
+      Result[i] := oldVal
+    else
+      Result[i] := Max(oldVal, newVal);  // toMax = true for merging gaps
+  end;
+end;
+
+{ Port of Grid.java mergeSizesGapsAndResConstrs() - line 2074 }
+function TfpgMigGrid.MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
+  AGapPush: array of Boolean; AMinPrefMaxSizes: array of TfpgMigSizeArray;
+  AGapSizes: array of TfpgMigSizeArray; ARefSize: Integer): TfpgMigFlowSizeSpec;
+var
+  sizes: array of TfpgMigSizeArray;
+  resConstsInclGaps: array of TfpgMigResizeConstraint;
+  i, crIx: Integer;
+  GAP_RC_CONST, GAP_RC_CONST_PUSH: TfpgMigResizeConstraint;
+begin
+  // Make room for gaps around: [gap, comp, gap, comp, ..., gap]
+  SetLength(sizes, (Length(AMinPrefMaxSizes) * 2) + 1);
+  SetLength(resConstsInclGaps, Length(sizes));
+
+  // Gap resize constraints (no grow/shrink for gaps)
+  GAP_RC_CONST := TfpgMigResizeConstraint.Create;
+  GAP_RC_CONST_PUSH := TfpgMigResizeConstraint.Create;  // TODO: Set push flag
+
+  // First gap
+  sizes[0] := AGapSizes[0];
+
+  for i := 0 to High(AMinPrefMaxSizes) do
+  begin
+    crIx := (i * 2) + 1;
+
+    // Component bounds and constraints
+    resConstsInclGaps[crIx] := AResConstr[i];
+    sizes[crIx] := AMinPrefMaxSizes[i];
+
+    // Gap after component
+    sizes[crIx + 1] := AGapSizes[i + 1];
+
+    // Set gap constraints (sizes array is always initialized with SetLength, no nil check needed)
+    if (i < Length(AGapPush)) and AGapPush[i] then
+      resConstsInclGaps[crIx - 1] := GAP_RC_CONST_PUSH
+    else
+      resConstsInclGaps[crIx - 1] := GAP_RC_CONST;
+
+    if i = High(AMinPrefMaxSizes) then
+    begin
+      if ((i + 1) < Length(AGapPush)) and AGapPush[i + 1] then
+        resConstsInclGaps[crIx + 1] := GAP_RC_CONST_PUSH
+      else
+        resConstsInclGaps[crIx + 1] := GAP_RC_CONST;
+    end;
+  end;
+
+  Result := TfpgMigFlowSizeSpec.Create(sizes, resConstsInclGaps);
+end;
+
+{ Port of Grid.java getRowGaps() - line 1224 }
+function TfpgMigGrid.GetRowGaps(ASpecs: array of TfpgMigDimConstraint; ARefSize: Integer;
+  AIsHor: Boolean; var AFillInPushGaps: TfpgMigBooleanArray): TfpgMigSizeArrayArray;
+var
+  defGap: TfpgMigBoundSize;
+  defGapArr: TfpgMigSizeArray;
+  retValues: array of TfpgMigSizeArray;
+  i: Integer;
+  specBefore, specAfter: TfpgMigDimConstraint;
+  gapBefore, gapAfter: TfpgMigSizeArray;
+begin
+  // Get default gap from LC
+  if AIsHor then
+    defGap := FLC.GetGridGapX
+  else
+    defGap := FLC.GetGridGapY;
+
+  if defGap = nil then
+  begin
+    if AIsHor then
+      defGap := TfpgMigPlatformDefaults.GetRelatedGapX  // Grid gap is same as related gap
+    else
+      defGap := TfpgMigPlatformDefaults.GetRelatedGapY;
+  end;
+
+  // Convert default gap to pixel sizes (defGapArr is a static array[0..2], no SetLength needed)
+  if defGap <> nil then
+  begin
+    if defGap.Min <> nil then
+      defGapArr[SIZE_MIN] := Round(defGap.Min.Value)
+    else
+      defGapArr[SIZE_MIN] := 6;  // Default
+    if defGap.Preferred <> nil then
+      defGapArr[SIZE_PREF] := Round(defGap.Preferred.Value)
+    else
+      defGapArr[SIZE_PREF] := 6;
+    if defGap.Max <> nil then
+      defGapArr[SIZE_MAX] := Round(defGap.Max.Value)
+    else
+      defGapArr[SIZE_MAX] := INF;
+  end
+  else
+  begin
+    defGapArr[SIZE_MIN] := 6;
+    defGapArr[SIZE_PREF] := 6;
+    defGapArr[SIZE_MAX] := INF;
+  end;
+
+  SetLength(retValues, Length(ASpecs) + 1);
+
+  for i := 0 to High(retValues) do
+  begin
+    if i > 0 then
+      specBefore := ASpecs[i - 1]
+    else
+      specBefore := nil;
+
+    if i < Length(ASpecs) then
+      specAfter := ASpecs[i]
+    else
+      specAfter := nil;
+
+    // TODO: For now, use default gaps everywhere
+    // Full implementation would check gap before/after on specs
+    // retValues[i] is a static array[0..2], just assign directly
+    retValues[i] := defGapArr;
+
+    // Check for push gaps
+    if ((specBefore <> nil) and specBefore.IsGapAfterPush) or
+       ((specAfter <> nil) and specAfter.IsGapBeforePush) then
+      AFillInPushGaps[i] := True;
+  end;
+
+  Result := retValues;
+end;
+
+{ Port of Grid.java calcRowsOrColsSizes() - line 1059
+  TODO: This is a stub implementation. Full implementation needed to properly calculate sizes
+  from LinkedDimGroup lists and handle size groups, spanning components, etc. }
+function TfpgMigGrid.CalcRowsOrColsSizes(AGroupsLists: array of TfpgMigLinkedDimGroupList;
+  ADefGrow: TfpgMigFloatArray; ARefSize: Integer; AIsHor: Boolean): TfpgMigFlowSizeSpec;
+var
+  primDCs: array of TfpgMigDimConstraint;
+  rowColBoundSizes: array of TfpgMigSizeArray;
+  allDCs: array of TfpgMigDimConstraint;
+  resConstrs: array of TfpgMigResizeConstraint;
+  fillInPushGaps: TfpgMigBooleanArray;
+  gapSizes: TfpgMigSizeArrayArray;
+  primIndexes: TfpgMigIntegerList;
+  i, r, cellIx: Integer;
+  groupSizes: TfpgMigIntArray;
+  group: TfpgMigLinkedDimGroup;
+  groups: TfpgMigLinkedDimGroupList;
+begin
+  // Get dimension constraints
+  if AIsHor then
+  begin
+    primDCs := FColConstr.GetConstraints;
+    primIndexes := FColIndexes;
+  end
+  else
+  begin
+    primDCs := FRowConstr.GetConstraints;
+    primIndexes := FRowIndexes;
+  end;
+
+  // Allocate arrays
+  SetLength(rowColBoundSizes, primIndexes.Count);
+  SetLength(allDCs, primIndexes.Count);
+
+  // Calculate sizes for each row/column
+  for r := 0 to primIndexes.Count - 1 do
+  begin
+    cellIx := primIndexes[r];
+
+    // Get dimension constraint for this row/column
+    if cellIx < Length(primDCs) then
+      allDCs[r] := primDCs[cellIx]
+    else if Length(primDCs) > 0 then
+      allDCs[r] := primDCs[High(primDCs)]
+    else
+      allDCs[r] := nil;
+
+    // Get groups for this row/column
+    if r < Length(AGroupsLists) then
+      groups := AGroupsLists[r]
+    else
+      groups := nil;
+
+    // Calculate group sizes (simplified for now)
+    if (groups <> nil) and (groups.Count > 0) then
+    begin
+      group := groups[0];
+      groupSizes := group.GetMinPrefMax;
+      if Length(groupSizes) >= 3 then
+      begin
+        rowColBoundSizes[r][SIZE_MIN] := groupSizes[SIZE_MIN];
+        rowColBoundSizes[r][SIZE_PREF] := groupSizes[SIZE_PREF];
+        rowColBoundSizes[r][SIZE_MAX] := INF;
+      end;
+    end
+    else
+    begin
+      rowColBoundSizes[r][SIZE_MIN] := 0;
+      rowColBoundSizes[r][SIZE_PREF] := 0;
+      rowColBoundSizes[r][SIZE_MAX] := INF;
+    end;
+
+    // Correct min/max
+    CorrectMinMax(rowColBoundSizes[r]);
+  end;
+
+  // Build resize constraints from dimension constraints
+  SetLength(resConstrs, Length(allDCs));
+  for i := 0 to High(allDCs) do
+  begin
+    if allDCs[i] <> nil then
+    begin
+      resConstrs[i] := TfpgMigResizeConstraint.Create(
+        allDCs[i].GetShrinkPriority,
+        allDCs[i].GetShrinkWeight,
+        allDCs[i].GetGrowPriority,
+        allDCs[i].GetGrowWeight
+      );
+    end
+    else
+    begin
+      resConstrs[i] := TfpgMigResizeConstraint.Create;
+    end;
+  end;
+
+  // Get gaps
+  SetLength(fillInPushGaps, Length(allDCs) + 1);
+  for i := 0 to High(fillInPushGaps) do
+    fillInPushGaps[i] := False;
+  gapSizes := GetRowGaps(allDCs, ARefSize, AIsHor, fillInPushGaps);
+
+  // Merge sizes, gaps, and resize constraints
+  Result := MergeSizesGapsAndResConstrs(resConstrs, fillInPushGaps, rowColBoundSizes, gapSizes, ARefSize);
+end;
+
+function TfpgMigGrid.CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
+  const APrefSizes: array of Integer; AAC: TfpgMigAC; ABounds: Integer;
+  AIsHor: Boolean): TfpgMigIntegerArray;
+var
+  count, i, gapSize, totalGaps: Integer;
+  sizeMatrix: TfpgMigSizeMatrix;
+  resConstr: TfpgMigResizeConstraintArray;
+  pushWeights: TfpgMigFloatArray;
+  dimConstr: TfpgMigDimConstraint;
+  dimConstraints: TfpgMigDimConstraintArray;
+  sizeArray: PfpgMigSizeArray;
+begin
+  count := AIndexes.Count;
+  if count = 0 then
+  begin
+    SetLength(Result, 0);
+    Exit;
+  end;
+
+  // Build size matrix [min, pref, max] for each dimension
+  SetLength(sizeMatrix, count);
+  for i := 0 to count - 1 do
+  begin
+    New(sizeArray);
+    sizeArray^[SIZE_MIN] := APrefSizes[i];     // For now, min = pref
+    sizeArray^[SIZE_PREF] := APrefSizes[i];
+    sizeArray^[SIZE_MAX] := INF_SIZE;          // Max is unlimited
+    sizeMatrix[i] := sizeArray;
+  end;
+
+  // Get constraints from AC
+  if AAC <> nil then
+    dimConstraints := AAC.GetConstraints
+  else
+    SetLength(dimConstraints, 0);
+
+  // Build ResizeConstraint array from AC + component constraints
+  SetLength(resConstr, count);
+  for i := 0 to count - 1 do
+  begin
+    // Start with AC constraints (or defaults)
+    if (i < Length(dimConstraints)) and (dimConstraints[i] <> nil) then
+    begin
+      dimConstr := dimConstraints[i];
+      resConstr[i] := TfpgMigResizeConstraint.Create(
+        dimConstr.GetShrinkPriority,
+        dimConstr.GetShrinkWeight,
+        dimConstr.GetGrowPriority,
+        dimConstr.GetGrowWeight
+      );
+    end
+    else
+    begin
+      // Default: no grow, default shrink (Java v11 behavior)
+      resConstr[i] := TfpgMigResizeConstraint.Create;
+    end;
+
+    // Now aggregate grow/shrink from components in this row/column
+    // This is done in Java MigLayout - components affect their column/row
+    AggregateComponentConstraints(resConstr[i], i, AIsHor);
+  end;
+
+  // Default push weights (nil for now)
+  SetLength(pushWeights, 0);
+
+  // Calculate gap size (TODO: get from LC)
+  gapSize := 6;
+  totalGaps := (count - 1) * gapSize;
+
+  // Call CalculateSerial to distribute space
+  Result := TfpgMigLayoutUtil.CalculateSerial(
+    sizeMatrix,
+    resConstr,
+    pushWeights,
+    SIZE_PREF,
+    ABounds - totalGaps  // Subtract gaps from available space
+  );
+
+  // Cleanup
+  for i := 0 to count - 1 do
+  begin
+    Dispose(sizeMatrix[i]);
+    resConstr[i].Free;
+  end;
+end;
+
 function TfpgMigGrid.Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
   ADebug: Boolean): Boolean;
 var
@@ -1233,6 +1753,8 @@ var
   colWidths, rowHeights: array of Integer;
   colPositions, rowPositions: array of Integer;
   maxWidth, maxHeight: Integer;
+  alignX, alignY: TfpgMigUnitValue;
+  offsetX, offsetY: Integer;
 begin
   Result := False;
 
@@ -1344,6 +1866,10 @@ begin
         rowHeights[cellY] := maxHeight;
     end;
 
+    // Use LayoutUtil.CalculateSerial to distribute space based on grow/shrink weights
+    colWidths := CalculateDimensionSizes(FColIndexes, colWidths, FColConstr, containerW, True);
+    rowHeights := CalculateDimensionSizes(FRowIndexes, rowHeights, FRowConstr, containerH, False);
+
     // Calculate positions for each column and row (with gaps between them)
     compX := containerX;
     for i := 0 to FColIndexes.Count - 1 do
@@ -1415,10 +1941,42 @@ begin
         maxHeight := cw.Comp.Height;
 
         // Calculate position within cell based on alignment
-        // TODO: Get actual alignment from CC.Horizontal.GetAlign / CC.Vertical.GetAlign
-        // For now, components use their preferred size at cell top-left
         compX := colPositions[cellX];
         compY := rowPositions[cellY];
+
+        // Apply horizontal alignment
+        if (cw.FCC <> nil) and (cw.FCC.Horizontal <> nil) then
+        begin
+          alignX := cw.FCC.Horizontal.GetAlign;
+          if alignX <> nil then
+          begin
+            // Calculate offset based on alignment
+            if (alignX.UnitType = utPercent) then
+            begin
+              // Percent-based alignment (0% = left, 50% = center, 100% = right)
+              offsetX := Round((colWidths[cellX] - maxWidth) * alignX.Value / 100);
+              compX := compX + offsetX;
+            end;
+            // utAlign with value 0 (leading) means no offset needed
+          end;
+        end;
+
+        // Apply vertical alignment
+        if (cw.FCC <> nil) and (cw.FCC.Vertical <> nil) then
+        begin
+          alignY := cw.FCC.Vertical.GetAlign;
+          if alignY <> nil then
+          begin
+            // Calculate offset based on alignment
+            if (alignY.UnitType = utPercent) then
+            begin
+              // Percent-based alignment (0% = top, 50% = center, 100% = bottom)
+              offsetY := Round((rowHeights[cellY] - maxHeight) * alignY.Value / 100);
+              compY := compY + offsetY;
+            end;
+            // utAlign with value 0 (leading) means no offset needed
+          end;
+        end;
 
         // Set bounds for this component
         cw.SetDimBounds(compX, maxWidth, True);   // horizontal
@@ -1575,8 +2133,7 @@ begin
   inherited Create;
   // Create default constraints - user can replace or modify
   FLC := TfpgMigLC.Create;
-  FLC.SetFlowX(True);  // Default to horizontal flow with wrap
-  FLC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
+  // Default is horizontal flow with no wrap (Java MigLayout behavior)
 
   FRowConstr := TfpgMigAC.Create;
   FColConstr := TfpgMigAC.Create;
