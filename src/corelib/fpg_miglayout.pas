@@ -154,6 +154,9 @@ type
 
     procedure AddCompWrap(ACompWrap: TfpgMigCompWrap);
     function GetMinPrefMax: TfpgMigIntArray;
+
+    property Span: Integer read FSpan;
+    property CompWraps: TfpgMigCompWrapList read FCompWraps;
   end;
 
   { FlowSizeSpec - size specifications for flow layout
@@ -175,6 +178,11 @@ type
   { Grid - the main layout engine }
   TfpgMigGrid = class
   private
+    const
+      { Port of Grid.java GROW_100 constant - line 45
+        Default grow weight array for when fill is enabled }
+      GROW_100: array[0..0] of Single = (100.0);
+  private
     FLC: TfpgMigLC;
     FRowConstr, FColConstr: TfpgMigAC;
     FContainer: TfpgWidgetBase;
@@ -183,6 +191,10 @@ type
     FColGroupLists, FRowGroupLists: array of TfpgMigLinkedDimGroupList;
     FWidth, FHeight: array[0..2] of Integer;
     FColFlowSpecs, FRowFlowSpecs: TfpgMigFlowSizeSpec;
+
+    { Port of Grid.java growXs, growYs fields - line 115
+      Default grow weights for columns and rows (from push or fill) }
+    FGrowXs, FGrowYs: TfpgMigFloatArray;
 
     { Build row and column index lists from grid }
     procedure BuildIndexes;
@@ -243,6 +255,21 @@ type
     { Port of Grid.java mergeSizes() - line 2104
       Merges two size arrays (takes max for each element) }
     class function MergeSizes(AOldValues, ANewValues: TfpgMigSizeArray): TfpgMigSizeArray;
+
+    { Port of Grid.java getTotalGroupsSizeParallel() - line 2033
+      Gets the combined size of all groups in parallel (max for min/pref, min for max) }
+    class function GetTotalGroupsSizeParallel(AGroups: TfpgMigLinkedDimGroupList;
+                                              ASizeType: Integer; ACountSpanning: Boolean): Integer;
+
+    { Port of Grid.java constrainSize() - line 2130 }
+    class function ConstrainSize(ASize: Integer): Integer;
+
+    { Port of Grid.java getDefaultGrowWeights() - line 772
+      Gets default grow weights based on push or fill flags and component grow weights
+      @param AHasPush If any push gap is set
+      @param AIsRows True for row dimension, False for column dimension
+      @returns Grow weights array or nil if no growth }
+    function GetDefaultGrowWeights(AHasPush: Boolean; AIsRows: Boolean): TfpgMigFloatArray;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -987,6 +1014,11 @@ begin
   // Third pass: Create dimension groups for size groups and end groups
   BuildDimensionGroups;
 
+  // Fourth pass: Calculate default grow weights (Port of Grid.java lines 385-386)
+  // Note: hasPush parameters not yet implemented, passing False for now
+  FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
+  FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
+
   // TODO: Calculate gaps between components
   // TODO: Create flow specs
 end;
@@ -1546,9 +1578,167 @@ begin
   Result := retValues;
 end;
 
-{ Port of Grid.java calcRowsOrColsSizes() - line 1059
-  TODO: This is a stub implementation. Full implementation needed to properly calculate sizes
-  from LinkedDimGroup lists and handle size groups, spanning components, etc. }
+{ Port of Grid.java constrainSize() - line 2130 }
+class function TfpgMigGrid.ConstrainSize(ASize: Integer): Integer;
+begin
+  if ASize > 0 then
+  begin
+    if ASize < INF then
+      Result := ASize
+    else
+      Result := INF;
+  end
+  else
+    Result := 0;
+end;
+
+{ Port of Grid.java getDefaultGrowWeights() - line 772 }
+function TfpgMigGrid.GetDefaultGrowWeights(AHasPush: Boolean; AIsRows: Boolean): TfpgMigFloatArray;
+var
+  groupLists: array of TfpgMigLinkedDimGroupList;
+  gwArr: TfpgMigFloatArray;
+  i, j, c, ix: Integer;
+  grps: TfpgMigLinkedDimGroupList;
+  rowGw: Single;
+  grp: TfpgMigLinkedDimGroup;
+  cw: TfpgMigCompWrap;
+  gw: Single;
+  hasGrowWeight: Boolean;
+begin
+  // If no push and no fill, return empty array (no growth) - line 774
+  if not AHasPush then
+  begin
+    if AIsRows then
+    begin
+      if not FLC.IsFillY then
+      begin
+        SetLength(Result, 0);
+        Exit;
+      end;
+    end
+    else
+    begin
+      if not FLC.IsFillX then
+      begin
+        SetLength(Result, 0);
+        Exit;
+      end;
+    end;
+  end;
+
+  // Get the appropriate group lists - line 777
+  if AIsRows then
+    groupLists := FRowGroupLists
+  else
+    groupLists := FColGroupLists;
+
+  // Start with GROW_100 (single element array with value 100.0) - line 779
+  SetLength(gwArr, 1);
+  gwArr[0] := GROW_100[0];
+
+  // Loop through each row/column - line 780
+  ix := 1;  // Index for alternating array (gaps at even, sizes at odd)
+  for i := 0 to Length(groupLists) - 1 do
+  begin
+    grps := groupLists[i];
+    rowGw := -1.0;  // Use -1 to indicate "not set"
+    hasGrowWeight := False;
+
+    // Find maximum grow weight for this row/column from all components - line 783
+    for j := 0 to grps.Count - 1 do
+    begin
+      grp := grps[j];
+      for c := 0 to grp.CompWraps.Count - 1 do
+      begin
+        cw := grp.CompWraps[c];
+
+        // Get grow weight from component CC - line 788
+        // Note: hasPush parameter not yet implemented, so we use component grow weight
+        if AIsRows then
+          hasGrowWeight := cw.FCC.Vertical.HasGrowWeight
+        else
+          hasGrowWeight := cw.FCC.Horizontal.HasGrowWeight;
+
+        if hasGrowWeight then
+        begin
+          if AIsRows then
+            gw := cw.FCC.Vertical.GetGrowWeight
+          else
+            gw := cw.FCC.Horizontal.GetGrowWeight;
+
+          if (rowGw < 0) or (gw > rowGw) then
+            rowGw := gw;
+        end;
+      end;
+    end;
+
+    // If this row/column has a specific grow weight, expand array and set it - line 794
+    if rowGw >= 0 then
+    begin
+      // First time we find a specific weight, expand from GROW_100 to full array - line 795
+      if Length(gwArr) = 1 then
+      begin
+        // Array size: (groupLists.length << 1) + 1 = groupLists.length * 2 + 1 - line 796
+        SetLength(gwArr, (Length(groupLists) * 2) + 1);
+        // Fill with zeros except first element (already has GROW_100[0])
+        for j := 1 to High(gwArr) do
+          gwArr[j] := 0.0;
+      end;
+      gwArr[ix] := rowGw;  // Put grow weight at odd index for this row/column
+    end;
+
+    ix := ix + 2;  // Move to next odd index (skip gap at even index)
+  end;
+
+  Result := gwArr;
+end;
+
+{ Port of Grid.java getTotalGroupsSizeParallel() - line 2033 }
+class function TfpgMigGrid.GetTotalGroupsSizeParallel(AGroups: TfpgMigLinkedDimGroupList;
+  ASizeType: Integer; ACountSpanning: Boolean): Integer;
+var
+  i: Integer;
+  group: TfpgMigLinkedDimGroup;
+  grpSize: Integer;
+  groupSizes: TfpgMigIntArray;
+begin
+  if ASizeType = SIZE_MAX then
+    Result := INF
+  else
+    Result := 0;
+
+  for i := 0 to AGroups.Count - 1 do
+  begin
+    group := AGroups[i];
+    if ACountSpanning or (group.Span = 1) then
+    begin
+      groupSizes := group.GetMinPrefMax;
+      if Length(groupSizes) > ASizeType then
+        grpSize := groupSizes[ASizeType]
+      else
+        grpSize := 0;
+
+      if grpSize >= INF then
+        Exit(INF);
+
+      // For MAX: take minimum, for MIN/PREF: take maximum
+      if ASizeType = SIZE_MAX then
+      begin
+        if grpSize < Result then
+          Result := grpSize;
+      end
+      else
+      begin
+        if grpSize > Result then
+          Result := grpSize;
+      end;
+    end;
+  end;
+
+  Result := ConstrainSize(Result);
+end;
+
+{ Port of Grid.java calcRowsOrColsSizes() - line 1059 }
 function TfpgMigGrid.CalcRowsOrColsSizes(AGroupsLists: array of TfpgMigLinkedDimGroupList;
   ADefGrow: TfpgMigFloatArray; ARefSize: Integer; AIsHor: Boolean): TfpgMigFlowSizeSpec;
 var
@@ -1560,11 +1750,10 @@ var
   gapSizes: TfpgMigSizeArrayArray;
   primIndexes: TfpgMigIntegerList;
   i, r, cellIx: Integer;
-  groupSizes: TfpgMigIntArray;
-  group: TfpgMigLinkedDimGroup;
   groups: TfpgMigLinkedDimGroupList;
+  rowColSizes: TfpgMigSizeArray;
 begin
-  // Get dimension constraints
+  // Get dimension constraints (lines 1061-1062 of Grid.java)
   if AIsHor then
   begin
     primDCs := FColConstr.GetConstraints;
@@ -1576,16 +1765,16 @@ begin
     primIndexes := FRowIndexes;
   end;
 
-  // Allocate arrays
+  // Allocate arrays (lines 1064-1066)
   SetLength(rowColBoundSizes, primIndexes.Count);
   SetLength(allDCs, primIndexes.Count);
 
-  // Calculate sizes for each row/column
+  // Calculate sizes for each row/column (lines 1068-1117)
   for r := 0 to primIndexes.Count - 1 do
   begin
     cellIx := primIndexes[r];
 
-    // Get dimension constraint for this row/column
+    // Get dimension constraint for this row/column (lines 1073-1077)
     if cellIx < Length(primDCs) then
       allDCs[r] := primDCs[cellIx]
     else if Length(primDCs) > 0 then
@@ -1593,36 +1782,39 @@ begin
     else
       allDCs[r] := nil;
 
-    // Get groups for this row/column
+    // Get groups for this row/column (line 1079)
     if r < Length(AGroupsLists) then
       groups := AGroupsLists[r]
     else
       groups := nil;
 
-    // Calculate group sizes (simplified for now)
+    // Calculate group sizes using getTotalGroupsSizeParallel (lines 1081-1084)
     if (groups <> nil) and (groups.Count > 0) then
     begin
-      group := groups[0];
-      groupSizes := group.GetMinPrefMax;
-      if Length(groupSizes) >= 3 then
-      begin
-        rowColBoundSizes[r][SIZE_MIN] := groupSizes[SIZE_MIN];
-        rowColBoundSizes[r][SIZE_PREF] := groupSizes[SIZE_PREF];
-        rowColBoundSizes[r][SIZE_MAX] := INF;
-      end;
+      rowColSizes[SIZE_MIN] := GetTotalGroupsSizeParallel(groups, SIZE_MIN, False);
+      rowColSizes[SIZE_PREF] := GetTotalGroupsSizeParallel(groups, SIZE_PREF, False);
+      rowColSizes[SIZE_MAX] := INF;
     end
     else
     begin
-      rowColBoundSizes[r][SIZE_MIN] := 0;
-      rowColBoundSizes[r][SIZE_PREF] := 0;
-      rowColBoundSizes[r][SIZE_MAX] := INF;
+      rowColSizes[SIZE_MIN] := 0;
+      rowColSizes[SIZE_PREF] := 0;
+      rowColSizes[SIZE_MAX] := INF;
     end;
 
-    // Correct min/max
-    CorrectMinMax(rowColBoundSizes[r]);
+    // Correct min/max (line 1086)
+    CorrectMinMax(rowColSizes);
+
+    // TODO: Apply DimConstraint size overrides (lines 1087-1111)
+    // For now, just use the calculated sizes
+    rowColBoundSizes[r] := rowColSizes;
+
+    // TODO: Handle size groups (line 1114)
   end;
 
-  // Build resize constraints from dimension constraints
+  // TODO: Equalize size groups (lines 1119-1125)
+
+  // Build resize constraints from dimension constraints (line 1128)
   SetLength(resConstrs, Length(allDCs));
   for i := 0 to High(allDCs) do
   begin
@@ -1641,14 +1833,16 @@ begin
     end;
   end;
 
-  // Get gaps
+  // Get gaps (lines 1130-1131)
   SetLength(fillInPushGaps, Length(allDCs) + 1);
   for i := 0 to High(fillInPushGaps) do
     fillInPushGaps[i] := False;
   gapSizes := GetRowGaps(allDCs, ARefSize, AIsHor, fillInPushGaps);
 
-  // Merge sizes, gaps, and resize constraints
+  // Merge sizes, gaps, and resize constraints (line 1134)
   Result := MergeSizesGapsAndResConstrs(resConstrs, fillInPushGaps, rowColBoundSizes, gapSizes, ARefSize);
+
+  // TODO: Adjust for spanning components (line 1137)
 end;
 
 function TfpgMigGrid.CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
@@ -1866,29 +2060,54 @@ begin
         rowHeights[cellY] := maxHeight;
     end;
 
-    // Use LayoutUtil.CalculateSerial to distribute space based on grow/shrink weights
-    colWidths := CalculateDimensionSizes(FColIndexes, colWidths, FColConstr, containerW, True);
-    rowHeights := CalculateDimensionSizes(FRowIndexes, rowHeights, FRowConstr, containerH, False);
+    // Use CalcRowsOrColsSizes + LayoutUtil.CalculateSerial (Java MigLayout v11 approach)
+    // This returns FlowSizeSpec with alternating [gap, size, gap, size, ...] and resize constraints
+    // Pass FGrowXs/FGrowYs to CalcRowsOrColsSizes for spanning components (Java line 527-528)
+    FColFlowSpecs := CalcRowsOrColsSizes(FColGroupLists, FGrowXs, containerW, True);
+    FRowFlowSpecs := CalcRowsOrColsSizes(FRowGroupLists, FGrowYs, containerH, False);
 
-    // Calculate positions for each column and row (with gaps between them)
+    // Calculate actual column widths and row heights (Java line 984)
+    // Pass FGrowXs/FGrowYs to CalculateSerial for grow weight distribution
+    colWidths := TfpgMigLayoutUtil.CalculateSerial(
+      FColFlowSpecs.GetSizes,
+      FColFlowSpecs.GetResizeConstraints,
+      FGrowXs,
+      SIZE_PREF,
+      containerW
+    );
+
+    rowHeights := TfpgMigLayoutUtil.CalculateSerial(
+      FRowFlowSpecs.GetSizes,
+      FRowFlowSpecs.GetResizeConstraints,
+      FGrowYs,
+      SIZE_PREF,
+      containerH
+    );
+
+    // Calculate positions from sizes (sizes array includes gaps: [gap, col0, gap, col1, gap, ...])
+    // Positions are calculated cumulatively from the alternating gap/size array
     compX := containerX;
+    SetLength(colPositions, FColIndexes.Count);
     for i := 0 to FColIndexes.Count - 1 do
     begin
+      // Index in sizes array: gap at (i*2), column at (i*2+1)
+      if Length(colWidths) > (i * 2) then
+        compX := compX + colWidths[i * 2];  // Add gap before
       colPositions[i] := compX;
-      compX := compX + colWidths[i];
-      // Add gap after each column (except the last)
-      if i < FColIndexes.Count - 1 then
-        compX := compX + 6;  // TODO: Get gap from LC GridGap
+      if Length(colWidths) > (i * 2 + 1) then
+        compX := compX + colWidths[i * 2 + 1];  // Add column width
     end;
 
     compY := containerY;
+    SetLength(rowPositions, FRowIndexes.Count);
     for i := 0 to FRowIndexes.Count - 1 do
     begin
+      // Index in sizes array: gap at (i*2), row at (i*2+1)
+      if Length(rowHeights) > (i * 2) then
+        compY := compY + rowHeights[i * 2];  // Add gap before
       rowPositions[i] := compY;
-      compY := compY + rowHeights[i];
-      // Add gap after each row (except the last)
-      if i < FRowIndexes.Count - 1 then
-        compY := compY + 6;  // TODO: Get gap from LC GridGap
+      if Length(rowHeights) > (i * 2 + 1) then
+        compY := compY + rowHeights[i * 2 + 1];  // Add row height
     end;
 
     // Position all components using calculated sizes
@@ -1936,46 +2155,93 @@ begin
         if (cw = nil) or (cw.Comp = nil) then
           Continue;
 
-        // Get component's actual size
+        // Get component's preferred size
         maxWidth := cw.Comp.Width;
         maxHeight := cw.Comp.Height;
+
+        // Get actual cell width and height from alternating sizes array
+        // Array format: [gap, col0, gap, col1, gap, ...]
+        // So column cellX width is at index (cellX * 2 + 1)
+        if Length(colWidths) > (cellX * 2 + 1) then
+          maxWidth := colWidths[cellX * 2 + 1]  // Use cell width
+        else
+          maxWidth := cw.Comp.Width;  // Fallback to component width
+
+        if Length(rowHeights) > (cellY * 2 + 1) then
+          maxHeight := rowHeights[cellY * 2 + 1]  // Use cell height
+        else
+          maxHeight := cw.Comp.Height;  // Fallback to component height
 
         // Calculate position within cell based on alignment
         compX := colPositions[cellX];
         compY := rowPositions[cellY];
 
-        // Apply horizontal alignment
+        // Apply horizontal alignment (if no grow, component keeps preferred width)
         if (cw.FCC <> nil) and (cw.FCC.Horizontal <> nil) then
         begin
           alignX := cw.FCC.Horizontal.GetAlign;
-          if alignX <> nil then
+          // Check if component has grow weight - if so, it fills the cell
+          if cw.FCC.Horizontal.HasGrowWeight and (cw.FCC.Horizontal.GetGrowWeight > 0) then
           begin
-            // Calculate offset based on alignment
+            // Component grows to fill cell - maxWidth already set to cell width above
+          end
+          else if alignX <> nil then
+          begin
+            // No grow - calculate offset based on alignment
             if (alignX.UnitType = utPercent) then
             begin
               // Percent-based alignment (0% = left, 50% = center, 100% = right)
-              offsetX := Round((colWidths[cellX] - maxWidth) * alignX.Value / 100);
+              // Component keeps its preferred size, just positioned within cell
+              offsetX := Round((maxWidth - cw.Comp.Width) * alignX.Value / 100);
               compX := compX + offsetX;
+              maxWidth := cw.Comp.Width;  // Use component's preferred width
             end;
             // utAlign with value 0 (leading) means no offset needed
+          end
+          else
+          begin
+            // No explicit alignment - use component's preferred width
+            maxWidth := cw.Comp.Width;
           end;
+        end
+        else
+        begin
+          // No horizontal constraint - use component's preferred width
+          maxWidth := cw.Comp.Width;
         end;
 
-        // Apply vertical alignment
+        // Apply vertical alignment (if no grow, component keeps preferred height)
         if (cw.FCC <> nil) and (cw.FCC.Vertical <> nil) then
         begin
           alignY := cw.FCC.Vertical.GetAlign;
-          if alignY <> nil then
+          // Check if component has grow weight - if so, it fills the cell
+          if cw.FCC.Vertical.HasGrowWeight and (cw.FCC.Vertical.GetGrowWeight > 0) then
           begin
-            // Calculate offset based on alignment
+            // Component grows to fill cell - maxHeight already set to cell height above
+          end
+          else if alignY <> nil then
+          begin
+            // No grow - calculate offset based on alignment
             if (alignY.UnitType = utPercent) then
             begin
               // Percent-based alignment (0% = top, 50% = center, 100% = bottom)
-              offsetY := Round((rowHeights[cellY] - maxHeight) * alignY.Value / 100);
+              // Component keeps its preferred size, just positioned within cell
+              offsetY := Round((maxHeight - cw.Comp.Height) * alignY.Value / 100);
               compY := compY + offsetY;
+              maxHeight := cw.Comp.Height;  // Use component's preferred height
             end;
             // utAlign with value 0 (leading) means no offset needed
+          end
+          else
+          begin
+            // No explicit alignment - use component's preferred height
+            maxHeight := cw.Comp.Height;
           end;
+        end
+        else
+        begin
+          // No vertical constraint - use component's preferred height
+          maxHeight := cw.Comp.Height;
         end;
 
         // Set bounds for this component
