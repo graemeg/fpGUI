@@ -29,7 +29,6 @@ type
     procedure TestRoundSizes;
     procedure TestGetSizeSafe_ValidSize;
     procedure TestGetSizeSafe_NotSet;
-    procedure TestGetSizeSafe_NilPointer;
     procedure TestGetIndexSafe_ValidIndex;
     procedure TestGetIndexSafe_OutOfBounds;
     procedure TestGetIndexSafe_EmptyArray;
@@ -44,29 +43,28 @@ type
 
 implementation
 
-{ Helper function to create size array }
-function MakeSizeArray(AMin, APref, AMax: Integer): PfpgMigSizeArray;
-begin
-  New(Result);
-  Result^[SIZE_MIN] := AMin;
-  Result^[SIZE_PREF] := APref;
-  Result^[SIZE_MAX] := AMax;
-end;
+
 
 { TTestLayoutUtil }
 
 procedure TTestLayoutUtil.TestCalculateSerial_EqualPreferred;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
 begin
   // Three components, each wants 100, space is 300 - perfect fit
   SetLength(sizes, 3);
-  sizes[0] := MakeSizeArray(50, 100, 200);
-  sizes[1] := MakeSizeArray(50, 100, 200);
-  sizes[2] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
+  sizes[1][SIZE_MIN] := 50;
+  sizes[1][SIZE_PREF] := 100;
+  sizes[1][SIZE_MAX] := 200;
+  sizes[2][SIZE_MIN] := 50;
+  sizes[2][SIZE_PREF] := 100;
+  sizes[2][SIZE_MAX] := 200;
 
   SetLength(resConstr, 0);  // No resize constraints
   SetLength(defPush, 0);
@@ -76,16 +74,11 @@ begin
   AssertEquals('Component 0 size', 100, result[0]);
   AssertEquals('Component 1 size', 100, result[1]);
   AssertEquals('Component 2 size', 100, result[2]);
-
-  // Cleanup
-  Dispose(sizes[0]);
-  Dispose(sizes[1]);
-  Dispose(sizes[2]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_GrowSingleComponent;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
@@ -93,7 +86,9 @@ var
 begin
   // One component wants 100, space is 150, can grow
   SetLength(sizes, 1);
-  sizes[0] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
 
   SetLength(resConstr, 1);
   rc := TfpgMigResizeConstraint.Create;
@@ -109,12 +104,11 @@ begin
 
   // Cleanup
   rc.Free;
-  Dispose(sizes[0]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_GrowMultipleWithPriority;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
@@ -123,8 +117,12 @@ var
 begin
   // Two components, equal grow weight, need to share extra space
   SetLength(sizes, 2);
-  sizes[0] := MakeSizeArray(50, 100, 200);
-  sizes[1] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
+  sizes[1][SIZE_MIN] := 50;
+  sizes[1][SIZE_PREF] := 100;
+  sizes[1][SIZE_MAX] := 200;
 
   SetLength(resConstr, 2);
   rc1 := TfpgMigResizeConstraint.Create;
@@ -151,13 +149,11 @@ begin
   // Cleanup
   rc1.Free;
   rc2.Free;
-  Dispose(sizes[0]);
-  Dispose(sizes[1]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_ShrinkSingleComponent;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
@@ -165,7 +161,9 @@ var
 begin
   // One component wants 100, space is 75, can shrink
   SetLength(sizes, 1);
-  sizes[0] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
 
   SetLength(resConstr, 1);
   rc := TfpgMigResizeConstraint.Create;
@@ -181,12 +179,11 @@ begin
 
   // Cleanup
   rc.Free;
-  Dispose(sizes[0]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_ShrinkMultipleWithPriority;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
@@ -195,8 +192,12 @@ var
 begin
   // Two components, equal shrink weight, need to share space reduction
   SetLength(sizes, 2);
-  sizes[0] := MakeSizeArray(50, 100, 200);
-  sizes[1] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
+  sizes[1][SIZE_MIN] := 50;
+  sizes[1][SIZE_PREF] := 100;
+  sizes[1][SIZE_MAX] := 200;
 
   SetLength(resConstr, 2);
   rc1 := TfpgMigResizeConstraint.Create;
@@ -223,21 +224,23 @@ begin
   // Cleanup
   rc1.Free;
   rc2.Free;
-  Dispose(sizes[0]);
-  Dispose(sizes[1]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_ExactFit;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
 begin
   // Space exactly matches preferred sizes
   SetLength(sizes, 2);
-  sizes[0] := MakeSizeArray(50, 100, 200);
-  sizes[1] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
+  sizes[1][SIZE_MIN] := 50;
+  sizes[1][SIZE_PREF] := 100;
+  sizes[1][SIZE_MAX] := 200;
 
   SetLength(resConstr, 0);
   SetLength(defPush, 0);
@@ -246,15 +249,11 @@ begin
 
   AssertEquals('Component 0 size', 100, result[0]);
   AssertEquals('Component 1 size', 100, result[1]);
-
-  // Cleanup
-  Dispose(sizes[0]);
-  Dispose(sizes[1]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_MinMaxConstraints;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
@@ -262,7 +261,9 @@ var
 begin
   // Component wants to grow but hits max constraint
   SetLength(sizes, 1);
-  sizes[0] := MakeSizeArray(50, 100, 150);  // Max is 150
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 150;  // Max is 150
 
   SetLength(resConstr, 1);
   rc := TfpgMigResizeConstraint.Create;
@@ -279,20 +280,23 @@ begin
 
   // Cleanup
   rc.Free;
-  Dispose(sizes[0]);
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_NoResizeConstraints;
 var
-  sizes: TfpgMigSizeMatrix;
+  sizes: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   defPush: TfpgMigFloatArray;
   result: TfpgMigIntegerArray;
 begin
   // No resize constraints, should stay at preferred
   SetLength(sizes, 2);
-  sizes[0] := MakeSizeArray(50, 100, 200);
-  sizes[1] := MakeSizeArray(50, 100, 200);
+  sizes[0][SIZE_MIN] := 50;
+  sizes[0][SIZE_PREF] := 100;
+  sizes[0][SIZE_MAX] := 200;
+  sizes[1][SIZE_MIN] := 50;
+  sizes[1][SIZE_PREF] := 100;
+  sizes[1][SIZE_MAX] := 200;
 
   SetLength(resConstr, 0);  // Empty array
   SetLength(defPush, 0);
@@ -302,10 +306,6 @@ begin
   // Without resize constraints, components don't grow
   AssertEquals('Component 0 stays at preferred', 100, result[0]);
   AssertEquals('Component 1 stays at preferred', 100, result[1]);
-
-  // Cleanup
-  Dispose(sizes[0]);
-  Dispose(sizes[1]);
 end;
 
 procedure TTestLayoutUtil.TestSum_PartialArray;
@@ -422,13 +422,7 @@ begin
   AssertEquals('NOT_SET returns 0', 0, result);
 end;
 
-procedure TTestLayoutUtil.TestGetSizeSafe_NilPointer;
-var
-  result: Integer;
-begin
-  result := TfpgMigLayoutUtil.GetSizeSafe(nil, SIZE_PREF);
-  AssertEquals('Nil pointer returns 0', 0, result);
-end;
+
 
 procedure TTestLayoutUtil.TestGetIndexSafe_ValidIndex;
 var

@@ -51,12 +51,26 @@ const
 type
   { Array types for size calculations }
   TfpgMigSizeArray = array[SIZE_MIN..SIZE_MAX] of Integer;  // [min, pref, max]
-  PfpgMigSizeArray = ^TfpgMigSizeArray;
-  TfpgMigSizeMatrix = array of PfpgMigSizeArray;  // Array of size arrays
+  TfpgMigSizeArrayArray = array of TfpgMigSizeArray;
   TfpgMigResizeConstraintArray = array of TfpgMigResizeConstraint;
   TfpgMigFloatArray = array of Single;
   TfpgMigIntegerArray = array of Integer;  // Specialized integer array
   TfpgMigIntegerList = specialize TList<Integer>;  // Specialized integer list
+
+  { FlowSizeSpec - size specifications for flow layout
+    Holds alternating [gap, component, gap, component...] sizes and resize constraints
+    Matches: Grid.FlowSizeSpec in Grid.java }
+  TfpgMigFlowSizeSpec = class(TObject)
+  private
+    FSizes: TfpgMigSizeArrayArray;
+    FResConstsInclGaps: TfpgMigResizeConstraintArray;
+  public
+    constructor Create(ASizes: TfpgMigSizeArrayArray; AResConstr: TfpgMigResizeConstraintArray);
+    destructor Destroy; override;
+    function CalculateSerial(AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
+    function GetSizes: TfpgMigSizeArrayArray;
+    property ResConstsInclGaps: TfpgMigResizeConstraintArray read FResConstsInclGaps;
+  end;
 
   { Static utility class with layout algorithms }
   TfpgMigLayoutUtil = class
@@ -80,7 +94,7 @@ type
       @param AStartSizeType The initial size to use. E.g. SIZE_PREF.
       @param ABounds To use for relative sizes.
       @returns The sizes. Array length will match ASizes. }
-    class function CalculateSerial(const ASizes: TfpgMigSizeMatrix;
+    class function CalculateSerial(const ASizes: TfpgMigSizeArrayArray;
                                    const AResConstr: TfpgMigResizeConstraintArray;
                                    const ADefPushWeights: TfpgMigFloatArray;
                                    AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
@@ -90,10 +104,8 @@ type
                                AIndex: Integer): TfpgMigResizeConstraint;
 
     { Returns size value from size array safely, handling NOT_SET }
-    class function GetSizeSafe(const ASizes: PfpgMigSizeArray;
-                              ASizeType: Integer): Integer; overload;
     class function GetSizeSafe(const ASizes: TfpgMigSizeArray;
-                              ASizeType: Integer): Integer; overload;
+                              ASizeType: Integer): Integer;
 
     { Sums array elements from start for len items }
     class function Sum(const ATerms: TfpgMigIntegerArray; AStart, ALen: Integer): Integer; overload;
@@ -128,9 +140,41 @@ implementation
 { Helper function - returns the bounded value if sz is outside lower/upper bounds }
 function GetBrokenBoundary(ASz, ALower, AUpper: Single): Integer; forward;
 
+{ TfpgMigFlowSizeSpec }
+
+constructor TfpgMigFlowSizeSpec.Create(ASizes: TfpgMigSizeArrayArray;
+  AResConstr: TfpgMigResizeConstraintArray);
+begin
+  inherited Create;
+  FSizes := ASizes;
+  FResConstsInclGaps := AResConstr;
+end;
+
+destructor TfpgMigFlowSizeSpec.Destroy;
+var
+  i: Integer;
+begin
+  // Free resize constraints
+  for i := 0 to High(FResConstsInclGaps) do
+    if FResConstsInclGaps[i] <> nil then
+      FResConstsInclGaps[i].Free;
+
+  inherited Destroy;
+end;
+
+function TfpgMigFlowSizeSpec.GetSizes: TfpgMigSizeArrayArray;
+begin
+  Result := FSizes;
+end;
+
+function TfpgMigFlowSizeSpec.CalculateSerial(AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
+begin
+  Result := TfpgMigLayoutUtil.CalculateSerial(FSizes, FResConstsInclGaps, nil, AStartSizeType, ABounds);
+end;
+
 { TfpgMigLayoutUtil }
 
-class function TfpgMigLayoutUtil.CalculateSerial(const ASizes: TfpgMigSizeMatrix;
+class function TfpgMigLayoutUtil.CalculateSerial(const ASizes: TfpgMigSizeArrayArray;
   const AResConstr: TfpgMigResizeConstraintArray;
   const ADefPushWeights: TfpgMigFloatArray; AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
 var
@@ -157,20 +201,17 @@ begin
   // Give all preferred size to start with
   for i := 0 to High(ASizes) do
   begin
-    if ASizes[i] <> nil then
-    begin
-      if ASizes[i]^[AStartSizeType] <> NOT_SET then
-        len := ASizes[i]^[AStartSizeType]
-      else
-        len := 0;
+    if ASizes[i][AStartSizeType] <> NOT_SET then
+      len := ASizes[i][AStartSizeType]
+    else
+      len := 0;
 
-      newSizeBounded := GetBrokenBoundary(len, ASizes[i]^[SIZE_MIN], ASizes[i]^[SIZE_MAX]);
-      if newSizeBounded <> NOT_SET then
-        len := newSizeBounded;
+    newSizeBounded := GetBrokenBoundary(len, ASizes[i][SIZE_MIN], ASizes[i][SIZE_MAX]);
+    if newSizeBounded <> NOT_SET then
+      len := newSizeBounded;
 
-      usedLength := usedLength + len;
-      lengths[i] := len;
-    end;
+    usedLength := usedLength + len;
+    lengths[i] := len;
   end;
 
   useLengthI := Round(usedLength);
@@ -217,9 +258,6 @@ begin
 
         for i := 0 to High(ASizes) do
         begin
-          if ASizes[i] = nil then  // if no min/pref/max size at all do not grow or shrink
-            continue;
-
           resC := GetIndexSafe(AResConstr, i);
           if resC <> nil then
           begin
@@ -264,16 +302,13 @@ begin
                 sizeDelta := toChange * weight / totWeight;
                 newSize := lengths[i] + sizeDelta;
 
-                if ASizes[i] <> nil then
+                newSizeBounded := GetBrokenBoundary(newSize, ASizes[i][SIZE_MIN], ASizes[i][SIZE_MAX]);
+                if newSizeBounded <> NOT_SET then
                 begin
-                  newSizeBounded := GetBrokenBoundary(newSize, ASizes[i]^[SIZE_MIN], ASizes[i]^[SIZE_MAX]);
-                  if newSizeBounded <> NOT_SET then
-                  begin
-                    sizeDelta := newSizeBounded - lengths[i];
-                    resizeWeight[i] := NaN;  // Don't use this one anymore
-                    hit := True;
-                    changedWeight := changedWeight + weight;
-                  end;
+                  sizeDelta := newSizeBounded - lengths[i];
+                  resizeWeight[i] := NaN;  // Don't use this one anymore
+                  hit := True;
+                  changedWeight := changedWeight + weight;
                 end;
 
                 lengths[i] := lengths[i] + sizeDelta;
@@ -314,14 +349,7 @@ begin
     Result := nil;
 end;
 
-class function TfpgMigLayoutUtil.GetSizeSafe(const ASizes: PfpgMigSizeArray;
-  ASizeType: Integer): Integer;
-begin
-  if ASizes <> nil then
-    Result := GetSizeSafe(ASizes^, ASizeType)
-  else
-    Result := 0;
-end;
+
 
 class function TfpgMigLayoutUtil.GetSizeSafe(const ASizes: TfpgMigSizeArray;
   ASizeType: Integer): Integer;

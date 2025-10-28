@@ -36,7 +36,6 @@ type
   TfpgMigCompWrap = class;
   TfpgMigCell = class;
   TfpgMigLinkedDimGroup = class;
-  TfpgMigFlowSizeSpec = class;
   TfpgMigGrid = class;
 
   { Helper record for baseline calculations }
@@ -55,7 +54,7 @@ type
   TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
   TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
   TfpgMigBooleanArray = array of Boolean;
-  TfpgMigSizeArrayArray = array of TfpgMigSizeArray;  // For return values
+
 
   { CompWrap - wraps a TfpgWidgetBase with its CC constraint
     Caches min/pref/max sizes and gap information }
@@ -159,21 +158,7 @@ type
     property CompWraps: TfpgMigCompWrapList read FCompWraps;
   end;
 
-  { FlowSizeSpec - size specifications for flow layout
-    Holds alternating [gap, component, gap, component...] sizes and resize constraints
-    Matches: Grid.FlowSizeSpec in Grid.java }
-  TfpgMigFlowSizeSpec = class
-  private
-    FSizes: array of TfpgMigSizeArray;  // Alternating gap and component sizes [min,pref,max]
-    FResConstsInclGaps: array of TfpgMigResizeConstraint;  // Alternating gap and component constraints
-  public
-    constructor Create(ASizes: array of TfpgMigSizeArray; AResConstr: array of TfpgMigResizeConstraint);
-    destructor Destroy; override;
 
-    function GetSizes: Pointer;  // Returns pointer to FSizes array for CalculateSerial
-    function GetResizeConstraints: Pointer;  // Returns pointer to FResConstsInclGaps array
-    function GetCount: Integer;  // Returns length of arrays
-  end;
 
   { Grid - the main layout engine }
   TfpgMigGrid = class
@@ -843,58 +828,9 @@ begin
   Result[SIZE_MAX] := INF;
 end;
 
-{ TfpgMigFlowSizeSpec }
 
-constructor TfpgMigFlowSizeSpec.Create(ASizes: array of TfpgMigSizeArray;
-  AResConstr: array of TfpgMigResizeConstraint);
-var
-  i: Integer;
-begin
-  inherited Create;
 
-  // Copy size arrays
-  SetLength(FSizes, Length(ASizes));
-  for i := 0 to High(ASizes) do
-    FSizes[i] := ASizes[i];
 
-  // Copy resize constraints
-  SetLength(FResConstsInclGaps, Length(AResConstr));
-  for i := 0 to High(AResConstr) do
-    FResConstsInclGaps[i] := AResConstr[i];
-end;
-
-destructor TfpgMigFlowSizeSpec.Destroy;
-var
-  i: Integer;
-begin
-  // Free resize constraints
-  for i := 0 to High(FResConstsInclGaps) do
-    if FResConstsInclGaps[i] <> nil then
-      FResConstsInclGaps[i].Free;
-
-  inherited Destroy;
-end;
-
-function TfpgMigFlowSizeSpec.GetSizes: Pointer;
-begin
-  if Length(FSizes) > 0 then
-    Result := @FSizes[0]
-  else
-    Result := nil;
-end;
-
-function TfpgMigFlowSizeSpec.GetResizeConstraints: Pointer;
-begin
-  if Length(FResConstsInclGaps) > 0 then
-    Result := @FResConstsInclGaps[0]
-  else
-    Result := nil;
-end;
-
-function TfpgMigFlowSizeSpec.GetCount: Integer;
-begin
-  Result := Length(FSizes);
-end;
 
 { TfpgMigGrid }
 
@@ -1460,18 +1396,17 @@ var
   sizes: array of TfpgMigSizeArray;
   resConstsInclGaps: array of TfpgMigResizeConstraint;
   i, crIx: Integer;
-  GAP_RC_CONST, GAP_RC_CONST_PUSH: TfpgMigResizeConstraint;
 begin
   // Make room for gaps around: [gap, comp, gap, comp, ..., gap]
   SetLength(sizes, (Length(AMinPrefMaxSizes) * 2) + 1);
   SetLength(resConstsInclGaps, Length(sizes));
 
-  // Gap resize constraints (no grow/shrink for gaps)
-  GAP_RC_CONST := TfpgMigResizeConstraint.Create;
-  GAP_RC_CONST_PUSH := TfpgMigResizeConstraint.Create;  // TODO: Set push flag
-
   // First gap
   sizes[0] := AGapSizes[0];
+  if (0 < Length(AGapPush)) and AGapPush[0] then
+    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create // TODO: Set push flag
+  else
+    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create;
 
   for i := 0 to High(AMinPrefMaxSizes) do
   begin
@@ -1484,19 +1419,10 @@ begin
     // Gap after component
     sizes[crIx + 1] := AGapSizes[i + 1];
 
-    // Set gap constraints (sizes array is always initialized with SetLength, no nil check needed)
-    if (i < Length(AGapPush)) and AGapPush[i] then
-      resConstsInclGaps[crIx - 1] := GAP_RC_CONST_PUSH
+    if ((i + 1) < Length(AGapPush)) and AGapPush[i + 1] then
+      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create // TODO: Set push flag
     else
-      resConstsInclGaps[crIx - 1] := GAP_RC_CONST;
-
-    if i = High(AMinPrefMaxSizes) then
-    begin
-      if ((i + 1) < Length(AGapPush)) and AGapPush[i + 1] then
-        resConstsInclGaps[crIx + 1] := GAP_RC_CONST_PUSH
-      else
-        resConstsInclGaps[crIx + 1] := GAP_RC_CONST;
-    end;
+      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create;
   end;
 
   Result := TfpgMigFlowSizeSpec.Create(sizes, resConstsInclGaps);
@@ -1850,12 +1776,11 @@ function TfpgMigGrid.CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
   AIsHor: Boolean): TfpgMigIntegerArray;
 var
   count, i, gapSize, totalGaps: Integer;
-  sizeMatrix: TfpgMigSizeMatrix;
+  sizeMatrix: TfpgMigSizeArrayArray;
   resConstr: TfpgMigResizeConstraintArray;
   pushWeights: TfpgMigFloatArray;
   dimConstr: TfpgMigDimConstraint;
   dimConstraints: TfpgMigDimConstraintArray;
-  sizeArray: PfpgMigSizeArray;
 begin
   count := AIndexes.Count;
   if count = 0 then
@@ -1868,11 +1793,9 @@ begin
   SetLength(sizeMatrix, count);
   for i := 0 to count - 1 do
   begin
-    New(sizeArray);
-    sizeArray^[SIZE_MIN] := APrefSizes[i];     // For now, min = pref
-    sizeArray^[SIZE_PREF] := APrefSizes[i];
-    sizeArray^[SIZE_MAX] := INF_SIZE;          // Max is unlimited
-    sizeMatrix[i] := sizeArray;
+    sizeMatrix[i][SIZE_MIN] := APrefSizes[i];     // For now, min = pref
+    sizeMatrix[i][SIZE_PREF] := APrefSizes[i];
+    sizeMatrix[i][SIZE_MAX] := INF;          // Max is unlimited
   end;
 
   // Get constraints from AC
@@ -1926,7 +1849,6 @@ begin
   // Cleanup
   for i := 0 to count - 1 do
   begin
-    Dispose(sizeMatrix[i]);
     resConstr[i].Free;
   end;
 end;
@@ -2070,7 +1992,7 @@ begin
     // Pass FGrowXs/FGrowYs to CalculateSerial for grow weight distribution
     colWidths := TfpgMigLayoutUtil.CalculateSerial(
       FColFlowSpecs.GetSizes,
-      FColFlowSpecs.GetResizeConstraints,
+      FColFlowSpecs.ResConstsInclGaps,
       FGrowXs,
       SIZE_PREF,
       containerW
@@ -2078,7 +2000,7 @@ begin
 
     rowHeights := TfpgMigLayoutUtil.CalculateSerial(
       FRowFlowSpecs.GetSizes,
-      FRowFlowSpecs.GetResizeConstraints,
+      FRowFlowSpecs.ResConstsInclGaps,
       FGrowYs,
       SIZE_PREF,
       containerH
