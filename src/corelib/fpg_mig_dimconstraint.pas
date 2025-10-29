@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils,
   fpg_base,
-  fpg_mig_unitvalue, fpg_mig_boundsize;
+  fpg_mig_unitvalue, fpg_mig_boundsize, fpg_mig_resizeconstraint;
 
 type
   { Dynamic array type for gap sizes [min, pref, max] }
@@ -59,6 +59,8 @@ type
     { Row/column specific }
     FFill: Boolean;
     FNoGrid: Boolean;
+
+    function GetResize: TfpgMigResizeConstraint;
   public
     constructor Create;
     destructor Destroy; override;
@@ -175,6 +177,11 @@ begin
     FGapAfter.Free;
 
   inherited Destroy;
+end;
+
+function TfpgMigDimConstraint.GetResize: TfpgMigResizeConstraint;
+begin
+  Result := TfpgMigResizeConstraint.Create(FShrinkPriority, FShrinkWeight, FGrowPriority, FGrowWeight);
 end;
 
 { Grow properties }

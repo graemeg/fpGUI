@@ -126,6 +126,8 @@ type
     function GetHorizontal: TfpgMigDimConstraint;
     function GetVertical: TfpgMigDimConstraint;
 
+    function GetDimConstraint(AIsHor: Boolean): TfpgMigDimConstraint;
+
     function GetNewline: TfpgMigBoundSize;
     procedure SetNewline(AValue: TfpgMigBoundSize);
 
@@ -594,6 +596,14 @@ end;
 function TfpgMigCC.GetVertical: TfpgMigDimConstraint;
 begin
   Result := FVer;
+end;
+
+function TfpgMigCC.GetDimConstraint(AIsHor: Boolean): TfpgMigDimConstraint;
+begin
+  if AIsHor then
+    Result := FHor
+  else
+    Result := FVer;
 end;
 
 function TfpgMigCC.GetNewline: TfpgMigBoundSize;

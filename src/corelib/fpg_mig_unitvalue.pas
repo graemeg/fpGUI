@@ -14,7 +14,7 @@ unit fpg_mig_unitvalue;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, fpg_base, fpg_widget;
 
 type
   { Unit types - from Java constants PIXEL, LPX, MM, etc. }
@@ -85,6 +85,8 @@ type
     constructor Create(AValue: Single; const AUnitStr: string; AIsHorizontal: Boolean;
                       AOper: TfpgMigOperation; const ACreateString: string); overload;
     destructor Destroy; override;
+
+    function GetPixels(ARefValue: Single; AParent: TfpgWidgetBase; AComp: TfpgWidgetBase): Single;
 
     function Clone: TfpgMigUnitValue;
 
@@ -260,6 +262,18 @@ begin
       Result.FSubUnits[i] := FSubUnits[i].Clone
     else
       Result.FSubUnits[i] := nil;
+  end;
+end;
+
+function TfpgMigUnitValue.GetPixels(ARefValue: Single; AParent: TfpgWidgetBase; AComp: TfpgWidgetBase): Single;
+begin
+  case FUnit of
+    utPixel:
+      Result := FValue;
+    utPercent:
+      Result := FValue * ARefValue / 100.0;
+  else
+    Result := 0; // Not implemented yet
   end;
 end;
 
