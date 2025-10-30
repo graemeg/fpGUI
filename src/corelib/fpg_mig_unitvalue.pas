@@ -118,6 +118,9 @@ type
   function UnitValueInf: TfpgMigUnitValue;
   function UnitValueLeading: TfpgMigUnitValue;
   function UnitValueCenter: TfpgMigUnitValue;
+  function UnitValueTrailing: TfpgMigUnitValue;
+  function UnitValueLeft: TfpgMigUnitValue;
+  function UnitValueRight: TfpgMigUnitValue;
   function UnitValueBaselineIdentity: TfpgMigUnitValue;
 
 implementation
@@ -132,6 +135,9 @@ var
   _UnitValueInf: TfpgMigUnitValue = nil;
   _UnitValueLeading: TfpgMigUnitValue = nil;
   _UnitValueCenter: TfpgMigUnitValue = nil;
+  _UnitValueTrailing: TfpgMigUnitValue = nil;
+  _UnitValueLeft: TfpgMigUnitValue = nil;
+  _UnitValueRight: TfpgMigUnitValue = nil;
   _UnitValueBaselineIdentity: TfpgMigUnitValue = nil;
 
 { Unit string to type mapping }
@@ -406,6 +412,27 @@ begin
   Result := _UnitValueCenter;
 end;
 
+function UnitValueTrailing: TfpgMigUnitValue;
+begin
+  if _UnitValueTrailing = nil then
+    _UnitValueTrailing := TfpgMigUnitValue.Create(100, utPercent, 'trailing');
+  Result := _UnitValueTrailing;
+end;
+
+function UnitValueLeft: TfpgMigUnitValue;
+begin
+  if _UnitValueLeft = nil then
+    _UnitValueLeft := TfpgMigUnitValue.Create(0, utPercent, 'left');
+  Result := _UnitValueLeft;
+end;
+
+function UnitValueRight: TfpgMigUnitValue;
+begin
+  if _UnitValueRight = nil then
+    _UnitValueRight := TfpgMigUnitValue.Create(100, utPercent, 'right');
+  Result := _UnitValueRight;
+end;
+
 function UnitValueBaselineIdentity: TfpgMigUnitValue;
 begin
   if _UnitValueBaselineIdentity = nil then
@@ -419,6 +446,9 @@ finalization
   FreeAndNil(_UnitValueInf);
   FreeAndNil(_UnitValueLeading);
   FreeAndNil(_UnitValueCenter);
+  FreeAndNil(_UnitValueTrailing);
+  FreeAndNil(_UnitValueLeft);
+  FreeAndNil(_UnitValueRight);
   FreeAndNil(_UnitValueBaselineIdentity);
 
 end.
