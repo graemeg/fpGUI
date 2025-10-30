@@ -175,7 +175,7 @@ var
 begin
   r1.SetRect(10, 10, 50, 50);
   r2.SetRect(20, 20, 50, 50);
-  UnionRect(lResult, r1, r2);
+  r1.UnionRect(lResult, r2);
   lRef.SetRect(10, 10, 60, 60);
   CheckEqualsRect(lRef, lResult, 'Failed on 1');
 

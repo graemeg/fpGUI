@@ -19,7 +19,7 @@ type
     FWidth: integer;
     FHeight: integer;
   public
-    constructor Create(const AFontDesc: string; AWidth, AHeight: integer);
+    constructor Create(const AFontDesc: string; AWidth, AHeight: integer); reintroduce;
     function GetAscent: integer; override;
     function GetDescent: integer; override;
     function GetHeight: integer; override;
@@ -138,16 +138,15 @@ end;
 
 procedure TTestFontCacheRemoval.TestMultipleFontsCached;
 var
-  font1, font2, font3: TfpgFontResourceBase;
   initialSize, afterAdd3, afterReleaseAll: integer;
 begin
   { Get initial cache size }
   initialSize := FFontManager.GetCacheSize;
 
   { Add three different fonts }
-  font1 := FFontManager.GetFont('Liberation Sans-12');
-  font2 := FFontManager.GetFont('Liberation Sans-14');
-  font3 := FFontManager.GetFont('Liberation Sans-16');
+  FFontManager.GetFont('Liberation Sans-12');
+  FFontManager.GetFont('Liberation Sans-14');
+  FFontManager.GetFont('Liberation Sans-16');
 
   { Cache should have 3 more fonts }
   afterAdd3 := FFontManager.GetCacheSize;
@@ -156,9 +155,7 @@ begin
            [initialSize + 3, afterAdd3]));
 
   { Release all font references }
-  font1 := nil;
-  font2 := nil;
-  font3 := nil;
+  // No need to set to nil if not declared
 
   { All fonts should STAY in cache (persistent cache model) }
   afterReleaseAll := FFontManager.GetCacheSize;
@@ -169,7 +166,7 @@ end;
 
 procedure TTestFontCacheRemoval.TestCacheSizeGrowsWithUniqueFonts;
 var
-  font1, font2, font1Again: TfpgFontResourceBase;
+  font1, font1Again: TfpgFontResourceBase;
   initialSize, afterFont1, afterFont2, afterFont1Again: integer;
 begin
   { Get initial cache size }
@@ -182,7 +179,7 @@ begin
     'Cache should grow by 1 for new font');
 
   { Add second different font }
-  font2 := FFontManager.GetFont('Liberation Mono-14');
+  FFontManager.GetFont('Liberation Mono-14');
   afterFont2 := FFontManager.GetCacheSize;
   CheckEquals(initialSize + 2, afterFont2,
     'Cache should grow by 1 for another new font');
@@ -199,7 +196,7 @@ begin
 
   { Cleanup }
   font1 := nil;
-  font2 := nil;
+  // font2 := nil; // Removed
   font1Again := nil;
 end;
 

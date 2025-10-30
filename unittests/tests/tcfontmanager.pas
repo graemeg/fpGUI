@@ -152,34 +152,32 @@ begin
 end;
 
 procedure TTestFontManager.TestCacheSize;
-var
-  f1, f2, f3: TfpgFontResourceBase;
 begin
   CheckEquals(0, FFontManager.GetCacheSize, 'Initial cache should be empty');
 
   {$IFDEF UNIX}
-  f1 := FFontManager.GetFont('Liberation Sans-10');
+  FFontManager.GetFont('Liberation Sans-10');
   {$ELSE}
-  f1 := FFontManager.GetFont('Arial-10');
+  FFontManager.GetFont('Arial-10');
   {$ENDIF}
   CheckEquals(1, FFontManager.GetCacheSize, 'Cache size should be 1');
 
   {$IFDEF UNIX}
-  f2 := FFontManager.GetFont('Liberation Sans-12');
+  FFontManager.GetFont('Liberation Sans-12');
   {$ELSE}
-  f2 := FFontManager.GetFont('Arial-12');
+  FFontManager.GetFont('Arial-12');
   {$ENDIF}
   CheckEquals(2, FFontManager.GetCacheSize, 'Cache size should be 2');
 
   {$IFDEF UNIX}
-  f3 := FFontManager.GetFont('Liberation Mono-10');
+  FFontManager.GetFont('Liberation Mono-10');
   {$ELSE}
-  f3 := FFontManager.GetFont('Courier New-10');
+  FFontManager.GetFont('Courier New-10');
   {$ENDIF}
   CheckEquals(3, FFontManager.GetCacheSize, 'Cache size should be 3');
 
   { Request cached font - size should not increase }
-  f1 := FFontManager.GetFont(TfpgFontResource(f1).FontDesc);
+  FFontManager.GetFont(TfpgFontResource(FFontManager.GetFont('Liberation Sans-10')).FontDesc);
   CheckEquals(3, FFontManager.GetCacheSize, 'Cache size should still be 3');
 end;
 
@@ -220,13 +218,14 @@ var
   stats: string;
   font: TfpgFontResourceBase;
 begin
+  font := nil;
   { Get a font to populate cache }
   {$IFDEF UNIX}
   font := FFontManager.GetFont('Liberation Sans-12');
   {$ELSE}
   font := FFontManager.GetFont('Arial-12');
   {$ENDIF}
-
+  CheckNotNull(font, 'font should be a valid font');
   stats := FFontManager.GetCacheStats;
 
   CheckTrue(Length(stats) > 0, 'Stats should not be empty');
@@ -242,15 +241,13 @@ begin
 end;
 
 procedure TTestFontManager.TestGetCacheSize_WithFonts;
-var
-  f1, f2: TfpgFontResourceBase;
 begin
   {$IFDEF UNIX}
-  f1 := FFontManager.GetFont('Liberation Sans-10');
-  f2 := FFontManager.GetFont('Liberation Mono-10');
+  FFontManager.GetFont('Liberation Sans-10');
+  FFontManager.GetFont('Liberation Mono-10');
   {$ELSE}
-  f1 := FFontManager.GetFont('Arial-10');
-  f2 := FFontManager.GetFont('Courier New-10');
+  FFontManager.GetFont('Arial-10');
+  FFontManager.GetFont('Courier New-10');
   {$ENDIF}
 
   CheckEquals(2, FFontManager.GetCacheSize,
@@ -260,17 +257,16 @@ end;
 procedure TTestFontManager.TestCacheClearsOnDestroy;
 var
   tempManager: TfpgFontManager;
-  font: TfpgFontResourceBase;
 begin
   { Create temporary manager and add fonts }
   tempManager := TfpgFontManager.Create;
   try
     {$IFDEF UNIX}
     tempManager.DefaultFontDesc := 'Liberation Sans-10';
-    font := tempManager.GetFont('Liberation Sans-12');
+    tempManager.GetFont('Liberation Sans-12');
     {$ELSE}
     tempManager.DefaultFontDesc := 'Arial-10';
-    font := tempManager.GetFont('Arial-12');
+    tempManager.GetFont('Arial-12');
     {$ENDIF}
 
     CheckEquals(1, tempManager.GetCacheSize, 'Cache should have 1 font');

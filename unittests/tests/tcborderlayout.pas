@@ -39,7 +39,6 @@ var
   lm: TfpgBorderLayoutManager;
   wNorth, wSouth, wEast, wWest, wCenter: TfpgWidget;
   c: TfpgBorderLayoutConstraint;
-  ps: TfpgSize;
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
@@ -49,32 +48,28 @@ begin
 
   wNorth := TfpgWidget.Create(container);
   wNorth.Name := 'north';
-  ps.SetSize(200, 20);
-  wNorth.PreferredSize := ps;
+  wNorth.PreferredSize := fpgSize(200, 20);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrNorth;
   lm.AddLayoutComponent(wNorth, c);
 
   wSouth := TfpgWidget.Create(container);
   wSouth.Name := 'south';
-  ps.SetSize(200, 20);
-  wSouth.PreferredSize := ps;
+  wSouth.PreferredSize := fpgSize(200, 20);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrSouth;
   lm.AddLayoutComponent(wSouth, c);
 
   wEast := TfpgWidget.Create(container);
   wEast.Name := 'east';
-  ps.SetSize(20, 160);
-  wEast.PreferredSize := ps;
+  wEast.PreferredSize := fpgSize(20, 160);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrEast;
   lm.AddLayoutComponent(wEast, c);
 
   wWest := TfpgWidget.Create(container);
   wWest.Name := 'west';
-  ps.SetSize(20, 160);
-  wWest.PreferredSize := ps;
+  wWest.PreferredSize := fpgSize(20, 160);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrWest;
   lm.AddLayoutComponent(wWest, c);
@@ -121,7 +116,6 @@ var
   lm: ILayoutManager;
   wNorth, wSouth, wWest: TfpgButton;
   c: TfpgBorderLayoutConstraint;
-  ps: TfpgSize;
 begin
   container := TfpgPanel.Create(nil);
   container.Name := 'container';
@@ -166,22 +160,20 @@ var
   lm: ILayoutManager;
   wNorth, wCenter: TfpgWidget;
   c: TfpgBorderLayoutConstraint;
-  ps, pref: TfpgSize;
+  pref: TfpgSize;
 begin
   container := TfpgWidget.Create(nil);
   lm := TfpgBorderLayoutManager.Create;
   container.LayoutManager := lm;
 
   wNorth := TfpgWidget.Create(container);
-  ps.SetSize(100, 20);
-  wNorth.PreferredSize := ps;
+  wNorth.PreferredSize := fpgSize(100, 20);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrNorth;
   lm.AddLayoutComponent(wNorth, c);
 
   wCenter := TfpgWidget.Create(container);
-  ps.SetSize(50, 50);
-  wCenter.PreferredSize := ps;
+  wCenter.PreferredSize := fpgSize(50, 50);
   c := TfpgBorderLayoutConstraint.Create;
   c.Region := blrCenter;
   lm.AddLayoutComponent(wCenter, c);

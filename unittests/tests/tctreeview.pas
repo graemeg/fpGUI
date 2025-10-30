@@ -127,12 +127,12 @@ end;
 
 procedure TTestTreeview.TestAppendText;
 var
-  n1, n2: TfpgTreeNode;
+  n1: TfpgTreeNode;
 begin
   n1 := FTree.RootNode.AppendText('n1');
   AssertTrue('Failed on 1', FTree.RootNode.FirstSubNode = n1);
   AssertEquals('Failed on 2', 1, FTree.RootNode.Count);
-  n2 := FTree.RootNode.AppendText('n2');
+  FTree.RootNode.AppendText('n2');
   AssertEquals('Failed on 3', 2, FTree.RootNode.Count);
 end;
 
