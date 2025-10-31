@@ -194,6 +194,7 @@ var
   toChange, changedWeight, sizeDelta, newSize: Single;
   weight: Single;
 begin
+  SetLength(Result, 0);
   SetLength(lengths, Length(ASizes));
   SetLength(Result, Length(ASizes));
   usedLength := 0.0;
@@ -255,6 +256,8 @@ begin
 
         totWeight := 0.0;
         SetLength(resizeWeight, Length(ASizes));
+        for i := 0 to High(resizeWeight) do
+          resizeWeight[i] := NaN;
 
         for i := 0 to High(ASizes) do
         begin
@@ -272,8 +275,10 @@ begin
               begin
                 if (force = 0) or not IsNaN(resC.Grow) then
                   resizeWeight[i] := resC.Grow
+                else if Length(ADefPushWeights) > 0 then
+                  resizeWeight[i] := ADefPushWeights[IfThen(i < Length(ADefPushWeights), i, Length(ADefPushWeights) - 1)]
                 else
-                  resizeWeight[i] := ADefPushWeights[IfThen(i < Length(ADefPushWeights), i, Length(ADefPushWeights) - 1)];
+                  resizeWeight[i] := NaN;
               end
               else
                 resizeWeight[i] := resC.Shrink;
@@ -329,6 +334,8 @@ end;
 
 function GetBrokenBoundary(ASz, ALower, AUpper: Single): Integer;
 begin
+  Result := NOT_SET;
+
   if (ALower <> NOT_SET) and (ASz < ALower) then
     Exit(Round(ALower));
 
@@ -341,6 +348,7 @@ end;
 class function TfpgMigLayoutUtil.GetIndexSafe(const AArr: TfpgMigResizeConstraintArray;
   AIndex: Integer): TfpgMigResizeConstraint;
 begin
+  Result := nil;
   if (AIndex >= 0) and (AIndex < Length(AArr)) then
     Result := AArr[AIndex]
   else if Length(AArr) > 0 then

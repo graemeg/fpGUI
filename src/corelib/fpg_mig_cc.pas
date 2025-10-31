@@ -114,7 +114,6 @@ type
     function GetCellY: Integer;
     procedure SetCellY(AValue: Integer);
 
-    function GetTag: string;
     procedure SetTag(const AValue: string);
 
     function GetId: string;
@@ -125,8 +124,6 @@ type
 
     function GetHorizontal: TfpgMigDimConstraint;
     function GetVertical: TfpgMigDimConstraint;
-
-    function GetDimConstraint(AIsHor: Boolean): TfpgMigDimConstraint;
 
     function GetNewline: TfpgMigBoundSize;
     procedure SetNewline(AValue: TfpgMigBoundSize);
@@ -149,6 +146,9 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    function GetDimConstraint(AIsHor: Boolean): TfpgMigDimConstraint;
+    function GetTag: string;
 
     { === Dimension Constraints (Width) === }
 

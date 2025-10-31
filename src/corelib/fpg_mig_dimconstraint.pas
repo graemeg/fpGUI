@@ -60,10 +60,11 @@ type
     FFill: Boolean;
     FNoGrid: Boolean;
 
-    function GetResize: TfpgMigResizeConstraint;
   public
     constructor Create;
     destructor Destroy; override;
+
+    function GetResize: TfpgMigResizeConstraint;
 
     { Grow properties }
     function GetGrowPriority: Integer;
@@ -127,6 +128,8 @@ type
     procedure SetFill(AFill: Boolean);
     function IsNoGrid: Boolean;
     procedure SetNoGrid(ANoGrid: Boolean);
+
+    property Resize: TfpgMigResizeConstraint read GetResize;
   end;
 
 implementation

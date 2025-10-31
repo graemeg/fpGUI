@@ -99,6 +99,7 @@ type
     function GetSizeInclGaps(ASizeType: Integer; AIsHor: Boolean): Integer;
     function GetGapBefore(ASizeType: Integer; AIsHor: Boolean): Integer;
     function GetGapAfter(ASizeType: Integer; AIsHor: Boolean): Integer;
+    function GetGaps(AIsHor, AIsBefore: Boolean): PInteger;
     function GetBaseline(ASizeType: Integer): Integer;
     function HasBaseline: Boolean;
     function IsPushGap(AIsHor, AIsBefore: Boolean): Boolean;
@@ -153,6 +154,7 @@ type
 
     procedure AddCompWrap(ACompWrap: TfpgMigCompWrap);
     function GetMinPrefMax: TfpgMigIntArray;
+    procedure Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
 
     property Span: Integer read FSpan;
     property CompWraps: TfpgMigCompWrapList read FCompWraps;
@@ -187,6 +189,8 @@ type
     { Build dimension groups from component constraints }
     procedure BuildDimensionGroups;
 
+    procedure LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
+
     { Grid position encoding/decoding helpers }
     class function EncodeCellKey(AX, AY: Integer): Integer;
     class procedure DecodeCellKey(AKey: Integer; out AX, AY: Integer);
@@ -198,6 +202,17 @@ type
                                      ASizeType: Integer; AIsHor: Boolean): Integer;
     class function GetBaselineAboveBelow(const ACompWraps: TfpgMigCompWrapList;
                                         ASizeType: Integer; ACenterBaseline: Boolean): TfpgMigAboveBelow;
+
+    class procedure LayoutSerial(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+    class procedure LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+    class procedure LayoutBaseline(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize, ASizeType, ASpanCount: Integer);
+    class procedure SetCompWrapBounds(AParent: TfpgWidgetBase; const AAllSizes: TfpgMigIntegerArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
+    class procedure SetCompWrapBoundsFromSizes(AParent: TfpgWidgetBase; const ASizes: TfpgMigSizeArrayArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
+    class function CorrectAlign(ACC: TfpgMigCC; ARowAlign: TfpgMigUnitValue; AIsHor, AFromEnd: Boolean): TfpgMigUnitValue;
+    class function GetGaps(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigSizeArrayArray;
+    class function GetComponentSizes(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigSizeArrayArray;
+    class function GetComponentGapPush(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigBooleanArray;
+    class function GetComponentResizeConstraints(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigResizeConstraintArray;
 
     { Calculate final dimension sizes using LayoutUtil.CalculateSerial }
     function CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
@@ -222,11 +237,10 @@ type
 
     { Port of Grid.java mergeSizesGapsAndResConstrs() - line 2074
       Merges row/col sizes, gaps, and resize constraints into FlowSizeSpec }
-    function MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
+    class function MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
                                          AGapPush: array of Boolean;
                                          AMinPrefMaxSizes: array of TfpgMigSizeArray;
-                                         AGapSizes: array of TfpgMigSizeArray;
-                                         ARefSize: Integer): TfpgMigFlowSizeSpec;
+                                         AGapSizes: array of TfpgMigSizeArray): TfpgMigFlowSizeSpec;
 
     { Port of Grid.java getRowGaps() - line 1224
       Returns the row gaps in pixel sizes. One more than there are specs sent in. }
@@ -641,6 +655,19 @@ begin
   Result := Filter(ASizeType, FGaps[gapIx][ASizeType]);
 end;
 
+function TfpgMigCompWrap.GetGaps(AIsHor, AIsBefore: Boolean): PInteger;
+var
+  gapIx: Integer;
+begin
+  if not FHasGaps then
+    Exit(nil);
+  if AIsBefore then
+    gapIx := GetGapIx(AIsHor, True)
+  else
+    gapIx := GetGapIx(AIsHor, False);
+  Result := @FGaps[gapIx][0];
+end;
+
 function TfpgMigCompWrap.GetBaseline(ASizeType: Integer): Integer;
 begin
   // TODO: fpGUI doesn't currently support baseline positioning
@@ -828,6 +855,27 @@ begin
   Result[SIZE_MAX] := INF;
 end;
 
+procedure TfpgMigLinkedDimGroup.Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
+var
+  Parent: TfpgWidgetBase;
+begin
+  FLStart := AStart;
+  FLSize := ASize;
+
+  if FCompWraps.Count = 0 then
+    Exit;
+
+  Parent := FCompWraps[0].Comp.Parent;
+  case FLinkType of
+    TYPE_PARALLEL:
+      TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
+    TYPE_BASELINE:
+      TfpgMigGrid.LayoutBaseline(Parent, FCompWraps, ADC, AStart, ASize, SIZE_PREF, ASpanCount);
+  else // TYPE_SERIAL
+    TfpgMigGrid.LayoutSerial(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
+  end;
+end;
+
 
 
 
@@ -847,6 +895,12 @@ var
   spanX, spanY: Integer;
   cellKey: Integer;
   cell: TfpgMigCell;
+  ltr: Boolean;
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cws: TfpgMigCompWrapList;
+  cwBef, cwAft: TfpgWidgetBase;
+  tag: string;
+  ccBef, ccAft: TfpgMigCC;
 begin
   inherited Create;
   FContainer := AContainer;
@@ -955,7 +1009,43 @@ begin
   FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
   FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
 
-  // TODO: Calculate gaps between components
+  // Calculate gaps now that the cells are filled
+  ltr := TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
+  for pair in FGrid do
+  begin
+    cell := pair.Value;
+    cws := cell.CompWraps;
+    for i := 0 to cws.Count - 1 do
+    begin
+      cw := cws[i];
+      if i > 0 then
+        cwBef := cws[i - 1].Comp
+      else
+        cwBef := nil;
+      if i < cws.Count - 1 then
+        cwAft := cws[i + 1].Comp
+      else
+        cwAft := nil;
+
+      cc := ACCMap[cw.Comp];
+      if cc <> nil then
+        tag := cc.GetTag
+      else
+        tag := '';
+
+      if cwBef <> nil then
+        ccBef := ACCMap[cwBef]
+      else
+        ccBef := nil;
+      if cwAft <> nil then
+        ccAft := ACCMap[cwAft]
+      else
+        ccAft := nil;
+
+      cw.CalcGaps(cwBef, ccBef, cwAft, ccAft, tag, cell.FlowX, ltr);
+    end;
+  end;
+
   // TODO: Create flow specs
 end;
 
@@ -1389,12 +1479,14 @@ begin
 end;
 
 { Port of Grid.java mergeSizesGapsAndResConstrs() - line 2074 }
-function TfpgMigGrid.MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
-  AGapPush: array of Boolean; AMinPrefMaxSizes: array of TfpgMigSizeArray;
-  AGapSizes: array of TfpgMigSizeArray; ARefSize: Integer): TfpgMigFlowSizeSpec;
+class function TfpgMigGrid.MergeSizesGapsAndResConstrs(
+    AResConstr: array of TfpgMigResizeConstraint;
+    AGapPush: array of Boolean;
+    AMinPrefMaxSizes: array of TfpgMigSizeArray;
+    AGapSizes: array of TfpgMigSizeArray): TfpgMigFlowSizeSpec;
 var
-  sizes: array of TfpgMigSizeArray;
-  resConstsInclGaps: array of TfpgMigResizeConstraint;
+  sizes: TfpgMigSizeArrayArray;
+  resConstsInclGaps: TfpgMigResizeConstraintArray;
   i, crIx: Integer;
 begin
   // Make room for gaps around: [gap, comp, gap, comp, ..., gap]
@@ -1404,9 +1496,9 @@ begin
   // First gap
   sizes[0] := AGapSizes[0];
   if (0 < Length(AGapPush)) and AGapPush[0] then
-    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create // TODO: Set push flag
+    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create(200, 100.0, 50, 100.0) // GAP_RC_CONST_PUSH
   else
-    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create;
+    resConstsInclGaps[0] := TfpgMigResizeConstraint.Create(200, 100.0, 50, NaN); // GAP_RC_CONST
 
   for i := 0 to High(AMinPrefMaxSizes) do
   begin
@@ -1420,9 +1512,9 @@ begin
     sizes[crIx + 1] := AGapSizes[i + 1];
 
     if ((i + 1) < Length(AGapPush)) and AGapPush[i + 1] then
-      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create // TODO: Set push flag
+      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create(200, 100.0, 50, 100.0) // GAP_RC_CONST_PUSH
     else
-      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create;
+      resConstsInclGaps[crIx + 1] := TfpgMigResizeConstraint.Create(200, 100.0, 50, NaN); // GAP_RC_CONST
   end;
 
   Result := TfpgMigFlowSizeSpec.Create(sizes, resConstsInclGaps);
@@ -1567,8 +1659,7 @@ begin
   for i := 0 to Length(groupLists) - 1 do
   begin
     grps := groupLists[i];
-    rowGw := -1.0;  // Use -1 to indicate "not set"
-    hasGrowWeight := False;
+    rowGw := NaN;  // Use NaN to indicate "not set"
 
     // Find maximum grow weight for this row/column from all components - line 783
     for j := 0 to grps.Count - 1 do
@@ -1592,23 +1683,23 @@ begin
           else
             gw := cw.FCC.Horizontal.GetGrowWeight;
 
-          if (rowGw < 0) or (gw > rowGw) then
+          if IsNan(rowGw) or (gw > rowGw) then
             rowGw := gw;
         end;
       end;
     end;
 
     // If this row/column has a specific grow weight, expand array and set it - line 794
-    if rowGw >= 0 then
+    if not IsNan(rowGw) then
     begin
       // First time we find a specific weight, expand from GROW_100 to full array - line 795
       if Length(gwArr) = 1 then
       begin
         // Array size: (groupLists.length << 1) + 1 = groupLists.length * 2 + 1 - line 796
         SetLength(gwArr, (Length(groupLists) * 2) + 1);
-        // Fill with zeros except first element (already has GROW_100[0])
-        for j := 1 to High(gwArr) do
-          gwArr[j] := 0.0;
+        // Fill with NaN
+        for j := 0 to High(gwArr) do
+          gwArr[j] := NaN;
       end;
       gwArr[ix] := rowGw;  // Put grow weight at odd index for this row/column
     end;
@@ -1617,6 +1708,92 @@ begin
   end;
 
   Result := gwArr;
+end;
+
+procedure TfpgMigGrid.LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
+var
+  fromEnd: Boolean;
+  primDCs: TfpgMigDimConstraintArray;
+  fss: TfpgMigFlowSizeSpec;
+  rowCols: array of TfpgMigLinkedDimGroupList;
+  rowColSizes: TfpgMigIntegerArray;
+  curPos: Integer;
+  i, j, scIx, bIx, bIx2: Integer;
+  linkedGroups: TfpgMigLinkedDimGroupList;
+  primDC: TfpgMigDimConstraint;
+  rowSize, groupSize: Integer;
+  group: TfpgMigLinkedDimGroup;
+begin
+  if AIsRows then
+    fromEnd := not FLC.IsTopToBottom
+  else
+    fromEnd := not TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
+
+  if AIsRows then
+    primDCs := FRowConstr.GetConstraints
+  else
+    primDCs := FColConstr.GetConstraints;
+
+  if AIsRows then
+    fss := FRowFlowSpecs
+  else
+    fss := FColFlowSpecs;
+
+  if AIsRows then
+    rowCols := FRowGroupLists
+  else
+    rowCols := FColGroupLists;
+
+  rowColSizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, ADefGrowW, SIZE_PREF, ARefSize);
+
+  // TODO: Port isDesignTime logic if needed
+
+  if AAlign <> nil then
+    curPos := Round(AAlign.GetPixels(ARefSize - TfpgMigLayoutUtil.Sum(rowColSizes), FContainer, nil))
+  else
+    curPos := 0;
+
+  if fromEnd then
+    curPos := ARefSize - curPos;
+
+  for i := 0 to High(rowCols) do
+  begin
+    linkedGroups := rowCols[i];
+    // scIx := i - (isRows ? dockOffY : dockOffX); // TODO: Port dockOff
+    scIx := i;
+
+    bIx := i shl 1;
+    bIx2 := bIx + 1;
+
+    if fromEnd then
+      curPos := curPos - rowColSizes[bIx]
+    else
+      curPos := curPos + rowColSizes[bIx];
+
+    if (scIx >= 0) and (scIx < Length(primDCs)) then
+      primDC := primDCs[scIx]
+    else if Length(primDCs) > 0 then
+      primDC := primDCs[High(primDCs)]
+    else
+      primDC := nil; // TODO: Port DOCK_DIM_CONSTRAINT
+
+    rowSize := rowColSizes[bIx2];
+
+    for j := 0 to linkedGroups.Count - 1 do
+    begin
+      group := linkedGroups[j];
+      groupSize := rowSize;
+      if group.Span > 1 then
+        groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
+
+      group.Layout(primDC, curPos, groupSize, group.Span);
+    end;
+
+    if fromEnd then
+      curPos := curPos - rowSize
+    else
+      curPos := curPos + rowSize;
+  end;
 end;
 
 { Port of Grid.java getTotalGroupsSizeParallel() - line 2033 }
@@ -1766,9 +1943,229 @@ begin
   gapSizes := GetRowGaps(allDCs, ARefSize, AIsHor, fillInPushGaps);
 
   // Merge sizes, gaps, and resize constraints (line 1134)
-  Result := MergeSizesGapsAndResConstrs(resConstrs, fillInPushGaps, rowColBoundSizes, gapSizes, ARefSize);
+  Result := MergeSizesGapsAndResConstrs(resConstrs, fillInPushGaps, rowColBoundSizes, gapSizes);
 
   // TODO: Adjust for spanning components (line 1137)
+end;
+
+class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+var
+  sizes: TfpgMigSizeArrayArray;
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  cDc: TfpgMigDimConstraint;
+  resConstr: TfpgMigResizeConstraintArray;
+  sz: TfpgMigSizeArrayArray;
+  growW: TfpgMigFloatArray;
+  rowAlign: TfpgMigUnitValue;
+  p: PInteger;
+  calculatedSizes: TfpgMigIntegerArray;
+begin
+  SetLength(sizes, ACompWraps.Count);
+
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+    cDc := cw.CC.GetDimConstraint(AIsHor);
+
+    SetLength(resConstr, 3);
+    if cw.IsPushGap(AIsHor, True) then
+      resConstr[0] := TfpgMigResizeConstraint.Create(200, 100.0, 50, 100.0) // GAP_RC_CONST_PUSH
+    else
+      resConstr[0] := TfpgMigResizeConstraint.Create(200, 100.0, 50, NaN); // GAP_RC_CONST;
+    resConstr[1] := cDc.GetResize;
+    if cw.IsPushGap(AIsHor, False) then
+      resConstr[2] := TfpgMigResizeConstraint.Create(200, 100.0, 50, 100.0) // GAP_RC_CONST_PUSH
+    else
+      resConstr[2] := TfpgMigResizeConstraint.Create(200, 100.0, 50, NaN); // GAP_RC_CONST;
+
+    SetLength(sz, 3);
+    p := cw.GetGaps(AIsHor, True);
+    if p <> nil then
+    begin
+      sz[0][SIZE_MIN] := p[SIZE_MIN];
+      sz[0][SIZE_PREF] := p[SIZE_PREF];
+      sz[0][SIZE_MAX] := p[SIZE_MAX];
+    end;
+
+    p := cw.GetSizes(AIsHor);
+    if p <> nil then
+    begin
+      sz[1][SIZE_MIN] := p[SIZE_MIN];
+      sz[1][SIZE_PREF] := p[SIZE_PREF];
+      sz[1][SIZE_MAX] := p[SIZE_MAX];
+    end;
+
+    p := cw.GetGaps(AIsHor, False);
+    if p <> nil then
+    begin
+      sz[2][SIZE_MIN] := p[SIZE_MIN];
+      sz[2][SIZE_PREF] := p[SIZE_PREF];
+      sz[2][SIZE_MAX] := p[SIZE_MAX];
+    end;
+
+
+    if (ADC <> nil) and ADC.IsFill then
+    begin
+      SetLength(growW, 1);
+      growW[0] := 100.0;
+    end
+    else
+      SetLength(growW, 0);
+
+    calculatedSizes := TfpgMigLayoutUtil.CalculateSerial(sz, resConstr, growW, SIZE_PREF, ASize);
+    if Length(calculatedSizes) > 0 then sizes[i][0] := calculatedSizes[0];
+    if Length(calculatedSizes) > 1 then sizes[i][1] := calculatedSizes[1];
+    if Length(calculatedSizes) > 2 then sizes[i][2] := calculatedSizes[2];
+  end;
+
+  rowAlign := ADC.GetAlignOrDefault(AIsHor);
+  SetCompWrapBoundsFromSizes(AParent, sizes, ACompWraps, rowAlign, AStart, ASize, AIsHor, AFromEnd);
+end;
+
+class procedure TfpgMigGrid.LayoutBaseline(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize, ASizeType, ASpanCount: Integer);
+var
+  aboveBelow: TfpgMigAboveBelow;
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  h: Integer;
+  baseline: Integer;
+begin
+  aboveBelow := TfpgMigGrid.GetBaselineAboveBelow(ACompWraps, ASizeType, True);
+
+  // layout with respect to baseline
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+    h := cw.GetSize(ASizeType, False);
+    baseline := cw.GetBaseline(ASizeType);
+    cw.SetDimBounds(AStart + aboveBelow.MaxAbove - baseline, h, False);
+  end;
+end;
+
+class procedure TfpgMigGrid.SetCompWrapBoundsFromSizes(AParent: TfpgWidgetBase; const ASizes: TfpgMigSizeArrayArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
+var
+  allSizes: TfpgMigIntegerArray;
+  i: Integer;
+begin
+  SetLength(allSizes, Length(ASizes) * 3);
+  for i := 0 to High(ASizes) do
+  begin
+    allSizes[(i * 3) + 0] := ASizes[i][0];
+    allSizes[(i * 3) + 1] := ASizes[i][1];
+    allSizes[(i * 3) + 2] := ASizes[i][2];
+  end;
+  SetCompWrapBounds(AParent, allSizes, ACompWraps, ARowAlign, AStart, ASize, AIsHor, AFromEnd);
+end;
+
+class function TfpgMigGrid.GetGaps(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigSizeArrayArray;
+var
+  i: Integer;
+  gap1, gap2: PInteger;
+  gap1arr, gap2arr: TfpgMigSizeArray;
+begin
+  SetLength(Result, ACompWraps.Count + 1);
+
+  gap1 := ACompWraps[0].GetGaps(AIsHor, True);
+  if gap1 <> nil then
+  begin
+    Result[0][SIZE_MIN] := gap1[SIZE_MIN];
+    Result[0][SIZE_PREF] := gap1[SIZE_PREF];
+    Result[0][SIZE_MAX] := gap1[SIZE_MAX];
+  end;
+
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    gap1 := ACompWraps[i].GetGaps(AIsHor, False);
+
+    if i < ACompWraps.Count - 1 then
+      gap2 := ACompWraps[i + 1].GetGaps(AIsHor, True)
+    else
+      gap2 := nil;
+
+    if gap1 <> nil then
+    begin
+      gap1arr[SIZE_MIN] := gap1[SIZE_MIN];
+      gap1arr[SIZE_PREF] := gap1[SIZE_PREF];
+      gap1arr[SIZE_MAX] := gap1[SIZE_MAX];
+    end;
+
+    if gap2 <> nil then
+    begin
+      gap2arr[SIZE_MIN] := gap2[SIZE_MIN];
+      gap2arr[SIZE_PREF] := gap2[SIZE_PREF];
+      gap2arr[SIZE_MAX] := gap2[SIZE_MAX];
+    end;
+
+    if (gap1 = nil) and (gap2 <> nil) then
+      Result[i + 1] := gap2arr
+    else if (gap1 <> nil) and (gap2 = nil) then
+      Result[i + 1] := gap1arr
+    else if (gap1 <> nil) and (gap2 <> nil) then
+      Result[i + 1] := MergeSizes(gap1arr, gap2arr)
+    else
+    begin
+      // no gaps
+    end;
+  end;
+end;
+
+class function TfpgMigGrid.GetComponentSizes(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigSizeArrayArray;
+var
+  i: Integer;
+  p: PInteger;
+begin
+  SetLength(Result, ACompWraps.Count);
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    p := ACompWraps[i].GetSizes(AIsHor);
+    Result[i][SIZE_MIN] := p[SIZE_MIN];
+    Result[i][SIZE_PREF] := p[SIZE_PREF];
+    Result[i][SIZE_MAX] := p[SIZE_MAX];
+  end;
+end;
+
+class function TfpgMigGrid.GetComponentGapPush(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigBooleanArray;
+var
+  i: Integer;
+  push: Boolean;
+begin
+  SetLength(Result, ACompWraps.Count + 1);
+  for i := 0 to ACompWraps.Count do
+  begin
+    if i > 0 then
+      push := ACompWraps[i - 1].IsPushGap(AIsHor, False)
+    else
+      push := False;
+
+    if not push and (i < ACompWraps.Count) then
+      push := ACompWraps[i].IsPushGap(AIsHor, True);
+
+    Result[i] := push;
+  end;
+end;
+
+class function TfpgMigGrid.GetComponentResizeConstraints(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigResizeConstraintArray;
+var
+  i: Integer;
+  cc: TfpgMigCC;
+  dc: TfpgMigDimConstraint;
+  // dock: Integer; // TODO: port docking
+begin
+  SetLength(Result, ACompWraps.Count);
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cc := ACompWraps[i].CC;
+    dc := cc.GetDimConstraint(AIsHor);
+    Result[i] := dc.Resize;
+
+    // TODO: Port docking grow
+    // dock := cc.GetDockSide;
+    // if (AIsHor and ((dock = 0) or (dock = 2))) or (not AIsHor and ((dock = 1) or (dock = 3))) then
+    // begin
+    //   // Result[i] := ...
+    // end;
+  end;
 end;
 
 function TfpgMigGrid.CalculateDimensionSizes(const AIndexes: TfpgMigIntegerList;
@@ -1854,331 +2251,21 @@ begin
 end;
 
 function TfpgMigGrid.Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
-  ADebug: Boolean): Boolean;
-var
-  containerX, containerY, containerW, containerH: Integer;
-  lc: TfpgMigLC;
-  pair: TfpgMigCellMap.TDictionaryPair;
-  cell: TfpgMigCell;
-  i, j: Integer;
-  cw: TfpgMigCompWrap;
-  cellKey: Integer;
-  cellX, cellY: Integer;
-  compX, compY: Integer;
-  insets: array[0..3] of Integer;  // top, left, bottom, right
-  colWidths, rowHeights: array of Integer;
-  colPositions, rowPositions: array of Integer;
-  maxWidth, maxHeight: Integer;
-  alignX, alignY: TfpgMigUnitValue;
-  offsetX, offsetY: Integer;
+                    ADebug: Boolean): Boolean;
 begin
-  Result := False;
+  Result := False; // Placeholder  // TODO: Port debug handling, checkSizeCalcs, resetLinkValues
 
-  // Extract bounds
-  if Length(ABounds) < 4 then
-    Exit;
+  LayoutInOneDim(ABounds[2], AAlignX, False, FGrowXs);
+  LayoutInOneDim(ABounds[3], AAlignY, True, FGrowYs);
 
-  containerX := ABounds[0];
-  containerY := ABounds[1];
-  containerW := ABounds[2];
-  containerH := ABounds[3];
+  // TODO: Port end group handling, absolute corrections, and bounds transfer
 
-  // Get layout constraints
-  lc := FLC;
-
-  // Apply insets from LC if present
-  insets[0] := 6;  // top - default inset
-  insets[1] := 6;  // left
-  insets[2] := 6;  // bottom
-  insets[3] := 6;  // right
-
-  // TODO: Extract actual insets from LC.GetInsets
-
-  // Adjust container bounds for insets
-  containerX := containerX + insets[1];
-  containerY := containerY + insets[0];
-  containerW := containerW - insets[1] - insets[3];
-  containerH := containerH - insets[0] - insets[2];
-
-  // Store container dimensions for layout calculations
-  FWidth[SIZE_PREF] := containerW;
-  FHeight[SIZE_PREF] := containerH;
-
-  // Calculate preferred sizes for each column and row
-  if (FColIndexes.Count > 0) and (FRowIndexes.Count > 0) then
-  begin
-    SetLength(colWidths, FColIndexes.Count);
-    SetLength(rowHeights, FRowIndexes.Count);
-    SetLength(colPositions, FColIndexes.Count);
-    SetLength(rowPositions, FRowIndexes.Count);
-
-    // Initialize with zeros
-    for i := 0 to FColIndexes.Count - 1 do
-      colWidths[i] := 0;
-    for i := 0 to FRowIndexes.Count - 1 do
-      rowHeights[i] := 0;
-
-    // Calculate preferred size for each column and row based on components
-    for pair in FGrid do
-    begin
-      cellKey := pair.Key;
-      cell := pair.Value;
-
-      if cell = nil then
-        Continue;
-
-      DecodeCellKey(cellKey, cellX, cellY);
-
-      // Find column and row indexes
-      j := -1;
-      for i := 0 to FColIndexes.Count - 1 do
-      begin
-        if FColIndexes[i] = cellX then
-        begin
-          j := i;
-          Break;
-        end;
-      end;
-      if j < 0 then
-        Continue;
-      cellX := j;  // Now cellX is the index, not the grid position
-
-      j := -1;
-      for i := 0 to FRowIndexes.Count - 1 do
-      begin
-        if FRowIndexes[i] = cellY then
-        begin
-          j := i;
-          Break;
-        end;
-      end;
-      if j < 0 then
-        Continue;
-      cellY := j;  // Now cellY is the index
-
-      // Get maximum preferred size for this cell
-      maxWidth := 0;
-      maxHeight := 0;
-      for i := 0 to cell.CompWraps.Count - 1 do
-      begin
-        cw := cell.CompWraps[i];
-        if cw = nil then
-          Continue;
-
-        // Get component's preferred size
-        if cw.Comp <> nil then
-        begin
-          if cw.Comp.Width > maxWidth then
-            maxWidth := cw.Comp.Width;
-          if cw.Comp.Height > maxHeight then
-            maxHeight := cw.Comp.Height;
-        end;
-      end;
-
-      // Update column and row sizes
-      if maxWidth > colWidths[cellX] then
-        colWidths[cellX] := maxWidth;
-      if maxHeight > rowHeights[cellY] then
-        rowHeights[cellY] := maxHeight;
-    end;
-
-    // Use CalcRowsOrColsSizes + LayoutUtil.CalculateSerial (Java MigLayout v11 approach)
-    // This returns FlowSizeSpec with alternating [gap, size, gap, size, ...] and resize constraints
-    // Pass FGrowXs/FGrowYs to CalcRowsOrColsSizes for spanning components (Java line 527-528)
-    FColFlowSpecs := CalcRowsOrColsSizes(FColGroupLists, FGrowXs, containerW, True);
-    FRowFlowSpecs := CalcRowsOrColsSizes(FRowGroupLists, FGrowYs, containerH, False);
-
-    // Calculate actual column widths and row heights (Java line 984)
-    // Pass FGrowXs/FGrowYs to CalculateSerial for grow weight distribution
-    colWidths := TfpgMigLayoutUtil.CalculateSerial(
-      FColFlowSpecs.GetSizes,
-      FColFlowSpecs.ResConstsInclGaps,
-      FGrowXs,
-      SIZE_PREF,
-      containerW
-    );
-
-    rowHeights := TfpgMigLayoutUtil.CalculateSerial(
-      FRowFlowSpecs.GetSizes,
-      FRowFlowSpecs.ResConstsInclGaps,
-      FGrowYs,
-      SIZE_PREF,
-      containerH
-    );
-
-    // Calculate positions from sizes (sizes array includes gaps: [gap, col0, gap, col1, gap, ...])
-    // Positions are calculated cumulatively from the alternating gap/size array
-    compX := containerX;
-    SetLength(colPositions, FColIndexes.Count);
-    for i := 0 to FColIndexes.Count - 1 do
-    begin
-      // Index in sizes array: gap at (i*2), column at (i*2+1)
-      if Length(colWidths) > (i * 2) then
-        compX := compX + colWidths[i * 2];  // Add gap before
-      colPositions[i] := compX;
-      if Length(colWidths) > (i * 2 + 1) then
-        compX := compX + colWidths[i * 2 + 1];  // Add column width
-    end;
-
-    compY := containerY;
-    SetLength(rowPositions, FRowIndexes.Count);
-    for i := 0 to FRowIndexes.Count - 1 do
-    begin
-      // Index in sizes array: gap at (i*2), row at (i*2+1)
-      if Length(rowHeights) > (i * 2) then
-        compY := compY + rowHeights[i * 2];  // Add gap before
-      rowPositions[i] := compY;
-      if Length(rowHeights) > (i * 2 + 1) then
-        compY := compY + rowHeights[i * 2 + 1];  // Add row height
-    end;
-
-    // Position all components using calculated sizes
-    for pair in FGrid do
-    begin
-      cellKey := pair.Key;
-      cell := pair.Value;
-
-      if cell = nil then
-        Continue;
-
-      DecodeCellKey(cellKey, cellX, cellY);
-
-      // Find column and row indexes
-      j := -1;
-      for i := 0 to FColIndexes.Count - 1 do
-      begin
-        if FColIndexes[i] = cellX then
-        begin
-          j := i;
-          Break;
-        end;
-      end;
-      if j < 0 then
-        Continue;
-      cellX := j;
-
-      j := -1;
-      for i := 0 to FRowIndexes.Count - 1 do
-      begin
-        if FRowIndexes[i] = cellY then
-        begin
-          j := i;
-          Break;
-        end;
-      end;
-      if j < 0 then
-        Continue;
-      cellY := j;
-
-      // Position all CompWraps in this cell
-      for i := 0 to cell.CompWraps.Count - 1 do
-      begin
-        cw := cell.CompWraps[i];
-        if (cw = nil) or (cw.Comp = nil) then
-          Continue;
-
-        // Get component's preferred size
-        maxWidth := cw.Comp.Width;
-        maxHeight := cw.Comp.Height;
-
-        // Get actual cell width and height from alternating sizes array
-        // Array format: [gap, col0, gap, col1, gap, ...]
-        // So column cellX width is at index (cellX * 2 + 1)
-        if Length(colWidths) > (cellX * 2 + 1) then
-          maxWidth := colWidths[cellX * 2 + 1]  // Use cell width
-        else
-          maxWidth := cw.Comp.Width;  // Fallback to component width
-
-        if Length(rowHeights) > (cellY * 2 + 1) then
-          maxHeight := rowHeights[cellY * 2 + 1]  // Use cell height
-        else
-          maxHeight := cw.Comp.Height;  // Fallback to component height
-
-        // Calculate position within cell based on alignment
-        compX := colPositions[cellX];
-        compY := rowPositions[cellY];
-
-        // Apply horizontal alignment (if no grow, component keeps preferred width)
-        if (cw.FCC <> nil) and (cw.FCC.Horizontal <> nil) then
-        begin
-          alignX := cw.FCC.Horizontal.GetAlign;
-          // Check if component has grow weight - if so, it fills the cell
-          if cw.FCC.Horizontal.HasGrowWeight and (cw.FCC.Horizontal.GetGrowWeight > 0) then
-          begin
-            // Component grows to fill cell - maxWidth already set to cell width above
-          end
-          else if alignX <> nil then
-          begin
-            // No grow - calculate offset based on alignment
-            if (alignX.UnitType = utPercent) then
-            begin
-              // Percent-based alignment (0% = left, 50% = center, 100% = right)
-              // Component keeps its preferred size, just positioned within cell
-              offsetX := Round((maxWidth - cw.Comp.Width) * alignX.Value / 100);
-              compX := compX + offsetX;
-              maxWidth := cw.Comp.Width;  // Use component's preferred width
-            end;
-            // utAlign with value 0 (leading) means no offset needed
-          end
-          else
-          begin
-            // No explicit alignment - use component's preferred width
-            maxWidth := cw.Comp.Width;
-          end;
-        end
-        else
-        begin
-          // No horizontal constraint - use component's preferred width
-          maxWidth := cw.Comp.Width;
-        end;
-
-        // Apply vertical alignment (if no grow, component keeps preferred height)
-        if (cw.FCC <> nil) and (cw.FCC.Vertical <> nil) then
-        begin
-          alignY := cw.FCC.Vertical.GetAlign;
-          // Check if component has grow weight - if so, it fills the cell
-          if cw.FCC.Vertical.HasGrowWeight and (cw.FCC.Vertical.GetGrowWeight > 0) then
-          begin
-            // Component grows to fill cell - maxHeight already set to cell height above
-          end
-          else if alignY <> nil then
-          begin
-            // No grow - calculate offset based on alignment
-            if (alignY.UnitType = utPercent) then
-            begin
-              // Percent-based alignment (0% = top, 50% = center, 100% = bottom)
-              // Component keeps its preferred size, just positioned within cell
-              offsetY := Round((maxHeight - cw.Comp.Height) * alignY.Value / 100);
-              compY := compY + offsetY;
-              maxHeight := cw.Comp.Height;  // Use component's preferred height
-            end;
-            // utAlign with value 0 (leading) means no offset needed
-          end
-          else
-          begin
-            // No explicit alignment - use component's preferred height
-            maxHeight := cw.Comp.Height;
-          end;
-        end
-        else
-        begin
-          // No vertical constraint - use component's preferred height
-          maxHeight := cw.Comp.Height;
-        end;
-
-        // Set bounds for this component
-        cw.SetDimBounds(compX, maxWidth, True);   // horizontal
-        cw.SetDimBounds(compY, maxHeight, False);  // vertical
-        cw.TransferBounds(False);
-      end;
-    end;
-  end;
-
-  Result := True;
+  Result := False; // Placeholder
 end;
 
 function TfpgMigGrid.GetWidth: TfpgMigIntArray;
 begin
+  SetLength(Result, 0);
   SetLength(Result, 3);
   Result[SIZE_MIN] := FWidth[SIZE_MIN];
   Result[SIZE_PREF] := FWidth[SIZE_PREF];
@@ -2192,6 +2279,107 @@ begin
   Result[SIZE_PREF] := FHeight[SIZE_PREF];
   Result[SIZE_MAX] := FHeight[SIZE_MAX];
 end;
+
+{ TfpgMigGrid - Static helper methods for layout }
+
+class procedure TfpgMigGrid.LayoutSerial(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+var
+  fss: TfpgMigFlowSizeSpec;
+  growW: TfpgMigFloatArray;
+  sizes: TfpgMigIntegerArray;
+begin
+  fss := MergeSizesGapsAndResConstrs(
+            GetComponentResizeConstraints(ACompWraps, AIsHor),
+            GetComponentGapPush(ACompWraps, AIsHor),
+            GetComponentSizes(ACompWraps, AIsHor),
+            GetGaps(ACompWraps, AIsHor)
+         );
+
+  if (ADC <> nil) and ADC.IsFill then
+  begin
+    SetLength(growW, 1);
+    growW[0] := 100.0;
+  end
+  else
+    SetLength(growW, 0);
+
+  sizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, growW, SIZE_PREF, ASize);
+  SetCompWrapBounds(AParent, sizes, ACompWraps, ADC.GetAlignOrDefault(AIsHor), AStart, ASize, AIsHor, AFromEnd);
+end;
+
+class procedure TfpgMigGrid.SetCompWrapBounds(AParent: TfpgWidgetBase; const AAllSizes: TfpgMigIntegerArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
+var
+  totSize, i, bIx: Integer;
+  cw: TfpgMigCompWrap;
+  align: TfpgMigUnitValue;
+  cSt, slack, al: Integer;
+begin
+  totSize := TfpgMigLayoutUtil.Sum(AAllSizes);
+  align := CorrectAlign(ACompWraps[0].CC, ARowAlign, AIsHor, AFromEnd);
+
+  cSt := AStart;
+  slack := ASize - totSize;
+  if (slack > 0) and (align <> nil) then
+  begin
+    al := Min(slack, Max(0, Round(align.GetPixels(slack, AParent, nil))));
+    if AFromEnd then
+      cSt := cSt - al
+    else
+      cSt := cSt + al;
+  end;
+
+  bIx := 0;
+  for i := 0 to ACompWraps.Count - 1 do
+  begin
+    cw := ACompWraps[i];
+    if AFromEnd then
+    begin
+      cSt := cSt - AAllSizes[bIx]; // gap
+      Inc(bIx);
+      cw.SetDimBounds(cSt - AAllSizes[bIx], AAllSizes[bIx], AIsHor);
+      cSt := cSt - AAllSizes[bIx];
+      Inc(bIx);
+    end
+    else
+    begin
+      cSt := cSt + AAllSizes[bIx]; // gap
+      Inc(bIx);
+      cw.SetDimBounds(cSt, AAllSizes[bIx], AIsHor);
+      cSt := cSt + AAllSizes[bIx];
+      Inc(bIx);
+    end;
+  end;
+end;
+
+class function TfpgMigGrid.CorrectAlign(ACC: TfpgMigCC; ARowAlign: TfpgMigUnitValue; AIsHor, AFromEnd: Boolean): TfpgMigUnitValue;
+var
+  align: TfpgMigUnitValue;
+  dc: TfpgMigDimConstraint;
+begin
+  if AIsHor then
+    align := ACC.Horizontal.GetAlign
+  else
+    align := ACC.Vertical.GetAlign;
+
+  if align = nil then
+    align := ARowAlign;
+
+    dc := ACC.GetDimConstraint(False);
+    if (dc <> nil) and (dc.GetAlignOrDefault(False) = UnitValueBaselineIdentity) then
+    begin
+      // TODO: Handle baseline alignment
+    end;
+
+  if AFromEnd then
+  begin
+    if align = UnitValueLeft then
+      align := UnitValueRight
+    else if align = UnitValueRight then
+      align := UnitValueLeft;
+  end;
+  Result := align;
+end;
+
 
 { TfpgMigGrid - Helper methods }
 
