@@ -137,6 +137,9 @@ type
 
 implementation
 
+uses
+  fpg_mig_platformdefaults;
+
 { Helper function - returns the bounded value if sz is outside lower/upper bounds }
 function GetBrokenBoundary(ASz, ALower, AUpper: Single): Integer; forward;
 
@@ -144,9 +147,13 @@ function GetBrokenBoundary(ASz, ALower, AUpper: Single): Integer; forward;
 
 constructor TfpgMigFlowSizeSpec.Create(ASizes: TfpgMigSizeArrayArray;
   AResConstr: TfpgMigResizeConstraintArray);
+var
+  i: Integer;
 begin
   inherited Create;
-  FSizes := ASizes;
+  SetLength(FSizes, Length(ASizes));
+  for i := 0 to High(ASizes) do
+    FSizes[i] := ASizes[i];
   FResConstsInclGaps := AResConstr;
 end;
 
@@ -194,9 +201,7 @@ var
   toChange, changedWeight, sizeDelta, newSize: Single;
   weight: Single;
 begin
-  SetLength(Result, 0);
   SetLength(lengths, Length(ASizes));
-  SetLength(Result, Length(ASizes));
   usedLength := 0.0;
 
   // Give all preferred size to start with
@@ -432,9 +437,20 @@ end;
 
 class function TfpgMigLayoutUtil.GetInsets(ALC: TfpgMigLC; ASide: Integer;
   AGetDefault: Boolean): TfpgMigUnitValue;
+var
+  i: TfpgMigUnitValueArray;
 begin
-  // TODO: Implement insets retrieval from LC
-  Result := nil;
+  if ALC <> nil then
+    i := ALC.GetInsets
+  else
+    i := nil;
+
+  if (i <> nil) and (Length(i) > ASide) and (i[ASide] <> nil) then
+    Result := i[ASide]
+  else if AGetDefault then
+    Result := TfpgMigPlatformDefaults.GetPanelInsets(ASide)
+  else
+    Result := UnitValueZero();
 end;
 
 class function TfpgMigLayoutUtil.ObjectEquals(AObj1, AObj2: TObject): Boolean;

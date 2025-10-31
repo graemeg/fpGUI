@@ -183,6 +183,9 @@ type
       Default grow weights for columns and rows (from push or fill) }
     FGrowXs, FGrowYs: TfpgMigFloatArray;
 
+    procedure checkSizeCalcs(refWidth, refHeight: Integer);
+    procedure calcGridSizes(refWidth, refHeight: Integer);
+
     { Build row and column index lists from grid }
     procedure BuildIndexes;
 
@@ -1366,6 +1369,77 @@ begin
   inherited Destroy;
 end;
 
+function TfpgMigGrid.Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
+                    ADebug: Boolean): Boolean;
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  cw: TfpgMigCompWrap;
+  addVisualPadding: Boolean;
+begin
+  Result := False;
+  if ADebug then
+  begin
+    // TODO: debugRects logic
+  end;
+
+  if FColFlowSpecs = nil then
+    checkSizeCalcs(ABounds[2], ABounds[3]);
+
+  // TODO: Port resetLinkValues
+
+  LayoutInOneDim(ABounds[2], AAlignX, False, FGrowXs);
+  LayoutInOneDim(ABounds[3], AAlignY, True, FGrowYs);
+
+  // Final loop to adjust for container bounds and transfer to components
+  addVisualPadding := FLC.IsVisualPadding;
+
+  for pair in FGrid do
+  begin
+    cell := pair.Value;
+    if cell = nil then Continue;
+
+    for cw in cell.CompWraps do
+    begin
+      // TODO: Port end group logic and absolute position logic
+
+      cw.X := cw.X + ABounds[0];
+      cw.Y := cw.Y + ABounds[1];
+
+      cw.transferBounds(addVisualPadding);
+
+      // TODO: Port callback logic
+    end;
+  end;
+
+  // TODO: Port the rest of the layout logic (absolute positioning, end groups, etc.)
+end;
+
+procedure TfpgMigGrid.checkSizeCalcs(refWidth, refHeight: Integer);
+begin
+  // This is a simplified port for now. The full Java version also handles
+  // recalculating the grid if the container's size has changed significantly.
+  if FColFlowSpecs = nil then
+    calcGridSizes(refWidth, refHeight);
+end;
+
+procedure TfpgMigGrid.calcGridSizes(refWidth, refHeight: Integer);
+var
+  colSpecs, rowSpecs: TfpgMigFlowSizeSpec;
+begin
+  colSpecs := CalcRowsOrColsSizes(FColGroupLists, FGrowXs, refWidth, True);
+  rowSpecs := CalcRowsOrColsSizes(FRowGroupLists, FGrowYs, refHeight, False);
+
+  if FColFlowSpecs <> nil then FColFlowSpecs.Free;
+  if FRowFlowSpecs <> nil then FRowFlowSpecs.Free;
+
+  FColFlowSpecs := colSpecs;
+  FRowFlowSpecs := rowSpecs;
+
+  // TODO: Port the rest of this method which calculates overall width/height
+  // and adjusts for absolute positioned components.
+end;
+
 procedure TfpgMigGrid.AggregateComponentConstraints(AResConstr: TfpgMigResizeConstraint;
   ADimIndex: Integer; AIsHor: Boolean);
 var
@@ -1526,51 +1600,22 @@ function TfpgMigGrid.GetRowGaps(ASpecs: array of TfpgMigDimConstraint; ARefSize:
 var
   defGap: TfpgMigBoundSize;
   defGapArr: TfpgMigSizeArray;
-  retValues: array of TfpgMigSizeArray;
-  i: Integer;
+  i, val: Integer;
   specBefore, specAfter: TfpgMigDimConstraint;
+  defIns: Boolean;
+  firstGap, lastGap: TfpgMigUnitValue;
   gapBefore, gapAfter: TfpgMigSizeArray;
+  wrapGapSize: TfpgMigBoundSize;
+  wgIx: Integer;
 begin
-  // Get default gap from LC
-  if AIsHor then
-    defGap := FLC.GetGridGapX
-  else
-    defGap := FLC.GetGridGapY;
+  SetLength(Result, Length(ASpecs) + 1);
+  wgIx := 0;
 
-  if defGap = nil then
-  begin
-    if AIsHor then
-      defGap := TfpgMigPlatformDefaults.GetRelatedGapX  // Grid gap is same as related gap
-    else
-      defGap := TfpgMigPlatformDefaults.GetRelatedGapY;
-  end;
+  defIns := True; // Simplified !hasDocks()
+  firstGap := TfpgMigLayoutUtil.GetInsets(FLC, IfThen(AIsHor, 1, 0), defIns);
+  lastGap  := TfpgMigLayoutUtil.GetInsets(FLC, IfThen(AIsHor, 3, 2), defIns);
 
-  // Convert default gap to pixel sizes (defGapArr is a static array[0..2], no SetLength needed)
-  if defGap <> nil then
-  begin
-    if defGap.Min <> nil then
-      defGapArr[SIZE_MIN] := Round(defGap.Min.Value)
-    else
-      defGapArr[SIZE_MIN] := 6;  // Default
-    if defGap.Preferred <> nil then
-      defGapArr[SIZE_PREF] := Round(defGap.Preferred.Value)
-    else
-      defGapArr[SIZE_PREF] := 6;
-    if defGap.Max <> nil then
-      defGapArr[SIZE_MAX] := Round(defGap.Max.Value)
-    else
-      defGapArr[SIZE_MAX] := INF;
-  end
-  else
-  begin
-    defGapArr[SIZE_MIN] := 6;
-    defGapArr[SIZE_PREF] := 6;
-    defGapArr[SIZE_MAX] := INF;
-  end;
-
-  SetLength(retValues, Length(ASpecs) + 1);
-
-  for i := 0 to High(retValues) do
+  for i := 0 to High(Result) do
   begin
     if i > 0 then
       specBefore := ASpecs[i - 1]
@@ -1582,18 +1627,42 @@ begin
     else
       specAfter := nil;
 
-    // TODO: For now, use default gaps everywhere
-    // Full implementation would check gap before/after on specs
-    // retValues[i] is a static array[0..2], just assign directly
-    retValues[i] := defGapArr;
+    // For now, only handle edge gaps (insets)
+    if (i = 0) and (firstGap <> nil) then
+    begin
+      Result[i][0] := val; Result[i][1] := val; Result[i][2] := val;
+    end
+    else if (i = High(Result)) and (lastGap <> nil) then
+    begin
+      val := Round(lastGap.GetPixels(ARefSize, FContainer, nil));
+      Result[i][0] := val; Result[i][1] := val; Result[i][2] := val;
+    end
+    else
+    begin
+      // TODO: Handle gaps between columns/rows from DimConstraints
+      // For now, use a default.
+      if AIsHor then
+        defGap := TfpgMigPlatformDefaults.GetDefaultHGap
+      else
+        defGap := TfpgMigPlatformDefaults.GetDefaultVGap;
 
-    // Check for push gaps
+      if defGap <> nil then
+      begin
+        defGapArr[SIZE_MIN] := Round(defGap.Min.GetPixels(ARefSize, FContainer, nil));
+        defGapArr[SIZE_PREF] := Round(defGap.Preferred.GetPixels(ARefSize, FContainer, nil));
+        val := Round(defGap.Max.GetPixels(ARefSize, FContainer, nil));
+        defGapArr[SIZE_MAX] := IfThen(val = 0, INF, val);
+      end else
+      begin
+        defGapArr[0] := 0; defGapArr[1] := 0; defGapArr[2] := INF;
+      end;
+      Result[i] := defGapArr;
+    end;
+
     if ((specBefore <> nil) and specBefore.IsGapAfterPush) or
        ((specAfter <> nil) and specAfter.IsGapBeforePush) then
       AFillInPushGaps[i] := True;
   end;
-
-  Result := retValues;
 end;
 
 { Port of Grid.java constrainSize() - line 2130 }
@@ -2248,19 +2317,6 @@ begin
   begin
     resConstr[i].Free;
   end;
-end;
-
-function TfpgMigGrid.Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
-                    ADebug: Boolean): Boolean;
-begin
-  Result := False; // Placeholder  // TODO: Port debug handling, checkSizeCalcs, resetLinkValues
-
-  LayoutInOneDim(ABounds[2], AAlignX, False, FGrowXs);
-  LayoutInOneDim(ABounds[3], AAlignY, True, FGrowYs);
-
-  // TODO: Port end group handling, absolute corrections, and bounds transfer
-
-  Result := False; // Placeholder
 end;
 
 function TfpgMigGrid.GetWidth: TfpgMigIntArray;

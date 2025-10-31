@@ -125,6 +125,9 @@ type
 
 implementation
 
+uses
+  fpg_mig_platformdefaults;
+
 const
   // Constant for infinity (large value)
   LAYOUT_INF = 2097051;  // LayoutUtil.INF from Java
@@ -276,10 +279,12 @@ begin
   case FUnit of
     utPixel:
       Result := FValue;
+    utLPX, utLPY:
+      Result := TfpgMigPlatformDefaults.GetPixelUnitFactor(FUnit = utLPX) * FValue;
     utPercent:
       Result := FValue * ARefValue / 100.0;
   else
-    Result := 0; // Not implemented yet
+    Result := 0; // Other units not implemented yet
   end;
 end;
 

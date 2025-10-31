@@ -44,7 +44,10 @@ type
     class var FHorScale: Single;
     class var FVerScale: Single;
     class var FDefHUnit: Integer;  // Default horizontal unit (utLPX)
-    class var FDefVUnit: Integer;  // Default vertical unit (utLPY)
+    FDefVUnit: Integer;  // Default vertical unit (utLPY)
+
+    FPanelInsets: array[0..3] of TfpgMigUnitValue;
+    FDialogInsets: array[0..3] of TfpgMigUnitValue;
 
     { Predefined UnitValues for common gaps }
     class var FLPX6, FLPX7, FLPX11, FLPX12, FLPX16, FLPX18, FLPX20: TfpgMigUnitValue;
@@ -96,6 +99,9 @@ type
     class function GetDefaultVerticalUnit: Integer;
     class procedure SetDefaultVerticalUnit(AUnit: Integer);
 
+    { Pixel conversion }
+    class function GetPixelUnitFactor(AIsHor: Boolean): Single;
+
     { Gap values }
     class procedure SetRelatedGap(AX, AY: TfpgMigUnitValue);
     class procedure SetUnrelatedGap(AX, AY: TfpgMigUnitValue);
@@ -106,6 +112,12 @@ type
     class function GetUnrelatedGapY: TfpgMigBoundSize;
     class function GetDefaultHGap: TfpgMigBoundSize;
     class function GetDefaultVGap: TfpgMigBoundSize;
+
+    { Inset values }
+    class function GetPanelInsets(ASide: Integer): TfpgMigUnitValue;
+    class procedure SetPanelInsets(ATop, ALeft, ABottom, ARight: TfpgMigUnitValue);
+    class function GetDialogInsets(ASide: Integer): TfpgMigUnitValue;
+    class procedure SetDialogInsets(ATop, ALeft, ABottom, ARight: TfpgMigUnitValue);
 
     { Button defaults }
     class procedure SetMinimumButtonWidth(AWidth: TfpgMigUnitValue);
@@ -124,7 +136,7 @@ type
 implementation
 
 uses
-  fpg_base;  // For platform detection
+  fpg_base, fpg_main;  // For platform detection and screen DPI
 
 { TfpgMigPlatformDefaults }
 
@@ -197,6 +209,8 @@ begin
       SetUnrelatedGap(FLPX11, FLPY11);
       SetGridCellGap(FLPX7, FLPY7);
       SetMinimumButtonWidth(FLPX75);
+      SetDialogInsets(FLPY11, FLPX11, FLPY11, FLPX11);
+      SetPanelInsets(FLPY7, FLPX7, FLPY7, FLPX7);
     end;
 
     PLATFORM_MAC_OSX:
@@ -205,6 +219,8 @@ begin
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX7, FLPY7);
       SetMinimumButtonWidth(FLPX70);
+      SetDialogInsets(FLPY20, FLPX20, FLPY20, FLPX20);
+      SetPanelInsets(FLPY16, FLPX16, FLPY16, FLPX16);
     end;
 
     PLATFORM_GNOME:
@@ -213,6 +229,8 @@ begin
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX6, FLPY6);
       SetMinimumButtonWidth(FLPX70);
+      SetDialogInsets(FLPY12, FLPX12, FLPY12, FLPX12);
+      SetPanelInsets(FLPY6, FLPX6, FLPY6, FLPX6);
     end;
   end;
 end;
@@ -328,6 +346,50 @@ begin
   Inc(FModCount);
 end;
 
+class function TfpgMigPlatformDefaults.GetPixelUnitFactor(AIsHor: Boolean): Single;
+var
+  s: Single;
+  screenDPI: Integer;
+begin
+  if FInstance = nil then Initialize;
+
+  case FLogicalPixelBase of
+    BASE_FONT_SIZE:
+      begin
+        // TODO: Port font-based scaling from SwingComponentWrapper
+        Result := 1.0;
+      end;
+    BASE_SCALE_FACTOR:
+      begin
+        if AIsHor then
+          s := FHorScale
+        else
+          s := FVerScale;
+
+        // Use explicit scale factor if set (and not 1.0)
+        if abs(s - 1.0) > 1e-6 then
+        begin
+          Result := s;
+          Exit;
+        end;
+
+        // Otherwise, calculate based on DPI.
+        if (fpgApplication <> nil) then
+        begin
+          screenDPI := fpgApplication.Screen_dpi;
+          if screenDPI > 0 then
+            Result := screenDPI / GetBaseDPI
+          else
+            Result := 1.0; // Fallback if DPI is not available
+        end
+        else
+          Result := 1.0; // Fallback if fpgApplication is not ready
+      end;
+  else // BASE_REAL_PIXEL
+    Result := 1.0;
+  end;
+end;
+
 class procedure TfpgMigPlatformDefaults.SetRelatedGap(AX, AY: TfpgMigUnitValue);
 begin
   if FInstance = nil then
@@ -425,6 +487,38 @@ begin
   if FInstance = nil then
     Initialize;
   Result := FDefVGap;
+end;
+
+class function TfpgMigPlatformDefaults.GetPanelInsets(ASide: Integer): TfpgMigUnitValue;
+begin
+  if FInstance = nil then Initialize;
+  Result := FPanelInsets[ASide];
+end;
+
+class procedure TfpgMigPlatformDefaults.SetPanelInsets(ATop, ALeft, ABottom, ARight: TfpgMigUnitValue);
+begin
+  if FInstance = nil then Initialize;
+  if ATop <> nil then FPanelInsets[0] := ATop;
+  if ALeft <> nil then FPanelInsets[1] := ALeft;
+  if ABottom <> nil then FPanelInsets[2] := ABottom;
+  if ARight <> nil then FPanelInsets[3] := ARight;
+  Inc(FModCount);
+end;
+
+class function TfpgMigPlatformDefaults.GetDialogInsets(ASide: Integer): TfpgMigUnitValue;
+begin
+  if FInstance = nil then Initialize;
+  Result := FDialogInsets[ASide];
+end;
+
+class procedure TfpgMigPlatformDefaults.SetDialogInsets(ATop, ALeft, ABottom, ARight: TfpgMigUnitValue);
+begin
+  if FInstance = nil then Initialize;
+  if ATop <> nil then FDialogInsets[0] := ATop;
+  if ALeft <> nil then FDialogInsets[1] := ALeft;
+  if ABottom <> nil then FDialogInsets[2] := ABottom;
+  if ARight <> nil then FDialogInsets[3] := ARight;
+  Inc(FModCount);
 end;
 
 class procedure TfpgMigPlatformDefaults.SetMinimumButtonWidth(AWidth: TfpgMigUnitValue);
