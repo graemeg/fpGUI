@@ -1601,35 +1601,60 @@ var
   defGap: TfpgMigBoundSize;
   defGapArr: TfpgMigSizeArray;
   i, val: Integer;
-  specBefore, specAfter: TfpgMigDimConstraint;
   defIns: Boolean;
   firstGap, lastGap: TfpgMigUnitValue;
-  gapBefore, gapAfter: TfpgMigSizeArray;
-  wrapGapSize: TfpgMigBoundSize;
-  wgIx: Integer;
 begin
-  SetLength(Result, Length(ASpecs) + 1);
-  wgIx := 0;
+  // Get default grid gap from LC or PlatformDefaults
+  if AIsHor then
+    defGap := FLC.GetGridGapX
+  else
+    defGap := FLC.GetGridGapY;
 
-  defIns := True; // Simplified !hasDocks()
+  if defGap = nil then
+  begin
+    if AIsHor then
+      defGap := TfpgMigPlatformDefaults.GetDefaultHGap
+    else
+      defGap := TfpgMigPlatformDefaults.GetDefaultVGap;
+  end;
+
+  // Safely convert default gap to pixel sizes
+  if defGap <> nil then
+  begin
+    if defGap.Min <> nil then
+      defGapArr[SIZE_MIN] := Round(defGap.Min.GetPixels(ARefSize, FContainer, nil))
+    else
+      defGapArr[SIZE_MIN] := 0;
+
+    if defGap.Preferred <> nil then
+      defGapArr[SIZE_PREF] := Round(defGap.Preferred.GetPixels(ARefSize, FContainer, nil))
+    else
+      defGapArr[SIZE_PREF] := 0;
+
+    if defGap.Max <> nil then
+    begin
+      val := Round(defGap.Max.GetPixels(ARefSize, FContainer, nil));
+      defGapArr[SIZE_MAX] := IfThen(val = 0, INF, val);
+    end
+    else
+      defGapArr[SIZE_MAX] := INF;
+  end else
+  begin
+    defGapArr[0] := 0; defGapArr[1] := 0; defGapArr[2] := INF;
+  end;
+
+  SetLength(Result, Length(ASpecs) + 1);
+
+  // Get container insets for edge gaps
+  defIns := True; // Simplified: !hasDocks()
   firstGap := TfpgMigLayoutUtil.GetInsets(FLC, IfThen(AIsHor, 1, 0), defIns);
   lastGap  := TfpgMigLayoutUtil.GetInsets(FLC, IfThen(AIsHor, 3, 2), defIns);
 
   for i := 0 to High(Result) do
   begin
-    if i > 0 then
-      specBefore := ASpecs[i - 1]
-    else
-      specBefore := nil;
-
-    if i < Length(ASpecs) then
-      specAfter := ASpecs[i]
-    else
-      specAfter := nil;
-
-    // For now, only handle edge gaps (insets)
     if (i = 0) and (firstGap <> nil) then
     begin
+      val := Round(firstGap.GetPixels(ARefSize, FContainer, nil));
       Result[i][0] := val; Result[i][1] := val; Result[i][2] := val;
     end
     else if (i = High(Result)) and (lastGap <> nil) then
@@ -1640,28 +1665,17 @@ begin
     else
     begin
       // TODO: Handle gaps between columns/rows from DimConstraints
-      // For now, use a default.
-      if AIsHor then
-        defGap := TfpgMigPlatformDefaults.GetDefaultHGap
-      else
-        defGap := TfpgMigPlatformDefaults.GetDefaultVGap;
-
-      if defGap <> nil then
-      begin
-        defGapArr[SIZE_MIN] := Round(defGap.Min.GetPixels(ARefSize, FContainer, nil));
-        defGapArr[SIZE_PREF] := Round(defGap.Preferred.GetPixels(ARefSize, FContainer, nil));
-        val := Round(defGap.Max.GetPixels(ARefSize, FContainer, nil));
-        defGapArr[SIZE_MAX] := IfThen(val = 0, INF, val);
-      end else
-      begin
-        defGapArr[0] := 0; defGapArr[1] := 0; defGapArr[2] := INF;
-      end;
       Result[i] := defGapArr;
     end;
 
-    if ((specBefore <> nil) and specBefore.IsGapAfterPush) or
-       ((specAfter <> nil) and specAfter.IsGapBeforePush) then
-      AFillInPushGaps[i] := True;
+    // TODO: Port full gap push logic
+    if (i > 0) and (i < Length(ASpecs)) then
+    begin
+      if (ASpecs[i-1] <> nil) and ASpecs[i-1].IsGapAfterPush then
+        AFillInPushGaps[i] := True;
+      if (ASpecs[i] <> nil) and ASpecs[i].IsGapBeforePush then
+        AFillInPushGaps[i] := True;
+    end;
   end;
 end;
 
