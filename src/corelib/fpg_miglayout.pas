@@ -556,7 +556,7 @@ begin
   parH := par.Height;
 
   // Get gap constraints from adjacent components
-  if ABefore <> nil then
+  if (ABefore <> nil) and (ABeforeCC <> nil) then
   begin
     if AFlowX then
       befGap := ABeforeCC.Horizontal.GetGapAfter
@@ -566,7 +566,7 @@ begin
   else
     befGap := nil;
 
-  if AAfter <> nil then
+  if (AAfter <> nil) and (AAfterCC <> nil) then
   begin
     if AFlowX then
       aftGap := AAfterCC.Horizontal.GetGapBefore
@@ -1109,17 +1109,26 @@ begin
       else
         cwAft := nil;
 
-      cc := ACCMap[cw.Comp];
-      if cc <> nil then
-        tag := cc.GetTag
+      // Safely get CC from map - component might not have constraints
+      if (ACCMap <> nil) and ACCMap.ContainsKey(cw.Comp) then
+      begin
+        cc := ACCMap[cw.Comp];
+        if cc <> nil then
+          tag := cc.GetTag
+        else
+          tag := '';
+      end
       else
+      begin
+        cc := nil;
         tag := '';
+      end;
 
-      if cwBef <> nil then
+      if (cwBef <> nil) and (ACCMap <> nil) and ACCMap.ContainsKey(cwBef) then
         ccBef := ACCMap[cwBef]
       else
         ccBef := nil;
-      if cwAft <> nil then
+      if (cwAft <> nil) and (ACCMap <> nil) and ACCMap.ContainsKey(cwAft) then
         ccAft := ACCMap[cwAft]
       else
         ccAft := nil;
@@ -1891,6 +1900,10 @@ begin
       begin
         cw := grp.CompWraps[c];
 
+        // Skip components without constraints
+        if cw.FCC = nil then
+          Continue;
+
         // Get grow weight from component CC - line 788
         // Note: hasPush parameter not yet implemented, so we use component grow weight
         if AIsRows then
@@ -2389,6 +2402,11 @@ begin
   for i := 0 to ACompWraps.Count - 1 do
   begin
     cw := ACompWraps[i];
+
+    // Skip components without constraints
+    if cw.CC = nil then
+      Continue;
+
     cDc := cw.CC.GetDimConstraint(AIsHor);
 
     SetLength(resConstr, 3);
@@ -2475,7 +2493,10 @@ begin
   for i := 0 to ACompWraps.Count - 1 do
   begin
     cw := ACompWraps[i];
-    align := CorrectAlign(cw.CC, ARowAlign, AIsHor, AFromEnd);
+    if cw.CC <> nil then
+      align := CorrectAlign(cw.CC, ARowAlign, AIsHor, AFromEnd)
+    else
+      align := ARowAlign;
 
     cSizes := ASizes[i];  // Get [gapBef, size, gapAft] for this component
     gapBef := cSizes[0];
@@ -2605,6 +2626,8 @@ begin
   for i := 0 to ACompWraps.Count - 1 do
   begin
     cc := ACompWraps[i].CC;
+    if cc = nil then
+      Continue;
     dc := cc.GetDimConstraint(AIsHor);
     Result[i] := dc.Resize;
 
@@ -2780,7 +2803,10 @@ begin
   {$ENDIF}
 
   totSize := TfpgMigLayoutUtil.Sum(AAllSizes);
-  align := CorrectAlign(ACompWraps[0].CC, ARowAlign, AIsHor, AFromEnd);
+  if (ACompWraps.Count > 0) and (ACompWraps[0].CC <> nil) then
+    align := CorrectAlign(ACompWraps[0].CC, ARowAlign, AIsHor, AFromEnd)
+  else
+    align := ARowAlign;
 
   cSt := AStart;
   slack := ASize - totSize;
@@ -2825,6 +2851,13 @@ var
   align: TfpgMigUnitValue;
   dc: TfpgMigDimConstraint;
 begin
+  // Safety check - return row align if no component constraints
+  if ACC = nil then
+  begin
+    Result := ARowAlign;
+    Exit;
+  end;
+
   if AIsHor then
     align := ACC.Horizontal.GetAlign
   else
