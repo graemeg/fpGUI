@@ -14,7 +14,7 @@ unit fpg_mig_dimconstraint;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Math,
   fpg_base,
   fpg_mig_unitvalue, fpg_mig_boundsize, fpg_mig_resizeconstraint;
 
@@ -145,7 +145,7 @@ begin
 
   { Initialize resize properties }
   FGrowPriority := DEFAULT_PRIORITY;
-  FGrowWeight := 0.0;  // No grow by default (Java MigLayout v11 behavior)
+  FGrowWeight := NaN;  // Not set by default (Java null equivalent)
   FHasGrowWeight := False;
 
   FShrinkPriority := DEFAULT_PRIORITY;
@@ -217,7 +217,7 @@ end;
 
 procedure TfpgMigDimConstraint.ClearGrowWeight;
 begin
-  FGrowWeight := 0.0;
+  FGrowWeight := NaN;  // Clear means "not set" (Java null equivalent)
   FHasGrowWeight := False;
 end;
 
