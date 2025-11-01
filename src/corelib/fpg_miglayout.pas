@@ -868,6 +868,7 @@ end;
 procedure TfpgMigLinkedDimGroup.Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
 var
   Parent: TfpgWidgetBase;
+  i: Integer;
 begin
   FLStart := AStart;
   FLSize := ASize;
@@ -876,6 +877,23 @@ begin
     Exit;
 
   Parent := FCompWraps[0].Comp.Parent;
+
+  {$IFDEF MIGDEBUG}
+  // DEBUG: Show layout parameters BEFORE calling layout to avoid output corruption
+  if FIsHor then
+    Write('DEBUG: BEFORE Layout group (H) with ')
+  else
+    Write('DEBUG: BEFORE Layout group (V) with ');
+  Write(FCompWraps.Count, ' components at start=', AStart, ', size=', ASize);
+  Write(', linkType=', FLinkType, ', components: [');
+  for i := 0 to FCompWraps.Count - 1 do
+  begin
+    Write(FCompWraps[i].Comp.Name);
+    if i < FCompWraps.Count - 1 then Write(', ');
+  end;
+  WriteLn(']');
+  {$ENDIF}
+
   case FLinkType of
     TYPE_PARALLEL:
       TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
@@ -912,6 +930,10 @@ var
   tag: string;
   ccBef, ccAft: TfpgMigCC;
 begin
+  {$IFDEF MIGDEBUG}
+  WriteLn('DEBUG: ===== Creating TfpgMigGrid =====');
+  WriteLn('DEBUG: Container has ', AContainer.ComponentCount, ' children');
+  {$ENDIF}
   inherited Create;
   FContainer := AContainer;
   FLC := ALC;
@@ -973,6 +995,10 @@ begin
     // Encode grid position as integer key
     cellKey := EncodeCellKey(cellX, cellY);
 
+    {$IFDEF MIGDEBUG}
+    WriteLn('DEBUG: Placing widget "', child.Name, '" at cell (', cellX, ', ', cellY, ')');
+    {$ENDIF}
+
     // Get or create cell at this position
     if not FGrid.TryGetValue(cellKey, cell) then
     begin
@@ -991,6 +1017,9 @@ begin
       // Check for wrap
       if (wrap > 0) and (cellX >= wrap) then
       begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next row');
+        {$ENDIF}
         cellX := 0;
         cellY := cellY + 1;
       end;
@@ -1002,10 +1031,16 @@ begin
       // Check for wrap
       if (wrap > 0) and (cellY >= wrap) then
       begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next column');
+        {$ENDIF}
         cellY := 0;
         cellX := cellX + 1;
       end;
     end;
+    {$IFDEF MIGDEBUG}
+    WriteLn('DEBUG: Next cell position will be (', cellX, ', ', cellY, ')');
+    {$ENDIF}
   end;
 
   // Second pass: Build row and column indexes
@@ -1340,6 +1375,16 @@ begin
     end;
   end;
 
+  {$IFDEF MIGDEBUG}
+  Write('DEBUG: Row indexes: [');
+  for i := 0 to FRowIndexes.Count - 1 do
+  begin
+    Write(FRowIndexes[i]);
+    if i < FRowIndexes.Count - 1 then Write(', ');
+  end;
+  WriteLn(']');
+  {$ENDIF}
+
   // Sort column indexes using bubble sort
   for i := 0 to FColIndexes.Count - 2 do
   begin
@@ -1353,6 +1398,16 @@ begin
       end;
     end;
   end;
+
+  {$IFDEF MIGDEBUG}
+  Write('DEBUG: Column indexes: [');
+  for i := 0 to FColIndexes.Count - 1 do
+  begin
+    Write(FColIndexes[i]);
+    if i < FColIndexes.Count - 1 then Write(', ');
+  end;
+  WriteLn(']');
+  {$ENDIF}
 end;
 
 destructor TfpgMigGrid.Destroy;
@@ -1934,6 +1989,30 @@ begin
       end;
     end;
   end;
+
+  {$IFDEF MIGDEBUG}
+  // DEBUG: Show created dimension groups
+  if AIsRows then
+    WriteLn('DEBUG: Created ', Length(Result), ' row group lists')
+  else
+  begin
+    WriteLn('DEBUG: Created ', Length(Result), ' column group lists');
+    for i := 0 to High(Result) do
+    begin
+      WriteLn('DEBUG:   Column ', i, ' has ', Result[i].Count, ' groups:');
+      for ix := 0 to Result[i].Count - 1 do
+      begin
+        Write('DEBUG:     Group ', ix, ' has ', Result[i][ix].CompWraps.Count, ' components: [');
+        for cellKey := 0 to Result[i][ix].CompWraps.Count - 1 do
+        begin
+          Write(Result[i][ix].CompWraps[cellKey].Comp.Name);
+          if cellKey < Result[i][ix].CompWraps.Count - 1 then Write(', ');
+        end;
+        WriteLn(']');
+      end;
+    end;
+  end;
+  {$ENDIF}
 end;
 
 procedure TfpgMigGrid.LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
@@ -2521,6 +2600,19 @@ var
   align: TfpgMigUnitValue;
   cSt, slack, al: Integer;
 begin
+  {$IFDEF MIGDEBUG}
+  if AIsHor then
+  begin
+    Write('DEBUG: SetCompWrapBounds (H) for ', ACompWraps.Count, ' components, AStart=', AStart, ', ASize=', ASize, ', AAllSizes=[');
+    for i := 0 to Min(High(AAllSizes), 9) do
+    begin
+      Write(AAllSizes[i]);
+      if i < Min(High(AAllSizes), 9) then Write(', ');
+    end;
+    WriteLn(']');
+  end;
+  {$ENDIF}
+
   totSize := TfpgMigLayoutUtil.Sum(AAllSizes);
   align := CorrectAlign(ACompWraps[0].CC, ARowAlign, AIsHor, AFromEnd);
 
@@ -2551,6 +2643,10 @@ begin
     begin
       cSt := cSt + AAllSizes[bIx]; // gap
       Inc(bIx);
+      {$IFDEF MIGDEBUG}
+      if AIsHor then
+        WriteLn('DEBUG:   Setting ', cw.Comp.Name, ' at position ', cSt, ', size=', AAllSizes[bIx]);
+      {$ENDIF}
       cw.SetDimBounds(cSt, AAllSizes[bIx], AIsHor);
       cSt := cSt + AAllSizes[bIx];
       Inc(bIx);
