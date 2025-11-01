@@ -54,6 +54,7 @@ type
   TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
   TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
   TfpgMigBooleanArray = array of Boolean;
+  TfpgMigLinkedDimGroupListArray = array of TfpgMigLinkedDimGroupList;
 
 
   { CompWrap - wraps a TfpgWidgetBase with its CC constraint
@@ -272,6 +273,12 @@ type
       @param AIsRows True for row dimension, False for column dimension
       @returns Grow weights array or nil if no growth }
     function GetDefaultGrowWeights(AHasPush: Boolean; AIsRows: Boolean): TfpgMigFloatArray;
+
+    { Port of Grid.java divideIntoLinkedGroups() - line 1458
+      Creates LinkedDimGroup objects for each row/column
+      @param AIsRows True for rows, False for columns
+      @returns Array of group lists, one for each row/column }
+    function DivideIntoLinkedGroups(AIsRows: Boolean): TfpgMigLinkedDimGroupListArray;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -1004,10 +1011,11 @@ begin
   // Second pass: Build row and column indexes
   BuildIndexes;
 
-  // Third pass: Create dimension groups for size groups and end groups
-  BuildDimensionGroups;
+  // Third pass: Divide components into linked dimension groups (Port of Grid.java line 391-392)
+  FColGroupLists := DivideIntoLinkedGroups(False);  // Columns
+  FRowGroupLists := DivideIntoLinkedGroups(True);   // Rows
 
-  // Fourth pass: Calculate default grow weights (Port of Grid.java lines 385-386)
+  // Fourth pass: Calculate default grow weights (Port of Grid.java lines 394-395)
   // Note: hasPush parameters not yet implemented, passing False for now
   FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
   FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
@@ -1793,6 +1801,141 @@ begin
   Result := gwArr;
 end;
 
+{ Port of Grid.java divideIntoLinkedGroups() - line 1458 }
+function TfpgMigGrid.DivideIntoLinkedGroups(AIsRows: Boolean): TfpgMigLinkedDimGroupListArray;
+var
+  fromEnd: Boolean;
+  primIndexes, secIndexes: TfpgMigIntegerList;
+  primDCs: TfpgMigDimConstraintArray;
+  gIx, i, ix, cellKey: Integer;
+  cellX, cellY, span, linkType: Integer;
+  dc: TfpgMigDimConstraint;
+  groupList: TfpgMigLinkedDimGroupList;
+  cell: TfpgMigCell;
+  isPar: Boolean;
+  lg: TfpgMigLinkedDimGroup;
+  cwIx, glIx: Integer;
+  cw: TfpgMigCompWrap;
+  linkCtx: string;
+  foundList: Boolean;
+  group: TfpgMigLinkedDimGroup;
+begin
+  if AIsRows then
+    fromEnd := not FLC.IsTopToBottom
+  else
+    fromEnd := not TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
+
+  if AIsRows then
+  begin
+    primIndexes := FRowIndexes;
+    secIndexes := FColIndexes;
+    primDCs := FRowConstr.GetConstraints;
+  end
+  else
+  begin
+    primIndexes := FColIndexes;
+    secIndexes := FRowIndexes;
+    primDCs := FColConstr.GetConstraints;
+  end;
+
+  SetLength(Result, primIndexes.Count);
+
+  gIx := 0;
+  for i := 0 to primIndexes.Count - 1 do
+  begin
+    // Get dimension constraint for this row/column
+    if primIndexes[i] < Length(primDCs) then
+      dc := primDCs[primIndexes[i]]
+    else if Length(primDCs) > 0 then
+      dc := primDCs[High(primDCs)]
+    else
+      dc := nil;
+
+    groupList := TfpgMigLinkedDimGroupList.Create(True);
+    Result[gIx] := groupList;
+    Inc(gIx);
+
+    for ix := 0 to secIndexes.Count - 1 do
+    begin
+      // Get cell at this position
+      if AIsRows then
+      begin
+        cellX := secIndexes[ix];
+        cellY := primIndexes[i];
+      end
+      else
+      begin
+        cellX := primIndexes[i];
+        cellY := secIndexes[ix];
+      end;
+
+      cellKey := EncodeCellKey(cellX, cellY);
+      if not FGrid.TryGetValue(cellKey, cell) then
+        Continue;
+
+      if (cell = nil) or (cell.CompWraps.Count = 0) then
+        Continue;
+
+      // Get span for this cell
+      if AIsRows then
+        span := cell.SpanY
+      else
+        span := cell.SpanX;
+
+      // TODO: Convert span if needed for sparse grid (convertSpanToSparseGrid)
+
+      isPar := (cell.FlowX = AIsRows);
+
+      // If serial flow with multiple components or spanning cell, create group for whole cell
+      if ((not isPar) and (cell.CompWraps.Count > 1)) or (span > 1) then
+      begin
+        if isPar then
+          linkType := TfpgMigLinkedDimGroup.TYPE_PARALLEL
+        else
+          linkType := TfpgMigLinkedDimGroup.TYPE_SERIAL;
+
+        lg := TfpgMigLinkedDimGroup.Create('p,' + IntToStr(ix), span, linkType, not AIsRows, fromEnd);
+        for cwIx := 0 to cell.CompWraps.Count - 1 do
+          lg.AddCompWrap(cell.CompWraps[cwIx]);
+        groupList.Add(lg);
+      end
+      else
+      begin
+        // Create individual groups for each component
+        for cwIx := 0 to cell.CompWraps.Count - 1 do
+        begin
+          cw := cell.CompWraps[cwIx];
+
+          // TODO: Handle baseline alignment
+          linkCtx := '';  // For now, no special link context
+
+          // Find existing group with same link context
+          foundList := False;
+          for glIx := 0 to groupList.Count - 1 do
+          begin
+            group := groupList[glIx];
+            if group.FLinkCtx = linkCtx then
+            begin
+              group.AddCompWrap(cw);
+              foundList := True;
+              Break;
+            end;
+          end;
+
+          // Create new group if none found
+          if not foundList then
+          begin
+            linkType := TfpgMigLinkedDimGroup.TYPE_PARALLEL;
+            lg := TfpgMigLinkedDimGroup.Create(linkCtx, 1, linkType, not AIsRows, fromEnd);
+            lg.AddCompWrap(cw);
+            groupList.Add(lg);
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
 procedure TfpgMigGrid.LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
 var
   fromEnd: Boolean;
@@ -2063,13 +2206,11 @@ begin
       resConstr[2] := TfpgMigResizeConstraint.Create(200, 100.0, 50, NaN); // GAP_RC_CONST;
 
     SetLength(sz, 3);
-    p := cw.GetGaps(AIsHor, True);
-    if p <> nil then
-    begin
-      sz[0][SIZE_MIN] := p[SIZE_MIN];
-      sz[0][SIZE_PREF] := p[SIZE_PREF];
-      sz[0][SIZE_MAX] := p[SIZE_MAX];
-    end;
+    // For parallel layout, gaps are handled at row/column level, not component level
+    // Component gaps would double-count with container insets
+    sz[0][SIZE_MIN] := 0;
+    sz[0][SIZE_PREF] := 0;
+    sz[0][SIZE_MAX] := 0;
 
     p := cw.GetSizes(AIsHor);
     if p <> nil then
@@ -2079,13 +2220,9 @@ begin
       sz[1][SIZE_MAX] := p[SIZE_MAX];
     end;
 
-    p := cw.GetGaps(AIsHor, False);
-    if p <> nil then
-    begin
-      sz[2][SIZE_MIN] := p[SIZE_MIN];
-      sz[2][SIZE_PREF] := p[SIZE_PREF];
-      sz[2][SIZE_MAX] := p[SIZE_MAX];
-    end;
+    sz[2][SIZE_MIN] := 0;
+    sz[2][SIZE_PREF] := 0;
+    sz[2][SIZE_MAX] := 0;
 
 
     if (ADC <> nil) and ADC.IsFill then

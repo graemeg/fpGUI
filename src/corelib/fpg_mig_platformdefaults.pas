@@ -44,10 +44,10 @@ type
     class var FHorScale: Single;
     class var FVerScale: Single;
     class var FDefHUnit: Integer;  // Default horizontal unit (utLPX)
-    FDefVUnit: Integer;  // Default vertical unit (utLPY)
+    class var FDefVUnit: Integer;  // Default vertical unit (utLPY)
 
-    FPanelInsets: array[0..3] of TfpgMigUnitValue;
-    FDialogInsets: array[0..3] of TfpgMigUnitValue;
+    class var FPanelInsets: array[0..3] of TfpgMigUnitValue;
+    class var FDialogInsets: array[0..3] of TfpgMigUnitValue;
 
     { Predefined UnitValues for common gaps }
     class var FLPX6, FLPX7, FLPX11, FLPX12, FLPX16, FLPX18, FLPX20: TfpgMigUnitValue;
