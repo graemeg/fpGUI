@@ -1055,6 +1055,11 @@ begin
   FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
   FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
 
+  {$IFDEF MIGDEBUG}
+  WriteLn('DEBUG: FGrowXs length=', Length(FGrowXs), ', FillX=', FLC.IsFillX);
+  WriteLn('DEBUG: FGrowYs length=', Length(FGrowYs), ', FillY=', FLC.IsFillY);
+  {$ENDIF}
+
   // Calculate gaps now that the cells are filled
   ltr := TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
   for pair in FGrid do
@@ -2049,12 +2054,31 @@ begin
   else
     rowCols := FColGroupLists;
 
+  {$IFDEF MIGDEBUG}
+  if not AIsRows then  // Debug columns
+  begin
+    WriteLn('DEBUG: LayoutInOneDim (COLS) ARefSize=', ARefSize, ', ADefGrowW length=', Length(ADefGrowW));
+    if Length(ADefGrowW) > 0 then
+      WriteLn('DEBUG:   ADefGrowW[0]=', ADefGrowW[0]:0:2);
+  end;
+  {$ENDIF}
+
   rowColSizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, ADefGrowW, SIZE_PREF, ARefSize);
 
   {$IFDEF MIGDEBUG}
   if AIsRows then
   begin
     Write('DEBUG: LayoutInOneDim (ROWS) rowColSizes=[');
+    for i := 0 to Min(High(rowColSizes), 9) do
+    begin
+      Write(rowColSizes[i]);
+      if i < Min(High(rowColSizes), 9) then Write(', ');
+    end;
+    WriteLn(']');
+  end
+  else
+  begin
+    Write('DEBUG: LayoutInOneDim (COLS) rowColSizes=[');
     for i := 0 to Min(High(rowColSizes), 9) do
     begin
       Write(rowColSizes[i]);

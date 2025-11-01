@@ -225,6 +225,10 @@ begin
   begin
     isGrow := useLengthI < ABounds;
 
+    {$IFDEF MIGDEBUG}
+    WriteLn('DEBUG: CalculateSerial usedLength=', useLengthI, ', ABounds=', ABounds, ', isGrow=', isGrow, ', ADefPushWeights.Length=', Length(ADefPushWeights));
+    {$ENDIF}
+
     // Create a list with the available priorities
     prioList := TfpgMigIntegerList.Create;
     try
@@ -274,6 +278,11 @@ begin
             else
               prio := resC.ShrinkPrio;
 
+            {$IFDEF MIGDEBUG}
+            if (ABounds = 200) and (i = 1) and isGrow then
+              WriteLn('DEBUG: i=', i, ', curPrio=', curPrio, ', prio=', prio, ', match=', (curPrio = prio), ', force=', force, ', Grow=', resC.Grow:0:2);
+            {$ENDIF}
+
             if curPrio = prio then
             begin
               if isGrow then
@@ -294,8 +303,17 @@ begin
           end;
         end;
 
+        {$IFDEF MIGDEBUG}
+        if ABounds = 200 then
+          WriteLn('DEBUG: CalculateSerial curPrio=', curPrio, ', totWeight=', totWeight:0:2, ', force=', force);
+        {$ENDIF}
+
         if totWeight > 0.0 then
         begin
+          {$IFDEF MIGDEBUG}
+          if ABounds = 200 then
+            WriteLn('DEBUG: Grow loop starting: toChange=', (ABounds - usedLength):0:1, ', totWeight=', totWeight:0:2);
+          {$ENDIF}
           repeat
             toChange := ABounds - usedLength;
             hit := False;
@@ -307,10 +325,19 @@ begin
                 Break;
 
               weight := resizeWeight[i];
+              {$IFDEF MIGDEBUG}
+              if (ABounds = 200) and (i = 1) and (toChange > 100) then  // Column at index 1
+                WriteLn('DEBUG: Before check: i=', i, ', weight=', weight:0:2, ', isNaN=', IsNaN(weight), ', >0=', (weight > 0));
+              {$ENDIF}
               if not IsNaN(weight) and (weight > 0) then
               begin
                 sizeDelta := toChange * weight / totWeight;
                 newSize := lengths[i] + sizeDelta;
+                {$IFDEF MIGDEBUG}
+                if (ABounds = 200) and (i = 1) then  // Column at index 1
+                  WriteLn('DEBUG: i=', i, ', weight=', weight:0:2, ', sizeDelta=', sizeDelta:0:2,
+                          ', lengths[i]=', lengths[i]:0:1, ', newSize=', newSize:0:1);
+                {$ENDIF}
 
                 newSizeBounded := GetBrokenBoundary(newSize, ASizes[i][SIZE_MIN], ASizes[i][SIZE_MAX]);
                 if newSizeBounded <> NOT_SET then
@@ -334,6 +361,19 @@ begin
   end;
 
   // Convert float lengths to integer results
+  {$IFDEF MIGDEBUG}
+  if ABounds = 200 then  // Only debug for container width=200 (our test case)
+  begin
+    Write('DEBUG: CalculateSerial final lengths=[');
+    for i := 0 to Min(High(lengths), 5) do
+    begin
+      Write(lengths[i]:0:1);
+      if i < Min(High(lengths), 5) then Write(', ');
+    end;
+    WriteLn(']');
+  end;
+  {$ENDIF}
+
   Result := RoundSizes(lengths);
 end;
 
