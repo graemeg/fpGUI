@@ -2759,7 +2759,10 @@ begin
   for i := 0 to ACompWraps.Count - 1 do
   begin
     cw := ACompWraps[i];
-    cwSize := cw.GetSizeInclGaps(ASizeType, AIsHor);
+    // For parallel layout (row/column sizing), use size WITHOUT gaps.
+    // Gaps are handled separately by GetRowGaps to avoid double-counting.
+    // This matches the fix we made in LayoutParallel for positioning.
+    cwSize := cw.GetSizes(AIsHor)[ASizeType];
 
     {$IFDEF MIGDEBUG}
     if not AIsHor then  // Debug vertical/row sizing
