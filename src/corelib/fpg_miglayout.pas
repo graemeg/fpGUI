@@ -2051,6 +2051,19 @@ begin
 
   rowColSizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, ADefGrowW, SIZE_PREF, ARefSize);
 
+  {$IFDEF MIGDEBUG}
+  if AIsRows then
+  begin
+    Write('DEBUG: LayoutInOneDim (ROWS) rowColSizes=[');
+    for i := 0 to Min(High(rowColSizes), 9) do
+    begin
+      Write(rowColSizes[i]);
+      if i < Min(High(rowColSizes), 9) then Write(', ');
+    end;
+    WriteLn(']');
+  end;
+  {$ENDIF}
+
   // TODO: Port isDesignTime logic if needed
 
   if AAlign <> nil then
@@ -2075,6 +2088,11 @@ begin
     else
       curPos := curPos + rowColSizes[bIx];
 
+    {$IFDEF MIGDEBUG}
+    if AIsRows then
+      WriteLn('DEBUG:   Row ', i, ': curPos after gap=', curPos, ', gap=', rowColSizes[bIx]);
+    {$ENDIF}
+
     if (scIx >= 0) and (scIx < Length(primDCs)) then
       primDC := primDCs[scIx]
     else if Length(primDCs) > 0 then
@@ -2098,6 +2116,11 @@ begin
       curPos := curPos - rowSize
     else
       curPos := curPos + rowSize;
+
+    {$IFDEF MIGDEBUG}
+    if AIsRows then
+      WriteLn('DEBUG:   Row ', i, ': curPos after row=', curPos, ', rowSize=', rowSize);
+    {$ENDIF}
   end;
 end;
 
@@ -2737,6 +2760,11 @@ begin
   begin
     cw := ACompWraps[i];
     cwSize := cw.GetSizeInclGaps(ASizeType, AIsHor);
+
+    {$IFDEF MIGDEBUG}
+    if not AIsHor then  // Debug vertical/row sizing
+      WriteLn('DEBUG: GetTotalSizeParallel(V) comp=', cw.Comp.Name, ', cwSize=', cwSize);
+    {$ENDIF}
 
     if cwSize >= INF then
       Exit(INF);
