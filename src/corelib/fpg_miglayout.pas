@@ -2344,17 +2344,49 @@ end;
 
 class procedure TfpgMigGrid.SetCompWrapBoundsFromSizes(AParent: TfpgWidgetBase; const ASizes: TfpgMigSizeArrayArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
 var
-  allSizes: TfpgMigIntegerArray;
   i: Integer;
+  cw: TfpgMigCompWrap;
+  align: TfpgMigUnitValue;
+  cSizes: TfpgMigSizeArray;
+  gapBef, cSize, gapAft: Integer;
+  cSt, slack, al: Integer;
 begin
-  SetLength(allSizes, Length(ASizes) * 3);
-  for i := 0 to High(ASizes) do
+  // Port of Grid.java setCompWrapBounds() line 2126 (parallel layout version)
+  // Each component is positioned INDEPENDENTLY from the base start position,
+  // not serially accumulated like in serial layout
+  for i := 0 to ACompWraps.Count - 1 do
   begin
-    allSizes[(i * 3) + 0] := ASizes[i][0];
-    allSizes[(i * 3) + 1] := ASizes[i][1];
-    allSizes[(i * 3) + 2] := ASizes[i][2];
+    cw := ACompWraps[i];
+    align := CorrectAlign(cw.CC, ARowAlign, AIsHor, AFromEnd);
+
+    cSizes := ASizes[i];  // Get [gapBef, size, gapAft] for this component
+    gapBef := cSizes[0];
+    cSize := cSizes[1];
+    gapAft := cSizes[2];
+
+    // Position from base start, not accumulated
+    if AFromEnd then
+      cSt := AStart - gapBef
+    else
+      cSt := AStart + gapBef;
+
+    // Apply alignment within available slack
+    slack := ASize - cSize - gapBef - gapAft;
+    if (slack > 0) and (align <> nil) then
+    begin
+      al := Min(slack, Max(0, Round(align.GetPixels(slack, AParent, nil))));
+      if AFromEnd then
+        cSt := cSt - al
+      else
+        cSt := cSt + al;
+    end;
+
+    // Set bounds - each component at same base position (parallel layout)
+    if AFromEnd then
+      cw.SetDimBounds(cSt - cSize, cSize, AIsHor)
+    else
+      cw.SetDimBounds(cSt, cSize, AIsHor);
   end;
-  SetCompWrapBounds(AParent, allSizes, ACompWraps, ARowAlign, AStart, ASize, AIsHor, AFromEnd);
 end;
 
 class function TfpgMigGrid.GetGaps(ACompWraps: TfpgMigCompWrapList; AIsHor: Boolean): TfpgMigSizeArrayArray;
