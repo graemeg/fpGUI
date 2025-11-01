@@ -227,9 +227,14 @@ begin
   container.Realign;
 
   // The cell is the whole container, so widget should be at the bottom right
+  // With inclusive boundaries:
+  //   Container: [0, 199] x [0, 199] (200x200 pixels)
+  //   Usable area after 6px insets: [6, 193] x [6, 193] (188x188 pixels)
+  //   Widget (50x20) right-aligned: Right=193, Left=193-50+1=144
+  //   Widget (50x20) bottom-aligned: Bottom=193, Top=193-20+1=174
 
-  CheckEquals(container.Right - 50 - 6, w1.Left, 'w1.Left');  // 50 width, 6 padding
-  CheckEquals(container.Bottom - 20 - 6, w1.Top, 'w1.Top');   // 20 height, 6 padding
+  CheckEquals(144, w1.Left, 'w1.Left');
+  CheckEquals(174, w1.Top, 'w1.Top');
 
   container.Free;
 end;
