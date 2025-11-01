@@ -9,7 +9,8 @@ uses
   SysUtils,
   //TestFramework,
   fpcunit, testutils, testregistry,
-  fpg_base;
+  fpg_base,
+  fpg_widget;
 
 type
 
@@ -26,6 +27,15 @@ type
     procedure TestSetBottom;
     procedure TestUnionRect_Old_vs_New;
     procedure TestUnionRect;
+    procedure TestInclusiveBoundaries;
+    procedure TestPixelCoverage;
+  end;
+
+  TTestFPGWidget = class(TTestCase)
+  published
+    procedure TestWidgetInclusiveBoundaries;
+    procedure TestWidgetPixelCoverage;
+    procedure TestWidgetAlignment;
   end;
 
 
@@ -43,6 +53,7 @@ procedure RegisterTests;
 begin
   // TestFramework.RegisterTest('fpg_base', TTestFPGRect.Suite);
   RegisterTest(TTestFPGRect);
+  RegisterTest(TTestFPGWidget);
 end;
 
 
@@ -193,6 +204,123 @@ begin
   lRef.SetRect(10, 10, 60, 60);
   r1.UnionRect(r1, r2);
   CheckEqualsRect(lRef, r1, 'Failed on 1');
+end;
+
+procedure TTestFPGRect.TestInclusiveBoundaries;
+var
+  r: TfpgRect;
+begin
+  // fpGUI uses inclusive boundaries: Right = Left + Width - 1, Bottom = Top + Height - 1
+  // This means a rect at (0,0) with size (200,200) occupies pixels [0,199] x [0,199]
+
+  r.SetRect(0, 0, 200, 200);
+  CheckEquals(199, r.Right, 'Right should be Left + Width - 1');
+  CheckEquals(199, r.Bottom, 'Bottom should be Top + Height - 1');
+
+  r.SetRect(10, 20, 50, 30);
+  CheckEquals(59, r.Right, 'Right = 10 + 50 - 1 = 59');
+  CheckEquals(49, r.Bottom, 'Bottom = 20 + 30 - 1 = 49');
+
+  // Edge case: 1x1 rectangle
+  r.SetRect(5, 5, 1, 1);
+  CheckEquals(5, r.Right, 'A 1x1 rect at (5,5) has Right=5');
+  CheckEquals(5, r.Bottom, 'A 1x1 rect at (5,5) has Bottom=5');
+end;
+
+procedure TTestFPGRect.TestPixelCoverage;
+var
+  r: TfpgRect;
+  pixelCount: Integer;
+begin
+  // A rect should cover exactly Width * Height pixels
+
+  r.SetRect(10, 20, 50, 30);
+  // Horizontal coverage: pixels [10..59] = 50 pixels
+  pixelCount := r.Right - r.Left + 1;
+  CheckEquals(50, pixelCount, 'Horizontal pixel count should equal Width');
+
+  // Vertical coverage: pixels [20..49] = 30 pixels
+  pixelCount := r.Bottom - r.Top + 1;
+  CheckEquals(30, pixelCount, 'Vertical pixel count should equal Height');
+
+  // Total coverage
+  pixelCount := (r.Right - r.Left + 1) * (r.Bottom - r.Top + 1);
+  CheckEquals(1500, pixelCount, 'Total pixels = Width * Height = 50 * 30 = 1500');
+end;
+
+{ TTestFPGWidget }
+
+procedure TTestFPGWidget.TestWidgetInclusiveBoundaries;
+var
+  w: TfpgWidget;
+begin
+  fpgApplication.Initialize;
+
+  w := TfpgWidget.Create(nil);
+  try
+    // Widget boundaries should follow the same inclusive rules as TfpgRect
+    w.SetPosition(0, 0, 200, 200);
+    CheckEquals(199, w.Right, 'Widget.Right should be Left + Width - 1');
+    CheckEquals(199, w.Bottom, 'Widget.Bottom should be Top + Height - 1');
+
+    w.SetPosition(10, 20, 50, 30);
+    CheckEquals(59, w.Right, 'Widget.Right = 10 + 50 - 1 = 59');
+    CheckEquals(49, w.Bottom, 'Widget.Bottom = 20 + 30 - 1 = 49');
+  finally
+    w.Free;
+  end;
+end;
+
+procedure TTestFPGWidget.TestWidgetPixelCoverage;
+var
+  w: TfpgWidget;
+  pixelCount: Integer;
+begin
+  fpgApplication.Initialize;
+
+  w := TfpgWidget.Create(nil);
+  try
+    w.SetPosition(10, 20, 50, 30);
+
+    // Widget should occupy exactly Width * Height pixels with inclusive boundaries
+    pixelCount := (w.Right - w.Left + 1) * (w.Bottom - w.Top + 1);
+    CheckEquals(1500, pixelCount, 'Widget should occupy Width * Height pixels');
+  finally
+    w.Free;
+  end;
+end;
+
+procedure TTestFPGWidget.TestWidgetAlignment;
+var
+  container, widget: TfpgWidget;
+begin
+  fpgApplication.Initialize;
+
+  container := TfpgWidget.Create(nil);
+  try
+    container.SetPosition(0, 0, 200, 200);
+
+    widget := TfpgWidget.Create(container);
+    try
+      // Test right-bottom alignment with inclusive boundaries
+      // Container: [0, 199] x [0, 199]
+      // 6px insets: usable area [6, 193] x [6, 193]
+      // Widget 50x20 right-aligned: should end at pixel 193
+      //   widget.Right = 193
+      //   widget.Left = 193 - 50 + 1 = 144
+
+      widget.SetPosition(144, 174, 50, 20);
+
+      CheckEquals(193, widget.Right, 'Widget right edge at container.Right - 6');
+      CheckEquals(193, widget.Bottom, 'Widget bottom edge at container.Bottom - 6');
+      CheckEquals(144, widget.Left, 'Widget.Left = (container.Right - 6) - Width + 1');
+      CheckEquals(174, widget.Top, 'Widget.Top = (container.Bottom - 6) - Height + 1');
+    finally
+      widget.Free;
+    end;
+  finally
+    container.Free;
+  end;
 end;
 
 
