@@ -988,8 +988,8 @@ begin
     spanY := 1;
     if cc <> nil then
     begin
-      // TODO: Get span from CC.GridCell or CC.Span properties
-      // For now, default to 1x1
+      spanX := cc.CellSpanX;
+      spanY := cc.CellSpanY;
     end;
 
     // Encode grid position as integer key
@@ -1323,11 +1323,13 @@ end;
 procedure TfpgMigGrid.BuildIndexes;
 var
   pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
   cellKey: Integer;
   cellX, cellY: Integer;
   i, j: Integer;
   found: Boolean;
   tempRow, tempCol: Integer;
+  spanIdx: Integer;
 begin
   // Clear existing indexes
   FRowIndexes.Clear;
@@ -1337,33 +1339,43 @@ begin
   for pair in FGrid do
   begin
     cellKey := pair.Key;
+    cell := pair.Value;
+    if cell = nil then
+      Continue;
+
     DecodeCellKey(cellKey, cellX, cellY);
 
-    // Add row index if not already present
-    found := False;
-    for i := 0 to FRowIndexes.Count - 1 do
+    // Add row indexes for this cell and its span
+    for spanIdx := 0 to cell.SpanY - 1 do
     begin
-      if FRowIndexes[i] = cellY then
+      found := False;
+      for i := 0 to FRowIndexes.Count - 1 do
       begin
-        found := True;
-        Break;
+        if FRowIndexes[i] = (cellY + spanIdx) then
+        begin
+          found := True;
+          Break;
+        end;
       end;
+      if not found then
+        FRowIndexes.Add(cellY + spanIdx);
     end;
-    if not found then
-      FRowIndexes.Add(cellY);
 
-    // Add column index if not already present
-    found := False;
-    for i := 0 to FColIndexes.Count - 1 do
+    // Add column indexes for this cell and its span
+    for spanIdx := 0 to cell.SpanX - 1 do
     begin
-      if FColIndexes[i] = cellX then
+      found := False;
+      for i := 0 to FColIndexes.Count - 1 do
       begin
-        found := True;
-        Break;
+        if FColIndexes[i] = (cellX + spanIdx) then
+        begin
+          found := True;
+          Break;
+        end;
       end;
+      if not found then
+        FColIndexes.Add(cellX + spanIdx);
     end;
-    if not found then
-      FColIndexes.Add(cellX);
   end;
 
   // Sort row indexes using bubble sort (simple for small lists)
@@ -2652,12 +2664,28 @@ var
   fss: TfpgMigFlowSizeSpec;
   growW: TfpgMigFloatArray;
   sizes: TfpgMigIntegerArray;
+  gaps: TfpgMigSizeArrayArray;
+  i: Integer;
 begin
+  // For single-component spanning layouts, use zero gaps so the component fills the entire span
+  if ACompWraps.Count = 1 then
+  begin
+    SetLength(gaps, 2);  // gap before and gap after
+    gaps[0][SIZE_MIN] := 0;
+    gaps[0][SIZE_PREF] := 0;
+    gaps[0][SIZE_MAX] := INF;
+    gaps[1][SIZE_MIN] := 0;
+    gaps[1][SIZE_PREF] := 0;
+    gaps[1][SIZE_MAX] := INF;
+  end
+  else
+    gaps := GetGaps(ACompWraps, AIsHor);
+
   fss := MergeSizesGapsAndResConstrs(
             GetComponentResizeConstraints(ACompWraps, AIsHor),
             GetComponentGapPush(ACompWraps, AIsHor),
             GetComponentSizes(ACompWraps, AIsHor),
-            GetGaps(ACompWraps, AIsHor)
+            gaps
          );
 
   if (ADC <> nil) and ADC.IsFill then
