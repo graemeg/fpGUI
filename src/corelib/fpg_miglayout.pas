@@ -190,6 +190,9 @@ type
     { Build row and column index lists from grid }
     procedure BuildIndexes;
 
+    { Check if a cell position is occupied by a spanning component }
+    function IsCellOccupied(ACellX, ACellY: Integer): Boolean;
+
     { Build dimension groups from component constraints }
     procedure BuildDimensionGroups;
 
@@ -1023,6 +1026,20 @@ begin
         cellX := 0;
         cellY := cellY + 1;
       end;
+
+      // Skip cells occupied by spanning components
+      while IsCellOccupied(cellX, cellY) do
+      begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Cell (', cellX, ', ', cellY, ') is occupied, skipping...');
+        {$ENDIF}
+        cellX := cellX + 1;
+        if (wrap > 0) and (cellX >= wrap) then
+        begin
+          cellX := 0;
+          cellY := cellY + 1;
+        end;
+      end;
     end
     else
     begin
@@ -1036,6 +1053,20 @@ begin
         {$ENDIF}
         cellY := 0;
         cellX := cellX + 1;
+      end;
+
+      // Skip cells occupied by spanning components
+      while IsCellOccupied(cellX, cellY) do
+      begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Cell (', cellX, ', ', cellY, ') is occupied, skipping...');
+        {$ENDIF}
+        cellY := cellY + 1;
+        if (wrap > 0) and (cellY >= wrap) then
+        begin
+          cellY := 0;
+          cellX := cellX + 1;
+        end;
       end;
     end;
     {$IFDEF MIGDEBUG}
@@ -1425,6 +1456,34 @@ begin
   end;
   WriteLn(']');
   {$ENDIF}
+end;
+
+function TfpgMigGrid.IsCellOccupied(ACellX, ACellY: Integer): Boolean;
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  cellKey: Integer;
+  cellX, cellY: Integer;
+  x, y: Integer;
+begin
+  Result := False;
+
+  // Check all existing cells to see if any of them cover (ACellX, ACellY) with their span
+  for pair in FGrid do
+  begin
+    cellKey := pair.Key;
+    cell := pair.Value;
+    if cell = nil then
+      Continue;
+
+    DecodeCellKey(cellKey, cellX, cellY);
+
+    // Check if (ACellX, ACellY) falls within this cell's span
+    for x := cellX to cellX + cell.SpanX - 1 do
+      for y := cellY to cellY + cell.SpanY - 1 do
+        if (x = ACellX) and (y = ACellY) then
+          Exit(True);
+  end;
 end;
 
 destructor TfpgMigGrid.Destroy;

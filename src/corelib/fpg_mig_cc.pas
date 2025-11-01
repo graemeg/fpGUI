@@ -746,6 +746,7 @@ end;
 function TfpgMigCC.GrowX: TfpgMigCC;
 begin
   FHor.SetGrowPriority(100);
+  FHor.SetGrowWeight(100.0);  // Set default grow weight
   Result := Self;
 end;
 
@@ -901,6 +902,7 @@ end;
 function TfpgMigCC.GrowY: TfpgMigCC;
 begin
   FVer.SetGrowPriority(100);
+  FVer.SetGrowWeight(100.0);  // Set default grow weight
   Result := Self;
 end;
 
