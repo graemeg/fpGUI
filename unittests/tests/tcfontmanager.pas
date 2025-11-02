@@ -279,4 +279,8 @@ begin
   Check(True, 'Manager destroyed without errors');
 end;
 
+
+initialization
+  RegisterTests;
+
 end.

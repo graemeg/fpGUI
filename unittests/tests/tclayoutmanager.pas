@@ -67,4 +67,7 @@ begin
   end;
 end;
 
+initialization
+  RegisterTests;
+
 end.

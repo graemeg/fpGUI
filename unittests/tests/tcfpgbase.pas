@@ -324,4 +324,7 @@ begin
 end;
 
 
+initialization
+  RegisterTests;
+
 end.

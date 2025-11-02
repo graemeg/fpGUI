@@ -220,4 +220,7 @@ begin
   container.Free;
 end;
 
+initialization
+  RegisterTests;
+
 end.

@@ -247,4 +247,7 @@ begin
   RegisterTest(TTestFontCacheRemoval);
 end;
 
+initialization
+  RegisterTests;
+
 end.

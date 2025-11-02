@@ -296,4 +296,7 @@ begin
   RegisterTest(TTestFontDefinition);
 end;
 
+initialization
+  RegisterTests;
+
 end.

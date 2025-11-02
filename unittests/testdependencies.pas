@@ -34,13 +34,13 @@ implementation
 
 initialization
 //  tctreeview.RegisterTests;
-  tcfpgbase.RegisterTests;
-  tcfontmanager.RegisterTests;
-  tcfontcacheremoval.RegisterTests;
-  tcfontdefinition.RegisterTests;
-  tclayoutmanager.RegisterTests;
-  tcflowlayout.RegisterTests;
-  tcborderlayout.RegisterTests;
-  tcmiglayout.RegisterTests;
+//  tcfpgbase.RegisterTests;
+//  tcfontmanager.RegisterTests;
+//  tcfontcacheremoval.RegisterTests;
+//  tcfontdefinition.RegisterTests;
+//  tclayoutmanager.RegisterTests;
+//  tcflowlayout.RegisterTests;
+//  tcborderlayout.RegisterTests;
+//  tcmiglayout.RegisterTests;
   // tcmig_unitvalue registers automatically via testregistry
 end.
