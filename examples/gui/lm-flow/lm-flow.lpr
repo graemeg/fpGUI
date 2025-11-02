@@ -57,6 +57,7 @@ var
 begin
   frm := TSimpleFlowForm.Create(nil);
   frm.ShowModal;
+  frm.Free;
 end;
 
 procedure TMainForm.btnContainersClicked(Sender: TObject);
@@ -65,6 +66,7 @@ var
 begin
   frm := TFlowWithContainers.Create(nil);
   frm.ShowModal;
+  frm.Free;
 end;
 
 procedure TMainForm.btnAdvancedClicked(Sender: TObject);
@@ -73,6 +75,7 @@ var
 begin
   frm := TAdvancedFlowForm.Create(nil);
   frm.ShowModal;
+  frm.Free;
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);
