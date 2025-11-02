@@ -57,8 +57,11 @@ var
   frm: TBasicMigForm;
 begin
   frm := TBasicMigForm.Create(nil);
-  frm.ShowModal;
-  frm.Free;
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.btnAlignmentClicked(Sender: TObject);
@@ -66,8 +69,11 @@ var
   frm: TAlignmentMigForm;
 begin
   frm := TAlignmentMigForm.Create(nil);
-  frm.ShowModal;
-  frm.Free;
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.btnSpanningClicked(Sender: TObject);
@@ -75,8 +81,11 @@ var
   frm: TSpanningMigForm;
 begin
   frm := TSpanningMigForm.Create(nil);
-  frm.ShowModal;
-  frm.Free;
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.btnGrowthClicked(Sender: TObject);
@@ -84,8 +93,11 @@ var
   frm: TGrowthMigForm;
 begin
   frm := TGrowthMigForm.Create(nil);
-  frm.ShowModal;
-  frm.Free;
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.btnComplexClicked(Sender: TObject);
@@ -93,8 +105,11 @@ var
   frm: TComplexMigForm;
 begin
   frm := TComplexMigForm.Create(nil);
-  frm.ShowModal;
-  frm.Free;
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);

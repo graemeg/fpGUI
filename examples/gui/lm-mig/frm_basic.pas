@@ -13,6 +13,9 @@ type
 
   TBasicMigForm = class(TfpgForm)
   public
+    lbl1, lbl2, lbl3: TfpgLabel;
+    edt1, edt2, edt3: TfpgEdit;
+    btn1, btn2: TfpgButton;
     procedure AfterCreate; override;
   end;
 
@@ -21,9 +24,6 @@ implementation
 procedure TBasicMigForm.AfterCreate;
 var
   mig: TfpgMigLayoutManager;
-  lbl1, lbl2, lbl3: TfpgLabel;
-  edt1, edt2, edt3: TfpgEdit;
-  btn1, btn2: TfpgButton;
 begin
   inherited AfterCreate;
   Name := 'BasicMigForm';
