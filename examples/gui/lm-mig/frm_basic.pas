@@ -40,60 +40,50 @@ begin
   lbl1 := TfpgLabel.Create(Self);
   lbl1.Name := 'lbl1';
   lbl1.Text := 'Name:';
-  lbl1.Width := 80;
-  lbl1.Height := 20;
+  lbl1.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl1, TfpgMigCC.Create());
 
   edt1 := TfpgEdit.Create(Self);
   edt1.Name := 'edt1';
   edt1.Text := '';
-  edt1.Width := 200;
-  edt1.Height := 24;
+  edt1.PreferredSize := fpgSize(200, 24);
   mig.AddLayoutComponent(edt1, TfpgMigCC.Create().GrowX().AlignX('fill'));
 
-  // Row 2: Label + Edit
   lbl2 := TfpgLabel.Create(Self);
   lbl2.Name := 'lbl2';
   lbl2.Text := 'Email:';
-  lbl2.Width := 80;
-  lbl2.Height := 20;
+  lbl2.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl2, TfpgMigCC.Create());
 
   edt2 := TfpgEdit.Create(Self);
   edt2.Name := 'edt2';
   edt2.Text := '';
-  edt2.Width := 200;
-  edt2.Height := 24;
+  edt2.PreferredSize := fpgSize(200, 24);
   mig.AddLayoutComponent(edt2, TfpgMigCC.Create().GrowX().AlignX('fill'));
 
-  // Row 3: Label + Edit
   lbl3 := TfpgLabel.Create(Self);
   lbl3.Name := 'lbl3';
   lbl3.Text := 'Phone:';
-  lbl3.Width := 80;
-  lbl3.Height := 20;
+  lbl3.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl3, TfpgMigCC.Create());
 
   edt3 := TfpgEdit.Create(Self);
   edt3.Name := 'edt3';
   edt3.Text := '';
-  edt3.Width := 200;
-  edt3.Height := 24;
+  edt3.PreferredSize := fpgSize(200, 24);
   mig.AddLayoutComponent(edt3, TfpgMigCC.Create().GrowX().AlignX('fill'));
 
   // Row 4: Buttons (spanning 2 columns, right-aligned)
   btn1 := TfpgButton.Create(Self);
   btn1.Name := 'btn1';
   btn1.Text := 'OK';
-  btn1.Width := 80;
-  btn1.Height := 30;
+  btn1.PreferredSize := fpgSize(80, 30);
   mig.AddLayoutComponent(btn1, TfpgMigCC.Create().Tag('buttons'));
 
   btn2 := TfpgButton.Create(Self);
   btn2.Name := 'btn2';
   btn2.Text := 'Cancel';
-  btn2.Width := 80;
-  btn2.Height := 30;
+  btn2.PreferredSize := fpgSize(80, 30);
   mig.AddLayoutComponent(btn2, TfpgMigCC.Create().Tag('buttons'));
 end;
 
