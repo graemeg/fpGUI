@@ -218,7 +218,7 @@ begin
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.PreferredSize := fpgSize(50, 20);
 
   c := TfpgMigCC.Create;
   c.AlignX('right').AlignY('bottom');
