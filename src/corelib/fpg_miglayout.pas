@@ -302,6 +302,7 @@ type
     FLC: TfpgMigLC;
     FRowConstr: TfpgMigAC;
     FColConstr: TfpgMigAC;
+    FIsLayingOut: Boolean;  // Prevents recursive layout calls
   protected
     // TfpgBaseLayoutManager overrides
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
@@ -796,6 +797,18 @@ begin
     // When implemented, adjust compX, compY, compW, compH here
   end;
 
+  // Sanity check on bounds before transferring - prevent negative or zero sizes
+  if (compW < 1) or (compH < 1) then
+  begin
+    {$IFDEF MIGDEBUG}
+    WriteLn('DEBUG: TransferBounds - Invalid size for ', FComp.Name, ': W=', compW, ', H=', compH);
+    {$ENDIF}
+    Exit;
+  end;
+
+  {$IFDEF MIGDEBUG}
+  WriteLn('DEBUG: TransferBounds - calling SetPosition() for widget ' + FComp.Name);
+  {$ENDIF MIGDEBUG}
   // Transfer calculated bounds to the widget
   FComp.SetPosition(compX, compY, compW, compH);
 end;
@@ -916,7 +929,6 @@ end;
 constructor TfpgMigGrid.Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
   ARowConstr, AColConstr: TfpgMigAC; const ACCMap: TfpgMigCCMap);
 var
-  i, childCount: Integer;
   child: TfpgWidgetBase;
   cc: TfpgMigCC;
   cw: TfpgMigCompWrap;
@@ -927,15 +939,16 @@ var
   cellKey: Integer;
   cell: TfpgMigCell;
   ltr: Boolean;
-  pair: TfpgMigCellMap.TDictionaryPair;
+  gridPair: TfpgMigCellMap.TDictionaryPair;
   cws: TfpgMigCompWrapList;
   cwBef, cwAft: TfpgWidgetBase;
   tag: string;
   ccBef, ccAft: TfpgMigCC;
+  i: Integer;
 begin
   {$IFDEF MIGDEBUG}
   WriteLn('DEBUG: ===== Creating TfpgMigGrid =====');
-  WriteLn('DEBUG: Container has ', AContainer.ComponentCount, ' children');
+  WriteLn('DEBUG: Container has ', ACCMap.Count, ' managed widgets');
   {$ENDIF}
   inherited Create;
   FContainer := AContainer;
@@ -959,24 +972,27 @@ begin
     wrap := -1;  // No wrap
   end;
 
-  // First pass: Create CompWraps for all child widgets
+  // First pass: Create CompWraps for all managed widgets
+  // Iterate in component order to preserve widget order, but only process those in ACCMap
   cellX := 0;
   cellY := 0;
 
-  childCount := AContainer.ComponentCount;
-  for i := 0 to childCount - 1 do
+  if ACCMap <> nil then
   begin
-    child := TfpgWidgetBase(AContainer.Components[i]);
+    // Iterate through container's components in order
+    for i := 0 to AContainer.ComponentCount - 1 do
+    begin
+      // Safe check: is this component a widget AND in our managed map?
+      if not (AContainer.Components[i] is TfpgWidgetBase) then
+        Continue;
 
-    // Skip if not a widget
-    if child = nil then
-      Continue;
+      child := TfpgWidgetBase(AContainer.Components[i]);
 
-    // TODO: Handle visibility check when we determine correct property
+      // Only process widgets that were added to ACCMap (filtered by iterator in DoLayout)
+      if not ACCMap.ContainsKey(child) then
+        Continue;
 
-    // Get component constraints from map
-    cc := nil;
-    if (ACCMap <> nil) and ACCMap.ContainsKey(child) then
+      // Get the constraint for this widget (may be nil)
       cc := ACCMap[child];
 
     // Create CompWrap for this widget
@@ -999,7 +1015,7 @@ begin
     cellKey := EncodeCellKey(cellX, cellY);
 
     {$IFDEF MIGDEBUG}
-    WriteLn('DEBUG: Placing widget "', child.Name, '" at cell (', cellX, ', ', cellY, ')');
+    WriteLn('DEBUG: Placing widget "', child.Name, '" [' + child.ClassType.ClassName + '] at cell (', cellX, ', ', cellY, ')');
     {$ENDIF}
 
     // Get or create cell at this position
@@ -1072,7 +1088,8 @@ begin
     {$IFDEF MIGDEBUG}
     WriteLn('DEBUG: Next cell position will be (', cellX, ', ', cellY, ')');
     {$ENDIF}
-  end;
+    end;  // end for i := 0 to AContainer.ComponentCount - 1
+  end;  // end if ACCMap <> nil
 
   // Second pass: Build row and column indexes
   BuildIndexes;
@@ -1093,9 +1110,9 @@ begin
 
   // Calculate gaps now that the cells are filled
   ltr := TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
-  for pair in FGrid do
+  for gridPair in FGrid do
   begin
-    cell := pair.Value;
+    cell := gridPair.Value;
     cws := cell.CompWraps;
     for i := 0 to cws.Count - 1 do
     begin
@@ -2138,6 +2155,10 @@ begin
   else
     rowCols := FColGroupLists;
 
+  // Safety check - if fss is nil, we can't proceed with layout
+  if fss = nil then
+    Exit;
+
   {$IFDEF MIGDEBUG}
   if not AIsRows then  // Debug columns
   begin
@@ -2191,6 +2212,16 @@ begin
     bIx := i shl 1;
     bIx2 := bIx + 1;
 
+    // Safety check - ensure array indices are within bounds
+    if bIx2 >= Length(rowColSizes) then
+    begin
+      {$IFDEF MIGDEBUG}
+      if AIsRows then
+        WriteLn('DEBUG: WARNING - bIx2=', bIx2, ' >= Length(rowColSizes)=', Length(rowColSizes), ', skipping row ', i);
+      {$ENDIF}
+      Continue;
+    end;
+
     if fromEnd then
       curPos := curPos - rowColSizes[bIx]
     else
@@ -2210,14 +2241,18 @@ begin
 
     rowSize := rowColSizes[bIx2];
 
-    for j := 0 to linkedGroups.Count - 1 do
+    // Safety check - linkedGroups could be nil
+    if linkedGroups <> nil then
     begin
-      group := linkedGroups[j];
-      groupSize := rowSize;
-      if group.Span > 1 then
-        groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
+      for j := 0 to linkedGroups.Count - 1 do
+      begin
+        group := linkedGroups[j];
+        groupSize := rowSize;
+        if group.Span > 1 then
+          groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
 
-      group.Layout(primDC, curPos, groupSize, group.Span);
+        group.Layout(primDC, curPos, groupSize, group.Span);
+      end;
     end;
 
     if fromEnd then
@@ -3023,6 +3058,7 @@ begin
 
   FRowConstr := TfpgMigAC.Create;
   FColConstr := TfpgMigAC.Create;
+  FIsLayingOut := False;
 end;
 
 destructor TfpgMigLayoutManager.Destroy;
@@ -3043,30 +3079,49 @@ var
   ccMap: TfpgMigCCMap;
   grid: TfpgMigGrid;
   bounds: array[0..3] of Integer;
-  i: Integer;
-  child: TfpgWidgetBase;
+  Iterator: ILayoutIterator;
+  child: TfpgWidget;
   constraint: TfpgLayoutConstraint;
   cc: TfpgMigCC;
 begin
   if AContainer = nil then
     Exit;
 
+  // Prevent recursive layout calls
+  if FIsLayingOut then
+    Exit;
+
+  FIsLayingOut := True;
+  try
+
+  {$IFDEF MIGDEBUG}
+  Writeln('>> MigLayout DoLayout()');
+  {$ENDIF MIGDEBUG}
+
+  // Get iterator for proper widget traversal (skips native window, hidden widgets, etc.)
+  Iterator := GetIterator(AContainer);
+  if not Assigned(Iterator) then
+    Exit;
+
   // 1. Build CC map from widgets and their constraints
+  // Add ALL valid widgets (filtered by iterator), even those without constraints
   ccMap := TfpgMigCCMap.Create;
   try
-    for i := 0 to AContainer.ComponentCount - 1 do
+    while Iterator.HasNext do
     begin
-      child := TfpgWidgetBase(AContainer.Components[i]);
+      child := Iterator.Next as TfpgWidget;
       if child = nil then
         Continue;
 
-      // Get layout constraint if it exists
+      // Get layout constraint if it exists (can be nil for default behavior)
       constraint := GetConstraint(child);
       if (constraint <> nil) and (constraint is TfpgMigCC) then
-      begin
-        cc := TfpgMigCC(constraint);
-        ccMap.Add(child, cc);
-      end;
+        cc := TfpgMigCC(constraint)
+      else
+        cc := nil;  // Widget will use default layout behavior
+
+      // Add to map - Grid will only process widgets in this map
+      ccMap.Add(child, cc);
     end;
 
     // 2. Create Grid instance using stored constraints
@@ -3087,6 +3142,13 @@ begin
     end;
   finally
     ccMap.Free;
+  end;
+
+  finally
+    FIsLayingOut := False;
+    {$IFDEF MIGDEBUG}
+    Writeln('<< MigLayout DoLayout()');
+    {$ENDIF MIGDEBUG}
   end;
 end;
 
