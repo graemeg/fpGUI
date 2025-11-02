@@ -1794,6 +1794,8 @@ begin
   inherited Create(AOwner);
   FWidth := 10;
   FHeight := 10;
+  FMinWidth := 2;   // Prevent widgets from becoming invisible
+  FMinHeight := 2;
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;
