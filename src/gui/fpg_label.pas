@@ -49,6 +49,7 @@ type
     FText: TfpgString;
     FFont: TfpgFontResourceBase;
     FTextHeight: integer;
+    procedure   DoGetPreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
     property    WrapText: boolean read FWrapText write SetWrapText default False;
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
@@ -228,6 +229,36 @@ begin
   FText := '';
   FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
+end;
+
+procedure TfpgCustomLabel.DoGetPreferredSize(var ASize: TfpgSize);
+var
+  CalculatedW, CalculatedH: integer;
+begin
+  // 1. First, determine the natural size based on content (text and font).
+  if Assigned(FFont) then
+  begin
+    CalculatedW := FFont.GetTextWidth(FText);
+    CalculatedH := FFont.GetHeight;
+  end
+  else
+  begin
+    // As a fallback, use the minimum size.
+    CalculatedW := FMinWidth;
+    CalculatedH := FMinHeight;
+  end;
+
+  // 2. Use the explicitly set PreferredSize.W, otherwise use the calculated width.
+  if FPreferredSize.W > 0 then
+    ASize.W := FPreferredSize.W
+  else
+    ASize.W := CalculatedW;
+
+  // 3. Use the explicitly set PreferredSize.H, otherwise use the calculated height.
+  if FPreferredSize.H > 0 then
+    ASize.H := FPreferredSize.H
+  else
+    ASize.H := CalculatedH;
 end;
 
 procedure TfpgCustomLabel.HandlePaint;
