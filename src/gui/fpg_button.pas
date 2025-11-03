@@ -26,6 +26,7 @@ interface
 uses
   Classes,
   SysUtils,
+  Math,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -78,6 +79,7 @@ type
     FAllowMultiLineText: boolean;
     procedure   SetShowImage(AValue: Boolean);
     procedure   CalculatePositions(var ImageX, ImageY, TextX, TextY : integer);
+    procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -405,6 +407,73 @@ begin
       ImageX := 0;
       TextY := (Height - textHeight) div 2;
     end;
+  end;
+end;
+
+procedure TfpgBaseButton.DoCalculatePreferredSize(var ASize: TfpgSize);
+var
+  textWidth, textHeight: integer;
+  imageWidth, imageHeight: integer;
+  spacing: integer;
+const
+  MinBorderMargin = 6; // 3 pixels on each side for borders/focus rect
+begin
+  // Calculate text dimensions
+  if (FText = '') or (not Assigned(FFont)) then
+  begin
+    textWidth := 0;
+    textHeight := 0;
+  end
+  else
+  begin
+    textWidth := FFont.GetTextWidth(FText);
+    textHeight := FFont.GetHeight;
+  end;
+
+  // Calculate image dimensions if visible
+  if FShowImage and Assigned(FImage) then
+  begin
+    imageWidth := FImage.Width;
+    imageHeight := FImage.Height;
+  end
+  else
+  begin
+    imageWidth := 0;
+    imageHeight := 0;
+  end;
+
+  // Calculate spacing between image and text
+  if (imageWidth > 0) and (textWidth > 0) then
+  begin
+    if FImageSpacing = -1 then
+      spacing := 6  // Default spacing when auto-calculated
+    else
+      spacing := FImageSpacing;
+  end
+  else
+    spacing := 0;
+
+  // Calculate preferred size based on image layout
+  case FImageLayout of
+    ilImageLeft, ilImageRight:
+      begin
+        // Horizontal layout: image and text side by side
+        ASize.W := imageWidth + spacing + textWidth + MinBorderMargin;
+        ASize.H := Max(imageHeight, textHeight) + MinBorderMargin;
+      end;
+    ilImageTop, ilImageBottom:
+      begin
+        // Vertical layout: image and text stacked
+        ASize.W := Max(imageWidth, textWidth) + MinBorderMargin;
+        ASize.H := imageHeight + spacing + textHeight + MinBorderMargin;
+      end;
+  end;
+
+  // Ensure minimum size if nothing set
+  if (ASize.W = 0) and (ASize.H = 0) then
+  begin
+    ASize.W := 80;  // Default button width
+    ASize.H := 24;  // Default button height
   end;
 end;
 
