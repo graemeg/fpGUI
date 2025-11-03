@@ -49,7 +49,7 @@ type
     FText: TfpgString;
     FFont: TfpgFontResourceBase;
     FTextHeight: integer;
-    procedure   DoGetPreferredSize(var ASize: TfpgSize); override;
+    procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
     property    WrapText: boolean read FWrapText write SetWrapText default False;
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
@@ -231,7 +231,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCustomLabel.DoGetPreferredSize(var ASize: TfpgSize);
+procedure TfpgCustomLabel.DoCalculatePreferredSize(var ASize: TfpgSize);
 var
   CalculatedW, CalculatedH: integer;
 begin

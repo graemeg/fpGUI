@@ -552,7 +552,7 @@ type
     // TODO: Maybe rename this to DoAllocateNativeWindow() or DoCreateNativeWindow() - it will be more accurate
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
-    procedure   DoGetPreferredSize(var ASize: TfpgSize); virtual;
+    procedure   DoCalculatePreferredSize(var ASize: TfpgSize); virtual;
     procedure   DoPreferredSizeChanged; virtual;
     //procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDragStartDetected; virtual;
@@ -1823,7 +1823,7 @@ begin
   DoUpdatePosition;
 end;
 
-procedure TfpgWidgetBase.DoGetPreferredSize(var ASize: TfpgSize);
+procedure TfpgWidgetBase.DoCalculatePreferredSize(var ASize: TfpgSize);
 begin
   // Base class default: return a sensible default size when not explicitly set
   // Subclasses (like TfpgLabel) override this to calculate from content
@@ -1835,7 +1835,7 @@ begin
   // If explicitly set by developer, return that (allows clipping content)
   // Otherwise, call virtual method to calculate from content
   if (FPreferredSize.W = 0) and (FPreferredSize.H = 0) then
-    DoGetPreferredSize(Result)  // Virtual - widgets can override
+    DoCalculatePreferredSize(Result)  // Virtual - widgets can override
   else
     Result := FPreferredSize;   // Explicit value overrides calculation
 end;
