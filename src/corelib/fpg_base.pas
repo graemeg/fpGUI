@@ -525,6 +525,8 @@ type
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+    function    GetPreferredSize: TfpgSize;
+    procedure   SetPreferredSize(const AValue: TfpgSize);
   protected
     FParent: TfpgWidgetBase;
     FMouseCursor: TMouseCursor;
@@ -540,6 +542,7 @@ type
     FMinHeight: TfpgCoord;
     FMaxHeight: TfpgCoord;
     FMaxWidth: TfpgCoord;
+    FPreferredSize: TfpgSize;
     FCanvas: TfpgCanvasBase;
     FDirtyFlags: TfpgWidgetDirtyFlags;
     FOnDragStartDetected: TNotifyEvent;
@@ -550,6 +553,7 @@ type
     procedure   DoAllocateWindowHandle; virtual; abstract;
     procedure   DoUpdatePosition; virtual; abstract;
     procedure   DoGetPreferredSize(var ASize: TfpgSize); virtual;
+    procedure   DoPreferredSizeChanged; virtual;
     //procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDragStartDetected; virtual;
     procedure   AddChild(AChild: TfpgWidgetBase);
@@ -574,7 +578,6 @@ type
     function    Bottom: TfpgCoord;
     procedure   UpdatePosition;
     procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
-    procedure   GetPreferredSize(var ASize: TfpgSize);
     procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
     procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord); virtual;
@@ -601,6 +604,7 @@ type
     property    MinHeight: TfpgCoord read FMinHeight write SetMinHeight;
     property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
     property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
+    property    PreferredSize: TfpgSize read GetPreferredSize write SetPreferredSize;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWidgetBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
@@ -1796,6 +1800,7 @@ begin
   FHeight := 10;
   FMinWidth := 2;   // Prevent widgets from becoming invisible
   FMinHeight := 2;
+  FPreferredSize.SetSize(0, 0);  // 0 = not explicitly set, calculate from content
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;
@@ -1818,14 +1823,35 @@ begin
   DoUpdatePosition;
 end;
 
-procedure TfpgWidgetBase.GetPreferredSize(var ASize: TfpgSize);
-begin
-  DoGetPreferredSize(ASize);
-end;
-
 procedure TfpgWidgetBase.DoGetPreferredSize(var ASize: TfpgSize);
 begin
-  ASize.SetSize(FWidth, FHeight);
+  // Base class default: return a sensible default size when not explicitly set
+  // Subclasses (like TfpgLabel) override this to calculate from content
+  ASize.SetSize(10, 10);
+end;
+
+function TfpgWidgetBase.GetPreferredSize: TfpgSize;
+begin
+  // If explicitly set by developer, return that (allows clipping content)
+  // Otherwise, call virtual method to calculate from content
+  if (FPreferredSize.W = 0) and (FPreferredSize.H = 0) then
+    DoGetPreferredSize(Result)  // Virtual - widgets can override
+  else
+    Result := FPreferredSize;   // Explicit value overrides calculation
+end;
+
+procedure TfpgWidgetBase.SetPreferredSize(const AValue: TfpgSize);
+begin
+  if (FPreferredSize.W <> AValue.W) or (FPreferredSize.H <> AValue.H) then
+  begin
+    FPreferredSize := AValue;
+    DoPreferredSizeChanged;
+  end;
+end;
+
+procedure TfpgWidgetBase.DoPreferredSizeChanged;
+begin
+  // Base class does nothing - subclasses can override
 end;
 
 procedure TfpgWidgetBase.UpdateWindowPosition;

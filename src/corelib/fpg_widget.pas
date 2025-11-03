@@ -66,8 +66,6 @@ type
     procedure   SetFormDesigner(const AValue: TObject);
     procedure   SetAlign(const AValue: TAlign);
     procedure   SetLayoutManager(const AValue: ILayoutManager);
-    function    GetPreferredSize: TfpgSize;
-    procedure   SetPreferredSize(const AValue: TfpgSize);
   protected
     procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     function    GetWindow: TfpgNativeWindow; reintroduce;
@@ -112,7 +110,6 @@ type
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
-    FPreferredSize: TfpgSize;
     FOnClickPending: Boolean;
     FIgnoreDblClicks: Boolean;
     procedure   DoAllocateWindowHandle; override;
@@ -132,7 +129,7 @@ type
     function    GetCanvas: TfpgCanvas; reintroduce;
     function    CreateCanvas: TfpgCanvasBase; virtual;
     procedure   DoUpdatePosition; override;
-    procedure   DoGetPreferredSize(var ASize: TfpgSize); override;
+    procedure   DoPreferredSizeChanged; override;
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
@@ -221,7 +218,6 @@ type
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    DropHandler: TfpgDropHandler read GetDropHandler write SetDropHandler;
     property    LayoutManager: ILayoutManager read FLayoutManager write SetLayoutManager;
-    property    PreferredSize: TfpgSize read GetPreferredSize write SetPreferredSize;
   end;
 
 
@@ -240,27 +236,12 @@ uses
   fpg_window, { for Finding the Toplevel Window }
   fpg_utils;
 
-function TfpgWidget.GetPreferredSize: TfpgSize;
+procedure TfpgWidget.DoPreferredSizeChanged;
 begin
-  Result := FPreferredSize;
-end;
-
-procedure TfpgWidget.SetPreferredSize(const AValue: TfpgSize);
-begin
-  if (FPreferredSize.W <> AValue.W) or (FPreferredSize.H <> AValue.H) then
-  begin
-    FPreferredSize := AValue;
-    if Assigned(Parent) and Assigned(Parent.LayoutManager) then
-      Parent.LayoutManager.InvalidateLayout(Parent);
-  end;
-end;
-
-procedure TfpgWidget.DoGetPreferredSize(var ASize: TfpgSize);
-begin
-  if (FPreferredSize.W > 0) and (FPreferredSize.H > 0) then
-    ASize := FPreferredSize
-  else
-    inherited DoGetPreferredSize(ASize);
+  inherited DoPreferredSizeChanged;
+  // Invalidate parent's layout when our preferred size changes
+  if Assigned(Parent) and Assigned(Parent.LayoutManager) then
+    Parent.LayoutManager.InvalidateLayout(Parent);
 end;
 
 

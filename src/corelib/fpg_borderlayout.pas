@@ -152,10 +152,10 @@ begin
 
   bounds := (AContainer as TfpgWidget).GetClientRect;
 
-  if Assigned(north) then begin north.GetPreferredSize(tmpSize); north_h := tmpSize.H; end else north_h := 0;
-  if Assigned(south) then begin south.GetPreferredSize(tmpSize); south_h := tmpSize.H; end else south_h := 0;
-  if Assigned(east) then begin east.GetPreferredSize(tmpSize); east_w := tmpSize.W; end else east_w := 0;
-  if Assigned(west) then begin west.GetPreferredSize(tmpSize); west_w := tmpSize.W; end else west_w := 0;
+  if Assigned(north) then begin tmpSize := north.PreferredSize; north_h := tmpSize.H; end else north_h := 0;
+  if Assigned(south) then begin tmpSize := south.PreferredSize; south_h := tmpSize.H; end else south_h := 0;
+  if Assigned(east) then begin tmpSize := east.PreferredSize; east_w := tmpSize.W; end else east_w := 0;
+  if Assigned(west) then begin tmpSize := west.PreferredSize; west_w := tmpSize.W; end else west_w := 0;
 
   top := bounds.Top + FVGap;
   left := bounds.Left + FHGap;
@@ -216,11 +216,11 @@ begin
       w := iterator.Next as TfpgWidget;
       constraint := GetConstraintOrDefault(w) as TfpgBorderLayoutConstraint;
       case constraint.Region of
-        blrNorth: begin north := w; w.GetPreferredSize(north_ps); end;
-        blrSouth: begin south := w; w.GetPreferredSize(south_ps); end;
-        blrWest:  begin west := w; w.GetPreferredSize(west_ps); end;
-        blrEast:  begin east := w; w.GetPreferredSize(east_ps); end;
-        blrCenter: begin center := w; w.GetPreferredSize(center_ps); end;
+        blrNorth: begin north := w; north_ps := w.PreferredSize; end;
+        blrSouth: begin south := w; south_ps := w.PreferredSize; end;
+        blrWest:  begin west := w; west_ps := w.PreferredSize; end;
+        blrEast:  begin east := w; east_ps := w.PreferredSize; end;
+        blrCenter: begin center := w; center_ps := w.PreferredSize; end;
       end;
     end;
   end;

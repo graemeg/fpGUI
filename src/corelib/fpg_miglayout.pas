@@ -446,9 +446,7 @@ begin
 
       SIZE_PREF:
         begin
-          sz.W := 0;
-          sz.H := 0;
-          FComp.GetPreferredSize(sz);
+          sz := FComp.PreferredSize;
           if AIsHor then
             Result := sz.W
           else

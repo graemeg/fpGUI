@@ -157,7 +157,7 @@ begin
   while Iterator.HasNext do
   begin
     w := Iterator.Next as TfpgWidget;
-    w.GetPreferredSize(prefSize);
+    prefSize := w.PreferredSize;
 
     if (Rows[rowIdx].Width > 0) and (Rows[rowIdx].Width + FHGap + prefSize.W > ContainerWidth - FHGap * 2) then
     begin
@@ -218,7 +218,7 @@ begin
     for j := 1 to Rows[i].ComponentCount do
     begin
       w := Iterator.Next as TfpgWidget;
-      w.GetPreferredSize(prefSize);
+      prefSize := w.PreferredSize;
       w.SetPosition(x, y, prefSize.W, prefSize.H);
       x := x + prefSize.W + FHGap;
     end;
@@ -252,7 +252,7 @@ begin
   while Iterator.HasNext do
   begin
     w := Iterator.Next as TfpgWidget;
-    w.GetPreferredSize(prefSize);
+    prefSize := w.PreferredSize;
     if totalWidth > 0 then
       totalWidth := totalWidth + FHGap;
     totalWidth := totalWidth + prefSize.W;
