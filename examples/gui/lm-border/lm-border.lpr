@@ -1,4 +1,4 @@
-program lm-border;
+program lmborder;
 
 {$mode objfpc}{$H+}
 
@@ -8,8 +8,6 @@ uses
   fpg_layoutmanager, fpg_borderlayout;
 
 type
-
-  { TMainForm }
 
   TMainForm = class(TfpgForm)
   public
