@@ -146,7 +146,7 @@ begin
   Iterator := GetIterator(AContainer);
   if not Assigned(Iterator) then Exit;
 
-  ContainerWidth := (AContainer as TfpgWidget).Width;
+  ContainerWidth := (AContainer as TfpgWidget).ActualWidth;
   SetLength(Rows, 1);
   rowIdx := 0;
   Rows[rowIdx].Width := 0;
@@ -186,8 +186,8 @@ begin
   // Determine starting Y position
   case FVAlignment of
     flvaTop: startY := FVGap;
-    flvaCenter: startY := (AContainer.Height - totalRowHeight) div 2;
-    flvaBottom: startY := AContainer.Height - totalRowHeight - FVGap;
+    flvaCenter: startY := (AContainer.ActualHeight - totalRowHeight) div 2;
+    flvaBottom: startY := AContainer.ActualHeight - totalRowHeight - FVGap;
   else
     startY := FVGap;
   end;

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -242,33 +242,33 @@ begin
   end;
   if FImageLayout in [ilImageLeft, ilImageRight] then
   begin
-    TextY := (Height - textHeight) div 2;
+    TextY := (ActualHeight - textHeight) div 2;
     // center vertically
     if FShowImage and assigned (FImage) then
     begin
-      ImageY := (Height - FImage.Height) div 2;
+      ImageY := (ActualHeight - FImage.Height) div 2;
       // horizontal places if image and text
       if FImageMargin = -1 then
       begin  // Free space between border and image is the same as between border and text
         if FImageSpacing = -1 then // free space between image/text = border/text = border/image
         begin
-          w := (Width - FImage.Width - textWidth) div 3;
+          w := (ActualWidth - FImage.Width - textWidth) div 3;
           if w < 3 then  // minimal margin from border for rectangle/focusrect/...
             w := 3;
           if FImageLayout = ilImageLeft then
           begin
             ImageX := w;
-            TextX := Width - w - textWidth;
+            TextX := ActualWidth - w - textWidth;
           end
           else // if FImageLayout = ilImageRight then
           begin
-            ImageX := Width - w - FImage.width;
+            ImageX := ActualWidth - w - FImage.width;
             TextX := w;
           end;
         end
         else // fixed space between image/text
         begin
-          w := (Width - FImageSpacing - FImage.width - textWidth) div 2;
+          w := (ActualWidth - FImageSpacing - FImage.width - textWidth) div 2;
           if w < 3 then  // minimal margin from border for rectangle/focusrect/...
             w := 3;
           if FImageLayout = ilImageLeft then
@@ -278,7 +278,7 @@ begin
           end
           else // if FImageLayout = ilImageRight then
           begin
-            ImageX := width - w - FImage.Width;
+            ImageX := ActualWidth - w - FImage.Width;
             TextX := w;
           end;
         end;
@@ -290,7 +290,7 @@ begin
           ImageX := FImageMargin + 3;
           if FImageSpacing = -1 then
           begin
-            w := (Width - FImage.Width - ImageX - textWidth) div 2;
+            w := (ActualWidth - FImage.Width - ImageX - textWidth) div 2;
             if w < 0 then
               w := 0;
           end
@@ -300,10 +300,10 @@ begin
         end
         else // if FImageLayout = ilImageRight then
         begin
-          ImageX := Width - FImageMargin - 3 - FImage.width;
+          ImageX := ActualWidth - FImageMargin - 3 - FImage.width;
           if FImageSpacing = -1 then
           begin
-            w := (Width - FImageMargin - FImage.width - textWidth) div 2;
+            w := (ActualWidth - FImageMargin - FImage.width - textWidth) div 2;
             if w < 3 then
               w := 3;
             TextX := w;
@@ -321,38 +321,38 @@ begin
     begin  // no image,
       ImageY := 0;
       ImageX := 0;
-      TextX := (Width - textWidth) div 2;
+      TextX := (ActualWidth - textWidth) div 2;
     end;
   end
   else // if ImageLayout in [ilImageTop, ilImageBottom] then
   begin
-    TextX := (Width - textWidth) div 2;
+    TextX := (ActualWidth - textWidth) div 2;
     // center horizontaly
     if FShowImage and assigned (FImage) then
     begin
-      ImageX := (Width - FImage.Width) div 2;
+      ImageX := (ActualWidth - FImage.Width) div 2;
       // vertical places if image and text
       if FImageMargin = -1 then
       begin  // Free space between border and image is the same as between border and text
         if FImageSpacing = -1 then // free space between image/text = border/text = border/image
         begin
-          w := (Height - FImage.Height - textHeight) div 3;
+          w := (ActualHeight - FImage.Height - textHeight) div 3;
           if w < 3 then  // minimal margin from border for rectangle/focusrect/...
             w := 3;
           if FImageLayout = ilImageTop then
           begin
             ImageY := w;
-            TextY := Height - w - textHeight;
+            TextY := ActualHeight - w - textHeight;
           end
           else // if FImageLayout = ilImageBottom then
           begin
-            ImageY := Height - w - FImage.Height;
+            ImageY := ActualHeight - w - FImage.Height;
             TextY := w;
           end;
         end
         else // fixed space between image/text
         begin
-          w := (Height - FImageSpacing - FImage.Height - textHeight) div 2;
+          w := (ActualHeight - FImageSpacing - FImage.Height - textHeight) div 2;
           if w < 3 then  // minimal margin from border for rectangle/focusrect/...
             w := 3;
           if FImageLayout = ilImageTop then
@@ -362,7 +362,7 @@ begin
           end
           else // if FImageLayout = ilImageRight then
           begin
-            ImageY := Height - w - FImage.Height;
+            ImageY := ActualHeight - w - FImage.Height;
             TextY := w;
           end;
         end;
@@ -374,7 +374,7 @@ begin
           ImageY := FImageMargin + 3;
           if FImageSpacing = -1 then
           begin
-            w := (Height - FImage.Height - ImageY - textHeight) div 2;
+            w := (ActualHeight - FImage.Height - ImageY - textHeight) div 2;
             if w < 0 then
               w := 0;
             end
@@ -384,10 +384,10 @@ begin
         end
         else // if FImageLayout = ilImageRight then
         begin
-          ImageY := Height - FImageMargin - 3 - FImage.Height;
+          ImageY := ActualHeight - FImageMargin - 3 - FImage.Height;
           if FImageSpacing = -1 then
           begin
-            w := (Height - FImageMargin - FImage.Height - textHeight) div 2;
+            w := (ActualHeight - FImageMargin - FImage.Height - textHeight) div 2;
             if w < 3 then
               w := 3;
             TextY := w;
@@ -405,7 +405,7 @@ begin
     begin  // no image,
       ImageY := 0;
       ImageX := 0;
-      TextY := (Height - textHeight) div 2;
+      TextY := (ActualHeight - textHeight) div 2;
     end;
   end;
 end;
@@ -600,7 +600,7 @@ var
 begin
   inherited HandlePaint;
 
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   border := fpgStyle.GetButtonBorders;
 
   lBtnFlags := [];
@@ -686,7 +686,7 @@ begin
       Only in this condition do we support multi-line text }
   if AllowMultiLineText and (FImageLayout = ilImageLeft) then
   begin
-    r.SetRect(0, 0, Width, Height);
+    r.SetRect(0, 0, ActualWidth, ActualHeight);
     InflateRect(r, -border.Left, -border.Top);   { same as focus rectangle }
     if FShowImage and Assigned(FImage) then
     begin
@@ -737,7 +737,7 @@ procedure TfpgBaseButton.DoRelease(x, y: integer);
 var
   r: TfpgRect;
 begin
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   if AllowDown then
   begin
     if FDown and (not FClickOnPush) and FAllowAllUp then

@@ -148,7 +148,11 @@ begin
   with btnAlignment do
   begin
     Name := 'btnAlignment';
-    SetPosition(20, 95, 240, 35);
+    // not using SetPosition() here to show that backward compatibility works
+    Left := 20;
+    Top := 95;
+    Width := 240;
+    Height := 35;
     Text := 'Cell Alignment';
     FontDesc := '#Button';
     OnClick := @btnAlignmentClicked;
@@ -159,7 +163,7 @@ begin
   begin
     Name := 'btnSpanning';
     SetPosition(20, 135, 240, 35);
-    Text := 'Column && Row Spanning';
+    Text := 'Column & Row Spanning';
     FontDesc := '#Button';
     OnClick := @btnSpanningClicked;
   end;

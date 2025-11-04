@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
+    Copyright (c) 2017 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -11,7 +11,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      This unit has helper function to help you create high dpi applications,
+      This unit has helper function to help you create HiDPI applications,
       scalling the UI as needed.
 }
 unit fpg_toolbox;
@@ -55,10 +55,11 @@ begin
     widget := TfpgWidget(Control);
     TfpgWidgetFriend(widget).Loading;
     with widget do
-    begin      Left := ScaleX(Left,FromDPI);
-      Top := ScaleY(Top,FromDPI);
-      Width := ScaleX(Width,FromDPI);
-      Height := ScaleY(Height,FromDPI);
+    begin
+      Left := ScaleX(Left, FromDPI);
+      Top := ScaleY(Top, FromDPI);
+      Width := ScaleX(ActualWidth, FromDPI);
+      Height := ScaleY(ActualHeight ,FromDPI);
 
       MinWidth := ScaleX(MinWidth, FromDPI);
       MinHeight := ScaleY(MinHeight, FromDPI);
@@ -73,15 +74,13 @@ begin
       end;
     end;
     TfpgWidgetFriend(widget).Loaded;
-    // process children
+
     if widget.ComponentCount > 0 then
     begin
       for n := 0 to widget.ComponentCount-1 do
       begin
         if widget.Components[n] is TfpgWidget then
-        begin
           ScaleDPI(widget.Components[n], FromDPI);
-        end;
       end;
     end;
     widget.UpdatePosition;

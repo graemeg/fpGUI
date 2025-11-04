@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -525,6 +525,9 @@ type
     procedure   SetMouseCursor(const AValue: TMouseCursor);
     function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
     function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+    function    GetWidth: TfpgCoord;
+    function    GetHeight: TfpgCoord;
+    function    GetActualSize: TfpgSize;
     function    GetPreferredSize: TfpgSize;
     procedure   SetPreferredSize(const AValue: TfpgSize);
   protected
@@ -598,13 +601,16 @@ type
     procedure   BringToFront; virtual;
     property    Left: TfpgCoord read FLeft write SetLeft;
     property    Top: TfpgCoord read FTop write SetTop;
-    property    Width: TfpgCoord read FWidth write SetWidth;
-    property    Height: TfpgCoord read FHeight write SetHeight;
+    property    Width: TfpgCoord read GetWidth write SetWidth;
+    property    Height: TfpgCoord read GetHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write SetMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write SetMinHeight;
     property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
     property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    PreferredSize: TfpgSize read GetPreferredSize write SetPreferredSize;
+    property    ActualWidth: TfpgCoord read FWidth;
+    property    ActualHeight: TfpgCoord read FHeight;
+    property    ActualSize: TfpgSize read GetActualSize;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWidgetBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
@@ -1680,7 +1686,7 @@ begin
   l := 0;
   t := 0;
   WidgetToWindow(l,t);
-  Result.SetRect(l,t,Width,Height);
+  Result.SetRect(l,t,ActualWidth,ActualHeight);
   //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
 end;
 
@@ -1727,12 +1733,32 @@ end;
 
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
 begin
-  HandleResize(FWidth, AValue);
+  if FPreferredSize.H <> AValue then
+  begin
+    FPreferredSize.H := AValue;
+
+    // Set actual height if not in layout-managed context
+    // Layout managers will override this by calling HandleResize directly
+    if not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+      FHeight := AValue;
+
+    DoPreferredSizeChanged;
+  end;
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
 begin
-  HandleResize(AValue, FHeight);
+  if FPreferredSize.W <> AValue then
+  begin
+    FPreferredSize.W := AValue;
+
+    // Set actual width if not in layout-managed context
+    // Layout managers will override this by calling HandleResize directly
+    if not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+      FWidth := AValue;
+
+    DoPreferredSizeChanged;
+  end;
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
@@ -1845,8 +1871,33 @@ begin
   if (FPreferredSize.W <> AValue.W) or (FPreferredSize.H <> AValue.H) then
   begin
     FPreferredSize := AValue;
+
+    // During construction, also initialize actual size
+    // After construction, layout managers will handle actual size
+    if (csLoading in ComponentState) then
+    begin
+      FWidth := AValue.W;
+      FHeight := AValue.H;
+    end;
+
     DoPreferredSizeChanged;
   end;
+end;
+
+function TfpgWidgetBase.GetWidth: TfpgCoord;
+begin
+  Result := GetPreferredSize.W;
+end;
+
+function TfpgWidgetBase.GetHeight: TfpgCoord;
+begin
+  Result := GetPreferredSize.H;
+end;
+
+function TfpgWidgetBase.GetActualSize: TfpgSize;
+begin
+  Result.W := FWidth;
+  Result.H := FHeight;
 end;
 
 procedure TfpgWidgetBase.DoPreferredSizeChanged;
@@ -1971,7 +2022,7 @@ end;
 
 function TfpgWidgetBase.GetBoundsRect: TfpgRect;
 begin
-  Result.SetRect(Left, Top, Width+1, Height+1);
+  Result.SetRect(Left, Top, ActualWidth+1, ActualHeight+1);
 end;
 
 procedure TfpgWidgetBase.CaptureMouse;
@@ -2581,7 +2632,7 @@ begin
     ParentsRectSet := True;
   end;
 
-  Result.SetRect(FDeltaX, FDeltaY, FWidget.Width, FWidget.Height);
+  Result.SetRect(FDeltaX, FDeltaY, FWidget.ActualWidth, FWidget.ActualHeight);
 
   if ParentsRectSet then
     Result.IntersectRect(Result, ParentsRect);
@@ -2620,7 +2671,7 @@ end;
 
 procedure TfpgCanvasBase.DoGetWinRect(out r: TfpgRect);
 begin
-  r.SetRect(0, 0, FWidget.Width, FWidget.Height);
+  r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 end;
 
 constructor TfpgCanvasBase.Create(awidget: TfpgWidgetBase);
@@ -3066,7 +3117,7 @@ begin
       ClearClipRect//SetClipRect(FWidget.GetClientRect)
     else
     begin
-      r.SetRect(0,0, FWidget.Width, FWidget.Height);
+      r.SetRect(0,0, FWidget.ActualWidth, FWidget.ActualHeight);
       SetClipRect(r);
     end;
 
@@ -3158,7 +3209,7 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
   {$ENDIF}
-  EndDraw(0, 0, FWidget.Width, FWidget.Height);
+  EndDraw(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 end;
 
 procedure TfpgCanvasBase.FreeResources;

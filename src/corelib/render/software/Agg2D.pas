@@ -4004,7 +4004,7 @@ begin
   m_renBaseComp.reset_clipping   (true );
   m_renBasePre.reset_clipping    (true );
   m_renBaseCompPre.reset_clipping(true );
-  ClipBox(0, 0, FWidget.Width, FWidget.Height);
+  ClipBox(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 
   //we have to do clipping still if we are an alien widget.
   m_rasterizer.m_clipping := not WeAreTopLevelCanvas;
@@ -4097,11 +4097,11 @@ begin
     if Result then
     begin
       { if the window was resized }
-      if (FImg.Width < FWidget.Width) or (FImg.Height < FWidget.Height) then
-//      if (abs(FImg.Width - FWidget.Width) > g_ResizeThreshold) or (abs(FImg.Height - FWidget.Height) > g_ResizeThreshold) then
+      if (FImg.Width < FWidget.ActualWidth) or (FImg.Height < FWidget.ActualHeight) then
+//      if (abs(FImg.Width - FWidget.ActualWidth) > g_ResizeThreshold) or (abs(FImg.Height - FWidget.ActualHeight) > g_ResizeThreshold) then
       begin
         {$IFDEF GDEBUG}
-        DebugLn('img vs widget width = ' + IntToStr(FImg.Width) + ' ' + IntToStr(FWidget.Width));
+        DebugLn('img vs widget width = ' + IntToStr(FImg.Width) + ' ' + IntToStr(FWidget.ActualWidth));
         DebugLn('**** Free old pixel buffer, because the window size has changed');
         {$ENDIF}
         FImg.Free;
@@ -4117,7 +4117,7 @@ begin
   if not Assigned(FImg) then
   begin
     FImg := TfpgImage.Create;
-    FImg.AllocateImage(32, FWidget.Width+g_ResizeThreshold, FWidget.Height+g_ResizeThreshold);
+    FImg.AllocateImage(32, FWidget.ActualWidth + g_ResizeThreshold, FWidget.ActualHeight + g_ResizeThreshold);
     Attach(FImg);
   end;
 end;

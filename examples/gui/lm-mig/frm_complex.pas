@@ -13,11 +13,18 @@ uses
 type
 
   TComplexMigForm = class(TfpgForm)
+  private
+    procedure btnCancelClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
 
 implementation
+
+procedure TComplexMigForm.btnCancelClicked(Sender: TObject);
+begin
+  Close;
+end;
 
 procedure TComplexMigForm.AfterCreate;
 var
@@ -138,7 +145,7 @@ begin
   btnCancel.Text := 'Cancel';
   btnCancel.Width := 90;
   btnCancel.Height := 30;
-//  btnCancel.OnClick := @Close;
+  btnCancel.OnClick := @btnCancelClicked;
   mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().AlignX('right').Tag('buttons'));
 end;
 

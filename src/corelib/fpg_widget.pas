@@ -543,7 +543,7 @@ begin
     begin
       Parent.WidgetToWindow(ParentLeft, ParentTop);
     end;
-    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
+    Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, ActualWidth, ActualHeight);
   end
   else if Parent <> nil then
   begin
@@ -555,8 +555,8 @@ begin
 
     if wdfPosition in FDirtyFlags then
     begin
-      PaintRect.SetRect(FLeft, FTop, FWidth, FHeight);
-      r2.SetRect(FPrevLeft, FPrevTop, FWidth, FHeight); // previous PaintRect
+      PaintRect.SetRect(FLeft, FTop, ActualWidth, ActualHeight);
+      r2.SetRect(FPrevLeft, FPrevTop, ActualWidth, ActualHeight); // previous PaintRect
       PaintRect.UnionRect(PaintRect, r2);
 
       // normalise the PaintRect
@@ -1220,7 +1220,7 @@ begin
       if (keycode=keyMenu) or (shiftstate*[ssShift, ssAlt, ssCtrl]=[ssShift]) then
       begin
         // ssExtra1 is a signal that keyMenu was used.
-        HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
+        HandleRMouseDown(ActualWidth div 2, ActualHeight div 2, [ssExtra1]);
         consumed := True;
       end;
   end;
@@ -1369,7 +1369,7 @@ procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   r: TfpgRect;
 begin
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   if PtInRect(r, Point(x, y)) and FOnClickPending and (self = uMouseDownSourceWidget) then
   begin
     if Assigned(FOnClick) then
@@ -1477,10 +1477,10 @@ begin
   if Assigned(Parent) then
   begin
     if (not Visible)
-    or (Left >= Parent.Width-1)
-    or (Left + Width <= 0)
-    or (Top >= Parent.Height-1)
-    or (Top + Height <= 0) then
+    or (Left >= Parent.ActualWidth-1)
+    or (Left + ActualWidth <= 0)
+    or (Top >= Parent.ActualHeight-1)
+    or (Top + ActualHeight <= 0) then
       Result := True;
   end;
 
@@ -1588,7 +1588,7 @@ begin
     Exit;//
   end;
 
-  if (Width < 1) or (Height < 1) then
+  if (ActualWidth < 1) or (ActualHeight < 1) then
     Exit;
 
   // combine existing invalid rect with message rect if sent
@@ -1661,14 +1661,14 @@ var
   dh: integer;
   _w, _h: integer;
 begin
-  _w := FWidth;
-  _h := FHeight;
+  _w := ActualWidth;
+  _h := ActualHeight;
   { Width and Height might not be what came through in the msg because of
     size constraints, so we calculate the delta diffs after HandleResize.
     NOTE: For TfpgBaseForm, this also triggers closing popup windows. }
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
-  dw := FWidth - _w;
-  dh := FHeight - _h;
+  dw := ActualWidth - _w;
+  dh := ActualHeight - _h;
 
   // If a layout manager is assigned, invalidate it to trigger recalculation
   if Assigned(FLayoutManager) then

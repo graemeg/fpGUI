@@ -779,14 +779,20 @@ This design creates a **single, unified sizing contract** that works for ALL for
 
 === Required Code Changes
 
-Only **ONE method** needs to be updated: `TfpgWidget.DoAlignment` in `fpg_widget.pas`
+**IMPORTANT UPDATE**: This section was initially incorrect. The scope of required changes is much larger than originally anticipated.
 
-**Changes required**:
+See the **Migration Guide** section at the end of this document for:
+- Complete list of problem patterns discovered during implementation
+- Comprehensive TODO list of files requiring changes
+- Detailed examples and search patterns
 
-. Replace all reads of `w.Width` with `w.ActualWidth` (4 occurrences in alTop, alBottom, alLeft, alRight cases)
-. Replace all reads of `w.Height` with `w.ActualHeight` (4 occurrences in alTop, alBottom, alLeft, alRight cases)
-. No changes needed to anchor logic (already uses internal fields correctly)
-. No changes needed to `MoveAndResize` or `HandleResize` (they already modify actual size directly)
+The changes required span:
+- Canvas and rendering code
+- Mouse event handling and hit-testing
+- All widget paint methods
+- Layout manager container size reading
+- Backend platform implementations (X11, GDI, etc.)
+- Every widget class in the framework
 
 === Complete Example: Widget with Align Property
 
@@ -898,3 +904,507 @@ This ensures backward compatibility: `panel.Height := 50` both sets preferred he
 8. Developer's original intent (`FPreferredSize.W := 200`) is preserved and not overwritten
 
 Both systems work harmoniously with the same API!
+
+== Migration Guide: Fixing Width/Height Usage
+
+=== Overview
+
+After implementing the intent vs actual size separation (where `Width`/`Height` properties now return `FPreferredSize` instead of `FWidth`/`FHeight`), ALL code that needs actual rendered dimensions must be updated to use `ActualWidth`/`ActualHeight` instead.
+
+**Critical insight**: This is a widespread breaking change that affects nearly every part of the framework that reads widget dimensions for:
+
+* Rendering/painting operations
+* Hit-testing (mouse clicks, bounds checking)
+* Layout calculations
+* Size calculations
+* Visibility checks
+
+=== Critical Fix: SetWidth/SetHeight Backward Compatibility
+
+**FIXED**: `SetWidth`/`SetHeight` now properly support manual positioning without layout managers.
+
+The original implementation only set actual size during construction (`csLoading` check), which broke code like:
+
+[source,pascal]
+----
+lblTitle := TfpgLabel.Create(self);
+lblTitle.SetPosition(20, 12, 240, 30);  // Actual size never set - stayed 10x10!
+----
+
+**Solution**: Changed from `csLoading` check to layout manager check:
+
+[source,pascal]
+----
+// OLD (broken for manual positioning):
+if (csLoading in ComponentState) then
+  FWidth := AValue;
+
+// NEW (works for both):
+if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
+  FWidth := AValue;
+----
+
+This ensures:
+- Manual positioning (SetPosition) sets actual size ✓
+- Layout managers override via HandleResize ✓
+- Backward compatibility maintained ✓
+
+**Status**: ✓ FIXED in fpg_base.pas:1757-1758 (SetWidth) and 1742-1743 (SetHeight)
+
+=== Common Problem Patterns
+
+==== Pattern 1: Canvas Drawing Operations
+
+**Problem**: Canvas methods using `Width`/`Height` for rendering rectangles
+
+**Symptoms**: Widget painting appears clipped at preferred size (e.g., button renders at 100x40 even though it fills the form)
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - uses preferred size for rendering
+r.SetRect(0, 0, FWidget.Width, FWidget.Height);
+
+// GOOD - uses actual size for rendering
+r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_base.pas` - TfpgCanvasBase methods:
+  ** `GetWidgetWindowRect` (line ~2635)
+  ** `DoGetWinRect` (line ~2674)
+  ** `SetClipRect` in BeginDraw (line ~3120)
+  ** `EndDraw` parameterless overload (line ~3212)
+
+**Status**: ✓ FIXED
+
+**Known Issues Remaining**:
+- Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation
+- TfpgLabel needs comprehensive review and fixes
+- All other widget classes need similar fixes to TfpgButton
+
+==== Pattern 2: Widget Paint Methods
+
+**Problem**: Widget `HandlePaint` methods using `Width`/`Height` for layout calculations
+
+**Symptoms**: Widget content (text, images, borders) rendered in wrong position or clipped
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - button renders at preferred size
+procedure TfpgBaseButton.HandlePaint;
+begin
+  r.SetRect(0, 0, Width, Height);  // Wrong!
+  // ... painting code ...
+end;
+
+// GOOD - button renders at actual size
+procedure TfpgBaseButton.HandlePaint;
+begin
+  r.SetRect(0, 0, ActualWidth, ActualHeight);  // Correct!
+  // ... painting code ...
+end;
+----
+
+**Files affected**:
+
+* `src/gui/fpg_button.pas`:
+  ** `HandlePaint` main rendering rect (line ~603)
+  ** `HandlePaint` multi-line text rect (line ~689)
+  ** `CalculatePositions` - ALL Width/Height references (lines ~245-408)
+
+**Status**: ✓ FIXED
+
+==== Pattern 3: Mouse Event Hit-Testing
+
+**Problem**: Mouse click detection using `Width`/`Height` for bounds checking
+
+**Symptoms**: Mouse clicks only register in preferred size area (e.g., button only clickable in top-left 100x40 region)
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - hit test uses preferred size
+procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(0, 0, Width, Height);  // Wrong!
+  if PtInRect(r, Point(x, y)) then
+    // ... handle click ...
+end;
+
+// GOOD - hit test uses actual size
+procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(0, 0, ActualWidth, ActualHeight);  // Correct!
+  if PtInRect(r, Point(x, y)) then
+    // ... handle click ...
+end;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `HandleLMouseUp` click detection (line ~1372)
+  ** Keyboard menu simulation center point (line ~1223)
+
+**Status**: ✓ FIXED
+
+==== Pattern 4: Bounds and Client Rectangle Methods
+
+**Problem**: Methods that return widget bounds using `Width`/`Height`
+
+**Symptoms**: Invalidation rectangles wrong size, intersection tests fail, clipping issues
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - bounds based on preferred size
+function TfpgWidgetBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);  // Wrong!
+end;
+
+// GOOD - bounds based on actual size
+function TfpgWidgetBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, ActualWidth+1, ActualHeight+1);  // Correct!
+end;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_base.pas`:
+  ** `GetBoundsRect` (line ~2025)
+  ** `GetClientRect` already correct - uses `FWidth`/`FHeight` directly
+
+**Status**: ✓ FIXED
+
+==== Pattern 5: Visibility and Clipping Checks
+
+**Problem**: Code checking if widget is visible/clipped using `Width`/`Height`
+
+**Symptoms**: Widgets incorrectly marked as hidden or clipped
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - visibility check uses preferred size
+if (Left >= Parent.Width-1) or (Left + Width <= 0) then
+  Result := True;  // Widget is outside visible area
+
+// GOOD - visibility check uses actual size
+if (Left >= Parent.ActualWidth-1) or (Left + ActualWidth <= 0) then
+  Result := True;  // Widget is outside visible area
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `IsHidden` visibility check (lines ~1480-1483)
+
+**Status**: ✓ FIXED
+
+==== Pattern 6: Native Window Positioning
+
+**Problem**: Native window size updates using `Width`/`Height`
+
+**Symptoms**: Widget rendering clipped at preferred size even though widget is larger
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - native window sized to preferred size
+Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
+
+// GOOD - native window sized to actual size
+Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, ActualWidth, ActualHeight);
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `DoUpdatePosition` window sizing (line ~546)
+
+**Status**: ✓ FIXED
+
+==== Pattern 7: Layout Manager Container Size Reading
+
+**Problem**: Layout managers reading container size as `Width`/`Height`
+
+**Symptoms**: Layout calculations wrong, widgets overflow container or don't fill it
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - layout reads preferred size
+parW := par.Width;
+parH := par.Height;
+
+// GOOD - layout reads actual size
+parW := par.ActualWidth;
+parH := par.ActualHeight;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_miglayout.pas`:
+  ** Container size reading (lines ~554-555)
+  ** `LayoutContainer` bounds array (lines ~3131-3132)
+* `src/corelib/fpg_flowlayout.pas`:
+  ** Container width reading (line ~149)
+  ** Vertical alignment calculations (lines ~189-190)
+
+**Status**: ✓ FIXED
+
+=== Search Patterns for Finding Issues
+
+Use these grep patterns to find remaining issues:
+
+[source,bash]
+----
+# Find .Width property reads (exclude FWidth field reads)
+grep -n "\.Width\b" file.pas | grep -v "FWidth"
+
+# Find .Height property reads (exclude FHeight field reads)
+grep -n "\.Height\b" file.pas | grep -v "FHeight"
+
+# Find SetRect calls that might use wrong size
+grep -n "SetRect.*Width.*Height" file.pas
+
+# Find PtInRect calls (hit-testing)
+grep -n "PtInRect" file.pas
+----
+
+**Important**: Not all `.Width`/`.Height` reads need changing! Only change them if the code needs **actual rendered size** rather than **preferred size**.
+
+**When to keep Width/Height**:
+
+* Layout managers reading widget's **intent** (what size it wants)
+* Code that needs to **preserve developer's desired size**
+* Align properties reading child's preferred dimension
+
+**When to change to ActualWidth/ActualHeight**:
+
+* Painting/rendering operations
+* Hit-testing (mouse events, bounds checking)
+* Container reading its own size for layout
+* Visibility/clipping calculations
+* Native window sizing
+
+=== Migration TODO List
+
+==== Core Framework Files - COMPLETED
+
+[%interactive]
+* [x] `src/corelib/fpg_base.pas` - Canvas methods
+* [x] `src/corelib/fpg_widget.pas` - Mouse events, visibility, native window
+* [x] `src/gui/fpg_button.pas` - Paint and layout calculations
+* [x] `src/corelib/fpg_miglayout.pas` - Container size reading
+* [x] `src/corelib/fpg_flowlayout.pas` - Container size reading
+
+==== Core Framework Files - PENDING
+
+Search these files for Width/Height property reads that might need ActualWidth/ActualHeight:
+
+[%interactive]
+* [ ] `src/corelib/fpg_main.pas` - Application/window management
+* [ ] `src/gui/fpg_form.pas` - Form painting, sizing, window management
+* [ ] `src/gui/fpg_panel.pas` - Panel painting, client area
+* [ ] `src/gui/fpg_frame.pas` - Frame painting, borders
+* [ ] `src/gui/fpg_scrollframe.pas` - Scrolling calculations, viewport
+* [ ] `src/gui/fpg_bevel.pas` - Bevel painting
+* [ ] `src/gui/fpg_splitter.pas` - Splitter drag calculations
+* [ ] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations
+* [ ] `src/gui/fpg_popupwindow.pas` - Popup window positioning
+* [ ] `src/gui/fpg_label.pas` - Label painting, text layout
+* [ ] `src/gui/fpg_edit.pas` - Edit control painting, scrolling
+* [ ] `src/gui/fpg_memo.pas` - Memo painting, scrolling, selection
+* [ ] `src/gui/fpg_checkbox.pas` - Checkbox painting, hit-testing
+* [ ] `src/gui/fpg_radiobutton.pas` - Radio button painting, hit-testing
+* [ ] `src/gui/fpg_combobox.pas` - Dropdown positioning, painting
+* [ ] `src/gui/fpg_listbox.pas` - Scrolling, item positioning, painting
+* [ ] `src/gui/fpg_grid.pas` - Grid cell calculations, scrolling, painting
+* [ ] `src/gui/fpg_tree.pas` - Tree node positioning, scrolling, painting
+* [ ] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning
+* [ ] `src/gui/fpg_progressbar.pas` - Progress bar painting
+* [ ] `src/gui/fpg_tab.pas` - Tab positioning, painting
+* [ ] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations
+* [ ] `src/gui/fpg_listview.pas` - ListView scrolling, column calculations
+* [ ] `src/gui/fpg_hyperlink.pas` - Hyperlink hit-testing
+* [ ] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning
+* [ ] `src/gui/fpg_gauge.pas` - Gauge painting
+* [ ] `src/gui/fpg_dialogs.pas` - Dialog positioning
+* [ ] `src/corelib/fpg_animation.pas` - Animation bounds
+
+==== Layout Managers - PENDING
+
+[%interactive]
+* [ ] `src/corelib/fpg_gridlayout.pas` - Grid layout calculations
+* [ ] `src/corelib/fpg_boxlayout.pas` - Box layout calculations (if exists)
+
+==== Rendering Backends - PENDING
+
+**Status Notes**:
+- AggCanvas backend (Agg2D.pas) is WORKING - user verified all fixes applied
+- X11 backend shows corrupted form background when AggCanvas disabled - needs fixes
+- All other backends (GDI, Carbon, Cocoa) untested and likely broken
+
+[%interactive]
+* [x] `src/corelib/render/software/Agg2D.pas` - Agg canvas implementation ✓ WORKING
+* [ ] `src/corelib/x11/fpg_x11.pas` - X11 window management (corrupted background issue)
+* [ ] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend
+* [ ] `src/corelib/carbon/fpg_carbon.pas` - macOS Carbon backend (if exists)
+* [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend (if exists)
+
+==== Application Examples - PENDING
+
+Check these for patterns that third-party developers might copy:
+
+[%interactive]
+* [ ] `examples/gui/helloworld/` - Simple button example (CRITICAL - this is where we found the issues!)
+* [ ] `examples/gui/lm-mig/` - MigLayout demo
+* [ ] `examples/gui/lm-flow/` - FlowLayout demo
+* [ ] `examples/gui/alignment/` - Align properties demo
+* [ ] `examples/gui/custom_window/` - Custom window painting
+* [ ] `docview/src/` - DocView application
+* [ ] `uidesigner/` - UI Designer application
+* [ ] `examples/apps/ide/` - Maximus IDE
+
+=== Testing Strategy
+
+After fixing each widget class:
+
+1. **Build framework**: `cd src && ./build.sh 1`
+2. **Test basic rendering**: Run helloworld demo - verify button renders correctly
+3. **Test mouse events**: Click button in different areas - verify click detection works
+4. **Test resizing**: Resize form - verify widget repaints correctly at new size
+5. **Test layout managers**: Run lm-mig demo - verify layouts calculate correctly
+6. **Test Align properties**: Run alignment demo - verify widgets resize with parent
+
+=== For Third-Party Widget Developers
+
+If you've written custom widgets using fpGUI, you'll need to update them:
+
+==== Step 1: Update Paint Methods
+
+Find all `HandlePaint` implementations and replace `Width`/`Height` with `ActualWidth`/`ActualHeight`:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  Canvas.BeginDraw;
+
+  // OLD:
+  // r.SetRect(0, 0, Width, Height);
+
+  // NEW:
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
+
+  // ... rest of painting code ...
+
+  Canvas.EndDraw;
+end;
+----
+
+==== Step 2: Update Mouse Event Handlers
+
+If you override mouse event handlers and do hit-testing:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  // OLD:
+  // if PtInRect(fpgRect(0, 0, Width, Height), fpgPoint(x, y)) then
+
+  // NEW:
+  if PtInRect(fpgRect(0, 0, ActualWidth, ActualHeight), fpgPoint(x, y)) then
+  begin
+    // ... handle click ...
+  end;
+
+  inherited HandleLMouseDown(x, y, shiftstate);
+end;
+----
+
+==== Step 3: Update Preferred Size Calculations
+
+If you override `DoCalculatePreferredSize`, this stays the same (it sets preferred size, not actual):
+
+[source,pascal]
+----
+procedure TMyCustomWidget.DoCalculatePreferredSize(var ASize: TfpgSize);
+begin
+  // This is CORRECT - calculating preferred (desired) size
+  ASize.W := FFont.TextWidth(FText) + 20;
+  ASize.H := FFont.Height + 10;
+end;
+----
+
+==== Step 4: Update Any Size-Dependent Calculations
+
+If your widget does calculations based on its size:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.CalculateLayout;
+var
+  centerX, centerY: integer;
+begin
+  // OLD:
+  // centerX := Width div 2;
+  // centerY := Height div 2;
+
+  // NEW:
+  centerX := ActualWidth div 2;
+  centerY := ActualHeight div 2;
+
+  // ... use center point for layout ...
+end;
+----
+
+==== Step 5: Reading vs Writing Size
+
+**Important distinction**:
+
+[source,pascal]
+----
+// SETTING size (developer intent) - use Width/Height
+myWidget.Width := 200;   // Sets preferred width
+myWidget.Height := 100;  // Sets preferred height
+
+// READING size for rendering/layout - use ActualWidth/ActualHeight
+x := myWidget.ActualWidth;   // Gets actual rendered width
+y := myWidget.ActualHeight;  // Gets actual rendered height
+----
+
+=== Completion Tracking
+
+**Note for continuation sessions**: As you complete items from the TODO list above, mark them with `[x]` in this document. This provides a persistent record of migration progress across multiple AI sessions.
+
+To mark an item complete, change:
+```
+* [ ] File description
+```
+to:
+```
+* [x] File description
+```
+
+This document serves as both a guide and a checklist for the migration effort.

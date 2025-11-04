@@ -551,8 +551,8 @@ begin
   if par = nil then
     Exit;
 
-  parW := par.Width;
-  parH := par.Height;
+  parW := par.ActualWidth;
+  parH := par.ActualHeight;
 
   // Get gap constraints from adjacent components
   if (ABefore <> nil) and (ABeforeCC <> nil) then
@@ -3128,8 +3128,8 @@ begin
       // 3. Setup bounds for layout
       bounds[0] := 0;  // x
       bounds[1] := 0;  // y
-      bounds[2] := AContainer.Width;   // width
-      bounds[3] := AContainer.Height;  // height
+      bounds[2] := AContainer.ActualWidth;   // width
+      bounds[3] := AContainer.ActualHeight;  // height
 
       // 4. Perform layout
       grid.Layout(bounds, nil, nil, False);
