@@ -1737,9 +1737,9 @@ begin
   begin
     FPreferredSize.H := AValue;
 
-    // Set actual height if not in layout-managed context
+    // Set actual height if: during loading (DPI scaling, construction) OR not in layout-managed context
     // Layout managers will override this by calling HandleResize directly
-    if not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+    if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
       FHeight := AValue;
 
     DoPreferredSizeChanged;
@@ -1752,9 +1752,9 @@ begin
   begin
     FPreferredSize.W := AValue;
 
-    // Set actual width if not in layout-managed context
+    // Set actual width if: during loading (DPI scaling, construction) OR not in layout-managed context
     // Layout managers will override this by calling HandleResize directly
-    if not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+    if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
       FWidth := AValue;
 
     DoPreferredSizeChanged;

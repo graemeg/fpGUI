@@ -982,8 +982,7 @@ r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 
 **Known Issues Remaining**:
 - Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation
-- TfpgLabel needs comprehensive review and fixes
-- All other widget classes need similar fixes to TfpgButton
+- All other widget classes need similar fixes to TfpgButton and TfpgLabel
 
 ==== Pattern 2: Widget Paint Methods
 
@@ -1229,7 +1228,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [ ] `src/gui/fpg_splitter.pas` - Splitter drag calculations
 * [ ] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations
 * [ ] `src/gui/fpg_popupwindow.pas` - Popup window positioning
-* [ ] `src/gui/fpg_label.pas` - Label painting, text layout
+* [x] `src/gui/fpg_label.pas` - Label painting, text layout ✓ FIXED
 * [ ] `src/gui/fpg_edit.pas` - Edit control painting, scrolling
 * [ ] `src/gui/fpg_memo.pas` - Memo painting, scrolling, selection
 * [ ] `src/gui/fpg_checkbox.pas` - Checkbox painting, hit-testing

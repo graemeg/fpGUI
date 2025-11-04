@@ -294,7 +294,7 @@ begin
     tlCenter:
       Include(lTxtFlags, txtVCenter);
   end;
-  FTextHeight := Canvas.DrawText(0, 0, Width, Height, FText, lTxtFlags);
+  FTextHeight := Canvas.DrawText(0, 0, ActualWidth, ActualHeight, FText, lTxtFlags);
 end;
 
 end.
