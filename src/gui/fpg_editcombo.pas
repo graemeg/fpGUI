@@ -701,7 +701,7 @@ procedure TfpgBaseEditCombo.HandleLMouseDown(x, y: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
-  FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
+  FBtnPressed := FInternalBtnRect.PointInRect(Point(x, y));
   if not FAutoCompletion then
   begin
     Repaint;
@@ -780,7 +780,7 @@ begin
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
   rect := fpgStyle.GetControlFrameBorders;
-  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+  r.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then
@@ -807,7 +807,7 @@ begin
     begin
       Canvas.SetColor(clSelection);
       Canvas.SetTextColor(clSelectionText);
-      InflateRect(r, -1, -1);
+      r.InflateRect(-1, -1);
     end
     else
     begin

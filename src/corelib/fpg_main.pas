@@ -2188,7 +2188,7 @@ begin
     ACanvas.SetColor(clBlack);
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
     Exclude(AFlags, btfIsDefault);
     fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>
@@ -2562,7 +2562,7 @@ begin
   if IsFocused then
   begin
     ACanvas.SetColor(clSelection);
-    InflateRect(lr, -1, -1);
+    lr.InflateRect(-1, -1);
     ACanvas.FillRectangle(lr);
   end;
 
@@ -2588,7 +2588,7 @@ begin
   if IsPressed then
   begin
     Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
+    ar.OffsetRect(1, 1);
   end;
   // paint button face
   DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, btnflags);

@@ -564,7 +564,7 @@ end;
 
 function TfpgLVIconPainter.GetHeaderArea: TfpgRect;
 begin
-  Result := fpgRect(0,0,0,0);
+  Result.SetRect(0,0,0,0);
 end;
 
 function TfpgLVIconPainter.GetHeaderHeight: Integer;
@@ -698,7 +698,7 @@ begin
     tHeight := ACanvas.Font.GetHeight();
     Inc(tLeft, (ItemWidth - tWidth - 5) div 2);
     // TmpRect is a rect a bit bigger than the text area.
-    TmpRect := fpgRect(tLeft-2,ItemRect.Top+ItemRect.Height-5-tHeight-2,tWidth+4,tHeight+4);
+    TmpRect.SetRect(tLeft-2,ItemRect.Top+ItemRect.Height-5-tHeight-2,tWidth+4,tHeight+4);
 
     // Paint Item Background
     ACanvas.Color := clListBox;
@@ -851,11 +851,11 @@ end;
 
 function TfpgLVReportPainter.GetHeaderArea: TfpgRect;
 begin
-  Result := fpgRect(0,0,0,0);
+  Result.SetRect(0,0,0,0);
   if GetHeaderHeight = 0 then
     Exit; // ==>
 
-  Result := fpgRect(fpgStyle.GetControlFrameBorders.Left, fpgStyle.GetControlFrameBorders.Top, GetVisibleColumnsWidth, GetHeaderHeight);
+  Result.SetRect(fpgStyle.GetControlFrameBorders.Left, fpgStyle.GetControlFrameBorders.Top, GetVisibleColumnsWidth, GetHeaderHeight);
 end;
 
 function TfpgLVReportPainter.GetItemsVirtualArea: TfpgSize;
@@ -1947,7 +1947,7 @@ begin
     Dec(cRect.Width,  FVScrollBar.Width);
 
 
-  if not PtInRect(cRect, Point(X,Y)) then
+  if not cRect.PointInRect(Point(X,Y)) then
     Exit;
 
   TfpgScrollbarFriend(FVScrollBar).HandleMouseScroll(x, y, shiftstate, delta);
@@ -1970,7 +1970,7 @@ begin
   
   FMouseDownPoint := Point(X,Y);
   
-  if not PtInRect(cRect, Point(X,Y)) then
+  if not cRect.PointInRect(Point(X,Y)) then
     Exit;
 
   // Check if event is within headers
@@ -2003,7 +2003,7 @@ begin
   if FVScrollBar.Visible then
     Dec(cRect.Width,  FVScrollBar.Width);
   
-  if not PtInRect(cRect, Point(X,Y)) then
+  if not cRect.PointInRect(Point(X,Y)) then
     Exit;
 
   // The only area left is the item area.
@@ -2041,7 +2041,7 @@ begin
   ShiftIsPressed := ssShift in shiftstate;
   cRect := GetClientRect;
 
-  if not PtInRect(cRect, Point(X,Y)) then
+  if not cRect.PointInRect(Point(X,Y)) then
     Exit;
 
   if FShowHeaders then
@@ -2110,7 +2110,7 @@ begin
 
   cRect := GetClientRect;
 
-  if not PtInRect(cRect, Point(X,Y)) and (FResizingColumn = nil) then
+  if not cRect.PointInRect(Point(X,Y)) and (FResizingColumn = nil) then
     Exit;
 
   if PtInRect(ViewStyle.GetHeaderArea, Point(x,y)) or Assigned(FResizingColumn) then
@@ -2239,7 +2239,7 @@ begin
   ClipRect.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, ClipRect);
   rect := fpgStyle.GetControlFrameBorders;
-  InflateRect(ClipRect, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+  ClipRect.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(ClipRect);
 
   if Enabled then

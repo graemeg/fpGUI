@@ -2035,8 +2035,8 @@ constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FAlignment := taRightJustify;
-  FDecimalSeparator := DecimalSeparator;
-  FThousandSeparator := ThousandSeparator;
+  FDecimalSeparator := FormatSettings.DecimalSeparator;
+  FThousandSeparator := FormatSettings.ThousandSeparator;
   FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;

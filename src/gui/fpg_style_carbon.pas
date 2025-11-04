@@ -238,7 +238,7 @@ procedure TfpgCarbonStyle.DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect);
 begin
   ACanvas.SetColor(clUnset);
   ACanvas.SetLineStyle(1, lsSolid);
-  //InflateRect(r, 1, 1);
+  //r.InflateRect(1, 1);
   ACanvas.DrawRectangle(r);
 end;
 

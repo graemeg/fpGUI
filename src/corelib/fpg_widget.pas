@@ -1389,7 +1389,7 @@ var
   r: TfpgRect;
 begin
   r.SetRect(0, 0, Width, Height);
-  if PtInRect(r, Point(x, y)) and FOnClickPending and (self = uMouseDownSourceWidget) then
+  if r.PointInRect(Point(x, y)) and FOnClickPending and (self = uMouseDownSourceWidget) then
   begin
     if Assigned(FOnClick) then
     FOnClick(self);

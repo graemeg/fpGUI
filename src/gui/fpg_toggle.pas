@@ -182,7 +182,7 @@ begin
   fpgStyleManager.Style.DrawBevel(Canvas,ToggleLeft,0,FToggleWidth, Height, False);
 
   // Toggle Button
-  ButtonRect := fpgRect(ToggleLeft+FSliderPosition+BvlWdth,BvlWdth,FToggleButtonWidth, Height -(BvlWdth*2));
+  ButtonRect.SetRect(ToggleLeft+FSliderPosition+BvlWdth,BvlWdth,FToggleButtonWidth, Height -(BvlWdth*2));
   fpgStyleManager.Style.DrawBevel(Canvas,ButtonRect.Left, ButtonRect.Top, ButtonRect.Width, ButtonRect.Height, True);
 
 
@@ -218,7 +218,7 @@ begin
   // lastly draw focus
   if FFocusable and FFocused then
   begin
-    InflateRect(ButtonRect, -1,-1);
+    ButtonRect.InflateRect(-1, -1);
     fpgStyleManager.Style.DrawFocusRect(Canvas, ButtonRect);
   end;
 

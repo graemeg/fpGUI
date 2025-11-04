@@ -1704,6 +1704,7 @@ var
   NewEvent: TXevent;
   i: integer;
   r: integer;
+  rect: TfpgRect;
   blockmsg: boolean;
   w: TfpgX11Window;
   ew: TfpgX11Window;
@@ -2014,10 +2015,15 @@ begin
     X.Expose:
         begin
           with ev.xexpose do
-            msgp.rect := fpgRect(x, y, width, height);
+            msgp.rect.SetRect(x, y, width, height);
           while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
+          begin
             with ev.xexpose do
-              UnionRect(msgp.rect, msgp.rect, fpgRect(x, y, width, height));
+            begin
+              rect.SetRect(x, y, width, height);
+              msgp.rect.UnionRect(msgp.rect, rect);
+            end;
+          end;
           if ev.xexpose.count = 0 then
           begin
             w := FindWindowByHandle(ev.xexpose.window);
@@ -3741,7 +3747,7 @@ procedure TfpgX11Canvas.DoAddClipRect(const ARect: TfpgRect);
 var
   NewRect: TfpgRect;
 begin
-  UnionRect(NewRect, FClipRect, ARect);
+  FClipRect.UnionRect(NewRect, ARect);
   DoSetClipRect(NewRect);
 end;
 
