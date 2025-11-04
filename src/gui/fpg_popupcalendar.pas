@@ -966,11 +966,16 @@ begin
 end;
 
 procedure TfpgPopupCalendar.HandlePaint;
+var
+  r: TfpgRect;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
   if PopupFrame then
-    Canvas.SetClipRect(fpgRect(1, 1, Width-2, Height-2));
+  begin
+    r.SetRect(1, 1, Width-2, Height-2);
+    Canvas.SetClipRect(r);
+  end;
   Canvas.Clear(clWindowBackground);
   Canvas.ClearClipRect;
   Canvas.EndDraw;

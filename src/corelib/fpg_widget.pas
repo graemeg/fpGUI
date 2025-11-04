@@ -1652,7 +1652,7 @@ begin
       begin
         if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
         begin
-          if not HasInvalidRegion or IntersectRect(Params.rect, FInvalidRect, w.GetBoundsRect) then
+          if not HasInvalidRegion or FInvalidRect.IntersectRect(Params.rect, w.GetBoundsRect) then
           begin
             if HasInvalidRegion then
               w.ParentToWidget(Params.rect.Left, Params.rect.Top)

@@ -828,7 +828,10 @@ begin
   Canvas.FillRectangle(r);
 
   if CanDrawExtraHint then
-    DrawPlaceholderText(fpgRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin));
+  begin
+    r.SetRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin);
+    DrawPlaceholderText(r);
+  end;
 
   // Draw select item's text
   if not AutoCompletion then

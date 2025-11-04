@@ -2044,7 +2044,7 @@ begin
           if ev.xgraphicsexpose.count = 0 then
           begin
             with ev.xgraphicsexpose do
-              msgp.rect := fpgRect(x, y, width, height);
+              msgp.rect.SetRect(x, y, width, height);
             w := FindWindowByHandle(ev.xexpose.window);
             // use invalidate in case a FPGM_PAINT message is already queued
             if Assigned(w) then
@@ -2158,14 +2158,15 @@ begin
             {$ENDIF}
             if Assigned(Drag) then
             begin
-              Drag.HandleDNDStatus(
-                  ev.xclient.data.l[0],
-                  ev.xclient.data.l[1] and 1,
-                  fpgRect(
+              rect.SetRect(
                     (ev.xclient.data.l[2] shr 16) and $FFFF,
                     ev.xclient.data.l[2] and $FFFF,
                     (ev.xclient.data.l[3] shr 16) and $FFFF,
-                    ev.xclient.data.l[3] and $FFFF),
+                    ev.xclient.data.l[3] and $FFFF);
+              Drag.HandleDNDStatus(
+                  ev.xclient.data.l[0],
+                  ev.xclient.data.l[1] and 1,
+                  rect,
                   ev.xclient.data.l[4]);
             end;
           end

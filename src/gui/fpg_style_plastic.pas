@@ -250,13 +250,17 @@ begin
 end;
 
 procedure TfpgPlasticStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
+var
+  r: TfpgRect;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
-  ACanvas.GradientFill(fpgRect(x, y, w, h), clWindowBackground, clScrollBar, gdVertical);
+  r.SetRect(x, y, w, h);
+  ACanvas.GradientFill(r, clWindowBackground, clScrollBar, gdVertical);
   ACanvas.Pixels[x, y + h - 1] := FPlasticColors^[9];
   ACanvas.Pixels[x + w - 1, y + h - 1] := FPlasticColors^[9];
   ACanvas.SetColor(clGridLines);
-  ACanvas.DrawRectangle(fpgRect(x + 1, y + 1, w - 2, h - 2));
+  r.SetRect(x + 1, y + 1, w - 2, h - 2);
+  ACanvas.DrawRectangle(r);
   ACanvas.Pixels[x + 1, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + w - 2, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + 1, y + h - 2] := FPlasticColors^[10];
@@ -344,13 +348,16 @@ end;
 
 procedure TfpgPlasticStyle.DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect;
   ABackgroundColor: TfpgColor);
+var
+  r2: TfpgRect;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.SetColor(clWindowBackground);
   ACanvas.FillRectangle(r);
   ACanvas.SetColor(clShadow2);
   ACanvas.DrawLine(r.Left, r.Top, r.Left + r.Right, r.Top);
-  DrawMenuItemSeparator(ACanvas, fpgRect(r.Left - 1, r.Height - 4, r.Width, r.Height));
+  r2.SetRect(r.Left - 1, r.Height - 4, r.Width, r.Height);
+  DrawMenuItemSeparator(ACanvas, r2);
 end;
 
 procedure TfpgPlasticStyle.DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect);

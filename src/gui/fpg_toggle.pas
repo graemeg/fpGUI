@@ -159,6 +159,8 @@ var
   TextEnabled: TfpgTextFlags;
   BvlWdth: TfpgCoord;
   ButtonRect: TfpgRect;
+  TextRect: TfpgRect;
+  FillRect: TfpgRect;
 begin
   Canvas.Clear(BackgroundColor);
 
@@ -172,9 +174,15 @@ begin
   BvlWdth := fpgStyleManager.Style.GetBevelWidth;
 
   if BoxLayout = tbRightBox then
-    Canvas.DrawText(fpgRect(0,0,FWidth-FToggleWidth, FHeight), Text, [txtLeft, txtVCenter] + TextEnabled)   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+  begin
+    TextRect.SetRect(0,0,FWidth-FToggleWidth, FHeight);
+    Canvas.DrawText(TextRect, Text, [txtLeft, txtVCenter] + TextEnabled);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+  end
   else
-    Canvas.DrawText(fpgRect(ToggleWidth,0,FWidth-ToggleWidth, FHeight), Text, [txtRight, txtVCenter] + TextEnabled);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+  begin
+    TextRect.SetRect(ToggleWidth,0,FWidth-ToggleWidth, FHeight);
+    Canvas.DrawText(TextRect, Text, [txtRight, txtVCenter] + TextEnabled);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+  end;
 
   // Toggle Stuff
 
@@ -200,19 +208,22 @@ begin
   end;
 
   // Toggle Text (inside 2 bevels)
-  Canvas.DrawText(fpgRect(ToggleLeft+FSliderPosition+BvlWdth*2,BvlWdth*2,FToggleButtonWidth-BvlWdth*4, Height-BvlWdth*4),ToggleText, [txtVCenter, txtHCenter] + TextEnabled);
+  TextRect.SetRect(ToggleLeft+FSliderPosition+BvlWdth*2,BvlWdth*2,FToggleButtonWidth-BvlWdth*4, Height-BvlWdth*4);
+  Canvas.DrawText(TextRect,ToggleText, [txtVCenter, txtHCenter] + TextEnabled);
 
   // Paint on either side of the button part of the toggle
   if FSliderPosition > 0 then
   begin
     Canvas.SetColor(CheckedColor);
-    Canvas.FillRectangle(fpgRect(ToggleLeft+1,1, FSliderPosition, FHeight - BvlWdth*2));
+    FillRect.SetRect(ToggleLeft+1,1, FSliderPosition, FHeight - BvlWdth*2);
+    Canvas.FillRectangle(FillRect);
   end;
 
   if FSliderPosition < FToggleWidth - FToggleButtonWidth -2 then
   begin
     Canvas.SetColor(UnCheckedColor);
-    Canvas.FillRectangle(fpgRect(ToggleLeft + FSliderPosition + FToggleButtonWidth+BvlWdth, BvlWdth, FToggleWidth - FToggleButtonWidth - FSliderPosition -(BvlWdth*2), FHeight - BvlWdth*2));
+    FillRect.SetRect(ToggleLeft + FSliderPosition + FToggleButtonWidth+BvlWdth, BvlWdth, FToggleWidth - FToggleButtonWidth - FSliderPosition -(BvlWdth*2), FHeight - BvlWdth*2);
+    Canvas.FillRectangle(FillRect);
   end;
 
   // lastly draw focus

@@ -655,7 +655,7 @@ begin
 
   ItemAreaBounds := FListView.GetItemClientArea;
 
-  UnionRect(oClipRect, ACanvas.GetClipRect, ItemAreaBounds);
+  ACanvas.GetClipRect.UnionRect(oClipRect, ItemAreaBounds);
 
   for I := FirstIndex to LastIndex do
   begin
@@ -1976,7 +1976,7 @@ begin
   // Check if event is within headers
   if FShowHeaders then
   begin
-    if PtInRect(ViewStyle.GetHeaderArea, Point(X, Y)) then
+    if ViewStyle.GetHeaderArea.PointInRect(Point(X, Y)) then
     //if (Y < GetHeaderHeight + cRect.Top)  then
     begin
       Column := ViewStyle.GetColumnFromX(X, ResizeColumn);
@@ -2046,7 +2046,7 @@ begin
 
   if FShowHeaders then
   begin
-    if PtInRect(ViewStyle.GetHeaderArea, Point(X,Y)) then
+    if ViewStyle.GetHeaderArea.PointInRect(Point(X,Y)) then
     begin
       Column := ViewStyle.GetColumnFromX(X);
       if Assigned(Column) then
@@ -2113,7 +2113,7 @@ begin
   if not cRect.PointInRect(Point(X,Y)) and (FResizingColumn = nil) then
     Exit;
 
-  if PtInRect(ViewStyle.GetHeaderArea, Point(x,y)) or Assigned(FResizingColumn) then
+  if ViewStyle.GetHeaderArea.PointInRect(Point(x,y)) or Assigned(FResizingColumn) then
   begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
   end

@@ -1591,12 +1591,15 @@ begin
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
   if CanDrawExtraHint then
-    DrawPlaceholderText(fpgRect(
+  begin
+    r.SetRect(
       r.Left - FDrawOffset + GetMarginAdjustment,
       r.Top + FHeightMargin,
       r.Width + FDrawOffset - GetMarginAdjustment,
       r.Height - FHeightMargin
-      ))
+      );
+    DrawPlaceholderText(r);
+  end
   else
   begin
     Canvas.SetTextColor(FTextColor);
