@@ -1556,12 +1556,13 @@ end;
 constructor TfpgX11Application.Create(const AParams: string);
 var
   s: string;
+  cmd: ICmdLineParams;
 begin
   inherited Create(AParams);
 
-  if gCommandLineParams.IsParam('display') then
+  if Supports(self, ICmdLineParams, cmd) and cmd.HasOption('display') then
   begin
-    s := gCommandLineParams.GetParam('display');
+    s := cmd.GetOptionValue('display');
     FDisplay := XOpenDisplay(PChar(s));
   end
   else

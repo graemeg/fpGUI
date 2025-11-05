@@ -931,12 +931,17 @@ var
   function GetDebugFileName: string;
   var
     EnvVarName: string;
+    cmd: ICmdLineParams;
   begin
     Result := '';
     // first try to find the log file name in the command line parameters
-    if gCommandLineParams.IsParam('debuglog') then
-      Result := gCommandLineParams.GetParam('debuglog')
-    else
+    if Supports(fpgApplication, ICmdLineParams, cmd) then
+    begin
+      if cmd.HasOption('debuglog') then
+        Result := cmd.GetOptionValue('debuglog');
+    end;
+
+    if Result = '' then
     begin
       // if not found yet, then try to find in the environment variable
       EnvVarName  := ApplicationName + '_debuglog';
