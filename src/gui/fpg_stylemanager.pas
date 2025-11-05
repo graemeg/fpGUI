@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2011 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -54,7 +54,6 @@ type
   private
     FList : TObjectList;
     FDefaultStyle: TfpgStyle;
-//    FUserStyle: TfpgStyle;
     FDefaultStyleType: string;
     function    GetStyle: TfpgStyle;
   public
@@ -117,7 +116,6 @@ constructor TfpgStyleManager.Create;
 begin
   inherited Create;
   FList := TObjectList.Create;
-//  FUserStyle        := nil;
   FDefaultStyle     := nil;
   FDefaultStyleType := cDefaultStyle;    // will change later
 end;
@@ -147,8 +145,7 @@ begin
     end;
   end;
 
-  Assert(FDefaultStyleType <> AStyleName,
-      Format('<%s> does not identify a registered style class.', [AStyleName]));
+  Assert(false, Format('<%s> does not identify a registered style class.', [AStyleName]));
 end;
 
 // Register a TStyle class for creation by the factory
@@ -160,7 +157,6 @@ begin
     if UpperCase(TfpgStyleClassMapping(FList.Items[i]).MappingName) = UpperCase(AStyleName) then
       Assert(false, Format('Style class <%s> already registered.', [AStyleName]));
   FList.Add(TfpgStyleClassMapping.Create(AStyleName, AStyleClass));
-//  writeln('Registering style: ' + AStyleName);
 end;
 
 // Call the factory to create an instance of TStyle
