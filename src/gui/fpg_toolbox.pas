@@ -58,10 +58,23 @@ begin
     begin
       Left := ScaleX(Left, FromDPI);
       Top := ScaleY(Top, FromDPI);
-      // Read actual size, scale it, write to Width/Height properties
-      // csLoading is active, so SetWidth/SetHeight will set both preferred AND actual size
-      Width := ScaleX(ActualWidth, FromDPI);
-      Height := ScaleY(ActualHeight, FromDPI);
+
+      // Choose which size to scale based on context:
+      // - Layout-managed widgets: scale preferred size (developer's intent)
+      // - Manual positioning: scale actual size (what was set by SetPosition)
+      if Assigned(Parent) and (Parent is TfpgWidget) and Assigned(TfpgWidget(Parent).LayoutManager) then
+      begin
+        // Layout manager present: scale preferred size
+        Width := ScaleX(Width, FromDPI);
+        Height := ScaleY(Height, FromDPI);
+      end
+      else
+      begin
+        // Manual positioning: scale actual size
+        // csLoading is active, so SetWidth/SetHeight will set both preferred AND actual size
+        Width := ScaleX(ActualWidth, FromDPI);
+        Height := ScaleY(ActualHeight, FromDPI);
+      end;
 
       MinWidth := ScaleX(MinWidth, FromDPI);
       MinHeight := ScaleY(MinHeight, FromDPI);
