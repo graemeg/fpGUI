@@ -14,13 +14,19 @@ uses
   fpg_layoutmanager,
   fpg_layouttypes,
   fpg_miglayout,
-  fpg_mig_cc;
+  fpg_mig_cc,
+  fpg_mig_platformdefaults;
 
 type
 
   { TTestMigLayout }
 
   TTestMigLayout = class(TTestCase)
+  private
+    FMigDefaultBaseDpi: integer;
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
   published
     procedure TestCreateMigLayout;
     procedure TestSingleWidgetLayout;
@@ -43,6 +49,23 @@ begin
 end;
 
 { TTestMigLayout }
+
+procedure TTestMigLayout.SetUp;
+begin
+  inherited SetUp;
+  FMigDefaultBaseDpi :=  TfpgMigPlatformDefaults.GetBaseDPI;
+  // Set BaseDPI to match screen DPI so scale factor = 1.0
+  // This makes tests DPI-independent by ensuring logical pixels = actual pixels
+  if fpgApplication <> nil then
+    TfpgMigPlatformDefaults.SetBaseDPI(fpgApplication.Screen_dpi);
+end;
+
+procedure TTestMigLayout.TearDown;
+begin
+  // restore for other tests
+  TfpgMigPlatformDefaults.SetBaseDPI(FMigDefaultBaseDpi);
+  inherited TearDown;
+end;
 
 procedure TTestMigLayout.TestCreateMigLayout;
 var
