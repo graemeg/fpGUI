@@ -3054,7 +3054,9 @@ begin
   begin
     FOffset := TWidgetFriend(Source).FDragStartPos;
 
-    FPreviewWin.MoveWidget(msg.Params.mouse.x-FOffset.X, msg.Params.mouse.y-FOffset.Y);
+    FPreviewWin.Left := msg.Params.mouse.x-FOffset.X;
+    FPreviewWin.Top := msg.Params.mouse.y-FOffset.Y;
+    FPreviewWin.UpdatePosition;
   end;
 end;
 

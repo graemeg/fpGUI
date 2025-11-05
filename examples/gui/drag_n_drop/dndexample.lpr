@@ -143,7 +143,7 @@ begin
   d.MimeData := m;
 
   D.OnPaintPreview:=@PaintDragPreview;
-  D.PreviewSize := fpgSize(Canvas.Font.TextWidth(d.MimeData.Text), Canvas.Font.Height);
+  D.PreviewSize := fpgSize(Canvas.Font.GetTextWidth(d.MimeData.Text), Canvas.Font.GetHeight());
 
   { TfpgDrag instance will be freed later when DND action is completed }
   d.Execute([daCopy]);

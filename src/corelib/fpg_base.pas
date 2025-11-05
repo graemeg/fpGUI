@@ -571,6 +571,8 @@ type
     procedure   SetHasOwnWindow(AValue: Boolean); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
+    procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
+    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
   public
     // The standard constructor.
@@ -581,9 +583,7 @@ type
     function    Bottom: TfpgCoord;
     procedure   UpdatePosition;
     procedure   UpdateWindowPosition; deprecated 'use UpdatePosition';
-    procedure   MoveWidget(const x: TfpgCoord; const y: TfpgCoord);
-    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
-    procedure   SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord); virtual;
+    procedure   SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord); virtual; deprecated 'Use Left, Top, Width, Height properties instead';
     function    ScreenToWidget(const AScreenPos: TPoint): TPoint;
     function    WidgetToScreen(ASource: TfpgWidgetBase; const AScreenPos: TPoint): TPoint;
     procedure   WidgetToWindow(var AX, AY: TfpgCoord);
