@@ -27,7 +27,7 @@ if not exist updatepofiles.exe goto Exit_Error
 :SkipTools
 
 echo Updating language files...
-@set Constants_RST=..\lib\%FPCTARGET%\fpg_constants.rst
+@set Constants_RST=..\lib\%FPCTARGET%\fpg_constants.rsj
 rstconv -i %Constants_RST% -o ..\languages\fpgui.po
 
 updatepofiles.exe ..\languages\fpgui.po
