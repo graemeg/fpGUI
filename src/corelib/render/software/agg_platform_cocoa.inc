@@ -144,19 +144,13 @@ begin
   // Calculate bytes per row (assuming 32-bit RGBA)
   bytesPerRow := FImg.Width * 4;
 
-  // Draw pixel by pixel directly to the view
+  // Draw pixel by pixel using lockFocus
   // NOTE: This is a simple but slow implementation for initial testing
   // TODO: Optimize by using a more efficient bitmap rendering method
   if Assigned(win.View) and Assigned(win.WinHandle) then
   begin
-    // Get the graphics context for the window
-    context := NSGraphicsContext.graphicsContextWithWindow(win.WinHandle);
-    if not Assigned(context) then
-      exit;
-
-    // Save and set the current context
-    NSGraphicsContext.saveGraphicsState;
-    NSGraphicsContext.setCurrentContext(context);
+    // Lock focus on the view to draw
+    if win.View.lockFocusIfCanDraw then
     try
       // Draw the rectangle of pixels
       srcPixel := PLongWord(imageData);
@@ -191,7 +185,7 @@ begin
       end;
 
     finally
-      NSGraphicsContext.restoreGraphicsState;
+      win.View.unlockFocus;
     end;
 
     // Force immediate display - flush the window to show rendered content
