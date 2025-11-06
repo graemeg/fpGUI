@@ -671,7 +671,7 @@ begin
   // Create and set delegate for window events
   FDelegate := TfpgCocoaWindowDelegate.alloc.init;
   FDelegate.setWindow(Self);
-  FWinHandle.setDelegate(FDelegate);
+  FWinHandle.setDelegate(NSWindowDelegateProtocol(FDelegate));
 
   // Create custom view for rendering
   FView := TfpgCocoaView.alloc.initWithFrame(NSMakeRect(0, 0, FSize.W, FSize.H));
