@@ -19,6 +19,7 @@
 
 
 {$ifdef agg_platform_implementation}
+{$modeswitch objectivec2}
 
 type
   // to get access to protected methods (seeing that FPC doesn't support Friend-classes)
