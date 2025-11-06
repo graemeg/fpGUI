@@ -662,27 +662,18 @@ const
   ID_ABOUT = 200001;  // Must match the definition in fpg_gdi.pas
   {$ENDIF}
 begin
-  WriteLn('DEBUG: MainFormShow - START');
   bvlBody.Realign;
-  WriteLn('DEBUG: MainFormShow - After Realign');
 
   // restore previous window position and size
   gINI.ReadFormState(self);
-  WriteLn('DEBUG: MainFormShow - After ReadFormState');
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
-  WriteLn('DEBUG: MainFormShow - After setting PageControl1.Width');
   UpdatePosition;
-  WriteLn('DEBUG: MainFormShow - After UpdatePosition');
 
   CreateMRUMenuItems;
-  WriteLn('DEBUG: MainFormShow - After CreateMRUMenuItems');
   ProcessCommandLineParams;
-  WriteLn('DEBUG: MainFormShow - After ProcessCommandLineParams');
 
   RichView.Images := FImages;
-  WriteLn('DEBUG: MainFormShow - After setting RichView.Images');
   UpdateRichViewFromSettings;
-  WriteLn('DEBUG: MainFormShow - After UpdateRichViewFromSettings');
 
   if ParamCount = 0 then
   begin
@@ -691,11 +682,9 @@ begin
     // load the DocView help file
     if Settings.StartupHelp then
     begin
-      WriteLn('DEBUG: MainFormShow - About to load startup help');
       lFilename := GetOwnHelpFileName;
       if FileExists(lFilename) then
         OpenFile(lFilename, '', true);
-      WriteLn('DEBUG: MainFormShow - After OpenFile');
     end;
   end;
   // This is just for fun! ;-)
@@ -704,7 +693,6 @@ begin
   AppendMenu(hSysMenu, MF_SEPARATOR, 0, nil);
   AppendMenu(hSysMenu, MF_STRING, ID_ABOUT, PChar('&About fpGUI Toolkit...'));
   {$ENDIF}
-  WriteLn('DEBUG: MainFormShow - END');
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
