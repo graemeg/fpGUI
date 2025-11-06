@@ -86,7 +86,7 @@ type
   
   
   { Window delegate for handling window events }
-  TfpgCocoaWindowDelegate = objcclass(NSObject, NSWindowDelegateProtocol)
+  TfpgCocoaWindowDelegate = objcclass(NSObject)
   public
     FWindow: TfpgCocoaWindow;
     procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
