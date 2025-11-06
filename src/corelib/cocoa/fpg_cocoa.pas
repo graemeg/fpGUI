@@ -1156,6 +1156,7 @@ var
   nsStr: NSString;
   pasteboardType: NSString;
 begin
+  writeln('TfpgCocoaClipboard.DoGetText called');
   Result := '';
   pasteboard := NSPasteboard.generalPasteboard;
 
@@ -1165,13 +1166,19 @@ begin
 
   if not Assigned(nsStr) then
   begin
+    writeln('  Modern type failed, trying legacy type');
     // Fall back to legacy type for older macOS
     pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
     nsStr := NSString(pasteboard.stringForType(pasteboardType));
   end;
 
   if Assigned(nsStr) then
+  begin
     Result := NSStringToString(nsStr);
+    writeln('  Got text: "', Result, '"');
+  end
+  else
+    writeln('  No text found on pasteboard');
 end;
 
 procedure TfpgCocoaClipboard.DoSetText(const AValue: TfpgString);
@@ -1181,6 +1188,7 @@ var
   pasteboardType: NSString;
   success: Boolean;
 begin
+  writeln('TfpgCocoaClipboard.DoSetText called with: "', AValue, '"');
   pasteboard := NSPasteboard.generalPasteboard;
 
   // Clear the pasteboard
@@ -1195,10 +1203,16 @@ begin
 
   if not success then
   begin
+    writeln('  Modern type failed, trying legacy type');
     // Fall back to legacy type for older macOS
     pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
-    pasteboard.setString_forType(nsStr, pasteboardType);
+    success := pasteboard.setString_forType(nsStr, pasteboardType);
   end;
+
+  if success then
+    writeln('  Successfully set clipboard text')
+  else
+    writeln('  Failed to set clipboard text');
 end;
 
 procedure TfpgCocoaClipboard.InitClipboard;

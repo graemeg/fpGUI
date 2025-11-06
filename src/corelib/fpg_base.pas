@@ -1240,13 +1240,14 @@ var
   c: string;
   ModKey: TShiftState;
 begin
-//  writeln('CheckClipboardKey');
+  writeln('CheckClipboardKey called - AKey: ', AKey, ' Shiftstate: ', Integer(Byte(AShiftstate)));
   Result := ckNone;
 
   // On macOS, Command key is used for shortcuts (mapped to ssMeta)
   // On other platforms, Ctrl key is used
   {$IFDEF DARWIN}
   ModKey := [ssMeta];
+  writeln('  Using ssMeta for macOS');
   {$ELSE}
   ModKey := [ssCtrl];
   {$ENDIF}
@@ -1263,14 +1264,25 @@ begin
   else if (AShiftstate = ModKey) then
   begin
     c := KeycodeToText(AKey, []);   // case is not important
-//    Writeln('Key: ', c);
+    Writeln('  Key text: "', c, '"');
     if c = 'C' then
-      Result := ckCopy
+    begin
+      Result := ckCopy;
+      writeln('  -> Detected COPY');
+    end
     else if c = 'V' then
-      Result := ckPaste
+    begin
+      Result := ckPaste;
+      writeln('  -> Detected PASTE');
+    end
     else if c = 'X' then
+    begin
       Result := ckCut;
+      writeln('  -> Detected CUT');
+    end;
   end  { if/else }
+  else
+    writeln('  Shiftstate mismatch - Expected ModKey but got something else');
 end;
 
 function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
