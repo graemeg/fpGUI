@@ -191,9 +191,8 @@ begin
       win.View.unlockFocus;
     end;
 
-    // Mark the rect as needing display
-    rect := NSMakeRect(x, y, w, h);
-    win.View.setNeedsDisplayInRect(rect);
+    // Force immediate display - flush the window to show rendered content
+    win.WinHandle.flushWindow;
   end;
 end;
 
