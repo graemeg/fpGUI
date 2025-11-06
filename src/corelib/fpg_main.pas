@@ -1570,13 +1570,16 @@ end;
 
 procedure TfpgApplication.Run;
 begin
+  WriteLn('DEBUG: TfpgApplication.Run - START');
   repeat
+    WriteLn('DEBUG: Calling RunMessageLoop');
     try
       RunMessageLoop;
     except
       HandleException(Self);
     end;
   until Terminated;
+  WriteLn('DEBUG: TfpgApplication.Run - END (Terminated)');
 end;
 
 procedure TfpgApplication.SetupLocalizationStrings;

@@ -947,17 +947,22 @@ end;
 
 constructor TfpgCocoaApplication.Create(const AParams: string);
 begin
+  WriteLn('DEBUG: TfpgCocoaApplication.Create - START');
   inherited Create(AParams);
 
   // Initialize NSApplication if not already done
   NSApp := NSApplication.sharedApplication;
+  WriteLn('DEBUG: NSApp obtained');
   NSApp.setActivationPolicy(NSApplicationActivationPolicyRegular);
+  WriteLn('DEBUG: Activation policy set');
 
   // Call finishLaunching to properly initialize the app for manual event loop
   // This is required when not using [NSApp run]
   NSApp.finishLaunching;
+  WriteLn('DEBUG: finishLaunching called');
 
   FIsInitialized := True;
+  WriteLn('DEBUG: TfpgCocoaApplication.Create - END');
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;
@@ -991,6 +996,7 @@ var
   pool: NSAutoreleasePool;
   timeoutDate: NSDate;
 begin
+  WriteLn('DEBUG: DoWaitWindowMessage - ENTER');
   pool := NSAutoreleasePool.alloc.init;
   try
     // Set timeout
@@ -999,22 +1005,27 @@ begin
     else
       timeoutDate := NSDate.distantFuture;
 
+    WriteLn('DEBUG: About to call nextEventMatchingMask');
     // Get next event
     event := NSApp.nextEventMatchingMask_untilDate_inMode_dequeue(
       NSAnyEventMask,
       timeoutDate,
       NSDefaultRunLoopMode,
       True);
+    WriteLn('DEBUG: nextEventMatchingMask returned, event assigned: ', Assigned(event));
 
     if Assigned(event) then
     begin
+      WriteLn('DEBUG: Event type: ', event.type_);
       // Process the event
       NSApp.sendEvent(event);
       NSApp.updateWindows;
+      WriteLn('DEBUG: Event processed');
     end;
   finally
     pool.release;
   end;
+  WriteLn('DEBUG: DoWaitWindowMessage - EXIT');
 end;
 
 function TfpgCocoaApplication.MessagesPending: boolean;
