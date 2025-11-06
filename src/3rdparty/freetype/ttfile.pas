@@ -47,6 +47,8 @@
 
 Unit TTFile;
 
+{$mode objfpc}{$H+}
+
 interface
 
 {$I TTCONFIG.INC}

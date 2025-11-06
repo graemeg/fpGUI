@@ -18,6 +18,8 @@
 
 unit TTCalc;
 
+{$mode objfpc}{$H+}
+
 interface
 
 {$I TTCONFIG.INC}
