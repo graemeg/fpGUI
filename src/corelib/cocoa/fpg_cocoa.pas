@@ -218,7 +218,7 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
-  fpg_window,       // used for window attributes changed callback
+  fpg_window,       // used for window attributes changed callback and window title
   fpg_stringutils,  // used for GetTextWidth
   fpg_utils,
   fpg_form,         // for modal event support
@@ -679,6 +679,13 @@ begin
 
   FWinHandle.setContentView(FView);
   FWinHandle.setAcceptsMouseMovedEvents(True);
+
+  // Set window title if we have a primary widget with a title
+  if Assigned(PrimaryWidget) and (PrimaryWidget is TfpgWindow) then
+  begin
+    if TfpgWindow(PrimaryWidget).WindowTitle <> '' then
+      DoSetWindowTitle(TfpgWindow(PrimaryWidget).WindowTitle);
+  end;
 
   // Handle parent window relationship
   if Assigned(AParent) then
