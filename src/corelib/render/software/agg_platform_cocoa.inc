@@ -7,7 +7,7 @@
 
 {$ifdef agg_platform_interface}
   protected
-    FCocoaImage: NSBitmapImageRep;  // Store NSBitmapImageRep for rendering
+    // No platform-specific members needed for Cocoa
 {$endif}
 
 
@@ -109,6 +109,11 @@ var
   imageData: Pointer;
   bytesPerRow: Integer;
   rect: NSRect;
+  provider: CGDataProviderRef;
+  colorSpace: CGColorSpaceRef;
+  cgImage: CGImageRef;
+  nsImage: NSImage;
+  context: NSGraphicsContext;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -139,57 +144,67 @@ begin
   // Calculate bytes per row (assuming 32-bit RGBA)
   bytesPerRow := FImg.Width * 4;
 
-  // Create or update NSBitmapImageRep
-  if not Assigned(FCocoaImage) then
-  begin
-    FCocoaImage := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(
-      @imageData,                       // planes
-      FImg.Width,                       // width
-      FImg.Height,                      // height
-      8,                                // bitsPerSample
-      4,                                // samplesPerPixel (RGBA)
-      True,                             // hasAlpha
-      False,                            // isPlanar
-      NSCalibratedRGBColorSpace,        // colorSpaceName
-      bytesPerRow,                      // bytesPerRow
-      32                                // bitsPerPixel
-    );
-  end
-  else
-  begin
-    // Update existing bitmap data
-    // Note: We might need to recreate if size changed
-    if (FCocoaImage.pixelsWide <> FImg.Width) or (FCocoaImage.pixelsHigh <> FImg.Height) then
-    begin
-      FCocoaImage.release;
-      FCocoaImage := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(
-        @imageData,
-        FImg.Width,
-        FImg.Height,
-        8,
-        4,
-        True,
-        False,
-        NSCalibratedRGBColorSpace,
-        bytesPerRow,
-        32
-      );
-    end;
-  end;
-
   // Lock focus and draw
   if Assigned(win.View) then
   begin
     win.View.lockFocus;
     try
-      // Draw the bitmap at the specified location
-      rect := NSMakeRect(x, y, w, h);
-      FCocoaImage.drawInRect(rect);
+      context := NSGraphicsContext.currentContext;
+      if not Assigned(context) then
+        exit;
+
+      // Create color space
+      colorSpace := CGColorSpaceCreateDeviceRGB();
+
+      // Create data provider from our image buffer
+      provider := CGDataProviderCreateWithData(nil, imageData, bytesPerRow * FImg.Height, nil);
+
+      // Create CGImage from data
+      cgImage := CGImageCreate(
+        FImg.Width,                          // width
+        FImg.Height,                         // height
+        8,                                   // bits per component
+        32,                                  // bits per pixel
+        bytesPerRow,                         // bytes per row
+        colorSpace,                          // color space
+        kCGImageAlphaLast or kCGBitmapByteOrder32Big,  // bitmap info
+        provider,                            // data provider
+        nil,                                 // decode array
+        false,                               // should interpolate
+        kCGRenderingIntentDefault            // rendering intent
+      );
+
+      if Assigned(cgImage) then
+      begin
+        // Create NSImage from CGImage
+        rect := NSMakeRect(0, 0, FImg.Width, FImg.Height);
+        nsImage := NSImage.alloc.initWithCGImage_size(cgImage, rect.size);
+
+        if Assigned(nsImage) then
+        begin
+          // Draw the image at the specified location
+          rect := NSMakeRect(x, y, w, h);
+          nsImage.drawInRect_fromRect_operation_fraction(
+            rect,
+            NSMakeRect(0, 0, FImg.Width, FImg.Height),
+            NSCompositeSourceOver,
+            1.0
+          );
+          nsImage.release;
+        end;
+
+        CGImageRelease(cgImage);
+      end;
+
+      CGDataProviderRelease(provider);
+      CGColorSpaceRelease(colorSpace);
+
     finally
       win.View.unlockFocus;
     end;
 
     // Mark the rect as needing display
+    rect := NSMakeRect(x, y, w, h);
     win.View.setNeedsDisplayInRect(rect);
   end;
 end;
