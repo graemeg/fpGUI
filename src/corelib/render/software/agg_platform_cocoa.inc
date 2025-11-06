@@ -1,13 +1,13 @@
 {%mainunit Agg2D.pas}
 
 {$ifdef uses_interface}
-  // CocoaAll,
+  CocoaAll,
 {$endif}
 
 
 {$ifdef agg_platform_interface}
   protected
-    // nothing here
+    FCocoaImage: NSBitmapImageRep;  // Store NSBitmapImageRep for rendering
 {$endif}
 
 
@@ -97,28 +97,18 @@ begin
       Result.IsItalic := True
     else if prop = 'ANGLE' then
       Result.Angle := StrToFloatDef(propval, 0.0);
-//    else if prop = 'ANTIALIAS' then
-//      if propval = 'FALSE' then
-//        lf.lfQuality := NONANTIALIASED_QUALITY else
-//      if propval = 'DEFAULT' then
-//        lf.lfQuality := DEFAULT_QUALITY;
   end;
 end;
 
 type
   TWindowHack = class(TfpgCocoaWindow);
-  TImageHack = class(TfpgImage);
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   win: TWindowHack;
-  context: NSGraphicsContext;
-  cgContext: CGContextRef;
   imageData: Pointer;
   bytesPerRow: Integer;
-  colorSpace: CGColorSpaceRef;
-  cgImage: CGImageRef;
-  destRect: NSRect;
+  rect: NSRect;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -141,65 +131,70 @@ begin
   // Update the image data
   FImg.UpdateImage;
 
-  // Lock focus on the view
-  if not Assigned(win.View) then
+  // Get image data from FImg
+  imageData := TImageHack(FImg).ImageData;
+  if not Assigned(imageData) then
     exit;
 
-  win.View.lockFocus;
-  try
-    // Get the current graphics context
-    context := NSGraphicsContext.currentContext;
-    if not Assigned(context) then
-      exit;
+  // Calculate bytes per row (assuming 32-bit RGBA)
+  bytesPerRow := FImg.Width * 4;
 
-    cgContext := CGContextRef(context.graphicsPort);
-
-    // Get image data from FImg
-    imageData := TImageHack(FImg).ImageData;
-    if not Assigned(imageData) then
-      exit;
-
-    // Calculate bytes per row (assuming 32-bit RGBA)
-    bytesPerRow := FImg.Width * 4;
-
-    // Create a color space
-    colorSpace := CGColorSpaceCreateDeviceRGB();
-    try
-      // Create CGImage from raw data
-      cgImage := CGImageCreate(
-        FImg.Width,                          // width
-        FImg.Height,                         // height
-        8,                                   // bits per component
-        32,                                  // bits per pixel
-        bytesPerRow,                         // bytes per row
-        colorSpace,                          // color space
-        kCGImageAlphaPremultipliedLast or kCGBitmapByteOrder32Big,  // bitmap info
-        nil,                                 // data provider (use imageData directly)
-        nil,                                 // decode array
-        false,                               // should interpolate
-        kCGRenderingIntentDefault            // rendering intent
+  // Create or update NSBitmapImageRep
+  if not Assigned(FCocoaImage) then
+  begin
+    FCocoaImage := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(
+      @imageData,                       // planes
+      FImg.Width,                       // width
+      FImg.Height,                      // height
+      8,                                // bitsPerSample
+      4,                                // samplesPerPixel (RGBA)
+      True,                             // hasAlpha
+      False,                            // isPlanar
+      NSCalibratedRGBColorSpace,        // colorSpaceName
+      bytesPerRow,                      // bytesPerRow
+      32                                // bitsPerPixel
+    );
+  end
+  else
+  begin
+    // Update existing bitmap data
+    // Note: We might need to recreate if size changed
+    if (FCocoaImage.pixelsWide <> FImg.Width) or (FCocoaImage.pixelsHigh <> FImg.Height) then
+    begin
+      FCocoaImage.release;
+      FCocoaImage := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(
+        @imageData,
+        FImg.Width,
+        FImg.Height,
+        8,
+        4,
+        True,
+        False,
+        NSCalibratedRGBColorSpace,
+        bytesPerRow,
+        32
       );
-
-      // Note: We need a data provider for CGImageCreate
-      // For now, use a simpler approach with NSBitmapImageRep
-      // This is a placeholder - actual implementation would create proper CGImage
-
-      // Set destination rectangle
-      destRect := NSMakeRect(x, y, w, h);
-
-      // For now, mark the view as needing display
-      win.View.setNeedsDisplayInRect(destRect);
-
-    finally
-      CGColorSpaceRelease(colorSpace);
-      if Assigned(cgImage) then
-        CGImageRelease(cgImage);
     end;
-  finally
-    win.View.unlockFocus;
+  end;
+
+  // Lock focus and draw
+  if Assigned(win.View) then
+  begin
+    win.View.lockFocus;
+    try
+      // Draw the bitmap at the specified location
+      rect := NSMakeRect(x, y, w, h);
+      FCocoaImage.drawInRect(rect);
+    finally
+      win.View.unlockFocus;
+    end;
+
+    // Mark the rect as needing display
+    win.View.setNeedsDisplayInRect(rect);
   end;
 end;
 
 
 {$endif}
+
 
