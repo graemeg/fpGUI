@@ -801,6 +801,8 @@ begin
 end;
 
 procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
+var
+  msgp: TfpgMessageParams;
 begin
   if not HandleIsValid then
     Exit;
@@ -809,6 +811,18 @@ begin
   begin
     FWinHandle.makeKeyAndOrderFront(nil);
     FWinHandle.orderFrontRegardless;
+
+    // Trigger initial paint when window becomes visible
+    if Assigned(FView) then
+    begin
+      FView.setNeedsDisplay(True);
+
+      // Also send a paint message to fpGUI to populate the buffer
+      fillchar(msgp, sizeof(msgp), 0);
+      msgp.rect.Width := FSize.W;
+      msgp.rect.Height := FSize.H;
+      fpgPostMessage(nil, Self, FPGM_PAINT, msgp);
+    end;
   end
   else
     FWinHandle.orderOut(nil);
