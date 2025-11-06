@@ -647,6 +647,13 @@ begin
   keyChar := NSStringToString(event.characters);
   modFlags := event.modifierFlags;
 
+  // For regular printable characters, use the character code as keycode
+  // Special keys (>= $e000) keep their mapped keycode
+  if (keyCode < $e000) and (Length(keyChar) > 0) then
+  begin
+    keyCode := Ord(keyChar[1]);
+  end;
+
   msgp.keyboard.keycode := keyCode;
   if Length(keyChar) > 0 then
     msgp.keyboard.keychar := keyChar[1]
