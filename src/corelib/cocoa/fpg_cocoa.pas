@@ -223,7 +223,16 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
-  fpg_constants; 
+  fpg_constants;
+
+{ Helper function to convert NSString to String }
+function NSStringToString(ns: NSString): String;
+begin
+  if Assigned(ns) then
+    Result := String(ns.UTF8String)
+  else
+    Result := '';
+end; 
 
 { TfpgCocoaFontResource }
 { NOTE: When using AggCanvas, TfpgAgg2DFontResource is used instead }
@@ -420,7 +429,7 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.mouse.x := Round(pt.x);
   msgp.mouse.y := Round(pt.y);
-  msgp.mouse.Buttons := [mbLeft];
+  msgp.mouse.Buttons := MOUSE_LEFT;
   msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
 
   fpgPostMessage(nil, FWindow, FPGM_MOUSEDOWN, msgp);
@@ -438,7 +447,7 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.mouse.x := Round(pt.x);
   msgp.mouse.y := Round(pt.y);
-  msgp.mouse.Buttons := [mbLeft];
+  msgp.mouse.Buttons := MOUSE_LEFT;
   msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
 
   fpgPostMessage(nil, FWindow, FPGM_MOUSEUP, msgp);
@@ -473,7 +482,7 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.mouse.x := Round(pt.x);
   msgp.mouse.y := Round(pt.y);
-  msgp.mouse.Buttons := [mbLeft];
+  msgp.mouse.Buttons := MOUSE_LEFT;  // Left button held during drag
   msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
 
   fpgPostMessage(nil, FWindow, FPGM_MOUSEMOVE, msgp);
@@ -525,7 +534,7 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.mouse.x := Round(pt.x);
   msgp.mouse.y := Round(pt.y);
-  msgp.mouse.Buttons := [mbRight];
+  msgp.mouse.Buttons := MOUSE_RIGHT;
   msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
 
   fpgPostMessage(nil, FWindow, FPGM_MOUSEDOWN, msgp);
@@ -543,7 +552,7 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.mouse.x := Round(pt.x);
   msgp.mouse.y := Round(pt.y);
-  msgp.mouse.Buttons := [mbRight];
+  msgp.mouse.Buttons := MOUSE_RIGHT;
   msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
 
   fpgPostMessage(nil, FWindow, FPGM_MOUSEUP, msgp);
@@ -553,7 +562,7 @@ procedure TfpgCocoaView.scrollWheel(event: NSEvent);
 var
   msgp: TfpgMessageParams;
   pt: NSPoint;
-  delta: CGFloat;
+  delta: Double;
 begin
   if not Assigned(FWindow) then
     exit;
@@ -624,11 +633,11 @@ begin
   if not HandleIsValid then
     Exit;
   r := FWinHandle.frame;
-  FLeft := Round(r.origin.x);
+  FPosition.X := Round(r.origin.x);
   // Cocoa uses bottom-left origin, fpGUI uses top-left
-  FTop := Round(NSScreen.mainScreen.frame.size.height - r.origin.y - r.size.height);
-  FWidth := Round(r.size.width);
-  FHeight := Round(r.size.height);
+  FPosition.Y := Round(NSScreen.mainScreen.frame.size.height - r.origin.y - r.size.height);
+  FSize.W := Round(r.size.width);
+  FSize.H := Round(r.size.height);
 end;
 
 procedure TfpgCocoaWindow.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
@@ -644,13 +653,13 @@ begin
   // Determine window style
   styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
 
-  if waResizable in FWindowAttributes then
+  if waSizeable in FWindowAttributes then
     styleMask := styleMask or NSResizableWindowMask;
 
   // Create content rect - convert fpGUI top-left to Cocoa bottom-left
-  contentRect := NSMakeRect(FLeft,
-                            NSScreen.mainScreen.frame.size.height - FTop - FHeight,
-                            FWidth, FHeight);
+  contentRect := NSMakeRect(FPosition.X,
+                            NSScreen.mainScreen.frame.size.height - FPosition.Y - FSize.H,
+                            FSize.W, FSize.H);
 
   // Create the window
   FWinHandle := NSWindow.alloc.initWithContentRect_styleMask_backing_defer(
@@ -665,21 +674,17 @@ begin
   FWinHandle.setDelegate(FDelegate);
 
   // Create custom view for rendering
-  FView := TfpgCocoaView.alloc.initWithFrame(NSMakeRect(0, 0, FWidth, FHeight));
+  FView := TfpgCocoaView.alloc.initWithFrame(NSMakeRect(0, 0, FSize.W, FSize.H));
   FView.setWindow(Self);
 
   FWinHandle.setContentView(FView);
   FWinHandle.setAcceptsMouseMovedEvents(True);
 
-  // Set window title if provided
-  if FWindowTitle <> '' then
-    DoSetWindowTitle(FWindowTitle);
-
   // Handle parent window relationship
-  if Assigned(AParent) and (AParent is TfpgWindowBase) then
+  if Assigned(AParent) then
   begin
-    parentWin := TfpgCocoaWindow(TfpgWindowBase(AParent).Window);
-    if parentWin.HandleIsValid then
+    parentWin := TfpgCocoaWindow(AParent.Window);
+    if Assigned(parentWin) and parentWin.HandleIsValid then
       parentWin.FWinHandle.addChildWindow_ordered(FWinHandle, NSWindowAbove);
   end;
 end;
@@ -723,10 +728,10 @@ begin
     Exit;
 
   // Update window style if resizable attribute changed
-  if (waResizable in ANewAttributes) <> (waResizable in AOldAtributes) then
+  if (waSizeable in ANewAttributes) <> (waSizeable in AOldAtributes) then
   begin
     styleMask := FWinHandle.styleMask;
-    if waResizable in ANewAttributes then
+    if waSizeable in ANewAttributes then
       styleMask := styleMask or NSResizableWindowMask
     else
       styleMask := styleMask and (not NSResizableWindowMask);
@@ -757,8 +762,8 @@ end;
 
 procedure TfpgCocoaWindow.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 var
-  screenHeight: CGFloat;
-  cocoaY: CGFloat;
+  screenHeight: Double;
+  cocoaY: Double;
   newOrigin: NSPoint;
 begin
   if not HandleIsValid then
@@ -766,7 +771,7 @@ begin
 
   // Convert fpGUI top-left to Cocoa bottom-left
   screenHeight := NSScreen.mainScreen.frame.size.height;
-  cocoaY := screenHeight - y - FHeight;
+  cocoaY := screenHeight - y - FSize.H;
   newOrigin := NSMakePoint(x, cocoaY);
 
   FWinHandle.setFrameOrigin(newOrigin);
@@ -927,13 +932,9 @@ end;
 function TfpgCocoaApplication.Screen_dpi_x: integer;
 var
   screen: NSScreen;
-  description: NSDictionary;
-  displayID: CGDirectDisplayID;
   screenSize: NSSize;
-  physicalSize: CGSize;
 begin
   screen := NSScreen.mainScreen;
-  description := screen.deviceDescription;
 
   // Get physical DPI if possible, otherwise use default
   Result := 72;  // Default macOS DPI
@@ -942,7 +943,7 @@ begin
   try
     screenSize := screen.frame.size;
     // Note: This is a simplified approach. Real DPI calculation would need
-    // CGDisplayScreenSize which requires additional APIs
+    // CGDisplayScreenSize which requires additional APIs not exposed in CocoaAll
     Result := 72;  // macOS standard DPI
   except
     Result := 72;
