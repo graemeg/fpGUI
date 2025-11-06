@@ -638,18 +638,21 @@ var
   keyChar: string;
   modFlags: NSUInteger;
   i: Integer;
+  virtualKeyCode: cushort;
 begin
   if not Assigned(FWindow) then
     exit;
 
   fillchar(msgp, sizeof(msgp), 0);
-  keyCode := TfpgCocoaApplication(fpgApplication).ConvertKeyCode(event.keyCode);
+  virtualKeyCode := event.keyCode;
+  keyCode := TfpgCocoaApplication(fpgApplication).ConvertKeyCode(virtualKeyCode);
   keyChar := NSStringToString(event.characters);
   modFlags := event.modifierFlags;
 
-  // For regular printable characters, use the character code as keycode
-  // Special keys (>= $e000) keep their mapped keycode
-  if (keyCode < $e000) and (Length(keyChar) > 0) then
+  // If ConvertKeyCode didn't map this key (returned the same value),
+  // and we have a character, use the character code as the keycode.
+  // This handles keys like Space that aren't in the ConvertKeyCode map.
+  if (keyCode = virtualKeyCode) and (keyCode < $e000) and (Length(keyChar) > 0) then
   begin
     keyCode := Ord(keyChar[1]);
   end;
