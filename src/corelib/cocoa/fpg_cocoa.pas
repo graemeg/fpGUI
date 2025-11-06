@@ -636,6 +636,8 @@ var
   msgp: TfpgMessageParams;
   keyCode: Word;
   keyChar: string;
+  modFlags: NSUInteger;
+  i: Integer;
 begin
   if not Assigned(FWindow) then
     exit;
@@ -643,15 +645,29 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   keyCode := TfpgCocoaApplication(fpgApplication).ConvertKeyCode(event.keyCode);
   keyChar := NSStringToString(event.characters);
+  modFlags := event.modifierFlags;
 
   msgp.keyboard.keycode := keyCode;
   if Length(keyChar) > 0 then
     msgp.keyboard.keychar := keyChar[1]
   else
     msgp.keyboard.keychar := #0;
-  msgp.keyboard.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+  msgp.keyboard.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(modFlags);
 
+  // Post FPGM_KEYPRESS for all keys
   fpgPostMessage(nil, FWindow, FPGM_KEYPRESS, msgp);
+
+  // Additionally post FPGM_KEYCHAR for character input (not for special keys with modifiers)
+  // Similar to X11 backend behavior
+  if (Length(keyChar) > 0) and ((modFlags and (NSCommandKeyMask or NSControlKeyMask or NSAlternateKeyMask)) = 0) then
+  begin
+    // Post FPGM_KEYCHAR for each character (UTF-8 may have multiple chars)
+    for i := 1 to UTF8Length(keyChar) do
+    begin
+      msgp.keyboard.keychar := UTF8Copy(keyChar, i, 1);
+      fpgPostMessage(nil, FWindow, FPGM_KEYCHAR, msgp);
+    end;
+  end;
 end;
 
 procedure TfpgCocoaView.keyUp(event: NSEvent);
