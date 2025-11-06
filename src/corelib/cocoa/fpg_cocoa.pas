@@ -18,8 +18,6 @@
 unit fpg_cocoa;
 
 {$I fpg_defines.inc}
-{$mode objfpc}{$H+}
-{$modeswitch objectivec2}
 
 interface
 
@@ -27,11 +25,14 @@ uses
   Classes,
   SysUtils,
   contnrs,
+  ctypes,
   CocoaAll,
   fpg_base,
   fpg_impl;
-  
+
 type
+  // Forward declarations
+  TfpgCocoaWindow = class;
 
   TfpgCocoaFontResource = class(TfpgFontResourceBase)
   public

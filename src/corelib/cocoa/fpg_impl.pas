@@ -19,8 +19,6 @@
 unit fpg_impl;
 
 {$I fpg_defines.inc}
-{$mode objfpc}{$H+}
-{$modeswitch objectivec2}
 
 interface
 
