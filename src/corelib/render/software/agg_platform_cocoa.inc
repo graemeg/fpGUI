@@ -1,7 +1,5 @@
 {%mainunit Agg2D.pas}
 
-{$modeswitch objectivec2}
-
 {$ifdef uses_interface}
   CocoaAll,
 {$endif}
