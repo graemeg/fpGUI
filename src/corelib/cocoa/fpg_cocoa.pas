@@ -396,7 +396,6 @@ end;
 
 procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight: Integer);
 begin
-  WriteLn('DEBUG: setImageBuffer - AData:', Assigned(AData), ' Size:', AWidth, 'x', AHeight);
   FImageData := AData;
   FImageWidth := AWidth;
   FImageHeight := AHeight;
@@ -410,7 +409,6 @@ var
   r, g, b, a: Byte;
   color: NSColor;
 begin
-  WriteLn('DEBUG: drawRect called - ImageData:', Assigned(FImageData), ' Size:', FImageWidth, 'x', FImageHeight);
   // This will be called by Cocoa when the view needs to be redrawn
   // Just draw the buffer - do NOT trigger FPGM_PAINT from here (causes infinite loop)
 
@@ -737,7 +735,6 @@ begin
     Exit;
 
   // Determine window style based on window type
-  WriteLn('DEBUG: DoAllocateWindowHandle - WindowType: ', Ord(WindowType), ' Pos:', FPosition.X, ',', FPosition.Y, ' Size:', FSize.W, 'x', FSize.H);
   case WindowType of
     wtChild:
       styleMask := NSBorderlessWindowMask;  // Child windows have no decorations
@@ -768,12 +765,9 @@ begin
   if not Assigned(FWinHandle) then
     raise Exception.Create('Failed to create Cocoa window');
 
-  WriteLn('DEBUG: Window created, handle assigned: ', Assigned(FWinHandle));
-
   // Configure popup windows to be visible and functional
   if (WindowType = wtPopup) or (WindowType = wtChild) then
   begin
-    WriteLn('DEBUG: Configuring borderless window');
     // Borderless windows need special configuration to be visible on macOS
     FWinHandle.setLevel(NSPopUpMenuWindowLevel);  // Appear above other windows
     FWinHandle.setOpaque(True);  // Make window opaque
@@ -801,7 +795,8 @@ begin
   end;
 
   // Handle parent window relationship
-  if Assigned(AParent) then
+  // Note: Popup windows should NOT be child windows - they need to float above everything
+  if Assigned(AParent) and (WindowType <> wtPopup) then
   begin
     parentWin := TfpgCocoaWindow(AParent.Window);
     if Assigned(parentWin) and parentWin.HandleIsValid then
@@ -870,27 +865,22 @@ procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
 var
   msgp: TfpgMessageParams;
 begin
-  WriteLn('DEBUG: DoSetWindowVisible - WindowType:', Ord(WindowType), ' AValue:', AValue, ' HasHandle:', HandleIsValid);
   if not HandleIsValid then
     Exit;
 
   if AValue then
   begin
-    WriteLn('DEBUG: Showing window - WindowType:', Ord(WindowType));
     // Popup windows shouldn't become key (they don't need keyboard focus)
     // Regular windows should become key
     if (WindowType = wtPopup) or (WindowType = wtChild) then
     begin
-      WriteLn('DEBUG: Showing popup/child with orderFront');
       FWinHandle.orderFront(nil);  // Show without making key
     end
     else
     begin
-      WriteLn('DEBUG: Showing regular window with makeKeyAndOrderFront');
       FWinHandle.makeKeyAndOrderFront(nil);
     end;
     FWinHandle.orderFrontRegardless;
-    WriteLn('DEBUG: Window should now be visible');
 
     // Trigger initial paint when window becomes visible
     if Assigned(FView) then
