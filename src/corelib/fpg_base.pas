@@ -1239,8 +1239,17 @@ function CheckClipboardKey(AKey: Word; AShiftstate: TShiftState): TClipboardKeyT
 var
   c: string;
   ModKey: TShiftState;
+  ss: string;
 begin
-  writeln('CheckClipboardKey called - AKey: ', AKey, ' Shiftstate: ', Integer(Byte(AShiftstate)));
+  // Build debug string for shiftstate
+  ss := '[';
+  if ssShift in AShiftstate then ss := ss + 'Shift ';
+  if ssCtrl in AShiftstate then ss := ss + 'Ctrl ';
+  if ssAlt in AShiftstate then ss := ss + 'Alt ';
+  if ssMeta in AShiftstate then ss := ss + 'Meta ';
+  ss := ss + ']';
+
+  writeln('CheckClipboardKey called - AKey: ', AKey, ' Shiftstate: ', ss);
   Result := ckNone;
 
   // On macOS, Command key is used for shortcuts (mapped to ssMeta)
