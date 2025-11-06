@@ -796,7 +796,7 @@ procedure TfpgCocoaWindow.DoSetWindowTitle(const ATitle: string);
 begin
   if not HandleIsValid then
     Exit;
-  FWinHandle.setTitle(NSStr(ATitle));
+  FWinHandle.setTitle(NSString(NSSTR(PChar(ATitle))));
 end;
 
 procedure TfpgCocoaWindow.DoSetMouseCursor;
@@ -930,24 +930,11 @@ begin
 end;
 
 function TfpgCocoaApplication.Screen_dpi_x: integer;
-var
-  screen: NSScreen;
-  screenSize: NSSize;
 begin
-  screen := NSScreen.mainScreen;
-
-  // Get physical DPI if possible, otherwise use default
-  Result := 72;  // Default macOS DPI
-
-  // Try to get actual DPI
-  try
-    screenSize := screen.frame.size;
-    // Note: This is a simplified approach. Real DPI calculation would need
-    // CGDisplayScreenSize which requires additional APIs not exposed in CocoaAll
-    Result := 72;  // macOS standard DPI
-  except
-    Result := 72;
-  end;
+  // macOS standard DPI
+  // Note: Real DPI calculation would need CGDisplayScreenSize
+  // which requires additional APIs not exposed in CocoaAll
+  Result := 72;
 end;
 
 function TfpgCocoaApplication.Screen_dpi_y: integer;
@@ -1058,7 +1045,7 @@ begin
   pasteboard.clearContents;
 
   // Set the string
-  nsStr := NSStr(AValue);
+  nsStr := NSString(NSSTR(PChar(AValue)));
   types := NSArray.arrayWithObject(NSStringPboardType);
   pasteboard.declareTypes_owner(types, nil);
   pasteboard.setString_forType(nsStr, NSStringPboardType);
