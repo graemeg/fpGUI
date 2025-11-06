@@ -547,7 +547,7 @@ begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
     // Calculate width of substring instead of accumulating per-character to avoid rounding errors
-    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum + 1));
+    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     chx := tw - FTextOffset + FSideMargin;
     if UsePxCursorPos then
     begin
@@ -1698,7 +1698,7 @@ begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
     // Calculate width of substring instead of accumulating per-character to avoid rounding errors
-    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum + 1));
+    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     case FAlignment of
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
