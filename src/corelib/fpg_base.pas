@@ -1272,8 +1272,8 @@ begin
     Result := ckCut
   else if (AShiftstate = ModKey) then
   begin
-    c := KeycodeToText(AKey, []);   // case is not important
-    Writeln('  Key text: "', c, '"');
+    c := UpCase(KeycodeToText(AKey, []));   // case is not important, so uppercase it
+    Writeln('  Key text (uppercased): "', c, '"');
     if c = 'C' then
     begin
       Result := ckCopy;
