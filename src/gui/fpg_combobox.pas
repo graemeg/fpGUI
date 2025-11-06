@@ -636,7 +636,7 @@ begin
   else
   begin
     // Popup button offset
-    r := fpgRect(ARect.Left, ARect.Top, ARect.Width-FInternalBtnRect.Width, ARect.Height);
+    r.SetRect(ARect.Left, ARect.Top, ARect.Width-FInternalBtnRect.Width, ARect.Height);
     DrawPlaceholderText(r);
   end;
 end;
@@ -693,7 +693,7 @@ procedure TfpgBaseStaticCombo.HandleLMouseDown(x, y: integer; shiftstate: TShift
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
-  FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
+  FBtnPressed := FInternalBtnRect.PointInRect(Point(x, y));
   Repaint;
   DoDropDown;
 end;
@@ -741,7 +741,7 @@ begin
   if not(wo_NoControlFrame in Options) then
   begin
     rect := fpgStyle.GetControlFrameBorders;
-    InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+    r.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
     Canvas.SetClipRect(r);
   end;
 

@@ -438,7 +438,7 @@ begin
     if (Width < MarginWidth * 2) or (Height < MarginWidth * 2) then
       Exit;  //==>
     r := GetClientRect;
-    InflateRect(r, -FMarginWidth, -FMarginWidth);
+    r.InflateRect(-FMarginWidth, -FMarginWidth);
     Canvas.Color := clShadow1;
     Canvas.SetLineStyle(1, lsSolid);
     Canvas.DrawRectangle(r);

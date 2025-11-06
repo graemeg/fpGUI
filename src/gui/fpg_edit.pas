@@ -1591,12 +1591,15 @@ begin
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
   if CanDrawExtraHint then
-    DrawPlaceholderText(fpgRect(
+  begin
+    r.SetRect(
       r.Left - FDrawOffset + GetMarginAdjustment,
       r.Top + FHeightMargin,
       r.Width + FDrawOffset - GetMarginAdjustment,
       r.Height - FHeightMargin
-      ))
+      );
+    DrawPlaceholderText(r);
+  end
   else
   begin
     Canvas.SetTextColor(FTextColor);
@@ -2035,8 +2038,8 @@ constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FAlignment := taRightJustify;
-  FDecimalSeparator := DecimalSeparator;
-  FThousandSeparator := ThousandSeparator;
+  FDecimalSeparator := FormatSettings.DecimalSeparator;
+  FThousandSeparator := FormatSettings.ThousandSeparator;
   FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;

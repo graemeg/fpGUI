@@ -701,7 +701,7 @@ procedure TfpgBaseEditCombo.HandleLMouseDown(x, y: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
-  FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
+  FBtnPressed := FInternalBtnRect.PointInRect(Point(x, y));
   if not FAutoCompletion then
   begin
     Repaint;
@@ -780,7 +780,7 @@ begin
   r.SetRect(0, 0, Width, Height);
   fpgStyle.DrawControlFrame(Canvas, r);
   rect := fpgStyle.GetControlFrameBorders;
-  InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
+  r.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
   Canvas.SetClipRect(r);
 
   if Enabled then
@@ -807,7 +807,7 @@ begin
     begin
       Canvas.SetColor(clSelection);
       Canvas.SetTextColor(clSelectionText);
-      InflateRect(r, -1, -1);
+      r.InflateRect(-1, -1);
     end
     else
     begin
@@ -828,7 +828,10 @@ begin
   Canvas.FillRectangle(r);
 
   if CanDrawExtraHint then
-    DrawPlaceholderText(fpgRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin));
+  begin
+    r.SetRect(r.Left+FMargin+1, FMargin, r.Width-FMargin-1, r.Height-FMargin);
+    DrawPlaceholderText(r);
+  end;
 
   // Draw select item's text
   if not AutoCompletion then

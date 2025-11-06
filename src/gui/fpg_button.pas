@@ -583,7 +583,7 @@ begin
 
   if FFocused and (not FEmbedded) then
   begin
-    InflateRect(r, -border.Left, -border.Top);
+    r.InflateRect(-border.Left, -border.Top);
     fpgStyle.DrawFocusRect(Canvas, r);
   end;
 
@@ -618,17 +618,17 @@ begin
   if AllowMultiLineText and (FImageLayout = ilImageLeft) then
   begin
     r.SetRect(0, 0, Width, Height);
-    InflateRect(r, -border.Left, -border.Top);   { same as focus rectangle }
+    r.InflateRect(-border.Left, -border.Top);   { same as focus rectangle }
     if FShowImage and Assigned(FImage) then
     begin
       ix := FImageMargin + FImage.Width;
       if FImageSpacing > 0 then
         ix += FImageSpacing;
-      OffsetRect(r, ix, 0);
+      r.OffsetRect(ix, 0);
       r.Width -= ix;
     end;
     if FDown then
-     OffsetRect(r, offset.x, offset.y);
+     r.OffsetRect(offset.x, offset.y);
 
     lTextFlags := [txtHCenter, txtVCenter, txtWrap];
     if not Enabled then
@@ -676,7 +676,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) and FOnClickPending then
+      if r.PointInRect(Point(x, y)) and FOnClickPending then
         Click;
     end;
   end
@@ -687,7 +687,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) and FOnClickPending then
+      if r.PointInRect(Point(x, y)) and FOnClickPending then
         Click;
     end;
   end;

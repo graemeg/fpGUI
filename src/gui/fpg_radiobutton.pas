@@ -226,7 +226,7 @@ begin
 
   r := GetClientRect;
   { max focus rectangle and text boundry }
-  InflateRect(r, -1, -1);
+  r.InflateRect(-1, -1);
   { exclude the radiobutton image and spacing from rectangle }
   if FBoxLayout = tbLeftBox then
   begin

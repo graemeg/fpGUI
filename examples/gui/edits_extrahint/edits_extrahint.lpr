@@ -16,10 +16,11 @@ uses
 procedure MainProc;
 var
   frm: TfrmMain;
+  //cmd: ICmdLineParams;
 begin
   fpgApplication.Initialize;
 
-  //if not gCommandLineParams.IsParam('style') then
+  //if Supports(fpgApplication, ICmdLineParams, cmd) and not cmd.HasOption('style') then
   //begin
   //  if fpgStyleManager.SetStyle('Plastic Light Gray') then
   //    fpgStyle := fpgStyleManager.Style;

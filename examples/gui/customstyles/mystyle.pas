@@ -26,12 +26,13 @@
     procedure MainProc;
     var
       frm: TMainForm;
+      cmd: ICmdLineParams;
     begin
       fpgApplication.Initialize;
 
       { Set our new style as the default (before we create any forms), unless
         a the end-user specified a different style via the command line. }
-      if not gCommandLineParams.IsParam('style') then
+      if Supports(fpgApplication, ICmdLineParams, cmd) and not cmd.HasOption('style') then
         if fpgStyleManager.SetStyle('Demo Style') then
           fpgStyle := fpgStyleManager.Style;
 
@@ -52,7 +53,7 @@ unit mystyle;
 interface
 
 uses
-  Classes, SysUtils, fpg_main, fpg_base;
+  Classes, SysUtils, fpg_main, fpg_base, fpg_cmdlineparams;
 
 type
 

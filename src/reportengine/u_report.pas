@@ -2065,8 +2065,8 @@ end;
 constructor T_Report.Create;
 begin
   inherited Create;
-  OldSeparator := DecimalSeparator;
-  DecimalSeparator := '.';
+  OldSeparator := FormatSettings.DecimalSeparator;
+  FormatSettings.DecimalSeparator := '.';
   Sections   := TList.Create;
   Fonts      := TList.Create;
   Columns    := TList.Create;
@@ -2138,7 +2138,7 @@ begin
     end;
   end;
   PdfPage.Free;
-  DecimalSeparator := OldSeparator;
+  FormatSettings.DecimalSeparator := OldSeparator;
   inherited;
 end;
 
