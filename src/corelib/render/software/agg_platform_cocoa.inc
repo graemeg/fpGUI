@@ -107,13 +107,18 @@ end;
 
 type
   TWindowHack = class(TfpgCocoaWindow);
+  TImageHack = class(TfpgImage);
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
-  // drawgc: Tgc;
-  // GcValues: TXGcValues;
-  // X11Handle: TfpgWinHandle;
   win: TWindowHack;
+  context: NSGraphicsContext;
+  cgContext: CGContextRef;
+  imageData: Pointer;
+  bytesPerRow: Integer;
+  colorSpace: CGColorSpaceRef;
+  cgImage: CGImageRef;
+  destRect: NSRect;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -122,23 +127,77 @@ begin
   itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
   DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
   {$ENDIF}
-  // win := TWindowHack(TfpgWidgetBase(FWidget).Window);
-  // X11Handle := win.WinHandle;
-  // if X11Handle <= 0 then
-  // begin
-    // debugln('TAgg2D/X11 DoPutBufferToScreen:  No WinHandle available.');
-    // exit;
-  // end;
- 
-  // FImg.UpdateImage;
-  // drawgc := XCreateGc(fpgApplication.Display, X11Handle, 0, @GcValues);
- 
-  // finally dump the image to screen!
-  // XPutImage(fpgApplication.Display, X11Handle,
-      // drawgc, TImageHack(FImg).XImage, x,y,x,y, w, h);
- 
-  // XFreeGc(fpgApplication.Display, drawgc);
-  // win.TriggerSyncCounter;
+
+  // Get the window
+  win := TWindowHack(TfpgWidgetBase(FWidget).Window);
+  if not Assigned(win) or not win.HandleIsValid then
+  begin
+    {$IFDEF CStackDebug}
+    DebugLn('TAgg2D/Cocoa DoPutBufferToScreen: No valid window handle.');
+    {$ENDIF}
+    exit;
+  end;
+
+  // Update the image data
+  FImg.UpdateImage;
+
+  // Lock focus on the view
+  if not Assigned(win.View) then
+    exit;
+
+  win.View.lockFocus;
+  try
+    // Get the current graphics context
+    context := NSGraphicsContext.currentContext;
+    if not Assigned(context) then
+      exit;
+
+    cgContext := CGContextRef(context.graphicsPort);
+
+    // Get image data from FImg
+    imageData := TImageHack(FImg).ImageData;
+    if not Assigned(imageData) then
+      exit;
+
+    // Calculate bytes per row (assuming 32-bit RGBA)
+    bytesPerRow := FImg.Width * 4;
+
+    // Create a color space
+    colorSpace := CGColorSpaceCreateDeviceRGB();
+    try
+      // Create CGImage from raw data
+      cgImage := CGImageCreate(
+        FImg.Width,                          // width
+        FImg.Height,                         // height
+        8,                                   // bits per component
+        32,                                  // bits per pixel
+        bytesPerRow,                         // bytes per row
+        colorSpace,                          // color space
+        kCGImageAlphaPremultipliedLast or kCGBitmapByteOrder32Big,  // bitmap info
+        nil,                                 // data provider (use imageData directly)
+        nil,                                 // decode array
+        false,                               // should interpolate
+        kCGRenderingIntentDefault            // rendering intent
+      );
+
+      // Note: We need a data provider for CGImageCreate
+      // For now, use a simpler approach with NSBitmapImageRep
+      // This is a placeholder - actual implementation would create proper CGImage
+
+      // Set destination rectangle
+      destRect := NSMakeRect(x, y, w, h);
+
+      // For now, mark the view as needing display
+      win.View.setNeedsDisplayInRect(destRect);
+
+    finally
+      CGColorSpaceRelease(colorSpace);
+      if Assigned(cgImage) then
+        CGImageRelease(cgImage);
+    end;
+  finally
+    win.View.unlockFocus;
+  end;
 end;
 
 
