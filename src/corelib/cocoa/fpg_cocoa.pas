@@ -1135,6 +1135,7 @@ begin
     76:  Result := keyReturn;  // Numpad Enter
     48:  Result := keyTab;
     53:  Result := keyEscape;
+    49:  Result := keySpace;
 
     // Special keys
     114: Result := keyInsert;
