@@ -734,11 +734,24 @@ begin
   if HandleIsValid then
     Exit;
 
-  // Determine window style
-  styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
-
-  if waSizeable in FWindowAttributes then
-    styleMask := styleMask or NSResizableWindowMask;
+  // Determine window style based on window type
+  case WindowType of
+    wtChild:
+      styleMask := NSBorderlessWindowMask;  // Child windows have no decorations
+    wtPopup:
+      styleMask := NSBorderlessWindowMask;  // Popup windows (menus, tooltips) have no decorations
+    wtModalForm:
+      styleMask := NSTitledWindowMask or NSClosableWindowMask;  // Modal forms have title and close button
+    wtWindow:
+      begin
+        // Normal windows get full decorations
+        styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
+        if waSizeable in FWindowAttributes then
+          styleMask := styleMask or NSResizableWindowMask;
+      end;
+  else
+    styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
+  end;
 
   // Create content rect - convert fpGUI top-left to Cocoa bottom-left
   contentRect := NSMakeRect(FPosition.X,
@@ -751,6 +764,10 @@ begin
 
   if not Assigned(FWinHandle) then
     raise Exception.Create('Failed to create Cocoa window');
+
+  // Set window level for popups to appear above other windows
+  if WindowType = wtPopup then
+    FWinHandle.setLevel(NSPopUpMenuWindowLevel);
 
   // Create and set delegate for window events
   FDelegate := TfpgCocoaWindowDelegate.alloc.init;
