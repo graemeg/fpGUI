@@ -108,12 +108,9 @@ var
   win: TWindowHack;
   imageData: Pointer;
   bytesPerRow: Integer;
-  rect: NSRect;
-  provider: CGDataProviderRef;
-  colorSpace: CGColorSpaceRef;
-  cgImage: CGImageRef;
-  nsImage: NSImage;
-  context: NSGraphicsContext;
+  rect, srcRect: NSRect;
+  bitmapRep: NSBitmapImageRep;
+  planes: array[0..0] of PByte;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -149,55 +146,32 @@ begin
   begin
     win.View.lockFocus;
     try
-      context := NSGraphicsContext.currentContext;
-      if not Assigned(context) then
-        exit;
+      // Setup planes array - points to our image data
+      planes[0] := PByte(imageData);
 
-      // Create color space
-      colorSpace := CGColorSpaceCreateDeviceRGB();
-
-      // Create data provider from our image buffer
-      provider := CGDataProviderCreateWithData(nil, imageData, bytesPerRow * FImg.Height, nil);
-
-      // Create CGImage from data
-      cgImage := CGImageCreate(
-        FImg.Width,                          // width
-        FImg.Height,                         // height
-        8,                                   // bits per component
-        32,                                  // bits per pixel
-        bytesPerRow,                         // bytes per row
-        colorSpace,                          // color space
-        kCGImageAlphaLast or kCGBitmapByteOrder32Big,  // bitmap info
-        provider,                            // data provider
-        nil,                                 // decode array
-        false,                               // should interpolate
-        kCGRenderingIntentDefault            // rendering intent
+      // Create NSBitmapImageRep with our data buffer
+      // Using the simple init without the long parameter name
+      bitmapRep := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitsPerPixel_bytesPerRow(
+        @planes,           // planes - pointer to our data
+        FImg.Width,        // pixelsWide
+        FImg.Height,       // pixelsHigh
+        8,                 // bitsPerSample
+        4,                 // samplesPerPixel (RGBA)
+        True,              // hasAlpha
+        False,             // isPlanar
+        NSDeviceRGBColorSpace,  // colorSpaceName
+        32,                // bitsPerPixel
+        bytesPerRow        // bytesPerRow
       );
 
-      if Assigned(cgImage) then
+      if Assigned(bitmapRep) then
       begin
-        // Create NSImage from CGImage
-        rect := NSMakeRect(0, 0, FImg.Width, FImg.Height);
-        nsImage := NSImage.alloc.initWithCGImage_size(cgImage, rect.size);
-
-        if Assigned(nsImage) then
-        begin
-          // Draw the image at the specified location
-          rect := NSMakeRect(x, y, w, h);
-          nsImage.drawInRect_fromRect_operation_fraction(
-            rect,
-            NSMakeRect(0, 0, FImg.Width, FImg.Height),
-            NSCompositeSourceOver,
-            1.0
-          );
-          nsImage.release;
-        end;
-
-        CGImageRelease(cgImage);
+        // Draw the bitmap representation directly
+        srcRect := NSMakeRect(0, 0, FImg.Width, FImg.Height);
+        rect := NSMakeRect(x, y, w, h);
+        bitmapRep.drawInRect(rect);
+        bitmapRep.release;
       end;
-
-      CGDataProviderRelease(provider);
-      CGColorSpaceRelease(colorSpace);
 
     finally
       win.View.unlockFocus;
