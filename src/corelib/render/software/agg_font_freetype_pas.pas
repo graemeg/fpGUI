@@ -103,7 +103,24 @@ const
   FT_KERNING_UNFITTED = 1;
   FT_KERNING_UNSCALED = 2;
 
+  // TrueType 'kern' table tag
+  TTAG_kern = $6B65726E; // 'kern' in hex
+
 type
+  // Kerning pair for caching
+  TKernPair = record
+    left: Word;
+    right: Word;
+    value: SmallInt;
+  end;
+  PKernPair = ^TKernPair;
+
+  // Kerning table cache
+  TKernTable = record
+    pairs: PKernPair;
+    num_pairs: Integer;
+    loaded: Boolean;
+  end;
   FT_Bool = boolean;
   FT_FWord = smallint;
   FT_UFWord = word;
@@ -291,6 +308,9 @@ type
     tt_face: TT_Face;
     tt_instance: TT_Instance;
     tt_glyph: TT_Glyph;
+
+    // Kerning cache
+    kern_table: TKernTable;
   end;
 
   FT_Charmap = record
@@ -329,6 +349,185 @@ implementation
 
 var
   g_library_initialized: Boolean = False;
+
+{ Helper function to swap bytes for big-endian TrueType format }
+function SwapWord(w: Word): Word; inline;
+begin
+  Result := (w shr 8) or ((w and $FF) shl 8);
+end;
+
+function SwapSmallInt(w: SmallInt): SmallInt; inline;
+begin
+  Result := SmallInt(SwapWord(Word(w)));
+end;
+
+function SwapLongInt(l: LongInt): LongInt; inline;
+begin
+  Result := ((l shr 24) and $FF) or
+            ((l shr 8) and $FF00) or
+            ((l shl 8) and $FF0000) or
+            ((l shl 24) and $FF000000);
+end;
+
+{ Load and parse kerning table from font }
+procedure LoadKernTable(face: FT_Face_ptr);
+var
+  buffer: array of Byte;
+  length: LongInt;
+  err: TT_Error;
+  p: PByte;
+  version: Word;
+  nTables: Word;
+  i, j: Integer;
+  subVersion: Word;
+  subLength: Word;
+  coverage: Word;
+  format: Word;
+  nPairs: Word;
+  searchRange: Word;
+  entrySelector: Word;
+  rangeShift: Word;
+  left, right: Word;
+  value: SmallInt;
+  pair_idx: Integer;
+begin
+  // Check if already loaded
+  if face^.kern_table.loaded then
+    Exit;
+
+  // Initialize
+  face^.kern_table.pairs := nil;
+  face^.kern_table.num_pairs := 0;
+  face^.kern_table.loaded := True;
+
+  // Try to get kern table length
+  length := 0;
+  err := TT_Get_Font_Data(face^.tt_face, TTAG_kern, 0, buffer, length);
+  if (err <> 0) or (length = 0) then
+    Exit; // No kern table
+
+  // Allocate buffer and read kern table
+  SetLength(buffer, length);
+  err := TT_Get_Font_Data(face^.tt_face, TTAG_kern, 0, buffer[0], length);
+  if err <> 0 then
+    Exit;
+
+  // Parse kern table header
+  if length < 4 then
+    Exit;
+
+  p := @buffer[0];
+
+  // Read version (big-endian)
+  version := SwapWord(PWord(p)^);
+  Inc(p, 2);
+
+  // Read number of subtables
+  nTables := SwapWord(PWord(p)^);
+  Inc(p, 2);
+
+  // For simplicity, we only support format 0 (the most common)
+  // Count total pairs first
+  face^.kern_table.num_pairs := 0;
+
+  for i := 0 to nTables - 1 do
+  begin
+    if PtrUInt(p) - PtrUInt(@buffer[0]) + 6 > PtrUInt(length) then
+      Break;
+
+    subVersion := SwapWord(PWord(p)^);
+    Inc(p, 2);
+    subLength := SwapWord(PWord(p)^);
+    Inc(p, 2);
+    coverage := SwapWord(PWord(p)^);
+    Inc(p, 2);
+
+    format := coverage shr 8;
+
+    // Only process format 0 (kerning pairs)
+    if format = 0 then
+    begin
+      if PtrUInt(p) - PtrUInt(@buffer[0]) + 8 > PtrUInt(length) then
+        Break;
+
+      nPairs := SwapWord(PWord(p)^);
+      Inc(face^.kern_table.num_pairs, nPairs);
+
+      // Skip to next subtable
+      Inc(p, subLength - 6);
+    end
+    else
+      // Skip unknown format
+      Inc(p, subLength - 6);
+  end;
+
+  if face^.kern_table.num_pairs = 0 then
+    Exit;
+
+  // Allocate kerning pairs array
+  GetMem(face^.kern_table.pairs, face^.kern_table.num_pairs * SizeOf(TKernPair));
+
+  // Parse again and extract pairs
+  p := @buffer[4]; // Skip header
+  pair_idx := 0;
+
+  for i := 0 to nTables - 1 do
+  begin
+    if PtrUInt(p) - PtrUInt(@buffer[0]) + 6 > PtrUInt(length) then
+      Break;
+
+    subVersion := SwapWord(PWord(p)^);
+    Inc(p, 2);
+    subLength := SwapWord(PWord(p)^);
+    Inc(p, 2);
+    coverage := SwapWord(PWord(p)^);
+    Inc(p, 2);
+
+    format := coverage shr 8;
+
+    if format = 0 then
+    begin
+      if PtrUInt(p) - PtrUInt(@buffer[0]) + 8 > PtrUInt(length) then
+        Break;
+
+      nPairs := SwapWord(PWord(p)^);
+      Inc(p, 2);
+      searchRange := SwapWord(PWord(p)^);
+      Inc(p, 2);
+      entrySelector := SwapWord(PWord(p)^);
+      Inc(p, 2);
+      rangeShift := SwapWord(PWord(p)^);
+      Inc(p, 2);
+
+      // Read kerning pairs
+      for j := 0 to nPairs - 1 do
+      begin
+        if PtrUInt(p) - PtrUInt(@buffer[0]) + 6 > PtrUInt(length) then
+          Break;
+        if pair_idx >= face^.kern_table.num_pairs then
+          Break;
+
+        left := SwapWord(PWord(p)^);
+        Inc(p, 2);
+        right := SwapWord(PWord(p)^);
+        Inc(p, 2);
+        value := SwapSmallInt(PSmallInt(p)^);
+        Inc(p, 2);
+
+        face^.kern_table.pairs[pair_idx].left := left;
+        face^.kern_table.pairs[pair_idx].right := right;
+        face^.kern_table.pairs[pair_idx].value := value;
+        Inc(pair_idx);
+      end;
+    end
+    else
+      Inc(p, subLength - 6);
+  end;
+
+  // Update kerning flag if we found pairs
+  if face^.kern_table.num_pairs > 0 then
+    face^.face_flags := face^.face_flags or FT_FACE_FLAG_KERNING;
+end;
 
 { FT_CURVE_TAG }
 function FT_CURVE_TAG(flag: char): char;
@@ -489,6 +688,9 @@ begin
     Exit;
   end;
 
+  // Load kerning table
+  LoadKernTable(new_face);
+
   aface := new_face;
   Result := 0;
 end;
@@ -511,6 +713,10 @@ begin
 
   if face^.tt_face <> nil then
     TT_Close_Face(face^.tt_face);
+
+  // Free kerning table
+  if face^.kern_table.pairs <> nil then
+    FreeMem(face^.kern_table.pairs);
 
   // Free glyph slot
   if face^.glyph <> nil then
@@ -634,12 +840,45 @@ end;
 { FT_Get_Kerning }
 function FT_Get_Kerning(face: FT_Face_ptr; left_glyph, right_glyph,
   kern_mode: FT_UInt; akerning: FT_Vector_ptr): FT_Error;
+var
+  i: Integer;
+  left16, right16: Word;
+  kern_value: SmallInt;
 begin
-  // FreeType 1 kerning support is more complex and requires additional tables
-  // For now, return no kerning (0,0)
-  // TODO: Implement proper kerning support if needed
+  // Initialize to no kerning
   akerning^.x := 0;
   akerning^.y := 0;
+
+  // Check if kerning table is available
+  if (face = nil) or (face^.kern_table.pairs = nil) or
+     (face^.kern_table.num_pairs = 0) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  // Convert to 16-bit glyph indices
+  left16 := Word(left_glyph);
+  right16 := Word(right_glyph);
+
+  // Linear search through kerning pairs
+  // (In a production implementation, you'd want binary search since pairs are sorted)
+  kern_value := 0;
+  for i := 0 to face^.kern_table.num_pairs - 1 do
+  begin
+    if (face^.kern_table.pairs[i].left = left16) and
+       (face^.kern_table.pairs[i].right = right16) then
+    begin
+      kern_value := face^.kern_table.pairs[i].value;
+      Break;
+    end;
+  end;
+
+  // Convert kern value to 26.6 fixed point format
+  // Kern values in the font are typically in font units
+  akerning^.x := kern_value;
+  akerning^.y := 0;
+
   Result := 0;
 end;
 

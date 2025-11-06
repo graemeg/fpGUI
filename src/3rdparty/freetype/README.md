@@ -94,7 +94,7 @@ The adapter maps FreeType 2 API to FreeType 1 API:
 | FT_Load_Glyph           | TT_Load_Glyph              | Requires instance parameter    |
 | FT_Render_Glyph         | TT_Get_Glyph_Pixmap        |                                |
 | FT_Get_Char_Index       | TT_Char_Index              | Uses character map             |
-| FT_Get_Kerning          | (Not fully implemented)    | Returns 0,0 for now            |
+| FT_Get_Kerning          | TT_Get_Font_Data + parsing | Reads 'kern' table directly    |
 
 ### Key Differences
 
@@ -106,17 +106,30 @@ The adapter maps FreeType 2 API to FreeType 1 API:
 
 4. **Grayscale Levels**: FT1 uses 5-level grayscale (0-4), FT2 uses 256-level (0-255).
 
+5. **Kerning**: FT1 doesn't have built-in kerning API, so the adapter reads the TrueType 'kern' table directly using `TT_Get_Font_Data()` and caches the kerning pairs in memory.
+
 ## License
 
 This code is licensed under the FreeType License (BSD-style with credit clause) or GPL v2, at your option.
 
 See: http://www.freetype.org/license.html
 
+## Kerning Support
+
+The adapter implements kerning by:
+1. Reading the TrueType 'kern' table using `TT_Get_Font_Data()`
+2. Parsing format 0 kerning subtables (the most common format)
+3. Caching kerning pairs in memory for fast lookup
+4. Linear search through pairs (could be optimized with binary search)
+
+Kerning is automatically loaded when a font is opened and properly freed when the font is closed.
+
 ## Future Improvements
 
-- [ ] Full kerning support
+- [ ] Binary search for kerning lookups (currently linear)
 - [ ] Support for memory-based fonts (FT_New_Memory_Face)
 - [ ] Additional character encoding support
+- [ ] Support for kerning table formats 1, 2, and 3
 - [ ] Performance optimizations
 - [ ] Font metrics caching
 
