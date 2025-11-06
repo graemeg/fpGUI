@@ -1443,7 +1443,6 @@ end;
 
 constructor TfpgApplication.Create(const AParams: string);
 begin
-  InitializeDebugOutput;
   fpgInitMsgQueue;
 
   FFontManager    := TfpgFontManager.Create;
@@ -1562,7 +1561,7 @@ end;
 
 procedure TfpgApplication.Initialize;
 begin
-  { TODO : Remember to process parameters!! }
+  InitializeDebugOutput;
   if IsInitialized then
     InternalInit
   else
