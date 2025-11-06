@@ -87,9 +87,8 @@ type
   
   { Window delegate for handling window events }
   TfpgCocoaWindowDelegate = objcclass(NSObject, NSWindowDelegateProtocol)
-  private
-    FWindow: TfpgCocoaWindow;
   public
+    FWindow: TfpgCocoaWindow;
     procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
     procedure windowDidResize(notification: NSNotification); message 'windowDidResize:';
     procedure windowDidMove(notification: NSNotification); message 'windowDidMove:';
@@ -100,9 +99,8 @@ type
 
   { Custom NSView subclass for handling rendering and events }
   TfpgCocoaView = objcclass(NSView)
-  private
-    FWindow: TfpgCocoaWindow;
   public
+    FWindow: TfpgCocoaWindow;
     procedure drawRect(dirtyRect: NSRect); override;
     function  acceptsFirstResponder: Boolean; override;
     function  isFlipped: Boolean; override;
