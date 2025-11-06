@@ -735,6 +735,7 @@ begin
     Exit;
 
   // Determine window style based on window type
+  WriteLn('DEBUG: DoAllocateWindowHandle - WindowType: ', Ord(WindowType), ' Pos:', FPosition.X, ',', FPosition.Y, ' Size:', FSize.W, 'x', FSize.H);
   case WindowType of
     wtChild:
       styleMask := NSBorderlessWindowMask;  // Child windows have no decorations
@@ -765,9 +766,14 @@ begin
   if not Assigned(FWinHandle) then
     raise Exception.Create('Failed to create Cocoa window');
 
+  WriteLn('DEBUG: Window created, handle assigned: ', Assigned(FWinHandle));
+
   // Set window level for popups to appear above other windows
   if WindowType = wtPopup then
+  begin
+    WriteLn('DEBUG: Setting popup window level');
     FWinHandle.setLevel(NSPopUpMenuWindowLevel);
+  end;
 
   // Create and set delegate for window events
   FDelegate := TfpgCocoaWindowDelegate.alloc.init;
@@ -858,11 +864,13 @@ procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
 var
   msgp: TfpgMessageParams;
 begin
+  WriteLn('DEBUG: DoSetWindowVisible - WindowType:', Ord(WindowType), ' AValue:', AValue, ' HasHandle:', HandleIsValid);
   if not HandleIsValid then
     Exit;
 
   if AValue then
   begin
+    WriteLn('DEBUG: Showing window - makeKeyAndOrderFront');
     FWinHandle.makeKeyAndOrderFront(nil);
     FWinHandle.orderFrontRegardless;
 
