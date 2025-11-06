@@ -2169,6 +2169,10 @@ end;
 
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
+  // Prevent reallocation if window handle already exists
+  if HasHandle then
+    Exit; //==>
+
   if Assigned(Owner) then
     DoAllocateWindowHandle(TfpgWidgetBase(Owner).Parent)
   else

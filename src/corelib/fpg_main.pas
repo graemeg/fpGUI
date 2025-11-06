@@ -1570,16 +1570,13 @@ end;
 
 procedure TfpgApplication.Run;
 begin
-  WriteLn('DEBUG: TfpgApplication.Run - START');
   repeat
-    WriteLn('DEBUG: Calling RunMessageLoop');
     try
       RunMessageLoop;
     except
       HandleException(Self);
     end;
   until Terminated;
-  WriteLn('DEBUG: TfpgApplication.Run - END (Terminated)');
 end;
 
 procedure TfpgApplication.SetupLocalizationStrings;
@@ -1863,11 +1860,8 @@ begin
     CheckSynchronize;  // execute the to-be synchronized method
 
   DoWaitWindowMessage(fpgClosestTimer(now, atimeoutms));
-  WriteLn('DEBUG: WaitWindowMessage - About to call fpgDeliverMessages');
   fpgDeliverMessages;
-  WriteLn('DEBUG: WaitWindowMessage - About to call fpgCheckTimers');
   fpgCheckTimers;
-  WriteLn('DEBUG: WaitWindowMessage - END');
 end;
 
 procedure TfpgApplication.RunMessageLoop;
