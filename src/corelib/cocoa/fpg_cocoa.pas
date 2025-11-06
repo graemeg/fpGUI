@@ -1154,24 +1154,32 @@ function TfpgCocoaClipboard.DoGetText: TfpgString;
 var
   pasteboard: NSPasteboard;
   nsStr: NSString;
+  pasteboardType: NSString;
 begin
   Result := '';
   pasteboard := NSPasteboard.generalPasteboard;
 
-  // Check if pasteboard contains string data
-  if pasteboard.availableTypeFromArray(NSArray.arrayWithObject(NSStringPboardType)) <> nil then
+  // Try modern UTI type first (macOS 10.6+)
+  pasteboardType := NSString.stringWithUTF8String('public.utf8-plain-text');
+  nsStr := NSString(pasteboard.stringForType(pasteboardType));
+
+  if not Assigned(nsStr) then
   begin
-    nsStr := NSString(pasteboard.stringForType(NSStringPboardType));
-    if Assigned(nsStr) then
-      Result := NSStringToString(nsStr);
+    // Fall back to legacy type for older macOS
+    pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
+    nsStr := NSString(pasteboard.stringForType(pasteboardType));
   end;
+
+  if Assigned(nsStr) then
+    Result := NSStringToString(nsStr);
 end;
 
 procedure TfpgCocoaClipboard.DoSetText(const AValue: TfpgString);
 var
   pasteboard: NSPasteboard;
   nsStr: NSString;
-  types: NSArray;
+  pasteboardType: NSString;
+  success: Boolean;
 begin
   pasteboard := NSPasteboard.generalPasteboard;
 
@@ -1180,9 +1188,17 @@ begin
 
   // Set the string
   nsStr := NSString.stringWithUTF8String(PChar(AValue));
-  types := NSArray.arrayWithObject(NSStringPboardType);
-  pasteboard.declareTypes_owner(types, nil);
-  pasteboard.setString_forType(nsStr, NSStringPboardType);
+
+  // Try modern UTI type first (macOS 10.6+)
+  pasteboardType := NSString.stringWithUTF8String('public.utf8-plain-text');
+  success := pasteboard.setString_forType(nsStr, pasteboardType);
+
+  if not success then
+  begin
+    // Fall back to legacy type for older macOS
+    pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
+    pasteboard.setString_forType(nsStr, pasteboardType);
+  end;
 end;
 
 procedure TfpgCocoaClipboard.InitClipboard;
