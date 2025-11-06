@@ -153,13 +153,40 @@ Minimal memory cost for significant performance gains!
 
 ## Future Improvements
 
+- [x] Full kerning support (✅ **DONE** - Parses TrueType 'kern' table format 0)
 - [x] Binary search for kerning lookups (✅ **DONE** - O(log n) instead of O(n))
 - [x] Character-to-glyph index caching (✅ **DONE** - 256-entry hash table)
+- [x] Comparison test programs (✅ **DONE** - test_ft1.pas and test_ft2.pas)
 - [ ] Support for memory-based fonts (FT_New_Memory_Face)
 - [ ] Additional character encoding support
-- [ ] Support for kerning table formats 1, 2, and 3
+- [ ] Support for kerning table formats 1, 2, and 3 (format 0 is the most common)
 - [ ] LRU cache for recently used glyphs (optional - adds complexity)
 - [ ] Font metrics caching (optional)
+
+## Testing and Comparison
+
+Two test programs are provided to compare rendering quality between FreeType 1 Pascal and FreeType 2 external library:
+
+### test_ft1.pas - FreeType 1 Pascal Test
+```bash
+./test_ft1 <font_file.ttf> [font_size] [text] [output_file]
+./test_ft1 /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf 24 "Hello World"
+```
+
+### test_ft2.pas - FreeType 2 Library Test
+```bash
+./test_ft2 <font_file.ttf> [font_size] [text] [output_file]
+./test_ft2 /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf 24 "Hello World"
+```
+
+Both programs:
+- Render text centered on 800×600 white background
+- Use outline rendering mode (AggPas rasterizes)
+- Support full kerning via AggPas font cache manager
+- Output to PNG using FPImage
+- Default text: "The quick brown fox jumps over the lazy dog. 1234567890"
+
+This allows direct visual comparison of rendering quality, kerning accuracy, and helps verify the FreeType 1 Pascal adapter produces identical results to FreeType 2.
 
 ## Usage Example
 
