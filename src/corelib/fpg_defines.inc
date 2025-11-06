@@ -3,7 +3,7 @@
 {$interfaces com}
 {$if defined(darwin)}
   {$define AggCanvas}
-  {$modeswitch objectivec2}
+  {$modeswitch objectivec1}
 {$endif}
 {$WARN 5024 off : Parameter "$1" not used}
 

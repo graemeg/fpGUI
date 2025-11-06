@@ -24,10 +24,10 @@ interface
 
 uses
   CocoaAll;
-  
+
 type
-  TfpgWinHandle = NSObject;
-  TfpgDCHandle  = NSObject;
+  TfpgWinHandle = NSWindow;
+  TfpgDCHandle  = NSGraphicsContext;
 
 
 implementation

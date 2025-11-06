@@ -1238,9 +1238,17 @@ end;
 function CheckClipboardKey(AKey: Word; AShiftstate: TShiftState): TClipboardKeyType;
 var
   c: string;
+  ModKey: TShiftState;
 begin
-//  writeln('CheckClipboardKey');
   Result := ckNone;
+
+  // On macOS, Command key is used for shortcuts (mapped to ssMeta)
+  // On other platforms, Ctrl key is used
+  {$IFDEF DARWIN}
+  ModKey := [ssMeta];
+  {$ELSE}
+  ModKey := [ssCtrl];
+  {$ENDIF}
 
   if AKey = keyInsert then
   begin
@@ -1251,10 +1259,9 @@ begin
   end
   else if (AKey = keyDelete) and (AShiftstate = [ssShift]) then
     Result := ckCut
-  else if (AShiftstate = [ssCtrl]) then
+  else if (AShiftstate = ModKey) then
   begin
-    c := KeycodeToText(AKey, []);   // case is not important
-//    Writeln('Key: ', c);
+    c := UpCase(KeycodeToText(AKey, []));   // case is not important, so uppercase it
     if c = 'C' then
       Result := ckCopy
     else if c = 'V' then
@@ -2162,6 +2169,10 @@ end;
 
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
+  // Prevent reallocation if window handle already exists
+  if HasHandle then
+    Exit; //==>
+
   if Assigned(Owner) then
     DoAllocateWindowHandle(TfpgWidgetBase(Owner).Parent)
   else

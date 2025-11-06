@@ -1,13 +1,13 @@
 {%mainunit Agg2D.pas}
 
 {$ifdef uses_interface}
-  // CocoaAll,
+  CocoaAll,
 {$endif}
 
 
 {$ifdef agg_platform_interface}
   protected
-    // nothing here
+    // No platform-specific members needed for Cocoa
 {$endif}
 
 
@@ -97,11 +97,6 @@ begin
       Result.IsItalic := True
     else if prop = 'ANGLE' then
       Result.Angle := StrToFloatDef(propval, 0.0);
-//    else if prop = 'ANTIALIAS' then
-//      if propval = 'FALSE' then
-//        lf.lfQuality := NONANTIALIASED_QUALITY else
-//      if propval = 'DEFAULT' then
-//        lf.lfQuality := DEFAULT_QUALITY;
   end;
 end;
 
@@ -110,10 +105,15 @@ type
 
 procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
-  // drawgc: Tgc;
-  // GcValues: TXGcValues;
-  // X11Handle: TfpgWinHandle;
   win: TWindowHack;
+  imageData: Pointer;
+  bytesPerRow: Integer;
+  rect: NSRect;
+  i, j: Integer;
+  srcPixel: PLongWord;
+  context: NSGraphicsContext;
+  color: NSColor;
+  r, g, b, a: Byte;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -122,25 +122,40 @@ begin
   itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
   DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
   {$ENDIF}
-  // win := TWindowHack(TfpgWidgetBase(FWidget).Window);
-  // X11Handle := win.WinHandle;
-  // if X11Handle <= 0 then
-  // begin
-    // debugln('TAgg2D/X11 DoPutBufferToScreen:  No WinHandle available.');
-    // exit;
-  // end;
- 
-  // FImg.UpdateImage;
-  // drawgc := XCreateGc(fpgApplication.Display, X11Handle, 0, @GcValues);
- 
-  // finally dump the image to screen!
-  // XPutImage(fpgApplication.Display, X11Handle,
-      // drawgc, TImageHack(FImg).XImage, x,y,x,y, w, h);
- 
-  // XFreeGc(fpgApplication.Display, drawgc);
-  // win.TriggerSyncCounter;
+
+  // Get the window
+  win := TWindowHack(TfpgWidgetBase(FWidget).Window);
+  if not Assigned(win) or not win.HandleIsValid then
+  begin
+    {$IFDEF CStackDebug}
+    DebugLn('TAgg2D/Cocoa DoPutBufferToScreen: No valid window handle.');
+    {$ENDIF}
+    exit;
+  end;
+
+  // Update the image data
+  FImg.UpdateImage;
+
+  // Get image data from FImg
+  imageData := TImageHack(FImg).ImageData;
+  if not Assigned(imageData) then
+    exit;
+
+  // Store the image buffer in the view so it can be drawn in drawRect
+  if Assigned(win.View) then
+  begin
+    win.View.setImageBuffer(imageData, FImg.Width, FImg.Height);
+
+    // Mark the dirty rectangle as needing display
+    rect := NSMakeRect(x, y, w, h);
+    win.View.setNeedsDisplayInRect(rect);
+
+    // Force immediate display
+    win.View.displayIfNeeded;
+  end;
 end;
 
 
 {$endif}
+
 
