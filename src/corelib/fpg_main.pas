@@ -1863,8 +1863,11 @@ begin
     CheckSynchronize;  // execute the to-be synchronized method
 
   DoWaitWindowMessage(fpgClosestTimer(now, atimeoutms));
+  WriteLn('DEBUG: WaitWindowMessage - About to call fpgDeliverMessages');
   fpgDeliverMessages;
+  WriteLn('DEBUG: WaitWindowMessage - About to call fpgCheckTimers');
   fpgCheckTimers;
+  WriteLn('DEBUG: WaitWindowMessage - END');
 end;
 
 procedure TfpgApplication.RunMessageLoop;

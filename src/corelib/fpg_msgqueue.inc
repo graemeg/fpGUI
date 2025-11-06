@@ -270,11 +270,14 @@ var
   oItem: TMsgHookItem;
   i: integer;
 begin
+  WriteLn('DEBUG: fpgDeliverMessage - MsgCode: ', msg.MsgCode);
   if msg.MsgCode = FPGM_KILLME then
     FreeAndNil(msg.Dest)
   else
   begin
+    WriteLn('DEBUG: About to Dispatch msg ', msg.MsgCode);
     msg.Dest.Dispatch(msg);
+    WriteLn('DEBUG: Dispatch completed for msg ', msg.MsgCode);
     if fpgApplication.FMessageHookList.Count > 0 then
     begin
       for i := 0 to fpgApplication.FMessageHookList.Count - 1 do
@@ -285,6 +288,7 @@ begin
       end;
     end;
   end;
+  WriteLn('DEBUG: fpgDeliverMessage - DONE');
 end;
 
 procedure fpgDeliverMessages;
@@ -292,6 +296,7 @@ var
   mp: PfpgMessageRec;
   m: TfpgMessageRec;
 begin
+  WriteLn('DEBUG: fpgDeliverMessages - START');
   repeat
     mp := fpgGetFirstMessage;
     if mp <> nil then
@@ -301,5 +306,6 @@ begin
       fpgDeliverMessage(m);
     end;
   until mp = nil;
+  WriteLn('DEBUG: fpgDeliverMessages - END');
 end;
 
