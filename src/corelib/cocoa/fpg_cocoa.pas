@@ -312,16 +312,17 @@ end;
 procedure TfpgCocoaWindowDelegate.windowDidResize(notification: NSNotification);
 var
   msgp: TfpgMessageParams;
-  frame: NSRect;
+  contentRect: NSRect;
 begin
   if not Assigned(FWindow) then
     exit;
 
-  frame := NSWindow(notification.object_).frame;
+  // Get content view size (not window frame which includes titlebar)
+  contentRect := NSWindow(notification.object_).contentView.frame;
 
   fillchar(msgp, sizeof(msgp), 0);
-  msgp.rect.Width := Round(frame.size.width);
-  msgp.rect.Height := Round(frame.size.height);
+  msgp.rect.Width := Round(contentRect.size.width);
+  msgp.rect.Height := Round(contentRect.size.height);
 
   fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
 end;
