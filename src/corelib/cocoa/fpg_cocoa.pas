@@ -147,6 +147,11 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     property    WinHandle: NSWindow read FWinHandle;
     property    View: TfpgCocoaView read FView;
+  public
+    procedure   ActivateWindow; override;
+    procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
+    procedure   ReleaseMouse; override;
+    procedure   BringToFront; override;
   end;
   
   
@@ -877,6 +882,33 @@ end;
 procedure TfpgCocoaWindow.DoDNDEnabled(const AValue: boolean);
 begin
   // TODO: Implement drag-and-drop support
+end;
+
+procedure TfpgCocoaWindow.ActivateWindow;
+begin
+  if HandleIsValid then
+    FWinHandle.makeKeyAndOrderFront(nil);
+end;
+
+procedure TfpgCocoaWindow.CaptureMouse(AForWidget: TfpgWidgetBase);
+begin
+  // Mouse capture is handled automatically by Cocoa during mouse tracking
+  // No explicit capture needed like in Windows or X11
+end;
+
+procedure TfpgCocoaWindow.ReleaseMouse;
+begin
+  // Mouse release is handled automatically by Cocoa
+  // No explicit release needed
+end;
+
+procedure TfpgCocoaWindow.BringToFront;
+begin
+  if HandleIsValid then
+  begin
+    FWinHandle.orderFront(nil);
+    FWinHandle.makeKeyWindow;
+  end;
 end;
 
 { TfpgCocoaApplication }
