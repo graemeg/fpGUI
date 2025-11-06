@@ -18,6 +18,8 @@
 unit fpg_cocoa;
 
 {$I fpg_defines.inc}
+{$linkframework Cocoa}
+{$linkframework Foundation}
 
 interface
 
