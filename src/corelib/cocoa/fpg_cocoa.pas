@@ -796,7 +796,7 @@ procedure TfpgCocoaWindow.DoSetWindowTitle(const ATitle: string);
 begin
   if not HandleIsValid then
     Exit;
-  FWinHandle.setTitle(NSSTR(PChar(ATitle)));
+  FWinHandle.setTitle(NSString.stringWithUTF8String(PChar(ATitle)));
 end;
 
 procedure TfpgCocoaWindow.DoSetMouseCursor;
@@ -1045,7 +1045,7 @@ begin
   pasteboard.clearContents;
 
   // Set the string
-  nsStr := NSSTR(PChar(AValue));
+  nsStr := NSString.stringWithUTF8String(PChar(AValue));
   types := NSArray.arrayWithObject(NSStringPboardType);
   pasteboard.declareTypes_owner(types, nil);
   pasteboard.setString_forType(nsStr, NSStringPboardType);
