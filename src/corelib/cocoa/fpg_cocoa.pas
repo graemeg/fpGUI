@@ -953,6 +953,10 @@ begin
   NSApp := NSApplication.sharedApplication;
   NSApp.setActivationPolicy(NSApplicationActivationPolicyRegular);
 
+  // Call finishLaunching to properly initialize the app for manual event loop
+  // This is required when not using [NSApp run]
+  NSApp.finishLaunching;
+
   FIsInitialized := True;
 end;
 
