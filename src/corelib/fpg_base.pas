@@ -2171,8 +2171,12 @@ procedure TfpgWindowBase.AllocateWindowHandle;
 begin
   // Prevent reallocation if window handle already exists
   if HasHandle then
+  begin
+    WriteLn('DEBUG: AllocateWindowHandle - Already has handle, skipping');
     Exit; //==>
+  end;
 
+  WriteLn('DEBUG: AllocateWindowHandle - Allocating new handle');
   if Assigned(Owner) then
     DoAllocateWindowHandle(TfpgWidgetBase(Owner).Parent)
   else
@@ -2180,7 +2184,9 @@ begin
   if FMouseCursorIsDirty then
     DoSetMouseCursor;
 
+  WriteLn('DEBUG: AllocateWindowHandle - About to notify widgets');
   NotifyWidgetsWindowAllocated;
+  WriteLn('DEBUG: AllocateWindowHandle - Notify complete');
 end;
 
 procedure TfpgWindowBase.DefaultHandler(var message);
