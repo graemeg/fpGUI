@@ -108,9 +108,12 @@ var
   win: TWindowHack;
   imageData: Pointer;
   bytesPerRow: Integer;
-  rect, srcRect: NSRect;
-  bitmapRep: NSBitmapImageRep;
-  planes: array[0..0] of PByte;
+  rect: NSRect;
+  i, j: Integer;
+  srcPixel: PLongWord;
+  context: NSGraphicsContext;
+  color: NSColor;
+  r, g, b, a: Byte;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -141,36 +144,47 @@ begin
   // Calculate bytes per row (assuming 32-bit RGBA)
   bytesPerRow := FImg.Width * 4;
 
-  // Lock focus and draw
+  // Lock focus and draw pixel by pixel
+  // NOTE: This is a simple but slow implementation for initial testing
+  // TODO: Optimize by using a more efficient bitmap rendering method
   if Assigned(win.View) then
   begin
     win.View.lockFocus;
     try
-      // Setup planes array - points to our image data
-      planes[0] := PByte(imageData);
+      context := NSGraphicsContext.currentContext;
+      if not Assigned(context) then
+        exit;
 
-      // Create NSBitmapImageRep with our data buffer
-      // Using the simple init without the long parameter name
-      bitmapRep := NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitsPerPixel_bytesPerRow(
-        @planes,           // planes - pointer to our data
-        FImg.Width,        // pixelsWide
-        FImg.Height,       // pixelsHigh
-        8,                 // bitsPerSample
-        4,                 // samplesPerPixel (RGBA)
-        True,              // hasAlpha
-        False,             // isPlanar
-        NSDeviceRGBColorSpace,  // colorSpaceName
-        32,                // bitsPerPixel
-        bytesPerRow        // bytesPerRow
-      );
+      // Draw the rectangle of pixels
+      srcPixel := PLongWord(imageData);
+      Inc(srcPixel, x + (y * FImg.Width)); // Start at the source position
 
-      if Assigned(bitmapRep) then
+      for j := 0 to h - 1 do
       begin
-        // Draw the bitmap representation directly
-        srcRect := NSMakeRect(0, 0, FImg.Width, FImg.Height);
-        rect := NSMakeRect(x, y, w, h);
-        bitmapRep.drawInRect(rect);
-        bitmapRep.release;
+        for i := 0 to w - 1 do
+        begin
+          // Extract RGBA components (assuming BGRA byte order on little-endian)
+          b := PByte(srcPixel)^;
+          g := PByte(PtrUInt(srcPixel) + 1)^;
+          r := PByte(PtrUInt(srcPixel) + 2)^;
+          a := PByte(PtrUInt(srcPixel) + 3)^;
+
+          // Create NSColor and set it
+          color := NSColor.colorWithDeviceRed_green_blue_alpha(
+            r / 255.0,
+            g / 255.0,
+            b / 255.0,
+            a / 255.0
+          );
+          color.set_;
+
+          // Draw a 1x1 rectangle (pixel)
+          NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
+
+          Inc(srcPixel);
+        end;
+        // Move to next row in source image
+        Inc(srcPixel, FImg.Width - w);
       end;
 
     finally
