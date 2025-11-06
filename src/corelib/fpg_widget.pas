@@ -1593,22 +1593,30 @@ var
   itf: IInterface;
 {$ENDIF}
 begin
+  WriteLn('DEBUG: MsgPaint ENTER for ', ClassName, ' (', Name, ')');
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgPaint - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
 
   if IsHidden then
+  begin
+    WriteLn('DEBUG: MsgPaint EXIT (IsHidden) for ', ClassName, ' (', Name, ')');
     Exit;
+  end;
 
   if not (WindowAllocated and (Window.HasHandle)) then
   begin
     // The window will generate a paint message later when it exists
+    WriteLn('DEBUG: MsgPaint EXIT (no window/handle) for ', ClassName, ' (', Name, ')');
     FInvalidated:=False;
     Exit;//
   end;
 
   if (Width < 1) or (Height < 1) then
+  begin
+    WriteLn('DEBUG: MsgPaint EXIT (width/height < 1) for ', ClassName, ' (', Name, ') W:', Width, ' H:', Height);
     Exit;
+  end;
 
   // combine existing invalid rect with message rect if sent
   if FInvalidRect.IsUnassigned then
@@ -1672,6 +1680,7 @@ begin
 
   FInvalidRect.Clear;
   FInvalidated:=False;
+  WriteLn('DEBUG: MsgPaint DONE for ', ClassName, ' (', Name, ') - FInvalidated set to False');
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
@@ -1986,11 +1995,13 @@ begin
 
     if not FInvalidated then
     begin
-      WriteLn('DEBUG: InvalidateRect posting FPGM_PAINT for ', ClassName, ' (', Name, ')');
+      WriteLn('DEBUG: InvalidateRect posting FPGM_PAINT for ', ClassName, ' (', Name, ') - FInvalidated was: ', FInvalidated);
       Params.rect := FInvalidRect;
       fpgPostMessage(Self, Self, FPGM_PAINT, Params);
       FInvalidated:=True;
-    end;
+    end
+    else
+      WriteLn('DEBUG: InvalidateRect SKIPPED (already invalidated) for ', ClassName, ' (', Name, ')');
   end;
 end;
 
