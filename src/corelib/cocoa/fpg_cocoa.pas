@@ -768,11 +768,15 @@ begin
 
   WriteLn('DEBUG: Window created, handle assigned: ', Assigned(FWinHandle));
 
-  // Set window level for popups to appear above other windows
-  if WindowType = wtPopup then
+  // Configure popup windows to be visible and functional
+  if (WindowType = wtPopup) or (WindowType = wtChild) then
   begin
-    WriteLn('DEBUG: Setting popup window level');
-    FWinHandle.setLevel(NSPopUpMenuWindowLevel);
+    WriteLn('DEBUG: Configuring borderless window');
+    // Borderless windows need special configuration to be visible on macOS
+    FWinHandle.setLevel(NSPopUpMenuWindowLevel);  // Appear above other windows
+    FWinHandle.setOpaque(True);  // Make window opaque
+    FWinHandle.setHasShadow(True);  // Add shadow for visibility
+    FWinHandle.setBackgroundColor(NSColor.windowBackgroundColor);  // Set background
   end;
 
   // Create and set delegate for window events
@@ -870,9 +874,21 @@ begin
 
   if AValue then
   begin
-    WriteLn('DEBUG: Showing window - makeKeyAndOrderFront');
-    FWinHandle.makeKeyAndOrderFront(nil);
+    WriteLn('DEBUG: Showing window - WindowType:', Ord(WindowType));
+    // Popup windows shouldn't become key (they don't need keyboard focus)
+    // Regular windows should become key
+    if (WindowType = wtPopup) or (WindowType = wtChild) then
+    begin
+      WriteLn('DEBUG: Showing popup/child with orderFront');
+      FWinHandle.orderFront(nil);  // Show without making key
+    end
+    else
+    begin
+      WriteLn('DEBUG: Showing regular window with makeKeyAndOrderFront');
+      FWinHandle.makeKeyAndOrderFront(nil);
+    end;
     FWinHandle.orderFrontRegardless;
+    WriteLn('DEBUG: Window should now be visible');
 
     // Trigger initial paint when window becomes visible
     if Assigned(FView) then
