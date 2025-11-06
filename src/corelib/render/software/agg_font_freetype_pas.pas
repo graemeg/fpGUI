@@ -120,6 +120,21 @@ type
     pairs: PKernPair;
     num_pairs: Integer;
     loaded: Boolean;
+    sorted: Boolean;  // True if pairs are sorted for binary search
+  end;
+
+  // Character index cache entry
+  TCharIndexCacheEntry = record
+    charcode: Cardinal;
+    glyph_index: Word;
+    used: Boolean;
+  end;
+
+  // Character index cache (simple hash table)
+  TCharIndexCache = record
+    entries: array[0..255] of TCharIndexCacheEntry;  // 256 entries
+    hits: Integer;
+    misses: Integer;
   end;
   FT_Bool = boolean;
   FT_FWord = smallint;
@@ -311,6 +326,9 @@ type
 
     // Kerning cache
     kern_table: TKernTable;
+
+    // Character index cache
+    char_index_cache: TCharIndexCache;
   end;
 
   FT_Charmap = record
@@ -367,6 +385,148 @@ begin
             ((l shr 8) and $FF00) or
             ((l shl 8) and $FF0000) or
             ((l shl 24) and $FF000000);
+end;
+
+{ Compare function for kerning pair sorting }
+function CompareKernPairs(const p1, p2: TKernPair): Integer;
+var
+  key1, key2: Cardinal;
+begin
+  // Create composite key: (left << 16) | right
+  key1 := (Cardinal(p1.left) shl 16) or p1.right;
+  key2 := (Cardinal(p2.left) shl 16) or p2.right;
+
+  if key1 < key2 then
+    Result := -1
+  else if key1 > key2 then
+    Result := 1
+  else
+    Result := 0;
+end;
+
+{ Quick sort for kerning pairs }
+procedure QuickSortKernPairs(pairs: PKernPair; left, right: Integer);
+var
+  i, j: Integer;
+  pivot, temp: TKernPair;
+begin
+  if left >= right then
+    Exit;
+
+  i := left;
+  j := right;
+  pivot := pairs[(left + right) div 2];
+
+  repeat
+    while CompareKernPairs(pairs[i], pivot) < 0 do
+      Inc(i);
+    while CompareKernPairs(pairs[j], pivot) > 0 do
+      Dec(j);
+
+    if i <= j then
+    begin
+      temp := pairs[i];
+      pairs[i] := pairs[j];
+      pairs[j] := temp;
+      Inc(i);
+      Dec(j);
+    end;
+  until i > j;
+
+  if left < j then
+    QuickSortKernPairs(pairs, left, j);
+  if i < right then
+    QuickSortKernPairs(pairs, i, right);
+end;
+
+{ Binary search for kerning pair - returns kerning value or 0 if not found }
+function BinarySearchKern(pairs: PKernPair; num_pairs: Integer;
+  left_glyph, right_glyph: Word): SmallInt;
+var
+  low, high, mid: Integer;
+  search_key, mid_key: Cardinal;
+begin
+  Result := 0;
+
+  if (pairs = nil) or (num_pairs = 0) then
+    Exit;
+
+  // Create composite search key
+  search_key := (Cardinal(left_glyph) shl 16) or right_glyph;
+
+  low := 0;
+  high := num_pairs - 1;
+
+  while low <= high do
+  begin
+    mid := (low + high) div 2;
+    mid_key := (Cardinal(pairs[mid].left) shl 16) or pairs[mid].right;
+
+    if mid_key = search_key then
+    begin
+      Result := pairs[mid].value;
+      Exit;
+    end
+    else if mid_key < search_key then
+      low := mid + 1
+    else
+      high := mid - 1;
+  end;
+end;
+
+{ Initialize character index cache }
+procedure InitCharIndexCache(var cache: TCharIndexCache);
+var
+  i: Integer;
+begin
+  for i := 0 to 255 do
+  begin
+    cache.entries[i].used := False;
+    cache.entries[i].charcode := 0;
+    cache.entries[i].glyph_index := 0;
+  end;
+  cache.hits := 0;
+  cache.misses := 0;
+end;
+
+{ Hash function for character index cache }
+function CharIndexCacheHash(charcode: Cardinal): Byte; inline;
+begin
+  // Simple hash: XOR fold the 32-bit charcode into 8 bits
+  Result := Byte(charcode xor (charcode shr 8) xor (charcode shr 16) xor (charcode shr 24));
+end;
+
+{ Lookup character index in cache }
+function LookupCharIndexCache(var cache: TCharIndexCache; charcode: Cardinal;
+  out glyph_index: Word): Boolean;
+var
+  hash: Byte;
+begin
+  hash := CharIndexCacheHash(charcode);
+
+  if cache.entries[hash].used and (cache.entries[hash].charcode = charcode) then
+  begin
+    glyph_index := cache.entries[hash].glyph_index;
+    Inc(cache.hits);
+    Result := True;
+  end
+  else
+  begin
+    Inc(cache.misses);
+    Result := False;
+  end;
+end;
+
+{ Store character index in cache }
+procedure StoreCharIndexCache(var cache: TCharIndexCache; charcode: Cardinal;
+  glyph_index: Word);
+var
+  hash: Byte;
+begin
+  hash := CharIndexCacheHash(charcode);
+  cache.entries[hash].charcode := charcode;
+  cache.entries[hash].glyph_index := glyph_index;
+  cache.entries[hash].used := True;
 end;
 
 { Load and parse kerning table from font }
@@ -526,7 +686,14 @@ begin
 
   // Update kerning flag if we found pairs
   if face^.kern_table.num_pairs > 0 then
+  begin
     face^.face_flags := face^.face_flags or FT_FACE_FLAG_KERNING;
+
+    // Sort kerning pairs for binary search
+    // Most fonts already have sorted pairs, but we ensure it
+    QuickSortKernPairs(face^.kern_table.pairs, 0, face^.kern_table.num_pairs - 1);
+    face^.kern_table.sorted := True;
+  end;
 end;
 
 { FT_CURVE_TAG }
@@ -691,6 +858,9 @@ begin
   // Load kerning table
   LoadKernTable(new_face);
 
+  // Initialize character index cache
+  InitCharIndexCache(new_face^.char_index_cache);
+
   aface := new_face;
   Result := 0;
 end;
@@ -738,10 +908,23 @@ end;
 function FT_Get_Char_Index(face: FT_Face_ptr; charcode: FT_ULong): FT_UInt;
 var
   map: TT_CharMap;
+  glyph_idx: Word;
 begin
-  // Get character map and look up glyph index
+  // Try cache first
+  if LookupCharIndexCache(face^.char_index_cache, charcode, glyph_idx) then
+  begin
+    Result := glyph_idx;
+    Exit;
+  end;
+
+  // Cache miss - look up in font
   if TT_Get_CharMap(face^.tt_face, 0, map) = 0 then
-    Result := TT_Char_Index(map, charcode)
+  begin
+    glyph_idx := TT_Char_Index(map, charcode);
+    // Store in cache for next time
+    StoreCharIndexCache(face^.char_index_cache, charcode, glyph_idx);
+    Result := glyph_idx;
+  end
   else
     Result := 0;
 end;
@@ -841,7 +1024,6 @@ end;
 function FT_Get_Kerning(face: FT_Face_ptr; left_glyph, right_glyph,
   kern_mode: FT_UInt; akerning: FT_Vector_ptr): FT_Error;
 var
-  i: Integer;
   left16, right16: Word;
   kern_value: SmallInt;
 begin
@@ -861,18 +1043,10 @@ begin
   left16 := Word(left_glyph);
   right16 := Word(right_glyph);
 
-  // Linear search through kerning pairs
-  // (In a production implementation, you'd want binary search since pairs are sorted)
-  kern_value := 0;
-  for i := 0 to face^.kern_table.num_pairs - 1 do
-  begin
-    if (face^.kern_table.pairs[i].left = left16) and
-       (face^.kern_table.pairs[i].right = right16) then
-    begin
-      kern_value := face^.kern_table.pairs[i].value;
-      Break;
-    end;
-  end;
+  // Use binary search for fast lookup (O(log n) instead of O(n))
+  kern_value := BinarySearchKern(face^.kern_table.pairs,
+                                 face^.kern_table.num_pairs,
+                                 left16, right16);
 
   // Convert kern value to 26.6 fixed point format
   // Kern values in the font are typically in font units
