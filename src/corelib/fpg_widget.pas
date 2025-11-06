@@ -1986,6 +1986,7 @@ begin
 
     if not FInvalidated then
     begin
+      WriteLn('DEBUG: InvalidateRect posting FPGM_PAINT for ', ClassName, ' (', Name, ')');
       Params.rect := FInvalidRect;
       fpgPostMessage(Self, Self, FPGM_PAINT, Params);
       FInvalidated:=True;

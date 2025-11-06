@@ -1338,24 +1338,9 @@ begin
 end;
 
 procedure TfpgCocoaCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
-var
-  dirtyRect: NSRect;
-  cocoaWindow: TfpgCocoaWindow;
 begin
-  // Tell Cocoa that this region of the view needs redrawing
-  // This will cause Cocoa to call the view's drawRect method
-  cocoaWindow := TfpgCocoaWindow(FWidget.Window);
-  if Assigned(cocoaWindow) and Assigned(cocoaWindow.FView) then
-  begin
-    // Convert fpGUI coordinates to NSRect
-    dirtyRect.origin.x := x;
-    dirtyRect.origin.y := y;
-    dirtyRect.size.width := w;
-    dirtyRect.size.height := h;
-
-    // Mark this rectangle as needing display
-    cocoaWindow.FView.setNeedsDisplayInRect(dirtyRect);
-  end;
+  // Stub - AggCanvas manages its own buffer
+  // Drawing is handled by the view's drawRect method
 end;
 
 procedure TfpgCocoaCanvas.DoEndDraw;
