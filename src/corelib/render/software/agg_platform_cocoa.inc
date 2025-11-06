@@ -141,55 +141,17 @@ begin
   if not Assigned(imageData) then
     exit;
 
-  // Calculate bytes per row (assuming 32-bit RGBA)
-  bytesPerRow := FImg.Width * 4;
-
-  // Draw pixel by pixel using lockFocus
-  // NOTE: This is a simple but slow implementation for initial testing
-  // TODO: Optimize by using a more efficient bitmap rendering method
-  if Assigned(win.View) and Assigned(win.WinHandle) then
+  // Store the image buffer in the view so it can be drawn in drawRect
+  if Assigned(win.View) then
   begin
-    // Lock focus on the view to draw
-    if win.View.lockFocusIfCanDraw then
-    try
-      // Draw the rectangle of pixels
-      srcPixel := PLongWord(imageData);
-      Inc(srcPixel, x + (y * FImg.Width)); // Start at the source position
+    win.View.setImageBuffer(imageData, FImg.Width, FImg.Height);
 
-      for j := 0 to h - 1 do
-      begin
-        for i := 0 to w - 1 do
-        begin
-          // Extract RGBA components (assuming BGRA byte order on little-endian)
-          b := PByte(srcPixel)^;
-          g := PByte(PtrUInt(srcPixel) + 1)^;
-          r := PByte(PtrUInt(srcPixel) + 2)^;
-          a := PByte(PtrUInt(srcPixel) + 3)^;
+    // Mark the dirty rectangle as needing display
+    rect := NSMakeRect(x, y, w, h);
+    win.View.setNeedsDisplayInRect(rect);
 
-          // Create NSColor and set it
-          color := NSColor.colorWithDeviceRed_green_blue_alpha(
-            r / 255.0,
-            g / 255.0,
-            b / 255.0,
-            a / 255.0
-          );
-          color.set_;
-
-          // Draw a 1x1 rectangle (pixel)
-          NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
-
-          Inc(srcPixel);
-        end;
-        // Move to next row in source image
-        Inc(srcPixel, FImg.Width - w);
-      end;
-
-    finally
-      win.View.unlockFocus;
-    end;
-
-    // Force immediate display - flush the window to show rendered content
-    win.WinHandle.flushWindow;
+    // Force immediate display
+    win.View.displayIfNeeded;
   end;
 end;
 

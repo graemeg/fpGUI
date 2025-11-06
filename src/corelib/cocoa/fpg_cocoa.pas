@@ -101,10 +101,14 @@ type
   TfpgCocoaView = objcclass(NSView)
   public
     FWindow: TfpgCocoaWindow;
+    FImageData: Pointer;  // Pointer to the Agg2D image buffer
+    FImageWidth: Integer;
+    FImageHeight: Integer;
     procedure drawRect(dirtyRect: NSRect); override;
     function  acceptsFirstResponder: Boolean; override;
     function  isFlipped: Boolean; override;
     procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
+    procedure setImageBuffer(AData: Pointer; AWidth, AHeight: Integer); message 'setImageBuffer:width:height:';
 
     // Mouse events
     procedure mouseDown(event: NSEvent); override;
@@ -385,14 +389,26 @@ end;
 
 { TfpgCocoaView }
 
+procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight: Integer);
+begin
+  FImageData := AData;
+  FImageWidth := AWidth;
+  FImageHeight := AHeight;
+end;
+
 procedure TfpgCocoaView.drawRect(dirtyRect: NSRect);
 var
   msgp: TfpgMessageParams;
+  srcPixel: PLongWord;
+  i, j: Integer;
+  x, y, w, h: Integer;
+  r, g, b, a: Byte;
+  color: NSColor;
 begin
   // This will be called by Cocoa when the view needs to be redrawn
   if Assigned(FWindow) then
   begin
-    // Trigger fpGUI paint event
+    // First, trigger fpGUI paint event to update the buffer
     fillchar(msgp, sizeof(msgp), 0);
     msgp.rect.Left := Round(dirtyRect.origin.x);
     msgp.rect.Top := Round(dirtyRect.origin.y);
@@ -400,6 +416,47 @@ begin
     msgp.rect.Height := Round(dirtyRect.size.height);
 
     fpgPostMessage(nil, FWindow, FPGM_PAINT, msgp);
+
+    // Now draw the image buffer if we have one
+    if Assigned(FImageData) and (FImageWidth > 0) and (FImageHeight > 0) then
+    begin
+      x := Round(dirtyRect.origin.x);
+      y := Round(dirtyRect.origin.y);
+      w := Round(dirtyRect.size.width);
+      h := Round(dirtyRect.size.height);
+
+      // Clamp to image bounds
+      if x < 0 then x := 0;
+      if y < 0 then y := 0;
+      if x + w > FImageWidth then w := FImageWidth - x;
+      if y + h > FImageHeight then h := FImageHeight - y;
+
+      if (w > 0) and (h > 0) then
+      begin
+        srcPixel := PLongWord(FImageData);
+        Inc(srcPixel, x + (y * FImageWidth));
+
+        for j := 0 to h - 1 do
+        begin
+          for i := 0 to w - 1 do
+          begin
+            // Extract RGBA components (assuming BGRA byte order)
+            b := PByte(srcPixel)^;
+            g := PByte(PtrUInt(srcPixel) + 1)^;
+            r := PByte(PtrUInt(srcPixel) + 2)^;
+            a := PByte(PtrUInt(srcPixel) + 3)^;
+
+            color := NSColor.colorWithDeviceRed_green_blue_alpha(
+              r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+            color.set_;
+            NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
+
+            Inc(srcPixel);
+          end;
+          Inc(srcPixel, FImageWidth - w);
+        end;
+      end;
+    end;
   end;
 end;
 
