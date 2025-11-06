@@ -815,7 +815,8 @@ begin
     // Trigger initial paint when window becomes visible
     if Assigned(FView) then
     begin
-      FView.setNeedsDisplay(True);
+      // Mark entire view as needing display
+      FView.setNeedsDisplay_(True);
 
       // Also send a paint message to fpGUI to populate the buffer
       fillchar(msgp, sizeof(msgp), 0);
