@@ -396,6 +396,7 @@ end;
 
 procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight: Integer);
 begin
+  WriteLn('DEBUG: setImageBuffer - AData:', Assigned(AData), ' Size:', AWidth, 'x', AHeight);
   FImageData := AData;
   FImageWidth := AWidth;
   FImageHeight := AHeight;
@@ -409,6 +410,7 @@ var
   r, g, b, a: Byte;
   color: NSColor;
 begin
+  WriteLn('DEBUG: drawRect called - ImageData:', Assigned(FImageData), ' Size:', FImageWidth, 'x', FImageHeight);
   // This will be called by Cocoa when the view needs to be redrawn
   // Just draw the buffer - do NOT trigger FPGM_PAINT from here (causes infinite loop)
 
