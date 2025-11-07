@@ -10,6 +10,7 @@ uses
   agg_color,
   agg_pixfmt,
   agg_pixfmt_rgb,
+  agg_pixfmt_rgba,
   agg_rendering_buffer,
   agg_renderer_base,
   agg_renderer_scanline,
@@ -170,13 +171,14 @@ begin
 
   // Measure text width
   text_width := 0;
+  y := 0;
   p := PChar(text_to_render);
   while p^ <> #0 do
   begin
     glyph := fman.glyph(Byte(p^));
     if glyph <> nil then
     begin
-      text_width := text_width + glyph.advance_x;
+      text_width := text_width + glyph^.advance_x;
       if p[1] <> #0 then
         fman.add_kerning(@text_width, @y);  // Apply kerning for next char
     end;
@@ -201,12 +203,15 @@ begin
   rgba_black.ConstrInt(0, 0, 0);
   ren_solid.color_(@rgba_black);
 
-  while p^ <> #0 do
-  begin
-    glyph := fman.glyph(Byte(p^));
+      while p^ <> #0 do
 
-    if glyph <> nil then
-    begin
+      begin
+
+        glyph := fman.glyph(Byte(p^));
+
+          if glyph <> nil then
+
+          begin
       // Apply kerning
       fman.add_kerning(@x, @y);
 
@@ -214,7 +219,7 @@ begin
       fman.init_embedded_adaptors(glyph, x, y);
 
       // Render outline glyph
-      if glyph.data_type = glyph_data_outline then
+      if glyph^.data_type = glyph_data_outline then
       begin
         ras.reset;
         ras.add_path(@curves);
@@ -222,17 +227,20 @@ begin
       end;
 
       // Advance pen
-      x := x + glyph.advance_x;
-      y := y + glyph.advance_y;
+      x := x + glyph^.advance_x;
+      y := y + glyph^.advance_y;
     end;
 
     Inc(p);
   end;
 
   WriteLn('Text rendered successfully');
+  WriteLn('LoadAndRenderText finished');
 end;
 
 procedure SaveToPNG;
+var
+  ix: Integer;
 begin
   WriteLn('Saving to PNG: ', output_file);
 
@@ -243,7 +251,7 @@ begin
     for i := 0 to IMG_HEIGHT - 1 do
     begin
       src_pixel := @buffer[i * IMG_WIDTH];
-      for x := 0 to IMG_WIDTH - 1 do
+      for ix := 0 to IMG_WIDTH - 1 do
       begin
         // Convert BGRA to FPColor (16-bit per channel)
         dst_pixel.red   := src_pixel^.r shl 8 or src_pixel^.r;
@@ -251,7 +259,7 @@ begin
         dst_pixel.blue  := src_pixel^.b shl 8 or src_pixel^.b;
         dst_pixel.alpha := src_pixel^.a shl 8 or src_pixel^.a;
 
-        img.Colors[Trunc(x), i] := dst_pixel;
+        img.Colors[ix, i] := dst_pixel;
         Inc(src_pixel);
       end;
     end;
@@ -271,18 +279,7 @@ begin
   end;
 end;
 
-procedure Cleanup;
-begin
-  curves.Destruct;
-  fman.Destruct;
-  feng.Destruct;
-  sl.Destruct;
-  ras.Destruct;
-  ren_solid.Destruct;
-  rb.Destruct;
-  rbuf.Destruct;
-  SetLength(buffer, 0);
-end;
+
 
 begin
   try
@@ -294,7 +291,6 @@ begin
     InitializeAggPas;
     LoadAndRenderText;
     SaveToPNG;
-    Cleanup;
 
     WriteLn;
     WriteLn('Done! Compare this output with FreeType 2 output.');

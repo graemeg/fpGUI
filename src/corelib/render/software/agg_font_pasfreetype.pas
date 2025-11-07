@@ -329,20 +329,18 @@ function decompose_ft_outline(
           mtx : trans_affine_ptr;
           path : path_storage_integer_ptr ) : boolean;
 var
+ n_contours: Integer;
  v_last ,v_control ,v_start ,vec ,v_middle ,vec1 ,vec2 : FT_Vector;
 
- x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double;
-
- point ,limit : FT_Vector_ptr;
-
- tags : char_ptr;
-
- n     ,      // index of contour in outline
- first ,      // index of first point in contour
- last  : int; // index of last point in contour
-
- tag : char;  // current point's state
-
+   x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double;
+ 
+   point_idx, limit_idx : Integer;
+ 
+   n     ,      // index of contour in outline
+   first ,      // index of first point in contour
+   last  : int; // index of last point in contour
+ 
+   tag : char;  // current point's state
 label
  Do_Conic ,Close ;
 
@@ -352,17 +350,16 @@ begin
 
  while n < outline.n_contours do
   begin
-   last :=FT_Short_ptr(ptrcomp(outline.contours ) + n * sizeof(FT_Short ) )^;
-   limit:=FT_Vector_ptr(ptrcomp(outline.points ) + last * sizeof(FT_Vector ) );
+   last := outline.contours[n];
+   limit_idx := last;
 
-   v_start:=FT_Vector_ptr(ptrcomp(outline.points ) + first * sizeof(FT_Vector) )^;
-   v_last :=FT_Vector_ptr(ptrcomp(outline.points ) + last * sizeof(FT_Vector) )^;
+   v_start := outline.points[first];
+   v_last := outline.points[last];
 
-   v_control:=v_start;
+   v_control := v_start;
 
-   point:=FT_Vector_ptr(ptrcomp(outline.points ) + first * sizeof(FT_Vector ) );
-   tags :=char_ptr     (ptrcomp(outline.tags ) + first * sizeof(char ) );
-   tag  :=FT_CURVE_TAG (tags^ );
+   point_idx := first;
+   tag  := FT_CURVE_TAG (outline.tags[point_idx]);
 
   // A contour cannot start with a cubic control point!
    if tag = char(FT_CURVE_TAG_CUBIC ) then
@@ -377,12 +374,12 @@ begin
    if tag = char(FT_CURVE_TAG_CONIC ) then
     begin
     // first point is conic control. Yes, this happens.
-     if FT_CURVE_TAG(char_ptr(ptrcomp(outline.tags ) + last )^ ) = char(FT_CURVE_TAG_ON ) then
+     if FT_CURVE_TAG(outline.tags[last]) = char(FT_CURVE_TAG_ON ) then
       begin
       // start at last point if it is on the curve
-       v_start:=v_last;
+       v_start := v_last;
 
-       dec(limit );
+       dec(limit_idx );
 
       end
      else
@@ -397,8 +394,7 @@ begin
 
       end;
 
-     dec(ptrcomp(point ) ,sizeof(FT_Vector ) );
-     dec(ptrcomp(tags ) );
+     dec(point_idx);
 
     end;
 
@@ -411,19 +407,19 @@ begin
    mtx.transform(mtx ,@x1 ,@y1 );
    path.move_to (dbl_to_int26p6(x1 ) ,dbl_to_int26p6(y1 ) );
 
-   while ptrcomp(point ) < ptrcomp(limit ) do
+   while point_idx < limit_idx do
     begin
-     inc(ptrcomp(point ) ,sizeof(FT_Vector ) );
-     inc(ptrcomp(tags ) );
+     WriteLn('n: ', n, ' point_idx: ', point_idx, ' limit_idx: ', limit_idx);
+     inc(point_idx);
 
-     tag:=FT_CURVE_TAG(tags^ );
+     tag:=FT_CURVE_TAG(outline.tags[point_idx]);
 
      case tag of
      // emit a single line_to
       char(FT_CURVE_TAG_ON ) :
        begin
-        x1:=int26p6_to_dbl(point.x );
-        y1:=int26p6_to_dbl(point.y );
+        x1:=int26p6_to_dbl(outline.points[point_idx].x );
+        y1:=int26p6_to_dbl(outline.points[point_idx].y );
 
         if flip_y then
          y1:=-y1;
@@ -438,19 +434,16 @@ begin
      // consume conic arcs
       char(FT_CURVE_TAG_CONIC ) :
        begin
-        v_control.x:=point.x;
-        v_control.y:=point.y;
-
-       Do_Conic:
-        if ptrcomp(point ) < ptrcomp(limit ) then
+        v_control.x:=outline.points[point_idx].x;
+        v_control.y:=outline.points[point_idx].y;
+        if point_idx < limit_idx then
          begin
-          inc(ptrcomp(point ) ,sizeof(FT_Vector ) );
-          inc(ptrcomp(tags ) );
+          inc(point_idx);
 
-          tag:=FT_CURVE_TAG(tags^ );
+          tag:=FT_CURVE_TAG(outline.tags[point_idx]);
 
-          vec.x:=point.x;
-          vec.y:=point.y;
+          vec.x:=outline.points[point_idx].x;
+          vec.y:=outline.points[point_idx].y;
 
           if tag = char(FT_CURVE_TAG_ON ) then
            begin
@@ -513,7 +506,7 @@ begin
 
           v_control:=vec;
 
-          goto Do_Conic;
+          continue;
 
          end;
 
@@ -545,8 +538,8 @@ begin
      // FT_CURVE_TAG_CUBIC
       else
        begin
-        if (ptrcomp(point ) + sizeof(FT_Vector ) > ptrcomp(limit ) ) or
-           (FT_CURVE_TAG(char_ptr(ptrcomp(tags ) + 1 )^ ) <> char(FT_CURVE_TAG_CUBIC ) ) then
+        if (point_idx + 1 > limit_idx ) or
+           (FT_CURVE_TAG(outline.tags[point_idx + 1]) <> char(FT_CURVE_TAG_CUBIC ) ) then
          begin
           result:=false;
 
@@ -554,18 +547,17 @@ begin
 
          end;
 
-        vec1.x:=point.x;
-        vec1.y:=point.y;
-        vec2.x:=FT_Vector_ptr(ptrcomp(point ) + sizeof(FT_Vector ) ).x;
-        vec2.y:=FT_Vector_ptr(ptrcomp(point ) + sizeof(FT_Vector ) ).y;
+        vec1.x:=outline.points[point_idx].x;
+        vec1.y:=outline.points[point_idx].y;
+        vec2.x:=outline.points[point_idx + 1].x;
+        vec2.y:=outline.points[point_idx + 1].y;
 
-        inc(ptrcomp(point ) ,2 * sizeof(FT_Vector ) );
-        inc(ptrcomp(tags ) ,2 );
+        inc(point_idx, 2);
 
-        if ptrcomp(point ) <= ptrcomp(limit ) then
+        if point_idx <= limit_idx then
          begin
-          vec.x:=point.x;
-          vec.y:=point.y;
+          vec.x:=outline.points[point_idx].x;
+          vec.y:=outline.points[point_idx].y;
 
           x1:=int26p6_to_dbl(vec1.x );
           y1:=int26p6_to_dbl(vec1.y );

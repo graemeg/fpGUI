@@ -2,12 +2,6 @@
 // Anti-Grain Geometry - Version 2.4 (Public License)
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Anti-Grain Geometry - Version 2.4 Release Milano 3 (AggPas 2.4 RM3)
-// Pascal Port By: Milan Marusinec alias Milano
-//                 milan@marusinec.sk
-//                 http://www.aggpas.org
-// Copyright (c) 2005-2007
-//
 // FreeType 1 Pascal Adapter
 // Copyright (c) 2025 Graeme Geldenhuys
 //
@@ -114,6 +108,9 @@ type
     value: SmallInt;
   end;
   PKernPair = ^TKernPair;
+
+  TKernPairArray = array[0..32767] of TKernPair;
+  PKernPairArray = ^TKernPairArray;
 
   // Kerning table cache
   TKernTable = record
@@ -232,9 +229,9 @@ type
   FT_Outline = record
     n_contours,
     n_points: FT_Short;
-    points: FT_Vector_ptr;
-    tags: PChar;
-    contours: FT_Short_ptr;
+    points: array of FT_Vector;
+    tags: array of Char;
+    contours: array of FT_Short;
     flags: FT_Int;
   end;
 
@@ -409,25 +406,28 @@ procedure QuickSortKernPairs(pairs: PKernPair; left, right: Integer);
 var
   i, j: Integer;
   pivot, temp: TKernPair;
+  pairArray: PKernPairArray;
 begin
   if left >= right then
     Exit;
 
+  pairArray := PKernPairArray(pairs);
+
   i := left;
   j := right;
-  pivot := pairs[(left + right) div 2];
+  pivot := pairArray^[(left + right) div 2];
 
   repeat
-    while CompareKernPairs(pairs[i], pivot) < 0 do
+    while CompareKernPairs(pairArray^[i], pivot) < 0 do
       Inc(i);
-    while CompareKernPairs(pairs[j], pivot) > 0 do
+    while CompareKernPairs(pairArray^[j], pivot) > 0 do
       Dec(j);
 
     if i <= j then
     begin
-      temp := pairs[i];
-      pairs[i] := pairs[j];
-      pairs[j] := temp;
+      temp := pairArray^[i];
+      pairArray^[i] := pairArray^[j];
+      pairArray^[j] := temp;
       Inc(i);
       Dec(j);
     end;
@@ -445,11 +445,14 @@ function BinarySearchKern(pairs: PKernPair; num_pairs: Integer;
 var
   low, high, mid: Integer;
   search_key, mid_key: Cardinal;
+  pairArray: PKernPairArray;
 begin
   Result := 0;
 
   if (pairs = nil) or (num_pairs = 0) then
     Exit;
+
+  pairArray := PKernPairArray(pairs);
 
   // Create composite search key
   search_key := (Cardinal(left_glyph) shl 16) or right_glyph;
@@ -460,11 +463,11 @@ begin
   while low <= high do
   begin
     mid := (low + high) div 2;
-    mid_key := (Cardinal(pairs[mid].left) shl 16) or pairs[mid].right;
+    mid_key := (Cardinal(pairArray^[mid].left) shl 16) or pairArray^[mid].right;
 
     if mid_key = search_key then
     begin
-      Result := pairs[mid].value;
+      Result := pairArray^[mid].value;
       Exit;
     end
     else if mid_key < search_key then
@@ -535,7 +538,7 @@ var
   buffer: array of Byte;
   length: LongInt;
   err: TT_Error;
-  p: PByte;
+  p: ^Byte;
   version: Word;
   nTables: Word;
   i, j: Integer;
@@ -550,6 +553,7 @@ var
   left, right: Word;
   value: SmallInt;
   pair_idx: Integer;
+  p_temp: Pointer;
 begin
   // Check if already loaded
   if face^.kern_table.loaded then
@@ -562,7 +566,8 @@ begin
 
   // Try to get kern table length
   length := 0;
-  err := TT_Get_Font_Data(face^.tt_face, TTAG_kern, 0, buffer, length);
+  p_temp := nil;
+  err := TT_Get_Font_Data(face^.tt_face, TTAG_kern, 0, p_temp, length);
   if (err <> 0) or (length = 0) then
     Exit; // No kern table
 
@@ -674,9 +679,9 @@ begin
         value := SwapSmallInt(PSmallInt(p)^);
         Inc(p, 2);
 
-        face^.kern_table.pairs[pair_idx].left := left;
-        face^.kern_table.pairs[pair_idx].right := right;
-        face^.kern_table.pairs[pair_idx].value := value;
+        PKernPairArray(face^.kern_table.pairs)^[pair_idx].left := left;
+        PKernPairArray(face^.kern_table.pairs)^[pair_idx].right := right;
+        PKernPairArray(face^.kern_table.pairs)^[pair_idx].value := value;
         Inc(pair_idx);
       end;
     end
@@ -705,13 +710,13 @@ end;
 { FT_IS_SCALABLE }
 function FT_IS_SCALABLE(face: FT_Face_ptr): boolean;
 begin
-  Result := (face.face_flags and FT_FACE_FLAG_SCALABLE) <> 0;
+  Result := (face^.face_flags and FT_FACE_FLAG_SCALABLE) <> 0;
 end;
 
 { FT_HAS_KERNING }
 function FT_HAS_KERNING(face: FT_Face_ptr): boolean;
 begin
-  Result := (face.face_flags and FT_FACE_FLAG_KERNING) <> 0;
+  Result := (face^.face_flags and FT_FACE_FLAG_KERNING) <> 0;
 end;
 
 { FT_Init_FreeType }
@@ -875,13 +880,13 @@ begin
   end;
 
   // Clean up TT objects
-  if face^.tt_glyph <> nil then
+  if face^.tt_glyph.z <> nil then
     TT_Done_Glyph(face^.tt_glyph);
 
-  if face^.tt_instance <> nil then
+  if face^.tt_instance.z <> nil then
     TT_Done_Instance(face^.tt_instance);
 
-  if face^.tt_face <> nil then
+  if face^.tt_face.z <> nil then
     TT_Close_Face(face^.tt_face);
 
   // Free kerning table
@@ -937,6 +942,7 @@ var
   load_flag: Integer;
   outline: TT_Outline;
   metrics: TT_Glyph_Metrics;
+  i: Integer;
 begin
   // Map FT2 load flags to FT1 load flags
   load_flag := 0;
@@ -962,9 +968,22 @@ begin
   // Copy outline to glyph slot
   face^.glyph^.outline.n_contours := outline.n_Contours;
   face^.glyph^.outline.n_points := outline.n_Points;
-  face^.glyph^.outline.points := FT_Vector_ptr(outline.points);
-  face^.glyph^.outline.tags := PChar(outline.flags);
-  face^.glyph^.outline.contours := FT_Short_ptr(outline.contours);
+
+  // Allocate and copy points
+  SetLength(face^.glyph^.outline.points, outline.n_Points);
+  for i := 0 to outline.n_Points - 1 do
+    face^.glyph^.outline.points[i] := FT_Vector_ptr(ptrcomp(outline.points) + i * sizeof(FT_Vector))^;
+
+  // Allocate and copy tags
+  SetLength(face^.glyph^.outline.tags, outline.n_Points);
+  for i := 0 to outline.n_Points - 1 do
+    face^.glyph^.outline.tags[i] := PChar(ptrcomp(outline.flags) + i * sizeof(Char))^;
+
+  // Allocate and copy contours
+  SetLength(face^.glyph^.outline.contours, outline.n_Contours);
+  for i := 0 to outline.n_Contours - 1 do
+    face^.glyph^.outline.contours[i] := FT_Short_ptr(ptrcomp(outline.conEnds) + i * sizeof(FT_Short))^;
+
   face^.glyph^.format := ft_glyph_format_outline;
 
   // Copy metrics
