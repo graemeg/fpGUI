@@ -17,6 +17,8 @@
 
 unit TTTypes;
 
+{$mode objfpc}{$H+}
+
 interface
 
 type

@@ -39,6 +39,8 @@
 
 Unit TTRASTER;
 
+{$mode objfpc}{$H+}
+
 interface
 
 {$R-} // TODO: Fix out-of-bounds accesses.
