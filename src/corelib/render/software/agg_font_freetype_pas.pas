@@ -1004,10 +1004,9 @@ begin
   face^.glyph^.advance.x := metrics.advance;
   face^.glyph^.advance.y := 0;
 
-  // DEBUG: Show advance for first few glyphs
-  if glyph_index <= 5 then
-    WriteLn('[DEBUG] Glyph ', glyph_index, ' advance (26.6): ', metrics.advance,
-            ' pixels: ', metrics.advance / 64.0:0:1);
+  // DEBUG: Show advance for all glyphs
+  WriteLn('[DEBUG] Glyph ', glyph_index, ' advance (26.6): ', metrics.advance,
+          ' pixels: ', metrics.advance / 64.0:0:1);
 
   Result := 0;
 end;
