@@ -426,6 +426,7 @@ begin
          y1:=-y1;
 
         mtx.transform(mtx ,@x1 ,@y1 );
+        WriteLn('[PATH]   line_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ') = (', x1:0:2, ', ', y1:0:2, ')');
         path.line_to (dbl_to_int26p6(x1 ) ,dbl_to_int26p6(y1 ) );
 
         continue;
@@ -463,6 +464,8 @@ begin
             mtx.transform(mtx ,@x1 ,@y1 );
             mtx.transform(mtx ,@x2 ,@y2 );
 
+            WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
+                    dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ')');
             path.curve3(
              dbl_to_int26p6(x1 ) ,
              dbl_to_int26p6(y1 ) ,
@@ -499,6 +502,8 @@ begin
           mtx.transform(mtx ,@x1 ,@y1 );
           mtx.transform(mtx ,@x2 ,@y2 );
 
+          WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
+                  dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ') [mid]');
           path.curve3(
            dbl_to_int26p6(x1 ) ,
            dbl_to_int26p6(y1 ) ,
@@ -526,6 +531,8 @@ begin
         mtx.transform(mtx ,@x1 ,@y1 );
         mtx.transform(mtx ,@x2 ,@y2 );
 
+        WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
+                dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ') [close]');
         path.curve3(
          dbl_to_int26p6(x1 ) ,
          dbl_to_int26p6(y1 ) ,
@@ -610,6 +617,9 @@ begin
         mtx.transform(mtx ,@x2 ,@y2 );
         mtx.transform(mtx ,@x3 ,@y3 );
 
+        WriteLn('[PATH]   curve4_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
+                dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ', ',
+                dbl_to_int26p6(x3), ', ', dbl_to_int26p6(y3), ') [cubic]');
         path.curve4(
          dbl_to_int26p6(x1) ,
          dbl_to_int26p6(y1) ,
