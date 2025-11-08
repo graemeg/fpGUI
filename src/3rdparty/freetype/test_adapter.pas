@@ -8,7 +8,7 @@ uses
   agg_font_freetype_pas;
 
 var
-  library: FT_Library_ptr;
+  ft_library: FT_Library_ptr;
   face: FT_Face_ptr;
   test_font: string;
   err: FT_Error;
@@ -31,7 +31,7 @@ end;
 
 procedure TestInitLibrary;
 begin
-  err := FT_Init_FreeType(library);
+  err := FT_Init_FreeType(ft_library);
   if err = 0 then
     TestPassed('FT_Init_FreeType')
   else
@@ -40,7 +40,7 @@ end;
 
 procedure TestLoadFace;
 begin
-  err := FT_New_Face(library, PChar(test_font), 0, face);
+  err := FT_New_Face(ft_library, PChar(test_font), 0, face);
   if err = 0 then
   begin
     TestPassed('FT_New_Face');
@@ -233,7 +233,7 @@ begin
   else
     TestFailed('FT_Done_Face', Format('Error code: %d', [err]));
 
-  err := FT_Done_FreeType(library);
+  err := FT_Done_FreeType(ft_library);
   if err = 0 then
     TestPassed('FT_Done_FreeType')
   else
