@@ -92,6 +92,7 @@ end;
 procedure TestLoadGlyph;
 var
   glyph_index: FT_UInt;
+  i: Integer;
 begin
   // Load glyph for 'A'
   glyph_index := FT_Get_Char_Index(face, Ord('A'));
@@ -153,7 +154,7 @@ begin
   if face^.glyph^.outline.n_points > 0 then
   begin
     WriteLn('  First 5 points:');
-    for var i := 0 to Min(4, face^.glyph^.outline.n_points - 1) do
+    for i := 0 to Min(4, face^.glyph^.outline.n_points - 1) do
       WriteLn(Format('    Point %d: (%d, %d) tag=%d', [
         i,
         face^.glyph^.outline.points[i].x,
