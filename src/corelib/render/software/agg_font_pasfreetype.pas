@@ -1578,20 +1578,25 @@ procedure font_engine_freetype_base.update_char_size;
 begin
  if m_cur_face <> NIL then
   begin
-   if m_resolution <> 0 then
-    FT_Set_Char_Size(
-     m_cur_face ,
-     m_width ,       // char_width in 1/64th of points
-     m_height ,      // char_height in 1/64th of points
-     m_resolution ,  // horizontal device resolution
-     m_resolution )  // vertical device resolution
-   else
-    FT_Set_Pixel_Sizes(
-     m_cur_face ,
-     m_width shr 6 ,    // pixel_width
-     m_height shr 6 );  // pixel_height
+   // Don't set size if width or height is zero - wait until both are set
+   // This prevents corruption when height_() is called before width_()
+   if (m_width > 0) and (m_height > 0) then
+   begin
+     if m_resolution <> 0 then
+      FT_Set_Char_Size(
+       m_cur_face ,
+       m_width ,       // char_width in 1/64th of points
+       m_height ,      // char_height in 1/64th of points
+       m_resolution ,  // horizontal device resolution
+       m_resolution )  // vertical device resolution
+     else
+      FT_Set_Pixel_Sizes(
+       m_cur_face ,
+       m_width shr 6 ,    // pixel_width
+       m_height shr 6 );  // pixel_height
 
-   update_signature;
+     update_signature;
+   end;
 
   end;
 
