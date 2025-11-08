@@ -409,7 +409,6 @@ begin
 
    while point_idx < limit_idx do
     begin
-     WriteLn('n: ', n, ' point_idx: ', point_idx, ' limit_idx: ', limit_idx);
      inc(point_idx);
 
      tag:=FT_CURVE_TAG(outline.tags[point_idx]);
