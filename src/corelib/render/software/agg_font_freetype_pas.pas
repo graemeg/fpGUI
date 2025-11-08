@@ -1012,10 +1012,6 @@ begin
   face^.glyph^.advance.x := metrics.advance;
   face^.glyph^.advance.y := 0;
 
-  // DEBUG: Show advance for all glyphs
-  WriteLn('[DEBUG] Glyph ', glyph_index, ' advance (26.6): ', metrics.advance,
-          ' pixels: ', metrics.advance / 64.0:0:1);
-
   Result := 0;
 end;
 
@@ -1124,16 +1120,11 @@ function FT_Set_Pixel_Sizes(face: FT_Face_ptr; pixel_width,
 var
   err: TT_Error;
 begin
-  // DEBUG: Show what we're setting
-  WriteLn('[DEBUG] FT_Set_Pixel_Sizes called: width=', pixel_width, ' height=', pixel_height);
-
   // Set pixel sizes
   // TT_Set_Instance_PixelSizes takes: pixelX, pixelY, pointsize
   // The pointsize parameter is metadata only - actual scaling uses pixelX/pixelY
   err := TT_Set_Instance_PixelSizes(face^.tt_instance, pixel_width,
     pixel_height, 0);  // Pass 0 for pointsize as it's not used for scaling
-
-  WriteLn('[DEBUG] TT_Set_Instance_PixelSizes returned: ', err);
 
   Result := err;
 end;

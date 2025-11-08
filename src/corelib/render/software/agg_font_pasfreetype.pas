@@ -345,16 +345,13 @@ label
  Do_Conic ,Close ;
 
 begin
- WriteLn('[DECOMPOSE] n_contours: ', outline.n_contours, ' n_points: ', outline.n_points);
  first:=0;
  n    :=0;
 
  while n < outline.n_contours do
   begin
-   WriteLn('[DECOMPOSE] Contour ', n, ' of ', outline.n_contours);
    last := outline.contours[n];
    limit_idx := last;
-   WriteLn('[DECOMPOSE] first: ', first, ' last: ', last);
 
    v_start := outline.points[first];
    v_last := outline.points[last];
@@ -363,12 +360,10 @@ begin
 
    point_idx := first;
    tag  := FT_CURVE_TAG (outline.tags[point_idx]);
-   WriteLn('[DECOMPOSE] first tag: ', Ord(tag));
 
   // A contour cannot start with a cubic control point!
    if tag = char(FT_CURVE_TAG_CUBIC ) then
     begin
-     WriteLn('[DECOMPOSE] ERROR: Contour starts with cubic control point!');
      result:=false;
 
      exit;
@@ -478,7 +473,6 @@ begin
 
           if tag <> char(FT_CURVE_TAG_CONIC ) then
            begin
-            WriteLn('[DECOMPOSE] ERROR: Expected conic tag but got: ', Ord(tag));
             result:=false;
 
             exit;
@@ -546,7 +540,6 @@ begin
         if (point_idx + 1 > limit_idx ) or
            (FT_CURVE_TAG(outline.tags[point_idx + 1]) <> char(FT_CURVE_TAG_CUBIC ) ) then
          begin
-          WriteLn('[DECOMPOSE] ERROR: Cubic curve check failed at point_idx: ', point_idx, ' limit: ', limit_idx);
           result:=false;
 
           exit;
@@ -640,7 +633,6 @@ begin
 
   end;
 
- WriteLn('[DECOMPOSE] SUCCESS - returning true');
  result:=true;
 
 end;
