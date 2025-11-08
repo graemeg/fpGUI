@@ -405,6 +405,8 @@ begin
     y1:=-y1;
 
    mtx.transform(mtx ,@x1 ,@y1 );
+
+   WriteLn('[PATH] Contour ', n, ' move_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ') = (', x1:0:2, ', ', y1:0:2, ')');
    path.move_to (dbl_to_int26p6(x1 ) ,dbl_to_int26p6(y1 ) );
 
    while point_idx < limit_idx do
@@ -624,6 +626,7 @@ begin
 
     end;
 
+   WriteLn('[PATH] Contour ', n, ' close_polygon');
    path.close_polygon;
 
   Close:
