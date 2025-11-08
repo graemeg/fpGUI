@@ -983,9 +983,17 @@ begin
 
   // Allocate and copy tags (flags)
   // TT_Outline.flags is TT_PTouchTable = ^array of byte
+  // Convert TrueType flags to FreeType2 tags:
+  // TrueType: bit 0 = 1 (on curve) or 0 (off curve/conic)
+  // FreeType2: FT_CURVE_TAG_ON (1) or FT_CURVE_TAG_CONIC (0)
   SetLength(face^.glyph^.outline.tags, outline.n_Points);
   for i := 0 to outline.n_Points - 1 do
-    face^.glyph^.outline.tags[i] := Char(outline.flags^[i]);
+  begin
+    if (outline.flags^[i] and 1) <> 0 then
+      face^.glyph^.outline.tags[i] := Char(FT_CURVE_TAG_ON)
+    else
+      face^.glyph^.outline.tags[i] := Char(FT_CURVE_TAG_CONIC);
+  end;
 
   // Allocate and copy contours (conEnds)
   // TT_Outline.conEnds is TT_PConStarts = ^array of word
