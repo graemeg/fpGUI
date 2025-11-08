@@ -487,6 +487,9 @@ begin
           v_middle.x:=(v_control.x + vec.x ) div 2;
           v_middle.y:=(v_control.y + vec.y ) div 2;
 
+          WriteLn('[PATH]     RAW: v_control=(', v_control.x, ', ', v_control.y,
+                  ') vec=(', vec.x, ', ', vec.y, ') v_middle=(', v_middle.x, ', ', v_middle.y, ')');
+
           x1:=int26p6_to_dbl(v_control.x );
           y1:=int26p6_to_dbl(v_control.y );
           x2:=int26p6_to_dbl(v_middle.x );
