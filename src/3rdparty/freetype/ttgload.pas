@@ -437,6 +437,13 @@ const
        for k := 0 to n_points-1 do with pts^ do
          org^[k].y := Scale_Y( exec^.metrics, org^[k].y );
 
+       (* DEBUG: Show coords after scaling *)
+       WriteLn('[ttgload] After scaling:');
+       for k := 0 to n_points-1 do
+         if (k >= 5) and (k <= 10) then
+           WriteLn('[ttgload]   Point ', k, ': org=(', pts^.org^[k].x:8, ', ',
+                   pts^.org^[k].y:8, ')');
+
        (* if hinting, round pp1, and shift the glyph accordingly *)
        if subg^.is_hinted then
        begin
@@ -445,6 +452,13 @@ const
          translate_array( n_points, pts^.org, x, 0 );
 
          org_to_cur( n_points, pts );
+
+         (* DEBUG: Show coords after org_to_cur (before hinting) *)
+         WriteLn('[ttgload] After org_to_cur, before hinting:');
+         for k := 0 to n_points-1 do
+           if (k >= 5) and (k <= 10) then
+             WriteLn('[ttgload]   Point ', k, ': cur=(', pts^.cur^[k].x:8, ', ',
+                     pts^.cur^[k].y:8, ')');
 
          (* set the advance width *)
          (*
@@ -462,6 +476,13 @@ const
 
              if Context_Run( exec, load_flags and TT_Load_Debug <> 0 ) then
                goto Fail_Exec;
+
+             (* DEBUG: Show coords after hinting *)
+             WriteLn('[ttgload] After hinting:');
+             for k := 0 to n_points-1 do
+               if (k >= 5) and (k <= 10) then
+                 WriteLn('[ttgload]   Point ', k, ': cur=(', pts^.cur^[k].x:8, ', ',
+                         pts^.cur^[k].y:8, ')');
          end;
        end
        else
