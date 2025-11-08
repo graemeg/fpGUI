@@ -942,9 +942,7 @@ var
   load_flag: Integer;
   outline: TT_Outline;
   metrics: TT_Glyph_Metrics;
-  instance_metrics: TT_Instance_Metrics;
   i: Integer;
-  scaled_advance: FT_Pos;
 begin
   // Map FT2 load flags to FT1 load flags
   load_flag := 0;
@@ -965,10 +963,9 @@ begin
   TT_Get_Glyph_Outline(face^.tt_glyph, outline);
 
   // Get glyph metrics
+  // NOTE: When TT_Load_Glyph is called with TT_Load_Scale_Glyph flag,
+  // the metrics are already in 26.6 fixed-point format, not font units!
   TT_Get_Glyph_Metrics(face^.tt_glyph, metrics);
-
-  // Get instance metrics for scaling
-  TT_Get_Instance_Metrics(face^.tt_instance, instance_metrics);
 
   // Copy outline to glyph slot
   face^.glyph^.outline.n_contours := outline.n_Contours;
@@ -998,24 +995,19 @@ begin
 
   face^.glyph^.format := ft_glyph_format_outline;
 
-  // Scale metrics from font units to 26.6 fixed-point pixels
-  // Formula: (font_units * scale_16_16) shr 10
-  // This converts from 16.16 fixed-point to 26.6 fixed-point
-  scaled_advance := (Int64(metrics.advance) * instance_metrics.x_scale) shr 10;
-
-  // Copy and scale metrics
-  face^.glyph^.metrics.width := (Int64(metrics.bbox.xMax - metrics.bbox.xMin) * instance_metrics.x_scale) shr 10;
-  face^.glyph^.metrics.height := (Int64(metrics.bbox.yMax - metrics.bbox.yMin) * instance_metrics.y_scale) shr 10;
-  face^.glyph^.metrics.horiBearingX := (Int64(metrics.bearingX) * instance_metrics.x_scale) shr 10;
-  face^.glyph^.metrics.horiBearingY := (Int64(metrics.bearingY) * instance_metrics.y_scale) shr 10;
-  face^.glyph^.metrics.horiAdvance := scaled_advance;
-  face^.glyph^.advance.x := scaled_advance;
+  // Copy metrics (already in 26.6 fixed-point format from TT_Load_Glyph)
+  face^.glyph^.metrics.width := metrics.bbox.xMax - metrics.bbox.xMin;
+  face^.glyph^.metrics.height := metrics.bbox.yMax - metrics.bbox.yMin;
+  face^.glyph^.metrics.horiBearingX := metrics.bearingX;
+  face^.glyph^.metrics.horiBearingY := metrics.bearingY;
+  face^.glyph^.metrics.horiAdvance := metrics.advance;
+  face^.glyph^.advance.x := metrics.advance;
   face^.glyph^.advance.y := 0;
 
   // DEBUG: Show advance for first few glyphs
   if glyph_index <= 5 then
-    WriteLn('[DEBUG] Glyph ', glyph_index, ' advance unscaled: ', metrics.advance,
-            ' scale: ', instance_metrics.x_scale, ' scaled: ', scaled_advance);
+    WriteLn('[DEBUG] Glyph ', glyph_index, ' advance (26.6): ', metrics.advance,
+            ' pixels: ', metrics.advance / 64.0:0:1);
 
   Result := 0;
 end;
