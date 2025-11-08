@@ -970,19 +970,22 @@ begin
   face^.glyph^.outline.n_points := outline.n_Points;
 
   // Allocate and copy points
+  // TT_Outline.points is TT_Points = ^array of TT_Vector, so we can index directly
   SetLength(face^.glyph^.outline.points, outline.n_Points);
   for i := 0 to outline.n_Points - 1 do
-    face^.glyph^.outline.points[i] := FT_Vector_ptr(ptrcomp(outline.points) + i * sizeof(FT_Vector))^;
+    face^.glyph^.outline.points[i] := outline.points^[i];
 
-  // Allocate and copy tags
+  // Allocate and copy tags (flags)
+  // TT_Outline.flags is TT_PTouchTable = ^array of byte
   SetLength(face^.glyph^.outline.tags, outline.n_Points);
   for i := 0 to outline.n_Points - 1 do
-    face^.glyph^.outline.tags[i] := PChar(ptrcomp(outline.flags) + i * sizeof(Char))^;
+    face^.glyph^.outline.tags[i] := Char(outline.flags^[i]);
 
-  // Allocate and copy contours
+  // Allocate and copy contours (conEnds)
+  // TT_Outline.conEnds is TT_PConStarts = ^array of word
   SetLength(face^.glyph^.outline.contours, outline.n_Contours);
   for i := 0 to outline.n_Contours - 1 do
-    face^.glyph^.outline.contours[i] := FT_Short_ptr(ptrcomp(outline.conEnds) + i * sizeof(FT_Short))^;
+    face^.glyph^.outline.contours[i] := outline.conEnds^[i];
 
   face^.glyph^.format := ft_glyph_format_outline;
 
