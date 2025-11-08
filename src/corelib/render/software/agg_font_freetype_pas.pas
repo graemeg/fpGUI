@@ -975,15 +975,18 @@ begin
   // TT_Outline.points is TT_Points = ^array of TT_Vector
   // Need to copy field-by-field because TT_Vector and FT_Vector are incompatible types
   SetLength(face^.glyph^.outline.points, outline.n_Points);
-  WriteLn('[FT_Load_Glyph] Copying ', outline.n_Points, ' points for glyph ', glyph_index);
+  WriteLn('[FT_Load_Glyph] Glyph ', glyph_index, ': n_Points=', outline.n_Points,
+          ' n_Contours=', outline.n_Contours);
+  WriteLn('[FT_Load_Glyph] Copying points from TT_Outline.points pointer: ',
+          PtrUInt(outline.points));
   for i := 0 to outline.n_Points - 1 do
   begin
     face^.glyph^.outline.points[i].x := outline.points^[i].x;
     face^.glyph^.outline.points[i].y := outline.points^[i].y;
-    if i >= 5 and i <= 10 then
-      WriteLn('[FT_Load_Glyph]   Point ', i, ': TT=(', outline.points^[i].x, ', ', outline.points^[i].y,
-              ') -> FT=(', face^.glyph^.outline.points[i].x, ', ', face^.glyph^.outline.points[i].y, ')');
+    WriteLn('[FT_Load_Glyph]   Point ', i, ': TT=(', outline.points^[i].x:8, ', ', outline.points^[i].y:8,
+            ') -> FT=(', face^.glyph^.outline.points[i].x:8, ', ', face^.glyph^.outline.points[i].y:8, ')');
   end;
+  WriteLn('[FT_Load_Glyph] Copy complete');
 
   // Allocate and copy tags (flags)
   // TT_Outline.flags is TT_PTouchTable = ^array of byte
