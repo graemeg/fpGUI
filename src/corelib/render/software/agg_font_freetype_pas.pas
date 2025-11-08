@@ -975,10 +975,14 @@ begin
   // TT_Outline.points is TT_Points = ^array of TT_Vector
   // Need to copy field-by-field because TT_Vector and FT_Vector are incompatible types
   SetLength(face^.glyph^.outline.points, outline.n_Points);
+  WriteLn('[FT_Load_Glyph] Copying ', outline.n_Points, ' points for glyph ', glyph_index);
   for i := 0 to outline.n_Points - 1 do
   begin
     face^.glyph^.outline.points[i].x := outline.points^[i].x;
     face^.glyph^.outline.points[i].y := outline.points^[i].y;
+    if i >= 5 and i <= 10 then
+      WriteLn('[FT_Load_Glyph]   Point ', i, ': TT=(', outline.points^[i].x, ', ', outline.points^[i].y,
+              ') -> FT=(', face^.glyph^.outline.points[i].x, ', ', face^.glyph^.outline.points[i].y, ')');
   end;
 
   // Allocate and copy tags (flags)
