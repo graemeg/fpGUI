@@ -478,6 +478,7 @@ begin
 
           if tag <> char(FT_CURVE_TAG_CONIC ) then
            begin
+            WriteLn('[DECOMPOSE] ERROR: Expected conic tag but got: ', Ord(tag));
             result:=false;
 
             exit;
@@ -545,6 +546,7 @@ begin
         if (point_idx + 1 > limit_idx ) or
            (FT_CURVE_TAG(outline.tags[point_idx + 1]) <> char(FT_CURVE_TAG_CUBIC ) ) then
          begin
+          WriteLn('[DECOMPOSE] ERROR: Cubic curve check failed at point_idx: ', point_idx, ' limit: ', limit_idx);
           result:=false;
 
           exit;
@@ -638,6 +640,7 @@ begin
 
   end;
 
+ WriteLn('[DECOMPOSE] SUCCESS - returning true');
  result:=true;
 
 end;
