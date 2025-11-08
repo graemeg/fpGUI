@@ -353,6 +353,8 @@ begin
    last := outline.contours[n];
    limit_idx := last;
 
+   WriteLn('[PATH] === Contour ', n, ' bounds: first=', first, ' last=', last, ' n_points=', outline.n_points, ' ===');
+
    v_start := outline.points[first];
    v_last := outline.points[last];
 
@@ -436,16 +438,21 @@ begin
      // consume conic arcs
       char(FT_CURVE_TAG_CONIC ) :
        begin
+        WriteLn('[PATH]   CONIC at point_idx=', point_idx, ' reading v_control');
         v_control.x:=outline.points[point_idx].x;
         v_control.y:=outline.points[point_idx].y;
+        WriteLn('[PATH]   v_control=(', v_control.x, ', ', v_control.y, ')');
         if point_idx < limit_idx then
          begin
           inc(point_idx);
+          WriteLn('[PATH]   After inc, point_idx=', point_idx, ' limit_idx=', limit_idx);
 
           tag:=FT_CURVE_TAG(outline.tags[point_idx]);
+          WriteLn('[PATH]   Next tag=', Ord(tag));
 
           vec.x:=outline.points[point_idx].x;
           vec.y:=outline.points[point_idx].y;
+          WriteLn('[PATH]   vec=(', vec.x, ', ', vec.y, ')');
 
           if tag = char(FT_CURVE_TAG_ON ) then
            begin
