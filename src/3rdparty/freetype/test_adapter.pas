@@ -4,6 +4,7 @@ program test_adapter;
 
 uses
   SysUtils,
+  Math,
   agg_basics,
   agg_font_freetype_pas;
 
