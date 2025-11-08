@@ -442,6 +442,8 @@ begin
         v_control.x:=outline.points[point_idx].x;
         v_control.y:=outline.points[point_idx].y;
         WriteLn('[PATH]   v_control=(', v_control.x, ', ', v_control.y, ')');
+
+       Do_Conic:
         if point_idx < limit_idx then
          begin
           inc(point_idx);
@@ -522,7 +524,7 @@ begin
 
           v_control:=vec;
 
-          continue;
+          goto Do_Conic;
 
          end;
 
