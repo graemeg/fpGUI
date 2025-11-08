@@ -1111,8 +1111,10 @@ var
   err: TT_Error;
 begin
   // Set pixel sizes
+  // TT_Set_Instance_PixelSizes takes: pixelX, pixelY, pointsize
+  // The pointsize parameter is metadata only - actual scaling uses pixelX/pixelY
   err := TT_Set_Instance_PixelSizes(face^.tt_instance, pixel_width,
-    pixel_height, pixel_height);
+    pixel_height, 0);  // Pass 0 for pointsize as it's not used for scaling
   Result := err;
 end;
 
