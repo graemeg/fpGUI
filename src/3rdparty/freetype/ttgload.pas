@@ -1220,8 +1220,12 @@ const
    (* copy also the phantom points, the debugger needs them *)
    inc( num_points, 2 );
 
+   WriteLn('[ttgload] Copying ', num_points, ' points from exec^.pts.cur');
    for k := 0 to num_points-1 do with glyph^.outline do
    begin
+     if (k >= 5) and (k <= 10) then
+       WriteLn('[ttgload]   Point ', k, ': cur=(', exec^.pts.cur^[k].x:8, ', ',
+               exec^.pts.cur^[k].y:8, ')');
      points^[k] := exec^.pts.cur^[k];
      flags ^[k] := exec^.pts.flags^[k];
    end;
