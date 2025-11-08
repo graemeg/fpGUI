@@ -1098,7 +1098,8 @@ begin
 
   // Set character size
   // FT1 uses points * 64, FT2 uses 26.6 fixed point which is the same
-  err := TT_Set_Instance_CharSize(face^.tt_instance, char_height);
+  // Use TT_Set_Instance_CharSizes (plural) to set both width and height
+  err := TT_Set_Instance_CharSizes(face^.tt_instance, char_width, char_height);
 
   Result := err;
 end;
