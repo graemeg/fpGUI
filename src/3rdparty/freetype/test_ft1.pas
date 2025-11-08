@@ -173,16 +173,20 @@ begin
   text_width := 0;
   y := 0;
   p := PChar(text_to_render);
+  i := 0;
   while p^ <> #0 do
   begin
     glyph := fman.glyph(Byte(p^));
     if glyph <> nil then
     begin
+      WriteLn('[TEST] Char ', i, ' (', p^, ') glyph ', glyph^.glyph_index,
+              ' advance_x: ', glyph^.advance_x:0:2, ' total: ', text_width:0:2);
       text_width := text_width + glyph^.advance_x;
       if p[1] <> #0 then
         fman.add_kerning(@text_width, @y);  // Apply kerning for next char
     end;
     Inc(p);
+    Inc(i);
   end;
 
   text_height := font_size;
