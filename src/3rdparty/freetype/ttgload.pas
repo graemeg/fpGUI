@@ -387,6 +387,12 @@ const
 
    AStream.ForgetFrame;
 
+   (* DEBUG: Show raw coordinates from font file before scaling/hinting *)
+   WriteLn('[ttgload] Raw coords from file for ', n_points, ' points:');
+   for k := 0 to n_points-1 do
+     if (k >= 5) and (k <= 10) then
+       WriteLn('[ttgload]   Point ', k, ': org=(', coords^[k].x:8, ', ', coords^[k].y:8, ')');
+
    (* Now adds the two shadow points at n and n+1     *)
    (* We need the left side bearing and advance width *)
 
