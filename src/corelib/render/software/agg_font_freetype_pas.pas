@@ -948,8 +948,11 @@ begin
   load_flag := 0;
   if (load_flags and FT_LOAD_NO_SCALE) = 0 then
     load_flag := load_flag or TT_Load_Scale_Glyph;
-  if (load_flags and FT_LOAD_NO_HINTING) = 0 then
-    load_flag := load_flag or TT_Load_Hint_Glyph;
+  // TEMPORARY: Disable hinting due to bug in TrueType interpreter
+  // The interpreter corrupts coordinates for some glyphs (e.g., 'y')
+  // TODO: Debug and fix ttinterp.pas bytecode interpreter
+  // if (load_flags and FT_LOAD_NO_HINTING) = 0 then
+  //   load_flag := load_flag or TT_Load_Hint_Glyph;
 
   // Load the glyph
   err := TT_Load_Glyph(face^.tt_instance, face^.tt_glyph, glyph_index, load_flag);
