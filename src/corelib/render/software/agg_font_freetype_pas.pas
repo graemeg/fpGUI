@@ -970,10 +970,14 @@ begin
   face^.glyph^.outline.n_points := outline.n_Points;
 
   // Allocate and copy points
-  // TT_Outline.points is TT_Points = ^array of TT_Vector, so we can index directly
+  // TT_Outline.points is TT_Points = ^array of TT_Vector
+  // Need to copy field-by-field because TT_Vector and FT_Vector are incompatible types
   SetLength(face^.glyph^.outline.points, outline.n_Points);
   for i := 0 to outline.n_Points - 1 do
-    face^.glyph^.outline.points[i] := outline.points^[i];
+  begin
+    face^.glyph^.outline.points[i].x := outline.points^[i].x;
+    face^.glyph^.outline.points[i].y := outline.points^[i].y;
+  end;
 
   // Allocate and copy tags (flags)
   // TT_Outline.flags is TT_PTouchTable = ^array of byte
