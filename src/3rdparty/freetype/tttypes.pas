@@ -38,7 +38,7 @@ type
 
   TT_Fixed  = LongInt;  (* Signed Fixed 16.16 Float *)
 
-  TT_FWord  = Integer;  (* Distance in FUnits *)
+  TT_FWord  = SmallInt; (* Distance in FUnits *)
   TT_UFWord = Word;     (* Unsigned Distance  *)
 
   TT_F2Dot14 = Integer; (* signed fixed float 2.14 used for *)
