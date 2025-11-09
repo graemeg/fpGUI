@@ -1217,16 +1217,12 @@ const
 
  function TInterpreter.Project( var P1, P2 : TT_Vector ) : TT_F26dot6;
  var
-   T1, T2 : Int64;
- begin
-   with pEC^.GS.projVector do
-   begin
-     MulTo64( P1.x - P2.x, x, T1 );
-     MulTo64( P1.y - P2.y, y, T2 );
-   end;
-
-   Project := Div64by32( T1+T2, $4000 );
- end;
+  v : TT_Vector;
+begin
+  v.x := P2.x - P1.x;
+  v.y := P2.y - P1.y;
+  Result := (Int64(v.x) * pEC^.GS.projVector.x + Int64(v.y) * pEC^.GS.projVector.y) shr 16;
+end;
 
 
  function TInterpreter.Dual_Project( var P1, P2 : TT_Vector ) : TT_F26dot6;
@@ -1336,8 +1332,8 @@ const
 (**************************************************)
 (*                                                *)
 (* Normalize :  Normer un vecteur ( U, V )        *)
-(*              r‚sultat dans     ( X, Y )        *)
-(*              False si vecteur paramŠtre nul    *)
+(*              rï¿½sultat dans     ( X, Y )        *)
+(*              False si vecteur paramï¿½tre nul    *)
 (*                                                *)
 (**************************************************)
 
