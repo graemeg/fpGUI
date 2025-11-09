@@ -948,13 +948,11 @@ begin
   load_flag := 0;
   if (load_flags and FT_LOAD_NO_SCALE) = 0 then
     load_flag := load_flag or TT_Load_Scale_Glyph;
-  // NOTE: TrueType hinting disabled due to unfixed bug in ttinterp.pas
-  // The interpreter corrupts coordinates for some glyphs (e.g., 'y')
-  // Bug exists in both our version and Lazarus FreeType1 version
-  // The bug is deep in the 3000-line bytecode interpreter
-  // Unhinted rendering works correctly and is acceptable for a fallback renderer
-  // if (load_flags and FT_LOAD_NO_HINTING) = 0 then
-  //   load_flag := load_flag or TT_Load_Hint_Glyph;
+  // TrueType hinting re-enabled after fixing bugs in ttinterp.pas:
+  // - Fixed integer overflow in Project() function (Int64 intermediate calculations)
+  // - Fixed copy-paste error in Ins_MIRP() (x/y coordinate swap)
+  if (load_flags and FT_LOAD_NO_HINTING) = 0 then
+    load_flag := load_flag or TT_Load_Hint_Glyph;
 
   // Load the glyph
   err := TT_Load_Glyph(face^.tt_instance, face^.tt_glyph, glyph_index, load_flag);
