@@ -3525,7 +3525,7 @@ end;
 
      if pEC^.GS.gep0 = 0 then  (* If in twilight zone *)
      begin
-       pEC^.zp0.org^[point].y := MulDiv_Round( pEC^.GS.freeVector.x,
+       pEC^.zp0.org^[point].x := MulDiv_Round( pEC^.GS.freeVector.x,
                                               distance,
                                               $4000 );
 
@@ -3670,7 +3670,7 @@ end;
                                               pEC^.GS.freeVector.x,
                                               $4000 );
 
-       pEC^.zp1.org^[point].x := pEC^.zp0.org^[pEC^.GS.rp0].y +
+       pEC^.zp1.org^[point].y := pEC^.zp0.org^[pEC^.GS.rp0].y +
                                 MulDiv_Round( cvt_dist,
                                               pEC^.GS.freeVector.y,
                                               $4000 );
