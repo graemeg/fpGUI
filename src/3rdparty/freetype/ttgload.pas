@@ -387,12 +387,6 @@ const
 
    AStream.ForgetFrame;
 
-   (* DEBUG: Show raw coordinates from font file before scaling/hinting *)
-   WriteLn('[ttgload] Raw coords from file for ', n_points, ' points:');
-   for k := 0 to n_points-1 do
-     if (k >= 5) and (k <= 10) then
-       WriteLn('[ttgload]   Point ', k, ': org=(', coords^[k].x:8, ', ', coords^[k].y:8, ')');
-
    (* Now adds the two shadow points at n and n+1     *)
    (* We need the left side bearing and advance width *)
 
@@ -437,13 +431,6 @@ const
        for k := 0 to n_points-1 do with pts^ do
          org^[k].y := Scale_Y( exec^.metrics, org^[k].y );
 
-       (* DEBUG: Show coords after scaling *)
-       WriteLn('[ttgload] After scaling:');
-       for k := 0 to n_points-1 do
-         if (k >= 5) and (k <= 10) then
-           WriteLn('[ttgload]   Point ', k, ': org=(', pts^.org^[k].x:8, ', ',
-                   pts^.org^[k].y:8, ')');
-
        (* if hinting, round pp1, and shift the glyph accordingly *)
        if subg^.is_hinted then
        begin
@@ -452,13 +439,6 @@ const
          translate_array( n_points, pts^.org, x, 0 );
 
          org_to_cur( n_points, pts );
-
-         (* DEBUG: Show coords after org_to_cur (before hinting) *)
-         WriteLn('[ttgload] After org_to_cur, before hinting:');
-         for k := 0 to n_points-1 do
-           if (k >= 5) and (k <= 10) then
-             WriteLn('[ttgload]   Point ', k, ': cur=(', pts^.cur^[k].x:8, ', ',
-                     pts^.cur^[k].y:8, ')');
 
          (* set the advance width *)
          (*
@@ -476,13 +456,6 @@ const
 
              if Context_Run( exec, load_flags and TT_Load_Debug <> 0 ) then
                goto Fail_Exec;
-
-             (* DEBUG: Show coords after hinting *)
-             WriteLn('[ttgload] After hinting:');
-             for k := 0 to n_points-1 do
-               if (k >= 5) and (k <= 10) then
-                 WriteLn('[ttgload]   Point ', k, ': cur=(', pts^.cur^[k].x:8, ', ',
-                         pts^.cur^[k].y:8, ')');
          end;
        end
        else
@@ -1247,12 +1220,8 @@ const
    (* copy also the phantom points, the debugger needs them *)
    inc( num_points, 2 );
 
-   WriteLn('[ttgload] Copying ', num_points, ' points from exec^.pts.cur');
    for k := 0 to num_points-1 do with glyph^.outline do
    begin
-     if (k >= 5) and (k <= 10) then
-       WriteLn('[ttgload]   Point ', k, ': cur=(', exec^.pts.cur^[k].x:8, ', ',
-               exec^.pts.cur^[k].y:8, ')');
      points^[k] := exec^.pts.cur^[k];
      flags ^[k] := exec^.pts.flags^[k];
    end;

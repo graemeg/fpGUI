@@ -353,8 +353,6 @@ begin
    last := outline.contours[n];
    limit_idx := last;
 
-   WriteLn('[PATH] === Contour ', n, ' bounds: first=', first, ' last=', last, ' n_points=', outline.n_points, ' ===');
-
    v_start := outline.points[first];
    v_last := outline.points[last];
 
@@ -408,7 +406,6 @@ begin
 
    mtx.transform(mtx ,@x1 ,@y1 );
 
-   WriteLn('[PATH] Contour ', n, ' move_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ') = (', x1:0:2, ', ', y1:0:2, ')');
    path.move_to (dbl_to_int26p6(x1 ) ,dbl_to_int26p6(y1 ) );
 
    while point_idx < limit_idx do
@@ -428,7 +425,6 @@ begin
          y1:=-y1;
 
         mtx.transform(mtx ,@x1 ,@y1 );
-        WriteLn('[PATH]   line_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ') = (', x1:0:2, ', ', y1:0:2, ')');
         path.line_to (dbl_to_int26p6(x1 ) ,dbl_to_int26p6(y1 ) );
 
         continue;
@@ -438,23 +434,18 @@ begin
      // consume conic arcs
       char(FT_CURVE_TAG_CONIC ) :
        begin
-        WriteLn('[PATH]   CONIC at point_idx=', point_idx, ' reading v_control');
         v_control.x:=outline.points[point_idx].x;
         v_control.y:=outline.points[point_idx].y;
-        WriteLn('[PATH]   v_control=(', v_control.x, ', ', v_control.y, ')');
 
        Do_Conic:
         if point_idx < limit_idx then
          begin
           inc(point_idx);
-          WriteLn('[PATH]   After inc, point_idx=', point_idx, ' limit_idx=', limit_idx);
 
           tag:=FT_CURVE_TAG(outline.tags[point_idx]);
-          WriteLn('[PATH]   Next tag=', Ord(tag));
 
           vec.x:=outline.points[point_idx].x;
           vec.y:=outline.points[point_idx].y;
-          WriteLn('[PATH]   vec=(', vec.x, ', ', vec.y, ')');
 
           if tag = char(FT_CURVE_TAG_ON ) then
            begin
@@ -473,8 +464,6 @@ begin
             mtx.transform(mtx ,@x1 ,@y1 );
             mtx.transform(mtx ,@x2 ,@y2 );
 
-            WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
-                    dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ')');
             path.curve3(
              dbl_to_int26p6(x1 ) ,
              dbl_to_int26p6(y1 ) ,
@@ -496,9 +485,6 @@ begin
           v_middle.x:=(v_control.x + vec.x ) div 2;
           v_middle.y:=(v_control.y + vec.y ) div 2;
 
-          WriteLn('[PATH]     RAW: v_control=(', v_control.x, ', ', v_control.y,
-                  ') vec=(', vec.x, ', ', vec.y, ') v_middle=(', v_middle.x, ', ', v_middle.y, ')');
-
           x1:=int26p6_to_dbl(v_control.x );
           y1:=int26p6_to_dbl(v_control.y );
           x2:=int26p6_to_dbl(v_middle.x );
@@ -514,8 +500,6 @@ begin
           mtx.transform(mtx ,@x1 ,@y1 );
           mtx.transform(mtx ,@x2 ,@y2 );
 
-          WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
-                  dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ') [mid]');
           path.curve3(
            dbl_to_int26p6(x1 ) ,
            dbl_to_int26p6(y1 ) ,
@@ -543,8 +527,6 @@ begin
         mtx.transform(mtx ,@x1 ,@y1 );
         mtx.transform(mtx ,@x2 ,@y2 );
 
-        WriteLn('[PATH]   curve3_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
-                dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ') [close]');
         path.curve3(
          dbl_to_int26p6(x1 ) ,
          dbl_to_int26p6(y1 ) ,
@@ -629,9 +611,6 @@ begin
         mtx.transform(mtx ,@x2 ,@y2 );
         mtx.transform(mtx ,@x3 ,@y3 );
 
-        WriteLn('[PATH]   curve4_to(', dbl_to_int26p6(x1), ', ', dbl_to_int26p6(y1), ', ',
-                dbl_to_int26p6(x2), ', ', dbl_to_int26p6(y2), ', ',
-                dbl_to_int26p6(x3), ', ', dbl_to_int26p6(y3), ') [cubic]');
         path.curve4(
          dbl_to_int26p6(x1) ,
          dbl_to_int26p6(y1) ,
@@ -648,7 +627,6 @@ begin
 
     end;
 
-   WriteLn('[PATH] Contour ', n, ' close_polygon');
    path.close_polygon;
 
   Close:
