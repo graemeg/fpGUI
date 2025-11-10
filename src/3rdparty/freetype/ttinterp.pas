@@ -3599,15 +3599,16 @@ end;
 
      if opcode and 8 <> 0 then
      begin
-
        if org_dist >= 0 then
-
+       begin
          if distance < pEC^.GS.minimum_distance then
-           distance := pEC^.GS.minimum_distance
-         else
+           distance := pEC^.GS.minimum_distance;
+       end
        else
+       begin
          if distance > -pEC^.GS.minimum_distance then
            distance := -pEC^.GS.minimum_distance;
+       end;
      end;
 
      (* now move the point *)
@@ -3714,13 +3715,15 @@ end;
      if opcode and 8 <> 0 then
      begin
        if org_dist >= 0 then
-
+       begin
          if distance < pEC^.GS.minimum_distance then
-           distance := pEC^.GS.minimum_distance
-         else
+           distance := pEC^.GS.minimum_distance;
+       end
        else
+       begin
          if distance > -pEC^.GS.minimum_distance then
            distance := -pEC^.GS.minimum_distance;
+       end;
      end;
 
      pEC^.func_move( @pEC^.zp1, point, distance - cur_dist );
@@ -4734,9 +4737,11 @@ end;
     SuiteLabel, ErrorLabel, No_Error;
   var
     A : Int;
+    instruction_count : Int;
   begin
     top     := 0;
     callTop := 0;
+    instruction_count := 0;
     if enableLog then instructionLog.Clear;
 
     (* set cvt functions *)
@@ -4759,6 +4764,14 @@ end;
 
     repeat
       Calc_Length;
+
+     (* Safety check: prevent infinite loops *)
+      inc(instruction_count);
+      if instruction_count > 1000000 then
+      begin
+        pEC^.error := TT_Err_Code_Overflow;
+        goto ErrorLabel;
+      end;
 
      (* First, let's check for empty stack and overflow *)
 
