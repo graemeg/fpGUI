@@ -809,9 +809,9 @@ const
    v := pEC^.GS.freeVector.x;
    if v <> 0 then
    begin
-     inc( zone^.cur^[point].x, MulDiv_Round( distance,
-                                             Long(v)*$10000,
-                                             pEC^.F_dot_P ));
+     // Bug #10: Use 64-bit arithmetic to prevent overflow in Long(v)*$10000
+     inc( zone^.cur^[point].x,
+          Int32((Int64(distance) * Int64(v) * $10000) div pEC^.F_dot_P) );
 
      zone^.flags^[point] := zone^.flags^[point] or TT_Flag_Touched_X;
    end;
@@ -819,9 +819,9 @@ const
    v := pEC^.GS.freeVector.y;
    if v <> 0 then
    begin
-     inc( zone^.cur^[point].y, MulDiv_Round( distance,
-                                             Long(v)*$10000,
-                                             pEC^.F_dot_P ));
+     // Bug #10: Use 64-bit arithmetic to prevent overflow in Long(v)*$10000
+     inc( zone^.cur^[point].y,
+          Int32((Int64(distance) * Int64(v) * $10000) div pEC^.F_dot_P) );
 
      zone^.flags^[point] := zone^.flags^[point] or TT_Flag_Touched_Y;
    end;

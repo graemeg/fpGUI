@@ -965,20 +965,6 @@ begin
   // Get glyph outline
   TT_Get_Glyph_Outline(face^.tt_glyph, outline);
 
-  WriteLn('[FT_Load_Glyph] glyph_index=', glyph_index, ' n_Points=', outline.n_Points, ' n_Contours=', outline.n_Contours);
-
-  // Check for corrupted coordinates in the outline
-  if outline.n_Points > 0 then
-  begin
-    for i := 0 to outline.n_Points - 1 do
-    begin
-      if (abs(outline.points^[i].x) > 100000000) or (abs(outline.points^[i].y) > 100000000) then
-      begin
-        WriteLn('[FT_Load_Glyph] WARNING: Corrupted coordinate at point ', i, ': x=', outline.points^[i].x, ' y=', outline.points^[i].y);
-      end;
-    end;
-  end;
-
   // Sanity check: reasonable glyph should have < 10000 points
   if (outline.n_Points < 0) or (outline.n_Points > 10000) or
      (outline.n_Contours < 0) or (outline.n_Contours > 1000) then
