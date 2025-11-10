@@ -406,7 +406,7 @@ end;
 
 function TfpgAbstractPanel.GetClientRect: TfpgRect;
 begin
-  Result.SetRect(2, 2, Width - 4, Height - 4);
+  Result.SetRect(2, 2, ActualWidth - 4, ActualHeight - 4);
   //PrintRect(Result);
 end;
 
@@ -476,15 +476,15 @@ begin
 
   { top }
   if FPanelBorder = bsSingle then
-    Canvas.DrawLine(0, 0, Width - 1, 0)
+    Canvas.DrawLine(0, 0, ActualWidth - 1, 0)
   else
-    Canvas.DrawLine(0, 1, Width - 1, 1);
+    Canvas.DrawLine(0, 1, ActualWidth - 1, 1);
 
   { left }
   if FPanelBorder = bsSingle then
-    Canvas.DrawLine(0, 1, 0, Height - 1)
+    Canvas.DrawLine(0, 1, 0, ActualHeight - 1)
   else
-    Canvas.DrawLine(1, 1, 1, Height - 1);
+    Canvas.DrawLine(1, 1, 1, ActualHeight - 1);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow1)
@@ -492,80 +492,80 @@ begin
     Canvas.SetColor(clHilite2);
 
   { right, then bottom }
-  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+  Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
+  Canvas.DrawLine(0, ActualHeight - 1, ActualWidth, ActualHeight - 1);
 end;
 
 procedure TfpgBevel.DrawFrame;
 begin
   Canvas.SetLineStyle(1, lsSolid);
 
-  Canvas.DrawLine(0, 0, Width - 1, 0);
-  Canvas.DrawLine(0, 1, 0, Height - 1);
-  Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
-  Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+  Canvas.DrawLine(0, 0, ActualWidth - 1, 0);
+  Canvas.DrawLine(0, 1, 0, ActualHeight - 1);
+  Canvas.DrawLine(ActualWidth - 2, 1, ActualWidth - 2, ActualHeight - 1);
+  Canvas.DrawLine(1, ActualHeight - 2, ActualWidth - 1, ActualHeight - 2);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(1, 1, Width - 2, 1);
-  Canvas.DrawLine(1, 2, 1, Height - 2);
-  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+  Canvas.DrawLine(1, 1, ActualWidth - 2, 1);
+  Canvas.DrawLine(1, 2, 1, ActualHeight - 2);
+  Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
+  Canvas.DrawLine(0, ActualHeight - 1, ActualWidth, ActualHeight - 1);
 end;
 
 procedure TfpgBevel.DrawTopLine;
 begin
   Canvas.SetLineStyle(1, lsSolid);
-  Canvas.DrawLine(0, 0, Width, 0);
+  Canvas.DrawLine(0, 0, ActualWidth, 0);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(0, 1, Width, 1);
+  Canvas.DrawLine(0, 1, ActualWidth, 1);
 end;
 
 procedure TfpgBevel.DrawBottomLine;
 begin
   Canvas.SetLineStyle(1, lsSolid);
-  Canvas.DrawLine(0, Height - 2, Width, Height - 2);
+  Canvas.DrawLine(0, ActualHeight - 2, ActualWidth, ActualHeight - 2);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+  Canvas.DrawLine(0, ActualHeight - 1, ActualWidth, ActualHeight - 1);
 end;
 
 procedure TfpgBevel.DrawLeftLine;
 begin
   Canvas.SetLineStyle(1, lsSolid);
-  Canvas.DrawLine(0, 1, 0, Height - 1);
+  Canvas.DrawLine(0, 1, 0, ActualHeight - 1);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(1, 1, 1, Height - 1);
+  Canvas.DrawLine(1, 1, 1, ActualHeight - 1);
 end;
 
 procedure TfpgBevel.DrawRightLine;
 begin
   Canvas.SetLineStyle(1, lsSolid);
-  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+  Canvas.DrawLine(ActualWidth - 2, 0, ActualWidth - 2, ActualHeight - 1);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
 end;
 
 procedure TfpgBevel.DrawSpacer;
@@ -575,7 +575,7 @@ begin
   begin
     Canvas.SetColor(clInactiveWgFrame);
     Canvas.SetLineStyle(1, lsDash);
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
   end;
 end;
 
@@ -589,15 +589,15 @@ procedure TfpgBevel.DrawVerDivider;
       Canvas.SetColor(clShadow1);
 
     Canvas.DrawLine(px, py, px+2, py);
-    Canvas.DrawLine(px, py, px, Height);
+    Canvas.DrawLine(px, py, px, ActualHeight);
 
     if Style = bsRaised then
       Canvas.SetColor(clShadow1)
     else
       Canvas.SetColor(clHilite2);
 
-    Canvas.DrawLine(px+1, Height - 1, px+3, Height - 1);
-    Canvas.DrawLine(px+2, py, px+2, Height);
+    Canvas.DrawLine(px+1, ActualHeight - 1, px+3, ActualHeight - 1);
+    Canvas.DrawLine(px+2, py, px+2, ActualHeight);
   end;
 
 begin
@@ -754,13 +754,13 @@ begin
 
     if FPanelBorder = bsSingle then
     begin
-      Canvas.DrawLine(0, 0, Width - 1, 0);
-      Canvas.DrawLine(0, 1, 0, Height - 1);
+      Canvas.DrawLine(0, 0, ActualWidth - 1, 0);
+      Canvas.DrawLine(0, 1, 0, ActualHeight - 1);
     end
     else
     begin
-      Canvas.DrawLine(0, 1, Width - 1, 1);
-      Canvas.DrawLine(1, 1, 1, Height - 1);
+      Canvas.DrawLine(0, 1, ActualWidth - 1, 1);
+      Canvas.DrawLine(1, 1, 1, ActualHeight - 1);
     end;
 
     if Style = bsRaised then
@@ -768,8 +768,8 @@ begin
     else
       Canvas.SetColor(clHilite2);
 
-    Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-    Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+    Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
+    Canvas.DrawLine(0, ActualHeight - 1, ActualWidth, ActualHeight - 1);
   end;
 
   Canvas.SetTextColor(FTextColor);
@@ -800,7 +800,7 @@ begin
       Include(lTxtFlags, txtVCenter);
   end;
 
-  Canvas.DrawText(FMargin, FMargin, Width - FMargin * 2, Height - FMargin * 2, FText, lTxtFlags, FLineSpace);
+  Canvas.DrawText(FMargin, FMargin, ActualWidth - FMargin * 2, ActualHeight - FMargin * 2, FText, lTxtFlags, FLineSpace);
 end;
 
 constructor TfpgPanel.Create(Aowner: TComponent);
@@ -828,7 +828,7 @@ end;
 function TfpgPanel.GetClientRect: TfpgRect;
 begin
   if Style = bsFlat then
-    Result.SetRect(0, 0, Width, Height)
+    Result.SetRect(0, 0, ActualWidth, ActualHeight)
   else
     Result := inherited GetClientRect;
 end;
@@ -899,7 +899,7 @@ begin
   if not Assigned(FFont) then
     exit;
   h := FFont.GetHeight + 4;
-  Result.SetRect(2, h, Width - 4, Height - (h + 2));
+  Result.SetRect(2, h, ActualWidth - 4, ActualHeight - (h + 2));
 end;
 
 procedure TfpgGroupBox.HandlePaint;
@@ -912,10 +912,10 @@ begin
 
   Canvas.Clear(Parent.BackgroundColor);
   Canvas.ClearClipRect;
-  r.SetRect(0, 5, Width, Height);
+  r.SetRect(0, 5, ActualWidth, ActualHeight);
   Canvas.SetClipRect(r);
   Canvas.Clear(FBackgroundColor);
-  
+
   lTxtFlags := TextFlagsDflt;
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
@@ -924,7 +924,7 @@ begin
 
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
-  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
+  //  Canvas.DrawRectangle(1, 1, ActualWidth - 1, ActualHeight - 1);
   if FPanelBorder = bsSingle then
     Canvas.SetLineStyle(1, lsSolid)
   else
@@ -937,13 +937,13 @@ begin
 
   if FPanelBorder = bsSingle then
   begin
-    Canvas.DrawLine(0, 5, Width - 1, 5);
-    Canvas.DrawLine(0, 6, 0, Height - 1);
+    Canvas.DrawLine(0, 5, ActualWidth - 1, 5);
+    Canvas.DrawLine(0, 6, 0, ActualHeight - 1);
   end
   else
   begin
-    Canvas.DrawLine(0, 6, Width - 1, 6);
-    Canvas.DrawLine(1, 6, 1, Height - 1);
+    Canvas.DrawLine(0, 6, ActualWidth - 1, 6);
+    Canvas.DrawLine(1, 6, 1, ActualHeight - 1);
   end;
 
   if Style = bsRaised then
@@ -951,8 +951,8 @@ begin
   else
     Canvas.SetColor(clHilite2);
 
-  Canvas.DrawLine(Width - 1, 5, Width - 1, Height - 1);
-  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+  Canvas.DrawLine(ActualWidth - 1, 5, ActualWidth - 1, ActualHeight - 1);
+  Canvas.DrawLine(0, ActualHeight - 1, ActualWidth, ActualHeight - 1);
 
   Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(Font);
@@ -991,7 +991,7 @@ begin
       end;
     taRightJustify:
       begin
-        w := Width - FFont.GetTextWidth(FText) - (FMargin * 2) - 5;
+        w := ActualWidth - FFont.GetTextWidth(FText) - (FMargin * 2) - 5;
         r.SetRect(w, 0, FFont.GetTextWidth(FText) + FMargin * 2, FFont.GetHeight + FMargin);
         Canvas.SetClipRect(r);
         Canvas.Clear(FBackgroundColor);
@@ -1003,12 +1003,12 @@ begin
 
         if FPanelBorder = bsSingle then
         begin
-          Canvas.DrawLine(w, 0, Width - 5, 0);
+          Canvas.DrawLine(w, 0, ActualWidth - 5, 0);
           Canvas.DrawLine(w, 0, w, 6);
         end
         else
         begin
-          Canvas.DrawLine(w, 1, Width - 5, 1);
+          Canvas.DrawLine(w, 1, ActualWidth - 5, 1);
           Canvas.DrawLine(w + 1, 0, w + 1, 7);
         end;
 
@@ -1017,12 +1017,12 @@ begin
         else
           Canvas.SetColor(clHilite2);
 
-        Canvas.DrawLine(Width - 6, 0, Width - 6, 6);
-        Canvas.DrawText(Width - FFont.GetTextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
+        Canvas.DrawLine(ActualWidth - 6, 0, ActualWidth - 6, 6);
+        Canvas.DrawText(ActualWidth - FFont.GetTextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
       end;
     taCenter:
       begin
-        w := (Width - FFont.GetTextWidth(FText) - FMargin * 2) div 2;
+        w := (ActualWidth - FFont.GetTextWidth(FText) - FMargin * 2) div 2;
         r.SetRect(w, 0, FFont.GetTextWidth(FText) + FMargin * 2, FFont.GetHeight + FMargin);
         Canvas.SetClipRect(r);
         Canvas.Clear(FBackgroundColor);
@@ -1101,10 +1101,10 @@ begin
   inherited HandlePaint;
   if Assigned(FImage) then
   begin
-    x := (Width - FImage.Width) div 2;
-    y := (Height - FImage.Height) div 2;
+    x := (ActualWidth - FImage.Width) div 2;
+    y := (ActualHeight - FImage.Height) div 2;
     if ScaleImage then
-      Canvas.StretchDraw(0, 0, Width, Height, FImage)
+      Canvas.StretchDraw(0, 0, ActualWidth, ActualHeight, FImage)
     else
       Canvas.DrawImage(x, y, FImage);
   end;

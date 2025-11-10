@@ -138,7 +138,7 @@ begin
     Exit;
   new_w := w.Right+MarginBR+1;
   new_h := w.Bottom+MarginBR+1;
-  if (Width < new_w) or (Height < new_h) then
+  if (ActualWidth < new_w) or (ActualHeight < new_h) then
   begin
     HandleResize(new_w, new_h);
     if updatewp then
@@ -151,8 +151,8 @@ end;
 
 procedure TfpgAutoSizingFrame.AdjustDimsWithout (w: TfpgWidget);
 begin
-  if (Width = w.Right+MarginBR+1)
-  or (Height = w.Bottom+MarginBR+1) then
+  if (ActualWidth = w.Right+MarginBR+1)
+  or (ActualHeight = w.Bottom+MarginBR+1) then
     RecalcFrameSize;
 end;
 
@@ -285,8 +285,8 @@ begin
     Canvas.DrawRectangle(GetClientRect);
     Canvas.SetLineStyle(1, lsSolid);
     Canvas.Color := clUIDesignerGreen;
-    Canvas.DrawLine(0, 0, Width, Height);
-    Canvas.DrawLine(Width, 0, 0, Height);
+    Canvas.DrawLine(0, 0, ActualWidth, ActualHeight);
+    Canvas.DrawLine(ActualWidth, 0, 0, ActualHeight);
     Canvas.TextColor := clShadow1;
     Canvas.DrawText(5, 5, Name + ': ' + ClassName);
     Exit;  //==>
@@ -332,18 +332,18 @@ var
   procedure getVisWidth;
   begin
     if showVsb then
-      visWidth := Width - (FVScrollBar.Width)
+      visWidth := ActualWidth - (FVScrollBar.ActualWidth)
     else
-      visWidth := Width;
+      visWidth := ActualWidth;
     Hfits := visWidth >= contentWidth
   end;
 
   procedure getVisHeight;
   begin
     if showHsb then
-      visHeight := Height - (FHScrollBar.Height)
+      visHeight := ActualHeight - (FHScrollBar.ActualHeight)
     else
-      visHeight := Height;
+      visHeight := ActualHeight;
     Vfits := visHeight >= contentHeight;
   end;
 
@@ -364,8 +364,8 @@ begin
   prevHideVsb := not FVScrollBar.Visible;
   showVsb := (FScrollBarStyle = ssBoth);
   showHsb := showVsb;
-  contentWidth := ContentFrame.Width;
-  contentHeight := ContentFrame.Height;
+  contentWidth := ContentFrame.ActualWidth;
+  contentHeight := ContentFrame.ActualHeight;
   getVisWidth;
   getVisHeight;
 

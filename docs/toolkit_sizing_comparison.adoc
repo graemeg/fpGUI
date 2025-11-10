@@ -1219,12 +1219,10 @@ grep -n "PtInRect" file.pas
 Search these files for Width/Height property reads that might need ActualWidth/ActualHeight:
 
 [%interactive]
-* [ ] `src/corelib/fpg_main.pas` - Application/window management
-* [ ] `src/gui/fpg_form.pas` - Form painting, sizing, window management
-* [ ] `src/gui/fpg_panel.pas` - Panel painting, client area
-* [ ] `src/gui/fpg_frame.pas` - Frame painting, borders
-* [ ] `src/gui/fpg_scrollframe.pas` - Scrolling calculations, viewport
-* [ ] `src/gui/fpg_bevel.pas` - Bevel painting
+* [x] `src/corelib/fpg_main.pas` - Application/window management ✓ FIXED (no changes needed)
+* [x] `src/gui/fpg_form.pas` - Form painting, sizing, window management ✓ FIXED (no changes needed)
+* [x] `src/gui/fpg_panel.pas` - Panel painting, client area (includes Bevel classes) ✓ FIXED
+* [x] `src/gui/fpg_scrollframe.pas` - Scrolling calculations, viewport ✓ FIXED
 * [ ] `src/gui/fpg_splitter.pas` - Splitter drag calculations
 * [ ] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations
 * [ ] `src/gui/fpg_popupwindow.pas` - Popup window positioning
