@@ -175,13 +175,17 @@ begin
   p := PChar(text_to_render);
   while p^ <> #0 do
   begin
+    Write('[MEASURE] char="', p^, '" (', Byte(p^), ') ... ');
     glyph := fman.glyph(Byte(p^));
     if glyph <> nil then
     begin
+      WriteLn('OK, advance=', glyph^.advance_x:0:2);
       text_width := text_width + glyph^.advance_x;
       if p[1] <> #0 then
         fman.add_kerning(@text_width, @y);  // Apply kerning for next char
-    end;
+    end
+    else
+      WriteLn('NULL!');
     Inc(p);
   end;
 

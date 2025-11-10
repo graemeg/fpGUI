@@ -671,6 +671,7 @@ const
    table,
    index,
    load_top : Int;
+   loop_count : Int;
 
    new_flags, k, l : Int;
 
@@ -786,9 +787,16 @@ const
    (* Main Loading Loop *)
 
    phase := Load_Glyph;
+   loop_count := 0;
 
    while phase <> Load_Exit do
    begin
+     inc(loop_count);
+     if loop_count > 10000 then
+     begin
+       error := TT_Err_Invalid_Composite;
+       goto Fail;
+     end;
 
      subglyph := @exec^.loadStack^[load_top];
 

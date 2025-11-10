@@ -4739,6 +4739,7 @@ end;
     A : Int;
     instruction_count : Int;
   begin
+    WriteLn('[DEBUG] Interpreter.Run started, codeSize=', pEC^.codeSize);
     top     := 0;
     callTop := 0;
     instruction_count := 0;
@@ -4769,6 +4770,7 @@ end;
       inc(instruction_count);
       if instruction_count > 1000000 then
       begin
+        WriteLn('[DEBUG] Hit instruction limit! IP=', pEC^.IP, ' opcode=$', IntToHex(opcode, 2));
         pEC^.error := TT_Err_Code_Overflow;
         goto ErrorLabel;
       end;
@@ -4865,10 +4867,12 @@ end;
     until pEC^.instruction_trap;
 
   No_Error:
+    WriteLn('[DEBUG] Interpreter.Run completed successfully, instructions=', instruction_count);
     result  := Success;
     exit;
 
   ErrorLabel:
+    WriteLn('[DEBUG] Interpreter.Run failed with error=', pEC^.error);
     result  := Failure;
 
   end;
@@ -4879,6 +4883,7 @@ end;
   begin
     if AValue > pEC^.stackSize then
     begin
+      WriteLn('[DEBUG] NeedStackSize: requested=', AValue, ' current=', pEC^.stackSize);
       if pEC^.stackSize < maxStackSizeAllowed then
       begin
         newSize := pEC^.stackSize*2+1;
@@ -4888,12 +4893,15 @@ end;
         begin //cannot allocate
           pEC^.error := TT_Err_Stack_Overflow;
           result := Failure;
+        end
+        else
+        begin //allocation succeeded
+          move(pEC^.stack^[0], newStack^[0], pEC^.stackSize*sizeof(Long) );
+          TTMemory.Free( pEC^.stack );
+          pEC^.stack := newStack;
+          pEC^.stackSize := newSize;
+          result := Success; //stack expanded
         end;
-        move(pEC^.stack^[0], newStack^[0], pEC^.stackSize*sizeof(Long) );
-        TTMemory.Free( pEC^.stack );
-        pEC^.stack := newStack;
-        pEC^.stackSize := newSize;
-        result := Success; //stack expanded
       end else
       begin
         //maximum allowed reached
