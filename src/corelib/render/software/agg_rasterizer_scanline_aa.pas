@@ -1792,9 +1792,7 @@ begin
  while not is_stop(cmd ) do
   begin
    add_vertex(x ,y ,cmd );
-
    cmd:=vs.vertex(@x ,@y );
-
   end;
 
 end;

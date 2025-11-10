@@ -200,6 +200,9 @@ type
 
 IMPLEMENTATION
 { LOCAL VARIABLES & CONSTANTS }
+var
+  g_total_vertex_calls: Int64 = 0;  // Global counter to detect infinite loops
+
 { UNIT IMPLEMENTATION }
 { CONSTRUCT }
 constructor vertex_int16.Construct;
@@ -211,9 +214,15 @@ end;
 
 { CONSTRUCT }
 constructor vertex_int16.Construct(x_ ,y_ : int16; flag : unsigned );
+var
+ tmp_x, tmp_y: int32;  // Use 32-bit to prevent overflow for int16
 begin
- x:=((x_ shl 1 ) and not 1 ) or (flag and 1 );
- y:=((y_ shl 1 ) and not 1 ) or (flag shr 1 );
+ // Use 32-bit intermediate to prevent overflow when shifting
+ tmp_x := int32(x_) shl 1;
+ tmp_y := int32(y_) shl 1;
+
+ x:=int16((tmp_x and not 1) or (flag and 1));
+ y:=int16((tmp_y and not 1) or (flag shr 1));
 
 end;
 
@@ -253,9 +262,23 @@ end;
 
 { CONSTRUCT }
 constructor vertex_int32.Construct(x_ ,y_ : int32; flag : unsigned );
+var
+ tmp_x, tmp_y: int64;  // Use 64-bit to prevent overflow
 begin
- x:=((x_ shl 1 ) and not 1 ) or (flag and 1 );
- y:=((y_ shl 1 ) and not 1 ) or (flag shr 1 );
+ // Use 64-bit intermediate to prevent overflow when shifting
+ tmp_x := int64(x_) shl 1;
+ tmp_y := int64(y_) shl 1;
+
+ x:=int32((tmp_x and not 1) or (flag and 1));
+ y:=int32((tmp_y and not 1) or (flag shr 1));
+
+ // Debug: check for suspiciously large stored values
+ if (abs(x) > 1000000000) or (abs(y) > 1000000000) then
+ begin
+   WriteLn('[Construct] WARNING: Large stored value! input x_=', x_, ' y_=', y_, ' flag=', flag);
+   WriteLn('[Construct] tmp_x=', tmp_x, ' tmp_y=', tmp_y);
+   WriteLn('[Construct] stored x=', x, ' y=', y);
+ end;
 
 end;
 
@@ -392,7 +415,9 @@ end;
 { BYTE_SIZE }
 function path_storage_int16.byte_size;
 begin
- result:=m_storage.size * sizeof(vertex_int16 );
+ // Return size of serialized data: only x,y fields (2 * sizeof(int16))
+ // NOT sizeof(vertex_int16) which includes VMT pointer overhead
+ result:=m_storage.size * (sizeof(int16) * 2);
 
 end;
 
@@ -400,16 +425,20 @@ end;
 procedure path_storage_int16.serialize;
 var
  i : unsigned;
+ v : vertex_int16_ptr;
 
 begin
  i:=0;
 
  while i < m_storage.size do
   begin
-   move(m_storage.array_operator(i )^ ,ptr^ ,sizeof(vertex_int16 ) );
+   v := m_storage.array_operator(i);
+   // Copy only x,y fields (2 * sizeof(int16) = 4 bytes)
+   // NOT the entire object which includes VMT pointer
+   move(v^.x, ptr^, sizeof(int16) * 2);
 
-   inc(ptrcomp(ptr ) ,sizeof(vertex_int16 ) );
-   inc(i );
+   inc(ptrcomp(ptr), sizeof(int16) * 2);
+   inc(i);
 
   end;
 
@@ -541,6 +570,9 @@ var
  v : vertex_int32;
 
 begin
+ if (abs(x) > 100000000) or (abs(y) > 100000000) then
+   WriteLn('[move_to] WARNING: Very large input coordinates! x=', x, ' y=', y);
+
  v.Construct  (x ,y ,cmd_move_to );
  m_storage.add(@v );
 
@@ -552,6 +584,9 @@ var
  v : vertex_int32;
 
 begin
+ if (abs(x) > 100000000) or (abs(y) > 100000000) then
+   WriteLn('[line_to] WARNING: Very large input coordinates! x=', x, ' y=', y);
+
  v.Construct  (x ,y ,cmd_line_to );
  m_storage.add(@v );
 
@@ -618,7 +653,9 @@ end;
 { BYTE_SIZE }
 function path_storage_int32.byte_size;
 begin
- result:=m_storage.size * sizeof(vertex_int32 );
+ // Return size of serialized data: only x,y fields (2 * sizeof(int32))
+ // NOT sizeof(vertex_int32) which includes VMT pointer overhead
+ result:=m_storage.size * (sizeof(int32) * 2);
 
 end;
 
@@ -626,16 +663,20 @@ end;
 procedure path_storage_int32.serialize;
 var
  i : unsigned;
+ v : vertex_int32_ptr;
 
 begin
  i:=0;
 
  while i < m_storage.size do
   begin
-   move(m_storage.array_operator(i )^ ,ptr^ ,sizeof(vertex_int32 ) );
+   v := m_storage.array_operator(i);
+   // Copy only x,y fields (2 * sizeof(int32) = 8 bytes)
+   // NOT the entire object which includes VMT pointer
+   move(v^.x, ptr^, sizeof(int32) * 2);
 
-   inc(ptrcomp(ptr ) ,sizeof(vertex_int32 ) );
-   inc(i );
+   inc(ptrcomp(ptr), sizeof(int32) * 2);
+   inc(i);
 
   end;
 
@@ -815,35 +856,29 @@ begin
   begin
    x^:=0;
    y^:=0;
-
-   inc(ptrcomp(m_ptr ) ,sizeof(vertex_int16 ) );
-
+   // Increment by 4 bytes (serialized size), not sizeof(vertex_int16)
+   inc(ptrcomp(m_ptr), sizeof(int16) * 2);
    result:=path_cmd_end_poly or path_flags_close;
-
    exit;
-
   end;
 
- move(m_ptr^ ,v ,sizeof(vertex_int16 ) );
+ // Read only x,y fields (4 bytes), not entire vertex_int16 struct (12 bytes with VMT)
+ move(m_ptr^, v.x, sizeof(int16) * 2);
 
  cmd:=v.vertex(x ,y ,m_dx ,m_dy ,m_scale );
 
- if is_move_to(cmd ) and
-    (m_vertices > 2 ) then
+ if is_move_to(cmd ) and (m_vertices > 2 ) then
   begin
    x^:=0;
    y^:=0;
-
    m_vertices:=0;
-
    result:=path_cmd_end_poly or path_flags_close;
-
    exit;
-
   end;
 
- inc(m_vertices );
- inc(ptrcomp(m_ptr ) ,sizeof(vertex_int16 ) );
+ inc(m_vertices);
+ // Increment by 4 bytes (size of serialized x,y), not sizeof(vertex_int16)
+ inc(ptrcomp(m_ptr), sizeof(int16) * 2);
 
  result:=cmd;
 
@@ -928,9 +963,7 @@ end;
 procedure serialized_int32_path_adaptor.rewind;
 begin
  m_ptr:=m_data;
-
  m_vertices:=0;
-
 end;
 
 { VERTEX }
@@ -941,51 +974,53 @@ var
  cmd : unsigned;
 
 begin
+ // Track vertex calls to detect infinite loops
+ inc(g_total_vertex_calls);
+ inc(m_vertices);
+
+ // Safety limit to prevent infinite loops
+ if (g_total_vertex_calls > 500000) or (m_vertices > 10000) then
+ begin
+   x^:=0;
+   y^:=0;
+   result:=path_cmd_stop;
+   exit;
+ end;
+
  if (m_data = NIL ) or
     (ptrcomp(m_ptr ) > ptrcomp(m_end ) ) then
   begin
    x^:=0;
    y^:=0;
-
    result:=path_cmd_stop;
-
    exit;
-
   end;
 
  if ptrcomp(m_ptr ) = ptrcomp(m_end ) then
   begin
    x^:=0;
    y^:=0;
-
-   inc(ptrcomp(m_ptr ) ,sizeof(vertex_int32 ) );
-
+   // Increment by 8 bytes (serialized size), not sizeof(vertex_int32)
+   inc(ptrcomp(m_ptr), sizeof(int32) * 2);
    result:=path_cmd_end_poly or path_flags_close;
-
    exit;
-
   end;
 
- move(m_ptr^ ,v ,sizeof(vertex_int32 ) );
-
+ // Read only x,y fields (8 bytes), not entire vertex_int32 struct (16 bytes with VMT)
+ move(m_ptr^, v.x, sizeof(int32) * 2);
  cmd:=v.vertex(x ,y ,m_dx ,m_dy ,m_scale );
 
- if is_move_to(cmd ) and
-    (m_vertices > 2 ) then
+ if is_move_to(cmd ) and (m_vertices > 2 ) then
   begin
    x^:=0;
    y^:=0;
-
    m_vertices:=0;
-
    result:=path_cmd_end_poly or path_flags_close;
-
    exit;
-
   end;
 
- inc(m_vertices );
- inc(ptrcomp(m_ptr ) ,sizeof(vertex_int32 ) );
+ // Increment by 8 bytes (size of serialized x,y), not sizeof(vertex_int32)
+ inc(ptrcomp(m_ptr), sizeof(int32) * 2);
 
  result:=cmd;
 

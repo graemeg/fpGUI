@@ -1322,6 +1322,7 @@ begin
          bnd:=m_path32.bounding_rect;
 
          m_data_size:=m_path32.byte_size;
+         WriteLn('[prepare_glyph] path32 size=', m_path32.size, ' byte_size=', m_data_size, ' glyph_index=', m_glyph_index);
          m_data_type:=glyph_data_outline;
          m_bounds.x1:=Floor(bnd.x1 );
          m_bounds.y1:=Floor(bnd.y1 );
