@@ -965,6 +965,17 @@ begin
   // Get glyph outline
   TT_Get_Glyph_Outline(face^.tt_glyph, outline);
 
+  WriteLn('[FT_Load_Glyph] glyph_index=', glyph_index, ' n_Points=', outline.n_Points, ' n_Contours=', outline.n_Contours);
+
+  // Sanity check: reasonable glyph should have < 10000 points
+  if (outline.n_Points < 0) or (outline.n_Points > 10000) or
+     (outline.n_Contours < 0) or (outline.n_Contours > 1000) then
+  begin
+    WriteLn('[FT_Load_Glyph] ERROR: Corrupted outline! n_Points=', outline.n_Points, ' n_Contours=', outline.n_Contours);
+    Result := -1; // Error code
+    Exit;
+  end;
+
   // Get glyph metrics
   // NOTE: When TT_Load_Glyph is called with TT_Load_Scale_Glyph flag,
   // the metrics are already in 26.6 fixed-point format, not font units!
