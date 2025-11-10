@@ -84,28 +84,28 @@ begin
 
   CheckEquals(0, wNorth.Top, 'wNorth.Top');
   CheckEquals(0, wNorth.Left, 'wNorth.Left');
-  CheckEquals(200, wNorth.Width, 'wNorth.Width');
-  CheckEquals(20, wNorth.Height, 'wNorth.Height');
+  CheckEquals(200, wNorth.ActualWidth, 'wNorth.ActualWidth');
+  CheckEquals(20, wNorth.ActualHeight, 'wNorth.ActualHeight');
 
   CheckEquals(180, wSouth.Top, 'wSouth.Top');
   CheckEquals(0, wSouth.Left, 'wSouth.Left');
-  CheckEquals(200, wSouth.Width, 'wSouth.Width');
-  CheckEquals(20, wSouth.Height, 'wSouth.Height');
+  CheckEquals(200, wSouth.ActualWidth, 'wSouth.ActualWidth');
+  CheckEquals(20, wSouth.ActualHeight, 'wSouth.ActualHeight');
 
   CheckEquals(20, wWest.Top, 'wWest.Top');
   CheckEquals(0, wWest.Left, 'wWest.Left');
-  CheckEquals(20, wWest.Width, 'wWest.Width');
-  CheckEquals(160, wWest.Height, 'wWest.Height');
+  CheckEquals(20, wWest.ActualWidth, 'wWest.ActualWidth');
+  CheckEquals(160, wWest.ActualHeight, 'wWest.ActualHeight');
 
   CheckEquals(20, wEast.Top, 'wEast.Top');
   CheckEquals(180, wEast.Left, 'wEast.Left');
-  CheckEquals(20, wEast.Width, 'wEast.Width');
-  CheckEquals(160, wEast.Height, 'wEast.Height');
+  CheckEquals(20, wEast.ActualWidth, 'wEast.ActualWidth');
+  CheckEquals(160, wEast.ActualHeight, 'wEast.ActualHeight');
 
   CheckEquals(20, wCenter.Top, 'wCenter.Top');
   CheckEquals(20, wCenter.Left, 'wCenter.Left');
-  CheckEquals(160, wCenter.Width, 'wCenter.Width');
-  CheckEquals(160, wCenter.Height, 'wCenter.Height');
+  CheckEquals(160, wCenter.ActualWidth, 'wCenter.ActualWidth');
+  CheckEquals(160, wCenter.ActualHeight, 'wCenter.ActualHeight');
 
   container.Free;
 end;

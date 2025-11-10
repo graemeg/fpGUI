@@ -375,10 +375,10 @@ begin
   container.Realign;
 
   CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(50, w1.Width, 'w1.Width');
+  CheckEquals(50, w1.ActualWidth, 'w1.ActualWidth');
 
   CheckEquals(62, w2.Left, 'w2.Left');
-  CheckEquals(132, w2.Width, 'w2.Width');
+  CheckEquals(132, w2.ActualWidth, 'w2.ActualWidth');
 
   container.Free;
 end;

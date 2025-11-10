@@ -1920,6 +1920,13 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.SetPosition - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
+  // SetPosition expresses developer's intent for size, so update preferred size
+  if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
+  begin
+    FPreferredSize.W := AWidth;
+    FPreferredSize.H := AHeight;
+  end;
+
   if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
     MoveAndResize(aleft, atop, awidth, aheight);
 end;
