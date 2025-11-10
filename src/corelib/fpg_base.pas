@@ -1836,12 +1836,12 @@ end;
 
 function TfpgWidgetBase.Right: TfpgCoord;
 begin
-  Result := Left+Width-1;
+  Result := Left+ActualWidth-1;
 end;
 
 function TfpgWidgetBase.Bottom: TfpgCoord;
 begin
-  Result := Top+Height-1;
+  Result := Top+ActualHeight-1;
 end;
 
 procedure TfpgWidgetBase.UpdatePosition;
@@ -1939,6 +1939,13 @@ end;
 
 procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
+  // SetPosition expresses developer's intent for size, so update preferred size
+  if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
+  begin
+    FPreferredSize.W := AWidth;
+    FPreferredSize.H := AHeight;
+  end;
+
   if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
     MoveAndResize(ALeft, ATop, AWidth, AHeight);
 end;

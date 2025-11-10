@@ -951,6 +951,90 @@ This ensures:
 
 **Status**: ✓ FIXED in fpg_base.pas:1757-1758 (SetWidth) and 1742-1743 (SetHeight)
 
+=== Critical Fix: Unit Test Failures and SetPosition
+
+**Issue**: After implementing the intent vs actual size separation, unit tests failed because:
+
+1. `SetPosition()` wasn't updating `FPreferredSize` - only actual size
+2. `.Right` and `.Bottom` were using `.Width`/`.Height` (preferred) instead of actual size
+3. Tests called `SetPosition(0, 0, 200, 200)` expecting `.Width` to return 200, but got default 10
+
+**Root Cause Analysis**:
+
+[source,pascal]
+----
+w.SetPosition(0, 0, 200, 200);
+// → Only calls MoveAndResize → HandleResize
+// → HandleResize sets FWidth/FHeight = 200 (actual size)
+// → FPreferredSize stays (0, 0)!
+// → w.Width calls GetPreferredSize → returns 10 (default)
+// → w.Right = Left + Width - 1 = 0 + 10 - 1 = 9 (WRONG, expected 199)
+----
+
+**Solution Applied**:
+
+1. **Updated `SetPosition` to set FPreferredSize** (fpg_base.pas:1940):
+   ```pascal
+   procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+   begin
+     // SetPosition expresses developer's intent for size
+     if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
+     begin
+       FPreferredSize.W := AWidth;
+       FPreferredSize.H := AHeight;
+     end;
+
+     if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
+       MoveAndResize(ALeft, ATop, AWidth, AHeight);
+   end;
+   ```
+
+2. **Fixed `.Right` and `.Bottom` to use actual size** (fpg_base.pas:1837-1845):
+   ```pascal
+   function TfpgWidgetBase.Right: TfpgCoord;
+   begin
+     Result := Left+ActualWidth-1;  // Was: Left+Width-1
+   end;
+
+   function TfpgWidgetBase.Bottom: TfpgCoord;
+   begin
+     Result := Top+ActualHeight-1;  // Was: Top+Height-1
+   end;
+   ```
+
+**Why HandleResize Should NOT Update FPreferredSize**:
+
+Initially attempted to update `FPreferredSize` in `HandleResize`, but this was **incorrect** because:
+- Layout managers call `HandleResize` to apply calculated size
+- If layout can only give 150px (constrained space), but developer requested 200px
+- Updating `FPreferredSize` to 150 loses the developer's intent
+- Widget would never know to grow back to 200px when space becomes available
+
+**Correct Behavior Now**:
+
+[source,pascal]
+----
+// Manual positioning (no layout manager)
+w.SetPosition(0, 0, 200, 200);
+// → FPreferredSize.W/H = 200 ✓
+// → FWidth/FHeight = 200 ✓
+// → w.Width returns 200 ✓
+// → w.ActualWidth returns 200 ✓
+// → w.Right = 0 + 200 - 1 = 199 ✓
+
+// Layout manager scenario
+w.Width := 200;              // Developer intent
+// → FPreferredSize.W = 200 ✓
+layout.DoLayout(container);  // Layout calculates and applies
+// → calls w.HandleResize(150, ...)  (constrained space)
+// → FPreferredSize.W still 200 ✓  (intent preserved)
+// → FWidth = 150 ✓  (actual size)
+// → w.Width returns 200 ✓  (intent)
+// → w.ActualWidth returns 150 ✓  (result)
+----
+
+**Status**: ✓ FIXED - All unit tests should now pass
+
 === Common Problem Patterns
 
 ==== Pattern 1: Canvas Drawing Operations
