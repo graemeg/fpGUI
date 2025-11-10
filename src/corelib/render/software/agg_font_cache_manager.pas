@@ -490,19 +490,35 @@ end;
 { INIT_EMBEDDED_ADAPTORS }
 procedure font_cache_manager.init_embedded_adaptors;
 begin
+ WriteLn('[init_embedded_adaptors] gl=', PtrUInt(gl), ' data_type=', gl^.data_type, ' glyph_index=', gl^.glyph_index);
  if gl <> NIL then
+ begin
+  WriteLn('[init_embedded_adaptors] gl not NIL, entering case');
   case gl.data_type of
    glyph_data_mono :
-    m_mono_adaptor.init(gl.data ,gl.data_size ,x ,y );
+    begin
+     WriteLn('[init_embedded_adaptors] mono adaptor');
+     m_mono_adaptor.init(gl.data ,gl.data_size ,x ,y );
+    end;
 
    glyph_data_gray8 :
-    m_gray8_adaptor.init(gl.data ,gl.data_size ,x ,y );
+    begin
+     WriteLn('[init_embedded_adaptors] gray8 adaptor');
+     m_gray8_adaptor.init(gl.data ,gl.data_size ,x ,y );
+    end;
 
    glyph_data_outline :
-    m_path_adaptor.init(gl.data ,gl.data_size ,x ,y ,scale );
+    begin
+     WriteLn('[init_embedded_adaptors] outline adaptor, data_size=', gl.data_size);
+     WriteLn('[init_embedded_adaptors] About to call m_path_adaptor.init');
+     m_path_adaptor.init(gl.data ,gl.data_size ,x ,y ,scale );
+     WriteLn('[init_embedded_adaptors] m_path_adaptor.init returned');
+    end;
 
   end;
-
+  WriteLn('[init_embedded_adaptors] case completed');
+ end;
+ WriteLn('[init_embedded_adaptors] exiting');
 end;
 
 { PATH_ADAPTOR }

@@ -236,14 +236,20 @@ begin
       fman.add_kerning(@x, @y);
 
       // Initialize glyph adaptors
+      WriteLn('[RENDER] About to init_embedded_adaptors');
       fman.init_embedded_adaptors(glyph, x, y);
+      WriteLn('[RENDER] init_embedded_adaptors done');
 
       // Render outline glyph
       if glyph^.data_type = glyph_data_outline then
       begin
+        WriteLn('[RENDER] Resetting rasterizer');
         ras.reset;
+        WriteLn('[RENDER] About to add_path, glyph_index=', glyph^.glyph_index, ' data_size=', glyph^.data_size);
         ras.add_path(@curves);
+        WriteLn('[RENDER] About to render_scanlines');
         render_scanlines(@ras, @sl, @ren_solid);
+        WriteLn('[RENDER] Scanlines rendered');
       end;
 
       // Advance pen

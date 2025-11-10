@@ -882,6 +882,35 @@ end;
 { INIT }
 procedure serialized_int32_path_adaptor.init;
 begin
+ WriteLn('[serialized_int32_path_adaptor.init] data=', PtrUInt(data), ' size=', size);
+
+ // Sanity check
+ if (data = nil) then
+ begin
+   WriteLn('[serialized_int32_path_adaptor.init] ERROR: data is NIL!');
+   m_data := nil;
+   m_end := nil;
+   m_ptr := nil;
+   m_dx := 0;
+   m_dy := 0;
+   m_scale := 1.0;
+   m_vertices := 0;
+   exit;
+ end;
+
+ if (size < 0) or (size > 1000000) then
+ begin
+   WriteLn('[serialized_int32_path_adaptor.init] ERROR: Invalid size=', size);
+   m_data := nil;
+   m_end := nil;
+   m_ptr := nil;
+   m_dx := 0;
+   m_dy := 0;
+   m_scale := 1.0;
+   m_vertices := 0;
+   exit;
+ end;
+
  m_data:=data;
  m_end :=int8u_ptr(ptrcomp(data ) + size );
  m_ptr :=data;
@@ -892,6 +921,7 @@ begin
  m_scale   :=scale;
  m_vertices:=0;
 
+ WriteLn('[serialized_int32_path_adaptor.init] completed successfully');
 end;
 
 { REWIND }
