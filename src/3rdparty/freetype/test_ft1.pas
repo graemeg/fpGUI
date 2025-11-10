@@ -177,27 +177,41 @@ begin
   begin
     Write('[MEASURE] char="', p^, '" (', Byte(p^), ') ... ');
     glyph := fman.glyph(Byte(p^));
+    Write('[glyph returned] ');
     if glyph <> nil then
     begin
       WriteLn('OK, advance=', glyph^.advance_x:0:2);
+      Write('[adding to width] ');
       text_width := text_width + glyph^.advance_x;
+      Write('[width updated] ');
       if p[1] <> #0 then
+      begin
+        Write('[calling add_kerning] ');
         fman.add_kerning(@text_width, @y);  // Apply kerning for next char
+        Write('[kerning done] ');
+      end;
+      WriteLn('[char complete]');
     end
     else
       WriteLn('NULL!');
+    Write('[incrementing p] ');
     Inc(p);
+    WriteLn('[p incremented]');
   end;
+  WriteLn('[DEBUG] Measurement loop completed');
 
   text_height := font_size;
   line_height := font_size * 1.2;
+  WriteLn('[DEBUG] Calculated text_height and line_height');
 
   // Center text
   start_x := (IMG_WIDTH - text_width) / 2.0;
   start_y := (IMG_HEIGHT + text_height) / 2.0;
+  WriteLn('[DEBUG] Calculated start position');
 
   WriteLn('Text width: ', text_width:0:1, ' pixels');
   WriteLn('Rendering at: (', start_x:0:1, ', ', start_y:0:1, ')');
+  WriteLn('[DEBUG] About to start rendering loop');
 
   // Render text
   x := start_x;
@@ -206,12 +220,14 @@ begin
 
   rgba_black.ConstrInt(0, 0, 0);
   ren_solid.color_(@rgba_black);
+  WriteLn('[DEBUG] Color set, entering render loop');
 
       while p^ <> #0 do
 
       begin
-
+        WriteLn('[RENDER] char="', p^, '" ...');
         glyph := fman.glyph(Byte(p^));
+        WriteLn('[RENDER] glyph retrieved');
 
           if glyph <> nil then
 
