@@ -1732,33 +1732,47 @@ begin
 end;
 
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
+var
+  PrefChanged: Boolean;
 begin
-  if FPreferredSize.H <> AValue then
-  begin
+  // Check if preferred size is changing
+  PrefChanged := (FPreferredSize.H <> AValue);
+
+  if PrefChanged then
     FPreferredSize.H := AValue;
 
-    // Set actual height if: during loading (DPI scaling, construction) OR not in layout-managed context
-    // Layout managers will override this by calling HandleResize directly
-    if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+  // Set actual height if: during loading (DPI scaling, construction) OR not in layout-managed context
+  // Layout managers will override this by calling HandleResize directly
+  if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+  begin
+    if FHeight <> AValue then
       FHeight := AValue;
-
-    DoPreferredSizeChanged;
   end;
+
+  if PrefChanged then
+    DoPreferredSizeChanged;
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
+var
+  PrefChanged: Boolean;
 begin
-  if FPreferredSize.W <> AValue then
-  begin
+  // Check if preferred size is changing
+  PrefChanged := (FPreferredSize.W <> AValue);
+
+  if PrefChanged then
     FPreferredSize.W := AValue;
 
-    // Set actual width if: during loading (DPI scaling, construction) OR not in layout-managed context
-    // Layout managers will override this by calling HandleResize directly
-    if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+  // Set actual width if: during loading (DPI scaling, construction) OR not in layout-managed context
+  // Layout managers will override this by calling HandleResize directly
+  if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
+  begin
+    if FWidth <> AValue then
       FWidth := AValue;
-
-    DoPreferredSizeChanged;
   end;
+
+  if PrefChanged then
+    DoPreferredSizeChanged;
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
