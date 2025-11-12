@@ -784,7 +784,10 @@ var
 begin
   Result := pcEditor.AppendTabSheet(ATitle);
   m := TfpgTextEdit.Create(Result);
-  m.SetPosition(1, 1, 200, 20);
+  m.Left := 1;
+  m.Top := 1;
+  m.Width := 200;
+  m.Height := 20;
   m.Align := alClient;
   m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   m.GutterVisible := True;

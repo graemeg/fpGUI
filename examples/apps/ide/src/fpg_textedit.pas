@@ -993,7 +993,10 @@ begin
   if Assigned(FGutterPan) and FGutterPan.Visible then
   begin
     FGutterPan.UpdateSize;
-    FGutterPan.SetPosition(r.Left, r.Top, FGutterPan.Width, r.Height);
+    FGutterPan.Left := r.Left;
+    FGutterPan.Top := r.Top;
+    FGutterPan.Width := FGutterPan.Width;
+    FGutterPan.Height := r.Height;
   end;
 end;
 

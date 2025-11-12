@@ -812,7 +812,10 @@ procedure TGeneralPropertyEditor.CreateLayout;
 begin
   Anchors       := [anTop, anLeft, anRight];
   Edit          := TfpgEdit.Create(self);
-  Edit.SetPosition(0, 0, Width, Height);
+  Edit.Left := 0;
+  Edit.Top := 0;
+  Edit.Width := Width;
+  Edit.Height := Height;
   Edit.Anchors  := Anchors;
 //  Edit.OnChange := @UpdateProperty;
   Edit.OnKeyPress := @EditKeyPressed;
@@ -1153,7 +1156,10 @@ procedure TChoicePropertyEditor.CreateLayout;
 begin
   Anchors      := [anTop, anLeft, anRight];
   chl          := TfpgComboBox.Create(self);
-  chl.SetPosition(0, 0, Width, Height);
+  chl.Left := 0;
+  chl.Top := 0;
+  chl.Width := Width;
+  chl.Height := Height;
   chl.Anchors  := Anchors;
   chl.OnChange := @UpdateProperty;
   chl.Visible := True;

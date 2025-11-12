@@ -1565,7 +1565,10 @@ begin
     if wgc.WidgetClass = TOtherWidget then
       TOtherWidget(wg).wgClassName := newclassname;
     wgd          := AddWidget(wg, wgc);
-    wg.SetPosition(x, y, wg.Width, wg.Height);
+    wg.Left := x;
+    wg.Top := y;
+    wg.Width := wg.Width;
+    wg.Height := wg.Height;
     wg.Visible   := True;
     wg.DropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
     DeSelectAll;

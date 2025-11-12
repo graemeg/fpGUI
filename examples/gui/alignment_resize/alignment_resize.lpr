@@ -46,7 +46,10 @@ procedure TMainForm.btnGoClicked(Sender: TObject);
 begin
   if rbName1.Checked then
   begin
-    pnlName1.SetPosition(4, 68, 240, 192);
+    pnlName1.Left := 4;
+    pnlName1.Top := 68;
+    pnlName1.Width := 240;
+    pnlName1.Height := 192;
   end
   else if rbName2.Checked then
   begin
@@ -62,7 +65,10 @@ end;
 
 procedure TMainForm.btnResetClicked(Sender: TObject);
 begin
-  pnlName1.SetPosition(4, 68, 140, 92);
+  pnlName1.Left := 4;
+  pnlName1.Top := 68;
+  pnlName1.Width := 140;
+  pnlName1.Height := 92;
 end;
 
 procedure TMainForm.PanelResized(Sender: TObject);

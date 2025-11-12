@@ -533,7 +533,10 @@ begin
     wgc           := VFDWidget(n);
     btn           := TwgPaletteButton.Create(wgpalette);
     btn.VFDWidget := wgc;
-    btn.SetPosition(x, y, 30, 28);
+    btn.Left := x;
+    btn.Top := y;
+    btn.Width := 30;
+    btn.Height := 28;
     btn.ImageName := wgc.WidgetIconName;
     btn.ImageMargin := -1;
     btn.Text      := '';
@@ -1215,7 +1218,10 @@ begin
   if editor = nil then
     Exit;
   x := 3 + NameWidth;
-  editor.SetPosition(x, editor.Top, Width - ScrollBarWidth - x, editor.Height);
+  editor.Left := x;
+  editor.Top := editor.Top;
+  editor.Width := Width - ScrollBarWidth - x;
+  editor.Height := editor.Height;
 end;
 
 procedure TfrmMain.FormShow(Sender: TObject);
@@ -1265,7 +1271,10 @@ begin
   for n := 0 to wgPalette.ComponentCount-1 do
   begin
     btn := wgPalette.Components[n] as TwgPaletteButton;
-    btn.SetPosition(x, y, 30, 28);
+    btn.Left := x;
+    btn.Top := y;
+    btn.Width := 30;
+    btn.Height := 28;
     btn.ImageMargin   := -1;
     btn.ImageSpacing  := 0;
     Inc(x, 32);
@@ -1375,7 +1384,10 @@ begin
   editor := prop.CreateEditor(Self);
   x      := 3 + NameWidth;
   y      := FMargin + ((FFocusItem - FFirstItem) * RowHeight);
-  editor.SetPosition(x, y, Width - FMargin - ScrollBarWidth - x, RowHeight-1); // last -1 is so cell border lines are still visible
+  editor.Left := x;
+  editor.Top := y;
+  editor.Width := Width - FMargin - ScrollBarWidth - x;
+  editor.Height := RowHeight-1; // last -1 is so cell border lines are still visible
   editor.CreateLayout;
   editor.OnUpdate := @OnUpdateProperty;
   editor.LoadValue(Props.Widget);

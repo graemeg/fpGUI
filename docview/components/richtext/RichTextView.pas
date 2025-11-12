@@ -992,12 +992,18 @@ begin
   FHScrollbar := TfpgScrollBar.Create( self );
   FHScrollbar.Visible := False;
   FHScrollbar.Orientation := orHorizontal;
-  FHScrollBar.SetPosition(2, Height-2-FScrollbarWidth, Width-4-FScrollbarWidth, FScrollbarWidth);
+  FHScrollBar.Left := 2;
+  FHScrollBar.Top := Height-2-FScrollbarWidth;
+  FHScrollBar.Width := Width-4-FScrollbarWidth;
+  FHScrollBar.Height := FScrollbarWidth;
 
   FVScrollbar := TfpgScrollBar.Create( self );
   FVScrollBar.Visible := False;
   FVScrollBar.Orientation := orVertical;
-  FVScrollbar.SetPosition(Width-2-FScrollbarWidth, 2, FScrollbarWidth, Height-4-FScrollbarWidth);
+  FVScrollbar.Left := Width-2-FScrollbarWidth;
+  FVScrollbar.Top := 2;
+  FVScrollbar.Width := FScrollbarWidth;
+  FVScrollbar.Height := Height-4-FScrollbarWidth;
 
 //  FScrollTimer := TfpgTimer.Create( 100 );
 //  FScrollTimer.OnTimer := @OnScrollTimer;
