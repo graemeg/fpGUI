@@ -1963,9 +1963,11 @@ end;
 
 procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
-  // SetPosition is deprecated but kept for backward compatibility
-  // Just delegates to MoveAndResize which handles everything
-  MoveAndResize(ALeft, ATop, AWidth, AHeight);
+  // Deprecated convenience wrapper - use properties directly
+  Left   := ALeft;
+  Top    := ATop;
+  Width  := AWidth;
+  Height := AHeight;
 end;
 
 function TfpgWidgetBase.ScreenToWidget(const AScreenPos: TPoint): TPoint;
