@@ -93,13 +93,15 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create as ILayoutManager;
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
 
   lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
@@ -119,19 +121,22 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
   lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
@@ -153,19 +158,22 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
   lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
@@ -187,24 +195,28 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 300, 200);
+  container.Width := 300;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
   lm.AddLayoutComponent(w1, TfpgMigCC.Create());
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
-  w3.SetPosition(0, 0, 100, 20);
+  w3.Width := 100;
+  w3.Height := 20;
   lm.AddLayoutComponent(w3, TfpgMigCC.Create());
 
   container.Realign;
@@ -234,7 +246,8 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.Fill;  // Make cells fill container (Java MigLayout v11 way)
   container.LayoutManager := lm;
@@ -271,21 +284,24 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 100, 20);
+  w1.Width := 100;
+  w1.Height := 20;
   c := TfpgMigCC.Create;
   c.SpanX(2);
   lm.AddLayoutComponent(w1, c);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   container.Realign;
@@ -308,26 +324,30 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 50);
+  w1.Width := 50;
+  w1.Height := 50;
   c := TfpgMigCC.Create;
   c.SpanY(2);
   lm.AddLayoutComponent(w1, c);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   lm.AddLayoutComponent(w2, TfpgMigCC.Create());
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
-  w3.SetPosition(0, 0, 50, 20);
+  w3.Width := 50;
+  w3.Height := 20;
   lm.AddLayoutComponent(w3, TfpgMigCC.Create());
 
   container.Realign;
@@ -353,7 +373,8 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 100);
+  container.Width := 200;
+  container.Height := 100;
   lm := TfpgMigLayoutManager.Create;
   lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
   lm.LC.FillX;  // Make columns fill container width (Java MigLayout v11 way)
@@ -361,13 +382,15 @@ begin
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
   c1 := TfpgMigCC.Create;
   lm.AddLayoutComponent(w1, c1);
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
   c2 := TfpgMigCC.Create;
   c2.GrowX.AlignX('fill');
   lm.AddLayoutComponent(w2, c2);

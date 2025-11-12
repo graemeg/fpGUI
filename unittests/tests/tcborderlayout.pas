@@ -42,7 +42,8 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgBorderLayoutManager.Create;
   container.LayoutManager := lm;
 
@@ -119,7 +120,8 @@ var
 begin
   container := TfpgPanel.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgBorderLayoutManager.Create(5, 10);
   container.LayoutManager := lm;
 

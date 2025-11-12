@@ -219,7 +219,7 @@ begin
     begin
       w := Iterator.Next as TfpgWidget;
       prefSize := w.PreferredSize;
-      w.SetPosition(x, y, prefSize.W, prefSize.H);
+      (w as ILayoutTarget).MoveAndResize(x, y, prefSize.W, prefSize.H);
       x := x + prefSize.W + FHGap;
     end;
 

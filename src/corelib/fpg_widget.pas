@@ -34,7 +34,7 @@ type
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
 
-  TfpgWidget = class(TfpgWidgetBase)
+  TfpgWidget = class(TfpgWidgetBase, ILayoutTarget)
   private
     FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
@@ -160,7 +160,6 @@ type
     procedure   HandleShow; virtual;
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
-    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   RePaint; virtual;
     { -- events -- }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -191,7 +190,6 @@ type
     procedure   SetFocus;
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
-    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);
     procedure   Invalidate;
     procedure   InvalidateRect(ARect: TfpgRect);
@@ -1788,36 +1786,6 @@ begin
     end;  { if }
 end;
 
-procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
-begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.MoveAndResize - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
-  {$IFDEF gDebug}
-  DebugLn(Format('Class:%s  t:%d  l:%d  w:%d  h:%d', [Classname, ATop, ALeft, AWidth, aHeight]));
-  {$ENDIF}
-  if not (csLoading in ComponentState) then
-  begin
-    if (ALeft <> FLeft) or (ATop <> FTop) then
-      HandleMove(ALeft, ATop);
-    if (AWidth <> FWidth) or (AHeight <> FHeight) then
-      HandleResize(AWidth, AHeight);
-  end
-  else
-  begin
-    // When the widget is created, it's position will be applied
-    Left   := ALeft;
-    Top    := ATop;
-    Width  := AWidth;
-    Height := AHeight;
-  end;
-  UpdatePosition;
-end;
-
 procedure TfpgWidget.MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
 begin
   if (dx <> 0) or (dy <> 0) or
@@ -1909,26 +1877,6 @@ begin
         Exit;
     end;
   end;
-end;
-
-procedure TfpgWidget.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
-begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.SetPosition - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
-  // SetPosition expresses developer's intent for size, so update preferred size
-  if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
-  begin
-    FPreferredSize.W := AWidth;
-    FPreferredSize.H := AHeight;
-  end;
-
-  if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
-    MoveAndResize(aleft, atop, awidth, aheight);
 end;
 
 procedure TfpgWidget.SetLayoutConstraint(AConstraint: TfpgLayoutConstraint);

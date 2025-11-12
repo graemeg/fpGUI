@@ -259,11 +259,15 @@ begin
   w := TfpgWidget.Create(nil);
   try
     // Widget boundaries should follow the same inclusive rules as TfpgRect
-    w.SetPosition(0, 0, 200, 200);
+    w.Width := 200;
+    w.Height := 200;
     CheckEquals(199, w.Right, 'Widget.Right should be Left + Width - 1');
     CheckEquals(199, w.Bottom, 'Widget.Bottom should be Top + Height - 1');
 
-    w.SetPosition(10, 20, 50, 30);
+    w.Left := 10;
+    w.Top := 20;
+    w.Width := 50;
+    w.Height := 30;
     CheckEquals(59, w.Right, 'Widget.Right = 10 + 50 - 1 = 59');
     CheckEquals(49, w.Bottom, 'Widget.Bottom = 20 + 30 - 1 = 49');
   finally
@@ -280,7 +284,8 @@ begin
 
   w := TfpgWidget.Create(nil);
   try
-    w.SetPosition(10, 20, 50, 30);
+    w.Width := 50;
+    w.Height := 30;
 
     // Widget should occupy exactly Width * Height pixels with inclusive boundaries
     pixelCount := (w.Right - w.Left + 1) * (w.Bottom - w.Top + 1);
@@ -298,7 +303,8 @@ begin
 
   container := TfpgWidget.Create(nil);
   try
-    container.SetPosition(0, 0, 200, 200);
+    container.Width := 200;
+    container.Height := 200;
 
     widget := TfpgWidget.Create(container);
     try
@@ -309,7 +315,10 @@ begin
       //   widget.Right = 193
       //   widget.Left = 193 - 50 + 1 = 144
 
-      widget.SetPosition(144, 174, 50, 20);
+      widget.Left := 144;
+      widget.Top := 174;
+      widget.Width := 50;
+      widget.Height := 20;
 
       CheckEquals(193, widget.Right, 'Widget right edge at container.Right - 6');
       CheckEquals(193, widget.Bottom, 'Widget bottom edge at container.Bottom - 6');

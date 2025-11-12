@@ -805,10 +805,10 @@ begin
   end;
 
   {$IFDEF MIGDEBUG}
-  WriteLn('DEBUG: TransferBounds - calling SetPosition() for widget ' + FComp.Name);
+  WriteLn('DEBUG: TransferBounds - calling MoveAndResize() for widget ' + FComp.Name);
   {$ENDIF MIGDEBUG}
-  // Transfer calculated bounds to the widget
-  FComp.SetPosition(compX, compY, compW, compH);
+  // Transfer calculated bounds to the widget via ILayoutTarget interface
+  (FComp as ILayoutTarget).MoveAndResize(compX, compY, compW, compH);
 end;
 
 { TfpgMigLinkedDimGroup }

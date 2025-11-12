@@ -58,21 +58,25 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 200, 200);
+  container.Width := 200;
+  container.Height := 200;
   lm := TfpgFlowLayoutManager.Create as ILayoutManager;
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
-  w3.SetPosition(0, 0, 50, 20);
+  w3.Width := 50;
+  w3.Height := 20;
 
   lm.AddLayoutComponent(w1, TfpgLayoutConstraint.Create());
   lm.AddLayoutComponent(w2, TfpgLayoutConstraint.Create());
@@ -100,21 +104,25 @@ var
 begin
   container := TfpgWidget.Create(nil);
   container.Name := 'container';
-  container.SetPosition(0, 0, 120, 200); // Narrow container
+  container.Width := 120;  // Narrow container
+  container.Height := 200;
   lm := TfpgFlowLayoutManager.Create(0, 0) as ILayoutManager;
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
   w1.Name := 'w1';
-  w1.SetPosition(0, 0, 50, 20);
+  w1.Width := 50;
+  w1.Height := 20;
 
   w2 := TfpgWidget.Create(container);
   w2.Name := 'w2';
-  w2.SetPosition(0, 0, 50, 20);
+  w2.Width := 50;
+  w2.Height := 20;
 
   w3 := TfpgWidget.Create(container);
   w3.Name := 'w3';
-  w3.SetPosition(0, 0, 50, 20);
+  w3.Width := 50;
+  w3.Height := 20;
 
   lm.AddLayoutComponent(w1, TfpgLayoutConstraint.Create());
   lm.AddLayoutComponent(w2, TfpgLayoutConstraint.Create());

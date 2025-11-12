@@ -164,27 +164,27 @@ begin
 
   if Assigned(north) then
   begin
-    north.SetPosition(left, top, right - left, north_h);
+    (north as ILayoutTarget).MoveAndResize(left, top, right - left, north_h);
     Inc(top, north_h + FVGap);
   end;
   if Assigned(south) then
   begin
-    south.SetPosition(left, bottom - south_h, right - left, south_h);
+    (south as ILayoutTarget).MoveAndResize(left, bottom - south_h, right - left, south_h);
     Dec(bottom, south_h + FVGap);
   end;
   if Assigned(east) then
   begin
-    east.SetPosition(right - east_w, top, east_w, bottom - top);
+    (east as ILayoutTarget).MoveAndResize(right - east_w, top, east_w, bottom - top);
     Dec(right, east_w + FHGap);
   end;
   if Assigned(west) then
   begin
-    west.SetPosition(left, top, west_w, bottom - top);
+    (west as ILayoutTarget).MoveAndResize(left, top, west_w, bottom - top);
     Inc(left, west_w + FHGap);
   end;
   if Assigned(center) then
   begin
-    center.SetPosition(left, top, right - left, bottom - top);
+    (center as ILayoutTarget).MoveAndResize(left, top, right - left, bottom - top);
   end;
 end;
 

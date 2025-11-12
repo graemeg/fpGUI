@@ -309,6 +309,11 @@ type
     function GetCanvasRef: TObject;
   end;
 
+  { Interface for layout managers to apply calculated positions/sizes }
+  ILayoutTarget = interface
+    ['{2F8E4A3B-6D1C-4E7F-9A2B-5C3D8E1F4A6B}']
+    procedure MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+  end;
 
   TfpgFontResourceBase = class(TInterfacedObject, IFontEngine)
   protected
@@ -1733,46 +1738,48 @@ end;
 
 procedure TfpgWidgetBase.SetHeight(const AValue: TfpgCoord);
 var
-  PrefChanged: Boolean;
+  NeedsResize: Boolean;
 begin
-  // Check if preferred size is changing
-  PrefChanged := (FPreferredSize.H <> AValue);
+  // Width/Height properties express developer's intent for preferred size
+  NeedsResize := FPreferredSize.H <> AValue;
 
-  if PrefChanged then
+  if NeedsResize then
+  begin
     FPreferredSize.H := AValue;
 
-  // Set actual height if: during loading (DPI scaling, construction) OR not in layout-managed context
-  // Layout managers will override this by calling HandleResize directly
-  if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
-  begin
-    if FHeight <> AValue then
-      FHeight := AValue;
-  end;
+    // During csLoading or without layout manager: also apply actual size immediately
+    // With layout manager at runtime: layout manager will call HandleResize with constrained size
+    if (csLoading in ComponentState) or not Assigned(Parent) or
+       not (Parent is TfpgWidget) or not Assigned(TfpgWidget(Parent).LayoutManager) then
+    begin
+      HandleResize(FWidth, AValue);
+    end;
 
-  if PrefChanged then
     DoPreferredSizeChanged;
+  end;
 end;
 
 procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
 var
-  PrefChanged: Boolean;
+  NeedsResize: Boolean;
 begin
-  // Check if preferred size is changing
-  PrefChanged := (FPreferredSize.W <> AValue);
+  // Width/Height properties express developer's intent for preferred size
+  NeedsResize := FPreferredSize.W <> AValue;
 
-  if PrefChanged then
+  if NeedsResize then
+  begin
     FPreferredSize.W := AValue;
 
-  // Set actual width if: during loading (DPI scaling, construction) OR not in layout-managed context
-  // Layout managers will override this by calling HandleResize directly
-  if (csLoading in ComponentState) or not Assigned(Parent) or not Assigned((Parent as TfpgWidget).LayoutManager) then
-  begin
-    if FWidth <> AValue then
-      FWidth := AValue;
-  end;
+    // During csLoading or without layout manager: also apply actual size immediately
+    // With layout manager at runtime: layout manager will call HandleResize with constrained size
+    if (csLoading in ComponentState) or not Assigned(Parent) or
+       not (Parent is TfpgWidget) or not Assigned(TfpgWidget(Parent).LayoutManager) then
+    begin
+      HandleResize(AValue, FHeight);
+    end;
 
-  if PrefChanged then
     DoPreferredSizeChanged;
+  end;
 end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
@@ -1935,6 +1942,7 @@ procedure TfpgWidgetBase.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
   if not (csLoading in ComponentState) then
   begin
+    // Runtime: Apply actual position and size via Handle* methods
     if (ALeft <> FLeft) or (ATop <> FTop) then
       HandleMove(ALeft, ATop);
     if (AWidth <> FWidth) or (AHeight <> FHeight) then
@@ -1942,26 +1950,22 @@ begin
   end
   else
   begin
-    // When the widget is created, its position will be applied
-    Left   := ALeft;
-    Top    := ATop;
-    Width  := AWidth;
-    Height := AHeight;
+    // During construction: Set preferred size via properties, then set actual position/size
+    Left   := ALeft;    // Sets FLeft via SetLeft
+    Top    := ATop;     // Sets FTop via SetTop
+    Width  := AWidth;   // Sets FPreferredSize.W via SetWidth
+    Height := AHeight;  // Sets FPreferredSize.H via SetHeight
+    // Also set actual size during construction (position already set by Left/Top properties)
+    HandleResize(AWidth, AHeight);  // Sets FWidth, FHeight
   end;
   UpdatePosition;
 end;
 
 procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
-  // SetPosition expresses developer's intent for size, so update preferred size
-  if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
-  begin
-    FPreferredSize.W := AWidth;
-    FPreferredSize.H := AHeight;
-  end;
-
-  if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
-    MoveAndResize(ALeft, ATop, AWidth, AHeight);
+  // SetPosition is deprecated but kept for backward compatibility
+  // Just delegates to MoveAndResize which handles everything
+  MoveAndResize(ALeft, ATop, AWidth, AHeight);
 end;
 
 function TfpgWidgetBase.ScreenToWidget(const AScreenPos: TPoint): TPoint;
