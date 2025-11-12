@@ -494,7 +494,10 @@ end;
 
 procedure TComboboxDropdownWindow.HandleShow;
 begin
-  FListBox.SetPosition(0, 0, Width, Height);
+  FListBox.Left := 0;
+  FListBox.Top := 0;
+  FListBox.Width := Width;
+  FListBox.Height := Height;
   FListBox.Items.Assign(FCallerWidget.Items);
   FListBox.FocusItem := FCallerWidget.FocusItem;
   inherited HandleShow;

@@ -612,7 +612,10 @@ var
 begin
   inherited HandleResize(AWidth, AHeight);
   BS := fpgStyle.GetBevelWidth;
-  FVScroll.SetPosition(Width-FVScroll.Width-BS, BS, FVScroll.Width, Height-BS*2);
+  FVScroll.Left := Width - FVScroll.Width - BS;
+  FVScroll.Top := BS;
+  FVScroll.Width := FVScroll.Width;
+  FVScroll.Height := Height - BS * 2;
 end;
 
 procedure TfpgHexView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

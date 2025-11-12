@@ -846,13 +846,25 @@ begin
         h := FFirstTabButton;
       if TabPosition = tpTop then
       begin
-        FLeftButton.SetPosition(Width - (FRightButton.Width * 2), FMargin, FRightButton.Height, FRightButton.Height);
-        FRightButton.SetPosition(Width - FRightButton.Width, FMargin, FRightButton.Height, FRightButton.Height);
+        FLeftButton.Left := Width - (FRightButton.Width * 2);
+        FLeftButton.Top := FMargin;
+        FLeftButton.Width := FRightButton.Height;
+        FLeftButton.Height := FRightButton.Height;
+        FRightButton.Left := Width - FRightButton.Width;
+        FRightButton.Top := FMargin;
+        FRightButton.Width := FRightButton.Height;
+        FRightButton.Height := FRightButton.Height;
       end
       else
       begin
-        FLeftButton.SetPosition(Width - (FRightButton.Width * 2), Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
-        FRightButton.SetPosition(Width - FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FLeftButton.Left := Width - (FRightButton.Width * 2);
+        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Width := FRightButton.Height;
+        FLeftButton.Height := FRightButton.Height;
+        FRightButton.Left := Width - FRightButton.Width;
+        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Width := FRightButton.Height;
+        FRightButton.Height := FRightButton.Height;
       end;
       FLeftButton.Visible   := True;
       FRightButton.Visible  := True;
@@ -874,13 +886,25 @@ begin
         h := FFirstTabButton;
       if TabPosition = tpLeft then
       begin
-        FLeftButton.SetPosition(MaxButtonWidth - (FRightButton.Width * 2), Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
-        FRightButton.SetPosition(MaxButtonWidth - FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FLeftButton.Left := MaxButtonWidth - (FRightButton.Width * 2);
+        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Width := FRightButton.Height;
+        FLeftButton.Height := FRightButton.Height;
+        FRightButton.Left := MaxButtonWidth - FRightButton.Width;
+        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Width := FRightButton.Height;
+        FRightButton.Height := FRightButton.Height;
       end
       else
       begin
-        FLeftButton.SetPosition(Width - MaxButtonWidth, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
-        FRightButton.SetPosition(Width - MaxButtonWidth + FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FLeftButton.Left := Width - MaxButtonWidth;
+        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Width := FRightButton.Height;
+        FLeftButton.Height := FRightButton.Height;
+        FRightButton.Left := Width - MaxButtonWidth + FRightButton.Width;
+        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Width := FRightButton.Height;
+        FRightButton.Height := FRightButton.Height;
       end;
       FLeftButton.Visible   := True;
       FRightButton.Visible  := True;
@@ -901,7 +925,10 @@ begin
             h.Visible:=false
           else
             h.Visible:=True;
-          h.SetPosition(FMargin+2, FMargin+2 , Width - (FMargin*2) - 4, Height - ((FMargin+2)*2));
+          h.Left := FMargin + 2;
+          h.Top := FMargin + 2;
+          h.Width := Width - (FMargin * 2) - 4;
+          h.Height := Height - ((FMargin + 2) * 2);
           if h <> TfpgTabSheet(FPages.Last) then
             h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
           else
@@ -930,7 +957,10 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            h.SetPosition(FMargin+2, FMargin+2 , Width - (FMargin*2) - 4, Height - TabH - (FMargin+2)*2);
+            h.Left := FMargin + 2;
+            h.Top := FMargin + 2;
+            h.Width := Width - (FMargin * 2) - 4;
+            h.Height := Height - TabH - (FMargin + 2) * 2;
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -982,7 +1012,10 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            h.SetPosition(FMargin+2, FMargin+2 + r2.Height, Width - (FMargin*2) - 4, Height - r2.Height - ((FMargin+2)*2));
+            h.Left := FMargin + 2;
+            h.Top := FMargin + 2 + r2.Height;
+            h.Width := Width - (FMargin * 2) - 4;
+            h.Height := Height - r2.Height - ((FMargin + 2) * 2);
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -1036,7 +1069,10 @@ begin
             toffset := 2;
             h.Visible := True;
             { set tab content page (client area) size }
-            h.SetPosition(FMargin+2, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
+            h.Left := FMargin + 2;
+            h.Top := FMargin + 2;
+            h.Width := Width - ((FMargin + 2) * 2) - TabW;
+            h.Height := Height - ((FMargin + 2) * 2);
           end;
           // paint tab button
           if h = ActivePage then
@@ -1088,7 +1124,10 @@ begin
             toffset := 2;
             h.Visible := True;
             { set tab content page (client area) size }
-            h.SetPosition(FMargin+2+TabW, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
+            h.Left := FMargin + 2 + TabW;
+            h.Top := FMargin + 2;
+            h.Width := Width - ((FMargin + 2) * 2) - TabW;
+            h.Height := Height - ((FMargin + 2) * 2);
           end;
           // paint tab button
           if h = ActivePage then

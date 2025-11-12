@@ -225,7 +225,10 @@ end;
 
 procedure TDropDownWindow.HandleShow;
 begin
-  FListBox.SetPosition(0, 0, Width, Height);
+  FListBox.Left := 0;
+  FListBox.Top := 0;
+  FListBox.Width := Width;
+  FListBox.Height := Height;
   inherited HandleShow;
   ActiveWidget := FListBox;
 end;

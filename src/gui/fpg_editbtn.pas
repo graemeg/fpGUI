@@ -305,8 +305,14 @@ begin
     end
     else
     begin
-        FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
-        FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+        FEdit.Left := 0;
+        FEdit.Top := 0;
+        FEdit.Width := AWidth - AHeight;
+        FEdit.Height := AHeight;
+        FButton.Left := AWidth - AHeight;
+        FButton.Top := 0;
+        FButton.Width := AHeight;
+        FButton.Height := AHeight;
     end;
   end;
 end;

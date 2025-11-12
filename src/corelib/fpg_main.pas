@@ -1540,7 +1540,10 @@ begin
     if w > ScreenWidth then
       w := ScreenWidth;
   end;
-  wnd.SetPosition(APos.X, APos.Y, w, h);
+  wnd.Left := APos.X;
+  wnd.Top := APos.Y;
+  wnd.Width := w;
+  wnd.Height := h;
   wnd.UpdatePosition;
   wnd.Show;
 end;

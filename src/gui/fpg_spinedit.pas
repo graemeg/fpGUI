@@ -261,7 +261,10 @@ begin
     newh := Result.FEdit.Font.GetHeight + 6
   else
     newh := h;
-  Result.SetPosition(x, y, w, newh);
+  Result.Left := x;
+  Result.Top := y;
+  Result.Width := w;
+  Result.Height := newh;
 
   if AMaxValue >= AMinValue then
   begin
@@ -287,7 +290,10 @@ begin
     newh := Result.FEdit.Font.GetHeight + 6
   else
     newh := h;
-  Result.SetPosition(x, y, w, newh);
+  Result.Left := x;
+  Result.Top := y;
+  Result.Width := w;
+  Result.Height := newh;
 
   if AMaxValue >= AMinValue then
   begin
@@ -303,7 +309,10 @@ end;
 function CreateSpinEdit(AOwner: TComponent; x, y, w: TfpgCoord; AOnChangeEvent: TNotifyEvent): TfpgSpinEdit;
 begin
   Result := TfpgSpinEdit.Create(AOwner);
-  Result.SetPosition(x, y, w, Result.Height);
+  Result.Left := x;
+  Result.Top := y;
+  Result.Width := w;
+  // Height is already set
   if Assigned(AOnChangeEvent) then
     Result.OnChange := AOnChangeEvent;
   Result.UpdatePosition;
@@ -333,8 +342,14 @@ end;
 
 procedure TfpgAbstractSpinEdit.ResizeChildren;
 begin
-  FButtonUp.SetPosition(Width - FButtonWidth, 0, FButtonWidth, Height div 2);
-  FButtonDown.SetPosition(Width - FButtonWidth, Height div 2, FButtonWidth, Height div 2);
+  FButtonUp.Left := Width - FButtonWidth;
+  FButtonUp.Top := 0;
+  FButtonUp.Width := FButtonWidth;
+  FButtonUp.Height := Height div 2;
+  FButtonDown.Left := Width - FButtonWidth;
+  FButtonDown.Top := Height div 2;
+  FButtonDown.Width := FButtonWidth;
+  FButtonDown.Height := Height div 2;
 end;
 
 procedure TfpgAbstractSpinEdit.HandlePaint;
@@ -444,7 +459,10 @@ begin
   FButtonUp := TfpgButton.Create(Self);
   with FButtonUp do
   begin
-    SetPosition(Width - FButtonWidth, 0, FButtonWidth, Height div 2);
+    Left := Width - FButtonWidth;
+    Top := 0;
+    Width := FButtonWidth;
+    Height := Height div 2;
     Text      := '';
     BackgroundColor := clButtonFace;
     Focusable := False;
@@ -454,7 +472,10 @@ begin
   FButtonDown := TfpgButton.Create(Self);
   with FButtonDown do
   begin
-    SetPosition(Width - FButtonWidth, Height div 2, FButtonWidth, Height div 2);
+    Left := Width - FButtonWidth;
+    Top := Height div 2;
+    Width := FButtonWidth;
+    Height := Height div 2;
     Text      := '';
     BackgroundColor := clButtonFace;
     Focusable := False;
@@ -522,7 +543,10 @@ end;
 
 procedure TfpgSpinEditFloat.ResizeChildren;
 begin
-  FEdit.SetPosition(0, 0, Width - FButtonWidth, Height);
+  FEdit.Left := 0;
+  FEdit.Top := 0;
+  FEdit.Width := Width - FButtonWidth;
+  FEdit.Height := Height;
   inherited ResizeChildren;
 end;
 
@@ -958,7 +982,10 @@ end;
 
 procedure TfpgSpinEdit.ResizeChildren;
 begin
-  FEdit.SetPosition(0, 0, Width - FButtonWidth, Height);
+  FEdit.Left := 0;
+  FEdit.Top := 0;
+  FEdit.Width := Width - FButtonWidth;
+  FEdit.Height := Height;
   inherited ResizeChildren;
 end;
 

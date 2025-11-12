@@ -475,7 +475,10 @@ begin
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
 
-  FVisibleArea.SetPosition(0, 0, visWidth, visHeight);
+  FVisibleArea.Left := 0;
+  FVisibleArea.Top := 0;
+  FVisibleArea.Width := visWidth;
+  FVisibleArea.Height := visHeight;
   FVisibleArea.UpdateWindowPosition;
 
   FContentFrame.UpdateWindowPosition;

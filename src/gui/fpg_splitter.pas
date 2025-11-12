@@ -154,9 +154,15 @@ begin
   begin
     case Align of
       alLeft, alRight:
-         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height);
+         begin
+           FControl.Width := FNewSize;
+           // Left, Top, Height unchanged
+         end;
       alTop, alBottom:
-         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);
+         begin
+           FControl.Height := FNewSize;
+           // Left, Top, Width unchanged
+         end;
     end;
     Parent.Realign;
     // if Assigned(FOnMoved) then FOnMoved(Self);

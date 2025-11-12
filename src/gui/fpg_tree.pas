@@ -1378,11 +1378,22 @@ begin
   SendDebug(Classname + '.ResetScrollbar');
   {$ENDIF}
   UpdateScrollBars;
+  FVScrollbar.Left := Width - cSBarThickness - 1;
+  FVScrollbar.Top := 1;
   if FHScrollbar.Visible then
-    FVScrollbar.SetPosition(Width - cSBarThickness-1, 1, cSBarThickness, Height - 2 - cSBarThickness)
+  begin
+    FVScrollbar.Width := cSBarThickness;
+    FVScrollbar.Height := Height - 2 - cSBarThickness;
+  end
   else
-    FVScrollbar.SetPosition(Width - cSBarThickness-1, 1, 16, Height - 2);
-  FHScrollbar.SetPosition(1, Height - cSBarThickness-1, Width - 2, cSBarThickness);
+  begin
+    FVScrollbar.Width := 16;
+    FVScrollbar.Height := Height - 2;
+  end;
+  FHScrollbar.Left := 1;
+  FHScrollbar.Top := Height - cSBarThickness - 1;
+  FHScrollbar.Width := Width - 2;
+  FHScrollbar.Height := cSBarThickness;
 end;
 
 procedure TfpgTreeView.ClearColumnLeft;

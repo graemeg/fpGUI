@@ -187,7 +187,10 @@ begin
   // This is so the Shadow Window is below the Hint Window.
   if Shadow > 0 then
   begin
-    uShadowForm.SetPosition(Left+Shadow, Top+Shadow, Width, Height);
+    uShadowForm.Left := Left + Shadow;
+    uShadowForm.Top := Top + Shadow;
+    uShadowForm.Width := Width;
+    uShadowForm.Height := Height;
     uShadowForm.Show;
   end;
   inherited HandleShow;

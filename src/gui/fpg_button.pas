@@ -195,7 +195,10 @@ function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
 begin
   Result         := TfpgButton.Create(AOwner);
   Result.Text    := AText;
-  Result.SetPosition(x, y, w, Result.Height); // font was used to calculate height.
+  Result.Left := x;
+  Result.Top := y;
+  Result.Width := w;
+  // Height is already set by font calculation
   Result.OnClick := AOnClickEvent;
   Result.ImageName := AImage;
   Result.UpdatePosition;
