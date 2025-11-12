@@ -905,6 +905,38 @@ This ensures backward compatibility: `panel.Height := 50` both sets preferred he
 
 Both systems work harmoniously with the same API!
 
+== Recent Changes: SetPosition API Deprecation (November 2025)
+
+=== Overview
+
+**Status**: ✅ COMPLETED
+
+As a prerequisite to the ActualWidth/ActualHeight migration, the SetPosition API has been cleaned up and deprecated:
+
+**Changes Made**:
+
+1. **SetPosition simplified** (fpg_base.pas): Now just calls individual property setters:
+   ```pascal
+   procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+   begin
+     // Deprecated convenience wrapper - use properties directly
+     Left   := ALeft;
+     Top    := ATop;
+     Width  := AWidth;
+     Height := AHeight;
+   end;
+   ```
+
+2. **MoveWidget and MoveAndResize moved to protected**: These internal methods are no longer public. Layout managers access them via ILayoutTarget interface.
+
+3. **All SetPosition calls replaced**: Replaced 56 SetPosition calls throughout:
+   - 34 calls in src/corelib/ and src/gui/ (commit 0bd9ca0b)
+   - 22 calls in examples/, docview/, uidesigner/ (commit c5bb170e)
+
+4. **Backward compatibility maintained**: SetPosition still works for existing code, but new code should use individual properties (Left, Top, Width, Height).
+
+**Impact**: This simplification ensures SetPosition behavior is consistent with property-based positioning, making the transition to ActualWidth/ActualHeight cleaner.
+
 == Migration Guide: Fixing Width/Height Usage
 
 === Overview
