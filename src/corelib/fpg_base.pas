@@ -1784,33 +1784,23 @@ end;
 
 procedure TfpgWidgetBase.HandleMove(x, y: TfpgCoord);
 begin
-  if FTop <> y then
+  if (FLeft <> x) or (FTop <> y) then
   begin
     if not (csLoading in ComponentState) then
-      FPrevTop := FTop
+    begin
+      FPrevLeft := FLeft;
+      FPrevTop := FTop;
+    end
     else
-      FPrevTop := y;
-    FTop := y;
-
-    if FTop <> FPrevTop then
-      Include(FDirtyFlags, wdfPosition);
-  end
-  else
-    FPrevTop := FTop;
-
-  if FLeft <> x then
-  begin
-    if not (csLoading in ComponentState) then
-      FPrevLeft := FLeft
-    else
+    begin
       FPrevLeft := x;
+      FPrevTop := y;
+    end;
     FLeft := x;
-
-    if FLeft <> FPrevLeft then
+    FTop := y;
+    if (FLeft <> FPrevLeft) or (FTop <> FPrevTop) then
       Include(FDirtyFlags, wdfPosition);
-  end
-  else
-    FPrevLeft := FLeft;
+  end;
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
