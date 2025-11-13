@@ -365,16 +365,16 @@ begin
   HWidth  := ActualWidth - 4;
 
   if FVScrollBar.Visible then
-    Dec(HWidth, FVScrollBar.Width);
+    Dec(HWidth, FVScrollBar.ActualWidth);
   if FHScrollBar.Visible then
-    Dec(VHeight, FHScrollBar.Height);
+    Dec(VHeight, FHScrollBar.ActualHeight);
 
-  FHScrollBar.Top     := ActualHeight -FHScrollBar.Height - 2;
+  FHScrollBar.Top     := ActualHeight - FHScrollBar.ActualHeight - 2;
   FHScrollBar.Left    := 2;
   FHScrollBar.Width   := HWidth;
 
   FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - 2;
+  FVScrollBar.Left    := ActualWidth - FVScrollBar.ActualWidth - 2;
   FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdatePosition;
@@ -1031,7 +1031,7 @@ begin
   vsbvis := (LineCount > vlines);
 
   if vsbvis then
-    vsbw := FVScrollBar.Width
+    vsbw := FVScrollBar.ActualWidth
   else
     vsbw := 0;
 
@@ -1040,7 +1040,7 @@ begin
   if FHScrollBar.Visible and not vsbvis then
   begin
     // recheck vertical scrollbar
-    vlines := (ActualHeight - (FSideMargin shl 1) - FHScrollBar.Height) div Lineheight;
+    vlines := (ActualHeight - (FSideMargin shl 1) - FHScrollBar.ActualHeight) div Lineheight;
     vsbvis := (LineCount > vlines);
   end;
 
@@ -1201,7 +1201,7 @@ var
   sw: integer;
 begin
   if FVScrollBar.Visible then
-    sw := FVScrollBar.Width
+    sw := FVScrollBar.ActualWidth
   else
     sw := 0;
   Result := (ActualWidth - (FSideMargin shl 1) - sw);

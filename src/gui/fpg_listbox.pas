@@ -431,7 +431,7 @@ begin
   VHeight := ActualHeight - (fpgStyle.GetControlFrameBorders.Top + fpgStyle.GetControlFrameBorders.Bottom);
 
   FScrollBar.Top     := fpgStyle.GetControlFrameBorders.Top;
-  FScrollBar.Left    := ActualWidth - FScrollBar.Width - fpgStyle.GetControlFrameBorders.Right;
+  FScrollBar.Left    := ActualWidth - FScrollBar.ActualWidth - fpgStyle.GetControlFrameBorders.Right;
   FScrollBar.Height  := VHeight;
   FScrollBar.UpdatePosition;
 end;
@@ -459,7 +459,7 @@ end;
 function TfpgBaseListBox.GetScrollBarWidth: integer;
 begin
   if FScrollBar.Visible then
-    result := FScrollBar.Width
+    result := FScrollBar.ActualWidth
   else
     result := 0;
 end;

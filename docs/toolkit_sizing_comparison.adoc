@@ -1416,6 +1416,49 @@ FHScrollBar.Top := ActualHeight - FHScrollBar.Height - 2;
 
 **Where to look**: Methods named `UpdateScrollBarCoords`, `UpdateScrollBarPosition`
 
+==== Pattern 6: Reading Child Widget Sizes for Positioning
+
+**Problem**: Reading child widget's Width/Height (preferred size) instead of ActualWidth/ActualHeight when positioning or calculating available space.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - reads scrollbar's preferred width
+if FVScrollBar.Visible then
+  Dec(HWidth, FVScrollBar.Width);
+FVScrollBar.Left := ActualWidth - FVScrollBar.Width - 2;
+
+// GOOD - reads scrollbar's actual width
+if FVScrollBar.Visible then
+  Dec(HWidth, FVScrollBar.ActualWidth);
+FVScrollBar.Left := ActualWidth - FVScrollBar.ActualWidth - 2;
+----
+
+**Example from `fpg_listbox.pas`**:
+[source,pascal]
+----
+// BAD - returns scrollbar's preferred width
+function GetScrollBarWidth: integer;
+begin
+  if FScrollBar.Visible then
+    result := FScrollBar.Width;  // Wrong!
+end;
+
+// GOOD - returns scrollbar's actual width
+function GetScrollBarWidth: integer;
+begin
+  if FScrollBar.Visible then
+    result := FScrollBar.ActualWidth;  // Correct!
+end;
+----
+
+**Where to look**:
+- `UpdateScrollBarCoords` methods reading scrollbar dimensions
+- Property getters like `GetScrollBarWidth` that query child widget sizes
+- Any calculation that reads a child widget's size for positioning: `FChild.Width`, `FChild.Height`
+
+**Critical**: When positioning child widgets, you need their **actual** size, not their preferred size!
+
 === Migration TODO List
 
 ==== Core Framework Files - COMPLETED
