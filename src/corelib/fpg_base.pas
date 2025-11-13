@@ -1814,28 +1814,28 @@ begin
 end;
 
 procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
+var
+  ConstrainedWidth, ConstrainedHeight: TfpgCoord;
 begin
-  if FWidth <> AWidth then
+  ConstrainedWidth := ConstraintWidth(AWidth);
+  ConstrainedHeight := ConstraintHeight(AHeight);
+
+  if (FWidth <> ConstrainedWidth) or (FHeight <> ConstrainedHeight) then
   begin
     if not (csLoading in ComponentState) then
-      FPrevWidth := FWidth
+    begin
+      FPrevWidth := FWidth;
+      FPrevHeight := FHeight;
+    end
     else
-      FPrevWidth := AWidth;
-    FWidth := ConstraintWidth(AWidth);
+    begin
+      FPrevWidth := ConstrainedWidth;
+      FPrevHeight := ConstrainedHeight;
+    end;
+    FWidth := ConstrainedWidth;
+    FHeight := ConstrainedHeight;
 
-    if FWidth <> FPrevWidth then
-      Include(FDirtyFlags, wdfSize);
-  end;
-
-  if FHeight <> AHeight then
-  begin
-    if not (csLoading in ComponentState) then
-      FPrevHeight := FHeight
-    else
-      FPrevHeight := AHeight;
-    FHeight := ConstraintHeight(AHeight);
-
-    if FHeight <> FPrevHeight then
+    if (FWidth <> FPrevWidth) or (FHeight <> FPrevHeight) then
       Include(FDirtyFlags, wdfSize);
   end;
 end;
