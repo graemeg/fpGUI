@@ -1804,28 +1804,28 @@ begin
     case w.Align of
       alTop:
         begin
-          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
-          Inc(FAlignRect.top, w.Height);
-          Dec(FAlignRect.Height, w.Height);
+          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.ActualHeight);
+          Inc(FAlignRect.top, w.ActualHeight);
+          Dec(FAlignRect.Height, w.ActualHeight);
         end;
 
       alBottom:
         begin
-          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top + FAlignRect.Height - w.Height, FAlignRect.Width, w.Height);
-          Dec(FAlignRect.Height, w.Height);
+          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top + FAlignRect.Height - w.ActualHeight, FAlignRect.Width, w.ActualHeight);
+          Dec(FAlignRect.Height, w.ActualHeight);
         end;
 
       alLeft:
         begin
-          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, w.Width, FAlignRect.Height);
-          Inc(FAlignRect.Left, w.Width);
-          Dec(FAlignRect.Width, w.Width);
+          w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, w.ActualWidth, FAlignRect.Height);
+          Inc(FAlignRect.Left, w.ActualWidth);
+          Dec(FAlignRect.Width, w.ActualWidth);
         end;
 
       alRight:
         begin
-          w.MoveAndResize(FAlignRect.Left + FAlignRect.Width - w.Width, FAlignRect.Top, w.Width, FAlignRect.Height);
-          Dec(FAlignRect.Width, w.Width);
+          w.MoveAndResize(FAlignRect.Left + FAlignRect.Width - w.ActualWidth, FAlignRect.Top, w.ActualWidth, FAlignRect.Height);
+          Dec(FAlignRect.Width, w.ActualWidth);
         end;
 
       alClient:
