@@ -428,10 +428,10 @@ procedure TfpgBaseListBox.UpdateScrollbarCoords;
 var
   VHeight: integer;
 begin
-  VHeight := Height - (fpgStyle.GetControlFrameBorders.Top + fpgStyle.GetControlFrameBorders.Bottom);
+  VHeight := ActualHeight - (fpgStyle.GetControlFrameBorders.Top + fpgStyle.GetControlFrameBorders.Bottom);
 
   FScrollBar.Top     := fpgStyle.GetControlFrameBorders.Top;
-  FScrollBar.Left    := Width - FScrollBar.Width - fpgStyle.GetControlFrameBorders.Right;
+  FScrollBar.Left    := ActualWidth - FScrollBar.Width - fpgStyle.GetControlFrameBorders.Right;
   FScrollBar.Height  := VHeight;
   FScrollBar.UpdatePosition;
 end;
@@ -736,7 +736,7 @@ var
   r: TfpgRect;
 begin
   inherited HandlePaint;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
 
   if popupframe then
   begin
@@ -755,7 +755,7 @@ begin
   fpgStyle.DrawListBox(Canvas, r, Enabled, ReadOnly, FBackgroundColor);
   Canvas.SetFont(FFont);
 
-  r.SetRect(0, 0, Width-ScrollBarWidth, Height);
+  r.SetRect(0, 0, ActualWidth-ScrollBarWidth, ActualHeight);
   r.InflateRect(-FMargin, -FMargin);
 //  r.SetRect(FMargin, FMargin, Width-ScrollBarWidth-(FMargin*2), Height - (FMargin*2));
   Canvas.SetClipRect(r);

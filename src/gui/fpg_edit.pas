@@ -747,7 +747,7 @@ var
   r: TfpgRect;
 begin
   inherited HandlePaint;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
         begin

@@ -341,7 +341,7 @@ begin
     lBorder := 0
   else
     lBorder := 2;
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), lBorder, Min(Height, 20)-lBorder, Height-lBorder*2);
+  FInternalBtnRect.SetRect(ActualWidth - Min(ActualHeight, 20), lBorder, Min(ActualHeight, 20)-lBorder, ActualHeight-lBorder*2);
 end;
 
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
@@ -739,7 +739,7 @@ var
   rect: TRect;
 begin
   inherited HandlePaint;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   fpgStyle.DrawControlFrame(Canvas, r);
   if not(wo_NoControlFrame in Options) then
   begin

@@ -361,20 +361,20 @@ var
   HWidth: integer;
   VHeight: integer;
 begin
-  VHeight := Height - 4;
-  HWidth  := Width - 4;
+  VHeight := ActualHeight - 4;
+  HWidth  := ActualWidth - 4;
 
   if FVScrollBar.Visible then
     Dec(HWidth, FVScrollBar.Width);
   if FHScrollBar.Visible then
     Dec(VHeight, FHScrollBar.Height);
 
-  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Top     := ActualHeight -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
   FHScrollBar.Width   := HWidth;
 
   FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - 2;
   FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdatePosition;
@@ -1035,12 +1035,12 @@ begin
   else
     vsbw := 0;
 
-  FHScrollBar.Visible := FLongestLineWidth > (Width - vsbw - FSideMargin * 2) - 1;
+  FHScrollBar.Visible := FLongestLineWidth > (ActualWidth - vsbw - FSideMargin * 2) - 1;
 
   if FHScrollBar.Visible and not vsbvis then
   begin
     // recheck vertical scrollbar
-    vlines := (Height - (FSideMargin shl 1) - FHScrollBar.Height) div Lineheight;
+    vlines := (ActualHeight - (FSideMargin shl 1) - FHScrollBar.Height) div Lineheight;
     vsbvis := (LineCount > vlines);
   end;
 
@@ -1204,7 +1204,7 @@ begin
     sw := FVScrollBar.Width
   else
     sw := 0;
-  Result := (Width - (FSideMargin shl 1) - sw);
+  Result := (ActualWidth - (FSideMargin shl 1) - sw);
 end;
 
 procedure TfpgMemo.HandleShow;
@@ -1271,7 +1271,7 @@ var
   s: string;
 begin
   inherited HandlePaint;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
         begin
