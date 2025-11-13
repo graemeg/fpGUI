@@ -809,7 +809,7 @@ begin
     DrawItem(n, r, 0);
     inc(r.Top, RowHeight);
 
-    if r.Top >= Height then
+    if r.Top >= ActualHeight then
       Break;
   end;  { for }
 

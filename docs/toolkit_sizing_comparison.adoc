@@ -1318,6 +1318,103 @@ grep -n "PtInRect" file.pas
 * Container reading its own size for layout
 * Visibility/clipping calculations
 * Native window sizing
+* **Scrollbar visibility/positioning calculations** (UpdateScrollBarCoords methods)
+* **Loop termination conditions** (e.g., `if r.Top >= Height then Break`)
+* **Visible line/width calculations** (VisibleLines, VisibleWidth methods)
+* **Dropdown/popup window sizing** (sizing popup to match parent widget)
+* **Child widget sizing within containers** (sizing internal widgets like listbox in dropdown)
+
+=== Common Patterns That Were Initially Missed
+
+During the migration, several patterns were easy to overlook. **Check these carefully** when migrating widgets:
+
+==== Pattern 1: Scrollbar Visibility Calculations
+
+**Problem**: Methods that calculate visible lines/width for scrollbar visibility checks.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+vlines := (Height - (FSideMargin shl 1)) div Lineheight;
+
+// GOOD - uses actual size
+vlines := (ActualHeight - (FSideMargin shl 1)) div Lineheight;
+----
+
+**Where to look**: Methods named `UpdateScrollBars`, `VisibleLines`, `VisibleWidth`, `VisibleHeight`
+
+==== Pattern 2: Loop Termination Conditions
+
+**Problem**: Paint loops that check if drawing position exceeds widget bounds.
+
+**Example from `fpg_listbox.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+if r.Top >= Height then
+  Break;
+
+// GOOD - uses actual size
+if r.Top >= ActualHeight then
+  Break;
+----
+
+**Where to look**: HandlePaint methods with loops, especially in scrollable widgets
+
+==== Pattern 3: Dropdown/Popup Window Sizing
+
+**Problem**: Popup windows sizing themselves to match parent widget.
+
+**Example from `fpg_combobox.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+ddw.Width := Width;
+
+// GOOD - uses actual size
+ddw.Width := ActualWidth;
+----
+
+**Where to look**: Methods like `HandleLMouseUp`, `ShowDropDown`, popup window creation
+
+==== Pattern 4: Child Widget Sizing in HandleShow
+
+**Problem**: Container widgets sizing child widgets in HandleShow.
+
+**Example from `fpg_combobox.pas` (TComboboxDropdownWindow):
+[source,pascal]
+----
+// BAD - uses preferred size
+FListBox.Width := Width;
+FListBox.Height := Height;
+
+// GOOD - uses actual size
+FListBox.Width := ActualWidth;
+FListBox.Height := ActualHeight;
+----
+
+**Where to look**: HandleShow methods, especially in popup/dropdown windows
+
+==== Pattern 5: UpdateScrollBarCoords Methods
+
+**Problem**: Methods that position scrollbars based on widget size.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+VHeight := Height - 4;
+HWidth := Width - 4;
+FHScrollBar.Top := Height - FHScrollBar.Height - 2;
+
+// GOOD - uses actual size
+VHeight := ActualHeight - 4;
+HWidth := ActualWidth - 4;
+FHScrollBar.Top := ActualHeight - FHScrollBar.Height - 2;
+----
+
+**Where to look**: Methods named `UpdateScrollBarCoords`, `UpdateScrollBarPosition`
 
 === Migration TODO List
 
@@ -1354,7 +1451,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [ ] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning
 * [ ] `src/gui/fpg_progressbar.pas` - Progress bar painting
 * [ ] `src/gui/fpg_tab.pas` - Tab positioning, painting
-* [ ] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations
+* [x] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations, hit-testing ✓ FIXED
 * [ ] `src/gui/fpg_listview.pas` - ListView scrolling, column calculations
 * [ ] `src/gui/fpg_hyperlink.pas` - Hyperlink hit-testing
 * [ ] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning

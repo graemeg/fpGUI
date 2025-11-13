@@ -1027,7 +1027,7 @@ var
 begin
   hsbwas := FHScrollBar.Visible;
   vsbwas := FVScrollBar.Visible;
-  vlines := (Height - (FSideMargin shl 1)) div Lineheight;
+  vlines := (ActualHeight - (FSideMargin shl 1)) div Lineheight;
   vsbvis := (LineCount > vlines);
 
   if vsbvis then
@@ -1193,7 +1193,7 @@ begin
     sh := 18
   else
     sh := 0;
-  Result := (Height - (FSideMargin shl 1) - sh) div Lineheight;
+  Result := (ActualHeight - (FSideMargin shl 1) - sh) div Lineheight;
 end;
 
 function TfpgMemo.VisibleWidth: integer;

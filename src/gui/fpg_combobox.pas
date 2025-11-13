@@ -496,8 +496,8 @@ procedure TComboboxDropdownWindow.HandleShow;
 begin
   FListBox.Left := 0;
   FListBox.Top := 0;
-  FListBox.Width := Width;
-  FListBox.Height := Height;
+  FListBox.Width := ActualWidth;
+  FListBox.Height := ActualHeight;
   FListBox.Items.Assign(FCallerWidget.Items);
   FListBox.FocusItem := FCallerWidget.FocusItem;
   inherited HandleShow;
@@ -604,7 +604,7 @@ begin
     if rowcount < 1 then
       rowcount := 1;  // Even if empty at least show one line dropdown
 
-    ddw.Width   := Width;
+    ddw.Width   := ActualWidth;
     ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.ListBox.ScrollBarWidth:= FScrollBarWidth;
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
