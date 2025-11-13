@@ -217,7 +217,7 @@ begin
   Result.Left  := x;
   Result.Top   := y;
   if w = 0 then
-    Result.Width := AOwner.Width
+    Result.Width := AOwner.ActualWidth
   else
     Result.Width := w;
   if h > 0 then
@@ -582,7 +582,7 @@ var
 begin
   Canvas.BeginDraw;
 
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   fpgStyle.DrawMenuBar(Canvas, r, FBackgroundColor);
 
   for n := 0 to VisibleCount-1 do
@@ -656,7 +656,7 @@ var
   r: TfpgRect;
   mi: TfpgMenuItem;
 begin
-  r.SetRect(2, 1, 1, Height-4);
+  r.SetRect(2, 1, 1, ActualHeight-4);
 
   for n := 0 to VisibleCount-1 do  { so we can calculate menu item position }
   begin
@@ -838,7 +838,7 @@ begin
   begin
     CloseSubMenus;
     // showing the submenu
-    mi.SubMenu.ShowAt(self, Width-5, GetItemPosY(FFocusItem)); // 5 is the menu overlap in pixels
+    mi.SubMenu.ShowAt(self, ActualWidth-5, GetItemPosY(FFocusItem)); // 5 is the menu overlap in pixels
     mi.SubMenu.OpenerPopup := self;
     mi.SubMenu.OpenerMenuBar := OpenerMenuBar;
     uFocusedPopupMenu := mi.SubMenu;
@@ -920,7 +920,7 @@ var
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   if not r.PointInRect(Point(x, y)) then
   begin
     ClosePopups;
@@ -1076,7 +1076,7 @@ begin
   Canvas.Clear(BackgroundColor);
 //  Canvas.SetColor(clBlack);
 //  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
-  Canvas.DrawButtonFace(0, 0, Width, Height, []);  // 3d rectangle inside black border
+  Canvas.DrawButtonFace(0, 0, ActualWidth, ActualHeight, []);  // 3d rectangle inside black border
 
   for n := 0 to VisibleCount-1 do
     DrawRow(n, n = FFocusItem);
@@ -1187,7 +1187,7 @@ var
   mi: TfpgMenuItem;
   lFlags: TfpgMenuItemFlags;
 begin
-  r.SetRect(FMargin, FMargin, FWidth-(2*FMargin), FHeight-(2*FMargin));
+  r.SetRect(FMargin, FMargin, ActualWidth-(2*FMargin), ActualHeight-(2*FMargin));
 
   for n := 0 to VisibleCount-1 do
   begin

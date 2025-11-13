@@ -104,10 +104,10 @@ begin
     Split := Y - FDownPos.Y;
   S := 0;
   case Align of
-    alLeft:   S := FControl.Width  + Split;
-    alRight:  S := FControl.Width  - Split;
-    alTop:    S := FControl.Height + Split;
-    alBottom: S := FControl.Height - Split;
+    alLeft:   S := FControl.ActualWidth  + Split;
+    alRight:  S := FControl.ActualWidth  - Split;
+    alTop:    S := FControl.ActualHeight + Split;
+    alBottom: S := FControl.ActualHeight - Split;
   end;
   NewSize := S;
   if S < FMinSize then
@@ -208,25 +208,25 @@ begin
   begin
     if Align in [alLeft, alRight] then
     begin
-      FMaxSize := Parent.Width - FMinSize;
+      FMaxSize := Parent.ActualWidth - FMinSize;
       for i := 0 to Parent.ComponentCount-1 do
       begin
         wg := TfpgWidget(Parent.Components[i]);
         if wg.Visible and (wg.Align in [alLeft, alRight]) then
-          Dec(FMaxSize, wg.Width);
+          Dec(FMaxSize, wg.ActualWidth);
       end;
-      Inc(FMaxSize, FControl.Width);
+      Inc(FMaxSize, FControl.ActualWidth);
     end
     else
     begin
-      FMaxSize := Parent.Height - FMinSize;
+      FMaxSize := Parent.ActualHeight - FMinSize;
       for i := 0 to Parent.ComponentCount-1 do
       begin
         wg := TfpgWidget(Parent.Components[i]);
         if (wg.Align in [alTop, alBottom]) then
-          Dec(FMaxSize, wg.Height);
+          Dec(FMaxSize, wg.ActualHeight);
       end;
-      Inc(FMaxSize, FControl.Height);
+      Inc(FMaxSize, FControl.ActualHeight);
     end;
     UpdateSize(X, Y);
 
@@ -328,15 +328,15 @@ begin
   begin
     Canvas.SetColor(clInactiveWgFrame);
     Canvas.SetLineStyle(1, lsDash);
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
   end;
 
   case Align of
     alRight,
     alLeft:
         begin
-          lRect.Top    := Height div 4;
-          lRect.SetBottom(Height div 4 * 3);
+          lRect.Top    := ActualHeight div 4;
+          lRect.SetBottom(ActualHeight div 4 * 3);
           lRect.Left   := 1;
           lRect.SetRight(6);
         end;
@@ -344,8 +344,8 @@ begin
     alTop,
     alBottom:
         begin
-          lRect.Left   := Width div 4;
-          lRect.SetRight(Width div 4 * 3);
+          lRect.Left   := ActualWidth div 4;
+          lRect.SetRight(ActualWidth div 4 * 3);
           lRect.Top    := 1;
           lRect.SetBottom(6);
         end;

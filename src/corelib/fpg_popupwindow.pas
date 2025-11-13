@@ -222,12 +222,12 @@ begin
   Result := AReferenceWindow.WidgetToScreen(AReferenceWindow, Point(x, y));
 
   // popup window will not fit below (x,y) so we place it above (x,y)
-  if (Result.y + self.Height) > fpgApplication.ScreenHeight then
-    Result.y := Result.y - self.Height;
+  if (Result.y + self.ActualHeight) > fpgApplication.ScreenHeight then
+    Result.y := Result.y - self.ActualHeight;
 
   // popup window will not fit to right of (x,y) so we place it to left of (x,y)
-  if (Result.x + self.Width) > fpgApplication.ScreenWidth then
-    Result.x := Result.x - self.Width;
+  if (Result.x + self.ActualWidth) > fpgApplication.ScreenWidth then
+    Result.x := Result.x - self.ActualWidth;
 end;
 
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
@@ -269,7 +269,7 @@ begin
         TfpgWidget(Components[i]).Anchors := [anRight, anBottom];
     end;
     // make space for the frame
-    HandleResize(Width+2, Height+2);
+    HandleResize(ActualWidth+2, ActualHeight+2);
     UpdatePosition;
 
     for i := 0 to ComponentCount-1 do
@@ -277,7 +277,7 @@ begin
       if Components[i] is TfpgWidget then
         TfpgWidget(Components[i]).Anchors := [anLeft, anTop];
     end;
-    HandleResize(Width+2, Height+2);
+    HandleResize(ActualWidth+2, ActualHeight+2);
     UpdatePosition;
     Repaint;
   end;
@@ -290,7 +290,7 @@ begin
   lColor := fpgColorToRGB(BackgroundColor);
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.SetColor(clWidgetFrame);
-  Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
   Canvas.SetColor(lColor);
 end;
 
