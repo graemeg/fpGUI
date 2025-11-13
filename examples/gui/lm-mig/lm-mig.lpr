@@ -121,14 +121,20 @@ procedure TMainForm.AfterCreate;
 begin
   inherited AfterCreate;
   Name := 'MainForm';
-  SetPosition(400, 300, 280, 380);
+  Left := 400;
+  Top := 300;
+  Width := 280;
+  Height := 380;
   WindowTitle := 'MigLayout Examples';
 
   lblTitle := TfpgLabel.Create(self);
   with lblTitle do
   begin
     Name := 'lblTitle';
-    SetPosition(20, 12, 240, 30);
+    Left := 20;
+    Top := 12;
+    Width := 240;
+    Height := 30;
     Text := 'MigLayout Demo Application';
     FontDesc := '#Label1:bold';
     Alignment := taCenter;
@@ -138,7 +144,10 @@ begin
   with btnBasic do
   begin
     Name := 'btnBasic';
-    SetPosition(20, 55, 240, 35);
+    Left := 20;
+    Top := 55;
+    Width := 240;
+    Height := 35;
     Text := 'Basic Layouts';
     FontDesc := '#Button';
     OnClick := @btnBasicClicked;
@@ -159,7 +168,10 @@ begin
   with btnSpanning do
   begin
     Name := 'btnSpanning';
-    SetPosition(20, 135, 240, 35);
+    Left := 20;
+    Top := 135;
+    Width := 240;
+    Height := 35;
     Text := 'Column & Row Spanning';
     FontDesc := '#Button';
     OnClick := @btnSpanningClicked;
@@ -169,7 +181,10 @@ begin
   with btnGrowth do
   begin
     Name := 'btnGrowth';
-    SetPosition(20, 175, 240, 35);
+    Left := 20;
+    Top := 175;
+    Width := 240;
+    Height := 35;
     Text := 'Growth Behavior';
     FontDesc := '#Button';
     OnClick := @btnGrowthClicked;
@@ -179,7 +194,10 @@ begin
   with btnComplex do
   begin
     Name := 'btnComplex';
-    SetPosition(20, 215, 240, 35);
+    Left := 20;
+    Top := 215;
+    Width := 240;
+    Height := 35;
     Text := 'Complex Form Example';
     FontDesc := '#Button';
     OnClick := @btnComplexClicked;
@@ -189,7 +207,10 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(20, 320, 240, 35);
+    Left := 20;
+    Top := 320;
+    Width := 240;
+    Height := 35;
     Text := 'Quit';
     FontDesc := '#Button';
     OnClick := @btnQuitClicked;
