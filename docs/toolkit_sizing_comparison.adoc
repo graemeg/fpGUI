@@ -1486,12 +1486,12 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_edit.pas` - Edit control border painting ✓ FIXED
 * [x] `src/gui/fpg_memo.pas` - Scrollbar positioning, visibility checks, painting ✓ FIXED
 * [x] `src/gui/fpg_checkbox.pas` - Checkbox box positioning ✓ FIXED
-* [ ] `src/gui/fpg_radiobutton.pas` - Radio button painting, hit-testing
+* [x] `src/gui/fpg_radiobutton.pas` - Radio button painting, hit-testing ✓ FIXED
 * [x] `src/gui/fpg_combobox.pas` - Button positioning, painting ✓ FIXED
 * [x] `src/gui/fpg_listbox.pas` - Scrollbar positioning, painting ✓ FIXED
 * [ ] `src/gui/fpg_grid.pas` - Grid cell calculations, scrolling, painting
 * [ ] `src/gui/fpg_tree.pas` - Tree node positioning, scrolling, painting
-* [ ] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning
+* [x] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning ✓ FIXED
 * [ ] `src/gui/fpg_progressbar.pas` - Progress bar painting
 * [ ] `src/gui/fpg_tab.pas` - Tab positioning, painting
 * [x] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations, hit-testing ✓ FIXED
