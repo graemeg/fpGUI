@@ -223,11 +223,17 @@ begin
       gkNeedle:
           begin
             { Half a filled circle background for needle }
+            {$IFDEF AGGCANVAS}
+            FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, -180,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
+            Canvas.SetLineStyle(2, lsSolid);
+            Canvas.SetColor(TfpgColor($FF98b2ed));
+            Canvas.DrawArc(Left, Top, Width, Height * 2 - 1, 0, -180);
+            {$ELSE}
             FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
             Canvas.SetLineStyle(2, lsSolid);
-            //Canvas.SetColor(TfpgColor($3b4c71));
             Canvas.SetColor(TfpgColor($FF98b2ed));
             Canvas.DrawArc(Left, Top, Width, Height * 2 - 1, 0, 180);
+            {$ENDIF}
             Canvas.SetLineStyle(1, lsSolid);
             Canvas.SetColor(TfpgColor($FF3b4c71));
             Canvas.DrawLine(Left, Bottom,Left + Width, Bottom);
@@ -235,11 +241,17 @@ begin
       gkDial:
           begin
             { 270° pie shaped background for Dial }
+            {$IFDEF AGGCANVAS}
+            FillArcGradient (Canvas,Left, Top, Width, Height , 135, 270 ,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
+            Canvas.SetLineStyle(2, lsSolid);
+            Canvas.SetColor(TfpgColor($FF98b2ed));
+            Canvas.DrawArc(Left,Top,Width,Height,135,270);
+            {$ELSE}
             FillArcGradient (Canvas,Left, Top, Width, Height , 225, -270 ,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
             Canvas.SetLineStyle(2, lsSolid);
-            //Canvas.SetColor(TfpgColor($3b4c71));
             Canvas.SetColor(TfpgColor($FF98b2ed));
             Canvas.DrawArc(Left,Top,Width,Height,225,-270);
+            {$ENDIF}
           end;
     end;
   end;  { with }
@@ -330,7 +342,11 @@ begin
     Angle := Percentage;
     Angle := Angle * 3.6; // Percentage to degrees
     Canvas.SetColor(TfpgColor($FF425d9b));
+    {$IFDEF AGGCANVAS}
+    FillArcGradient (Canvas,Left, Top, Width, Height , 270, Angle,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
+    {$ELSE}
     FillArcGradient (Canvas,Left, Top, Width, Height , 90, -Angle,TfpgColor($FF425d9b),TfpgColor($FF98b2ed));
+    {$ENDIF}
   end;
 end;
 
