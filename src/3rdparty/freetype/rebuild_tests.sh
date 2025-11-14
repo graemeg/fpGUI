@@ -5,6 +5,7 @@
 #
 
 set -e  # Exit on error
+set -o pipefail # Exit on pipe failure
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
