@@ -1506,7 +1506,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning ✓ FIXED
 * [x] `src/gui/fpg_gauge.pas` - Gauge painting ✓ FIXED
 * [x] `src/gui/fpg_dialogs.pas` - Dialog positioning ✓ FIXED
-* [ ] `src/corelib/fpg_animation.pas` - Animation bounds
+* [x] `src/gui/fpg_animation.pas` - Animation bounds ✓ FIXED (no changes needed - only uses FImage.Width/Height)
 
 ==== Layout Managers - PENDING
 
