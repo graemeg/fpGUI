@@ -204,9 +204,9 @@ begin
   Canvas.SetLineStyle(1, lsSolid);
 
   if FBoxLayout = tbLeftBox then
-    r.SetRect(2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize)
+    r.SetRect(2, ((ActualHeight - FBoxSize) div 2), FBoxSize, FBoxSize)
   else
-    r.SetRect(Width - FBoxSize - 2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize);
+    r.SetRect(ActualWidth - FBoxSize - 2, ((ActualHeight - FBoxSize) div 2), FBoxSize, FBoxSize);
   if r.top < 0 then
     r.top := 0;
 

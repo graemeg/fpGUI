@@ -262,7 +262,7 @@ var
 begin
   if Orientation = orHorizontal then
   begin
-    h := Height div 2 - 1;
+    h := ActualHeight div 2 - 1;
     Canvas.SetColor(clHilite1);
     Canvas.DrawLine(p - FSliderSize div 2,5, p + FSliderSize div 2, 5);
     Canvas.DrawLine(p - FSliderSize div 2,5, p - FSliderSize div 2, h - FSliderSize div 2);
@@ -280,7 +280,7 @@ begin
   end
   else
   begin
-    h := Width div 2 - 1;
+    h := ActualWidth div 2 - 1;
     Canvas.SetColor(clHilite1);
     Canvas.DrawLine(5,p - FSliderSize div 2, 5, p + FSliderSize div 2);
     Canvas.DrawLine(5,p - FSliderSize div 2, h - FSliderSize div 2, p - FSliderSize div 2);
@@ -306,7 +306,7 @@ var
   i: integer;
 begin
   inherited HandlePaint;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
 
   if FFocused then
     Canvas.SetColor(clWidgetFrame)
@@ -319,27 +319,27 @@ begin
 
   if Orientation = orHorizontal then
   begin
-    drawwidth := Width - 5 - FSliderSize;
+    drawwidth := ActualWidth - 5 - FSliderSize;
     linepos   := FMax - FMin;
     if linepos <> 0 then
     begin
       linepos := drawwidth / linepos;
       Canvas.SetColor(clWidgetFrame);
       for i := 0 to (FMax - FMin) do
-        Canvas.DrawLine(round(2 + (FSliderSize div 2) + (linepos * i)), Height div 2 + FSliderSize * 2, round(2 + FSliderSize div 2 + linepos * i), Height - 5);
+        Canvas.DrawLine(round(2 + (FSliderSize div 2) + (linepos * i)), ActualHeight div 2 + FSliderSize * 2, round(2 + FSliderSize div 2 + linepos * i), ActualHeight - 5);
       DrawSlider(round(2 + FSliderSize div 2 + linepos * position));
     end;
   end
   else
   begin
-    drawwidth := Height - 5 - FSliderSize;
+    drawwidth := ActualHeight - 5 - FSliderSize;
     linepos   := FMax - FMin;
     if linepos <> 0 then
     begin
       linepos := drawwidth / linepos;
       Canvas.SetColor(clWidgetFrame);
       for i := 0 to (FMax - FMin) do
-        Canvas.DrawLine(Width div 2 + FSliderSize * 2, round(2 + (FSliderSize div 2) + (linepos * i)), Width - 5, round(2 + FSliderSize div 2 + linepos * i));
+        Canvas.DrawLine(ActualWidth div 2 + FSliderSize * 2, round(2 + (FSliderSize div 2) + (linepos * i)), ActualWidth - 5, round(2 + FSliderSize div 2 + linepos * i));
       DrawSlider(round(2 + FSliderSize div 2 + linepos * position));
     end;
   end;  { if/else }
@@ -357,13 +357,13 @@ begin
   
   if Orientation = orHorizontal then
   begin
-    drawwidth := Width - 5 - FSliderSize;
+    drawwidth := ActualWidth - 5 - FSliderSize;
     linepos   := drawwidth / linepos;
     FPosition  := round((x - 2 - FSliderSize div 2) / linepos) + FMin;
   end
   else
   begin
-    drawwidth := Height - 5 - FSliderSize;
+    drawwidth := ActualHeight - 5 - FSliderSize;
     linepos   := drawwidth / linepos;
     FPosition  := round((y - 2 - FSliderSize div 2) / linepos) + FMin;
   end;
@@ -504,13 +504,13 @@ begin
   if Orientation = orVertical then
   begin
     d     := y - FSliderDragPos;
-    area  := Height - FSliderLength-4;
+    area  := ActualHeight - FSliderLength-4;
   end
   else
   begin
     d     := x - FSliderDragPos;
     tw    := GetTextWidth;
-    area  := Width - FSliderLength-4-tw;
+    area  := ActualWidth - FSliderLength-4-tw;
   end;
 
   //ppos       := FSliderPos;
@@ -541,7 +541,7 @@ begin
   { dont't draw focus rect while dragging - it flickers }
   if Focused and (not FSliderDragging) then
   begin
-    r.SetRect(0, 0, Width, Height);
+    r.SetRect(0, 0, ActualWidth, ActualHeight);
     Canvas.DrawFocusRect(r);
   end;
 end;
@@ -554,11 +554,11 @@ var
   tw: TfpgCoord;
 begin
   if Orientation = orVertical then
-    area := Height-4
+    area := ActualHeight-4
   else
   begin
     tw := GetTextWidth;
-    area := Width-4-tw;
+    area := ActualWidth-4-tw;
   end;
 
   if recalc then
@@ -580,9 +580,9 @@ begin
 
   if Orientation = orVertical then
   begin
-    r.SetRect((Width-4) div 2, 1, 4, Height {- tw} - 4);
+    r.SetRect((ActualWidth-4) div 2, 1, 4, ActualHeight {- tw} - 4);
     fpgStyle.DrawControlFrame(Canvas, r);
-    r.SetRect((Width-20) div 2, FSliderPos, 21, FSliderLength);
+    r.SetRect((ActualWidth-20) div 2, FSliderPos, 21, FSliderLength);
     Canvas.DrawButtonFace(r, []);
     //if FShowPosition then
     //begin
@@ -592,14 +592,14 @@ begin
   end
   else
   begin
-    r.SetRect(1, (Height-4) div 2, Width - tw - 4, 4);
+    r.SetRect(1, (ActualHeight-4) div 2, ActualWidth - tw - 4, 4);
     fpgStyle.DrawControlFrame(Canvas, r);
-    r.SetRect(FSliderPos, (Height-20) div 2, FSliderLength, 21);
+    r.SetRect(FSliderPos, (ActualHeight-20) div 2, FSliderLength, 21);
     Canvas.DrawButtonFace(r, []);
     if FShowPosition then
     begin
       Canvas.SetTextColor(TextColor);
-      fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.GetHeight) div 2, IntToStr(Position), Enabled);
+      fpgStyle.DrawString(Canvas, ActualWidth - tw, (ActualHeight - FFont.GetHeight) div 2, IntToStr(Position), Enabled);
     end;
   end;
 end;
