@@ -193,7 +193,7 @@ begin
   {common Background for all kinds }
 
   {Client area is Widget area, to start with}
-  FClientRect.SetRect(0, 0, Width, Height);
+  FClientRect.SetRect(0, 0, ActualWidth, ActualHeight);
   Canvas.ClearClipRect;
   Canvas.Clear(Color);
   { This must be adjusted according the selected style }
@@ -372,7 +372,7 @@ begin
   Radius.X := Center.X -3;
   Radius.Y := Center.Y -3;
   {compute centre circle size}
-  CenterDot := (Width + Height) div 40; // approx. scaled to 1/10 of widget size:
+  CenterDot := (ActualWidth + ActualHeight) div 40; // approx. scaled to 1/10 of widget size:
   if CenterDot < 2 then
     CenterDot := 2;
   { draw needle centre circle }
