@@ -1479,9 +1479,9 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_form.pas` - Form painting, sizing, window management ✓ FIXED (no changes needed)
 * [x] `src/gui/fpg_panel.pas` - Panel painting, client area (includes Bevel classes) ✓ FIXED
 * [x] `src/gui/fpg_scrollframe.pas` - Scrolling calculations, viewport ✓ FIXED
-* [ ] `src/gui/fpg_splitter.pas` - Splitter drag calculations
-* [ ] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations
-* [ ] `src/gui/fpg_popupwindow.pas` - Popup window positioning
+* [x] `src/gui/fpg_splitter.pas` - Splitter drag calculations ✓ FIXED
+* [x] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations ✓ FIXED
+* [x] `src/gui/fpg_popupwindow.pas` - Popup window positioning ✓ FIXED
 * [x] `src/gui/fpg_label.pas` - Label painting, text layout ✓ FIXED
 * [x] `src/gui/fpg_edit.pas` - Edit control border painting ✓ FIXED
 * [x] `src/gui/fpg_memo.pas` - Scrollbar positioning, visibility checks, painting ✓ FIXED
