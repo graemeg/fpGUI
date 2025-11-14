@@ -168,7 +168,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
-    canvas.SetColor(RGBTripleTofpgColor(newcolor));
+    canvas.SetColor(fpgColor(newcolor.Red, newcolor.Green, newcolor.Blue));
     canvas.DrawArc(X, Y, W, H, a1, a2);
   end;
 end;
