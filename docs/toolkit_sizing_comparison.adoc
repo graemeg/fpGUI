@@ -1,6 +1,9 @@
 = UI Toolkit Sizing API Comparison
 :toc: left
+:toclevels: 4
 :sectnums:
+:source-highlighter: rouge
+:icons: font
 
 == Executive Summary
 
@@ -1037,6 +1040,7 @@ w.SetPosition(0, 0, 200, 200);
 **Why HandleResize Should NOT Update FPreferredSize**:
 
 Initially attempted to update `FPreferredSize` in `HandleResize`, but this was **incorrect** because:
+
 - Layout managers call `HandleResize` to apply calculated size
 - If layout can only give 150px (constrained space), but developer requested 200px
 - Updating `FPreferredSize` to 150 loses the developer's intent
@@ -1097,6 +1101,7 @@ r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 **Status**: ✓ FIXED
 
 **Known Issues Remaining**:
+
 - Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation
 - All other widget classes need similar fixes to TfpgButton and TfpgLabel
 
@@ -1453,6 +1458,7 @@ end;
 ----
 
 **Where to look**:
+
 - `UpdateScrollBarCoords` methods reading scrollbar dimensions
 - Property getters like `GetScrollBarWidth` that query child widget sizes
 - Any calculation that reads a child widget's size for positioning: `FChild.Width`, `FChild.Height`
@@ -1511,6 +1517,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 ==== Rendering Backends - PENDING
 
 **Status Notes**:
+
 - AggCanvas backend (Agg2D.pas) is WORKING - user verified all fixes applied
 - X11 backend shows corrupted form background when AggCanvas disabled - needs fixes
 - All other backends (GDI, Carbon, Cocoa) untested and likely broken
@@ -1519,8 +1526,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/corelib/render/software/Agg2D.pas` - Agg canvas implementation ✓ WORKING
 * [ ] `src/corelib/x11/fpg_x11.pas` - X11 window management (corrupted background issue)
 * [ ] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend
-* [ ] `src/corelib/carbon/fpg_carbon.pas` - macOS Carbon backend (if exists)
-* [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend (if exists)
+* [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend
 
 ==== Application Examples - PENDING
 
