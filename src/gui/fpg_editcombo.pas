@@ -227,8 +227,8 @@ procedure TDropDownWindow.HandleShow;
 begin
   FListBox.Left := 0;
   FListBox.Top := 0;
-  FListBox.Width := Width;
-  FListBox.Height := Height;
+  FListBox.Width := ActualWidth;
+  FListBox.Height := ActualHeight;
   inherited HandleShow;
   ActiveWidget := FListBox;
 end;
@@ -312,7 +312,7 @@ begin
     FreeAndNil(FDropDown);
     FDropDown := TDropDownWindow.Create(nil);
     ddw := TDropDownWindow(FDropDown);
-    ddw.Width := Width;
+    ddw.Width := ActualWidth;
     ddw.CallerWidget := self;
     ddw.FListBox.OnSelect := @InternalListBoxSelect;
     ddw.FListBox.OnKeyPress := @InternalListBoxKeyPress;
@@ -780,7 +780,7 @@ var
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   fpgStyle.DrawControlFrame(Canvas, r);
   rect := fpgStyle.GetControlFrameBorders;
   InflateRect(r, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }

@@ -1503,7 +1503,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations, hit-testing ✓ FIXED
 * [x] `src/gui/fpg_listview.pas` - ListView scrolling, column calculations ✓ FIXED
 * [x] `src/gui/fpg_hyperlink.pas` - Hyperlink hit-testing ✓ FIXED (no changes needed - inherits from TfpgCustomLabel)
-* [ ] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning
+* [x] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning ✓ FIXED
 * [ ] `src/gui/fpg_gauge.pas` - Gauge painting
 * [ ] `src/gui/fpg_dialogs.pas` - Dialog positioning
 * [ ] `src/corelib/fpg_animation.pas` - Animation bounds
