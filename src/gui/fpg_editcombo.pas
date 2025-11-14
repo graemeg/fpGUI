@@ -778,7 +778,7 @@ var
   end;
 
 begin
-//  inherited HandlePaint;
+  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, ActualWidth, ActualHeight);
   fpgStyle.DrawControlFrame(Canvas, r);
