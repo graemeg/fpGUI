@@ -212,6 +212,7 @@ type
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMouseHorizScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
@@ -277,10 +278,6 @@ type
 
 implementation
 
-{$IFDEF DEBUG}
-uses
-  fpg_dbugintf;
-{$ENDIF}
 
 type
   PColumnLeft = ^integer;
@@ -589,9 +586,6 @@ function TfpgTreeNode.AppendText(AText: TfpgString): TfpgTreeNode;
 var
   h: TfpgTreeNode;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.AppendText');
-  {$ENDIF}
   h := TfpgTreeNode.Create;
   h.FTree := FTree;
   h.Text := AText;
@@ -605,9 +599,6 @@ var
   a: integer;
   t: integer;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.GetMaxDepth');
-  {$ENDIF}
   h := FirstSubNode;
   result := 1;
   a := 0;
@@ -627,9 +618,6 @@ var
   a: integer;
   t: integer;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.GetMaxVisibleDepth');
-  {$ENDIF}
   result := 1;
   h := FirstSubNode;
   if h.Collapsed then
@@ -849,9 +837,6 @@ end;
 
 procedure TfpgTreeview.VScrollbarScroll(Sender: TObject; position: integer);
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.VScrollbarMove');
-  {$ENDIF}
   FYOffset := Position;
   RePaint;
 end;
@@ -1049,9 +1034,6 @@ var
   w: integer;
   r: integer;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.MaxNodeWidth');
-  {$ENDIF}
   result := 0;
   h := RootNode.FirstSubNode;
   r := 0;
@@ -1092,9 +1074,6 @@ function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
 var
   lImageItem: TfpgImageItem;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.GetNodeWidth');
-  {$ENDIF}
   if ANode = nil then
     Result := 0
   else
@@ -1182,9 +1161,6 @@ var
   h: PfpgTreeColumnWidth;
   i: integer;
 begin
-{$IFDEF DEBUG}
-  SendDebug(Classname + '.GetColumnWidth');
-{$ENDIF}
   h := FFirstColumn;
   i := 0;
   if h = nil then // not found
@@ -1313,9 +1289,6 @@ var
   ACounter: integer;
   AColumnLeft: PColumnLeft;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.PreCalcColumnLeft');
-  {$ENDIf}
   if FColumnLeft = nil then
 	  FColumnLeft := TList.Create;
 
@@ -1340,26 +1313,29 @@ end;
 procedure TfpgTreeview.UpdateScrollbars;
 var
   VBarWasVisible, HBarWasVisible: Boolean;
+  OldVPos, OldHPos: Integer;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.UpdateScrollbars');
-  {$ENDIF}
-  // Save current visibility state
+  // Save current visibility state and positions
   VBarWasVisible := FVScrollbar.Visible;
   HBarWasVisible := FHScrollbar.Visible;
+  OldVPos := FVScrollbar.Position;
+  OldHPos := FHScrollbar.Position;
 
   FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
-  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.ActualHeight;
+  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight;
   FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
   FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move the height of the font
-  FHScrollbar.Min := 0;
-  FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.ActualWidth;
-  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the height
-  FHScrollbar.Visible := MaxNodeWidth > ActualWidth - 2;
 
-  // Only update/repaint if visibility changed
-  if not FVScrollbar.Visible then
+  if FVScrollbar.Visible then
+  begin
+    // Sync scrollbar position with internal offset
+    FVScrollbar.Position := FYOffset;
+    // Only repaint if position actually changed
+    if FVScrollbar.Position <> OldVPos then
+      FVScrollbar.RepaintSlider;
+  end
+  else
   begin
     if VBarWasVisible then  // Just became invisible
     begin
@@ -1368,7 +1344,20 @@ begin
     end;
   end;
 
-  if not FHScrollbar.Visible then
+  FHScrollbar.Min := 0;
+  FHScrollbar.Max := MaxNodeWidth - VisibleWidth;
+  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the width
+  FHScrollbar.Visible := MaxNodeWidth > VisibleWidth;
+
+  if FHScrollbar.Visible then
+  begin
+    // Sync scrollbar position with internal offset
+    FHScrollbar.Position := FXOffset;
+    // Only repaint if position actually changed
+    if FHScrollbar.Position <> OldHPos then
+      FHScrollbar.RepaintSlider;
+  end
+  else
   begin
     if HBarWasVisible then  // Just became invisible
     begin
@@ -1379,29 +1368,22 @@ begin
 end;
 
 procedure TfpgTreeview.ResetScrollbar;
-const
-  cSBarThickness = 16;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.ResetScrollbar');
-  {$ENDIF}
   // Size the scrollbars FIRST so UpdateScrollBars can read their ActualWidth/ActualHeight
-  FVScrollbar.Left := ActualWidth - cSBarThickness - 1;
+  // Use the scrollbar's Width/Height (preferred size) which respects DPI scaling
+  FVScrollbar.Left := ActualWidth - FVScrollbar.Width - 1;
   FVScrollbar.Top := 1;
   if FHScrollbar.Visible then
-  begin
-    FVScrollbar.Width := cSBarThickness;
-    FVScrollbar.Height := ActualHeight - 2 - cSBarThickness;
-  end
+    FVScrollbar.Height := ActualHeight - 2 - FHScrollbar.Height
   else
-  begin
-    FVScrollbar.Width := 16;
     FVScrollbar.Height := ActualHeight - 2;
-  end;
+
   FHScrollbar.Left := 1;
-  FHScrollbar.Top := ActualHeight - cSBarThickness - 1;
-  FHScrollbar.Width := ActualWidth - 2;
-  FHScrollbar.Height := cSBarThickness;
+  FHScrollbar.Top := ActualHeight - FHScrollbar.Height - 1;
+  if FVScrollbar.Visible then
+    FHScrollbar.Width := ActualWidth - 2 - FVScrollbar.Width
+  else
+    FHScrollbar.Width := ActualWidth - 2;
 
   // Now call UpdateScrollBars which can read the correct ActualWidth/ActualHeight
   UpdateScrollBars;
@@ -1427,9 +1409,6 @@ end;
 
 procedure TfpgTreeview.HandleResize(awidth, aheight: TfpgCoord);
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.HandleResize');
-  {$ENDIF}
   inherited HandleResize(awidth, aheight);
   if (csLoading in ComponentState) then
     Exit; //==>
@@ -1584,6 +1563,7 @@ begin
     end
     else
       Selection.Collapse;
+    UpdateScrollbars;  // Update scrollbar ranges after expand/collapse
     RePaint;
   end;
 end;
@@ -1613,9 +1593,6 @@ var
   AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.HandlePaint');
-  {$ENDIF}
   if csUpdating in ComponentState then
     Exit;
 
@@ -1889,6 +1866,13 @@ begin
       break;  //==>
     end;
   end; { while h <> nil }
+
+  // Paint corner rectangle where scrollbars meet
+  if FVScrollbar.Visible and FHScrollbar.Visible then
+  begin
+    Canvas.SetColor(clWindowBackground);
+    Canvas.FillRectangle(FVScrollbar.Left, FHScrollbar.Top, FVScrollbar.ActualWidth, FHScrollbar.ActualHeight);
+  end;
 end;
 
 procedure TfpgTreeview.DrawHeader(ACol: integer; ARect: TfpgRect;
@@ -1991,29 +1975,60 @@ end;
 procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 var
-  i: integer;
+  maxoffset: integer;
   dy: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
+
+  // Only allow scrolling if vertical scrollbar is visible
+  if not FVScrollbar.Visible then
+    Exit;
+
   dy := (VisibleHeight div 3);  // mouse scrolling is 1/3 of the height
   if delta > 0 then // scrolling down
   begin
-    inc(FYOffset, dy);  //FScrollWheelDelta);
-    i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.ActualHeight;
-    if FYOffset > i then
-      FYOffset := i;
-    i := FVScrollbar.Position + dy;
-    FVScrollbar.Position := i;
+    inc(FYOffset, dy);
+    maxoffset := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight;
+    if FYOffset > maxoffset then
+      FYOffset := maxoffset;
   end
   else
   begin  // scrolling up
-    dec(FYOffset, dy); //FScrollWheelDelta);
+    dec(FYOffset, dy);
     if FYOffset < 0 then
       FYOffset := 0;
-    i := FVScrollbar.Position - dy;
-    FVScrollbar.Position := i;
   end;
-  UpdateScrollbars;
+  UpdateScrollbars;  // This will sync scrollbar position and repaint it
+  RePaint;
+end;
+
+procedure TfpgTreeview.HandleMouseHorizScroll(x, y: integer;
+  shiftstate: TShiftState; delta: smallint);
+var
+  maxoffset: integer;
+  dx: integer;
+begin
+  inherited HandleMouseHorizScroll(x, y, shiftstate, delta);
+
+  // Only allow scrolling if horizontal scrollbar is visible
+  if not FHScrollbar.Visible then
+    Exit;
+
+  dx := (VisibleWidth div 3);  // mouse scrolling is 1/3 of the width
+  if delta > 0 then // scrolling right
+  begin
+    inc(FXOffset, dx);
+    maxoffset := MaxNodeWidth - VisibleWidth;
+    if FXOffset > maxoffset then
+      FXOffset := maxoffset;
+  end
+  else
+  begin  // scrolling left
+    dec(FXOffset, dx);
+    if FXOffset < 0 then
+      FXOffset := 0;
+  end;
+  UpdateScrollbars;  // This will sync scrollbar position and repaint it
   RePaint;
 end;
 
@@ -2228,6 +2243,7 @@ begin
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
   FHScrollbar.SliderSize  := 0.5;
+  FHScrollbar.Height      := 16;  // Default scrollbar thickness (will be DPI scaled)
 
   FVScrollbar := TfpgScrollbar.Create(self);
   FVScrollbar.Orientation := orVertical;
@@ -2235,6 +2251,7 @@ begin
   FVScrollbar.Visible     := False;
   FVScrollbar.Position    := 0;
   FVScrollbar.SliderSize  := 0.2;
+  FVScrollbar.Width       := 16;  // Default scrollbar thickness (will be DPI scaled)
 
   FBackgroundColor  := clListBox;
   FTreeLineColor    := clShadow1; //clText1;
@@ -2268,9 +2285,6 @@ var
   n: PfpgTreeColumnWidth;
   i: word;
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.SetColumnWidth');
-  {$ENDIF}
   h := FFirstColumn;
   if h = nil then
   begin
