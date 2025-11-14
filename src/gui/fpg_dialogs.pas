@@ -437,7 +437,7 @@ begin
   begin
     tw := FFont.GetTextWidth(FLines[n]);
     if CentreText then
-      Canvas.DrawString(Width div 2 - tw div 2, y, FLines[n])
+      Canvas.DrawString(ActualWidth div 2 - tw div 2, y, FLines[n])
     else
       Canvas.DrawString(10, y, FLines[n]);
     Inc(y, FLineHeight);
