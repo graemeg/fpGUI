@@ -1490,7 +1490,7 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_combobox.pas` - Button positioning, painting ✓ FIXED
 * [x] `src/gui/fpg_listbox.pas` - Scrollbar positioning, painting ✓ FIXED
 * [ ] `src/gui/fpg_grid.pas` - Grid cell calculations, scrolling, painting
-* [ ] `src/gui/fpg_tree.pas` - Tree node positioning, scrolling, painting
+* [x] `src/gui/fpg_tree.pas` - Tree node positioning, scrolling, painting ✓ FIXED
 * [x] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning ✓ FIXED
 * [ ] `src/gui/fpg_progressbar.pas` - Progress bar painting
 * [x] `src/gui/fpg_tab.pas` - Tab positioning, painting ✓ FIXED

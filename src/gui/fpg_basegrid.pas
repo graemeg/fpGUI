@@ -860,7 +860,7 @@ begin
     FVScrollBar.Position := FFirstRow;
     FVScrollBar.RepaintSlider;
     FVScrollBar.Top := borders.Top;
-    FVScrollBar.Left := Width - FVScrollBar.Width - borders.Right;
+    FVScrollBar.Left := ActualWidth - FVScrollBar.Width - borders.Right;
     FVScrollBar.Height := VHeight;
   end
   else
@@ -892,7 +892,7 @@ begin
     end;
     FHScrollBar.SliderSize := HWidth / lTotalColWidth;
     FHScrollBar.RepaintSlider;
-    FHScrollBar.Top     := Height - FHScrollBar.Height - borders.Bottom;
+    FHScrollBar.Top     := ActualHeight - FHScrollBar.Height - borders.Bottom;
     FHScrollBar.Left    := borders.Left;
     FHScrollBar.Width   := HWidth;
   end
@@ -907,12 +907,12 @@ begin
     // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
   end;
 
-  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Top     := ActualHeight -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
   FHScrollBar.Width   := HWidth;
 
   FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - 2;
   FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdatePosition;
@@ -938,7 +938,7 @@ var
   cWidths: array of integer;
 begin
   Canvas.ClearClipRect;
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
         begin
