@@ -441,23 +441,23 @@ begin
   { Calculate and set Width and Height }
   if TabPosition in [tpTop, tpBottom] then
   begin
-    w := Width - (FMargin*2) - r.Left - r.Right;
+    w := ActualWidth - (FMargin*2) - r.Left - r.Right;
     APage.Width   := w;
-    h := Height - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
+    h := ActualHeight - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
     APage.Height  := h;
   end
   else if TabPosition in [tpLeft, tpRight] then
   begin
-    w := Width - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
+    w := ActualWidth - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
     APage.Width   := w;
-    h := Height - (FMargin*2) - r.Top - r.Bottom;
+    h := ActualHeight - (FMargin*2) - r.Top - r.Bottom;
     APage.Height  := h;
   end
   else
   begin   // tpNone
-    w := Width - (FMargin*2) - r.Left - r.Right;
+    w := ActualWidth - (FMargin*2) - r.Left - r.Right;
     APage.Width   := w;
-    h := Height - (FMargin*2) - r.Top - r.Bottom;
+    h := ActualHeight - (FMargin*2) - r.Top - r.Bottom;
     APage.Height  := h;
   end;
 
@@ -838,7 +838,7 @@ begin
 
   if TabPosition in [tpTop, tpBottom] then
   begin
-    if MaxButtonWidthSum > (Width-(FMargin*2)) then
+    if MaxButtonWidthSum > (ActualWidth-(FMargin*2)) then
     begin
       if FFirstTabButton = nil then
         FFirstTabButton := h
@@ -846,23 +846,23 @@ begin
         h := FFirstTabButton;
       if TabPosition = tpTop then
       begin
-        FLeftButton.Left := Width - (FRightButton.Width * 2);
+        FLeftButton.Left := ActualWidth - (FRightButton.Width * 2);
         FLeftButton.Top := FMargin;
         FLeftButton.Width := FRightButton.Height;
         FLeftButton.Height := FRightButton.Height;
-        FRightButton.Left := Width - FRightButton.Width;
+        FRightButton.Left := ActualWidth - FRightButton.Width;
         FRightButton.Top := FMargin;
         FRightButton.Width := FRightButton.Height;
         FRightButton.Height := FRightButton.Height;
       end
       else
       begin
-        FLeftButton.Left := Width - (FRightButton.Width * 2);
-        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Left := ActualWidth - (FRightButton.Width * 2);
+        FLeftButton.Top := ActualHeight - ButtonHeight - FMargin;
         FLeftButton.Width := FRightButton.Height;
         FLeftButton.Height := FRightButton.Height;
-        FRightButton.Left := Width - FRightButton.Width;
-        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Left := ActualWidth - FRightButton.Width;
+        FRightButton.Top := ActualHeight - ButtonHeight - FMargin;
         FRightButton.Width := FRightButton.Height;
         FRightButton.Height := FRightButton.Height;
       end;
@@ -878,7 +878,7 @@ begin
 
   if TabPosition in [tpLeft, tpRight] then
   begin
-    if MaxButtonHeightSum > (Height-(FMargin*2)) then
+    if MaxButtonHeightSum > (ActualHeight-(FMargin*2)) then
     begin
       if FFirstTabButton = nil then
         FFirstTabButton := h
@@ -887,22 +887,22 @@ begin
       if TabPosition = tpLeft then
       begin
         FLeftButton.Left := MaxButtonWidth - (FRightButton.Width * 2);
-        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Top := ActualHeight - ButtonHeight - FMargin;
         FLeftButton.Width := FRightButton.Height;
         FLeftButton.Height := FRightButton.Height;
         FRightButton.Left := MaxButtonWidth - FRightButton.Width;
-        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Top := ActualHeight - ButtonHeight - FMargin;
         FRightButton.Width := FRightButton.Height;
         FRightButton.Height := FRightButton.Height;
       end
       else
       begin
-        FLeftButton.Left := Width - MaxButtonWidth;
-        FLeftButton.Top := Height - ButtonHeight - FMargin;
+        FLeftButton.Left := ActualWidth - MaxButtonWidth;
+        FLeftButton.Top := ActualHeight - ButtonHeight - FMargin;
         FLeftButton.Width := FRightButton.Height;
         FLeftButton.Height := FRightButton.Height;
-        FRightButton.Left := Width - MaxButtonWidth + FRightButton.Width;
-        FRightButton.Top := Height - ButtonHeight - FMargin;
+        FRightButton.Left := ActualWidth - MaxButtonWidth + FRightButton.Width;
+        FRightButton.Top := ActualHeight - ButtonHeight - FMargin;
         FRightButton.Width := FRightButton.Height;
         FRightButton.Height := FRightButton.Height;
       end;
@@ -927,8 +927,8 @@ begin
             h.Visible:=True;
           h.Left := FMargin + 2;
           h.Top := FMargin + 2;
-          h.Width := Width - (FMargin * 2) - 4;
-          h.Height := Height - ((FMargin + 2) * 2);
+          h.Width := ActualWidth - (FMargin * 2) - 4;
+          h.Height := ActualHeight - ((FMargin + 2) * 2);
           if h <> TfpgTabSheet(FPages.Last) then
             h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
           else
@@ -936,8 +936,8 @@ begin
         end;
         r2.Left    := 0;
         r2.Top     := 0;
-        r2.Width   := Width;
-        r2.Height  := Height;
+        r2.Width   := ActualWidth;
+        r2.Height  := ActualHeight;
         Canvas.DrawButtonFace(r2, []);
       end;
 
@@ -945,7 +945,7 @@ begin
       begin
         lTxtFlags += TextFlagsDflt;
         lp := 0;
-        r2.SetRect(2, Height - ButtonHeight, 50, TabH-2);
+        r2.SetRect(2, ActualHeight - ButtonHeight, 50, TabH-2);
         while h <> nil do
         begin
           if h <> ActivePage then
@@ -959,8 +959,8 @@ begin
             h.Visible := True;
             h.Left := FMargin + 2;
             h.Top := FMargin + 2;
-            h.Width := Width - (FMargin * 2) - 4;
-            h.Height := Height - TabH - (FMargin + 2) * 2;
+            h.Width := ActualWidth - (FMargin * 2) - 4;
+            h.Height := ActualHeight - TabH - (FMargin + 2) * 2;
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -973,7 +973,7 @@ begin
           begin
             Canvas.SetTextColor(h.TabTextColor);
             Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.GetTabFont.GetTextWidth(GetTabText(h.Text)) div 2,
-                Height-TabH+toffset, GetTabText(h.Text), lTxtFlags);
+                ActualHeight-TabH+toffset, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -985,8 +985,8 @@ begin
         // Draw Page Control body rectangle (client area)
         r2.Left    := 0;
         r2.Top     := 0;
-        r2.Width   := Width;
-        r2.Height  := Height - TabH;
+        r2.Width   := ActualWidth;
+        r2.Height  := ActualHeight - TabH;
         Canvas.DrawButtonFace(r2, []);
 
         // Draw text of ActivePage, because we didn't before.
@@ -1014,8 +1014,8 @@ begin
             h.Visible := True;
             h.Left := FMargin + 2;
             h.Top := FMargin + 2 + r2.Height;
-            h.Width := Width - (FMargin * 2) - 4;
-            h.Height := Height - r2.Height - ((FMargin + 2) * 2);
+            h.Width := ActualWidth - (FMargin * 2) - 4;
+            h.Height := ActualHeight - r2.Height - ((FMargin + 2) * 2);
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -1040,8 +1040,8 @@ begin
         // Draw Page Control body rectangle (client area)
         r2.Left    := 0;
         r2.Top     := r2.Top + r2.Height-2;
-        r2.Width   := Width;
-        r2.Height  := Height - r2.Height;
+        r2.Width   := ActualWidth;
+        r2.Height  := ActualHeight - r2.Height;
         Canvas.DrawButtonFace(r2, []);
 
         // Draw text of ActivePage, because we didn't before.
@@ -1056,7 +1056,7 @@ begin
         lTxtFlags += [txtVCenter, txtLeft];
         lp := 0;
         TabW := MaxButtonWidth;
-        r2.SetRect(Width - 2 - TabW, 2, TabW, TabH);
+        r2.SetRect(ActualWidth - 2 - TabW, 2, TabW, TabH);
         while h <> nil do
         begin
           if h <> ActivePage then
@@ -1071,8 +1071,8 @@ begin
             { set tab content page (client area) size }
             h.Left := FMargin + 2;
             h.Top := FMargin + 2;
-            h.Width := Width - ((FMargin + 2) * 2) - TabW;
-            h.Height := Height - ((FMargin + 2) * 2);
+            h.Width := ActualWidth - ((FMargin + 2) * 2) - TabW;
+            h.Height := ActualHeight - ((FMargin + 2) * 2);
           end;
           // paint tab button
           if h = ActivePage then
@@ -1095,8 +1095,8 @@ begin
         // Draw Page Control body rectangle (client area)
         r2.Left    := 0;
         r2.Top     := 0;
-        r2.Width   := Width - TabW;
-        r2.Height  := Height;
+        r2.Width   := ActualWidth - TabW;
+        r2.Height  := ActualHeight;
         Canvas.DrawButtonFace(r2, []);
 
         // Draw text of ActivePage, because we didn't before.
@@ -1126,8 +1126,8 @@ begin
             { set tab content page (client area) size }
             h.Left := FMargin + 2 + TabW;
             h.Top := FMargin + 2;
-            h.Width := Width - ((FMargin + 2) * 2) - TabW;
-            h.Height := Height - ((FMargin + 2) * 2);
+            h.Width := ActualWidth - ((FMargin + 2) * 2) - TabW;
+            h.Height := ActualHeight - ((FMargin + 2) * 2);
           end;
           // paint tab button
           if h = ActivePage then
@@ -1150,8 +1150,8 @@ begin
         // Draw Page Control body rectangle (client area)
         r2.Left    := TabW;
         r2.Top     := 0;
-        r2.Width   := Width - TabW;
-        r2.Height  := Height;
+        r2.Width   := ActualWidth - TabW;
+        r2.Height  := ActualHeight;
         Canvas.DrawButtonFace(r2, []);
 
         // Draw text of ActivePage, because we didn't before.
