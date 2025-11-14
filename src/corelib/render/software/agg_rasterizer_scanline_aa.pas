@@ -444,7 +444,7 @@ begin
 
    m_cur_cell_ptr^:=m_cur_cell;
 
-   inc(ptrcomp(m_cur_cell_ptr ) ,sizeof(cell_aa ) );
+   inc(m_cur_cell_ptr);
    inc(m_num_cells );
 
    if m_cur_cell.x < m_min_x then
@@ -549,37 +549,37 @@ begin
     repeat
      x:=base^.x;
 
-     inc(ptrcomp(i ) ,sizeof(cell_aa_ptr ) );
+     inc(i);
 
      while i^.x < x do
-      inc(ptrcomp(i ) ,sizeof(cell_aa_ptr ) );
+      inc(i);
 
-     dec(ptrcomp(j ) ,sizeof(cell_aa_ptr ) );
+     dec(j);
 
      while x < j^.x do
-      dec(ptrcomp(j ) ,sizeof(cell_aa_ptr ) );
+      dec(j);
 
-     if ptrcomp(i ) > ptrcomp(j ) then
+     if ptrcomp(i) > ptrcomp(j) then
       break;
 
-     temp:=p32_ptr(i ).ptr;
+     temp:=p32_ptr(i).ptr;
 
-     p32_ptr(i ).ptr:=p32_ptr(j ).ptr;
-     p32_ptr(j ).ptr:=temp;
+     p32_ptr(i).ptr:=p32_ptr(j).ptr;
+     p32_ptr(j).ptr:=temp;
 
     until false;
 
-    temp:=p32_ptr(base ).ptr;
+    temp:=p32_ptr(base).ptr;
 
-    p32_ptr(base ).ptr:=p32_ptr(j ).ptr;
-    p32_ptr(j ).ptr   :=temp;
+    p32_ptr(base).ptr:=p32_ptr(j).ptr;
+    p32_ptr(j).ptr   :=temp;
 
    // now, push the largest sub-array
-    if (ptrcomp(j ) - ptrcomp(base ) ) div SizeOf(Pointer) > (ptrcomp(limit ) - ptrcomp(i ) ) div SizeOf(Pointer) then
+    if (ptrcomp(j) - ptrcomp(base)) div SizeOf(Pointer) > (ptrcomp(limit) - ptrcomp(i)) div SizeOf(Pointer) then
      begin
       top^:=base;
 
-      inc(ptrcomp(top ) ,sizeof(cell_aa_ptr_ptr ) );
+      inc(top);
 
       top^:=j;
       base:=i;
@@ -589,37 +589,37 @@ begin
      begin
       top^:=i;
 
-      inc(ptrcomp(top ) ,sizeof(cell_aa_ptr_ptr ) );
+      inc(top);
 
       top^ :=limit;
       limit:=j;
 
      end;
 
-    inc(ptrcomp(top ) ,sizeof(cell_aa_ptr_ptr ) );
+    inc(top);
 
    end
   else
    begin
    // the sub-array is small, perform insertion sort
     j:=base;
-    i:=cell_aa_ptr_ptr(ptrcomp(j ) + 1 * SizeOf(Pointer) );
+    i:=cell_aa_ptr_ptr(ptrcomp(j) + 1 * SizeOf(Pointer));
 
-    while ptrcomp(i ) < ptrcomp(limit ) do
+    while ptrcomp(i) < ptrcomp(limit) do
      begin
       try
-       while cell_aa_ptr_ptr(ptrcomp(j ) + 1 * SizeOf(Pointer) )^^.x < j^.x do
+       while cell_aa_ptr_ptr(ptrcomp(j) + 1 * SizeOf(Pointer))^^.x < j^.x do
         begin
-         //swap_ptrs(cell_aa_ptr_ptr(ptrcomp(j ) + 1 * SizeOf(Pointer) ) ,j );
-          temp:=p32_ptr(cell_aa_ptr_ptr(ptrcomp(j ) + 1 * SizeOf(Pointer) ) ).ptr;
+         //swap_ptrs(cell_aa_ptr_ptr(ptrcomp(j) + 1 * SizeOf(Pointer)) ,j );
+          temp:=p32_ptr(cell_aa_ptr_ptr(ptrcomp(j) + 1 * SizeOf(Pointer))).ptr;
 
-          p32_ptr(cell_aa_ptr_ptr(ptrcomp(j ) + 1 * SizeOf(Pointer) ) ).ptr:=p32_ptr(j ).ptr;
-          p32_ptr(j ).ptr:=temp;
+          p32_ptr(cell_aa_ptr_ptr(ptrcomp(j) + 1 * SizeOf(Pointer))).ptr:=p32_ptr(j).ptr;
+          p32_ptr(j).ptr:=temp;
 
          if j = base then
           break;
 
-         dec(ptrcomp(j ) ,sizeof(cell_aa_ptr ) );
+         dec(j);
 
         end;
 
@@ -628,17 +628,17 @@ begin
 
       j:=i;
 
-      inc(ptrcomp(i ) ,sizeof(cell_aa_ptr ) );
+      inc(i);
 
      end;
 
-    if ptrcomp(top ) > ptrcomp(@stack[0 ] ) then
+    if ptrcomp(top) > ptrcomp(@stack[0]) then
      begin
-      dec(ptrcomp(top ) ,sizeof(cell_aa_ptr_ptr ) );
+      dec(top);
 
       limit:=top^;
 
-      dec(ptrcomp(top ) ,sizeof(cell_aa_ptr_ptr ) );
+      dec(top);
 
       base:=top^;
 
@@ -693,7 +693,7 @@ begin
 
    cell_ptr:=block_ptr^;
 
-   inc(ptrcomp(block_ptr ) ,sizeof(cell_aa_ptr ) );
+   inc(block_ptr);
 
    i:=cell_block_size;
 
@@ -701,7 +701,7 @@ begin
     begin
      dec(i );
      inc(sorted_y_ptr(ptrcomp(m_sorted_y.m_array ) + unsigned(cell_ptr^.y - m_min_y ) * m_sorted_y.m_entry_sz ).start );
-     inc(ptrcomp(cell_ptr ) ,sizeof(cell_aa ) );
+     inc(cell_ptr);
 
     end;
 
@@ -709,7 +709,7 @@ begin
 
  cell_ptr:=block_ptr^;
 
- inc(ptrcomp(block_ptr ) ,sizeof(cell_aa_ptr ) );
+ inc(block_ptr);
 
  i:=m_num_cells and cell_block_mask;
 
@@ -717,7 +717,7 @@ begin
   begin
    dec(i );
    inc(sorted_y_ptr(ptrcomp(m_sorted_y.m_array ) + unsigned(cell_ptr^.y - m_min_y ) * m_sorted_y.m_entry_sz ).start );
-   inc(ptrcomp(cell_ptr ) ,sizeof(cell_aa ) );
+   inc(cell_ptr);
 
   end;
 
@@ -745,7 +745,7 @@ begin
 
    cell_ptr:=block_ptr^;
 
-   inc(ptrcomp(block_ptr ) ,sizeof(cell_aa_ptr ) );
+   inc(block_ptr);
 
    i:=cell_block_size;
 
@@ -758,7 +758,7 @@ begin
      p32_ptr(ptrcomp(m_sorted_cells.m_array ) + unsigned(cur_y.start + cur_y.num ) * m_sorted_cells.m_entry_sz ).ptr:=cell_ptr;
 
      inc(cur_y.num );
-     inc(ptrcomp(cell_ptr ) ,sizeof(cell_aa ) );
+     inc(cell_ptr);
 
     end;
 
@@ -766,7 +766,7 @@ begin
 
  cell_ptr:=block_ptr^;
 
- inc(ptrcomp(block_ptr ) ,sizeof(cell_aa_ptr ) );
+ inc(block_ptr);
 
  i:=m_num_cells and cell_block_mask;
 
@@ -779,7 +779,7 @@ begin
    p32_ptr(ptrcomp(m_sorted_cells.m_array ) + unsigned(cur_y.start + cur_y.num ) * m_sorted_cells.m_entry_sz ).ptr:=cell_ptr;
 
    inc(cur_y.num );
-   inc(ptrcomp(cell_ptr ) ,sizeof(cell_aa ) );
+   inc(cell_ptr);
 
   end;
 
@@ -1486,8 +1486,8 @@ begin
      else
       line_to_no_clip(px^ ,py^ );
 
-     inc(ptrcomp(px ) ,sizeof(int ) );
-     inc(ptrcomp(py ) ,sizeof(int ) ); 
+     inc(px);
+     inc(py); 
      dec(n );
 
     end;
@@ -1625,7 +1625,7 @@ begin
 
     while num_cells > 0 do
      begin
-      inc(ptrcomp(cells ) ,sizeof(cell_aa_ptr ) );
+      inc(cells);
 
       cur_cell:=cells^;
 

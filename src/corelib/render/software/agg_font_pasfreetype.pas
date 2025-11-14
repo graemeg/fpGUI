@@ -482,8 +482,8 @@ begin
 
            end;
 
-          v_middle.x:=(v_control.x + vec.x ) div 2;
-          v_middle.y:=(v_control.y + vec.y ) div 2;
+          v_middle.x:=(v_control.x + vec.x ) shr 1;
+          v_middle.y:=(v_control.y + vec.y ) shr 1;
 
           x1:=int26p6_to_dbl(v_control.x );
           y1:=int26p6_to_dbl(v_control.y );

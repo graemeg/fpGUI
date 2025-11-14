@@ -1380,21 +1380,9 @@ begin
         if U < 0 then begin U := -U; S1 := True; end else S1 := False;
         if V < 0 then begin V := -V; S2 := True; end else S2 := False;
 
-        while W < $1000000 do
-         begin
-           (* We need to increase W, by a minimal amount *)
-           if U < V then inc( U )
-                    else inc( V );
-           W := U*U + V*V;
-         end;
-
-        while W >= $1004000 do
-         begin
-           (* We need to decrease W, by a minimal amount *)
-           if U < V then dec( U )
-                    else dec( V );
-           W := U*U + V*V;
-         end;
+        (* The while loops below were removed as they can cause extreme *)
+        (* performance issues. The initial scaling is assumed to be    *)
+        (* sufficient.                                                 *)
 
         (* Note that in various cases, we can only *)
         (* compute a Sqrt(W) of $3FFF, eg. U=V     *)
@@ -1537,21 +1525,52 @@ end;
 (****************************************************************)
 
    function TInterpreter.SkipCode : boolean;
-   var
-     b : Boolean;
    begin
-     b := False;
-
+     // inc IP by previous opcode length
      inc( pEC^.IP, oplength );
 
-     b := pEC^.IP < pEC^.codeSize;
-
-     if b then b := Calc_Length;
-
-     if not b then
+     if pEC^.IP >= pEC^.codeSize then
+     begin
        pEC^.error := TT_Err_Code_Overflow;
+       Result := false;
+       exit;
+     end;
 
-     SkipCode := b;
+     // read next opcode and determine its length
+     opcode := pEC^.Code^[pEC^.IP];
+     case opcode of
+       $40 : if pEC^.IP+1 >= pEC^.codeSize then
+             begin
+               pEC^.error := TT_Err_Code_Overflow;
+               Result := false;
+               exit;
+             end
+             else
+               oplength := pEC^.code^[pEC^.IP+1] + 2;
+
+       $41 : if pEC^.IP+1 >= pEC^.codeSize then
+             begin
+               pEC^.error := TT_Err_Code_Overflow;
+               Result := false;
+               exit;
+             end
+             else
+               oplength := pEC^.code^[pEC^.IP+1]*2 + 2;
+
+       $B0..$B7 : oplength := opcode - $B0 + 2;
+       $B8..$BF : oplength := (opcode - $B8)*2 + 3;
+     else
+       oplength := 1;
+     end;
+
+     if pEC^.IP + oplength > pEC^.codeSize then
+     begin
+       pEC^.error := TT_Err_Code_Overflow;
+       Result := false;
+       exit;
+     end;
+
+     Result := True;
    end;
 
 
@@ -3727,6 +3746,8 @@ end;
      end;
 
      pEC^.func_move( @pEC^.zp1, point, distance - cur_dist );
+
+     WriteLn('[MIRP] point=', point, ' cvtEntry=', cvtEntry, ' cvt_dist=', cvt_dist, ' org_dist=', org_dist, ' cur_dist=', cur_dist, ' distance=', distance, ' move_dist=', distance - cur_dist);
 
      pEC^.GS.rp1 := pEC^.GS.rp0;
 

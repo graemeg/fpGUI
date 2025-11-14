@@ -27,7 +27,7 @@ uses
 const
   IMG_WIDTH = 800;
   IMG_HEIGHT = 600;
-  DEFAULT_TEXT = 'The quick brown fox jumps over the lazy dog. 1234567890';
+  DEFAULT_TEXT = 's';
   DEFAULT_FONT_SIZE = 24.0;
 
 type
@@ -68,6 +68,11 @@ var
   writer: TFPWriterPNG;
   src_pixel: PRGBA32;
   dst_pixel: TFPColor;
+
+function Log(const s: string): string;
+begin
+  Result := FormatDateTime('[hh:nn:ss.zzz] ', Now) + s;
+end;
 
 procedure ParseCommandLine;
 begin
@@ -145,7 +150,7 @@ begin
   curves.Construct(fman.path_adaptor);
   curves.approximation_scale_(2.0);
 
-  WriteLn('Using FreeType 1 Pascal implementation');
+  WriteLn(Log('Using FreeType 1 Pascal implementation'));
 end;
 
 procedure LoadAndRenderText;
@@ -156,7 +161,7 @@ begin
   // Load font
   if not feng.load_font(PChar(font_file), 0, glyph_ren_outline) then
   begin
-    WriteLn('Error: Failed to load font: ', font_file);
+    WriteLn(Log('Error: Failed to load font: ' + font_file));
     Halt(1);
   end;
 
@@ -165,9 +170,9 @@ begin
   feng.hinting_(True);
   feng.flip_y_(True);
 
-  WriteLn('Font loaded: ', font_file);
-  WriteLn('Font size: ', font_size:0:1);
-  WriteLn('Text: ', text_to_render);
+  WriteLn(Log('Font loaded: ' + font_file));
+  WriteLn(Log('Font size: ' + FloatToStr(font_size)));
+  WriteLn(Log('Text: ' + text_to_render));
 
   // Measure text width
   text_width := 0;
@@ -175,43 +180,43 @@ begin
   p := PChar(text_to_render);
   while p^ <> #0 do
   begin
-    Write('[MEASURE] char="', p^, '" (', Byte(p^), ') ... ');
+    Write(Log('[MEASURE] char="' + p^ + '" (' + IntToStr(Byte(p^)) + ') ... '));
     glyph := fman.glyph(Byte(p^));
     Write('[glyph returned] ');
     if glyph <> nil then
     begin
       WriteLn('OK, advance=', glyph^.advance_x:0:2);
-      Write('[adding to width] ');
+      Write(Log('[adding to width] '));
       text_width := text_width + glyph^.advance_x;
       Write('[width updated] ');
       if p[1] <> #0 then
       begin
-        Write('[calling add_kerning] ');
+        Write(Log('[calling add_kerning] '));
         fman.add_kerning(@text_width, @y);  // Apply kerning for next char
         Write('[kerning done] ');
       end;
-      WriteLn('[char complete]');
+      WriteLn(Log('[char complete]'));
     end
     else
       WriteLn('NULL!');
-    Write('[incrementing p] ');
+    Write(Log('[incrementing p] '));
     Inc(p);
-    WriteLn('[p incremented]');
+    WriteLn(Log('[p incremented]'));
   end;
-  WriteLn('[DEBUG] Measurement loop completed');
+  WriteLn(Log('[DEBUG] Measurement loop completed'));
 
   text_height := font_size;
   line_height := font_size * 1.2;
-  WriteLn('[DEBUG] Calculated text_height and line_height');
+  WriteLn(Log('[DEBUG] Calculated text_height and line_height'));
 
   // Center text
   start_x := (IMG_WIDTH - text_width) / 2.0;
   start_y := (IMG_HEIGHT + text_height) / 2.0;
-  WriteLn('[DEBUG] Calculated start position');
+  WriteLn(Log('[DEBUG] Calculated start position'));
 
-  WriteLn('Text width: ', text_width:0:1, ' pixels');
-  WriteLn('Rendering at: (', start_x:0:1, ', ', start_y:0:1, ')');
-  WriteLn('[DEBUG] About to start rendering loop');
+  WriteLn(Log('Text width: ' + FloatToStr(text_width) + ' pixels'));
+  WriteLn(Log('Rendering at: (' + FloatToStr(start_x) + ', ' + FloatToStr(start_y) + ')'));
+  WriteLn(Log('[DEBUG] About to start rendering loop'));
 
   // Render text
   x := start_x;
@@ -220,36 +225,34 @@ begin
 
   rgba_black.ConstrInt(0, 0, 0);
   ren_solid.color_(@rgba_black);
-  WriteLn('[DEBUG] Color set, entering render loop');
+  WriteLn(Log('[DEBUG] Color set, entering render loop'));
 
-      while p^ <> #0 do
+  while p^ <> #0 do
+  begin
+    WriteLn(Log('[RENDER] char="' + p^ + '" ...'));
+    glyph := fman.glyph(Byte(p^));
+    WriteLn(Log('[RENDER] glyph retrieved'));
 
-      begin
-        WriteLn('[RENDER] char="', p^, '" ...');
-        glyph := fman.glyph(Byte(p^));
-        WriteLn('[RENDER] glyph retrieved');
-
-          if glyph <> nil then
-
-          begin
+    if glyph <> nil then
+    begin
       // Apply kerning
       fman.add_kerning(@x, @y);
 
       // Initialize glyph adaptors
-      WriteLn('[RENDER] About to init_embedded_adaptors');
+      WriteLn(Log('[RENDER] About to init_embedded_adaptors'));
       fman.init_embedded_adaptors(glyph, x, y);
-      WriteLn('[RENDER] init_embedded_adaptors done');
+      WriteLn(Log('[RENDER] init_embedded_adaptors done'));
 
       // Render outline glyph
       if glyph^.data_type = glyph_data_outline then
       begin
-        WriteLn('[RENDER] Resetting rasterizer');
+        WriteLn(Log('[RENDER] Resetting rasterizer'));
         ras.reset;
-        WriteLn('[RENDER] About to add_path, glyph_index=', glyph^.glyph_index, ' data_size=', glyph^.data_size);
+        WriteLn(Log('[RENDER] About to add_path, glyph_index=' + IntToStr(glyph^.glyph_index) + ' data_size=' + IntToStr(glyph^.data_size)));
         ras.add_path(@curves);
-        WriteLn('[RENDER] About to render_scanlines');
+        WriteLn(Log('[RENDER] About to render_scanlines'));
         render_scanlines(@ras, @sl, @ren_solid);
-        WriteLn('[RENDER] Scanlines rendered');
+        WriteLn(Log('[RENDER] Scanlines rendered'));
       end;
 
       // Advance pen
@@ -260,15 +263,15 @@ begin
     Inc(p);
   end;
 
-  WriteLn('Text rendered successfully');
-  WriteLn('LoadAndRenderText finished');
+  WriteLn(Log('Text rendered successfully'));
+  WriteLn(Log('LoadAndRenderText finished'));
 end;
 
 procedure SaveToPNG;
 var
   ix: Integer;
 begin
-  WriteLn('Saving to PNG: ', output_file);
+  WriteLn(Log('Saving to PNG: ' + output_file));
 
   // Create FPImage
   img := TFPMemoryImage.Create(IMG_WIDTH, IMG_HEIGHT);
@@ -296,7 +299,7 @@ begin
       writer.Indexed := False;
       writer.UseAlpha := True;
       img.SaveToFile(output_file, writer);
-      WriteLn('PNG saved successfully: ', output_file);
+      WriteLn(Log('PNG saved successfully: ' + output_file));
     finally
       writer.Free;
     end;
@@ -324,7 +327,7 @@ begin
   except
     on E: Exception do
     begin
-      WriteLn('Error: ', E.Message);
+      WriteLn(Log('Error: ' + E.Message));
       Halt(1);
     end;
   end;

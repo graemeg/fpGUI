@@ -365,6 +365,11 @@ implementation
 var
   g_library_initialized: Boolean = False;
 
+function Log(const s: string): string;
+begin
+  Result := FormatDateTime('[hh:nn:ss.zzz] ', Now) + s;
+end;
+
 { Helper function to swap bytes for big-endian TrueType format }
 function SwapWord(w: Word): Word; inline;
 begin
@@ -943,6 +948,11 @@ var
   outline: TT_Outline;
   metrics: TT_Glyph_Metrics;
   i: Integer;
+  // Vars for debug logging
+  log_file: TextFile;
+  i_log: Integer;
+  outline_log: TT_Outline;
+  load_flag_no_hint: Integer;
 begin
   // Map FT2 load flags to FT1 load flags
   load_flag := 0;
@@ -962,6 +972,37 @@ begin
     Exit;
   end;
 
+  // --- BEGIN DEBUG LOGGING ---
+  if (glyph_index = 86) then // Glyph for 's'
+  begin
+    // Log hinted points
+    TT_Get_Glyph_Outline(face^.tt_glyph, outline_log);
+    AssignFile(log_file, 'hinted_points.log');
+    Rewrite(log_file);
+    WriteLn(log_file, 'Hinted points for glyph ' + IntToStr(glyph_index));
+    for i_log := 0 to outline_log.n_Points - 1 do
+      WriteLn(log_file, 'pt[' + IntToStr(i_log) + '] = (' + IntToStr(outline_log.points^[i_log].x) + ', ' + IntToStr(outline_log.points^[i_log].y) + ')');
+    CloseFile(log_file);
+
+    // Load again without hinting and log
+    load_flag_no_hint := 0;
+    if (load_flags and FT_LOAD_NO_SCALE) = 0 then
+      load_flag_no_hint := load_flag_no_hint or TT_Load_Scale_Glyph;
+    TT_Load_Glyph(face^.tt_instance, face^.tt_glyph, glyph_index, load_flag_no_hint);
+
+    TT_Get_Glyph_Outline(face^.tt_glyph, outline_log);
+    AssignFile(log_file, 'unhinted_points.log');
+    Rewrite(log_file);
+    WriteLn(log_file, 'Unhinted points for glyph ' + IntToStr(glyph_index));
+    for i_log := 0 to outline_log.n_Points - 1 do
+      WriteLn(log_file, 'pt[' + IntToStr(i_log) + '] = (' + IntToStr(outline_log.points^[i_log].x) + ', ' + IntToStr(outline_log.points^[i_log].y) + ')');
+    CloseFile(log_file);
+
+    // Restore the hinted version for the rest of the function
+    TT_Load_Glyph(face^.tt_instance, face^.tt_glyph, glyph_index, load_flag);
+  end;
+  // --- END DEBUG LOGGING ---
+
   // Get glyph outline
   TT_Get_Glyph_Outline(face^.tt_glyph, outline);
 
@@ -969,7 +1010,7 @@ begin
   if (outline.n_Points < 0) or (outline.n_Points > 10000) or
      (outline.n_Contours < 0) or (outline.n_Contours > 1000) then
   begin
-    WriteLn('[FT_Load_Glyph] ERROR: Corrupted outline! n_Points=', outline.n_Points, ' n_Contours=', outline.n_Contours);
+    WriteLn(Log('[FT_Load_Glyph] ERROR: Corrupted outline! n_Points=' + IntToStr(outline.n_Points) + ' n_Contours=' + IntToStr(outline.n_Contours)));
     Result := -1; // Error code
     Exit;
   end;

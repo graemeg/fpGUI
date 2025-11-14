@@ -34,7 +34,8 @@ INTERFACE
 uses
  agg_basics ,
  agg_array ,
- agg_vertex_source ;
+ agg_vertex_source,
+ SysUtils;
 
 { TYPES DEFINITION }
 const
@@ -204,6 +205,11 @@ var
   g_total_vertex_calls: Int64 = 0;  // Global counter to detect infinite loops
 
 { UNIT IMPLEMENTATION }
+function Log(const s: string): string;
+begin
+  Result := FormatDateTime('[hh:nn:ss.zzz] ', Now) + s;
+end;
+
 { CONSTRUCT }
 constructor vertex_int16.Construct;
 begin
@@ -275,9 +281,9 @@ begin
  // Debug: check for suspiciously large stored values
  if (abs(x) > 1000000000) or (abs(y) > 1000000000) then
  begin
-   WriteLn('[Construct] WARNING: Large stored value! input x_=', x_, ' y_=', y_, ' flag=', flag);
-   WriteLn('[Construct] tmp_x=', tmp_x, ' tmp_y=', tmp_y);
-   WriteLn('[Construct] stored x=', x, ' y=', y);
+   WriteLn(Log('[Construct] WARNING: Large stored value! input x_=' + IntToStr(x_) + ' y_=' + IntToStr(y_) + ' flag=' + IntToStr(flag)));
+   WriteLn(Log('[Construct] tmp_x=' + IntToStr(tmp_x) + ' tmp_y=' + IntToStr(tmp_y)));
+   WriteLn(Log('[Construct] stored x=' + IntToStr(x) + ' y=' + IntToStr(y)));
  end;
 
 end;
@@ -437,7 +443,7 @@ begin
    // NOT the entire object which includes VMT pointer
    move(v^.x, ptr^, sizeof(int16) * 2);
 
-   inc(ptrcomp(ptr), sizeof(int16) * 2);
+   inc(ptr, sizeof(int16) * 2);
    inc(i);
 
   end;
@@ -571,7 +577,7 @@ var
 
 begin
  if (abs(x) > 100000000) or (abs(y) > 100000000) then
-   WriteLn('[move_to] WARNING: Very large input coordinates! x=', x, ' y=', y);
+   WriteLn(Log('[move_to] WARNING: Very large input coordinates! x=' + IntToStr(x) + ' y=' + IntToStr(y)));
 
  v.Construct  (x ,y ,cmd_move_to );
  m_storage.add(@v );
@@ -585,7 +591,7 @@ var
 
 begin
  if (abs(x) > 100000000) or (abs(y) > 100000000) then
-   WriteLn('[line_to] WARNING: Very large input coordinates! x=', x, ' y=', y);
+   WriteLn(Log('[line_to] WARNING: Very large input coordinates! x=' + IntToStr(x) + ' y=' + IntToStr(y)));
 
  v.Construct  (x ,y ,cmd_line_to );
  m_storage.add(@v );
@@ -675,7 +681,7 @@ begin
    // NOT the entire object which includes VMT pointer
    move(v^.x, ptr^, sizeof(int32) * 2);
 
-   inc(ptrcomp(ptr), sizeof(int32) * 2);
+   inc(ptr, sizeof(int32) * 2);
    inc(i);
 
   end;
@@ -857,7 +863,7 @@ begin
    x^:=0;
    y^:=0;
    // Increment by 4 bytes (serialized size), not sizeof(vertex_int16)
-   inc(ptrcomp(m_ptr), sizeof(int16) * 2);
+   inc(m_ptr, sizeof(int16) * 2);
    result:=path_cmd_end_poly or path_flags_close;
    exit;
   end;
@@ -878,7 +884,7 @@ begin
 
  inc(m_vertices);
  // Increment by 4 bytes (size of serialized x,y), not sizeof(vertex_int16)
- inc(ptrcomp(m_ptr), sizeof(int16) * 2);
+ inc(m_ptr, sizeof(int16) * 2);
 
  result:=cmd;
 
@@ -917,12 +923,12 @@ end;
 { INIT }
 procedure serialized_int32_path_adaptor.init;
 begin
- WriteLn('[serialized_int32_path_adaptor.init] data=', PtrUInt(data), ' size=', size);
+ WriteLn(Log('[serialized_int32_path_adaptor.init] data=' + IntToStr(PtrUInt(data)) + ' size=' + IntToStr(size)));
 
  // Sanity check
  if (data = nil) then
  begin
-   WriteLn('[serialized_int32_path_adaptor.init] ERROR: data is NIL!');
+   WriteLn(Log('[serialized_int32_path_adaptor.init] ERROR: data is NIL!'));
    m_data := nil;
    m_end := nil;
    m_ptr := nil;
@@ -935,7 +941,7 @@ begin
 
  if (size < 0) or (size > 1000000) then
  begin
-   WriteLn('[serialized_int32_path_adaptor.init] ERROR: Invalid size=', size);
+   WriteLn(Log('[serialized_int32_path_adaptor.init] ERROR: Invalid size=' + IntToStr(size)));
    m_data := nil;
    m_end := nil;
    m_ptr := nil;
@@ -956,7 +962,7 @@ begin
  m_scale   :=scale;
  m_vertices:=0;
 
- WriteLn('[serialized_int32_path_adaptor.init] completed successfully');
+ WriteLn(Log('[serialized_int32_path_adaptor.init] completed successfully'));
 end;
 
 { REWIND }
@@ -1001,7 +1007,7 @@ begin
    x^:=0;
    y^:=0;
    // Increment by 8 bytes (serialized size), not sizeof(vertex_int32)
-   inc(ptrcomp(m_ptr), sizeof(int32) * 2);
+   inc(m_ptr, sizeof(int32) * 2);
    result:=path_cmd_end_poly or path_flags_close;
    exit;
   end;
@@ -1020,7 +1026,7 @@ begin
   end;
 
  // Increment by 8 bytes (size of serialized x,y), not sizeof(vertex_int32)
- inc(ptrcomp(m_ptr), sizeof(int32) * 2);
+ inc(m_ptr, sizeof(int32) * 2);
 
  result:=cmd;
 

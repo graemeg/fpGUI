@@ -714,15 +714,15 @@ begin
 
   arc^[4].x := arc^[2].x;
   b := arc^[1].x;
-  a := (arc^[2].x + b) div 2; arc^[3].x := a;
-  b := (arc^[0].x + b) div 2; arc^[1].x := b;
-  arc^[2].x := (a+b) div 2;
+  a := (arc^[2].x + b) shr 1; arc^[3].x := a;
+  b := (arc^[0].x + b) shr 1; arc^[1].x := b;
+  arc^[2].x := (a+b) shr 1;
 
   arc^[4].y := arc^[2].y;
   b := arc^[1].y;
-  a := (arc^[2].y + b) div 2; arc^[3].y := a;
-  b := (arc^[0].y + b) div 2; arc^[1].y := b;
-  arc^[2].y := (a+b) div 2;
+  a := (arc^[2].y + b) shr 1; arc^[3].y := a;
+  b := (arc^[0].y + b) shr 1; arc^[1].y := b;
+  arc^[2].y := (a+b) shr 1;
 {$ENDIF}
 end;
 
