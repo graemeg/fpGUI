@@ -765,8 +765,8 @@ begin
   end;
 
 
-  vBottom := LV.Height - fpgStyle.GetControlFrameBorders.Bottom;
-  vRight := LV.Width - fpgStyle.GetControlFrameBorders.Right;
+  vBottom := LV.ActualHeight - fpgStyle.GetControlFrameBorders.Bottom;
+  vRight := LV.ActualWidth - fpgStyle.GetControlFrameBorders.Right;
   if LV.FHScrollBar.Visible then
     Dec(vBottom, LV.FHScrollBar.Height);
   if LV.FVScrollBar.Visible then
@@ -780,7 +780,7 @@ begin
     ItemRect.Left := fpgStyle.GetControlFrameBorders.Left;
     ItemRect.Top := cBottom;
     ItemRect.SetBottom(vBottom);
-    ItemRect.Width := LV.Width - fpgStyle.GetControlFrameBorders.Left - fpgStyle.GetControlFrameBorders.Right;
+    ItemRect.Width := LV.ActualWidth - fpgStyle.GetControlFrameBorders.Left - fpgStyle.GetControlFrameBorders.Right;
     ACanvas.FillRectangle(ItemRect);
   end;
   // paint area to the right of the items
@@ -974,7 +974,7 @@ begin
   if cLeft < FListView.FWidth-fpgStyle.GetControlFrameBorders.Right then
   begin
     ACanvas.SetColor(clButtonFace);
-    ACanvas.FillRectangle(cLeft, cTop, cLeft+(FListView.Width-3-cLeft), ACanvas.Font.GetHeight()+10);
+    ACanvas.FillRectangle(cLeft, cTop, cLeft+(FListView.ActualWidth-3-cLeft), ACanvas.Font.GetHeight()+10);
   end;
 end;
 
@@ -1131,7 +1131,7 @@ begin
   end;
 
 
-  vBottom := LV.Height - fpgStyle.GetControlFrameBorders.Bottom;
+  vBottom := LV.ActualHeight - fpgStyle.GetControlFrameBorders.Bottom;
   if LV.FHScrollBar.Visible then
     Dec(vBottom, LV.FHScrollBar.Height);
 
@@ -1141,7 +1141,7 @@ begin
     ItemRect.Left := fpgStyle.GetControlFrameBorders.Left;
     ItemRect.Top := cBottom;
     ItemRect.SetBottom(vBottom);
-    ItemRect.Width := LV.Width - fpgStyle.GetControlFrameBorders.Left - fpgStyle.GetControlFrameBorders.Right;
+    ItemRect.Width := LV.ActualWidth - fpgStyle.GetControlFrameBorders.Left - fpgStyle.GetControlFrameBorders.Right;
     ACanvas.SetColor(clListBox);
     ACanvas.FillRectangle(ItemRect);
   end;
@@ -1741,8 +1741,8 @@ function TfpgListView.GetClientRect: TfpgRect;
 begin
   Result.Top := fpgStyle.GetControlFrameBorders.Top;
   Result.Left := fpgStyle.GetControlFrameBorders.Left;
-  Result.SetRight(Width - fpgStyle.GetControlFrameBorders.Right);
-  Result.SetBottom(Height - fpgStyle.GetControlFrameBorders.Bottom);
+  Result.SetRight(ActualWidth - fpgStyle.GetControlFrameBorders.Right);
+  Result.SetBottom(ActualHeight - fpgStyle.GetControlFrameBorders.Bottom);
 end;
 
 function TfpgListView.GetItemAreaHeight: Integer;
@@ -2236,7 +2236,7 @@ begin
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
   Canvas.ClearClipRect;
-  ClipRect.SetRect(0, 0, Width, Height);
+  ClipRect.SetRect(0, 0, ActualWidth, ActualHeight);
   fpgStyle.DrawControlFrame(Canvas, ClipRect);
   rect := fpgStyle.GetControlFrameBorders;
   InflateRect(ClipRect, -rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
@@ -2268,8 +2268,8 @@ begin
   if FVScrollBar.Visible then
     Dec(ClipRect.Width, FVScrollBar.Width);
   if FHScrollBar.Visible then
-    Dec(ClipRect.Height, FhScrollBar.Height);
-    
+    Dec(ClipRect.Height, FHScrollBar.Height);
+
   Canvas.SetClipRect(ClipRect);
 
   ViewStyle.Paint(Canvas);
@@ -2314,7 +2314,7 @@ begin
   ItemsTotalSize := ViewStyle.GetItemsVirtualArea;
 
   // GetHeaderHeight is 0 if not visible
-  VisibleItemArea.SetSize(Width-Border.Left-Border.Right, Height-Border.Top-Border.Bottom-GetHeaderHeight);
+  VisibleItemArea.SetSize(ActualWidth-Border.Left-Border.Right, ActualHeight-Border.Top-Border.Bottom-GetHeaderHeight);
 
   // Start with the assumption that both scrollbars are hidden.
   ScrollBarVisible:=[];
@@ -2355,15 +2355,15 @@ begin
   until SameCount = 2;
 
   VScrollBar.Top := Border.Top + GetHeaderHeight;
-  VScrollBar.Left:= Width-Border.Left-VScrollBar.Width;
-  VScrollBar.Height:=Height-VScrollBar.Top-Border.Top;
+  VScrollBar.Left:= ActualWidth-Border.Left-VScrollBar.Width;
+  VScrollBar.Height:=ActualHeight-VScrollBar.Top-Border.Top;
 
   if HScrollBar.Visible then
     VScrollBar.Height:=VScrollBar.Height-HScrollBar.Height;
 
-  HScrollBar.Top:=Height-Border.Top-HScrollBar.Height;
+  HScrollBar.Top:=ActualHeight-Border.Top-HScrollBar.Height;
   HScrollBar.Left:=Border.Left;
-  HScrollBar.Width:=Width-Border.Left-Border.Right;
+  HScrollBar.Width:=ActualWidth-Border.Left-Border.Right;
 
   if VScrollBar.Visible then
     HScrollBar.Width:=HScrollBar.Width-VScrollBar.Width;
@@ -2418,13 +2418,15 @@ begin
   FVScrollBar.OnScroll := @VScrollChange;
   FVScrollBar.ScrollStep := 18;
   FVScrollBar.Position := 0;
-  
+  FVScrollBar.Width := 16;  // Default scrollbar thickness (will be DPI scaled)
+
   FHScrollBar := TfpgScrollBar.Create(Self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.OnScroll := @HScrollChange;
   FHScrollBar.ScrollStep := 18;
   FHScrollBar.Position := 0;
-  
+  FHScrollBar.Height := 16;  // Default scrollbar thickness (will be DPI scaled)
+
   FColumns := TfpgLVColumns.Create(Self);
 
   FItems := TfpgLVItems.Create(Self);
