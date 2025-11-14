@@ -107,7 +107,10 @@ begin
   Name := 'fpgAbout';
   MinWidth := w; // these two override parent class
   MinHeight := h;
-  SetPosition(0, 0, w, h);
+  Left := 0;
+  Top := 0;
+  Width := w;
+  Height := h;
   WindowTitle := 'About';
   Hint := '';
   OnShow:=@FormShow;

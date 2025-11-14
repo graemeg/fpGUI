@@ -75,7 +75,6 @@ constructor TForm2.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'Form2';
-  Sizeable := False;
   Left := 200;
   Top := 200;
   Width := 200;
@@ -118,7 +117,6 @@ begin
   inherited Create(AOwner);
   Visible:=False;
   WindowTitle := 'Form1';
-  Sizeable := False;
   Left := 150;
   Top := 150;
   Width := 200;
@@ -168,7 +166,6 @@ constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'Modal Form Demo';
-  Sizeable := False;
   Left := 100;
   Top := 100;
   Width := 400;
