@@ -32,7 +32,7 @@ type
 
   TGaugeKind = (gkText, gkHorizontalBar, gkVerticalBar, gkPie, gkNeedle, gkDial);
 
-  TBorderStyle = (bsNone, bsSingle, bsDouble, bsRaisedPanel, bsSunkenPanel, 
+  TBorderStyle = (bsNone, bsSingle, bsDouble, bsRaisedPanel, bsSunkenPanel,
                   bsRaised3D, bsSunken3D, bsEtched, bsEmmbossed);
 
 
@@ -267,7 +267,7 @@ begin
   begin
     X := (Width - FFont.GetTextWidth(S)) div 2;
     Y := (Height - FFont.GetHeight) div 2;
-    if Kind = gkDial then 
+    if Kind = gkDial then
       Y := Y + (Y div 2);
   end;
 { If contrast is poor we might use a Xor function }
@@ -514,12 +514,12 @@ var
 begin
   CurrPercentage  := GetPercentage;
   MustRepaint     := False;
-  
+
   if AValue < FMin then
     AValue := FMin
   else if AValue > FMax then
     AValue := FMax;
-    
+
   if FPosition <> AValue then
   begin // Value has changed
     FPosition := AValue;

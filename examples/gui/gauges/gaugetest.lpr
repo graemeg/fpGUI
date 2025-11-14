@@ -61,7 +61,6 @@ begin
   SetPosition(83, 160, 595, 379);
   WindowTitle := 'Gauge Test';
   WindowPosition:= wpScreenCenter;
-  Sizeable := False;
 
   CloseBtn := TfpgButton.Create(self);
   with CloseBtn do
