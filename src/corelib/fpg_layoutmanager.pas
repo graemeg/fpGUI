@@ -183,13 +183,19 @@ begin
 
   // Update container's MinWidth/MinHeight when layout changes
   // This ensures the minimum size constraints are updated as components are added/removed
-  if Assigned(AContainer) then
+  // Only do this if container has reasonable dimensions to avoid issues during extreme resizing
+  if Assigned(AContainer) and (AContainer.Width > 10) and (AContainer.Height > 10) then
   begin
-    minSize := GetMinimumSize(AContainer);
-    if (minSize.W > 0) and (minSize.H > 0) then
-    begin
-      AContainer.MinWidth := minSize.W;
-      AContainer.MinHeight := minSize.H;
+    try
+      minSize := GetMinimumSize(AContainer);
+      if (minSize.W > 0) and (minSize.H > 0) then
+      begin
+        AContainer.MinWidth := minSize.W;
+        AContainer.MinHeight := minSize.H;
+      end;
+    except
+      // Silently ignore errors during minimum size calculation
+      // This can happen during extreme resize operations
     end;
   end;
 end;
