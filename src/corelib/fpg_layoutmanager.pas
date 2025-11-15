@@ -174,10 +174,24 @@ begin
 end;
 
 procedure TfpgBaseLayoutManager.InvalidateLayout(AContainer: TfpgWidgetBase);
+var
+  minSize: TfpgSize;
 begin
   FLayoutDirty := True;
   FCachedPreferredSize.SetSize(0, 0);
   FCachedMinimumSize.SetSize(0, 0);
+
+  // Update container's MinWidth/MinHeight when layout changes
+  // This ensures the minimum size constraints are updated as components are added/removed
+  if Assigned(AContainer) then
+  begin
+    minSize := GetMinimumSize(AContainer);
+    if (minSize.W > 0) and (minSize.H > 0) then
+    begin
+      AContainer.MinWidth := minSize.W;
+      AContainer.MinHeight := minSize.H;
+    end;
+  end;
 end;
 
 function TfpgBaseLayoutManager.GetConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
