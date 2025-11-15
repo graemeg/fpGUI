@@ -101,6 +101,7 @@ begin
   lblPx := TfpgLabel.Create(Self);
   lblPx.Name := 'lblPx';
   lblPx.Text := 'Pixels (200px width):';
+  lblPx.AutoSize := True;
   mig.AddLayoutComponent(lblPx, TfpgMigCC.Create());
 
   edtPx := TfpgEdit.Create(Self);
@@ -115,6 +116,7 @@ begin
   lblPercent := TfpgLabel.Create(Self);
   lblPercent.Name := 'lblPercent';
   lblPercent.Text := 'Percent (50% width):';
+  lblPercent.AutoSize := True;
   mig.AddLayoutComponent(lblPercent, TfpgMigCC.Create());
 
   edtPercent := TfpgEdit.Create(Self);
@@ -128,6 +130,7 @@ begin
   lblMM := TfpgLabel.Create(Self);
   lblMM.Name := 'lblMM';
   lblMM.Text := 'Millimeters (50mm):';
+  lblMM.AutoSize := True;
   mig.AddLayoutComponent(lblMM, TfpgMigCC.Create());
 
   edtMM := TfpgEdit.Create(Self);
@@ -150,6 +153,7 @@ begin
   lblMinPrefMax := TfpgLabel.Create(Self);
   lblMinPrefMax.Name := 'lblMinPrefMax';
   lblMinPrefMax.Text := 'Min:Pref:Max (100:200:300):';
+  lblMinPrefMax.AutoSize := True;
   mig.AddLayoutComponent(lblMinPrefMax, TfpgMigCC.Create());
 
   edtBounds := TfpgEdit.Create(Self);
@@ -211,6 +215,7 @@ begin
   lblOpExample := TfpgLabel.Create(Self);
   lblOpExample.Name := 'lblOpExample';
   lblOpExample.Text := 'Max operation (max(150px,30%)):';
+  lblOpExample.AutoSize := True;
   mig.AddLayoutComponent(lblOpExample, TfpgMigCC.Create());
 
   edtOperation := TfpgEdit.Create(Self);

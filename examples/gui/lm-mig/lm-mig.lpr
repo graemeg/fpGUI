@@ -172,8 +172,10 @@ begin
   with btnAlignment do
   begin
     Name := 'btnAlignment';
-    // Using SetPosition() to test deprecated method still works
-    SetPosition(20, 95, 240, 35);
+    Left := 20;
+    Top := 95;
+    Width := 240;
+    Height := 35;
     Text := 'Cell Alignment';
     FontDesc := '#Button';
     OnClick := @btnAlignmentClicked;
