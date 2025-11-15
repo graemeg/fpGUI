@@ -1545,11 +1545,11 @@ Check these for patterns that third-party developers might copy:
 * [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
 * [x] `examples/apps/globe/` - Globe demo ✓ VERIFIED (no changes needed - uses hardcoded coords)
 * [x] `examples/gui/wulinetest/` - Wu line test ✓ VERIFIED (no changes needed - uses hardcoded coords)
-* [ ] `examples/gui/lm-mig/` - MigLayout demo (not reviewed)
-* [ ] `examples/gui/lm-flow/` - FlowLayout demo (not reviewed)
-* [ ] `examples/gui/alignment/` - Align properties demo (not reviewed)
-* [ ] `docview/src/` - DocView application (not reviewed)
-* [ ] `uidesigner/` - UI Designer application (not reviewed)
+* [x] `examples/gui/lm-mig/` - MigLayout demo ✓ VERIFIED (no changes needed - uses layout manager)
+* [x] `examples/gui/lm-flow/` - FlowLayout demo ✓ VERIFIED (no changes needed - uses layout manager)
+* [x] `examples/gui/alignment/` - Align properties demo ✓ VERIFIED (no changes needed - uses Align)
+* [x] `docview/` - DocView application ✓ FIXED (RichTextView scrollbar corner)
+* [x] `uidesigner/` - UI Designer application ✓ FIXED (designer grid and widget frame)
 
 === Testing Strategy
 

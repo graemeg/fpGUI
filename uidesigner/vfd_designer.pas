@@ -1661,24 +1661,24 @@ begin
   begin
     Canvas.Clear(TfpgColor($ff3e85cd));
     // horizontal lines
-    for i := 0 to Height-1 do
+    for i := 0 to ActualHeight-1 do
     begin
       if i mod 50 = 0 then
         Canvas.SetColor(TfpgColor($ff5492d0))
       else
         Canvas.SetColor(TfpgColor($ff488bcf));
       if i mod 10 = 0 then
-        Canvas.DrawLine(0, i, Width-1, i);
+        Canvas.DrawLine(0, i, ActualWidth-1, i);
     end;
     // vertical lines
-    for i := 0 to Width-1 do
+    for i := 0 to ActualWidth-1 do
     begin
       if i mod 50 = 0 then
         Canvas.SetColor(TfpgColor($ff5492d0))
       else
         Canvas.SetColor(TfpgColor($ff488bcf));
       if i mod 10 = 0 then
-        Canvas.DrawLine(i, 0, i, Height-1);
+        Canvas.DrawLine(i, 0, i, ActualHeight-1);
     end;
   end;
 end;
@@ -1707,7 +1707,7 @@ begin
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(FFont);
   Canvas.SetColor(clWidgetFrame);
-  Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
   Canvas.SetTextColor(clText1);
   s := Name + ': ' + wgClassName;
   Canvas.DrawString(2, 2, s);

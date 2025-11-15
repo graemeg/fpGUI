@@ -748,8 +748,8 @@ begin
         end;
     end;
     // blank out corner between scrollbars
-    CornerRect.Left := Width - x - FScrollBarWidth;
-    CornerRect.Top := Height - y - FScrollBarWidth;
+    CornerRect.Left := ActualWidth - x - FScrollBarWidth;
+    CornerRect.Top := ActualHeight - y - FScrollBarWidth;
     CornerRect.Width := FScrollBarWidth;
     CornerRect.Height := FScrollBarWidth;
     Canvas.Color := clWindowBackground;
