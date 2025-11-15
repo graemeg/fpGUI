@@ -1508,11 +1508,14 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/gui/fpg_dialogs.pas` - Dialog positioning ✓ FIXED
 * [x] `src/gui/fpg_animation.pas` - Animation bounds ✓ FIXED (no changes needed - only uses FImage.Width/Height)
 
-==== Layout Managers - PENDING
+==== Layout Managers - COMPLETED
 
 [%interactive]
-* [ ] `src/corelib/fpg_gridlayout.pas` - Grid layout calculations
-* [ ] `src/corelib/fpg_boxlayout.pas` - Box layout calculations (if exists)
+* [x] `src/corelib/fpg_miglayout.pas` - MigLayout container size reading ✓ FIXED (already completed)
+* [x] `src/corelib/fpg_flowlayout.pas` - FlowLayout container size reading ✓ FIXED (already completed)
+* [x] `src/corelib/fpg_borderlayout.pas` - BorderLayout calculations ✓ FIXED (no changes needed - uses GetClientRect)
+* [x] `src/corelib/fpg_gridlayout.pas` - Does not exist ✓ N/A
+* [x] `src/corelib/fpg_boxlayout.pas` - Does not exist ✓ N/A
 
 ==== Rendering Backends - PENDING
 
