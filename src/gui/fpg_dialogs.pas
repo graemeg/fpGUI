@@ -446,7 +446,9 @@ end;
 
 procedure TfpgMessageBox.FormShow(Sender: TObject);
 begin
-  FButton.Text := cMsgDlgBtnText[mbOK]
+  FButton.Text := cMsgDlgBtnText[mbOK];
+  // Set Sizeable to False after DPI scaling is complete
+  Sizeable := False;
 end;
 
 procedure TfpgMessageBox.FormKeyPressed(Sender: TObject; var KeyCode: word;
@@ -487,6 +489,7 @@ begin
   inherited Create(AOwner);
   FLines        := TStringList.Create;
   FFont         := fpgApplication.FontManager.GetFont('#Label1');
+  // Use 96 DPI baseline - ScaleDPI will scale everything when form is shown
   FTextY        := 10;
   FLineHeight   := FFont.GetHeight + 4;
   FMaxLineWidth := 500;
@@ -505,12 +508,16 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MessageBox}
   Name := 'MessageBox';
-  SetPosition(330, 199, 419, 138);
+  // Widget properties are designed at 96 DPI - HandleShow will auto-scale them
+  Left := 330;
+  Top := 199;
+  Width := 419;
+  Height := 138;
   WindowTitle := 'Message';
   Hint := '';
   WindowPosition := wpOneThirdDown;
   MinWidth := 200;
-  Sizeable := False;
+  // Don't set Sizeable := False here - it will be set in FormShow after DPI scaling
   OnShow  := @FormShow;
   OnPaint := @FormPaint;
   OnKeyPress := @FormKeyPressed;
@@ -519,7 +526,10 @@ begin
   with FButton do
   begin
     Name := 'FButton';
-    SetPosition(8, 8, 75, 23);
+    Left := 8;
+    Top := 8;
+    Width := 75;
+    Height := 23;
     Text := 'OK';
     FontDesc := '#Label1';
     Hint := '';
@@ -538,6 +548,7 @@ var
 begin
   WrapText(AMessage, FLines, FFont, FMaxLineWidth, outw);
 
+  // Use 96 DPI baseline values - ScaleDPI will scale when form is shown
   // dialog width with 10 pixel border on both sides
   Width := outw + 2*10;
 
