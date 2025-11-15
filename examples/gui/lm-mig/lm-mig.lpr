@@ -14,7 +14,8 @@ uses
   frm_alignment,
   frm_spanning,
   frm_growth,
-  frm_complex;
+  frm_complex,
+  frm_parser;
 
 
 type
@@ -26,12 +27,14 @@ type
     btnSpanning: TfpgButton;
     btnGrowth: TfpgButton;
     btnComplex: TfpgButton;
+    btnParser: TfpgButton;
     btnQuit: TfpgButton;
     procedure btnBasicClicked(Sender: TObject);
     procedure btnAlignmentClicked(Sender: TObject);
     procedure btnSpanningClicked(Sender: TObject);
     procedure btnGrowthClicked(Sender: TObject);
     procedure btnComplexClicked(Sender: TObject);
+    procedure btnParserClicked(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
@@ -112,6 +115,18 @@ begin
   end;
 end;
 
+procedure TMainForm.btnParserClicked(Sender: TObject);
+var
+  frm: TParserMigForm;
+begin
+  frm := TParserMigForm.Create(nil);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
+end;
+
 procedure TMainForm.btnQuitClicked(Sender: TObject);
 begin
   Close;
@@ -124,7 +139,7 @@ begin
   Left := 400;
   Top := 300;
   Width := 280;
-  Height := 380;
+  Height := 420;
   WindowTitle := 'MigLayout Examples';
 
   lblTitle := TfpgLabel.Create(self);
@@ -203,12 +218,25 @@ begin
     OnClick := @btnComplexClicked;
   end;
 
+  btnParser := TfpgButton.Create(self);
+  with btnParser do
+  begin
+    Name := 'btnParser';
+    Left := 20;
+    Top := 255;
+    Width := 240;
+    Height := 35;
+    Text := 'String Parser Examples';
+    FontDesc := '#Button';
+    OnClick := @btnParserClicked;
+  end;
+
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
   begin
     Name := 'btnQuit';
     Left := 20;
-    Top := 320;
+    Top := 360;
     Width := 240;
     Height := 35;
     Text := 'Quit';
