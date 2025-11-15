@@ -1537,15 +1537,19 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 Check these for patterns that third-party developers might copy:
 
 [%interactive]
-* [x] `examples/gui/helloworld/` - Simple button example ✓ VERIFIED (no changes needed)
+* [x] `examples/corelib/helloworld/` - Hello world example ✓ FIXED (MsgPaint gradient and text centering)
+* [x] `examples/corelib/eventtest/` - Event test ✓ FIXED (MsgPaint background fill)
+* [x] `examples/gui/helloworld/` - GUI button example ✓ VERIFIED (no changes needed - uses Align)
+* [x] `examples/gui/customwindow/` - Custom window painting ✓ FIXED (border and gradient rendering)
+* [x] `examples/gui/stdimages/` - Standard images list ✓ FIXED (HandlePaint overflow check)
+* [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
+* [x] `examples/apps/globe/` - Globe demo ✓ VERIFIED (no changes needed - uses hardcoded coords)
+* [x] `examples/gui/wulinetest/` - Wu line test ✓ VERIFIED (no changes needed - uses hardcoded coords)
 * [ ] `examples/gui/lm-mig/` - MigLayout demo (not reviewed)
 * [ ] `examples/gui/lm-flow/` - FlowLayout demo (not reviewed)
 * [ ] `examples/gui/alignment/` - Align properties demo (not reviewed)
-* [x] `examples/gui/customwindow/` - Custom window painting ✓ FIXED
 * [ ] `docview/src/` - DocView application (not reviewed)
 * [ ] `uidesigner/` - UI Designer application (not reviewed)
-* [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
-* [x] `examples/corelib/eventtest/` - Event test ✓ FIXED
 
 === Testing Strategy
 

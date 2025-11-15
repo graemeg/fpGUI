@@ -65,7 +65,7 @@ begin
       Canvas.DrawImage(x+130, y, img);
 
     inc(y, img.Height+8);
-    if y > Height-32 then // largest images are 32 in height
+    if y > ActualHeight-32 then // largest images are 32 in height
     begin
       inc(x, 200);
       y := 8;
