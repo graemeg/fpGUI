@@ -309,6 +309,9 @@ begin
     if Components[i] is TfpgButton then
       if TfpgButton(Components[i]).Default then
         TfpgButton(Components[i]).SetFocus;
+
+  // Set Sizeable to False after DPI scaling is complete
+  Sizeable := False;
 end;
 
 procedure TfpgMessageDialog.HandleKeyPress(var keycode: word;
@@ -559,7 +562,7 @@ begin
   {@VFD_BODY_BEGIN: fpgMessageDialog}
   Name := 'fpgMessageDialog';
   WindowTitle := rsMessage;
-  Sizeable  := False;
+  // Don't set Sizeable := False here - it will be set in HandleShow after DPI scaling
   Width     := 500;
   Height    := 400;
   MinWidth  := 300;
