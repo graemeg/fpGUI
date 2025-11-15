@@ -426,7 +426,9 @@ begin
   begin
     t := TfpgTabSheet(FPages[i]);
     PositionTabSheet(t);
-    t.Anchors := [anLeft, anTop, anRight, anBottom];
+    { Don't set anchors - we manually position tab sheets in PositionTabSheet.
+      Setting anchors would cause inherited HandleAlignments to also resize,
+      creating a double-resize conflict that causes flicker during continuous resize. }
   end;
 end;
 
@@ -435,62 +437,65 @@ var
   r: TRect;
   w: integer;
   h: integer;
+  lLeft, lTop: integer;
 begin
   // PageControl has bevelled edges in some themes
   r := fpgStyle.GetControlFrameBorders;
 
-  { Calculate and set Width and Height }
+  { Calculate Width and Height }
   if TabPosition in [tpTop, tpBottom] then
   begin
     w := ActualWidth - (FMargin*2) - r.Left - r.Right;
-    APage.Width   := w;
     h := ActualHeight - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
-    APage.Height  := h;
   end
   else if TabPosition in [tpLeft, tpRight] then
   begin
     w := ActualWidth - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
-    APage.Width   := w;
     h := ActualHeight - (FMargin*2) - r.Top - r.Bottom;
-    APage.Height  := h;
   end
   else
   begin   // tpNone
     w := ActualWidth - (FMargin*2) - r.Left - r.Right;
-    APage.Width   := w;
     h := ActualHeight - (FMargin*2) - r.Top - r.Bottom;
-    APage.Height  := h;
   end;
 
-  { Calculate and set Top and Left }
+  { Calculate Top and Left }
   if TabPosition = tpTop then
   begin
-    APage.Left    := FMargin + r.Left;
-    APage.Top     := ButtonHeight + FMargin + r.Top;
+    lLeft := FMargin + r.Left;
+    lTop  := ButtonHeight + FMargin + r.Top;
   end
   else if TabPosition = tpBottom then
   begin
-    APage.Left    := FMargin + r.Left;
-    APage.Top     := FMargin + r.Top;
+    lLeft := FMargin + r.Left;
+    lTop  := FMargin + r.Top;
   end
   else if TabPosition = tpLeft then
   begin
-    APage.Left    := MaxButtonWidth + FMargin + r.Left;
-    APage.Top     := FMargin + r.Top;
+    lLeft := MaxButtonWidth + FMargin + r.Left;
+    lTop  := FMargin + r.Top;
   end
   else if TabPosition = tpRight then
   begin
-    APage.Left    := FMargin + r.Left;
-    APage.Top     := FMargin + r.Top;
-  end;
-
-  if TabPosition in [tpNone] then
+    lLeft := FMargin + r.Left;
+    lTop  := FMargin + r.Top;
+  end
+  else // tpNone
   begin
-    APage.Left    := FMargin + r.Left;
-    APage.Top     := FMargin + r.Top;
+    lLeft := FMargin + r.Left;
+    lTop  := FMargin + r.Top;
   end;
 
-  APage.UpdatePosition; { Internal state is now resolved }
+  { Only update position/size if they have changed - prevents cascading resize events }
+  if (APage.Left <> lLeft) or (APage.Top <> lTop) or
+     (APage.Width <> w) or (APage.Height <> h) then
+  begin
+    APage.Left   := lLeft;
+    APage.Top    := lTop;
+    APage.Width  := w;
+    APage.Height := h;
+    APage.UpdatePosition; { Internal state is now resolved }
+  end;
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
