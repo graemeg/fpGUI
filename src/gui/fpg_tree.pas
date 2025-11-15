@@ -2242,7 +2242,7 @@ begin
   FHScrollbar.OnScroll    := @HScrollbarScroll;
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
-  FHScrollbar.SliderSize  := 0.5;
+  FHScrollbar.SliderSize  := 0.3;
   FHScrollbar.Height      := 16;  // Default scrollbar thickness (will be DPI scaled)
 
   FVScrollbar := TfpgScrollbar.Create(self);
@@ -2250,7 +2250,7 @@ begin
   FVScrollbar.OnScroll    := @VScrollbarScroll;
   FVScrollbar.Visible     := False;
   FVScrollbar.Position    := 0;
-  FVScrollbar.SliderSize  := 0.2;
+  FVScrollbar.SliderSize  := 0.3;
   FVScrollbar.Width       := 16;  // Default scrollbar thickness (will be DPI scaled)
 
   FBackgroundColor  := clListBox;
