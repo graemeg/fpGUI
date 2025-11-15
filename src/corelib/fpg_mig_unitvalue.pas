@@ -84,6 +84,8 @@ type
     constructor Create(AValue: Single; AUnit: TfpgMigUnitType; const ACreateString: string); overload;
     constructor Create(AValue: Single; const AUnitStr: string; AIsHorizontal: Boolean;
                       AOper: TfpgMigOperation; const ACreateString: string); overload;
+    constructor CreateOper(AIsHorizontal: Boolean; AOper: TfpgMigOperation;
+                          ASub1, ASub2: TfpgMigUnitValue; const ACreateString: string);
     destructor Destroy; override;
 
     function GetPixels(ARefValue: Single; AParent: TfpgWidgetBase; AComp: TfpgWidgetBase): Single;
@@ -121,6 +123,9 @@ type
   function UnitValueTrailing: TfpgMigUnitValue;
   function UnitValueLeft: TfpgMigUnitValue;
   function UnitValueRight: TfpgMigUnitValue;
+  function UnitValueTop: TfpgMigUnitValue;
+  function UnitValueBottom: TfpgMigUnitValue;
+  function UnitValueLabel: TfpgMigUnitValue;
   function UnitValueBaselineIdentity: TfpgMigUnitValue;
 
 implementation
@@ -141,6 +146,9 @@ var
   _UnitValueTrailing: TfpgMigUnitValue = nil;
   _UnitValueLeft: TfpgMigUnitValue = nil;
   _UnitValueRight: TfpgMigUnitValue = nil;
+  _UnitValueTop: TfpgMigUnitValue = nil;
+  _UnitValueBottom: TfpgMigUnitValue = nil;
+  _UnitValueLabel: TfpgMigUnitValue = nil;
   _UnitValueBaselineIdentity: TfpgMigUnitValue = nil;
 
 { Unit string to type mapping }
@@ -239,6 +247,27 @@ begin
     FUnit := ParseUnitString
   else
     FUnit := utPixel;  // Default to pixels
+end;
+
+constructor TfpgMigUnitValue.CreateOper(AIsHorizontal: Boolean; AOper: TfpgMigOperation;
+  ASub1, ASub2: TfpgMigUnitValue; const ACreateString: string);
+begin
+  inherited Create;
+
+  if (ASub1 = nil) or (ASub2 = nil) then
+    raise Exception.Create('Sub units is null!');
+
+  FValue := 0;
+  FUnitString := '';
+  FUnit := utPixel;  // Will be determined by sub-units
+  FIsHorizontal := AIsHorizontal;
+  FOperation := AOper;
+  FLinkId := '';
+
+  // Store sub-units
+  SetLength(FSubUnits, 2);
+  FSubUnits[0] := ASub1;
+  FSubUnits[1] := ASub2;
 end;
 
 destructor TfpgMigUnitValue.Destroy;
@@ -438,6 +467,27 @@ begin
   Result := _UnitValueRight;
 end;
 
+function UnitValueTop: TfpgMigUnitValue;
+begin
+  if _UnitValueTop = nil then
+    _UnitValueTop := TfpgMigUnitValue.Create(0, utPercent, 'top');
+  Result := _UnitValueTop;
+end;
+
+function UnitValueBottom: TfpgMigUnitValue;
+begin
+  if _UnitValueBottom = nil then
+    _UnitValueBottom := TfpgMigUnitValue.Create(100, utPercent, 'bottom');
+  Result := _UnitValueBottom;
+end;
+
+function UnitValueLabel: TfpgMigUnitValue;
+begin
+  if _UnitValueLabel = nil then
+    _UnitValueLabel := TfpgMigUnitValue.Create(0, utLabelAlign, 'label');
+  Result := _UnitValueLabel;
+end;
+
 function UnitValueBaselineIdentity: TfpgMigUnitValue;
 begin
   if _UnitValueBaselineIdentity = nil then
@@ -454,6 +504,9 @@ finalization
   FreeAndNil(_UnitValueTrailing);
   FreeAndNil(_UnitValueLeft);
   FreeAndNil(_UnitValueRight);
+  FreeAndNil(_UnitValueTop);
+  FreeAndNil(_UnitValueBottom);
+  FreeAndNil(_UnitValueLabel);
   FreeAndNil(_UnitValueBaselineIdentity);
 
 end.

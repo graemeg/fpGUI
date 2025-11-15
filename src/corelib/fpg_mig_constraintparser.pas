@@ -158,24 +158,24 @@ end;
 
 { Returns the operation type based on the string format.
   Detects: min(...), max(...), mid(...), or inline +, -, *, / }
-function GetOper(const AStr: string): Integer;
+function GetOper(const AStr: string): TfpgMigOperation;
 var
   len, i, j, p: Integer;
   c: Char;
 begin
   len := Length(AStr);
   if len < 3 then
-    Exit(OP_STATIC);
+    Exit(opStatic);
 
   // Check for min(...), max(...), mid(...)
   if (len > 5) and (AStr[4] = '(') and (AStr[len] = ')') then
   begin
     if Copy(AStr, 1, 4) = 'min(' then
-      Exit(OP_MIN);
+      Exit(opMin);
     if Copy(AStr, 1, 4) = 'max(' then
-      Exit(OP_MAX);
+      Exit(opMax);
     if Copy(AStr, 1, 4) = 'mid(' then
-      Exit(OP_MID);
+      Exit(opMid);
   end;
 
   // Try inline add/sub, then mul/div (precedence order)
@@ -193,19 +193,19 @@ begin
       begin
         if j = 0 then
         begin
-          if c = '+' then Exit(OP_ADD);
-          if c = '-' then Exit(OP_SUB);
+          if c = '+' then Exit(opAdd);
+          if c = '-' then Exit(opSub);
         end
         else
         begin
-          if c = '*' then Exit(OP_MUL);
-          if c = '/' then Exit(OP_DIV);
+          if c = '*' then Exit(opMul);
+          if c = '/' then Exit(opDiv);
         end;
       end;
     end;
   end;
 
-  Result := OP_STATIC;
+  Result := opStatic;
 end;
 
 { Checks if string s starts with match string, allowing lenient matching.
@@ -294,7 +294,7 @@ function ParseUnitValue(const AStr: string; AEmptyReplacement: TfpgMigUnitValue;
 var
   s, cs: string;
   c0: Char;
-  oper: Integer;
+  oper: TfpgMigOperation;
   inline: Boolean;
   uvs: TStringArray;
   sub: string;
@@ -327,10 +327,10 @@ begin
 
   // Detect operation type
   oper := GetOper(s);
-  inline := (oper = OP_ADD) or (oper = OP_SUB) or (oper = OP_MUL) or (oper = OP_DIV);
+  inline := (oper = opAdd) or (oper = opSub) or (oper = opMul) or (oper = opDiv);
 
   // If multi-value expression
-  if oper <> OP_STATIC then
+  if oper <> opStatic then
   begin
     if not inline then
     begin
@@ -344,9 +344,9 @@ begin
     begin
       // Inline format: 10px+5mm
       case oper of
-        OP_ADD: delim := '+';
-        OP_SUB: delim := '-';
-        OP_MUL: delim := '*';
+        opAdd: delim := '+';
+        opSub: delim := '-';
+        opMul: delim := '*';
         else delim := '/';
       end;
 
@@ -372,7 +372,9 @@ begin
     if (sub1 = nil) or (sub2 = nil) then
       raise Exception.Create('Malformed UnitValue. Must be two sub-values: ''' + AStr + '''');
 
-    Result := TfpgMigUnitValue.Create(AIsHorizontal, oper, sub1, sub2, cs);
+    // Create UnitValue with operation and sub-units
+    // Note: Need to add this constructor to TfpgMigUnitValue
+    Result := TfpgMigUnitValue.CreateOper(AIsHorizontal, oper, sub1, sub2, cs);
   end
   else
   begin
@@ -415,10 +417,10 @@ end;
 
 function ParseBoundSize(const AStr: string; AIsGap, AIsHor: Boolean): TfpgMigBoundSize;
 var
-  s, cs, s0: string;
+  s, s0: string;
   push, hasEM: Boolean;
   sizes: TStringArray;
-  uv: TfpgMigUnitValue;
+  uv, uvMax: TfpgMigUnitValue;
   len: Integer;
 begin
   // Handle empty/null
@@ -426,7 +428,6 @@ begin
     Exit(nil);
 
   s := AStr;
-  cs := AStr;  // Save creation string
   push := False;
 
   // Check for "push" suffix
@@ -440,7 +441,7 @@ begin
       s := Copy(s, 1, len - 4);
 
     if s = '' then
-      Exit(TfpgMigBoundSize.Create(nil, nil, nil, push, cs));
+      Exit(TfpgMigBoundSize.Create(nil, nil, nil, push));
   end;
 
   // Split by ':' to get min:pref:max
@@ -461,9 +462,15 @@ begin
         // Always use value for pref
         // If has !, use value for max too
         if AIsGap or hasEM then
-          Result := TfpgMigBoundSize.Create(uv, uv, IfThen(hasEM, uv, nil), push, cs)
+        begin
+          if hasEM then
+            uvMax := uv
+          else
+            uvMax := nil;
+          Result := TfpgMigBoundSize.Create(uv, uv, uvMax, push);
+        end
         else
-          Result := TfpgMigBoundSize.Create(nil, uv, nil, push, cs);
+          Result := TfpgMigBoundSize.Create(nil, uv, nil, push);
       end;
 
     2:
@@ -472,8 +479,7 @@ begin
         ParseUnitValue(s0, nil, AIsHor),
         ParseUnitValue(sizes[1], nil, AIsHor),
         nil,
-        push,
-        cs
+        push
       );
 
     3:
@@ -482,11 +488,10 @@ begin
         ParseUnitValue(s0, nil, AIsHor),
         ParseUnitValue(sizes[1], nil, AIsHor),
         ParseUnitValue(sizes[2], nil, AIsHor),
-        push,
-        cs
+        push
       );
   else
-    raise Exception.Create('Min:Preferred:Max size section must contain 0, 1 or 2 colons. ''' + cs + '''');
+    raise Exception.Create('Min:Preferred:Max size section must contain 0, 1 or 2 colons. ''' + AStr + '''');
   end;
 end;
 
@@ -509,9 +514,9 @@ begin
     for j := 0 to 3 do
     begin
       if isPanel then
-        Result[j] := GetPanelInsets(j)
+        Result[j] := TfpgMigPlatformDefaults.GetPanelInsets(j)
       else
-        Result[j] := GetDialogInsets(j);
+        Result[j] := TfpgMigPlatformDefaults.GetDialogInsets(j);
     end;
     Exit;
   end;
@@ -531,7 +536,7 @@ begin
     if insSz <> nil then
       Result[j] := insSz
     else
-      Result[j] := GetPanelInsets(j);
+      Result[j] := TfpgMigPlatformDefaults.GetPanelInsets(j);
   end;
 end;
 
