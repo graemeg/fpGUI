@@ -44,7 +44,7 @@ begin
   // Create MigLayout with 4 columns for flexible layout
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(4);  // 4 columns
-  mig.LC.FillX;            // Fill horizontal space
+  mig.LC.Fill;             // Fill both horizontal and vertical space
   mig.LC.Debug(500);
   LayoutManager := mig;
 

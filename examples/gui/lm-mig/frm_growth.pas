@@ -31,10 +31,10 @@ begin
   SetPosition(200, 150, 550, 450);
   WindowTitle := 'MigLayout - Growth Behavior';
 
-  // Create MigLayout with FillX to distribute extra space
+  // Create MigLayout with Fill to distribute extra space
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(2);  // 2 columns
-  mig.LC.FillX;            // Columns fill horizontal space
+  mig.LC.Fill;             // Fill both horizontal and vertical space
   mig.LC.Debug(500);
   LayoutManager := mig;
 
