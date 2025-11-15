@@ -1687,9 +1687,10 @@ The ActualWidth/ActualHeight migration is **100% complete** for all critical fra
 - ✅ All core framework widgets migrated (30+ widgets)
 - ✅ All layout managers migrated (MigLayout, FlowLayout, BorderLayout)
 - ✅ All rendering backends migrated (X11, GDI, AggCanvas, Cocoa stub)
-- ✅ All critical example applications fixed
+- ✅ All example applications and tools migrated
 - ✅ Tab sheet resize flicker issues resolved
 - ✅ Comprehensive examples directory review completed
+- ✅ DocView and UI Designer applications migrated
 
 ==== Session Work Summary
 
@@ -1713,6 +1714,16 @@ The ActualWidth/ActualHeight migration is **100% complete** for all critical fra
   * examples/gui/stdimages/ - Image overflow check
 - Verified additional examples (globe, wulinetest, gridtest, hintwindow)
 
+**Session 3: Final Applications** (Nov 15, 2025)
+- Completed comprehensive review of ALL remaining applications
+- Verified layout manager examples (lm-mig, lm-flow, alignment) - no changes needed
+- Fixed docview application:
+  * components/richtext/RichTextView.pas - Scrollbar corner rectangle calculation
+- Fixed uidesigner application:
+  * vfd_designer.pas - TDesignedForm grid drawing in HandlePaint
+  * vfd_designer.pas - TOtherWidget frame rectangle in HandlePaint
+- Achieved true 100% completion across entire fpGUI framework
+
 ==== Critical Fixes Applied
 
 **Tab Sheet Resize (Commits: 17cc8d24, 2af658b7)**:
@@ -1732,17 +1743,17 @@ The ActualWidth/ActualHeight migration is **100% complete** for all critical fra
 - Conditional compilation adjusts arc angles for different Y-axis orientation
 - X11 uses mathematical coordinates, AggCanvas uses screen coordinates
 
-==== Remaining Non-Critical Items
+==== All Applications Verified
 
-The following example applications were not reviewed but likely work correctly since they use framework widgets that have already been migrated:
+All example applications and major tools have been reviewed and migrated:
 
-- `examples/gui/lm-mig/` - MigLayout demo
-- `examples/gui/lm-flow/` - FlowLayout demo
-- `examples/gui/alignment/` - Align properties demo
-- `docview/src/` - DocView application
-- `uidesigner/` - UI Designer application
+- ✅ `examples/gui/lm-mig/` - MigLayout demo (verified, no changes needed)
+- ✅ `examples/gui/lm-flow/` - FlowLayout demo (verified, no changes needed)
+- ✅ `examples/gui/alignment/` - Align properties demo (verified, no changes needed)
+- ✅ `docview/` - DocView application (RichTextView scrollbar corner fixed)
+- ✅ `uidesigner/` - UI Designer application (grid and widget frame rendering fixed)
 
-These can be reviewed as needed but are not blocking the migration completion.
+No remaining applications require migration.
 
 ==== Testing Recommendations
 
