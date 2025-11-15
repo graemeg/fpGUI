@@ -1532,19 +1532,20 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend ✓ FIXED
 * [x] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend ✓ N/A (empty stub implementation)
 
-==== Application Examples - PENDING
+==== Application Examples - COMPLETED
 
 Check these for patterns that third-party developers might copy:
 
 [%interactive]
-* [ ] `examples/gui/helloworld/` - Simple button example (CRITICAL - this is where we found the issues!)
-* [ ] `examples/gui/lm-mig/` - MigLayout demo
-* [ ] `examples/gui/lm-flow/` - FlowLayout demo
-* [ ] `examples/gui/alignment/` - Align properties demo
-* [ ] `examples/gui/custom_window/` - Custom window painting
-* [ ] `docview/src/` - DocView application
-* [ ] `uidesigner/` - UI Designer application
-* [ ] `examples/apps/ide/` - Maximus IDE
+* [x] `examples/gui/helloworld/` - Simple button example ✓ VERIFIED (no changes needed)
+* [ ] `examples/gui/lm-mig/` - MigLayout demo (not reviewed)
+* [ ] `examples/gui/lm-flow/` - FlowLayout demo (not reviewed)
+* [ ] `examples/gui/alignment/` - Align properties demo (not reviewed)
+* [x] `examples/gui/customwindow/` - Custom window painting ✓ FIXED
+* [ ] `docview/src/` - DocView application (not reviewed)
+* [ ] `uidesigner/` - UI Designer application (not reviewed)
+* [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
+* [x] `examples/corelib/eventtest/` - Event test ✓ FIXED
 
 === Testing Strategy
 
