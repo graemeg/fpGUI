@@ -1527,9 +1527,9 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 
 [%interactive]
 * [x] `src/corelib/render/software/Agg2D.pas` - Agg canvas implementation ✓ WORKING
-* [ ] `src/corelib/x11/fpg_x11.pas` - X11 window management (corrupted background issue)
-* [ ] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend
-* [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend
+* [x] `src/corelib/x11/fpg_x11.pas` - X11 canvas buffer management ✓ FIXED
+* [ ] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend (untested)
+* [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend (untested)
 
 ==== Application Examples - PENDING
 

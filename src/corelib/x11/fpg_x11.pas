@@ -3331,8 +3331,8 @@ begin
   end;
 
   //XGetGeometry(xapplication.display, TfpgX11Window(awidget.Window).WinHandle, @rw, @x, @y, @w, @h, @bw, @d);
-  h := FWidget.Height;
-  w := FWidget.Width;
+  h := FWidget.ActualHeight;
+  w := FWidget.ActualWidth;
 
   {if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
@@ -3464,7 +3464,7 @@ begin
     if Result then
     begin
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
-      if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
+      if (wp - FWidget.ActualWidth > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.ActualHeight > PIXMAP_RESIZE_SIZE*2) or (FWidget.ActualWidth > wp) or (FWidget.ActualHeight > hp) then
       begin
         TryFreePixmap;
         Result := False;
@@ -3477,14 +3477,14 @@ procedure TfpgX11Canvas.DoAllocateBuffer;
 begin
   if FBufferPixmap <> 0 then
     TryFreePixmap;
-  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.Width+PIXMAP_RESIZE_SIZE, FWidget.Height+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
+  FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11Window(FWidget.Window).WinHandle, FWidget.ActualWidth+PIXMAP_RESIZE_SIZE, FWidget.ActualHeight+PIXMAP_RESIZE_SIZE, xapplication.DisplayDepth);
   FDrawHandle:=FBufferPixmap;
 end;
 
 procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
 begin
   {$IFDEF GDEBUG}
-  WriteLn('fpGFX/X11: Freeing Buffer w=', FWidget.Width, ' h=', FWidget.Height);
+  WriteLn('fpGFX/X11: Freeing Buffer w=', FWidget.ActualWidth, ' h=', FWidget.ActualHeight);
   {$ENDIF}
   TryFreePixmap;
   FreeAndNil(FBufferFreeTimer);
