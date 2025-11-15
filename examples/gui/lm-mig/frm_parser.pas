@@ -61,7 +61,10 @@ var
 begin
   inherited AfterCreate;
   Name := 'ParserMigForm';
-  SetPosition(250, 150, 650, 550);
+  Left := 250;
+  Top := 150;
+  Width := 650;
+  Height := 550;
   WindowTitle := 'MigLayout - String Parser Examples';
 
   // Create MigLayout with 2-column grid
