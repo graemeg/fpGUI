@@ -308,6 +308,10 @@ type
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+    function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+
+    // Helper to calculate sizes from grid
+    function CalculateGridSize(AContainer: TfpgWidgetBase; ASizeType: Integer): TfpgSize;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -3158,10 +3162,86 @@ begin
   end;
 end;
 
+function TfpgMigLayoutManager.CalculateGridSize(AContainer: TfpgWidgetBase; ASizeType: Integer): TfpgSize;
+var
+  ccMap: TfpgMigCCMap;
+  grid: TfpgMigGrid;
+  Iterator: ILayoutIterator;
+  child: TfpgWidget;
+  constraint: TfpgLayoutConstraint;
+  cc: TfpgMigCC;
+  widthArray, heightArray: TfpgMigIntArray;
+  refWidth, refHeight: Integer;
+begin
+  Result.SetSize(0, 0);
+
+  if AContainer = nil then
+    Exit;
+
+  // Build CC map from widgets and their constraints (same as DoLayout)
+  Iterator := GetIterator(AContainer);
+  if not Assigned(Iterator) then
+    Exit;
+
+  ccMap := TfpgMigCCMap.Create;
+  try
+    while Iterator.HasNext do
+    begin
+      child := Iterator.Next as TfpgWidget;
+      if child = nil then
+        Continue;
+
+      constraint := GetConstraint(child);
+      if (constraint <> nil) and (constraint is TfpgMigCC) then
+        cc := TfpgMigCC(constraint)
+      else
+        cc := nil;
+
+      ccMap.Add(child, cc);
+    end;
+
+    // Create Grid instance to calculate sizes
+    grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
+    try
+      // Use large reference size for calculation (Grid will shrink to minimum/preferred)
+      // For minimum size, Grid should calculate the smallest dimensions needed
+      // For preferred size, Grid should calculate the ideal dimensions
+      refWidth := 10000;
+      refHeight := 10000;
+
+      // Force grid to calculate its dimensions
+      grid.checkSizeCalcs(refWidth, refHeight);
+
+      // Get calculated dimensions from grid
+      widthArray := grid.GetWidth;
+      heightArray := grid.GetHeight;
+
+      // Extract the requested size type (SIZE_MIN=0, SIZE_PREF=1, SIZE_MAX=2)
+      if (Length(widthArray) > ASizeType) and (Length(heightArray) > ASizeType) then
+      begin
+        Result.W := widthArray[ASizeType];
+        Result.H := heightArray[ASizeType];
+
+        // Add container insets if any (margins around the grid)
+        // TODO: Get actual insets from LC or container
+        // For now, we'll trust that the grid has calculated these
+      end;
+    finally
+      grid.Free;
+    end;
+  finally
+    ccMap.Free;
+  end;
+end;
+
 function TfpgMigLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
 begin
-  // TODO: Use Grid.getWidth/getHeight for preferred size
-  Result.SetSize(0, 0);
+  Result := CalculateGridSize(AContainer, SIZE_PREF);
+end;
+
+function TfpgMigLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
+begin
+  Result := CalculateGridSize(AContainer, SIZE_MIN);
 end;
 
 end.

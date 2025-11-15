@@ -424,10 +424,25 @@ begin
 end;
 
 procedure TfpgWidget.SetLayoutManager(const AValue: ILayoutManager);
+var
+  minSize: TfpgSize;
 begin
   if FLayoutManager = AValue then
     Exit;
   FLayoutManager := AValue;
+
+  // Update MinWidth/MinHeight from layout manager's calculated minimum size
+  // This ensures the window manager enforces proper minimum dimensions
+  if Assigned(FLayoutManager) then
+  begin
+    minSize := FLayoutManager.GetMinimumSize(Self);
+    if (minSize.W > 0) and (minSize.H > 0) then
+    begin
+      MinWidth := minSize.W;
+      MinHeight := minSize.H;
+    end;
+  end;
+
   Realign;
 end;
 
