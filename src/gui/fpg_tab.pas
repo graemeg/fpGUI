@@ -152,6 +152,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); override;
     procedure   RePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -925,10 +926,7 @@ begin
             h.Visible:=false
           else
             h.Visible:=True;
-          h.Left := FMargin + 2;
-          h.Top := FMargin + 2;
-          h.Width := ActualWidth - (FMargin * 2) - 4;
-          h.Height := ActualHeight - ((FMargin + 2) * 2);
+          { Position and size are set by PositionTabSheets called from HandleAlignments }
           if h <> TfpgTabSheet(FPages.Last) then
             h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
           else
@@ -957,10 +955,7 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            h.Left := FMargin + 2;
-            h.Top := FMargin + 2;
-            h.Width := ActualWidth - (FMargin * 2) - 4;
-            h.Height := ActualHeight - TabH - (FMargin + 2) * 2;
+            { Position and size are set by PositionTabSheets called from HandleAlignments }
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -1012,10 +1007,7 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            h.Left := FMargin + 2;
-            h.Top := FMargin + 2 + r2.Height;
-            h.Width := ActualWidth - (FMargin * 2) - 4;
-            h.Height := ActualHeight - r2.Height - ((FMargin + 2) * 2);
+            { Position and size are set by PositionTabSheets called from HandleAlignments }
           end;
           // paint tab button
           r2.Width := ButtonWidth(h.Text);
@@ -1068,11 +1060,7 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            { set tab content page (client area) size }
-            h.Left := FMargin + 2;
-            h.Top := FMargin + 2;
-            h.Width := ActualWidth - ((FMargin + 2) * 2) - TabW;
-            h.Height := ActualHeight - ((FMargin + 2) * 2);
+            { Position and size are set by PositionTabSheets called from HandleAlignments }
           end;
           // paint tab button
           if h = ActivePage then
@@ -1123,11 +1111,7 @@ begin
           begin
             toffset := 2;
             h.Visible := True;
-            { set tab content page (client area) size }
-            h.Left := FMargin + 2 + TabW;
-            h.Top := FMargin + 2;
-            h.Width := ActualWidth - ((FMargin + 2) * 2) - TabW;
-            h.Height := ActualHeight - ((FMargin + 2) * 2);
+            { Position and size are set by PositionTabSheets called from HandleAlignments }
           end;
           // paint tab button
           if h = ActivePage then
@@ -1175,7 +1159,7 @@ begin
   if csDesigning in ComponentState then
   begin
     Canvas.SetColor(clInactiveWgFrame);
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
     if PageCount = 0 then
     begin
       Canvas.SetTextColor(clText1);
@@ -1267,6 +1251,15 @@ begin
 
   if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgPageControl.HandleAlignments(const dwidth, dheight: TfpgCoord);
+begin
+  { Reposition tab sheets when PageControl resizes }
+  if (dwidth <> 0) or (dheight <> 0) then
+    PositionTabSheets;
+  { Now let base class handle alignments for all children }
+  inherited HandleAlignments(dwidth, dheight);
 end;
 
 procedure TfpgPageControl.RePaint;
