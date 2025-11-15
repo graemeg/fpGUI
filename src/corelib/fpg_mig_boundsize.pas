@@ -117,17 +117,31 @@ end;
 destructor TfpgMigBoundSize.Destroy;
 begin
   // Free owned UnitValues, but do not free the global constants
+  // Use try-except to handle finalization order issues where global constants
+  // might already be freed when this destructor runs
   if (FMin <> nil) and (FMin <> UnitValueZero) and (FMin <> UnitValueInf) and
      (FMin <> UnitValueLeading) and (FMin <> UnitValueCenter) and (FMin <> UnitValueBaselineIdentity) then
-    FMin.Free;
+  try
+    FreeAndNil(FMin);
+  except
+    // Silently ignore errors during finalization
+  end;
 
   if (FPref <> nil) and (FPref <> UnitValueZero) and (FPref <> UnitValueInf) and
      (FPref <> UnitValueLeading) and (FPref <> UnitValueCenter) and (FPref <> UnitValueBaselineIdentity) then
-    FPref.Free;
+  try
+    FreeAndNil(FPref);
+  except
+    // Silently ignore errors during finalization
+  end;
 
   if (FMax <> nil) and (FMax <> UnitValueZero) and (FMax <> UnitValueInf) and
      (FMax <> UnitValueLeading) and (FMax <> UnitValueCenter) and (FMax <> UnitValueBaselineIdentity) then
-    FMax.Free;
+  try
+    FreeAndNil(FMax);
+  except
+    // Silently ignore errors during finalization
+  end;
 
   inherited Destroy;
 end;
