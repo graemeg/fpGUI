@@ -299,13 +299,11 @@ begin
   bs := ParseBoundSize('100px', False, True);
   try
     AssertNotNull('Result should not be nil', bs);
-    AssertNotNull('Min should not be nil', bs.Min);
+    // For non-gap single value: only preferred is set (Java v11 behavior)
+    AssertNull('Min should be nil for non-gap', bs.Min);
     AssertNotNull('Preferred should not be nil', bs.Preferred);
-    AssertNotNull('Max should not be nil', bs.Max);
-    // Simple value means min=pref=max
-    AssertEquals('Min value should be 100', 100.0, bs.Min.Value, 0.001);
+    AssertNull('Max should be nil for non-gap', bs.Max);
     AssertEquals('Preferred value should be 100', 100.0, bs.Preferred.Value, 0.001);
-    AssertEquals('Max value should be 100', 100.0, bs.Max.Value, 0.001);
   finally
     bs.Free;
   end;
@@ -333,11 +331,14 @@ procedure TTestMigConstraintParser.TestParseBoundSize_PrefOnly;
 var
   bs: TfpgMigBoundSize;
 begin
+  // "::100px" means min=empty, pref=empty, max=100px (max-only constraint)
   bs := ParseBoundSize('::100px', False, True);
   try
     AssertNotNull('Result should not be nil', bs);
-    AssertNotNull('Preferred should not be nil', bs.Preferred);
-    AssertEquals('Preferred value should be 100', 100.0, bs.Preferred.Value, 0.001);
+    AssertNull('Min should be nil', bs.Min);
+    AssertNull('Preferred should be nil', bs.Preferred);
+    AssertNotNull('Max should not be nil', bs.Max);
+    AssertEquals('Max value should be 100', 100.0, bs.Max.Value, 0.001);
   finally
     bs.Free;
   end;
@@ -441,22 +442,29 @@ var
 begin
   insets := ParseInsets('10px 20px', True);
   AssertEquals('Should have 4 values', 4, Length(insets));
-  // Two values: vertical horizontal
+  // Two values: uses last value for remaining (Java v11 behavior)
+  // Order: top, right, bottom, left (0,1,2,3)
   AssertEquals('Top should be 10', 10.0, insets[0].Value, 0.001);
   AssertEquals('Right should be 20', 20.0, insets[1].Value, 0.001);
-  AssertEquals('Bottom should be 10', 10.0, insets[2].Value, 0.001);
-  AssertEquals('Left should be 20', 20.0, insets[3].Value, 0.001);
+  AssertEquals('Bottom should be 20 (uses last)', 20.0, insets[2].Value, 0.001);
+  AssertEquals('Left should be 20 (uses last)', 20.0, insets[3].Value, 0.001);
 end;
 
 procedure TTestMigConstraintParser.TestParseInsets_Null;
 var
   insets: TfpgMigUnitValueArray;
 begin
+  // In Java v11, "null" string in insets returns platform defaults, not empty array
+  // parseUnitValue("null") returns nil, which triggers platform default fallback
   insets := ParseInsets('null', True);
-  AssertEquals('null should return empty array', 0, Length(insets));
+  AssertEquals('null should return platform defaults (4 values)', 4, Length(insets));
+  AssertNotNull('All insets should be set', insets[0]);
+  AssertNotNull('All insets should be set', insets[1]);
+  AssertNotNull('All insets should be set', insets[2]);
+  AssertNotNull('All insets should be set', insets[3]);
 
   insets := ParseInsets('n', True);
-  AssertEquals('n should return empty array', 0, Length(insets));
+  AssertEquals('n should return platform defaults (4 values)', 4, Length(insets));
 end;
 
 initialization
