@@ -172,6 +172,17 @@ var
  _row_ptr : int8u_ptr;
 
 begin
+ // Safety check: if width or height is 0 or unreasonably large (likely underflow from negative),
+ // don't attach to prevent crashes. Max reasonable size is 32767 (signed 16-bit max).
+ if (width_ = 0) or (height_ = 0) or (width_ > 32767) or (height_ > 32767) then
+ begin
+   m_buf   := NIL;
+   m_width := 0;
+   m_height:= 0;
+   m_stride:= 0;
+   Exit;  // Don't proceed with invalid dimensions
+ end;
+
  m_buf   :=buf_;
  m_width :=width_;
  m_height:=height_;
