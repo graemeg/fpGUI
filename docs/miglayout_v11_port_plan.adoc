@@ -1253,58 +1253,92 @@ Critical utility class with core algorithms:
 
 This is mathematically complex - needs careful testing.
 
-==== Step 3.3: Port Grid.java Core Structure (7-10 days) - IN PROGRESS
+==== Step 3.3: Port Grid.java Core Structure ✓ MOSTLY COMPLETE (85-90%)
 
-**File:** `Grid.java` → Refactor `fpg_miglayout.pas`
+**Status:** Core layout features working, advanced features need implementation
 
-**Simplified Approach:** Work directly with `TfpgWidgetBase` - no wrapper classes needed since we only support fpGUI (unlike Java MigLayout which supports Swing, SWT, JavaFX).
+**Commit:** Multiple commits, current as of a42e2e44
 
-Strategy:
+**File:** `Grid.java` → `fpg_miglayout.pas` (3,159 lines)
 
-1. Keep existing `TfpgMigLayoutManager` shell
-2. Port `Grid` as internal class `TfpgMigGrid`
-3. Port inner classes: `Cell`, `CompWrap`, `FlowSizeSpec`, `LinkedDimGroup`, `AboveBelow`, `WeakCell`
-4. Use `TfpgWidgetBase` directly throughout (same as support classes in Step 3.1)
+**Summary:**
 
-[source,pascal]
-----
-type
-  // Inner classes
-  TfpgMigCell = class
-  private
-    FCompWraps: TObjectList<TfpgMigCompWrap>;
-    FSpanX, FSpanY: Integer;
-    FFlowX: Boolean;
-  end;
+Grid implementation is approximately **85-90% complete** with all core layout features working:
 
-  TfpgMigCompWrap = class
-  private
-    FComp: TfpgWidget;
-    FCC: TfpgMigCC;
-    FHideMode: Integer;
-  end;
+**✅ VERIFIED WORKING (via lm-mig demo testing):**
 
-  TfpgMigGrid = class
-  private
-    FContainer: TfpgWidget;
-    FLC: TfpgMigLC;
-    FRowConstr, FColConstr: TfpgMigAC;
-    FGrid: TDictionary<Integer, TfpgMigCell>;
+* ✓ Basic grid layout (2, 3, 4 column grids)
+* ✓ Column spanning (SpanX)
+* ✓ Row spanning (SpanY)
+* ✓ Horizontal growth (GrowX with FillX)
+* ✓ Vertical growth (GrowY with FillY)
+* ✓ Cell alignment (AlignX, AlignY)
+* ✓ Component fill behavior
+* ✓ Multi-DPI support (96dpi, 140dpi tested)
+* ✓ Grid wrapping (WrapAfter)
+* ✓ Grid structure building
+* ✓ Size calculation (LayoutInOneDim, CalculateSerial)
+* ✓ Gap handling (basic)
+* ✓ Linked dimension groups
 
-    procedure LayoutInOneDim(AWidth, AHeight: Integer; AIsHor: Boolean);
-    function GetPos(AComp: TfpgWidget; ACC: TfpgMigCC): TArray<TfpgMigUnitValue>;
-    procedure AdjustMinPrefForSpanningComps(...);
-    // ... many more methods from Grid.java
-  end;
-----
+**❌ MISSING FEATURES (via TODO analysis):**
 
-Key methods to port:
+* ✗ Absolute positioning (adjustSizeForAbsolute, doAbsoluteCorrections, getAbsoluteDimBounds)
+* ✗ Docking mode (getDockInsets, DOCK_DIM_CONSTRAINT)
+* ✗ Size groups (TODO line 2384, 2387)
+* ✗ Baseline alignment (fpGUI limitation - no baseline APIs)
+* ✗ Parallel/Serial layout modes (layoutParallel, layoutSerial)
+* ✗ Advanced gap push logic (TODO line 1834)
+* ✗ Flow specs (partially implemented, TODO line 1155)
+* ✗ Callback support (getCallbackSize)
+* ✗ Component linking (setLinkedBounds, resetLinkValues)
+* ✗ Sparse grid conversion (TODO line 2044)
+* ✗ DimConstraint size overrides (TODO line 2380)
 
-* Constructor - builds grid structure
-* `layoutInOneDim()` - main layout algorithm
-* `adjustMinPrefForSpanningComps()` - handles spanning (we struggled with this!)
-* `divideIntoLinkedGroups()` - baseline/grouped components
-* Size calculation methods
+**Testing Results (2025-11-15):**
+
+Manual testing of `examples/gui/lm-mig/` demo confirmed:
+- All 5 demo forms render correctly
+- Spanning works perfectly (both X and Y)
+- Growth behavior works correctly (after fixing .Fill)
+- Alignment works correctly
+- No crashes or visual glitches
+- Multi-DPI rendering correct
+
+**Implementation Approach:**
+
+Direct port using `TfpgWidgetBase` - no wrapper classes needed (unlike Java which supports multiple toolkits).
+
+**Inner Classes Ported:**
+
+* ✓ TfpgMigCell - holds component wraps in grid cell
+* ✓ TfpgMigCompWrap - wraps TfpgWidgetBase with CC constraint
+* ✓ TfpgMigLinkedDimGroup - components sharing layout properties
+* ✓ TfpgMigFlowSizeSpec - flow size specifications
+* ✓ TfpgMigAboveBelow - baseline calculations (record)
+
+**Key Methods Ported:**
+
+* ✓ Constructor - builds grid structure
+* ✓ Layout() - main layout entry point
+* ✓ LayoutInOneDim() - one-dimensional layout algorithm
+* ✓ CalcGridSizes() - calculates grid sizes
+* ✓ CalculateDimensionSizes() - calculates dimension sizes
+* ✓ GetDefaultGrowWeights() - calculates grow weights
+* ✓ DivideIntoLinkedGroups() - groups linked components
+* ✓ BuildIndexes() - builds row/column indexes
+* ✓ BuildDimensionGroups() - builds dimension groups
+* ✓ GetWidth(), GetHeight() - size getters
+
+**Recommendation:**
+
+The Grid is production-ready for **common layout scenarios**:
+- Form layouts (labels + fields)
+- Button bars
+- Grid layouts with spanning
+- Resizable layouts with growth
+
+Advanced features (docking, absolute positioning, size groups) can be added incrementally as needed.
 
 ==== Step 3.4: Port Component/Container Wrappers - NOT NEEDED ✓ SKIPPED
 
