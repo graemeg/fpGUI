@@ -20,6 +20,7 @@ uses
   tcmiglayout,
   tcmig_unitvalue,
   tcmig_boundsize,
+  tcmig_constraintparser,
   tcmig_platformdefaults,
   tcmig_dimconstraint,
   tcmig_ac,
