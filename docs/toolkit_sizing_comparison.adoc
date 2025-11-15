@@ -1517,18 +1517,19 @@ Search these files for Width/Height property reads that might need ActualWidth/A
 * [x] `src/corelib/fpg_gridlayout.pas` - Does not exist ✓ N/A
 * [x] `src/corelib/fpg_boxlayout.pas` - Does not exist ✓ N/A
 
-==== Rendering Backends - PENDING
+==== Rendering Backends - IN PROGRESS
 
 **Status Notes**:
 
 - AggCanvas backend (Agg2D.pas) is WORKING - user verified all fixes applied
 - X11 backend shows corrupted form background when AggCanvas disabled - needs fixes
-- All other backends (GDI, Carbon, Cocoa) untested and likely broken
+- GDI backend (Windows) migrated - canvas buffer management uses ActualWidth/ActualHeight
+- Cocoa backend (macOS) untested and likely needs migration
 
 [%interactive]
 * [x] `src/corelib/render/software/Agg2D.pas` - Agg canvas implementation ✓ WORKING
 * [x] `src/corelib/x11/fpg_x11.pas` - X11 canvas buffer management ✓ FIXED
-* [ ] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend (untested)
+* [x] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend ✓ FIXED
 * [ ] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend (untested)
 
 ==== Application Examples - PENDING

@@ -2625,9 +2625,9 @@ begin
     begin
       // to try avoiding reallocating the buffer for every resize we allocate a
       // buffer that is a bit larger than we need.
-      if (FBufSize.W - FWidget.Width > BUFFER_RESIZE_SIZE*2)
-      or (FBufSize.H - FWidget.Height > BUFFER_RESIZE_SIZE*2)
-      or (FWidget.Width > FBufSize.W) or (FWidget.Height > FBufSize.H) then
+      if (FBufSize.W - FWidget.ActualWidth > BUFFER_RESIZE_SIZE*2)
+      or (FBufSize.H - FWidget.ActualHeight > BUFFER_RESIZE_SIZE*2)
+      or (FWidget.ActualWidth > FBufSize.W) or (FWidget.ActualHeight > FBufSize.H) then
       begin
         TryFreeBackBuffer;
         Result := False;
@@ -2649,8 +2649,8 @@ begin
   if FBufferBitmap > 0 then
     TryFreeBackBuffer;
 
-  FBufSize.W := FWidget.Width + BUFFER_RESIZE_SIZE;
-  FBufSize.H := FWidget.Height + BUFFER_RESIZE_SIZE;
+  FBufSize.W := FWidget.ActualWidth + BUFFER_RESIZE_SIZE;
+  FBufSize.H := FWidget.ActualHeight + BUFFER_RESIZE_SIZE;
   FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, FBufSize.W, FBufSize.H);
   SelectObject(FDrawGC, FBufferBitmap);
   SelectObject(FDrawGC, FPen);
