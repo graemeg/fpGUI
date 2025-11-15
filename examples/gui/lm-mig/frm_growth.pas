@@ -28,7 +28,10 @@ var
 begin
   inherited AfterCreate;
   Name := 'GrowthMigForm';
-  SetPosition(200, 150, 550, 450);
+  Left := 200;
+  Top := 150;
+  Width := 550;
+  Height := 450;
   WindowTitle := 'MigLayout - Growth Behavior';
 
   // Create MigLayout with Fill to distribute extra space
@@ -69,7 +72,7 @@ begin
   edt1.Text := 'This edit grows horizontally';
   edt1.Width := 200;
   edt1.Height := 24;
-  mig.AddLayoutComponent(edt1, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edt1, TfpgMigCC.Create().GrowX());
 
   // Row 3: Three buttons - left fixed, middle grows, right fixed
   lbl4 := TfpgLabel.Create(Self);
@@ -79,10 +82,10 @@ begin
   mig.AddLayoutComponent(lbl4, TfpgMigCC.Create());
 
   btn2 := TfpgButton.Create(Self);
-  btn2.Text := 'Grows with fill';
+  btn2.Text := 'Grows horizontally';
   btn2.Width := 100;
   btn2.Height := 30;
-  mig.AddLayoutComponent(btn2, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(btn2, TfpgMigCC.Create().GrowX());
 
   // Row 4: Memo spanning 2 columns with both horizontal and vertical growth
   memo := TfpgMemo.Create(Self);
@@ -93,7 +96,7 @@ begin
   memo.Lines.Add('Try resizing the window to see the growth behavior.');
   memo.Lines.Add('');
   memo.Lines.Add('The memo will expand to fill available space.');
-  mig.AddLayoutComponent(memo, TfpgMigCC.Create().SpanX(2).GrowX().GrowY().AlignX('fill').AlignY('fill'));
+  mig.AddLayoutComponent(memo, TfpgMigCC.Create().SpanX(2).GrowX().GrowY());
 
   // Bottom buttons
   btn3 := TfpgButton.Create(Self);

@@ -38,7 +38,10 @@ var
 begin
   inherited AfterCreate;
   Name := 'ComplexMigForm';
-  SetPosition(200, 100, 550, 500);
+  Left := 200;
+  Top := 100;
+  Width := 550;
+  Height := 500;
   WindowTitle := 'MigLayout - Complex Form Example';
 
   // Create MigLayout with 4 columns for flexible layout
@@ -66,7 +69,7 @@ begin
   edtName := TfpgEdit.Create(Self);
   edtName.Width := 250;
   edtName.Height := 24;
-  mig.AddLayoutComponent(edtName, TfpgMigCC.Create().SpanX(3).GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edtName, TfpgMigCC.Create().SpanX(3).GrowX());
 
   // Email field (label + edit spanning 3 columns)
   lblEmail := TfpgLabel.Create(Self);
@@ -78,7 +81,7 @@ begin
   edtEmail := TfpgEdit.Create(Self);
   edtEmail.Width := 250;
   edtEmail.Height := 24;
-  mig.AddLayoutComponent(edtEmail, TfpgMigCC.Create().SpanX(3).GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edtEmail, TfpgMigCC.Create().SpanX(3).GrowX());
 
   // Country combobox (label + combo + space)
   lblCountry := TfpgLabel.Create(Self);
@@ -131,7 +134,7 @@ begin
   memoComments.Width := 400;
   memoComments.Height := 100;
   memoComments.Lines.Add('Enter any additional comments here...');
-  mig.AddLayoutComponent(memoComments, TfpgMigCC.Create().SpanX(4).GrowX().GrowY().AlignX('fill').AlignY('fill'));
+  mig.AddLayoutComponent(memoComments, TfpgMigCC.Create().SpanX(4).GrowX().GrowY());
 
   // Button row at bottom right
   // Use SpanX to span all columns, then align right with gap

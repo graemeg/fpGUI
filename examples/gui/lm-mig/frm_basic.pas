@@ -27,7 +27,10 @@ var
 begin
   inherited AfterCreate;
   Name := 'BasicMigForm';
-  SetPosition(300, 200, 450, 250);
+  Left := 300;
+  Top := 200;
+  Width := 450;
+  Height := 250;
   WindowTitle := 'MigLayout - Basic Layouts';
 
   // Create MigLayout with 2-column grid
@@ -47,7 +50,7 @@ begin
   edt1.Name := 'edt1';
   edt1.Text := '';
   edt1.PreferredSize := fpgSize(200, 24);
-  mig.AddLayoutComponent(edt1, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edt1, TfpgMigCC.Create().GrowX());
 
   lbl2 := TfpgLabel.Create(Self);
   lbl2.Name := 'lbl2';
@@ -59,7 +62,7 @@ begin
   edt2.Name := 'edt2';
   edt2.Text := '';
   edt2.PreferredSize := fpgSize(200, 24);
-  mig.AddLayoutComponent(edt2, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edt2, TfpgMigCC.Create().GrowX());
 
   lbl3 := TfpgLabel.Create(Self);
   lbl3.Name := 'lbl3';
@@ -71,7 +74,7 @@ begin
   edt3.Name := 'edt3';
   edt3.Text := '';
   edt3.PreferredSize := fpgSize(200, 24);
-  mig.AddLayoutComponent(edt3, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(edt3, TfpgMigCC.Create().GrowX());
 
   // Row 4: Buttons (spanning 2 columns, right-aligned)
   btn1 := TfpgButton.Create(Self);
