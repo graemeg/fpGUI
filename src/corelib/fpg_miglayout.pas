@@ -1616,11 +1616,19 @@ var
   growPrio, shrinkPrio: Integer;
   growWeight, shrinkWeight: Single;
 begin
-  // Get actual grid position from index
+  // Bounds check to prevent access violations when form is resized very small
   if AIsHor then
-    dimPos := FColIndexes[ADimIndex]
+  begin
+    if (ADimIndex < 0) or (ADimIndex >= FColIndexes.Count) then
+      Exit;  // Index out of bounds, skip this dimension
+    dimPos := FColIndexes[ADimIndex];
+  end
   else
+  begin
+    if (ADimIndex < 0) or (ADimIndex >= FRowIndexes.Count) then
+      Exit;  // Index out of bounds, skip this dimension
     dimPos := FRowIndexes[ADimIndex];
+  end;
 
   // Iterate through all cells to find components in this dimension
   for pair in FGrid do
