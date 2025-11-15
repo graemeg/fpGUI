@@ -254,6 +254,10 @@ type
     function GetRowGaps(ASpecs: array of TfpgMigDimConstraint; ARefSize: Integer;
                        AIsHor: Boolean; var AFillInPushGaps: TfpgMigBooleanArray): TfpgMigSizeArrayArray;
 
+    { Helper to get gaps between rows/columns from component constraints }
+    function GetComponentGapsBetweenDims(AGapIndex: Integer; AIsHor: Boolean;
+                                         ARefSize: Integer; const ADefGap: TfpgMigSizeArray): TfpgMigSizeArray;
+
     { Port of Grid.java correctMinMax() - line 2135
       Corrects a size array so min <= pref <= max }
     class procedure CorrectMinMax(var ASizes: TfpgMigSizeArray);
@@ -1839,8 +1843,8 @@ begin
     end
     else
     begin
-      // TODO: Handle gaps between columns/rows from DimConstraints
-      Result[i] := defGapArr;
+      // Handle gaps between columns/rows from component constraints
+      Result[i] := GetComponentGapsBetweenDims(i, AIsHor, ARefSize, defGapArr);
     end;
 
     // TODO: Port full gap push logic
@@ -1852,6 +1856,149 @@ begin
         AFillInPushGaps[i] := True;
     end;
   end;
+end;
+
+{ Helper to get gaps between rows/columns from component constraints }
+function TfpgMigGrid.GetComponentGapsBetweenDims(AGapIndex: Integer; AIsHor: Boolean;
+  ARefSize: Integer; const ADefGap: TfpgMigSizeArray): TfpgMigSizeArray;
+var
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  cellKey, cellX, cellY: Integer;
+  dimBefore, dimAfter: Integer;
+  i: Integer;
+  cw: TfpgMigCompWrap;
+  compDim: TfpgMigDimConstraint;
+  gapBoundSize: TfpgMigBoundSize;
+  gapVal: Integer;
+  maxGap: TfpgMigSizeArray;
+begin
+  // Start with default gap
+  Result := ADefGap;
+  maxGap[SIZE_MIN] := ADefGap[SIZE_MIN];
+  maxGap[SIZE_PREF] := ADefGap[SIZE_PREF];
+  maxGap[SIZE_MAX] := ADefGap[SIZE_MAX];
+
+  // AGapIndex represents the gap between dimension (AGapIndex-1) and dimension (AGapIndex)
+  if AGapIndex <= 0 then
+    Exit; // First gap (before first row/col) - use default or insets
+
+  if AIsHor then
+  begin
+    // Horizontal: gap between columns
+    if (AGapIndex - 1 >= FColIndexes.Count) or (AGapIndex > FColIndexes.Count) then
+      Exit; // Out of bounds
+
+    if AGapIndex - 1 < FColIndexes.Count then
+      dimBefore := FColIndexes[AGapIndex - 1]
+    else
+      dimBefore := -1;
+
+    if AGapIndex < FColIndexes.Count then
+      dimAfter := FColIndexes[AGapIndex]
+    else
+      dimAfter := -1;
+  end
+  else
+  begin
+    // Vertical: gap between rows
+    if (AGapIndex - 1 >= FRowIndexes.Count) or (AGapIndex > FRowIndexes.Count) then
+      Exit; // Out of bounds
+
+    if AGapIndex - 1 < FRowIndexes.Count then
+      dimBefore := FRowIndexes[AGapIndex - 1]
+    else
+      dimBefore := -1;
+
+    if AGapIndex < FRowIndexes.Count then
+      dimAfter := FRowIndexes[AGapIndex]
+    else
+      dimAfter := -1;
+  end;
+
+  // Iterate through all cells to find components and get their gaps
+  for pair in FGrid do
+  begin
+    cellKey := pair.Key;
+    cell := pair.Value;
+    if cell = nil then
+      Continue;
+
+    DecodeCellKey(cellKey, cellX, cellY);
+
+    // Check all components in this cell
+    for i := 0 to cell.CompWraps.Count - 1 do
+    begin
+      cw := cell.CompWraps[i];
+      if (cw = nil) or (cw.FCC = nil) then
+        Continue;
+
+      // Get the appropriate dimension constraint
+      if AIsHor then
+        compDim := cw.FCC.Horizontal
+      else
+        compDim := cw.FCC.Vertical;
+
+      if compDim = nil then
+        Continue;
+
+      // Check if this component is in dimBefore (check GapAfter)
+      if (dimBefore >= 0) and ((AIsHor and (cellX = dimBefore)) or (not AIsHor and (cellY = dimBefore))) then
+      begin
+        gapBoundSize := compDim.GetGapAfter;
+        if (gapBoundSize <> nil) and (not gapBoundSize.IsUnset) then
+        begin
+          if gapBoundSize.Min <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Min.GetPixels(ARefSize, FContainer, nil));
+            if gapVal > maxGap[SIZE_MIN] then
+              maxGap[SIZE_MIN] := gapVal;
+          end;
+          if gapBoundSize.Preferred <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Preferred.GetPixels(ARefSize, FContainer, nil));
+            if gapVal > maxGap[SIZE_PREF] then
+              maxGap[SIZE_PREF] := gapVal;
+          end;
+          if gapBoundSize.Max <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Max.GetPixels(ARefSize, FContainer, nil));
+            if (gapVal > 0) and (gapVal < maxGap[SIZE_MAX]) then
+              maxGap[SIZE_MAX] := gapVal;
+          end;
+        end;
+      end;
+
+      // Check if this component is in dimAfter (check GapBefore)
+      if (dimAfter >= 0) and ((AIsHor and (cellX = dimAfter)) or (not AIsHor and (cellY = dimAfter))) then
+      begin
+        gapBoundSize := compDim.GetGapBefore;
+        if (gapBoundSize <> nil) and (not gapBoundSize.IsUnset) then
+        begin
+          if gapBoundSize.Min <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Min.GetPixels(ARefSize, FContainer, nil));
+            if gapVal > maxGap[SIZE_MIN] then
+              maxGap[SIZE_MIN] := gapVal;
+          end;
+          if gapBoundSize.Preferred <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Preferred.GetPixels(ARefSize, FContainer, nil));
+            if gapVal > maxGap[SIZE_PREF] then
+              maxGap[SIZE_PREF] := gapVal;
+          end;
+          if gapBoundSize.Max <> nil then
+          begin
+            gapVal := Round(gapBoundSize.Max.GetPixels(ARefSize, FContainer, nil));
+            if (gapVal > 0) and (gapVal < maxGap[SIZE_MAX]) then
+              maxGap[SIZE_MAX] := gapVal;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  Result := maxGap;
 end;
 
 { Port of Grid.java constrainSize() - line 2130 }
