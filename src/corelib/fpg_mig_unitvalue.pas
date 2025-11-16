@@ -14,7 +14,7 @@ unit fpg_mig_unitvalue;
 interface
 
 uses
-  Classes, SysUtils, fpg_base, fpg_widget;
+  Classes, SysUtils, fpg_base, fpg_widget, fpg_main;
 
 type
   { Unit types - from Java constants PIXEL, LPX, MM, etc. }
@@ -304,6 +304,8 @@ begin
 end;
 
 function TfpgMigUnitValue.GetPixels(ARefValue: Single; AParent: TfpgWidgetBase; AComp: TfpgWidgetBase): Single;
+var
+  dpi: Integer;
 begin
   case FUnit of
     utPixel:
@@ -312,6 +314,25 @@ begin
       Result := TfpgMigPlatformDefaults.GetPixelUnitFactor(FUnit = utLPX) * FValue;
     utPercent:
       Result := FValue * ARefValue / 100.0;
+    utMM, utCM, utInch, utPT:
+      begin
+        // Get appropriate DPI based on horizontal/vertical orientation
+        if FIsHorizontal then
+          dpi := fpgApplication.Screen_dpi_x
+        else
+          dpi := fpgApplication.Screen_dpi_y;
+
+        // Convert physical units to pixels based on DPI
+        // 1 inch = 25.4mm = 2.54cm = 72pt = DPI pixels
+        case FUnit of
+          utMM:   Result := FValue * dpi / 25.4;   // millimeters to pixels
+          utCM:   Result := FValue * dpi / 2.54;   // centimeters to pixels
+          utInch: Result := FValue * dpi;          // inches to pixels
+          utPT:   Result := FValue * dpi / 72.0;   // points to pixels
+        else
+          Result := 0;
+        end;
+      end;
   else
     Result := 0; // Other units not implemented yet
   end;
