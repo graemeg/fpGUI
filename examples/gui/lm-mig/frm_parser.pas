@@ -100,8 +100,9 @@ begin
   lblTitle := TfpgLabel.Create(Self);
   lblTitle.Name := 'lblTitle';
   lblTitle.Text := 'ConstraintParser String Syntax Examples';
-  lblTitle.FontDesc := '#Label1:bold';
+  lblTitle.FontDesc := '#Label2';
   lblTitle.Alignment := taCenter;
+  lblTitle.AutoSize := True;
   mig.AddLayoutComponent(lblTitle,
     TfpgMigCC.Create()
       .SpanX(2)        // Span 2 columns
@@ -112,7 +113,8 @@ begin
   lblUnits := TfpgLabel.Create(Self);
   lblUnits.Name := 'lblUnits';
   lblUnits.Text := '1. Unit Types (px, %, mm, lpx):';
-  lblUnits.FontDesc := '#Label1:bold';
+  lblUnits.FontDesc := '#Label2';
+  lblUnits.AutoSize := True;
   mig.AddLayoutComponent(lblUnits,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -165,7 +167,8 @@ begin
   lblBounds := TfpgLabel.Create(Self);
   lblBounds.Name := 'lblBounds';
   lblBounds.Text := '2. BoundSize (min:pref:max):';
-  lblBounds.FontDesc := '#Label1:bold';
+  lblBounds.FontDesc := '#Label2';
+  lblBounds.AutoSize := True;
   mig.AddLayoutComponent(lblBounds,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -190,7 +193,8 @@ begin
   lblAlign := TfpgLabel.Create(Self);
   lblAlign.Name := 'lblAlign';
   lblAlign.Text := '3. Alignment Keywords (left, center, right):';
-  lblAlign.FontDesc := '#Label1:bold';
+  lblAlign.FontDesc := '#Label2';
+  lblAlign.AutoSize := True;
   mig.AddLayoutComponent(lblAlign,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -227,7 +231,8 @@ begin
   lblOps := TfpgLabel.Create(Self);
   lblOps.Name := 'lblOps';
   lblOps.Text := '4. Operations (min, max, +, -):';
-  lblOps.FontDesc := '#Label1:bold';
+  lblOps.FontDesc := '#Label2';
+  lblOps.AutoSize := True;
   mig.AddLayoutComponent(lblOps,
     TfpgMigCC.Create()
       .SpanX(2)
