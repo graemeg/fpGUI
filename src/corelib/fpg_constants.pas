@@ -119,7 +119,6 @@ const
 
   FPG_CONFIG_DIR = 'fpgui_toolkit' + PathDelim;
   FPG_CONFIG_FILE = 'fpgui.ini';
-  FPG_BOOKMARKS_FILE = 'bookmarks.ini';
   FPG_BOOKMARK_SECTION = 'bookmarks';
   FPG_DISPLAY_SECTION = 'display';
 

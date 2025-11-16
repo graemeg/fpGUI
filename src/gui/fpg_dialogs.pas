@@ -1533,7 +1533,7 @@ begin
     lst := TStringList.Create;
     try
       if not Assigned(FIni) then
-        FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_BOOKMARKS_FILE);
+        FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_CONFIG_FILE);
       FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
       // add previous bookmarks to menu
       for i := 0 to lst.Count-1 do
