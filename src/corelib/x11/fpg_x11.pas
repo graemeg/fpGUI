@@ -3243,7 +3243,8 @@ end;
 
 function TfpgX11FontResource.GetHeight: integer;
 begin
-  Result := FFontData^.Height;
+  // Return ascent + descent to ensure full font height including descenders
+  Result := FFontData^.ascent + FFontData^.descent;
 end;
 
 function TfpgX11FontResource.GetTextWidth(const txt: string): integer;
