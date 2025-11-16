@@ -1314,7 +1314,7 @@ begin
 
     FAscent := round(m_fontEngine._ascender);
     FDescent := round(abs(m_fontEngine._descender));
-    FHeight := FAscent + FDescent;
+    FHeight := round(m_fontEngine._height);
     FValid := True;
   end;
 end;
