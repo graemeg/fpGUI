@@ -69,6 +69,15 @@ var
   mig: TfpgMigLayoutManager;
 begin
   inherited AfterCreate;
+
+  // The following lines are a temporary workaround for systems where the
+  // screen DPI is not correctly configured. This functionality is now handled
+  // by the global fpgui.ini configuration file.
+  // See TfpgMigPlatformDefaults.Initialize for more details.
+  //
+  // TfpgMigPlatformDefaults.SetHorizontalScaleFactor(158.75 / 96.0);
+  // TfpgMigPlatformDefaults.SetVerticalScaleFactor(158.75 / 96.0);
+
   Name := 'ParserMigForm';
   Left := 250;
   Top := 150;

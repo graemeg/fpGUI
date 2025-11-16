@@ -136,11 +136,17 @@ type
 implementation
 
 uses
-  fpg_base, fpg_main;  // For platform detection and screen DPI
+  fpg_base, fpg_main,  // For platform detection and screen DPI
+  inifiles, fpg_utils, fpg_constants;
+
 
 { TfpgMigPlatformDefaults }
 
 class procedure TfpgMigPlatformDefaults.Initialize;
+var
+  Ini: TINIFile;
+  IniFileName: string;
+  ScaleFactor: Single;
 begin
   if FInstance <> nil then
     Exit;
@@ -154,6 +160,24 @@ begin
   FDefHUnit := Ord(utLPX);
   FDefVUnit := Ord(utLPY);
   FDefaultRowAlignmentBaseline := True;  // Default since v3.5
+
+  // Read scale factor from fpgui.ini
+  IniFileName := fpgGetToolkitConfigDir + FPG_CONFIG_FILE;
+  if fpgFileExists(IniFileName) then
+  begin
+    Ini := TINIFile.Create(IniFileName);
+    try
+      // Read scale factor from [Display] section
+      ScaleFactor := Ini.ReadFloat(FPG_DISPLAY_SECTION, 'ScaleFactor', 1.0);
+      if (ScaleFactor > 0) and (abs(ScaleFactor - 1.0) > 1e-6) then
+      begin
+        FHorScale := ScaleFactor;
+        FVerScale := ScaleFactor;
+      end;
+    finally
+      Ini.Free;
+    end;
+  end;
 
   CreatePredefinedValues;
 

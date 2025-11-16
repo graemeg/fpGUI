@@ -308,6 +308,7 @@ var
   dpi: Integer;
   compName: string;
   debugUnitStr: string;
+  s: Single;
 begin
   case FUnit of
     utPixel:
@@ -323,6 +324,17 @@ begin
           dpi := fpgApplication.Screen_dpi_x
         else
           dpi := fpgApplication.Screen_dpi_y;
+
+        // Get scale factor from PlatformDefaults to allow overriding system DPI
+        if FIsHorizontal then
+          s := TfpgMigPlatformDefaults.GetHorizontalScaleFactor
+        else
+          s := TfpgMigPlatformDefaults.GetVerticalScaleFactor;
+
+        // Apply scale factor to DPI if it's set to something other than 1.0.
+        // This is useful for systems where the reported DPI is incorrect.
+        if (s > 0) and (abs(s - 1.0) > 1e-6) then
+          dpi := Round(dpi * s);
 
         // Convert physical units to pixels based on DPI
         // 1 inch = 25.4mm = 2.54cm = 72pt = DPI pixels
@@ -353,8 +365,6 @@ begin
           compName := AComp.Name
         else
           compName := 'nil';
-        WriteLn(Format('DEBUG GetPixels: Component=%s Unit=%s Value=%.2f IsHor=%s DPI=%d Calc=%.2f*%d/25.4 Result=%.2f',
-          [compName, debugUnitStr, FValue, BoolToStr(FIsHorizontal, True), dpi, FValue, dpi, Result]));
       end;
   else
     Result := 0; // Other units not implemented yet

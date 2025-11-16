@@ -430,6 +430,7 @@ function TfpgMigCompWrap.GetSize(ABoundSize: TfpgMigBoundSize; ASizeType: Intege
 var
   uv: TfpgMigUnitValue;
   sz: TfpgSize;
+  refSize: Single;
 begin
   // Get the UnitValue for this size type
   uv := nil;
@@ -472,9 +473,17 @@ begin
   end
   else
   begin
-    // TODO: Implement full GetPixels with parent size, relative units, etc.
-    // For now, just use the value directly (assumes pixels)
-    Result := Round(uv.Value);
+    if (FComp <> nil) and (FComp.Parent <> nil) then
+    begin
+      if AIsHor then
+        refSize := FComp.Parent.ActualWidth
+      else
+        refSize := FComp.Parent.ActualHeight;
+    end
+    else
+      refSize := ASizeHint; // Fallback, though likely -1
+
+    Result := Round(uv.GetPixels(refSize, FComp.Parent, FComp));
   end;
 end;
 

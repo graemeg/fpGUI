@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -118,8 +118,10 @@ const
   FPG_HELPVIEWER = 'docview';
 
   FPG_CONFIG_DIR = 'fpgui_toolkit' + PathDelim;
+  FPG_CONFIG_FILE = 'fpgui.ini';
   FPG_BOOKMARKS_FILE = 'bookmarks.ini';
   FPG_BOOKMARK_SECTION = 'bookmarks';
+  FPG_DISPLAY_SECTION = 'display';
 
   // Used for the internal message queue
   cMessageQueueSize = 2048;
