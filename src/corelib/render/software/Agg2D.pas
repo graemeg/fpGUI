@@ -3971,7 +3971,9 @@ begin
   NoLine;
   TextHints(False);
   TextAlignment(AGG_AlignLeft, AGG_AlignTop);
-  Text(x, y+3{+FontHeight}, txt);
+  // AGG_AlignTop means Y represents the top of the text bounding box.
+  // AGG automatically positions the baseline at Y + ascent internally.
+  Text(x, y, txt);
 end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
