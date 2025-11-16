@@ -359,7 +359,6 @@ function TfpgMigDimConstraint.GetComponentGaps(AParent: TfpgWidgetBase;
 var
   gap: TfpgMigBoundSize;
   hasGap: Boolean;
-  i: Integer;
   uv: TfpgMigUnitValue;
 begin
   // Determine which gap to use based on side (0=top, 1=left are "before", 2=bottom, 3=right are "after")

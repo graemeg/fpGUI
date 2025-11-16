@@ -899,7 +899,9 @@ end;
 procedure TfpgMigLinkedDimGroup.Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
 var
   Parent: TfpgWidgetBase;
+{$IFDEF MIGDEBUG}
   i: Integer;
+{$ENDIF}
 begin
   FLStart := AStart;
   FLSize := ASize;
@@ -2948,7 +2950,6 @@ var
   growW: TfpgMigFloatArray;
   sizes: TfpgMigIntegerArray;
   gaps: TfpgMigSizeArrayArray;
-  i: Integer;
 begin
   // For single-component spanning layouts, use zero gaps so the component fills the entire span
   if ACompWraps.Count = 1 then
