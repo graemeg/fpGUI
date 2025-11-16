@@ -1145,8 +1145,8 @@ begin
   inherited Create(AOwner);
   FFont               := fpgApplication.FontManager.GetFont('#Edit1');
   Focusable           := True;
-  FHeight             := 24;
-  FWidth              := 120;
+  Height              := 24;
+  Width               := 120;
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;
