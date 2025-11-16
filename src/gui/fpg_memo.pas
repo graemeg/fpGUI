@@ -576,28 +576,29 @@ end;
 function TfpgMemo.TabbedTextWidth(const AText: TfpgString): integer;
 var
   tstop, p, i: integer;
+  s: string;
 begin
   result := 0;
   if AText = '' then exit;
-  tstop := FFont.GetTextWidth('+') * FTabWidth;
+  tstop := FFont.GetTextWidth(' ') * FTabWidth; // Use space instead of '+'
   p := 1;
   for i := 1 to length(AText) do
   begin
     if AText[i] = #9 then
     begin
-      if p <> i then
-        inc(result, FFont.GetTextWidth(copy(AText, p, i - p)));
-      inc(result, tstop - (result mod tstop));
+      s := copy(AText, p, i - p);
+      if s <> '' then
+        inc(result, FFont.GetTextWidth(s));
+      if tstop > 0 then
+        inc(result, tstop - (result mod tstop));
       p := i + 1;
     end;
   end;
-  // fpc exits FOR with i = length(AText)
-  if p <= i then
+  // handle remaining part of the string
+  if p <= length(AText) then
   begin
-    if p > 1 then
-      inc(result, FFont.GetTextWidth(copy(AText, p, i - p + 1)))
-    else // more efficient if we don't have to make another string
-      result := FFont.GetTextWidth(AText);
+    s := copy(AText, p, length(AText) - p + 1);
+    inc(result, FFont.GetTextWidth(s));
   end;
 end;
 
