@@ -1,6 +1,6 @@
 unit fpg_migconstraint;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

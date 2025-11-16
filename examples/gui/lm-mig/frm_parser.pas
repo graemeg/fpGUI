@@ -82,7 +82,7 @@ begin
   Left := 250;
   Top := 150;
   Width := 650;
-  Height := 550;
+  Height := 700;
   WindowTitle := 'MigLayout - String Parser Examples';
 
   // Debug: Show DPI information

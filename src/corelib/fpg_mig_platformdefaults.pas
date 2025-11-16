@@ -9,7 +9,7 @@ unit fpg_mig_platformdefaults;
   This is a simplified implementation for Phase 1 focusing on core functionality.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

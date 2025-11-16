@@ -1,6 +1,6 @@
 unit fpg_miglayout;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 {
   MigLayout v11 Port for fpGUI

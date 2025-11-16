@@ -19,7 +19,7 @@ unit fpg_mig_lc;
     TfpgMigLC.Create.FlowX.Fill.Wrap.GridGap('10px', '10px')
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

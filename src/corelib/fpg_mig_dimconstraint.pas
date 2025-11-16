@@ -9,7 +9,7 @@ unit fpg_mig_dimconstraint;
   Handles size, alignment, gaps, grow/shrink priorities and weights.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

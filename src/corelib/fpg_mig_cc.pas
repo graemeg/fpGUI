@@ -10,7 +10,7 @@ unit fpg_mig_cc;
   alignment, gaps, spanning, docking, and more.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

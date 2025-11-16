@@ -11,12 +11,12 @@ unit fpg_mig_layoututil;
   License (BSD):
   ==============
 
-  Copyright (c) 2004, Mikael Grev, MiG InfoCom AB. (miglayout (at) miginfocom (dot) com)
+  Copyright (c) 2004, Mikael Grev, MiG InfoCom AB. (miglayout@miginfocomo.com)
   Pascal port Copyright (c) 2025, Graeme Geldenhuys
   All rights reserved.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

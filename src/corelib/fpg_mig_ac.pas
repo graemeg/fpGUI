@@ -12,7 +12,7 @@ unit fpg_mig_ac;
     AC.Index(0).Fill.Gap.Size('100px').Gap.Fill
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

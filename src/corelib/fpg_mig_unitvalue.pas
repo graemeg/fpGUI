@@ -9,7 +9,7 @@ unit fpg_mig_unitvalue;
   and supports arithmetic operations between unit values.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 

@@ -9,7 +9,7 @@ unit fpg_mig_boundsize;
   Each bound is a TfpgMigUnitValue that can be null.
 }
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 
