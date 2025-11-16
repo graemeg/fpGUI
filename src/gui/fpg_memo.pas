@@ -327,7 +327,7 @@ begin
   for i := FFirstLine to LineCount-1 do
   begin
     yp := yp + LineHeight;
-    if yp > Height then
+    if yp > ActualHeight then
     begin
       MaxLine := i - 1;
       break;
@@ -1379,8 +1379,10 @@ begin
     end;  { if }
 
     yp := yp + LineHeight;
-    if yp > Height then
+    if yp > ActualHeight then
+    begin
       Break;
+    end;
   end;  { for }
 
   // Special case because it never entered the for loop above
