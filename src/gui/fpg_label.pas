@@ -64,8 +64,8 @@ type
     property    Font: TfpgFontResourceBase read FFont;
     property    TextHeight: integer read FTextHeight;
   end;
-  
-  
+
+
   TfpgLabel = class(TfpgCustomLabel)
   published
     property    AcceptDrops;
@@ -82,8 +82,8 @@ type
     property    LineSpace;
     property    MaxHeight;
     property    MaxWidth;
-    property    MinHeight;
-    property    MinWidth;
+    property    MinHeight default 2;
+    property    MinWidth default 2;
     property    Parent;
     property    ParentShowHint;
     property    ShowHint;
@@ -271,11 +271,11 @@ begin
     Canvas.SetTextColor(FTextColor)
   else
     Canvas.SetTextColor(clShadow1);
-  
+
   lTxtFlags:= [];
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
-    
+
   if FWrapText then
     Include(lTxtFlags, txtWrap);
   case FAlignment of
