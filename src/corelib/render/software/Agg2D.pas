@@ -1354,10 +1354,12 @@ end;
 function TfpgAgg2DFontResource.GetTextWidth(const txt: string): integer;
 var
   w: double;
-  i: integer;
   p: PChar;
   glyph: glyph_cache_ptr;
   x, y: double;
+  charLen: longint;
+  charCode: Cardinal;
+  firstGlyph: boolean;
 begin
   if not FValid or (txt = '') then
   begin
@@ -1369,18 +1371,21 @@ begin
   x := 0;
   y := 0;
   p := PChar(txt);
-  for i := 1 to Length(txt) do
+  firstGlyph := True;
+  while p^ <> #0 do
   begin
-    glyph := m_fontCacheManager.glyph(Ord(p^));
+    charCode := UTF8CharToUnicode(p, charLen);
+    glyph := m_fontCacheManager.glyph(charCode);
     if Assigned(glyph) then
     begin
-      if i > 1 then
+      if not firstGlyph then
       begin
          m_fontCacheManager.add_kerning(@x, @y);
       end;
       w := w + glyph^.advance_x;
+      firstGlyph := False;
     end;
-    Inc(p);
+    Inc(p, charLen);
   end;
   Result := round(w + x);
 end;
