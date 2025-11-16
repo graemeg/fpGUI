@@ -306,6 +306,8 @@ end;
 function TfpgMigUnitValue.GetPixels(ARefValue: Single; AParent: TfpgWidgetBase; AComp: TfpgWidgetBase): Single;
 var
   dpi: Integer;
+  compName: string;
+  debugUnitStr: string;
 begin
   case FUnit of
     utPixel:
@@ -325,13 +327,34 @@ begin
         // Convert physical units to pixels based on DPI
         // 1 inch = 25.4mm = 2.54cm = 72pt = DPI pixels
         case FUnit of
-          utMM:   Result := FValue * dpi / 25.4;   // millimeters to pixels
-          utCM:   Result := FValue * dpi / 2.54;   // centimeters to pixels
-          utInch: Result := FValue * dpi;          // inches to pixels
-          utPT:   Result := FValue * dpi / 72.0;   // points to pixels
+          utMM:   begin
+                    Result := FValue * dpi / 25.4;
+                    debugUnitStr := 'MM';
+                  end;
+          utCM:   begin
+                    Result := FValue * dpi / 2.54;
+                    debugUnitStr := 'CM';
+                  end;
+          utInch: begin
+                    Result := FValue * dpi;
+                    debugUnitStr := 'INCH';
+                  end;
+          utPT:   begin
+                    Result := FValue * dpi / 72.0;
+                    debugUnitStr := 'PT';
+                  end;
         else
           Result := 0;
+          debugUnitStr := 'UNKNOWN';
         end;
+
+        // Debug output for physical unit conversions
+        if Assigned(AComp) then
+          compName := AComp.Name
+        else
+          compName := 'nil';
+        WriteLn(Format('DEBUG GetPixels: Component=%s Unit=%s Value=%.2f IsHor=%s DPI=%d Calc=%.2f*%d/25.4 Result=%.2f',
+          [compName, debugUnitStr, FValue, BoolToStr(FIsHorizontal, True), dpi, FValue, dpi, Result]));
       end;
   else
     Result := 0; // Other units not implemented yet

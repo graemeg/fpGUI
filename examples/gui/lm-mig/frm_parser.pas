@@ -45,6 +45,7 @@ type
     btnClose: TfpgButton;
 
     procedure AfterCreate; override;
+    procedure HandleShow; override;
     procedure btnCloseClicked(Sender: TObject);
   end;
 
@@ -53,6 +54,14 @@ implementation
 procedure TParserMigForm.btnCloseClicked(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TParserMigForm.HandleShow;
+begin
+  inherited HandleShow;
+  // Debug: Show actual widget widths after layout
+  WriteLn(Format('DEBUG Widget widths after layout: edtPx=%d edtMM=%d edtPercent=%d',
+    [edtPx.Width, edtMM.Width, edtPercent.Width]));
 end;
 
 procedure TParserMigForm.AfterCreate;
@@ -66,6 +75,9 @@ begin
   Width := 650;
   Height := 550;
   WindowTitle := 'MigLayout - String Parser Examples';
+
+  // Debug: Show DPI information
+  WriteLn(Format('DEBUG Screen DPI: X=%d Y=%d', [fpgApplication.Screen_dpi_x, fpgApplication.Screen_dpi_y]));
 
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
