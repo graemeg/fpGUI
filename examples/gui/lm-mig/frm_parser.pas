@@ -84,6 +84,7 @@ begin
   Width := 650;
   Height := 700;
   WindowTitle := 'MigLayout - String Parser Examples';
+  ShowHint := true;
 
   // Debug: Show DPI information
   WriteLn(Format('DEBUG Screen DPI: X=%d Y=%d', [fpgApplication.Screen_dpi_x, fpgApplication.Screen_dpi_y]));
@@ -246,12 +247,15 @@ begin
 
   edtOperation := TfpgEdit.Create(Self);
   edtOperation.Name := 'edtOperation';
-  edtOperation.Text := 'Width = max(150px, 30%)';
-  // Width uses max() operation: larger of 150px or 30% of available space
+  edtOperation.Text := 'MaxWidth = max(150px, 30%) - resize to see!';
+  edtOperation.Hint := edtOperation.Text;
+  // MaxWidth uses max() operation: limits growth to larger of 150px or 30%
+  // When narrow (< 500px): maxes out at 150px
+  // When wide (> 500px): maxes out at 30% of available width
   mig.AddLayoutComponent(edtOperation,
     TfpgMigCC.Create()
-      .Width('max(150px,30%)')   // Operation in string constraint
-      .GrowX());
+      .MaxWidth('max(150px,30%)')   // Max operation limits maximum width
+      .GrowX());                     // Grows up to the max limit
 
   // ==== Info memo ====
   memoInfo := TfpgMemo.Create(Self);
@@ -264,15 +268,17 @@ begin
   memoInfo.Lines.Add('• Operations: min(), max(), mid(), +, -, *, /');
   memoInfo.Lines.Add('• Special: pref, null, push, inf');
   memoInfo.Lines.Add('');
-  memoInfo.Lines.Add('Example: .Width("100px:200px:300px") sets min, preferred, and max widths.');
-  memoInfo.Lines.Add('Example: .GapLeft("max(10px,5%)") uses the larger of 10px or 5%.');
+  memoInfo.Lines.Add('Examples:');
+  memoInfo.Lines.Add('  .Width("100px:200px:300px") - min, preferred, and max widths');
+  memoInfo.Lines.Add('  .MaxWidth("max(150px,30%)") - limit to larger of 150px or 30%');
+  memoInfo.Lines.Add('  .GapLeft("min(10px,5%)") - use smaller of 10px or 5%');
   mig.AddLayoutComponent(memoInfo,
     TfpgMigCC.Create()
       .SpanX(2)
       .GrowX()
       .GrowY()
       .Height('120px:150px:')    // Min 120px, preferred 150px, no max (grows)
-      .GapTop('15px'));
+      .GapTop('45px'));
 
   // ==== Close button ====
   btnClose := TfpgButton.Create(Self);
