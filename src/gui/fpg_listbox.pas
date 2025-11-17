@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -757,7 +757,6 @@ begin
 
   r.SetRect(0, 0, ActualWidth-ScrollBarWidth, ActualHeight);
   r.InflateRect(-FMargin, -FMargin);
-//  r.SetRect(FMargin, FMargin, Width-ScrollBarWidth-(FMargin*2), Height - (FMargin*2));
   Canvas.SetClipRect(r);
 
   r.Height := RowHeight;

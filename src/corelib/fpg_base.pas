@@ -2041,7 +2041,7 @@ end;
 
 function TfpgWidgetBase.GetClientRect: TfpgRect;
 begin
-  Result.SetRect(0,0,FWidth, FHeight);
+  Result.SetRect(0, 0, ActualWidth, ActualHeight);
 end;
 
 function TfpgWidgetBase.GetBoundsRect: TfpgRect;
