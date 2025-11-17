@@ -28,6 +28,7 @@ type
     FPref: TfpgMigUnitValue;
     FMax: TfpgMigUnitValue;
     FGapPush: Boolean;
+    FOwnsValues: Boolean;  // True if we cloned the values, False if storing references
   public
     { Constructor using same value for min/preferred/max }
     constructor Create(AMinMaxPref: TfpgMigUnitValue); overload;
@@ -92,55 +93,48 @@ constructor TfpgMigBoundSize.Create(AMin, APref, AMax: TfpgMigUnitValue; AGapPus
 begin
   inherited Create;
 
-  // Clone UnitValues to take ownership, but don't clone global constants
-  if (AMin = nil) or (AMin = UnitValueZero) or (AMin = UnitValueInf) or
-     (AMin = UnitValueLeading) or (AMin = UnitValueCenter) or (AMin = UnitValueBaselineIdentity) then
-    FMin := AMin
+  // Special case: if all three values are the same instance (e.g. ZERO_PIXEL),
+  // don't clone - just store references for efficiency
+  if (AMin = APref) and (APref = AMax) then
+  begin
+    FMin := AMin;
+    FPref := APref;
+    FMax := AMax;
+    FOwnsValues := False;  // Storing references, don't free
+  end
   else
-    FMin := AMin.Clone;
+  begin
+    // Different values - clone to take ownership and avoid finalization issues
+    if AMin <> nil then
+      FMin := AMin.Clone
+    else
+      FMin := nil;
 
-  if (APref = nil) or (APref = UnitValueZero) or (APref = UnitValueInf) or
-     (APref = UnitValueLeading) or (APref = UnitValueCenter) or (APref = UnitValueBaselineIdentity) then
-    FPref := APref
-  else
-    FPref := APref.Clone;
+    if APref <> nil then
+      FPref := APref.Clone
+    else
+      FPref := nil;
 
-  if (AMax = nil) or (AMax = UnitValueZero) or (AMax = UnitValueInf) or
-     (AMax = UnitValueLeading) or (AMax = UnitValueCenter) or (AMax = UnitValueBaselineIdentity) then
-    FMax := AMax
-  else
-    FMax := AMax.Clone;
+    if AMax <> nil then
+      FMax := AMax.Clone
+    else
+      FMax := nil;
+
+    FOwnsValues := True;  // We cloned, we own them, we free them
+  end;
 
   FGapPush := AGapPush;
 end;
 
 destructor TfpgMigBoundSize.Destroy;
 begin
-  // Free owned UnitValues, but do not free the global constants
-  // Use try-except to handle finalization order issues where global constants
-  // might already be freed when this destructor runs
-  if (FMin <> nil) and (FMin <> UnitValueZero) and (FMin <> UnitValueInf) and
-     (FMin <> UnitValueLeading) and (FMin <> UnitValueCenter) and (FMin <> UnitValueBaselineIdentity) then
-  try
+  // Only free UnitValues if we own them (i.e., we cloned them)
+  // If we're storing references to global constants, don't free
+  if FOwnsValues then
+  begin
     FreeAndNil(FMin);
-  except
-    // Silently ignore errors during finalization
-  end;
-
-  if (FPref <> nil) and (FPref <> UnitValueZero) and (FPref <> UnitValueInf) and
-     (FPref <> UnitValueLeading) and (FPref <> UnitValueCenter) and (FPref <> UnitValueBaselineIdentity) then
-  try
     FreeAndNil(FPref);
-  except
-    // Silently ignore errors during finalization
-  end;
-
-  if (FMax <> nil) and (FMax <> UnitValueZero) and (FMax <> UnitValueInf) and
-     (FMax <> UnitValueLeading) and (FMax <> UnitValueCenter) and (FMax <> UnitValueBaselineIdentity) then
-  try
     FreeAndNil(FMax);
-  except
-    // Silently ignore errors during finalization
   end;
 
   inherited Destroy;
