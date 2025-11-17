@@ -107,8 +107,8 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
   container.Free;
 end;
@@ -141,11 +141,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
-  CheckEquals(6, w2.Left, 'w2.Left');
-  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (gap) + 20 (w1.height) + 6 (gap)
+  CheckEquals(12, w2.Left, 'w2.Left');
+  CheckEquals(38, w2.Top, 'w2.Top'); // 12 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -178,11 +178,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
-  CheckEquals(62, w2.Left, 'w2.Left'); // 6 (gap) + 50 (w1.width) + 6 (gap)
-  CheckEquals(6, w2.Top, 'w2.Top');
+  CheckEquals(68, w2.Left, 'w2.Left'); // 12 (left inset) + 50 (w1.width) + 6 (gap)
+  CheckEquals(12, w2.Top, 'w2.Top');
 
   container.Free;
 end;
@@ -222,17 +222,17 @@ begin
   container.Realign;
 
   // w1 is in column 0, row 0
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
   // w2 is in column 1, row 0
   // The first column width should be 100 because of w3
-  CheckEquals(112, w2.Left, 'w2.Left'); // 6 (gap) + 100 (w3.width) + 6 (gap)
-  CheckEquals(6, w2.Top, 'w2.Top');
+  CheckEquals(118, w2.Left, 'w2.Left'); // 12 (left inset) + 100 (w3.width) + 6 (gap)
+  CheckEquals(12, w2.Top, 'w2.Top');
 
   // w3 is in column 0, row 1
-  CheckEquals(6, w3.Left, 'w3.Left');
-  CheckEquals(32, w3.Top, 'w3.Top'); // 6 (gap) + 20 (max row height) + 6 (gap)
+  CheckEquals(12, w3.Left, 'w3.Left');
+  CheckEquals(38, w3.Top, 'w3.Top'); // 12 (top inset) + 20 (max row height) + 6 (gap)
 
   container.Free;
 end;
@@ -265,12 +265,12 @@ begin
   // The cell is the whole container, so widget should be at the bottom right
   // With inclusive boundaries:
   //   Container: [0, 199] x [0, 199] (200x200 pixels)
-  //   Usable area after 6px insets: [6, 193] x [6, 193] (188x188 pixels)
-  //   Widget (50x20) right-aligned: Right=193, Left=193-50+1=144
-  //   Widget (50x20) bottom-aligned: Bottom=193, Top=193-20+1=174
+  //   Usable area after 12px insets: [12, 187] x [12, 187] (176x176 pixels)
+  //   Widget (50x20) right-aligned: Right=187, Left=187-50+1=138
+  //   Widget (50x20) bottom-aligned: Bottom=187, Top=187-20+1=168
 
-  CheckEquals(144, w1.Left, 'w1.Left');
-  CheckEquals(174, w1.Top, 'w1.Top');
+  CheckEquals(138, w1.Left, 'w1.Left');
+  CheckEquals(168, w1.Top, 'w1.Top');
 
   container.Free;
 end;
@@ -306,11 +306,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
-  CheckEquals(6, w2.Left, 'w2.Left');
-  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (gap) + 20 (w1.height) + 6 (gap)
+  CheckEquals(12, w2.Left, 'w2.Left');
+  CheckEquals(38, w2.Top, 'w2.Top'); // 12 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -352,14 +352,14 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Top, 'w1.Top');
 
-  CheckEquals(62, w2.Left, 'w2.Left');
-  CheckEquals(6, w2.Top, 'w2.Top');
+  CheckEquals(68, w2.Left, 'w2.Left');
+  CheckEquals(12, w2.Top, 'w2.Top');
 
-  CheckEquals(62, w3.Left, 'w3.Left');
-  CheckEquals(32, w3.Top, 'w3.Top');
+  CheckEquals(68, w3.Left, 'w3.Left');
+  CheckEquals(38, w3.Top, 'w3.Top');
 
   container.Free;
 end;
@@ -397,11 +397,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(12, w1.Left, 'w1.Left');
   CheckEquals(50, w1.ActualWidth, 'w1.ActualWidth');
 
-  CheckEquals(62, w2.Left, 'w2.Left');
-  CheckEquals(132, w2.ActualWidth, 'w2.ActualWidth');
+  CheckEquals(68, w2.Left, 'w2.Left');
+  CheckEquals(120, w2.ActualWidth, 'w2.ActualWidth');
 
   container.Free;
 end;

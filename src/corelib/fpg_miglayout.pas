@@ -374,7 +374,14 @@ begin
   FEHideMode := AEHideMode;
   FUseVisualPadding := AUseVisualPadding;
   FSizesOk := False;
-  FIsAbsolute := False;  // TODO: Check if horizontal and vertical sizes are absolute
+
+  // Check if component has absolute (non-relative) sizes
+  // Percentage-based and other relative constraints are not absolute
+  if ACC <> nil then
+    FIsAbsolute := ACC.Horizontal.GetSize.IsAbsolute and ACC.Vertical.GetSize.IsAbsolute
+  else
+    FIsAbsolute := False;
+
   FHasGaps := False;
 
   FX := NOT_SET;
@@ -384,21 +391,10 @@ begin
 
   FForcedPushGaps := 0;
 
-  // Calculate sizes if visible and CC is provided
-  if (AEHideMode <= 0) and (ACC <> nil) then
-  begin
-    hBS := ACC.Horizontal.GetSize;
-    vBS := ACC.Vertical.GetSize;
-
-    for i := SIZE_MIN to SIZE_MAX do
-    begin
-      FHorSizes[i] := GetSize(hBS, i, True, AUseVisualPadding, -1);
-      FVerSizes[i] := GetSize(vBS, i, False, AUseVisualPadding, -1);
-    end;
-
-    CorrectMinMax(FHorSizes);
-    CorrectMinMax(FVerSizes);
-  end;
+  // Don't calculate sizes eagerly in constructor - they will be calculated
+  // lazily in ValidateSize() when needed during layout. This ensures
+  // percentage-based constraints use correct reference values after
+  // insets are accounted for.
 
   // Initialize gaps if hide mode > 1
   if AEHideMode > 1 then
@@ -419,9 +415,40 @@ begin
 end;
 
 procedure TfpgMigCompWrap.ValidateSize;
+var
+  hBS, vBS: TfpgMigBoundSize;
+  i: Integer;
 begin
-  // TODO: Implement size validation and calculation
-  // This is complex - involves content bias, callbacks, visual padding
+  // If sizes are already calculated and valid, skip
+  if FSizesOk then
+    Exit;
+
+  // Calculate sizes now (lazy evaluation)
+  // This happens during layout when we have proper context
+  if (FEHideMode <= 0) and (FCC <> nil) then
+  begin
+    hBS := FCC.Horizontal.GetSize;
+    vBS := FCC.Vertical.GetSize;
+
+    for i := SIZE_MIN to SIZE_MAX do
+    begin
+      FHorSizes[i] := GetSize(hBS, i, True, FUseVisualPadding, -1);
+      FVerSizes[i] := GetSize(vBS, i, False, FUseVisualPadding, -1);
+    end;
+
+    CorrectMinMax(FHorSizes);
+    CorrectMinMax(FVerSizes);
+  end
+  else
+  begin
+    // Hidden component - zero sizes
+    for i := SIZE_MIN to SIZE_MAX do
+    begin
+      FHorSizes[i] := 0;
+      FVerSizes[i] := 0;
+    end;
+  end;
+
   FSizesOk := True;
 end;
 
@@ -482,6 +509,12 @@ begin
     end
     else
       refSize := ASizeHint; // Fallback, though likely -1
+
+    {$IFDEF MIGDEBUG}
+    if (uv.UnitType = utPercent) and (FComp <> nil) then
+      WriteLn(Format('DEBUG GetSize: Component=%s, Percent=%.1f%%, RefSize=%.1f, Calculated=%d',
+        [FComp.Name, uv.Value, refSize, Round(uv.GetPixels(refSize, FComp.Parent, FComp))]));
+    {$ENDIF}
 
     Result := Round(uv.GetPixels(refSize, FComp.Parent, FComp));
   end;
@@ -2293,6 +2326,9 @@ procedure TfpgMigGrid.LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue
 var
   fromEnd: Boolean;
   primDCs: TfpgMigDimConstraintArray;
+{$IFDEF MIGDEBUG}
+  debugDim: string;
+{$ENDIF}
   fss: TfpgMigFlowSizeSpec;
   rowCols: array of TfpgMigLinkedDimGroupList;
   rowColSizes: TfpgMigIntegerArray;
@@ -3250,6 +3286,8 @@ var
   child: TfpgWidget;
   constraint: TfpgLayoutConstraint;
   cc: TfpgMigCC;
+  insTop, insLeft, insBottom, insRight: Integer;
+  insUV: TfpgMigUnitValue;
 begin
   if AContainer = nil then
     Exit;
@@ -3294,13 +3332,41 @@ begin
     // 2. Create Grid instance using stored constraints
     grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
     try
-      // 3. Setup bounds for layout
-      bounds[0] := 0;  // x
-      bounds[1] := 0;  // y
-      bounds[2] := AContainer.ActualWidth;   // width
-      bounds[3] := AContainer.ActualHeight;  // height
+      // 3. Calculate insets from LC and convert to pixels
+      // This matches Java MigLayout.layoutContainer() behavior where
+      // container insets are subtracted before passing bounds to Grid.layout()
+      // In fpGUI, we only have LC insets (no native container border insets)
 
-      // 4. Perform layout
+      // Get top inset (side 0)
+      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 0, True);
+      insTop := Round(insUV.GetPixels(0, AContainer, nil));
+
+      // Get left inset (side 1)
+      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 1, True);
+      insLeft := Round(insUV.GetPixels(0, AContainer, nil));
+
+      // Get bottom inset (side 2)
+      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 2, True);
+      insBottom := Round(insUV.GetPixels(0, AContainer, nil));
+
+      // Get right inset (side 3)
+      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
+      insRight := Round(insUV.GetPixels(0, AContainer, nil));
+
+      {$IFDEF MIGDEBUG}
+      WriteLn(Format('DEBUG: Insets (T,L,B,R): %d, %d, %d, %d',
+        [insTop, insLeft, insBottom, insRight]));
+      {$ENDIF MIGDEBUG}
+
+      // 4. Setup bounds for layout, accounting for insets
+      // This matches Java: bounds = [insets.left, insets.top,
+      //                              width - left - right, height - top - bottom]
+      bounds[0] := insLeft;   // x offset
+      bounds[1] := insTop;    // y offset
+      bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
+      bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
+
+      // 5. Perform layout
       grid.Layout(bounds, nil, nil, False);
 
       // Bounds are transferred to widgets inside Layout method
@@ -3379,9 +3445,13 @@ begin
         Result.W := widthArray[ASizeType];
         Result.H := heightArray[ASizeType];
 
-        // Add container insets if any (margins around the grid)
-        // TODO: Get actual insets from LC or container
-        // For now, we'll trust that the grid has calculated these
+        // Add container insets (margins around the grid)
+        // The grid calculates internal sizes, we need to add the insets
+        // to get the total container size
+        Result.W := Result.W + Round(TfpgMigLayoutUtil.GetInsets(FLC, 1, True).GetPixels(0, AContainer, nil)) +  // left
+                                Round(TfpgMigLayoutUtil.GetInsets(FLC, 3, True).GetPixels(0, AContainer, nil));   // right
+        Result.H := Result.H + Round(TfpgMigLayoutUtil.GetInsets(FLC, 0, True).GetPixels(0, AContainer, nil)) +  // top
+                                Round(TfpgMigLayoutUtil.GetInsets(FLC, 2, True).GetPixels(0, AContainer, nil));   // bottom
       end;
     finally
       grid.Free;
