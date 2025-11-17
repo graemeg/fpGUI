@@ -189,8 +189,8 @@ begin
   begin
     uShadowForm.Left := Left + Shadow;
     uShadowForm.Top := Top + Shadow;
-    uShadowForm.Width := Width;
-    uShadowForm.Height := Height;
+    uShadowForm.Width := ActualWidth;
+    uShadowForm.Height := ActualHeight;
     uShadowForm.Show;
   end;
   inherited HandleShow;
@@ -206,7 +206,7 @@ begin
   PaintBorder;
   if FBorder > 0 then
   begin
-    r.SetRect(FBorder, FBorder, Width-(FBorder*2), Height-(FBorder*2));
+    r.SetRect(FBorder, FBorder, ActualWidth-(FBorder*2), ActualHeight-(FBorder*2));
     Canvas.SetClipRect(r);
   end;
   PaintHintText;
@@ -221,13 +221,13 @@ begin
   Canvas.Color := clBlack;
   for i := 0 to FBorder-1 do
   begin
-    Canvas.DrawRectangle(i, i, Width-(i*2), Height-(i*2));
+    Canvas.DrawRectangle(i, i, ActualWidth-(i*2), ActualHeight-(i*2));
   end;
 end;
 
 procedure TfpgHintWindow.PaintHintText;
 begin
-  FHintTextRec.SetRect(FBorder, FBorder, Width-(FBorder*2), Height-(FBorder*2));
+  FHintTextRec.SetRect(FBorder, FBorder, ActualWidth-(FBorder*2), ActualHeight-(FBorder*2));
   Canvas.TextColor := FTextColor;
   Canvas.DrawText(FHintTextRec, Text, [txtHCenter, txtVCenter, txtWrap]);
 end;
