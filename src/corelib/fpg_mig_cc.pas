@@ -463,6 +463,8 @@ begin
 end;
 
 destructor TfpgMigCC.Destroy;
+var
+  i: Integer;
 begin
   FHor.Free;
   FVer.Free;
@@ -472,6 +474,14 @@ begin
     FNewline.Free;
   if (FWrap <> nil) and (FWrap <> CCDefGap) then
     FWrap.Free;
+
+  // Free UnitValue arrays
+  for i := 0 to 3 do
+  begin
+    FreeAndNil(FPos[i]);
+    FreeAndNil(FPadding[i]);
+    FreeAndNil(FVisualPadding[i]);
+  end;
 
   inherited Destroy;
 end;
