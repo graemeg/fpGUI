@@ -535,7 +535,7 @@ end;
 
 function TfpgBaseListBox.ListHeight: TfpgCoord;
 begin
-  result := height - (2*FMargin);
+  result := ActualHeight - (2*FMargin);
 end;
 
 function TfpgBaseListBox.PageLength: integer;
@@ -809,7 +809,7 @@ begin
     DrawItem(n, r, 0);
     inc(r.Top, RowHeight);
 
-    if r.Top >= ActualHeight then
+    if r.Top >= (ActualHeight - FMargin) then
       Break;
   end;  { for }
 
