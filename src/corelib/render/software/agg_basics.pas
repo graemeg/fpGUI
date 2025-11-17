@@ -1231,7 +1231,7 @@ begin
   begin
    dst^:=add[err + 1 ];
 
-   inc(ptrcomp(dst ) );
+   inc(dst);
    inc(err );
 
   end;
@@ -1264,7 +1264,7 @@ begin
        begin
         dst^:=src^;
 
-        inc(ptrcomp(dst ) );
+        inc(dst);
 
        end;
 
@@ -1320,7 +1320,7 @@ begin
        begin
         dst^:=src^;
 
-        inc(ptrcomp(dst ) );
+        inc(dst);
 
         sc:=_string;
 
@@ -1495,7 +1495,7 @@ begin
 
    end;
 
-   inc(ptrcomp(src ) );
+   inc(src);
 
   end;
 
