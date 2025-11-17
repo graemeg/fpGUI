@@ -309,66 +309,117 @@ var
   compName: string;
   debugUnitStr: string;
   s: Single;
+  r1, r2: Single;
 begin
-  case FUnit of
-    utPixel:
-      Result := FValue;
-    utLPX, utLPY:
-      Result := TfpgMigPlatformDefaults.GetPixelUnitFactor(FUnit = utLPX) * FValue;
-    utPercent:
-      Result := FValue * ARefValue / 100.0;
-    utMM, utCM, utInch, utPT:
-      begin
-        // Get appropriate DPI based on horizontal/vertical orientation
-        if FIsHorizontal then
-          dpi := fpgApplication.Screen_dpi_x
-        else
-          dpi := fpgApplication.Screen_dpi_y;
+  // Handle STATIC operations (single value with unit)
+  // Ported from UnitValue.java lines 298-380
+  if FOperation = opStatic then
+  begin
+    case FUnit of
+      utPixel:
+        Result := FValue;
+      utLPX, utLPY:
+        Result := TfpgMigPlatformDefaults.GetPixelUnitFactor(FUnit = utLPX) * FValue;
+      utPercent:
+        Result := FValue * ARefValue / 100.0;
+      utMM, utCM, utInch, utPT:
+        begin
+          // Get appropriate DPI based on horizontal/vertical orientation
+          if FIsHorizontal then
+            dpi := fpgApplication.Screen_dpi_x
+          else
+            dpi := fpgApplication.Screen_dpi_y;
 
-        // Get scale factor from PlatformDefaults to allow overriding system DPI
-        if FIsHorizontal then
-          s := TfpgMigPlatformDefaults.GetHorizontalScaleFactor
-        else
-          s := TfpgMigPlatformDefaults.GetVerticalScaleFactor;
+          // Get scale factor from PlatformDefaults to allow overriding system DPI
+          if FIsHorizontal then
+            s := TfpgMigPlatformDefaults.GetHorizontalScaleFactor
+          else
+            s := TfpgMigPlatformDefaults.GetVerticalScaleFactor;
 
-        // Apply scale factor to DPI if it's set to something other than 1.0.
-        // This is useful for systems where the reported DPI is incorrect.
-        if (s > 0) and (abs(s - 1.0) > 1e-6) then
-          dpi := Round(dpi * s);
+          // Apply scale factor to DPI if it's set to something other than 1.0.
+          // This is useful for systems where the reported DPI is incorrect.
+          if (s > 0) and (abs(s - 1.0) > 1e-6) then
+            dpi := Round(dpi * s);
 
-        // Convert physical units to pixels based on DPI
-        // 1 inch = 25.4mm = 2.54cm = 72pt = DPI pixels
-        case FUnit of
-          utMM:   begin
-                    Result := FValue * dpi / 25.4;
-                    debugUnitStr := 'MM';
-                  end;
-          utCM:   begin
-                    Result := FValue * dpi / 2.54;
-                    debugUnitStr := 'CM';
-                  end;
-          utInch: begin
-                    Result := FValue * dpi;
-                    debugUnitStr := 'INCH';
-                  end;
-          utPT:   begin
-                    Result := FValue * dpi / 72.0;
-                    debugUnitStr := 'PT';
-                  end;
-        else
-          Result := 0;
-          debugUnitStr := 'UNKNOWN';
+          // Convert physical units to pixels based on DPI
+          // 1 inch = 25.4mm = 2.54cm = 72pt = DPI pixels
+          case FUnit of
+            utMM:   begin
+                      Result := FValue * dpi / 25.4;
+                      debugUnitStr := 'MM';
+                    end;
+            utCM:   begin
+                      Result := FValue * dpi / 2.54;
+                      debugUnitStr := 'CM';
+                    end;
+            utInch: begin
+                      Result := FValue * dpi;
+                      debugUnitStr := 'INCH';
+                    end;
+            utPT:   begin
+                      Result := FValue * dpi / 72.0;
+                      debugUnitStr := 'PT';
+                    end;
+          else
+            Result := 0;
+            debugUnitStr := 'UNKNOWN';
+          end;
+
+          // Debug output for physical unit conversions
+          if Assigned(AComp) then
+            compName := AComp.Name
+          else
+            compName := 'nil';
         end;
-
-        // Debug output for physical unit conversions
-        if Assigned(AComp) then
-          compName := AComp.Name
-        else
-          compName := 'nil';
-      end;
-  else
-    Result := 0; // Other units not implemented yet
+    else
+      Result := 0; // Other units not implemented yet
+    end;
+    Exit;
   end;
+
+  // Handle OPERATIONS (ADD, SUB, MUL, DIV, MIN, MAX, MID)
+  // Ported from UnitValue.java lines 382-401
+  if (Length(FSubUnits) = 2) and (FSubUnits[0] <> nil) and (FSubUnits[1] <> nil) then
+  begin
+    // Recursively evaluate both sub-units
+    r1 := FSubUnits[0].GetPixels(ARefValue, AParent, AComp);
+    r2 := FSubUnits[1].GetPixels(ARefValue, AParent, AComp);
+
+    // Apply the operation
+    case FOperation of
+      opAdd:
+        Result := r1 + r2;
+      opSub:
+        Result := r1 - r2;
+      opMul:
+        Result := r1 * r2;
+      opDiv:
+        begin
+          if abs(r2) < 1e-6 then
+            Result := 0  // Avoid division by zero
+          else
+            Result := r1 / r2;
+        end;
+      opMin:
+        if r1 < r2 then
+          Result := r1
+        else
+          Result := r2;
+      opMax:
+        if r1 > r2 then
+          Result := r1
+        else
+          Result := r2;
+      opMid:
+        Result := (r1 + r2) * 0.5;
+    else
+      raise Exception.CreateFmt('Internal: Unknown Operation: %d', [Ord(FOperation)]);
+    end;
+    Exit;
+  end;
+
+  // Should not reach here - invalid state
+  raise Exception.CreateFmt('Internal: Unknown Oper: %d', [Ord(FOperation)]);
 end;
 
 function TfpgMigUnitValue.ContentEquals(AOther: TfpgMigUnitValue): Boolean;
