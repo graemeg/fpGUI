@@ -3982,13 +3982,8 @@ begin
 end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
-var
-  R: TfpgRect;
 begin
-  R := ARect;
-  { TODO: still not sure why these +2 and +3 values are needed. But using
-    TfpgEdit with text selection, you can see it is required. }
-  ClipBox(R.Left, R.Top, R.Right+1, R.Bottom+2);
+  ClipBox(ARect.Left, ARect.Top, ARect.Right+1, ARect.Bottom+1);
   m_rasterizer.m_clipping := True;
 end;
 
