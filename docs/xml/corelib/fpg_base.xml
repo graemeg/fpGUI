@@ -1058,6 +1058,32 @@ Enabled property to False.</descr>
 </element>
 
 
+<element name="TfpgWidgetBase.GetClientRect">
+<short>Interior rendering space (local coordinates)</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgWidgetBase.GetClientRect"/>.
+<ul>
+<li>Origin: (0, 0) - local to the widget</li>
+<li>Size: Should be ActualWidth, ActualHeight - the actual rendered size</li>
+<li>Purpose: Canvas painting area, clipping regions</li>
+</ul>
+</descr>
+</element>
+
+<element name="TfpgWidgetBase.GetBoundsRect">
+<short>Full bounding rectangle (parent coordinates)</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgWidgetBase.GetBoundsRect"/>.
+<ul>
+<li>Origin: (Left, Top) - position in parent</li>
+<li>Size: Should be ActualWidth, ActualHeight - the actual rendered size</li>
+<li>Purpose: Hit-testing, positioning relative to parent</li>
+</ul>
+</descr>
+</element>
+
+
+
+
+
     </module>
     <!-- fpg_base -->
   </package>
