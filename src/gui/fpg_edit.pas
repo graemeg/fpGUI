@@ -719,10 +719,9 @@ var
   lcolor: TfpgColor;
   rs: TfpgRect;
   r: TfpgRect;
+  textY: TfpgCoord;
 begin
   r := GetClientRect;  // contains adjusted size based on borders
-  r.Height :=  r.Height-2;
-  r.Top := r.Top + 1;
 
   if Focused then
   begin
@@ -735,11 +734,14 @@ begin
     Canvas.SetTextColor(clInactiveSelText);
   end;
 
+  // Calculate vertical center position based on actual height
+  textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
+
   rs.SetRect(FVisSelStartPx, r.Top, FVisSelEndPx - FVisSelStartPx, r.height{FFont.Height});
   Canvas.SetColor(lcolor);
   Canvas.FillRectangle(rs);
   Canvas.SetClipRect(rs);
-  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top {+ FHeightMargin}, FVisibleText, Enabled);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, textY, FVisibleText, Enabled);
   Canvas.ClearClipRect;
 end;
 
@@ -1587,24 +1589,28 @@ end;
 procedure TfpgBaseTextEdit.HandlePaint;
 var
   r: TfpgRect;
+  textY: TfpgCoord;
 begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
+
+  // Calculate vertical center position based on actual height
+  textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
 
   if CanDrawExtraHint then
   begin
     r.SetRect(
       r.Left - FDrawOffset + GetMarginAdjustment,
-      r.Top + FHeightMargin,
+      textY,
       r.Width + FDrawOffset - GetMarginAdjustment,
-      r.Height - FHeightMargin
+      FFont.GetHeight
       );
     DrawPlaceholderText(r);
   end
   else
   begin
     Canvas.SetTextColor(FTextColor);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, textY, FVisibleText, Enabled);
   end;
 
   if Focused then
@@ -1613,7 +1619,7 @@ begin
     if FSelOffset <> 0 then
       DrawSelection;
     // drawing cursor
-    fpgCaret.SetCaret(Canvas, Max(FCursorPx, r.Left), r.Top + FHeightMargin, fpgCaret.Width, FFont.GetHeight);
+    fpgCaret.SetCaret(Canvas, Max(FCursorPx, r.Left), textY, fpgCaret.Width, FFont.GetHeight);
   end
   else
   begin
@@ -1988,6 +1994,7 @@ procedure TfpgBaseNumericEdit.HandlePaint;
 var
   x: TfpgCoord;
   r: TfpgRect;
+  textY: TfpgCoord;
 begin
   inherited HandlePaint;
 
@@ -1996,10 +2003,13 @@ begin
     r := GetClientRect;
     Canvas.SetClipRect(r);
 
+    // Calculate vertical center position based on actual height
+    textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
+
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
     x := r.Width - Font.GetTextWidth(Text) - FSideMargin;
-    fpgStyle.DrawString(Canvas, x, r.Top + FHeightMargin, Text, Enabled);
+    fpgStyle.DrawString(Canvas, x, textY, Text, Enabled);
 
     if Focused then
     begin
@@ -2007,7 +2017,7 @@ begin
       if FSelOffset <> 0 then
         DrawSelection;
       // drawing cursor
-      fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.GetHeight);
+      fpgCaret.SetCaret(Canvas, FCursorPx, textY, fpgCaret.Width, FFont.GetHeight);
     end
     else
     begin
