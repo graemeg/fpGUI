@@ -1622,7 +1622,10 @@ begin
 
   i1 := 0;
   PreCalcColumnLeft;
-  UpdateScrollbars;
+  // UpdateScrollbars should NOT be called during paint as it causes the scrollbars
+  // to invalidate themselves, which posts new paint messages creating an infinite loop.
+  // UpdateScrollbars is called when needed (resize, data changes, etc.)
+  // UpdateScrollbars;
   AVisibleHeight := VisibleHeight;
 
 

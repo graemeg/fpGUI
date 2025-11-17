@@ -201,7 +201,7 @@ begin
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawRectangle(FClientRect);
   { This must be completed and adjusted with border style }
-  InflateRect(FClientRect, -1, -1);
+  FClientRect.InflateRect(-1, -1);
   with FClientRect do
   begin
     { Kind specific Bacground }

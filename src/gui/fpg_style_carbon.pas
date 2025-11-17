@@ -115,9 +115,12 @@ end;
 
 procedure TfpgCarbonStyle.DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord;
   ARaised: boolean);
+var
+  r: TfpgRect;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
-  ACanvas.GradientFill(fpgRect(x,y,w,h), clUnset, CarbonBaseColors[15], gdVertical);
+  r.SetRect(x,y,w,h);
+  ACanvas.GradientFill(r, clUnset, CarbonBaseColors[15], gdVertical);
   ACanvas.SetColor(clHilite1);
   ACanvas.DrawRectangle(x, y, w, h);
 end;
@@ -238,7 +241,7 @@ procedure TfpgCarbonStyle.DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect);
 begin
   ACanvas.SetColor(clUnset);
   ACanvas.SetLineStyle(1, lsSolid);
-  //InflateRect(r, 1, 1);
+  //r.InflateRect(1, 1);
   ACanvas.DrawRectangle(r);
 end;
 

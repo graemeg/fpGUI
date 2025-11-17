@@ -575,7 +575,7 @@ begin
     for c := 0 to 6 do
     begin
       if r = -1 then
-        grdName1.ColumnTitle[c] := ShortDayNames[Succ((c+FWeekStartDay) mod 7)]  // ShortDayNames is 1-based indexing
+        grdName1.ColumnTitle[c] := FormatSettings.ShortDayNames[Succ((c+FWeekStartDay) mod 7)]  // ShortDayNames is 1-based indexing
       else
       begin
         lCellDay := CalculateCellDay(c, r);
@@ -894,7 +894,7 @@ begin
       CalculateMonthOffset;
       PopulateDays;
       edtYear.Text := IntToStr(Year);
-      edtMonth.Text := LongMonthNames[Month];
+      edtMonth.Text := FormatSettings.LongMonthNames[Month];
       DecodeDate(FDate, lY, lM, lD);
 
       grdName1.FocusCol := (lD - FMonthOffset - FWeekStartDay) mod 7;
@@ -966,11 +966,16 @@ begin
 end;
 
 procedure TfpgPopupCalendar.HandlePaint;
+var
+  r: TfpgRect;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
   if PopupFrame then
-    Canvas.SetClipRect(fpgRect(1, 1, Width-2, Height-2));
+  begin
+    r.SetRect(1, 1, Width-2, Height-2);
+    Canvas.SetClipRect(r);
+  end;
   Canvas.Clear(clWindowBackground);
   Canvas.ClearClipRect;
   Canvas.EndDraw;
@@ -1413,7 +1418,7 @@ begin
   FDate := Now;
   FCloseOnSelect := True;
   FSingleClickSelect := False;
-  DateFormat := ShortDateFormat;
+  DateFormat := FormatSettings.ShortDateFormat;
   FSelectedColor := clBlack;
   FHolidayColor := clBlack;
   FDayColor := clBlack;
@@ -1580,13 +1585,13 @@ procedure TfpgCalendarCheckCombo.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
   FCheckBoxRect.Top := (AHeight - FCheckBoxRect.Height) div 2;
-  OffsetRect(FCheckboxRect, 0, 3);  // frame border must be taken into consideration
+  FCheckboxRect.OffsetRect(0, 3);  // frame border must be taken into consideration
 end;
 
 procedure TfpgCalendarCheckCombo.HandleLMouseDown(x, y: integer;
   shiftstate: TShiftState);
 begin
-  if PtInRect(FCheckBoxRect, Point(x,y)) then
+  if FCheckBoxRect.PointInRect(Point(x,y)) then
     // do nothing
   else
     inherited HandleLMouseDown(x, y, shiftstate);
@@ -1595,7 +1600,7 @@ end;
 procedure TfpgCalendarCheckCombo.HandleLMouseUp(x, y: integer;
   shiftstate: TShiftState);
 begin
-  if PtInRect(FCheckBoxRect, Point(x,y)) then
+  if FCheckBoxRect.PointInRect(Point(x,y)) then
   begin
     Checked := not FChecked;
     DoCheckboxChanged;
@@ -1611,7 +1616,7 @@ begin
   FChecked := True;
   FCheckBoxRect.SetRect(2, 0, 17, 17);
   FCheckboxRect.Top := (FHeight - FCheckBoxRect.Height) div 2;
-  OffsetRect(FCheckboxRect, 2, 3);  // frame border must be taken into consideration
+  FCheckboxRect.OffsetRect(2, 3);  // frame border must be taken into consideration
 end;
 
 

@@ -1556,12 +1556,13 @@ end;
 constructor TfpgX11Application.Create(const AParams: string);
 var
   s: string;
+  cmd: ICmdLineParams;
 begin
   inherited Create(AParams);
 
-  if gCommandLineParams.IsParam('display') then
+  if Supports(self, ICmdLineParams, cmd) and cmd.HasOption('display') then
   begin
-    s := gCommandLineParams.GetParam('display');
+    s := cmd.GetOptionValue('display');
     FDisplay := XOpenDisplay(PChar(s));
   end
   else
@@ -1704,6 +1705,7 @@ var
   NewEvent: TXevent;
   i: integer;
   r: integer;
+  rect: TfpgRect;
   blockmsg: boolean;
   w: TfpgX11Window;
   ew: TfpgX11Window;
@@ -2014,10 +2016,15 @@ begin
     X.Expose:
         begin
           with ev.xexpose do
-            msgp.rect := fpgRect(x, y, width, height);
+            msgp.rect.SetRect(x, y, width, height);
           while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
+          begin
             with ev.xexpose do
-              UnionRect(msgp.rect, msgp.rect, fpgRect(x, y, width, height));
+            begin
+              rect.SetRect(x, y, width, height);
+              msgp.rect.UnionRect(msgp.rect, rect);
+            end;
+          end;
           if ev.xexpose.count = 0 then
           begin
             w := FindWindowByHandle(ev.xexpose.window);
@@ -2038,7 +2045,7 @@ begin
           if ev.xgraphicsexpose.count = 0 then
           begin
             with ev.xgraphicsexpose do
-              msgp.rect := fpgRect(x, y, width, height);
+              msgp.rect.SetRect(x, y, width, height);
             w := FindWindowByHandle(ev.xexpose.window);
             // use invalidate in case a FPGM_PAINT message is already queued
             if Assigned(w) then
@@ -2152,14 +2159,15 @@ begin
             {$ENDIF}
             if Assigned(Drag) then
             begin
-              Drag.HandleDNDStatus(
-                  ev.xclient.data.l[0],
-                  ev.xclient.data.l[1] and 1,
-                  fpgRect(
+              rect.SetRect(
                     (ev.xclient.data.l[2] shr 16) and $FFFF,
                     ev.xclient.data.l[2] and $FFFF,
                     (ev.xclient.data.l[3] shr 16) and $FFFF,
-                    ev.xclient.data.l[3] and $FFFF),
+                    ev.xclient.data.l[3] and $FFFF);
+              Drag.HandleDNDStatus(
+                  ev.xclient.data.l[0],
+                  ev.xclient.data.l[1] and 1,
+                  rect,
                   ev.xclient.data.l[4]);
             end;
           end
@@ -3742,7 +3750,7 @@ procedure TfpgX11Canvas.DoAddClipRect(const ARect: TfpgRect);
 var
   NewRect: TfpgRect;
 begin
-  UnionRect(NewRect, FClipRect, ARect);
+  FClipRect.UnionRect(NewRect, ARect);
   DoSetClipRect(NewRect);
 end;
 

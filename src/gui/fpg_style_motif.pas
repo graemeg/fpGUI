@@ -109,7 +109,7 @@ begin
     ACanvas.SetColor(clBlack);
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
     Exclude(AFlags, btfIsDefault);
     fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>

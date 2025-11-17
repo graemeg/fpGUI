@@ -18,6 +18,8 @@
 unit fpg_cocoa;
 
 {$I fpg_defines.inc}
+{$linkframework Cocoa}
+{$linkframework Foundation}
 
 interface
 
@@ -25,11 +27,14 @@ uses
   Classes,
   SysUtils,
   contnrs,
+  ctypes,
   CocoaAll,
   fpg_base,
   fpg_impl;
-  
+
 type
+  // Forward declarations
+  TfpgCocoaWindow = class;
 
   TfpgCocoaFontResource = class(TfpgFontResourceBase)
   public
@@ -80,9 +85,52 @@ type
   end;
   
   
+  { Window delegate for handling window events }
+  TfpgCocoaWindowDelegate = objcclass(NSObject)
+  public
+    FWindow: TfpgCocoaWindow;
+    procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
+    procedure windowDidResize(notification: NSNotification); message 'windowDidResize:';
+    procedure windowDidMove(notification: NSNotification); message 'windowDidMove:';
+    procedure windowDidBecomeKey(notification: NSNotification); message 'windowDidBecomeKey:';
+    procedure windowDidResignKey(notification: NSNotification); message 'windowDidResignKey:';
+    function windowShouldClose(sender: id): Boolean; message 'windowShouldClose:';
+  end;
+
+  { Custom NSView subclass for handling rendering and events }
+  TfpgCocoaView = objcclass(NSView)
+  public
+    FWindow: TfpgCocoaWindow;
+    FImageData: Pointer;  // Pointer to the Agg2D image buffer
+    FImageWidth: Integer;
+    FImageHeight: Integer;
+    procedure drawRect(dirtyRect: NSRect); override;
+    function  acceptsFirstResponder: Boolean; override;
+    function  isFlipped: Boolean; override;
+    procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
+    procedure setImageBuffer(AData: Pointer; AWidth, AHeight: Integer); message 'setImageBuffer:width:height:';
+
+    // Mouse events
+    procedure mouseDown(event: NSEvent); override;
+    procedure mouseUp(event: NSEvent); override;
+    procedure mouseMoved(event: NSEvent); override;
+    procedure mouseDragged(event: NSEvent); override;
+    procedure mouseEntered(event: NSEvent); override;
+    procedure mouseExited(event: NSEvent); override;
+    procedure rightMouseDown(event: NSEvent); override;
+    procedure rightMouseUp(event: NSEvent); override;
+    procedure scrollWheel(event: NSEvent); override;
+
+    // Keyboard events
+    procedure keyDown(event: NSEvent); override;
+    procedure keyUp(event: NSEvent); override;
+  end;
+
   TfpgCocoaWindow = class(TfpgWindowBase)
   private
-    FWinHandle: TfpgWinHandle;
+    FWinHandle: NSWindow;
+    FView: TfpgCocoaView;
+    FDelegate: TfpgCocoaWindowDelegate;
   protected
     FModalForWin: TfpgCocoaWindow;
     function    HandleIsValid: boolean; override;
@@ -97,11 +145,20 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
+    property    WinHandle: NSWindow read FWinHandle;
+    property    View: TfpgCocoaView read FView;
+  public
+    procedure   ActivateWindow; override;
+    procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
+    procedure   ReleaseMouse; override;
+    procedure   BringToFront; override;
   end;
   
   
   TfpgCocoaApplication = class(TfpgApplicationBase)
+  private
+    function    ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
+    function    ConvertKeyCode(keyCode: cushort): Word;
   protected
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
@@ -170,102 +227,753 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
-  fpg_window,       // used for window attributes changed callback
+  fpg_window,       // used for window attributes changed callback and window title
   fpg_stringutils,  // used for GetTextWidth
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
-  fpg_constants; 
+  fpg_constants;
+
+{ Helper function to convert NSString to String }
+function NSStringToString(ns: NSString): String;
+begin
+  if Assigned(ns) then
+    Result := String(ns.UTF8String)
+  else
+    Result := '';
+end; 
 
 { TfpgCocoaFontResource }
+{ NOTE: When using AggCanvas, TfpgAgg2DFontResource is used instead }
+{ This implementation is here for completeness but won't be used with AggCanvas }
 
 constructor TfpgCocoaFontResource.Create(const afontdesc: string);
 begin
   inherited Create(afontdesc);  // Call base constructor to set FFontDesc
+  // When using AggCanvas, font rendering is handled by TfpgAgg2DFontResource
+  // This class would only be used if implementing native Cocoa font rendering
 end;
 
-function    TfpgCocoaFontResource.GetAscent: integer;
+function TfpgCocoaFontResource.GetAscent: integer;
 begin
+  // Stub - not used with AggCanvas
+  Result := 10;
 end;
 
-function    TfpgCocoaFontResource.GetDescent: integer;
+function TfpgCocoaFontResource.GetDescent: integer;
 begin
+  // Stub - not used with AggCanvas
+  Result := 2;
 end;
 
-function    TfpgCocoaFontResource.GetHeight: integer;
+function TfpgCocoaFontResource.GetHeight: integer;
 begin
+  // Stub - not used with AggCanvas
+  Result := 12;
 end;
 
-function    TfpgCocoaFontResource.GetTextWidth(const txt: string): integer;
+function TfpgCocoaFontResource.GetTextWidth(const txt: string): integer;
 begin
+  // Stub - not used with AggCanvas
+  Result := Length(txt) * 8;  // Rough estimate
 end;
 
-function    TfpgCocoaFontResource.HandleIsValid: boolean;
+function TfpgCocoaFontResource.HandleIsValid: boolean;
 begin
+  // Stub - not used with AggCanvas
+  Result := True;
 end;
 
 { TfpgCocoaImage }
 
-procedure   TfpgCocoaImage.DoFreeImage;
+procedure TfpgCocoaImage.DoFreeImage;
 begin
+  // When using AggCanvas, image cleanup is handled by base class
+  // No platform-specific cleanup needed for Cocoa
 end;
 
-procedure   TfpgCocoaImage.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgCocoaImage.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
 begin
+  // When using AggCanvas, images are rendered through Agg2D
+  // The image data is stored in the base class (ImageData pointer)
+  // and rendered via DoPutBufferToScreen
+
+  // Just store the basic properties
+  FMasked := False;
+  // Image data is already handled by base class TfpgImageBase
 end;
 
-procedure   TfpgCocoaImage.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgCocoaImage.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
 begin
+  // Set up alpha mask for transparency
+  FMasked := True;
+  // Mask data handling would go here if needed for platform-specific rendering
+  // With AggCanvas, transparency is handled through the RGBA buffer
+end;
+
+{ TfpgCocoaWindowDelegate }
+
+procedure TfpgCocoaWindowDelegate.setWindow(AWindow: TfpgCocoaWindow);
+begin
+  FWindow := AWindow;
+end;
+
+procedure TfpgCocoaWindowDelegate.windowDidResize(notification: NSNotification);
+var
+  msgp: TfpgMessageParams;
+  contentRect: NSRect;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  // Get content view size (not window frame which includes titlebar)
+  contentRect := NSWindow(notification.object_).contentView.frame;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.rect.Width := Round(contentRect.size.width);
+  msgp.rect.Height := Round(contentRect.size.height);
+
+  fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
+end;
+
+procedure TfpgCocoaWindowDelegate.windowDidMove(notification: NSNotification);
+var
+  msgp: TfpgMessageParams;
+  frame: NSRect;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  frame := NSWindow(notification.object_).frame;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.rect.Left := Round(frame.origin.x);
+  msgp.rect.Top := Round(NSScreen.mainScreen.frame.size.height - frame.origin.y - frame.size.height);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOVE, msgp);
+end;
+
+procedure TfpgCocoaWindowDelegate.windowDidBecomeKey(notification: NSNotification);
+var
+  msgp: TfpgMessageParams;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  fpgPostMessage(nil, FWindow, FPGM_ACTIVATE, msgp);
+end;
+
+procedure TfpgCocoaWindowDelegate.windowDidResignKey(notification: NSNotification);
+var
+  msgp: TfpgMessageParams;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  fpgPostMessage(nil, FWindow, FPGM_DEACTIVATE, msgp);
+end;
+
+function TfpgCocoaWindowDelegate.windowShouldClose(sender: id): Boolean;
+var
+  msgp: TfpgMessageParams;
+begin
+  Result := True;  // Default: allow close
+
+  if not Assigned(FWindow) then
+    exit;
+
+  // Post close message to allow fpGUI to handle it
+  fillchar(msgp, sizeof(msgp), 0);
+  fpgPostMessage(nil, FWindow, FPGM_CLOSE, msgp);
+
+  // Return false to prevent automatic close - fpGUI will handle it
+  Result := False;
+end;
+
+{ TfpgCocoaView }
+
+procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight: Integer);
+begin
+  FImageData := AData;
+  FImageWidth := AWidth;
+  FImageHeight := AHeight;
+end;
+
+procedure TfpgCocoaView.drawRect(dirtyRect: NSRect);
+var
+  srcPixel: PLongWord;
+  i, j: Integer;
+  x, y, w, h: Integer;
+  r, g, b, a: Byte;
+  color: NSColor;
+begin
+  // This will be called by Cocoa when the view needs to be redrawn
+  // Just draw the buffer - do NOT trigger FPGM_PAINT from here (causes infinite loop)
+
+  // Draw the image buffer if we have one
+  if Assigned(FImageData) and (FImageWidth > 0) and (FImageHeight > 0) then
+  begin
+    x := Round(dirtyRect.origin.x);
+    y := Round(dirtyRect.origin.y);
+    w := Round(dirtyRect.size.width);
+    h := Round(dirtyRect.size.height);
+
+    // Clamp to image bounds
+    if x < 0 then x := 0;
+    if y < 0 then y := 0;
+    if x + w > FImageWidth then w := FImageWidth - x;
+    if y + h > FImageHeight then h := FImageHeight - y;
+
+    if (w > 0) and (h > 0) then
+    begin
+      srcPixel := PLongWord(FImageData);
+      Inc(srcPixel, x + (y * FImageWidth));
+
+      for j := 0 to h - 1 do
+      begin
+        for i := 0 to w - 1 do
+        begin
+          // Extract RGBA components (assuming BGRA byte order)
+          b := PByte(srcPixel)^;
+          g := PByte(PtrUInt(srcPixel) + 1)^;
+          r := PByte(PtrUInt(srcPixel) + 2)^;
+          a := PByte(PtrUInt(srcPixel) + 3)^;
+
+          color := NSColor.colorWithDeviceRed_green_blue_alpha(
+            r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+          color.set_;
+          NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
+
+          Inc(srcPixel);
+        end;
+        Inc(srcPixel, FImageWidth - w);
+      end;
+    end;
+  end;
+end;
+
+function TfpgCocoaView.acceptsFirstResponder: Boolean;
+begin
+  Result := True;  // Allow view to receive keyboard events
+end;
+
+function TfpgCocoaView.isFlipped: Boolean;
+begin
+  Result := True;  // Use top-left origin like fpGUI expects
+end;
+
+procedure TfpgCocoaView.setWindow(AWindow: TfpgCocoaWindow);
+begin
+  FWindow := AWindow;
+end;
+
+procedure TfpgCocoaView.mouseDown(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.Buttons := MOUSE_LEFT;
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEDOWN, msgp);
+end;
+
+procedure TfpgCocoaView.mouseUp(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.Buttons := MOUSE_LEFT;
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEUP, msgp);
+end;
+
+procedure TfpgCocoaView.mouseMoved(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEMOVE, msgp);
+end;
+
+procedure TfpgCocoaView.mouseDragged(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.Buttons := MOUSE_LEFT;  // Left button held during drag
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEMOVE, msgp);
+end;
+
+procedure TfpgCocoaView.mouseEntered(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEENTER, msgp);
+end;
+
+procedure TfpgCocoaView.mouseExited(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEEXIT, msgp);
+end;
+
+procedure TfpgCocoaView.rightMouseDown(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.Buttons := MOUSE_RIGHT;
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEDOWN, msgp);
+end;
+
+procedure TfpgCocoaView.rightMouseUp(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.Buttons := MOUSE_RIGHT;
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_MOUSEUP, msgp);
+end;
+
+procedure TfpgCocoaView.scrollWheel(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  pt: NSPoint;
+  delta: Double;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  pt := convertPoint_fromView(event.locationInWindow, nil);
+  delta := event.deltaY;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.mouse.x := Round(pt.x);
+  msgp.mouse.y := Round(pt.y);
+  msgp.mouse.delta := Round(delta);
+  msgp.mouse.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_SCROLL, msgp);
+end;
+
+procedure TfpgCocoaView.keyDown(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  keyCode: Word;
+  keyChar: string;
+  modFlags: NSUInteger;
+  i: Integer;
+  virtualKeyCode: cushort;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  virtualKeyCode := event.keyCode;
+  keyCode := TfpgCocoaApplication(fpgApplication).ConvertKeyCode(virtualKeyCode);
+  keyChar := NSStringToString(event.characters);
+  modFlags := event.modifierFlags;
+
+  // If ConvertKeyCode didn't map this key (returned the same value),
+  // and we have a character, use the character code as the keycode.
+  // This handles keys like Space that aren't in the ConvertKeyCode map.
+  if (keyCode = virtualKeyCode) and (keyCode < $e000) and (Length(keyChar) > 0) then
+  begin
+    keyCode := Ord(keyChar[1]);
+  end;
+
+  msgp.keyboard.keycode := keyCode;
+  if Length(keyChar) > 0 then
+    msgp.keyboard.keychar := keyChar[1]
+  else
+    msgp.keyboard.keychar := #0;
+  msgp.keyboard.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(modFlags);
+
+  // Post FPGM_KEYPRESS for all keys
+  fpgPostMessage(nil, FWindow, FPGM_KEYPRESS, msgp);
+
+  // Additionally post FPGM_KEYCHAR for character input (not for special keys)
+  // Similar to X11 backend behavior
+  // Only send FPGM_KEYCHAR when:
+  // 1. There are characters to send
+  // 2. No Command/Control/Alt modifiers are pressed
+  // 3. The keycode is NOT a special key (special keys are >= $e000)
+  if (Length(keyChar) > 0) and
+     ((modFlags and (NSCommandKeyMask or NSControlKeyMask or NSAlternateKeyMask)) = 0) and
+     (keyCode < $e000) then
+  begin
+    // Post FPGM_KEYCHAR for each character (UTF-8 may have multiple chars)
+    for i := 1 to UTF8Length(keyChar) do
+    begin
+      msgp.keyboard.keychar := UTF8Copy(keyChar, i, 1);
+      fpgPostMessage(nil, FWindow, FPGM_KEYCHAR, msgp);
+    end;
+  end;
+end;
+
+procedure TfpgCocoaView.keyUp(event: NSEvent);
+var
+  msgp: TfpgMessageParams;
+  keyCode: Word;
+begin
+  if not Assigned(FWindow) then
+    exit;
+
+  fillchar(msgp, sizeof(msgp), 0);
+  keyCode := TfpgCocoaApplication(fpgApplication).ConvertKeyCode(event.keyCode);
+
+  msgp.keyboard.keycode := keyCode;
+  msgp.keyboard.shiftstate := TfpgCocoaApplication(fpgApplication).ConvertShiftState(event.modifierFlags);
+
+  fpgPostMessage(nil, FWindow, FPGM_KEYRELEASE, msgp);
 end;
 
 { TfpgCocoaWindow }
-  
-function    TfpgCocoaWindow.HandleIsValid: boolean;
+
+function TfpgCocoaWindow.HandleIsValid: boolean;
 begin
+  Result := Assigned(FWinHandle);
 end;
 
-procedure   TfpgCocoaWindow.DoUpdateWindowPosition;
+procedure TfpgCocoaWindow.DoUpdateWindowPosition;
+var
+  r: NSRect;
 begin
+  if not HandleIsValid then
+    Exit;
+  r := FWinHandle.frame;
+  FPosition.X := Round(r.origin.x);
+  // Cocoa uses bottom-left origin, fpGUI uses top-left
+  FPosition.Y := Round(NSScreen.mainScreen.frame.size.height - r.origin.y - r.size.height);
+  FSize.W := Round(r.size.width);
+  FSize.H := Round(r.size.height);
 end;
 
-procedure   TfpgCocoaWindow.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
+procedure TfpgCocoaWindow.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
+var
+  styleMask: NSUInteger;
+  contentRect: NSRect;
+  parentWin: TfpgCocoaWindow;
 begin
+  // Don't create if already exists
+  if HandleIsValid then
+    Exit;
+
+  // Determine window style based on window type
+  case WindowType of
+    wtChild:
+      styleMask := NSBorderlessWindowMask;  // Child windows have no decorations
+    wtPopup:
+      styleMask := NSBorderlessWindowMask;  // Popup windows (menus, tooltips) have no decorations
+    wtModalForm:
+      styleMask := NSTitledWindowMask or NSClosableWindowMask;  // Modal forms have title and close button
+    wtWindow:
+      begin
+        // Normal windows get full decorations
+        styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
+        if waSizeable in FWindowAttributes then
+          styleMask := styleMask or NSResizableWindowMask;
+      end;
+  else
+    styleMask := NSTitledWindowMask or NSClosableWindowMask or NSMiniaturizableWindowMask;
+  end;
+
+  // Create content rect - convert fpGUI top-left to Cocoa bottom-left
+  contentRect := NSMakeRect(FPosition.X,
+                            NSScreen.mainScreen.frame.size.height - FPosition.Y - FSize.H,
+                            FSize.W, FSize.H);
+
+  // Create the window
+  FWinHandle := NSWindow.alloc.initWithContentRect_styleMask_backing_defer(
+    contentRect, styleMask, NSBackingStoreBuffered, False);
+
+  if not Assigned(FWinHandle) then
+    raise Exception.Create('Failed to create Cocoa window');
+
+  // Configure popup windows to be visible and functional
+  if (WindowType = wtPopup) or (WindowType = wtChild) then
+  begin
+    // Borderless windows need special configuration to be visible on macOS
+    FWinHandle.setLevel(NSPopUpMenuWindowLevel);  // Appear above other windows
+    FWinHandle.setOpaque(True);  // Make window opaque
+    FWinHandle.setHasShadow(True);  // Add shadow for visibility
+    FWinHandle.setBackgroundColor(NSColor.windowBackgroundColor);  // Set background
+  end;
+
+  // Create and set delegate for window events
+  FDelegate := TfpgCocoaWindowDelegate.alloc.init;
+  FDelegate.setWindow(Self);
+  FWinHandle.setDelegate(NSWindowDelegateProtocol(FDelegate));
+
+  // Create custom view for rendering
+  FView := TfpgCocoaView.alloc.initWithFrame(NSMakeRect(0, 0, FSize.W, FSize.H));
+  FView.setWindow(Self);
+
+  FWinHandle.setContentView(FView);
+  FWinHandle.setAcceptsMouseMovedEvents(True);
+
+  // Set window title if we have a primary widget with a title
+  if Assigned(PrimaryWidget) and (PrimaryWidget is TfpgWindow) then
+  begin
+    if TfpgWindow(PrimaryWidget).WindowTitle <> '' then
+      DoSetWindowTitle(TfpgWindow(PrimaryWidget).WindowTitle);
+  end;
+
+  // Handle parent window relationship
+  // Note: Popup windows should NOT be child windows - they need to float above everything
+  if Assigned(AParent) and (WindowType <> wtPopup) then
+  begin
+    parentWin := TfpgCocoaWindow(AParent.Window);
+    if Assigned(parentWin) and parentWin.HandleIsValid then
+      parentWin.FWinHandle.addChildWindow_ordered(FWinHandle, NSWindowAbove);
+  end;
 end;
 
-procedure   TfpgCocoaWindow.DoReleaseWindowHandle;
+procedure TfpgCocoaWindow.DoReleaseWindowHandle;
 begin
+  if not HandleIsValid then
+    Exit;
+
+  // Clear delegate
+  if Assigned(FDelegate) then
+  begin
+    FWinHandle.setDelegate(nil);
+    FDelegate.release;
+    FDelegate := nil;
+  end;
+
+  // Close and release window
+  FWinHandle.close;
+  FWinHandle.release;
+  FWinHandle := nil;
+
+  // Release view
+  if Assigned(FView) then
+  begin
+    FView.release;
+    FView := nil;
+  end;
 end;
 
-procedure   TfpgCocoaWindow.DoRemoveWindowLookup;
+procedure TfpgCocoaWindow.DoRemoveWindowLookup;
 begin
+  // Cleanup window lookup table if we implement one
 end;
 
-procedure   TfpgCocoaWindow.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
+procedure TfpgCocoaWindow.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
+var
+  styleMask: NSUInteger;
 begin
+  if not HandleIsValid then
+    Exit;
+
+  // Update window style if resizable attribute changed
+  if (waSizeable in ANewAttributes) <> (waSizeable in AOldAtributes) then
+  begin
+    styleMask := FWinHandle.styleMask;
+    if waSizeable in ANewAttributes then
+      styleMask := styleMask or NSResizableWindowMask
+    else
+      styleMask := styleMask and (not NSResizableWindowMask);
+    FWinHandle.setStyleMask(styleMask);
+  end;
+
+  // Handle other attributes as needed
+  if waFullScreen in ANewAttributes then
+  begin
+    if not (waFullScreen in AOldAtributes) then
+      FWinHandle.toggleFullScreen(nil);
+  end;
 end;
 
-procedure   TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
+procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
+var
+  msgp: TfpgMessageParams;
 begin
+  if not HandleIsValid then
+    Exit;
+
+  if AValue then
+  begin
+    // Popup windows shouldn't become key (they don't need keyboard focus)
+    // Regular windows should become key
+    if (WindowType = wtPopup) or (WindowType = wtChild) then
+    begin
+      FWinHandle.orderFront(nil);  // Show without making key
+    end
+    else
+    begin
+      FWinHandle.makeKeyAndOrderFront(nil);
+    end;
+    FWinHandle.orderFrontRegardless;
+
+    // Trigger initial paint when window becomes visible
+    if Assigned(FView) then
+    begin
+      // Mark entire view as needing display
+      FView.setNeedsDisplay_(True);
+
+      // Also send a paint message to fpGUI to populate the buffer
+      fillchar(msgp, sizeof(msgp), 0);
+      msgp.rect.Width := FSize.W;
+      msgp.rect.Height := FSize.H;
+      fpgPostMessage(nil, Self, FPGM_PAINT, msgp);
+    end;
+  end
+  else
+    FWinHandle.orderOut(nil);
 end;
 
-procedure   TfpgCocoaWindow.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+procedure TfpgCocoaWindow.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+var
+  screenHeight: Double;
+  cocoaY: Double;
+  newOrigin: NSPoint;
 begin
+  if not HandleIsValid then
+    Exit;
+
+  // Convert fpGUI top-left to Cocoa bottom-left
+  screenHeight := NSScreen.mainScreen.frame.size.height;
+  cocoaY := screenHeight - y - FSize.H;
+  newOrigin := NSMakePoint(x, cocoaY);
+
+  FWinHandle.setFrameOrigin(newOrigin);
 end;
 
-function    TfpgCocoaWindow.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+function TfpgCocoaWindow.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+var
+  winFrame: NSRect;
 begin
+  Result := AScreenPos;
+  if not HandleIsValid then
+    Exit;
+
+  winFrame := FWinHandle.frame;
+  Result.X := AScreenPos.X + Round(winFrame.origin.x);
+  // Convert Cocoa bottom-left to fpGUI top-left
+  Result.Y := AScreenPos.Y + Round(NSScreen.mainScreen.frame.size.height -
+                                    winFrame.origin.y - winFrame.size.height);
 end;
 
-procedure   TfpgCocoaWindow.DoSetWindowTitle(const ATitle: string);
+procedure TfpgCocoaWindow.DoSetWindowTitle(const ATitle: string);
 begin
+  if not HandleIsValid then
+    Exit;
+  FWinHandle.setTitle(NSString.stringWithUTF8String(PChar(ATitle)));
 end;
 
-procedure   TfpgCocoaWindow.DoSetMouseCursor;
+procedure TfpgCocoaWindow.DoSetMouseCursor;
 begin
+  // TODO: Implement mouse cursor changes
+  // Will need to map fpGUI cursor types to NSCursor types
 end;
 
-procedure   TfpgCocoaWindow.DoDNDEnabled(const AValue: boolean);
+procedure TfpgCocoaWindow.DoDNDEnabled(const AValue: boolean);
 begin
+  // TODO: Implement drag-and-drop support
+end;
+
+procedure TfpgCocoaWindow.ActivateWindow;
+begin
+  if HandleIsValid then
+    FWinHandle.makeKeyAndOrderFront(nil);
+end;
+
+procedure TfpgCocoaWindow.CaptureMouse(AForWidget: TfpgWidgetBase);
+begin
+  // Mouse capture is handled automatically by Cocoa during mouse tracking
+  // No explicit capture needed like in Windows or X11
+end;
+
+procedure TfpgCocoaWindow.ReleaseMouse;
+begin
+  // Mouse release is handled automatically by Cocoa
+  // No explicit release needed
+end;
+
+procedure TfpgCocoaWindow.BringToFront;
+begin
+  if HandleIsValid then
+  begin
+    FWinHandle.orderFront(nil);
+    FWinHandle.makeKeyWindow;
+  end;
 end;
 
 { TfpgCocoaApplication }
@@ -273,201 +981,466 @@ end;
 constructor TfpgCocoaApplication.Create(const AParams: string);
 begin
   inherited Create(AParams);
+
+  // Initialize NSApplication if not already done
+  NSApp := NSApplication.sharedApplication;
+  NSApp.setActivationPolicy(NSApplicationActivationPolicyRegular);
+
+  // Call finishLaunching to properly initialize the app for manual event loop
+  // This is required when not using [NSApp run]
+  NSApp.finishLaunching;
+
   FIsInitialized := True;
 end;
 
-function    TfpgCocoaApplication.DoGetFontFaceList: TStringList;
+function TfpgCocoaApplication.DoGetFontFaceList: TStringList;
+var
+  fontManager: NSFontManager;
+  fontFamilies: NSArray;
+  i: Integer;
+  fontName: NSString;
 begin
+  Result := TStringList.Create;
+  try
+    fontManager := NSFontManager.sharedFontManager;
+    fontFamilies := fontManager.availableFontFamilies;
+
+    for i := 0 to fontFamilies.count - 1 do
+    begin
+      fontName := NSString(fontFamilies.objectAtIndex(i));
+      Result.Add(NSStringToString(fontName));
+    end;
+
+    Result.Sort;
+  except
+    Result.Free;
+    raise;
+  end;
 end;
 
-procedure   TfpgCocoaApplication.DoWaitWindowMessage(atimeoutms: integer);
+procedure TfpgCocoaApplication.DoWaitWindowMessage(atimeoutms: integer);
+var
+  event: NSEvent;
+  pool: NSAutoreleasePool;
+  timeoutDate: NSDate;
 begin
+  pool := NSAutoreleasePool.alloc.init;
+  try
+    // Set timeout
+    if atimeoutms > 0 then
+      timeoutDate := NSDate.dateWithTimeIntervalSinceNow(atimeoutms / 1000.0)
+    else
+      timeoutDate := NSDate.distantFuture;
+
+    // Get next event
+    event := NSApp.nextEventMatchingMask_untilDate_inMode_dequeue(
+      NSAnyEventMask,
+      timeoutDate,
+      NSDefaultRunLoopMode,
+      True);
+
+    if Assigned(event) then
+    begin
+      // Process the event
+      NSApp.sendEvent(event);
+      NSApp.updateWindows;
+    end;
+  finally
+    pool.release;
+  end;
 end;
 
-function    TfpgCocoaApplication.MessagesPending: boolean;
+function TfpgCocoaApplication.MessagesPending: boolean;
+var
+  event: NSEvent;
+  pool: NSAutoreleasePool;
 begin
+  pool := NSAutoreleasePool.alloc.init;
+  try
+    // Check if there's an event without removing it from queue
+    event := NSApp.nextEventMatchingMask_untilDate_inMode_dequeue(
+      NSAnyEventMask,
+      NSDate.distantPast,  // Don't wait
+      NSDefaultRunLoopMode,
+      False);  // Don't dequeue
+
+    Result := Assigned(event);
+  finally
+    pool.release;
+  end;
 end;
 
-procedure   TfpgCocoaApplication.DoFlush;
+procedure TfpgCocoaApplication.DoFlush;
 begin
+  // Flush any pending drawing operations
+  NSApp.updateWindows;
 end;
 
-function    TfpgCocoaApplication.GetScreenWidth: TfpgCoord;
+function TfpgCocoaApplication.GetScreenWidth: TfpgCoord;
+var
+  screenRect: NSRect;
 begin
+  screenRect := NSScreen.mainScreen.frame;
+  Result := Round(screenRect.size.width);
 end;
 
-function    TfpgCocoaApplication.GetScreenHeight: TfpgCoord;
+function TfpgCocoaApplication.GetScreenHeight: TfpgCoord;
+var
+  screenRect: NSRect;
 begin
+  screenRect := NSScreen.mainScreen.frame;
+  Result := Round(screenRect.size.height);
 end;
 
-function    TfpgCocoaApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
+function TfpgCocoaApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
 begin
+  // TODO: Implement screen pixel color reading
+  // This would require using CGWindowListCreateImage or similar
+  Result := 0;
 end;
 
-function    TfpgCocoaApplication.Screen_dpi_x: integer;
+function TfpgCocoaApplication.Screen_dpi_x: integer;
 begin
+  // macOS standard DPI
+  // Note: Real DPI calculation would need CGDisplayScreenSize
+  // which requires additional APIs not exposed in CocoaAll
+  Result := 72;
 end;
 
-function    TfpgCocoaApplication.Screen_dpi_y: integer;
+function TfpgCocoaApplication.Screen_dpi_y: integer;
 begin
+  Result := Screen_dpi_x;  // macOS uses square pixels
 end;
 
-function    TfpgCocoaApplication.Screen_dpi: integer;
+function TfpgCocoaApplication.Screen_dpi: integer;
 begin
+  Result := Screen_dpi_x;
+end;
+
+function TfpgCocoaApplication.ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
+begin
+  Result := [];
+
+  if (modifierFlags and NSShiftKeyMask) <> 0 then
+    Include(Result, ssShift);
+
+  if (modifierFlags and NSControlKeyMask) <> 0 then
+    Include(Result, ssCtrl);
+
+  if (modifierFlags and NSAlternateKeyMask) <> 0 then
+    Include(Result, ssAlt);
+
+  if (modifierFlags and NSCommandKeyMask) <> 0 then
+    Include(Result, ssMeta);  // Map Command key to Meta
+
+  // Mouse buttons are handled separately in mouse events
+end;
+
+function TfpgCocoaApplication.ConvertKeyCode(keyCode: cushort): Word;
+begin
+  // Map Cocoa virtual key codes to fpGUI key codes
+  // This is a simplified mapping - a complete implementation would need more key codes
+  case keyCode of
+    // Function keys
+    122: Result := keyF1;
+    120: Result := keyF2;
+    99:  Result := keyF3;
+    118: Result := keyF4;
+    96:  Result := keyF5;
+    97:  Result := keyF6;
+    98:  Result := keyF7;
+    100: Result := keyF8;
+    101: Result := keyF9;
+    109: Result := keyF10;
+    103: Result := keyF11;
+    111: Result := keyF12;
+
+    // Navigation keys
+    126: Result := keyUp;
+    125: Result := keyDown;
+    123: Result := keyLeft;
+    124: Result := keyRight;
+    116: Result := keyPageUp;
+    121: Result := keyPageDown;
+    115: Result := keyHome;
+    119: Result := keyEnd;
+
+    // Editing keys
+    51:  Result := keyBackSpace;
+    117: Result := keyDelete;
+    36:  Result := keyReturn;
+    76:  Result := keyReturn;  // Numpad Enter
+    48:  Result := keyTab;
+    53:  Result := keyEscape;
+    49:  Result := keySpace;
+
+    // Special keys
+    114: Result := keyInsert;
+    71:  Result := keyNUMLOCK;
+    107: Result := keySCROLLLOCK;
+
+    // Default: pass through the keycode
+    else
+      Result := keyCode;
+  end;
 end;
 
 { TfpgCocoaClipboard }
 
-function    TfpgCocoaClipboard.DoGetText: TfpgString;
+function TfpgCocoaClipboard.DoGetText: TfpgString;
+var
+  pasteboard: NSPasteboard;
+  nsStr: NSString;
+  pasteboardType: NSString;
 begin
+  writeln('TfpgCocoaClipboard.DoGetText called');
+  Result := '';
+  pasteboard := NSPasteboard.generalPasteboard;
+
+  // Try modern UTI type first (macOS 10.6+)
+  pasteboardType := NSString.stringWithUTF8String('public.utf8-plain-text');
+  nsStr := NSString(pasteboard.stringForType(pasteboardType));
+
+  if not Assigned(nsStr) then
+  begin
+    writeln('  Modern type failed, trying legacy type');
+    // Fall back to legacy type for older macOS
+    pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
+    nsStr := NSString(pasteboard.stringForType(pasteboardType));
+  end;
+
+  if Assigned(nsStr) then
+  begin
+    Result := NSStringToString(nsStr);
+    writeln('  Got text: "', Result, '"');
+  end
+  else
+    writeln('  No text found on pasteboard');
 end;
 
-procedure   TfpgCocoaClipboard.DoSetText(const AValue: TfpgString);
+procedure TfpgCocoaClipboard.DoSetText(const AValue: TfpgString);
+var
+  pasteboard: NSPasteboard;
+  nsStr: NSString;
+  pasteboardType: NSString;
+  success: Boolean;
 begin
+  writeln('TfpgCocoaClipboard.DoSetText called with: "', AValue, '"');
+  pasteboard := NSPasteboard.generalPasteboard;
+
+  // Clear the pasteboard
+  pasteboard.clearContents;
+
+  // Set the string
+  nsStr := NSString.stringWithUTF8String(PChar(AValue));
+
+  // Try modern UTI type first (macOS 10.6+)
+  pasteboardType := NSString.stringWithUTF8String('public.utf8-plain-text');
+  success := pasteboard.setString_forType(nsStr, pasteboardType);
+
+  if not success then
+  begin
+    writeln('  Modern type failed, trying legacy type');
+    // Fall back to legacy type for older macOS
+    pasteboardType := NSString.stringWithUTF8String('NSStringPboardType');
+    success := pasteboard.setString_forType(nsStr, pasteboardType);
+  end;
+
+  if success then
+    writeln('  Successfully set clipboard text')
+  else
+    writeln('  Failed to set clipboard text');
 end;
 
-procedure   TfpgCocoaClipboard.InitClipboard;
+procedure TfpgCocoaClipboard.InitClipboard;
 begin
+  // Nothing special needed for Cocoa clipboard initialization
+  // NSPasteboard is accessed on demand
 end;
 
 { TfpgCocoaDrag }
 
-function    TfpgCocoaDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction;
+function TfpgCocoaDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction;
 begin
+  // TODO: Implement drag and drop using NSDraggingSession
+  Result := daIgnore;
 end;
 
 { TfpgCocoaDrop }
 
-function    TfpgCocoaDrop.GetDropAction: TfpgDropAction;
+function TfpgCocoaDrop.GetDropAction: TfpgDropAction;
 begin
+  // TODO: Implement drop action
+  Result := daIgnore;
 end;
 
-procedure   TfpgCocoaDrop.SetDropAction(AValue: TfpgDropAction);
+procedure TfpgCocoaDrop.SetDropAction(AValue: TfpgDropAction);
 begin
+  // TODO: Implement drop action setting
 end;
 
-function    TfpgCocoaDrop.GetWindowForDrop: TfpgWindowBase;
+function TfpgCocoaDrop.GetWindowForDrop: TfpgWindowBase;
 begin
+  // TODO: Implement window for drop
+  Result := nil;
 end;
 
 { TfpgCocoaCanvas }
+{ NOTE: When using AggCanvas, TAgg2D is used instead }
+{ These are stub implementations that won't be called with AggCanvas }
 
-procedure   TfpgCocoaCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
+procedure TfpgCocoaCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoSetTextColor(cl: TfpgColor);
+procedure TfpgCocoaCanvas.DoSetTextColor(cl: TfpgColor);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoSetColor(cl: TfpgColor);
+procedure TfpgCocoaCanvas.DoSetColor(cl: TfpgColor);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+procedure TfpgCocoaCanvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCocoaCanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+procedure TfpgCocoaCanvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+procedure TfpgCocoaCanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCocoaCanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCocoaCanvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+procedure TfpgCocoaCanvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
+procedure TfpgCocoaCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoSetClipRect(const ARect: TfpgRect);
+procedure TfpgCocoaCanvas.DoSetClipRect(const ARect: TfpgRect);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-function    TfpgCocoaCanvas.DoGetClipRect: TfpgRect;
+function TfpgCocoaCanvas.DoGetClipRect: TfpgRect;
 begin
+  // Stub - not used with AggCanvas
+  Result := fpgRect(0, 0, 0, 0);
 end;
 
-procedure   TfpgCocoaCanvas.DoAddClipRect(const ARect: TfpgRect);
+procedure TfpgCocoaCanvas.DoAddClipRect(const ARect: TfpgRect);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoClearClipRect;
+procedure TfpgCocoaCanvas.DoClearClipRect;
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
+procedure TfpgCocoaCanvas.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+procedure TfpgCocoaCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
+  // Stub - AggCanvas manages its own buffer
+  // Drawing is handled by the view's drawRect method
 end;
 
-procedure   TfpgCocoaCanvas.DoEndDraw;
+procedure TfpgCocoaCanvas.DoEndDraw;
 begin
+  // Stub - not used with AggCanvas
 end;
 
-function    TfpgCocoaCanvas.GetPixel(X, Y: integer): TfpgColor;
+function TfpgCocoaCanvas.GetPixel(X, Y: integer): TfpgColor;
 begin
+  // Stub - not used with AggCanvas
+  Result := 0;
 end;
 
-procedure   TfpgCocoaCanvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
+procedure TfpgCocoaCanvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-procedure   TfpgCocoaCanvas.DoDrawPolygon(const Points: array of TPoint);
+procedure TfpgCocoaCanvas.DoDrawPolygon(const Points: array of TPoint);
 begin
+  // Stub - not used with AggCanvas
 end;
 
-function    TfpgCocoaCanvas.GetBufferAllocated: Boolean;
+function TfpgCocoaCanvas.GetBufferAllocated: Boolean;
 begin
+  // Stub - not used with AggCanvas
+  Result := False;
 end;
 
-procedure   TfpgCocoaCanvas.DoAllocateBuffer;
+procedure TfpgCocoaCanvas.DoAllocateBuffer;
 begin
+  // Stub - not used with AggCanvas
 end;
 
 { TfpgCocoaSystemTrayHandler }
 
-procedure   TfpgCocoaSystemTrayHandler.Show;
+procedure TfpgCocoaSystemTrayHandler.Show;
 begin
+  // TODO: Implement using NSStatusBar
+  // NSStatusBar.systemStatusBar.statusItemWithLength(NSVariableStatusItemLength)
 end;
 
-procedure   TfpgCocoaSystemTrayHandler.Hide;
+procedure TfpgCocoaSystemTrayHandler.Hide;
 begin
+  // TODO: Implement status item removal
 end;
 
-function    TfpgCocoaSystemTrayHandler.IsSystemTrayAvailable: boolean;
+function TfpgCocoaSystemTrayHandler.IsSystemTrayAvailable: boolean;
 begin
+  // macOS always has a status bar (menu bar)
+  Result := True;
 end;
 
-function    TfpgCocoaSystemTrayHandler.SupportsMessages: boolean;
+function TfpgCocoaSystemTrayHandler.SupportsMessages: boolean;
 begin
+  // macOS status bar items support notifications
+  Result := True;
 end;
 
 end.

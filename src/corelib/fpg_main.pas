@@ -931,12 +931,17 @@ var
   function GetDebugFileName: string;
   var
     EnvVarName: string;
+    cmd: ICmdLineParams;
   begin
     Result := '';
     // first try to find the log file name in the command line parameters
-    if gCommandLineParams.IsParam('debuglog') then
-      Result := gCommandLineParams.GetParam('debuglog')
-    else
+    if Supports(fpgApplication, ICmdLineParams, cmd) then
+    begin
+      if cmd.HasOption('debuglog') then
+        Result := cmd.GetOptionValue('debuglog');
+    end;
+
+    if Result = '' then
     begin
       // if not found yet, then try to find in the environment variable
       EnvVarName  := ApplicationName + '_debuglog';
@@ -1438,7 +1443,6 @@ end;
 
 constructor TfpgApplication.Create(const AParams: string);
 begin
-  InitializeDebugOutput;
   fpgInitMsgQueue;
 
   FFontManager    := TfpgFontManager.Create;
@@ -1560,7 +1564,7 @@ end;
 
 procedure TfpgApplication.Initialize;
 begin
-  { TODO : Remember to process parameters!! }
+  InitializeDebugOutput;
   if IsInitialized then
     InternalInit
   else
@@ -2191,7 +2195,7 @@ begin
     ACanvas.SetColor(clBlack);
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
-    InflateRect(r, -1, -1);
+    r.InflateRect(-1, -1);
     Exclude(AFlags, btfIsDefault);
     fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>
@@ -2565,7 +2569,7 @@ begin
   if IsFocused then
   begin
     ACanvas.SetColor(clSelection);
-    InflateRect(lr, -1, -1);
+    lr.InflateRect(-1, -1);
     ACanvas.FillRectangle(lr);
   end;
 
@@ -2591,7 +2595,7 @@ begin
   if IsPressed then
   begin
     Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
+    ar.OffsetRect(1, 1);
   end;
   // paint button face
   DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, btnflags);

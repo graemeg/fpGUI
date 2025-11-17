@@ -481,7 +481,7 @@ begin
       ACanvas.SetColor(TfpgColor($ffacacac));
   end;
   ACanvas.DrawRectangle(r);
-  InflateRect(r, -1, -1);
+  r.InflateRect(-1, -1);
   if btfDisabled in AFlags then
   begin
     ACanvas.SetColor(TfpgColor($ffefefef));

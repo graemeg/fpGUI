@@ -21,7 +21,7 @@ script.
 All text and messages used in the toolkit should be placed into the  
 <fpGUIdir/src/corelib/lang_en.inc (English) include file. This unit uses a
 resourcestring section, so that the compiler will create the
-<fpGUIdir>/lib/fpg_constants.rst file.
+<fpGUIdir>/lib/fpg_constants.rsj (used to be .rst) file.
 Since this is a fpc-only format it must be converted with the rstconv program:
 
 cd <fpGUIdir>/languages

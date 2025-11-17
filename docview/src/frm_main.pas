@@ -3662,19 +3662,23 @@ var
   showtopic: boolean;
   t: TTopic;
   n: integer;
+  cmd: ICmdLineParams;
 begin
+  if not Supports(fpgApplication, ICmdLineParams, cmd) then
+    Exit;
+
   if ParamCount > 0 then
   begin
-    if gCommandLineParams.IsParam('h') then
+    if cmd.HasOption('h') then
     begin
       ShowCmdLineParamHelp;
       Exit; //==>
     end
-    else if gCommandLineParams.IsParam('debuglog') then
+    else if cmd.HasOption('debuglog') then
       // do nothing
     else
     begin
-      showtopic := not gCommandLineParams.IsParam('k');
+      showtopic := not cmd.HasOption('k');
       { is the first parameter a known docview help, or some addition parameter }
       if Pos(ctiCommandLineParamPrefix, ParamStr(1)) = 1 then
         // command line parameter order seems wrong, so do nothing
@@ -3684,32 +3688,32 @@ begin
   end;
 
   // now process all other parameters
-  if gCommandLineParams.IsParam('k') then
+  if cmd.HasOption('k') then
   begin
     { Search for a string }
-    edSearchText.Text := gCommandLineParams.GetParam('k');
+    edSearchText.Text := cmd.GetOptionValue('k');
     PageControl1.ActivePage := tsSearch;
     DoSearch;
   end
-  else if gCommandLineParams.IsParam('n') then
+  else if cmd.HasOption('n') then
   begin
     { Display topic with numeric topic id }
     try
-      n := StrToInt(gCommandLineParams.GetParam('n'));
+      n := StrToInt(cmd.GetOptionValue('n'));
       t := FindTopicByResourceID(n);
       DisplayTopic(t);
     except
       on EConvertError do
         begin
           TfpgMessageDialog.Critical('Invalid Parameter Value',
-            '<' + gCommandLineParams.GetParam('n') + '> is not an number.');
+            '<' + cmd.GetOptionValue('n') + '> is not an number.');
         end;
     end;
   end
-  else if gCommandLineParams.IsParam('s') then
+  else if cmd.HasOption('s') then
   begin
     { Display topic with string topic id }
-    t := FindTopicByName(gCommandLineParams.GetParam('s'));
+    t := FindTopicByName(cmd.GetOptionValue('s'));
     DisplayTopic(t);
   end;
 end;

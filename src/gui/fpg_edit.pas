@@ -546,7 +546,8 @@ begin
   begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
-    tw  := tw + FFont.GetTextWidth(ch);
+    // Calculate width of substring instead of accumulating per-character to avoid rounding errors
+    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     chx := tw - FTextOffset + FSideMargin;
     if UsePxCursorPos then
     begin
@@ -1591,12 +1592,15 @@ begin
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
   if CanDrawExtraHint then
-    DrawPlaceholderText(fpgRect(
+  begin
+    r.SetRect(
       r.Left - FDrawOffset + GetMarginAdjustment,
       r.Top + FHeightMargin,
       r.Width + FDrawOffset - GetMarginAdjustment,
       r.Height - FHeightMargin
-      ))
+      );
+    DrawPlaceholderText(r);
+  end
   else
   begin
     Canvas.SetTextColor(FTextColor);
@@ -1693,7 +1697,8 @@ begin
   begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
-    tw  := tw + FFont.GetTextWidth(ch);
+    // Calculate width of substring instead of accumulating per-character to avoid rounding errors
+    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     case FAlignment of
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
@@ -2035,8 +2040,8 @@ constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FAlignment := taRightJustify;
-  FDecimalSeparator := DecimalSeparator;
-  FThousandSeparator := ThousandSeparator;
+  FDecimalSeparator := FormatSettings.DecimalSeparator;
+  FThousandSeparator := FormatSettings.ThousandSeparator;
   FShowThousand := True;
   FNegativeColor := clRed;
   FOldColor := TextColor;

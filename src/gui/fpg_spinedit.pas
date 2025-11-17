@@ -410,9 +410,9 @@ var
 begin
   r := AButton.GetClientRect;
 
-  InflateRect(r, -2, -2); // button borders
+  r.InflateRect(-2, -2); // button borders
   if AButton.Down then
-    OffsetRect(r, 1, 1);
+    r.OffsetRect(1, 1);
 
   Result := fpgRectToRect(r);
 end;

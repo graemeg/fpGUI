@@ -145,7 +145,7 @@ begin
       if ParentScrollFrame is TfpgScrollFrame then
         ParentScrollFrame.UpdateScrollbars
       else
-        UpdateWindowPosition;
+        UpdatePosition;
   end;
 end;
 
@@ -185,7 +185,7 @@ begin
   if ParentScrollFrame is TfpgScrollFrame then
     ParentScrollFrame.UpdateScrollbars
   else
-    UpdateWindowPosition;
+    UpdatePosition;
 end;
 
 
@@ -300,7 +300,7 @@ begin
   if position = XOffset then
     Exit;
   XOffset := position;
-  FContentFrame.UpdateWindowPosition;
+  FContentFrame.UpdatePosition;
 end;
 
 procedure TfpgScrollFrame.VScrollBarMove(Sender: TObject; position: integer);
@@ -308,7 +308,7 @@ begin
   if position = YOffset then
     Exit;
   YOffset := position;
-  FContentFrame.UpdateWindowPosition;
+  FContentFrame.UpdatePosition;
 end;
 
 procedure TfpgScrollFrame.UpdateScrollbars;
@@ -325,7 +325,7 @@ var
       if Visible then
       begin
         Visible := False;
-        UpdateWindowPosition;
+        UpdatePosition;
       end;
   end;
 
@@ -472,16 +472,16 @@ begin
       XOffset := 0;
   end;
 
-  FVScrollBar.UpdateWindowPosition;
-  FHScrollBar.UpdateWindowPosition;
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
 
   FVisibleArea.Left := 0;
   FVisibleArea.Top := 0;
   FVisibleArea.Width := visWidth;
   FVisibleArea.Height := visHeight;
-  FVisibleArea.UpdateWindowPosition;
+  FVisibleArea.UpdatePosition;
 
-  FContentFrame.UpdateWindowPosition;
+  FContentFrame.UpdatePosition;
 end;
 
 constructor TfpgScrollFrame.Create(AOwner: TComponent);
