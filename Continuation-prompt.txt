@@ -176,3 +176,31 @@ Session Update (2025-11-18 - Continued):
      d) The conversion from sparse to dense grid might be losing span info
    - Need to add more targeted debug output to trace size distribution
 
+Session Update (2025-11-18 - Continued Further):
+
+4. ✅ Fixed ExtractSubArray grow weight distribution (commit ef3247bb)
+   - **Root cause**: ExtractSubArray only set WEIGHT_100 for ONE column (last non-dock)
+   - **Problem**: For spanning components, ALL spanned columns need equal grow weights
+   - **Fix**: Removed early Exit, set WEIGHT_100 for all non-dock columns in range
+   - **Result**: Spanning columns now get [100, 0, 100] instead of [0, 0, 100]
+   - **Verification**: fss.GetSizes shows [6, 80, 6, 43, 6, 43, 6, 80, 6, 0]
+     - Columns 1 and 2 (indices 3, 5) both have 43 pixels (evenly distributed!)
+   - Location: fpg_mig_layoututil.pas:530-558 (ExtractSubArray method)
+
+5. ❌ TestCellSpanning still failing - NEW ISSUE DISCOVERED
+   - **Separate bug**: SpanX() without args creates span=30000 instead of span-to-end
+   - **Behavior**: SpanX() sets FSpanX to INF_SIZE (2147471302)
+   - **Clamping**: Code clamps to MAX_GRID=30000 at fpg_miglayout.pas:1083
+   - **Impact**: Creates 30000 columns, initial size=180252 pixels, massive shrinking
+   - **Expected**: Should span to last column in row (4 columns), not create 30000
+   - **Next fix needed**: Calculate actual span based on grid column count, not MAX_GRID
+   - Test layout: Row 0 has comp1, comp2(span 2), comp3; Row 1 has comp4(span to end)
+   - comp4 should span 4 columns (0-3), currently spans 30000
+
+6. Progress Summary:
+   - ✅ ExtractSubArray iteration bug fixed (commit 4ba93ab2)
+   - ✅ ExtractSubArray grow weight distribution fixed (commit ef3247bb)
+   - ✅ Spanning columns now get equal sizes before final shrink
+   - ❌ SpanX() infinity handling still broken
+   - Next: Fix infinite span calculation to use actual column count
+
