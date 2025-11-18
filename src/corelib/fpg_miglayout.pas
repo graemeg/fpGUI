@@ -883,10 +883,8 @@ begin
     Exit;
   end;
 
-  {$IFDEF MIGDEBUG}
-  WriteLn('DEBUG: TransferBounds - calling MoveAndResize() for widget ' + FComp.Name,
-          ' X=', compX, ', Y=', compY, ', W=', compW, ', H=', compH);
-  {$ENDIF MIGDEBUG}
+  WriteLn(Format('DEBUG TransferBounds: %s [%s] - X=%d, Y=%d, W=%d, H=%d',
+    [FComp.Name, FComp.ClassName, compX, compY, compW, compH]));
   // Transfer calculated bounds to the widget via ILayoutTarget interface
   (FComp as ILayoutTarget).MoveAndResize(compX, compY, compW, compH);
 end;
@@ -3289,10 +3287,13 @@ begin
       [fss.GetSizes[2][SIZE_MIN], fss.GetSizes[2][SIZE_PREF], fss.GetSizes[2][SIZE_MAX]]));
   end;
 
-  if (ADC <> nil) and ADC.IsFill then
+  // Enable growth if fill is set OR if spanning component (needs to fill spanned space)
+  if ((ADC <> nil) and ADC.IsFill) or (ASpanCount > 1) then
   begin
     SetLength(growW, 1);
     growW[0] := 100.0;
+    WriteLn(Format('DEBUG LayoutSerial: Enabling grow weight (IsFill=%d, SpanCount=%d)',
+      [Ord((ADC <> nil) and ADC.IsFill), ASpanCount]));
   end
   else
     SetLength(growW, 0);
@@ -3358,10 +3359,9 @@ begin
     begin
       cSt := cSt + AAllSizes[bIx]; // gap
       Inc(bIx);
-      {$IFDEF MIGDEBUG}
       if AIsHor then
-        WriteLn('DEBUG:   Setting ', cw.Comp.Name, ' at position ', cSt, ', size=', AAllSizes[bIx]);
-      {$ENDIF}
+        WriteLn(Format('DEBUG SetCompWrapBounds: Setting %s at position %d, size=%d',
+          [cw.Comp.Name, cSt, AAllSizes[bIx]]));
       cw.SetDimBounds(cSt, AAllSizes[bIx], AIsHor);
       cSt := cSt + AAllSizes[bIx];
       Inc(bIx);
@@ -3638,10 +3638,9 @@ begin
       insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
       insRight := Round(insUV.GetPixels(0, AContainer, nil));
 
-      {$IFDEF MIGDEBUG}
-      WriteLn(Format('DEBUG: Insets (T,L,B,R): %d, %d, %d, %d',
-        [insTop, insLeft, insBottom, insRight]));
-      {$ENDIF MIGDEBUG}
+      WriteLn(Format('DEBUG DoLayout: Container=%s, ActualWidth=%d, ActualHeight=%d, Insets (T,L,B,R)=(%d,%d,%d,%d)',
+        [AContainer.ClassName, AContainer.ActualWidth, AContainer.ActualHeight,
+         insTop, insLeft, insBottom, insRight]));
 
       // 4. Setup bounds for layout, accounting for insets
       // This matches Java: bounds = [insets.left, insets.top,
@@ -3650,6 +3649,7 @@ begin
       bounds[1] := insTop;    // y offset
       bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
       bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
+      WriteLn(Format('DEBUG DoLayout: bounds=[%d, %d, %d, %d]', [bounds[0], bounds[1], bounds[2], bounds[3]]));
 
       // 5. Perform layout
       grid.Layout(bounds, nil, nil, False);
