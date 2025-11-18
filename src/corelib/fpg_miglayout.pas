@@ -2457,6 +2457,19 @@ begin
   end;
   {$ENDIF}
 
+  {$IFDEF MIGDEBUG}
+  if not AIsRows then  // Debug columns before CalculateSerial
+  begin
+    Write('DEBUG: LayoutInOneDim (COLS) fss.GetSizes (SIZE_PREF) before CalculateSerial: [');
+    for i := 0 to Min(High(fss.GetSizes), 9) do
+    begin
+      Write(fss.GetSizes[i][SIZE_PREF]);
+      if i < Min(High(fss.GetSizes), 9) then Write(', ');
+    end;
+    WriteLn(']');
+  end;
+  {$ENDIF}
+
   rowColSizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, ADefGrowW, SIZE_PREF, ARefSize);
 
   {$IFDEF MIGDEBUG}
@@ -2472,7 +2485,7 @@ begin
   end
   else
   begin
-    Write('DEBUG: LayoutInOneDim (COLS) rowColSizes=[');
+    Write('DEBUG: LayoutInOneDim (COLS) rowColSizes after CalculateSerial: [');
     for i := 0 to Min(High(rowColSizes), 9) do
     begin
       Write(rowColSizes[i]);
