@@ -2376,10 +2376,16 @@ begin
 
       // Convert span to sparse grid coordinates (for components spanning multiple actual columns/rows)
       // Port of Grid.java line 1488: span = convertSpanToSparseGrid(i, span, primIndexes);
+      // NOTE: Java's 'i' is the VALUE from primIndexes (e.g., row index 0, 1, 2...), not a loop counter
+      // In our Pascal code, primIndexes[i] gives us that value
       if AIsRows then
-        span := ConvertSpanToSparseGrid(gIx, span, FRowIndexes)
+      begin
+        WriteLn(Format('DEBUG DivideIntoLinkedGroups: BEFORE ConvertSpan - AIsRows=true, primIndexes[%d]=%d, span=%d', [i, primIndexes[i], span]));
+        span := ConvertSpanToSparseGrid(primIndexes[i], span, FRowIndexes);
+        WriteLn(Format('DEBUG DivideIntoLinkedGroups: AFTER ConvertSpan - span=%d, FRowIndexes.Count=%d', [span, FRowIndexes.Count]));
+      end
       else
-        span := ConvertSpanToSparseGrid(gIx, span, FColIndexes);
+        span := ConvertSpanToSparseGrid(primIndexes[i], span, FColIndexes);
 
       isPar := (cell.FlowX = AIsRows);
 
@@ -2555,6 +2561,14 @@ begin
       if i < Min(High(rowColSizes), 9) then Write(', ');
     end;
     WriteLn(']');
+    WriteLn('DEBUG: Row layout breakdown:');
+    WriteLn('  rowColSizes[0] = ', rowColSizes[0], ' (gap before row 0 / top inset)');
+    if Length(rowColSizes) > 1 then
+      WriteLn('  rowColSizes[1] = ', rowColSizes[1], ' (row 0 height)');
+    if Length(rowColSizes) > 2 then
+      WriteLn('  rowColSizes[2] = ', rowColSizes[2], ' (gap between row 0 and row 1)');
+    if Length(rowColSizes) > 3 then
+      WriteLn('  rowColSizes[3] = ', rowColSizes[3], ' (row 1 height)');
   end
   else
   begin
@@ -3765,20 +3779,31 @@ begin
   // Port of Grid.java convertSpanToSparseGrid() - lines 1539-1554
   lastIx := ACurIx + ASpan;
   retSpan := 1;
+  WriteLn(Format('DEBUG ConvertSpanToSparseGrid: ACurIx=%d, ASpan=%d, AIndexes.Count=%d, lastIx=%d',
+    [ACurIx, ASpan, AIndexes.Count, lastIx]));
 
   for i := 0 to AIndexes.Count - 1 do
   begin
     ix := AIndexes[i];
+    WriteLn(Format('  Loop i=%d: ix=%d, ACurIx=%d, lastIx=%d', [i, ix, ACurIx, lastIx]));
 
     if ix <= ACurIx then
+    begin
+      WriteLn('    SKIP (ix <= ACurIx)');
       Continue;  // Haven't arrived at the current index yet
+    end;
 
     if ix >= lastIx then
+    begin
+      WriteLn('    BREAK (ix >= lastIx)');
       Break;  // Past the end of the span
+    end;
 
+    WriteLn(Format('    INC retSpan from %d to %d', [retSpan, retSpan+1]));
     Inc(retSpan);
   end;
 
+  WriteLn(Format('DEBUG ConvertSpanToSparseGrid: Result=%d', [retSpan]));
   Result := retSpan;
 end;
 
