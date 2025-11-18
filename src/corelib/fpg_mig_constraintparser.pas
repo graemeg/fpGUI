@@ -517,10 +517,12 @@ var
   j: Integer;
   insS: TStringArray;
   insSz: TfpgMigUnitValue;
+  defaultInset: TfpgMigUnitValue;
 begin
   SetLength(Result, 4);
 
   // Handle dialog/panel defaults
+  // Return singleton references directly (caller must clone if it needs ownership)
   if (AStr = '') or (AStr = 'dialog') or (AStr = 'panel') then
   begin
     if not AAcceptPanel then

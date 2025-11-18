@@ -247,6 +247,10 @@ begin
   if FGridGapY <> nil then
     FGridGapY.Free;
 
+  // Note: FInsets and FAlign values are NOT freed here because they can be
+  // singleton constants (UnitValueZero, UnitValueCenter, GetDialogInsets, etc.)
+  // They are managed by the constant pool / platform defaults
+
   inherited Destroy;
 end;
 
@@ -572,8 +576,8 @@ begin
   insV := ParseUnitValue(AAllSides, False);
   FInsets[0] := insV;  // top
   FInsets[1] := insH;  // left
-  FInsets[2] := insV;  // bottom
-  FInsets[3] := insH;  // right
+  FInsets[2] := insV;  // bottom (shared reference)
+  FInsets[3] := insH;  // right (shared reference)
   Result := Self;
 end;
 
