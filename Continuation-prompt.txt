@@ -112,21 +112,33 @@ Accomplishments:
    - TestAutoWrap_3Columns (passing)
    - TestCellSpanning (1 assertion failing - span sizing not implemented)
 5. ✅ Updated tcmig_boundsize.pas test to check value equality vs pointer equality
+6. ✅ Implemented AdjustMinPrefForSpanningComps and ExpandSizes (fpg_miglayout.pas, fpg_mig_layoututil.pas)
+   - Ported Java Grid.java spanning logic for size adjustment
+   - Added helper methods ExtractSubArray and GetIndexSafe overload
+7. ✅ Fixed BuildIndexes to correctly add spanned column/row indexes (fpg_miglayout.pas:1522-1546)
+   - Now properly adds all columns covered by spanning components
+   - Column indexes now [0,1,2,3] instead of [0,1,3] for comp spanning columns 1-2
 
-Commits:
+Commits (so far):
 - fix: ParseBoundSize memory leaks in constraint parser
 - fix: memory leaks in BoundSize and constraint parser
 - fix: component-level wrap not working in grid building
 - fix: infinite loop with SpanX() - add MAX_GRID clamping
 - test: add Quick Start Guide test suite
 
-Key Discovery:
-- Cell spanning is HALF-IMPLEMENTED: Grid placement works (components positioned correctly in cells),
-  but component sizing doesn't account for spans. Components spanning multiple cells don't get
-  the combined width/height of spanned cells + gaps.
-- This is why frm_spanning.pas looks correct - manual Width/Height values are used, not calculated.
+Current Debug Session:
+- ✅ Spanning groups ARE being created correctly (span=2 detected)
+- ✅ DivideIntoLinkedGroups finds spanning cells and creates groups with correct span
+- ✅ AdjustMinPrefForSpanningComps is called and finds spanning groups
+- ✅ ExpandSizes is being called (ATargetSize=92, ALen=3 to expand 2 columns + gap)
+- ✅ BuildIndexes now adds all spanned columns to index list
+- ❌ BUT: Component still gets W=2 instead of proper spanning width
+  - Debug shows: TransferBounds W=2 for spanning component (should be ~80-90)
+  - Problem: ExpandSizes modifies FlowSizeSpec.FSizes, but layout doesn't use expanded sizes
 
-Next Priority:
-- Implement span-based sizing in LayoutInOneDim/LayoutParallel/LayoutSerial methods
-- Port Java Grid.java logic that calculates total size for spanning components
+Next Investigation:
+- ExpandSizes expands the FlowSizeSpec.FSizes array correctly
+- But LayoutInOneDim needs to USE those expanded sizes when positioning components
+- Need to check if LayoutInOneDim is reading from correct FlowSizeSpec or old sizes
+- Java Grid.layoutSerial() may have additional logic for spanning components we haven't ported
 
