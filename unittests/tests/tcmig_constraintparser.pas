@@ -407,47 +407,65 @@ end;
 procedure TTestMigConstraintParser.TestParseInsets_SingleValue;
 var
   insets: TfpgMigUnitValueArray;
+  i: Integer;
 begin
   insets := ParseInsets('10px', True);
-  AssertEquals('Should have 4 values', 4, Length(insets));
-  AssertNotNull('Top should not be nil', insets[0]);
-  AssertNotNull('Right should not be nil', insets[1]);
-  AssertNotNull('Bottom should not be nil', insets[2]);
-  AssertNotNull('Left should not be nil', insets[3]);
-  AssertEquals('All values should be 10', 10.0, insets[0].Value, 0.001);
-  AssertEquals('All values should be 10', 10.0, insets[1].Value, 0.001);
-  AssertEquals('All values should be 10', 10.0, insets[2].Value, 0.001);
-  AssertEquals('All values should be 10', 10.0, insets[3].Value, 0.001);
+  try
+    AssertEquals('Should have 4 values', 4, Length(insets));
+    AssertNotNull('Top should not be nil', insets[0]);
+    AssertNotNull('Right should not be nil', insets[1]);
+    AssertNotNull('Bottom should not be nil', insets[2]);
+    AssertNotNull('Left should not be nil', insets[3]);
+    AssertEquals('All values should be 10', 10.0, insets[0].Value, 0.001);
+    AssertEquals('All values should be 10', 10.0, insets[1].Value, 0.001);
+    AssertEquals('All values should be 10', 10.0, insets[2].Value, 0.001);
+    AssertEquals('All values should be 10', 10.0, insets[3].Value, 0.001);
+  finally
+    for i := 0 to High(insets) do
+      insets[i].Free;
+  end;
 end;
 
 procedure TTestMigConstraintParser.TestParseInsets_FourValues;
 var
   insets: TfpgMigUnitValueArray;
+  i: Integer;
 begin
   insets := ParseInsets('10px 20px 30px 40px', True);
-  AssertEquals('Should have 4 values', 4, Length(insets));
-  AssertNotNull('Top should not be nil', insets[0]);
-  AssertNotNull('Right should not be nil', insets[1]);
-  AssertNotNull('Bottom should not be nil', insets[2]);
-  AssertNotNull('Left should not be nil', insets[3]);
-  AssertEquals('Top should be 10', 10.0, insets[0].Value, 0.001);
-  AssertEquals('Right should be 20', 20.0, insets[1].Value, 0.001);
-  AssertEquals('Bottom should be 30', 30.0, insets[2].Value, 0.001);
-  AssertEquals('Left should be 40', 40.0, insets[3].Value, 0.001);
+  try
+    AssertEquals('Should have 4 values', 4, Length(insets));
+    AssertNotNull('Top should not be nil', insets[0]);
+    AssertNotNull('Right should not be nil', insets[1]);
+    AssertNotNull('Bottom should not be nil', insets[2]);
+    AssertNotNull('Left should not be nil', insets[3]);
+    AssertEquals('Top should be 10', 10.0, insets[0].Value, 0.001);
+    AssertEquals('Right should be 20', 20.0, insets[1].Value, 0.001);
+    AssertEquals('Bottom should be 30', 30.0, insets[2].Value, 0.001);
+    AssertEquals('Left should be 40', 40.0, insets[3].Value, 0.001);
+  finally
+    for i := 0 to High(insets) do
+      insets[i].Free;
+  end;
 end;
 
 procedure TTestMigConstraintParser.TestParseInsets_TwoValues;
 var
   insets: TfpgMigUnitValueArray;
+  i: Integer;
 begin
   insets := ParseInsets('10px 20px', True);
-  AssertEquals('Should have 4 values', 4, Length(insets));
-  // Two values: uses last value for remaining (Java v11 behavior)
-  // Order: top, right, bottom, left (0,1,2,3)
-  AssertEquals('Top should be 10', 10.0, insets[0].Value, 0.001);
-  AssertEquals('Right should be 20', 20.0, insets[1].Value, 0.001);
-  AssertEquals('Bottom should be 20 (uses last)', 20.0, insets[2].Value, 0.001);
-  AssertEquals('Left should be 20 (uses last)', 20.0, insets[3].Value, 0.001);
+  try
+    AssertEquals('Should have 4 values', 4, Length(insets));
+    // Two values: uses last value for remaining (Java v11 behavior)
+    // Order: top, right, bottom, left (0,1,2,3)
+    AssertEquals('Top should be 10', 10.0, insets[0].Value, 0.001);
+    AssertEquals('Right should be 20', 20.0, insets[1].Value, 0.001);
+    AssertEquals('Bottom should be 20 (uses last)', 20.0, insets[2].Value, 0.001);
+    AssertEquals('Left should be 20 (uses last)', 20.0, insets[3].Value, 0.001);
+  finally
+    for i := 0 to High(insets) do
+      insets[i].Free;
+  end;
 end;
 
 procedure TTestMigConstraintParser.TestParseInsets_Null;

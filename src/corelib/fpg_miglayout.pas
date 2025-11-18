@@ -1695,7 +1695,11 @@ end;
 destructor TfpgMigGrid.Destroy;
 var
   i: Integer;
+  cell: TfpgMigCell;
 begin
+  // Free all cells in the grid (TDictionary doesn't own its values)
+  for cell in FGrid.Values do
+    cell.Free;
   FGrid.Free;
   FRowIndexes.Free;
   FColIndexes.Free;
@@ -2902,7 +2906,7 @@ end;
 class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
 var
   sizes: TfpgMigSizeArrayArray;
-  i: Integer;
+  i, j: Integer;
   cw: TfpgMigCompWrap;
   cDc: TfpgMigDimConstraint;
   resConstr: TfpgMigResizeConstraintArray;
@@ -2973,6 +2977,11 @@ begin
     if Length(calculatedSizes) > 2 then sizes[i][2] := calculatedSizes[2];
     WriteLn(Format('DEBUG LayoutParallel: Component %d calculated sizes = [%d, %d, %d]',
       [i, calculatedSizes[0], calculatedSizes[1], calculatedSizes[2]]));
+
+    // Free temporary ResizeConstraint objects (all are newly created)
+    resConstr[0].Free;
+    resConstr[1].Free;
+    resConstr[2].Free;
   end;
 
   rowAlign := ADC.GetAlignOrDefault(AIsHor);
@@ -3318,6 +3327,9 @@ begin
   if Length(sizes) > 0 then
     WriteLn(Format('DEBUG LayoutSerial: sizes=[%d, %d, ...]', [sizes[0], sizes[1]]));
   SetCompWrapBounds(AParent, sizes, ACompWraps, ADC.GetAlignOrDefault(AIsHor), AStart, ASize, AIsHor, AFromEnd);
+
+  // Free the FlowSizeSpec object created by MergeSizesGapsAndResConstrs
+  fss.Free;
 end;
 
 class procedure TfpgMigGrid.SetCompWrapBounds(AParent: TfpgWidgetBase; const AAllSizes: TfpgMigIntegerArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
