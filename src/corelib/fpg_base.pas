@@ -1814,11 +1814,16 @@ procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
 var
   ConstrainedWidth, ConstrainedHeight: TfpgCoord;
 begin
+  WriteLn(Format('DEBUG HandleResize %s: AWidth=%d, AHeight=%d, CurrentWidth=%d, CurrentHeight=%d',
+    [Name, AWidth, AHeight, FWidth, FHeight]));
   ConstrainedWidth := ConstraintWidth(AWidth);
   ConstrainedHeight := ConstraintHeight(AHeight);
+  WriteLn(Format('DEBUG HandleResize %s: ConstrainedWidth=%d, ConstrainedHeight=%d',
+    [Name, ConstrainedWidth, ConstrainedHeight]));
 
   if (FWidth <> ConstrainedWidth) or (FHeight <> ConstrainedHeight) then
   begin
+    WriteLn(Format('DEBUG HandleResize %s: SIZE CHANGE DETECTED', [Name]));
     if not (csLoading in ComponentState) then
     begin
       FPrevWidth := FWidth;
@@ -1829,12 +1834,17 @@ begin
       FPrevWidth := ConstrainedWidth;
       FPrevHeight := ConstrainedHeight;
     end;
+    WriteLn(Format('DEBUG HandleResize %s: BEFORE: FWidth=%d, FHeight=%d', [Name, FWidth, FHeight]));
     FWidth := ConstrainedWidth;
     FHeight := ConstrainedHeight;
+    WriteLn(Format('DEBUG HandleResize %s: AFTER: FWidth=%d, FHeight=%d', [Name, FWidth, FHeight]));
 
     if (FWidth <> FPrevWidth) or (FHeight <> FPrevHeight) then
       Include(FDirtyFlags, wdfSize);
-  end;
+  end
+  else
+    WriteLn(Format('DEBUG HandleResize %s: NO SIZE CHANGE (FWidth=%d already equals ConstrainedWidth=%d)',
+      [Name, FWidth, ConstrainedWidth]));
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
@@ -1937,13 +1947,20 @@ end;
 
 procedure TfpgWidgetBase.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
+  WriteLn(Format('DEBUG MoveAndResize %s: ALeft=%d, ATop=%d, AWidth=%d, AHeight=%d (Current: L=%d, T=%d, W=%d, H=%d)',
+    [Name, ALeft, ATop, AWidth, AHeight, FLeft, FTop, FWidth, FHeight]));
   if not (csLoading in ComponentState) then
   begin
     // Runtime: Apply actual position and size via Handle* methods
     if (ALeft <> FLeft) or (ATop <> FTop) then
       HandleMove(ALeft, ATop);
     if (AWidth <> FWidth) or (AHeight <> FHeight) then
+    begin
+      WriteLn(Format('DEBUG MoveAndResize %s: Calling HandleResize', [Name]));
       HandleResize(AWidth, AHeight);
+    end
+    else
+      WriteLn(Format('DEBUG MoveAndResize %s: SKIPPING HandleResize (size unchanged)', [Name]));
   end
   else
   begin
