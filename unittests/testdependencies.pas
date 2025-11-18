@@ -29,7 +29,8 @@ uses
   tcmig_resizeconstraint,
   tcmig_linkhandler,
   tcmig_layoututil,
-  tcmig_grid;
+  tcmig_grid,
+  tcmig_quickstart;
 
 implementation
 

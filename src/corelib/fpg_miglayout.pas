@@ -1083,8 +1083,19 @@ begin
     begin
       // Horizontal flow
       cellX := cellX + spanX;
-      // Check for wrap
-      if (wrap > 0) and (cellX >= wrap) then
+
+      // Check for component-level wrap constraint (manual wrap)
+      // Port of Grid.java line 312-314: if (cc.isWrap())
+      if (cc <> nil) and (cc.WrapGap <> nil) then
+      begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Component "', child.Name, '" has wrap constraint, moving to next row');
+        {$ENDIF}
+        cellX := 0;
+        cellY := cellY + 1;
+      end
+      // Check for layout-level auto-wrap
+      else if (wrap > 0) and (cellX >= wrap) then
       begin
         {$IFDEF MIGDEBUG}
         WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next row');
@@ -1111,8 +1122,19 @@ begin
     begin
       // Vertical flow
       cellY := cellY + spanY;
-      // Check for wrap
-      if (wrap > 0) and (cellY >= wrap) then
+
+      // Check for component-level wrap constraint (manual wrap)
+      // Port of Grid.java line 312-314: if (cc.isWrap())
+      if (cc <> nil) and (cc.WrapGap <> nil) then
+      begin
+        {$IFDEF MIGDEBUG}
+        WriteLn('DEBUG: Component "', child.Name, '" has wrap constraint, moving to next column');
+        {$ENDIF}
+        cellY := 0;
+        cellX := cellX + 1;
+      end
+      // Check for layout-level auto-wrap
+      else if (wrap > 0) and (cellY >= wrap) then
       begin
         {$IFDEF MIGDEBUG}
         WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next column');
