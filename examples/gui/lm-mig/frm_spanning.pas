@@ -47,7 +47,7 @@ begin
   // Row 1: Button spanning 2 columns
   btnSpan2Cols := TfpgButton.Create(Self);
   btnSpan2Cols.Text := 'This button spans 2 columns';
-  btnSpan2Cols.Width := 220;
+  btnSpan2Cols.Width := 80;
   btnSpan2Cols.Height := 30;
   mig.AddLayoutComponent(btnSpan2Cols, TfpgMigCC.Create().SpanX(2));
 
@@ -86,8 +86,8 @@ begin
   // Row spanning: Button spanning 2 rows in first column
   btnSpan2Rows := TfpgButton.Create(Self);
   btnSpan2Rows.Text := 'Spans 2 rows';
-  btnSpan2Rows.Width := 100;
-  btnSpan2Rows.Height := 80;
+  btnSpan2Rows.Width := 80;
+  btnSpan2Rows.Height := 30;
   mig.AddLayoutComponent(btnSpan2Rows, TfpgMigCC.Create().SpanY(2));
 
   // Two buttons next to the spanning button
