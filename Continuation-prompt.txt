@@ -137,8 +137,15 @@ Current Debug Session:
   - Problem: ExpandSizes modifies FlowSizeSpec.FSizes, but layout doesn't use expanded sizes
 
 Next Investigation:
-- ExpandSizes expands the FlowSizeSpec.FSizes array correctly
-- But LayoutInOneDim needs to USE those expanded sizes when positioning components
-- Need to check if LayoutInOneDim is reading from correct FlowSizeSpec or old sizes
-- Java Grid.layoutSerial() may have additional logic for spanning components we haven't ported
+- ✅ ExpandSizes IS being called and modifying FSizes
+- ✅ LayoutInOneDim IS reading the expanded sizes from fss.GetSizes
+- ❌ **CRITICAL BUG FOUND**: ExpandSizes puts expanded size in GAP instead of COLUMNS!
+  - Before CalculateSerial: fss.GetSizes = [6, 80, 6, 0, 92, 0, 6, 80, 6, 0]
+  - Index 3 (column 1): 0 <- should have expanded size
+  - Index 4 (gap): 92 <- WRONG! Gap has the expanded size
+  - Index 5 (column 2): 0 <- should have expanded size
+  - The 92 pixels should be in indices 3 and 5 (columns), not index 4 (gap)
+  - Bug is in ExpandSizes implementation - distributing sizes to wrong indices
+
+NEXT: Fix ExpandSizes to distribute expanded size to COLUMN indices, not GAP indices
 
