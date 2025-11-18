@@ -532,8 +532,13 @@ begin
     // In Java, this checks for DOCK_DIM_CONSTRAINT which has grow priority = 0
     // We check for non-nil spec with grow priority > 0
     // Java uses "i -= 2" to iterate only over column/row indices (odd), not gaps (even)
+    //
+    // IMPORTANT: Original Java code sets only ONE element and returns early.
+    // This works for normal cases, but for SPANNING components, we need ALL
+    // spanned columns to grow. So we set WEIGHT_100 for all non-dock column
+    // indices in the range, not just the first one found.
     i := AIx + ALen - 1;
-    while i >= 0 do
+    while i >= AIx do
     begin
       specIx := i shr 1;
       if specIx < Length(ASpecs) then
@@ -542,8 +547,11 @@ begin
         // If spec is not nil and not a dock (grow priority > 0), use it
         if (spec <> nil) and (spec.GetGrowPriority > 0) then
         begin
+          {$IFDEF MIGDEBUG}
+          WriteLn('DEBUG: ExtractSubArray setting Result[', i - AIx, ']=WEIGHT_100 (i=', i, ', AIx=', AIx, ')');
+          {$ENDIF}
           Result[i - AIx] := WEIGHT_100;
-          Exit;
+          // Don't exit early - continue to set weights for all non-dock columns
         end;
       end;
       Dec(i, 2);  // Step by 2 to only visit column/row indices, not gaps
