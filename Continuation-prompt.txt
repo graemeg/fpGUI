@@ -149,3 +149,30 @@ Next Investigation:
 
 NEXT: Fix ExpandSizes to distribute expanded size to COLUMN indices, not GAP indices
 
+Session Update (2025-11-18 - Continued):
+
+1. ✅ Fixed ExtractSubArray bug (commit 4ba93ab2)
+   - Bug: Loop was processing even indices (gaps) instead of odd indices (columns)
+   - Java code uses "i -= 2" to step only through column/row indices
+   - Changed from `for i downto 0` with `if (i mod 2) <> 0 then Continue`
+   - To: `while i >= 0 do ... Dec(i, 2)` matching Java behavior
+   - This ensures grow weights are assigned to columns, not gaps
+   - Location: fpg_mig_layoututil.pas:534-550 (ExtractSubArray method)
+
+2. ❌ TestCellSpanning still failing after ExtractSubArray fix
+   - Test expects: comp2.Width > comp1.Width (comp2 spans 2 cells)
+   - Spanning IS being detected: SpanX=2 shown in debug output
+   - BuildIndexes IS adding correct column indices (1 and 2)
+   - But component still doesn't get expanded width
+   - Additional issue found: SpanX() without args creates span=30000 instead of spanning remaining columns
+
+3. Next Investigation Needed:
+   - ExtractSubArray fix was necessary but insufficient
+   - Need to trace through ExpandSizes/CalculateSerial to see where expansion fails
+   - Possible issues:
+     a) ResizeConstraints for columns might have wrong grow weights
+     b) CalculateSerial might not be distributing sizes correctly
+     c) Size initialization in ExpandSizes might be wrong
+     d) The conversion from sparse to dense grid might be losing span info
+   - Need to add more targeted debug output to trace size distribution
+
