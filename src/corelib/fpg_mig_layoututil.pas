@@ -531,11 +531,10 @@ begin
     // Line 2409-2416
     // In Java, this checks for DOCK_DIM_CONSTRAINT which has grow priority = 0
     // We check for non-nil spec with grow priority > 0
-    for i := AIx + ALen - 1 downto 0 do
+    // Java uses "i -= 2" to iterate only over column/row indices (odd), not gaps (even)
+    i := AIx + ALen - 1;
+    while i >= 0 do
     begin
-      if (i mod 2) <> 0 then  // Skip gaps
-        Continue;
-
       specIx := i shr 1;
       if specIx < Length(ASpecs) then
       begin
@@ -547,6 +546,7 @@ begin
           Exit;
         end;
       end;
+      Dec(i, 2);  // Step by 2 to only visit column/row indices, not gaps
     end;
 
     Exit;
