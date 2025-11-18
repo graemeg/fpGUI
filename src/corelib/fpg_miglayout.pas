@@ -992,10 +992,17 @@ begin
 
   case FLinkType of
     TYPE_PARALLEL:
+    begin
+      WriteLn(Format('DEBUG group.Layout: Calling LayoutParallel with ASize=%d', [ASize]));
       TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
+    end;
     TYPE_BASELINE:
+    begin
+      WriteLn(Format('DEBUG group.Layout: Calling LayoutBaseline with ASize=%d', [ASize]));
       TfpgMigGrid.LayoutBaseline(Parent, FCompWraps, ADC, AStart, ASize, SIZE_PREF, ASpanCount);
+    end;
   else // TYPE_SERIAL
+    WriteLn(Format('DEBUG group.Layout: Calling LayoutSerial with ASize=%d, FLinkType=%d', [ASize, FLinkType]));
     TfpgMigGrid.LayoutSerial(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
   end;
 end;
@@ -1012,7 +1019,7 @@ var
   child: TfpgWidgetBase;
   cc: TfpgMigCC;
   cw: TfpgMigCompWrap;
-  flowX: Boolean;
+  flowX, cellFlowX: Boolean;
   wrap: Integer;
   cellX, cellY: Integer;
   spanX, spanY: Integer;
@@ -1109,8 +1116,16 @@ begin
     // Get or create cell at this position
     if not FGrid.TryGetValue(cellKey, cell) then
     begin
-      cell := TfpgMigCell.Create(spanX, spanY, flowX);
+      // Check if CC has flowX override (Java: cellFlowX != null ? cellFlowX : lc.isFlowX())
+      // CC.IsFlowX: 0=nil, 1=false, 2=true
+      cellFlowX := flowX;  // Default to LC's flowX
+      if (cc <> nil) and (cc.IsFlowX <> 0) then
+        cellFlowX := (cc.IsFlowX = 2);  // Use CC's flowX if set
+
+      cell := TfpgMigCell.Create(spanX, spanY, cellFlowX);
       FGrid.Add(cellKey, cell);
+      WriteLn(Format('DEBUG: Created cell at (%d,%d) with spanX=%d, spanY=%d, flowX=%d (CC.IsFlowX=%d) for component "%s"',
+        [cellX, cellY, spanX, spanY, Ord(cellFlowX), cc.IsFlowX, child.Name]));
     end;
 
     // Add CompWrap to cell
@@ -2611,9 +2626,18 @@ begin
         group := linkedGroups[j];
         groupSize := rowSize;
         if group.Span > 1 then
+        begin
           groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
+          WriteLn(Format('DEBUG LayoutInOneDim: Spanning group j=%d detected! Span=%d, rowSize=%d, calculated groupSize=%d, bIx2=%d',
+            [j, group.Span, rowSize, groupSize, bIx2]));
+        end
+        else
+          WriteLn(Format('DEBUG LayoutInOneDim: Regular group j=%d, Span=%d, groupSize=%d, bIx2=%d',
+            [j, group.Span, groupSize, bIx2]));
 
+        WriteLn(Format('DEBUG LayoutInOneDim: About to call group.Layout with groupSize=%d', [groupSize]));
         group.Layout(primDC, curPos, groupSize, group.Span);
+        WriteLn('DEBUG LayoutInOneDim: Returned from group.Layout');
       end;
     end;
 
@@ -2876,6 +2900,8 @@ var
   p: PInteger;
   calculatedSizes: TfpgMigIntegerArray;
 begin
+  WriteLn(Format('DEBUG LayoutParallel START: ASize=%d, ACompWraps.Count=%d, IsHor=%d',
+    [ASize, ACompWraps.Count, Ord(AIsHor)]));
   SetLength(sizes, ACompWraps.Count);
 
   for i := 0 to ACompWraps.Count - 1 do
@@ -2912,6 +2938,8 @@ begin
       sz[1][SIZE_MIN] := p[SIZE_MIN];
       sz[1][SIZE_PREF] := p[SIZE_PREF];
       sz[1][SIZE_MAX] := p[SIZE_MAX];
+      WriteLn(Format('DEBUG LayoutParallel: Component %d sizes - MIN=%d, PREF=%d, MAX=%d, AvailableSize=%d',
+        [i, p[SIZE_MIN], p[SIZE_PREF], p[SIZE_MAX], ASize]));
     end;
 
     sz[2][SIZE_MIN] := 0;
@@ -2931,6 +2959,8 @@ begin
     if Length(calculatedSizes) > 0 then sizes[i][0] := calculatedSizes[0];
     if Length(calculatedSizes) > 1 then sizes[i][1] := calculatedSizes[1];
     if Length(calculatedSizes) > 2 then sizes[i][2] := calculatedSizes[2];
+    WriteLn(Format('DEBUG LayoutParallel: Component %d calculated sizes = [%d, %d, %d]',
+      [i, calculatedSizes[0], calculatedSizes[1], calculatedSizes[2]]));
   end;
 
   rowAlign := ADC.GetAlignOrDefault(AIsHor);
@@ -3248,6 +3278,17 @@ begin
             gaps
          );
 
+  WriteLn(Format('DEBUG LayoutSerial: fss.GetSizes has %d elements', [Length(fss.GetSizes)]));
+  if Length(fss.GetSizes) >= 3 then
+  begin
+    WriteLn(Format('DEBUG LayoutSerial: Gap before  (fss[0]) = min:%d, pref:%d, max:%d',
+      [fss.GetSizes[0][SIZE_MIN], fss.GetSizes[0][SIZE_PREF], fss.GetSizes[0][SIZE_MAX]]));
+    WriteLn(Format('DEBUG LayoutSerial: Component   (fss[1]) = min:%d, pref:%d, max:%d',
+      [fss.GetSizes[1][SIZE_MIN], fss.GetSizes[1][SIZE_PREF], fss.GetSizes[1][SIZE_MAX]]));
+    WriteLn(Format('DEBUG LayoutSerial: Gap after   (fss[2]) = min:%d, pref:%d, max:%d',
+      [fss.GetSizes[2][SIZE_MIN], fss.GetSizes[2][SIZE_PREF], fss.GetSizes[2][SIZE_MAX]]));
+  end;
+
   if (ADC <> nil) and ADC.IsFill then
   begin
     SetLength(growW, 1);
@@ -3257,6 +3298,10 @@ begin
     SetLength(growW, 0);
 
   sizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, growW, SIZE_PREF, ASize);
+  WriteLn(Format('DEBUG LayoutSerial: ASize=%d, ACompWraps.Count=%d, calculated sizes length=%d',
+    [ASize, ACompWraps.Count, Length(sizes)]));
+  if Length(sizes) > 0 then
+    WriteLn(Format('DEBUG LayoutSerial: sizes=[%d, %d, ...]', [sizes[0], sizes[1]]));
   SetCompWrapBounds(AParent, sizes, ACompWraps, ADC.GetAlignOrDefault(AIsHor), AStart, ASize, AIsHor, AFromEnd);
 end;
 
