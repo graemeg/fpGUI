@@ -377,7 +377,7 @@ begin
   FSpanX := ASpanX;
   FSpanY := ASpanY;
   FFlowX := AFlowX;
-  FCompWraps := TfpgMigCompWrapList.Create(False);  // Don't own CompWraps
+  FCompWraps := TfpgMigCompWrapList.Create(True);  // Own CompWraps so they're freed
   if ACompWrap <> nil then
     FCompWraps.Add(ACompWrap);
   FHasTagged := False;
