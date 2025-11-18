@@ -297,6 +297,15 @@ type
       @param AIsRows True for rows, False for columns
       @returns Array of group lists, one for each row/column }
     function DivideIntoLinkedGroups(AIsRows: Boolean): TfpgMigLinkedDimGroupListArray;
+
+    { Port of Grid.java convertSpanToSparseGrid() - line 1539
+      Converts a span from dense grid coordinates to sparse grid coordinates
+      @param ACurIx Current index in sparse grid
+      @param ASpan Span in dense grid coordinates
+      @param AIndexes Sorted list of actual sparse grid indexes
+      @returns Converted span in sparse grid coordinates }
+    class function ConvertSpanToSparseGrid(ACurIx, ASpan: Integer;
+                                           const AIndexes: TfpgMigIntegerList): Integer;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -1504,19 +1513,38 @@ begin
     DecodeCellKey(cellKey, cellX, cellY);
 
     // Add row indexes for this cell and its span
-    for spanIdx := 0 to cell.SpanY - 1 do
+    // For very large spans (INF_SIZE), only add the starting row
+    if cell.SpanY >= MAX_GRID then
     begin
       found := False;
       for i := 0 to FRowIndexes.Count - 1 do
       begin
-        if FRowIndexes[i] = (cellY + spanIdx) then
+        if FRowIndexes[i] = cellY then
         begin
           found := True;
           Break;
         end;
       end;
       if not found then
-        FRowIndexes.Add(cellY + spanIdx);
+        FRowIndexes.Add(cellY);
+    end
+    else
+    begin
+      // Normal span: add all spanned row indexes
+      for spanIdx := 0 to cell.SpanY - 1 do
+      begin
+        found := False;
+        for i := 0 to FRowIndexes.Count - 1 do
+        begin
+          if FRowIndexes[i] = (cellY + spanIdx) then
+          begin
+            found := True;
+            Break;
+          end;
+        end;
+        if not found then
+          FRowIndexes.Add(cellY + spanIdx);
+      end;
     end;
 
     // Add column indexes for this cell and its span
@@ -1525,12 +1553,16 @@ begin
       WriteLn('DEBUG: BuildIndexes processing cell at (', cellX, ',', cellY, ') with SpanX=', cell.SpanX);
     {$ENDIF}
 
-    for spanIdx := 0 to cell.SpanX - 1 do
+    // For very large spans (e.g., INF_SIZE/30000 from SpanX()), only add the starting column
+    // The actual span will be calculated later based on how many real columns exist
+    // This prevents creating thousands of unnecessary column indexes
+    if cell.SpanX >= MAX_GRID then
     begin
+      // Just add the starting column for infinite/very large spans
       found := False;
       for i := 0 to FColIndexes.Count - 1 do
       begin
-        if FColIndexes[i] = (cellX + spanIdx) then
+        if FColIndexes[i] = cellX then
         begin
           found := True;
           Break;
@@ -1539,10 +1571,33 @@ begin
       if not found then
       begin
         {$IFDEF MIGDEBUG}
-        if cell.SpanX > 1 then
-          WriteLn('DEBUG:   Adding column index ', cellX + spanIdx);
+        WriteLn('DEBUG:   Adding starting column index ', cellX, ' for large span');
         {$ENDIF}
-        FColIndexes.Add(cellX + spanIdx);
+        FColIndexes.Add(cellX);
+      end;
+    end
+    else
+    begin
+      // Normal span: add all spanned column indexes
+      for spanIdx := 0 to cell.SpanX - 1 do
+      begin
+        found := False;
+        for i := 0 to FColIndexes.Count - 1 do
+        begin
+          if FColIndexes[i] = (cellX + spanIdx) then
+          begin
+            found := True;
+            Break;
+          end;
+        end;
+        if not found then
+        begin
+          {$IFDEF MIGDEBUG}
+          if cell.SpanX > 1 then
+            WriteLn('DEBUG:   Adding column index ', cellX + spanIdx);
+          {$ENDIF}
+          FColIndexes.Add(cellX + spanIdx);
+        end;
       end;
     end;
   end;
@@ -2306,7 +2361,12 @@ begin
       else
         span := cell.SpanX;
 
-      // TODO: Convert span if needed for sparse grid (convertSpanToSparseGrid)
+      // Convert span to sparse grid coordinates (for components spanning multiple actual columns/rows)
+      // Port of Grid.java line 1488: span = convertSpanToSparseGrid(i, span, primIndexes);
+      if AIsRows then
+        span := ConvertSpanToSparseGrid(gIx, span, FRowIndexes)
+      else
+        span := ConvertSpanToSparseGrid(gIx, span, FColIndexes);
 
       isPar := (cell.FlowX = AIsRows);
 
@@ -3649,6 +3709,32 @@ end;
 function TfpgMigLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
 begin
   Result := CalculateGridSize(AContainer, SIZE_MIN);
+end;
+
+{ TfpgMigGrid.ConvertSpanToSparseGrid - Port of Grid.java:1539 }
+class function TfpgMigGrid.ConvertSpanToSparseGrid(ACurIx, ASpan: Integer;
+  const AIndexes: TfpgMigIntegerList): Integer;
+var
+  lastIx, retSpan, i, ix: Integer;
+begin
+  // Port of Grid.java convertSpanToSparseGrid() - lines 1539-1554
+  lastIx := ACurIx + ASpan;
+  retSpan := 1;
+
+  for i := 0 to AIndexes.Count - 1 do
+  begin
+    ix := AIndexes[i];
+
+    if ix <= ACurIx then
+      Continue;  // Haven't arrived at the current index yet
+
+    if ix >= lastIx then
+      Break;  // Past the end of the span
+
+    Inc(retSpan);
+  end;
+
+  Result := retSpan;
 end;
 
 initialization
