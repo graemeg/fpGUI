@@ -218,6 +218,11 @@ var
 begin
   // Port of Grid.java FlowSizeSpec.expandSizes() - lines 2369-2400
 
+  {$IFDEF MIGDEBUG}
+  WriteLn('DEBUG: ExpandSizes called: ATargetSize=', ATargetSize, ', AFromIx=', AFromIx,
+          ', ALen=', ALen, ', ASizeType=', ASizeType, ', AEagerness=', AEagerness);
+  {$ENDIF}
+
   SetLength(resConstr, ALen);
   SetLength(sizesToExpand, ALen);
 

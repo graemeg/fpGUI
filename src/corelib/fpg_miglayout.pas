@@ -875,7 +875,8 @@ begin
   end;
 
   {$IFDEF MIGDEBUG}
-  WriteLn('DEBUG: TransferBounds - calling MoveAndResize() for widget ' + FComp.Name);
+  WriteLn('DEBUG: TransferBounds - calling MoveAndResize() for widget ' + FComp.Name,
+          ' X=', compX, ', Y=', compY, ', W=', compW, ', H=', compH);
   {$ENDIF MIGDEBUG}
   // Transfer calculated bounds to the widget via ILayoutTarget interface
   (FComp as ILayoutTarget).MoveAndResize(compX, compY, compW, compH);
@@ -1082,6 +1083,11 @@ begin
       spanX := Min(cc.CellSpanX, MAX_GRID - cellX);
       // Clamp spanY to remaining grid height
       spanY := Min(cc.CellSpanY, MAX_GRID - cellY);
+      {$IFDEF MIGDEBUG}
+      if (cc.CellSpanX > 1) or (cc.CellSpanY > 1) then
+        WriteLn('DEBUG:   Component "', child.Name, '" has span: cc.CellSpanX=', cc.CellSpanX,
+                ', cc.CellSpanY=', cc.CellSpanY, ', spanX=', spanX, ', spanY=', spanY);
+      {$ENDIF}
     end;
 
     // Encode grid position as integer key
@@ -1514,6 +1520,11 @@ begin
     end;
 
     // Add column indexes for this cell and its span
+    {$IFDEF MIGDEBUG}
+    if cell.SpanX > 1 then
+      WriteLn('DEBUG: BuildIndexes processing cell at (', cellX, ',', cellY, ') with SpanX=', cell.SpanX);
+    {$ENDIF}
+
     for spanIdx := 0 to cell.SpanX - 1 do
     begin
       found := False;
@@ -1526,7 +1537,13 @@ begin
         end;
       end;
       if not found then
+      begin
+        {$IFDEF MIGDEBUG}
+        if cell.SpanX > 1 then
+          WriteLn('DEBUG:   Adding column index ', cellX + spanIdx);
+        {$ENDIF}
         FColIndexes.Add(cellX + spanIdx);
+      end;
     end;
   end;
 
@@ -1690,8 +1707,8 @@ begin
   colSpecs := CalcRowsOrColsSizes(FColGroupLists, FGrowXs, refWidth, True);
   rowSpecs := CalcRowsOrColsSizes(FRowGroupLists, FGrowYs, refHeight, False);
 
-  if FColFlowSpecs <> nil then FColFlowSpecs.Free;
-  if FRowFlowSpecs <> nil then FRowFlowSpecs.Free;
+  FreeAndNil(FColFlowSpecs);
+  FreeAndNil(FRowFlowSpecs);
 
   FColFlowSpecs := colSpecs;
   FRowFlowSpecs := rowSpecs;
@@ -2296,6 +2313,13 @@ begin
       // If serial flow with multiple components or spanning cell, create group for whole cell
       if ((not isPar) and (cell.CompWraps.Count > 1)) or (span > 1) then
       begin
+        {$IFDEF MIGDEBUG}
+        if span > 1 then
+          WriteLn('DEBUG: DivideIntoLinkedGroups creating group with span=', span,
+                  ' at cell(', cellX, ',', cellY, ') for ',
+                  cell.CompWraps.Count, ' components, AIsRows=', AIsRows);
+        {$ENDIF}
+
         if isPar then
           linkType := TfpgMigLinkedDimGroup.TYPE_PARALLEL
         else
@@ -2345,16 +2369,32 @@ begin
   {$IFDEF MIGDEBUG}
   // DEBUG: Show created dimension groups
   if AIsRows then
-    WriteLn('DEBUG: Created ', Length(Result), ' row group lists')
+  begin
+    WriteLn('DEBUG: Created ', Length(Result), ' row group lists');
+    for i := 0 to High(Result) do
+    begin
+      WriteLn('DEBUG:   Row ', i, ' has ', Result[i].Count, ' groups');
+      for ix := 0 to Result[i].Count - 1 do
+      begin
+        Write('DEBUG:     Group ', ix, ' span=', Result[i][ix].Span, ' comps=', Result[i][ix].CompWraps.Count, ': [');
+        for cellKey := 0 to Result[i][ix].CompWraps.Count - 1 do
+        begin
+          Write(Result[i][ix].CompWraps[cellKey].Comp.Name);
+          if cellKey < Result[i][ix].CompWraps.Count - 1 then Write(', ');
+        end;
+        WriteLn(']');
+      end;
+    end;
+  end
   else
   begin
     WriteLn('DEBUG: Created ', Length(Result), ' column group lists');
     for i := 0 to High(Result) do
     begin
-      WriteLn('DEBUG:   Column ', i, ' has ', Result[i].Count, ' groups:');
+      WriteLn('DEBUG:   Column ', i, ' has ', Result[i].Count, ' groups');
       for ix := 0 to Result[i].Count - 1 do
       begin
-        Write('DEBUG:     Group ', ix, ' has ', Result[i][ix].CompWraps.Count, ' components: [');
+        Write('DEBUG:     Group ', ix, ' span=', Result[i][ix].Span, ' comps=', Result[i][ix].CompWraps.Count, ': [');
         for cellKey := 0 to Result[i][ix].CompWraps.Count - 1 do
         begin
           Write(Result[i][ix].CompWraps[cellKey].Comp.Name);
@@ -2677,8 +2717,23 @@ var
   group: TfpgMigLinkedDimGroup;
   sizes: TfpgMigIntegerArray;
   sz: Integer;
+  {$IFDEF MIGDEBUG}
+  startTime, endTime: QWord;
+  {$ENDIF}
 begin
   // Port of Grid.java adjustMinPrefForSpanningComps() - lines 1420-1451
+
+  {$IFDEF MIGDEBUG}
+  startTime := GetTickCount64;
+  WriteLn('DEBUG: AdjustMinPrefForSpanningComps called, AGroupsLists.Length=', Length(AGroupsLists));
+  for r := 0 to High(AGroupsLists) do
+  begin
+    if AGroupsLists[r] <> nil then
+      WriteLn('DEBUG:   AGroupsLists[', r, '] has ', AGroupsLists[r].Count, ' groups')
+    else
+      WriteLn('DEBUG:   AGroupsLists[', r, '] is nil');
+  end;
+  {$ENDIF}
 
   // Since 3.7.3: Iterate from end to start. Will solve some multiple spanning components hard to solve problems
   for r := High(AGroupsLists) downto 0 do
@@ -2689,6 +2744,11 @@ begin
 
     for group in groups do
     begin
+      {$IFDEF MIGDEBUG}
+      if group.Span > 1 then
+        WriteLn('DEBUG:   Found spanning group at row ', r, ' with span=', group.Span);
+      {$ENDIF}
+
       if group.Span = 1 then
         Continue;
 
@@ -2723,6 +2783,11 @@ begin
       end;
     end;
   end;
+
+  {$IFDEF MIGDEBUG}
+  endTime := GetTickCount64;
+  WriteLn('DEBUG: AdjustMinPrefForSpanningComps completed in ', endTime - startTime, 'ms');
+  {$ENDIF}
 end;
 
 class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
