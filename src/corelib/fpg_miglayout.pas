@@ -242,6 +242,17 @@ type
                                  ADefGrow: TfpgMigFloatArray; ARefSize: Integer;
                                  AIsHor: Boolean): TfpgMigFlowSizeSpec;
 
+    { Port of Grid.java adjustMinPrefForSpanningComps() - line 1420
+      Adjusts min/pref sizes for components spanning multiple cells.
+      @param ASpecs The row or column dimension constraints
+      @param ADefPush Default push weights if specs don't have grow
+      @param AFss The FlowSizeSpec to adjust
+      @param AGroupsLists Array of LinkedDimGroup lists for each row/col }
+    procedure AdjustMinPrefForSpanningComps(ASpecs: TfpgMigDimConstraintArray;
+                                           ADefPush: TfpgMigFloatArray;
+                                           AFss: TfpgMigFlowSizeSpec;
+                                           AGroupsLists: array of TfpgMigLinkedDimGroupList);
+
     { Port of Grid.java mergeSizesGapsAndResConstrs() - line 2074
       Merges row/col sizes, gaps, and resize constraints into FlowSizeSpec }
     class function MergeSizesGapsAndResConstrs(AResConstr: array of TfpgMigResizeConstraint;
@@ -331,6 +342,11 @@ implementation
 const
   { Maximum grid size - matches Grid.java MAX_GRID constant }
   MAX_GRID = 30000;
+
+var
+  { Port of Grid.java DOCK_DIM_CONSTRAINT - line 48
+    DimConstraint used for docked components }
+  DOCK_DIM_CONSTRAINT: TfpgMigDimConstraint = nil;
 
 { Implementation of inner classes }
 
@@ -2649,7 +2665,64 @@ begin
   // Merge sizes, gaps, and resize constraints (line 1134)
   Result := MergeSizesGapsAndResConstrs(resConstrs, fillInPushGaps, rowColBoundSizes, gapSizes);
 
-  // TODO: Adjust for spanning components (line 1137)
+  // Spanning components are not handled yet. Check and adjust the multi-row min/pref they enforce (line 1137)
+  AdjustMinPrefForSpanningComps(allDCs, ADefGrow, Result, AGroupsLists);
+end;
+
+procedure TfpgMigGrid.AdjustMinPrefForSpanningComps(ASpecs: TfpgMigDimConstraintArray;
+  ADefPush: TfpgMigFloatArray; AFss: TfpgMigFlowSizeSpec; AGroupsLists: array of TfpgMigLinkedDimGroupList);
+var
+  r, s, sIx, len, j, cSize, rowSize, newRowSize, eagerness: Integer;
+  groups: TfpgMigLinkedDimGroupList;
+  group: TfpgMigLinkedDimGroup;
+  sizes: TfpgMigIntegerArray;
+  sz: Integer;
+begin
+  // Port of Grid.java adjustMinPrefForSpanningComps() - lines 1420-1451
+
+  // Since 3.7.3: Iterate from end to start. Will solve some multiple spanning components hard to solve problems
+  for r := High(AGroupsLists) downto 0 do
+  begin
+    groups := AGroupsLists[r];
+    if groups = nil then
+      Continue;
+
+    for group in groups do
+    begin
+      if group.Span = 1 then
+        Continue;
+
+      sizes := group.GetMinPrefMax;
+      for s := SIZE_MIN to SIZE_PREF do
+      begin
+        cSize := sizes[s];
+        if cSize = NOT_SET then
+          Continue;
+
+        rowSize := 0;
+        sIx := (r shl 1) + 1;
+        len := Min((group.Span shl 1), Length(AFss.GetSizes) - sIx) - 1;
+
+        for j := sIx to sIx + len - 1 do
+        begin
+          sz := AFss.GetSizes[j][s];
+          if sz <> NOT_SET then
+            rowSize := rowSize + sz;
+        end;
+
+        if (rowSize < cSize) and (len > 0) then
+        begin
+          eagerness := 0;
+          newRowSize := 0;
+          while (eagerness < 4) and (newRowSize < cSize) do
+          begin
+            newRowSize := AFss.ExpandSizes(ASpecs, ADefPush, cSize, sIx, len, s, eagerness);
+            Inc(eagerness);
+          end;
+        end;
+      end;
+    end;
+  end;
 end;
 
 class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
@@ -3499,5 +3572,14 @@ function TfpgMigLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): Tfpg
 begin
   Result := CalculateGridSize(AContainer, SIZE_MIN);
 end;
+
+initialization
+  // Port of Grid.java static initializer - line 50
+  // Create DOCK_DIM_CONSTRAINT with grow priority of 0
+  DOCK_DIM_CONSTRAINT := TfpgMigDimConstraint.Create;
+  DOCK_DIM_CONSTRAINT.SetGrowPriority(0);
+
+finalization
+  FreeAndNil(DOCK_DIM_CONSTRAINT);
 
 end.

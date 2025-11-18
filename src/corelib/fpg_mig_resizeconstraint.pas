@@ -7,6 +7,11 @@ interface
 uses
   Classes, SysUtils;
 
+const
+  { Port of ResizeConstraint.java WEIGHT_100 constant - line 43
+    Default weight value used throughout MigLayout }
+  WEIGHT_100 = 100.0;
+
 type
   TfpgMigResizeConstraint = class
   public

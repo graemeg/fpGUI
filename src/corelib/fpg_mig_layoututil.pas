@@ -26,6 +26,8 @@ uses
   fpg_mig_unitvalue,
   fpg_mig_boundsize,
   fpg_mig_resizeconstraint,
+  fpg_mig_dimconstraint,
+  fpg_mig_ac,
   fpg_mig_lc;
 
 const
@@ -69,6 +71,20 @@ type
     destructor Destroy; override;
     function CalculateSerial(AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
     function GetSizes: TfpgMigSizeArrayArray;
+
+    { Port of Grid.java FlowSizeSpec.expandSizes() - line 2369
+      Expands sizes to meet a target size for spanning components.
+      @param ASpecs The specs for the columns or rows
+      @param ADefGrow The default grow weight if the specs don't have anyone that will grow
+      @param ATargetSize The size to try to meet
+      @param AFromIx Starting index in sizes array
+      @param ALen Number of elements to expand
+      @param ASizeType SIZE_MIN or SIZE_PREF
+      @param AEagerness How eager to expand (0-3)
+      @returns The new total size }
+    function ExpandSizes(ASpecs: TfpgMigDimConstraintArray; ADefGrow: TfpgMigFloatArray;
+                        ATargetSize, AFromIx, ALen, ASizeType, AEagerness: Integer): Integer;
+
     property ResConstsInclGaps: TfpgMigResizeConstraintArray read FResConstsInclGaps;
   end;
 
@@ -101,7 +117,9 @@ type
 
     { Safe array index accessor - returns nil if index out of bounds }
     class function GetIndexSafe(const AArr: TfpgMigResizeConstraintArray;
-                               AIndex: Integer): TfpgMigResizeConstraint;
+                               AIndex: Integer): TfpgMigResizeConstraint; overload;
+    class function GetIndexSafe(const AArr: TfpgMigDimConstraintArray;
+                               AIndex: Integer): TfpgMigDimConstraint; overload;
 
     { Returns size value from size array safely, handling NOT_SET }
     class function GetSizeSafe(const ASizes: TfpgMigSizeArray;
@@ -133,6 +151,12 @@ type
 
     { Equality check supporting nil values }
     class function ObjectEquals(AObj1, AObj2: TObject): Boolean;
+
+    { Port of Grid.java extractSubArray() - line 2403
+      Extracts a subarray or creates default grow weights for spanning }
+    class function ExtractSubArray(ASpecs: TfpgMigDimConstraintArray;
+                                   AArr: TfpgMigFloatArray;
+                                   AIx, ALen: Integer): TfpgMigFloatArray;
   end;
 
 implementation
@@ -177,6 +201,78 @@ end;
 function TfpgMigFlowSizeSpec.CalculateSerial(AStartSizeType, ABounds: Integer): TfpgMigIntegerArray;
 begin
   Result := TfpgMigLayoutUtil.CalculateSerial(FSizes, FResConstsInclGaps, nil, AStartSizeType, ABounds);
+end;
+
+function TfpgMigFlowSizeSpec.ExpandSizes(ASpecs: TfpgMigDimConstraintArray;
+  ADefGrow: TfpgMigFloatArray; ATargetSize, AFromIx, ALen, ASizeType, AEagerness: Integer): Integer;
+var
+  resConstr: TfpgMigResizeConstraintArray;
+  sizesToExpand: TfpgMigSizeArrayArray;
+  i, cIx: Integer;
+  minPrefMax: TfpgMigSizeArray;
+  spec: TfpgMigDimConstraint;
+  sz: TfpgMigBoundSize;
+  growW: TfpgMigFloatArray;
+  newSizes: TfpgMigIntegerArray;
+  s, newSize: Integer;
+begin
+  // Port of Grid.java FlowSizeSpec.expandSizes() - lines 2369-2400
+
+  SetLength(resConstr, ALen);
+  SetLength(sizesToExpand, ALen);
+
+  for i := 0 to ALen - 1 do
+  begin
+    minPrefMax := FSizes[i + AFromIx];
+    // Initialize the size array for this element
+    sizesToExpand[i][SIZE_MIN] := minPrefMax[ASizeType];
+    sizesToExpand[i][SIZE_PREF] := minPrefMax[SIZE_PREF];
+    sizesToExpand[i][SIZE_MAX] := minPrefMax[SIZE_MAX];
+
+    // Line 2377: Check if we should skip this element based on eagerness
+    // (i % 2 == 0) means only odd indexes, which is only rows/col indexes and not gaps
+    if (AEagerness <= 1) and ((i mod 2) = 0) then
+    begin
+      cIx := (i + AFromIx - 1) shr 1;
+      spec := TfpgMigLayoutUtil.GetIndexSafe(ASpecs, cIx) as TfpgMigDimConstraint;
+
+      if spec <> nil then
+      begin
+        sz := spec.GetSize;
+        if sz <> nil then
+        begin
+          // Skip if we're expanding min and it has an explicit min (not MIN_SIZE)
+          if (ASizeType = SIZE_MIN) and (sz.Min <> nil) and (sz.Min.UnitType <> utMinSize) then
+            Continue;
+          // Skip if we're expanding pref and it has an explicit pref (not PREF_SIZE)
+          if (ASizeType = SIZE_PREF) and (sz.Preferred <> nil) and (sz.Preferred.UnitType <> utPrefSize) then
+            Continue;
+        end;
+      end;
+    end;
+
+    resConstr[i] := TfpgMigLayoutUtil.GetIndexSafe(FResConstsInclGaps, i + AFromIx);
+  end;
+
+  // Line 2390: Determine if we should use default grow weights
+  if (AEagerness = 1) or (AEagerness = 3) then
+    growW := TfpgMigLayoutUtil.ExtractSubArray(ASpecs, ADefGrow, AFromIx, ALen)
+  else
+    growW := nil;
+
+  // Line 2391: Calculate new sizes
+  newSizes := TfpgMigLayoutUtil.CalculateSerial(sizesToExpand, resConstr, growW, SIZE_PREF, ATargetSize);
+  newSize := 0;
+
+  // Line 2394-2398: Apply new sizes and calculate total
+  for i := 0 to ALen - 1 do
+  begin
+    s := newSizes[i];
+    FSizes[i + AFromIx][ASizeType] := s;
+    newSize := newSize + s;
+  end;
+
+  Result := newSize;
 end;
 
 { TfpgMigLayoutUtil }
@@ -402,7 +498,59 @@ begin
     Result := nil;
 end;
 
+class function TfpgMigLayoutUtil.GetIndexSafe(const AArr: TfpgMigDimConstraintArray;
+  AIndex: Integer): TfpgMigDimConstraint;
+begin
+  Result := nil;
+  if (AIndex >= 0) and (AIndex < Length(AArr)) then
+    Result := AArr[AIndex]
+  else if Length(AArr) > 0 then
+    Result := AArr[High(AArr)]  // Use last element for indices beyond array
+  else
+    Result := nil;
+end;
 
+class function TfpgMigLayoutUtil.ExtractSubArray(ASpecs: TfpgMigDimConstraintArray;
+  AArr: TfpgMigFloatArray; AIx, ALen: Integer): TfpgMigFloatArray;
+var
+  i, specIx: Integer;
+  spec: TfpgMigDimConstraint;
+begin
+  // Port of Grid.java extractSubArray() - lines 2403-2422
+
+  if (Length(AArr) = 0) or (Length(AArr) < AIx + ALen) then
+  begin
+    SetLength(Result, ALen);
+
+    // Handle a group where some rows (first one/few and/or last one/few) are docks
+    // Line 2409-2416
+    // In Java, this checks for DOCK_DIM_CONSTRAINT which has grow priority = 0
+    // We check for non-nil spec with grow priority > 0
+    for i := AIx + ALen - 1 downto 0 do
+    begin
+      if (i mod 2) <> 0 then  // Skip gaps
+        Continue;
+
+      specIx := i shr 1;
+      if specIx < Length(ASpecs) then
+      begin
+        spec := ASpecs[specIx];
+        // If spec is not nil and not a dock (grow priority > 0), use it
+        if (spec <> nil) and (spec.GetGrowPriority > 0) then
+        begin
+          Result[i - AIx] := WEIGHT_100;
+          Exit;
+        end;
+      end;
+    end;
+
+    Exit;
+  end;
+
+  // Line 2419-2421: Copy subarray
+  SetLength(Result, ALen);
+  Move(AArr[AIx], Result[0], ALen * SizeOf(Single));
+end;
 
 class function TfpgMigLayoutUtil.GetSizeSafe(const ASizes: TfpgMigSizeArray;
   ASizeType: Integer): Integer;
