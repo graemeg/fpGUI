@@ -328,6 +328,10 @@ type
 
 implementation
 
+const
+  { Maximum grid size - matches Grid.java MAX_GRID constant }
+  MAX_GRID = 30000;
+
 { Implementation of inner classes }
 
 { TfpgMigCell }
@@ -1053,12 +1057,15 @@ begin
     // For now, use simple flow placement
 
     // Get span from CC if available
+    // Port of Grid.java lines 252-253: Clamp spans to prevent going beyond MAX_GRID
     spanX := 1;
     spanY := 1;
     if cc <> nil then
     begin
-      spanX := cc.CellSpanX;
-      spanY := cc.CellSpanY;
+      // Clamp spanX to remaining grid width
+      spanX := Min(cc.CellSpanX, MAX_GRID - cellX);
+      // Clamp spanY to remaining grid height
+      spanY := Min(cc.CellSpanY, MAX_GRID - cellY);
     end;
 
     // Encode grid position as integer key

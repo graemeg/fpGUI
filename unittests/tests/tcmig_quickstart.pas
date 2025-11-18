@@ -33,6 +33,9 @@ type
 
     { Test auto wrap - using "wrap 3" in layout constraints }
     procedure TestAutoWrap_3Columns;
+
+    { Test cell spanning - comp2 spans 2 cells, comp4 spans whole row }
+    procedure TestCellSpanning;
   end;
 
 implementation
@@ -172,6 +175,60 @@ begin
     FComp4.Top > FComp1.Top);
   AssertEquals('comp4 should align with comp1 horizontally',
     FComp1.Left, FComp4.Left);
+end;
+
+procedure TTestMigQuickStart.TestCellSpanning;
+begin
+  // Quick Start Guide: Merging and Splitting Cells
+  // panel.add(comp1)
+  // panel.add(comp2, "span 2")  // Component spans two cells
+  // panel.add(comp3, "wrap")    // Wrap to next row
+  // panel.add(comp4, "span")    // Span whole row
+  //
+  // Expected grid:
+  // +-------------------------------+
+  // | comp1 | comp2 (span 2) | comp3|
+  // +-------------------------------+
+  // |       comp4 (span row)        |
+  // +-------------------------------+
+
+  // Create layout manager
+  FLayout := TfpgMigLayoutManager.Create;
+  FForm.LayoutManager := FLayout;
+
+  // Add components with spanning constraints
+  FLayout.AddLayoutComponent(FComp1, TfpgMigCC.Create);
+  FLayout.AddLayoutComponent(FComp2, TfpgMigCC.Create.SpanX(2));  // Span 2 columns
+  FLayout.AddLayoutComponent(FComp3, TfpgMigCC.Create.Wrap);      // Wrap after this
+  FLayout.AddLayoutComponent(FComp4, TfpgMigCC.Create.SpanX);     // Span whole row
+
+  // Perform layout
+  FForm.Realign;
+
+  // Verify Row 1: comp1, comp2 (spanning 2), comp3
+  AssertEquals('comp1 and comp2 should be on same row',
+    FComp1.Top, FComp2.Top);
+  AssertEquals('comp1 and comp3 should be on same row',
+    FComp1.Top, FComp3.Top);
+
+  AssertTrue('comp1 should be left of comp2',
+    FComp1.Left < FComp2.Left);
+  AssertTrue('comp2 should be left of comp3',
+    FComp2.Left < FComp3.Left);
+
+  // comp2 should span 2 cells, so it should be wider than comp1
+  AssertTrue('comp2 should be wider than comp1 (spans 2 cells)',
+    FComp2.Width > FComp1.Width);
+
+  // Verify Row 2: comp4 (spanning whole row)
+  AssertTrue('comp4 should be on next row (below comp1)',
+    FComp4.Top > FComp1.Top);
+  AssertEquals('comp4 should align with comp1 horizontally',
+    FComp1.Left, FComp4.Left);
+
+  // comp4 should span the whole row width
+  AssertTrue('comp4 should span full row width',
+    FComp4.Width >= (FComp3.Left + FComp3.Width - FComp1.Left));
 end;
 
 initialization

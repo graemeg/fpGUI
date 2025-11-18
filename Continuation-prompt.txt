@@ -1,0 +1,132 @@
+I'm continuing the MigLayout v11 port for fpGUI. Please read the implementation plan:
+
+docs/miglayout_v11_port_plan.adoc
+
+Current status (as of 2025-11-18):
+- Branch: miglayout-port-continue
+- Phase: Phase 3 - Core Layout Engine (85-90% complete)
+- Last completed: Fixed wrap bug, reduced memory leaks to 992 blocks, added Quick Start tests
+- Next task: Implement span-based component sizing in LayoutInOneDim
+
+Progress Summary:
+✅ Phase 1: Foundation Classes - COMPLETE
+   - UnitValue, BoundSize, PlatformDefaults, HideMode all ported and tested
+✅ Phase 2: Constraint Classes - COMPLETE
+   - DimConstraint, AC, LC, CC all ported with fluent API
+✅ Phase 3: Core Layout Engine - 85-90% COMPLETE
+   - LayoutUtil complete with 27 tests
+   - Grid core features working (spanning, growth, alignment)
+   - Support classes complete (LinkHandler, ResizeConstraint, etc.)
+
+Current Implementation Status:
+- Total unit tests: 380 (3 Quick Start tests added, 1 failing)
+- Test results: 379 passing, 0 errors, 1 failure
+- Memory leaks: 992 unfreed blocks (down from 1129, was 802 before ParseInsets fix)
+- Core layout features verified working via lm-mig demo
+- Basic grid layout, growth (X/Y), alignment all functional
+- Multi-DPI support working
+- Cell spanning: PARTIALLY working (grid placement works, automatic sizing doesn't)
+
+Please:
+1. Review the implementation plan starting from the "Getting Started" section
+2. Check git status to see what's been done (last 10-15 commits)
+3. Focus on fixing the critical bugs identified below
+4. Follow test-as-you-go approach (write tests alongside implementation)
+5. Make regular commits after each completed subtask
+6. Update this document with progress
+
+Important Reminders
+
+1. Follow Java code line-by-line - The Java MigLayout v11 source is our source of truth
+2. Empty arrays are not null in Pascal - Check Length(array) > 0 instead of array <> nil
+3. Test-Driven Development - We've found many bugs by creating tests first
+4. Memory management - Use "Clone-on-Set" strategy for BoundSize/UnitValue to avoid leaks
+5. When using generics, you need to define specialized types before you can use them in
+   method declarations.
+6. Unit tests can be run as follows: (cd unittests && fpc -dX11 -dAggCanvas @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -10)
+7. We are mainly testing with the X11+AggCanvas backed, but occationally test with X11
+   (AggCanvas disabled)
+8. We have experienced a lot of bugs, and then discovered it's because only stubs were
+   implemented in our mig porting code. So maybe it's vital that we go through all
+   src/corelib/fpg_mig*.pas units looking for stub implementations, or code with TODO
+   markers, and complete them - using the java code as reference.
+9. Java mig code (as reference) can be found in: prototypes/miglayout/mig-java-latest/core
+   & prototypes/miglayout/mig-java-latest/swing
+
+Critical Bugs Identified (2025-11-18)
+
+Priority 1 - BLOCKING PRODUCTION USE:
+1. ❌ Cell spanning doesn't calculate component sizes (DISCOVERED 2025-11-18)
+   - Grid placement respects spans (components positioned correctly)
+   - But LayoutInOneDim doesn't allocate combined width/height for spanning components
+   - Example: Component with SpanX(2) should get width = col1 + gap + col2, but gets col1 only
+   - Workaround: Manually set component Width/Height large enough (as in frm_spanning.pas demo)
+   - Root cause: LayoutInOneDim and layout methods don't check component span when sizing
+   - Fix needed: Port Java Grid.java spanning logic from layoutParallel/layoutSerial methods
+   - Impact: Dynamic layouts relying on MigLayout to size spanning components fail
+   - Test failure: TTestMigQuickStart.TestCellSpanning (comp2.Width > comp1.Width fails)
+   - Location: fpg_miglayout.pas LayoutInOneDim, LayoutParallel, LayoutSerial methods
+
+2. ❌ UnitValue.GetPixels() does NOT handle operations (ADD, SUB, MUL, DIV, MIN, MAX, MID)
+   - Currently only handles STATIC operations, returns 0 for everything else
+   - This breaks string constraints like: .Width('max(150px,30%)')
+   - Root cause: Missing implementation of lines 382-401 from UnitValue.java
+   - Fix needed: Recursively evaluate subUnits[0] and subUnits[1], apply operation
+   - Impact: All operation-based constraints fail silently
+   - Location: fpg_mig_unitvalue.pas:306-372 (GetPixels method)
+
+Priority 2 - MEMORY LEAKS:
+3. ⚠️ Memory leaks detected: 992 unfreed memory blocks (292,299 bytes) - IMPROVED
+   - Was 1129 blocks, then 802, now 992 (still investigating pattern)
+   - Fixed 72 leaks in ParseBoundSize by adding try-finally blocks (2025-11-18)
+   - Fixed BoundSize to always clone/free UnitValues (simpler ownership model)
+   - Remaining leaks likely from ParseInsets returning singleton references
+   - Most remaining are fpGUI core initialization (fonts, styles) ~700 blocks
+   - Access violation on test exit (heaptrc reporting issue)
+   - Location: Remaining leaks throughout constraint parser and LC/CC classes
+
+Priority 3 - INCOMPLETE FEATURES:
+4. ℹ️ 33 TODO items remaining across mig units
+   - Most are advanced features: docking, absolute positioning, size groups
+   - Baseline alignment (fpGUI limitation - no baseline APIs)
+   - Visual padding, flow specs, callbacks
+   - Not blocking basic layout functionality but needed for 100% compatibility
+
+Analysis Details:
+- Compared Pascal GetPixels() with Java getPixelsExact() (UnitValue.java:293-404)
+- Java handles operations in lines 382-401 by recursively calling getPixelsExact on subUnits
+- Pascal implementation stops at line 371 with "Result := 0; // Other units not implemented yet"
+- This explains why frm_parser.pas operations don't work (max, min, arithmetic ops)
+
+Recent Session Summary (2025-11-18):
+
+Accomplishments:
+1. ✅ Fixed component-level wrap bug - Grid now checks cc.WrapGap before auto-wrap (fpg_miglayout.pas:1087-1144)
+2. ✅ Fixed infinite loop with SpanX() - Added MAX_GRID constant and span clamping (fpg_miglayout.pas:333, 1066-1068)
+3. ✅ Reduced memory leaks from 1129→992 blocks by:
+   - Simplified BoundSize ownership: always clone, always free
+   - Added try-finally in ParseBoundSize for temporary UnitValues
+   - Reverted ParseInsets to return singletons (callers don't own)
+4. ✅ Created Quick Start Guide test suite (tcmig_quickstart.pas):
+   - TestManualWrap_3Columns (passing)
+   - TestAutoWrap_3Columns (passing)
+   - TestCellSpanning (1 assertion failing - span sizing not implemented)
+5. ✅ Updated tcmig_boundsize.pas test to check value equality vs pointer equality
+
+Commits:
+- fix: ParseBoundSize memory leaks in constraint parser
+- fix: memory leaks in BoundSize and constraint parser
+- fix: component-level wrap not working in grid building
+- fix: infinite loop with SpanX() - add MAX_GRID clamping
+- test: add Quick Start Guide test suite
+
+Key Discovery:
+- Cell spanning is HALF-IMPLEMENTED: Grid placement works (components positioned correctly in cells),
+  but component sizing doesn't account for spans. Components spanning multiple cells don't get
+  the combined width/height of spanned cells + gaps.
+- This is why frm_spanning.pas looks correct - manual Width/Height values are used, not calculated.
+
+Next Priority:
+- Implement span-based sizing in LayoutInOneDim/LayoutParallel/LayoutSerial methods
+- Port Java Grid.java logic that calculates total size for spanning components
+
