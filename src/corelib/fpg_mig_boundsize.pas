@@ -28,7 +28,6 @@ type
     FPref: TfpgMigUnitValue;
     FMax: TfpgMigUnitValue;
     FGapPush: Boolean;
-    FOwnsValues: Boolean;  // True if we cloned the values, False if storing references
   public
     { Constructor using same value for min/preferred/max }
     constructor Create(AMinMaxPref: TfpgMigUnitValue); overload;
@@ -93,49 +92,32 @@ constructor TfpgMigBoundSize.Create(AMin, APref, AMax: TfpgMigUnitValue; AGapPus
 begin
   inherited Create;
 
-  // Special case: if all three values are the same instance (e.g. ZERO_PIXEL),
-  // don't clone - just store references for efficiency
-  if (AMin = APref) and (APref = AMax) then
-  begin
-    FMin := AMin;
-    FPref := APref;
-    FMax := AMax;
-    FOwnsValues := False;  // Storing references, don't free
-  end
+  // Always clone UnitValues to take ownership
+  // This simplifies memory management - caller frees their temporaries, we free our clones
+  if AMin <> nil then
+    FMin := AMin.Clone
   else
-  begin
-    // Different values - clone to take ownership and avoid finalization issues
-    if AMin <> nil then
-      FMin := AMin.Clone
-    else
-      FMin := nil;
+    FMin := nil;
 
-    if APref <> nil then
-      FPref := APref.Clone
-    else
-      FPref := nil;
+  if APref <> nil then
+    FPref := APref.Clone
+  else
+    FPref := nil;
 
-    if AMax <> nil then
-      FMax := AMax.Clone
-    else
-      FMax := nil;
-
-    FOwnsValues := True;  // We cloned, we own them, we free them
-  end;
+  if AMax <> nil then
+    FMax := AMax.Clone
+  else
+    FMax := nil;
 
   FGapPush := AGapPush;
 end;
 
 destructor TfpgMigBoundSize.Destroy;
 begin
-  // Only free UnitValues if we own them (i.e., we cloned them)
-  // If we're storing references to global constants, don't free
-  if FOwnsValues then
-  begin
-    FreeAndNil(FMin);
-    FreeAndNil(FPref);
-    FreeAndNil(FMax);
-  end;
+  // Always free UnitValues since we always clone in Create
+  FreeAndNil(FMin);
+  FreeAndNil(FPref);
+  FreeAndNil(FMax);
 
   inherited Destroy;
 end;

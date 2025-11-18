@@ -420,7 +420,7 @@ var
   s, s0: string;
   push, hasEM: Boolean;
   sizes: TStringArray;
-  uv, uvMax: TfpgMigUnitValue;
+  uv, uvMax, uv1, uv2, uv3: TfpgMigUnitValue;
   len: Integer;
 begin
   // Handle empty/null
@@ -457,39 +457,55 @@ begin
           s0 := Copy(s0, 1, Length(s0) - 1);
 
         uv := ParseUnitValue(s0, nil, AIsHor);
-
-        // If gap or has !, use value for min
-        // Always use value for pref
-        // If has !, use value for max too
-        if AIsGap or hasEM then
-        begin
-          if hasEM then
-            uvMax := uv
+        try
+          // If gap or has !, use value for min
+          // Always use value for pref
+          // If has !, use value for max too
+          if AIsGap or hasEM then
+          begin
+            if hasEM then
+              uvMax := uv
+            else
+              uvMax := nil;
+            Result := TfpgMigBoundSize.Create(uv, uv, uvMax, push);
+          end
           else
-            uvMax := nil;
-          Result := TfpgMigBoundSize.Create(uv, uv, uvMax, push);
-        end
-        else
-          Result := TfpgMigBoundSize.Create(nil, uv, nil, push);
+            Result := TfpgMigBoundSize.Create(nil, uv, nil, push);
+        finally
+          // BoundSize clones the UnitValues, so free our temporary
+          uv.Free;
+        end;
       end;
 
     2:
-      // min:pref
-      Result := TfpgMigBoundSize.Create(
-        ParseUnitValue(s0, nil, AIsHor),
-        ParseUnitValue(sizes[1], nil, AIsHor),
-        nil,
-        push
-      );
+      begin
+        // min:pref
+        uv1 := ParseUnitValue(s0, nil, AIsHor);
+        uv2 := ParseUnitValue(sizes[1], nil, AIsHor);
+        try
+          Result := TfpgMigBoundSize.Create(uv1, uv2, nil, push);
+        finally
+          // BoundSize clones the UnitValues, so free our temporaries
+          uv1.Free;
+          uv2.Free;
+        end;
+      end;
 
     3:
-      // min:pref:max
-      Result := TfpgMigBoundSize.Create(
-        ParseUnitValue(s0, nil, AIsHor),
-        ParseUnitValue(sizes[1], nil, AIsHor),
-        ParseUnitValue(sizes[2], nil, AIsHor),
-        push
-      );
+      begin
+        // min:pref:max
+        uv1 := ParseUnitValue(s0, nil, AIsHor);
+        uv2 := ParseUnitValue(sizes[1], nil, AIsHor);
+        uv3 := ParseUnitValue(sizes[2], nil, AIsHor);
+        try
+          Result := TfpgMigBoundSize.Create(uv1, uv2, uv3, push);
+        finally
+          // BoundSize clones the UnitValues, so free our temporaries
+          uv1.Free;
+          uv2.Free;
+          uv3.Free;
+        end;
+      end;
   else
     raise Exception.Create('Min:Preferred:Max size section must contain 0, 1 or 2 colons. ''' + AStr + '''');
   end;

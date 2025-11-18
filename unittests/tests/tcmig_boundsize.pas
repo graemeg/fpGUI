@@ -301,8 +301,15 @@ begin
   zeroPixel := BoundSizeZeroPixel;
   AssertNotNull('ZERO_PIXEL should not be nil', zeroPixel);
   AssertNotNull('ZERO_PIXEL should have min', zeroPixel.Min);
-  AssertSame('ZERO_PIXEL min/pref/max should be same', zeroPixel.Min, zeroPixel.Preferred);
-  AssertSame('ZERO_PIXEL pref/max should be same', zeroPixel.Preferred, zeroPixel.Max);
+  AssertNotNull('ZERO_PIXEL should have pref', zeroPixel.Preferred);
+  AssertNotNull('ZERO_PIXEL should have max', zeroPixel.Max);
+  // Check values are equal (all zero pixels), not pointer equality
+  AssertEquals('ZERO_PIXEL min should be 0', 0.0, zeroPixel.Min.Value);
+  AssertEquals('ZERO_PIXEL pref should be 0', 0.0, zeroPixel.Preferred.Value);
+  AssertEquals('ZERO_PIXEL max should be 0', 0.0, zeroPixel.Max.Value);
+  AssertEquals('ZERO_PIXEL min should be pixel', Ord(utPixel), Ord(zeroPixel.Min.UnitType));
+  AssertEquals('ZERO_PIXEL pref should be pixel', Ord(utPixel), Ord(zeroPixel.Preferred.UnitType));
+  AssertEquals('ZERO_PIXEL max should be pixel', Ord(utPixel), Ord(zeroPixel.Max.UnitType));
 end;
 
 procedure TTestMigBoundSize.TestPropertyAccess;
