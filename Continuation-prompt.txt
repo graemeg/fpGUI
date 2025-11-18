@@ -201,6 +201,34 @@ Session Update (2025-11-18 - Continued Further):
    - ✅ ExtractSubArray iteration bug fixed (commit 4ba93ab2)
    - ✅ ExtractSubArray grow weight distribution fixed (commit ef3247bb)
    - ✅ Spanning columns now get equal sizes before final shrink
-   - ❌ SpanX() infinity handling still broken
-   - Next: Fix infinite span calculation to use actual column count
+   - ✅ Infinite span performance fixed (commit 0c4410ce) - 1500x faster!
+   - ❌ TestCellSpanning still failing - comp2 has span=2 but same width as comp1
+   - Next: Investigate why spanning size distribution not working
+
+Session Update (2025-11-18 - Final):
+
+7. ✅ Fixed infinite span performance issue (commit 0c4410ce)
+   - **Root cause**: BuildIndexes iterated 30,000 times for infinite spans
+   - **Problem**: SpanX() sets span to INF_SIZE→30000, creating 30K columns
+   - **Fix 1**: BuildIndexes checks if span >= MAX_GRID, only adds starting column
+   - **Fix 2**: Implemented ConvertSpanToSparseGrid() (Grid.java:1539)
+   - **Fix 3**: DivideIntoLinkedGroups uses ConvertSpanToSparseGrid for correct spans
+   - **Performance**: TestCellSpanning 15s → 0.01s (1500x faster!)
+   - **Verification**: Column indexes now [0,1,2,3] not [0...29999]
+   - Location: fpg_miglayout.pas:1507-1574 (BuildIndexes), 3710-3733 (ConvertSpanToSparseGrid)
+
+8. ❌ TestCellSpanning STILL failing - different issue
+   - **Current state**: Spans calculated correctly (comp2 span=2, comp4 span=3)
+   - **Problem**: All components have W=80 despite different spans
+   - **Expected**: comp2 should be wider than comp1 (spans 2 columns vs 1)
+   - **Debug output**: TransferBounds shows all widths=80
+   - **Investigation needed**: Why doesn't spanning group size expansion work?
+   - Possible causes:
+     a) LayoutParallel not using spanning group sizes correctly
+     b) Column sizes not accounting for spans during SetCompWrapBounds
+     c) Spanning group min/pref/max calculations incorrect
+     d) Size distribution in AdjustMinPrefForSpanningComps not applied
+
+NEXT: Debug why comp2 (span=2) gets same width as comp1 (span=1) despite
+correct span calculation and ExtractSubArray fixes.
 
