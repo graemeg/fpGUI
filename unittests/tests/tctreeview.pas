@@ -29,9 +29,6 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 implementation
 
 uses
@@ -183,6 +180,9 @@ begin
   AssertTrue('Failed on 14', FTree.RootNode.FindSubNode('n2.1.1', False) = nil);
   AssertTrue('Failed on 15', FTree.RootNode.FindSubNode('n2.1.1', True) = r);
 end;
+
+initialization
+  RegisterTests;
 
 end.
 

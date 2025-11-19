@@ -9,6 +9,7 @@ unit testdependencies;
 interface
 
 uses
+  csvparser_test,
   tctreeview,
   tcfpgbase,
   tcfontmanager,
@@ -34,15 +35,5 @@ uses
 
 implementation
 
-initialization
-//  tctreeview.RegisterTests;
-//  tcfpgbase.RegisterTests;
-//  tcfontmanager.RegisterTests;
-//  tcfontcacheremoval.RegisterTests;
-//  tcfontdefinition.RegisterTests;
-//  tclayoutmanager.RegisterTests;
-//  tcflowlayout.RegisterTests;
-//  tcborderlayout.RegisterTests;
-//  tcmiglayout.RegisterTests;
-  // tcmig_unitvalue registers automatically via testregistry
+
 end.
