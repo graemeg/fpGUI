@@ -327,12 +327,14 @@ type
     FRowConstr: TfpgMigAC;
     FColConstr: TfpgMigAC;
     FIsLayingOut: Boolean;  // Prevents recursive layout calls
+    FDebug: Boolean;
   protected
     // TfpgBaseLayoutManager overrides
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
     function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+    procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase); override;
 
     // Helper to calculate sizes from grid
     function CalculateGridSize(AContainer: TfpgWidgetBase; ASizeType: Integer): TfpgSize;
@@ -344,6 +346,7 @@ type
     property LC: TfpgMigLC read FLC write FLC;
     property RowConstraints: TfpgMigAC read FRowConstr write FRowConstr;
     property ColumnConstraints: TfpgMigAC read FColConstr write FColConstr;
+    property IsDebug: Boolean read FDebug write FDebug;
   end;
 
 implementation
@@ -3780,6 +3783,23 @@ end;
 function TfpgMigLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
 begin
   Result := CalculateGridSize(AContainer, SIZE_MIN);
+end;
+
+procedure TfpgMigLayoutManager.PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase);
+begin
+  if not FDebug then
+    Exit;
+
+  // Proof-of-concept: Draw a red border and text
+  if Assigned(ACanvas) then
+  begin
+    ACanvas.Color := clRed;
+    ACanvas.SetLineStyle(2, lsDash);
+    ACanvas.DrawRectangle(0, 0, AWidget.ActualWidth, AWidget.ActualHeight);
+
+    ACanvas.TextColor := clRed;
+    ACanvas.DrawString(5, 5, 'DEBUG');
+  end;
 end;
 
 { TfpgMigGrid.ConvertSpanToSparseGrid - Port of Grid.java:1539 }

@@ -1580,17 +1580,7 @@ var
   w: TfpgWidget;
   HasInvalidRegion: Boolean;
   Params: TfpgMessageParams;
-  {$IFDEF GDEBUG}
-  Tmp: TfpgRect;
-  {$ENDIF}
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgWidget.MsgPaint - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
-
   if IsHidden then
     Exit;
 
@@ -1619,10 +1609,6 @@ begin
     if Assigned(FOnPaint) then
       FOnPaint(Self);
 
-    {$IFDEF GDEBUG}
-    Tmp := FInvalidRect; // for debugging
-    {$ENDIF}
-
     if HasOwnWindow then
     begin
       if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
@@ -1630,11 +1616,6 @@ begin
         Canvas.EndDraw;
         FInvalidRect.Clear;
         FInvalidated:=False;
-        {$IFDEF GDEBUG}
-        DebugLn('Invalid Rect Detected!');
-        DebugWrite('MSG: '); PrintRect(msg.Params.rect);
-        DebugWrite('INV: '); PrintRect(Tmp);
-        {$ENDIF}
         Exit;
       end;
     end;
@@ -1657,6 +1638,10 @@ begin
         end;
       end; { if w.InheritsFrom(...) }
     end; { for i }
+
+    // Paint layout manager debug visuals
+    if Assigned(FLayoutManager) then
+      FLayoutManager.PaintDebug(Self, Canvas);
   finally
     if HasInvalidRegion then
       Canvas.EndDraw(FInvalidRect)

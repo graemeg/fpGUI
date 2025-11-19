@@ -55,6 +55,8 @@ type
     procedure AddLayoutComponent(AWidget: TfpgWidgetBase; AConstraint: TfpgLayoutConstraint); virtual;
     procedure RemoveLayoutComponent(AWidget: TfpgWidgetBase); virtual;
     procedure InvalidateLayout(AContainer: TfpgWidgetBase); virtual;
+    procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase); virtual;
+
     function GetIterator(AContainer: TfpgWidgetBase): ILayoutIterator; virtual;
   end;
 
@@ -232,6 +234,11 @@ begin
     Result := TLayoutIterator.Create(AContainer as TfpgWidget, FConstraints)
   else
     Result := nil;
+end;
+
+procedure TfpgBaseLayoutManager.PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase);
+begin
+  // Do nothing in base class
 end;
 
 end.

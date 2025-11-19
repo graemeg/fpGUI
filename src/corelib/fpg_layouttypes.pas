@@ -39,6 +39,9 @@ type
 
     // Invalidation
     procedure InvalidateLayout(AContainer: TfpgWidgetBase);
+
+    // debugging
+    procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase);
   end;
 
   ILayoutIterator = interface
