@@ -159,6 +159,9 @@ type
 
     property Span: Integer read FSpan;
     property CompWraps: TfpgMigCompWrapList read FCompWraps;
+    property LStart: Integer read FLStart write FLStart;  // Layout start position
+    property LSize: Integer read FLSize write FLSize;     // Layout size
+    property FromEnd: Boolean read FFromEnd;              // Layout direction
   end;
 
 
@@ -183,6 +186,10 @@ type
     { Port of Grid.java growXs, growYs fields - line 115
       Default grow weights for columns and rows (from push or fill) }
     FGrowXs, FGrowYs: TfpgMigFloatArray;
+
+    { Port of Grid.java debugRects field - line 108
+      If debug is on, contains bounds for cells to paint }
+    FDebugRects: specialize TList<TfpgRect>;
 
     procedure checkSizeCalcs(refWidth, refHeight: Integer);
     procedure calcGridSizes(refWidth, refHeight: Integer);
@@ -306,6 +313,11 @@ type
       @returns Converted span in sparse grid coordinates }
     class function ConvertSpanToSparseGrid(ACurIx, ASpan: Integer;
                                            const AIndexes: TfpgMigIntegerList): Integer;
+
+    { Helper method for finding the dimension group containing a component
+      Used for debug painting }
+    function GetGroupContaining(const AGroupLists: array of TfpgMigLinkedDimGroupList;
+                                ACompWrap: TfpgMigCompWrap): TfpgMigLinkedDimGroup;
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
@@ -315,6 +327,10 @@ type
     { Main layout method - positions and sizes all components }
     function Layout(const ABounds: array of Integer; AAlignX, AAlignY: TfpgMigUnitValue;
                     ADebug: Boolean): Boolean;
+
+    { Port of Grid.java paintDebug() - line 567
+      Paints debug visualization (cell bounds and component outlines) }
+    procedure PaintDebug(ACanvas: TfpgCanvasBase);
 
     { Get calculated dimensions }
     function GetWidth: TfpgMigIntArray;
@@ -327,7 +343,13 @@ type
     FRowConstr: TfpgMigAC;
     FColConstr: TfpgMigAC;
     FIsLayingOut: Boolean;  // Prevents recursive layout calls
-    FDebug: Boolean;
+    FGrid: TfpgMigGrid;     // Cached grid instance for debug painting
+    FDirty: Boolean;        // True when grid needs to be recreated
+    FContainer: TfpgWidgetBase;  // Last container we laid out
+
+    procedure SetLC(AValue: TfpgMigLC);
+    procedure SetRowConstr(AValue: TfpgMigAC);
+    procedure SetColConstr(AValue: TfpgMigAC);
   protected
     // TfpgBaseLayoutManager overrides
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
@@ -343,10 +365,9 @@ type
     destructor Destroy; override;
 
     { MigLayout v11 constraint properties }
-    property LC: TfpgMigLC read FLC write FLC;
-    property RowConstraints: TfpgMigAC read FRowConstr write FRowConstr;
-    property ColumnConstraints: TfpgMigAC read FColConstr write FColConstr;
-    property IsDebug: Boolean read FDebug write FDebug;
+    property LC: TfpgMigLC read FLC write SetLC;
+    property RowConstraints: TfpgMigAC read FRowConstr write SetRowConstr;
+    property ColumnConstraints: TfpgMigAC read FColConstr write SetColConstr;
   end;
 
 implementation
@@ -1047,6 +1068,7 @@ begin
   FGrid := TfpgMigCellMap.Create;
   FRowIndexes := TfpgMigIntegerList.Create;
   FColIndexes := TfpgMigIntegerList.Create;
+  FDebugRects := nil;  // Created on demand when debug is enabled
 
   // Determine flow direction and wrap setting
   if ALC <> nil then
@@ -1718,6 +1740,10 @@ begin
 
   FColFlowSpecs.Free;
   FRowFlowSpecs.Free;
+
+  // Free debug rects if allocated (TfpgRect is a record, no element cleanup needed)
+  FreeAndNil(FDebugRects);
+
   inherited Destroy;
 end;
 
@@ -1728,11 +1754,18 @@ var
   cell: TfpgMigCell;
   cw: TfpgMigCompWrap;
   addVisualPadding: Boolean;
+  hGrp, vGrp: TfpgMigLinkedDimGroup;
+  debugRect: TfpgRect;
 begin
   Result := False;
+
+  // Port of Grid.java line 479-480: Create debug rects list if debug enabled
   if ADebug then
   begin
-    // TODO: debugRects logic
+    if FDebugRects = nil then
+      FDebugRects := specialize TList<TfpgRect>.Create
+    else
+      FDebugRects.Clear;
   end;
 
   if FColFlowSpecs = nil then
@@ -1759,6 +1792,32 @@ begin
       cw.Y := cw.Y + ABounds[1];
 
       cw.transferBounds(addVisualPadding);
+
+      // Port of Grid.java lines 553-564: Populate debugRects
+      if ADebug then
+      begin
+        hGrp := GetGroupContaining(FColGroupLists, cw);
+        vGrp := GetGroupContaining(FRowGroupLists, cw);
+
+        if (hGrp <> nil) and (vGrp <> nil) then
+        begin
+          // Calculate cell rectangle bounds
+          if hGrp.FromEnd then
+            debugRect.Left := hGrp.LStart + ABounds[0] - hGrp.LSize
+          else
+            debugRect.Left := hGrp.LStart + ABounds[0];
+
+          if vGrp.FromEnd then
+            debugRect.Top := vGrp.LStart + ABounds[1] - vGrp.LSize
+          else
+            debugRect.Top := vGrp.LStart + ABounds[1];
+
+          debugRect.Width := hGrp.LSize;
+          debugRect.Height := vGrp.LSize;
+
+          FDebugRects.Add(debugRect);
+        end;
+      end;
 
       // TODO: Port callback logic
     end;
@@ -3313,16 +3372,20 @@ begin
       [fss.GetSizes[2][SIZE_MIN], fss.GetSizes[2][SIZE_PREF], fss.GetSizes[2][SIZE_MAX]]));
   end;
 
-  // Enable growth if fill is set OR if spanning component (needs to fill spanned space)
-  if ((ADC <> nil) and ADC.IsFill) or (ASpanCount > 1) then
+  // Port of Grid.java line 2066: Enable growth only if fill is set
+  // Spanning does NOT automatically enable growth - component keeps preferred size
+  // and is aligned within the spanned space
+  if (ADC <> nil) and ADC.IsFill then
   begin
     SetLength(growW, 1);
     growW[0] := 100.0;
-    WriteLn(Format('DEBUG LayoutSerial: Enabling grow weight (IsFill=%d, SpanCount=%d)',
-      [Ord((ADC <> nil) and ADC.IsFill), ASpanCount]));
+    WriteLn(Format('DEBUG LayoutSerial: Enabling grow weight (IsFill=True, SpanCount=%d)', [ASpanCount]));
   end
   else
+  begin
     SetLength(growW, 0);
+    WriteLn(Format('DEBUG LayoutSerial: No growth (IsFill=False, SpanCount=%d) - component will use preferred size', [ASpanCount]));
+  end;
 
   sizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, growW, SIZE_PREF, ASize);
   WriteLn(Format('DEBUG LayoutSerial: ASize=%d, ACompWraps.Count=%d, calculated sizes length=%d',
@@ -3363,9 +3426,28 @@ begin
 
   cSt := AStart;
   slack := ASize - totSize;
+
+  {$IFDEF MIGDEBUG}
+  if AIsHor and (ACompWraps.Count > 0) then
+  begin
+    WriteLn(Format('DEBUG SetCompWrapBounds: Component=%s, totSize=%d, ASize=%d, slack=%d',
+      [ACompWraps[0].Comp.Name, totSize, ASize, slack]));
+    if align <> nil then
+      WriteLn(Format('DEBUG SetCompWrapBounds: align.Value=%.1f, align.Unit=%d',
+        [align.Value, Ord(align.UnitType)]))
+    else
+      WriteLn('DEBUG SetCompWrapBounds: align=nil');
+  end;
+  {$ENDIF}
+
   if (slack > 0) and (align <> nil) then
   begin
     al := Min(slack, Max(0, Round(align.GetPixels(slack, AParent, nil))));
+    {$IFDEF MIGDEBUG}
+    if AIsHor then
+      WriteLn(Format('DEBUG SetCompWrapBounds: Applying alignment offset al=%d (%.1f%% of %d)',
+        [al, (al / slack) * 100, slack]));
+    {$ENDIF}
     if AFromEnd then
       cSt := cSt - al
     else
@@ -3414,6 +3496,16 @@ begin
     align := ACC.Horizontal.GetAlign
   else
     align := ACC.Vertical.GetAlign;
+
+  {$IFDEF MIGDEBUG}
+  WriteLn(Format('DEBUG CorrectAlign: AIsHor=%s, component align=%s, row align=%s',
+    [BoolToStr(AIsHor, True),
+     BoolToStr(align <> nil, True),
+     BoolToStr(ARowAlign <> nil, True)]));
+  if align <> nil then
+    WriteLn(Format('DEBUG CorrectAlign: Component align value=%.1f, unit=%d',
+      [align.Value, Ord(align.UnitType)]));
+  {$ENDIF}
 
   if align = nil then
     align := ARowAlign;
@@ -3576,14 +3668,50 @@ begin
   FRowConstr := TfpgMigAC.Create;
   FColConstr := TfpgMigAC.Create;
   FIsLayingOut := False;
+  FGrid := nil;
+  FDirty := True;
+  FContainer := nil;
 end;
 
 destructor TfpgMigLayoutManager.Destroy;
 begin
+  FreeAndNil(FGrid);
   FLC.Free;
   FRowConstr.Free;
   FColConstr.Free;
   inherited Destroy;
+end;
+
+{ Setters that mark grid as dirty }
+
+procedure TfpgMigLayoutManager.SetLC(AValue: TfpgMigLC);
+begin
+  if FLC <> AValue then
+  begin
+    FLC.Free;
+    FLC := AValue;
+    FDirty := True;
+  end;
+end;
+
+procedure TfpgMigLayoutManager.SetRowConstr(AValue: TfpgMigAC);
+begin
+  if FRowConstr <> AValue then
+  begin
+    FRowConstr.Free;
+    FRowConstr := AValue;
+    FDirty := True;
+  end;
+end;
+
+procedure TfpgMigLayoutManager.SetColConstr(AValue: TfpgMigAC);
+begin
+  if FColConstr <> AValue then
+  begin
+    FColConstr.Free;
+    FColConstr := AValue;
+    FDirty := True;
+  end;
 end;
 
 function TfpgMigLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
@@ -3594,7 +3722,6 @@ end;
 procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 var
   ccMap: TfpgMigCCMap;
-  grid: TfpgMigGrid;
   bounds: array[0..3] of Integer;
   Iterator: ILayoutIterator;
   child: TfpgWidget;
@@ -3602,6 +3729,8 @@ var
   cc: TfpgMigCC;
   insTop, insLeft, insBottom, insRight: Integer;
   insUV: TfpgMigUnitValue;
+  needsRecreate: Boolean;
+  isDebug: Boolean;
 begin
   if AContainer = nil then
     Exit;
@@ -3621,6 +3750,9 @@ begin
   Iterator := GetIterator(AContainer);
   if not Assigned(Iterator) then
     Exit;
+
+  // Check if grid needs to be recreated
+  needsRecreate := FDirty or (FGrid = nil) or (FContainer <> AContainer);
 
   // 1. Build CC map from widgets and their constraints
   // Add ALL valid widgets (filtered by iterator), even those without constraints
@@ -3643,50 +3775,54 @@ begin
       ccMap.Add(child, cc);
     end;
 
-    // 2. Create Grid instance using stored constraints
-    grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
-    try
-      // 3. Calculate insets from LC and convert to pixels
-      // This matches Java MigLayout.layoutContainer() behavior where
-      // container insets are subtracted before passing bounds to Grid.layout()
-      // In fpGUI, we only have LC insets (no native container border insets)
-
-      // Get top inset (side 0)
-      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 0, True);
-      insTop := Round(insUV.GetPixels(0, AContainer, nil));
-
-      // Get left inset (side 1)
-      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 1, True);
-      insLeft := Round(insUV.GetPixels(0, AContainer, nil));
-
-      // Get bottom inset (side 2)
-      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 2, True);
-      insBottom := Round(insUV.GetPixels(0, AContainer, nil));
-
-      // Get right inset (side 3)
-      insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
-      insRight := Round(insUV.GetPixels(0, AContainer, nil));
-
-      WriteLn(Format('DEBUG DoLayout: Container=%s, ActualWidth=%d, ActualHeight=%d, Insets (T,L,B,R)=(%d,%d,%d,%d)',
-        [AContainer.ClassName, AContainer.ActualWidth, AContainer.ActualHeight,
-         insTop, insLeft, insBottom, insRight]));
-
-      // 4. Setup bounds for layout, accounting for insets
-      // This matches Java: bounds = [insets.left, insets.top,
-      //                              width - left - right, height - top - bottom]
-      bounds[0] := insLeft;   // x offset
-      bounds[1] := insTop;    // y offset
-      bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
-      bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
-      WriteLn(Format('DEBUG DoLayout: bounds=[%d, %d, %d, %d]', [bounds[0], bounds[1], bounds[2], bounds[3]]));
-
-      // 5. Perform layout
-      grid.Layout(bounds, nil, nil, False);
-
-      // Bounds are transferred to widgets inside Layout method
-    finally
-      grid.Free;
+    // 2. Create or reuse Grid instance
+    if needsRecreate then
+    begin
+      FreeAndNil(FGrid);
+      FGrid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
+      FDirty := False;
+      FContainer := AContainer;
     end;
+
+    // 3. Calculate insets from LC and convert to pixels
+    // This matches Java MigLayout.layoutContainer() behavior where
+    // container insets are subtracted before passing bounds to Grid.layout()
+    // In fpGUI, we only have LC insets (no native container border insets)
+
+    // Get top inset (side 0)
+    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 0, True);
+    insTop := Round(insUV.GetPixels(0, AContainer, nil));
+
+    // Get left inset (side 1)
+    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 1, True);
+    insLeft := Round(insUV.GetPixels(0, AContainer, nil));
+
+    // Get bottom inset (side 2)
+    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 2, True);
+    insBottom := Round(insUV.GetPixels(0, AContainer, nil));
+
+    // Get right inset (side 3)
+    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
+    insRight := Round(insUV.GetPixels(0, AContainer, nil));
+
+    WriteLn(Format('DEBUG DoLayout: Container=%s, ActualWidth=%d, ActualHeight=%d, Insets (T,L,B,R)=(%d,%d,%d,%d)',
+      [AContainer.ClassName, AContainer.ActualWidth, AContainer.ActualHeight,
+       insTop, insLeft, insBottom, insRight]));
+
+    // 4. Setup bounds for layout, accounting for insets
+    // This matches Java: bounds = [insets.left, insets.top,
+    //                              width - left - right, height - top - bottom]
+    bounds[0] := insLeft;   // x offset
+    bounds[1] := insTop;    // y offset
+    bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
+    bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
+    WriteLn(Format('DEBUG DoLayout: bounds=[%d, %d, %d, %d]', [bounds[0], bounds[1], bounds[2], bounds[3]]));
+
+    // 5. Perform layout with debug flag based on LC.DebugMillis
+    isDebug := FLC.GetDebugMillis > 0;
+    FGrid.Layout(bounds, nil, nil, isDebug);
+
+    // Grid is kept alive for PaintDebug to use
   finally
     ccMap.Free;
   end;
@@ -3787,10 +3923,16 @@ end;
 
 procedure TfpgMigLayoutManager.PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase);
 begin
-  if not FDebug then
+  // Check if debug is enabled via LC.DebugMillis constraint (data-driven)
+  if (FLC = nil) or (FLC.GetDebugMillis <= 0) then
     Exit;
 
+  // Delegate to Grid's PaintDebug if grid exists
+  if (FGrid <> nil) and Assigned(ACanvas) then
+    FGrid.PaintDebug(ACanvas);
+
   // Proof-of-concept: Draw a red border and text
+{
   if Assigned(ACanvas) then
   begin
     ACanvas.Color := clRed;
@@ -3800,6 +3942,7 @@ begin
     ACanvas.TextColor := clRed;
     ACanvas.DrawString(5, 5, 'DEBUG');
   end;
+}
 end;
 
 { TfpgMigGrid.ConvertSpanToSparseGrid - Port of Grid.java:1539 }
@@ -3837,6 +3980,124 @@ begin
 
   WriteLn(Format('DEBUG ConvertSpanToSparseGrid: Result=%d', [retSpan]));
   Result := retSpan;
+end;
+
+{ Port of Grid.java getGroupContaining() - line 932
+  Searches for the LinkedDimGroup that contains the specified CompWrap }
+function TfpgMigGrid.GetGroupContaining(const AGroupLists: array of TfpgMigLinkedDimGroupList;
+                                        ACompWrap: TfpgMigCompWrap): TfpgMigLinkedDimGroup;
+var
+  i, j, k: Integer;
+  groupList: TfpgMigLinkedDimGroupList;
+  group: TfpgMigLinkedDimGroup;
+  cw: TfpgMigCompWrap;
+begin
+  Result := nil;
+  for i := 0 to High(AGroupLists) do
+  begin
+    groupList := AGroupLists[i];
+    if groupList = nil then
+      Continue;
+
+    for j := 0 to groupList.Count - 1 do
+    begin
+      group := groupList[j];
+      if group = nil then
+        Continue;
+
+      for k := 0 to group.CompWraps.Count - 1 do
+      begin
+        cw := group.CompWraps[k];
+        if cw = ACompWrap then
+        begin
+          Result := group;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+end;
+
+{ Port of Grid.java paintDebug() - line 567
+  Paints debug visualization: cell bounds (red) and component outlines (blue) }
+procedure TfpgMigGrid.PaintDebug(ACanvas: TfpgCanvasBase);
+var
+  i: Integer;
+  rect: TfpgRect;
+  painted: specialize TList<TfpgRect>;
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  cw: TfpgMigCompWrap;
+  widget: TfpgWidget;
+  compRect: TfpgRect;
+  savedClipRect: TfpgRect;
+  savedColor: TfpgColor;
+  savedLineWidth: Integer;
+  savedLineStyle: TfpgLineStyle;
+begin
+  if (FDebugRects = nil) or (ACanvas = nil) then
+    Exit;
+
+  // Save canvas state manually
+  savedClipRect := ACanvas.GetClipRect;
+  savedColor := ACanvas.Color;
+  savedLineWidth := ACanvas.GetLineWidth;
+  savedLineStyle := ACanvas.LineStyle;
+
+  writeln('PaintDebug: FDebugRects.Count =' + IntToStr(FDebugRects.Count));
+  ACanvas.ClearClipRect;
+  try
+    // Paint cell outlines (red dashed rectangles)
+    // Port of Grid.java lines 572-578
+    painted := specialize TList<TfpgRect>.Create;
+    try
+      ACanvas.Color := fpgColor($FF,0,0);  // Red
+      ACanvas.SetLineStyle(1, lsDash);
+
+      for i := 0 to FDebugRects.Count - 1 do
+      begin
+        rect := FDebugRects[i];
+
+        // Avoid painting duplicate rects (Java uses ArrayList.contains())
+        if painted.IndexOf(rect) = -1 then
+        begin
+          ACanvas.DrawRectangle(rect);
+          painted.Add(rect);
+        end;
+      end;
+    finally
+      painted.Free;
+    end;
+
+    // Paint component outlines (blue dashed rectangles)
+    // Port of Grid.java lines 580-584
+    ACanvas.Color := fpgColor($00, $00, $C8);  // Blue (0, 0, 200)
+    ACanvas.SetLineStyle(1, lsDash);
+
+    for pair in FGrid do
+    begin
+      cell := pair.Value;
+      if cell = nil then
+        Continue;
+
+      for cw in cell.CompWraps do
+      begin
+        // Draw outline around each component
+        if cw.Comp is TfpgWidget then
+        begin
+          widget := TfpgWidget(cw.Comp);
+          compRect.SetRect(widget.Left, widget.Top, widget.Width, widget.Height);
+          ACanvas.DrawRectangle(compRect);
+        end;
+      end;
+    end;
+
+  finally
+    // Restore canvas state
+    ACanvas.Color := savedColor;
+    ACanvas.SetLineStyle(savedLineWidth, savedLineStyle);
+    ACanvas.SetClipRect(savedClipRect);
+  end;
 end;
 
 initialization
