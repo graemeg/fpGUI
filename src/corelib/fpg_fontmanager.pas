@@ -175,19 +175,18 @@ var
   i: integer;
   fontBase: TfpgFontResourceBase;
 begin
-  Result := Format('Font Cache Statistics:'#13#10, []);
-  Result := Result + Format('  Total cached fonts: %d'#13#10, [FFontCache.Count]);
-  Result := Result + Format('  Default font: %s'#13#10, [FDefaultFontDesc]);
-  Result := Result + Format('  Fixed font: %s'#13#10#13#10, [FFixedFontDesc]);
+  Result := Format('Font Cache Statistics:'+LineEnding, []);
+  Result := Result + Format('  Total cached fonts: %d'+LineEnding, [FFontCache.Count]);
+  Result := Result + Format('  Default font: %s'+LineEnding, [FDefaultFontDesc]);
+  Result := Result + Format('  Fixed font: %s'+LineEnding+LineEnding, [FFixedFontDesc]);
 
   if FFontCache.Count > 0 then
   begin
-    Result := Result + 'Cached fonts:'#13#10;
+    Result := Result + 'Cached fonts:'+LineEnding;
     for i := 0 to FFontCache.Count - 1 do
     begin
       fontBase := TfpgFontResourceBase(FFontCache[i]);
-      Result := Result + Format('  [%d] %s'#13#10,
-                                [i, fontBase.FontDesc]);
+      Result := Result + Format('  [%d] %s'+LineEnding, [i, fontBase.FontDesc]);
     end;
   end;
 end;
