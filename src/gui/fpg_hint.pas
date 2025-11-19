@@ -26,7 +26,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_form;
-  
+
 type
 
   TfpgHintWindow = class(TfpgForm)
@@ -84,7 +84,7 @@ type
 
 
   TfpgHintWindowClass = class of TfpgHintWindow;
-  
+
 
 var
   HintWindowClass: TfpgHintWindowClass = TfpgHintWindow;
@@ -103,8 +103,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
-  
-  
+
+
 var
   uShadowForm: TfpgHintShadow;
 
@@ -262,7 +262,7 @@ end;
 destructor TfpgHintWindow.Destroy;
 begin
   FTimer.Free;
-  FFont := nil;
+  FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
   uShadowForm.Free;
 end;
