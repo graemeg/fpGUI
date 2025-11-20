@@ -12,11 +12,20 @@ uses
 type
 
   TAlignmentMigForm = class(TfpgForm)
+  private
+    FDebug: boolean;
   public
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
   end;
 
 implementation
+
+constructor TAlignmentMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TAlignmentMigForm.AfterCreate;
 var
@@ -35,7 +44,8 @@ begin
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(3);  // 3 columns
   mig.LC.Fill;             // Cells fill available space
-  mig.LC.Debug(500);
+  if FDebug then
+    mig.LC.Debug(500);
   LayoutManager := mig;
 
   // Title

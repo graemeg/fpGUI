@@ -12,11 +12,20 @@ uses
 type
 
   TSpanningMigForm = class(TfpgForm)
+  private
+    FDebug: boolean;
   public
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
   end;
 
 implementation
+
+constructor TSpanningMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TSpanningMigForm.AfterCreate;
 var
@@ -34,7 +43,8 @@ begin
   // Create MigLayout with 3 columns
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(3);  // 3 columns
-  mig.LC.Debug;
+  if FDebug then
+    mig.LC.Debug(500);
   LayoutManager := mig;
 
   // Title

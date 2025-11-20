@@ -7,6 +7,7 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
+  fpg_checkbox,
   fpg_form,
   fpg_button,
   fpg_label,
@@ -29,6 +30,7 @@ type
     btnComplex: TfpgButton;
     btnParser: TfpgButton;
     btnQuit: TfpgButton;
+    chkDebug: TfpgCheckBox;
     procedure btnBasicClicked(Sender: TObject);
     procedure btnAlignmentClicked(Sender: TObject);
     procedure btnSpanningClicked(Sender: TObject);
@@ -59,7 +61,7 @@ procedure TMainForm.btnBasicClicked(Sender: TObject);
 var
   frm: TBasicMigForm;
 begin
-  frm := TBasicMigForm.Create(nil);
+  frm := TBasicMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -71,7 +73,7 @@ procedure TMainForm.btnAlignmentClicked(Sender: TObject);
 var
   frm: TAlignmentMigForm;
 begin
-  frm := TAlignmentMigForm.Create(nil);
+  frm := TAlignmentMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -83,7 +85,7 @@ procedure TMainForm.btnSpanningClicked(Sender: TObject);
 var
   frm: TSpanningMigForm;
 begin
-  frm := TSpanningMigForm.Create(nil);
+  frm := TSpanningMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -95,7 +97,7 @@ procedure TMainForm.btnGrowthClicked(Sender: TObject);
 var
   frm: TGrowthMigForm;
 begin
-  frm := TGrowthMigForm.Create(nil);
+  frm := TGrowthMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -107,7 +109,7 @@ procedure TMainForm.btnComplexClicked(Sender: TObject);
 var
   frm: TComplexMigForm;
 begin
-  frm := TComplexMigForm.Create(nil);
+  frm := TComplexMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -119,7 +121,7 @@ procedure TMainForm.btnParserClicked(Sender: TObject);
 var
   frm: TParserMigForm;
 begin
-  frm := TParserMigForm.Create(nil);
+  frm := TParserMigForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -230,6 +232,14 @@ begin
     FontDesc := '#Button';
     OnClick := @btnParserClicked;
   end;
+
+  chkDebug := TfpgCheckBox.Create(Self);
+  chkDebug.Left := 20;
+  chkDebug.Top := 330;
+  chkDebug.Text := 'Enable layout debugging';
+  chkDebug.Width := 220;
+  chkDebug.Height := 20;
+
 
   btnQuit := TfpgButton.Create(self);
   with btnQuit do

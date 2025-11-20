@@ -12,6 +12,8 @@ uses
 type
 
   TParserMigForm = class(TfpgForm)
+  private
+    FDebug: boolean;
   public
     lblTitle: TfpgLabel;
 
@@ -44,12 +46,19 @@ type
     memoInfo: TfpgMemo;
     btnClose: TfpgButton;
 
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
     procedure HandleShow; override;
     procedure btnCloseClicked(Sender: TObject);
   end;
 
 implementation
+
+constructor TParserMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TParserMigForm.btnCloseClicked(Sender: TObject);
 begin
@@ -94,7 +103,8 @@ begin
   mig.LC.SetWrapAfter(2);  // Wrap after 2 components
   mig.LC.Fill;             // Fill both horizontally and vertically
   mig.LC.InsetsAll('10lpx'); // Using string insets - 10 logical pixels all sides
-  mig.LC.Debug(500);       // Enable debug visualization
+  if FDebug then
+    mig.LC.Debug(500);       // Enable debug visualization
   LayoutManager := mig;
 
   // Title - spanning 2 columns
@@ -131,6 +141,7 @@ begin
   edtPx := TfpgEdit.Create(Self);
   edtPx.Name := 'edtPx';
   edtPx.Text := 'Fixed 200px wide';
+  edtPx.Height := 30;
   // Using string constraint: width="200px" instead of PreferredSize
   mig.AddLayoutComponent(edtPx,
     TfpgMigCC.Create()
@@ -146,6 +157,7 @@ begin
   edtPercent := TfpgEdit.Create(Self);
   edtPercent.Name := 'edtPercent';
   edtPercent.Text := '50% of available space';
+  edtPercent.Height := 30;
   mig.AddLayoutComponent(edtPercent,
     TfpgMigCC.Create()
       .Width('50%'));    // 50% of available width
@@ -160,6 +172,7 @@ begin
   edtMM := TfpgEdit.Create(Self);
   edtMM.Name := 'edtMM';
   edtMM.Text := 'Physical 50mm wide';
+  edtMM.Height := 30;
   mig.AddLayoutComponent(edtMM,
     TfpgMigCC.Create()
       .Width('50mm'));   // Physical millimeters
@@ -184,6 +197,7 @@ begin
   edtBounds := TfpgEdit.Create(Self);
   edtBounds.Name := 'edtBounds';
   edtBounds.Text := 'Resize to see min/max constraints';
+  edtBounds.Height := 30;
   // Width constraint: min=100px, preferred=200px, max=300px
   mig.AddLayoutComponent(edtBounds,
     TfpgMigCC.Create()
@@ -249,6 +263,7 @@ begin
   edtOperation.Name := 'edtOperation';
   edtOperation.Text := 'MaxWidth = max(150px, 30%) - resize to see!';
   edtOperation.Hint := edtOperation.Text;
+  edtOperation.Height := 30;
   // MaxWidth uses max() operation: limits growth to larger of 150px or 30%
   // When narrow (< 500px): maxes out at 150px
   // When wide (> 500px): maxes out at 30% of available width

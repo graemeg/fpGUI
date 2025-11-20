@@ -12,11 +12,21 @@ uses
 type
 
   TGrowthMigForm = class(TfpgForm)
+  private
+    FDebug: boolean;
+    procedure CloseClicked(Sender: TObject);
   public
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
   end;
 
 implementation
+
+constructor TGrowthMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TGrowthMigForm.AfterCreate;
 var
@@ -38,7 +48,8 @@ begin
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(2);  // 2 columns
   mig.LC.Fill;             // Fill both horizontal and vertical space
-  mig.LC.Debug(500);
+  if FDebug then
+    mig.LC.Debug(500);
   LayoutManager := mig;
 
   // Title
@@ -100,11 +111,17 @@ begin
 
   // Bottom buttons
   btn3 := TfpgButton.Create(Self);
-  btn3.Text := 'Close';
+  btn3.Text := 'Close (maxWidth=550)';
   btn3.Width := 100;
   btn3.Height := 30;
-//  btn3.OnClick := @Close;
-  mig.AddLayoutComponent(btn3, TfpgMigCC.Create().SpanX(2).AlignX('right'));
+  btn3.MaxWidth := 550;
+  btn3.OnClick := @CloseClicked;
+  mig.AddLayoutComponent(btn3, TfpgMigCC.Create().SpanX(2).AlignX('center'));
+end;
+
+procedure TGrowthMigForm.CloseClicked(Sender: TObject);
+begin
+  Close;
 end;
 
 end.

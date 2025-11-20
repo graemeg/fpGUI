@@ -12,14 +12,23 @@ uses
 type
 
   TBasicMigForm = class(TfpgForm)
+  private
+    FDebug: boolean;
   public
     lbl1, lbl2, lbl3: TfpgLabel;
     edt1, edt2, edt3: TfpgEdit;
     btn1, btn2: TfpgButton;
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
   end;
 
 implementation
+
+constructor TBasicMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TBasicMigForm.AfterCreate;
 var
@@ -36,7 +45,8 @@ begin
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
-  mig.LC.Debug(500);       // Enable debug visualization
+  if FDebug then
+    mig.LC.Debug(500);       // Enable debug visualization
   LayoutManager := mig;
 
   // Row 1: Label + Edit

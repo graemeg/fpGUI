@@ -14,12 +14,20 @@ type
 
   TComplexMigForm = class(TfpgForm)
   private
+    FDebug: boolean;
     procedure btnCancelClicked(Sender: TObject);
   public
+    constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
   end;
 
 implementation
+
+constructor TComplexMigForm.Create(AEnableDebug: Boolean);
+begin
+  inherited Create(nil);
+  FDebug := AEnableDebug;
+end;
 
 procedure TComplexMigForm.btnCancelClicked(Sender: TObject);
 begin
@@ -48,7 +56,8 @@ begin
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(4);  // 4 columns
   mig.LC.Fill;             // Fill both horizontal and vertical space
-  mig.LC.Debug(500);
+  if FDebug then
+    mig.LC.Debug(500);
   LayoutManager := mig;
 
   // Title spanning all columns
