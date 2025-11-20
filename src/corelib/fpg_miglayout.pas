@@ -785,18 +785,29 @@ end;
 
 function TfpgMigCompWrap.GetBaseline(ASizeType: Integer): Integer;
 begin
-  // TODO: fpGUI doesn't currently support baseline positioning
-  // Baseline is used for aligning text components on their text baseline
-  // For now, return 0 (top of component)
-  // When implemented: return comp.getBaseline(width, height)
+  // TODO: Baseline support disabled for initial release
+  // Proper baseline calculation needs to account for:
+  // - Component borders/insets (buttons, edits)
+  // - Padding/margins
+  // - Text positioning within component (tlTop, tlCenter, tlBottom for labels)
+  // - Component-specific rendering logic
+  //
+  // Future implementation should make GetBaseline() a virtual method in
+  // TfpgWidgetBase so each widget can calculate its actual text baseline position.
   Result := 0;
 end;
 
 function TfpgMigCompWrap.HasBaseline: Boolean;
 begin
-  // TODO: fpGUI doesn't currently support baseline queries
-  // When implemented, check if component supports baseline alignment
-  // (typically true for text components like labels, buttons with text)
+  // TODO: Baseline support disabled for initial release
+  // When HasBaseline returns False, MigLayout falls back to CENTER alignment
+  // for rows (or whatever alignment is explicitly specified).
+  //
+  // To enable baseline support in the future:
+  // 1. Make TfpgWidgetBase.GetBaseline(width, height) virtual
+  // 2. Override in TfpgLabel, TfpgButton, TfpgEdit, etc.
+  // 3. Calculate actual baseline position considering insets/padding/layout
+  // 4. Return True here for components that implement GetBaseline properly
   Result := False;
 end;
 
