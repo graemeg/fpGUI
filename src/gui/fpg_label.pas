@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -40,14 +40,12 @@ type
     procedure   SetWrapText(const AValue: boolean);
     procedure   SetAlignment(const AValue: TAlignment);
     procedure   SetLayout(const AValue: TLayout);
-    function    GetFontDesc: string;
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: TfpgString);
     procedure   ResizeLabel;
   protected
     FText: TfpgString;
-    FFont: TfpgFontResourceBase;
     FTextHeight: integer;
     procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
@@ -55,13 +53,11 @@ type
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    Layout: TLayout read FLayout write SetLayout default tlTop;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Text: TfpgString read FText write SetText;
     property    LineSpace: integer read FLineSpace write FLineSpace default 2;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFontResourceBase read FFont;
     property    TextHeight: integer read FTextHeight;
   end;
 
@@ -164,14 +160,6 @@ begin
   end;
 end;
 
-function TfpgCustomLabel.GetFontDesc: string;
-begin
-  if Assigned(FFont) then
-    Result := FFont.FontDesc
-  else
-    Result := '';
-end;
-
 procedure TfpgCustomLabel.SetAutoSize(const AValue: boolean);
 begin
   if FAutoSize <> AValue then
@@ -183,9 +171,8 @@ end;
 
 procedure TfpgCustomLabel.SetFontDesc(const AValue: string);
 begin
-  FFont := nil;  // Release old font (automatic ref count decrement)
-  FFont := fpgApplication.FontManager.GetFont(AValue);
-  ResizeLabel;
+  inherited SetFontDesc(AValue);  // Call base class to update Font property
+  ResizeLabel;  // Label-specific: resize based on new font
 end;
 
 procedure TfpgCustomLabel.SetText(const AValue: TfpgString);
@@ -201,8 +188,8 @@ procedure TfpgCustomLabel.ResizeLabel;
 begin
   if FAutoSize and (not FWrapText) then
   begin
-    Width := FFont.GetTextWidth(FText);
-    Height:= FFont.GetHeight;
+    Width := Font.GetTextWidth(FText);
+    Height:= Font.GetHeight;
   end;
   UpdatePosition;
   RePaint;
@@ -212,9 +199,9 @@ constructor TfpgCustomLabel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText             := 'Label';
-  FFont             := fpgApplication.FontManager.GetFont('#Label1');
-  FHeight            := FFont.GetHeight;
-  FWidth             := 80;
+  FontDesc          := '#Label1';  // Use property to set font (calls inherited SetFontDesc)
+  FHeight           := Font.GetHeight;
+  FWidth            := 80;
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FAutoSize         := False;
@@ -227,7 +214,7 @@ end;
 destructor TfpgCustomLabel.Destroy;
 begin
   FText := '';
-  FFont := nil;  // Automatic ref count decrement and cleanup
+  // Font is now managed by TfpgWidgetBase - no need to clean up here
   inherited Destroy;
 end;
 
@@ -236,10 +223,10 @@ var
   CalculatedW, CalculatedH: integer;
 begin
   // 1. First, determine the natural size based on content (text and font).
-  if Assigned(FFont) then
+  if Assigned(Font) then
   begin
-    CalculatedW := FFont.GetTextWidth(FText);
-    CalculatedH := FFont.GetHeight;
+    CalculatedW := Font.GetTextWidth(FText);
+    CalculatedH := Font.GetHeight;
   end
   else
   begin

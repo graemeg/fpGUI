@@ -524,7 +524,9 @@ type
   TfpgWidgetBase = class(TfpgComponent)
   private
     FHasOwnWindow: Boolean;
+    FFont: TfpgFontResourceBase;
     function    GetWindowAllocated: Boolean;
+    function    GetFontDesc: string;
     procedure   SetMinHeight(AValue: TfpgCoord);
     procedure   SetMinWidth(AValue: TfpgCoord);
     procedure   SetMouseCursor(const AValue: TMouseCursor);
@@ -556,6 +558,7 @@ type
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
+    procedure   SetFontDesc(const AValue: string); virtual;
     function    GetWindow: TfpgWindowBase; virtual;
     // TODO: Maybe rename this to DoAllocateNativeWindow() or DoCreateNativeWindow() - it will be more accurate
     procedure   DoAllocateWindowHandle; virtual; abstract;
@@ -620,6 +623,8 @@ type
     property    Parent: TfpgWidgetBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
     property    Window: TfpgWindowBase read GetWindow;
+    property    Font: TfpgFontResourceBase read FFont;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
   end;
 
 
@@ -1855,6 +1860,7 @@ begin
   FMinWidth := 2;   // Prevent widgets from becoming invisible
   FMinHeight := 2;
   FPreferredSize.SetSize(0, 0);  // 0 = not explicitly set, calculate from content
+  FFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FONT_DESC);  // Default font for all widgets
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;
@@ -1910,6 +1916,20 @@ begin
 
     DoPreferredSizeChanged;
   end;
+end;
+
+function TfpgWidgetBase.GetFontDesc: string;
+begin
+  if FFont <> nil then
+    Result := FFont.FontDesc
+  else
+    Result := FPG_DEFAULT_FONT_DESC;
+end;
+
+procedure TfpgWidgetBase.SetFontDesc(const AValue: string);
+begin
+  FFont := nil;  // Release old font reference (font manager owns fonts)
+  FFont := fpgApplication.FontManager.GetFont(AValue);
 end;
 
 function TfpgWidgetBase.GetWidth: TfpgCoord;

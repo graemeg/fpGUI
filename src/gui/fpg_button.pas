@@ -49,11 +49,9 @@ type
     FGroupIndex: integer;
     FAllowAllUp: boolean;
     FModalResult: TfpgModalResult;
-    function    GetFontDesc: string;
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
     procedure   SetFlat(const AValue: Boolean);
-    procedure   SetFontDesc(const AValue: string);
     procedure   SetImageLayout(const AValue: TImageLayout);
     procedure   SetImageName(const AValue: string);
     procedure   SetText(const AValue: string);
@@ -73,10 +71,10 @@ type
     FDown: Boolean;
     FImage: TfpgImage;
     FText: string;
-    FFont: TfpgFontResourceBase;
     FDefault: boolean;
     FState: integer;  // 0 - normal  // 1 - hover
     FAllowMultiLineText: boolean;
+    procedure   SetFontDesc(const AValue: string); override;
     procedure   SetShowImage(AValue: Boolean);
     procedure   CalculatePositions(var ImageX, ImageY, TextX, TextY : integer);
     procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
@@ -99,7 +97,6 @@ type
       This is similar to Focusable = False, but the appearance of the down state might differ. }
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    Flat: Boolean read FFlat write SetFlat default False;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
     { Used in combination with AllowDown and AllowAllUp. Allows buttons in the same
       group to work together. }
     property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
@@ -116,7 +113,6 @@ type
     procedure   Click;
     function    GetCommand: ICommand;   // ICommandHolder interface
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
-    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -238,10 +234,10 @@ begin
   end
   else
   begin
-    textWidth := FFont.GetTextWidth(Text);
-    textHeight := FFont.GetHeight;
+    textWidth := Font.GetTextWidth(Text);
+    textHeight := Font.GetHeight;
     // Only single line texts will be placed correctly.
-    // Normally FFont.TextHeight should be used (not yet implemented)
+    // Normally Font.TextHeight should be used (not yet implemented)
   end;
   if FImageLayout in [ilImageLeft, ilImageRight] then
   begin
@@ -422,15 +418,15 @@ const
   MinBorderMargin = 6; // 3 pixels on each side for borders/focus rect
 begin
   // Calculate text dimensions
-  if (FText = '') or (not Assigned(FFont)) then
+  if (FText = '') or (not Assigned(Font)) then
   begin
     textWidth := 0;
     textHeight := 0;
   end
   else
   begin
-    textWidth := FFont.GetTextWidth(FText);
-    textHeight := FFont.GetHeight;
+    textWidth := Font.GetTextWidth(FText);
+    textHeight := Font.GetHeight;
   end;
 
   // Calculate image dimensions if visible
@@ -495,14 +491,6 @@ begin
   Repaint;
 end;
 
-function TfpgBaseButton.GetFontDesc: string;
-begin
-  if Assigned(FFont) then
-    Result := FFont.FontDesc
-  else
-    Result := '';
-end;
-
 procedure TfpgBaseButton.SetDefault(const AValue: boolean);
 var
   i: integer;
@@ -546,8 +534,7 @@ end;
 
 procedure TfpgBaseButton.SetFontDesc(const AValue: string);
 begin
-  FFont := nil;  // Release old font (automatic ref count decrement)
-  FFont := fpgApplication.FontManager.GetFont(AValue);
+  inherited SetFontDesc(AValue);
   RePaint;
 end;
 
@@ -555,8 +542,8 @@ constructor TfpgBaseButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText         := 'Button';
-  FFont         := fpgApplication.FontManager.GetFont('#Label1');
-  FHeight       := FFont.GetHeight + 8;
+  FontDesc      := '#Label1';  // Use inherited property setter
+  FHeight       := Font.GetHeight + 8;
   FWidth        := 80;
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
@@ -586,7 +573,6 @@ destructor TfpgBaseButton.Destroy;
 begin
   FImage := nil;
   FText  := '';
-  FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
 end;
 

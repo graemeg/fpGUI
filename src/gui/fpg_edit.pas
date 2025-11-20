@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -71,8 +71,6 @@ type
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetHideSelection(const AValue: Boolean);
     procedure   SetPasswordMode(const AValue: boolean);
-    function    GetFontDesc: string;
-    procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   SetSideMargin(const AValue: integer);
     procedure   SetHeightMargin(const AValue: integer);
@@ -86,7 +84,6 @@ type
     procedure   SetReadOnly(const AValue: Boolean);
     procedure   SetAutoSize(const AValue: Boolean);
   protected
-    FFont: TfpgFontResourceBase;
     FSideMargin: integer;
     FHeightMargin: integer;
     FMouseDragPos: integer;
@@ -101,6 +98,7 @@ type
     FVisibleText: TfpgString;
     FVisSelStartPx: integer;
     FVisSelEndPx: integer;
+    procedure   SetFontDesc(const AValue: string); override;
     function    GetMarginAdjustment: integer; virtual;
     procedure   DrawSelection; virtual;
     procedure   DoOnChange; virtual;
@@ -125,7 +123,6 @@ type
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
     property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
-    property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
     property    IgnoreMouseCursor: Boolean read FIgnoreMouseCursor write FIgnoreMouseCursor default False;
     property    MaxLength: Integer read FMaxLength write FMaxLength;
@@ -146,7 +143,6 @@ type
     procedure   CutToClipboard;
     procedure   InsertAtCursorPos(const AText: TfpgString);
     procedure   PasteFromClipboard;
-    property    Font: TfpgFontResourceBase read FFont;
     property    SideMargin: integer read FSideMargin write SetSideMargin default 3;
     property    HeightMargin: integer read FHeightMargin write SetHeightMargin default 2;
   end;
@@ -442,8 +438,8 @@ begin
   Result.Top   := y;
   if w > 0 then
     Result.Width := w;
-  if h < TfpgEdit(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2) then
-    Result.Height := TfpgEdit(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2)
+  if h < TfpgEdit(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEdit(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
   Result.UpdatePosition;
@@ -456,8 +452,8 @@ begin
   Result.Top   := y;
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
-  if h < TfpgEditInteger(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2) then
-    Result.Height := TfpgEditInteger(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2)
+  if h < TfpgEditInteger(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditInteger(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
   Result.UpdatePosition;
@@ -473,8 +469,8 @@ begin
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
   Result.FixedDecimals := AFixedDecimals;
-  if h < TfpgEditFloat(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2) then
-    Result.Height := TfpgEditFloat(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2)
+  if h < TfpgEditFloat(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditFloat(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
   Result.UpdatePosition;
@@ -489,8 +485,8 @@ begin
   Result.Width    := w;
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
-  if h < TfpgEditCurrency(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2) then
-    Result.Height := TfpgEditCurrency(Result).FFont.GetHeight + 4 + (Result.FHeightMargin * 2)
+  if h < TfpgEditCurrency(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditCurrency(Result).Font.GetHeight + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
   Result.UpdatePosition;
@@ -547,7 +543,7 @@ begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
     // Calculate width of substring instead of accumulating per-character to avoid rounding errors
-    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
+    tw  := Font.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     chx := tw - FTextOffset + FSideMargin;
     if UsePxCursorPos then
     begin
@@ -626,7 +622,7 @@ begin
     pdp := dpos;
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
-    tw  := tw + FFont.GetTextWidth(ch);
+    tw  := tw + Font.GetTextWidth(ch);
     chx := tw - FTextOffset + FSideMargin;
 
     // calculate selection-related fields
@@ -686,7 +682,7 @@ begin
   while dpos <= Length(dtext) do
   begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
-    tw := tw + FFont.GetTextWidth(ch);
+    tw := tw + Font.GetTextWidth(ch);
     cx := tw - FTextOffset + FSideMargin;
     if abs(cx - x) < abs(bestcx - x) then
     begin
@@ -735,7 +731,7 @@ begin
   end;
 
   // Calculate vertical center position based on actual height
-  textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
+  textY := r.Top + ((r.Height - Font.GetHeight) div 2);
 
   rs.SetRect(FVisSelStartPx, r.Top, FVisSelEndPx - FVisSelStartPx, r.height{FFont.Height});
   Canvas.SetColor(lcolor);
@@ -770,7 +766,7 @@ begin
   Canvas.SetClipRect(r);
 
   fpgStyle.DrawEditBox(Canvas, r, Enabled, ReadOnly, FBackgroundColor);
-  Canvas.SetFont(FFont);
+  Canvas.SetFont(Font);
 end;
 
 procedure TfpgBaseEdit.HandleResize(awidth, aheight: TfpgCoord);
@@ -1146,10 +1142,10 @@ end;
 constructor TfpgBaseEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont               := fpgApplication.FontManager.GetFont('#Edit1');
+  FontDesc            := '#Edit1';  // Use inherited property setter
   Focusable           := True;
-  Height              := 24;
-  Width               := 120;
+  FHeight             := 24;
+  FWidth              := 120;
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;
@@ -1177,7 +1173,6 @@ destructor TfpgBaseEdit.Destroy;
 begin
   if Assigned(FDefaultPopupMenu) then
     FDefaultPopupMenu.Free;
-  FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
 end;
 
@@ -1205,33 +1200,24 @@ begin
   RePaint;
 end;
 
-function TfpgBaseEdit.GetFontDesc: string;
-begin
-  if Assigned(FFont) then
-    Result := FFont.FontDesc
-  else
-    Result := '';
-end;
-
 procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
 var
   rect: TRect;
 begin
-  FFont := nil;  // Release old font (automatic ref count decrement)
-  FFont := fpgApplication.FontManager.GetFont(AValue);
+  inherited SetFontDesc(AValue);
   if AutoSize then
   begin
     rect := fpgStyle.GetControlFrameBorders;
     case BorderStyle of
       ebsNone:
-        if Height < FFont.GetHeight + (FHeightMargin * 2) then
-          Height := FFont.GetHeight + (FHeightMargin * 2);
+        if Height < Font.GetHeight + (FHeightMargin * 2) then
+          Height := Font.GetHeight + (FHeightMargin * 2);
       ebsDefault:
-        if Height < FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2) then
-          Height := FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
+        if Height < Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
       ebsSingle:
-        if Height < FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2) then
-          Height := FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
+        if Height < Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2) then
+          Height := Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
   end;
   Adjust;
@@ -1291,11 +1277,11 @@ begin
     rect := fpgStyle.GetControlFrameBorders;
     case BorderStyle of
       ebsNone:
-        Height := FFont.GetHeight + (FHeightMargin * 2);
+        Height := Font.GetHeight + (FHeightMargin * 2);
       ebsDefault:
-        Height := FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
+        Height := Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
       ebsSingle:
-        Height := FFont.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
+        Height := Font.GetHeight + rect.Top + rect.Bottom + (FHeightMargin * 2);
     end;
   end;
   Repaint;
@@ -1389,7 +1375,7 @@ begin
   if FAutoSize then
   begin
     r := fpgStyle.GetControlFrameBorders;
-    FHeight := FFont.GetHeight + (FHeightMargin*2) + (r.Top+r.Bottom);
+    FHeight := Font.GetHeight + (FHeightMargin*2) + (r.Top+r.Bottom);
     UpdatePosition;
   end;
 end;
@@ -1595,7 +1581,7 @@ begin
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
   // Calculate vertical center position based on actual height
-  textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
+  textY := r.Top + ((r.Height - Font.GetHeight) div 2);
 
   if CanDrawExtraHint then
   begin
@@ -1603,7 +1589,7 @@ begin
       r.Left - FDrawOffset + GetMarginAdjustment,
       textY,
       r.Width + FDrawOffset - GetMarginAdjustment,
-      FFont.GetHeight
+      Font.GetHeight
       );
     DrawPlaceholderText(r);
   end
@@ -1619,7 +1605,7 @@ begin
     if FSelOffset <> 0 then
       DrawSelection;
     // drawing cursor
-    fpgCaret.SetCaret(Canvas, Max(FCursorPx, r.Left), textY, fpgCaret.Width, FFont.GetHeight);
+    fpgCaret.SetCaret(Canvas, Max(FCursorPx, r.Left), textY, fpgCaret.Width, Font.GetHeight);
   end
   else
   begin
@@ -1704,12 +1690,12 @@ begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
     // Calculate width of substring instead of accumulating per-character to avoid rounding errors
-    tw  := FFont.GetTextWidth(UTF8Copy(dtext, 1, chnum));
+    tw  := Font.GetTextWidth(UTF8Copy(dtext, 1, chnum));
     case FAlignment of
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
     taRightJustify:
-      chx := tw - FTextOffset - FSideMargin + r.Width - FFont.GetTextWidth(dtext);
+      chx := tw - FTextOffset - FSideMargin + r.Width - Font.GetTextWidth(dtext);
     end;
     if UsePxCursorPos then
     begin
@@ -1744,7 +1730,7 @@ begin
   taLeftJustify:
     FCursorPx := tw - FTextOffset + FSideMargin;
   taRightJustify:
-    FCursorPx := tw - FTextOffset - FSideMargin + r.Width - FFont.GetTextWidth(dtext);
+    FCursorPx := tw - FTextOffset - FSideMargin + r.Width - Font.GetTextWidth(dtext);
   end;
 end;
 
@@ -1794,12 +1780,12 @@ begin
     pdp := dpos;
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     ptw := tw;
-    tw  := tw + FFont.GetTextWidth(ch);
+    tw  := tw + Font.GetTextWidth(ch);
     case FAlignment of
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
     taRightJustify:
-      chx := tw - FTextOffset - FSideMargin + r.Width - FFont.GetTextWidth(dtext);
+      chx := tw - FTextOffset - FSideMargin + r.Width - Font.GetTextWidth(dtext);
     end;
 
     // calculate selection-related fields
@@ -1817,7 +1803,7 @@ begin
       taLeftJustify:
         FDrawOffset := ptw;
       taRightJustify:
-        FDrawOffset := ptw + r.Width - FFont.GetTextWidth(dtext);
+        FDrawOffset := ptw + r.Width - Font.GetTextWidth(dtext);
       end;
     end;
     // in small edit field the same character can be both the first and the last, so no 'else' allowed
@@ -2004,7 +1990,7 @@ begin
     Canvas.SetClipRect(r);
 
     // Calculate vertical center position based on actual height
-    textY := r.Top + ((r.Height - FFont.GetHeight) div 2);
+    textY := r.Top + ((r.Height - Font.GetHeight) div 2);
 
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
@@ -2017,7 +2003,7 @@ begin
       if FSelOffset <> 0 then
         DrawSelection;
       // drawing cursor
-      fpgCaret.SetCaret(Canvas, FCursorPx, textY, fpgCaret.Width, FFont.GetHeight);
+      fpgCaret.SetCaret(Canvas, FCursorPx, textY, fpgCaret.Width, Font.GetHeight);
     end
     else
     begin

@@ -35,27 +35,24 @@ type
     FOnChange: TNotifyEvent;
     FReadOnly: Boolean;
     FText: string;
-    FFont: TfpgFontResourceBase;
     FBoxLayout: TBoxLayout;
     FBoxSize: integer;
     FImgTextSpacing: integer;
     FIsPressed: boolean;
     function    GetBoxLayout: TBoxLayout;
-    function    GetFontDesc: string;
     procedure   SetBoxLayout(const AValue: TBoxLayout);
     procedure   SetChecked(const AValue: boolean);
-    procedure   SetFontDesc(const AValue: string);
     procedure   SetReadOnly(const AValue: Boolean);
     procedure   SetText(const AValue: string);
     procedure   DoOnChange;
   protected
+    procedure   SetFontDesc(const AValue: string); override;
     procedure   HandleCheckChanged; virtual;
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Checked: boolean read FChecked write SetChecked default False;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
     property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    Text: string read FText write SetText;
@@ -63,7 +60,6 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    Font: TfpgFontResourceBase read FFont;
   end;
 
 
@@ -137,14 +133,6 @@ begin
   Result := FBoxLayout;
 end;
 
-function TfpgBaseCheckBox.GetFontDesc: string;
-begin
-  if Assigned(FFont) then
-    Result := FFont.FontDesc
-  else
-    Result := '';
-end;
-
 procedure TfpgBaseCheckBox.SetBoxLayout(const AValue: TBoxLayout);
 begin
   if FBoxLayout = AValue then
@@ -155,8 +143,7 @@ end;
 
 procedure TfpgBaseCheckBox.SetFontDesc(const AValue: string);
 begin
-  FFont := nil;  // Release old font (automatic ref count decrement)
-  FFont := fpgApplication.FontManager.GetFont(AValue);
+  inherited SetFontDesc(AValue);
   { TODO: Implement AutoSize property, then adjust width here if True }
   RePaint;
 end;
@@ -294,8 +281,8 @@ constructor TfpgBaseCheckBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText       := 'CheckBox';
-  FFont       := fpgApplication.FontManager.GetFont('#Label1');
-  FHeight     := FFont.GetHeight + 4;
+  FontDesc    := '#Label1';  // Use inherited property setter
+  FHeight     := Font.GetHeight + 4;
   FWidth      := 120;
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
@@ -311,7 +298,6 @@ end;
 
 destructor TfpgBaseCheckBox.Destroy;
 begin
-  FFont := nil;
   inherited Destroy;
 end;
 
