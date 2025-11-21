@@ -356,6 +356,7 @@ type
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
     function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+    procedure InvalidateLayout(AContainer: TfpgWidgetBase); override;
     procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase); override;
 
     // Helper to calculate sizes from grid
@@ -3728,6 +3729,14 @@ end;
 function TfpgMigLayoutManager.CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint;
 begin
   Result := TfpgMigCC.Create;  // Use new v11 CC class
+end;
+
+procedure TfpgMigLayoutManager.InvalidateLayout(AContainer: TfpgWidgetBase);
+begin
+  inherited InvalidateLayout(AContainer);
+  // Mark grid as dirty so it will be recreated on next layout
+  // This is important when widgets are added/removed or constraints change
+  FDirty := True;
 end;
 
 procedure TfpgMigLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
