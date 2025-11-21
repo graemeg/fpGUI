@@ -70,7 +70,7 @@ begin
     PreferredSize := fpgSize(150, 35);
     OnClick := @btnBasicClicked;
   end;
-  mig.AddLayoutComponent(btnBasic, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(btnBasic, TfpgMigCC.Create().GrowX());
 
   btnNested := TfpgButton.Create(self);
   with btnNested do
@@ -80,7 +80,7 @@ begin
     PreferredSize := fpgSize(150, 35);
     OnClick := @btnNestedClicked;
   end;
-  mig.AddLayoutComponent(btnNested, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(btnNested, TfpgMigCC.Create().GrowX());
 
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
@@ -91,7 +91,7 @@ begin
     FontDesc := 'Liberation Sans-10:antialias=true';
     OnClick := @btnQuitClicked;
   end;
-  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create().GrowX().AlignX('fill'));
+  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create().GrowX());
 
 end;
 
