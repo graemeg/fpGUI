@@ -202,9 +202,9 @@ begin
 
   // Add components with spanning constraints
   FLayout.AddLayoutComponent(FComp1, TfpgMigCC.Create);
-  FLayout.AddLayoutComponent(FComp2, TfpgMigCC.Create.SpanX(2));  // Span 2 columns
+  FLayout.AddLayoutComponent(FComp2, TfpgMigCC.Create.SpanX(2).GrowX);  // Span 2 columns and grow
   FLayout.AddLayoutComponent(FComp3, TfpgMigCC.Create.Wrap);      // Wrap after this
-  FLayout.AddLayoutComponent(FComp4, TfpgMigCC.Create.SpanX);     // Span whole row
+  FLayout.AddLayoutComponent(FComp4, TfpgMigCC.Create.SpanX.GrowX);     // Span whole row and grow
 
   // Perform layout
   FForm.Realign;
