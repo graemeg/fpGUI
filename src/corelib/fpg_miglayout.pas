@@ -3941,19 +3941,6 @@ begin
   // Delegate to Grid's PaintDebug if grid exists
   if (FGrid <> nil) and Assigned(ACanvas) then
     FGrid.PaintDebug(ACanvas);
-
-  // Proof-of-concept: Draw a red border and text
-{
-  if Assigned(ACanvas) then
-  begin
-    ACanvas.Color := clRed;
-    ACanvas.SetLineStyle(2, lsDash);
-    ACanvas.DrawRectangle(0, 0, AWidget.ActualWidth, AWidget.ActualHeight);
-
-    ACanvas.TextColor := clRed;
-    ACanvas.DrawString(5, 5, 'DEBUG');
-  end;
-}
 end;
 
 { TfpgMigGrid.ConvertSpanToSparseGrid - Port of Grid.java:1539 }
@@ -3965,31 +3952,20 @@ begin
   // Port of Grid.java convertSpanToSparseGrid() - lines 1539-1554
   lastIx := ACurIx + ASpan;
   retSpan := 1;
-  WriteLn(Format('DEBUG ConvertSpanToSparseGrid: ACurIx=%d, ASpan=%d, AIndexes.Count=%d, lastIx=%d',
-    [ACurIx, ASpan, AIndexes.Count, lastIx]));
 
   for i := 0 to AIndexes.Count - 1 do
   begin
     ix := AIndexes[i];
-    WriteLn(Format('  Loop i=%d: ix=%d, ACurIx=%d, lastIx=%d', [i, ix, ACurIx, lastIx]));
 
     if ix <= ACurIx then
-    begin
-      WriteLn('    SKIP (ix <= ACurIx)');
       Continue;  // Haven't arrived at the current index yet
-    end;
 
     if ix >= lastIx then
-    begin
-      WriteLn('    BREAK (ix >= lastIx)');
       Break;  // Past the end of the span
-    end;
 
-    WriteLn(Format('    INC retSpan from %d to %d', [retSpan, retSpan+1]));
     Inc(retSpan);
   end;
 
-  WriteLn(Format('DEBUG ConvertSpanToSparseGrid: Result=%d', [retSpan]));
   Result := retSpan;
 end;
 
@@ -4055,7 +4031,6 @@ begin
   savedLineWidth := ACanvas.GetLineWidth;
   savedLineStyle := ACanvas.LineStyle;
 
-  writeln('PaintDebug: FDebugRects.Count =' + IntToStr(FDebugRects.Count));
   ACanvas.ClearClipRect;
   try
     // Paint cell outlines (red dashed rectangles)
