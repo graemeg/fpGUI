@@ -1759,10 +1759,10 @@ begin
   begin
     FPreferredSize.H := AValue;
 
-    // During csLoading or without layout manager: also apply actual size immediately
-    // With layout manager at runtime: layout manager will call HandleResize with constrained size
-    if (csLoading in ComponentState) or not Assigned(Parent) or
-       not (Parent is TfpgWidget) or not Assigned(TfpgWidget(Parent).LayoutManager) then
+    // Without layout manager: also apply actual size immediately (backward compatibility)
+    // With layout manager: layout manager will call HandleResize with constrained size
+    if not Assigned(Parent) or not (Parent is TfpgWidget) or
+       not Assigned(TfpgWidget(Parent).LayoutManager) then
     begin
       HandleResize(FWidth, AValue);
     end;
@@ -1782,10 +1782,10 @@ begin
   begin
     FPreferredSize.W := AValue;
 
-    // During csLoading or without layout manager: also apply actual size immediately
-    // With layout manager at runtime: layout manager will call HandleResize with constrained size
-    if (csLoading in ComponentState) or not Assigned(Parent) or
-       not (Parent is TfpgWidget) or not Assigned(TfpgWidget(Parent).LayoutManager) then
+    // Without layout manager: also apply actual size immediately (backward compatibility)
+    // With layout manager: layout manager will call HandleResize with constrained size
+    if not Assigned(Parent) or not (Parent is TfpgWidget) or
+       not Assigned(TfpgWidget(Parent).LayoutManager) then
     begin
       HandleResize(AValue, FHeight);
     end;
@@ -1966,25 +1966,25 @@ begin
 end;
 
 procedure TfpgWidgetBase.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+var
+  HasLayoutManager: Boolean;
 begin
-  WriteLn(Format('DEBUG MoveAndResize %s: ALeft=%d, ATop=%d, AWidth=%d, AHeight=%d (Current: L=%d, T=%d, W=%d, H=%d)',
-    [Name, ALeft, ATop, AWidth, AHeight, FLeft, FTop, FWidth, FHeight]));
-  if not (csLoading in ComponentState) then
+  // Check if this widget has a layout manager managing it
+  HasLayoutManager := Assigned(Parent) and (Parent is TfpgWidget) and
+                     Assigned(TfpgWidget(Parent).LayoutManager);
+
+  if HasLayoutManager or not (csLoading in ComponentState) then
   begin
-    // Runtime: Apply actual position and size via Handle* methods
+    // Runtime OR managed by layout: Apply actual position and size via Handle* methods
+    // Layout managers should always use this path, even during construction
     if (ALeft <> FLeft) or (ATop <> FTop) then
       HandleMove(ALeft, ATop);
     if (AWidth <> FWidth) or (AHeight <> FHeight) then
-    begin
-      WriteLn(Format('DEBUG MoveAndResize %s: Calling HandleResize', [Name]));
       HandleResize(AWidth, AHeight);
-    end
-    else
-      WriteLn(Format('DEBUG MoveAndResize %s: SKIPPING HandleResize (size unchanged)', [Name]));
   end
   else
   begin
-    // During construction: Set preferred size via properties, then set actual position/size
+    // During construction WITHOUT layout manager: Set preferred size via properties, then set actual position/size
     Left   := ALeft;    // Sets FLeft via SetLeft
     Top    := ATop;     // Sets FTop via SetTop
     Width  := AWidth;   // Sets FPreferredSize.W via SetWidth

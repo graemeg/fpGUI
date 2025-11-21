@@ -65,8 +65,8 @@ begin
       if Assigned(Parent) and (Parent is TfpgWidget) and Assigned(TfpgWidget(Parent).LayoutManager) then
       begin
         // Layout manager present: scale preferred size
-        Width := ScaleX(Width, FromDPI);
-        Height := ScaleY(Height, FromDPI);
+        // Set both dimensions atomically to avoid corrupting FPreferredSize
+        PreferredSize := fpgSize(ScaleX(Width, FromDPI), ScaleY(Height, FromDPI));
       end
       else
       begin
