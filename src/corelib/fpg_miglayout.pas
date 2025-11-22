@@ -564,12 +564,6 @@ begin
     else
       refSize := ASizeHint; // Fallback, though likely -1
 
-    {$IFDEF MIGDEBUG}
-    if (uv.UnitType = utPercent) and (FComp <> nil) then
-      WriteLn(Format('DEBUG GetSize: Component=%s, Percent=%.1f%%, RefSize=%.1f, Calculated=%d',
-        [FComp.Name, uv.Value, refSize, Round(uv.GetPixels(refSize, FComp.Parent, FComp))]));
-    {$ENDIF}
-
     Result := Round(uv.GetPixels(refSize, FComp.Parent, FComp));
   end;
 end;
@@ -912,15 +906,8 @@ begin
 
   // Sanity check on bounds before transferring - prevent negative or zero sizes
   if (compW < 1) or (compH < 1) then
-  begin
-    {$IFDEF MIGDEBUG}
-    WriteLn('DEBUG: TransferBounds - Invalid size for ', FComp.Name, ': W=', compW, ', H=', compH);
-    {$ENDIF}
     Exit;
-  end;
 
-  WriteLn(Format('DEBUG TransferBounds: %s [%s] - X=%d, Y=%d, W=%d, H=%d',
-    [FComp.Name, FComp.ClassName, compX, compY, compW, compH]));
   // Transfer calculated bounds to the widget via ILayoutTarget interface
   (FComp as ILayoutTarget).MoveAndResize(compX, compY, compW, compH);
 end;
@@ -1008,41 +995,19 @@ begin
 
   Parent := FCompWraps[0].Comp.Parent;
 
-  {$IFDEF MIGDEBUG}
-  // DEBUG: Show layout parameters BEFORE calling layout to avoid output corruption
-  if FIsHor then
-    Write('DEBUG: BEFORE Layout group (H) with ')
-  else
-    Write('DEBUG: BEFORE Layout group (V) with ');
-  Write(FCompWraps.Count, ' components at start=', AStart, ', size=', ASize);
-  Write(', linkType=', FLinkType, ', components: [');
-  for i := 0 to FCompWraps.Count - 1 do
-  begin
-    Write(FCompWraps[i].Comp.Name);
-    if i < FCompWraps.Count - 1 then Write(', ');
-  end;
-  WriteLn(']');
-  {$ENDIF}
-
   case FLinkType of
     TYPE_PARALLEL:
     begin
-      WriteLn(Format('DEBUG group.Layout: Calling LayoutParallel with ASize=%d', [ASize]));
       TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
     end;
     TYPE_BASELINE:
     begin
-      WriteLn(Format('DEBUG group.Layout: Calling LayoutBaseline with ASize=%d', [ASize]));
       TfpgMigGrid.LayoutBaseline(Parent, FCompWraps, ADC, AStart, ASize, SIZE_PREF, ASpanCount);
     end;
   else // TYPE_SERIAL
-    WriteLn(Format('DEBUG group.Layout: Calling LayoutSerial with ASize=%d, FLinkType=%d', [ASize, FLinkType]));
     TfpgMigGrid.LayoutSerial(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
   end;
 end;
-
-
-
 
 
 { TfpgMigGrid }
@@ -1067,10 +1032,6 @@ var
   ccBef, ccAft: TfpgMigCC;
   i: Integer;
 begin
-  {$IFDEF MIGDEBUG}
-  WriteLn('DEBUG: ===== Creating TfpgMigGrid =====');
-  WriteLn('DEBUG: Container has ', ACCMap.Count, ' managed widgets');
-  {$ENDIF}
   inherited Create;
   FContainer := AContainer;
   FLC := ALC;
@@ -1134,19 +1095,10 @@ begin
       spanX := Min(cc.CellSpanX, MAX_GRID - cellX);
       // Clamp spanY to remaining grid height
       spanY := Min(cc.CellSpanY, MAX_GRID - cellY);
-      {$IFDEF MIGDEBUG}
-      if (cc.CellSpanX > 1) or (cc.CellSpanY > 1) then
-        WriteLn('DEBUG:   Component "', child.Name, '" has span: cc.CellSpanX=', cc.CellSpanX,
-                ', cc.CellSpanY=', cc.CellSpanY, ', spanX=', spanX, ', spanY=', spanY);
-      {$ENDIF}
     end;
 
     // Encode grid position as integer key
     cellKey := EncodeCellKey(cellX, cellY);
-
-    {$IFDEF MIGDEBUG}
-    WriteLn('DEBUG: Placing widget "', child.Name, '" [' + child.ClassType.ClassName + '] at cell (', cellX, ', ', cellY, ')');
-    {$ENDIF}
 
     // Get or create cell at this position
     if not FGrid.TryGetValue(cellKey, cell) then
@@ -1159,8 +1111,6 @@ begin
 
       cell := TfpgMigCell.Create(spanX, spanY, cellFlowX);
       FGrid.Add(cellKey, cell);
-      WriteLn(Format('DEBUG: Created cell at (%d,%d) with spanX=%d, spanY=%d, flowX=%d (CC.IsFlowX=%d) for component "%s"',
-        [cellX, cellY, spanX, spanY, Ord(cellFlowX), cc.IsFlowX, child.Name]));
     end;
 
     // Add CompWrap to cell
@@ -1176,18 +1126,12 @@ begin
       // Port of Grid.java line 312-314: if (cc.isWrap())
       if (cc <> nil) and (cc.WrapGap <> nil) then
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Component "', child.Name, '" has wrap constraint, moving to next row');
-        {$ENDIF}
         cellX := 0;
         cellY := cellY + 1;
       end
       // Check for layout-level auto-wrap
       else if (wrap > 0) and (cellX >= wrap) then
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next row');
-        {$ENDIF}
         cellX := 0;
         cellY := cellY + 1;
       end;
@@ -1195,9 +1139,6 @@ begin
       // Skip cells occupied by spanning components
       while IsCellOccupied(cellX, cellY) do
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Cell (', cellX, ', ', cellY, ') is occupied, skipping...');
-        {$ENDIF}
         cellX := cellX + 1;
         if (wrap > 0) and (cellX >= wrap) then
         begin
@@ -1215,18 +1156,12 @@ begin
       // Port of Grid.java line 312-314: if (cc.isWrap())
       if (cc <> nil) and (cc.WrapGap <> nil) then
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Component "', child.Name, '" has wrap constraint, moving to next column');
-        {$ENDIF}
         cellY := 0;
         cellX := cellX + 1;
       end
       // Check for layout-level auto-wrap
       else if (wrap > 0) and (cellY >= wrap) then
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Wrapping after ', wrap, ' components, moving to next column');
-        {$ENDIF}
         cellY := 0;
         cellX := cellX + 1;
       end;
@@ -1234,9 +1169,6 @@ begin
       // Skip cells occupied by spanning components
       while IsCellOccupied(cellX, cellY) do
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG: Cell (', cellX, ', ', cellY, ') is occupied, skipping...');
-        {$ENDIF}
         cellY := cellY + 1;
         if (wrap > 0) and (cellY >= wrap) then
         begin
@@ -1245,9 +1177,6 @@ begin
         end;
       end;
     end;
-    {$IFDEF MIGDEBUG}
-    WriteLn('DEBUG: Next cell position will be (', cellX, ', ', cellY, ')');
-    {$ENDIF}
     end;  // end for i := 0 to AContainer.ComponentCount - 1
   end;  // end if ACCMap <> nil
 
@@ -1262,11 +1191,6 @@ begin
   // Note: hasPush parameters not yet implemented, passing False for now
   FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
   FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
-
-  {$IFDEF MIGDEBUG}
-  WriteLn('DEBUG: FGrowXs length=', Length(FGrowXs), ', FillX=', FLC.IsFillX);
-  WriteLn('DEBUG: FGrowYs length=', Length(FGrowYs), ', FillY=', FLC.IsFillY);
-  {$ENDIF}
 
   // Calculate gaps now that the cells are filled
   ltr := TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
@@ -1598,10 +1522,6 @@ begin
     end;
 
     // Add column indexes for this cell and its span
-    {$IFDEF MIGDEBUG}
-    if cell.SpanX > 1 then
-      WriteLn('DEBUG: BuildIndexes processing cell at (', cellX, ',', cellY, ') with SpanX=', cell.SpanX);
-    {$ENDIF}
 
     // For very large spans (e.g., INF_SIZE/30000 from SpanX()), only add the starting column
     // The actual span will be calculated later based on how many real columns exist
@@ -1620,9 +1540,6 @@ begin
       end;
       if not found then
       begin
-        {$IFDEF MIGDEBUG}
-        WriteLn('DEBUG:   Adding starting column index ', cellX, ' for large span');
-        {$ENDIF}
         FColIndexes.Add(cellX);
       end;
     end
@@ -1642,10 +1559,6 @@ begin
         end;
         if not found then
         begin
-          {$IFDEF MIGDEBUG}
-          if cell.SpanX > 1 then
-            WriteLn('DEBUG:   Adding column index ', cellX + spanIdx);
-          {$ENDIF}
           FColIndexes.Add(cellX + spanIdx);
         end;
       end;
@@ -1666,16 +1579,6 @@ begin
     end;
   end;
 
-  {$IFDEF MIGDEBUG}
-  Write('DEBUG: Row indexes: [');
-  for i := 0 to FRowIndexes.Count - 1 do
-  begin
-    Write(FRowIndexes[i]);
-    if i < FRowIndexes.Count - 1 then Write(', ');
-  end;
-  WriteLn(']');
-  {$ENDIF}
-
   // Sort column indexes using bubble sort
   for i := 0 to FColIndexes.Count - 2 do
   begin
@@ -1689,16 +1592,6 @@ begin
       end;
     end;
   end;
-
-  {$IFDEF MIGDEBUG}
-  Write('DEBUG: Column indexes: [');
-  for i := 0 to FColIndexes.Count - 1 do
-  begin
-    Write(FColIndexes[i]);
-    if i < FColIndexes.Count - 1 then Write(', ');
-  end;
-  WriteLn(']');
-  {$ENDIF}
 end;
 
 function TfpgMigGrid.IsCellOccupied(ACellX, ACellY: Integer): Boolean;
@@ -2458,9 +2351,7 @@ begin
       // In our Pascal code, primIndexes[i] gives us that value
       if AIsRows then
       begin
-        WriteLn(Format('DEBUG DivideIntoLinkedGroups: BEFORE ConvertSpan - AIsRows=true, primIndexes[%d]=%d, span=%d', [i, primIndexes[i], span]));
         span := ConvertSpanToSparseGrid(primIndexes[i], span, FRowIndexes);
-        WriteLn(Format('DEBUG DivideIntoLinkedGroups: AFTER ConvertSpan - span=%d, FRowIndexes.Count=%d', [span, FRowIndexes.Count]));
       end
       else
         span := ConvertSpanToSparseGrid(primIndexes[i], span, FColIndexes);
@@ -2470,13 +2361,6 @@ begin
       // If serial flow with multiple components or spanning cell, create group for whole cell
       if ((not isPar) and (cell.CompWraps.Count > 1)) or (span > 1) then
       begin
-        {$IFDEF MIGDEBUG}
-        if span > 1 then
-          WriteLn('DEBUG: DivideIntoLinkedGroups creating group with span=', span,
-                  ' at cell(', cellX, ',', cellY, ') for ',
-                  cell.CompWraps.Count, ' components, AIsRows=', AIsRows);
-        {$ENDIF}
-
         if isPar then
           linkType := TfpgMigLinkedDimGroup.TYPE_PARALLEL
         else
@@ -2523,54 +2407,12 @@ begin
     end;
   end;
 
-  {$IFDEF MIGDEBUG}
-  // DEBUG: Show created dimension groups
-  if AIsRows then
-  begin
-    WriteLn('DEBUG: Created ', Length(Result), ' row group lists');
-    for i := 0 to High(Result) do
-    begin
-      WriteLn('DEBUG:   Row ', i, ' has ', Result[i].Count, ' groups');
-      for ix := 0 to Result[i].Count - 1 do
-      begin
-        Write('DEBUG:     Group ', ix, ' span=', Result[i][ix].Span, ' comps=', Result[i][ix].CompWraps.Count, ': [');
-        for cellKey := 0 to Result[i][ix].CompWraps.Count - 1 do
-        begin
-          Write(Result[i][ix].CompWraps[cellKey].Comp.Name);
-          if cellKey < Result[i][ix].CompWraps.Count - 1 then Write(', ');
-        end;
-        WriteLn(']');
-      end;
-    end;
-  end
-  else
-  begin
-    WriteLn('DEBUG: Created ', Length(Result), ' column group lists');
-    for i := 0 to High(Result) do
-    begin
-      WriteLn('DEBUG:   Column ', i, ' has ', Result[i].Count, ' groups');
-      for ix := 0 to Result[i].Count - 1 do
-      begin
-        Write('DEBUG:     Group ', ix, ' span=', Result[i][ix].Span, ' comps=', Result[i][ix].CompWraps.Count, ': [');
-        for cellKey := 0 to Result[i][ix].CompWraps.Count - 1 do
-        begin
-          Write(Result[i][ix].CompWraps[cellKey].Comp.Name);
-          if cellKey < Result[i][ix].CompWraps.Count - 1 then Write(', ');
-        end;
-        WriteLn(']');
-      end;
-    end;
-  end;
-  {$ENDIF}
 end;
 
 procedure TfpgMigGrid.LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
 var
   fromEnd: Boolean;
   primDCs: TfpgMigDimConstraintArray;
-{$IFDEF MIGDEBUG}
-  debugDim: string;
-{$ENDIF}
   fss: TfpgMigFlowSizeSpec;
   rowCols: array of TfpgMigLinkedDimGroupList;
   rowColSizes: TfpgMigIntegerArray;
@@ -2605,60 +2447,7 @@ begin
   if fss = nil then
     Exit;
 
-  {$IFDEF MIGDEBUG}
-  if not AIsRows then  // Debug columns
-  begin
-    WriteLn('DEBUG: LayoutInOneDim (COLS) ARefSize=', ARefSize, ', ADefGrowW length=', Length(ADefGrowW));
-    if Length(ADefGrowW) > 0 then
-      WriteLn('DEBUG:   ADefGrowW[0]=', ADefGrowW[0]:0:2);
-  end;
-  {$ENDIF}
-
-  {$IFDEF MIGDEBUG}
-  if not AIsRows then  // Debug columns before CalculateSerial
-  begin
-    Write('DEBUG: LayoutInOneDim (COLS) fss.GetSizes (SIZE_PREF) before CalculateSerial: [');
-    for i := 0 to Min(High(fss.GetSizes), 9) do
-    begin
-      Write(fss.GetSizes[i][SIZE_PREF]);
-      if i < Min(High(fss.GetSizes), 9) then Write(', ');
-    end;
-    WriteLn(']');
-  end;
-  {$ENDIF}
-
   rowColSizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, ADefGrowW, SIZE_PREF, ARefSize);
-
-  {$IFDEF MIGDEBUG}
-  if AIsRows then
-  begin
-    Write('DEBUG: LayoutInOneDim (ROWS) rowColSizes=[');
-    for i := 0 to Min(High(rowColSizes), 9) do
-    begin
-      Write(rowColSizes[i]);
-      if i < Min(High(rowColSizes), 9) then Write(', ');
-    end;
-    WriteLn(']');
-    WriteLn('DEBUG: Row layout breakdown:');
-    WriteLn('  rowColSizes[0] = ', rowColSizes[0], ' (gap before row 0 / top inset)');
-    if Length(rowColSizes) > 1 then
-      WriteLn('  rowColSizes[1] = ', rowColSizes[1], ' (row 0 height)');
-    if Length(rowColSizes) > 2 then
-      WriteLn('  rowColSizes[2] = ', rowColSizes[2], ' (gap between row 0 and row 1)');
-    if Length(rowColSizes) > 3 then
-      WriteLn('  rowColSizes[3] = ', rowColSizes[3], ' (row 1 height)');
-  end
-  else
-  begin
-    Write('DEBUG: LayoutInOneDim (COLS) rowColSizes after CalculateSerial: [');
-    for i := 0 to Min(High(rowColSizes), 9) do
-    begin
-      Write(rowColSizes[i]);
-      if i < Min(High(rowColSizes), 9) then Write(', ');
-    end;
-    WriteLn(']');
-  end;
-  {$ENDIF}
 
   // TODO: Port isDesignTime logic if needed
 
@@ -2681,23 +2470,12 @@ begin
 
     // Safety check - ensure array indices are within bounds
     if bIx2 >= Length(rowColSizes) then
-    begin
-      {$IFDEF MIGDEBUG}
-      if AIsRows then
-        WriteLn('DEBUG: WARNING - bIx2=', bIx2, ' >= Length(rowColSizes)=', Length(rowColSizes), ', skipping row ', i);
-      {$ENDIF}
       Continue;
-    end;
 
     if fromEnd then
       curPos := curPos - rowColSizes[bIx]
     else
       curPos := curPos + rowColSizes[bIx];
-
-    {$IFDEF MIGDEBUG}
-    if AIsRows then
-      WriteLn('DEBUG:   Row ', i, ': curPos after gap=', curPos, ', gap=', rowColSizes[bIx]);
-    {$ENDIF}
 
     if (scIx >= 0) and (scIx < Length(primDCs)) then
       primDC := primDCs[scIx]
@@ -2716,18 +2494,9 @@ begin
         group := linkedGroups[j];
         groupSize := rowSize;
         if group.Span > 1 then
-        begin
           groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
-          WriteLn(Format('DEBUG LayoutInOneDim: Spanning group j=%d detected! Span=%d, rowSize=%d, calculated groupSize=%d, bIx2=%d',
-            [j, group.Span, rowSize, groupSize, bIx2]));
-        end
-        else
-          WriteLn(Format('DEBUG LayoutInOneDim: Regular group j=%d, Span=%d, groupSize=%d, bIx2=%d',
-            [j, group.Span, groupSize, bIx2]));
 
-        WriteLn(Format('DEBUG LayoutInOneDim: About to call group.Layout with groupSize=%d', [groupSize]));
         group.Layout(primDC, curPos, groupSize, group.Span);
-        WriteLn('DEBUG LayoutInOneDim: Returned from group.Layout');
       end;
     end;
 
@@ -2735,11 +2504,6 @@ begin
       curPos := curPos - rowSize
     else
       curPos := curPos + rowSize;
-
-    {$IFDEF MIGDEBUG}
-    if AIsRows then
-      WriteLn('DEBUG:   Row ', i, ': curPos after row=', curPos, ', rowSize=', rowSize);
-    {$ENDIF}
   end;
 end;
 
@@ -2904,23 +2668,8 @@ var
   group: TfpgMigLinkedDimGroup;
   sizes: TfpgMigIntegerArray;
   sz: Integer;
-  {$IFDEF MIGDEBUG}
-  startTime, endTime: QWord;
-  {$ENDIF}
 begin
   // Port of Grid.java adjustMinPrefForSpanningComps() - lines 1420-1451
-
-  {$IFDEF MIGDEBUG}
-  startTime := GetTickCount64;
-  WriteLn('DEBUG: AdjustMinPrefForSpanningComps called, AGroupsLists.Length=', Length(AGroupsLists));
-  for r := 0 to High(AGroupsLists) do
-  begin
-    if AGroupsLists[r] <> nil then
-      WriteLn('DEBUG:   AGroupsLists[', r, '] has ', AGroupsLists[r].Count, ' groups')
-    else
-      WriteLn('DEBUG:   AGroupsLists[', r, '] is nil');
-  end;
-  {$ENDIF}
 
   // Since 3.7.3: Iterate from end to start. Will solve some multiple spanning components hard to solve problems
   for r := High(AGroupsLists) downto 0 do
@@ -2931,11 +2680,6 @@ begin
 
     for group in groups do
     begin
-      {$IFDEF MIGDEBUG}
-      if group.Span > 1 then
-        WriteLn('DEBUG:   Found spanning group at row ', r, ' with span=', group.Span);
-      {$ENDIF}
-
       if group.Span = 1 then
         Continue;
 
@@ -2970,11 +2714,6 @@ begin
       end;
     end;
   end;
-
-  {$IFDEF MIGDEBUG}
-  endTime := GetTickCount64;
-  WriteLn('DEBUG: AdjustMinPrefForSpanningComps completed in ', endTime - startTime, 'ms');
-  {$ENDIF}
 end;
 
 class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
@@ -2990,8 +2729,6 @@ var
   p: PInteger;
   calculatedSizes: TfpgMigIntegerArray;
 begin
-  WriteLn(Format('DEBUG LayoutParallel START: ASize=%d, ACompWraps.Count=%d, IsHor=%d',
-    [ASize, ACompWraps.Count, Ord(AIsHor)]));
   SetLength(sizes, ACompWraps.Count);
 
   for i := 0 to ACompWraps.Count - 1 do
@@ -3028,8 +2765,6 @@ begin
       sz[1][SIZE_MIN] := p[SIZE_MIN];
       sz[1][SIZE_PREF] := p[SIZE_PREF];
       sz[1][SIZE_MAX] := p[SIZE_MAX];
-      WriteLn(Format('DEBUG LayoutParallel: Component %d sizes - MIN=%d, PREF=%d, MAX=%d, AvailableSize=%d',
-        [i, p[SIZE_MIN], p[SIZE_PREF], p[SIZE_MAX], ASize]));
     end;
 
     sz[2][SIZE_MIN] := 0;
@@ -3049,8 +2784,6 @@ begin
     if Length(calculatedSizes) > 0 then sizes[i][0] := calculatedSizes[0];
     if Length(calculatedSizes) > 1 then sizes[i][1] := calculatedSizes[1];
     if Length(calculatedSizes) > 2 then sizes[i][2] := calculatedSizes[2];
-    WriteLn(Format('DEBUG LayoutParallel: Component %d calculated sizes = [%d, %d, %d]',
-      [i, calculatedSizes[0], calculatedSizes[1], calculatedSizes[2]]));
 
     // Free temporary ResizeConstraint objects (all are newly created)
     resConstr[0].Free;
@@ -3373,17 +3106,6 @@ begin
             gaps
          );
 
-  WriteLn(Format('DEBUG LayoutSerial: fss.GetSizes has %d elements', [Length(fss.GetSizes)]));
-  if Length(fss.GetSizes) >= 3 then
-  begin
-    WriteLn(Format('DEBUG LayoutSerial: Gap before  (fss[0]) = min:%d, pref:%d, max:%d',
-      [fss.GetSizes[0][SIZE_MIN], fss.GetSizes[0][SIZE_PREF], fss.GetSizes[0][SIZE_MAX]]));
-    WriteLn(Format('DEBUG LayoutSerial: Component   (fss[1]) = min:%d, pref:%d, max:%d',
-      [fss.GetSizes[1][SIZE_MIN], fss.GetSizes[1][SIZE_PREF], fss.GetSizes[1][SIZE_MAX]]));
-    WriteLn(Format('DEBUG LayoutSerial: Gap after   (fss[2]) = min:%d, pref:%d, max:%d',
-      [fss.GetSizes[2][SIZE_MIN], fss.GetSizes[2][SIZE_PREF], fss.GetSizes[2][SIZE_MAX]]));
-  end;
-
   // Port of Grid.java line 2066: Enable growth only if fill is set
   // Spanning does NOT automatically enable growth - component keeps preferred size
   // and is aligned within the spanned space
@@ -3391,19 +3113,13 @@ begin
   begin
     SetLength(growW, 1);
     growW[0] := 100.0;
-    WriteLn(Format('DEBUG LayoutSerial: Enabling grow weight (IsFill=True, SpanCount=%d)', [ASpanCount]));
   end
   else
   begin
     SetLength(growW, 0);
-    WriteLn(Format('DEBUG LayoutSerial: No growth (IsFill=False, SpanCount=%d) - component will use preferred size', [ASpanCount]));
   end;
 
   sizes := TfpgMigLayoutUtil.CalculateSerial(fss.GetSizes, fss.ResConstsInclGaps, growW, SIZE_PREF, ASize);
-  WriteLn(Format('DEBUG LayoutSerial: ASize=%d, ACompWraps.Count=%d, calculated sizes length=%d',
-    [ASize, ACompWraps.Count, Length(sizes)]));
-  if Length(sizes) > 0 then
-    WriteLn(Format('DEBUG LayoutSerial: sizes=[%d, %d, ...]', [sizes[0], sizes[1]]));
   SetCompWrapBounds(AParent, sizes, ACompWraps, ADC.GetAlignOrDefault(AIsHor), AStart, ASize, AIsHor, AFromEnd);
 
   // Free the FlowSizeSpec object created by MergeSizesGapsAndResConstrs
@@ -3417,19 +3133,6 @@ var
   align: TfpgMigUnitValue;
   cSt, slack, al: Integer;
 begin
-  {$IFDEF MIGDEBUG}
-  if AIsHor then
-  begin
-    Write('DEBUG: SetCompWrapBounds (H) for ', ACompWraps.Count, ' components, AStart=', AStart, ', ASize=', ASize, ', AAllSizes=[');
-    for i := 0 to Min(High(AAllSizes), 9) do
-    begin
-      Write(AAllSizes[i]);
-      if i < Min(High(AAllSizes), 9) then Write(', ');
-    end;
-    WriteLn(']');
-  end;
-  {$ENDIF}
-
   totSize := TfpgMigLayoutUtil.Sum(AAllSizes);
   if (ACompWraps.Count > 0) and (ACompWraps[0].CC <> nil) then
     align := CorrectAlign(ACompWraps[0].CC, ARowAlign, AIsHor, AFromEnd)
@@ -3439,27 +3142,9 @@ begin
   cSt := AStart;
   slack := ASize - totSize;
 
-  {$IFDEF MIGDEBUG}
-  if AIsHor and (ACompWraps.Count > 0) then
-  begin
-    WriteLn(Format('DEBUG SetCompWrapBounds: Component=%s, totSize=%d, ASize=%d, slack=%d',
-      [ACompWraps[0].Comp.Name, totSize, ASize, slack]));
-    if align <> nil then
-      WriteLn(Format('DEBUG SetCompWrapBounds: align.Value=%.1f, align.Unit=%d',
-        [align.Value, Ord(align.UnitType)]))
-    else
-      WriteLn('DEBUG SetCompWrapBounds: align=nil');
-  end;
-  {$ENDIF}
-
   if (slack > 0) and (align <> nil) then
   begin
     al := Min(slack, Max(0, Round(align.GetPixels(slack, AParent, nil))));
-    {$IFDEF MIGDEBUG}
-    if AIsHor then
-      WriteLn(Format('DEBUG SetCompWrapBounds: Applying alignment offset al=%d (%.1f%% of %d)',
-        [al, (al / slack) * 100, slack]));
-    {$ENDIF}
     if AFromEnd then
       cSt := cSt - al
     else
@@ -3482,9 +3167,6 @@ begin
     begin
       cSt := cSt + AAllSizes[bIx]; // gap
       Inc(bIx);
-      if AIsHor then
-        WriteLn(Format('DEBUG SetCompWrapBounds: Setting %s at position %d, size=%d',
-          [cw.Comp.Name, cSt, AAllSizes[bIx]]));
       cw.SetDimBounds(cSt, AAllSizes[bIx], AIsHor);
       cSt := cSt + AAllSizes[bIx];
       Inc(bIx);
@@ -3508,16 +3190,6 @@ begin
     align := ACC.Horizontal.GetAlign
   else
     align := ACC.Vertical.GetAlign;
-
-  {$IFDEF MIGDEBUG}
-  WriteLn(Format('DEBUG CorrectAlign: AIsHor=%s, component align=%s, row align=%s',
-    [BoolToStr(AIsHor, True),
-     BoolToStr(align <> nil, True),
-     BoolToStr(ARowAlign <> nil, True)]));
-  if align <> nil then
-    WriteLn(Format('DEBUG CorrectAlign: Component align value=%.1f, unit=%d',
-      [align.Value, Ord(align.UnitType)]));
-  {$ENDIF}
 
   if align = nil then
     align := ARowAlign;
@@ -3563,11 +3235,6 @@ begin
     // Gaps are handled separately by GetRowGaps to avoid double-counting.
     // This matches the fix we made in LayoutParallel for positioning.
     cwSize := cw.GetSizes(AIsHor)[ASizeType];
-
-    {$IFDEF MIGDEBUG}
-    if not AIsHor then  // Debug vertical/row sizing
-      WriteLn('DEBUG: GetTotalSizeParallel(V) comp=', cw.Comp.Name, ', cwSize=', cwSize);
-    {$ENDIF}
 
     if cwSize >= INF then
       Exit(INF);
@@ -3762,10 +3429,6 @@ begin
   FIsLayingOut := True;
   try
 
-  {$IFDEF MIGDEBUG}
-  Writeln('>> MigLayout DoLayout()');
-  {$ENDIF MIGDEBUG}
-
   // Get iterator for proper widget traversal (skips native window, hidden widgets, etc.)
   Iterator := GetIterator(AContainer);
   if not Assigned(Iterator) then
@@ -3825,10 +3488,6 @@ begin
     insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
     insRight := Round(insUV.GetPixels(0, AContainer, nil));
 
-    WriteLn(Format('DEBUG DoLayout: Container=%s, ActualWidth=%d, ActualHeight=%d, Insets (T,L,B,R)=(%d,%d,%d,%d)',
-      [AContainer.ClassName, AContainer.ActualWidth, AContainer.ActualHeight,
-       insTop, insLeft, insBottom, insRight]));
-
     // 4. Setup bounds for layout, accounting for insets
     // This matches Java: bounds = [insets.left, insets.top,
     //                              width - left - right, height - top - bottom]
@@ -3836,7 +3495,6 @@ begin
     bounds[1] := insTop;    // y offset
     bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
     bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
-    WriteLn(Format('DEBUG DoLayout: bounds=[%d, %d, %d, %d]', [bounds[0], bounds[1], bounds[2], bounds[3]]));
 
     // 5. Perform layout with debug flag based on LC.DebugMillis
     isDebug := FLC.GetDebugMillis > 0;
@@ -3849,9 +3507,6 @@ begin
 
   finally
     FIsLayingOut := False;
-    {$IFDEF MIGDEBUG}
-    Writeln('<< MigLayout DoLayout()');
-    {$ENDIF MIGDEBUG}
   end;
 end;
 

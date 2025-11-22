@@ -153,9 +153,6 @@ var
   lPos: integer;
   ToolkitOnly: Boolean;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TranslateUnitResourceStrings:');
-  {$ENDIF}
   Result := False;
   ToolkitOnly := False;
 
@@ -164,11 +161,6 @@ begin
   lFile := fpgExtractFileName(AFilename);
   lPos := Pos('.', lFile);
   lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
-  {$IFDEF GDEBUG}
-  writeln('  lFile = ', lFile);
-  writeln('  ResUnitName="', ResUnitName, '"');
-  writeln('  AFilename="', AFilename, '"');
-  {$ENDIF}
 
   if {(ResUnitName = '') or} (AFilename = '') or (not fpgFileExists(AFilename)) then
     ToolkitOnly := True;  // we don't have a application translation file
@@ -179,9 +171,6 @@ begin
     begin
       if not fpgFileExists(lFile) then
         Exit;
-      {$IFDEF GDEBUG}
-      writeln('  ************  Only translating the toolkit   ***********');
-      {$ENDIF}
       po := TPOFile.Create(nil);
       po.AppendFile(lFile);
     end
@@ -244,18 +233,10 @@ begin
 
   if (FallbackLang <> '') then
   begin
-    {$IFDEF GDEBUG}
-    writeln('1) Trying fallback language... ', Fallbacklang);
-    {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [FallbackLang]));
   end;
   if (Lang <> '') then
-  begin
-    {$IFDEF GDEBUG}
-    writeln('2) Trying language... ', Lang);
-    {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [Lang]));
-  end;
 end;
 
 { TPOFile }
@@ -364,9 +345,6 @@ procedure TPOFile.Add(const Identifier, OriginalValue, TranslatedValue: string);
 var
   Item: TPOFileItem;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TPOFile.Add: ' + Identifier + ' | ' + OriginalValue + ' | ' + TranslatedValue);
-  {$ENDIF}
   if (TranslatedValue = '') then
     Exit; //==>
   Item := TPOFileItem.Create(Identifier, OriginalValue, TranslatedValue);
@@ -381,15 +359,9 @@ var
   s: string;
 begin
   s := StringReplace(Identifier, '.', ':', []);
-  {$IFDEF GDEBUG}
-  writeln('TPOFile.Translate: ' + s + '(' + Identifier + ') | ' + OriginalValue);
-  {$ENDIF}
   Item := TPOFileItem(FIdentifierToItem.Data[s]);
   if Item = nil then
   begin
-    {$IFDEF GDEBUG}
-    writeln('  identifier lookup failed, trying original value');
-    {$ENDIF}
     Item := TPOFileItem(FOriginalToItem.Data[OriginalValue]);
   end;
   if Item <> nil then
@@ -399,12 +371,7 @@ begin
       raise Exception.Create('TPOFile.Translate Inconsistency');
   end
   else
-  begin
-    {$IFDEF GDEBUG}
-    writeln('  OriginalValue lookup failed, defaulting to original value');
-    {$ENDIF}
     Result := OriginalValue;
-  end;
 end;
 
 procedure TPOFile.AppendFile(const AFilename: string);
@@ -413,7 +380,6 @@ var
   s: string;
   f: TStream;
 begin
-  // Now fpGUI translation
   if (AFilename = '') or (not fpgFileExists(AFilename)) then
     Exit;
   f := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);

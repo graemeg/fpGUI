@@ -89,9 +89,6 @@ function TfpgImageList.GetFListIndex(AIndex: Integer): Integer;
 var
   i: integer;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageList.GetFListIndex');
-  {$ENDIF}
   result := -1;
   for i := 0 to FList.Count - 1 do
     if TfpgImageItem(FList[i]).Index = AIndex then
@@ -105,9 +102,6 @@ function TfpgImageList.GetItem(AIndex: integer): TfpgImageItem;
 var
   AFindIndex: integer;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageList.GetItem');
-  {$ENDIF}
   result := nil;
   AFindIndex := GetFListIndex(AIndex);
   if AFindIndex > -1 then
@@ -148,10 +142,6 @@ procedure TfpgImageList.AddItemFromFile(AFileName: TfpgString; AIndex: integer);
 var
   AImageItem: TfpgImageItem;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageList.AddItemFromFile');
-  {$ENDIF}
-
   if not fpgFileExists(AFileName) then
     Exit; //==>
 
@@ -183,9 +173,6 @@ end;
 
 procedure TfpgImageList.RemoveIndex(AIndex: integer);
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageList.RemoveIndex');
-  {$ENDIF}
   AIndex := GetFListIndex(AIndex);
   if AIndex <> -1 then
   begin
@@ -232,9 +219,6 @@ end;
 
 procedure TfpgImageItem.SetIndex(AIndex: integer);
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageItem.SetIndex');
-  {$ENDIF}
   if AIndex <> FIndex then
   begin
     if ImageList <> nil then
@@ -245,9 +229,6 @@ end;
 
 procedure TfpgImageItem.SetImage(AImage: TfpgImage);
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageItem.SetImage');
-  {$ENDIF}
   FImage := AImage;
 end;
 
@@ -271,9 +252,6 @@ end;
 
 constructor TfpgImageItem.Create(AFileName: TfpgString; AIndex: integer);
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageItem.Create(', AFileName, ',', AIndex, ')');
-  {$ENDIF}
   Index := AIndex;
   LoadFromFile(AFileName);
 end;
@@ -287,9 +265,6 @@ end;
 
 procedure TfpgImageItem.LoadFromFile(AFileName: TfpgString);
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgImageItem.LoadFromFile');
-  {$ENDIF}
   if FImage <> nil then
     FImage.Destroy;
   if Lowercase(fpgExtractFileExt(AFileName)) = '.png' then

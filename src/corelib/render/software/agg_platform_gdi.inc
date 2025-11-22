@@ -25,7 +25,6 @@ function GetWindowsFontDir: string;
 var
   lWinFontPath: array[0..MAX_PATH] of WideChar;
   lPasWinFontPath: string;
-  i: Integer;
 begin
   // Find for example C:\Windows\Fonts or C:\WINNT\Fonts
   Windows.GetWindowsDirectoryW(@lWinFontPath[0], MAX_PATH);
@@ -38,20 +37,10 @@ procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   srcdc: HDC;
   destdc: HDC;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
-  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
-  {$ENDIF}
   // Only the top level window canvas puts the buffer to the screen so no delta needed
   if not FWidget.WindowAllocated or not FWidget.Window.HasHandle then
-  begin
-    debugln('TAgg2D/GDI DoPutBufferToScreen:  No WinHandle available.');
     exit;
-  end;
 
   FImg.UpdateImage;
   destdc := Windows.GetDC(TfpgNativeWindow(FWidget.Window).WinHandle);

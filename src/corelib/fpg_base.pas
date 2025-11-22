@@ -1704,7 +1704,6 @@ begin
   t := 0;
   WidgetToWindow(l,t);
   Result.SetRect(l,t,ActualWidth,ActualHeight);
-  //WriteLn('wir: ', Format('x=%d:y=%d:r=%d:b=%d',[l,t,result.Right,Result.Bottom]));
 end;
 
 procedure TfpgWidgetBase.AddChild(AChild: TfpgWidgetBase);
@@ -1819,16 +1818,11 @@ procedure TfpgWidgetBase.HandleResize(AWidth, AHeight: TfpgCoord);
 var
   ConstrainedWidth, ConstrainedHeight: TfpgCoord;
 begin
-  WriteLn(Format('DEBUG HandleResize %s: AWidth=%d, AHeight=%d, CurrentWidth=%d, CurrentHeight=%d',
-    [Name, AWidth, AHeight, FWidth, FHeight]));
   ConstrainedWidth := ConstraintWidth(AWidth);
   ConstrainedHeight := ConstraintHeight(AHeight);
-  WriteLn(Format('DEBUG HandleResize %s: ConstrainedWidth=%d, ConstrainedHeight=%d',
-    [Name, ConstrainedWidth, ConstrainedHeight]));
 
   if (FWidth <> ConstrainedWidth) or (FHeight <> ConstrainedHeight) then
   begin
-    WriteLn(Format('DEBUG HandleResize %s: SIZE CHANGE DETECTED', [Name]));
     if not (csLoading in ComponentState) then
     begin
       FPrevWidth := FWidth;
@@ -1839,17 +1833,12 @@ begin
       FPrevWidth := ConstrainedWidth;
       FPrevHeight := ConstrainedHeight;
     end;
-    WriteLn(Format('DEBUG HandleResize %s: BEFORE: FWidth=%d, FHeight=%d', [Name, FWidth, FHeight]));
     FWidth := ConstrainedWidth;
     FHeight := ConstrainedHeight;
-    WriteLn(Format('DEBUG HandleResize %s: AFTER: FWidth=%d, FHeight=%d', [Name, FWidth, FHeight]));
 
     if (FWidth <> FPrevWidth) or (FHeight <> FPrevHeight) then
       Include(FDirtyFlags, wdfSize);
-  end
-  else
-    WriteLn(Format('DEBUG HandleResize %s: NO SIZE CHANGE (FWidth=%d already equals ConstrainedWidth=%d)',
-      [Name, FWidth, ConstrainedWidth]));
+  end;
 end;
 
 constructor TfpgWidgetBase.Create(AOwner: TComponent);
@@ -2350,7 +2339,6 @@ var
 begin
   inherited DefaultHandler(message);
   FMsg:=@msg;
-  //WriteLn(msg.MsgCode);
   case msg.MsgCode of
     FPGM_SCROLL,
     FPGM_MOUSEDOWN,
@@ -2480,7 +2468,6 @@ begin
 
   MouseCursor:=w.MouseCursor;
   w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
-  //WriteLn('Dispatch MouseEvent: ', w.ClassName, msg.Params.mouse.x,':',msg.Params.mouse.y);
   msg.Dest := w;
   w.Dispatch(msg);
 end;
@@ -2533,7 +2520,6 @@ begin
   end;
   if Result = nil then
     Result := PrimaryWidget;
-  //WriteLn('KEY: ', Result.ClassName);
 end;
 
 procedure TfpgWindowBase.SetCurrentWidget(AValue: TfpgWidgetBase);
@@ -4455,7 +4441,6 @@ var
 
   function IsBefore(newitem, item: TFileEntry): boolean;
   begin
-    //if newitem.etype = etDir then writeln('dir: ',newitem.name,' (',item.name,')');
     if (newitem.EntryType = etDir) and (item.EntryType <> etDir) then
     begin
       result := true;

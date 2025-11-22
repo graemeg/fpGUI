@@ -113,7 +113,6 @@ begin
     begin
       if (e.msg.Dest = Dest) and ((MsgCode = -1) or (MsgCode = e.msg.MsgCode)) then
       begin
-        //WriteLn(Format('fpgDeleteMessagesForTarget: Deleted message %d for %s', [e.msg.MsgCode, e.msg.Dest.ClassName]));
         MsgListRemoveElement(e, UsedFirstMessage, UsedLastMessage);
         MsgListInsertElement(e, FreeFirstMessage, FreeLastMessage);
       end;

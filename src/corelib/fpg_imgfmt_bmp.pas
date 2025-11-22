@@ -180,9 +180,6 @@ begin
     img.AllocateMask;
   end;
 
-  //Writeln('width: ',img.width,' height: ',img.height,' depth: ',depth);
-  //Writeln('compression: ',ih^.compression);
-
   Inc(p, SizeOf(TBMPInfoHeaderRec));
 
   if ih^.bitcount <= 8 then
@@ -218,7 +215,6 @@ begin
     1:
     begin
       // direct line transfer
-      //writeln('reading 1-bit color bitmap');
       linecnt := 0;
       bcnt := img.Width div 32;
       if (img.Width and $1F) > 0 then
@@ -233,14 +229,12 @@ begin
         Inc(linecnt);
       until linecnt >= img.Height;
 
-      //Writeln(linecnt,' lines loaded.');
       move(img.ImageData^, img.MaskData^, img.ImageDataSize);
       img.Invert(True);
     end;
 
     4:
     begin
-      //writeln('reading 4-bit color');
       linecnt := 0;
       repeat
         // parse one line..
@@ -276,7 +270,6 @@ begin
 
     8:
     begin
-      //writeln('reading 8-bit color');
       linecnt := 0;
       repeat
         // parse one line..
@@ -301,7 +294,6 @@ begin
 
     24:
     begin
-      //writeln('reading truecolor');
       linecnt := 0;
       repeat
         // parse one line..
@@ -440,7 +432,6 @@ begin
     1:
     begin
       // direct line transfer
-      //writeln('reading 1-bit color bitmap');
       linecnt := 0;
       bcnt := img.Width div 32;
       if (img.Width and $1F) > 0 then
@@ -455,14 +446,12 @@ begin
         Inc(linecnt);
       until linecnt >= img.Height;
 
-      //Writeln(linecnt,' lines loaded.');
       move(img.ImageData^, img.MaskData^, img.ImageDataSize);
       img.Invert(True);
     end;
 
     4:
     begin
-      //writeln('reading 4-bit color');
       linecnt := 0;
       repeat
         // parse one line..
@@ -498,7 +487,6 @@ begin
 
     8:
     begin
-      //writeln('reading 8-bit color');
       linecnt := 0;
       repeat
         // parse one line..
@@ -523,7 +511,6 @@ begin
 
     24:
     begin
-      //writeln('reading truecolor');
       linecnt := 0;
       repeat
         // parse one line..

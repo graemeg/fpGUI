@@ -714,9 +714,6 @@ end;
 
 destructor TfpgWidget.Destroy;
 begin
-  {$IFDEF GDEBUG}
-  writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
-  {$ENDIF}
   FLayoutConstraint.Free;
   FCanvas.Free;
   HandleHide;

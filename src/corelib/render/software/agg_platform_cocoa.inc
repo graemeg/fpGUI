@@ -114,26 +114,12 @@ var
   context: NSGraphicsContext;
   color: NSColor;
   r, g, b, a: Byte;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
-  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
-  {$ENDIF}
-
   // Get the window
   win := TWindowHack(TfpgWidgetBase(FWidget).Window);
   if not Assigned(win) or not win.HandleIsValid then
-  begin
-    {$IFDEF CStackDebug}
-    DebugLn('TAgg2D/Cocoa DoPutBufferToScreen: No valid window handle.');
-    {$ENDIF}
     exit;
-  end;
 
-  // Update the image data
   FImg.UpdateImage;
 
   // Get image data from FImg
@@ -157,5 +143,4 @@ end;
 
 
 {$endif}
-
 

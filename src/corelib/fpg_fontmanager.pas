@@ -193,7 +193,7 @@ end;
 
 procedure TfpgFontManager.DumpCache;
 begin
-  WriteLn(GetCacheStats);
+  DebugLn(GetCacheStats);
 end;
 
 end.

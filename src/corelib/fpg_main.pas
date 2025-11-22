@@ -969,7 +969,7 @@ begin
       Freemem(uDebugText);
       uDebugText := nil;
       // Add extra line ending: a dialog will be shown in Windows gui application
-      writeln(StdOut, 'Cannot open file: ', DebugFileName+LineEnding);
+      Writeln(StdOut, 'Cannot open file: ', DebugFileName+LineEnding);
     end;
   end;
   if uDebugText = nil then
@@ -1666,7 +1666,6 @@ end;
 
 procedure TfpgApplication.InternalMsgHintTimer(var msg: TfpgMessageRec);
 begin
-//  writeln('InternalMsgHintTimer msg');
   if (msg.Params.user.Param1 < 2) then
   begin
     { MouseEnter occured }
@@ -1706,7 +1705,6 @@ begin
   try
     if Assigned(w) then
     begin
-//writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
       TWidgetFriend(w).DoShowHint(lHint);
       ActivateHint(w.WidgetToScreen(w, FHintPos), lHint);
     end;
@@ -1721,7 +1719,6 @@ end;
 
 procedure TfpgApplication.SetShowHint(const AValue: boolean);
 begin
-//writeln('>> SetShowHint to :', AValue);
   FShowHint := AValue;
 end;
 
