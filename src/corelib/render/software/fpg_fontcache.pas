@@ -288,10 +288,12 @@ begin
     FT_Init_FreeType(m_library);
 
     lPathList := TStringList.Create;
+    {$IFDEF UNIX}
     lPathList.Add('/usr/share/cups/fonts/');
     lPathList.Add('/usr/share/fonts/truetype/');
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
+    {$ENDIF}
     lPathList.Add(GetUserDir + '.fonts/');
     {$IFDEF Darwin}
     { As per Apple Support page: https://support.apple.com/en-us/HT201722 }
