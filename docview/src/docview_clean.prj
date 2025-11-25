@@ -594,9 +594,9 @@ libpref=-Fl
 objpref=-Fo
 targpref=-o
 befcommand=1
- rm units/${TargetCPU}-${TargetOS}/*
+ [ -d "units/${TargetCPU}-${TargetOS}" ] || (mkdir "units/${TargetCPU}-${TargetOS}" )
 aftcommand=1
- 
+ rm units/${TargetCPU}-${TargetOS}/*
 makeoptions=10
  -l -Mobjfpc -Sch
  -gwl -O- -godwarfsets -godwarfmethodclassprefix
@@ -621,7 +621,7 @@ makeoptpurpose=10
  
  
 befcommandon=1
- 0
+ 63
 makeoptionson=10
  63
  31
