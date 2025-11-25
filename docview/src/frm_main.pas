@@ -3962,7 +3962,7 @@ begin
     Exit;
 
   {$NOTE: Replace this with TStringList or TStringStream.}
-  FileMode := fmInput;
+  FileMode := fmOpenRead;
   AssignFile( BookmarksFile, BookmarksFileName );
   try
     Reset( BookmarksFile );
