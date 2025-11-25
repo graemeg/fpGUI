@@ -964,7 +964,7 @@ begin
       Add( TopicInfoFile + HelpFile.Filename );
       Add( TopicInfoResourceIDs );
       for i := 0 to ResourceIDs.Count - 1 do
-        Add( '  ' + IntToStr( longint( ResourceIDs[ i ] ) ) );
+        Add( '  ' + IntToStr( PtrInt( ResourceIDs[ i ] ) ) );
       if ResourceIDs.Count = 0 then
         Add( TopicInfoNoResourceIDs );
     end;
