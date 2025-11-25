@@ -350,7 +350,7 @@ var
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
   OpenAdditionalFile := False;
   try
     for i := 0 to sl.Count-1 do
@@ -374,7 +374,7 @@ var
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
   OpenAdditionalFile := True;
   try
     for i := 0 to sl.Count-1 do
@@ -393,7 +393,6 @@ end;
 
 procedure TMainForm.tvContentsDragEntered(Drop: TfpgDrop);
 var
-  i: integer;
   s: string;
 begin
 //  ShowMimeList(Drop.MimeTypes);
