@@ -2429,13 +2429,25 @@ var
   oldColor: TfpgColor;
   oldLineWidth: integer;
   oldLineStyle: TfpgLineStyle;
+  lineWidth: integer;
+  dpi: integer;
 begin
   oldColor      := ACanvas.Color;
   oldLineWidth  := ACanvas.GetLineWidth;
   oldLineStyle  := ACanvas.LineStyle;
 
+  // Scale line width for HiDPI displays to keep focus rectangle visible
+  // At 96 DPI (100%): 1 pixel
+  // At 120 DPI (125%): 2 pixels (1.25x rounded up)
+  // At 144 DPI (150%): 2 pixels (1.5x rounded)
+  // At 192 DPI (200%): 2 pixels (2x)
+  dpi := fpgApplication.Screen_dpi;
+  lineWidth := Max(1, Round(dpi / 96.0));
+  if lineWidth > 2 then
+    lineWidth := 2;  // Cap at 2 pixels to avoid overly thick lines
+
   ACanvas.SetColor(clText1);
-  ACanvas.SetLineStyle(1, lsDot);
+  ACanvas.SetLineStyle(lineWidth, lsDot);
   ACanvas.DrawRectangle(r);
 
   // restore previous settings
