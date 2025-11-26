@@ -2428,6 +2428,7 @@ begin
   FMouseCursorIsDirty := False;
   FWindowState := wsNormal;
   FDropableWidgets := TFPList.Create;
+  FWindowAttributes := [waSizeable];
 end;
 
 destructor TfpgWindowBase.Destroy;

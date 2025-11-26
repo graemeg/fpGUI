@@ -2776,10 +2776,10 @@ begin
     else
     begin
       hints.flags      := hints.flags or PMinSize or PMaxSize;
-      hints.min_width  := widget.MinWidth;
-      hints.min_height := widget.MinHeight;
-      hints.max_width  := widget.MaxWidth;
-      hints.max_height := widget.MaxHeight;
+      hints.min_width  := w;
+      hints.min_height := h;
+      hints.max_width  := w;
+      hints.max_height := h;
     end;
 
   XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
@@ -2995,21 +2995,24 @@ begin
   end;
 
   // waSizeable;
-  if waSizeable in Changed then
+  if (waSizeable in Changed) or AForceAll then
   begin
     if (FWindowType <> wtChild) and (waSizeable in ANewAttributes) then
     begin
-      hints.flags      := hints.flags or PMinSize or PMaxSize;
+      hints.flags      := hints.flags or PMinSize;
       hints.min_width  := w.MinWidth;
       hints.min_height := w.MinHeight;
-      if w.MaxWidth > 0 then
-        hints.max_width := w.MaxWidth
-      else
-        hints.max_width := xapplication.ScreenWidth;
-      if w.MaxHeight > 0 then
-        hints.max_height := w.MaxHeight
-      else
-        hints.max_height := xapplication.ScreenHeight;
+      { Only set max size hints if widget has explicit size constraints }
+      if (w.MaxWidth > 0) and (w.MaxWidth < xapplication.ScreenWidth) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_width  := w.MaxWidth;
+      end;
+      if (w.MaxHeight > 0) and (w.MaxHeight < xapplication.ScreenHeight) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_height := w.MaxHeight;
+      end;
     end
     else // not waSizeable
     begin
