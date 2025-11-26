@@ -1102,6 +1102,9 @@ procedure TfpgMemo.SetFontDesc(const AValue: string);
 begin
   FFont := nil;  // Release old font (automatic ref count decrement)
   FFont := fpgApplication.FontManager.GetFont(AValue);
+  FLineHeight := FFont.GetHeight + 2;
+  RecalcLongestLine;
+  UpdateScrollBars;
   RePaint;
 end;
 

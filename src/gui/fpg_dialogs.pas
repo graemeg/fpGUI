@@ -653,10 +653,15 @@ var
 begin
   fdesc := GetFontDesc;
   {$IFDEF DEBUG} Writeln(fdesc); {$ENDIF}
-  memSample.FontDesc := fdesc;
-  memSample.Text := FSampleText;
-  if FMode = 2 then
-    memSample.Lines.Add(fpgGetNamedFontDesc(UTF8Copy(fdesc, 2, UTF8Length(fdesc)-1)));
+  memSample.BeginUpdate;
+  try
+    memSample.FontDesc := fdesc;
+    memSample.Text := FSampleText;
+    if FMode = 2 then
+      memSample.Lines.Add(fpgGetNamedFontDesc(UTF8Copy(fdesc, 2, UTF8Length(fdesc)-1)));
+  finally
+    memSample.EndUpdate;
+  end;
 end;
 
 procedure TfpgFontSelectDialog.OnSampleTextChanged(Sender: TObject);
