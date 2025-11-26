@@ -53,6 +53,7 @@ type
   protected
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+    function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
     function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
   public
     constructor Create; override; overload;
@@ -132,7 +133,7 @@ var
   prefSize: TfpgSize;
   x, y: TfpgCoord;
   rowMaxHeight: TfpgCoord;
-  ContainerWidth: TfpgCoord;
+  ContainerWidth, ContainerHeight: TfpgCoord;
   Rows: array of TRowInfo;
   rowIdx: integer;
   i, j: integer;
@@ -140,13 +141,16 @@ var
   rowStartX: TfpgCoord;
   totalRowHeight: TfpgCoord;
   startY: TfpgCoord;
+  bounds: TfpgRect;
 begin
   if not (AContainer is TfpgWidget) then Exit;
 
   Iterator := GetIterator(AContainer);
   if not Assigned(Iterator) then Exit;
 
-  ContainerWidth := (AContainer as TfpgWidget).ActualWidth;
+  bounds := (AContainer as TfpgWidget).GetClientRect;
+  ContainerWidth := bounds.Width;
+  ContainerHeight := bounds.Height;
   SetLength(Rows, 1);
   rowIdx := 0;
   Rows[rowIdx].Width := 0;
@@ -186,8 +190,8 @@ begin
   // Determine starting Y position
   case FVAlignment of
     flvaTop: startY := FVGap;
-    flvaCenter: startY := (AContainer.ActualHeight - totalRowHeight) div 2;
-    flvaBottom: startY := AContainer.ActualHeight - totalRowHeight - FVGap;
+    flvaCenter: startY := (ContainerHeight - totalRowHeight) div 2;
+    flvaBottom: startY := ContainerHeight - totalRowHeight - FVGap;
   else
     startY := FVGap;
   end;
@@ -237,8 +241,12 @@ var
   Iterator: ILayoutIterator;
   w: TfpgWidget;
   prefSize: TfpgSize;
-  totalWidth: TfpgCoord;
-  maxHeight: TfpgCoord;
+  maxWidth: TfpgCoord;
+  totalHeight: TfpgCoord;
+  rowWidth: TfpgCoord;
+  rowHeight: TfpgCoord;
+  ContainerWidth: TfpgCoord;
+  bounds: TfpgRect;
 begin
   if not (AContainer is TfpgWidget) then
   begin
@@ -246,21 +254,89 @@ begin
     Exit;
   end;
 
+  // Get container's actual width to calculate wrapping
+  bounds := (AContainer as TfpgWidget).GetClientRect;
+  ContainerWidth := bounds.Width;
+
+  // If container width is not yet set (e.g., during initial construction),
+  // use a reasonable default to allow multi-row layout
+  if ContainerWidth <= 0 then
+    ContainerWidth := 400;  // Default reasonable width for wrapping
+
   Iterator := GetIterator(AContainer);
-  totalWidth := 0;
-  maxHeight := 0;
+  maxWidth := 0;
+  totalHeight := 0;
+  rowWidth := 0;
+  rowHeight := 0;
+
   while Iterator.HasNext do
   begin
     w := Iterator.Next as TfpgWidget;
     prefSize := w.PreferredSize;
-    if totalWidth > 0 then
-      totalWidth := totalWidth + FHGap;
-    totalWidth := totalWidth + prefSize.W;
+
+    // Check if adding this widget would exceed container width (need to wrap)
+    if (rowWidth > 0) and (rowWidth + FHGap + prefSize.W > ContainerWidth - FHGap * 2) then
+    begin
+      // Finish current row
+      if rowWidth > maxWidth then
+        maxWidth := rowWidth;
+      totalHeight := totalHeight + rowHeight + FVGap;
+
+      // Start new row
+      rowWidth := prefSize.W;
+      rowHeight := prefSize.H;
+    end
+    else
+    begin
+      // Add to current row
+      if rowWidth > 0 then
+        rowWidth := rowWidth + FHGap;
+      rowWidth := rowWidth + prefSize.W;
+      if prefSize.H > rowHeight then
+        rowHeight := prefSize.H;
+    end;
+  end;
+
+  // Finish last row
+  if rowWidth > maxWidth then
+    maxWidth := rowWidth;
+  totalHeight := totalHeight + rowHeight;
+
+  Result.SetSize(maxWidth + FHGap * 2, totalHeight + FVGap * 2);
+end;
+
+function TfpgFlowLayoutManager.DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize;
+var
+  Iterator: ILayoutIterator;
+  w: TfpgWidget;
+  prefSize: TfpgSize;
+  maxWidth: TfpgCoord;
+  maxHeight: TfpgCoord;
+begin
+  // For a flow layout, the minimum size is the size needed to display
+  // the largest single widget (since everything else can wrap)
+  if not (AContainer is TfpgWidget) then
+  begin
+    Result.SetSize(0, 0);
+    Exit;
+  end;
+
+  Iterator := GetIterator(AContainer);
+  maxWidth := 0;
+  maxHeight := 0;
+
+  while Iterator.HasNext do
+  begin
+    w := Iterator.Next as TfpgWidget;
+    prefSize := w.PreferredSize;
+    if prefSize.W > maxWidth then
+      maxWidth := prefSize.W;
     if prefSize.H > maxHeight then
       maxHeight := prefSize.H;
   end;
 
-  Result.SetSize(totalWidth + FHGap * 2, maxHeight + FVGap * 2);
+  // Add gaps/padding for the minimum size
+  Result.SetSize(maxWidth + FHGap * 2, maxHeight + FVGap * 2);
 end;
 
 end.
