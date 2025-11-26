@@ -56,6 +56,9 @@ type
     mnuHelp: TfpgPopupMenu;
     mnuOptions: TfpgPopupMenu;
     {@VFD_HEAD_END: MainFrom}
+    miAutoIndent: TfpgMenuItem;
+    miLineNumbers: TfpgMenuItem;
+    miElasticTabstops: TfpgMenuItem;
     FTextToFind: TfpgString;
     FFindOptions: TfpgFindOptions;
     FIsForward: boolean;
@@ -81,6 +84,7 @@ type
     procedure   HelpProductInfo(Sender: TObject);
     procedure   miOptionsAutoIndentClicked(Sender: TObject);
     procedure   miOptionsLineNumbersClicked(Sender: TObject);
+    procedure   miOptionsElasticTabstopsClicked(Sender: TObject);
     procedure   btnGOClick(Sender: TObject);
     procedure   memEditorChanged(Sender: TObject);
     procedure   UpdateStatus(const AMessage: TfpgString);
@@ -363,6 +367,20 @@ begin
   end;
 end;
 
+procedure TMainForm.miOptionsElasticTabstopsClicked(Sender: TObject);
+var
+  i: integer;
+  editor: TfpgTextEdit;
+begin
+  TfpgMenuItem(Sender).Checked := not TfpgMenuItem(Sender).Checked;
+  for i := 0 to pcEditor.PageCount-1 do
+  begin
+    editor := GetEditorFromTabIndex(i);
+    editor.UseElasticTabstops := TfpgMenuItem(Sender).Checked;
+    editor.Invalidate;
+  end;
+end;
+
 procedure TMainForm.btnGOClick(Sender: TObject);
 //var
 //  ftr: TElasticTabstopsDocFilter;
@@ -580,8 +598,12 @@ begin
   begin
     Name := 'mnuOptions';
     SetPosition(348, 100, 120, 20);
-    AddMenuItem('Auto Indent', '', @miOptionsAutoIndentClicked).Checked := True;
-    AddMenuItem('Line Numbers', '', @miOptionsLineNumbersClicked).Checked := True;
+    miAutoIndent := AddMenuItem('Auto Indent', '', @miOptionsAutoIndentClicked);
+    miAutoIndent.Checked := True;
+    miLineNumbers := AddMenuItem('Line Numbers', '', @miOptionsLineNumbersClicked);
+    miLineNumbers.Checked := True;
+    miElasticTabstops := AddMenuItem('Elastic Tabstops', '', @miOptionsElasticTabstopsClicked);
+    miElasticTabstops.Checked := False;
   end;
 
   {@VFD_BODY_END: MainFrom}
@@ -643,10 +665,12 @@ begin
   m.SetPosition(1, 1, 200, 20);
   m.Align := alClient;
   m.FontDesc := '#edit2';
-  m.GutterVisible := True;
+  m.GutterVisible := miLineNumbers.Checked;
   m.GutterShowLineNumbers := True;
   m.RightEdge := True;
   m.ShowHint := True;
+  m.AutoIndent := miAutoIndent.Checked;
+  m.UseElasticTabstops := miElasticTabstops.Checked;
   m.DropHandler := TfpgDropEventHandler.Create(@Bevel1DragEnter, @Bevel1DragLeave, @PanelDragDrop, nil);
 end;
 

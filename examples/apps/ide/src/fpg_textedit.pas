@@ -25,7 +25,7 @@ unit fpg_textedit;
 interface
 
 uses
-  Classes, SysUtils, fpg_base, fpg_main, fpg_widget,
+  Classes, SysUtils, Contnrs, fpg_base, fpg_main, fpg_widget,
   fpg_scrollbar;
 
 type
@@ -111,7 +111,6 @@ type
   private
     FAutoIndent: boolean;
     FDefaultDropHandler: TfpgDropEventHandler;
-    FFont: TfpgFontResourceBase;
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
@@ -142,6 +141,10 @@ type
     FRightEdge: Boolean;
     FRightEdgeCol: Integer;
     FLineChanged: Integer;    // force only one line to repaint if greater than -1
+    // Elastic Tabstops support
+    FElasticTabstops: TObject;  // Will be TTabstopsList (list of TIntegerList)
+    FTabPadding: Integer;
+    FUseElasticTabstops: Boolean;
 
     FLastScrollEventTime: TTime; // in milliseconds
     FLastScrollEventTimeBefore: TTime; // in milliseconds
@@ -191,7 +194,10 @@ type
     function    mousewheelacceleration(const avalue: double): double;
     function    mousewheelacceleration(const avalue: integer): integer;
     function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
+    procedure   CalculateElasticTabstops;
+    procedure   SetUseElasticTabstops(const AValue: Boolean);
   protected
+    FFont: TfpgFontResourceBase;
     { -- internal events -- }
     procedure   HandleShow; override;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
@@ -209,7 +215,7 @@ type
     { -- local widget functions -- }
     procedure   DrawVisible; virtual;
     procedure   DrawLine(const ALineIndex, Y: Integer); virtual;
-    procedure   FormatLine(const ALineIndex, X, Y: Integer);
+    procedure   FormatLine(const ALineIndex, X, Y: Integer); virtual;
     procedure   DrawCaret(const X, Y: Integer); virtual;
     { -- to be published --}
     property    AutoIndent: boolean read FAutoIndent write FAutoIndent default True;
@@ -254,6 +260,25 @@ type
     property    VisibleLines: Integer read FVisLines;
     property    RightEdge: Boolean read FRightEdge write SetRightEdge default False;
     property    RightEdgeCol: Integer read FRightEdgeCol write SetRightEdgeCol default 80;
+    { Elastic Tabstops: Automatically aligns tab-separated columns across multiple lines.
+      When enabled, pressing Tab inserts an actual tab character (#9) instead of spaces,
+      and the renderer calculates optimal column positions based on content width.
+
+      KNOWN LIMITATIONS:
+      - Text rendering works correctly and columns align properly
+      - Cursor navigation treats tabs as single characters (correct from a string index
+        perspective), but this doesn't match the visual column positions
+      - Mouse click positioning doesn't account for elastic tab widths
+      - Text selection may not align perfectly with visual columns
+
+      Fixing cursor/selection behavior would require overriding KeyboardCaretNav(),
+      GetRowColAtPos(), DrawCaret(), and selection handling to map between character
+      indices and visual pixel positions - a significant undertaking.
+
+      Despite these limitations, elastic tabstops are useful for viewing and creating
+      tab-aligned data where visual alignment is more important than cursor precision. }
+    property    UseElasticTabstops: Boolean read FUseElasticTabstops write SetUseElasticTabstops default False;
+    property    TabPadding: Integer read FTabPadding write FTabPadding default 8;
   end;
 
 
@@ -267,8 +292,10 @@ type
     property    Lines;
     property    RightEdge;
     property    ScrollBarStyle;
+    property    TabPadding;
     property    TabWidth;
     property    Tracking;
+    property    UseElasticTabstops;
     property    OnDrawLine;
     property    OnFindText;
     property    OnSearchEnd;
@@ -285,7 +312,13 @@ uses
   fpg_utils,
   math,
   strutils,
-  dbugintf;
+  dbugintf,
+  fgl;
+
+type
+  { Specialized generic lists for elastic tabstops }
+  TIntegerList = specialize TFPGList<Integer>;
+  TTabstopsList = specialize TFPGObjectList<TIntegerList>;
 
 
 function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
@@ -739,6 +772,11 @@ end;
 procedure TfpgBaseTextEdit.LinesChanged(Sender: TObject);
 begin
   FGutterPan.UpdateSize;
+  if FUseElasticTabstops then
+  begin
+    CalculateElasticTabstops;
+    Invalidate;
+  end;
 end;
 
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
@@ -1929,7 +1967,7 @@ var
   lIndentOffset: integer;
 begin
   {$IFDEF gDEBUG}
-  SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress')
+  SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress');
   {$ENDIF}
   CaretScroll := False;
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
@@ -2011,10 +2049,22 @@ begin
 
     keyTab:
         begin
-          AddS := '  ';
-          UTF8Insert(AddS, SLine, CaretPos.X);
-          FLines[CaretPos.Y] := SLine;
-          CaretPos.X := CaretPos.X + 2;
+          if FUseElasticTabstops then
+          begin
+            // Insert actual tab character for elastic tabstops
+            AddS := #9;
+            UTF8Insert(AddS, SLine, CaretPos.X + 1);
+            FLines[CaretPos.Y] := SLine;
+            CaretPos.X := CaretPos.X + 1;
+          end
+          else
+          begin
+            // Insert spaces for normal tab behavior
+            AddS := '  ';
+            UTF8Insert(AddS, SLine, CaretPos.X);
+            FLines[CaretPos.Y] := SLine;
+            CaretPos.X := CaretPos.X + 2;
+          end;
           FSelection.StartPos := CaretPos;
           consumed := True;
         end;
@@ -2176,6 +2226,13 @@ procedure TfpgBaseTextEdit.DrawVisible;
 var
   I, Y, cntVis: Integer;
 begin
+  // Calculate elastic tabstops if enabled
+  {$IFDEF gDEBUG}
+  writeln('DrawVisible: FUseElasticTabstops=', FUseElasticTabstops);
+  {$ENDIF}
+  if FUseElasticTabstops then
+    CalculateElasticTabstops;
+
   Y := 0;
   cntVis := 1;
   GetSelBounds(StartNo, EndNo, StartOffs, EndOffs);
@@ -2239,6 +2296,9 @@ var
   TI, Si, Ei, T: Integer;
   R: TfpgRect;
   AllowDraw: Boolean;
+  cells: TStringList;
+  positions: TIntegerList;
+  i, currentX: Integer;
 begin
   if FLines.Count = 0 then
     Exit; //==>
@@ -2249,6 +2309,53 @@ begin
   if Length(s) = 0 then
     Exit; // no text to draw, so we are done
 
+  // Handle elastic tabstops if enabled
+  if FUseElasticTabstops and Assigned(FElasticTabstops) and
+     (ALineIndex < TTabstopsList(FElasticTabstops).Count) and (Pos(#9, S) > 0) then
+  begin
+    // Elastic tabstops rendering
+    cells := TStringList.Create;
+    try
+      cells.Delimiter := #9;
+      cells.StrictDelimiter := True;
+      cells.DelimitedText := S;
+      positions := TTabstopsList(FElasticTabstops)[ALineIndex];
+
+      // Allow custom drawing via OnDrawLine event
+      R.SetRect(X, Y, Width, FChrH);
+      AllowDraw := True;
+      if Assigned(FOnDrawLine) then
+        FOnDrawLine(self, S, ALineIndex, Canvas, R, AllowDraw);
+
+      if AllowDraw then
+      begin
+        Canvas.TextColor := clBlack;
+        currentX := X;
+        {$IFDEF gDEBUG}
+        writeln('=== Line ', ALineIndex, ' X=', X, ' cells=', cells.Count, ' positions=', positions.Count);
+        {$ENDIF}
+        for i := 0 to cells.Count - 1 do
+        begin
+          {$IFDEF gDEBUG}
+          if i < positions.Count then
+            writeln('  Cell[', i, ']="', cells[i], '" at X=', currentX, ' nextPos=', positions[i])
+          else
+            writeln('  Cell[', i, ']="', cells[i], '" at X=', currentX, ' (last cell)');
+          {$ENDIF}
+          Canvas.DrawString(currentX, Y, cells[i]);
+          if i < positions.Count then
+            currentX := X + positions[i]
+          else
+            inc(currentX, FFont.GetTextWidth(cells[i]));
+        end;
+      end;
+    finally
+      cells.Free;
+    end;
+    Exit; // Done with elastic tabstops rendering
+  end;
+
+  // Standard tab handling (convert tabs to spaces)
   if Pos(#9, S) > 0 then
   begin
     CorrectS := '';
@@ -2422,6 +2529,9 @@ begin
   FRightEdgeCol := 80;
   FLineChanged := -1;
   FAutoIndent := True;
+  FElasticTabstops := nil;
+  FTabPadding := 8;
+  FUseElasticTabstops := False;
 
   fmousewheelfrequmin := 1;
   fmousewheelfrequmax := 100;
@@ -2455,6 +2565,8 @@ begin
   FFont := nil;
   if Assigned(FDefaultDropHandler) then
     FDefaultDropHandler.Free;
+  if Assigned(FElasticTabstops) then
+    TTabstopsList(FElasticTabstops).Free;
   inherited Destroy;
 end;
 
@@ -2781,6 +2893,157 @@ begin
   SrcRes := FindReplaceProc(TextToFind, FindOptions, Backward, False, Rep);
   if Assigned(FOnSearchEnd) then
     FOnSearchEnd(Self, SrcRes, False);
+end;
+
+procedure TfpgBaseTextEdit.SetUseElasticTabstops(const AValue: Boolean);
+begin
+  if FUseElasticTabstops = AValue then Exit;
+  FUseElasticTabstops := AValue;
+  if FUseElasticTabstops then
+    CalculateElasticTabstops;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.CalculateElasticTabstops;
+var
+  cellsPerLine: TObjectList; // of TStringList
+  widthsPerLine: TTabstopsList;
+  maxedWidthsPerLine: TTabstopsList;
+  widthsPerCol: TTabstopsList;
+  maxNumCells, i, j, k, l, lmaxWidth, runningTotal: integer;
+  line, cellText: string;
+  cells: TStringList;
+  widths, col, positions: TIntegerList;
+begin
+  {$IFDEF gDEBUG}
+  writeln('CalculateElasticTabstops called: Lines=', FLines.Count);
+  {$ENDIF}
+  // Free previous tabstops and re-create
+  if Assigned(FElasticTabstops) then
+    TTabstopsList(FElasticTabstops).Free;
+  FElasticTabstops := TTabstopsList.Create(True); // Owns the TIntegerLists
+
+  if (FLines.Count = 0) or (not FUseElasticTabstops) then Exit;
+
+  // --- Part 1: Grid of cell widths ---
+  cellsPerLine := TObjectList.Create(True); // Owns the TStringLists
+  widthsPerLine := TTabstopsList.Create(True);
+  maxNumCells := 0;
+  try
+    for i := 0 to FLines.Count - 1 do
+    begin
+      line := FLines[i];
+      cells := TStringList.Create;
+      cells.Delimiter := #9;
+      cells.StrictDelimiter := True;
+      cells.DelimitedText := line;
+      cellsPerLine.Add(cells);
+
+      widths := TIntegerList.Create;
+      for cellText in cells do
+        widths.Add(FFont.GetTextWidth(cellText));
+      widthsPerLine.Add(widths);
+
+      if cells.Count > maxNumCells then
+        maxNumCells := cells.Count;
+    end;
+    if maxNumCells = 0 then maxNumCells := 1;
+
+    // --- Part 2: Transpose and find max adjacent ---
+    widthsPerCol := TTabstopsList.Create(False); // Does NOT own TIntegerLists
+    try
+      for j := 0 to maxNumCells - 2 do
+      begin
+        col := TIntegerList.Create;
+        for i := 0 to FLines.Count - 1 do
+        begin
+          widths := widthsPerLine[i];
+          if j < widths.Count then
+            col.Add(widths[j])
+          else
+            col.Add(-1); // Use -1 as sentinel for "no cell"
+        end;
+        widthsPerCol.Add(col);
+      end;
+
+      // Find max in adjacent runs for each column
+      for j := 0 to widthsPerCol.Count - 1 do
+      begin
+        col := widthsPerCol[j];
+        i := 0;
+        while i < col.Count do
+        begin
+          if col[i] >= 0 then
+          begin
+            // Start of a run of non-nil values
+            l := i;
+            lmaxWidth := 0;
+            while (l < col.Count) and (col[l] >= 0) do
+            begin
+              if col[l] > lmaxWidth then
+                lmaxWidth := col[l];
+              inc(l);
+            end;
+
+            // Apply max width to the run
+            for k := i to l - 1 do
+              col[k] := lmaxWidth;
+
+            i := l; // Continue after the run
+          end
+          else
+            inc(i); // It's a sentinel, just skip
+        end;
+      end;
+
+      // --- Part 3: Transpose back and calculate positions ---
+      maxedWidthsPerLine := TTabstopsList.Create(True);
+      try
+        for i := 0 to FLines.Count - 1 do
+          maxedWidthsPerLine.Add(TIntegerList.Create);
+
+        for j := 0 to widthsPerCol.Count - 1 do
+        begin
+          col := widthsPerCol[j];
+          for i := 0 to col.Count - 1 do
+          begin
+            if col[i] >= 0 then
+              maxedWidthsPerLine[i].Add(col[i]);
+          end;
+        end;
+
+        // Finally, calculate the running total for the tabstop positions for each line
+        for i := 0 to FLines.Count - 1 do
+        begin
+          widths := maxedWidthsPerLine[i];
+          positions := TIntegerList.Create;
+          runningTotal := 0;
+          {$IFDEF gDEBUG}
+          write('Line ', i, ' tabstops: ');
+          {$ENDIF}
+          for k := 0 to widths.Count - 1 do
+          begin
+            inc(runningTotal, widths[k] + FTabPadding);
+            positions.Add(runningTotal);
+            {$IFDEF gDEBUG}
+            write(runningTotal, ' ');
+            {$ENDIF}
+          end;
+          {$IFDEF gDEBUG}
+          writeln;
+          {$ENDIF}
+          TTabstopsList(FElasticTabstops).Add(positions);
+        end;
+      finally
+        maxedWidthsPerLine.Free;
+      end;
+    finally
+      widthsPerCol.Free;
+    end;
+  finally
+    cellsPerLine.Free;
+    widthsPerLine.Free;
+  end;
 end;
 
 
