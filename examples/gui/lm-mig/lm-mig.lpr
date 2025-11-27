@@ -8,6 +8,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_checkbox,
+  fpg_radiobutton,
   fpg_form,
   fpg_button,
   fpg_label,
@@ -16,7 +17,8 @@ uses
   frm_spanning,
   frm_growth,
   frm_complex,
-  frm_parser;
+  frm_parser,
+  frm_buttonorder;
 
 
 type
@@ -29,6 +31,7 @@ type
     btnGrowth: TfpgButton;
     btnComplex: TfpgButton;
     btnParser: TfpgButton;
+    btnButtonOrder: TfpgButton;
     btnQuit: TfpgButton;
     chkDebug: TfpgCheckBox;
     procedure btnBasicClicked(Sender: TObject);
@@ -37,6 +40,7 @@ type
     procedure btnGrowthClicked(Sender: TObject);
     procedure btnComplexClicked(Sender: TObject);
     procedure btnParserClicked(Sender: TObject);
+    procedure btnButtonOrderClicked(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
@@ -129,6 +133,18 @@ begin
   end;
 end;
 
+procedure TMainForm.btnButtonOrderClicked(Sender: TObject);
+var
+  frm: TButtonOrderForm;
+begin
+  frm := TButtonOrderForm.Create(chkDebug.Checked);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
+end;
+
 procedure TMainForm.btnQuitClicked(Sender: TObject);
 begin
   Close;
@@ -141,7 +157,7 @@ begin
   Left := 400;
   Top := 300;
   Width := 280;
-  Height := 420;
+  Height := 460;
   WindowTitle := 'MigLayout Examples';
 
   lblTitle := TfpgLabel.Create(self);
@@ -233,9 +249,22 @@ begin
     OnClick := @btnParserClicked;
   end;
 
+  btnButtonOrder := TfpgButton.Create(self);
+  with btnButtonOrder do
+  begin
+    Name := 'btnButtonOrder';
+    Left := 20;
+    Top := 295;
+    Width := 240;
+    Height := 35;
+    Text := 'Platform Button Ordering';
+    FontDesc := '#Button';
+    OnClick := @btnButtonOrderClicked;
+  end;
+
   chkDebug := TfpgCheckBox.Create(Self);
   chkDebug.Left := 20;
-  chkDebug.Top := 330;
+  chkDebug.Top := 370;
   chkDebug.Text := 'Enable layout debugging';
   chkDebug.Width := 220;
   chkDebug.Height := 20;
@@ -246,7 +275,7 @@ begin
   begin
     Name := 'btnQuit';
     Left := 20;
-    Top := 360;
+    Top := 400;
     Width := 240;
     Height := 35;
     Text := 'Quit';

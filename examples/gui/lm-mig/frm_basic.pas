@@ -90,14 +90,14 @@ begin
   btn1 := TfpgButton.Create(Self);
   btn1.Name := 'btn1';
   btn1.Text := 'OK';
-  btn1.PreferredSize := fpgSize(80, 30);
-  mig.AddLayoutComponent(btn1, TfpgMigCC.Create().Tag('buttons'));
+  btn1.PreferredSize := fpgSize(80, 24);
+  mig.AddLayoutComponent(btn1, TfpgMigCC.Create().SpanX.Split(2).Tag('ok'));
 
   btn2 := TfpgButton.Create(Self);
   btn2.Name := 'btn2';
   btn2.Text := 'Cancel';
-  btn2.PreferredSize := fpgSize(80, 30);
-  mig.AddLayoutComponent(btn2, TfpgMigCC.Create().Tag('buttons'));
+  btn2.PreferredSize := fpgSize(80, 24);
+  mig.AddLayoutComponent(btn2, TfpgMigCC.Create().Tag('cancel'));
 end;
 
 end.

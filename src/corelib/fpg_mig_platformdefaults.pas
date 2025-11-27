@@ -62,6 +62,7 @@ type
     { Button defaults }
     class var FMinButtonWidth: TfpgMigUnitValue;
     class var FMinButtonPadding: TfpgMigUnitValue;
+    class var FButtonOrder: string;  // Platform-specific button order string
 
     { Row alignment }
     class var FDefaultRowAlignmentBaseline: Boolean;
@@ -124,6 +125,11 @@ type
     class function GetMinimumButtonWidth: TfpgMigUnitValue;
     class procedure SetMinimumButtonPadding(APadding: TfpgMigUnitValue);
     class function GetMinimumButtonPadding: TfpgMigUnitValue;
+
+    { Button order for platform-specific button bar layouts }
+    class function GetButtonOrder: string;
+    class procedure SetButtonOrder(const AOrder: string);
+    class function GetTagForChar(AChar: Char): string;
 
     { Row alignment }
     class function GetDefaultRowAlignmentBaseline: Boolean;
@@ -233,6 +239,7 @@ begin
       SetUnrelatedGap(FLPX11, FLPY11);
       SetGridCellGap(FLPX7, FLPY7);
       SetMinimumButtonWidth(FLPX75);
+      SetButtonOrder('L_E+U+YNBXOCAH_I_R');  // Windows button order
       SetDialogInsets(FLPY11, FLPX11, FLPY11, FLPX11);
       SetPanelInsets(FLPY7, FLPX7, FLPY7, FLPX7);
     end;
@@ -243,6 +250,7 @@ begin
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX7, FLPY7);
       SetMinimumButtonWidth(FLPX70);
+      SetButtonOrder('L_HE+U+NYBXCOA_I_R');  // Mac OS X button order
       SetDialogInsets(FLPY20, FLPX20, FLPY20, FLPX20);
       SetPanelInsets(FLPY16, FLPX16, FLPY16, FLPX16);
     end;
@@ -253,6 +261,7 @@ begin
       SetUnrelatedGap(FLPX12, FLPY12);
       SetGridCellGap(FLPX6, FLPY6);
       SetMinimumButtonWidth(FLPX70);
+      SetButtonOrder('L_HE+UNYACBXO_I_R');  // GNOME button order
       SetDialogInsets(FLPY12, FLPX12, FLPY12, FLPX12);
       SetPanelInsets(FLPY6, FLPX6, FLPY6, FLPX6);
     end;
@@ -599,6 +608,45 @@ begin
     Initialize;
   FDefaultRowAlignmentBaseline := AValue;
   Inc(FModCount);
+end;
+
+{ Button order methods }
+
+class function TfpgMigPlatformDefaults.GetButtonOrder: string;
+begin
+  if FInstance = nil then
+    Initialize;
+  Result := FButtonOrder;
+end;
+
+class procedure TfpgMigPlatformDefaults.SetButtonOrder(const AOrder: string);
+begin
+  if FInstance = nil then
+    Initialize;
+  FButtonOrder := AOrder;
+  Inc(FModCount);
+end;
+
+class function TfpgMigPlatformDefaults.GetTagForChar(AChar: Char): string;
+begin
+  // Convert to lowercase for case-insensitive matching
+  case LowerCase(AChar) of
+    'o': Result := 'ok';
+    'c': Result := 'cancel';
+    'h': Result := 'help';
+    'e': Result := 'help2';
+    'y': Result := 'yes';
+    'n': Result := 'no';
+    'a': Result := 'apply';
+    'x': Result := 'next';    // a.k.a forward
+    'b': Result := 'back';    // a.k.a. previous
+    'i': Result := 'finish';
+    'l': Result := 'left';
+    'r': Result := 'right';
+    'u': Result := 'other';
+  else
+    Result := '';  // Unknown tag
+  end;
 end;
 
 finalization

@@ -41,6 +41,10 @@ type
     procedure TestFilter_NotSet_MinType;
     procedure TestFilter_NotSet_PrefType;
     procedure TestFilter_NotSet_MaxType;
+
+    // Grid/Cell tests
+    procedure TestSplit_TwoComponentsShareCell;
+    procedure TestSplit_ThreeComponentsShareCell;
   end;
 
 procedure RegisterTests;
@@ -321,6 +325,100 @@ begin
     CheckEquals(INF, cw.Filter(SIZE_MAX, NOT_SET), 'NOT_SET for MAX should return INF');
   finally
     cw.Free;
+  end;
+end;
+
+procedure TTestMigGrid.TestSplit_TwoComponentsShareCell;
+var
+  container: TfpgWidget;
+  mig: TfpgMigLayoutManager;
+  w1, w2: TfpgWidget;
+begin
+  // Setup: Create container with MigLayout and two widgets
+  // w1 has Split(2), w2 should share the same cell
+  // Test verifies Split by checking widget positions after layout
+//  fpgApplication.Initialize;
+  try
+    container := TfpgWidget.Create(nil);
+    try
+      container.Name := 'container';
+      container.Width := 400;
+      container.Height := 300;
+
+      mig := TfpgMigLayoutManager.Create;
+      container.LayoutManager := mig;
+
+      w1 := TfpgWidget.Create(container);
+      w1.Width := 80;
+      w1.Height := 24;
+      mig.AddLayoutComponent(w1, TfpgMigCC.Create().Split(2));
+
+      w2 := TfpgWidget.Create(container);
+      w2.Width := 80;
+      w2.Height := 24;
+      mig.AddLayoutComponent(w2, TfpgMigCC.Create());
+
+      // Force layout
+      container.Realign;
+
+      // With Split(2), both widgets should be on same row (same Y position)
+      // Without Split, w2 would be below w1
+      CheckEquals(w1.Top, w2.Top, 'Both widgets should have same Y position (same row) due to Split');
+      CheckTrue(w2.Left > w1.Left, 'Second widget should be to the right of first widget');
+    finally
+      container.Free;
+    end;
+  finally
+//    fpgApplication.Terminate;
+  end;
+end;
+
+procedure TTestMigGrid.TestSplit_ThreeComponentsShareCell;
+var
+  container: TfpgWidget;
+  mig: TfpgMigLayoutManager;
+  w1, w2, w3: TfpgWidget;
+begin
+  // Setup: Create container with MigLayout and three widgets
+  // w1 has Split(3), w2 and w3 should share the same cell
+  fpgApplication.Initialize;
+  try
+    container := TfpgWidget.Create(nil);
+    try
+      container.Width := 400;
+      container.Height := 300;
+
+      mig := TfpgMigLayoutManager.Create;
+      container.LayoutManager := mig;
+
+      w1 := TfpgWidget.Create(container);
+      w1.Width := 80;
+      w1.Height := 24;
+      mig.AddLayoutComponent(w1, TfpgMigCC.Create().Split(3));
+
+      w2 := TfpgWidget.Create(container);
+      w2.Width := 80;
+      w2.Height := 24;
+      mig.AddLayoutComponent(w2, TfpgMigCC.Create());
+
+      w3 := TfpgWidget.Create(container);
+      w3.Width := 80;
+      w3.Height := 24;
+      mig.AddLayoutComponent(w3, TfpgMigCC.Create());
+
+      // Force layout
+      container.Realign;
+
+      // With Split(3), all three widgets should be on same row (same Y position)
+      CheckEquals(w1.Top, w2.Top, 'Widgets 1 and 2 should have same Y position');
+      CheckEquals(w1.Top, w3.Top, 'Widgets 1 and 3 should have same Y position');
+      CheckTrue(w2.Left > w1.Left, 'Widget 2 should be to the right of widget 1');
+      CheckTrue(w3.Left > w2.Left, 'Widget 3 should be to the right of widget 2');
+    finally
+      container.Free;
+    end;
+  finally
+    fpgApplication.Terminate;
   end;
 end;
 

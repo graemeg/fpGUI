@@ -15,7 +15,7 @@ unit fpg_miglayout;
 interface
 
 uses
-  Classes, SysUtils, Math, Generics.Collections,
+  Classes, SysUtils, Math, Generics.Collections, DateUtils,
   fpg_base,
   fpg_widget,
   fpg_layouttypes,
@@ -49,6 +49,7 @@ type
   TfpgMigCellList = specialize TObjectList<TfpgMigCell>;
   TfpgMigLinkedDimGroupList = specialize TObjectList<TfpgMigLinkedDimGroup>;
   TfpgMigCellMap = specialize TDictionary<Integer, TfpgMigCell>;
+  TfpgMigOccupiedCellsSet = specialize TDictionary<Integer, Boolean>;  // Set of occupied cell keys for O(1) lookup
   TfpgMigIntegerList = specialize TList<Integer>;
   TfpgMigIntArray = array of Integer;
   TfpgMigCCMap = specialize TDictionary<TfpgWidgetBase, TfpgMigCC>;
@@ -178,6 +179,7 @@ type
     FRowConstr, FColConstr: TfpgMigAC;
     FContainer: TfpgWidgetBase;
     FGrid: TfpgMigCellMap;
+    FOccupiedCells: TfpgMigOccupiedCellsSet;  // Cache of occupied cell keys for O(1) lookup
     FRowIndexes, FColIndexes: TfpgMigIntegerList;
     FColGroupLists, FRowGroupLists: array of TfpgMigLinkedDimGroupList;
     FWidth, FHeight: array[0..2] of Integer;
@@ -200,8 +202,14 @@ type
     { Check if a cell position is occupied by a spanning component }
     function IsCellOccupied(ACellX, ACellY: Integer): Boolean;
 
+    { Mark cells as occupied by a spanning component - O(spanX * spanY) }
+    procedure MarkCellsOccupied(ACellX, ACellY, ASpanX, ASpanY: Integer);
+
     { Build dimension groups from component constraints }
     procedure BuildDimensionGroups;
+
+    { Sort components in cells based on platform-specific button order }
+    procedure SortCellsByPlatform;
 
     procedure LayoutInOneDim(ARefSize: Integer; AAlign: TfpgMigUnitValue; AIsRows: Boolean; ADefGrowW: TfpgMigFloatArray);
 
@@ -1031,6 +1039,7 @@ var
   tag: string;
   ccBef, ccAft: TfpgMigCC;
   i: Integer;
+  splitLeft: Integer;  // Remaining components to add to current cell due to Split
 begin
   inherited Create;
   FContainer := AContainer;
@@ -1039,6 +1048,7 @@ begin
   FColConstr := AColConstr;
 
   FGrid := TfpgMigCellMap.Create;
+  FOccupiedCells := TfpgMigOccupiedCellsSet.Create;
   FRowIndexes := TfpgMigIntegerList.Create;
   FColIndexes := TfpgMigIntegerList.Create;
   FDebugRects := nil;  // Created on demand when debug is enabled
@@ -1059,6 +1069,7 @@ begin
   // Iterate in component order to preserve widget order, but only process those in ACCMap
   cellX := 0;
   cellY := 0;
+  splitLeft := 0;  // Track remaining components to add to current cell due to Split
 
   if ACCMap <> nil then
   begin
@@ -1111,10 +1122,30 @@ begin
 
       cell := TfpgMigCell.Create(spanX, spanY, cellFlowX);
       FGrid.Add(cellKey, cell);
+
+      // Mark all cells covered by this span as occupied
+      MarkCellsOccupied(cellX, cellY, spanX, spanY);
     end;
 
     // Add CompWrap to cell
     cell.CompWraps.Add(cw);
+
+    // Track if cell has tagged components
+    if (cc <> nil) and (cc.GetTag <> '') then
+      cell.HasTagged := True;
+
+    // Handle Split: if this component has Split > 1, the next (Split-1) components
+    // should be added to the SAME cell instead of advancing
+    if (cc <> nil) and (cc.SplitParts > 1) and (splitLeft = 0) then
+      splitLeft := cc.SplitParts - 1;  // Reserve space for additional components in this cell
+
+    // Decrement splitLeft if we're in a split cell
+    if splitLeft > 0 then
+    begin
+      Dec(splitLeft);
+      // Don't advance to next cell - next component goes in same cell
+      Continue;  // Skip cell advancement
+    end;
 
     // Advance to next cell based on flow direction
     if flowX then
@@ -1182,6 +1213,9 @@ begin
 
   // Second pass: Build row and column indexes
   BuildIndexes;
+
+  // Sort cells by platform-specific button order (if any cells have tagged components)
+  SortCellsByPlatform;
 
   // Third pass: Divide components into linked dimension groups (Port of Grid.java line 391-392)
   FColGroupLists := DivideIntoLinkedGroups(False);  // Columns
@@ -1461,6 +1495,164 @@ begin
   end;
 end;
 
+{ Port of Grid.java sortCellsByPlatform() - lines 780-864
+  Sorts components in cells based on platform-specific button order }
+procedure TfpgMigGrid.SortCellsByPlatform;
+var
+  order, orderLo: string;
+  unrelSize: Integer;
+  gapUnrel, flGap: array[0..2] of Integer;
+  pair: TfpgMigCellMap.TDictionaryPair;
+  cell: TfpgMigCell;
+  sortedList: TfpgMigCompWrapList;
+  prevCW, cw: TfpgMigCompWrap;
+  nextUnrel, nextPush: Boolean;
+  i, j, iSz, jSz: Integer;
+  c: Char;
+  tag: string;
+begin
+  // Get platform-specific button order string
+  order := TfpgMigPlatformDefaults.GetButtonOrder;
+  if order = '' then
+    Exit;  // No button order defined
+
+  orderLo := LowerCase(order);
+
+  // Get unrelated gap size (use hardcoded value for now - typical unrelated gap is 11px)
+  // TODO: Properly evaluate unrelated gap from PlatformDefaults
+  unrelSize := 11;
+
+  gapUnrel[0] := unrelSize;
+  gapUnrel[1] := unrelSize;
+  gapUnrel[2] := NOT_SET;
+
+  flGap[0] := 0;
+  flGap[1] := 0;
+  flGap[2] := NOT_SET;
+
+  // Process each cell
+  for pair in FGrid do
+  begin
+    cell := pair.Value;
+    if (cell = nil) or (not cell.HasTagged) then
+      Continue;
+
+    prevCW := nil;
+    nextUnrel := False;
+    nextPush := False;
+    sortedList := TfpgMigCompWrapList.Create(False);  // Don't own objects
+    try
+      // Iterate through button order string
+      iSz := Length(orderLo);
+      for i := 1 to iSz do  // Pascal strings are 1-based
+      begin
+        // Early exit if all components are sorted
+        if sortedList.Count >= cell.CompWraps.Count then
+          Break;
+
+        c := orderLo[i];
+        if (c = '+') or (c = '_') then
+        begin
+          nextUnrel := True;
+          if c = '+' then
+            nextPush := True;
+        end
+        else
+        begin
+          tag := TfpgMigPlatformDefaults.GetTagForChar(c);
+          if tag <> '' then
+          begin
+            // Find components with this tag
+            jSz := cell.CompWraps.Count;
+            for j := 0 to jSz - 1 do
+            begin
+              cw := cell.CompWraps[j];
+              if (cw.CC <> nil) and (tag = cw.CC.GetTag) then
+              begin
+                // TODO: Implement adjustMinHorSizeUp for uppercase chars
+                // if (order[i] >= 'A') and (order[i] <= 'Z') then
+                //   cw.adjustMinHorSizeUp(...);
+
+                sortedList.Add(cw);
+
+                if nextUnrel then
+                begin
+                  if prevCW <> nil then
+                    prevCW.MergeGapSizes(gapUnrel, cell.FlowX, False)
+                  else
+                    cw.MergeGapSizes(gapUnrel, cell.FlowX, True);
+
+                  if nextPush then
+                  begin
+                    cw.FForcedPushGaps := 1;
+                    nextUnrel := False;
+                    nextPush := False;
+                  end;
+                end;
+
+                // "unknown" components always get an Unrelated gap
+                if c = 'u' then
+                  nextUnrel := True;
+
+                prevCW := cw;
+              end;
+            end;
+          end;
+        end;
+      end;
+
+      // Handle trailing push gap
+      if sortedList.Count > 0 then
+      begin
+        cw := sortedList[sortedList.Count - 1];
+        if nextUnrel then
+        begin
+          cw.MergeGapSizes(gapUnrel, cell.FlowX, False);
+          if nextPush then
+            cw.FForcedPushGaps := cw.FForcedPushGaps or 2;
+        end;
+
+        // Remove first and last gap if not set explicitly
+        if (cw.CC <> nil) and (cw.CC.Horizontal.GetGapAfter = nil) then
+          cw.MergeGapSizes(flGap, cell.FlowX, False);
+
+        cw := sortedList[0];
+        if (cw.CC <> nil) and (cw.CC.Horizontal.GetGapBefore = nil) then
+          cw.MergeGapSizes(flGap, cell.FlowX, True);
+      end;
+
+      // Replace cell's CompWraps with sorted list
+      if cell.CompWraps.Count = sortedList.Count then
+      begin
+        // All components were sorted - clear without freeing
+        cell.CompWraps.OwnsObjects := False;
+        try
+          cell.CompWraps.Clear;
+        finally
+          cell.CompWraps.OwnsObjects := True;
+        end;
+      end
+      else
+      begin
+        // Some components weren't tagged - remove only sorted ones without freeing
+        cell.CompWraps.OwnsObjects := False;
+        try
+          for i := 0 to sortedList.Count - 1 do
+            cell.CompWraps.Remove(sortedList[i]);
+        finally
+          cell.CompWraps.OwnsObjects := True;
+        end;
+      end;
+
+      // Add sorted components back
+      for i := 0 to sortedList.Count - 1 do
+        cell.CompWraps.Add(sortedList[i]);
+    finally
+      sortedList.Free;
+    end;
+  end;
+end;
+
 procedure TfpgMigGrid.BuildIndexes;
 var
   pair: TfpgMigCellMap.TDictionaryPair;
@@ -1596,30 +1788,26 @@ end;
 
 function TfpgMigGrid.IsCellOccupied(ACellX, ACellY: Integer): Boolean;
 var
-  pair: TfpgMigCellMap.TDictionaryPair;
-  cell: TfpgMigCell;
   cellKey: Integer;
-  cellX, cellY: Integer;
-  x, y: Integer;
 begin
-  Result := False;
+  // O(1) lookup using cached occupied cells dictionary
+  cellKey := EncodeCellKey(ACellX, ACellY);
+  Result := FOccupiedCells.ContainsKey(cellKey);
+end;
 
-  // Check all existing cells to see if any of them cover (ACellX, ACellY) with their span
-  for pair in FGrid do
-  begin
-    cellKey := pair.Key;
-    cell := pair.Value;
-    if cell = nil then
-      Continue;
-
-    DecodeCellKey(cellKey, cellX, cellY);
-
-    // Check if (ACellX, ACellY) falls within this cell's span
-    for x := cellX to cellX + cell.SpanX - 1 do
-      for y := cellY to cellY + cell.SpanY - 1 do
-        if (x = ACellX) and (y = ACellY) then
-          Exit(True);
-  end;
+procedure TfpgMigGrid.MarkCellsOccupied(ACellX, ACellY, ASpanX, ASpanY: Integer);
+var
+  x, y: Integer;
+  cellKey: Integer;
+begin
+  // Mark all cells within the span as occupied - O(spanX * spanY) using dictionary
+  for x := ACellX to ACellX + ASpanX - 1 do
+    for y := ACellY to ACellY + ASpanY - 1 do
+    begin
+      cellKey := EncodeCellKey(x, y);
+      // AddOrSetValue is safe - won't throw if key exists
+      FOccupiedCells.AddOrSetValue(cellKey, True);
+    end;
 end;
 
 destructor TfpgMigGrid.Destroy;
@@ -1631,6 +1819,7 @@ begin
   for cell in FGrid.Values do
     cell.Free;
   FGrid.Free;
+  FOccupiedCells.Free;
   FRowIndexes.Free;
   FColIndexes.Free;
 
