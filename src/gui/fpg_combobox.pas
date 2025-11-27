@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -60,8 +60,6 @@ type
   TfpgComboOption = (wo_FocusItemTriggersOnChange, wo_AllowUserBlank, wo_NoControlFrame);
   TfpgComboOptions = set of TfpgComboOption;
 
-
-  { TfpgBaseComboBox }
 
   TfpgBaseComboBox = class(TfpgWidget)
   private
@@ -136,6 +134,8 @@ type
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure   HandleShow; override;
+    procedure   HandleMove(x, y: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -683,6 +683,22 @@ begin
   inherited HandleResize(AWidth, AHeight);
   if wdfSize in FDirtyFlags then
     CalculateInternalButtonRect;
+end;
+
+procedure TfpgBaseStaticCombo.HandleShow;
+begin
+  inherited HandleShow;
+  // Recalculate button position after DPI scaling completes
+  // DPI scaling in fpg_toolbox.ScaleDPI updates FWidth/FHeight via SetPreferredSize
+  // during csLoading state, so HandleResize doesn't get called. We need to
+  // recalculate the button rect here to use the post-DPI-scaling dimensions.
+  CalculateInternalButtonRect;
+end;
+
+procedure TfpgBaseStaticCombo.HandleMove(x, y: TfpgCoord);
+begin
+  CalculateInternalButtonRect;
+  inherited HandleMove(x, y);
 end;
 
 procedure TfpgBaseStaticCombo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
