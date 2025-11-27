@@ -50,7 +50,9 @@ uses
   fpg_tab,
   fpg_menu,
   fpg_iniutils,
-  fpg_imagelist;
+  fpg_imagelist,
+  fpg_miglayout,
+  fpg_mig_cc;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,

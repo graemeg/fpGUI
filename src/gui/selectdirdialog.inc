@@ -18,9 +18,11 @@
 
 {$IFDEF read_interface}
 
-  TfpgSelectDirDialog = class(TfpgBaseDialog)
+  TfpgSelectDirDialog = class(TfpgForm)
   protected
     tv: TfpgTreeView;
+    btnOK: TfpgButton;
+    btnCancel: TfpgButton;
     FRootDir: TfpgString;
     FShowHidden: Boolean;
     FImagelist: TfpgImageList;
@@ -31,6 +33,9 @@
     procedure   NodeExpanded(Sender: TObject; ANode: TfpgTreeNode);
     function    GetSelectedDir: TfpgString;
     procedure   SetSelectedDir(const AValue: TfpgString);
+    procedure   btnOKClick(Sender: TObject);
+    procedure   btnCancelClick(Sender: TObject);
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     {$IFDEF MSWINDOWS}
     procedure   AddWindowsDriveLetters;
     {$ENDIF}
@@ -268,6 +273,7 @@ var
   img: TfpgImage;
 begin
   inherited Create(AOwner);
+  WindowType := wtModalForm;
   FShowHidden := False;
   FImagelist := TfpgImageList.Create;
   img := fpgImages.GetImage('stdimg.folder').ImageFromSource;
@@ -280,7 +286,31 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgSelectDirDialog.btnOKClick(Sender: TObject);
+begin
+  ModalResult := mrOK;
+end;
+
+procedure TfpgSelectDirDialog.btnCancelClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+  Close;
+end;
+
+procedure TfpgSelectDirDialog.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  if keycode = keyEscape then
+  begin
+    btnCancelClick(nil);
+    consumed := True;
+  end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
 procedure TfpgSelectDirDialog.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
 begin
   inherited AfterCreate;
   Name := 'fpgSelectDirDialog';
@@ -288,24 +318,47 @@ begin
   WindowTitle := rsSelectaDirectory;
   WindowPosition := wpOneThirdDown;
 
+  // Create MigLayout manager
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.Debug(1000);  // Enable debug visualization for 1000ms
+  LayoutManager := mig;
+
   tv := TfpgTreeView.Create(self);
   with tv do
   begin
     Name := 'tv';
-    SetPosition(FSpacing, FSpacing, 288, 322);
-    Anchors     := [anTop, anLeft, anRight, anBottom];
     ImageList   := FImageList;
     ShowImages  := True;
     OnExpand    := @NodeExpanded;
+    PreferredSize := fpgSize(280, 300);
   end;
+  mig.AddLayoutComponent(tv, TfpgMigCC.Create().Grow().Wrap());
 
-  // reposition buttons
-  btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
-  btnCancel.Top   := Height - FSpacing - btnCancel.Height;
-  btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
-  btnOK.Top       := btnCancel.Top;
+  btnOK := TfpgButton.Create(self);
+  with btnOK do
+  begin
+    Name := 'btnOK';
+    Text := rsOK;
+    ImageName := 'stdimg.ok';
+    ShowImage := True;
+    PreferredSize := fpgSize(80, 24);
+    OnClick := @btnOKClick;
+  end;
+  mig.AddLayoutComponent(btnOK, TfpgMigCC.Create().SpanX().Split(2).Tag('ok'));
 
-  // now reset tab order
+  btnCancel := TfpgButton.Create(self);
+  with btnCancel do
+  begin
+    Name := 'btnCancel';
+    Text := rsCancel;
+    ImageName := 'stdimg.cancel';
+    ShowImage := True;
+    PreferredSize := fpgSize(80, 24);
+    OnClick := @btnCancelClick;
+  end;
+  mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().Tag('cancel'));
+
+  // Set tab order
   tv.TabOrder         := 1;
   btnOK.TabOrder      := 2;
   btnCancel.TabOrder  := 3;
