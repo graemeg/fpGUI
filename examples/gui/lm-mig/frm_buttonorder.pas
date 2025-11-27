@@ -128,7 +128,8 @@ begin
   // Get platform-specific minimum button width with DPI scaling
   minBtnWidth := TfpgMigPlatformDefaults.GetMinimumButtonWidth;
   btnWidth := Round(minBtnWidth.GetPixels(0, Self, nil));
-  btnHeight := 24;  // Standard button height (could also use platform defaults)
+  // Button height uses natural DPI-aware calculation
+  btnHeight := Font.GetHeight + 8;  // Same as TfpgButton's default
 
   // Create buttons with tags for platform-specific ordering
   btnHelp := TfpgButton.Create(Self);
