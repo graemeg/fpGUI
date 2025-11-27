@@ -354,6 +354,7 @@ type
     FGrid: TfpgMigGrid;     // Cached grid instance for debug painting
     FDirty: Boolean;        // True when grid needs to be recreated
     FContainer: TfpgWidgetBase;  // Last container we laid out
+    FLastComponentCount: Integer;  // Track component count to detect structural changes
 
     procedure SetLC(AValue: TfpgMigLC);
     procedure SetRowConstr(AValue: TfpgMigAC);
@@ -3539,6 +3540,7 @@ begin
   FGrid := nil;
   FDirty := True;
   FContainer := nil;
+  FLastComponentCount := -1;  // -1 indicates never laid out
 end;
 
 destructor TfpgMigLayoutManager.Destroy;
@@ -3623,9 +3625,6 @@ begin
   if not Assigned(Iterator) then
     Exit;
 
-  // Check if grid needs to be recreated
-  needsRecreate := FDirty or (FGrid = nil) or (FContainer <> AContainer);
-
   // 1. Build CC map from widgets and their constraints
   // Add ALL valid widgets (filtered by iterator), even those without constraints
   ccMap := TfpgMigCCMap.Create;
@@ -3647,16 +3646,26 @@ begin
       ccMap.Add(child, cc);
     end;
 
-    // 2. Create or reuse Grid instance
+    // 2. Check if grid needs to be recreated
+    // Only recreate if:
+    // - FDirty is true (explicit invalidation via AddLayoutComponent)
+    // - Grid doesn't exist yet
+    // - Container changed
+    // - Component count changed (structural change - widget added/removed)
+    needsRecreate := FDirty or (FGrid = nil) or (FContainer <> AContainer) or
+                     (ccMap.Count <> FLastComponentCount);
+
+    // 3. Create or reuse Grid instance
     if needsRecreate then
     begin
       FreeAndNil(FGrid);
       FGrid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
       FDirty := False;
       FContainer := AContainer;
+      FLastComponentCount := ccMap.Count;
     end;
 
-    // 3. Calculate insets from LC and convert to pixels
+    // 4. Calculate insets from LC and convert to pixels
     // This matches Java MigLayout.layoutContainer() behavior where
     // container insets are subtracted before passing bounds to Grid.layout()
     // In fpGUI, we only have LC insets (no native container border insets)
@@ -3677,7 +3686,7 @@ begin
     insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
     insRight := Round(insUV.GetPixels(0, AContainer, nil));
 
-    // 4. Setup bounds for layout, accounting for insets
+    // 5. Setup bounds for layout, accounting for insets
     // This matches Java: bounds = [insets.left, insets.top,
     //                              width - left - right, height - top - bottom]
     bounds[0] := insLeft;   // x offset
@@ -3685,7 +3694,7 @@ begin
     bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
     bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
 
-    // 5. Perform layout with debug flag based on LC.DebugMillis
+    // 6. Perform layout with debug flag based on LC.DebugMillis
     isDebug := FLC.GetDebugMillis > 0;
     FGrid.Layout(bounds, nil, nil, isDebug);
 
