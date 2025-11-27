@@ -7,9 +7,12 @@ interface
 uses
   SysUtils, Classes,
   fpg_base, fpg_main, fpg_form, fpg_button, fpg_label, fpg_radiobutton,
-  fpg_miglayout, fpg_mig_lc, fpg_mig_cc, fpg_mig_platformdefaults;
+  fpg_miglayout, fpg_mig_lc, fpg_mig_cc, fpg_mig_platformdefaults,
+  fpg_mig_unitvalue;
 
 type
+
+  { TButtonOrderForm }
 
   TButtonOrderForm = class(TfpgForm)
   private
@@ -23,7 +26,7 @@ type
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     procedure rbPlatformChanged(Sender: TObject);
-    procedure RecreateButtonLayout;
+    procedure btnHelpClicked(Sender: TObject);
   public
     constructor Create(AEnableDebug: Boolean); reintroduce;
     procedure AfterCreate; override;
@@ -47,66 +50,23 @@ begin
   else if rbGnome.Checked then
     TfpgMigPlatformDefaults.SetPlatform(PLATFORM_GNOME);
 
-  // Recreate layout to apply new button order
-  RecreateButtonLayout;
+  // Invalidate layout - Grid will be recreated with new button order and sizes
+  Realign;
 end;
 
-procedure TButtonOrderForm.RecreateButtonLayout;
-var
-  mig: TfpgMigLayoutManager;
+procedure TButtonOrderForm.btnHelpClicked(Sender: TObject);
 begin
-  // Destroy existing buttons
-  if Assigned(btnHelp) then
-    FreeAndNil(btnHelp);
-  if Assigned(btnOK) then
-    FreeAndNil(btnOK);
-  if Assigned(btnCancel) then
-    FreeAndNil(btnCancel);
-
-  // Create new MigLayout manager
-  mig := TfpgMigLayoutManager.Create;
-  if FDebug then
-    mig.LC.Debug(500);
-  LayoutManager := mig;
-
-  // Re-add title label
-  mig.AddLayoutComponent(lblTitle, TfpgMigCC.Create().SpanX().Wrap());
-
-  // Re-add platform selection label and radio buttons
-  mig.AddLayoutComponent(lblPlatform, TfpgMigCC.Create().SpanX().Wrap());
-  mig.AddLayoutComponent(rbWindows, TfpgMigCC.Create());
-  mig.AddLayoutComponent(rbMacOSX, TfpgMigCC.Create());
-  mig.AddLayoutComponent(rbGnome, TfpgMigCC.Create().Wrap());
-
-  // Create buttons with tags for platform-specific ordering
-  btnHelp := TfpgButton.Create(Self);
-  btnHelp.Name := 'btnHelp';
-  btnHelp.Text := 'Help';
-  btnHelp.PreferredSize := fpgSize(80, 24);
-  mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create().SpanX().Split(3).Tag('help'));
-
-  btnOK := TfpgButton.Create(Self);
-  btnOK.Name := 'btnOK';
-  btnOK.Text := 'OK';
-  btnOK.PreferredSize := fpgSize(80, 24);
-  btnOK.ModalResult := mrOK;
-  mig.AddLayoutComponent(btnOK, TfpgMigCC.Create().Tag('ok'));
-
-  btnCancel := TfpgButton.Create(Self);
-  btnCancel.Name := 'btnCancel';
-  btnCancel.Text := 'Cancel';
-  btnCancel.PreferredSize := fpgSize(80, 24);
-  btnCancel.ModalResult := mrCancel;
-  mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().Tag('cancel'));
-
-  // Force layout update
-  Realign;
+  PrintRect(btnHelp.GetBoundsRect);
+  PrintRect(btnOK.GetBoundsRect);
+  PrintRect(btnCancel.GetBoundsRect);
 end;
 
 procedure TButtonOrderForm.AfterCreate;
 var
   mig: TfpgMigLayoutManager;
   currentPlatform: Integer;
+  minBtnWidth: TfpgMigUnitValue;
+  btnWidth, btnHeight: Integer;
 begin
   inherited AfterCreate;
   Name := 'ButtonOrderForm';
@@ -122,7 +82,7 @@ begin
   // Create MigLayout manager
   mig := TfpgMigLayoutManager.Create;
   if FDebug then
-    mig.LC.Debug(500);
+    mig.LC.Debug();
   LayoutManager := mig;
 
   // Title label
@@ -165,24 +125,31 @@ begin
   rbGnome.OnChange := @rbPlatformChanged;
   mig.AddLayoutComponent(rbGnome, TfpgMigCC.Create().Wrap());
 
+  // Get platform-specific minimum button width with DPI scaling
+  minBtnWidth := TfpgMigPlatformDefaults.GetMinimumButtonWidth;
+  btnWidth := Round(minBtnWidth.GetPixels(0, Self, nil));
+  btnHeight := 24;  // Standard button height (could also use platform defaults)
+
   // Create buttons with tags for platform-specific ordering
   btnHelp := TfpgButton.Create(Self);
   btnHelp.Name := 'btnHelp';
   btnHelp.Text := 'Help';
-  btnHelp.PreferredSize := fpgSize(80, 24);
+  btnHelp.ImageName := 'stdimg.help';
+  btnHelp.PreferredSize := fpgSize(btnWidth, btnHeight);
+  btnHelp.OnClick := @btnHelpClicked;
   mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create().SpanX().Split(3).Tag('help'));
 
   btnOK := TfpgButton.Create(Self);
   btnOK.Name := 'btnOK';
   btnOK.Text := 'OK';
-  btnOK.PreferredSize := fpgSize(80, 24);
+  btnOK.PreferredSize := fpgSize(btnWidth, btnHeight);
   btnOK.ModalResult := mrOK;
   mig.AddLayoutComponent(btnOK, TfpgMigCC.Create().Tag('ok'));
 
   btnCancel := TfpgButton.Create(Self);
   btnCancel.Name := 'btnCancel';
   btnCancel.Text := 'Cancel';
-  btnCancel.PreferredSize := fpgSize(80, 24);
+  btnCancel.PreferredSize := fpgSize(btnWidth, btnHeight);
   btnCancel.ModalResult := mrCancel;
   mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().Tag('cancel'));
 end;
