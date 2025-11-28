@@ -519,6 +519,34 @@ begin
     wg.UpdatePosition;
     //if lok then Writeln('sd ok.');
     //writeln('WT: ',sval);
+  end
+  else if ident = 'LEFT' then
+  begin
+    lok := CheckSymbol(s, ':=');
+    if lok then
+      wg.Left := GetIntValue(s);
+    lok := lok and CheckSymbol(s, ';');
+  end
+  else if ident = 'TOP' then
+  begin
+    lok := CheckSymbol(s, ':=');
+    if lok then
+      wg.Top := GetIntValue(s);
+    lok := lok and CheckSymbol(s, ';');
+  end
+  else if ident = 'WIDTH' then
+  begin
+    lok := CheckSymbol(s, ':=');
+    if lok then
+      wg.Width := GetIntValue(s);
+    lok := lok and CheckSymbol(s, ';');
+  end
+  else if ident = 'HEIGHT' then
+  begin
+    lok := CheckSymbol(s, ':=');
+    if lok then
+      wg.Height := GetIntValue(s);
+    lok := lok and CheckSymbol(s, ';');
   end;
 
   if not lok then

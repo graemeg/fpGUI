@@ -1228,11 +1228,10 @@ begin
   if maindsgn.SaveComponentNames then
     s := s + Ind(1) + 'Name := ' + QuotedStr(FForm.Name) + ';' + LineEnding;
 
-  s := s + Ind(1) + 'SetPosition('
-      + IntToStr(FForm.Left) + ', '
-      + IntToStr(FForm.Top) + ', '
-      + IntToStr(FForm.Width) + ', '
-      + IntToStr(FForm.Height) + ');' + LineEnding;
+  s := s + Ind(1) + 'Left := ' + IntToStr(FForm.Left) + ';' + LineEnding;
+  s := s + Ind(1) + 'Top := ' + IntToStr(FForm.Top) + ';' + LineEnding;
+  s := s + Ind(1) + 'Width := ' + IntToStr(FForm.Width) + ';' + LineEnding;
+  s := s + Ind(1) + 'Height := ' + IntToStr(FForm.Height) + ';' + LineEnding;
 
 {
   // Extend this and the Form Parser to handle WindowPosition, Width and Height
@@ -1390,11 +1389,10 @@ begin
   if maindsgn.SaveComponentNames then
     s := s + ident + 'Name := ' + QuotedStr(wg.Name) + ';' + LineEnding;
 
-  s := s + ident + 'SetPosition('
-      + IntToStr(wg.Left) + ', '
-      + IntToStr(wg.Top) + ', '
-      + IntToStr(wg.Width) + ', '
-      + IntToStr(wg.Height) + ');' + LineEnding;
+  s := s + ident + 'Left := ' + IntToStr(wg.Left) + ';' + LineEnding;
+  s := s + ident + 'Top := ' + IntToStr(wg.Top) + ';' + LineEnding;
+  s := s + ident + 'Width := ' + IntToStr(wg.Width) + ';' + LineEnding;
+  s := s + ident + 'Height := ' + IntToStr(wg.Height) + ';' + LineEnding;
 
   if wg.Anchors <> [anLeft, anTop] then
   begin
