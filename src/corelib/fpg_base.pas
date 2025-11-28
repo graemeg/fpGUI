@@ -509,7 +509,7 @@ type
     procedure   SetHelpKeyword(const AValue: TfpgString); virtual;
   public
     constructor Create(AOwner: TComponent); override;
-    property    TagPointer: Pointer read FTagPointer write FTagPointer;
+    property    TagPointer: Pointer read FTagPointer write FTagPointer; deprecated 'TComponent''s Tag is now PtrInt to support 64-bit';
   published
     property    HelpContext: THelpContext read FHelpContext write SetHelpContext default 0;
     property    HelpKeyword: TfpgString read FHelpKeyword write SetHelpKeyword;
