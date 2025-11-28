@@ -360,7 +360,7 @@ begin
   if Assigned(FFont) then
     result := FFont.FontDesc
   else
-    result := '';
+    result := FPG_DEFAULT_FONT_DESC;
 end;
 
 procedure TfpgBaseListBox.SetBorderStyle(AValue: TfpgEditBorderStyle);
@@ -404,7 +404,7 @@ begin
   FFont := nil;  // Release old font (automatic ref count decrement)
   FFont := fpgApplication.FontManager.GetFont(AValue);
   if FAutoHeight then
-    Height:= ((Height - 6) div RowHeight) * RowHeight + 6;
+    Height := ((ActualHeight - 6) div RowHeight) * RowHeight + 6;
   RePaint;
 end;
 
