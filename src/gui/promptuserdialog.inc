@@ -104,8 +104,8 @@ begin
   edPassword.PasswordMode := True;
 
   // reposition buttons
-  btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
-  btnCancel.Top   := Height - FSpacing - btnCancel.Height;
+  btnCancel.Left  := ActualWidth-FDefaultButtonWidth-FSpacing;
+  btnCancel.Top   := ActualHeight - FSpacing - btnCancel.ActualHeight;
   btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
   btnOK.Top       := btnCancel.Top;
 
@@ -159,11 +159,11 @@ begin
   lblDatabases := CreateLabel(self, 8, 101, rsDatabase);
   cbDatabases := CreateComboBox(self, 8, 119, 184, aStringList);
   cbDatabases.Anchors := [anLeft, anTop, anRight];
-  cbDatabases.Height := edUserID.Height;
+  cbDatabases.Height := edUserID.ActualHeight;
 
   // reposition buttons
-  btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
-  btnCancel.Top   := Height - FSpacing - btnCancel.Height;
+  btnCancel.Left  := ActualWidth-FDefaultButtonWidth-FSpacing;
+  btnCancel.Top   := ActualHeight - FSpacing - btnCancel.ActualHeight;
   btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
   btnOK.Top       := btnCancel.Top;
 

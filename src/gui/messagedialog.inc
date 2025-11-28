@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -194,12 +194,13 @@ begin
   begin
     b       := TfpgButton.Create(self);
     b.Name  := 'DlgButton' + IntToStr(i+1);
+    b.PreferredSize := fpgSize(80, 24);
     b.Text  := sl.Names[i];
     b.ModalResult   := TfpgModalResult(StrToInt(sl.ValueFromIndex[i]));
     if (i = lDefault) or (lcount = 1) then
       b.Default := True;
     FButtonList.Add(b);
-    lwidth  := lwidth + b.Width
+    lwidth  := lwidth + b.ActualWidth
   end;
   lwidth := lwidth + (cSpacing * (lcount-1));
 
@@ -210,12 +211,12 @@ begin
     ltop := lblName1.Bottom + 15;
 
 //  ltop := Height - TfpgButton(FButtonList[0]).Height - cSpacing;
-  lleft := (Width - lwidth) div 2;
+  lleft := (ActualWidth - lwidth) div 2;
   for i := 0 to lcount-1 do
   begin
     b := TfpgButton(FButtonList[i]);
-    b.SetPosition(lleft, ltop, b.Width, b.Height);
-    lleft := lleft + b.Width + cSpacing;
+    b.SetPosition(lleft, ltop, b.ActualWidth, b.ActualHeight);
+    lleft := lleft + b.ActualWidth + cSpacing;
   end;
 
   sl.Free;
@@ -300,10 +301,41 @@ begin
 end;
 
 procedure TfpgMessageDialog.HandleShow;
+const
+  cSpacing = 4;
 var
   i: integer;
+  b: TfpgButton;
+  lwidth: integer;
+  ltop: integer;
+  lleft: integer;
 begin
-  inherited HandleShow;
+  inherited HandleShow;  // DPI scaling happens here
+
+  // Now reposition buttons using DPI-scaled values
+  if FButtonList.Count > 0 then
+  begin
+    // Calculate total width of all buttons
+    lwidth := 0;
+    for i := 0 to FButtonList.Count-1 do
+    begin
+      b := TfpgButton(FButtonList[i]);
+      lwidth := lwidth + b.ActualWidth;
+    end;
+    lwidth := lwidth + (cSpacing * (FButtonList.Count-1));
+
+    // Position buttons from the bottom
+    b := TfpgButton(FButtonList[0]);
+    ltop := ActualHeight - b.ActualHeight - cSpacing - 10;
+    lleft := (ActualWidth - lwidth) div 2;
+
+    for i := 0 to FButtonList.Count-1 do
+    begin
+      b := TfpgButton(FButtonList[i]);
+      b.SetPosition(lleft, ltop, b.ActualWidth, b.ActualHeight);
+      lleft := lleft + b.ActualWidth + cSpacing;
+    end;
+  end;
 
   for i := 0 to ComponentCount-1 do
     if Components[i] is TfpgButton then

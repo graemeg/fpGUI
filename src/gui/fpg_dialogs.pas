@@ -254,7 +254,8 @@ implementation
 uses
   fpg_widget,
   fpg_utils,
-  fpg_stringutils
+  fpg_stringutils,
+  fpg_toolbox
   {$IFDEF WINDOWS}
   ,Windows   // used by File Dialog & Select Dir Dialog
   {$ENDIF}
@@ -562,7 +563,7 @@ begin
 
   // center button
   FButton.Top   := FTextY + FLineHeight*FLines.Count + FTextY;
-  FButton.Left  := (Width div 2) - (FButton.Width div 2);
+  FButton.Left  := (ActualWidth div 2) - (FButton.ActualWidth div 2);
 
   // adjust dialog's height
   Height := FButton.Top + FButton.Height + FTextY;

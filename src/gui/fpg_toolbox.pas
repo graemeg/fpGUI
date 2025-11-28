@@ -29,6 +29,7 @@ uses
 procedure ScaleDPI(Control: TComponent; FromDPI: Integer);
 function  ScaleX(const SizeX, FromDPI: Integer): Integer;
 function  ScaleY(const SizeY, FromDPI: Integer): Integer;
+function  fpgScaleFontToPixel(const ASize: Integer): Integer;
 function  MathRound(AValue: ValReal): Int64; inline;
 function  MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;
 
@@ -110,6 +111,13 @@ end;
 function ScaleY(const SizeY, FromDPI: Integer): Integer;
 begin
   Result := MulDiv(SizeY, fpgApplication.Screen_dpi_y, FromDPI);
+end;
+
+function fpgScaleFontToPixel(const ASize: Integer): Integer;
+begin
+  // Scale from 96 DPI baseline (standard font DPI) to current screen DPI
+  // Use Y-axis scaling as it's typically used for vertical spacing
+  Result := MulDiv(ASize, fpgApplication.Screen_dpi_y, 96);
 end;
 
 function MathRound(AValue: ValReal): Int64; inline;

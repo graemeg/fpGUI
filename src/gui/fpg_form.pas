@@ -336,14 +336,7 @@ begin
 end;
 
 procedure TfpgBaseForm.Show;
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgBaseForm.Show - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
   FVisible := True;
   HandleShow;
 end;
