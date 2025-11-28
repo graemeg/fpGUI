@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -330,6 +330,10 @@ begin
       rowcount := DropDownCount;
     if rowcount < 1 then
       rowcount := 1;
+
+    // Set listbox font to match combobox font before calculating row height
+    ddw.FListBox.FontDesc := FontDesc;
+
     ddw.Height := (ddw.FListBox.RowHeight * rowcount) + 4;
     ddw.FListBox.ScrollBarWidth:= FScrollBarWidth;
     ddw.FListBox.Height := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used

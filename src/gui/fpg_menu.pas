@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -51,8 +51,6 @@ type
 
   TfpgMenuItemType = (mitText, mitSeparator, mitHeader);
 
-  { TfpgMenuItem }
-
   TfpgMenuItem = class(TfpgComponent, ICommandHolder)
   private
     FCommand: ICommand;
@@ -97,11 +95,8 @@ type
   end;
 
 
-  // Actual Menu Items are stored in TComponent's Components property
-  // Visible only items are stored in FItems just before a paint
-
-  { TfpgPopupMenu }
-
+  { Actual Menu Items are stored in TComponent's Components property
+    Visible only items are stored in FItems just before a paint. }
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBeforeShow: TNotifyEvent;
