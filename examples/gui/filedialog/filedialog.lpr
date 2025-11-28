@@ -18,8 +18,6 @@ uses
 
 type
 
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainForm}
@@ -121,7 +119,9 @@ begin
   dlg := TfpgFileDialog.Create(Self);
   try
     // defines 3 filters (All Files, Object Pascal and Lazarus Project)
-    dlg.Filter := 'All Files (*)|*|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp|Lazarus Project (*.lpi)|*.lpi';
+    dlg.Filter :=  Format('All Files (%s)|%s', [AllFilesMask, AllFilesMask])
+      + '|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp'
+      + '|Lazarus Project (*.lpi)|*.lpi';
     if dlg.RunOpenFile then
       edFilename.Text := dlg.FileName;
   finally
@@ -287,10 +287,10 @@ var
 begin
   app:=fpgApplication;
   app.Initialize;
-  app.AppTitle     := 'File dialog test';
+  app.AppTitle     := 'fpGUI Dialogs Demo';
   app.AppVersion   := FPGUI_VERSION;
   app.AppAuthor    := 'Written by Graeme Geldenhuys & others';
-  app.AppCopyright := 'Copyright (c) 2006 - 2019 - modified LGPL2 license';
+  app.AppCopyright := 'Copyright (c) 2006 - modified LGPL2 license';
   app.AppSiteName  := fpGUIWebsite;
   app.AppSiteURL   := fpGUIWebsite;
   //app.AppIcon      :=
