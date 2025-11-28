@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -46,9 +46,8 @@ type
   TfpgGridOption = (go_HideFocusRect, go_AlternativeColor, go_SmoothScroll);
   TfpgGridOptions = set of TfpgGridOption;
 
-  // Column 2 is special just for testing purposes. Descendant classes will
-  // override that special behavior anyway.
-
+  { Column 2 is special just for testing purposes. Descendant classes will
+    override that special behaviour anyway. }
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -1823,8 +1822,15 @@ begin
   rect := fpgStyle.GetControlFrameBorders;
   case BorderStyle of
 //    ebsNone:      // nothing to do
-    ebsDefault:   Result.InflateRect(-rect.Left, -rect.Top);  { assuming borders are even on opposite sides }
-    ebsSingle:    Result.InflateRect(-1, -1);
+    ebsDefault:
+        begin
+          Inc(Result.Left, rect.Left);
+          Inc(Result.Top, rect.Top);
+          Dec(Result.Width, rect.Left + rect.Right);
+          Dec(Result.Height, rect.Top + rect.Bottom);
+        end;
+    ebsSingle:
+        Result.InflateRect(-1, -1);
   end;
 end;
 
