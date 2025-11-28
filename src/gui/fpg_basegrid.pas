@@ -929,7 +929,7 @@ var
   firstcol, lastcol, firstrow, lastrow : integer;
   cWidths: array of integer;
 begin
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
   r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
@@ -939,19 +939,19 @@ begin
     ebsDefault:
         begin
           fpgStyle.DrawControlFrame(Canvas, r);
+          r.InflateRect(-2, -2);
         end;
     ebsSingle:
         begin
           Canvas.SetColor(clShadow2);
           Canvas.DrawRectangle(r);
+          r.InflateRect(-1, -1);
         end;
   end;
-  r := GetClientRect;
+  Canvas.SetClipRect(r);
+
   clipr := r;
   Canvas.SetClipRect(clipr);
-
-  Canvas.SetColor(FBackgroundColor);
-  Canvas.FillRectangle(r);
 
   cLeft := r.Left; // column starting point
   rTop := r.Top; // row starting point
