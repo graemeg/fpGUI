@@ -120,8 +120,6 @@ type
   end;
 
 
-  { TfpgBaseStaticCombo }
-
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
@@ -196,9 +194,6 @@ implementation
 
 uses
   fpg_listbox,
-  {$IFDEF DEBUG}
-  fpg_dbugintf,
-  {$ENDIF}
   math;
 
 
@@ -579,14 +574,8 @@ var
   rowcount: integer;
   r: TfpgRect;
 begin
-  {$IFDEF DEBUG}
-  SendMethodEnter('TfpgBaseStaticCombo.DoDropDown');
-  {$ENDIF}
   if (not Assigned(FDropDown)) or (not FDropDown.WindowAllocated) then
   begin
-    {$IFDEF DEBUG}
-    SendDebug('.... creating');
-    {$ENDIF}
     FreeAndNil(FDropDown);
     DisableShowHint;  // disable hints while dropdown is visible
 
@@ -604,6 +593,9 @@ begin
     if rowcount < 1 then
       rowcount := 1;  // Even if empty at least show one line dropdown
 
+    // Set listbox font to match combobox font before calculating row height
+    ddw.ListBox.FontDesc := FontDesc;
+
     ddw.Width   := ActualWidth;
     ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.ListBox.ScrollBarWidth:= FScrollBarWidth;
@@ -615,9 +607,6 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG}
-    SendDebug('.... destroying');
-    {$ENDIF}
     FBtnPressed := False;
     ddw := TComboboxDropdownWindow(FDropDown);
     ddw.Close;
