@@ -768,9 +768,9 @@ begin
   vBottom := LV.ActualHeight - fpgStyle.GetControlFrameBorders.Bottom;
   vRight := LV.ActualWidth - fpgStyle.GetControlFrameBorders.Right;
   if LV.FHScrollBar.Visible then
-    Dec(vBottom, LV.FHScrollBar.Height);
+    Dec(vBottom, LV.FHScrollBar.ActualHeight);
   if LV.FVScrollBar.Visible then
-    Dec(vRight, LV.FVScrollBar.Width);
+    Dec(vRight, LV.FVScrollBar.ActualWidth);
 
   // the painted items haven't fully covered the visible area
   ACanvas.SetColor(clListBox);
@@ -1133,7 +1133,7 @@ begin
 
   vBottom := LV.ActualHeight - fpgStyle.GetControlFrameBorders.Bottom;
   if LV.FHScrollBar.Visible then
-    Dec(vBottom, LV.FHScrollBar.Height);
+    Dec(vBottom, LV.FHScrollBar.ActualHeight);
 
   // the painted items haven't fully covered the visible area
   if vBottom > cBottom then
@@ -1751,7 +1751,7 @@ begin
   if ShowHeaders then
     Dec(Result, GetHeaderHeight);
   if FHScrollBar.Visible then
-    Dec(Result,FHScrollBar.Height);
+    Dec(Result,FHScrollBar.ActualHeight);
 end;
 
 function TfpgListView.GetItemClientArea: TfpgRect;
@@ -1942,9 +1942,9 @@ begin
   // GetHeaderHeight is 0 if ShowHeaders is false.
   Inc(cRect.Top, GetHeaderHeight);
   if FHScrollBar.Visible then
-    Dec(cRect.Height, FHScrollBar.Height);
+    Dec(cRect.Height, FHScrollBar.ActualHeight);
   if FVScrollBar.Visible then
-    Dec(cRect.Width,  FVScrollBar.Width);
+    Dec(cRect.Width,  FVScrollBar.ActualWidth);
 
 
   if not cRect.PointInRect(Point(X,Y)) then
@@ -1999,9 +1999,9 @@ begin
 
   // Remove V and H scrollbars from posible area.
   if FHScrollBar.Visible then
-    Dec(cRect.Height, FHScrollBar.Height);
+    Dec(cRect.Height, FHScrollBar.ActualHeight);
   if FVScrollBar.Visible then
-    Dec(cRect.Width,  FVScrollBar.Width);
+    Dec(cRect.Width,  FVScrollBar.ActualWidth);
   
   if not cRect.PointInRect(Point(X,Y)) then
     Exit;
@@ -2056,9 +2056,9 @@ begin
 
   {  Maybe useful later for something else
   if FVScrollBar.Visible then
-    Dec(cRect.Width, FVScrollBar.Width);
+    Dec(cRect.Width, FVScrollBar.ActualWidth);
   if FHScrollBar.Visible then
-    Dec(cRect.Height, FHScrollBar.Height);
+    Dec(cRect.Height, FHScrollBar.ActualHeight);
     }
 end;
 
@@ -2121,8 +2121,8 @@ begin
     if (MouseCursor <> mcDefault) and (FResizingColumn = nil) then
       MouseCursor := mcDefault;
   
-  //if FVScrollBar.Visible then Dec(cRect.Width, FVScrollBar.Width);
-  //if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.Height);
+  //if FVScrollBar.Visible then Dec(cRect.Width, FVScrollBar.ActualWidth);
+  //if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.ActualHeight);
 end;
 
 procedure TfpgListView.HandleKeyPress(var keycode: word;
@@ -2259,16 +2259,16 @@ begin
   if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
     Canvas.Color := clButtonFace;
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
-                         FVScrollBar.Top+FVScrollBar.Height,
-                         FVScrollBar.Width,
-                         FHScrollBar.Height);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
+                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+                         FVScrollBar.ActualWidth,
+                         FHScrollBar.ActualHeight);
   end;
-  
+
   if FVScrollBar.Visible then
-    Dec(ClipRect.Width, FVScrollBar.Width);
+    Dec(ClipRect.Width, FVScrollBar.ActualWidth);
   if FHScrollBar.Visible then
-    Dec(ClipRect.Height, FHScrollBar.Height);
+    Dec(ClipRect.Height, FHScrollBar.ActualHeight);
 
   Canvas.SetClipRect(ClipRect);
 
@@ -2374,8 +2374,8 @@ begin
     FVScrollBar.SliderSize := 1
   else
   begin
-    if (FVScrollBar.Max + FVScrollBar.Height) > 0 then
-      FVScrollBar.SliderSize := FVScrollBar.Height / (FVScrollBar.Max + FVScrollBar.Height{ - VScrollBar.Width*2})
+    if (FVScrollBar.Max + FVScrollBar.ActualHeight) > 0 then
+      FVScrollBar.SliderSize := FVScrollBar.ActualHeight / (FVScrollBar.Max + FVScrollBar.ActualHeight{ - VScrollBar.Width*2})
     else
       FVScrollBar.SliderSize := 0.5;
   end;
@@ -2386,8 +2386,8 @@ begin
     FHScrollBar.SliderSize := 1
   else
   begin
-    if (FHScrollBar.Max + FHScrollBar.Width) > 0 then
-      FHScrollBar.SliderSize := FHScrollBar.Width / (FHScrollBar.Max + FHScrollBar.Width)
+    if (FHScrollBar.Max + FHScrollBar.ActualWidth) > 0 then
+      FHScrollBar.SliderSize := FHScrollBar.ActualWidth / (FHScrollBar.Max + FHScrollBar.ActualWidth)
     else
       FHScrollBar.SliderSize := 0.5;
   end;
@@ -2436,7 +2436,7 @@ begin
   FSelectionFollowsFocus := True;
   FItemIndex := -1;
   FScrollBarNeedsUpdate := True;
-  FScrollBarWidth := FVScrollBar.Width;
+  FScrollBarWidth := FVScrollBar.ActualWidth;
   FHScrollBar.Height:=FScrollBarWidth;
   FScrollBarStyle:=ssAutoBoth;
   FViewStyleClass:=TfpgLVReportPainter;

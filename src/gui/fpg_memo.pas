@@ -1400,10 +1400,10 @@ begin
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
     Canvas.SetColor(clButtonFace);
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
-                         FVScrollBar.Top+FVScrollBar.Height,
-                         FVScrollBar.Width,
-                         FHScrollBar.Height);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
+                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+                         FVScrollBar.ActualWidth,
+                         FHScrollBar.ActualHeight);
   end;
 end;
 
