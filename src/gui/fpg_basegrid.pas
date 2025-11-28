@@ -240,7 +240,7 @@ end;
 
 function TfpgBaseGrid.GetScrollBarWidth: Integer;
 begin
-  Result := FVScrollBar.Width;
+  Result := FVScrollBar.ActualWidth;
 end;
 
 function TfpgBaseGrid.GetTotalColumnWidth: integer;
@@ -340,7 +340,7 @@ end;
 
 procedure TfpgBaseGrid.SetScrollBarWidth(const AValue: integer);
 begin
-  if FVScrollBar.Width = AValue then
+  if FVScrollBar.ActualWidth = AValue then
     Exit; //==>
   FVScrollBar.Width := AValue;
   FHScrollBar.Height:= AValue;
@@ -614,7 +614,7 @@ var
   hh: integer;
 begin
   if FHScrollBar.Visible then
-    hh := FHScrollbar.Height
+    hh := FHScrollbar.ActualHeight
   else
     hh := 0;
   if ShowHeader then
@@ -627,7 +627,7 @@ var
   sw: integer;
 begin
   if FVScrollBar.Visible then
-    sw := FVScrollBar.Width
+    sw := FVScrollBar.ActualWidth
   else
     sw := 0;
   Result := GetClientRect.Width - sw
@@ -638,7 +638,7 @@ var
   sw: integer;
 begin
   if FHScrollBar.Visible then
-    sw := FHScrollBar.Height
+    sw := FHScrollBar.ActualHeight
   else
     sw := 0;
   Result := GetClientRect.Height - sw;
@@ -679,12 +679,12 @@ begin
     r := GetAdjustedBorderSizes;
     if FShowHeader then
       if (FScrollBarStyle = ssHorizontal) or (FScrollBarStyle = ssAutoBoth) then
-        Result := Succ(((Height - r.Bottom * 2 - HeaderHeight - FHScrollBar.Height) div DefaultRowHeight) * DefaultRowHeight + HeaderHeight + FHScrollBar.Height + r.Bottom * 2)
+        Result := Succ(((Height - r.Bottom * 2 - HeaderHeight - FHScrollBar.ActualHeight) div DefaultRowHeight) * DefaultRowHeight + HeaderHeight + FHScrollBar.ActualHeight + r.Bottom * 2)
       else
         Result := Succ(((Height - r.Bottom * 2 - HeaderHeight) div DefaultRowHeight) * DefaultRowHeight + HeaderHeight + r.Bottom * 2)
     else
       if (FScrollBarStyle = ssHorizontal) or (FScrollBarStyle = ssAutoBoth) then
-        Result := Succ(((Height - r.Bottom * 2 - FHScrollBar.Height) div DefaultRowHeight) * DefaultRowHeight + FHScrollBar.Height + r.Bottom * 2)
+        Result := Succ(((Height - r.Bottom * 2 - FHScrollBar.ActualHeight) div DefaultRowHeight) * DefaultRowHeight + FHScrollBar.ActualHeight + r.Bottom * 2)
       else
         Result := Succ(((Height - r.Bottom * 2) div DefaultRowHeight) * DefaultRowHeight + r.Bottom * 2);
     if Align = alBottom then
@@ -719,7 +719,7 @@ var
   procedure getVisWidth;
   begin
     if showV then
-      lVisibleWidth := HWidth - (FVScrollBar.Width-1)
+      lVisibleWidth := HWidth - (FVScrollBar.ActualWidth-1)
     else
       lVisibleWidth := HWidth;
     Hfits := lVisibleWidth >= lTotalColWidth;
@@ -733,7 +733,7 @@ var
     if ShowHeader then
       inc (hh, FHeaderHeight+1);
     if showH then
-      inc (hh, FHScrollBar.Height);
+      inc (hh, FHScrollBar.ActualHeight);
     vl := (VHeight - hh) div FDefaultRowHeight;
     Vfits := vl >= RowCount;
   end;
@@ -839,9 +839,9 @@ begin
 
   // set the scrollbar width/height space
   if showV then
-    Dec(HWidth, FVScrollBar.Width);
+    Dec(HWidth, FVScrollBar.ActualWidth);
   if showH then
-    Dec(VHeight, FHScrollBar.Height);
+    Dec(VHeight, FHScrollBar.ActualHeight);
 
   // show or hide the scrollbars
 
@@ -860,7 +860,7 @@ begin
     FVScrollBar.Position := FFirstRow;
     FVScrollBar.RepaintSlider;
     FVScrollBar.Top := borders.Top;
-    FVScrollBar.Left := ActualWidth - FVScrollBar.Width - borders.Right;
+    FVScrollBar.Left := ActualWidth - FVScrollBar.ActualWidth - borders.Right;
     FVScrollBar.Height := VHeight;
   end
   else
@@ -892,7 +892,7 @@ begin
     end;
     FHScrollBar.SliderSize := HWidth / lTotalColWidth;
     FHScrollBar.RepaintSlider;
-    FHScrollBar.Top     := ActualHeight - FHScrollBar.Height - borders.Bottom;
+    FHScrollBar.Top     := ActualHeight - FHScrollBar.ActualHeight - borders.Bottom;
     FHScrollBar.Left    := borders.Left;
     FHScrollBar.Width   := HWidth;
   end
@@ -906,14 +906,6 @@ begin
     end;
     // if horizontal doesn't fit and no scrollbar, do not change firstcol/xoffset
   end;
-
-  FHScrollBar.Top     := ActualHeight -FHScrollBar.Height - 2;
-  FHScrollBar.Left    := 2;
-  FHScrollBar.Width   := HWidth;
-
-  FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - 2;
-  FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdatePosition;
   FHScrollBar.UpdatePosition;
@@ -1129,10 +1121,10 @@ begin
   begin
     Canvas.ClearClipRect;
     Canvas.SetColor(clButtonFace);
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
-                         FVScrollBar.Top+FVScrollBar.Height,
-                         FVScrollBar.Width,
-                         FHScrollBar.Height);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
+                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+                         FVScrollBar.ActualWidth,
+                         FHScrollBar.ActualHeight);
   end;
 
   if (RowCount = 0) and (ColumnCount = 0) and (csDesigning in ComponentState) then
