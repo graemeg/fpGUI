@@ -980,6 +980,7 @@ if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
 ----
 
 This ensures:
+
 - Manual positioning (SetPosition) sets actual size ✓
 - Layout managers override via HandleResize ✓
 - Backward compatibility maintained ✓
@@ -1102,8 +1103,8 @@ r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 
 **Known Issues Remaining**:
 
-- Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation
-- All other widget classes need similar fixes to TfpgButton and TfpgLabel
+- Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation ✓ FIXED
+- All other widget classes need similar fixes to TfpgButton and TfpgLabel ✓ FIXED
 
 ==== Pattern 2: Widget Paint Methods
 
@@ -1476,7 +1477,7 @@ end;
 * [x] `src/corelib/fpg_miglayout.pas` - Container size reading
 * [x] `src/corelib/fpg_flowlayout.pas` - Container size reading
 
-==== Core Framework Files - PENDING
+==== Core Framework Files - COMPLETED
 
 Search these files for Width/Height property reads that might need ActualWidth/ActualHeight:
 
@@ -1785,3 +1786,10 @@ If new issues are discovered, they should be documented here with:
 
 
 This document serves as both a guide and a checklist for the migration effort.
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2025-10-28 +
+**Branch:** feature/sizing-refactor +
+**Author:** Graeme Geldenhuys
