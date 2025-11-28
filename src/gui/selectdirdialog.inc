@@ -320,7 +320,6 @@ begin
 
   // Create MigLayout manager
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.Debug(1000);  // Enable debug visualization for 1000ms
   LayoutManager := mig;
 
   tv := TfpgTreeView.Create(self);

@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -152,7 +152,7 @@ type
   end;
 
 
-  TfpgFileDialog = class(TfpgBaseDialog)
+  TfpgFileDialog = class(TfpgForm)
   private
     FLastSortOrder: TFileListSortOrder;
   protected
@@ -168,6 +168,8 @@ type
     chlFilter: TfpgComboBox;
     lb1: TfpgLabel;
     lb2: TfpgLabel;
+    btnOK: TfpgButton;
+    btnCancel: TfpgButton;
     FOpenMode: boolean;
     FFilterList: TStringList;
     FFilter: string;
@@ -201,9 +203,10 @@ type
     procedure   BookmarkItemClicked(Sender: TObject);
     procedure   ShowConfigureBookmarks;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   btnOKClick(Sender: TObject); override;
+    procedure   btnOKClick(Sender: TObject);
+    procedure   btnCancelClick(Sender: TObject);
     procedure   SetCurrentDirectory(const ADir: string);
-    procedure   SetupCaptions; override;
+    procedure   SetupCaptions;
   public
     FileName: string;
     constructor Create(AOwner: TComponent); override;
@@ -1140,66 +1143,60 @@ begin
 end;
 
 procedure TfpgFileDialog.InitializeComponents;
+var
+  mig: TfpgMigLayoutManager;
 begin
+  // Create MigLayout manager
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.Fill;
+  LayoutManager := mig;
+
+  // Directory combobox with toolbar buttons on same row
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
-    SetPosition(8, 12, 484, 24);
-    Anchors := [anLeft, anRight, anTop];
     Name := 'chlDir';
     FontDesc := '#List';
+    PreferredSize := fpgSize(400, 24);
     OnChange := @DirChange;
   end;
-
-  grid := TfpgFileGrid.Create(self);
-  with grid do
-  begin
-    SetPosition(8, 44, 624, 202);
-    Anchors := [anLeft, anRight, anTop, anBottom];
-    Options := [go_AlternativeColor, go_SmoothScroll];
-    OnRowChange := @ListChanged;
-    OnDoubleClick := @GridDblClicked;
-    OnHeaderClick := @GridHeaderClicked;
-    Name := 'grid';
-  end;
+  mig.AddLayoutComponent(chlDir, TfpgMigCC.Create().GrowX().PushX().MinWidth('50lp'));
 
   btnUpDir := TfpgButton.Create(self);
   with btnUpDir do
   begin
-    SetPosition(500, 11, 24, 24);
-    Anchors := [anRight, anTop];
-    Text := '';
     Name := 'btnUpDir';
+    Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderup';   // Do NOT localize
     Focusable := False;
     ImageSpacing := 0;
     ImageMargin := -1;
+    PreferredSize := fpgSize(24, 24);
     OnClick := @UpDirClick;
   end;
+  mig.AddLayoutComponent(btnUpDir, TfpgMigCC.Create().Split(5).GapX('2lp', '2lp').AlignX('right').MinWidth('24lp'));
 
   btnDirNew := TfpgButton.Create(self);
   with btnDirNew do
   begin
-    SetPosition(526, 11, 24, 24);
-    Anchors := [anRight, anTop];
-    Text := '';
     Name := 'btnDirNew';
+    Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.foldernew';    // Do NOT localize
     Focusable := False;
     ImageSpacing := 0;
     ImageMargin := -1;
+    PreferredSize := fpgSize(24, 24);
     OnClick := @btnDirNewClicked;
   end;
+  mig.AddLayoutComponent(btnDirNew, TfpgMigCC.Create().GapX('2lp', '2lp').MinWidth('24lp'));
 
   btnShowHidden := TfpgButton.Create(self);
   with btnShowHidden do
   begin
-    SetPosition(552, 11, 24, 24);
-    Anchors := [anRight, anTop];
-    Text := '';
     Name := 'btnShowHidden';
+    Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.hidden';   // Do NOT localize
     Focusable := False;
@@ -1207,94 +1204,142 @@ begin
     AllowAllUp := True;
     ImageSpacing := 0;
     ImageMargin := -1;
+    PreferredSize := fpgSize(24, 24);
     OnClick := @DirChange;
   end;
+  mig.AddLayoutComponent(btnShowHidden, TfpgMigCC.Create().GapX('2lp', '2lp').MinWidth('24lp'));
 
   btnGoHome := TfpgButton.Create(self);
   with btnGoHome do
   begin
-    SetPosition(578, 11, 24, 24);
-    Anchors := [anRight, anTop];
-    Text := '';
     Name := 'btnGoHome';
+    Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderhome';    // Do NOT localize
     Focusable := False;
     ImageSpacing := 0;
     ImageMargin := -1;
+    PreferredSize := fpgSize(24, 24);
     OnClick := @btnGoHomeClicked;
   end;
+  mig.AddLayoutComponent(btnGoHome, TfpgMigCC.Create().GapX('2lp', '2lp').MinWidth('24lp'));
 
   btnBookmark := TfpgButton.Create(self);
   with btnBookmark do
   begin
-    SetPosition(604, 11, 24, 24);
-    Anchors := [anRight, anTop];
-    Text := '';
     Name := 'btnBookmark';
+    Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.bookmark';    // Do NOT localize
     Focusable := False;
     ImageSpacing := 0;
     ImageMargin := -1;
+    PreferredSize := fpgSize(24, 24);
     OnClick := @btnBookmarkClicked;
   end;
+  mig.AddLayoutComponent(btnBookmark, TfpgMigCC.Create().GapX('2lp', '2lp').MinWidth('24lp').Wrap());
 
-  { Create lower Panel details }
+  // File grid - grows both horizontally and vertically, spans 2 columns
+  grid := TfpgFileGrid.Create(self);
+  with grid do
+  begin
+    Name := 'grid';
+    Options := [go_AlternativeColor, go_SmoothScroll];
+    PreferredSize := fpgSize(600, 200);
+    OnRowChange := @ListChanged;
+    OnDoubleClick := @GridDblClicked;
+    OnHeaderClick := @GridHeaderClicked;
+  end;
+  mig.AddLayoutComponent(grid, TfpgMigCC.Create().GrowX().GrowY().SpanX(2).Wrap());
 
+  { Create lower Panel details - spans 2 columns, only grows horizontally }
   pnlFileInfo := TfpgPanel.Create(self);
   with pnlFileInfo do
   begin
     Name := 'pnlFileInfo';
-    SetPosition(8, 253, 624, 25);
-    Anchors := [anLeft, anRight, anBottom];
     Alignment := taLeftJustify;
     Margin := 4;
     Style := bsLowered;
     Text := '';
+    PreferredSize := fpgSize(600, 25);
   end;
+  mig.AddLayoutComponent(pnlFileInfo, TfpgMigCC.Create().GrowX().SpanX(2).Wrap());
 
+  // Filename label - spans 2 columns
+  lb1 := TfpgLabel.Create(self);
+  with lb1 do
+  begin
+    Name := 'lb1';
+    Text := fpgAddColon(rsFileName);
+    FontDesc := '#Label1';
+  end;
+  mig.AddLayoutComponent(lb1, TfpgMigCC.Create().GrowX().SpanX(2).Wrap());
+
+  // Filename edit - spans 2 columns, only grows horizontally
   edFilename := TfpgEdit.Create(self);
   with edFilename do
   begin
-    SetPosition(8, 301, 624, 22);
-    Anchors := [anLeft, anRight, anBottom];
-    Text := '';
     Name := 'edFilename';
+    Text := '';
     FontDesc := '#Edit1';
+    PreferredSize := fpgSize(600, 22);
     OnChange := @edFilenameChanged;
     OnKeyPress := @edFilenameKeyPressed;
   end;
+  mig.AddLayoutComponent(edFilename, TfpgMigCC.Create().GrowX().SpanX(2).Wrap());
 
-  { Filter section }
+  { Filter section - spans 2 columns }
+  lb2 := TfpgLabel.Create(self);
+  with lb2 do
+  begin
+    Name := 'lb2';
+    Text := fpgAddColon(rsFileType);
+    FontDesc := '#Label1';
+  end;
+  mig.AddLayoutComponent(lb2, TfpgMigCC.Create().GrowX().SpanX(2).Wrap());
 
   chlFilter := TfpgComboBox.Create(self);
   with chlFilter do
   begin
-    SetPosition(8, 345, 624, 22);
-    Anchors := [anLeft, anRight, anBottom];
-    FontDesc := '#List';
-    OnChange := @FilterChange;
     Name := 'chlFilter';
+    FontDesc := '#List';
+    PreferredSize := fpgSize(600, 22);
+    OnChange := @FilterChange;
   end;
+  mig.AddLayoutComponent(chlFilter, TfpgMigCC.Create().GrowX().SpanX(2).Wrap());
 
-  lb1 := TfpgLabel.Create(self);
-  with lb1 do
+  // OK and Cancel buttons using MIG button tags with gap above
+  btnOK := TfpgButton.Create(self);
+  with btnOK do
   begin
-    SetPosition(8, 283, 624, 16);
-    Anchors := [anLeft, anBottom];
-    Text := fpgAddColon(rsFileName);
-    FontDesc := '#Label1';
+    Name := 'btnOK';
+    Text := rsOK;
+    ImageName := 'stdimg.ok';   // Do NOT localize
+    ShowImage := True;
+    PreferredSize := fpgSize(80, 24);
+    OnClick := @btnOKClick;
   end;
+  mig.AddLayoutComponent(btnOK, TfpgMigCC.Create().SpanX().Split(2).Tag('ok').GapTop('16lp'));
 
-  lb2 := TfpgLabel.Create(self);
-  with lb2 do
+  btnCancel := TfpgButton.Create(self);
+  with btnCancel do
   begin
-    SetPosition(8, 327, 624, 16);
-    Anchors := [anLeft, anBottom];
-    Text := fpgAddColon(rsFileType);
-    FontDesc := '#Label1';
+    Name := 'btnCancel';
+    Text := rsCancel;
+    ImageName := 'stdimg.cancel';   // Do NOT localize
+    ShowImage := True;
+    PreferredSize := fpgSize(80, 24);
+    OnClick := @btnCancelClick;
   end;
+  mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().Tag('cancel'));
+
+  // Set tab order
+  chlDir.TabOrder := 1;
+  grid.TabOrder := 2;
+  edFilename.TabOrder := 3;
+  chlFilter.TabOrder := 4;
+  btnOK.TabOrder := 5;
+  btnCancel.TabOrder := 6;
 
   ActiveWidget := grid;
   FileName := '';
@@ -1308,6 +1353,14 @@ var
 begin
   if not consumed then
   begin
+    case keycode of
+      keyEscape:
+        begin
+          btnCancelClick(nil);
+          consumed := True;
+        end;
+    end;
+
     if (ActiveWidget = grid) then
     begin
       case keycode of
@@ -1358,26 +1411,28 @@ begin
     FileName := grid.FileList.DirectoryName + edFileName.Text;
 end;
 
+procedure TfpgFileDialog.btnCancelClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+  Close;
+end;
+
 constructor TfpgFileDialog.Create(AOwner: TComponent);
 begin
+  WindowType := wtModalForm;
   inherited Create(AOwner);
   WindowTitle := rsFileSelection;
-  Width       := 640;
-  Height      := 410;
+  Width := 640;
+  Height := 410;
+  MinWidth := 500;
+  MinHeight := 400;
   WindowPosition := wpOneThirdDown;
-  FSpacing    := 10;
   FLastSortOrder := soFileName;
   FOriginalCurrentDirectory := fpgGetCurrentDir;
 
   FFilterList := TStringList.Create;
 
   InitializeComponents;
-
-  // position standard dialog buttons
-  btnCancel.Left  := Width - FDefaultButtonWidth - FSpacing;
-  btnCancel.Top   := Height - btnCancel.Height - FSpacing;
-  btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
-  btnOK.Top       := btnCancel.Top;
 end;
 
 destructor TfpgFileDialog.Destroy;
@@ -1504,7 +1559,8 @@ end;
 
 procedure TfpgFileDialog.SetupCaptions;
 begin
-  inherited SetupCaptions;
+  btnOK.Text := rsOK;
+  btnCancel.Text := rsCancel;
   btnUpDir.Hint := rsGoToParentDirectory;
   btnDirNew.Hint := rsCreateDirectory;
   btnShowHidden.Hint := rsShowHidden;
