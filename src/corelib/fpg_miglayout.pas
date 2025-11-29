@@ -3936,7 +3936,7 @@ begin
         if cw.Comp is TfpgWidget then
         begin
           widget := TfpgWidget(cw.Comp);
-          compRect.SetRect(widget.Left, widget.Top, widget.Width, widget.Height);
+          compRect.SetRect(widget.Left, widget.Top, widget.ActualWidth, widget.ActualHeight);
           ACanvas.DrawRectangle(compRect);
         end;
       end;
