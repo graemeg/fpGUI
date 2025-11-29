@@ -117,6 +117,11 @@ type
     procedure   uiCreateMenuBar;
     procedure   uiCreateToolBar;
     procedure   uiCreateContextArea;
+    procedure   uiCreateContentsTab;
+    procedure   uiCreateIndexTab;
+    procedure   uiCreateSearchPage;
+    procedure   uiCreateNotesPage;
+    procedure   uiCreateHistoryPage;
 
     procedure   RichViewDragDrop(Drop: TfpgDrop; AData: Variant);
     procedure   tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
@@ -733,12 +738,66 @@ begin
     OnChange := @PageControl1Change;
   end;
 
+  // Create the page control tabs
+  uiCreateContentsTab;
+  uiCreateIndexTab;
+  uiCreateSearchPage;
+  uiCreateNotesPage;
+  uiCreateHistoryPage;
+
+  pnlTitle := TfpgPanel.Create(bvlBody);
+  with pnlTitle do
+  begin
+    Name := 'pnlTitle';
+    PreferredSize := fpgSize(400, 20);
+    Alignment := taLeftJustify;
+    BackgroundColor := fpgColor($55, $9D, $D4);
+    FontDesc := '#Label2';
+    Hint := '';
+    Margin := 15;
+    Style := bsFlat;
+    Text := 'Panel';
+    TextColor := fpgColor($FF, $FF, $FF);
+    OnPaint:= @pnlTitleGradientPaint;
+  end;
+
+  RichView := TRichTextView.Create(bvlBody);
+  with RichView do
+  begin
+    Name := 'RichView';
+    PreferredSize := fpgSize(350, 400);
+    MinWidth := 300;
+    TabOrder := 2;
+    OnOverLink  := @RichViewOverLink;
+    OnNotOverLink := @RichViewNotOverLink;
+    OnClickLink := @RichViewClickLink;
+    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @RichViewDragDrop, nil);
+  end;
+
+  {%endregion}
+
+  bvlBody.LayoutManager := lm;
+  lm.LC.InsetsAll('2lp').Fill;
+  lm.RowConstraints.Index(0).Grow(0).Index(1).Grow;
+  lm.AddLayoutComponent(PageControl1, TfpgMigCC.Create.SpanY(2).Width('260lp').MinWidth('120lp').GrowY.PushY);
+  lm.AddLayoutComponent(pnlTitle, TfpgMigCC.Create.GrowX.Height('20lp!').Wrap);
+  lm.AddLayoutComponent(RichView, TfpgMigCC.Create.GrowX.GrowY.Push);
+
+end;
+
+procedure TMainForm.uiCreateContentsTab;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'Contents Page' -fold}
+
   tsContents := TfpgTabSheet.Create(PageControl1);
   with tsContents do
   begin
     Name := 'tsContents';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 300);
     Text := 'Contents';
   end;
 
@@ -746,10 +805,8 @@ begin
   with tvContents do
   begin
     Name := 'tvContents';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(240, 300);
     FontDesc := '#Label1';
-    Hint := '';
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
@@ -761,16 +818,24 @@ begin
   with btnGo do
   begin
     Name := 'btnGo';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
+    PreferredSize := fpgSize(80, 24);
     Text := 'Go to';
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     TabOrder := 1;
     OnClick := @btnGoClicked;
   end;
+  {%endregion}
 
+  tsContents.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(1);  // Single column layout (wrap after each component)
+  lm.AddLayoutComponent(btnGo, TfpgMigCC.Create.AlignX('right'));
+  lm.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowY);
+end;
+
+procedure TMainForm.uiCreateIndexTab;
+begin
+
+  {%region 'Index Page' -fold}
   tsIndex := TfpgTabSheet.Create(PageControl1);
   with tsIndex do
   begin
@@ -821,6 +886,15 @@ begin
     OnChange := @IndexSearchEditOnChange;
     OnKeyPress :=@IndexSearchEditKeyPress;
   end;
+
+  {%endregion}
+
+end;
+
+procedure TMainForm.uiCreateSearchPage;
+begin
+
+  {%region 'Search Page' -fold}
 
   tsSearch := TfpgTabSheet.Create(PageControl1);
   with tsSearch do
@@ -981,6 +1055,15 @@ begin
     OnClick := @btnSearchClicked;
   end;
 
+  {%endregion}
+
+end;
+
+procedure TMainForm.uiCreateNotesPage;
+begin
+
+  {%region 'Notes Page' -fold}
+
   tsNotes := TfpgTabSheet.Create(PageControl1);
   with tsNotes do
   begin
@@ -1063,6 +1146,15 @@ begin
     OnClick := @btnNotesGotoClicked;
   end;
 
+  {%endregion}
+
+end;
+
+procedure TMainForm.uiCreateHistoryPage;
+begin
+
+  {%region 'History Page' -fold}
+
   tsHistory := TfpgTabSheet.Create(PageControl1);
   with tsHistory do
   begin
@@ -1085,62 +1177,7 @@ begin
     OnKeyPress := @lbHistoryKeyPress;
   end;
 
-  //Splitter1 := TfpgSplitter.Create(bvlBody);
-  //with Splitter1 do
-  //begin
-  //  Name := 'Splitter1';
-  //  SetPosition(262, 2, 8, 306);
-  //  Align := alLeft;
-  //  OnDoubleClick :=@Splitter1DoubleClicked;
-  //end;
-
-  //bvlContentArea := TfpgBevel.Create(bvlBody);
-  //with bvlContentArea do
-  //begin
-  //  Name := 'bvlContentArea';
-  //  SetPosition(270, 2, 381, 306);
-  //  Align := alClient;
-  //  Hint := '';
-  //  Shape := bsSpacer;
-  //end;
-
-  pnlTitle := TfpgPanel.Create(bvlBody);
-  with pnlTitle do
-  begin
-    Name := 'pnlTitle';
-    PreferredSize := fpgSize(400, 20);
-    Alignment := taLeftJustify;
-    BackgroundColor := fpgColor($55, $9D, $D4);
-    FontDesc := '#Label2';
-    Hint := '';
-    Margin := 15;
-    Style := bsFlat;
-    Text := 'Panel';
-    TextColor := fpgColor($FF, $FF, $FF);
-    OnPaint:= @pnlTitleGradientPaint;
-  end;
-
-  RichView := TRichTextView.Create(bvlBody);
-  with RichView do
-  begin
-    Name := 'RichView';
-    PreferredSize := fpgSize(350, 400);
-    MinWidth := 300;
-    TabOrder := 2;
-    OnOverLink  := @RichViewOverLink;
-    OnNotOverLink := @RichViewNotOverLink;
-    OnClickLink := @RichViewClickLink;
-    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @RichViewDragDrop, nil);
-  end;
-
   {%endregion}
-
-  bvlBody.LayoutManager := lm;
-  lm.LC.InsetsAll('2lp').Fill;
-  lm.RowConstraints.Index(0).Grow(0).Index(1).Grow;
-  lm.AddLayoutComponent(PageControl1, TfpgMigCC.Create.SpanY(2).Width('260lp').MinWidth('120lp').GrowY.PushY);
-  lm.AddLayoutComponent(pnlTitle, TfpgMigCC.Create.GrowX.Height('20lp!').Wrap);
-  lm.AddLayoutComponent(RichView, TfpgMigCC.Create.GrowX.GrowY.Push);
 
 end;
 
