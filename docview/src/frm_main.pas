@@ -893,7 +893,10 @@ begin
 end;
 
 procedure TMainForm.uiCreateSearchPage;
+var
+  lm: TfpgMigLayoutManager;
 begin
+  lm := TfpgMigLayoutManager.Create;
 
   {%region 'Search Page' -fold}
 
@@ -901,8 +904,7 @@ begin
   with tsSearch do
   begin
     Name := 'tsSearch';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 300);
     Text := 'Search';
   end;
 
@@ -910,33 +912,30 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(4, 4, 120, 16);
+    PreferredSize := fpgSize(170, 16);
     FontDesc := '#Label1';
-    Hint := '';
     Text := 'Search for:';
+    BackgroundColor := clYellow;
   end;
 
   edSearchText := TfpgEdit.Create(tsSearch);
   with edSearchText do
   begin
     Name := 'edSearchText';
-    SetPosition(4, 20, 210, 26);
-    Anchors := [anLeft,anRight,anTop];
+    PreferredSize := fpgSize(200, 24);
     ExtraHint := '';
     FontDesc := '#Edit1';
-    Hint := '';
     TabOrder := 1;
     Text := '';
-    OnKeyPress :=@edSearchTextKeyPress;
+    OnKeyPress := @edSearchTextKeyPress;
   end;
 
   Label2 := TfpgLabel.Create(tsSearch);
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(4, 48, 172, 16);
+    PreferredSize := fpgSize(170, 16);
     FontDesc := '#Label1';
-    Hint := '';
     Text := 'Criteria:';
   end;
 
@@ -944,11 +943,10 @@ begin
   with RadioButton1 do
   begin
     Name := 'RadioButton1';
-    SetPosition(12, 68, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 3;
     Text := 'This section';
   end;
@@ -957,11 +955,10 @@ begin
   with RadioButton2 do
   begin
     Name := 'RadioButton2';
-    SetPosition(12, 88, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 4;
     Text := 'Marked sections';
   end;
@@ -970,12 +967,11 @@ begin
   with RadioButton3 do
   begin
     Name := 'RadioButton3';
-    SetPosition(12, 108, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Checked := True;
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 5;
     Text := 'All sections';
   end;
@@ -984,11 +980,10 @@ begin
   with RadioButton4 do
   begin
     Name := 'RadioButton4';
-    SetPosition(12, 128, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 6;
     Text := 'Index';
   end;
@@ -997,11 +992,10 @@ begin
   with RadioButton5 do
   begin
     Name := 'RadioButton5';
-    SetPosition(12, 148, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 7;
     Text := 'Marked libraries';
   end;
@@ -1010,11 +1004,10 @@ begin
   with RadioButton6 do
   begin
     Name := 'RadioButton6';
-    SetPosition(12, 168, 192, 20);
+    PreferredSize := fpgSize(190, 20);
     Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    Hint := '';
     TabOrder := 8;
     Text := 'All libraries';
   end;
@@ -1023,10 +1016,8 @@ begin
   with lbSearchResults do
   begin
     Name := 'lbSearchResults';
-    SetPosition(4, 220, 242, 54);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(220, 200);
     FontDesc := '#List';
-    Hint := '';
     TabOrder := 9;
     OnDoubleClick := @lbSearchResultsDoubleClick;
     OnKeyPress := @lbSearchResultsKeyPress;
@@ -1036,9 +1027,8 @@ begin
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(4, 200, 196, 16);
+    PreferredSize := fpgSize(160, 16);
     FontDesc := '#Label1';
-    Hint := '';
     Text := 'Search results:';
   end;
 
@@ -1046,17 +1036,29 @@ begin
   with btnSearch do
   begin
     Name := 'btnSearch';
-    SetPosition(220, 20, 28, 26);
-    Anchors := [anRight,anTop];
+    PreferredSize := fpgSize(30, 24);
     Text := 'Go';
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     TabOrder := 11;
     OnClick := @btnSearchClicked;
   end;
 
   {%endregion}
+
+  tsSearch.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(Label1, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(edSearchText, TfpgMigCC.Create.GrowX);
+  lm.AddLayoutComponent(btnSearch, TfpgMigCC.Create);
+  lm.AddLayoutComponent(Label2, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton1, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton2, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton3, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton4, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton5, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton6, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(Label3, TfpgMigCC.Create.SpanX(2).AlignY('bottom').GrowX);
+  lm.AddLayoutComponent(lbSearchResults, TfpgMigCC.Create.SpanX(2).GrowY.GrowX);
 
 end;
 
