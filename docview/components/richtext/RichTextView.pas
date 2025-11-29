@@ -690,8 +690,9 @@ Var
   end;
 
 begin
+  inherited HandlePaint;
   ProfileEvent('TRichTextView.HandlePaint >>>');
-  Canvas.ClearClipRect;
+
   DrawBorder;
   DrawRect := GetDrawRect;
   Canvas.Color := RichTextSettings.DefaultBackgroundColor;
@@ -993,17 +994,17 @@ begin
   FHScrollbar.Visible := False;
   FHScrollbar.Orientation := orHorizontal;
   FHScrollBar.Left := 2;
-  FHScrollBar.Top := Height-2-FScrollbarWidth;
-  FHScrollBar.Width := Width-4-FScrollbarWidth;
+  FHScrollBar.Top := ActualHeight-2-FScrollbarWidth;
+  FHScrollBar.Width := ActualWidth-4-FScrollbarWidth;
   FHScrollBar.Height := FScrollbarWidth;
 
   FVScrollbar := TfpgScrollBar.Create( self );
   FVScrollBar.Visible := False;
   FVScrollBar.Orientation := orVertical;
-  FVScrollbar.Left := Width-2-FScrollbarWidth;
+  FVScrollbar.Left := ActualWidth-2-FScrollbarWidth;
   FVScrollbar.Top := 2;
   FVScrollbar.Width := FScrollbarWidth;
-  FVScrollbar.Height := Height-4-FScrollbarWidth;
+  FVScrollbar.Height := ActualHeight-4-FScrollbarWidth;
 
 //  FScrollTimer := TfpgTimer.Create( 100 );
 //  FScrollTimer.OnTimer := @OnScrollTimer;
@@ -1183,8 +1184,7 @@ procedure TRichTextView.DrawBorder;
 var
   r: TfpgRect;
 begin
-//  Canvas.GetWinRect(Rect);
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
         begin
@@ -1193,13 +1193,16 @@ begin
     ebsDefault:
         begin
           fpgStyle.DrawControlFrame(Canvas, r);
+          r.InflateRect(-2, -2);
         end;
     ebsSingle:
         begin
           Canvas.SetColor(clShadow2);
           Canvas.DrawRectangle(r);
+          r.InflateRect(-1, -1);
         end;
   end;
+  Canvas.SetClipRect(r);
 end;
 
 Procedure TRichTextView.Draw( StartLine, EndLine: longint );
@@ -2915,7 +2918,7 @@ function TRichTextView.GetClientRect: TfpgRect;
 var
   r: TRect;
 begin
-  Result.SetRect(0, 0, Width, Height);
+  Result.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
         begin
@@ -2924,11 +2927,11 @@ begin
     ebsDefault:
         begin
           r := fpgStyle.GetControlFrameBorders;
-          InflateRect(Result, -r.Left, -r.Top);  { assuming borders are even on opposite sides }
+          InflateRect(r, -2, -2);
         end;
     ebsSingle:
         begin
-          InflateRect(Result, -1, -1);
+          InflateRect(r, -1, -1);
         end;
   end;
 end;
