@@ -156,7 +156,7 @@ type
 
     procedure AddCompWrap(ACompWrap: TfpgMigCompWrap);
     function GetMinPrefMax: TfpgMigIntArray;
-    procedure Layout(ADC: TfpgMigDimConstraint; ALC: TfpgMigLC; AStart, ASize, ASpanCount: Integer);
+    procedure Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
 
     property Span: Integer read FSpan;
     property CompWraps: TfpgMigCompWrapList read FCompWraps;
@@ -226,7 +226,7 @@ type
                                         ASizeType: Integer; ACenterBaseline: Boolean): TfpgMigAboveBelow;
 
     class procedure LayoutSerial(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
-    class procedure LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; ALC: TfpgMigLC; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+    class procedure LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
     class procedure LayoutBaseline(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize, ASizeType, ASpanCount: Integer);
     class procedure SetCompWrapBounds(AParent: TfpgWidgetBase; const AAllSizes: TfpgMigIntegerArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
     class procedure SetCompWrapBoundsFromSizes(AParent: TfpgWidgetBase; const ASizes: TfpgMigSizeArrayArray; ACompWraps: TfpgMigCompWrapList; ARowAlign: TfpgMigUnitValue;  AStart, ASize: Integer; AIsHor, AFromEnd: Boolean);
@@ -989,7 +989,7 @@ begin
   Result[SIZE_MAX] := INF;
 end;
 
-procedure TfpgMigLinkedDimGroup.Layout(ADC: TfpgMigDimConstraint; ALC: TfpgMigLC; AStart, ASize, ASpanCount: Integer);
+procedure TfpgMigLinkedDimGroup.Layout(ADC: TfpgMigDimConstraint; AStart, ASize, ASpanCount: Integer);
 var
   Parent: TfpgWidgetBase;
 {$IFDEF MIGDEBUG}
@@ -1007,7 +1007,7 @@ begin
   case FLinkType of
     TYPE_PARALLEL:
     begin
-      TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, ALC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
+      TfpgMigGrid.LayoutParallel(Parent, FCompWraps, ADC, AStart, ASize, FIsHor, ASpanCount, FFromEnd);
     end;
     TYPE_BASELINE:
     begin
@@ -2686,7 +2686,7 @@ begin
         if group.Span > 1 then
           groupSize := TfpgMigLayoutUtil.Sum(rowColSizes, bIx2, Min((group.Span shl 1) - 1, Length(rowColSizes) - bIx2 - 1));
 
-        group.Layout(primDC, FLC, curPos, groupSize, group.Span);
+        group.Layout(primDC, curPos, groupSize, group.Span);
       end;
     end;
 
@@ -2906,7 +2906,7 @@ begin
   end;
 end;
 
-class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; ALC: TfpgMigLC; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
+class procedure TfpgMigGrid.LayoutParallel(AParent: TfpgWidgetBase; ACompWraps: TfpgMigCompWrapList; ADC: TfpgMigDimConstraint; AStart, ASize: Integer; AIsHor: Boolean; ASpanCount: Integer; AFromEnd: Boolean);
 var
   sizes: TfpgMigSizeArrayArray;
   i, j: Integer;
@@ -2962,9 +2962,7 @@ begin
     sz[2][SIZE_MAX] := 0;
 
 
-    // Check if Fill is enabled - first check row/column DimConstraint, then fall back to LC
-    if ((ADC <> nil) and ADC.IsFill) or
-       ((ADC = nil) or not ADC.IsFill) and (ALC <> nil) and ((AIsHor and ALC.IsFillX) or (not AIsHor and ALC.IsFillY)) then
+    if (ADC <> nil) and ADC.IsFill then
     begin
       SetLength(growW, 1);
       growW[0] := 100.0;
