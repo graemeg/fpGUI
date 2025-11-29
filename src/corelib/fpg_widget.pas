@@ -95,7 +95,6 @@ type
     FDragStartPos: TfpgPoint;
     FDropHandler: TfpgDropHandler;
     FFormDesigner: TObject;
-    FVisible: boolean;
     FEnabled: boolean;
     FFocusable: boolean;
     FFocused: boolean;
@@ -121,7 +120,7 @@ type
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
-    procedure   SetVisible(const AValue: boolean); virtual;
+    procedure   SetVisible(const AValue: boolean); override;
     procedure   SetShowHint(const AValue: boolean); virtual;
     procedure   SetParentShowHint(const AValue: boolean); virtual;
     function    GetHint: TfpgString; virtual;
@@ -200,7 +199,6 @@ type
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
     property    Canvas: TfpgCanvas read GetCanvas;
-    property    Visible: boolean read FVisible write SetVisible default True;
     property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
     { Is the widget allowed to receive keyboard focus. }
@@ -471,9 +469,7 @@ end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
-  if FVisible = AValue then
-    Exit;
-  FVisible := AValue;
+  inherited SetVisible(AValue);
   if FOnScreen then
     if FVisible then
     begin

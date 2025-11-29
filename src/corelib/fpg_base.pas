@@ -558,7 +558,9 @@ type
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
     FWindow: TfpgWindowBase;
+    FVisible: boolean;
     procedure   SetFontDesc(const AValue: string); virtual;
+    procedure   SetVisible(const AValue: boolean); virtual;
     function    GetWindow: TfpgWindowBase; virtual;
     // TODO: Maybe rename this to DoAllocateNativeWindow() or DoCreateNativeWindow() - it will be more accurate
     procedure   DoAllocateWindowHandle; virtual; abstract;
@@ -622,6 +624,7 @@ type
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWidgetBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
+    property    Visible: boolean read FVisible write SetVisible default True;
     property    Window: TfpgWindowBase read GetWindow;
     property    Font: TfpgFontResourceBase read FFont;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -1919,6 +1922,13 @@ procedure TfpgWidgetBase.SetFontDesc(const AValue: string);
 begin
   FFont := nil;  // Release old font reference (font manager owns fonts)
   FFont := fpgApplication.FontManager.GetFont(AValue);
+end;
+
+procedure TfpgWidgetBase.SetVisible(const AValue: boolean);
+begin
+  if FVisible = AValue then
+    Exit;
+  FVisible := AValue;
 end;
 
 function TfpgWidgetBase.GetWidth: TfpgCoord;
