@@ -37,6 +37,7 @@ type
     procedure TestColumnSpan;
     procedure TestRowSpan;
     procedure TestGrow;
+    procedure TestComponentOrder;
   end;
 
 procedure RegisterTests;
@@ -404,6 +405,53 @@ begin
 
   CheckEquals(68, w2.Left, 'w2.Left');
   CheckEquals(120, w2.ActualWidth, 'w2.ActualWidth');
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestComponentOrder;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  btnA, btnB: TfpgButton;
+begin
+  container := TfpgWidget.Create(nil);
+  container.Name := 'container';
+  container.Width := 200;
+  container.Height := 200;
+
+  lm := TfpgMigLayoutManager.Create;
+  lm.LC.SetWrapAfter(1); // one component per row
+  container.LayoutManager := lm;
+
+  // 1. Create components in one order
+  btnA := TfpgButton.Create(container);
+  btnA.Name := 'btnA';
+  btnA.Width := 50;
+  btnA.Height := 25;
+
+  btnB := TfpgButton.Create(container);
+  btnB.Name := 'btnB';
+  btnB.Width := 50;
+  btnB.Height := 25;
+
+  // 2. Add them to layout manager in a DIFFERENT order
+  lm.AddLayoutComponent(btnB, TfpgMigCC.Create);
+  lm.AddLayoutComponent(btnA, TfpgMigCC.Create);
+
+  // 3. Realign and check positions
+  container.Realign;
+
+  // btnB was added first, it should be in row 0
+  // btnA was added second, it should be in row 1
+
+  // Failing check: This will fail if layout is based on creation order.
+  // In that case, btnA is at top, btnB is second.
+  CheckTrue(btnA.Top > btnB.Top, 'btnA should be below btnB');
+
+  // More specific checks
+  CheckEquals(12, btnB.Top, 'btnB.Top should be at top inset');
+  CheckTrue(btnA.Top > 30, 'btnA.Top should be below btnB'); // 12 + 25 + 6 = 43
 
   container.Free;
 end;

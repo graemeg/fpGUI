@@ -56,6 +56,7 @@ type
   TfpgMigSizeArray = array[0..2] of Integer;  // [min,pref,max]
   TfpgMigBooleanArray = array of Boolean;
   TfpgMigLinkedDimGroupListArray = array of TfpgMigLinkedDimGroupList;
+  TfpgWidgetBaseList = specialize TList<TfpgWidgetBase>;
 
 
   { CompWrap - wraps a TfpgWidgetBase with its CC constraint
@@ -329,7 +330,8 @@ type
   public
     constructor Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
                        ARowConstr, AColConstr: TfpgMigAC;
-                       const ACCMap: TfpgMigCCMap);
+                       const ACCMap: TfpgMigCCMap;
+                       AComponents: TfpgWidgetBaseList);
     destructor Destroy; override;
 
     { Main layout method - positions and sizes all components }
@@ -355,6 +357,7 @@ type
     FDirty: Boolean;        // True when grid needs to be recreated
     FContainer: TfpgWidgetBase;  // Last container we laid out
     FLastComponentCount: Integer;  // Track component count to detect structural changes
+    FComponentOrder: TfpgWidgetBaseList;  // Tracks order of AddLayoutComponent calls
 
     procedure SetLC(AValue: TfpgMigLC);
     procedure SetRowConstr(AValue: TfpgMigAC);
@@ -365,14 +368,18 @@ type
     procedure DoLayout(AContainer: TfpgWidgetBase); override;
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
     function DoGetMinimumSize(AContainer: TfpgWidgetBase): TfpgSize; override;
-    procedure InvalidateLayout(AContainer: TfpgWidgetBase); override;
-    procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase); override;
 
     // Helper to calculate sizes from grid
     function CalculateGridSize(AContainer: TfpgWidgetBase; ASizeType: Integer): TfpgSize;
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    // TfpgBaseLayoutManager overrides
+    procedure InvalidateLayout(AContainer: TfpgWidgetBase); override;
+    procedure PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase); override;
+    procedure AddLayoutComponent(AWidget: TfpgWidgetBase; AConstraint: TfpgLayoutConstraint); override;
+    procedure RemoveLayoutComponent(AWidget: TfpgWidgetBase); override;
 
     { MigLayout v11 constraint properties }
     property LC: TfpgMigLC read FLC write SetLC;
@@ -1022,7 +1029,8 @@ end;
 { TfpgMigGrid }
 
 constructor TfpgMigGrid.Create(AContainer: TfpgWidgetBase; ALC: TfpgMigLC;
-  ARowConstr, AColConstr: TfpgMigAC; const ACCMap: TfpgMigCCMap);
+  ARowConstr, AColConstr: TfpgMigAC; const ACCMap: TfpgMigCCMap;
+  AComponents: TfpgWidgetBaseList);
 var
   child: TfpgWidgetBase;
   cc: TfpgMigCC;
@@ -1072,144 +1080,138 @@ begin
   cellY := 0;
   splitLeft := 0;  // Track remaining components to add to current cell due to Split
 
-  if ACCMap <> nil then
+  if (ACCMap <> nil) and (AComponents <> nil) then
   begin
-    // Iterate through container's components in order
-    for i := 0 to AContainer.ComponentCount - 1 do
+    // Iterate through the provided component list
+    for child in AComponents do
     begin
-      // Safe check: is this component a widget AND in our managed map?
-      if not (AContainer.Components[i] is TfpgWidgetBase) then
-        Continue;
-
-      child := TfpgWidgetBase(AContainer.Components[i]);
-
-      // Only process widgets that were added to ACCMap (filtered by iterator in DoLayout)
-      if not ACCMap.ContainsKey(child) then
+      // Only process widgets that are visible and were added to ACCMap
+      if not child.Visible or not ACCMap.ContainsKey(child) then
         Continue;
 
       // Get the constraint for this widget (may be nil)
       cc := ACCMap[child];
 
-    // Create CompWrap for this widget
-    cw := TfpgMigCompWrap.Create(child, cc, 0, False);
+      // Create CompWrap for this widget
+      cw := TfpgMigCompWrap.Create(child, cc, 0, False);
 
-    // Determine grid position
-    // TODO: Handle explicit grid coordinates from CC
-    // For now, use simple flow placement
+      // Determine grid position
+      // TODO: Handle explicit grid coordinates from CC
+      // For now, use simple flow placement
 
-    // Get span from CC if available
-    // Port of Grid.java lines 252-253: Clamp spans to prevent going beyond MAX_GRID
-    spanX := 1;
-    spanY := 1;
-    if cc <> nil then
-    begin
-      // Clamp spanX to remaining grid width
-      spanX := Min(cc.CellSpanX, MAX_GRID - cellX);
-      // Clamp spanY to remaining grid height
-      spanY := Min(cc.CellSpanY, MAX_GRID - cellY);
-    end;
-
-    // Encode grid position as integer key
-    cellKey := EncodeCellKey(cellX, cellY);
-
-    // Get or create cell at this position
-    if not FGrid.TryGetValue(cellKey, cell) then
-    begin
-      // Check if CC has flowX override (Java: cellFlowX != null ? cellFlowX : lc.isFlowX())
-      // CC.IsFlowX: 0=nil, 1=false, 2=true
-      cellFlowX := flowX;  // Default to LC's flowX
-      if (cc <> nil) and (cc.IsFlowX <> 0) then
-        cellFlowX := (cc.IsFlowX = 2);  // Use CC's flowX if set
-
-      cell := TfpgMigCell.Create(spanX, spanY, cellFlowX);
-      FGrid.Add(cellKey, cell);
-
-      // Mark all cells covered by this span as occupied
-      MarkCellsOccupied(cellX, cellY, spanX, spanY);
-    end;
-
-    // Add CompWrap to cell
-    cell.CompWraps.Add(cw);
-
-    // Track if cell has tagged components
-    if (cc <> nil) and (cc.GetTag <> '') then
-      cell.HasTagged := True;
-
-    // Handle Split: if this component has Split > 1, the next (Split-1) components
-    // should be added to the SAME cell instead of advancing
-    if (cc <> nil) and (cc.SplitParts > 1) and (splitLeft = 0) then
-      splitLeft := cc.SplitParts - 1;  // Reserve space for additional components in this cell
-
-    // Decrement splitLeft if we're in a split cell
-    if splitLeft > 0 then
-    begin
-      Dec(splitLeft);
-      // Don't advance to next cell - next component goes in same cell
-      Continue;  // Skip cell advancement
-    end;
-
-    // Advance to next cell based on flow direction
-    if flowX then
-    begin
-      // Horizontal flow
-      cellX := cellX + spanX;
-
-      // Check for component-level wrap constraint (manual wrap)
-      // Port of Grid.java line 312-314: if (cc.isWrap())
-      if (cc <> nil) and (cc.WrapGap <> nil) then
+      // Get span from CC if available
+      // Port of Grid.java lines 252-253: Clamp spans to prevent going beyond MAX_GRID
+      spanX := 1;
+      spanY := 1;
+      if cc <> nil then
       begin
-        cellX := 0;
-        cellY := cellY + 1;
-      end
-      // Check for layout-level auto-wrap
-      else if (wrap > 0) and (cellX >= wrap) then
-      begin
-        cellX := 0;
-        cellY := cellY + 1;
+        // Clamp spanX to remaining grid width
+        spanX := Min(cc.CellSpanX, MAX_GRID - cellX);
+        // Clamp spanY to remaining grid height
+        spanY := Min(cc.CellSpanY, MAX_GRID - cellY);
       end;
 
-      // Skip cells occupied by spanning components
-      while IsCellOccupied(cellX, cellY) do
+      // Encode grid position as integer key
+      cellKey := EncodeCellKey(cellX, cellY);
+
+      // Get or create cell at this position
+      if not FGrid.TryGetValue(cellKey, cell) then
       begin
-        cellX := cellX + 1;
-        if (wrap > 0) and (cellX >= wrap) then
+        // Check if CC has flowX override (Java: cellFlowX != null ? cellFlowX : lc.isFlowX())
+        // CC.IsFlowX: 0=nil, 1=false, 2=true
+        cellFlowX := flowX;  // Default to LC's flowX
+        if (cc <> nil) and (cc.IsFlowX <> 0) then
+          cellFlowX := (cc.IsFlowX = 2);  // Use CC's flowX if set
+
+        cell := TfpgMigCell.Create(spanX, spanY, cellFlowX);
+        FGrid.Add(cellKey, cell);
+
+        // Mark all cells covered by this span as occupied
+        MarkCellsOccupied(cellX, cellY, spanX, spanY);
+      end;
+
+      // Add CompWrap to cell
+      cell.CompWraps.Add(cw);
+
+      // Track if cell has tagged components
+      if (cc <> nil) and (cc.GetTag <> '') then
+        cell.HasTagged := True;
+
+      // Handle Split: if this component has Split > 1, the next (Split-1) components
+      // should be added to the SAME cell instead of advancing
+      if (cc <> nil) and (cc.SplitParts > 1) and (splitLeft = 0) then
+        splitLeft := cc.SplitParts - 1;  // Reserve space for additional components in this cell
+
+      // Decrement splitLeft if we're in a split cell
+      if splitLeft > 0 then
+      begin
+        Dec(splitLeft);
+        // Don't advance to next cell - next component goes in same cell
+        Continue;  // Skip cell advancement
+      end;
+
+      // Advance to next cell based on flow direction
+      if flowX then
+      begin
+        // Horizontal flow
+        cellX := cellX + spanX;
+
+        // Check for component-level wrap constraint (manual wrap)
+        // Port of Grid.java line 312-314: if (cc.isWrap())
+        if (cc <> nil) and (cc.WrapGap <> nil) then
+        begin
+          cellX := 0;
+          cellY := cellY + 1;
+        end
+        // Check for layout-level auto-wrap
+        else if (wrap > 0) and (cellX >= wrap) then
         begin
           cellX := 0;
           cellY := cellY + 1;
         end;
-      end;
-    end
-    else
-    begin
-      // Vertical flow
-      cellY := cellY + spanY;
 
-      // Check for component-level wrap constraint (manual wrap)
-      // Port of Grid.java line 312-314: if (cc.isWrap())
-      if (cc <> nil) and (cc.WrapGap <> nil) then
-      begin
-        cellY := 0;
-        cellX := cellX + 1;
+        // Skip cells occupied by spanning components
+        while IsCellOccupied(cellX, cellY) do
+        begin
+          cellX := cellX + 1;
+          if (wrap > 0) and (cellX >= wrap) then
+          begin
+            cellX := 0;
+            cellY := cellY + 1;
+          end;
+        end;
       end
-      // Check for layout-level auto-wrap
-      else if (wrap > 0) and (cellY >= wrap) then
+      else
       begin
-        cellY := 0;
-        cellX := cellX + 1;
-      end;
+        // Vertical flow
+        cellY := cellY + spanY;
 
-      // Skip cells occupied by spanning components
-      while IsCellOccupied(cellX, cellY) do
-      begin
-        cellY := cellY + 1;
-        if (wrap > 0) and (cellY >= wrap) then
+        // Check for component-level wrap constraint (manual wrap)
+        // Port of Grid.java line 312-314: if (cc.isWrap())
+        if (cc <> nil) and (cc.WrapGap <> nil) then
+        begin
+          cellY := 0;
+          cellX := cellX + 1;
+        end
+        // Check for layout-level auto-wrap
+        else if (wrap > 0) and (cellY >= wrap) then
         begin
           cellY := 0;
           cellX := cellX + 1;
         end;
+
+        // Skip cells occupied by spanning components
+        while IsCellOccupied(cellX, cellY) do
+        begin
+          cellY := cellY + 1;
+          if (wrap > 0) and (cellY >= wrap) then
+          begin
+            cellY := 0;
+            cellX := cellX + 1;
+          end;
+        end;
       end;
-    end;
-    end;  // end for i := 0 to AContainer.ComponentCount - 1
+    end;  // end for child in AComponents
   end;  // end if ACCMap <> nil
 
   // Second pass: Build row and column indexes
@@ -3541,15 +3543,32 @@ begin
   FDirty := True;
   FContainer := nil;
   FLastComponentCount := -1;  // -1 indicates never laid out
+  FComponentOrder := TfpgWidgetBaseList.Create;
 end;
 
 destructor TfpgMigLayoutManager.Destroy;
 begin
+  FreeAndNil(FLC);
+  FreeAndNil(FRowConstr);
+  FreeAndNil(FColConstr);
+  FreeAndNil(FConstraints);
   FreeAndNil(FGrid);
-  FLC.Free;
-  FRowConstr.Free;
-  FColConstr.Free;
+  FreeAndNil(FComponentOrder);
   inherited Destroy;
+end;
+
+procedure TfpgMigLayoutManager.AddLayoutComponent(AWidget: TfpgWidgetBase; AConstraint: TfpgLayoutConstraint);
+begin
+  inherited AddLayoutComponent(AWidget, AConstraint);
+  FComponentOrder.Add(AWidget);
+  InvalidateLayout(AWidget.Parent);
+end;
+
+procedure TfpgMigLayoutManager.RemoveLayoutComponent(AWidget: TfpgWidgetBase);
+begin
+  FComponentOrder.Remove(AWidget);
+  inherited RemoveLayoutComponent(AWidget);
+  InvalidateLayout(AWidget.Parent);
 end;
 
 { Setters that mark grid as dirty }
@@ -3659,7 +3678,7 @@ begin
     if needsRecreate then
     begin
       FreeAndNil(FGrid);
-      FGrid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
+      FGrid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap, FComponentOrder);
       FDirty := False;
       FContainer := AContainer;
       FLastComponentCount := ccMap.Count;
@@ -3747,7 +3766,7 @@ begin
     end;
 
     // Create Grid instance to calculate sizes
-    grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap);
+    grid := TfpgMigGrid.Create(AContainer, FLC, FRowConstr, FColConstr, ccMap, FComponentOrder);
     try
       // Use large reference size for calculation (Grid will shrink to minimum/preferred)
       // For minimum size, Grid should calculate the smallest dimensions needed
