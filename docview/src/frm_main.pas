@@ -833,15 +833,17 @@ begin
 end;
 
 procedure TMainForm.uiCreateIndexTab;
+var
+  lm: TfpgMigLayoutManager;
 begin
+  lm := TfpgMigLayoutManager.Create;
 
   {%region 'Index Page' -fold}
   tsIndex := TfpgTabSheet.Create(PageControl1);
   with tsIndex do
   begin
     Name := 'tsIndex';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 300);
     Text := 'Index';
   end;
 
@@ -849,12 +851,9 @@ begin
   with btnIndex do
   begin
     Name := 'btnIndex';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
+    PreferredSize := fpgSize(80, 24);
     Text := 'Go to';
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     TabOrder := 1;
     OnClick := @btnShowIndex;
   end;
@@ -863,10 +862,8 @@ begin
   with lbIndex do
   begin
     Name := 'lbIndex';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(240, 300);
     FontDesc := '#List';
-    Hint := '';
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
     OnKeyPress := @lbIndexKeyPress;
@@ -876,8 +873,7 @@ begin
   with IndexSearchEdit do
   begin
     Name := 'IndexSearchEdit';
-    SetPosition(4, 4, 152, 24);
-    Anchors := [anLeft,anRight,anTop];
+    PreferredSize := fpgSize(100, 24);
     ExtraHint := '';
     FontDesc := '#Edit1';
     Hint := '';
@@ -889,6 +885,11 @@ begin
 
   {%endregion}
 
+  tsIndex.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(IndexSearchEdit, TfpgMigCC.Create.GrowX);
+  lm.AddLayoutComponent(btnIndex, TfpgMigCC.Create.MinWidth('80lp'));
+  lm.AddLayoutComponent(lbIndex, TfpgMigCC.Create.SpanX(2).GrowY);
 end;
 
 procedure TMainForm.uiCreateSearchPage;
