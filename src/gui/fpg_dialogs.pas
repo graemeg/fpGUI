@@ -1344,7 +1344,7 @@ begin
 
   ActiveWidget := grid;
   FileName := '';
-  SetFilter(rsAllFiles + ' (*)|*');
+  SetFilter(Format('%s (%s)|%s', [rsAllFiles, AllFilesMask, AllFilesMask]));
   chlFilter.FocusItem := 0;
 end;
 
