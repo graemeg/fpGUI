@@ -915,7 +915,6 @@ begin
     PreferredSize := fpgSize(170, 16);
     FontDesc := '#Label1';
     Text := 'Search for:';
-    BackgroundColor := clYellow;
   end;
 
   edSearchText := TfpgEdit.Create(tsSearch);
@@ -1016,7 +1015,7 @@ begin
   with lbSearchResults do
   begin
     Name := 'lbSearchResults';
-    PreferredSize := fpgSize(220, 200);
+    PreferredSize := fpgSize(220, 100);
     FontDesc := '#List';
     TabOrder := 9;
     OnDoubleClick := @lbSearchResultsDoubleClick;
@@ -1036,7 +1035,7 @@ begin
   with btnSearch do
   begin
     Name := 'btnSearch';
-    PreferredSize := fpgSize(30, 24);
+    PreferredSize := fpgSize(80, 24);
     Text := 'Go';
     FontDesc := '#Label1';
     TabOrder := 11;
@@ -1049,7 +1048,7 @@ begin
   lm.LC.Fill.WrapAfter(2);
   lm.AddLayoutComponent(Label1, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(edSearchText, TfpgMigCC.Create.GrowX);
-  lm.AddLayoutComponent(btnSearch, TfpgMigCC.Create);
+  lm.AddLayoutComponent(btnSearch, TfpgMigCC.Create.MinWidth('80lp'));
   lm.AddLayoutComponent(Label2, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(RadioButton1, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(RadioButton2, TfpgMigCC.Create.SpanX(2).GrowX);
@@ -1059,11 +1058,13 @@ begin
   lm.AddLayoutComponent(RadioButton6, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(Label3, TfpgMigCC.Create.SpanX(2).AlignY('bottom').GrowX);
   lm.AddLayoutComponent(lbSearchResults, TfpgMigCC.Create.SpanX(2).GrowY.GrowX);
-
 end;
 
 procedure TMainForm.uiCreateNotesPage;
+var
+  lm: TfpgMigLayoutManager;
 begin
+  lm := TfpgMigLayoutManager.Create;
 
   {%region 'Notes Page' -fold}
 
@@ -1071,8 +1072,7 @@ begin
   with tsNotes do
   begin
     Name := 'tsNotes';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 300);
     Text := 'Notes';
   end;
 
@@ -1080,10 +1080,8 @@ begin
   with NotesListBox do
   begin
     Name := 'NotesListBox';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 300);
     FontDesc := '#List';
-    Hint := '';
     TabOrder := 0;
     OnDoubleClick  := @NotesListBoxDoubleClick;
     OnKeyPress  := @NotesListBoxKeyPress;
@@ -1094,11 +1092,10 @@ begin
   with btnNotesAdd do
   begin
     Name := 'btnNotesAdd';
-    SetPosition(4, 4, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
     FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.add';
     TabOrder := 1;
@@ -1109,11 +1106,10 @@ begin
   with btnNotesEdit do
   begin
     Name := 'btnNotesEdit';
-    SetPosition(32, 4, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
     FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.edit';
     TabOrder := 2;
@@ -1124,11 +1120,10 @@ begin
   with btnNotesDel do
   begin
     Name := 'btnNotesDel';
-    SetPosition(60, 4, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
     FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.remove';
     TabOrder := 3;
@@ -1139,22 +1134,29 @@ begin
   with btnNotesGoto do
   begin
     Name := 'btnNotesGoto';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
+    PreferredSize := fpgSize(80, 24);
     Text := 'Go to';
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     TabOrder := 4;
     OnClick := @btnNotesGotoClicked;
   end;
 
   {%endregion}
 
+  tsNotes.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(btnNotesAdd, TfpgMigCC.Create.Split(3).GapX('0', '4lp').AlignX('left').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesEdit, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesDel, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesGoTo, TfpgMigCC.Create.AlignX('right').MinWidth('80lp'));
+  lm.AddLayoutComponent(NotesListBox, TfpgMigCC.Create.SpanX(2).GrowX.GrowY);
 end;
 
 procedure TMainForm.uiCreateHistoryPage;
+var
+  lm: TfpgMigLayoutManager;
 begin
+  lm := TfpgMigLayoutManager.Create;
 
   {%region 'History Page' -fold}
 
@@ -1162,8 +1164,7 @@ begin
   with tsHistory do
   begin
     Name := 'tsHistory';
-    SetPosition(3, 24, 254, 249);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(250, 250);
     Text := 'History';
   end;
 
@@ -1171,10 +1172,8 @@ begin
   with lbHistory do
   begin
     Name := 'lbHistory';
-    SetPosition(4, 8, 242, 236);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    PreferredSize := fpgSize(220, 100);
     FontDesc := '#List';
-    Hint := '';
     TabOrder := 0;
     OnDoubleClick := @lbHistoryDoubleClick;
     OnKeyPress := @lbHistoryKeyPress;
@@ -1182,6 +1181,9 @@ begin
 
   {%endregion}
 
+  tsHistory.LayoutManager := lm;
+  lm.LC.Fill;
+  lm.AddLayoutComponent(lbHistory, TfpgMigCC.Create.GrowX.GrowY);
 end;
 
 { If you drop on RichView, only load the first INF file (closing all others
