@@ -169,7 +169,7 @@ begin
     Width := 240;
     Height := 30;
     Text := 'MigLayout Demo Application';
-    FontDesc := '#Label1:bold';
+    FontDesc := '#Label2';
     Alignment := taCenter;
   end;
 
@@ -182,7 +182,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Basic Layouts';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnBasicClicked;
   end;
 
@@ -193,7 +193,7 @@ begin
     // Using SetPosition() to test deprecated method still works
     SetPosition(20, 95, 240, 35);
     Text := 'Cell Alignment';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnAlignmentClicked;
   end;
 
@@ -206,7 +206,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Column & Row Spanning';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnSpanningClicked;
   end;
 
@@ -219,7 +219,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Growth Behavior';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnGrowthClicked;
   end;
 
@@ -232,7 +232,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Complex Form Example';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnComplexClicked;
   end;
 
@@ -245,7 +245,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'String Parser Examples';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnParserClicked;
   end;
 
@@ -258,7 +258,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Platform Button Ordering';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnButtonOrderClicked;
   end;
 
@@ -279,7 +279,7 @@ begin
     Width := 240;
     Height := 35;
     Text := 'Quit';
-    FontDesc := '#Button';
+    FontDesc := '#Label1';
     OnClick := @btnQuitClicked;
   end;
 end;
