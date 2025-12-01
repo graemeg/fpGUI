@@ -3971,7 +3971,10 @@ initialization
   // Port of Grid.java static initializer - line 50
   // Create DOCK_DIM_CONSTRAINT with grow priority of 0
   DOCK_DIM_CONSTRAINT := TfpgMigDimConstraint.Create;
+  DOCK_DIM_CONSTRAINT.SetGrowWeight(0);
   DOCK_DIM_CONSTRAINT.SetGrowPriority(0);
+  DOCK_DIM_CONSTRAINT.SetShrinkWeight(0);
+  DOCK_DIM_CONSTRAINT.SetShrinkPriority(0);
 
 finalization
   FreeAndNil(DOCK_DIM_CONSTRAINT);
