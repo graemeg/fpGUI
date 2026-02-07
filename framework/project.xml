@@ -39,9 +39,10 @@
         <define>DEBUG</define>
       </defines>
       <compilerOptions>
-        <option>-gw3</option>
+        <option>-gw</option>
         <option>-godwarfsets -godwarfmethodclassprefix</option>
         <option>-Criot</option>
+        <option>-gl</option>
       </compilerOptions>
     </profile>
 
@@ -49,7 +50,6 @@
       <id>memleak</id>
       <compilerOptions>
         <option>-gh</option>
-        <option>-gl</option>
       </compilerOptions>
     </profile>
 

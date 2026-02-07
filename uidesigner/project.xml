@@ -15,4 +15,13 @@
     <module>../framework</module>
   </moduleDependencies>
 
+  <test>
+    <framework>fpcunit</framework>
+    <testSource>TestRunner.pas</testSource>
+    <frameworkOptions>
+      <option>--all</option>
+      <option>--format=plain</option>
+    </frameworkOptions>
+  </test>
+
 </project>

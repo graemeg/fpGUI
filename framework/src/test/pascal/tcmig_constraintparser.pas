@@ -158,13 +158,10 @@ var
   uv: TfpgMigUnitValue;
 begin
   uv := ParseUnitValueOrAlign('left', True);
-  try
-    AssertNotNull('Result should not be nil', uv);
-    AssertEquals('Value should be 0', 0.0, uv.Value, 0.001);
-    AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
-  finally
-    uv.Free;
-  end;
+  // Do NOT free uv - ParseUnitValueOrAlign returns singleton UnitValue constants
+  AssertNotNull('Result should not be nil', uv);
+  AssertEquals('Value should be 0', 0.0, uv.Value, 0.001);
+  AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
 end;
 
 procedure TTestMigConstraintParser.TestParseUnitValue_AlignCenter;
@@ -172,13 +169,10 @@ var
   uv: TfpgMigUnitValue;
 begin
   uv := ParseUnitValueOrAlign('center', True);
-  try
-    AssertNotNull('Result should not be nil', uv);
-    AssertEquals('Value should be 50', 50.0, uv.Value, 0.001);
-    AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
-  finally
-    uv.Free;
-  end;
+  // Do NOT free uv - ParseUnitValueOrAlign returns singleton UnitValue constants
+  AssertNotNull('Result should not be nil', uv);
+  AssertEquals('Value should be 50', 50.0, uv.Value, 0.001);
+  AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
 end;
 
 procedure TTestMigConstraintParser.TestParseUnitValue_AlignRight;
@@ -186,13 +180,10 @@ var
   uv: TfpgMigUnitValue;
 begin
   uv := ParseUnitValueOrAlign('right', True);
-  try
-    AssertNotNull('Result should not be nil', uv);
-    AssertEquals('Value should be 100', 100.0, uv.Value, 0.001);
-    AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
-  finally
-    uv.Free;
-  end;
+  // Do NOT free uv - ParseUnitValueOrAlign returns singleton UnitValue constants
+  AssertNotNull('Result should not be nil', uv);
+  AssertEquals('Value should be 100', 100.0, uv.Value, 0.001);
+  AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
 end;
 
 procedure TTestMigConstraintParser.TestParseUnitValue_AlignTop;
@@ -200,13 +191,10 @@ var
   uv: TfpgMigUnitValue;
 begin
   uv := ParseUnitValueOrAlign('top', False);
-  try
-    AssertNotNull('Result should not be nil', uv);
-    AssertEquals('Value should be 0', 0.0, uv.Value, 0.001);
-    AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
-  finally
-    uv.Free;
-  end;
+  // Do NOT free uv - ParseUnitValueOrAlign returns singleton UnitValue constants
+  AssertNotNull('Result should not be nil', uv);
+  AssertEquals('Value should be 0', 0.0, uv.Value, 0.001);
+  AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
 end;
 
 procedure TTestMigConstraintParser.TestParseUnitValue_AlignBottom;
@@ -214,13 +202,10 @@ var
   uv: TfpgMigUnitValue;
 begin
   uv := ParseUnitValueOrAlign('bottom', False);
-  try
-    AssertNotNull('Result should not be nil', uv);
-    AssertEquals('Value should be 100', 100.0, uv.Value, 0.001);
-    AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
-  finally
-    uv.Free;
-  end;
+  // Do NOT free uv - ParseUnitValueOrAlign returns singleton UnitValue constants
+  AssertNotNull('Result should not be nil', uv);
+  AssertEquals('Value should be 100', 100.0, uv.Value, 0.001);
+  AssertEquals('Unit should be percent', Ord(utPercent), Ord(uv.UnitType));
 end;
 
 procedure TTestMigConstraintParser.TestParseUnitValue_WithAddition;
