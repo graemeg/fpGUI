@@ -38,6 +38,7 @@ type
     procedure TestRowSpan;
     procedure TestGrow;
     procedure TestComponentOrder;
+    procedure TestDocking;
   end;
 
 procedure RegisterTests;
@@ -452,6 +453,93 @@ begin
   // More specific checks
   CheckEquals(12, btnB.Top, 'btnB.Top should be at top inset');
   CheckTrue(btnA.Top > 30, 'btnA.Top should be below btnB'); // 12 + 25 + 6 = 43
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestDocking;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  btnN, btnS, btnW, btnE, btnCenter: TfpgWidget;
+begin
+  // Test docking: North=top, South=bottom, West=left, East=right
+  // Expected layout (conceptual):
+  //
+  // +------------------------------------+
+  // |           btnN (North)             |
+  // +------+--------------------+--------+
+  // |      |                    |        |
+  // | btnW |     btnCenter      |  btnE  |
+  // |      |                    |        |
+  // +------+--------------------+--------+
+  // |           btnS (South)             |
+  // +------------------------------------+
+
+  container := TfpgWidget.Create(nil);
+  container.Name := 'dockContainer';
+  container.Width := 400;
+  container.Height := 300;
+  lm := TfpgMigLayoutManager.Create;
+  container.LayoutManager := lm;
+
+  // Create center component (normal grid flow)
+  btnCenter := TfpgWidget.Create(container);
+  btnCenter.Name := 'btnCenter';
+  btnCenter.Width := 80;
+  btnCenter.Height := 24;
+  lm.AddLayoutComponent(btnCenter, TfpgMigCC.Create);
+
+  // Create docking components
+  btnN := TfpgWidget.Create(container);
+  btnN.Name := 'btnN';
+  btnN.Width := 80;
+  btnN.Height := 24;
+  lm.AddLayoutComponent(btnN, TfpgMigCC.Create.DockNorth);
+
+  btnS := TfpgWidget.Create(container);
+  btnS.Name := 'btnS';
+  btnS.Width := 80;
+  btnS.Height := 24;
+  lm.AddLayoutComponent(btnS, TfpgMigCC.Create.DockSouth);
+
+  btnW := TfpgWidget.Create(container);
+  btnW.Name := 'btnW';
+  btnW.Width := 80;
+  btnW.Height := 24;
+  lm.AddLayoutComponent(btnW, TfpgMigCC.Create.DockWest);
+
+  btnE := TfpgWidget.Create(container);
+  btnE.Name := 'btnE';
+  btnE.Width := 80;
+  btnE.Height := 24;
+  lm.AddLayoutComponent(btnE, TfpgMigCC.Create.DockEast);
+
+  container.Realign;
+
+  // Verify North dock: should be at top, spanning width
+  CheckTrue(btnN.Top < btnCenter.Top, 'North dock should be above center');
+  CheckTrue(btnN.Top < btnW.Top, 'North dock should be above West dock');
+  CheckTrue(btnN.Top < btnE.Top, 'North dock should be above East dock');
+
+  // Verify South dock: should be at bottom
+  CheckTrue(btnS.Top > btnCenter.Top, 'South dock should be below center');
+  CheckTrue(btnS.Top > btnW.Top, 'South dock should be below West dock');
+  CheckTrue(btnS.Top > btnE.Top, 'South dock should be below East dock');
+
+  // Verify West dock: should be to the left of center
+  CheckTrue(btnW.Left < btnCenter.Left, 'West dock should be left of center');
+
+  // Verify East dock: should be to the right of center
+  CheckTrue(btnE.Left > btnCenter.Left, 'East dock should be right of center');
+
+  // Verify North spans full width (should be wider than a single component)
+  CheckTrue(btnN.ActualWidth > btnCenter.ActualWidth,
+    'North dock should span wider than center component');
+
+  // Verify South spans full width
+  CheckTrue(btnS.ActualWidth > btnCenter.ActualWidth,
+    'South dock should span wider than center component');
 
   container.Free;
 end;

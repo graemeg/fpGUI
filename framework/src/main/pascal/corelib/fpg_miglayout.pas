@@ -1278,7 +1278,6 @@ begin
     This determines how many rows/cols are used for docking }
   FDockOffX := GetDockInsets(FColIndexes);
   FDockOffY := GetDockInsets(FRowIndexes);
-  WriteLn(Format('DockOff: X=%d, Y=%d', [FDockOffX, FDockOffY]));
 
   // Sort cells by platform-specific button order (if any cells have tagged components)
   SortCellsByPlatform;
@@ -1725,7 +1724,7 @@ var
   cell: TfpgMigCell;
   cellKey: Integer;
   cellX, cellY: Integer;
-  i, j: Integer;
+  i, j, writePos: Integer;
   found: Boolean;
   tempRow, tempCol: Integer;
   spanIdx: Integer;
@@ -1735,7 +1734,11 @@ begin
   // FRowIndexes.Clear;  // REMOVED - would delete docking indexes added by AddDockingCell
   // FColIndexes.Clear;  // REMOVED - would delete docking indexes added by AddDockingCell
 
-  // Collect unique row and column indexes from grid cells
+  // Collect unique row and column indexes from normal grid cells only.
+  // IMPORTANT: Skip docking cells here - their indexes were already added by AddDockingCell.
+  // DecodeCellKey doesn't handle negative coordinates correctly (shr is logical, not
+  // arithmetic), so docking cell keys (which use negative row/col values) would decode
+  // to incorrect large positive values, creating phantom rows/columns.
   for pair in FGrid do
   begin
     cellKey := pair.Key;
@@ -1744,6 +1747,12 @@ begin
       Continue;
 
     DecodeCellKey(cellKey, cellX, cellY);
+
+    // Skip docking cells - they have coordinates outside the normal grid range.
+    // Normal cells always have coordinates in [0, MAX_GRID).
+    // Docking cells decode to values >= MAX_GRID due to the encoding of negative values.
+    if (cellX >= MAX_GRID) or (cellY >= MAX_GRID) then
+      Continue;
 
     // Add row indexes for this cell and its span
     // For very large spans (INF_SIZE), only add the starting row
@@ -1850,6 +1859,39 @@ begin
         FColIndexes[j] := tempCol;
       end;
     end;
+  end;
+
+  // Remove consecutive duplicates from sorted row indexes.
+  // AddDockingCell doesn't deduplicate (Java uses TreeSet which auto-deduplicates).
+  if FRowIndexes.Count > 1 then
+  begin
+    writePos := 1;
+    for i := 1 to FRowIndexes.Count - 1 do
+    begin
+      if FRowIndexes[i] <> FRowIndexes[writePos - 1] then
+      begin
+        FRowIndexes[writePos] := FRowIndexes[i];
+        Inc(writePos);
+      end;
+    end;
+    while FRowIndexes.Count > writePos do
+      FRowIndexes.Delete(FRowIndexes.Count - 1);
+  end;
+
+  // Remove consecutive duplicates from sorted column indexes
+  if FColIndexes.Count > 1 then
+  begin
+    writePos := 1;
+    for i := 1 to FColIndexes.Count - 1 do
+    begin
+      if FColIndexes[i] <> FColIndexes[writePos - 1] then
+      begin
+        FColIndexes[writePos] := FColIndexes[i];
+        Inc(writePos);
+      end;
+    end;
+    while FColIndexes.Count > writePos do
+      FColIndexes.Delete(FColIndexes.Count - 1);
   end;
 end;
 
@@ -2031,10 +2073,6 @@ begin
 
       cw.X := cw.X + ABounds[0];
       cw.Y := cw.Y + ABounds[1];
-
-      if (cw.CC <> nil) and (cw.CC.Dock <> -1) then
-        WriteLn(Format('Docking comp %s: dock=%d, X=%d, Y=%d, W=%d, H=%d',
-          [cw.Comp.Name, cw.CC.Dock, cw.X, cw.Y, cw.Width, cw.Height]));
 
       cw.transferBounds(addVisualPadding);
 
