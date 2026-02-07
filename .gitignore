@@ -39,6 +39,9 @@ backup/
 lib/
 units/
 
+# Build output directories (pasbuild, maven-style)
+target/
+
 # Application bundle for Mac OS and other related OSX files
 *.app/
 .DS_Store
