@@ -275,19 +275,26 @@ Make sure any new units created, have been added to the following files:
 * src/corelib/gdi/fpgui_toolkit.pas
 * src/corelib/gdi/fpgui_toolkit.lpk
 
+From the root of the fpGUI project directory:
+
 [source,bash]
 ----
-cd src
-./build.sh 1
+pasbuild compile -p unix,agg,debug
 ----
+
+If we don't want to include the AggPas 2D software rendering, then run this instead:
+
+[source,bash]
+----
+pasbuild compile -p unix,debug
+----
+
 
 **Build and run unit tests:**
 
 [source,bash]
 ----
-cd unittests
-./build.sh 1
-./fpgui_unittests_console --all --format=plain 2>&1 | tail -5
+pasbuild test
 ----
 
 **Build a specific example:**

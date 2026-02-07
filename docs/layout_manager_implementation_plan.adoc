@@ -1634,8 +1634,8 @@ Create complete example applications:
 
 How should parent containers negotiate sizes with children using layout managers?
 
-**Option A**: Simple preferred/minimum size queries
-**Option B**: Full constraint-based negotiation (like Java's GridBagLayout)
+* **Option A**: Simple preferred/minimum size queries
+* **Option B**: Full constraint-based negotiation (like Java's GridBagLayout)
 
 **Recommendation**: Start with Option A, add Option B if needed.
 
@@ -1643,8 +1643,8 @@ How should parent containers negotiate sizes with children using layout managers
 
 Where should constraints be stored?
 
-**Option A**: In layout manager (separate map)
-**Option B**: In widget (FLayoutConstraint field)
+* **Option A**: In layout manager (separate map)
+* **Option B**: In widget (FLayoutConstraint field)
 
 **Recommendation**: Option B for type safety and simplicity.
 
