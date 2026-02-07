@@ -49,3 +49,10 @@ units/
 
 # Ignore Java MigLayout implementation
 prototypes/miglayout/mig-java-latest/
+extras/contributed/*.*
+*.html
+*.maff
+docs/*.inf*
+*.pdf
+bugs/
+
