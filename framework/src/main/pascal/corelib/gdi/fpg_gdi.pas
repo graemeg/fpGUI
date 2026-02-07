@@ -2560,6 +2560,8 @@ procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
+  if (w < 1) or (h < 1) then
+    Exit; //==>
   {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
@@ -2582,6 +2584,8 @@ procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
+  if (w < 1) or (h < 1) then
+    Exit; //==>
   {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
@@ -2668,15 +2672,18 @@ begin
   DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
   {$ENDIF}
   // Only the top level window canvas puts the buffer to the screen so no delta needed
-  if FBufferBitmap > 0 then
+  if (FBufferBitmap > 0) and (w > 0) and (h > 0) then
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
+  cw, ch: TfpgCoord;
 begin
-  rg           := CreateRectRgn(ARect.Left+FDeltaX, ARect.Top+FDeltaY, ARect.Left+ARect.Width+FDeltaX, ARect.Top+ARect.Height+FDeltaY);
+  cw := Max(ARect.Width, 0);
+  ch := Max(ARect.Height, 0);
+  rg           := CreateRectRgn(ARect.Left+FDeltaX, ARect.Top+FDeltaY, ARect.Left+cw+FDeltaX, ARect.Top+ch+FDeltaY);
   FClipRect    := ARect;
   FClipRectSet := True;
   CombineRgn(FClipRegion, rg, FClipRegion, RGN_AND);
@@ -2694,7 +2701,7 @@ begin
   begin
     DeleteObject(FClipRegion);
     R := GetWidgetWindowRect;
-    FClipRegion  := CreateRectRgn(R.Left, R.Top, R.Left+R.Width, R.Top+R.Height);
+    FClipRegion  := CreateRectRgn(R.Left, R.Top, R.Left+Max(R.Width, 0), R.Top+Max(R.Height, 0));
     SelectClipRgn(FDrawGC, FClipRegion);
   end;
   FClipRectSet := False;
@@ -2721,6 +2728,8 @@ end;
 {$ENDIF}
 
 begin
+  if (w < 1) or (h < 1) then
+    Exit;  // nothing to draw
   Inc(x, FDeltaX);
   Inc(y, FDeltaY);
   if FLineStyle = lsSolid then
@@ -2767,6 +2776,8 @@ procedure TfpgGDICanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
 begin
+  if (w < 1) or (h < 1) then
+    Exit;  // nothing to fill
   Inc(x, FDeltaX);
   Inc(y, FDeltaY);
   wr.Left   := x;
@@ -2797,6 +2808,8 @@ begin
 end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
+var
+  cw, ch: TfpgCoord;
 begin
   FClipRectSet := True;
   FClipRect    := ARect;
@@ -2805,7 +2818,10 @@ begin
   if not WeAreTopLevelCanvas then
     FClipRect.IntersectRect(FClipRect, GetWidgetWindowRect);
   DeleteObject(FClipRegion);
-  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left+FClipRect.Width, FClipRect.Top+FClipRect.Height);
+  // Clamp to non-negative: IntersectRect can produce negative Width/Height
+  cw := Max(FClipRect.Width, 0);
+  ch := Max(FClipRect.Height, 0);
+  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left + cw, FClipRect.Top + ch);
   SelectClipRgn(FDrawGC, FClipRegion);
 end;
 
@@ -2941,6 +2957,8 @@ var
 begin
   if img = nil then
     Exit; //==>
+  if (w < 1) or (h < 1) then
+    Exit; //==>
 
   Inc(x, FDeltaX);
   Inc(y, FDeltaY);
@@ -2965,6 +2983,8 @@ var
   hb: HBRUSH;
   nullpen: HPEN;
 begin
+  if (w < 1) or (h < 1) then
+    Exit;  // nothing to fill
   hb      := CreateSolidBrush(fpgColorToWin(fpgColorToRGB(col)));
   nullpen := CreatePen(PS_NULL, 0, 0);
 

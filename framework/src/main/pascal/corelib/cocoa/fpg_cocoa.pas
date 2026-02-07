@@ -332,6 +332,9 @@ begin
   fillchar(msgp, sizeof(msgp), 0);
   msgp.rect.Width := Round(contentRect.size.width);
   msgp.rect.Height := Round(contentRect.size.height);
+  // Clamp to non-negative to prevent downstream range check errors
+  if msgp.rect.Width < 0 then msgp.rect.Width := 0;
+  if msgp.rect.Height < 0 then msgp.rect.Height := 0;
 
   fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
 end;
