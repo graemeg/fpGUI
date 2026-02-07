@@ -209,13 +209,6 @@ begin
   // Perform layout
   FForm.Realign;
 
-  // Debug: Print actual component widths and constraints after layout
-  WriteLn('DEBUG TEST: After layout:');
-  WriteLn(Format('  comp1.Width=%d, ActualWidth=%d', [FComp1.Width, FComp1.ActualWidth]));
-  WriteLn(Format('  comp2.Width=%d, ActualWidth=%d', [FComp2.Width, FComp2.ActualWidth]));
-  WriteLn(Format('  comp3.Width=%d, ActualWidth=%d', [FComp3.Width, FComp3.ActualWidth]));
-  WriteLn(Format('  comp4.Width=%d, ActualWidth=%d', [FComp4.Width, FComp4.ActualWidth]));
-
   // Verify Row 1: comp1, comp2 (spanning 2), comp3
   AssertEquals('comp1 and comp2 should be on same row',
     FComp1.Top, FComp2.Top);

@@ -217,6 +217,8 @@ var
   s, newSize: Integer;
 begin
   // Port of Grid.java FlowSizeSpec.expandSizes() - lines 2369-2400
+  if ALen < 1 then
+    Exit(0);
   SetLength(resConstr, ALen);
   SetLength(sizesToExpand, ALen);
 

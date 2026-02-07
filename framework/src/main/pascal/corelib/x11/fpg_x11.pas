@@ -3378,6 +3378,8 @@ begin
   {$ENDIF}
   if (DrawHandle = FBufferPixmap) then
   begin
+    if (w < 1) or (h < 1) then
+      Exit;  // nothing to copy
     cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
     XCopyArea(xapplication.Display, FBufferPixmap, TfpgX11Window(FWidget.Window).WinHandle, cgc, x+FDeltaX, y+FDeltaY, w, h, x+FDeltaX, y+FDeltaY);
     XFreeGc(xapplication.display, cgc);
@@ -3428,6 +3430,8 @@ end;
 
 procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
+  if (w < 1) or (h < 1) then
+    Exit;  // nothing to draw
   XDrawArc(xapplication.display, DrawHandle, Fgc, FDeltaX+x, FDeltaY+y, w-1, h-1,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
@@ -3699,6 +3703,8 @@ procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
+  if (w < 1) or (h < 1) then
+    Exit;  // nothing to draw
   if (w = 1) and (h = 1) then // a dot
     DoDrawLine(x, y, x+w, y+w)
   else
@@ -3730,8 +3736,16 @@ begin
 
   r.x      := TmpRect.Left;
   r.y      := TmpRect.Top;
-  r.Width  := TmpRect.Width;
-  r.Height := TmpRect.Height;
+  // Clamp to non-negative: IntersectRect can produce negative Width/Height
+  // when rects don't overlap, and TXRectangle fields are unsigned (cushort).
+  if TmpRect.Width > 0 then
+    r.Width := TmpRect.Width
+  else
+    r.Width := 0;
+  if TmpRect.Height > 0 then
+    r.Height := TmpRect.Height
+  else
+    r.Height := 0;
 
   rg := XCreateRegion;
   XUnionRectWithRegion(@r, rg, rg);
@@ -3774,6 +3788,8 @@ var
   SourcePos: TfpgPoint;
 begin
   if img = nil then
+    Exit; //==>
+  if (w < 1) or (h < 1) then
     Exit; //==>
   if img.Masked then
   begin

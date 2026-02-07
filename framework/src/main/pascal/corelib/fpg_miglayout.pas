@@ -3121,6 +3121,8 @@ begin
         rowSize := 0;
         sIx := (r shl 1) + 1;
         len := Min((group.Span shl 1), Length(AFss.GetSizes) - sIx) - 1;
+        if len < 1 then
+          Continue;
 
         for j := sIx to sIx + len - 1 do
         begin
@@ -3953,10 +3955,11 @@ begin
     // 5. Setup bounds for layout, accounting for insets
     // This matches Java: bounds = [insets.left, insets.top,
     //                              width - left - right, height - top - bottom]
+    // Clamp to minimum of 2px to prevent range errors when container is smaller than insets
     bounds[0] := insLeft;   // x offset
     bounds[1] := insTop;    // y offset
-    bounds[2] := AContainer.ActualWidth - insLeft - insRight;     // available width
-    bounds[3] := AContainer.ActualHeight - insTop - insBottom;    // available height
+    bounds[2] := Max(2, AContainer.ActualWidth - insLeft - insRight);    // available width
+    bounds[3] := Max(2, AContainer.ActualHeight - insTop - insBottom);   // available height
 
     // 6. Perform layout with debug flag based on LC.DebugMillis
     isDebug := FLC.GetDebugMillis > 0;

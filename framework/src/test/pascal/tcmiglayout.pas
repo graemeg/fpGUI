@@ -39,6 +39,7 @@ type
     procedure TestGrow;
     procedure TestComponentOrder;
     procedure TestDocking;
+    procedure TestSmallContainerNoRangeError;
   end;
 
 procedure RegisterTests;
@@ -540,6 +541,58 @@ begin
   // Verify South spans full width
   CheckTrue(btnS.ActualWidth > btnCenter.ActualWidth,
     'South dock should span wider than center component');
+
+  container.Free;
+end;
+
+procedure TTestMigLayout.TestSmallContainerNoRangeError;
+var
+  container: TfpgWidget;
+  lm: TfpgMigLayoutManager;
+  btn1, btn2, btn3: TfpgWidget;
+begin
+  // Test that resizing a container very small does not cause range check errors.
+  // The layout engine must handle cases where available space is less than insets.
+  container := TfpgWidget.Create(nil);
+  container.Name := 'tinyContainer';
+  container.Width := 200;
+  container.Height := 150;
+  lm := TfpgMigLayoutManager.Create;
+  container.LayoutManager := lm;
+
+  btn1 := TfpgWidget.Create(container);
+  btn1.Name := 'btn1';
+  btn1.Width := 80;
+  btn1.Height := 24;
+  lm.AddLayoutComponent(btn1, TfpgMigCC.Create);
+
+  btn2 := TfpgWidget.Create(container);
+  btn2.Name := 'btn2';
+  btn2.Width := 80;
+  btn2.Height := 24;
+  lm.AddLayoutComponent(btn2, TfpgMigCC.Create.Wrap);
+
+  btn3 := TfpgWidget.Create(container);
+  btn3.Name := 'btn3';
+  btn3.Width := 80;
+  btn3.Height := 24;
+  lm.AddLayoutComponent(btn3, TfpgMigCC.Create);
+
+  // Normal layout should work
+  container.Realign;
+  CheckTrue(btn1.ActualWidth > 0, 'btn1 should have positive width at normal size');
+
+  // Simulate resize to very small - smaller than insets would require
+  container.Width := 5;
+  container.Height := 5;
+  lm.InvalidateLayout(container);
+  container.Realign;  // Must not raise range check error
+
+  // Resize to zero
+  container.Width := 0;
+  container.Height := 0;
+  lm.InvalidateLayout(container);
+  container.Realign;  // Must not raise range check error
 
   container.Free;
 end;

@@ -135,11 +135,27 @@ begin
 end;
 
 procedure TfpgBaseLayoutManager.LayoutContainer(AContainer: TfpgWidgetBase);
+var
+  minSize: TfpgSize;
 begin
   if FLayoutDirty then
   begin
     DoLayout(AContainer);
     FLayoutDirty := False;
+
+    // Update container MinWidth/MinHeight so the window manager can enforce them.
+    // This must happen after DoLayout because the grid needs to be built first
+    // before minimum sizes can be calculated accurately.
+    minSize := GetMinimumSize(AContainer);
+    if (minSize.W > 0) and (minSize.H > 0) then
+    begin
+      if (AContainer.MinWidth <> minSize.W) or (AContainer.MinHeight <> minSize.H) then
+      begin
+        AContainer.MinWidth := minSize.W;
+        AContainer.MinHeight := minSize.H;
+        AContainer.UpdatePosition;
+      end;
+    end;
   end;
 end;
 
