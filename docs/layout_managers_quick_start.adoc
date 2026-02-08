@@ -1,0 +1,558 @@
+= Layout Managers Quick Start Guide
+:toc: left
+:toclevels: 3
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== What Are Layout Managers?
+
+A layout manager is an object that controls the positioning and sizing of child widgets
+within a container. Instead of manually calculating pixel coordinates for every widget,
+a layout manager applies an algorithm to arrange widgets automatically.
+
+fpGUI provides three built-in layout managers:
+
+[cols="2,4", options="header"]
+|===
+|Layout Manager |Description
+
+|`TfpgFlowLayoutManager`
+|Arranges widgets in a horizontal row, wrapping to the next line when the container edge
+is reached. Similar to how text wraps in a paragraph.
+
+|`TfpgBorderLayoutManager`
+|Divides the container into five regions: North, South, East, West, and Center. Widgets
+dock to edges, and the center widget fills the remaining space.
+
+|`TfpgMigLayoutManager`
+|A powerful grid-based layout manager ported from Java's MigLayout v11. Supports column/row
+spanning, growth priorities, alignment, docking, and constraint-based sizing.
+|===
+
+=== Why Use Layout Managers?
+
+Layout managers solve several common problems with manual widget positioning:
+
+* **No manual coordinate calculations** -- widgets are positioned automatically
+* **Automatic resize behaviour** -- the layout adapts when the window is resized
+* **Consistent spacing** -- gaps between widgets are managed uniformly
+* **DPI awareness** -- layouts scale correctly across different display densities
+* **Maintainability** -- adding or removing a widget does not require recalculating positions for every other widget
+
+=== Coexistence with Align/Anchors
+
+Layout managers coexist with fpGUI's traditional `Align` and `Anchors` system. They are
+entirely optional. When a container has a layout manager assigned, it delegates positioning to
+that manager. When no layout manager is assigned, the existing Align/Anchors behaviour
+applies unchanged.
+
+A container can use a layout manager for its children while itself being positioned by its
+parent's Align/Anchors system. This allows gradual adoption without rewriting existing code.
+
+== Core Concepts
+
+Every layout manager follows the same three-step pattern:
+
+. **Create** a layout manager instance
+. **Assign** it to a container's `LayoutManager` property
+. **Add** child widgets with `AddLayoutComponent(widget, constraint)`
+
+Each layout manager defines its own constraint class. Constraints describe how a specific
+widget should behave within the layout -- for example, which grid cell it occupies, whether
+it should grow to fill available space, or which region it docks to.
+
+== FlowLayout -- The Simplest Layout Manager
+
+`TfpgFlowLayoutManager` arranges widgets in a horizontal row from left to right. When a
+widget would exceed the container width, it wraps to the next line. This is the simplest
+layout manager and a good starting point.
+
+=== Minimal Example
+
+[source,pascal]
+----
+uses
+  SysUtils,
+  fpg_base, fpg_main, fpg_form, fpg_button,
+  fpg_flowlayout,       // Flow layout manager
+  fpg_layouttypes;      // TfpgLayoutConstraint base class
+
+type
+  TMainForm = class(TfpgForm)
+  public
+    procedure AfterCreate; override;
+  end;
+
+procedure TMainForm.AfterCreate;
+var
+  flow: TfpgFlowLayoutManager;
+  btn: TfpgButton;
+  i: Integer;
+begin
+  WindowTitle := 'Flow Layout Demo';
+  Width := 400;
+  Height := 200;
+
+  // 1. Create the layout manager
+  flow := TfpgFlowLayoutManager.Create;
+  flow.HGap := 6;   // horizontal gap between widgets
+  flow.VGap := 6;   // vertical gap between rows
+
+  // 2. Assign it to the form
+  LayoutManager := flow;
+
+  // 3. Add widgets
+  for i := 1 to 8 do
+  begin
+    btn := TfpgButton.Create(Self);
+    btn.Text := Format('Button %d', [i]);
+    btn.Width := 80;
+    btn.Height := 28;
+    flow.AddLayoutComponent(btn, TfpgLayoutConstraint.Create);
+  end;
+end;
+----
+
+=== FlowLayout Properties
+
+[cols="2,4", options="header"]
+|===
+|Property |Description
+
+|`HGap`
+|Horizontal gap in pixels between adjacent widgets (default: 4)
+
+|`VGap`
+|Vertical gap in pixels between rows (default: 4)
+
+|`Alignment`
+|Horizontal alignment of each row: `flaLeft`, `flaCenter`, `flaRight`
+
+|`VAlignment`
+|Vertical alignment of widgets within a row: `flvaTop`, `flvaCenter`, `flvaBottom`
+|===
+
+== BorderLayout -- Five-Region Docking
+
+`TfpgBorderLayoutManager` divides a container into five regions. North and South span the
+full width. West and East occupy the sides between North and South. Center fills the
+remaining space. This is well-suited for application frames with toolbars, status bars,
+side panels, and a main content area.
+
+=== Example
+
+[source,pascal]
+----
+uses
+  fpg_base, fpg_main, fpg_form, fpg_button, fpg_panel,
+  fpg_borderlayout;     // Border layout manager + constraint
+
+type
+  TMainForm = class(TfpgForm)
+  public
+    procedure AfterCreate; override;
+  end;
+
+procedure TMainForm.AfterCreate;
+var
+  lm: TfpgBorderLayoutManager;
+  constraint: TfpgBorderLayoutConstraint;
+  pnl: TfpgPanel;
+  btn: TfpgButton;
+begin
+  WindowTitle := 'Border Layout Demo';
+  Width := 500;
+  Height := 350;
+
+  // 1. Create with gaps (horizontal=8, vertical=4)
+  lm := TfpgBorderLayoutManager.Create(8, 4);
+
+  // 2. Assign to form
+  LayoutManager := lm;
+
+  // 3. Add widgets to regions
+  // -- North (toolbar area) --
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'North - Toolbar';
+  btn.Height := 32;
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrNorth;
+  lm.AddLayoutComponent(btn, constraint);
+
+  // -- South (status bar) --
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'South - Status';
+  btn.Height := 24;
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrSouth;
+  lm.AddLayoutComponent(btn, constraint);
+
+  // -- West (side panel) --
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'West';
+  btn.Width := 100;
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrWest;
+  lm.AddLayoutComponent(btn, constraint);
+
+  // -- Center (main content) --
+  pnl := TfpgPanel.Create(Self);
+  pnl.BackgroundColor := clWindowBackground;
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrCenter;
+  lm.AddLayoutComponent(pnl, constraint);
+end;
+----
+
+=== BorderLayout Regions
+
+[cols="1,4", options="header"]
+|===
+|Region |Behaviour
+
+|`blrNorth`
+|Spans full width at the top. Height is determined by the widget.
+
+|`blrSouth`
+|Spans full width at the bottom. Height is determined by the widget.
+
+|`blrWest`
+|Left side between North and South. Width is determined by the widget.
+
+|`blrEast`
+|Right side between North and South. Width is determined by the widget.
+
+|`blrCenter`
+|Fills all remaining space after the other four regions are allocated.
+|===
+
+== MigLayout -- The Grid Layout Manager
+
+`TfpgMigLayoutManager` is the most capable layout manager, ported from Java's MigLayout
+v11.4.2. It organises widgets in a flexible grid with support for spanning, growth,
+alignment, docking, and fine-grained sizing control.
+
+MigLayout uses three levels of constraints:
+
+* **LC (Layout Constraints)** -- container-level settings such as column count, fill mode,
+  and debug visualisation
+* **AC (Axis Constraints)** -- per-column and per-row constraints such as size and growth
+* **CC (Component Constraints)** -- per-widget constraints such as span, alignment, and
+  growth priority
+
+=== Basic Grid Example
+
+This example creates a simple two-column form with labels and edit fields.
+
+[source,pascal]
+----
+uses
+  fpg_base, fpg_main, fpg_form, fpg_label, fpg_edit, fpg_button,
+  fpg_miglayout,    // TfpgMigLayoutManager
+  fpg_mig_lc,       // Layout Constraints
+  fpg_mig_cc;       // Component Constraints
+
+type
+  TLoginForm = class(TfpgForm)
+  public
+    procedure AfterCreate; override;
+  end;
+
+procedure TLoginForm.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
+  lbl: TfpgLabel;
+  edt: TfpgEdit;
+  btn: TfpgButton;
+begin
+  WindowTitle := 'Login';
+  Width := 350;
+  Height := 150;
+
+  // 1. Create and configure the layout manager
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.SetWrapAfter(2);   // 2-column grid
+
+  // 2. Assign to form
+  LayoutManager := mig;
+
+  // 3. Add widgets with constraints
+  // Row 1: Username
+  lbl := TfpgLabel.Create(Self);
+  lbl.Text := 'Username:';
+  mig.AddLayoutComponent(lbl, TfpgMigCC.Create);
+
+  edt := TfpgEdit.Create(Self);
+  edt.PreferredSize := fpgSize(200, 24);
+  mig.AddLayoutComponent(edt, TfpgMigCC.Create.GrowX);  // <1>
+
+  // Row 2: Password
+  lbl := TfpgLabel.Create(Self);
+  lbl.Text := 'Password:';
+  mig.AddLayoutComponent(lbl, TfpgMigCC.Create);
+
+  edt := TfpgEdit.Create(Self);
+  edt.PasswordMode := True;
+  edt.PreferredSize := fpgSize(200, 24);
+  mig.AddLayoutComponent(edt, TfpgMigCC.Create.GrowX);
+
+  // Row 3: Buttons spanning both columns
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'Login';
+  btn.PreferredSize := fpgSize(80, 26);
+  mig.AddLayoutComponent(btn,
+    TfpgMigCC.Create.SpanX(2).AlignX('right'));          // <2>
+end;
+----
+<1> `.GrowX` tells the widget to expand horizontally when extra space is available.
+<2> `.SpanX(2)` spans both columns; `.AlignX('right')` right-aligns the button within the
+spanned area.
+
+=== Component Constraints (TfpgMigCC) Reference
+
+The `TfpgMigCC` class uses a fluent API. Methods return the same CC instance, allowing
+calls to be chained.
+
+[cols="2,4", options="header"]
+|===
+|Method |Description
+
+|`.GrowX` / `.GrowY`
+|Allow the widget to grow horizontally / vertically to fill extra space.
+
+|`.SpanX(n)` / `.SpanY(n)`
+|Span across _n_ columns / rows. Use `.SpanX` without arguments to span all remaining
+columns.
+
+|`.AlignX('left'\|'center'\|'right')`
+|Horizontal alignment within the cell.
+
+|`.AlignY('top'\|'center'\|'bottom')`
+|Vertical alignment within the cell.
+
+|`.Split(n)`
+|Split the current cell into _n_ sub-cells, allowing multiple widgets in one grid position.
+
+|`.Wrap`
+|Force a line break after this widget.
+
+|`.NewLine`
+|Force a line break before this widget.
+
+|`.Tag(name)`
+|Assign an identifier tag (used for platform-specific button ordering).
+
+|`.DockNorth` / `.DockSouth` / `.DockWest` / `.DockEast`
+|Dock this widget to a container edge, outside the normal grid.
+
+|`.GapLeft(s)` / `.GapRight(s)` / `.GapTop(s)` / `.GapBottom(s)`
+|Set explicit gaps around this widget (e.g. `'10px'`, `'1mm'`).
+|===
+
+=== Layout Constraints (LC)
+
+Layout constraints configure the container as a whole. They are accessed via the
+`mig.LC` property.
+
+[cols="2,4", options="header"]
+|===
+|Method |Description
+
+|`.SetWrapAfter(n)`
+|Automatically wrap to the next row after every _n_ components.
+
+|`.FillX` / `.FillY`
+|Make the grid fill the container width / height.
+
+|`.Fill`
+|Shorthand for both FillX and FillY.
+
+|`.SetInsets(top, left, bottom, right)`
+|Set container padding in pixels.
+
+|`.FlowY`
+|Change the primary flow direction to vertical (top-to-bottom) instead of horizontal.
+
+|`.Debug`
+|Enable debug overlay that highlights grid cells and gaps.
+|===
+
+=== Growth and Fill
+
+Growth is one of the most useful MigLayout features. By default, widgets occupy their
+preferred size. When the container is larger than needed, extra space is distributed to
+widgets that have growth enabled.
+
+[source,pascal]
+----
+// Widget grows horizontally
+mig.AddLayoutComponent(edt, TfpgMigCC.Create.GrowX);
+
+// Widget grows in both directions
+mig.AddLayoutComponent(memo, TfpgMigCC.Create.GrowX.GrowY);
+
+// Two widgets sharing growth (equal distribution)
+mig.AddLayoutComponent(edt1, TfpgMigCC.Create.GrowX);
+mig.AddLayoutComponent(edt2, TfpgMigCC.Create.GrowX);
+----
+
+NOTE: For growth to take effect, the container-level LC must also enable fill.
+Use `mig.LC.FillX` (or `.Fill`) so that the grid expands to fill the container.
+
+=== Column Spanning
+
+Spanning allows a widget to occupy multiple grid cells.
+
+[source,pascal]
+----
+// A heading label spanning 3 columns
+mig.AddLayoutComponent(lblHeading,
+  TfpgMigCC.Create.SpanX(3).AlignX('center'));
+
+// A text area spanning 2 columns and 3 rows
+mig.AddLayoutComponent(memo,
+  TfpgMigCC.Create.SpanX(2).SpanY(3).GrowX.GrowY);
+----
+
+=== Docking
+
+MigLayout supports docking widgets to container edges, outside the normal grid. Docked
+widgets are laid out first, and the grid occupies the remaining space.
+
+[source,pascal]
+----
+// Dock a toolbar to the top
+mig.AddLayoutComponent(toolbar, TfpgMigCC.Create.DockNorth);
+
+// Dock a status bar to the bottom
+mig.AddLayoutComponent(statusbar, TfpgMigCC.Create.DockSouth);
+
+// Dock a tree view to the left
+mig.AddLayoutComponent(tree, TfpgMigCC.Create.DockWest);
+
+// The remaining widgets form the grid in the center area
+mig.AddLayoutComponent(content, TfpgMigCC.Create.GrowX.GrowY);
+----
+
+== Widget Sizing
+
+Widgets in fpGUI have both a _preferred size_ (the size the developer intends) and an
+_actual size_ (the size after the layout manager and window system have made their
+calculations). Layout managers read a widget's preferred size to determine how much space
+it needs.
+
+There are two ways to set preferred size:
+
+[source,pascal]
+----
+// Option 1: Set Width and Height (these define the preferred size)
+btn.Width := 100;
+btn.Height := 30;
+
+// Option 2: Use PreferredSize directly
+btn.PreferredSize := fpgSize(100, 30);
+----
+
+Some widgets (such as `TfpgLabel` and `TfpgButton`) calculate their preferred size
+automatically based on their content and font. For these widgets, it is usually unnecessary
+to set an explicit size.
+
+== Mixing Layout Managers
+
+Layout managers can be nested. A form may use BorderLayout for its overall structure, while
+individual panels use MigLayout or FlowLayout for their content.
+
+[source,pascal]
+----
+procedure TMainForm.AfterCreate;
+var
+  border: TfpgBorderLayoutManager;
+  mig: TfpgMigLayoutManager;
+  pnlContent: TfpgPanel;
+  pnlToolbar: TfpgPanel;
+  constraint: TfpgBorderLayoutConstraint;
+begin
+  // Form uses BorderLayout
+  border := TfpgBorderLayoutManager.Create(0, 4);
+  LayoutManager := border;
+
+  // Toolbar panel docked to North
+  pnlToolbar := TfpgPanel.Create(Self);
+  pnlToolbar.Height := 36;
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrNorth;
+  border.AddLayoutComponent(pnlToolbar, constraint);
+
+  // Content panel fills Center
+  pnlContent := TfpgPanel.Create(Self);
+  constraint := TfpgBorderLayoutConstraint.Create;
+  constraint.Region := blrCenter;
+  border.AddLayoutComponent(pnlContent, constraint);
+
+  // Content panel uses MigLayout internally
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.SetWrapAfter(2);
+  pnlContent.LayoutManager := mig;
+
+  // Add widgets to the content panel via MigLayout
+  // ...
+end;
+----
+
+== Running the Examples
+
+fpGUI ships with working examples for each layout manager:
+
+* `examples/gui/lm-flow/` -- FlowLayout with basic and advanced demos
+* `examples/gui/lm-border/` -- BorderLayout five-region demo
+* `examples/gui/lm-mig/` -- MigLayout demo with eight feature panels covering basic grids,
+  alignment, spanning, growth, docking, constraint parsing, and button ordering
+
+Use PasBuild from the project root, to make sure the fpGUI framework has been compiled:
+
+[source,bash]
+----
+pasbuild compile -p unix,agg,debug
+----
+
+Then build and run an example:
+
+[source,bash]
+----
+cd examples/gui/lm-mig
+fpc @extrafpc.cfg lm-mig.lpr
+./lm-mig
+----
+
+== Debug Visualisation
+
+MigLayout includes a built-in debug mode that draws grid cell boundaries, gaps, and
+component outlines as coloured overlays. This is invaluable for understanding how the
+layout engine distributes space.
+
+Enable it by calling `Debug()` on the LC:
+
+[source,pascal]
+----
+mig.LC.Debug;
+----
+
+The debug overlay uses:
+
+* **Blue outlines** for grid cell boundaries
+* **Red outlines** for component bounds
+* **Green dashes** for gaps between cells
+
+== Further Reading
+
+* `docs/miglayout_v11_port_plan.adoc` -- Detailed MigLayout v11 port implementation plan
+* `docs/layout_manager_implementation_plan.adoc` -- Original architecture design document
+* `docs/toolkit_sizing_comparison.adoc` -- Widget sizing API design (intent vs actual size)
+* Java MigLayout documentation at http://miglayout.com applies directly to the fpGUI port
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2026-02-08 +
+**Author:** Graeme Geldenhuys

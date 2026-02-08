@@ -1,14 +1,10 @@
 #!/bin/bash
 #
-# Build script for fpGUI framework and critical applications
+# Build script for fpGUI framework and critical applications (PARALLEL VERSION)
 # This script builds:
-#   1. fpGUI framework (AggCanvas backend)
-#   2. uidesigner
-#   3. docview
-#   4. maximus (example IDE)
+#   1. fpGUI framework (AggCanvas backend) - sequential
+#   2. uidesigner, docview, maximus - in parallel
 #
-
-set -e  # Exit on error (but we'll trap errors to continue)
 
 # Colors for output
 RED='\033[0;31m'
@@ -20,6 +16,7 @@ NC='\033[0m' # No Color
 # Track build results
 declare -a BUILD_SUCCESS
 declare -a BUILD_FAILED
+declare -A BUILD_PIDS
 
 # Function to print colored messages
 print_header() {
@@ -40,74 +37,106 @@ print_info() {
     echo -e "${BRIGHT_YELLOW}→ $1${NC}"
 }
 
-# Function to build a project
+# Function to build a project (returns exit code via return, name via global arrays)
 build_project() {
     local name=$1
     local dir=$2
     local cmd=$3
     local logname=$(echo "$name" | tr ' ' '_' | tr '[:upper:]' '[:lower:]' | tr -d '()')
 
-    print_header "Building $name"
-    print_info "Directory: $dir"
-    print_info "Command: $cmd"
-
     if cd "$dir" 2>/dev/null; then
         if eval "$cmd" > "/tmp/fpgui_build_${logname}.log" 2>&1; then
-            print_success "$name built successfully"
-            BUILD_SUCCESS+=("$name")
             cd - > /dev/null
             return 0
         else
-            print_error "$name build FAILED (see /tmp/fpgui_build_${logname}.log)"
-            BUILD_FAILED+=("$name")
             cd - > /dev/null
             return 1
         fi
     else
-        print_error "Directory $dir not found"
-        BUILD_FAILED+=("$name")
         return 1
     fi
+}
+
+# Function to build a project in background
+build_project_async() {
+    local name=$1
+    local dir=$2
+    local cmd=$3
+
+    print_header "Starting build: $name"
+    print_info "Directory: $dir"
+    print_info "Command: $cmd"
+
+    # Build in background and store PID
+    (build_project "$name" "$dir" "$cmd"; exit $?) &
+    BUILD_PIDS["$name"]=$!
 }
 
 # Save current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-print_header "fpGUI Build All - Starting"
+print_header "fpGUI Parallel Build - Starting"
 echo "Build started at: $(date)"
 echo ""
 
-# Build 1: fpGUI Framework (AggCanvas)
-build_project "fpGUI Framework (AggCanvas)" \
-              "$SCRIPT_DIR/src" \
-              "./build.sh 1"
+# Build 1: fpGUI Framework (AggCanvas) - MUST be sequential
+print_header "Building fpGUI Framework (AggCanvas)"
+print_info "Directory: $SCRIPT_DIR/src"
+print_info "Command: ./build.sh 1"
+
+if build_project "fpGUI Framework (AggCanvas)" "$SCRIPT_DIR/src" "./build.sh 1"; then
+    print_success "fpGUI Framework (AggCanvas) built successfully"
+    BUILD_SUCCESS+=("fpGUI Framework (AggCanvas)")
+else
+    print_error "fpGUI Framework (AggCanvas) build FAILED (see /tmp/fpgui_build_fpgui_framework_aggcanvas.log)"
+    BUILD_FAILED+=("fpGUI Framework (AggCanvas)")
+
+    # If framework fails, don't bother building apps
+    print_header "Build Summary"
+    echo ""
+    echo -e "${RED}Framework build failed - aborting remaining builds${NC}"
+    echo -e "${YELLOW}Check log file: /tmp/fpgui_build_fpgui_framework_aggcanvas.log${NC}"
+    exit 1
+fi
 
 echo ""
-
-# Build 2: uidesigner
-build_project "uidesigner" \
-              "$SCRIPT_DIR/uidesigner" \
-              "fpc @extrafpc.cfg uidesigner.lpr"
-
+print_header "Building applications in parallel"
 echo ""
 
-# Build 3: docview
-build_project "docview" \
-              "$SCRIPT_DIR/docview/src" \
-              "fpc @extrafpc.cfg docview.lpr"
+# Build applications in parallel
+build_project_async "uidesigner" \
+                    "$SCRIPT_DIR/uidesigner" \
+                    "fpc @extrafpc.cfg uidesigner.lpr"
+
+build_project_async "docview" \
+                    "$SCRIPT_DIR/docview/src" \
+                    "fpc @extrafpc.cfg docview.lpr"
+
+build_project_async "maximus" \
+                    "$SCRIPT_DIR/examples/apps/ide/src" \
+                    "fpc @extrafpc.cfg maximus.lpr"
+
+build_project_async "unittests" \
+                    "$SCRIPT_DIR/unittests" \
+                    "fpc -dX11 -dAGGCanvas @extrafpc.cfg fpgui_unittests_console.lpr"
 
 echo ""
+print_info "Waiting for parallel builds to complete..."
+echo ""
 
-# Build 4: maximus (example IDE)
-build_project "maximus" \
-              "$SCRIPT_DIR/examples/apps/ide/src" \
-              "fpc @extrafpc.cfg maximus.lpr"
-
-# Build 5: unittests
-build_project "unittests" \
-              "$SCRIPT_DIR/unittests" \
-              "fpc -dX11 -dAGGCanvas @extrafpc.cfg fpgui_unittests_console.lpr"
+# Wait for all background jobs and collect results
+for name in "${!BUILD_PIDS[@]}"; do
+    pid=${BUILD_PIDS[$name]}
+    if wait $pid; then
+        print_success "$name built successfully"
+        BUILD_SUCCESS+=("$name")
+    else
+        logname=$(echo "$name" | tr ' ' '_' | tr '[:upper:]' '[:lower:]' | tr -d '()')
+        print_error "$name build FAILED (see /tmp/fpgui_build_${logname}.log)"
+        BUILD_FAILED+=("$name")
+    fi
+done
 
 echo ""
 

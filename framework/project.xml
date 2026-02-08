@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <!-- PasBuild Project Configuration -->
+  <name>fpgui-framework</name>
+  <version>1.9.0-beta</version>
+  <author>Graeme Geldenhuys</author>
+  <license>BSD-3-Clause</license>
+
+  <build>
+    <projectType>library</projectType>
+
+    <!-- Global defines (always active) -->
+    <defines>
+      <define>UseCThreads</define>
+    </defines>
+
+    <unitPaths>
+      <!-- These act as inclusion rules based on conditions -->
+      <path condition="UNIX">corelib/x11</path>
+      <path condition="WINDOWS">corelib/gdi</path>
+      <path condition="DARWIN">corelib/cocoa</path>
+      <path condition="AggCanvas">corelib/render/software</path>
+      <!-- There are just to clean up the FPC command - not strictly needed -->
+      <path condition="UNUSED">corelib/_template</path>
+      <path condition="UNUSED">corelib/render/cairo</path>
+      <path condition="UNUSED">3rdparty/libvlc</path>
+    </unitPaths>
+
+    <resources>
+      <filtering>true</filtering>
+    </resources>
+  </build>
+
+  <!-- Build Profiles -->
+  <profiles>
+    <profile>
+      <id>debug</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gw</option>
+        <option>-godwarfsets -godwarfmethodclassprefix</option>
+        <option>-Criot</option>
+        <option>-gl</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>memleak</id>
+      <compilerOptions>
+        <option>-gh</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <defines>
+        <define>RELEASE</define>
+      </defines>
+      <compilerOptions>
+        <option>-O3</option>
+        <option>-CX</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>unix</id>
+      <defines>
+         <define>X11</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>windows</id>
+      <defines>
+         <define>GDI</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>macos</id>
+      <defines>
+         <define>cocoa</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>agg</id>
+      <defines>
+         <define>AggCanvas</define>
+      </defines>
+    </profile>
+
+  </profiles>
+
+  <test>
+    <framework>fpcunit</framework>
+    <testSource>TestRunner.pas</testSource>
+    <frameworkOptions>
+      <option>--all</option>
+      <option>--format=plain</option>
+    </frameworkOptions>
+  </test>
+
+</project>

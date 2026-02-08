@@ -79,22 +79,22 @@ var
 begin
   Canvas.BeginDraw;  // begin double buffering
 
-  r.SetRect(0, 0, Width, Height);
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
   Canvas.GradientFill(r, clBlue, clBlack, gdVertical);
 
   Canvas.SetFont(FLargeFont);
   Canvas.SetTextColor(clBlack);
-  Canvas.DrawString((Width - FLargeFont.GetTextWidth(HelloWorldString)) div 2 + 1,
-    (Height - FLargeFont.GetHeight) div 2 + 1, HelloWorldString);
+  Canvas.DrawString((ActualWidth - FLargeFont.GetTextWidth(HelloWorldString)) div 2 + 1,
+    (ActualHeight - FLargeFont.GetHeight) div 2 + 1, HelloWorldString);
 
   Canvas.SetTextColor(clWhite);
-  Canvas.DrawString((Width - FLargeFont.GetTextWidth(HelloWorldString)) div 2 - 1,
-    (Height - FLargeFont.GetHeight) div 2 - 1, HelloWorldString);
+  Canvas.DrawString((ActualWidth - FLargeFont.GetTextWidth(HelloWorldString)) div 2 - 1,
+    (ActualHeight - FLargeFont.GetHeight) div 2 - 1, HelloWorldString);
 
 
   Canvas.SetFont(FSmallFont);
-  Canvas.DrawString((Width - FSmallFont.GetTextWidth(ClickToClose)) div 2 - 1,
-    Height - (FSmallFont.GetHeight*2), ClickToClose);
+  Canvas.DrawString((ActualWidth - FSmallFont.GetTextWidth(ClickToClose)) div 2 - 1,
+    ActualHeight - (FSmallFont.GetHeight*2), ClickToClose);
 
   Canvas.EndDraw;
 end;

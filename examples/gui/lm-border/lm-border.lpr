@@ -9,8 +9,6 @@ uses
 
 type
 
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   public
     procedure AfterCreate; override;

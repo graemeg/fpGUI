@@ -64,7 +64,10 @@ begin
   SetPosition(100, 100, 620, 400);
   
   FGrid := TfpgFileGrid.Create(self);
-  FGrid.SetPosition(8, 8, 600, 360);
+  FGrid.Left := 8;
+  FGrid.Top := 8;
+  FGrid.Width := 600;
+  FGrid.Height := 360;
   FGrid.FileList.ShowHidden := True;
   FGrid.FileList.ReadDirectory('');
   FGrid.Anchors := [anLeft, anTop, anBottom, anRight];

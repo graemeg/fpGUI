@@ -1,0 +1,2109 @@
+= MigLayout v11 Port Implementation Plan for fpGUI
+:toc: left
+:toclevels: 3
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== Executive Summary
+
+This document outlines the plan to port MigLayout v11.4.2 from Java to Object Pascal for fpGUI. Rather than continuing test-driven development from scratch, we will systematically port the battle-tested Java implementation while preserving the fpGUI-native architecture we've already established.
+
+**Source:** `prototypes/miglayout/mig-java-latest/` (MigLayout v11.4.2 for Java)
+
+**Branch:** `feature/miglayout-v11-port`
+
+**Key Strategy:**
+
+* Port proven v11.4.2 algorithms while keeping fpGUI architecture
+* **API-first approach**: Full fluent API first, string parser deferred to Phase 2
+* **Test-as-you-go**: Write tests alongside each class for immediate validation
+* Reuse existing `ILayoutManager` interface and base classes
+* Leverage existing unit tests as regression validation
+* Build confidence incrementally - catch bugs early
+* Gain 11 versions worth of bug fixes and features
+* Native HiDPI support via logic units
+* Use interfaces and generics where beneficial (FPC 3.2+ support)
+* Maintain compatibility with Java MigLayout behavior
+
+== Session Continuation Guide
+
+=== Prompt Template for Continuing Implementation
+
+When starting a new session to continue implementation, use this prompt:
+
+----
+I'm continuing the MigLayout v11 port for fpGUI. Please read the implementation plan:
+
+docs/miglayout_v11_port_plan.adoc
+
+Current status:
+- Branch: feature/miglayout-v11-port
+- Last completed: [PHASE X, STEP X.X - description]
+- Next task: [PHASE X, STEP X.X - description]
+
+Please:
+1. Review the implementation plan starting from the "Getting Started" section
+2. Check git status to see what's been done
+3. Verify existing tests still pass (cd unittests && fpc -dX11 @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
+4. Continue with [NEXT STEP]
+5. Follow test-as-you-go approach (write tests alongside implementation)
+6. Make regular commits after each completed subtask
+7. Update this document with checkmarks as steps are completed
+----
+
+**Example usage:**
+
+----
+I'm continuing the MigLayout v11 port for fpGUI. Please read the implementation plan:
+
+docs/miglayout_v11_port_plan.adoc
+
+Current status:
+- Branch: feature/miglayout-v11-port
+- Last completed: Phase 1, Step 1.2 - Ported UnitValue class with tests
+- Next task: Phase 1, Step 1.3 - Port BoundSize
+
+Please:
+1. Review the implementation plan starting from the "Getting Started" section
+2. Check git status to see what's been done
+3. Verify existing tests still pass (cd unittests && fpc -dX11 @extrafpc.cfg fpgui_unittests_console.lpr && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5)
+4. Continue with Step 1.3: Port BoundSize
+5. Follow test-as-you-go approach (write tests alongside implementation)
+6. Make regular commits after each completed subtask
+7. Update this document with checkmarks as steps are completed
+----
+
+=== Commit Guidelines During Implementation
+
+**Commit frequency:**
+
+* After each completed subtask (e.g., "Implement UnitValue.Parse for pixel units")
+* After each passing test (e.g., "Add test for UnitValue percentage conversion")
+* After each completed step (e.g., "Complete Step 1.2: Port UnitValue")
+* Before breaks or end of session
+
+**Commit message format:**
+
+----
+<scope>: <brief description>
+
+<optional detailed explanation>
+----
+
+**Examples:**
+
+----
+mig: Add TfpgMigUnitValue class structure
+
+Ported from UnitValue.java (v11.4.2)
+- Added unit type enum
+- Added Parse class method stub
+- Added GetPixels method stub
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+test: Add UnitValue parsing tests for absolute units
+
+Tests for px, mm, cm, inch, pt unit types.
+All tests passing.
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+mig: Implement UnitValue.GetPixels for absolute units
+
+Conversion logic for px, mm, cm, inch, pt.
+Uses PlatformDefaults for DPI.
+
+Reference: Phase 1, Step 1.2
+----
+
+----
+docs: Mark Step 1.2 complete in implementation plan
+
+UnitValue class fully ported and tested.
+12 tests passing (3 new for UnitValue).
+----
+
+**Don't commit:**
+
+* Broken/non-compiling code
+* Failing tests (unless documenting known issue)
+* Commented-out debugging code
+* Temporary test files
+
+**Do commit:**
+
+* Working incremental progress
+* Passing tests (even incomplete feature)
+* Documentation updates
+* Step completion markers
+
+=== Tracking Progress in This Document
+
+As you complete each step, update the document with checkmarks:
+
+**Before:**
+----
+==== Step 1.2: Port UnitValue (3-4 days)
+----
+
+**After:**
+----
+==== Step 1.2: Port UnitValue ✓ COMPLETED (3 days actual)
+----
+
+**For partially completed steps, use:**
+----
+==== Step 1.3: Port BoundSize (2-3 days) - IN PROGRESS
+
+Progress:
+☑ Class structure ported
+☑ Constructor implemented
+☑ Basic tests written and passing
+☐ Null handling implementation
+☐ Edge case tests
+☐ Complete
+----
+
+This allows quick visual scanning to see what's done and what's next.
+
+== Getting Started
+
+=== Prerequisites
+
+**Required:**
+
+* Free Pascal Compiler 3.2+ (for generics support)
+* fpGUI source code on `feature/miglayout-v11-port` branch
+* Java MigLayout v11.4.2 source in `prototypes/miglayout/mig-java-latest/`
+
+**Verify setup:**
+
+[source,bash]
+----
+# Check FPC version
+fpc -iV  # Should be 3.2.0 or higher
+
+# Verify Java source exists
+ls prototypes/miglayout/mig-java-latest/pom.xml
+# Should show version 11.4.2
+
+# Check current branch
+git branch --show-current
+# Should be: feature/miglayout-v11-port
+----
+
+=== Current Baseline
+
+**Existing fpGUI MigLayout implementation:**
+
+* `src/corelib/fpg_miglayout.pas` - Current v3-based implementation
+* `src/corelib/fpg_migconstraint.pas` - Current constraint classes
+* `src/corelib/fpg_layoutmanager.pas` - ILayoutManager interface
+* `src/corelib/fpg_layouttypes.pas` - TfpgLayoutConstraint base class
+* `unittests/tests/tcmiglayout.pas` - 9 existing tests (all passing)
+
+**Existing test suite (baseline):**
+
+* TestCreateMigLayout ✓
+* TestSingleWidgetLayout ✓
+* TestTwoWidgetsLayout ✓
+* TestTwoColumnLayout ✓
+* TestColumnWidthCalculation ✓
+* TestCellAlignment ✓
+* TestColumnSpan ✓
+* TestRowSpan ✓
+* TestGrow ✓
+
+=== Java Source File Reference
+
+Java MigLayout v11.4.2 source files to port:
+
+[cols="2,3", options="header"]
+|===
+|Component |Java Source Path
+
+|UnitValue
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/UnitValue.java`
+
+|BoundSize
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/BoundSize.java`
+
+|LC (Layout Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LC.java`
+
+|AC (Axis Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/AC.java`
+
+|CC (Component Constraints)
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/CC.java`
+
+|DimConstraint
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/DimConstraint.java`
+
+|Grid
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/Grid.java`
+
+|LayoutUtil
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LayoutUtil.java`
+
+|PlatformDefaults
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/PlatformDefaults.java`
+
+|HideMode
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/HideMode.java`
+
+|LayoutCallback
+|`prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/LayoutCallback.java`
+|===
+
+=== Build and Test Commands
+
+**Build fpGUI framework:**
+
+Make sure any new units created, have been added to the following files:
+
+* src/corelib/cocoa/fpgui_toolkit.pas
+* src/corelib/cocoa/fpgui_toolkit.lpk
+* src/corelib/x11/fpgui_toolkit.pas
+* src/corelib/x11/fpgui_toolkit.lpk
+* src/corelib/gdi/fpgui_toolkit.pas
+* src/corelib/gdi/fpgui_toolkit.lpk
+
+From the root of the fpGUI project directory:
+
+[source,bash]
+----
+pasbuild compile -p unix,agg,debug
+----
+
+If we don't want to include the AggPas 2D software rendering, then run this instead:
+
+[source,bash]
+----
+pasbuild compile -p unix,debug
+----
+
+
+**Build and run unit tests:**
+
+[source,bash]
+----
+pasbuild test
+----
+
+**Build a specific example:**
+
+[source,bash]
+----
+cd examples/gui/lm-flow
+fpc @extrafpc.cfg lm_flow_demo.lpr
+./lm_flow_demo
+----
+
+=== First Steps Checklist
+
+Before starting Phase 1, verify:
+
+* ☐ FPC 3.2+ installed and working
+* ☐ Current branch is `feature/miglayout-v11-port`
+* ☐ Framework builds successfully (`cd src && ./build.sh 1`)
+* ☐ All 9 existing tests pass (`cd unittests && ./build.sh 1 && ./fpgui_unittests_console --all --format=plain 2>&1 | tail -5`)
+* ☐ Java source files accessible in `prototypes/miglayout/mig-java-latest/`
+* ☐ Read Executive Summary and understand API-first + test-as-you-go approach
+
+=== Quick Reference
+
+**FPC objfpc mode generics syntax:**
+
+[source,pascal]
+----
+type
+  // MUST use specialize keyword
+  TMyList = specialize TObjectList<TMyClass>;
+
+var
+  list: TMyList;
+begin
+  list := TMyList.Create(True); // True = owns objects
+  try
+    list.Add(TMyClass.Create);
+  finally
+    list.Free;
+  end;
+end;
+----
+
+**Interface reference counting pattern:**
+
+[source,pascal]
+----
+type
+  IMyInterface = interface
+    ['{GUID}']
+    function DoSomething: IMyInterface; // Fluent API
+  end;
+
+  TMyClass = class(TInterfacedObject, IMyInterface)
+  public
+    function DoSomething: IMyInterface; // Return Self as interface
+  end;
+
+// Usage - automatic cleanup
+var
+  obj: IMyInterface;
+begin
+  obj := TMyClass.Create.DoSomething;
+  // No need to Free - reference counting handles it
+end;
+----
+
+== Rationale for Porting vs TDD
+
+=== Lessons from Row Spanning Implementation
+
+The row spanning feature took significant effort to implement correctly:
+
+* Required studying Java source code (Grid.java) to understand algorithm
+* Multiple iterations to get edge cases right
+* Complex logic for occupied cell tracking and size distribution
+* Risk of diverging from Java behavior
+
+**Insight:** We're already depending on Java source for correctness. Why not make it systematic?
+
+=== Problems with Pure TDD Approach
+
+1. **Slow Progress**: Each feature requires research, implementation, testing, debugging
+2. **Reinventing Wheels**: Solving problems already solved in v3, v4...v11
+3. **Hidden Complexity**: Many features as complex as row spanning await:
+   * Baseline alignment
+   * Size groups and component links
+   * Dock mode with spans
+   * Gap collapse for hidden components
+   * Flow mode wrapping
+   * Absolute positioning
+   * Percentage-based sizing
+4. **Edge Cases**: Will miss subtle bugs until production use
+5. **Documentation Gap**: v11 docs won't match partial implementation
+6. **Version Lag**: Starting from scratch puts us 11 versions behind
+
+=== Advantages of Porting v11
+
+1. **Battle-Tested Logic**: 11 versions of bug fixes and refinements
+2. **Complete Feature Set**: All features from day one
+3. **HiDPI Support**: Logic units built-in (goal for fpGUI)
+4. **Proven Algorithms**: Complex cases already solved correctly
+5. **Faster to Production**: Direct translation more mechanical than invention
+6. **Perfect Compatibility**: Behaves exactly like Java version
+7. **Documentation Match**: Official v11 docs apply directly
+8. **Future Updates**: Can track Java releases for improvements
+9. **Less Risk**: Algorithmic bugs already found and fixed
+
+=== What We Preserve from Current Implementation
+
+Our existing work remains valuable:
+
+* ✓ `ILayoutManager` interface design
+* ✓ `TfpgBaseLayoutManager` helper class
+* ✓ `TfpgLayoutConstraint` base class
+* ✓ Integration with `TfpgWidget.HandleAlignments`
+* ✓ All unit tests (9 passing tests)
+* ✓ fpGUI architectural patterns
+* ✓ Understanding of MigLayout concepts
+
+**Strategy:** Keep our interface layer, replace implementation internals with v11 algorithms.
+
+== MigLayout v11.4.2 Architecture
+
+=== Core Components
+
+Based on analysis of `prototypes/miglayout/mig-java-latest/core/src/main/java/net/miginfocom/layout/`:
+
+[cols="2,3,3", options="header"]
+|===
+|Java Class |Purpose |fpGUI Equivalent
+
+|`Grid.java`
+|Core layout engine, does all calculations
+|Port to `fpg_miglayout.pas` (TfpgMigGrid)
+
+|`LC.java`
+|Layout Constraints (container-level)
+|Port to `fpg_mig_lc.pas` (TfpgMigLC)
+
+|`AC.java`
+|Axis Constraints (row/column level)
+|Port to `fpg_mig_ac.pas` (TfpgMigAC)
+
+|`CC.java`
+|Component Constraints (widget-level)
+|Extend existing `fpg_migconstraint.pas` (TfpgMigConstraint)
+
+|`DimConstraint.java`
+|Dimension constraints for rows/columns
+|Port to `fpg_mig_dimconstraint.pas`
+
+|`BoundSize.java`
+|Min/Preferred/Max size triplet
+|Port to `fpg_mig_boundsize.pas`
+
+|`UnitValue.java`
+|Value with unit (px, %, lp, etc.)
+|Port to `fpg_mig_unitvalue.pas`
+
+|`LayoutUtil.java`
+|Utility functions for layout calculations
+|Port to `fpg_mig_layoututil.pas`
+
+|`ConstraintParser.java`
+|Parses string constraints
+|Port to `fpg_mig_constraintparser.pas`
+
+|`PlatformDefaults.java`
+|Platform-specific defaults (gaps, sizes)
+|Port to `fpg_mig_platformdefaults.pas`
+
+|`ComponentWrapper.java`
+|Abstraction for UI components
+|Already have via `ILayoutIterator`/`TfpgWidget`
+
+|`ContainerWrapper.java`
+|Abstraction for containers
+|Already have via `TfpgWidget`
+
+|`UnitConverter.java`
+|Converts between unit types
+|Port to `fpg_mig_unitconverter.pas`
+
+|`LinkHandler.java`
+|Handles component linking
+|Port to `fpg_mig_linkhandler.pas`
+
+|`ResizeConstraint.java`
+|Constraints for resizing behavior
+|Port to `fpg_mig_resizeconstraint.pas`
+
+|`AlignX.java`, `AlignY.java`
+|Alignment enums
+|Extend existing `TfpgMigAlignX`, `TfpgMigAlignY`
+
+|`AnimSpec.java`
+|Animation specifications (layout transitions)
+|**Skip** - Optional cosmetic feature, defer to future enhancement
+
+|`HideMode.java`
+|Hide mode enum
+|Port to `fpg_mig_hidemode.pas`
+
+|`LayoutCallback.java`
+|Callback interface for custom positioning/sizing
+|Port to `fpg_mig_layoutcallback.pas` (useful for advanced scenarios)
+
+|`InCellGapProvider.java`
+|Custom gap provider
+|Port to `fpg_mig_gapprovider.pas`
+
+|`IDEUtil.java`
+|IDE integration utilities (visual designer support)
+|**Skip** - Only needed for uidesigner integration, defer to future
+|===
+
+=== File Organization
+
+Proposed structure:
+
+----
+src/corelib/
+  fpg_layoutmanager.pas          (existing - ILayoutManager)
+  fpg_layouttypes.pas             (existing - base types)
+
+  fpg_miglayout.pas               (existing - TfpgMigLayoutManager, port Grid.java)
+  fpg_migconstraint.pas           (existing - extend with CC.java features)
+
+  fpg_mig_lc.pas                  (new - Layout Constraints)
+  fpg_mig_ac.pas                  (new - Axis Constraints)
+  fpg_mig_dimconstraint.pas       (new - Dimension Constraints)
+  fpg_mig_boundsize.pas           (new - BoundSize)
+  fpg_mig_unitvalue.pas           (new - UnitValue)
+  fpg_mig_unitconverter.pas       (new - Unit Conversion)
+  fpg_mig_layoututil.pas          (new - Layout Utilities)
+  fpg_mig_platformdefaults.pas    (new - Platform Defaults)
+  fpg_mig_linkhandler.pas         (new - Link Handler)
+  fpg_mig_resizeconstraint.pas    (new - Resize Constraints)
+  fpg_mig_hidemode.pas            (new - Hide Mode)
+  fpg_mig_layoutcallback.pas      (new - Layout Callbacks)
+  fpg_mig_gapprovider.pas         (new - Gap Provider)
+----
+
+**Deferred to Future:**
+
+----
+  fpg_mig_constraintparser.pas    (future - String constraint parsing)
+  fpg_mig_animspec.pas            (future - Layout animations)
+  fpg_mig_ideutil.pas             (future - uidesigner integration)
+----
+
+=== Design Patterns and Pascal Features
+
+==== Use of Interfaces
+
+fpGUI already uses the interface pattern successfully (`ILayoutManager` + `TfpgBaseLayoutManager`). We should continue this where beneficial:
+
+**Benefits:**
+
+* Reference counting via `TInterfacedObject` - automatic memory management
+* Loose coupling - depend on contracts, not implementations
+* Testability - easy to mock/stub
+
+**Critical for Fluent API:**
+
+Interfaces are **REQUIRED** for all constraint classes that use fluent API pattern. Without interfaces, the fluent pattern causes memory leaks in Pascal:
+
+[source,pascal]
+----
+// WITHOUT interfaces - MEMORY LEAK!
+lm.RowConstraints := TfpgMigAC.Create.Fill.Grow(100);
+// The intermediate TfpgMigAC instance is never freed!
+
+// WITH interfaces - NO LEAK (reference counting)
+lm.RowConstraints := TfpgMigAC.Create.Fill.Grow(100);
+// Interface reference counting handles cleanup automatically
+----
+
+**Where to use interfaces:**
+
+* **REQUIRED**: All fluent API constraint classes (LC, AC, CC)
+* Keep `ILayoutManager` for layout managers
+* Consider `ILayoutCallback` for LayoutCallback (allows easy stubbing)
+* Grid internals can use classes (performance-critical, not exposed to users)
+
+**Interface Design Pattern:**
+
+[source,pascal]
+----
+type
+  // Interface defines the public API
+  IfpgMigAC = interface
+    ['{GUID-HERE}']
+    function Fill: IfpgMigAC;
+    function Grow(APriority: Integer): IfpgMigAC;
+    function Index(AIndex: Integer): IfpgMigAC;
+    function Gap(const AGap: string): IfpgMigAC;
+    // Internal access for layout engine
+    function GetConstraints: TArray<TfpgMigDimConstraint>;
+  end;
+
+  // Implementation with reference counting
+  TfpgMigAC = class(TInterfacedObject, IfpgMigAC)
+  private
+    FConstraints: TObjectList<TfpgMigDimConstraint>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    // Fluent methods return interface, not Self
+    function Fill: IfpgMigAC;
+    function Grow(APriority: Integer): IfpgMigAC;
+    function GetConstraints: TArray<TfpgMigDimConstraint>;
+  end;
+
+implementation
+
+function TfpgMigAC.Fill: IfpgMigAC;
+begin
+  // Modify state
+  // Return interface to self for chaining
+  Result := Self;
+end;
+----
+
+This pattern eliminates memory leaks while maintaining the fluent API convenience that Java enjoys with garbage collection.
+
+==== Use of Generics (FPC objfpc mode)
+
+Free Pascal Compiler 3.2+ with `{$mode objfpc}` requires **specialized** type definitions:
+
+**FPC Syntax (objfpc mode):**
+
+[source,pascal]
+----
+uses
+  Generics.Collections;
+
+type
+  // Must declare specialized types first
+  TfpgMigCompWrapList = specialize TObjectList<TfpgMigCompWrap>;
+  TStringIntMap = specialize TDictionary<string, Integer>;
+  TIntegerList = specialize TList<Integer>;
+
+  TfpgMigCell = class
+  private
+    FCompWraps: TfpgMigCompWrapList;  // Use specialized type
+  end;
+----
+
+**Note:** Unlike Delphi mode, objfpc mode requires explicit `specialize` declarations. Cannot use inline generics like `TObjectList<T>`.
+
+==== Reducing Circular Dependencies
+
+When porting, consider class hierarchy carefully:
+
+**Guideline:** If a field/property could logically belong to `TfpgWidgetBase` instead of `TfpgWidget`, move it there to reduce circular unit dependencies.
+
+**Example from current code:**
+
+* Layout-related fields might be better in `TfpgWidgetBase`
+* Reduces coupling between layout manager units and widget units
+* Makes testing easier (can test against base class)
+
+**During port, we may refactor:**
+
+* Move layout-related properties higher in hierarchy
+* Extract interfaces where it reduces coupling
+* Keep backward compatibility via property forwarding if needed
+
+==== Critical Architectural Change: TfpgLayoutConstraint Base Class
+
+**Problem:** The fluent API pattern requires `TInterfacedObject` for automatic reference counting, but the existing `TfpgLayoutConstraint` inherits from `TPersistent`, which does **not** provide reference counting.
+
+**Testing confirms:** `TPersistent` does not implement `IInterface` methods (`QueryInterface`, `_AddRef`, `_Release`), so classes inheriting from `TPersistent` cannot use interface reference counting.
+
+**Solution:** Change `TfpgLayoutConstraint` base class in `fpg_layouttypes.pas`:
+
+[source,pascal]
+----
+// Before:
+TfpgLayoutConstraint = class(TPersistent)
+end;
+
+// After:
+TfpgLayoutConstraint = class(TInterfacedObject)
+end;
+----
+
+**Rationale:**
+
+* Enables reference counting for all layout constraint classes
+* `TPersistent` was likely chosen for `Assign()` method and RTTI (`{$M+}`)
+* Layout constraints don't need `TPersistent`'s streaming/component features
+* `TInterfacedObject` provides the reference counting required for fluent API
+* Should be backward compatible (existing constraint classes gain reference counting)
+
+**Impact:**
+
+* All existing layout constraints (e.g., flow layout, future layouts) can use interface pattern
+* MigLayout constraints can cleanly inherit: `TfpgMigCC = class(TfpgLayoutConstraint, IfpgMigCC)`
+* No multiple inheritance issues
+* Enables future fluent APIs in other layout managers
+
+=== Key Differences: Java vs Pascal
+
+==== Collection Types
+
+[source,java]
+----
+// Java
+ArrayList<CompWrap> compWraps = new ArrayList<>();
+HashMap<String, Integer> map = new HashMap<>();
+TreeSet<Integer> indexes = new TreeSet<>();
+----
+
+[source,pascal]
+----
+// Pascal (using Generics.Collections)
+compWraps: TList<TCompWrap>;
+map: TDictionary<string, Integer>;
+indexes: TList<Integer>; // sorted manually or use custom comparator
+----
+
+==== Nullable Types
+
+[source,java]
+----
+// Java
+Float growPriority = null;
+if (growPriority != null) { ... }
+----
+
+[source,pascal]
+----
+// Pascal (use pointer or variant or custom nullable record)
+type
+  TNullableFloat = record
+    HasValue: Boolean;
+    Value: Single;
+  end;
+
+var
+  growPriority: TNullableFloat;
+if growPriority.HasValue then ...
+----
+
+==== Interface vs Abstract Class
+
+Java uses interfaces with default methods (since Java 8). Pascal doesn't have default interface methods, so we'll use abstract classes where appropriate or split into interface + helper class pattern (already established with `ILayoutManager` + `TfpgBaseLayoutManager`).
+
+==== String Handling
+
+Java strings are immutable objects. Pascal strings are mutable. Need to be careful with string parsing and ensure proper copying where needed.
+
+==== Platform Detection
+
+[source,java]
+----
+// Java
+String osName = System.getProperty("os.name");
+----
+
+[source,pascal]
+----
+// Pascal
+{$IFDEF WINDOWS}
+  // Windows-specific
+{$ENDIF}
+{$IFDEF UNIX}
+  // Unix-specific
+{$ENDIF}
+----
+
+== Implementation Phases
+
+=== Phase 1: Foundation Classes (Week 1-2)
+
+**Goal:** Port basic data structures and types
+
+==== Step 1.0: Update Base Class ✓ COMPLETED
+
+**Critical prerequisite for fluent API support**
+
+Update `fpg_layouttypes.pas` to enable reference counting:
+
+[source,pascal]
+----
+// Change:
+TfpgLayoutConstraint = class(TPersistent)
+end;
+
+// To:
+TfpgLayoutConstraint = class(TInterfacedObject)
+end;
+----
+
+**Testing:**
+
+* ✓ All existing layout managers still compile
+* ✓ Framework builds successfully
+* ✓ All 68 unit tests pass (0 errors, 0 failures)
+* ✓ All 9 MigLayout tests pass
+
+**Deliverable:** ✓ Updated base class with reference counting support
+
+**Committed:** 1b483892
+
+==== Step 1.1: Port Enums and Simple Types ✓ COMPLETED
+
+1. ✓ **AlignX.java, AlignY.java** → Extended existing alignment enums
+2. ✓ **HideMode.java** → `fpg_mig_hidemode.pas`
+
+[source,pascal]
+----
+type
+  // Extended alignment enums
+  TfpgMigAlignX = (axLeft, axCenter, axRight, axFill);
+    // Note: axLeading, axTrailing commented out (no BiDi support yet)
+
+  TfpgMigAlignY = (ayTop, ayCenter, ayBottom, ayFill, ayBaseline);
+
+  // New HideMode enum
+  TfpgMigHideMode = (hmNormal, hmSize0RetainGaps, hmSize0Gaps0, hmDisregard);
+----
+
+**Deliverables:**
+
+* ✓ fpg_mig_hidemode.pas created with all 4 hide modes
+* ✓ TfpgMigAlignY extended with ayBaseline
+* ✓ Framework builds successfully
+* ✓ All 68 unit tests pass
+
+**Committed:** daafee85
+
+==== Step 1.2: Port UnitValue ✓ COMPLETED
+
+**Status:** ✓ Complete
+
+**Summary:**
+
+* Created fpg_mig_unitvalue.pas with TfpgMigUnitValue class
+* Ported all unit types from Java (pixel, mm, cm, inch, pt, %, lp, sp, etc.)
+* Ported operation types (static, add, sub, mul, div, min, max, mid)
+* Implemented comprehensive unit string parsing including link syntax
+* Added IsAbsolute and IsLinked helper methods
+* Created 22 unit tests in tcmig_unitvalue.pas
+* All 90 unit tests pass (0 errors, 0 failures)
+
+**Note:** Full GetPixels conversion with reference values will be implemented when needed in later phases.
+
+**Committed:** 0af37e41
+
+==== Step 1.2: Port UnitValue (3-4 days) - ORIGINAL PLAN
+
+**File:** `UnitValue.java` → `fpg_mig_unitvalue.pas`
+
+Key features:
+
+* Value storage with unit type
+* Unit types: PIXEL, LPX (logic pixel), PT (point), MM, CM, INCH, PERCENT, etc.
+* Parsing from strings: "10px", "50%", "5mm"
+* Conversion to pixels
+
+[source,pascal]
+----
+type
+  TfpgMigUnitType = (utPixel, utLogicPixel, utPoint, utMM, utCM, utInch,
+                     utPercent, utRelated, utMin, utMax, utPref);
+
+  TfpgMigUnitValue = class
+  private
+    FValue: Single;
+    FUnit: TfpgMigUnitType;
+    FOperation: Integer; // for complex expressions
+  public
+    constructor Create(AValue: Single; AUnit: TfpgMigUnitType);
+    function GetPixels(ARefValue: Single; AContainer: TfpgWidget; AParent: TfpgWidget): Integer;
+    class function Parse(const AStr: string): TfpgMigUnitValue;
+  end;
+----
+
+**Testing (create as you port):**
+
+Create `unittests/tests/tcmig_unitvalue.pas` with tests for:
+
+* Parse each unit type: "10px", "5mm", "2cm", "50%", "10lp"
+* GetPixels conversion for absolute units (px, mm, cm, inch, pt)
+* GetPixels conversion for relative units (%, lp)
+* Edge cases: zero values, negative values, very large values
+* Invalid input handling
+
+**Port Strategy:**
+
+1. Study `UnitValue.java` thoroughly - understand all unit types
+2. Port the class structure
+3. Write first test (e.g., parse "10px")
+4. Implement parsing for that unit
+5. Verify test passes
+6. Repeat for each unit type
+7. Move to GetPixels conversion with same test-driven approach
+
+**Deliverable:** Working UnitValue class with comprehensive tests
+
+==== Step 1.3: Port BoundSize ✓ COMPLETED
+
+**Status:** ✓ Complete
+
+**Summary:**
+
+* Created fpg_mig_boundsize.pas with TfpgMigBoundSize class
+* Ported min/preferred/max size triplet structure from Java
+* Implemented IsUnset, IsLinked, and IsAbsolute helper methods
+* Added GapPush property for gap push behavior
+* Added constant values: BoundSizeNullSize and BoundSizeZeroPixel
+* Created 20 comprehensive unit tests in tcmig_boundsize.pas
+* Updated toolkit files for all platforms
+* All 110 unit tests pass (0 errors, 0 failures)
+
+**Note:** BoundSize is immutable - values cannot be changed after creation.
+
+**Committed:** cb7f02a3
+
+==== Step 1.3: Port BoundSize (2-3 days) - ORIGINAL PLAN
+
+**File:** `BoundSize.java` → `fpg_mig_boundsize.pas`
+
+Represents min/preferred/max size triplet.
+
+[source,pascal]
+----
+type
+  TfpgMigBoundSize = class
+  private
+    FMin: TfpgMigUnitValue;
+    FPreferred: TfpgMigUnitValue;
+    FMax: TfpgMigUnitValue;
+  public
+    constructor Create(AMin, APref, AMax: TfpgMigUnitValue);
+    function GetMin(ARefValue: Integer): Integer;
+    function GetPreferred(ARefValue: Integer): Integer;
+    function GetMax(ARefValue: Integer): Integer;
+  end;
+----
+
+**Testing (create as you port):**
+
+Create `unittests/tests/tcmig_boundsize.pas` with tests for:
+
+* Create BoundSize with all three values specified
+* Create BoundSize with null values (use nullable pattern)
+* GetMin/GetPreferred/GetMax calculations
+* Min/Preferred/Max constraint ordering (min ≤ preferred ≤ max)
+* Edge cases: same values, null handling
+
+**Port Strategy:**
+
+1. Study `BoundSize.java` - understand null handling
+2. Port class structure
+3. Write tests for basic creation and retrieval
+4. Implement and verify
+5. Add tests for constraint validation
+6. Add tests for edge cases
+
+**Deliverable:** Working BoundSize class with comprehensive tests
+
+==== Step 1.4: Port PlatformDefaults ✓ COMPLETED
+
+**File:** `PlatformDefaults.java` → `fpg_mig_platformdefaults.pas`
+
+Platform-specific defaults for gaps, button sizes, etc.
+
+[source,pascal]
+----
+type
+  TfpgMigPlatformDefaults = class
+  public
+    class function GetDefaultHorizontalGap: TfpgMigUnitValue;
+    class function GetDefaultVerticalGap: TfpgMigUnitValue;
+    class function GetRelatedGapX: TfpgMigUnitValue;
+    class function GetUnrelatedGapX: TfpgMigUnitValue;
+    class function GetButtonWidth: TfpgMigBoundSize;
+    class function GetLogicalPixelSize: Single;
+    // ... many more defaults
+  end;
+----
+
+**Testing (create as you port):**
+
+Create `unittests/tests/tcmig_platformdefaults.pas` with tests for:
+
+* Correct gap values for each platform (Windows, Linux, macOS)
+* DPI/logical pixel calculations
+* Button size defaults match platform guidelines
+* Cross-platform consistency where expected
+
+**Port Strategy:**
+
+1. Study Java platform detection and defaults
+2. Map to FPC platform conditionals ({$IFDEF WINDOWS}, etc.)
+3. Write tests for current platform first
+4. Implement and verify
+5. Document other platform values for future testing
+
+**Deliverable:** Working PlatformDefaults with platform-specific tests
+
+**Phase 1 Summary:**
+
+* ✓ Updated base class (TfpgLayoutConstraint)
+* ✓ 4 new Pascal units (enums, UnitValue, BoundSize, PlatformDefaults)
+* ✓ 3 comprehensive test suites (tcmig_unitvalue, tcmig_boundsize, tcmig_platformdefaults)
+* ✓ All Phase 1 tests passing
+* ✓ Foundation ready for constraint classes
+
+=== Phase 2: Constraint Classes (Week 3)
+
+**Goal:** Port constraint classes (LC, AC, CC, DimConstraint)
+
+==== Step 2.1: Port DimConstraint ✓ COMPLETED
+
+**File:** `DimConstraint.java` → `fpg_mig_dimconstraint.pas`
+
+Constraints for a single dimension (row or column).
+
+**Status:** Complete - All functionality ported and tested
+**Commit:** 6af963ce
+
+[source,pascal]
+----
+type
+  TfpgMigDimConstraint = class
+  private
+    FSize: TfpgMigBoundSize;
+    FGrowPriority: Integer;
+    FShrinkPriority: Integer;
+    FAlign: TfpgMigUnitValue;
+    FGapBefore: TfpgMigBoundSize;
+    FGapAfter: TfpgMigBoundSize;
+    FFill: Boolean;
+  public
+    constructor Create;
+    property Size: TfpgMigBoundSize read FSize write FSize;
+    property GrowPriority: Integer read FGrowPriority write FGrowPriority;
+    property Align: TfpgMigUnitValue read FAlign write FAlign;
+    property Fill: Boolean read FFill write FFill;
+  end;
+----
+
+==== Step 2.2: Port AC (Axis Constraints) ✓ COMPLETED
+
+**File:** `AC.java` → `fpg_mig_ac.pas`
+
+Constraints for entire axis (all rows or all columns).
+
+**Status:** Complete - Fluent API with all constraint methods implemented
+**Commit:** bb850441
+
+[source,pascal]
+----
+type
+  IfpgMigAC = interface
+    ['{GUID-HERE}']
+    function Index(AIndex: Integer): IfpgMigAC;
+    function Fill: IfpgMigAC;
+    function Grow(APriority: Integer): IfpgMigAC;
+    function Gap(const AGap: string): IfpgMigAC;
+    function GetConstraints: TArray<TfpgMigDimConstraint>;
+  end;
+
+  TfpgMigAC = class(TInterfacedObject, IfpgMigAC)
+  private
+    FConstraints: TObjectList<TfpgMigDimConstraint>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function Index(AIndex: Integer): IfpgMigAC;
+    function Fill: IfpgMigAC;
+    function Grow(APriority: Integer): IfpgMigAC;
+    function Gap(const AGap: string): IfpgMigAC;
+    function GetConstraints: TArray<TfpgMigDimConstraint>;
+  end;
+----
+
+==== Step 2.3: Port LC (Layout Constraints) ✓ COMPLETED
+
+**Status:** Complete - Container-level layout constraints with fluent API
+**Commit:** dde3d127
+
+**File:** `LC.java` → `fpg_mig_lc.pas`
+
+Container-level layout constraints.
+
+[source,pascal]
+----
+type
+  IfpgMigLC = interface
+    ['{GUID-HERE}']
+    function FlowX: IfpgMigLC;
+    function FlowY: IfpgMigLC;
+    function Wrap(ACount: Integer): IfpgMigLC;
+    function FillX: IfpgMigLC;
+    function FillY: IfpgMigLC;
+    function Insets(const AInsets: string): IfpgMigLC;
+    function HideMode(AMode: TfpgMigHideMode): IfpgMigLC;
+  end;
+
+  TfpgMigLC = class(TInterfacedObject, IfpgMigLC)
+  private
+    FFlowX: Boolean;
+    FWrapAfter: Integer;
+    FInsets: TfpgMigUnitValue;
+    FFillX, FFillY: Boolean;
+    FHideMode: TfpgMigHideMode;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function FlowX: IfpgMigLC;
+    function FlowY: IfpgMigLC;
+    function Wrap(ACount: Integer): IfpgMigLC;
+    function FillX: IfpgMigLC;
+    function FillY: IfpgMigLC;
+    function Insets(const AInsets: string): IfpgMigLC;
+    function HideMode(AMode: TfpgMigHideMode): IfpgMigLC;
+  end;
+----
+
+==== Step 2.4: Port CC (Component Constraints) ✓ COMPLETED
+
+**Status:** Complete - Widget-level constraints with 79 fluent API methods
+
+**Commit:** 8c07189c
+
+**File:** `CC.java` → `fpg_mig_cc.pas` (TfpgMigCC)
+
+Widget-level constraints. This is the most complex constraint class.
+
+[source,pascal]
+----
+type
+  IfpgMigCC = interface
+    ['{GUID-HERE}']
+    function Span(AX, AY: Integer): IfpgMigCC;
+    function SpanX(AX: Integer): IfpgMigCC;
+    function SpanY(AY: Integer): IfpgMigCC;
+    function Grow(AX, AY: Single): IfpgMigCC;
+    function GrowX(APriority: Single): IfpgMigCC;
+    function GrowY(APriority: Single): IfpgMigCC;
+    function Wrap: IfpgMigCC;
+    function NewLine: IfpgMigCC;
+    function AlignX(const AAlign: string): IfpgMigCC;
+    function AlignY(const AAlign: string): IfpgMigCC;
+    function Gap(const AGap: string): IfpgMigCC;
+    function Tag(const ATag: string): IfpgMigCC;
+    // ... many more fluent methods
+  end;
+
+  TfpgMigCC = class(TfpgLayoutConstraint, IfpgMigCC)
+  private
+    FSpanX, FSpanY: Integer;
+    FGrowX, FGrowY: Single;
+    FShrinkX, FShrinkY: Single;
+    FPushX, FPushY: Single;
+    FAlignX: TfpgMigUnitValue;
+    FAlignY: TfpgMigUnitValue;
+    FGapBefore, FGapAfter, FGapTop, FGapBottom: TfpgMigBoundSize;
+    FTag: string;
+    FExternal: Boolean;
+    FWrap: Boolean;
+    FNewline: Boolean;
+    FDockSide: Integer;
+    // ... many more properties
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function Span(AX, AY: Integer): IfpgMigCC;
+    function SpanX(AX: Integer): IfpgMigCC;
+    function SpanY(AY: Integer): IfpgMigCC;
+    function Grow(AX, AY: Single): IfpgMigCC;
+    function GrowX(APriority: Single): IfpgMigCC;
+    function GrowY(APriority: Single): IfpgMigCC;
+    function Wrap: IfpgMigCC;
+    function NewLine: IfpgMigCC;
+    function AlignX(const AAlign: string): IfpgMigCC;
+    function AlignY(const AAlign: string): IfpgMigCC;
+    function Gap(const AGap: string): IfpgMigCC;
+    function Tag(const ATag: string): IfpgMigCC;
+    // ... many more fluent methods
+  end;
+----
+
+**Note:** TfpgMigCC inherits from TfpgLayoutConstraint (which now inherits from TInterfacedObject) and implements IfpgMigCC interface for fluent API with automatic reference counting.
+
+**Testing Throughout Phase 2:**
+
+Each constraint class should have tests created alongside implementation:
+
+* `tcmig_dimconstraint.pas` - Test size, gap, grow/shrink, alignment
+* `tcmig_ac.pas` - Test fluent API, constraint arrays, index access
+* `tcmig_lc.pas` - Test flow direction, wrap, fill, insets, hide modes
+* `tcmig_cc.pas` - Test all constraint combinations, fluent API chaining
+
+**Port Strategy for Each Class:**
+
+1. Study Java source thoroughly
+2. Port interface definition
+3. Write first test (e.g., simple creation)
+4. Implement basic functionality
+5. Write test for fluent API chaining
+6. Implement fluent methods
+7. Write tests for constraint interactions
+8. Verify all tests pass before moving to next class
+
+**Deliverables:**
+
+* 4 new/extended Pascal units with interface-based fluent API
+* 4 comprehensive test suites
+* All constraint classes tested and working
+* Example code demonstrating fluent API usage
+
+=== Phase 3: Core Layout Engine (Week 4-6)
+
+**Goal:** Port Grid.java - the heart of MigLayout
+
+==== Step 3.1: Port Support Classes ✓ COMPLETED
+
+**Status:** Complete - All support classes ported and tested
+
+**Commit:** 7efc8a21
+
+**Files Created:**
+
+* `ResizeConstraint.java` → `fpg_mig_resizeconstraint.pas`
+* `LinkHandler.java` → `fpg_mig_linkhandler.pas`
+* `LayoutCallback.java` → `fpg_mig_layoutcallback.pas`
+* `InCellGapProvider.java` → `fpg_mig_gapprovider.pas`
+
+**Summary:**
+
+* Ported all 4 support classes from MigLayout v11.4.2
+* Used TfpgWidgetBase for type-safe component references
+* Used TCriticalSection (SyncObjs) for thread-safe LinkHandler
+* Added TfpgMigUnitValueArray and TfpgMigBoundSizeArray types
+* Created 6 comprehensive tests for LinkHandler
+* Created 2 tests for ResizeConstraint
+* Updated all 3 platform toolkit files (x11, gdi, cocoa)
+* All 301 unit tests passing (0 errors, 0 failures)
+
+==== Step 3.2: Port LayoutUtil ✓ COMPLETED
+
+**Status:** Complete - Core layout algorithms with 27 comprehensive tests
+
+**Commit:** 3741e018
+
+**File:** `LayoutUtil.java` → `fpg_mig_layoututil.pas`
+
+Critical utility class with core algorithms:
+
+* `calculateSerial()` - distributes space along axis
+* Size negotiation algorithms
+* Baseline calculations
+* Gap calculations
+
+This is mathematically complex - needs careful testing.
+
+==== Step 3.3: Port Grid.java Core Structure ✓ MOSTLY COMPLETE (85-90%)
+
+**Status:** Core layout features working, advanced features need implementation
+
+**Commit:** Multiple commits, current as of a42e2e44
+
+**File:** `Grid.java` → `fpg_miglayout.pas` (3,159 lines)
+
+**Summary:**
+
+Grid implementation is approximately **85-90% complete** with all core layout features working:
+
+**✅ VERIFIED WORKING (via lm-mig demo testing):**
+
+* ✓ Basic grid layout (2, 3, 4 column grids)
+* ✓ Column spanning (SpanX)
+* ✓ Row spanning (SpanY)
+* ✓ Horizontal growth (GrowX with FillX)
+* ✓ Vertical growth (GrowY with FillY)
+* ✓ Cell alignment (AlignX, AlignY)
+* ✓ Component fill behavior
+* ✓ Multi-DPI support (96dpi, 140dpi tested)
+* ✓ Grid wrapping (WrapAfter)
+* ✓ Grid structure building
+* ✓ Size calculation (LayoutInOneDim, CalculateSerial)
+* ✓ Gap handling (basic)
+* ✓ Linked dimension groups
+
+**❌ MISSING FEATURES (via TODO analysis):**
+
+* ✗ Absolute positioning (adjustSizeForAbsolute, doAbsoluteCorrections, getAbsoluteDimBounds)
+* ✗ Docking mode (getDockInsets, DOCK_DIM_CONSTRAINT)
+* ✗ Size groups (TODO line 2384, 2387)
+* ✗ Baseline alignment (fpGUI limitation - no baseline APIs)
+* ✗ Parallel/Serial layout modes (layoutParallel, layoutSerial)
+* ✗ Advanced gap push logic (TODO line 1834)
+* ✗ Flow specs (partially implemented, TODO line 1155)
+* ✗ Callback support (getCallbackSize)
+* ✗ Component linking (setLinkedBounds, resetLinkValues)
+* ✗ Sparse grid conversion (TODO line 2044)
+* ✗ DimConstraint size overrides (TODO line 2380)
+
+**Testing Results (2025-11-15):**
+
+Manual testing of `examples/gui/lm-mig/` demo confirmed:
+- All 5 demo forms render correctly
+- Spanning works perfectly (both X and Y)
+- Growth behavior works correctly (after fixing .Fill)
+- Alignment works correctly
+- No crashes or visual glitches
+- Multi-DPI rendering correct
+
+**Implementation Approach:**
+
+Direct port using `TfpgWidgetBase` - no wrapper classes needed (unlike Java which supports multiple toolkits).
+
+**Inner Classes Ported:**
+
+* ✓ TfpgMigCell - holds component wraps in grid cell
+* ✓ TfpgMigCompWrap - wraps TfpgWidgetBase with CC constraint
+* ✓ TfpgMigLinkedDimGroup - components sharing layout properties
+* ✓ TfpgMigFlowSizeSpec - flow size specifications
+* ✓ TfpgMigAboveBelow - baseline calculations (record)
+
+**Key Methods Ported:**
+
+* ✓ Constructor - builds grid structure
+* ✓ Layout() - main layout entry point
+* ✓ LayoutInOneDim() - one-dimensional layout algorithm
+* ✓ CalcGridSizes() - calculates grid sizes
+* ✓ CalculateDimensionSizes() - calculates dimension sizes
+* ✓ GetDefaultGrowWeights() - calculates grow weights
+* ✓ DivideIntoLinkedGroups() - groups linked components
+* ✓ BuildIndexes() - builds row/column indexes
+* ✓ BuildDimensionGroups() - builds dimension groups
+* ✓ GetWidth(), GetHeight() - size getters
+
+**Recommendation:**
+
+The Grid is production-ready for **common layout scenarios**:
+- Form layouts (labels + fields)
+- Button bars
+- Grid layouts with spanning
+- Resizable layouts with growth
+
+Advanced features (docking, absolute positioning, size groups) can be added incrementally as needed.
+
+==== Step 3.4: Port Component/Container Wrappers - NOT NEEDED ✓ SKIPPED
+
+**Decision:** Wrapper classes are not needed for fpGUI implementation.
+
+Unlike Java MigLayout which must support multiple toolkits (Swing, SWT, JavaFX), our fpGUI implementation only needs to support one toolkit. Therefore:
+
+* Work directly with `TfpgWidgetBase` throughout Grid implementation
+* No ComponentWrapper or ContainerWrapper abstraction needed
+* Simpler, more idiomatic fpGUI code
+* Better performance (no wrapper allocation overhead)
+
+**Testing Throughout Phase 3:**
+
+Create `tcmig_grid.pas` with incremental tests:
+
+**Step 3.2 tests (LayoutUtil):**
+
+* Test calculateSerial with simple distributions
+* Test size negotiation with min/pref/max
+* Test baseline calculations
+* Test gap calculations
+
+**Step 3.3 tests (Grid):**
+
+* Test grid cell creation and placement
+* Test single widget layout
+* Test multi-widget layout (2x2 grid)
+* Test spanning widgets (existing TestRowSpan, TestColumnSpan)
+* Test grow/shrink distribution
+* Test alignment within cells
+* Test flow mode
+* Test wrap mode
+
+**Port Strategy:**
+
+1. Port LayoutUtil piece by piece
+2. Write test for each algorithm (e.g., calculateSerial)
+3. Verify against Java behavior
+4. Port Grid incrementally
+5. Reuse existing 9 tests as regression tests
+6. Add new tests for v11 features
+7. Compare layout results with Java MigLayout examples
+
+**Deliverables:**
+
+* Complete Grid implementation with API-based constraints
+* All support classes working and tested
+* Comprehensive unit tests (30+ tests total)
+  - 9 existing tests still passing
+  - 20+ new tests for v11 features
+* Grid produces layouts matching Java MigLayout behavior
+
+=== Phase 4: Integration & Validation (Week 7)
+
+**Goal:** End-to-end validation and edge case testing
+
+NOTE: String constraint parsing is **deferred to Phase 2** (future enhancement). Phase 1 delivers fully functional MigLayout via fluent API.
+
+**Status Check:**
+
+By this phase, we already have comprehensive tests from Phases 1-3:
+
+* ✓ UnitValue tested (Phase 1)
+* ✓ BoundSize tested (Phase 1)
+* ✓ PlatformDefaults tested (Phase 1)
+* ✓ LC, AC, CC, DimConstraint tested (Phase 2)
+* ✓ LayoutUtil tested (Phase 3)
+* ✓ Grid tested (Phase 3)
+* ✓ 30+ unit tests passing
+
+==== Step 4.1: Integration Testing (2-3 days)
+
+Create `tcmig_integration.pas` for end-to-end tests:
+
+**Real-world layout scenarios:**
+
+* Form layout (labels + fields, multiple rows)
+* Button bar (horizontal flow with gaps)
+* Complex grid (spanning, alignment, growth)
+* Nested containers (container within container)
+* Dialog layout (header, content, buttons)
+
+**Test against Java examples:**
+
+* Port 3-5 Java example layouts
+* Compare widget positions pixel-by-pixel
+* Verify identical behavior
+
+==== Step 4.2: Edge Cases & Stress Testing (2-3 days)
+
+**Edge case tests:**
+
+* Empty container (no widgets)
+* All widgets hidden (HideMode variations)
+* Extreme spanning (span entire grid)
+* Minimum/maximum size conflicts
+* Widgets larger than container
+* Zero-size widgets
+* Negative gaps
+* Very large widget counts (100+ widgets)
+
+**Performance testing:**
+
+* Measure layout time for 10, 50, 100, 500 widgets
+* Target: < 16ms for 100 widgets (60 FPS)
+* Profile and optimize hot paths if needed
+
+**Cross-platform validation:**
+
+* Run all tests on Linux and Windows
+* Verify pixel calculations match
+* Check platform-specific gap values
+* Document any platform differences
+
+**Goal:** All edge cases handled gracefully, performance acceptable, cross-platform consistency verified.
+
+=== Phase 5: Examples & Documentation (Week 9)
+
+**Goal:** Create examples and documentation for API-based MigLayout
+
+==== Step 5.1: Update TfpgMigLayoutManager (2-3 days)
+
+Refactor existing `TfpgMigLayoutManager` to use new v11 Grid:
+
+[source,pascal]
+----
+type
+  TfpgMigLayoutManager = class(TfpgBaseLayoutManager)
+  private
+    FLC: IfpgMigLC;
+    FRowConstr, FColConstr: IfpgMigAC;
+    FGrid: TfpgMigGrid; // now uses v11 implementation
+  protected
+    function CreateDefaultConstraint(AWidget: TfpgWidgetBase): TfpgLayoutConstraint; override;
+    procedure DoLayout(AContainer: TfpgWidgetBase); override;
+    function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
+  public
+    constructor Create; overload; override;
+    constructor Create(ALayoutConstraints: IfpgMigLC); overload;
+    constructor Create(ALC: IfpgMigLC; AColConstr, ARowConstr: IfpgMigAC); overload;
+
+    function GetLayoutConstraints: IfpgMigLC;
+    function GetColumnConstraints: IfpgMigAC;
+    function GetRowConstraints: IfpgMigAC;
+  end;
+----
+
+==== Step 5.2: Port Java Examples to API (5-7 days)
+
+Port Java demo applications, **converting string constraints to API calls**:
+
+From `prototypes/miglayout/mig-java-latest/examples/`:
+
+* Basic form layouts
+* Flow layouts
+* Grid layouts
+* Dock layouts
+* Complex nested layouts
+
+Create Pascal equivalents in `examples/gui/lm-mig/` using fluent API:
+
+[source,pascal]
+----
+// Java original: panel.add(field, "span 2, growx");
+// Pascal API version (interface automatically freed):
+Panel.AddLayoutComponent(Field,
+  TfpgMigCC.Create.Span(2, 1).GrowX);
+
+// Or with variable for clarity:
+var
+  cc: IfpgMigCC;
+begin
+  cc := TfpgMigCC.Create.Span(2, 1).GrowX;
+  Panel.AddLayoutComponent(Field, cc);
+  // No need to free - interface reference counting handles it
+end;
+----
+
+Each example should:
+
+* Demonstrate specific MigLayout features
+* Include comments showing equivalent Java string constraint
+* Be runnable and visually verifiable
+
+==== Step 5.3: Documentation (3-4 days)
+
+Create comprehensive API documentation:
+
+1. **API Reference**:
+   * All public classes and methods
+   * Code examples for each constraint type
+   * Common patterns and recipes
+
+2. **Migration Guide**:
+   * From Align/Anchors to MigLayout
+   * Side-by-side comparisons
+   * When to use which approach
+
+3. **Tutorial**:
+   * Quick start (10 minutes)
+   * Form layouts
+   * Grid layouts
+   * Advanced features (docking, spanning, size groups)
+
+4. **String-to-API Reference** (for future):
+   * Document string constraint equivalents
+   * Example: `"span 2, growx"` = `TfpgMigCC.Create.Span(2,1).GrowX`
+   * Help users familiar with Java MigLayout
+
+**Deliverables:**
+
+* All 9 existing tests pass with v11
+* 5+ ported Java examples (using API)
+* 30+ new unit tests covering v11 features
+* Complete API documentation
+* Migration guide and tutorial
+
+=== Phase 6: Polish & Production Release (Week 10)
+
+**Goal:** Production-ready release
+
+==== Step 6.1: Code Review & Refactoring (3-4 days)
+
+* Review all ported code for Pascal idioms
+* Ensure consistent naming (fpGUI conventions)
+* Add XML documentation comments
+* Performance profiling and optimization
+
+==== Step 6.2: Example Applications (2-3 days)
+
+Create polished examples:
+
+* Form builder demo
+* Calculator layout
+* Contact manager (list/detail)
+* Preference dialog with tabs
+
+==== Step 6.3: Final Testing & Release (2-3 days)
+
+* Validate all tests pass on Linux and Windows
+* Build docview with MigLayout (test real-world integration)
+* Cross-platform testing
+* Performance benchmarks (layout speed for various widget counts)
+* Memory leak testing
+* Prepare release notes
+
+**Deliverables:**
+
+* Production-ready MigLayout v11 for fpGUI (API-based)
+* 4+ polished example applications
+* Complete documentation
+* Release notes listing all features
+
+**Timeline: ~9-10 weeks for complete Phase 1 implementation**
+
+== Future Enhancements (Phase 2)
+
+These features are deferred but can be added later without breaking Phase 1:
+
+=== String Constraint Parser (~2 weeks)
+
+**File:** `ConstraintParser.java` → `fpg_mig_constraintparser.pas`
+
+Port the string constraint parser to enable:
+
+[source,pascal]
+----
+// Instead of API:
+lm.AddLayoutComponent(field, TfpgMigCC.Create.Span(2,1).GrowX);
+
+// Allow strings:
+lm.AddLayoutComponent(field, 'span 2, growx');
+----
+
+**Benefits:**
+
+* Shorter, more concise code
+* Familiar to Java MigLayout users
+* Matches all documentation/tutorials
+
+**Complexity:** High - parser is ~1000+ lines with many edge cases
+
+**Strategy:**
+
+* Add string overloads to existing API methods
+* Parser creates same constraint objects as API
+* Fully backward compatible with Phase 1
+
+=== Layout Animations (~1 week)
+
+**File:** `AnimSpec.java` → `fpg_mig_animspec.pas`
+
+Enable smooth transitions when layout changes:
+
+[source,pascal]
+----
+lm.SetAnimationSpec(TfpgMigAnimSpec.Create(200, 0.2, 0.2)); // 200ms, ease in/out
+----
+
+**Benefits:**
+
+* Polished UI feel
+* Smooth show/hide transitions
+* Modern app aesthetic
+
+**Complexity:** Medium - requires fpGUI event loop integration
+
+=== IDE Integration (~2 weeks)
+
+**File:** `IDEUtil.java` → `fpg_mig_ideutil.pas`
+
+Support for uidesigner visual layout editing:
+
+* Convert between API and string constraints
+* Query grid structure for visual display
+* Property editor support
+
+**Benefits:**
+
+* Visual layout design in uidesigner
+* Faster UI prototyping
+
+**Complexity:** Medium - depends on uidesigner architecture
+
+=== Additional Features
+
+* Enhanced baseline alignment modes
+* Advanced size group features
+* Custom gap providers
+* Additional platform defaults
+
+== Java to Pascal Porting Guidelines
+
+=== Naming Conventions
+
+[source,java]
+----
+// Java
+public class ComponentWrapper {
+    private int minWidth;
+    public int getMinWidth() { return minWidth; }
+    public void setMinWidth(int value) { minWidth = value; }
+}
+----
+
+[source,pascal]
+----
+// Pascal
+type
+  TfpgMigComponentWrapper = class
+  private
+    FMinWidth: Integer;
+  public
+    property MinWidth: Integer read FMinWidth write FMinWidth;
+  end;
+----
+
+**Rules:**
+
+* Class names: `ClassName` → `TfpgMigClassName`
+* Private fields: `fieldName` → `FFieldName`
+* Methods: `methodName()` → `MethodName()`
+* Properties: `getProperty()/setProperty()` → `property Property`
+* Constants: `CONSTANT_NAME` → `CONSTANT_NAME` (keep same)
+
+=== Collection Translation
+
+[source,java]
+----
+// Java
+ArrayList<Cell> cells = new ArrayList<>();
+HashMap<String, Integer> map = new HashMap<>();
+----
+
+[source,pascal]
+----
+// Pascal
+uses Generics.Collections;
+
+var
+  cells: TObjectList<TfpgMigCell>;  // owns objects
+  map: TDictionary<string, Integer>;
+
+begin
+  cells := TObjectList<TfpgMigCell>.Create(True); // True = owns objects
+  map := TDictionary<string, Integer>.Create;
+  try
+    // use collections
+  finally
+    cells.Free;
+    map.Free;
+  end;
+end;
+----
+
+**Memory Management:**
+
+* Java: garbage collected
+* Pascal: manual - always Free in finally blocks
+* Use TObjectList with OwnsObjects=True where appropriate
+
+=== Null Handling
+
+[source,java]
+----
+// Java
+Float value = null;
+if (value != null) {
+    useValue(value);
+}
+----
+
+[source,pascal]
+----
+// Pascal - Option 1: Pointer
+var
+  value: PSingle;
+begin
+  value := nil;
+  if value <> nil then
+    UseValue(value^);
+end;
+
+// Pascal - Option 2: Nullable record (recommended)
+type
+  TNullableSingle = record
+    HasValue: Boolean;
+    Value: Single;
+    class function Null: TNullableSingle; static;
+    class function Of(AValue: Single): TNullableSingle; static;
+  end;
+
+var
+  value: TNullableSingle;
+begin
+  value := TNullableSingle.Null;
+  if value.HasValue then
+    UseValue(value.Value);
+end;
+----
+
+=== Exception Handling
+
+[source,java]
+----
+// Java
+try {
+    doSomething();
+} catch (IllegalArgumentException e) {
+    handleError(e.getMessage());
+}
+----
+
+[source,pascal]
+----
+// Pascal
+try
+  DoSomething;
+except
+  on E: EInvalidArgument do
+    HandleError(E.Message);
+end;
+----
+
+=== String Methods
+
+[source,java]
+----
+// Java
+String s = "hello";
+s = s.trim().toUpperCase();
+boolean contains = s.contains("ELL");
+String[] parts = s.split(",");
+----
+
+[source,pascal]
+----
+// Pascal
+uses SysUtils, StrUtils;
+
+var
+  s: string;
+  contains: Boolean;
+  parts: TStringArray;
+begin
+  s := 'hello';
+  s := UpperCase(Trim(s));
+  contains := Pos('ELL', s) > 0;
+  parts := SplitString(s, ',');
+end;
+----
+
+=== Interface vs Class
+
+Java code uses interfaces extensively. Pascal strategy:
+
+1. Keep `ILayoutManager` interface pattern for public API
+2. Use abstract classes for internal hierarchy (Grid, etc.)
+3. Use helper classes where Java uses default interface methods
+
+=== Floating Point
+
+[source,java]
+----
+// Java
+float f = 1.5f;
+double d = 1.5;
+Float obj = Float.valueOf(1.5f);
+----
+
+[source,pascal]
+----
+// Pascal
+var
+  f: Single;      // 32-bit float (like Java float)
+  d: Double;      // 64-bit float (like Java double)
+  obj: PSingle;   // pointer if nullable needed
+begin
+  f := 1.5;
+  d := 1.5;
+end;
+----
+
+== Testing Strategy
+
+=== Unit Test Coverage
+
+Each ported class should have unit tests:
+
+1. **Foundation Classes** (Phase 1):
+   * UnitValue: parsing, conversion, each unit type
+   * BoundSize: min/pref/max calculations
+   * PlatformDefaults: correct values for each platform
+
+2. **Constraint Classes** (Phase 2):
+   * LC: fluent API, property setting
+   * AC: constraint arrays, fluent API
+   * CC: all constraint combinations
+   * DimConstraint: size calculations
+
+3. **Layout Engine** (Phase 3):
+   * LayoutUtil: calculateSerial with various inputs
+   * Grid: cell placement, spanning, alignment
+   * Integration: end-to-end layout tests
+
+4. **Parser** (Phase 4):
+   * All constraint string formats
+   * Error handling
+   * Complex nested constraints
+
+=== Java Example Port Tests
+
+For each Java example ported, create:
+
+1. Visual test (runnable program)
+2. Unit test (verify widget positions)
+3. Screenshot comparison (optional)
+
+=== Regression Tests
+
+Keep all existing tests from Phase 3 implementation:
+
+* TestCreateMigLayout ✓
+* TestSingleWidgetLayout ✓
+* TestTwoWidgetsLayout ✓
+* TestTwoColumnLayout ✓
+* TestColumnWidthCalculation ✓
+* TestCellAlignment ✓
+* TestColumnSpan ✓
+* TestRowSpan ✓
+* TestGrow ✓
+
+These validate that v11 port doesn't break existing functionality.
+
+== Risk Mitigation
+
+=== Technical Risks
+
+[cols="3,2,3", options="header"]
+|===
+|Risk |Probability |Mitigation
+
+|Java idioms don't translate cleanly
+|Medium
+|Study similar Pascal ports, use proven patterns
+
+|Missing Pascal libraries for Java features
+|Low
+|Most needed collections exist in Generics.Collections
+
+|Performance issues with ported code
+|Low
+|Profile and optimize hot paths, Java code is already efficient
+
+|Complex algorithms hard to understand
+|High
+|Study Java code thoroughly first, add detailed comments
+
+|Breaking existing API
+|Low
+|Keep ILayoutManager interface stable, tests validate
+
+|Incomplete feature set
+|Low
+|Port systematically, use Java tests as checklist
+
+|Cross-platform differences
+|Medium
+|Test on Linux, Windows, macOS early and often
+|===
+
+=== Schedule Risks
+
+[cols="3,2,3", options="header"]
+|===
+|Risk |Probability |Mitigation
+
+|Underestimating complexity
+|High
+|Built-in buffer time, prioritize core features
+
+|Grid.java more complex than expected
+|Medium
+|Allocate extra time (3 weeks), tackle incrementally
+
+|Parser complexity
+|Medium
+|Can defer string parsing, use fluent API first
+
+|Testing takes longer than expected
+|Medium
+|Write tests as we go, not at end
+|===
+
+== Success Criteria
+
+The port is successful when:
+
+1. ✓ All 9 existing unit tests pass
+2. ✓ At least 5 Java examples ported and working
+3. ✓ At least 20 new unit tests for v11 features
+4. ✓ String constraint parsing working
+5. ✓ Layout behavior matches Java MigLayout
+6. ✓ Performance acceptable (< 16ms for 100 widgets)
+7. ✓ Documentation complete (API + tutorial)
+8. ✓ Cross-platform tested
+9. ✓ Example applications demonstrate real-world usage
+10. ✓ No memory leaks
+
+== Timeline Summary
+
+[cols="1,2,3", options="header"]
+|===
+|Phase |Duration |Deliverables
+
+|Phase 1: Foundation
+|2 weeks
+|UnitValue, BoundSize, PlatformDefaults, enums + tests
+
+|Phase 2: Constraints
+|1 week
+|LC, AC, CC, DimConstraint classes + tests
+
+|Phase 3: Core Engine
+|3 weeks
+|Grid, LayoutUtil, support classes + tests
+
+|Phase 4: Integration
+|1 week
+|End-to-end tests, edge cases, performance validation
+
+|Phase 5: Examples & Docs
+|1 week
+|API examples, documentation, tutorial
+
+|Phase 6: Polish
+|1 week
+|Code review, final validation, release prep
+
+|**Total**
+|**9 weeks**
+|**Production-ready MigLayout v11 for fpGUI (API-based)**
+|===
+
+**Key Changes from Original Plan:**
+
+* **Test-as-you-go:** Tests created alongside each class (not batched at end)
+* **Earlier confidence:** Bugs caught immediately, not after full port
+* **One week shorter:** Testing integrated into Phases 1-3 (not separate phase)
+* **String parser deferred:** Moved to Future Enhancements (Phase 2)
+
+**Estimated effort:** ~270-300 hours of development work
+
+**Testing Philosophy:**
+
+This approach mirrors what helped us with row spanning - write tests to verify assumptions immediately, catch bugs early, build confidence incrementally. By Phase 4, we have 30+ passing tests validating all core functionality.
+
+== Maintenance Strategy
+
+=== Tracking Java Updates
+
+MigLayout continues to evolve. Strategy for staying current:
+
+1. Subscribe to MigLayout releases (GitHub watch)
+2. Review release notes for each version
+3. Evaluate which changes apply to fpGUI
+4. Port significant improvements (6-month cycle)
+
+=== Bug Fixes
+
+When bugs found:
+
+1. Check if bug exists in Java version
+2. If yes: port the fix from Java
+3. If no: it's a Pascal-specific bug - fix and document
+
+=== Feature Requests
+
+Prioritize:
+
+1. Features that exist in Java MigLayout (port them)
+2. fpGUI-specific needs (add carefully)
+3. Maintain compatibility with Java version
+
+== References
+
+* **MigLayout Website:** http://miglayout.com
+* **Java Source:** `prototypes/miglayout/mig-java-latest/` (v11.4.2)
+* **Old Implementation:** `prototypes/miglayout/net/` (v3.0.2)
+* **Original Plan:** `docs/layout_manager_implementation_plan.adoc`
+* **fpGUI Current Code:** `src/corelib/fpg_miglayout.pas`, `unittests/tests/tcmiglayout.pas`
+
+== Conclusion
+
+Porting MigLayout v11.4.2 is the pragmatic choice. We gain:
+
+* 11 versions of refinements and bug fixes
+* Complete feature set from day one
+* HiDPI support via logic units
+* Proven correctness from battle-tested code
+* Faster time to production than TDD from scratch
+* Perfect behavioral compatibility with Java
+
+Our existing work provides:
+
+* Solid architectural foundation
+* Working test suite
+* Integration with fpGUI
+* Understanding of concepts
+
+This isn't starting over—it's upgrading the engine while keeping the chassis.
+
+**Let's build the best layout manager fpGUI has ever seen!**
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2025-10-24 +
+**Branch:** feature/miglayout-v11-port +
+**Author:** Graeme Geldenhuys

@@ -31,9 +31,20 @@ begin
             ij := j + num_button_rows*i;
             b := TfpgButton.Create(f);
             with b do begin
-              if (i=2) and (j=2)
-                then SetPosition(6000, 6000, 100, 25)
-                else SetPosition(20+i*105, 50+j*30, 100, 25);
+              if (i=2) and (j=2) then
+              begin
+                Left := 6000;
+                Top := 6000;
+                Width := 100;
+                Height := 25;
+              end
+              else
+              begin
+                Left := 20+i*105;
+                Top := 50+j*30;
+                Width := 100;
+                Height := 25;
+              end;
               name := 'button' + inttostr(ij);
               Text := 'Button ' + inttostr(ij+1);
               FontDesc := '#Label1';
@@ -65,7 +76,10 @@ begin
   embed_button.Visible:=false;
   inner_bevel := TfpgBevel.Create(self);
   with inner_bevel do begin;
-    SetPosition(90, 210, 300, 300);
+    Left := 90;
+    Top := 210;
+    Width := 300;
+    Height := 300;
     BorderStyle := bsDouble;
     Shape := bsFrame;
     UpdateWindowPosition;

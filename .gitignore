@@ -39,6 +39,9 @@ backup/
 lib/
 units/
 
+# Build output directories (pasbuild, maven-style)
+target/
+
 # Application bundle for Mac OS and other related OSX files
 *.app/
 .DS_Store
@@ -46,4 +49,13 @@ units/
 
 # We should come up with a naming convension for demo binaries to exclude existing
 # and new future ones automatically.
+
+# Ignore Java MigLayout implementation
+prototypes/miglayout/mig-java-latest/
+extras/contributed/*.*
+*.html
+*.maff
+docs/*.inf*
+*.pdf
+bugs/
 

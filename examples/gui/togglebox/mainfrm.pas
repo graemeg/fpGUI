@@ -31,7 +31,10 @@ begin
   SetHeight(200);
 
   FToggle := TfpgToggle.Create(Self);
-  FToggle.SetPosition(10, 10, 200, 20);
+  FToggle.Left := 10;
+  FToggle.Top := 10;
+  FToggle.Width := 200;
+  FToggle.Height := 20;
 //  FToggle.Width:=200;
 
   //FToggle.ToggleSide:=tsLeft;

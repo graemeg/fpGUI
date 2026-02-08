@@ -216,7 +216,10 @@ begin
     lForm.Name        := 'FormShowStrings';
     lMemo.Lines.Text  := AString;
     lMemo.FontDesc    := '#Edit2';
-    lMemo.SetPosition(0, 0, lForm.Width, lForm.Height);
+    lMemo.Left := 0;
+    lMemo.Top := 0;
+    lMemo.Width := lForm.Width;
+    lMemo.Height := lForm.Height;
     lMemo.Align       := alClient;
     lForm.ShowModal;
   finally

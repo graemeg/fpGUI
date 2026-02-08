@@ -1,0 +1,740 @@
+= fpGUI Virtual Window Architecture
+:toc: left
+:toclevels: 3
+:numbered:
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+
+== Overview
+
+This document describes fpGUI's "virtual window" or "alien window" architecture when compiled with the `AggCanvas` renderer. This design is significantly different from traditional GUI toolkits where each widget has its own operating system window handle.
+
+=== Key Concept
+
+In fpGUI's virtual window system:
+
+* The operating system sees **only one native window** per top-level form
+* All child widgets (buttons, labels, panels, etc.) are **virtual** - they have no OS window handle
+* All widgets share a **single drawing surface** (memory buffer)
+* Widgets are differentiated through **coordinate translation** and **clipping rectangles**
+* Events from the OS are **routed to the correct widget** through hit-testing
+
+This architecture provides:
+
+* **Memory efficiency** - one OS window instead of hundreds
+* **Rendering performance** - direct memory buffer painting with AGG's anti-aliased rendering
+* **Flexibility** - widgets can be positioned anywhere, even partially outside parent bounds (clipped appropriately)
+
+'''
+
+== Architecture Components
+
+=== Class Hierarchy
+
+[source]
+----
+TfpgComponent (from FCL)
+    ├── TfpgWidgetBase (abstract base for all widgets)
+    │       ├── TfpgWidget (standard widget implementation)
+    │       │       ├── TfpgButton
+    │       │       ├── TfpgLabel
+    │       │       ├── TfpgPanel
+    │       │       └── ... (all GUI widgets)
+    │       └── TfpgWindowBase (has OS window handle)
+    │               └── TfpgWindow (form/dialog implementation)
+    │
+    └── TfpgCanvasBase (abstract drawing surface)
+            ├── TAgg2D (AggCanvas - virtual window mode)
+            ├── TfpgGDICanvas (Windows GDI)
+            └── TfpgX11Canvas (X11/Xlib)
+----
+
+=== TfpgWindowBase: The Native Window
+
+`TfpgWindowBase` represents the **actual OS window**. Key responsibilities:
+
+* Holds the native window handle
+* Receives events from the operating system
+* Routes events to child widgets
+* Manages the primary canvas/drawing surface
+* Handles mouse capture and focus tracking
+
+*Important Fields:*
+
+* `FMouseCapture: TfpgWidgetBase` - widget that has captured mouse
+* `FCurrentWidget: TfpgWidgetBase` - widget currently under mouse cursor
+* `PrimaryWidget: TfpgWidgetBase` - the top-level widget (usually a form)
+
+=== TfpgWidgetBase: Widget Properties
+
+Every widget (virtual or windowed) inherits from `TfpgWidgetBase`:
+
+* `FParent: TfpgWidgetBase` - parent widget in the hierarchy
+* `FCanvas: TfpgCanvasBase` - widget's canvas (may be virtual)
+* `FWindow: TfpgWindowBase` - reference to the native window
+* `FHasOwnWindow: Boolean` - does this widget have its own OS window?
+* `FTop, FLeft, FWidth, FHeight` - position and size
+
+=== TfpgCanvasBase: Drawing Surface
+
+The canvas represents a drawing surface. In virtual window mode:
+
+* Each widget has a canvas instance
+* Child widget canvases are **not separate surfaces** - they're views into the parent's buffer
+* The canvas uses `FDeltaX` and `FDeltaY` to translate coordinates
+* `FCanvasTarget` points to the actual surface (usually the top-level window's canvas)
+
+'''
+
+== Widget Lifecycle
+
+=== 1. Widget Creation
+
+[source,pascal]
+----
+constructor TfpgButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);  // Sets Parent := AOwner if owner is a widget
+
+  // Widget properties initialized
+  FCanvas := CreateCanvas;   // Each widget gets a canvas instance
+
+  // By default, widgets are virtual (HasOwnWindow = False)
+end;
+----
+
+At creation:
+
+* Widget is added to parent's `Components` list
+* Widget creates its own `TfpgCanvas` instance
+* No OS window is allocated yet
+
+=== 2. Window Allocation (HandleShow)
+
+When a form is shown:
+
+[source,pascal]
+----
+TfpgWidget.HandleShow
+  -> TfpgWidget.InternalHandleShow
+     -> AllocateWindowHandle
+        -> DoAllocateWindowHandle
+           if HasOwnWindow then
+              FWindow := TfpgNativeWindow.Create(Self)
+              Window.AllocateWindowHandle  // Create OS window
+           else
+              FWindow := nil  // Use parent's window
+----
+
+For **virtual widgets** (default):
+
+* `HasOwnWindow = False`
+* `FWindow` is `nil` - widget queries parent for window reference
+* No OS resources allocated
+
+For **windowed widgets** (rare):
+
+* `HasOwnWindow = True`
+* Widget gets its own `TfpgNativeWindow`
+* OS window handle is created
+
+=== 3. Widget Destruction
+
+[source,pascal]
+----
+destructor TfpgWidget.Destroy;
+begin
+  FCanvas.Free;              // Free canvas instance
+  HandleHide;                // Release OS window if HasOwnWindow
+  if Assigned(Window) then
+    Window.NotifyWidgetDestroying(Self);
+  inherited Destroy;
+end;
+----
+
+'''
+
+== Canvas Lifecycle and Painting
+
+=== Canvas Instance vs Surface
+
+**Critical distinction:**
+
+* Every widget has its own `TfpgCanvas` **instance** (object)
+* Virtual widgets do **not** have their own drawing **surface** (memory buffer)
+* The canvas instance is just a "view" or "proxy" into the parent's surface
+
+=== BeginDraw: Canvas Attachment
+
+Before a widget paints, it calls `Canvas.BeginDraw`:
+
+[source,pascal]
+----
+procedure TAgg2D.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
+var
+  R: TfpgRect;
+begin
+  if CanvasTarget <> Self then
+  begin
+    // Attach this canvas to a region of the parent canvas
+    R := GetWidgetWindowRect;  // Get visible region (parent-intersected)
+    AttachPartialImage(TAgg2D(CanvasTarget).FImg, R);
+  end;
+end;
+----
+
+*What happens:*
+
+1. `GetWidgetWindowRect` calculates the widget's position in window coordinates
+2. This rectangle is **intersected with parent bounds** - this is the clipping!
+3. `AttachPartialImage` sets up the canvas to draw to that specific memory region
+4. The canvas can now only access that constrained region of the image buffer
+
+[source,pascal]
+----
+function TfpgCanvasBase.GetWidgetWindowRect: TfpgRect;
+var
+  ParentsRect: TfpgRect;
+begin
+  // Get widget's rectangle in window coordinates
+  Result.SetRect(FDeltaX, FDeltaY, FWidget.Width, FWidget.Height);
+
+  // Intersect with parent's valid region
+  if not FWidget.HasOwnWindow and (FWidget.Parent <> nil) then
+  begin
+    ParentsRect := FWidget.Parent.Canvas.GetWidgetWindowRect;
+    Result.IntersectRect(Result, ParentsRect);  // CLIPPING HAPPENS HERE
+  end;
+end;
+----
+
+=== AttachPartialImage: Memory Region Attachment
+
+[source,pascal]
+----
+function TAgg2D.AttachPartialImage(bitmap: TfpgImage; ARect: TfpgRect): boolean;
+var
+  stride: integer;
+  OffsetIntoImage: integer;
+begin
+  stride := Integer(bitmap.ScanLine[1] - bitmap.ScanLine[0]);
+
+  // Calculate byte offset into parent's image buffer
+  OffsetIntoImage := ARect.Left * 4 + ARect.Top * stride;
+
+  // Attach to this specific region with constrained width/height
+  Result := Attach(bitmap, ARect.Width, ARect.Height, stride, OffsetIntoImage);
+end;
+----
+
+*Result:* The child widget's canvas is now a **view** into a rectangular region of the parent's pixel buffer. Any drawing operations are automatically clipped because the canvas literally cannot access memory outside this region.
+
+=== Painting Sequence
+
+[source,pascal]
+----
+TfpgWidget.MsgPaint (paint message received)
+  -> Canvas.BeginDraw            // Attach to memory region
+     -> TAgg2D.DoBeginDraw
+        -> AttachPartialImage    // Set up constrained view
+
+  -> HandlePaint                 // Widget draws itself
+     -> Canvas.ClearClipRect     // Reset to widget bounds
+     -> Canvas.Clear(BackgroundColor)
+     -> Canvas.DrawText, DrawLine, etc.
+
+  -> Paint children recursively
+     -> For each child widget:
+        -> Send FPGM_PAINT message
+        -> Child calls BeginDraw (attaches to its region)
+        -> Child paints
+
+  -> Canvas.EndDraw
+     -> If top-level widget, copy buffer to OS window
+     -> TAgg2D.DoPutBufferToScreen
+----
+
+'''
+
+== Event Routing
+
+=== How Events Reach Virtual Widgets
+
+The operating system only knows about the single native window. When the user clicks at position (100, 200):
+
+1. **OS generates mouse event** → delivered to `TfpgWindowBase`
+
+2. **Window receives event** → `TfpgWindowBase.DispatchMouseEvent(100, 200, msg)`
+
+3. **Hit-testing finds target widget:**
+
+[source,pascal]
+----
+procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
+var
+  w: TfpgWidgetBase;
+begin
+  w := FindWidgetForMouseEvent(PrimaryWidget, AX, AY);
+  CurrentWidget := w;  // Generates enter/exit events if changed
+
+  // Handle mouse capture
+  if Assigned(MouseCapture) then
+    w := MouseCapture;
+
+  // Translate coordinates to widget-local
+  w.WindowToWidget(msg.Params.mouse.x, msg.Params.mouse.y);
+
+  // Dispatch to widget
+  msg.Dest := w;
+  w.Dispatch(msg);  // Calls widget's MsgMouseDown, etc.
+end;
+----
+
+4. **FindWidgetForMouseEvent** recursively searches the widget tree:
+
+[source,pascal]
+----
+function TfpgWindowBase.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase;
+    AX, AY: TfpgCoord): TfpgWidgetBase;
+var
+  i: Integer;
+  w: TfpgWidget;
+begin
+  Result := AWidget;  // Default to parent
+
+  // Iterate children in reverse order (top-most first)
+  for i := AWidget.ComponentCount-1 downto 0 do
+  begin
+    w := TfpgWidget(AWidget.Components[i]);
+    if w.InheritsFrom(TfpgWidget) and not w.HasOwnWindow and w.Visible then
+    begin
+      // Check if point is inside widget's bounds (in window coordinates)
+      if w.WidgetBoundsInWindow.PointInRect(Point(AX, AY)) then
+      begin
+        // Recursively check this widget's children
+        Result := FindWidgetForMouseEvent(w, AX, AY);
+        break;
+      end;
+    end;
+  end;
+end;
+----
+
+5. **Coordinates are translated** from window coordinates to widget-local coordinates
+
+6. **Widget receives event** → `TfpgButton.MsgMouseDown(...)` is called
+
+7. **Widget handles event** → `HandleLMouseDown(...)` → `OnClick` event fires
+
+=== Event Types and Routing
+
+==== Mouse Events
+
+* `FPGM_MOUSEDOWN` / `FPGM_MOUSEUP` / `FPGM_MOUSEMOVE`
+* Window uses hit-testing to find target widget
+* Coordinates translated to widget-local
+* Dispatched to widget's message handler
+
+==== Keyboard Events
+
+* `FPGM_KEYPRESS` / `FPGM_KEYRELEASE` / `FPGM_KEYCHAR`
+* Window routes to **focused widget**
+* No hit-testing needed - focus is tracked
+* If not consumed, bubbles up parent chain
+
+[source,pascal]
+----
+function TfpgWindowBase.FindWidgetForKeyEvent: TfpgWidgetBase;
+var
+  w: TfpgWidget;
+begin
+  w := PrimaryWidget;
+  while Assigned(w) do
+  begin
+    Result := w;
+    w := w.ActiveWidget;  // Follow focus chain
+  end;
+end;
+----
+
+==== Paint Events
+
+* Generated by calling `Invalidate` / `InvalidateRect`
+* Widget posts `FPGM_PAINT` to itself
+* Paint propagates to children automatically during `MsgPaint`
+
+==== Mouse Enter/Exit
+
+* Tracked by comparing `FCurrentWidget` before and after event
+* Automatically generated when mouse moves between widgets
+
+'''
+
+== Clipping Mechanism
+
+=== Why Clipping Matters
+
+In a virtual window system where all widgets share one surface, clipping prevents:
+
+* Widgets drawing outside their bounds
+* Child widgets drawing outside parent's visible area
+* Partially-visible widgets drawing hidden portions
+
+=== Multi-Level Clipping
+
+Clipping happens at **two levels**:
+
+==== 1. Canvas Attachment (Primary Clipping)
+
+When `BeginDraw` is called, `AttachPartialImage` constrains the canvas to a memory region:
+
+* Widget's canvas is attached to a rectangle **already intersected with parent bounds**
+* The canvas physically cannot access pixels outside this region
+* This is **enforced by memory addressing** - most robust form of clipping
+
+==== 2. ClipRect API (Secondary Clipping)
+
+Widgets can further constrain drawing using `Canvas.SetClipRect`:
+
+[source,pascal]
+----
+procedure TfpgButton.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  inherited HandlePaint;
+
+  // ... draw button background ...
+
+  // Clip to text area
+  r.SetRect(5, 5, Width-10, Height-10);
+  Canvas.SetClipRect(r);
+  Canvas.DrawText(r, FText, [txtLeft, txtVCenter]);
+
+  Canvas.ClearClipRect;  // Reset to widget bounds
+end;
+----
+
+*Important:* `SetClipRect` coordinates are **widget-relative**, not window-relative. The canvas translates them using `FDeltaX` and `FDeltaY`.
+
+=== How GetWidgetWindowRect Works
+
+This is the **key function** for clipping in virtual window mode:
+
+[source,pascal]
+----
+function TfpgCanvasBase.GetWidgetWindowRect: TfpgRect;
+var
+  ParentsRect: TfpgRect;
+  ParentsRectSet: Boolean = False;
+begin
+  ParentsRect.Clear;
+
+  // Get parent's valid drawing rectangle
+  if not FWidget.HasOwnWindow and (FWidget.Parent <> nil) then
+  begin
+    ParentsRect := FWidget.Parent.Canvas.GetWidgetWindowRect;  // RECURSIVE!
+    ParentsRectSet := True;
+  end;
+
+  // Widget's rectangle in window coordinates
+  Result.SetRect(FDeltaX, FDeltaY, FWidget.Width, FWidget.Height);
+
+  // Intersect with parent's allowed region
+  if ParentsRectSet then
+    Result.IntersectRect(Result, ParentsRect);
+end;
+----
+
+This recursively walks up the parent chain, calculating the **intersection** of all parent bounds. The result is the widget's **actual visible region** in window coordinates.
+
+=== Clipping Coordinates Example
+
+Consider this widget hierarchy:
+
+----
+Window (0, 0, 400, 300)
+  └─ Panel (10, 10, 200, 150)
+      └─ Button (150, 100, 100, 30)  // Partially outside panel
+----
+
+*Button's GetWidgetWindowRect calculation:*
+
+1. Button's position in window coords: `(10+150, 10+100) = (160, 110)`, size `(100, 30)`
+   → Rectangle: `(160, 110, 100, 30)` → Right edge at 260
+
+2. Parent panel's window rect: `(10, 10, 200, 150)` → Right edge at 210
+
+3. Intersection: `(160, 110, 50, 30)` ← **Button is clipped!**
+
+When `AttachPartialImage` is called, the button's canvas can only draw to a 50-pixel wide region, even though the button is 100 pixels wide. The right 50 pixels are physically inaccessible.
+
+'''
+
+== Window Resize Behavior
+
+=== Resize Sequence
+
+When the user resizes a native window:
+
+1. **OS sends resize event** → `TfpgWindowBase.MsgResize(newWidth, newHeight)`
+
+2. **Message dispatched to primary widget:**
+
+[source,pascal]
+----
+procedure TfpgWindowBase.MsgResize(var msg: TfpgMessageRec);
+var
+  NewSize: TfpgSize;
+begin
+  NewSize := fpgSize(msg.Params.rect.Width, msg.Params.rect.Height);
+  if NewSize <> FNotifiedSize then
+  begin
+    FNotifiedSize := NewSize;
+    DefaultHandler(msg);  // Dispatch to PrimaryWidget
+  end;
+end;
+----
+
+3. **Widget handles resize:**
+
+[source,pascal]
+----
+procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
+begin
+  HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
+
+  // Calculate size delta
+  dw := FWidth - FPrevWidth;
+  dh := FHeight - FPrevHeight;
+
+  // Realign children
+  HandleAlignments(dw, dh);
+
+  DoResize;  // Fire OnResize event
+end;
+----
+
+4. **Canvas buffer is reallocated** (if needed)
+
+For `TAgg2D`, the image buffer is resized when the window changes size. The buffer allocation happens in `DoAllocateBuffer`.
+
+5. **Children are repositioned** based on `Align` and `Anchors` properties
+
+6. **Full repaint triggered** → All widgets are invalidated
+
+=== Alignment System
+
+Widgets can automatically resize/reposition when parent changes size:
+
+*Align property:*
+
+* `alNone` - no automatic positioning
+* `alTop` - docked to top edge, width = parent width
+* `alBottom` - docked to bottom
+* `alLeft` - docked to left edge, height = parent height
+* `alRight` - docked to right
+* `alClient` - fills remaining space
+
+*Anchors property:*
+
+* Controls which edges stay fixed distance from parent edges
+* Default: `[anLeft, anTop]` - top-left corner stays fixed
+* `[anLeft, anRight, anTop]` - widget stretches horizontally
+* `[anLeft, anRight, anTop, anBottom]` - widget stretches both directions
+
+=== Canvas Coordinate Updates
+
+When a widget moves or resizes:
+
+* `FDeltaX` and `FDeltaY` are updated (position in window coordinates)
+* `GetWidgetWindowRect` now returns new bounds
+* Next `BeginDraw` will attach to new memory region
+
+No special cleanup is needed - the canvas attachment is re-calculated on every paint.
+
+'''
+
+== Memory Management
+
+=== Canvas Instances
+
+* Each widget has its own `TfpgCanvas` **instance**
+* Widget owns the canvas: created in constructor, freed in destructor
+* Canvas does **not** own the image buffer (shared with parent)
+
+=== Image Buffer
+
+* Only **top-level windowed widgets** allocate image buffers
+* Buffer is created in `TAgg2D.DoAllocateBuffer`
+* Size = window client area size
+* Format = 32-bit RGBA (4 bytes per pixel)
+
+[source,pascal]
+----
+procedure TAgg2D.DoAllocateBuffer;
+begin
+  if Assigned(FImg) then
+    FImg.Free;
+
+  FImg := TfpgImage.Create;
+  FImg.AllocateImage(32, FWidget.Width, FWidget.Height);
+  Attach(FImg);
+end;
+----
+
+* Child widgets' canvases use **pointer arithmetic** to access subregions
+* No memory duplication - all pointing to same buffer
+
+=== Reference Counting
+
+Font resources use reference counting:
+
+* Fonts are managed by `TfpgFontManager`
+* `GetFont()` increments reference count
+* Setting font to `nil` decrements reference count
+* Font is freed when count reaches zero
+
+'''
+
+== Performance Considerations
+
+=== Advantages of Virtual Windows
+
+1. **Low memory footprint** - one OS window instead of hundreds
+2. **Fast rendering** - direct memory buffer access, no OS calls per widget
+3. **High-quality graphics** - AGG provides anti-aliasing, alpha blending
+4. **Reduced OS overhead** - fewer window handles to manage
+
+=== Potential Bottlenecks
+
+1. **Full-window repaints** - resizing can trigger repainting all widgets
+   * Mitigated by: dirty rectangle tracking (`FInvalidRect`)
+
+2. **Hit-testing overhead** - every mouse move requires tree traversal
+   * Mitigated by: reverse iteration (top-most first), early exit
+
+3. **Memory allocation** - large windows = large buffers
+   * 1920x1080 window = ~8MB buffer (1920 * 1080 * 4 bytes)
+
+'''
+
+== Comparison with Windowed Mode
+
+[cols="1,2,2"]
+|===
+|Aspect |Virtual Windows (AggCanvas) |Windowed Mode (GDI/X11)
+
+|OS windows
+|One per top-level form
+|One per widget (if needed)
+
+|Event routing
+|Manual hit-testing
+|OS handles routing
+
+|Clipping
+|Memory region + AGG ClipBox
+|OS clip regions
+
+|Rendering
+|Direct memory buffer
+|OS drawing calls
+
+|Memory usage
+|Lower (shared buffer)
+|Higher (multiple windows)
+
+|Graphics quality
+|High (AGG anti-aliasing)
+|OS-dependent
+
+|Transparency/Alpha
+|Full support
+|Limited OS support
+|===
+
+'''
+
+== Debugging Tips
+
+=== Visualizing Clip Regions
+
+To debug clipping issues, temporarily draw clip rectangles:
+
+[source,pascal]
+----
+procedure TfpgButton.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  inherited HandlePaint;
+
+  // DEBUG: Show widget bounds
+  r := GetWidgetWindowRect;
+  Canvas.SetColor(clRed);
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.DrawRectangle(r);
+end;
+----
+
+=== Tracking Event Routing
+
+Add debug output to `FindWidgetForMouseEvent`:
+
+[source,pascal]
+----
+function TfpgWindowBase.FindWidgetForMouseEvent(...): TfpgWidgetBase;
+begin
+  WriteLn('Hit-testing at ', AX, ':', AY);
+  // ... existing code ...
+  WriteLn('  -> Found: ', Result.ClassName);
+end;
+----
+
+=== Canvas Attachment Verification
+
+Check if canvas is attached correctly:
+
+[source,pascal]
+----
+procedure TAgg2D.DoBeginDraw(...);
+begin
+  WriteLn('Attaching ', FWidget.ClassName, ' to region: ', R.ToString);
+  // ... existing code ...
+end;
+----
+
+'''
+
+== Conclusion
+
+fpGUI's virtual window architecture demonstrates that a full-featured GUI toolkit doesn't require one OS window per widget. By using:
+
+* Memory region-based canvas attachment
+* Coordinate translation via `FDeltaX`/`FDeltaY`
+* Recursive parent-intersected clipping
+* Manual event hit-testing
+
+The framework achieves a lightweight, high-performance rendering system with advanced graphics capabilities, while maintaining a clean widget hierarchy and familiar event model.
+
+Understanding this architecture is essential for:
+
+* Debugging painting issues
+* Implementing custom widgets
+* Optimizing rendering performance
+* Working with the clipping system
+* Understanding memory management
+
+'''
+
+[appendix]
+== Key Source Files
+
+* `src/corelib/fpg_base.pas` - `TfpgWidgetBase`, `TfpgWindowBase`, `TfpgCanvasBase`
+* `src/corelib/fpg_widget.pas` - `TfpgWidget`, `MsgPaint`, event handling
+* `src/corelib/render/software/Agg2D.pas` - `TAgg2D` canvas, `AttachPartialImage`
+* `src/corelib/gdi/fpg_gdi.pas` - Windows GDI canvas (for comparison)
+* `src/corelib/x11/fpg_x11.pas` - X11 canvas (for comparison)

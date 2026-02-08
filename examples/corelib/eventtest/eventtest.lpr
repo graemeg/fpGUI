@@ -111,7 +111,7 @@ begin
   Canvas.BeginDraw;
   h := Canvas.Font.Height;
   Canvas.SetColor(clWhite);
-  Canvas.FillRectangle(0, 0, Width, Height);
+  Canvas.FillRectangle(0, 0, ActualWidth, ActualHeight);
   Canvas.SetTextColor(clBlack);
   Canvas.DrawString(0, 0, 'Event test');
   Canvas.DrawString(0, h, 'Do something interactive (move mouse, press keys...)');

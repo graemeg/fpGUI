@@ -1,2 +1,0 @@
-/usr/local/bin/ppcppc -Fu"../;../ctrl;../platform/mac;../util;upi" -Fi../ -FU_debug -k"-framework Carbon -framework QuickTime" -Mdelphi -Tdarwin -WC -Sg -Se3 -XX -Xs -B -v0i find_compilers_mac.dpr
-

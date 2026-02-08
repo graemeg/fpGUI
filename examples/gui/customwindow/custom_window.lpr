@@ -122,7 +122,7 @@ begin
     Canvas.Clear(cGrayPanel);
 
     Canvas.Color := cBorder;
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 
     Canvas.TextColor := cBorder;
     // Output some sample text
@@ -144,27 +144,27 @@ procedure TMainForm.PaintTitle(Sender: TObject);
 var
   r: TfpgRect;
 begin
-  r.SetRect(0, 1, Width, 46);
+  r.SetRect(0, 1, bvlTitle.ActualWidth, 46);
   with bvlTitle do
   begin
     Canvas.GradientFill(r, cGradientTop, cGradientBottom, gdVertical);
 
     Canvas.Color := TfpgColor($FFc9c9c9);
-    Canvas.DrawLine(0, Height-2, Width, Height-2);
+    Canvas.DrawLine(0, ActualHeight-2, ActualWidth, ActualHeight-2);
 
     Canvas.Color := cBorder;
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 
     Canvas.TextColor := cBorder;
     Canvas.SetFont(fntHead1);
-    Canvas.DrawText(30, 8, Width-60, 20, WindowTitle, [txtHCenter, txtTop]);
+    Canvas.DrawText(30, 8, ActualWidth-60, 20, WindowTitle, [txtHCenter, txtTop]);
   end;
 end;
 
 procedure TMainForm.FormPaint(Sender: TObject);
 begin
   Canvas.Color := cBorder;
-  Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);

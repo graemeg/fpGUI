@@ -1,2 +1,0 @@
-fpc -Fu"../;../ctrl;../platform/linux;../util" -Fi../ -FU_debug -Mdelphi -Tlinux -Sg -Se3 -XX -Xs -B -v0i find_compilers_linux.dpr
-

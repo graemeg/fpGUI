@@ -230,7 +230,10 @@ begin
   FLiveViewFrame := TLiveViewFrame.Create(self);
   grdMessages.Height := grdMessages.Height - FLiveViewFrame.Height;
   grdMessages.UpdatePosition;
-  FLiveViewFrame.SetPosition(grdMessages.Left, grdMessages.Bottom+1, grdMessages.Width, FLiveViewFrame.Height);
+  FLiveViewFrame.Left := grdMessages.Left;
+  FLiveViewFrame.Top := grdMessages.Bottom+1;
+  FLiveViewFrame.Width := grdMessages.Width;
+  FLiveViewFrame.Height := FLiveViewFrame.Height;
 end;
 
 procedure TMainForm.DestroyLiveViewFrame;

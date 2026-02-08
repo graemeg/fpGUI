@@ -536,9 +536,9 @@ begin
   Canvas.Clear(clWindowBackground);
   // Gutter right border
   Canvas.SetColor(clHilite2);
-  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+  Canvas.DrawLine(ActualWidth - 2, 0, ActualWidth - 2, ActualHeight - 1);
   Canvas.SetColor(clShadow1);
-  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
   DrawLineNums;
 end;
 
@@ -1031,7 +1031,10 @@ begin
   if Assigned(FGutterPan) and FGutterPan.Visible then
   begin
     FGutterPan.UpdateSize;
-    FGutterPan.SetPosition(r.Left, r.Top, FGutterPan.Width, r.Height);
+    FGutterPan.Left := r.Left;
+    FGutterPan.Top := r.Top;
+    FGutterPan.Width := FGutterPan.Width;
+    FGutterPan.Height := r.Height;
   end;
 end;
 
@@ -1549,10 +1552,10 @@ begin
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
     Canvas.SetColor(clButtonFace);
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
-                         FVScrollBar.Top+FVScrollBar.Height,
-                         FVScrollBar.Width,
-                         FHScrollBar.Height);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
+                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+                         FVScrollBar.ActualWidth,
+                         FHScrollBar.ActualHeight);
   end;
 end;
 
@@ -2251,7 +2254,7 @@ begin
       with Canvas do
       begin
         Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
-        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Height);
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.ActualWidth, GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.ActualWidth, GetClientRect.Height);
       end;
   end;
 

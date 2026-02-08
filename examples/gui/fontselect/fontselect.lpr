@@ -43,11 +43,11 @@ end;
 
 procedure TMainForm.btnSelectFontClick(Sender: TObject);
 var
-  fontdesc: string;
+  s: string;
 begin
-  fontdesc := edFontDesc.Text;
-  if SelectFontDialog(fontdesc) then
-    edFontDesc.Text := fontdesc;
+  s := edFontDesc.Text;
+  if SelectFontDialog(s) then
+    edFontDesc.Text := s;
 end;
 
 procedure TMainForm.CreateFontList;
