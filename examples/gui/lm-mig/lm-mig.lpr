@@ -18,10 +18,14 @@ uses
   frm_growth,
   frm_complex,
   frm_parser,
-  frm_buttonorder;
+  frm_buttonorder,
+  frm_docking;
 
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
   private
     lblTitle: TfpgLabel;
@@ -32,6 +36,7 @@ type
     btnComplex: TfpgButton;
     btnParser: TfpgButton;
     btnButtonOrder: TfpgButton;
+    btnDocking: TfpgButton;
     btnQuit: TfpgButton;
     chkDebug: TfpgCheckBox;
     procedure btnBasicClicked(Sender: TObject);
@@ -41,6 +46,7 @@ type
     procedure btnComplexClicked(Sender: TObject);
     procedure btnParserClicked(Sender: TObject);
     procedure btnButtonOrderClicked(Sender: TObject);
+    procedure btnDockingClicked(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
@@ -138,6 +144,18 @@ var
   frm: TButtonOrderForm;
 begin
   frm := TButtonOrderForm.Create(chkDebug.Checked);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
+end;
+
+procedure TMainForm.btnDockingClicked(Sender: TObject);
+var
+  frm: TDockingForm;
+begin
+  frm := TDockingForm.Create(chkDebug.Checked);
   try
     frm.ShowModal;
   finally
@@ -260,6 +278,19 @@ begin
     Text := 'Platform Button Ordering';
     FontDesc := '#Label1';
     OnClick := @btnButtonOrderClicked;
+  end;
+
+  btnDocking := TfpgButton.Create(self);
+  with btnDocking do
+  begin
+    Name := 'btnDocking';
+    Left := 20;
+    Top := 335;
+    Width := 240;
+    Height := 35;
+    Text := 'Docking Components';
+    FontDesc := '#Label1';
+    OnClick := @btnDockingClicked;
   end;
 
   chkDebug := TfpgCheckBox.Create(Self);
