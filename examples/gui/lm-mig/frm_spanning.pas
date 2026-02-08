@@ -44,7 +44,7 @@ begin
   mig := TfpgMigLayoutManager.Create;
   mig.LC.SetWrapAfter(3);  // 3 columns
   if FDebug then
-    mig.LC.Debug(500);
+    mig.LC.Debug;
   LayoutManager := mig;
 
   // Title

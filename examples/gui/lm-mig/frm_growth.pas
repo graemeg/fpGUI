@@ -49,7 +49,7 @@ begin
   mig.LC.WrapAfter(2);  // 2 columns
   mig.LC.Fill;             // Fill both horizontal and vertical space
   if FDebug then
-    mig.LC.Debug(500);
+    mig.LC.Debug;
   LayoutManager := mig;
 
   // Title

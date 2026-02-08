@@ -3961,8 +3961,8 @@ begin
     bounds[2] := Max(2, AContainer.ActualWidth - insLeft - insRight);    // available width
     bounds[3] := Max(2, AContainer.ActualHeight - insTop - insBottom);   // available height
 
-    // 6. Perform layout with debug flag based on LC.DebugMillis
-    isDebug := FLC.GetDebugMillis > 0;
+    // 6. Perform layout with debug flag
+    isDebug := FLC.GetDebug;
     FGrid.Layout(bounds, nil, nil, isDebug);
 
     // Grid is kept alive for PaintDebug to use
@@ -4063,8 +4063,8 @@ end;
 
 procedure TfpgMigLayoutManager.PaintDebug(AWidget: TfpgWidgetBase; ACanvas: TfpgCanvasBase);
 begin
-  // Check if debug is enabled via LC.DebugMillis constraint (data-driven)
-  if (FLC = nil) or (FLC.GetDebugMillis <= 0) then
+  // Check if debug is enabled via LC
+  if (FLC = nil) or (not FLC.GetDebug) then
     Exit;
 
   // Delegate to Grid's PaintDebug if grid exists

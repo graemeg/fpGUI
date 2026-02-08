@@ -53,7 +53,7 @@ type
     FPackH: TfpgMigBoundSize;
     FPwAlign: Single;  // Pack width alignment 0.0-1.0
     FPhAlign: Single;  // Pack height alignment 0.0-1.0
-    FDebugMillis: Integer;
+    FDebug: Boolean;
     FHideMode: Integer;
     FNoCache: Boolean;
     FFlowX: Boolean;
@@ -106,8 +106,8 @@ type
     function GetPackHeightAlign: Single;
     procedure SetPackHeightAlign(AAlign: Single);
 
-    function GetDebugMillis: Integer;
-    procedure SetDebugMillis(AMillis: Integer);
+    function GetDebug: Boolean;
+    procedure SetDebug(AValue: Boolean);
 
     function GetHideMode: Integer;
     procedure SetHideMode(AMode: Integer);
@@ -186,8 +186,7 @@ type
     function NoVisualPadding: TfpgMigLC;
 
     { Fluent API - Debug and hide mode }
-    function Debug: TfpgMigLC; overload;
-    function Debug(ARepaintMillis: Integer): TfpgMigLC; overload;
+    function Debug: TfpgMigLC;
     function HideMode(AMode: Integer): TfpgMigLC; overload;
     function HideMode(AMode: TfpgMigHideMode): TfpgMigLC; overload;
   end;
@@ -220,7 +219,7 @@ begin
   FPackH := BoundSizeNullSize;
   FPwAlign := 0.5;
   FPhAlign := 1.0;
-  FDebugMillis := 0;
+  FDebug := False;
   FHideMode := 0;
   FNoCache := False;
   FFlowX := True;
@@ -431,14 +430,14 @@ begin
   FPhAlign := Max(0.0, Min(1.0, AAlign));
 end;
 
-function TfpgMigLC.GetDebugMillis: Integer;
+function TfpgMigLC.GetDebug: Boolean;
 begin
-  Result := FDebugMillis;
+  Result := FDebug;
 end;
 
-procedure TfpgMigLC.SetDebugMillis(AMillis: Integer);
+procedure TfpgMigLC.SetDebug(AValue: Boolean);
 begin
-  FDebugMillis := AMillis;
+  FDebug := AValue;
 end;
 
 function TfpgMigLC.GetHideMode: Integer;
@@ -790,13 +789,7 @@ end;
 
 function TfpgMigLC.Debug: TfpgMigLC;
 begin
-  SetDebugMillis(300);
-  Result := Self;
-end;
-
-function TfpgMigLC.Debug(ARepaintMillis: Integer): TfpgMigLC;
-begin
-  SetDebugMillis(ARepaintMillis);
+  SetDebug(True);
   Result := Self;
 end;
 

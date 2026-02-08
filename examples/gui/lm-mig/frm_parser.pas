@@ -104,7 +104,7 @@ begin
   mig.LC.Fill;             // Fill both horizontally and vertically
   mig.LC.InsetsAll('10lpx'); // Using string insets - 10 logical pixels all sides
   if FDebug then
-    mig.LC.Debug(500);       // Enable debug visualization
+    mig.LC.Debug;       // Enable debug visualization
   LayoutManager := mig;
 
   // Title - spanning 2 columns

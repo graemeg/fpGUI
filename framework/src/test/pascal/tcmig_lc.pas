@@ -77,7 +77,6 @@ type
 
     { Debug and hide mode }
     procedure TestDebug_Default;
-    procedure TestDebug_Custom;
     procedure TestHideMode_Integer;
     procedure TestHideMode_Enum;
 
@@ -117,7 +116,7 @@ begin
     AssertTrue('Default top-to-bottom should be true', lc.IsTopToBottom);
     AssertFalse('Default noGrid should be false', lc.IsNoGrid);
     AssertTrue('Default visual padding should be true', lc.IsVisualPadding);
-    AssertEquals('Default debug millis should be 0', 0, lc.GetDebugMillis);
+    AssertFalse('Default debug should be false', lc.GetDebug);
     AssertEquals('Default hide mode should be 0', 0, lc.GetHideMode);
     AssertEquals('Default pack width align should be 0.5', 0.5, lc.GetPackWidthAlign, 0.01);
     AssertEquals('Default pack height align should be 1.0', 1.0, lc.GetPackHeightAlign, 0.01);
@@ -642,20 +641,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.Debug;
-    AssertEquals('Debug should set millis to 300', 300, lc.GetDebugMillis);
-  finally
-    lc.Free;
-  end;
-end;
-
-procedure TTestMigLC.TestDebug_Custom;
-var
-  lc: TfpgMigLC;
-begin
-  lc := TfpgMigLC.Create;
-  try
-    lc.Debug(500);
-    AssertEquals('Debug should set custom millis', 500, lc.GetDebugMillis);
+    AssertTrue('Debug should enable debug mode', lc.GetDebug);
   finally
     lc.Free;
   end;
@@ -693,13 +679,13 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    lc.FlowX.Fill.Wrap.Debug(100).NoGrid;
+    lc.FlowX.Fill.Wrap.Debug.NoGrid;
 
     AssertTrue('FlowX should be set', lc.IsFlowX);
     AssertTrue('FillX should be set', lc.IsFillX);
     AssertTrue('FillY should be set', lc.IsFillY);
     AssertEquals('Wrap should be set to 0', 0, lc.GetWrapAfter);
-    AssertEquals('Debug should be set to 100', 100, lc.GetDebugMillis);
+    AssertTrue('Debug should be set', lc.GetDebug);
     AssertTrue('NoGrid should be set', lc.IsNoGrid);
   finally
     lc.Free;
@@ -713,13 +699,13 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.SetWrapAfter(5);
-    lc.SetDebugMillis(200);
+    lc.SetDebug(True);
     lc.SetHideMode(1);
     lc.SetFillX(True);
     lc.SetFlowX(False);
 
     AssertEquals('GetWrapAfter should return value', 5, lc.GetWrapAfter);
-    AssertEquals('GetDebugMillis should return value', 200, lc.GetDebugMillis);
+    AssertTrue('GetDebug should return value', lc.GetDebug);
     AssertEquals('GetHideMode should return value', 1, lc.GetHideMode);
     AssertTrue('IsFillX should return value', lc.IsFillX);
     AssertFalse('IsFlowX should return value', lc.IsFlowX);
