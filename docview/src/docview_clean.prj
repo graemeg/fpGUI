@@ -1,8 +1,7 @@
 [breakpoints]
-panels=1
- panel1
+panels=0
 [layout]
-windowlayout=468
+windowlayout=449
  [mainfo.openform]
  filecolwidth=174
  x=0
@@ -26,18 +25,18 @@ windowlayout=468
  useroptions=268450944
  [mainfo]
  splitdir=0
- useroptions=301990011
+ useroptions=268435579
  stackedunder=
  parent=
- mdistate=0
+ mdistate=3
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=380
- y=54
- cx=1177
- cy=65
+ x=277
+ y=97
+ cx=1047
+ cy=576
  rcx=0
  rcy=0
  wsize=0
@@ -52,10 +51,10 @@ windowlayout=468
  ny=0
  ncx=0
  ncy=0
- x=1592
- y=1056
+ x=171
+ y=740
  cx=624
- cy=347
+ cy=166
  rcx=0
  rcy=0
  wsize=0
@@ -165,7 +164,7 @@ windowlayout=468
  sorted=0
  col=0
  row=-1073741823
- rowheight=17
+ rowheight=19
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -318,7 +317,7 @@ windowlayout=468
  [messagefo]
  splitdir=0
  useroptions=268484715
- parent=mainfo.panel1.container
+ parent=mainfo.basedock
  visible=1
  mdistate=0
  nx=0
@@ -326,9 +325,9 @@ windowlayout=468
  ncx=0
  ncy=0
  x=0
- y=1118
- cx=1195
- cy=168
+ y=409
+ cx=1037
+ cy=125
  rcx=0
  rcy=0
  [componentstorefo]
@@ -410,14 +409,14 @@ windowlayout=468
  ncy=0
  x=0
  y=0
- cx=1167
- cy=27
+ cx=1037
+ cy=20
  rcx=0
  rcy=0
  [sourcefo]
  splitdir=0
  useroptions=268451945
- parent=mainfo.panel1.container
+ parent=mainfo.basedock
  visible=1
  mdistate=0
  nx=0
@@ -425,9 +424,9 @@ windowlayout=468
  ncx=0
  ncy=0
  x=0
- y=0
- cx=1195
- cy=1115
+ y=23
+ cx=1037
+ cy=383
  rcx=0
  rcy=0
  [actionsmo.watchesonact]
@@ -452,25 +451,6 @@ windowlayout=468
  wsize=0
  active=0
  visible=0
- [mainfo.panel1]
- splitdir=2
- useroptions=302022123
- stackedunder=mainfo
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=422
- y=149
- cx=1205
- cy=1286
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [projectoptions]
 sourcefilemasks=5
  "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
@@ -560,9 +540,9 @@ sourcedirs=16
  ${FPTest}/
  ${tiOPF}Options/
  ${tiOPF}Core/
- ${FPGUI}/src/corelib/gdi/X/
- ${FPGUI}/src/corelib/x11/
- ${FPGUI}/src/*/
+ ${FPGUIDIR}/src/corelib/gdi/X/
+ ${FPGUIDIR}/src/corelib/x11/
+ ${FPGUIDIR}/src/*/
  ./
 defines=0
 progparameters=/data/devel/fpgui/docview/docs/IPFREF_v4.INF
@@ -602,21 +582,21 @@ unitdirs=9
  ../components/richtext
  ${FPTest}3rdparty/epiktimer/
  ${FPTest}src/
- ${FPGUI}/src/3rdparty/regex
- ${FPGUI}/src/corelib/render/software
- ${FPGUI}/src
- ${FPGUI}/src/corelib/${FPG_GFX}
- ${FPGUI}/src/gui
- ${FPGUI}/src/corelib
+ ${FPGUIDIR}/src/3rdparty/regex
+ ${FPGUIDIR}/src/corelib/render/software
+ ${FPGUIDIR}/src
+ ${FPGUIDIR}/src/corelib/${FPG_GFX}
+ ${FPGUIDIR}/src/gui
+ ${FPGUIDIR}/src/corelib
 unitpref=-Fu
 incpref=-Fi
 libpref=-Fl
 objpref=-Fo
 targpref=-o
 befcommand=1
- rm units/${TargetCPU}-${TargetOS}/*
+ [ -d "units/${TargetCPU}-${TargetOS}" ] || (mkdir "units/${TargetCPU}-${TargetOS}" )
 aftcommand=1
- 
+ rm units/${TargetCPU}-${TargetOS}/*
 makeoptions=10
  -l -Mobjfpc -Sch
  -gwl -O- -godwarfsets -godwarfmethodclassprefix
@@ -641,7 +621,7 @@ makeoptpurpose=10
  
  
 befcommandon=1
- 0
+ 63
 makeoptionson=10
  63
  31
@@ -655,15 +635,16 @@ makeoptionson=10
  0
 aftcommandon=1
  0
-unitdirson=8
+unitdirson=9
  65599
  65599
  65599
  196671
  196671
  196671
- 65583
+ 196655
  196647
+ 196671
 uid=0
 macroon=5
  9
@@ -750,8 +731,8 @@ toolmenus=2
  fpGUI &UI Designer
  &DocView
 toolfiles=2
- ${FPGUI}/uidesigner/uidesigner${EXEEXT}
- ${FPGUI}/docview/docview${EXEEXT}
+ ${FPGUIDIR}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUIDIR}/docview/docview${EXEEXT}
 toolparams=2
  ${CURSOURCEFILE}
  ${HelpPath} -k ${cursword}

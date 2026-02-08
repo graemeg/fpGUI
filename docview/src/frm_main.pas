@@ -1196,7 +1196,7 @@ var
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
   OpenAdditionalFile := False;
   try
     for i := 0 to sl.Count-1 do
@@ -1220,7 +1220,7 @@ var
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
   OpenAdditionalFile := True;
   try
     for i := 0 to sl.Count-1 do
@@ -1239,7 +1239,6 @@ end;
 
 procedure TMainForm.tvContentsDragEntered(Drop: TfpgDrop);
 var
-  i: integer;
   s: string;
 begin
 //  ShowMimeList(Drop.MimeTypes);
@@ -1811,7 +1810,7 @@ begin
       Add( TopicInfoFile + HelpFile.Filename );
       Add( TopicInfoResourceIDs );
       for i := 0 to ResourceIDs.Count - 1 do
-        Add( '  ' + IntToStr( longint( ResourceIDs[ i ] ) ) );
+        Add( '  ' + IntToStr( PtrInt( ResourceIDs[ i ] ) ) );
       if ResourceIDs.Count = 0 then
         Add( TopicInfoNoResourceIDs );
     end;
@@ -4064,7 +4063,7 @@ begin
     Exit;
 
   {$NOTE: Replace this with TStringList or TStringStream.}
-  FileMode := fmInput;
+  FileMode := fmOpenRead;
   AssignFile( BookmarksFile, BookmarksFileName );
   try
     Reset( BookmarksFile );

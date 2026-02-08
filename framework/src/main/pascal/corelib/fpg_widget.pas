@@ -1613,6 +1613,12 @@ begin
       end;
     end;
 
+    { Set the invalidated flag before processing child widgets to prevent
+      infinite paint loops. If a child widget triggers parent invalidation
+      during painting, this flag prevents posting duplicate paint messages
+      since InvalidateRect checks "if not FInvalidated" before posting. }
+    FInvalidated := True;
+
     for i := 0 to ComponentCount-1 do
     begin
       w := TfpgWidget(Components[i]);
