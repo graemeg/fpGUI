@@ -1085,9 +1085,6 @@ end;
 
 procedure TfpgPopupMenu.HandleClose;
 begin
-  {$IFDEF DEBUG}
-  writeln(Classname, '.HandleClose');
-  {$ENDIF}
   inherited HandleClose;
 end;
 
@@ -1282,17 +1279,11 @@ end;
 
 procedure TfpgPopupMenu.HandleMouseEnter;
 begin
-  {$IFDEF DEBUG}
-  writeln(Classname, '.HandleMouseEnter');
-  {$ENDIF}
   inherited HandleMouseEnter;
 end;
 
 procedure TfpgPopupMenu.HandleMouseExit;
 begin
-  {$IFDEF DEBUG}
-  writeln(Classname, '.HandleMouseExit');
-  {$ENDIF}
   inherited HandleMouseExit;
   FFocusItem := -1;
   Repaint;
@@ -1436,9 +1427,6 @@ end;
 
 destructor TfpgPopupMenu.Destroy;
 begin
-  {$IFDEF DEBUG}
-  writeln(Classname, '.Destroy');
-  {$ENDIF}
   FItems.Free;
   inherited Destroy;
 end;
