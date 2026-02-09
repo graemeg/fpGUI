@@ -27,7 +27,7 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="1" Minor="5"/>
+    <Version Major="2" Minor="0"/>
     <Files Count="134">
       <Item1>
         <Filename Value="../../../framework/src/main/pascal/corelib/stdimages.inc"/>
