@@ -1,0 +1,333 @@
+[projectoptions]
+sourcefilemasks=5
+ "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+ "*.ipf"
+ "*.sql"
+syntaxdeffiles=5
+ ${SYNTAXDEFDIR}pascal_dark.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+ ${SYNTAXDEFDIR}ipf2.sdef
+ ${SYNTAXDEFDIR}sql.sdef
+filemasknames=5
+ Source
+ Forms
+ Text
+ IPF help
+ All Files
+filemasks=5
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
+ frm_*.pas
+ *.txt
+ *.ipf
+ *
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+noformdesignerdocking=0
+componenthints=1
+gridsizex=8
+gridsizey=8
+autoindent=1
+blockindent=2
+linenumberson=1
+rightmarginon=1
+rightmarginchars=80
+scrollheight=0
+tabstops=2
+spacetabs=1
+showtabs=0
+tabindent=0
+editfontname=DejaVu Sans Mono
+editfontheight=14
+editfontwidth=0
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
+pairmarkcolor=-1610612712
+editfontantialiased=1
+editmarkbrackets=1
+editmarkpairwords=1
+backupfilecount=0
+encoding=0
+eolstyle=1
+trimtrailingwhitespace=0
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+runcommand=
+xtermcommand=xterm -S${PTSN}/${PTSH}
+remoteconnection=
+uploadcommand=
+gdbprocessor=x86_64
+gdbservercommand=
+gdbservercommandattach=
+beforeconnect=
+afterconnect=
+beforeload=
+afterload=
+beforerun=
+sourcebase=
+sourcedirs=16
+ ../components/richtext/
+ ${FPCDIR}src/rtl/${TargetCPU}/
+ ${FPCDIR}src/rtl/inc/
+ ${FPCDIR}src/rtl/linux/${TargetCPU}/
+ ${FPCDIR}src/rtl/linux/
+ ${FPCDIR}src/rtl/unix/
+ ${FPCDIR}src/rtl/objpas/sysutils/
+ ${FPCDIR}src/rtl/objpas/classes/
+ ${FPCDIR}src/rtl/objpas/
+ ${FPTest}/
+ ${tiOPF}Options/
+ ${tiOPF}Core/
+ ${FPGUI}/src/corelib/render/software/
+ ${FPGUI}/src/corelib/${FPG_GFX}/
+ ${FPGUI}/src/*/
+ ./
+defines=0
+progparameters=/data/devel/fpgui/docview/docs/IPFREF_v4.INF
+progworkingdirectory=
+envvarnames=0
+envvarvalues=0
+defineson=0
+stoponexception=0
+valuehints=1
+activateonbreak=1
+raiseonbreak=1
+showconsole=1
+externalconsole=0
+settty=1
+gdbdownload=0
+downloadalways=0
+startupbkpt=0
+startupbkpton=0
+gdbsimulator=0
+gdbserverstartonce=0
+gdbloadtimeout=
+gdbserverwait=0
+nogdbserverexit=0
+gdbservertty=0
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+nodebugbeginend=0
+fpcgdbworkaround=1
+mainfile=bitmaptest.lpr
+targetfile=bitmaptest${EXEEXT}
+makecommand=${COMPILER}
+makedir=
+unitdirs=7
+ ${FPTest}3rdparty/epiktimer/
+ ${FPTest}src/
+ ${FPGUI}/src/corelib/render/software
+ ${FPGUI}/src
+ ${FPGUI}/src/corelib/${FPG_GFX}
+ ${FPGUI}/src/gui
+ ${FPGUI}/src/corelib
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+befcommand=1
+ rm units/*
+aftcommand=0
+makeoptions=8
+ -l -Mobjfpc -Sh
+ -gl -O-
+ -B
+ -O2 -XX -Xs -CX
+ -FUunits/
+ -gh
+ -view
+ -dAGGCANVAS
+reversepathorder=0
+makeoptpurpose=8
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+befcommandon=1
+ 0
+makeoptionson=8
+ 63
+ 31
+ 34
+ 32
+ 63
+ 31
+ 63
+ 52
+aftcommandon=0
+unitdirson=7
+ 65599
+ 65599
+ 196671
+ 196671
+ 196671
+ 65599
+ 196671
+uid=0
+macroon=7
+ 9
+ 3
+ 6
+ 4
+ 8
+ 63
+ 63
+macronames=7
+ TargetCPU
+ TargetOS
+ TargetCPU
+ TargetOS
+ TargetOS
+ HelpPath
+ FPTest
+macrovalues=7
+ x86_64
+ linux
+ i386
+ win32
+ freebsd
+ /data/devel/FPC_Docs/inf/
+ /data/devel/fptest/
+groupcomments=6
+ Linux 64-bit
+ Linux 32-bit
+ Windows 32-bit
+ FreeBSD 64-bit
+ 
+ 
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=4
+ ${TEMPLATEDIR}/fptest/program.pas
+ ${TEMPLATEDIR}fpgui/units/i386-linux/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/i386-win32/placeholder.txt
+ ${TEMPLATEDIR}fpgui/units/x86_64-linux/placeholder.txt
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ ${%PROJECTDIR%}units/i386-linux/placeholder.txt
+ ${%PROJECTDIR%}units/i386-win32/placeholder.txt
+ ${%PROJECTDIR%}units/x86_64-linux/placeholder.txt
+newfinames=3
+ Program
+ Test Unit
+ Textfile
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}fptest/program.pas
+ ${TEMPLATEDIR}fptest/unit.pas
+ 
+newfonames=2
+ Mainform
+ Simple Form
+newfonamebases=2
+ 
+ 
+newfosources=2
+ ${TEMPLATEDIR}fpgui/mainform.pas
+ ${TEMPLATEDIR}fpgui/simpleform.pas
+newfoforms=2
+ 
+ 
+expandprojectfilemacros=4
+ 1
+ -1
+ -1
+ -1
+loadprojectfile=4
+ 1
+ 0
+ 0
+ 0
+newinheritedforms=2
+ 0
+ 0
+toolmenus=2
+ fpGUI &UI Designer
+ DocView
+toolfiles=2
+ ${FPGUI}/uidesigner/uidesigner${EXEEXT}
+ ${FPGUI}/docview/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath}fcl.inf+${HelpPath}rtl.inf+${HelpPath}tiopf.inf+${HelpPath}fpc_lang_ref.inf+${HelpPath}fpgui.inf -k ${cursword}
+toolsave=2
+ -1
+ 0
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmessages=2
+ 0
+ 0
+toolshortcuts=2
+ 0
+ 1
+settingsfile=bitmaptest_clean.prj
+settingsautoload=0
+settingsautosave=0
+settingseditor=1
+settingsdebugger=1
+settingsmake=1
+settingsmacros=1
+settingsfontalias=0
+settingsusercolors=0
+settingsformatmacros=0
+settingstemplates=1
+settingstools=1
+settingsstorage=1
+settingscomponentstore=0
+settingsprojecttree=0
+settingslayout=0
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F

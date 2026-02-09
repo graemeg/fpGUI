@@ -36,22 +36,18 @@
       <Unit0>
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="test"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
         <Filename Value="commands.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="commands"/>
       </Unit2>
       <Unit3>
         <Filename Value="frm_splashscreen.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_splashscreen"/>
       </Unit3>
     </Units>
   </ProjectOptions>
@@ -68,8 +64,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

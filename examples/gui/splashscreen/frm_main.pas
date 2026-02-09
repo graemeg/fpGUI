@@ -39,9 +39,9 @@ type
     TrackBar1: TfpgTrackBar;
     {@VFD_HEAD_END: BorderLessForm}
   public
-    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     class procedure Execute;
+    procedure FormShow(Sender: TObject);
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -55,12 +55,6 @@ uses
 
 { TBorderLessForm }
 
-constructor TBorderLessForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Include(FWindowAttributes, waBorderLess);  // borderless and steals focus like a normal form
-end;
-
 procedure TBorderLessForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -70,6 +64,7 @@ begin
   WindowTitle := 'BorderLessForm';
   Hint := '';
   WindowPosition := wpOneThirdDown;
+  OnShow := @FormShow;
 
   btnClose := TfpgButton.Create(self);
   with btnClose do
@@ -117,6 +112,18 @@ begin
     frm.ShowModal;
   finally
     frm.Free;
+  end;
+end;
+
+procedure TBorderLessForm.FormShow(Sender: TObject);
+var
+  wa: TWindowAttributes;
+begin
+  if Assigned(Window) then
+  begin
+    wa := Window.WindowAttributes;
+    wa := wa + [waBorderLess];  // borderless and steals focus like a normal form
+    Window.WindowAttributes := wa;
   end;
 end;
 

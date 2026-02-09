@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_popupwindow">
+<short>Defines a popup window widget</short>
+<descr><printshort id="fpg_popupwindow"/>. This class is not normally used directly, but well known
+descendants are <link id="#fpgui.fpg_menu.TfpgPopupMenu">TfpgPopupMenu</link> and the popup window
+that appears when the button on a ComboBox is clicked.</descr>
+
+<element name="TfpgPopupWindow.PopupWidget">
+<short>Indicates the widget that last displayed the popup window</short>
+<descr><p>When querying the value of <var>PopupWidget</var>, note that it could be nil, or
+contain a reference to a widget. If the value is not nil, it indicates the
+widget that called the <link id="TfpgPopupWindow.ShowAt">ShowAt(widget, x, y)</link> method to display the popup window.</p>
+<p>An example of where this is very useful is with the <var>TfpgPopupMenu</var> widget - which
+is a descendant of <var>TfpgPopupWindow</var>. The OnClick event handler of the menu item
+can query the PopupWidget to know which widget displayed the menu. Often used where
+popup menus are shared between multiple widgets.</p>
+</descr>
+<seealso>
+<link id="#fpgui.fpg_menu.TfpgPopupMenu">TfpgPopupMenu</link>
+</seealso>
+</element>
+
+
+<element name="TfpgPopupWindow.ShowAt">
+<short>When called, will display the popup window at location (x,y)</short>
+<descr><printshort id="TfpgPopupWindow.ShowAt"/>.</descr>
+</element>
+
+<element name="TfpgPopupWindow.ShowAt.AWidget">
+<short>Specifies the widget that called the ShowAt() method. If ShowAt() without AWidget is called, then the X and Y coordinates are screen coordinates. No coordinate translation is done.</short>
+</element>
+
+<element name="TfpgPopupWindow.ShowAt.X">
+<short>X coordinate where the popup window will display.</short>
+</element>
+
+<element name="TfpgPopupWindow.ShowAt.Y">
+<short>Y coordinate where the popup window will display.</short>
+</element>
+
+<element name="TfpgPopupWindow.ShowAt.ACanAdjustPos">
+<short>As the name suggests - do we allow the display position to be adjusted. eg: if x,y coordinate means the window will not fit on the desktop.</short>
+</element>
+
+</module>
+
+</package>
+</fpdoc-descriptions>

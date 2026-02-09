@@ -1061,7 +1061,8 @@ the :hp1.qword:ehp1. and :hp1.int64:ehp1. types are not true ordinals, so
 some Pascal constructs will not work with these two integer types.
 
 :cgraphic.
- :hp2.Type                         Range                   Size in bytes:ehp2.
+:hp2.
+ Type                         Range                   Size in bytes:ehp2.
 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  Byte                         0 .. 255                            1
  Shortint                  -128 .. 127                            1
@@ -1081,6 +1082,29 @@ The :hp1.integer:ehp1. type maps to the smallint type in the default
 &fpc. mode. It maps to either a longint in either Delphi or ObjFPC
 mode. The :hp1.cardinal:ehp1. type is currently always mapped to the
 longword type.
+
+:p.
+The following (U)Int<x> data types are independent of CPU targets, and
+more obvious to the developer in their data range and size. Because of
+this, it is often recommended to use them, especially in record structures
+used to read binary data files, instead of the more classic data types like
+SmallInt, Word etc.
+
+:cgraphic.
+:hp2.
+ Type                         Range                   Size in bytes:ehp2.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Int8   = ShortInt        -128 .. 127                             1
+ Int16  = SmallInt      -32768 .. 32767                           2
+ Int32  = LongInt  -2147483648 .. 2147483647                      4
+ Int64    -9223372036854775808 .. 9223372036854775807             8
+
+ UInt8  = Byte               0 .. 255                             1
+ UInt16 = Word               0 .. 65535                           2
+ UInt32 = Cardinal           0 .. 4294967295                      4
+ UInt64 = QWord              0 .. 18446744073709551615            8
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+:ecgraphic.
 
 :nt.
 All decimal constants which do no fit within the -2147483648..2147483647 range
@@ -1763,6 +1787,153 @@ In the table below, :hp1.P:ehp1. and :hp1.Q:ehp1. are of type :hp1.PChar:ehp1., 
                       (or the number of characters between P and Q)
 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 :ecgraphic.
+
+
+.* --------------------------------------------------------------
+:h3 name=character_and_string_types.Characters and string types
+:p.
+This section contains detailed information about the different character and
+string types supported by &fpc..
+
+:p.
+Free Pascal supports several character and string types. They range from 
+single ANSI characters to unicode strings and also include pointer types. 
+Differences also apply to encodings and reference counting. 
+
+:p.
+[Copy the content from
+http://wiki.freepascal.org/Character_and_string_types
+]
+
+:p.
+:hp2.ANSICHAR:ehp2.
+:p.
+A variable of type AnsiChar, also referred to as char, is exactly 1 byte in
+size, and contains one ANSI character.
+:cgraphic.
+ÚÄÄÄ¿
+³ a ³
+ÀÄÄÄÙ
+:ecgraphic.
+
+
+:p.
+:hp2.WIDECHAR:ehp2.
+:p.
+A variable of type WideChar, also referred to as UnicodeChar, is exactly 2
+bytes in size, and contains one (part of) Unicode character in UTF-16 encoding.
+:nt.It is impossible to encode all Unicode code points in 2 bytes. Therefore,
+2 WideChars may be needed to encode a single code point.:ent.
+:lm margin=1.
+
+:cgraphic.
+ÚÄÄÄÂÄÄÄ¿
+³   ³ a ³
+ÀÄÄÄÁÄÄÄÙ
+:ecgraphic.
+
+:p.
+:hp2.ARRAY OF CHAR:ehp2.
+:p.
+Early Pascal implementations that were in use before 1978 did not support a 
+string type (with the exception of string constants). The only possibility to 
+store strings in variables was the use of arrays of char. This approach has 
+many disadvantages and is no longer recommended. It is, however, still 
+supported to ensure backward-compatibility with ancient code.
+
+:p.
+:hp3.Static Array of Char:ehp3.
+:xmp.
+type
+  TOldString4 = array[0..3] of char;
+var
+  aOldString4: TOldString4; 
+begin
+  aOldString4[0] := 'a';
+  aOldString4[1] := 'b';
+  aOldString4[2] := 'c';
+  aOldString4[3] := 'd';
+end;
+:exmp.
+
+:p.
+The static array of char now has the content:
+
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄ¿
+³ a ³ b ³ c ³ d ³
+ÀÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÙ
+:ecgraphic.
+
+:nt.Unassigned chars can have any content, depending on what was just in
+memory when the memory for the array was made available.:ent.
+:lm margin=1.
+
+
+:p.
+:hp3.Dynamic Array of Char:ehp3.
+:xmp.
+var
+  aOldString: Array of Char; 
+begin
+  SetLength(aOldString, 5);
+  aOldString[0] := 'a';
+  aOldString[1] := 'b';
+  aOldString[2] := 'c';
+  aOldString[3] := 'd';
+end;
+:exmp.
+
+:p.
+The dynamic array of char now has the content:
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄ¿
+³ a ³ b ³ c ³ d ³ #0 ³
+ÀÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÄÙ
+:ecgraphic.
+
+:nt.Unassigned chars in dynamic arrays have the content #0, cause empty positions
+of all dynamic arrays are initially initialised with 0 (or #0, or nil, or ...)
+:ent.
+:lm margin=1.
+
+:p.
+:hp2.PCHAR:ehp2.
+:p.
+A variable of type PChar is basically a pointer to a Char type, but allows
+additional operations. PChars can be used to access C-style null-terminated
+strings, e.g. in interaction with certain OS libraries or third-party software.
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄ¿
+³ a ³ b ³ c ³ #0 ³
+ÃÄÄÄÅÄÄÄÁÄÄÄÁÄÄÄÄ´
+³ ^ ³            ³
+ÀÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÙ
+:ecgraphic.
+
+:p.
+:hp2.PWIDECHAR:ehp2.
+:p.
+A variable of type PWideChar is a pointer to a WideChar variable.
+:cgraphic.
+ÚÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÂÄÄÄÄÂÄÄÄÄ¿
+³   ³ a ³   ³ b ³   ³ c ³ #0 ³ #0 ³
+ÃÄÄÄÅÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÁÄÄÄÄÁÄÄÄÄ´
+³ ^ ³                             ³
+ÀÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+:ecgraphic.
+
+
+:p.
+:hp2.STRING:ehp2.
+:p.
+The type String may refer to ShortString or AnsiString, depending from the
+{$H} switch. If the switch is off ({$H-}) then any string declaration will
+define a ShortString. Its size will be 255 chars, if not otherwise specified.
+If it is on ({$H+}) strings without a length specifier will define an AnsiString,
+otherwise a ShortString with specified length. In :hp1.mode delphiunicode:ehp1. String
+is UnicodeString. 
+
 
 
 
@@ -5364,10 +5535,68 @@ in the accumulator. In the case of floating point values, these depend
 on the target processor and emulation options.
 
 :h2.Object Pascal Grammar
-:p.This section describes the Object Pascal grammar in a EBNF
+.* Got the initial content from [http://delphi.wikia.com/wiki/Object_Pascal_Grammar]
+.* on Mar 2013, but has diverted from it since by adding FPC specific syntax (mode objfpc only).
+:p.
+This section describes the Object Pascal grammar in a EBNF
 (Extended Backus-Naur Form) like style. The syntax only covers the
-:hp1.ObjFPC:ehp1. mode of the &fpc. compiler.
+:hp1.objfpc:ehp1. mode of the &fpc. compiler.
 
+:p.
+EBNF syntax is described on WikiPedia at [https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form].
+
+:p.
+:hp2.Table of symbols used in EBNF:ehp2.
+:p.
+The following represents a proposed ISO/IEC 14977 standard, by R. S. Scowen, page 7, table 1.
+
+:table cols='25 15'.
+:row.
+:c.USAGE
+:c.NOTATION
+:row.
+:c.definition
+:c.=
+:row.
+:c.concatenation
+:c.,
+:row.
+:c.termination
+:c.;
+:row.
+:c.termination
+:c..
+:row.
+:c.alternation
+:c.|
+:row.
+:c.option
+:c.[ ... ]
+:row.
+:c.repetition
+:c.{ ... }
+:row.
+:c.grouping
+:c.( ... )
+:row.
+:c.terminal string
+:c." ... "
+:row.
+:c.terminal string
+:c.' ... '
+:row.
+:c.comment
+:c.(* ... *)
+:row.
+:c.special sequence
+:c.? ... ?
+:row.
+:c.exception
+:c.-
+:etable.
+
+:p.
+:hp2.Grammar:ehp2.
 :cgraphic.
 Goal -> (Program | Package | Library | Unit)
 Program -> [PROGRAM Ident ['(' IdentList ')'] ';']
@@ -5404,9 +5633,8 @@ ImplementationSection -> IMPLEMENTATION
                          [DeclSection]...
                          [ExportsStmt]...
 Block -> [DeclSection]
-         [ExportsStmt]...
          CompoundStmt
-         [ExportsStmt]...
+         [ExportsStmt]
 ExportsStmt -> EXPORTS ExportsItem [, ExportsItem]...
 ExportsItem -> Ident [NAME|INDEX "'" ConstExpr "'"]
                      [INDEX|NAME "'" ConstExpr "'"]
@@ -5481,9 +5709,11 @@ FileType -> FILE OF TypeId [HintDirective]
 PointerType -> '^' TypeId [HintDirective]
 ProcedureType -> (ProcedureHeading | FunctionHeading) [OF OBJECT]
 VarSection -> VAR (VarDecl ';')...
-VarDecl
-  On Windows -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' ConstExpr] [HintDirective]
-  On Linux   -> IdentList ':' Type [ABSOLUTE (Ident) | '=' ConstExpr] [HintDirective]
+VarDecl -> IdentList ':' Type ['=' ConstExpr] [VarModifiers] [HintDirective]
+VarModifiers ->   ABSOLUTE (Ident | ConstExpr) ;
+                | ';' EXPORT ;
+                | ';' CVAR ;
+                | ';' EXTERNAL (ConstExpr | NAME ConstExpr) ;
 Expression -> SimpleExpression [RelOp SimpleExpression]...
 SimpleExpression -> ['+' | '-'] Term [AddOp Term]...
 Term -> Factor [MulOp Factor]...
@@ -5533,7 +5763,7 @@ StructStmt -> CompoundStmt
            -> TryFinallyStmt
            -> RaiseStmt
            -> AssemblerStmt
-CompoundStmt -> BEGIN StmtList END
+CompoundStmt -> BEGIN StmtList END [';']
 ConditionalStmt -> IfStmt
                 -> CaseStmt
 IfStmt -> IF Expression THEN Statement [ELSE Statement]
@@ -5553,18 +5783,18 @@ TryExceptStmt -> TRY
                    Statement...
                  EXCEPT
                    ExceptionBlock
-                 END
+                 END [';']
 ExceptionBlock -> [ON [Ident ':'] TypeID DO Statement]...
                   [ELSE Statement...]
 TryFinallyStmt -> TRY
                     Statement
                   FINALLY
                     Statement
-                  END
+                  END [';']
 RaiseStmt -> RAISE [object] [AT address]
 AssemblerStatement -> ASM
                    -> <assemblylanguage>
-                   -> END
+                   -> END [';']
 ProcedureDeclSection -> ProcedureDecl
                      -> FunctionDecl
 ProcedureDecl -> ProcedureHeading ';' [Directive] [HintDirective]
@@ -5634,19 +5864,24 @@ InterfaceType -> INTERFACE [InterfaceHeritage]
                  [ClassPropertyList]
                  ...
                  END
-InterfaceHeritage -> '(' IdentList ')'
+InterfaceHeritage -> '(' Ident ')'
 RequiresClause -> REQUIRES IdentList... ';'
 ContainsClause -> CONTAINS IdentList... ';'
 IdentList -> Ident ','...
 QualId -> [UnitId '.'] Ident
 TypeId -> [UnitId '.'] <type-identifier>
-Ident -> <identifier>
+Ident -> alphabetic character, { alphabetic character | digit | "_" } ;
 ConstExpr -> <constant-expression>
-UnitId -> <unit-identifier>
-LabelId -> <label-identifier>
-Number -> <number>
-String -> <string>
-
+UnitId -> Ident
+LabelId -> Ident
+Number -> [ "-" ], digit, { digit } ;
+String ->  "'" , { all characters - "'" }, "'" ;
+alphabetic character ->  "A" | "B" | "C" | "D" | "E" | "F" | "G"
+                      | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+                      | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+                      | "V" | "W" | "X" | "Y" | "Z" ;
+digit ->  "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+all characters ->  ? all visible characters ? ;
 :ecgraphic.
 
 :euserdoc.

@@ -1,0 +1,723 @@
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.
+# Translators:
+# Rivo Zängov <eraser@eraser.ee>, 2018
+# AlexL <loginov.alex.valer@gmail.com>, 2019
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: FPGUI\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-03-18 00:00+0200\n"
+"PO-Revision-Date: 2018-11-21 04:13+0000\n"
+"Last-Translator: AlexL <loginov.alex.valer@gmail.com>, 2019\n"
+"Language-Team: Estonian (https://www.transifex.com/Magic/teams/44238/et/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: et\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: fpg_constants:rserrnotassigned
+msgid "<%s> not assigned"
+msgstr "<%s> pole määratud"
+
+#: fpg_constants:rsnewitemdetected
+msgid "A new item has been detected."
+msgstr "Tuvastati uus kirje."
+
+#: fpg_constants:rsabort
+msgid "Abort"
+msgstr "Katkesta"
+
+#: fpg_constants:rsabout
+msgid "About %s"
+msgstr "Teave %s kohta"
+
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr "Lisa praegune kaust"
+
+#: fpg_constants:rsall
+msgid "All"
+msgstr "Kõik"
+
+#: fpg_constants:rsallfiles
+msgid "All Files"
+msgstr "Kõik failid"
+
+#: fpg_constants:rscollectionallfonts
+msgid "All Fonts"
+msgstr "Kõik fondid"
+
+#: fpg_constants:rskeyalt
+msgid "Alt+"
+msgstr ""
+
+#: fpg_constants:rserrunexpected
+msgid "An unexpected error occurred."
+msgstr ""
+
+#: fpg_constants:rsantialiasing
+msgid "Anti aliasing"
+msgstr ""
+
+#: fpg_constants:rsshortapr
+msgid "Apr"
+msgstr "Apr"
+
+#: fpg_constants:rslongapr
+msgid "April"
+msgstr "Aprill"
+
+#: fpg_constants:rsfileattributes
+msgid "Attributes"
+msgstr "Omadused"
+
+#: fpg_constants:rsshortaug
+msgid "Aug"
+msgstr "Aug"
+
+#: fpg_constants:rslongaug
+msgid "August"
+msgstr "August"
+
+#: fpg_constants:rskeybksp
+msgid "BkSp"
+msgstr ""
+
+#: fpg_constants:rscolorblue
+msgid "Blue"
+msgstr "Sinine"
+
+#: fpg_constants:rsbold
+msgid "Bold"
+msgstr "Rasvane"
+
+#: fpg_constants:rsbookmarks
+msgid "Bookmarks"
+msgstr "Järjehoidjad"
+
+#: fpg_constants:rscancel
+msgid "Cancel"
+msgstr "Loobu"
+
+#: fpg_constants:rscannotcreatedir
+msgid "Cannot create directory"
+msgstr "Kausta ei saa luua"
+
+#: fpg_constants:rschange
+msgid "Change"
+msgstr "Muuda"
+
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr "Muuda pealkirja"
+
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
+#: fpg_constants:rscolorpickerhint
+msgid "Click on Picker and maintain click => release to get the color"
+msgstr ""
+
+#: fpg_constants:rsclose
+msgid "Close"
+msgstr "Sulge"
+
+#: fpg_constants:rscollection
+msgid "Collection"
+msgstr "Kogu"
+
+#: fpg_constants:rstabsheetcolorwheel
+msgid "Color Wheel"
+msgstr "Värviratas"
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
+msgstr ""
+
+#: fpg_constants:rsconfirm
+msgid "Confirm"
+msgstr "Kinnita"
+
+#: fpg_constants:rsconfirmation
+msgid "Confirmation"
+msgstr "Kinnitus"
+
+#: fpg_constants:rscontinuous
+msgid "Continuous"
+msgstr "Jätkuv"
+
+#: fpg_constants:rscopy
+msgid "Copy"
+msgstr "Kopeeri"
+
+#: fpg_constants:rserrcouldnotopendir
+msgid "Could not open the directory <%s>"
+msgstr ""
+
+#: fpg_constants:rscreate
+msgid "Create"
+msgstr "Loo"
+
+#: fpg_constants:rscreatedirectory
+msgid "Create directory"
+msgstr "Loo kaust"
+
+#: fpg_constants:rscriticalerror
+msgid "Critical Error"
+msgstr "Kriitiline viga"
+
+#: fpg_constants:rskeyctrl
+msgid "Ctrl+"
+msgstr "Ctrl+"
+
+#: fpg_constants:rscut
+msgid "Cut"
+msgstr "Lõika"
+
+#: fpg_constants:rsdatabase
+msgid "Database"
+msgstr "Andmebaas"
+
+#: fpg_constants:rsshortdec
+msgid "Dec"
+msgstr "Dets"
+
+#: fpg_constants:rslongdec
+msgid "December"
+msgstr "Detsember"
+
+#: fpg_constants:rskeydel
+msgid "Del"
+msgstr "Kustuta"
+
+#: fpg_constants:rsdelete
+msgid "Delete"
+msgstr "Kustuta"
+
+#: fpg_constants:rsdirectories
+msgid "Directories"
+msgstr "Kaustad"
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
+msgstr "Kaust"
+
+#: fpg_constants:rskeydown
+msgid "Down"
+msgstr "All"
+
+#: fpg_constants:rsdrive
+msgid "Drive"
+msgstr ""
+
+#: fpg_constants:rsedit
+msgid "Edit"
+msgstr "Muuda"
+
+#: fpg_constants:rskeyend
+msgid "End"
+msgstr "End"
+
+#: fpg_constants:rslanguage
+msgid "English"
+msgstr "Eesti"
+
+#: fpg_constants:rskeyenter
+msgid "Enter"
+msgstr "Sisestusklahv"
+
+#: fpg_constants:rsenternewdirectory
+msgid "Enter new directory name"
+msgstr "Sisesta uus kausta nimi"
+
+#: fpg_constants:rserror
+msgid "Error"
+msgstr "Viga"
+
+#: fpg_constants:rskeyesc
+msgid "Esc"
+msgstr "Esc"
+
+#: fpg_constants:rsexampletext
+msgid "Example Text"
+msgstr "Näidistekst"
+
+#: fpg_constants:rsexit
+msgid "Exit"
+msgstr "Välju"
+
+#: fpg_constants:rserrfailedtocreatedir
+msgid "Failed to create the directory <%s>"
+msgstr "Tõrge kataloogi <%s> loomisel"
+
+#: fpg_constants:rsfailedtofindhelpviewer
+msgid "Failed to find the help viewer."
+msgstr ""
+
+#: fpg_constants:rsfalse
+msgid "False"
+msgstr "Väär"
+
+#: fpg_constants:rscollectionfavourites
+msgid "Favourites"
+msgstr "Lemmikud"
+
+#: fpg_constants:rsshortfeb
+msgid "Feb"
+msgstr "Veebr"
+
+#: fpg_constants:rslongfeb
+msgid "February"
+msgstr "Veebruar"
+
+#: fpg_constants:rsfileselection
+msgid "File Selection"
+msgstr "Faili valimine"
+
+#: fpg_constants:rsfilename
+msgid "Filename"
+msgstr "Failinimi"
+
+#: fpg_constants:rsfiles
+msgid "Files"
+msgstr "Failid"
+
+#: fpg_constants:rsfind
+msgid "Find"
+msgstr "Otsi"
+
+#: fpg_constants:rscollectionfixedwidth
+msgid "Fixed Width"
+msgstr "Fikseeritud laius"
+
+#: fpg_constants:rscollectionfontaliases
+msgid "Font Aliases"
+msgstr ""
+
+#: fpg_constants:rserrreportfontfilemissing
+msgid "Font file <%s.fnt> not found"
+msgstr ""
+
+#: fpg_constants:rsshortfri
+msgid "Fri"
+msgstr "Reede"
+
+#: fpg_constants:rslongfri
+msgid "Friday"
+msgstr "Reede"
+
+#: fpg_constants:rsgotohomedirectory
+msgid "Go to home directory"
+msgstr "Mine kodukausta"
+
+#: fpg_constants:rsgotoparentdirectory
+msgid "Go to parent directory"
+msgstr "Mine ülemisse kausta"
+
+#: fpg_constants:rscolorgreen
+msgid "Green"
+msgstr "Roheline"
+
+#: fpg_constants:rsfilegroup
+msgid "Group"
+msgstr "Grupeeri"
+
+#: fpg_constants:rshelp
+msgid "Help"
+msgstr "Abiinfo"
+
+#: fpg_constants:rshexadecimal
+msgid "Hexadecimal"
+msgstr ""
+
+#: fpg_constants:rskeyhome
+msgid "Home"
+msgstr "Avaleht"
+
+#: fpg_constants:rsignore
+msgid "Ignore"
+msgstr "Ignoreeri"
+
+#: fpg_constants:rserrreportimagefilemissing
+msgid "Image <%s> is missing"
+msgstr ""
+
+#: fpg_constants:rsinformation
+msgid "Information"
+msgstr "Info"
+
+#: fpg_constants:rskeyins
+msgid "Ins"
+msgstr "Ins"
+
+#: fpg_constants:rsinsert
+msgid "Insert"
+msgstr "Sisesta"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
+
+#: fpg_constants:serrinvalidoption
+msgid "Invalid option at position %d: %s"
+msgstr "Vigane valik kohas %d: %s"
+
+#: fpg_constants:rsitalic
+msgid "Italic"
+msgstr "Kaldkiri"
+
+#: fpg_constants:rserritemofwrongtype
+msgid "Item is not of <%s> type!"
+msgstr ""
+
+#: fpg_constants:rsshortjan
+msgid "Jan"
+msgstr "Jan"
+
+#: fpg_constants:rslongjan
+msgid "January"
+msgstr "Jaanuar"
+
+#: fpg_constants:rsshortjul
+msgid "Jul"
+msgstr "Juul"
+
+#: fpg_constants:rslongjul
+msgid "July"
+msgstr "Juuli"
+
+#: fpg_constants:rsshortjun
+msgid "Jun"
+msgstr "Juun"
+
+#: fpg_constants:rslongjun
+msgid "June"
+msgstr "Juuni"
+
+#: fpg_constants:rskeyleft
+msgid "Left"
+msgstr "Vasakul"
+
+#: fpg_constants:rserrlistmustbeempty
+msgid "List must be empty"
+msgstr "Nimekiri peab olema tühi"
+
+#: fpg_constants:rsshortmar
+msgid "Mar"
+msgstr "Märts"
+
+#: fpg_constants:rslongmar
+msgid "March"
+msgstr "Märts"
+
+#: fpg_constants:rsshortmay
+msgid "May"
+msgstr ""
+
+#: fpg_constants:rsmessage
+msgid "Message"
+msgstr "Sõnum"
+
+#: fpg_constants:rskeymeta
+msgid "Meta+"
+msgstr "Meta+"
+
+#: fpg_constants:rsfilemodifiedtime
+msgid "Mod. Time"
+msgstr ""
+
+#: fpg_constants:rsshortmon
+msgid "Mon"
+msgstr "Esmasp"
+
+#: fpg_constants:rslongmon
+msgid "Monday"
+msgstr "Esmaspäev"
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr "Liiguta alla"
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr "Liiguta üles"
+
+#: fpg_constants:rsname
+msgid "Name"
+msgstr "Nimi"
+
+#: fpg_constants:rsno
+msgid "No"
+msgstr "Ei"
+
+#: fpg_constants:rsnotoall
+msgid "No to All"
+msgstr "MItte kõigile"
+
+#: fpg_constants:rsshortnov
+msgid "Nov"
+msgstr "Nov"
+
+#: fpg_constants:rslongnov
+msgid "November"
+msgstr "November"
+
+#: fpg_constants:rsok
+msgid "OK"
+msgstr "OK"
+
+#: fpg_constants:rsshortoct
+msgid "Oct"
+msgstr "Okt"
+
+#: fpg_constants:rslongoct
+msgid "October"
+msgstr "Oktoober"
+
+#: fpg_constants:rsopen
+msgid "Open"
+msgstr "Ava"
+
+#: fpg_constants:rsopenafile
+msgid "Open a file"
+msgstr "Ava fail"
+
+#: fpg_constants:serrnooptionallowed
+msgid "Option at position %d does not allow an argument: %s"
+msgstr ""
+
+#: fpg_constants:serroptionneeded
+msgid "Option at position %d needs an argument: %s"
+msgstr ""
+
+#: fpg_constants:rsfileowner
+msgid "Owner"
+msgstr "Omanik"
+
+#: fpg_constants:rsfiletypepdf
+msgid "PDF Documents"
+msgstr "PDf dokumendid"
+
+#: fpg_constants:rsreportpage
+msgid "Page"
+msgstr "Lehekülg"
+
+#: fpg_constants:rspassword
+msgid "Password"
+msgstr "Parool"
+
+#: fpg_constants:rspaste
+msgid "Paste"
+msgstr "Aseta"
+
+#: fpg_constants:rskeypgdn
+msgid "PgDn"
+msgstr ""
+
+#: fpg_constants:rskeypgup
+msgid "PgUp"
+msgstr "PgUp"
+
+#: fpg_constants:rstabpredefined
+msgid "Predefined"
+msgstr "Eelmääratud"
+
+#: fpg_constants:rsreportpreview
+msgid "Preview"
+msgstr "Eelvaade"
+
+#: fpg_constants:rscollectionrecentlyused
+msgid "Recently Used"
+msgstr "Hiljuti kasutatud"
+
+#: fpg_constants:rscolorred
+msgid "Red"
+msgstr "Punane"
+
+#: fpg_constants:rsreplace
+msgid "Replace"
+msgstr "Asenda"
+
+#: fpg_constants:rsretry
+msgid "Retry"
+msgstr "Proovi uuesti"
+
+#: fpg_constants:rskeyright
+msgid "Right"
+msgstr "Paremal"
+
+#: fpg_constants:rsfilerights
+msgid "Rights"
+msgstr "Õigused"
+
+#: fpg_constants:rscollectionsans
+msgid "Sans"
+msgstr "Sans"
+
+#: fpg_constants:rsshortsat
+msgid "Sat"
+msgstr "Laup"
+
+#: fpg_constants:rslongsat
+msgid "Saturday"
+msgstr "Laupäev"
+
+#: fpg_constants:rssave
+msgid "Save"
+msgstr "Salvesta"
+
+#: fpg_constants:rssaveafile
+msgid "Save file as"
+msgstr "Salvesta fail kui"
+
+#: fpg_constants:rssearch
+msgid "Search"
+msgstr "Otsi"
+
+#: fpg_constants:rsreportsection
+msgid "Section"
+msgstr "Sektsioon"
+
+#: fpg_constants:rsselect
+msgid "Select"
+msgstr "Vali"
+
+#: fpg_constants:rsselectall
+msgid "Select All"
+msgstr "Vali kõik"
+
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Vali kaust"
+
+#: fpg_constants:rsselectafont
+msgid "Select a font"
+msgstr "Vali font"
+
+#: fpg_constants:rsshortsep
+msgid "Sep"
+msgstr ""
+
+#: fpg_constants:rslongsep
+msgid "September"
+msgstr "September"
+
+#: fpg_constants:rscollectionserif
+msgid "Serif"
+msgstr "Serif"
+
+#: fpg_constants:rskeyshift
+msgid "Shift+"
+msgstr "Shift+"
+
+#: fpg_constants:rsshowhidden
+msgid "Show hidden files"
+msgstr "Näita peidetud faile"
+
+#: fpg_constants:rssize
+msgid "Size"
+msgstr "Suurus"
+
+#: fpg_constants:rskeyspace
+msgid "Space"
+msgstr "Tühik"
+
+#: fpg_constants:rsstyle
+msgid "Style"
+msgstr "Stiil"
+
+#: fpg_constants:rsshortsun
+msgid "Sun"
+msgstr "Pühap"
+
+#: fpg_constants:rslongsun
+msgid "Sunday"
+msgstr "Pühapäev"
+
+#: fpg_constants:rskeytab
+msgid "Tab"
+msgstr "Tab"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
+
+#: fpg_constants:rserrreportnopagestoprint
+msgid "There are no pages to print"
+msgstr ""
+
+#: fpg_constants:rsshortthu
+msgid "Thu"
+msgstr "Neljap"
+
+#: fpg_constants:rslongthu
+msgid "Thursday"
+msgstr "Neljapäev"
+
+#: fpg_constants:rstoday
+msgid "Today"
+msgstr "Täna"
+
+#: fpg_constants:rstrue
+msgid "True"
+msgstr "Tõene"
+
+#: fpg_constants:rsshorttue
+msgid "Tue"
+msgstr "Teisip"
+
+#: fpg_constants:rslongtue
+msgid "Tuesday"
+msgstr "Teisipäev"
+
+#: fpg_constants:rsfiletype
+msgid "Type of file"
+msgstr ""
+
+#: fpg_constants:rstypeface
+msgid "Typeface"
+msgstr ""
+
+#: fpg_constants:rsunderscore
+msgid "UnderScore"
+msgstr "Alakriips"
+
+#: fpg_constants:rskeyup
+msgid "Up"
+msgstr "Üles"
+
+#: fpg_constants:rsusername
+msgid "User name"
+msgstr "Kasutaja nimi"
+
+#: fpg_constants:rswarning
+msgid "Warning"
+msgstr "Hoiatus"
+
+#: fpg_constants:rsshortwed
+msgid "Wed"
+msgstr "Kolmap"
+
+#: fpg_constants:rslongwed
+msgid "Wednesday"
+msgstr "Kolmapäev"
+
+#: fpg_constants:rsaddnewitem
+msgid "Would you like to add the new item <%s> to the list?"
+msgstr ""
+
+#: fpg_constants:rsyes
+msgid "Yes"
+msgstr "Jah"
+
+#: fpg_constants:rsyestoall
+msgid "Yes to All"
+msgstr "Jah kõigile"
+
+#: fpg_constants:rsreportpageof
+msgid "of"
+msgstr ""
+

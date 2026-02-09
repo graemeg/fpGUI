@@ -20,7 +20,7 @@ type
   private
     FHorBar: TfpgScrollbar;
     FVerBar: TfpgScrollbar;
-    FList: TList;
+    FList: TFPList;
     FActiveWindow: TfpgMDIChildForm;
     FScrollingHorizonal: Boolean;
     FLastHorizonalPos: integer;
@@ -100,7 +100,7 @@ var
   dx, dy: integer;
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, AMousePos);
+  pt := WidgetToScreen(self, AMousePos);
   if not FIsMouseDown then
   begin
     FLastPos := pt;
@@ -112,7 +112,7 @@ begin
   Left := Left + dx;
   Top := Top + dy;
   FLastPos := pt;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TfpgMDIChildForm.TitleMouseUp(Sender: TObject; AButton: TMouseButton;
@@ -127,7 +127,7 @@ procedure TfpgMDIChildForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton
 begin
   FMDIWorkArea.ActiveWindow := self;
   FIsMouseDown := True;
-  FLastPos := Panel1.WindowToScreen(self, AMousePos);
+  FLastPos := Panel1.WidgetToScreen(self, AMousePos);
   Panel1.CaptureMouse;
 end;
 
@@ -385,8 +385,8 @@ begin
   begin
     if csDestroying in TComponent(msg.Sender).ComponentState then
       Exit;
-    RemoveComponent(TfpgMDIChildForm(msg.Sender));
     i := FList.IndexOf(TfpgMDIChildForm(msg.Sender));
+    RemoveComponent(TfpgMDIChildForm(msg.Sender));
     if i = -1 then
       raise Exception.Create('Could not find MDI Child Form');
     FList.Delete(i);
@@ -474,7 +474,6 @@ end;
 
 procedure TfpgMDIWorkArea.HorizontalScrollBarScrolled(Sender: TObject; position: integer);
 var
-  w: integer;
   i: integer;
   c: TfpgMDIChildForm;
 begin
@@ -487,7 +486,7 @@ begin
     begin
       c := Components[i] as TfpgMDIChildForm;
       c.Left := c.Left + (FLastHorizonalPos - position);
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       fpgApplication.ProcessMessages;
     end;
   end;
@@ -539,7 +538,7 @@ begin
 
   PositionScrollBars;
 
-  FList := TList.Create;
+  FList := TFPList.Create;
   FActiveWindow := nil;
 end;
 
@@ -565,29 +564,28 @@ procedure TfpgMDIWorkArea.CascadeWindows;
 const
   GAP = 25;
 var
-  w: integer;
   i: integer;
   c: TfpgMDIChildForm;
   x, y: integer;
 begin
   x := 5;
   y := 5;
-  for i := 0 to ComponentCount -1 do
+  c := nil;
+  for i := 0 to FList.Count - 1 do
   begin
-    if Components[i] is TfpgScrollBar then
-      continue;
-    if Components[i] is TfpgMDIChildForm then
+    if TObject(FList[i]) is TfpgMDIChildForm then
     begin
-      c := Components[i] as TfpgMDIChildForm;
+      c := TfpgMDIChildForm(FList[i]);
       c.Left := x;
       x += GAP;
       c.Top := y;
       y += GAP;
-      c.UpdateWindowPosition;
+      c.UpdatePosition;
       c.BringToFront;
     end;
   end;
-  ActiveWindow := c;
+  if Assigned(c) then
+    ActiveWindow := c;
 end;
 
 end.

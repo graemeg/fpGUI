@@ -41,7 +41,7 @@ end;
 procedure TMainForm.CustomPaintJob;
 var
   r: TfpgRect;
-  fnt: TfpgFont;
+  fnt: TfpgFontResourceBase;
   y: integer;
   c: TfpgColor;
   lImage: TfpgImage;
@@ -96,7 +96,7 @@ begin
   // Testing Text and Fonts
   y := 60;
   Canvas.SetTextColor(clBlack);
-  Canvas.DrawString(5, y, 'This text must be black and default font (' + fpgStyle.DefaultFont.FontDesc + ')');
+  Canvas.DrawString(5, y, 'This text must be black and default font');
 
   // red dot indicates top/left corner of where previous text was started
   Canvas.Pixels[5,y] := clRed;
@@ -104,20 +104,20 @@ begin
 //  Canvas.DrawLine(1,y, 10, y);
 
   Canvas.SetTextColor(clRed);
-  y := y + Canvas.Font.Height;  // fonts are different sizes on differet OS's
+  y := y + Canvas.Font.GetHeight();  // fonts are different sizes on differet OS's
   Canvas.DrawString(5, y, 'This text must be red.');
   Canvas.SetTextColor(clBlack);
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
   Canvas.DrawString(5, y, 'Russian (UTF-8) text -> Òåñò');
-  y := y + Canvas.Font.Height;
-  fnt := fpgApplication.GetFont('Times-14:bold');
-  Canvas.Font := fnt;
-  Canvas.DrawString(5, y, 'Font used is ' + Canvas.Font.FontDesc);
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
+  fnt := fpgApplication.FontManager.GetFont('Times-14:bold');
+  Canvas.SetFont(fnt);
+  Canvas.DrawString(5, y, 'Font used is Times-14:bold');
+  y := y + fnt.GetHeight;
 
 
   // Testing basic style drawings
-  Canvas.Font := fpgStyle.DefaultFont;
+  Canvas.SetFont(fpgStyle.GetDefaultFont);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
 
   r.SetRect(300, 20, 75, 25);
@@ -137,7 +137,7 @@ begin
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
 
   Canvas.DrawString(45, y, 'DrawControlFrame():');
-  y := y + Canvas.Font.Height;
+  y := y + Canvas.Font.GetHeight();
   fpgStyle.DrawControlFrame(Canvas, 5, y, 200, 23);
 
 

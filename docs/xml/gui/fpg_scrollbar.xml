@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_scrollbar">
+<short>Defines scrollbar widgets</short>
+<descr><printshort id="fpg_scrollbar"/>.</descr>
+
+<element name="TfpgScrollStyle.ssNone">
+<short>Don't display any scrollbars</short>
+<descr><printshort id="TfpgScrollStyle.ssNone"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssHorizontal">
+<short>A horizontal scrollbar is shown</short>
+<descr><printshort id="TfpgScrollStyle.ssHorizontal"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssVertical">
+<short>A vertical scrollbar is shown</short>
+<descr><printshort id="TfpgScrollStyle.ssVertical"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssBoth">
+<short>Both horizontal and vertical scrollbars are shown</short>
+<descr><printshort id="TfpgScrollStyle.ssBoth"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssAutoHorizontal">
+<short>A horizontal scrollbar is shown when needed</short>
+<descr><printshort id="TfpgScrollStyle.ssAutoHorizontal"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssAutoVertical">
+<short>A vertical scrollbar is shown when needed</short>
+<descr><printshort id="TfpgScrollStyle.ssAutoVertical"/>.</descr>
+</element>
+
+<element name="TfpgScrollStyle.ssAutoBoth">
+<short>Both horizontal and vertical scrollbars are shown when needed</short>
+<descr><printshort id="TfpgScrollStyle.ssAutoBoth"/>.</descr>
+</element>
+
+</module>
+
+</package>
+</fpdoc-descriptions>

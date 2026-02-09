@@ -32,8 +32,6 @@ procedure TMainForm.HandlePaint;
 var
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
-  inherited HandlePaint;
   Canvas.Clear(clSteelBlue);
 
   Canvas.DrawString(10, 10, 'Original 50x50 image:');
@@ -54,8 +52,8 @@ begin
   Canvas.DrawRectangle(102, 102, 46, 46);  // (over second outer black rectangle)
   Canvas.SetColor(clMagenta);
   Canvas.DrawRectangle(104, 104, 42, 42);  // (over third outer black rectangle)
-  r.SetRect(104, 104, 42, 42);
-  Canvas.DrawFocusRect(r);  // (over third outer magenta rectangle)
+//  r.SetRect(104, 104, 42, 42);
+//  Canvas.DrawFocusRect(r);  // (over third outer magenta rectangle)
 
   // Point (outer 4 corners)
   Canvas.Pixels[100, 100] := clBlue;
@@ -83,8 +81,6 @@ begin
   Canvas.DrawLine(106, 106, 144, 106);
   Canvas.DrawLine(106, 143, 144, 143);
 
-
-  Canvas.EndDraw;
 end;
 
 procedure TMainForm.HandleShow;
@@ -99,7 +95,6 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Draw test';
   SetPosition(100, 100, 300, 300);
-
 end;
 
 destructor TMainForm.Destroy;
@@ -116,8 +111,12 @@ var
 begin
   fpgApplication.Initialize;
   frm := TMainForm.Create(nil);
-  frm.Show;
-  fpgApplication.Run;
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
 end;
 
 begin

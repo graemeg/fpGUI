@@ -5,47 +5,59 @@
 
 
 
-Building fpGUI from the Command Line
-════════════════════════════════════
+Building fpGUI from the Command Line (using PasBuild)
+═════════════════════════════════════════════════════
 
-This is still a work in progress until I can find a suitable solution. I'm
-not 100% satisfied with this, but it's a quick and dirty way to get things
-to compile. I'll assume you have the 'fpc' executable setup in your PATH so it
-can be run from any location on your computer. I'll also assume your global
-fpc.cfg file has been setup correctly so the FPC compiler can find the RTL and
-FCL units.
+fpGUI uses PasBuild, a Maven-inspired build tool for Free Pascal projects.
+You will need PasBuild installed and the 'fpc' executable available in your
+PATH. Your global fpc.cfg file should be set up correctly so the FPC compiler
+can find the RTL and FCL units.
 
-Under Linux, *BSD, OpenSolaris and MacOSX run:
-   cd <fpgui>/src
-   build.sh
+To compile the framework from the project root directory:
+
+Under Linux and FreeBSD run:
+   pasbuild compile -p unix,agg
 
 Under Windows run:
-   cd <fpgui>\src
-   build.bat
+   pasbuild compile -p windows,agg
 
+Under MacOS run:
+   pasbuild compile -p macos,agg
 
-The extrafpc.cfg file located in the src directory is combined with your global
-fpc.cfg file. The local extrafpc.cfg file sets up all the required search and
-include paths to compile the CoreLib and GUI directories.
+To compile with debug information, add the debug profile:
+   pasbuild compile -p unix,agg,debug
 
-All compiled units (*.o and *.ppu) are saved in the <fpgui>/lib directory. This
-makes the search paths for you applications a little easier to setup.
+To run unit tests:
+   pasbuild test -p unix,agg,debug
+
+All compiled units (*.o and *.ppu) are output to the
+<fpgui>/framework/target/units/ directory.
+
+Then in your own project, simply add "<fpgui>/framework/target/units" to
+the -Fu unit path of your project.
 
 
 Building fpGUI using Lazarus
 ════════════════════════════
 
-I use a Lazarus feature call Packages that compiles the required
-units and keeps track of the compiled units and paths when creating
-applications.
+Lazarus IDE uses Packages (.lpk files) to compile the required units and
+keep track of compiled units and paths when creating applications. The
+Lazarus package files are located in the "extras/" directory, separate from
+the framework source code.
 
  * Start Lazarus
- * Select Components->Open Package File (*.lpk) and select the
-    src/corelib/<your platform>/fpgui_toolkit.lpk
+ * First, open the AggPas dependency package:
+   Select Components->Open Package File (*.lpk) and open
+     extras/aggpas/aggpas.lpk
+   A new dialog will appear - click Compile.
+ * Next, open the fpGUI toolkit package for your platform:
+   Select Components->Open Package File (*.lpk) and open
+     extras/lazarus_ide/<your platform>/fpgui_toolkit.lpk
    Under Linux/FreeBSD the .lpk file will be in the 'x11' directory.
    Under Windows the .lpk file will be in the 'gdi' directory.
+   Under MacOS the .lpk file will be in the 'cocoa' directory.
    A new dialog will appear - click Compile.
- * Lazarus has now compiled the package and will keep track of
+ * Lazarus has now compiled the packages and will keep track of
    all the compiled units and paths.
  * Now lets open a project. Select Project->Open Project and select
    any project in the examples/gui directory. Select the *.lpi file.
@@ -54,16 +66,16 @@ applications.
    source. The compiled units will be placed in the <project>/units
    directory.
 
-When you create you own project, all you need to do is tell Lazarus to
-associate the 'fpgui_package.lpk' with your project and it will automatically
-find all the fpGUI compiled units and source for you.
+When you create your own project, all you need to do is tell Lazarus to
+associate the 'fpgui_toolkit' package with your project and it will
+automatically find all the fpGUI compiled units and source for you.
 
  * Creating a new project. Select Project->New Project.  Select
    Program and click the Create button.
  * Save the project in your preferred directory.
  * Associate fpGUI with your project. Select Project->Project Inspector.
-   An new dialog will appear. Select Add then New Requirements. In the
-   Package Name combobox, select the 'fpgui_package' package and
+   A new dialog will appear. Select Add then New Requirements. In the
+   Package Name combobox, select the 'fpgui_toolkit' package and
    click OK.
  * You can now write your program and use any fpGUI units. Lazarus will
    automatically include the paths to the fpGUI compiled units for you.
@@ -73,107 +85,91 @@ Building fpGUI from the Free Pascal Text IDE
 ════════════════════════════════════════════
 
 First you would need to setup the 'fp' IDE to find the related files.
-As far as I understand the text mode IDE has it's own built-in compiler
+As far as I understand the text mode IDE has its own built-in compiler
 so doesn't read the standard fpc.cfg file.
 
  * Run the text mode IDE from the command line:  fp
  * Navigate the menus to: Options|Directories and select the 'Units'
    tab.
  * Now enter the following directories replacing the relevant parts with
-   your actual paths. The example below is valid on my system only.
-   I was using FPC 2.2.0 under Linux and the X11 corelib backend.
+   your actual full paths for fpGUI.
 
-    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/*
-    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/rtl
-    /home/graemeg/programming/fpGUI/src/corelib
-    /home/graemeg/programming/fpGUI/src/corelib/x11
-    /home/graemeg/programming/fpGUI/src/gui
+   For Unix-like systems (Linux, *BSD, OpenSolaris and MacOS):
+   -----------------------------------------------------------
+   full_path_to/fpGUI/framework/src/main/pascal/corelib
+   full_path_to/fpGUI/framework/src/main/pascal/corelib/<platform>
+   full_path_to/fpGUI/framework/src/main/pascal/corelib/render/software
+   full_path_to/fpGUI/framework/src/main/pascal/gui
+   full_path_to/fpGUI/framework/src/main/pascal/gui/db
+   full_path_to/fpGUI/framework/src/main/pascal/3rdparty/regex
+
+   For Windows:
+   -----------
+   full_path_to\fpGUI\framework\src\main\pascal\corelib
+   full_path_to\fpGUI\framework\src\main\pascal\corelib\gdi
+   full_path_to\fpGUI\framework\src\main\pascal\corelib\render\software
+   full_path_to\fpGUI\framework\src\main\pascal\gui
+   full_path_to\fpGUI\framework\src\main\pascal\gui\db
+   full_path_to\fpGUI\framework\src\main\pascal\3rdparty\regex
 
  * Now select the 'Include files' tab and enter the following paths.
    Again change the paths to point to your actual directories and
    X11 or GDI corelib backend.
 
-    /home/graemeg/programming/fpGUI/src/corelib
-    /home/graemeg/programming/fpGUI/src/corelib/x11
+    For Unix-like systems (Linux, *BSD, OpenSolaris and MacOS):
+    -----------------------------------------------------------
+    full_path_to/fpGUI/framework/src/main/pascal/corelib
+    full_path_to/fpGUI/framework/src/main/pascal/corelib/x11
+    full_path_to/fpGUI/framework/src/main/pascal/corelib/render/software
+    full_path_to/fpGUI/framework/src/main/resources
+
+    For Windows:
+    -----------
+    full_path_to\fpGUI\framework\src\main\pascal\corelib
+    full_path_to\fpGUI\framework\src\main\pascal\corelib\gdi
+    full_path_to\fpGUI\framework\src\main\pascal\corelib\render\software
+    full_path_to\fpGUI\framework\src\main\resources
 
  * Now changes to 'Miscellaneous' tab, PPU output directory. Type in
-   the edit box:  units
+   the edit box:  full_path_to/fpGUI/framework/target/units
 
    NOTE:
-   This will place all the compiled *.ppu and *.o files into a 'units'
-   directory inside you current directory. So make sure you create it
+   This will place all the compiled *.ppu and *.o files into the
+   framework/target/units/ directory. Make sure the directory exists
    before you try to compile for the first time. FPC doesn't create
    directories for you!
 
- * Now you are ready to open your projects main program unit (F3) and
-   compiling it by pressing (F9).
+ * To create all the units for fpGUI,
+   compile one of the following:
+     full_path_to/fpGUI/extras/lazarus_ide/x11/fpgui_toolkit.pas   // for Unix-like systems
+     full_path_to\fpGUI\extras\lazarus_ide\gdi\fpgui_toolkit.pas   // for Windows
+
+ * Now you can restore your Free Pascal configuration by:
+     - remove all the directories added in the Units Tab
+     - remove the directories added in Include Files Tab
+     - remove units from the Miscellaneous tab
+
+ * Add the compiled units directory to the Units tab:
+     full_path_to/fpGUI/framework/target/units
+
+You are ready to open your project's main program unit (F3) and
+compiling it by pressing (F9).
 
 
 Compiling any of the examples from the Command Line
 ═══════════════════════════════════════════════════
 
-You need to compile fpGUI first as mentioned above!
-Every project in the ../examples directory has it's own extrafpc.cfg file.
+You need to compile fpGUI first, as mentioned above!
+Every project in the `examples` directory has its own `extrafpc.cfg` file.
 You only need to specify that config file and the project unit to compile
 it.
 
-fpc @extrafpc.cfg <project unit>
+fpc @extrafpc.cfg <project_unit>
 
 Example:
-  fpc @extrafpc.cfg docedit.lpr
+  cd examples/gui/alignment
+  fpc @extrafpc.cfg aligntest.lpr
 
-
-Mac OSX instructions and known issues
-═════════════════════════════════════
-
-NOTE #1:
-  MacOSX is still an unsupported platform, but users have reported
-  that it works, so I decided to add some of their notes here for any other
-  Mac users that want to try fpGUI.
-
-NOTE #2:
-  It seems Apple stopped shipping X11 with OSX. From OSX 10.9 you need to
-  install X11 Server support by downloading it from the open source project
-  named XQuartz [http://xquartz.macosforge.org/landing/].
-
-To compile and run fpGUI based application under MacOSX, you use the X11 backend.
-X11 is included with all recent MacOSX versions (in older OSX versions it was a
-separate install - but included on the install DVD).
-
-An example workflow to work with any fpgui app is:
-a) launch X11 (Applications -> Utilities)
-b) start the X11 console xterm (Cmd+N or from the X11 menu)
-c) change to the directory of the fpGUI application. For example:
-     cd ./Documents/fpgui/examples/apps
-   if you put fpgui in your Documents folder.
-d) type ./appname to start the application "appname"
-
- * Apparently starting fpGUI apps from an icon on the desktop requires that you
-   double click the icon twice. This issue seems to be common with other X11
-   apps under OSX as well. eg: Gimp, any GTK2 app etc.. Alternatively, start it
-   from a X11 console, then it runs first time.
-
- * This issue is more about FPC then fpGUI specific, but it's handy to know. In
-   many standard Xcode + X11 installation, the linker can't find the X11
-   libraries. So changing the fpc.cfg by adding
-      -Fl/usr/X11/lib
-   in the search library path solved the problem. Mac usually doesn't let you
-   choose the path during installation, so probably other OSX users will
-   have to double check the correct X11 library path.
-
-   If you still get the error about the missing X11 the you might have to setup
-   a generic symlink. eg:
-
-      cd /usr/X11/lib
-      sudo ln -s libX11.6.dylib libX11.dylib
-      sudo ln -s libXft.2.dylib libXft.dylib
-      sudo ln -s libfontconfig.1.dylib libfontconfig.dylib
-
- * Compiling from the command line, the compiler cannot create the
-   sub-directory "units" used by most demos included with fpGUI. So remember to
-   create such a directory if the compilation fails. The compiler output will
-   clearly state such a situation. When using Lazarus or Maximus IDE to compile
-   fpGUI projects, the IDE will creates the missing unit output path for you.
 
 
 

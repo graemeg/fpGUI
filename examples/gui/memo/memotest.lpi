@@ -25,7 +25,6 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -37,7 +36,6 @@
       <Unit0>
         <Filename Value="memotest.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="memotest"/>
       </Unit0>
     </Units>
   </ProjectOptions>
@@ -54,8 +52,5 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

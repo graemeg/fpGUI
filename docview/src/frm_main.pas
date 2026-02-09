@@ -23,6 +23,7 @@ type
   // doesn't contain it's own index entries.
   TListType = ( ltContents, ltIndex );
 
+
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainForm}
@@ -112,9 +113,19 @@ type
     Bookmarks: TList;
     BookmarksMenuItems: TList;
 
-    procedure   RichViewDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    procedure   tvContentsDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    procedure   tvContentsDragEntered(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
+    procedure   uiCreateStatusBar;
+    procedure   uiCreateMenuBar;
+    procedure   uiCreateToolBar;
+    procedure   uiCreateContextArea;
+    procedure   uiCreateContentsTab;
+    procedure   uiCreateIndexTab;
+    procedure   uiCreateSearchPage;
+    procedure   uiCreateNotesPage;
+    procedure   uiCreateHistoryPage;
+
+    procedure   RichViewDragDrop(Drop: TfpgDrop; AData: Variant);
+    procedure   tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
+    procedure   tvContentsDragEntered(Drop: TfpgDrop);
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
     procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
@@ -257,6 +268,7 @@ type
     procedure   OnBookmarksChanged(Sender: TObject);
     procedure   BuildBookmarksMenu;
     procedure   NavigateToBookmark(Bookmark: TBookmark);
+    procedure   ShowMimeList(AMimeList: TfpgMimeDataItemList);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -290,6 +302,8 @@ uses
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit
+  ,fpg_miglayout
+  ,fpg_mig_cc
   ;
 
 const
@@ -339,18 +353,851 @@ begin
   btnNext.Click;
 end;
 
+procedure TMainForm.uiCreateStatusBar;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'status bar' -fold}
+  bvlStatusBar := TfpgBevel.Create(self);
+  with bvlStatusBar do
+  begin
+    Name := 'bvlStatusBar';
+    PreferredSize := fpgSize(600, 24);
+    Style := bsLowered;
+    BackgroundColor := clDarkKhaki;
+  end;
+
+  lblStatus := TfpgLabel.Create(bvlStatusBar);
+  with lblStatus do
+  begin
+    Name := 'lblStatus';
+    PreferredSize := fpgSize(400, 16);
+    Text := '';
+    FontDesc := '#Label1';
+  end;
+
+  ProgressBar := TfpgProgressBar.Create(bvlStatusBar);
+  with ProgressBar do
+  begin
+    Name := 'ProgressBar';
+    PreferredSize := fpgSize(150, 16);
+  end;
+
+  {%endregion}
+
+  bvlStatusBar.LayoutManager := lm;
+  lm.LC.InsetsAll('2lp').FillX;
+  lm.AddLayoutComponent(lblStatus, TfpgMigCC.Create.Width('80%'));
+  lm.AddLayoutComponent(ProgressBar, TfpgMigCC.Create.Width('20%'));
+end;
+
+procedure TMainForm.uiCreateMenuBar;
+begin
+  {%region 'main menu' -fold}
+  MainMenu := TfpgMenuBar.Create(self);
+  with MainMenu do
+  begin
+    Name := 'MainMenu';
+    PreferredSize := fpgSize(600, 24);
+  end;
+
+  miFile := TfpgPopupMenu.Create(self);
+  with miFile do
+  begin
+    Name := 'miFile';
+    SetPosition(292, 96, 132, 20);
+    AddMenuItem('Open...', rsKeyCtrl+'O', @miFileOpenClicked);
+    AddMenuItem('Open additional file...', rsKeyCtrl+rsKeyShift+'O', @miFileOpenAdditionalFileClicked);
+    AddMenuItem('Open Special...', rsKeyCtrl+'L', @miFileOpenSpecialClicked);
+    AddMenuItem('Save current Topic to IPF...', rsKeyCtrl+'S', @miFileSaveTopicAsIPF);
+    AddMenuItem('Close', rsKeyCtrl+'W', @miFileCloseClicked);
+    AddSeparator;
+    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
+    AddMenuitem('-', '', nil);
+    AddMenuItem('Quit', 'Ctrl+Q', @miFileQuitClicked);
+  end;
+
+  miActions := TfpgPopupMenu.Create(self);
+  with miActions do
+  begin
+    Name := 'miActions';
+    SetPosition(282, 96, 132, 20);
+    AddMenuItem('Contents', 'F5', @miActionsContentsClicked);
+    AddMenuItem('Index', 'F6', @miActionsIndexClicked);
+    AddMenuItem('Search', 'F7', @miActionsSearchClicked);
+    AddMenuItem('Notes', 'F8', @miActionsNotesClicked);
+    AddMenuItem('History', 'F9', @miActionsHistoryClicked);
+    AddSeparator;
+    AddMenuItem('Back', rsKeyCtrl+'Left', @miActionsBackClicked);
+    AddMenuItem('Forward', rsKeyCtrl+'Right', @miActionsForwardClicked);
+    AddMenuItem('Previous Topic', rsKeyCtrl+'Up', @miActionsPrevTopicClicked);
+    AddMenuItem('Next Topic', rsKeyCtrl+'Down', @miActionsNextTopicClicked);
+  end;
+
+  miSettings := TfpgPopupMenu.Create(self);
+  with miSettings do
+  begin
+    Name := 'miSettings';
+    SetPosition(292, 120, 132, 20);
+    AddMenuItem('Options...', '', @miConfigureClicked);
+  end;
+
+  miBookmarks := TfpgPopupMenu.Create(self);
+  with miBookmarks do
+  begin
+    Name := 'miBookmarks';
+    SetPosition(292, 144, 132, 20);
+    AddMenuItem('Add', rsKeyCtrl+'B', @btnBookmarkClick);
+    AddMenuItem('Edit...', rsKeyCtrl+'D', @miOpenBookmarksMenuClicked);
+    AddSeparator;
+    AddMenuItem('Add note at cursor position', rsKeyCtrl+'M', @btnNotesAddClick);
+  end;
+
+  miView := TfpgPopupMenu.Create(self);
+  with miView do
+  begin
+    Name := 'miView';
+    SetPosition(292, 216, 132, 20);
+    AddMenuItem('Expand All', '', @miViewExpandAllClicked);
+    AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
+    AddSeparator;
+    AddMenuItem('Topic Properties', '', @miTopicPropertiesClicked);
+  end;
+
+  miTools := TfpgPopupMenu.Create(self);
+  with miTools do
+  begin
+    Name := 'miTools';
+    SetPosition(428, 96, 120, 20);
+    AddMenuItem('Show file info', '', @miShowFileInfoClicked);
+    AddMenuItem('Find topic by resource ID', '', @miToolsFindByResourceID);
+    AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
+    miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
+    AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
+    AddMenuItem('Current topic properties', '', @miTopicPropertiesClicked);
+    AddMenuItem('Dump dictionary to file in temp directory', '', @miDumpDictionaryClicked);
+    AddMenuItem('Show DocView used environment variables', '', @miToolsShowEnvVariablesClicked);
+  end;
+
+  miHelp := TfpgPopupMenu.Create(self);
+  with miHelp do
+  begin
+    Name := 'miHelp';
+    SetPosition(292, 168, 132, 20);
+    AddMenuItem('Help using DocView', rsKeyCtrl+'F1', @miHelpUsingDocView);
+    AddMenuItem('Command line parameters', rsKeyCtrl+rsKeyShift+'F1', @miHelpCmdLineParams);
+    AddSeparator;
+    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
+    AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
+  end;
+
+  {%endregion}
+end;
+
+procedure TMainForm.uiCreateToolBar;
+begin
+  {%region 'toolbar' -fold}
+  ToolBar := TfpgBevel.Create(self);
+  with ToolBar do
+  begin
+    Name := 'ToolBar';
+    PreferredSize := fpgSize(600, 28);
+    Shape := bsBottomLine;
+    Style := bsLowered;
+  end;
+
+  btnQuit := TfpgButton.Create(ToolBar);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(4, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Quit the application';
+    ImageMargin := -1;
+    ImageName := 'stdimg.quit';
+    ImageSpacing := 0;
+    TabOrder := 8;
+    OnClick := @miFileQuitClicked;
+    Focusable := False;
+  end;
+
+  btnOpen := TfpgButton.Create(ToolBar);
+  with btnOpen do
+  begin
+    Name := 'btnOpen';
+    SetPosition(30, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Open a new help file';
+    ImageMargin := -1;
+    ImageName := 'stdimg.open';
+    ImageSpacing := 0;
+    TabOrder := 0;
+    OnClick := @miFileOpenClicked;
+    Focusable := False;
+  end;
+
+  Bevel1 := TfpgBevel.Create(ToolBar);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(61, 0, 6, 24);
+    Hint := '';
+    Shape := bsLeftLine;
+    Style := bsLowered;
+  end;
+
+  btnBack := TfpgButton.Create(ToolBar);
+  with btnBack do
+  begin
+    Name := 'btnBack';
+    SetPosition(70, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Previous history item';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowleft';
+    ImageSpacing := 0;
+    TabOrder := 2;
+    Focusable := False;
+    OnClick := @btnBackHistClick;
+  end;
+
+  btnFwd := TfpgButton.Create(ToolBar);
+  with btnFwd do
+  begin
+    Name := 'btnFwd';
+    SetPosition(104, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Next history item';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowright';
+    ImageSpacing := 0;
+    TabOrder := 3;
+    Focusable := False;
+    OnClick := @btnFwdHistClick;
+  end;
+
+  btnPrev := TfpgButton.Create(ToolBar);
+  with btnPrev do
+  begin
+    Name := 'btnPrev';
+    SetPosition(138, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Previous Topic';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowup';
+    ImageSpacing := 0;
+    TabOrder := 4;
+    Focusable := False;
+    OnClick := @btnPrevClick;
+  end;
+
+  btnNext := TfpgButton.Create(ToolBar);
+  with btnNext do
+  begin
+    Name := 'btnNext';
+    SetPosition(172, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Next Topic';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowdown';
+    ImageSpacing := 0;
+    TabOrder := 5;
+    Focusable := False;
+    OnClick := @btnNextClick;
+  end;
+
+  Bevel2 := TfpgBevel.Create(ToolBar);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(210, 0, 6, 24);
+    Hint := '';
+    Shape := bsLeftLine;
+    Style := bsLowered;
+  end;
+
+  btnTBNoteAdd := TfpgButton.Create(ToolBar);
+  with btnTBNoteAdd do
+  begin
+    Name := 'btnTBNoteAdd';
+    SetPosition(218, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Add an annotation';
+    ImageMargin := -1;
+    ImageName := 'dv.notegreen';
+    ImageSpacing := 0;
+    TabOrder := 12;
+    Focusable := False;
+    OnClick := @btnTBNoteAddClick;
+  end;
+
+  btnBookmark := TfpgButton.Create(ToolBar);
+  with btnBookmark do
+  begin
+    Name := 'btnBookmark';
+    SetPosition(244, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Add a bookmark';
+    ImageMargin := -1;
+    ImageName := 'stdimg.bookmark';
+    ImageSpacing := 0;
+    TabOrder := 5;
+    Focusable := False;
+    OnClick := @btnBookmarkClick;
+  end;
+
+  Bevel3 := TfpgBevel.Create(ToolBar);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(275, 0, 6, 24);
+    Hint := '';
+    Shape := bsLeftLine;
+    Style := bsLowered;
+  end;
+
+  btnHelp := TfpgButton.Create(ToolBar);
+  with btnHelp do
+  begin
+    Name := 'btnHelp';
+    SetPosition(283, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Display Product Information';
+    ImageMargin := -1;
+    ImageName := 'stdimg.about';
+    ImageSpacing := 0;
+    TabOrder := 6;
+    Focusable := False;
+    OnClick := @miHelpProdInfoClicked;
+  end;
+
+  cbEncoding := TfpgComboBox.Create(ToolBar);
+  with cbEncoding do
+  begin
+    Name := 'cbEncoding';
+    SetPosition(524, 2, 124, 22);
+    Anchors := [anRight,anTop];
+    ExtraHint := '';
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('UTF-8');
+    Items.Add('CP437');
+    Items.Add('CP850');
+    Items.Add('CP866');
+    Items.Add('CP1250');
+    Items.Add('IBM Graph (cp437)');
+    FocusItem := 0;
+    TabOrder := 10;
+    OnChange  := @cbEncodingChanged;
+  end;
+
+  {%endregion}
+end;
+
+procedure TMainForm.uiCreateContextArea;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'body area' -fold}
+  bvlBody := TfpgBevel.Create(self);
+  with bvlBody do
+  begin
+    Name := 'bvlBody';
+    PreferredSize := fpgSize(600, 400);
+    Shape := bsSpacer;
+  end;
+
+  PageControl1 := TfpgPageControl.Create(bvlBody);
+  with PageControl1 do
+  begin
+    Name := 'PageControl1';
+    PreferredSize := fpgSize(260, 350);
+    TabOrder := 0;
+    OnChange := @PageControl1Change;
+  end;
+
+  // Create the page control tabs
+  uiCreateContentsTab;
+  uiCreateIndexTab;
+  uiCreateSearchPage;
+  uiCreateNotesPage;
+  uiCreateHistoryPage;
+
+  pnlTitle := TfpgPanel.Create(bvlBody);
+  with pnlTitle do
+  begin
+    Name := 'pnlTitle';
+    PreferredSize := fpgSize(400, 20);
+    Alignment := taLeftJustify;
+    BackgroundColor := fpgColor($55, $9D, $D4);
+    FontDesc := '#Label2';
+    Hint := '';
+    Margin := 15;
+    Style := bsFlat;
+    Text := 'Panel';
+    TextColor := fpgColor($FF, $FF, $FF);
+    OnPaint:= @pnlTitleGradientPaint;
+  end;
+
+  RichView := TRichTextView.Create(bvlBody);
+  with RichView do
+  begin
+    Name := 'RichView';
+    PreferredSize := fpgSize(350, 400);
+    MinWidth := 300;
+    TabOrder := 2;
+    OnOverLink  := @RichViewOverLink;
+    OnNotOverLink := @RichViewNotOverLink;
+    OnClickLink := @RichViewClickLink;
+    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @RichViewDragDrop, nil);
+  end;
+
+  {%endregion}
+
+  bvlBody.LayoutManager := lm;
+  lm.LC.InsetsAll('2lp').Fill;
+  lm.RowConstraints.Index(0).Grow(0).Index(1).Grow;
+  lm.AddLayoutComponent(PageControl1, TfpgMigCC.Create.SpanY(2).Width('260lp').MinWidth('120lp').GrowY.PushY);
+  lm.AddLayoutComponent(pnlTitle, TfpgMigCC.Create.GrowX.Height('20lp!').Wrap);
+  lm.AddLayoutComponent(RichView, TfpgMigCC.Create.GrowX.GrowY.Push);
+
+end;
+
+procedure TMainForm.uiCreateContentsTab;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'Contents Page' -fold}
+
+  tsContents := TfpgTabSheet.Create(PageControl1);
+  with tsContents do
+  begin
+    Name := 'tsContents';
+    PreferredSize := fpgSize(250, 300);
+    Text := 'Contents';
+  end;
+
+  tvContents := TfpgTreeView.Create(tsContents);
+  with tvContents do
+  begin
+    Name := 'tvContents';
+    PreferredSize := fpgSize(240, 300);
+    FontDesc := '#Label1';
+    ScrollWheelDelta := 60;
+    ShowImages := True;
+    TabOrder := 0;
+    OnChange  := @tvContentsChange;
+    DropHandler := TfpgDropEventHandler.Create(@tvContentsDragEntered, nil, @tvContentsDragDrop, nil);
+  end;
+
+  btnGo := TfpgButton.Create(tsContents);
+  with btnGo do
+  begin
+    Name := 'btnGo';
+    PreferredSize := fpgSize(80, 24);
+    Text := 'Go to';
+    FontDesc := '#Label1';
+    TabOrder := 1;
+    OnClick := @btnGoClicked;
+  end;
+  {%endregion}
+
+  tsContents.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(1);  // Single column layout (wrap after each component)
+  lm.AddLayoutComponent(btnGo, TfpgMigCC.Create.AlignX('right'));
+  lm.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowY);
+end;
+
+procedure TMainForm.uiCreateIndexTab;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'Index Page' -fold}
+  tsIndex := TfpgTabSheet.Create(PageControl1);
+  with tsIndex do
+  begin
+    Name := 'tsIndex';
+    PreferredSize := fpgSize(250, 300);
+    Text := 'Index';
+  end;
+
+  btnIndex := TfpgButton.Create(tsIndex);
+  with btnIndex do
+  begin
+    Name := 'btnIndex';
+    PreferredSize := fpgSize(80, 24);
+    Text := 'Go to';
+    FontDesc := '#Label1';
+    TabOrder := 1;
+    OnClick := @btnShowIndex;
+  end;
+
+  lbIndex := TfpgListBox.Create(tsIndex);
+  with lbIndex do
+  begin
+    Name := 'lbIndex';
+    PreferredSize := fpgSize(240, 300);
+    FontDesc := '#List';
+    TabOrder := 1;
+    OnDoubleClick  := @lbIndexDoubleClick;
+    OnKeyPress := @lbIndexKeyPress;
+  end;
+
+  IndexSearchEdit := TfpgEdit.Create(tsIndex);
+  with IndexSearchEdit do
+  begin
+    Name := 'IndexSearchEdit';
+    PreferredSize := fpgSize(100, 24);
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 2;
+    Text := '';
+    OnChange := @IndexSearchEditOnChange;
+    OnKeyPress :=@IndexSearchEditKeyPress;
+  end;
+
+  {%endregion}
+
+  tsIndex.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(IndexSearchEdit, TfpgMigCC.Create.GrowX);
+  lm.AddLayoutComponent(btnIndex, TfpgMigCC.Create.MinWidth('80lp'));
+  lm.AddLayoutComponent(lbIndex, TfpgMigCC.Create.SpanX(2).GrowY);
+end;
+
+procedure TMainForm.uiCreateSearchPage;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'Search Page' -fold}
+
+  tsSearch := TfpgTabSheet.Create(PageControl1);
+  with tsSearch do
+  begin
+    Name := 'tsSearch';
+    PreferredSize := fpgSize(250, 300);
+    Text := 'Search';
+  end;
+
+  Label1 := TfpgLabel.Create(tsSearch);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    PreferredSize := fpgSize(170, 16);
+    FontDesc := '#Label1';
+    Text := 'Search for:';
+  end;
+
+  edSearchText := TfpgEdit.Create(tsSearch);
+  with edSearchText do
+  begin
+    Name := 'edSearchText';
+    PreferredSize := fpgSize(200, 24);
+    ExtraHint := '';
+    FontDesc := '#Edit1';
+    TabOrder := 1;
+    Text := '';
+    OnKeyPress := @edSearchTextKeyPress;
+  end;
+
+  Label2 := TfpgLabel.Create(tsSearch);
+  with Label2 do
+  begin
+    Name := 'Label2';
+    PreferredSize := fpgSize(170, 16);
+    FontDesc := '#Label1';
+    Text := 'Criteria:';
+  end;
+
+  RadioButton1 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton1 do
+  begin
+    Name := 'RadioButton1';
+    PreferredSize := fpgSize(190, 20);
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 3;
+    Text := 'This section';
+  end;
+
+  RadioButton2 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton2 do
+  begin
+    Name := 'RadioButton2';
+    PreferredSize := fpgSize(190, 20);
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 4;
+    Text := 'Marked sections';
+  end;
+
+  RadioButton3 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton3 do
+  begin
+    Name := 'RadioButton3';
+    PreferredSize := fpgSize(190, 20);
+    Checked := True;
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 5;
+    Text := 'All sections';
+  end;
+
+  RadioButton4 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton4 do
+  begin
+    Name := 'RadioButton4';
+    PreferredSize := fpgSize(190, 20);
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 6;
+    Text := 'Index';
+  end;
+
+  RadioButton5 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton5 do
+  begin
+    Name := 'RadioButton5';
+    PreferredSize := fpgSize(190, 20);
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 7;
+    Text := 'Marked libraries';
+  end;
+
+  RadioButton6 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton6 do
+  begin
+    Name := 'RadioButton6';
+    PreferredSize := fpgSize(190, 20);
+    Enabled := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 8;
+    Text := 'All libraries';
+  end;
+
+  lbSearchResults := TfpgListBox.Create(tsSearch);
+  with lbSearchResults do
+  begin
+    Name := 'lbSearchResults';
+    PreferredSize := fpgSize(220, 100);
+    FontDesc := '#List';
+    TabOrder := 9;
+    OnDoubleClick := @lbSearchResultsDoubleClick;
+    OnKeyPress := @lbSearchResultsKeyPress;
+  end;
+
+  Label3 := TfpgLabel.Create(tsSearch);
+  with Label3 do
+  begin
+    Name := 'Label3';
+    PreferredSize := fpgSize(160, 16);
+    FontDesc := '#Label1';
+    Text := 'Search results:';
+  end;
+
+  btnSearch := TfpgButton.Create(tsSearch);
+  with btnSearch do
+  begin
+    Name := 'btnSearch';
+    PreferredSize := fpgSize(80, 24);
+    Text := 'Go';
+    FontDesc := '#Label1';
+    TabOrder := 11;
+    OnClick := @btnSearchClicked;
+  end;
+
+  {%endregion}
+
+  tsSearch.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(Label1, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(edSearchText, TfpgMigCC.Create.GrowX);
+  lm.AddLayoutComponent(btnSearch, TfpgMigCC.Create.MinWidth('80lp'));
+  lm.AddLayoutComponent(Label2, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton1, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton2, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton3, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton4, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton5, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(RadioButton6, TfpgMigCC.Create.SpanX(2).GrowX);
+  lm.AddLayoutComponent(Label3, TfpgMigCC.Create.SpanX(2).AlignY('bottom').GrowX);
+  lm.AddLayoutComponent(lbSearchResults, TfpgMigCC.Create.SpanX(2).GrowY.GrowX);
+end;
+
+procedure TMainForm.uiCreateNotesPage;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'Notes Page' -fold}
+
+  tsNotes := TfpgTabSheet.Create(PageControl1);
+  with tsNotes do
+  begin
+    Name := 'tsNotes';
+    PreferredSize := fpgSize(250, 300);
+    Text := 'Notes';
+  end;
+
+  NotesListBox := TfpgListBox.Create(tsNotes);
+  with NotesListBox do
+  begin
+    Name := 'NotesListBox';
+    PreferredSize := fpgSize(250, 300);
+    FontDesc := '#List';
+    TabOrder := 0;
+    OnDoubleClick  := @NotesListBoxDoubleClick;
+    OnKeyPress  := @NotesListBoxKeyPress;
+    OnChange  := @NotesListBoxChange;
+  end;
+
+  btnNotesAdd := TfpgButton.Create(tsNotes);
+  with btnNotesAdd do
+  begin
+    Name := 'btnNotesAdd';
+    PreferredSize := fpgSize(24, 24);
+    Text := '';
+    Enabled := False;
+    FontDesc := '#Label1';
+    ImageMargin := 0;
+    ImageName := 'stdimg.add';
+    TabOrder := 1;
+    OnClick  := @btnNotesAddClick;
+  end;
+
+  btnNotesEdit := TfpgButton.Create(tsNotes);
+  with btnNotesEdit do
+  begin
+    Name := 'btnNotesEdit';
+    PreferredSize := fpgSize(24, 24);
+    Text := '';
+    Enabled := False;
+    FontDesc := '#Label1';
+    ImageMargin := 0;
+    ImageName := 'stdimg.edit';
+    TabOrder := 2;
+    OnClick := @btnNotesEditClick;
+  end;
+
+  btnNotesDel := TfpgButton.Create(tsNotes);
+  with btnNotesDel do
+  begin
+    Name := 'btnNotesDel';
+    PreferredSize := fpgSize(24, 24);
+    Text := '';
+    Enabled := False;
+    FontDesc := '#Label1';
+    ImageMargin := 0;
+    ImageName := 'stdimg.remove';
+    TabOrder := 3;
+    OnClick := @btnNotesDelClick;
+  end;
+
+  btnNotesGoto := TfpgButton.Create(tsNotes);
+  with btnNotesGoto do
+  begin
+    Name := 'btnNotesGoto';
+    PreferredSize := fpgSize(80, 24);
+    Text := 'Go to';
+    FontDesc := '#Label1';
+    TabOrder := 4;
+    OnClick := @btnNotesGotoClicked;
+  end;
+
+  {%endregion}
+
+  tsNotes.LayoutManager := lm;
+  lm.LC.Fill.WrapAfter(2);
+  lm.AddLayoutComponent(btnNotesAdd, TfpgMigCC.Create.Split(3).GapX('0', '4lp').AlignX('left').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesEdit, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesDel, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
+  lm.AddLayoutComponent(btnNotesGoTo, TfpgMigCC.Create.AlignX('right').MinWidth('80lp'));
+  lm.AddLayoutComponent(NotesListBox, TfpgMigCC.Create.SpanX(2).GrowX.GrowY);
+end;
+
+procedure TMainForm.uiCreateHistoryPage;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'History Page' -fold}
+
+  tsHistory := TfpgTabSheet.Create(PageControl1);
+  with tsHistory do
+  begin
+    Name := 'tsHistory';
+    PreferredSize := fpgSize(250, 250);
+    Text := 'History';
+  end;
+
+  lbHistory := TfpgListBox.Create(tsHistory);
+  with lbHistory do
+  begin
+    Name := 'lbHistory';
+    PreferredSize := fpgSize(220, 100);
+    FontDesc := '#List';
+    TabOrder := 0;
+    OnDoubleClick := @lbHistoryDoubleClick;
+    OnKeyPress := @lbHistoryKeyPress;
+  end;
+
+  {%endregion}
+
+  tsHistory.LayoutManager := lm;
+  lm.LC.Fill;
+  lm.AddLayoutComponent(lbHistory, TfpgMigCC.Create.GrowX.GrowY);
+end;
+
 { If you drop on RichView, only load the first INF file (closing all others
   first. If you want multiple files or add more files, drop on Contents
   TreeView. }
-procedure TMainForm.RichViewDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.RichViewDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   s: string;
   i: integer;
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
+  OpenAdditionalFile := False;
   try
     for i := 0 to sl.Count-1 do
     begin
@@ -366,15 +1213,14 @@ begin
   end;
 end;
 
-procedure TMainForm.tvContentsDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.tvContentsDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   s: string;
   i: integer;
   sl: TStringList;
 begin
   sl := TStringList.Create;
-  sl.Text := Trim(AData);
+  sl.Text := Trim(string(AData));
   OpenAdditionalFile := True;
   try
     for i := 0 to sl.Count-1 do
@@ -391,22 +1237,20 @@ begin
   end;
 end;
 
-procedure TMainForm.tvContentsDragEntered(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.tvContentsDragEntered(Drop: TfpgDrop);
 var
-  i: integer;
   s: string;
 begin
+//  ShowMimeList(Drop.MimeTypes);
   { the mime type we want to accept }
   s := 'text/uri-list';
   { if we wil accept the drop, set Accept to True }
-  Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
+  Drop.CanDrop := Drop.AcceptMimeType([s]);
+  if Drop.CanDrop then
   begin
     { If the offered mime type is different, request our preference }
-    if AMimeChoice <> s then
-      AMimeChoice := s;
+    if Drop.MimeChoice <> s then
+      Drop.MimeChoice := s;
   end;
 end;
 
@@ -480,9 +1324,13 @@ end;
 
 procedure TMainForm.UpdateRichViewFromSettings;
 begin
-  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
-  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
+  RichView.RichTextSettings.BeginUpdate;
+  RichView.RichTextSettings.NormalFont := fpgApplication.FontManager.GetFont(Settings.NormalFontDesc);
+  RichView.RichTextSettings.FixedFont := fpgApplication.FontManager.GetFont(Settings.FixedFontDesc);
+  RichView.RichTextSettings.EndUpdate;
   RichView.ScrollDistance := Settings.ScrollDistance;
+  RichView.BackgroundColor := Settings.Colors[TopicBackgroundColorIndex];
+  RichView.Invalidate;
 end;
 
 procedure TMainForm.btnBackHistClick(Sender: TObject);
@@ -534,6 +1382,7 @@ procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
 var
   LinkDetails: TfpgString;
   LinkIndex: integer;
+  LinkTopic: string;
   lLink: THelpLink;
   lHelp: THelpFile;
   f: THelpFile;
@@ -543,6 +1392,7 @@ var
   lFound: Boolean;
   lURL: TfpgString;
   lNoteIndex: integer;
+  lPath: TfpgString;
 begin
   if pos(PARAM_LINK_NOTE, Link) > 0 then
   begin
@@ -557,12 +1407,14 @@ begin
   else if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
     LinkDetails := StrRightFrom( Link, 10 );    // 10 is starting pos of data, after 'external '
-    LinkIndex := StrToInt( ExtractNextValue( LinkDetails, ' ' ) );
+    LinkIndex := StrToInt(ExtractNextValue(LinkDetails, ' '));
+    LinkTopic := ExtractNextValue( LinkDetails, ' ');
+
     lHelp := CurrentTopic.HelpFile as THelpFile;
 
     lHelpFileName := lHelp.ReferencedFiles[ LinkIndex ];
 
-    { Only open the external file once. So see if it is already openned. }
+    { Only open the external file once. So see if it is already opened. }
     lFound := False;
     for i := 0 to CurrentOpenFiles.Count-1 do
     begin
@@ -572,13 +1424,20 @@ begin
     end;
     if not lFound then
     begin
+      // try what DocView considers the Current Directory
+      if not fpgFileExists(lHelpFileName) then
+      begin
+        // try the path of the INF file of the current topic.
+        lPath := fpgExtractFilePath(lHelp.Filename);
+        lHelpFileName := lPath + fpgExtractFileName(lHelpFileName);
+      end;
       OpenAdditionalFile := True;
-      OpenFile(lHelpFileName, '', false);
+      OpenFile(lHelpFileName, '', true);
       OpenAdditionalFile := False;
     end;
 
     { Not sure if we have an ID or Resource Name, so lets try both if possible }
-    if TryStrToInt(LinkDetails, i) then
+    if TryStrToInt(LinkTopic, i) then
       DisplayTopicByResourceID(i)
     else
       DisplayTopicByName(LinkDetails);
@@ -653,7 +1512,7 @@ begin
   // restore previous window position and size
   gINI.ReadFormState(self);
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
-  UpdateWindowPosition;
+  UpdatePosition;
 
   CreateMRUMenuItems;
   ProcessCommandLineParams;
@@ -675,7 +1534,7 @@ begin
   end;
   // This is just for fun! ;-)
   {$IFDEF ABOUT_SYSMENU}
-  hSysMenu := GetSystemMenu(self.WinHandle, false);
+  hSysMenu := GetSystemMenu(self.Window.WinHandle, false);
   AppendMenu(hSysMenu, MF_SEPARATOR, 0, nil);
   AppendMenu(hSysMenu, MF_STRING, ID_ABOUT, PChar('&About fpGUI Toolkit...'));
   {$ENDIF}
@@ -857,6 +1716,7 @@ begin
       Add('<b>String resource id count:</b> ' + IntToStr(f.StringResourceIDCount));
       Add('<b>Numeric resource id count:</b> ' + IntToStr(f.NumericResourceIDCount));
       Add(' ');
+      Add(fpgApplication.FontManager.GetCacheStats());
       //Add('Dictionary contents:');
       //for i := 0 to f.DictionaryCount-1 do
       //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
@@ -914,6 +1774,7 @@ begin
   RichView.Clear;
   RichView.AddParagraph(PChar(LGetEnvVarValue(BookshelfEnvironmentVar)));
   RichView.AddParagraph(PChar(LGetEnvVarValue(HelpPathEnvironmentVar)));
+  RichView.AddParagraph(PChar('Current Directory = ' + GetCurrentDir));
 end;
 
 procedure TMainForm.miTopicPropertiesClicked(Sender: TObject);
@@ -949,7 +1810,7 @@ begin
       Add( TopicInfoFile + HelpFile.Filename );
       Add( TopicInfoResourceIDs );
       for i := 0 to ResourceIDs.Count - 1 do
-        Add( '  ' + IntToStr( longint( ResourceIDs[ i ] ) ) );
+        Add( '  ' + IntToStr( PtrInt( ResourceIDs[ i ] ) ) );
       if ResourceIDs.Count = 0 then
         Add( TopicInfoNoResourceIDs );
     end;
@@ -1728,7 +2589,10 @@ begin
   if not OpenAdditionalFile then
     CloseFile;
 
-  AssignList(tmpHelpFiles, CurrentOpenFiles );
+  if OpenAdditionalFile then
+    AddList(tmpHelpFiles, CurrentOpenFiles)
+  else
+    AssignList(tmpHelpFiles, CurrentOpenFiles );
 
   if CurrentOpenFiles.Count = 0 then
    exit; // no help files found - nothing further to do
@@ -2725,8 +3589,6 @@ begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
   fpgApplication.HelpFile := cDocViewHelpFile;
-  OnShow  := @MainFormShow;
-  OnDestroy := @MainFormDestroy;
 //  Files := TList.Create;
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
@@ -2793,792 +3655,44 @@ begin
 end;
 
 procedure TMainForm.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
 begin
-  {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(602, 274, 654, 386);
-  WindowTitle := 'fpGUI Documentation Viewer';
-  Hint := '';
-  ShowHint := True;
-  WindowPosition := wpUser;
+  Top := 100;
+  Left := 100;
+  PreferredSize := fpgSize(650, 400);
   MinWidth := 430;
   MinHeight := 300;
-  DNDEnabled := True;
-  OnCloseQuery  := @MainFormCloseQuery;
+  WindowTitle := 'fpGUI Documentation Viewer';
+  ShowHint := True;
+  WindowPosition := wpUser;
+  OnCloseQuery := @MainFormCloseQuery;
+  OnShow := @MainFormShow;
+  OnDestroy := @MainFormDestroy;
 
-  bvlStatusBar := TfpgBevel.Create(self);
-  with bvlStatusBar do
-  begin
-    Name := 'bvlStatusBar';
-    SetPosition(0, 366, 653, 20);
-    Anchors := [anLeft,anRight,anBottom];
-    Hint := '';
-    Style := bsLowered;
-  end;
+  // Create MigLayout manager
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.InsetsAll('2lp').WrapAfter(1).Fill;
+  LayoutManager := mig;
 
-  ProgressBar := TfpgProgressBar.Create(bvlStatusBar);
-  with ProgressBar do
-  begin
-    Name := 'ProgressBar';
-    SetPosition(501, 2, 150, 16);
-    Anchors := [anRight,anBottom];
-    Hint := '';
-  end;
 
-  lblStatus := TfpgLabel.Create(bvlStatusBar);
-  with lblStatus do
-  begin
-    Name := 'lblStatus';
-    SetPosition(4, 2, 380, 16);
-    Anchors := [anLeft,anRight,anBottom];
-    FontDesc := '#Label1';
-    Hint := '';
-    Text := '';
-  end;
+  // -------------------
 
-  bvlBody := TfpgBevel.Create(self);
-  with bvlBody do
-  begin
-    Name := 'bvlBody';
-    SetPosition(0, 55, 653, 310);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Hint := '';
-    Shape := bsSpacer;
-  end;
+  uiCreateMenuBar;
+  mig.AddLayoutComponent(MainMenu, TfpgMigCC.Create.GrowX().PushX().Height('24lp!'));
 
-  PageControl1 := TfpgPageControl.Create(bvlBody);
-  with PageControl1 do
-  begin
-    Name := 'PageControl1';
-    SetPosition(2, 2, 260, 306);
-    Align := alLeft;
-    Hint := '';
-    TabOrder := 0;
-    MinWidth := 120;
-    OnChange  := @PageControl1Change;
-  end;
+  uiCreateToolBar;
+  mig.AddLayoutComponent(ToolBar, TfpgMigCC.Create.GrowX().PushX().Height('28lp!'));
 
-  tsContents := TfpgTabSheet.Create(PageControl1);
-  with tsContents do
-  begin
-    Name := 'tsContents';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'Contents';
-  end;
+  uiCreateContextArea;
+  mig.AddLayoutComponent(bvlBody, TfpgMigCC.Create.GrowX.GrowY.PushY);
 
-  tvContents := TfpgTreeView.Create(tsContents);
-  with tvContents do
-  begin
-    Name := 'tvContents';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#Label1';
-    Hint := '';
-    ScrollWheelDelta := 60;
-    ShowImages := True;
-    TabOrder := 0;
-    AcceptDrops := True;
-    OnChange  := @tvContentsChange;
-    //OnDoubleClick  := @tvContentsDoubleClick;
-    OnDragEnter := @tvContentsDragEntered;
-    OnDragDrop := @tvContentsDragDrop;
-  end;
+  uiCreateStatusBar;
+  mig.AddLayoutComponent(bvlStatusBar, TfpgMigCC.Create.GrowX().PushX().Height('24lp!'));
 
-  btnGo := TfpgButton.Create(tsContents);
-  with btnGo do
-  begin
-    Name := 'btnGo';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
-    Text := 'Go to';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 1;
-    OnClick := @btnGoClicked;
-  end;
+  // -------------------
 
-  tsIndex := TfpgTabSheet.Create(PageControl1);
-  with tsIndex do
-  begin
-    Name := 'tsIndex';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'Index';
-  end;
-
-  btnIndex := TfpgButton.Create(tsIndex);
-  with btnIndex do
-  begin
-    Name := 'btnIndex';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
-    Text := 'Go to';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 1;
-    OnClick := @btnShowIndex;
-  end;
-
-  lbIndex := TfpgListBox.Create(tsIndex);
-  with lbIndex do
-  begin
-    Name := 'lbIndex';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#List';
-    Hint := '';
-    TabOrder := 1;
-    OnDoubleClick  := @lbIndexDoubleClick;
-    OnKeyPress := @lbIndexKeyPress;
-  end;
-
-  IndexSearchEdit := TfpgEdit.Create(tsIndex);
-  with IndexSearchEdit do
-  begin
-    Name := 'IndexSearchEdit';
-    SetPosition(4, 4, 152, 24);
-    Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
-    FontDesc := '#Edit1';
-    Hint := '';
-    TabOrder := 2;
-    Text := '';
-    OnChange := @IndexSearchEditOnChange;
-    OnKeyPress :=@IndexSearchEditKeyPress;
-  end;
-
-  tsSearch := TfpgTabSheet.Create(PageControl1);
-  with tsSearch do
-  begin
-    Name := 'tsSearch';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'Search';
-  end;
-
-  Label1 := TfpgLabel.Create(tsSearch);
-  with Label1 do
-  begin
-    Name := 'Label1';
-    SetPosition(4, 4, 120, 16);
-    FontDesc := '#Label1';
-    Hint := '';
-    Text := 'Search for:';
-  end;
-
-  edSearchText := TfpgEdit.Create(tsSearch);
-  with edSearchText do
-  begin
-    Name := 'edSearchText';
-    SetPosition(4, 20, 210, 26);
-    Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
-    FontDesc := '#Edit1';
-    Hint := '';
-    TabOrder := 1;
-    Text := '';
-    OnKeyPress :=@edSearchTextKeyPress;
-  end;
-
-  Label2 := TfpgLabel.Create(tsSearch);
-  with Label2 do
-  begin
-    Name := 'Label2';
-    SetPosition(4, 48, 172, 16);
-    FontDesc := '#Label1';
-    Hint := '';
-    Text := 'Criteria:';
-  end;
-
-  RadioButton1 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton1 do
-  begin
-    Name := 'RadioButton1';
-    SetPosition(12, 68, 192, 20);
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 3;
-    Text := 'This section';
-  end;
-
-  RadioButton2 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton2 do
-  begin
-    Name := 'RadioButton2';
-    SetPosition(12, 88, 192, 20);
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 4;
-    Text := 'Marked sections';
-  end;
-
-  RadioButton3 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton3 do
-  begin
-    Name := 'RadioButton3';
-    SetPosition(12, 108, 192, 20);
-    Checked := True;
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 5;
-    Text := 'All sections';
-  end;
-
-  RadioButton4 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton4 do
-  begin
-    Name := 'RadioButton4';
-    SetPosition(12, 128, 192, 20);
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 6;
-    Text := 'Index';
-  end;
-
-  RadioButton5 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton5 do
-  begin
-    Name := 'RadioButton5';
-    SetPosition(12, 148, 192, 20);
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 7;
-    Text := 'Marked libraries';
-  end;
-
-  RadioButton6 := TfpgRadioButton.Create(tsSearch);
-  with RadioButton6 do
-  begin
-    Name := 'RadioButton6';
-    SetPosition(12, 168, 192, 20);
-    Enabled := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    TabOrder := 8;
-    Text := 'All libraries';
-  end;
-
-  lbSearchResults := TfpgListBox.Create(tsSearch);
-  with lbSearchResults do
-  begin
-    Name := 'lbSearchResults';
-    SetPosition(4, 220, 242, 54);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#List';
-    Hint := '';
-    TabOrder := 9;
-    OnDoubleClick := @lbSearchResultsDoubleClick;
-    OnKeyPress := @lbSearchResultsKeyPress;
-  end;
-
-  Label3 := TfpgLabel.Create(tsSearch);
-  with Label3 do
-  begin
-    Name := 'Label3';
-    SetPosition(4, 200, 196, 16);
-    FontDesc := '#Label1';
-    Hint := '';
-    Text := 'Search results:';
-  end;
-
-  btnSearch := TfpgButton.Create(tsSearch);
-  with btnSearch do
-  begin
-    Name := 'btnSearch';
-    SetPosition(220, 20, 28, 26);
-    Anchors := [anRight,anTop];
-    Text := 'Go';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 11;
-    OnClick := @btnSearchClicked;
-  end;
-
-  tsNotes := TfpgTabSheet.Create(PageControl1);
-  with tsNotes do
-  begin
-    Name := 'tsNotes';
-    SetPosition(3, 24, 254, 279);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'Notes';
-  end;
-
-  NotesListBox := TfpgListBox.Create(tsNotes);
-  with NotesListBox do
-  begin
-    Name := 'NotesListBox';
-    SetPosition(4, 32, 242, 242);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#List';
-    Hint := '';
-    TabOrder := 0;
-    OnDoubleClick  := @NotesListBoxDoubleClick;
-    OnKeyPress  := @NotesListBoxKeyPress;
-    OnChange  := @NotesListBoxChange;
-  end;
-
-  btnNotesAdd := TfpgButton.Create(tsNotes);
-  with btnNotesAdd do
-  begin
-    Name := 'btnNotesAdd';
-    SetPosition(4, 4, 24, 24);
-    Text := '';
-    Enabled := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageMargin := 0;
-    ImageName := 'stdimg.add';
-    TabOrder := 1;
-    OnClick  := @btnNotesAddClick;
-  end;
-
-  btnNotesEdit := TfpgButton.Create(tsNotes);
-  with btnNotesEdit do
-  begin
-    Name := 'btnNotesEdit';
-    SetPosition(32, 4, 24, 24);
-    Text := '';
-    Enabled := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageMargin := 0;
-    ImageName := 'stdimg.edit';
-    TabOrder := 2;
-    OnClick := @btnNotesEditClick;
-  end;
-
-  btnNotesDel := TfpgButton.Create(tsNotes);
-  with btnNotesDel do
-  begin
-    Name := 'btnNotesDel';
-    SetPosition(60, 4, 24, 24);
-    Text := '';
-    Enabled := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageMargin := 0;
-    ImageName := 'stdimg.remove';
-    TabOrder := 3;
-    OnClick := @btnNotesDelClick;
-  end;
-
-  btnNotesGoto := TfpgButton.Create(tsNotes);
-  with btnNotesGoto do
-  begin
-    Name := 'btnNotesGoto';
-    SetPosition(166, 4, 80, 24);
-    Anchors := [anRight,anTop];
-    Text := 'Go to';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 4;
-    OnClick := @btnNotesGotoClicked;
-  end;
-
-  tsHistory := TfpgTabSheet.Create(PageControl1);
-  with tsHistory do
-  begin
-    Name := 'tsHistory';
-    SetPosition(3, 24, 254, 249);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Text := 'History';
-  end;
-
-  lbHistory := TfpgListBox.Create(tsHistory);
-  with lbHistory do
-  begin
-    Name := 'lbHistory';
-    SetPosition(4, 8, 242, 236);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#List';
-    Hint := '';
-    TabOrder := 0;
-    OnDoubleClick := @lbHistoryDoubleClick;
-    OnKeyPress := @lbHistoryKeyPress;
-  end;
-
-  Splitter1 := TfpgSplitter.Create(bvlBody);
-  with Splitter1 do
-  begin
-    Name := 'Splitter1';
-    SetPosition(262, 2, 8, 306);
-    Align := alLeft;
-    OnDoubleClick :=@Splitter1DoubleClicked;
-  end;
-
-  bvlContentArea := TfpgBevel.Create(bvlBody);
-  with bvlContentArea do
-  begin
-    Name := 'bvlContentArea';
-    SetPosition(270, 2, 381, 306);
-    Align := alClient;
-    Hint := '';
-    Shape := bsSpacer;
-  end;
-
-  pnlTitle := TfpgPanel.Create(bvlContentArea);
-  with pnlTitle do
-  begin
-    Name := 'pnlTitle';
-    SetPosition(2, 2, 377, 20);
-    Align := alTop;
-    Alignment := taLeftJustify;
-    BackgroundColor := TfpgColor($559DD4);
-    FontDesc := '#Label2';
-    Hint := '';
-    Margin := 15;
-    Style := bsFlat;
-    Text := 'Panel';
-    TextColor := TfpgColor($FFFFFF);
-    OnPaint:=@pnlTitleGradientPaint;
-  end;
-
-  RichView := TRichTextView.Create(bvlContentArea);
-  with RichView do
-  begin
-    Name := 'RichView';
-    SetPosition(77, 188, 244, 92);
-    TabOrder := 2;
-    Align := alClient;
-    AcceptDrops := True;
-    OnOverLink  := @RichViewOverLink;
-    OnNotOverLink  := @RichViewNotOverLink;
-    OnClickLink := @RichViewClickLink;
-    OnDragEnter := @tvContentsDragEntered;
-    OnDragDrop := @RichViewDragDrop;
-  end;
-
-  MainMenu := TfpgMenuBar.Create(self);
-  with MainMenu do
-  begin
-    Name := 'MainMenu';
-    SetPosition(0, 0, 654, 24);
-    Anchors := [anLeft,anRight,anTop];
-  end;
-
-  miFile := TfpgPopupMenu.Create(self);
-  with miFile do
-  begin
-    Name := 'miFile';
-    SetPosition(292, 96, 132, 20);
-    AddMenuItem('Open...', rsKeyCtrl+'O', @miFileOpenClicked);
-    AddMenuItem('Open additional file...', rsKeyCtrl+rsKeyShift+'O', @miFileOpenAdditionalFileClicked);
-    AddMenuItem('Open Special...', rsKeyCtrl+'L', @miFileOpenSpecialClicked);
-    AddMenuItem('Save current Topic to IPF...', rsKeyCtrl+'S', @miFileSaveTopicAsIPF);
-    AddMenuItem('Close', rsKeyCtrl+'W', @miFileCloseClicked);
-    AddSeparator;
-    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
-    AddMenuitem('-', '', nil);
-    AddMenuItem('Quit', 'Ctrl+Q', @miFileQuitClicked);
-  end;
-
-  miActions := TfpgPopupMenu.Create(self);
-  with miActions do
-  begin
-    Name := 'miActions';
-    SetPosition(282, 96, 132, 20);
-    AddMenuItem('Contents', 'F5', @miActionsContentsClicked);
-    AddMenuItem('Index', 'F6', @miActionsIndexClicked);
-    AddMenuItem('Search', 'F7', @miActionsSearchClicked);
-    AddMenuItem('Notes', 'F8', @miActionsNotesClicked);
-    AddMenuItem('History', 'F9', @miActionsHistoryClicked);
-    AddSeparator;
-    AddMenuItem('Back', rsKeyCtrl+'Left', @miActionsBackClicked);
-    AddMenuItem('Forward', rsKeyCtrl+'Right', @miActionsForwardClicked);
-    AddMenuItem('Previous Topic', rsKeyCtrl+'Up', @miActionsPrevTopicClicked);
-    AddMenuItem('Next Topic', rsKeyCtrl+'Down', @miActionsNextTopicClicked);
-  end;
-
-  miSettings := TfpgPopupMenu.Create(self);
-  with miSettings do
-  begin
-    Name := 'miSettings';
-    SetPosition(292, 120, 132, 20);
-    AddMenuItem('Options...', '', @miConfigureClicked);
-  end;
-
-  miBookmarks := TfpgPopupMenu.Create(self);
-  with miBookmarks do
-  begin
-    Name := 'miBookmarks';
-    SetPosition(292, 144, 132, 20);
-    AddMenuItem('Add', rsKeyCtrl+'B', @btnBookmarkClick);
-    AddMenuItem('Edit...', rsKeyCtrl+'D', @miOpenBookmarksMenuClicked);
-    AddSeparator;
-    AddMenuItem('Add note at cursor position', rsKeyCtrl+'M', @btnNotesAddClick);
-  end;
-
-  miView := TfpgPopupMenu.Create(self);
-  with miView do
-  begin
-    Name := 'miView';
-    SetPosition(292, 216, 132, 20);
-    AddMenuItem('Expand All', '', @miViewExpandAllClicked);
-    AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
-    AddSeparator;
-    AddMenuItem('Topic Properties', '', @miTopicPropertiesClicked);
-  end;
-
-  miTools := TfpgPopupMenu.Create(self);
-  with miTools do
-  begin
-    Name := 'miTools';
-    SetPosition(428, 96, 120, 20);
-    AddMenuItem('Show file info', '', @miShowFileInfoClicked);
-    AddMenuItem('Find topic by resource ID', '', @miToolsFindByResourceID);
-    AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
-    miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
-    AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
-    AddMenuItem('Current topic properties', '', @miTopicPropertiesClicked);
-    AddMenuItem('Dump dictionary to file in temp directory', '', @miDumpDictionaryClicked);
-    AddMenuItem('Show DocView used environment variables', '', @miToolsShowEnvVariablesClicked);
-  end;
-
-  miHelp := TfpgPopupMenu.Create(self);
-  with miHelp do
-  begin
-    Name := 'miHelp';
-    SetPosition(292, 168, 132, 20);
-    AddMenuItem('Help using DocView', rsKeyCtrl+'F1', @miHelpUsingDocView);
-    AddMenuItem('Command line parameters', rsKeyCtrl+rsKeyShift+'F1', @miHelpCmdLineParams);
-    AddSeparator;
-    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
-    AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
-  end;
-
-  ToolBar := TfpgBevel.Create(self);
-  with ToolBar do
-  begin
-    Name := 'ToolBar';
-    SetPosition(0, 25, 654, 28);
-    Anchors := [anLeft,anRight,anTop];
-    Hint := '';
-    Shape := bsBottomLine;
-    Style := bsLowered;
-  end;
-
-  btnQuit := TfpgButton.Create(ToolBar);
-  with btnQuit do
-  begin
-    Name := 'btnQuit';
-    SetPosition(4, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Quit the application';
-    ImageMargin := -1;
-    ImageName := 'stdimg.quit';
-    ImageSpacing := 0;
-    TabOrder := 8;
-    OnClick := @miFileQuitClicked;
-    Focusable := False;
-  end;
-
-  btnOpen := TfpgButton.Create(ToolBar);
-  with btnOpen do
-  begin
-    Name := 'btnOpen';
-    SetPosition(30, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Open a new help file';
-    ImageMargin := -1;
-    ImageName := 'stdimg.open';
-    ImageSpacing := 0;
-    TabOrder := 0;
-    OnClick := @miFileOpenClicked;
-    Focusable := False;
-  end;
-
-  Bevel1 := TfpgBevel.Create(ToolBar);
-  with Bevel1 do
-  begin
-    Name := 'Bevel1';
-    SetPosition(61, 0, 6, 24);
-    Hint := '';
-    Shape := bsLeftLine;
-    Style := bsLowered;
-  end;
-
-  btnBack := TfpgButton.Create(ToolBar);
-  with btnBack do
-  begin
-    Name := 'btnBack';
-    SetPosition(70, 1, 32, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Previous history item';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowleft';
-    ImageSpacing := 0;
-    TabOrder := 2;
-    Focusable := False;
-    OnClick := @btnBackHistClick;
-  end;
-
-  btnFwd := TfpgButton.Create(ToolBar);
-  with btnFwd do
-  begin
-    Name := 'btnFwd';
-    SetPosition(104, 1, 32, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Next history item';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowright';
-    ImageSpacing := 0;
-    TabOrder := 3;
-    Focusable := False;
-    OnClick := @btnFwdHistClick;
-  end;
-
-  btnPrev := TfpgButton.Create(ToolBar);
-  with btnPrev do
-  begin
-    Name := 'btnPrev';
-    SetPosition(138, 1, 32, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Previous Topic';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowup';
-    ImageSpacing := 0;
-    TabOrder := 4;
-    Focusable := False;
-    OnClick := @btnPrevClick;
-  end;
-
-  btnNext := TfpgButton.Create(ToolBar);
-  with btnNext do
-  begin
-    Name := 'btnNext';
-    SetPosition(172, 1, 32, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Next Topic';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowdown';
-    ImageSpacing := 0;
-    TabOrder := 5;
-    Focusable := False;
-    OnClick := @btnNextClick;
-  end;
-
-  Bevel2 := TfpgBevel.Create(ToolBar);
-  with Bevel2 do
-  begin
-    Name := 'Bevel2';
-    SetPosition(210, 0, 6, 24);
-    Hint := '';
-    Shape := bsLeftLine;
-    Style := bsLowered;
-  end;
-
-  btnTBNoteAdd := TfpgButton.Create(ToolBar);
-  with btnTBNoteAdd do
-  begin
-    Name := 'btnTBNoteAdd';
-    SetPosition(218, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Add an annotation';
-    ImageMargin := -1;
-    ImageName := 'dv.notegreen';
-    ImageSpacing := 0;
-    TabOrder := 12;
-    Focusable := False;
-    OnClick := @btnTBNoteAddClick;
-  end;
-
-  btnBookmark := TfpgButton.Create(ToolBar);
-  with btnBookmark do
-  begin
-    Name := 'btnBookmark';
-    SetPosition(244, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Add a bookmark';
-    ImageMargin := -1;
-    ImageName := 'stdimg.bookmark';
-    ImageSpacing := 0;
-    TabOrder := 5;
-    Focusable := False;
-    OnClick := @btnBookmarkClick;
-  end;
-
-  Bevel3 := TfpgBevel.Create(ToolBar);
-  with Bevel3 do
-  begin
-    Name := 'Bevel3';
-    SetPosition(275, 0, 6, 24);
-    Hint := '';
-    Shape := bsLeftLine;
-    Style := bsLowered;
-  end;
-
-  btnHelp := TfpgButton.Create(ToolBar);
-  with btnHelp do
-  begin
-    Name := 'btnHelp';
-    SetPosition(283, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Display Product Information';
-    ImageMargin := -1;
-    ImageName := 'stdimg.about';
-    ImageSpacing := 0;
-    TabOrder := 6;
-    Focusable := False;
-    OnClick := @miHelpProdInfoClicked;
-  end;
-
-  cbEncoding := TfpgComboBox.Create(ToolBar);
-  with cbEncoding do
-  begin
-    Name := 'cbEncoding';
-    SetPosition(524, 2, 124, 22);
-    Anchors := [anRight,anTop];
-    ExtraHint := '';
-    FontDesc := '#List';
-    Hint := '';
-    Items.Add('UTF-8');
-    Items.Add('CP437');
-    Items.Add('CP850');
-    Items.Add('CP866');
-    Items.Add('CP1250');
-    Items.Add('IBM Graph (cp437)');
-    FocusItem := 0;
-    TabOrder := 10;
-    OnChange  := @cbEncodingChanged;
-  end;
-
-  {@VFD_BODY_END: MainForm}
-  {%endregion}
 
   // remove toolbar button text
   btnBack.Text := '';
@@ -3649,19 +3763,23 @@ var
   showtopic: boolean;
   t: TTopic;
   n: integer;
+  cmd: ICmdLineParams;
 begin
+  if not Supports(fpgApplication, ICmdLineParams, cmd) then
+    Exit;
+
   if ParamCount > 0 then
   begin
-    if gCommandLineParams.IsParam('h') then
+    if cmd.HasOption('h') then
     begin
       ShowCmdLineParamHelp;
       Exit; //==>
     end
-    else if gCommandLineParams.IsParam('debuglog') then
+    else if cmd.HasOption('debuglog') then
       // do nothing
     else
     begin
-      showtopic := not gCommandLineParams.IsParam('k');
+      showtopic := not cmd.HasOption('k');
       { is the first parameter a known docview help, or some addition parameter }
       if Pos(ctiCommandLineParamPrefix, ParamStr(1)) = 1 then
         // command line parameter order seems wrong, so do nothing
@@ -3671,32 +3789,32 @@ begin
   end;
 
   // now process all other parameters
-  if gCommandLineParams.IsParam('k') then
+  if cmd.HasOption('k') then
   begin
     { Search for a string }
-    edSearchText.Text := gCommandLineParams.GetParam('k');
+    edSearchText.Text := cmd.GetOptionValue('k');
     PageControl1.ActivePage := tsSearch;
     DoSearch;
   end
-  else if gCommandLineParams.IsParam('n') then
+  else if cmd.HasOption('n') then
   begin
     { Display topic with numeric topic id }
     try
-      n := StrToInt(gCommandLineParams.GetParam('n'));
+      n := StrToInt(cmd.GetOptionValue('n'));
       t := FindTopicByResourceID(n);
       DisplayTopic(t);
     except
       on EConvertError do
         begin
           TfpgMessageDialog.Critical('Invalid Parameter Value',
-            '<' + gCommandLineParams.GetParam('n') + '> is not an number.');
+            '<' + cmd.GetOptionValue('n') + '> is not an number.');
         end;
     end;
   end
-  else if gCommandLineParams.IsParam('s') then
+  else if cmd.HasOption('s') then
   begin
     { Display topic with string topic id }
-    t := FindTopicByName(gCommandLineParams.GetParam('s'));
+    t := FindTopicByName(cmd.GetOptionValue('s'));
     DisplayTopic(t);
   end;
 end;
@@ -3945,7 +4063,7 @@ begin
     Exit;
 
   {$NOTE: Replace this with TStringList or TStringStream.}
-  FileMode := fmInput;
+  FileMode := fmOpenRead;
   AssignFile( BookmarksFile, BookmarksFileName );
   try
     Reset( BookmarksFile );
@@ -4097,6 +4215,21 @@ begin
   DisplayTopic(Bookmark.ContentsTopic);
 end;
 
+{ for debug purposes, output the various mime types supported by the source }
+procedure TMainForm.ShowMimeList(AMimeList: TfpgMimeDataItemList);
+var
+  i: integer;
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  try
+    for i := 0 to AMimeList.Count-1 do
+      sl.Add(Format('%2d  %s', [i, AMimeList.Items[i].Format]));
+    ShowMessage(sl.Text);
+  finally
+    sl.Free;
+  end;
+end;
 
 
 end.

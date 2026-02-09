@@ -3,24 +3,16 @@ program eventtest;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
-  {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base,
   fpg_main,
-  fpg_widget;
+  fpg_widget,
+  fpg_form;
   
-
-const
-  ButtonNames: array[TMouseButton] of PChar =
-    ('Left', 'Right', 'Middle');
 
 type
 
-  { TMainForm }
-
-  TMainForm = class(TfpgWindow)
+  TMainForm = class(TfpgForm)
   private
     FMoveEventCount: integer;
     function    ShiftStateToStr(Shift: TShiftState): string;
@@ -41,10 +33,9 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
-  protected
+    procedure   MsgHorzScroll(var msg: TfpgMessageRec); message FPGM_HSCROLL;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure   Show;
   end;
 
 { TMainForm }
@@ -109,7 +100,7 @@ end;
 procedure TMainForm.MsgClose(var msg: TfpgMessageRec);
 begin
   Writeln('Window Close message');
-  Halt(0);
+  Close;
 end;
 
 procedure TMainForm.MsgPaint(var msg: TfpgMessageRec);
@@ -120,7 +111,7 @@ begin
   Canvas.BeginDraw;
   h := Canvas.Font.Height;
   Canvas.SetColor(clWhite);
-  Canvas.FillRectangle(0, 0, Width, Height);
+  Canvas.FillRectangle(0, 0, ActualWidth, ActualHeight);
   Canvas.SetTextColor(clBlack);
   Canvas.DrawString(0, 0, 'Event test');
   Canvas.DrawString(0, h, 'Do something interactive (move mouse, press keys...)');
@@ -170,14 +161,12 @@ procedure TMainForm.MsgMouseDown(var msg: TfpgMessageRec);
 begin
   WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)),
     'Mouse button pressed: ', ' button=' + IntToStr(msg.Params.mouse.Buttons));
-//    ButtonNames[msg.Params.mouse.Buttons]);
 end;
 
 procedure TMainForm.MsgMouseUp(var msg: TfpgMessageRec);
 begin
   WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)),
     'Mouse button released: ', ' button=' + IntToStr(msg.Params.mouse.Buttons));
-//    ButtonNames[msg.Params.mouse.Buttons]);
 end;
 
 procedure TMainForm.MsgMouseMove(var msg: TfpgMessageRec);
@@ -213,24 +202,23 @@ begin
   Writeln('Mouse scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
+procedure TMainForm.MsgHorzScroll(var msg: TfpgMessageRec);
+var
+  delta: Integer;
+begin
+  delta := msg.Params.mouse.delta;
+  Writeln('Mouse horizontal scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(aowner);
   FMoveEventCount := 0;
   FWidth    := 400;
   FHeight   := 100;
-  WindowAttributes := [waSizeable, waScreenCenterPos];
+//  WindowAttributes := [waSizeable, waScreenCenterPos];
 end;
 
-procedure TMainForm.Show;
-begin
-  AllocateWindowHandle;
-  DoSetWindowVisible(True);
-  // We can't set a title if we don't have a window handle. So we do that here
-  // and not in the constructor.
-  SetWindowTitle('fpGFX event test');
-end;
-  
   
 procedure MainProc;
 var

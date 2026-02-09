@@ -1,0 +1,1795 @@
+= UI Toolkit Sizing API Comparison
+:toc: left
+:toclevels: 4
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== Executive Summary
+
+All major UI toolkits (Swing, Qt, WPF, SWT, GTK+) implement a clear separation between **intent** (preferred/desired size) and **result** (actual size). This separation is fundamental to robust layout management and is considered industry best practice.
+
+.Common Pattern Across All Toolkits
+|===
+| Concept | Purpose | Set By | Read By
+
+| **Intent/Preferred Size**
+| What size the widget wants to be
+| Developer or widget's content calculation
+| Layout manager
+
+| **Actual Size**
+| What size the widget currently is after layout
+| Layout manager
+| Developer (for reading only)
+
+| **Constraints**
+| Min/max boundaries
+| Developer
+| Layout manager
+|===
+
+== Framework-by-Framework Analysis
+
+=== Java Swing (est. 1997)
+
+==== Intent Properties
+
+* `getPreferredSize()` / `setPreferredSize(Dimension)`
+* `getMinimumSize()` / `setMinimumSize(Dimension)`
+* `getMaximumSize()` / `setMaximumSize(Dimension)`
+
+==== Result Properties
+
+* `getSize()` / `setSize(int, int)`
+* `getBounds()` / `setBounds(Rectangle)`
+
+==== Key Principles
+
+**Separation of concerns**: Layout managers read preferred sizes, then call `setSize()` to apply the calculated result. Developers should call `setPreferredSize()` to express intent, not `setSize()`.
+
+**Expert guidance**: "setSize() should be thought of as something that the layout manager calls - not something that you call." (Stack Overflow community consensus)
+
+**Backward compatibility**: Both APIs exist, but `setSize()` is only appropriate for components without layout managers (rare in modern Swing).
+
+**Method calling**: Custom widgets override `getPreferredSize()` to calculate based on content. Framework calls this during layout.
+
+=== Qt (C++, est. 1995)
+
+==== Intent Properties
+
+* `sizeHint()` - returns QSize with preferred dimensions
+* `minimumSizeHint()` - returns QSize with minimum preferred dimensions
+* `setSizePolicy(QSizePolicy)` - controls how widget responds to available space
+
+==== Result Properties
+
+* `size()` - returns QSize with actual dimensions
+* `geometry()` - returns QRect with position and size
+* `resize(int, int)` / `setGeometry(QRect)` - sets actual size
+
+==== Key Principles
+
+**Virtual method override**: Custom widgets override `sizeHint()` and `minimumSizeHint()` virtual methods to provide their preferred dimensions.
+
+**Automatic constraint enforcement**: "The size component is adjusted if it lies outside the range defined by minimumSize() and maximumSize()."
+
+**Layout manager contract**: "QLayout will never resize a widget to a size smaller than the minimum size hint unless minimumSize() is set or the size policy is set to QSizePolicy::Ignore."
+
+**Event-based notification**: When layout calls `resize()` or `setGeometry()`, widget receives `resizeEvent()` notification.
+
+=== WPF (C#/.NET, est. 2006)
+
+==== Intent Properties
+
+* `Width` / `Height` - input properties (can be set but don't reflect actual size)
+* `MinWidth` / `MinHeight` / `MaxWidth` / `MaxHeight` - constraints
+* `DesiredSize` - calculated during Measure pass (read-only)
+
+==== Result Properties
+
+* `ActualWidth` / `ActualHeight` - read-only properties with actual rendered size
+* `RenderSize` - the final render size after layout
+
+==== Key Principles
+
+**Two-pass layout system**:
+
+1. **Measure Pass**: Parent calls `Measure(Size constraint)` on children, which calculates `DesiredSize` based on content and constraints
+2. **Arrange Pass**: Parent calls `Arrange(Rect bounds)` on children, which sets `ActualWidth`/`ActualHeight`
+
+**Explicit read-only enforcement**: `ActualWidth` and `ActualHeight` have no setters - they are truly read-only properties calculated by the layout system.
+
+**Clear documentation**: "ActualHeight is a calculated value based on other height inputs and the layout system."
+
+**Virtual method overrides**: Custom controls override `MeasureOverride(Size)` to calculate desired size and `ArrangeOverride(Size)` to finalize layout.
+
+**Important distinction**: Setting `Width` doesn't guarantee `ActualWidth` will match - the layout system makes the final decision.
+
+=== Eclipse SWT (Java, est. 2000)
+
+==== Intent Properties
+
+* `computeSize(int wHint, int hHint)` - calculates preferred size given optional width/height hints
+* `computeSize(int wHint, int hHint, boolean changed)` - with cache invalidation
+
+==== Result Properties
+
+* `getSize()` - returns Point with current size
+* `setSize(int, int)` / `setSize(Point)` - sets actual size
+* `getBounds()` / `setBounds(Rectangle)` - position and size
+
+==== Key Principles
+
+**Hint-based calculation**: `computeSize()` can answer questions like "Given width of 200px, how tall should I be?" by passing hints. Use `SWT.DEFAULT` for unconstrained dimension.
+
+**Layout manager usage**: Layout managers call `computeSize()` to determine preferred dimensions, then call `setSize()` to apply calculated size.
+
+**Content-driven sizing**: Default implementation calculates size based on widget's content (text, children, etc.).
+
+**Common pattern**:
+
+[source,java]
+----
+Point size = control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+control.setSize(size);
+----
+
+=== GTK+ (C/GObject, est. 1998)
+
+==== Intent Properties
+
+* `gtk_widget_get_preferred_width()` - gets minimum and natural width
+* `gtk_widget_get_preferred_height()` - gets minimum and natural height
+* `gtk_widget_get_preferred_size()` - gets both as GtkRequisition
+* `gtk_widget_set_size_request()` - sets minimum size constraint
+
+==== Result Properties
+
+* `gtk_widget_get_allocated_width()` / `gtk_widget_get_allocated_height()` - actual allocated size
+* `gtk_widget_size_allocate()` - called by parent to set actual size
+* `size-allocate` signal - emitted when widget receives new allocation
+
+==== Key Principles
+
+**Two-pass system similar to WPF**:
+
+1. **Size Request**: Bottom-up, widgets report minimum and natural sizes
+2. **Size Allocation**: Top-down, containers allocate actual sizes to children
+
+**Virtual methods**: Custom widgets override `get_preferred_width_vfunc` and `get_preferred_height_vfunc` to provide their preferred dimensions.
+
+**Height-for-width support**: Can query preferred height given a specific width, supporting text widgets that reflow.
+
+**Signal-based monitoring**: Use `size-allocate` signal to detect when widget receives new actual size.
+
+**Important note**: "There's a difference between what size a widget would like to have and what size it actually gets."
+
+== Common Design Patterns
+
+All five frameworks share these fundamental patterns:
+
+=== Clear Method Name Distinction
+
+Every framework uses different names for intent vs result:
+
+|===
+| Framework | Intent Method | Result Method
+
+| Swing | `getPreferredSize()` | `getSize()`
+| Qt | `sizeHint()` | `size()`
+| WPF | `DesiredSize` (calculated) | `ActualWidth`/`ActualHeight`
+| SWT | `computeSize()` | `getSize()`
+| GTK+ | `get_preferred_size()` | `get_allocated_width/height()`
+|===
+
+The naming makes it **impossible to confuse** intent with result.
+
+=== Virtual Methods for Custom Widgets
+
+All frameworks expect custom widgets to override methods that calculate preferred size:
+
+|===
+| Framework | Override Method
+
+| Swing | `getPreferredSize()`
+| Qt | `sizeHint()`, `minimumSizeHint()`
+| WPF | `MeasureOverride(Size)`
+| SWT | `computeSize(int, int, boolean)`
+| GTK+ | `get_preferred_width_vfunc()`, `get_preferred_height_vfunc()`
+|===
+
+=== Layout Manager as the Authority
+
+In all frameworks:
+
+1. **Developer** expresses intent (preferred size, constraints)
+2. **Layout manager** reads intent from all children
+3. **Layout manager** calculates actual sizes based on available space, constraints, and layout rules
+4. **Layout manager** applies results by calling size-setting methods
+5. **Widget** receives notification (event, signal, or override) of final size
+
+=== Constraints as Boundaries
+
+All frameworks support min/max constraints that act as hard boundaries:
+
+* **Swing**: `getMinimumSize()`, `getMaximumSize()`
+* **Qt**: `minimumSize()`, `maximumSize()`, `minimumSizeHint()`
+* **WPF**: `MinWidth`, `MinHeight`, `MaxWidth`, `MaxHeight`
+* **SWT**: Less formal, but `computeSize()` hints can enforce constraints
+* **GTK+**: `set_size_request()` sets minimum size
+
+=== Read-Only Result Properties
+
+Most modern frameworks make actual size read-only:
+
+* **WPF**: `ActualWidth`/`ActualHeight` have no public setters
+* **GTK+**: `get_allocated_width()` is read-only; only layout system calls `size_allocate()`
+* **Qt**: `size()` is read-only; use `resize()` method to change it
+* **Swing/SWT**: Both readable, but convention is that only layout managers should call setters
+
+== What Nobody Does
+
+No major framework exhibits these anti-patterns:
+
+❌ **Using a single property for both intent and result** - Everyone separates these concepts
+
+❌ **Allowing developers to directly set actual size in layout-managed contexts** - Result is always controlled by layout system
+
+❌ **Making preferred size read-only** - Intent must be settable by developers
+
+❌ **Returning current size as preferred size when none is set** - This creates feedback loops
+
+❌ **Ambiguous property names** - Names clearly indicate whether it's intent or result
+
+== Implications for fpGUI's Proposed Design
+
+=== Strong Industry Validation
+
+The proposed separation of `PreferredSize` (intent) from `Width`/`Height` (result) aligns with 25+ years of industry best practices across five major frameworks.
+
+=== Naming Recommendations
+
+Based on industry standards, consider:
+
+|===
+| Current Proposal | Industry Standard Alternative | Rationale
+
+| `PreferredSize` (R/W)
+| ✓ Good - matches Swing, GTK+
+| Clear intent indication
+
+| `Width`/`Height` (Read-only)
+| Consider `ActualWidth`/`ActualHeight`
+| WPF's naming makes read-only nature explicit
+
+| `SetWidth()`/`SetHeight()`
+| Potentially confusing
+| If Width is "read-only", why does SetWidth() exist?
+|===
+
+=== The Backward Compatibility Challenge
+
+The proposal's approach of redirecting `SetWidth()` to modify `PreferredSize` has **no precedent** in the surveyed frameworks. Here's why:
+
+**WPF's approach**:
+
+* `Width` property IS settable (input property)
+* `ActualWidth` property is truly read-only (output property)
+* No confusion because they're different properties with different names
+
+**Qt's approach**:
+
+* `resize(w, h)` method exists and is callable
+* BUT it's documented that layout managers will override it
+* Developers are warned not to use it in layout-managed contexts
+
+**Swing's approach**:
+
+* Both `setSize()` and `setPreferredSize()` exist
+* Community convention: only use `setSize()` for non-layout-managed components
+* No magic redirection
+
+=== The Read-After-Write Problem
+
+The proposed design creates this surprising behavior:
+
+[source,pascal]
+----
+widget.Width := 100;        // Actually sets FPreferredSize.W := 100
+x := widget.Width;          // Returns FWidth (current actual size)
+// x might not be 100!
+----
+
+**No surveyed framework exhibits this behavior.** They solve it in two ways:
+
+1. **Different property names** (WPF: `Width` vs `ActualWidth`)
+2. **Both properties readable and writable** but with strong conventions (Swing, Qt)
+
+=== Better Alternative: Follow WPF's Model
+
+==== The Solution
+
+[source,pascal]
+----
+// Unified preferred size storage with flexible property access
+private
+  FPreferredSize: TfpgSize;  // Unified storage
+  FWidth: TfpgCoord;         // Actual width
+  FHeight: TfpgCoord;        // Actual height
+
+public
+  property PreferredSize: TfpgSize read FPreferredSize write SetPreferredSize;
+  property ActualSize: TfpgSize read GetActualSize;
+
+  property ActualWidth: TfpgCoord read FWidth;   // Truly read-only, no setter
+  property ActualHeight: TfpgCoord read FHeight; // Truly read-only, no setter
+
+  // Keep Width/Height as legacy properties that work with preferred size
+  property Width: TfpgCoord read GetWidth write SetWidth;    // Maps to FPreferredSize.W
+  property Height: TfpgCoord read GetHeight write SetHeight; // Maps to FPreferredSize.H
+----
+
+==== How This Solves Read-After-Write
+
+**The Problem** (original proposal):
+
+[source,pascal]
+----
+// Original proposal: Width getter returns FWidth (actual), setter modifies FPreferredSize
+button.Width := 200;        // Sets FPreferredSize.W := 200
+                            // But FWidth still has old value (e.g., 150)
+
+x := button.Width;          // Returns FWidth = 150 (NOT 200!)
+// SURPRISE! You just set Width to 200, but reading it gives 150
+----
+
+**The Solution** (WPF-inspired model with unified storage):
+
+[source,pascal]
+----
+// Both getter and setter work with the SAME backing field (FPreferredSize.W)
+button.Width := 200;              // Sets FPreferredSize.W := 200
+x := button.Width;                // Returns FPreferredSize.W = 200 ✓
+// No surprise! Read-after-write is consistent
+
+// If you want the actual size after layout, use the explicit property
+actual := button.ActualWidth;     // Returns FWidth (might be different than 200)
+----
+
+==== Complete Example
+
+[source,pascal]
+----
+// Setting up a button before layout
+myButton := TfpgButton.Create(self);
+myButton.Text := 'Click Me';
+myButton.Width := 200;            // Sets preferred width
+myButton.Height := 30;            // Sets preferred height
+
+WriteLn('Requested: ', myButton.Width, 'x', myButton.Height);
+// Output: "Requested: 200x30"  ✓ Consistent with what we set
+
+WriteLn('Actual (before layout): ', myButton.ActualWidth, 'x', myButton.ActualHeight);
+// Output: "Actual (before layout): 10x10"  (default initial values)
+
+// ... Layout manager runs ...
+// Layout gives button only 150 pixels width due to space constraints
+
+WriteLn('Requested: ', myButton.Width, 'x', myButton.Height);
+// Output: "Requested: 200x30"  ✓ Intent preserved
+
+WriteLn('Actual (after layout): ', myButton.ActualWidth, 'x', myButton.ActualHeight);
+// Output: "Actual (after layout): 150x30"  ← What layout actually gave it
+
+// Developer can check if they got what they wanted
+if myButton.ActualWidth < myButton.Width then
+  WriteLn('Warning: Button was constrained smaller than requested');
+----
+
+==== Benefits
+
+* ✓ **Read-after-write consistency**: `Width := 200` then `x := Width` gives `x = 200`
+* ✓ **Clear API**: `ActualWidth` explicitly means "result after layout"
+* ✓ **Backward compatible**: Old code using `Width`/`Height` continues to work without changes
+* ✓ **Intent preserved**: Layout system can't accidentally overwrite developer's desired size
+* ✓ **Familiar to developers**: Matches WPF, the most modern of the surveyed frameworks
+
+== Key Takeaways
+
+1. **Industry consensus**: Intent/result separation is universal and proven over 25+ years
+
+2. **Naming matters**: Clear, distinct names prevent confusion (e.g., `DesiredSize` vs `ActualWidth`)
+
+3. **Virtual methods**: Custom widgets calculate preferred size by overriding methods
+
+4. **Layout manager authority**: Result size is always set by layout system, never directly by developer
+
+5. **Constraints are boundaries**: Min/max properties are respected by all layout systems
+
+6. **No magic redirects**: No framework redirects `SetWidth()` to mean `SetPreferredWidth()` - they use different names or clear conventions
+
+7. **Read-only enforcement**: Modern frameworks (WPF, GTK+) make actual size truly read-only with no setter
+
+== Recommendation
+
+=== Proposed API Design
+
+**Follow WPF's model with fpGUI naming conventions, using unified preferred size storage**:
+
+[source,pascal]
+----
+// In TfpgWidgetBase:
+private
+  FPreferredSize: TfpgSize;  // Unified storage for preferred dimensions
+  FWidth: TfpgCoord;         // Actual width after layout
+  FHeight: TfpgCoord;        // Actual height after layout
+
+  function GetWidth: TfpgCoord;
+  function GetHeight: TfpgCoord;
+  function GetActualSize: TfpgSize;
+  procedure SetWidth(const AValue: TfpgCoord);
+  procedure SetHeight(const AValue: TfpgCoord);
+  procedure SetPreferredSize(const AValue: TfpgSize);
+
+public
+  // Aggregate properties
+  property PreferredSize: TfpgSize read FPreferredSize write SetPreferredSize;
+  property ActualSize: TfpgSize read GetActualSize;
+
+  // Individual properties - for intent (backward compatible)
+  property Width: TfpgCoord read GetWidth write SetWidth;
+  property Height: TfpgCoord read GetHeight write SetHeight;
+
+  // Individual properties - for result (new, read-only)
+  property ActualWidth: TfpgCoord read FWidth;
+  property ActualHeight: TfpgCoord read FHeight;
+----
+
+=== Design Rationale
+
+==== Why Unified FPreferredSize Storage?
+
+**Preferred size is conceptually a single unit** - it represents the widget's desired dimensions as a cohesive whole. When a button calculates its preferred size, it's thinking "I need 120×30 pixels", not "I need width 120" and separately "I need height 30". The dimensions are interdependent.
+
+**Benefits**:
+
+* ✓ **Semantic clarity**: Matches how widgets naturally think about their desired size
+* ✓ **Atomic updates**: Can set both dimensions in one operation
+* ✓ **Clean API for calculation**: `DoCalculatePreferredSize(var ASize: TfpgSize)` works with single parameter
+* ✓ **Flexibility**: Supports both aggregate (`PreferredSize`) and individual (`Width`/`Height`) access patterns
+
+==== Why Both Aggregate and Individual Properties?
+
+**Different properties suit different use cases**:
+
+**Aggregate properties** (`PreferredSize`, `ActualSize`):
+
+* Setting a widget's desired size: `button.PreferredSize := TfpgSize.Create(200, 30);`
+* Comparing sizes: `if widget1.ActualSize = widget2.ActualSize then...`
+* Saving/restoring state: `savedSize := widget.ActualSize;`
+
+**Individual properties** (`Width`, `Height`, `ActualWidth`, `ActualHeight`):
+
+* Reading in layout calculations: `if w.ActualWidth > availableSpace then...`
+* Painting code: `Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);`
+* Conditional logic: `if ActualWidth < Width then ShowScrollbar;`
+* Performance-critical paths: Direct field access instead of function calls
+
+**Industry precedent**: All major frameworks (WPF, Qt, Swing, GTK+) provide BOTH aggregate and individual access to actual size. Individual properties are used far more frequently in practice.
+
+==== Property Implementation Details
+
+[source,pascal]
+----
+// Width/Height getters return preferred size (for backward compatibility)
+function TfpgWidgetBase.GetWidth: TfpgCoord;
+begin
+  Result := FPreferredSize.W;
+end;
+
+function TfpgWidgetBase.GetHeight: TfpgCoord;
+begin
+  Result := FPreferredSize.H;
+end;
+
+// Width/Height setters modify preferred size
+procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
+begin
+  if FPreferredSize.W <> AValue then
+  begin
+    FPreferredSize.W := AValue;
+
+    // Also set actual width if not in layout-managed context (backward compatibility)
+    if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
+      HandleResize(AValue, FHeight);
+
+    DoPreferredSizeChanged;
+  end;
+end;
+
+// ActualSize aggregate constructs record from actual dimensions
+function TfpgWidgetBase.GetActualSize: TfpgSize;
+begin
+  Result.W := FWidth;
+  Result.H := FHeight;
+end;
+
+// PreferredSize setter is atomic
+procedure TfpgWidgetBase.SetPreferredSize(const AValue: TfpgSize);
+begin
+  if (FPreferredSize.W <> AValue.W) or (FPreferredSize.H <> AValue.H) then
+  begin
+    FPreferredSize := AValue;
+
+    // Also set actual size if not in layout-managed context (backward compatibility)
+    if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
+      HandleResize(AValue.W, AValue.H);
+
+    DoPreferredSizeChanged;
+  end;
+end;
+----
+
+=== How This Solves Read-After-Write
+
+**Key insight**: Both the getter AND setter of `Width` work with the **same backing field** (`FPreferredSize.W`), ensuring consistency:
+
+[source,pascal]
+----
+// Developer code - completely intuitive behavior
+button.Width := 200;                    // Sets FPreferredSize.W := 200
+w := button.Width;                      // Returns FPreferredSize.W = 200 ✓
+// No surprise! You get back what you set
+
+// Alternative: set both dimensions at once
+button.PreferredSize := TfpgSize.Create(200, 30);  // Sets FPreferredSize atomically
+
+// When you need the actual size after layout runs
+actualW := button.ActualWidth;          // Returns FWidth (what layout gave it)
+actualSize := button.ActualSize;        // Returns TfpgSize(FWidth, FHeight)
+
+// Layout manager code
+procedure TfpgMigLayoutManager.TransferBounds(...);
+begin
+  // Layout reads the intent (can use Width property or PreferredSize.W)
+  preferredW := widget.Width;           // Returns FPreferredSize.W
+  // or
+  preferredSize := widget.PreferredSize;  // Returns FPreferredSize record
+
+  // Layout calculates actual size based on constraints and available space
+  calculatedW := CalculateSize(preferredW, constraints, availableSpace);
+
+  // Layout sets the result via internal method (NOT via Width property!)
+  widget.HandleResize(calculatedW, calculatedH);  // Sets FWidth, FHeight directly
+end;
+----
+
+=== Why This Works
+
+1. **Developer reads/writes intent**: Using `Width` property always works with `FPreferredSize.W`
+2. **Layout reads intent**: Layout manager reads `Width` (returns `FPreferredSize.W`) or `PreferredSize` (returns entire record)
+3. **Layout writes result**: Layout calls `HandleResize()` which modifies `FWidth`/`FHeight` directly
+4. **Developer reads result**: Using `ActualWidth` property reads the final `FWidth`, or `ActualSize` for both dimensions
+5. **No confusion**: Intent and result are stored in different fields, accessed via different properties
+
+=== Benefits
+
+* ✓ **Read-after-write consistency**: Setting then reading `Width` gives back the same value
+* ✓ **Aligns with industry best practices**: Matches WPF's clear separation
+* ✓ **Backward compatible**: Existing code using `Width`/`Height` continues to work unchanged
+* ✓ **Clear, unambiguous API**: New code can use explicit `PreferredSize`/`ActualSize` or `ActualWidth`/`ActualHeight`
+* ✓ **Prevents layout feedback loops**: Layout result doesn't overwrite developer's intent
+* ✓ **Familiar to developers**: Anyone who has used WPF will immediately understand this pattern
+* ✓ **Flexible access patterns**: Both aggregate and individual properties available for all use cases
+
+== Compatibility with Anchors and Align
+
+=== The Critical Question
+
+**Will this design work when layout managers are NOT used, and developers continue using Anchors and Align as they always have?**
+
+**Answer: YES**, this design works perfectly for both layout managers AND the traditional Anchor/Align system. The key insight is that both are forms of "layout logic" that follow the same contract.
+
+=== How Anchors and Align Currently Work
+
+In fpGUI today, the `HandleAlignments` method in `TfpgWidget` manages both Align properties and Anchors:
+
+1. **Parent container's resize event triggers**
+2. **`HandleAlignments` is called** with delta width/height
+3. **For Align properties** (alTop, alBottom, alLeft, alRight, alClient):
+   - Logic reads child's current actual width/height: `w.Width`, `w.Height`
+   - Calculates new position and size based on alignment rules
+   - Calls `w.MoveAndResize(left, top, width, height)` to apply changes
+4. **For Anchors** (when Align = alNone):
+   - Calculates position/size deltas based on anchor flags
+   - Calls `w.MoveAndResizeBy(dx, dy, dw, dh)` → `MoveAndResize(...)` to apply changes
+5. **`MoveAndResize` calls `HandleResize(width, height)`**
+6. **`HandleResize` directly modifies `FWidth` and `FHeight`** (actual size fields)
+
+=== The Problem with Current Implementation
+
+**Current code in `DoAlignment` method** (fpg_widget.pas):
+
+[source,pascal]
+----
+alTop:
+  begin
+    w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
+    //                                                                  ^^^^^^^^
+    //                                                    Reads actual size from w.Height
+    Inc(FAlignRect.top, w.Height);
+    Dec(FAlignRect.Height, w.Height);
+  end;
+
+alLeft:
+  begin
+    w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, w.Width, FAlignRect.Height);
+    //                                               ^^^^^^^
+    //                                    Reads actual size from w.Width
+    Inc(FAlignRect.Left, w.Width);
+    Dec(FAlignRect.Width, w.Width);
+  end;
+----
+
+If we change `Width`/`Height` properties to return `FPreferredSize.W`/`FPreferredSize.H` without any other changes, **this alignment code would read the wrong value** and produce incorrect layouts.
+
+=== The Solution: Use ActualWidth/ActualHeight for Reading
+
+The fix is simple and surgical - update `HandleAlignments` to read from the explicit actual size properties:
+
+**Updated code in `DoAlignment` method**:
+
+[source,pascal]
+----
+alTop:
+  begin
+    w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.ActualHeight);
+    //                                                                  ^^^^^^^^^^^^^
+    //                                                        Now reads actual size explicitly
+    Inc(FAlignRect.top, w.ActualHeight);
+    Dec(FAlignRect.Height, w.ActualHeight);
+  end;
+
+alBottom:
+  begin
+    w.MoveAndResize(FAlignRect.Left, FAlignRect.Top + FAlignRect.Height - w.ActualHeight,
+                    FAlignRect.Width, w.ActualHeight);
+    Dec(FAlignRect.Height, w.ActualHeight);
+  end;
+
+alLeft:
+  begin
+    w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, w.ActualWidth, FAlignRect.Height);
+    //                                               ^^^^^^^^^^^^
+    //                                     Now reads actual size explicitly
+    Inc(FAlignRect.Left, w.ActualWidth);
+    Dec(FAlignRect.Width, w.ActualWidth);
+  end;
+
+alRight:
+  begin
+    w.MoveAndResize(FAlignRect.Left + FAlignRect.Width - w.ActualWidth, FAlignRect.Top,
+                    w.ActualWidth, FAlignRect.Height);
+    Dec(FAlignRect.Width, w.ActualWidth);
+  end;
+
+alClient:
+  w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, FAlignRect.Height);
+  // Note: alClient doesn't read child size, so no change needed
+----
+
+=== Why This Works
+
+The key architectural insight is that **`HandleResize()` is an internal method that bypasses the property setters**:
+
+**Public API (for developers and external code)**:
+
+* `PreferredSize` property: getter returns `FPreferredSize`, setter modifies `FPreferredSize`
+* `ActualSize` property: getter returns `TfpgSize(FWidth, FHeight)` (read-only, no setter)
+* `Width` property: getter returns `FPreferredSize.W`, setter modifies `FPreferredSize.W`
+* `Height` property: getter returns `FPreferredSize.H`, setter modifies `FPreferredSize.H`
+* `ActualWidth` property: getter returns `FWidth` (read-only, no setter)
+* `ActualHeight` property: getter returns `FHeight` (read-only, no setter)
+
+**Internal API (for layout logic - both layout managers AND anchor/align)**:
+
+* `HandleResize(w, h)`: **Directly modifies `FWidth` and `FHeight`** (bypasses property setters)
+* This is the method that layout logic (including anchors/align) uses to set actual size
+
+**Flow for Anchor/Align system**:
+
+[source,pascal]
+----
+procedure TfpgWidget.HandleAlignments(const dwidth, dheight: TfpgCoord);
+begin
+  // ... process Align properties ...
+  for each aligned widget w do
+  begin
+    // 1. Read the actual current size
+    currentWidth := w.ActualWidth;   // Returns FWidth
+    currentHeight := w.ActualHeight; // Returns FHeight
+
+    // 2. Calculate new size based on alignment rules
+    newWidth := CalculateAlignedWidth(...);
+    newHeight := CalculateAlignedHeight(...);
+
+    // 3. Apply via MoveAndResize (which calls HandleResize internally)
+    w.MoveAndResize(newLeft, newTop, newWidth, newHeight);
+    //                                 ↓
+    //                          calls HandleResize(newWidth, newHeight)
+    //                                 ↓
+    //                     directly sets FWidth := newWidth, FHeight := newHeight
+  end;
+end;
+----
+
+**Flow for Anchor system** (already correct, no changes needed):
+
+[source,pascal]
+----
+// For widgets with Anchors set
+if (anRight in wg.Anchors) then
+  if (anLeft in wg.Anchors) then
+    dw := dwidth  // Anchored both sides → grow width by parent's delta
+  else
+    dx := dwidth  // Anchored right only → move right by parent's delta
+
+// Apply the calculated deltas
+wg.MoveAndResizeBy(dx, dy, dw, dh);
+//        ↓
+// calls MoveAndResize(FLeft + dx, FTop + dy, FWidth + dw, FHeight + dh)
+//        ↓
+// calls HandleResize(newWidth, newHeight)
+//        ↓
+// directly sets FWidth := newWidth, FHeight := newHeight
+----
+
+Note that the anchor code uses `FWidth` and `FHeight` internally (line 1825 in `MoveAndResizeBy`), which is correct because it's reading actual size in an internal method.
+
+=== Unified Layout Contract
+
+This design creates a **single, unified sizing contract** that works for ALL forms of layout:
+
+[cols="1,2,2", options="header"]
+|===
+| Layout System | Reads Actual Size From | Sets Actual Size Via
+
+| **Layout Managers**
+| `widget.ActualWidth`, `widget.ActualHeight`
+| `widget.HandleResize(w, h)` internally
+
+| **Align Properties**
+| `widget.ActualWidth`, `widget.ActualHeight`
+| `widget.MoveAndResize(...)` → `HandleResize(w, h)` internally
+
+| **Anchors**
+| Internal fields `FWidth`, `FHeight` in `MoveAndResizeBy`
+| `widget.MoveAndResize(...)` → `HandleResize(w, h)` internally
+
+| **Manual Positioning** (no layout system)
+| `widget.ActualWidth`, `widget.ActualHeight` (if needed)
+| `widget.Width := value` (sets preferred size, then call `UpdateLayout` if needed)
+|===
+
+=== Benefits for Anchor/Align System
+
+1. **✓ Clear separation of concerns**: Layout logic (including anchors/align) reads actual size, calculates new size, sets actual size via internal methods
+2. **✓ No feedback loops**: Parent resize → calculate new child size based on actual current size → set new actual size
+3. **✓ Consistent with layout managers**: Both systems use the same contract
+4. **✓ Preserves developer intent**: If developer sets `Width := 200`, that preference is preserved in `FPreferredSize.W` even after layout modifies actual width
+5. **✓ Backward compatible**: Existing code works with minimal changes (just read from `ActualWidth`/`ActualHeight` instead of `Width`/`Height` in layout calculations)
+
+=== Required Code Changes
+
+**IMPORTANT UPDATE**: This section was initially incorrect. The scope of required changes is much larger than originally anticipated.
+
+See the **Migration Guide** section at the end of this document for:
+- Complete list of problem patterns discovered during implementation
+- Comprehensive TODO list of files requiring changes
+- Detailed examples and search patterns
+
+The changes required span:
+- Canvas and rendering code
+- Mouse event handling and hit-testing
+- All widget paint methods
+- Layout manager container size reading
+- Backend platform implementations (X11, GDI, etc.)
+- Every widget class in the framework
+
+=== Complete Example: Widget with Align Property
+
+[source,pascal]
+----
+// Create a panel with Align = alTop
+panel := TfpgPanel.Create(Form1);
+panel.Align := alTop;
+panel.Height := 50;  // Sets FPreferredSize.H := 50
+
+// What happens during layout?
+
+// 1. Form's HandleAlignments is called
+// 2. DoAlignment processes the panel:
+actualH := panel.ActualHeight;  // Returns FHeight (current actual height)
+//                                   First time, this might be 10 (default initial value)
+
+// 3. Alignment logic says: "alTop means use preferred height"
+panel.MoveAndResize(0, 0, Form1.ClientWidth, panel.Height);
+//                                            ^^^^^^^^^^^^
+//                                    Reads FPreferredSize.H = 50 ← WAIT, this is wrong!
+
+// CORRECTION: We should NOT read panel.Height here!
+// The alignment logic should use a separate variable or read ActualHeight first, then
+// decide whether to honor preferred size or calculate based on content.
+
+// Actually, looking at the code, alTop DOES read w.Height:
+//   w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
+//
+// This means: "Keep the widget's current height, but stretch width to fill alignment rect"
+// So we DO need ActualHeight here!
+
+// 4. Corrected flow:
+panel.MoveAndResize(0, 0, Form1.ClientWidth, panel.ActualHeight);
+//                                            ^^^^^^^^^^^^^^^^^^^
+//                                            Returns FHeight (actual current height)
+
+// 5. But wait - how does the panel get its preferred height of 50?
+// Answer: The first time panel is shown, its initial size should be set to preferred size!
+----
+
+**Important realization**: There's a subtle issue here. When a widget with `Align = alTop` and `Height := 50` is added to a form, how does it get its initial height of 50?
+
+**Answer**: The widget's **initial actual size** should be set to its **preferred size** when it's first added to the parent. This happens in the widget's initialization or when it's added to a parent. After that, the align logic preserves that height.
+
+**Updated understanding**:
+
+[source,pascal]
+----
+// When widget is added to parent or shown for first time
+procedure TfpgWidget.AfterConstruction;
+begin
+  inherited;
+  // If preferred size is set, use it as initial actual size
+  if (FPreferredSize.W > 0) or (FPreferredSize.H > 0) then
+  begin
+    if FPreferredSize.W > 0 then
+      FWidth := FPreferredSize.W;
+    if FPreferredSize.H > 0 then
+      FHeight := FPreferredSize.H;
+  end;
+end;
+----
+
+**Alternative**: The `SetPreferredSize` (and `SetWidth`/`SetHeight` when they modify preferred size) should ALSO set the actual size if the widget hasn't been laid out yet:
+
+[source,pascal]
+----
+procedure TfpgWidgetBase.SetWidth(const AValue: TfpgCoord);
+begin
+  // Set preferred width
+  if FPreferredSize.W <> AValue then
+  begin
+    FPreferredSize.W := AValue;
+
+    // If widget hasn't been laid out yet (or no layout manager), also set actual width
+    if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
+      HandleResize(AValue, FHeight);
+
+    DoPreferredSizeChanged;
+  end;
+end;
+----
+
+This ensures backward compatibility: `panel.Height := 50` both sets preferred height AND actual height (if not in a layout-managed context).
+
+=== Final Architecture Summary
+
+**For widgets WITHOUT layout managers** (using Align/Anchors):
+
+1. Developer sets `Width := 200` → Sets `FPreferredSize.W := 200` AND `FWidth := 200` (if not in layout-managed context)
+2. Parent resizes → `HandleAlignments` called
+3. Alignment logic reads `w.ActualWidth` to get current size
+4. Alignment logic calculates new size based on rules
+5. Alignment logic calls `w.MoveAndResize(...)` → `HandleResize(...)` to set new actual size
+6. `FWidth` and `FHeight` updated to new actual size
+7. Developer can check `ActualWidth` to see what layout actually gave the widget
+8. Developer's original intent (`FPreferredSize.W := 200`) is preserved and not overwritten
+
+**For widgets WITH layout managers**:
+
+1. Developer sets `Width := 200` → Sets `FPreferredSize.W := 200` (actual size NOT modified)
+2. Parent resizes → `HandleAlignments` → delegates to layout manager
+3. Layout manager reads `w.Width` (returns `FPreferredSize.W`) or `w.PreferredSize.W` to get developer's intent
+4. Layout manager calculates actual size based on constraints, available space, etc.
+5. Layout manager calls `w.HandleResize(...)` to set actual size
+6. `FWidth` and `FHeight` updated to calculated actual size
+7. Developer can check `ActualWidth` to see what layout actually gave the widget
+8. Developer's original intent (`FPreferredSize.W := 200`) is preserved and not overwritten
+
+Both systems work harmoniously with the same API!
+
+== Recent Changes: SetPosition API Deprecation (November 2025)
+
+=== Overview
+
+**Status**: ✅ COMPLETED
+
+As a prerequisite to the ActualWidth/ActualHeight migration, the SetPosition API has been cleaned up and deprecated:
+
+**Changes Made**:
+
+1. **SetPosition simplified** (fpg_base.pas): Now just calls individual property setters:
+   ```pascal
+   procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+   begin
+     // Deprecated convenience wrapper - use properties directly
+     Left   := ALeft;
+     Top    := ATop;
+     Width  := AWidth;
+     Height := AHeight;
+   end;
+   ```
+
+2. **MoveWidget and MoveAndResize moved to protected**: These internal methods are no longer public. Layout managers access them via ILayoutTarget interface.
+
+3. **All SetPosition calls replaced**: Replaced 56 SetPosition calls throughout:
+   - 34 calls in src/corelib/ and src/gui/ (commit 0bd9ca0b)
+   - 22 calls in examples/, docview/, uidesigner/ (commit c5bb170e)
+
+4. **Backward compatibility maintained**: SetPosition still works for existing code, but new code should use individual properties (Left, Top, Width, Height).
+
+**Impact**: This simplification ensures SetPosition behavior is consistent with property-based positioning, making the transition to ActualWidth/ActualHeight cleaner.
+
+== Migration Guide: Fixing Width/Height Usage
+
+=== Overview
+
+After implementing the intent vs actual size separation (where `Width`/`Height` properties now return `FPreferredSize` instead of `FWidth`/`FHeight`), ALL code that needs actual rendered dimensions must be updated to use `ActualWidth`/`ActualHeight` instead.
+
+**Critical insight**: This is a widespread breaking change that affects nearly every part of the framework that reads widget dimensions for:
+
+* Rendering/painting operations
+* Hit-testing (mouse clicks, bounds checking)
+* Layout calculations
+* Size calculations
+* Visibility checks
+
+=== Critical Fix: SetWidth/SetHeight Backward Compatibility
+
+**FIXED**: `SetWidth`/`SetHeight` now properly support manual positioning without layout managers.
+
+The original implementation only set actual size during construction (`csLoading` check), which broke code like:
+
+[source,pascal]
+----
+lblTitle := TfpgLabel.Create(self);
+lblTitle.SetPosition(20, 12, 240, 30);  // Actual size never set - stayed 10x10!
+----
+
+**Solution**: Changed from `csLoading` check to layout manager check:
+
+[source,pascal]
+----
+// OLD (broken for manual positioning):
+if (csLoading in ComponentState) then
+  FWidth := AValue;
+
+// NEW (works for both):
+if not Assigned(Parent) or not Assigned(Parent.LayoutManager) then
+  FWidth := AValue;
+----
+
+This ensures:
+
+- Manual positioning (SetPosition) sets actual size ✓
+- Layout managers override via HandleResize ✓
+- Backward compatibility maintained ✓
+
+**Status**: ✓ FIXED in fpg_base.pas:1757-1758 (SetWidth) and 1742-1743 (SetHeight)
+
+=== Critical Fix: Unit Test Failures and SetPosition
+
+**Issue**: After implementing the intent vs actual size separation, unit tests failed because:
+
+1. `SetPosition()` wasn't updating `FPreferredSize` - only actual size
+2. `.Right` and `.Bottom` were using `.Width`/`.Height` (preferred) instead of actual size
+3. Tests called `SetPosition(0, 0, 200, 200)` expecting `.Width` to return 200, but got default 10
+
+**Root Cause Analysis**:
+
+[source,pascal]
+----
+w.SetPosition(0, 0, 200, 200);
+// → Only calls MoveAndResize → HandleResize
+// → HandleResize sets FWidth/FHeight = 200 (actual size)
+// → FPreferredSize stays (0, 0)!
+// → w.Width calls GetPreferredSize → returns 10 (default)
+// → w.Right = Left + Width - 1 = 0 + 10 - 1 = 9 (WRONG, expected 199)
+----
+
+**Solution Applied**:
+
+1. **Updated `SetPosition` to set FPreferredSize** (fpg_base.pas:1940):
+   ```pascal
+   procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+   begin
+     // SetPosition expresses developer's intent for size
+     if (FPreferredSize.W <> AWidth) or (FPreferredSize.H <> AHeight) then
+     begin
+       FPreferredSize.W := AWidth;
+       FPreferredSize.H := AHeight;
+     end;
+
+     if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
+       MoveAndResize(ALeft, ATop, AWidth, AHeight);
+   end;
+   ```
+
+2. **Fixed `.Right` and `.Bottom` to use actual size** (fpg_base.pas:1837-1845):
+   ```pascal
+   function TfpgWidgetBase.Right: TfpgCoord;
+   begin
+     Result := Left+ActualWidth-1;  // Was: Left+Width-1
+   end;
+
+   function TfpgWidgetBase.Bottom: TfpgCoord;
+   begin
+     Result := Top+ActualHeight-1;  // Was: Top+Height-1
+   end;
+   ```
+
+**Why HandleResize Should NOT Update FPreferredSize**:
+
+Initially attempted to update `FPreferredSize` in `HandleResize`, but this was **incorrect** because:
+
+- Layout managers call `HandleResize` to apply calculated size
+- If layout can only give 150px (constrained space), but developer requested 200px
+- Updating `FPreferredSize` to 150 loses the developer's intent
+- Widget would never know to grow back to 200px when space becomes available
+
+**Correct Behavior Now**:
+
+[source,pascal]
+----
+// Manual positioning (no layout manager)
+w.SetPosition(0, 0, 200, 200);
+// → FPreferredSize.W/H = 200 ✓
+// → FWidth/FHeight = 200 ✓
+// → w.Width returns 200 ✓
+// → w.ActualWidth returns 200 ✓
+// → w.Right = 0 + 200 - 1 = 199 ✓
+
+// Layout manager scenario
+w.Width := 200;              // Developer intent
+// → FPreferredSize.W = 200 ✓
+layout.DoLayout(container);  // Layout calculates and applies
+// → calls w.HandleResize(150, ...)  (constrained space)
+// → FPreferredSize.W still 200 ✓  (intent preserved)
+// → FWidth = 150 ✓  (actual size)
+// → w.Width returns 200 ✓  (intent)
+// → w.ActualWidth returns 150 ✓  (result)
+----
+
+**Status**: ✓ FIXED - All unit tests should now pass
+
+=== Common Problem Patterns
+
+==== Pattern 1: Canvas Drawing Operations
+
+**Problem**: Canvas methods using `Width`/`Height` for rendering rectangles
+
+**Symptoms**: Widget painting appears clipped at preferred size (e.g., button renders at 100x40 even though it fills the form)
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - uses preferred size for rendering
+r.SetRect(0, 0, FWidget.Width, FWidget.Height);
+
+// GOOD - uses actual size for rendering
+r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_base.pas` - TfpgCanvasBase methods:
+  ** `GetWidgetWindowRect` (line ~2635)
+  ** `DoGetWinRect` (line ~2674)
+  ** `SetClipRect` in BeginDraw (line ~3120)
+  ** `EndDraw` parameterless overload (line ~3212)
+
+**Status**: ✓ FIXED
+
+**Known Issues Remaining**:
+
+- Popup windows (e.g., combobox dropdowns) render incorrect size - needs investigation ✓ FIXED
+- All other widget classes need similar fixes to TfpgButton and TfpgLabel ✓ FIXED
+
+==== Pattern 2: Widget Paint Methods
+
+**Problem**: Widget `HandlePaint` methods using `Width`/`Height` for layout calculations
+
+**Symptoms**: Widget content (text, images, borders) rendered in wrong position or clipped
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - button renders at preferred size
+procedure TfpgBaseButton.HandlePaint;
+begin
+  r.SetRect(0, 0, Width, Height);  // Wrong!
+  // ... painting code ...
+end;
+
+// GOOD - button renders at actual size
+procedure TfpgBaseButton.HandlePaint;
+begin
+  r.SetRect(0, 0, ActualWidth, ActualHeight);  // Correct!
+  // ... painting code ...
+end;
+----
+
+**Files affected**:
+
+* `src/gui/fpg_button.pas`:
+  ** `HandlePaint` main rendering rect (line ~603)
+  ** `HandlePaint` multi-line text rect (line ~689)
+  ** `CalculatePositions` - ALL Width/Height references (lines ~245-408)
+
+**Status**: ✓ FIXED
+
+==== Pattern 3: Mouse Event Hit-Testing
+
+**Problem**: Mouse click detection using `Width`/`Height` for bounds checking
+
+**Symptoms**: Mouse clicks only register in preferred size area (e.g., button only clickable in top-left 100x40 region)
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - hit test uses preferred size
+procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(0, 0, Width, Height);  // Wrong!
+  if PtInRect(r, Point(x, y)) then
+    // ... handle click ...
+end;
+
+// GOOD - hit test uses actual size
+procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(0, 0, ActualWidth, ActualHeight);  // Correct!
+  if PtInRect(r, Point(x, y)) then
+    // ... handle click ...
+end;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `HandleLMouseUp` click detection (line ~1372)
+  ** Keyboard menu simulation center point (line ~1223)
+
+**Status**: ✓ FIXED
+
+==== Pattern 4: Bounds and Client Rectangle Methods
+
+**Problem**: Methods that return widget bounds using `Width`/`Height`
+
+**Symptoms**: Invalidation rectangles wrong size, intersection tests fail, clipping issues
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - bounds based on preferred size
+function TfpgWidgetBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);  // Wrong!
+end;
+
+// GOOD - bounds based on actual size
+function TfpgWidgetBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, ActualWidth+1, ActualHeight+1);  // Correct!
+end;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_base.pas`:
+  ** `GetBoundsRect` (line ~2025)
+  ** `GetClientRect` already correct - uses `FWidth`/`FHeight` directly
+
+**Status**: ✓ FIXED
+
+==== Pattern 5: Visibility and Clipping Checks
+
+**Problem**: Code checking if widget is visible/clipped using `Width`/`Height`
+
+**Symptoms**: Widgets incorrectly marked as hidden or clipped
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - visibility check uses preferred size
+if (Left >= Parent.Width-1) or (Left + Width <= 0) then
+  Result := True;  // Widget is outside visible area
+
+// GOOD - visibility check uses actual size
+if (Left >= Parent.ActualWidth-1) or (Left + ActualWidth <= 0) then
+  Result := True;  // Widget is outside visible area
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `IsHidden` visibility check (lines ~1480-1483)
+
+**Status**: ✓ FIXED
+
+==== Pattern 6: Native Window Positioning
+
+**Problem**: Native window size updates using `Width`/`Height`
+
+**Symptoms**: Widget rendering clipped at preferred size even though widget is larger
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - native window sized to preferred size
+Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, Width, Height);
+
+// GOOD - native window sized to actual size
+Window.UpdateWindowPosition(Left+ParentLeft, Top+ParentTop, ActualWidth, ActualHeight);
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_widget.pas`:
+  ** `DoUpdatePosition` window sizing (line ~546)
+
+**Status**: ✓ FIXED
+
+==== Pattern 7: Layout Manager Container Size Reading
+
+**Problem**: Layout managers reading container size as `Width`/`Height`
+
+**Symptoms**: Layout calculations wrong, widgets overflow container or don't fill it
+
+**Example locations**:
+
+[source,pascal]
+----
+// BAD - layout reads preferred size
+parW := par.Width;
+parH := par.Height;
+
+// GOOD - layout reads actual size
+parW := par.ActualWidth;
+parH := par.ActualHeight;
+----
+
+**Files affected**:
+
+* `src/corelib/fpg_miglayout.pas`:
+  ** Container size reading (lines ~554-555)
+  ** `LayoutContainer` bounds array (lines ~3131-3132)
+* `src/corelib/fpg_flowlayout.pas`:
+  ** Container width reading (line ~149)
+  ** Vertical alignment calculations (lines ~189-190)
+
+**Status**: ✓ FIXED
+
+=== Search Patterns for Finding Issues
+
+Use these grep patterns to find remaining issues:
+
+[source,bash]
+----
+# Find .Width property reads (exclude FWidth field reads)
+grep -n "\.Width\b" file.pas | grep -v "FWidth"
+
+# Find .Height property reads (exclude FHeight field reads)
+grep -n "\.Height\b" file.pas | grep -v "FHeight"
+
+# Find SetRect calls that might use wrong size
+grep -n "SetRect.*Width.*Height" file.pas
+
+# Find PtInRect calls (hit-testing)
+grep -n "PtInRect" file.pas
+----
+
+**Important**: Not all `.Width`/`.Height` reads need changing! Only change them if the code needs **actual rendered size** rather than **preferred size**.
+
+**When to keep Width/Height**:
+
+* Layout managers reading widget's **intent** (what size it wants)
+* Code that needs to **preserve developer's desired size**
+* Align properties reading child's preferred dimension
+
+**When to change to ActualWidth/ActualHeight**:
+
+* Painting/rendering operations
+* Hit-testing (mouse events, bounds checking)
+* Container reading its own size for layout
+* Visibility/clipping calculations
+* Native window sizing
+* **Scrollbar visibility/positioning calculations** (UpdateScrollBarCoords methods)
+* **Loop termination conditions** (e.g., `if r.Top >= Height then Break`)
+* **Visible line/width calculations** (VisibleLines, VisibleWidth methods)
+* **Dropdown/popup window sizing** (sizing popup to match parent widget)
+* **Child widget sizing within containers** (sizing internal widgets like listbox in dropdown)
+
+=== Common Patterns That Were Initially Missed
+
+During the migration, several patterns were easy to overlook. **Check these carefully** when migrating widgets:
+
+==== Pattern 1: Scrollbar Visibility Calculations
+
+**Problem**: Methods that calculate visible lines/width for scrollbar visibility checks.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+vlines := (Height - (FSideMargin shl 1)) div Lineheight;
+
+// GOOD - uses actual size
+vlines := (ActualHeight - (FSideMargin shl 1)) div Lineheight;
+----
+
+**Where to look**: Methods named `UpdateScrollBars`, `VisibleLines`, `VisibleWidth`, `VisibleHeight`
+
+==== Pattern 2: Loop Termination Conditions
+
+**Problem**: Paint loops that check if drawing position exceeds widget bounds.
+
+**Example from `fpg_listbox.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+if r.Top >= Height then
+  Break;
+
+// GOOD - uses actual size
+if r.Top >= ActualHeight then
+  Break;
+----
+
+**Where to look**: HandlePaint methods with loops, especially in scrollable widgets
+
+==== Pattern 3: Dropdown/Popup Window Sizing
+
+**Problem**: Popup windows sizing themselves to match parent widget.
+
+**Example from `fpg_combobox.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+ddw.Width := Width;
+
+// GOOD - uses actual size
+ddw.Width := ActualWidth;
+----
+
+**Where to look**: Methods like `HandleLMouseUp`, `ShowDropDown`, popup window creation
+
+==== Pattern 4: Child Widget Sizing in HandleShow
+
+**Problem**: Container widgets sizing child widgets in HandleShow.
+
+**Example from `fpg_combobox.pas` (TComboboxDropdownWindow):
+[source,pascal]
+----
+// BAD - uses preferred size
+FListBox.Width := Width;
+FListBox.Height := Height;
+
+// GOOD - uses actual size
+FListBox.Width := ActualWidth;
+FListBox.Height := ActualHeight;
+----
+
+**Where to look**: HandleShow methods, especially in popup/dropdown windows
+
+==== Pattern 5: UpdateScrollBarCoords Methods
+
+**Problem**: Methods that position scrollbars based on widget size.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - uses preferred size
+VHeight := Height - 4;
+HWidth := Width - 4;
+FHScrollBar.Top := Height - FHScrollBar.Height - 2;
+
+// GOOD - uses actual size
+VHeight := ActualHeight - 4;
+HWidth := ActualWidth - 4;
+FHScrollBar.Top := ActualHeight - FHScrollBar.Height - 2;
+----
+
+**Where to look**: Methods named `UpdateScrollBarCoords`, `UpdateScrollBarPosition`
+
+==== Pattern 6: Reading Child Widget Sizes for Positioning
+
+**Problem**: Reading child widget's Width/Height (preferred size) instead of ActualWidth/ActualHeight when positioning or calculating available space.
+
+**Example from `fpg_memo.pas`**:
+[source,pascal]
+----
+// BAD - reads scrollbar's preferred width
+if FVScrollBar.Visible then
+  Dec(HWidth, FVScrollBar.Width);
+FVScrollBar.Left := ActualWidth - FVScrollBar.Width - 2;
+
+// GOOD - reads scrollbar's actual width
+if FVScrollBar.Visible then
+  Dec(HWidth, FVScrollBar.ActualWidth);
+FVScrollBar.Left := ActualWidth - FVScrollBar.ActualWidth - 2;
+----
+
+**Example from `fpg_listbox.pas`**:
+[source,pascal]
+----
+// BAD - returns scrollbar's preferred width
+function GetScrollBarWidth: integer;
+begin
+  if FScrollBar.Visible then
+    result := FScrollBar.Width;  // Wrong!
+end;
+
+// GOOD - returns scrollbar's actual width
+function GetScrollBarWidth: integer;
+begin
+  if FScrollBar.Visible then
+    result := FScrollBar.ActualWidth;  // Correct!
+end;
+----
+
+**Where to look**:
+
+- `UpdateScrollBarCoords` methods reading scrollbar dimensions
+- Property getters like `GetScrollBarWidth` that query child widget sizes
+- Any calculation that reads a child widget's size for positioning: `FChild.Width`, `FChild.Height`
+
+**Critical**: When positioning child widgets, you need their **actual** size, not their preferred size!
+
+=== Migration TODO List
+
+==== Core Framework Files - COMPLETED
+
+[%interactive]
+* [x] `src/corelib/fpg_base.pas` - Canvas methods
+* [x] `src/corelib/fpg_widget.pas` - Mouse events, visibility, native window
+* [x] `src/gui/fpg_button.pas` - Paint and layout calculations
+* [x] `src/corelib/fpg_miglayout.pas` - Container size reading
+* [x] `src/corelib/fpg_flowlayout.pas` - Container size reading
+
+==== Core Framework Files - COMPLETED
+
+Search these files for Width/Height property reads that might need ActualWidth/ActualHeight:
+
+[%interactive]
+* [x] `src/corelib/fpg_main.pas` - Application/window management ✓ FIXED (no changes needed)
+* [x] `src/gui/fpg_form.pas` - Form painting, sizing, window management ✓ FIXED (no changes needed)
+* [x] `src/gui/fpg_panel.pas` - Panel painting, client area (includes Bevel classes) ✓ FIXED
+* [x] `src/gui/fpg_scrollframe.pas` - Scrolling calculations, viewport ✓ FIXED
+* [x] `src/gui/fpg_splitter.pas` - Splitter drag calculations ✓ FIXED
+* [x] `src/gui/fpg_menu.pas` - Menu positioning, popup calculations ✓ FIXED
+* [x] `src/gui/fpg_popupwindow.pas` - Popup window positioning ✓ FIXED
+* [x] `src/gui/fpg_label.pas` - Label painting, text layout ✓ FIXED
+* [x] `src/gui/fpg_edit.pas` - Edit control border painting ✓ FIXED
+* [x] `src/gui/fpg_memo.pas` - Scrollbar positioning, visibility checks, painting ✓ FIXED
+* [x] `src/gui/fpg_checkbox.pas` - Checkbox box positioning ✓ FIXED
+* [x] `src/gui/fpg_radiobutton.pas` - Radio button painting, hit-testing ✓ FIXED
+* [x] `src/gui/fpg_combobox.pas` - Button positioning, painting ✓ FIXED
+* [x] `src/gui/fpg_listbox.pas` - Scrollbar positioning, painting ✓ FIXED
+* [x] `src/gui/fpg_grid.pas` - Grid cell calculations, scrolling, painting ✓ FIXED
+* [x] `src/gui/fpg_tree.pas` - Tree node positioning, scrolling, painting ✓ FIXED
+* [x] `src/gui/fpg_trackbar.pas` - Trackbar painting, thumb positioning ✓ FIXED
+* [x] `src/gui/fpg_progressbar.pas` - Progress bar painting ✓ FIXED
+* [x] `src/gui/fpg_tab.pas` - Tab positioning, painting ✓ FIXED
+* [x] `src/gui/fpg_scrollbar.pas` - Scrollbar painting, thumb calculations, hit-testing ✓ FIXED
+* [x] `src/gui/fpg_listview.pas` - ListView scrolling, column calculations ✓ FIXED
+* [x] `src/gui/fpg_hyperlink.pas` - Hyperlink hit-testing ✓ FIXED (no changes needed - inherits from TfpgCustomLabel)
+* [x] `src/gui/fpg_editcombo.pas` - Edit combo dropdown positioning ✓ FIXED
+* [x] `src/gui/fpg_gauge.pas` - Gauge painting ✓ FIXED
+* [x] `src/gui/fpg_dialogs.pas` - Dialog positioning ✓ FIXED
+* [x] `src/gui/fpg_animation.pas` - Animation bounds ✓ FIXED (no changes needed - only uses FImage.Width/Height)
+
+==== Layout Managers - COMPLETED
+
+[%interactive]
+* [x] `src/corelib/fpg_miglayout.pas` - MigLayout container size reading ✓ FIXED (already completed)
+* [x] `src/corelib/fpg_flowlayout.pas` - FlowLayout container size reading ✓ FIXED (already completed)
+* [x] `src/corelib/fpg_borderlayout.pas` - BorderLayout calculations ✓ FIXED (no changes needed - uses GetClientRect)
+* [x] `src/corelib/fpg_gridlayout.pas` - Does not exist ✓ N/A
+* [x] `src/corelib/fpg_boxlayout.pas` - Does not exist ✓ N/A
+
+==== Rendering Backends - COMPLETED
+
+**Status Notes**:
+
+- AggCanvas backend (Agg2D.pas) is WORKING - user verified all fixes applied
+- X11 backend shows corrupted form background when AggCanvas disabled - needs fixes
+- GDI backend (Windows) migrated - canvas buffer management uses ActualWidth/ActualHeight
+- Cocoa backend (macOS) is empty stub implementation - no migration needed
+
+[%interactive]
+* [x] `src/corelib/render/software/Agg2D.pas` - Agg canvas implementation ✓ WORKING
+* [x] `src/corelib/x11/fpg_x11.pas` - X11 canvas buffer management ✓ FIXED
+* [x] `src/corelib/gdi/fpg_gdi.pas` - Windows GDI backend ✓ FIXED
+* [x] `src/corelib/cocoa/fpg_cocoa.pas` - macOS Cocoa backend ✓ N/A (empty stub implementation)
+
+==== Application Examples - COMPLETED
+
+Check these for patterns that third-party developers might copy:
+
+[%interactive]
+* [x] `examples/corelib/helloworld/` - Hello world example ✓ FIXED (MsgPaint gradient and text centering)
+* [x] `examples/corelib/eventtest/` - Event test ✓ FIXED (MsgPaint background fill)
+* [x] `examples/gui/helloworld/` - GUI button example ✓ VERIFIED (no changes needed - uses Align)
+* [x] `examples/gui/customwindow/` - Custom window painting ✓ FIXED (border and gradient rendering)
+* [x] `examples/gui/stdimages/` - Standard images list ✓ FIXED (HandlePaint overflow check)
+* [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
+* [x] `examples/apps/globe/` - Globe demo ✓ VERIFIED (no changes needed - uses hardcoded coords)
+* [x] `examples/gui/wulinetest/` - Wu line test ✓ VERIFIED (no changes needed - uses hardcoded coords)
+* [x] `examples/gui/lm-mig/` - MigLayout demo ✓ VERIFIED (no changes needed - uses layout manager)
+* [x] `examples/gui/lm-flow/` - FlowLayout demo ✓ VERIFIED (no changes needed - uses layout manager)
+* [x] `examples/gui/alignment/` - Align properties demo ✓ VERIFIED (no changes needed - uses Align)
+* [x] `docview/` - DocView application ✓ FIXED (RichTextView scrollbar corner)
+* [x] `uidesigner/` - UI Designer application ✓ FIXED (designer grid and widget frame)
+
+=== Testing Strategy
+
+After fixing each widget class:
+
+1. **Build framework**: `cd src && ./build.sh 1`
+2. **Test basic rendering**: Run helloworld demo - verify button renders correctly
+3. **Test mouse events**: Click button in different areas - verify click detection works
+4. **Test resizing**: Resize form - verify widget repaints correctly at new size
+5. **Test layout managers**: Run lm-mig demo - verify layouts calculate correctly
+6. **Test Align properties**: Run alignment demo - verify widgets resize with parent
+
+=== For Third-Party Widget Developers
+
+If you've written custom widgets using fpGUI, you'll need to update them:
+
+==== Step 1: Update Paint Methods
+
+Find all `HandlePaint` implementations and replace `Width`/`Height` with `ActualWidth`/`ActualHeight`:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  Canvas.BeginDraw;
+
+  // OLD:
+  // r.SetRect(0, 0, Width, Height);
+
+  // NEW:
+  r.SetRect(0, 0, ActualWidth, ActualHeight);
+
+  // ... rest of painting code ...
+
+  Canvas.EndDraw;
+end;
+----
+
+==== Step 2: Update Mouse Event Handlers
+
+If you override mouse event handlers and do hit-testing:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  // OLD:
+  // if PtInRect(fpgRect(0, 0, Width, Height), fpgPoint(x, y)) then
+
+  // NEW:
+  if PtInRect(fpgRect(0, 0, ActualWidth, ActualHeight), fpgPoint(x, y)) then
+  begin
+    // ... handle click ...
+  end;
+
+  inherited HandleLMouseDown(x, y, shiftstate);
+end;
+----
+
+==== Step 3: Update Preferred Size Calculations
+
+If you override `DoCalculatePreferredSize`, this stays the same (it sets preferred size, not actual):
+
+[source,pascal]
+----
+procedure TMyCustomWidget.DoCalculatePreferredSize(var ASize: TfpgSize);
+begin
+  // This is CORRECT - calculating preferred (desired) size
+  ASize.W := FFont.TextWidth(FText) + 20;
+  ASize.H := FFont.Height + 10;
+end;
+----
+
+==== Step 4: Update Any Size-Dependent Calculations
+
+If your widget does calculations based on its size:
+
+[source,pascal]
+----
+procedure TMyCustomWidget.CalculateLayout;
+var
+  centerX, centerY: integer;
+begin
+  // OLD:
+  // centerX := Width div 2;
+  // centerY := Height div 2;
+
+  // NEW:
+  centerX := ActualWidth div 2;
+  centerY := ActualHeight div 2;
+
+  // ... use center point for layout ...
+end;
+----
+
+==== Step 5: Reading vs Writing Size
+
+**Important distinction**:
+
+[source,pascal]
+----
+// SETTING size (developer intent) - use Width/Height
+myWidget.Width := 200;   // Sets preferred width
+myWidget.Height := 100;  // Sets preferred height
+
+// READING size for rendering/layout - use ActualWidth/ActualHeight
+x := myWidget.ActualWidth;   // Gets actual rendered width
+y := myWidget.ActualHeight;  // Gets actual rendered height
+----
+
+=== Completion Tracking
+
+**Note for continuation sessions**: As you complete items from the TODO list above, mark them with `[x]` in this document. This provides a persistent record of migration progress across multiple AI sessions.
+
+To mark an item complete, change:
+```
+* [ ] File description
+```
+to:
+```
+* [x] File description
+```
+
+=== Migration Completion Status
+
+==== Overall Status: COMPLETED ✓
+
+The ActualWidth/ActualHeight migration is **100% complete** for all critical framework components.
+
+**Completion Date**: November 15, 2025
+
+**Summary**:
+
+- ✅ All core framework widgets migrated (30+ widgets)
+- ✅ All layout managers migrated (MigLayout, FlowLayout, BorderLayout)
+- ✅ All rendering backends migrated (X11, GDI, AggCanvas, Cocoa stub)
+- ✅ All example applications and tools migrated
+- ✅ Tab sheet resize flicker issues resolved
+- ✅ Comprehensive examples directory review completed
+- ✅ DocView and UI Designer applications migrated
+
+==== Session Work Summary
+
+**Session 1: Core Migration** (Nov 14, 2025)
+
+- Migrated 30+ core widgets to ActualWidth/ActualHeight
+- Fixed all container widgets, layout calculations
+- Migrated rendering/painting code for all widget types
+- Fixed specific issues: gauge rendering, editcombo borders, AggCanvas coordinates
+
+**Session 2: Backend & Examples** (Nov 15, 2025)
+
+- Completed GDI backend canvas buffer management migration
+- Reviewed Cocoa backend (marked N/A - empty stub)
+- Fixed tab sheet resize issues:
+  * Added HandleAlignments override to properly resize tab sheets before children align
+  * Eliminated resize flicker by preventing double-resize conflicts (removed anchors)
+- Fixed example applications:
+  * examples/gui/customwindow/ - Border and gradient rendering
+  * examples/apps/ide/fpg_textedit.pas - Gutter borders, scrollbar corner
+  * examples/corelib/eventtest/ - Background fill
+  * examples/corelib/helloworld/ - Gradient and text centering
+  * examples/gui/stdimages/ - Image overflow check
+- Verified additional examples (globe, wulinetest, gridtest, hintwindow)
+
+**Session 3: Final Applications** (Nov 15, 2025)
+
+- Completed comprehensive review of ALL remaining applications
+- Verified layout manager examples (lm-mig, lm-flow, alignment) - no changes needed
+- Fixed docview application:
+  * components/richtext/RichTextView.pas - Scrollbar corner rectangle calculation
+- Fixed uidesigner application:
+  * vfd_designer.pas - TDesignedForm grid drawing in HandlePaint
+  * vfd_designer.pas - TOtherWidget frame rectangle in HandlePaint
+- Achieved true 100% completion across entire fpGUI framework
+
+==== Critical Fixes Applied
+
+**Tab Sheet Resize (Commits: 17cc8d24, 2af658b7)**:
+
+- Problem: Tab sheet children (like textedit) not resizing when PageControl resized
+- Root cause: Tab sheet sizes set during HandlePaint (too late for child alignment)
+- Solution: Override HandleAlignments to call PositionTabSheets before inherited
+- Additional fix: Removed anchor assignment to prevent double-resize conflicts
+- Result: Smooth, flicker-free resizing with proper child layout propagation
+
+**Rendering Backend Buffer Management**:
+
+- X11 backend: Canvas pixmap buffers sized using ActualWidth/ActualHeight
+- GDI backend: Canvas bitmap buffers sized using ActualWidth/ActualHeight
+- Prevents buffer size mismatches during widget resize operations
+
+**AggCanvas Coordinate System**:
+
+- Fixed arc drawing in fpg_gauge for AggCanvas backend
+- Conditional compilation adjusts arc angles for different Y-axis orientation
+- X11 uses mathematical coordinates, AggCanvas uses screen coordinates
+
+==== All Applications Verified
+
+All example applications and major tools have been reviewed and migrated:
+
+- ✅ `examples/gui/lm-mig/` - MigLayout demo (verified, no changes needed)
+- ✅ `examples/gui/lm-flow/` - FlowLayout demo (verified, no changes needed)
+- ✅ `examples/gui/alignment/` - Align properties demo (verified, no changes needed)
+- ✅ `docview/` - DocView application (RichTextView scrollbar corner fixed)
+- ✅ `uidesigner/` - UI Designer application (grid and widget frame rendering fixed)
+
+No remaining applications require migration.
+
+==== Testing Recommendations
+
+For users upgrading to the ActualWidth/ActualHeight framework:
+
+1. **Build and test**: Run `cd src && ./build.sh 1` to rebuild framework
+2. **Test rendering**: Verify widgets render correctly at design-time size
+3. **Test resizing**: Resize forms and check widget repainting
+4. **Test layout managers**: Verify MigLayout, FlowLayout calculations
+5. **Test continuous resize**: Drag splitters, resize forms continuously - check for flicker
+6. **Test tab controls**: Verify tab sheet children resize properly
+
+==== Known Issues
+
+**None** - All identified issues during migration have been resolved.
+
+If new issues are discovered, they should be documented here with:
+- Issue description
+- Affected components
+- Workaround (if available)
+- Fix status
+
+
+This document serves as both a guide and a checklist for the migration effort.
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2025-10-28 +
+**Branch:** feature/sizing-refactor +
+**Author:** Graeme Geldenhuys

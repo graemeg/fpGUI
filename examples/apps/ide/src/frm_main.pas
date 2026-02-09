@@ -77,7 +77,7 @@ type
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
-    FKeywordFont: TfpgFont;
+    FKeywordFont: TfpgFontResourceBase;
     FFileMonitor: TFileMonitor;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
@@ -90,6 +90,7 @@ type
     procedure   miFileNewUnit(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
+    procedure   miFileClose(Sender: TObject);
     procedure   miEditCutClicked(Sender: TObject);
     procedure   miEditCopyClicked(Sender: TObject);
     procedure   miEditPasteClicked(Sender: TObject);
@@ -245,6 +246,21 @@ begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+end;
+
+procedure TMainForm.miFileClose(Sender: TObject);
+var
+  ts: TfpgTabSheet;
+  i: integer;
+begin
+  pcEditor.BeginUpdate;
+  try
+    ts := pcEditor.ActivePage;
+    pcEditor.RemoveTabSheet(ts);
+    ts.Free;
+  finally
+    pcEditor.EndUpdate;
+  end;
 end;
 
 procedure TMainForm.miEditCutClicked(Sender: TObject);
@@ -574,11 +590,11 @@ var
   r: TfpgTreeNode;
   n: TfpgTreeNode;
   ts: TfpgTabSheet;
-  u: TUnit;
+  u: TUnit = nil;
 begin
   r := GetUnitsNode;
   n := tvProject.Selection;
-  if n.Data <> nil then
+  if (n <> nil) and (n.Data <> nil) then
     u := TUnit(n.Data);
   if u <> nil then
   begin
@@ -768,7 +784,10 @@ var
 begin
   Result := pcEditor.AppendTabSheet(ATitle);
   m := TfpgTextEdit.Create(Result);
-  m.SetPosition(1, 1, 200, 20);
+  m.Left := 1;
+  m.Top := 1;
+  m.Width := 200;
+  m.Height := 20;
   m.Align := alClient;
   m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   m.GutterVisible := True;
@@ -893,12 +912,12 @@ const
 
   cDefines1 = '\{\$[^\{]*\}';
 
-  cString1 = '''.*''';
+  cString1 =  '''[^''\r\n]*''';
 
   cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
-  cHexadecimal = '\$[0-9a-fA-F]+';
+  cHexadecimal = '\$[A-F0-9]+\b';
 var
-  oldfont: TfpgFont;
+  oldfont: TfpgFontResourceBase;
   s: TfpgString;  // copy of ALineText we work with
   i, j, c: integer;  // i = position of reserved word; c = last character pos
   iLength: integer; // length of reserved word
@@ -911,7 +930,7 @@ begin
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
 
-  oldfont := TfpgFont(ACanvas.Font);
+  oldfont := TfpgFontResourceBase(ACanvas.Font);
   ACanvas.Color := clWhite;
 
   { draw the plain text first }
@@ -923,8 +942,8 @@ begin
 
   { syntax highlighting for: keywords }
   if not Assigned(FKeywordFont) then
-    FKeywordFont := fpgGetFont(edt.FontDesc + ':bold');
-  ACanvas.Font := FKeywordFont;
+    FKeywordFont := fpgApplication.FontManager.GetFont(edt.FontDesc + ':bold');
+  ACanvas.SetFont(FKeywordFont);
   ACanvas.Color := clWhite;
   FRegex.Expression := cKeywords1;
   FRegex.ModifierI := True;
@@ -942,7 +961,7 @@ begin
     until not FRegex.ExecNext;
   end;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 
   { syntax highlighting for: cDecimal }
   ACanvas.TextColor := clNavy;
@@ -1050,7 +1069,7 @@ begin
     ACanvas.DrawText(r, s);
   end;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 //  writeln('------');
 end;
 
@@ -1065,7 +1084,7 @@ const
   cHunk = '^\@\@.*';                        // starts with "@@" symbols
   cStartOfFile = '^(diff|index) .*';        // starts with "diff " or "index " symbols
 var
-  oldfont: TfpgFont;
+  oldfont: TfpgFontResourceBase;
   s: TfpgString;  // copy of ALineText we work with
   i, j, c: integer;  // i = position of reserved word; c = last character pos
   iLength: integer; // length of reserved word
@@ -1077,7 +1096,7 @@ begin
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
 
-  oldfont := TfpgFont(ACanvas.Font);
+  oldfont := TfpgFontResourceBase(ACanvas.Font);
   ACanvas.Color := clWhite;
 
   { draw the plain text first }
@@ -1191,7 +1210,7 @@ begin
   end;
   ACanvas.Color := clWhite;
 
-  ACanvas.Font := oldfont;
+  ACanvas.SetFont(oldfont);
 end;
 
 procedure TMainForm.SetupEditorPreference;
@@ -1200,7 +1219,6 @@ var
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
-  FKeywordFont.Free;
   FKeywordFont := nil;
   for i := 0 to pcEditor.PageCount-1 do
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
@@ -1220,7 +1238,7 @@ begin
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
   Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
   Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
-  UpdateWindowPosition;
+  UpdatePosition;
 
   SetupProjectTree;
   SetupFilesGrid;
@@ -1261,7 +1279,7 @@ begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
   FRegex.Free;
-  FKeywordFont.Free;
+  FKeywordFont := nil;
   inherited Destroy;
 end;
 
@@ -1578,13 +1596,15 @@ begin
     Name := 'mnuFile';
     SetPosition(476, 61, 172, 20);
     miFile := AddMenuItem('New...', rsKeyCtrl+'N', @miFileNewUnit);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
     AddMenuItem('Open Recent', '', nil).Enabled := False;
+    AddSeparator;
     AddMenuItem('Save', rsKeyCtrl+'S', @miFileSave);
     AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('Save All', rsKeyCtrl+rsKeyShift+'S', nil).Enabled := False;
-    AddMenuItem('-', '', nil);
+    AddSeparator;
+    AddMenuItem('Close', rsKeyCtrl+'F4', @miFileClose);
     AddMenuItem('Quit', rsKeyCtrl+'Q', @btnQuitClicked);
   end;
 
@@ -1596,7 +1616,7 @@ begin
     AddMenuItem('Cut', rsKeyCtrl+'X', @miEditCutClicked);
     AddMenuItem('Copy', rsKeyCtrl+'C', @miEditCopyClicked);
     AddMenuItem('Paste', rsKeyCtrl+'V', @miEditPasteClicked);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Indent selection', rsKeyCtrl+'I', nil).Enabled := False;
     AddMenuItem('Unindent selection', rsKeyCtrl+'U', nil).Enabled := False;
     AddMenuItem('Insert $IFDEF...', rsKeyCtrl+rsKeyShift+'D', nil).Enabled := False;
@@ -1612,7 +1632,7 @@ begin
     AddMenuItem('Find Previous', rsKeyShift+'F3', @miFindPrevClicked);
     AddMenuItem('Find in Files...', rsKeyCtrl+rsKeyShift+'F', nil).Enabled := False;
     AddMenuItem('Replace...', rsKeyCtrl+'R', nil).Enabled := False;
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
   end;
@@ -1632,14 +1652,14 @@ begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
     AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'F11', @miProjectOptions);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
     AddMenuItem('Open...', '', @miProjectOpen);
     miRecentProjects := AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save', rsKeyCtrl+rsKeyAlt+'S', @miProjectSave);
     AddMenuItem('Save As...', '', @miProjectSaveAs);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('View Source', '', nil);
     AddMenuItem('Add editor file to Project', rsKeyCtrl+rsKeyShift+'A', @miProjectAddUnitToProject);
   end;
@@ -1655,7 +1675,7 @@ begin
     AddMenuItem('Make 2', rsKeyCtrl+rsKeyAlt+'2', @miRunMake2);
     AddMenuItem('Make 3', rsKeyCtrl+rsKeyAlt+'3', @miRunMake3);
     AddMenuItem('Make 4', rsKeyCtrl+rsKeyAlt+'4', @miRunMake4);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('Run', 'F9', nil);
     AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);
   end;
@@ -1683,7 +1703,7 @@ begin
     Name := 'mnuHelp';
     SetPosition(476, 224, 172, 20);
     AddMenuItem('Contents...', '', nil);
-    AddMenuItem('-', '', nil);
+    AddSeparator;
     AddMenuItem('About fpGUI Toolkit...', '', @miAboutFPGuiClicked);
     AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
   end;

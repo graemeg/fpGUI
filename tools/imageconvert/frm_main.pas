@@ -1,3 +1,16 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+}
 unit frm_main;
 
 {$mode objfpc}{$H+}
@@ -23,11 +36,8 @@ type
     btnCopy: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure miFileQuit(Sender: TObject);
-    procedure MemoDragEnter(Sender, Source: TObject; AMimeList: TStringList;
-      var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction;
-      var Accept: Boolean);
-    procedure MemoDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    function ConvertImage(const AFileName: string): string;
+    procedure MemoDragEnter(Drop: TfpgDrop);
+    procedure MemoDragDrop(Drop: TfpgDrop; AData: Variant);
     procedure btnClearClicked(Sender: TObject);
     procedure btnConvertClicked(Sender: TObject);
     procedure btnCopyClicked(Sender: TObject);
@@ -40,7 +50,7 @@ type
 implementation
 
 uses
-  fpg_utils;
+  bin2pas;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -49,9 +59,7 @@ begin
   Close;
 end;
 
-procedure TMainForm.MemoDragEnter(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.MemoDragEnter(Drop: TfpgDrop);
 var
   s: string;
 begin
@@ -61,16 +69,11 @@ begin
   {$ELSE}
   s := 'text/uri-list';
   {$ENDIF}
-  Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
-  begin
-    if AMimeChoice <> s then
-      AMimeChoice := s;
-  end;
+
+  Drop.CanDrop := Drop.AcceptMimeType([s]);
 end;
 
-procedure TMainForm.MemoDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.MemoDragDrop(Drop: TfpgDrop; AData: Variant);
 var
   fileName: string;
   sl: TStringList;
@@ -92,58 +95,6 @@ begin
     end;
   finally
     sl.Free;
-  end;
-end;
-
-function TMainForm.ConvertImage(const AFileName: string): string;
-const
-  Prefix = '     ';
-  MaxLineLength = 72;
-var
-  InStream: TFileStream;
-  I, Count: longint;
-  b: byte;
-  Line, ToAdd: String;
-  ConstName: string;
-
-  procedure WriteStr(const St: string);
-  begin
-    Result := Result + St;
-  end;
-
-  procedure WriteStrLn(const St: string);
-  begin
-    Result := Result + St + LineEnding;
-  end;
-
-begin
-  InStream := TFileStream.Create(AFileName, fmOpenRead);
-  try
-    ConstName := 'newimg_' + ChangeFileExt(fpgExtractFileName(AFileName), '');
-    WriteStrLn('');
-    WriteStrLn('const');
-
-    InStream.Seek(0, soFromBeginning);
-    Count := InStream.Size;
-    WriteStrLn(Format('  %s: array[0..%d] of byte = (',[ConstName, Count-1]));
-    Line := Prefix;
-    for I := 1 to Count do
-    begin
-      InStream.Read(B, 1);
-      ToAdd := Format('%3d',[b]);
-      if I < Count then
-        ToAdd := ToAdd + ',';
-      Line := Line + ToAdd;
-      if Length(Line) >= MaxLineLength then
-      begin
-        WriteStrLn(Line);
-        Line := PreFix;
-      end;
-    end; { for }
-    WriteStrln(Line+');');
-    WriteStrLn('');
-  finally
-    InStream.Free;
   end;
 end;
 
@@ -176,7 +127,6 @@ begin
   WindowTitle := 'Image Conversion Tool';
   Hint := '';
   ShowHint := True;
-  DNDEnabled := True;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
@@ -207,9 +157,7 @@ begin
     FontDesc := '#Edit2';
     Hint := '';
     TabOrder := 5;
-    AcceptDrops := True;
-    OnDragEnter  := @MemoDragEnter;
-    OnDragDrop  := @MemoDragDrop;
+    DropHandler := TfpgDropEventHandler.Create(@MemoDragEnter, nil, @MemoDragDrop, nil);
   end;
 
   Button1 := TfpgButton.Create(self);

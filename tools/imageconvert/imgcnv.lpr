@@ -1,3 +1,16 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+}
 program imgcnv;
 
 {$mode objfpc}{$H+}
@@ -7,7 +20,10 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_base, fpg_main, fpgui_toolkit, frm_main;
+  Classes,
+  fpg_base,
+  fpg_main,
+  frm_main;
 
 
 procedure MainProc;

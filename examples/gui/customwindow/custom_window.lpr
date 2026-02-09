@@ -12,7 +12,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_button,
-  fpg_stylemanager, fpg_cmdlineparams, fpg_grid,
+  fpg_stylemanager, fpg_cmdlineparams, fpg_basegrid, fpg_grid,
   fpg_StringGridBuilder, fpg_editbtn, fpg_checkbox,
   fpg_panel, fpg_dialogs;
 
@@ -34,6 +34,8 @@ type
     {@VFD_HEAD_END: MainForm}
     FLastPos: TPoint;
     FMouseTracked: Boolean;
+    fntHead1: TfpgFontResourceBase;
+    fntHead2: TfpgFontResourceBase;
     procedure   TitleMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TitleMouseMoved(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
@@ -45,7 +47,9 @@ type
     procedure   btnGoClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
+    procedure   AdjustWindowStyle; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -74,7 +78,7 @@ procedure TMainForm.TitleMouseDown(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   FMouseTracked := True;
-  FLastPos := bvlTitle.WindowToScreen(self, AMousePos);
+  FLastPos := bvlTitle.WidgetToScreen(self, AMousePos);
   bvlTitle.CaptureMouse;
 end;
 
@@ -91,7 +95,7 @@ var
   dx, dy: integer;
   pt: TPoint;
 begin
-  pt := WindowToScreen(self, AMousePos);
+  pt := WidgetToScreen(self, AMousePos);
   if not FMouseTracked then
   begin
     FLastPos := pt;
@@ -103,7 +107,7 @@ begin
   Left := Left + dx;
   Top := Top + dy;
   FLastPos := pt;
-  UpdateWindowPosition;
+  UpdatePosition;
 end;
 
 procedure TMainForm.btnCloseClicked(Sender: TObject);
@@ -118,20 +122,20 @@ begin
     Canvas.Clear(cGrayPanel);
 
     Canvas.Color := cBorder;
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 
     Canvas.TextColor := cBorder;
     // Output some sample text
-    Canvas.Font := fpgGetFont(cHeader1);
+    Canvas.SetFont(fntHead1);
     Canvas.DrawText(8, 10, 'Personal');
-    Canvas.Font := fpgGetFont(cHeader2);
+    Canvas.SetFont(fntHead2);
     Canvas.DrawText(20, 30, 'Home');
     Canvas.DrawText(20, 50, 'Documents');
     Canvas.DrawText(20, 70, 'Music');
     Canvas.DrawText(20, 90, 'Pictures');
-    Canvas.Font := fpgGetFont(cHeader1);
+    Canvas.SetFont(fntHead1);
     Canvas.DrawText(8, 110, 'Network');
-    Canvas.Font := fpgGetFont(cHeader2);
+    Canvas.SetFont(fntHead2);
     Canvas.DrawText(20, 130, 'Entire network');
   end;
 end;
@@ -140,27 +144,27 @@ procedure TMainForm.PaintTitle(Sender: TObject);
 var
   r: TfpgRect;
 begin
-  r.SetRect(0, 1, Width, 46);
+  r.SetRect(0, 1, bvlTitle.ActualWidth, 46);
   with bvlTitle do
   begin
     Canvas.GradientFill(r, cGradientTop, cGradientBottom, gdVertical);
 
     Canvas.Color := TfpgColor($FFc9c9c9);
-    Canvas.DrawLine(0, Height-2, Width, Height-2);
+    Canvas.DrawLine(0, ActualHeight-2, ActualWidth, ActualHeight-2);
 
     Canvas.Color := cBorder;
-    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 
     Canvas.TextColor := cBorder;
-    Canvas.Font := fpgGetFont(cHeader1);
-    Canvas.DrawText(30, 8, Width-60, 20, WindowTitle, [txtHCenter, txtTop]);
+    Canvas.SetFont(fntHead1);
+    Canvas.DrawText(30, 8, ActualWidth-60, 20, WindowTitle, [txtHCenter, txtTop]);
   end;
 end;
 
 procedure TMainForm.FormPaint(Sender: TObject);
 begin
   Canvas.Color := cBorder;
-  Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.DrawRectangle(0, 0, ActualWidth, ActualHeight);
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);
@@ -173,7 +177,7 @@ var
   sgb: TStringGridBuilder;
 begin
   try
-    sgb := TStringGridBuilder.CreateCustom(Grid1, FilenameEdit1.FileName, CheckBox1.Checked);
+    sgb := TStringGridBuilder.Create(Grid1, FilenameEdit1.FileName, CheckBox1.Checked);
     sgb.Run;
   finally
     sgb.Free;
@@ -183,7 +187,6 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Include(FWindowAttributes, waBorderLess);  // borderless and steals focus like a normal form
   FMouseTracked := False;
 
   fpgSetNamedColor(clWindowBackground, cBackground);
@@ -197,6 +200,15 @@ begin
             'my.resize',
             @img_resize,
       sizeof(img_resize));
+  fntHead1 := fpgApplication.FontManager.GetFont(cHeader1);
+  fntHead2 := fpgApplication.FontManager.GetFont(cHeader2);
+end;
+
+destructor TMainForm.Destroy;
+begin
+  fntHead1 := nil;
+  fntHead2 := nil;
+  inherited Destroy;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -234,6 +246,7 @@ begin
     RowCount := 0;
     RowSelect := False;
     TabOrder := 2;
+    Options := [go_SmoothScroll];
   end;
 
   FilenameEdit1 := TfpgFileNameEdit.Create(self);
@@ -322,16 +335,26 @@ begin
   btnResize.Image := fpgImages.GetImage('my.resize');
 end;
 
+procedure TMainForm.AdjustWindowStyle;
+var
+  attr: TWindowAttributes;
+begin
+  inherited AdjustWindowStyle;
+  attr := Window.WindowAttributes;
+  Include(attr, waBorderLess);  // borderless and steals focus like a normal form
+  Window.WindowAttributes := attr;
+end;
 
 procedure MainProc;
 var
   frm: TMainForm;
+  cmd: ICmdLineParams;
 begin
   fpgApplication.Initialize;
 
   { Set our new style as the default (before we create any forms), unless
     a the end-user specified a different style via the command line. }
-  if not gCommandLineParams.IsParam('style') then
+  if Supports(fpgApplication, ICmdLineParams, cmd) and not cmd.HasOption('style') then
   begin
     if fpgStyleManager.SetStyle('Plastic Light Gray') then
       fpgStyle := fpgStyleManager.Style;

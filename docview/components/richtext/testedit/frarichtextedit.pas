@@ -1,29 +1,26 @@
-unit frarichtextedit;
+unit fraRichTextEdit;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
+  Classes,
+  SysUtils,
   fpg_base,
   fpg_tab,
   fpg_button,
   fpg_panel,
   fpg_main,
   fpg_memo,
-  fpg_form,
   fpg_dialogs,
-  fpg_stdimages,
   RichTextView,
   fpg_imagelist,
   fpg_imgfmt_bmp,
   fpg_imgfmt_png,
-  fpg_imgfmt_jpg,
-  Classes, SysUtils;
+  fpg_imgfmt_jpg;
 
-Type
-
-  { TRichTextEditFrame }
+type
 
   TRichTextEditFrame = class(TfpgFrame)
   private
@@ -76,6 +73,7 @@ Type
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   Public
+    destructor Destroy; override;
     Property ImageNames : TStrings Read GetImageNames Write SetImageNames;
     Property RichText : String Read GetRichText Write SetRichText;
   end;
@@ -404,52 +402,47 @@ end;
 
 procedure TRichTextEditFrame.AfterCreate;
 
-  Function TBSpace(Var ALeft : Integer; AName : String) : TfpgBevel;
-
+  function TBSpace(Var ALeft : Integer; AName : String) : TfpgBevel;
   begin
     Result := TfpgBevel.Create(BBar);
     with Result do
-      begin
+    begin
       Name := AName;
       SetPosition(ALeft, 2, 10, 24);
       ALeft:=ALeft+10;
       Align := alLeft;
       Hint := '';
       Shape := bsSpacer;
-      end;
-
+    end;
   end;
 
-  Function TBButton(Var ALeft,ATab : Integer; ATag : Integer; Const AName,AImage,AText : String) : tfpgButton;
-
+  function TBButton(var ALeft, ATab: Integer; ATag: Integer; const AName, AImage, AText, AHint: String): TfpgButton;
   begin
     Result := TfpgButton.Create(BBar);
     with Result do
-      begin
+    begin
       Name := AName;
       SetPosition(ALeft, 2, BSize, BSize);
-      ALeft:=ALeft+BSize;
+      ALeft := ALeft+BSize;
       Align := alLeft;
       Text := AText;
-      ImageName:=AImage;
-      Tag:=ATag;
+      ImageName := AImage;
+      Tag := ATag;
       FontDesc := '#Label1';
-      Hint := '';
+      Hint := AHint;
       ImageMargin := -1;
-      Embedded:=True;
-      Flat:=True;
+      Embedded := True;
+      Flat := True;
       TabOrder := ATab;
-      ATab:=ATab+1;
-      OnClick:=@OnToolButton;
-      end;
+      ATab := ATab+1;
+      OnClick := @OnToolButton;
+    end;
   end;
 
 var
   I, J, L, T: integer;
   img: tfpgimage;
   S: string;
-
-
 begin
   {%region 'Auto-generated GUI code' }
 
@@ -524,48 +517,54 @@ begin
   // Create toolbar
   L:=2;
   T:=0;
-  BBold:=TBButton(L,T,TBBold,'BBold',BIBold,'');
-  BItalic:=TBButton(L,T,TBItalic,'BItalic',BIItalic,'');
-  Bunderline:=TBButton(L,T,TBunderline,'BUnderline',BIUnderline,'');
+  BBold:=TBButton(L,T,TBBold,'BBold',BIBold,'', 'Bold');
+  BItalic:=TBButton(L,T,TBItalic,'BItalic',BIItalic,'', 'Italic');
+  Bunderline:=TBButton(L,T,TBunderline,'BUnderline',BIUnderline,'', 'Underline');
 
   BHead := TBSpace(L,'BHead');
 
-  BH1 := TBButton(L,T,TBH1,'BH1','','1');
-  BH2 := TBButton(L,T,TBH2,'BH2','','2');
-  BH3 := TBButton(L,T,TBH3,'BH3','','3');
+  BH1 := TBButton(L,T,TBH1,'BH1','','1', 'Header level 1');
+  BH2 := TBButton(L,T,TBH2,'BH2','','2', 'Header level 2');
+  BH3 := TBButton(L,T,TBH3,'BH3','','3', 'Header level 3');
 
   BAligns := TBSpace(L,'BAligns');
 
-  BAleft := TBButton(L,T,TBAlignLeft,'BALeft',BIAlignLeft,'');
-  BACenter := TBButton(L,T,TBAlignCenter,'BACenter',BIAlignCenter,'');
-  BAJustified := TBButton(L,T,TBAlignJustify,'BAJustified',BIAlignJustify,'');
-  BARight := TBButton(L,T,TBAlignRight,'BARight',BIAlignRight,'');
-  BAUnaligned := TBButton(L,T,TBAlignNone,'BAUnalign',BIAlignLeft,'');
+  BAleft := TBButton(L,T,TBAlignLeft,'BALeft',BIAlignLeft,'', 'Align Left');
+  BACenter := TBButton(L,T,TBAlignCenter,'BACenter',BIAlignCenter,'', 'Align Center');
+  BAJustified := TBButton(L,T,TBAlignJustify,'BAJustified',BIAlignJustify,'', 'Align Justified');
+  BARight := TBButton(L,T,TBAlignRight,'BARight',BIAlignRight,'', 'Align Right');
+  BAUnaligned := TBButton(L,T,TBAlignNone,'BAUnalign',BIAlignLeft,'', 'Unaligned');
 
-  BANowrap := TBButton(L,T,TBNowrap,'BNowrap',BINoWrap,'');
+  BANowrap := TBButton(L,T,TBNowrap,'BNowrap',BINoWrap,'', 'No wordwrap');
 
   BevMargin := TBSpace(L,'BevMargin');
-  BMargin := TBButton(L,T,TBMargin,'BMargin',BIMargin,'');
+  BMargin := TBButton(L,T,TBMargin,'BMargin',BIMargin,'', 'Margin');
 
-  BFont := TBButton(L,T,TBFont,'BFont',BIFont,'');
-  BColor := TBButton(L,T,TBColor,'BColor',BIColor,'');
-  BBGColor := TBButton(L,T,TBBGColor,'BBGColor',BIBGColor,'');
+  BFont := TBButton(L,T,TBFont,'BFont',BIFont,'', 'Font');
+  BColor := TBButton(L,T,TBColor,'BColor',BIColor,'', 'Foreground Color');
+  BBGColor := TBButton(L,T,TBBGColor,'BBGColor',BIBGColor,'', 'Background Color');
 
   BSpaceImage := TBSpace(L,'BSpaceImage');
 
-  BImage := TBButton(L,T,TBImage,'BImage',BIImage,'');
-  BLink := TBButton(L,T,TBLink,'BLink',BILink,'');
-  BCheck := TBButton(L,T,TBCheck,'BCheck',BICheck,'');
+  BImage := TBButton(L,T,TBImage,'BImage',BIImage,'', 'Image');
+  BLink := TBButton(L,T,TBLink,'BLink',BILink,'', 'Link');
+  BCheck := TBButton(L,T,TBCheck,'BCheck',BICheck,'', 'Check');
 
-  FImageList:=TfpgImageList.Create;
-  FImageNames:=TStringList.Create;
-  RTVPreview.Images:=FImageList;
-  RTVPreview.RichTextSettings.Heading1Font := fpgGetFont('Arial-18:bold');
-  RTVPreview.RichTextSettings.Heading2Font := fpgGetFont('Arial-14:bold');
-  RTVPreview.RichTextSettings.Heading3Font := fpgGetFont('Arial-12:bold');
-  RTVPreview.RichTextSettings.NormalFont := fpgGetFont(FPG_DEFAULT_FONT_DESC);
-  RTVPreview.RichTextSettings.FixedFont := fpgGetFont('Courier New-10:antialiased=true');
+  FImageList := TfpgImageList.Create;
+  FImageNames := TStringList.Create;
+  RTVPreview.Images := FImageList;
+  RTVPreview.RichTextSettings.Heading1Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-18:bold');
+  RTVPreview.RichTextSettings.Heading2Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-14:bold');
+  RTVPreview.RichTextSettings.Heading3Font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-12:bold');
+  RTVPreview.RichTextSettings.NormalFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FONT_DESC);
+  RTVPreview.RichTextSettings.FixedFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED_FONT_DESC);
+end;
 
+destructor TRichTextEditFrame.Destroy;
+begin
+  FImageList.Free;
+  FImageNames.Free;
+  inherited Destroy;
 end;
 
 Procedure RegisterStdRichTextImages;

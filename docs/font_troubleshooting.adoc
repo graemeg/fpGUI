@@ -1,0 +1,1152 @@
+= fpGUI Font System Troubleshooting Guide
+:toc: left
+:toclevels: 4
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+
+== Overview
+
+This guide helps diagnose and resolve issues with the fpGUI font system. It covers common problems, debugging techniques, and platform-specific issues.
+
+=== When to Use This Guide
+
+Use this guide if you're experiencing:
+
+* Fonts not loading or appearing as defaults
+* Memory leaks related to fonts
+* Incorrect font rendering or metrics
+* Platform-specific font issues
+* AggCanvas font problems
+* Performance issues with font caching
+
+---
+
+== Common Issues
+
+=== Font Not Found
+
+**Symptoms:**
+
+* Widget displays with default font instead of requested font
+* Warning messages about missing fonts
+* `HandleIsValid` returns false
+
+==== Diagnosis
+
+[source,pascal]
+----
+var
+  font: TfpgFontResourceBase;
+begin
+  font := fpgApplication.FontManager.GetFont('MyFont-12');
+
+  if not font.HandleIsValid then
+  begin
+    WriteLn('ERROR: Font not found or could not be loaded');
+    WriteLn('Font descriptor: ', font.FontDesc);
+  end;
+end;
+----
+
+==== Common Causes
+
+1. **Font name misspelled**
++
+[source,pascal]
+----
+// Wrong:
+font := fpgApplication.FontManager.GetFont('Ariel-12');  // Typo!
+
+// Correct:
+font := fpgApplication.FontManager.GetFont('Arial-12');
+----
+
+2. **Font not installed on system**
++
+Check if font is available:
++
+[source,bash]
+----
+# Linux (fontconfig)
+fc-list | grep -i "Arial"
+
+# Windows
+dir C:\Windows\Fonts\arial*.ttf
+----
+
+3. **Incorrect font descriptor format**
++
+[source,pascal]
+----
+// Wrong formats:
+'Arial'            // Missing size
+'Arial:12'         // Wrong separator
+'Arial-12-bold'    // Wrong attribute separator
+
+// Correct format:
+'Arial-12'         // Plain
+'Arial-12:bold'    // With attributes
+----
+
+==== Solutions
+
+**Solution 1: Use platform default fonts**
+
+[source,pascal]
+----
+uses
+  fpg_constants;
+
+// These constants work on all platforms:
+font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-10');
+font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SERIF + '-10');
+font := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED + '-10');
+----
+
+**Platform mappings:**
+
+[cols="1,1,1",options="header"]
+|===
+|Constant |Linux |Windows
+
+|`FPG_DEFAULT_SANS`
+|Liberation Sans
+|Arial
+
+|`FPG_DEFAULT_SERIF`
+|Liberation Serif
+|Times New Roman
+
+|`FPG_DEFAULT_FIXED`
+|Liberation Mono
+|Courier New
+|===
+
+**Solution 2: Check available fonts**
+
+[source,pascal]
+----
+{$IFDEF UNIX}
+procedure ListAvailableFonts;
+var
+  sl: TStringList;
+  i: integer;
+begin
+  sl := TStringList.Create;
+  try
+    RunCommand('fc-list', [':'], sl);
+    for i := 0 to sl.Count - 1 do
+      WriteLn(sl[i]);
+  finally
+    sl.Free;
+  end;
+end;
+{$ENDIF}
+----
+
+**Solution 3: Provide fallback**
+
+[source,pascal]
+----
+function GetFontSafe(const ADesc: string): TfpgFontResourceBase;
+begin
+  Result := fpgApplication.FontManager.GetFont(ADesc);
+  if not Result.HandleIsValid then
+  begin
+    // Fallback to default
+    WriteLn('WARNING: Font "', ADesc, '" not found, using default');
+    Result := fpgApplication.FontManager.GetDefaultFont;
+  end;
+end;
+----
+
+---
+
+=== Memory Leaks
+
+**Symptoms:**
+
+* Memory usage grows over time
+* Heaptrc reports unfreed memory blocks
+* Application slows down
+
+==== Diagnosis
+
+**Enable heap trace:**
+
+[source,bash]
+----
+# Compile with heap trace
+fpc -gh -gl myapp.pas
+
+# Run application
+./myapp
+
+# Check output for leaks
+# Look for lines like:
+#   Heap dump by heaptrc unit
+#   123 memory blocks allocated : 45678/56789
+#   123 memory blocks freed     : 45678/56789
+#   0 unfreed memory blocks : 0  ← Should be 0
+----
+
+**Use valgrind (Linux):**
+
+[source,bash]
+----
+valgrind --leak-check=full --show-leak-kinds=all ./myapp
+----
+
+**Check font cache:**
+
+[source,pascal]
+----
+// At application shutdown, before freeing font manager:
+WriteLn('Fonts still in cache:');
+fpgApplication.FontManager.DumpCache;
+
+// Expected: All fonts used by the application
+// Cache persists until font manager is destroyed
+----
+
+==== Common Causes
+
+1. **Forgot to clear font pointer**
++
+[source,pascal]
+----
+// BAD: Pointer never cleared (not a leak, but poor practice)
+constructor TMyWidget.Create;
+begin
+  inherited;
+  FFont := fpgApplication.FontManager.GetFont('Arial-12');
+end;
+
+destructor TMyWidget.Destroy;
+begin
+  // Missing: FFont := nil;
+  inherited;
+end;
+----
+
+2. **Calling Free directly**
++
+[source,pascal]
+----
+// BAD: Font is owned by cache
+FFont.Free;  // Don't do this!
+
+// GOOD: Use nil assignment to clear pointer
+FFont := nil;
+----
+
+3. **Circular references**
++
+[source,pascal]
+----
+// BAD: Widget holds font, font callback holds widget reference
+type
+  TFontCallback = procedure(AFontChanged: TfpgFontResourceBase) of object;
+
+  TMyWidget = class
+    FFont: TfpgFontResourceBase;
+    FCallback: TFontCallback;
+  end;
+
+// If callback references widget, creates circular reference
+----
+
+4. **Exception during cleanup**
++
+[source,pascal]
+----
+destructor TMyWidget.Destroy;
+begin
+  DoSomethingThatMightRaise;  // If this raises, FFont never cleared
+  FFont := nil;
+  inherited;
+end;
+
+// Better:
+destructor TMyWidget.Destroy;
+begin
+  FFont := nil;  // Clear early
+  try
+    DoSomethingThatMightRaise;
+  except
+    // Handle
+  end;
+  inherited;
+end;
+----
+
+==== Solutions
+
+**Solution 1: Audit font pointer cleanup**
+
+Search for all font field declarations:
+
+[source,bash]
+----
+grep -r "FFont.*TfpgFontResourceBase" src/
+----
+
+For each, verify destructor clears it:
+
+[source,pascal]
+----
+destructor TMyWidget.Destroy;
+begin
+  FFont := nil;  // Good practice to clear pointer
+  inherited;
+end;
+----
+
+**Solution 2: Add debug logging**
+
+[source,pascal]
+----
+{$IFDEF DEBUG}
+destructor TMyWidget.Destroy;
+begin
+  if Assigned(FFont) then
+  begin
+    WriteLn(ClassName, ': Clearing font pointer');
+    WriteLn('  FontDesc: ', FFont.FontDesc);
+  end;
+  FFont := nil;
+  inherited;
+end;
+{$ENDIF}
+----
+
+**Solution 3: Use try-finally for temporary fonts**
+
+[source,pascal]
+----
+procedure Example;
+var
+  tempFont: TfpgFontResourceBase;
+begin
+  tempFont := fpgApplication.FontManager.GetFont('Arial-12');
+  try
+    // Use font...
+  finally
+    tempFont := nil;  // Guaranteed pointer clear
+  end;
+end;
+----
+
+---
+
+=== Incorrect Font Rendering
+
+**Symptoms:**
+
+* Text appears in wrong font
+* Bold/italic not working
+* Font size incorrect
+* Characters overlapping or too spaced out
+
+==== Diagnosis
+
+**Check active font:**
+
+[source,pascal]
+----
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.SetFont(FFont);
+
+  // Debug: Print active font info
+  {$IFDEF DEBUG}
+  if Assigned(Canvas.Font) then
+    WriteLn('Active font: ', Canvas.Font.FontDesc);
+  {$ENDIF}
+
+  Canvas.DrawText(10, 10, 'Test');
+end;
+----
+
+**Check font metrics:**
+
+[source,pascal]
+----
+WriteLn('Font metrics:');
+WriteLn('  Height: ', FFont.GetHeight);
+WriteLn('  Ascent: ', FFont.GetAscent);
+WriteLn('  Descent: ', FFont.GetDescent);
+WriteLn('  TextWidth("Test"): ', FFont.GetTextWidth('Test'));
+----
+
+**Compare with expected:**
+
+[source,pascal]
+----
+// Arial 12pt should have approximately:
+//   Height: 14-16 pixels (depending on DPI)
+//   Ascent: 11-13 pixels
+//   Descent: 3-4 pixels
+----
+
+==== Common Causes
+
+1. **Font descriptor parsing error**
++
+[source,pascal]
+----
+// These might not parse as expected:
+'Arial-12:Bold'      // Capital B - check case sensitivity
+'Arial-12: bold'     // Space before attribute
+'Arial-12:bold '     // Trailing space
+----
+
+2. **Canvas font not set**
++
+[source,pascal]
+----
+// BAD: Font never set on canvas
+procedure TMyWidget.HandlePaint;
+begin
+  // Missing: Canvas.SetFont(FFont);
+  Canvas.DrawText(10, 10, 'Text');  // Uses whatever font was previously set
+end;
+----
+
+3. **AggCanvas vs Native mismatch**
++
+With `-dAGGCANVAS`, fonts use FreeType metrics which may differ slightly from native Xft/GDI metrics.
+
+4. **DPI scaling issues**
++
+[source,pascal]
+----
+// Font size is in points (72 DPI), display is at screen DPI
+// AggCanvas applies: size * Screen_dpi / 72
+// Native fonts handle DPI automatically
+----
+
+==== Solutions
+
+**Solution 1: Validate font descriptor**
+
+[source,pascal]
+----
+function IsValidFontDesc(const ADesc: string): boolean;
+var
+  def: TfpgFontDefinition;
+begin
+  Result := False;
+  try
+    def := TfpgFontDefinition.Create(ADesc);
+    try
+      // Check parsed correctly
+      Result := (def.FaceName <> '') and (def.Size > 0);
+      if not Result then
+        WriteLn('Invalid font descriptor: ', ADesc);
+    finally
+      def.Free;
+    end;
+  except
+    on E: Exception do
+      WriteLn('Font descriptor parse error: ', E.Message);
+  end;
+end;
+----
+
+**Solution 2: Ensure canvas font is set**
+
+[source,pascal]
+----
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  try
+    // ALWAYS set font before drawing text
+    Canvas.SetFont(FFont);
+    Canvas.DrawText(10, 10, FText);
+  finally
+    Canvas.EndDraw;
+  end;
+end;
+----
+
+**Solution 3: Test with known fonts**
+
+[source,pascal]
+----
+// Use platform defaults for testing
+FFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-12');
+----
+
+---
+
+=== AggCanvas Specific Issues
+
+**Symptoms (when compiled with `-dAGGCANVAS`):**
+
+* Fonts not rendering at all
+* Different metrics than native
+* Crash on font load
+* Missing glyphs
+
+==== Diagnosis
+
+**Check AggCanvas is active:**
+
+[source,pascal]
+----
+{$IFDEF AGGCANVAS}
+WriteLn('AggCanvas is enabled');
+{$ELSE}
+WriteLn('Using native rendering');
+{$ENDIF}
+----
+
+**Check Agg font registration:**
+
+[source,pascal]
+----
+{$IFDEF AGGCANVAS}
+uses
+  fpg_fontmanager;
+
+if not Assigned(AggFontResourceClass) then
+  WriteLn('ERROR: AggCanvas enabled but font class not registered!');
+{$ENDIF}
+----
+
+**Check font file loading:**
+
+[source,pascal]
+----
+// In TfpgAgg2DFontResource.Create debug output:
+WriteLn('Loading font file: ', fontFile);
+WriteLn('Font face: ', fontDef.FaceName);
+WriteLn('Font size: ', fontDef.Size);
+----
+
+==== Common Causes
+
+1. **Font file not found**
++
+AggCanvas needs actual font files (.ttf, .otf). It uses `gFontCache` to locate them:
++
+[source,pascal]
+----
+// Font cache might not find the font file
+fontFile := gFontCache.Find(fontDef.FaceName, bold, italic);
+if fontFile = '' then
+  WriteLn('ERROR: Font file not found for: ', fontDef.FaceName);
+----
+
+2. **FreeType not initialized**
++
+[source,pascal]
+----
+// Check in Agg2D unit initialization:
+m_fontEngine.Construct;  // Must be called
+----
+
+3. **Metrics not populated**
++
+After loading font in `TAgg2D.Font()`, metrics must be cached:
++
+[source,pascal]
+----
+// In TAgg2D.Font():
+m_fontEngine.height_(height * Screen_dpi / 72);
+m_fontAscent := m_fontEngine._ascender;
+m_fontDescent := abs(m_fontEngine._descender);
+----
+
+4. **Mixing native and Agg fonts**
++
+With older code, widgets might cache X11 fonts but AggCanvas expects Agg fonts.
+
+==== Solutions
+
+**Solution 1: Ensure font files installed**
+
+[source,bash]
+----
+# Linux: Check fontconfig cache
+fc-cache -fv
+fc-list | grep -i "liberation"
+
+# Ensure Liberation fonts installed:
+# Ubuntu/Debian:
+sudo apt-get install fonts-liberation fonts-liberation2
+
+# Fedora:
+sudo dnf install liberation-fonts
+----
+
+**Solution 2: Debug font cache**
+
+[source,pascal]
+----
+uses
+  fpg_fontcache;
+
+// Check font cache entries
+WriteLn('Font cache directory: ', gFontCache.FontPath);
+
+// Manually test font lookup
+var
+  fontFile: string;
+begin
+  fontFile := gFontCache.Find('Liberation Sans', False, False);
+  if fontFile <> '' then
+    WriteLn('Found: ', fontFile)
+  else
+    WriteLn('Not found in cache');
+end;
+----
+
+**Solution 3: Use Liberation fonts**
+
+[source,pascal]
+----
+// These are guaranteed to work with AggCanvas on Linux:
+'Liberation Sans-10'
+'Liberation Sans-10:bold'
+'Liberation Mono-10'
+'Liberation Serif-10'
+----
+
+**Solution 4: Verify registration**
+
+[source,pascal]
+----
+// In Agg2D.pas initialization section:
+initialization
+  {$IFDEF AGGCANVAS}
+  if not Assigned(AggFontResourceClass) then
+    AggFontResourceClass := TfpgAgg2DFontResource;
+  {$ENDIF}
+end.
+----
+
+---
+
+=== Performance Issues
+
+**Symptoms:**
+
+* Slow font creation
+* UI lag when changing fonts
+* High memory usage
+* Cache growing indefinitely
+
+==== Diagnosis
+
+**Measure font creation time:**
+
+[source,pascal]
+----
+uses
+  SysUtils, DateUtils;
+
+var
+  startTime: TDateTime;
+  font: TfpgFontResourceBase;
+begin
+  startTime := Now;
+  font := fpgApplication.FontManager.GetFont('Arial-12');
+  WriteLn('Font creation took: ', MilliSecondsBetween(Now, startTime), ' ms');
+  font := nil;
+end;
+----
+
+**Check cache statistics:**
+
+[source,pascal]
+----
+WriteLn(fpgApplication.FontManager.GetCacheStats());
+----
+
+**Monitor cache growth:**
+
+[source,pascal]
+----
+procedure MonitorCache;
+begin
+  WriteLn('Cache size: ', fpgApplication.FontManager.GetCacheSize, ' fonts');
+  // Call periodically to detect unbounded growth
+end;
+----
+
+==== Common Causes
+
+1. **Creating fonts repeatedly instead of caching**
++
+[source,pascal]
+----
+// BAD: Creates new font reference every paint
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.SetFont(fpgApplication.FontManager.GetFont('Arial-12'));
+  Canvas.DrawText(10, 10, 'Text');
+end;
+
+// GOOD: Cache font in widget
+constructor TMyWidget.Create;
+begin
+  FFont := fpgApplication.FontManager.GetFont('Arial-12');
+end;
+
+procedure TMyWidget.HandlePaint;
+begin
+  Canvas.SetFont(FFont);
+  Canvas.DrawText(10, 10, 'Text');
+end;
+----
+
+2. **Creating unique font descriptors**
++
+[source,pascal]
+----
+// BAD: Creates new cache entry each time
+for i := 1 to 1000 do
+begin
+  font := fpgApplication.FontManager.GetFont('Arial-' + IntToStr(10 + Random(100)));
+  // Cache grows to 100+ entries
+end;
+
+// GOOD: Reuse common sizes
+font := fpgApplication.FontManager.GetFont('Arial-12');
+----
+
+3. **Font files on slow storage**
++
+AggCanvas loads font files from disk. Slow disk = slow font loading.
+
+4. **Large number of fonts in cache**
++
+While lookups are O(1), large caches use more memory and GC time.
+
+==== Solutions
+
+**Solution 1: Cache fonts in widgets**
+
+Always store commonly-used fonts:
+
+[source,pascal]
+----
+type
+  TMyWidget = class(TfpgWidget)
+  private
+    FNormalFont: TfpgFontResourceBase;
+    FBoldFont: TfpgFontResourceBase;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  end;
+
+constructor TMyWidget.Create(AOwner: TComponent);
+begin
+  inherited;
+  // Cache once, reuse many times
+  FNormalFont := fpgApplication.FontManager.GetFont('Arial-12');
+  FBoldFont := fpgApplication.FontManager.GetFont('Arial-12:bold');
+end;
+----
+
+**Solution 2: Limit font sizes**
+
+[source,pascal]
+----
+// Use standard sizes: 8, 9, 10, 11, 12, 14, 16, 18, 24, 36
+function NormalizeFontSize(ASize: integer): integer;
+begin
+  // Snap to nearest standard size
+  if ASize <= 8 then Result := 8
+  else if ASize <= 9 then Result := 9
+  else if ASize <= 10 then Result := 10
+  else if ASize <= 12 then Result := 12
+  else if ASize <= 14 then Result := 14
+  else Result := 16;
+end;
+----
+
+**Solution 3: Preload common fonts**
+
+[source,pascal]
+----
+procedure PreloadCommonFonts;
+begin
+  // Load fonts at startup to avoid UI lag later
+  fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-10');
+  fpgApplication.FontManager.GetFont(FPG_DEFAULT_SANS + '-10:bold');
+  fpgApplication.FontManager.GetFont(FPG_DEFAULT_FIXED + '-10');
+end;
+----
+
+**Solution 4: Monitor and debug cache**
+
+[source,pascal]
+----
+{$IFDEF DEBUG}
+// At application shutdown:
+procedure TMyApp.Destroy;
+begin
+  WriteLn('Final font cache state:');
+  WriteLn(fpgApplication.FontManager.GetCacheStats());
+  // Shows all fonts that were created during application lifetime
+  inherited;
+end;
+{$ENDIF}
+----
+
+---
+
+== Platform-Specific Issues
+
+=== Linux / X11 / Xft
+
+**Issue: Font anti-aliasing looks wrong**
+
+*Cause:* System fontconfig settings
+
+*Solution:*
+
+[source,bash]
+----
+# Check fontconfig settings
+fc-match -v "Arial"
+
+# Configure anti-aliasing in ~/.config/fontconfig/fonts.conf
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <match target="font">
+    <edit name="antialias" mode="assign">
+      <bool>true</bool>
+    </edit>
+  </match>
+</fontconfig>
+----
+
+**Issue: Font appears at wrong size**
+
+*Cause:* DPI mismatch between system and X11
+
+*Solution:*
+
+[source,bash]
+----
+# Check X11 DPI
+xdpyinfo | grep resolution
+
+# Set DPI explicitly
+xrandr --dpi 96
+----
+
+**Issue: Fonts not showing up**
+
+*Cause:* Font cache needs rebuild
+
+*Solution:*
+
+[source,bash]
+----
+# Rebuild font cache
+fc-cache -fv
+
+# Clear cache and rebuild
+rm -rf ~/.cache/fontconfig
+fc-cache -fv
+----
+
+=== Windows / GDI
+
+**Issue: Bold fonts too heavy**
+
+*Cause:* GDI font weight value too high
+
+*Solution:* Check font weight in `TfpgGDIFontResource.Create`:
+
+[source,pascal]
+----
+// In fpg_gdi.pas
+if fpgFontBold in Attrs then
+  LogFont.lfWeight := FW_BOLD   // 700 - normal bold
+else
+  LogFont.lfWeight := FW_NORMAL; // 400
+----
+
+**Issue: ClearType rendering disabled**
+
+*Cause:* Need to enable quality flag
+
+*Solution:*
+
+[source,pascal]
+----
+// In fpg_gdi.pas
+LogFont.lfQuality := CLEARTYPE_QUALITY;  // or DEFAULT_QUALITY
+----
+
+**Issue: Font substitution wrong**
+
+*Cause:* Windows font substitution registry
+
+*Check:*
+
+----
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
+----
+
+=== macOS / Cocoa
+
+**Issue: CoreText font loading slow**
+
+*Cause:* Font activation overhead
+
+*Solution:* Cache CTFont references where possible
+
+**Issue: Font attributes not working**
+
+*Cause:* CTFont descriptor parsing
+
+*Check:* Verify `TfpgCocoaFontResource.Create` parses bold/italic correctly
+
+---
+
+== Debugging Techniques
+
+=== Enable Detailed Logging
+
+Add debug output to font operations:
+
+[source,pascal]
+----
+{$DEFINE DEBUG_FONTS}
+
+{$IFDEF DEBUG_FONTS}
+function TfpgFontManager.GetFont(const ADesc: string): TfpgFontResourceBase;
+begin
+  WriteLn('[FontManager] GetFont: "', ADesc, '"');
+  Result := ... // existing code
+  if Assigned(Result) then
+  begin
+    WriteLn('[FontManager] Returned font, HandleValid=', Result.HandleIsValid);
+    WriteLn('[FontManager] FontDesc=', Result.FontDesc);
+  end;
+end;
+{$ENDIF}
+----
+
+=== Use Breakpoints
+
+Set breakpoints at key locations:
+
+* `TfpgFontManager.GetFont()` - Font creation
+* `TfpgFontResourceBase.Destroy` - Font cleanup
+* Canvas `DoSetFontRes()` - Font activation
+* Widget paint methods - Font usage
+
+=== Inspect Cache at Runtime
+
+[source,pascal]
+----
+// Call from debugger or add temporary menu item
+procedure DumpFontCache;
+begin
+  fpgApplication.FontManager.DumpCache;
+end;
+----
+
+=### Compare Platforms
+
+If font works on one platform but not another:
+
+[source,pascal]
+----
+{$IFDEF UNIX}
+  WriteLn('Platform: X11/Xft');
+{$ENDIF}
+{$IFDEF WINDOWS}
+  WriteLn('Platform: GDI');
+{$ENDIF}
+{$IFDEF DARWIN}
+  WriteLn('Platform: Cocoa');
+{$ENDIF}
+
+WriteLn('Font handle type: ', FFont.ClassName);
+WriteLn('Font descriptor: ', FFont.FontDesc);
+----
+
+---
+
+== Error Messages
+
+=== "Font not found: XXX"
+
+**Meaning:** Font manager could not load the requested font
+
+**Check:**
+
+1. Is font installed on system?
+2. Is font name spelled correctly?
+3. Is font descriptor format correct?
+
+**Fix:** Use platform default fonts or install missing font
+
+---
+
+=== "Division by zero" in text rendering
+
+**Meaning:** Font metrics returned zero height or width
+
+**Check:**
+
+1. Font loaded successfully? (`HandleIsValid`)
+2. Canvas font set before drawing?
+3. AggCanvas: FreeType metrics populated?
+
+**Fix:** Ensure font loaded and activated correctly
+
+---
+
+=== "Access violation" when accessing font
+
+**Meaning:** Font object freed prematurely or never assigned
+
+**Check:**
+
+1. Font field initialized in constructor?
+2. Font not freed manually with `Free`?
+3. Font not accessed after widget destroyed?
+
+**Fix:** Use `nil` assignment for cleanup, check initialization
+
+---
+
+=== "Memory leak: TfpgFontResource"
+
+**Meaning:** Font cache not destroyed (typically only at application exit)
+
+**Check:**
+
+1. Is this at application shutdown? (Expected - fonts live until exit)
+2. Is FontManager being destroyed properly?
+3. Any manual `Free` calls on fonts?
+
+**Fix:** Font cache persists until application exit by design. This is not a leak unless fonts survive after fpgApplication is destroyed.
+
+---
+
+== Best Practices
+
+=== Clear Font Pointers in Destructors
+
+[source,pascal]
+----
+destructor TMyWidget.Destroy;
+begin
+  FFont := nil;  // Good practice: clear pointer
+  inherited;
+end;
+----
+
+=== Check Font Validity
+
+[source,pascal]
+----
+font := fpgApplication.FontManager.GetFont('MyFont-12');
+if not font.HandleIsValid then
+  font := fpgApplication.FontManager.GetDefaultFont;
+----
+
+=== Use Platform Constants
+
+[source,pascal]
+----
+// GOOD: Works everywhere
+FPG_DEFAULT_SANS + '-12'
+
+// BAD: Only works on some platforms
+'Arial-12'
+----
+
+=== Cache Fonts in Widgets
+
+[source,pascal]
+----
+// GOOD: Cache in constructor
+FFont := fpgApplication.FontManager.GetFont('Arial-12');
+
+// BAD: Request every time
+Canvas.SetFont(fpgApplication.FontManager.GetFont('Arial-12'));
+----
+
+=== Test with Heaptrc
+
+[source,bash]
+----
+# Always test for leaks
+fpc -gh myapp.pas
+./myapp
+# Check output
+----
+
+---
+
+== Getting Help
+
+If issues persist after trying these solutions:
+
+1. **Check documentation:**
+   * `docs/font_architecture.adoc` - Architecture details
+   * `docs/font_migration_guide.adoc` - API migration help
+
+2. **Search issue tracker:**
+   * https://github.com/graemeg/fpGUI/issues
+
+3. **Ask in the support group:**
+   * fpGUI community newsgroup (web browser) http://geldenhuys.co.uk/webnews
+   * or with a news client via news://geldenhuys.co.uk port 119
+
+4. **Provide details when asking:**
+   * Platform (Linux/Windows/macOS)
+   * fpGUI version/branch
+   * Compiler version (fpc -i)
+   * AggCanvas enabled? (`-dAGGCANVAS`)
+   * Font descriptor string
+   * Minimal test case
+   * Heaptrc output if memory leak
+   * Console output if crash
+
+---
+
+== Summary Checklist
+
+When encountering font issues:
+
+- [ ] Check font name spelling and format
+- [ ] Verify font installed on system
+- [ ] Ensure `HandleIsValid` is true
+- [ ] Clear font pointers in destructor (`:= nil`)
+- [ ] No direct `Free` calls on fonts
+- [ ] Canvas font set before drawing
+- [ ] Test with platform default fonts
+- [ ] Run with heaptrc to check leaks
+- [ ] Check console for error messages
+- [ ] Review font cache statistics
+
+Most issues fall into one of these categories:
+
+1. Font not found → Use platform defaults
+2. Memory leak → Add `:= nil` in destructor
+3. Wrong rendering → Check descriptor format
+4. AggCanvas issues → Verify font files available
+
+---
+
+**Document Version:** 1.0 +
+**Date:** 2025-10-15 +
+**Branch:** font-handling-refactor & develop (from Oct 2025) +
+**Author:** Graeme Geldenhuys

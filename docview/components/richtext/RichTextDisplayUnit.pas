@@ -75,7 +75,7 @@ end;
 function InvertRGB( Arg: TfpgColor ): TfpgColor;
 begin
   Result := fpgColorToRGB( Arg ); // in case it's a system color e.g. button face
-  Result := Result xor $ffffff; // now invert the RGB components
+  Result := Result xor $00ffffff; // now invert the RGB components
 end;
 
 // Draw a string at the given location with given color/selected state
@@ -104,8 +104,8 @@ ProfileEvent('DEBUG:  DrawRichTextString >>>');
   end;
   if FontManager.Canvas.Color <> Layout.FRichTextSettings.DefaultBackgroundColor then
     FontManager.Canvas.FillRectangle(x, y,
-        FontManager.Canvas.Font.TextWidth(s),
-        FontManager.Canvas.Font.Height);
+        FontManager.Canvas.Font.GetTextWidth(s),
+        FontManager.Canvas.Font.GetHeight());
   FontManager.DrawString( Point, Len, S );
   X := Point.X;
 ProfileEvent('DEBUG:  DrawRichTextString <<<');

@@ -32,6 +32,7 @@ type
     procedure   btn3Click(Sender: TObject);
     procedure   chkSortChange(Sender: TObject);
     procedure   cbTabPosChanged(Sender: TObject);
+    procedure   btnChangeFontClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -89,12 +90,18 @@ begin
     pcMain.TabPosition := tpNone;
 end;
 
+procedure TMainForm.btnChangeFontClicked(Sender: TObject);
+begin
+  pcMain.FontDesc := FPG_DEFAULT_FIXED_FONT_DESC + ':bold';
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'Tab control test';
   SetPosition(100, 100, 566, 350);
   ShowHint := True;
+  WindowPosition := wpOneThirdDown;
   
   btnQuit := CreateButton(self, 476, 320, 80, 'Quit', @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
@@ -109,6 +116,7 @@ begin
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
   pcMain.ActiveTabColor:= clOrangeRed;
   pcMain.ActiveTabTextColor:= clYellow;
+  pcMain.FontDesc := FPG_DEFAULT_FIXED_FONT_DESC;
 //  pcMain.FixedTabWidth:=150;
 
   // Tab One
@@ -122,7 +130,7 @@ begin
   tsTwo := TfpgTabSheet.Create(pcMain);
   tsTwo.Text := 'Tab Two';
   CreateLabel(tsTwo, 50, 50, 'TabSheet Two');
-  CreateButton(tsTwo, 50, 100, 80, 'Button1', nil);
+  CreateButton(tsTwo, 50, 100, 80, 'Button1', @btnChangeFontClicked);
 
   // Tab Three
   tsThree := TfpgTabSheet.Create(pcMain);
@@ -169,6 +177,7 @@ begin
   edtHeight.Anchors := [anBottom, anLeft];
   edtHeight.Hint := 'Tab height';
   edtHeight.OnChange := @edtHeightChanged;
+  edtHeight.BringToFront;
 end;
 
 procedure MainProc;

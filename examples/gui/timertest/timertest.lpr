@@ -83,17 +83,17 @@ begin
   
   lblTimer1 := CreateLabel(self, 50, 50, '---');
   lblTimer1.FontDesc  := 'Arial-14:bold';
-  lblTimer1.Height    := lblTimer1.Font.Height;
+  lblTimer1.Height    := lblTimer1.Font.GetHeight;
   lblTimer1.Width     := 150;
   
   lblTimer2 := CreateLabel(self, 50, 80, '---');
   lblTimer2.FontDesc  := 'Arial-14:bold';
-  lblTimer2.Height    := lblTimer2.Font.Height;
+  lblTimer2.Height    := lblTimer2.Font.GetHeight;
   lblTimer2.Width     := 150;
 
   lblTimer3 := CreateLabel(self, 50, 110, '---');
   lblTimer3.FontDesc  := 'Arial-14:bold';
-  lblTimer3.Height    := lblTimer3.Font.Height;
+  lblTimer3.Height    := lblTimer3.Font.GetHeight;
   lblTimer3.Width     := 150;
 
   timer1          := TfpgTimer.Create(50);

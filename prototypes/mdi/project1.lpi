@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -40,17 +40,14 @@
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="project1"/>
       </Unit0>
       <Unit1>
         <Filename Value="fpg_mdi.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpg_mdi"/>
       </Unit1>
       <Unit2>
         <Filename Value="frm_child.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_child"/>
       </Unit2>
     </Units>
   </ProjectOptions>
@@ -59,12 +56,6 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
     </SearchPaths>
-    <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

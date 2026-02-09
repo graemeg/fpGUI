@@ -1,0 +1,3 @@
+# Ignore compiled units
+*.o
+*.ppu

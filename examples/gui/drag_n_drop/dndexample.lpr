@@ -12,7 +12,11 @@ uses
   fpg_label, fpg_edit, fpg_stdimages, fpg_checkbox;
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
+    procedure PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
   private
     {@VFD_HEAD_BEGIN: MainForm}
     Bevel1: TfpgPanel;
@@ -28,15 +32,15 @@ type
     chkAccept: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure CheckAcceptDropsChanged(Sender: TObject);
-    procedure Edit1DragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
-    procedure Edit1DragEnter(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
-    procedure Bevel1DragEnter(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
-    procedure Bevel1DragLeave(Sender: TObject);
-    procedure PanelDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
+    procedure Edit1DragDrop(Sender: TfpgDrop; AData: variant);
+    procedure Edit1DragEnter(Sender: TfpgDrop);
+    procedure Bevel1DragEnter(Sender: TfpgDrop);
+    procedure Bevel1DragLeave(Sender: TfpgDrop);
+    procedure PanelDragDrop(Sender: TfpgDrop; AData: variant);
     procedure Button1Clicked(Sender: TObject);
     procedure btnClearClicked(Sender: TObject);
     procedure LabelDragStartDetected(Sender: TObject);
-    procedure ShowMimeList(AMimeList: TStringList);
+    procedure ShowMimeList(AMimeList: TfpgMimeDataItemList);
   public
     procedure AfterCreate; override;
   end;
@@ -47,69 +51,63 @@ type
 
 {@VFD_NEWFORM_IMPL}
 
-procedure TMainForm.CheckAcceptDropsChanged(Sender: TObject);
+procedure TMainForm.PaintDragPreview(ASender: TfpgDrag; ACanvas: TfpgCanvas);
 begin
-  Edit1.AcceptDrops := chkAcceptDrops.Checked;
+  ACanvas.Clear(clWindowBackground);
+  ACanvas.DrawString(0,0, ASender.MimeData.Text);
 end;
 
-procedure TMainForm.Edit1DragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: variant);
+procedure TMainForm.CheckAcceptDropsChanged(Sender: TObject);
+begin
+  if chkAcceptDrops.Checked then
+    Edit1.DropHandler := TfpgDropEventHandler.Create(@Edit1DragEnter, nil, @Edit1DragDrop, nil)
+  else
+    Edit1.DropHandler := nil;
+end;
+
+procedure TMainForm.Edit1DragDrop(Sender: TfpgDrop; AData: variant);
 begin
   Edit1.Text := AData;
 end;
 
-procedure TMainForm.Edit1DragEnter(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.Edit1DragEnter(Sender: TfpgDrop);
 var
   s: string;
 begin
-  ShowMimeList(AMimeList);
+  ShowMimeList(Sender.Mimetypes);
   s := 'text/plain';
   if chkAccept.Checked then
-    Accept := False
+    Sender.CanDrop := False
   else
-    Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
-  begin
-    if AMimeChoice <> s then
-      AMimeChoice := s;
-  end;
+    Sender.CanDrop := Sender.AcceptMimeType([s]);
 end;
 
-procedure TMainForm.Bevel1DragEnter(Sender, Source: TObject;
-  AMimeList: TStringList; var AMimeChoice: TfpgString;
-  var ADropAction: TfpgDropAction; var Accept: Boolean);
+procedure TMainForm.Bevel1DragEnter(Sender: TfpgDrop);
 var
   s: string;
 begin
-  ShowMimeList(AMimeList);
+  ShowMimeList(Sender.Mimetypes);
   { the mime type we want to accept }
   s := 'text/html';
-  { if we wil accept the drop, set Accept to True }
-  Accept := AMimeList.IndexOf(s) > -1;
-  if Accept then
+  { if we will accept the drop, set CanDrop to True }
+  Sender.CanDrop := Sender.AcceptMimeType([s]);
+  if Sender.CanDrop then
   begin
-    { If the offered mime type is different, request our preference }
-    if AMimeChoice <> s then
-      AMimeChoice := s;
-
     Bevel1.BackgroundColor := clRed;
   end;
 end;
 
-procedure TMainForm.Bevel1DragLeave(Sender: TObject);
+procedure TMainForm.Bevel1DragLeave(Sender: TfpgDrop);
 begin
   Bevel1.BackgroundColor := clWindowBackground;
 end;
 
-procedure TMainForm.PanelDragDrop(Sender, Source: TObject; X, Y: integer;
-  AData: Variant);
+procedure TMainForm.PanelDragDrop(Sender: TfpgDrop; AData: variant);
 var
   s: string;
 begin
   s := AData;
-  Bevel1.Text := Format('Drop event at (%d,%d) with value(s):'+LineEnding+'%s', [X, Y, s]);
+  Bevel1.Text := Format('Drop event at (%d,%d) with value(s):'+LineEnding+'%s', [Sender.MousePos.X, Sender.MousePos.Y, s]);
   Bevel1DragLeave(nil);
 end;
 
@@ -131,7 +129,6 @@ var
   d: TfpgDrag;
 begin
   m := TfpgMimeData.Create;
-
   { via convenience properties }
   m.Text := 'My name is Earl';
   m.HTML := 'My name is <b>Earl</b>';
@@ -140,16 +137,19 @@ begin
 //  m.SetData('text/html', 'My name is <b>Earl</b>');
 
   { tell TfpgDrag who is the Source of the drag }
-  d := TfpgDrag.Create(Sender as TfpgWindow);
+  d := TfpgDrag.Create(Sender as TfpgWidgetBase);
 
   { TfpgDrag now takes ownership of TfpgMimeData }
   d.MimeData := m;
+
+  D.OnPaintPreview:=@PaintDragPreview;
+  D.PreviewSize := fpgSize(Canvas.Font.GetTextWidth(d.MimeData.Text), Canvas.Font.GetHeight());
 
   { TfpgDrag instance will be freed later when DND action is completed }
   d.Execute([daCopy]);
 end;
 
-procedure TMainForm.ShowMimeList(AMimeList: TStringList);
+procedure TMainForm.ShowMimeList(AMimeList: TfpgMimeDataItemList);
 var
   i: integer;
 begin
@@ -158,7 +158,7 @@ begin
   for i := 0 to AMimeList.Count-1 do
   begin
     Grid1.Cells[0, i] := IntToStr(i+1);
-    Grid1.Cells[1, i] := AMimeList[i];
+    Grid1.Cells[1, i] := AMimeList.Items[i].format;
   end;
 end;
 
@@ -170,7 +170,6 @@ begin
   SetPosition(316, 186, 512, 429);
   WindowTitle := 'Drop Site Demo';
   Hint := '';
-  DNDEnabled := True;
 
   Bevel1 := TfpgPanel.Create(self);
   with Bevel1 do
@@ -186,10 +185,7 @@ begin
     Style := bsLowered;
     Text := '';
     WrapText := True;
-    AcceptDrops := True;
-    OnDragEnter := @Bevel1DragEnter;
-    OnDragLeave := @Bevel1DragLeave;
-    OnDragDrop  := @PanelDragDrop;
+    DropHandler := TfpgDropEventHandler.Create(@Bevel1DragEnter, @Bevel1DragLeave, @PanelDragDrop, nil);
   end;
 
   Grid1 := TfpgStringGrid.Create(self);
@@ -264,9 +260,7 @@ begin
     Hint := '';
     TabOrder := 7;
     Text := '';
-    AcceptDrops := True;
-    OnDragEnter := @Edit1DragEnter;
-    OnDragDrop  := @Edit1DragDrop;
+    DropHandler := TfpgDropEventHandler.Create(@Edit1DragEnter, nil, @Edit1DragDrop, nil);
   end;
 
   Label1 := TfpgLabel.Create(self);
@@ -308,7 +302,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 10;
-    Text := 'Enable AcceptDrops';
+    Text := 'Enable DropHandler';
     OnChange :=@CheckAcceptDropsChanged;
   end;
 

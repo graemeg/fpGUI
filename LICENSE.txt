@@ -1,0 +1,34 @@
+License Overview
+════════════════
+This file gives an overview of the licenses used in the fpGUI sources.
+
+The fpGUI sources consists of several parts, and each part has its own
+license. Two main licenses are in use:
+
+  * the GNU General Public License, version 2 (GPLv2)
+  * a modified GNU Lesser General Public License (as described in license.ModifiedLGPL)
+
+In general, each file contains a header, describing the license of the file.
+
+The license directory tree:
+
+<fpgui>/
+ │
+ ├─ docview         (GPLv2)
+ │
+ ├─ uidesigner      (modified LGPL)
+ │
+ ├─ src             (modified LGPL)
+ │
+ ├─ examples        (GPLv2)
+ │
+ ╰─ extras          (various - see specific directories or files)
+    │
+    ╰─ contributed
+       │
+       ╰─ nicegrid       (MPL - Mozilla public license)
+
+           
+
+               ────────────oOo────────────
+

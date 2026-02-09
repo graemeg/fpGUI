@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui</name>
+  <version>2.0.0</version>
+  <author>Graeme Geldenhuys</author>
+  <license>LGPL</license>
+
+  <build>
+    <packaging>pom</packaging>
+  </build>
+
+  <!-- List child modules in build order -->
+  <modules>
+    <module>framework</module>
+<!--    <module>docview</module> -->
+    <module>uidesigner</module>
+  </modules>
+</project>

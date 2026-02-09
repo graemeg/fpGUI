@@ -7,7 +7,7 @@
 #
 # This script
 # - builds the tools if required
-# - converts all compiled .rst files to .po files
+# - converts all .rsj files to .po files
 # - updates all translated xx.po files
 #
 
@@ -40,7 +40,7 @@ for idx in ${!RSTFILES[@]}; do
   POFILE=${LINE[2]:-$RSTFILE}
    
 #  RST=`find $RSTDIR/{units,lib}/$FPCTARGET -name $RSTFILE.rst | xargs ls -1t | head -1`;
-  RST=`find $RSTDIR/{units,lib} -name $RSTFILE.rst | xargs ls -1t | head -1`;
+  RST=`find $RSTDIR/{units,lib} -name $RSTFILE.rsj | xargs ls -1t | head -1`;
 
   if [ "@"$RST != "@" ]; then
     echo $RSTDIR/languages/$POFILE.po

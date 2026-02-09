@@ -229,15 +229,18 @@ begin
     FLiveViewFrame.Free;
   FLiveViewFrame := TLiveViewFrame.Create(self);
   grdMessages.Height := grdMessages.Height - FLiveViewFrame.Height;
-  grdMessages.UpdateWindowPosition;
-  FLiveViewFrame.SetPosition(grdMessages.Left, grdMessages.Bottom+1, grdMessages.Width, FLiveViewFrame.Height);
+  grdMessages.UpdatePosition;
+  FLiveViewFrame.Left := grdMessages.Left;
+  FLiveViewFrame.Top := grdMessages.Bottom+1;
+  FLiveViewFrame.Width := grdMessages.Width;
+  FLiveViewFrame.Height := FLiveViewFrame.Height;
 end;
 
 procedure TMainForm.DestroyLiveViewFrame;
 begin
   grdMessages.Height := grdMessages.Height + FLiveViewFrame.Height;
   FreeAndNil(FLiveViewFrame);
-  grdMessages.UpdateWindowPosition;
+  grdMessages.UpdatePosition;
 end;
 
 procedure TMainForm.btnLiveViewClicked(Sender: TObject);
@@ -378,10 +381,10 @@ begin
   if btnExpandView.Down then
   begin
     FMemo := CreateMemo(self, grdMessages.Right + cSpacing, grdMessages.Top, 200, Height - grdMessages.Top - cSpacing);
-    FMemo.UpdateWindowPosition;
+    FMemo.UpdatePosition;
     grdMessages.Anchors := grdMessages.Anchors - [anRight];
     Width := Width + FMemo.Width + (2 * cSpacing);
-    UpdateWindowPosition;
+    UpdatePosition;
     grdMessages.Anchors := grdMessages.Anchors + [anRight];
     GridClicked(nil); // update memo contents
   end
@@ -390,7 +393,7 @@ begin
     grdMessages.Anchors := grdMessages.Anchors - [anRight];
     Width := Width - FMemo.Width - (2 * cSpacing);
     FMemo.Visible := False;
-    UpdateWindowPosition;
+    UpdatePosition;
     grdMessages.Anchors := grdMessages.Anchors + [anRight];
     FreeAndNil(FMemo);
   end;

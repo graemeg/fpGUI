@@ -184,7 +184,7 @@ begin
   c := FIniFile.ReadInteger(cProjectOptions, 'MakeOptionsCount', 0);
   for j := 1 to c do
     FIniFile.DeleteKey(cProjectOptions, cINIMakeOption + IntToStr(j));
-  { no lets save new info }
+  { now lets save new info }
   SaveList(MakeOptions, 'MakeOptionsCount', cINIMakeOption);
   for j := 0 to MakeOptions.Count-1 do
   begin
@@ -202,6 +202,10 @@ begin
   end;
 
   // macros definitions
+  { first delete old items in ini file }
+  c := FIniFile.ReadInteger(cProjectOptions, 'MacroCount', 0);
+  for j := 1 to c do
+    FIniFile.DeleteKey(cProjectOptions, 'Macro' + IntToStr(j));
   SaveList(MacroNames, 'MacroCount', 'Macro');
 
   // unit search directories

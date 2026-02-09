@@ -75,8 +75,10 @@ constructor TForm2.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'Form2';
-  Sizeable := False;
-  SetPosition(200, 200, 200, 200);
+  Left := 200;
+  Top := 200;
+  Width := 200;
+  Height := 200;
 
   Label1 := CreateLabel(self, 10, 10, 'This is Form2');
 
@@ -115,8 +117,10 @@ begin
   inherited Create(AOwner);
   Visible:=False;
   WindowTitle := 'Form1';
-  Sizeable := False;
-  SetPosition(150, 150, 200, 200);
+  Left := 150;
+  Top := 150;
+  Width := 200;
+  Height := 200;
 
   Label1 := CreateLabel(self, 10, 10, 'This is Form1');
   
@@ -125,10 +129,13 @@ begin
   btnClose.ShowImage := True;
   
   btnOpenForm2 := CreateButton(self, 70, 100, 80, 'Open Form2', @btnOpenForm2Click);
-  
+
   cal := TfpgComboBox.Create(self);
-  cal.SetPosition(10, 10, 120, 23);
-  
+  cal.Left := 10;
+  cal.Top := 10;
+  cal.Width := 120;
+  cal.Height := 23;
+
   edtTest := CreateEdit(self, 10, 60, 100, 23);
 
 end;
@@ -159,18 +166,23 @@ constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'Modal Form Demo';
-  Sizeable := False;
-  SetPosition(100, 100, 400, 200);
+  Left := 100;
+  Top := 100;
+  Width := 400;
+  Height := 200;
 
   btnClose := CreateButton(self, 310, 170, 80, 'Quit', @btnCloseClick);
   btnClose.ImageName := 'stdimg.Quit';
   btnClose.ShowImage := True;
   
   btnOpenForm1 := CreateButton(self, 100, 100, 80, 'Open Form1', @btnOpenForm1Click);
-  
+
   cal := TfpgComboBox.Create(self);
-  cal.SetPosition(10, 10, 120, 23);
-  
+  cal.Left := 10;
+  cal.Top := 10;
+  cal.Width := 120;
+  cal.Height := 23;
+
   edtTest := CreateEdit(self, 10, 60, 100, 23);
 end;
 

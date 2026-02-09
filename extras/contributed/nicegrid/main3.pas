@@ -29,7 +29,7 @@ begin
   SetPosition(260, 99, 719, 570);
   WindowTitle := 'Tabel Budget';
   Hint := ''; 
-  WindowAttributes := [waSizeable, waScreenCenterPos];
+  WindowPosition := wpOneThirdDown;
   
   Panel1:= TfpgPanel.Create(self);
   with Panel1 do

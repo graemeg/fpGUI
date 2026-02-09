@@ -234,6 +234,7 @@ begin
   begin
     Name := 'EditCombo1';
     SetPosition(8, 88, 168, 21);
+    FontDesc := '#List';
   end;
 
   lblName3 := TfpgLabel.Create(self);

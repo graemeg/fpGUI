@@ -37,17 +37,14 @@
       <Unit0>
         <Filename Value="customstyles.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="customstyles"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_test.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frm_test"/>
       </Unit1>
       <Unit2>
         <Filename Value="mystyle.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="mystyle"/>
       </Unit2>
     </Units>
   </ProjectOptions>
@@ -75,11 +72,5 @@
         <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>
-    <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

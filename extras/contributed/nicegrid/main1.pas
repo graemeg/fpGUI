@@ -66,7 +66,7 @@ begin
   FMenuBar := CreateMenuBar(self);
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   
- Grid1 := TfpgNiceGrid.Create(self);
+  Grid1 := TfpgNiceGrid.Create(self);
   with Grid1 do
   begin
     Name := 'Grid1';
@@ -91,7 +91,7 @@ begin
     BeginUpdate;  // JP
     with Columns.Add do
     begin
-      Title := 'Merged;Multilined|Merged;Multilined';
+      Title := 'Merged;Multilined';
       Footer := 'Footer 0';
       Font:='Arial-8';
       FontColor:=clBlack;

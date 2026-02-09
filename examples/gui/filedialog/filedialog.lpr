@@ -7,18 +7,16 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
+  fpg_constants,
   fpg_base,
   fpg_main,
   fpg_form,
   fpg_dialogs,
   fpg_button,
-  fpg_edit,
-  fpg_label;
+  fpg_edit;
 
 
 type
-
-  { TMainForm }
 
   TMainForm = class(TfpgForm)
   private
@@ -42,7 +40,7 @@ type
   public
     procedure   AfterCreate; override;
   end;
-  
+
 
   TMyDBLoginDlg = class(TfpgPromptUserDbDialog)
   private
@@ -91,10 +89,9 @@ begin
     if dlg.ShowModal = mrOK then
     begin
       TfpgMessageDialog.Information('User Results',
-          'User=' + dlg.UserID + #13 +
-          'Pass=' + dlg.Password +  #13 +
+          'User=' + dlg.UserID + LineEnding +
+          'Pass=' + dlg.Password +  LineEnding +
           'Database=' + dlg.Database, [mbOK]);
-//      fpgApplication.ProcessMessages;
     end;
   finally
     dlg.Free;
@@ -122,7 +119,9 @@ begin
   dlg := TfpgFileDialog.Create(Self);
   try
     // defines 3 filters (All Files, Object Pascal and Lazarus Project)
-    dlg.Filter := 'All Files (*)|*|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp|Lazarus Project (*.lpi)|*.lpi';
+    dlg.Filter :=  Format('All Files (%s)|%s', [AllFilesMask, AllFilesMask])
+      + '|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp'
+      + '|Lazarus Project (*.lpi)|*.lpi';
     if dlg.RunOpenFile then
       edFilename.Text := dlg.FileName;
   finally
@@ -152,6 +151,7 @@ end;
 
 procedure TMainForm.btnMessageDlgClick(Sender: TObject);
 begin
+  TfpgMessageDialog.About('', 'This is a simple app written to show off the many prebuilt dialogs in fpGUI! See the "aboutdialog" example for a more advanced "about box" and a class you can mod and use in your own app.');
   TfpgMessageDialog.AboutFPGui('My title here');
   TfpgMessageDialog.Critical('Something Critical...', 'And this is where the text goes.', mbAbortRetryIgnore, mbAbort);
   TfpgMessageDialog.Warning('Some Warning...', 'And this is where the text goes.', mbYesNoCancel, mbNo);
@@ -165,7 +165,7 @@ begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
   SetPosition(330, 199, 419, 138);
-  WindowTitle := 'File dialog test';
+  //WindowTitle auto set from AppTtitle
   Hint := '';
   MinWidth := 300;
   MinHeight := 135;
@@ -283,8 +283,17 @@ end;
 procedure MainProc;
 var
   frm: TMainForm;
+  app: TfpgApplication;
 begin
-  fpgApplication.Initialize;
+  app:=fpgApplication;
+  app.Initialize;
+  app.AppTitle     := 'fpGUI Dialogs Demo';
+  app.AppVersion   := FPGUI_VERSION;
+  app.AppAuthor    := 'Written by Graeme Geldenhuys & others';
+  app.AppCopyright := 'Copyright (c) 2006 - modified LGPL2 license';
+  app.AppSiteName  := fpGUIWebsite;
+  app.AppSiteURL   := fpGUIWebsite;
+  //app.AppIcon      :=
   frm := TMainForm.Create(nil);
   frm.Show;
   fpgApplication.Run;

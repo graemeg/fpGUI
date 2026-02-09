@@ -140,7 +140,7 @@ type
 
     property ReferencedFiles: TStringList read _ReferencedFiles;
 
-    procedure GetImages( ImageOffsets: TList; Images: TfpgImageList );
+    procedure GetImages(var ImageOffsets: TList; var Images: TfpgImageList );
 
     function GetImage( ImageOffset: longint ): THelpBitmap;
 
@@ -389,7 +389,7 @@ begin
     ReadFontTableData;
     ParseFontTable;
     ReadReferencedFilesTable;
-    
+
     // Fix text encoding
     for i := 0 to TopicCount-1 do
     begin
@@ -571,7 +571,7 @@ begin
                             _FontTable,
                             _ReferencedFiles );
 
-        
+
     Topic.HelpFile := Self;
     Topic.Index := EntryIndex;
 
@@ -1058,7 +1058,7 @@ begin
   end;
 end;
 
-procedure THelpFile.GetImages( ImageOffsets: TList; Images: TfpgImageList );
+procedure THelpFile.GetImages(var ImageOffsets: TList; var Images: TfpgImageList );
 var
   ListIndex: longint;
   ImageOffset: longint;

@@ -6,14 +6,14 @@ interface
 
 uses
   Classes, SysUtils, fpg_memo;
-  
+
 type
 
   TMutableInteger = class(TObject)
   public
     Value: integer;
   end;
-  
+
 
   TETLine = class(TObject)
   public
@@ -33,9 +33,9 @@ type
     EndsInTab: boolean;
     constructor Create;
   end;
-  
 
-  
+
+
   TElasticTabstopsDocFilter = class(TObject)
   private
     FMemo: TfpgMemo;
@@ -120,7 +120,7 @@ begin
   linecount := FMemo.Lines.Count;
   SetLength(lines, linecount);
   SetLength(grid, linecount, FMaxTabstops);
-  
+
   // initialise array
   for l := 0 to linecount - 1 do  // for each line
   begin
@@ -128,7 +128,7 @@ begin
     for t := 0 to MaxTabstops - 1 do  // for each column
       grid[l, t] := TETTabstop.Create;
   end;
-  
+
   // get width of text in cells
   for l := 0 to linecount - 1 do  // for each line
   begin
@@ -137,11 +137,11 @@ begin
     lineEnd := 0;
     lines[l].StartPos := lineStart;
     lines[l].EndPos := lineEnd;
-    
+
     lineText := FMemo.Lines[l];
     tabs_on_line := 0;
     textWidthInTab := 0;
-    
+
     for c := 1 to Length(lineText) do // for each char in current line
     begin
       if c = Length(lineText) then
@@ -164,7 +164,7 @@ begin
         Inc(textWidthInTab, FMemo.Canvas.Font.TextWidth(lineText[c]));
     end;  { for c }
   end;  { for l }
-  
+
   // find columns blocks and stretch to fit the widest cell
   for t := 0 to MaxTabstops - 1 do // for each column
   begin
@@ -194,7 +194,7 @@ begin
       end;  { if/else }
     end; { for l }
   end;
-  
+
   // apply tabstop sizes to the text
   for l := 0 to linecount - 1 do  // for each line
   begin
@@ -205,14 +205,14 @@ begin
       Inc(accTabStop, grid[l, t].WidestWidthPix.Value);
       grid[l, t].TextWidthPix := accTabStop;
     end;
-    
+
     // SetBlocksTabStops(grid[l], lines[l].NumTabs);
 //    Delete();
 
 //    FMemo.Lines[l];
 //      FMemo.Invalidate;
   end;
-  
+
 end;
 
 end.

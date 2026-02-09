@@ -30,7 +30,7 @@ type
 
 var
   frmSplash: TSplashForm;
-  
+
 implementation
 
 {@VFD_NEWFORM_IMPL}
@@ -46,8 +46,16 @@ begin
 end;
 
 procedure TSplashForm.SplashFormShow(Sender: TObject);
+var
+  wa: TWindowAttributes;
 begin
   tmr.Enabled := True;
+  if Assigned(Window) then
+  begin
+    wa := Window.WindowAttributes;
+    wa := wa + [waStayOnTop]; // well, it lets the window stay on top. :)
+    Window.WindowAttributes := wa;
+  end;
 end;
 
 procedure TSplashForm.TimerFired(Sender: TObject);
@@ -61,11 +69,10 @@ constructor TSplashForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowType := wtPopup;  // borderless but doesn't steal focus
-  WindowAttributes := WindowAttributes + [waStayOnTop]; // well, it lets the window stay on top. :)
 
   tmr := TfpgTimer.Create(3000);
   tmr.OnTimer := @TimerFired;
-  
+
   OnShow := @SplashFormShow;
   OnClick := @SplashFormClick;
   OnClose := @SplashFormClose;

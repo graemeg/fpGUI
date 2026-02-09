@@ -1,0 +1,3 @@
+The fpGUI Nanoedit text editor is distributed under the
+Simplified BSD License (BSD 2-clause license). See the
+unit header comments for details.

@@ -2,6 +2,75 @@
   Release notes for fpGUI
   =======================
 
+v2.0 (unknown)
+  - Code breaking changes
+    * TfpgScrollStyle enums have changed names to make it more clear as to
+      what they do or mean.
+      ssHorizVisible, ssVertiVisible, ssBothVisible were deleted, and new
+      ssBoth, ssAutoHorizontal, ssAutoVertical types added.
+    * Widgets with 3D borders were cleaned up and refactored. Instead of them
+      descending directly from TfpgWidget, they now descend from TfpgBorderWidget.
+      So if you have custom written widgets, they might need some adjusting.
+    * AlienWindows branch got merged. This resulted in some code changes that
+      might need to be applied to your code:
+       - UpdateWindowPosition -> UpdatePosition
+       - HasHandle -> Window.HasHandle  or use  WindowAllocated
+       - WindowToScreen() -> WidgetToScreen()
+       - WinHandle -> Window.WinHandle
+       - WindowAttributes -> Window.WindowAttributes
+    * PDF reporting classes and identifier names got translated from French to
+      English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
+    * Renamed TfpgRect.IsEmpty to TfpgRect.IsUnassigned. Added TfpgRect.Clear
+    * Removed OnDragEnter, OnDragLeave and OnDragDrop from TfpgWidget. Now a
+      property DropHandler is used that expects a TfpgDropHandler descendant.
+      TfpgDropEventHandler may be used as an object that accepts drop events.
+    * The FPGM_DROPENTER message has changed. Before the message type was
+      TfpgMsgParmMouse now it is TfpgMsgParmDrop. FPGM_DROPMOVE has replaced part
+      of the functionality FPGM_DROPENTER used to fulfill.
+  - MigLayout v11 port and layout manager framework (298 commits):
+    - Layout manager framework: ILayoutManager interface with
+      FlowLayout, BorderLayout, and MigLayout implementations
+    - MigLayout v11: full port from Java including constraint parsing,
+      grid engine, grow/shrink, cell spanning, docking, split cells,
+      component links, size groups, and debug visualisation
+    - Fluent constraint API: LC (layout), AC (axis), CC (component)
+      with chainable methods for concise layout definitions
+    - Widget sizing: Width/Height as preferred/intent size separated
+      from ActualWidth/ActualHeight as rendered size (WPF-inspired)
+    - MinWidth/MinHeight/MaxWidth/MaxHeight enforcement in base widget
+    - PasBuild build system: multi-module reactor builds with
+      automatic test discovery and resource filtering
+    - Repository restructured for PasBuild (framework + uidesigner
+      as separate build modules)
+    - Canvas hardening: dimension guards across X11, GDI, and Cocoa
+      backends preventing range errors on small/negative sizes
+    - 395 unit tests covering all MigLayout components
+    - Quick start guide and example demos for all three layout managers
+    - Updated all example extrafpc.cfg files for new directory layout
+  - So many bug fixes - too many to mention!
+
+
+v1.4.1 (2015-09-02)
+  This was a maintenance release. We had 71 commits made by 5 contributors.
+  Run the following command to see all the changes:
+
+    git shortlog v1.4..v1.4.1
+
+
+v1.4 (2015-04-09)
+  We had 172 commits made by 6 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.2..v1.4
+
+
+v1.2 (2014-08-20)
+  We had 375 commits made by 8 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.0..v1.2
+
+
 v1.0 (2013-04-09)
   - Docview improvements: Bookmark maintenance, keyboard shortcuts,
     image support in INF files, cross link support.
@@ -35,8 +104,8 @@ v0.8 (2011-12-02)
     * Spinning Globe, show some graphics support with zooming.
     * An experimental IDE called Maximus, which supports project
       management, compiler settings management, macro management,
-      multi-threading enabled, fast procedure list searching, 
-      syntax-highlighting enabled text editor, OS independent 
+      multi-threading enabled, fast procedure list searching,
+      syntax-highlighting enabled text editor, OS independent
       file monitor support etc.
   - PDF reporting engine and preview support. Thanks to
     Jean-Marc Levecque for this awesome contribution.
