@@ -1776,7 +1776,7 @@ begin
       // Poll would be better but FPC has no official poll interface (if I'm right)
       fpFD_ZERO(rfds);
       fpFD_SET(xfd, rfds);
-      r := fpSelect(xfd + 1, @rfds, nil, nil, {atimeoutms} 50);
+      r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
 
       if r < 1 then
         Exit; // no event received.
@@ -1799,7 +1799,7 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, 10);
+    r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
     if r <> 0 then  // We got a X event or the timeout happened
       XNextEvent(display, @ev)
     else
