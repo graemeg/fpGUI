@@ -2804,25 +2804,26 @@ end;
 function TfpgGDICanvas.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
-  Dec(Result.Top, FDeltaY);
-  Dec(Result.Left, FDeltaX);
 end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
 var
   cw, ch: TfpgCoord;
+  WinRect: TfpgRect;
 begin
   FClipRectSet := True;
   FClipRect    := ARect;
-  Inc(FClipRect.Top, FDeltaY);
-  Inc(FClipRect.Left, FDeltaX);
+  // Convert to window coordinates for the GDI region
+  WinRect := FClipRect;
+  Inc(WinRect.Top, FDeltaY);
+  Inc(WinRect.Left, FDeltaX);
   if not WeAreTopLevelCanvas then
-    FClipRect.IntersectRect(FClipRect, GetWidgetWindowRect);
+    WinRect.IntersectRect(WinRect, GetWidgetWindowRect);
   DeleteObject(FClipRegion);
   // Clamp to non-negative: IntersectRect can produce negative Width/Height
-  cw := Max(FClipRect.Width, 0);
-  ch := Max(FClipRect.Height, 0);
-  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left + cw, FClipRect.Top + ch);
+  cw := Max(WinRect.Width, 0);
+  ch := Max(WinRect.Height, 0);
+  FClipRegion  := CreateRectRgn(WinRect.Left, WinRect.Top, WinRect.Left + cw, WinRect.Top + ch);
   SelectClipRgn(FDrawGC, FClipRegion);
 end;
 
