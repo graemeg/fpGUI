@@ -289,12 +289,13 @@ begin
 
     lPathList := TStringList.Create;
     {$IFDEF UNIX}
+    lPathList.Add('/usr/share/fonts/');            // Covers all distro layouts (recursive search)
     lPathList.Add('/usr/share/cups/fonts/');
-    lPathList.Add('/usr/share/fonts/truetype/');
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
     {$ENDIF}
-    lPathList.Add(GetUserDir + '.fonts/');
+    lPathList.Add(GetUserDir + '.local/share/fonts/');  // XDG standard user font directory
+    lPathList.Add(GetUserDir + '.fonts/');               // Legacy user font directory
     {$IFDEF Darwin}
     { As per Apple Support page: https://support.apple.com/en-us/HT201722 }
     lPathList.Add('/System/Library/Fonts/');
