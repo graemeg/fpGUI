@@ -354,8 +354,6 @@ type
 
 
   TfpgGDITimer = class(TfpgBaseTimer)
-  private
-    FHandle: THandle;
   protected
     procedure   SetEnabled(const AValue: boolean); override;
   public
@@ -1608,24 +1606,29 @@ end;
 procedure TfpgGDIApplication.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
+  timeoutval: DWORD;
+  DummyHandle: THandle;
 begin
   if (atimeoutms >= 0) and (not MessagesPending) then
   begin
     if Assigned(FOnIdle) then
       OnIdle(self);
+
+    // Wait for messages or timeout (whichever comes first)
+    if atimeoutms < 0 then
+      timeoutval := INFINITE
+    else
+      timeoutval := DWORD(atimeoutms);
+
+    MsgWaitForMultipleObjects(0, DummyHandle, False, timeoutval, QS_ALLINPUT);
   end;
 
-  {$IFDEF WinCE}
-  // No GetVersion
-  Windows.GetMessageW(@Msg, 0, 0, 0);   //NT
-  {$ELSE}
-  if (GetVersion() < $80000000) then
-    Windows.GetMessageW(@Msg, 0, 0, 0)   //NT
-  else
-    Windows.GetMessage(@Msg, 0, 0, 0);   //Win98
-  {$ENDIF}
-
-  Windows.DispatchMessage(@msg);
+  // Process all pending messages (non-blocking)
+  while PeekMessageW(@Msg, 0, 0, 0, PM_REMOVE) do
+  begin
+    Windows.TranslateMessage(@msg);
+    Windows.DispatchMessage(@msg);
+  end;
 end;
 
 procedure TfpgGDIApplication.DoFlush;
@@ -3596,35 +3599,16 @@ begin
   {$ENDIF}
 end;
 
-procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
-begin
-  { idEvent contains the handle to the timer that got triggered }
-  fpgCheckTimers;
-end;
-
 { TfpgGDITimer }
 
 procedure TfpgGDITimer.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
-  if FEnabled then
-  begin
-    FHandle := Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
-  end
-  else
-  begin
-    if FHandle <> 0 then
-    begin
-      Windows.KillTimer(FHandle, 0);
-      FHandle := 0;
-    end;
-  end;
 end;
 
 constructor TfpgGDITimer.Create(AInterval: integer);
 begin
   inherited Create(AInterval);
-  FHandle := 0;
 end;
 
 
