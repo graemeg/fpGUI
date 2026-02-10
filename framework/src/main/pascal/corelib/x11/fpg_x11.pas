@@ -3776,7 +3776,7 @@ var
   r: TfpgRect;
 begin
   FClipRectSet := False;
-  r.SetRect(0,0,0,0);
+  r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
   DoSetClipRectInternal(r);
 end;
 

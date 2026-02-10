@@ -2704,6 +2704,7 @@ begin
     FClipRegion  := CreateRectRgn(R.Left, R.Top, R.Left+Max(R.Width, 0), R.Top+Max(R.Height, 0));
     SelectClipRgn(FDrawGC, FClipRegion);
   end;
+  FClipRect.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
   FClipRectSet := False;
 end;
 
