@@ -244,7 +244,7 @@ end;
 var
   uLastClickWidget: TfpgWidget;
   uLastClickPoint: TPoint;
-  uLastClickTime: DWord;
+  uLastClickTime: QWord;
   uMultiClickCount: Integer; { how many clicks have occured in a row that happen faster than DOUBLECLICK_MS }
   uMouseDownSourceWidget: TfpgWidget; { widget Left MButton was pressed on }
 

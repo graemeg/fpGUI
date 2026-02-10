@@ -3938,7 +3938,7 @@ end;
 procedure TfpgX11Selection.SendClipboardToManager;
 var
   ClipboardManager: TAtom;
-  StartTime: DWord;
+  StartTime: QWord;
 begin
   // if we don't own the clipboard then there is nothing to save
   if not FOwnsSelection then
