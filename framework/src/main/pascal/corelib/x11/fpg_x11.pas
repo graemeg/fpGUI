@@ -3800,7 +3800,7 @@ begin
     OriginalSize.SetRect(x,y,w,h);
     OriginalSize.IntersectRect(ClippedSize, FClipRect);
     // if the rect is empty (clipped out) then there is nothing to do
-    if FClipRectSet and ClippedSize.IsRectEmpty then
+    if ClippedSize.IsRectEmpty then
       Exit; // ==>
 
     // rendering the mask
