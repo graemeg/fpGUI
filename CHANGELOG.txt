@@ -2,6 +2,38 @@
   Release notes for fpGUI
   =======================
 
+v2.0.1 (unreleased) - last used SHA1 38e3c629
+  - Bug Fixes
+    * Fixed infinite recursion crash when default font fails to load on
+      distros with non-standard font paths (Arch, Void, Fedora). Raises
+      a clear EfpGUIException instead. (Fixes #143)
+    * Added /usr/share/fonts/ as a recursive font search path, covering
+      all Linux distro font directory layouts. Added ~/.local/share/fonts/
+      for XDG user fonts.
+    * Fixed ERangeError in DoDrawImagePart when the image rectangle is
+      fully clipped out of the visible area. (Fixes #121)
+    * Fixed Canvas.GetClipRect returning an empty rectangle when no
+      explicit clip rect was set. (Fixes #113)
+    * Fixed access violation in timer list when a timer destroys itself
+      during its own callback, or after Windows hibernation. (Fixes #17)
+    * Widened TfpgMsgParmUser.Param1/2/3 from Integer to PtrInt for
+      correct 64-bit window handle passing.
+    * Added missing extrafpc.cfg in hexviewer example folder.
+  - Improvements
+    * Timer architecture redesign:
+      - X11 message loop now uses the calculated timeout instead of a
+        hardcoded 10ms poll, reducing idle CPU wakeups
+      - GDI message loop replaced blocking GetMessage with
+        MsgWaitForMultipleObjects, enabling proper timeout support
+      - Removed redundant native Windows.SetTimer mechanism; timer
+        checking is now unified through the main loop
+      - All timer arithmetic switched from wall-clock time (TDateTime/Now)
+        to monotonic time (GetTickCount64/CLOCK_MONOTONIC), making timers
+        immune to NTP sync, DST changes, and system hibernation
+    * Normalized GDI clip rect storage to widget-local coordinates,
+      matching the X11 and Cocoa backends.
+
+
 v2.0.0 (2026-02-09)
   - Code breaking changes
     * TfpgScrollStyle enums have changed names to make it more clear as to
