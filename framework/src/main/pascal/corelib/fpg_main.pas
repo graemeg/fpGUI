@@ -679,6 +679,7 @@ function fpgCheckTimers: Boolean;
 var
   i: integer;
   ctime: TDateTime;
+  t: TfpgTimer;
 begin
   if fpgTimers = nil then
     Exit;
@@ -691,7 +692,14 @@ begin
     if fpgTimers[i] = nil then
       fpgTimers.Delete(i)
     else
-      TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
+    begin
+      t := TfpgTimer(fpgTimers[i]);
+      t.CheckAlarm(ctime);
+      // Timer callback may have destroyed this or other timers (setting
+      // their fpgTimers slot to nil). Clean up if this one was destroyed.
+      if (i < fpgTimers.Count) and (fpgTimers[i] = nil) then
+        fpgTimers.Delete(i);
+    end;
   end;
 end;
 
@@ -702,7 +710,8 @@ begin
   if fpgTimers = nil then
     Exit;
   for i := 0 to fpgTimers.Count-1 do
-    TfpgTimer(fpgTimers[i]).Reset;
+    if fpgTimers[i] <> nil then
+      TfpgTimer(fpgTimers[i]).Reset;
 end;
 
 function fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
