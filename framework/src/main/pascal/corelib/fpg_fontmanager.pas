@@ -23,6 +23,7 @@ type
     FFontCache: TFPHashObjectList;  // Hash table for O(1) font lookup
     FDefaultFontDesc: string;
     FFixedFontDesc: string;
+    FLoadingDefaultFont: Boolean;   // Guard against GetFont <-> GetDefaultFont recursion
 
     function ResolveFontAlias(const ADesc: string): string;
   public
@@ -60,6 +61,7 @@ begin
   // Platform-specific defaults will be set by TfpgApplication
   FDefaultFontDesc := '';
   FFixedFontDesc := '';
+  FLoadingDefaultFont := False;
 end;
 
 destructor TfpgFontManager.Destroy;
@@ -125,9 +127,12 @@ begin
       end
       else
       begin
-        // Font creation failed - free it and return default font
+        // Font creation failed - free it and try default font
         Result.Free;
-        Result := GetDefaultFont;
+        if FLoadingDefaultFont then
+          Result := nil  // Default font itself failed - avoid infinite recursion
+        else
+          Result := GetDefaultFont;
       end;
     end;
   finally
@@ -147,7 +152,16 @@ begin
     {$ENDIF}
   end;
 
-  Result := GetFont(FDefaultFontDesc);
+  FLoadingDefaultFont := True;
+  try
+    Result := GetFont(FDefaultFontDesc);
+  finally
+    FLoadingDefaultFont := False;
+  end;
+
+  if Result = nil then
+    raise EfpGUIException.CreateFmt('Unable to load default font "%s". ' +
+      'Please ensure font files are installed in a standard font directory.', [FDefaultFontDesc]);
 end;
 
 function TfpgFontManager.GetFixedFont: TfpgFontResourceBase;
