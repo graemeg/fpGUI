@@ -222,9 +222,9 @@ type
 
 
   TfpgMsgParmUser = record
-    Param1: Integer;
-    Param2: Integer;
-    Param3: Integer;
+    Param1: PtrInt;
+    Param2: PtrInt;
+    Param3: PtrInt;
   end;
 
 
