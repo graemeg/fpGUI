@@ -2,7 +2,7 @@
   Release notes for fpGUI
   =======================
 
-v2.0.1 (unreleased) - last used SHA1 38e3c629
+v2.0.1 (unreleased) - last used SHA1 c2467863
   - Bug Fixes
     * Fixed infinite recursion crash when default font fails to load on
       distros with non-standard font paths (Arch, Void, Fedora). Raises
@@ -19,6 +19,10 @@ v2.0.1 (unreleased) - last used SHA1 38e3c629
     * Widened TfpgMsgParmUser.Param1/2/3 from Integer to PtrInt for
       correct 64-bit window handle passing.
     * Added missing extrafpc.cfg in hexviewer example folder.
+    * Fixed AggPas Win32 font engine compilation and rendering: added
+      proper ifdef splits for Win32 TrueType vs FreeType font engines,
+      fixed font size DPI scaling, and removed unnecessary freetype.dll
+      dependency when using the default Win32 font engine.
   - Improvements
     * Timer architecture redesign:
       - X11 message loop now uses the calculated timeout instead of a
@@ -32,6 +36,11 @@ v2.0.1 (unreleased) - last used SHA1 38e3c629
         immune to NTP sync, DST changes, and system hibernation
     * Normalized GDI clip rect storage to widget-local coordinates,
       matching the X11 and Cocoa backends.
+    * About fpGUI dialog now shows the canvas backend type (AggPas or
+      Native) after the version number.
+    * Added 'freetype' build profile for PasBuild, allowing Windows
+      users to toggle between the Win32 TrueType and FreeType font
+      engines via: pasbuild compile -p windows,agg,freetype
 
 
 v2.0.0 (2026-02-09)
