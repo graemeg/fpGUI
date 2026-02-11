@@ -91,6 +91,13 @@
       </defines>
     </profile>
 
+    <profile>
+      <id>freetype</id>
+      <defines>
+         <define>FORCE_FREETYPE</define>
+      </defines>
+    </profile>
+
   </profiles>
 
   <test>

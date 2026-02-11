@@ -21,6 +21,12 @@ Under Linux and FreeBSD run:
 Under Windows run:
    pasbuild compile -p windows,agg
 
+   By default on Windows, the Win32 TrueType font engine is used, which
+   does not require any external DLLs. To use the FreeType font engine
+   instead (recommended for better text rendering), add the freetype
+   profile. This requires freetype.dll to be available at runtime:
+   pasbuild compile -p windows,agg,freetype
+
 Under MacOS run:
    pasbuild compile -p macos,agg
 

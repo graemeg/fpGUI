@@ -26,6 +26,23 @@ unit fpg_fontcache;
 
 {$mode objfpc}{$H+}
 
+{ Replicate font engine selection from agg_mode.inc (cannot include it
+  directly because it sets {$MODE delphi} which conflicts with objfpc). }
+{$IFDEF WINDOWS}
+  {$DEFINE AGG2D_USE_WINFONTS}
+{$ENDIF}
+{$if defined(UNIX) and not defined(DARWIN)}
+  {$DEFINE AGG2D_USE_FREETYPE}
+{$ENDIF}
+{$IFDEF DARWIN}
+  {$DEFINE AGG2D_USE_FREETYPE}
+{$ENDIF}
+{ Allow build system to force FreeType engine (e.g. pasbuild -p windows,agg,freetype) }
+{$IFDEF FORCE_FREETYPE}
+  {$UNDEF AGG2D_USE_WINFONTS}
+  {$DEFINE AGG2D_USE_FREETYPE}
+{$ENDIF}
+
 interface
 
 uses
@@ -88,8 +105,11 @@ function gFontCache: TFontCacheList;
 implementation
 
 uses
-  fpg_utils,
-  agg_font_freetype_lib;
+  fpg_utils
+  {$IFDEF AGG2D_USE_FREETYPE}
+  , agg_font_freetype_lib
+  {$ENDIF}
+  ;
 
 const
   FPG_FONT_STYLE_REGULAR = 1 shl 0;     { Regular, Plain, Book }
@@ -104,7 +124,9 @@ const
   FPG_FONT_STYLE_FIXEDWIDTH = 1 shl 9;  { Fixedwidth }
 
 var
+  {$IFDEF AGG2D_USE_FREETYPE}
   m_library: FT_Library_ptr;
+  {$ENDIF}
   uFontCacheList: TFontCacheList;
 
 function gFontCache: TFontCacheList;
@@ -172,6 +194,7 @@ end;
 { TFontCacheList }
 
 procedure TFontCacheList.SearchForFont(const AFontPath: TfpgString);
+{$IFDEF AGG2D_USE_FREETYPE}
 var
   sr: TSearchRec;
   lFont: TFontCacheItem;
@@ -202,8 +225,14 @@ begin
   end;
   FindClose(sr);
 end;
+{$ELSE}
+begin
+  // No-op: Win32 font engine uses typeface names directly
+end;
+{$ENDIF}
 
 function TFontCacheList.BuildFontCacheItem(const AFontFile: TfpgString): TFontCacheItem;
+{$IFDEF AGG2D_USE_FREETYPE}
 var
   face_ptr: FT_Face_ptr;
   s: Ansistring;
@@ -236,6 +265,11 @@ begin
 
   FT_Done_Face(face_ptr);
 end;
+{$ELSE}
+begin
+  Result := TFontCacheItem.Create(AFontFile);
+end;
+{$ENDIF}
 
 procedure TFontCacheList.SetStyleIfExists(var AText: Ansistring; var AStyleFlags: integer;
   const AStyleName: AnsiString; const AStyleBit: integer);
@@ -278,6 +312,7 @@ begin
 end;
 
 procedure TFontCacheList.BuildFontCache;
+{$IFDEF AGG2D_USE_FREETYPE}
 var
   lPath: TfpgString;
   lPathList: TStringList;
@@ -289,12 +324,13 @@ begin
 
     lPathList := TStringList.Create;
     {$IFDEF UNIX}
+    lPathList.Add('/usr/share/fonts/');            // Covers all distro layouts (recursive search)
     lPathList.Add('/usr/share/cups/fonts/');
-    lPathList.Add('/usr/share/fonts/truetype/');
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
     {$ENDIF}
-    lPathList.Add(GetUserDir + '.fonts/');
+    lPathList.Add(GetUserDir + '.local/share/fonts/');  // XDG standard user font directory
+    lPathList.Add(GetUserDir + '.fonts/');               // Legacy user font directory
     {$IFDEF Darwin}
     { As per Apple Support page: https://support.apple.com/en-us/HT201722 }
     lPathList.Add('/System/Library/Fonts/');
@@ -313,6 +349,11 @@ begin
     lPathList.Free;
   end;
 end;
+{$ELSE}
+begin
+  // No-op: Win32 font engine uses typeface names directly, no font file cache needed
+end;
+{$ENDIF}
 
 function TFontCacheList.Add(const AObject: TFontCacheItem): integer;
 begin

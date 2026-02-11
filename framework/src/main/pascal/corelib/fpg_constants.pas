@@ -110,8 +110,6 @@ const
   DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick in milliseconds
   DOUBLECLICK_DISTANCE = 5; // max distance between points when doing doubleclick in pixels
 
-  ONE_MILLISEC = 1/MSecsPerDay;
-
   DEFAULT_HINT_PAUSE = 500;   // in milliseconds
 
   { Default fpGUI help viewer }

@@ -32,8 +32,9 @@ unit Agg2D;
 interface
 
 
-{ With this define you can switch use of FreeType or Win32 TrueType font
-  engine.
+{ Font engine selection is automatic: Windows uses Win32 TrueType,
+  Unix/macOS use FreeType. To force FreeType on Windows, use the
+  'freetype' build profile: pasbuild compile -p windows,agg,freetype
 
   NOTE:
   The FreeType font engine is recommended, even under Windows - simply
@@ -41,12 +42,6 @@ interface
   enabled under Windows, your application will require the freetype.dll
   though. The freetype.dll is included in the fpGUI repository for your
   convenience. }
-
-{.$DEFINE AGG2D_USE_FREETYPE }
-
-{$IFDEF AGG2D_USE_FREETYPE}
-  {$UNDEF AGG2D_USE_WINFONTS}
-{$ENDIF}
 
 uses
   agg_basics ,
@@ -670,6 +665,7 @@ type
  TfpgAgg2DFontResource = class(TfpgFontResourceBase)
  private
    FFontPath: string;
+   FFamilyName: string;
    FFontSize: double;
    FBold: boolean;
    FItalic: boolean;
@@ -677,6 +673,9 @@ type
    FDescent: Integer;
    FHeight: Integer;
    FValid: Boolean;
+   {$IFDEF AGG2D_USE_WINFONTS}
+   m_fontDC: HDC;
+   {$ENDIF}
    {$IFNDEF AGG2D_NO_FONT}
    m_fontEngine       : TAggFontEngine;
    m_fontCacheManager : font_cache_manager;
@@ -691,6 +690,7 @@ type
    function GetTextWidth(const txt: string): integer; override;
    function GetCanvasRef: TObject; override;
    property FontPath: string read FFontPath;
+   property FamilyName: string read FFamilyName;
    property Size: double read FFontSize;
    property IsBold: boolean read FBold;
    property IsItalic: boolean read FItalic;
@@ -1265,8 +1265,10 @@ var
   fnt: TFontCacheItem;
   i: integer;
   lSize: double;
+  lFamilyName: string;
   {$IFDEF AGG2D_USE_WINFONTS}
-  m_fontDC: HDC;
+  b: int;
+  tm: TEXTMETRIC;
   {$ENDIF}
 begin
   inherited Create(AFontDesc);  // Call base constructor to set FFontDesc
@@ -1276,6 +1278,8 @@ begin
   FFontSize := lSize;
   FBold := fnt.IsBold;
   FItalic := fnt.IsItalic;
+  lFamilyName := fnt.FamilyName;
+  FFamilyName := lFamilyName;
 
   i := gFontCache.Find(fnt);
   if i >= 0 then
@@ -1287,11 +1291,20 @@ begin
   if FFontPath = '' then
   begin
     // Fallback for font not in cache
+    {$IFDEF AGG2D_USE_FREETYPE}
     fnt := FontCacheItemFromFontDesc('Liberation Sans-10', lSize);
     i := gFontCache.Find(fnt);
     if i >= 0 then
       FFontPath := gFontCache.Items[i].FileName;
     fnt.Free;
+    {$ENDIF}
+    {$IFDEF AGG2D_USE_WINFONTS}
+    if lFamilyName = '' then
+    begin
+      lFamilyName := 'Arial';
+      FFamilyName := lFamilyName;
+    end;
+    {$ENDIF}
   end;
 
   {$IFNDEF AGG2D_NO_FONT}
@@ -1305,6 +1318,7 @@ begin
   m_fontCacheManager.Construct(@m_fontEngine);
   {$ENDIF}
 
+  {$IFDEF AGG2D_USE_FREETYPE}
   if FFontPath <> '' then
   begin
     m_fontEngine.load_font(PChar(FFontPath), 0, glyph_ren_agg_gray8);
@@ -1317,6 +1331,36 @@ begin
     FHeight := round(m_fontEngine._height);
     FValid := True;
   end;
+  {$ENDIF}
+  {$IFDEF AGG2D_USE_WINFONTS}
+  if lFamilyName <> '' then
+  begin
+    if FBold then
+      b := 700
+    else
+      b := 400;
+    if m_fontEngine.create_font_(PChar(lFamilyName), glyph_ren_agg_gray8,
+        FFontSize * fpgApplication.Screen_dpi / 72, 0.0, b, FItalic) then
+    begin
+      m_fontEngine.flip_y_(True);
+      m_fontEngine.hinting_(True);
+
+      if GetTextMetrics(m_fontDC, tm) then
+      begin
+        FAscent := tm.tmAscent;
+        FDescent := tm.tmDescent;
+        FHeight := tm.tmHeight;
+      end
+      else
+      begin
+        FHeight := round(m_fontEngine._height);
+        FAscent := FHeight;
+        FDescent := 0;
+      end;
+      FValid := True;
+    end;
+  end;
+  {$ENDIF}
 end;
 
 destructor TfpgAgg2DFontResource.Destroy;
@@ -2874,6 +2918,7 @@ procedure TAgg2D.Font(
 {$IFDEF AGG2D_USE_WINFONTS}
 var
  b : int;
+ tm : TEXTMETRIC;
 {$ENDIF}
 begin
  m_textAngle    :=angle;
@@ -2906,13 +2951,16 @@ begin
   b:=400;
 
  if cache = AGG_VectorFontCache then
-  m_fontEngine.create_font_(PChar(@fileName[1 ] ) ,glyph_ren_outline ,height ,0.0 ,b ,italic )
+  m_fontEngine.create_font_(PChar(@fileName[1 ] ) ,glyph_ren_outline ,height * fpgApplication.Screen_dpi / 72 ,0.0 ,b ,italic )
  else
   m_fontEngine.create_font_(PChar(@fileName[1 ] ) ,glyph_ren_agg_gray8 ,worldToScreen(height) ,0.0 ,b ,italic );
 
- // Populate ascent/descent metrics from font engine
- m_fontAscent := m_fontEngine._ascender;
- m_fontDescent := abs(m_fontEngine._descender);  // descent is typically negative, make positive
+ // Populate ascent/descent metrics via GetTextMetrics (Win32 engine has no _ascender/_descender)
+ if GetTextMetrics(m_fontDC, tm) then
+ begin
+   m_fontAscent := tm.tmAscent;
+   m_fontDescent := tm.tmDescent;
+ end;
 {$ENDIF }
 end;
 
@@ -3806,10 +3854,14 @@ begin
 
   aggFont := fntres as TfpgAgg2DFontResource;
 
+  {$IFDEF AGG2D_USE_FREETYPE}
   if aggFont.FontPath <> '' then
-  begin
     Font(aggFont.FontPath, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_VectorFontCache);
-  end;
+  {$ENDIF}
+  {$IFDEF AGG2D_USE_WINFONTS}
+  if aggFont.FamilyName <> '' then
+    Font(aggFont.FamilyName, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_VectorFontCache);
+  {$ENDIF}
 end;
 
 procedure TAgg2D.DoSetTextColor(cl: TfpgColor);

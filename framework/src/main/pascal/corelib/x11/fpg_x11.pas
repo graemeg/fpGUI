@@ -1776,7 +1776,7 @@ begin
       // Poll would be better but FPC has no official poll interface (if I'm right)
       fpFD_ZERO(rfds);
       fpFD_SET(xfd, rfds);
-      r := fpSelect(xfd + 1, @rfds, nil, nil, {atimeoutms} 50);
+      r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
 
       if r < 1 then
         Exit; // no event received.
@@ -1799,7 +1799,7 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, 10);
+    r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
     if r <> 0 then  // We got a X event or the timeout happened
       XNextEvent(display, @ev)
     else
@@ -3776,7 +3776,7 @@ var
   r: TfpgRect;
 begin
   FClipRectSet := False;
-  r.SetRect(0,0,0,0);
+  r.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
   DoSetClipRectInternal(r);
 end;
 
@@ -3800,7 +3800,7 @@ begin
     OriginalSize.SetRect(x,y,w,h);
     OriginalSize.IntersectRect(ClippedSize, FClipRect);
     // if the rect is empty (clipped out) then there is nothing to do
-    if FClipRectSet and ClippedSize.IsRectEmpty then
+    if ClippedSize.IsRectEmpty then
       Exit; // ==>
 
     // rendering the mask
@@ -3938,7 +3938,7 @@ end;
 procedure TfpgX11Selection.SendClipboardToManager;
 var
   ClipboardManager: TAtom;
-  StartTime: DWord;
+  StartTime: QWord;
 begin
   // if we don't own the clipboard then there is nothing to save
   if not FOwnsSelection then

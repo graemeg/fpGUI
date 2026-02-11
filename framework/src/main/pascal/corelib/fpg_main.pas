@@ -458,8 +458,8 @@ function  fpgGetNamedFontList: TStringlist;
 procedure fpgInitTimers;
 function  fpgCheckTimers: Boolean;
 procedure fpgResetAllTimers;
-function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
-function  fpgGetTickCount: DWord;
+function  fpgClosestTimer(ctime: QWord; amaxtime: integer): integer;
+function  fpgGetTickCount: QWord;
 procedure fpgPause(MilliSeconds: Cardinal);
 
 // Rectangle, Point & Size routines
@@ -678,11 +678,12 @@ end;
 function fpgCheckTimers: Boolean;
 var
   i: integer;
-  ctime: TDateTime;
+  ctime: QWord;
+  t: TfpgTimer;
 begin
   if fpgTimers = nil then
     Exit;
-  ctime := now;
+  ctime := GetTickCount64;
   i := fpgTimers.Count;
   Result := i > 0;
   while i > 0 do
@@ -691,7 +692,14 @@ begin
     if fpgTimers[i] = nil then
       fpgTimers.Delete(i)
     else
-      TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
+    begin
+      t := TfpgTimer(fpgTimers[i]);
+      t.CheckAlarm(ctime);
+      // Timer callback may have destroyed this or other timers (setting
+      // their fpgTimers slot to nil). Clean up if this one was destroyed.
+      if (i < fpgTimers.Count) and (fpgTimers[i] = nil) then
+        fpgTimers.Delete(i);
+    end;
   end;
 end;
 
@@ -702,45 +710,47 @@ begin
   if fpgTimers = nil then
     Exit;
   for i := 0 to fpgTimers.Count-1 do
-    TfpgTimer(fpgTimers[i]).Reset;
+    if fpgTimers[i] <> nil then
+      TfpgTimer(fpgTimers[i]).Reset;
 end;
 
-function fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
+function fpgClosestTimer(ctime: QWord; amaxtime: integer): integer;
 var
   i: integer;
   t: TfpgTimer;
-  dt: TDateTime;
+  deadline: QWord;
   tb: Boolean;
 begin
   if fpgTimers = nil then
     Exit;
   // returns -1 if no timers are pending
-  dt := ctime + amaxtime * ONE_MILLISEC;
+  deadline := ctime + QWord(amaxtime);
   tb := False;
 
   for i := 0 to fpgTimers.Count-1 do
   begin
     t := TfpgTimer(fpgTimers[i]);
-    if (t <> nil) and t.Enabled and (t.NextAlarm < dt) then
+    if (t <> nil) and t.Enabled and (t.NextAlarm < deadline) then
     begin
-      dt := t.NextAlarm;
+      deadline := t.NextAlarm;
       tb := True;
     end;
   end;
 
   if tb then
   begin
-    Result := trunc(0.5 + (dt - ctime) / ONE_MILLISEC);
-    if Result < 0 then
+    if deadline > ctime then
+      Result := integer(deadline - ctime)
+    else
       Result := 0;
   end
   else
     Result := -1;
 end;
 
-function fpgGetTickCount: DWord;
+function fpgGetTickCount: QWord;
 begin
-  Result := DWord(Trunc(Now * MSecsPerDay));
+  Result := GetTickCount64;
 end;
 
 { blocking function for the caller, but still processes framework messages }
@@ -1857,7 +1867,7 @@ begin
   if IsMultiThread then
     CheckSynchronize;  // execute the to-be synchronized method
 
-  DoWaitWindowMessage(fpgClosestTimer(now, atimeoutms));
+  DoWaitWindowMessage(fpgClosestTimer(GetTickCount64, atimeoutms));
   fpgDeliverMessages;
   fpgCheckTimers;
 end;

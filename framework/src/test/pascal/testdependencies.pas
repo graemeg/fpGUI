@@ -31,7 +31,8 @@ uses
   tcmig_linkhandler,
   tcmig_layoututil,
   tcmig_grid,
-  tcmig_quickstart;
+  tcmig_quickstart,
+  tctimer;
 
 implementation
 

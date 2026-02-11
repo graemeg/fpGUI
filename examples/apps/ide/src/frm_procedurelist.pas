@@ -184,7 +184,7 @@ end;
 
 procedure TProcedureListForm.SetFilename(const AValue: string);
 var
-  LoadTime: DWord;
+  LoadTime: QWord;
 begin
   if FFilename=AValue then exit;
   FFilename:=AValue;

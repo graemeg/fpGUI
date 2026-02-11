@@ -354,8 +354,6 @@ type
 
 
   TfpgGDITimer = class(TfpgBaseTimer)
-  private
-    FHandle: THandle;
   protected
     procedure   SetEnabled(const AValue: boolean); override;
   public
@@ -1608,24 +1606,29 @@ end;
 procedure TfpgGDIApplication.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
+  timeoutval: DWORD;
+  DummyHandle: THandle;
 begin
   if (atimeoutms >= 0) and (not MessagesPending) then
   begin
     if Assigned(FOnIdle) then
       OnIdle(self);
+
+    // Wait for messages or timeout (whichever comes first)
+    if atimeoutms < 0 then
+      timeoutval := INFINITE
+    else
+      timeoutval := DWORD(atimeoutms);
+
+    MsgWaitForMultipleObjects(0, DummyHandle, False, timeoutval, QS_ALLINPUT);
   end;
 
-  {$IFDEF WinCE}
-  // No GetVersion
-  Windows.GetMessageW(@Msg, 0, 0, 0);   //NT
-  {$ELSE}
-  if (GetVersion() < $80000000) then
-    Windows.GetMessageW(@Msg, 0, 0, 0)   //NT
-  else
-    Windows.GetMessage(@Msg, 0, 0, 0);   //Win98
-  {$ENDIF}
-
-  Windows.DispatchMessage(@msg);
+  // Process all pending messages (non-blocking)
+  while PeekMessageW(@Msg, 0, 0, 0, PM_REMOVE) do
+  begin
+    Windows.TranslateMessage(@msg);
+    Windows.DispatchMessage(@msg);
+  end;
 end;
 
 procedure TfpgGDIApplication.DoFlush;
@@ -2704,6 +2707,7 @@ begin
     FClipRegion  := CreateRectRgn(R.Left, R.Top, R.Left+Max(R.Width, 0), R.Top+Max(R.Height, 0));
     SelectClipRgn(FDrawGC, FClipRegion);
   end;
+  FClipRect.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
   FClipRectSet := False;
 end;
 
@@ -2803,25 +2807,26 @@ end;
 function TfpgGDICanvas.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
-  Dec(Result.Top, FDeltaY);
-  Dec(Result.Left, FDeltaX);
 end;
 
 procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
 var
   cw, ch: TfpgCoord;
+  WinRect: TfpgRect;
 begin
   FClipRectSet := True;
   FClipRect    := ARect;
-  Inc(FClipRect.Top, FDeltaY);
-  Inc(FClipRect.Left, FDeltaX);
+  // Convert to window coordinates for the GDI region
+  WinRect := FClipRect;
+  Inc(WinRect.Top, FDeltaY);
+  Inc(WinRect.Left, FDeltaX);
   if not WeAreTopLevelCanvas then
-    FClipRect.IntersectRect(FClipRect, GetWidgetWindowRect);
+    WinRect.IntersectRect(WinRect, GetWidgetWindowRect);
   DeleteObject(FClipRegion);
   // Clamp to non-negative: IntersectRect can produce negative Width/Height
-  cw := Max(FClipRect.Width, 0);
-  ch := Max(FClipRect.Height, 0);
-  FClipRegion  := CreateRectRgn(FClipRect.Left, FClipRect.Top, FClipRect.Left + cw, FClipRect.Top + ch);
+  cw := Max(WinRect.Width, 0);
+  ch := Max(WinRect.Height, 0);
+  FClipRegion  := CreateRectRgn(WinRect.Left, WinRect.Top, WinRect.Left + cw, WinRect.Top + ch);
   SelectClipRgn(FDrawGC, FClipRegion);
 end;
 
@@ -3594,35 +3599,16 @@ begin
   {$ENDIF}
 end;
 
-procedure TimerCallBackProc(hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); {$IFNDEF WINCE} stdcall; {$ELSE} cdecl; {$ENDIF}
-begin
-  { idEvent contains the handle to the timer that got triggered }
-  fpgCheckTimers;
-end;
-
 { TfpgGDITimer }
 
 procedure TfpgGDITimer.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
-  if FEnabled then
-  begin
-    FHandle := Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
-  end
-  else
-  begin
-    if FHandle <> 0 then
-    begin
-      Windows.KillTimer(FHandle, 0);
-      FHandle := 0;
-    end;
-  end;
 end;
 
 constructor TfpgGDITimer.Create(AInterval: integer);
 begin
   inherited Create(AInterval);
-  FHandle := 0;
 end;
 
 

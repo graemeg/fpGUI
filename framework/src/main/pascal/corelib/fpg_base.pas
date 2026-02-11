@@ -222,9 +222,9 @@ type
 
 
   TfpgMsgParmUser = record
-    Param1: Integer;
-    Param2: Integer;
-    Param3: Integer;
+    Param1: PtrInt;
+    Param2: PtrInt;
+    Param3: PtrInt;
   end;
 
 
@@ -991,7 +991,7 @@ type
 
   TfpgBaseTimer = class(TObject)
   private
-    FNextAlarm: TDateTime;
+    FNextAlarm: QWord;      { monotonic timestamp in milliseconds (via GetTickCount64) }
     FInterval: integer;
     FOnTimer: TNotifyEvent;
     procedure   SetInterval(const AValue: integer);
@@ -1001,11 +1001,11 @@ type
   public
     constructor Create(AInterval: integer); virtual;
     destructor  Destroy; override;
-    procedure   CheckAlarm(ACurrentTime: TDateTime);
+    procedure   CheckAlarm(ACurrentTime: QWord);
     procedure   Reset;
     procedure   Pause(ASeconds: integer);
     property    Enabled: boolean read FEnabled write SetEnabled;
-    property    NextAlarm: TDateTime read FNextAlarm;
+    property    NextAlarm: QWord read FNextAlarm;
     { Interval is in milliseconds. }
     property    Interval: integer read FInterval write SetInterval;
     property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
@@ -4789,7 +4789,7 @@ end;
 procedure TfpgBaseTimer.SetInterval(const AValue: integer);
 begin
   FInterval := AValue;
-  FNextAlarm := Now + (FInterval * ONE_MILLISEC);
+  FNextAlarm := GetTickCount64 + QWord(FInterval);
 end;
 
 procedure TfpgBaseTimer.SetEnabled(const AValue: boolean);
@@ -4797,7 +4797,7 @@ begin
   if AValue and (FInterval <= 0) then
      Exit;
   if (not FEnabled) and AValue then
-    FNextAlarm := now + (interval * ONE_MILLISEC);
+    FNextAlarm := GetTickCount64 + QWord(Interval);
   FEnabled := AValue;
 end;
 
@@ -4815,7 +4815,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgBaseTimer.CheckAlarm(ACurrentTime: TDateTime);
+procedure TfpgBaseTimer.CheckAlarm(ACurrentTime: QWord);
 begin
   if not FEnabled then
     Exit; //==>
@@ -4825,7 +4825,7 @@ begin
     // set the next alarm point
     if Interval > 0 then
       while FNextAlarm <= ACurrentTime do
-        FNextAlarm += (Interval * ONE_MILLISEC);
+        FNextAlarm += QWord(Interval);
 
     if Assigned(FOnTimer) then
       FOnTimer(self);
@@ -4842,7 +4842,7 @@ procedure TfpgBaseTimer.Pause(ASeconds: integer);
 begin
   if Enabled then
   begin
-    FNextAlarm := IncSecond(Now, ASeconds);
+    FNextAlarm := GetTickCount64 + QWord(ASeconds) * 1000;
   end;
 end;
 
