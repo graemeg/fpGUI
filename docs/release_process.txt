@@ -7,8 +7,8 @@ Release process
 2. Bump version numbers
 
 	docview/src/docview.rc
-	src/VERSION_FILE.inc
-	fpgui_toolkit.lpk  (both X11 & gdi)
+	project.xml
+	extras/lazarus_ide/<platform>/fpgui_toolkit.lpk
 	docs/manifest.xml
 
 3. Run localization script to update all *.po files
