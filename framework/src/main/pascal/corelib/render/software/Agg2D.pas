@@ -32,8 +32,9 @@ unit Agg2D;
 interface
 
 
-{ With this define you can switch use of FreeType or Win32 TrueType font
-  engine.
+{ Font engine selection is automatic: Windows uses Win32 TrueType,
+  Unix/macOS use FreeType. To force FreeType on Windows, use the
+  'freetype' build profile: pasbuild compile -p windows,agg,freetype
 
   NOTE:
   The FreeType font engine is recommended, even under Windows - simply
@@ -41,12 +42,6 @@ interface
   enabled under Windows, your application will require the freetype.dll
   though. The freetype.dll is included in the fpGUI repository for your
   convenience. }
-
-{.$DEFINE AGG2D_USE_FREETYPE }
-
-{$IFDEF AGG2D_USE_FREETYPE}
-  {$UNDEF AGG2D_USE_WINFONTS}
-{$ENDIF}
 
 uses
   agg_basics ,

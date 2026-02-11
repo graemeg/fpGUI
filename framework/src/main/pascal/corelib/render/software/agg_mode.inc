@@ -112,6 +112,12 @@
   {$ENDIF}
 {$ENDIF }
 
+// Allow build system to force FreeType engine (e.g. pasbuild -p windows,agg,freetype)
+{$IFDEF FORCE_FREETYPE}
+  {$UNDEF AGG2D_USE_WINFONTS}
+  {$DEFINE AGG2D_USE_FREETYPE}
+{$ENDIF}
+
 {$IFNDEF AGG2D_USE_WINFONTS}
   {$IFNDEF AGG2D_USE_FREETYPE}
     {$DEFINE AGG2D_NO_FONT}

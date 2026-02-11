@@ -37,6 +37,11 @@ unit fpg_fontcache;
 {$IFDEF DARWIN}
   {$DEFINE AGG2D_USE_FREETYPE}
 {$ENDIF}
+{ Allow build system to force FreeType engine (e.g. pasbuild -p windows,agg,freetype) }
+{$IFDEF FORCE_FREETYPE}
+  {$UNDEF AGG2D_USE_WINFONTS}
+  {$DEFINE AGG2D_USE_FREETYPE}
+{$ENDIF}
 
 interface
 
