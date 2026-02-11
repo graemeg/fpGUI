@@ -2,7 +2,10 @@
   Release notes for fpGUI
   =======================
 
-v2.0.1 (unreleased) - last used SHA1 c2467863
+v2.0.2 (unreleased) - last used SHA1 c2467863
+
+
+v2.0.1 (2026-02-11)
   - Bug Fixes
     * Fixed infinite recursion crash when default font fails to load on
       distros with non-standard font paths (Arch, Void, Fedora). Raises
