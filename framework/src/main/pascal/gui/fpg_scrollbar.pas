@@ -112,8 +112,9 @@ begin
   FScrollTimer.Enabled := False;
   FScrollTimer.OnTimer := @ScrollTimer;
   Orientation   := orVertical;
-  Width         := 16;  // TODO: This value should come from fpgStyle
-  Height        := 16;  // TODO: This value should come from fpgStyle
+  FWidth        := 16;  // TODO: This value should come from fpgStyle
+  FHeight       := 16;  // TODO: This value should come from fpgStyle
+  FPreferredSize.SetSize(FWidth, FHeight);
   FMin          := 0;
   FMax          := 100;
   FPosition     := 10;

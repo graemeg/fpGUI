@@ -1144,8 +1144,9 @@ begin
   inherited Create(AOwner);
   FontDesc            := '#Edit1';  // Use inherited property setter
   Focusable           := True;
-  Height              := 24;
-  Width               := 120;
+  FHeight             := 24;
+  FWidth              := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;

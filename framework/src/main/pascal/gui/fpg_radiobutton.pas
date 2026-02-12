@@ -405,8 +405,9 @@ begin
   inherited Create(AOwner);
   FText       := 'RadioButton';
   FFont       := fpgApplication.FontManager.GetFont('#Label1');
-  Height      := FFont.GetHeight + 4;
-  Width       := 120;
+  FHeight     := FFont.GetHeight + 4;
+  FWidth      := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;

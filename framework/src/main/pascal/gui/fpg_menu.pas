@@ -614,7 +614,8 @@ begin
   // calculate the best height based on font
   // Need temp font since no canvas available yet in constructor
   lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
-  Height := lFont.GetHeight + 6; // 3px margin top and bottom
+  FHeight := lFont.GetHeight + 6; // 3px margin top and bottom
+  FPreferredSize.H := FHeight;
   lFont := nil;  // Release font (automatic ref count decrement)
   FMenuOptions := [];
   FMouseIsOver := False;

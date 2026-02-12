@@ -547,8 +547,9 @@ constructor TfpgBaseGauge.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable     := False;
-  Width         := 100;
-  Height        := 25;
+  FWidth        := 100;
+  FHeight       := 25;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FKind         := gkHorizontalBar;
   FSecondColor  := clWhite;
   FFirstColor   := clBlack;

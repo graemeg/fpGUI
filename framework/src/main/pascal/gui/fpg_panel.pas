@@ -809,8 +809,9 @@ begin
   FText             := 'Panel';
   FFont             := fpgApplication.FontManager.GetFont('#Label1');
   FPanelStyle       := bsRaised;
-  Width             := 80;
-  Height            := 80;
+  FWidth            := 80;
+  FHeight           := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FAlignment        := taCenter;
   FLayout           := tlCenter;
   FWrapText         := False;
@@ -1060,8 +1061,9 @@ begin
   FText             := 'Group box';
   FFont             := fpgApplication.FontManager.GetFont('#Label1');
   FPanelStyle       := bsRaised;
-  Width             := 80;
-  Height            := 80;
+  FWidth            := 80;
+  FHeight           := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFocusable        := True;  // otherwise children can't get focus
   FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taLeftJustify;

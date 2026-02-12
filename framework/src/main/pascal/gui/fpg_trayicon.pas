@@ -117,8 +117,9 @@ end;
 constructor TfpgSystemTrayIcon.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Width := 20;
-  Height := 20;
+  FWidth := 20;
+  FHeight := 20;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FVisible := False;
 
   FHint := '';

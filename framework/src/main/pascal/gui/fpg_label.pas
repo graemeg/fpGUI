@@ -200,8 +200,9 @@ begin
   inherited Create(AOwner);
   FText             := 'Label';
   FontDesc          := '#Label1';  // Use property to set font (calls inherited SetFontDesc)
-  Height            := Font.GetHeight;
-  Width             := 80;
+  FHeight           := Font.GetHeight;
+  FWidth            := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FAutoSize         := False;

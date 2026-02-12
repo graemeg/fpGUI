@@ -282,8 +282,9 @@ begin
   inherited Create(AOwner);
   FText       := 'CheckBox';
   FontDesc    := '#Label1';  // Use inherited property setter
-  Height      := Font.GetHeight + 4;
-  Width       := 120;
+  FHeight     := Font.GetHeight + 4;
+  FWidth      := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;

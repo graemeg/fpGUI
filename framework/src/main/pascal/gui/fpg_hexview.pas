@@ -248,8 +248,9 @@ var
   EditWidths: Integer;
 begin
   inherited Create(AOwner);
-  Width := 300;
-  Height := 100;
+  FWidth := 300;
+  FHeight := 100;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFont := fpgApplication.FontManager.GetFont('#Label1');
 
   LabelWidths := FFont.GetTextWidth(IntTypeToString(bcU64));
@@ -693,8 +694,9 @@ end;
 constructor TfpgHexView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Width := 400;
-  Height := 300;
+  FWidth := 400;
+  FHeight := 300;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FVScroll := TfpgScrollBar.Create(Self);
   FVScroll.Orientation:=orVertical;
   FVScroll.OnScroll:=@DoScroll;

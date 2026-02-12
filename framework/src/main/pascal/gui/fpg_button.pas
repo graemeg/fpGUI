@@ -543,8 +543,9 @@ begin
   inherited Create(AOwner);
   FText         := 'Button';
   FontDesc      := '#Label1';  // Use inherited property setter
-  Height        := Font.GetHeight + 8;
-  Width         := 80;
+  FHeight       := Font.GetHeight + 8;
+  FWidth        := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
   FBackgroundColor := clButtonFace;
