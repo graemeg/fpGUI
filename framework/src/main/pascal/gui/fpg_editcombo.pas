@@ -897,8 +897,8 @@ begin
   inherited Create(AOwner);
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
-  FWidth            := 120;
-  FHeight           := Font.GetHeight + 6;
+  Width             := 120;
+  Height            := Font.GetHeight + 6;
   FMargin           := 3;
   FFocusable        := True;
   FAutocompletion   := False;

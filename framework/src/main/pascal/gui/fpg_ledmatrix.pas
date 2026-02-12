@@ -417,8 +417,8 @@ end;
 constructor TfpgLEDMatrix.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth := 150;
-  FHeight := 30;
+  Width := 150;
+  Height := 30;
   FBackgroundColor := clBlack;
   FLEDOnColor := TfpgColor($FFFFB539);
   FLEDOffColor := TfpgColor($FF634210);

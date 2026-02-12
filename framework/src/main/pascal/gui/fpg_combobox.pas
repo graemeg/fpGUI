@@ -439,8 +439,8 @@ end;
 constructor TfpgBaseComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth          := 120;
-  FHeight         := 24;
+  Width           := 120;
+  Height          := 24;
   FAutoSize       := False;
   FDropDownCount  := 8;
   FMargin         := 1;

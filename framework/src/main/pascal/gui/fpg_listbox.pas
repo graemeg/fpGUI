@@ -830,8 +830,8 @@ begin
   FFocusable      := True;
   FFocusItem      := -1;
   FFirstItem      := 0;
-  FWidth          := 80;
-  FHeight         := 80;
+  Width           := 80;
+  Height          := 80;
   FMargin         := 2;
   FUpdateCount    := 0;
   FMouseDragging  := False;

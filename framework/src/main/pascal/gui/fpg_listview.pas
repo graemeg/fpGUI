@@ -2406,8 +2406,8 @@ end;
 constructor TfpgListView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth       := 120;
-  FHeight      := 80;
+  Width        := 120;
+  Height       := 80;
   Focusable := True;
   FShowHeaders := True;
   FShowFocusRect := True;

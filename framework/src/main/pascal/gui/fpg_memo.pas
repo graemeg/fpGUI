@@ -524,8 +524,8 @@ begin
   inherited Create(AOwner);
   Focusable   := True;
   FFont       := fpgApplication.FontManager.GetFont('#Edit1');
-  FHeight     := FFont.GetHeight * 3 + 4;
-  FWidth      := 120;
+  Height      := FFont.GetHeight * 3 + 4;
+  Width       := 120;
   FLineHeight := FFont.GetHeight + 2;
   FSideMargin := 3;
   FMaxLength  := 0;
