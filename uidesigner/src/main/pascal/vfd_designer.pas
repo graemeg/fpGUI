@@ -255,36 +255,36 @@ begin
         2:
         begin
           rs.Top  := Widget.Top - 2;
-          rs.left := Widget.left + Widget.Width div 2 - 2;
+          rs.left := Widget.left + Widget.ActualWidth div 2 - 2;
         end;
         3:
         begin
           rs.Top  := Widget.Top - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         4:
         begin
-          rs.Top  := Widget.Top + Widget.Height div 2 - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight div 2 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         5:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         6:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
-          rs.left := Widget.left + Widget.Width div 2 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth div 2 - 2;
         end;
         7:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
           rs.left := Widget.left - 2;
         end;
         8:
         begin
-          rs.Top  := Widget.Top + Widget.Height div 2 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight div 2 - 2;
           rs.left := Widget.left - 2;
         end;
       end; // case
@@ -670,8 +670,11 @@ begin
     cd := TWidgetDesigner(FWidgets.Items[n]);
     if cd.Selected then
     begin
-//      if maindsgn.GridResolution > 1 then;
       cd.Widget.MoveAndResizeBy(dx, dy, dw, dh);
+      { MoveAndResizeBy updates actual size but not preferred size.
+        Sync preferred size so Width/Height properties stay consistent. }
+      cd.Widget.Width := cd.Widget.ActualWidth;
+      cd.Widget.Height := cd.Widget.ActualHeight;
       cd.UpdateResizerPositions;
     end;
   end;
@@ -1565,8 +1568,8 @@ begin
     wgd          := AddWidget(wg, wgc);
     wg.Left := x;
     wg.Top := y;
-    wg.Width := wg.Width;
-    wg.Height := wg.Height;
+    wg.Width := wg.ActualWidth;
+    wg.Height := wg.ActualHeight;
     wg.Visible   := True;
     wg.DropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
     DeSelectAll;

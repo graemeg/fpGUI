@@ -106,6 +106,10 @@ begin
     7: wgd.Widget.MoveAndResizeBy(dx, 0, -dx, dy);
     8: wgd.Widget.MoveAndResizeBy(dx, 0, -dx, 0);
   end;
+  { MoveAndResizeBy updates actual size but not preferred size.
+    Sync preferred size so Width/Height properties stay consistent. }
+  wgd.Widget.Width := wgd.Widget.ActualWidth;
+  wgd.Widget.Height := wgd.Widget.ActualHeight;
   wgd.UpdateResizerPositions;
   wgd.FormDesigner.UpdatePropWin;
 end;
