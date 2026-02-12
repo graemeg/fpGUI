@@ -1720,8 +1720,8 @@ begin
   wgClassName := 'TfpgWidget';
   FBackgroundColor := clUIDesignerGreen;
   FFont   := fpgStyle.GetDefaultFont;
-  FWidth  := 120;
-  FHeight := 32;
+  Width   := 120;
+  Height  := 32;
 end;
 
 end.
