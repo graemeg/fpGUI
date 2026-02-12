@@ -1570,6 +1570,7 @@ begin
     wg.Top := y;
     wg.Width := wg.ActualWidth;
     wg.Height := wg.ActualHeight;
+    wg.UpdatePosition;
     wg.Visible   := True;
     wg.DropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
     DeSelectAll;
