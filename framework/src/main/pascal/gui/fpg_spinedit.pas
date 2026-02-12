@@ -453,6 +453,7 @@ constructor TfpgAbstractSpinEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FHeight := 24;
+  FPreferredSize.H := FHeight;
   FButtonWidth := 13; // width of spin buttons
   Shape := bsSpacer;
 

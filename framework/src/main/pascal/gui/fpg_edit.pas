@@ -1146,6 +1146,7 @@ begin
   Focusable           := True;
   FHeight             := 24;
   FWidth              := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;

@@ -202,8 +202,14 @@ begin
   UpdateResizerPositions;
 
   if FSelected and Widget.WindowAllocated then
+  begin
     for n := 1 to 8 do
       resizer[n].Show;
+    { Invalidate parent to ensure resizer areas are included in the
+      next paint cycle. This is essential for AggPas canvas where
+      DoPutBufferToScreen must cover the resizer positions. }
+    Widget.Parent.Invalidate;
+  end;
 end;
 
 constructor TWidgetDesigner.Create(AFormDesigner: TFormDesigner; wg: TfpgWidget; wgc: TVFDWidgetClass);
@@ -255,36 +261,36 @@ begin
         2:
         begin
           rs.Top  := Widget.Top - 2;
-          rs.left := Widget.left + Widget.Width div 2 - 2;
+          rs.left := Widget.left + Widget.ActualWidth div 2 - 2;
         end;
         3:
         begin
           rs.Top  := Widget.Top - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         4:
         begin
-          rs.Top  := Widget.Top + Widget.Height div 2 - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight div 2 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         5:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
-          rs.left := Widget.left + Widget.Width - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth - 1 - 2;
         end;
         6:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
-          rs.left := Widget.left + Widget.Width div 2 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
+          rs.left := Widget.left + Widget.ActualWidth div 2 - 2;
         end;
         7:
         begin
-          rs.Top  := Widget.Top + Widget.Height - 1 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight - 1 - 2;
           rs.left := Widget.left - 2;
         end;
         8:
         begin
-          rs.Top  := Widget.Top + Widget.Height div 2 - 2;
+          rs.Top  := Widget.Top + Widget.ActualHeight div 2 - 2;
           rs.left := Widget.left - 2;
         end;
       end; // case
@@ -670,8 +676,11 @@ begin
     cd := TWidgetDesigner(FWidgets.Items[n]);
     if cd.Selected then
     begin
-//      if maindsgn.GridResolution > 1 then;
       cd.Widget.MoveAndResizeBy(dx, dy, dw, dh);
+      { MoveAndResizeBy updates actual size but not preferred size.
+        Sync preferred size so Width/Height properties stay consistent. }
+      cd.Widget.Width := cd.Widget.ActualWidth;
+      cd.Widget.Height := cd.Widget.ActualHeight;
       cd.UpdateResizerPositions;
     end;
   end;
@@ -931,8 +940,8 @@ begin
 
     btnLeft.Text    := IntToStr(wg.Left);
     btnTop.Text     := IntToStr(wg.Top);
-    btnWidth.Text   := IntToStr(wg.Width);
-    btnHeight.Text  := IntToStr(wg.Height);
+    btnWidth.Text   := IntToStr(wg.ActualWidth);
+    btnHeight.Text  := IntToStr(wg.ActualHeight);
 
     btnAnLeft.Down   := anLeft in wg.Anchors;
     btnAnTop.Down    := anTop in wg.Anchors;
@@ -1072,12 +1081,12 @@ begin
   else if Sender = frmProperties.btnWidth then
   begin
     frm.lbPos.Text := rsWidth + ':';
-    frm.edPos.Text := IntToStr(wg.Width);
+    frm.edPos.Text := IntToStr(wg.ActualWidth);
   end
   else if Sender = frmProperties.btnHeight then
   begin
     frm.lbPos.Text := rsHeight + ':';
-    frm.edPos.Text := IntToStr(wg.Height);
+    frm.edPos.Text := IntToStr(wg.ActualHeight);
   end;
 
   posval := -9999;
@@ -1230,8 +1239,8 @@ begin
 
   s := s + Ind(1) + 'Left := ' + IntToStr(FForm.Left) + ';' + LineEnding;
   s := s + Ind(1) + 'Top := ' + IntToStr(FForm.Top) + ';' + LineEnding;
-  s := s + Ind(1) + 'Width := ' + IntToStr(FForm.Width) + ';' + LineEnding;
-  s := s + Ind(1) + 'Height := ' + IntToStr(FForm.Height) + ';' + LineEnding;
+  s := s + Ind(1) + 'Width := ' + IntToStr(FForm.ActualWidth) + ';' + LineEnding;
+  s := s + Ind(1) + 'Height := ' + IntToStr(FForm.ActualHeight) + ';' + LineEnding;
 
 {
   // Extend this and the Form Parser to handle WindowPosition, Width and Height
@@ -1391,8 +1400,8 @@ begin
 
   s := s + ident + 'Left := ' + IntToStr(wg.Left) + ';' + LineEnding;
   s := s + ident + 'Top := ' + IntToStr(wg.Top) + ';' + LineEnding;
-  s := s + ident + 'Width := ' + IntToStr(wg.Width) + ';' + LineEnding;
-  s := s + ident + 'Height := ' + IntToStr(wg.Height) + ';' + LineEnding;
+  s := s + ident + 'Width := ' + IntToStr(wg.ActualWidth) + ';' + LineEnding;
+  s := s + ident + 'Height := ' + IntToStr(wg.ActualHeight) + ';' + LineEnding;
 
   if wg.Anchors <> [anLeft, anTop] then
   begin
@@ -1565,8 +1574,9 @@ begin
     wgd          := AddWidget(wg, wgc);
     wg.Left := x;
     wg.Top := y;
-    wg.Width := wg.Width;
-    wg.Height := wg.Height;
+    wg.Width := wg.ActualWidth;
+    wg.Height := wg.ActualHeight;
+    wg.UpdatePosition;
     wg.Visible   := True;
     wg.DropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, nil);
     DeSelectAll;
@@ -1719,6 +1729,7 @@ begin
   FFont   := fpgStyle.GetDefaultFont;
   FWidth  := 120;
   FHeight := 32;
+  FPreferredSize.SetSize(FWidth, FHeight);
 end;
 
 end.

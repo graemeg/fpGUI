@@ -2408,6 +2408,7 @@ begin
   inherited Create(AOwner);
   FWidth       := 120;
   FHeight      := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   Focusable := True;
   FShowHeaders := True;
   FShowFocusRect := True;

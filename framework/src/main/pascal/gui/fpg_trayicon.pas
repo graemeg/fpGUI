@@ -119,6 +119,7 @@ begin
   inherited Create(AOwner);
   FWidth := 20;
   FHeight := 20;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FVisible := False;
 
   FHint := '';

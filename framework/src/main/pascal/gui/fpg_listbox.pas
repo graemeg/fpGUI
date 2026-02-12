@@ -832,6 +832,7 @@ begin
   FFirstItem      := 0;
   FWidth          := 80;
   FHeight         := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FMargin         := 2;
   FUpdateCount    := 0;
   FMouseDragging  := False;

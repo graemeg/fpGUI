@@ -545,6 +545,7 @@ begin
   FontDesc      := '#Label1';  // Use inherited property setter
   FHeight       := Font.GetHeight + 8;
   FWidth        := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
   FBackgroundColor := clButtonFace;
