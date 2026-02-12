@@ -202,8 +202,14 @@ begin
   UpdateResizerPositions;
 
   if FSelected and Widget.WindowAllocated then
+  begin
     for n := 1 to 8 do
       resizer[n].Show;
+    { Invalidate parent to ensure resizer areas are included in the
+      next paint cycle. This is essential for AggPas canvas where
+      DoPutBufferToScreen must cover the resizer positions. }
+    Widget.Parent.Invalidate;
+  end;
 end;
 
 constructor TWidgetDesigner.Create(AFormDesigner: TFormDesigner; wg: TfpgWidget; wgc: TVFDWidgetClass);

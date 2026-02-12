@@ -120,8 +120,9 @@ begin
   FBackgroundColor := $404040;
   wgdesigner := aCompDesigner;
   FDragging := False;
-  Width     := 5;
-  Height    := 5;
+  FWidth    := 5;
+  FHeight   := 5;
+  FPreferredSize.SetSize(FWidth, FHeight);
   direction := adirection;
   case direction of
     1: MouseCursor := mcSizeSENW;   // top left

@@ -404,7 +404,7 @@ end;
 
 procedure TfpgCairoCanvas.DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase);
 begin
-  CheckAllocateSurface(awidget.Width, awidget.Height);
+  CheckAllocateSurface(awidget.ActualWidth, awidget.ActualHeight);
 end;
 
 procedure TfpgCairoCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
@@ -488,7 +488,7 @@ begin
     if Result then
     begin
       XGetGeometry(xapplication.display, FBufferPixmap, @rw, @x, @y, @wp, @hp, @bw, @d);
-      if (wp - FWidget.Width > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.Height > PIXMAP_RESIZE_SIZE*2) or (FWidget.Width > wp) or (FWidget.Height > hp) then
+      if (wp - FWidget.ActualWidth > PIXMAP_RESIZE_SIZE*2) or (hp - FWidget.ActualHeight > PIXMAP_RESIZE_SIZE*2) or (FWidget.ActualWidth > wp) or (FWidget.ActualHeight > hp) then
       begin
         TryFreePixmap;
         Result := False;
@@ -501,8 +501,8 @@ procedure TfpgCairoCanvas.DoAllocateBuffer;
 begin
   if FBufferPixmap <> 0 then
       TryFreePixmap;
-  FPixmapSize.W:=FWidget.Width+PIXMAP_RESIZE_SIZE;
-  FPixmapSize.H:= FWidget.Height+PIXMAP_RESIZE_SIZE;
+  FPixmapSize.W:=FWidget.ActualWidth+PIXMAP_RESIZE_SIZE;
+  FPixmapSize.H:= FWidget.ActualHeight+PIXMAP_RESIZE_SIZE;
   FBufferPixmap := XCreatePixmap(xapplication.display, TfpgX11WindowHack(FWidget.Window).WinHandle, FPixmapSize.W,  FPixmapSize.H, xapplication.DisplayDepth);
 
   CheckAllocateSurface(FPixmapSize.W, FPixmapSize.H);
