@@ -908,37 +908,109 @@ This ensures backward compatibility: `panel.Height := 50` both sets preferred he
 
 Both systems work harmoniously with the same API!
 
-== Recent Changes: SetPosition API Deprecation (November 2025)
+== Why SetPosition() Is Deprecated
 
-=== Overview
+=== Quick Answer
 
-**Status**: ✅ COMPLETED
+`SetPosition()` is deprecated because fpGUI now separates **preferred size** (what a widget wants) from **actual size** (what the layout system gives it). The individual property setters (`Left`, `Top`, `Width`, `Height`) contain logic to handle this separation correctly. `SetPosition()` cannot.
 
-As a prerequisite to the ActualWidth/ActualHeight migration, the SetPosition API has been cleaned up and deprecated:
+Your existing code still compiles and works — `SetPosition()` is not removed, just deprecated. But new code should use properties directly.
 
-**Changes Made**:
+=== What To Change
 
-1. **SetPosition simplified** (fpg_base.pas): Now just calls individual property setters:
-   ```pascal
-   procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
-   begin
-     // Deprecated convenience wrapper - use properties directly
-     Left   := ALeft;
-     Top    := ATop;
-     Width  := AWidth;
-     Height := AHeight;
-   end;
-   ```
+The fix is straightforward:
 
-2. **MoveWidget and MoveAndResize moved to protected**: These internal methods are no longer public. Layout managers access them via ILayoutTarget interface.
+[source,pascal]
+----
+// Old way (deprecated):
+button.SetPosition(10, 20, 200, 30);
 
-3. **All SetPosition calls replaced**: Replaced 56 SetPosition calls throughout:
-   - 34 calls in src/corelib/ and src/gui/ (commit 0bd9ca0b)
-   - 22 calls in examples/, docview/, uidesigner/ (commit c5bb170e)
+// New way:
+button.Left   := 10;
+button.Top    := 20;
+button.Width  := 200;
+button.Height := 30;
+----
 
-4. **Backward compatibility maintained**: SetPosition still works for existing code, but new code should use individual properties (Left, Top, Width, Height).
+=== Why Properties Instead of SetPosition?
 
-**Impact**: This simplification ensures SetPosition behavior is consistent with property-based positioning, making the transition to ActualWidth/ActualHeight cleaner.
+In fpGUI's new sizing model (see earlier sections of this document), every widget stores two kinds of size:
+
+* **Preferred size** (`FPreferredSize`) — what the developer requested
+* **Actual size** (`FWidth` / `FHeight`) — what the widget actually got after layout
+
+When you write `button.Width := 200`, the property setter does the right thing depending on context:
+
+. It records `200` as the preferred width.
+. If there is **no layout manager**, it also applies `200` as the actual width immediately. This is the common case for manually positioned widgets, and matches the old behaviour.
+. If there **is** a layout manager, it only records the preference. The layout manager will later calculate and apply the actual width (which might be different from 200, depending on available space and constraints).
+
+This conditional logic lives in `SetWidth` and `SetHeight`. The old `SetPosition()` method bypassed this logic — it called the internal `MoveAndResize` method directly, which unconditionally overwrites the actual size. That means `SetPosition()` could overwrite a layout manager's calculated size, defeating the purpose of having a layout manager.
+
+=== A Concrete Example of the Problem
+
+Consider a button inside a MigLayout container:
+
+[source,pascal]
+----
+// Developer creates a button and expresses a size preference
+button.Width := 200;
+button.Height := 30;
+
+// Layout manager runs and decides the button only gets 150px width
+// (because of column constraints, available space, etc.)
+// Layout manager applies actual size via internal HandleResize(150, 30)
+
+button.Width;        // Returns 200 (developer's intent is preserved)
+button.ActualWidth;  // Returns 150 (what the layout actually gave it)
+----
+
+This works correctly because `SetWidth` stores `200` in `FPreferredSize.W` and lets the layout manager control `FWidth` separately.
+
+Now imagine using the old `SetPosition()` which called `MoveAndResize` directly:
+
+[source,pascal]
+----
+button.SetPosition(10, 20, 200, 30);
+// This called MoveAndResize → HandleResize(200, 30)
+// which set FWidth := 200 directly, bypassing the layout manager
+----
+
+The layout manager has no opportunity to apply its own calculated size. Worse, during the implementation of this separation, keeping `SetPosition()` in sync with the property setters proved fragile — multiple bugs were introduced and fixed because the two code paths kept falling out of sync.
+
+=== The Solution: One Code Path
+
+By deprecating `SetPosition()` and making it a thin wrapper over the property setters, there is now **one code path** for setting widget size. The property setters are the single source of truth for the preferred-size logic:
+
+[source,pascal]
+----
+// SetPosition is now just syntactic sugar:
+procedure TfpgWidgetBase.SetPosition(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+begin
+  Left   := ALeft;
+  Top    := ATop;
+  Width  := AWidth;
+  Height := AHeight;
+end;
+----
+
+Since `SetPosition()` adds no value over setting the four properties directly, it is deprecated.
+
+=== Related Change: MoveAndResize Moved to Protected
+
+`MoveAndResize` and `MoveWidget` were moved from `public` to `protected` in the same change. These methods set actual size directly via `HandleResize`, bypassing preferred-size logic. Only the framework's internal layout systems (layout managers, Align/Anchor processing) should call them. Application code should never need to.
+
+Layout managers access `MoveAndResize` through the `ILayoutTarget` interface.
+
+=== Backward Compatibility
+
+* `SetPosition()` still compiles and works correctly. It delegates to the property setters internally.
+* The compiler will emit a deprecation warning to guide developers toward the property-based approach.
+* No existing functionality is lost — only the entry point has changed.
+
+=== UI Designer Code Generation
+
+The UI Designer (`uidesigner`) has been updated to generate individual property assignments instead of `SetPosition()` calls. Forms created or edited with the updated designer will use the new style automatically.
 
 == Migration Guide: Fixing Width/Height Usage
 
