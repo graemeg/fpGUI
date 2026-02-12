@@ -934,8 +934,8 @@ begin
 
     btnLeft.Text    := IntToStr(wg.Left);
     btnTop.Text     := IntToStr(wg.Top);
-    btnWidth.Text   := IntToStr(wg.Width);
-    btnHeight.Text  := IntToStr(wg.Height);
+    btnWidth.Text   := IntToStr(wg.ActualWidth);
+    btnHeight.Text  := IntToStr(wg.ActualHeight);
 
     btnAnLeft.Down   := anLeft in wg.Anchors;
     btnAnTop.Down    := anTop in wg.Anchors;
@@ -1075,12 +1075,12 @@ begin
   else if Sender = frmProperties.btnWidth then
   begin
     frm.lbPos.Text := rsWidth + ':';
-    frm.edPos.Text := IntToStr(wg.Width);
+    frm.edPos.Text := IntToStr(wg.ActualWidth);
   end
   else if Sender = frmProperties.btnHeight then
   begin
     frm.lbPos.Text := rsHeight + ':';
-    frm.edPos.Text := IntToStr(wg.Height);
+    frm.edPos.Text := IntToStr(wg.ActualHeight);
   end;
 
   posval := -9999;
@@ -1233,8 +1233,8 @@ begin
 
   s := s + Ind(1) + 'Left := ' + IntToStr(FForm.Left) + ';' + LineEnding;
   s := s + Ind(1) + 'Top := ' + IntToStr(FForm.Top) + ';' + LineEnding;
-  s := s + Ind(1) + 'Width := ' + IntToStr(FForm.Width) + ';' + LineEnding;
-  s := s + Ind(1) + 'Height := ' + IntToStr(FForm.Height) + ';' + LineEnding;
+  s := s + Ind(1) + 'Width := ' + IntToStr(FForm.ActualWidth) + ';' + LineEnding;
+  s := s + Ind(1) + 'Height := ' + IntToStr(FForm.ActualHeight) + ';' + LineEnding;
 
 {
   // Extend this and the Form Parser to handle WindowPosition, Width and Height
@@ -1394,8 +1394,8 @@ begin
 
   s := s + ident + 'Left := ' + IntToStr(wg.Left) + ';' + LineEnding;
   s := s + ident + 'Top := ' + IntToStr(wg.Top) + ';' + LineEnding;
-  s := s + ident + 'Width := ' + IntToStr(wg.Width) + ';' + LineEnding;
-  s := s + ident + 'Height := ' + IntToStr(wg.Height) + ';' + LineEnding;
+  s := s + ident + 'Width := ' + IntToStr(wg.ActualWidth) + ';' + LineEnding;
+  s := s + ident + 'Height := ' + IntToStr(wg.ActualHeight) + ';' + LineEnding;
 
   if wg.Anchors <> [anLeft, anTop] then
   begin
