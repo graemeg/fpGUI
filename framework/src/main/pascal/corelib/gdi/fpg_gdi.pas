@@ -2513,6 +2513,13 @@ begin
     FBackgroundColor := fpgColorToWin(clBoxColor);
   end;
 
+  { Re-select the current font into FDrawGC. A newly created compatible DC
+    defaults to the SYSTEM_FONT stock object (bold, ~16px). Without this,
+    SetFont() skips DoSetFontRes() when the font pointer hasn't changed,
+    leaving the wrong font selected after a DC reallocation. }
+  if (FCurFontRes <> nil) and FCurFontRes.HandleIsValid then
+    Windows.SelectObject(FDrawGC, FCurFontRes.Handle);
+
   FDrawing := True;
 end;
 
@@ -2999,14 +3006,17 @@ end;
 { TfpgGDIFontResource }
 
 constructor TfpgGDIFontResource.Create(const afontdesc: string);
+var
+  OldFont: HFONT;
 begin
   inherited Create(afontdesc);  // Call base constructor to set FFontDesc
   FFontData := OpenFontByDesc(afontdesc);
 
   if HandleIsValid then
   begin
-    SelectObject(wapplication.display, FFontData);
+    OldFont := SelectObject(wapplication.display, FFontData);
     GetTextMetrics(wapplication.display, FMetrics);
+    SelectObject(wapplication.display, OldFont);
   end;
 end;
 
@@ -3155,13 +3165,14 @@ function TfpgGDIFontResource.GetTextWidth(const txt: string): integer;
 var
   ts: Windows.SIZE;
   WideText: widestring;
+  OldFont: HFONT;
 begin
   if length(txt) < 1 then
   begin
     Result := 0;
     Exit;
   end;
-  SelectObject(wapplication.display, FFontData);
+  OldFont := SelectObject(wapplication.display, FFontData);
 
   WideText := Utf8Decode(txt);
   {$ifdef wince}
@@ -3171,6 +3182,7 @@ begin
   {$endif}
 
   Result := ts.cx;
+  SelectObject(wapplication.display, OldFont);
 end;
 
 { TfpgGDIImage }
