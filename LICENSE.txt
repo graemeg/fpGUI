@@ -18,7 +18,7 @@ The license directory tree:
  │
  ├─ uidesigner      (modified LGPL)
  │
- ├─ src             (modified LGPL)
+ ├─ framework       (modified LGPL)
  │
  ├─ examples        (GPLv2)
  │
@@ -28,7 +28,7 @@ The license directory tree:
        │
        ╰─ nicegrid       (MPL - Mozilla public license)
 
-           
+
 
                ────────────oOo────────────
 
