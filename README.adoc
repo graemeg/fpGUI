@@ -69,7 +69,12 @@ sudo apt-get install libx11-dev libxft-dev
 ==== AggPas Canvas (optional)
 
 When using the AggPas rendering backend, ensure the Liberation Sans font is installed
-on Linux/FreeBSD. On Windows, the AggPas canvas uses Arial, which is included with the OS.
+on Linux/FreeBSD. On Windows, the AggPas canvas uses Arial, which is included with
+the OS.
+
+The AggPas canvas on Windows defaults to the native Win32 TrueType font engine. You
+can optionally switch to the FreeType font engine by compiling with the `freetype`
+build profile, though this requires distributing `freetype.dll` with your application.
 
 === Compiling the Framework
 
@@ -83,8 +88,11 @@ pasbuild compile -p unix,agg
 # Linux with native X11 canvas
 pasbuild compile -p unix
 
-# Windows with AggPas canvas
+# Windows with AggPas canvas and native font engine
 pasbuild compile -p windows,agg
+
+# Windows with AggPas canvas and freetype font engine
+pasbuild compile -p windows,agg,freetype
 ----
 
 === Running Tests
