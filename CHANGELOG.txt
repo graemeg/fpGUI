@@ -2,6 +2,9 @@
   Release notes for fpGUI
   =======================
 
+v2.0.5 (unreleased) - last used SHA1 c08a89d98
+
+
 v2.0.3 (2026-02-14)
   - Bug Fixes
     * Fixed AggPas canvas crash when using the 'plastic dark' theme.
