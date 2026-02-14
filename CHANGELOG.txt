@@ -2,7 +2,33 @@
   Release notes for fpGUI
   =======================
 
-v2.0.1 (unreleased) - last used SHA1 c2467863
+v2.0.3 (2026-02-14)
+  - Bug Fixes
+    * Fixed AggPas canvas crash when using the 'plastic dark' theme.
+      Widget canvases now correctly route pixel operations through the
+      window canvas target instead of accessing a nil image buffer.
+    * Added bounds checking in TfpgImageBase.SetColor to prevent
+      out-of-bounds memory writes when using the AggPas canvas.
+    * Fixed incorrect pixel coordinates in plastic style DrawFocusRect
+      that used Width/Height as positions instead of Left+Width and
+      Top+Height.
+    * Fixed GDI font reverting to bold stock font after device context
+      reallocation.
+    * Fixed duplicate TranslateMessage call causing double keystrokes
+      on Windows.
+    * Added Windows font paths to FreeType font cache.
+    * Fixed widget constructors using property setters for Width/Height
+      instead of direct field access, which caused issues with the
+      sizing API separation.
+  - UI Designer
+    * Fixed resizer rendering and canvas sizing.
+    * Fixed property display and source generation to use
+      ActualWidth/ActualHeight for positioning.
+    * Fixed widget placement to call UpdatePosition after positioning.
+    * Changed PasBuild module name to 'fpgui-uidesigner'.
+
+
+v2.0.1 (2026-02-11)
   - Bug Fixes
     * Fixed infinite recursion crash when default font fails to load on
       distros with non-standard font paths (Arch, Void, Fedora). Raises

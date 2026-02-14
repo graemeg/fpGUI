@@ -899,6 +899,7 @@ begin
   FTextColor        := Parent.TextColor;
   FWidth            := 120;
   FHeight           := Font.GetHeight + 6;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FMargin           := 3;
   FFocusable        := True;
   FAutocompletion   := False;

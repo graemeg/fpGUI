@@ -526,6 +526,7 @@ begin
   FFont       := fpgApplication.FontManager.GetFont('#Edit1');
   FHeight     := FFont.GetHeight * 3 + 4;
   FWidth      := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FLineHeight := FFont.GetHeight + 2;
   FSideMargin := 3;
   FMaxLength  := 0;

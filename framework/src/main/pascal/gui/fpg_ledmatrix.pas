@@ -419,6 +419,7 @@ begin
   inherited Create(AOwner);
   FWidth := 150;
   FHeight := 30;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FBackgroundColor := clBlack;
   FLEDOnColor := TfpgColor($FFFFB539);
   FLEDOffColor := TfpgColor($FF634210);

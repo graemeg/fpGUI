@@ -284,6 +284,7 @@ begin
   FontDesc    := '#Label1';  // Use inherited property setter
   FHeight     := Font.GetHeight + 4;
   FWidth      := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;

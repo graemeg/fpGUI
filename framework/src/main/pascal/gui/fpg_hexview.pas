@@ -250,6 +250,7 @@ begin
   inherited Create(AOwner);
   FWidth := 300;
   FHeight := 100;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFont := fpgApplication.FontManager.GetFont('#Label1');
 
   LabelWidths := FFont.GetTextWidth(IntTypeToString(bcU64));
@@ -695,6 +696,7 @@ begin
   inherited Create(AOwner);
   FWidth := 400;
   FHeight := 300;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FVScroll := TfpgScrollBar.Create(Self);
   FVScroll.Orientation:=orVertical;
   FVScroll.OnScroll:=@DoScroll;

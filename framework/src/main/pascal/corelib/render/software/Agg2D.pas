@@ -4082,13 +4082,31 @@ begin
 end;
 
 function TAgg2D.GetPixel(X, Y: integer): TfpgColor;
+var
+  R: TfpgRect;
 begin
-  Result := FImg.Colors[x, y];
+  if Assigned(FImg) then
+    Result := FImg.Colors[x, y]
+  else if Assigned(FCanvasTarget) then
+  begin
+    R := GetWidgetWindowRect;
+    Result := TAgg2D(FCanvasTarget).GetPixel(R.Left + x, R.Top + y);
+  end
+  else
+    Result := 0;
 end;
 
 procedure TAgg2D.SetPixel(X, Y: integer; const AValue: TfpgColor);
+var
+  R: TfpgRect;
 begin
-  FImg.Colors[x, y] := AValue;
+  if Assigned(FImg) then
+    FImg.Colors[x, y] := AValue
+  else if Assigned(FCanvasTarget) then
+  begin
+    R := GetWidgetWindowRect;
+    TAgg2D(FCanvasTarget).SetPixel(R.Left + x, R.Top + y, AValue);
+  end;
 end;
 
 procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);

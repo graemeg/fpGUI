@@ -407,6 +407,7 @@ begin
   FFont       := fpgApplication.FontManager.GetFont('#Label1');
   FHeight     := FFont.GetHeight + 4;
   FWidth      := 120;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;

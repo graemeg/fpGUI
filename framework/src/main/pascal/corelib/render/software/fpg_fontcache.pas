@@ -323,14 +323,26 @@ begin
     FT_Init_FreeType(m_library);
 
     lPathList := TStringList.Create;
+    {$IFDEF WINDOWS}
+    { Windows system fonts directory (e.g. C:\Windows\Fonts\) }
+    lPath := GetEnvironmentVariable('WINDIR');
+    if lPath <> '' then
+      lPathList.Add(IncludeTrailingPathDelimiter(lPath) + 'Fonts' + PathDelim);
+    { Per-user fonts (Windows 10 1809+) }
+    lPath := GetEnvironmentVariable('LOCALAPPDATA');
+    if lPath <> '' then
+      lPathList.Add(IncludeTrailingPathDelimiter(lPath) + 'Microsoft' + PathDelim + 'Windows' + PathDelim + 'Fonts' + PathDelim);
+    {$ENDIF}
     {$IFDEF UNIX}
     lPathList.Add('/usr/share/fonts/');            // Covers all distro layouts (recursive search)
     lPathList.Add('/usr/share/cups/fonts/');
     lPathList.Add('/usr/local/lib/X11/fonts/');
     lPathList.Add('/usr/local/share/fonts/');
     {$ENDIF}
+    {$IFNDEF WINDOWS}
     lPathList.Add(GetUserDir + '.local/share/fonts/');  // XDG standard user font directory
     lPathList.Add(GetUserDir + '.fonts/');               // Legacy user font directory
+    {$ENDIF}
     {$IFDEF Darwin}
     { As per Apple Support page: https://support.apple.com/en-us/HT201722 }
     lPathList.Add('/System/Library/Fonts/');

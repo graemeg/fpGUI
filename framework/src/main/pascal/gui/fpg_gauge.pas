@@ -549,6 +549,7 @@ begin
   Focusable     := False;
   FWidth        := 100;
   FHeight       := 25;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FKind         := gkHorizontalBar;
   FSecondColor  := clWhite;
   FFirstColor   := clBlack;

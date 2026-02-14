@@ -811,6 +811,7 @@ begin
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FAlignment        := taCenter;
   FLayout           := tlCenter;
   FWrapText         := False;
@@ -1062,6 +1063,7 @@ begin
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FFocusable        := True;  // otherwise children can't get focus
   FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taLeftJustify;

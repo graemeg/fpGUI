@@ -202,6 +202,7 @@ begin
   FontDesc          := '#Label1';  // Use property to set font (calls inherited SetFontDesc)
   FHeight           := Font.GetHeight;
   FWidth            := 80;
+  FPreferredSize.SetSize(FWidth, FHeight);
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FAutoSize         := False;
