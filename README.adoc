@@ -55,7 +55,7 @@ toc::[]
 === Prerequisites
 
 * https://www.freepascal.org[Free Pascal Compiler] 3.2.2 or later
-* https://github.com/nickelsworth/pasbuild[PasBuild] build tool
+* https://github.com/nickelsworth/pasbuild[PasBuild] build tool (optional but recommended)
 
 ==== Linux / FreeBSD
 
