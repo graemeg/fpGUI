@@ -3722,6 +3722,8 @@ procedure TfpgImageBase.SetColor(x, y: TfpgCoord; const AValue: TfpgColor);
 var
   p: Plongword;
 begin
+  if (x < 0) or (x >= FWidth) or (y < 0) or (y >= FHeight) then
+    Exit;
   p := FImageData;
   Inc(p, (FWidth * y) + x);
   p^ := AValue;
