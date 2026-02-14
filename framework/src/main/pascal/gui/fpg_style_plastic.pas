@@ -274,12 +274,12 @@ begin
   ACanvas.DrawRectangle(r);
   ACanvas.Pixels[r.Left, r.Top] := FPlasticColors^[9];
   ACanvas.Pixels[r.Left + 1, r.Top + 1] := clSplitterGrabBar;
-  ACanvas.Pixels[r.Width - 1, r.Top] := FPlasticColors^[9];
-  ACanvas.Pixels[r.Width - 2, r.Top + 1] := clSplitterGrabBar;
-  ACanvas.Pixels[r.Left, r.Height - 1] := FPlasticColors^[9];
-  ACanvas.Pixels[r.Left + 1, r.Height - 2] := clSplitterGrabBar;
-  ACanvas.Pixels[r.Width - 1, r.Height - 1] := FPlasticColors^[9];
-  ACanvas.Pixels[r.Width - 2, r.Height - 2] := clSplitterGrabBar;
+  ACanvas.Pixels[r.Left + r.Width - 1, r.Top] := FPlasticColors^[9];
+  ACanvas.Pixels[r.Left + r.Width - 2, r.Top + 1] := clSplitterGrabBar;
+  ACanvas.Pixels[r.Left, r.Top + r.Height - 1] := FPlasticColors^[9];
+  ACanvas.Pixels[r.Left + 1, r.Top + r.Height - 2] := clSplitterGrabBar;
+  ACanvas.Pixels[r.Left + r.Width - 1, r.Top + r.Height - 1] := FPlasticColors^[9];
+  ACanvas.Pixels[r.Left + r.Width - 2, r.Top + r.Height - 2] := clSplitterGrabBar;
 end;
 
 procedure TfpgPlasticStyle.DrawButtonFace(ACanvas: TfpgCanvas;
