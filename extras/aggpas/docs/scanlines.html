@@ -1,0 +1,195 @@
+<html><head><title>Anti-Grain Geometry - Scanlines and Scanline 
+Renderers</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" 
+href="scanlines.agdoc_files/agg.css">
+</head><body><a name="PAGE_SCANLINES"><b></b></a>
+
+
+<table style="margin: 0px;" height="1px" width="640px" border="0" 
+cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td bgcolor="#583927"></td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" width="640px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr>
+<td>
+<table style="margin: 0px;" width="170px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr><td><a href="http://www.antigrain.com/index.html" 
+class="mpmenu">Home/</a></td></tr>
+<tr><td><a href="http://www.antigrain.com/doc/index.html" class="mpmenu">Table
+ of Content/</a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+</tbody></table>
+</td>
+<td width="1px" bgcolor="#583927"></td>
+<td style="text-align: right;" valign="top" width="450px">
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td><img src="scanlines.agdoc_files/agg_logo.gif" border="0"></td>
+</tr>
+<tr>
+<td>
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr height="15px">
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/news/index.html">News</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/doc/index.html">Docs</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/download/index.html">Download</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/maillist/index.html">Mailing List</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/cvs/index.html">CVS</a>&nbsp;&nbsp;</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>
+</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><h1>Scanlines and Scanline Renderers</h1></td></tr></tbody></table>
+
+<table class="toc" width="640px"><tbody><tr><td>
+    <div style="margin-left: 2em; padding: 3px; font-size: 14px;"><a 
+href="#toc0001"><b>Scanline Containers</b></a>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0002">Introduction</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0003">Interfaces</a>
+            <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0004">Filling Interface (put)</a></div>
+            <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0005">Iterating Interface (get)</a></div></div></div>
+    <div style="margin-left: 2em; padding: 3px; font-size: 14px;"><a 
+href="#toc0006"><b>Scanline Renderers</b></a></div>
+
+</td></tr></tbody></table>
+
+
+<h2>Scanline Containers<a name="toc0001"></a></h2>
+
+<h3>Introduction<a name="toc0002"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+low level renderers operate with
+simplest data and they are very simple too. In fact, the pixel format
+renderers are not the obligatory part of the library and can be 
+replaced or rewritten. For example, if you have an API with similar
+functionality, but hardware accelerated, it will be better to use it
+instead of pure software blending (the low level renderers are 
+essentially alpha-blenders). It's also possible to use Intel SSE/SSE2
+to write optimized renderers. All other rendering functionality in 
+AGG is based on these simple classes.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>To 
+draw Anti-Aliased primitives one shoud <b>rasterize</b> them first.
+The primary rasterization technique in AGG is scanline based. That is, 
+a polygon is converted into a number of horizontal scanlines and then
+the scanlines are being rendered one by one. Again, the scanline
+rasterizer is not the only class that can produce scanlines. It can 
+be some container or even your own super-ultra-mega rasterizer.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>To 
+transfer information from a rasterizer to the scanline renderer 
+there scanline containers are used.
+A scanline consists of a number of horizontal, non-intersecting spans.
+All spans must be ordered by X. It means that there is no sorting 
+operation provided, the order must be perserved when adding spans
+to the scanline. If the order is not guaranteed it can result in 
+undefined behaviour.</p></td></tr></tbody></table> 
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>In <b>AGG</b>
+ there are three types of scanline containers:
+</p><ul type="disc">
+<li><code>scanline_u</code> - unpacked scaline container</li>
+<li><code>scanline_p</code> - packed scanline container</li>
+<li><code><a 
+href="http://www.antigrain.com/__code/include/agg_scanline_bin.h.html#scanline_bin">scanline_bin</a></code>
+ - container for binary, &#8220;aliased&#8221; scanlines</li></ul><p></p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>First
+ two containers can keep <b><nobr>Anti-Aliasing</nobr></b> information, 
+the third one cannot.</p></td></tr></tbody></table>
+
+<table class="warning" width="640px"><tbody><tr><td><b>IMPORTANT!</b><br>
+All the scanline containers are optimized for speed, not for 
+memory usage. In fact, it allocates memory for the worst case, 
+so there is some overhead. It's not critical when you use only
+few scanline containers, but it's not a good idea to use an 
+array of scanlines to store the whole shape because it will take
+more memory than the resulting image.
+</td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+difference between <b>packed</b> and <b>unpacked</b> scanline 
+containers is that the <b>unpacked</b> scaline always keeps the 
+coverage values for all pixels including the ones that are 
+fully covered by a polygon. In the <b>packed</b> scanline 
+all pixels with the same coverage value are merged into <b>solid</b>
+spans.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="scanlines.agdoc_files/scanline_u.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td><center><img 
+src="scanlines.agdoc_files/scanline_p.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>It 
+can seem it's always better to use the packed version, but in 
+practice it's not so. The scanline_p works faster when rendering 
+large solid polygons, that is when the area of the polygon is 
+much larger than the perimeter in the meaning of the number
+of pixels. But when renering text it's definitely better to use
+the scanline_u because of much less number of processed spans
+The difference is about three times and the number of spans 
+is also important for the overall performance. Besides, in most
+of the span generators, such as gradients, Gouraud shader, or 
+image transformers, the number of spans becomes even more critical, 
+and so, the scanline_p is not used there.</p></td></tr></tbody></table>
+
+
+<h3>Interfaces<a name="toc0003"></a></h3>
+
+<h4>Filling Interface (put)<a name="toc0004"></a></h4>
+
+<h4>Iterating Interface (get)<a name="toc0005"></a></h4>
+
+
+<br><h2>Scanline Renderers<a name="toc0006"></a></h2>
+
+<br><table style="margin: 0px;" height="1px" width="640px" 
+bgcolor="#583927" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr><td><center><span class="authors">
+Copyright <span class="larger">©</span> 2002-2006
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+<tr><td><center><span class="authors">
+Web Design and Programming
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+</tbody></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body></html>

@@ -1,0 +1,690 @@
+<html><head><title>Anti-Grain Geometry - Introduction</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" 
+href="introduction.agdoc_files/agg.css">
+</head><body><a name="PAGE_INTRODUCTION"><b></b></a>
+
+
+<table style="margin: 0px;" height="1px" width="640px" border="0" 
+cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td bgcolor="#583927"></td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" width="640px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr>
+<td>
+<table style="margin: 0px;" width="170px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr><td><a href="http://www.antigrain.com/index.html" 
+class="mpmenu">Home/</a></td></tr>
+<tr><td><a href="http://www.antigrain.com/doc/index.html" class="mpmenu">Table
+ of Content/</a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+</tbody></table>
+</td>
+<td width="1px" bgcolor="#583927"></td>
+<td style="text-align: right;" valign="top" width="450px">
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td><img src="introduction.agdoc_files/agg_logo.gif" border="0"></td>
+</tr>
+<tr>
+<td>
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr height="15px">
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/news/index.html">News</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/doc/index.html">Docs</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/download/index.html">Download</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/maillist/index.html">Mailing List</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://www.antigrain.com/cvs/index.html">CVS</a>&nbsp;&nbsp;</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>
+</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><h1>Introduction<span 
+class="subtitle"><br>Overview and Basic Concepts</span></h1></td></tr></tbody></table>
+
+
+<table class="toc" width="640px"><tbody><tr><td>
+    <div style="margin-left: 2em; padding: 3px; font-size: 14px;"><a 
+href="#toc0001"><b>Brief Overview</b></a>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0002">Yet Another Invention of the Wheel</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0003">Gentle Criticism</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0004">The Proposal</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0005">Anti-Aliasing and Subpixel Accuracy</a></div></div>
+    <div style="margin-left: 2em; padding: 3px; font-size: 14px;"><a 
+href="#toc0006"><b>Basic Concepts</b></a>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0007">Design of the Library</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0008">Colors, Color Spaces, and Pixel Formats</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0009">Coordinate Units</a></div>
+        <div style="margin-left: 2em; font-size: 12px;"><a 
+href="#toc0010">AGG Building and Coding Notes</a></div></div>
+    <div style="margin-left: 2em; padding: 3px; font-size: 14px;"><a 
+href="#toc0011"><b>About this Manual</b></a></div>
+
+</td></tr></tbody></table>
+
+
+<h2>Brief Overview<a name="toc0001"></a></h2>
+
+
+<h3>Yet Another Invention of the Wheel<a name="toc0002"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Grain</nobr>
+ Geometry</b> (<b>AGG</b>) is a general purpose graphical toolkit 
+written completely in
+standard and platform independent <b>C++</b>.
+It can be used in many areas of computer programming where high quality 
+2D
+graphics is an essential part of the project. For example, if you render
+ 
+2D geographic maps <b>AGG</b> is a must. <b>AGG</b> uses only <b>C++</b>
+ and standard 
+C runtime functions, such as <b>memcpy, sin, cos, sqrt</b>, etc.
+The basic algorithms don't even use <b>C++ Standard Template Library</b>.
+ Thus, <b>AGG</b> can be used in a very large 
+number of applications, including embedded systems.</p></td></tr></tbody></table>
+ 
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>On 
+the other hand, <b>AGG</b> allows you to replace any part of the 
+library, if, for example, 
+it doesn't fit performance requirements. Or you can add another color 
+space if needed. 
+All of it is possible because of extensive using of <b>C++</b> <b>template</b>
+ mechanism.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Grain</nobr>
+ Geometry</b> is not a solid graphic library and it's not very easy to 
+use. 
+I consider <b>AGG</b> as a <b>&#8220;tool to create other tools&#8221;</b>. It means
+ that there's 
+no <b>&#8220;Graphics&#8221;</b> object or something like that, instead, <b>AGG</b> 
+consists of 
+a number of loosely coupled algorithms that can be used together or 
+separately. 
+All of them have well defined interfaces and absolute minimum of 
+implicit or explicit
+dependencies.</p></td></tr></tbody></table>
+
+
+
+<h3>Gentle Criticism<a name="toc0003"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Most
+ of the graphic libraries have a single class like <b>&#8220;Graphics&#8221;</b>
+in GDI+, that has hundred or even thousands of functions. This object 
+can exist implicitly, like in OpenGL. Anyway, all commonly used
+graphical tool kits, including Java2D, DisplayPDF, SVG, and other very 
+good ones have this kind of a class explicitly or implicitly. 
+That's simple and in some cases quite suitable, but always very 
+restrictive. It works well only in simple cases, at least I haven't 
+seen a graphical library that would completely fit all my needs. 
+Moreover, all that kinds of libraries or standards have a 
+syndrome of giantism. Most of the functionality is never
+used, but some simple things are impossible to achieve. Herein, the 
+graphical engines (or libraries) typically weigh tons of 
+mega-bytes. If you take the most advanced SVG viewer, 
+<a href="http://www.adobe.com/svg/main.html"><img 
+src="introduction.agdoc_files/link.gif" border="0">Adobe SVG</a>, it 
+works well only with 
+simplest primitives. As soon as you try to use some advanced things, 
+like interactive SVG with different graphical filters, you will have 
+memory leaks, or even crashes. It's not because it has bad design,
+it's because the proposed possibilities assume extremely complex design.
+The design itself becomes an <b>NP-complete</b> task, which is 
+impossible
+to perceive by a human mind as impossible to perceive the infinity.</p></td></tr></tbody></table>
+
+
+
+<h3>The Proposal<a name="toc0004"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+primary goal of <b><nobr>Anti-Grain</nobr> Geometry</b> is to break this
+ ancient as mammoth's manure 
+tradition and show you the beauty of stability, lightness,
+flexibility, and freedom. The basic concepts can seem not very 
+conventional at the beginning, but they are very close to the ones
+used in <b>STL</b>. But there's a big difference too. <b>STL</b> is a 
+general <b>C++</b> tool 
+while <b>AGG</b> is <b>C++</b> graphics. You usually use <b>STL</b> in 
+your applications directly 
+as a convenient toolkit. I wouldn't say it's a good idea to use <b>AGG</b>
+ in the 
+very same way. A good idea is to create a 
+lightweight, problem oriented wrapper over <b>AGG</b> to solve your 
+particular
+tasks. How can that be different from that very GDI+ then? The first
+thing is that you have total control upon that wrapper. <b><nobr>Anti-Grain</nobr>
+ Geometry</b> just provides
+you a set of basic algorithms and flexible design with the minimum of 
+implicit
+or explitit dependencies. You and only you define the interface, 
+conversion pipelines, and the form of output. You can even simulate a 
+part 
+of any existing graphical interface. For example, you can use <b>AGG</b>
+ rasterizer 
+to display graphics on the screen and direct Windows GDI calls for 
+printing, 
+incorporating it into a single API. Not convincing? Look at the quality 
+of 
+rendering in <b>GDI+</b> and <b>AGG</b>:
+</p></td></tr></tbody></table><a name="GDIP_AGG_QUALITY"><b></b></a><table
+ width="640px"><tbody><tr><td><center><img 
+src="introduction.agdoc_files/qual_gdip_agg.gif" title="Quality of 
+Rendering" border="0"><br><i>Quality of Rendering</i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>But 
+most of all, your applications become absolutely portable, if 
+your design is smart enough. <b>AGG</b> can be also a tool to combine 
+different
+outputs in a uniform API. Particularly, you can use <b>AGG</b> to 
+generate 
+raster images on the server side in your Web-Based applications. And it 
+all
+can be <b>cross-platform!</b></p></td></tr></tbody></table>
+
+
+
+<a name="PAGE_ANTI_ALIASING"><b></b></a>
+<h3>Anti-Aliasing and Subpixel Accuracy<a name="toc0005"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Aliasing</nobr></b>
+ is a very well known technique used to improve the visual quality of 
+images when displaying them on low resolution devices. It's based on the
+ properties 
+of the human vision. Look at the following picture and try to guess what
+ it means.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="introduction.agdoc_files/stereo_enlarged.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Well,
+ it's a word drawn with <b><nobr>Anti-Aliasing</nobr></b>. In terms of 
+Kotelnikov-Shannon's theorem, 
+the maximal frequency of the image is far above of the Shannon limit.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><img
+ src="introduction.agdoc_files/stereo_small.gif" title="" 
+style="border-color: rgb(255, 255, 255);" align="left" border="4"><!---->
+ 
+Now look at the same picture that has normal size and <b>within the 
+context</b>. You easily
+recognize word <b>&#8220;stereo&#8221;</b>. However, the pictrures are exactly the 
+same. The first 
+one is just an enlarged version of the last one. This very property 
+allows us to 
+reconstruct missing information on the basis of accumulated experience. <b><nobr>Anti-Aliasing</nobr></b>
+ 
+doesn't make you see better, it basically makes you brain work better 
+and reconstruct 
+missing details. The result is great. It allows us to draw much more 
+detailed maps for 
+example.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>But 
+the point is not only in <b><nobr>Anti-Aliasing</nobr></b> itself. The 
+point is we can draw primitives 
+with <b>Subpixel Accuracy</b>. It's especially important for the visual 
+thickness of the lines.
+First, let us see that even with simple Bresenham line interpolator we 
+can achieve 
+a better result if we use <b>Subpixel Accuracy</b>. The following 
+picture shows enlarged 
+results of the simple Bresenham interpolator.
+</p></td></tr></tbody></table><a name="SUBPIXEL_BRESENHAM"><b></b></a><table
+ width="640px"><tbody><tr><td><center><img 
+src="introduction.agdoc_files/subpixel_bresenham.gif" title="A Bresenham
+ Line Rendered with Subpixel Accuracy" border="0"><br><i>A Bresenham 
+Line Rendered with Subpixel Accuracy</i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Consider
+ cases (2) and (3). The thin black lines are what we need to 
+interpolate.
+If we use <b>Subpixel Accuracy</b> we will really have two different 
+sets of pixels 
+displayed, despite of the fact that the begins and ends of both lines 
+fall into
+the same pixels. And the lines have really different tangents, which is 
+very important.
+If we use a classical Bresenham, without considering the <b>Subpixel 
+Accuracy</b> we will see 
+result (1) in all cases. That's especially important to approximate 
+curves with short 
+line segments. But if we use <b><nobr>Anti-Aliasing</nobr></b> plus <b>Subpixel
+ Accuracy</b> we can do much better. 
+Look at that difference.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td 
+style="text-align: center;"><p>
+<img src="introduction.agdoc_files/aliased_pix_accuracy.gif" title="" 
+border="0"><!----> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img src="introduction.agdoc_files/aliased_subpix_accuracy.gif" title=""
+ border="0"><!----> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img src="introduction.agdoc_files/anti_aliased.gif" title="" border="0"><!---->
+</p></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Here
+ all three spirals are approximated with short straight line segments. 
+The left one is drawn using regular integer Bresenham, when the 
+coordinates
+are rounded off to pixels (you will have a similar result if you use 
+Winwows GDI MoveTo/LineTo, for example). The one in the middle uses a 
+modified 
+integer Bresenham with precision of 1/256 of a pixel. And the right one 
+uses 
+the same 1/256 accuracy, but with <b><nobr>Anti-Aliasing</nobr></b>. 
+Note that it's very important
+to have a possibility of real subpixel positioning of the line segments.
+ 
+If we use regular pixel coordinates with <b><nobr>Anti-Aliasing</nobr></b>,
+ the spiral will look 
+smooth but still, as ugly as the one on the left.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The <b>Subpixel
+ Accuracy</b> is even more important to control the visual thickness
+of the lines. It's possible only if we have good algorithms of 
+<b><nobr>Anti-Aliasing</nobr></b>. On the other hand, there's no much 
+sense of <b><nobr>Anti-Aliasing</nobr></b>
+if can set the line width with the discretness of one pixel only. <b><nobr>Anti-Aliasing</nobr></b>
+and <b>Subpixel Accuracy</b> always work in cooperation.</p></td></tr></tbody></table>
+ 
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Modern
+ displays have resolutions of at most 120 DPI, while <b>Subpixel 
+Accuracy</b> 
+is actual up to 300 DPI. The following picture shows lines with 
+thickness 
+starting from 0.3 pixels and increasing by 0.3 pixel.
+</p></td></tr></tbody></table><a name="LINE_THICKNESS"><b></b></a><table
+ width="640px"><tbody><tr><td><center><img 
+src="introduction.agdoc_files/line_thickness.gif" title="Lines Rendered 
+with Anti-Aliasing and Subpixel Accuracy" border="0"><br><i>Lines 
+Rendered with Anti-Aliasing and Subpixel Accuracy</i></center></td></tr></tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>There
+ are two more examples of rendering with <b>Subpixel Accuracy</b>.</p></td></tr></tbody></table>
+
+<a name="SUBPIXEL_ACCURACY1"><b></b></a><table width="640px"><tbody><tr><td><center><img
+ src="introduction.agdoc_files/subpixel_accuracy1.gif" title="Circles 
+Rendered with Anti-Aliasing and Subpixel Accuracy" border="0"><br><i>Circles
+ Rendered with Anti-Aliasing and Subpixel Accuracy</i></center></td></tr></tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<a name="SUBPIXEL_ACCURACY2"><b></b></a><table width="640px"><tbody><tr><td><center><img
+ src="introduction.agdoc_files/subpixel_accuracy2.gif" title="Cute 
+Lions" border="0"><br><i>Cute Lions</i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Note
+ that the appearance of the small ones remains consistent
+despite of lost details.
+</p></td></tr></tbody></table><table style="margin: 0px;" height="1px" 
+width="640px" bgcolor="#583927" border="0" cellpadding="0" 
+cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+
+
+<br><h2>Basic Concepts<a name="toc0006"></a></h2>
+
+
+
+
+<h3>Design of the Library<a name="toc0007"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Grain</nobr>
+ Geometry</b> is designed as a set of loosely coupled algorithms and 
+class templates 
+united with a common idea, so that all the components can be easily 
+combined.
+Also, the template based design allows you to replace any part of the 
+library without the 
+necessity to modify a single byte in the existing code.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Also
+ <b>AGG</b> is designed keeping in mind extensibility and flexibility. 
+Basically I just wanted
+to create a toolkit that would allow me (and anyone else) to add new 
+fancy 
+algorithms very easily.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b>AGG</b>
+ does not dictate you any style of its use, you are free to use any part
+ 
+of it. However, <b>AGG</b> is often associated with a tool for rendering
+ images in memory. 
+That is not quite true, but it can be a good starting point in studying.
+ 
+The tutorials describe the use of <b>AGG</b> starting from the low level
+ functionality that 
+deals with frame buffers and pixels. 
+Then you will gradually understand how to abstract different parts
+of the library and how to use them separately. Remember, the raster 
+picture
+is often not the only thing you want to obtain, you will probably want 
+to 
+print your graphics with highest possible quality and in this case you 
+can 
+easily combine the &#8220;vectorial&#8221; part of the library with some API like 
+Windows GDI, 
+having a common external interface.
+If that API can render multi-polygons with non-zero and even-odd filling
+ rules
+it's all you need to incorporate <b>AGG</b> into your application. For 
+example, Windows
+API PolyPolygon perfectly fits these needs, except certain advanced 
+things like 
+gradient filling, Gouraud shading, image transformations, and so on. Or,
+ as 
+an alternative, you can use all <b>AGG</b> algorithms producing high 
+resolution pixel
+images and then to send the result to the printer as a pixel map.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Below
+ is a typical brief scheme of the <b>AGG</b> rendering pipeline. <br>
+<a name="TYPICAL_SCHEME"><b></b></a><table align="left"><tbody><tr><td><center><img
+ src="introduction.agdoc_files/typical_scheme.gif" title="Typical Scheme
+ of the Rendering Pipeline" border="0"></center></td></tr><tr><td><i><center>Typical
+ Scheme of the Rendering Pipeline</center></i></td></tr></tbody></table>
+<br>
+Please note that any component between the &#8220;Vertex Source&#8221; and 
+&#8220;Screen Output&#8221; is not mandatory. It all depends on your particular 
+needs. For example, 
+you can use your own rasterizer, based on Windows API. In this case you 
+won't need 
+the AGG rasterizer and renderers. Or, if you need to draw only lines, 
+you can use the 
+AGG <b>outline</b> rasterizer that has certain restrictions but works 
+faster. The number of 
+possibilities is endless.</p></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Here:
+</p><ul type="disc">
+<li><b>Vertex Source</b> is some object that produces polygons or 
+polylines as 
+   a set of consecutive 2D vertices with commands like &#8220;MoveTo&#8221;, 
+&#8220;LineTo&#8221;. 
+   It can be a container or some other object that generates vertices on
+ demand.</li>
+<li><b>Coordinate conversion pipeline</b> consists of a number of 
+coordinate converters. 
+   It always works with vectorial data (X,Y) represented as floating 
+point numbers 
+   <nobr>(double)</nobr>. For example, it can contain an affine 
+transformer, outline (stroke)
+   generator, some marker generator (like arrowheads/arrowtails), dashed
+ lines 
+   generator, and so on. The pipeline can have branches and you also can
+ have any 
+   number of different pipelines. You also can write your own converter 
+and include
+   it into the pipeline.</li>
+<li><b>Scanline Rasterizer</b> converts vectorial data into a number of 
+horizontal scanlines. 
+   The scanlines usually (but not obligatory) carry information about <b><nobr>Anti-Aliasing</nobr></b>
+ as 
+   &#8220;coverage&#8221; values. </li>
+<li><b>Renderers</b> render scanlines, sorry for the tautology. The 
+simplest example is 
+   solid filling. The renderer just adds a color to the scanline and 
+writes the result
+   into the rendering buffer. More complex renderers can produce 
+multi-color result, 
+   like gradients, Gouraud shading, image transformations, patterns, and
+ so on.</li>
+<li><b>Rendering Buffer</b> is a buffer in memory that will be displayed
+ afterwards. Usually 
+   but not obligatory it contains pixels in format that fits your video 
+system. For example, 
+   24 bits <nobr>B-G-R</nobr>, 32 bits <nobr>B-G-R-A</nobr>, or 15 bits <nobr>R-G-B-555</nobr>
+ for Windows. 
+   But in general, there're no restrictions on pixel formats or color 
+space if 
+   you write your own low level class that supports that format.</li></ul><p></p></td></tr></tbody></table>
+
+
+
+<h3>Colors, Color Spaces, and Pixel Formats<a name="toc0008"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Colors
+ in <b>AGG</b> appear only in renderers, that is, when you actually put 
+some data 
+to the rendering buffer. In general, there's no general purpose 
+structure or 
+class like <b>&#8220;color&#8221;</b>, instead, <b>AGG</b> always operates with 
+concrete color space. 
+There are plenty of color spaces in the world, like RGB, HSV, CMYK, 
+etc., and 
+all of them have certain restrictions. For example, the RGB color space 
+is just a
+poor subset of colors that a human eye can recognize. If you look at the
+ 
+full <a href="http://www.efg2.com/Lab/Graphics/Colors/Chromaticity.htm"><img
+ src="introduction.agdoc_files/link.gif" border="0"><b>CIE Chromaticity 
+Diagram</b></a>, you will see that 
+the RGB triangle is just a little part of it. 
+</p></td></tr></tbody></table><a name="CIE_1931"><b></b></a><table 
+width="640px"><tbody><tr><td><center><img 
+src="introduction.agdoc_files/cie_1931.jpg" title="CIE Chromaticity 
+Diagram and the RGB Gamut" border="0"><br><i>CIE Chromaticity Diagram 
+and the RGB Gamut</i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>In 
+other words there are plenty 
+of colors in the real world that cannot be reproduced with RGB, CMYK, 
+HSV, etc.
+Any color space except the one existing in Nature is restrictive. 
+Thus, it was decided not to introduce such an object like <b>&#8220;color&#8221;</b>
+ in order 
+not to restrict the possibilities in advance. Instead, there are objects
+ that 
+operate with concrete color spaces. Currently there are agg::<a 
+href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba">rgba</a>
+ and agg::<a 
+href="http://www.antigrain.com/__code/include/agg_color_rgba.h.html#rgba8">rgba8</a>
+ 
+that operate with the most popular <b>RGB</b> color space (strictly 
+speaking there's 
+RGB plus Alpha). The RGB color space is used with different pixel 
+formats, like 
+<nobr>24-bit</nobr> RGB or <nobr>32-bit</nobr> RGBA with different order
+ of color components. 
+But the common property of all of them is that they are essentially RGB.
+Although, <b>AGG</b> doesn't explicitly support any other color spaces, 
+there is at 
+least a potential possibility of adding them. It means that all class 
+and 
+function templates that depend on the <b>&#8220;color&#8221;</b> type are 
+parameterized with the 
+<b>&#8220;ColorT&#8221;</b> argument.</p></td></tr></tbody></table>
+
+
+
+<h3>Coordinate Units<a name="toc0009"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Basically,
+ <b>AGG</b> operates with coordinates of the output device. 
+On your screen there are pixels. But unlike many other libraries and 
+APIs 
+<b>AGG</b> initially supports <b>Subpixel Accuracy</b>. It means that 
+the coordinates are represented as 
+<b>doubles</b>, where fractional values actually take effect. 
+<b>AGG</b> doesn't have an embedded conversion mechanism from <u>world</u>
+ to <u>screen</u> 
+coordinates in order not to restrict your freedom. It's very important 
+where and when 
+you do that conversion, so, different applications can require different
+ approaches. 
+<b>AGG</b> just provides you a transformer of that kind, namely,
+that can convert your own <u>view port</u> to the <u>device</u> one. And
+ it's your responsibility
+to include it into the proper place of the pipeline. You can also write 
+your own 
+very simple class that will allow you to operate with millimeters, 
+inches, or any
+other physical units.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Internally,
+ the rasterizers use integer coordinates of the format
+24.8 bits, that is, 24 bits for the integer part and 8 bits for the 
+fractional one. In other words, all the internal coordinates are 
+multiplied
+by 256. If you intend to use <b>AGG</b> in some embedded system that has
+ inefficient 
+floating point processing, you still can use the rasterizers with their 
+integer 
+interfaces. Although, you won't be able to use the floating point 
+coordinate pipelines 
+in this case.</p></td></tr></tbody></table>
+
+
+
+
+<h3>AGG Building and Coding Notes<a name="toc0010"></a></h3>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Grain</nobr>
+ Geometry</b> doesn't have any rich and automated environvents to build.
+ <b>AGG</b> mantra is 
+<b>&#8220;It just compiles and works&#8221;</b>. It doesn't have any installation 
+packages either. Maybe it's not very good from the point of view of 
+automated
+configuring and making of applications (like it's commonly used on 
+Unix), 
+but all you need to do is just add <b>AGG</b> source files into your 
+distribution 
+package as if they were your files. 
+As a benefit of this approach, you won't have any problems 
+with configuration files and endless <b>#ifdef&#8230;#elif&#8230;#endif</b>. This is
+ 
+possible because <b>AGG</b> has absolute minimum of external 
+dependencies. For Unix
+there are the simplest possible <b>Makefiles</b> to build the <b>.a</b> 
+library, for
+Windows there's no library created at all. All the demo examples just 
+include
+the necessary source files. This practice allows for more convenient 
+debugging 
+process; in fact, almost all the examples are actually used to implement
+ 
+and debug the algorithms. It also advantages stability of the library, 
+because all 
+the algorithms suffer very deep testing in the conditions near to 
+operational.
+</p></td></tr></tbody></table><table class="note" width="640px"><tbody><tr><td><b>NOTE</b><br>
+If you want to use <b>AGG</b> in Windows Visual C++ environment, please 
+note that 
+there's no <b>&#8220;stdafx.h&#8221;</b> file used. It's <a 
+href="http://www.microsoft.com/"><img 
+src="introduction.agdoc_files/link.gif" border="0"><b>Microsoft</b></a> 
+specific and not
+a part of C/C++ standard libraries, but <a 
+href="http://www.microsoft.com/"><img 
+src="introduction.agdoc_files/link.gif" border="0"><b>Microsoft</b></a> 
+just enforces to use it.
+To successfully use <b>AGG</b> in Visual C++ projects don't forget to 
+turn off the
+<b>&#8220;Precompiled Headers&#8221;</b> option for all <b>AGG</b> source files. 
+Besides, if you
+link <b>AGG</b> with static <b>MFC</b> you will probably have 
+duplicating <code>new</code> and <code>delete</code>
+operators when linking. It's not because of <b>AGG</b>, it's because of <b>MFC</b>.
+You will have the very same problem when you try to use any other <b>C++</b>
+code that calls <code>new/delete</code> and doesn't include <b><nobr>stdafx.h</nobr></b>.
+To resolve this situation follow the 
+<a 
+href="http://support.microsoft.com/default.aspx?scid=kb;en-us;q148652"><img
+ src="introduction.agdoc_files/link.gif" border="0"><b>Microsoft 
+recommendations</b></a> or just search in <a 
+href="http://www.google.com/"><img 
+src="introduction.agdoc_files/link.gif" border="0"><b>Google</b></a> for
+ <b>&#8220;<nobr>148652 LNK2005</nobr>&#8221;</b>.
+</td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>As 
+it was mentioned above, <b>AGG</b> uses <b>C++</b> template mechanism 
+very actively. 
+However, it uses only well known and proven language constructions. A 
+good compatibility 
+is one of the primary aspirations. <b>C++</b> gurus can be suprised that
+ <b>AGG</b> doesn't use <b>STL</b>, 
+for example. It's done intentionally, in order not to have extra 
+dependencies 
+where the necessity of <b>STL</b> containers is very little. Of course, 
+it doesn't 
+prevent you from using <b>STL</b> or any other popular tools in a higher
+ level. 
+<b>AGG</b> is designed to have absolute minumum of potential conflicts 
+with existing <b>C++</b> 
+libraties, tools and technologies.</p></td></tr></tbody></table>
+
+
+
+
+<br><h2>About this Manual<a name="toc0011"></a></h2>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>As 
+it was said before <b>AGG</b> provides many different levels of 
+functionality, so 
+that you can use it in many different ways. For example, you may want to
+ use 
+<b>AGG</b> rasterizers without the scanline renderers. But for the sake 
+of 
+consistency and graduality we will start from the very beginning and 
+describe
+all the functionality with examples. This approach might be slower than 
+some 
+&#8220;Quick Start&#8221;, but it will allow you to understand the conceps of the 
+design. 
+It is really useful because you will know how to replace certain classes
+ and 
+algorithms with your own, or how to extend the library. Particularly, 
+the 
+scanline renderers are platform independent, but not the fastest. You 
+may want
+to write your own, optimized ones, but oriented to some hardware 
+archtecture, like SSE2.</p></td></tr></tbody></table>
+
+<br><table style="margin: 0px;" height="1px" width="640px" 
+bgcolor="#583927" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr><td><center><span class="authors">
+Copyright <span class="larger">©</span> 2002-2006
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+<tr><td><center><span class="authors">
+Web Design and Programming
+<a href="http://www.antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+</tbody></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body></html>

@@ -1,0 +1,263 @@
+<html><head><title>Anti-Grain Geometry - The Problem of Line Alignment</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" 
+href="line_alignment.agdoc_files/agg.css">
+</head><body><a name="PAGE_LINE_ALIGNMENT"><b></b></a>
+
+
+<table style="margin: 0px;" height="1px" width="640px" border="0" 
+cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td bgcolor="#583927"></td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" width="640px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr>
+<td>
+<table style="margin: 0px;" width="170px" border="0" cellpadding="0" 
+cellspacing="0">
+<tbody><tr><td><a href="http://antigrain.com/index.html" class="mpmenu">Home/</a></td></tr>
+<tr><td><a href="http://antigrain.com/tips/index.html" class="mpmenu">Tips
+ &amp; Tricks/</a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+<tr><td><a href="" class="mpmenu"></a></td></tr>
+</tbody></table>
+</td>
+<td width="1px" bgcolor="#583927"></td>
+<td style="text-align: right;" valign="top" width="450px">
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td><img src="line_alignment.agdoc_files/agg_logo.gif" border="0"></td>
+</tr>
+<tr>
+<td>
+<table style="margin: 0px;" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr height="15px">
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://antigrain.com/news/index.html">News</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://antigrain.com/doc/index.html">Docs</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://antigrain.com/download/index.html">Download</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://antigrain.com/maillist/index.html">Mailing List</a>&nbsp;&nbsp;</td>
+<td width="1px" bgcolor="#8e521d"></td>
+<td>&nbsp;&nbsp;<a class="topmenu" 
+href="http://antigrain.com/cvs/index.html">CVS</a>&nbsp;&nbsp;</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>
+</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td><h1>The Problem of Line Alignment<span
+ class="subtitle"><br>The "half-a-pixel" problem when rendering lines</span></h1></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p><b><nobr>Anti-Aliasing</nobr></b>
+ is a tricky thing. If you decided you like <b>AGG</b> and it finally 
+solves all your problems in 2D graphics, it's a mistake. 
+Nothing of the kind. The more you worry about the quality 
+the more problems there are exposed.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Let 
+us start with a simple rectangle.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect1.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Here
+ we have a rectangle with exact integral coordinates (1,1,4,4).
+Everything looks fine, but to understand and see how the <b><nobr>Anti-Aliasing</nobr></b>
+ and <b>Subpixel Accuracy</b>
+work let's shift it to 0.5 pixel by X and Y:
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect2.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+pixels have intensities proportional to the area of the pixel 
+covered by the rectangle. In practice it means that the rectangle 
+looks blur. It's not a caprice, it's a necessity because only 
+in this case we can preserve the <b>visual</b> area covered by the 
+rectangle the same, regardless of its subpixel position. The 
+initial rectangle covers 9 pixels. If we just round off the 
+coordinates, the resulting rectangle can be drawn as 4 pixels and
+it can be drawn as 16 pixels, depending on the position and 
+the rounding rules. So that, the &#8220;blurness&#8221; is much less evil
+than "jitter" because it allows you to keep the image much more
+consistent.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Now 
+let's try to calculate an outline of one pixel width around
+this square:
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect3.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>This
+ is an ideal case. In prcatice we cannot draw anything between
+pixels, so the result will look even more blur:
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect4.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>There
+ are no fully covered pixels at all and this fact creates the 
+problem of line alignment. Bad news is that there's no ideal 
+solution of it, we'll have to sacrifice something. The good news
+is there are several partial solutions that can be satisfactory.
+First, let's try to add 0.5 to the coordinates of the <b>outline</b>.
+Remember, if we add 0.5 to the filled rectangle too, the ones 
+without outlines will look blur (see above).
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect5.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>Looks
+ perfect while the outline is 100% opaque. If we have a 
+translucent boundary it will look worse:
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect6.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+translucency can be <b>implicit</b>, for example, if we draw a 
+line of 0.5 pixel width, it's simulated with translucency! 
+It will look better if we shift both, the fill and its outline.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/rect61.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>But 
+remember, it will look worse if it's not outlined. Still, 
+The first solution is to shift everything to 0.5 pixel, which
+can be appropriate when you have outlines in all cases.</p></td></tr></tbody></table>
+ 
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+second solution is to shift only outlines, keeping 
+the filled polygons as they are. In this case you must be 
+sure you always have the outline of at least 1 pixel width. That's
+not a good restriction. You can do even better, shifting only
+those polygons that have an outline (stroke). But in this case
+you can have some inconsistency between polygons with and without 
+strokes.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+shifting transformer is very simple:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre><span class="kw1">namespace</span> agg
+<span class="op">{</span>
+    <span class="kw1">class</span> trans_shift
+    <span class="op">{</span>
+    <span class="kw1">public</span>:
+        trans_shift<span class="op">(</span><span class="op">)</span> : m_shift<span class="op">(</span><span class="num">0</span><span class="op">.</span><span class="num">0</span><span class="op">)</span> <span class="op">{</span><span class="op">}</span>
+        trans_shift<span class="op">(</span><span class="kw1">double</span> s<span class="op">)</span> : m_shift<span class="op">(</span>s<span class="op">)</span> <span class="op">{</span><span class="op">}</span>
+
+        <span class="kw1">void</span> shift<span class="op">(</span><span class="kw1">double</span> s<span class="op">)</span> <span class="op">{</span> m_shift <span class="op">=</span> s<span class="op">;</span> <span class="op">}</span>
+        <span class="kw1">double</span> shift<span class="op">(</span><span class="op">)</span> <span class="kw1">const</span> <span class="op">{</span> <span class="kw1">return</span> m_shift<span class="op">;</span> <span class="op">}</span>
+
+        <span class="kw1">void</span> transform<span class="op">(</span><span class="kw1">double</span><span class="op">*</span> x<span class="op">,</span> <span class="kw1">double</span><span class="op">*</span> y<span class="op">)</span> <span class="kw1">const</span>
+        <span class="op">{</span>
+            <span class="op">*</span>x <span class="op">+=</span> m_shift<span class="op">;</span>
+            <span class="op">*</span>y <span class="op">+=</span> m_shift<span class="op">;</span>
+        <span class="op">}</span>
+    <span class="kw1">private</span>:
+        <span class="kw1">double</span> m_shift<span class="op">;</span>
+    <span class="op">}</span><span class="op">;</span>
+<span class="op">}</span></pre></td></tr></tbody></table><font 
+style="margin-left: 1em;"><i></i></font>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>And 
+its use is simple too:</p></td></tr></tbody></table>
+
+<table width="640px" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td><pre>agg::trans_shift ts<span class="op">(</span><span class="num">0</span><span class="op">.</span><span class="num">5</span><span class="op">)</span><span class="op">;</span>
+agg::<a href="http://antigrain.com/__code/include/agg_conv_transform.h.html#conv_transform">conv_transform</a><span class="op">&lt;</span>source_class<span class="op">,</span> agg::trans_shift<span class="op">&gt;</span> shift<span class="op">(</span>source<span class="op">,</span> ts<span class="op">)</span><span class="op">;</span>
+</pre></td></tr></tbody></table><font style="margin-left: 1em;"><i></i></font>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>That
+ is, it's included into the pipeline as yet another transformer. 
+If you use the affine transformer (most probably you will), you can do
+without this additional converter. Just add the following, after the 
+matrix is formed:
+</p></td></tr></tbody></table><table width="640px" border="0" 
+cellpadding="0" cellspacing="0"><tbody><tr><td><pre>mtx <span class="op">*=</span> agg::trans_affine_translate<span class="op">(</span><span class="num">0</span><span class="op">.</span><span class="num">5</span><span class="op">,</span> <span class="num">0</span><span class="op">.</span><span class="num">5</span><span class="op">)</span><span class="op">;</span></pre></td></tr></tbody></table><font
+ style="margin-left: 1em;"><i></i></font>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>In 
+this case there will be no additional
+&#8220;performance fee&#8221;. Of course, you will have to worry about when and 
+where to add this shift (see cases above).</p></td></tr></tbody></table>
+
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>There
+ is one more solution and it can be even better. Nobody says that 
+we need to apply the same shift to all coordinates. In case of our 
+rectangle there can be <b>inner</b> or <b>outer</b> outline:
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td 
+style="text-align: center;"><p><img 
+src="line_alignment.agdoc_files/rect7.gif" title="" border="0"><!----> 
+&nbsp;&nbsp;&nbsp;&nbsp; <img src="line_alignment.agdoc_files/rect8.gif"
+ title="" border="0"><!----></p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>You 
+can achive this with using <a 
+href="http://antigrain.com/__code/include/agg_conv_contour.h.html#conv_contour">conv_contour</a>,
+ see also 
+<a href="http://antigrain.com/demo/index.html#PAGE_DEMO_conv_contour">Demo
+ conv_contour.cpp</a>.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>But 
+there are some problems too. First of all, the &#8220;insideness&#8221;
+becomes important, while <a 
+href="http://antigrain.com/__code/include/agg_conv_stroke.h.html#conv_stroke">conv_stroke</a>
+ doesn't care about it. So that,
+you should preserve or detect the orientation of the contours, not
+to mention that self-intersecting polygons don't have a univocal
+orientation, they can have only a &#8220;prevaling&#8221; orientation.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+second problem is where to apply this transformation. It should be 
+definitely done <b>before</b> stroke converter. But there is a
+contradiction with the succeeding affine transformations. Take the
+zoom operation, for example. If you want the line widths to be 
+consistent
+with the transformations, you have to use the affine transformer
+<b>after</b> the outline is calculated. If it's done before, you can 
+change
+the stroke width respectively, but in this case you breake the 
+integrity if you have different scaling coefficients by X and Y.
+</p></td></tr></tbody></table><table width="640px"><tbody><tr><td><center><img
+ src="line_alignment.agdoc_files/conv_order.gif" title="" border="0"><br><i></i></center></td></tr></tbody></table>
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>If 
+you are absolutely sure you will never use different scaling 
+coefficients by X and Y, you can transform paths before 
+calculating the outline. In other words, the sequence of the 
+conversions is important and it can be contadictive. Besides, 
+you have to decide if you only need to correct the 
+&#8220;0.5 problem&#8221; or to have the true <b>inner</b> or <b>outer</b> stroke.</p></td></tr></tbody></table>
+
+<table width="640px"><tbody><tr><td style="text-align: justify;"><p>The 
+conclusion is that there's no ideal solution. But the whole 
+idea of <b><nobr>Anti-Grain</nobr> Geometry</b> is that it's you who 
+chooses the neccessary pipelines
+and solve your problem-orinted tasks. Thare are no other APIs that
+allow you to have this flexibility.</p></td></tr></tbody></table> 
+
+<table style="margin: 0px;" height="1px" width="640px" bgcolor="#583927"
+ border="0" cellpadding="0" cellspacing="0"><tbody><tr><td></td></tr></tbody></table>
+<table width="640px" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr><td><center><span class="authors">
+Copyright <span class="larger">©</span> 2002-2006
+<a href="http://antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+<tr><td><center><span class="authors">
+Web Design and Programming
+<a href="http://antigrain.com/mcseem/index.html"><b>Maxim Shemanarev</b></a>
+</span></center></td></tr>
+</tbody></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body></html>
