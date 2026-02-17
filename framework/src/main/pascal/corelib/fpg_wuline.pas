@@ -27,8 +27,8 @@ uses
   Classes, SysUtils, fpg_base, fpg_main;
 
 
-procedure WuLine(ACanvas: TfpgCanvas; Point1, Point2: TPoint; AColor: TfpgColor);
-procedure DrawWuCircle(Canvas: TfpgCanvas; x, y, r: integer; AColor: TfpgColor);
+procedure WuLine(ACanvas: TfpgCanvas; Point1, Point2: TPoint; AColor: TfpgColor); deprecated 'Use AggCanvas instead';
+procedure DrawWuCircle(Canvas: TfpgCanvas; x, y, r: integer; AColor: TfpgColor); deprecated 'Use AggCanvas instead';
 
 
 implementation
@@ -37,7 +37,7 @@ implementation
 type
   // to get access to Protected fields
   TCanvasHack = class(TfpgCanvas);
-  
+
 
 // Blend a pixel with the current colour
 procedure AlphaBlendPixel(ACanvas: TfpgCanvas; X, Y: integer; R, G, B: word; ARatio: Double);
@@ -72,7 +72,7 @@ begin
   y2      := Point2.Y;
   deltax  := abs(x2 - x1); // Calculate deltax and deltay for initialisation
   deltay  := abs(y2 - y1);
-  
+
   if (deltax = 0) or (deltay = 0) then  // straight lines
   begin
     ACanvas.SetColor(AColor);
@@ -88,7 +88,7 @@ begin
       dydx := -(deltay / deltax)
     else
       dydx := deltay / deltax;
-      
+
     if x2 < x1 then
     begin
       start   := x2; // right to left
@@ -102,7 +102,7 @@ begin
       dy      := y1;
       dydx    := -dydx; // inverse slope
     end;
-    
+
     for loop := start to finish do
     begin
       AlphaBlendPixel(ACanvas, loop, trunc(dy), LR, LG, LB, 1 - frac(dy));
@@ -116,7 +116,7 @@ begin
       dydx := -(deltax / deltay)
     else
       dydx := deltax / deltay;
-      
+
     if y2 < y1 then
     begin
       start   := y2; // right to left
@@ -130,7 +130,7 @@ begin
       dx      := x1;
       dydx    := -dydx; // inverse slope
     end;
-    
+
     for loop := start to finish do
     begin
       AlphaBlendPixel(ACanvas, trunc(dx), loop, LR, LG, LB, 1 - frac(dx));
