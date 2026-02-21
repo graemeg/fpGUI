@@ -35,7 +35,11 @@ type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
   TfpgColor       = type longword;    // Always in AARRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type AnsiString;
-  TfpgChar        = type String[4];
+
+  // 1. Define the specific string length first
+  ShortString4 = String[4];
+  // 2. Now use that named type for your alias
+  TfpgChar        = type ShortString4;
 
   PPoint = ^TPoint;
 
