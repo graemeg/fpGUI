@@ -2982,6 +2982,7 @@ begin
   DoFillTriangle(x1, y1, x2, y2, x3, y3);
 end;
 
+{ aka A Pie shape, not a Chord }
 procedure TfpgCanvasBase.FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   DoFillArc(x, y, w, h, a1, a2);

@@ -4117,10 +4117,49 @@ begin
 end;
 
 procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+var
+  path: path_storage;
+  my_arc: arc;
+  xd, yd: double;
+  cmd: unsigned;
+  center_x, center_y: double;
 begin
-  LineColor(LineColor);
   FillColor(LineColor);
-  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
+  LineColor(LineColor);
+
+  m_path.remove_all;
+  path.Construct;
+  center_x := x + (w/2);
+  center_y := y + (h/2);
+  xd := x;
+  xd := y;
+
+  // 1. Move to the center of the circle
+  path.move_to(center_x, center_y);
+
+  // 2. Initialize the arc (0 to 270 degrees)
+  // Note: 270 degrees in AGG (Y-down) is 12 o'clock.
+  my_arc.Construct(center_x, center_y, w/2, h/2,
+                   DegToRad(a1), DegToRad(-a2), false);
+
+  // 3. Feed the arc points into our path
+  my_arc.rewind(0);
+  cmd := my_arc.vertex(@xd, @yd);
+
+  // The first point of the arc should be a line_to
+  // because we are already at the center.
+  while not is_stop(cmd) do
+  begin
+    path.line_to(xd, yd);
+    cmd := my_arc.vertex(@xd, @yd);
+  end;
+
+  // 4. Close the path back to the center
+  path.close_polygon;
+
+  // Now pass 'path' to your AGG rasterizer to fill it.
+  m_path.add_path(@path ,0 ,false );
+  DrawPath(AGG_FillAndStroke);
 end;
 
 procedure TAgg2D.DoDrawPolygon(const Points: array of TPoint);
