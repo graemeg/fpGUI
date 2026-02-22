@@ -216,7 +216,7 @@ type
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
@@ -3439,7 +3439,7 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   XFillArc(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, Max(w,0), Max(h,0),
       Trunc(64 * a1), Trunc(64 * a2));
