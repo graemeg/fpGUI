@@ -406,8 +406,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
@@ -4109,14 +4109,14 @@ begin
   end;
 end;
 
-procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   NoFill;
   LineColor(LineColor);
   Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
 end;
 
-procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   LineColor(LineColor);
   FillColor(LineColor);

@@ -77,8 +77,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
@@ -1395,12 +1395,12 @@ begin
   // Stub - not used with AggCanvas
 end;
 
-procedure TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   // Stub - not used with AggCanvas
 end;
 
-procedure TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   // Stub - not used with AggCanvas
 end;

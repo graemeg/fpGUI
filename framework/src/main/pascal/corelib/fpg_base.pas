@@ -441,8 +441,8 @@ type
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
     procedure   DoDrawPolygon(const Points: array of TPoint); virtual; abstract;
     function    GetBufferAllocated: Boolean; virtual; abstract;
     procedure   DoAllocateBuffer; virtual; abstract;

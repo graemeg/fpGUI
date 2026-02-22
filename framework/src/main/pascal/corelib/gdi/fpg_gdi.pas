@@ -148,8 +148,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
@@ -2556,7 +2556,7 @@ begin
   Windows.SetPixel(FDrawGC, X, Y, fpgColorToWin(AValue));
 end;
 
-procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 var
   SX, SY, EX, EY: Longint;
 begin
@@ -2580,7 +2580,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 var
   SX, SY, EX, EY: Longint;
 begin
