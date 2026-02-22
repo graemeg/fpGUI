@@ -69,7 +69,6 @@ type
    function  vertex(x ,y : double_ptr ) : unsigned; virtual;
 
    procedure normalize(a1 ,a2 : double; ccw : boolean );
-
   end;
 
 { GLOBAL PROCEDURES }
@@ -90,7 +89,7 @@ begin
  m_end  :=0;
  m_da   :=0;
 
- m_ccw     :=false;
+ m_ccw     := false;
  m_path_cmd:=0;
 
  m_scale:=1;
@@ -104,27 +103,23 @@ constructor arc.Construct(x ,y ,rx ,ry ,a1 ,a2 : double; ccw : boolean = true );
 begin
  Construct;
 
- m_x :=x;
- m_y :=y;
- m_rx:=rx;
- m_ry:=ry;
-
- m_scale:=1;
+ m_x := x;
+ m_y := y;
+ m_rx := rx;
+ m_ry := ry;
 
  normalize(a1 ,a2 ,ccw );
-
 end;
 
 { INIT }
-procedure arc.init;
+procedure arc.init(x ,y ,rx ,ry ,a1 ,a2 : double; ccw : boolean = true );
 begin
- m_x :=x;
- m_y :=y;
- m_rx:=rx;
- m_ry:=ry;
+ m_x := x;
+ m_y := y;
+ m_rx := rx;
+ m_ry := ry;
 
  normalize(a1 ,a2 ,ccw );
-
 end;
 
 { APPROXIMATION_SCALE_ }
@@ -189,7 +184,7 @@ begin
 end;
 
 { NORMALIZE }
-procedure arc.normalize;
+procedure arc.normalize(a1 ,a2 : double; ccw : boolean );
 var
  ra : double;
 
@@ -205,7 +200,7 @@ begin
    while a1 < a2 do
     a1:=a1 + (pi * 2.0 );
 
-   m_da:=-m_da; 
+   m_da:=-m_da;
 
   end;
 
@@ -214,7 +209,6 @@ begin
  m_end  :=a2;
 
  m_initialized:=true;
-
 end;
 
 END.
