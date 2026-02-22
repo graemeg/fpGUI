@@ -2815,9 +2815,9 @@ var
   ar: agg_arc.arc;
 begin
   m_path.remove_all;
-  ar.Construct(cx ,cy ,rx ,ry ,sweep ,start ,false );
+  ar.Construct(cx ,cy ,rx ,ry ,start ,sweep ,false );
   m_path.add_path(@ar ,0 ,false );
-  DrawPath(AGG_FillAndStroke);
+  DrawPath(AGG_StrokeOnly);
 end;
 
 { STAR }
@@ -4113,7 +4113,7 @@ procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   NoFill;
   LineColor(LineColor);
-  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1+90), Deg2Rad(a2+90));
+  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1), Deg2Rad(-a2));
 end;
 
 procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
