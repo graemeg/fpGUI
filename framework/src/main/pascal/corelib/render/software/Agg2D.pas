@@ -523,7 +523,7 @@ type
 
    procedure Ellipse(const cx ,cy ,rx ,ry : double );
 
-   procedure Arc (const cx ,cy ,rx ,ry ,start ,sweep : double );
+   procedure Arc(const cx ,cy ,rx ,ry ,start_angle ,end_angle : double );
    procedure Star(const cx ,cy ,r1 ,r2 ,startAngle : double; const numRays : integer );
 
    procedure Curve(const x1 ,y1 ,x2 ,y2 ,x3 ,y3 : double ); overload;
@@ -2810,14 +2810,14 @@ begin
 end;
 
 { ARC }
-procedure TAgg2D.Arc(const cx ,cy ,rx ,ry ,start ,sweep : double );
+procedure TAgg2D.Arc(const cx ,cy ,rx ,ry ,start_angle ,end_angle : double );
 var
   ar: agg_arc.arc;
 begin
   m_path.remove_all;
-  ar.Construct(cx ,cy ,rx ,ry ,start ,sweep ,false );
+  ar.Construct(cx ,cy ,rx ,ry ,start_angle ,end_angle ,false );
   m_path.add_path(@ar ,0 ,false );
-  DrawPath(AGG_StrokeOnly);
+  DrawPath(AGG_FillAndStroke);
 end;
 
 { STAR }
