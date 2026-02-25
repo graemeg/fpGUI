@@ -804,7 +804,7 @@ end;
 
 procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom);
 var
-	clip: TfpgX11Selection;
+  clip: TfpgX11Selection;
 begin
   if Atom = None then
   begin
