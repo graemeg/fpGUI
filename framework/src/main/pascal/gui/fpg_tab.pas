@@ -503,7 +503,6 @@ var
   i: integer;
   t: TfpgTabSheet;
 begin
-  {$IFDEF DEBUG}writeln(Classname + '.MaxButtonWidthSum');{$ENDIF}
   Result := 0;
 
   for i := 0 to FPages.Count-1 do
@@ -593,7 +592,6 @@ var
   i: integer;
   f: TfpgFontResourceBase;
 begin
-  {$IFDEF DEBUG}writeln(Classname + '.GetTabText');{$ENDIF}
   Result  := AText;
   s       := AText;
   s1      := '';
