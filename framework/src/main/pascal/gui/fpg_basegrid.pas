@@ -558,10 +558,15 @@ begin
   FFocusRow := AValue;
 
   // apply min/max limit
-  if FFocusRow < 0 then
-    FFocusRow := 0;
-  if FFocusRow > RowCount-1 then
-    FFocusRow := RowCount-1;
+  if RowCount = 0 then
+    FFocusRow := -1
+  else
+  begin
+    if FFocusRow < 0 then
+      FFocusRow := 0;
+    if FFocusRow > RowCount-1 then
+      FFocusRow := RowCount-1;
+  end;
 
   FollowFocus;
   Update;

@@ -184,6 +184,8 @@ type
   
   
   TfpgCocoaFileList = class(TfpgFileListBase)
+  protected
+    procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
   
   
@@ -1260,6 +1262,21 @@ begin
   // Nothing special needed for Cocoa clipboard initialization
   // NSPasteboard is accessed on demand
 end;
+
+{ TfpgCocoaFileList }
+
+procedure TfpgCocoaFileList.PopulateSpecialDirs(const aDirectory: TfpgString);
+var
+  ds: string;
+begin
+  FSpecialDirs.Clear;
+  FSpecialDirs.Add(DirectorySeparator); // add root /
+  ds := aDirectory;
+  if Copy(ds, 1, 1) <> DirectorySeparator then
+    ds := DirectorySeparator + ds;
+  inherited PopulateSpecialDirs(ds);
+end;
+
 
 { TfpgCocoaDrag }
 
