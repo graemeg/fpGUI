@@ -356,14 +356,16 @@ type
     function    MessagesPending: boolean; override;
     function    GetHelpViewer: TfpgString; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay; platform;
     property    RootWindow: TfpgWinHandle read FRootWindow; platform;
@@ -507,10 +509,42 @@ uses
   cursorfont,
   xatom,            // used for XA_WM_NAME
   keysym,
-  math;
+  math,
+  dynlibs;
 
 var
   xapplication: TfpgApplication;
+
+{ XRandR 1.5 structs — not in FPC's xrandr.pp which only covers v1.1 }
+type
+  TRROutput15 = culong;
+  PRROutput15 = ^TRROutput15;
+
+  TXRRMonitorInfo = record
+    name      : TAtom;
+    primary   : TBool;
+    automatic : TBool;
+    noutput   : cint;
+    x, y      : cint;
+    width     : cint;      // pixels
+    height    : cint;      // pixels
+    mwidth    : cint;      // physical mm
+    mheight   : cint;      // physical mm
+    outputs   : PRROutput15;
+  end;
+  PXRRMonitorInfo = ^TXRRMonitorInfo;
+
+  TXRRQueryVersionFunc = function(dpy: PXDisplay; major, minor: Pcint): TStatus; cdecl;
+  TXRRGetMonitorsFunc  = function(dpy: PXDisplay; window: TWindow;
+                           get_active: TBool; nmonitors: Pcint): PXRRMonitorInfo; cdecl;
+  TXRRFreeMonitorsProc = procedure(monitors: PXRRMonitorInfo); cdecl;
+
+var
+  xrandrLib       : TLibHandle = 0;
+  xrrQueryVersion : TXRRQueryVersionFunc = nil;
+  xrrGetMonitors  : TXRRGetMonitorsFunc  = nil;
+  xrrFreeMonitors : TXRRFreeMonitorsProc = nil;
+  xrandrAvailable : Boolean = False;
 
 const
   FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
@@ -1265,6 +1299,28 @@ begin
 end;
 {$ENDIF}
 
+procedure InitXRandR(ADisplay: PXDisplay);
+var
+  major, minor: cint;
+begin
+  xrandrLib := LoadLibrary('libXrandr.so.2');
+  if xrandrLib = 0 then
+    xrandrLib := LoadLibrary('libXrandr.so');
+  if xrandrLib = 0 then
+    Exit;
+  Pointer(xrrQueryVersion) := GetProcAddress(xrandrLib, 'XRRQueryVersion');
+  Pointer(xrrGetMonitors)  := GetProcAddress(xrandrLib, 'XRRGetMonitors');
+  Pointer(xrrFreeMonitors) := GetProcAddress(xrandrLib, 'XRRFreeMonitors');
+  if not (Assigned(xrrQueryVersion) and Assigned(xrrGetMonitors)
+      and Assigned(xrrFreeMonitors)) then
+    Exit;
+  major := 0;
+  minor := 0;
+  xrrQueryVersion(ADisplay, @major, @minor);
+  xrandrAvailable := (major > 1) or ((major = 1) and (minor >= 5));
+end;
+
+
 { TfpgX11Application }
 
 procedure TfpgX11Application.SetDrag(const AValue: TfpgX11Drag);
@@ -1609,6 +1665,9 @@ begin
     Exit;
   FIsInitialized := True;
   xapplication := TfpgApplication(self);
+
+  // Initialize XRandR for multi-monitor support (dynamic loading, graceful fallback)
+  InitXRandR(FDisplay);
 
   // this needs to happen after the above global registration
   FSelection := TfpgX11Selection.Create;
@@ -2458,6 +2517,61 @@ begin
   {$ENDIF}
 end;
 
+function TfpgX11Application.GetMonitorCount: Integer;
+var
+  monitors: PXRRMonitorInfo;
+  count: cint;
+begin
+  if xrandrAvailable then
+  begin
+    count := 0;
+    monitors := xrrGetMonitors(FDisplay, FRootWindow, TBool(True), @count);
+    xrrFreeMonitors(monitors);
+    Result := count;
+  end
+  else
+    Result := 1;
+end;
+
+function TfpgX11Application.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+var
+  monitors: PXRRMonitorInfo;
+  count: cint;
+  m: PXRRMonitorInfo;
+  wa: TXWindowAttributes;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  if xrandrAvailable then
+  begin
+    count := 0;
+    monitors := xrrGetMonitors(FDisplay, FRootWindow, TBool(True), @count);
+    try
+      m := monitors;
+      Inc(m, AIndex);
+      Result.Bounds.SetRect(m^.x, m^.y, m^.width, m^.height);
+      Result.WorkArea := Result.Bounds;  // X11/EWMH has no per-monitor work area; full bounds is correct baseline
+      Result.Primary := (m^.primary <> 0);
+      { Physical mm dimensions → DPI. Guard against displays reporting 0mm. }
+      if (m^.mwidth > 0) and (m^.mheight > 0) then
+      begin
+        Result.DpiX := Round(m^.width  / (m^.mwidth  / 25.4));
+        Result.DpiY := Round(m^.height / (m^.mheight / 25.4));
+      end;
+      // DpiX/DpiY = 0 means unknown; TfpgDesktop falls back to Screen_dpi
+    finally
+      xrrFreeMonitors(monitors);
+    end;
+  end
+  else
+  begin
+    { No XRandR: report single monitor from root window attributes }
+    XGetWindowAttributes(FDisplay, FRootWindow, @wa);
+    Result.Bounds.SetRect(0, 0, wa.Width, wa.Height);
+    Result.WorkArea := Result.Bounds;
+    Result.Primary  := True;
+  end;
+end;
+
 { TfpgX11Window }
 
 procedure TfpgX11Window.ApplyFormIcon;
@@ -2947,6 +3061,7 @@ var
   prop: TAtom;
   mwmhints: TMWMHints;
   w: TfpgWidgetBase;
+  pm: TfpgRect;
 begin
   // currently unhandled (here) attributes. Some are only set when the window is created.
   {
@@ -2976,20 +3091,30 @@ begin
     if not (waAutoPos in ANewAttributes) then
       hints.flags := hints.flags or PPosition;
 
-    // waScreenCenterPos;
+    // waScreenCenterPos — centers on primary monitor's work area
     if (waScreenCenterPos in ANewAttributes) then
     begin
+      pm := xapplication.Desktop.AvailableGeometry(xapplication.Desktop.PrimaryScreen);
       hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
+      FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+      FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
       DoMoveWindow(FPosition.X, FPosition.Y);
     end
-    // waOneThirdDownPos
+    // waOneThirdDownPos — centers horizontally, one-third down on primary monitor
     else if waOneThirdDownPos in ANewAttributes then
     begin
+      pm := xapplication.Desktop.AvailableGeometry(xapplication.Desktop.PrimaryScreen);
       hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
+      FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+      FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
+      DoMoveWindow(FPosition.X, FPosition.Y);
+    end
+    // waVirtualScreenCenterPos — old behavior: centers on full virtual desktop
+    else if waVirtualScreenCenterPos in ANewAttributes then
+    begin
+      hints.flags := hints.flags or PPosition;
+      FPosition.X := (xapplication.ScreenWidth  - FSize.W) div 2;
+      FPosition.Y := (xapplication.ScreenHeight - FSize.H) div 2;
       DoMoveWindow(FPosition.X, FPosition.Y);
     end;
   end;
@@ -4565,8 +4690,13 @@ initialization
   xapplication := nil;
 {$IFDEF GDEBUG}
   OldXErrorHandler:=XSetErrorHandler(@fpgXErrorHandler);
+{$ENDIF}
+
 finalization
+{$IFDEF GDEBUG}
   XSetErrorHandler(OldXErrorHandler);
 {$ENDIF}
+  if xrandrLib <> 0 then
+    UnloadLibrary(xrandrLib);
 
 end.

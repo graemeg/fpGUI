@@ -164,13 +164,15 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
   end;
   
@@ -843,6 +845,7 @@ end;
 procedure TfpgCocoaWindow.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
 var
   styleMask: NSUInteger;
+  pm: TfpgRect;
 begin
   if not HandleIsValid then
     Exit;
@@ -863,6 +866,33 @@ begin
   begin
     if not (waFullScreen in AOldAtributes) then
       FWinHandle.toggleFullScreen(nil);
+  end;
+
+  // waScreenCenterPos — centers on primary monitor's work area
+  if (waScreenCenterPos in ANewAttributes) and
+     (AForceAll or (waScreenCenterPos in (ANewAttributes - AOldAtributes))) then
+  begin
+    pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
+    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
+    DoMoveWindow(FPosition.X, FPosition.Y);
+  end
+  // waOneThirdDownPos — one-third down on primary monitor
+  else if (waOneThirdDownPos in ANewAttributes) and
+          (AForceAll or (waOneThirdDownPos in (ANewAttributes - AOldAtributes))) then
+  begin
+    pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
+    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
+    DoMoveWindow(FPosition.X, FPosition.Y);
+  end
+  // waVirtualScreenCenterPos — old behavior: centers on full virtual desktop
+  else if (waVirtualScreenCenterPos in ANewAttributes) and
+          (AForceAll or (waVirtualScreenCenterPos in (ANewAttributes - AOldAtributes))) then
+  begin
+    FPosition.X := (fpgApplication.ScreenWidth  - FSize.W) div 2;
+    FPosition.Y := (fpgApplication.ScreenHeight - FSize.H) div 2;
+    DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 end;
 
@@ -1120,6 +1150,28 @@ end;
 function TfpgCocoaApplication.Screen_dpi: integer;
 begin
   Result := Screen_dpi_x;
+end;
+
+function TfpgCocoaApplication.GetMonitorCount: Integer;
+begin
+  { TODO: Use NSScreen.screens.count for proper multi-monitor support }
+  Result := 1;
+end;
+
+function TfpgCocoaApplication.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+var
+  screenRect: NSRect;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  { TODO: Enumerate NSScreen.screens for per-monitor info }
+  if AIndex = 0 then
+  begin
+    screenRect := NSScreen.mainScreen.frame;
+    Result.Bounds.SetRect(0, 0, Round(screenRect.size.width), Round(screenRect.size.height));
+    Result.WorkArea := Result.Bounds;
+    Result.Primary  := True;
+    { DPI: macOS uses 72 pt/inch as base. DpiX/DpiY left as 0 → falls back to Screen_dpi }
+  end;
 end;
 
 function TfpgCocoaApplication.ConvertShiftState(modifierFlags: NSUInteger): TShiftState;

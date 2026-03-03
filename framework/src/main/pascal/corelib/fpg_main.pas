@@ -111,6 +111,7 @@ type
   TfpgCanvas = class;
   TfpgTimer = class;
   TfpgDrag = class;
+  TfpgDesktop = class;
 
 
   TfpgNativeWindow = class(TfpgWindowImpl)
@@ -250,6 +251,26 @@ type
   end;
 
 
+  { Qt QDesktopWidget-inspired class: owns all screen topology information.
+    Populated once by TfpgApplication.Create from the platform backend. }
+  TfpgDesktop = class(TObject)
+  private
+    FScreens: array of TfpgScreenInfo;
+    function  GetScreenCount: Integer;
+    function  GetPrimaryScreen: Integer;
+    function  GetVirtualGeometry: TfpgRect;
+  public
+    procedure Populate(const AScreens: array of TfpgScreenInfo);
+    function  ScreenGeometry(AScreen: Integer): TfpgRect;
+    function  AvailableGeometry(AScreen: Integer): TfpgRect;
+    { Per-screen DPI. Falls back to fpgApplication.Screen_dpi when DpiX = 0. }
+    function  Screen_dpi(AScreen: Integer): Integer;
+    property  ScreenCount: Integer read GetScreenCount;
+    property  PrimaryScreen: Integer read GetPrimaryScreen;
+    property  VirtualGeometry: TfpgRect read GetVirtualGeometry;
+  end;
+
+
   TfpgApplication = class(TfpgApplicationImpl)
   private
     FHintPause: Integer;
@@ -274,6 +295,7 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
+    FDesktop: TfpgDesktop;
     FFontManager: TfpgFontManager;  // centralized font management
     FMessageHookList: TFPList;
     procedure   InternalInit;
@@ -294,6 +316,7 @@ type
     procedure   ShowException(E: Exception);
     procedure   ShowBacktrace(sender: TObject; E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
+    property    Desktop: TfpgDesktop read FDesktop;
     property    HintPause: Integer read FHintPause write SetHintPause;
     property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
@@ -1449,11 +1472,101 @@ begin
   fpgApplication.WaitWindowMessage(500);
 end;
 
+
+{ TfpgDesktop }
+
+function TfpgDesktop.GetScreenCount: Integer;
+begin
+  Result := Length(FScreens);
+end;
+
+function TfpgDesktop.GetPrimaryScreen: Integer;
+var
+  i: Integer;
+begin
+  Result := 0;  // fallback: index 0 is primary
+  for i := 0 to High(FScreens) do
+    if FScreens[i].Primary then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
+function TfpgDesktop.GetVirtualGeometry: TfpgRect;
+var
+  i: Integer;
+  minX, minY, maxX, maxY: Integer;
+begin
+  if Length(FScreens) = 0 then
+  begin
+    Result.SetRect(0, 0, 0, 0);
+    Exit;
+  end;
+  minX := FScreens[0].Bounds.Left;
+  minY := FScreens[0].Bounds.Top;
+  maxX := FScreens[0].Bounds.Right;
+  maxY := FScreens[0].Bounds.Bottom;
+  for i := 1 to High(FScreens) do
+  begin
+    if FScreens[i].Bounds.Left   < minX then minX := FScreens[i].Bounds.Left;
+    if FScreens[i].Bounds.Top    < minY then minY := FScreens[i].Bounds.Top;
+    if FScreens[i].Bounds.Right  > maxX then maxX := FScreens[i].Bounds.Right;
+    if FScreens[i].Bounds.Bottom > maxY then maxY := FScreens[i].Bounds.Bottom;
+  end;
+  Result.SetRect(minX, minY, maxX - minX, maxY - minY);
+end;
+
+procedure TfpgDesktop.Populate(const AScreens: array of TfpgScreenInfo);
+var
+  i: Integer;
+begin
+  SetLength(FScreens, Length(AScreens));
+  for i := 0 to High(AScreens) do
+    FScreens[i] := AScreens[i];
+end;
+
+function TfpgDesktop.ScreenGeometry(AScreen: Integer): TfpgRect;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+    Result := FScreens[AScreen].Bounds
+  else
+    Result := GetVirtualGeometry;
+end;
+
+function TfpgDesktop.AvailableGeometry(AScreen: Integer): TfpgRect;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+    Result := FScreens[AScreen].WorkArea
+  else
+    Result := GetVirtualGeometry;
+end;
+
+function TfpgDesktop.Screen_dpi(AScreen: Integer): Integer;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+  begin
+    if (FScreens[AScreen].DpiX > 0) and (FScreens[AScreen].DpiY > 0) then
+      Result := (FScreens[AScreen].DpiX + FScreens[AScreen].DpiY) div 2
+    else if FScreens[AScreen].DpiX > 0 then
+      Result := FScreens[AScreen].DpiX
+    else
+      Result := fpgApplication.Screen_dpi
+  end
+  else
+    Result := fpgApplication.Screen_dpi;
+end;
+
+
 constructor TfpgApplication.Create(const AParams: string);
+var
+  i: Integer;
+  screens: array of TfpgScreenInfo;
 begin
   fpgInitMsgQueue;
 
   FFontManager    := TfpgFontManager.Create;
+  FDesktop        := TfpgDesktop.Create;
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
@@ -1469,8 +1582,19 @@ begin
     inherited Create(AParams);
     if IsInitialized then
     begin
-      FScreenWidth  := GetScreenWidth;
-      FScreenHeight := GetScreenHeight;
+      { Populate desktop topology from platform backend }
+      SetLength(screens, GetMonitorCount);
+      for i := 0 to High(screens) do
+        screens[i] := GetMonitorInfo(i);
+      FDesktop.Populate(screens);
+      { ScreenWidth/ScreenHeight backed by virtual desktop bounds }
+      FScreenWidth  := FDesktop.VirtualGeometry.Width;
+      FScreenHeight := FDesktop.VirtualGeometry.Height;
+      { Fallback if Desktop is empty (e.g. backend returned no monitors) }
+      if FScreenWidth <= 0 then
+        FScreenWidth  := GetScreenWidth;
+      if FScreenHeight <= 0 then
+        FScreenHeight := GetScreenHeight;
     end;
   except
     on E: Exception do
@@ -1512,6 +1636,8 @@ begin
 
   // Free font manager (will free all cached fonts)
   FFontManager.Free;
+
+  FreeAndNil(FDesktop);
 
   FreeAndNil(FModalFormStack);
 

@@ -54,7 +54,7 @@ type
 
   TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop);
+      waOneThirdDownPos, waSystemStayOnTop, waVirtualScreenCenterPos);
   TWindowAttributes = set of TWindowAttribute;
 
   TfpgWindowAttributeChanged = procedure(Sender: TObject; ChangedAttributes: TWindowAttributes) of object;
@@ -746,6 +746,16 @@ type
   end;
 
 
+  { Per-screen geometry, work area and DPI information }
+  TfpgScreenInfo = record
+    Bounds   : TfpgRect;   // full monitor bounds (absolute screen coordinates, pixels)
+    WorkArea : TfpgRect;   // usable area minus taskbar/panels
+    Primary  : Boolean;
+    DpiX     : Integer;    // horizontal DPI  (0 = unknown, use application default)
+    DpiY     : Integer;    // vertical DPI
+  end;
+
+
   TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
   private
     FMainForm: TfpgWidgetBase;
@@ -771,6 +781,8 @@ type
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
     procedure   DoFlush; virtual; abstract;
+    function    GetMonitorCount: Integer; virtual; abstract;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; virtual; abstract;
   public { METADATA }
     AppTitle: TfpgString;
     AppVersion: TfpgString;
@@ -793,8 +805,8 @@ type
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; virtual; abstract;
-    function    Screen_dpi_x: integer; virtual; abstract;
-    function    Screen_dpi_y: integer; virtual; abstract;
+    function    Screen_dpi_x: integer; virtual; abstract; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; virtual; abstract; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; virtual; abstract;
     procedure   Terminate;
     procedure   Lock;

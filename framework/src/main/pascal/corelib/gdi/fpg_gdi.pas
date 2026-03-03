@@ -232,6 +232,7 @@ type
   TfpgGDIApplication = class(TfpgApplicationBase)
   private
     FDrag: TfpgGDIDrag;
+    FMonitorList: array of TfpgScreenInfo;
     procedure   DoWakeMainThread(Sender: TObject);
     procedure   SetDrag(const AValue: TfpgGDIDrag);
     property    Drag: TfpgGDIDrag read FDrag write SetDrag;
@@ -266,14 +267,16 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
     property    Display: HDC read FDisplay;
  end;
@@ -1344,6 +1347,43 @@ begin
   end;
 end;
 
+{ Monitor enumeration callback for TfpgGDIApplication }
+
+type
+  PMonitorCollector = ^TMonitorCollector;
+  TMonitorCollector = record
+    List: array of TfpgScreenInfo;
+  end;
+
+function MonitorEnumProc(hMonitor: HMONITOR; hdcMonitor: HDC;
+    {%H-}lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
+var
+  mi: MONITORINFO;
+  info: TfpgScreenInfo;
+  coll: PMonitorCollector;
+begin
+  coll := PMonitorCollector(dwData);
+  FillChar(mi, SizeOf(mi), 0);
+  mi.cbSize := SizeOf(mi);
+  Windows.GetMonitorInfo(hMonitor, @mi);
+  FillChar(info, SizeOf(info), 0);
+  info.Bounds.SetRect(mi.rcMonitor.Left, mi.rcMonitor.Top,
+      mi.rcMonitor.Right  - mi.rcMonitor.Left,
+      mi.rcMonitor.Bottom - mi.rcMonitor.Top);
+  info.WorkArea.SetRect(mi.rcWork.Left, mi.rcWork.Top,
+      mi.rcWork.Right  - mi.rcWork.Left,
+      mi.rcWork.Bottom - mi.rcWork.Top);
+  info.Primary := (mi.dwFlags and MONITORINFOF_PRIMARY) <> 0;
+  { DPI via the monitor's device context — same for all monitors on pre-8.1 Windows.
+    GetDpiForMonitor (SHCore.dll, Win 8.1+) is a future enhancement. }
+  info.DpiX := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSX);
+  info.DpiY := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSY);
+  SetLength(coll^.List, Length(coll^.List) + 1);
+  coll^.List[High(coll^.List)] := info;
+  Result := True;
+end;
+
+
 { TfpgGDIApplication }
 
 // helper function for DoGetFontFaceList
@@ -1522,9 +1562,20 @@ begin
 end;
 
 constructor TfpgGDIApplication.Create(const AParams: string);
+var
+  coll: TMonitorCollector;
 begin
   inherited Create(AParams);
   FDisplay        := Windows.GetDC(0);
+
+  { Enumerate connected monitors. This runs before TfpgApplication.Create
+    calls GetMonitorCount/GetMonitorInfo (those are called after inherited returns). }
+  FillChar(coll, SizeOf(coll), 0);
+  Windows.EnumDisplayMonitors(0, nil, MONITORENUMPROC(@MonitorEnumProc), LPARAM(@coll));
+  FMonitorList := coll.List;
+  { Safety fallback if EnumDisplayMonitors returned nothing }
+  if Length(FMonitorList) = 0 then
+    SetLength(FMonitorList, 1);
   Terminated := False;
 
   with WindowClass do
@@ -1629,21 +1680,13 @@ begin
 end;
 
 function TfpgGDIApplication.GetScreenWidth: TfpgCoord;
-var
-  r: TRECT;
 begin
-  GetWindowRect(GetDesktopWindow, r);
-  Result := r.Right - r.Left;
-  // Result := Windows.GetSystemMetrics(SM_CXSCREEN);
+  Result := Windows.GetSystemMetrics(SM_CXVIRTUALSCREEN);
 end;
 
 function TfpgGDIApplication.GetScreenHeight: TfpgCoord;
-var
-  r: TRECT;
 begin
-  GetWindowRect(GetDesktopWindow, r);
-  Result := r.Bottom - r.Top;
-  // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
+  Result := Windows.GetSystemMetrics(SM_CYVIRTUALSCREEN);
 end;
 
 function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
@@ -1667,6 +1710,19 @@ end;
 function TfpgGDIApplication.Screen_dpi: integer;
 begin
   Result := Screen_dpi_y;
+end;
+
+function TfpgGDIApplication.GetMonitorCount: Integer;
+begin
+  Result := Length(FMonitorList);
+end;
+
+function TfpgGDIApplication.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+begin
+  if (AIndex >= 0) and (AIndex < Length(FMonitorList)) then
+    Result := FMonitorList[AIndex]
+  else
+    FillChar(Result, SizeOf(Result), 0);
 end;
 
 { TfpgGDIWindow }
@@ -1922,6 +1978,7 @@ var
   rwidth: integer;
   rheight: integer;
   r: TRect;
+  pm: TfpgRect;
 begin
   if FWinHandle > 0 then
     Exit; //==>
@@ -2048,14 +2105,22 @@ begin
 
   if waScreenCenterPos in FWindowAttributes then
   begin
-    FPosition.X := (wapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (wapplication.ScreenHeight - FSize.H) div 2;
+    pm := wapplication.Desktop.AvailableGeometry(wapplication.Desktop.PrimaryScreen);
+    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
     DoMoveWindow(FPosition.X, FPosition.Y);
   end
   else if waOneThirdDownPos in FWindowAttributes then
   begin
-    FPosition.X := (wapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (wapplication.ScreenHeight - FSize.H) div 3;
+    pm := wapplication.Desktop.AvailableGeometry(wapplication.Desktop.PrimaryScreen);
+    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
+    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
+    DoMoveWindow(FPosition.X, FPosition.Y);
+  end
+  else if waVirtualScreenCenterPos in FWindowAttributes then
+  begin
+    FPosition.X := (wapplication.ScreenWidth  - FSize.W) div 2;
+    FPosition.Y := (wapplication.ScreenHeight - FSize.H) div 2;
     DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 
@@ -2140,7 +2205,8 @@ begin
 
     if (waAutoPos in FWindowAttributes) or
       (waScreenCenterPos in FWindowAttributes) or
-      (waOneThirdDownPos in FWindowAttributes) then
+      (waOneThirdDownPos in FWindowAttributes) or
+      (waVirtualScreenCenterPos in FWindowAttributes) then
     begin
       GetWindowRect(FWinHandle, r);
       FPosition.X := r.Left;

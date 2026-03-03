@@ -29,7 +29,7 @@ uses
   fpg_window;
 
 type
-  TWindowPosition = (wpUser, wpAuto, wpScreenCenter, wpOneThirdDown);
+  TWindowPosition = (wpUser, wpAuto, wpScreenCenter, wpOneThirdDown, wpVirtualScreenCenter);
   TCloseAction = (caNone, caHide, caFree{, caMinimize});
 
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
@@ -263,6 +263,11 @@ begin
     Include(WindowAttributes, waOneThirdDownPos)
   else
     Exclude(WindowAttributes, waOneThirdDownPos);
+
+  if FWindowPosition = wpVirtualScreenCenter then
+    Include(WindowAttributes, waVirtualScreenCenterPos)
+  else
+    Exclude(WindowAttributes, waVirtualScreenCenterPos);
 
   if FSizeable then
     Include(WindowAttributes, waSizeable)
