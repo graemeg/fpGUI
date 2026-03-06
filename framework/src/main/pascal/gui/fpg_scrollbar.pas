@@ -222,7 +222,10 @@ begin
     FPosition := AValue;
 
   if WindowAllocated then
-    Invalidate;//    DrawSlider(False);
+  begin
+    FRecalc := True;
+    Invalidate;
+  end;
 end;
 
 procedure TfpgScrollBar.Step(ASteps: Integer);

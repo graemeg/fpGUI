@@ -1722,6 +1722,14 @@ begin
   ClearSelection;
   FText[ 0 ] := #0;
   FTopCharIndex := 0;
+  // Reset scroll state so that SetupScrollbars (called via Layout below)
+  // initialises FYScroll/FXScroll from position 0, not from the previous topic.
+  FYScroll := 0;
+  FLastYScroll := 0;
+  FXScroll := 0;
+  FLastXScroll := 0;
+  FVScrollBar.Position := 0;
+  FHScrollBar.Position := 0;
   if not ADestroying then
   begin
     Layout;
