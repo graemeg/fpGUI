@@ -1579,20 +1579,24 @@ begin
 
   if not (WindowAllocated and (Window.HasHandle)) then
   begin
-    // The window will generate a paint message later when it exists
+    { The window will generate a paint message later when it exists. }
     FInvalidated:=False;
-    Exit;//
+    Exit;
   end;
 
   if (ActualWidth < 1) or (ActualHeight < 1) then
     Exit;
 
-  // combine existing invalid rect with message rect if sent
-  if FInvalidRect.IsUnassigned then
+  { Merge the incoming dirty rect with any accumulated invalid region.
+    When the parent sends an empty rect it is requesting a full repaint of
+    this widget; clear FInvalidRect so this widget and all of its virtual
+    children also repaint in full, keeping the shared buffer complete. }
+  if msg.Params.rect.IsUnassigned then
+    FInvalidRect.Clear
+  else if FInvalidRect.IsUnassigned then
     FInvalidRect := msg.Params.rect
   else
-    if not msg.Params.rect.IsUnassigned then
-      FInvalidRect.UnionRect(FInvalidRect, msg.Params.rect);
+    FInvalidRect.UnionRect(FInvalidRect, msg.Params.rect);
 
   HasInvalidRegion := not FInvalidRect.IsUnassigned;
 
@@ -1626,19 +1630,20 @@ begin
       begin
         if not w.HasOwnWindow and w.Visible and assigned(w.parent) then
         begin
-          if not HasInvalidRegion or FInvalidRect.IntersectRect(Params.rect, w.GetBoundsRect) then
-          begin
-            if HasInvalidRegion then
-              w.ParentToWidget(Params.rect.Left, Params.rect.Top)
-            else
-              Params.rect.Clear;
-            fpgSendMessage(Self, w, FPGM_PAINT, Params);
-          end;
+          { In the alien-windows model all virtual widgets share a single
+            off-screen buffer owned by the top-level window.  HandlePaint
+            draws the widget background across the entire buffer, so partial
+            child repaints leave other children's areas as plain background
+            colour.  Always repaint every visible virtual child so the buffer
+            remains complete and RestoreFromBuffer works correctly for OS
+            expose events. }
+          Params.rect.Clear;
+          fpgSendMessage(Self, w, FPGM_PAINT, Params);
         end;
       end; { if w.InheritsFrom(...) }
     end; { for i }
 
-    // Paint layout manager debug visuals
+    { Paint layout manager debug visuals. }
     if Assigned(FLayoutManager) then
       FLayoutManager.PaintDebug(Self, Canvas);
   finally
