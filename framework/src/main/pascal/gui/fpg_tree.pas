@@ -1067,7 +1067,7 @@ end;
 
 function TfpgTreeview.GetNodeHeight: integer;
 begin
-  Result := FFont.GetHeight + 2;
+  Result := FFont.GetHeight + 6;
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
@@ -1592,6 +1592,34 @@ var
   y: integer;
   AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
+
+  // Draw the expand/collapse [+]/[-] box for a node, centred on boxCenterY.
+  // Fills the box interior first so any tree lines already drawn behind it
+  // are covered before the outline and symbol are rendered on top.
+  procedure DrawExpandBox(boxCenterY: integer; aNode: TfpgTreeNode);
+  var
+    bx: integer;
+  begin
+    bx := w - FXOffset - GetColumnWidth(i1) div 2 - 3;
+    // Fill interior with widget background to erase any lines drawn behind
+    Canvas.Color := BackgroundColor;
+    Canvas.FillRectangle(bx + 1, boxCenterY - 3, 7, 7);
+    // Draw the box outline (always solid)
+    Canvas.SetColor(FTreeLineColor);
+    Canvas.SetLineStyle(1, lsSolid);
+    Canvas.DrawRectangle(bx, boxCenterY - 4, 9, 9);
+    // Draw + or -, centred inside the box
+    Canvas.SetColor(clText1);
+    if aNode.Collapsed then
+    begin
+      Canvas.DrawLine(bx + 1, boxCenterY, bx + 7, boxCenterY);          // horizontal bar
+      Canvas.DrawLine(bx + 4, boxCenterY - 2, bx + 4, boxCenterY + 2);  // vertical bar
+    end
+    else
+      Canvas.DrawLine(bx + 1, boxCenterY, bx + 7, boxCenterY);           // horizontal bar only
+    Canvas.SetLineStyle(1, FTreeLineStyle);
+  end;
+
 begin
   if csUpdating in ComponentState then
     Exit;
@@ -1731,7 +1759,7 @@ begin
         Canvas.FillRectangle(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h) - imgx, GetNodeHeight);
       end;
 
-      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - (GetNodeHeight div 2), h.text);
+      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - (FFont.GetAscent div 2), h.text);
 
       Canvas.SetTextColor(h.ParentTextColor);
       Canvas.SetLineStyle(1, FTreeLineStyle);
@@ -1749,31 +1777,13 @@ begin
         end;
 
         // subnode rectangle around the "+" or "-"
-        Canvas.SetColor(FTreeLineColor);
-        Canvas.SetLineStyle(1, lsSolid);  // rectangle is always solid line style
-        Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
-
-        Canvas.SetColor(clText1);
-
-        if h.Collapsed {or h.HasChildren} then
-        begin
-          // draw a "+"
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 4);
-        end
-        else
-        begin
-          // draw a "-"
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
-        end;
-
-        Canvas.SetLineStyle(1, FTreeLineStyle);
+        DrawExpandBox(ACenterPos, h);
       end
       else
       begin
         // short horizontal line for each node
         Canvas.SetColor(FTreeLineColor);
-        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos + 1, w - FXOffset - 1,  ACenterPos + 1);
+        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos, w - FXOffset - 1,  ACenterPos);
       end;
 
       Canvas.SetColor(FTreeLineColor);
@@ -1788,6 +1798,8 @@ begin
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5)
           else
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5);
+          // connector line passed through h.prev's box — redraw it on top
+          DrawExpandBox(ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight), h.prev);
         end
         else
         begin
