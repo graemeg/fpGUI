@@ -1254,7 +1254,11 @@ end;
 Function TRichTextView.GetTextAreaRect: TfpgRect;
 begin
   Result := GetDrawRect;
-//  InflateRect(Result, -2, -2);
+  case BorderStyle of
+    ebsDefault: Result.InflateRect(-2, -2);
+    ebsSingle:  Result.InflateRect(-1, -1);
+    ebsNone:    ; // no inset required
+  end;
 end;
 
 function TRichTextView.GetTextAreaHeight: longint;
