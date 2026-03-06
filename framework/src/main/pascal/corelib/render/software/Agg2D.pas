@@ -1392,7 +1392,10 @@ end;
 
 function TfpgAgg2DFontResource.GetHeight: integer;
 begin
-  Result := FHeight;
+  // Return ascent + descent only, excluding FreeType line-leading.
+  // This keeps GetHeight consistent with the X11 backend (ascent + descent)
+  // and gives correct single-line text height for layout and centering.
+  Result := FAscent + FDescent;
 end;
 
 function TfpgAgg2DFontResource.GetTextWidth(const txt: string): integer;
