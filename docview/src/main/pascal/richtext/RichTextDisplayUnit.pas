@@ -339,9 +339,8 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
     end;
     inc( Y, Line.Height );
 
-    { TODO 99 -oGraeme -cMUST FIX : Must remove this hard-coded value. It's just a test!!! }
     // 4 is the Border Width of 2px times 2 borders.
-    if Y > (FontManager.Widget.Height-4) then
+    if Y > (FontManager.Widget.ActualHeight-4) then
       // past bottom of output canvas
       break;
 
