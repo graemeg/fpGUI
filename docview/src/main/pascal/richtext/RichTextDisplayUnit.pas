@@ -85,7 +85,6 @@ procedure DrawRichTextString( var FontManager: TCanvasFontManager; Layout: TRich
 var
   Point: TPoint;
 begin
-ProfileEvent('DEBUG:  DrawRichTextString >>>');
   if Len = 0 then
     exit;
 
@@ -108,7 +107,6 @@ ProfileEvent('DEBUG:  DrawRichTextString >>>');
         FontManager.Canvas.Font.GetHeight());
   FontManager.DrawString( Point, Len, S );
   X := Point.X;
-ProfileEvent('DEBUG:  DrawRichTextString <<<');
 end;
 
 var
@@ -153,7 +151,6 @@ var
 
 
 begin
-ProfileEvent('DEBUG:  DrawRichTextLine >>>');
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 
@@ -282,7 +279,6 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
   end;
 
   DrawTextBlock;
-ProfileEvent('DEBUG:  DrawRichTextLine <<<');
 end;
 
 Procedure DrawRichTextLayout( var FontManager: TCanvasFontManager;
@@ -298,7 +294,6 @@ Var
   Y: longint;
   BottomOfLine: longint;
 begin
-ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
   assert( StartLine >= 0 );
   assert( StartLine <= Layout.FNumLines );
   assert( EndLine >= 0 );
@@ -351,7 +346,6 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
       break;
 
   until false;
-ProfileEvent('DEBUG:  DrawRichTextLayout <<<');
 End;
 
 Procedure PrintRichTextLayout( var FontManager: TCanvasFontManager;

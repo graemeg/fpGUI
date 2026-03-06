@@ -185,7 +185,6 @@ constructor TRichTextLayout.Create(Text: PChar; Images: TfpgImageList;
     RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager;
     AWidth: longint);
 begin
-ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   inherited Create;
   FRichTextSettings := RichTextSettings;
   FImages := Images;
@@ -203,12 +202,10 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   //FVerticalImageScale   :=   FFontManager.Canvas.VerticalResolution
   //                         / Screen.Canvas.VerticalResolution;
   Layout;
-ProfileEvent('DEBUG:  TRichTextLayout.Create <<<<');
 end;
 
 Destructor TRichTextLayout.Destroy;
 Begin
-  ProfileEvent('TRichTextLayout.Destroy  ******* ');
   FreeAndNil(FLines);
   FLinks.Free;
   FRichTextSettings := nil; // was a reference only
@@ -221,20 +218,17 @@ Procedure TRichTextLayout.AddLineStart(var Line: TLayoutLine);
 begin
   FLines.Add(Line);
   inc( FNumLines );
-  ProfileEvent('TRichTextLayout.AddLineStart: FNumLines =' + intToStr(FNumLines));
 end;
 
 Procedure TRichTextLayout.PerformStyleTag( Const Tag: TTag;
                                            Var Style: TTextDrawStyle;
                                            const X: longint );
 begin
-ProfileEvent('TRichTextLayout.PerformStyleTag >>>');
   ApplyStyleTag( Tag,
                  Style,
                  FFontManager,
                  FRichTextSettings,
                  X );
-ProfileEvent('TRichTextLayout.PerformStyleTag <<<');
 end;
 
 // Check the current font specifications and see if the
@@ -339,7 +333,6 @@ Var
   end;
 
 begin
-ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   FNumLines := 0;
   FWidth := FRichTextSettings.Margins.Left;
   FHeight := FRichTextSettings.Margins.Top;
@@ -628,7 +621,6 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   until false; // loop is exited by finding end of text
 
   inc( FHeight, FRichTextSettings.Margins.Bottom );
-ProfileEvent('DEBUG:  TRichTextLayout.Layout  <<<<');
 End;
 
 Function TRichTextLayout.GetStartX( Style: TTextDrawStyle;

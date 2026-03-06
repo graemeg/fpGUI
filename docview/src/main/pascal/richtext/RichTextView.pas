@@ -691,7 +691,6 @@ Var
 
 begin
   inherited HandlePaint;
-  ProfileEvent('TRichTextView.HandlePaint >>>');
 
   DrawBorder;
   DrawRect := GetDrawRect;
@@ -756,7 +755,6 @@ begin
     Canvas.Color := clWindowBackground;
     Canvas.FillRectangle(CornerRect);
   end;
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint <<<');
 end;
 
 procedure TRichTextView.HandleHide;
@@ -768,7 +766,6 @@ end;
 procedure TRichTextView.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
   var consumed: boolean);
 begin
-ProfileEvent('HandleKeyPress');
   case keycode of
     keyPageDown:
         begin
@@ -1076,7 +1073,6 @@ Procedure TRichTextView.Layout;
 Var
   DrawWidth: longint;
 begin
-ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
   FLayoutRequired := true;
 
   if InDesigner then
@@ -1084,43 +1080,35 @@ ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
   if IsLoading or not WindowAllocated then
     exit;
 
-ProfileEvent('DEBUG:  TRichTextView.Layout    1 of 6');
   FSelectionEnd := -1;
   FSelectionStart := -1;
   RemoveCursor;
 
-ProfileEvent('DEBUG:  TRichTextView.Layout    2');
   DrawWidth := GetTextAreaRect.Width;
 
   try
     if Assigned(FLayout) then
     begin
-ProfileEvent('DEBUG:  TRichTextView.Layout    3');
       FLayout.Free;
       FLayout := nil;
     end;
   except
     // this is only every a issue under 64bit. FLayout can suddenly not be referenced anymore
     on E: Exception do
-      ProfileEvent('ERROR:  Failed to free FLayout.  Error Msg: ' + E.Message);
 //      raise Exception.Create('Failed to free FLayout. Error msg: ' + E.Message);
   end;
 
-ProfileEvent('DEBUG:  TRichTextView.Layout    4');
   FLayout := TRichTextLayout.Create( FText,
                                      FImages,
                                      FRichTextSettings,
                                      FFontManager,
                                      DrawWidth-(FScrollbarWidth{*6}) );
 
-ProfileEvent('DEBUG:  TRichTextView.Layout    5');
 
   SetupScrollBars;
-ProfileEvent('DEBUG:  TRichTextView.Layout    6');
   RefreshCursorPosition;
 
   FLayoutRequired := false;
-ProfileEvent('DEBUG:  TRichTextView.Layout <<<<');
 End;
 
 procedure TRichTextView.GetFirstVisibleLine( Var LineIndex: longint;
@@ -1214,7 +1202,6 @@ Var
   SelectionEndP: PChar;
   Temp: longint;
 begin
-ProfileEvent('DEBUG:  TRichTextView.Draw >>>');
   DrawRect := GetTextAreaRect;
   if StartLine > EndLine then
   begin
@@ -1245,7 +1232,6 @@ ProfileEvent('DEBUG:  TRichTextView.Draw >>>');
                       EndLine,
                       Point(X, Y)
                       );
-ProfileEvent('DEBUG:  TRichTextView.Draw <<<');
 End;
 
 // This gets the area of the control that we can draw on

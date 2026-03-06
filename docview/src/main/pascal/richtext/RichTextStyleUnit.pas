@@ -119,13 +119,11 @@ Procedure ApplyStyle(var Style: TTextDrawStyle; FontManager: TCanvasFontManager)
 var
   s: string;
 begin
-ProfileEvent('DEBUG:  ApplyStyle >>>');
   assert(FontManager <> nil, 'FontManager should not have been nil');
   s := Style.FontNameSize;
   ApplyFontAttributes(s, Style.FontAttributes);
   FontManager.SetFont(s);
   FontManager.Canvas.TextColor := Style.Color;
-ProfileEvent('DEBUG:  ApplyStyle <<<');
 end;
 
 Procedure ApplyStyleTag( Const Tag: TTag;
@@ -148,7 +146,6 @@ var
   MarginSize: longint;
   ParsePoint: longint;
 begin
-ProfileEvent('DEBUG:  ApplyStyleTag >>>');
   case Tag.TagType of
     ttBold:
       Include( Style.FontAttributes, faBold );
@@ -335,7 +332,6 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
   end;  { case Tag.TagType }
 
   ApplyStyle( Style, FontManager );
-ProfileEvent('DEBUG:  ApplyStyleTag <<<');
 end;
 
 function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;

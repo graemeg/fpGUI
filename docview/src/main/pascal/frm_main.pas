@@ -2720,7 +2720,6 @@ var
   lReadInsertPoint: boolean;
   lNoteTextStarted: boolean;
 begin
-  ProfileEvent( 'Load notes for ' + AHelpFile.Filename );
 
   if AHelpFile.NotesLoaded then
     exit;
@@ -2818,9 +2817,7 @@ begin
   for FileIndex:= 0 to AFiles.Count - 1 do
   begin
     HelpFile:= THelpFile(AFiles[ FileIndex ]);
-    ProfileEvent( 'File ' + IntToStr( FileIndex ) );
     TopicIndex:= 0;
-    ProfileEvent('TopicCount=' + IntToStr(HelpFile.TopicCount));
     while TopicIndex < HelpFile.TopicCount do
     begin
       Topic := HelpFile.Topics[ TopicIndex ];
@@ -3235,13 +3232,11 @@ var
   NotesFile: TStringList;
   TopicIndex: integer;
 begin
-  ProfileEvent('Save notes for ' + AHelpFile.Filename);
   if not AHelpFile.NotesLoaded then
     // we never loaded the notes/displayed a topic from this file
     // so don't do anything.
     exit;
 
-  ProfileEvent('Really saving');
   NotesFileName := fpgChangeFileExt(AHelpFile.FileName, NOTES_FILE_EXTENSION);
 
   FileNoteCount := 0;
@@ -3382,7 +3377,6 @@ var
   FileIndex: integer;
   HelpFile: THelpFile;
 begin
-  ProfileEvent( 'Save notes' );
   for FileIndex := 0 to CurrentOpenFiles.Count-1 do
   begin
     HelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
@@ -3442,7 +3436,6 @@ begin
   if CurrentOpenFiles.Count = 0 then
     Exit;
 
-  ProfileEvent('DisplayTopic >>>>');
   if ATopic = nil then
   begin
     case PageControl1.ActivePageIndex of
@@ -3454,7 +3447,6 @@ begin
             end
             else
               Topic := TTopic(tvContents.Selection.Data);
-            ProfileEvent('Got Topic from Treeview');
           end;
       1:  begin // Index tab
             if lbIndex.FocusItem = -1 then
@@ -3464,7 +3456,6 @@ begin
             end
             else
               Topic := TTopic(lbIndex.Items.Objects[lbIndex.FocusItem]);
-            ProfileEvent('Got Topic from Index listbox');
           end;
       2:  begin // Search tab
             if lbSearchResults.FocusItem = -1 then
@@ -3474,7 +3465,6 @@ begin
             end
             else
               Topic := TTopic(lbSearchResults.Items.Objects[lbSearchResults.FocusItem]);
-            ProfileEvent('Got Topic from Search Results listbox');
           end;
       4:  begin // History tab
             if lbHistory.FocusItem = -1 then
@@ -3484,7 +3474,6 @@ begin
             end
             else
               Topic := TTopic(lbHistory.Items.Objects[lbHistory.FocusItem]);
-            ProfileEvent('Got Topic from History listbox');
           end;
     end;
   end  // case..
@@ -3498,14 +3487,12 @@ begin
 
   RichView.Clear;
   ImageIndices := TList.Create;
-  ProfileEvent('Cleared memo...');
 
   HelpFile := TopicFile(CurrentTopic);
   if HelpFile = nil then
     raise Exception.Create('Failed to get active HelpFile from Topic');
 
   if HelpFile.HighlightWords <> nil then
-    ProfileEvent('highlightwords is ok');
 
   if (AllFilesWordSequences.Count > 0) // ie we have done a search...
      {and ViewHighlightSearchWordsMI.Checked} then
@@ -3517,9 +3504,7 @@ begin
     HighlightWordSequences :=  nil;
 
   lText := '';
-  ProfileEvent('Debug show hex values = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
-    ProfileEvent('ImageIndices initialized');
 
   CurrentTopic.GetText( HighlightWordSequences,
                   Debug {ShowCodes},
@@ -4055,7 +4040,6 @@ var
   BookmarksFileName: string;
   s: string;
 begin
-  ProfileEvent( 'Load bookmarks for ' + AHelpFile.Filename );
 
   BookmarksFileName := fpgChangeFileExt(AHelpFile.FileName, BOOKMARK_FILE_EXTENSION);
 
@@ -4106,7 +4090,6 @@ var
   BookmarksFileName: TfpgString;
   BookmarkCount: integer;
 begin
-  ProfileEvent( 'Save bookmarks for ' + AHelpFile.Filename );
 
   BookmarksFileName:= fpgChangeFileExt(AHelpFile.FileName, BOOKMARK_FILE_EXTENSION);
 

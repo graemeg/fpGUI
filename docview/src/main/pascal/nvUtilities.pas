@@ -46,8 +46,6 @@ procedure DeallocateMemory( Var P: pointer );
 
 // Alias method which is the same as Move() but with less confusing name
 procedure MemCopy(const src; var dest; size: SizeInt);
-// Allows for debug output and quite disable of output
-procedure ProfileEvent(const AString: string);
 // Return AFilename's size in bytes
 function GetFileSize(const AFilename: string): integer;
 
@@ -210,13 +208,6 @@ end;
 procedure MemCopy(const src; var dest; size: SizeInt);
 begin
   Move(src, dest, size);
-end;
-
-procedure ProfileEvent(const AString: string);
-begin
-  {$IFDEF DEBUG}
-  writeln('DEBUG:  ', AString);
-  {$ENDIF}
 end;
 
 function GetFileSize(const AFilename: string): integer;
