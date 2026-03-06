@@ -1759,7 +1759,7 @@ begin
         Canvas.FillRectangle(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h) - imgx, GetNodeHeight);
       end;
 
-      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - (FFont.GetAscent div 2), h.text);
+      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - ((FFont.GetAscent + FFont.GetDescent) div 2), h.text);
 
       Canvas.SetTextColor(h.ParentTextColor);
       Canvas.SetLineStyle(1, FTreeLineStyle);
