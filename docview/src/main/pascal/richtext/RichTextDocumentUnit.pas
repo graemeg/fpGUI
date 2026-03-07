@@ -804,6 +804,10 @@ begin
     P := NextP;
   end;
 
+  // Null-terminate the output so PChar-to-string conversion works correctly
+  if (Buffer <> nil) and (Q < EndQ) then
+    Q[ 0 ] := #0;
+
   Result := PCharDiff( Q, Buffer );
 end;
 
