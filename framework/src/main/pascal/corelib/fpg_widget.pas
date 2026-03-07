@@ -1647,10 +1647,12 @@ begin
     if Assigned(FLayoutManager) then
       FLayoutManager.PaintDebug(Self, Canvas);
   finally
-    if HasInvalidRegion then
-      Canvas.EndDraw(FInvalidRect)
-    else
-      Canvas.EndDraw;
+    { HandlePaint clears the entire off-screen buffer and we unconditionally
+      repaint all virtual children to keep the buffer complete, so we must
+      blit the full buffer — not just FInvalidRect — otherwise regions
+      outside the dirty rect show stale screen content (e.g. the right
+      portion of a RichTextView never updates after scrolling). }
+    Canvas.EndDraw;
   end;
 
   FInvalidRect.Clear;
