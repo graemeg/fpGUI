@@ -3654,8 +3654,8 @@ begin
   Top := 100;
   Left := 100;
   PreferredSize := fpgSize(650, 400);
-  MinWidth := 430;
-  MinHeight := 300;
+  MinWidth := 550;
+  MinHeight := 500;
   WindowTitle := 'fpGUI Documentation Viewer';
   ShowHint := True;
   WindowPosition := wpUser;
