@@ -814,8 +814,7 @@ begin
   with tvContents do
   begin
     Name := 'tvContents';
-    PreferredSize := fpgSize(240, 300);
-    FontDesc := '#Label1';
+    PreferredSize := fpgSize(200, 100);
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
@@ -829,16 +828,15 @@ begin
     Name := 'btnGo';
     PreferredSize := fpgSize(80, 24);
     Text := 'Go to';
-    FontDesc := '#Label1';
     TabOrder := 1;
     OnClick := @btnGoClicked;
   end;
   {%endregion}
 
   tsContents.LayoutManager := lm;
-  lm.LC.Fill.WrapAfter(1);  // Single column layout (wrap after each component)
+  lm.LC.WrapAfter(1).Fill;
   lm.AddLayoutComponent(btnGo, TfpgMigCC.Create.AlignX('right'));
-  lm.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowY);
+  lm.AddLayoutComponent(tvContents, TfpgMigCC.Create.PushY.Grow);
 end;
 
 procedure TMainForm.uiCreateIndexTab;
