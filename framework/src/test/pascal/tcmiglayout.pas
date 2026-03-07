@@ -397,7 +397,8 @@ begin
   w2.Width := 50;
   w2.Height := 20;
   c2 := TfpgMigCC.Create;
-  c2.GrowX;  // GrowX alone provides fill behavior in MigLayout v11
+  c2.PushX;  // PushX makes column 2 grow; GrowX makes w2 fill the grown column
+  c2.GrowX;
   lm.AddLayoutComponent(w2, c2);
 
   container.Realign;

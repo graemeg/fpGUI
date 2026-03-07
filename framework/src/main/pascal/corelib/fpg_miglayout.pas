@@ -1078,6 +1078,7 @@ var
   splitLeft: Integer;  // Remaining components to add to current cell due to Split
   dockInsets: array[0..3] of Integer;  // [top, left, bottom, right] for docking
   dockSide: Integer;
+  hasPushX, hasPushY: Boolean;  // Port of Grid.java lines 147, 285-286
 begin
   inherited Create;
   FContainer := AContainer;
@@ -1117,6 +1118,8 @@ begin
   cellX := 0;
   cellY := 0;
   splitLeft := 0;  // Track remaining components to add to current cell due to Split
+  hasPushX := False;
+  hasPushY := False;
 
   if (ACCMap <> nil) and (AComponents <> nil) then
   begin
@@ -1129,6 +1132,16 @@ begin
 
       // Get the constraint for this widget (may be nil)
       cc := ACCMap[child];
+
+      { Port of Grid.java lines 285-286: Detect push weights from CC
+        hasPushX/Y become True if any visible component has push weight set }
+      if cc <> nil then
+      begin
+        if not IsNan(cc.PushWeightX) then
+          hasPushX := True;
+        if not IsNan(cc.PushWeightY) then
+          hasPushY := True;
+      end;
 
       { Port of Grid.java lines 196-203: Handle docking components
         Docking components bypass normal grid flow }
@@ -1286,10 +1299,10 @@ begin
   FColGroupLists := DivideIntoLinkedGroups(False);  // Columns
   FRowGroupLists := DivideIntoLinkedGroups(True);   // Rows
 
-  // Fourth pass: Calculate default grow weights (Port of Grid.java lines 394-395)
-  // Note: hasPush parameters not yet implemented, passing False for now
-  FGrowXs := GetDefaultGrowWeights(False, False);  // For columns
-  FGrowYs := GetDefaultGrowWeights(False, True);   // For rows
+  // Fourth pass: Calculate default push weights (Port of Grid.java lines 394-395)
+  // hasPushX/Y detected during first pass from CC.PushWeightX/Y
+  FGrowXs := GetDefaultGrowWeights(hasPushX, False);  // For columns
+  FGrowYs := GetDefaultGrowWeights(hasPushY, True);   // For rows
 
   // Calculate gaps now that the cells are filled
   ltr := TfpgMigLayoutUtil.IsLeftToRight(FLC, FContainer);
@@ -2571,12 +2584,12 @@ var
   gwArr: TfpgMigFloatArray;
   i, j, c, ix: Integer;
   grps: TfpgMigLinkedDimGroupList;
-  rowGw: Single;
+  rowPushWeight: Single;
   grp: TfpgMigLinkedDimGroup;
   cw: TfpgMigCompWrap;
-  gw: Single;
-  hasGrowWeight: Boolean;
+  pushWeight: Single;
 begin
+  // Port of Grid.java getDefaultPushWeights() - line 866
   // If no push and no fill, return empty array (no growth) - line 774
   if not AHasPush then
   begin
@@ -2598,24 +2611,24 @@ begin
     end;
   end;
 
-  // Get the appropriate group lists - line 777
+  // Get the appropriate group lists
   if AIsRows then
     groupLists := FRowGroupLists
   else
     groupLists := FColGroupLists;
 
-  // Start with GROW_100 (single element array with value 100.0) - line 779
+  // Start with GROW_100 (single element array with value 100.0)
   SetLength(gwArr, 1);
   gwArr[0] := GROW_100[0];
 
-  // Loop through each row/column - line 780
+  // Loop through each row/column
   ix := 1;  // Index for alternating array (gaps at even, sizes at odd)
   for i := 0 to Length(groupLists) - 1 do
   begin
     grps := groupLists[i];
-    rowGw := NaN;  // Use NaN to indicate "not set"
+    rowPushWeight := NaN;  // null in Java
 
-    // Find maximum grow weight for this row/column from all components - line 783
+    // Find maximum push weight for this row/column from all components - line 879
     for j := 0 to grps.Count - 1 do
     begin
       grp := grps[j];
@@ -2627,39 +2640,30 @@ begin
         if cw.FCC = nil then
           Continue;
 
-        // Get grow weight from component CC - line 788
-        // Note: hasPush parameter not yet implemented, so we use component grow weight
+        // Get push weight from CC (PushX or PushY) - line 879
         if AIsRows then
-          hasGrowWeight := cw.FCC.Vertical.HasGrowWeight
+          pushWeight := cw.FCC.PushWeightY
         else
-          hasGrowWeight := cw.FCC.Horizontal.HasGrowWeight;
+          pushWeight := cw.FCC.PushWeightX;
 
-        if hasGrowWeight then
-        begin
-          if AIsRows then
-            gw := cw.FCC.Vertical.GetGrowWeight
-          else
-            gw := cw.FCC.Horizontal.GetGrowWeight;
-
-          if IsNan(rowGw) or (gw > rowGw) then
-            rowGw := gw;
-        end;
+        // Keep max push weight for this row/column - line 880
+        if IsNan(rowPushWeight) or (not IsNan(pushWeight) and (pushWeight > rowPushWeight)) then
+          rowPushWeight := pushWeight;
       end;
     end;
 
-    // If this row/column has a specific grow weight, expand array and set it - line 794
-    if not IsNan(rowGw) then
+    // If this row/column has a push weight, expand array and set it - line 885
+    if not IsNan(rowPushWeight) then
     begin
-      // First time we find a specific weight, expand from GROW_100 to full array - line 795
+      // First time we find a push weight, expand from GROW_100 to full array - line 886
       if Length(gwArr) = 1 then
       begin
-        // Array size: (groupLists.length << 1) + 1 = groupLists.length * 2 + 1 - line 796
         SetLength(gwArr, (Length(groupLists) * 2) + 1);
         // Fill with NaN
         for j := 0 to High(gwArr) do
           gwArr[j] := NaN;
       end;
-      gwArr[ix] := rowGw;  // Put grow weight at odd index for this row/column
+      gwArr[ix] := rowPushWeight;  // Put push weight at odd index
     end;
 
     ix := ix + 2;  // Move to next odd index (skip gap at even index)
