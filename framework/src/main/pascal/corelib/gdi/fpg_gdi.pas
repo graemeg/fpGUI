@@ -153,6 +153,7 @@ type
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); override;
     property    DCHandle: TfpgDCHandle read FDrawGC;
   public
     constructor Create(awidget: TfpgWidgetBase); override;
@@ -1331,8 +1332,16 @@ begin
           {$ENDIF}
           if GetUpdateRect(w.WinHandle, r, False) then
             msgp.rect.SetRect(r.Left, r.Top, r.Right-r.Left, r.Bottom-r.Top);
+          { ValidateRect must always be called to clear the update region and
+            prevent Windows from re-posting WM_PAINT continuously. }
           ValidateRect(w.WinHandle, r);
-          fpgSendMessage(nil, w, FPGM_PAINT, msgp);
+          { Fast path: blit the dirty rect from the off-screen buffer directly
+            to the window, bypassing the paint message queue.  This is the
+            correct approach for the alien-windows model where every widget
+            renders into a single shared buffer.  Fall back to a full repaint
+            message only when no buffer exists yet (before the first paint). }
+          if not TfpgWidget(w.Owner).Canvas.RestoreFromBuffer(msgp.rect) then
+            fpgSendMessage(nil, w, FPGM_PAINT, msgp);
         end;
 
     WM_SYSCOMMAND:
@@ -2740,6 +2749,24 @@ begin
   // Only the top level window canvas puts the buffer to the screen so no delta needed
   if (FBufferBitmap > 0) and (w > 0) and (h > 0) then
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
+end;
+
+procedure TfpgGDICanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  hdc: HDC;
+begin
+  { Blit the exposed rect from the off-screen buffer DC (FDrawGC) directly to
+    the window.  FDrawGC is valid whenever the buffer has been allocated, which
+    RestoreFromBuffer guarantees before calling here.  We obtain a fresh window
+    DC so this is safe to call outside of a BeginDraw/EndDraw pair. }
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  hdc := Windows.GetDC(WinHandle);
+  if hdc = 0 then
+    Exit;
+  BitBlt(hdc, ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+      FDrawGC, ARect.Left, ARect.Top, SRCCOPY);
+  Windows.ReleaseDC(WinHandle, hdc);
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);

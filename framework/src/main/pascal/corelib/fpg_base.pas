@@ -446,6 +446,10 @@ type
     procedure   DoDrawPolygon(const Points: array of TPoint); virtual; abstract;
     function    GetBufferAllocated: Boolean; virtual; abstract;
     procedure   DoAllocateBuffer; virtual; abstract;
+    { Blit the off-screen buffer directly to the OS window for the given rect,
+      bypassing the paint message queue. Called by RestoreFromBuffer.
+      The default implementation is a no-op; backends override as needed. }
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); virtual;
   public
     constructor Create(awidget: TfpgWidgetBase); virtual;
     destructor  Destroy; override;
@@ -490,6 +494,12 @@ type
     procedure   EndDraw(ARect: TfpgRect); overload;
     procedure   EndDraw; overload;
     procedure   FreeResources;
+    { Blit ARect from the off-screen buffer directly to the OS window without
+      going through the paint message queue. Returns True if the buffer was
+      available and the blit was performed; False if no buffer exists yet (e.g.
+      before the first paint), in which case the caller should fall back to
+      InvalidateRect to trigger a full repaint. }
+    function    RestoreFromBuffer(const ARect: TfpgRect): Boolean;
     property    Color: TfpgColor read FColor write SetColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
     property    Font: TfpgFontResourceBase read FFont;
@@ -3289,6 +3299,18 @@ begin
   itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
   {$ENDIF}
   EndDraw(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+end;
+
+procedure TfpgCanvasBase.DoRestoreFromBuffer(const ARect: TfpgRect);
+begin
+  { Default no-op. Backends that support direct buffer blitting override this. }
+end;
+
+function TfpgCanvasBase.RestoreFromBuffer(const ARect: TfpgRect): Boolean;
+begin
+  Result := GetBufferAllocated;
+  if Result then
+    DoRestoreFromBuffer(ARect);
 end;
 
 procedure TfpgCanvasBase.FreeResources;

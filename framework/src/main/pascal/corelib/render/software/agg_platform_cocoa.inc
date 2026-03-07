@@ -141,6 +141,36 @@ begin
   end;
 end;
 
+procedure TAgg2D.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  win: TWindowHack;
+  imageData: Pointer;
+  rect: NSRect;
+begin
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  if not Assigned(FImg) then
+    Exit;
+
+  win := TWindowHack(TfpgWidgetBase(FWidget).Window);
+  if not Assigned(win) or not win.HandleIsValid then
+    Exit;
+
+  FImg.UpdateImage;
+
+  imageData := TImageHack(FImg).ImageData;
+  if not Assigned(imageData) then
+    Exit;
+
+  if Assigned(win.View) then
+  begin
+    win.View.setImageBuffer(imageData, FImg.Width, FImg.Height);
+    rect := NSMakeRect(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
+    win.View.setNeedsDisplayInRect(rect);
+    win.View.displayIfNeeded;
+  end;
+end;
+
 
 {$endif}
 

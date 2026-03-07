@@ -133,5 +133,27 @@ begin
   ReleaseDC(TfpgNativeWindow(FWidget.Window).WinHandle, destdc);
 end;
 
+procedure TAgg2D.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  srcdc: HDC;
+  destdc: HDC;
+begin
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  if not Assigned(FImg) then
+    Exit;
+  if not FWidget.WindowAllocated or not FWidget.Window.HasHandle then
+    Exit;
+
+  FImg.UpdateImage;
+  destdc := Windows.GetDC(TfpgNativeWindow(FWidget.Window).WinHandle);
+  srcdc := CreateCompatibleDC(fpgApplication.Display);
+  SelectObject(srcdc, TImageHack(FImg).BMPHandle);
+  BitBlt(destdc, ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+         srcdc, ARect.Left, ARect.Top, SRCCOPY);
+  DeleteDC(srcdc);
+  ReleaseDC(TfpgNativeWindow(FWidget.Window).WinHandle, destdc);
+end;
+
 {$endif}
 

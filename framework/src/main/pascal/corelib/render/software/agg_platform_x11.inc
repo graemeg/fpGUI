@@ -135,6 +135,32 @@ begin
   win.TriggerSyncCounter;
 end;
 
+procedure TAgg2D.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  drawgc: Tgc;
+  GcValues: TXGcValues;
+  X11Handle: TfpgWinHandle;
+  win: TfpgX11WindowHack;
+begin
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  if not Assigned(FImg) then
+    Exit;
+
+  win := TfpgX11WindowHack(TfpgWidgetBase(FWidget).Window);
+  X11Handle := win.WinHandle;
+  if X11Handle <= 0 then
+    Exit;
+
+  FImg.UpdateImage;
+  drawgc := XCreateGc(fpgApplication.Display, X11Handle, 0, @GcValues);
+  XPutImage(fpgApplication.Display, X11Handle,
+      drawgc, TImageHack(FImg).XImage,
+      ARect.Left, ARect.Top, ARect.Left, ARect.Top,
+      ARect.Width, ARect.Height);
+  XFreeGc(fpgApplication.Display, drawgc);
+end;
+
 
 {$endif}
 

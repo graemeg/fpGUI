@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2026 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -220,6 +220,7 @@ type
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); override;
     property    DCHandle: TfpgDCHandle read DrawHandle;
   public
     constructor Create(awidget: TfpgWidgetBase); override;
@@ -2074,8 +2075,12 @@ begin
 
     X.Expose:
         begin
+          { Save the window handle before the loop may update ev. }
+          w := FindWindowByHandle(ev.xexpose.window);
           with ev.xexpose do
             msgp.rect.SetRect(x, y, width, height);
+          { Drain all pending Expose events for this window in one pass,
+            merging their rectangles into a single repaint region. }
           while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
           begin
             with ev.xexpose do
@@ -2084,11 +2089,14 @@ begin
               msgp.rect.UnionRect(msgp.rect, rect);
             end;
           end;
-          if ev.xexpose.count = 0 then
+          if Assigned(w) then
           begin
-            w := FindWindowByHandle(ev.xexpose.window);
-            // use invalidate if a FPGM_PAINT message is already queued
-            if Assigned(w) then
+            { Fast path: blit the exposed region from the off-screen buffer
+              directly to the window.  This is correct for the alien-windows
+              model where a single buffer backs the entire top-level window.
+              Fall back to a full repaint only when no buffer exists yet
+              (e.g. before the very first paint). }
+            if not TfpgWidget(w.Owner).Canvas.RestoreFromBuffer(msgp.rect) then
               TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
           end;
         end;
@@ -3496,14 +3504,7 @@ procedure TfpgX11Canvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
-  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
-  {$ENDIF}
   if (DrawHandle = FBufferPixmap) then
   begin
     if (w < 1) or (h < 1) then
@@ -3513,6 +3514,24 @@ begin
     XFreeGc(xapplication.display, cgc);
     TfpgX11Window(FWidget.Window).TriggerSyncCounter;
   end;
+end;
+
+procedure TfpgX11Canvas.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  cgc: TfpgGContext;
+  GcValues: TXGcValues;
+begin
+  { Blit directly from the off-screen pixmap to the X window for the exposed
+    rect.  We create a temporary GC so this is safe to call outside of a
+    BeginDraw/EndDraw pair, i.e. from the Expose event handler. }
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
+  XCopyArea(xapplication.Display, FBufferPixmap,
+      TfpgX11Window(FWidget.Window).WinHandle, cgc,
+      ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+      ARect.Left, ARect.Top);
+  XFreeGc(xapplication.display, cgc);
 end;
 
 procedure TfpgX11Canvas.DoEndDraw;

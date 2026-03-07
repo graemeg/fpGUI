@@ -411,6 +411,7 @@ type
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); override;
     // -------- TfpgCanvasBase  end  ---------------
 
   public
