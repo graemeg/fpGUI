@@ -103,7 +103,6 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: TfpgString;
-    FInvalidRect: TfpgRect;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
@@ -688,8 +687,6 @@ begin
   FAcceptDrops    := False;
   FOnClickPending := False;
   FIgnoreDblClicks := False;
-  FInvalidRect.Clear;
-
   inherited Create(AOwner);
 
   if (AOwner <> nil) and (AOwner is TfpgWidget)
@@ -714,7 +711,7 @@ begin
   FCanvas.Free;
   HandleHide;
 
-  if FInvalidated or not FInvalidRect.IsUnassigned then
+  if FInvalidated then
     fpgDeleteMessagesForTarget(Self, FPGM_PAINT);
 
   if Parent <> nil then
@@ -1571,7 +1568,6 @@ procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 var
   i: Integer;
   w: TfpgWidget;
-  HasInvalidRegion: Boolean;
   Params: TfpgMessageParams;
 begin
   if IsHidden then
@@ -1587,35 +1583,11 @@ begin
   if (ActualWidth < 1) or (ActualHeight < 1) then
     Exit;
 
-  { Merge the incoming dirty rect with any accumulated invalid region.
-    When the parent sends an empty rect it is requesting a full repaint of
-    this widget; clear FInvalidRect so this widget and all of its virtual
-    children also repaint in full, keeping the shared buffer complete. }
-  if msg.Params.rect.IsUnassigned then
-    FInvalidRect.Clear
-  else if FInvalidRect.IsUnassigned then
-    FInvalidRect := msg.Params.rect
-  else
-    FInvalidRect.UnionRect(FInvalidRect, msg.Params.rect);
-
-  HasInvalidRegion := not FInvalidRect.IsUnassigned;
-
   Canvas.BeginDraw;
   try
     HandlePaint;
     if Assigned(FOnPaint) then
       FOnPaint(Self);
-
-    if HasOwnWindow then
-    begin
-      if HasInvalidRegion and ((FInvalidRect.Width <= 0)  or (FInvalidRect.Height <= 0 )) then
-      begin
-        Canvas.EndDraw;
-        FInvalidRect.Clear;
-        FInvalidated:=False;
-        Exit;
-      end;
-    end;
 
     { Set the invalidated flag before processing child widgets to prevent
       infinite paint loops. If a child widget triggers parent invalidation
@@ -1649,13 +1621,10 @@ begin
   finally
     { HandlePaint clears the entire off-screen buffer and we unconditionally
       repaint all virtual children to keep the buffer complete, so we must
-      blit the full buffer — not just FInvalidRect — otherwise regions
-      outside the dirty rect show stale screen content (e.g. the right
-      portion of a RichTextView never updates after scrolling). }
+      blit the full buffer to screen. }
     Canvas.EndDraw;
   end;
 
-  FInvalidRect.Clear;
   FInvalidated:=False;
 end;
 
@@ -1902,8 +1871,6 @@ begin
 end;
 
 procedure TfpgWidget.InvalidateRect(ARect: TfpgRect);
-var
-  Params: TfpgMessageParams;
 begin
   if not HasOwnWindow then
   begin
@@ -1921,15 +1888,9 @@ begin
     if (not WindowAllocated) or ((ARect.Width <= 0) or (ARect.Height <= 0)) then
       Exit;
 
-    if FInvalidRect.IsUnassigned then
-      FInvalidRect := ARect
-    else
-      FInvalidRect.UnionRect(FInvalidRect, ARect);
-
     if not FInvalidated then
     begin
-      Params.rect := FInvalidRect;
-      fpgPostMessage(Self, Self, FPGM_PAINT, Params);
+      fpgPostMessage(Self, Self, FPGM_PAINT);
       FInvalidated:=True;
     end;
   end;
