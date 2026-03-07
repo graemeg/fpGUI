@@ -2695,7 +2695,7 @@ end;
 
 function TfpgGDICanvas.GetBufferAllocated: Boolean;
 begin
-  if FCanvasTarget <> Self then
+  if (FCanvasTarget <> nil) and (FCanvasTarget <> Self) then
     Result := TfpgGDICanvas(FCanvasTarget).GetBufferAllocated
   else
   begin

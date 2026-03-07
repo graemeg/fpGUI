@@ -3616,7 +3616,7 @@ var
   hp: longword;
   bw: longword;
 begin
-  if FCanvasTarget <> Self then
+  if (FCanvasTarget <> nil) and (FCanvasTarget <> Self) then
     Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
   else
   begin

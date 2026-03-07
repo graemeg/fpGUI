@@ -4202,7 +4202,7 @@ end;
 
 function TAgg2D.GetBufferAllocated: Boolean;
 begin
-  if FCanvasTarget <> Self then
+  if (FCanvasTarget <> nil) and (FCanvasTarget <> Self) then
   begin
     Result := TAgg2D(FCanvasTarget).GetBufferAllocated;
   end
