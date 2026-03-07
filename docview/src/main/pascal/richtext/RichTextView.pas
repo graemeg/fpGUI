@@ -257,7 +257,8 @@ Type
                               PreserveSelection: boolean );
     procedure SetCursorPosition( Offset: longint;
                                  Row: longint;
-                                 PreserveSelection: boolean );
+                                 PreserveSelection: boolean;
+                                 EnsureVisible: boolean = True );
 
     procedure MakeRowVisible( Row: longint );
     procedure MakeRowAndColumnVisible(Row: longint; Column: longint);
@@ -801,7 +802,7 @@ begin
   if not Shift then
     ClearSelection;
 
-  SetCursorPosition(Offset, Line, Shift);
+  SetCursorPosition(Offset, Line, Shift, False);
 
   FMouseDragging := True;
   CaptureMouse;
@@ -844,7 +845,7 @@ begin
     if Position in [tpAboveTextArea, tpBelowTextArea] then
       exit;
 
-    SetCursorPosition(Offset, Line, True); // True = preserve selection start
+    SetCursorPosition(Offset, Line, True, False); // PreserveSelection=True, EnsureVisible=False
 
     if SelectionSet then
     begin
@@ -2134,7 +2135,8 @@ end;
 
 procedure TRichTextView.SetCursorPosition( Offset: longint;
                                            Row: longint;
-                                           PreserveSelection: boolean );
+                                           PreserveSelection: boolean;
+                                           EnsureVisible: boolean = True );
 var
   Index: longint;
 begin
@@ -2152,7 +2154,8 @@ begin
     SetSelectionEndInternal( -1 );
     SetSelectionStartInternal( Index );
   end;
-  MakeRowAndColumnVisible( FCursorRow, Offset );
+  if EnsureVisible then
+    MakeRowAndColumnVisible( FCursorRow, Offset );
 end;
 
 Procedure TRichTextView.CursorRight( PreserveSelection: boolean );
