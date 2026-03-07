@@ -588,14 +588,15 @@ end;
 * Child widgets' canvases use **pointer arithmetic** to access subregions
 * No memory duplication - all pointing to same buffer
 
-=== Reference Counting
+=== Font Resources
 
-Font resources use reference counting:
+Font resources are managed centrally by `TfpgFontManager`:
 
-* Fonts are managed by `TfpgFontManager`
-* `GetFont()` increments reference count
-* Setting font to `nil` decrements reference count
-* Font is freed when count reaches zero
+* All fonts are obtained via `fpgApplication.FontManager.GetFont(desc)`
+* The manager caches font resources — identical descriptors return the same instance
+* Widgets hold a plain reference (`TfpgFontResourceBase`); they do **not** own it
+* Widgets must set their font field to `nil` on destruction — never call `.Free`
+* All cached font resources are released by the font manager at application exit
 
 '''
 
@@ -610,8 +611,11 @@ Font resources use reference counting:
 
 === Potential Bottlenecks
 
-1. **Full-window repaints** - resizing can trigger repainting all widgets
-   * Mitigated by: dirty rectangle tracking (`FInvalidRect`)
+1. **Full-window repaints** - resizing or any invalidation repaints the widget and
+   all its virtual children unconditionally
+   * This is by design: because all virtual widgets share one off-screen buffer,
+     a partial repaint would leave other widgets' areas as plain background colour.
+     Every visible virtual child is always repainted so the buffer stays complete.
 
 2. **Hit-testing overhead** - every mouse move requires tree traversal
    * Mitigated by: reverse iteration (top-most first), early exit
