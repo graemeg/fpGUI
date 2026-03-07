@@ -124,6 +124,7 @@ Type
     FImages: TfpgImageList;
 
     // Selection scrolling
+    FMouseDragging: boolean;
     //FScrollTimer: TfpgTimer;
     FOldMousePoint: TPoint;
     FScrollingDirection: TScrollingDirection;
@@ -460,10 +461,6 @@ begin
 end;
 
 Procedure TRichTextView.SetSelectionEndInternal( SelectionEnd: longint );
-var
-  StartRedrawLine: longint;
-  EndRedrawLine: longint;
-  OldClip: TfpgRect;
 begin
   if SelectionEnd = FSelectionEnd then
     exit;
@@ -478,63 +475,19 @@ begin
   if SelectionEnd = FSelectionStart then
     SelectionEnd := -1;
 
-  if ( FSelectionEnd = -1 ) then
-  begin
-    // there is currently no selection,
-    // and we are setting one: need to draw it all
-    StartRedrawLine := FLayout.GetLineFromCharIndex( FSelectionStart );
-    EndRedrawLine := FLayout.GetLineFromCharIndex( SelectionEnd );
-  end
-  else
-  begin
-    // there is already a selection
-    if SelectionEnd = -1 then
-    begin
-      // and we're clearing it
-      StartRedrawLine := FLayout.GetLineFromCharIndex( FSelectionStart );
-      EndRedrawLine := FLayout.GetLineFromCharIndex( FSelectionEnd );
-    end
-    else
-    begin
-      // and we're setting a new one, so draw from the old end to the new
-      StartRedrawLine := FLayout.GetLineFromCharIndex( FSelectionEnd );
-      EndRedrawLine := FLayout.GetLineFromCharIndex( SelectionEnd );
-    end;
-  end;
-
   FSelectionEnd := SelectionEnd;
-
-  OldClip := Canvas.GetClipRect;
-  Canvas.SetClipRect(GetTextAreaRect);
-
-  // (re)draw selection
-  { TODO -ograeme : Draw must not be called here }
-//  Draw( StartRedrawLine, EndRedrawLine );
-  Canvas.SetClipRect(OldClip);
+  Repaint;
 end;
 
 Procedure TRichTextView.ClearSelection;
 var
-  OldClip: TfpgRect;
-  StartLine: longint;
-  EndLine: longint;
+  NeedRepaint: boolean;
 begin
-  if SelectionSet then
-  begin
-    OldClip := Canvas.GetClipRect;
-    Canvas.SetClipRect(GetTextAreaRect);
-
-    StartLine := FLayout.GetLineFromCharIndex( FSelectionStart );
-    EndLine := FLayout.GetLineFromCharIndex( FSelectionEnd );
-
-    FSelectionEnd := -1;
-    FSelectionStart := -1;
-    Canvas.SetClipRect(OldClip);
- end;
-
+  NeedRepaint := SelectionSet;
   FSelectionEnd := -1;
   FSelectionStart := -1;
-  Repaint;
+  if NeedRepaint then
+    Repaint;
 end;
 
 Function TRichTextView.GetTextEnd: longint;
@@ -559,8 +512,6 @@ begin
     FDebugMI        := AddMenuItem('&Debug', '', @DebugMIClick);
   end;
 
-  FSelectAllMI.Enabled := False;  // TODO: implement me
-  FCopyMI.Enabled := False;  // TODO: implement me
 end;
 
 Procedure TRichTextView.SelectAllMIClick( Sender: TObject );
@@ -598,6 +549,7 @@ end;
 
 Procedure TRichTextView.DefaultMenuPopup( Sender: TObject );
 begin
+  FCopyMI.Enabled := SelectionSet;
   FWordWrapMI.Checked := FRichTextSettings.DefaultWrap;
   FSmoothScrollMI.Checked := SmoothScroll;
   FDebugMI.Checked := Debug;
@@ -647,6 +599,7 @@ begin
   FRichTextSettings.OnChange := @OnRichTextSettingsChanged;
 
   FImages := nil;
+  FMouseDragging := False;
 
   if not InDesigner then
   begin
@@ -766,20 +719,39 @@ end;
 procedure TRichTextView.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
   var consumed: boolean);
 begin
-  case keycode of
-    keyPageDown:
-        begin
-          consumed := True;
-          UpPage;
-        end;
-    keyPageUp:
-        begin
-          consumed := True;
-          DownPage;
-        end;
-
+  // Ctrl+C or Ctrl+Insert: copy selection to clipboard
+  if (not consumed) and (ssCtrl in shiftstate) then
+  begin
+    if (keycode = ord('C')) or (keycode = ord('c')) or (keycode = keyInsert) then
+    begin
+      CopySelectionToClipboard;
+      consumed := True;
+    end
+    else if (keycode = ord('A')) or (keycode = ord('a')) then
+    begin
+      SelectAll;
+      consumed := True;
+    end;
   end;
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  if not consumed then
+  begin
+    case keycode of
+      keyPageDown:
+          begin
+            consumed := True;
+            UpPage;
+          end;
+      keyPageUp:
+          begin
+            consumed := True;
+            DownPage;
+          end;
+    end;
+  end;
+
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TRichTextView.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -818,10 +790,8 @@ begin
   Offset := 0;
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
-  //writeln('  link=', Link, '  line=', Line, ' offset=', offset);
 
   if Position in [tpAboveTextArea, tpBelowTextArea] then
-    // not on the control (this probably won't happen)
     exit;
 
   // if shift is pressed then keep the same selection start.
@@ -832,12 +802,23 @@ begin
     ClearSelection;
 
   SetCursorPosition(Offset, Line, Shift);
+
+  FMouseDragging := True;
+  CaptureMouse;
 end;
 
 procedure TRichTextView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
-  if FClickedLink <> '' then
+
+  if FMouseDragging then
+  begin
+    FMouseDragging := False;
+    ReleaseMouse;
+  end;
+
+  // Only follow links if user clicked without dragging a selection
+  if (FClickedLink <> '') and (not SelectionSet) then
   begin
     if Assigned( FOnClickLink ) then
       FOnClickLink( Self, FClickedLink );
@@ -857,6 +838,23 @@ begin
     exit;
   Position := FindPoint(X, Y, Line, Offset, Link);
 
+  if FMouseDragging then
+  begin
+    // Extending selection via mouse drag
+    if Position in [tpAboveTextArea, tpBelowTextArea] then
+      exit;
+
+    SetCursorPosition(Offset, Line, True); // True = preserve selection start
+
+    if SelectionSet then
+    begin
+      FClickedLink := ''; // dragging over a link cancels link click
+      MouseCursor := mcIBeam;
+    end;
+    exit;
+  end;
+
+  // Not dragging - handle link hover feedback
   if Link <> FLastLinkOver then
   begin
     if Link <> '' then
@@ -875,7 +873,7 @@ begin
   if Link <> '' then
     MouseCursor := mcHand
   else
-    MouseCursor := mcDefault;   // TODO: later this should be IBeam when RichView supports editing
+    MouseCursor := mcIBeam;
 end;
 
 procedure TRichTextView.SetBackgroundColor(const AValue: TfpgColor);
@@ -2145,8 +2143,6 @@ begin
   FCursorRow := Row;
   Index := FLayout.GetCharIndex( FLayout.FLines[Row].Text ) + Offset;
 
-  //writeln('  SetCursorPosition: offset=', FCursorOffset, ' row=', FCursorRow, ' index=', Index);
-  exit;    { TODO:  Complete this selection of text code - currently gives AV's }
   if PreserveSelection then
   begin
     SetSelectionEndInternal( Index )
@@ -2422,10 +2418,10 @@ begin
     EndP := FText + FSelectionStart;
   end;
 
-  //Result := CopyPlainTextToBuffer( P,
-  //                                 EndP,
-  //                                 Buffer,
-  //                                 BufferLength );
+  Result := CopyPlainTextToBuffer( P,
+                                   EndP,
+                                   Buffer,
+                                   BufferLength );
 end;
 
 // TODO: This doesn't seem to be used anywhere, so we could probably delete it.

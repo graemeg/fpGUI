@@ -755,19 +755,19 @@ begin
   Result := true;
 end;
 
-// TODO: Rewrite this to work with fpGUI and AnsiString/TfpgString
 function CopyPlainTextToBuffer( StartP: PChar;
                                 EndP: PChar;
                                 Buffer: PChar;
                                 BufferLength: longint ): longint;
 var
   Q: PChar;
-  EndQ: Pchar;
+  EndQ: PChar;
   P: PChar;
   NextP: PChar;
   Element: TTextElement;
+  CharLen: integer;
+  i: integer;
 begin
- (*
   P := StartP;
   Q := Buffer;
   EndQ := Buffer + BufferLength;
@@ -778,35 +778,33 @@ begin
     case Element.ElementType of
       teText, teWordBreak:
       begin
-        // copy char
-        if Buffer <> nil then
-          Q[ 0 ] := Element.Character;
-        inc( Q );
+        // Copy UTF-8 character bytes (TfpgChar is a ShortString4)
+        CharLen := Length( Element.Character );
+        for i := 1 to CharLen do
+        begin
+          if Buffer <> nil then
+            Q[ 0 ] := Element.Character[ i ];
+          inc( Q );
+          if Q = EndQ then
+            break;
+        end;
       end;
 
       teLineBreak:
       begin
-        if Buffer <> nil then
-          Q[ 0 ] := #13;
-        inc( Q );
-        if Q = EndQ then
-          // end of buffer
-          break;
-
         if Buffer <> nil then
           Q[ 0 ] := #10;
         inc( Q );
       end;
     end;
 
-   if Q = EndQ then
-     // end of buffer
-     break;
+    if Q >= EndQ then
+      break;
 
     P := NextP;
   end;
-  result := PCharDiff( Q, Buffer );
-  *)
+
+  Result := PCharDiff( Q, Buffer );
 end;
 
 Initialization
