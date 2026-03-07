@@ -632,7 +632,7 @@ end;
 
 procedure TfrmProperties.SetHierarchyMaxHeight;
 begin
-  Bevel1.MaxHeight := Round(Height * 0.4); // no more than 40% of window height
+  Bevel1.MaxHeight := Round(ActualHeight * 0.4); // no more than 40% of window height
 end;
 
 procedure TfrmProperties.AfterCreate;
