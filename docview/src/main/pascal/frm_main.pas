@@ -894,9 +894,9 @@ begin
 
   tsIndex.LayoutManager := lm;
   lm.LC.Fill.WrapAfter(2);
-  lm.AddLayoutComponent(IndexSearchEdit, TfpgMigCC.Create.GrowX);
+  lm.AddLayoutComponent(IndexSearchEdit, TfpgMigCC.Create.GrowX.PushX);
   lm.AddLayoutComponent(btnIndex, TfpgMigCC.Create.MinWidth('80lp'));
-  lm.AddLayoutComponent(lbIndex, TfpgMigCC.Create.SpanX(2).GrowY);
+  lm.AddLayoutComponent(lbIndex, TfpgMigCC.Create.SpanX(2).Grow.PushY);
 end;
 
 procedure TMainForm.uiCreateSearchPage;
@@ -906,7 +906,6 @@ begin
   lm := TfpgMigLayoutManager.Create;
 
   {%region 'Search Page' -fold}
-
   tsSearch := TfpgTabSheet.Create(PageControl1);
   with tsSearch do
   begin
@@ -920,7 +919,6 @@ begin
   begin
     Name := 'Label1';
     PreferredSize := fpgSize(170, 16);
-    FontDesc := '#Label1';
     Text := 'Search for:';
   end;
 
@@ -930,7 +928,6 @@ begin
     Name := 'edSearchText';
     PreferredSize := fpgSize(200, 24);
     ExtraHint := '';
-    FontDesc := '#Edit1';
     TabOrder := 1;
     Text := '';
     OnKeyPress := @edSearchTextKeyPress;
@@ -941,7 +938,6 @@ begin
   begin
     Name := 'Label2';
     PreferredSize := fpgSize(170, 16);
-    FontDesc := '#Label1';
     Text := 'Criteria:';
   end;
 
@@ -951,7 +947,6 @@ begin
     Name := 'RadioButton1';
     PreferredSize := fpgSize(190, 20);
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 3;
     Text := 'This section';
@@ -963,7 +958,6 @@ begin
     Name := 'RadioButton2';
     PreferredSize := fpgSize(190, 20);
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 4;
     Text := 'Marked sections';
@@ -976,7 +970,6 @@ begin
     PreferredSize := fpgSize(190, 20);
     Checked := True;
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 5;
     Text := 'All sections';
@@ -988,7 +981,6 @@ begin
     Name := 'RadioButton4';
     PreferredSize := fpgSize(190, 20);
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 6;
     Text := 'Index';
@@ -1000,7 +992,6 @@ begin
     Name := 'RadioButton5';
     PreferredSize := fpgSize(190, 20);
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 7;
     Text := 'Marked libraries';
@@ -1012,7 +1003,6 @@ begin
     Name := 'RadioButton6';
     PreferredSize := fpgSize(190, 20);
     Enabled := False;
-    FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 8;
     Text := 'All libraries';
@@ -1023,7 +1013,6 @@ begin
   begin
     Name := 'lbSearchResults';
     PreferredSize := fpgSize(220, 100);
-    FontDesc := '#List';
     TabOrder := 9;
     OnDoubleClick := @lbSearchResultsDoubleClick;
     OnKeyPress := @lbSearchResultsKeyPress;
@@ -1034,7 +1023,6 @@ begin
   begin
     Name := 'Label3';
     PreferredSize := fpgSize(160, 16);
-    FontDesc := '#Label1';
     Text := 'Search results:';
   end;
 
@@ -1044,7 +1032,6 @@ begin
     Name := 'btnSearch';
     PreferredSize := fpgSize(80, 24);
     Text := 'Go';
-    FontDesc := '#Label1';
     TabOrder := 11;
     OnClick := @btnSearchClicked;
   end;
@@ -1064,7 +1051,7 @@ begin
   lm.AddLayoutComponent(RadioButton5, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(RadioButton6, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(Label3, TfpgMigCC.Create.SpanX(2).AlignY('bottom').GrowX);
-  lm.AddLayoutComponent(lbSearchResults, TfpgMigCC.Create.SpanX(2).GrowY.GrowX);
+  lm.AddLayoutComponent(lbSearchResults, TfpgMigCC.Create.SpanX(2).Grow.PushY);
 end;
 
 procedure TMainForm.uiCreateNotesPage;
@@ -1074,7 +1061,6 @@ begin
   lm := TfpgMigLayoutManager.Create;
 
   {%region 'Notes Page' -fold}
-
   tsNotes := TfpgTabSheet.Create(PageControl1);
   with tsNotes do
   begin
@@ -1088,7 +1074,6 @@ begin
   begin
     Name := 'NotesListBox';
     PreferredSize := fpgSize(250, 300);
-    FontDesc := '#List';
     TabOrder := 0;
     OnDoubleClick  := @NotesListBoxDoubleClick;
     OnKeyPress  := @NotesListBoxKeyPress;
@@ -1102,7 +1087,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
-    FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'stdimg.add';
     TabOrder := 1;
@@ -1116,7 +1100,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
-    FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'stdimg.edit';
     TabOrder := 2;
@@ -1130,7 +1113,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Enabled := False;
-    FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'stdimg.remove';
     TabOrder := 3;
@@ -1143,7 +1125,6 @@ begin
     Name := 'btnNotesGoto';
     PreferredSize := fpgSize(80, 24);
     Text := 'Go to';
-    FontDesc := '#Label1';
     TabOrder := 4;
     OnClick := @btnNotesGotoClicked;
   end;
@@ -1156,7 +1137,7 @@ begin
   lm.AddLayoutComponent(btnNotesEdit, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
   lm.AddLayoutComponent(btnNotesDel, TfpgMigCC.Create.GapX('0', '4lp').MinWidth('24lp'));
   lm.AddLayoutComponent(btnNotesGoTo, TfpgMigCC.Create.AlignX('right').MinWidth('80lp'));
-  lm.AddLayoutComponent(NotesListBox, TfpgMigCC.Create.SpanX(2).GrowX.GrowY);
+  lm.AddLayoutComponent(NotesListBox, TfpgMigCC.Create.SpanX(2).Grow.PushY);
 end;
 
 procedure TMainForm.uiCreateHistoryPage;
@@ -1166,7 +1147,6 @@ begin
   lm := TfpgMigLayoutManager.Create;
 
   {%region 'History Page' -fold}
-
   tsHistory := TfpgTabSheet.Create(PageControl1);
   with tsHistory do
   begin
@@ -1180,7 +1160,6 @@ begin
   begin
     Name := 'lbHistory';
     PreferredSize := fpgSize(220, 100);
-    FontDesc := '#List';
     TabOrder := 0;
     OnDoubleClick := @lbHistoryDoubleClick;
     OnKeyPress := @lbHistoryKeyPress;
@@ -1190,7 +1169,7 @@ begin
 
   tsHistory.LayoutManager := lm;
   lm.LC.Fill;
-  lm.AddLayoutComponent(lbHistory, TfpgMigCC.Create.GrowX.GrowY);
+  lm.AddLayoutComponent(lbHistory, TfpgMigCC.Create.Grow);
 end;
 
 { If you drop on RichView, only load the first INF file (closing all others
