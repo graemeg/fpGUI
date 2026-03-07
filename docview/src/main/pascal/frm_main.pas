@@ -497,7 +497,11 @@ begin
 end;
 
 procedure TMainForm.uiCreateToolBar;
+var
+  mig: TfpgMigLayoutManager;
 begin
+  mig := TfpgMigLayoutManager.Create;
+
   {%region 'toolbar' -fold}
   ToolBar := TfpgBevel.Create(self);
   with ToolBar do
@@ -512,7 +516,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(4, 1, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -529,7 +533,7 @@ begin
   with btnOpen do
   begin
     Name := 'btnOpen';
-    SetPosition(30, 1, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -546,7 +550,7 @@ begin
   with Bevel1 do
   begin
     Name := 'Bevel1';
-    SetPosition(61, 0, 6, 24);
+    PreferredSize := fpgSize(6, 24);
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
@@ -556,7 +560,7 @@ begin
   with btnBack do
   begin
     Name := 'btnBack';
-    SetPosition(70, 1, 32, 24);
+    PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -573,7 +577,7 @@ begin
   with btnFwd do
   begin
     Name := 'btnFwd';
-    SetPosition(104, 1, 32, 24);
+    PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -590,7 +594,7 @@ begin
   with btnPrev do
   begin
     Name := 'btnPrev';
-    SetPosition(138, 1, 32, 24);
+    PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -607,7 +611,7 @@ begin
   with btnNext do
   begin
     Name := 'btnNext';
-    SetPosition(172, 1, 32, 24);
+    PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -624,7 +628,7 @@ begin
   with Bevel2 do
   begin
     Name := 'Bevel2';
-    SetPosition(210, 0, 6, 24);
+    PreferredSize := fpgSize(6, 24);
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
@@ -634,7 +638,7 @@ begin
   with btnTBNoteAdd do
   begin
     Name := 'btnTBNoteAdd';
-    SetPosition(218, 1, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -651,7 +655,7 @@ begin
   with btnBookmark do
   begin
     Name := 'btnBookmark';
-    SetPosition(244, 1, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -668,7 +672,7 @@ begin
   with Bevel3 do
   begin
     Name := 'Bevel3';
-    SetPosition(275, 0, 6, 24);
+    PreferredSize := fpgSize(6, 24);
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
@@ -678,10 +682,9 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(283, 1, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Display Product Information';
     ImageMargin := -1;
     ImageName := 'stdimg.about';
@@ -695,10 +698,8 @@ begin
   with cbEncoding do
   begin
     Name := 'cbEncoding';
-    SetPosition(524, 2, 124, 22);
-    Anchors := [anRight,anTop];
+    PreferredSize := fpgSize(124, 22);
     ExtraHint := '';
-    FontDesc := '#List';
     Hint := '';
     Items.Add('UTF-8');
     Items.Add('CP437');
@@ -712,6 +713,21 @@ begin
   end;
 
   {%endregion}
+  ToolBar.LayoutManager := mig;
+  mig.LC.InsetsAll('2lp').Fill; //.Debug;
+  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(Bevel1, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnBack, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnFwd, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnPrev, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnNext, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(Bevel2, TfpgMigCC.Create.MaxWidth('6lp'));
+  mig.AddLayoutComponent(btnTBNoteAdd, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(btnBookmark, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(Bevel3, TfpgMigCC.Create.MaxWidth('6lp'));
+  mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create.MaxWidth('24lp'));
+  mig.AddLayoutComponent(cbEncoding, TfpgMigCC.Create.GrowX.AlignX('right').MaxWidth('200lp'));
 end;
 
 procedure TMainForm.uiCreateContextArea;
