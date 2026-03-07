@@ -690,7 +690,8 @@ begin
   with cbEncoding do
   begin
     Name := 'cbEncoding';
-    PreferredSize := fpgSize(124, 22);
+    PreferredSize := fpgSize(200, 22);
+    MinWidth := 125;
     ExtraHint := '';
     Hint := '';
     Items.Add('UTF-8');
@@ -707,19 +708,19 @@ begin
   {%endregion}
   ToolBar.LayoutManager := mig;
   mig.LC.InsetsAll('2lp').Fill; //.Debug;
-  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(Bevel1, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnBack, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnFwd, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnPrev, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnNext, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(Bevel2, TfpgMigCC.Create.MaxWidth('6lp'));
-  mig.AddLayoutComponent(btnTBNoteAdd, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(btnBookmark, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(Bevel3, TfpgMigCC.Create.MaxWidth('6lp'));
-  mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create.MaxWidth('24lp'));
-  mig.AddLayoutComponent(cbEncoding, TfpgMigCC.Create.GrowX.AlignX('right').MaxWidth('200lp'));
+  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(Bevel1, TfpgMigCC.Create.MinWidth('6lp'));
+  mig.AddLayoutComponent(btnBack, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnFwd, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnPrev, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnNext, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(Bevel2, TfpgMigCC.Create.MinWidth('6lp'));
+  mig.AddLayoutComponent(btnTBNoteAdd, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnBookmark, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(Bevel3, TfpgMigCC.Create.MinWidth('6lp'));
+  mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(cbEncoding, TfpgMigCC.Create.PushX.AlignX('right'));
 end;
 
 procedure TMainForm.uiCreateContextArea;
