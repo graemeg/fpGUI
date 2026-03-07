@@ -519,7 +519,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Quit the application';
     ImageMargin := -1;
     ImageName := 'stdimg.quit';
@@ -536,7 +535,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Open a new help file';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
@@ -563,7 +561,6 @@ begin
     PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Previous history item';
     ImageMargin := -1;
     ImageName := 'dv.arrowleft';
@@ -580,7 +577,6 @@ begin
     PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Next history item';
     ImageMargin := -1;
     ImageName := 'dv.arrowright';
@@ -597,7 +593,6 @@ begin
     PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Previous Topic';
     ImageMargin := -1;
     ImageName := 'dv.arrowup';
@@ -614,7 +609,6 @@ begin
     PreferredSize := fpgSize(32, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Next Topic';
     ImageMargin := -1;
     ImageName := 'dv.arrowdown';
@@ -641,7 +635,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Add an annotation';
     ImageMargin := -1;
     ImageName := 'dv.notegreen';
@@ -658,7 +651,6 @@ begin
     PreferredSize := fpgSize(24, 24);
     Text := '';
     Flat := True;
-    FontDesc := '#Label1';
     Hint := 'Add a bookmark';
     ImageMargin := -1;
     ImageName := 'stdimg.bookmark';
