@@ -265,11 +265,11 @@ TfpgWidget.MsgPaint (paint message received)
 The operating system only knows about the single native window. When the user clicks at position (100, 200):
 
 1. **OS generates mouse event** → delivered to `TfpgWindowBase`
-
++
 2. **Window receives event** → `TfpgWindowBase.DispatchMouseEvent(100, 200, msg)`
-
++
 3. **Hit-testing finds target widget:**
-
++
 [source,pascal]
 ----
 procedure TfpgWindowBase.DispatchMouseEvent(AX, AY: TfpgCoord; var msg: TfpgMessageRec);
@@ -291,9 +291,9 @@ begin
   w.Dispatch(msg);  // Calls widget's MsgMouseDown, etc.
 end;
 ----
-
++
 4. **FindWidgetForMouseEvent** recursively searches the widget tree:
-
++
 [source,pascal]
 ----
 function TfpgWindowBase.FindWidgetForMouseEvent(AWidget: TfpgWidgetBase;
@@ -321,11 +321,11 @@ begin
   end;
 end;
 ----
-
++
 5. **Coordinates are translated** from window coordinates to widget-local coordinates
-
++
 6. **Widget receives event** → `TfpgButton.MsgMouseDown(...)` is called
-
++
 7. **Widget handles event** → `HandleLMouseDown(...)` → `OnClick` event fires
 
 === Event Types and Routing
@@ -480,9 +480,9 @@ When `AttachPartialImage` is called, the button's canvas can only draw to a 50-p
 When the user resizes a native window:
 
 1. **OS sends resize event** → `TfpgWindowBase.MsgResize(newWidth, newHeight)`
-
++
 2. **Message dispatched to primary widget:**
-
++
 [source,pascal]
 ----
 procedure TfpgWindowBase.MsgResize(var msg: TfpgMessageRec);
@@ -497,9 +497,9 @@ begin
   end;
 end;
 ----
-
++
 3. **Widget handles resize:**
-
++
 [source,pascal]
 ----
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
@@ -516,13 +516,13 @@ begin
   DoResize;  // Fire OnResize event
 end;
 ----
-
++
 4. **Canvas buffer is reallocated** (if needed)
-
++
 For `TAgg2D`, the image buffer is resized when the window changes size. The buffer allocation happens in `DoAllocateBuffer`.
-
++
 5. **Children are repositioned** based on `Align` and `Anchors` properties
-
++
 6. **Full repaint triggered** → All widgets are invalidated
 
 === Alignment System
