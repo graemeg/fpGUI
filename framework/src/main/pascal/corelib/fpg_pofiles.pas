@@ -132,7 +132,6 @@ begin
   {$ENDIF}
 end;
 
-{$ifndef ver2_0}
 function Translate(Name, Value: ansistring; Hash: longint; arg: Pointer): ansistring;
 var
   po: TPOFile;
@@ -147,15 +146,8 @@ begin
     Result := UTF8ToSystemCharSet(Result);
 end;
 
-{$endif ver2_0}
-
 function TranslateUnitResourceStrings(const ResUnitName, AFilename: string): boolean;
 var
-{$ifdef ver2_0}
-  TableID, StringID, TableCount: integer;
-  s: string;
-  DefValue: string;
-{$endif ver2_0}
   po: TPOFile;
   lPath, lFile: string;
   lPos: integer;
@@ -170,7 +162,7 @@ begin
   lPos := Pos('.', lFile);
   lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
 
-  if {(ResUnitName = '') or} (AFilename = '') or (not fpgFileExists(AFilename)) then
+  if (AFilename = '') or (not fpgFileExists(AFilename)) then
     ToolkitOnly := True;  // we don't have a application translation file
   try
     po := nil;
@@ -189,37 +181,7 @@ begin
       po.AppendFile(lFile);
     end;
     try
-{$ifdef ver2_0}
-      for TableID := 0 to ResourceStringTableCount - 1 do
-      begin
-        TableCount := ResourceStringCount(TableID);
-
-        // check if this table belongs to the ResUnitName
-        if TableCount = 0 then
-          continue;
-        s := GetResourceStringName(TableID, 0);
-        if CompareText(ResUnitName + '.', LeftStr(s, length(ResUnitName) + 1)) <> 0 then
-          continue;
-
-        // translate all resource strings of the unit
-        for StringID := 0 to TableCount - 1 do
-        begin
-          DefValue := GetResourceStringDefaultValue(TableID, StringID);
-          // get UTF8 string
-          s        := po.Translate(GetResourceStringName(TableID, StringID), DefValue);
-
-          if Length(s) > 0 then
-          begin
-            // convert UTF8 to current local
-            s := UTF8ToSystemCharSet(s);
-            SetResourceStringValue(TableID, StringID, s);
-          end;
-        end;
-      end;
-{$else ver2_0}
-//      SetUnitResourceStrings(ResUnitName, @Translate, po);
       SetResourceStrings(@Translate, po);
-{$endif ver2_0}
     finally
       po.Free;
     end;
@@ -236,7 +198,7 @@ end;
 
 procedure TranslateUnitResourceStrings(const ResUnitName, BaseFilename, Lang, FallbackLang: string);
 begin
-  if {(ResUnitName = '') or} (BaseFilename = '') then
+  if (BaseFilename = '') then
     Exit;
 
   if (FallbackLang <> '') then
@@ -380,10 +342,10 @@ var
   s: string;
 begin
   s := StringReplace(Identifier, '.', ':', []);
-  Item := TPOFileItem(FIdentifierToItem.Find(LowerCase(s)));  // case-insensitive
+  Item := TPOFileItem(FIdentifierToItem[LowerCase(s)]);  // case-insensitive
   if Item = nil then
   begin
-    Item := TPOFileItem(FOriginalToItem.Find(OriginalValue));  // case-sensitive
+    Item := TPOFileItem(FOriginalToItem[OriginalValue]);  // case-sensitive
   end;
   if Item <> nil then
   begin
@@ -406,7 +368,7 @@ begin
   s := StringReplace(Identifier, '.', ':', []);
 
   // Primary match: by identifier (always safe and precise)
-  Item := TPOFileItem(FIdentifierToItem.Find(LowerCase(s)));
+  Item := TPOFileItem(FIdentifierToItem[LowerCase(s)]);
 
   // Scoped fallback: only try original-value matching if the resource string
   // belongs to a unit that has entries in this PO file. This prevents
@@ -419,7 +381,7 @@ begin
     begin
       lUnitPrefix := LowerCase(Copy(s, 1, lDotPos - 1));
       if FKnownUnits.IndexOf(lUnitPrefix) >= 0 then
-        Item := TPOFileItem(FOriginalToItem.Find(OriginalValue));
+        Item := TPOFileItem(FOriginalToItem[OriginalValue]);
     end;
   end;
 
