@@ -170,7 +170,7 @@ begin
 
   // We use one translation file for all fpGUI Toolkit related text and one
   // translation file for all fpGUI based application text
-  TranslateUnitResourceStrings('fake', POFile, Lang, FallbackLang);
+  TranslateUnitResourceStrings('fpgui', POFile, Lang, FallbackLang);
 end;
 
 // Strip the '.' onwards part. eg: en_ZA.UTF-8  ->  en_ZA

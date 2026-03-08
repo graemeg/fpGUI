@@ -69,6 +69,7 @@ type
     FItems: TFPList;  // list of TPOFileItem
     FIdentifierToItem: TFPDataHashTable;  // case-insensitive (keys lowercased)
     FOriginalToItem: TFPDataHashTable;    // case-sensitive
+    FKnownUnits: TStringList;             // unit prefixes from PO identifiers
   public
     constructor Create(const AFilename: string);
     constructor Create(AStream: TStream);
@@ -76,6 +77,11 @@ type
     procedure   ReadPOText(const s: string);
     procedure   Add(const Identifier, OriginalValue, TranslatedValue: string);
     function    Translate(const Identifier, OriginalValue: string): string;
+    { Translates by identifier first. If not found, falls back to
+      original-value matching only if the resource string belongs to a unit
+      that has entries in this PO file. Returns empty string if no match,
+      so SetResourceStrings leaves the string unchanged. }
+    function    TranslateScoped(const Identifier, OriginalValue: string): string;
     procedure   AppendFile(const AFilename: string);
   end;
 
@@ -131,10 +137,12 @@ function Translate(Name, Value: ansistring; Hash: longint; arg: Pointer): ansist
 var
   po: TPOFile;
 begin
-  po     := TPOFile(arg);
-  // get UTF8 string
-  Result := po.Translate(Name, Value);
-  // convert UTF8 to current local
+  po := TPOFile(arg);
+  // Use scoped translation: matches by identifier first, then falls back to
+  // original-value matching only for units that have entries in the PO file.
+  // Returns empty string for non-matches so SetResourceStrings skips them.
+  Result := po.TranslateScoped(Name, Value);
+  // convert UTF8 to current locale
   if Result <> '' then
     Result := UTF8ToSystemCharSet(Result);
 end;
@@ -245,13 +253,13 @@ constructor TPOFile.Create(const AFilename: string);
 var
   f: TStream;
 begin
+  f := nil;
   if AFilename <> '' then
     f := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
   try
     Self.Create(f);
   finally
-    if Assigned(f) then
-      f.Free;
+    f.Free;
   end;
 end;
 
@@ -264,6 +272,9 @@ begin
   FItems            := TFPList.Create;
   FIdentifierToItem := TFPDataHashTable.Create;  // case-insensitive via LowerCase
   FOriginalToItem   := TFPDataHashTable.Create;  // case-sensitive
+  FKnownUnits       := TStringList.Create;
+  FKnownUnits.Sorted := True;
+  FKnownUnits.Duplicates := dupIgnore;
 
   if AStream = nil then
     Exit;
@@ -285,6 +296,7 @@ begin
   FItems.Free;
   FIdentifierToItem.Free;
   FOriginalToItem.Free;
+  FKnownUnits.Free;
   inherited Destroy;
 end;
 
@@ -344,6 +356,8 @@ end;
 procedure TPOFile.Add(const Identifier, OriginalValue, TranslatedValue: string);
 var
   Item: TPOFileItem;
+  lColonPos: integer;
+  lUnitPrefix: string;
 begin
   if (TranslatedValue = '') then
     Exit; //==>
@@ -351,6 +365,13 @@ begin
   FItems.Add(Item);
   FIdentifierToItem.Add(LowerCase(Identifier), Item);  // case-insensitive
   FOriginalToItem.Add(OriginalValue, Item);            // case-sensitive
+  // Track unit prefix for scoped original-value fallback
+  lColonPos := Pos(':', Identifier);
+  if lColonPos > 1 then
+  begin
+    lUnitPrefix := LowerCase(Copy(Identifier, 1, lColonPos - 1));
+    FKnownUnits.Add(lUnitPrefix);
+  end;
 end;
 
 function TPOFile.Translate(const Identifier, OriginalValue: string): string;
@@ -372,6 +393,38 @@ begin
   end
   else
     Result := OriginalValue;
+end;
+
+function TPOFile.TranslateScoped(const Identifier, OriginalValue: string): string;
+var
+  Item: TPOFileItem;
+  s: string;
+  lDotPos: integer;
+  lUnitPrefix: string;
+begin
+  Result := '';
+  s := StringReplace(Identifier, '.', ':', []);
+
+  // Primary match: by identifier (always safe and precise)
+  Item := TPOFileItem(FIdentifierToItem.Find(LowerCase(s)));
+
+  // Scoped fallback: only try original-value matching if the resource string
+  // belongs to a unit that has entries in this PO file. This prevents
+  // inadvertently translating strings from unrelated libraries (e.g.,
+  // BGRABitmap, FPC RTL) that happen to share the same original text.
+  if Item = nil then
+  begin
+    lDotPos := Pos(':', s);
+    if lDotPos > 1 then
+    begin
+      lUnitPrefix := LowerCase(Copy(s, 1, lDotPos - 1));
+      if FKnownUnits.IndexOf(lUnitPrefix) >= 0 then
+        Item := TPOFileItem(FOriginalToItem.Find(OriginalValue));
+    end;
+  end;
+
+  if (Item <> nil) and (Item.Translation <> '') then
+    Result := Item.Translation;
 end;
 
 procedure TPOFile.AppendFile(const AFilename: string);
