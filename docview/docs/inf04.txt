@@ -93,6 +93,7 @@
           {
             int16 ID;           // ID magic word (5348h = "HS")
             int8  unknown1;     // unknown purpose, could be third letter of ID
+                                // so signature could be "HSP" (Help System Platform)
             int8  flags;        // probably a flag word...
                                 //  bit 0: set if INF style file
                                 //  bit 4: set if HLP style file
