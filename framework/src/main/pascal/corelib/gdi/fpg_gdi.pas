@@ -405,26 +405,25 @@ const
   BUFFER_RESIZE_SIZE = 50;
   ID_ABOUT = 200001;
 
-{ Multi-monitor API declarations — not present in all FPC Windows unit versions }
+{ Multi-monitor API declarations — not in the FPC RTL Windows unit }
 const
   MONITORINFOF_PRIMARY = $00000001;
 
 type
-  MONITORINFO = record
+  tagMONITORINFO = record
     cbSize:    DWORD;
     rcMonitor: TRect;
     rcWork:    TRect;
     dwFlags:   DWORD;
   end;
-  LPMONITORINFO = ^MONITORINFO;
 
-  MONITORENUMPROC = function(hMonitor: HMONITOR; hdcMonitor: HDC;
+  TMonitorEnumCallback = function(hMonitor: HMONITOR; hdcMonitor: HDC;
       lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
 
-function GetMonitorInfoW(hMonitor: HMONITOR; lpmi: LPMONITORINFO): BOOL;
+function GetMonitorInfoW(hMonitor: HMONITOR; lpmi: Pointer): BOOL;
     stdcall; external 'user32.dll' name 'GetMonitorInfoW';
 function EnumDisplayMonitors(hdc: HDC; lprcClip: LPRECT;
-    lpfnEnum: MONITORENUMPROC; dwData: LPARAM): BOOL;
+    lpfnEnum: TMonitorEnumCallback; dwData: LPARAM): BOOL;
     stdcall; external 'user32.dll' name 'EnumDisplayMonitors';
 
 // some required keyboard functions
@@ -1389,7 +1388,7 @@ type
 function MonitorEnumProc(hMonitor: HMONITOR; hdcMonitor: HDC;
     {%H-}lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
 var
-  mi: MONITORINFO;
+  mi: tagMONITORINFO;
   info: TfpgScreenInfo;
   coll: PMonitorCollector;
 begin
