@@ -32,7 +32,7 @@ widgets automatically.
 :p.
 &fpg. provides three built-in layout managers&colon.
 
-:table cols='20 40'.
+:table cols='30 50'.
 :row.
 :c.:hp2.Layout Manager:ehp2.
 :c.:hp2.Description:ehp2.
@@ -262,7 +262,7 @@ a main content area.
 
 :h5 id=ch_border_regions.BorderLayout Regions
 
-:table cols='10 40'.
+:table cols='12 40'.
 :row.
 :c.:hp2.Region:ehp2.
 :c.:hp2.Behaviour:ehp2.
@@ -383,7 +383,7 @@ spanned area.
 The :color fc=darkred.TfpgMigCC:color fc=default. class uses a fluent API.
 Methods return the same CC instance, allowing calls to be chained.
 
-:table cols='20 40'.
+:table cols='25 50'.
 :row.
 :c.:hp2.Method:ehp2.
 :c.:hp2.Description:ehp2.
@@ -430,7 +430,7 @@ Methods return the same CC instance, allowing calls to be chained.
 Layout constraints configure the container as a whole. They are accessed via the
 :color fc=darkred.mig.LC:color fc=default. property.
 
-:table cols='20 40'.
+:table cols='25 50'.
 :row.
 :c.:hp2.Method:ehp2.
 :c.:hp2.Description:ehp2.
