@@ -748,5 +748,5 @@ facename=default size=0x0. &endash. Original architecture design document
 :li.:font facename='System Monospaced' size=0x0.<fpgui>/docs/toolkit_sizing_comparison.adoc:font
 facename=default size=0x0. &endash. Widget sizing API design (intent vs actual size)
 :li.Java MigLayout documentation at https://miglayout.com applies directly to the
-&fpg. port
+&fpg. port. For reference, the original Java code can be found here: https://github.com/mikaelgrev/miglayout
 :eul.
