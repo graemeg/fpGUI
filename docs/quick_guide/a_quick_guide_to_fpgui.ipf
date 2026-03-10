@@ -33,7 +33,8 @@ http://www.freepascal.org/docs.var
 :efn.
 
 :h1.A Quick Guide to using &fpg.
-:font facename='Helvetica-20:antialias=true'.
+.* OS/2 and IPF convention is HxW
+:font facename='Helvetica' size=30x20.
 .* :artwork name='img0.bmp' align=center.
 :lines align=center.
 A Quick Guide to using
