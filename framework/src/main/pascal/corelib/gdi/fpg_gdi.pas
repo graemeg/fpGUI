@@ -2774,7 +2774,7 @@ end;
 
 procedure TfpgGDICanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
 var
-  hdc: HDC;
+  dc: Windows.HDC;
 begin
   { Blit the exposed rect from the off-screen buffer DC (FDrawGC) directly to
     the window.  FDrawGC is valid whenever the buffer has been allocated, which
@@ -2782,12 +2782,12 @@ begin
     DC so this is safe to call outside of a BeginDraw/EndDraw pair. }
   if (ARect.Width < 1) or (ARect.Height < 1) then
     Exit;
-  hdc := Windows.GetDC(WinHandle);
-  if hdc = 0 then
+  dc := Windows.GetDC(WinHandle);
+  if dc = 0 then
     Exit;
-  BitBlt(hdc, ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+  BitBlt(dc, ARect.Left, ARect.Top, ARect.Width, ARect.Height,
       FDrawGC, ARect.Left, ARect.Top, SRCCOPY);
-  Windows.ReleaseDC(WinHandle, hdc);
+  Windows.ReleaseDC(WinHandle, dc);
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
