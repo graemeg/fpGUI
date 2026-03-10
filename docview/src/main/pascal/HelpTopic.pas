@@ -1167,11 +1167,8 @@ begin
         begin
 //          pFontSpec := _FontTable[ FontIndex ];
           FaceName := StrNPas( pFontSpec^.FaceName, sizeof(pFontSpec^.FaceName) );
-          // arbitrarily and capriciously use specified height * 2/3
-          // as the point size - seems to correspond to what original
-          // view wanted...  note this doesn't necessarily scale
-          // correctly, since default font could be different. whatever.
-          PointSize := (pFontSpec^.Height * 2) div 3;
+          // Per IBM IPF spec, Height is already in points.
+          PointSize := pFontSpec^.Height;
 
           if PointSize < 8 then
             PointSize := 8;
