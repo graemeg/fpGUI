@@ -10,7 +10,7 @@ uses
   Classes, fpg_main, frm_main;
 
 {$IFDEF WINDOWS}
-  {$R docview.rc}
+  {$R ../resources/docview.rc}
 {$ENDIF}
 
 procedure MainProc;
