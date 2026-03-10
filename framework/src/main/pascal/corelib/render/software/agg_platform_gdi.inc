@@ -58,13 +58,26 @@ begin
   NextToken;
 
   facename := token;
-  // Add known substites
-  if lowercase(facename) = 'times' then
+  // Substitute common bitmap font names (from OS/2 INF files) to outline equivalents.
+  // Must stay consistent with CanvasFontManager.SubstituteBitmapFontToOutline().
+  if CompareText(facename, 'Helv') = 0 then
+    facename := FPG_DEFAULT_SANS
+  else if CompareText(facename, 'Helvetica') = 0 then
+    facename := FPG_DEFAULT_SANS
+  else if CompareText(facename, 'Tms Rmn') = 0 then
     facename := 'Times New Roman'
-  else if lowercase(facename) = 'courier' then
+  else if CompareText(facename, 'Times') = 0 then
+    facename := 'Times New Roman'
+  else if CompareText(facename, 'System Proportional') = 0 then
+    facename := FPG_DEFAULT_SANS
+  else if CompareText(facename, 'System Monospaced') = 0 then
+    facename := FPG_DEFAULT_FIXED
+  else if CompareText(facename, 'System VIO') = 0 then
+    facename := FPG_DEFAULT_FIXED
+  else if CompareText(facename, 'Courier') = 0 then
     facename := 'Courier New'
-  else if lowercase(facename) = 'monospace' then
-    facename := 'Courier New';
+  else if CompareText(facename, 'Monospace') = 0 then
+    facename := FPG_DEFAULT_FIXED;
   Result.FamilyName := facename;
 
   if c = '-' then

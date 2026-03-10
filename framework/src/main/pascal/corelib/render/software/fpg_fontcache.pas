@@ -389,7 +389,7 @@ begin
   Result := -1; // nothing found
   for i := 0 to Count-1 do
   begin
-    if (Items[i].FamilyName = AFontCacheItem.FamilyName) and
+    if (CompareText(Items[i].FamilyName, AFontCacheItem.FamilyName) = 0) and
        (Items[i].StyleFlags = AFontCacheItem.StyleFlags) then
     begin
       Result := i;
