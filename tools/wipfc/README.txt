@@ -34,4 +34,15 @@ Usage
    wipfc -i my_help_file.ipf
 
 
+
+Compiling your own wipfc
+------------------------
+
+  git clone https://github.com/open-watcom/open-watcom-v2.git
+  cd open-watcom-v2/bld/wipfc
+  ./configure
+  make
+  sudo make install
+
+
              -----------[ end ]------------
