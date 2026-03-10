@@ -405,6 +405,28 @@ const
   BUFFER_RESIZE_SIZE = 50;
   ID_ABOUT = 200001;
 
+{ Multi-monitor API declarations — not present in all FPC Windows unit versions }
+const
+  MONITORINFOF_PRIMARY = $00000001;
+
+type
+  MONITORINFO = record
+    cbSize:    DWORD;
+    rcMonitor: TRect;
+    rcWork:    TRect;
+    dwFlags:   DWORD;
+  end;
+  LPMONITORINFO = ^MONITORINFO;
+
+  MONITORENUMPROC = function(hMonitor: HMONITOR; hdcMonitor: HDC;
+      lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
+
+function GetMonitorInfoW(hMonitor: HMONITOR; lpmi: LPMONITORINFO): BOOL;
+    stdcall; external 'user32.dll' name 'GetMonitorInfoW';
+function EnumDisplayMonitors(hdc: HDC; lprcClip: LPRECT;
+    lpfnEnum: MONITORENUMPROC; dwData: LPARAM): BOOL;
+    stdcall; external 'user32.dll' name 'EnumDisplayMonitors';
+
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
 
@@ -1374,7 +1396,7 @@ begin
   coll := PMonitorCollector(dwData);
   FillChar(mi, SizeOf(mi), 0);
   mi.cbSize := SizeOf(mi);
-  Windows.GetMonitorInfo(hMonitor, @mi);
+  GetMonitorInfoW(hMonitor, @mi);
   FillChar(info, SizeOf(info), 0);
   info.Bounds.SetRect(mi.rcMonitor.Left, mi.rcMonitor.Top,
       mi.rcMonitor.Right  - mi.rcMonitor.Left,
@@ -1580,7 +1602,7 @@ begin
   { Enumerate connected monitors. This runs before TfpgApplication.Create
     calls GetMonitorCount/GetMonitorInfo (those are called after inherited returns). }
   FillChar(coll, SizeOf(coll), 0);
-  Windows.EnumDisplayMonitors(0, nil, MONITORENUMPROC(@MonitorEnumProc), LPARAM(@coll));
+  EnumDisplayMonitors(0, nil, @MonitorEnumProc, LPARAM(@coll));
   FMonitorList := coll.List;
   { Safety fallback if EnumDisplayMonitors returned nothing }
   if Length(FMonitorList) = 0 then
