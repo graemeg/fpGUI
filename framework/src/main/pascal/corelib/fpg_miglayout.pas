@@ -3875,8 +3875,8 @@ var
   child: TfpgWidget;
   constraint: TfpgLayoutConstraint;
   cc: TfpgMigCC;
-  insTop, insLeft, insBottom, insRight: Integer;
-  insUV: TfpgMigUnitValue;
+  //insTop, insLeft, insBottom, insRight: Integer;
+  //insUV: TfpgMigUnitValue;
   needsRecreate: Boolean;
   isDebug: Boolean;
 begin
@@ -3935,35 +3935,16 @@ begin
       FLastComponentCount := ccMap.Count;
     end;
 
-    // 4. Calculate insets from LC and convert to pixels
-    // This matches Java MigLayout.layoutContainer() behavior where
-    // container insets are subtracted before passing bounds to Grid.layout()
-    // In fpGUI, we only have LC insets (no native container border insets)
-
-    // Get top inset (side 0)
-    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 0, True);
-    insTop := Round(insUV.GetPixels(0, AContainer, nil));
-
-    // Get left inset (side 1)
-    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 1, True);
-    insLeft := Round(insUV.GetPixels(0, AContainer, nil));
-
-    // Get bottom inset (side 2)
-    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 2, True);
-    insBottom := Round(insUV.GetPixels(0, AContainer, nil));
-
-    // Get right inset (side 3)
-    insUV := TfpgMigLayoutUtil.GetInsets(FLC, 3, True);
-    insRight := Round(insUV.GetPixels(0, AContainer, nil));
-
-    // 5. Setup bounds for layout, accounting for insets
-    // This matches Java: bounds = [insets.left, insets.top,
-    //                              width - left - right, height - top - bottom]
-    // Clamp to minimum of 2px to prevent range errors when container is smaller than insets
-    bounds[0] := insLeft;   // x offset
-    bounds[1] := insTop;    // y offset
-    bounds[2] := Max(2, AContainer.ActualWidth - insLeft - insRight);    // available width
-    bounds[3] := Max(2, AContainer.ActualHeight - insTop - insBottom);   // available height
+    // 4. Setup bounds for layout
+    // In Java MigLayout, bounds subtracts the container's NATIVE insets (Swing
+    // border padding) from the size, while LC insets are handled separately as
+    // edge gaps inside Grid.getRowGaps(). fpGUI has no native container insets,
+    // so bounds should be the full container size. The LC insets (panel padding)
+    // are applied internally by the grid as the first/last gaps.
+    bounds[0] := 0;   // no native container inset offset
+    bounds[1] := 0;
+    bounds[2] := Max(2, AContainer.ActualWidth);    // full container width
+    bounds[3] := Max(2, AContainer.ActualHeight);   // full container height
 
     // 6. Perform layout with debug flag
     isDebug := FLC.GetDebug;
@@ -4039,13 +4020,10 @@ begin
         Result.W := widthArray[ASizeType];
         Result.H := heightArray[ASizeType];
 
-        // Add container insets (margins around the grid)
-        // The grid calculates internal sizes, we need to add the insets
-        // to get the total container size
-        Result.W := Result.W + Round(TfpgMigLayoutUtil.GetInsets(FLC, 1, True).GetPixels(0, AContainer, nil)) +  // left
-                                Round(TfpgMigLayoutUtil.GetInsets(FLC, 3, True).GetPixels(0, AContainer, nil));   // right
-        Result.H := Result.H + Round(TfpgMigLayoutUtil.GetInsets(FLC, 0, True).GetPixels(0, AContainer, nil)) +  // top
-                                Round(TfpgMigLayoutUtil.GetInsets(FLC, 2, True).GetPixels(0, AContainer, nil));   // bottom
+        // NOTE: Do NOT add LC insets here. The grid's internal size calculation
+        // (via GetRowGaps/GetColGaps) already includes LC insets as edge gaps.
+        // Adding them again would double-count. The grid's GetWidth/GetHeight
+        // already includes all gaps (including edge insets).
       end;
     finally
       grid.Free;
