@@ -869,7 +869,7 @@ begin
   with lbIndex do
   begin
     Name := 'lbIndex';
-    PreferredSize := fpgSize(240, 300);
+    PreferredSize := fpgSize(240, 100);
     FontDesc := '#List';
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
@@ -1012,7 +1012,7 @@ begin
   with lbSearchResults do
   begin
     Name := 'lbSearchResults';
-    PreferredSize := fpgSize(220, 100);
+    PreferredSize := fpgSize(220, 80);
     TabOrder := 9;
     OnDoubleClick := @lbSearchResultsDoubleClick;
     OnKeyPress := @lbSearchResultsKeyPress;
@@ -1039,7 +1039,7 @@ begin
   {%endregion}
 
   tsSearch.LayoutManager := lm;
-  lm.LC.Fill.WrapAfter(2);
+  lm.LC.Fill.WrapAfter(2).GridGapY('1lp');
   lm.AddLayoutComponent(Label1, TfpgMigCC.Create.SpanX(2).GrowX);
   lm.AddLayoutComponent(edSearchText, TfpgMigCC.Create.GrowX);
   lm.AddLayoutComponent(btnSearch, TfpgMigCC.Create.MinWidth('80lp'));
@@ -1073,7 +1073,7 @@ begin
   with NotesListBox do
   begin
     Name := 'NotesListBox';
-    PreferredSize := fpgSize(250, 300);
+    PreferredSize := fpgSize(250, 100);
     TabOrder := 0;
     OnDoubleClick  := @NotesListBoxDoubleClick;
     OnKeyPress  := @NotesListBoxKeyPress;
@@ -3632,9 +3632,9 @@ begin
   Name := 'MainForm';
   Top := 100;
   Left := 100;
-  PreferredSize := fpgSize(650, 400);
+  PreferredSize := fpgSize(650, 450);
   MinWidth := 550;
-  MinHeight := 500;
+  MinHeight := 450;
   WindowTitle := 'fpGUI Documentation Viewer';
   ShowHint := True;
   WindowPosition := wpUser;
