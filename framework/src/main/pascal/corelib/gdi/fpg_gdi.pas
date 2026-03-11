@@ -1163,7 +1163,13 @@ begin
           {$ENDIF}
           // skip minimize & restore
           if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+          begin
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+            // Update cached size so the next WM_SIZE can detect changes.
+            // Without this, restore-from-maximize goes undetected because
+            // FSize still holds the pre-maximize dimensions.
+            w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+          end;
         end;
 
 
@@ -1179,7 +1185,10 @@ begin
           msgp.rect.Height := lprc^.Bottom - lprc^.Top + 1;
 
           if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+          begin
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+            w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+          end;
         end;
 
     WM_MOVE:
@@ -1204,7 +1213,11 @@ begin
             msgp.rect.Top  := Hi(lParam);
           end;
 
-          fpgSendMessage(nil, w, FPGM_MOVE, msgp);
+          if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
+          begin
+            fpgSendMessage(nil, w, FPGM_MOVE, msgp);
+            w.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+          end;
         end;
 
     WM_STYLECHANGED:

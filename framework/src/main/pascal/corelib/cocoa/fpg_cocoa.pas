@@ -340,7 +340,14 @@ begin
   if msgp.rect.Width < 0 then msgp.rect.Width := 0;
   if msgp.rect.Height < 0 then msgp.rect.Height := 0;
 
-  fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
+  if (FWindow.FSize.W <> msgp.rect.Width) or (FWindow.FSize.H <> msgp.rect.Height) then
+  begin
+    fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
+    // Update cached size so the next windowDidResize can detect changes.
+    // Without this, restore-from-maximize goes undetected because
+    // FSize still holds the pre-maximize dimensions.
+    FWindow.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+  end;
 end;
 
 procedure TfpgCocoaWindowDelegate.windowDidMove(notification: NSNotification);
@@ -357,7 +364,11 @@ begin
   msgp.rect.Left := Round(frame.origin.x);
   msgp.rect.Top := Round(NSScreen.mainScreen.frame.size.height - frame.origin.y - frame.size.height);
 
-  fpgPostMessage(nil, FWindow, FPGM_MOVE, msgp);
+  if (FWindow.FPosition.X <> msgp.rect.Left) or (FWindow.FPosition.Y <> msgp.rect.Top) then
+  begin
+    fpgPostMessage(nil, FWindow, FPGM_MOVE, msgp);
+    FWindow.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+  end;
 end;
 
 procedure TfpgCocoaWindowDelegate.windowDidBecomeKey(notification: NSNotification);

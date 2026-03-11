@@ -2304,10 +2304,19 @@ begin
             end;
 
             if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+            begin
               fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+              // Update cached size so the next ConfigureNotify can detect changes.
+              // Without this, restore-from-maximize goes undetected because
+              // FSize still holds the pre-maximize dimensions.
+              w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+            end;
 
             if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
+            begin
               fpgPostMessage(nil, w, FPGM_MOVE, msgp);
+              w.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+            end;
           end;
         end;
 
