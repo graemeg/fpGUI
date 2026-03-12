@@ -3610,7 +3610,8 @@ end;
 
 destructor TMainForm.Destroy;
 begin
-  RichView.Images := nil;
+  if Assigned(RichView) then
+    RichView.Images := nil;
   FImages.Free;
   CurrentTopic := nil;  // it was a reference only
   FFileOpenRecent := nil;   // it was a reference only

@@ -177,12 +177,20 @@ begin
 
 
       // Colours
+      // Store as hex strings to avoid range check errors: TfpgColor is longword
+      // (unsigned) but ReadInteger/WriteInteger use longint (signed). Colours
+      // with alpha $FFxxxxxx have bit 31 set, which overflows signed longint.
       for ColorIndex := 0 to High( Colors ) do
       begin
         DefaultColor := DefaultColors[ ColorIndex ];
-        Colors[ ColorIndex ] := ReadInteger( ColoursSection,
-                                             'Color' + IntToStr( ColorIndex ),
-                                             DefaultColor );
+        SettingString := ReadString( ColoursSection,
+                                     'Color' + IntToStr( ColorIndex ),
+                                     IntToHex( DefaultColor, 8 ) );
+        // Handle old INI files that stored colours as signed decimal integers
+        if (Length(SettingString) > 0) and (SettingString[1] in ['-', '0'..'9']) then
+          Colors[ ColorIndex ] := TfpgColor(StrToInt64(SettingString))
+        else
+          Colors[ ColorIndex ] := TfpgColor(StrToQWord('$' + SettingString));
       end;
 
       // Most Recently Used files list...
@@ -314,11 +322,11 @@ begin
       WriteInteger(GeneralSection, 'ExtraLineSpacing', ExtraLineSpacing);
 
 
-      // Colours
+      // Colours (stored as hex strings - see LoadSettings for rationale)
       for ColorIndex := 0 to High( Colors ) do
-        WriteInteger( ColoursSection,
-                      'Color' + IntToStr( ColorIndex ),
-                      Colors[ ColorIndex ] );
+        WriteString( ColoursSection,
+                     'Color' + IntToStr( ColorIndex ),
+                     IntToHex( Colors[ ColorIndex ], 8 ) );
 
       // MRU files
       WriteInteger( MRUSection, 'Count', MRUList.Count );
