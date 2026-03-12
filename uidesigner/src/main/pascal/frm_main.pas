@@ -474,7 +474,7 @@ begin
   mig.AddLayoutComponent(btnNewForm, TfpgMigCC.Create.GapX('4', '2'));
   mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create);
   mig.AddLayoutComponent(btnSave, TfpgMigCC.Create);
-  mig.AddLayoutComponent(btnGrid, TfpgMigCC.Create.GapX('12', '0').PushX.AlignX('right'));
+  mig.AddLayoutComponent(btnGrid, TfpgMigCC.Create.GapX('12', '0').AlignX('right'));
   mig.AddLayoutComponent(wgpalette, TfpgMigCC.Create.Grow.PushX.PushY.SpanY(2));
   mig.AddLayoutComponent(chlPalette, TfpgMigCC.Create.SpanX(4).PushY.AlignY('top'));
 
