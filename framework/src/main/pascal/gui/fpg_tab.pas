@@ -1355,14 +1355,14 @@ begin
 
     tpBottom:
       begin
-        p1 := Height - FMargin - ButtonHeight;
-        p2 := Height - FMargin;
+        p1 := ActualHeight - FMargin - ButtonHeight;
+        p2 := ActualHeight - FMargin;
       end;
 
     tpRight:
       begin
-        p1 := Width - MaxButtonWidth;
-        p2 := Width;
+        p1 := ActualWidth - MaxButtonWidth;
+        p2 := ActualWidth;
       end;
 
     tpLeft:
@@ -1374,7 +1374,7 @@ begin
 
   if TabPosition in [tpTop, tpBottom] then
   begin
-    if MaxButtonWidthSum > (Width-(FMargin*2)) then
+    if MaxButtonWidthSum > (ActualWidth-(FMargin*2)) then
       h := FFirstTabButton;
     if (y > p1) and (y < p2) then
     begin
@@ -1399,7 +1399,7 @@ begin
   if TabPosition in [tpLeft, tpRight] then
   begin
     bh := ButtonHeight;  // initialize button height
-    if MaxButtonHeightSum > (Height-(FMargin*2)) then
+    if MaxButtonHeightSum > (ActualHeight-(FMargin*2)) then
       h := FFirstTabButton;
     if (x > p1) and (x < p2) then
     begin
