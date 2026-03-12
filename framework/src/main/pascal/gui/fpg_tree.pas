@@ -978,14 +978,14 @@ end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-  Result := ActualWidth - 2; // border width = 2 pixels
+  Result := ActualWidth - 4; // 2px border on each side
   if FVScrollbar.Visible then
      dec(Result, FVScrollbar.ActualWidth);
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
-  Result := ActualHeight - 2; // border width = 2 pixels
+  Result := ActualHeight - 4; // 2px border on each side
   if FShowColumns then
     dec(Result, FColumnHeight);
   if FHScrollbar.Visible then
@@ -1202,7 +1202,7 @@ begin
 
   Result := nil;
   i := 0;
-  lTop := y - col - 1 + FYOffset;
+  lTop := y - col - 2 + FYOffset;
   lLeft := x + FXOffset;
   cancel := False;
   last := RootNode;
@@ -1390,19 +1390,19 @@ procedure TfpgTreeview.ResetScrollbar;
 begin
   // Size the scrollbars FIRST so UpdateScrollBars can read their ActualWidth/ActualHeight
   // Use the scrollbar's Width/Height (preferred size) which respects DPI scaling
-  FVScrollbar.Left := ActualWidth - FVScrollbar.Width - 1;
-  FVScrollbar.Top := 1;
+  FVScrollbar.Left := ActualWidth - FVScrollbar.Width - 2;
+  FVScrollbar.Top := 2;
   if FHScrollbar.Visible then
-    FVScrollbar.Height := ActualHeight - 2 - FHScrollbar.Height
+    FVScrollbar.Height := ActualHeight - 4 - FHScrollbar.Height
   else
-    FVScrollbar.Height := ActualHeight - 2;
+    FVScrollbar.Height := ActualHeight - 4;
 
-  FHScrollbar.Left := 1;
-  FHScrollbar.Top := ActualHeight - FHScrollbar.Height - 1;
+  FHScrollbar.Left := 2;
+  FHScrollbar.Top := ActualHeight - FHScrollbar.Height - 2;
   if FVScrollbar.Visible then
-    FHScrollbar.Width := ActualWidth - 2 - FVScrollbar.Width
+    FHScrollbar.Width := ActualWidth - 4 - FVScrollbar.Width
   else
-    FHScrollbar.Width := ActualWidth - 2;
+    FHScrollbar.Width := ActualWidth - 4;
 
   // Now call UpdateScrollBars which can read the correct ActualWidth/ActualHeight
   UpdateScrollBars;
@@ -1467,7 +1467,7 @@ begin
       col := FColumnHeight
     else
       col := 0;
-    y := y - col - 1 + FYOffset;
+    y := y - col - 2 + FYOffset;
     i := 0;
     x := x + FXOffset;
     cancel := False;
@@ -1660,12 +1660,7 @@ begin
     Exit;
   end;
 
-  if FFocused then
-    Canvas.SetColor(clWidgetFrame)
-  else
-    Canvas.SetColor(clInactiveWgFrame);
-  r.SetRect(0, 0, ActualWidth, ActualHeight);
-  Canvas.DrawRectangle(r); // border
+  fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
 
   i1 := 0;
   PreCalcColumnLeft;
@@ -1700,12 +1695,12 @@ begin
   // Calculate the client area used for nodes and lines
   if ShowColumns then
   begin
-    r.SetRect(1, 1 + FColumnHeight, VisibleWidth, VisibleHeight);
+    r.SetRect(2, 2 + FColumnHeight, VisibleWidth, VisibleHeight);
     col := FColumnHeight;
   end
   else
   begin
-    r.SetRect(1, 1, VisibleWidth, VisibleHeight);
+    r.SetRect(2, 2, VisibleWidth, VisibleHeight);
     col := 0;
   end;
   Canvas.ClearClipRect;
