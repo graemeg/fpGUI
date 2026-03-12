@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -40,6 +40,11 @@ uses
   fpg_panel,
   fpg_tree,
   fpg_splitter,
+  fpg_flowlayout,
+  fpg_layouttypes,
+  fpg_miglayout,
+  fpg_mig_lc,
+  fpg_mig_cc,
   vfd_widgetclass,
   vfd_widgets;
 
@@ -54,19 +59,12 @@ type
   end;
 
 
-  TwgPalette = class(TfpgWidget)
-  protected
-    procedure HandlePaint; override;
-  end;
-
-
   TfrmMain = class(TfpgForm)
   private
     FFileOpenRecent: TfpgMenuItem;
     procedure   FormShow(Sender: TObject);
     procedure   OnPaletteDragStart(Sender: TObject);
     procedure   PaintPaletteButtonForDrag(ASender: TfpgDrag; ACanvas: TfpgCanvas);
-    procedure   PaletteBarResized(Sender: TObject);
     procedure   miHelpAboutClick(Sender: TObject);
     procedure   miHelpAboutGUI(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: string);
@@ -79,7 +77,7 @@ type
     btnNewForm: TfpgButton;
     btnOpen: TfpgButton;
     btnSave: TfpgButton;
-    wgpalette: TwgPalette;
+    wgpalette: TfpgPanel;
     chlPalette: TfpgComboBox;
     filemenu: TfpgPopupMenu;
     formmenu: TfpgPopupMenu;
@@ -345,35 +343,38 @@ end;
 procedure TfrmMain.AfterCreate;
 var
   n: integer;
-  x, y: integer;
   wgc: TVFDWidgetClass;
   btn: TwgPaletteButton;
   mi: TfpgMenuItem;
+  mig: TfpgMigLayoutManager;
+  flow: TfpgFlowLayoutManager;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(338, 140, 754, 92);
+  Left := 330;
+  Top := 140;
+  PreferredSize := fpgSize(726, 137);
   WindowTitle := 'frmMain';
   Hint := '';
   ShowHint := True;
   WindowPosition := wpUser;
-  MinHeight := 82;
+  MinHeight := 135;
   MinWidth := 315;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 753, 24);
-    Align := alTop;
+    PreferredSize := fpgSize(753, 24);
   end;
 
   btnNewForm := TfpgButton.Create(self);
   with btnNewForm do
   begin
     Name := 'btnNewForm';
-    SetPosition(4, 28, 25, 24);
+    PreferredSize := fpgSize(25, 24);
+    MinWidth := 25;
     Text := '';
     FontDesc := '#Label1';
     Hint := rsAddNewFormToUnit;
@@ -389,7 +390,8 @@ begin
   with btnOpen do
   begin
     Name := 'btnOpen';
-    SetPosition(30, 28, 25, 24);
+    PreferredSize := fpgSize(25, 24);
+    MinWidth := 25;
     Text := '';
     FontDesc := '#Label1';
     Hint := '';
@@ -405,7 +407,8 @@ begin
   with btnSave do
   begin
     Name := 'btnSave';
-    SetPosition(56, 28, 25, 24);
+    PreferredSize := fpgSize(25, 24);
+    MinWidth := 25;
     Text := '';
     FontDesc := '#Label1';
     Hint := rsSaveCurrentFormDesign;
@@ -418,23 +421,32 @@ begin
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
-  wgpalette := TwgPalette.Create(self);
-  with wgpalette do
+  btnGrid := TfpgButton.Create(self);
+  with btnGrid do
   begin
-    Name := 'wgpalette';
-    SetPosition(152, 28, 600, 62);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    //    Width := self.Width - Left - 3;
+    Name := 'btnGrid';
+    PreferredSize := fpgSize(25, 24);
+    MinWidth := 25;
+    Text := '';
+    AllowAllUp := True;
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := rsToggleDesignerGrid;
+    ImageMargin := -1;
+    ImageName := 'vfd.grid';
+    ImageSpacing := 0;
+    TabOrder := 13;
     Focusable := False;
-    OnResize := @PaletteBarResized;
+    AllowDown := True;
+    OnClick := @ToggleDesignerGrid;
   end;
 
   chlPalette := TfpgComboBox.Create(self);
   with chlPalette do
   begin
     Name := 'chlPalette';
-    SetPosition(4, 67, 144, 22);
-    Anchors := [anLeft,anBottom];
+    PreferredSize := fpgSize(144, 22);
+    MinWidth := 120;
     ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
@@ -442,6 +454,33 @@ begin
     FocusItem := 0;
     TabOrder := 5;
   end;
+
+  { Component palette - fills remaining horizontal space, auto-wraps buttons }
+  wgpalette := TfpgPanel.Create(self);
+  with wgpalette do
+  begin
+    Name := 'wgpalette';
+    PreferredSize := fpgSize(600, 96);
+    Text := '';
+    Focusable := False;
+    Style := bsFlat;
+  end;
+
+  { Arrange toolbar buttons and palette selector with MigLayout }
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.SetWrapAfter(5);
+  self.LayoutManager := mig;
+  mig.AddLayoutComponent(MainMenu, TfpgMigCC.Create.SpanX(5).GrowX);
+  mig.AddLayoutComponent(btnNewForm, TfpgMigCC.Create.GapX('4', '2'));
+  mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create);
+  mig.AddLayoutComponent(btnSave, TfpgMigCC.Create);
+  mig.AddLayoutComponent(btnGrid, TfpgMigCC.Create.GapX('12', '0').PushX.AlignX('right'));
+  mig.AddLayoutComponent(wgpalette, TfpgMigCC.Create.Grow.PushX.PushY.SpanY(2));
+  mig.AddLayoutComponent(chlPalette, TfpgMigCC.Create.SpanX(4).PushY.AlignY('top'));
+
+  { Assign FlowLayout to palette for automatic button wrapping }
+  flow := TfpgFlowLayoutManager.Create(2, 2);
+  wgpalette.LayoutManager := flow;
 
   filemenu := TfpgPopupMenu.Create(self);
   with filemenu do
@@ -503,57 +542,28 @@ begin
     SetPosition(336, 30, 120, 20);
   end;
 
-  btnGrid := TfpgButton.Create(self);
-  with btnGrid do
-  begin
-    Name := 'btnGrid';
-    SetPosition(103, 28, 25, 24);
-    Text := '';
-    AllowAllUp := True;
-    FontDesc := '#Label1';
-    GroupIndex := 1;
-    Hint := rsToggleDesignerGrid;
-    ImageMargin := -1;
-    ImageName := 'vfd.grid';
-    ImageSpacing := 0;
-    TabOrder := 13;
-    Focusable := False;
-    AllowDown := True;
-    OnClick := @ToggleDesignerGrid;
-  end;
-
   {@VFD_BODY_END: frmMain}
   {%endregion}
 
-  { Build component palette }
-  x := 0;
-  y := 0;
+  { Build component palette using FlowLayout }
   for n := 0 to VFDWidgetCount-1 do
   begin
     wgc           := VFDWidget(n);
     btn           := TwgPaletteButton.Create(wgpalette);
     btn.VFDWidget := wgc;
-    btn.Left := x;
-    btn.Top := y;
-    btn.Width := 30;
-    btn.Height := 28;
+    btn.PreferredSize := fpgSize(30, 28);
     btn.ImageName := wgc.WidgetIconName;
-    btn.ImageMargin := -1;
+    btn.ImageMargin   := -1;
+    btn.ImageSpacing  := 0;
     btn.Text      := '';
     btn.Hint      := wgc.WidgetClass.ClassName;
     btn.Focusable := False;
     btn.OnClick   := @OnPaletteClick;
-    btn.OnDragStartDetected:=@OnPaletteDragStart;
-    btn.AllowDown := True;
+    btn.OnDragStartDetected := @OnPaletteDragStart;
+    btn.AllowDown  := True;
     btn.AllowAllUp := True;
+    flow.AddLayoutComponent(btn, TfpgLayoutConstraint.Create());
     chlPalette.Items.AddObject(wgc.WidgetClass.ClassName, wgc);
-
-    Inc(x, 32);
-    if (x+30) >= wgpalette.Width then
-    begin
-      x := 0;
-      Inc(y, 30);
-    end;
   end;
 
   BuildThemePreviewMenu;
@@ -1261,31 +1271,6 @@ begin
   // Do Nothing, the widget paints itself
 end;
 
-procedure TfrmMain.PaletteBarResized(Sender: TObject);
-var
-  btn: TwgPaletteButton;
-  x, y, n: integer;
-begin
-  x := 0;
-  y := 0;
-  for n := 0 to wgPalette.ComponentCount-1 do
-  begin
-    btn := wgPalette.Components[n] as TwgPaletteButton;
-    btn.Left := x;
-    btn.Top := y;
-    btn.Width := 30;
-    btn.Height := 28;
-    btn.ImageMargin   := -1;
-    btn.ImageSpacing  := 0;
-    Inc(x, 32);
-    if (x+30) >= wgpalette.Width then
-    begin
-      x := 0;
-      Inc(y, 30);
-    end;
-  end;
-end;
-
 procedure TfrmMain.miHelpAboutClick(Sender: TObject);
 begin
   TfrmAbout.Execute;
@@ -1394,13 +1379,6 @@ begin
   editor.Visible := True;
 
   self.ActiveWidget := editor;
-end;
-
-{ TwgPalette }
-
-procedure TwgPalette.HandlePaint;
-begin
-  Canvas.Clear(clWindowBackground);
 end;
 
 

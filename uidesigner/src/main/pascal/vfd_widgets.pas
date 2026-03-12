@@ -635,7 +635,7 @@ begin
   wc.AddProperty('AlternateBGColor', TPropertyColor, 'The color of every alternative row. Dependent on grid Options property.');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('BorderStyle', TPropertyEnum, '');
-  wc.AddProperty('Columns', TPropertyDBColumns, 'Defines the various columns for a grid. At least one column must exist.');
+  wc.AddProperty('Columns', TPropertyDBColumns, 'Defines the various columns for a grid. At least one column must exist.', True);
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');

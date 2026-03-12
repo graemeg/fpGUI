@@ -86,7 +86,7 @@ type
     constructor Create(aClass: TWidgetClass);
     destructor  Destroy; override;
     function    AddListProperty(apropname: string; apropeditorclass: TVFDPropertyEditorClass; desc: string; AList: TList): TVFDWidgetProperty;
-    function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
+    function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string; AForce: Boolean = False): TVFDWidgetProperty;
     function    HasProperty(apropname: string): Boolean;
     function    PropertyCount: integer;
     function    GetError(var AErr: String): Boolean;
@@ -127,16 +127,19 @@ begin
 end;
 
 function TVFDWidgetClass.AddProperty(apropname: string; apropclass: TVFDPropertyClass;
-  desc: string): TVFDWidgetProperty;
+  desc: string; AForce: Boolean): TVFDWidgetProperty;
 var
   PropInfo: PPropInfo;
 begin
-  PropInfo := GetPropInfo(WidgetClass, apropname);
-  if not Assigned(PropInfo) then
+  if not AForce then
   begin
-    Result := nil;
-    FErrors.Add(Format('Invalid property: %s', [apropname]));
-    Exit; // ==>
+    PropInfo := GetPropInfo(WidgetClass, apropname);
+    if not Assigned(PropInfo) then
+    begin
+      Result := nil;
+      FErrors.Add(Format('Invalid property: %s', [apropname]));
+      Exit; // ==>
+    end;
   end;
   Result := apropclass.Create(apropname);
   Result.Description := desc;
