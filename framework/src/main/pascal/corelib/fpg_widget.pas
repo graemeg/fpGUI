@@ -1338,7 +1338,7 @@ var
   pw: TfpgWidget;
   w: TfpgWidget;
 begin
-  if FShowHint then
+  if FShowHint or (FParentShowHint and Assigned(Parent) and Parent.ShowHint) then
     fpgApplication.HideHint;
 
   // setting the focus through all parents
@@ -1355,7 +1355,7 @@ end;
 
 procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
-  if FShowHint then
+  if FShowHint or (FParentShowHint and Assigned(Parent) and Parent.ShowHint) then
     fpgApplication.HideHint;
   // keyMenu was pressed
   if shiftstate = [ssExtra1] then
@@ -1364,7 +1364,7 @@ end;
 
 procedure TfpgWidget.HandleMMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
-  if FShowHint then
+  if FShowHint or (FParentShowHint and Assigned(Parent) and Parent.ShowHint) then
     fpgApplication.HideHint;
 end;
 
@@ -1453,7 +1453,7 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.HandleMouseExit - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-  if FShowHint then
+  if FShowHint or (FParentShowHint and Assigned(Parent) and Parent.ShowHint) then
     fpgApplication.HideHint;
 end;
 
