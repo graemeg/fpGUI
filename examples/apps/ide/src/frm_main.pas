@@ -779,8 +779,8 @@ begin
   m := TfpgTextEdit.Create(Result);
   m.Left := 1;
   m.Top := 1;
-  m.Width := 200;
-  m.Height := 20;
+  m.Width := pcEditor.ActualWidth;
+  m.Height := pcEditor.ActualHeight;
   m.Align := alClient;
   m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   m.GutterVisible := True;
@@ -1213,8 +1213,8 @@ var
 begin
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
-  Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
-  Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
+  Width := gINI.ReadInteger(Name + 'State', 'Width', ActualWidth);
+  Height := gINI.ReadInteger(Name + 'State', 'Height', ActualHeight);
   UpdatePosition;
 
   SetupProjectTree;
@@ -1234,8 +1234,8 @@ begin
   CloseAction := caFree;
   gINI.WriteInteger(Name + 'State', 'Left', Left);
   gINI.WriteInteger(Name + 'State', 'Top', Top);
-  gINI.WriteInteger(Name + 'State', 'Width', Width);
-  gINI.WriteInteger(Name + 'State', 'Height', Height);
+  gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
+  gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -1262,7 +1262,7 @@ begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
   SetPosition(310, 206, 638, 428);
-  WindowTitle := 'fpGUI IDE - %s';
+  WindowTitle := 'fpGUI Maximus IDE - %s';
   Hint := '';
   WindowPosition := wpOneThirdDown;
   MinWidth := 580;
