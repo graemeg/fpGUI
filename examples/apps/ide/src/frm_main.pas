@@ -69,9 +69,6 @@ type
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
-    {$ifdef DEBUGSVR}
-    btnTest: TfpgButton;
-    {$endif}
     pmOpenRecentMenu: TfpgPopupMenu;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
@@ -134,7 +131,6 @@ type
     procedure   LoadProject(const AFilename: TfpgString);
     function    CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
-    procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
     procedure   HighlightObjectPascal(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
@@ -169,9 +165,6 @@ uses
   ,Project
   ,UnitList
   ,BuilderThread
-  {$IFDEF DEBUGSVR}
-  ,fpg_dbugintf
-  {$ENDIF}
   ,ideutils
   ;
 
@@ -373,7 +366,7 @@ end;
 procedure TMainForm.miAboutIDE(Sender: TObject);
 begin
   TfpgMessageDialog.Information('About fpGUI IDE',
-      'fpGUI IDE version ' + FPGUI_VERSION + LineEnding + LineEnding
+      'fpGUI''s Maximus IDE version ' + FPGUI_VERSION + LineEnding + LineEnding
       + 'Created by Graeme Geldenhuys' + LineEnding
       + 'Compiled with FPC ' + FPCVersion);
 end;
@@ -869,21 +862,6 @@ begin
   UpdateStatus(s);
 end;
 
-procedure TMainForm.miTest(Sender: TObject);
-var
-  s: TfpgString;
-  r: TfpgString;
-begin
-  {$ifdef DEBUGSVR}
-  TempHourGlassCursor(TfpgWidget(self));
-  s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
-  SendDebug('source string = ' + s);
-  r := GMacroList.ExpandMacro(s);
-  SendDebug('expanded string = ' + r);
-  sleep(5000);
-  {$endif}
-end;
-
 function TMainForm.GetUnitsNode: TfpgTreeNode;
 begin
   Result := tvProject.RootNode.FindSubNode('Units', True);
@@ -1233,7 +1211,6 @@ procedure TMainForm.FormShow(Sender: TObject);
 var
   lErrPos: integer;
 begin
-  {$IFDEF DEBUGSVR}SendMethodEnter('TMainForm.FormShow');{$ENDIF}
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
   Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
@@ -1250,7 +1227,6 @@ begin
   TextEditor.SetFocus;
 
   FFileMonitor.Resume;
-  {$IFDEF DEBUGSVR}SendMethodExit('TMainForm.FormShow');{$ENDIF}
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1267,9 +1243,6 @@ begin
   inherited Create(AOwner);
   OnShow  := @FormShow;
   OnClose := @FormClose;
-  {$IFDEF DEBUGSVR}
-  SendDebug('TMainForm.Create');
-  {$ENDIF}
   FFileMonitor := TFileMonitor.CreateCustom;
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
 end;
@@ -1285,9 +1258,6 @@ end;
 
 procedure TMainForm.AfterCreate;
 begin
-  {$IFDEF DEBUGSVR}
-  SendMethodEnter('TMainForm.AfterCreate');
-  {$ENDIF}
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
@@ -1755,24 +1725,6 @@ begin
   FRecentFiles.MaxItems       := gINI.ReadInteger('Options', 'MRUProjectCount', 10);
   FRecentFiles.ShowFullPath   := gINI.ReadBool('Options', 'ShowFullPath', True);
   FRecentFiles.LoadMRU;
-
-  {$IFDEF DEBUGSVR}
-  btnTest := TfpgButton.Create(Toolbar);
-  with btnTest do
-  begin
-    Name := 'btnTest';
-    SetPosition(168, 2, 80, 24);
-    Text := 'test';
-    Down := False;
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 7;
-    OnClick := @miTest;
-  end;
-
-  SendMethodExit('TMainForm.AfterCreate');
-  {$ENDIF}
 end;
 
 
