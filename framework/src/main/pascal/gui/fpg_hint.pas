@@ -196,6 +196,9 @@ begin
     uShadowForm.Show;
   end;
   inherited HandleShow;
+  { The off-screen buffer may contain stale content from a previous tooltip.
+    Force a full repaint so the correct text and size are always rendered. }
+  Invalidate;
 end;
 
 procedure TfpgHintWindow.HandlePaint;
