@@ -152,6 +152,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); override;
     procedure   RePaint; override;
   public
@@ -1254,6 +1255,44 @@ begin
 
   if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgPageControl.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+begin
+  if FFirstTabButton = nil then
+  begin
+    inherited HandleMouseScroll(x, y, shiftstate, delta);
+    Exit;
+  end;
+
+  if TabPosition in [tpTop, tpBottom] then
+  begin
+    if delta > 0 then  { scroll right }
+    begin
+      if TfpgTabSheet(FPages.Last) <> FFirstTabButton then
+        FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)+1]);
+    end
+    else               { scroll left }
+    begin
+      if TfpgTabSheet(FPages.First) <> FFirstTabButton then
+        FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)-1]);
+    end;
+  end
+  else if TabPosition in [tpLeft, tpRight] then
+  begin
+    if delta > 0 then  { scroll down }
+    begin
+      if TfpgTabSheet(FPages.Last) <> FFirstTabButton then
+        FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)+1]);
+    end
+    else               { scroll up }
+    begin
+      if TfpgTabSheet(FPages.First) <> FFirstTabButton then
+        FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)-1]);
+    end;
+  end;
+
+  RePaint;
 end;
 
 procedure TfpgPageControl.HandleAlignments(const dwidth, dheight: TfpgCoord);
