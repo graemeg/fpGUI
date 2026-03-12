@@ -1011,12 +1011,12 @@ begin
   VHeight := r.Height;
   HWidth  := r.Width;
 
-  FHScrollBar.Top     := Height - FHScrollBar.Height - r.Top;
+  FHScrollBar.Top     := ActualHeight - FHScrollBar.Height - r.Top;
   FHScrollBar.Left    := r.Top;
   FHScrollBar.Width   := HWidth;
 
   FVScrollBar.Top     := r.Top;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - r.Top;
+  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - r.Top;
   FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdatePosition;
@@ -1512,7 +1512,7 @@ end;
 procedure TfpgBaseTextEdit.HandleShow;
 begin
   inherited HandleShow;
-  HandleResize(Width, Height);
+  HandleResize(ActualWidth, ActualHeight);
 end;
 
 procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -1528,7 +1528,7 @@ end;
 
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
-  Canvas.ClearClipRect;
+  inherited HandlePaint;
   if FLineChanged > -1 then
   begin
     { TODO: We would like Vertical and Underline cursor painting at some point }
@@ -1539,7 +1539,7 @@ begin
 
   // normal house keeping
   Canvas.Clear(clBoxColor);
-  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
+  fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
   Canvas.SetFont(FFont);
   Canvas.SetClipRect(GetClientRect);
 
@@ -2577,7 +2577,7 @@ function TfpgBaseTextEdit.GetClientRect: TfpgRect;
 begin
   FillMem(@Result, SizeOf(TfpgRect), 0);
   // widget has a 2 pixel 3D border
-  Result.SetRect(2, 2, Width-4, Height-4);
+  Result.SetRect(2, 2, ActualWidth-4, ActualHeight-4);
   if Assigned(FVScrollBar) and FVScrollBar.Visible then
     Result.Width := Result.Width - FVScrollBar.Width;
   if Assigned(FHScrollBar) and FHScrollBar.Visible then
@@ -2884,7 +2884,7 @@ begin
     Exit; //==>
   Clear;
   FLines.LoadFromFile(fpgToOSEncoding(AFileName));
-  HandleResize(Width, Height);
+  HandleResize(ActualWidth, ActualHeight);
   Invalidate;
 end;
 
