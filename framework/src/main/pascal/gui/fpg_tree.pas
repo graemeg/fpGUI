@@ -1265,6 +1265,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  ResetScrollbar;
   Repaint;
 end;
 
@@ -1280,6 +1281,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  ResetScrollbar;
   Repaint;
 end;
 
@@ -1314,6 +1316,10 @@ procedure TfpgTreeview.UpdateScrollbars;
 var
   VBarWasVisible, HBarWasVisible: Boolean;
   OldVPos, OldHPos: Integer;
+  totalContentHeight: integer;
+  totalContentWidth: integer;
+  visH: integer;
+  visW: integer;
 begin
   // Save current visibility state and positions
   VBarWasVisible := FVScrollbar.Visible;
@@ -1321,19 +1327,28 @@ begin
   OldVPos := FVScrollbar.Position;
   OldHPos := FHScrollbar.Position;
 
-  FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
+  totalContentHeight := GetNodeHeightSum * GetNodeHeight;
+  totalContentWidth  := MaxNodeWidth;
+  visH := VisibleHeight;
+  visW := VisibleWidth;
+
+  FVScrollbar.Visible := visH < totalContentHeight;
   FVScrollbar.Min := 0;
-  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight;
-  FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
-  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move the height of the font
+  FVScrollbar.Max := totalContentHeight - visH;
+  FVScrollbar.PageSize := visH;  // one full page per page-scroll operation
+  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move one row
+  // Set proportional thumb size so the thumb reflects what fraction of content is visible
+  if totalContentHeight > 0 then
+    FVScrollbar.SliderSize := visH / totalContentHeight
+  else
+    FVScrollbar.SliderSize := 1.0;
 
   if FVScrollbar.Visible then
   begin
     // Sync scrollbar position with internal offset
     FVScrollbar.Position := FYOffset;
-    // Only repaint if position actually changed
-    if FVScrollbar.Position <> OldVPos then
-      FVScrollbar.RepaintSlider;
+    // Always repaint: position or slider size may have changed (e.g. node expanded)
+    FVScrollbar.RepaintSlider;
   end
   else
   begin
@@ -1345,17 +1360,21 @@ begin
   end;
 
   FHScrollbar.Min := 0;
-  FHScrollbar.Max := MaxNodeWidth - VisibleWidth;
-  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the width
-  FHScrollbar.Visible := MaxNodeWidth > VisibleWidth;
+  FHScrollbar.Max := totalContentWidth - visW;
+  FHScrollbar.PageSize := visW;  // one full page per page-scroll operation
+  FHScrollbar.Visible := totalContentWidth > visW;
+  // Set proportional thumb size so the thumb reflects what fraction of content is visible
+  if totalContentWidth > 0 then
+    FHScrollbar.SliderSize := visW / totalContentWidth
+  else
+    FHScrollbar.SliderSize := 1.0;
 
   if FHScrollbar.Visible then
   begin
     // Sync scrollbar position with internal offset
     FHScrollbar.Position := FXOffset;
-    // Only repaint if position actually changed
-    if FHScrollbar.Position <> OldHPos then
-      FHScrollbar.RepaintSlider;
+    // Always repaint: position or slider size may have changed
+    FHScrollbar.RepaintSlider;
   end
   else
   begin
