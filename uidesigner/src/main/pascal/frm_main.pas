@@ -468,14 +468,14 @@ begin
 
   { Arrange toolbar buttons and palette selector with MigLayout }
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(5);
+  mig.LC.WrapAfter(5);
   self.LayoutManager := mig;
   mig.AddLayoutComponent(MainMenu, TfpgMigCC.Create.SpanX(5).GrowX);
   mig.AddLayoutComponent(btnNewForm, TfpgMigCC.Create.GapX('4', '2'));
   mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create);
   mig.AddLayoutComponent(btnSave, TfpgMigCC.Create);
   mig.AddLayoutComponent(btnGrid, TfpgMigCC.Create.GapX('12', '0').AlignX('right'));
-  mig.AddLayoutComponent(wgpalette, TfpgMigCC.Create.Grow.PushX.PushY.SpanY(2));
+  mig.AddLayoutComponent(wgpalette, TfpgMigCC.Create.Grow.PushX.SpanY(2));
   mig.AddLayoutComponent(chlPalette, TfpgMigCC.Create.SpanX(4).PushY.AlignY('top'));
 
   { Assign FlowLayout to palette for automatic button wrapping }
