@@ -118,6 +118,8 @@ end;
 
 procedure TfpgHintWindow.FormHide(Sender: TObject);
 begin
+  if Assigned(FTimer) then
+    FTimer.Enabled := False;
   if Assigned(uShadowForm) then
     uShadowForm.Hide;
 end;
@@ -262,6 +264,7 @@ end;
 destructor TfpgHintWindow.Destroy;
 begin
   FTimer.Free;
+  FTimer := nil;  // Prevent FormHide (fired by inherited Destroy) from accessing freed timer
   FFont := nil;  // Automatic ref count decrement and cleanup
   inherited Destroy;
   uShadowForm.Free;
