@@ -2912,24 +2912,12 @@ begin
 end;
 
 function TRichTextView.GetClientRect: TfpgRect;
-var
-  r: TRect;
 begin
   Result.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
-    ebsNone:
-        begin
-          // do nothing
-        end;
-    ebsDefault:
-        begin
-          r := fpgStyle.GetControlFrameBorders;
-          InflateRect(r, -2, -2);
-        end;
-    ebsSingle:
-        begin
-          InflateRect(r, -1, -1);
-        end;
+    ebsDefault: Result.InflateRect(-2, -2);
+    ebsSingle:  Result.InflateRect(-1, -1);
+    ebsNone:    ; // no change needed
   end;
 end;
 
