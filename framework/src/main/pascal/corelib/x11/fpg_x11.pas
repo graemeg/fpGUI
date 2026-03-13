@@ -3503,8 +3503,7 @@ begin
       DoEndDraw;
   end;
 
-  if not FDrawing then
-    AllocateDC;
+  AllocateDC;
 
   FDrawing := True;
 end;
