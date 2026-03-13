@@ -982,7 +982,7 @@ begin
         begin
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
           //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
-          if Lo(lParam) <= 1 then
+          if LOWORD(lParam) <= 1 then
             w.DoSetMouseCursor
           else
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -1155,8 +1155,8 @@ begin
 
           // note that WM_SIZING allows some control on sizing
           //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
-          msgp.rect.Width  := Lo(lParam);
-          msgp.rect.Height := Hi(lParam);
+          msgp.rect.Width  := LOWORD(lParam);
+          msgp.rect.Height := HIWORD(lParam);
 
           {$IFDEF GDEBUG}
           DebugLnFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
@@ -1175,20 +1175,9 @@ begin
 
     WM_SIZING:
         begin
-          { **** NOTE ****
-            This is only here, because WM_SIZE is not working correctly for some
-            odd reason. So this is only a work-around, until I can figure out what
-            is going on with WM_SIZE. }
-          lprc := LPRECT(lparam);
-          PrintRect(lprc^);
-          msgp.rect.Width  := lprc^.Right - lprc^.Left + 1;
-          msgp.rect.Height := lprc^.Bottom - lprc^.Top + 1;
-
-          if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
-          begin
-            fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
-            w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
-          end;
+          { WM_SIZING is no longer used for resize handling. WM_SIZE provides
+            the correct client area dimensions via LOWORD/HIWORD(lParam). }
+          Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_MOVE:
@@ -1209,8 +1198,8 @@ begin
           end
           else
           begin
-            msgp.rect.Left := Lo(lParam);
-            msgp.rect.Top  := Hi(lParam);
+            msgp.rect.Left := LOWORD(lParam);
+            msgp.rect.Top  := HIWORD(lParam);
           end;
 
           if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
@@ -1230,9 +1219,14 @@ begin
     WM_WINDOWPOSCHANGED:
         begin
           {$IFDEF GDEBUG}
-          DebugLnFmt('%s: WM_STYLECHANGED' , [w.ClassName]);
+          DebugLnFmt('%s: WM_WINDOWPOSCHANGED' , [w.ClassName]);
           {$ENDIF}
           w.HandleWM_WINDOWPOSCHANGED(Pointer(lParam));
+          { DefWindowProc MUST be called here. It is responsible for generating
+            the WM_SIZE and WM_MOVE messages from WM_WINDOWPOSCHANGED. Without
+            this call, maximize, restore, and any system-driven resize/move will
+            not produce WM_SIZE/WM_MOVE, so fpGUI would never process them. }
+          Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_MOUSEWHEEL:
