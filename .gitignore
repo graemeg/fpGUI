@@ -58,4 +58,5 @@ extras/contributed/*.*
 docs/*.inf*
 *.pdf
 bugs/
+do-not-commit/
 
