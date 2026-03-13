@@ -16,7 +16,7 @@
       various fpGUI widgets and framework functionality.
 }
 
-unit frm_main;
+unit ide.form.main;
 
 {$mode objfpc}{$H+}
 
@@ -26,7 +26,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, synregexpr,
-  filemonitor;
+  ide.filemonitor;
 
 type
 
@@ -154,18 +154,18 @@ uses
   ,fpg_stringutils
   ,fpg_constants
   ,fpg_widget
-  ,frm_configureide
-  ,frm_projectoptions
-  ,frm_debug
-  ,frm_procedurelist
-  ,frm_find
+  ,ide.form.configure
+  ,ide.form.projectoptions
+  ,ide.form.debug
+  ,ide.form.procedurelist
+  ,ide.form.find
   ,fpg_basegrid
-  ,ideconst
-  ,idemacros
-  ,Project
-  ,UnitList
-  ,BuilderThread
-  ,ideutils
+  ,ide.consts
+  ,ide.macros
+  ,ide.project
+  ,ide.project.unitlist
+  ,ide.builder.thread
+  ,ide.utils
   ;
 
 

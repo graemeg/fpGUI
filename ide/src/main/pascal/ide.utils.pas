@@ -14,7 +14,7 @@
       ---
 }
 
-unit ideutils;
+unit ide.utils;
 
 {$mode objfpc}{$H+}
 

@@ -14,7 +14,7 @@
       ---
 }
 
-unit frm_find;
+unit ide.form.find;
 
 {$mode objfpc}{$H+}
 

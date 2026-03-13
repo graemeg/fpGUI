@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-ide</name>
+  <author>Graeme Geldenhuys</author>
+  <license>BSD-3-Clause</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>ide.main.pas</mainSource>
+    <executableName>maximus</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../framework</module>
+  </moduleDependencies>
+
+  <profiles>
+    <profile>
+      <id>debug</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gw</option>
+        <option>-godwarfsets -godwarfmethodclassprefix</option>
+        <option>-gl</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <defines>
+        <define>RELEASE</define>
+      </defines>
+      <compilerOptions>
+        <option>-O3</option>
+        <option>-CX</option>
+        <option>-Xs</option>
+        <option>-XX</option>
+      </compilerOptions>
+    </profile>
+  </profiles>
+</project>

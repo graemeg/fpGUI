@@ -14,7 +14,7 @@
       ---
 }
 
-unit idemacros;
+unit ide.macros;
 
 {$mode objfpc}{$H+}
 
@@ -67,7 +67,7 @@ function GMacroList: TIDEMacroList;
 implementation
 
 uses
-  ideconst
+  ide.consts
   ,fpg_iniutils;
 
 var

@@ -14,7 +14,7 @@
       ---
 }
 
-unit frm_configureide;
+unit ide.form.configure;
 
 {$mode objfpc}{$H+}
 
@@ -22,7 +22,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
-  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros, fpg_combobox,
+  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, ide.macros, fpg_combobox,
   fpg_checkbox, fpg_panel;
 
 type
@@ -102,7 +102,7 @@ uses
   fpg_dialogs
   ,fpg_iniutils
   ,fpg_widget
-  ,ideconst
+  ,ide.consts
   ;
 
 type

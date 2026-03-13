@@ -12,7 +12,9 @@
   <!-- List child modules in build order -->
   <modules>
     <module>framework</module>
+    <module>ide</module>
     <module>docview</module>
     <module>uidesigner</module>
+    <module>examples</module>
   </modules>
 </project>

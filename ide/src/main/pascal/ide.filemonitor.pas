@@ -14,7 +14,7 @@
       ---
 }
 
-unit filemonitor;
+unit ide.filemonitor;
 
 {$mode objfpc}{$H+}
 

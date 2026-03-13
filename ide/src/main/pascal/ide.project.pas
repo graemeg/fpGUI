@@ -14,14 +14,14 @@
       ---
 }
 
-unit Project;
+unit ide.project;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, UnitList, fpg_base, fpg_iniutils;
+  Classes, SysUtils, ide.project.unitlist, fpg_base, fpg_iniutils;
 
 type
   TBooleanGrid = array of array of Boolean;
@@ -75,10 +75,10 @@ procedure FreeProject;
 implementation
 
 uses
-  ideconst
-  ,ideutils
+  ide.consts
+  ,ide.utils
   ,fpg_utils
-  ,idemacros
+  ,ide.macros
   ;
 
 

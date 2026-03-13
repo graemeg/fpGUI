@@ -14,7 +14,7 @@
       ---
 }
 
-unit BuilderThread;
+unit ide.builder.thread;
 
 {$mode objfpc}{$H+}
 
@@ -43,13 +43,13 @@ type
 implementation
 
 uses
-  project
+  ide.project
   ,process
   ,fpg_base
   ,fpg_iniutils
   ,fpg_utils
-  ,ideconst
-  ,idemacros
+  ,ide.consts
+  ,ide.macros
   ;
 
 { TBuilderThread }

@@ -14,7 +14,7 @@
       ---
 }
 
-unit UnitList;
+unit ide.project.unitlist;
 
 {$mode objfpc}{$H+}
 
@@ -62,7 +62,7 @@ implementation
 
 uses
   fpg_utils,
-  project;
+  ide.project;
 
 { TUnitList }
 

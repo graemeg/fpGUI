@@ -14,7 +14,7 @@
       ---
 }
 
-unit ideimages;
+unit ide.images;
 
 {$mode objfpc}{$H+}
 

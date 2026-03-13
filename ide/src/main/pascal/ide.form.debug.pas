@@ -14,7 +14,7 @@
       ---
 }
 
-unit frm_debug;
+unit ide.form.debug;
 
 {$mode objfpc}{$H+}
 

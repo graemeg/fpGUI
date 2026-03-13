@@ -14,7 +14,7 @@
       ---
 }
 
-unit frm_procedurelist;
+unit ide.form.procedurelist;
 
 {$mode objfpc}{$H+}
 
@@ -113,9 +113,9 @@ function DisplayProcedureList(const AFilename: TfpgString; var AEditor: TfpgText
 implementation
 
 uses
-  ideconst
+  ide.consts
   ,mPasLex
-  ,ideutils
+  ,ide.utils
   ,dbugintf
   ,fpg_utils
   ,fpg_imgfmt_bmp

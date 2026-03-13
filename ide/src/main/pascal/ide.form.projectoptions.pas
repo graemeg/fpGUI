@@ -14,7 +14,7 @@
       ---
 }
 
-unit frm_projectoptions;
+unit ide.form.projectoptions;
 
 {$mode objfpc}{$H+}
 
@@ -23,7 +23,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
   fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_basegrid,
-  fpg_combobox, fpg_edit, idemacros, fpg_menu;
+  fpg_combobox, fpg_edit, ide.macros, fpg_menu;
 
 type
 
@@ -124,9 +124,9 @@ uses
   fpg_iniutils
   ,fpg_dialogs
   ,fpg_widget
-  ,Project
-  ,ideconst
-  ,ideutils
+  ,ide.project
+  ,ide.consts
+  ,ide.utils
   ;
 
 type

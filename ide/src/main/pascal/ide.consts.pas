@@ -14,7 +14,7 @@
       ---
 }
 
-unit ideconst;
+unit ide.consts;
 
 {$mode objfpc}{$H+}
 

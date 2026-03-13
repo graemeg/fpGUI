@@ -14,7 +14,7 @@
       ---
 }
 
-unit stringhelpers;
+unit ide.stringhelpers;
 
 {$mode objfpc}{$H+}
 
