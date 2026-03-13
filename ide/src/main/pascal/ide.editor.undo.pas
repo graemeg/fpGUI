@@ -5,6 +5,9 @@
     Each text mutation is represented as a TUndoAction subclass that
     can execute, undo, and redo itself against a TStringList model.
 
+    All column positions are in UTF-8 codepoints (0-based), matching
+    the editor's CaretPos.X convention.
+
     TUndoManager orchestrates the undo/redo stacks, action merging
     (consecutive keystrokes), and optional max-depth limiting.
 }
@@ -16,7 +19,8 @@ interface
 
 uses
   Classes,
-  SysUtils;
+  SysUtils,
+  fpg_stringutils;
 
 type
 
@@ -24,6 +28,8 @@ type
 
   TUndoAction = class
   public
+    CaretBefore: TPoint;
+    CaretAfter: TPoint;
     procedure Execute; virtual; abstract;
     procedure Undo; virtual; abstract;
     procedure Redo; virtual;
@@ -32,7 +38,8 @@ type
   end;
 
 
-  { TInsertTextAction — inserts text at a given line/column position }
+  { TInsertTextAction — inserts text at a given line/column position.
+    Column is in UTF-8 codepoints (0-based). }
 
   TInsertTextAction = class(TUndoAction)
   private
@@ -48,7 +55,7 @@ type
   end;
 
 
-  { TDeleteTextAction — deletes ACount characters starting at line/column }
+  { TDeleteTextAction — deletes ACount codepoints starting at line/column }
 
   TDeleteTextAction = class(TUndoAction)
   private
@@ -88,7 +95,7 @@ type
   private
     FLines: TStringList;
     FLineIndex: Integer;
-    FJoinCol: Integer;     { column where the join happened (length of previous line) }
+    FJoinCol: Integer;     { codepoint column where the join happened }
     FJoinedText: string;   { text of the line that was removed }
   public
     constructor Create(ALines: TStringList; ALineIndex: Integer);
@@ -106,7 +113,29 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Add(AAction: TUndoAction);
+    function Count: Integer;
     procedure Execute; override;
+    procedure Undo; override;
+    procedure Redo; override;
+  end;
+
+
+  { TTextBlockAction — snapshot-based undo for complex multi-line changes.
+    Used for DeleteSelection, InsertTextAtPos, etc. The editor performs the
+    mutation directly, and this action records before/after state for undo. }
+
+  TTextBlockAction = class(TUndoAction)
+  private
+    FLines: TStringList;
+    FStartLine: Integer;
+    FOldLines: TStringList;
+    FNewLines: TStringList;
+  public
+    constructor Create(ALines: TStringList; AStartLine: Integer);
+    destructor Destroy; override;
+    procedure SaveBefore(AEndLine: Integer);
+    procedure SaveAfter(AEndLine: Integer);
+    procedure Execute; override;  { no-op: change already performed by editor }
     procedure Undo; override;
     procedure Redo; override;
   end;
@@ -120,8 +149,11 @@ type
     FRedoStack: TList;
     FMaxUndoLevels: Integer;
     FMergeBroken: Boolean;
+    FLastCaretPos: TPoint;
+    FCompoundAction: TCompoundAction;
     procedure ClearStack(AStack: TList);
     procedure TrimUndoStack;
+    procedure PushAction(AAction: TUndoAction);
   public
     constructor Create;
     destructor Destroy; override;
@@ -130,11 +162,15 @@ type
     procedure Redo;
     procedure Clear;
     procedure BreakMerge;
+    procedure BeginCompound;
+    procedure EndCompound;
+    function InCompound: Boolean;
     function CanUndo: Boolean;
     function CanRedo: Boolean;
     function UndoCount: Integer;
     function RedoCount: Integer;
     property MaxUndoLevels: Integer read FMaxUndoLevels write FMaxUndoLevels;
+    property LastCaretPos: TPoint read FLastCaretPos;
   end;
 
 
@@ -175,7 +211,7 @@ var
   Line: string;
 begin
   Line := FLines[FLineIndex];
-  Insert(FText, Line, FColPos + 1);  { FColPos is 0-based, Insert is 1-based }
+  UTF8Insert(FText, Line, FColPos + 1);  { FColPos is 0-based, UTF8Insert is 1-based }
   FLines[FLineIndex] := Line;
 end;
 
@@ -184,7 +220,7 @@ var
   Line: string;
 begin
   Line := FLines[FLineIndex];
-  Delete(Line, FColPos + 1, Length(FText));
+  UTF8Delete(Line, FColPos + 1, UTF8Length(FText));
   FLines[FLineIndex] := Line;
 end;
 
@@ -198,10 +234,11 @@ begin
   Other := TInsertTextAction(AOther);
   { Merge if same line and the new insert follows immediately after this one }
   if (Other.FLineIndex = FLineIndex) and
-     (Other.FColPos = FColPos + Length(FText)) and
-     (Length(Other.FText) = 1) then
+     (Other.FColPos = FColPos + UTF8Length(FText)) and
+     (UTF8Length(Other.FText) = 1) then
   begin
     FText := FText + Other.FText;
+    CaretAfter := Other.CaretAfter;
     Result := True;
   end;
 end;
@@ -226,8 +263,8 @@ var
   Line: string;
 begin
   Line := FLines[FLineIndex];
-  FDeletedText := Copy(Line, FColPos + 1, FCount);
-  Delete(Line, FColPos + 1, FCount);
+  FDeletedText := UTF8Copy(Line, FColPos + 1, FCount);
+  UTF8Delete(Line, FColPos + 1, FCount);
   FLines[FLineIndex] := Line;
 end;
 
@@ -236,7 +273,7 @@ var
   Line: string;
 begin
   Line := FLines[FLineIndex];
-  Insert(FDeletedText, Line, FColPos + 1);
+  UTF8Insert(FDeletedText, Line, FColPos + 1);
   FLines[FLineIndex] := Line;
 end;
 
@@ -246,7 +283,7 @@ var
 begin
   { On redo we already know what was deleted, just delete again }
   Line := FLines[FLineIndex];
-  Delete(Line, FColPos + 1, Length(FDeletedText));
+  UTF8Delete(Line, FColPos + 1, UTF8Length(FDeletedText));
   FLines[FLineIndex] := Line;
 end;
 
@@ -267,6 +304,7 @@ begin
     FDeletedText := Other.FDeletedText + FDeletedText;
     FColPos := Other.FColPos;
     FCount := FCount + 1;
+    CaretAfter := Other.CaretAfter;
     Result := True;
   end;
 end;
@@ -300,8 +338,8 @@ var
   Line, Tail: string;
 begin
   Line := FLines[FLineIndex];
-  Tail := FIndent + Copy(Line, FColPos + 1, MaxInt);
-  FLines[FLineIndex] := Copy(Line, 1, FColPos);
+  Tail := FIndent + UTF8Copy(Line, FColPos + 1, MaxInt);
+  FLines[FLineIndex] := UTF8Copy(Line, 1, FColPos);
   FLines.Insert(FLineIndex + 1, Tail);
 end;
 
@@ -312,7 +350,7 @@ begin
   Top := FLines[FLineIndex];
   Bottom := FLines[FLineIndex + 1];
   { Remove the indent that was added, then rejoin }
-  Joined := Top + Copy(Bottom, Length(FIndent) + 1, MaxInt);
+  Joined := Top + UTF8Copy(Bottom, UTF8Length(FIndent) + 1, MaxInt);
   FLines[FLineIndex] := Joined;
   FLines.Delete(FLineIndex + 1);
 end;
@@ -334,7 +372,7 @@ end;
 procedure TJoinLinesAction.Execute;
 begin
   FJoinedText := FLines[FLineIndex];
-  FJoinCol := Length(FLines[FLineIndex - 1]);
+  FJoinCol := UTF8Length(FLines[FLineIndex - 1]);
   FLines[FLineIndex - 1] := FLines[FLineIndex - 1] + FJoinedText;
   FLines.Delete(FLineIndex);
 end;
@@ -344,7 +382,7 @@ var
   Line: string;
 begin
   Line := FLines[FLineIndex - 1];
-  FLines[FLineIndex - 1] := Copy(Line, 1, FJoinCol);
+  FLines[FLineIndex - 1] := UTF8Copy(Line, 1, FJoinCol);
   FLines.Insert(FLineIndex, FJoinedText);
 end;
 
@@ -374,6 +412,11 @@ begin
   FActions.Add(AAction);
 end;
 
+function TCompoundAction.Count: Integer;
+begin
+  Result := FActions.Count;
+end;
+
 procedure TCompoundAction.Execute;
 var
   i: Integer;
@@ -401,6 +444,76 @@ end;
 
 
 { =========================================================================
+    TTextBlockAction
+  ========================================================================= }
+
+constructor TTextBlockAction.Create(ALines: TStringList; AStartLine: Integer);
+begin
+  inherited Create;
+  FLines := ALines;
+  FStartLine := AStartLine;
+  FOldLines := TStringList.Create;
+  FNewLines := TStringList.Create;
+end;
+
+destructor TTextBlockAction.Destroy;
+begin
+  FOldLines.Free;
+  FNewLines.Free;
+  inherited Destroy;
+end;
+
+procedure TTextBlockAction.SaveBefore(AEndLine: Integer);
+var
+  i: Integer;
+begin
+  FOldLines.Clear;
+  for i := FStartLine to AEndLine do
+    if i < FLines.Count then
+      FOldLines.Add(FLines[i]);
+end;
+
+procedure TTextBlockAction.SaveAfter(AEndLine: Integer);
+var
+  i: Integer;
+begin
+  FNewLines.Clear;
+  for i := FStartLine to AEndLine do
+    if i < FLines.Count then
+      FNewLines.Add(FLines[i]);
+end;
+
+procedure TTextBlockAction.Execute;
+begin
+  { No-op: the editor already performed the change before pushing this action }
+end;
+
+procedure TTextBlockAction.Undo;
+var
+  i: Integer;
+begin
+  { Remove the new lines and restore the old ones }
+  for i := 1 to FNewLines.Count do
+    if FStartLine < FLines.Count then
+      FLines.Delete(FStartLine);
+  for i := FOldLines.Count - 1 downto 0 do
+    FLines.Insert(FStartLine, FOldLines[i]);
+end;
+
+procedure TTextBlockAction.Redo;
+var
+  i: Integer;
+begin
+  { Remove the old lines and restore the new ones }
+  for i := 1 to FOldLines.Count do
+    if FStartLine < FLines.Count then
+      FLines.Delete(FStartLine);
+  for i := FNewLines.Count - 1 downto 0 do
+    FLines.Insert(FStartLine, FNewLines[i]);
+end;
+
+
+{ =========================================================================
     TUndoManager
   ========================================================================= }
 
@@ -411,10 +524,13 @@ begin
   FRedoStack := TList.Create;
   FMaxUndoLevels := 0;  { 0 = unlimited }
   FMergeBroken := False;
+  FCompoundAction := nil;
+  FLastCaretPos := Point(0, 0);
 end;
 
 destructor TUndoManager.Destroy;
 begin
+  FCompoundAction.Free;
   ClearStack(FUndoStack);
   ClearStack(FRedoStack);
   FUndoStack.Free;
@@ -442,11 +558,25 @@ begin
   end;
 end;
 
+procedure TUndoManager.PushAction(AAction: TUndoAction);
+begin
+  FUndoStack.Add(AAction);
+  TrimUndoStack;
+  ClearStack(FRedoStack);
+end;
+
 procedure TUndoManager.ExecuteAction(AAction: TUndoAction);
 var
   Top: TUndoAction;
 begin
   AAction.Execute;
+
+  { If inside a compound block, collect rather than push }
+  if FCompoundAction <> nil then
+  begin
+    FCompoundAction.Add(AAction);
+    Exit;
+  end;
 
   { Try to merge with the top of the undo stack }
   if (not FMergeBroken) and (FUndoStack.Count > 0) then
@@ -462,11 +592,7 @@ begin
   end;
 
   FMergeBroken := False;
-  FUndoStack.Add(AAction);
-  TrimUndoStack;
-
-  { Clear redo stack — new action invalidates redo history }
-  ClearStack(FRedoStack);
+  PushAction(AAction);
 end;
 
 procedure TUndoManager.Undo;
@@ -479,6 +605,7 @@ begin
   FUndoStack.Delete(FUndoStack.Count - 1);
   Action.Undo;
   FRedoStack.Add(Action);
+  FLastCaretPos := Action.CaretBefore;
   FMergeBroken := True;
 end;
 
@@ -492,11 +619,13 @@ begin
   FRedoStack.Delete(FRedoStack.Count - 1);
   Action.Redo;
   FUndoStack.Add(Action);
+  FLastCaretPos := Action.CaretAfter;
   FMergeBroken := True;
 end;
 
 procedure TUndoManager.Clear;
 begin
+  FreeAndNil(FCompoundAction);
   ClearStack(FUndoStack);
   ClearStack(FRedoStack);
   FMergeBroken := False;
@@ -505,6 +634,31 @@ end;
 procedure TUndoManager.BreakMerge;
 begin
   FMergeBroken := True;
+end;
+
+procedure TUndoManager.BeginCompound;
+begin
+  if FCompoundAction <> nil then
+    Exit;  { already in compound mode }
+  FCompoundAction := TCompoundAction.Create;
+  FMergeBroken := True;
+end;
+
+procedure TUndoManager.EndCompound;
+begin
+  if FCompoundAction = nil then
+    Exit;
+  if FCompoundAction.Count > 0 then
+    PushAction(FCompoundAction)
+  else
+    FCompoundAction.Free;
+  FCompoundAction := nil;
+  FMergeBroken := True;
+end;
+
+function TUndoManager.InCompound: Boolean;
+begin
+  Result := FCompoundAction <> nil;
 end;
 
 function TUndoManager.CanUndo: Boolean;

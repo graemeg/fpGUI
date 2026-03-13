@@ -144,6 +144,25 @@ type
     procedure TestConsecutiveBackspacesAtSamePositionMerge;
   end;
 
+  { TTestUTF8Actions — verify all actions with multi-byte codepoints }
+
+  TTestUTF8Actions = class(TTestCase)
+  private
+    FLines: TStringList;
+    FManager: TUndoManager;
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestInsertAfterMultiByte;
+    procedure TestDeleteMultiByteCodepoint;
+    procedure TestDeleteAfterMultiByte;
+    procedure TestSplitLineWithMultiByte;
+    procedure TestJoinLinesWithMultiByte;
+    procedure TestConsecutiveMultiByteInsertsMerge;
+    procedure TestBackspaceMultiByteCodepointsMerge;
+  end;
+
 
 implementation
 
@@ -755,6 +774,110 @@ begin
 end;
 
 
+{ =========================================================================
+    TTestUTF8Actions — verify all actions handle multi-byte codepoints
+    correctly (where byte offset ≠ codepoint offset).
+  ========================================================================= }
+
+procedure TTestUTF8Actions.SetUp;
+begin
+  inherited SetUp;
+  FLines := TStringList.Create;
+  FManager := TUndoManager.Create;
+end;
+
+procedure TTestUTF8Actions.TearDown;
+begin
+  FManager.Free;
+  FLines.Free;
+  inherited TearDown;
+end;
+
+procedure TTestUTF8Actions.TestInsertAfterMultiByte;
+begin
+  { Line: 'café' — é is 2 bytes, so byte length = 5, codepoint count = 4 }
+  FLines.Add('caf' + #$C3#$A9);
+  { Insert 's' at codepoint 4 (after é). Byte-based Insert at pos 4 would
+    land inside the é sequence — only codepoint-based insert is correct. }
+  FManager.ExecuteAction(TInsertTextAction.Create(FLines, 0, 4, 's'));
+  AssertEquals('caf' + #$C3#$A9 + 's', FLines[0]);
+  FManager.Undo;
+  AssertEquals('caf' + #$C3#$A9, FLines[0]);
+end;
+
+procedure TTestUTF8Actions.TestDeleteMultiByteCodepoint;
+begin
+  { Line: 'café' — delete the é at codepoint 3 }
+  FLines.Add('caf' + #$C3#$A9);
+  FManager.ExecuteAction(TDeleteTextAction.Create(FLines, 0, 3, 1));
+  AssertEquals('caf', FLines[0]);
+  FManager.Undo;
+  AssertEquals('caf' + #$C3#$A9, FLines[0]);
+end;
+
+procedure TTestUTF8Actions.TestDeleteAfterMultiByte;
+begin
+  { Line: 'résumé' — r(1) é(2) s(3) u(4) m(5) é(6), 8 bytes total
+    Delete 'u' at codepoint 3 (0-based) = codepoint 4 (1-based) }
+  FLines.Add('r' + #$C3#$A9 + 'sum' + #$C3#$A9);
+  FManager.ExecuteAction(TDeleteTextAction.Create(FLines, 0, 3, 1));
+  AssertEquals('r' + #$C3#$A9 + 'sm' + #$C3#$A9, FLines[0]);
+  FManager.Undo;
+  AssertEquals('r' + #$C3#$A9 + 'sum' + #$C3#$A9, FLines[0]);
+end;
+
+procedure TTestUTF8Actions.TestSplitLineWithMultiByte;
+begin
+  { Line: 'café latte' — split at codepoint 5 (after the space) }
+  FLines.Add('caf' + #$C3#$A9 + ' latte');
+  FManager.ExecuteAction(TSplitLineAction.Create(FLines, 0, 5));
+  AssertEquals('Line count', 2, FLines.Count);
+  AssertEquals('First line', 'caf' + #$C3#$A9 + ' ', FLines[0]);
+  AssertEquals('Second line', 'latte', FLines[1]);
+  FManager.Undo;
+  AssertEquals('After undo count', 1, FLines.Count);
+  AssertEquals('After undo', 'caf' + #$C3#$A9 + ' latte', FLines[0]);
+end;
+
+procedure TTestUTF8Actions.TestJoinLinesWithMultiByte;
+begin
+  { Two lines with multi-byte chars, join them }
+  FLines.Add('caf' + #$C3#$A9);
+  FLines.Add(' cr' + #$C3#$A8 + 'me');
+  FManager.ExecuteAction(TJoinLinesAction.Create(FLines, 1));
+  AssertEquals('Line count', 1, FLines.Count);
+  AssertEquals('Joined', 'caf' + #$C3#$A9 + ' cr' + #$C3#$A8 + 'me', FLines[0]);
+  FManager.Undo;
+  AssertEquals('After undo count', 2, FLines.Count);
+  AssertEquals('Line 0', 'caf' + #$C3#$A9, FLines[0]);
+  AssertEquals('Line 1', ' cr' + #$C3#$A8 + 'me', FLines[1]);
+end;
+
+procedure TTestUTF8Actions.TestConsecutiveMultiByteInsertsMerge;
+begin
+  { Type two multi-byte chars — should merge into one undo step }
+  FLines.Add('ab');
+  FManager.ExecuteAction(TInsertTextAction.Create(FLines, 0, 2, #$C3#$A9));  { é }
+  FManager.ExecuteAction(TInsertTextAction.Create(FLines, 0, 3, #$C3#$A8));  { è }
+  AssertEquals('ab' + #$C3#$A9 + #$C3#$A8, FLines[0]);
+  AssertEquals('Should merge', 1, FManager.UndoCount);
+  FManager.Undo;
+  AssertEquals('ab', FLines[0]);
+end;
+
+procedure TTestUTF8Actions.TestBackspaceMultiByteCodepointsMerge;
+begin
+  { Line: 'aéè' — backspace è then é }
+  FLines.Add('a' + #$C3#$A9 + #$C3#$A8);
+  FManager.ExecuteAction(TDeleteTextAction.Create(FLines, 0, 2, 1));  { delete è at codepoint 2 }
+  FManager.ExecuteAction(TDeleteTextAction.Create(FLines, 0, 1, 1));  { delete é at codepoint 1 }
+  AssertEquals('a', FLines[0]);
+  AssertEquals('Backspaces should merge', 1, FManager.UndoCount);
+  FManager.Undo;
+  AssertEquals('a' + #$C3#$A9 + #$C3#$A8, FLines[0]);
+end;
+
+
 initialization
   RegisterTest(TTestUndoManager);
   RegisterTest(TTestInsertTextAction);
@@ -763,5 +886,6 @@ initialization
   RegisterTest(TTestJoinLinesAction);
   RegisterTest(TTestCompoundAction);
   RegisterTest(TTestActionMerging);
+  RegisterTest(TTestUTF8Actions);
 
 end.

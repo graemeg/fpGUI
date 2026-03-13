@@ -26,7 +26,7 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, fpg_base, fpg_main, fpg_widget,
-  fpg_scrollbar;
+  fpg_scrollbar, ide.editor.undo;
 
 type
   // forward declaration
@@ -145,6 +145,7 @@ type
     FElasticTabstops: TObject;  // Will be TTabstopsList (list of TIntegerList)
     FTabPadding: Integer;
     FUseElasticTabstops: Boolean;
+    FUndoManager: TUndoManager;
 
     FLastScrollEventTime: TTime; // in milliseconds
     FLastScrollEventTimeBefore: TTime; // in milliseconds
@@ -246,6 +247,10 @@ type
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
     procedure   DeleteSelection;
+    procedure   Undo;
+    procedure   Redo;
+    function    CanUndo: Boolean;
+    function    CanRedo: Boolean;
     function    GetSelectedText: TfpgString;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
@@ -581,6 +586,7 @@ end;
 procedure TfpgBaseTextEdit.SetLines(const AValue: TStrings);
 begin
   FLines.Assign(AValue);
+  FUndoManager.Clear;
   Invalidate;
 end;
 
@@ -1904,8 +1910,14 @@ end;
 procedure TfpgBaseTextEdit.PasteFromClipboard;
 begin
   if FSelected then
+  begin
+    FUndoManager.BeginCompound;
     DeleteSelection;
-  InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+    InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+    FUndoManager.EndCompound;
+  end
+  else
+    InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
 end;
 
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
@@ -1968,6 +1980,7 @@ var
   X: Integer;
   CaretScroll: Boolean;
   lIndentOffset: integer;
+  UndoAction: TUndoAction;
 begin
   {$IFDEF gDEBUG}
   SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress');
@@ -1995,6 +2008,27 @@ begin
       end;
   end;
 
+  { Undo/Redo key bindings }
+  if not consumed then
+  begin
+    AddS := UpperCase(KeycodeToText(keycode, []));
+    if (shiftstate = [ssCtrl]) and (AddS = 'Z') then
+    begin
+      Undo;
+      consumed := True;
+    end
+    else if (shiftstate = [ssCtrl, ssShift]) and (AddS = 'Z') then
+    begin
+      Redo;
+      consumed := True;
+    end
+    else if (shiftstate = [ssCtrl]) and (AddS = 'Y') then
+    begin
+      Redo;
+      consumed := True;
+    end;
+  end;
+
   { Add lines as we go, so we can cursor past EOF. }
   { todo: This behaviour should be optional }
   if CaretPos.Y > pred(FLines.Count) then
@@ -2016,10 +2050,12 @@ begin
         begin
           if FSelected then
           begin
+            FUndoManager.BreakMerge;
             DeleteSelection;
             consumed := True;
             Exit;
           end;
+          { Snap cursor to line end if beyond it }
           if UTF8Length(SLine) >= CaretPos.X then
             X := CaretPos.X
           else
@@ -2027,24 +2063,26 @@ begin
             X := UTF8Length(SLine);
             CaretPos.X := X;
           end;
-          UTF8Delete(SLine, X, 1);
-          FLines[CaretPos.Y] := SLine;
-          CaretPos.X := CaretPos.X - 1;
-          if CaretPos.X < 0 then
+          if X > 0 then
           begin
-            if CaretPos.Y > 0 then
-            begin
-              AddS := FLines[CaretPos.Y];  { store any text from current line }
-              FLines.Delete(CaretPos.Y);
-              CaretPos.Y := CaretPos.Y - 1;
-              CaretPos.X := UTF8Length(FLines[CaretPos.Y]); { reposition cursor }
-              if AddS <> '' then
-                FLines[CaretPos.Y] := FLines[CaretPos.Y] + AddS; { add stored text to new current line }
-            end
-            else
-            begin
-              CaretPos.X := 0;
-            end;
+            { Delete character before cursor }
+            UndoAction := TDeleteTextAction.Create(TStringList(FLines), CaretPos.Y, X - 1, 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.X := CaretPos.X - 1;
+            UndoAction.CaretAfter := CaretPos;
+          end
+          else if CaretPos.Y > 0 then
+          begin
+            { At start of line — join with previous }
+            FUndoManager.BreakMerge;
+            X := UTF8Length(FLines[CaretPos.Y - 1]);  { join point = end of previous line }
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.Y := CaretPos.Y - 1;
+            CaretPos.X := X;
+            UndoAction.CaretAfter := CaretPos;
           end;
           FSelection.StartPos := CaretPos;
           consumed := True;
@@ -2052,40 +2090,28 @@ begin
 
     keyTab:
         begin
+          FUndoManager.BreakMerge;
           if FUseElasticTabstops then
-          begin
-            // Insert actual tab character for elastic tabstops
-            AddS := #9;
-            UTF8Insert(AddS, SLine, CaretPos.X + 1);
-            FLines[CaretPos.Y] := SLine;
-            CaretPos.X := CaretPos.X + 1;
-          end
+            AddS := #9
           else
-          begin
-            // Insert spaces for normal tab behavior
             AddS := '  ';
-            UTF8Insert(AddS, SLine, CaretPos.X);
-            FLines[CaretPos.Y] := SLine;
-            CaretPos.X := CaretPos.X + 2;
-          end;
+          UndoAction := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS);
+          UndoAction.CaretBefore := CaretPos;
+          FUndoManager.ExecuteAction(UndoAction);
+          CaretPos.X := CaretPos.X + UTF8Length(AddS);
+          UndoAction.CaretAfter := CaretPos;
           FSelection.StartPos := CaretPos;
           consumed := True;
         end;
 
     keyReturn:
         begin
-          AddS := '';
-          if UTF8Length(SLine) > CaretPos.X then
-          begin
-            AddS := Copy(SLine, CaretPos.X + 1, Length(SLine) - CaretPos.X + 1);
-            Delete(SLine, CaretPos.X + 1, Length(SLine) - CaretPos.X);
-            FLines[CaretPos.Y] := SLine;
-          end;
+          FUndoManager.BreakMerge;
 
+          { Compute auto-indent from current line }
           lIndentOffset := 0;
           if AutoIndent then
           begin
-            { find first non whitespace character }
             lStrLen := UTF8Length(SLine);
             for x := 1 to lStrLen do
             begin
@@ -2094,20 +2120,24 @@ begin
               else
                 Break;
             end;
-            lIndentOffset := x-1;
+            lIndentOffset := x - 1;
           end;
 
-          if CaretPos.Y = pred(FLines.Count) then
-            FLines.Add(DupeString(' ', lIndentOffset) + AddS)
+          AddS := DupeString(' ', lIndentOffset);
+          if lIndentOffset > 0 then
+            UndoAction := TSplitLineAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS)
           else
-            FLines.Insert(CaretPos.Y + 1, DupeString(' ', lIndentOffset) + AddS);
+            UndoAction := TSplitLineAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X);
+          UndoAction.CaretBefore := CaretPos;
+          FUndoManager.ExecuteAction(UndoAction);
 
           CaretPos.Y := CaretPos.Y + 1;
           if AutoIndent then
             CaretPos.X := lIndentOffset
           else
             CaretPos.X := 0;
-          CaretScroll:=True;
+          UndoAction.CaretAfter := CaretPos;
+          CaretScroll := True;
           FSelection.StartPos := CaretPos;
           consumed := True;
         end;
@@ -2123,6 +2153,7 @@ begin
         begin
           if FSelected then
           begin
+            FUndoManager.BreakMerge;
             DeleteSelection;
             consumed := True;
             Exit;
@@ -2130,27 +2161,33 @@ begin
           if CaretPos.Y > pred(FLines.Count) then
             Exit;
           SLine := FLines[CaretPos.Y];
-          if SLine = '' then  // short circut the code block
+          if UTF8Length(SLine) > CaretPos.X then
           begin
-            FLines.Delete(CaretPos.Y);
-            FVScrollBar.Max := FVScrollBar.Max - 1;
+            { Delete character at cursor }
+            UndoAction := TDeleteTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            UndoAction.CaretAfter := CaretPos;  { cursor stays }
           end
-          else
+          else if CaretPos.Y + 1 <= pred(FLines.Count) then
           begin
-            if Length(SLine) >= CaretPos.X + 1 then
-            begin
-              X := CaretPos.X + 1;
-              Delete(SLine, X, 1);
-              FLines[CaretPos.Y] := SLine;
-            end
-            else
-            begin
-              if CaretPos.Y + 1 > pred(FLines.Count) then
-                Exit;
-              AddS := FLines[CaretPos.Y + 1];
-              FLines[CaretPos.Y] := SLine + AddS;
-              FLines.Delete(CaretPos.Y + 1);
-            end;
+            { At/beyond end of line — join next line onto this one }
+            FUndoManager.BreakMerge;
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y + 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            UndoAction.CaretAfter := CaretPos;
+          end
+          else if (SLine = '') and (FLines.Count > 1) then
+          begin
+            { Empty line with content above — join onto previous }
+            FUndoManager.BreakMerge;
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.Y := CaretPos.Y - 1;
+            CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
+            UndoAction.CaretAfter := CaretPos;
           end;
           consumed := True;
         end;
@@ -2180,7 +2217,10 @@ end;
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
 var
   SLine: TfpgString;
-  Fill: Integer;
+  InsertCol: Integer;
+  InsertText: string;
+  PadLen: Integer;
+  Action: TInsertTextAction;
 begin
   {$IFDEF gDEBUG}
   writeln('>> TfpgBaseTextEdit.HandleKeyChar');
@@ -2188,7 +2228,10 @@ begin
   if not consumed then
   begin
     if FSelected then
+    begin
+      FUndoManager.BreakMerge;
       DeleteSelection;
+    end;
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
     if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
@@ -2196,13 +2239,23 @@ begin
       SLine := FLines[CaretPos.Y];
 
       { cursor was somewhere in whitespace, so we need to fill up the spaces }
-      if UTF8Length(SLine) < CaretPos.X + 1 then
-        for Fill := Length(SLine) to CaretPos.X + 1 do
-          SLine := SLine + ' ';
+      if UTF8Length(SLine) < CaretPos.X then
+      begin
+        PadLen := CaretPos.X - UTF8Length(SLine);
+        InsertText := StringOfChar(' ', PadLen) + AText;
+        InsertCol := UTF8Length(SLine);
+      end
+      else
+      begin
+        InsertText := AText;
+        InsertCol := CaretPos.X;
+      end;
 
-      UTF8Insert(AText, SLine, CaretPos.X + 1);
-      FLines[CaretPos.Y] := SLine;
+      Action := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, InsertCol, InsertText);
+      Action.CaretBefore := CaretPos;
+      FUndoManager.ExecuteAction(Action);
       CaretPos.X := CaretPos.X + 1;
+      Action.CaretAfter := CaretPos;
       FSelection.StartPos := CaretPos;
       consumed := True;
     end;
@@ -2535,6 +2588,7 @@ begin
   FElasticTabstops := nil;
   FTabPadding := 8;
   FUseElasticTabstops := False;
+  FUndoManager := TUndoManager.Create;
 
   fmousewheelfrequmin := 1;
   fmousewheelfrequmax := 100;
@@ -2564,6 +2618,7 @@ end;
 
 destructor TfpgBaseTextEdit.Destroy;
 begin
+  FUndoManager.Free;
   FLines.Free;
   FFont := nil;
   if Assigned(FDefaultDropHandler) then
@@ -2671,20 +2726,34 @@ begin
   FSelection.StartPos := fpgPoint(0,0);
   FLines.Clear;
   FSelected := False;
+  FUndoManager.Clear;
   Invalidate;
 end;
 
 procedure TfpgBaseTextEdit.InsertTextAtPos(S: TfpgString; Col, Row: Integer);
 var
+  Block: TTextBlockAction;
   SLine, BufS1, BufS2, BufS: TfpgString;
-  I, L: Integer;
+  I, L, OldLineCount: Integer;
+  AddedEmptyLine: Boolean;
 begin
   if S = '' then
     Exit;
   if Row > FLines.Count then
     Exit;
-  if Row = FLines.Count then
+
+  AddedEmptyLine := (Row = FLines.Count);
+  if AddedEmptyLine then
     FLines.Add('');
+
+  OldLineCount := FLines.Count;
+
+  { Capture before state for undo }
+  Block := TTextBlockAction.Create(TStringList(FLines), Row);
+  Block.SaveBefore(Row);
+  Block.CaretBefore := Point(Col, Row);
+
+  { --- Original mutation code --- }
   SLine := FLines[Row];
   if Col > UTF8Length(SLine) then
   begin
@@ -2758,6 +2827,13 @@ begin
       Invalidate;
     end;
   end;
+  { --- End original mutation code --- }
+
+  { Capture after state and push to undo }
+  Block.SaveAfter(Block.CaretBefore.Y + (FLines.Count - OldLineCount));
+  Block.CaretAfter := CaretPos;
+  FUndoManager.BreakMerge;
+  FUndoManager.ExecuteAction(Block);
 end;
 
 procedure TfpgBaseTextEdit.ScrollTo(X, Y: Integer);
@@ -2780,6 +2856,7 @@ end;
 
 procedure TfpgBaseTextEdit.DeleteSelection;
 var
+  Block: TTextBlockAction;
   FirstPart, LastPart, SLine: TfpgString;
   StartLine, StartPos, EndLine, EndPos, I, DelLine: Integer;
 begin
@@ -2794,6 +2871,13 @@ begin
     Exit;
   if EndLine > (FLines.Count-1) then
     EndLine := (FLines.Count-1);
+
+  { Capture before state for undo }
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  { Perform the deletion }
   SLine := FLines[StartLine];
   FirstPart := UTF8Copy(SLine, 1, StartPos);
   SLine := FLines[EndLine];
@@ -2809,8 +2893,49 @@ begin
   CaretPos.X := StartPos;
   FSelected := False;
 
+  { Capture after state and push to undo }
+  Block.SaveAfter(StartLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
   UpdateScrollbars;
   Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.Undo;
+begin
+  if not FUndoManager.CanUndo then
+    Exit;
+  FUndoManager.Undo;
+  CaretPos.X := FUndoManager.LastCaretPos.X;
+  CaretPos.Y := FUndoManager.LastCaretPos.Y;
+  FSelected := False;
+  FSelection.StartPos := CaretPos;
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.Redo;
+begin
+  if not FUndoManager.CanRedo then
+    Exit;
+  FUndoManager.Redo;
+  CaretPos.X := FUndoManager.LastCaretPos.X;
+  CaretPos.Y := FUndoManager.LastCaretPos.Y;
+  FSelected := False;
+  FSelection.StartPos := CaretPos;
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+function TfpgBaseTextEdit.CanUndo: Boolean;
+begin
+  Result := FUndoManager.CanUndo;
+end;
+
+function TfpgBaseTextEdit.CanRedo: Boolean;
+begin
+  Result := FUndoManager.CanRedo;
 end;
 
 function TfpgBaseTextEdit.GetSelectedText: TfpgString;
