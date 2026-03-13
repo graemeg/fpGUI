@@ -805,6 +805,15 @@ begin
   FWinHandle.setContentView(FView);
   FWinHandle.setAcceptsMouseMovedEvents(True);
 
+  // Apply min/max size constraints for sizeable windows
+  if (WindowType <> wtChild) and (waSizeable in FWindowAttributes) and Assigned(PrimaryWidget) then
+  begin
+    if (PrimaryWidget.MinWidth > 0) or (PrimaryWidget.MinHeight > 0) then
+      FWinHandle.setContentMinSize(NSMakeSize(PrimaryWidget.MinWidth, PrimaryWidget.MinHeight));
+    if (PrimaryWidget.MaxWidth > 0) or (PrimaryWidget.MaxHeight > 0) then
+      FWinHandle.setContentMaxSize(NSMakeSize(PrimaryWidget.MaxWidth, PrimaryWidget.MaxHeight));
+  end;
+
   // Set window title if we have a primary widget with a title
   if Assigned(PrimaryWidget) and (PrimaryWidget is TfpgWindow) then
   begin
@@ -870,6 +879,15 @@ begin
     else
       styleMask := styleMask and (not NSResizableWindowMask);
     FWinHandle.setStyleMask(styleMask);
+  end;
+
+  // Apply min/max size constraints for sizeable windows
+  if (FWindowType <> wtChild) and (waSizeable in ANewAttributes) and Assigned(PrimaryWidget) then
+  begin
+    if (PrimaryWidget.MinWidth > 0) or (PrimaryWidget.MinHeight > 0) then
+      FWinHandle.setContentMinSize(NSMakeSize(PrimaryWidget.MinWidth, PrimaryWidget.MinHeight));
+    if (PrimaryWidget.MaxWidth > 0) or (PrimaryWidget.MaxHeight > 0) then
+      FWinHandle.setContentMaxSize(NSMakeSize(PrimaryWidget.MaxWidth, PrimaryWidget.MaxHeight));
   end;
 
   // Handle other attributes as needed

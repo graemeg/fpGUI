@@ -2903,6 +2903,17 @@ begin
       hints.flags      := hints.flags or PMinSize;
       hints.min_width  := widget.MinWidth;
       hints.min_height := widget.MinHeight;
+      { Only set max size hints if widget has explicit size constraints }
+      if (widget.MaxWidth > 0) and (widget.MaxWidth < xapplication.ScreenWidth) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_width  := widget.MaxWidth;
+      end;
+      if (widget.MaxHeight > 0) and (widget.MaxHeight < xapplication.ScreenHeight) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_height := widget.MaxHeight;
+      end;
     end
     else
     begin
