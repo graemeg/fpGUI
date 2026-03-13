@@ -127,7 +127,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
+  lm.LC.WrapAfter(1);  // Wrap after each component (vertical stacking)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -164,7 +164,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -201,7 +201,7 @@ begin
   container.Width := 300;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -290,7 +290,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -330,7 +330,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -381,7 +381,7 @@ begin
   container.Width := 200;
   container.Height := 100;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   lm.LC.FillX;  // Make columns fill container width (Java MigLayout v11 way)
   container.LayoutManager := lm;
 
@@ -424,7 +424,7 @@ begin
   container.Height := 200;
 
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(1); // one component per row
+  lm.LC.WrapAfter(1); // one component per row
   container.LayoutManager := lm;
 
   // 1. Create components in one order

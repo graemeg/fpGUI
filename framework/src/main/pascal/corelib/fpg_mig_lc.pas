@@ -62,76 +62,58 @@ type
     FTopToBottom: Boolean;
     FNoGrid: Boolean;
     FVisualPadding: Boolean;
+
+    { Setters - private; use the fluent API methods instead }
+    procedure SetWrapAfter(ACount: Integer);
+    procedure SetLeftToRight(AValue: Integer);
+    procedure SetInsets(const AInsets: TfpgMigUnitValueArray);
+    procedure SetAlignX(AValue: TfpgMigUnitValue);
+    procedure SetAlignY(AValue: TfpgMigUnitValue);
+    procedure SetGridGapX(AValue: TfpgMigBoundSize);
+    procedure SetGridGapY(AValue: TfpgMigBoundSize);
+    procedure SetWidth(AValue: TfpgMigBoundSize);
+    procedure SetHeight(AValue: TfpgMigBoundSize);
+    procedure SetPackWidth(AValue: TfpgMigBoundSize);
+    procedure SetPackHeight(AValue: TfpgMigBoundSize);
+    procedure SetPackWidthAlign(AAlign: Single);
+    procedure SetPackHeightAlign(AAlign: Single);
+    procedure SetDebug(AValue: Boolean);
+    procedure SetHideMode(AMode: Integer);
+    procedure SetNoCache(AValue: Boolean);
+    procedure SetFlowX(AValue: Boolean);
+    procedure SetFillX(AValue: Boolean);
+    procedure SetFillY(AValue: Boolean);
+    procedure SetTopToBottom(AValue: Boolean);
+    procedure SetNoGrid(AValue: Boolean);
+    procedure SetVisualPadding(AValue: Boolean);
+
   public
     constructor Create;
     destructor Destroy; override;
 
-    { Property getters/setters }
+    { Getters - used by the layout engine to read constraint state }
     function GetWrapAfter: Integer;
-    procedure SetWrapAfter(ACount: Integer);
-
     function GetLeftToRight: Integer;  // Returns 0=nil, 1=false, 2=true
-    procedure SetLeftToRight(AValue: Integer);
-
     function GetInsets: TfpgMigUnitValueArray;  // Returns copy
-    procedure SetInsets(const AInsets: TfpgMigUnitValueArray);
-
     function GetAlignX: TfpgMigUnitValue;
-    procedure SetAlignX(AValue: TfpgMigUnitValue);
-
     function GetAlignY: TfpgMigUnitValue;
-    procedure SetAlignY(AValue: TfpgMigUnitValue);
-
     function GetGridGapX: TfpgMigBoundSize;
-    procedure SetGridGapX(AValue: TfpgMigBoundSize);
-
     function GetGridGapY: TfpgMigBoundSize;
-    procedure SetGridGapY(AValue: TfpgMigBoundSize);
-
     function GetWidth: TfpgMigBoundSize;
-    procedure SetWidth(AValue: TfpgMigBoundSize);
-
     function GetHeight: TfpgMigBoundSize;
-    procedure SetHeight(AValue: TfpgMigBoundSize);
-
     function GetPackWidth: TfpgMigBoundSize;
-    procedure SetPackWidth(AValue: TfpgMigBoundSize);
-
     function GetPackHeight: TfpgMigBoundSize;
-    procedure SetPackHeight(AValue: TfpgMigBoundSize);
-
     function GetPackWidthAlign: Single;
-    procedure SetPackWidthAlign(AAlign: Single);
-
     function GetPackHeightAlign: Single;
-    procedure SetPackHeightAlign(AAlign: Single);
-
     function GetDebug: Boolean;
-    procedure SetDebug(AValue: Boolean);
-
     function GetHideMode: Integer;
-    procedure SetHideMode(AMode: Integer);
-
     function IsNoCache: Boolean;
-    procedure SetNoCache(AValue: Boolean);
-
     function IsFlowX: Boolean;
-    procedure SetFlowX(AValue: Boolean);
-
     function IsFillX: Boolean;
-    procedure SetFillX(AValue: Boolean);
-
     function IsFillY: Boolean;
-    procedure SetFillY(AValue: Boolean);
-
     function IsTopToBottom: Boolean;
-    procedure SetTopToBottom(AValue: Boolean);
-
     function IsNoGrid: Boolean;
-    procedure SetNoGrid(AValue: Boolean);
-
     function IsVisualPadding: Boolean;
-    procedure SetVisualPadding(AValue: Boolean);
 
     { Fluent API - Flow direction }
     function FlowX: TfpgMigLC;

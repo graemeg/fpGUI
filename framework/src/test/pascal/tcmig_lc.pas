@@ -698,11 +698,11 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    lc.SetWrapAfter(5);
-    lc.SetDebug(True);
-    lc.SetHideMode(1);
-    lc.SetFillX(True);
-    lc.SetFlowX(False);
+    lc.WrapAfter(5);
+    lc.Debug;
+    lc.HideMode(1);
+    lc.FillX;
+    lc.FlowY; // FlowY and FlowX are mutually exclusive. Setting one to True, makes the other one False.
 
     AssertEquals('GetWrapAfter should return value', 5, lc.GetWrapAfter);
     AssertTrue('GetDebug should return value', lc.GetDebug);
