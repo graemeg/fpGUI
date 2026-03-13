@@ -10,6 +10,15 @@
     <executableName>maximus</executableName>
   </build>
 
+  <test>
+    <testSource>TestRunner.pas</testSource>
+    <framework>fpcunit</framework>
+    <frameworkOptions>
+      <option>--all</option>
+      <option>--format=plain</option>
+    </frameworkOptions>
+  </test>
+
   <moduleDependencies>
     <module>../framework</module>
   </moduleDependencies>

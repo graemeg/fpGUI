@@ -43,7 +43,8 @@ uses
   SynRegExpr,
   fpg_textedit,
   ide.form.find,
-  Sha1;
+  Sha1,
+  ide.editor.undo;
 
 
 procedure MainProc;
