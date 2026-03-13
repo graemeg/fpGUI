@@ -470,7 +470,7 @@ begin
   mig := TfpgMigLayoutManager.Create;
   mig.LC.WrapAfter(5);
   self.LayoutManager := mig;
-  mig.AddLayoutComponent(MainMenu, TfpgMigCC.Create.SpanX(5).GrowX);
+  mig.AddLayoutComponent(MainMenu, TfpgMigCC.Create.DockNorth);
   mig.AddLayoutComponent(btnNewForm, TfpgMigCC.Create.GapX('4', '2'));
   mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create);
   mig.AddLayoutComponent(btnSave, TfpgMigCC.Create);
