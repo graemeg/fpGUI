@@ -760,12 +760,12 @@ end;
 
 function TfpgBaseTextEdit.GetCaretPosH: Integer;
 begin
-  Result := CaretPos.Y;
+  Result := CaretPos.X;
 end;
 
 function TfpgBaseTextEdit.GetCaretPosV: Integer;
 begin
-  Result := CaretPos.X;
+  Result := CaretPos.Y;
 end;
 
 function TfpgBaseTextEdit.GetLineFirstCharPos(ALine: Integer): Integer;
@@ -833,12 +833,12 @@ end;
 
 procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: Integer);
 begin
-  CaretPos.Y := AValue;
+  CaretPos.X := AValue;
 end;
 
 procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
 begin
-  CaretPos.X := AValue;
+  CaretPos.Y := AValue;
 end;
 
 procedure TfpgBaseTextEdit.SetVScrollPos(const AValue: Integer);
@@ -2919,11 +2919,11 @@ end;
 procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
 begin
   CaretPos.X := 0;
-  CaretPos.Y := ALine;
+  CaretPos.Y := ALine - 1;  { ALine is 1-based, CaretPos.Y is 0-based }
   if ALine > 5 then
-    ScrollPos_V := ALine-5  // scrolling a few lines short so cursor is not on top line
+    ScrollPos_V := ALine - 5  // scrolling a few lines short so cursor is not on top line
   else
-    ScrollPos_V := ALine;
+    ScrollPos_V := 0;
   UpdateScrollBars;
 end;
 

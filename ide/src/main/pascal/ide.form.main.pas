@@ -335,8 +335,8 @@ begin
   if not Assigned(edt) then
     Exit;
   iMax := edt.Lines.Count;
-  sValue := IntToStr(edt.CaretPos_H + 1);
-  if fpgInputQuery('Go to line', Format('Line %d of %d — enter line number:', [edt.CaretPos_H + 1, iMax]), sValue) then
+  sValue := IntToStr(edt.CaretPos_V + 1);
+  if fpgInputQuery('Go to line', Format('Line %d of %d — enter line number:', [edt.CaretPos_V + 1, iMax]), sValue) then
   begin
     try
       i := StrToInt(sValue);
