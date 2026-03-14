@@ -146,6 +146,7 @@ type
     FTabPadding: Integer;
     FUseElasticTabstops: Boolean;
     FIndentSize: Integer;
+    FLineHighlightColor: TfpgColor;
     FUndoManager: TUndoManager;
 
     FLastScrollEventTime: TTime; // in milliseconds
@@ -228,6 +229,7 @@ type
     property    Lines: TStrings read FLines write SetLines;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    IndentSize: Integer read FIndentSize write FIndentSize default 2;
+    property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
     property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
@@ -299,6 +301,7 @@ type
     property    GutterVisible;
     property    GutterShowLineNumbers;
     property    IndentSize;
+    property    LineHighlightColor;
     property    Lines;
     property    RightEdge;
     property    ScrollBarStyle;
@@ -2364,6 +2367,8 @@ procedure TfpgBaseTextEdit.DrawLine(const ALineIndex, Y: Integer);
 var
   X: Integer;
   GSz: Integer;
+  HighlightCol, BgCol: TfpgColor;
+  R: TfpgRect;
 begin
   if FGutterPan.Visible then
   begin
@@ -2376,6 +2381,34 @@ begin
   end
   else
     GSz := GetClientRect.Left + 1; // gutter size if no gutter panel
+
+  { Current line highlighting — fill full line width before text renders on top }
+  if (ALineIndex = CaretPos.Y) and Focused then
+  begin
+    if FLineHighlightColor <> clNone then
+      HighlightCol := FLineHighlightColor
+    else
+    begin
+      { Auto-calculate: slightly darken or lighten the background }
+      BgCol := fpgColorToRGB(clBoxColor);
+      if fpgGetRed(BgCol) + fpgGetGreen(BgCol) + fpgGetBlue(BgCol) > 384 then
+        HighlightCol := fpgDarker(BgCol, 95)   { light background → darken slightly }
+      else
+        HighlightCol := fpgLighter(BgCol, 95);  { dark background → lighten slightly }
+    end;
+    R.SetRect(GSz, Y, GetClientRect.Width, FChrH);
+    Canvas.Color := HighlightCol;
+    Canvas.FillRectangle(R);
+    { Redraw right edge segment over the highlight }
+    if FRightEdge then
+    begin
+      Canvas.Color := clShadow1;
+      X := (FRightEdgeCol * FChrW) - (HPos * FChrW);
+      if FGutterPan.Visible then
+        X := X + FGutterPan.ActualWidth;
+      Canvas.DrawLine(X, Y, X, Y + FChrH);
+    end;
+  end;
 
   if ALineIndex < FLines.Count then
   begin
@@ -2613,6 +2646,7 @@ begin
   FTopLine      := 0;
   FTabWidth     := 8;
   FIndentSize   := 2;
+  FLineHighlightColor := clNone;
   FMaxScrollH   := 1;
   VPos          := 0;
   HPos          := 0;
