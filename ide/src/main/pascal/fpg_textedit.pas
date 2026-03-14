@@ -145,6 +145,7 @@ type
     FElasticTabstops: TObject;  // Will be TTabstopsList (list of TIntegerList)
     FTabPadding: Integer;
     FUseElasticTabstops: Boolean;
+    FIndentSize: Integer;
     FUndoManager: TUndoManager;
 
     FLastScrollEventTime: TTime; // in milliseconds
@@ -226,6 +227,7 @@ type
     property    GutterShowLineNumbers: Boolean read GetGutterShowLineNumbers write SetGutterShowLineNumbers default True;
     property    Lines: TStrings read FLines write SetLines;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
+    property    IndentSize: Integer read FIndentSize write FIndentSize default 2;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
     property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
@@ -247,6 +249,8 @@ type
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
     procedure   DeleteSelection;
+    procedure   BlockIndent;
+    procedure   BlockUnindent;
     procedure   Undo;
     procedure   Redo;
     function    CanUndo: Boolean;
@@ -294,6 +298,7 @@ type
     property    FullRedraw;
     property    GutterVisible;
     property    GutterShowLineNumbers;
+    property    IndentSize;
     property    Lines;
     property    RightEdge;
     property    ScrollBarStyle;
@@ -2090,18 +2095,46 @@ begin
 
     keyTab:
         begin
-          FUndoManager.BreakMerge;
-          if FUseElasticTabstops then
-            AddS := #9
+          if (ssShift in ShiftState) then
+          begin
+            { Shift+Tab: unindent selected lines or current line }
+            if not FSelected then
+            begin
+              { Temporarily select current line so BlockUnindent can operate }
+              FSelection.FStartPos := fpgPoint(0, CaretPos.Y);
+              FSelection.FEndPos := fpgPoint(UTF8Length(FLines[CaretPos.Y]), CaretPos.Y);
+              FSelected := True;
+              BlockUnindent;
+              { Clear the temporary selection }
+              FSelected := False;
+              FSelection.StartPos := CaretPos;
+            end
+            else
+              BlockUnindent;
+            consumed := True;
+          end
+          else if FSelected then
+          begin
+            { Tab with selection: indent all selected lines }
+            BlockIndent;
+            consumed := True;
+          end
           else
-            AddS := '  ';
-          UndoAction := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS);
-          UndoAction.CaretBefore := CaretPos;
-          FUndoManager.ExecuteAction(UndoAction);
-          CaretPos.X := CaretPos.X + UTF8Length(AddS);
-          UndoAction.CaretAfter := CaretPos;
-          FSelection.StartPos := CaretPos;
-          consumed := True;
+          begin
+            { Tab without selection: insert spaces/tab at cursor }
+            FUndoManager.BreakMerge;
+            if FUseElasticTabstops then
+              AddS := #9
+            else
+              AddS := StringOfChar(' ', FIndentSize);
+            UndoAction := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.X := CaretPos.X + UTF8Length(AddS);
+            UndoAction.CaretAfter := CaretPos;
+            FSelection.StartPos := CaretPos;
+            consumed := True;
+          end;
         end;
 
     keyReturn:
@@ -2227,6 +2260,11 @@ begin
   {$ENDIF}
   if not consumed then
   begin
+    { Tab is fully handled in HandleKeyPress — skip it here to avoid
+      a spurious DeleteSelection when a selection is active. }
+    if AText = #9 then
+      Exit;
+
     if FSelected then
     begin
       FUndoManager.BreakMerge;
@@ -2574,6 +2612,7 @@ begin
   CaretPos.y    := 0;
   FTopLine      := 0;
   FTabWidth     := 8;
+  FIndentSize   := 2;
   FMaxScrollH   := 1;
   VPos          := 0;
   HPos          := 0;
@@ -2899,6 +2938,127 @@ begin
   FUndoManager.ExecuteAction(Block);
 
   UpdateScrollbars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.BlockIndent;
+var
+  Block: TTextBlockAction;
+  StartLine, EndLine, I: Integer;
+  Indent: string;
+begin
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if StartLine > (FLines.Count - 1) then Exit;
+  if EndLine > (FLines.Count - 1) then
+    EndLine := FLines.Count - 1;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  Indent := StringOfChar(' ', FIndentSize);
+  for I := StartLine to EndLine do
+    FLines[I] := Indent + FLines[I];
+
+  { Adjust selection and caret to account for added indent }
+  FSelection.FStartPos.X := FSelection.FStartPos.X + FIndentSize;
+  FSelection.FEndPos.X   := FSelection.FEndPos.X + FIndentSize;
+  CaretPos.X := CaretPos.X + FIndentSize;
+
+  Block.SaveAfter(EndLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.BlockUnindent;
+var
+  Block: TTextBlockAction;
+  StartLine, EndLine, I, J, Remove: Integer;
+  Line: string;
+  StartRemoved, EndRemoved: Integer;
+begin
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if StartLine > (FLines.Count - 1) then Exit;
+  if EndLine > (FLines.Count - 1) then
+    EndLine := FLines.Count - 1;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  StartRemoved := 0;
+  EndRemoved := 0;
+  for I := StartLine to EndLine do
+  begin
+    Line := FLines[I];
+    if (Length(Line) > 0) and (Line[1] = #9) then
+    begin
+      { Remove one leading tab }
+      Delete(Line, 1, 1);
+      Remove := 1;
+    end
+    else
+    begin
+      { Remove up to FIndentSize leading spaces }
+      Remove := 0;
+      for J := 1 to Length(Line) do
+      begin
+        if Remove >= FIndentSize then
+          Break;
+        if Line[J] = ' ' then
+          Inc(Remove)
+        else
+          Break;
+      end;
+      if Remove > 0 then
+        Delete(Line, 1, Remove);
+    end;
+    FLines[I] := Line;
+    if I = StartLine then
+      StartRemoved := Remove;
+    if I = EndLine then
+      EndRemoved := Remove;
+  end;
+
+  { Adjust selection and caret }
+  if FSelection.FStartPos.X >= StartRemoved then
+    FSelection.FStartPos.X := FSelection.FStartPos.X - StartRemoved
+  else
+    FSelection.FStartPos.X := 0;
+  if FSelection.FEndPos.X >= EndRemoved then
+    FSelection.FEndPos.X := FSelection.FEndPos.X - EndRemoved
+  else
+    FSelection.FEndPos.X := 0;
+  { Adjust caret based on whichever line it is on }
+  if CaretPos.Y = EndLine then
+    Remove := EndRemoved
+  else
+    Remove := StartRemoved;
+  if CaretPos.X >= Remove then
+    CaretPos.X := CaretPos.X - Remove
+  else
+    CaretPos.X := 0;
+
+  Block.SaveAfter(EndLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
   Invalidate;
 end;
 

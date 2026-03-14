@@ -18,7 +18,8 @@ uses
   fpcunit,
   testregistry,
   consoletestrunner,
-  ide.test.editor.undo;
+  ide.test.editor.undo,
+  ide.test.editor.blockindent;
 
 var
   Application: TTestRunner;
