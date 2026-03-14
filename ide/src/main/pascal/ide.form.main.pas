@@ -328,16 +328,22 @@ procedure TMainForm.miGoToLineClick(Sender: TObject);
 var
   sValue: string;
   i: integer;
+  iMax: integer;
   edt: TfpgTextEdit;
 begin
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   if not Assigned(edt) then
     Exit;
-  if fpgInputQuery('Go to line', 'Go to line number?', sValue) then
+  iMax := edt.Lines.Count;
+  sValue := IntToStr(edt.CaretPos_H + 1);
+  if fpgInputQuery('Go to line', Format('Line %d of %d — enter line number:', [edt.CaretPos_H + 1, iMax]), sValue) then
   begin
     try
       i := StrToInt(sValue);
-      edt.GotoLine(i);
+      if (i < 1) or (i > iMax) then
+        ShowMessage(Format('Line number must be between 1 and %d.', [iMax]))
+      else
+        edt.GotoLine(i);
     except
       on E: Exception do
          ShowMessage('Invalid line number.' + LineEnding + E.Message);
