@@ -114,6 +114,7 @@ type
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
+    FOnChange: TNotifyEvent;
     FOnDrawLine: TfpgDrawLineEvent;
     FOnFindText: TfpgFindText;
     FOnReplaceText: TfpgReplaceText;
@@ -232,6 +233,7 @@ type
     property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
     property    OnFindText: TfpgFindText read FOnFindText write FOnFindText;
     property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
@@ -309,6 +311,7 @@ type
     property    TabWidth;
     property    Tracking;
     property    UseElasticTabstops;
+    property    OnChange;
     property    OnDrawLine;
     property    OnFindText;
     property    OnSearchEnd;
@@ -791,6 +794,8 @@ begin
     CalculateElasticTabstops;
     Invalidate;
   end;
+  if Assigned(FOnChange) then
+    FOnChange(Self);
 end;
 
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
@@ -1990,11 +1995,10 @@ var
   lIndentOffset: integer;
   UndoAction: TUndoAction;
 begin
-  {$IFDEF gDEBUG}
-  SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress');
+  {$IFDEF DEBUG}
+  DebugLn('>> TfpgBaseTextEdit.HandleKeyPress');
   {$ENDIF}
   CaretScroll := False;
-//  inherited HandleKeyPress(keycode, shiftstate, consumed);
   case CheckClipboardKey(keycode, shiftstate) of
     ckCopy:
       begin
@@ -2180,9 +2184,19 @@ begin
 
     keyLeft, keyRight, keyUp, keyDown, keyHome, keyEnd, keyPrior, keyNext:
         begin
-          KeyboardCaretNav(ShiftState, keycode);
-          CaretScroll := True;
-          consumed := True;
+          { Ctrl+PageUp/PageDown: let parent handle tab switching }
+          if (ssCtrl in ShiftState) and
+             ((keycode = keyPrior) or (keycode = keyNext)) and
+             not (ssShift in ShiftState) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
+          else
+          begin
+            KeyboardCaretNav(ShiftState, keycode);
+            CaretScroll := True;
+            consumed := True;
+          end;
         end;
 
     keyDelete:
@@ -2243,10 +2257,14 @@ begin
       ScrollPos_V := CaretPos.Y - FVisLines + 2;
   end;
 
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+
   if consumed then
     Invalidate;
-  {$IFDEF gDEBUG}
-  SendMethodExit('TfpgBaseTextEdit.HandleKeyPress')
+  {$IFDEF DEBUG}
+  DebugLn('<< TfpgBaseTextEdit.HandleKeyPress')
   {$ENDIF}
 end;
 

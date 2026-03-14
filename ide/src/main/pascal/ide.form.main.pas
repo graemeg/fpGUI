@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2014 Graeme Geldenhuys
+    Copyright (C) 2012 - 2026 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -70,6 +70,8 @@ type
     mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
+    pmTabMenu: TfpgPopupMenu;
+    FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
@@ -118,6 +120,12 @@ type
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   tvProjectKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   grdMessageKeyPressed(Sender: TObject; var KeyCode: Word; var ShiftState: TShiftState; var Consumed: Boolean);
+    procedure   pcEditorMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   pmTabCloseClick(Sender: TObject);
+    procedure   pmTabCloseOthersClick(Sender: TObject);
+    procedure   pmTabCloseAllClick(Sender: TObject);
+    procedure   pmTabCopyPathClick(Sender: TObject);
+    procedure   EditorChanged(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
@@ -136,6 +144,8 @@ type
     procedure   HighlightObjectPascal(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   HighlightPatch(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   SetupEditorPreference;
+  protected
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -225,10 +235,17 @@ end;
 procedure TMainForm.miFileSave(Sender: TObject);
 var
   s: TfpgString;
+  ts: TfpgTabSheet;
 begin
-  s := pcEditor.ActivePage.Hint;
+  ts := pcEditor.ActivePage;
+  s := ts.Hint;
   if s <> '' then
-    TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+  begin
+    TfpgTextEdit(ts.Components[0]).SaveToFile(s);
+    { Clear modified indicator }
+    if (Length(ts.Text) > 2) and (Copy(ts.Text, 1, 2) = '* ') then
+      ts.Text := Copy(ts.Text, 3, Length(ts.Text) - 2);
+  end;
   AddMessage('File saved');
 end;
 
@@ -651,6 +668,118 @@ begin
   end;
 end;
 
+procedure TMainForm.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+var
+  idx: Integer;
+begin
+  if (ssCtrl in shiftstate) and not (ssShift in shiftstate) then
+  begin
+    case keycode of
+      keyPrior:  { Ctrl+PageUp: previous tab }
+        begin
+          idx := pcEditor.ActivePageIndex - 1;
+          if idx < 0 then
+            idx := pcEditor.PageCount - 1;
+          pcEditor.ActivePageIndex := idx;
+          consumed := True;
+        end;
+      keyNext:   { Ctrl+PageDown: next tab }
+        begin
+          idx := pcEditor.ActivePageIndex + 1;
+          if idx >= pcEditor.PageCount then
+            idx := 0;
+          pcEditor.ActivePageIndex := idx;
+          consumed := True;
+        end;
+    end;
+  end;
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TMainForm.pcEditorMouseUp(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+var
+  ts: TfpgTabSheet;
+begin
+  {$ifdef debug}writeln('pcEditorMouseUp: widget: ', AButton);{$endif}
+  if (AButton = mbMiddle) and (AShift * [ssCtrl, ssShift, ssAlt] = []) then
+  begin
+    ts := pcEditor.TabSheetAtPos(AMousePos.X, AMousePos.Y);
+    if Assigned(ts) then
+    begin
+      pcEditor.RemoveTabSheet(ts);
+      ts.Free;
+    end;
+  end
+  else if (AButton = mbRight) and (AShift * [ssCtrl, ssShift, ssAlt] = []) then
+  begin
+    ts := pcEditor.TabSheetAtPos(AMousePos.X, AMousePos.Y);
+    if Assigned(ts) then
+    begin
+      FLastTabClickPos := AMousePos;
+      pmTabMenu.ShowAt(pcEditor, AMousePos.X, AMousePos.Y);
+    end;
+  end;
+end;
+
+procedure TMainForm.pmTabCloseClick(Sender: TObject);
+var
+  ts: TfpgTabSheet;
+begin
+  ts := pcEditor.TabSheetAtPos(FLastTabClickPos.X, FLastTabClickPos.Y);
+  if Assigned(ts) then
+  begin
+    pcEditor.RemoveTabSheet(ts);
+    ts.Free;
+  end;
+end;
+
+procedure TMainForm.pmTabCloseOthersClick(Sender: TObject);
+var
+  ts, target: TfpgTabSheet;
+  I: Integer;
+begin
+  target := pcEditor.TabSheetAtPos(FLastTabClickPos.X, FLastTabClickPos.Y);
+  if not Assigned(target) then
+    Exit;
+  pcEditor.ActivePage := target;
+  for I := pcEditor.PageCount - 1 downto 0 do
+  begin
+    ts := pcEditor.Pages[I];
+    if ts <> target then
+    begin
+      pcEditor.RemoveTabSheet(ts);
+      ts.Free;
+    end;
+  end;
+end;
+
+procedure TMainForm.pmTabCloseAllClick(Sender: TObject);
+begin
+  CloseAllTabs;
+end;
+
+procedure TMainForm.pmTabCopyPathClick(Sender: TObject);
+var
+  ts: TfpgTabSheet;
+begin
+  ts := pcEditor.TabSheetAtPos(FLastTabClickPos.X, FLastTabClickPos.Y);
+  if Assigned(ts) then
+    fpgClipboard.Text := ts.Hint;
+end;
+
+procedure TMainForm.EditorChanged(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  ts: TfpgTabSheet;
+begin
+  edt := Sender as TfpgTextEdit;
+  ts := edt.Parent as TfpgTabSheet;
+  if Assigned(ts) and (Copy(ts.Text, 1, 2) <> '* ') then
+    ts.Text := '* ' + ts.Text;
+end;
+
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
   u: TUnit;
@@ -813,7 +942,7 @@ begin
   found := False;
   for i := 0 to pcEditor.PageCount-1 do
   begin
-    if pcEditor.Pages[i].Text = f then
+    if (pcEditor.Pages[i].Text = f) or (pcEditor.Pages[i].Text = '* ' + f) then
       found := True;
     if found then
       break;
@@ -862,6 +991,7 @@ begin
     ts.Realign;
     pcEditor.ActivePage := ts;
     FFileMonitor.AddFile(AFilename);
+    editor.OnChange := @EditorChanged;
   end;
   ts.Hint := s;
   Result := ts;
@@ -1543,8 +1673,18 @@ begin
     Hint := '';
     TabOrder := 18;
     TabPosition := tpRight;
-    Options := Options + [to_PMenuClose];
     OnClosingTabSheet := @TabSheetClosing;
+    OnMouseUp := @pcEditorMouseUp;
+  end;
+
+  pmTabMenu := TfpgPopupMenu.Create(self);
+  with pmTabMenu do
+  begin
+    AddMenuItem('Close', '', @pmTabCloseClick);
+    AddMenuItem('Close Others', '', @pmTabCloseOthersClick);
+    AddMenuItem('Close All', '', @pmTabCloseAllClick);
+    AddSeparator;
+    AddMenuItem('Copy Path', '', @pmTabCopyPathClick);
   end;
 
   tseditor := TfpgTabSheet.Create(pcEditor);

@@ -188,6 +188,7 @@ type
     property    TabOrder;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
     property    TextColor;
+    property    OnMouseUp;
     property    OnShowHint;
   end;
 
@@ -1422,8 +1423,7 @@ begin
           bw := ButtonWidth(h.Text);  // initialize button width
           if (x > lp) and (x < lp + bw) then
           begin
-            if h <> ActivePage then
-              Result := h;
+            Result := h;
             exit;
           end;  { if }
           lp := lp + bw;
@@ -1446,8 +1446,7 @@ begin
       begin
         if (y > lp) and (y < lp + bh) then
         begin
-          if h <> ActivePage then
-            Result := h;
+          Result := h;
           exit;
         end;  { if }
         lp := lp + bh;
