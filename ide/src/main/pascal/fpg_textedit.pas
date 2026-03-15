@@ -731,9 +731,6 @@ begin
   Invalidate;
 
   NewLines.Free;
-
-
-
 end;
 
 function TfpgBaseTextEdit.GetFontDesc: string;

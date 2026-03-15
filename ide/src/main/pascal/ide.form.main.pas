@@ -26,7 +26,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, synregexpr,
-  ide.filemonitor;
+  ide.filemonitor, ide.highlighter;
 
 type
 
@@ -78,6 +78,8 @@ type
     FRegex: TRegExpr;
     FKeywordFont: TfpgFontResourceBase;
     FFileMonitor: TFileMonitor;
+    FHighlighter: TPascalHighlighter;
+    FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
@@ -126,6 +128,8 @@ type
     procedure   pmTabCloseAllClick(Sender: TObject);
     procedure   pmTabCopyPathClick(Sender: TObject);
     procedure   EditorChanged(Sender: TObject);
+    procedure   EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
+    procedure   RetokeniseEditor(AEditor: TfpgTextEdit);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
@@ -778,12 +782,37 @@ begin
   ts := edt.Parent as TfpgTabSheet;
   if Assigned(ts) and (Copy(ts.Text, 1, 2) <> '* ') then
     ts.Text := '* ' + ts.Text;
+  RetokeniseEditor(edt);
+end;
+
+procedure TMainForm.EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
+var
+  edt: TfpgTextEdit;
+begin
+  if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
+  begin
+    edt := ATabSheet.Components[0] as TfpgTextEdit;
+    if edt <> FHighlighterEditor then
+      RetokeniseEditor(edt);
+  end;
+end;
+
+procedure TMainForm.RetokeniseEditor(AEditor: TfpgTextEdit);
+begin
+  if not Assigned(AEditor) then
+    Exit;
+  FHighlighterEditor := AEditor;
+  FHighlighter.Tokenise(AEditor.Lines.Text);
 end;
 
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
   u: TUnit;
 begin
+  { Clear highlighter reference if this tab's editor is being tracked }
+  if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
+    if ATabSheet.Components[0] = FHighlighterEditor then
+      FHighlighterEditor := nil;
   u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
   begin
@@ -868,6 +897,7 @@ var
   ts: TfpgTabSheet;
   i: integer;
 begin
+  FHighlighterEditor := nil;
   pcEditor.BeginUpdate;
   try
     for i := 0 to pcEditor.PageCount-1 do
@@ -970,6 +1000,9 @@ begin
     { Clear modified indicator - file now matches disk }
     if Copy(ts.Text, 1, 2) = '* ' then
       ts.Text := Copy(ts.Text, 3, Length(ts.Text));
+    { Re-tokenise for syntax highlighting }
+    if Assigned(editor.OnDrawLine) then
+      RetokeniseEditor(editor);
     AddMessage('File reloaded: ' + s);
   end
   else
@@ -986,11 +1019,12 @@ begin
       ext := fpgExtractFileExt(AFilename);
       if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr') or (ext = '.dpr') then
       begin
-        TfpgTextEdit(ts.Components[0]).OnDrawLine := @HighlightObjectPascal;
+        editor.OnDrawLine := @HighlightObjectPascal;
+        RetokeniseEditor(editor);
       end
       else if (ext = '.patch') or (ext = '.diff') then
       begin
-        TfpgTextEdit(ts.Components[0]).OnDrawLine := @HighlightPatch;
+        editor.OnDrawLine := @HighlightPatch;
       end;
     end;
     ts.Realign;
@@ -1016,180 +1050,96 @@ end;
 procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;
   ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
   var AllowSelfDraw: Boolean);
-const
-  { nicely working so far }
-  cKeywords1 = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
-    + '|implementation|procedure|function|constructor|destructor|property|operator'
-    + '|private|protected|public|published|type|virtual|abstract|overload'
-    + '|override|class|unit|program|library|set|of|if|then|for|downto|to|as|div|mod|shr|shl'
-    + '|do|else|while|and|inherited|const|var|initialization|finalization'
-    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default'
-    + '|xor|repeat|until|constref|stdcall|cdecl|external|generic|specialize)\b';
-
-  cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
-  cComments2 = '\{[^\$][^\{]*\}';
-
-  cDefines1 = '\{\$[^\{]*\}';
-
-  cString1 =  '''[^''\r\n]*''';
-
-  cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
-  cHexadecimal = '\$[A-F0-9]+\b';
 var
   oldfont: TfpgFontResourceBase;
-  s: TfpgString;  // copy of ALineText we work with
-  i, j, c: integer;  // i = position of reserved word; c = last character pos
-  iLength: integer; // length of reserved word
-  w: integer;     // reserved word loop variable
-  r: TfpgRect;    // string rectangle to draw in
   edt: TfpgTextEdit;
-  lMatchPos, lOffset: integer; // user for regex
+  tokens: THighlightTokenArray;
+  tok: THighlightToken;
+  i: Integer;
+  r: TfpgRect;
+  s: TfpgString;
 begin
-//  writeln('syntax highlight line: ', ALineIndex);
   edt := TfpgTextEdit(Sender);
-  AllowSelfDraw := False;
 
+  { Ensure highlighter is tokenised for this editor }
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+
+  AllowSelfDraw := False;
   oldfont := TfpgFontResourceBase(ACanvas.Font);
   ACanvas.Color := clWhite;
 
-  { draw the plain text first }
+  { Draw plain text first as baseline }
   ACanvas.TextColor := clBlack;
   ACanvas.DrawText(ATextRect, ALineText);
 
-  lMatchPos := 0;
-  lOffset := 0;
-
-  { syntax highlighting for: keywords }
+  { Ensure bold keyword font is available }
   if not Assigned(FKeywordFont) then
     FKeywordFont := fpgApplication.FontManager.GetFont(edt.FontDesc + ':bold');
-  ACanvas.SetFont(FKeywordFont);
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cKeywords1;
-  FRegex.ModifierI := True;
-  if FRegex.Exec(ALineText) then
+
+  { Get tokens for this line }
+  tokens := FHighlighter.GetLineTokens(ALineIndex);
+  if tokens = nil then
   begin
-    repeat { process results }
-        lMatchPos := FRegex.MatchPos[1];
-        lOffset := FRegex.MatchLen[1];
-        s := FRegex.Match[1];
-        j := Length(s);
-        r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-            (edt.FontWidth * j), ATextRect.Height);
+    ACanvas.SetFont(oldfont);
+    Exit;
+  end;
+
+  { Draw each token with appropriate style }
+  for i := 0 to Length(tokens) - 1 do
+  begin
+    tok := tokens[i];
+
+    { Extract the token text from the line }
+    s := Copy(ALineText, tok.Column + 1, tok.Length);
+    if s = '' then
+      Continue;
+
+    { Calculate the draw rectangle }
+    r.SetRect(ATextRect.Left + (edt.FontWidth * tok.Column), ATextRect.Top,
+        (edt.FontWidth * tok.Length), ATextRect.Height);
+
+    { Set style based on category }
+    case tok.Category of
+      hcKeyword:
+      begin
+        ACanvas.SetFont(FKeywordFont);
+        ACanvas.TextColor := clBlack;
+        ACanvas.Color := clWhite;
         ACanvas.FillRectangle(r);
         ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
+        ACanvas.SetFont(oldfont);
+        Continue;
+      end;
+      hcNumber:
+      begin
+        ACanvas.TextColor := clNavy;
+        ACanvas.Color := clWhite;
+      end;
+      hcComment:
+      begin
+        ACanvas.TextColor := clDarkCyan;
+        ACanvas.Color := clWhite;
+      end;
+      hcDirective:
+      begin
+        ACanvas.TextColor := clRed;
+        ACanvas.Color := clWhite;
+      end;
+      hcString:
+      begin
+        ACanvas.TextColor := clOlive;
+        ACanvas.Color := clWhite;
+      end;
+      else
+        Continue;  { identifiers, symbols, whitespace: keep default black }
+    end;
 
-  ACanvas.SetFont(oldfont);
-
-  { syntax highlighting for: cDecimal }
-  ACanvas.TextColor := clNavy;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cDecimal;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cHexadecimal }
-  ACanvas.TextColor := clMagenta;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cHexadecimal;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth *j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: comments2 }
-  ACanvas.TextColor := clDarkCyan;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cComments2;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cDefines1 }
-  ACanvas.TextColor := clRed;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cDefines1;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cString1 }
-  ACanvas.TextColor := clOlive;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cString1;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: comments1 }
-  ACanvas.TextColor := clDarkCyan;
-  ACanvas.Color := clWhite;
-  FRegex.Expression := cComments1;
-  if FRegex.Exec(ALineText) then
-  begin
-    lMatchPos := FRegex.MatchPos[1];
-    lOffset := FRegex.MatchLen[1];
-    s := FRegex.Match[1];
-    j := Length(s);
-    r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-        (edt.FontWidth * j), ATextRect.Height);
     ACanvas.FillRectangle(r);
     ACanvas.DrawText(r, s);
   end;
 
   ACanvas.SetFont(oldfont);
-//  writeln('------');
 end;
 
 procedure TMainForm.HighlightPatch(Sender: TObject; ALineText: TfpgString;
@@ -1386,12 +1336,15 @@ begin
   OnClose := @FormClose;
   FFileMonitor := TFileMonitor.CreateCustom;
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
+  FHighlighter := TPascalHighlighter.Create;
+  FHighlighterEditor := nil;
 end;
 
 destructor TMainForm.Destroy;
 begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
+  FHighlighter.Free;
   FRegex.Free;
   FKeywordFont := nil;
   inherited Destroy;
@@ -1680,6 +1633,7 @@ begin
     TabPosition := tpRight;
     OnClosingTabSheet := @TabSheetClosing;
     OnMouseUp := @pcEditorMouseUp;
+    OnChange := @EditorTabChanged;
   end;
 
   pmTabMenu := TfpgPopupMenu.Create(self);

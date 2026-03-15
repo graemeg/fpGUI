@@ -19,7 +19,8 @@ uses
   testregistry,
   consoletestrunner,
   ide.test.editor.undo,
-  ide.test.editor.blockindent;
+  ide.test.editor.blockindent,
+  ide.test.highlighter;
 
 var
   Application: TTestRunner;
