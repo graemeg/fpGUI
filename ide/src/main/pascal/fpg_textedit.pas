@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2016 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -1995,9 +1995,6 @@ var
   lIndentOffset: integer;
   UndoAction: TUndoAction;
 begin
-  {$IFDEF DEBUG}
-  DebugLn('>> TfpgBaseTextEdit.HandleKeyPress');
-  {$ENDIF}
   CaretScroll := False;
   case CheckClipboardKey(keycode, shiftstate) of
     ckCopy:
@@ -2050,8 +2047,6 @@ begin
     consumed := True;
     Exit; //==>
   end;
-//  if (keycode = keyEscape) or (ssCtrl in ShiftState) then
-//    Exit; //==>
 
   SLine := FLines[CaretPos.Y];
 
@@ -2260,12 +2255,8 @@ begin
   if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 
-
   if consumed then
     Invalidate;
-  {$IFDEF DEBUG}
-  DebugLn('<< TfpgBaseTextEdit.HandleKeyPress')
-  {$ENDIF}
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
@@ -2276,9 +2267,6 @@ var
   PadLen: Integer;
   Action: TInsertTextAction;
 begin
-  {$IFDEF gDEBUG}
-  writeln('>> TfpgBaseTextEdit.HandleKeyChar');
-  {$ENDIF}
   if not consumed then
   begin
     { Tab is fully handled in HandleKeyPress — skip it here to avoid
@@ -2321,12 +2309,9 @@ begin
   end;
 
   if consumed then
-    RePaint
+    Repaint
   else
     inherited HandleKeyChar(AText, shiftstate, consumed);
-  {$IFDEF gDEBUG}
-  writeln('<< TfpgBaseTextEdit.HandleKeyChar');
-  {$ENDIF}
 end;
 
 function TfpgBaseTextEdit.GetDefaultDropHandler: TfpgDropHandler;
@@ -2342,9 +2327,6 @@ var
   I, Y, cntVis: Integer;
 begin
   // Calculate elastic tabstops if enabled
-  {$IFDEF gDEBUG}
-  writeln('DrawVisible: FUseElasticTabstops=', FUseElasticTabstops);
-  {$ENDIF}
   if FUseElasticTabstops then
     CalculateElasticTabstops;
 
