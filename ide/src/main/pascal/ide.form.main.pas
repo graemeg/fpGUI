@@ -955,6 +955,7 @@ begin
     pos_v := editor.ScrollPos_V;
     cur_pos_h := editor.CaretPos_H;
     cur_pos_v := editor.CaretPos_V;
+    editor.OnChange := nil;  // suppress modified indicator during reload
     editor.Lines.BeginUpdate;
     editor.LoadFromFile(s);
     editor.ScrollPos_H := pos_h;
@@ -963,8 +964,12 @@ begin
     editor.CaretPos_V := cur_pos_v;
     editor.UpdateScrollBars;
     editor.Lines.EndUpdate;
+    editor.OnChange := @EditorChanged;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
+    { Clear modified indicator - file now matches disk }
+    if Copy(ts.Text, 1, 2) = '* ' then
+      ts.Text := Copy(ts.Text, 3, Length(ts.Text));
     AddMessage('File reloaded: ' + s);
   end
   else
