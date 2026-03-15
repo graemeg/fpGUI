@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2026 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -23,8 +23,10 @@ uses
   cthreads,
   {$ENDIF}
   Classes,
+  SysUtils,
   fpg_base,
   fpg_main,
+  fpg_stylemanager,
   fpg_cmdlineparams,
   ide.form.main,
   ide.form.configure,
@@ -50,10 +52,20 @@ uses
 procedure MainProc;
 var
   frm: TMainForm;
+  cmd: ICmdLineParams;
 begin
 //  FPG_DEFAULT_FONT_DESC := 'DejaVu Sans-9';
   fpgApplication.Initialize;
   RegisterIDEImages;
+
+  { Set our new style as the default (before we create any forms), unless
+    a the end-user specified a different style via the command line. }
+  if Supports(fpgApplication, ICmdLineParams, cmd) and not cmd.HasOption('style') then
+  begin
+    if fpgStyleManager.SetStyle( 'Plastic Medium Gray') then  // 'Plastic Dark'
+      fpgStyle := fpgStyleManager.Style;
+  end;
+
   frm := TMainForm.Create(nil);
   try
     frm.Show;
