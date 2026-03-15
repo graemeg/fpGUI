@@ -60,3 +60,7 @@ docs/*.inf*
 bugs/
 do-not-commit/
 
+# Progress tracking documents (local working docs, not for repo)
+**/progress.adoc
+**/progress-*.adoc
+
