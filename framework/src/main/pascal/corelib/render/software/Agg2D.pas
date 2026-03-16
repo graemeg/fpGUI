@@ -3953,10 +3953,12 @@ end;
 procedure TAgg2D.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 var
   r: TfpgRect;
+  px, py: TfpgCoord;
+  pixel: TfpgColor;
+  xorMask: TfpgColor;
 begin
   if FPaintCaret then
   begin
-    //DebugLn('true - DoXORFillRectangle');
     r := FWidget.WidgetBoundsInWindow;
     r.Left := r.Left + x;
     r.Top := r.Top + y;
@@ -3964,13 +3966,19 @@ begin
     r.Height := h;
     FCaretPos.SetPoint(x, y);
     FCaretImg := TAgg2D(FCanvasTarget).FImg.ImageFromRect(r);
-    DoSetColor(clTextCursor);
-    DoFillRectangle(x, y, w, h);
+    { Perform true bitwise XOR on pixel data, matching X11's GXxor behaviour.
+      This ensures the caret is always visible regardless of background colour. }
+    xorMask := col or $FF000000;
+    for py := r.Top to r.Top + r.Height - 1 do
+      for px := r.Left to r.Left + r.Width - 1 do
+      begin
+        pixel := TAgg2D(FCanvasTarget).FImg.Colors[px, py];
+        TAgg2D(FCanvasTarget).FImg.Colors[px, py] := pixel xor xorMask;
+      end;
     FPaintCaret := False
   end
   else
   begin
-    //DebugLn('false - DoXORFillRectangle');
     if Assigned(FCaretImg) then
     begin
       if (FCaretPos.x = x) and (FCaretPos.y = y) then
