@@ -23,7 +23,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
   fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, ide.macros, fpg_combobox,
-  fpg_checkbox, fpg_panel;
+  fpg_checkbox, fpg_panel, ide.editor.theme;
 
 type
   TConfigureIDEForm = class(TfpgForm)
@@ -76,6 +76,8 @@ type
     lblActiveTabColor: TfpgLabel;
     pnlActiveTabColor: TfpgPanel;
     btnColor: TfpgButton;
+    lblEditorTheme: TfpgLabel;
+    cbEditorTheme: TfpgComboBox;
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
@@ -85,6 +87,7 @@ type
     procedure SaveToMacroList(AList: TIDEMacroList);
     procedure FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure btnActiveTabColorClicked(Sender: TObject);
+    procedure PopulateThemeList;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -101,6 +104,7 @@ implementation
 uses
   fpg_dialogs
   ,fpg_iniutils
+  ,fpg_utils
   ,fpg_widget
   ,ide.consts
   ;
@@ -180,6 +184,11 @@ begin
   cbTabPosition.FocusItem := gINI.ReadInteger(cEditor, 'TabPosition', 0);
   pnlActiveTabColor.BackgroundColor := gINI.ReadInteger(cEditor, 'ActiveTabColor', clWindowBackground);
   cbSyntaxHighlighting.Checked := gINI.ReadBool(cEditor, 'SyntaxHighlighting', True);
+  PopulateThemeList;
+  cbEditorTheme.FocusItem := cbEditorTheme.Items.IndexOf(
+    gINI.ReadString(cEditor, 'Theme', 'Default'));
+  if cbEditorTheme.FocusItem < 0 then
+    cbEditorTheme.FocusItem := 0;
 end;
 
 procedure TConfigureIDEForm.SaveSettings;
@@ -197,6 +206,8 @@ begin
   gINI.WriteInteger(cEditor, 'TabPosition', cbTabPosition.FocusItem);
   gINI.WriteInteger(cEditor, 'ActiveTabColor', pnlActiveTabColor.BackgroundColor);
   gINI.WriteBool(cEditor, 'SyntaxHighlighting', cbSyntaxHighlighting.Checked);
+  if (cbEditorTheme.FocusItem >= 0) and (cbEditorTheme.FocusItem < cbEditorTheme.Items.Count) then
+    gINI.WriteString(cEditor, 'Theme', cbEditorTheme.Items[cbEditorTheme.FocusItem]);
 
   SaveToMacroList(GMacroList);
 end;
@@ -223,6 +234,39 @@ end;
 procedure TConfigureIDEForm.btnActiveTabColorClicked(Sender: TObject);
 begin
   pnlActiveTabColor.BackgroundColor := fpgSelectColorDialog(pnlActiveTabColor.BackgroundColor);
+end;
+
+procedure TConfigureIDEForm.PopulateThemeList;
+var
+  themeDir: string;
+  files: TStringList;
+  i: Integer;
+  t: TEditorTheme;
+begin
+  cbEditorTheme.Items.Clear;
+  { Built-in themes are always available }
+  cbEditorTheme.Items.Add('Default');
+  cbEditorTheme.Items.Add('Dark');
+  cbEditorTheme.Items.Add('Solarized Dark');
+  cbEditorTheme.Items.Add('Solarized Light');
+
+  { Scan for additional user-provided INI theme files }
+  themeDir := fpgExtractFilePath(ParamStr(0)) + 'editor-themes';
+  if fpgDirectoryExists(themeDir) then
+  begin
+    files := TStringList.Create;
+    try
+      FindThemeFiles(themeDir, files);
+      for i := 0 to files.Count - 1 do
+      begin
+        t := LoadThemeFromINI(files[i]);
+        if cbEditorTheme.Items.IndexOf(t.Name) < 0 then
+          cbEditorTheme.Items.Add(t.Name);
+      end;
+    finally
+      files.Free;
+    end;
+  end;
 end;
 
 constructor TConfigureIDEForm.Create(AOwner: TComponent);
@@ -810,6 +854,28 @@ begin
     ImageName := '';
     TabOrder := 8;
     OnClick := @btnActiveTabColorClicked;
+  end;
+
+  lblEditorTheme := TfpgLabel.Create(tsEditor);
+  with lblEditorTheme do
+  begin
+    Name := 'lblEditorTheme';
+    SetPosition(8, 170, 404, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Colour theme';
+  end;
+
+  cbEditorTheme := TfpgComboBox.Create(tsEditor);
+  with cbEditorTheme do
+  begin
+    Name := 'cbEditorTheme';
+    SetPosition(8, 188, 200, 22);
+    ExtraHint := '';
+    FontDesc := '#List';
+    Hint := '';
+    FocusItem := 0;
+    TabOrder := 9;
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}

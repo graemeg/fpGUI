@@ -147,6 +147,7 @@ type
     procedure   UpdateWindowTitle;
     procedure   HighlightObjectPascal(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   HighlightPatch(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   LoadThemeByName(const AName: string);
     procedure   SetupEditorPreference;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -1274,12 +1275,56 @@ begin
   ACanvas.SetFont(oldfont);
 end;
 
+procedure TMainForm.LoadThemeByName(const AName: string);
+var
+  themeDir: string;
+  files: TStringList;
+  i: Integer;
+  t: TEditorTheme;
+begin
+  { Check built-in themes first }
+  if AName = 'Dark' then
+    FTheme := DarkTheme
+  else if AName = 'Solarized Dark' then
+    FTheme := SolarizedDarkTheme
+  else if AName = 'Solarized Light' then
+    FTheme := SolarizedLightTheme
+  else if AName = 'Default' then
+    FTheme := DefaultTheme
+  else
+  begin
+    { Search external INI files for a matching theme name }
+    themeDir := fpgExtractFilePath(ParamStr(0)) + 'editor-themes';
+    if fpgDirectoryExists(themeDir) then
+    begin
+      files := TStringList.Create;
+      try
+        FindThemeFiles(themeDir, files);
+        for i := 0 to files.Count - 1 do
+        begin
+          t := LoadThemeFromINI(files[i]);
+          if t.Name = AName then
+          begin
+            FTheme := t;
+            Exit;
+          end;
+        end;
+      finally
+        files.Free;
+      end;
+    end;
+    { Fallback to default if not found }
+    FTheme := DefaultTheme;
+  end;
+end;
+
 procedure TMainForm.SetupEditorPreference;
 var
   i: integer;
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
+  LoadThemeByName(gINI.ReadString(cEditor, 'Theme', 'Default'));
   for i := 0 to pcEditor.PageCount-1 do
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
 end;
