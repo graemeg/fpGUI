@@ -111,9 +111,9 @@ uses
 
 type
 
-  { THighlightResolver - a stream resolver that returns empty content for
+  (* THighlightResolver - a stream resolver that returns empty content for
     include files instead of raising errors. This allows the scanner to
-    continue past {$I ...} directives when highlighting editor text. }
+    continue past {$I ...} directives when highlighting editor text. *)
 
   THighlightResolver = class(TStreamResolver)
   public
@@ -282,9 +282,9 @@ var
   LineIdx, Col, DirEnd: Integer;
   S: string;
 begin
-  { Scan source lines for {$...} and (*$...*) directive patterns
+  (* Scan source lines for {$...} and ( *$...* ) directive patterns
     that the scanner skipped (e.g. false IFDEF branches).
-    Add hcDirective tokens for any not already covered. }
+    Add hcDirective tokens for any not already covered. *)
   for LineIdx := 0 to ASourceLines.Count - 1 do
   begin
     S := ASourceLines[LineIdx];
