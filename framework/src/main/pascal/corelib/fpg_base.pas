@@ -601,6 +601,7 @@ type
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
     // general properties and functions
     function    Right: TfpgCoord;
@@ -1879,6 +1880,12 @@ begin
   FMinHeight := 2;
   FPreferredSize.SetSize(0, 0);  // 0 = not explicitly set, calculate from content
   FFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FONT_DESC);  // Default font for all widgets
+end;
+
+destructor TfpgWidgetBase.Destroy;
+begin
+  FFont := nil;
+  inherited Destroy;
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;

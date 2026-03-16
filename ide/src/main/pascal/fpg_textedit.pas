@@ -159,7 +159,6 @@ type
     fmousewheelaccelerationmax: double;
 
     fwheelsensitivity: double;
-    function    GetFontDesc: string;
     function    GetGutterShowLineNumbers: Boolean;
     function    GetGutterVisible: Boolean;
     function    GetHScrollPos: Integer;
@@ -168,7 +167,6 @@ type
     function    GetCaretPosV: Integer;
     function    GetLineFirstCharPos(ALine: Integer): Integer;
     procedure   LinesChanged(Sender: TObject);
-    procedure   SetFontDesc(const AValue: string);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
     procedure   SetGutterVisible(const AValue: Boolean);
     procedure   SetHScrollPos(const AValue: Integer);
@@ -201,7 +199,7 @@ type
     procedure   CalculateElasticTabstops;
     procedure   SetUseElasticTabstops(const AValue: Boolean);
   protected
-    FFont: TfpgFontResourceBase;
+    procedure   SetFontDesc(const AValue: string); override;
     { -- internal events -- }
     procedure   HandleShow; override;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
@@ -223,7 +221,6 @@ type
     procedure   DrawCaret(const X, Y: Integer); virtual;
     { -- to be published --}
     property    AutoIndent: boolean read FAutoIndent write FAutoIndent default True;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    FullRedraw: Boolean read FFullRedraw write FFullRedraw default False;
     property    GutterVisible: Boolean read GetGutterVisible write SetGutterVisible default False;
     property    GutterShowLineNumbers: Boolean read GetGutterShowLineNumbers write SetGutterShowLineNumbers default True;
@@ -496,7 +493,7 @@ begin
   H         := FOwner.FChrH;
   MaxI      := FOwner.FVisLines;
   ltxtflags := [txtRight, txtVCenter];
-  Canvas.SetFont(FOwner.FFont);
+  Canvas.SetFont(FOwner.Font);
   r.SetRect(2, 0, W, H);
 
   for i := 0 to MaxI do
@@ -541,7 +538,7 @@ var
 begin
   if FAutoSize then
   begin
-    NeededWidth := FOwner.FFont.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    NeededWidth := FOwner.Font.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
     Width:=NeededWidth;
   end;
 end;
@@ -733,11 +730,6 @@ begin
   NewLines.Free;
 end;
 
-function TfpgBaseTextEdit.GetFontDesc: string;
-begin
-  Result := FFont.FontDesc;
-end;
-
 function TfpgBaseTextEdit.GetGutterShowLineNumbers: Boolean;
 begin
  Result := FGutterPan.ShowNum;
@@ -797,8 +789,7 @@ end;
 
 procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
 begin
-  FFont := nil;
-  FFont := fpgApplication.FontManager.GetFont(AValue);
+  inherited SetFontDesc(AValue);
   UpdateCharBounds;
   Invalidate;
 end;
@@ -850,10 +841,10 @@ end;
 
 procedure TfpgBaseTextEdit.UpdateCharBounds;
 begin
-  if not Assigned(FFont) or not FFont.HandleIsValid then exit;
+  if not Assigned(Font) or not Font.HandleIsValid then exit;
 
-  FChrW := FFont.GetTextWidth('W');
-  FChrH := FFont.GetHeight;
+  FChrW := Font.GetTextWidth('W');
+  FChrH := Font.GetHeight;
 
   if FChrH > 0 then
     FVisLines := (GetClientRect.Height div FChrH) + 1
@@ -1556,7 +1547,7 @@ begin
   // normal house keeping
   Canvas.Clear(BackgroundColor);
   fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
-  Canvas.SetFont(FFont);
+  Canvas.SetFont(Font);
   Canvas.SetClipRect(GetClientRect);
 
   // do the actual drawing
@@ -2470,7 +2461,7 @@ begin
           if i < positions.Count then
             currentX := X + positions[i]
           else
-            inc(currentX, FFont.GetTextWidth(cells[i]));
+            inc(currentX, Font.GetTextWidth(cells[i]));
         end;
       end;
     finally
@@ -2619,7 +2610,7 @@ begin
     //Pen.Mode := pmCopy;
   //end;
   if Focused then
-    fpgCaret.SetCaret(Canvas, Xp, Yp, fpgCaret.Width, FFont.GetHeight)
+    fpgCaret.SetCaret(Canvas, Xp, Yp, fpgCaret.Width, Font.GetHeight)
   else
     fpgCaret.UnSetCaret(Canvas);
 
@@ -2633,7 +2624,7 @@ constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable     := True;
-  FFont         := fpgApplication.FontManager.GetFont('#Edit1');
+  FontDesc      := '#Edit2';
   Width         := 320;
   Height        := 240;
   FLines        := TStringList.Create;
@@ -2690,7 +2681,6 @@ destructor TfpgBaseTextEdit.Destroy;
 begin
   FUndoManager.Free;
   FLines.Free;
-  FFont := nil;
   if Assigned(FDefaultDropHandler) then
     FDefaultDropHandler.Free;
   if Assigned(FElasticTabstops) then
@@ -3260,7 +3250,7 @@ begin
 
       widths := TIntegerList.Create;
       for cellText in cells do
-        widths.Add(FFont.GetTextWidth(cellText));
+        widths.Add(Font.GetTextWidth(cellText));
       widthsPerLine.Add(widths);
 
       if cells.Count > maxNumCells then
