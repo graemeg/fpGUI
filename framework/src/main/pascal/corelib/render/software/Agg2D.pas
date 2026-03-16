@@ -2937,10 +2937,7 @@ begin
 
  m_fontEngine.hinting_(m_textHints );
 
- if cache = AGG_VectorFontCache then
-  m_fontEngine.height_(height * fpgApplication.Screen_dpi {screen dpi} / 72 {font dpi})
- else
-  m_fontEngine.height_(worldToScreen(height ) );
+ m_fontEngine.height_(height * fpgApplication.Screen_dpi {screen dpi} / 72 {font dpi});
 
  // Populate ascent/descent metrics from FreeType
  m_fontAscent := m_fontEngine._ascender;
@@ -3860,11 +3857,11 @@ begin
 
   {$IFDEF AGG2D_USE_FREETYPE}
   if aggFont.FontPath <> '' then
-    Font(aggFont.FontPath, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_VectorFontCache);
+    Font(aggFont.FontPath, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_RasterFontCache);
   {$ENDIF}
   {$IFDEF AGG2D_USE_WINFONTS}
   if aggFont.FamilyName <> '' then
-    Font(aggFont.FamilyName, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_VectorFontCache);
+    Font(aggFont.FamilyName, aggFont.Size, aggFont.IsBold, aggFont.IsItalic, AGG_RasterFontCache);
   {$ENDIF}
 end;
 
@@ -4030,11 +4027,12 @@ begin
 
   DoSetTextColor(FTextColor);
   NoLine;
-  TextHints(False);
-  TextAlignment(AGG_AlignLeft, AGG_AlignTop);
-  // AGG_AlignTop means Y represents the top of the text bounding box.
-  // AGG automatically positions the baseline at Y + ascent internally.
-  Text(x, y, txt);
+  TextHints(True);
+  // Position at baseline directly (Y = top + ascent), matching the X11 backend.
+  // This avoids AGG_AlignTop's 'H' glyph bounds approximation which causes
+  // vertical artifacts with raster font rendering.
+  TextAlignment(AGG_AlignLeft, AGG_AlignBottom);
+  Text(x, y + FFont.GetAscent, txt);
 end;
 
 procedure TAgg2D.DoSetClipRect(const ARect: TfpgRect);
