@@ -1554,7 +1554,7 @@ begin
   end;
 
   // normal house keeping
-  Canvas.Clear(clBoxColor);
+  Canvas.Clear(BackgroundColor);
   fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
   Canvas.SetFont(FFont);
   Canvas.SetClipRect(GetClientRect);
@@ -2387,7 +2387,7 @@ begin
     else
     begin
       { Auto-calculate: slightly darken or lighten the background }
-      BgCol := fpgColorToRGB(clBoxColor);
+      BgCol := fpgColorToRGB(BackgroundColor);
       if fpgGetRed(BgCol) + fpgGetGreen(BgCol) + fpgGetBlue(BgCol) > 384 then
         HighlightCol := fpgDarker(BgCol, 95)   { light background → darken slightly }
       else

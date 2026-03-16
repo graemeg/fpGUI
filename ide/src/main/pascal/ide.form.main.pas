@@ -952,6 +952,7 @@ begin
   m.GutterVisible := True;
   m.GutterShowLineNumbers := True;
   m.RightEdge := True;
+  m.BackgroundColor := FTheme.Chrome.Background;
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -1326,7 +1327,10 @@ begin
   pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
   LoadThemeByName(gINI.ReadString(cEditor, 'Theme', 'Default'));
   for i := 0 to pcEditor.PageCount-1 do
+  begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).BackgroundColor := FTheme.Chrome.Background;
+  end;
 end;
 
 procedure TMainForm.MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
