@@ -32,16 +32,28 @@ uses
 
 type
 
-  { Simplified token categories for syntax highlighting }
+  { Token categories for syntax highlighting.
+    Numbered variants (jEdit-inspired) allow a single theme to serve
+    many languages — each language highlighter maps its tokens to the
+    appropriate slot.  Unused slots inherit from their base style. }
   THighlightCategory = (
     hcWhitespace,
-    hcKeyword,
+    hcKeyword1,       // primary keywords (Pascal: begin, end, if, class …)
+    hcKeyword2,       // secondary keywords (future: built-in types, etc.)
+    hcKeyword3,       // tertiary keywords (future)
     hcIdentifier,
-    hcString,
+    hcString1,        // primary string literals
+    hcString2,        // secondary strings (future: heredoc, template, etc.)
     hcNumber,
-    hcComment,
-    hcDirective,    // compiler directives: {$...} and (*$...*)
-    hcSymbol        // operators, punctuation, brackets
+    hcComment1,       // primary comments
+    hcComment2,       // secondary comments (future: doc-comments, etc.)
+    hcDirective,      // compiler directives / preprocessor
+    hcSymbol,         // punctuation, brackets
+    hcOperator,       // distinguished operators (future)
+    hcFunction,       // function / procedure names (future)
+    hcLabel,          // labels (future)
+    hcMarkup,         // markup / annotations (future)
+    hcInvalid         // error / invalid tokens (future)
   );
 
   { A single highlighted token on a line }
@@ -381,14 +393,14 @@ begin
                 if (Length(TokenStr) > 0) and (TokenStr[1] = '$') then
                   Category := hcDirective
                 else
-                  Category := hcComment;
+                  Category := hcComment1;
               end;
 
               tkIdentifier:
                 Category := hcIdentifier;
 
               tkString, tkStringMultiLine:
-                Category := hcString;
+                Category := hcString1;
 
               tkChar:
                 { tkChar covers ^A..^Z syntax. The scanner can't distinguish
@@ -399,6 +411,9 @@ begin
               tkNumber:
                 Category := hcNumber;
 
+              { All reserved words map to hcKeyword1 for now.
+                A future enhancement could split these into keyword2/3
+                for finer-grained colouring (e.g. types vs flow-control). }
               tkabsolute, tkand, tkarray, tkas, tkasm, tkbegin, tkbitpacked,
               tkcase, tkclass, tkconst, tkconstref, tkconstructor, tkcontains,
               tkdestructor, tkdispinterface, tkdiv, tkdo, tkdownto, tkelse,
@@ -412,7 +427,7 @@ begin
               tkResourceString, tkself, tkset, tkshl, tkshr, tkspecialize,
               tkthen, tkthreadvar, tkto, tktrue, tktry, tktype, tkunit,
               tkuntil, tkuses, tkvar, tkwhile, tkwith, tkxor:
-                Category := hcKeyword;
+                Category := hcKeyword1;
 
               else
                 Category := hcSymbol;

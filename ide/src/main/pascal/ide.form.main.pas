@@ -26,7 +26,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, synregexpr,
-  ide.filemonitor, ide.highlighter;
+  ide.filemonitor, ide.highlighter, ide.editor.theme;
 
 type
 
@@ -76,7 +76,7 @@ type
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
-    FKeywordFont: TfpgFontResourceBase;
+    FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
     FHighlighter: TPascalHighlighter;
     FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
@@ -1055,9 +1055,12 @@ var
   edt: TfpgTextEdit;
   tokens: THighlightTokenArray;
   tok: THighlightToken;
+  ts: TTokenStyle;
   i: Integer;
   r: TfpgRect;
   s: TfpgString;
+  lFontDesc: string;
+  bg: TfpgColor;
 begin
   edt := TfpgTextEdit(Sender);
 
@@ -1067,15 +1070,11 @@ begin
 
   AllowSelfDraw := False;
   oldfont := TfpgFontResourceBase(ACanvas.Font);
-  ACanvas.Color := clWhite;
 
-  { Draw plain text first as baseline }
-  ACanvas.TextColor := clBlack;
+  { Draw plain text with theme default colours }
+  ACanvas.Color := FTheme.Chrome.Background;
+  ACanvas.TextColor := FTheme.Chrome.Foreground;
   ACanvas.DrawText(ATextRect, ALineText);
-
-  { Ensure bold keyword font is available }
-  if not Assigned(FKeywordFont) then
-    FKeywordFont := fpgApplication.FontManager.GetFont(edt.FontDesc + ':bold');
 
   { Get tokens for this line }
   tokens := FHighlighter.GetLineTokens(ALineIndex);
@@ -1085,10 +1084,16 @@ begin
     Exit;
   end;
 
-  { Draw each token with appropriate style }
+  { Draw each token with theme-defined style }
   for i := 0 to Length(tokens) - 1 do
   begin
     tok := tokens[i];
+    ts := FTheme.TokenStyles[tok.Category];
+
+    { Skip tokens that match default text and have no special style }
+    if (ts.Foreground = FTheme.Chrome.Foreground) and
+       (ts.Background = clNone) and (ts.Style = []) then
+      Continue;
 
     { Extract the token text from the line }
     s := Copy(ALineText, tok.Column + 1, tok.Length);
@@ -1099,44 +1104,31 @@ begin
     r.SetRect(ATextRect.Left + (edt.FontWidth * tok.Column), ATextRect.Top,
         (edt.FontWidth * tok.Length), ATextRect.Height);
 
-    { Set style based on category }
-    case tok.Category of
-      hcKeyword:
-      begin
-        ACanvas.SetFont(FKeywordFont);
-        ACanvas.TextColor := clBlack;
-        ACanvas.Color := clWhite;
-        ACanvas.FillRectangle(r);
-        ACanvas.DrawText(r, s);
-        ACanvas.SetFont(oldfont);
-        Continue;
-      end;
-      hcNumber:
-      begin
-        ACanvas.TextColor := clNavy;
-        ACanvas.Color := clWhite;
-      end;
-      hcComment:
-      begin
-        ACanvas.TextColor := clDarkCyan;
-        ACanvas.Color := clWhite;
-      end;
-      hcDirective:
-      begin
-        ACanvas.TextColor := clRed;
-        ACanvas.Color := clWhite;
-      end;
-      hcString:
-      begin
-        ACanvas.TextColor := clOlive;
-        ACanvas.Color := clWhite;
-      end;
-      else
-        Continue;  { identifiers, symbols, whitespace: keep default black }
+    { Apply font style if needed }
+    if ts.Style <> [] then
+    begin
+      lFontDesc := edt.FontDesc;
+      if tsfBold in ts.Style then
+        lFontDesc := lFontDesc + ':bold';
+      if tsfItalic in ts.Style then
+        lFontDesc := lFontDesc + ':italic';
+      ACanvas.SetFont(fpgApplication.FontManager.GetFont(lFontDesc));
     end;
+
+    { Set colours }
+    ACanvas.TextColor := ts.Foreground;
+    if ts.Background <> clNone then
+      bg := ts.Background
+    else
+      bg := FTheme.Chrome.Background;
+    ACanvas.Color := bg;
 
     ACanvas.FillRectangle(r);
     ACanvas.DrawText(r, s);
+
+    { Restore normal font if we changed it }
+    if ts.Style <> [] then
+      ACanvas.SetFont(oldfont);
   end;
 
   ACanvas.SetFont(oldfont);
@@ -1288,7 +1280,6 @@ var
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
-  FKeywordFont := nil;
   for i := 0 to pcEditor.PageCount-1 do
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
 end;
@@ -1338,6 +1329,7 @@ begin
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
   FHighlighter := TPascalHighlighter.Create;
   FHighlighterEditor := nil;
+  FTheme := DefaultTheme;
 end;
 
 destructor TMainForm.Destroy;
@@ -1346,7 +1338,6 @@ begin
   FFileMonitor.Free;
   FHighlighter.Free;
   FRegex.Free;
-  FKeywordFont := nil;
   inherited Destroy;
 end;
 

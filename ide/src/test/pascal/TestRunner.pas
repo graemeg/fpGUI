@@ -20,7 +20,8 @@ uses
   consoletestrunner,
   ide.test.editor.undo,
   ide.test.editor.blockindent,
-  ide.test.highlighter;
+  ide.test.highlighter,
+  ide.test.editortheme;
 
 var
   Application: TTestRunner;
