@@ -254,8 +254,10 @@ begin
     tkPower, tkSymmetricalDifference, tkAssignPlus, tkAssignMinus,
     tkAssignMul, tkAssignDivision, tkAtAt:
       Result := 2;
+    {$IFDEF FPC_IS_MAIN}
     tkDotDotDot:
       Result := 3;
+    {$ENDIF}
     else
       Result := 1;
   end;
@@ -399,7 +401,7 @@ begin
               tkIdentifier:
                 Category := hcIdentifier;
 
-              tkString, tkStringMultiLine:
+              tkString{$IFDEF FPC_IS_MAIN}, tkStringMultiLine{$ENDIF}:
                 Category := hcString1;
 
               tkChar:
@@ -415,15 +417,16 @@ begin
                 A future enhancement could split these into keyword2/3
                 for finer-grained colouring (e.g. types vs flow-control). }
               tkabsolute, tkand, tkarray, tkas, tkasm, tkbegin, tkbitpacked,
-              tkcase, tkclass, tkconst, tkconstref, tkconstructor, tkcontains,
+              tkcase, tkclass, tkconst, tkconstref, tkconstructor, 
+              {$IFDEF FPC_IS_MAIN}tkcontains, tkPackage, tkrequires,{$ENDIF}
               tkdestructor, tkdispinterface, tkdiv, tkdo, tkdownto, tkelse,
               tkend, tkexcept, tkexports, tkfalse, tkfile, tkfinalization,
               tkfinally, tkfor, tkfunction, tkgeneric, tkgoto, tkif,
               tkimplementation, tkin, tkinherited, tkinitialization, tkinline,
               tkinterface, tkis, tklabel, tklibrary, tkmod, tknil, tknot,
               tkobjccategory, tkobjcclass, tkobjcprotocol, tkobject, tkof,
-              tkoperator, tkor, tkotherwise, tkpacked, tkPackage, tkprocedure,
-              tkprogram, tkproperty, tkraise, tkrecord, tkrepeat, tkrequires,
+              tkoperator, tkor, tkotherwise, tkpacked, tkprocedure,
+              tkprogram, tkproperty, tkraise, tkrecord, tkrepeat,
               tkResourceString, tkself, tkset, tkshl, tkshr, tkspecialize,
               tkthen, tkthreadvar, tkto, tktrue, tktry, tktype, tkunit,
               tkuntil, tkuses, tkvar, tkwhile, tkwith, tkxor:
@@ -514,6 +517,7 @@ begin
                 end;
               end;
 
+              {$IFDEF FPC_IS_MAIN}
               tkStringMultiLine:
               begin
                 { Multi-line strings: CurTokenString includes delimiters.
@@ -548,6 +552,7 @@ begin
                 else
                   AddToken(Line, Col, Length(TokenStr), Category);
               end;
+              {$ENDIF}
 
               { Operators: CurTokenString is empty, length from token type }
               tkBraceOpen, tkBraceClose, tkMul, tkPlus, tkComma, tkMinus,
@@ -557,7 +562,8 @@ begin
               tkDotDot, tkAssign, tkNotEqual, tkLessEqualThan,
               tkGreaterEqualThan, tkPower, tkSymmetricalDifference,
               tkAssignPlus, tkAssignMinus, tkAssignMul, tkAssignDivision,
-              tkAtAt, tkDotDotDot:
+              tkAtAt
+              {$IFDEF FPC_IS_MAIN}, tkDotDotDot{$ENDIF}:
                 AddToken(Line, Col, SymbolTokenLength(Token), Category);
 
               else

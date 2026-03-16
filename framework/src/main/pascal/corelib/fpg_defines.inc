@@ -31,4 +31,7 @@
 {.$Define DEBUGKEYS}        // Debug key input - currently GDI testing
 // *************  DEBUG use only - [end]    *************
 
-
+// Check if we are specifically on the Development/Main branch (3.3.x)
+{$IF FPC_FULLVERSION >= 30300}
+	{$DEFINE FPC_IS_MAIN}
+{$ENDIF}
