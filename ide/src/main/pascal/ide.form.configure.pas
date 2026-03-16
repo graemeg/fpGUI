@@ -182,7 +182,7 @@ begin
   edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', GMacroList.FindByName(cMacro_Target).Value);
   edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   cbTabPosition.FocusItem := gINI.ReadInteger(cEditor, 'TabPosition', 0);
-  pnlActiveTabColor.BackgroundColor := gINI.ReadInteger(cEditor, 'ActiveTabColor', clWindowBackground);
+  pnlActiveTabColor.BackgroundColor := gINI.ReadColor(cEditor, 'ActiveTabColor', clWindowBackground);
   cbSyntaxHighlighting.Checked := gINI.ReadBool(cEditor, 'SyntaxHighlighting', True);
   PopulateThemeList;
   cbEditorTheme.FocusItem := cbEditorTheme.Items.IndexOf(
@@ -204,7 +204,7 @@ begin
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
   gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
   gINI.WriteInteger(cEditor, 'TabPosition', cbTabPosition.FocusItem);
-  gINI.WriteInteger(cEditor, 'ActiveTabColor', pnlActiveTabColor.BackgroundColor);
+  gINI.WriteColor(cEditor, 'ActiveTabColor', pnlActiveTabColor.BackgroundColor);
   gINI.WriteBool(cEditor, 'SyntaxHighlighting', cbSyntaxHighlighting.Checked);
   if (cbEditorTheme.FocusItem >= 0) and (cbEditorTheme.FocusItem < cbEditorTheme.Items.Count) then
     gINI.WriteString(cEditor, 'Theme', cbEditorTheme.Items[cbEditorTheme.FocusItem]);

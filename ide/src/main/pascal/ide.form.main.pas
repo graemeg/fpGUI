@@ -1324,7 +1324,7 @@ var
   i: integer;
 begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
-  pcEditor.ActiveTabColor := TfpgColor(gINI.ReadInteger(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor));
+  pcEditor.ActiveTabColor := gINI.ReadColor(cEditor, 'ActiveTabColor', pcEditor.BackgroundColor);
   LoadThemeByName(gINI.ReadString(cEditor, 'Theme', 'Default'));
   for i := 0 to pcEditor.PageCount-1 do
   begin
