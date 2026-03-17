@@ -1068,6 +1068,10 @@ var
 begin
   edt := TfpgTextEdit(Sender);
 
+  { Guard against calls during destruction when FHighlighter is already freed }
+  if not Assigned(FHighlighter) then
+    Exit;
+
   { Ensure highlighter is tokenised for this editor }
   if edt <> FHighlighterEditor then
     RetokeniseEditor(edt);
@@ -1188,6 +1192,11 @@ var
   lMatchPos, lOffset: integer; // user for regex
 begin
   edt := TfpgTextEdit(Sender);
+
+  { Guard against calls during destruction when FRegex is already freed }
+  if not Assigned(FRegex) then
+    Exit;
+
   AllowSelfDraw := False;
 
   oldfont := TfpgFontResourceBase(ACanvas.Font);
@@ -1416,8 +1425,8 @@ destructor TMainForm.Destroy;
 begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
-  FHighlighter.Free;
-  FRegex.Free;
+  FreeAndNil(FHighlighter);
+  FreeAndNil(FRegex);
   inherited Destroy;
 end;
 
