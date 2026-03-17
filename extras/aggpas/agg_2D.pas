@@ -8,6 +8,14 @@
       usage of AggPas a bit easier. This unit has NO graphical toolkit
       dependencies, so is ideal for console or web based (server side)
       projects.
+
+    Coordinate and angle convention:
+      This unit uses screen coordinates (origin at top-left, Y increases
+      downward), but angle-based methods (Arc, Star, etc.) follow the
+      mathematical counter-clockwise convention to match GDI and Xlib
+      behaviour. 0 degrees is at the 3 o'clock position and 90 degrees
+      is at the 12 o'clock position. Angles are negated internally
+      before passing to the underlying AggPas arc vertex generator.
 }
 
 
@@ -2153,7 +2161,7 @@ var
 begin
  m_path.remove_all;
 
- ar.Construct(cx ,cy ,rx ,ry ,start_angle, end_angle, false );
+ ar.Construct(cx ,cy ,rx ,ry ,-start_angle, -end_angle, false );
 
  m_path.add_path(@ar ,0 ,false );
 
@@ -2179,7 +2187,7 @@ begin
  while i < numRays do
   begin
    x:=Cos(a ) * r2 + cx;
-   y:=Sin(a ) * r2 + cy;
+   y:=-Sin(a ) * r2 + cy;
 
    if i <> 0 then
     m_path.line_to(x ,y )
@@ -2188,7 +2196,7 @@ begin
 
    a:=a + da;
 
-   m_path.line_to(Cos(a ) * r1 + cx ,Sin(a ) * r1 + cy );
+   m_path.line_to(Cos(a ) * r1 + cx ,-Sin(a ) * r1 + cy );
 
    a:=a + da;
 

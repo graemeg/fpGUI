@@ -7,6 +7,14 @@
       This unit implements a fpGUI Canvas that uses AggPas for all 2D
       rendering. Thus this unit has a fpGUI Toolkit dependency because
       it descends from the TfpgCanvasBase class.
+
+    Coordinate and angle convention:
+      This unit uses screen coordinates (origin at top-left, Y increases
+      downward), but angle-based methods (Arc, Star, etc.) follow the
+      mathematical counter-clockwise convention to match GDI and Xlib
+      behaviour. 0 degrees is at the 3 o'clock position and 90 degrees
+      is at the 12 o'clock position. Angles are negated internally
+      before passing to the underlying AggPas arc vertex generator.
 }
 
 
@@ -2819,7 +2827,7 @@ var
   ar: agg_arc.arc;
 begin
   m_path.remove_all;
-  ar.Construct(cx ,cy ,rx ,ry ,start_angle ,end_angle ,false );
+  ar.Construct(cx ,cy ,rx ,ry ,-start_angle ,-end_angle ,false );
   m_path.add_path(@ar ,0 ,false );
   DrawPath(AGG_FillAndStroke);
 end;
@@ -2842,7 +2850,7 @@ begin
  while i < numRays do
   begin
    x:=Cos(a ) * r2 + cx;
-   y:=Sin(a ) * r2 + cy;
+   y:=-Sin(a ) * r2 + cy;
 
    if i <> 0 then
     m_path.line_to(x ,y )
@@ -2851,7 +2859,7 @@ begin
 
    a:=a + da;
 
-   m_path.line_to(Cos(a ) * r1 + cx ,Sin(a ) * r1 + cy );
+   m_path.line_to(Cos(a ) * r1 + cx ,-Sin(a ) * r1 + cy );
 
    a:=a + da;
 
@@ -4123,7 +4131,7 @@ procedure TAgg2D.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   NoFill;
   LineColor(LineColor);
-  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1), Deg2Rad(-a2));
+  Arc(x+(w/2), y+(h/2), w/2, h/2, Deg2Rad(a1), Deg2Rad(a2));
 end;
 
 procedure TAgg2D.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
@@ -4147,10 +4155,10 @@ begin
   // 1. Move to the center of the circle
   path.move_to(center_x, center_y);
 
-  // 2. Initialize the arc (0 to 270 degrees)
-  // Note: 270 degrees in AGG (Y-down) is 12 o'clock.
+  // 2. Initialize the arc - negate angles so 90 degrees = 12 o'clock
+  // (matching GDI/Xlib convention despite Y-down screen coordinates)
   my_arc.Construct(center_x, center_y, w/2, h/2,
-                   DegToRad(a1), DegToRad(-a2), false);
+                   -DegToRad(a1), -DegToRad(a2), false);
 
   // 3. Feed the arc points into our path
   my_arc.rewind(0);
