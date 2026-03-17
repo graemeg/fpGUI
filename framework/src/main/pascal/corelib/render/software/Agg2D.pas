@@ -363,6 +363,11 @@ type
    FPaintCaret: boolean;
    FCaretImg: TfpgImage;
    FCaretPos: TfpgPoint;
+   FLastFontName: AnsiString;   // Cache to skip redundant Font() calls
+   FLastFontHeight: double;
+   FLastFontBold: boolean;
+   FLastFontItalic: boolean;
+   FLastFontCache: TAggFontCacheType;
 
   protected
     FImg: TfpgImage;
@@ -2933,6 +2938,17 @@ var
  tm : TEXTMETRIC;
 {$ENDIF}
 begin
+ { Skip expensive FreeType operations if font parameters match current engine state.
+   The font engine signature already encodes all parameters (name, height, rendering
+   type, hinting, etc.) - compare against it to avoid redundant FT_Set_Char_Size,
+   CRC32 gamma hashing and signature string rebuilding on every Font() call.
+   This is critical for syntax-highlighted editors that alternate between normal
+   and bold fonts hundreds of times per paint cycle. }
+ if (fileName = FLastFontName) and (height = FLastFontHeight) and
+    (bold = FLastFontBold) and (italic = FLastFontItalic) and
+    (cache = FLastFontCache) and (angle = m_textAngle) then
+   exit;
+
  m_textAngle    :=angle;
  m_fontHeight   :=height;
  m_fontCacheType:=cache;
@@ -2971,6 +2987,13 @@ begin
    m_fontDescent := tm.tmDescent;
  end;
 {$ENDIF }
+
+ { Update cache so identical calls are skipped next time }
+ FLastFontName   := fileName;
+ FLastFontHeight := height;
+ FLastFontBold   := bold;
+ FLastFontItalic := italic;
+ FLastFontCache  := cache;
 end;
 
 function TAgg2D.FontHeight : double;

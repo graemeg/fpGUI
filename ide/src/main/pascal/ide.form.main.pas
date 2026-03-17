@@ -1062,7 +1062,9 @@ var
   r: TfpgRect;
   s: TfpgString;
   lFontDesc: string;
-  bg: TfpgColor;
+  bg, fg: TfpgColor;
+  lLastCol: Integer;
+  lNeedFont: boolean;
 begin
   edt := TfpgTextEdit(Sender);
 
@@ -1073,41 +1075,61 @@ begin
   AllowSelfDraw := False;
   oldfont := TfpgFontResourceBase(ACanvas.Font);
 
-  { Draw plain text with theme default colours }
-  ACanvas.Color := FTheme.Chrome.Background;
-  ACanvas.TextColor := FTheme.Chrome.Foreground;
-  ACanvas.DrawText(ATextRect, ALineText);
-
   { Get tokens for this line }
   tokens := FHighlighter.GetLineTokens(ALineIndex);
+
   if tokens = nil then
   begin
-    ACanvas.SetFont(oldfont);
+    { No tokens — draw plain text with default colours }
+    ACanvas.Color := FTheme.Chrome.Background;
+    ACanvas.TextColor := FTheme.Chrome.Foreground;
+    ACanvas.FillRectangle(ATextRect);
+    ACanvas.DrawString(ATextRect.Left, ATextRect.Top, ALineText);
     Exit;
   end;
 
-  { Draw each token with theme-defined style }
+  { Sequential drawing: render each token exactly once, left to right.
+    This avoids the previous draw-all-then-overdraw approach which caused
+    every styled character to be alpha-blended twice — the dominant cost
+    shown in profiling (BLEND_PIX_RGBA called millions of times). }
+  lLastCol := 0;
   for i := 0 to Length(tokens) - 1 do
   begin
     tok := tokens[i];
-    ts := FTheme.TokenStyles[tok.Category];
 
-    { Skip tokens that match default text and have no special style }
-    if (ts.Foreground = FTheme.Chrome.Foreground) and
-       (ts.Background = clNone) and (ts.Style = []) then
-      Continue;
-
-    { Extract the token text from the line }
+    { Extract the token text }
     s := Copy(ALineText, tok.Column + 1, tok.Length);
     if s = '' then
       Continue;
 
-    { Calculate the draw rectangle }
-    r.SetRect(ATextRect.Left + (edt.FontWidth * tok.Column), ATextRect.Top,
-        (edt.FontWidth * tok.Length), ATextRect.Height);
+    { Fill any gap before this token with background colour (handles
+      cases where tokens might not be perfectly contiguous) }
+    if tok.Column > lLastCol then
+    begin
+      r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
+          edt.FontWidth * (tok.Column - lLastCol), ATextRect.Height);
+      ACanvas.Color := FTheme.Chrome.Background;
+      ACanvas.FillRectangle(r);
+    end;
+
+    { Determine style for this token }
+    ts := FTheme.TokenStyles[tok.Category];
+
+    { Foreground colour }
+    if ts.Foreground <> clNone then
+      fg := ts.Foreground
+    else
+      fg := FTheme.Chrome.Foreground;
+
+    { Background colour }
+    if ts.Background <> clNone then
+      bg := ts.Background
+    else
+      bg := FTheme.Chrome.Background;
 
     { Apply font style if needed }
-    if ts.Style <> [] then
+    lNeedFont := ts.Style <> [];
+    if lNeedFont then
     begin
       lFontDesc := edt.FontDesc;
       if tsfBold in ts.Style then
@@ -1117,20 +1139,29 @@ begin
       ACanvas.SetFont(fpgApplication.FontManager.GetFont(lFontDesc));
     end;
 
-    { Set colours }
-    ACanvas.TextColor := ts.Foreground;
-    if ts.Background <> clNone then
-      bg := ts.Background
-    else
-      bg := FTheme.Chrome.Background;
-    ACanvas.Color := bg;
+    { Calculate the draw rectangle and render }
+    r.SetRect(ATextRect.Left + (edt.FontWidth * tok.Column), ATextRect.Top,
+        (edt.FontWidth * tok.Length), ATextRect.Height);
 
+    ACanvas.Color := bg;
+    ACanvas.TextColor := fg;
     ACanvas.FillRectangle(r);
-    ACanvas.DrawText(r, s);
+    ACanvas.DrawString(r.Left, r.Top, s);
 
     { Restore normal font if we changed it }
-    if ts.Style <> [] then
+    if lNeedFont then
       ACanvas.SetFont(oldfont);
+
+    lLastCol := tok.Column + tok.Length;
+  end;
+
+  { Fill any remaining space after the last token }
+  if lLastCol * edt.FontWidth < ATextRect.Width then
+  begin
+    r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
+        ATextRect.Width - (edt.FontWidth * lLastCol), ATextRect.Height);
+    ACanvas.Color := FTheme.Chrome.Background;
+    ACanvas.FillRectangle(r);
   end;
 
   ACanvas.SetFont(oldfont);
