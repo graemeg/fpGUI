@@ -21,7 +21,8 @@ uses
   ide.test.editor.undo,
   ide.test.editor.blockindent,
   ide.test.highlighter,
-  ide.test.editortheme;
+  ide.test.editortheme,
+  ide.test.bracketmatch;
 
 var
   Application: TTestRunner;

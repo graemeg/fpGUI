@@ -54,6 +54,7 @@ type
     GutterBackground: TfpgColor;  // gutter / line-number area background
     GutterText: TfpgColor;        // line-number text colour
     RightEdge: TfpgColor;         // right margin indicator
+    BracketMatch: TfpgColor;      // bracket match highlight background
   end;
 
   { Complete editor theme }
@@ -261,6 +262,7 @@ begin
     GutterBackground := TfpgColor($ffF0F0F0);
     GutterText      := TfpgColor($ff999999);
     RightEdge       := TfpgColor($ffE0E0E0);
+    BracketMatch    := TfpgColor($ffB4D7FF);  // light blue highlight
   end;
 
   { Token styles — IntelliJ IDEA-inspired }
@@ -300,6 +302,7 @@ begin
     GutterBackground := TfpgColor($ff313335);
     GutterText      := TfpgColor($ff606366);
     RightEdge       := TfpgColor($ff4D4D4D);
+    BracketMatch    := TfpgColor($ff3B514D);  // subtle teal highlight
   end;
 
   { Token styles — Darcula-inspired }
@@ -357,6 +360,7 @@ begin
     GutterBackground := base02;
     GutterText      := base01;
     RightEdge       := base01;
+    BracketMatch    := base01;
   end;
 
   { Token styles }
@@ -414,6 +418,7 @@ begin
     GutterBackground := base2;
     GutterText      := base1;
     RightEdge       := base1;
+    BracketMatch    := base1;
   end;
 
   { Token styles }
@@ -467,6 +472,7 @@ begin
       GutterBackground := HexToColor(ini.ReadString(cSectEditor, 'GutterBackground', ''), GutterBackground);
       GutterText      := HexToColor(ini.ReadString(cSectEditor, 'GutterText', ''), GutterText);
       RightEdge       := HexToColor(ini.ReadString(cSectEditor, 'RightEdge', ''), RightEdge);
+      BracketMatch    := HexToColor(ini.ReadString(cSectEditor, 'BracketMatch', ''), BracketMatch);
     end;
 
     { Token style sections }
@@ -510,6 +516,7 @@ begin
       ini.WriteString(cSectEditor, 'GutterBackground', ColorToHex(GutterBackground));
       ini.WriteString(cSectEditor, 'GutterText', ColorToHex(GutterText));
       ini.WriteString(cSectEditor, 'RightEdge', ColorToHex(RightEdge));
+      ini.WriteString(cSectEditor, 'BracketMatch', ColorToHex(BracketMatch));
     end;
 
     { Token style sections }

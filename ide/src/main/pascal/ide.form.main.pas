@@ -26,7 +26,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, synregexpr,
-  ide.filemonitor, ide.highlighter, ide.editor.theme;
+  ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch;
 
 type
 
@@ -80,6 +80,7 @@ type
     FFileMonitor: TFileMonitor;
     FHighlighter: TPascalHighlighter;
     FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
+    FBracketMatch: TBracketMatchResult;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
@@ -130,6 +131,7 @@ type
     procedure   EditorChanged(Sender: TObject);
     procedure   EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   RetokeniseEditor(AEditor: TfpgTextEdit);
+    procedure   EditorCaretChanged(Sender: TObject; ALine, ACol: Integer);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
@@ -790,6 +792,7 @@ procedure TMainForm.EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
   edt: TfpgTextEdit;
 begin
+  FBracketMatch.Found := False;
   if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
   begin
     edt := ATabSheet.Components[0] as TfpgTextEdit;
@@ -804,6 +807,25 @@ begin
     Exit;
   FHighlighterEditor := AEditor;
   FHighlighter.Tokenise(AEditor.Lines.Text);
+end;
+
+procedure TMainForm.EditorCaretChanged(Sender: TObject; ALine, ACol: Integer);
+var
+  edt: TfpgTextEdit;
+  OldMatch: TBracketMatchResult;
+begin
+  if not Assigned(FHighlighter) then
+    Exit;
+  edt := TfpgTextEdit(Sender);
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+
+  OldMatch := FBracketMatch;
+  FBracketMatch := FindMatchingBracket(FHighlighter, ALine, ACol, edt.Lines);
+
+  { Only repaint if match state changed }
+  if OldMatch.Found or FBracketMatch.Found then
+    edt.Invalidate;
 end;
 
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -1022,6 +1044,7 @@ begin
       if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr') or (ext = '.dpr') then
       begin
         editor.OnDrawLine := @HighlightObjectPascal;
+        editor.OnCaretChange := @EditorCaretChanged;
         RetokeniseEditor(editor);
       end
       else if (ext = '.patch') or (ext = '.diff') then
@@ -1130,6 +1153,15 @@ begin
       bg := ts.Background
     else
       bg := FTheme.Chrome.Background;
+
+    { Bracket match highlight }
+    if FBracketMatch.Found then
+    begin
+      if (ALineIndex = FBracketMatch.SourceLine) and (tok.Column = FBracketMatch.SourceCol) then
+        bg := FTheme.Chrome.BracketMatch;
+      if (ALineIndex = FBracketMatch.MatchLine) and (tok.Column = FBracketMatch.MatchCol) then
+        bg := FTheme.Chrome.BracketMatch;
+    end;
 
     { Apply font style if needed }
     lNeedFont := ts.Style <> [];

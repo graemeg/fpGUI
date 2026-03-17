@@ -74,6 +74,8 @@ type
       ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
       var AllowSelfDraw: Boolean) of object;
 
+  TfpgCaretChangeEvent = procedure(Sender: TObject; ALine, ACol: Integer) of object;
+
   TfpgFindText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord: Boolean) of object;
 
   TfpgReplaceText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord, ReplaceText: Boolean) of object;
@@ -114,6 +116,8 @@ type
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
+    FLastCaretPos: TPoint;
+    FOnCaretChange: TfpgCaretChangeEvent;
     FOnChange: TNotifyEvent;
     FOnDrawLine: TfpgDrawLineEvent;
     FOnFindText: TfpgFindText;
@@ -198,6 +202,7 @@ type
     function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
     procedure   CalculateElasticTabstops;
     procedure   SetUseElasticTabstops(const AValue: Boolean);
+    procedure   CheckCaretChanged;
   protected
     procedure   SetFontDesc(const AValue: string); override;
     { -- internal events -- }
@@ -230,6 +235,7 @@ type
     property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
+    property    OnCaretChange: TfpgCaretChangeEvent read FOnCaretChange write FOnCaretChange;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
     property    OnFindText: TfpgFindText read FOnFindText write FOnFindText;
@@ -308,6 +314,7 @@ type
     property    TabWidth;
     property    Tracking;
     property    UseElasticTabstops;
+    property    OnCaretChange;
     property    OnChange;
     property    OnDrawLine;
     property    OnFindText;
@@ -832,6 +839,16 @@ end;
 procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
 begin
   CaretPos.Y := AValue;
+end;
+
+procedure TfpgBaseTextEdit.CheckCaretChanged;
+begin
+  if (CaretPos.X <> FLastCaretPos.X) or (CaretPos.Y <> FLastCaretPos.Y) then
+  begin
+    FLastCaretPos := CaretPos;
+    if Assigned(FOnCaretChange) then
+      FOnCaretChange(Self, CaretPos.Y, CaretPos.X);
+  end;
 end;
 
 procedure TfpgBaseTextEdit.SetVScrollPos(const AValue: Integer);
@@ -1613,6 +1630,7 @@ begin
     FSelected := True;
   end;
   Invalidate;
+  CheckCaretChanged;
 end;
 
 procedure TfpgBaseTextEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -1648,6 +1666,7 @@ begin
     FSelection.EndPos := fpgPoint(CNo, RNo);
     FSelected:=True;
     Invalidate;
+    CheckCaretChanged;
   end;
 end;
 
@@ -1971,6 +1990,7 @@ begin
     Invalidate;
     FIsMultiClick:=True;
   end;
+  CheckCaretChanged;
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -2245,6 +2265,7 @@ begin
 
   if consumed then
     Invalidate;
+  CheckCaretChanged;
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
@@ -2300,6 +2321,7 @@ begin
     Repaint
   else
     inherited HandleKeyChar(AText, shiftstate, consumed);
+  CheckCaretChanged;
 end;
 
 function TfpgBaseTextEdit.GetDefaultDropHandler: TfpgDropHandler;
@@ -2631,6 +2653,8 @@ begin
   OnDragStartDetected:=@DragStartDetected;
   CaretPos.x    := 0;
   CaretPos.y    := 0;
+  FLastCaretPos.X := -1;
+  FLastCaretPos.Y := -1;
   FTopLine      := 0;
   FTabWidth     := 8;
   FIndentSize   := 2;
@@ -2912,6 +2936,7 @@ begin
   else
     ScrollPos_V := 0;
   UpdateScrollBars;
+  CheckCaretChanged;
 end;
 
 procedure TfpgBaseTextEdit.DeleteSelection;
@@ -3094,6 +3119,7 @@ begin
   FSelection.StartPos := CaretPos;
   UpdateScrollBars;
   Invalidate;
+  CheckCaretChanged;
 end;
 
 procedure TfpgBaseTextEdit.Redo;
@@ -3107,6 +3133,7 @@ begin
   FSelection.StartPos := CaretPos;
   UpdateScrollBars;
   Invalidate;
+  CheckCaretChanged;
 end;
 
 function TfpgBaseTextEdit.CanUndo: Boolean;
