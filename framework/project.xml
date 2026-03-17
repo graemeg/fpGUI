@@ -40,7 +40,6 @@
       <compilerOptions>
         <option>-gw</option>
         <option>-godwarfsets -godwarfmethodclassprefix</option>
-        <option>-Criot</option>
         <option>-gl</option>
       </compilerOptions>
     </profile>
