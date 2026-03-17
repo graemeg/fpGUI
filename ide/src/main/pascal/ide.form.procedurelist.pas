@@ -23,7 +23,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_label,
   fpg_edit, fpg_combobox, fpg_basegrid, fpg_grid, fpg_imagelist,
-  pparser, pastree, fpg_textedit;
+  pscanner, pparser, pastree, fpg_textedit;
 
 type
 
@@ -114,7 +114,6 @@ implementation
 
 uses
   ide.consts
-  ,mPasLex
   ,ide.utils
   ,dbugintf
   ,fpg_utils
@@ -128,6 +127,20 @@ const
   SImplementationNotFound = 'Implementation section not found (parser error?)';
   SInvalidIndex = 'Invalid index number';
   SParseStatistics = 'Procedures processed in %.4g seconds';
+
+
+type
+  { Custom resolver that returns empty content for {$I} include files,
+    preventing scanner errors when parsing files with include directives. }
+  TProcListResolver = class(TStreamResolver)
+  public
+    function FindIncludeFile(const AName: string): TLineReader; override;
+  end;
+
+function TProcListResolver.FindIncludeFile(const AName: string): TLineReader;
+begin
+  Result := TStringStreamLineReader.Create(AName, '');
+end;
 
 
 {$I proclistimages.inc}
@@ -409,10 +422,9 @@ end;
 
 procedure TProcedureListForm.LoadProcs;
 var
-  Parser: TmwPasLex;
-//  CParser: TBCBTokenList;
-  BeginBracePosition: Longint;
-  BraceCount, PreviousBraceCount: Integer;
+  Scanner: TPascalScanner;
+  Resolver: TProcListResolver;
+  Token: TToken;
 
   function MoveToImplementation: Boolean;
   begin
@@ -422,188 +434,52 @@ var
       Exit;
     end;
     Result := False;
-    while Parser.TokenID <> tkNull do
+    while Token <> tkEOF do
     begin
-      if Parser.TokenID = tkImplementation then
+      if Token = tkimplementation then
         Result := True;
-      Parser.Next;
+      Token := Scanner.FetchToken;
       if Result then
         Break;
     end;
   end;
 
+  function IsVisibilityIdent(const AToken: TToken; const ATokenStr: string): Boolean;
+  begin
+    Result := (AToken = tkIdentifier) and
+      ((CompareText(ATokenStr, 'private') = 0) or
+       (CompareText(ATokenStr, 'protected') = 0) or
+       (CompareText(ATokenStr, 'public') = 0) or
+       (CompareText(ATokenStr, 'published') = 0));
+  end;
+
   procedure FindProcs;
 
-    function GetProperProcName(ProcType: TTokenKind; IsClass: Boolean): string;
+    function GetProperProcName(ProcType: TToken; IsClass: Boolean): string;
     begin
       Result := SUnknown;
       if IsClass then
       begin
-        if ProcType = tkFunction then
+        if ProcType = tkfunction then
           Result := 'Class Func' // Do not localize.
-        else if ProcType = tkProcedure then
+        else if ProcType = tkprocedure then
           Result := 'Class Proc'; // Do not localize.
       end
       else
       begin
         case ProcType of
           // Do not localize.
-          tkFunction: Result := 'Function';
-          tkProcedure: Result := 'Procedure';
-          tkConstructor: Result := 'Constructor';
-          tkDestructor: Result := 'Destructor';
+          tkfunction: Result := 'Function';
+          tkprocedure: Result := 'Procedure';
+          tkconstructor: Result := 'Constructor';
+          tkdestructor: Result := 'Destructor';
         end;
       end;
     end;
-
-(*
-    procedure FindBeginningBrace;
-    begin
-      repeat
-        CParser.NextNonJunk;
-        case CParser.RunID of
-          ctkbraceopen: Inc(BraceCount);
-          ctkbraceclose: Dec(BraceCount);
-          ctknull: Exit;
-        end;
-      until (CParser.RunID = ctkbraceopen) or
-            (CParser.RunID = ctkbracepair) or
-            (CParser.RunID = ctknull);
-    end;
-
-    // This procedure does two things.  It looks for procedures and it
-    // looks for named scopes (like class/struct definitions & namespaces)
-    // If it finds a named scope it returns the non-blank name.  If it finds
-    // a procedure it returns a blank name.
-    procedure FindBeginningProcedureBrace(var Name: string); // Used for CPP
-    var
-      InitialPosition: Integer;
-      RestorePosition: Integer;
-      FoundClass: Boolean;
-    begin
-      BeginBracePosition := 0;
-      InitialPosition := CParser.RunPosition;
-      // Skip these: enum {a, b, c};  or  int a[] = {0, 3, 5};  and find  foo () {
-      FindBeginningBrace;
-      if CParser.RunID = ctknull then
-        Exit;
-      CParser.PreviousNonJunk;
-      // Check for a namespace or a class name
-      if CParser.RunID = ctkidentifier then
-      begin
-        Name := CParser.RunToken;  // The name
-        // This might be a derived class so search backward
-        // no further than InitialPosition to see
-        RestorePosition := CParser.RunPosition;
-        FoundClass      := False;
-        while CParser.RunPosition >= InitialPosition do begin
-          if CParser.RunID in [ctkclass, ctkstruct, ctknamespace] then
-          begin
-            FoundClass := True;
-            Break;
-          end;
-          if CParser.RunPosition = InitialPosition then
-            Break;
-          CParser.PreviousNonJunk;
-        end;
-        // The class name is the last token before a : or {
-        if FoundClass then
-        begin
-          while not (CParser.RunID in [ctkcolon, ctkbraceopen, ctknull]) do begin
-             Name := CParser.RunToken;
-             CParser.NextNonJunk;
-          end;
-          // Back up a bit if we are on a brace open so empty enums don't get treated as namespaces
-          if CParser.RunID = ctkbraceopen then
-            CParser.PreviousNonJunk;
-        end;
-        // Now get back to where you belong
-        while CParser.RunPosition < RestorePosition do
-          CParser.NextNonJunk;
-        CParser.NextNonJunk;
-        BeginBracePosition := CParser.RunPosition;
-      end
-      else
-      begin
-        if CParser.RunID in [ctkroundclose, ctkroundpair, ctkconst, ctkvolatile, ctknull] then
-        begin
-          // Return an empty name to indicate that a procedure was found
-          Name := '';
-          CParser.NextNonJunk;
-          BeginBracePosition := CParser.RunPosition;
-        end
-        else
-        begin
-          while not (CParser.RunID in [ctkroundclose, ctkroundpair, ctkconst, ctkvolatile, ctknull]) do
-          begin
-            CParser.NextNonJunk;
-            if CParser.RunID = ctknull then
-              Exit;
-            // Recurse
-            FindBeginningProcedureBrace(Name);
-            CParser.PreviousNonJunk;
-            if Name <> '' then Break;
-          end;
-          CParser.NextNonJunk;
-        end;
-      end;
-    end;
-
-    // This function searches backward from the current parser position
-    // trying to find the procedure name - it returns all of the text
-    // between the starting position and the position where it thinks a
-    // procedure name has been found.
-    function SearchForProcedureName: string;
-    var
-      ParenCount: Integer;
-    begin
-      ParenCount := 0;
-      Result := '';
-      repeat
-        CParser.Previous;
-        if CParser.RunID <> ctkcrlf then
-          if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
-            Result := #32 + Result
-          else
-            Result := CParser.RunToken + Result;
-        case CParser.RunID of
-          ctkroundclose: Inc(ParenCount);
-          ctkroundopen: Dec(ParenCount);
-          ctknull: Exit;
-        end;
-      until ((ParenCount = 0) and ((CParser.RunID = ctkroundopen) or (CParser.RunID = ctkroundpair)));
-      CParser.PreviousNonJunk; // This is the procedure name
-    end;
-
-    function SearchForTemplateArgs: string;
-    var
-      AngleCount: Integer;
-    begin
-      Result := '';
-      if CParser.RunID <> ctkGreater then
-        Exit; // only use if we are on a '>'
-      AngleCount := 1;
-      Result := CParser.RunToken;
-      repeat
-        CParser.Previous;
-        if CParser.RunID <> ctkcrlf then
-          if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
-            Result := #32 + Result
-          else
-            Result := CParser.RunToken + Result;
-        case CParser.RunID of
-          ctkgreater: Inc(AngleCount);
-          ctklower: Dec(AngleCount);
-          ctknull: Exit;
-        end;
-      until (((AngleCount = 0) and (CParser.RunID = ctklower)) or (CParser.RunIndex = 0));
-      CParser.PreviousNonJunk; // This is the token before the template args
-    end;
-*)
 
   var
     ProcLine: string;
-    ProcType: TTokenKind;
+    ProcType: TToken;
     Line: Integer;
     ClassLast: Boolean;
     InParenthesis: Boolean;
@@ -611,26 +487,7 @@ var
     FoundNonEmptyType: Boolean;
     IdentifierNeeded: Boolean;
     ProcedureInfo: TProcInfo;
-    BeginProcHeaderPosition: Longint;
-    i, j: Integer;
-    LineNo: Integer;
-    ProcName, ProcReturnType: string;
-    ProcedureType, ProcClass, ProcArgs: string;
-    ProcIndex: Integer;
-    NameList: TStringList;
-    NewName, TmpName, ProcClassAdd, ClassName: string;
-    BraceCountDelta: Integer;
-    TemplateArgs: string;
-
-    procedure EraseName(Index: Integer);
-    var
-      NameIndex: Integer;
-    begin
-      NameIndex := NameList.IndexOfName(IntToStr(Index));
-      if NameIndex <> -1 then
-        NameList.Delete(NameIndex);
-    end;
-
+    TokenStr: string;
   begin
     FProcList.Capacity := 200;
     FProcList.BeginUpdate;
@@ -645,23 +502,22 @@ var
             InTypeDeclaration := False;
             FoundNonEmptyType := False;
 
-            while Parser.TokenID <> tkNull do
+            while Token <> tkEOF do
             begin
               if not InTypeDeclaration and
-                (Parser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor]) then
+                (Token in [tkfunction, tkprocedure, tkconstructor, tkdestructor]) then
               begin
                 IdentifierNeeded := True;
-                ProcType := Parser.TokenID;
-                Line := Parser.LineNumber + 1;
+                ProcType := Token;
+                Line := Scanner.CurTokenPos.Row;
                 ProcLine := '';
-                while not (Parser.TokenId in [tkNull]) do
+                while Token <> tkEOF do
                 begin
-                  //{$IFOPT D+} SendDebug('Found Inner Token: '+ Parser.Token+ ' '+BTS(ClassLast)); {$ENDIF}
-                  case Parser.TokenID of
-                    tkIdentifier, tkRegister:
+                  case Token of
+                    tkIdentifier:
                       IdentifierNeeded := False;
 
-                    tkRoundOpen:
+                    tkBraceOpen:
                       begin
                         // Did we run into an identifier already?
                         // This prevents
@@ -672,25 +528,36 @@ var
                         InParenthesis := True;
                       end;
 
-                    tkRoundClose:
+                    tkBraceClose:
                       InParenthesis := False;
 
                   else
                     // nothing
                   end; // case
 
-                  if (not InParenthesis) and (Parser.TokenID = tkSemiColon) then
+                  if (not InParenthesis) and (Token = tkSemicolon) then
                     Break;
 
-                  if not (Parser.TokenID in [tkCRLF, tkCRLFCo]) then
-                    ProcLine := ProcLine + Parser.Token;
-                  Parser.Next;
+                  if Token in [tkWhitespace, tkTab] then
+                  begin
+                    { Preserve a single space between tokens }
+                    if (ProcLine <> '') and (ProcLine[Length(ProcLine)] <> ' ') then
+                      ProcLine := ProcLine + ' ';
+                  end
+                  else if Token <> tkLineEnding then
+                  begin
+                    TokenStr := Scanner.CurTokenString;
+                    if TokenStr <> '' then
+                      ProcLine := ProcLine + TokenStr
+                    else
+                      ProcLine := ProcLine + TokenInfos[Token];
+                  end;
+                  Token := Scanner.FetchToken;
                 end; // while
-                if Parser.TokenID = tkSemicolon then
+                if Token = tkSemicolon then
                   ProcLine := ProcLine + ';';
                 if ClassLast then
                   ProcLine := 'class ' + ProcLine; // Do not localize.
-                //{$IFOPT D+} SendDebug('FoundProc: ' + ProcLine); {$ENDIF}
                 if not IdentifierNeeded then
                 begin
                   ProcedureInfo := TProcInfo.Create;
@@ -700,282 +567,28 @@ var
                   AddProcedure(ProcedureInfo);
                 end;
               end;
-              if (Parser.TokenID = tkClass) and Parser.IsClass then
+              { Track class type declarations to skip forward-declared methods }
+              if (Token = tkclass) and not ClassLast then
               begin
                 InTypeDeclaration := True;
                 FoundNonEmptyType := False;
               end
               else if InTypeDeclaration and
-                (Parser.TokenID in [tkProcedure, tkFunction, tkProperty,
-                tkPrivate, tkProtected, tkPublic, tkPublished]) then
+                ((Token in [tkprocedure, tkfunction, tkproperty]) or
+                 IsVisibilityIdent(Token, Scanner.CurTokenString)) then
               begin
                 FoundNonEmptyType := True;
               end
               else if InTypeDeclaration and
-                ((Parser.TokenID = tkEnd) or
-                ((Parser.TokenID = tkSemiColon) and not FoundNonEmptyType)) then
+                ((Token = tkend) or
+                ((Token = tkSemicolon) and not FoundNonEmptyType)) then
               begin
                 InTypeDeclaration := False;
               end;
-              //{$IFOPT D+} SendDebug('Found Token: '+ Parser.Token+ ' '+BTS(ClassLast)); {$ENDIF}
-              ClassLast := (Parser.TokenID = tkClass);
-              if ClassLast then
-              begin
-                Parser.NextNoJunk;
-                //{$IFOPT D+} SendDebug('Found Class Token'+ ' '+BTS(ClassLast)); {$ENDIF}
-              end
-              else
-                Parser.Next;
+              ClassLast := (Token = tkclass);
+              Token := Scanner.FetchToken;
             end;
           end; //ltPas
-
-(*
-        ltCpp:
-          begin
-            NameList := TStringList.Create;
-            try
-              BraceCount := 0;
-              NameList.Add('0='); // empty enclosure name
-              j := CParser.TokenPositionsList[CParser.TokenPositionsList.Count - 1];
-              PreviousBraceCount := BraceCount;
-              FindBeginningProcedureBrace(NewName);
-
-              while (CParser.RunPosition <= j - 1) or (CParser.RunID <> ctknull) do
-              begin
-                // If NewName = '' then we are looking at a real procedure - otherwise
-                // we've just found a new enclosure name to add to our list
-                if NewName = '' then
-                begin
-                  // If we found a brace pair then special handling is necessary
-                  // for the bracecounting stuff (it is off by one)
-                  if CParser.RunID = ctkbracepair then
-                    BraceCountDelta := 0
-                  else
-                    BraceCountDelta := 1;
-                  if (BraceCountDelta > 0) and (PreviousBraceCount >= BraceCount) then
-                    EraseName(PreviousBraceCount);
-                  // Back up a tiny bit so that we are "in front of" the
-                  // ctkbraceopen or ctkbracepair we just found
-                  CParser.Previous;
-
-                  while not ((CParser.RunID in [ctksemicolon, ctkbraceclose, ctkbraceopen, ctkbracepair]) or
-                             (CParser.RunID in IdentDirect) or
-                             (CParser.RunIndex = 0)) do
-                  begin
-                    CParser.PreviousNonJunk;
-                    // Handle the case where a colon is part of a valid procedure definition
-                    if CParser.RunID = ctkcolon then
-                    begin
-                      // A colon is valid in a procedure definition only if it is immediately
-                      // following a close parenthesis (possibly separated by "junk")
-                      CParser.PreviousNonJunk;
-                      if CParser.RunID in [ctkroundclose, ctkroundpair] then
-                        CParser.NextNonJunk
-                      else
-                      begin
-                        // Restore position and stop backtracking
-                        CParser.NextNonJunk;
-                        Break;
-                      end;
-                    end;
-                  end;
-
-                  if CParser.RunID in [ctkcolon, ctksemicolon, ctkbraceclose, ctkbraceopen, ctkbracepair] then
-                    CParser.NextNonComment
-                  else if CParser.RunIndex = 0 then
-                  begin
-                    if CParser.IsJunk then
-                      CParser.NextNonJunk;
-                  end
-                  else // IdentDirect
-                  begin
-                    while CParser.RunID <> ctkcrlf do
-                    begin
-                      if (CParser.RunID = ctknull) then
-                        Exit;
-                      CParser.Next;
-                    end;
-                    CParser.NextNonJunk;
-                  end;
-                  // We are at the beginning of procedure header
-                  BeginProcHeaderPosition := CParser.RunPosition;
-
-                  ProcLine := '';
-                  while (CParser.RunPosition < BeginBracePosition) and (CParser.RunID <> ctkcolon) do
-                  begin
-                    if (CParser.RunID = ctknull) then
-                      Exit
-                    else if (CParser.RunID <> ctkcrlf) then
-                      if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
-                        ProcLine := ProcLine + #32
-                      else
-                        ProcLine := ProcLine + CParser.RunToken;
-                    CParser.NextNonComment;
-                  end;
-                  // We are at the end of a procedure header
-                  // Go back and skip parenthesis to find the procedure name
-                  ProcName := '';
-                  ProcClass := '';
-                  ProcReturnType := '';
-                  ProcArgs := SearchForProcedureName;
-                  // We have to check for ctknull and exit since we moved the
-                  // code to a nested procedure (if we exit SearchForProcedureName
-                  // early due to RunID = ctknull we exit this procedure early as well)
-                  if CParser.RunID = ctknull then
-                    Exit;
-                  if CParser.RunID = ctkthrow then
-                  begin
-                    ProcArgs := CParser.RunToken + ProcArgs;
-                    ProcArgs := SearchForProcedureName + ProcArgs;
-                  end;
-                  // Since we've enabled nested procedures it is now possible
-                  // that we think we've found a procedure but what we've really found
-                  // is a standard C or C++ construct (like if or for, etc...)
-                  // To guard against this we require that our procedures be of type
-                  // ctkidentifier.  If not, then skip this step.
-                  if (CParser.RunID = ctkidentifier) and not InProcedureBlacklist(CParser.RunToken) then
-                  begin
-                    ProcName := CParser.RunToken;
-                    LineNo := CParser.PositionAtLine(CParser.RunPosition);
-                    CParser.PreviousNonJunk;
-                    if CParser.RunID = ctkcoloncolon then // The object/method delimiter
-                    begin
-                      // There may be multiple name::name::name:: sets here
-                      // so loop until no more are found
-                      ClassName := '';
-                      while CParser.RunID = ctkcoloncolon do begin
-                        CParser.PreviousNonJunk; // The object name?
-                        // It is possible that we are looking at a templatized class and
-                        // what we have in front of the :: is the end of a specialization:
-                        // ClassName<x, y, z>::Function
-                        if CParser.RunID = ctkgreater then
-                          TemplateArgs := SearchForTemplateArgs;
-                        ProcClass := CParser.RunToken + ProcClass;
-                        if ClassName = '' then
-                          ClassName := CParser.RunToken;
-                        CParser.PreviousNonJunk; // look for another ::
-                        if CParser.RunID = ctkcoloncolon then
-                          ProcClass := CParser.RunToken + ProcClass;
-                      end;
-                      // We went back one step too far so go ahead one
-                      CParser.NextNonJunk;
-                      ProcIndex := ImageIndexFunction;
-                      if ProcName = ClassName then // A constructor
-                        ProcIndex := ImageIndexNew;
-                      if ProcName = '~' + ClassName then // A destructor
-                        ProcIndex := ImageIndexTrash;
-                    end
-                    else
-                    begin
-                      ProcIndex := ImageIndexFunction;
-                      // If ProcIndex is 1 then we have backed up too far already
-                      // so restore our previous position in order to correctly
-                      // get the return type information for non-class methods
-                      CParser.NextNonJunk;
-                    end;
-
-                    while CParser.RunPosition > BeginProcHeaderPosition do // Find the return type of the procedure
-                    begin
-                      CParser.PreviousNonComment;
-                      // Handle the possibility of template specifications and
-                      // do not include them in the return type
-                      if CParser.RunID = ctkGreater then
-                        TemplateArgs := SearchForTemplateArgs;
-                      if CParser.RunID = ctktemplate then
-                        Continue;
-                      if CParser.RunID in [ctkcrlf, ctkspace] then
-                        ProcReturnType := ' ' + ProcReturnType
-                      else
-                        ProcReturnType := CParser.RunToken + ProcReturnType
-                    end;
-
-                    // If the return type is an empty string then it must be a constructor
-                    // or a destructor (depending on the presence of a ~ in the name
-                    if (Trim(ProcReturnType) = '') or (Trim(ProcReturnType) = 'virtual') then
-                    begin
-                      if StrBeginsWith('~', ProcName) then
-                        ProcIndex := ImageIndexTrash // a destructor
-                      else
-                        ProcIndex := ImageIndexNew; // a constructor
-                    end;
-
-                    ProcLine := Trim(ProcReturnType) + ' ';
-
-                    // This code sticks enclosure names in front of
-                    // methods (namespaces & classes with in-line definitions)
-                    ProcClassAdd := '';
-                    for i := 0 to BraceCount - BraceCountDelta do begin
-                      if i < NameList.Count then
-                      begin
-                        TmpName := NameList.Values[IntToStr(i)];
-                        if TmpName <> '' then
-                        begin
-                          if ProcClassAdd <> '' then
-                            ProcClassAdd := ProcClassAdd + '::';
-                          ProcClassAdd := ProcClassAdd + TmpName;
-                        end;
-                      end;
-                    end;
-
-                    if Length(ProcClassAdd) > 0 then
-                    begin
-                      if Length(ProcClass) > 0 then
-                        ProcClassAdd := ProcClassAdd + '::';
-                      ProcClass := ProcClassAdd + ProcClass;
-                    end;
-                    if Length(ProcClass) > 0 then
-                      ProcLine := ProcLine + ' ' + ProcClass + '::';
-                    ProcLine := ProcLine + ProcName + ' ' + ProcArgs;
-
-                    // We need to double check the ProcIndex if it is = 0
-                    // if it isn't a "static" method it should be 1
-                    if (ProcIndex in [ImageIndexFunction, ImageIndexGear]) then
-                      if StrBeginsWith('static ', Trim(ProcReturnType)) and
-                         (Length(ProcClass) > 0) then
-                        ProcIndex := ImageIndexGear
-                      else
-                        ProcIndex := ImageIndexFunction;
-
-                    case ProcIndex of
-                      ImageIndexFunction: if StrContains('void', ProcReturnType) then
-                          ProcedureType := 'Procedure'
-                        else
-                          ProcedureType := 'Function';
-                      ImageIndexGear: if StrContains('void', ProcReturnType) then
-                          ProcedureType := 'Class Proc'
-                        else
-                          ProcedureType := 'Class Func';
-                      ImageIndexNew: ProcedureType := 'Constructor';
-                      ImageIndexTrash: ProcedureType := 'Destructor';
-                    end;
-
-                    ProcedureInfo := TProcInfo.Create;
-                    ProcedureInfo.Name := ProcLine;
-                    ProcedureInfo.ProcedureType := ProcedureType;
-                    ProcedureInfo.LineNo := LineNo;
-                    ProcedureInfo.ProcClass := ProcClass;
-                    ProcedureInfo.ProcArgs := ProcArgs;
-                    ProcedureInfo.ProcReturnType := ProcReturnType;
-                    ProcedureInfo.ProcIndex := ProcIndex;
-                    ProcedureInfo.ProcName := ProcName;
-                    AddProcedure(ProcedureInfo);
-                  end;
-                  while (CParser.RunPosition < BeginBracePosition) do
-                    CParser.Next;
-                end
-                else begin
-                  // Insert enclosure name into our list (delete the old one if found)
-                  EraseName(BraceCount);
-                  NameList.Add(IntToStr(BraceCount) + '=' + NewName);
-                end;
-                PreviousBraceCount := BraceCount;
-                FindBeginningProcedureBrace(NewName);
-              end; //while (RunPosition <= j-1) ...
-            finally
-              NameList.Free;
-            end;
-          end; //Cpp
-*)
       end; //case Language
     finally
       FProcList.EndUpdate;
@@ -984,34 +597,36 @@ var
 
 var
   SFile: TFileStream;
-  MemStream: TMemoryStream;
-  Pos: Integer;
+  SourceText: string;
   Size: Integer;
-const
-  TheEnd: Char = #0; // Leave typed constant as is - needed for streaming code
 begin
-  case Language of
-    ltPas: Parser := TmwPasLex.Create;
-//    ltCpp: CParser := TBCBTokenList.Create;
-  end;
+  Resolver := TProcListResolver.Create;
   try
-    MemStream := TMemoryStream.Create;
+    Resolver.OwnsStreams := True;
+
+    { Read source file into a string }
+    SFile := TFileStream.Create(FFilename, fmOpenRead or fmShareDenyWrite);
     try
-      // Read from file on disk and store in a memory stream
-      SFile := TFileStream.Create(FFilename, fmOpenRead or fmShareDenyWrite);
-      try
-        SFile.Position := 0;
-        MemStream.CopyFrom(SFile, SFile.Size);
-        MemStream.Write(TheEnd, 1);
-      finally
-        SFile.Free;
-      end;
-//      SendDebug('Procedure List: Starting Parse');
-      case Language of
-        ltPas: Parser.Origin := MemStream.Memory;
-//        ltCpp: CParser.SetOrigin(MemStream.Memory, MemStream.Size);
-      end;
+      Size := SFile.Size;
+      SetLength(SourceText, Size);
+      if Size > 0 then
+        SFile.Read(SourceText[1], Size);
+    finally
+      SFile.Free;
+    end;
+
+    Resolver.AddStream(FFilename, TStringStream.Create(SourceText));
+
+    Scanner := TPascalScanner.Create(Resolver);
+    try
+      Scanner.SkipWhiteSpace := False;
+      Scanner.SkipComments := True;
+      Scanner.OpenFile(FFilename);
+
       WindowTitle := WindowTitle + ' - ' + fpgExtractFileName(FFileName);
+
+      { Prime the scanner with the first token }
+      Token := Scanner.FetchToken;
 
       ClearObjectStrings;
       try
@@ -1019,17 +634,12 @@ begin
       finally
         LoadObjectCombobox;
       end;
-//      SendDebug('Procedure List: QuickSorting procedures');
       QuickSort(0, FProcList.Count - 1);
-//      StatusBar.Panels[1].Text := Trim(IntToStr(lvProcs.Items.Count));
     finally
-      MemStream.Free;
+      Scanner.Free;
     end;
   finally
-    case Language of
-      ltPas: Parser.Free;
-//      ltCpp: CParser.Free;
-    end;
+    Resolver.Free;
   end;
 end;
 
