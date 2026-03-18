@@ -802,10 +802,10 @@ constructor Agg2D.Construct;
 begin
  m_rbuf.Construct;
 
- pixfmt_rgba32           (m_pixFormat ,@m_rbuf );
- pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
- pixfmt_rgba32           (m_pixFormatPre ,@m_rbuf );
- pixfmt_custom_blend_rgba(m_pixFormatCompPre ,@m_rbuf ,@comp_op_adaptor_rgba ,rgba_order );
+ pixfmt_bgra32           (m_pixFormat ,@m_rbuf );
+ pixfmt_custom_blend_rgba(m_pixFormatComp ,@m_rbuf ,@comp_op_adaptor_rgba ,bgra_order );
+ pixfmt_bgra32           (m_pixFormatPre ,@m_rbuf );
+ pixfmt_custom_blend_rgba(m_pixFormatCompPre ,@m_rbuf ,@comp_op_adaptor_rgba ,bgra_order );
 
  m_renBase.Construct       (@m_pixFormat );
  m_renBaseComp.Construct   (@m_pixFormatComp );
@@ -2991,7 +2991,7 @@ var
 
 begin
  worldToScreen(@dstX ,@dstY );
- pixfmt_rgba32(pixF ,@img.renBuf );
+ pixfmt_bgra32(pixF ,@img.renBuf );
  r.Construct  (imgX1 ,imgY1 ,imgX2 ,imgY2 );
 
  if m_blendMode = BlendAlpha then
@@ -3008,7 +3008,7 @@ var
 
 begin
  worldToScreen(@dstX ,@dstY );
- pixfmt_rgba32(pixF ,@img.renBuf );
+ pixfmt_bgra32(pixF ,@img.renBuf );
 
  m_renBasePre.blend_from(@pixF ,NIL ,Trunc(dstX ) ,Trunc(dstY ) ,alpha );
 
@@ -3379,7 +3379,7 @@ begin
  if gr.m_imageFilter = NoFilter then
   begin
    clr.ConstrInt(0 ,0 ,0 ,0 );
-   sg.Construct (@gr.m_allocator ,@img.renBuf ,@clr ,interpolator ,rgba_order );
+   sg.Construct (@gr.m_allocator ,@img.renBuf ,@clr ,interpolator ,bgra_order );
    sc.Construct (@sg ,@blend );
    ri.Construct (renBase ,@sc );
 
@@ -3409,7 +3409,7 @@ begin
       @clr ,
       interpolator ,
       @gr.m_imageFilterLut ,
-      rgba_order );
+      bgra_order );
 
      sc.Construct(@sa ,@blend );
      ri.Construct(renBase ,@sc );
@@ -3426,7 +3426,7 @@ begin
        @img.renBuf ,
        @clr ,
        interpolator ,
-       rgba_order );
+       bgra_order );
 
       sc.Construct(@sb ,@blend );
       ri.Construct(renBase ,@sc );
@@ -3444,7 +3444,7 @@ begin
         @clr ,
         interpolator,
         @gr.m_imageFilterLut ,
-        rgba_order );
+        bgra_order );
 
        sc.Construct(@s2 ,@blend );
        ri.Construct(renBase ,@sc );
@@ -3461,7 +3461,7 @@ begin
         @clr ,
         interpolator ,
         @gr.m_imageFilterLut ,
-        rgba_order );
+        bgra_order );
 
        sc.Construct(@si ,@blend );
        ri.Construct(renBase ,@sc );
