@@ -62,6 +62,8 @@ type
     FBufferManager: IBufferManager;
     FTextQueue: array of TDeferredTextItem;
     FTextQueueCount: Integer;
+    FLastTextQueue: array of TDeferredTextItem;  // Snapshot for expose replay
+    FLastTextQueueCount: Integer;
     FCurrentTextColor: TfpgColor;
     FWindowAttached: Boolean;
     FAttachedWindow: TfpgWindowBase;
@@ -74,6 +76,8 @@ type
     FParentCanvas: THybridCanvas;  // Parent canvas for alien widgets (text queue target)
     procedure EnsureWindowAttached;
     procedure FlushTextQueue;
+    procedure ReplayTextQueue;
+    procedure RenderTextItems(AQueue: array of TDeferredTextItem; ACount: Integer);
     procedure EnqueueText(AX, AY: TfpgCoord; const AText: string);
   protected
     { Text rendering — deferred to ITextRenderer }
@@ -159,6 +163,7 @@ begin
   inherited Create(awidget);
   FAgg.Construct;
   FTextQueueCount := 0;
+  FLastTextQueueCount := 0;
   FCurrentTextColor := 0;
   FWindowAttached := False;
   FAttachedWindow := nil;
@@ -238,7 +243,7 @@ begin
   Inc(target.FTextQueueCount);
 end;
 
-procedure THybridCanvas.FlushTextQueue;
+procedure THybridCanvas.RenderTextItems(AQueue: array of TDeferredTextItem; ACount: Integer);
 var
   i: Integer;
   lastColor: TfpgColor;
@@ -246,7 +251,7 @@ var
   lastClip: TfpgRect;
   lastHasClip: Boolean;
 begin
-  if (FTextQueueCount = 0) or not Assigned(FTextRenderer) then
+  if (ACount = 0) or not Assigned(FTextRenderer) then
     Exit;
 
   EnsureWindowAttached;
@@ -258,9 +263,9 @@ begin
   lastHasClip := False;
   lastClip.SetRect(0, 0, 0, 0);
 
-  for i := 0 to FTextQueueCount - 1 do
+  for i := 0 to ACount - 1 do
   begin
-    with FTextQueue[i] do
+    with AQueue[i] do
     begin
       { Only update renderer state when it changes }
       if Font <> lastFont then
@@ -298,8 +303,31 @@ begin
   { Clear clip state after flushing }
   if lastHasClip then
     FTextRenderer.ClearClipRect;
+end;
+
+procedure THybridCanvas.FlushTextQueue;
+var
+  i: Integer;
+begin
+  if FTextQueueCount = 0 then
+    Exit;
+
+  RenderTextItems(FTextQueue, FTextQueueCount);
+
+  { Snapshot the queue for expose replay }
+  if Length(FLastTextQueue) < FTextQueueCount then
+    SetLength(FLastTextQueue, FTextQueueCount);
+  for i := 0 to FTextQueueCount - 1 do
+    FLastTextQueue[i] := FTextQueue[i];
+  FLastTextQueueCount := FTextQueueCount;
 
   FTextQueueCount := 0;
+end;
+
+procedure THybridCanvas.ReplayTextQueue;
+begin
+  if FLastTextQueueCount > 0 then
+    RenderTextItems(FLastTextQueue, FLastTextQueueCount);
 end;
 
 
@@ -595,8 +623,23 @@ begin
 end;
 
 procedure THybridCanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  fullRect: TfpgRect;
 begin
-  if Assigned(FBufferManager) then
+  if not Assigned(FBufferManager) then
+    Exit;
+  if FLastTextQueueCount > 0 then
+  begin
+    { Text was rendered directly to the window (not into the buffer).
+      To avoid drawing text on top of stale text (which causes darkening
+      due to sub-pixel anti-aliasing accumulation), blit the full window
+      area to reset all pixels, then replay the text queue. }
+    fullRect.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+    FBufferManager.RestoreFromBuffer(fullRect);
+    ReplayTextQueue;
+  end
+  else
+    { No text to replay — just blit the exposed region }
     FBufferManager.RestoreFromBuffer(ARect);
 end;
 
