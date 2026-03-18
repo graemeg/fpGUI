@@ -88,6 +88,9 @@ function CreateX11BufferManager: IBufferManager;
 
 implementation
 
+uses
+  fpg_main;  // for fpgColorToRGB
+
 var
   { X error suppression for stale window handles.
     Popup menus can be destroyed between paint cycles, leaving stale
@@ -122,10 +125,9 @@ procedure TX11TextRenderer.ConvertColor(AColor: TfpgColor);
 var
   c: TfpgColor;
 begin
-  { Convert fpGUI colour to Xft colour format.
-    fpGUI stores colours as $AARRGGBB after fpgColorToRGB.
-    We do the RGB extraction inline to avoid depending on fpg_main. }
-  c := AColor;
+  { Resolve named/system colours (e.g. clText1) to raw RGB first,
+    then convert to Xft colour format ($AARRGGBB). }
+  c := fpgColorToRGB(AColor);
   FXftColor.color.blue  := (c and $000000FF) shl 8;
   FXftColor.color.green := (c and $0000FF00);
   FXftColor.color.red   := (c and $00FF0000) shr 8;
