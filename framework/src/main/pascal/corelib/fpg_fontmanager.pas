@@ -110,15 +110,10 @@ begin
 
     if not Assigned(Result) then
     begin
-      // Cache miss - create new platform-specific font resource
-      {$IFDEF AGGCANVAS}
-      if Assigned(AggFontResourceClass) then
-        Result := AggFontResourceClass.Create(fdesc)
-      else
-        Result := TfpgFontResource.Create(fdesc); // Fallback if not registered
-      {$ELSE}
+      // Cache miss - create new platform-specific font resource.
+      // Always use native font resources — the hybrid canvas uses
+      // native text rendering (Xft/GDI) for performance.
       Result := TfpgFontResource.Create(fdesc);
-      {$ENDIF}
 
       if Result.HandleIsValid then
       begin

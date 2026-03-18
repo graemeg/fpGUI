@@ -557,6 +557,7 @@ uses
 {$ifdef AGGCanvas}
   Agg2D,
 {$endif}
+  fpg_hybrid_canvas,
 {$IFDEF GDEBUG}
   fpg_dbugintf,
 {$ENDIF}
@@ -3255,6 +3256,10 @@ initialization
 {$else}
   DefaultCanvasClass := TfpgCanvas;
 {$endif}
+  { Hybrid canvas is available when platform factories are registered
+    (done in fpg_interface.pas). Override AGGCANVAS selection above. }
+  if Assigned(fpg_hybrid_canvas.CreateBufferManager) then
+    DefaultCanvasClass := THybridCanvas;
   {$IF FPC_FULLVERSION >= 30000}
   // This switches RTL, FCL and String data type to UTF-8. Many of fpg_utils functions will not be needed any more.
   DefaultSystemCodePage := CP_UTF8;
