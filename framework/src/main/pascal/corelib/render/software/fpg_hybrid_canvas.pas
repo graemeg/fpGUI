@@ -551,21 +551,19 @@ end;
 procedure THybridCanvas.DoAfterPaint;
 begin
   { Called after each widget's HandlePaint, before its children paint.
-    Blit this widget's buffer region to the window and render its text
-    immediately, so child widgets will correctly overlap parent content. }
+    Alien widgets blit their region and render text immediately, so child
+    widgets will correctly overlap parent content.
+    Top-level widgets only flush text here (no blit) to avoid flickering —
+    a full parent blit would momentarily erase all children. Children's
+    individual blits update the window progressively. }
   if Assigned(FParentCanvas) then
   begin
-    { Alien widget: blit our region from the parent's buffer }
+    { Alien widget: blit our region from the parent's buffer, then text }
     if Assigned(FParentCanvas.FBufferManager) then
       FParentCanvas.FBufferManager.PutBufferToScreen(
         FWinDeltaX, FWinDeltaY, FWidget.ActualWidth, FWidget.ActualHeight);
-  end
-  else
-  begin
-    { Top-level widget: blit our full area }
-    if Assigned(FBufferManager) then
-      FBufferManager.PutBufferToScreen(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
   end;
+  { Flush text for both SELF and ALIEN widgets }
   FlushTextQueue;
 end;
 
