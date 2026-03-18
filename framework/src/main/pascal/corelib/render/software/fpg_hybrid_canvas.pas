@@ -71,6 +71,7 @@ type
     FBufHeight: Integer;
     FWinDeltaX: TfpgCoord;  // Real window offsets for text rendering (preserved when FDeltaX is zeroed)
     FWinDeltaY: TfpgCoord;
+    FParentCanvas: THybridCanvas;  // Parent canvas for alien widgets (text queue target)
     procedure EnsureWindowAttached;
     procedure FlushTextQueue;
     procedure EnqueueText(AX, AY: TfpgCoord; const AText: string);
@@ -167,6 +168,7 @@ begin
   FBufHeight := 0;
   FWinDeltaX := 0;
   FWinDeltaY := 0;
+  FParentCanvas := nil;
   if Assigned(CreateTextRenderer) then
     FTextRenderer := CreateTextRenderer();
   if Assigned(CreateBufferManager) then
@@ -204,11 +206,20 @@ end;
 
 procedure THybridCanvas.EnqueueText(AX, AY: TfpgCoord; const AText: string);
 var
+  target: THybridCanvas;
   item: ^TDeferredTextItem;
+  cr: TfpgRect;
 begin
-  if FTextQueueCount >= Length(FTextQueue) then
-    SetLength(FTextQueue, FTextQueueCount + 64);
-  item := @FTextQueue[FTextQueueCount];
+  { For alien widgets, push text items to the parent's queue so they
+    are flushed when the parent blits the shared buffer to screen. }
+  if Assigned(FParentCanvas) then
+    target := FParentCanvas
+  else
+    target := Self;
+
+  if target.FTextQueueCount >= Length(target.FTextQueue) then
+    SetLength(target.FTextQueue, target.FTextQueueCount + 64);
+  item := @target.FTextQueue[target.FTextQueueCount];
   item^.X := AX;
   item^.Y := AY;
   item^.Text := AText;
@@ -217,10 +228,14 @@ begin
   { Use real window offsets for text rendering (FDeltaX may be zeroed for alien widgets) }
   item^.DeltaX := FWinDeltaX;
   item^.DeltaY := FWinDeltaY;
-  { Capture current clip state so text is clipped correctly at flush time }
+  { Capture current clip state so text is clipped correctly at flush time.
+    For alien widgets, translate clip rect to window coordinates. }
   item^.HasClipRect := True;
-  item^.ClipRect := DoGetClipRect;
-  Inc(FTextQueueCount);
+  cr := DoGetClipRect;
+  cr.Left := cr.Left + FWinDeltaX;
+  cr.Top := cr.Top + FWinDeltaY;
+  item^.ClipRect := cr;
+  Inc(target.FTextQueueCount);
 end;
 
 procedure THybridCanvas.FlushTextQueue;
@@ -468,6 +483,7 @@ begin
     { Top-level canvas: we draw to our own buffer.
       Buffer is already attached via DoAllocateBuffer. }
     EnsureWindowAttached;
+    FParentCanvas := nil;
     FWinDeltaX := FDeltaX;
     FWinDeltaY := FDeltaY;
   end
@@ -478,6 +494,7 @@ begin
       widget's top-left pixel. This way we do NOT need FDeltaX/FDeltaY offsets
       in draw calls — AggPas draws in widget-local coordinates.
       This mirrors the original TAgg2D.AttachPartialImage approach. }
+    FParentCanvas := THybridCanvas(CanvasTarget);
     if THybridCanvas(CanvasTarget).FBufData <> nil then
     begin
       FBufData := THybridCanvas(CanvasTarget).FBufData;
