@@ -1,0 +1,456 @@
+= Hybrid AggPas + Native Text Rendering
+:author: Graeme Geldenhuys
+:date: 2026-03-17
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Executive Summary
+
+The fpGUI AggPas canvas backend provides superior 2D rendering (anti-aliased lines, alpha blending, sub-pixel accuracy) but suffers significant text rendering performance overhead. Profiling with `valgrind --tool=callgrind` confirmed that the dominant cost is `BLEND_PIX_RGBA` — the per-pixel alpha compositing in FreeType glyph rasterisation.
+
+This document proposes a hybrid canvas architecture: retain AggPas for all 2D drawing operations, but delegate text rendering and font metrics to the native platform backend (Xft on X11, GDI on Windows). This eliminates the proven bottleneck whilst preserving AggPas's visual quality advantages.
+
+== Problem Statement
+
+When the IDE editor is built with `{$DEFINE AGGCANVAS}`, every character drawn passes through:
+
+. `TAgg2D.DoDrawString` → `TAgg2D.Text()`
+. FreeType glyph rasterisation (software)
+. Per-pixel alpha blending via `BLEND_PIX_RGBA` into the AggPas memory buffer
+. `XPutImage` to push the full buffer to screen
+
+For a typical 80×40 editor view (~3,200 characters), this means ~3,200 individual glyph rasterisation + blend operations per paint cycle. The native X11 path uses Xft with hardware-accelerated `XftDrawStringUTF8`, which is orders of magnitude faster for text.
+
+== Current Architecture
+
+=== Canvas Class Hierarchy
+
+[source]
+----
+TfpgCanvasBase (abstract, fpg_base.pas)
+  ├── TfpgX11Canvas (fpg_x11.pas)        — native X11/Xft rendering
+  ├── TfpgGDICanvas (fpg_gdi.pas)         — native Windows GDI rendering
+  └── TAgg2D (Agg2D.pas)                  — AggPas software rendering
+----
+
+Canvas selection occurs at startup via the `DefaultCanvasClass` global variable in `fpg_main.pas`:
+
+[source,pascal]
+----
+{$IFDEF AGGCANVAS}
+  DefaultCanvasClass := TAgg2D;
+{$ELSE}
+  DefaultCanvasClass := TfpgCanvasImpl;  // platform-native
+{$ENDIF}
+----
+
+Each widget calls `CreateCanvas` in its constructor, which instantiates `DefaultCanvasClass`. This is an all-or-nothing choice — every widget in the application uses the same canvas class.
+
+=== Font Resource Hierarchy
+
+[source]
+----
+TfpgFontResourceBase (abstract, fpg_base.pas)
+  ├── TfpgX11FontResource (fpg_x11.pas)     — wraps XftFont
+  ├── TfpgGDIFontResource (fpg_gdi.pas)     — wraps HFONT
+  └── TfpgAgg2DFontResource (Agg2D.pas)     — wraps FreeType face
+----
+
+Font resources implement the `IFontEngine` interface:
+
+[source,pascal]
+----
+IFontEngine = interface
+  function GetTextWidth(const AText: TfpgString): Integer;
+  function GetLineHeight: Integer;
+  function GetAscent: Integer;
+  function GetDescent: Integer;
+end;
+----
+
+The font manager in `fpg_fontmanager.pas` creates the appropriate font resource type based on the `AGGCANVAS` define, using the `AggFontResourceClass` global variable:
+
+[source,pascal]
+----
+{$IFDEF AGGCANVAS}
+  fr := AggFontResourceClass.Create(facename, fsize, fitalic, fweight, ...);
+{$ELSE}
+  fr := TfpgFontResource.Create(facename, fsize, ...);
+{$ENDIF}
+----
+
+=== Text Rendering Path (AggPas)
+
+. `TfpgCanvasBase.DrawString` validates the string and calls `DoDrawString`
+. `TAgg2D.DoDrawString` translates coordinates and calls `TAgg2D.Text(x, y, AText)`
+. `Text()` calls FreeType to rasterise each glyph
+. Each glyph is alpha-blended pixel-by-pixel into the AggPas memory buffer via `BLEND_PIX_RGBA`
+. On `DoPutBufferToScreen`, the entire buffer is pushed to the X11 drawable via `XPutImage`
+
+=== Text Rendering Path (Native X11)
+
+. `TfpgCanvasBase.DrawString` validates the string and calls `DoDrawString`
+. `TfpgX11Canvas.DoDrawString` calls `XftDrawStringUTF8` directly
+. Xft uses server-side or client-side font rendering with hardware acceleration
+. Text appears immediately on the X11 drawable — no buffer copy required
+
+=== Buffer-to-Screen Transfer (AggPas on X11)
+
+The AggPas buffer is transferred to screen in `DoPutBufferToScreen` (`agg_platform_x11.inc`):
+
+[source,pascal]
+----
+procedure TAgg2D.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+begin
+  if FImg <> nil then
+    XPutImage(fpgX11Display, TfpgX11Window(FWindow).WinHandle,
+              TfpgX11Window(FWindow).Gc, FImg, x, y, x, y, w, h);
+end;
+----
+
+This pushes the AggPas RGBA memory buffer as an `XImage` to the X window. The critical observation is that this happens *after* all AggPas drawing (including text) is complete — the buffer is the sole rendering surface.
+
+== Proposed Hybrid Architecture
+
+=== Core Concept
+
+Introduce a new canvas class, `THybridCanvas`, that:
+
+* Inherits from or wraps `TAgg2D` for all 2D drawing operations
+* Delegates text rendering and font metrics to a native canvas helper
+* Manages the compositing order so text rendered natively appears correctly over the AggPas buffer
+
+=== Compositing Strategy
+
+The fundamental challenge is compositing order. AggPas renders into a memory buffer; native text rendering draws directly to a window drawable. Two strategies are possible:
+
+==== Strategy A: AggPas First, Native Text Overlay
+
+. All non-text drawing goes through AggPas into the memory buffer
+. `DoPutBufferToScreen` flushes the buffer to the X11 drawable
+. Text is drawn *after* the buffer flush, directly onto the X11 drawable using Xft
+
+*Advantages*:
+
+- Simple compositing — text always appears on top
+- No modifications to the AggPas rendering pipeline
+- Text benefits from Xft sub-pixel rendering and hinting
+
+*Disadvantages*:
+
+- Text cannot appear behind semi-transparent AggPas elements (unlikely in practice)
+- Requires careful ordering: all non-text drawing must complete before text begins
+- Multiple `XPutImage` calls if text and 2D drawing are interleaved (solvable by batching)
+
+*In Summary*:
+
+*THybridCanvas vs modifying TAgg2D* — You're right, a clean `THybridCanvas` is better. It composes an internal `TAgg2D` for 2D and an `ITextRenderer` for
+text, without platform include files. Much cleaner separation.
+
+*Native canvas and ITextRenderer* — The native canvases (`TfpgX11Canvas`, `TfpgGDICanvas`) don't need `ITextRenderer`. They already do text rendering
+efficiently inline. The interface exists solely so `THybridCanvas` can delegate text to the platform without knowing which platform it's on.
+Eventually, once we're confident the hybrid canvas works well, the native canvases can be deprecated entirely — they'd only remain as the source
+  of ITextRenderer implementations.
+
+So the architecture would be:
+
+```
+  TfpgCanvasBase (abstract)
+    ├── TfpgX11Canvas        — native, stays as-is (eventual deprecation)
+    ├── TfpgGDICanvas        — native, stays as-is (eventual deprecation)
+    ├── TAgg2D               — pure AggPas, stays as-is (becomes internal to hybrid)
+    └── THybridCanvas        — composes TAgg2D + ITextRenderer
+          ├── uses TAgg2D for all 2D drawing
+          └── uses TX11TextRenderer or TGDITextRenderer for text
+```
+
+`THybridCanvas` lives in its own unit (fpg_hybrid_canvas.pas) with no platform include files. The platform-specific `ITextRenderer` implementations
+live alongside their native canvas units (e.g. `TX11TextRenderer` in `fpg_x11.pas` or a small dedicated unit).
+
+==== Strategy B: Render Text into AggPas Buffer via Native Backend
+
+. Create an off-screen X11 pixmap
+. Use Xft to render text onto the pixmap
+. Copy the rendered text pixels back into the AggPas memory buffer
+. Flush the combined buffer via `XPutImage`
+
+*Advantages*:
+
+- Single compositing surface — correct Z-order for all elements
+- Single `XPutImage` call
+
+*Disadvantages*:
+
+- Requires pixmap creation and pixel readback (may negate performance gains)
+- Complex colour space management (Xft renders to RGB, AggPas uses RGBA)
+- Alpha channel information lost in the pixmap roundtrip
+
+==== Recommended: Strategy A
+
+Strategy A is recommended. The IDE editor (and most UI elements) does not require text behind semi-transparent overlays. The rendering sequence naturally separates: paint background and decorations (AggPas), flush buffer, then paint text (native). This matches how `TfpgBaseTextEdit.HandlePaint` already structures its painting: background fill, gutter, line highlights, and selection rectangles first, then text on top.
+
+=== Interface-Based Design
+
+Object Pascal interfaces enable clean separation of concerns. The hybrid approach introduces two key interfaces and restructures the canvas to use composition.
+
+==== ITextRenderer Interface
+
+[source,pascal]
+----
+type
+  ITextRenderer = interface
+    ['{A1B2C3D4-...}']
+    procedure DrawText(AX, AY: TfpgCoord; const AText: TfpgString);
+    procedure SetTextColor(AColor: TfpgColor);
+    procedure SetFont(AFont: TfpgFontResourceBase);
+    procedure BeginTextBatch;
+    procedure EndTextBatch;
+  end;
+----
+
+`BeginTextBatch` / `EndTextBatch` allow the hybrid canvas to flush the AggPas buffer before text drawing begins and synchronise afterwards.
+
+==== I2DRenderer Interface
+
+[source,pascal]
+----
+type
+  I2DRenderer = interface
+    ['{E5F6G7H8-...}']
+    procedure DrawLine(X1, Y1, X2, Y2: TfpgCoord);
+    procedure DrawRectangle(const ARect: TfpgRect);
+    procedure FillRectangle(const ARect: TfpgRect);
+    procedure DrawArc(X, Y, W, H: TfpgCoord; StartAngle, SweepAngle: Double);
+    procedure FillArc(X, Y, W, H: TfpgCoord; StartAngle, SweepAngle: Double);
+    procedure DrawPolygon(const Points: array of TPoint);
+    procedure SetColor(AColor: TfpgColor);
+    procedure SetLineStyle(AWidth: Integer; AStyle: TfpgLineStyle);
+  end;
+----
+
+==== THybridCanvas Class
+
+[source,pascal]
+----
+type
+  THybridCanvas = class(TfpgCanvasBase)
+  private
+    FAgg: TAgg2D;              // owns the AggPas rendering backend
+    FNativeText: ITextRenderer; // platform-native text renderer
+    FBufferFlushed: Boolean;
+  protected
+    procedure DoDrawString(const AX, AY: TfpgCoord;
+      const AText: string); override;
+    procedure DoSetFontRes(AFont: TfpgFontResourceBase); override;
+    procedure DoSetTextColor(AColor: TfpgColor); override;
+    procedure DoBeginDraw; override;
+    procedure DoEndDraw; override;
+    // All 2D methods delegate to FAgg
+    procedure DoDrawLine(...); override;
+    procedure DoFillRectangle(...); override;
+    // etc.
+  public
+    constructor Create(AWindow: TfpgWindowBase); override;
+    destructor Destroy; override;
+  end;
+----
+
+The key behavioural change is in `DoDrawString`:
+
+[source,pascal]
+----
+procedure THybridCanvas.DoDrawString(const AX, AY: TfpgCoord;
+  const AText: string);
+begin
+  if not FBufferFlushed then
+  begin
+    FAgg.DoPutBufferToScreen(0, 0, FAgg.Width, FAgg.Height);
+    FBufferFlushed := True;
+  end;
+  FNativeText.DrawText(AX, AY, AText);
+end;
+----
+
+==== Platform-Specific ITextRenderer Implementations
+
+[source,pascal]
+----
+type
+  TX11TextRenderer = class(TInterfacedObject, ITextRenderer)
+  private
+    FDisplay: PXDisplay;
+    FDrawable: TfpgWinHandle;
+    FGC: TfpgGContext;
+    FXftDraw: PXftDraw;
+    FXftColor: TXftColor;
+    FXftFont: PXftFont;
+  public
+    procedure DrawText(AX, AY: TfpgCoord; const AText: TfpgString);
+    procedure SetTextColor(AColor: TfpgColor);
+    procedure SetFont(AFont: TfpgFontResourceBase);
+    procedure BeginTextBatch;
+    procedure EndTextBatch;
+  end;
+----
+
+The Windows equivalent would wrap `ExtTextOut` / `SelectObject` with the existing `TfpgGDIFontResource` handle.
+
+=== Font Metrics Delegation
+
+Font metrics (`GetTextWidth`, `GetLineHeight`, `GetAscent`, `GetDescent`) must also come from the native backend for consistency — if native Xft renders the text, its metrics must be used for layout calculations. Otherwise, glyph widths may differ between FreeType and Xft, causing misaligned text.
+
+This is already handled by the `IFontEngine` interface on `TfpgFontResourceBase`. The hybrid canvas should use native font resources (`TfpgX11FontResource` / `TfpgGDIFontResource`) rather than AggPas font resources. The font manager conditional needs updating:
+
+[source,pascal]
+----
+{$IFDEF HYBRIDCANVAS}
+  // Use native font resources for metrics consistency
+  fr := TfpgFontResource.Create(facename, fsize, ...);
+{$ELSEIF DEFINED(AGGCANVAS)}
+  fr := AggFontResourceClass.Create(facename, fsize, ...);
+{$ELSE}
+  fr := TfpgFontResource.Create(facename, fsize, ...);
+{$ENDIF}
+----
+
+== Implementation Plan
+
+=== Phase 1: ITextRenderer Extraction
+
+. Define `ITextRenderer` interface in `fpg_base.pas`
+. Implement `TX11TextRenderer` in `fpg_x11.pas` by extracting the existing `DoDrawString`, `DoSetFontRes`, and `DoSetTextColor` logic from `TfpgX11Canvas`
+. Implement `TGDITextRenderer` in `fpg_gdi.pas` similarly
+. Unit tests for the interface contract
+
+=== Phase 2: THybridCanvas Implementation
+
+. Create `fpg_hybrid_canvas.pas` with `THybridCanvas`
+. Composition: embed `TAgg2D` for 2D operations, `ITextRenderer` for text
+. Implement `DoBeginDraw` / `DoEndDraw` to coordinate both backends
+. Handle buffer flush timing: flush AggPas buffer before first `DrawText` call in each paint cycle
+. Add `{$DEFINE HYBRIDCANVAS}` option in build configuration
+
+=== Phase 3: Font Manager Integration
+
+. Update `fpg_fontmanager.pas` to create native font resources when `HYBRIDCANVAS` is defined
+. Verify metric consistency between the native font resource and actual rendered output
+. Test with various font descriptors and sizes
+
+=== Phase 4: Buffer Management Refinement
+
+. Profile the hybrid approach to confirm performance improvement
+. Optimise buffer flush frequency — explore dirty-rectangle tracking to minimise `XPutImage` area
+. Handle edge cases: overlapping text and 2D elements, clipping regions
+
+=== Phase 5: Platform Testing
+
+. Test on X11 (primary target)
+. Test on Windows GDI
+. Verify visual parity with pure AggPas rendering for non-text elements
+
+== Risk Assessment
+
+=== Low Risk
+
+* **2D rendering quality**: No change — AggPas continues to handle all non-text drawing
+* **API compatibility**: `TfpgCanvasBase` abstract interface is unchanged — widgets call the same methods
+* **Font descriptor handling**: No changes to font descriptor format or caching
+
+=== Medium Risk
+
+* **Compositing artifacts**: If a widget draws text and then draws 2D elements on top of that text, the hybrid approach may produce incorrect Z-order. Mitigation: audit all widget paint methods for this pattern (believed to be rare)
+* **Clipping region synchronisation**: The AggPas clip region and the native X11/GDI clip region must be kept in sync. Mitigation: propagate clip changes to both backends
+
+=== High Risk
+
+* **Font metric divergence**: FreeType and Xft may produce slightly different metrics for the same font at the same size, due to hinting differences. This could cause layout shifts when switching from pure AggPas to hybrid. Mitigation: use native metrics exclusively in hybrid mode (Phase 3)
+
+== Performance Expectations
+
+Based on the profiling data, text rendering accounts for the majority of `BLEND_PIX_RGBA` calls in the editor paint path. Eliminating software glyph rasterisation and per-pixel blending for ~3,200 characters per paint cycle should yield a substantial performance improvement.
+
+Expected gains:
+
+* **Editor scrolling**: Significant improvement — text is the dominant cost
+* **Syntax highlighting**: Significant improvement — each differently-coloured token segment is a separate `DrawString` call
+* **Widget rendering**: Moderate improvement — most widgets have limited text content
+* **2D drawing**: No change — still uses AggPas
+
+The native X11 text path (`XftDrawStringUTF8`) operates at hardware-accelerated speed, so the text rendering cost effectively drops to near zero compared to the AggPas software path.
+
+== Alternative Approaches Considered
+
+=== Full Native Canvas (No AggPas)
+
+Abandon AggPas entirely and use only native rendering. This loses anti-aliased line drawing, alpha blending, and sub-pixel accuracy for 2D elements. Not recommended — these features are valuable for modern UI appearance.
+
+=== AggPas with Glyph Caching
+
+Cache rasterised glyphs in the AggPas pipeline to avoid re-rasterising the same character. FreeType already does internal caching, and AggPas's `font_cache_manager` is in use. The bottleneck is not rasterisation alone but the per-pixel alpha blending of each glyph onto the buffer. Caching does not eliminate this cost.
+
+=== Threaded Text Rendering
+
+Render text in a background thread using AggPas, then composite. This adds complexity (thread safety for the shared buffer) without eliminating the fundamental `BLEND_PIX_RGBA` cost. Not recommended.
+
+=== Per-Widget Canvas Selection
+
+Allow individual widgets to choose between AggPas and native canvas. This preserves the existing class hierarchy but requires each widget to declare its preference. Complex to maintain and does not solve the interleaving problem within a single widget's paint method. The hybrid canvas approach is cleaner.
+
+== Future Direction: Cached Bitmap Glyph Rendering
+
+=== Problem with Deferred Text Overlay
+
+The current hybrid canvas (Strategy A) defers all text rendering until after the AggPas buffer is blitted to screen. This produces incorrect z-ordering when parent widget text should be occluded by child widgets painted on top. For example, a panel's title text rendered via Xft appears above buttons that visually overlap it, because all text draws happen after all 2D draws.
+
+An interim solution (per-widget buffer flush) addresses this by blitting and rendering text for each widget before its children paint. However, the long-term correct solution is to render text directly into the AggPas buffer — eliminating the two-surface compositing problem entirely.
+
+=== Haiku OS Reference Implementation
+
+The Haiku operating system uses AGG as its primary rendering engine and has solved the text performance problem effectively. Their approach is documented at:
+
+https://www.haiku-os.org/documents/dev/painter_and_how_agg_works/
+
+Key techniques from Haiku's implementation:
+
+* **Bypass the AGG vector pipeline for text** — Horizontal text rendering is handled as a special case that does not pass through AGG's rasterisation and transformation pipeline.
+
+* **FreeType bitmap glyph caching** — Each glyph is rasterised once by FreeType (with hinting for pixel-perfect results) into a small bitmap. The rendered result is cached at the scanline level. Subsequent draws of the same glyph at the same size copy the cached bitmap directly into the buffer.
+
+* **Scanline-level cache** — Because font hinting snaps glyphs to the pixel grid, the rendered output is deterministic for a given glyph + size + hinting configuration. This means the cache hit rate is very high in practice.
+
+* **Specialised fast paths** — Simple operations (horizontal/vertical lines, rectangle fills) bypass the full AGG vector pipeline entirely.
+
+=== Proposed Approach for fpGUI
+
+The performance bottleneck identified in the profiling (`BLEND_PIX_RGBA` per-pixel alpha compositing) was caused by running every glyph through AGG's full vector rasterisation pipeline. Haiku demonstrates that this is unnecessary — the solution is to render glyphs as pre-rasterised bitmaps rather than vector outlines.
+
+A cached bitmap glyph renderer for fpGUI would:
+
+. Use FreeType to rasterise each unique glyph (character + font size + style) into an alpha-coverage bitmap — **once**
+. Store these bitmaps in a glyph cache (keyed by glyph index + size + hinting mode)
+. When drawing text, look up each glyph in the cache and copy the pre-rendered bitmap directly into the AggPas buffer using a simple alpha blend loop
+. The alpha blend for a cached glyph bitmap is a tight inner loop over a small rectangle (typically 8-16 pixels wide, 12-20 pixels tall) — far cheaper than the full AGG scanline pipeline
+
+This approach achieves:
+
+* **Correct z-ordering** — text is rendered into the same buffer as 2D content, so widget paint order naturally handles occlusion
+* **High performance** — no vector rasterisation per draw call; glyph bitmaps are memcpy-like operations
+* **Visual quality** — FreeType hinting and sub-pixel rendering produce high-quality glyphs, comparable to Xft
+* **Single buffer** — no deferred text queue, no expose replay complexity, no two-surface compositing issues
+* **Platform independence** — the glyph cache is pure software, works identically on X11, GDI, and Cocoa
+
+=== Implementation Considerations
+
+* FreeType is already linked via AggPas (`AGG2D_USE_FREETYPE`). The font loading infrastructure exists.
+* The glyph cache should use the same font files that the platform would use (resolved via fontconfig on Linux, system font directories on Windows).
+* Cache invalidation occurs on font size or DPI changes — both are infrequent.
+* Memory usage is modest: a typical 12pt Latin font cache is approximately 100-200 KB (96 printable ASCII glyphs × ~200 bytes per glyph bitmap average, plus Unicode glyphs loaded on demand).
+* The existing `ITextRenderer` interface can remain as a fallback or for platforms where FreeType is unavailable.
+
+
+== Conclusion
+
+The hybrid canvas approach addresses the proven AggPas text rendering bottleneck with minimal disruption to the existing architecture. The `ITextRenderer` interface provides clean separation of concerns and enables future extensibility (e.g., DirectWrite on Windows, Cairo on Wayland). Strategy A (AggPas first, native text overlay) is recommended for its simplicity and alignment with existing widget paint patterns.
+
+The implementation can proceed incrementally: Phase 1 extracts the interface without changing any runtime behaviour, providing a safe foundation for the subsequent phases.

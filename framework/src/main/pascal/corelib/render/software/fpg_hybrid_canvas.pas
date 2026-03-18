@@ -105,6 +105,7 @@ type
     procedure DoClearClipRect; override;
     { Lifecycle — coordinate FAgg, IBufferManager, and ITextRenderer }
     procedure DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
+    procedure DoAfterPaint; override;
     procedure DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure DoEndDraw; override;
     function  GetBufferAllocated: Boolean; override;
@@ -211,20 +212,12 @@ end;
 
 procedure THybridCanvas.EnqueueText(AX, AY: TfpgCoord; const AText: string);
 var
-  target: THybridCanvas;
   item: ^TDeferredTextItem;
   cr: TfpgRect;
 begin
-  { For alien widgets, push text items to the parent's queue so they
-    are flushed when the parent blits the shared buffer to screen. }
-  if Assigned(FParentCanvas) then
-    target := FParentCanvas
-  else
-    target := Self;
-
-  if target.FTextQueueCount >= Length(target.FTextQueue) then
-    SetLength(target.FTextQueue, target.FTextQueueCount + 64);
-  item := @target.FTextQueue[target.FTextQueueCount];
+  if FTextQueueCount >= Length(FTextQueue) then
+    SetLength(FTextQueue, FTextQueueCount + 64);
+  item := @FTextQueue[FTextQueueCount];
   item^.X := AX;
   item^.Y := AY;
   item^.Text := AText;
@@ -233,14 +226,13 @@ begin
   { Use real window offsets for text rendering (FDeltaX may be zeroed for alien widgets) }
   item^.DeltaX := FWinDeltaX;
   item^.DeltaY := FWinDeltaY;
-  { Capture current clip state so text is clipped correctly at flush time.
-    For alien widgets, translate clip rect to window coordinates. }
+  { Translate clip rect to window coordinates for text rendering }
   item^.HasClipRect := True;
   cr := DoGetClipRect;
   cr.Left := cr.Left + FWinDeltaX;
   cr.Top := cr.Top + FWinDeltaY;
   item^.ClipRect := cr;
-  Inc(target.FTextQueueCount);
+  Inc(FTextQueueCount);
 end;
 
 procedure THybridCanvas.RenderTextItems(AQueue: array of TDeferredTextItem; ACount: Integer);
@@ -307,19 +299,29 @@ end;
 
 procedure THybridCanvas.FlushTextQueue;
 var
-  i: Integer;
+  i, base: Integer;
+  target: THybridCanvas;
 begin
   if FTextQueueCount = 0 then
     Exit;
 
   RenderTextItems(FTextQueue, FTextQueueCount);
 
-  { Snapshot the queue for expose replay }
-  if Length(FLastTextQueue) < FTextQueueCount then
-    SetLength(FLastTextQueue, FTextQueueCount);
+  { Append to the top-level parent's snapshot for final blit replay.
+    The parent's DoPutBufferToScreen blits the full buffer (overwriting
+    all per-widget text), then replays this complete snapshot so all
+    text reappears in the correct z-order. }
+  if Assigned(FParentCanvas) then
+    target := FParentCanvas
+  else
+    target := Self;
+
+  base := target.FLastTextQueueCount;
+  if Length(target.FLastTextQueue) < base + FTextQueueCount then
+    SetLength(target.FLastTextQueue, base + FTextQueueCount + 64);
   for i := 0 to FTextQueueCount - 1 do
-    FLastTextQueue[i] := FTextQueue[i];
-  FLastTextQueueCount := FTextQueueCount;
+    target.FLastTextQueue[base + i] := FTextQueue[i];
+  target.FLastTextQueueCount := base + FTextQueueCount;
 
   FTextQueueCount := 0;
 end;
@@ -514,6 +516,7 @@ begin
     FParentCanvas := nil;
     FWinDeltaX := FDeltaX;
     FWinDeltaY := FDeltaY;
+    FLastTextQueueCount := 0;  // Reset snapshot for this paint cycle
   end
   else if CanvasTarget is THybridCanvas then
   begin
@@ -545,15 +548,33 @@ begin
   end;
 end;
 
+procedure THybridCanvas.DoAfterPaint;
+begin
+  { Called after each widget's HandlePaint, before its children paint.
+    Blit this widget's buffer region to the window and render its text
+    immediately, so child widgets will correctly overlap parent content. }
+  if Assigned(FParentCanvas) then
+  begin
+    { Alien widget: blit our region from the parent's buffer }
+    if Assigned(FParentCanvas.FBufferManager) then
+      FParentCanvas.FBufferManager.PutBufferToScreen(
+        FWinDeltaX, FWinDeltaY, FWidget.ActualWidth, FWidget.ActualHeight);
+  end
+  else
+  begin
+    { Top-level widget: blit our full area }
+    if Assigned(FBufferManager) then
+      FBufferManager.PutBufferToScreen(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+  end;
+  FlushTextQueue;
+end;
+
 procedure THybridCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
-  // WriteLn('PutBuffer x=', x, ' y=', y, ' w=', w, ' h=', h,
-  //   ' buf=', HexStr(PtrUInt(FBufData), 16), ' textQ=', FTextQueueCount);
-  { First: flush the AggPas 2D buffer to the window }
-  if Assigned(FBufferManager) then
-    FBufferManager.PutBufferToScreen(x, y, w, h);
-  { Second: draw all deferred text on top via the native text renderer }
-  FlushTextQueue;
+  { Each widget already blitted its region and drew its text in DoAfterPaint
+    with correct z-ordering (parent text under children). A full blit here
+    would overwrite that text, so we skip it. The buffer and text snapshot
+    remain valid for expose-event replay via DoRestoreFromBuffer. }
 end;
 
 procedure THybridCanvas.DoEndDraw;
