@@ -1589,10 +1589,6 @@ begin
     if Assigned(FOnPaint) then
       FOnPaint(Self);
 
-    { Allow canvas to flush per-widget state (e.g. text rendering)
-      before children paint over this widget's area in the buffer. }
-    Canvas.AfterPaint;
-
     { Set the invalidated flag before processing child widgets to prevent
       infinite paint loops. If a child widget triggers parent invalidation
       during painting, this flag prevents posting duplicate paint messages

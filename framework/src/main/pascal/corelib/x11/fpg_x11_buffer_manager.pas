@@ -7,12 +7,12 @@
     for details about redistributing fpGUI.
 
     Description:
-      X11 platform implementations for the hybrid canvas architecture:
-      - TX11TextRenderer: Xft-based text rendering
-      - TX11BufferManager: XImage-based pixel buffer management
+      X11 platform implementation of IBufferManager for the hybrid canvas.
+      Manages an XImage pixel buffer and blits it to an X11 window via
+      XPutImage.
 }
 
-unit fpg_x11_text_renderer;
+unit fpg_x11_buffer_manager;
 
 {$mode objfpc}{$H+}
 
@@ -24,34 +24,9 @@ uses
   XUtil,
   fpg_impl,
   fpg_base,
-  fpg_xft_x11,
   fpg_x11;
 
 type
-
-  { TX11TextRenderer - Renders text via Xft onto an X11 window drawable }
-
-  TX11TextRenderer = class(TInterfacedObject, ITextRenderer)
-  private
-    FDisplay: PXDisplay;
-    FXftDraw: PXftDraw;
-    FWinHandle: TfpgWinHandle;
-    FXftColor: TXftColor;
-    FCurFont: PXftFont;
-    procedure ConvertColor(AColor: TfpgColor);
-  public
-    constructor Create;
-    destructor Destroy; override;
-    { ITextRenderer }
-    procedure AttachWindow(AWindow: TfpgWindowBase);
-    procedure DetachWindow;
-    procedure SetFont(AFont: TfpgFontResourceBase);
-    procedure SetTextColor(AColor: TfpgColor);
-    procedure DrawText(AX, AY: TfpgCoord; const AText: string);
-    procedure SetClipRect(const ARect: TfpgRect);
-    procedure ClearClipRect;
-  end;
-
 
   { TX11BufferManager - Manages an XImage pixel buffer and blits it
     to an X11 window via XPutImage }
@@ -82,7 +57,6 @@ type
   end;
 
 
-function CreateX11TextRenderer: ITextRenderer;
 function CreateX11BufferManager: IBufferManager;
 
 
@@ -94,9 +68,9 @@ uses
 var
   { X error suppression for stale window handles.
     Popup menus can be destroyed between paint cycles, leaving stale
-    handles in the text renderer and buffer manager. Rather than let
-    the default X error handler call exit(), we temporarily suppress
-    errors around X calls on potentially-stale drawables. }
+    handles in the buffer manager. Rather than let the default X error
+    handler call exit(), we temporarily suppress errors around X calls
+    on potentially-stale drawables. }
   XErrorOccurred: Boolean = False;
   PreviousErrorHandler: TXErrorHandler = nil;
 
@@ -116,136 +90,6 @@ procedure EndSuppressXErrors;
 begin
   XSetErrorHandler(PreviousErrorHandler);
   PreviousErrorHandler := nil;
-end;
-
-
-{ TX11TextRenderer }
-
-procedure TX11TextRenderer.ConvertColor(AColor: TfpgColor);
-var
-  c: TfpgColor;
-begin
-  { Resolve named/system colours (e.g. clText1) to raw RGB first,
-    then convert to Xft colour format ($AARRGGBB). }
-  c := fpgColorToRGB(AColor);
-  FXftColor.color.blue  := (c and $000000FF) shl 8;
-  FXftColor.color.green := (c and $0000FF00);
-  FXftColor.color.red   := (c and $00FF0000) shr 8;
-  FXftColor.color.alpha := (c and $FF000000) shr 16;
-  if FXftColor.color.alpha = 0 then
-    FXftColor.color.alpha := FXftColor.color.alpha xor $FFFF;  // 0 means fully opaque
-  FXftColor.pixel := 0;
-end;
-
-constructor TX11TextRenderer.Create;
-begin
-  inherited Create;
-  FDisplay := nil;
-  FXftDraw := nil;
-  FWinHandle := 0;
-  FCurFont := nil;
-end;
-
-destructor TX11TextRenderer.Destroy;
-begin
-  DetachWindow;
-  inherited Destroy;
-end;
-
-procedure TX11TextRenderer.AttachWindow(AWindow: TfpgWindowBase);
-var
-  win: TfpgX11Window;
-begin
-  win := TfpgX11Window(AWindow);
-  if win.WinHandle = FWinHandle then
-    Exit;  // already attached to this window
-
-  DetachWindow;
-
-  FWinHandle := win.WinHandle;
-  if FWinHandle <= 0 then
-    Exit;
-
-  { Get the display via public accessor functions }
-  FDisplay := fpgX11Display;
-
-  FXftDraw := XftDrawCreate(
-    FDisplay,
-    FWinHandle,
-    XDefaultVisual(FDisplay, fpgX11Screen),
-    XDefaultColormap(FDisplay, fpgX11Screen));
-end;
-
-procedure TX11TextRenderer.DetachWindow;
-begin
-  if Assigned(FXftDraw) then
-  begin
-    { The underlying window may have been destroyed already (e.g. popup menus).
-      XftDrawDestroy internally calls XRenderFreePicture which will generate
-      a RenderBadPicture error on a stale drawable. Suppress it. }
-    BeginSuppressXErrors;
-    try
-      XftDrawDestroy(FXftDraw);
-      if FDisplay <> nil then
-        XSync(FDisplay, 0);
-    finally
-      EndSuppressXErrors;
-    end;
-    FXftDraw := nil;
-  end;
-  FWinHandle := 0;
-end;
-
-procedure TX11TextRenderer.SetFont(AFont: TfpgFontResourceBase);
-begin
-  if AFont is TfpgX11FontResource then
-    FCurFont := TfpgX11FontResource(AFont).Handle
-  else
-    FCurFont := nil;
-end;
-
-procedure TX11TextRenderer.SetTextColor(AColor: TfpgColor);
-begin
-  ConvertColor(AColor);
-end;
-
-procedure TX11TextRenderer.DrawText(AX, AY: TfpgCoord; const AText: string);
-begin
-  if (Length(AText) < 1) or (FCurFont = nil) or (FXftDraw = nil) then
-    Exit;
-  XftDrawStringUTF8(FXftDraw, FXftColor, FCurFont,
-    AX, AY + FCurFont^.ascent,
-    PChar(AText), Length(AText));
-end;
-
-procedure TX11TextRenderer.SetClipRect(const ARect: TfpgRect);
-var
-  rgn: TRegion;
-  xr: TXRectangle;
-begin
-  if FXftDraw = nil then
-    Exit;
-  xr.x := ARect.Left;
-  xr.y := ARect.Top;
-  xr.width := ARect.Width;
-  xr.height := ARect.Height;
-  rgn := XCreateRegion;
-  XUnionRectWithRegion(@xr, rgn, rgn);
-  XftDrawSetClip(FXftDraw, rgn);
-  XDestroyRegion(rgn);
-end;
-
-procedure TX11TextRenderer.ClearClipRect;
-begin
-  if FXftDraw = nil then
-    Exit;
-  XftDrawSetClip(FXftDraw, nil);
-end;
-
-
-function CreateX11TextRenderer: ITextRenderer;
-begin
-  Result := TX11TextRenderer.Create;
 end;
 
 

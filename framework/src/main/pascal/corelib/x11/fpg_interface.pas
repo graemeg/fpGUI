@@ -23,7 +23,7 @@ interface
 
 uses
   fpg_x11,
-  fpg_x11_text_renderer;  { provides TX11BufferManager }
+  fpg_x11_buffer_manager;
 
 type
   TfpgFontResourceImpl  = class(TfpgX11FontResource);

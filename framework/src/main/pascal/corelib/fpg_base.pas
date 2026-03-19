@@ -337,20 +337,6 @@ type
   end;
 
 
-  { Text rendering abstraction for hybrid canvas architecture.
-    Platform-specific implementations (X11/Xft, GDI) provide hardware-
-    accelerated text rendering whilst AggPas handles 2D drawing. }
-  ITextRenderer = interface
-    ['{F4A2B8C1-3D7E-4F9A-B5C6-8E1D2F3A4B5C}']
-    procedure AttachWindow(AWindow: TfpgWindowBase);
-    procedure DetachWindow;
-    procedure SetFont(AFont: TfpgFontResourceBase);
-    procedure SetTextColor(AColor: TfpgColor);
-    procedure DrawText(AX, AY: TfpgCoord; const AText: string);
-    procedure SetClipRect(const ARect: TfpgRect);
-    procedure ClearClipRect;
-  end;
-
   { Buffer management abstraction for hybrid canvas architecture.
     Handles platform-specific pixel buffer allocation, screen flushing
     (XPutImage on X11, BitBlt on Windows), and cleanup. }
@@ -468,10 +454,6 @@ type
     procedure   DoClearClipRect; virtual; abstract;
     procedure   DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
-    { Called after a widget's HandlePaint, before its children paint.
-      Allows canvas implementations to flush per-widget state (e.g. text)
-      so that child widgets correctly overlap parent content. }
-    procedure   DoAfterPaint; virtual;
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
@@ -487,7 +469,6 @@ type
   public
     constructor Create(awidget: TfpgWidgetBase); virtual;
     destructor  Destroy; override;
-    procedure   AfterPaint;
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
@@ -3341,16 +3322,6 @@ begin
   itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
   {$ENDIF}
   EndDraw(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
-end;
-
-procedure TfpgCanvasBase.AfterPaint;
-begin
-  DoAfterPaint;
-end;
-
-procedure TfpgCanvasBase.DoAfterPaint;
-begin
-  { Default no-op. THybridCanvas overrides to flush per-widget text. }
 end;
 
 procedure TfpgCanvasBase.DoRestoreFromBuffer(const ARect: TfpgRect);

@@ -270,8 +270,28 @@ begin
 end;
 
 procedure THybridCanvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+var
+  aggImg: agg_2D.Image;
+  stride: Integer;
+  buffer: Pointer;
 begin
-  { TODO: implement image rendering via AggPas TransformImage }
+  if not (img is TfpgImage) then
+    Exit;
+  if TfpgImage(img).ColorDepth <> 32 then
+    Exit;
+
+  stride := Integer(TfpgImage(img).ScanLine[1]) - Integer(TfpgImage(img).ScanLine[0]);
+  if stride < 0 then
+    buffer := TfpgImage(img).ScanLine[TfpgImage(img).Height - 1]
+  else
+    buffer := TfpgImage(img).ScanLine[0];
+
+  aggImg.Construct(int8u_ptr(buffer), TfpgImage(img).Width, TfpgImage(img).Height, stride);
+  FAgg.transformImage(
+    @aggImg,
+    xi, yi, xi + w, yi + h,
+    x + FDeltaX, y + FDeltaY, x + FDeltaX + w, y + FDeltaY + h);
+  aggImg.Destruct;
 end;
 
 procedure THybridCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
@@ -299,25 +319,79 @@ begin
 end;
 
 procedure THybridCanvas.DoDrawPolygon(const Points: array of TPoint);
+var
+  i, j: Integer;
+  poly: array of double;
 begin
-  { TODO: implement polygon rendering }
+  if Length(Points) < 2 then
+    Exit;
+  SetLength(poly, (Length(Points) * 2) + 1);
+  j := 1;
+  for i := Low(Points) to High(Points) do
+  begin
+    poly[j * 2 - 1] := Points[i].X + FDeltaX + 0.5;
+    poly[j * 2] := Points[i].Y + FDeltaY + 0.5;
+    Inc(j);
+  end;
+  FAgg.lineWidth(1);
+  FAgg.noFill;
+  FAgg.polygon(@poly[1], Length(Points));
 end;
 
 function THybridCanvas.GetPixel(X, Y: integer): TfpgColor;
+var
+  px: PByte;
+  drawX, drawY: Integer;
 begin
-  { TODO: read from buffer }
   Result := 0;
+  drawX := X + FDeltaX;
+  drawY := Y + FDeltaY;
+  if (FBufData = nil) or (drawX < 0) or (drawY < 0) or
+     (drawX >= FBufWidth) or (drawY >= FBufHeight) then
+    Exit;
+  px := PByte(FBufData) + drawY * FBufStride + drawX * 4;
+  { BGRA to TfpgColor ($AARRGGBB) }
+  Result := (TfpgColor(px[2]) shl 16) or (TfpgColor(px[1]) shl 8) or TfpgColor(px[0]);
 end;
 
 procedure THybridCanvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
+var
+  px: PByte;
+  rgb: TfpgColor;
+  drawX, drawY: Integer;
 begin
-  { TODO: write to buffer }
+  drawX := X + FDeltaX;
+  drawY := Y + FDeltaY;
+  if (FBufData = nil) or (drawX < 0) or (drawY < 0) or
+     (drawX >= FBufWidth) or (drawY >= FBufHeight) then
+    Exit;
+  rgb := fpgColorToRGB(AValue);
+  px := PByte(FBufData) + drawY * FBufStride + drawX * 4;
+  { TfpgColor ($AARRGGBB) to BGRA }
+  px[0] := rgb and $FF;           { B }
+  px[1] := (rgb shr 8) and $FF;   { G }
+  px[2] := (rgb shr 16) and $FF;  { R }
+  px[3] := 255;                   { A = fully opaque }
 end;
 
 procedure THybridCanvas.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection);
+var
+  c1, c2: agg_2D.Color;
 begin
-  { TODO: implement via AggPas gradient }
-  inherited GradientFill(ARect, AStart, AStop, ADirection);
+  c1 := fpgColorToAgg(AStart);
+  c2 := fpgColorToAgg(AStop);
+  if ADirection = gdVertical then
+    FAgg.fillLinearGradient(
+      ARect.Left + FDeltaX, ARect.Top + FDeltaY,
+      ARect.Left + FDeltaX, ARect.Bottom + FDeltaY, c1, c2)
+  else
+    FAgg.fillLinearGradient(
+      ARect.Left + FDeltaX, ARect.Top + FDeltaY,
+      ARect.Right + FDeltaX, ARect.Top + FDeltaY, c1, c2);
+  FAgg.noLine;
+  FAgg.rectangle(
+    ARect.Left + FDeltaX, ARect.Top + FDeltaY,
+    ARect.Right + FDeltaX, ARect.Bottom + FDeltaY, True);
 end;
 
 
