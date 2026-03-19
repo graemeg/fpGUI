@@ -225,8 +225,15 @@ const
     styDashDot,     // lsDashDot
     styDashDotDot   // lsDashDotDot
   );
+var
+  w: integer;
 begin
-  FAgg.SetLineStyle(awidth, StyleMap[astyle]);
+  { X11 treats lineWidth=0 as "1px hardware-accelerated line".
+    AggPas treats 0 as "don't stroke at all", so clamp to 1. }
+  w := awidth;
+  if w < 1 then
+    w := 1;
+  FAgg.SetLineStyle(w, StyleMap[astyle]);
 end;
 
 procedure THybridCanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
