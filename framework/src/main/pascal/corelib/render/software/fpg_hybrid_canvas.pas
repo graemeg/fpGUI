@@ -8,14 +8,16 @@
 
     Description:
       Hybrid canvas that uses AggPas for all 2D rendering (anti-aliased
-      lines, alpha blending, gradients) and delegates text rendering to
-      the native platform backend (Xft on X11, GDI on Windows) via
-      ITextRenderer. Buffer management (allocation, screen flushing)
-      is handled via IBufferManager.
+      lines, alpha blending, gradients) and renders text directly into
+      the AggPas buffer via cached FreeType bitmap glyphs (TGlyphCache).
+      Buffer management (allocation, screen flushing) is handled via
+      IBufferManager.
 
-      Text draw calls are deferred into a queue and replayed after the
-      AggPas buffer is flushed to screen, ensuring correct Z-order
-      (2D elements underneath, text on top).
+      Text is rendered into the same pixel buffer as 2D content, giving
+      correct z-ordering automatically. No deferred text queues, no
+      two-surface compositing, no flickering.
+
+      No platform-specific code, no include files.
 }
 
 unit fpg_hybrid_canvas;
@@ -28,42 +30,26 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  agg_2D;
+  agg_2D,
+  fpg_glyph_cache;
 
 type
 
-  { Deferred text draw item — captures all state needed to replay a
-    DrawString call after the AggPas buffer has been flushed. }
-  TDeferredTextItem = record
-    X, Y: TfpgCoord;
-    Text: string;
-    Color: TfpgColor;
-    Font: TfpgFontResourceBase;
-    DeltaX, DeltaY: TfpgCoord;
-    ClipRect: TfpgRect;
-    HasClipRect: Boolean;
-  end;
-
-
   { THybridCanvas — composes a clean Agg2D object for 2D rendering
-    with ITextRenderer for native text and IBufferManager for
-    platform-specific pixel buffer operations.
+    with TGlyphCache for cached FreeType bitmap glyph text rendering
+    and IBufferManager for platform-specific pixel buffer operations.
 
     Inherits from TfpgCanvasBase to satisfy the fpGUI canvas contract.
     All 2D operations are forwarded to the internal Agg2D object.
-    Text operations are deferred and replayed after buffer flush.
+    Text is rendered directly into the buffer via glyph cache.
 
     No platform-specific code, no include files. }
 
   THybridCanvas = class(TfpgCanvasBase)
   private
     FAgg: agg_2D.Agg2D;
-    FTextRenderer: ITextRenderer;
+    FGlyphCache: TGlyphCache;
     FBufferManager: IBufferManager;
-    FTextQueue: array of TDeferredTextItem;
-    FTextQueueCount: Integer;
-    FLastTextQueue: array of TDeferredTextItem;  // Snapshot for expose replay
-    FLastTextQueueCount: Integer;
     FCurrentTextColor: TfpgColor;
     FWindowAttached: Boolean;
     FAttachedWindow: TfpgWindowBase;
@@ -71,16 +57,9 @@ type
     FBufStride: Integer;
     FBufWidth: Integer;
     FBufHeight: Integer;
-    FWinDeltaX: TfpgCoord;  // Real window offsets for text rendering (preserved when FDeltaX is zeroed)
-    FWinDeltaY: TfpgCoord;
-    FParentCanvas: THybridCanvas;  // Parent canvas for alien widgets (text queue target)
     procedure EnsureWindowAttached;
-    procedure FlushTextQueue;
-    procedure ReplayTextQueue;
-    procedure RenderTextItems(AQueue: array of TDeferredTextItem; ACount: Integer);
-    procedure EnqueueText(AX, AY: TfpgCoord; const AText: string);
   protected
-    { Text rendering — deferred to ITextRenderer }
+    { Text rendering — into buffer via glyph cache }
     procedure DoDrawString(x, y: TfpgCoord; const txt: string); override;
     procedure DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure DoSetTextColor(cl: TfpgColor); override;
@@ -98,14 +77,13 @@ type
     procedure DoDrawPolygon(const Points: array of TPoint); override;
     function  GetPixel(X, Y: integer): TfpgColor; override;
     procedure SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    { Clip rect — applied to FAgg, captured per deferred text item }
+    { Clip rect — applied to FAgg }
     procedure DoSetClipRect(const ARect: TfpgRect); override;
     function  DoGetClipRect: TfpgRect; override;
     procedure DoAddClipRect(const ARect: TfpgRect); override;
     procedure DoClearClipRect; override;
-    { Lifecycle — coordinate FAgg, IBufferManager, and ITextRenderer }
+    { Lifecycle — coordinate FAgg and IBufferManager }
     procedure DoBeginDraw(awidget: TfpgWidgetBase; CanvasTarget: TfpgCanvasBase); override;
-    procedure DoAfterPaint; override;
     procedure DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure DoEndDraw; override;
     function  GetBufferAllocated: Boolean; override;
@@ -118,14 +96,12 @@ type
   end;
 
 
-{ Factory function types for creating platform-specific implementations }
+{ Factory function type for creating platform-specific buffer manager }
 type
-  TTextRendererFactory = function: ITextRenderer;
   TBufferManagerFactory = function: IBufferManager;
 
 var
-  { Set by platform-specific initialisation code (e.g. fpg_main.pas) }
-  CreateTextRenderer: TTextRendererFactory = nil;
+  { Set by platform-specific initialisation code (e.g. fpg_interface.pas) }
   CreateBufferManager: TBufferManagerFactory = nil;
 
 
@@ -163,8 +139,7 @@ constructor THybridCanvas.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
   FAgg.Construct;
-  FTextQueueCount := 0;
-  FLastTextQueueCount := 0;
+  FGlyphCache := TGlyphCache.Create;
   FCurrentTextColor := 0;
   FWindowAttached := False;
   FAttachedWindow := nil;
@@ -172,18 +147,13 @@ begin
   FBufStride := 0;
   FBufWidth := 0;
   FBufHeight := 0;
-  FWinDeltaX := 0;
-  FWinDeltaY := 0;
-  FParentCanvas := nil;
-  if Assigned(CreateTextRenderer) then
-    FTextRenderer := CreateTextRenderer();
   if Assigned(CreateBufferManager) then
     FBufferManager := CreateBufferManager();
 end;
 
 destructor THybridCanvas.Destroy;
 begin
-  FTextRenderer := nil;
+  FGlyphCache.Free;
   if Assigned(FBufferManager) then
   begin
     FBufferManager.FreeBuffer;
@@ -203,150 +173,30 @@ begin
     Exit;
   { Attach (or re-attach if window changed) }
   FAttachedWindow := FWidget.Window;
-  if Assigned(FTextRenderer) then
-    FTextRenderer.AttachWindow(FAttachedWindow);
   if Assigned(FBufferManager) then
     FBufferManager.AttachWindow(FAttachedWindow);
   FWindowAttached := True;
 end;
 
-procedure THybridCanvas.EnqueueText(AX, AY: TfpgCoord; const AText: string);
-var
-  item: ^TDeferredTextItem;
-  cr: TfpgRect;
-begin
-  if FTextQueueCount >= Length(FTextQueue) then
-    SetLength(FTextQueue, FTextQueueCount + 64);
-  item := @FTextQueue[FTextQueueCount];
-  item^.X := AX;
-  item^.Y := AY;
-  item^.Text := AText;
-  item^.Color := FCurrentTextColor;
-  item^.Font := FFont;
-  { Use real window offsets for text rendering (FDeltaX may be zeroed for alien widgets) }
-  item^.DeltaX := FWinDeltaX;
-  item^.DeltaY := FWinDeltaY;
-  { Translate clip rect to window coordinates for text rendering }
-  item^.HasClipRect := True;
-  cr := DoGetClipRect;
-  cr.Left := cr.Left + FWinDeltaX;
-  cr.Top := cr.Top + FWinDeltaY;
-  item^.ClipRect := cr;
-  Inc(FTextQueueCount);
-end;
 
-procedure THybridCanvas.RenderTextItems(AQueue: array of TDeferredTextItem; ACount: Integer);
-var
-  i: Integer;
-  lastColor: TfpgColor;
-  lastFont: TfpgFontResourceBase;
-  lastClip: TfpgRect;
-  lastHasClip: Boolean;
-begin
-  if (ACount = 0) or not Assigned(FTextRenderer) then
-    Exit;
-
-  EnsureWindowAttached;
-  if not FWindowAttached then
-    Exit;
-
-  lastColor := High(TfpgColor);  // sentinel
-  lastFont := nil;
-  lastHasClip := False;
-  lastClip.SetRect(0, 0, 0, 0);
-
-  for i := 0 to ACount - 1 do
-  begin
-    with AQueue[i] do
-    begin
-      { Only update renderer state when it changes }
-      if Font <> lastFont then
-      begin
-        FTextRenderer.SetFont(Font);
-        lastFont := Font;
-      end;
-      if Color <> lastColor then
-      begin
-        FTextRenderer.SetTextColor(Color);
-        lastColor := Color;
-      end;
-      { Update clip rect if changed }
-      if HasClipRect then
-      begin
-        if (not lastHasClip) or
-           (ClipRect.Left <> lastClip.Left) or (ClipRect.Top <> lastClip.Top) or
-           (ClipRect.Width <> lastClip.Width) or (ClipRect.Height <> lastClip.Height) then
-        begin
-          FTextRenderer.SetClipRect(ClipRect);
-          lastClip := ClipRect;
-          lastHasClip := True;
-        end;
-      end
-      else if lastHasClip then
-      begin
-        FTextRenderer.ClearClipRect;
-        lastHasClip := False;
-      end;
-
-      FTextRenderer.DrawText(X + DeltaX, Y + DeltaY, Text);
-    end;
-  end;
-
-  { Clear clip state after flushing }
-  if lastHasClip then
-    FTextRenderer.ClearClipRect;
-end;
-
-procedure THybridCanvas.FlushTextQueue;
-var
-  i, base: Integer;
-  target: THybridCanvas;
-begin
-  if FTextQueueCount = 0 then
-    Exit;
-
-  RenderTextItems(FTextQueue, FTextQueueCount);
-
-  { Append to the top-level parent's snapshot for final blit replay.
-    The parent's DoPutBufferToScreen blits the full buffer (overwriting
-    all per-widget text), then replays this complete snapshot so all
-    text reappears in the correct z-order. }
-  if Assigned(FParentCanvas) then
-    target := FParentCanvas
-  else
-    target := Self;
-
-  base := target.FLastTextQueueCount;
-  if Length(target.FLastTextQueue) < base + FTextQueueCount then
-    SetLength(target.FLastTextQueue, base + FTextQueueCount + 64);
-  for i := 0 to FTextQueueCount - 1 do
-    target.FLastTextQueue[base + i] := FTextQueue[i];
-  target.FLastTextQueueCount := base + FTextQueueCount;
-
-  FTextQueueCount := 0;
-end;
-
-procedure THybridCanvas.ReplayTextQueue;
-begin
-  if FLastTextQueueCount > 0 then
-    RenderTextItems(FLastTextQueue, FLastTextQueueCount);
-end;
-
-
-{ --- Text rendering (deferred to ITextRenderer) --- }
+{ --- Text rendering (into buffer via glyph cache) --- }
 
 procedure THybridCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
   if Length(txt) < 1 then
     Exit;
-  EnqueueText(x, y, txt);
+  if FBufData = nil then
+    Exit;
+  { Position at baseline (Y = top + ascent), using the ascent from the same
+    FreeType instance that renders the glyphs. This guarantees metric/rendering
+    consistency — no mixing of font systems. }
+  FGlyphCache.DrawText(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
+    x + FDeltaX, y + FDeltaY + FGlyphCache.Ascent, txt, FCurrentTextColor);
 end;
 
 procedure THybridCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
-  { Font is stored in TfpgCanvasBase.FFont by SetFont() before this
-    is called. We don't need to configure AggPas font engine since
-    text rendering is handled by ITextRenderer. }
+  FGlyphCache.SetFont(fntres);
 end;
 
 procedure THybridCanvas.DoSetTextColor(cl: TfpgColor);
@@ -513,10 +363,6 @@ begin
     { Top-level canvas: we draw to our own buffer.
       Buffer is already attached via DoAllocateBuffer. }
     EnsureWindowAttached;
-    FParentCanvas := nil;
-    FWinDeltaX := FDeltaX;
-    FWinDeltaY := FDeltaY;
-    FLastTextQueueCount := 0;  // Reset snapshot for this paint cycle
   end
   else if CanvasTarget is THybridCanvas then
   begin
@@ -525,21 +371,18 @@ begin
       widget's top-left pixel. This way we do NOT need FDeltaX/FDeltaY offsets
       in draw calls — AggPas draws in widget-local coordinates.
       This mirrors the original TAgg2D.AttachPartialImage approach. }
-    FParentCanvas := THybridCanvas(CanvasTarget);
     if THybridCanvas(CanvasTarget).FBufData <> nil then
     begin
-      FBufData := THybridCanvas(CanvasTarget).FBufData;
       FBufStride := THybridCanvas(CanvasTarget).FBufStride;
       FBufWidth := awidget.ActualWidth;
       FBufHeight := awidget.ActualHeight;
-      FAgg.attach(
-        int8u_ptr(PByte(FBufData) + FDeltaX * 4 + FDeltaY * FBufStride),
-        FBufWidth,
-        FBufHeight,
-        FBufStride);
-      { Save real window offsets for text rendering (text goes direct to window) }
-      FWinDeltaX := FDeltaX;
-      FWinDeltaY := FDeltaY;
+      { Calculate byte offset into parent's buffer so position (0,0) maps
+        to the widget's top-left pixel. Both FAgg and FBufData must use
+        this same offset pointer so the glyph cache renders into the
+        correct sub-region. }
+      FBufData := PByte(THybridCanvas(CanvasTarget).FBufData)
+                  + FDeltaX * 4 + FDeltaY * FBufStride;
+      FAgg.attach(int8u_ptr(FBufData), FBufWidth, FBufHeight, FBufStride);
       { Zero out deltas: partial-attach already positioned the buffer
         at the widget's origin, so draw calls use widget-local coords. }
       FDeltaX := 0;
@@ -548,42 +391,19 @@ begin
   end;
 end;
 
-procedure THybridCanvas.DoAfterPaint;
-begin
-  { Called after each widget's HandlePaint, before its children paint.
-    Alien widgets blit their region and render text immediately, so child
-    widgets will correctly overlap parent content.
-    Top-level widgets only flush text here (no blit) to avoid flickering —
-    a full parent blit would momentarily erase all children. Children's
-    individual blits update the window progressively. }
-  if Assigned(FParentCanvas) then
-  begin
-    { Alien widget: blit our region from the parent's buffer, then text }
-    if Assigned(FParentCanvas.FBufferManager) then
-      FParentCanvas.FBufferManager.PutBufferToScreen(
-        FWinDeltaX, FWinDeltaY, FWidget.ActualWidth, FWidget.ActualHeight);
-  end;
-  { Flush text for both SELF and ALIEN widgets }
-  FlushTextQueue;
-end;
-
 procedure THybridCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
-  { Each widget already blitted its region and drew its text in DoAfterPaint
-    with correct z-ordering (parent text under children). A full blit here
-    would overwrite that text, so we skip it. The buffer and text snapshot
-    remain valid for expose-event replay via DoRestoreFromBuffer. }
+  { Text is now rendered into the buffer, so a single blit is sufficient. }
+  if Assigned(FBufferManager) then
+    FBufferManager.PutBufferToScreen(x, y, w, h);
 end;
 
 procedure THybridCanvas.DoEndDraw;
 begin
   { Called during FreeResources (widget destruction).
     Detach from window and release resources. }
-  FTextQueueCount := 0;
   FWindowAttached := False;
   FAttachedWindow := nil;
-  if Assigned(FTextRenderer) then
-    FTextRenderer.DetachWindow;
   if Assigned(FBufferManager) then
     FBufferManager.DetachWindow;
   FCanvasTarget := nil;
@@ -642,23 +462,9 @@ begin
 end;
 
 procedure THybridCanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
-var
-  fullRect: TfpgRect;
 begin
-  if not Assigned(FBufferManager) then
-    Exit;
-  if FLastTextQueueCount > 0 then
-  begin
-    { Text was rendered directly to the window (not into the buffer).
-      To avoid drawing text on top of stale text (which causes darkening
-      due to sub-pixel anti-aliasing accumulation), blit the full window
-      area to reset all pixels, then replay the text queue. }
-    fullRect.SetRect(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
-    FBufferManager.RestoreFromBuffer(fullRect);
-    ReplayTextQueue;
-  end
-  else
-    { No text to replay — just blit the exposed region }
+  { Text is in the buffer, so a simple blit restores everything correctly. }
+  if Assigned(FBufferManager) then
     FBufferManager.RestoreFromBuffer(ARect);
 end;
 

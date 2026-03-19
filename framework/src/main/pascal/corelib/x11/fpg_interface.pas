@@ -23,7 +23,7 @@ interface
 
 uses
   fpg_x11,
-  fpg_x11_text_renderer;
+  fpg_x11_text_renderer;  { provides TX11BufferManager }
 
 type
   TfpgFontResourceImpl  = class(TfpgX11FontResource);
@@ -45,7 +45,6 @@ uses
   fpg_hybrid_canvas;
 
 initialization
-  CreateTextRenderer := @CreateX11TextRenderer;
   CreateBufferManager := @CreateX11BufferManager;
 
 end.

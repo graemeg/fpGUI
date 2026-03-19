@@ -449,8 +449,231 @@ This approach achieves:
 * The existing `ITextRenderer` interface can remain as a fallback or for platforms where FreeType is unavailable.
 
 
+== Lessons Learned: Native Text Overlay (Strategy A)
+
+Strategy A (AggPas buffer + native Xft text overlay) was implemented on the `feature/hybridcanvas` branch across commits `ecab8e83` through `08737fe7`. The implementation achieved functional rendering but revealed fundamental architectural problems that make this approach unsuitable for production use.
+
+=== What Worked
+
+* **THybridCanvas architecture** — Composing an `Agg2D` object with `ITextRenderer` and `IBufferManager` interfaces provides clean separation with no platform-specific include files in the canvas unit. This architecture should be preserved.
+* **Partial buffer attach for alien widgets** — Calculating a byte offset into the parent's buffer so AggPas position (0,0) maps to the widget's top-left pixel. This mirrors the original `TAgg2D.AttachPartialImage` approach and works correctly.
+* **IBufferManager** — The `TX11BufferManager` using `XImage` + `XPutImage` works well for buffer-to-screen transfer.
+* **Named colour resolution** — `fpgColorToRGB()` must be called before extracting RGB components from fpGUI colour values. Named colours like `clWindowBackground` have high bits set (e.g. `$80000001`) that produce wrong results if bit-shifted directly.
+* **BGRA pixel format** — All platforms (X11, GDI, Cocoa) use BGRA byte order natively. Switching `agg_2D.pas` from `pixfmt_rgba32` to `pixfmt_bgra32` eliminates colour channel swapping.
+
+=== What Did Not Work
+
+* **Deferred text queue** — Text drawn via Xft goes directly to the X11 window, not into the AggPas buffer. This creates a two-surface compositing problem:
+** **Z-order violation**: Parent widget text rendered on top of child widgets' 2D content, because all text was deferred to after the final buffer blit. The "Client Panel" label appeared over buttons that should have occluded it.
+** **Text darkening on expose**: Replaying text after each expose event caused sub-pixel anti-aliasing accumulation (text drawn on top of existing text).
+** **Complex snapshot machinery**: Required `FLastTextQueue` snapshots, `ReplayTextQueue`, and full-buffer blits before replay to avoid darkening.
+
+* **Per-widget DoAfterPaint flush** — Attempted fix for z-order by blitting each widget's region and rendering its text before children paint. This solved z-order but introduced:
+** **Flickering**: Multiple buffer blits per paint cycle (parent blit erases children momentarily, then children repaint one by one).
+** **Increasing complexity**: Each fix for one problem created another. The parent blit was removed to reduce flickering, but then parent background areas were not updated.
+
+* **`ITextRenderer` as a long-term design** — The interface itself is clean, but the architectural constraint of rendering text to a different surface than 2D content is fundamentally incompatible with correct widget compositing.
+
+=== Root Cause
+
+The core issue is that **text and 2D content exist on different surfaces** (Xft draws to the X11 window; AggPas draws to a memory buffer). These two surfaces cannot be correctly interleaved in a single-pass paint cycle. Any attempt to work around this (deferred queues, per-widget flushes, text snapshots) adds complexity without fully solving the problem.
+
+The correct solution is to render text into the same buffer as 2D content, using cached bitmap glyphs for performance.
+
+
+== Revised Plan: Cached Bitmap Glyph Rendering
+
+=== Design Decision
+
+After evaluating Strategy A (native text overlay), the project will pivot to rendering text directly into the AggPas buffer using cached FreeType bitmap glyphs. This approach:
+
+* Eliminates the two-surface compositing problem entirely
+* Provides correct z-ordering automatically (text is part of the buffer)
+* Eliminates flickering (single buffer blit per paint cycle)
+* Achieves high performance via pre-rendered glyph bitmap caching
+* Maintains the clean `THybridCanvas` architecture (no platform include files)
+
+This is the same approach used by Haiku OS for their AGG-based rendering engine. Reference: https://www.haiku-os.org/documents/dev/painter_and_how_agg_works/
+
+=== Architecture Overview
+
+[source]
+----
+THybridCanvas (fpg_hybrid_canvas.pas)
+  ├── FAgg: Agg2D              — 2D rendering (lines, rects, arcs, etc.)
+  ├── FGlyphCache: TGlyphCache — cached FreeType bitmap glyphs
+  ├── FBufferManager: IBufferManager — platform buffer allocation + screen blit
+  └── (no ITextRenderer — text rendered into buffer via glyph cache)
+
+TGlyphCache (new unit, e.g. fpg_glyph_cache.pas)
+  ├── Uses FreeType to rasterise glyphs in gd_gray8 mode (bitmap, not vector)
+  ├── Caches rendered glyph bitmaps keyed by (glyph_index, font_size, style)
+  ├── Renders cached bitmaps into AggPas buffer via BlendSolidHSpan
+  └── Platform-independent (pure software)
+
+IBufferManager (unchanged)
+  ├── TX11BufferManager — XImage + XPutImage
+  ├── (future) TGDIBufferManager — DIBSection + BitBlt
+  └── (future) TCocoaBufferManager
+----
+
+=== What to Keep from Current Implementation
+
+The following components from the `feature/hybridcanvas` branch should be preserved:
+
+* **`THybridCanvas`** class structure in `fpg_hybrid_canvas.pas` — constructor, destructor, `Agg2D` composition, all 2D drawing method overrides (`DoFillRectangle`, `DoDrawLine`, `DoDrawArc`, etc.)
+* **`IBufferManager`** interface and `TX11BufferManager` implementation in `fpg_x11_text_renderer.pas` (rename unit to `fpg_x11_buffer_manager.pas`)
+* **Partial buffer attach** for alien widgets in `DoBeginDraw` — the byte offset calculation and `FDeltaX`/`FDeltaY` zeroing
+* **`fpgColorToAgg()`** helper function with `fpgColorToRGB()` resolution
+* **`agg_2D.pas`** with `pixfmt_bgra32` pixel format
+* **`fpgX11Display`/`fpgX11Screen`/`fpgX11DisplayDepth`** accessor functions in `fpg_x11.pas`
+* **`DoAllocateBuffer`**, `GetBufferAllocated`, `DoPutBufferToScreen`, `DoRestoreFromBuffer` lifecycle methods
+* **Factory registration** in `fpg_interface.pas` (adjust for removed `ITextRenderer`)
+* **`DefaultCanvasClass := THybridCanvas`** selection in `fpg_main.pas`
+* **Font manager** always creating native font resources (for metrics via `IFontEngine`)
+
+=== What to Remove
+
+The following components were part of the Strategy A (native text overlay) approach and should be removed:
+
+* **`ITextRenderer`** interface from `fpg_base.pas`
+* **`TX11TextRenderer`** class (the entire Xft text rendering path)
+* **Deferred text queue** — `FTextQueue`, `FTextQueueCount`, `EnqueueText`, `FlushTextQueue`
+* **Text snapshot/replay** — `FLastTextQueue`, `FLastTextQueueCount`, `ReplayTextQueue`, `RenderTextItems`
+* **`FCurrentTextColor`** field (colour will be applied directly during glyph blitting)
+* **`FParentCanvas`** field and parent-queue delegation logic
+* **`FWinDeltaX`/`FWinDeltaY`** fields (only needed for window-coordinate text; buffer-local rendering uses `FDeltaX`/`FDeltaY` which are zeroed for alien widgets via partial attach)
+* **`DoAfterPaint`** virtual method from `TfpgCanvasBase` and the call in `fpg_widget.pas` `MsgPaint`
+* **X error suppression** in `TX11TextRenderer.DetachWindow` (may still be needed in buffer manager; evaluate)
+* **`CreateTextRenderer`** factory variable and its registration
+
+=== What to Add: Glyph Cache
+
+==== Core Concept
+
+FreeType can render glyphs in two modes:
+
+* **Vector outlines** (`gd_outline`) — produces path data that must be fed through the AGG rasteriser pipeline. This is what the old `TAgg2D.Text()` method uses. It is accurate but slow due to per-pixel blending via `BLEND_PIX_RGBA`.
+* **Bitmap masks** (`gd_gray8`) — produces a pre-rendered 8-bit alpha coverage bitmap. This can be composited into the buffer via a simple `BlendSolidHSpan` call, bypassing the AGG rasteriser entirely.
+
+The glyph cache stores the `gd_gray8` bitmaps keyed by `(glyph_index, font_size, font_style)`. For a typical 12pt Latin font, the cache holds ~96 ASCII glyphs plus Unicode glyphs loaded on demand. Memory usage is modest (~100-200 KB per font/size combination).
+
+==== AggPas Components to Use
+
+The existing AggPas codebase already includes the necessary components:
+
+* **`agg_font_freetype.pas`** — `font_engine_freetype_int32` wraps FreeType for glyph rasterisation
+* **`agg_font_cache_manager.pas`** — `font_cache_manager` provides glyph caching with `glyph_type` selection (`glyph_data_gray8` for bitmap mode)
+* **`renderer_base.blend_solid_hspan`** — composites an alpha coverage span into the pixel buffer with a solid colour. This is the "fast path" for rendering cached glyph bitmaps.
+
+The key change from the old `TAgg2D.Text()` method: request `glyph_data_gray8` instead of `glyph_data_outline`, and use `blend_solid_hspan` instead of feeding paths through the rasteriser.
+
+==== Implementation Steps
+
+===== Step 1: Create the Glyph Cache Unit
+
+Create `fpg_glyph_cache.pas` (platform-independent):
+
+* Wraps `font_engine_freetype_int32` and `font_cache_manager`
+* Provides a `DrawText(ABuffer, AStride, AWidth, AHeight, AX, AY, AText, AColor, AFontResource)` method
+* Uses `glyph_data_gray8` mode for horizontal text (the common case, 99%+ of all text rendering)
+* Falls back to `glyph_data_outline` + rasteriser for rotated/transformed text (future, if needed)
+* Reuses the existing `fpg_fontcache.pas` infrastructure for font file resolution (see Step 2)
+
+===== Step 2: Font File Resolution (Already Implemented)
+
+The glyph cache needs the actual font file path (e.g. `/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf`) to load via FreeType. This is already solved by the existing AggPas canvas infrastructure — no new font resolution code is required.
+
+The existing `fpg_fontcache.pas` unit provides `TFontCacheList` (accessed via the `gFontCache` singleton) which:
+
+* Recursively discovers `.ttf`/`.otf` files across OS-specific search paths (Linux: `/usr/share/fonts/`, `~/.local/share/fonts/`, etc.; Windows: `%WINDIR%\Fonts\`, per-user fonts; macOS: `/System/Library/Fonts/`, `/Library/Fonts/`, `~/Library/Fonts/`)
+* Loads each font file via FreeType to extract the family name and style flags from the font metadata
+* Caches the mapping (family name + style flags → file path) in a global list
+* Lazy-initialises on first access via `gFontCache`
+* Provides `Find(AFontCacheItem)` for case-insensitive family name + exact style flag lookup
+
+`Agg2D.pas` already uses this infrastructure: it parses the fpGUI font descriptor via `FontCacheItemFromFontDesc()`, calls `gFontCache.Find()` to resolve it to a file path, then passes that path to `m_fontEngine.load_font()`. The glyph cache unit can follow the same pattern.
+
+Additionally, `agg_font_freetype.pas` maintains its own face pool (up to 32 loaded `FT_Face` handles, looked up by file path) to avoid redundant file loads, and `agg_font_cache_manager.pas` provides two-level glyph caching (font-level pool by signature, glyph-level hash table by glyph code). These components are available for direct reuse.
+
+===== Step 3: Integrate into THybridCanvas
+
+Replace `DoDrawString` implementation:
+
+[source,pascal]
+----
+procedure THybridCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
+begin
+  if Length(txt) < 1 then
+    Exit;
+  { Render cached glyph bitmaps directly into the AggPas buffer.
+    Text is part of the buffer — correct z-order automatically. }
+  FGlyphCache.DrawText(
+    FBufData, FBufStride, FBufWidth, FBufHeight,
+    x + FDeltaX, y + FDeltaY,
+    txt, FTextColor, FFont);
+end;
+----
+
+Replace `DoSetFontRes`:
+
+[source,pascal]
+----
+procedure THybridCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
+begin
+  FGlyphCache.SetFont(fntres);
+end;
+----
+
+`DoPutBufferToScreen` reverts to the simple single-blit approach:
+
+[source,pascal]
+----
+procedure THybridCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+begin
+  if Assigned(FBufferManager) then
+    FBufferManager.PutBufferToScreen(x, y, w, h);
+end;
+----
+
+===== Step 4: Verify Font Metrics Consistency
+
+Font metrics (`GetTextWidth`, `GetLineHeight`, `GetAscent`, `GetDescent`) currently come from the native platform font resources (`TfpgX11FontResource` uses Xft). The glyph cache uses FreeType. These should produce identical metrics for the same font at the same size, since Xft uses FreeType internally. However, hinting differences could cause minor discrepancies.
+
+Verify by comparing `TfpgX11FontResource.GetTextWidth('Hello')` with the sum of FreeType glyph advances for the same string. If they differ, the glyph cache should provide its own `IFontEngine` implementation for consistent metrics.
+
+===== Step 5: Remove Strategy A Artefacts
+
+Remove all deferred text queue infrastructure, `ITextRenderer`, `DoAfterPaint`, text snapshot/replay, and the `TX11TextRenderer` class. The `fpg_x11_text_renderer.pas` unit should be renamed to `fpg_x11_buffer_manager.pas` (it only contains `TX11BufferManager` after removing the text renderer).
+
+=== Performance Expectations
+
+Based on the Haiku OS experience and the AggPas profiling data:
+
+* **Vector path** (current old `TAgg2D.Text`): 5,000 glyphs × ~50 vectors per glyph = 250,000 edge calculations + scanline conversion per frame
+* **Bitmap cache path** (proposed): 5,000 memory copies of pre-rendered 8-bit alpha masks — effectively instantaneous on modern CPUs
+
+The bitmap cache path eliminates `BLEND_PIX_RGBA` as the dominant cost centre. The remaining cost is the `BlendSolidHSpan` call per glyph, which is a tight inner loop over a small rectangle (typically 8-16 × 12-20 pixels).
+
+=== Risk Assessment
+
+==== Low Risk
+
+* **2D rendering**: Unchanged — AggPas handles all non-text drawing identically
+* **Buffer management**: `IBufferManager` is unaffected
+* **Widget paint cycle**: Reverts to the simple `BeginDraw → HandlePaint → EndDraw → DoPutBufferToScreen` flow with no `DoAfterPaint` hooks
+
+==== Medium Risk
+
+* **Metric consistency**: FreeType and Xft metrics may differ slightly due to hinting. Mitigation: test with common fonts and sizes; provide `IFontEngine` from glyph cache if needed.
+
+==== Low-Medium Risk (Downgraded from High)
+
+* **Font file resolution and FreeType initialisation**: Previously assessed as high risk due to the assumption that new fontconfig integration would be required. In practice, the existing `fpg_fontcache.pas` infrastructure already handles font file discovery across all platforms, and `Agg2D.pas` already demonstrates the full pipeline: font descriptor parsing → `gFontCache.Find()` → `m_fontEngine.load_font()`. This is proven, working code that the glyph cache unit can reuse directly. The remaining risk is limited to ensuring the glyph cache correctly initialises its own `font_engine_freetype_int32` instance and coordinates with the existing font cache singleton.
+
+
 == Conclusion
 
-The hybrid canvas approach addresses the proven AggPas text rendering bottleneck with minimal disruption to the existing architecture. The `ITextRenderer` interface provides clean separation of concerns and enables future extensibility (e.g., DirectWrite on Windows, Cairo on Wayland). Strategy A (AggPas first, native text overlay) is recommended for its simplicity and alignment with existing widget paint patterns.
+The hybrid canvas architecture (`THybridCanvas` + `IBufferManager` + `Agg2D` composition) is sound and should be preserved. The native text overlay approach (Strategy A with `ITextRenderer`) proved architecturally incompatible with correct widget compositing due to the two-surface problem.
 
-The implementation can proceed incrementally: Phase 1 extracts the interface without changing any runtime behaviour, providing a safe foundation for the subsequent phases.
+The path forward is cached bitmap glyph rendering into the AggPas buffer, following the approach proven by Haiku OS. This eliminates the text performance bottleneck that motivated the hybrid canvas work, whilst maintaining correct z-ordering, eliminating flickering, and preserving the clean platform-independent architecture.
