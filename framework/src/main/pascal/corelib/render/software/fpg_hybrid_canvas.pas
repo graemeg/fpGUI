@@ -217,9 +217,16 @@ begin
 end;
 
 procedure THybridCanvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+const
+  StyleMap: array[TfpgLineStyle] of agg_2D.LineStyle = (
+    stySolid,       // lsSolid
+    styDash,        // lsDash
+    styDot,         // lsDot
+    styDashDot,     // lsDashDot
+    styDashDotDot   // lsDashDotDot
+  );
 begin
-  FAgg.lineWidth(awidth);
-  { TODO: map TfpgLineStyle to AggPas dash patterns if needed }
+  FAgg.SetLineStyle(awidth, StyleMap[astyle]);
 end;
 
 procedure THybridCanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
@@ -250,11 +257,17 @@ begin
 end;
 
 procedure THybridCanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+var
+  c: agg_2D.Color;
 begin
-  FAgg.noLine;
-  FAgg.triangle(x1 + FDeltaX, y1 + FDeltaY,
-                x2 + FDeltaX, y2 + FDeltaY,
-                x3 + FDeltaX, y3 + FDeltaY);
+  { Ensure both fill and line use the current color, matching
+    TAgg2D.DoFillTriangle behaviour. Add 0.5 for pixel alignment. }
+  c := FAgg.lineColor;
+  FAgg.fillColor(c);
+  FAgg.lineWidth(1);
+  FAgg.triangle(x1 + FDeltaX + 0.5, y1 + FDeltaY + 0.5,
+                x2 + FDeltaX + 0.5, y2 + FDeltaY + 0.5,
+                x3 + FDeltaX + 0.5, y3 + FDeltaY + 0.5);
 end;
 
 procedure THybridCanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
@@ -274,24 +287,75 @@ var
   aggImg: agg_2D.Image;
   stride: Integer;
   buffer: Pointer;
+  tempBuf: PLongWord;
+  srcBuf: PLongWord;
+  maskPtr: PByte;
+  imgW, imgH: Integer;
+  row, col: Integer;
+  mskLineLen: Integer;
+  byteIdx, bitIdx: Integer;
+  needFree: Boolean;
 begin
   if not (img is TfpgImage) then
     Exit;
   if TfpgImage(img).ColorDepth <> 32 then
     Exit;
 
-  stride := Integer(TfpgImage(img).ScanLine[1]) - Integer(TfpgImage(img).ScanLine[0]);
-  if stride < 0 then
-    buffer := TfpgImage(img).ScanLine[TfpgImage(img).Height - 1]
-  else
-    buffer := TfpgImage(img).ScanLine[0];
+  imgW := TfpgImage(img).Width;
+  imgH := TfpgImage(img).Height;
+  needFree := False;
 
-  aggImg.Construct(int8u_ptr(buffer), TfpgImage(img).Width, TfpgImage(img).Height, stride);
+  if img.Masked and (img.MaskData <> nil) then
+  begin
+    { Image has a 1-bit mask. Create a temporary copy with alpha applied.
+      Mask format: 1 bit per pixel, MSB first, rows padded to 32-bit.
+      Bit = 1 means opaque, bit = 0 means transparent.
+      BMP palette images may have alpha=0 for all pixels (the native X11
+      canvas ignores alpha), so we must set alpha=0xFF for opaque pixels. }
+    tempBuf := GetMem(imgW * imgH * 4);
+    srcBuf := PLongWord(img.ImageData);
+    Move(srcBuf^, tempBuf^, imgW * imgH * 4);
+
+    mskLineLen := ((imgW + 31) div 32) * 4;  { bytes per mask row }
+    maskPtr := PByte(img.MaskData);
+
+    for row := 0 to imgH - 1 do
+    begin
+      for col := 0 to imgW - 1 do
+      begin
+        byteIdx := col div 8;
+        bitIdx := 7 - (col mod 8);  { MSB first }
+        if ((maskPtr + row * mskLineLen + byteIdx)^ shr bitIdx) and 1 = 0 then
+          { Mask bit = 0: transparent — clear alpha }
+          tempBuf[row * imgW + col] := tempBuf[row * imgW + col] and $00FFFFFF
+        else
+          { Mask bit = 1: opaque — ensure alpha is 0xFF }
+          tempBuf[row * imgW + col] := tempBuf[row * imgW + col] or $FF000000;
+      end;
+    end;
+
+    buffer := tempBuf;
+    stride := imgW * 4;
+    needFree := True;
+  end
+  else
+  begin
+    stride := Integer(TfpgImage(img).ScanLine[1]) - Integer(TfpgImage(img).ScanLine[0]);
+    if stride < 0 then
+      buffer := TfpgImage(img).ScanLine[imgH - 1]
+    else
+      buffer := TfpgImage(img).ScanLine[0];
+  end;
+
+  aggImg.Construct(int8u_ptr(buffer), imgW, imgH, stride);
   FAgg.transformImage(
     @aggImg,
     xi, yi, xi + w, yi + h,
     x + FDeltaX, y + FDeltaY, x + FDeltaX + w, y + FDeltaY + h);
   aggImg.Destruct;
+
+  if needFree then
+    FreeMem(tempBuf);
 end;
 
 procedure THybridCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
@@ -322,6 +386,7 @@ procedure THybridCanvas.DoDrawPolygon(const Points: array of TPoint);
 var
   i, j: Integer;
   poly: array of double;
+  c: agg_2D.Color;
 begin
   if Length(Points) < 2 then
     Exit;
@@ -333,8 +398,11 @@ begin
     poly[j * 2] := Points[i].Y + FDeltaY + 0.5;
     Inc(j);
   end;
+  { X11 uses XFillPolygon, GDI uses Windows.Polygon — both fill.
+    Ensure fill and line color match so polygon renders filled. }
+  c := FAgg.lineColor;
+  FAgg.fillColor(c);
   FAgg.lineWidth(1);
-  FAgg.noFill;
   FAgg.polygon(@poly[1], Length(Points));
 end;
 
