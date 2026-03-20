@@ -57,7 +57,8 @@ type
     procedure BlitGlyph(ABuf: PByte; AStride, ABufW, ABufH: Integer;
       AGlyphData: PByte; ADataSize: Cardinal;
       ADestX, ADestY: Integer;
-      AR, AG, AB: Byte);
+      AR, AG, AB: Byte;
+      AClipX1, AClipY1, AClipX2, AClipY2: Integer);
     function ResolveFontPath(const AFontDesc: string;
       out ASize: double; out ABold, AItalic: Boolean): string;
   public
@@ -67,7 +68,10 @@ type
     { DrawText renders at baseline Y — caller must add Ascent to convert
       from top-of-text to baseline. }
     procedure DrawText(ABuf: PByte; AStride, ABufW, ABufH: Integer;
-      AX, AY: Integer; const AText: string; AColor: TfpgColor);
+      AX, AY: Integer; const AText: string; AColor: TfpgColor); overload;
+    procedure DrawText(ABuf: PByte; AStride, ABufW, ABufH: Integer;
+      AX, AY: Integer; const AText: string; AColor: TfpgColor;
+      AClipX1, AClipY1, AClipX2, AClipY2: Integer); overload;
     function TextWidth(const AText: string): Integer;
     { Font metrics from the same FreeType instance that renders glyphs.
       Guaranteed consistent with rendered output. }
@@ -300,7 +304,8 @@ end;
 procedure TGlyphCache.BlitGlyph(ABuf: PByte; AStride, ABufW, ABufH: Integer;
   AGlyphData: PByte; ADataSize: Cardinal;
   ADestX, ADestY: Integer;
-  AR, AG, AB: Byte);
+  AR, AG, AB: Byte;
+  AClipX1, AClipY1, AClipX2, AClipY2: Integer);
 var
   p: PByte;
   minX, minY, maxX, maxY: Int32;
@@ -333,8 +338,8 @@ begin
 
     drawY := ADestY + slY;
 
-    { Skip scanlines outside buffer vertically }
-    if (drawY < 0) or (drawY >= ABufH) then
+    { Skip scanlines outside clip rect vertically }
+    if (drawY < AClipY1) or (drawY >= AClipY2) then
     begin
       { Skip past remaining span data.
         slSize includes its own 4 bytes, and we already read Y and numSpans (8 bytes),
@@ -359,11 +364,11 @@ begin
         Inc(p, 1);
         spanLen := -spanLen;
 
-        { Clip horizontally }
+        { Clip horizontally against clip rect }
         clipLeft := drawX;
         clipRight := drawX + spanLen;
-        if clipLeft < 0 then clipLeft := 0;
-        if clipRight > ABufW then clipRight := ABufW;
+        if clipLeft < AClipX1 then clipLeft := AClipX1;
+        if clipRight > AClipX2 then clipRight := AClipX2;
 
         if clipLeft < clipRight then
         begin
@@ -384,13 +389,13 @@ begin
         clipStart := 0;
         clipLeft := drawX;
         clipRight := drawX + spanLen;
-        if clipLeft < 0 then
+        if clipLeft < AClipX1 then
         begin
-          clipStart := -clipLeft;
-          clipLeft := 0;
+          clipStart := AClipX1 - clipLeft;
+          clipLeft := AClipX1;
         end;
-        if clipRight > ABufW then
-          clipRight := ABufW;
+        if clipRight > AClipX2 then
+          clipRight := AClipX2;
 
         if clipLeft < clipRight then
         begin
@@ -418,6 +423,15 @@ end;
 
 procedure TGlyphCache.DrawText(ABuf: PByte; AStride, ABufW, ABufH: Integer;
   AX, AY: Integer; const AText: string; AColor: TfpgColor);
+begin
+  { Default: clip to full buffer bounds }
+  DrawText(ABuf, AStride, ABufW, ABufH, AX, AY, AText, AColor,
+    0, 0, ABufW, ABufH);
+end;
+
+procedure TGlyphCache.DrawText(ABuf: PByte; AStride, ABufW, ABufH: Integer;
+  AX, AY: Integer; const AText: string; AColor: TfpgColor;
+  AClipX1, AClipY1, AClipX2, AClipY2: Integer);
 var
   engine: PFontEngine;
   cache: PCacheManager;
@@ -435,6 +449,12 @@ begin
 
   engine := PFontEngine(FEnginePtr);
   cache := PCacheManager(FCacheManagerPtr);
+
+  { Clamp clip rect to buffer bounds }
+  if AClipX1 < 0 then AClipX1 := 0;
+  if AClipY1 < 0 then AClipY1 := 0;
+  if AClipX2 > ABufW then AClipX2 := ABufW;
+  if AClipY2 > ABufH then AClipY2 := ABufH;
 
   { Resolve named colours and extract RGB }
   rgb := fpgColorToRGB(AColor);
@@ -470,7 +490,8 @@ begin
         BlitGlyph(ABuf, AStride, ABufW, ABufH,
           glyph^.data, glyph^.data_size,
           Trunc(startX), Trunc(startY),
-          r, g, b);
+          r, g, b,
+          AClipX1, AClipY1, AClipX2, AClipY2);
       end;
 
       startX := startX + glyph^.advance_x;

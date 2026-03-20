@@ -188,6 +188,8 @@ end;
 { --- Text rendering (into buffer via glyph cache) --- }
 
 procedure THybridCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
+var
+  cb: agg_2D.RectD;
 begin
   if Length(txt) < 1 then
     Exit;
@@ -198,8 +200,13 @@ begin
     text lands exactly where the layout engine intended.  The glyph cache's
     own FreeType ascent may differ slightly from the native (Xft) ascent due
     to hinting/rounding differences, which would cause vertical misalignment. }
+  { Pass the current AggPas clip box so the glyph cache clips text rendering
+    to the same region as 2D operations — required for clipped text redraws
+    like selection highlighting in TfpgEdit. }
+  cb := FAgg.clipBox;
   FGlyphCache.DrawText(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
-    x + FDeltaX, y + FDeltaY + FFont.GetAscent, txt, FCurrentTextColor);
+    x + FDeltaX, y + FDeltaY + FFont.GetAscent, txt, FCurrentTextColor,
+    Trunc(cb.x1), Trunc(cb.y1), Trunc(cb.x2), Trunc(cb.y2));
 end;
 
 procedure THybridCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
