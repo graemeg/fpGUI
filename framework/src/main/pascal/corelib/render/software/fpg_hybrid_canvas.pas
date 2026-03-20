@@ -169,9 +169,15 @@ begin
     Exit;
   if not Assigned(FWidget.Window) then
     Exit;
-  if FWindowAttached and (FWidget.Window = FAttachedWindow) then
-    Exit;
-  { Attach (or re-attach if window changed) }
+  { Always re-attach the buffer manager to the current window.
+    Popup windows are destroyed and recreated between show/hide
+    cycles, so the X11 handle changes even though the canvas
+    persists. Object-pointer comparison is unreliable because FPC's
+    memory allocator may reuse the same address for the new window,
+    making a stale FAttachedWindow appear current while the buffer
+    manager still holds a zeroed-out (invalid) X11 handle.
+    AttachWindow is cheap (copies a few fields), so always calling
+    it is safer than trying to detect staleness. }
   FAttachedWindow := FWidget.Window;
   if Assigned(FBufferManager) then
     FBufferManager.AttachWindow(FAttachedWindow);
@@ -542,7 +548,6 @@ end;
 
 procedure THybridCanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
-  { Text is now rendered into the buffer, so a single blit is sufficient. }
   if Assigned(FBufferManager) then
     FBufferManager.PutBufferToScreen(x, y, w, h);
 end;
@@ -570,6 +575,15 @@ begin
     Result := Assigned(FBufData);
     if Result and Assigned(FWidget) then
     begin
+      { If the widget's window was destroyed (popup close/hide), the
+        buffer cannot be blitted to screen.  Return False so that the
+        Expose handler falls through to InvalidateRect and triggers a
+        full repaint when the window is recreated on re-show. }
+      if not Assigned(FWidget.Window) then
+      begin
+        Result := False;
+        Exit;
+      end;
       { Check if the window was resized }
       if (FBufWidth < FWidget.ActualWidth) or (FBufHeight < FWidget.ActualHeight) then
       begin
@@ -612,7 +626,12 @@ end;
 
 procedure THybridCanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
 begin
-  { Text is in the buffer, so a simple blit restores everything correctly. }
+  { RestoreFromBuffer can be called from the Expose event handler, outside
+    of a BeginDraw/EndDraw pair.  The buffer manager's cached window handle
+    may be stale (popup windows are destroyed and recreated between show/hide
+    cycles).  Re-attach to the current window so we blit to the right target,
+    matching how the X11 canvas reads FWidget.Window.WinHandle directly. }
+  EnsureWindowAttached;
   if Assigned(FBufferManager) then
     FBufferManager.RestoreFromBuffer(ARect);
 end;

@@ -215,13 +215,19 @@ begin
     error handler from calling exit(). }
   BeginSuppressXErrors;
   try
+    { Flush any stale errors from previously destroyed windows before
+      we start our own operations, so they don't falsely trigger our
+      error check below. }
+    XSync(FDisplay, 0);
+    XErrorOccurred := False;
+
     gc := XCreateGc(FDisplay, FWinHandle, 0, @GcValues);
     if not XErrorOccurred then
     begin
       XPutImage(FDisplay, FWinHandle, gc, @FXImage, x, y, x, y, w, h);
       XFreeGc(FDisplay, gc);
+      XSync(FDisplay, 0);
     end;
-    XSync(FDisplay, 0);
   finally
     EndSuppressXErrors;
   end;
