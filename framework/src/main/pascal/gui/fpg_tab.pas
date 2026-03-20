@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -23,7 +23,6 @@ unit fpg_tab;
     * Tab Styles (tab, button, flat button, angled)
     * Focus rectangle drawn on tabs itself
     * FindNextPage() must be implemented
-    * Popup menu for tab selection. Should occur with RClick on tabs.
 }
 
 interface
@@ -177,7 +176,7 @@ type
     property    BackgroundColor;
     property    Enabled;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
-    property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
+    property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 0;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Hint;
     property    Options: TfpgTabOptions read FTabOptions write FTabOptions;
@@ -240,7 +239,7 @@ end;
 procedure TfpgTabSheet.SetText(const AValue: string);
 begin
   if FText = AValue then
-    Exit; //==>
+    Exit;
   FText := AValue;
   if PageControl <> nil then
     PageControl.Invalidate;
@@ -349,7 +348,7 @@ end;
 procedure TfpgPageControl.InsertPage(var APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
 begin
   if FPages.IndexOf(APage) <> -1 then
-    Exit; //==>   The page has already been added.
+    Exit; { The page has already been added. }
   FPages.Add(APage);
   PositionTabSheets;
   { TODO: This behaviour could maybe be controlled by a Options property }
@@ -368,9 +367,9 @@ var
   i: integer;
 begin
   if APage = nil then
-    Exit; // ==>
+    Exit;
   if FPages.Count =0 then
-    Exit; // ==>
+    Exit;
 
   if FPages.Count > 1 then
   begin
@@ -410,7 +409,7 @@ end;
 procedure TfpgPageControl.SetActivePage(const AValue: TfpgTabSheet);
 begin
   if FActivePage = AValue then
-    Exit; //==>
+    Exit;
   FActivePage := AValue;
   ActiveWidget := AValue;
   if AValue <> nil then
@@ -541,16 +540,12 @@ begin
 end;
 
 function TfpgPageControl.ButtonHeight: integer;
-var
-  f: TfpgFontResourceBase;
 begin
   if FFixedTabHeight > 0 then
     result := FFixedTabHeight
   else
-  begin
-    f := fpgStyle.GetTabFont;
-    result := f.GetHeight + 10;   { TODO: correct this }
-  end;
+    { Now uses font height + padding and dpi scaling }
+    result := fpgStyle.GetDefaultTabHeight;
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
@@ -562,14 +557,15 @@ begin
   else
   begin
     f := fpgStyle.GetTabFont;
-    result := f.GetTextWidth(AText) + 10;
+    { Text width + DPI-scaled horizontal padding (6px left + 6px right at 96 DPI) }
+    result := f.GetTextWidth(AText) + Round(12 * fpgApplication.Screen_dpi / 96);
   end;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
 begin
   if FFixedTabWidth = AValue then
-    Exit; //==>
+    Exit;
   if AValue >= 5 then
   begin
     FFixedTabWidth := AValue;
@@ -580,7 +576,7 @@ end;
 procedure TfpgPageControl.SetFixedTabHeight(const AValue: integer);
 begin
   if FFixedTabHeight = AValue then
-    Exit; //==>
+    Exit;
   if AValue >= 5 then
   begin
     FFixedTabHeight := AValue;
@@ -618,7 +614,6 @@ end;
 
 procedure TfpgPageControl.LeftButtonClick(Sender: TObject);
 begin
-  {$IFDEF DEBUG}writeln(Classname + '.LeftButtonClick');{$ENDIF}
   if FFirstTabButton <> nil then
   begin
     if TfpgTabSheet(FPages.First) <> FFirstTabButton then
@@ -631,7 +626,6 @@ end;
 
 procedure TfpgPageControl.RightButtonClick(Sender: TObject);
 begin
-  {$IFDEF DEBUG}writeln(Classname + '.RightButtonClick');{$ENDIF}
   if FFirstTabButton <> nil then
   begin
     if TfpgTabSheet(FPages.Last) <> FFirstTabButton then
@@ -658,7 +652,7 @@ end;
 procedure TfpgPageControl.SetSortPages(const AValue: boolean);
 begin
   if FSortPages = AValue then
-    Exit; //==>
+    Exit;
   FSortPages := AValue;
   RePaint;
 end;
@@ -666,7 +660,7 @@ end;
 procedure TfpgPageControl.SetStyle(const AValue: TfpgTabStyle);
 begin
   if FStyle = AValue then
-    Exit; //==>
+    Exit;
   FStyle := AValue;
   Invalidate;
 end;
@@ -674,7 +668,7 @@ end;
 procedure TfpgPageControl.SetTabPosition(const AValue: TfpgTabPosition);
 begin
   if FTabPosition = AValue then
-    Exit; //==>
+    Exit;
   FTabPosition := AValue;
   if FTabPosition = tpNone then
   begin
@@ -823,10 +817,10 @@ var
 
 begin
   if not WindowAllocated then
-    Exit; //==>
+    Exit;
 
   if PageCount = 0 then
-    Exit; //==>
+    Exit;
 
   TabW := FixedTabWidth;
   TabH := FixedTabHeight;
@@ -834,7 +828,7 @@ begin
     TabH := fpgStyle.GetDefaultTabHeight;
   h := TfpgTabSheet(FPages.First);
   if h = nil then
-    Exit; //==>
+    Exit;
 
   Canvas.SetTextColor(TextColor);
   Canvas.SetFont(GetFont);
@@ -946,7 +940,7 @@ begin
 
     tpBottom:
       begin
-        lTxtFlags += TextFlagsDflt;
+        lTxtFlags += [txtHCenter, txtVCenter];
         lp := 0;
         r2.SetRect(2, ActualHeight - ButtonHeight, 50, TabH-2);
         while h <> nil do
@@ -972,8 +966,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.GetTabFont.GetTextWidth(GetTabText(h.Text)) div 2,
-                ActualHeight-TabH+toffset, GetTabText(h.Text), lTxtFlags);
+            Canvas.DrawText(r2.Left, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -993,12 +986,12 @@ begin
         h := self.ActivePage;
         DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
-        Canvas.DrawText(r3.Left+4, r3.Top+5, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
+        Canvas.DrawText(r3.Left, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
 
     tpTop:
       begin
-        lTxtFlags += TextFlagsDflt;
+        lTxtFlags += [txtHCenter, txtVCenter];
         lp := 0;
         r2.SetRect(2, 2, 50, TabH);
         while h <> nil do
@@ -1024,8 +1017,7 @@ begin
           if h <> ActivePage then
           begin
             Canvas.SetTextColor(h.TabTextColor);
-            Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - fpgStyle.GetTabFont.GetTextWidth(GetTabText(h.Text)) div 2,
-                FMargin+toffset, GetTabText(h.Text), lTxtFlags);
+            Canvas.DrawText(r2.Left, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
           end;
           r2.Left := r2.Left + r2.Width;
           lp := lp + ButtonWidth(h.Text);
@@ -1045,7 +1037,7 @@ begin
         h := self.ActivePage;
         DrawTab(h, r3, h = ActivePage);
         ApplyCorrectTabTextColorToCanvas(h);
-        Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
+        Canvas.DrawText(r3.Left, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
 
     tpRight:
@@ -1185,10 +1177,9 @@ procedure TfpgPageControl.HandleLMouseUp(x, y: integer; shiftstate: TShiftState)
 var
   ts: TfpgTabSheet;
 begin
-//  debugln('>> TfpgPageControl.HandleLMouseUp');
   ts := TfpgTabSheet(FPages.First);
   if ts = nil then
-    exit; //==>  { This means there are no tabs }
+    exit; { This means there are no tabs }
 
   ts := TabSheetAtPos(x, y);
 
@@ -1329,7 +1320,7 @@ begin
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
-  FFixedTabHeight   := 21;
+  FFixedTabHeight   := 0;
   FFirstTabButton   := nil;
   FStyle            := tsTabs;
   FTabPosition      := tpTop;
