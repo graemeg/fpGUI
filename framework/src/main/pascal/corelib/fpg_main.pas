@@ -2766,8 +2766,12 @@ begin
 end;
 
 function TfpgStyle.GetDefaultTabHeight: TfpgCoord;
+var
+  lScreenDpi: integer;
 begin
-  Result := 21;
+  { Font height + DPI-scaled vertical padding (4px top + 4px bottom at 96 DPI) }
+  lScreenDpi := fpgApplication.Desktop.Screen_dpi(fpgApplication.Desktop.PrimaryScreen);
+  Result := GetTabFont.GetHeight + Round(8 * lScreenDpi / fpgApplication.DesignedDPI);
 end;
 
 procedure TfpgStyle.DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor);
