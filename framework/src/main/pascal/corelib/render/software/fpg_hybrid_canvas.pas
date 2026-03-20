@@ -193,11 +193,13 @@ begin
     Exit;
   if FBufData = nil then
     Exit;
-  { Position at baseline (Y = top + ascent), using the ascent from the same
-    FreeType instance that renders the glyphs. This guarantees metric/rendering
-    consistency — no mixing of font systems. }
+  { Position at baseline (Y = top + ascent).  Use the same ascent value that
+    widget layout uses (FFont.GetAscent, from the native font resource) so
+    text lands exactly where the layout engine intended.  The glyph cache's
+    own FreeType ascent may differ slightly from the native (Xft) ascent due
+    to hinting/rounding differences, which would cause vertical misalignment. }
   FGlyphCache.DrawText(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
-    x + FDeltaX, y + FDeltaY + FGlyphCache.Ascent, txt, FCurrentTextColor);
+    x + FDeltaX, y + FDeltaY + FFont.GetAscent, txt, FCurrentTextColor);
 end;
 
 procedure THybridCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
