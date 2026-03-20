@@ -258,17 +258,49 @@ end;
 
 procedure THybridCanvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 var
-  c: agg_2D.Color;
+  px, py: TfpgCoord;
+  rx, ry, rw, rh: TfpgCoord;
+  xorMask: LongWord;
+  rgb: TfpgColor;
+  rowPtr: PLongWord;
 begin
-  { AggPas doesn't natively support XOR drawing.
-    Fall back to a normal fill with the specified colour. }
   if (w < 1) or (h < 1) then
     Exit;
-  c := fpgColorToAgg(col);
-  FAgg.noLine;
-  FAgg.fillColor(c);
-  FAgg.rectangle(x + FDeltaX, y + FDeltaY,
-                 x + FDeltaX + w - 1, y + FDeltaY + h - 1, True);
+  if FBufData = nil then
+    Exit;
+
+  { Perform true bitwise XOR on pixel data, matching X11's GXxor behaviour.
+    This ensures the caret is always visible regardless of background colour. }
+  rgb := fpgColorToRGB(col);
+  { Build BGRA XOR mask: TfpgColor is $AARRGGBB, buffer is BGRA byte order.
+    On little-endian, a LongWord in memory is [B, G, R, A].
+    Force alpha to $FF so XOR flips the colour channels but keeps pixels opaque. }
+  xorMask := (rgb and $FF) shl 16          { R → byte 2 }
+           or (rgb and $FF00)               { G → byte 1 }
+           or ((rgb shr 16) and $FF)        { B → byte 0 }
+           or $FF000000;                    { A = $FF }
+
+  rx := x + FDeltaX;
+  ry := y + FDeltaY;
+  rw := w;
+  rh := h;
+  { Clip to buffer bounds }
+  if rx < 0 then begin Inc(rw, rx); rx := 0; end;
+  if ry < 0 then begin Inc(rh, ry); ry := 0; end;
+  if rx + rw > FBufWidth then rw := FBufWidth - rx;
+  if ry + rh > FBufHeight then rh := FBufHeight - ry;
+  if (rw < 1) or (rh < 1) then
+    Exit;
+
+  for py := ry to ry + rh - 1 do
+  begin
+    rowPtr := PLongWord(PByte(FBufData) + py * FBufStride + rx * 4);
+    for px := 0 to rw - 1 do
+    begin
+      rowPtr^ := rowPtr^ xor xorMask;
+      Inc(rowPtr);
+    end;
+  end;
 end;
 
 procedure THybridCanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
