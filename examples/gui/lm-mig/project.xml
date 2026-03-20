@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-  <name>examples-gui-alignment</name>
+  <name>examples-gui-lmmig</name>
 
   <build>
-    <mainSource>aligntest.lpr</mainSource>
+    <mainSource>lm-mig.lpr</mainSource>
     <sourceDirectory>.</sourceDirectory>
-    <executableName>aligntest</executableName>
+    <executableName>lm-mig</executableName>
   </build>
 
   <moduleDependencies>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-  <name>aboutdialog</name>
+  <name>examples-gui-aboutdialog</name>
 
   <build>
     <mainSource>aboutdialog.pp</mainSource>
     <sourceDirectory>.</sourceDirectory>
+    <executableName>aboutdialog</executableName>
   </build>
 
   <moduleDependencies>

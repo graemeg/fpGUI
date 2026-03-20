@@ -9,5 +9,8 @@
   <modules>
     <module>aboutdialog</module>
     <module>alignment</module>
+    <module>lm-border</module>
+    <module>lm-flow</module>
+    <module>lm-mig</module>
   </modules>
 </project>
