@@ -100,7 +100,7 @@ begin
 
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(2);  // Wrap after 2 components
+  mig.LC.WrapAfter(2);  // Wrap after 2 components
   mig.LC.Fill;             // Fill both horizontally and vertically
   mig.LC.InsetsAll('10lpx'); // Using string insets - 10 logical pixels all sides
   if FDebug then

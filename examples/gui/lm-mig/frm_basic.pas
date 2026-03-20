@@ -44,7 +44,7 @@ begin
 
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  mig.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   if FDebug then
     mig.LC.Debug;       // Enable debug visualization
   LayoutManager := mig;
