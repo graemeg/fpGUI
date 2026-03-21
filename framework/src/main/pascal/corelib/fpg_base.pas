@@ -337,6 +337,22 @@ type
   end;
 
 
+  { Buffer management abstraction for hybrid canvas architecture.
+    Handles platform-specific pixel buffer allocation, screen flushing
+    (XPutImage on X11, BitBlt on Windows), and cleanup. }
+  IBufferManager = interface
+    ['{D7E8F9A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}']
+    procedure AttachWindow(AWindow: TfpgWindowBase);
+    procedure DetachWindow;
+    procedure AllocateBuffer(AWidth, AHeight: Integer;
+      out AData: Pointer; out AStride: Integer);
+    function BufferAllocated: Boolean;
+    procedure FreeBuffer;
+    procedure PutBufferToScreen(x, y, w, h: TfpgCoord);
+    procedure RestoreFromBuffer(const ARect: TfpgRect);
+  end;
+
+
   { Represents font properties without rendering engine dependency }
   TfpgFontDefinition = class(TObject)
   private

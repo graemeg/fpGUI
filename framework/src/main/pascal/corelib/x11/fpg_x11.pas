@@ -147,9 +147,8 @@ type
     FFontData: PXftFont;
     function    DoGetTextWidthClassic(const txt: string): integer;
     function    DoGetTextWidthWorkaround(const txt: string): integer;
-  protected
-    property    Handle: PXftFont read FFontData;
   public
+    property    Handle: PXftFont read FFontData;
     constructor Create(const afontdesc: string); override;
     destructor  Destroy; override;
     function    HandleIsValid: boolean; override;
@@ -259,9 +258,9 @@ type
     function    GetWindowState: TfpgWindowState; override;
     procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
+  public
     procedure   TriggerSyncCounter;
     property    WinHandle: TfpgWinHandle read FWinHandle;
-  public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
     procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
@@ -489,6 +488,11 @@ type
 
 function fpgColorToX(col: TfpgColor): longword;
 
+{ Accessors for X11 application state — avoids exposing xapplication global }
+function fpgX11Display: PXDisplay;
+function fpgX11Screen: integer;
+function fpgX11DisplayDepth: integer;
+
 
 implementation
 
@@ -617,6 +621,21 @@ begin
     XAllocColor(xapplication.display, xapplication.DefaultColorMap, @xc);
     Result := xc.pixel;
   end;
+end;
+
+function fpgX11Display: PXDisplay;
+begin
+  Result := xapplication.Display;
+end;
+
+function fpgX11Screen: integer;
+begin
+  Result := xapplication.DefaultScreen;
+end;
+
+function fpgX11DisplayDepth: integer;
+begin
+  Result := xapplication.DisplayDepth;
 end;
 
 procedure SetXftColor(col: TfpgColor; var colxft: TXftColor);

@@ -16,10 +16,13 @@
     <unitPaths>
       <!-- These act as inclusion rules based on conditions -->
       <path condition="LINUX">corelib/x11</path>
+      <path condition="LINUX">corelib/render/software</path>
       <path condition="FREEBSD">corelib/x11</path>
+      <path condition="FREEBSD">corelib/render/software</path>
       <path condition="WINDOWS">corelib/gdi</path>
+      <path condition="WINDOWS">corelib/render/software</path>
       <path condition="DARWIN">corelib/cocoa</path>
-      <path condition="AggCanvas">corelib/render/software</path>
+      <path condition="DARWIN">corelib/render/software</path>
       <!-- There are just to clean up the FPC command - not strictly needed -->
       <path condition="UNUSED">corelib/_template</path>
       <path condition="UNUSED">3rdparty/libvlc</path>
@@ -52,6 +55,14 @@
     </profile>
 
     <profile>
+      <id>profiler</id>
+      <compilerOptions>
+        <option>-pg</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
       <id>release</id>
       <defines>
         <define>RELEASE</define>
@@ -80,6 +91,7 @@
       <id>macos</id>
       <defines>
          <define>cocoa</define>
+         <define>AggCanvas</define>
       </defines>
     </profile>
 

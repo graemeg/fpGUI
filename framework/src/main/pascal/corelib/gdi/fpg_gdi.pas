@@ -210,8 +210,8 @@ type
     procedure   SetWindowOpacity(AValue: Single); override;
     {$ENDIF}
     function    GetWindowState: TfpgWindowState; override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
   public
+    property    WinHandle: TfpgWinHandle read FWinHandle;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   ActivateWindow; override;

@@ -22,7 +22,11 @@ unit fpg_interface;
 interface
 
 uses
-  fpg_cocoa;
+  fpg_cocoa
+  {$ifdef AGGCanvas}
+  , fpg_cocoa_buffer_manager
+  {$endif}
+  ;
 
 type
   TfpgFontResourceImpl  = class(TfpgCocoaFontResource);
@@ -39,6 +43,14 @@ type
   TfpgSystemTrayHandler = class(TfpgCocoaSystemTrayHandler);
 
 implementation
+
+{$ifdef AGGCanvas}
+uses
+  fpg_hybrid_canvas;
+
+initialization
+  CreateBufferManager := @CreateCocoaBufferManager;
+{$endif}
 
 end.
 

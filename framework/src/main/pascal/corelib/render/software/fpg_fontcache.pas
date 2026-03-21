@@ -26,22 +26,10 @@ unit fpg_fontcache;
 
 {$mode objfpc}{$H+}
 
-{ Replicate font engine selection from agg_mode.inc (cannot include it
-  directly because it sets {$MODE delphi} which conflicts with objfpc). }
-{$IFDEF WINDOWS}
-  {$DEFINE AGG2D_USE_WINFONTS}
-{$ENDIF}
-{$if defined(UNIX) and not defined(DARWIN)}
-  {$DEFINE AGG2D_USE_FREETYPE}
-{$ENDIF}
-{$IFDEF DARWIN}
-  {$DEFINE AGG2D_USE_FREETYPE}
-{$ENDIF}
-{ Allow build system to force FreeType engine (e.g. pasbuild -p windows,agg,freetype) }
-{$IFDEF FORCE_FREETYPE}
-  {$UNDEF AGG2D_USE_WINFONTS}
-  {$DEFINE AGG2D_USE_FREETYPE}
-{$ENDIF}
+{ The hybrid canvas uses FreeType (via AggPas) for glyph rendering on all
+  platforms. The font cache must always scan font files using FreeType so
+  it can resolve font descriptors to TTF file paths. }
+{$DEFINE AGG2D_USE_FREETYPE}
 
 interface
 

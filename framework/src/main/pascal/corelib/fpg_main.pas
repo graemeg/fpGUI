@@ -555,7 +555,7 @@ uses
   strutils,
   math,
 {$ifdef AGGCanvas}
-  Agg2D,
+  fpg_hybrid_canvas,
 {$endif}
 {$IFDEF GDEBUG}
   fpg_dbugintf,
@@ -1874,7 +1874,10 @@ begin
   { If the end-user passed in a style, try and create an instance of it }
   if Supports(self, ICmdLineParams, cmd) then
     if cmd.HasOption('style') then
+    begin
+      writeln('detected the --style command line parameter');
       fpgStyleManager.SetStyle(cmd.GetOptionValue('style'));
+    end;
   fpgStyle := fpgStyleManager.Style;
 
   fpgCaret      := TfpgCaret.Create;
@@ -3255,7 +3258,12 @@ initialization
   iCallTrace      := -1;
 
 {$ifdef AGGCanvas}
-  DefaultCanvasClass := TAgg2D;
+  { Hybrid canvas is available when platform buffer manager factories
+    are registered (done in fpg_interface.pas initialization). }
+  if Assigned(fpg_hybrid_canvas.CreateBufferManager) then
+    DefaultCanvasClass := THybridCanvas
+  else
+    DefaultCanvasClass := TfpgCanvas;  { fallback if no buffer manager }
 {$else}
   DefaultCanvasClass := TfpgCanvas;
 {$endif}
