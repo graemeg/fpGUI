@@ -252,15 +252,74 @@ begin
 end;
 
 procedure THybridCanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
+var
+  fc: agg_2D.Color;
+  rx, ry, rw, rh: TfpgCoord;
+  cx1, cy1, cx2, cy2: TfpgCoord;
+  cb: agg_2D.RectD;
+  bgra: LongWord;
+  py: TfpgCoord;
+  rowPtr: PLongWord;
 begin
   if (w < 1) or (h < 1) then
     Exit;
-  { fillColor was already set by DoSetColor — just draw.
-    Do NOT re-read FColor here: Clear() calls DoSetColor() directly
-    without updating FColor, so FColor may be stale. }
-  FAgg.noLine;
-  FAgg.rectangle(x + FDeltaX, y + FDeltaY,
-                 x + FDeltaX + w - 1, y + FDeltaY + h - 1, True);
+
+  fc := FAgg.fillColor;
+
+  { Fast path: for fully opaque fills we write directly into the pixel buffer,
+    bypassing AggPas's per-pixel alpha-blend rasteriser. Profiling showed that
+    BGRA32_BLEND_SOLID_HSPAN consumed 84% of CPU time — most of which was
+    opaque solid rectangle fills that need no blending at all. }
+  if (fc.a = 255) and (FBufData <> nil) then
+  begin
+    { Build BGRA32 LongWord: on little-endian [B, G, R, A] in memory }
+    bgra := LongWord(fc.b)
+          or (LongWord(fc.g) shl 8)
+          or (LongWord(fc.r) shl 16)
+          or LongWord($FF000000);
+
+    { Get clip rect from AggPas }
+    cb := FAgg.clipBox;
+    cx1 := Round(cb.x1);
+    cy1 := Round(cb.y1);
+    cx2 := Round(cb.x2);
+    cy2 := Round(cb.y2);
+
+    { Apply window delta and compute fill rect }
+    rx := x + FDeltaX;
+    ry := y + FDeltaY;
+    rw := w;
+    rh := h;
+
+    { Clip to AggPas clip rect }
+    if rx < cx1 then begin Dec(rw, cx1 - rx); rx := cx1; end;
+    if ry < cy1 then begin Dec(rh, cy1 - ry); ry := cy1; end;
+    if rx + rw > cx2 then rw := cx2 - rx;
+    if ry + rh > cy2 then rh := cy2 - ry;
+
+    { Clip to buffer bounds }
+    if rx < 0 then begin Dec(rw, -rx); rx := 0; end;
+    if ry < 0 then begin Dec(rh, -ry); ry := 0; end;
+    if rx + rw > FBufWidth then rw := FBufWidth - rx;
+    if ry + rh > FBufHeight then rh := FBufHeight - ry;
+
+    if (rw < 1) or (rh < 1) then
+      Exit;
+
+    { Direct memory fill — no alpha blending needed }
+    for py := ry to ry + rh - 1 do
+    begin
+      rowPtr := PLongWord(PByte(FBufData) + py * FBufStride + rx * 4);
+      FillDWord(rowPtr^, rw, bgra);
+    end;
+  end
+  else
+  begin
+    { Transparent or no buffer — fall through to AggPas for proper blending }
+    FAgg.noLine;
+    FAgg.rectangle(x + FDeltaX, y + FDeltaY,
+                   x + FDeltaX + w - 1, y + FDeltaY + h - 1, True);
+  end;
 end;
 
 procedure THybridCanvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
