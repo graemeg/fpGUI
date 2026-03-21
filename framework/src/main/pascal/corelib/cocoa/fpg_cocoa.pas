@@ -145,9 +145,9 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
+  public
     property    WinHandle: NSWindow read FWinHandle;
     property    View: TfpgCocoaView read FView;
-  public
     procedure   ActivateWindow; override;
     procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
     procedure   ReleaseMouse; override;
