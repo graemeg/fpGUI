@@ -555,9 +555,8 @@ uses
   strutils,
   math,
 {$ifdef AGGCanvas}
-  Agg2D,
-{$endif}
   fpg_hybrid_canvas,
+{$endif}
 {$IFDEF GDEBUG}
   fpg_dbugintf,
 {$ENDIF}
@@ -1875,7 +1874,10 @@ begin
   { If the end-user passed in a style, try and create an instance of it }
   if Supports(self, ICmdLineParams, cmd) then
     if cmd.HasOption('style') then
+    begin
+      writeln('detected the --style command line parameter');
       fpgStyleManager.SetStyle(cmd.GetOptionValue('style'));
+    end;
   fpgStyle := fpgStyleManager.Style;
 
   fpgCaret      := TfpgCaret.Create;
@@ -3256,14 +3258,15 @@ initialization
   iCallTrace      := -1;
 
 {$ifdef AGGCanvas}
-  DefaultCanvasClass := TAgg2D;
+  { Hybrid canvas is available when platform buffer manager factories
+    are registered (done in fpg_interface.pas initialization). }
+  if Assigned(fpg_hybrid_canvas.CreateBufferManager) then
+    DefaultCanvasClass := THybridCanvas
+  else
+    DefaultCanvasClass := TfpgCanvas;  { fallback if no buffer manager }
 {$else}
   DefaultCanvasClass := TfpgCanvas;
 {$endif}
-  { Hybrid canvas is available when platform factories are registered
-    (done in fpg_interface.pas). Override AGGCANVAS selection above. }
-  if Assigned(fpg_hybrid_canvas.CreateBufferManager) then
-    DefaultCanvasClass := THybridCanvas;
   {$IF FPC_FULLVERSION >= 30000}
   // This switches RTL, FCL and String data type to UTF-8. Many of fpg_utils functions will not be needed any more.
   DefaultSystemCodePage := CP_UTF8;

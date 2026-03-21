@@ -8,7 +8,8 @@
 {$WARN 5024 off : Parameter "$1" not used}
 
 
-// To enable the AggPas powered Canvas class
+// To enable the AggPas hybrid canvas (software rendered 2D + cached glyph text).
+// On Windows this requires freetype.dll until native glyph extraction is implemented.
 {.$define AGGCanvas}
 
 

@@ -22,8 +22,11 @@ unit fpg_interface;
 interface
 
 uses
-  fpg_x11,
-  fpg_x11_buffer_manager;
+  fpg_x11
+  {$ifdef AGGCanvas}
+  , fpg_x11_buffer_manager
+  {$endif}
+  ;
 
 type
   TfpgFontResourceImpl  = class(TfpgX11FontResource);
@@ -41,11 +44,13 @@ type
 
 implementation
 
+{$ifdef AGGCanvas}
 uses
   fpg_hybrid_canvas;
 
 initialization
   CreateBufferManager := @CreateX11BufferManager;
+{$endif}
 
 end.
 
