@@ -22,7 +22,8 @@ unit fpg_interface;
 interface
 
 uses
-  fpg_gdi;
+  fpg_gdi,
+  fpg_gdi_buffer_manager;
 
 type
   TfpgFontResourceImpl  = class(TfpgGDIFontResource);
@@ -39,6 +40,12 @@ type
   TfpgSystemTrayHandler = class(TfpgGDISystemTrayIcon);
 
 implementation
+
+uses
+  fpg_hybrid_canvas;
+
+initialization
+  CreateBufferManager := @CreateGDIBufferManager;
 
 end.
 
