@@ -1072,16 +1072,10 @@ begin
     spacing += '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
-  {$IFDEF GDEBUG}
-  SendDebug(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
-  {$ENDIF}
 end;
 
 destructor TPrintCallTrace.Destroy;
 begin
-  {$IFDEF GDEBUG}
-  SendDebug(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
-  {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
 end;
@@ -1424,15 +1418,13 @@ var
   n: integer;
 begin
   for n := 0 to fpgNamedFonts.Count - 1 do
+  begin
     if (lowercase(TNamedFontItem(fpgNamedFonts[n]).FontID) = lowercase(afontid)) then
     begin // found
       Result := TNamedFontItem(fpgNamedFonts[n]).FontDesc;
       Exit; //==>
     end;
-
-  {$IFDEF GDEBUG}
-  SendDebug('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
-  {$ENDIF}
+  end;
   Result := FPG_DEFAULT_FONT_DESC;
 end;
 
@@ -1964,9 +1956,6 @@ end;
 
 procedure TfpgApplication.HideHint;
 begin
-  {$IFDEF GDEBUG}
-  SendDebug('HideHint');
-  {$ENDIF}
   FHintTimer.Enabled := False;
   if Assigned(FHintWindow) and TfpgHintWindow(FHintWindow).Visible then
     TfpgHintWindow(FHintWindow).Hide;
