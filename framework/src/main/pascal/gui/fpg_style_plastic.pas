@@ -255,7 +255,8 @@ var
 begin
   ACanvas.SetLineStyle(1, lsSolid);
   r.SetRect(x, y, w, h);
-  ACanvas.GradientFill(r, clWindowBackground, clScrollBar, gdVertical);
+  ACanvas.SetColor(clWindowBackground);
+  ACanvas.FillRectangle(r);
   ACanvas.Pixels[x, y + h - 1] := FPlasticColors^[9];
   ACanvas.Pixels[x + w - 1, y + h - 1] := FPlasticColors^[9];
   ACanvas.SetColor(clGridLines);

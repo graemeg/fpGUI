@@ -1562,10 +1562,10 @@ begin
   end;
 
   // normal house keeping
-  Canvas.Clear(BackgroundColor);
   fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
-  Canvas.SetFont(Font);
   Canvas.SetClipRect(GetClientRect);
+  Canvas.Clear(BackgroundColor);
+  Canvas.SetFont(Font);
 
   // do the actual drawing
   DrawVisible;
