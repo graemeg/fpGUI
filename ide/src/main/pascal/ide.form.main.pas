@@ -94,9 +94,13 @@ type
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
     procedure   miFileClose(Sender: TObject);
+    procedure   miEditUndoClicked(Sender: TObject);
+    procedure   miEditRedoClicked(Sender: TObject);
     procedure   miEditCutClicked(Sender: TObject);
     procedure   miEditCopyClicked(Sender: TObject);
     procedure   miEditPasteClicked(Sender: TObject);
+    procedure   miEditDuplicateLineClicked(Sender: TObject);
+    procedure   miEditDeleteLineClicked(Sender: TObject);
     procedure   miFindClicked(Sender: TObject);
     procedure   miFindNextClicked(Sender: TObject);
     procedure   miFindPrevClicked(Sender: TObject);
@@ -287,6 +291,22 @@ begin
   end;
 end;
 
+procedure TMainForm.miEditUndoClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.Undo;
+end;
+
+procedure TMainForm.miEditRedoClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.Redo;
+end;
+
 procedure TMainForm.miEditCutClicked(Sender: TObject);
 var
   edt: TfpgTextEdit;
@@ -309,6 +329,22 @@ var
 begin
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   edt.PasteFromClipboard;
+end;
+
+procedure TMainForm.miEditDuplicateLineClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.DuplicateLine;
+end;
+
+procedure TMainForm.miEditDeleteLineClicked(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.DeleteLine;
 end;
 
 procedure TMainForm.miFindClicked(Sender: TObject);
@@ -1879,9 +1915,15 @@ begin
   begin
     Name := 'mnuEdit';
     SetPosition(476, 80, 172, 20);
+    AddMenuItem('Undo', rsKeyCtrl+'Z', @miEditUndoClicked);
+    AddMenuItem('Redo', rsKeyCtrl+rsKeyShift+'Z', @miEditRedoClicked);
+    AddSeparator;
     AddMenuItem('Cut', rsKeyCtrl+'X', @miEditCutClicked);
     AddMenuItem('Copy', rsKeyCtrl+'C', @miEditCopyClicked);
     AddMenuItem('Paste', rsKeyCtrl+'V', @miEditPasteClicked);
+    AddSeparator;
+    AddMenuItem('Duplicate Line', rsKeyCtrl+'D', @miEditDuplicateLineClicked);
+    AddMenuItem('Delete Line', rsKeyCtrl+'Y', @miEditDeleteLineClicked);
     AddSeparator;
     AddMenuItem('Indent selection', rsKeyCtrl+'I', nil).Enabled := False;
     AddMenuItem('Unindent selection', rsKeyCtrl+'U', nil).Enabled := False;

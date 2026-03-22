@@ -256,6 +256,8 @@ type
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
     procedure   DeleteSelection;
+    procedure   DuplicateLine;
+    procedure   DeleteLine;
     procedure   BlockIndent;
     procedure   BlockUnindent;
     procedure   Undo;
@@ -2038,11 +2040,6 @@ begin
     begin
       Redo;
       consumed := True;
-    end
-    else if (shiftstate = [ssCtrl]) and (AddS = 'Y') then
-    begin
-      Redo;
-      consumed := True;
     end;
   end;
 
@@ -2988,6 +2985,67 @@ begin
   FUndoManager.ExecuteAction(Block);
 
   UpdateScrollbars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.DuplicateLine;
+var
+  Block: TTextBlockAction;
+  LineNum: Integer;
+begin
+  LineNum := CaretPos.Y;
+  if (LineNum < 0) or (LineNum >= FLines.Count) then
+    Exit;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), LineNum);
+  Block.SaveBefore(LineNum);
+  Block.CaretBefore := CaretPos;
+
+  FLines.Insert(LineNum + 1, FLines[LineNum]);
+  CaretPos.Y := LineNum + 1;
+
+  Block.SaveAfter(LineNum + 1);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.DeleteLine;
+var
+  Block: TTextBlockAction;
+  LineNum: Integer;
+begin
+  LineNum := CaretPos.Y;
+  if (LineNum < 0) or (LineNum >= FLines.Count) then
+    Exit;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), LineNum);
+  Block.SaveBefore(LineNum);
+  Block.CaretBefore := CaretPos;
+
+  if FLines.Count > 1 then
+  begin
+    FLines.Delete(LineNum);
+    if LineNum >= FLines.Count then
+      CaretPos.Y := FLines.Count - 1;
+  end
+  else
+    FLines[0] := '';
+
+  CaretPos.X := 0;
+
+  Block.SaveAfter(CaretPos.Y);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  FSelected := False;
+  UpdateScrollBars;
   Invalidate;
 end;
 
