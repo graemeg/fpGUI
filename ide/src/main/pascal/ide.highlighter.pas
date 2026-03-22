@@ -98,6 +98,7 @@ type
   TPascalHighlighter = class(TEditorHighlighter)
   private
     procedure FillMissingDirectives(ASourceLines: TStrings);
+    procedure FillUntokenisedGaps(ASourceLines: TStrings);
     function HasTokenAt(ALine, ACol: Integer): Boolean;
   protected
     procedure DoTokenise(const AText: string); override;
@@ -214,12 +215,27 @@ end;
 function TEditorHighlighter.GetLineTokens(ALine: Integer): THighlightTokenArray;
 var
   p: PHighlightLine;
+  i, j: Integer;
+  tmp: THighlightToken;
 begin
   p := GetLine(ALine);
   if (p <> nil) and (p^.Count > 0) then
   begin
     SetLength(Result, p^.Count);
     Move(p^.Tokens[0], Result[0], p^.Count * SizeOf(THighlightToken));
+    { Sort by column — post-processing steps (FillMissingDirectives,
+      FillUntokenisedGaps) append tokens out of order }
+    for i := 1 to Length(Result) - 1 do
+    begin
+      tmp := Result[i];
+      j := i - 1;
+      while (j >= 0) and (Result[j].Column > tmp.Column) do
+      begin
+        Result[j + 1] := Result[j];
+        Dec(j);
+      end;
+      Result[j + 1] := tmp;
+    end;
   end
   else
     Result := nil;
@@ -325,6 +341,72 @@ begin
       end
       else
         Inc(Col);
+    end;
+  end;
+end;
+
+procedure TPascalHighlighter.FillUntokenisedGaps(ASourceLines: TStrings);
+var
+  LineIdx, Col, RunStart, TokenEnd: Integer;
+  S: string;
+  p: PHighlightLine;
+  i: Integer;
+  Covered: Boolean;
+begin
+  { After FillMissingDirectives, some lines may still have untokenised
+    non-whitespace text — typically code inside false IFDEF branches
+    that the scanner skipped entirely. Add hcIdentifier tokens for
+    these regions so the renderer draws them as plain text. }
+  for LineIdx := 0 to ASourceLines.Count - 1 do
+  begin
+    p := GetLine(LineIdx);
+    if p = nil then
+      Continue;
+    S := ASourceLines[LineIdx];
+    Col := 0;  { 0-based }
+    while Col < Length(S) do
+    begin
+      { Skip whitespace }
+      if S[Col + 1] <= ' ' then
+      begin
+        Inc(Col);
+        Continue;
+      end;
+      { Check if this column is covered by an existing token }
+      Covered := False;
+      for i := 0 to p^.Count - 1 do
+      begin
+        if (Col >= p^.Tokens[i].Column) and
+           (Col < p^.Tokens[i].Column + p^.Tokens[i].Length) then
+        begin
+          Covered := True;
+          { Skip past this token }
+          Col := p^.Tokens[i].Column + p^.Tokens[i].Length;
+          Break;
+        end;
+      end;
+      if Covered then
+        Continue;
+      { Found untokenised non-whitespace — find the extent of the run }
+      RunStart := Col;
+      Inc(Col);
+      while (Col < Length(S)) and (S[Col + 1] > ' ') do
+      begin
+        { Stop if we hit an existing token }
+        Covered := False;
+        for i := 0 to p^.Count - 1 do
+        begin
+          if Col = p^.Tokens[i].Column then
+          begin
+            Covered := True;
+            Break;
+          end;
+        end;
+        if Covered then
+          Break;
+        Inc(Col);
+      end;
+      AddToken(LineIdx, RunStart, Col - RunStart, hcIdentifier);
     end;
   end;
 end;
@@ -590,6 +672,7 @@ begin
     { Post-process: fill in directives the scanner skipped
       (e.g. false IFDEF/IFNDEF branches) }
     FillMissingDirectives(SourceLines);
+    FillUntokenisedGaps(SourceLines);
   finally
     SourceLines.Free;
   end;
