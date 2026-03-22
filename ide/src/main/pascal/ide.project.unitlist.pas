@@ -62,6 +62,7 @@ implementation
 
 uses
   fpg_utils,
+  ide.project.backend,
   ide.project;
 
 { TUnitList }

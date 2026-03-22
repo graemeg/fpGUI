@@ -43,7 +43,8 @@ type
 implementation
 
 uses
-  ide.project
+  ide.project.backend
+  ,ide.project
   ,process
   ,fpg_base
   ,fpg_iniutils
@@ -73,27 +74,36 @@ var
   i: integer;
   LineStart: integer;
 begin
-  unitdir := GProject.ProjectDir + GProject.UnitOutputDir;
-  unitdir := GMacroList.ExpandMacro(unitdir);
-  if not fpgDirectoryExists(unitdir) then
-  begin
-    {$IFDEF DEBUG}
-    writeln('DEBUG:  TBuilderThread.Execute - Creating dir: ' + unitdir);
-    {$ENDIF}
-    fpgForceDirectories(unitDir);
-  end;
-
   p := TProcess.Create(nil);
   p.Options := [poUsePipes, poStdErrToOutPut];
   p.ShowWindow := swoShowNormal;
+
   p.CurrentDirectory := GProject.ProjectDir;
 
-  // build compilation string
-  c := gINI.ReadString(cEnvironment, 'Compiler', '');
-  c := c + GProject.GenerateCmdLine(False, BuildMode);
-  c := GMacroList.ExpandMacro(c);
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    // PasBuild projects: GenerateCmdLine returns full pasbuild command
+    c := GProject.GenerateCmdLine(False, BuildMode);
+  end
+  else
+  begin
+    // Legacy projects create unit output dir and invoke FPC directly
+    unitdir := GProject.ProjectDir + GProject.UnitOutputDir;
+    unitdir := GMacroList.ExpandMacro(unitdir);
+    if not fpgDirectoryExists(unitdir) then
+    begin
+      {$IFDEF DEBUG}
+      writeln('DEBUG:  TBuilderThread.Execute - Creating dir: ' + unitdir);
+      {$ENDIF}
+      fpgForceDirectories(unitDir);
+    end;
+    c := gINI.ReadString(cEnvironment, 'Compiler', '');
+    c := c + GProject.GenerateCmdLine(False, BuildMode);
+    c := GMacroList.ExpandMacro(c);
+  end;
 
-//  AddMessage('Compile command: ' + c);
+  OutputLine := 'Compiling ' + c;
+  Synchronize(@DoOutputLine);
   p.CommandLine := c;
   try
     p.Execute;

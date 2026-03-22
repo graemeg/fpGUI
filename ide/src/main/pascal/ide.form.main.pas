@@ -179,6 +179,7 @@ uses
   ,fpg_basegrid
   ,ide.consts
   ,ide.macros
+  ,ide.project.backend
   ,ide.project
   ,ide.project.unitlist
   ,ide.builder.thread
@@ -190,7 +191,7 @@ const
   cTitle = 'Maximus IDE - %s';
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
-  cProjectFiles = '*.project';
+  cProjectFiles = '*.project;project.xml';
 
 
 {@VFD_NEWFORM_IMPL}
@@ -510,6 +511,7 @@ begin
     if dlg.RunOpenFile then
     begin
       lFilename := dlg.FileName;
+      SetProject(CreateProjectBackend(lFilename));
       GProject.Load(lFilename);
     end;
   finally
@@ -943,6 +945,8 @@ begin
   CloseAllTabs;
   SetupProjectTree;
   FreeProject;
+  // create the appropriate backend for this project format
+  SetProject(CreateProjectBackend(AFilename));
   // now load new project info
   GProject.Load(AFilename);
   FRecentFiles.AddItem(AFilename);

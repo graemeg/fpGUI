@@ -124,6 +124,7 @@ uses
   fpg_iniutils
   ,fpg_dialogs
   ,fpg_widget
+  ,ide.project.backend
   ,ide.project
   ,ide.consts
   ,ide.utils
@@ -139,6 +140,12 @@ var
   frm: TProjectOptionsForm;
   Result: Boolean;
 begin
+  if GLegacyProject = nil then
+  begin
+    TfpgMessageDialog.Information('Project Options',
+      'PasBuild projects are configured via project.xml');
+    Exit;
+  end;
   frm := TProjectOptionsForm.Create(nil);
   try
     frm.LoadSettings;
@@ -163,7 +170,7 @@ begin
   c := gINI.ReadString(cEnvironment, 'Compiler', '') + LineEnding;
   b := cbDefaultMakeCol.FocusItem;
 
-  c := c + GProject.GenerateCmdLine(True, b);
+  c := c + GLegacyProject.GenerateCmdLine(True, b);
   try
     c := GMacroList.ExpandMacro(c);
   except
@@ -444,39 +451,39 @@ procedure TProjectOptionsForm.LoadSettings;
 var
   i, j: integer;
 begin
-  edtMainFile.FileName            := GProject.MainUnit;
-  edtTargetFile.FileName          := GProject.TargetFile;
-  edtMakeDir.Directory            := GProject.ProjectDir;
-  edtUnitOutputDir.Directory      := GProject.UnitOutputDir;
-  cbDefaultMakeCol.FocusItem      := GProject.DefaultMake;
-  grdCompilerMakeOptions.RowCount := GProject.MakeOptions.Count;
+  edtMainFile.FileName            := GLegacyProject.MainUnit;
+  edtTargetFile.FileName          := GLegacyProject.TargetFile;
+  edtMakeDir.Directory            := GLegacyProject.ProjectDir;
+  edtUnitOutputDir.Directory      := GLegacyProject.UnitOutputDir;
+  cbDefaultMakeCol.FocusItem      := GLegacyProject.DefaultMake;
+  grdCompilerMakeOptions.RowCount := GLegacyProject.MakeOptions.Count;
 
-  for i := 0 to GProject.MakeOptions.Count-1 do
+  for i := 0 to GLegacyProject.MakeOptions.Count-1 do
   begin
-    grdCompilerMakeOptions.Cells[6, i] := GProject.MakeOptions[i];
+    grdCompilerMakeOptions.Cells[6, i] := GLegacyProject.MakeOptions[i];
     for j := 0 to 5 do // we know there is only 6 boolean columns
     begin
-      if GProject.MakeOptionsGrid[j, i] then
+      if GLegacyProject.MakeOptionsGrid[j, i] then
         grdCompilerMakeOptions.Cells[j, i] := cCheck;
     end;
   end;
 
-  grdCompilerDirs.RowCount := GProject.UnitDirs.Count;
-  for i := 0 to GProject.UnitDirs.Count-1 do
+  grdCompilerDirs.RowCount := GLegacyProject.UnitDirs.Count;
+  for i := 0 to GLegacyProject.UnitDirs.Count-1 do
   begin
-    grdCompilerDirs.Cells[10, i] := GProject.UnitDirs[i];
+    grdCompilerDirs.Cells[10, i] := GLegacyProject.UnitDirs[i];
     for j := 0 to 9 do // we know there is only 10 boolean columns
     begin
-      if GProject.UnitDirsGrid[j, i] then
+      if GLegacyProject.UnitDirsGrid[j, i] then
         grdCompilerDirs.Cells[j, i] := cCheck;
     end;
   end;
 
-  grdUserMacros.RowCount := GProject.MacroNames.Count;
-  for i := 0 to GProject.MacroNames.Count-1 do
+  grdUserMacros.RowCount := GLegacyProject.MacroNames.Count;
+  for i := 0 to GLegacyProject.MacroNames.Count-1 do
   begin
-    grdUserMacros.Cells[6, i] := GProject.MacroNames.Names[i];
-    grdUserMacros.Cells[7, i] := GProject.MacroNames.ValueFromIndex[i];
+    grdUserMacros.Cells[6, i] := GLegacyProject.MacroNames.Names[i];
+    grdUserMacros.Cells[7, i] := GLegacyProject.MacroNames.ValueFromIndex[i];
   end;
 end;
 
@@ -484,43 +491,43 @@ procedure TProjectOptionsForm.SaveSettings;
 var
   i, j: integer;
 begin
-  GProject.MainUnit          := edtMainFile.FileName;
-  GProject.TargetFile        := edtTargetFile.FileName;
-  GProject.ProjectDir        := edtMakeDir.Directory;
-  GProject.DefaultMake       := cbDefaultMakeCol.FocusItem;
-  GProject.UnitOutputDir     := edtUnitOutputDir.Directory;
+  GLegacyProject.MainUnit          := edtMainFile.FileName;
+  GLegacyProject.TargetFile        := edtTargetFile.FileName;
+  GLegacyProject.ProjectDir        := edtMakeDir.Directory;
+  GLegacyProject.DefaultMake       := cbDefaultMakeCol.FocusItem;
+  GLegacyProject.UnitOutputDir     := edtUnitOutputDir.Directory;
 
   CleanupCompilerMakeOptionsGrid;
-  GProject.ClearAndInitMakeOptions(grdCompilerMakeOptions.RowCount);
+  GLegacyProject.ClearAndInitMakeOptions(grdCompilerMakeOptions.RowCount);
   for i := 0 to grdCompilerMakeOptions.RowCount-1 do
   begin
     if grdCompilerMakeOptions.Cells[6, i] = '' then
       Continue;
-    GProject.MakeOptions.Add(grdCompilerMakeOptions.Cells[6, i]);
+    GLegacyProject.MakeOptions.Add(grdCompilerMakeOptions.Cells[6, i]);
     for j := 0 to 5 do // we know there is only 6 boolean columns
     begin
       if grdCompilerMakeOptions.Cells[j, i] = cCheck then
-        GProject.MakeOptionsGrid[j, i] := True;
+        GLegacyProject.MakeOptionsGrid[j, i] := True;
     end;
   end;
 
   CleanupCompilerDirs;
-  GProject.ClearAndInitUnitDirsGrid(grdCompilerDirs.RowCount);
+  GLegacyProject.ClearAndInitUnitDirsGrid(grdCompilerDirs.RowCount);
   for i := 0 to grdCompilerDirs.RowCount-1 do
   begin
-    GProject.UnitDirs.Add(grdCompilerDirs.Cells[10, i]);
+    GLegacyProject.UnitDirs.Add(grdCompilerDirs.Cells[10, i]);
     for j := 0 to 9 do // we know there is only 10 boolean columns
     begin
       if grdCompilerDirs.Cells[j, i] = cCheck then
-        GProject.UnitDirsGrid[j, i] := True;
+        GLegacyProject.UnitDirsGrid[j, i] := True;
     end;
   end;
 
   CleanupUserMacrosGrid;
-  GProject.ClearAndInitMacrosGrid(grdUserMacros.RowCount);
+  GLegacyProject.ClearAndInitMacrosGrid(grdUserMacros.RowCount);
   for i := 0 to grdUserMacros.RowCount-1 do
   begin
-    GProject.MacroNames.Values[grdUserMacros.Cells[6, i]] := grdUserMacros.Cells[7, i];
+    GLegacyProject.MacroNames.Values[grdUserMacros.Cells[6, i]] := grdUserMacros.Cells[7, i];
   end;
 end;
 
@@ -1211,7 +1218,7 @@ end;
 
 procedure TProjectOptionsForm.miDelMacro(Sender: TObject);
 begin
-  GProject.MacroNames.Delete(grdUserMacros.FocusRow);
+  GLegacyProject.MacroNames.Delete(grdUserMacros.FocusRow);
   grdUserMacros.DeleteRow(grdUserMacros.FocusRow);
 end;
 

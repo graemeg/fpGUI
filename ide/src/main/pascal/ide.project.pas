@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2026 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -11,7 +11,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      ---
+      Legacy .project INI-based project backend.
 }
 
 unit ide.project;
@@ -21,12 +21,13 @@ unit ide.project;
 interface
 
 uses
-  Classes, SysUtils, ide.project.unitlist, fpg_base, fpg_iniutils;
+  Classes, SysUtils, ide.project.backend, ide.project.unitlist, fpg_base,
+  fpg_iniutils;
 
 type
   TBooleanGrid = array of array of Boolean;
 
-  TProject = class(TObject)
+  TLegacyProjectBackend = class(TIDEProjectBackend)
   private
     FMakeOptionsGrid: TBooleanGrid;
     FProjectName: TfpgString;
@@ -43,31 +44,52 @@ type
     FUnitOutputDir: TfpgString;
     procedure   MergeWithGlobalMacros;
   public
-    constructor Create;
+    constructor Create; override;
     destructor  Destroy; override;
-    function    Save(const AFile: TfpgString = ''): Boolean;
-    function    Load(AProjectFile: TfpgString): Boolean;
-    function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString;
+    { TIDEProjectBackend overrides }
+    function    Load(const AProjectFile: TfpgString): Boolean; override;
+    function    Save(const AFile: TfpgString = ''): Boolean; override;
+    function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString; override;
+    function    GetProjectName: TfpgString; override;
+    procedure   SetProjectName(const AValue: TfpgString); override;
+    function    GetProjectDir: TfpgString; override;
+    procedure   SetProjectDir(const AValue: TfpgString); override;
+    function    GetMainSource: TfpgString; override;
+    procedure   SetMainSource(const AValue: TfpgString); override;
+    function    GetTargetFile: TfpgString; override;
+    procedure   SetTargetFile(const AValue: TfpgString); override;
+    function    GetUnitOutputDir: TfpgString; override;
+    procedure   SetUnitOutputDir(const AValue: TfpgString); override;
+    function    GetUnitList: TUnitList; override;
+    function    GetUnitDirs: TStringList; override;
+    function    GetProjectFormat: TProjectFormat; override;
+    { Legacy-specific methods }
     procedure   ClearAndInitMakeOptions(const ASize: integer);
     procedure   ClearAndInitUnitDirsGrid(const ASize: integer);
     procedure   ClearAndInitMacrosGrid(const ASize: integer);
-    property    ProjectDir: TfpgString read FProjectDir write FProjectDir;
-    property    ProjectName: TfpgString read FProjectName write FProjectName;
-    property    MainUnit: TfpgString read FMainUnit write FMainUnit;
-    property    TargetFile: TfpgString read FTargetFile write FTargetFile;
-    property    UnitList: TUnitList read FUnitList;
+    { Legacy-specific properties }
     property    DefaultMake: integer read FDefaultMake write FDefaultMake;
     property    MakeOptions: TStringList read FMakeOptions;
     property    MakeOptionsGrid: TBooleanGrid read FMakeOptionsGrid write FMakeOptionsGrid;
     property    MacroNames: TStringList read FMacroNames;
-    property    UnitDirs: TStringList read FUnitDirs;
-    property    UnitOutputDir: TfpgString read FUnitOutputDir write FUnitOutputDir;
     property    UnitDirsGrid: TBooleanGrid read FUnitDirsGrid write FUnitDirsGrid;
   end;
 
 
 // lazy-mans singleton
-function GProject: TProject;
+function GProject: TIDEProjectBackend;
+
+// typed accessor for legacy-specific features (nil if not a legacy project)
+function GLegacyProject: TLegacyProjectBackend;
+
+// replace the global project instance
+procedure SetProject(AProject: TIDEProjectBackend);
+
+// create the appropriate backend based on the project filename
+function CreateProjectBackend(const AFileName: TfpgString): TIDEProjectBackend;
+
+// detect project format from filename
+function DetectProjectFormat(const AFileName: TfpgString): TProjectFormat;
 
 procedure FreeProject;
 
@@ -79,17 +101,50 @@ uses
   ,ide.utils
   ,fpg_utils
   ,ide.macros
+  ,ide.project.pasbuild
   ;
 
 
 var
-  uProject: TProject;
+  uProject: TIDEProjectBackend;
 
-function GProject: TProject;
+function GProject: TIDEProjectBackend;
 begin
   if not Assigned(uProject) then
-    uProject := TProject.Create;
+    uProject := TLegacyProjectBackend.Create;
   Result := uProject;
+end;
+
+function GLegacyProject: TLegacyProjectBackend;
+begin
+  if GProject is TLegacyProjectBackend then
+    Result := TLegacyProjectBackend(GProject)
+  else
+    Result := nil;
+end;
+
+procedure SetProject(AProject: TIDEProjectBackend);
+begin
+  if Assigned(uProject) then
+    uProject.Free;
+  uProject := AProject;
+end;
+
+function DetectProjectFormat(const AFileName: TfpgString): TProjectFormat;
+begin
+  if (fpgExtractFileName(AFileName) = 'project.xml') or
+     (fpgExtractFileExt(AFileName) = '.xml') then
+    Result := pfPasBuild
+  else
+    Result := pfLegacy;
+end;
+
+function CreateProjectBackend(const AFileName: TfpgString): TIDEProjectBackend;
+begin
+  if DetectProjectFormat(AFileName) = pfPasBuild then
+    Result := TPasBuildProjectBackend.Create
+  else
+    Result := TLegacyProjectBackend.Create;
 end;
 
 procedure FreeProject;
@@ -99,9 +154,9 @@ begin
 end;
 
 
-{ TProject }
+{ TLegacyProjectBackend }
 
-procedure TProject.MergeWithGlobalMacros;
+procedure TLegacyProjectBackend.MergeWithGlobalMacros;
 var
   o: TIDEMacro;
   i: integer;
@@ -115,7 +170,7 @@ begin
   end;
 end;
 
-constructor TProject.Create;
+constructor TLegacyProjectBackend.Create;
 begin
   inherited Create;
   FUnitList := TUnitList.Create;
@@ -124,7 +179,7 @@ begin
   FUnitDirs := TStringList.Create;
 end;
 
-destructor TProject.Destroy;
+destructor TLegacyProjectBackend.Destroy;
 begin
   FUnitDirs.Free;
   FMacroNames.Free;
@@ -134,7 +189,72 @@ begin
   inherited Destroy;
 end;
 
-function TProject.Save(const AFile: TfpgString = ''): Boolean;
+function TLegacyProjectBackend.GetProjectName: TfpgString;
+begin
+  Result := FProjectName;
+end;
+
+procedure TLegacyProjectBackend.SetProjectName(const AValue: TfpgString);
+begin
+  FProjectName := AValue;
+end;
+
+function TLegacyProjectBackend.GetProjectDir: TfpgString;
+begin
+  Result := FProjectDir;
+end;
+
+procedure TLegacyProjectBackend.SetProjectDir(const AValue: TfpgString);
+begin
+  FProjectDir := AValue;
+end;
+
+function TLegacyProjectBackend.GetMainSource: TfpgString;
+begin
+  Result := FMainUnit;
+end;
+
+procedure TLegacyProjectBackend.SetMainSource(const AValue: TfpgString);
+begin
+  FMainUnit := AValue;
+end;
+
+function TLegacyProjectBackend.GetTargetFile: TfpgString;
+begin
+  Result := FTargetFile;
+end;
+
+procedure TLegacyProjectBackend.SetTargetFile(const AValue: TfpgString);
+begin
+  FTargetFile := AValue;
+end;
+
+function TLegacyProjectBackend.GetUnitOutputDir: TfpgString;
+begin
+  Result := FUnitOutputDir;
+end;
+
+procedure TLegacyProjectBackend.SetUnitOutputDir(const AValue: TfpgString);
+begin
+  FUnitOutputDir := AValue;
+end;
+
+function TLegacyProjectBackend.GetUnitList: TUnitList;
+begin
+  Result := FUnitList;
+end;
+
+function TLegacyProjectBackend.GetUnitDirs: TStringList;
+begin
+  Result := FUnitDirs;
+end;
+
+function TLegacyProjectBackend.GetProjectFormat: TProjectFormat;
+begin
+  Result := pfLegacy;
+end;
+
+function TLegacyProjectBackend.Save(const AFile: TfpgString = ''): Boolean;
 var
   c, j: integer;
   s: TfpgString;
@@ -241,7 +361,7 @@ begin
   Result := True;
 end;
 
-function TProject.Load(AProjectFile: TfpgString): Boolean;
+function TLegacyProjectBackend.Load(const AProjectFile: TfpgString): Boolean;
 var
   a: string;
   s: TfpgString;
@@ -344,7 +464,7 @@ begin
   Result := True;
 end;
 
-function TProject.GenerateCmdLine(const AShowOnly: Boolean; const ABuildMode: integer): TfpgString;
+function TLegacyProjectBackend.GenerateCmdLine(const AShowOnly: Boolean; const ABuildMode: integer): TfpgString;
 var
   c: TfpgString;
   b: integer;
@@ -384,21 +504,21 @@ begin
   Result := c;
 end;
 
-procedure TProject.ClearAndInitMakeOptions(const ASize: integer);
+procedure TLegacyProjectBackend.ClearAndInitMakeOptions(const ASize: integer);
 begin
   FMakeOptions.Clear;
   SetLength(FMakeOptionsGrid, 0, 0);    // free items
   SetLength(FMakeOptionsGrid, 6, ASize);    // 6 columns by X rows
 end;
 
-procedure TProject.ClearAndInitUnitDirsGrid(const ASize: integer);
+procedure TLegacyProjectBackend.ClearAndInitUnitDirsGrid(const ASize: integer);
 begin
   FUnitDirs.Clear;
   SetLength(FUnitDirsGrid, 0, 0); // free items
   SetLength(FUnitDirsGrid, 10, ASize);   // 10 columns by X rows
 end;
 
-procedure TProject.ClearAndInitMacrosGrid(const ASize: integer);
+procedure TLegacyProjectBackend.ClearAndInitMacrosGrid(const ASize: integer);
 begin
   FMacroNames.Clear;
 end;
@@ -411,4 +531,3 @@ finalization
   FreeProject;
 
 end.
-
