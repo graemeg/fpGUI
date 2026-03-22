@@ -254,14 +254,14 @@ var
   r: TfpgRect;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
-  r.SetRect(x, y, w, h);
-  ACanvas.SetColor(clWindowBackground);
-  ACanvas.FillRectangle(r);
+  { Outer corner pixels }
   ACanvas.Pixels[x, y + h - 1] := FPlasticColors^[9];
   ACanvas.Pixels[x + w - 1, y + h - 1] := FPlasticColors^[9];
+  { Inner frame rectangle }
   ACanvas.SetColor(clGridLines);
   r.SetRect(x + 1, y + 1, w - 2, h - 2);
   ACanvas.DrawRectangle(r);
+  { Inner corner pixels }
   ACanvas.Pixels[x + 1, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + w - 2, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + 1, y + h - 2] := FPlasticColors^[10];
