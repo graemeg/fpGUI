@@ -84,6 +84,7 @@ type
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
+    FLastFileDir: TfpgString;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -184,6 +185,7 @@ uses
   ,ide.project.unitlist
   ,ide.builder.thread
   ,ide.utils
+  ,ide.session
   ;
 
 
@@ -205,9 +207,10 @@ procedure TMainForm.btnOpenFileClicked(Sender: TObject);
 var
   s: TfpgString;
 begin
-  s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Source Files', cSourceFiles, cSourceFiles]));
+  s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Source Files', cSourceFiles, cSourceFiles]), FLastFileDir);
   if s <> '' then
   begin
+    FLastFileDir := fpgExtractFileDir(s);
     OpenEditorPage(s);
   end;
 end;
@@ -261,9 +264,12 @@ procedure TMainForm.miFileSaveAs(Sender: TObject);
 var
   s: TfpgString;
 begin
-  s := SelectFileDialog(sfdSave);
+  s := SelectFileDialog(sfdSave, '', FLastFileDir);
   if s <> '' then
+  begin
+    FLastFileDir := fpgExtractFileDir(s);
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+  end;
 end;
 
 procedure TMainForm.miFileClose(Sender: TObject);
@@ -940,6 +946,11 @@ procedure TMainForm.LoadProject(const AFilename: TfpgString);
 var
   i: integer;
   ts: TfpgTabSheet;
+  Session: TIDESession;
+  Info: TOpenFileInfo;
+  AbsPath: TfpgString;
+  editor: TfpgTextEdit;
+  SessionLoaded: Boolean;
 begin
   // remove all project info
   CloseAllTabs;
@@ -949,15 +960,51 @@ begin
   SetProject(CreateProjectBackend(AFilename));
   // now load new project info
   GProject.Load(AFilename);
+  FLastFileDir := GProject.ProjectDir;
   FRecentFiles.AddItem(AFilename);
-  for i := 0 to GProject.UnitList.Count-1 do
-  begin
-    if GProject.UnitList[i].Opened then
+
+  // try to restore session state
+  SessionLoaded := False;
+  Session := TIDESession.Create(GProject.ProjectDir);
+  try
+    if Session.SessionFileExists then
     begin
-      ts := OpenEditorPage(GProject.UnitList[i].FileName);
-      ts.TagPointer := GProject.UnitList[i];
+      Session.Load;
+      SessionLoaded := True;
+      for i := 0 to Session.OpenFileCount - 1 do
+      begin
+        Info := Session.OpenFiles[i];
+        AbsPath := ExpandFileName(GProject.ProjectDir + Info.Path);
+        if fpgFileExists(AbsPath) then
+        begin
+          ts := OpenEditorPage(AbsPath);
+          editor := TfpgTextEdit(ts.Components[0]);
+          editor.CaretPos_V := Info.CaretLine;
+          editor.CaretPos_H := Info.CaretCol;
+          editor.ScrollPos_V := Info.ScrollTop;
+          editor.ScrollPos_H := Info.ScrollLeft;
+        end;
+      end;
+      if (Session.ActiveTab >= 0) and (Session.ActiveTab < pcEditor.PageCount) then
+        pcEditor.ActivePageIndex := Session.ActiveTab;
+    end;
+  finally
+    Session.Free;
+  end;
+
+  // fall back to legacy Opened flags if no session file
+  if not SessionLoaded then
+  begin
+    for i := 0 to GProject.UnitList.Count-1 do
+    begin
+      if GProject.UnitList[i].Opened then
+      begin
+        ts := OpenEditorPage(GProject.UnitList[i].FileName);
+        ts.TagPointer := GProject.UnitList[i];
+      end;
     end;
   end;
+
   PopuplateProjectTree;
   UpdateWindowTitle;
   AddMessage('Project loaded');
@@ -1437,12 +1484,40 @@ begin
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  Session: TIDESession;
+  I: Integer;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
 begin
   CloseAction := caFree;
   gINI.WriteInteger(Name + 'State', 'Left', Left);
   gINI.WriteInteger(Name + 'State', 'Top', Top);
   gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
   gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
+
+  { Save session data }
+  if GProject.ProjectDir <> '' then
+  begin
+    Session := TIDESession.Create(GProject.ProjectDir);
+    try
+      Session.ActiveTab := pcEditor.ActivePageIndex;
+      for I := 0 to pcEditor.PageCount - 1 do
+      begin
+        ts := pcEditor.Pages[I];
+        if ts.Hint <> '' then
+        begin
+          editor := TfpgTextEdit(ts.Components[0]);
+          Session.AddOpenFile(ts.Hint,
+            editor.CaretPos_V, editor.CaretPos_H,
+            editor.ScrollPos_V, editor.ScrollPos_H, I);
+        end;
+      end;
+      Session.Save;
+    finally
+      Session.Free;
+    end;
+  end;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);

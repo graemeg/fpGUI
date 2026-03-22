@@ -48,7 +48,8 @@ uses
   fpg_textedit,
   ide.form.find,
   Sha1,
-  ide.editor.undo;
+  ide.editor.undo,
+  ide.session;
 
 
 procedure MainProc;
