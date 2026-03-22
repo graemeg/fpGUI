@@ -2709,6 +2709,10 @@ begin
     FDefaultDropHandler.Free;
   if Assigned(FElasticTabstops) then
     TTabstopsList(FElasticTabstops).Free;
+  { Nil scrollbar refs before inherited, because child destruction
+    triggers Parent.Invalidate which calls GetClientRect }
+  FVScrollBar := nil;
+  FHScrollBar := nil;
   inherited Destroy;
 end;
 
