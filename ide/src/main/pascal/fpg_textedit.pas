@@ -11,16 +11,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      A new Memo-like component. It's actually more a TextEdit or MulitLineEdit
-      component because it has a lot more features than simply a Memo. Features
-      include: gutter, line numbers in gutter, right edge margin, syntax
-      highlighting, much more optimised etc...
+      A text editor component with features like:
+      gutter, line numbers in gutter, right edge margin, syntax
+      highlighting, Undo/Redo and much more.
 }
 
 unit fpg_textedit;
 
 {$mode objfpc}{$H+}
-{.$Define gDEBUG}
 
 interface
 
