@@ -48,5 +48,13 @@
         <option>-XX</option>
       </compilerOptions>
     </profile>
+
+    <profile>
+      <id>profiler</id>
+      <compilerOptions>
+        <option>-pg</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
   </profiles>
 </project>
