@@ -40,6 +40,7 @@ uses
   fpg_panel,
   fpg_tree,
   fpg_splitter,
+  fpg_stylemanager,
   fpg_flowlayout,
   fpg_layouttypes,
   fpg_miglayout,
@@ -70,6 +71,7 @@ type
     procedure   miMRUClick(Sender: TObject; const FileName: string);
     procedure   SetupCaptions;
     procedure   BuildThemePreviewMenu;
+    procedure   miPreviewStyleClicked(Sender: TObject);
     procedure   ToggleDesignerGrid(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmMain}
@@ -213,10 +215,10 @@ uses
   fpg_iniutils,
   fpg_dialogs,
   fpg_constants,
-  fpg_stylemanager,
   fpg_window,
   vfd_main,
-  vfd_constants;
+  vfd_constants,
+  vfd_designer;
 
 
 // Anchor images
@@ -1297,6 +1299,8 @@ var
   sl: TStringList;
   i: integer;
 begin
+  previewmenu.AddMenuItem('Default (reset)', '', @miPreviewStyleClicked);
+  previewmenu.AddSeparator;
   sl := TStringList.Create;
   fpgStyleManager.AssignStyleTypes(sl);
   sl.Sort;
@@ -1304,9 +1308,26 @@ begin
   begin
     if sl[i] = 'auto' then
       continue;
-    previewmenu.AddMenuItem(sl[i], '', nil).Enabled := False;
+    previewmenu.AddMenuItem(sl[i], '', @miPreviewStyleClicked);
   end;
   sl.Free;
+end;
+
+procedure TfrmMain.miPreviewStyleClicked(Sender: TObject);
+var
+  mi: TfpgMenuItem;
+  styleName: string;
+begin
+  mi := TfpgMenuItem(Sender);
+  styleName := mi.Text;
+  if maindsgn.selectedform = nil then
+    Exit;
+  if Pos('Default', styleName) = 1 then
+  begin
+    maindsgn.selectedform.Form.ClearPreviewStyle;
+    Exit;
+  end;
+  maindsgn.selectedform.Form.SetPreviewStyle(styleName);
 end;
 
 procedure TfrmMain.ToggleDesignerGrid(Sender: TObject);

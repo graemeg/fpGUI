@@ -60,12 +60,19 @@ type
   TDesignedForm = class(TfpgForm)
   private
     FShowGrid: boolean;
+    FPreviewStyle: TfpgStyle;
+    FPreviewColors: array[0..255] of TfpgColor;
+    FHasPreviewColors: boolean;
     procedure   SetShowGrid(AValue: boolean);
   protected
     procedure   HandlePaint; override;
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
+    procedure   SetPreviewStyle(const AStyleName: string);
+    procedure   ClearPreviewStyle;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid;
   end;
 
@@ -162,7 +169,8 @@ uses
   vfd_main,
   vfd_utils,
   vfd_constants,
-  fpg_tree;
+  fpg_tree,
+  fpg_stylemanager;
 
 const
   cEditOrder: array[TfpgEditMode] of string = (rsDlgWidgetOrder, rsDlgTabOrder);
@@ -1695,6 +1703,14 @@ constructor TDesignedForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FShowGrid := False;
+  FPreviewStyle := nil;
+  FHasPreviewColors := False;
+end;
+
+destructor TDesignedForm.Destroy;
+begin
+  FPreviewStyle.Free;
+  inherited Destroy;
 end;
 
 procedure TDesignedForm.AfterCreate;
@@ -1703,6 +1719,73 @@ begin
   WindowPosition := wpUser;
   WindowTitle := rsDlgNewForm;
   SetPosition(300, 150, 300, 250);
+end;
+
+procedure TDesignedForm.SetPreviewStyle(const AStyleName: string);
+var
+  OriginalColors: array[0..255] of TfpgColor;
+  i: integer;
+begin
+  FPreviewStyle.Free;
+  FPreviewStyle := nil;
+  FHasPreviewColors := False;
+  if AStyleName = '' then
+  begin
+    Invalidate;
+    Exit;
+  end;
+  { Save the current named colours BEFORE creating the style instance,
+    because the style constructor changes named colours as a side effect. }
+  for i := 0 to 255 do
+    OriginalColors[i] := fpgColorToRGB(TfpgColor(cl_BaseNamedColor + i));
+  { Create the style instance — its constructor sets preview colours }
+  FPreviewStyle := fpgStyleManager.CreateInstance(AStyleName);
+  if Assigned(FPreviewStyle) then
+  begin
+    { Capture the preview colours that the constructor just set }
+    for i := 0 to 255 do
+      FPreviewColors[i] := fpgColorToRGB(TfpgColor(cl_BaseNamedColor + i));
+    FHasPreviewColors := True;
+    { Restore original named colours so the rest of the app is unaffected }
+    for i := 0 to 255 do
+      fpgSetNamedColor(cl_BaseNamedColor + i, OriginalColors[i]);
+  end;
+  Invalidate;
+end;
+
+procedure TDesignedForm.ClearPreviewStyle;
+begin
+  SetPreviewStyle('');
+end;
+
+procedure TDesignedForm.MsgPaint(var msg: TfpgMessageRec);
+var
+  SavedStyle: TfpgStyle;
+  SavedColors: array[0..255] of TfpgColor;
+  i: integer;
+begin
+  if Assigned(FPreviewStyle) and FHasPreviewColors then
+  begin
+    { Save the current global style and named colours }
+    SavedStyle := fpgStyle;
+    for i := 0 to 255 do
+      SavedColors[i] := fpgColorToRGB(TfpgColor(cl_BaseNamedColor + i));
+    { Swap in the preview style and colours for the entire paint cycle,
+      including all child widgets }
+    fpgStyle := FPreviewStyle;
+    for i := 0 to 255 do
+      fpgSetNamedColor(cl_BaseNamedColor + i, FPreviewColors[i]);
+    try
+      inherited MsgPaint(msg);
+    finally
+      { Restore the original style and colours }
+      fpgStyle := SavedStyle;
+      for i := 0 to 255 do
+        fpgSetNamedColor(cl_BaseNamedColor + i, SavedColors[i]);
+    end;
+  end
+  else
+    inherited MsgPaint(msg);
 end;
 
 
