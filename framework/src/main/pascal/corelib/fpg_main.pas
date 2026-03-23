@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 by Graeme Geldenhuys.
+    Copyright (c) 2006-2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -573,9 +573,11 @@ uses
   fpg_dnd_window,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
+//  fpg_style_win8,
   fpg_style_motif,   // TODO: This needs to be removed!
   fpg_style_carbon,
   fpg_style_plastic,
+  fpg_style_fusion,
   fpg_tab;
 
 var
