@@ -65,8 +65,8 @@ begin
     a the end-user specified a different style via the command line. }
   if Supports(fpgApplication, ICmdLineParams, cmd) and not cmd.HasOption('style') then
   begin
-//    if fpgStyleManager.SetStyle( 'Plastic Medium Gray') then  // 'Plastic Dark'
-//      fpgStyle := fpgStyleManager.Style;
+    if fpgStyleManager.SetStyle('Fusion Light') then
+      fpgStyle := fpgStyleManager.Style;
   end;
 
   frm := TMainForm.Create(nil);
