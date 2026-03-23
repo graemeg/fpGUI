@@ -16,9 +16,9 @@
       to use it. Styles can be changed at runtime via the --style parameter.
       eg:
 
-        $ ./customstyles --style='Demo Style'
-        $ ./customstyles --style=Win2000
-        $ ./customstyles --style='demo style'
+        $ ./customstyles -style='Demo Style'
+        $ ./customstyles -style=Win2000
+        $ ./customstyles -style='demo style'
 
       Note that the style name is not case sensitive. Also if the style
       name consists of more than one word, in needs to be between single
