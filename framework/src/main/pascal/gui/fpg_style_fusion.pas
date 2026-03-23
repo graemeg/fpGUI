@@ -24,6 +24,7 @@ interface
 
 uses
   Classes,
+  SysUtils,
   fpg_main,
   fpg_base;
 
@@ -47,8 +48,13 @@ type
       15 Disabled text
       16 Menu separator
       17 Button highlight line
-      18 Button border }
-  TFusionColors = array [0..18] of TfpgColor;
+      18 Button border
+      19 Progress bar gradient top
+      20 Progress bar gradient bottom
+      21 Progress bar highlight line
+      22 Progress bar border
+      23 Progress bar track background }
+  TFusionColors = array [0..23] of TfpgColor;
   PFusionColors = ^TFusionColors;
 
   TfpgFusionStyle = class(TfpgStyle)
@@ -72,6 +78,8 @@ type
     procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); override;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); override;
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); override;
+    { ProgressBar }
+    procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); override;
   end;
 
   TfpgFusionLightStyle = class(TfpgFusionStyle)
@@ -110,7 +118,12 @@ const
     $FFA0A0A4,  { 15 Disabled text }
     $FFD5D5D5,  { 16 Menu separator }
     $FFFFFFFF,  { 17 Button highlight line }
-    $FF999EA3   { 18 Button border }
+    $FF999EA3,  { 18 Button border }
+    $FF4DB8F0,  { 19 Progress bar gradient top }
+    $FF2D8BC9,  { 20 Progress bar gradient bottom }
+    $FF6EC6F5,  { 21 Progress bar highlight line }
+    $FF2980B9,  { 22 Progress bar border }
+    $FFD4D4D4   { 23 Progress bar track background }
   );
 
   FusionDarkColors: TFusionColors = (
@@ -132,7 +145,12 @@ const
     $FF72767B,  { 15 Disabled text }
     $FF4A4E52,  { 16 Menu separator }
     $FF505860,  { 17 Button highlight line }
-    $FF5E6164   { 18 Button border }
+    $FF5E6164,  { 18 Button border }
+    $FF3DAEE9,  { 19 Progress bar gradient top }
+    $FF2A8BC4,  { 20 Progress bar gradient bottom }
+    $FF5BBEF0,  { 21 Progress bar highlight line }
+    $FF1F7AAE,  { 22 Progress bar border }
+    $FF3E4349   { 23 Progress bar track background }
   );
 
 
@@ -336,6 +354,64 @@ begin
   ACanvas.SetColor(FColors^[16]);
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.DrawLine(r.Left + 1, r.Top + 2, r.Right, r.Top + 2);
+end;
+
+procedure TfpgFusionStyle.DrawProgressBar(ACanvas: TfpgCanvas;
+  AParams: TfpgStyleDrawProgressBar);
+var
+  r, fill: TfpgRect;
+  diff: integer;
+  aPos: integer;
+  pos: integer;
+  percent: integer;
+  txt: string;
+  x, y: TfpgCoord;
+begin
+  r := AParams.Rect;
+
+  { Calculate position }
+  diff    := AParams.Max - AParams.Min;
+  aPos    := AParams.Position - AParams.Min;
+  percent := round(((100 / diff) * aPos));
+  pos     := round(percent * (r.Width - 2) / 100);
+
+  { Track background }
+  ACanvas.SetColor(FColors^[23]);
+  ACanvas.FillRectangle(r);
+
+  { Track border }
+  ACanvas.SetColor(FColors^[3]);
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.DrawRectangle(r);
+
+  if AParams.Position > AParams.Min then
+  begin
+    { Fill bar area }
+    fill.SetRect(r.Left + 1, r.Top + 1, pos, r.Height - 2);
+
+    { Gradient fill using accent colours }
+    ACanvas.GradientFill(fill, FColors^[19], FColors^[20], gdVertical);
+
+    { Top highlight line for subtle raised appearance }
+    ACanvas.SetColor(FColors^[21]);
+    ACanvas.DrawLine(fill.Left, fill.Top, fill.Right, fill.Top);
+
+    { Fill bar border }
+    ACanvas.SetColor(FColors^[22]);
+    ACanvas.DrawRectangle(fill);
+  end;
+
+  { Paint percentage text if required }
+  if AParams.ShowCaption then
+  begin
+    txt := IntToStr(percent) + '%';
+    x := r.Left + (r.Width - AParams.Font.GetTextWidth(txt)) div 2;
+    y := r.Top + (r.Height - AParams.Font.GetHeight) div 2;
+    ACanvas.SetFont(AParams.Font);
+    { Use contrasting text — white over fill, normal text over track }
+    ACanvas.SetTextColor(AParams.TextColor);
+    ACanvas.DrawString(x, y, txt);
+  end;
 end;
 
 

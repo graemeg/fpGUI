@@ -95,6 +95,17 @@ type
   end;
 
 
+  TfpgStyleDrawProgressBar = record
+    Rect: TfpgRect;
+    Position: longint;
+    Min: longint;
+    Max: longint;
+    ShowCaption: boolean;
+    Font: TfpgFontResourceBase;
+    BackgroundColor: TfpgColor;
+    TextColor: TfpgColor;
+  end;
+
   TfpgStyleDrawTab = record
     TabSheet: TObject;
     TabPosition: TfpgTabPosition;
@@ -241,6 +252,8 @@ type
     { Listbox }
     procedure   DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
     procedure   DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean; const HasFocus: Boolean); virtual;
+    { ProgressBar }
+    procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); virtual;
   end;
 
 
@@ -2906,6 +2919,58 @@ begin
       ACanvas.SetTextColor(clInactiveSelText);
     end;
     ACanvas.FillRectangle(r);
+  end;
+end;
+
+procedure TfpgStyle.DrawProgressBar(ACanvas: TfpgCanvas;
+  AParams: TfpgStyleDrawProgressBar);
+var
+  r: TfpgRect;
+  diff: integer;
+  aPos: integer;
+  pos: integer;
+  percent: integer;
+  txt: string;
+  x, y: TfpgCoord;
+begin
+  r := AParams.Rect;
+  ACanvas.Clear(AParams.BackgroundColor);
+
+  { Calculate position }
+  diff    := AParams.Max - AParams.Min;
+  aPos    := AParams.Position - AParams.Min;
+  percent := round(((100 / diff) * aPos));
+  pos     := round(percent * (r.Width - 2) / 100);
+
+  { Bluecurve theme — outer dark border }
+  ACanvas.SetColor(fpgColor(153, 153, 153));
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.DrawRectangle(r);
+  r.InflateRect(-1, -1);
+  r.Width := pos;
+  if AParams.Position > AParams.Min then
+  begin
+    { Left and top highlight }
+    ACanvas.SetColor(fpgColor(152, 178, 237));
+    ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
+    ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
+    { Right and bottom shadow }
+    ACanvas.SetColor(fpgColor(59, 76, 113));
+    ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
+    ACanvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom); // bottom
+    { Interior gradient fill }
+    r.InflateRect(-1, -1);
+    ACanvas.GradientFill(r, fpgColor(66, 93, 155), fpgColor(151, 176, 232), gdVertical);
+  end;
+  { Paint percentage text if required }
+  if AParams.ShowCaption then
+  begin
+    txt := IntToStr(percent) + '%';
+    x := AParams.Rect.Left + (AParams.Rect.Width - AParams.Font.GetTextWidth(txt)) div 2;
+    y := AParams.Rect.Top + (AParams.Rect.Height - AParams.Font.GetHeight) div 2;
+    ACanvas.SetTextColor(AParams.TextColor);
+    ACanvas.SetFont(AParams.Font);
+    ACanvas.DrawString(x, y, txt);
   end;
 end;
 

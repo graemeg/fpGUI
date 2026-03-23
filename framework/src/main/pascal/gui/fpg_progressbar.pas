@@ -145,59 +145,19 @@ end;
 
 procedure TfpgCustomProgressBar.HandlePaint;
 var
-  r: TfpgRect;
-  diff: integer;
-  aPos: integer;  // absolute position
-  pos: integer;
-  percent: integer;
-  txt: string;
-  x: TfpgCoord;
-  y: TfpgCoord;
+  params: TfpgStyleDrawProgressBar;
 begin
   inherited HandlePaint;
   Canvas.ClearClipRect;
-  r.SetRect(0, 0, ActualWidth, ActualHeight);
-
-  Canvas.Clear(BackgroundColor);
-//  Canvas.SetColor(clInactiveWgFrame);
-
-  // calculate position
-  diff    := Max - Min; // diff..
-  aPos    := Position - Min;  // absolute position
-  percent := round(((100 / diff) * aPos));
-  pos     := round(percent * (ActualWidth-2) / 100);
-
-  // Bluecurve theme  :)
-  // outer dark border
-  Canvas.SetColor(fpgColor(153, 153, 153));  // was $999999
-  Canvas.SetLineStyle(1, lsSolid);
-  Canvas.DrawRectangle(r);
-  r.InflateRect(-1, -1);
-  r.Width := pos;
-  if FPosition > 0 then
-  begin
-    // left top
-    Canvas.SetColor(fpgColor(152, 178, 237));  // was $98b2ed
-    Canvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
-    Canvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
-    // right bottom
-    Canvas.SetColor(fpgColor(59, 76, 113));  // was $3b4c71
-    Canvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
-    Canvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom);   // bottom
-    // inside gradient fill
-    r.InflateRect(-1, -1);
-    Canvas.GradientFill(r, fpgColor(66, 93, 155), fpgColor(151, 176, 232), gdVertical);  // was $425d9b, $97b0e8
-  end;
-  // paint percentage if required
-  if FShowCaption then
-  begin
-    txt := IntToStr(percent) + '%';
-    x := (ActualWidth - FFont.GetTextWidth(txt)) div 2;
-    y := (ActualHeight - FFont.GetHeight) div 2;
-    Canvas.SetTextColor(TextColor);
-    Canvas.SetFont(FFont);
-    Canvas.DrawString(x, y, txt);
-  end;
+  params.Rect.SetRect(0, 0, ActualWidth, ActualHeight);
+  params.Position := FPosition;
+  params.Min := FMin;
+  params.Max := FMax;
+  params.ShowCaption := FShowCaption;
+  params.Font := FFont;
+  params.BackgroundColor := BackgroundColor;
+  params.TextColor := TextColor;
+  fpgStyle.DrawProgressBar(Canvas, params);
 end;
 
 constructor TfpgCustomProgressBar.Create(AOwner: TComponent);
