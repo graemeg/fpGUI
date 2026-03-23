@@ -50,7 +50,7 @@ type
     { Combobox }
     procedure   DrawStaticComboBox(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsFocused: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor; const AInternalBtnRect: TfpgRect; const ABtnPressed: Boolean); override;
     { Checkbox }
-    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); override;
+    procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
   end;
 
 implementation
@@ -520,14 +520,23 @@ begin
   DrawDirectionArrow(ACanvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
 end;
 
-procedure TfpgWin8Style.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+procedure TfpgWin8Style.DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags);
 var
   img: TfpgImage;
   size: integer;
+  ix: integer;
 begin
   img := FImages.GetImage('win8.checkboxes');    // Do NOT localize - return value is a reference only
   size := GetCheckBoxSize;
-  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
+  if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+  begin
+    ix := Ord(cbfChecked in AFlags);
+    if cbfPressed in AFlags then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(cbfChecked in AFlags) * 2)) - Ord(cbfChecked in AFlags);
+  ACanvas.DrawImagePart(r.Left, r.Top, img, ix * size, 0, size, size);
 end;
 
 

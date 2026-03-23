@@ -177,7 +177,7 @@ end;
 procedure TfpgBaseCheckBox.HandlePaint;
 var
   r: TfpgRect;
-  ix: integer;
+  cbFlags: TfpgCheckBoxFlags;
   LFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
@@ -191,23 +191,20 @@ begin
   if r.top < 0 then
     r.top := 0;
 
-  // calculate which image to paint.
+  { Build checkbox state flags }
+  cbFlags := [];
+  if FChecked then
+    Include(cbFlags, cbfChecked);
   if Enabled then
-  begin
-    if ReadOnly then
-      ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked)
-    else
-    begin
-      ix := Ord(FChecked);
-      if FIsPressed then
-        Inc(ix, 2);
-    end;
-  end
-  else
-    ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
+    Include(cbFlags, cbfEnabled);
+  if FIsPressed then
+    Include(cbFlags, cbfPressed);
+  if FReadOnly then
+    Include(cbFlags, cbfReadOnly);
+  if FFocused then
+    Include(cbFlags, cbfHasFocus);
 
-  // paint the check (in this case a X)
-  fpgStyle.DrawCheckbox(Canvas, r.Left, r.Top, ix*FBoxSize, 0);
+  fpgStyle.DrawCheckBox(Canvas, r, cbFlags);
 
   r := GetClientRect;
   { max focus rectangle and text boundry }

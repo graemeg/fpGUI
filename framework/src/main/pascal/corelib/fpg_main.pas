@@ -47,6 +47,8 @@ type
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu, mifHeader);
 
+  TfpgCheckBoxFlags = set of (cbfChecked, cbfPressed, cbfEnabled, cbfReadOnly, cbfHasFocus);
+
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
 
@@ -243,7 +245,7 @@ type
     procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
     { Checkbox }
     function    GetCheckBoxSize: integer; virtual;
-    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
+    procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); virtual;
     { PageControl & Tabs }
     function    GetTabBorders: TRect; virtual;
     function    GetDefaultTabHeight: TfpgCoord; virtual;
@@ -2756,14 +2758,26 @@ begin
   Result := 13; // 13x13 - it is always a rectangle
 end;
 
-procedure TfpgStyle.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+procedure TfpgStyle.DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags);
 var
   img: TfpgImage;
   size: integer;
+  ix: integer;
 begin
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
   size := GetCheckBoxSize;
-  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
+  { Map flags to sprite sheet index:
+      0 = unchecked, 1 = checked,
+      2 = unchecked pressed/disabled, 3 = checked pressed/disabled }
+  if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+  begin
+    ix := Ord(cbfChecked in AFlags);
+    if cbfPressed in AFlags then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(cbfChecked in AFlags) * 2)) - Ord(cbfChecked in AFlags);
+  ACanvas.DrawImagePart(r.Left, r.Top, img, ix * size, 0, size, size);
 end;
 
 function TfpgStyle.GetTabBorders: TRect;

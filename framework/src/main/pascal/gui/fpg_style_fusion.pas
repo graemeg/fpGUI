@@ -53,8 +53,12 @@ type
       20 Progress bar gradient bottom
       21 Progress bar highlight line
       22 Progress bar border
-      23 Progress bar track background }
-  TFusionColors = array [0..23] of TfpgColor;
+      23 Progress bar track background
+      24 Checkbox background
+      25 Checkbox border
+      26 Checkbox check mark colour
+      27 Checkbox pressed background }
+  TFusionColors = array [0..27] of TfpgColor;
   PFusionColors = ^TFusionColors;
 
   TfpgFusionStyle = class(TfpgStyle)
@@ -80,6 +84,8 @@ type
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); override;
     { ProgressBar }
     procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); override;
+    { Checkbox }
+    procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
   end;
 
   TfpgFusionLightStyle = class(TfpgFusionStyle)
@@ -123,7 +129,11 @@ const
     $FF2D8BC9,  { 20 Progress bar gradient bottom }
     $FF6EC6F5,  { 21 Progress bar highlight line }
     $FF2980B9,  { 22 Progress bar border }
-    $FFD4D4D4   { 23 Progress bar track background }
+    $FFD4D4D4,  { 23 Progress bar track background }
+    $FFFCFCFC,  { 24 Checkbox background }
+    $FF999EA3,  { 25 Checkbox border }
+    $FF232627,  { 26 Checkbox check mark colour }
+    $FFD0E8F8   { 27 Checkbox pressed background }
   );
 
   FusionDarkColors: TFusionColors = (
@@ -150,7 +160,11 @@ const
     $FF2A8BC4,  { 20 Progress bar gradient bottom }
     $FF5BBEF0,  { 21 Progress bar highlight line }
     $FF1F7AAE,  { 22 Progress bar border }
-    $FF3E4349   { 23 Progress bar track background }
+    $FF3E4349,  { 23 Progress bar track background }
+    $FF232629,  { 24 Checkbox background }
+    $FF5E6164,  { 25 Checkbox border }
+    $FFEFF0F1,  { 26 Checkbox check mark colour }
+    $FF2A3035   { 27 Checkbox pressed background }
   );
 
 
@@ -411,6 +425,46 @@ begin
     { Use contrasting text — white over fill, normal text over track }
     ACanvas.SetTextColor(AParams.TextColor);
     ACanvas.DrawString(x, y, txt);
+  end;
+end;
+
+procedure TfpgFusionStyle.DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect;
+  AFlags: TfpgCheckBoxFlags);
+var
+  cx, cy: TfpgCoord;
+begin
+  ACanvas.SetLineStyle(1, lsSolid);
+
+  { Checkbox box background }
+  if cbfPressed in AFlags then
+    ACanvas.SetColor(FColors^[27])
+  else
+    ACanvas.SetColor(FColors^[24]);
+  ACanvas.FillRectangle(r);
+
+  { Border — use accent colour when focused, normal border otherwise }
+  if cbfHasFocus in AFlags then
+    ACanvas.SetColor(FColors^[8])
+  else
+    ACanvas.SetColor(FColors^[25]);
+  ACanvas.DrawRectangle(r);
+
+  { Draw the check mark }
+  if cbfChecked in AFlags then
+  begin
+    if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+      ACanvas.SetColor(FColors^[8])  { accent colour for check mark }
+    else
+      ACanvas.SetColor(FColors^[15]);  { disabled text colour }
+    ACanvas.SetLineStyle(2, lsSolid);
+    { Draw a tick/check mark centred in the box }
+    cx := r.Left + (r.Width div 2);
+    cy := r.Top + (r.Height div 2);
+    { Short leg of tick: bottom-left to centre-bottom }
+    ACanvas.DrawLine(cx - 3, cy, cx - 1, cy + 3);
+    { Long leg of tick: centre-bottom to top-right }
+    ACanvas.DrawLine(cx - 1, cy + 3, cx + 4, cy - 2);
+    ACanvas.SetLineStyle(1, lsSolid);
   end;
 end;
 
