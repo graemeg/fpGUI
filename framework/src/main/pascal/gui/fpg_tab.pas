@@ -935,7 +935,7 @@ begin
         r2.Top     := 0;
         r2.Width   := ActualWidth;
         r2.Height  := ActualHeight;
-        Canvas.DrawButtonFace(r2, []);
+        fpgStyle.DrawPageControlBody(Canvas, r2);
       end;
 
     tpBottom:
@@ -980,7 +980,7 @@ begin
         r2.Top     := 0;
         r2.Width   := ActualWidth;
         r2.Height  := ActualHeight - TabH;
-        Canvas.DrawButtonFace(r2, []);
+        fpgStyle.DrawPageControlBody(Canvas, r2);
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
@@ -1031,7 +1031,7 @@ begin
         r2.Top     := r2.Top + r2.Height-2;
         r2.Width   := ActualWidth;
         r2.Height  := ActualHeight - r2.Height;
-        Canvas.DrawButtonFace(r2, []);
+        fpgStyle.DrawPageControlBody(Canvas, r2);
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
@@ -1082,7 +1082,7 @@ begin
         r2.Top     := 0;
         r2.Width   := ActualWidth - TabW;
         r2.Height  := ActualHeight;
-        Canvas.DrawButtonFace(r2, []);
+        fpgStyle.DrawPageControlBody(Canvas, r2);
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;
@@ -1133,7 +1133,7 @@ begin
         r2.Top     := 0;
         r2.Width   := ActualWidth - TabW;
         r2.Height  := ActualHeight;
-        Canvas.DrawButtonFace(r2, []);
+        fpgStyle.DrawPageControlBody(Canvas, r2);
 
         // Draw text of ActivePage, because we didn't before.
         h := self.ActivePage;

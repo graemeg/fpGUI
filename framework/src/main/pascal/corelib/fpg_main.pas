@@ -253,6 +253,7 @@ type
     function    GetTabBorders: TRect; virtual;
     function    GetDefaultTabHeight: TfpgCoord; virtual;
     procedure   DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor); virtual;
+    procedure   DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); virtual;
     { Listbox }
     procedure   DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
@@ -2827,6 +2828,11 @@ end;
 procedure TfpgStyle.DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor);
 begin
   ACanvas.Clear(ABGColor);
+end;
+
+procedure TfpgStyle.DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  DrawButtonFace(ACanvas, r, []);
 end;
 
 procedure TfpgStyle.DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab);

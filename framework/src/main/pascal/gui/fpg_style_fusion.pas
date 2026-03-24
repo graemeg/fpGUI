@@ -57,8 +57,10 @@ type
       24 Checkbox background
       25 Checkbox border
       26 Checkbox check mark colour
-      27 Checkbox pressed background }
-  TFusionColors = array [0..27] of TfpgColor;
+      27 Checkbox pressed background
+      28 Inactive tab background
+      29 Tab border }
+  TFusionColors = array [0..29] of TfpgColor;
   PFusionColors = ^TFusionColors;
 
   TfpgFusionStyle = class(TfpgStyle)
@@ -89,6 +91,9 @@ type
     { RadioButton }
     function    GetRadioButtonSize: integer; override;
     procedure   DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
+    { PageControl & Tabs }
+    procedure   DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect); override;
+    procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); override;
   end;
 
   TfpgFusionLightStyle = class(TfpgFusionStyle)
@@ -105,7 +110,8 @@ type
 implementation
 
 uses
-  fpg_stylemanager;
+  fpg_stylemanager,
+  fpg_tab;
 
 const
   FusionLightColors: TFusionColors = (
@@ -136,7 +142,9 @@ const
     $FFFCFCFC,  { 24 Checkbox background }
     $FF999EA3,  { 25 Checkbox border }
     $FF232627,  { 26 Checkbox check mark colour }
-    $FFD0E8F8   { 27 Checkbox pressed background }
+    $FFD0E8F8,  { 27 Checkbox pressed background }
+    $FFD8DADC,  { 28 Inactive tab background }
+    $FFBCBEC0   { 29 Tab border }
   );
 
   FusionDarkColors: TFusionColors = (
@@ -167,7 +175,9 @@ const
     $FF232629,  { 24 Checkbox background }
     $FF5E6164,  { 25 Checkbox border }
     $FFEFF0F1,  { 26 Checkbox check mark colour }
-    $FF2A3035   { 27 Checkbox pressed background }
+    $FF2A3035,  { 27 Checkbox pressed background }
+    $FF272B30,  { 28 Inactive tab background }
+    $FF54575B   { 29 Tab border }
   );
 
 
@@ -509,6 +519,133 @@ begin
       ACanvas.SetColor(FColors^[15]);  { disabled colour }
     ACanvas.FillArc(cx - 3, cy - 3, 6, 6, 0, 360);
   end;
+end;
+
+procedure TfpgFusionStyle.DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  ACanvas.SetColor(clWindowBackground);
+  ACanvas.FillRectangle(r);
+  ACanvas.SetColor(FColors^[29]);
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.DrawRectangle(r);
+  { Subtle bottom shadow line — lighter than border, darker than background }
+  ACanvas.SetColor(FColors^[6]);
+  ACanvas.DrawLine(r.Left, r.Bottom, r.Right + 1, r.Bottom);
+end;
+
+procedure TfpgFusionStyle.DrawPageControlTab(ACanvas: TfpgCanvas;
+  AParams: TfpgStyleDrawTab);
+var
+  r: TfpgRect;
+  activeColor: TfpgColor;
+begin
+  r := AParams.TabRect;
+  ACanvas.SetLineStyle(1, lsSolid);
+
+  { Determine the active tab colour }
+  if TfpgTabSheet(AParams.TabSheet).PageControl.ActiveTabColor = clDefault then
+    activeColor := TfpgTabSheet(AParams.TabSheet).TabColor
+  else
+    activeColor := TfpgTabSheet(AParams.TabSheet).PageControl.ActiveTabColor;
+
+  case AParams.TabPosition of
+    tpTop:
+      begin
+        if AParams.IsSelected then
+        begin
+          { Active tab: light background, no bottom border }
+          ACanvas.SetColor(activeColor);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 1);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Bottom - 1, r.Left, r.Top + 1);    // left
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Right - 1, r.Top + 1, r.Right - 1, r.Bottom - 1); // right
+        end
+        else
+        begin
+          { Inactive tab: shaded background }
+          ACanvas.SetColor(FColors^[28]);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Bottom - 1, r.Left, r.Top + 1);    // left
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Right - 1, r.Top + 1, r.Right - 1, r.Bottom - 1); // right
+          ACanvas.DrawLine(r.Left, r.Bottom - 1, r.Right, r.Bottom - 1);       // bottom
+        end;
+      end;
+
+    tpBottom:
+      begin
+        if AParams.IsSelected then
+        begin
+          ACanvas.SetColor(activeColor);
+          ACanvas.FillRectangle(r.Left + 1, r.Top, r.Width - 2, r.Height - 1);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom - 1);        // left
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+          ACanvas.DrawLine(r.Right - 1, r.Top, r.Right - 1, r.Bottom - 1);      // right
+        end
+        else
+        begin
+          ACanvas.SetColor(FColors^[28]);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom - 1);        // left
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+          ACanvas.DrawLine(r.Right - 1, r.Top, r.Right - 1, r.Bottom - 1);      // right
+          ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);              // top
+        end;
+      end;
+
+    tpLeft:
+      begin
+        if AParams.IsSelected then
+        begin
+          r.Width := r.Width - 1;
+          r.Height := r.Height + 2;
+          ACanvas.SetColor(activeColor);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 1, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Bottom - 1, r.Left, r.Top + 1);    // left
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+        end
+        else
+        begin
+          ACanvas.SetColor(FColors^[28]);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left, r.Bottom - 1, r.Left, r.Top + 1);    // left
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+          ACanvas.DrawLine(r.Right - 1, r.Top, r.Right - 1, r.Bottom);  // right
+        end;
+      end;
+
+    tpRight:
+      begin
+        if AParams.IsSelected then
+        begin
+          r.Height := r.Height + 2;
+          ACanvas.SetColor(activeColor);
+          ACanvas.FillRectangle(r.Left, r.Top + 1, r.Width - 1, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Right - 1, r.Top + 1, r.Right - 1, r.Bottom - 1); // right
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+        end
+        else
+        begin
+          ACanvas.SetColor(FColors^[28]);
+          ACanvas.FillRectangle(r.Left + 1, r.Top + 1, r.Width - 2, r.Height - 2);
+          ACanvas.SetColor(FColors^[29]);
+          ACanvas.DrawLine(r.Left + 1, r.Top, r.Right - 1, r.Top);      // top
+          ACanvas.DrawLine(r.Right - 1, r.Top + 1, r.Right - 1, r.Bottom - 1); // right
+          ACanvas.DrawLine(r.Left + 1, r.Bottom - 1, r.Right - 1, r.Bottom - 1); // bottom
+          ACanvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom);            // left
+        end;
+      end;
+  end;  { case }
 end;
 
 
