@@ -170,6 +170,7 @@ type
     procedure   miJumpToInterface(Sender: TObject);
     procedure   miJumpToImplementation(Sender: TObject);
     procedure   miJumpToggleIntfImpl(Sender: TObject);
+    procedure   CheckGitIgnoreForIdeDir;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -1119,6 +1120,7 @@ begin
 
   PopuplateProjectTree;
   UpdateWindowTitle;
+  CheckGitIgnoreForIdeDir;
   AddMessage('Project loaded');
 end;
 
@@ -1651,6 +1653,50 @@ begin
   nav := NavigateInterfaceImplementation(FHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
     edt.GotoLine(nav.Line + 1);
+end;
+
+procedure TMainForm.CheckGitIgnoreForIdeDir;
+var
+  GitIgnorePath: TfpgString;
+  Content: TStringList;
+  F: TextFile;
+begin
+  GitIgnorePath := GProject.ProjectDir + '.gitignore';
+
+  { Check if .gitignore already contains .ide/ }
+  if fpgFileExists(GitIgnorePath) then
+  begin
+    Content := TStringList.Create;
+    try
+      Content.LoadFromFile(GitIgnorePath);
+      if (Content.IndexOf('.ide/') >= 0) or (Content.IndexOf('.ide') >= 0) then
+        Exit; { already present }
+    finally
+      Content.Free;
+    end;
+  end
+  else
+  begin
+    { No .gitignore at all — only offer if .ide/ directory exists }
+    if not fpgDirectoryExists(GProject.ProjectDir + '.ide') then
+      Exit;
+  end;
+
+  if TfpgMessageDialog.Question('Add .ide/ to .gitignore?',
+      'The .ide/ directory contains session data that should not be committed. '
+      + 'Add it to .gitignore?') = mbYes then
+  begin
+    AssignFile(F, GitIgnorePath);
+    if fpgFileExists(GitIgnorePath) then
+      Append(F)
+    else
+      Rewrite(F);
+    try
+      WriteLn(F, '.ide/');
+    finally
+      CloseFile(F);
+    end;
+  end;
 end;
 
 procedure TMainForm.SetupEditorPreference;
