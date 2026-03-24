@@ -87,6 +87,7 @@ type
     { ProgressBar }
     procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); override;
     { Checkbox }
+    function    GetCheckBoxSize: integer; override;
     procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
     { RadioButton }
     function    GetRadioButtonSize: integer; override;
@@ -441,10 +442,16 @@ begin
   end;
 end;
 
+function TfpgFusionStyle.GetCheckBoxSize: integer;
+begin
+  Result := 20; // 20x20 - it is always a rectangle
+end;
+
 procedure TfpgFusionStyle.DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect;
   AFlags: TfpgCheckBoxFlags);
 var
   cx, cy: TfpgCoord;
+  p1x, p1y, p2x, p2y, p3x, p3y: TfpgCoord;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
 
@@ -469,7 +476,8 @@ begin
       ACanvas.SetColor(FColors^[8])  { accent colour for check mark }
     else
       ACanvas.SetColor(FColors^[15]);  { disabled text colour }
-    ACanvas.SetLineStyle(2, lsSolid);
+    ACanvas.SetLineStyle(3, lsSolid);
+(*
     { Draw a tick/check mark centred in the box }
     cx := r.Left + (r.Width div 2);
     cy := r.Top + (r.Height div 2);
@@ -477,6 +485,20 @@ begin
     ACanvas.DrawLine(cx - 3, cy, cx - 1, cy + 3);
     { Long leg of tick: centre-bottom to top-right }
     ACanvas.DrawLine(cx - 1, cy + 3, cx + 4, cy - 2);
+    ACanvas.SetLineStyle(1, lsSolid);
+*)
+    { Calculate all three anchor points }
+    p1x := r.Left + Round(r.Width * 0.22);
+    p1y := r.Top + Round(r.Height * 0.50);
+
+    p2x := r.Left + Round(r.Width * 0.42);
+    p2y := r.Top + Round(r.Height * 0.75);
+
+    p3x := r.Left + Round(r.Width * 0.70);
+    p3y := r.Top + Round(r.Height * 0.20);
+
+    ACanvas.DrawLine(p1x, p1y, p2x, p2y);
+    ACanvas.DrawLine(p2x, p2y, p3x, p3y);
     ACanvas.SetLineStyle(1, lsSolid);
   end;
 end;
