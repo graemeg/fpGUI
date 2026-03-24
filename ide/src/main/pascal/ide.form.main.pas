@@ -80,6 +80,10 @@ type
     FFileMonitor: TFileMonitor;
     FHighlighter: TPascalHighlighter;
     FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
+    FINIHighlighter: TEditorHighlighter;
+    FINIHighlighterEditor: TfpgTextEdit;
+    FXMLHighlighter: TEditorHighlighter;
+    FXMLHighlighterEditor: TfpgTextEdit;
     FBracketMatch: TBracketMatchResult;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
@@ -152,7 +156,10 @@ type
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
     function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
+    procedure   HighlightWithTokens(AHighlighter: TEditorHighlighter; Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean; AShowBracketMatch: Boolean = False);
     procedure   HighlightObjectPascal(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   HighlightINI(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
+    procedure   HighlightXML(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   HighlightPatch(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   LoadThemeByName(const AName: string);
     procedure   SetupEditorPreference;
@@ -194,6 +201,8 @@ uses
   ,ide.utils
   ,ide.session
   ,ide.navigation
+  ,ide.highlighter.ini
+  ,ide.highlighter.xml
   ;
 
 
@@ -849,7 +858,13 @@ begin
   ts := edt.Parent as TfpgTabSheet;
   if Assigned(ts) and (Copy(ts.Text, 1, 2) <> '* ') then
     ts.Text := '* ' + ts.Text;
-  RetokeniseEditor(edt);
+  { Invalidate cached highlighter state so the next paint retokenises }
+  if edt = FHighlighterEditor then
+    FHighlighterEditor := nil;
+  if edt = FINIHighlighterEditor then
+    FINIHighlighterEditor := nil;
+  if edt = FXMLHighlighterEditor then
+    FXMLHighlighterEditor := nil;
 end;
 
 procedure TMainForm.EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -896,10 +911,16 @@ procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
   u: TUnit;
 begin
-  { Clear highlighter reference if this tab's editor is being tracked }
+  { Clear highlighter references if this tab's editor is being tracked }
   if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
+  begin
     if ATabSheet.Components[0] = FHighlighterEditor then
       FHighlighterEditor := nil;
+    if ATabSheet.Components[0] = FINIHighlighterEditor then
+      FINIHighlighterEditor := nil;
+    if ATabSheet.Components[0] = FXMLHighlighterEditor then
+      FXMLHighlighterEditor := nil;
+  end;
   u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
   begin
@@ -1157,6 +1178,17 @@ begin
       else if (ext = '.patch') or (ext = '.diff') then
       begin
         editor.OnDrawLine := @HighlightPatch;
+      end
+      else if (ext = '.ini') or (ext = '.cfg') or (ext = '.conf') then
+      begin
+        editor.OnDrawLine := @HighlightINI;
+      end
+      else if (ext = '.xml') or (ext = '.html') or (ext = '.htm') or
+              (ext = '.xhtml') or (ext = '.svg') or (ext = '.xsd') or
+              (ext = '.xsl') or (ext = '.xslt') or (ext = '.lpi') or
+              (ext = '.lpk') then
+      begin
+        editor.OnDrawLine := @HighlightXML;
       end;
     end;
     ts.Realign;
@@ -1179,9 +1211,10 @@ begin
   WindowTitle := Format(cTitle, [GProject.ProjectName]);
 end;
 
-procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;
-  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
-  var AllowSelfDraw: Boolean);
+procedure TMainForm.HighlightWithTokens(AHighlighter: TEditorHighlighter;
+  Sender: TObject; ALineText: TfpgString; ALineIndex: Integer;
+  ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean;
+  AShowBracketMatch: Boolean);
 var
   oldfont: TfpgFontResourceBase;
   edt: TfpgTextEdit;
@@ -1198,19 +1231,14 @@ var
 begin
   edt := TfpgTextEdit(Sender);
 
-  { Guard against calls during destruction when FHighlighter is already freed }
-  if not Assigned(FHighlighter) then
+  if not Assigned(AHighlighter) then
     Exit;
-
-  { Ensure highlighter is tokenised for this editor }
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
 
   AllowSelfDraw := False;
   oldfont := TfpgFontResourceBase(ACanvas.Font);
 
   { Get tokens for this line }
-  tokens := FHighlighter.GetLineTokens(ALineIndex);
+  tokens := AHighlighter.GetLineTokens(ALineIndex);
 
   if tokens = nil then
   begin
@@ -1222,10 +1250,7 @@ begin
     Exit;
   end;
 
-  { Sequential drawing: render each token exactly once, left to right.
-    This avoids the previous draw-all-then-overdraw approach which caused
-    every styled character to be alpha-blended twice — the dominant cost
-    shown in profiling (BLEND_PIX_RGBA called millions of times). }
+  { Sequential drawing: render each token exactly once, left to right. }
   lLastCol := 0;
   for i := 0 to Length(tokens) - 1 do
   begin
@@ -1236,8 +1261,7 @@ begin
     if s = '' then
       Continue;
 
-    { Fill any gap before this token with background colour (handles
-      cases where tokens might not be perfectly contiguous) }
+    { Fill any gap before this token with background colour }
     if tok.Column > lLastCol then
     begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
@@ -1261,8 +1285,8 @@ begin
     else
       bg := FTheme.Chrome.Background;
 
-    { Bracket match highlight }
-    if FBracketMatch.Found then
+    { Bracket match highlight (Pascal only) }
+    if AShowBracketMatch and FBracketMatch.Found then
     begin
       if (ALineIndex = FBracketMatch.SourceLine) and (tok.Column = FBracketMatch.SourceCol) then
         bg := FTheme.Chrome.BracketMatch;
@@ -1308,6 +1332,57 @@ begin
   end;
 
   ACanvas.SetFont(oldfont);
+end;
+
+procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;
+  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+  var AllowSelfDraw: Boolean);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(Sender);
+  if not Assigned(FHighlighter) then
+    Exit;
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+  HighlightWithTokens(FHighlighter, Sender, ALineText, ALineIndex,
+    ACanvas, ATextRect, AllowSelfDraw, True);
+end;
+
+procedure TMainForm.HighlightINI(Sender: TObject; ALineText: TfpgString;
+  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+  var AllowSelfDraw: Boolean);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(Sender);
+  if not Assigned(FINIHighlighter) then
+    Exit;
+  if edt <> FINIHighlighterEditor then
+  begin
+    FINIHighlighterEditor := edt;
+    FINIHighlighter.Tokenise(edt.Lines.Text);
+  end;
+  HighlightWithTokens(FINIHighlighter, Sender, ALineText, ALineIndex,
+    ACanvas, ATextRect, AllowSelfDraw);
+end;
+
+procedure TMainForm.HighlightXML(Sender: TObject; ALineText: TfpgString;
+  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+  var AllowSelfDraw: Boolean);
+var
+  edt: TfpgTextEdit;
+begin
+  edt := TfpgTextEdit(Sender);
+  if not Assigned(FXMLHighlighter) then
+    Exit;
+  if edt <> FXMLHighlighterEditor then
+  begin
+    FXMLHighlighterEditor := edt;
+    FXMLHighlighter.Tokenise(edt.Lines.Text);
+  end;
+  HighlightWithTokens(FXMLHighlighter, Sender, ALineText, ALineIndex,
+    ACanvas, ATextRect, AllowSelfDraw);
 end;
 
 procedure TMainForm.HighlightPatch(Sender: TObject; ALineText: TfpgString;
@@ -1630,6 +1705,10 @@ begin
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
   FHighlighter := TPascalHighlighter.Create;
   FHighlighterEditor := nil;
+  FINIHighlighter := TINIHighlighter.Create;
+  FINIHighlighterEditor := nil;
+  FXMLHighlighter := TXMLHighlighter.Create;
+  FXMLHighlighterEditor := nil;
   FTheme := DefaultTheme;
 end;
 
@@ -1638,6 +1717,8 @@ begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
   FreeAndNil(FHighlighter);
+  FreeAndNil(FINIHighlighter);
+  FreeAndNil(FXMLHighlighter);
   FreeAndNil(FRegex);
   inherited Destroy;
 end;

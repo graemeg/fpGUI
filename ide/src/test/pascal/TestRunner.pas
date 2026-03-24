@@ -23,7 +23,9 @@ uses
   ide.test.highlighter,
   ide.test.editortheme,
   ide.test.bracketmatch,
-  ide.test.navigation;
+  ide.test.navigation,
+  ide.test.highlighter.ini,
+  ide.test.highlighter.xml;
 
 var
   Application: TTestRunner;
