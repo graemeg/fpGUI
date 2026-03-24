@@ -156,6 +156,9 @@ type
     procedure   HighlightPatch(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
     procedure   LoadThemeByName(const AName: string);
     procedure   SetupEditorPreference;
+    procedure   miJumpToInterface(Sender: TObject);
+    procedure   miJumpToImplementation(Sender: TObject);
+    procedure   miJumpToggleIntfImpl(Sender: TObject);
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -190,6 +193,7 @@ uses
   ,ide.builder.thread
   ,ide.utils
   ,ide.session
+  ,ide.navigation
   ;
 
 
@@ -740,6 +744,22 @@ begin
           if idx >= pcEditor.PageCount then
             idx := 0;
           pcEditor.ActivePageIndex := idx;
+          consumed := True;
+        end;
+    end;
+  end;
+  { Ctrl+Shift shortcuts for interface/implementation navigation }
+  if not consumed and ([ssCtrl, ssShift] <= shiftstate) and not (ssAlt in shiftstate) then
+  begin
+    case keycode of
+      keyUp:  { Ctrl+Shift+Up: jump to interface declaration }
+        begin
+          miJumpToInterface(nil);
+          consumed := True;
+        end;
+      keyDown:  { Ctrl+Shift+Down: jump to implementation }
+        begin
+          miJumpToImplementation(nil);
           consumed := True;
         end;
     end;
@@ -1478,6 +1498,51 @@ begin
   end;
 end;
 
+procedure TMainForm.miJumpToInterface(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  nav: TNavigationResult;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+  nav := NavigateToInterface(FHighlighter, edt.Lines, edt.CaretPos_V);
+  if nav.Found then
+    edt.GotoLine(nav.Line + 1);  { GotoLine is 1-based }
+end;
+
+procedure TMainForm.miJumpToImplementation(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  nav: TNavigationResult;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+  nav := NavigateToImplementation(FHighlighter, edt.Lines, edt.CaretPos_V);
+  if nav.Found then
+    edt.GotoLine(nav.Line + 1);
+end;
+
+procedure TMainForm.miJumpToggleIntfImpl(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  nav: TNavigationResult;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  if edt <> FHighlighterEditor then
+    RetokeniseEditor(edt);
+  nav := NavigateInterfaceImplementation(FHighlighter, edt.Lines, edt.CaretPos_V);
+  if nav.Found then
+    edt.GotoLine(nav.Line + 1);
+end;
+
 procedure TMainForm.SetupEditorPreference;
 var
   i: integer;
@@ -1943,6 +2008,10 @@ begin
     AddSeparator;
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
+    AddSeparator;
+    AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
+    AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
+    AddMenuItem('Toggle Interface/Implementation', rsKeyCtrl+rsKeyShift+'J', @miJumpToggleIntfImpl);
   end;
 
   mnuView := TfpgPopupMenu.Create(self);

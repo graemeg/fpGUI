@@ -2189,6 +2189,12 @@ begin
           begin
             { do nothing - let key bubble up to form }
           end
+          { Ctrl+Shift+Up/Down: let parent handle interface/implementation nav }
+          else if ([ssCtrl, ssShift] <= ShiftState) and
+             ((keycode = keyUp) or (keycode = keyDown)) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
           else
           begin
             KeyboardCaretNav(ShiftState, keycode);

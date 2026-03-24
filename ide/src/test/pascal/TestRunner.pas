@@ -22,7 +22,8 @@ uses
   ide.test.editor.blockindent,
   ide.test.highlighter,
   ide.test.editortheme,
-  ide.test.bracketmatch;
+  ide.test.bracketmatch,
+  ide.test.navigation;
 
 var
   Application: TTestRunner;
