@@ -135,6 +135,7 @@ type
     function  Save(const AFile: TfpgString = ''): Boolean; override;
     function  GenerateCmdLine(const AShowOnly: Boolean = False;
                 const ABuildMode: integer = -1): TfpgString; override;
+    function  GenerateGoalCmdLine(const AGoal: TfpgString): TfpgString; override;
     { PasBuild-specific }
     procedure Resolve; overload;
     procedure Resolve(const AProfiles: TfpgString); overload;
@@ -713,10 +714,16 @@ function TPasBuildProjectBackend.GenerateCmdLine(const AShowOnly: Boolean;
 begin
   { For PasBuild projects, build is delegated to pasbuild CLI.
     Return the full pasbuild compile command. }
-  Result := FindPasBuild + ' compile';
+  Result := GenerateGoalCmdLine('compile');
+end;
+
+function TPasBuildProjectBackend.GenerateGoalCmdLine(const AGoal: TfpgString): TfpgString;
+begin
+  Result := FindPasBuild + ' ' + AGoal;
   if FAggregatorDir <> '' then
     Result := Result + ' -f ' + FAggregatorDir + 'project.xml'
                      + ' -m ' + FAggregatorModule;
+  { clean does not need profiles, but it does no harm to pass them }
   if FActiveProfiles.Count > 0 then
     Result := Result + ' -p ' + FActiveProfiles.CommaText;
 end;

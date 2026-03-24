@@ -118,6 +118,10 @@ type
     procedure   miRunMake2(Sender: TObject);
     procedure   miRunMake3(Sender: TObject);
     procedure   miRunMake4(Sender: TObject);
+    procedure   miRunClean(Sender: TObject);
+    procedure   miRunRebuild(Sender: TObject);
+    procedure   miRunTest(Sender: TObject);
+    procedure   StartBuildGoal(const AGoal: string);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   miProjectNew(Sender: TObject);
@@ -528,6 +532,38 @@ begin
   thd.Resume;
 end;
 
+procedure TMainForm.miRunClean(Sender: TObject);
+begin
+  StartBuildGoal('clean');
+end;
+
+procedure TMainForm.miRunRebuild(Sender: TObject);
+begin
+  StartBuildGoal('rebuild');
+end;
+
+procedure TMainForm.miRunTest(Sender: TObject);
+begin
+  StartBuildGoal('test');
+end;
+
+procedure TMainForm.StartBuildGoal(const AGoal: string);
+var
+  thd: TBuilderThread;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+  begin
+    AddMessage('This action is only available for PasBuild projects.');
+    Exit;
+  end;
+  ClearMessagesWindow;
+  thd := TBuilderThread.Create(True);
+  thd.BuildGoal := AGoal;
+  thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+end;
+
 procedure TMainForm.miConfigureIDE(Sender: TObject);
 begin
   DisplayConfigureIDE;
@@ -782,7 +818,6 @@ procedure TMainForm.pcEditorMouseUp(Sender: TObject; AButton: TMouseButton;
 var
   ts: TfpgTabSheet;
 begin
-  {$ifdef debug}writeln('pcEditorMouseUp: widget: ', AButton);{$endif}
   if (AButton = mbMiddle) and (AShift * [ssCtrl, ssShift, ssAlt] = []) then
   begin
     ts := pcEditor.TabSheetAtPos(AMousePos.X, AMousePos.Y);
@@ -931,7 +966,7 @@ end;
 
 procedure TMainForm.BuildTerminated(Sender: TObject);
 begin
-  AddMessage('Compilation complete');
+  AddMessage('Done.');
 end;
 
 procedure TMainForm.BuildOutput(Sender: TObject; const ALine: string);
@@ -2133,6 +2168,10 @@ begin
     AddMenuItem('Make 2', rsKeyCtrl+rsKeyAlt+'2', @miRunMake2);
     AddMenuItem('Make 3', rsKeyCtrl+rsKeyAlt+'3', @miRunMake3);
     AddMenuItem('Make 4', rsKeyCtrl+rsKeyAlt+'4', @miRunMake4);
+    AddSeparator;
+    AddMenuItem('Clean', '', @miRunClean);
+    AddMenuItem('Rebuild', '', @miRunRebuild);
+    AddMenuItem('Test', rsKeyCtrl+rsKeyShift+'F10', @miRunTest);
     AddSeparator;
     AddMenuItem('Run', 'F9', nil);
     AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);

@@ -37,6 +37,7 @@ type
     function    Save(const AFile: TfpgString = ''): Boolean; virtual; abstract;
     { Build }
     function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString; virtual; abstract;
+    function    GenerateGoalCmdLine(const AGoal: TfpgString): TfpgString; virtual;
     { Project identity }
     function    GetProjectName: TfpgString; virtual; abstract;
     procedure   SetProjectName(const AValue: TfpgString); virtual; abstract;
@@ -80,6 +81,12 @@ end;
 destructor TIDEProjectBackend.Destroy;
 begin
   inherited Destroy;
+end;
+
+function TIDEProjectBackend.GenerateGoalCmdLine(const AGoal: TfpgString): TfpgString;
+begin
+  { Default: not supported for legacy projects }
+  Result := '';
 end;
 
 
