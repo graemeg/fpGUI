@@ -86,6 +86,9 @@ type
     procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); override;
     { Checkbox }
     procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
+    { RadioButton }
+    function    GetRadioButtonSize: integer; override;
+    procedure   DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); override;
   end;
 
   TfpgFusionLightStyle = class(TfpgFusionStyle)
@@ -465,6 +468,46 @@ begin
     { Long leg of tick: centre-bottom to top-right }
     ACanvas.DrawLine(cx - 1, cy + 3, cx + 4, cy - 2);
     ACanvas.SetLineStyle(1, lsSolid);
+  end;
+end;
+
+function TfpgFusionStyle.GetRadioButtonSize: integer;
+begin
+  Result := 14;
+end;
+
+procedure TfpgFusionStyle.DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect;
+  AFlags: TfpgCheckBoxFlags);
+var
+  cx, cy, radius: integer;
+begin
+  cx := r.Left + (r.Width div 2);
+  cy := r.Top + (r.Height div 2);
+  radius := (r.Width div 2) - 1;
+
+  { Outer circle background }
+  if cbfPressed in AFlags then
+    ACanvas.SetColor(FColors^[27])
+  else
+    ACanvas.SetColor(FColors^[24]);
+  ACanvas.FillArc(cx - radius, cy - radius, radius * 2, radius * 2, 0, 360);
+
+  { Border circle — accent when focused, normal border otherwise }
+  if cbfHasFocus in AFlags then
+    ACanvas.SetColor(FColors^[8])
+  else
+    ACanvas.SetColor(FColors^[25]);
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.DrawArc(cx - radius, cy - radius, radius * 2, radius * 2, 0, 360);
+
+  { Inner dot when selected }
+  if cbfChecked in AFlags then
+  begin
+    if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+      ACanvas.SetColor(FColors^[8])  { accent colour }
+    else
+      ACanvas.SetColor(FColors^[15]);  { disabled colour }
+    ACanvas.FillArc(cx - 3, cy - 3, 6, 6, 0, 360);
   end;
 end;
 

@@ -246,6 +246,9 @@ type
     { Checkbox }
     function    GetCheckBoxSize: integer; virtual;
     procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); virtual;
+    { RadioButton }
+    function    GetRadioButtonSize: integer; virtual;
+    procedure   DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); virtual;
     { PageControl & Tabs }
     function    GetTabBorders: TRect; virtual;
     function    GetDefaultTabHeight: TfpgCoord; virtual;
@@ -2769,6 +2772,33 @@ begin
   { Map flags to sprite sheet index:
       0 = unchecked, 1 = checked,
       2 = unchecked pressed/disabled, 3 = checked pressed/disabled }
+  if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+  begin
+    ix := Ord(cbfChecked in AFlags);
+    if cbfPressed in AFlags then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(cbfChecked in AFlags) * 2)) - Ord(cbfChecked in AFlags);
+  ACanvas.DrawImagePart(r.Left, r.Top, img, ix * size, 0, size, size);
+end;
+
+function TfpgStyle.GetRadioButtonSize: integer;
+begin
+  Result := 12; // 12x12 - it is always a rectangle
+end;
+
+procedure TfpgStyle.DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags);
+var
+  img: TfpgImage;
+  size: integer;
+  ix: integer;
+begin
+  img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize - return value is a reference only
+  size := GetRadioButtonSize;
+  { Map flags to sprite sheet index:
+      0 = unselected, 1 = selected,
+      2 = unselected pressed/disabled, 3 = selected pressed/disabled }
   if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
   begin
     ix := Ord(cbfChecked in AFlags);
