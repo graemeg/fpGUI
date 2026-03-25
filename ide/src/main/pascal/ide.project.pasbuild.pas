@@ -97,6 +97,7 @@ type
     FAvailableProfiles: TStringList;
     FActiveProfiles: TStringList;
     FModuleNames: TStringList;   { for aggregator projects }
+    FDeclaredDeps: TStringList;  { formatted dependency display strings from XML }
     FBuildOrder: TStringList;
     FModules: TList;             { list of TPasBuildModule }
     FActiveModule: TPasBuildModule;
@@ -106,6 +107,7 @@ type
     FAggregatorModule: TfpgString; { this module's name within the aggregator }
     procedure ParseProjectXML(const AFileName: TfpgString);
     procedure DetectAggregatorParent;
+    procedure UpdateDeclaredDepsVersions;
     procedure ClearModules;
     procedure ClearResolveData;
     function  InvokePasBuildResolve(const AProfiles: TfpgString;
@@ -151,6 +153,7 @@ type
     property  AvailableProfiles: TStringList read FAvailableProfiles;
     property  ActiveProfiles: TStringList read FActiveProfiles;
     property  ModuleNames: TStringList read FModuleNames;
+    property  DeclaredDeps: TStringList read FDeclaredDeps;
     property  BuildOrder: TStringList read FBuildOrder;
     property  Modules: TList read FModules;
     property  ActiveModule: TPasBuildModule read FActiveModule write FActiveModule;
@@ -200,6 +203,7 @@ begin
   FAvailableProfiles := TStringList.Create;
   FActiveProfiles := TStringList.Create;
   FModuleNames := TStringList.Create;
+  FDeclaredDeps := TStringList.Create;
   FBuildOrder := TStringList.Create;
   FModules := TList.Create;
   FActiveModule := nil;
@@ -212,6 +216,7 @@ begin
   ClearModules;
   FModules.Free;
   FBuildOrder.Free;
+  FDeclaredDeps.Free;
   FModuleNames.Free;
   FActiveProfiles.Free;
   FAvailableProfiles.Free;
@@ -359,13 +364,66 @@ begin
     Doc.Free;
 end;
 
+procedure TPasBuildProjectBackend.UpdateDeclaredDepsVersions;
+var
+  i: Integer;
+  s: TfpgString;
+begin
+  { After DetectAggregatorParent, FVersion is set from the root aggregator.
+    Fill in version for module deps that had none. }
+  if FVersion = '' then
+    Exit;
+  for i := 0 to FDeclaredDeps.Count - 1 do
+  begin
+    s := FDeclaredDeps[i];
+    { Pattern without version: "name [module]" — insert version }
+    if (Pos(' [module]', s) > 0) and (Pos(':', s) = 0) then
+    begin
+      s := Copy(s, 1, Pos(' [module]', s) - 1);
+      FDeclaredDeps[i] := s + ':' + FVersion + ' [module]';
+    end;
+  end;
+end;
+
+procedure ReadModuleNameAndVersion(const AProjectXML: TfpgString;
+  out AName, AVersion: TfpgString);
+var
+  Doc: TXMLDocument;
+  RootNode, Node: TDOMNode;
+begin
+  AName := '';
+  AVersion := '';
+  if not fpgFileExists(AProjectXML) then
+    Exit;
+  Doc := nil;
+  try
+    ReadXMLFile(Doc, AProjectXML);
+    RootNode := Doc.DocumentElement;
+    if RootNode = nil then
+      Exit;
+    Node := RootNode.FindNode('name');
+    if Assigned(Node) and Assigned(Node.FirstChild) then
+      AName := UTF8Encode(Node.FirstChild.NodeValue);
+    Node := RootNode.FindNode('version');
+    if Assigned(Node) and Assigned(Node.FirstChild) then
+      AVersion := UTF8Encode(Node.FirstChild.NodeValue);
+  except
+  end;
+  if Assigned(Doc) then
+    Doc.Free;
+end;
+
 procedure TPasBuildProjectBackend.ParseProjectXML(const AFileName: TfpgString);
 var
   Doc: TXMLDocument;
   RootNode, Node, ChildNode, ProfileNode, ModuleNode: TDOMNode;
+  DepNode: TDOMNode;
+  ModPath, ModXML, DepName, DepVersion, DepLabel: TfpgString;
+  BaseDir: TfpgString;
 begin
   FAvailableProfiles.Clear;
   FModuleNames.Clear;
+  FDeclaredDeps.Clear;
 
   ReadXMLFile(Doc, AFileName);
   try
@@ -435,6 +493,65 @@ begin
         if (ModuleNode.NodeName = 'module') and Assigned(ModuleNode.FirstChild) then
           FModuleNames.Add(UTF8Encode(ModuleNode.FirstChild.NodeValue));
         ModuleNode := ModuleNode.NextSibling;
+      end;
+    end;
+
+    { Module dependencies — local modules in the same repo }
+    BaseDir := fpgExtractFileDir(AFileName);
+    if BaseDir = '' then
+      BaseDir := fpgGetCurrentDir;
+    BaseDir := IncludeTrailingPathDelimiter(BaseDir);
+    Node := RootNode.FindNode('moduleDependencies');
+    if Assigned(Node) then
+    begin
+      DepNode := Node.FirstChild;
+      while Assigned(DepNode) do
+      begin
+        if (DepNode.NodeName = 'module') and Assigned(DepNode.FirstChild) then
+        begin
+          ModPath := UTF8Encode(DepNode.FirstChild.NodeValue);
+          ModXML := IncludeTrailingPathDelimiter(
+            BaseDir + SetDirSeparators(ModPath)) + 'project.xml';
+          ReadModuleNameAndVersion(ModXML, DepName, DepVersion);
+          if DepName = '' then
+            DepName := ModPath;
+          if DepVersion <> '' then
+            DepLabel := DepName + ':' + DepVersion + ' [module]'
+          else
+            DepLabel := DepName + ' [module]';
+          FDeclaredDeps.Add(DepLabel);
+        end;
+        DepNode := DepNode.NextSibling;
+      end;
+    end;
+
+    { External dependencies — installed by PasBuild }
+    Node := RootNode.FindNode('dependencies');
+    if Assigned(Node) then
+    begin
+      DepNode := Node.FirstChild;
+      while Assigned(DepNode) do
+      begin
+        if DepNode.NodeName = 'dependency' then
+        begin
+          DepName := '';
+          DepVersion := '';
+          ChildNode := DepNode.FindNode('name');
+          if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+            DepName := UTF8Encode(ChildNode.FirstChild.NodeValue);
+          ChildNode := DepNode.FindNode('version');
+          if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+            DepVersion := UTF8Encode(ChildNode.FirstChild.NodeValue);
+          if DepName <> '' then
+          begin
+            if DepVersion <> '' then
+              DepLabel := DepName + ':' + DepVersion + ' [external]'
+            else
+              DepLabel := DepName + ' [external]';
+            FDeclaredDeps.Add(DepLabel);
+          end;
+        end;
+        DepNode := DepNode.NextSibling;
       end;
     end;
   finally
@@ -739,6 +856,7 @@ begin
   try
     ParseProjectXML(AProjectFile);
     DetectAggregatorParent;
+    UpdateDeclaredDepsVersions;
     Result := True;
   except
     on E: Exception do

@@ -1062,7 +1062,6 @@ var
   RootNode: TfpgTreeNode;
   DirNode: TfpgTreeNode;
   DepNode: TfpgTreeNode;
-  Dep: TPasBuildDependency;
   RootLabel: TfpgString;
   SrcDir: TfpgString;
   i: integer;
@@ -1116,18 +1115,12 @@ begin
     AddDirectoryToTree(DirNode, SrcDir, '*');
   end;
 
-  { Dependencies }
-  if pb.Resolved and (pb.ActiveModule <> nil) and (pb.ActiveModule.Dependencies.Count > 0) then
+  { Dependencies — from declared XML, no resolve needed }
+  if pb.DeclaredDeps.Count > 0 then
   begin
     DepNode := RootNode.AppendText('Dependencies');
-    for i := 0 to pb.ActiveModule.Dependencies.Count - 1 do
-    begin
-      Dep := TPasBuildDependency(pb.ActiveModule.Dependencies[i]);
-      if Dep.Version <> '' then
-        DepNode.AppendText(Dep.Name + ' (' + Dep.Version + ')')
-      else
-        DepNode.AppendText(Dep.Name);
-    end;
+    for i := 0 to pb.DeclaredDeps.Count - 1 do
+      DepNode.AppendText(pb.DeclaredDeps[i]);
   end;
 
   RootNode.Expand;
