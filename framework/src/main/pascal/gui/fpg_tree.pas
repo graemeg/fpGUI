@@ -1561,8 +1561,18 @@ begin
 end;
 
 procedure TfpgTreeView.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  node: TfpgTreeNode;
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
+  { Select the node under the mouse — standard behaviour in GTK, Qt, Win32 }
+  node := GetNodeAt(x, y);
+  if (node <> nil) and (node <> Selection) then
+  begin
+    Selection := node;
+    RePaint;
+    DoChange;
+  end;
   if Assigned(PopupMenu) then
     PopupMenu.ShowAt(self, x, y);
 end;
