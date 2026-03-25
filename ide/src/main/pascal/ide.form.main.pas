@@ -26,7 +26,8 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, synregexpr,
-  ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch;
+  ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
+  ide.project.pasbuild;
 
 type
 
@@ -71,6 +72,7 @@ type
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
+    pmModuleMenu: TfpgPopupMenu;
     FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
@@ -141,6 +143,9 @@ type
     procedure   pmTabCloseOthersClick(Sender: TObject);
     procedure   pmTabCloseAllClick(Sender: TObject);
     procedure   pmTabCopyPathClick(Sender: TObject);
+    procedure   pmModuleBuildClick(Sender: TObject);
+    procedure   pmModuleCleanClick(Sender: TObject);
+    procedure   pmModuleRebuildClick(Sender: TObject);
     procedure   EditorChanged(Sender: TObject);
     procedure   EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   RetokeniseEditor(AEditor: TfpgTextEdit);
@@ -152,6 +157,8 @@ type
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
+    procedure   AddModuleSubtree(AParent: TfpgTreeNode; const AModuleDir, ASourceDir: TfpgString; ADeps: TStringList; AExpandSources: Boolean);
+    procedure   AddModuleInfoToTree(AParent: TfpgTreeNode; AInfo: TAggregatorModuleInfo);
     procedure   AddDirectoryToTree(AParent: TfpgTreeNode; const ADir: TfpgString; const AExtensions: TStringList);
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
@@ -203,7 +210,6 @@ uses
   ,ide.macros
   ,ide.project.backend
   ,ide.project
-  ,ide.project.pasbuild
   ,ide.project.unitlist
   ,ide.builder.thread
   ,ide.utils
@@ -471,9 +477,27 @@ end;
 procedure TMainForm.miRunMake(Sender: TObject);
 var
   thd: TBuilderThread;
+  pb: TPasBuildProjectBackend;
+  ModInfo: TAggregatorModuleInfo;
+  FilePath: TfpgString;
 begin
   ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
+  { For aggregator projects, detect the active module from the current editor tab }
+  if (GProject.ProjectFormat = pfPasBuild) then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    if pb.IsAggregator and (pcEditor.ActivePage <> nil) then
+    begin
+      FilePath := pcEditor.ActivePage.Hint;
+      if FilePath <> '' then
+      begin
+        ModInfo := pb.FindModuleInfoForFile(FilePath);
+        if ModInfo <> nil then
+          thd.BuildModule := ModInfo.Name;
+      end;
+    end;
+  end;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
@@ -485,7 +509,13 @@ var
 begin
   ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
-  thd.BuildMode := 1;
+  { Build All: for PasBuild aggregator projects, use 'compile' goal without
+    specifying a module — pasbuild will compile all modules in dependency order.
+    For legacy projects, use BuildMode 1. }
+  if GProject.ProjectFormat = pfPasBuild then
+    thd.BuildGoal := 'compile'
+  else
+    thd.BuildMode := 1;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
@@ -557,6 +587,9 @@ end;
 procedure TMainForm.StartBuildGoal(const AGoal: string);
 var
   thd: TBuilderThread;
+  pb: TPasBuildProjectBackend;
+  ModInfo: TAggregatorModuleInfo;
+  FilePath: TfpgString;
 begin
   if GProject.ProjectFormat <> pfPasBuild then
   begin
@@ -566,6 +599,18 @@ begin
   ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildGoal := AGoal;
+  { For aggregator projects, detect the active module from the current editor tab }
+  pb := TPasBuildProjectBackend(GProject);
+  if pb.IsAggregator and (pcEditor.ActivePage <> nil) then
+  begin
+    FilePath := pcEditor.ActivePage.Hint;
+    if FilePath <> '' then
+    begin
+      ModInfo := pb.FindModuleInfoForFile(FilePath);
+      if ModInfo <> nil then
+        thd.BuildModule := ModInfo.Name;
+    end;
+  end;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
@@ -712,9 +757,11 @@ procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton;
 var
   n: TfpgTreeNode;
   Cat: TfpgTreeNode;
+  ModParent: TfpgTreeNode;
   ts: TfpgTabSheet;
   u: TUnit = nil;
   pb: TPasBuildProjectBackend;
+  ModInfo: TAggregatorModuleInfo;
   DirPath: TfpgString;
   FilePath: TfpgString;
   RelPath: TfpgString;
@@ -726,7 +773,7 @@ begin
   if GProject.ProjectFormat = pfPasBuild then
   begin
     { PasBuild: leaf nodes are files. Walk up to find the category
-      ancestor (node with Data tag) and build relative path from
+      ancestor (node with Data tag 1-4) and build relative path from
       any intermediate subdirectory nodes. }
     if (n.Parent <> nil) and (n.Count = 0) then
     begin
@@ -739,22 +786,50 @@ begin
         RelPath := Cat.Text + PathDelim + RelPath;
         Cat := Cat.Parent;
       end;
-      if (Cat <> nil) and (Cat.Data <> nil) then
+      if (Cat <> nil) and (Cat.Data <> nil) and
+         (PtrInt(Cat.Data) >= 1) and (PtrInt(Cat.Data) <= 4) then
       begin
-        case PtrInt(Cat.Data) of
-          1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
-          2: DirPath := SetDirSeparators('src/test/pascal/');
-          3: DirPath := SetDirSeparators('src/main/resources/');
-          4: DirPath := SetDirSeparators('src/test/resources/');
-        else
-          DirPath := '';
-        end;
-        if DirPath <> '' then
+        { Determine base directory and source directory.
+          For aggregator projects, walk further up to find the module node
+          which stores a TAggregatorModuleInfo pointer. }
+        ModInfo := nil;
+        if pb.IsAggregator then
         begin
-          FilePath := pb.ProjectDir + DirPath + RelPath + n.Text;
-          if fpgFileExists(FilePath) then
-            OpenEditorPage(FilePath);
+          ModParent := Cat.Parent;
+          while (ModParent <> nil) and (ModParent.Data = nil) do
+            ModParent := ModParent.Parent;
+          if (ModParent <> nil) and (ModParent.Data <> nil) and
+             (PtrInt(ModParent.Data) > 4) then
+            ModInfo := TAggregatorModuleInfo(ModParent.Data);
         end;
+
+        if Assigned(ModInfo) then
+        begin
+          { Aggregator module — use module's directory and source dir }
+          case PtrInt(Cat.Data) of
+            1: DirPath := SetDirSeparators(ModInfo.SourceDirectory + '/');
+            2: DirPath := SetDirSeparators('src/test/pascal/');
+            3: DirPath := SetDirSeparators('src/main/resources/');
+            4: DirPath := SetDirSeparators('src/test/resources/');
+          end;
+          FilePath := ModInfo.ProjectDir + DirPath + RelPath + n.Text;
+        end
+        else
+        begin
+          { Single module — use project directory }
+          case PtrInt(Cat.Data) of
+            1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
+            2: DirPath := SetDirSeparators('src/test/pascal/');
+            3: DirPath := SetDirSeparators('src/main/resources/');
+            4: DirPath := SetDirSeparators('src/test/resources/');
+          else
+            DirPath := '';
+          end;
+          FilePath := pb.ProjectDir + DirPath + RelPath + n.Text;
+        end;
+
+        if (DirPath <> '') and fpgFileExists(FilePath) then
+          OpenEditorPage(FilePath);
       end;
     end;
   end
@@ -936,6 +1011,75 @@ begin
     fpgClipboard.Text := ts.Hint;
 end;
 
+procedure TMainForm.pmModuleBuildClick(Sender: TObject);
+var
+  n: TfpgTreeNode;
+  ModInfo: TAggregatorModuleInfo;
+  thd: TBuilderThread;
+begin
+  n := tvProject.Selection;
+  if (n = nil) or (n.Data = nil) then
+    Exit;
+  if PtrInt(n.Data) <= 4 then
+    Exit;
+  if not (TObject(n.Data) is TAggregatorModuleInfo) then
+    Exit;
+  ModInfo := TAggregatorModuleInfo(n.Data);
+  ClearMessagesWindow;
+  thd := TBuilderThread.Create(True);
+  thd.BuildGoal := 'compile';
+  thd.BuildModule := ModInfo.Name;
+  thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+end;
+
+procedure TMainForm.pmModuleCleanClick(Sender: TObject);
+var
+  n: TfpgTreeNode;
+  ModInfo: TAggregatorModuleInfo;
+  thd: TBuilderThread;
+begin
+  n := tvProject.Selection;
+  if (n = nil) or (n.Data = nil) then
+    Exit;
+  if PtrInt(n.Data) <= 4 then
+    Exit;
+  if not (TObject(n.Data) is TAggregatorModuleInfo) then
+    Exit;
+  ModInfo := TAggregatorModuleInfo(n.Data);
+  ClearMessagesWindow;
+  thd := TBuilderThread.Create(True);
+  thd.BuildGoal := 'clean';
+  thd.BuildModule := ModInfo.Name;
+  thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+end;
+
+procedure TMainForm.pmModuleRebuildClick(Sender: TObject);
+var
+  n: TfpgTreeNode;
+  ModInfo: TAggregatorModuleInfo;
+  thd: TBuilderThread;
+begin
+  n := tvProject.Selection;
+  if (n = nil) or (n.Data = nil) then
+    Exit;
+  if PtrInt(n.Data) <= 4 then
+    Exit;
+  if not (TObject(n.Data) is TAggregatorModuleInfo) then
+    Exit;
+  ModInfo := TAggregatorModuleInfo(n.Data);
+  ClearMessagesWindow;
+  thd := TBuilderThread.Create(True);
+  thd.BuildGoal := 'rebuild';
+  thd.BuildModule := ModInfo.Name;
+  thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+end;
+
 procedure TMainForm.EditorChanged(Sender: TObject);
 var
   edt: TfpgTextEdit;
@@ -1073,15 +1217,115 @@ begin
   tvProject.Invalidate;
 end;
 
+procedure TMainForm.AddModuleSubtree(AParent: TfpgTreeNode;
+  const AModuleDir, ASourceDir: TfpgString; ADeps: TStringList;
+  AExpandSources: Boolean);
+var
+  DirNode: TfpgTreeNode;
+  DepNode: TfpgTreeNode;
+  SourceExts: TStringList;
+  SrcDir: TfpgString;
+  i: integer;
+begin
+  SourceExts := TStringList.Create;
+  try
+    SourceExts.Add('.pas');
+    SourceExts.Add('.pp');
+    SourceExts.Add('.lpr');
+    SourceExts.Add('.dpr');
+    SourceExts.Add('.inc');
+
+    { Sources }
+    SrcDir := AModuleDir + SetDirSeparators(ASourceDir + '/');
+    if fpgDirectoryExists(SrcDir) then
+    begin
+      DirNode := AParent.AppendText('Sources');
+      DirNode.TextColor := clText2;
+      DirNode.Data := Pointer(1);
+      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
+      if AExpandSources then
+        DirNode.Expand;
+    end;
+
+    { Tests }
+    SrcDir := AModuleDir + SetDirSeparators('src/test/pascal/');
+    if fpgDirectoryExists(SrcDir) then
+    begin
+      DirNode := AParent.AppendText('Tests');
+      DirNode.TextColor := clText2;
+      DirNode.Data := Pointer(2);
+      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
+    end;
+  finally
+    SourceExts.Free;
+  end;
+
+  { Resources }
+  SrcDir := AModuleDir + SetDirSeparators('src/main/resources/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := AParent.AppendText('Resources');
+    DirNode.TextColor := clText2;
+    DirNode.Data := Pointer(3);
+    AddDirectoryToTree(DirNode, SrcDir, nil);
+  end;
+
+  { Test Resources }
+  SrcDir := AModuleDir + SetDirSeparators('src/test/resources/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := AParent.AppendText('Test Resources');
+    DirNode.TextColor := clText2;
+    DirNode.Data := Pointer(4);
+    AddDirectoryToTree(DirNode, SrcDir, nil);
+  end;
+
+  { Dependencies }
+  if Assigned(ADeps) and (ADeps.Count > 0) then
+  begin
+    DepNode := AParent.AppendText('Dependencies');
+    DepNode.TextColor := clText2;
+    for i := 0 to ADeps.Count - 1 do
+      DepNode.AppendText(ADeps[i]).TextColor := clText1;
+  end;
+end;
+
+procedure TMainForm.AddModuleInfoToTree(AParent: TfpgTreeNode;
+  AInfo: TAggregatorModuleInfo);
+var
+  ModNode: TfpgTreeNode;
+  ModLabel: TfpgString;
+  i: integer;
+begin
+  if AInfo.Version <> '' then
+    ModLabel := AInfo.Name + ' (' + AInfo.Version + ')'
+  else
+    ModLabel := AInfo.Name;
+
+  ModNode := AParent.AppendText(ModLabel);
+  ModNode.TextColor := clText2;
+  ModNode.Data := Pointer(AInfo);  { store module info for double-click navigation }
+
+  if AInfo.IsAggregator then
+  begin
+    { Nested aggregator — show its sub-modules recursively }
+    for i := 0 to AInfo.SubModules.Count - 1 do
+      AddModuleInfoToTree(ModNode, TAggregatorModuleInfo(AInfo.SubModules[i]));
+  end
+  else
+  begin
+    { Leaf module — show Sources/Tests/Resources/Dependencies }
+    AddModuleSubtree(ModNode, AInfo.ProjectDir, AInfo.SourceDirectory,
+      AInfo.DeclaredDeps, False);
+  end;
+end;
+
 procedure TMainForm.PopulatePasBuildTree;
 var
   pb: TPasBuildProjectBackend;
   RootNode: TfpgTreeNode;
   DirNode: TfpgTreeNode;
-  DepNode: TfpgTreeNode;
-  SourceExts: TStringList;
   RootLabel: TfpgString;
-  SrcDir: TfpgString;
   i: integer;
 begin
   pb := TPasBuildProjectBackend(GProject);
@@ -1092,69 +1336,28 @@ begin
   RootNode := tvProject.RootNode.AppendText(RootLabel);
   RootNode.TextColor := clText2;
 
-  { Build source extension list from cSourceFiles constant }
-  SourceExts := TStringList.Create;
-  try
-    SourceExts.Add('.pas');
-    SourceExts.Add('.pp');
-    SourceExts.Add('.lpr');
-    SourceExts.Add('.dpr');
-    SourceExts.Add('.inc');
-
-    { Sources — from <sourceDirectory> or default src/main/pascal }
-    SrcDir := pb.ProjectDir + SetDirSeparators(pb.SourceDirectory + '/');
-    if fpgDirectoryExists(SrcDir) then
+  if pb.IsAggregator then
+  begin
+    { Aggregator project — show Modules with per-module subtrees }
+    tvProject.PopupMenu := pmModuleMenu;
+    if pb.ModuleInfos.Count > 0 then
     begin
-      DirNode := RootNode.AppendText('Sources');
+      DirNode := RootNode.AppendText('Modules');
       DirNode.TextColor := clText2;
-      DirNode.Data := Pointer(1);
-      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
+      for i := 0 to pb.ModuleInfos.Count - 1 do
+        AddModuleInfoToTree(DirNode, TAggregatorModuleInfo(pb.ModuleInfos[i]));
       DirNode.Expand;
     end;
-
-    { Tests — convention: src/test/pascal/ }
-    SrcDir := pb.ProjectDir + SetDirSeparators('src/test/pascal/');
-    if fpgDirectoryExists(SrcDir) then
-    begin
-      DirNode := RootNode.AppendText('Tests');
-      DirNode.TextColor := clText2;
-      DirNode.Data := Pointer(2);
-      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
-    end;
-  finally
-    SourceExts.Free;
-  end;
-
-  { Resources — convention: src/main/resources/ (show all files) }
-  SrcDir := pb.ProjectDir + SetDirSeparators('src/main/resources/');
-  if fpgDirectoryExists(SrcDir) then
+  end
+  else
   begin
-    DirNode := RootNode.AppendText('Resources');
-    DirNode.TextColor := clText2;
-    DirNode.Data := Pointer(3);
-    AddDirectoryToTree(DirNode, SrcDir, nil);
+    { Single module — show Sources/Tests/Resources/Dependencies directly }
+    tvProject.PopupMenu := nil;
+    AddModuleSubtree(RootNode, pb.ProjectDir, pb.SourceDirectory,
+      pb.DeclaredDeps, True);
   end;
 
-  { Test Resources — convention: src/test/resources/ (show all files) }
-  SrcDir := pb.ProjectDir + SetDirSeparators('src/test/resources/');
-  if fpgDirectoryExists(SrcDir) then
-  begin
-    DirNode := RootNode.AppendText('Test Resources');
-    DirNode.TextColor := clText2;
-    DirNode.Data := Pointer(4);
-    AddDirectoryToTree(DirNode, SrcDir, nil);
-  end;
-
-  { Dependencies — from declared XML, no resolve needed }
-  if pb.DeclaredDeps.Count > 0 then
-  begin
-    DepNode := RootNode.AppendText('Dependencies');
-    DepNode.TextColor := clText2;
-    for i := 0 to pb.DeclaredDeps.Count - 1 do
-      DepNode.AppendText(pb.DeclaredDeps[i]).TextColor := clText1;
-  end;
-
-  { Build Profiles — from <profiles> in project.xml }
+  { Build Profiles — from <profiles> in project.xml (aggregator or module) }
   if pb.AvailableProfiles.Count > 0 then
   begin
     DirNode := RootNode.AppendText('Build Profiles');
@@ -2356,6 +2559,14 @@ begin
     AddMenuItem('Close All', '', @pmTabCloseAllClick);
     AddSeparator;
     AddMenuItem('Copy Path', '', @pmTabCopyPathClick);
+  end;
+
+  pmModuleMenu := TfpgPopupMenu.Create(self);
+  with pmModuleMenu do
+  begin
+    AddMenuItem('Build Module', '', @pmModuleBuildClick);
+    AddMenuItem('Clean Module', '', @pmModuleCleanClick);
+    AddMenuItem('Rebuild Module', '', @pmModuleRebuildClick);
   end;
 
   tseditor := TfpgTabSheet.Create(pcEditor);

@@ -44,6 +44,33 @@ type
     property UnitDir: TfpgString read FUnitDir write FUnitDir;
   end;
 
+  { Lightweight per-module info parsed from project.xml (no resolve needed).
+    Used for aggregator project tree display. Supports nesting — a module
+    with ProjectType='pom' contains child modules in SubModules. }
+  TAggregatorModuleInfo = class(TObject)
+  private
+    FName: TfpgString;
+    FVersion: TfpgString;
+    FRelativePath: TfpgString;   { relative path from parent aggregator }
+    FProjectDir: TfpgString;     { absolute path to module directory }
+    FSourceDirectory: TfpgString; { from <sourceDirectory>, default 'src/main/pascal' }
+    FProjectType: TfpgString;    { 'application', 'library', 'pom' }
+    FDeclaredDeps: TStringList;  { formatted dependency display strings }
+    FSubModules: TList;          { list of TAggregatorModuleInfo for nested pom modules }
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function  IsAggregator: Boolean;
+    property Name: TfpgString read FName write FName;
+    property Version: TfpgString read FVersion write FVersion;
+    property RelativePath: TfpgString read FRelativePath write FRelativePath;
+    property ProjectDir: TfpgString read FProjectDir write FProjectDir;
+    property SourceDirectory: TfpgString read FSourceDirectory write FSourceDirectory;
+    property ProjectType: TfpgString read FProjectType write FProjectType;
+    property DeclaredDeps: TStringList read FDeclaredDeps;
+    property SubModules: TList read FSubModules;
+  end;
+
   { Resolved data for a single module }
   TPasBuildModule = class(TObject)
   private
@@ -97,6 +124,7 @@ type
     FAvailableProfiles: TStringList;
     FActiveProfiles: TStringList;
     FModuleNames: TStringList;   { for aggregator projects }
+    FModuleInfos: TList;         { list of TAggregatorModuleInfo — populated for aggregators }
     FDeclaredDeps: TStringList;  { formatted dependency display strings from XML }
     FBuildOrder: TStringList;
     FModules: TList;             { list of TPasBuildModule }
@@ -109,6 +137,8 @@ type
     procedure DetectAggregatorParent;
     procedure UpdateDeclaredDepsVersions;
     procedure ClearModules;
+    procedure ClearModuleInfos;
+    procedure ParseAggregatorModules;
     procedure ClearResolveData;
     function  InvokePasBuildResolve(const AProfiles: TfpgString;
                 const AModule: TfpgString = ''): TfpgString;
@@ -139,10 +169,12 @@ type
     function  GenerateCmdLine(const AShowOnly: Boolean = False;
                 const ABuildMode: integer = -1): TfpgString; override;
     function  GenerateGoalCmdLine(const AGoal: TfpgString): TfpgString; override;
+    function  GenerateModuleGoalCmdLine(const AGoal, AModuleName: TfpgString): TfpgString;
     { PasBuild-specific }
     procedure Resolve; overload;
     procedure Resolve(const AProfiles: TfpgString); overload;
     function  FindModuleForFile(const AFilePath: TfpgString): TPasBuildModule;
+    function  FindModuleInfoForFile(const AFilePath: TfpgString): TAggregatorModuleInfo;
     function  IsAggregator: Boolean;
     function  GetBuildDir: TfpgString;
     { Properties }
@@ -153,6 +185,7 @@ type
     property  AvailableProfiles: TStringList read FAvailableProfiles;
     property  ActiveProfiles: TStringList read FActiveProfiles;
     property  ModuleNames: TStringList read FModuleNames;
+    property  ModuleInfos: TList read FModuleInfos;
     property  DeclaredDeps: TStringList read FDeclaredDeps;
     property  BuildOrder: TStringList read FBuildOrder;
     property  Modules: TList read FModules;
@@ -166,6 +199,34 @@ implementation
 uses
   fpjson, jsonparser, DOM, XMLRead,
   fpg_utils, process;
+
+
+{ TAggregatorModuleInfo }
+
+constructor TAggregatorModuleInfo.Create;
+begin
+  inherited Create;
+  FDeclaredDeps := TStringList.Create;
+  FSubModules := TList.Create;
+  FSourceDirectory := 'src/main/pascal';
+  FProjectType := 'application';
+end;
+
+destructor TAggregatorModuleInfo.Destroy;
+var
+  I: Integer;
+begin
+  for I := 0 to FSubModules.Count - 1 do
+    TAggregatorModuleInfo(FSubModules[I]).Free;
+  FSubModules.Free;
+  FDeclaredDeps.Free;
+  inherited Destroy;
+end;
+
+function TAggregatorModuleInfo.IsAggregator: Boolean;
+begin
+  Result := FProjectType = 'pom';
+end;
 
 
 { TPasBuildModule }
@@ -203,6 +264,7 @@ begin
   FAvailableProfiles := TStringList.Create;
   FActiveProfiles := TStringList.Create;
   FModuleNames := TStringList.Create;
+  FModuleInfos := TList.Create;
   FDeclaredDeps := TStringList.Create;
   FBuildOrder := TStringList.Create;
   FModules := TList.Create;
@@ -217,6 +279,8 @@ begin
   FModules.Free;
   FBuildOrder.Free;
   FDeclaredDeps.Free;
+  ClearModuleInfos;
+  FModuleInfos.Free;
   FModuleNames.Free;
   FActiveProfiles.Free;
   FAvailableProfiles.Free;
@@ -235,12 +299,199 @@ begin
   FActiveModule := nil;
 end;
 
+procedure TPasBuildProjectBackend.ClearModuleInfos;
+var
+  I: Integer;
+begin
+  for I := 0 to FModuleInfos.Count - 1 do
+    TAggregatorModuleInfo(FModuleInfos[I]).Free;
+  FModuleInfos.Clear;
+end;
+
 procedure TPasBuildProjectBackend.ClearResolveData;
 begin
   ClearModules;
   FBuildOrder.Clear;
   FUnitDirs.Clear;
   FResolved := False;
+end;
+
+procedure ReadModuleNameAndVersion(const AProjectXML: TfpgString;
+  out AName, AVersion: TfpgString);
+var
+  Doc: TXMLDocument;
+  RootNode, Node: TDOMNode;
+begin
+  AName := '';
+  AVersion := '';
+  if not fpgFileExists(AProjectXML) then
+    Exit;
+  Doc := nil;
+  try
+    ReadXMLFile(Doc, AProjectXML);
+    RootNode := Doc.DocumentElement;
+    if RootNode = nil then
+      Exit;
+    Node := RootNode.FindNode('name');
+    if Assigned(Node) and Assigned(Node.FirstChild) then
+      AName := UTF8Encode(Node.FirstChild.NodeValue);
+    Node := RootNode.FindNode('version');
+    if Assigned(Node) and Assigned(Node.FirstChild) then
+      AVersion := UTF8Encode(Node.FirstChild.NodeValue);
+  except
+  end;
+  if Assigned(Doc) then
+    Doc.Free;
+end;
+
+procedure TPasBuildProjectBackend.ParseAggregatorModules;
+
+  function ParseModuleDir(const ABaseDir, ARelPath: TfpgString;
+    const AParentVersion: TfpgString): TAggregatorModuleInfo;
+  var
+    ModDir, ModXML: TfpgString;
+    Doc: TXMLDocument;
+    RootNode, Node, ChildNode, ModNode, DepNode: TDOMNode;
+    DepName, DepVersion, DepLabel, SubPath: TfpgString;
+  begin
+    Result := TAggregatorModuleInfo.Create;
+    Result.RelativePath := ARelPath;
+    ModDir := IncludeTrailingPathDelimiter(ABaseDir + SetDirSeparators(ARelPath));
+    Result.ProjectDir := ModDir;
+    ModXML := ModDir + 'project.xml';
+
+    if not fpgFileExists(ModXML) then
+    begin
+      Result.Name := ARelPath;
+      Exit;
+    end;
+
+    Doc := nil;
+    try
+      ReadXMLFile(Doc, ModXML);
+      RootNode := Doc.DocumentElement;
+      if RootNode = nil then
+      begin
+        Result.Name := ARelPath;
+        Exit;
+      end;
+
+      { Name }
+      Node := RootNode.FindNode('name');
+      if Assigned(Node) and Assigned(Node.FirstChild) then
+        Result.Name := UTF8Encode(Node.FirstChild.NodeValue)
+      else
+        Result.Name := ARelPath;
+
+      { Version — inherit from parent if not specified }
+      Node := RootNode.FindNode('version');
+      if Assigned(Node) and Assigned(Node.FirstChild) then
+        Result.Version := UTF8Encode(Node.FirstChild.NodeValue)
+      else
+        Result.Version := AParentVersion;
+
+      { Build config }
+      Node := RootNode.FindNode('build');
+      if Assigned(Node) then
+      begin
+        ChildNode := Node.FindNode('packaging');
+        if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+          Result.ProjectType := UTF8Encode(ChildNode.FirstChild.NodeValue);
+        ChildNode := Node.FindNode('sourceDirectory');
+        if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+          Result.SourceDirectory := UTF8Encode(ChildNode.FirstChild.NodeValue);
+      end;
+
+      { Dependencies — same logic as ParseProjectXML }
+      Node := RootNode.FindNode('moduleDependencies');
+      if Assigned(Node) then
+      begin
+        DepNode := Node.FirstChild;
+        while Assigned(DepNode) do
+        begin
+          if (DepNode.NodeName = 'module') and Assigned(DepNode.FirstChild) then
+          begin
+            SubPath := UTF8Encode(DepNode.FirstChild.NodeValue);
+            ReadModuleNameAndVersion(
+              IncludeTrailingPathDelimiter(ModDir + SetDirSeparators(SubPath)) + 'project.xml',
+              DepName, DepVersion);
+            if DepName = '' then
+              DepName := SubPath;
+            if DepVersion <> '' then
+              DepLabel := DepName + ':' + DepVersion + ' [module]'
+            else if Result.Version <> '' then
+              DepLabel := DepName + ':' + Result.Version + ' [module]'
+            else
+              DepLabel := DepName + ' [module]';
+            Result.DeclaredDeps.Add(DepLabel);
+          end;
+          DepNode := DepNode.NextSibling;
+        end;
+      end;
+
+      Node := RootNode.FindNode('dependencies');
+      if Assigned(Node) then
+      begin
+        DepNode := Node.FirstChild;
+        while Assigned(DepNode) do
+        begin
+          if DepNode.NodeName = 'dependency' then
+          begin
+            DepName := '';
+            DepVersion := '';
+            ChildNode := DepNode.FindNode('name');
+            if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+              DepName := UTF8Encode(ChildNode.FirstChild.NodeValue);
+            ChildNode := DepNode.FindNode('version');
+            if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+              DepVersion := UTF8Encode(ChildNode.FirstChild.NodeValue);
+            if DepName <> '' then
+            begin
+              if DepVersion <> '' then
+                DepLabel := DepName + ':' + DepVersion + ' [external]'
+              else
+                DepLabel := DepName + ' [external]';
+              Result.DeclaredDeps.Add(DepLabel);
+            end;
+          end;
+          DepNode := DepNode.NextSibling;
+        end;
+      end;
+
+      { Sub-modules — recurse for pom modules }
+      if Result.IsAggregator then
+      begin
+        Node := RootNode.FindNode('modules');
+        if Assigned(Node) then
+        begin
+          ModNode := Node.FirstChild;
+          while Assigned(ModNode) do
+          begin
+            if (ModNode.NodeName = 'module') and Assigned(ModNode.FirstChild) then
+            begin
+              SubPath := UTF8Encode(ModNode.FirstChild.NodeValue);
+              Result.SubModules.Add(ParseModuleDir(ModDir, SubPath, Result.Version));
+            end;
+            ModNode := ModNode.NextSibling;
+          end;
+        end;
+      end;
+    except
+    end;
+    if Assigned(Doc) then
+      Doc.Free;
+  end;
+
+var
+  I: Integer;
+  ModPath: TfpgString;
+begin
+  ClearModuleInfos;
+  for I := 0 to FModuleNames.Count - 1 do
+  begin
+    ModPath := FModuleNames[I];
+    FModuleInfos.Add(ParseModuleDir(FProjectDir, ModPath, FVersion));
+  end;
 end;
 
 function TPasBuildProjectBackend.FindPasBuild: TfpgString;
@@ -383,34 +634,6 @@ begin
       FDeclaredDeps[i] := s + ':' + FVersion + ' [module]';
     end;
   end;
-end;
-
-procedure ReadModuleNameAndVersion(const AProjectXML: TfpgString;
-  out AName, AVersion: TfpgString);
-var
-  Doc: TXMLDocument;
-  RootNode, Node: TDOMNode;
-begin
-  AName := '';
-  AVersion := '';
-  if not fpgFileExists(AProjectXML) then
-    Exit;
-  Doc := nil;
-  try
-    ReadXMLFile(Doc, AProjectXML);
-    RootNode := Doc.DocumentElement;
-    if RootNode = nil then
-      Exit;
-    Node := RootNode.FindNode('name');
-    if Assigned(Node) and Assigned(Node.FirstChild) then
-      AName := UTF8Encode(Node.FirstChild.NodeValue);
-    Node := RootNode.FindNode('version');
-    if Assigned(Node) and Assigned(Node.FirstChild) then
-      AVersion := UTF8Encode(Node.FirstChild.NodeValue);
-  except
-  end;
-  if Assigned(Doc) then
-    Doc.Free;
 end;
 
 procedure TPasBuildProjectBackend.ParseProjectXML(const AFileName: TfpgString);
@@ -857,6 +1080,8 @@ begin
     ParseProjectXML(AProjectFile);
     DetectAggregatorParent;
     UpdateDeclaredDepsVersions;
+    if IsAggregator then
+      ParseAggregatorModules;
     Result := True;
   except
     on E: Exception do
@@ -890,6 +1115,14 @@ begin
     Result := Result + ' -f ' + FAggregatorDir + 'project.xml'
                      + ' -m ' + FAggregatorModule;
   { clean does not need profiles, but it does no harm to pass them }
+  if FActiveProfiles.Count > 0 then
+    Result := Result + ' -p ' + FActiveProfiles.CommaText;
+end;
+
+function TPasBuildProjectBackend.GenerateModuleGoalCmdLine(
+  const AGoal, AModuleName: TfpgString): TfpgString;
+begin
+  Result := FindPasBuild + ' ' + AGoal + ' -m ' + AModuleName;
   if FActiveProfiles.Count > 0 then
     Result := Result + ' -p ' + FActiveProfiles.CommaText;
 end;
@@ -936,6 +1169,35 @@ begin
         Result := Module;
     end;
   end;
+end;
+
+function TPasBuildProjectBackend.FindModuleInfoForFile(
+  const AFilePath: TfpgString): TAggregatorModuleInfo;
+
+  procedure SearchModules(AList: TList; var ABest: TAggregatorModuleInfo);
+  var
+    I: Integer;
+    Info: TAggregatorModuleInfo;
+  begin
+    for I := 0 to AList.Count - 1 do
+    begin
+      Info := TAggregatorModuleInfo(AList[I]);
+      if Pos(Info.ProjectDir, AFilePath) = 1 then
+      begin
+        { Prefer the most specific match (longest ProjectDir) }
+        if (ABest = nil) or
+           (Length(Info.ProjectDir) > Length(ABest.ProjectDir)) then
+          ABest := Info;
+      end;
+      { Recurse into nested aggregators }
+      if Info.SubModules.Count > 0 then
+        SearchModules(Info.SubModules, ABest);
+    end;
+  end;
+
+begin
+  Result := nil;
+  SearchModules(FModuleInfos, Result);
 end;
 
 function TPasBuildProjectBackend.IsAggregator: Boolean;

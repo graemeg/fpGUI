@@ -32,6 +32,7 @@ type
   private
     FBuildMode: integer;
     FBuildGoal: string;
+    FBuildModule: string;
     FOnAvailableOutput: TOutputLineEvent;
     OutputLine: string;
     procedure DoOutputLine;
@@ -45,6 +46,8 @@ type
     { PasBuild goal: 'compile', 'clean', 'test', 'rebuild'.
       Empty string means default compile (backward compatible). }
     property  BuildGoal: string read FBuildGoal write FBuildGoal;
+    { For aggregator projects: build a specific module. Empty = build all. }
+    property  BuildModule: string read FBuildModule write FBuildModule;
     property  OnAvailableOutput: TOutputLineEvent read FOnAvailableOutput write FOnAvailableOutput;
   end;
 
@@ -53,6 +56,7 @@ implementation
 uses
   ide.project.backend
   ,ide.project
+  ,ide.project.pasbuild
   ,process
   ,fpg_base
   ,fpg_iniutils
@@ -68,6 +72,7 @@ begin
   inherited AfterConstruction;
   FBuildMode := -1;  // signals use of project's default build mode
   FBuildGoal := '';
+  FBuildModule := '';
   FreeOnTerminate := True;
 end;
 
@@ -135,18 +140,24 @@ var
   unitdir: TfpgString;
   Goal: string;
   ExitCode: Integer;
+  pb: TPasBuildProjectBackend;
 begin
   Goal := FBuildGoal;
 
   { PasBuild projects with a specific goal }
   if (GProject.ProjectFormat = pfPasBuild) and (Goal <> '') then
   begin
+    pb := TPasBuildProjectBackend(GProject);
+
     if Goal = 'rebuild' then
     begin
       { Rebuild = clean then compile as two separate executions }
-      c := GProject.GenerateGoalCmdLine('clean');
+      if FBuildModule <> '' then
+        c := pb.GenerateModuleGoalCmdLine('clean', FBuildModule)
+      else
+        c := GProject.GenerateGoalCmdLine('clean');
       SendOutput('Cleaning: ' + c);
-      ExitCode := RunCommand(c, GProject.ProjectDir);
+      ExitCode := RunCommand(c, pb.GetBuildDir);
       if ExitCode <> 0 then
       begin
         SendOutput('Clean failed (exit code ' + IntToStr(ExitCode) + ')');
@@ -154,16 +165,22 @@ begin
       end;
       SendOutput('');
       { Now compile }
-      c := GProject.GenerateGoalCmdLine('compile');
+      if FBuildModule <> '' then
+        c := pb.GenerateModuleGoalCmdLine('compile', FBuildModule)
+      else
+        c := GProject.GenerateGoalCmdLine('compile');
       SendOutput('Compiling: ' + c);
-      RunCommand(c, GProject.ProjectDir);
+      RunCommand(c, pb.GetBuildDir);
     end
     else
     begin
       { Single goal: clean, test, compile }
-      c := GProject.GenerateGoalCmdLine(Goal);
+      if FBuildModule <> '' then
+        c := pb.GenerateModuleGoalCmdLine(Goal, FBuildModule)
+      else
+        c := GProject.GenerateGoalCmdLine(Goal);
       SendOutput('Running: ' + c);
-      RunCommand(c, GProject.ProjectDir);
+      RunCommand(c, pb.GetBuildDir);
     end;
     Exit;
   end;
@@ -171,7 +188,19 @@ begin
   { Default path: compile (backward compatible) }
   if GProject.ProjectFormat = pfPasBuild then
   begin
-    c := GProject.GenerateCmdLine(False, BuildMode);
+    pb := TPasBuildProjectBackend(GProject);
+    if FBuildModule <> '' then
+    begin
+      c := pb.GenerateModuleGoalCmdLine('compile', FBuildModule);
+      SendOutput('Compiling module ' + FBuildModule + ': ' + c);
+      RunCommand(c, pb.GetBuildDir);
+    end
+    else
+    begin
+      c := GProject.GenerateCmdLine(False, BuildMode);
+      SendOutput('Compiling: ' + c);
+      RunCommand(c, pb.GetBuildDir);
+    end;
   end
   else
   begin
@@ -188,10 +217,9 @@ begin
     c := gINI.ReadString(cEnvironment, 'Compiler', '');
     c := c + GProject.GenerateCmdLine(False, BuildMode);
     c := GMacroList.ExpandMacro(c);
+    SendOutput('Compiling: ' + c);
+    RunCommand(c, GProject.ProjectDir);
   end;
-
-  SendOutput('Compiling: ' + c);
-  RunCommand(c, GProject.ProjectDir);
 end;
 
 procedure TBuilderThread.DoOutputLine;
