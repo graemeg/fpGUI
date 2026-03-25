@@ -228,6 +228,11 @@ implementation
 uses
   baseunix,
   unix,
+  CGImage,
+  CGColorSpace,
+  CGDataProvider,
+  CGGeometry,
+  CGContext,
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
@@ -421,55 +426,67 @@ end;
 
 procedure TfpgCocoaView.drawRect(dirtyRect: NSRect);
 var
-  srcPixel: PLongWord;
-  i, j: Integer;
-  x, y, w, h: Integer;
-  r, g, b, a: Byte;
-  color: NSColor;
+  colorSpace: CGColorSpaceRef;
+  provider: CGDataProviderRef;
+  image: CGImageRef;
+  ctx: CGContextRef;
+  stride: Integer;
+  fullRect: CGRect;
+  nsCtx: NSGraphicsContext;
 begin
-  // This will be called by Cocoa when the view needs to be redrawn
-  // Just draw the buffer - do NOT trigger FPGM_PAINT from here (causes infinite loop)
+  { Called by Cocoa when the view needs to be redrawn.
+    Do NOT trigger FPGM_PAINT from here — that causes an infinite loop.
+    Just blit the pixel buffer that the hybrid canvas has already rendered. }
+  if not Assigned(FImageData) or (FImageWidth < 1) or (FImageHeight < 1) then
+    Exit;
 
-  // Draw the image buffer if we have one
-  if Assigned(FImageData) and (FImageWidth > 0) and (FImageHeight > 0) then
+  nsCtx := NSGraphicsContext.currentContext;
+  if nsCtx = nil then
+    Exit;
+
+  stride := FImageWidth * 4;
+
+  { Create a CGImage from the BGRA pixel buffer.
+    kCGBitmapByteOrder32Little + kCGImageAlphaNoneSkipFirst = BGRA layout
+    which matches the AggPas buffer byte order exactly. }
+  colorSpace := CGColorSpaceCreateDeviceRGB;
+  provider := CGDataProviderCreateWithData(nil, FImageData,
+    stride * FImageHeight, nil);
+  image := CGImageCreate(
+    FImageWidth, FImageHeight,
+    8,               { bits per component }
+    32,              { bits per pixel }
+    stride,          { bytes per row }
+    colorSpace,
+    kCGBitmapByteOrder32Little or kCGImageAlphaNoneSkipFirst,
+    provider,
+    nil,             { no decode array }
+    0,               { shouldInterpolate = false }
+    kCGRenderingIntentDefault
+  );
+
+  if image <> nil then
   begin
-    x := Round(dirtyRect.origin.x);
-    y := Round(dirtyRect.origin.y);
-    w := Round(dirtyRect.size.width);
-    h := Round(dirtyRect.size.height);
-
-    // Clamp to image bounds
-    if x < 0 then x := 0;
-    if y < 0 then y := 0;
-    if x + w > FImageWidth then w := FImageWidth - x;
-    if y + h > FImageHeight then h := FImageHeight - y;
-
-    if (w > 0) and (h > 0) then
+    ctx := CGContext.CGContextRef(nsCtx.CGContext);
+    if ctx <> nil then
     begin
-      srcPixel := PLongWord(FImageData);
-      Inc(srcPixel, x + (y * FImageWidth));
-
-      for j := 0 to h - 1 do
-      begin
-        for i := 0 to w - 1 do
-        begin
-          // Extract RGBA components (assuming BGRA byte order)
-          b := PByte(srcPixel)^;
-          g := PByte(PtrUInt(srcPixel) + 1)^;
-          r := PByte(PtrUInt(srcPixel) + 2)^;
-          a := PByte(PtrUInt(srcPixel) + 3)^;
-
-          color := NSColor.colorWithDeviceRed_green_blue_alpha(
-            r / 255.0, g / 255.0, b / 255.0, a / 255.0);
-          color.set_;
-          NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
-
-          Inc(srcPixel);
-        end;
-        Inc(srcPixel, FImageWidth - w);
-      end;
+      { CGContextDrawImage always draws the image's first row at the
+        bottom of the destination rect. In our isFlipped=True view the
+        y-axis points downward, so without correction the image appears
+        upside-down. Fix by flipping the CG context vertically. }
+      CGContextSaveGState(ctx);
+      CGContextTranslateCTM(ctx, 0, FImageHeight);
+      CGContextScaleCTM(ctx, 1, -1);
+      fullRect := CGRectMake(0, 0, FImageWidth, FImageHeight);
+      CGContextDrawImage(ctx, fullRect, image);
+      CGContextRestoreGState(ctx);
     end;
   end;
+
+  { Release Core Graphics objects }
+  CGImageRelease(image);
+  CGDataProviderRelease(provider);
+  CGColorSpaceRelease(colorSpace);
 end;
 
 function TfpgCocoaView.acceptsFirstResponder: Boolean;
@@ -946,13 +963,11 @@ begin
     end;
     FWinHandle.orderFrontRegardless;
 
-    // Trigger initial paint when window becomes visible
+    // Trigger initial paint when window becomes visible.
+    // The paint handler populates the buffer, then the buffer manager
+    // calls setNeedsDisplayInRect + displayIfNeeded to blit it.
     if Assigned(FView) then
     begin
-      // Mark entire view as needing display
-      FView.setNeedsDisplay_(True);
-
-      // Also send a paint message to fpGUI to populate the buffer
       fillchar(msgp, sizeof(msgp), 0);
       msgp.rect.Width := FSize.W;
       msgp.rect.Height := FSize.H;

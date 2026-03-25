@@ -15,15 +15,12 @@
 unit fpg_cocoa_buffer_manager;
 
 {$mode objfpc}{$H+}
+{$modeswitch objectivec1}
 
 interface
 
 uses
   CocoaAll,
-  CGImage,
-  CGColorSpace,
-  CGDataProvider,
-  CGContext,
   fpg_impl,
   fpg_base,
   fpg_cocoa;
@@ -134,74 +131,24 @@ begin
 end;
 
 procedure TCocoaBufferManager.PutBufferToScreen(x, y, w, h: TfpgCoord);
-var
-  colorSpace: CGColorSpaceRef;
-  provider: CGDataProviderRef;
-  image: CGImageRef;
-  stride: Integer;
-  ctx: CGContextRef;
-  destRect: CGRect;
-  nsCtx: NSGraphicsContext;
 begin
   if not Assigned(FView) or not BufferAllocated then
     Exit;
   if (w < 1) or (h < 1) then
     Exit;
 
-  stride := FBufWidth * 4;
+  { Pass the buffer pointer to the view so drawRect can access it.
+    On modern macOS (10.14+) views are layer-backed by default, which
+    means lockFocus does not provide a valid NSGraphicsContext. The
+    correct pattern is to hand the data to the view and let Cocoa call
+    drawRect: in the display cycle, where a valid CGContext exists. }
+  FView.setImageBuffer(FBuffer, FBufWidth, FBufHeight);
 
-  { Create a CGImage from our BGRA pixel buffer.
-    kCGBitmapByteOrder32Little + kCGImageAlphaNoneSkipFirst = BGRA byte order
-    which matches our AggPas buffer layout exactly. }
-  colorSpace := CGColorSpaceCreateDeviceRGB;
-  provider := CGDataProviderCreateWithData(nil, FBuffer, stride * FBufHeight, nil);
-  image := CGImageCreate(
-    FBufWidth, FBufHeight,
-    8,               { bits per component }
-    32,              { bits per pixel }
-    stride,          { bytes per row }
-    colorSpace,
-    kCGBitmapByteOrder32Little or kCGImageAlphaNoneSkipFirst,
-    provider,
-    nil,             { no decode array }
-    False,           { no interpolation }
-    kCGRenderingIntentDefault
-  );
-
-  if image <> nil then
-  begin
-    { Use lockFocus to draw outside of drawRect.
-      This is the direct equivalent of X11's XPutImage or GDI's BitBlt -
-      immediate buffer-to-screen transfer without going through the
-      Cocoa display cycle. }
-    FView.lockFocus;
-    try
-      nsCtx := NSGraphicsContext.currentContext;
-      if nsCtx <> nil then
-      begin
-        ctx := nsCtx.CGContext;
-        if ctx <> nil then
-        begin
-          { The view uses isFlipped=True (top-left origin) so coordinate
-            system already matches our buffer layout. Draw only the dirty
-            region by clipping and drawing the full image - CG will only
-            rasterise the visible portion. }
-          CGContextSaveGState(ctx);
-          destRect := CGRectMake(0, 0, FBufWidth, FBufHeight);
-          CGContextClipToRect(ctx, CGRectMake(x, y, w, h));
-          CGContextDrawImage(ctx, destRect, image);
-          CGContextRestoreGState(ctx);
-        end;
-      end;
-    finally
-      FView.unlockFocus;
-    end;
-  end;
-
-  { Release Core Graphics objects }
-  CGImageRelease(image);
-  CGDataProviderRelease(provider);
-  CGColorSpaceRelease(colorSpace);
+  { Mark the view as needing display and force an immediate
+    redraw so the update appears without waiting for the next
+    run loop iteration — gives immediate feedback like X11's XPutImage. }
+  FView.setNeedsDisplay_(True);
+  FView.displayIfNeeded;
 end;
 
 procedure TCocoaBufferManager.RestoreFromBuffer(const ARect: TfpgRect);
