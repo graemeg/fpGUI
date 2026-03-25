@@ -246,82 +246,114 @@ begin
     Result := 'pasbuild';  { TProcess resolves via PATH }
 end;
 
-procedure TPasBuildProjectBackend.DetectAggregatorParent;
+function IsModuleOf(const AParentXML, AChildDir: TfpgString): Boolean;
 var
-  ParentDir: TfpgString;
-  ParentXML: TfpgString;
   Doc: TXMLDocument;
-  RootNode, Node, ChildNode, ProfileNode, IdNode: TDOMNode;
-  ModulePath: TfpgString;
+  RootNode, Node, ChildNode: TDOMNode;
+  ParentDir, ModulePath: TfpgString;
 begin
-  FAggregatorDir := '';
-  FAggregatorModule := '';
-
-  { Check if parent directory contains a project.xml with <modules> }
-  ParentDir := IncludeTrailingPathDelimiter(
-    fpgExtractFileDir(ExcludeTrailingPathDelimiter(FProjectDir)));
-  ParentXML := ParentDir + 'project.xml';
-  if not fpgFileExists(ParentXML) then
-    Exit;
-
+  Result := False;
   Doc := nil;
   try
-    ReadXMLFile(Doc, ParentXML);
+    ReadXMLFile(Doc, AParentXML);
     RootNode := Doc.DocumentElement;
     if RootNode = nil then
       Exit;
-
     Node := RootNode.FindNode('modules');
     if Node = nil then
       Exit;
-
-    { Check if any module path points to our directory }
+    ParentDir := IncludeTrailingPathDelimiter(fpgExtractFileDir(AParentXML));
     ChildNode := Node.FirstChild;
     while Assigned(ChildNode) do
     begin
       if (ChildNode.NodeName = 'module') and Assigned(ChildNode.FirstChild) then
       begin
         ModulePath := UTF8Encode(ChildNode.FirstChild.NodeValue);
-        if IncludeTrailingPathDelimiter(ParentDir + ModulePath) = FProjectDir then
+        if IncludeTrailingPathDelimiter(ParentDir + ModulePath) = AChildDir then
         begin
-          FAggregatorDir := ParentDir;
-          FAggregatorModule := FProjectName;
-          Break;
+          Result := True;
+          Exit;
         end;
       end;
       ChildNode := ChildNode.NextSibling;
     end;
+  except
+  end;
+  if Assigned(Doc) then
+    Doc.Free;
+end;
 
-    { Inherit version from aggregator if sub-module has none }
-    if (FAggregatorDir <> '') and (FVersion = '') then
+procedure TPasBuildProjectBackend.DetectAggregatorParent;
+var
+  CurrentDir: TfpgString;
+  ParentDir: TfpgString;
+  ParentXML: TfpgString;
+  RootDir: TfpgString;
+  Doc: TXMLDocument;
+  RootNode, Node, ProfileNode, IdNode: TDOMNode;
+begin
+  FAggregatorDir := '';
+  FAggregatorModule := '';
+
+  { Walk up the directory tree to find the root aggregator.
+    Each level must contain a project.xml with <modules> listing
+    the child directory. Stop when the parent no longer qualifies. }
+  RootDir := '';
+  CurrentDir := FProjectDir;
+  repeat
+    ParentDir := IncludeTrailingPathDelimiter(
+      fpgExtractFileDir(ExcludeTrailingPathDelimiter(CurrentDir)));
+    if ParentDir = CurrentDir then
+      Break; { reached filesystem root }
+    ParentXML := ParentDir + 'project.xml';
+    if not fpgFileExists(ParentXML) then
+      Break;
+    if not IsModuleOf(ParentXML, CurrentDir) then
+      Break;
+    RootDir := ParentDir;
+    CurrentDir := ParentDir;
+  until False;
+
+  if RootDir = '' then
+    Exit;
+
+  FAggregatorDir := RootDir;
+  FAggregatorModule := FProjectName;
+
+  { Read version and profiles from the root aggregator }
+  Doc := nil;
+  try
+    ReadXMLFile(Doc, RootDir + 'project.xml');
+    RootNode := Doc.DocumentElement;
+    if RootNode = nil then
+      Exit;
+
+    { Inherit version if sub-module has none }
+    if FVersion = '' then
     begin
       Node := RootNode.FindNode('version');
       if Assigned(Node) and Assigned(Node.FirstChild) then
         FVersion := UTF8Encode(Node.FirstChild.NodeValue);
     end;
 
-    { Also grab available profiles from the aggregator if found }
-    if FAggregatorDir <> '' then
+    { Grab available profiles from the root aggregator }
+    Node := RootNode.FindNode('profiles');
+    if Assigned(Node) then
     begin
-      Node := RootNode.FindNode('profiles');
-      if Assigned(Node) then
+      FAvailableProfiles.Clear;
+      ProfileNode := Node.FirstChild;
+      while Assigned(ProfileNode) do
       begin
-        FAvailableProfiles.Clear;
-        ProfileNode := Node.FirstChild;
-        while Assigned(ProfileNode) do
+        if ProfileNode.NodeName = 'profile' then
         begin
-          if ProfileNode.NodeName = 'profile' then
-          begin
-            IdNode := ProfileNode.FindNode('id');
-            if Assigned(IdNode) and Assigned(IdNode.FirstChild) then
-              FAvailableProfiles.Add(UTF8Encode(IdNode.FirstChild.NodeValue));
-          end;
-          ProfileNode := ProfileNode.NextSibling;
+          IdNode := ProfileNode.FindNode('id');
+          if Assigned(IdNode) and Assigned(IdNode.FirstChild) then
+            FAvailableProfiles.Add(UTF8Encode(IdNode.FirstChild.NodeValue));
         end;
+        ProfileNode := ProfileNode.NextSibling;
       end;
     end;
   except
-    { Silently ignore parse errors in parent project.xml }
   end;
   if Assigned(Doc) then
     Doc.Free;
