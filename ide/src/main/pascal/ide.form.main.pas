@@ -152,7 +152,7 @@ type
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
-    procedure   AddDirectoryToTree(AParent: TfpgTreeNode; const ADir: TfpgString; const APattern: TfpgString);
+    procedure   AddDirectoryToTree(AParent: TfpgTreeNode; const ADir: TfpgString; const AExtensions: TStringList);
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
@@ -708,11 +708,13 @@ end;
 procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 var
   n: TfpgTreeNode;
+  Cat: TfpgTreeNode;
   ts: TfpgTabSheet;
   u: TUnit = nil;
   pb: TPasBuildProjectBackend;
   DirPath: TfpgString;
   FilePath: TfpgString;
+  RelPath: TfpgString;
 begin
   n := tvProject.Selection;
   if n = nil then
@@ -720,24 +722,36 @@ begin
 
   if GProject.ProjectFormat = pfPasBuild then
   begin
-    { PasBuild: leaf nodes under a category node are files.
-      Resolve directory from the parent node's Data tag. }
-    if (n.Parent <> nil) and (n.Count = 0) and (n.Parent.Data <> nil) then
+    { PasBuild: leaf nodes are files. Walk up to find the category
+      ancestor (node with Data tag) and build relative path from
+      any intermediate subdirectory nodes. }
+    if (n.Parent <> nil) and (n.Count = 0) then
     begin
       pb := TPasBuildProjectBackend(GProject);
-      case PtrInt(n.Parent.Data) of
-        1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
-        2: DirPath := SetDirSeparators('src/test/pascal/');
-        3: DirPath := SetDirSeparators('src/main/resources/');
-        4: DirPath := SetDirSeparators('src/test/resources/');
-      else
-        DirPath := '';
-      end;
-      if DirPath <> '' then
+      { Build relative sub-path from intermediate directory nodes }
+      RelPath := '';
+      Cat := n.Parent;
+      while (Cat <> nil) and (Cat.Data = nil) do
       begin
-        FilePath := pb.ProjectDir + DirPath + n.Text;
-        if fpgFileExists(FilePath) then
-          OpenEditorPage(FilePath);
+        RelPath := Cat.Text + PathDelim + RelPath;
+        Cat := Cat.Parent;
+      end;
+      if (Cat <> nil) and (Cat.Data <> nil) then
+      begin
+        case PtrInt(Cat.Data) of
+          1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
+          2: DirPath := SetDirSeparators('src/test/pascal/');
+          3: DirPath := SetDirSeparators('src/main/resources/');
+          4: DirPath := SetDirSeparators('src/test/resources/');
+        else
+          DirPath := '';
+        end;
+        if DirPath <> '' then
+        begin
+          FilePath := pb.ProjectDir + DirPath + RelPath + n.Text;
+          if fpgFileExists(FilePath) then
+            OpenEditorPage(FilePath);
+        end;
       end;
     end;
   end
@@ -1062,6 +1076,7 @@ var
   RootNode: TfpgTreeNode;
   DirNode: TfpgTreeNode;
   DepNode: TfpgTreeNode;
+  SourceExts: TStringList;
   RootLabel: TfpgString;
   SrcDir: TfpgString;
   i: integer;
@@ -1073,46 +1088,53 @@ begin
     RootLabel := pb.ProjectName;
   RootNode := tvProject.RootNode.AppendText(RootLabel);
 
-  { Sources — from <sourceDirectory> or default src/main/pascal }
-  SrcDir := pb.ProjectDir + SetDirSeparators(pb.SourceDirectory + '/');
-  if fpgDirectoryExists(SrcDir) then
-  begin
-    DirNode := RootNode.AppendText('Sources');
-    DirNode.Data := Pointer(1);
-    AddDirectoryToTree(DirNode, SrcDir, '*.pas');
-    AddDirectoryToTree(DirNode, SrcDir, '*.pp');
-    AddDirectoryToTree(DirNode, SrcDir, '*.lpr');
-    AddDirectoryToTree(DirNode, SrcDir, '*.inc');
-    DirNode.Expand;
+  { Build source extension list from cSourceFiles constant }
+  SourceExts := TStringList.Create;
+  try
+    SourceExts.Add('.pas');
+    SourceExts.Add('.pp');
+    SourceExts.Add('.lpr');
+    SourceExts.Add('.dpr');
+    SourceExts.Add('.inc');
+
+    { Sources — from <sourceDirectory> or default src/main/pascal }
+    SrcDir := pb.ProjectDir + SetDirSeparators(pb.SourceDirectory + '/');
+    if fpgDirectoryExists(SrcDir) then
+    begin
+      DirNode := RootNode.AppendText('Sources');
+      DirNode.Data := Pointer(1);
+      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
+      DirNode.Expand;
+    end;
+
+    { Tests — convention: src/test/pascal/ }
+    SrcDir := pb.ProjectDir + SetDirSeparators('src/test/pascal/');
+    if fpgDirectoryExists(SrcDir) then
+    begin
+      DirNode := RootNode.AppendText('Tests');
+      DirNode.Data := Pointer(2);
+      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
+    end;
+  finally
+    SourceExts.Free;
   end;
 
-  { Tests — convention: src/test/pascal/ }
-  SrcDir := pb.ProjectDir + SetDirSeparators('src/test/pascal/');
-  if fpgDirectoryExists(SrcDir) then
-  begin
-    DirNode := RootNode.AppendText('Tests');
-    DirNode.Data := Pointer(2);
-    AddDirectoryToTree(DirNode, SrcDir, '*.pas');
-    AddDirectoryToTree(DirNode, SrcDir, '*.pp');
-    AddDirectoryToTree(DirNode, SrcDir, '*.inc');
-  end;
-
-  { Resources — convention: src/main/resources/ }
+  { Resources — convention: src/main/resources/ (show all files) }
   SrcDir := pb.ProjectDir + SetDirSeparators('src/main/resources/');
   if fpgDirectoryExists(SrcDir) then
   begin
     DirNode := RootNode.AppendText('Resources');
     DirNode.Data := Pointer(3);
-    AddDirectoryToTree(DirNode, SrcDir, '*');
+    AddDirectoryToTree(DirNode, SrcDir, nil);
   end;
 
-  { Test Resources — convention: src/test/resources/ }
+  { Test Resources — convention: src/test/resources/ (show all files) }
   SrcDir := pb.ProjectDir + SetDirSeparators('src/test/resources/');
   if fpgDirectoryExists(SrcDir) then
   begin
     DirNode := RootNode.AppendText('Test Resources');
     DirNode.Data := Pointer(4);
-    AddDirectoryToTree(DirNode, SrcDir, '*');
+    AddDirectoryToTree(DirNode, SrcDir, nil);
   end;
 
   { Dependencies — from declared XML, no resolve needed }
@@ -1129,26 +1151,80 @@ begin
 end;
 
 procedure TMainForm.AddDirectoryToTree(AParent: TfpgTreeNode;
-  const ADir: TfpgString; const APattern: TfpgString);
+  const ADir: TfpgString; const AExtensions: TStringList);
 var
   sr: TSearchRec;
   Files: TStringList;
+  Dirs: TStringList;
+  SubNode: TfpgTreeNode;
+  Ext: TfpgString;
   i: integer;
+  MatchAll: Boolean;
+
+  function IsExcludedDir(const AName: TfpgString): Boolean;
+  begin
+    Result := (AName = '.') or (AName = '..') or
+              (AName = '.ide') or (AName = 'target') or
+              (AName = 'units');
+  end;
+
+  function MatchesExtension(const AName: TfpgString): Boolean;
+  var
+    j: integer;
+  begin
+    if MatchAll then
+    begin
+      Result := True;
+      Exit;
+    end;
+    Ext := LowerCase(fpgExtractFileExt(AName));
+    for j := 0 to AExtensions.Count - 1 do
+    begin
+      if Ext = AExtensions[j] then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+    Result := False;
+  end;
+
 begin
+  MatchAll := (AExtensions = nil) or (AExtensions.Count = 0);
   Files := TStringList.Create;
+  Dirs := TStringList.Create;
   try
     Files.Sorted := True;
-    if FindFirst(ADir + APattern, faAnyFile and not faDirectory, sr) = 0 then
+    Dirs.Sorted := True;
+
+    { Single scan: collect directories and matching files }
+    if fpgFindFirst(ADir + AllFilesMask, faAnyFile, sr) = 0 then
     begin
       repeat
-        if (sr.Attr and faDirectory) = 0 then
+        if (sr.Attr and faDirectory) <> 0 then
+        begin
+          if not IsExcludedDir(sr.Name) then
+            Dirs.Add(sr.Name);
+        end
+        else if MatchesExtension(sr.Name) then
           Files.Add(sr.Name);
-      until FindNext(sr) <> 0;
+      until fpgFindNext(sr) <> 0;
       FindClose(sr);
     end;
+
+    { Add subdirectories first, then recurse }
+    for i := 0 to Dirs.Count - 1 do
+    begin
+      SubNode := AParent.AppendText(Dirs[i]);
+      AddDirectoryToTree(SubNode,
+        IncludeTrailingPathDelimiter(ADir + Dirs[i]), AExtensions);
+    end;
+
+    { Add files }
     for i := 0 to Files.Count - 1 do
       AParent.AppendText(Files[i]);
   finally
+    Dirs.Free;
     Files.Free;
   end;
 end;
