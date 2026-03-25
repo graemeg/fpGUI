@@ -196,6 +196,7 @@ begin
   fpgSetNamedColor(clHilite1, FPlasticColors^[3]);
   fpgSetNamedColor(clHilite2, FPlasticColors^[3]);
   fpgSetNamedColor(clText1, FPlasticColors^[4]);
+  fpgSetNamedColor(clText2, FPlasticColors^[8]);   { accent text — for emphasis/category labels }
   fpgSetNamedColor(clText4, FPlasticColors^[2]);
   fpgSetNamedColor(clSelection, FPlasticColors^[5]);
   fpgSetNamedColor(clSelectionText, FPlasticColors^[4]);

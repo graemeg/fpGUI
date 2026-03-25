@@ -2277,10 +2277,10 @@ begin
   fpgSetNamedColor(clShadow2, $FF424142);       // dark
   fpgSetNamedColor(clHilite1, $FFE0E0E0);       // light
   fpgSetNamedColor(clHilite2, $FFFFFFFF);       // white
-  fpgSetNamedColor(clText1, $FF000000);
-  fpgSetNamedColor(clText2, $FF000040);
-  fpgSetNamedColor(clText3, $FF800000);
-  fpgSetNamedColor(clText4, $FF404000);
+  fpgSetNamedColor(clText1, $FF000000);  // normal text
+  fpgSetNamedColor(clText2, $FF000040);  // accent text — for emphasis/category labels
+  fpgSetNamedColor(clText3, $FF800000);  // url links etc
+  fpgSetNamedColor(clText4, $FF404000);  // draw a lot of attention
   fpgSetNamedColor(clSelection, $FF08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFFFF);
   fpgSetNamedColor(clInactiveSel, $FF99A6BF);  // win 2000 buttonface = $D4D0C8
