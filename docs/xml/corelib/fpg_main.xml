@@ -64,9 +64,34 @@ is simply an index value, but later translated to a real RGB value via the themi
 </element>
 
 <element name="TfpgCanvas.DrawText">
-<short>Output Text onto the Canvas</short>
+<short>Draws text within a bounding rectangle with alignment, wrapping and theme support</short>
 <descr>
-<printshort id="TfpgCanvas.DrawText"/>.</descr>
+<printshort id="TfpgCanvas.DrawText"/>.
+This is the high-level text drawing method. It renders text inside the given
+<var>ARect</var> rectangle, supporting horizontal alignment (left, centre, right),
+vertical alignment and optional word wrapping via the <var>AFlags</var> parameter.
+
+<p>Internally, <var>DrawText</var> delegates to
+<link id="fpg_base.TfpgStyle.DrawString">fpgStyle.DrawString</link>, which means
+the active style controls the final text colour. For example,
+<var>TfpgFusionStyle.DrawString</var> sets the text colour to <var>clText1</var>
+for enabled widgets and <var>clText4</var> for disabled widgets, regardless of
+any prior <var>Canvas.TextColor</var> assignment.</p>
+
+<p>Use <var>DrawText</var> for standard themed widgets such as labels, buttons,
+panels and menu items — anywhere you want the text to follow the application's
+visual style automatically.</p>
+
+<p><b>Important:</b> Do not use <var>DrawText</var> in custom-painted widgets
+(text editors, syntax highlighters, list boxes) where you need precise control
+over text colour. Because the style override will replace your
+<var>Canvas.TextColor</var>, use
+<link id="fpg_base.TfpgCanvasBase.DrawString">DrawString</link> instead in
+those cases.</p>
+</descr>
+<seealso>
+<link id="fpg_base.TfpgCanvasBase.DrawString"/>
+</seealso>
 </element>
 
 <element name="TfpgCanvas.StretchDraw" link="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">
