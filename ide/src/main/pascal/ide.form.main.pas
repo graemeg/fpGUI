@@ -151,6 +151,8 @@ type
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
+    procedure   PopulatePasBuildTree;
+    procedure   AddDirectoryToTree(AParent: TfpgTreeNode; const ADir: TfpgString; const APattern: TfpgString);
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
@@ -201,6 +203,7 @@ uses
   ,ide.macros
   ,ide.project.backend
   ,ide.project
+  ,ide.project.pasbuild
   ,ide.project.unitlist
   ,ide.builder.thread
   ,ide.utils
@@ -704,20 +707,51 @@ end;
 
 procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 var
-  r: TfpgTreeNode;
   n: TfpgTreeNode;
   ts: TfpgTabSheet;
   u: TUnit = nil;
+  pb: TPasBuildProjectBackend;
+  DirPath: TfpgString;
+  FilePath: TfpgString;
 begin
-  r := GetUnitsNode;
   n := tvProject.Selection;
-  if (n <> nil) and (n.Data <> nil) then
-    u := TUnit(n.Data);
-  if u <> nil then
+  if n = nil then
+    Exit;
+
+  if GProject.ProjectFormat = pfPasBuild then
   begin
-    ts := OpenEditorPage(u.FileName);
-    u.Opened := True;
-    ts.TagPointer := u; // add reference to tabsheet
+    { PasBuild: leaf nodes under a category node are files.
+      Resolve directory from the parent node's Data tag. }
+    if (n.Parent <> nil) and (n.Count = 0) and (n.Parent.Data <> nil) then
+    begin
+      pb := TPasBuildProjectBackend(GProject);
+      case PtrInt(n.Parent.Data) of
+        1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
+        2: DirPath := SetDirSeparators('src/test/pascal/');
+        3: DirPath := SetDirSeparators('src/main/resources/');
+        4: DirPath := SetDirSeparators('src/test/resources/');
+      else
+        DirPath := '';
+      end;
+      if DirPath <> '' then
+      begin
+        FilePath := pb.ProjectDir + DirPath + n.Text;
+        if fpgFileExists(FilePath) then
+          OpenEditorPage(FilePath);
+      end;
+    end;
+  end
+  else
+  begin
+    { Legacy: nodes carry TUnit in Data }
+    if n.Data <> nil then
+      u := TUnit(n.Data);
+    if u <> nil then
+    begin
+      ts := OpenEditorPage(u.FileName);
+      u.Opened := True;
+      ts.TagPointer := u;
+    end;
   end;
 end;
 
@@ -727,12 +761,12 @@ var
   n: TfpgTreeNode;
   i: integer;
 begin
-  if keyCode = keyDelete then
+  { Delete key removes unit from legacy projects only }
+  if (keyCode = keyDelete) and (GProject.ProjectFormat = pfLegacy) then
   begin
     r := GetUnitsNode;
-    if r.FindSubNode(tvProject.Selection.Text, False) = tvProject.Selection then
+    if (r <> nil) and (r.FindSubNode(tvProject.Selection.Text, False) = tvProject.Selection) then
     begin
-      // remove from project, then from tree view
       n := tvProject.Selection;
       tvProject.GotoNextNodeUp;
       r.Remove(n);
@@ -983,11 +1017,14 @@ end;
 procedure TMainForm.SetupProjectTree;
 begin
   tvProject.RootNode.Clear;
-  tvProject.RootNode.AppendText('Units');
-  tvProject.RootNode.AppendText('Images');
-  tvProject.RootNode.AppendText('Help Files');
-  tvProject.RootNode.AppendText('Text');
-  tvProject.RootNode.AppendText('Other');
+  if GProject.ProjectFormat <> pfPasBuild then
+  begin
+    tvProject.RootNode.AppendText('Units');
+    tvProject.RootNode.AppendText('Images');
+    tvProject.RootNode.AppendText('Help Files');
+    tvProject.RootNode.AppendText('Text');
+    tvProject.RootNode.AppendText('Other');
+  end;
 end;
 
 procedure TMainForm.PopuplateProjectTree;
@@ -997,9 +1034,16 @@ var
   i: integer;
   s: TfpgString;
 begin
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    PopulatePasBuildTree;
+    Exit;
+  end;
+
+  { Legacy project tree }
   r := GetUnitsNode;
   tvProject.Selection := r;
-  if Assigned(r) then // just to be safe, but 'Units' should always exist
+  if Assigned(r) then
   begin
     for i := 0 to GProject.UnitList.Count-1 do
     begin
@@ -1010,6 +1054,110 @@ begin
   end;
   r.Expand;
   tvProject.Invalidate;
+end;
+
+procedure TMainForm.PopulatePasBuildTree;
+var
+  pb: TPasBuildProjectBackend;
+  RootNode: TfpgTreeNode;
+  DirNode: TfpgTreeNode;
+  DepNode: TfpgTreeNode;
+  Dep: TPasBuildDependency;
+  RootLabel: TfpgString;
+  SrcDir: TfpgString;
+  i: integer;
+begin
+  pb := TPasBuildProjectBackend(GProject);
+  if pb.Version <> '' then
+    RootLabel := pb.ProjectName + ' (' + pb.Version + ')'
+  else
+    RootLabel := pb.ProjectName;
+  RootNode := tvProject.RootNode.AppendText(RootLabel);
+
+  { Sources — from <sourceDirectory> or default src/main/pascal }
+  SrcDir := pb.ProjectDir + SetDirSeparators(pb.SourceDirectory + '/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := RootNode.AppendText('Sources');
+    DirNode.Data := Pointer(1);
+    AddDirectoryToTree(DirNode, SrcDir, '*.pas');
+    AddDirectoryToTree(DirNode, SrcDir, '*.pp');
+    AddDirectoryToTree(DirNode, SrcDir, '*.lpr');
+    AddDirectoryToTree(DirNode, SrcDir, '*.inc');
+    DirNode.Expand;
+  end;
+
+  { Tests — convention: src/test/pascal/ }
+  SrcDir := pb.ProjectDir + SetDirSeparators('src/test/pascal/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := RootNode.AppendText('Tests');
+    DirNode.Data := Pointer(2);
+    AddDirectoryToTree(DirNode, SrcDir, '*.pas');
+    AddDirectoryToTree(DirNode, SrcDir, '*.pp');
+    AddDirectoryToTree(DirNode, SrcDir, '*.inc');
+  end;
+
+  { Resources — convention: src/main/resources/ }
+  SrcDir := pb.ProjectDir + SetDirSeparators('src/main/resources/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := RootNode.AppendText('Resources');
+    DirNode.Data := Pointer(3);
+    AddDirectoryToTree(DirNode, SrcDir, '*');
+  end;
+
+  { Test Resources — convention: src/test/resources/ }
+  SrcDir := pb.ProjectDir + SetDirSeparators('src/test/resources/');
+  if fpgDirectoryExists(SrcDir) then
+  begin
+    DirNode := RootNode.AppendText('Test Resources');
+    DirNode.Data := Pointer(4);
+    AddDirectoryToTree(DirNode, SrcDir, '*');
+  end;
+
+  { Dependencies }
+  if pb.Resolved and (pb.ActiveModule <> nil) and (pb.ActiveModule.Dependencies.Count > 0) then
+  begin
+    DepNode := RootNode.AppendText('Dependencies');
+    for i := 0 to pb.ActiveModule.Dependencies.Count - 1 do
+    begin
+      Dep := TPasBuildDependency(pb.ActiveModule.Dependencies[i]);
+      if Dep.Version <> '' then
+        DepNode.AppendText(Dep.Name + ' (' + Dep.Version + ')')
+      else
+        DepNode.AppendText(Dep.Name);
+    end;
+  end;
+
+  RootNode.Expand;
+  tvProject.Selection := RootNode;
+  tvProject.Invalidate;
+end;
+
+procedure TMainForm.AddDirectoryToTree(AParent: TfpgTreeNode;
+  const ADir: TfpgString; const APattern: TfpgString);
+var
+  sr: TSearchRec;
+  Files: TStringList;
+  i: integer;
+begin
+  Files := TStringList.Create;
+  try
+    Files.Sorted := True;
+    if FindFirst(ADir + APattern, faAnyFile and not faDirectory, sr) = 0 then
+    begin
+      repeat
+        if (sr.Attr and faDirectory) = 0 then
+          Files.Add(sr.Name);
+      until FindNext(sr) <> 0;
+      FindClose(sr);
+    end;
+    for i := 0 to Files.Count - 1 do
+      AParent.AppendText(Files[i]);
+  finally
+    Files.Free;
+  end;
 end;
 
 procedure TMainForm.SetupFilesGrid;
@@ -1067,12 +1215,12 @@ var
 begin
   // remove all project info
   CloseAllTabs;
-  SetupProjectTree;
   FreeProject;
   // create the appropriate backend for this project format
   SetProject(CreateProjectBackend(AFilename));
   // now load new project info
   GProject.Load(AFilename);
+  SetupProjectTree;
   FLastFileDir := GProject.ProjectDir;
   FRecentFiles.AddItem(AFilename);
 

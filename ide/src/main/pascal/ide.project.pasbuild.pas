@@ -88,6 +88,7 @@ type
     FProjectName: TfpgString;
     FVersion: TfpgString;
     FProjectType: TfpgString;    { 'application', 'library', 'pom' }
+    FSourceDirectory: TfpgString; { from <sourceDirectory>, default 'src/main/pascal' }
     FMainSource: TfpgString;
     FTargetFile: TfpgString;
     FUnitOutputDir: TfpgString;
@@ -146,6 +147,7 @@ type
     property  ProjectFile: TfpgString read FProjectFile;
     property  Version: TfpgString read FVersion;
     property  ProjectType: TfpgString read FProjectType;
+    property  SourceDirectory: TfpgString read FSourceDirectory;
     property  AvailableProfiles: TStringList read FAvailableProfiles;
     property  ActiveProfiles: TStringList read FActiveProfiles;
     property  ModuleNames: TStringList read FModuleNames;
@@ -290,6 +292,14 @@ begin
       ChildNode := ChildNode.NextSibling;
     end;
 
+    { Inherit version from aggregator if sub-module has none }
+    if (FAggregatorDir <> '') and (FVersion = '') then
+    begin
+      Node := RootNode.FindNode('version');
+      if Assigned(Node) and Assigned(Node.FirstChild) then
+        FVersion := UTF8Encode(Node.FirstChild.NodeValue);
+    end;
+
     { Also grab available profiles from the aggregator if found }
     if FAggregatorDir <> '' then
     begin
@@ -350,6 +360,12 @@ begin
         FProjectType := UTF8Encode(ChildNode.FirstChild.NodeValue)
       else
         FProjectType := 'application';
+
+      ChildNode := Node.FindNode('sourceDirectory');
+      if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+        FSourceDirectory := UTF8Encode(ChildNode.FirstChild.NodeValue)
+      else
+        FSourceDirectory := 'src/main/pascal';
 
       ChildNode := Node.FindNode('mainSource');
       if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
