@@ -210,6 +210,7 @@ begin
   fpgSetNamedColor(clHilite1, FColors^[3]);
   fpgSetNamedColor(clHilite2, FColors^[3]);
   fpgSetNamedColor(clText1, FColors^[4]);
+  fpgSetNamedColor(clText2, FColors^[5]);   { accent text — for emphasis/category labels }
   fpgSetNamedColor(clText4, FColors^[15]);
   fpgSetNamedColor(clSelection, FColors^[5]);
   fpgSetNamedColor(clSelectionText, $FFFFFFFF);

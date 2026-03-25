@@ -1090,6 +1090,7 @@ begin
   else
     RootLabel := pb.ProjectName;
   RootNode := tvProject.RootNode.AppendText(RootLabel);
+  RootNode.TextColor := clText2;
 
   { Build source extension list from cSourceFiles constant }
   SourceExts := TStringList.Create;
@@ -1105,6 +1106,7 @@ begin
     if fpgDirectoryExists(SrcDir) then
     begin
       DirNode := RootNode.AppendText('Sources');
+      DirNode.TextColor := clText2;
       DirNode.Data := Pointer(1);
       AddDirectoryToTree(DirNode, SrcDir, SourceExts);
       DirNode.Expand;
@@ -1115,6 +1117,7 @@ begin
     if fpgDirectoryExists(SrcDir) then
     begin
       DirNode := RootNode.AppendText('Tests');
+      DirNode.TextColor := clText2;
       DirNode.Data := Pointer(2);
       AddDirectoryToTree(DirNode, SrcDir, SourceExts);
     end;
@@ -1127,6 +1130,7 @@ begin
   if fpgDirectoryExists(SrcDir) then
   begin
     DirNode := RootNode.AppendText('Resources');
+    DirNode.TextColor := clText2;
     DirNode.Data := Pointer(3);
     AddDirectoryToTree(DirNode, SrcDir, nil);
   end;
@@ -1136,6 +1140,7 @@ begin
   if fpgDirectoryExists(SrcDir) then
   begin
     DirNode := RootNode.AppendText('Test Resources');
+    DirNode.TextColor := clText2;
     DirNode.Data := Pointer(4);
     AddDirectoryToTree(DirNode, SrcDir, nil);
   end;
@@ -1144,16 +1149,18 @@ begin
   if pb.DeclaredDeps.Count > 0 then
   begin
     DepNode := RootNode.AppendText('Dependencies');
+    DepNode.TextColor := clText2;
     for i := 0 to pb.DeclaredDeps.Count - 1 do
-      DepNode.AppendText(pb.DeclaredDeps[i]);
+      DepNode.AppendText(pb.DeclaredDeps[i]).TextColor := clText1;
   end;
 
   { Build Profiles — from <profiles> in project.xml }
   if pb.AvailableProfiles.Count > 0 then
   begin
     DirNode := RootNode.AppendText('Build Profiles');
+    DirNode.TextColor := clText2;
     for i := 0 to pb.AvailableProfiles.Count - 1 do
-      DirNode.AppendText(pb.AvailableProfiles[i]);
+      DirNode.AppendText(pb.AvailableProfiles[i]).TextColor := clText1;
   end;
 
   RootNode.Expand;
@@ -1227,13 +1234,14 @@ begin
     for i := 0 to Dirs.Count - 1 do
     begin
       SubNode := AParent.AppendText(Dirs[i]);
+      SubNode.TextColor := clText1;
       AddDirectoryToTree(SubNode,
         IncludeTrailingPathDelimiter(ADir + Dirs[i]), AExtensions);
     end;
 
     { Add files }
     for i := 0 to Files.Count - 1 do
-      AParent.AppendText(Files[i]);
+      AParent.AppendText(Files[i]).TextColor := clText1;
   finally
     Dirs.Free;
     Files.Free;
