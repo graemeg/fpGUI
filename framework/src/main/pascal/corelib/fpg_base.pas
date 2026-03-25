@@ -1595,9 +1595,6 @@ begin
   // convert window cordinates to widget coordinates
   w.WindowToWidget(AX, AY);
 
-  {$IFDEF DNDDEBUG}
-  DebugLn('dragging over widget: ', TargetWidget.ClassName, ' ',AX,':',AY);
-  {$ENDIF}
   msgp.drop.Drop := Self;
   msgp.drop.x:=AX;
   msgp.drop.y:=AY;
@@ -3273,15 +3270,7 @@ end;
 
 
 procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(x,y,w,h) - ' + ClassName);
-  DebugLnFmt('x:%d  y:%d  w:%d  h:%d', [x,y,w,h]);
-  {$ENDIF}
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
@@ -3301,26 +3290,12 @@ begin
 end;
 
 procedure TfpgCanvasBase.EndDraw(ARect: TfpgRect);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(rect) - ' + ClassName);
-  {$ENDIF}
   EndDraw(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
 end;
 
 procedure TfpgCanvasBase.EndDraw;
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
-  {$ENDIF}
   EndDraw(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
 end;
 
