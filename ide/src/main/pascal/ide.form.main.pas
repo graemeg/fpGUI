@@ -25,7 +25,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_mru, synregexpr,
+  fpg_tree, fpg_textedit, fpg_mru, regexpr,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.project.pasbuild;
 

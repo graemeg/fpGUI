@@ -26,7 +26,7 @@ uses
   fpg_dbugintf, fpg_dbugmsg, fpg_fontcache, fpg_window, fpg_style_carbon,
   fpg_style_plastic, fpg_style_fusion, fpg_style_win8, fpg_scrollframe, fpg_toggle,
   fpg_StringGridBuilder, fpg_CSVParser, fpg_ledmatrix, fpg_dnd_window,
-  fpg_hexview, SynRegExpr, fpg_flowlayout, fpg_layoutmanager, fpg_layouttypes,
+  fpg_hexview, fpg_flowlayout, fpg_layoutmanager, fpg_layouttypes,
   fpg_borderlayout, fpg_miglayout, fpg_migconstraint, fpg_mig_hidemode,
   fpg_mig_unitvalue, fpg_mig_boundsize, fpg_mig_platformdefaults,
   fpg_mig_dimconstraint, fpg_mig_ac, fpg_mig_lc, fpg_mig_cc, fpg_mig_constraintparser,

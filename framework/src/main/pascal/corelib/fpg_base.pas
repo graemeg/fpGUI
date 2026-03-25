@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006-2026 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1110,7 +1110,7 @@ uses
   process,
   dateutils,
   math,
-  synregexpr;
+  regexpr;
 
 
 const

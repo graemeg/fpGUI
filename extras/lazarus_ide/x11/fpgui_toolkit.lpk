@@ -486,10 +486,6 @@
         <Filename Value="../../../framework/src/main/pascal/gui/fpg_hexview.pas"/>
         <UnitName Value="fpg_hexview"/>
       </Item115>
-      <Item116>
-        <Filename Value="../../../framework/src/main/pascal/3rdparty/regex/synregexpr.pas"/>
-        <UnitName Value="SynRegExpr"/>
-      </Item116>
       <Item117>
         <Filename Value="../../../framework/src/main/pascal/corelib/fpg_flowlayout.pas"/>
         <UnitName Value="fpg_flowlayout"/>

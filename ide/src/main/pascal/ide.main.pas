@@ -44,7 +44,6 @@ uses
   ide.stringhelpers,
   ide.form.procedurelist,
   ide.filemonitor,
-  SynRegExpr,
   fpg_textedit,
   ide.form.find,
   Sha1,
