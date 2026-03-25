@@ -149,6 +149,9 @@ type
     FTabPadding: Integer;
     FUseElasticTabstops: Boolean;
     FIndentSize: Integer;
+    FFontColor: TfpgColor;
+    FSelectionColor: TfpgColor;
+    FSelectionTextColor: TfpgColor;
     FLineHighlightColor: TfpgColor;
     FUndoManager: TUndoManager;
 
@@ -230,6 +233,9 @@ type
     property    Lines: TStrings read FLines write SetLines;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    IndentSize: Integer read FIndentSize write FIndentSize default 2;
+    property    FontColor: TfpgColor read FFontColor write FFontColor default clBlack;
+    property    SelectionColor: TfpgColor read FSelectionColor write FSelectionColor;
+    property    SelectionTextColor: TfpgColor read FSelectionTextColor write FSelectionTextColor;
     property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
@@ -306,6 +312,9 @@ type
     property    GutterVisible;
     property    GutterShowLineNumbers;
     property    IndentSize;
+    property    FontColor;
+    property    SelectionColor;
+    property    SelectionTextColor;
     property    LineHighlightColor;
     property    Lines;
     property    RightEdge;
@@ -2467,19 +2476,10 @@ begin
 
       if AllowDraw then
       begin
-        Canvas.TextColor := clBlack;
+        Canvas.TextColor := FFontColor;
         currentX := X;
-        {$IFDEF gDEBUG}
-        writeln('=== Line ', ALineIndex, ' X=', X, ' cells=', cells.Count, ' positions=', positions.Count);
-        {$ENDIF}
         for i := 0 to cells.Count - 1 do
         begin
-          {$IFDEF gDEBUG}
-          if i < positions.Count then
-            writeln('  Cell[', i, ']="', cells[i], '" at X=', currentX, ' nextPos=', positions[i])
-          else
-            writeln('  Cell[', i, ']="', cells[i], '" at X=', currentX, ' (last cell)');
-          {$ENDIF}
           Canvas.DrawString(currentX, Y, cells[i]);
           if i < positions.Count then
             currentX := X + positions[i]
@@ -2521,8 +2521,8 @@ begin
   { Draw simple text line... }
   if AllowDraw then
   begin
-    Canvas.TextColor := clBlack;
-    Canvas.DrawText(R, S);
+    Canvas.TextColor := FFontColor;
+    Canvas.DrawString(R.Left, R.Top, S);
   end;
 
   if FSelected then
@@ -2530,10 +2530,10 @@ begin
     if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
     begin
       R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
-      Canvas.TextColor := clWhite;
-      Canvas.Color := fpgColorToRGB(clSelection);
+      Canvas.TextColor := FSelectionTextColor;
+      Canvas.Color := fpgColorToRGB(FSelectionColor);
       Canvas.FillRectangle(R);
-      Canvas.DrawText(R, S);
+      Canvas.DrawString(R.Left, R.Top, S);
     end
     else
     begin
@@ -2547,10 +2547,10 @@ begin
         else
           SS := UTF8Copy(S, Si + 1, Ei - Si);
         R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
-        Canvas.TextColor := clWhite;
-        Canvas.Color := fpgColorToRGB(clSelection);
+        Canvas.TextColor := FSelectionTextColor;
+        Canvas.Color := fpgColorToRGB(FSelectionColor);
         Canvas.FillRectangle(R);
-        Canvas.DrawText(R, SS);
+        Canvas.DrawString(R.Left, R.Top, SS);
       end
       else
       begin
@@ -2558,10 +2558,10 @@ begin
         begin
           SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
           R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
-          Canvas.TextColor := clWhite;
-          Canvas.Color := fpgColorToRGB(clSelection);
+          Canvas.TextColor := FSelectionTextColor;
+          Canvas.Color := fpgColorToRGB(FSelectionColor);
           Canvas.FillRectangle(R);
-          Canvas.DrawText(R, SS);
+          Canvas.DrawString(R.Left, R.Top, SS);
         end
         else
         begin
@@ -2571,10 +2571,10 @@ begin
               Ei := UTF8Length(S);
             SS := UTF8Copy(S, 1, Ei);
             R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
-            Canvas.TextColor := clWhite;
-            Canvas.Color := fpgColorToRGB(clSelection);
+            Canvas.TextColor := FSelectionTextColor;
+            Canvas.Color := fpgColorToRGB(FSelectionColor);
             Canvas.FillRectangle(R);
-            Canvas.DrawText(R, SS);
+            Canvas.DrawString(R.Left, R.Top, SS);
           end;
         end;
       end;
@@ -2659,6 +2659,9 @@ begin
   FTopLine      := 0;
   FTabWidth     := 8;
   FIndentSize   := 2;
+  FFontColor    := clBlack;
+  FSelectionColor := clSelection;
+  FSelectionTextColor := clWhite;
   FLineHighlightColor := clNone;
   FMaxScrollH   := 1;
   VPos          := 0;

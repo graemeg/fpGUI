@@ -272,12 +272,15 @@ procedure TMainForm.miFileSave(Sender: TObject);
 var
   s: TfpgString;
   ts: TfpgTabSheet;
+  edt: TfpgTextEdit;
 begin
   ts := pcEditor.ActivePage;
+  edt := TfpgTextEdit(ts.Components[0]);
+
   s := ts.Hint;
   if s <> '' then
   begin
-    TfpgTextEdit(ts.Components[0]).SaveToFile(s);
+    edt.SaveToFile(s);
     { Clear modified indicator }
     if (Length(ts.Text) > 2) and (Copy(ts.Text, 1, 2) = '* ') then
       ts.Text := Copy(ts.Text, 3, Length(ts.Text) - 2);
@@ -1357,6 +1360,10 @@ begin
   m.GutterShowLineNumbers := True;
   m.RightEdge := True;
   m.BackgroundColor := FTheme.Chrome.Background;
+  m.FontColor := FTheme.Chrome.Foreground;
+  m.SelectionColor := FTheme.Chrome.Selection;
+  m.SelectionTextColor := FTheme.Chrome.SelectionText;
+  m.LineHighlightColor := FTheme.Chrome.CurrentLine;
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -1443,7 +1450,9 @@ begin
               (ext = '.lpk') then
       begin
         editor.OnDrawLine := @HighlightXML;
-      end;
+      end
+      else
+        editor.OnDrawLine := nil;
     end;
     ts.Realign;
     pcEditor.ActivePage := ts;
@@ -1515,13 +1524,17 @@ begin
     if s = '' then
       Continue;
 
-    { Fill any gap before this token with background colour }
+    { Fill any gap before this token with background + default text }
     if tok.Column > lLastCol then
     begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
           edt.FontWidth * (tok.Column - lLastCol), ATextRect.Height);
       ACanvas.Color := FTheme.Chrome.Background;
       ACanvas.FillRectangle(r);
+      { Draw unhighlighted text in the gap (e.g. XML text content) }
+      ACanvas.TextColor := FTheme.Chrome.Foreground;
+      ACanvas.DrawString(r.Left, r.Top,
+          Copy(ALineText, lLastCol + 1, tok.Column - lLastCol));
     end;
 
     { Determine style for this token }
@@ -1583,6 +1596,13 @@ begin
         ATextRect.Width - (edt.FontWidth * lLastCol), ATextRect.Height);
     ACanvas.Color := FTheme.Chrome.Background;
     ACanvas.FillRectangle(r);
+    { Draw any trailing unhighlighted text }
+    if lLastCol < Length(ALineText) then
+    begin
+      ACanvas.TextColor := FTheme.Chrome.Foreground;
+      ACanvas.DrawString(r.Left, r.Top,
+          Copy(ALineText, lLastCol + 1, Length(ALineText) - lLastCol));
+    end;
   end;
 
   ACanvas.SetFont(oldfont);
@@ -1668,11 +1688,12 @@ begin
   AllowSelfDraw := False;
 
   oldfont := TfpgFontResourceBase(ACanvas.Font);
-  ACanvas.Color := clWhite;
+  ACanvas.Color := FTheme.Chrome.Background;
 
   { draw the plain text first }
-  ACanvas.TextColor := clBlack;
-  ACanvas.DrawText(ATextRect, ALineText);
+  ACanvas.TextColor := FTheme.Chrome.Foreground;
+  ACanvas.FillRectangle(ATextRect);
+  ACanvas.DrawString(ATextRect.Left, ATextRect.Top, ALineText);
 
   lMatchPos := 0;
   lOffset := 0;
@@ -1690,7 +1711,7 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
 
@@ -1707,7 +1728,7 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
 
@@ -1724,7 +1745,7 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
 
@@ -1741,7 +1762,7 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
 
@@ -1758,12 +1779,12 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
 
   { syntax highlighting for: cStartOfFile }
-  ACanvas.TextColor := clBlack;
+  ACanvas.TextColor := FTheme.Chrome.Foreground;
   ACanvas.Color := clSilver;
   FRegex.Expression := cStartOfFile;
   if FRegex.Exec(ALineText) then
@@ -1776,10 +1797,10 @@ begin
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
+      ACanvas.DrawString(r.Left, r.Top, s);
     until not FRegex.ExecNext;
   end;
-  ACanvas.Color := clWhite;
+  ACanvas.Color := FTheme.Chrome.Background;
 
   ACanvas.SetFont(oldfont);
 end;
@@ -1927,6 +1948,10 @@ begin
   begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).BackgroundColor := FTheme.Chrome.Background;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontColor := FTheme.Chrome.Foreground;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionColor := FTheme.Chrome.Selection;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionTextColor := FTheme.Chrome.SelectionText;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).LineHighlightColor := FTheme.Chrome.CurrentLine;
   end;
 end;
 
