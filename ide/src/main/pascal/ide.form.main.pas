@@ -1148,6 +1148,14 @@ begin
       DepNode.AppendText(pb.DeclaredDeps[i]);
   end;
 
+  { Build Profiles — from <profiles> in project.xml }
+  if pb.AvailableProfiles.Count > 0 then
+  begin
+    DirNode := RootNode.AppendText('Build Profiles');
+    for i := 0 to pb.AvailableProfiles.Count - 1 do
+      DirNode.AppendText(pb.AvailableProfiles[i]);
+  end;
+
   RootNode.Expand;
   tvProject.Selection := RootNode;
   tvProject.Invalidate;
