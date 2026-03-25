@@ -110,10 +110,14 @@ begin
 
     if not Assigned(Result) then
     begin
-      // Cache miss - create new platform-specific font resource.
-      // Always use native font resources — the hybrid canvas uses
-      // native text rendering (Xft/GDI) for performance.
-      Result := TfpgFontResource.Create(fdesc);
+      // Cache miss - create font resource.
+      // When AggPas is active, use AggFontResourceClass which provides
+      // FreeType-based metrics matching the rendered output. Otherwise
+      // use native font resources (Xft on X11, GDI on Windows).
+      if Assigned(AggFontResourceClass) then
+        Result := AggFontResourceClass.Create(fdesc)
+      else
+        Result := TfpgFontResource.Create(fdesc);
 
       if Result.HandleIsValid then
       begin

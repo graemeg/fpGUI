@@ -30,6 +30,8 @@ uses
   Classes,
   SysUtils,
   fpg_base,
+  fpg_fontmanager,
+  fpg_fontresource_freetype,
   agg_2D,
   fpg_glyph_cache;
 
@@ -736,5 +738,8 @@ begin
     FBufferManager.RestoreFromBuffer(ARect);
 end;
 
+
+initialization
+  AggFontResourceClass := TfpgFreeTypeFontResource;
 
 end.

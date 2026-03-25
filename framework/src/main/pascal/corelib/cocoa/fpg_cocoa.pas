@@ -243,6 +243,15 @@ uses
   fpg_cmdlineparams,
   fpg_constants;
 
+{ FPC's CocoaAll window level constants are all broken (return -1).
+  Define the correct values from Apple's CGWindowLevel.h. }
+const
+  fpgkCGNormalWindowLevel    = 0;
+  fpgkCGFloatingWindowLevel  = 3;
+  fpgkCGModalPanelWindowLevel = 8;
+  fpgkCGPopUpMenuWindowLevel = 101;
+  fpgkCGScreenSaverWindowLevel = 1000;
+
 { Helper function to convert NSString to String }
 function NSStringToString(ns: NSString): String;
 begin
@@ -804,7 +813,7 @@ begin
   if (WindowType = wtPopup) or (WindowType = wtChild) then
   begin
     // Borderless windows need special configuration to be visible on macOS
-    FWinHandle.setLevel(NSPopUpMenuWindowLevel);  // Appear above other windows
+    FWinHandle.setLevel(fpgkCGPopUpMenuWindowLevel);  // Appear above other windows
     FWinHandle.setOpaque(True);  // Make window opaque
     FWinHandle.setHasShadow(True);  // Add shadow for visibility
     FWinHandle.setBackgroundColor(NSColor.windowBackgroundColor);  // Set background
@@ -962,6 +971,7 @@ begin
       FWinHandle.makeKeyAndOrderFront(nil);
     end;
     FWinHandle.orderFrontRegardless;
+
 
     // Trigger initial paint when window becomes visible.
     // The paint handler populates the buffer, then the buffer manager
