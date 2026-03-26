@@ -3108,7 +3108,6 @@ var
   prop: TAtom;
   mwmhints: TMWMHints;
   w: TfpgWidgetBase;
-  pm: TfpgRect;
 begin
   // currently unhandled (here) attributes. Some are only set when the window is created.
   {
@@ -3134,44 +3133,9 @@ begin
   // if the window is mapped then this stuff is irrelevant
   if not (xwsfMapped in FWinFlags) or AForceAll then
   begin
-    // waAutoPos
+    // waAutoPos — let the window manager choose position
     if not (waAutoPos in ANewAttributes) then
       hints.flags := hints.flags or PPosition;
-
-    // waScreenCenterPos — centers on primary monitor's work area
-    if (waScreenCenterPos in ANewAttributes) then
-    begin
-      pm := xapplication.Desktop.AvailableGeometry(xapplication.Desktop.PrimaryScreen);
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-      FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end
-    // waOneThirdDownPos — centers horizontally, one-third down on primary monitor
-    else if waOneThirdDownPos in ANewAttributes then
-    begin
-      pm := xapplication.Desktop.AvailableGeometry(xapplication.Desktop.PrimaryScreen);
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-      FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end
-    // waVirtualScreenCenterPos — old behavior: centers on full virtual desktop
-    else if waVirtualScreenCenterPos in ANewAttributes then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth  - FSize.W) div 2;
-      FPosition.Y := (xapplication.ScreenHeight - FSize.H) div 2;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end
-    // waMainFormCenterPos — centers over the main form
-    else if (waMainFormCenterPos in ANewAttributes) and Assigned(fpgApplication.MainForm) then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
-      FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end;
   end;
 
   // waSizeable;
@@ -3261,9 +3225,9 @@ var
   ChangedAttrs: TWindowAttributes = [];
   Attr: TWindowAttribute;
 begin
-  {waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
+  {waSizeable, waAutoPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop, waMainFormCenterPos}
+      waSystemStayOnTop}
 
   {nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
                      nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn}

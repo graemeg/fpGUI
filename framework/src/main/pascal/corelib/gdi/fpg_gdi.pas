@@ -2015,7 +2015,6 @@ var
   rwidth: integer;
   rheight: integer;
   r: TRect;
-  pm: TfpgRect;
 begin
   if FWinHandle > 0 then
     Exit; //==>
@@ -2140,33 +2139,6 @@ begin
   SetWindowOpacity(WindowOpacity);
   {$ENDIF}
 
-  if waScreenCenterPos in FWindowAttributes then
-  begin
-    pm := wapplication.Desktop.AvailableGeometry(wapplication.Desktop.PrimaryScreen);
-    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  else if waOneThirdDownPos in FWindowAttributes then
-  begin
-    pm := wapplication.Desktop.AvailableGeometry(wapplication.Desktop.PrimaryScreen);
-    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  else if waVirtualScreenCenterPos in FWindowAttributes then
-  begin
-    FPosition.X := (wapplication.ScreenWidth  - FSize.W) div 2;
-    FPosition.Y := (wapplication.ScreenHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  else if (waMainFormCenterPos in FWindowAttributes) and Assigned(fpgApplication.MainForm) then
-  begin
-    FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
-    FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end;
-
   DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
 
   // the forms require some adjustments before the Window appears
@@ -2246,11 +2218,7 @@ begin
     else
       Windows.ShowWindow(FWinHandle, SW_SHOWNORMAL);
 
-    if (waAutoPos in FWindowAttributes) or
-      (waScreenCenterPos in FWindowAttributes) or
-      (waOneThirdDownPos in FWindowAttributes) or
-      (waVirtualScreenCenterPos in FWindowAttributes) or
-      (waMainFormCenterPos in FWindowAttributes) then
+    if (waAutoPos in FWindowAttributes) then
     begin
       GetWindowRect(FWinHandle, r);
       FPosition.X := r.Left;

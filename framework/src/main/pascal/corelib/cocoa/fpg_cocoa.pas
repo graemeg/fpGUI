@@ -891,7 +891,6 @@ end;
 procedure TfpgCocoaWindow.DoSetWindowAttributes(const AOldAtributes, ANewAttributes: TWindowAttributes; const AForceAll: Boolean);
 var
   styleMask: NSUInteger;
-  pm: TfpgRect;
 begin
   if not HandleIsValid then
     Exit;
@@ -923,41 +922,9 @@ begin
       FWinHandle.toggleFullScreen(nil);
   end;
 
-  // waScreenCenterPos — centers on primary monitor's work area
-  if (waScreenCenterPos in ANewAttributes) and
-     (AForceAll or (waScreenCenterPos in (ANewAttributes - AOldAtributes))) then
-  begin
-    pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
-    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  // waOneThirdDownPos — one-third down on primary monitor
-  else if (waOneThirdDownPos in ANewAttributes) and
-          (AForceAll or (waOneThirdDownPos in (ANewAttributes - AOldAtributes))) then
-  begin
-    pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
-    FPosition.X := pm.Left + (pm.Width  - FSize.W) div 2;
-    FPosition.Y := pm.Top  + (pm.Height - FSize.H) div 3;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  // waVirtualScreenCenterPos — old behavior: centers on full virtual desktop
-  else if (waVirtualScreenCenterPos in ANewAttributes) and
-          (AForceAll or (waVirtualScreenCenterPos in (ANewAttributes - AOldAtributes))) then
-  begin
-    FPosition.X := (fpgApplication.ScreenWidth  - FSize.W) div 2;
-    FPosition.Y := (fpgApplication.ScreenHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  // waMainFormCenterPos — centers over the main form
-  else if (waMainFormCenterPos in ANewAttributes) and
-          (AForceAll or (waMainFormCenterPos in (ANewAttributes - AOldAtributes))) and
-          Assigned(fpgApplication.MainForm) then
-  begin
-    FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
-    FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end;
+  { Window positioning (wpScreenCenter, wpOneThirdDown, etc.) is now handled
+    centrally in TfpgBaseForm.DoAllocateWindowHandle before the native window
+    is created. Only waAutoPos remains as a backend concern. }
 end;
 
 procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);

@@ -254,26 +254,6 @@ begin
   else
     Exclude(WindowAttributes, waAutoPos);
 
-  if FWindowPosition = wpScreenCenter then
-    Include(WindowAttributes, waScreenCenterPos)
-  else
-    Exclude(WindowAttributes, waScreenCenterPos);
-
-  if FWindowPosition = wpOneThirdDown then
-    Include(WindowAttributes, waOneThirdDownPos)
-  else
-    Exclude(WindowAttributes, waOneThirdDownPos);
-
-  if FWindowPosition = wpVirtualScreenCenter then
-    Include(WindowAttributes, waVirtualScreenCenterPos)
-  else
-    Exclude(WindowAttributes, waVirtualScreenCenterPos);
-
-  if FWindowPosition = wpMainFormCenter then
-    Include(WindowAttributes, waMainFormCenterPos)
-  else
-    Exclude(WindowAttributes, waMainFormCenterPos);
-
   if FSizeable then
     Include(WindowAttributes, waSizeable)
   else
@@ -541,7 +521,39 @@ begin
 end;
 
 procedure TfpgBaseForm.DoAllocateWindowHandle;
+var
+  pm: TfpgRect;
 begin
+  { Calculate window position before the native window is created, so that
+    Left/Top flow through to the backend via the UpdatePosition chain. }
+  case FWindowPosition of
+    wpScreenCenter:
+      begin
+        pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
+        Left := pm.Left + (pm.Width  - Width) div 2;
+        Top  := pm.Top  + (pm.Height - Height) div 2;
+      end;
+    wpOneThirdDown:
+      begin
+        pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
+        Left := pm.Left + (pm.Width  - Width) div 2;
+        Top  := pm.Top  + (pm.Height - Height) div 3;
+      end;
+    wpVirtualScreenCenter:
+      begin
+        Left := (fpgApplication.ScreenWidth  - Width) div 2;
+        Top  := (fpgApplication.ScreenHeight - Height) div 2;
+      end;
+    wpMainFormCenter:
+      begin
+        if Assigned(fpgApplication.MainForm) then
+        begin
+          Left := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - Width) div 2;
+          Top  := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - Height) div 2;
+        end;
+      end;
+  end;
+
   inherited DoAllocateWindowHandle;
   AdjustWindowStyle;
 end;
