@@ -25,7 +25,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_mru, regexpr,
+  fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru, regexpr,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.project.pasbuild;
@@ -75,6 +75,7 @@ type
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
     pmProfileMenu: TfpgPopupMenu;
+    FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
@@ -158,8 +159,10 @@ type
     procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   UpdateProfilesDisplay;
+    procedure   ToggleProfile(const AProfileName: TfpgString);
     procedure   lblProfilesClicked(Sender: TObject);
     procedure   pmProfileClicked(Sender: TObject);
+    procedure   tvProfileStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
@@ -227,6 +230,7 @@ uses
   ,ide.navigation
   ,ide.highlighter.ini
   ,ide.highlighter.xml
+  ,fpg_imgfmt_bmp
   ;
 
 
@@ -235,6 +239,109 @@ const
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project;project.xml';
+
+  { 16x16 checkbox images for tree view state icons (BMP format, mask colour at 0,0) }
+  cCheckboxUnchecked: array[0..821] of byte = (
+      66, 77, 54,  3,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0, 40,  0,  0,
+       0, 16,  0,  0,  0, 16,  0,  0,  0,  1,  0, 24,  0,  0,  0,  0,  0,
+       0,  3,  0,  0,100,  0,  0,  0,100,  0,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,132,132,132,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,132,132,132,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,132,132,132,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,132,132,132,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,132,132,
+     132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,
+     132,132,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,132,132,132,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,132,132,132,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255);
+
+  cCheckboxChecked: array[0..821] of byte = (
+      66, 77, 54,  3,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0, 40,  0,  0,
+       0, 16,  0,  0,  0, 16,  0,  0,  0,  1,  0, 24,  0,  0,  0,  0,  0,
+       0,  3,  0,  0,100,  0,  0,  0,100,  0,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,132,132,132,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,
+     255,255,255,255,255,255,  0,  0,  0,255,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,132,132,132,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,255,255,
+       0,  0,  0,  0,  0,  0,  0,  0,  0,255,255,255,255,255,255,255,255,
+     255,255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,132,132,132,255,255,255,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0,  0,255,255,255,255,255,255,255,255,
+     255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,132,132,132,255,255,255,  0,  0,  0,  0,  0,  0,255,255,255,
+       0,  0,  0,  0,  0,  0,  0,  0,  0,255,255,255,255,255,255,132,132,
+     132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,
+     132,132,255,255,255,  0,  0,  0,255,255,255,255,255,255,255,255,255,
+       0,  0,  0,  0,  0,  0,  0,  0,  0,255,255,255,132,132,132,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+       0,  0,  0,  0,  0,  0,255,255,255,132,132,132,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+       0,  0,  0,255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,132,132,132,255,255,255,255,255,255,255,
+     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+     255,255,255,132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,
+     132,132,132,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,
+     255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,
+       0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,255,  0,255,
+     255,  0,255,255,  0,255);
 
 
 {@VFD_NEWFORM_IMPL}
@@ -1235,28 +1342,21 @@ begin
   pmProfileMenu.ShowAt(lblProfiles, 0, -lPopupHeight, True);
 end;
 
-procedure TMainForm.pmProfileClicked(Sender: TObject);
+procedure TMainForm.ToggleProfile(const AProfileName: TfpgString);
 var
-  mi: TfpgMenuItem;
   pb: TPasBuildProjectBackend;
-  ProfileName: TfpgString;
   idx: integer;
 begin
-  if not (Sender is TfpgMenuItem) then
-    Exit;
-  mi := TfpgMenuItem(Sender);
-  ProfileName := mi.Text;
-
   if GProject.ProjectFormat <> pfPasBuild then
     Exit;
   pb := TPasBuildProjectBackend(GProject);
 
   { Toggle the profile }
-  idx := pb.ActiveProfiles.IndexOf(ProfileName);
+  idx := pb.ActiveProfiles.IndexOf(AProfileName);
   if idx >= 0 then
     pb.ActiveProfiles.Delete(idx)
   else
-    pb.ActiveProfiles.Add(ProfileName);
+    pb.ActiveProfiles.Add(AProfileName);
 
   { Re-resolve with new profiles and refresh UI }
   pb.Resolve(pb.ActiveProfiles.CommaText);
@@ -1264,6 +1364,23 @@ begin
   PopuplateProjectTree;
   UpdateProfilesDisplay;
   AddMessage('Active profiles: ' + pb.ActiveProfiles.CommaText);
+end;
+
+procedure TMainForm.pmProfileClicked(Sender: TObject);
+var
+  mi: TfpgMenuItem;
+begin
+  if not (Sender is TfpgMenuItem) then
+    Exit;
+  mi := TfpgMenuItem(Sender);
+  ToggleProfile(mi.Text);
+end;
+
+procedure TMainForm.tvProfileStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+begin
+  { Only handle profile nodes (children of 'Build Profiles' parent) }
+  if (ANode.Parent <> nil) and (ANode.Parent.Text = 'Build Profiles') then
+    ToggleProfile(ANode.Text);
 end;
 
 procedure TMainForm.SetupProjectTree;
@@ -1416,6 +1533,7 @@ var
   pb: TPasBuildProjectBackend;
   RootNode: TfpgTreeNode;
   DirNode: TfpgTreeNode;
+  ProfileNode: TfpgTreeNode;
   RootLabel: TfpgString;
   i: integer;
 begin
@@ -1454,7 +1572,15 @@ begin
     DirNode := RootNode.AppendText('Build Profiles');
     DirNode.TextColor := clText2;
     for i := 0 to pb.AvailableProfiles.Count - 1 do
-      DirNode.AppendText(pb.AvailableProfiles[i]).TextColor := clText1;
+    begin
+      ProfileNode := DirNode.AppendText(pb.AvailableProfiles[i]);
+      ProfileNode.TextColor := clText1;
+      if pb.ActiveProfiles.IndexOf(pb.AvailableProfiles[i]) >= 0 then
+        ProfileNode.StateImageIndex := 1   { checked }
+      else
+        ProfileNode.StateImageIndex := 0;  { unchecked }
+    end;
+    DirNode.Expand;
   end;
 
   RootNode.Expand;
@@ -2353,6 +2479,17 @@ begin
   FXMLHighlighter := TXMLHighlighter.Create;
   FXMLHighlighterEditor := nil;
   FTheme := DefaultTheme;
+
+  { Build state image list for tree checkboxes (16x16 masked BMPs) }
+  FProfileStateImages := TfpgImageList.Create;
+  FProfileStateImages.AddImage(
+    CreateImage_BMP(@cCheckboxUnchecked, SizeOf(cCheckboxUnchecked)), 0);
+  FProfileStateImages.Items[0].Image.CreateMaskFromSample(0, 0);
+  FProfileStateImages.Items[0].Image.UpdateImage;
+  FProfileStateImages.AddImage(
+    CreateImage_BMP(@cCheckboxChecked, SizeOf(cCheckboxChecked)), 1);
+  FProfileStateImages.Items[1].Image.CreateMaskFromSample(0, 0);
+  FProfileStateImages.Items[1].Image.UpdateImage;
 end;
 
 destructor TMainForm.Destroy;
@@ -2363,6 +2500,9 @@ begin
   FreeAndNil(FINIHighlighter);
   FreeAndNil(FXMLHighlighter);
   FreeAndNil(FRegex);
+  if Assigned(tvProject) then
+    tvProject.StateImageList := nil;
+  FreeAndNil(FProfileStateImages);
   inherited Destroy;
 end;
 
@@ -2513,8 +2653,12 @@ begin
     Name := 'tvProject';
     Align := alClient;
     FontDesc := '#Label1';
+    ShowImages := True;
+    StateImageList := FProfileStateImages;
+    IndentNodeWithNoImage := False;
     OnDoubleClick := @tvProjectDoubleClick;
     OnKeyPress := @tvProjectKeyPressed;
+    OnStateImageClicked := @tvProfileStateImageClicked;
   end;
 
   tsFiles := TfpgTabSheet.Create(pnlTool);
