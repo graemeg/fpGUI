@@ -2,8 +2,65 @@
   Release notes for fpGUI
   =======================
 
-v2.0.5 (unreleased) - last used SHA1 c08a89d98
+v2.0.5 (unreleased) - last used SHA1 357dbbcf
 
+  - Hybrid Canvas (new)
+    * New hybrid canvas backend combining AggPas 2D rendering with native
+      text output. Activated via the AGGCanvas compiler define.
+    * Cached bitmap glyph rendering for fast syntax-highlighted text.
+    * Deferred text rendering for correct z-order with alien widgets.
+    * Platform buffer managers added for Windows (GDI) and macOS (Cocoa).
+    * Performance: fast-path for opaque rectangle fills, bypassing AggPas
+      blending when alpha is not needed.
+  - Fusion Style (new)
+    * Added Fusion Light and Fusion Dark application styles, inspired by
+      Qt5 Fusion. Fusion Light is now the default IDE style.
+    * Fusion-style page control tabs and body rendering.
+    * Checkbox, radio button, and progress bar painting delegated to
+      TfpgStyle, enabling per-style customisation.
+  - Maximus IDE
+    * PasBuild backend integration (Phase 3.2): TPasBuildProjectBackend
+      bridges the IDE with the PasBuild build system.
+    * Project tree redesign (Phase 3.4): displays modules, dependencies,
+      and build profiles as tree nodes with accent colour category headers.
+    * Multi-module UI with aggregator project support (Phase 3.6).
+    * Build actions: clean, rebuild, and test added to IDE toolbar.
+    * INI and XML syntax highlighting added.
+    * Interface/implementation section navigation added.
+    * MigLayout used throughout the IDE UI, including a TfpgMigSplitter
+      and MigLayout-managed status bar.
+    * Session persistence: open files, window layout, and file dialog
+      directories are saved and restored per project.
+    * Edit menu: Duplicate Line, Delete Line, Undo, and Redo added.
+  - DocView
+    * Project restructured and added as a PasBuild module.
+    * Fixed rendering stopping prematurely, leaving a blank area at the
+      bottom of the document.
+  - UI Designer
+    * Added style preview support, showing the designer form in the
+      user-selected style.
+  - Framework Bug Fixes
+    * Fixed FreeType font metrics producing squashed line spacing.
+    * Fixed XOR selection rendering in TfpgMemo — now uses proper theme
+      colours instead of XOR pixel inversion.
+    * Fixed Open/Save dialog grid not growing correctly on resize.
+    * Fixed pagecontrol tab rendering to be font and DPI aware.
+    * Fixed Cocoa hybrid canvas rendering (drawRect instead of lockFocus).
+    * Fixed Cocoa font metrics and popup window visibility.
+    * Fixed FreeType font cache not being enabled on Windows.
+    * Fixed index out of bounds in File Open dialog under macOS.
+    * Compatibility fix for upcoming FPC 3.3.x release.
+    * Added wpMainFormCenter window position option; centralised window
+      positioning logic into fpg_form.pas.
+    * Experimental multi-monitor and per-screen DPI support.
+  - Code Hygiene
+    * Replaced bundled SynRegExpr with FPC's standard RegExpr unit.
+    * Replaced bundled mPasLex with FPC's fcl-passrc for Procedure List.
+    * Replaced bundled sha1.pas (D5-era) with FPC's standard hash package.
+    * Removed Cairo rendering backend.
+    * Removed VLC units (now part of FPC's Free Component Library).
+    * Removed MigLayout Java reference source (porting complete).
+    * Removed unused and empty style units.
 
 v2.0.3 (2026-02-14)
   - Bug Fixes
