@@ -3163,6 +3163,14 @@ begin
       FPosition.X := (xapplication.ScreenWidth  - FSize.W) div 2;
       FPosition.Y := (xapplication.ScreenHeight - FSize.H) div 2;
       DoMoveWindow(FPosition.X, FPosition.Y);
+    end
+    // waMainFormCenterPos — centers over the main form
+    else if (waMainFormCenterPos in ANewAttributes) and Assigned(fpgApplication.MainForm) then
+    begin
+      hints.flags := hints.flags or PPosition;
+      FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
+      FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
+      DoMoveWindow(FPosition.X, FPosition.Y);
     end;
   end;
 
@@ -3255,7 +3263,7 @@ var
 begin
   {waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop}
+      waOneThirdDownPos, waSystemStayOnTop, waMainFormCenterPos}
 
   {nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
                      nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn}

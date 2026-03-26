@@ -948,6 +948,15 @@ begin
     FPosition.X := (fpgApplication.ScreenWidth  - FSize.W) div 2;
     FPosition.Y := (fpgApplication.ScreenHeight - FSize.H) div 2;
     DoMoveWindow(FPosition.X, FPosition.Y);
+  end
+  // waMainFormCenterPos — centers over the main form
+  else if (waMainFormCenterPos in ANewAttributes) and
+          (AForceAll or (waMainFormCenterPos in (ANewAttributes - AOldAtributes))) and
+          Assigned(fpgApplication.MainForm) then
+  begin
+    FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
+    FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
+    DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 end;
 

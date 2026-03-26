@@ -2159,6 +2159,12 @@ begin
     FPosition.X := (wapplication.ScreenWidth  - FSize.W) div 2;
     FPosition.Y := (wapplication.ScreenHeight - FSize.H) div 2;
     DoMoveWindow(FPosition.X, FPosition.Y);
+  end
+  else if (waMainFormCenterPos in FWindowAttributes) and Assigned(fpgApplication.MainForm) then
+  begin
+    FPosition.X := fpgApplication.MainForm.Left + (fpgApplication.MainForm.ActualWidth  - FSize.W) div 2;
+    FPosition.Y := fpgApplication.MainForm.Top  + (fpgApplication.MainForm.ActualHeight - FSize.H) div 2;
+    DoMoveWindow(FPosition.X, FPosition.Y);
   end;
 
   DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
@@ -2243,7 +2249,8 @@ begin
     if (waAutoPos in FWindowAttributes) or
       (waScreenCenterPos in FWindowAttributes) or
       (waOneThirdDownPos in FWindowAttributes) or
-      (waVirtualScreenCenterPos in FWindowAttributes) then
+      (waVirtualScreenCenterPos in FWindowAttributes) or
+      (waMainFormCenterPos in FWindowAttributes) then
     begin
       GetWindowRect(FWinHandle, r);
       FPosition.X := r.Left;

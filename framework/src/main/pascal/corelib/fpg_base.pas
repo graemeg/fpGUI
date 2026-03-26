@@ -54,7 +54,8 @@ type
 
   TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop, waVirtualScreenCenterPos);
+      waOneThirdDownPos, waSystemStayOnTop, waVirtualScreenCenterPos,
+      waMainFormCenterPos);
   TWindowAttributes = set of TWindowAttribute;
 
   TfpgWindowAttributeChanged = procedure(Sender: TObject; ChangedAttributes: TWindowAttributes) of object;
