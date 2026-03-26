@@ -1265,17 +1265,53 @@ begin
 end;
 
 procedure TfpgMemo.HandlePaint;
+
+  procedure DrawLineText(ALine: string; AX, AY: integer; var ATabStop: integer);
+  var
+    c: integer;
+    seg: string;
+    xp: integer;
+  begin
+    xp := AX;
+    seg := '';
+    for c := 1 to Length(ALine) do
+    begin
+      if ALine[c] = #9 then
+      begin
+        if seg <> '' then
+        begin
+          Canvas.DrawString(-FDrawOffset + FSideMargin + xp, AY, seg);
+          inc(xp, Canvas.Font.GetTextWidth(seg));
+          seg := '';
+        end;
+        if ATabStop = -1 then
+          ATabStop := TabbedTextWidth(#9);
+        inc(xp, ATabStop - (xp mod ATabStop));
+      end
+      else
+        seg := seg + ALine[c];
+    end;
+    if seg <> '' then
+      Canvas.DrawString(-FDrawOffset + FSideMargin + xp, AY, seg);
+  end;
+
 var
   n: integer;
-  tw, tw2, st, len, tstop: integer;
-  yp, xp: integer;
+  selStartX, selEndX, selStart, selLen: integer;
+  yp: integer;
   ls: string;
   r: TfpgRect;
-  selsl, selsp, selel, selep: integer;
-  c: integer;
-  s: string;
+  selFirstLine, selFirstPos, selLastLine, selLastPos: integer;
+  hasSelection: boolean;
+  lineSelected: boolean;
+  selColor, selTextColor: TfpgColor;
+  selRect: TfpgRect;
+  savedClip: TfpgRect;
+  tstop: integer;
 begin
   inherited HandlePaint;
+
+  { --- draw border --- }
   r.SetRect(0, 0, ActualWidth, ActualHeight);
   case BorderStyle of
     ebsNone:
@@ -1296,113 +1332,117 @@ begin
   end;
   Canvas.SetClipRect(r);
 
+  { --- fill background --- }
   if Enabled and not ReadOnly then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectAngle(r);
+  Canvas.FillRectangle(r);
 
-  Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(FFont);
 
+  { --- design-time placeholder --- }
   if (LineCount = 0) and (csDesigning in ComponentState) then
   begin
-    // Simply to distinguish between a empty Memo, ListBox and StringGrid
     Canvas.TextColor := clShadow1;
     Canvas.DrawText(5, 5, Name + ': ' + ClassName);
   end;
 
+  { --- normalise selection range so First <= Last --- }
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
   begin
-    selsl := FSelStartLine;
-    selsp := FSelStartPos;
-    selel := FSelEndLine;
-    selep := FSelEndPos;
+    selFirstLine := FSelStartLine;
+    selFirstPos  := FSelStartPos;
+    selLastLine  := FSelEndLine;
+    selLastPos   := FSelEndPos;
   end
   else
   begin
-    selel := FSelStartLine;
-    selep := FSelStartPos;
-    selsl := FSelEndLine;
-    selsp := FSelEndPos;
+    selFirstLine := FSelEndLine;
+    selFirstPos  := FSelEndPos;
+    selLastLine  := FSelStartLine;
+    selLastPos   := FSelStartPos;
+  end;
+  hasSelection := FSelEndLine > -1;
+
+  { --- choose selection colours based on focus state --- }
+  if Focused then
+  begin
+    selColor     := clSelection;
+    selTextColor := clSelectionText;
+  end
+  else
+  begin
+    selColor     := clInactiveSel;
+    selTextColor := clInactiveSelText;
   end;
 
+  { --- paint visible lines --- }
   yp := Top_Margin;
-  tstop := -1; // init tab stop cache
-  for n := FFirstline to LineCount-1 do
+  tstop := -1;
+  for n := FFirstLine to LineCount - 1 do
   begin
     ls := GetLineText(n);
-    xp := 0;
-    s := '';
-    for c := 1 to Length(ls) do
+
+    { draw the line text in normal colours }
+    Canvas.SetTextColor(FTextColor);
+    DrawLineText(ls, 0, yp, tstop);
+
+    { draw selection highlight over this line if applicable }
+    lineSelected := hasSelection and (selFirstLine <= n) and (selLastLine >= n);
+    if lineSelected then
     begin
-      if ls[c] = #9 then
-      begin
-        if s <> '' then
-        begin
-          Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
-          inc(xp, Canvas.Font.GetTextWidth(s));
-        end;
-        if tstop = -1 then
-          tstop := TabbedTextWidth(#9); // tabstop width
-        inc(xp, tstop-(xp mod tstop));
-        s := '';
-      end
+      if selFirstLine < n then
+        selStart := 0
       else
-        s := s + ls[c];
+        selStart := selFirstPos;
+      if selLastLine > n then
+        selLen := UTF8Length(ls) - selStart
+      else
+        selLen := selLastPos - selStart;
+
+      selStartX := TabbedTextWidth(UTF8Copy(ls, 1, selStart));
+      selEndX   := TabbedTextWidth(UTF8Copy(ls, 1, selStart + selLen));
+
+      { fill selection background }
+      selRect.SetRect(
+        -FDrawOffset + FSideMargin + selStartX,
+        yp,
+        selEndX - selStartX,
+        LineHeight);
+      Canvas.SetColor(selColor);
+      Canvas.FillRectangle(selRect);
+
+      { redraw the selected portion of text in selection colours }
+      savedClip := Canvas.GetClipRect;
+      Canvas.SetClipRect(selRect);
+      Canvas.SetTextColor(selTextColor);
+      DrawLineText(ls, 0, yp, tstop);
+      Canvas.SetClipRect(savedClip);
     end;
-    if s <> '' then
-      Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
 
-    if Focused then
-    begin
-      // drawing selection
-      if (FSelEndLine > -1) and (selsl <= n) and (selel >= n) then
-      begin
-        if selsl < n then
-          st  := 0
-        else
-          st  := selsp;
-        if selel > n then
-          len := UTF8Length(ls)
-        else
-          len := selep - st;
-
-        tw  := TabbedTextWidth(UTF8Copy(ls, 1, st));
-        tw2 := TabbedTextWidth(UTF8Copy(ls, 1, st + len));
-        Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, -FDrawOffset +
-          FSideMargin + tw, yp, tw2 - tw, LineHeight);
-      end;
-
-      //drawing cursor
-      if FCursorLine = n then
-      begin
-        // drawing cursor
-        SetCaretPosition(FCursorLine, FCursorPos);
-      end;
-    end;  { if }
+    { draw cursor on current line }
+    if Focused and (FCursorLine = n) then
+      SetCaretPosition(FCursorLine, FCursorPos);
 
     yp := yp + LineHeight;
     if yp > ActualHeight then
-    begin
       Break;
-    end;
-  end;  { for }
+  end;
 
-  // Special case because it never entered the for loop above
+  { handle empty document with focus }
   if (LineCount = 0) and Focused then
-    SetCaretPosition(0,0);
-    //fpgCaret.SetCaret(Canvas, FSideMargin, Top_Margin, fpgCaret.Width, FFont.Height);
+    SetCaretPosition(0, 0);
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
 
-  // The little square in the bottom right corner
+  { the little square in the bottom right corner }
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
     Canvas.SetColor(clButtonFace);
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
-                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+    Canvas.FillRectangle(FHScrollBar.Left + FHScrollBar.ActualWidth,
+                         FVScrollBar.Top + FVScrollBar.ActualHeight,
                          FVScrollBar.ActualWidth,
                          FHScrollBar.ActualHeight);
   end;
