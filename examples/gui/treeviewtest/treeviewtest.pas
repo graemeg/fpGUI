@@ -3,9 +3,6 @@ program treeviewtest;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
-  {$ENDIF}{$ENDIF}
   Classes,
   SysUtils,
   fpg_base,
@@ -240,15 +237,17 @@ begin
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
+const
+  cImagePath = '../../../../images/';
 begin
   inherited Create(AOwner);
   // create a image list
   FImagelist := TfpgImageList.Create;
-  if fpgFileExists('../../../images/folder_16.bmp') then
-    FImagelist.AddItemFromFile(SetDirSeparators('../../../images/folder_16.bmp'), 0);
-  if fpgFileExists('../../../images/menu_preferences_16.bmp') then
+  if fpgFileExists(cImagePath + 'folder_16.bmp') then
+    FImagelist.AddItemFromFile(SetDirSeparators(cImagePath + 'folder_16.bmp'), 0);
+  if fpgFileExists(cImagePath + 'menu_preferences_16.bmp') then
   begin
-    FImagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
+    FImagelist.AddItemFromFile(SetDirSeparators(cImagePath + 'menu_preferences_16.bmp'), 1);
     FImagelist.Items[1].Image.CreateMaskFromSample(0, 0);
     FImagelist.Items[1].Image.UpdateImage;
   end;

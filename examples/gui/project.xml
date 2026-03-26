@@ -12,5 +12,6 @@
     <module>lm-border</module>
     <module>lm-flow</module>
     <module>lm-mig</module>
+    <module>treeviewtest</module>
   </modules>
 </project>
