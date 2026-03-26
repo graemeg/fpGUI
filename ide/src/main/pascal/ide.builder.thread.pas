@@ -23,7 +23,7 @@ unit ide.builder.thread;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, SyncObjs;
 
 type
   TOutputLineEvent = procedure(Sender: TObject; const ALine: string) of object;
@@ -34,14 +34,16 @@ type
     FBuildGoal: string;
     FBuildModule: string;
     FOnAvailableOutput: TOutputLineEvent;
-    OutputLine: string;
-    procedure DoOutputLine;
+    FOutputQueue: TStringList;
+    FOutputLock: TCriticalSection;
+    procedure DoFlushOutput;
     procedure SendOutput(const ALine: string);
     function  RunCommand(const ACmd: string; const AWorkDir: string): Integer;
   protected
     procedure Execute; override;
   public
     procedure AfterConstruction; override;
+    destructor Destroy; override;
     property  BuildMode: integer read FBuildMode write FBuildMode;
     { PasBuild goal: 'compile', 'clean', 'test', 'rebuild'.
       Empty string means default compile (backward compatible). }
@@ -74,12 +76,64 @@ begin
   FBuildGoal := '';
   FBuildModule := '';
   FreeOnTerminate := True;
+  FOutputQueue := TStringList.Create;
+  FOutputLock  := TCriticalSection.Create;
 end;
 
+destructor TBuilderThread.Destroy;
+begin
+  FOutputLock.Free;
+  FOutputQueue.Free;
+  inherited Destroy;
+end;
+
+{ Push a line into the queue and schedule a non-blocking flush on the main
+  thread. Queue() returns immediately so the builder thread is never blocked
+  waiting for the GUI to catch up. }
 procedure TBuilderThread.SendOutput(const ALine: string);
 begin
-  OutputLine := ALine;
-  Synchronize(@DoOutputLine);
+  FOutputLock.Acquire;
+  try
+    FOutputQueue.Add(ALine);
+  finally
+    FOutputLock.Release;
+  end;
+  Queue(@DoFlushOutput);
+end;
+
+{ Called on the main thread by CheckSynchronize. Drains all lines that have
+  accumulated since the last flush and fires the output event for each one.
+  Because every SendOutput() call queues a DoFlushOutput, many of these
+  invocations will find the queue already drained by an earlier call in the
+  same CheckSynchronize batch — so we exit early before allocating. }
+procedure TBuilderThread.DoFlushOutput;
+var
+  i: integer;
+  snapshot: TStringList;
+begin
+  if not Assigned(FOnAvailableOutput) then
+    Exit;
+  FOutputLock.Acquire;
+  try
+    if FOutputQueue.Count = 0 then
+      Exit;
+  finally
+    FOutputLock.Release;
+  end;
+  snapshot := TStringList.Create;
+  try
+    FOutputLock.Acquire;
+    try
+      snapshot.Assign(FOutputQueue);
+      FOutputQueue.Clear;
+    finally
+      FOutputLock.Release;
+    end;
+    for i := 0 to snapshot.Count - 1 do
+      FOnAvailableOutput(Self, snapshot[i]);
+  finally
+    snapshot.Free;
+  end;
 end;
 
 function TBuilderThread.RunCommand(const ACmd: string; const AWorkDir: string): Integer;
@@ -91,6 +145,7 @@ var
   Count: integer;
   i: integer;
   LineStart: integer;
+  CurrentLine: string;  { accumulates partial lines across reads }
 begin
   p := TProcess.Create(nil);
   try
@@ -101,7 +156,7 @@ begin
     p.Execute;
 
     { Process output line by line }
-    OutputLine := '';
+    CurrentLine := '';
     SetLength(Buf, BufSize);
     repeat
       if (p.Output <> nil) then
@@ -114,19 +169,19 @@ begin
       begin
         if Buf[i] in [#10, #13] then
         begin
-          OutputLine := OutputLine + Copy(Buf, LineStart, i - LineStart);
-          Synchronize(@DoOutputLine);
-          OutputLine := '';
+          CurrentLine := CurrentLine + Copy(Buf, LineStart, i - LineStart);
+          SendOutput(CurrentLine);
+          CurrentLine := '';
           if (i < Count) and (Buf[i+1] in [#10, #13]) and (Buf[i] <> Buf[i+1]) then
             inc(i);
           LineStart := i + 1;
         end;
         inc(i);
       end;
-      OutputLine := Copy(Buf, LineStart, Count - LineStart + 1);
+      CurrentLine := Copy(Buf, LineStart, Count - LineStart + 1);
     until Count = 0;
-    if OutputLine <> '' then
-      Synchronize(@DoOutputLine);
+    if CurrentLine <> '' then
+      SendOutput(CurrentLine);
     p.WaitOnExit;
     Result := p.ExitCode;
   finally
@@ -220,12 +275,6 @@ begin
     SendOutput('Compiling: ' + c);
     RunCommand(c, GProject.ProjectDir);
   end;
-end;
-
-procedure TBuilderThread.DoOutputLine;
-begin
-  if Assigned(FOnAvailableOutput) then
-    FOnAvailableOutput(self, OutputLine);
 end;
 
 end.
