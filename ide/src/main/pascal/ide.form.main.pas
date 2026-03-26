@@ -26,6 +26,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
   fpg_tree, fpg_textedit, fpg_mru, regexpr,
+  fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.project.pasbuild;
 
@@ -43,6 +44,7 @@ type
     btnSaveAll: TfpgButton;
     pnlStatusBar: TfpgBevel;
     lblStatus: TfpgLabel;
+    lblProfiles: TfpgLabel;
     pnlClientArea: TfpgBevel;
     pnlWindow: TfpgPageControl;
     tsMessages: TfpgTabSheet;
@@ -87,6 +89,7 @@ type
     FXMLHighlighter: TEditorHighlighter;
     FXMLHighlighterEditor: TfpgTextEdit;
     FBracketMatch: TBracketMatchResult;
+    FStatusBarLayout: TfpgMigLayoutManager;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
@@ -154,6 +157,7 @@ type
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
+    procedure   UpdateProfilesDisplay;
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
@@ -1175,6 +1179,22 @@ begin
   lblStatus.Text := AText;
 end;
 
+procedure TMainForm.UpdateProfilesDisplay;
+var
+  pb: TPasBuildProjectBackend;
+begin
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    if pb.ActiveProfiles.Count > 0 then
+      lblProfiles.Text := pb.ActiveProfiles.CommaText
+    else
+      lblProfiles.Text := '(no profiles)';
+  end
+  else
+    lblProfiles.Text := '';
+end;
+
 procedure TMainForm.SetupProjectTree;
 begin
   tvProject.RootNode.Clear;
@@ -1559,6 +1579,7 @@ begin
 
   PopuplateProjectTree;
   UpdateWindowTitle;
+  UpdateProfilesDisplay;
   CheckGitIgnoreForIdeDir;
   AddMessage('Project loaded');
 end;
@@ -2375,8 +2396,8 @@ begin
   with pnlStatusBar do
   begin
     Name := 'pnlStatusBar';
-    SetPosition(0, 408, 636, 20);
-    Anchors := [anLeft,anRight,anBottom];
+    PreferredSize := fpgSize(636, 22);
+    Align := alBottom;
     Hint := '';
     Style := bsLowered;
   end;
@@ -2385,13 +2406,27 @@ begin
   with lblStatus do
   begin
     Name := 'lblStatus';
-    SetPosition(2, 2, 632, 16);
-    Anchors := [anLeft,anRight,anTop];
-    Align := alBottom;
+    PreferredSize := fpgSize(400, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := '';
   end;
+
+  lblProfiles := TfpgLabel.Create(pnlStatusBar);
+  with lblProfiles do
+  begin
+    Name := 'lblProfiles';
+    PreferredSize := fpgSize(150, 16);
+    FontDesc := '#Label1';
+    Hint := 'Active build profiles';
+    Text := '';
+  end;
+
+  FStatusBarLayout := TfpgMigLayoutManager.Create;
+  pnlStatusBar.LayoutManager := FStatusBarLayout;
+  FStatusBarLayout.LC.InsetsAll('2lp').FillX;
+  FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
+  FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right'));
 
   pnlClientArea := TfpgBevel.Create(self);
   with pnlClientArea do
