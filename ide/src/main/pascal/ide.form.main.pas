@@ -74,6 +74,7 @@ type
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
+    pmProfileMenu: TfpgPopupMenu;
     FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
@@ -157,6 +158,8 @@ type
     procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   UpdateProfilesDisplay;
+    procedure   lblProfilesClicked(Sender: TObject);
+    procedure   pmProfileClicked(Sender: TObject);
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
@@ -1198,6 +1201,71 @@ begin
     lblProfiles.Text := '';
 end;
 
+procedure TMainForm.lblProfilesClicked(Sender: TObject);
+var
+  pb: TPasBuildProjectBackend;
+  mi: TfpgMenuItem;
+  i: integer;
+  lFont: TfpgFontResourceBase;
+  lItemHeight: integer;
+  lPopupHeight: integer;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  if pb.AvailableProfiles.Count = 0 then
+    Exit;
+
+  { Rebuild menu items each time — profile list may change after project reload }
+  pmProfileMenu.Free;
+  pmProfileMenu := TfpgPopupMenu.Create(self);
+  for i := 0 to pb.AvailableProfiles.Count - 1 do
+  begin
+    mi := pmProfileMenu.AddMenuItem(pb.AvailableProfiles[i], '', @pmProfileClicked);
+    mi.Checked := pb.ActiveProfiles.IndexOf(pb.AvailableProfiles[i]) >= 0;
+  end;
+
+  { Calculate popup height using menu font metrics (HiDPI-aware) }
+  lFont := fpgApplication.FontManager.GetFont(fpgStyle.MenuFontDef.FontDesc);
+  lItemHeight := lFont.GetHeight + 2;
+  lFont := nil;
+  lPopupHeight := 6 + (pb.AvailableProfiles.Count * lItemHeight);  { 6 = margin*2 }
+
+  { Show popup above the label }
+  pmProfileMenu.ShowAt(lblProfiles, 0, -lPopupHeight, True);
+end;
+
+procedure TMainForm.pmProfileClicked(Sender: TObject);
+var
+  mi: TfpgMenuItem;
+  pb: TPasBuildProjectBackend;
+  ProfileName: TfpgString;
+  idx: integer;
+begin
+  if not (Sender is TfpgMenuItem) then
+    Exit;
+  mi := TfpgMenuItem(Sender);
+  ProfileName := mi.Text;
+
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+
+  { Toggle the profile }
+  idx := pb.ActiveProfiles.IndexOf(ProfileName);
+  if idx >= 0 then
+    pb.ActiveProfiles.Delete(idx)
+  else
+    pb.ActiveProfiles.Add(ProfileName);
+
+  { Re-resolve with new profiles and refresh UI }
+  pb.Resolve(pb.ActiveProfiles.CommaText);
+  SetupProjectTree;
+  PopuplateProjectTree;
+  UpdateProfilesDisplay;
+  AddMessage('Active profiles: ' + pb.ActiveProfiles.CommaText);
+end;
+
 procedure TMainForm.SetupProjectTree;
 begin
   tvProject.RootNode.Clear;
@@ -1562,6 +1630,12 @@ begin
       end;
       if (Session.ActiveTab >= 0) and (Session.ActiveTab < pcEditor.PageCount) then
         pcEditor.ActivePageIndex := Session.ActiveTab;
+      { Restore active profiles for PasBuild projects }
+      if (GProject.ProjectFormat = pfPasBuild) and (Session.ActiveProfiles.Count > 0) then
+      begin
+        TPasBuildProjectBackend(GProject).ActiveProfiles.Assign(Session.ActiveProfiles);
+        TPasBuildProjectBackend(GProject).Resolve(Session.ActiveProfiles.CommaText);
+      end;
     end;
   finally
     Session.Free;
@@ -2244,6 +2318,9 @@ begin
     Session := TIDESession.Create(GProject.ProjectDir);
     try
       Session.ActiveTab := pcEditor.ActivePageIndex;
+      { Save active profiles for PasBuild projects }
+      if GProject.ProjectFormat = pfPasBuild then
+        Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
       for I := 0 to pcEditor.PageCount - 1 do
       begin
         ts := pcEditor.Pages[I];
@@ -2386,9 +2463,12 @@ begin
     Name := 'lblProfiles';
     PreferredSize := fpgSize(150, 16);
     FontDesc := '#Label1';
-    Hint := 'Active build profiles';
+    Hint := 'Active build profiles — click to change';
     Text := '';
+    OnClick := @lblProfilesClicked;
   end;
+
+  pmProfileMenu := TfpgPopupMenu.Create(self);
 
   pnlStatusBar.LayoutManager := FStatusBarLayout;
   FStatusBarLayout.LC.InsetsAll('2lp').FillX;

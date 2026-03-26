@@ -807,7 +807,7 @@ begin
       P.Parameters.Add(AModule);
     end;
     P.CurrentDirectory := FProjectDir;
-    P.Options := [poUsePipes, poStdErrToOutput];
+    P.Options := [poUsePipes];
 
     {$IFDEF DEBUG}
     WriteLn('DEBUG: TPasBuildProjectBackend.InvokePasBuildResolve');
@@ -840,8 +840,7 @@ begin
       Exit;
     end;
 
-    (* Strip [INFO] lines from output — JSON starts at first '{' *)
-    Result := Copy(Buf, Pos('{', Buf), Length(Buf));
+    Result := Buf;
   finally
     P.Free;
   end;
