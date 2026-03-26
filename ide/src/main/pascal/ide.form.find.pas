@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Maximus
 
-    Copyright (C) 2012 - 2013 Graeme Geldenhuys
+    Copyright (C) 2012 - 2026 Graeme Geldenhuys
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -11,7 +11,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      ---
+      Find in File search dialog.
 }
 
 unit ide.form.find;
@@ -29,7 +29,9 @@ uses
   fpg_edit,
   fpg_button,
   fpg_checkbox,
-  fpg_textedit;
+  fpg_textedit,
+  fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
+  fpg_mig_unitvalue, fpg_mig_platformdefaults;
 
 type
 
@@ -113,21 +115,37 @@ begin
 end;
 
 procedure TFindForm.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
+  lMinBtnWidth: TfpgMigUnitValue;
+  lBtnWidth, lBtnHeight: Integer;
 begin
   {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: FindForm}
   Name := 'FindForm';
-  SetPosition(458, 214, 300, 250);
+  Left := 458;
+  Top := 214;
+  PreferredSize := fpgSize(300, 275);
+  MinHeight := 275;
+  MinWidth := 200;
   WindowTitle := 'Find';
-  Hint := '';
+  WindowPosition := wpMainFormCenter;
+
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.WrapAfter(1); //.Debug();
+  LayoutManager := mig;
+
+  // Get platform-specific minimum button width with DPI scaling
+  lMinBtnWidth := TfpgMigPlatformDefaults.GetMinimumButtonWidth;
+  lBtnWidth := Round(lMinBtnWidth.GetPixels(0, Self, nil));
+  // Button height uses natural DPI-aware calculation
+  lBtnHeight := Font.GetHeight + 8;  // Same as TfpgButton's default
 
   Label1 := TfpgLabel.Create(self);
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(4, 4, 284, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(250, 20);
+    MinWidth := 185;
     Text := 'Text to find:';
   end;
 
@@ -135,13 +153,8 @@ begin
   with edtFindText do
   begin
     Name := 'edtFindText';
-    SetPosition(4, 22, 292, 24);
-    Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
-    FontDesc := '#Edit1';
-    Hint := '';
+    PreferredSize := fpgSize(292, 24);
     TabOrder := 2;
-    Text := '';
     OnKeyPress := @edtFindTextKeyPressed;
   end;
 
@@ -149,9 +162,7 @@ begin
   with chkReplace do
   begin
     Name := 'chkReplace';
-    SetPosition(4, 50, 188, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(188, 20);
     TabOrder := 3;
     Text := 'Replace with';
     OnChange := @chkReplaceChanged;
@@ -161,23 +172,17 @@ begin
   with edtReplaceText do
   begin
     Name := 'edtReplaceText';
-    SetPosition(4, 70, 292, 24);
-    Anchors := [anLeft,anRight,anTop];
+    PreferredSize := fpgSize(292, 24);
     Enabled := False;
-    ExtraHint := '';
-    FontDesc := '#Edit1';
-    Hint := '';
     TabOrder := 4;
-    Text := '';
   end;
 
   Label2 := TfpgLabel.Create(self);
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(4, 100, 160, 16);
+    PreferredSize := fpgSize(160, 16);
     FontDesc := '#Label2';
-    Hint := '';
     Text := 'Options';
   end;
 
@@ -185,9 +190,7 @@ begin
   with chkCaseSensitive do
   begin
     Name := 'chkCaseSensitive';
-    SetPosition(16, 120, 160, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(160, 20);
     TabOrder := 6;
     Text := 'Case Sensitive';
   end;
@@ -196,9 +199,7 @@ begin
   with chkWholeWord do
   begin
     Name := 'chkWholeWord';
-    SetPosition(16, 140, 160, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(160, 20);
     TabOrder := 7;
     Text := 'Whole Words Only';
   end;
@@ -207,9 +208,7 @@ begin
   with chkGlobalScope do
   begin
     Name := 'chkGlobalScope';
-    SetPosition(16, 160, 160, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(160, 20);
     TabOrder := 8;
     Text := 'Global Scope';
   end;
@@ -218,9 +217,7 @@ begin
   with chkSearchBackwards do
   begin
     Name := 'chkSearchBackwards';
-    SetPosition(16, 180, 160, 20);
-    FontDesc := '#Label1';
-    Hint := '';
+    PreferredSize := fpgSize(160, 20);
     TabOrder := 9;
     Text := 'Search backwards';
   end;
@@ -229,12 +226,8 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(216, 220, 80, 24);
-    Anchors := [anRight,anBottom];
+    PreferredSize := fpgSize(lBtnWidth, lBtnHeight);
     Text := 'Cancel';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     ModalResult := mrCancel;
     TabOrder := 10;
   end;
@@ -243,12 +236,8 @@ begin
   with btnFind do
   begin
     Name := 'btnFind';
-    SetPosition(132, 220, 80, 24);
-    Anchors := [anRight,anBottom];
+    PreferredSize := fpgSize(lBtnWidth, lBtnHeight);
     Text := 'Find';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     ModalResult := mrOK;
     TabOrder := 11;
   end;
@@ -257,16 +246,25 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(4, 220, 24, 24);
-    Anchors := [anLeft,anBottom];
+    PreferredSize := fpgSize(lBtnHeight, lBtnHeight); // square shape
     Text := '?';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
     TabOrder := 12;
   end;
 
-  {@VFD_BODY_END: FindForm}
+  mig.AddLayoutComponent(Label1, TfpgMigCC.Create());
+  mig.AddLayoutComponent(edtFindText, TfpgMigCC.Create().GrowX);
+  mig.AddLayoutComponent(chkReplace, TfpgMigCC.Create());
+  mig.AddLayoutComponent(edtReplaceText, TfpgMigCC.Create().GrowX);
+
+  mig.AddLayoutComponent(Label2, TfpgMigCC.Create());
+  mig.AddLayoutComponent(chkCaseSensitive, TfpgMigCC.Create().GrowX);
+  mig.AddLayoutComponent(chkWholeWord, TfpgMigCC.Create().GrowX);
+  mig.AddLayoutComponent(chkGlobalScope, TfpgMigCC.Create().GrowX);
+  mig.AddLayoutComponent(chkSearchBackwards, TfpgMigCC.Create().GrowX);
+
+  mig.AddLayoutComponent(btnHelp, TfpgMigCC.Create().SpanX.Split(3).Tag('help'));
+  mig.AddLayoutComponent(btnFind, TfpgMigCC.Create().Tag('ok'));
+  mig.AddLayoutComponent(btnCancel, TfpgMigCC.Create().Tag('cancel'));
   {%endregion}
 end;
 
