@@ -51,6 +51,7 @@ type
     FCurrentItalic: Boolean;
     FAscent: Integer;
     FDescent: Integer;
+    FLineHeight: Integer;
     FEnginePtr: Pointer;       { ^font_engine_freetype_int32 }
     FCacheManagerPtr: Pointer;  { ^font_cache_manager }
     procedure EnsureInitialised;
@@ -77,6 +78,7 @@ type
       Guaranteed consistent with rendered output. }
     property Ascent: Integer read FAscent;
     property Descent: Integer read FDescent;
+    property LineHeight: Integer read FLineHeight;
   end;
 
 
@@ -88,6 +90,7 @@ uses
   fpg_stringutils,
   agg_basics,
   agg_font_freetype,
+  agg_font_freetype_lib,
   agg_font_engine,
   agg_font_cache_manager;
 
@@ -288,9 +291,17 @@ begin
     PFontEngine(FEnginePtr)^.height_(
       sz * fpgApplication.Screen_dpi / 72);
 
-    { Capture metrics from the same FreeType instance that renders glyphs }
-    FAscent := Round(Abs(PFontEngine(FEnginePtr)^._ascender));
-    FDescent := Round(Abs(PFontEngine(FEnginePtr)^._descender));
+    { Read metrics from face->size->metrics (populated by FT_Set_Pixel_Sizes).
+      These are 26.6 fixed-point values scaled by units_per_EM, which matches
+      how X11/Xft computes ascent and descent.
+
+      The AGG wrapper's _ascender/_descender use a different scaling:
+        face.ascender * pixel_height / face.height
+      where face.height can differ from units_per_EM. This produces
+      values that are too small, causing squashed line spacing. }
+    FAscent  := (PFontEngine(FEnginePtr)^.m_cur_face^.size^.metrics.ascender + 63) shr 6;
+    FDescent := (-PFontEngine(FEnginePtr)^.m_cur_face^.size^.metrics.descender + 63) shr 6;
+    FLineHeight := (PFontEngine(FEnginePtr)^.m_cur_face^.size^.metrics.height + 63) shr 6;
 
     FCurrentFontPath := fontpath;
     FCurrentSize := sz;

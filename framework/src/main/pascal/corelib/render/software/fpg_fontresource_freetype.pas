@@ -81,7 +81,7 @@ end;
 
 function TfpgFreeTypeFontResource.GetHeight: integer;
 begin
-  Result := FGlyphCache.Ascent + FGlyphCache.Descent;
+  Result := FGlyphCache.LineHeight;
 end;
 
 function TfpgFreeTypeFontResource.GetTextWidth(const txt: string): integer;
