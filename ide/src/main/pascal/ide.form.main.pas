@@ -35,7 +35,6 @@ type
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainForm}
-    pnlMenu: TfpgBevel;
     mainmenu: TfpgMenuBar;
     Toolbar: TfpgBevel;
     btnQuit: TfpgButton;
@@ -52,13 +51,13 @@ type
     tsScribble: TfpgTabSheet;
     memScribble: TfpgMemo;
     tsTerminal: TfpgTabSheet;
-    Splitter1: TfpgSplitter;
     pnlTool: TfpgPageControl;
     tsProject: TfpgTabSheet;
     tvProject: TfpgTreeView;
     tsFiles: TfpgTabSheet;
     grdFiles: TfpgFileGrid;
-    Splitter2: TfpgSplitter;
+    SplitterV: TfpgMigSplitter;
+    SplitterH: TfpgMigSplitter;
     pcEditor: TfpgPageControl;
     tseditor: TfpgTabSheet;
     TextEditor: TfpgTextEdit;
@@ -184,6 +183,10 @@ type
     procedure   miJumpToImplementation(Sender: TObject);
     procedure   miJumpToggleIntfImpl(Sender: TObject);
     procedure   CheckGitIgnoreForIdeDir;
+    procedure   uiCreateToolBar;
+    procedure   uiCreateStatusBar;
+    procedure   uiCreateClientArea;
+    procedure   uiCreateMenus;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -2286,45 +2289,17 @@ begin
   inherited Destroy;
 end;
 
-procedure TMainForm.AfterCreate;
+procedure TMainForm.uiCreateToolBar;
+var
+  mig: TfpgMigLayoutManager;
 begin
-  {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: MainForm}
-  Name := 'MainForm';
-  SetPosition(310, 206, 638, 428);
-  WindowTitle := 'fpGUI Maximus IDE - %s';
-  Hint := '';
-  WindowPosition := wpOneThirdDown;
-  MinWidth := 580;
-  MinHeight := 400;
+  mig := TfpgMigLayoutManager.Create;
 
-  pnlMenu := TfpgBevel.Create(self);
-  with pnlMenu do
-  begin
-    Name := 'pnlMenu';
-    SetPosition(0, 0, 638, 54);
-    Align := alTop;
-    Hint := '';
-    Shape := bsSpacer;
-  end;
-
-  mainmenu := TfpgMenuBar.Create(pnlMenu);
-  with mainmenu do
-  begin
-    Name := 'mainmenu';
-    SetPosition(0, 0, 638, 24);
-    Anchors := [anLeft,anRight,anTop];
-    Align := alTop;
-  end;
-
-  Toolbar := TfpgBevel.Create(pnlMenu);
+  Toolbar := TfpgBevel.Create(self);
   with Toolbar do
   begin
     Name := 'Toolbar';
-    SetPosition(2, 2, 634, 50);
-    Anchors := [anLeft,anRight,anTop];
-    Align := alClient;
-    Hint := '';
+    PreferredSize := fpgSize(600, 28);
     Shape := bsSpacer;
   end;
 
@@ -2332,31 +2307,23 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(4, 2, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
-    Down := False;
     Embedded := True;
-    FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.quit';
-    TabOrder := 3;
-    OnClick  := @btnQuitClicked;
+    OnClick := @btnQuitClicked;
   end;
 
   btnOpen := TfpgButton.Create(Toolbar);
   with btnOpen do
   begin
     Name := 'btnOpen';
-    SetPosition(28, 2, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
-    Down := False;
     Embedded := True;
-    FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.open';
-    TabOrder := 4;
     OnClick := @btnOpenFileClicked;
   end;
 
@@ -2364,15 +2331,11 @@ begin
   with btnSave do
   begin
     Name := 'btnSave';
-    SetPosition(56, 2, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
-    Down := False;
     Embedded := True;
-    FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.save';
-    TabOrder := 5;
     OnClick := @miFileSave;
   end;
 
@@ -2380,25 +2343,31 @@ begin
   with btnSaveAll do
   begin
     Name := 'btnSaveAll';
-    SetPosition(80, 2, 24, 24);
+    PreferredSize := fpgSize(24, 24);
     Text := '';
-    Down := False;
     Embedded := True;
     Enabled := False;
-    FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.saveall';
-    TabOrder := 6;
   end;
+
+  Toolbar.LayoutManager := mig;
+  mig.LC.InsetsAll('2lp').Fill;
+  mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnSave, TfpgMigCC.Create.MinWidth('24lp'));
+  mig.AddLayoutComponent(btnSaveAll, TfpgMigCC.Create.MinWidth('24lp').PushX);
+end;
+
+procedure TMainForm.uiCreateStatusBar;
+begin
+  FStatusBarLayout := TfpgMigLayoutManager.Create;
 
   pnlStatusBar := TfpgBevel.Create(self);
   with pnlStatusBar do
   begin
     Name := 'pnlStatusBar';
-    PreferredSize := fpgSize(636, 22);
-    Align := alBottom;
-    Hint := '';
+    PreferredSize := fpgSize(600, 22);
     Style := bsLowered;
   end;
 
@@ -2408,7 +2377,6 @@ begin
     Name := 'lblStatus';
     PreferredSize := fpgSize(400, 16);
     FontDesc := '#Label1';
-    Hint := '';
     Text := '';
   end;
 
@@ -2422,114 +2390,40 @@ begin
     Text := '';
   end;
 
-  FStatusBarLayout := TfpgMigLayoutManager.Create;
   pnlStatusBar.LayoutManager := FStatusBarLayout;
   FStatusBarLayout.LC.InsetsAll('2lp').FillX;
   FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
   FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right'));
+end;
 
+procedure TMainForm.uiCreateClientArea;
+var
+  lm: TfpgMigLayoutManager;
+begin
+  lm := TfpgMigLayoutManager.Create;
+
+  {%region 'client area' -fold}
   pnlClientArea := TfpgBevel.Create(self);
   with pnlClientArea do
   begin
     Name := 'pnlClientArea';
-    SetPosition(0, 54, 638, 374);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Align := alClient;
-    Hint := '';
+    PreferredSize := fpgSize(600, 350);
     Shape := bsSpacer;
   end;
 
-  pnlWindow := TfpgPageControl.Create(pnlClientArea);
-  with pnlWindow do
-  begin
-    Name := 'pnlWindow';
-    SetPosition(2, 288, 634, 84);
-    ActivePageIndex := 0;
-    Align := alBottom;
-    Hint := '';
-    TabOrder := 11;
-    TabPosition := tpRight;
-  end;
-
-  tsMessages := TfpgTabSheet.Create(pnlWindow);
-  with tsMessages do
-  begin
-    Name := 'tsMessages';
-    SetPosition(73, 3, 558, 78);
-    Text := 'Messages';
-  end;
-
-  grdMessages := TfpgStringGrid.Create(tsMessages);
-  with grdMessages do
-  begin
-    Name := 'grdMessages';
-    SetPosition(0, 4, 558, 73);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    BackgroundColor := TfpgColor($80000002);
-    AddColumn('New', 2000, taLeftJustify);
-    FontDesc := '#Grid';
-    HeaderFontDesc := '#GridHeader';
-    Hint := '';
-    RowCount := 0;
-    RowSelect := True;
-    ShowHeader := False;
-    TabOrder := 13;
-    OnKeyPress := @grdMessageKeyPressed;
-  end;
-
-  tsScribble := TfpgTabSheet.Create(pnlWindow);
-  with tsScribble do
-  begin
-    Name := 'tsScribble';
-    SetPosition(73, 3, 188, 78);
-    Text := 'Scribble';
-  end;
-
-  memScribble := TfpgMemo.Create(tsScribble);
-  with memScribble do
-  begin
-    Name := 'memScribble';
-    SetPosition(0, 4, 187, 73);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#Edit2';
-    Hint := '';
-    Lines.Add('Make notes, use it as a clipboard');
-    Lines.Add('or type whatever you want...');
-    TabOrder := 15;
-  end;
-
-  tsTerminal := TfpgTabSheet.Create(pnlWindow);
-  with tsTerminal do
-  begin
-    Name := 'tsTerminal';
-    SetPosition(73, 3, 188, 78);
-    Text := 'Terminal';
-  end;
-
-  Splitter1 := TfpgSplitter.Create(pnlClientArea);
-  with Splitter1 do
-  begin
-    Name := 'Splitter1';
-    SetPosition(2, 281, 634, 7);
-    Align := alBottom;
-  end;
-
+  { Left tool panel — project tree and files }
   pnlTool := TfpgPageControl.Create(pnlClientArea);
   with pnlTool do
   begin
     Name := 'pnlTool';
-    SetPosition(2, 2, 140, 279);
+    PreferredSize := fpgSize(160, 250);
     ActivePageIndex := 0;
-    Align := alLeft;
-    Hint := '';
-    TabOrder := 18;
   end;
 
   tsProject := TfpgTabSheet.Create(pnlTool);
   with tsProject do
   begin
     Name := 'tsProject';
-    SetPosition(3, 24, 134, 252);
     Text := 'Project';
   end;
 
@@ -2537,11 +2431,8 @@ begin
   with tvProject do
   begin
     Name := 'tvProject';
-    SetPosition(1, 1, 132, 250);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    Align := alClient;
     FontDesc := '#Label1';
-    Hint := '';
-    TabOrder := 20;
     OnDoubleClick := @tvProjectDoubleClick;
     OnKeyPress := @tvProjectKeyPressed;
   end;
@@ -2550,7 +2441,6 @@ begin
   with tsFiles do
   begin
     Name := 'tsFiles';
-    SetPosition(3, 24, 134, 193);
     Text := 'Files';
   end;
 
@@ -2558,34 +2448,118 @@ begin
   with grdFiles do
   begin
     Name := 'grdFiles';
-    SetPosition(1, 1, 131, 190);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    Align := alClient;
     Options := Options + [go_SmoothScroll];
   end;
 
-  Splitter2 := TfpgSplitter.Create(pnlClientArea);
-  with Splitter2 do
+  { Vertical splitter — between tool panel and editor }
+  SplitterV := TfpgMigSplitter.Create(pnlClientArea);
+  with SplitterV do
   begin
-    Name := 'Splitter2';
-    SetPosition(142, 2, 8, 279);
-    Align := alLeft;
+    Name := 'SplitterV';
+    Orientation := soVertical;
+    Control := pnlTool;
+    MinSize := 100;
   end;
 
+  { Centre editor area }
   pcEditor := TfpgPageControl.Create(pnlClientArea);
   with pcEditor do
   begin
     Name := 'pcEditor';
-    SetPosition(150, 2, 358, 279);
+    PreferredSize := fpgSize(400, 250);
     ActivePageIndex := 0;
-    Align := alClient;
-    Hint := '';
-    TabOrder := 18;
     TabPosition := tpRight;
     OnClosingTabSheet := @TabSheetClosing;
     OnMouseUp := @pcEditorMouseUp;
     OnChange := @EditorTabChanged;
   end;
 
+  tseditor := TfpgTabSheet.Create(pcEditor);
+  with tseditor do
+  begin
+    Name := 'tseditor';
+    Text := 'Tabsheet1';
+  end;
+
+  TextEditor := TfpgTextEdit.Create(tseditor);
+  with TextEditor do
+  begin
+    Name := 'TextEditor';
+    Align := alClient;
+    GutterVisible := True;
+    GutterShowLineNumbers := True;
+    FontDesc := '#Edit2';
+  end;
+
+  { Horizontal splitter — between editor row and bottom panel }
+  SplitterH := TfpgMigSplitter.Create(pnlClientArea);
+  with SplitterH do
+  begin
+    Name := 'SplitterH';
+    Orientation := soHorizontal;
+    MinSize := 60;
+    // Control set after pnlWindow is created
+  end;
+
+  { Bottom output panel — messages, scribble, terminal }
+  pnlWindow := TfpgPageControl.Create(pnlClientArea);
+  with pnlWindow do
+  begin
+    Name := 'pnlWindow';
+    PreferredSize := fpgSize(600, 100);
+    ActivePageIndex := 0;
+    TabPosition := tpRight;
+  end;
+
+  tsMessages := TfpgTabSheet.Create(pnlWindow);
+  with tsMessages do
+  begin
+    Name := 'tsMessages';
+    Text := 'Messages';
+  end;
+
+  grdMessages := TfpgStringGrid.Create(tsMessages);
+  with grdMessages do
+  begin
+    Name := 'grdMessages';
+    Align := alClient;
+    BackgroundColor := TfpgColor($80000002);
+    AddColumn('New', 2000, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    RowCount := 0;
+    RowSelect := True;
+    ShowHeader := False;
+    OnKeyPress := @grdMessageKeyPressed;
+  end;
+
+  tsScribble := TfpgTabSheet.Create(pnlWindow);
+  with tsScribble do
+  begin
+    Name := 'tsScribble';
+    Text := 'Scribble';
+  end;
+
+  memScribble := TfpgMemo.Create(tsScribble);
+  with memScribble do
+  begin
+    Name := 'memScribble';
+    Align := alClient;
+    FontDesc := '#Edit2';
+    Lines.Add('Make notes, use it as a clipboard');
+    Lines.Add('or type whatever you want...');
+  end;
+
+  tsTerminal := TfpgTabSheet.Create(pnlWindow);
+  with tsTerminal do
+  begin
+    Name := 'tsTerminal';
+    Text := 'Terminal';
+  end;
+  {%endregion}
+
+  { Context menu for editor tabs }
   pmTabMenu := TfpgPopupMenu.Create(self);
   with pmTabMenu do
   begin
@@ -2596,6 +2570,7 @@ begin
     AddMenuItem('Copy Path', '', @pmTabCopyPathClick);
   end;
 
+  { Context menu for module tree nodes }
   pmModuleMenu := TfpgPopupMenu.Create(self);
   with pmModuleMenu do
   begin
@@ -2604,30 +2579,29 @@ begin
     AddMenuItem('Rebuild Module', '', @pmModuleRebuildClick);
   end;
 
-  tseditor := TfpgTabSheet.Create(pcEditor);
-  with tseditor do
-  begin
-    Name := 'tseditor';
-    SetPosition(3, 3, 282, 273);
-    Text := 'Tabsheet1';
-  end;
+  SplitterH.Control := pnlWindow;
 
-  TextEditor := TfpgTextEdit.Create(tseditor);
-  with TextEditor do
-  begin
-    Name := 'TextEditor';
-    SetPosition(0, 0, 130, 200);
-    Align := alClient;
-    GutterVisible := True;
-    GutterShowLineNumbers := True;
-    FontDesc := '#Edit2';
-  end;
+  { Lay out the client area as a grid:
+    Row 0: pnlTool | SplitterV | pcEditor        (wrap)
+    Row 1: (span)  | (span)    | SplitterH       (wrap)
+    Row 2: (span)  | (span)    | pnlWindow
 
+    pnlTool and SplitterV span all 3 rows. }
+  pnlClientArea.LayoutManager := lm;
+  lm.LC.InsetsAll('0').Fill;
+  lm.AddLayoutComponent(pnlTool, TfpgMigCC.Create.SpanY(3).MinWidth('100lp').GrowY.PushY);
+  lm.AddLayoutComponent(SplitterV, TfpgMigCC.Create.SpanY(3).Width('3lp!').GrowY);
+  lm.AddLayoutComponent(pcEditor, TfpgMigCC.Create.GrowX.GrowY.Push.Wrap);
+  lm.AddLayoutComponent(SplitterH, TfpgMigCC.Create.GrowX.Height('3lp!').Wrap);
+  lm.AddLayoutComponent(pnlWindow, TfpgMigCC.Create.GrowX.MinHeight('60lp'));
+end;
+
+procedure TMainForm.uiCreateMenus;
+begin
   mnuFile := TfpgPopupMenu.Create(self);
   with mnuFile do
   begin
     Name := 'mnuFile';
-    SetPosition(476, 61, 172, 20);
     miFile := AddMenuItem('New...', rsKeyCtrl+'N', @miFileNewUnit);
     AddSeparator;
     AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
@@ -2645,7 +2619,6 @@ begin
   with mnuEdit do
   begin
     Name := 'mnuEdit';
-    SetPosition(476, 80, 172, 20);
     AddMenuItem('Undo', rsKeyCtrl+'Z', @miEditUndoClicked);
     AddMenuItem('Redo', rsKeyCtrl+rsKeyShift+'Z', @miEditRedoClicked);
     AddSeparator;
@@ -2665,7 +2638,6 @@ begin
   with mnuSearch do
   begin
     Name := 'mnuSearch';
-    SetPosition(476, 98, 172, 20);
     AddMenuItem('Find...', rsKeyCtrl+'F', @miFindClicked);
     AddMenuItem('Find Next', 'F3', @miFindNextClicked);
     AddMenuItem('Find Previous', rsKeyShift+'F3', @miFindPrevClicked);
@@ -2684,7 +2656,6 @@ begin
   with mnuView do
   begin
     Name := 'mnuView';
-    SetPosition(476, 119, 172, 20);
     AddMenuItem('Todo List...', rsKeyCtrl+'F2', nil).Enabled := False;
     AddMenuItem('Debug Windows', '', @miViewDebug);
   end;
@@ -2693,7 +2664,6 @@ begin
   with mnuProject do
   begin
     Name := 'mnuProject';
-    SetPosition(476, 140, 172, 20);
     AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'F11', @miProjectOptions);
     AddSeparator;
     AddMenuItem('New (empty)...', '', @miProjectNew);
@@ -2711,7 +2681,6 @@ begin
   with mnuRun do
   begin
     Name := 'mnuRun';
-    SetPosition(476, 161, 172, 20);
     AddMenuItem('Make', rsKeyCtrl+'F9', @miRunMake);
     AddMenuItem('Build All', rsKeyCtrl+rsKeyShift+'F9', @miRunBuild);
     AddMenuItem('Make 1', rsKeyCtrl+rsKeyAlt+'1', @miRunMake1);
@@ -2731,7 +2700,6 @@ begin
   with mnuTools do
   begin
     Name := 'mnuTools';
-    SetPosition(476, 182, 172, 20);
     AddMenuItem('fpGUI UI Designer...', 'F12', nil);
     AddMenuItem('fpGUI DocView...', rsKeyCtrl+'F1', nil);
   end;
@@ -2740,7 +2708,6 @@ begin
   with mnuSettings do
   begin
     Name := 'mnuSettings';
-    SetPosition(476, 203, 172, 20);
     AddMenuItem('Configure IDE...', '', @miConfigureIDE);
   end;
 
@@ -2748,34 +2715,11 @@ begin
   with mnuHelp do
   begin
     Name := 'mnuHelp';
-    SetPosition(476, 224, 172, 20);
     AddMenuItem('Contents...', '', nil);
     AddSeparator;
     AddMenuItem('About fpGUI Toolkit...', '', @miAboutFPGuiClicked);
     AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
   end;
-
-  {@VFD_BODY_END: MainForm}
-  {%endregion}
-
-{
-  pcEditor.AppendTabSheet('Five');
-  pcEditor.AppendTabSheet('Six');
-  pcEditor.AppendTabSheet('Seven');
-  pcEditor.AppendTabSheet('Eight');
-  pcEditor.AppendTabSheet('Nine');
-  pcEditor.AppendTabSheet('Ten');
-  pcEditor.AppendTabSheet('11');
-  pcEditor.AppendTabSheet('12');
-  pcEditor.AppendTabSheet('13');
-  pcEditor.AppendTabSheet('14');
-  pcEditor.AppendTabSheet('15');
-  pcEditor.AppendTabSheet('16');
-  pcEditor.AppendTabSheet('17');
-  pcEditor.AppendTabSheet('18');
-  pcEditor.AppendTabSheet('19');
-  pcEditor.AppendTabSheet('20');
-}
 
   mainmenu.AddMenuItem('&File', nil).SubMenu := mnuFile;
   mainmenu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
@@ -2791,7 +2735,6 @@ begin
   with pmOpenRecentMenu do
   begin
     Name := 'pmOpenRecentMenu';
-    SetPosition(336, 68, 128, 20);
   end;
 
   miRecentProjects.SubMenu := pmOpenRecentMenu;
@@ -2802,6 +2745,41 @@ begin
   FRecentFiles.MaxItems       := gINI.ReadInteger('Options', 'MRUProjectCount', 10);
   FRecentFiles.ShowFullPath   := gINI.ReadBool('Options', 'ShowFullPath', True);
   FRecentFiles.LoadMRU;
+end;
+
+procedure TMainForm.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
+begin
+  Name := 'MainForm';
+  SetPosition(310, 206, 638, 428);
+  WindowTitle := 'fpGUI Maximus IDE - %s';
+  WindowPosition := wpOneThirdDown;
+  MinWidth := 580;
+  MinHeight := 400;
+
+  { Top-level MigLayout for the form }
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.InsetsAll('0').Fill;
+  LayoutManager := mig;
+
+  { Menu bar — docked north }
+  mainmenu := TfpgMenuBar.Create(self);
+  with mainmenu do
+  begin
+    Name := 'mainmenu';
+    PreferredSize := fpgSize(600, 24);
+  end;
+
+  uiCreateToolBar;
+  uiCreateStatusBar;
+  uiCreateClientArea;
+  uiCreateMenus;
+
+  mig.AddLayoutComponent(mainmenu, TfpgMigCC.Create.DockNorth.GrowX.Height('24lp!'));
+  mig.AddLayoutComponent(Toolbar, TfpgMigCC.Create.DockNorth.GrowX.Height('28lp!'));
+  mig.AddLayoutComponent(pnlStatusBar, TfpgMigCC.Create.DockSouth.GrowX.Height('22lp!'));
+  mig.AddLayoutComponent(pnlClientArea, TfpgMigCC.Create.GrowX.GrowY.Push);
 end;
 
 

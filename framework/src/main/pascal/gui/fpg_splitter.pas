@@ -31,7 +31,37 @@ uses
 type
   NaturalNumber = 1..High(Integer);
 
+  TfpgSplitterOrientation = (soVertical, soHorizontal);
+
   TfpgSnapEvent = procedure(Sender: TObject; const AClosed: boolean) of object;
+
+  { Layout-manager-friendly splitter (WPF GridSplitter pattern).
+    Place between two widgets in a MigLayout grid. Set Control to the
+    widget whose PreferredSize should change on drag. The parent's
+    layout manager re-lays-out automatically. }
+  TfpgMigSplitter = class(TfpgWidget)
+  private
+    FControl: TfpgWidget;
+    FOrientation: TfpgSplitterOrientation;
+    FDownPos: TPoint;
+    FOriginalSize: Integer;
+    FDragging: Boolean;
+    FMouseOver: Boolean;
+    FMinSize: Integer;
+  protected
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseEnter; override;
+    procedure   HandleMouseExit; override;
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    Control: TfpgWidget read FControl write FControl;
+    property    Orientation: TfpgSplitterOrientation read FOrientation write FOrientation default soVertical;
+    property    MinSize: Integer read FMinSize write FMinSize default 30;
+  end;
 
   TfpgSplitter = class(TfpgWidget)
   private
@@ -90,6 +120,111 @@ begin
   Result.Width  := AWidth;
   Result.Height := AHeight;
   Result.Align  := AnAlign;
+end;
+
+{ TfpgMigSplitter }
+
+constructor TfpgMigSplitter.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FOrientation := soVertical;
+  FMinSize := 30;
+  FDragging := False;
+  FMouseOver := False;
+  FControl := nil;
+  if FOrientation = soVertical then
+    PreferredSize := fpgSize(3, 100)
+  else
+    PreferredSize := fpgSize(100, 3);
+end;
+
+procedure TfpgMigSplitter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if not Assigned(FControl) then
+    Exit;
+  FDragging := True;
+  FDownPos := Point(x, y);
+  if FOrientation = soVertical then
+    FOriginalSize := FControl.Width
+  else
+    FOriginalSize := FControl.Height;
+  CaptureMouse;
+end;
+
+procedure TfpgMigSplitter.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  if FDragging then
+  begin
+    FDragging := False;
+    ReleaseMouse;
+  end;
+end;
+
+procedure TfpgMigSplitter.HandleMouseMove(x, y: integer; btnstate: word;
+  shiftstate: TShiftState);
+var
+  Delta, NewSize: Integer;
+  ps: TfpgSize;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  if not FDragging then
+    Exit;
+  if not Assigned(FControl) then
+    Exit;
+
+  if FOrientation = soVertical then
+    Delta := x - FDownPos.X
+  else
+    Delta := -(y - FDownPos.Y);  // invert: dragging down shrinks the panel below
+
+  NewSize := FOriginalSize + Delta;
+  if NewSize < FMinSize then
+    NewSize := FMinSize;
+
+  ps := FControl.PreferredSize;
+  if FOrientation = soVertical then
+    ps.W := NewSize
+  else
+    ps.H := NewSize;
+  FControl.PreferredSize := ps;
+
+  if Assigned(Parent) then
+    TfpgWidget(Parent).Realign;
+end;
+
+procedure TfpgMigSplitter.HandleMouseEnter;
+begin
+  FMouseOver := True;
+  if FOrientation = soVertical then
+    MouseCursor := mcSizeEW
+  else
+    MouseCursor := mcSizeNS;
+  Repaint;
+end;
+
+procedure TfpgMigSplitter.HandleMouseExit;
+begin
+  FMouseOver := False;
+  if not FDragging then
+    MouseCursor := mcDefault;
+  Repaint;
+end;
+
+procedure TfpgMigSplitter.HandlePaint;
+begin
+  // Minimal rendering — match parent background, subtle line on hover
+  Canvas.SetColor(clWindowBackground);
+  Canvas.FillRectangle(GetClientRect);
+  if FMouseOver or FDragging then
+  begin
+    Canvas.SetColor(clSplitterGrabBar);
+    if FOrientation = soVertical then
+      Canvas.DrawLine(ActualWidth div 2, 0, ActualWidth div 2, ActualHeight)
+    else
+      Canvas.DrawLine(0, ActualHeight div 2, ActualWidth, ActualHeight div 2);
+  end;
 end;
 
 { TfpgSplitter }
