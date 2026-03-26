@@ -42,6 +42,8 @@ type
     FOpenFiles: array of TOpenFileInfo;
     FActiveTab: Integer;
     FActiveProfiles: TStringList;
+    FToolPanelWidth: Integer;
+    FBottomPanelHeight: Integer;
     function GetOpenFileCount: Integer;
     function GetOpenFile(AIndex: Integer): TOpenFileInfo;
   public
@@ -57,6 +59,8 @@ type
     property OpenFiles[AIndex: Integer]: TOpenFileInfo read GetOpenFile;
     property ActiveTab: Integer read FActiveTab write FActiveTab;
     property ActiveProfiles: TStringList read FActiveProfiles;
+    property ToolPanelWidth: Integer read FToolPanelWidth write FToolPanelWidth;
+    property BottomPanelHeight: Integer read FBottomPanelHeight write FBottomPanelHeight;
     property SessionFile: TfpgString read FSessionFile;
   end;
 
@@ -75,6 +79,8 @@ begin
   FProjectDir := IncludeTrailingPathDelimiter(AProjectDir);
   FSessionFile := FProjectDir + '.ide' + PathDelim + 'session.json';
   FActiveTab := -1;
+  FToolPanelWidth := -1;
+  FBottomPanelHeight := -1;
   FActiveProfiles := TStringList.Create;
   FActiveProfiles.Delimiter := ',';
   FActiveProfiles.StrictDelimiter := True;
@@ -102,6 +108,8 @@ begin
   SetLength(FOpenFiles, 0);
   FActiveTab := -1;
   FActiveProfiles.Clear;
+  FToolPanelWidth := -1;
+  FBottomPanelHeight := -1;
 end;
 
 procedure TIDESession.AddOpenFile(const AAbsPath: TfpgString;
@@ -162,6 +170,10 @@ begin
         for I := 0 to ProfilesArr.Count - 1 do
           FActiveProfiles.Add(ProfilesArr.Strings[I]);
       end;
+      if SessionObj.IndexOfName('toolPanelWidth') >= 0 then
+        FToolPanelWidth := SessionObj.Integers['toolPanelWidth'];
+      if SessionObj.IndexOfName('bottomPanelHeight') >= 0 then
+        FBottomPanelHeight := SessionObj.Integers['bottomPanelHeight'];
     end;
 
     { Open files }
@@ -224,6 +236,10 @@ begin
         ProfilesArr.Add(FActiveProfiles[I]);
       SessionObj.Add('activeProfiles', ProfilesArr);
     end;
+    if FToolPanelWidth > 0 then
+      SessionObj.Add('toolPanelWidth', FToolPanelWidth);
+    if FBottomPanelHeight > 0 then
+      SessionObj.Add('bottomPanelHeight', FBottomPanelHeight);
     RootObj.Add('session', SessionObj);
 
     { Open files }

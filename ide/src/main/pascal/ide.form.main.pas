@@ -173,6 +173,7 @@ type
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
     procedure   CloseAllTabs;
+    procedure   SaveSession;
     procedure   LoadProject(const AFilename: TfpgString);
     function    CreateNewEditorTab(const ATitle: TfpgString): TfpgTabSheet;
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -1711,6 +1712,39 @@ begin
   end;
 end;
 
+procedure TMainForm.SaveSession;
+var
+  Session: TIDESession;
+  I: Integer;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  if GProject.ProjectDir = '' then
+    Exit;
+  Session := TIDESession.Create(GProject.ProjectDir);
+  try
+    Session.ActiveTab := pcEditor.ActivePageIndex;
+    Session.ToolPanelWidth := pnlTool.PreferredSize.W;
+    Session.BottomPanelHeight := pnlWindow.PreferredSize.H;
+    if GProject.ProjectFormat = pfPasBuild then
+      Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
+    for I := 0 to pcEditor.PageCount - 1 do
+    begin
+      ts := pcEditor.Pages[I];
+      if ts.Hint <> '' then
+      begin
+        editor := TfpgTextEdit(ts.Components[0]);
+        Session.AddOpenFile(ts.Hint,
+          editor.CaretPos_V, editor.CaretPos_H,
+          editor.ScrollPos_V, editor.ScrollPos_H, I);
+      end;
+    end;
+    Session.Save;
+  finally
+    Session.Free;
+  end;
+end;
+
 procedure TMainForm.LoadProject(const AFilename: TfpgString);
 var
   i: integer;
@@ -1721,6 +1755,10 @@ var
   editor: TfpgTextEdit;
   SessionLoaded: Boolean;
 begin
+  { save session info of current project, before opening new project }
+  if GProject.ProjectDir <> '' then
+    SaveSession;
+
   // remove all project info
   CloseAllTabs;
   FreeProject;
@@ -1762,6 +1800,13 @@ begin
         TPasBuildProjectBackend(GProject).ActiveProfiles.Assign(Session.ActiveProfiles);
         TPasBuildProjectBackend(GProject).Resolve(Session.ActiveProfiles.CommaText);
       end;
+      { Restore splitter positions }
+      if Session.ToolPanelWidth > 0 then
+        pnlTool.PreferredSize := fpgSize(Session.ToolPanelWidth, pnlTool.PreferredSize.H);
+      if Session.BottomPanelHeight > 0 then
+        pnlWindow.PreferredSize := fpgSize(pnlWindow.PreferredSize.W, Session.BottomPanelHeight);
+      if (Session.ToolPanelWidth > 0) or (Session.BottomPanelHeight > 0) then
+        pnlClientArea.Realign;
     end;
   finally
     Session.Free;
@@ -2438,31 +2483,7 @@ begin
   gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
   gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
 
-  { Save session data }
-  if GProject.ProjectDir <> '' then
-  begin
-    Session := TIDESession.Create(GProject.ProjectDir);
-    try
-      Session.ActiveTab := pcEditor.ActivePageIndex;
-      { Save active profiles for PasBuild projects }
-      if GProject.ProjectFormat = pfPasBuild then
-        Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
-      for I := 0 to pcEditor.PageCount - 1 do
-      begin
-        ts := pcEditor.Pages[I];
-        if ts.Hint <> '' then
-        begin
-          editor := TfpgTextEdit(ts.Components[0]);
-          Session.AddOpenFile(ts.Hint,
-            editor.CaretPos_V, editor.CaretPos_H,
-            editor.ScrollPos_V, editor.ScrollPos_H, I);
-        end;
-      end;
-      Session.Save;
-    finally
-      Session.Free;
-    end;
-  end;
+  SaveSession;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
