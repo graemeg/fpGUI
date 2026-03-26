@@ -46,7 +46,6 @@ uses
   ide.filemonitor,
   fpg_textedit,
   ide.form.find,
-  Sha1,
   ide.editor.undo,
   ide.session;
 

@@ -137,7 +137,7 @@ begin
     lFile.Size := s;
     lFile.Date := d;
 
-    Result := SHA1ofStr(lFile.AsString);
+    Result := SHA1Print(SHA1String(lFile.AsString));
   finally
     lFile.Free;
   end;
@@ -151,7 +151,7 @@ begin
   ReadFileDateSize(Name, d, s);
   Size := s;
   Date := d;
-  SHA1 := SHA1ofStr(AsString);
+  SHA1 := SHA1Print(SHA1String(AsString));
 end;
 
 { TFileMonitor }
@@ -250,7 +250,7 @@ begin
   ReadFileDateSize(AFileName, d, s);
   lFile.Size := s;
   lFile.Date := d;
-  lFile.SHA1 := SHA1ofStr(lFile.AsString);
+  lFile.SHA1 := SHA1Print(SHA1String(lFile.AsString));
   FFileList.Add(lFile);
 end;
 
