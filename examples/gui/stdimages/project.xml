@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-stdimages</name>
+
+  <build>
+    <mainSource>stdimglist.pas</mainSource>
+    <sourceDirectory>./</sourceDirectory>
+    <executableName>stdimglist</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -22,15 +22,15 @@ type
 
 procedure TMainForm.AfterCreate;
 begin
-  SetPosition(100,100,700,500);
   WindowTitle := 'fpGUI Standard Image Listing';
   WindowPosition := wpOneThirdDown;
+  PreferredSize := fpgSize(700, 500);
   MinWidth := 200;
-  MinHeight := 100;
+  MinHeight := 200;
 
   CreateReportImages;
 
-  btnClose := CreateButton(self, Width-90, Height-35, 75, 'Quit', @btnCloseClick);
+  btnClose := CreateButton(self, ActualWidth-90, ActualHeight-35, 75, 'Quit', @btnCloseClick);
   btnClose.ImageName := 'stdimg.quit';
   btnClose.Anchors := [anRight, anBottom];
 end;
@@ -55,11 +55,11 @@ begin
   x   := 8;
   y   := 8;
   fpgImages.ListImages(sl);
-  
+
   for n := 0 to sl.Count-1 do
   begin
     Canvas.DrawString(x, y, sl[n]+':');
-    
+
     img := TfpgImage(sl.Objects[n]);
     if img <> nil then
       Canvas.DrawImage(x+130, y, img);
@@ -90,3 +90,4 @@ end;
 begin
   MainProc;
 end.
+
