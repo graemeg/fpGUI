@@ -411,7 +411,7 @@ begin
   with Result.Chrome do
   begin
     Background      := base3;
-    Foreground      := base00;
+    Foreground      := base0;
     CurrentLine     := base2;
     Selection       := base1;
     SelectionText   := base03;
