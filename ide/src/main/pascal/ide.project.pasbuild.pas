@@ -816,7 +816,17 @@ begin
     WriteLn('  Directory:  ', P.CurrentDirectory);
     {$ENDIF}
 
-    P.Execute;
+    try
+      P.Execute;
+    except
+      on E: Exception do
+      begin
+        raise Exception.Create(
+          'Could not run "pasbuild". Please ensure pasbuild is installed ' +
+          'and available in your PATH environment variable.' + LineEnding +
+          LineEnding + 'Details: ' + E.Message);
+      end;
+    end;
 
     { Read all output }
     Buf := '';
