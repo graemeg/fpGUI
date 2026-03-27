@@ -21,7 +21,7 @@ unit ide.filemonitor;
 interface
 
 uses
-  Classes, SysUtils, fpg_main, fpg_base, contnrs;
+  Classes, SysUtils, SyncObjs, fpg_main, fpg_base, contnrs;
 
 type
 
@@ -66,9 +66,10 @@ type
     FInterval: LongWord;
     FFileList: TThreadList;
     FOnFileChanged: TFileChangedEvent;
-    FCurrent: TMonitoredFile;
-    FCurrentState: TFileMonitorEventType;
-    procedure DoFileChangeNotification;
+    FEventQueue: TList;
+    FEventLock: TCriticalSection;
+    procedure QueueNotification(AFile: TMonitoredFile; AState: TFileMonitorEventType);
+    procedure DoFlushNotifications;
   public
     constructor CreateCustom;
     destructor Destroy; override;
@@ -154,17 +155,67 @@ begin
   SHA1 := SHA1Print(SHA1String(AsString));
 end;
 
+type
+  PEventQueueItem = ^TEventQueueItem;
+  TEventQueueItem = record
+    EventType: TFileMonitorEventType;
+    FileName: TfpgString;
+  end;
+
 { TFileMonitor }
 
-procedure TFileMonitor.DoFileChangeNotification;
+procedure TFileMonitor.QueueNotification(AFile: TMonitoredFile; AState: TFileMonitorEventType);
 var
+  item: PEventQueueItem;
+begin
+  New(item);
+  item^.EventType := AState;
+  item^.FileName := AFile.Name;
+  FEventLock.Acquire;
+  try
+    FEventQueue.Add(item);
+  finally
+    FEventLock.Release;
+  end;
+  Queue(@DoFlushNotifications);
+end;
+
+procedure TFileMonitor.DoFlushNotifications;
+var
+  snapshot: TList;
+  i: integer;
+  item: PEventQueueItem;
   rec: TFileMonitorEventData;
 begin
-  if Assigned(FOnFileChanged) then
-  begin
-    rec.EventType := FCurrentState;
-    rec.FileName := FCurrent.Name;
-    FOnFileChanged(self, rec);
+  if not Assigned(FOnFileChanged) then
+    Exit;
+  FEventLock.Acquire;
+  try
+    if FEventQueue.Count = 0 then
+      Exit;
+  finally
+    FEventLock.Release;
+  end;
+  snapshot := TList.Create;
+  try
+    FEventLock.Acquire;
+    try
+      for i := 0 to FEventQueue.Count - 1 do
+        snapshot.Add(FEventQueue[i]);
+      FEventQueue.Clear;
+    finally
+      FEventLock.Release;
+    end;
+    for i := 0 to snapshot.Count - 1 do
+    begin
+      item := PEventQueueItem(snapshot[i]);
+      rec.EventType := item^.EventType;
+      rec.FileName := item^.FileName;
+      FOnFileChanged(Self, rec);
+      Dispose(item);
+    end;
+  finally
+    snapshot.Free;
   end;
 end;
 
@@ -172,6 +223,8 @@ constructor TFileMonitor.CreateCustom;
 begin
   Create(True);
   FFileList := TThreadList.Create;
+  FEventQueue := TList.Create;
+  FEventLock := TCriticalSection.Create;
   FInterval := 500;
 end;
 
@@ -180,7 +233,16 @@ var
   f: TMonitoredFile;
   lst: TList;
   i: integer;
+  item: PEventQueueItem;
 begin
+  { Free any pending undelivered events }
+  for i := 0 to FEventQueue.Count - 1 do
+  begin
+    item := PEventQueueItem(FEventQueue[i]);
+    Dispose(item);
+  end;
+  FEventQueue.Free;
+  FEventLock.Free;
   try
     lst := FFileList.LockList;
     for i := lst.Count-1 downto 0 do
@@ -215,17 +277,13 @@ begin
           begin
             if lFile.SHA1 <> lFile.GetNewSHA1 then
             begin
-              FCurrent := lFile;
-              FCurrentState := fmeFileChanged;
-              Synchronize(@DoFileChangeNotification);
+              QueueNotification(lFile, fmeFileChanged);
               lFile.UpdateInfo;
             end;
           end
           else
           begin
-            FCurrent := lFile;
-            FCurrentState := fmeFileDeleted;
-            Synchronize(@DoFileChangeNotification);
+            QueueNotification(lFile, fmeFileDeleted);
             lst.Remove(lFile);
           end;
         end;

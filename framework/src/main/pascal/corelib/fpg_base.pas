@@ -29,7 +29,8 @@ uses
   variants,
   fgl,
   contnrs,
-  fpg_cmdlineparams;
+  fpg_cmdlineparams,
+  fpg_wakeChannel;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -788,6 +789,7 @@ type
     FMainForm: TfpgWidgetBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
+    FWakeChannel: IWakeChannel;
     FHelpKey: word;
     FHelpFile: TfpgString;
     FCmdLineParams: ICmdLineParams;
@@ -838,6 +840,12 @@ type
     procedure   Terminate;
     procedure   Lock;
     procedure   Unlock;
+    { Thread-safe: wakes the main thread's event loop from any thread.
+      Worker threads should call this after enqueuing work for the main
+      thread (via fpgPostMessage, TThread.Queue, etc.) to ensure the
+      event loop processes the work promptly instead of waiting for
+      the next platform event or timer. }
+    procedure   WakeMainThread;
     procedure   InvokeHelp;
     function    ContextHelp(const AHelpContext: THelpContext): Boolean;
     function    KeywordHelp(const AHelpKeyword: string): Boolean;
@@ -853,6 +861,7 @@ type
     property    Terminated: boolean read FTerminated write FTerminated;
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
     property    selection: TfpgClipboardBase read FSelection;
+    property    WakeChannel: IWakeChannel read FWakeChannel write FWakeChannel;
   end;
 
 
@@ -4165,6 +4174,12 @@ end;
 procedure TfpgApplicationBase.Unlock;
 begin
   FCritSect.Leave;
+end;
+
+procedure TfpgApplicationBase.WakeMainThread;
+begin
+  if FWakeChannel <> nil then
+    FWakeChannel.Signal;
 end;
 
 procedure TfpgApplicationBase.InvokeHelp;

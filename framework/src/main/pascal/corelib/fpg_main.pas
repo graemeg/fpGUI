@@ -480,6 +480,11 @@ procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
 function  fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 procedure fpgDeliverMessages;
+{ Coalesce duplicate FPGM_PAINT and FPGM_RESIZE messages in the queue.
+  For each (Dest, MsgCode) pair that is coalescable, only the last message
+  is kept. Call this before fpgDeliverMessages to reduce redundant paint
+  and resize processing. }
+procedure fpgCoalesceMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
 procedure fpgDeleteFirstMessage;
 
@@ -597,7 +602,8 @@ uses
   fpg_style_carbon,
   fpg_style_plastic,
   fpg_style_fusion,
-  fpg_tab;
+  fpg_tab,
+  fpg_async;
 
 var
   fpgTimers: TList;
@@ -1920,6 +1926,9 @@ begin
     WaitWindowMessage(250);
     Flush;
   end;
+  { Always process invoke queue — items may be pending even when
+    no platform messages exist }
+  fpgProcessInvokeQueue;
 end;
 
 procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
@@ -2008,6 +2017,7 @@ begin
 
   DoWaitWindowMessage(fpgClosestTimer(GetTickCount64, atimeoutms));
   fpgDeliverMessages;
+  fpgProcessInvokeQueue;
   fpgCheckTimers;
 end;
 

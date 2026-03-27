@@ -159,6 +159,7 @@ type
   private
     function    ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
     function    ConvertKeyCode(keyCode: cushort): Word;
+    procedure   DoWakeMainThread(Sender: TObject);
   protected
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
@@ -168,6 +169,7 @@ type
     function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
+    destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -241,7 +243,9 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
-  fpg_constants;
+  fpg_constants,
+  fpg_wakeChannel,
+  fpg_cocoa_wakechannel;
 
 { FPC's CocoaAll window level constants are all broken (return -1).
   Define the correct values from Apple's CGWindowLevel.h. }
@@ -1056,6 +1060,29 @@ begin
   NSApp.finishLaunching;
 
   FIsInitialized := True;
+
+  { Create and open the wake channel. On Cocoa this posts a dummy
+    NSApplicationDefined event to wake nextEventMatchingMask. }
+  WakeChannel := TfpgCocoaWakeChannel.Create;
+  WakeChannel.Open;
+
+  { Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+    the event loop via our channel }
+  Classes.WakeMainThread := @DoWakeMainThread;
+end;
+
+procedure TfpgCocoaApplication.DoWakeMainThread(Sender: TObject);
+begin
+  Self.WakeMainThread;
+end;
+
+destructor TfpgCocoaApplication.Destroy;
+begin
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
+  inherited Destroy;
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;

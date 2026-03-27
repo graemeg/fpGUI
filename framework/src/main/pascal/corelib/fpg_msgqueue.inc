@@ -180,6 +180,7 @@ begin
   finally
     fpgApplication.Unlock;
   end;
+  fpgApplication.WakeMainThread;
 end;
 
 procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -205,6 +206,7 @@ begin
   finally
     fpgApplication.Unlock;
   end;
+  fpgApplication.WakeMainThread;
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: TfpgMessageParams); overload;
@@ -286,11 +288,56 @@ begin
   end;
 end;
 
+function IsCoalescable(AMsgCode: Integer): Boolean; inline;
+begin
+  Result := (AMsgCode = FPGM_PAINT) or (AMsgCode = FPGM_RESIZE);
+end;
+
+procedure fpgCoalesceMessages;
+var
+  e, scan, next: TMessageListElement;
+  removed: Boolean;
+begin
+  fpgApplication.Lock;
+  try
+    { Walk the queue backwards. For each coalescable message, check if
+      an earlier message with the same (Dest, MsgCode) exists. If so,
+      remove the earlier duplicate (keeping the later one which has
+      the most up-to-date params for resize). }
+    e := UsedLastMessage;
+    while e <> nil do
+    begin
+      if IsCoalescable(e.msg.MsgCode) then
+      begin
+        { Scan earlier messages for duplicates }
+        scan := e.Prev;
+        while scan <> nil do
+        begin
+          next := scan.Prev;
+          if (scan.msg.MsgCode = e.msg.MsgCode) and (scan.msg.Dest = e.msg.Dest) then
+          begin
+            { Remove the older duplicate }
+            MsgListRemoveElement(scan, UsedFirstMessage, UsedLastMessage);
+            MsgListInsertElement(scan, FreeFirstMessage, FreeLastMessage);
+          end;
+          scan := next;
+        end;
+      end;
+      if e = UsedFirstMessage then
+        Break;
+      e := e.Prev;
+    end;
+  finally
+    fpgApplication.Unlock;
+  end;
+end;
+
 procedure fpgDeliverMessages;
 var
   mp: PfpgMessageRec;
   m: TfpgMessageRec;
 begin
+  fpgCoalesceMessages;
   repeat
     mp := fpgGetFirstMessage;
     if mp <> nil then
