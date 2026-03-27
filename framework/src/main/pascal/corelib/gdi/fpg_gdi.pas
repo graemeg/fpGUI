@@ -384,6 +384,8 @@ uses
   fpg_stringutils,
   fpg_form,
   fpg_window,
+  fpg_wakeChannel,
+  fpg_gdi_wakechannel,
   math;
 
 
@@ -1558,9 +1560,10 @@ end;
 
 procedure TfpgGDIApplication.DoWakeMainThread(Sender: TObject);
 begin
-  // WakeMainThread is called during TThread.Synchronize.
-  if Assigned(MainForm) then
-    Windows.PostMessage(TfpgGDIWindow(MainForm.Window).WinHandle, WM_NULL, 0, 0);
+  { Called by the RTL when TThread.Synchronize or TThread.Queue posts
+    work for the main thread. Delegates to the wake channel which posts
+    a message to a hidden window, waking MsgWaitForMultipleObjects. }
+  Self.WakeMainThread;
 end;
 
 procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
@@ -1660,13 +1663,24 @@ begin
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
-  WakeMainThread := @DoWakeMainThread;
+
+  { Create the wake channel. On Windows this posts WM_FPGUI_WAKE to
+    a hidden message-only window, waking MsgWaitForMultipleObjects. }
+  WakeChannel := TfpgGDIWakeChannel.Create;
+  WakeChannel.Open;
+
+  { Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+    the event loop via our channel instead of the old MainForm approach }
+  Classes.WakeMainThread := @DoWakeMainThread;
 
 end;
 
 destructor TfpgGDIApplication.Destroy;
 begin
-  WakeMainThread := nil;
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
   if Assigned(FDrag) then
     FDrag.Free;
   UnhookWindowsHookEx(ActivationHook);

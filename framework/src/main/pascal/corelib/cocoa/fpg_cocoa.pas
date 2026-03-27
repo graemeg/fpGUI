@@ -241,7 +241,9 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
-  fpg_constants;
+  fpg_constants,
+  fpg_wakeChannel,
+  fpg_cocoa_wakechannel;
 
 { FPC's CocoaAll window level constants are all broken (return -1).
   Define the correct values from Apple's CGWindowLevel.h. }
@@ -1056,6 +1058,11 @@ begin
   NSApp.finishLaunching;
 
   FIsInitialized := True;
+
+  { Create and open the wake channel. On Cocoa this posts a dummy
+    NSApplicationDefined event to wake nextEventMatchingMask. }
+  WakeChannel := TfpgCocoaWakeChannel.Create;
+  WakeChannel.Open;
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;
