@@ -480,6 +480,11 @@ procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
 function  fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 procedure fpgDeliverMessages;
+{ Coalesce duplicate FPGM_PAINT and FPGM_RESIZE messages in the queue.
+  For each (Dest, MsgCode) pair that is coalescable, only the last message
+  is kept. Call this before fpgDeliverMessages to reduce redundant paint
+  and resize processing. }
+procedure fpgCoalesceMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
 procedure fpgDeleteFirstMessage;
 

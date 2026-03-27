@@ -33,7 +33,8 @@ uses
   tcmig_grid,
   tcmig_quickstart,
   tctimer,
-  tcmsgqueue;
+  tcmsgqueue,
+  tcmsgcoalesce;
 
 implementation
 
