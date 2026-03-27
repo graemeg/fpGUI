@@ -31,6 +31,10 @@ uses
 
 const
   WM_FPGUI_WAKE = WM_USER + $F001;
+  { HWND_MESSAGE is not defined in FPC 3.2.x Windows unit }
+  {$IF NOT DECLARED(HWND_MESSAGE)}
+  HWND_MESSAGE = HWND(-3);
+  {$ENDIF}
 
 type
 
