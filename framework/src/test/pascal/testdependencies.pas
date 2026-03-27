@@ -34,7 +34,8 @@ uses
   tcmig_quickstart,
   tctimer,
   tcmsgqueue,
-  tcmsgcoalesce;
+  tcmsgcoalesce,
+  tcasynctask;
 
 implementation
 
