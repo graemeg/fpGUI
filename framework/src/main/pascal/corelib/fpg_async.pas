@@ -47,6 +47,7 @@ type
     procedure DoComplete;
     procedure DoError;
     procedure InternalExecute;
+    procedure HandleThreadTerminate(Sender: TObject);
   protected
     { Override to perform background work. Called on the worker thread.
       Call PublishProgress() from here to send updates to the GUI. }
@@ -262,13 +263,24 @@ begin
   { Default: no-op. Override in subclasses. }
 end;
 
+procedure TfpgAsyncTask.HandleThreadTerminate(Sender: TObject);
+begin
+  if FErrorMsg <> '' then
+    DoError
+  else
+    DoComplete;
+end;
+
 procedure TfpgAsyncTask.Start;
 var
   thd: TAsyncTaskThread;
 begin
   thd := TAsyncTaskThread.Create(Self);
   FThread := thd;
-  thd.OnTerminate := nil; // TODO: wire up completion via Queue
+  { OnTerminate is called on the main thread via Synchronize by FPC's
+    RTL after Execute completes. The wake channel ensures this happens
+    promptly without waiting for user input. }
+  thd.OnTerminate := @HandleThreadTerminate;
   thd.Start;
 end;
 

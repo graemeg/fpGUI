@@ -34,12 +34,30 @@ type
     property SumResult: Integer read FResult;
   end;
 
+  { Test async task that raises an exception }
+  TTestFailingTask = class(TfpgAsyncTask)
+  protected
+    procedure Execute; override;
+  public
+    CompleteCalled: Boolean;
+    ErrorMessage: string;
+    procedure OnComplete; override;
+    procedure OnError(const AMessage: string); override;
+    constructor Create;
+  end;
+
   { TTestAsyncTask }
 
   TTestAsyncTask = class(TTestCase)
   published
-    procedure TestAsyncTask_ExecutesAndCompletes;
-    procedure TestAsyncTask_PublishProgressDelivered;
+    { Synchronous path }
+    procedure TestRunSynchronous_ExecutesAndCompletes;
+    procedure TestRunSynchronous_PublishProgressDelivered;
+    procedure TestRunSynchronous_ErrorCallsOnError;
+    { Threaded path via Start }
+    procedure TestStart_CompleteFiredOnMainThread;
+    procedure TestStart_ProgressDeliveredViaThread;
+    procedure TestStart_ErrorFiredOnMainThread;
   end;
 
   { TTestInvokeLater }
@@ -111,15 +129,39 @@ begin
 end;
 
 
-{ TTestAsyncTask }
+{ TTestFailingTask }
 
-procedure TTestAsyncTask.TestAsyncTask_ExecutesAndCompletes;
+constructor TTestFailingTask.Create;
+begin
+  inherited Create;
+  CompleteCalled := False;
+  ErrorMessage := '';
+end;
+
+procedure TTestFailingTask.Execute;
+begin
+  raise Exception.Create('deliberate test failure');
+end;
+
+procedure TTestFailingTask.OnComplete;
+begin
+  CompleteCalled := True;
+end;
+
+procedure TTestFailingTask.OnError(const AMessage: string);
+begin
+  ErrorMessage := AMessage;
+end;
+
+
+{ TTestAsyncTask — synchronous path }
+
+procedure TTestAsyncTask.TestRunSynchronous_ExecutesAndCompletes;
 var
   task: TTestSumTask;
 begin
   task := TTestSumTask.Create(1, 100);
   try
-    { Run synchronously for testing }
     task.RunSynchronous;
     AssertTrue('OnComplete should have been called', task.CompleteCalled);
     AssertEquals('Sum 1..100 = 5050', 5050, task.SumResult);
@@ -129,17 +171,102 @@ begin
   end;
 end;
 
-procedure TTestAsyncTask.TestAsyncTask_PublishProgressDelivered;
+procedure TTestAsyncTask.TestRunSynchronous_PublishProgressDelivered;
 var
   task: TTestSumTask;
 begin
   task := TTestSumTask.Create(1, 50);
   try
     task.RunSynchronous;
-    { Progress published at every multiple of 10: 10, 20, 30, 40, 50 }
     AssertEquals('Should have 5 progress lines', 5, task.ProgressLines.Count);
     AssertTrue('First progress line should mention 10',
       Pos('10', task.ProgressLines[0]) > 0);
+  finally
+    task.Free;
+  end;
+end;
+
+procedure TTestAsyncTask.TestRunSynchronous_ErrorCallsOnError;
+var
+  task: TTestFailingTask;
+begin
+  task := TTestFailingTask.Create;
+  try
+    task.RunSynchronous;
+    AssertFalse('OnComplete should NOT be called on error', task.CompleteCalled);
+    AssertTrue('OnError should have the exception message',
+      Pos('deliberate test failure', task.ErrorMessage) > 0);
+  finally
+    task.Free;
+  end;
+end;
+
+{ TTestAsyncTask — threaded path via Start }
+
+procedure TTestAsyncTask.TestStart_CompleteFiredOnMainThread;
+var
+  task: TTestSumTask;
+  waited: Integer;
+begin
+  task := TTestSumTask.Create(1, 100);
+  try
+    task.Start;
+    { Poll CheckSynchronize to process the OnTerminate callback.
+      The wake channel ensures CheckSynchronize fires promptly. }
+    waited := 0;
+    while (not task.CompleteCalled) and (waited < 2000) do
+    begin
+      CheckSynchronize(10);
+      Sleep(10);
+      Inc(waited, 10);
+    end;
+    AssertTrue('OnComplete should fire via Start path', task.CompleteCalled);
+    AssertEquals('Sum 1..100 = 5050 via threaded path', 5050, task.SumResult);
+  finally
+    task.Free;
+  end;
+end;
+
+procedure TTestAsyncTask.TestStart_ProgressDeliveredViaThread;
+var
+  task: TTestSumTask;
+  waited: Integer;
+begin
+  task := TTestSumTask.Create(1, 50);
+  try
+    task.Start;
+    waited := 0;
+    while (not task.CompleteCalled) and (waited < 2000) do
+    begin
+      CheckSynchronize(10);
+      Sleep(10);
+      Inc(waited, 10);
+    end;
+    AssertTrue('Task should have completed', task.CompleteCalled);
+    AssertEquals('Should have 5 progress lines via thread', 5, task.ProgressLines.Count);
+  finally
+    task.Free;
+  end;
+end;
+
+procedure TTestAsyncTask.TestStart_ErrorFiredOnMainThread;
+var
+  task: TTestFailingTask;
+  waited: Integer;
+begin
+  task := TTestFailingTask.Create;
+  try
+    task.Start;
+    waited := 0;
+    while (task.ErrorMessage = '') and (not task.CompleteCalled) and (waited < 2000) do
+    begin
+      CheckSynchronize(10);
+      Sleep(10);
+      Inc(waited, 10);
+    end;
+    AssertFalse('OnComplete should NOT fire on error via Start', task.CompleteCalled);
+    AssertTrue('OnError should fire via Start path',
+      Pos('deliberate test failure', task.ErrorMessage) > 0);
   finally
     task.Free;
   end;
