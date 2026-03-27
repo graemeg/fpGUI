@@ -511,6 +511,8 @@ uses
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
   fpg_constants,
+  fpg_wakeChannel,
+  fpg_x11_wakechannel,
   cursorfont,
   xatom,            // used for XA_WM_NAME
   keysym,
@@ -1686,6 +1688,11 @@ begin
   FIsInitialized := True;
   xapplication := TfpgApplication(self);
 
+  // Create and open the wake channel (self-pipe) so worker threads
+  // can wake the event loop via WakeMainThread
+  WakeChannel := TfpgX11WakeChannel.Create;
+  WakeChannel.Open;
+
   // Initialize XRandR for multi-monitor support (dynamic loading, graceful fallback)
   InitXRandR(FDisplay);
 
@@ -1695,6 +1702,9 @@ end;
 
 destructor TfpgX11Application.Destroy;
 begin
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
   FSelection.free;
   netlayer.Free;
   XCloseDisplay(FDisplay);
@@ -1796,6 +1806,8 @@ var
   msgp: TfpgMessageParams;
   rfds: baseunix.TFDSet;
   xfd: integer;
+  wakefd: integer;
+  maxfd: integer;
   KeySym: TKeySym;
   Popup: TfpgWidget;
   needToWait: boolean;
@@ -1878,11 +1890,38 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
-    if r <> 0 then  // We got a X event or the timeout happened
+
+    { Include the wake channel pipe fd in the select set so that
+      worker threads calling WakeMainThread instantly unblock us. }
+    wakefd := -1;
+    maxfd := xfd;
+    if WakeChannel <> nil then
+    begin
+      wakefd := WakeChannel.GetPollFd;
+      if wakefd >= 0 then
+      begin
+        fpFD_SET(wakefd, rfds);
+        if wakefd > maxfd then
+          maxfd := wakefd;
+      end;
+    end;
+
+    r := fpSelect(maxfd + 1, @rfds, nil, nil, atimeoutms);
+
+    { Drain the wake pipe if it was signalled, regardless of whether
+      X events are also pending }
+    if (wakefd >= 0) and (r > 0) and (fpFD_ISSET(wakefd, rfds) <> 0) then
+    begin
+      if WakeChannel <> nil then
+        WakeChannel.Drain;
+    end;
+
+    if (r > 0) and (fpFD_ISSET(xfd, rfds) <> 0) then
       XNextEvent(display, @ev)
+    else if r <= 0 then
+      Exit  // timeout or error — nothing further to do
     else
-      Exit; // nothing further to do here!
+      Exit; // only the wake pipe was signalled, no X event
   end;
 
   // if the event filter returns true then it ate the message
