@@ -159,6 +159,7 @@ type
   private
     function    ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
     function    ConvertKeyCode(keyCode: cushort): Word;
+    procedure   DoWakeMainThread(Sender: TObject);
   protected
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
@@ -1063,6 +1064,15 @@ begin
     NSApplicationDefined event to wake nextEventMatchingMask. }
   WakeChannel := TfpgCocoaWakeChannel.Create;
   WakeChannel.Open;
+
+  { Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+    the event loop via our channel }
+  Classes.WakeMainThread := @DoWakeMainThread;
+end;
+
+procedure TfpgCocoaApplication.DoWakeMainThread(Sender: TObject);
+begin
+  Self.WakeMainThread;
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;

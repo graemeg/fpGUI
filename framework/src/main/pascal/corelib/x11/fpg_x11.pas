@@ -329,6 +329,7 @@ type
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
     procedure   HandleDNDdrop(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ATimestamp: x.TTime);
     procedure   HandleDNDSelection(const ev: TXEvent);
+    procedure   DoWakeMainThread(Sender: TObject);
     property    Drag: TfpgX11Drag read FDrag write SetDrag;
   protected
     FDisplay: PXDisplay;
@@ -1693,6 +1694,10 @@ begin
   WakeChannel := TfpgX11WakeChannel.Create;
   WakeChannel.Open;
 
+  // Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+  // the event loop via the self-pipe
+  Classes.WakeMainThread := @DoWakeMainThread;
+
   // Initialize XRandR for multi-monitor support (dynamic loading, graceful fallback)
   InitXRandR(FDisplay);
 
@@ -1700,8 +1705,14 @@ begin
   FSelection := TfpgX11Selection.Create;
 end;
 
+procedure TfpgX11Application.DoWakeMainThread(Sender: TObject);
+begin
+  Self.WakeMainThread;
+end;
+
 destructor TfpgX11Application.Destroy;
 begin
+  Classes.WakeMainThread := nil;
   if WakeChannel <> nil then
     WakeChannel.Close;
   WakeChannel := nil;

@@ -83,7 +83,6 @@ type
     FRegex: TRegExpr;
     FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
-    FBuildTimer: TfpgTimer;
     FHighlighter: TPascalHighlighter;
     FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
     FINIHighlighter: TEditorHighlighter;
@@ -156,8 +155,6 @@ type
     procedure   RetokeniseEditor(AEditor: TfpgTextEdit);
     procedure   EditorCaretChanged(Sender: TObject; ALine, ACol: Integer);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
-    procedure   BeginBuild;
-    procedure   BuildTimerFired(Sender: TObject);
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
@@ -621,7 +618,6 @@ begin
   end;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -640,7 +636,6 @@ begin
     thd.BuildMode := 1;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -653,7 +648,6 @@ begin
   thd.BuildMode := 2;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -666,7 +660,6 @@ begin
   thd.BuildMode := 3;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -679,7 +672,6 @@ begin
   thd.BuildMode := 4;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -692,7 +684,6 @@ begin
   thd.BuildMode := 5;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -740,7 +731,6 @@ begin
   end;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -1159,7 +1149,6 @@ begin
   thd.BuildModule := ModInfo.Name;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -1183,7 +1172,6 @@ begin
   thd.BuildModule := ModInfo.Name;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -1207,7 +1195,6 @@ begin
   thd.BuildModule := ModInfo.Name;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
-  BeginBuild;
   thd.Resume;
 end;
 
@@ -1291,32 +1278,8 @@ begin
   end;
 end;
 
-{ Create the build-active timer on demand and enable it. While active, the
-  timer fires every 100 ms, keeping the event loop spinning so that
-  CheckSynchronize is called regularly and queued output lines from the
-  builder thread are flushed to the grid promptly — independent of mouse
-  movement or other user input. }
-procedure TMainForm.BeginBuild;
-begin
-  if not Assigned(FBuildTimer) then
-  begin
-    FBuildTimer := TfpgTimer.Create(100);
-    FBuildTimer.OnTimer := @BuildTimerFired;
-  end;
-  FBuildTimer.Enabled := True;
-end;
-
-procedure TMainForm.BuildTimerFired(Sender: TObject);
-begin
-  { Intentionally empty. The sole purpose of this timer is to keep the
-    fpGUI event loop spinning during a build so that CheckSynchronize is
-    invoked regularly. }
-end;
-
 procedure TMainForm.BuildTerminated(Sender: TObject);
 begin
-  if Assigned(FBuildTimer) then
-    FBuildTimer.Enabled := False;
   AddMessage('Done.');
 end;
 
@@ -2552,7 +2515,6 @@ end;
 
 destructor TMainForm.Destroy;
 begin
-  FreeAndNil(FBuildTimer);
   FFileMonitor.Terminate;
   FFileMonitor.Free;
   FreeAndNil(FHighlighter);
