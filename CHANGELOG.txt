@@ -2,8 +2,29 @@
   Release notes for fpGUI
   =======================
 
-v2.0.5 (unreleased) - last used SHA1 357dbbcf
+v2.1.0 (unreleased) - last used SHA1 d353b99e
 
+  - Event Loop Rearchitecture
+    * Wake channel infrastructure (IWakeChannel interface) enables worker
+      threads to wake the main thread's event loop instantly on all
+      platforms, without depending on mouse movement or timer timeouts.
+    * X11: self-pipe monitored alongside the X display fd in fpSelect().
+    * GDI: posts WM_FPGUI_WAKE to a hidden message-only window, waking
+      MsgWaitForMultipleObjects.
+    * Cocoa: posts a dummy NSApplicationDefined event to wake
+      nextEventMatchingMask.
+    * fpgPostMessage now wakes the event loop after enqueuing, giving
+      sub-millisecond delivery from worker threads.
+    * Hooked FPC's Classes.WakeMainThread on all three backends so that
+      TThread.Queue() and TThread.Synchronize() wake the event loop
+      automatically.
+    * Message coalescing: duplicate FPGM_PAINT and FPGM_RESIZE messages
+      for the same widget are automatically merged, reducing redundant
+      paint and resize processing during high-frequency updates.
+    * New TfpgAsyncTask base class (SwingWorker-inspired) for background
+      tasks that publish progress to the GUI thread safely.
+    * New fpgInvokeLater() for scheduling work on the main thread from
+      any thread.
   - Hybrid Canvas (new)
     * New hybrid canvas backend combining AggPas 2D rendering with native
       text output. Activated via the AGGCanvas compiler define.
