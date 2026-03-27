@@ -180,6 +180,7 @@ begin
   finally
     fpgApplication.Unlock;
   end;
+  fpgApplication.WakeMainThread;
 end;
 
 procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -205,6 +206,7 @@ begin
   finally
     fpgApplication.Unlock;
   end;
+  fpgApplication.WakeMainThread;
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: TfpgMessageParams); overload;
