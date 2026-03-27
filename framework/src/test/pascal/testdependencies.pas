@@ -32,7 +32,8 @@ uses
   tcmig_layoututil,
   tcmig_grid,
   tcmig_quickstart,
-  tctimer;
+  tctimer,
+  tcmsgqueue;
 
 implementation
 
