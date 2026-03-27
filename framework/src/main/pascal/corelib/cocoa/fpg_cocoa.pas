@@ -169,6 +169,7 @@ type
     function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
+    destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
@@ -1073,6 +1074,15 @@ end;
 procedure TfpgCocoaApplication.DoWakeMainThread(Sender: TObject);
 begin
   Self.WakeMainThread;
+end;
+
+destructor TfpgCocoaApplication.Destroy;
+begin
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
+  inherited Destroy;
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;
