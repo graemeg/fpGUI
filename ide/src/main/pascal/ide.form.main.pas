@@ -28,7 +28,7 @@ uses
   fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
-  ide.highlight.renderer, ide.project.pasbuild;
+  ide.highlight.renderer, ide.build.dispatch, ide.project.pasbuild;
 
 type
 
@@ -742,8 +742,7 @@ end;
 
 procedure TMainForm.pmTreeDependencyTreeClick(Sender: TObject);
 var
-  n: TfpgTreeNode;
-  ModInfo: TAggregatorModuleInfo;
+  ModName: string;
   thd: TBuilderThread;
 begin
   if GProject.ProjectFormat <> pfPasBuild then
@@ -752,19 +751,8 @@ begin
     Exit;
   end;
   ClearMessagesWindow;
-  thd := TBuilderThread.Create(True);
-  thd.BuildGoal := 'dependency-tree';
-  { If a module node is selected, target that module specifically }
-  n := tvProject.Selection;
-  if (n <> nil) and (n.Data <> nil) and (PtrInt(n.Data) > 4)
-      and (TObject(n.Data) is TAggregatorModuleInfo) then
-  begin
-    ModInfo := TAggregatorModuleInfo(n.Data);
-    thd.BuildModule := ModInfo.Name;
-  end;
-  thd.OnTerminate := @BuildTerminated;
-  thd.OnAvailableOutput := @BuildOutput;
-  thd.Resume;
+  ModName := DetectModuleFromTreeNode(tvProject.Selection);
+  StartModuleBuild('dependency-tree', ModName, @BuildTerminated, @BuildOutput);
 end;
 
 procedure TMainForm.miConfigureIDE(Sender: TObject);
@@ -1164,71 +1152,35 @@ end;
 
 procedure TMainForm.pmModuleBuildClick(Sender: TObject);
 var
-  n: TfpgTreeNode;
-  ModInfo: TAggregatorModuleInfo;
-  thd: TBuilderThread;
+  ModName: string;
 begin
-  n := tvProject.Selection;
-  if (n = nil) or (n.Data = nil) then
+  ModName := DetectModuleFromTreeNode(tvProject.Selection);
+  if ModName = '' then
     Exit;
-  if PtrInt(n.Data) <= 4 then
-    Exit;
-  if not (TObject(n.Data) is TAggregatorModuleInfo) then
-    Exit;
-  ModInfo := TAggregatorModuleInfo(n.Data);
   ClearMessagesWindow;
-  thd := TBuilderThread.Create(True);
-  thd.BuildGoal := 'compile';
-  thd.BuildModule := ModInfo.Name;
-  thd.OnTerminate := @BuildTerminated;
-  thd.OnAvailableOutput := @BuildOutput;
-  thd.Resume;
+  StartModuleBuild('compile', ModName, @BuildTerminated, @BuildOutput);
 end;
 
 procedure TMainForm.pmModuleCleanClick(Sender: TObject);
 var
-  n: TfpgTreeNode;
-  ModInfo: TAggregatorModuleInfo;
-  thd: TBuilderThread;
+  ModName: string;
 begin
-  n := tvProject.Selection;
-  if (n = nil) or (n.Data = nil) then
+  ModName := DetectModuleFromTreeNode(tvProject.Selection);
+  if ModName = '' then
     Exit;
-  if PtrInt(n.Data) <= 4 then
-    Exit;
-  if not (TObject(n.Data) is TAggregatorModuleInfo) then
-    Exit;
-  ModInfo := TAggregatorModuleInfo(n.Data);
   ClearMessagesWindow;
-  thd := TBuilderThread.Create(True);
-  thd.BuildGoal := 'clean';
-  thd.BuildModule := ModInfo.Name;
-  thd.OnTerminate := @BuildTerminated;
-  thd.OnAvailableOutput := @BuildOutput;
-  thd.Resume;
+  StartModuleBuild('clean', ModName, @BuildTerminated, @BuildOutput);
 end;
 
 procedure TMainForm.pmModuleRebuildClick(Sender: TObject);
 var
-  n: TfpgTreeNode;
-  ModInfo: TAggregatorModuleInfo;
-  thd: TBuilderThread;
+  ModName: string;
 begin
-  n := tvProject.Selection;
-  if (n = nil) or (n.Data = nil) then
+  ModName := DetectModuleFromTreeNode(tvProject.Selection);
+  if ModName = '' then
     Exit;
-  if PtrInt(n.Data) <= 4 then
-    Exit;
-  if not (TObject(n.Data) is TAggregatorModuleInfo) then
-    Exit;
-  ModInfo := TAggregatorModuleInfo(n.Data);
   ClearMessagesWindow;
-  thd := TBuilderThread.Create(True);
-  thd.BuildGoal := 'rebuild';
-  thd.BuildModule := ModInfo.Name;
-  thd.OnTerminate := @BuildTerminated;
-  thd.OnAvailableOutput := @BuildOutput;
-  thd.Resume;
+  StartModuleBuild('rebuild', ModName, @BuildTerminated, @BuildOutput);
 end;
 
 procedure TMainForm.EditorChanged(Sender: TObject);

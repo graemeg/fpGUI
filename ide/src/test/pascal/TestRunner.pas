@@ -26,7 +26,8 @@ uses
   ide.test.navigation,
   ide.test.highlighter.ini,
   ide.test.highlighter.xml,
-  ide.test.highlight.renderer;
+  ide.test.highlight.renderer,
+  ide.test.build.dispatch;
 
 var
   Application: TTestRunner;
