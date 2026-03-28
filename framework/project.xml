@@ -25,7 +25,6 @@
       <path condition="DARWIN">corelib/render/software</path>
       <!-- There are just to clean up the FPC command - not strictly needed -->
       <path condition="UNUSED">corelib/_template</path>
-      <path condition="UNUSED">3rdparty/libvlc</path>
     </unitPaths>
 
     <resources>
