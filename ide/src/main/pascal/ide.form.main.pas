@@ -28,7 +28,8 @@ uses
   fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
-  ide.highlight.renderer, ide.build.dispatch, ide.project.pasbuild;
+  ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
+  ide.project.pasbuild;
 
 type
 
@@ -167,9 +168,6 @@ type
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   PopulatePasBuildTree;
-    procedure   AddModuleSubtree(AParent: TfpgTreeNode; const AModuleDir, ASourceDir: TfpgString; ADeps: TStringList; AExpandSources: Boolean);
-    procedure   AddModuleInfoToTree(AParent: TfpgTreeNode; AInfo: TAggregatorModuleInfo);
-    procedure   AddDirectoryToTree(AParent: TfpgTreeNode; const ADir: TfpgString; const AExtensions: TStringList);
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
@@ -895,15 +893,10 @@ end;
 procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 var
   n: TfpgTreeNode;
-  Cat: TfpgTreeNode;
-  ModParent: TfpgTreeNode;
   ts: TfpgTabSheet;
   u: TUnit = nil;
   pb: TPasBuildProjectBackend;
-  ModInfo: TAggregatorModuleInfo;
-  DirPath: TfpgString;
   FilePath: TfpgString;
-  RelPath: TfpgString;
 begin
   n := tvProject.Selection;
   if n = nil then
@@ -911,66 +904,11 @@ begin
 
   if GProject.ProjectFormat = pfPasBuild then
   begin
-    { PasBuild: leaf nodes are files. Walk up to find the category
-      ancestor (node with Data tag 1-4) and build relative path from
-      any intermediate subdirectory nodes. }
-    if (n.Parent <> nil) and (n.Count = 0) then
-    begin
-      pb := TPasBuildProjectBackend(GProject);
-      { Build relative sub-path from intermediate directory nodes }
-      RelPath := '';
-      Cat := n.Parent;
-      while (Cat <> nil) and (Cat.Data = nil) do
-      begin
-        RelPath := Cat.Text + PathDelim + RelPath;
-        Cat := Cat.Parent;
-      end;
-      if (Cat <> nil) and (Cat.Data <> nil) and
-         (PtrInt(Cat.Data) >= 1) and (PtrInt(Cat.Data) <= 4) then
-      begin
-        { Determine base directory and source directory.
-          For aggregator projects, walk further up to find the module node
-          which stores a TAggregatorModuleInfo pointer. }
-        ModInfo := nil;
-        if pb.IsAggregator then
-        begin
-          ModParent := Cat.Parent;
-          while (ModParent <> nil) and (ModParent.Data = nil) do
-            ModParent := ModParent.Parent;
-          if (ModParent <> nil) and (ModParent.Data <> nil) and
-             (PtrInt(ModParent.Data) > 4) then
-            ModInfo := TAggregatorModuleInfo(ModParent.Data);
-        end;
-
-        if Assigned(ModInfo) then
-        begin
-          { Aggregator module — use module's directory and source dir }
-          case PtrInt(Cat.Data) of
-            1: DirPath := SetDirSeparators(ModInfo.SourceDirectory + '/');
-            2: DirPath := SetDirSeparators('src/test/pascal/');
-            3: DirPath := SetDirSeparators('src/main/resources/');
-            4: DirPath := SetDirSeparators('src/test/resources/');
-          end;
-          FilePath := ModInfo.ProjectDir + DirPath + RelPath + n.Text;
-        end
-        else
-        begin
-          { Single module — use project directory }
-          case PtrInt(Cat.Data) of
-            1: DirPath := SetDirSeparators(pb.SourceDirectory + '/');
-            2: DirPath := SetDirSeparators('src/test/pascal/');
-            3: DirPath := SetDirSeparators('src/main/resources/');
-            4: DirPath := SetDirSeparators('src/test/resources/');
-          else
-            DirPath := '';
-          end;
-          FilePath := pb.ProjectDir + DirPath + RelPath + n.Text;
-        end;
-
-        if (DirPath <> '') and fpgFileExists(FilePath) then
-          OpenEditorPage(FilePath);
-      end;
-    end;
+    pb := TPasBuildProjectBackend(GProject);
+    FilePath := ResolveNodeFilePath(n, pb.ProjectDir, pb.SourceDirectory,
+      pb.IsAggregator);
+    if (FilePath <> '') and fpgFileExists(FilePath) then
+      OpenEditorPage(FilePath);
   end
   else
   begin
@@ -1442,109 +1380,6 @@ begin
   tvProject.Invalidate;
 end;
 
-procedure TMainForm.AddModuleSubtree(AParent: TfpgTreeNode;
-  const AModuleDir, ASourceDir: TfpgString; ADeps: TStringList;
-  AExpandSources: Boolean);
-var
-  DirNode: TfpgTreeNode;
-  DepNode: TfpgTreeNode;
-  SourceExts: TStringList;
-  SrcDir: TfpgString;
-  i: integer;
-begin
-  SourceExts := TStringList.Create;
-  try
-    SourceExts.Add('.pas');
-    SourceExts.Add('.pp');
-    SourceExts.Add('.lpr');
-    SourceExts.Add('.dpr');
-    SourceExts.Add('.inc');
-
-    { Sources }
-    SrcDir := AModuleDir + SetDirSeparators(ASourceDir + '/');
-    if fpgDirectoryExists(SrcDir) then
-    begin
-      DirNode := AParent.AppendText('Sources');
-      DirNode.TextColor := clText2;
-      DirNode.Data := Pointer(1);
-      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
-      if AExpandSources then
-        DirNode.Expand;
-    end;
-
-    { Tests }
-    SrcDir := AModuleDir + SetDirSeparators('src/test/pascal/');
-    if fpgDirectoryExists(SrcDir) then
-    begin
-      DirNode := AParent.AppendText('Tests');
-      DirNode.TextColor := clText2;
-      DirNode.Data := Pointer(2);
-      AddDirectoryToTree(DirNode, SrcDir, SourceExts);
-    end;
-  finally
-    SourceExts.Free;
-  end;
-
-  { Resources }
-  SrcDir := AModuleDir + SetDirSeparators('src/main/resources/');
-  if fpgDirectoryExists(SrcDir) then
-  begin
-    DirNode := AParent.AppendText('Resources');
-    DirNode.TextColor := clText2;
-    DirNode.Data := Pointer(3);
-    AddDirectoryToTree(DirNode, SrcDir, nil);
-  end;
-
-  { Test Resources }
-  SrcDir := AModuleDir + SetDirSeparators('src/test/resources/');
-  if fpgDirectoryExists(SrcDir) then
-  begin
-    DirNode := AParent.AppendText('Test Resources');
-    DirNode.TextColor := clText2;
-    DirNode.Data := Pointer(4);
-    AddDirectoryToTree(DirNode, SrcDir, nil);
-  end;
-
-  { Dependencies }
-  if Assigned(ADeps) and (ADeps.Count > 0) then
-  begin
-    DepNode := AParent.AppendText('Dependencies');
-    DepNode.TextColor := clText2;
-    for i := 0 to ADeps.Count - 1 do
-      DepNode.AppendText(ADeps[i]).TextColor := clText1;
-  end;
-end;
-
-procedure TMainForm.AddModuleInfoToTree(AParent: TfpgTreeNode;
-  AInfo: TAggregatorModuleInfo);
-var
-  ModNode: TfpgTreeNode;
-  ModLabel: TfpgString;
-  i: integer;
-begin
-  if AInfo.Version <> '' then
-    ModLabel := AInfo.Name + ' (' + AInfo.Version + ')'
-  else
-    ModLabel := AInfo.Name;
-
-  ModNode := AParent.AppendText(ModLabel);
-  ModNode.TextColor := clText2;
-  ModNode.Data := Pointer(AInfo);  { store module info for double-click navigation }
-
-  if AInfo.IsAggregator then
-  begin
-    { Nested aggregator — show its sub-modules recursively }
-    for i := 0 to AInfo.SubModules.Count - 1 do
-      AddModuleInfoToTree(ModNode, TAggregatorModuleInfo(AInfo.SubModules[i]));
-  end
-  else
-  begin
-    { Leaf module — show Sources/Tests/Resources/Dependencies }
-    AddModuleSubtree(ModNode, AInfo.ProjectDir, AInfo.SourceDirectory,
-      AInfo.DeclaredDeps, False);
-  end;
-end;
-
 procedure TMainForm.PopulatePasBuildTree;
 var
   pb: TPasBuildProjectBackend;
@@ -1603,86 +1438,6 @@ begin
   RootNode.Expand;
   tvProject.Selection := RootNode;
   tvProject.Invalidate;
-end;
-
-procedure TMainForm.AddDirectoryToTree(AParent: TfpgTreeNode;
-  const ADir: TfpgString; const AExtensions: TStringList);
-var
-  sr: TSearchRec;
-  Files: TStringList;
-  Dirs: TStringList;
-  SubNode: TfpgTreeNode;
-  Ext: TfpgString;
-  i: integer;
-  MatchAll: Boolean;
-
-  function IsExcludedDir(const AName: TfpgString): Boolean;
-  begin
-    Result := (AName = '.') or (AName = '..') or
-              (AName = '.ide') or (AName = 'target') or
-              (AName = 'units');
-  end;
-
-  function MatchesExtension(const AName: TfpgString): Boolean;
-  var
-    j: integer;
-  begin
-    if MatchAll then
-    begin
-      Result := True;
-      Exit;
-    end;
-    Ext := LowerCase(fpgExtractFileExt(AName));
-    for j := 0 to AExtensions.Count - 1 do
-    begin
-      if Ext = AExtensions[j] then
-      begin
-        Result := True;
-        Exit;
-      end;
-    end;
-    Result := False;
-  end;
-
-begin
-  MatchAll := (AExtensions = nil) or (AExtensions.Count = 0);
-  Files := TStringList.Create;
-  Dirs := TStringList.Create;
-  try
-    Files.Sorted := True;
-    Dirs.Sorted := True;
-
-    { Single scan: collect directories and matching files }
-    if fpgFindFirst(ADir + AllFilesMask, faAnyFile, sr) = 0 then
-    begin
-      repeat
-        if (sr.Attr and faDirectory) <> 0 then
-        begin
-          if not IsExcludedDir(sr.Name) then
-            Dirs.Add(sr.Name);
-        end
-        else if MatchesExtension(sr.Name) then
-          Files.Add(sr.Name);
-      until fpgFindNext(sr) <> 0;
-      FindClose(sr);
-    end;
-
-    { Add subdirectories first, then recurse }
-    for i := 0 to Dirs.Count - 1 do
-    begin
-      SubNode := AParent.AppendText(Dirs[i]);
-      SubNode.TextColor := clText1;
-      AddDirectoryToTree(SubNode,
-        IncludeTrailingPathDelimiter(ADir + Dirs[i]), AExtensions);
-    end;
-
-    { Add files }
-    for i := 0 to Files.Count - 1 do
-      AParent.AppendText(Files[i]).TextColor := clText1;
-  finally
-    Dirs.Free;
-    Files.Free;
-  end;
 end;
 
 procedure TMainForm.SetupFilesGrid;
