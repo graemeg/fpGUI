@@ -20,7 +20,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// Adaptation for high precision colors has been sponsored by 
+// Adaptation for high precision colors has been sponsored by
 // Liberty Technology Systems, Inc., visit http://lib-sys.com
 //
 // Liberty Technology Systems, Inc. is the provider of
@@ -31,7 +31,7 @@
 // 23.06.2006-Milano: ptrcomp adjustments
 // 06.03.2006-Milano: Unit port establishment
 //
-{ agg_span_pattern_rgb.pas {untested}
+{ CAUTION: untested }
 unit
  agg_span_pattern_rgb ;
 
