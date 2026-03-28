@@ -81,8 +81,6 @@ type
   TfpgOnSearchEnd = procedure(Sender: TObject; FindIt, ReplaceMode: Boolean) of object;
 
 
-  { TfpgBaseTextEdit }
-
   TfpgBaseTextEdit = class(TfpgWidget)
   private
     type
