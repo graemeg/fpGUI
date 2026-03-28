@@ -43,6 +43,8 @@ type
     btnSaveAll: TfpgButton;
     pnlStatusBar: TfpgBevel;
     lblStatus: TfpgLabel;
+    lblCursorPos: TfpgLabel;
+    lblGitBranch: TfpgLabel;
     lblProfiles: TfpgLabel;
     pnlClientArea: TfpgBevel;
     pnlWindow: TfpgPageControl;
@@ -161,6 +163,8 @@ type
     procedure   BuildTerminated(Sender: TObject);
     procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
+    procedure   UpdateCursorPos(const ALine, ACol: Integer);
+    procedure   UpdateGitBranch;
     procedure   UpdateProfilesDisplay;
     procedure   ToggleProfile(const AProfileName: TfpgString);
     procedure   lblProfilesClicked(Sender: TObject);
@@ -1261,6 +1265,13 @@ begin
     edt := ATabSheet.Components[0] as TfpgTextEdit;
     if edt <> FHighlighterEditor then
       RetokeniseEditor(edt);
+    UpdateStatus(ATabSheet.Hint);
+    UpdateCursorPos(edt.CaretPos_V, edt.CaretPos_H);
+  end
+  else
+  begin
+    UpdateStatus('');
+    lblCursorPos.Text := '';
   end;
 end;
 
@@ -1277,6 +1288,7 @@ var
   edt: TfpgTextEdit;
   OldMatch: TBracketMatchResult;
 begin
+  UpdateCursorPos(ALine, ACol);
   if not Assigned(FHighlighter) then
     Exit;
   edt := TfpgTextEdit(Sender);
@@ -1326,6 +1338,44 @@ end;
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
 begin
   lblStatus.Text := AText;
+end;
+
+procedure TMainForm.UpdateCursorPos(const ALine, ACol: Integer);
+begin
+  { ALine and ACol are 0-based from TfpgTextEdit; display as 1-based }
+  lblCursorPos.Text := Format('Ln %d Col %d', [ALine + 1, ACol + 1]);
+end;
+
+procedure TMainForm.UpdateGitBranch;
+var
+  p: TProcess;
+  s: TStringList;
+begin
+  lblGitBranch.Text := '';
+  if GProject.ProjectDir = '' then
+    Exit;
+  p := TProcess.Create(nil);
+  s := TStringList.Create;
+  try
+    p.Executable := 'git';
+    p.Parameters.Add('rev-parse');
+    p.Parameters.Add('--abbrev-ref');
+    p.Parameters.Add('HEAD');
+    p.CurrentDirectory := GProject.ProjectDir;
+    p.Options := [poUsePipes, poStderrToOutPut, poNoConsole];
+    try
+      p.Execute;
+      s.LoadFromStream(p.Output);
+      p.WaitOnExit;
+      if (p.ExitCode = 0) and (s.Count > 0) then
+        lblGitBranch.Text := s[0];
+    except
+      { git not available or not a git repo — silently ignore }
+    end;
+  finally
+    s.Free;
+    p.Free;
+  end;
 end;
 
 procedure TMainForm.UpdateProfilesDisplay;
@@ -1863,6 +1913,7 @@ begin
   PopuplateProjectTree;
   UpdateWindowTitle;
   UpdateProfilesDisplay;
+  UpdateGitBranch;
   CheckGitIgnoreForIdeDir;
   AddMessage('Project loaded');
 end;
@@ -2653,6 +2704,24 @@ begin
     Text := '';
   end;
 
+  lblCursorPos := TfpgLabel.Create(pnlStatusBar);
+  with lblCursorPos do
+  begin
+    Name := 'lblCursorPos';
+    PreferredSize := fpgSize(100, 16);
+    FontDesc := '#Label1';
+    Text := '';
+  end;
+
+  lblGitBranch := TfpgLabel.Create(pnlStatusBar);
+  with lblGitBranch do
+  begin
+    Name := 'lblGitBranch';
+    PreferredSize := fpgSize(100, 16);
+    FontDesc := '#Label1';
+    Text := '';
+  end;
+
   lblProfiles := TfpgLabel.Create(pnlStatusBar);
   with lblProfiles do
   begin
@@ -2669,6 +2738,8 @@ begin
   pnlStatusBar.LayoutManager := FStatusBarLayout;
   FStatusBarLayout.LC.InsetsAll('2lp').FillX;
   FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
+  FStatusBarLayout.AddLayoutComponent(lblCursorPos, TfpgMigCC.Create.AlignX('right'));
+  FStatusBarLayout.AddLayoutComponent(lblGitBranch, TfpgMigCC.Create.AlignX('right'));
   FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right'));
 end;
 
