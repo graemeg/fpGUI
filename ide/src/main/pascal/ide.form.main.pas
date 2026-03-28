@@ -29,7 +29,7 @@ uses
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
-  ide.project.pasbuild;
+  ide.editor.tabs, ide.project.pasbuild;
 
 type
 
@@ -1690,29 +1690,22 @@ begin
     if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
     begin
       ext := fpgExtractFileExt(AFilename);
-      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr') or (ext = '.dpr') then
-      begin
-        editor.OnDrawLine := @HighlightObjectPascal;
-        editor.OnCaretChange := @EditorCaretChanged;
-        RetokeniseEditor(editor);
-      end
-      else if (ext = '.patch') or (ext = '.diff') then
-      begin
-        editor.OnDrawLine := @HighlightPatch;
-      end
-      else if (ext = '.ini') or (ext = '.cfg') or (ext = '.conf') then
-      begin
-        editor.OnDrawLine := @HighlightINI;
-      end
-      else if (ext = '.xml') or (ext = '.html') or (ext = '.htm') or
-              (ext = '.xhtml') or (ext = '.svg') or (ext = '.xsd') or
-              (ext = '.xsl') or (ext = '.xslt') or (ext = '.lpi') or
-              (ext = '.lpk') then
-      begin
-        editor.OnDrawLine := @HighlightXML;
-      end
+      case HighlightKindForExtension(ext) of
+        hkPascal:
+          begin
+            editor.OnDrawLine := @HighlightObjectPascal;
+            editor.OnCaretChange := @EditorCaretChanged;
+            RetokeniseEditor(editor);
+          end;
+        hkPatch:
+          editor.OnDrawLine := @HighlightPatch;
+        hkINI:
+          editor.OnDrawLine := @HighlightINI;
+        hkXML:
+          editor.OnDrawLine := @HighlightXML;
       else
         editor.OnDrawLine := nil;
+      end;
     end;
     ts.Realign;
     pcEditor.ActivePage := ts;
