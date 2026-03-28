@@ -25,10 +25,10 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru, regexpr,
+  fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
-  ide.project.pasbuild;
+  ide.highlight.renderer, ide.project.pasbuild;
 
 type
 
@@ -83,15 +83,9 @@ type
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
-    FRegex: TRegExpr;
     FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
-    FHighlighter: TPascalHighlighter;
-    FHighlighterEditor: TfpgTextEdit;  // last editor tokenised for
-    FINIHighlighter: TEditorHighlighter;
-    FINIHighlighterEditor: TfpgTextEdit;
-    FXMLHighlighter: TEditorHighlighter;
-    FXMLHighlighterEditor: TfpgTextEdit;
+    FHighlightCache: THighlighterCache;
     FBracketMatch: TBracketMatchResult;
     FStatusBarLayout: TfpgMigLayoutManager;
     FLastSearchText: TfpgString;
@@ -1247,12 +1241,7 @@ begin
   if Assigned(ts) and (Copy(ts.Text, 1, 2) <> '* ') then
     ts.Text := '* ' + ts.Text;
   { Invalidate cached highlighter state so the next paint retokenises }
-  if edt = FHighlighterEditor then
-    FHighlighterEditor := nil;
-  if edt = FINIHighlighterEditor then
-    FINIHighlighterEditor := nil;
-  if edt = FXMLHighlighterEditor then
-    FXMLHighlighterEditor := nil;
+  FHighlightCache.InvalidateEditor(edt);
 end;
 
 procedure TMainForm.EditorTabChanged(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -1263,8 +1252,7 @@ begin
   if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
   begin
     edt := ATabSheet.Components[0] as TfpgTextEdit;
-    if edt <> FHighlighterEditor then
-      RetokeniseEditor(edt);
+    FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
     UpdateStatus(ATabSheet.Hint);
     UpdateCursorPos(edt.CaretPos_V, edt.CaretPos_H);
   end
@@ -1279,8 +1267,7 @@ procedure TMainForm.RetokeniseEditor(AEditor: TfpgTextEdit);
 begin
   if not Assigned(AEditor) then
     Exit;
-  FHighlighterEditor := AEditor;
-  FHighlighter.Tokenise(AEditor.Lines.Text);
+  FHighlightCache.EnsurePascalTokenised(AEditor, AEditor.Lines);
 end;
 
 procedure TMainForm.EditorCaretChanged(Sender: TObject; ALine, ACol: Integer);
@@ -1289,14 +1276,13 @@ var
   OldMatch: TBracketMatchResult;
 begin
   UpdateCursorPos(ALine, ACol);
-  if not Assigned(FHighlighter) then
+  if not Assigned(FHighlightCache) then
     Exit;
   edt := TfpgTextEdit(Sender);
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
 
   OldMatch := FBracketMatch;
-  FBracketMatch := FindMatchingBracket(FHighlighter, ALine, ACol, edt.Lines);
+  FBracketMatch := FindMatchingBracket(FHighlightCache.PascalHighlighter, ALine, ACol, edt.Lines);
 
   { Only repaint if match state changed }
   if OldMatch.Found or FBracketMatch.Found then
@@ -1309,14 +1295,7 @@ var
 begin
   { Clear highlighter references if this tab's editor is being tracked }
   if Assigned(ATabSheet) and (ATabSheet.ComponentCount > 0) then
-  begin
-    if ATabSheet.Components[0] = FHighlighterEditor then
-      FHighlighterEditor := nil;
-    if ATabSheet.Components[0] = FINIHighlighterEditor then
-      FINIHighlighterEditor := nil;
-    if ATabSheet.Components[0] = FXMLHighlighterEditor then
-      FXMLHighlighterEditor := nil;
-  end;
+    FHighlightCache.InvalidateEditor(ATabSheet.Components[0]);
   u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
   begin
@@ -1783,7 +1762,7 @@ var
   ts: TfpgTabSheet;
   i: integer;
 begin
-  FHighlighterEditor := nil;
+  FHighlightCache.InvalidateEditor(nil);
   pcEditor.BeginUpdate;
   try
     for i := 0 to pcEditor.PageCount-1 do
@@ -2053,133 +2032,27 @@ procedure TMainForm.HighlightWithTokens(AHighlighter: TEditorHighlighter;
   ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean;
   AShowBracketMatch: Boolean);
 var
-  oldfont: TfpgFontResourceBase;
   edt: TfpgTextEdit;
-  tokens: THighlightTokenArray;
-  tok: THighlightToken;
-  ts: TTokenStyle;
-  i: Integer;
-  r: TfpgRect;
-  s: TfpgString;
-  lFontDesc: string;
-  bg, fg: TfpgColor;
-  lLastCol: Integer;
-  lNeedFont: boolean;
+  segs: TRenderSegmentArray;
+  lastCol: Integer;
 begin
   edt := TfpgTextEdit(Sender);
-
   if not Assigned(AHighlighter) then
     Exit;
-
   AllowSelfDraw := False;
-  oldfont := TfpgFontResourceBase(ACanvas.Font);
-
-  { Get tokens for this line }
-  tokens := AHighlighter.GetLineTokens(ALineIndex);
-
-  if tokens = nil then
+  segs := BuildRenderSegments(AHighlighter, ALineText, ALineIndex,
+    FTheme, FBracketMatch, AShowBracketMatch);
+  if Length(segs) = 0 then
   begin
-    { No tokens — draw plain text with default colours }
+    { Empty line — fill background }
     ACanvas.Color := FTheme.Chrome.Background;
-    ACanvas.TextColor := FTheme.Chrome.Foreground;
     ACanvas.FillRectangle(ATextRect);
-    ACanvas.DrawString(ATextRect.Left, ATextRect.Top, ALineText);
     Exit;
   end;
-
-  { Sequential drawing: render each token exactly once, left to right. }
-  lLastCol := 0;
-  for i := 0 to Length(tokens) - 1 do
-  begin
-    tok := tokens[i];
-
-    { Extract the token text }
-    s := Copy(ALineText, tok.Column + 1, tok.Length);
-    if s = '' then
-      Continue;
-
-    { Fill any gap before this token with background + default text }
-    if tok.Column > lLastCol then
-    begin
-      r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
-          edt.FontWidth * (tok.Column - lLastCol), ATextRect.Height);
-      ACanvas.Color := FTheme.Chrome.Background;
-      ACanvas.FillRectangle(r);
-      { Draw unhighlighted text in the gap (e.g. XML text content) }
-      ACanvas.TextColor := FTheme.Chrome.Foreground;
-      ACanvas.DrawString(r.Left, r.Top,
-          Copy(ALineText, lLastCol + 1, tok.Column - lLastCol));
-    end;
-
-    { Determine style for this token }
-    ts := FTheme.TokenStyles[tok.Category];
-
-    { Foreground colour }
-    if ts.Foreground <> clNone then
-      fg := ts.Foreground
-    else
-      fg := FTheme.Chrome.Foreground;
-
-    { Background colour }
-    if ts.Background <> clNone then
-      bg := ts.Background
-    else
-      bg := FTheme.Chrome.Background;
-
-    { Bracket match highlight (Pascal only) }
-    if AShowBracketMatch and FBracketMatch.Found then
-    begin
-      if (ALineIndex = FBracketMatch.SourceLine) and (tok.Column = FBracketMatch.SourceCol) then
-        bg := FTheme.Chrome.BracketMatch;
-      if (ALineIndex = FBracketMatch.MatchLine) and (tok.Column = FBracketMatch.MatchCol) then
-        bg := FTheme.Chrome.BracketMatch;
-    end;
-
-    { Apply font style if needed }
-    lNeedFont := ts.Style <> [];
-    if lNeedFont then
-    begin
-      lFontDesc := edt.FontDesc;
-      if tsfBold in ts.Style then
-        lFontDesc := lFontDesc + ':bold';
-      if tsfItalic in ts.Style then
-        lFontDesc := lFontDesc + ':italic';
-      ACanvas.SetFont(fpgApplication.FontManager.GetFont(lFontDesc));
-    end;
-
-    { Calculate the draw rectangle and render }
-    r.SetRect(ATextRect.Left + (edt.FontWidth * tok.Column), ATextRect.Top,
-        (edt.FontWidth * tok.Length), ATextRect.Height);
-
-    ACanvas.Color := bg;
-    ACanvas.TextColor := fg;
-    ACanvas.FillRectangle(r);
-    ACanvas.DrawString(r.Left, r.Top, s);
-
-    { Restore normal font if we changed it }
-    if lNeedFont then
-      ACanvas.SetFont(oldfont);
-
-    lLastCol := tok.Column + tok.Length;
-  end;
-
-  { Fill any remaining space after the last token }
-  if lLastCol * edt.FontWidth < ATextRect.Width then
-  begin
-    r.SetRect(ATextRect.Left + (edt.FontWidth * lLastCol), ATextRect.Top,
-        ATextRect.Width - (edt.FontWidth * lLastCol), ATextRect.Height);
-    ACanvas.Color := FTheme.Chrome.Background;
-    ACanvas.FillRectangle(r);
-    { Draw any trailing unhighlighted text }
-    if lLastCol < Length(ALineText) then
-    begin
-      ACanvas.TextColor := FTheme.Chrome.Foreground;
-      ACanvas.DrawString(r.Left, r.Top,
-          Copy(ALineText, lLastCol + 1, Length(ALineText) - lLastCol));
-    end;
-  end;
-
-  ACanvas.SetFont(oldfont);
+  PaintSegments(segs, ALineText, edt.FontWidth, ACanvas, ATextRect,
+    FTheme, edt.FontDesc);
+  lastCol := segs[High(segs)].Column + segs[High(segs)].Length;
+  PaintTrailingGap(lastCol, ALineText, edt.FontWidth, ACanvas, ATextRect, FTheme);
 end;
 
 procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;
@@ -2189,12 +2062,9 @@ var
   edt: TfpgTextEdit;
 begin
   edt := TfpgTextEdit(Sender);
-  if not Assigned(FHighlighter) then
-    Exit;
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
-  HighlightWithTokens(FHighlighter, Sender, ALineText, ALineIndex,
-    ACanvas, ATextRect, AllowSelfDraw, True);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+  HighlightWithTokens(FHighlightCache.PascalHighlighter, Sender, ALineText,
+    ALineIndex, ACanvas, ATextRect, AllowSelfDraw, True);
 end;
 
 procedure TMainForm.HighlightINI(Sender: TObject; ALineText: TfpgString;
@@ -2204,15 +2074,9 @@ var
   edt: TfpgTextEdit;
 begin
   edt := TfpgTextEdit(Sender);
-  if not Assigned(FINIHighlighter) then
-    Exit;
-  if edt <> FINIHighlighterEditor then
-  begin
-    FINIHighlighterEditor := edt;
-    FINIHighlighter.Tokenise(edt.Lines.Text);
-  end;
-  HighlightWithTokens(FINIHighlighter, Sender, ALineText, ALineIndex,
-    ACanvas, ATextRect, AllowSelfDraw);
+  FHighlightCache.EnsureINITokenised(edt, edt.Lines);
+  HighlightWithTokens(FHighlightCache.INIHighlighter, Sender, ALineText,
+    ALineIndex, ACanvas, ATextRect, AllowSelfDraw);
 end;
 
 procedure TMainForm.HighlightXML(Sender: TObject; ALineText: TfpgString;
@@ -2222,161 +2086,29 @@ var
   edt: TfpgTextEdit;
 begin
   edt := TfpgTextEdit(Sender);
-  if not Assigned(FXMLHighlighter) then
-    Exit;
-  if edt <> FXMLHighlighterEditor then
-  begin
-    FXMLHighlighterEditor := edt;
-    FXMLHighlighter.Tokenise(edt.Lines.Text);
-  end;
-  HighlightWithTokens(FXMLHighlighter, Sender, ALineText, ALineIndex,
-    ACanvas, ATextRect, AllowSelfDraw);
+  FHighlightCache.EnsureXMLTokenised(edt, edt.Lines);
+  HighlightWithTokens(FHighlightCache.XMLHighlighter, Sender, ALineText,
+    ALineIndex, ACanvas, ATextRect, AllowSelfDraw);
 end;
 
 procedure TMainForm.HighlightPatch(Sender: TObject; ALineText: TfpgString;
   ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
   var AllowSelfDraw: Boolean);
-const
-  cRemovedLines = '^(-[^-]|\<|!).*';        // starts with "-" or "<" or "!" symbols
-  cAddedLines = '^(\+[^\+]|\>).*';          // starts with "+" or ">" symbols
-  cLeftFile = '^--- .*';                    // starts with "--- " symbols
-  cRightFile = '^(\+\+\+|\*\*\*) .*';       // starts with "+++ " or "*** " symbols
-  cHunk = '^\@\@.*';                        // starts with "@@" symbols
-  cStartOfFile = '^(diff|index) .*';        // starts with "diff " or "index " symbols
 var
-  oldfont: TfpgFontResourceBase;
-  s: TfpgString;  // copy of ALineText we work with
-  i, j, c: integer;  // i = position of reserved word; c = last character pos
-  iLength: integer; // length of reserved word
-  w: integer;     // reserved word loop variable
-  r: TfpgRect;    // string rectangle to draw in
   edt: TfpgTextEdit;
-  lMatchPos, lOffset: integer; // user for regex
+  segs: TRenderSegmentArray;
 begin
   edt := TfpgTextEdit(Sender);
-
-  { Guard against calls during destruction when FRegex is already freed }
-  if not Assigned(FRegex) then
-    Exit;
-
   AllowSelfDraw := False;
-
-  oldfont := TfpgFontResourceBase(ACanvas.Font);
-  ACanvas.Color := FTheme.Chrome.Background;
-
-  { draw the plain text first }
-  ACanvas.TextColor := FTheme.Chrome.Foreground;
-  ACanvas.FillRectangle(ATextRect);
-  ACanvas.DrawString(ATextRect.Left, ATextRect.Top, ALineText);
-
-  lMatchPos := 0;
-  lOffset := 0;
-
-  { syntax highlighting for: cRemovedLines }
-  ACanvas.TextColor := clRed;
-  FRegex.Expression := cRemovedLines;
-  if FRegex.Exec(ALineText) then
+  segs := BuildPatchRenderSegments(ALineText, FTheme);
+  if Length(segs) = 0 then
   begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
+    ACanvas.Color := FTheme.Chrome.Background;
+    ACanvas.FillRectangle(ATextRect);
+    Exit;
   end;
-
-  { syntax highlighting for: cAddedLines }
-  ACanvas.TextColor := clGreen;
-  FRegex.Expression := cAddedLines;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cLeftFile }
-  ACanvas.TextColor := clMagenta;
-  FRegex.Expression := cLeftFile;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cRightFile }
-  ACanvas.TextColor := clMagenta;
-  FRegex.Expression := cRightFile;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cHunk }
-  ACanvas.TextColor := clBlue;
-  FRegex.Expression := cHunk;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
-  end;
-
-  { syntax highlighting for: cStartOfFile }
-  ACanvas.TextColor := FTheme.Chrome.Foreground;
-  ACanvas.Color := clSilver;
-  FRegex.Expression := cStartOfFile;
-  if FRegex.Exec(ALineText) then
-  begin
-    repeat
-      lMatchPos := FRegex.MatchPos[0];
-      lOffset := FRegex.MatchLen[0];
-      s := FRegex.Match[0];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawString(r.Left, r.Top, s);
-    until not FRegex.ExecNext;
-  end;
-  ACanvas.Color := FTheme.Chrome.Background;
-
-  ACanvas.SetFont(oldfont);
+  PaintSegments(segs, ALineText, edt.FontWidth, ACanvas, ATextRect,
+    FTheme, edt.FontDesc);
 end;
 
 procedure TMainForm.LoadThemeByName(const AName: string);
@@ -2430,9 +2162,8 @@ begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
-  nav := NavigateToInterface(FHighlighter, edt.Lines, edt.CaretPos_V);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+  nav := NavigateToInterface(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
     edt.GotoLine(nav.Line + 1);  { GotoLine is 1-based }
 end;
@@ -2445,9 +2176,8 @@ begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
-  nav := NavigateToImplementation(FHighlighter, edt.Lines, edt.CaretPos_V);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+  nav := NavigateToImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
     edt.GotoLine(nav.Line + 1);
 end;
@@ -2460,9 +2190,8 @@ begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
-  if edt <> FHighlighterEditor then
-    RetokeniseEditor(edt);
-  nav := NavigateInterfaceImplementation(FHighlighter, edt.Lines, edt.CaretPos_V);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+  nav := NavigateInterfaceImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
     edt.GotoLine(nav.Line + 1);
 end;
@@ -2548,8 +2277,6 @@ begin
   SetupFilesGrid;
   SetupEditorPreference;
 
-  FRegex := TRegExpr.Create;
-
   TextEditor.Clear;
   TextEditor.SetFocus;
 
@@ -2579,12 +2306,7 @@ begin
   OnClose := @FormClose;
   FFileMonitor := TFileMonitor.CreateCustom;
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
-  FHighlighter := TPascalHighlighter.Create;
-  FHighlighterEditor := nil;
-  FINIHighlighter := TINIHighlighter.Create;
-  FINIHighlighterEditor := nil;
-  FXMLHighlighter := TXMLHighlighter.Create;
-  FXMLHighlighterEditor := nil;
+  FHighlightCache := THighlighterCache.Create;
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -2603,10 +2325,7 @@ destructor TMainForm.Destroy;
 begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
-  FreeAndNil(FHighlighter);
-  FreeAndNil(FINIHighlighter);
-  FreeAndNil(FXMLHighlighter);
-  FreeAndNil(FRegex);
+  FreeAndNil(FHighlightCache);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);

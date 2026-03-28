@@ -25,7 +25,8 @@ uses
   ide.test.bracketmatch,
   ide.test.navigation,
   ide.test.highlighter.ini,
-  ide.test.highlighter.xml;
+  ide.test.highlighter.xml,
+  ide.test.highlight.renderer;
 
 var
   Application: TTestRunner;
