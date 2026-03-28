@@ -15,6 +15,6 @@
     <module>ide</module>
     <module>docview</module>
     <module>uidesigner</module>
-    <module>examples</module>
+    <module activeByDefault="false">examples</module>
   </modules>
 </project>
