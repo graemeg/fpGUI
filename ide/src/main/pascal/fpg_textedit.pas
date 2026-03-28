@@ -2893,7 +2893,7 @@ begin
       FSelection.EndPos := CaretPos;
       Row := Row + 1;
     end;
-    if SLine <> '' then
+    if (SLine <> '') and (Row < FLines.Count) then
     begin
       FLines[Row] := SLine;
       SetCaretPosV(Row);
@@ -2920,7 +2920,7 @@ begin
         FSelection.EndPos := CaretPos;
         Row := Row + 1;
       end;
-      if SLine <> '' then
+      if (SLine <> '') and (Row < FLines.Count) then
       begin
         FLines[Row] := SLine;
         SetCaretPosV(Row);
@@ -2931,7 +2931,8 @@ begin
     end else
     begin
       SetCaretPosV(Row);
-      FLines[Row] := SLine;
+      if Row < FLines.Count then
+        FLines[Row] := SLine;
       SetCaretPosH(Col + Length(S));
       FSelection.StartPos := fpgPoint(Length(BufS1), Row);
       FSelection.EndPos   := fpgPoint(CaretPos.X, Row);
@@ -3002,7 +3003,8 @@ begin
   DelLine := StartLine + 1;
   for I := DelLine to EndLine do
     FLines.Delete(DelLine);
-  FLines[StartLine] := FirstPart + LastPart;
+  if StartLine < FLines.Count then
+    FLines[StartLine] := FirstPart + LastPart;
 
   SetCaretPosV(StartLine);
   SetCaretPosH(StartPos);
@@ -3101,7 +3103,8 @@ begin
 
   Indent := StringOfChar(' ', FIndentSize);
   for I := StartLine to EndLine do
-    FLines[I] := Indent + GetLineText(I);
+    if I < FLines.Count then
+      FLines[I] := Indent + GetLineText(I);
 
   { Adjust selection and caret to account for added indent }
   FSelection.FStartPos.X := FSelection.FStartPos.X + FIndentSize;
@@ -3165,7 +3168,8 @@ begin
       if Remove > 0 then
         Delete(Line, 1, Remove);
     end;
-    FLines[I] := Line;
+    if I < FLines.Count then
+      FLines[I] := Line;
     if I = StartLine then
       StartRemoved := Remove;
     if I = EndLine then
