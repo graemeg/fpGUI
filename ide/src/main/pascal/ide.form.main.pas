@@ -30,7 +30,7 @@ uses
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
   ide.editor.tabs, ide.profiles, ide.project.pasbuild,
-  ide.cursorhistory;
+  ide.cursorhistory, ide.filefinder, ide.form.filefinder;
 
 type
 
@@ -195,6 +195,7 @@ type
     procedure   NavigateToLocation(const ALoc: TCursorLocation);
     procedure   miNavigateBack(Sender: TObject);
     procedure   miNavigateForward(Sender: TObject);
+    procedure   miNavigateToFile(Sender: TObject);
     procedure   CheckGitIgnoreForIdeDir;
     procedure   uiCreateToolBar;
     procedure   uiCreateStatusBar;
@@ -1978,6 +1979,51 @@ begin
     NavigateToLocation(loc);
 end;
 
+procedure TMainForm.miNavigateToFile(Sender: TObject);
+var
+  pb: TPasBuildProjectBackend;
+  mi: TAggregatorModuleInfo;
+  Exts: TStringList;
+  Files: TFileEntryArray;
+  SelectedFile: string;
+  i: Integer;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  Exts := TStringList.Create;
+  try
+    Exts.Add('.pas');
+    Exts.Add('.pp');
+    Exts.Add('.lpr');
+    Exts.Add('.dpr');
+    Exts.Add('.inc');
+    SetLength(Files, 0);
+    if pb.IsAggregator then
+    begin
+      for i := 0 to pb.ModuleInfos.Count - 1 do
+      begin
+        mi := TAggregatorModuleInfo(pb.ModuleInfos[i]);
+        if not mi.IsAggregator then
+          CollectSourceFiles(mi.ProjectDir + mi.SourceDirectory,
+            pb.ProjectDir, Exts, Files);
+      end;
+    end
+    else
+      CollectSourceFiles(pb.ProjectDir + pb.SourceDirectory,
+        pb.ProjectDir, Exts, Files);
+  finally
+    Exts.Free;
+  end;
+
+  SelectedFile := DisplayFileFinder(Files);
+  if SelectedFile <> '' then
+  begin
+    RecordCursorLocation;
+    OpenEditorPage(SelectedFile);
+  end;
+end;
+
 procedure TMainForm.CheckGitIgnoreForIdeDir;
 var
   GitIgnorePath: TfpgString;
@@ -2509,6 +2555,7 @@ begin
     AddSeparator;
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
+    AddMenuItem('Navigate to File...', rsKeyCtrl+rsKeyShift+'N', @miNavigateToFile);
     AddSeparator;
     AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);

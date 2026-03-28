@@ -31,7 +31,8 @@ uses
   ide.test.projecttree,
   ide.test.editor.tabs,
   ide.test.profiles,
-  ide.test.cursorhistory;
+  ide.test.cursorhistory,
+  ide.test.filefinder;
 
 var
   Application: TTestRunner;
