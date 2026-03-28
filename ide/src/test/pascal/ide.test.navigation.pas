@@ -43,6 +43,9 @@ type
     procedure TestToggle_FromImplementation;
     procedure TestNavigateFromImpl_NoEnclosingMethod;
     procedure TestNoSections_ReturnsFalse;
+    procedure TestNavigateToImpl_IncludeFile;
+    procedure TestNavigateToImpl_IncludeFile_NotFound;
+    procedure TestNavigateToIntf_FromIncludeFile;
   end;
 
 
@@ -243,6 +246,186 @@ begin
   SetSource('program Test;' + LineEnding + 'begin' + LineEnding + 'end.');
   nav := NavigateInterfaceImplementation(FHL, FLines, 1);
   CheckFalse(nav.Found, 'Program without interface/implementation should return not found');
+end;
+
+procedure TTestNavigation.TestNavigateToImpl_IncludeFile;
+var
+  nav: TNavigationResult;
+  TmpDir, IncFile, UnitFile: string;
+  F: TextFile;
+begin
+  { Create a temporary include file with the implementation }
+  TmpDir := GetTempDir + 'fpgui_test' + PathDelim;
+  ForceDirectories(TmpDir);
+  IncFile := TmpDir + 'test_impl.inc';
+  UnitFile := TmpDir + 'testunit.pas';
+
+  { Write include file with the implementation of DoSomething }
+  AssignFile(F, IncFile);
+  try
+    Rewrite(F);
+    WriteLn(F, '');                                  // line 0
+    WriteLn(F, 'procedure DoSomething;');             // line 1
+    WriteLn(F, 'begin');                              // line 2
+    WriteLn(F, '  WriteLn(''hello'');');              // line 3
+    WriteLn(F, 'end;');                               // line 4
+    CloseFile(F);
+
+    { Set up the unit source with an include directive }
+    SetSource(
+      'unit testunit;'                  + LineEnding +   // 0
+      ''                                + LineEnding +   // 1
+      'interface'                       + LineEnding +   // 2
+      ''                                + LineEnding +   // 3
+      'procedure DoSomething;'          + LineEnding +   // 4
+      ''                                + LineEnding +   // 5
+      'implementation'                  + LineEnding +   // 6
+      ''                                + LineEnding +   // 7
+      '{$I test_impl.inc}'             + LineEnding +   // 8
+      ''                                + LineEnding +   // 9
+      'end.');
+
+    { Navigate from interface (line 4) to implementation, passing the unit file path }
+    nav := NavigateToImplementation(FHL, FLines, 4, UnitFile);
+    CheckTrue(nav.Found, 'Should find implementation in include file');
+    CheckEquals(IncFile, nav.Filename,
+      'Should report the include file path');
+    CheckEquals(1, nav.Line,
+      'Should point to line 1 in the include file (procedure DoSomething)');
+  finally
+    DeleteFile(IncFile);
+    RemoveDir(TmpDir);
+  end;
+end;
+
+procedure TTestNavigation.TestNavigateToImpl_IncludeFile_NotFound;
+var
+  nav: TNavigationResult;
+  TmpDir, IncFile, UnitFile: string;
+  F: TextFile;
+begin
+  { Create a temporary include file WITHOUT the target method }
+  TmpDir := GetTempDir + 'fpgui_test' + PathDelim;
+  ForceDirectories(TmpDir);
+  IncFile := TmpDir + 'other_impl.inc';
+  UnitFile := TmpDir + 'testunit2.pas';
+
+  AssignFile(F, IncFile);
+  try
+    Rewrite(F);
+    WriteLn(F, 'procedure OtherProc;');
+    WriteLn(F, 'begin');
+    WriteLn(F, 'end;');
+    CloseFile(F);
+
+    SetSource(
+      'unit testunit2;'                 + LineEnding +   // 0
+      ''                                + LineEnding +   // 1
+      'interface'                       + LineEnding +   // 2
+      ''                                + LineEnding +   // 3
+      'procedure DoSomething;'          + LineEnding +   // 4
+      ''                                + LineEnding +   // 5
+      'implementation'                  + LineEnding +   // 6
+      ''                                + LineEnding +   // 7
+      '{$I other_impl.inc}'            + LineEnding +   // 8
+      ''                                + LineEnding +   // 9
+      'end.');
+
+    { Method not in include file — should fall back to implementation keyword }
+    nav := NavigateToImplementation(FHL, FLines, 4, UnitFile);
+    CheckTrue(nav.Found, 'Should still return found (fallback)');
+    CheckEquals('', nav.Filename,
+      'Filename should be empty (fallback to current file)');
+    CheckEquals(6, nav.Line,
+      'Should fall back to implementation keyword (line 6)');
+  finally
+    DeleteFile(IncFile);
+    RemoveDir(TmpDir);
+  end;
+end;
+
+procedure TTestNavigation.TestNavigateToIntf_FromIncludeFile;
+var
+  nav: TNavigationResult;
+  TmpDir, SubDir, IncFile, UnitFile: string;
+  F: TextFile;
+begin
+  { Create a parent unit and an include file in a subdirectory }
+  TmpDir := GetTempDir + 'fpgui_test3' + PathDelim;
+  SubDir := TmpDir + 'platform' + PathDelim;
+  ForceDirectories(SubDir);
+  UnitFile := TmpDir + 'myunit.pas';
+  IncFile := SubDir + 'myunit_impl.inc';
+
+  { Write the parent unit }
+  AssignFile(F, UnitFile);
+  try
+    Rewrite(F);
+    WriteLn(F, 'unit myunit;');                        // line 0
+    WriteLn(F, '');                                      // line 1
+    WriteLn(F, 'interface');                              // line 2
+    WriteLn(F, '');                                      // line 3
+    WriteLn(F, 'procedure DoSomething;');                 // line 4
+    WriteLn(F, 'function GetValue: Integer;');            // line 5
+    WriteLn(F, '');                                      // line 6
+    WriteLn(F, 'implementation');                         // line 7
+    WriteLn(F, '');                                      // line 8
+    WriteLn(F, '{$I myunit_impl.inc}');                  // line 9
+    WriteLn(F, '');                                      // line 10
+    WriteLn(F, 'end.');                                  // line 11
+    CloseFile(F);
+
+    { Write the include file with mainunit directive }
+    AssignFile(F, IncFile);
+    Rewrite(F);
+    WriteLn(F, '{%mainunit myunit.pas}');                 // line 0
+    WriteLn(F, '');                                       // line 1
+    WriteLn(F, 'procedure DoSomething;');                 // line 2
+    WriteLn(F, 'begin');                                  // line 3
+    WriteLn(F, '  WriteLn;');                             // line 4
+    WriteLn(F, 'end;');                                   // line 5
+    WriteLn(F, '');                                       // line 6
+    WriteLn(F, 'function GetValue: Integer;');            // line 7
+    WriteLn(F, 'begin');                                  // line 8
+    WriteLn(F, '  Result := 42;');                        // line 9
+    WriteLn(F, 'end;');                                   // line 10
+    CloseFile(F);
+
+    { Tokenise the include file content }
+    SetSource(
+      '{%mainunit myunit.pas}'          + LineEnding +   // 0
+      ''                                + LineEnding +   // 1
+      'procedure DoSomething;'          + LineEnding +   // 2
+      'begin'                           + LineEnding +   // 3
+      '  WriteLn;'                      + LineEnding +   // 4
+      'end;'                            + LineEnding +   // 5
+      ''                                + LineEnding +   // 6
+      'function GetValue: Integer;'     + LineEnding +   // 7
+      'begin'                           + LineEnding +   // 8
+      '  Result := 42;'                 + LineEnding +   // 9
+      'end;');
+
+    { Navigate from include file (line 2, DoSomething) to interface }
+    nav := NavigateToInterface(FHL, FLines, 2, IncFile);
+    CheckTrue(nav.Found, 'Should find interface declaration in parent unit');
+    CheckEquals(UnitFile, nav.Filename,
+      'Should report the parent unit file path');
+    CheckEquals(4, nav.Line,
+      'Should point to line 4 in parent unit (procedure DoSomething)');
+
+    { Also test from within a method body (line 4) }
+    nav := NavigateToInterface(FHL, FLines, 4, IncFile);
+    CheckTrue(nav.Found, 'Should find interface from method body');
+    CheckEquals(UnitFile, nav.Filename,
+      'Should report parent unit from body too');
+    CheckEquals(4, nav.Line,
+      'Should still find DoSomething declaration (line 4)');
+  finally
+    DeleteFile(IncFile);
+    DeleteFile(UnitFile);
+    RemoveDir(SubDir);
+    RemoveDir(TmpDir);
+  end;
 end;
 
 initialization

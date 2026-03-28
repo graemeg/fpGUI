@@ -1877,16 +1877,28 @@ procedure TMainForm.miJumpToInterface(Sender: TObject);
 var
   edt: TfpgTextEdit;
   nav: TNavigationResult;
+  ts: TfpgTabSheet;
 begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
-  nav := NavigateToInterface(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
+  nav := NavigateToInterface(FHighlightCache.PascalHighlighter, edt.Lines,
+    edt.CaretPos_V, pcEditor.ActivePage.Hint);
   if nav.Found then
   begin
     RecordCursorLocation;
-    edt.GotoLine(nav.Line + 1);  { GotoLine is 1-based }
+    if nav.Filename <> '' then
+    begin
+      ts := OpenEditorPage(nav.Filename);
+      if ts <> nil then
+      begin
+        edt := TfpgTextEdit(ts.Components[0]);
+        edt.GotoLine(nav.Line + 1);
+      end;
+    end
+    else
+      edt.GotoLine(nav.Line + 1);
   end;
 end;
 
@@ -1894,16 +1906,29 @@ procedure TMainForm.miJumpToImplementation(Sender: TObject);
 var
   edt: TfpgTextEdit;
   nav: TNavigationResult;
+  ts: TfpgTabSheet;
 begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
-  nav := NavigateToImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
+  nav := NavigateToImplementation(FHighlightCache.PascalHighlighter, edt.Lines,
+    edt.CaretPos_V, pcEditor.ActivePage.Hint);
   if nav.Found then
   begin
     RecordCursorLocation;
-    edt.GotoLine(nav.Line + 1);
+    if nav.Filename <> '' then
+    begin
+      { Implementation is in an include file — open it }
+      ts := OpenEditorPage(nav.Filename);
+      if ts <> nil then
+      begin
+        edt := TfpgTextEdit(ts.Components[0]);
+        edt.GotoLine(nav.Line + 1);
+      end;
+    end
+    else
+      edt.GotoLine(nav.Line + 1);
   end;
 end;
 
@@ -1911,16 +1936,28 @@ procedure TMainForm.miJumpToggleIntfImpl(Sender: TObject);
 var
   edt: TfpgTextEdit;
   nav: TNavigationResult;
+  ts: TfpgTabSheet;
 begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
-  nav := NavigateInterfaceImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
+  nav := NavigateInterfaceImplementation(FHighlightCache.PascalHighlighter, edt.Lines,
+    edt.CaretPos_V, pcEditor.ActivePage.Hint);
   if nav.Found then
   begin
     RecordCursorLocation;
-    edt.GotoLine(nav.Line + 1);
+    if nav.Filename <> '' then
+    begin
+      ts := OpenEditorPage(nav.Filename);
+      if ts <> nil then
+      begin
+        edt := TfpgTextEdit(ts.Components[0]);
+        edt.GotoLine(nav.Line + 1);
+      end;
+    end
+    else
+      edt.GotoLine(nav.Line + 1);
   end;
 end;
 
