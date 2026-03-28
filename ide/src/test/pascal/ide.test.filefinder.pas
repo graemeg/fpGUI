@@ -40,6 +40,18 @@ type
     procedure TestExactMatchScoresHighest;
   end;
 
+  { TTestFuzzyMatchEx - match position tracking }
+
+  TTestFuzzyMatchEx = class(TTestCase)
+  published
+    procedure TestExactMatchPositions;
+    procedure TestPrefixMatchPositions;
+    procedure TestSubstringMatchPositions;
+    procedure TestWordStartMatchPositions;
+    procedure TestSubsequenceMatchPositions;
+    procedure TestNoMatchReturnsEmptyPositions;
+  end;
+
   { TTestFilterFiles }
 
   TTestFilterFiles = class(TTestCase)
@@ -231,8 +243,87 @@ begin
 end;
 
 
+{ TTestFuzzyMatchEx }
+
+procedure TTestFuzzyMatchEx.TestExactMatchPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckTrue(FuzzyMatchEx('main.pas', 'main.pas', Score, Positions),
+    'Exact match should succeed');
+  CheckEquals(1, Length(Positions), 'Should have 1 range for exact match');
+  CheckEquals(1, Positions[0].Start, 'Range should start at 1');
+  CheckEquals(8, Positions[0].Length, 'Range should cover full filename');
+end;
+
+procedure TTestFuzzyMatchEx.TestPrefixMatchPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckTrue(FuzzyMatchEx('ide', 'ide.form.main.pas', Score, Positions),
+    'Prefix match should succeed');
+  CheckEquals(1, Length(Positions), 'Should have 1 range for prefix match');
+  CheckEquals(1, Positions[0].Start, 'Range should start at 1');
+  CheckEquals(3, Positions[0].Length, 'Range should cover pattern length');
+end;
+
+procedure TTestFuzzyMatchEx.TestSubstringMatchPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckTrue(FuzzyMatchEx('form', 'ide.form.main.pas', Score, Positions),
+    'Substring match should succeed');
+  CheckEquals(1, Length(Positions), 'Should have 1 range for substring match');
+  CheckEquals(5, Positions[0].Start, 'Range should start at position of "form"');
+  CheckEquals(4, Positions[0].Length, 'Range should cover pattern length');
+end;
+
+procedure TTestFuzzyMatchEx.TestWordStartMatchPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckTrue(FuzzyMatchEx('ifm', 'ide.form.main.pas', Score, Positions),
+    'Word-start match should succeed');
+  CheckTrue(Length(Positions) >= 3,
+    Format('Should have at least 3 positions for "ifm", got %d', [Length(Positions)]));
+  { Each position should be a single character at a word boundary }
+  CheckEquals(1, Positions[0].Start, 'First match at "i" in "ide"');
+  CheckEquals(1, Positions[0].Length, 'Single character match');
+end;
+
+procedure TTestFuzzyMatchEx.TestSubsequenceMatchPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckTrue(FuzzyMatchEx('imn', 'ide.form.main.pas', Score, Positions),
+    'Subsequence match should succeed');
+  CheckTrue(Length(Positions) >= 3,
+    Format('Should have at least 3 positions for "imn", got %d', [Length(Positions)]));
+  { Each matched character should be a single-char range }
+  CheckEquals(1, Positions[0].Length, 'Each match should be 1 character');
+  CheckEquals(1, Positions[1].Length, 'Each match should be 1 character');
+  CheckEquals(1, Positions[2].Length, 'Each match should be 1 character');
+end;
+
+procedure TTestFuzzyMatchEx.TestNoMatchReturnsEmptyPositions;
+var
+  Score: Integer;
+  Positions: TMatchRangeArray;
+begin
+  CheckFalse(FuzzyMatchEx('xyz', 'ide.form.main.pas', Score, Positions),
+    'Should not match');
+  CheckEquals(0, Length(Positions), 'No match should return empty positions');
+end;
+
+
 initialization
   RegisterTest(TTestFuzzyMatch);
+  RegisterTest(TTestFuzzyMatchEx);
   RegisterTest(TTestFilterFiles);
 
 end.
