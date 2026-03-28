@@ -32,7 +32,8 @@ uses
   ide.test.editor.tabs,
   ide.test.profiles,
   ide.test.cursorhistory,
-  ide.test.filefinder;
+  ide.test.filefinder,
+  ide.test.symbolfinder;
 
 var
   Application: TTestRunner;

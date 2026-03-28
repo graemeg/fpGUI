@@ -30,7 +30,8 @@ uses
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
   ide.editor.tabs, ide.profiles, ide.project.pasbuild,
-  ide.cursorhistory, ide.filefinder, ide.form.filefinder;
+  ide.cursorhistory, ide.filefinder, ide.form.filefinder,
+  ide.symbolfinder, ide.form.symbolfinder;
 
 type
 
@@ -196,6 +197,7 @@ type
     procedure   miNavigateBack(Sender: TObject);
     procedure   miNavigateForward(Sender: TObject);
     procedure   miNavigateToFile(Sender: TObject);
+    procedure   miNavigateToSymbol(Sender: TObject);
     procedure   CheckGitIgnoreForIdeDir;
     procedure   uiCreateToolBar;
     procedure   uiCreateStatusBar;
@@ -2024,6 +2026,61 @@ begin
   end;
 end;
 
+procedure TMainForm.miNavigateToSymbol(Sender: TObject);
+var
+  pb: TPasBuildProjectBackend;
+  mi: TAggregatorModuleInfo;
+  Exts: TStringList;
+  Files: TFileEntryArray;
+  Symbols: TSymbolEntryArray;
+  Res: TSymbolFinderResult;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+  i: Integer;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  Exts := TStringList.Create;
+  try
+    Exts.Add('.pas');
+    Exts.Add('.pp');
+    Exts.Add('.lpr');
+    Exts.Add('.dpr');
+    SetLength(Files, 0);
+    if pb.IsAggregator then
+    begin
+      for i := 0 to pb.ModuleInfos.Count - 1 do
+      begin
+        mi := TAggregatorModuleInfo(pb.ModuleInfos[i]);
+        if not mi.IsAggregator then
+          CollectSourceFiles(mi.ProjectDir + mi.SourceDirectory,
+            pb.ProjectDir, Exts, Files);
+      end;
+    end
+    else
+      CollectSourceFiles(pb.ProjectDir + pb.SourceDirectory,
+        pb.ProjectDir, Exts, Files);
+  finally
+    Exts.Free;
+  end;
+
+  SetLength(Symbols, 0);
+  CollectProjectSymbols(Files, Symbols);
+
+  Res := DisplaySymbolFinder(Symbols);
+  if Res.FullPath <> '' then
+  begin
+    RecordCursorLocation;
+    ts := OpenEditorPage(Res.FullPath);
+    if ts <> nil then
+    begin
+      editor := TfpgTextEdit(ts.Components[0]);
+      editor.GotoLine(Res.Line);
+    end;
+  end;
+end;
+
 procedure TMainForm.CheckGitIgnoreForIdeDir;
 var
   GitIgnorePath: TfpgString;
@@ -2556,6 +2613,7 @@ begin
     AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
     AddMenuItem('Navigate to File...', rsKeyCtrl+rsKeyShift+'N', @miNavigateToFile);
+    AddMenuItem('Navigate to Symbol...', rsKeyCtrl+rsKeyShift+'O', @miNavigateToSymbol);
     AddSeparator;
     AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
