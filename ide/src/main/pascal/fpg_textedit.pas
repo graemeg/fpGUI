@@ -2974,8 +2974,11 @@ var
 begin
   if not FSelected then Exit;
 
-  StartLine := Max(0, FSelection.StartLine);
-  EndLine   := Max(0, FSelection.EndLine);
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if (StartLine < 0) or (EndLine < 0) then
+    Exit;
   StartPos  := FSelection.StartPos.X;
   EndPos    := FSelection.EndPos.X;
 
