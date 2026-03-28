@@ -170,6 +170,7 @@ type
     function    GetVScrollPos: Integer;
     function    GetCaretPosH: Integer;
     function    GetCaretPosV: Integer;
+    function    GetLineText(AIndex: Integer): TfpgString;
     function    GetLineFirstCharPos(ALine: Integer): Integer;
     procedure   LinesChanged(Sender: TObject);
     procedure   SetGutterShowLineNumbers(const AValue: Boolean);
@@ -776,13 +777,21 @@ begin
   Result := CaretPos.Y;
 end;
 
+function TfpgBaseTextEdit.GetLineText(AIndex: Integer): TfpgString;
+begin
+  if (AIndex < 0) or (AIndex >= FLines.Count) then
+    Exit('');
+
+  Result := FLines[AIndex];
+end;
+
 function TfpgBaseTextEdit.GetLineFirstCharPos(ALine: Integer): Integer;
 var
   L: String;
   I: Integer;
 begin
   Result := 0;
-  L := FLines[ALine];
+  L := GetLineText(ALine);
   // We dont need to worry about utf8. We are testing for ' ' from the start.
   for I := 1 to Length(L) do
   begin
@@ -842,12 +851,12 @@ end;
 
 procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: Integer);
 begin
-  CaretPos.X := AValue;
+  CaretPos.X := Max(0, AValue);
 end;
 
 procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
 begin
-  CaretPos.Y := AValue;
+  CaretPos.Y := Max(0, Min(FLines.Count - 1, AValue));
 end;
 
 procedure TfpgBaseTextEdit.CheckCaretChanged;
@@ -1107,7 +1116,7 @@ var
       NotFindIt := True;
       while NotFindIt do
       begin
-        S := FLines[CaretPos.Y];
+        S := GetLineText(CaretPos.Y);
         I := CaretPos.X;
         if GetNextWord(S, I) then
         begin
@@ -1116,7 +1125,7 @@ var
         end
         else if CaretPos.Y < FLines.Count-1 then
         begin
-          CaretPos.Y := CaretPos.Y + 1;
+          SetCaretPosV(CaretPos.Y + 1);
           CaretPos.X := 0;
           NotFindIt := False;
         end
@@ -1153,8 +1162,8 @@ begin
               begin
                 if (ssCtrl in ShiftState) then
                 begin
-                  CaretPos.Y := CaretPos.Y - 1;
-                  CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
+                  SetCaretPosV(CaretPos.Y - 1);
+                  CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
                   if FSelected then
                   begin
                     FSelection.EndPos := CaretPos;
@@ -1162,8 +1171,8 @@ begin
                   Exit;
                 end;
               end;
-              CaretPos.Y := CaretPos.Y - 1;
-              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
+              SetCaretPosV(CaretPos.Y - 1);
+              CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
             end
             else
             begin
@@ -1175,8 +1184,8 @@ begin
             if not FSelected then
             begin
               if CaretPos.Y <= (FLines.Count-1) then
-                if CaretPos.X > UTF8Length(FLines[CaretPos.Y]) then
-                  CaretPos.X := UTF8Length(FLines[CaretPos.Y]) - 1;
+                if CaretPos.X > UTF8Length(GetLineText(CaretPos.Y)) then
+                  CaretPos.X := UTF8Length(GetLineText(CaretPos.Y)) - 1;
               FSelected := True;
               FSelection.StartPos := fpgPoint(CaretPos.X+1, CaretPos.Y);
               if ssCtrl in ShiftState then
@@ -1190,7 +1199,7 @@ begin
               FSelection.EndPos := CaretPos;
               if FSelection.EndLine <= (FLines.Count-1) then
               begin
-                if not FSelection.ValidateEndOffset(FLines[FSelection.EndLine]) then
+                if not FSelection.ValidateEndOffset(GetLineText(FSelection.EndLine)) then
                 begin
                   CaretPos.X := FSelection.EndPos.X;
                 end;
@@ -1268,7 +1277,7 @@ begin
             Exit;
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
-            CaretPos.Y := CaretPos.Y - 1;
+            SetCaretPosV(CaretPos.Y - 1);
             // scroll text
             if FVScrollBar.Visible and (CaretPos.Y < FTopLine) then
               FVScrollBar.LineUp;
@@ -1282,7 +1291,7 @@ begin
           end
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
-            CaretPos.Y := CaretPos.Y - 1;
+            SetCaretPosV(CaretPos.Y - 1);
             if FVScrollBar.Visible then
               FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
             FSelection.StartPos := CaretPos;
@@ -1290,7 +1299,7 @@ begin
           end
           else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
           begin
-            CaretPos.Y := CaretPos.Y - 1;
+            SetCaretPosV(CaretPos.Y - 1);
             if not FSelected then
             begin
               FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y +1);
@@ -1311,7 +1320,7 @@ begin
             Exit;
           if ShiftState = [] then
           begin
-            CaretPos.Y := CaretPos.Y + 1;
+            SetCaretPosV(CaretPos.Y + 1);
             // scroll text
             if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
               FVScrollBar.LineDown;
@@ -1325,7 +1334,7 @@ begin
           end
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
-            CaretPos.Y := CaretPos.Y + 1;
+            SetCaretPosV(CaretPos.Y + 1);
             if FVScrollBar.Visible then
               FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
             FSelection.StartPos := CaretPos;
@@ -1333,7 +1342,7 @@ begin
           end
           else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
           begin
-            CaretPos.Y := CaretPos.Y + 1;
+            SetCaretPosV(CaretPos.Y + 1);
             if not FSelected then
             begin
               FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y -1);
@@ -1403,7 +1412,7 @@ begin
           if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             if CaretPos.Y <= pred(FLines.Count) then
-              CaretPos.X := Length(FLines[CaretPos.Y])
+              CaretPos.X := Length(GetLineText(CaretPos.Y))
             else
               CaretPos.X := 0;
           end;
@@ -1416,13 +1425,13 @@ begin
                 FSelection.StartPos := CaretPos;
                 FSelected := True;
               end;
-              CaretPos.Y := pred(FLines.Count);
-              CaretPos.X := Length(FLines[CaretPos.Y]);
-              FSelection.EndPos := fpgPoint(Length(FLines[CaretPos.Y]), pred(FLines.Count));
+              SetCaretPosV( pred(FLines.Count));
+              CaretPos.X := Length(GetLineText(CaretPos.Y));
+              FSelection.EndPos := fpgPoint(Length(GetLineText(CaretPos.Y)), pred(FLines.Count));
             end else
             begin
-              CaretPos.Y := pred(FLines.Count);
-              CaretPos.X := Length(FLines[CaretPos.Y]);
+              SetCaretPosV(pred(FLines.Count));
+              CaretPos.X := Length(GetLineText(CaretPos.Y));
             end;
             ScrollPos_V := CaretPos.Y - FVisLines;
             UpdateScrollBars;
@@ -1433,13 +1442,13 @@ begin
             if not FSelected then
             begin
               if CaretPos.Y <= pred(FLines.Count) then
-                if CaretPos.X > Length(FLines[CaretPos.Y]) then
-                  CaretPos.X := Length(FLines[CaretPos.Y]);
+                if CaretPos.X > Length(GetLineText(CaretPos.Y)) then
+                  CaretPos.X := Length(GetLineText(CaretPos.Y));
               FSelection.StartPos := CaretPos;
               FSelected := True;
             end;
             if CaretPos.Y <= pred(FLines.Count) then
-              CaretPos.X := Length(FLines[CaretPos.Y])
+              CaretPos.X := Length(GetLineText(CaretPos.Y))
             else
               CaretPos.X := 0;
             FSelection.EndPos := CaretPos;
@@ -1468,15 +1477,15 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageUp;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveYCaretOffset;
+              SetCaretPosV(FTopLine + SaveYCaretOffset);
             end;
           end
           else
           begin  { PageDown handling }
             if VPos > (FLines.Count - FVisLines) then
             begin
-              CaretPos.Y := FLines.Count-1;
-              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
+              SetCaretPosV(FLines.Count-1);
+              CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
             end
             else
             begin
@@ -1484,7 +1493,7 @@ begin
               if FVScrollBar.Visible then
                 FVScrollBar.PageDown;
               // restore caret at same line offset as before
-              CaretPos.Y := FTopLine + SaveYCaretOffset;
+              SetCaretPosV(FTopLine + SaveYCaretOffset);
             end;
           end;
           if ssShift in ShiftState then
@@ -1537,7 +1546,10 @@ var
   S: String;
   L: PtrInt;
 begin
-  S := ALines[APoint.Y];
+  if (APoint.Y < 0) or (APoint.Y > ALines.Count-1) then
+    S := ''
+  else
+    S := ALines[APoint.Y];
   L := Length8(S);
   APoint.X := Min(L, APoint.X);
 end;
@@ -1614,7 +1626,7 @@ begin
 
   GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
   CaretPos.X := CNo;
-  CaretPos.Y := RNo;
+  SetCaretPosV(RNo);
   if FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo)) then
   begin
     FSelDrag := sdMightDrag;
@@ -1669,8 +1681,8 @@ begin
   if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
   begin
     GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
-    CaretPos.X := CNo;
-    CaretPos.Y := RNo;
+    SetCaretPosH(CNo);
+    SetCaretPosV(RNo);
     FSelection.StartPos := FSelection.Origin;
     FSelection.EndPos := fpgPoint(CNo, RNo);
     FSelected:=True;
@@ -1763,7 +1775,7 @@ begin
   begin
     for I := SrcBegin to SrcEnd do
     begin
-      SLine := FLines[I];
+      SLine := GetLineText(I);
       if not (foMatchCase in FindOptions) then
         SLine := UpperCase(SLine);
       FindPos.x := 0;
@@ -1806,7 +1818,7 @@ begin
         FSelection.StartPos := fpgPoint(FindPos.X -1, I);
         FSelection.EndPos   := fpgPoint(FindPos.X + Length(SrcWord) - 1, I);
         FSelected := True;
-        CaretPos.Y := I;
+        SetCaretPosV(I);
         CaretPos.X := FindPos.x + Length(SrcWord) - 1;
         if AllowScroll then
         begin
@@ -1843,7 +1855,7 @@ begin
   begin
     for I := SrcBegin downto SrcEnd do
     begin
-      SLine := FLines[I];
+      SLine := GetLineText(I);
       if not (foMatchCase in FindOptions) then
         SLine := UpperCase(SLine);
       FindPos.x := 0;
@@ -1989,7 +2001,7 @@ begin
         end;
     3:  begin
           FSelection.StartPos := fpgPoint(0, CaretPos.Y);
-          FSelection.EndPos := fpgPoint(Length8(FLines[CaretPos.Y]), CaretPos.Y);
+          FSelection.EndPos := fpgPoint(Length8(GetLineText(CaretPos.Y)), CaretPos.Y);
         end;
     // 4: { select paragraph}
   end;
@@ -2060,7 +2072,7 @@ begin
     Exit; //==>
   end;
 
-  SLine := FLines[CaretPos.Y];
+  SLine := GetLineText(CaretPos.Y);
 
   if not consumed then
   begin
@@ -2095,11 +2107,11 @@ begin
           begin
             { At start of line — join with previous }
             FUndoManager.BreakMerge;
-            X := UTF8Length(FLines[CaretPos.Y - 1]);  { join point = end of previous line }
+            X := UTF8Length(GetLineText(CaretPos.Y - 1));  { join point = end of previous line }
             UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
             UndoAction.CaretBefore := CaretPos;
             FUndoManager.ExecuteAction(UndoAction);
-            CaretPos.Y := CaretPos.Y - 1;
+            SetCaretPosV(CaretPos.Y - 1);
             CaretPos.X := X;
             UndoAction.CaretAfter := CaretPos;
           end;
@@ -2116,7 +2128,7 @@ begin
             begin
               { Temporarily select current line so BlockUnindent can operate }
               FSelection.FStartPos := fpgPoint(0, CaretPos.Y);
-              FSelection.FEndPos := fpgPoint(UTF8Length(FLines[CaretPos.Y]), CaretPos.Y);
+              FSelection.FEndPos := fpgPoint(UTF8Length(GetLineText(CaretPos.Y)), CaretPos.Y);
               FSelected := True;
               BlockUnindent;
               { Clear the temporary selection }
@@ -2178,7 +2190,7 @@ begin
           UndoAction.CaretBefore := CaretPos;
           FUndoManager.ExecuteAction(UndoAction);
 
-          CaretPos.Y := CaretPos.Y + 1;
+          SetCaretPosV(CaretPos.Y + 1);
           if AutoIndent then
             CaretPos.X := lIndentOffset
           else
@@ -2230,7 +2242,7 @@ begin
           end;
           if CaretPos.Y > pred(FLines.Count) then
             Exit;
-          SLine := FLines[CaretPos.Y];
+          SLine := GetLineText(CaretPos.Y);
           if UTF8Length(SLine) > CaretPos.X then
           begin
             { Delete character at cursor }
@@ -2255,8 +2267,8 @@ begin
             UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
             UndoAction.CaretBefore := CaretPos;
             FUndoManager.ExecuteAction(UndoAction);
-            CaretPos.Y := CaretPos.Y - 1;
-            CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
+            SetCaretPosV(CaretPos.Y - 1);
+            SetCaretPosH(UTF8Length(GetLineText(CaretPos.Y)));
             UndoAction.CaretAfter := CaretPos;
           end;
           consumed := True;
@@ -2309,7 +2321,7 @@ begin
     // UTF-8 characters beyond ANSI range are supposed to be printable
     if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
     begin
-      SLine := FLines[CaretPos.Y];
+      SLine := GetLineText(CaretPos.Y);
 
       { cursor was somewhere in whitespace, so we need to fill up the spaces }
       if UTF8Length(SLine) < CaretPos.X then
@@ -2459,7 +2471,7 @@ begin
   if (ALineIndex < 0) or (ALineIndex > FLines.Count-1) then
     Exit; //==>
 
-  S := FLines[ALineIndex];
+  S := GetLineText(ALineIndex);
   if Length(s) = 0 then
     Exit; // no text to draw, so we are done
 
@@ -2754,7 +2766,7 @@ begin
   Ei := 0;
   lX := X;
   if Y > pred(FLines.Count) then Exit;  //==>
-  S := FLines[Y];
+  S := GetLineText(Y);
   if S = '' then Exit;  //==>
   if lX > UTF8Length(S) - 1 then
     lX := UTF8Length(S) - 1;
@@ -2853,7 +2865,7 @@ begin
   Block.CaretBefore := Point(Col, Row);
 
   { --- Original mutation code --- }
-  SLine := FLines[Row];
+  SLine := GetLineText(Row);
   if Col > UTF8Length(SLine) then
   begin
     L := UTF8Length(SLine);
@@ -2876,16 +2888,16 @@ begin
       FLines.Insert(Row, BufS);
       Delete(SLine, 1, I+1);
       I := pos(#13#10, SLine);
-      CaretPos.Y := Row;
-      CaretPos.X := Length(BufS);
+      SetCaretPosV(Row);
+      SetCaretPosH(Length(BufS));
       FSelection.EndPos := CaretPos;
       Row := Row + 1;
     end;
-    if SLine <> '' then
+    if (SLine <> '') and (Row < FLines.Count) then
     begin
       FLines[Row] := SLine;
-      CaretPos.Y := Row;
-      CaretPos.X := Length(SLine) - Length(BufS2);
+      SetCaretPosV(Row);
+      SetCaretPosH(Length(SLine) - Length(BufS2));
       FSelection.EndPos := CaretPos;
     end;
     Invalidate;
@@ -2903,24 +2915,25 @@ begin
         FLines.Insert(Row, BufS);
         Delete(SLine, 1, I);
         I := pos(#10, SLine);
-        CaretPos.Y := Row;
-        CaretPos.X := Length(BufS);
+        SetCaretPosV(Row);
+        SetCaretPosH(Length(BufS));
         FSelection.EndPos := CaretPos;
         Row := Row + 1;
       end;
-      if SLine <> '' then
+      if (SLine <> '') and (Row < FLines.Count) then
       begin
         FLines[Row] := SLine;
-        CaretPos.Y := Row;
-        CaretPos.X := Length(SLine) - Length(BufS2);
+        SetCaretPosV(Row);
+        SetCaretPosH(Length(SLine) - Length(BufS2));
         FSelection.EndPos := CaretPos;
       end;
       Invalidate;
     end else
     begin
-      CaretPos.Y := Row;
-      FLines[Row] := SLine;
-      CaretPos.X := Col + Length(S);
+      SetCaretPosV(Row);
+      if Row < FLines.Count then
+        FLines[Row] := SLine;
+      SetCaretPosH(Col + Length(S));
       FSelection.StartPos := fpgPoint(Length(BufS1), Row);
       FSelection.EndPos   := fpgPoint(CaretPos.X, Row);
       Invalidate;
@@ -2945,7 +2958,7 @@ end;
 procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
 begin
   CaretPos.X := 0;
-  CaretPos.Y := ALine - 1;  { ALine is 1-based, CaretPos.Y is 0-based }
+  SetCaretPosV(ALine - 1);  { ALine is 1-based, CaretPos.Y is 0-based }
   if ALine > 5 then
     ScrollPos_V := ALine - 5  // scrolling a few lines short so cursor is not on top line
   else
@@ -2964,6 +2977,9 @@ begin
 
   StartLine := FSelection.StartLine;
   EndLine   := FSelection.EndLine;
+
+  if (StartLine < 0) or (EndLine < 0) then
+    Exit;
   StartPos  := FSelection.StartPos.X;
   EndPos    := FSelection.EndPos.X;
 
@@ -2978,19 +2994,20 @@ begin
   Block.CaretBefore := CaretPos;
 
   { Perform the deletion }
-  SLine := FLines[StartLine];
+  SLine := GetLineText(StartLine);
   FirstPart := UTF8Copy(SLine, 1, StartPos);
-  SLine := FLines[EndLine];
+  SLine := GetLineText(EndLine);
   if EndPos > UTF8Length(SLine) then
     EndPos := UTF8Length(SLine);
   LastPart := UTF8Copy(SLine, EndPos + 1, UTF8Length(SLine) - EndPos);
   DelLine := StartLine + 1;
   for I := DelLine to EndLine do
     FLines.Delete(DelLine);
-  FLines[StartLine] := FirstPart + LastPart;
+  if StartLine < FLines.Count then
+    FLines[StartLine] := FirstPart + LastPart;
 
-  CaretPos.Y := StartLine;
-  CaretPos.X := StartPos;
+  SetCaretPosV(StartLine);
+  SetCaretPosH(StartPos);
   FSelected := False;
 
   { Capture after state and push to undo }
@@ -3017,8 +3034,8 @@ begin
   Block.SaveBefore(LineNum);
   Block.CaretBefore := CaretPos;
 
-  FLines.Insert(LineNum + 1, FLines[LineNum]);
-  CaretPos.Y := LineNum + 1;
+  FLines.Insert(LineNum + 1, GetLineText(LineNum));
+  SetCaretPosV(LineNum + 1);
 
   Block.SaveAfter(LineNum + 1);
   Block.CaretAfter := CaretPos;
@@ -3047,7 +3064,7 @@ begin
   begin
     FLines.Delete(LineNum);
     if LineNum >= FLines.Count then
-      CaretPos.Y := FLines.Count - 1;
+      SetCaretPosV(FLines.Count - 1);
   end
   else
     FLines[0] := '';
@@ -3086,7 +3103,8 @@ begin
 
   Indent := StringOfChar(' ', FIndentSize);
   for I := StartLine to EndLine do
-    FLines[I] := Indent + FLines[I];
+    if I < FLines.Count then
+      FLines[I] := Indent + GetLineText(I);
 
   { Adjust selection and caret to account for added indent }
   FSelection.FStartPos.X := FSelection.FStartPos.X + FIndentSize;
@@ -3127,7 +3145,7 @@ begin
   EndRemoved := 0;
   for I := StartLine to EndLine do
   begin
-    Line := FLines[I];
+    Line := GetLineText(I);
     if (Length(Line) > 0) and (Line[1] = #9) then
     begin
       { Remove one leading tab }
@@ -3150,7 +3168,8 @@ begin
       if Remove > 0 then
         Delete(Line, 1, Remove);
     end;
-    FLines[I] := Line;
+    if I < FLines.Count then
+      FLines[I] := Line;
     if I = StartLine then
       StartRemoved := Remove;
     if I = EndLine then
@@ -3189,8 +3208,8 @@ begin
   if not FUndoManager.CanUndo then
     Exit;
   FUndoManager.Undo;
-  CaretPos.X := FUndoManager.LastCaretPos.X;
-  CaretPos.Y := FUndoManager.LastCaretPos.Y;
+  SetCaretPosH(FUndoManager.LastCaretPos.X);
+  SetCaretPosV(FUndoManager.LastCaretPos.Y);
   FSelected := False;
   FSelection.StartPos := CaretPos;
   UpdateScrollBars;
@@ -3203,8 +3222,8 @@ begin
   if not FUndoManager.CanRedo then
     Exit;
   FUndoManager.Redo;
-  CaretPos.X := FUndoManager.LastCaretPos.X;
-  CaretPos.Y := FUndoManager.LastCaretPos.Y;
+  SetCaretPosH(FUndoManager.LastCaretPos.X);
+  SetCaretPosV(FUndoManager.LastCaretPos.Y);
   FSelected := False;
   FSelection.StartPos := CaretPos;
   UpdateScrollBars;
@@ -3238,18 +3257,18 @@ begin
   if StartLine > pred(FLines.Count) then Exit;
   if EndLine > pred(FLines.Count) then
     EndLine := pred(FLines.Count);
-  SLine := FLines[StartLine];
+  SLine := GetLineText(StartLine);
   if StartLine < EndLine then
   begin
     FirstPart := Copy(SLine, StartPos + 1, Length(SLine) - StartPos);
-    SLine := FLines[EndLine];
+    SLine := GetLineText(EndLine);
     if EndPos > Length(SLine) then
       EndPos := Length(SLine);
     LastPart := Copy(SLine, 1, EndPos);
     LineI := StartLine + 1;
     Result := FirstPart;
     for I := LineI to (EndLine - 1) do
-      Result := Result + LineEnding + FLines[I];
+      Result := Result + LineEnding + GetLineText(I);
     Result := Result + LineEnding + LastPart;
   end
   else
@@ -3344,7 +3363,7 @@ begin
   try
     for i := 0 to FLines.Count - 1 do
     begin
-      line := FLines[i];
+      line := GetLineText(i);
       cells := TStringList.Create;
       cells.Delimiter := #9;
       cells.StrictDelimiter := True;
