@@ -29,7 +29,8 @@ uses
   ide.test.highlight.renderer,
   ide.test.build.dispatch,
   ide.test.projecttree,
-  ide.test.editor.tabs;
+  ide.test.editor.tabs,
+  ide.test.profiles;
 
 var
   Application: TTestRunner;

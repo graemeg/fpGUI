@@ -29,7 +29,7 @@ uses
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
-  ide.editor.tabs, ide.project.pasbuild;
+  ide.editor.tabs, ide.profiles, ide.project.pasbuild;
 
 type
 
@@ -1248,17 +1248,10 @@ begin
 end;
 
 procedure TMainForm.UpdateProfilesDisplay;
-var
-  pb: TPasBuildProjectBackend;
 begin
   if GProject.ProjectFormat = pfPasBuild then
-  begin
-    pb := TPasBuildProjectBackend(GProject);
-    if pb.ActiveProfiles.Count > 0 then
-      lblProfiles.Text := pb.ActiveProfiles.CommaText
-    else
-      lblProfiles.Text := '(no profiles)';
-  end
+    lblProfiles.Text := ProfilesDisplayText(
+      TPasBuildProjectBackend(GProject).ActiveProfiles)
   else
     lblProfiles.Text := '';
 end;
@@ -1300,18 +1293,11 @@ end;
 procedure TMainForm.ToggleProfile(const AProfileName: TfpgString);
 var
   pb: TPasBuildProjectBackend;
-  idx: integer;
 begin
   if GProject.ProjectFormat <> pfPasBuild then
     Exit;
   pb := TPasBuildProjectBackend(GProject);
-
-  { Toggle the profile }
-  idx := pb.ActiveProfiles.IndexOf(AProfileName);
-  if idx >= 0 then
-    pb.ActiveProfiles.Delete(idx)
-  else
-    pb.ActiveProfiles.Add(AProfileName);
+  ToggleProfileInList(pb.ActiveProfiles, AProfileName);
 
   { Re-resolve with new profiles and refresh UI }
   pb.Resolve(pb.ActiveProfiles.CommaText);
