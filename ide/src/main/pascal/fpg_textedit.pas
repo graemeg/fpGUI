@@ -856,7 +856,7 @@ end;
 
 procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
 begin
-  CaretPos.Y :=  Max(0, Min(FLines.Count, AValue));
+  CaretPos.Y := Max(0, Min(FLines.Count - 1, AValue));
 end;
 
 procedure TfpgBaseTextEdit.CheckCaretChanged;
