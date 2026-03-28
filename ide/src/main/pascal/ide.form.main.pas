@@ -29,7 +29,8 @@ uses
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
-  ide.editor.tabs, ide.profiles, ide.project.pasbuild;
+  ide.editor.tabs, ide.profiles, ide.project.pasbuild,
+  ide.cursorhistory;
 
 type
 
@@ -89,6 +90,7 @@ type
     FHighlightCache: THighlighterCache;
     FBracketMatch: TBracketMatchResult;
     FStatusBarLayout: TfpgMigLayoutManager;
+    FCursorHistory: TCursorHistory;
     FLastSearchText: TfpgString;
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
@@ -188,6 +190,11 @@ type
     procedure   miJumpToInterface(Sender: TObject);
     procedure   miJumpToImplementation(Sender: TObject);
     procedure   miJumpToggleIntfImpl(Sender: TObject);
+    function    GetCurrentCursorLocation: TCursorLocation;
+    procedure   RecordCursorLocation;
+    procedure   NavigateToLocation(const ALoc: TCursorLocation);
+    procedure   miNavigateBack(Sender: TObject);
+    procedure   miNavigateForward(Sender: TObject);
     procedure   CheckGitIgnoreForIdeDir;
     procedure   uiCreateToolBar;
     procedure   uiCreateStatusBar;
@@ -557,7 +564,10 @@ begin
       if (i < 1) or (i > iMax) then
         ShowMessage(Format('Line number must be between 1 and %d.', [iMax]))
       else
+      begin
+        RecordCursorLocation;
         edt.GotoLine(i);
+      end;
     except
       on E: Exception do
          ShowMessage('Invalid line number.' + LineEnding + E.Message);
@@ -908,7 +918,10 @@ begin
     FilePath := ResolveNodeFilePath(n, pb.ProjectDir, pb.SourceDirectory,
       pb.IsAggregator);
     if (FilePath <> '') and fpgFileExists(FilePath) then
+    begin
+      RecordCursorLocation;
       OpenEditorPage(FilePath);
+    end;
   end
   else
   begin
@@ -917,6 +930,7 @@ begin
       u := TUnit(n.Data);
     if u <> nil then
     begin
+      RecordCursorLocation;
       ts := OpenEditorPage(u.FileName);
       u.Opened := True;
       ts.TagPointer := u;
@@ -1009,6 +1023,22 @@ begin
       keyDown:  { Ctrl+Shift+Down: jump to implementation }
         begin
           miJumpToImplementation(nil);
+          consumed := True;
+        end;
+    end;
+  end;
+  { Alt+Left/Right: navigate back/forward in cursor history }
+  if not consumed and (ssAlt in shiftstate) and not (ssCtrl in shiftstate) and not (ssShift in shiftstate) then
+  begin
+    case keycode of
+      keyLeft:
+        begin
+          miNavigateBack(nil);
+          consumed := True;
+        end;
+      keyRight:
+        begin
+          miNavigateForward(nil);
           consumed := True;
         end;
     end;
@@ -1851,7 +1881,10 @@ begin
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
   nav := NavigateToInterface(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
+  begin
+    RecordCursorLocation;
     edt.GotoLine(nav.Line + 1);  { GotoLine is 1-based }
+  end;
 end;
 
 procedure TMainForm.miJumpToImplementation(Sender: TObject);
@@ -1865,7 +1898,10 @@ begin
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
   nav := NavigateToImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
+  begin
+    RecordCursorLocation;
     edt.GotoLine(nav.Line + 1);
+  end;
 end;
 
 procedure TMainForm.miJumpToggleIntfImpl(Sender: TObject);
@@ -1879,7 +1915,67 @@ begin
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
   nav := NavigateInterfaceImplementation(FHighlightCache.PascalHighlighter, edt.Lines, edt.CaretPos_V);
   if nav.Found then
+  begin
+    RecordCursorLocation;
     edt.GotoLine(nav.Line + 1);
+  end;
+end;
+
+function TMainForm.GetCurrentCursorLocation: TCursorLocation;
+var
+  edt: TfpgTextEdit;
+begin
+  Result.Filename := '';
+  Result.Line := 0;
+  Result.Col := 0;
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  Result.Filename := pcEditor.ActivePage.Hint;
+  Result.Line := edt.CaretPos_V;
+  Result.Col := edt.CaretPos_H;
+end;
+
+procedure TMainForm.RecordCursorLocation;
+var
+  loc: TCursorLocation;
+begin
+  loc := GetCurrentCursorLocation;
+  if loc.Filename <> '' then
+    FCursorHistory.RecordLocation(loc);
+end;
+
+procedure TMainForm.NavigateToLocation(const ALoc: TCursorLocation);
+var
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  ts := OpenEditorPage(ALoc.Filename);
+  if ts = nil then
+    Exit;
+  editor := TfpgTextEdit(ts.Components[0]);
+  editor.GotoLine(ALoc.Line + 1);  { GotoLine is 1-based, ALoc.Line is 0-based }
+  editor.CaretPos_H := ALoc.Col;
+end;
+
+procedure TMainForm.miNavigateBack(Sender: TObject);
+var
+  loc, current: TCursorLocation;
+begin
+  if not FCursorHistory.CanGoBack then
+    Exit;
+  current := GetCurrentCursorLocation;
+  FCursorHistory.RecordBeforeJump(current);
+  if FCursorHistory.GoBack(loc) then
+    NavigateToLocation(loc);
+end;
+
+procedure TMainForm.miNavigateForward(Sender: TObject);
+var
+  loc: TCursorLocation;
+begin
+  if FCursorHistory.GoForward(loc) then
+    NavigateToLocation(loc);
 end;
 
 procedure TMainForm.CheckGitIgnoreForIdeDir;
@@ -1993,6 +2089,7 @@ begin
   FFileMonitor := TFileMonitor.CreateCustom;
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
   FHighlightCache := THighlighterCache.Create;
+  FCursorHistory := TCursorHistory.Create(50);
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -2012,6 +2109,7 @@ begin
   FFileMonitor.Terminate;
   FFileMonitor.Free;
   FreeAndNil(FHighlightCache);
+  FreeAndNil(FCursorHistory);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);
@@ -2415,6 +2513,9 @@ begin
     AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
     AddMenuItem('Toggle Interface/Implementation', rsKeyCtrl+rsKeyShift+'J', @miJumpToggleIntfImpl);
+    AddSeparator;
+    AddMenuItem('Navigate Back', rsKeyAlt+'Left', @miNavigateBack);
+    AddMenuItem('Navigate Forward', rsKeyAlt+'Right', @miNavigateForward);
   end;
 
   mnuView := TfpgPopupMenu.Create(self);

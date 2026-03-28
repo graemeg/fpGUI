@@ -30,7 +30,8 @@ uses
   ide.test.build.dispatch,
   ide.test.projecttree,
   ide.test.editor.tabs,
-  ide.test.profiles;
+  ide.test.profiles,
+  ide.test.cursorhistory;
 
 var
   Application: TTestRunner;

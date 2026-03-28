@@ -2204,6 +2204,13 @@ begin
           begin
             { do nothing - let key bubble up to form }
           end
+          { Alt+Left/Right: let parent handle cursor history navigation }
+          else if (ssAlt in ShiftState) and not (ssCtrl in ShiftState) and
+             not (ssShift in ShiftState) and
+             ((keycode = keyLeft) or (keycode = keyRight)) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
           else
           begin
             KeyboardCaretNav(ShiftState, keycode);
