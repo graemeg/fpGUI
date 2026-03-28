@@ -779,7 +779,7 @@ end;
 
 function TfpgBaseTextEdit.GetLineText(AIndex: Integer): TfpgString;
 begin
-  if AIndex >= FLines.Count then
+  if (AIndex < 0) or (AIndex >= FLines.Count) then
     Exit('');
 
   Result := FLines[AIndex];
