@@ -74,6 +74,7 @@ type
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
+    pmProjectTreeMenu: TfpgPopupMenu;
     pmProfileMenu: TfpgPopupMenu;
     FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
@@ -128,6 +129,8 @@ type
     procedure   miRunRebuild(Sender: TObject);
     procedure   miRunTest(Sender: TObject);
     procedure   StartBuildGoal(const AGoal: string);
+    procedure   miProjectDependencyTree(Sender: TObject);
+    procedure   pmTreeDependencyTreeClick(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   miProjectNew(Sender: TObject);
@@ -728,6 +731,38 @@ begin
       if ModInfo <> nil then
         thd.BuildModule := ModInfo.Name;
     end;
+  end;
+  thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+end;
+
+procedure TMainForm.miProjectDependencyTree(Sender: TObject);
+begin
+  StartBuildGoal('dependency-tree');
+end;
+
+procedure TMainForm.pmTreeDependencyTreeClick(Sender: TObject);
+var
+  n: TfpgTreeNode;
+  ModInfo: TAggregatorModuleInfo;
+  thd: TBuilderThread;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+  begin
+    AddMessage('This action is only available for PasBuild projects.');
+    Exit;
+  end;
+  ClearMessagesWindow;
+  thd := TBuilderThread.Create(True);
+  thd.BuildGoal := 'dependency-tree';
+  { If a module node is selected, target that module specifically }
+  n := tvProject.Selection;
+  if (n <> nil) and (n.Data <> nil) and (PtrInt(n.Data) > 4)
+      and (TObject(n.Data) is TAggregatorModuleInfo) then
+  begin
+    ModInfo := TAggregatorModuleInfo(n.Data);
+    thd.BuildModule := ModInfo.Name;
   end;
   thd.OnTerminate := @BuildTerminated;
   thd.OnAvailableOutput := @BuildOutput;
@@ -1562,7 +1597,7 @@ begin
   else
   begin
     { Single module — show Sources/Tests/Resources/Dependencies directly }
-    tvProject.PopupMenu := nil;
+    tvProject.PopupMenu := pmProjectTreeMenu;
     AddModuleSubtree(RootNode, pb.ProjectDir, pb.SourceDirectory,
       pb.DeclaredDeps, True);
   end;
@@ -2822,6 +2857,15 @@ begin
     AddMenuItem('Build Module', '', @pmModuleBuildClick);
     AddMenuItem('Clean Module', '', @pmModuleCleanClick);
     AddMenuItem('Rebuild Module', '', @pmModuleRebuildClick);
+    AddSeparator;
+    AddMenuItem('Show Dependency Tree', '', @pmTreeDependencyTreeClick);
+  end;
+
+  { Context menu for project tree (non-aggregator PasBuild projects) }
+  pmProjectTreeMenu := TfpgPopupMenu.Create(self);
+  with pmProjectTreeMenu do
+  begin
+    AddMenuItem('Show Dependency Tree', '', @pmTreeDependencyTreeClick);
   end;
 
   SplitterH.Control := pnlWindow;
@@ -2920,6 +2964,8 @@ begin
     AddSeparator;
     AddMenuItem('View Source', '', nil);
     AddMenuItem('Add editor file to Project', rsKeyCtrl+rsKeyShift+'A', @miProjectAddUnitToProject);
+    AddSeparator;
+    AddMenuItem('Show Dependency Tree', '', @miProjectDependencyTree);
   end;
 
   mnuRun := TfpgPopupMenu.Create(self);
