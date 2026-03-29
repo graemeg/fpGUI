@@ -2172,13 +2172,9 @@ begin
           if AutoIndent then
           begin
             lStrLen := UTF8Length(SLine);
-            for x := 1 to lStrLen do
-            begin
-              if AnsiMatchStr(fpgCharAt(SLine, x), [#9, ' ']) then
-                Continue
-              else
-                Break;
-            end;
+            x := 1;
+            while (x <= lStrLen) and AnsiMatchStr(fpgCharAt(SLine, x), [#9, ' ']) do
+              Inc(x);
             lIndentOffset := x - 1;
           end;
 
