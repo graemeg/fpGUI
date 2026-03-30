@@ -1,0 +1,52 @@
+= Vendored fcl-passrc (from FPC 3.3.1 trunk)
+
+== Purpose
+
+This directory contains a copy of the `fcl-passrc` package from the FPC 3.3.1
+development trunk. It provides the Pascal parser (`TPasParser`), scanner
+(`TPascalScanner`), AST (`TPasElement` hierarchy), and resolver
+(`TPasResolver`) used by the IDE's "Go to Declaration" feature.
+
+We vendor this because FPC 3.3.1's resolver is significantly more complete
+than the 3.2.2 release — notably adding support for `object` types, improved
+scope handling, and better cross-unit resolution. Since the last stable FPC
+release (3.2.2) is from 2021 and no new release is imminent, vendoring lets
+us use these improvements now while building against the stable compiler.
+
+== Source
+
+* **Origin**: FPC 3.3.1 development trunk (`packages/fcl-passrc/src/`)
+* **Copied**: 2026-03-30
+* **Source tree date**: March 2026 snapshot
+* **Built with**: FPC 3.2.2 (confirmed compatible)
+
+== Files
+
+[cols="1,2",options="header"]
+|===
+| File | Purpose
+
+| `pscanner.pp`       | Pascal lexical scanner
+| `pparser.pp`        | Pascal parser
+| `pastree.pp`        | Pascal AST node types
+| `pasresolver.pp`    | Scope-aware name resolver
+| `pasresolveeval.pas`| Constant expression evaluator (resolver dependency)
+| `fcl-passrc.inc`    | Shared compiler conditionals
+|===
+
+== When to Remove
+
+When fpGUI moves to a stable FPC release that includes these resolver
+improvements (FPC 3.4.0 or later), this vendored copy should be removed
+and the IDE should use the compiler-bundled version instead.
+
+To remove:
+
+. Delete this directory
+. Remove the `-Fu` path to `fcl-passrc/` from the build configuration
+. Verify `pasbuild test -m fpgui-ide -p unix,debug` still passes
+
+== Contributing Back
+
+Any bug fixes or improvements made to these files should be contributed
+back to the FPC project via their bug tracker or mailing list.
