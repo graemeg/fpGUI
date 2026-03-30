@@ -55,8 +55,12 @@ type
     FUnitPaths: TStrings;        { borrowed }
     FIncludePaths: TStrings;     { borrowed }
     FParsing: TStringList;       { tracks units currently being parsed -- circular use guard }
+    FOwnsHub: Boolean;           { True for root engine, False for sub-engines }
+    FOwnsParsing: Boolean;       { True for root engine, False for sub-engines }
+    function SubParseUnit(const AName, AFilename, ASource: string): TPasModule;
   public
     constructor Create;
+    constructor CreateSub(AHub: TPasResolverHub; AParsing: TStringList);
     destructor Destroy; override;
     function FindUnit(const AName, InFilename: String;
       NameExpr, InFileExpr: TPasExpr): TPasModule; override;
@@ -67,6 +71,13 @@ type
 { ALine and ACol are both 0-based (matching editor CaretPos_V / CaretPos_H) }
 function GetIdentifierAtCursor(AHighlighter: TPascalHighlighter;
   ALines: TStrings; ALine, ACol: Integer): string;
+
+{ ALine and ACol are 0-based (matching editor CaretPos_V / CaretPos_H).
+  Converted to 1-based internally for TPasElement.SourceLinenumber. }
+function FindDeclaration(AHighlighter: TPascalHighlighter;
+  ALines: TStrings; const AFilename: string;
+  ALine, ACol: Integer;
+  AUnitPaths, AIncludePaths: TStrings): TDeclarationResult;
 
 
 implementation
@@ -149,25 +160,94 @@ end;
 constructor TDeclarationEngine.Create;
 begin
   inherited Create;
+  Hub := TPasResolverHub.Create(Self);
+  FOwnsHub := True;
   FParsing := TStringList.Create;
   FParsing.Sorted := True;
+  FOwnsParsing := True;
+end;
+
+constructor TDeclarationEngine.CreateSub(AHub: TPasResolverHub;
+  AParsing: TStringList);
+begin
+  inherited Create;
+  Hub := AHub;
+  FOwnsHub := False;
+  FParsing := AParsing;
+  FOwnsParsing := False;
 end;
 
 destructor TDeclarationEngine.Destroy;
+var
+  h: TPasResolverHub;
 begin
-  FParsing.Free;
+  if FOwnsParsing then
+    FParsing.Free;
+  { Save and detach Hub before inherited Destroy calls Clear }
+  h := Hub;
   inherited Destroy;
+  if FOwnsHub then
+    h.Free;
+end;
+
+function TDeclarationEngine.SubParseUnit(const AName, AFilename,
+  ASource: string): TPasModule;
+var
+  subResolver: TDeclarationFileResolver;
+  subScanner: TPascalScanner;
+  subParser: TPasParser;
+  subEngine: TDeclarationEngine;
+begin
+  Result := nil;
+  FParsing.Add(UpperCase(AName));
+  subResolver := TDeclarationFileResolver.Create;
+  try
+    subResolver.OwnsStreams := True;
+    subResolver.UnitPaths := FUnitPaths;
+    subResolver.IncludePaths := FIncludePaths;
+    subResolver.AddStream(AFilename, TStringStream.Create(ASource));
+
+    subScanner := TPascalScanner.Create(subResolver);
+    try
+      subScanner.OpenFile(AFilename);
+      { Each unit needs its own engine instance, sharing Hub and parsing guard }
+      subEngine := TDeclarationEngine.CreateSub(Hub, FParsing);
+      try
+        subEngine.UnitPaths := FUnitPaths;
+        subEngine.IncludePaths := FIncludePaths;
+        subEngine.AddObjFPCBuiltInIdentifiers;
+
+        subParser := TPasParser.Create(subScanner, subResolver, subEngine);
+        try
+          subParser.ImplicitUses.Clear;
+          try
+            subParser.ParseMain(Result);
+          except
+            { Prevent secondary parse failures from corrupting the main scope stack }
+            Result := nil;
+          end;
+        finally
+          subParser.Free;
+        end;
+      finally
+        subEngine.Free;
+      end;
+    finally
+      subScanner.Free;
+    end;
+  finally
+    subResolver.Free;
+    FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
+  end;
 end;
 
 function TDeclarationEngine.FindUnit(const AName, InFilename: String;
   NameExpr, InFileExpr: TPasExpr): TPasModule;
 var
-  resolver: TDeclarationFileResolver;
-  scanner: TPascalScanner;
-  parser: TPasParser;
   filePath: string;
   fs: TFileStream;
   ss: TStringStream;
+  searchResolver: TDeclarationFileResolver;
 begin
   Result := nil;
 
@@ -179,60 +259,35 @@ begin
   filePath := '';
   if FUnitPaths <> nil then
   begin
-    resolver := TDeclarationFileResolver.Create;
+    searchResolver := TDeclarationFileResolver.Create;
     try
-      filePath := resolver.SearchPaths(FUnitPaths, AName + '.pas');
+      filePath := searchResolver.SearchPaths(FUnitPaths, AName + '.pas');
       if filePath = '' then
-        filePath := resolver.SearchPaths(FUnitPaths, AName + '.pp');
+        filePath := searchResolver.SearchPaths(FUnitPaths, AName + '.pp');
     finally
-      resolver.Free;
+      searchResolver.Free;
     end;
   end;
 
   if filePath = '' then
     Exit;
 
-  { Sub-parse the unit }
-  FParsing.Add(UpperCase(AName));
-  resolver := TDeclarationFileResolver.Create;
+  { Load file content }
+  ss := TStringStream.Create('');
   try
-    resolver.OwnsStreams := True;
-    resolver.UnitPaths := FUnitPaths;
-    resolver.IncludePaths := FIncludePaths;
-
-    { Load file content into a stream for the resolver }
-    ss := TStringStream.Create('');
     fs := TFileStream.Create(filePath, fmOpenRead or fmShareDenyNone);
     try
       ss.CopyFrom(fs, 0);
     finally
       fs.Free;
     end;
-    ss.Position := 0;
-    resolver.AddStream(filePath, ss);
-
-    scanner := TPascalScanner.Create(resolver);
-    try
-      scanner.OpenFile(filePath);
-      parser := TPasParser.Create(scanner, resolver, Self);
-      try
-        parser.ImplicitUses.Clear;
-        try
-          parser.ParseMain(Result);
-        except
-          { Prevent secondary parse failures from corrupting the main scope stack }
-          Result := nil;
-        end;
-      finally
-        parser.Free;
-      end;
-    finally
-      scanner.Free;
-    end;
-  finally
-    resolver.Free;
-    FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
+  except
+    ss.Free;
+    Exit;
   end;
+
+  Result := SubParseUnit(AName, filePath, ss.DataString);
+  ss.Free;
 end;
 
 
@@ -266,6 +321,162 @@ begin
         Result := TokenText(ALines, ALine, tok);
       Exit;
     end;
+  end;
+end;
+
+
+{ AST visitor types }
+
+type
+  TDeclSearchData = record
+    TargetFile: string;      { filter: only match in this file }
+    TargetLine: Integer;     { 1-based (matching TPasElement.SourceLinenumber) }
+    TargetName: string;      { case-insensitive comparison }
+    FoundDecl: TPasElement;  { output: the resolved declaration, or nil }
+  end;
+  PDeclSearchData = ^TDeclSearchData;
+
+  { TDeclVisitor - helper for ForEachCall which requires an 'of object' callback }
+
+  TDeclVisitor = class
+  public
+    procedure VisitElement(El: TPasElement; arg: Pointer);
+  end;
+
+procedure TDeclVisitor.VisitElement(El: TPasElement; arg: Pointer);
+var
+  Data: PDeclSearchData;
+begin
+  Data := PDeclSearchData(arg);
+  { Already found -- skip }
+  if Data^.FoundDecl <> nil then
+    Exit;
+  { Filter: only match in the target file }
+  if El.SourceFilename <> Data^.TargetFile then
+    Exit;
+  { Must be an identifier expression }
+  if not (El is TPrimitiveExpr) then
+    Exit;
+  if TPrimitiveExpr(El).Kind <> pekIdent then
+    Exit;
+  { Must be on the target line }
+  if El.SourceLinenumber <> Data^.TargetLine then
+    Exit;
+  { Must match the target name (case-insensitive) }
+  if CompareText(TPrimitiveExpr(El).Value, Data^.TargetName) <> 0 then
+    Exit;
+  { Must have a resolved reference with a declaration }
+  if not (El.CustomData is TResolvedReference) then
+    Exit;
+  if TResolvedReference(El.CustomData).Declaration = nil then
+    Exit;
+  Data^.FoundDecl := TResolvedReference(El.CustomData).Declaration;
+end;
+
+
+function FindDeclaration(AHighlighter: TPascalHighlighter;
+  ALines: TStrings; const AFilename: string;
+  ALine, ACol: Integer;
+  AUnitPaths, AIncludePaths: TStrings): TDeclarationResult;
+var
+  ident: string;
+  resolver: TDeclarationFileResolver;
+  scanner: TPascalScanner;
+  parser: TPasParser;
+  engine: TDeclarationEngine;
+  module: TPasModule;
+  sourceStream: TStringStream;
+  searchData: TDeclSearchData;
+  visitor: TDeclVisitor;
+begin
+  Result.Found := False;
+  Result.DeclFile := '';
+  Result.DeclLine := 0;
+  Result.DeclName := '';
+
+  { Step 1: Extract identifier at cursor }
+  ident := GetIdentifierAtCursor(AHighlighter, ALines, ALine, ACol);
+  if ident = '' then
+    Exit;
+
+  { Step 2: Create the parsing pipeline }
+  module := nil;
+  resolver := TDeclarationFileResolver.Create;
+  try
+    resolver.OwnsStreams := True;
+    resolver.UnitPaths := AUnitPaths;
+    resolver.IncludePaths := AIncludePaths;
+
+    { Register current source buffer }
+    sourceStream := TStringStream.Create(ALines.Text);
+    resolver.AddStream(AFilename, sourceStream);
+
+    scanner := TPascalScanner.Create(resolver);
+    try
+      scanner.OpenFile(AFilename);
+
+      engine := TDeclarationEngine.Create;
+      try
+        engine.UnitPaths := AUnitPaths;
+        engine.IncludePaths := AIncludePaths;
+        engine.AddObjFPCBuiltInIdentifiers;
+        { Register common type aliases not in base types (normally in System unit) }
+        engine.AddBaseType('Integer', btLongint);
+        engine.AddBaseType('Cardinal', btLongWord);
+        engine.AddBaseType('SizeInt', {$ifdef HasInt64}btInt64{$else}btIntDouble{$endif});
+
+        parser := TPasParser.Create(scanner, resolver, engine);
+        try
+          parser.ImplicitUses.Clear;
+
+          { Step 3: Parse }
+          try
+            parser.ParseMain(module);
+          except
+            on E: EPasResolve do
+              Exit;
+            on E: EParserError do
+              Exit;
+            on E: EScannerError do
+              Exit;
+          end;
+
+          if module = nil then
+            Exit;
+
+          { Step 4: Walk AST }
+          searchData.TargetFile := AFilename;
+          searchData.TargetLine := ALine + 1;  { convert 0-based to 1-based }
+          searchData.TargetName := ident;
+          searchData.FoundDecl := nil;
+
+          visitor := TDeclVisitor.Create;
+          try
+            module.ForEachCall(@visitor.VisitElement, @searchData);
+          finally
+            visitor.Free;
+          end;
+
+          { Step 5: Extract result }
+          if searchData.FoundDecl <> nil then
+          begin
+            Result.Found := True;
+            Result.DeclFile := searchData.FoundDecl.SourceFilename;
+            Result.DeclLine := searchData.FoundDecl.SourceLinenumber;
+            Result.DeclName := searchData.FoundDecl.Name;
+          end;
+
+        finally
+          parser.Free;
+        end;
+      finally
+        engine.Free;
+      end;
+    finally
+      scanner.Free;
+    end;
+  finally
+    resolver.Free;
   end;
 end;
 

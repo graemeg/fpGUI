@@ -36,6 +36,16 @@ type
     procedure TestGetIdentAtCursor_OnWhitespace;
     procedure TestGetIdentAtCursor_StartOfIdent;
     procedure TestGetIdentAtCursor_EndOfIdent;
+    { Phase B -- Single-unit resolution }
+    procedure TestFindDecl_LocalVar;
+    procedure TestFindDecl_ProcParam;
+    procedure TestFindDecl_TypeName;
+    procedure TestFindDecl_ClassMethod;
+    procedure TestFindDecl_OverloadedProc;
+    procedure TestFindDecl_DottedExpr;
+    procedure TestFindDecl_SameIdentTwiceOnLine;
+    procedure TestFindDecl_NotAnIdent;
+    procedure TestFindDecl_ParseError;
   end;
 
 
@@ -55,6 +65,100 @@ const
     'begin'                      + LineEnding +   // 3
     '  MyCounter := 1;'          + LineEnding +   // 4
     'end.';                                        // 5
+
+  { Phase B test sources }
+
+  cLocalVar =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'var'                        + LineEnding +   // 2
+    '  x: Integer;'              + LineEnding +   // 3
+    'begin'                      + LineEnding +   // 4
+    '  x := 1;'                  + LineEnding +   // 5
+    'end.';                                        // 6
+
+  cProcParam =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'procedure DoIt(AValue: Integer);' + LineEnding + // 2
+    'begin'                      + LineEnding +   // 3
+    '  AValue := 0;'             + LineEnding +   // 4 -- AValue ref, col 2
+    'end;'                       + LineEnding +   // 5
+    'begin'                      + LineEnding +   // 6
+    'end.';                                        // 7
+
+  cTypeName =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'type'                       + LineEnding +   // 2
+    '  TMyRecord = record'       + LineEnding +   // 3
+    '    Value: Integer;'        + LineEnding +   // 4
+    '  end;'                     + LineEnding +   // 5
+    'var'                        + LineEnding +   // 6
+    '  r: TMyRecord;'            + LineEnding +   // 7
+    'begin'                      + LineEnding +   // 8
+    '  r.Value := 42;'           + LineEnding +   // 9 -- Value ref, col 4
+    'end.';                                        // 10
+
+  cClassMethod =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'type'                       + LineEnding +   // 2
+    '  TFoo = object'            + LineEnding +   // 3
+    '    procedure DoWork;'      + LineEnding +   // 4
+    '  end;'                     + LineEnding +   // 5
+    'procedure TFoo.DoWork;'     + LineEnding +   // 6
+    'begin'                      + LineEnding +   // 7
+    'end;'                       + LineEnding +   // 8
+    'var'                        + LineEnding +   // 9
+    '  f: TFoo;'                 + LineEnding +   // 10
+    'begin'                      + LineEnding +   // 11
+    '  f.DoWork;'                + LineEnding +   // 12 -- DoWork ref, col 4
+    'end.';                                        // 13
+
+  cOverloaded =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'procedure Calc(A: Integer); overload;' + LineEnding + // 2
+    'begin'                      + LineEnding +   // 3
+    'end;'                       + LineEnding +   // 4
+    'procedure Calc(A: String); overload;' + LineEnding + // 5
+    'begin'                      + LineEnding +   // 6
+    'end;'                       + LineEnding +   // 7
+    'begin'                      + LineEnding +   // 8
+    '  Calc(42);'                + LineEnding +   // 9  -- resolves to Integer overload (line 2)
+    '  Calc(''hi'');'            + LineEnding +   // 10 -- resolves to String overload (line 5)
+    'end.';                                        // 11
+
+  cDottedExpr =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'type'                       + LineEnding +   // 2
+    '  TFoo = object'            + LineEnding +   // 3
+    '    FField: Integer;'       + LineEnding +   // 4
+    '    procedure Go;'          + LineEnding +   // 5
+    '  end;'                     + LineEnding +   // 6
+    'procedure TFoo.Go;'         + LineEnding +   // 7
+    'begin'                      + LineEnding +   // 8
+    '  Self.FField := 1;'        + LineEnding +   // 9 -- FField ref, col 7
+    'end;'                       + LineEnding +   // 10
+    'begin'                      + LineEnding +   // 11
+    'end.';                                        // 12
+
+  cSameIdentTwice =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'var'                        + LineEnding +   // 2
+    '  x: Integer;'              + LineEnding +   // 3
+    'begin'                      + LineEnding +   // 4
+    '  x := x + 1;'             + LineEnding +   // 5 -- both x resolve to line 3
+    'end.';                                        // 6
+
+  cBrokenSyntax =
+    'program Test;'              + LineEnding +   // 0
+    'begin'                      + LineEnding +   // 1
+    '  x := ;'                   + LineEnding +   // 2
+    'end.';                                        // 3
 
 
 { TTestDeclaration }
@@ -120,6 +224,109 @@ begin
   CheckEquals('MyCounter',
     GetIdentifierAtCursor(FHL, FLines, 4, 10),
     'Cursor at last char of MyCounter should return MyCounter');
+end;
+
+
+{ Phase B -- Single-unit resolution }
+
+procedure TTestDeclaration.TestFindDecl_LocalVar;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cLocalVar);
+  // Line 5: '  x := 1;' -- x at col 2, declared on line 3 (0-based) = line 4 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 5, 2, nil, nil);
+  CheckTrue(decl.Found, 'Should find local var declaration');
+  CheckEquals(4, decl.DeclLine, 'x declared on 1-based line 4');
+end;
+
+procedure TTestDeclaration.TestFindDecl_ProcParam;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cProcParam);
+  // Line 4: '  AValue := 0;' -- AValue at col 2, declared on line 2 (0-based) = line 3 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 2, nil, nil);
+  CheckTrue(decl.Found, 'Should find proc param declaration');
+  CheckEquals(3, decl.DeclLine, 'AValue declared on 1-based line 3');
+end;
+
+procedure TTestDeclaration.TestFindDecl_TypeName;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cTypeName);
+  // Line 9: '  r.Value := 42;' -- Value at col 4, declared on line 4 (0-based) = line 5 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 4, nil, nil);
+  CheckTrue(decl.Found, 'Should find record field declaration');
+  CheckEquals(5, decl.DeclLine, 'Value declared on 1-based line 5');
+end;
+
+procedure TTestDeclaration.TestFindDecl_ClassMethod;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cClassMethod);
+  // Line 12: '  f.DoWork;' -- DoWork at col 4, declared on line 4 (0-based) = line 5 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 12, 4, nil, nil);
+  CheckTrue(decl.Found, 'Should find class method declaration');
+  CheckEquals(5, decl.DeclLine, 'DoWork declared on 1-based line 5');
+end;
+
+procedure TTestDeclaration.TestFindDecl_OverloadedProc;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cOverloaded);
+  // Line 9: '  Calc(42);' -- Calc at col 2, should resolve to Integer overload (line 2, 0-based) = line 3 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 2, nil, nil);
+  CheckTrue(decl.Found, 'Should find overloaded proc (Integer)');
+  CheckEquals(3, decl.DeclLine, 'Calc(Integer) declared on 1-based line 3');
+end;
+
+procedure TTestDeclaration.TestFindDecl_DottedExpr;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cDottedExpr);
+  // Line 9: '  Self.FField := 1;' -- FField at col 7, declared on line 4 (0-based) = line 5 (1-based)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 7, nil, nil);
+  CheckTrue(decl.Found, 'Should find field declaration via Self.FField');
+  CheckEquals(5, decl.DeclLine, 'FField declared on 1-based line 5');
+end;
+
+procedure TTestDeclaration.TestFindDecl_SameIdentTwiceOnLine;
+var
+  decl1, decl2: TDeclarationResult;
+begin
+  SetSource(cSameIdentTwice);
+  // Line 5: '  x := x + 1;' -- first x at col 2, second x at col 7
+  decl1 := FindDeclaration(FHL, FLines, 'test.pas', 5, 2, nil, nil);
+  decl2 := FindDeclaration(FHL, FLines, 'test.pas', 5, 7, nil, nil);
+  CheckTrue(decl1.Found, 'First x should resolve');
+  CheckTrue(decl2.Found, 'Second x should resolve');
+  CheckEquals(decl1.DeclLine, decl2.DeclLine, 'Both x should resolve to same decl line');
+  CheckEquals(4, decl1.DeclLine, 'x declared on 1-based line 4');
+end;
+
+procedure TTestDeclaration.TestFindDecl_NotAnIdent;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cLocalVar);
+  // Line 4: 'begin' -- keyword, not an identifier
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 2, nil, nil);
+  CheckFalse(decl.Found, 'Cursor on keyword should not find declaration');
+end;
+
+procedure TTestDeclaration.TestFindDecl_ParseError;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cBrokenSyntax);
+  // Line 2: '  x := ;' -- broken syntax, should not crash
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 2, nil, nil);
+  CheckFalse(decl.Found, 'Broken syntax should return Found=False, no exception');
 end;
 
 
