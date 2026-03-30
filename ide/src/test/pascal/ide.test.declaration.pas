@@ -52,6 +52,11 @@ type
     procedure TestFindDecl_CrossUnit_Type;
     procedure TestFindDecl_CrossUnit_Proc;
     procedure TestFindDecl_UnitNotFound;
+    { Phase D -- Edge cases }
+    procedure TestFindDecl_EmptySource;
+    procedure TestFindDecl_ConstRef;
+    procedure TestFindDecl_ProgramName;
+    procedure TestFindDecl_CircularUses;
   end;
 
 
@@ -475,6 +480,111 @@ begin
 
   decl := FindDeclaration(FHL, FLines, 'test.pas', 3, 2, nil, nil);
   CheckFalse(decl.Found, 'Missing unit should return Found=False gracefully');
+end;
+
+
+{ Phase D -- Edge cases }
+
+procedure TTestDeclaration.TestFindDecl_EmptySource;
+var
+  decl: TDeclarationResult;
+begin
+  SetSource('');
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 0, 0, nil, nil);
+  CheckFalse(decl.Found, 'Empty source should return Found=False gracefully');
+end;
+
+procedure TTestDeclaration.TestFindDecl_ConstRef;
+const
+  cConstSrc =
+    'program Test;'              + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'const'                      + LineEnding +   // 2
+    '  MaxItems = 100;'          + LineEnding +   // 3
+    'var'                        + LineEnding +   // 4
+    '  n: Integer;'              + LineEnding +   // 5
+    'begin'                      + LineEnding +   // 6
+    '  n := MaxItems;'           + LineEnding +   // 7 -- MaxItems ref, col 7
+    'end.';
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cConstSrc);
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 7, 7, nil, nil);
+  CheckTrue(decl.Found, 'Should find const declaration');
+  CheckEquals(4, decl.DeclLine, 'MaxItems declared on 1-based line 4');
+  CheckEquals('MaxItems', decl.DeclName, 'DeclName should be MaxItems');
+end;
+
+procedure TTestDeclaration.TestFindDecl_ProgramName;
+const
+  cProgSrc =
+    'program MyApp;'             + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'       + LineEnding +   // 1
+    'begin'                      + LineEnding +   // 2
+    'end.';
+var
+  decl: TDeclarationResult;
+begin
+  SetSource(cProgSrc);
+  { Cursor on 'MyApp' in program declaration -- this is the declaration itself,
+    not a reference, so there is no resolved reference to follow }
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 0, 10, nil, nil);
+  CheckFalse(decl.Found, 'Program name is not a reference -- should return Found=False');
+end;
+
+procedure TTestDeclaration.TestFindDecl_CircularUses;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  { UnitA uses UnitB, UnitB uses UnitA -- circular dependency }
+  WriteTempUnit('UnitA',
+    'unit UnitA;'                  + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'uses UnitB;'                  + LineEnding +
+    'type'                         + LineEnding +
+    '  TThingA = record'           + LineEnding +   // line 6 (1-based)
+    '    Name: Integer;'           + LineEnding +
+    '  end;'                       + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+
+  WriteTempUnit('UnitB',
+    'unit UnitB;'                  + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'uses UnitA;'                  + LineEnding +
+    'var'                          + LineEnding +
+    '  GlobalB: Integer;'          + LineEnding +   // line 6 (1-based)
+    'implementation'               + LineEnding +
+    'end.');
+
+  { Main program uses UnitA -- should not hang or crash due to circular uses }
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses UnitA;'                  + LineEnding +   // 2
+    'var'                          + LineEnding +   // 3
+    '  a: TThingA;'               + LineEnding +   // 4
+    'begin'                        + LineEnding +   // 5
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    { The circular use guard should prevent infinite recursion.
+      We don't require it to fully resolve -- just that it doesn't crash. }
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 5, unitPaths, nil);
+    { Result may or may not be Found depending on how deep resolution gets,
+      but the key assertion is that we reach this point without hanging. }
+    Check(True, 'Circular uses did not hang or crash');
+  finally
+    unitPaths.Free;
+  end;
 end;
 
 
