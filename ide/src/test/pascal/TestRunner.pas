@@ -33,7 +33,8 @@ uses
   ide.test.profiles,
   ide.test.cursorhistory,
   ide.test.filefinder,
-  ide.test.symbolfinder;
+  ide.test.symbolfinder,
+  ide.test.declaration;
 
 var
   Application: TTestRunner;

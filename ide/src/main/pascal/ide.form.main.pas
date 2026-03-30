@@ -238,6 +238,7 @@ uses
   ,ide.utils
   ,ide.session
   ,ide.navigation
+  ,ide.declaration
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
