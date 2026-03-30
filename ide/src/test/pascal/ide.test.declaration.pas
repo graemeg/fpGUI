@@ -25,7 +25,9 @@ type
   private
     FHL: TPascalHighlighter;
     FLines: TStringList;
+    FTempDir: string;
     procedure SetSource(const ASource: string);
+    procedure WriteTempUnit(const AUnitName, ASource: string);
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -46,6 +48,10 @@ type
     procedure TestFindDecl_SameIdentTwiceOnLine;
     procedure TestFindDecl_NotAnIdent;
     procedure TestFindDecl_ParseError;
+    { Phase C -- Cross-unit resolution }
+    procedure TestFindDecl_CrossUnit_Type;
+    procedure TestFindDecl_CrossUnit_Proc;
+    procedure TestFindDecl_UnitNotFound;
   end;
 
 
@@ -169,16 +175,50 @@ begin
   FHL.Tokenise(ASource);
 end;
 
+procedure TTestDeclaration.WriteTempUnit(const AUnitName, ASource: string);
+var
+  sl: TStringList;
+begin
+  if FTempDir = '' then
+  begin
+    FTempDir := IncludeTrailingPathDelimiter(GetTempDir) + 'fpgui_decl_test';
+    ForceDirectories(FTempDir);
+  end;
+  sl := TStringList.Create;
+  try
+    sl.Text := ASource;
+    sl.SaveToFile(IncludeTrailingPathDelimiter(FTempDir) + AUnitName + '.pas');
+  finally
+    sl.Free;
+  end;
+end;
+
 procedure TTestDeclaration.SetUp;
 begin
   FHL := TPascalHighlighter.Create;
   FLines := TStringList.Create;
+  FTempDir := '';
 end;
 
 procedure TTestDeclaration.TearDown;
+var
+  sr: TSearchRec;
 begin
   FLines.Free;
   FHL.Free;
+  { Clean up any temp files }
+  if FTempDir <> '' then
+  begin
+    if FindFirst(IncludeTrailingPathDelimiter(FTempDir) + '*', faAnyFile, sr) = 0 then
+    begin
+      repeat
+        if (sr.Name <> '.') and (sr.Name <> '..') then
+          DeleteFile(IncludeTrailingPathDelimiter(FTempDir) + sr.Name);
+      until FindNext(sr) <> 0;
+      FindClose(sr);
+    end;
+    RemoveDir(FTempDir);
+  end;
 end;
 
 procedure TTestDeclaration.TestGetIdentAtCursor_OnIdentifier;
@@ -327,6 +367,114 @@ begin
   // Line 2: '  x := ;' -- broken syntax, should not crash
   decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 2, nil, nil);
   CheckFalse(decl.Found, 'Broken syntax should return Found=False, no exception');
+end;
+
+
+{ Phase C -- Cross-unit resolution }
+
+procedure TTestDeclaration.TestFindDecl_CrossUnit_Type;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  { Write dependency unit to temp dir }
+  WriteTempUnit('HelperUnit',
+    'unit HelperUnit;'             + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'type'                         + LineEnding +
+    '  TMyHelper = record'         + LineEnding +   // line 5 (1-based)
+    '    Value: Integer;'          + LineEnding +
+    '  end;'                       + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+
+  { Main program uses the type from HelperUnit }
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses HelperUnit;'             + LineEnding +   // 2
+    'var'                          + LineEnding +   // 3
+    '  h: TMyHelper;'             + LineEnding +   // 4
+    'begin'                        + LineEnding +   // 5
+    '  h.Value := 1;'             + LineEnding +   // 6 -- Value ref, col 4
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 6, 4, unitPaths, nil);
+    CheckTrue(decl.Found, 'Should find type member from cross-unit');
+    CheckEquals(6, decl.DeclLine, 'Value declared on 1-based line 6 of HelperUnit');
+    CheckTrue(Pos('HelperUnit', decl.DeclFile) > 0,
+      'DeclFile should reference HelperUnit');
+  finally
+    unitPaths.Free;
+  end;
+end;
+
+procedure TTestDeclaration.TestFindDecl_CrossUnit_Proc;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  { Write dependency unit with a procedure }
+  WriteTempUnit('MathUtils',
+    'unit MathUtils;'              + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'function AddTwo(A: Integer): Integer;' + LineEnding +  // line 4 (1-based)
+    'implementation'               + LineEnding +
+    'function AddTwo(A: Integer): Integer;' + LineEnding +
+    'begin'                        + LineEnding +
+    '  Result := A + 2;'          + LineEnding +
+    'end;'                         + LineEnding +
+    'end.');
+
+  { Main program calls the function }
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses MathUtils;'              + LineEnding +   // 2
+    'var'                          + LineEnding +   // 3
+    '  x: Integer;'                + LineEnding +   // 4
+    'begin'                        + LineEnding +   // 5
+    '  x := AddTwo(5);'           + LineEnding +   // 6 -- AddTwo ref, col 7
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 6, 7, unitPaths, nil);
+    CheckTrue(decl.Found, 'Should find proc from cross-unit');
+    CheckEquals(4, decl.DeclLine, 'AddTwo declared on 1-based line 4 of MathUtils');
+    CheckTrue(Pos('MathUtils', decl.DeclFile) > 0,
+      'DeclFile should reference MathUtils');
+  finally
+    unitPaths.Free;
+  end;
+end;
+
+procedure TTestDeclaration.TestFindDecl_UnitNotFound;
+var
+  decl: TDeclarationResult;
+  mainSrc: string;
+begin
+  { Program uses a non-existent unit -- should fail gracefully }
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses NonExistentUnit;'        + LineEnding +   // 2
+    'begin'                        + LineEnding +   // 3
+    'end.';
+  SetSource(mainSrc);
+
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 3, 2, nil, nil);
+  CheckFalse(decl.Found, 'Missing unit should return Found=False gracefully');
 end;
 
 

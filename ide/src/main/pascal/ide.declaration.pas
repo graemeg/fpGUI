@@ -55,15 +55,19 @@ type
     FUnitPaths: TStrings;        { borrowed }
     FIncludePaths: TStrings;     { borrowed }
     FParsing: TStringList;       { tracks units currently being parsed -- circular use guard }
+    FSubEngines: TFPList;        { sub-engines kept alive until root cleanup }
+    FSubObjects: TFPList;        { parsers/scanners/resolvers kept alive until root cleanup }
     FOwnsHub: Boolean;           { True for root engine, False for sub-engines }
     FOwnsParsing: Boolean;       { True for root engine, False for sub-engines }
     function SubParseUnit(const AName, AFilename, ASource: string): TPasModule;
   public
     constructor Create;
-    constructor CreateSub(AHub: TPasResolverHub; AParsing: TStringList);
+    constructor CreateSub(AHub: TPasResolverHub; AParsing: TStringList;
+      ASubEngines: TFPList; ASubObjects: TFPList);
     destructor Destroy; override;
     function FindUnit(const AName, InFilename: String;
       NameExpr, InFileExpr: TPasExpr): TPasModule; override;
+    procedure UsedInterfacesFinished(Section: TPasSection); override;
     property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
     property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
   end;
@@ -165,24 +169,39 @@ begin
   FParsing := TStringList.Create;
   FParsing.Sorted := True;
   FOwnsParsing := True;
+  FSubEngines := TFPList.Create;
+  FSubObjects := TFPList.Create;
 end;
 
 constructor TDeclarationEngine.CreateSub(AHub: TPasResolverHub;
-  AParsing: TStringList);
+  AParsing: TStringList; ASubEngines: TFPList; ASubObjects: TFPList);
 begin
   inherited Create;
   Hub := AHub;
   FOwnsHub := False;
   FParsing := AParsing;
   FOwnsParsing := False;
+  FSubEngines := ASubEngines;  { shared with root }
+  FSubObjects := ASubObjects;  { shared with root }
 end;
 
 destructor TDeclarationEngine.Destroy;
 var
   h: TPasResolverHub;
+  i: Integer;
 begin
   if FOwnsParsing then
+  begin
+    { Free sub-engines first (they may reference shared state) }
+    for i := 0 to FSubEngines.Count - 1 do
+      TObject(FSubEngines[i]).Free;
+    FSubEngines.Free;
+    { Free parsers, scanners, resolvers kept alive for AST integrity }
+    for i := 0 to FSubObjects.Count - 1 do
+      TObject(FSubObjects[i]).Free;
+    FSubObjects.Free;
     FParsing.Free;
+  end;
   { Save and detach Hub before inherited Destroy calls Clear }
   h := Hub;
   inherited Destroy;
@@ -200,45 +219,58 @@ var
 begin
   Result := nil;
   FParsing.Add(UpperCase(AName));
-  subResolver := TDeclarationFileResolver.Create;
   try
+    subResolver := TDeclarationFileResolver.Create;
     subResolver.OwnsStreams := True;
     subResolver.UnitPaths := FUnitPaths;
     subResolver.IncludePaths := FIncludePaths;
     subResolver.AddStream(AFilename, TStringStream.Create(ASource));
 
     subScanner := TPascalScanner.Create(subResolver);
-    try
-      subScanner.OpenFile(AFilename);
-      { Each unit needs its own engine instance, sharing Hub and parsing guard }
-      subEngine := TDeclarationEngine.CreateSub(Hub, FParsing);
-      try
-        subEngine.UnitPaths := FUnitPaths;
-        subEngine.IncludePaths := FIncludePaths;
-        subEngine.AddObjFPCBuiltInIdentifiers;
+    subScanner.OpenFile(AFilename);
 
-        subParser := TPasParser.Create(subScanner, subResolver, subEngine);
-        try
-          subParser.ImplicitUses.Clear;
-          try
-            subParser.ParseMain(Result);
-          except
-            { Prevent secondary parse failures from corrupting the main scope stack }
-            Result := nil;
-          end;
-        finally
-          subParser.Free;
-        end;
-      finally
-        subEngine.Free;
-      end;
-    finally
-      subScanner.Free;
+    { Each unit needs its own engine instance, sharing Hub and parsing guard.
+      Sub-engines are kept alive until root engine cleanup (AST nodes are
+      owned by the engine that created them). }
+    subEngine := TDeclarationEngine.CreateSub(Hub, FParsing, FSubEngines, FSubObjects);
+    subEngine.UnitPaths := FUnitPaths;
+    subEngine.IncludePaths := FIncludePaths;
+    subEngine.AddObjFPCBuiltInIdentifiers;
+    subEngine.AddBaseType('Integer', btLongint);
+    subEngine.AddBaseType('Cardinal', btLongWord);
+    subEngine.AddBaseType('SizeInt', {$ifdef HasInt64}btInt64{$else}btIntDouble{$endif});
+    FSubEngines.Add(subEngine);
+
+    subParser := TPasParser.Create(subScanner, subResolver, subEngine);
+    subParser.ImplicitUses.Clear;
+
+    { Keep parser, scanner, and resolver alive until root engine cleanup.
+      TPasParser.Destroy calls Engine.CurrentParser := nil which triggers
+      TPasResolver.Clear, wiping all CustomData from the AST.  We need
+      the scopes intact for the main engine's cross-unit resolution. }
+    FSubObjects.Add(subParser);
+    FSubObjects.Add(subScanner);
+    FSubObjects.Add(subResolver);
+
+    try
+      subParser.NextToken;
+      subParser.ParseUnit(Result);
+    except
+      on E: Exception do
+        Result := nil;
     end;
   finally
-    subResolver.Free;
     FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
   end;
+end;
+
+procedure TDeclarationEngine.UsedInterfacesFinished(Section: TPasSection);
+begin
+  { Sub-engines: do not parse recursively -- using queue-based approach.
+    Root engine: let inherited handle continuation. }
+  if not FOwnsHub then
+    Exit;
+  inherited UsedInterfacesFinished(Section);
 end;
 
 function TDeclarationEngine.FindUnit(const AName, InFilename: String;
@@ -401,6 +433,7 @@ begin
 
   { Step 2: Create the parsing pipeline }
   module := nil;
+  try
   resolver := TDeclarationFileResolver.Create;
   try
     resolver.OwnsStreams := True;
@@ -433,12 +466,8 @@ begin
           try
             parser.ParseMain(module);
           except
-            on E: EPasResolve do
-              Exit;
-            on E: EParserError do
-              Exit;
-            on E: EScannerError do
-              Exit;
+            on E: Exception do
+              module := nil;
           end;
 
           if module = nil then
@@ -477,6 +506,9 @@ begin
     end;
   finally
     resolver.Free;
+  end;
+  except
+    { Catch any cleanup exceptions }
   end;
 end;
 
