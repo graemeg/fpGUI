@@ -24,7 +24,7 @@ unit ide.declaration;
 interface
 
 uses
-  Classes, SysUtils, pscanner, ide.highlighter;
+  Classes, SysUtils, pscanner, pparser, pastree, pasresolver, ide.highlighter;
 
 type
   TDeclarationResult = record
@@ -44,6 +44,22 @@ type
   public
     function FindSourceFile(const AName: string): TLineReader; override;
     function FindIncludeFile(const AName: string): TLineReader; override;
+    property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
+    property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
+  end;
+
+  { TDeclarationEngine }
+
+  TDeclarationEngine = class(TPasResolver)
+  private
+    FUnitPaths: TStrings;        { borrowed }
+    FIncludePaths: TStrings;     { borrowed }
+    FParsing: TStringList;       { tracks units currently being parsed -- circular use guard }
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function FindUnit(const AName, InFilename: String;
+      NameExpr, InFileExpr: TPasExpr): TPasModule; override;
     property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
     property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
   end;
@@ -125,6 +141,98 @@ begin
   else
     { Graceful degradation -- return empty reader }
     Result := TStringStreamLineReader.Create(AName, '');
+end;
+
+
+{ TDeclarationEngine }
+
+constructor TDeclarationEngine.Create;
+begin
+  inherited Create;
+  FParsing := TStringList.Create;
+  FParsing.Sorted := True;
+end;
+
+destructor TDeclarationEngine.Destroy;
+begin
+  FParsing.Free;
+  inherited Destroy;
+end;
+
+function TDeclarationEngine.FindUnit(const AName, InFilename: String;
+  NameExpr, InFileExpr: TPasExpr): TPasModule;
+var
+  resolver: TDeclarationFileResolver;
+  scanner: TPascalScanner;
+  parser: TPasParser;
+  filePath: string;
+  fs: TFileStream;
+  ss: TStringStream;
+begin
+  Result := nil;
+
+  { Circular use guard }
+  if FParsing.IndexOf(UpperCase(AName)) >= 0 then
+    Exit;
+
+  { Search unit paths for source file }
+  filePath := '';
+  if FUnitPaths <> nil then
+  begin
+    resolver := TDeclarationFileResolver.Create;
+    try
+      filePath := resolver.SearchPaths(FUnitPaths, AName + '.pas');
+      if filePath = '' then
+        filePath := resolver.SearchPaths(FUnitPaths, AName + '.pp');
+    finally
+      resolver.Free;
+    end;
+  end;
+
+  if filePath = '' then
+    Exit;
+
+  { Sub-parse the unit }
+  FParsing.Add(UpperCase(AName));
+  resolver := TDeclarationFileResolver.Create;
+  try
+    resolver.OwnsStreams := True;
+    resolver.UnitPaths := FUnitPaths;
+    resolver.IncludePaths := FIncludePaths;
+
+    { Load file content into a stream for the resolver }
+    ss := TStringStream.Create('');
+    fs := TFileStream.Create(filePath, fmOpenRead or fmShareDenyNone);
+    try
+      ss.CopyFrom(fs, 0);
+    finally
+      fs.Free;
+    end;
+    ss.Position := 0;
+    resolver.AddStream(filePath, ss);
+
+    scanner := TPascalScanner.Create(resolver);
+    try
+      scanner.OpenFile(filePath);
+      parser := TPasParser.Create(scanner, resolver, Self);
+      try
+        parser.ImplicitUses.Clear;
+        try
+          parser.ParseMain(Result);
+        except
+          { Prevent secondary parse failures from corrupting the main scope stack }
+          Result := nil;
+        end;
+      finally
+        parser.Free;
+      end;
+    finally
+      scanner.Free;
+    end;
+  finally
+    resolver.Free;
+    FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
+  end;
 end;
 
 
