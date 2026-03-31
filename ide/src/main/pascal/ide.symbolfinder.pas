@@ -72,19 +72,7 @@ function FilterSymbolsEx(const APattern: string;
 implementation
 
 uses
-  pscanner;
-
-type
-  { Custom resolver that returns empty content for include files }
-  TSymbolListResolver = class(TStreamResolver)
-  public
-    function FindIncludeFile(const AName: string): TLineReader; override;
-  end;
-
-function TSymbolListResolver.FindIncludeFile(const AName: string): TLineReader;
-begin
-  Result := TStringStreamLineReader.Create(AName, '');
-end;
+  ide.pascal.tokeniser;
 
 function SymbolKindToStr(AKind: TSymbolKind): string;
 begin
@@ -122,9 +110,9 @@ end;
 procedure ScanSourceForSymbols(const ASource, AFileName: string;
   var ASymbols: TSymbolEntryArray);
 var
-  Scanner: TPascalScanner;
-  Resolver: TSymbolListResolver;
-  Token: TToken;
+  Tokeniser: TFpgPascalTokeniser;
+  Tok: TFpgPasToken;
+  TokUpper: string;
   IsUnit: Boolean;
   InInterface: Boolean;
   Section: (secNone, secType, secConst, secVar, secOther);
@@ -132,270 +120,212 @@ var
   CurrentClassName: string;
   SymName: string;
   Line: Integer;
+  SymKind: TSymbolKind;
+
+  procedure FetchToken;
+  begin
+    repeat
+      Tok := Tokeniser.NextToken;
+    until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                            fptkComment, fptkDirective]);
+    TokUpper := Tokeniser.TokenTextUpper;
+  end;
+
+  function IsKW(const AWord: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkKeyword) and (TokUpper = AWord);
+  end;
+
+  function IsSym(const ACh: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = ACh);
+  end;
+
 begin
   if Length(ASource) = 0 then
     Exit;
 
-  Resolver := TSymbolListResolver.Create;
+  Tokeniser := TFpgPascalTokeniser.Create;
   try
-    Resolver.OwnsStreams := True;
-    Resolver.AddStream(AFileName, TStringStream.Create(ASource));
+    Tokeniser.SetSource(ASource);
+    FetchToken;
 
-    Scanner := TPascalScanner.Create(Resolver);
-    try
-      Scanner.SkipWhiteSpace := True;
-      Scanner.SkipComments := True;
-      Scanner.OpenFile(AFileName);
-
-      Token := Scanner.FetchToken;
-
-      { Determine if this is a unit (has interface/implementation sections) }
-      IsUnit := (Token = tkunit);
-      if IsUnit then
+    // Determine if this is a unit (has interface/implementation sections)
+    IsUnit := IsKW('UNIT');
+    if IsUnit then
+    begin
+      InInterface := False;
+      while Tok.Kind <> fptkEOF do
       begin
-        { Skip to interface keyword }
-        InInterface := False;
-        while Token <> tkEOF do
+        if IsKW('INTERFACE') then
         begin
-          if Token = tkinterface then
-          begin
-            InInterface := True;
-            Token := Scanner.FetchToken;
-            Break;
-          end;
-          Token := Scanner.FetchToken;
-        end;
-        if not InInterface then
-          Exit;
-      end;
-      { For program/library files, scan the whole top-level }
-
-      Section := secNone;
-      TypeNestDepth := 0;
-      CurrentClassName := '';
-
-      while Token <> tkEOF do
-      begin
-        { Stop at implementation section for units }
-        if IsUnit and (Token = tkimplementation) then
+          InInterface := True;
+          FetchToken;
           Break;
-
-        { Track section changes at the top level (not inside a type body) }
-        if TypeNestDepth = 0 then
-        begin
-          case Token of
-            tktype:
-              begin
-                Section := secType;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkconst:
-              begin
-                Section := secConst;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkvar:
-              begin
-                Section := secVar;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkprocedure, tkfunction, tkconstructor, tkdestructor:
-              begin
-                Section := secOther;
-                { fall through to handle below }
-              end;
-          end;
         end;
-
-        { Handle procedures/functions }
-        if Token in [tkprocedure, tkfunction, tkconstructor, tkdestructor] then
-        begin
-          Line := Scanner.CurTokenPos.Row;
-          case Token of
-            tkprocedure:   Section := secOther;
-            tkfunction:    Section := secOther;
-            tkconstructor: Section := secOther;
-            tkdestructor:  Section := secOther;
-          end;
-
-          { Remember the kind }
-          case Token of
-            tkprocedure:
-              begin
-                Token := Scanner.FetchToken;
-                if Token = tkIdentifier then
-                begin
-                  SymName := Scanner.CurTokenString;
-                  if (TypeNestDepth > 0) and (CurrentClassName <> '') then
-                    AddSymbol(ASymbols, SymName, CurrentClassName + '.' + SymName,
-                      AFileName, '', '', skProcedure, Line)
-                  else
-                    AddSymbol(ASymbols, SymName, SymName,
-                      AFileName, '', '', skProcedure, Line);
-                end;
-                { Skip to semicolon }
-                while (Token <> tkSemicolon) and (Token <> tkEOF) do
-                  Token := Scanner.FetchToken;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkfunction:
-              begin
-                Token := Scanner.FetchToken;
-                if Token = tkIdentifier then
-                begin
-                  SymName := Scanner.CurTokenString;
-                  if (TypeNestDepth > 0) and (CurrentClassName <> '') then
-                    AddSymbol(ASymbols, SymName, CurrentClassName + '.' + SymName,
-                      AFileName, '', '', skFunction, Line)
-                  else
-                    AddSymbol(ASymbols, SymName, SymName,
-                      AFileName, '', '', skFunction, Line);
-                end;
-                while (Token <> tkSemicolon) and (Token <> tkEOF) do
-                  Token := Scanner.FetchToken;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkconstructor:
-              begin
-                Token := Scanner.FetchToken;
-                if Token = tkIdentifier then
-                begin
-                  SymName := Scanner.CurTokenString;
-                  if (TypeNestDepth > 0) and (CurrentClassName <> '') then
-                    AddSymbol(ASymbols, SymName, CurrentClassName + '.' + SymName,
-                      AFileName, '', '', skConstructor, Line)
-                  else
-                    AddSymbol(ASymbols, SymName, SymName,
-                      AFileName, '', '', skConstructor, Line);
-                end;
-                while (Token <> tkSemicolon) and (Token <> tkEOF) do
-                  Token := Scanner.FetchToken;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-            tkdestructor:
-              begin
-                Token := Scanner.FetchToken;
-                if Token = tkIdentifier then
-                begin
-                  SymName := Scanner.CurTokenString;
-                  if (TypeNestDepth > 0) and (CurrentClassName <> '') then
-                    AddSymbol(ASymbols, SymName, CurrentClassName + '.' + SymName,
-                      AFileName, '', '', skDestructor, Line)
-                  else
-                    AddSymbol(ASymbols, SymName, SymName,
-                      AFileName, '', '', skDestructor, Line);
-                end;
-                while (Token <> tkSemicolon) and (Token <> tkEOF) do
-                  Token := Scanner.FetchToken;
-                Token := Scanner.FetchToken;
-                Continue;
-              end;
-          end;
-        end;
-
-        { Handle type declarations }
-        if (Section = secType) and (TypeNestDepth = 0) and (Token = tkIdentifier) then
-        begin
-          SymName := Scanner.CurTokenString;
-          Line := Scanner.CurTokenPos.Row;
-          Token := Scanner.FetchToken;
-          if Token = tkEqual then
-          begin
-            AddSymbol(ASymbols, SymName, SymName,
-              AFileName, '', '', skType, Line);
-            Token := Scanner.FetchToken;
-            { Check if this starts a class/record/object body }
-            if Token in [tkclass, tkrecord, tkobject] then
-            begin
-              CurrentClassName := SymName;
-              TypeNestDepth := 1;
-              Token := Scanner.FetchToken;
-              { Check for forward declaration: class; }
-              if Token = tkSemicolon then
-              begin
-                TypeNestDepth := 0;
-                CurrentClassName := '';
-                Token := Scanner.FetchToken;
-              end;
-              { Otherwise Token already holds the first token inside the body }
-              Continue;
-            end
-            else
-            begin
-              { Simple type (enum, range, alias) — skip to semicolon }
-              while (Token <> tkSemicolon) and (Token <> tkEOF) do
-                Token := Scanner.FetchToken;
-            end;
-          end;
-          Token := Scanner.FetchToken;
-          Continue;
-        end;
-
-        { Track nesting inside class/record/object bodies }
-        if TypeNestDepth > 0 then
-        begin
-          if Token in [tkrecord, tkclass, tkobject] then
-          begin
-            { Nested type — check for 'end' matching }
-            Inc(TypeNestDepth);
-          end
-          else if Token = tkend then
-          begin
-            Dec(TypeNestDepth);
-            if TypeNestDepth = 0 then
-              CurrentClassName := '';
-          end;
-        end;
-
-        { Handle const declarations }
-        if (Section = secConst) and (TypeNestDepth = 0) and (Token = tkIdentifier) then
-        begin
-          SymName := Scanner.CurTokenString;
-          Line := Scanner.CurTokenPos.Row;
-          Token := Scanner.FetchToken;
-          if (Token = tkEqual) or (Token = tkColon) then
-          begin
-            AddSymbol(ASymbols, SymName, SymName,
-              AFileName, '', '', skConst, Line);
-            { Skip to semicolon }
-            while (Token <> tkSemicolon) and (Token <> tkEOF) do
-              Token := Scanner.FetchToken;
-          end;
-          Token := Scanner.FetchToken;
-          Continue;
-        end;
-
-        { Handle var declarations }
-        if (Section = secVar) and (TypeNestDepth = 0) and (Token = tkIdentifier) then
-        begin
-          SymName := Scanner.CurTokenString;
-          Line := Scanner.CurTokenPos.Row;
-          Token := Scanner.FetchToken;
-          if Token = tkColon then
-          begin
-            AddSymbol(ASymbols, SymName, SymName,
-              AFileName, '', '', skVar, Line);
-            { Skip to semicolon }
-            while (Token <> tkSemicolon) and (Token <> tkEOF) do
-              Token := Scanner.FetchToken;
-          end;
-          Token := Scanner.FetchToken;
-          Continue;
-        end;
-
-        Token := Scanner.FetchToken;
+        FetchToken;
       end;
-    finally
-      Scanner.Free;
+      if not InInterface then
+        Exit;
+    end;
+    // For program/library files, scan the whole top-level
+
+    Section := secNone;
+    TypeNestDepth := 0;
+    CurrentClassName := '';
+
+    while Tok.Kind <> fptkEOF do
+    begin
+      // Stop at implementation section for units
+      if IsUnit and IsKW('IMPLEMENTATION') then
+        Break;
+
+      // Track section changes at top level (not inside a type body)
+      if TypeNestDepth = 0 then
+      begin
+        if IsKW('TYPE') then
+        begin
+          Section := secType;
+          FetchToken;
+          Continue;
+        end;
+        if IsKW('CONST') then
+        begin
+          Section := secConst;
+          FetchToken;
+          Continue;
+        end;
+        if IsKW('VAR') then
+        begin
+          Section := secVar;
+          FetchToken;
+          Continue;
+        end;
+        if (TokUpper = 'PROCEDURE') or (TokUpper = 'FUNCTION') or
+           (TokUpper = 'CONSTRUCTOR') or (TokUpper = 'DESTRUCTOR') then
+          Section := secOther;
+      end;
+
+      // Handle procedures/functions
+      if (Tok.Kind = fptkKeyword) and
+         ((TokUpper = 'PROCEDURE') or (TokUpper = 'FUNCTION') or
+          (TokUpper = 'CONSTRUCTOR') or (TokUpper = 'DESTRUCTOR')) then
+      begin
+        Line := Tok.Line;
+        if TokUpper = 'PROCEDURE' then SymKind := skProcedure
+        else if TokUpper = 'FUNCTION' then SymKind := skFunction
+        else if TokUpper = 'CONSTRUCTOR' then SymKind := skConstructor
+        else SymKind := skDestructor;
+
+        FetchToken;
+        if Tok.Kind = fptkIdentifier then
+        begin
+          SymName := Tokeniser.TokenText;
+          if (TypeNestDepth > 0) and (CurrentClassName <> '') then
+            AddSymbol(ASymbols, SymName, CurrentClassName + '.' + SymName,
+              AFileName, '', '', SymKind, Line)
+          else
+            AddSymbol(ASymbols, SymName, SymName,
+              AFileName, '', '', SymKind, Line);
+        end;
+        // Skip to semicolon
+        while not IsSym(';') and (Tok.Kind <> fptkEOF) do
+          FetchToken;
+        FetchToken;
+        Continue;
+      end;
+
+      // Handle type declarations
+      if (Section = secType) and (TypeNestDepth = 0) and
+         (Tok.Kind = fptkIdentifier) then
+      begin
+        SymName := Tokeniser.TokenText;
+        Line := Tok.Line;
+        FetchToken;
+        if IsSym('=') then
+        begin
+          AddSymbol(ASymbols, SymName, SymName,
+            AFileName, '', '', skType, Line);
+          FetchToken;
+          // Check if this starts a class/record/object body
+          if IsKW('CLASS') or IsKW('RECORD') or IsKW('OBJECT') then
+          begin
+            CurrentClassName := SymName;
+            TypeNestDepth := 1;
+            FetchToken;
+            // Check for forward declaration: class;
+            if IsSym(';') then
+            begin
+              TypeNestDepth := 0;
+              CurrentClassName := '';
+              FetchToken;
+            end;
+            Continue;
+          end
+          else
+          begin
+            // Simple type (enum, range, alias) — skip to semicolon
+            while not IsSym(';') and (Tok.Kind <> fptkEOF) do
+              FetchToken;
+          end;
+        end;
+        FetchToken;
+        Continue;
+      end;
+
+      // Track nesting inside class/record/object bodies
+      if TypeNestDepth > 0 then
+      begin
+        if IsKW('RECORD') or IsKW('CLASS') or IsKW('OBJECT') then
+          Inc(TypeNestDepth)
+        else if IsKW('END') then
+        begin
+          Dec(TypeNestDepth);
+          if TypeNestDepth = 0 then
+            CurrentClassName := '';
+        end;
+      end;
+
+      // Handle const declarations
+      if (Section = secConst) and (TypeNestDepth = 0) and
+         (Tok.Kind = fptkIdentifier) then
+      begin
+        SymName := Tokeniser.TokenText;
+        Line := Tok.Line;
+        FetchToken;
+        if IsSym('=') or IsSym(':') then
+        begin
+          AddSymbol(ASymbols, SymName, SymName,
+            AFileName, '', '', skConst, Line);
+          while not IsSym(';') and (Tok.Kind <> fptkEOF) do
+            FetchToken;
+        end;
+        FetchToken;
+        Continue;
+      end;
+
+      // Handle var declarations
+      if (Section = secVar) and (TypeNestDepth = 0) and
+         (Tok.Kind = fptkIdentifier) then
+      begin
+        SymName := Tokeniser.TokenText;
+        Line := Tok.Line;
+        FetchToken;
+        if IsSym(':') then
+        begin
+          AddSymbol(ASymbols, SymName, SymName,
+            AFileName, '', '', skVar, Line);
+          while not IsSym(';') and (Tok.Kind <> fptkEOF) do
+            FetchToken;
+        end;
+        FetchToken;
+        Continue;
+      end;
+
+      FetchToken;
     end;
   finally
-    Resolver.Free;
+    Tokeniser.Free;
   end;
 end;
 
