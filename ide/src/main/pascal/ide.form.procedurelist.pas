@@ -23,17 +23,9 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_label,
   fpg_edit, fpg_combobox, fpg_basegrid, fpg_grid, fpg_imagelist,
-  pscanner, pparser, pastree, fpg_textedit;
+  fpg_textedit;
 
 type
-
-  TSimpleEngine = class(TPasTreeContainer)
-  public
-    function CreateElement(AClass: TPTreeElement; const AName: String;
-      AParent: TPasElement; AVisibility: TPasMemberVisibility;
-      const ASourceFilename: String; ASourceLinenumber: Integer): TPasElement; override;
-    function FindElement(const AName: String): TPasElement; override;
-  end;
 
   TSourceLanguage = (ltPas, ltCpp);
 
@@ -115,6 +107,7 @@ implementation
 uses
   ide.consts
   ,ide.utils
+  ,ide.pascal.tokeniser
   ,dbugintf
   ,fpg_utils
   ,fpg_imgfmt_bmp
@@ -127,20 +120,6 @@ const
   SImplementationNotFound = 'Implementation section not found (parser error?)';
   SInvalidIndex = 'Invalid index number';
   SParseStatistics = 'Procedures processed in %.4g seconds';
-
-
-type
-  { Custom resolver that returns empty content for {$I} include files,
-    preventing scanner errors when parsing files with include directives. }
-  TProcListResolver = class(TStreamResolver)
-  public
-    function FindIncludeFile(const AName: string): TLineReader; override;
-  end;
-
-function TProcListResolver.FindIncludeFile(const AName: string): TLineReader;
-begin
-  Result := TStringStreamLineReader.Create(AName, '');
-end;
 
 
 {$I proclistimages.inc}
@@ -213,32 +192,8 @@ begin
 end;
 
 procedure TProcedureListForm.FormShow(Sender: TObject);
-var
-  M: TPasModule;
-  E: TPasTreeContainer;
-  I: Integer;
-  Decls: TList;
-  p: TPasElement;
 begin
-{
-  E := TSimpleEngine.Create;
-  try
-//    writeln(Format('Parsing file <%s> for OS <%s> and CPU <%s>', [FFilename, OSTarget, CPUTarget]));
-    M := ParseSource(E, FFilename, OSTarget, CPUTarget);
-
-    { Cool, we successfully parsed the unit.
-      Now output some info about it. }
-    Decls := M.InterfaceSection.Declarations;
-    for I := 0 to Decls.Count - 1 do
-    begin
-      p := TObject(Decls[I]) as TPasElement;
-//      Writeln('Interface item ', I, ': ' + p.Name + ' [line ' + IntToStr(p.SourceLinenumber) + ']');
-    end;
-    FreeAndNil(M);
-  finally
-    FreeAndNil(E)
-  end;
-}
+  // placeholder — loading is handled by SetFilename/InitializeForm
 end;
 
 procedure TProcedureListForm.InitializeForm;
@@ -422,64 +377,64 @@ end;
 
 procedure TProcedureListForm.LoadProcs;
 var
-  Scanner: TPascalScanner;
-  Resolver: TProcListResolver;
-  Token: TToken;
+  Tokeniser: TFpgPascalTokeniser;
+  Tok: TFpgPasToken;
+  TokUpper: string;
+
+  procedure FetchToken;
+  begin
+    repeat
+      Tok := Tokeniser.NextToken;
+    until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                            fptkComment, fptkDirective]);
+    TokUpper := Tokeniser.TokenTextUpper;
+  end;
+
+  // Keep whitespace for building display strings
+  procedure FetchTokenKeepWS;
+  begin
+    repeat
+      Tok := Tokeniser.NextToken;
+    until not (Tok.Kind in [fptkComment, fptkDirective]);
+    TokUpper := Tokeniser.TokenTextUpper;
+  end;
+
+  function IsKW(const AWord: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkKeyword) and (TokUpper = AWord);
+  end;
+
+  function IsSym(const ACh: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = ACh);
+  end;
 
   function MoveToImplementation: Boolean;
   begin
     if IsProgram(FFileName) or (IsInc(FFileName)) then
-    begin
-      Result := True;
-      Exit;
-    end;
+      Exit(True);
     Result := False;
-    while Token <> tkEOF do
+    while Tok.Kind <> fptkEOF do
     begin
-      if Token = tkimplementation then
+      if IsKW('IMPLEMENTATION') then
         Result := True;
-      Token := Scanner.FetchToken;
+      FetchToken;
       if Result then
         Break;
     end;
   end;
 
-  function IsVisibilityIdent(const AToken: TToken; const ATokenStr: string): Boolean;
+  function IsVisibilityIdent: Boolean;
   begin
-    Result := (AToken = tkIdentifier) and
-      ((CompareText(ATokenStr, 'private') = 0) or
-       (CompareText(ATokenStr, 'protected') = 0) or
-       (CompareText(ATokenStr, 'public') = 0) or
-       (CompareText(ATokenStr, 'published') = 0));
+    Result := (Tok.Kind = fptkIdentifier) and
+      ((TokUpper = 'PRIVATE') or (TokUpper = 'PROTECTED') or
+       (TokUpper = 'PUBLIC') or (TokUpper = 'PUBLISHED'));
   end;
 
   procedure FindProcs;
-
-    function GetProperProcName(ProcType: TToken; IsClass: Boolean): string;
-    begin
-      Result := SUnknown;
-      if IsClass then
-      begin
-        if ProcType = tkfunction then
-          Result := 'Class Func' // Do not localize.
-        else if ProcType = tkprocedure then
-          Result := 'Class Proc'; // Do not localize.
-      end
-      else
-      begin
-        case ProcType of
-          // Do not localize.
-          tkfunction: Result := 'Function';
-          tkprocedure: Result := 'Procedure';
-          tkconstructor: Result := 'Constructor';
-          tkdestructor: Result := 'Destructor';
-        end;
-      end;
-    end;
-
   var
     ProcLine: string;
-    ProcType: TToken;
+    ProcKindStr: string;
     Line: Integer;
     ClassLast: Boolean;
     InParenthesis: Boolean;
@@ -487,7 +442,7 @@ var
     FoundNonEmptyType: Boolean;
     IdentifierNeeded: Boolean;
     ProcedureInfo: TProcInfo;
-    TokenStr: string;
+    IsClassProc: Boolean;
   begin
     FProcList.Capacity := 200;
     FProcList.BeginUpdate;
@@ -502,91 +457,94 @@ var
             InTypeDeclaration := False;
             FoundNonEmptyType := False;
 
-            while Token <> tkEOF do
+            while Tok.Kind <> fptkEOF do
             begin
-              if not InTypeDeclaration and
-                (Token in [tkfunction, tkprocedure, tkconstructor, tkdestructor]) then
+              if not InTypeDeclaration and (Tok.Kind = fptkKeyword) and
+                 ((TokUpper = 'FUNCTION') or (TokUpper = 'PROCEDURE') or
+                  (TokUpper = 'CONSTRUCTOR') or (TokUpper = 'DESTRUCTOR')) then
               begin
                 IdentifierNeeded := True;
-                ProcType := Token;
-                Line := Scanner.CurTokenPos.Row;
-                ProcLine := '';
-                while Token <> tkEOF do
+                IsClassProc := ClassLast;
+                // Determine procedure type display
+                if IsClassProc then
                 begin
-                  case Token of
-                    tkIdentifier:
-                      IdentifierNeeded := False;
+                  if TokUpper = 'FUNCTION' then ProcKindStr := 'Class Func'
+                  else if TokUpper = 'PROCEDURE' then ProcKindStr := 'Class Proc'
+                  else ProcKindStr := SUnknown;
+                end
+                else
+                begin
+                  if TokUpper = 'FUNCTION' then ProcKindStr := 'Function'
+                  else if TokUpper = 'PROCEDURE' then ProcKindStr := 'Procedure'
+                  else if TokUpper = 'CONSTRUCTOR' then ProcKindStr := 'Constructor'
+                  else if TokUpper = 'DESTRUCTOR' then ProcKindStr := 'Destructor'
+                  else ProcKindStr := SUnknown;
+                end;
+                Line := Tok.Line;
+                ProcLine := '';
 
-                    tkBraceOpen:
-                      begin
-                        // Did we run into an identifier already?
-                        // This prevents
-                        //    AProcedure = procedure() of object
-                        // from being recognised as a procedure
-                        if IdentifierNeeded then
-                          Break;
-                        InParenthesis := True;
-                      end;
+                // Build procedure signature string
+                while Tok.Kind <> fptkEOF do
+                begin
+                  if Tok.Kind = fptkIdentifier then
+                    IdentifierNeeded := False;
 
-                    tkBraceClose:
-                      InParenthesis := False;
+                  if IsSym('(') then
+                  begin
+                    // Prevent "AProcedure = procedure() of object" from matching
+                    if IdentifierNeeded then
+                      Break;
+                    InParenthesis := True;
+                  end
+                  else if IsSym(')') then
+                    InParenthesis := False;
 
-                  else
-                    // nothing
-                  end; // case
-
-                  if (not InParenthesis) and (Token = tkSemicolon) then
+                  if (not InParenthesis) and IsSym(';') then
                     Break;
 
-                  if Token in [tkWhitespace, tkTab] then
+                  if Tok.Kind = fptkWhitespace then
                   begin
-                    { Preserve a single space between tokens }
+                    // Preserve a single space between tokens
                     if (ProcLine <> '') and (ProcLine[Length(ProcLine)] <> ' ') then
                       ProcLine := ProcLine + ' ';
                   end
-                  else if Token <> tkLineEnding then
-                  begin
-                    TokenStr := Scanner.CurTokenString;
-                    if TokenStr <> '' then
-                      ProcLine := ProcLine + TokenStr
-                    else
-                      ProcLine := ProcLine + TokenInfos[Token];
-                  end;
-                  Token := Scanner.FetchToken;
-                end; // while
-                if Token = tkSemicolon then
+                  else if Tok.Kind <> fptkLineEnding then
+                    ProcLine := ProcLine + Tokeniser.TokenText;
+
+                  FetchTokenKeepWS;
+                end;
+                if IsSym(';') then
                   ProcLine := ProcLine + ';';
-                if ClassLast then
-                  ProcLine := 'class ' + ProcLine; // Do not localize.
+                if IsClassProc then
+                  ProcLine := 'class ' + ProcLine;
                 if not IdentifierNeeded then
                 begin
                   ProcedureInfo := TProcInfo.Create;
                   ProcedureInfo.Name := ProcLine;
-                  ProcedureInfo.ProcedureType := GetProperProcName(ProcType, ClassLast);
+                  ProcedureInfo.ProcedureType := ProcKindStr;
                   ProcedureInfo.LineNo := Line;
                   AddProcedure(ProcedureInfo);
                 end;
               end;
-              { Track class type declarations to skip forward-declared methods }
-              if (Token = tkclass) and not ClassLast then
+              // Track class type declarations to skip forward-declared methods
+              if IsKW('CLASS') and not ClassLast then
               begin
                 InTypeDeclaration := True;
                 FoundNonEmptyType := False;
               end
               else if InTypeDeclaration and
-                ((Token in [tkprocedure, tkfunction, tkproperty]) or
-                 IsVisibilityIdent(Token, Scanner.CurTokenString)) then
+                ((IsKW('PROCEDURE') or IsKW('FUNCTION') or IsKW('PROPERTY')) or
+                 IsVisibilityIdent) then
               begin
                 FoundNonEmptyType := True;
               end
               else if InTypeDeclaration and
-                ((Token = tkend) or
-                ((Token = tkSemicolon) and not FoundNonEmptyType)) then
+                (IsKW('END') or (IsSym(';') and not FoundNonEmptyType)) then
               begin
                 InTypeDeclaration := False;
               end;
-              ClassLast := (Token = tkclass);
-              Token := Scanner.FetchToken;
+              ClassLast := IsKW('CLASS');
+              FetchToken;
             end;
           end; //ltPas
       end; //case Language
@@ -600,46 +558,33 @@ var
   SourceText: string;
   Size: Integer;
 begin
-  Resolver := TProcListResolver.Create;
+  // Read source file
+  SFile := TFileStream.Create(FFilename, fmOpenRead or fmShareDenyWrite);
   try
-    Resolver.OwnsStreams := True;
-
-    { Read source file into a string }
-    SFile := TFileStream.Create(FFilename, fmOpenRead or fmShareDenyWrite);
-    try
-      Size := SFile.Size;
-      SetLength(SourceText, Size);
-      if Size > 0 then
-        SFile.Read(SourceText[1], Size);
-    finally
-      SFile.Free;
-    end;
-
-    Resolver.AddStream(FFilename, TStringStream.Create(SourceText));
-
-    Scanner := TPascalScanner.Create(Resolver);
-    try
-      Scanner.SkipWhiteSpace := False;
-      Scanner.SkipComments := True;
-      Scanner.OpenFile(FFilename);
-
-      WindowTitle := WindowTitle + ' - ' + fpgExtractFileName(FFileName);
-
-      { Prime the scanner with the first token }
-      Token := Scanner.FetchToken;
-
-      ClearObjectStrings;
-      try
-        FindProcs;
-      finally
-        LoadObjectCombobox;
-      end;
-      QuickSort(0, FProcList.Count - 1);
-    finally
-      Scanner.Free;
-    end;
+    Size := SFile.Size;
+    SetLength(SourceText, Size);
+    if Size > 0 then
+      SFile.Read(SourceText[1], Size);
   finally
-    Resolver.Free;
+    SFile.Free;
+  end;
+
+  Tokeniser := TFpgPascalTokeniser.Create;
+  try
+    Tokeniser.SetSource(SourceText);
+    FetchToken;
+
+    WindowTitle := WindowTitle + ' - ' + fpgExtractFileName(FFileName);
+
+    ClearObjectStrings;
+    try
+      FindProcs;
+    finally
+      LoadObjectCombobox;
+    end;
+    QuickSort(0, FProcList.Count - 1);
+  finally
+    Tokeniser.Free;
   end;
 end;
 
@@ -936,23 +881,5 @@ begin
   {%endregion}
 end;
 
-
-{ TSimpleEngine }
-
-function TSimpleEngine.CreateElement(AClass: TPTreeElement;
-  const AName: String; AParent: TPasElement; AVisibility: TPasMemberVisibility;
-  const ASourceFilename: String; ASourceLinenumber: Integer): TPasElement;
-begin
-  Result := AClass.Create(AName, AParent);
-  Result.Visibility := AVisibility;
-  Result.SourceFilename := ASourceFilename;
-  Result.SourceLinenumber := ASourceLinenumber;
-end;
-
-function TSimpleEngine.FindElement(const AName: String): TPasElement;
-begin
-  { dummy implementation, see TFPDocEngine.FindElement for a real example }
-  Result := nil;
-end;
 
 end.
