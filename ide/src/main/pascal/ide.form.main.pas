@@ -191,6 +191,7 @@ type
     procedure   miJumpToInterface(Sender: TObject);
     procedure   miJumpToImplementation(Sender: TObject);
     procedure   miJumpToggleIntfImpl(Sender: TObject);
+    procedure   miGoToDeclaration(Sender: TObject);
     function    GetCurrentCursorLocation: TCursorLocation;
     procedure   RecordCursorLocation;
     procedure   NavigateToLocation(const ALoc: TCursorLocation);
@@ -1011,6 +1012,11 @@ begin
           if idx >= pcEditor.PageCount then
             idx := 0;
           pcEditor.ActivePageIndex := idx;
+          consumed := True;
+        end;
+      keyB:  { Ctrl+B: go to declaration }
+        begin
+          miGoToDeclaration(nil);
           consumed := True;
         end;
     end;
@@ -1962,6 +1968,56 @@ begin
   end;
 end;
 
+procedure TMainForm.miGoToDeclaration(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  decl: TDeclarationResult;
+  ts: TfpgTabSheet;
+  pb: TPasBuildProjectBackend;
+  m: TPasBuildModule;
+  unitPaths, includePaths: TStrings;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+
+  { Get unit/include paths from project }
+  unitPaths := nil;
+  includePaths := nil;
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
+    if m <> nil then
+    begin
+      unitPaths := m.UnitPaths;
+      includePaths := m.IncludePaths;
+    end;
+  end;
+  if unitPaths = nil then
+    unitPaths := GProject.UnitDirs;
+
+  decl := FindDeclaration(FHighlightCache.PascalHighlighter, edt.Lines,
+    pcEditor.ActivePage.Hint, edt.CaretPos_V, edt.CaretPos_H,
+    unitPaths, includePaths);
+  if decl.Found then
+  begin
+    RecordCursorLocation;
+    if (decl.DeclFile <> '') and (decl.DeclFile <> pcEditor.ActivePage.Hint) then
+    begin
+      ts := OpenEditorPage(decl.DeclFile);
+      if ts <> nil then
+      begin
+        edt := TfpgTextEdit(ts.Components[0]);
+        edt.GotoLine(decl.DeclLine);
+      end;
+    end
+    else
+      edt.GotoLine(decl.DeclLine);
+  end;
+end;
+
 function TMainForm.GetCurrentCursorLocation: TCursorLocation;
 var
   edt: TfpgTextEdit;
@@ -2656,6 +2712,7 @@ begin
     AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
     AddMenuItem('Toggle Interface/Implementation', rsKeyCtrl+rsKeyShift+'J', @miJumpToggleIntfImpl);
+    AddMenuItem('Go to Declaration', rsKeyCtrl+'B', @miGoToDeclaration);
     AddSeparator;
     AddMenuItem('Navigate Back', rsKeyAlt+'Left', @miNavigateBack);
     AddMenuItem('Navigate Forward', rsKeyAlt+'Right', @miNavigateForward);
