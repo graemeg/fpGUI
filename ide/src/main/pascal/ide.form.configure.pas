@@ -670,7 +670,7 @@ begin
   with tsExtTools do
   begin
     Name := 'tsExtTools';
-    SetPosition(125, 3, 442, 424);
+    SetPosition(3, 3, 442, 424);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Text := 'External Tools';
   end;
