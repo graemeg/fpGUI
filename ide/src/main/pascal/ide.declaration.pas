@@ -92,6 +92,124 @@ begin
 end;
 
 
+function GetUsesUnitAtCursor(const ASource: string;
+  ACursorLine, ACursorCol: Integer): string;
+// Walk tokens to find uses clauses. For each unit name, check whether
+// the cursor falls within any of its component tokens. If so, return
+// the full dotted unit name.
+type
+  TTokenSpan = record
+    Line, ColStart, ColEnd: Integer; // 1-based
+  end;
+var
+  Tokeniser: TFpgPascalTokeniser;
+  Tok: TFpgPasToken;
+  UnitName: string;
+  Spans: array of TTokenSpan;
+  SpanCount: Integer;
+  CursorHit: Boolean;
+  i: Integer;
+
+  procedure FetchTok;
+  begin
+    repeat
+      Tok := Tokeniser.NextToken;
+    until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                            fptkComment, fptkDirective]);
+  end;
+
+  procedure AddSpan(ATok: TFpgPasToken);
+  begin
+    if SpanCount >= Length(Spans) then
+      SetLength(Spans, SpanCount + 16);
+    Spans[SpanCount].Line := ATok.Line;
+    Spans[SpanCount].ColStart := ATok.Column;
+    Spans[SpanCount].ColEnd := ATok.Column + ATok.Len - 1;
+    Inc(SpanCount);
+  end;
+
+  function CursorInSpans: Boolean;
+  var
+    j: Integer;
+  begin
+    for j := 0 to SpanCount - 1 do
+      if (ACursorLine = Spans[j].Line) and
+         (ACursorCol >= Spans[j].ColStart) and
+         (ACursorCol <= Spans[j].ColEnd) then
+        Exit(True);
+    Result := False;
+  end;
+
+begin
+  Result := '';
+  Tokeniser := TFpgPascalTokeniser.Create;
+  try
+    Tokeniser.SetSource(ASource);
+    FetchTok;
+    while Tok.Kind <> fptkEOF do
+    begin
+      // Look for 'uses' keyword
+      if (Tok.Kind = fptkKeyword) and (Tokeniser.TokenTextUpper = 'USES') then
+      begin
+        FetchTok;
+        // Parse comma-separated unit names until ';'
+        while Tok.Kind <> fptkEOF do
+        begin
+          if (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = ';') then
+          begin
+            FetchTok;
+            Break;
+          end;
+
+          // Start of a unit name
+          if (Tok.Kind = fptkIdentifier) or (Tok.Kind = fptkKeyword) then
+          begin
+            UnitName := Tokeniser.TokenText;
+            SpanCount := 0;
+            AddSpan(Tok);
+            // Collect dotted continuation
+            FetchTok;
+            while (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = '.') do
+            begin
+              AddSpan(Tok); // the dot
+              UnitName := UnitName + '.';
+              FetchTok;
+              if (Tok.Kind = fptkIdentifier) or (Tok.Kind = fptkKeyword) then
+              begin
+                UnitName := UnitName + Tokeniser.TokenText;
+                AddSpan(Tok);
+                FetchTok;
+              end
+              else
+                Break;
+            end;
+            // Check if cursor is within this unit name's tokens
+            if CursorInSpans then
+              Exit(UnitName);
+            // Skip optional 'in' <filename>
+            if (Tok.Kind = fptkKeyword) and (Tokeniser.TokenTextUpper = 'IN') then
+            begin
+              FetchTok;
+              if Tok.Kind = fptkString then
+                FetchTok;
+            end;
+            // Skip comma
+            if (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = ',') then
+              FetchTok;
+          end
+          else
+            FetchTok;
+        end;
+        Continue;
+      end;
+      FetchTok;
+    end;
+  finally
+    Tokeniser.Free;
+  end;
+end;
+
+
 // Search unit paths for a source file. Returns absolute path or ''.
 function SearchUnitFile(APaths: TStrings; const AUnitName: string): string;
 var
@@ -513,7 +631,7 @@ var
   ident, sourceText: string;
   match: TDeclMatch;
   usedUnits: TStringList;
-  unitPath, unitSource: string;
+  unitName, unitPath, unitSource: string;
   fs: TFileStream;
   i, sz: Integer;
 begin
@@ -528,6 +646,23 @@ begin
     Exit;
 
   sourceText := ALines.Text;
+
+  // Step 1b: Check if cursor is on a unit name in a uses clause
+  begin
+    unitName := GetUsesUnitAtCursor(sourceText, ALine + 1, ACol + 1);
+    if unitName <> '' then
+    begin
+      unitPath := SearchUnitFile(AUnitPaths, unitName);
+      if unitPath <> '' then
+      begin
+        Result.Found := True;
+        Result.DeclFile := unitPath;
+        Result.DeclLine := 1;
+        Result.DeclName := unitName;
+        Exit;
+      end;
+    end;
+  end;
 
   // Step 2: Scan current file for declaration
   match := ScanSourceForDecl(sourceText, ident, False);

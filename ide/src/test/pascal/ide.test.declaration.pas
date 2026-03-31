@@ -57,6 +57,11 @@ type
     procedure TestFindDecl_ConstRef;
     procedure TestFindDecl_ProgramName;
     procedure TestFindDecl_CircularUses;
+    { Phase E -- Uses unit navigation (Ctrl+B on unit name) }
+    procedure TestFindDecl_UsesUnit_Simple;
+    procedure TestFindDecl_UsesUnit_Dotted;
+    procedure TestFindDecl_UsesUnit_SecondInList;
+    procedure TestFindDecl_UsesUnit_NotFound;
   end;
 
 
@@ -585,6 +590,137 @@ begin
   finally
     unitPaths.Free;
   end;
+end;
+
+
+{ Phase E -- Uses unit navigation }
+
+procedure TTestDeclaration.TestFindDecl_UsesUnit_Simple;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  WriteTempUnit('HelperUnit',
+    'unit HelperUnit;'             + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses HelperUnit;'             + LineEnding +   // 2 -- HelperUnit at col 5
+    'begin'                        + LineEnding +   // 3
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 7, unitPaths, nil);
+    CheckTrue(decl.Found, 'Should find unit file for HelperUnit');
+    CheckEquals(1, decl.DeclLine, 'Should navigate to line 1 of the unit');
+    CheckTrue(Pos('HelperUnit', decl.DeclFile) > 0,
+      'DeclFile should reference HelperUnit');
+  finally
+    unitPaths.Free;
+  end;
+end;
+
+procedure TTestDeclaration.TestFindDecl_UsesUnit_Dotted;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  WriteTempUnit('my.helper.utils',
+    'unit my.helper.utils;'        + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses my.helper.utils;'        + LineEnding +   // 2 -- cursor on 'helper' at col 8
+    'begin'                        + LineEnding +   // 3
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    // Cursor on middle part 'helper' of the dotted name
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 8, unitPaths, nil);
+    CheckTrue(decl.Found, 'Should find unit file for dotted unit name');
+    CheckEquals(1, decl.DeclLine, 'Should navigate to line 1 of the unit');
+    CheckTrue(Pos('my.helper.utils', decl.DeclFile) > 0,
+      'DeclFile should reference my.helper.utils');
+  finally
+    unitPaths.Free;
+  end;
+end;
+
+procedure TTestDeclaration.TestFindDecl_UsesUnit_SecondInList;
+var
+  decl: TDeclarationResult;
+  unitPaths: TStringList;
+  mainSrc: string;
+begin
+  WriteTempUnit('UnitAlpha',
+    'unit UnitAlpha;'              + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+  WriteTempUnit('UnitBeta',
+    'unit UnitBeta;'               + LineEnding +
+    '{$mode objfpc}{$H+}'        + LineEnding +
+    'interface'                    + LineEnding +
+    'implementation'               + LineEnding +
+    'end.');
+
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses UnitAlpha, UnitBeta;'    + LineEnding +   // 2 -- UnitBeta at col 16
+    'begin'                        + LineEnding +   // 3
+    'end.';
+  SetSource(mainSrc);
+
+  unitPaths := TStringList.Create;
+  try
+    unitPaths.Add(FTempDir);
+    decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 18, unitPaths, nil);
+    CheckTrue(decl.Found, 'Should find second unit in uses list');
+    CheckEquals(1, decl.DeclLine, 'Should navigate to line 1');
+    CheckTrue(Pos('UnitBeta', decl.DeclFile) > 0,
+      'DeclFile should reference UnitBeta');
+  finally
+    unitPaths.Free;
+  end;
+end;
+
+procedure TTestDeclaration.TestFindDecl_UsesUnit_NotFound;
+var
+  decl: TDeclarationResult;
+  mainSrc: string;
+begin
+  mainSrc :=
+    'program Test;'                + LineEnding +   // 0
+    '{$mode objfpc}{$H+}'        + LineEnding +   // 1
+    'uses NoSuchUnit;'             + LineEnding +   // 2 -- NoSuchUnit at col 5
+    'begin'                        + LineEnding +   // 3
+    'end.';
+  SetSource(mainSrc);
+
+  // Unit not on disk — should fall through gracefully (Found=False)
+  decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 7, nil, nil);
+  CheckFalse(decl.Found,
+    'Uses unit not on disk should return Found=False');
 end;
 
 
