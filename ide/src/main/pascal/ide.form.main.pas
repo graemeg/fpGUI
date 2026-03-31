@@ -2054,6 +2054,7 @@ var
   m: TPasBuildModule;
   ownedUnitPaths, ownedIncludePaths: TStringList;
   unitPaths, includePaths: TStrings;
+  fpcSrcDir: string;
   i: Integer;
 begin
   if pcEditor.ActivePage = nil then
@@ -2086,6 +2087,27 @@ begin
   end;
   if unitPaths = nil then
     unitPaths := GProject.UnitDirs;
+
+  { Append FPC source directories if configured, so go-to-declaration
+    can resolve identifiers from RTL/FCL/packages units }
+  fpcSrcDir := gINI.ReadString(cEnvironment, 'FPCSrcDir', '');
+  if fpcSrcDir <> '' then
+  begin
+    fpcSrcDir := IncludeTrailingPathDelimiter(fpcSrcDir);
+    if DirectoryExists(fpcSrcDir) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        ownedUnitPaths.Assign(unitPaths);
+        unitPaths := ownedUnitPaths;
+      end;
+      if DirectoryExists(fpcSrcDir + 'rtl') then
+        AddSubdirectories(ownedUnitPaths, fpcSrcDir + 'rtl');
+      if DirectoryExists(fpcSrcDir + 'packages') then
+        AddSubdirectories(ownedUnitPaths, fpcSrcDir + 'packages');
+    end;
+  end;
 
   try
     decl := FindDeclaration(FHighlightCache.PascalHighlighter, edt.Lines,
