@@ -12,10 +12,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Provides "Go to Declaration" functionality using FPC's fcl-passrc
-      package (TPasParser + TPasResolver) for scope-aware identifier
-      resolution. Ctrl+B on an identifier navigates to where it is
-      declared.
+      Provides "Go to Declaration" functionality using lightweight
+      token scanning. Ctrl+B on an identifier navigates to where
+      it is declared, including cross-unit resolution via uses clauses.
 }
 unit ide.declaration;
 
@@ -24,63 +23,21 @@ unit ide.declaration;
 interface
 
 uses
-  Classes, SysUtils, pscanner, pparser, pastree, pasresolver, ide.highlighter;
+  Classes, SysUtils, ide.highlighter;
 
 type
   TDeclarationResult = record
     Found: Boolean;
-    DeclFile: string;     { absolute path to declaration's source file }
-    DeclLine: Integer;    { 1-based line number (as stored by TPasElement) }
-    DeclName: string;     { name of the resolved declaration }
+    DeclFile: string;     // absolute path to declaration's source file
+    DeclLine: Integer;    // 1-based line number
+    DeclName: string;     // name of the resolved declaration
   end;
 
-  { TDeclarationFileResolver }
-
-  TDeclarationFileResolver = class(TStreamResolver)
-  private
-    FUnitPaths: TStrings;        { borrowed, not owned }
-    FIncludePaths: TStrings;     { borrowed, not owned }
-    function SearchPaths(APaths: TStrings; const AName: string): string;
-  public
-    function FindSourceFile(const AName: string): TLineReader; override;
-    function FindIncludeFile(const AName: string): TLineReader; override;
-    property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
-    property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
-  end;
-
-  { TDeclarationEngine }
-
-  TDeclarationEngine = class(TPasResolver)
-  private
-    FUnitPaths: TStrings;        { borrowed }
-    FIncludePaths: TStrings;     { borrowed }
-    FParsing: TStringList;       { tracks units currently being parsed -- circular use guard }
-    FParsedModules: TStringList; { cache: uppercase unit name -> TPasModule (shared) }
-    FSubEngines: TFPList;        { sub-engines kept alive until root cleanup }
-    FSubObjects: TFPList;        { parsers/scanners/resolvers kept alive until root cleanup }
-    FOwnsHub: Boolean;           { True for root engine, False for sub-engines }
-    FOwnsParsing: Boolean;       { True for root engine, False for sub-engines }
-    function SubParseUnit(const AName, AFilename, ASource: string): TPasModule;
-  public
-    constructor Create;
-    constructor CreateSub(AHub: TPasResolverHub; AParsing: TStringList;
-      AParsedModules: TStringList;
-      ASubEngines: TFPList; ASubObjects: TFPList);
-    destructor Destroy; override;
-    function FindUnit(const AName, InFilename: String;
-      NameExpr, InFileExpr: TPasExpr): TPasModule; override;
-    procedure UsedInterfacesFinished(Section: TPasSection); override;
-    procedure FinishScope(ScopeType: TPasScopeType; El: TPasElement); override;
-    property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
-    property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
-  end;
-
-{ ALine and ACol are both 0-based (matching editor CaretPos_V / CaretPos_H) }
+// ALine and ACol are both 0-based (matching editor CaretPos_V / CaretPos_H)
 function GetIdentifierAtCursor(AHighlighter: TPascalHighlighter;
   ALines: TStrings; ALine, ACol: Integer): string;
 
-{ ALine and ACol are 0-based (matching editor CaretPos_V / CaretPos_H).
-  Converted to 1-based internally for TPasElement.SourceLinenumber. }
+// ALine and ACol are 0-based. Converted to 1-based internally.
 function FindDeclaration(AHighlighter: TPascalHighlighter;
   ALines: TStrings; const AFilename: string;
   ALine, ACol: Integer;
@@ -89,298 +46,20 @@ function FindDeclaration(AHighlighter: TPascalHighlighter;
 
 implementation
 
-{ TDeclarationFileResolver }
+uses
+  ide.pascal.tokeniser;
 
-function TDeclarationFileResolver.SearchPaths(APaths: TStrings;
-  const AName: string): string;
-var
-  i: Integer;
-  dir, candidate: string;
-begin
-  Result := '';
-  if APaths = nil then
-    Exit;
-  for i := 0 to APaths.Count - 1 do
-  begin
-    dir := IncludeTrailingPathDelimiter(APaths[i]);
-    { Try original case first }
-    candidate := dir + AName;
-    if FileExists(candidate) then
-      Exit(candidate);
-    { Try lowercase for Linux case-sensitivity }
-    candidate := dir + LowerCase(AName);
-    if FileExists(candidate) then
-      Exit(candidate);
-  end;
-end;
-
-function TDeclarationFileResolver.FindSourceFile(const AName: string): TLineReader;
-var
-  filePath: string;
-  fs: TFileStream;
-  ss: TStringStream;
-begin
-  { Check registered streams first (the override buffer) }
-  Result := inherited FindSourceFile(AName);
-  if Result <> nil then
-    Exit;
-  { Search unit paths for .pas / .pp files }
-  filePath := SearchPaths(FUnitPaths, AName + '.pas');
-  if filePath = '' then
-    filePath := SearchPaths(FUnitPaths, AName + '.pp');
-  if filePath = '' then
-    Exit(nil);
-  { Read file into a stream, register it, and return a reader }
-  ss := TStringStream.Create('');
-  try
-    fs := TFileStream.Create(filePath, fmOpenRead or fmShareDenyNone);
-    try
-      ss.CopyFrom(fs, 0);
-    finally
-      fs.Free;
-    end;
-  except
-    ss.Free;
-    Exit(nil);
-  end;
-  ss.Position := 0;
-  AddStream(filePath, ss);
-  Result := TStringStreamLineReader.Create(filePath, ss.DataString);
-end;
-
-function TDeclarationFileResolver.FindIncludeFile(const AName: string): TLineReader;
-var
-  filePath: string;
-begin
-  { Search include paths }
-  filePath := SearchPaths(FIncludePaths, AName);
-  if filePath <> '' then
-    Result := TFileLineReader.Create(filePath)
-  else
-    { Graceful degradation -- return empty reader }
-    Result := TStringStreamLineReader.Create(AName, '');
-end;
-
-
-{ TDeclarationEngine }
-
-constructor TDeclarationEngine.Create;
-begin
-  inherited Create;
-  Hub := TPasResolverHub.Create(Self);
-  FOwnsHub := True;
-  FParsing := TStringList.Create;
-  FParsing.Sorted := True;
-  FParsedModules := TStringList.Create;
-  FParsedModules.Sorted := True;
-  FOwnsParsing := True;
-  FSubEngines := TFPList.Create;
-  FSubObjects := TFPList.Create;
-end;
-
-constructor TDeclarationEngine.CreateSub(AHub: TPasResolverHub;
-  AParsing: TStringList; AParsedModules: TStringList;
-  ASubEngines: TFPList; ASubObjects: TFPList);
-begin
-  inherited Create;
-  Hub := AHub;
-  FOwnsHub := False;
-  FParsing := AParsing;
-  FParsedModules := AParsedModules;  { shared with root }
-  FOwnsParsing := False;
-  FSubEngines := ASubEngines;  { shared with root }
-  FSubObjects := ASubObjects;  { shared with root }
-end;
-
-destructor TDeclarationEngine.Destroy;
-var
-  h: TPasResolverHub;
-  i: Integer;
-begin
-  if FOwnsParsing then
-  begin
-    { Free sub-engines first (they may reference shared state) }
-    for i := 0 to FSubEngines.Count - 1 do
-      TObject(FSubEngines[i]).Free;
-    FSubEngines.Free;
-    { Free parsers, scanners, resolvers kept alive for AST integrity }
-    for i := 0 to FSubObjects.Count - 1 do
-      TObject(FSubObjects[i]).Free;
-    FSubObjects.Free;
-    FParsing.Free;
-    FParsedModules.Free;
-  end;
-  { Save and detach Hub before inherited Destroy calls Clear }
-  h := Hub;
-  inherited Destroy;
-  if FOwnsHub then
-    h.Free;
-end;
-
-function TDeclarationEngine.SubParseUnit(const AName, AFilename,
-  ASource: string): TPasModule;
-var
-  subResolver: TDeclarationFileResolver;
-  subScanner: TPascalScanner;
-  subParser: TPasParser;
-  subEngine: TDeclarationEngine;
-begin
-  Result := nil;
-  FParsing.Add(UpperCase(AName));
-  try
-    subResolver := TDeclarationFileResolver.Create;
-    subResolver.OwnsStreams := True;
-    subResolver.UnitPaths := FUnitPaths;
-    subResolver.IncludePaths := FIncludePaths;
-    subResolver.AddStream(AFilename, TStringStream.Create(ASource));
-
-    subScanner := TPascalScanner.Create(subResolver);
-    subScanner.OpenFile(AFilename);
-
-    { Each unit needs its own engine instance, sharing Hub and parsing guard.
-      Sub-engines are kept alive until root engine cleanup (AST nodes are
-      owned by the engine that created them). }
-    subEngine := TDeclarationEngine.CreateSub(Hub, FParsing, FParsedModules, FSubEngines, FSubObjects);
-    subEngine.UnitPaths := FUnitPaths;
-    subEngine.IncludePaths := FIncludePaths;
-    subEngine.AddObjFPCBuiltInIdentifiers;
-    subEngine.AddBaseType('Integer', btLongint);
-    subEngine.AddBaseType('Cardinal', btLongWord);
-    subEngine.AddBaseType('SizeInt', {$ifdef HasInt64}btInt64{$else}btIntDouble{$endif});
-    FSubEngines.Add(subEngine);
-
-    subParser := TPasParser.Create(subScanner, subResolver, subEngine);
-    subParser.ImplicitUses.Clear;
-
-    { Keep parser, scanner, and resolver alive until root engine cleanup.
-      TPasParser.Destroy calls Engine.CurrentParser := nil which triggers
-      TPasResolver.Clear, wiping all CustomData from the AST.  We need
-      the scopes intact for the main engine's cross-unit resolution. }
-    FSubObjects.Add(subParser);
-    FSubObjects.Add(subScanner);
-    FSubObjects.Add(subResolver);
-
-    try
-      subParser.NextToken;
-      subParser.ParseUnit(Result);
-    except
-      on E: Exception do
-        { Keep partially-parsed Result -- ParseUnit assigns it early }
-    end;
-  finally
-    FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
-  end;
-end;
-
-procedure TDeclarationEngine.UsedInterfacesFinished(Section: TPasSection);
-begin
-  { Sub-engines: do not parse recursively -- using queue-based approach.
-    Root engine: let inherited handle continuation. }
-  if not FOwnsHub then
-    Exit;
-  inherited UsedInterfacesFinished(Section);
-end;
-
-procedure TDeclarationEngine.FinishScope(ScopeType: TPasScopeType;
-  El: TPasElement);
-begin
-  { Lenient mode: catch resolution errors per-scope so parsing continues.
-    Without this, any unresolved identifier (e.g. RTL types, or framework
-    types when source paths are incomplete) aborts the entire parse.
-    Scopes that fail are simply left unresolved -- the AST visitor will
-    find no resolved reference for those nodes. }
-  try
-    inherited FinishScope(ScopeType, El);
-  except
-    on EPasResolve do
-      { skip this scope, continue parsing }
-  end;
-end;
-
-function TDeclarationEngine.FindUnit(const AName, InFilename: String;
-  NameExpr, InFileExpr: TPasExpr): TPasModule;
-var
-  filePath: string;
-  fs: TFileStream;
-  ss: TStringStream;
-  searchResolver: TDeclarationFileResolver;
-  idx: Integer;
-begin
-  Result := nil;
-
-  { Check module cache first -- avoids re-parsing the same unit thousands of times }
-  idx := FParsedModules.IndexOf(UpperCase(AName));
-  if idx >= 0 then
-  begin
-    Result := TPasModule(FParsedModules.Objects[idx]);
-    Exit;
+type
+  TDeclMatch = record
+    Found: Boolean;
+    Line: Integer;       // 1-based
+    Name: string;
+    InInterface: Boolean;
   end;
 
-  { Circular use guard }
-  if FParsing.IndexOf(UpperCase(AName)) >= 0 then
-    Exit;
 
-  { Search unit paths for source file }
-  filePath := '';
-  if FUnitPaths <> nil then
-  begin
-    searchResolver := TDeclarationFileResolver.Create;
-    try
-      filePath := searchResolver.SearchPaths(FUnitPaths, AName + '.pas');
-      if filePath = '' then
-        filePath := searchResolver.SearchPaths(FUnitPaths, AName + '.pp');
-    finally
-      searchResolver.Free;
-    end;
-  end;
-
-  if filePath = '' then
-  begin
-    { Unit source not found -- return a stub module so the resolver
-      can continue parsing.  Without this, FindModule raises
-      nCantFindUnitX which aborts the entire parse. }
-    Result := SubParseUnit(AName, AName + '.pas',
-      'unit ' + AName + ';' + LineEnding +
-      'interface' + LineEnding +
-      'implementation' + LineEnding +
-      'end.');
-    if Result <> nil then
-      FParsedModules.AddObject(UpperCase(AName), Result);
-    Exit;
-  end;
-
-  { Load file content }
-  ss := TStringStream.Create('');
-  try
-    fs := TFileStream.Create(filePath, fmOpenRead or fmShareDenyNone);
-    try
-      ss.CopyFrom(fs, 0);
-    finally
-      fs.Free;
-    end;
-  except
-    ss.Free;
-    Exit;
-  end;
-
-  Result := SubParseUnit(AName, filePath, ss.DataString);
-  ss.Free;
-  { If parsing the real source failed, fall back to a stub so the
-    resolver doesn't abort with "can't find unit" }
-  if Result = nil then
-    Result := SubParseUnit(AName, AName + '_stub.pas',
-      'unit ' + AName + ';' + LineEnding +
-      'interface' + LineEnding +
-      'implementation' + LineEnding +
-      'end.');
-  { Cache the result (real module or stub) to avoid re-parsing }
-  if Result <> nil then
-    FParsedModules.AddObject(UpperCase(AName), Result);
-end;
-
-
-{ Helper: extract text for a token from the source line }
-function TokenText(ALines: TStrings; ALineIdx: Integer;
+// Helper: extract text for a token from the source line
+function HLTokenText(ALines: TStrings; ALineIdx: Integer;
   const AToken: THighlightToken): string;
 begin
   if (ALineIdx >= 0) and (ALineIdx < ALines.Count) then
@@ -406,89 +85,423 @@ begin
     if (ACol >= tok.Column) and (ACol < tok.Column + tok.Length) then
     begin
       if tok.Category = hcIdentifier then
-        Result := TokenText(ALines, ALine, tok);
+        Result := HLTokenText(ALines, ALine, tok);
       Exit;
     end;
   end;
 end;
 
 
-{ AST visitor types }
-
-type
-  TDeclSearchData = record
-    TargetFile: string;      { filter: only match in this file }
-    TargetLine: Integer;     { 1-based (matching TPasElement.SourceLinenumber) }
-    TargetName: string;      { case-insensitive comparison }
-    FoundDecl: TPasElement;  { output: the resolved declaration, or nil }
-  end;
-  PDeclSearchData = ^TDeclSearchData;
-
-  { TDeclVisitor - walks resolved references to find declarations }
-
-  TDeclVisitor = class
-  public
-    procedure VisitElement(El: TPasElement; arg: Pointer);
-  end;
-
-  { TDeclNameVisitor - fallback: finds declarations by name when resolver
-    didn't produce resolved references (e.g. incomplete source tree) }
-
-  TDeclNameVisitor = class
-  public
-    procedure VisitElement(El: TPasElement; arg: Pointer);
-  end;
-
-procedure TDeclVisitor.VisitElement(El: TPasElement; arg: Pointer);
+// Search unit paths for a source file. Returns absolute path or ''.
+function SearchUnitFile(APaths: TStrings; const AUnitName: string): string;
 var
-  Data: PDeclSearchData;
+  i: Integer;
+  dir, candidate: string;
 begin
-  Data := PDeclSearchData(arg);
-  { Already found -- skip }
-  if Data^.FoundDecl <> nil then
+  Result := '';
+  if APaths = nil then
     Exit;
-  { Filter: only match in the target file }
-  if El.SourceFilename <> Data^.TargetFile then
-    Exit;
-  { Must be an identifier expression }
-  if not (El is TPrimitiveExpr) then
-    Exit;
-  if TPrimitiveExpr(El).Kind <> pekIdent then
-    Exit;
-  { Must be on the target line }
-  if El.SourceLinenumber <> Data^.TargetLine then
-    Exit;
-  { Must match the target name (case-insensitive) }
-  if CompareText(TPrimitiveExpr(El).Value, Data^.TargetName) <> 0 then
-    Exit;
-  { Must have a resolved reference with a declaration }
-  if not (El.CustomData is TResolvedReference) then
-    Exit;
-  if TResolvedReference(El.CustomData).Declaration = nil then
-    Exit;
-  Data^.FoundDecl := TResolvedReference(El.CustomData).Declaration;
+  for i := 0 to APaths.Count - 1 do
+  begin
+    dir := IncludeTrailingPathDelimiter(APaths[i]);
+    candidate := dir + AUnitName + '.pas';
+    if FileExists(candidate) then Exit(candidate);
+    candidate := dir + LowerCase(AUnitName) + '.pas';
+    if FileExists(candidate) then Exit(candidate);
+    candidate := dir + AUnitName + '.pp';
+    if FileExists(candidate) then Exit(candidate);
+    candidate := dir + LowerCase(AUnitName) + '.pp';
+    if FileExists(candidate) then Exit(candidate);
+  end;
 end;
 
-procedure TDeclNameVisitor.VisitElement(El: TPasElement; arg: Pointer);
+
+// Scan Pascal source for a declaration of AIdent. If AInterfaceOnly is True,
+// only the interface section of a unit is scanned. Returns the best match,
+// preferring interface declarations over implementation ones.
+function ScanSourceForDecl(const ASource, AIdent: string;
+  AInterfaceOnly: Boolean): TDeclMatch;
 var
-  Data: PDeclSearchData;
+  Tokeniser: TFpgPascalTokeniser;
+  Tok: TFpgPasToken;
+  TokUp: string;
+  Section: Integer;  // 0=none, 1=type, 2=const, 3=var
+  IsUnit, InInterface: Boolean;
+  NestDepth: Integer;
+  IdentUp: string;
+  TmpName, TmpUp: string;
+  TmpLine: Integer;
+
+  procedure FetchTok;
+  begin
+    repeat
+      Tok := Tokeniser.NextToken;
+    until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                            fptkComment, fptkDirective]);
+    TokUp := Tokeniser.TokenTextUpper;
+  end;
+
+  function IsKW(const AW: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkKeyword) and (TokUp = AW);
+  end;
+
+  function IsSy(const AC: string): Boolean; inline;
+  begin
+    Result := (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = AC);
+  end;
+
+  procedure TryRecord(ALine: Integer; const AName: string);
+  begin
+    // Prefer interface matches; don't overwrite one with implementation
+    if Result.Found and Result.InInterface then
+      Exit;
+    Result.Found := True;
+    Result.Line := ALine;
+    Result.Name := AName;
+    Result.InInterface := InInterface;
+  end;
+
+  procedure SkipToSemicolon;
+  begin
+    while (Tok.Kind <> fptkEOF) and not IsSy(';') do
+      FetchTok;
+  end;
+
+  procedure ScanClassBody;
+  // Scan inside a class/record/object body for matching declarations
+  var
+    FldName, FldUp: string;
+    FldLine: Integer;
+  begin
+    NestDepth := 1;
+    while (Tok.Kind <> fptkEOF) and (NestDepth > 0) do
+    begin
+      if IsKW('RECORD') then
+        Inc(NestDepth)
+      else if IsKW('END') then
+      begin
+        Dec(NestDepth);
+        if NestDepth <= 0 then
+          Break;
+      end
+      else if (Tok.Kind = fptkKeyword) and
+         ((TokUp = 'PROCEDURE') or (TokUp = 'FUNCTION') or
+          (TokUp = 'CONSTRUCTOR') or (TokUp = 'DESTRUCTOR')) then
+      begin
+        FetchTok;
+        if (Tok.Kind = fptkIdentifier) and (TokUp = IdentUp) then
+          TryRecord(Tok.Line, Tokeniser.TokenText);
+        SkipToSemicolon;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end
+      else if IsKW('PROPERTY') then
+      begin
+        FetchTok;
+        if (Tok.Kind = fptkIdentifier) and (TokUp = IdentUp) then
+          TryRecord(Tok.Line, Tokeniser.TokenText);
+        SkipToSemicolon;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end
+      else if (Tok.Kind = fptkIdentifier) then
+      begin
+        // Potential field: <Name> :
+        FldName := Tokeniser.TokenText;
+        FldUp := TokUp;
+        FldLine := Tok.Line;
+        FetchTok;
+        if IsSy(':') and (FldUp = IdentUp) then
+          TryRecord(FldLine, FldName);
+        // Skip rest of this declaration
+        while (Tok.Kind <> fptkEOF) and not IsSy(';') and not IsKW('END') do
+          FetchTok;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end;
+      FetchTok;
+    end;
+    NestDepth := 0;
+  end;
+
 begin
-  Data := PDeclSearchData(arg);
-  if Data^.FoundDecl <> nil then
-    Exit;
-  { Match named declarations: procedures, variables, types, constants, properties }
-  if El.Name = '' then
-    Exit;
-  if CompareText(El.Name, Data^.TargetName) <> 0 then
-    Exit;
-  { Skip the usage site itself -- we want the declaration, not the reference }
-  if (El.SourceFilename = Data^.TargetFile) and
-     (El.SourceLinenumber = Data^.TargetLine) then
-    Exit;
-  { Accept declarations: procedures, variables, types, constants, properties }
-  if (El is TPasProcedure) or (El is TPasVariable) or (El is TPasType) or
-     (El is TPasConst) or (El is TPasProperty) then
-    Data^.FoundDecl := El;
+  Result.Found := False;
+  Result.InInterface := False;
+  IdentUp := UpperCase(AIdent);
+
+  Tokeniser := TFpgPascalTokeniser.Create;
+  try
+    Tokeniser.SetSource(ASource);
+    FetchTok;
+
+    // Determine file type
+    IsUnit := IsKW('UNIT');
+    if IsUnit then
+    begin
+      InInterface := False;
+      while Tok.Kind <> fptkEOF do
+      begin
+        if IsKW('INTERFACE') then
+        begin
+          InInterface := True;
+          FetchTok;
+          Break;
+        end;
+        FetchTok;
+      end;
+      if not InInterface then
+        Exit;
+    end
+    else
+      // Program/library: treat all declarations as "interface"
+      InInterface := True;
+
+    Section := 0;
+    NestDepth := 0;
+
+    while Tok.Kind <> fptkEOF do
+    begin
+      // Track interface/implementation boundary
+      if IsUnit and IsKW('IMPLEMENTATION') then
+      begin
+        if AInterfaceOnly then
+          Break;
+        InInterface := False;
+        Section := 0;
+        FetchTok;
+        Continue;
+      end;
+
+      // Section keywords
+      if IsKW('TYPE') then begin Section := 1; FetchTok; Continue; end;
+      if IsKW('CONST') then begin Section := 2; FetchTok; Continue; end;
+      if IsKW('VAR') then begin Section := 3; FetchTok; Continue; end;
+      if IsKW('BEGIN') then begin Section := 0; FetchTok; Continue; end;
+
+      // Procedure/function declarations
+      if (Tok.Kind = fptkKeyword) and
+         ((TokUp = 'PROCEDURE') or (TokUp = 'FUNCTION') or
+          (TokUp = 'CONSTRUCTOR') or (TokUp = 'DESTRUCTOR')) then
+      begin
+        Section := 0;
+        FetchTok;
+        if Tok.Kind = fptkIdentifier then
+        begin
+          TmpName := Tokeniser.TokenText;
+          TmpUp := TokUp;
+          TmpLine := Tok.Line;
+          FetchTok;
+          // Check for ClassName.MethodName
+          if IsSy('.') then
+          begin
+            FetchTok;
+            if (Tok.Kind = fptkIdentifier) or (Tok.Kind = fptkKeyword) then
+            begin
+              TmpName := Tokeniser.TokenText;
+              TmpUp := TokUp;
+              TmpLine := Tok.Line;
+              FetchTok;
+            end;
+          end;
+          // Check proc name match
+          if TmpUp = IdentUp then
+            TryRecord(TmpLine, TmpName);
+          // Scan parameters
+          if IsSy('(') then
+          begin
+            FetchTok;
+            while (Tok.Kind <> fptkEOF) and not IsSy(')') do
+            begin
+              if (Tok.Kind = fptkIdentifier) and (TokUp = IdentUp) then
+              begin
+                TmpLine := Tok.Line;
+                TmpName := Tokeniser.TokenText;
+                FetchTok;
+                if IsSy(':') then
+                  TryRecord(TmpLine, TmpName);
+                Continue;
+              end;
+              FetchTok;
+            end;
+          end;
+        end;
+        SkipToSemicolon;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end;
+
+      // Type declarations: <Name> =
+      if (Section = 1) and (NestDepth = 0) and (Tok.Kind = fptkIdentifier) then
+      begin
+        TmpName := Tokeniser.TokenText;
+        TmpUp := TokUp;
+        TmpLine := Tok.Line;
+        FetchTok;
+        if IsSy('=') then
+        begin
+          if TmpUp = IdentUp then
+            TryRecord(TmpLine, TmpName);
+          FetchTok;
+          // Check for class/record/object body
+          if IsKW('CLASS') or IsKW('RECORD') or IsKW('OBJECT') or
+             IsKW('PACKED') or IsKW('BITPACKED') then
+          begin
+            // Handle packed record / bitpacked record
+            if IsKW('PACKED') or IsKW('BITPACKED') then
+              FetchTok;
+            if IsKW('CLASS') or IsKW('RECORD') or IsKW('OBJECT') then
+            begin
+              FetchTok;
+              // Forward declaration: class;
+              if IsSy(';') then
+              begin
+                FetchTok;
+                Continue;
+              end;
+              // Skip optional inheritance: class(TParent)
+              if IsSy('(') then
+              begin
+                while (Tok.Kind <> fptkEOF) and not IsSy(')') do
+                  FetchTok;
+                if IsSy(')') then
+                  FetchTok;
+              end;
+              ScanClassBody;
+              // Skip past 'end'
+              if IsKW('END') then FetchTok;
+              SkipToSemicolon;
+              if IsSy(';') then FetchTok;
+              Continue;
+            end;
+          end;
+          // Simple type — skip to semicolon
+          SkipToSemicolon;
+          if IsSy(';') then FetchTok;
+          Continue;
+        end;
+        // Not followed by '=' — skip
+        Continue;
+      end;
+
+      // Const declarations: <Name> = or <Name> :
+      if (Section = 2) and (NestDepth = 0) and (Tok.Kind = fptkIdentifier) then
+      begin
+        TmpName := Tokeniser.TokenText;
+        TmpUp := TokUp;
+        TmpLine := Tok.Line;
+        FetchTok;
+        if (IsSy('=') or IsSy(':')) and (TmpUp = IdentUp) then
+          TryRecord(TmpLine, TmpName);
+        SkipToSemicolon;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end;
+
+      // Var declarations: <Name> :
+      if (Section = 3) and (NestDepth = 0) and (Tok.Kind = fptkIdentifier) then
+      begin
+        TmpName := Tokeniser.TokenText;
+        TmpUp := TokUp;
+        TmpLine := Tok.Line;
+        FetchTok;
+        if IsSy(':') and (TmpUp = IdentUp) then
+          TryRecord(TmpLine, TmpName);
+        SkipToSemicolon;
+        if IsSy(';') then FetchTok;
+        Continue;
+      end;
+
+      FetchTok;
+    end;
+  finally
+    Tokeniser.Free;
+  end;
+end;
+
+
+// Extract unit names from uses clauses in the source
+procedure CollectUsedUnits(const ASource: string; ANames: TStrings);
+var
+  Tokeniser: TFpgPascalTokeniser;
+  Tok: TFpgPasToken;
+  UnitName: string;
+begin
+  Tokeniser := TFpgPascalTokeniser.Create;
+  try
+    Tokeniser.SetSource(ASource);
+    repeat
+      Tok := Tokeniser.NextToken;
+      if Tok.Kind in [fptkWhitespace, fptkLineEnding, fptkComment, fptkDirective] then
+        Continue;
+      if Tok.Kind = fptkEOF then
+        Break;
+
+      if (Tok.Kind = fptkKeyword) and (Tokeniser.TokenTextUpper = 'USES') then
+      begin
+        // Parse uses clause entries
+        repeat
+          Tok := Tokeniser.NextToken;
+          if Tok.Kind in [fptkWhitespace, fptkLineEnding, fptkComment, fptkDirective] then
+            Continue;
+          if Tok.Kind = fptkEOF then Break;
+
+          // Unit name starts with identifier (or keyword for dotted names)
+          if (Tok.Kind = fptkIdentifier) or (Tok.Kind = fptkKeyword) then
+          begin
+            UnitName := Tokeniser.TokenText;
+            // Check for dotted name continuation
+            repeat
+              Tok := Tokeniser.NextToken;
+              if Tok.Kind in [fptkWhitespace, fptkLineEnding, fptkComment, fptkDirective] then
+                Continue;
+              if (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = '.') then
+              begin
+                UnitName := UnitName + '.';
+                repeat
+                  Tok := Tokeniser.NextToken;
+                until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                                        fptkComment, fptkDirective]);
+                if (Tok.Kind = fptkIdentifier) or (Tok.Kind = fptkKeyword) then
+                  UnitName := UnitName + Tokeniser.TokenText
+                else
+                  Break;
+              end
+              else
+                Break;
+            until Tok.Kind = fptkEOF;
+            ANames.Add(UnitName);
+            // Skip optional 'in' filename
+            if (Tok.Kind = fptkKeyword) and (Tokeniser.TokenTextUpper = 'IN') then
+            begin
+              repeat
+                Tok := Tokeniser.NextToken;
+              until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                                      fptkComment, fptkDirective]);
+              // Skip the filename string
+              if Tok.Kind = fptkString then
+              begin
+                repeat
+                  Tok := Tokeniser.NextToken;
+                until not (Tok.Kind in [fptkWhitespace, fptkLineEnding,
+                                        fptkComment, fptkDirective]);
+              end;
+            end;
+          end;
+
+          // End of uses clause
+          if (Tok.Kind = fptkSymbol) and (Tokeniser.TokenText = ';') then
+            Break;
+        until Tok.Kind = fptkEOF;
+      end;
+
+      // Stop at implementation (only scan interface uses for cross-unit)
+      if (Tok.Kind = fptkKeyword) and (Tokeniser.TokenTextUpper = 'IMPLEMENTATION') then
+        Break;
+    until Tok.Kind = fptkEOF;
+  finally
+    Tokeniser.Free;
+  end;
 end;
 
 
@@ -497,144 +510,72 @@ function FindDeclaration(AHighlighter: TPascalHighlighter;
   ALine, ACol: Integer;
   AUnitPaths, AIncludePaths: TStrings): TDeclarationResult;
 var
-  ident: string;
-  resolver: TDeclarationFileResolver;
-  scanner: TPascalScanner;
-  parser: TPasParser;
-  engine: TDeclarationEngine;
-  module: TPasModule;
-  sourceStream: TStringStream;
-  searchData: TDeclSearchData;
-  visitor: TDeclVisitor;
-  nameVisitor: TDeclNameVisitor;
+  ident, sourceText: string;
+  match: TDeclMatch;
+  usedUnits: TStringList;
+  unitPath, unitSource: string;
+  fs: TFileStream;
+  i, sz: Integer;
 begin
   Result.Found := False;
   Result.DeclFile := '';
   Result.DeclLine := 0;
   Result.DeclName := '';
 
-  { Step 1: Extract identifier at cursor }
+  // Step 1: Extract identifier at cursor
   ident := GetIdentifierAtCursor(AHighlighter, ALines, ALine, ACol);
   if ident = '' then
+    Exit;
+
+  sourceText := ALines.Text;
+
+  // Step 2: Scan current file for declaration
+  match := ScanSourceForDecl(sourceText, ident, False);
+  if match.Found then
   begin
-    writeln('DEBUG: GetIdentifierAtCursor exit early');
+    Result.Found := True;
+    Result.DeclFile := AFilename;
+    Result.DeclLine := match.Line;
+    Result.DeclName := match.Name;
     Exit;
   end;
 
-  { Step 2: Create the parsing pipeline }
-  module := nil;
+  // Step 3: Scan used units (interface sections only)
+  usedUnits := TStringList.Create;
   try
-  resolver := TDeclarationFileResolver.Create;
-  try
-    resolver.OwnsStreams := True;
-    resolver.UnitPaths := AUnitPaths;
-    resolver.IncludePaths := AIncludePaths;
-
-    { Register current source buffer }
-    sourceStream := TStringStream.Create(ALines.Text);
-    resolver.AddStream(AFilename, sourceStream);
-
-    scanner := TPascalScanner.Create(resolver);
-    try
-      scanner.OpenFile(AFilename);
-
-      engine := TDeclarationEngine.Create;
+    CollectUsedUnits(sourceText, usedUnits);
+    for i := 0 to usedUnits.Count - 1 do
+    begin
+      unitPath := SearchUnitFile(AUnitPaths, usedUnits[i]);
+      if unitPath = '' then
+        Continue;
+      // Read unit source
       try
-        engine.UnitPaths := AUnitPaths;
-        engine.IncludePaths := AIncludePaths;
-        engine.AddObjFPCBuiltInIdentifiers;
-        { Register common type aliases not in base types (normally in System unit) }
-        engine.AddBaseType('Integer', btLongint);
-        engine.AddBaseType('Cardinal', btLongWord);
-        engine.AddBaseType('SizeInt', {$ifdef HasInt64}btInt64{$else}btIntDouble{$endif});
-
-        parser := TPasParser.Create(scanner, resolver, engine);
+        fs := TFileStream.Create(unitPath, fmOpenRead or fmShareDenyNone);
         try
-          parser.ImplicitUses.Clear;
-
-          { Step 3: Parse -- module is created early by ParseMain.
-            If the resolver fails partway through (e.g. unresolved types
-            from framework units), the AST up to that point still has
-            valid resolved references we can walk. }
-          try
-            parser.ParseMain(module);
-          except
-            { Continue with partially-resolved module }
-            on E: Exception do
-              writeln('DEBUG: ParseMain() execption: ' + e.Message);
-          end;
-
-          if module = nil then
-          begin
-            writeln('DEBUG: module = nil. Exit early');
-            Exit;
-          end;
-
-          { Step 4: Walk AST }
-          searchData.TargetFile := AFilename;
-          searchData.TargetLine := ALine + 1;  { convert 0-based to 1-based }
-          searchData.TargetName := ident;
-          searchData.FoundDecl := nil;
-          WriteLn('DEBUG: Walking AST for ident="', ident, '" file="', AFilename,
-            '" line=', ALine + 1);
-
-          visitor := TDeclVisitor.Create;
-          try
-            module.ForEachCall(@visitor.VisitElement, @searchData);
-          finally
-            visitor.Free;
-          end;
-
-          { Step 5: Extract result from resolved references }
-          if searchData.FoundDecl <> nil then
-          begin
-            Result.Found := True;
-            Result.DeclFile := searchData.FoundDecl.SourceFilename;
-            Result.DeclLine := searchData.FoundDecl.SourceLinenumber;
-            Result.DeclName := searchData.FoundDecl.Name;
-            WriteLn('DEBUG: Found via resolved ref: "', Result.DeclName,
-              '" at ', Result.DeclFile, ':', Result.DeclLine);
-          end
-          else
-          begin
-            { Fallback: name-based declaration search.  When the resolver
-              couldn't fully resolve scopes (e.g. incomplete source tree),
-              resolved references are absent.  Search the AST for a
-              declaration with the matching name instead. }
-            WriteLn('DEBUG: No resolved ref, trying name-based fallback for "', ident, '"');
-            nameVisitor := TDeclNameVisitor.Create;
-            try
-              module.ForEachCall(@nameVisitor.VisitElement, @searchData);
-            finally
-              nameVisitor.Free;
-            end;
-            if searchData.FoundDecl <> nil then
-            begin
-              Result.Found := True;
-              Result.DeclFile := searchData.FoundDecl.SourceFilename;
-              Result.DeclLine := searchData.FoundDecl.SourceLinenumber;
-              Result.DeclName := searchData.FoundDecl.Name;
-              WriteLn('DEBUG: Found via name fallback: "', Result.DeclName,
-                '" at ', Result.DeclFile, ':', Result.DeclLine);
-            end
-            else
-              WriteLn('DEBUG: No declaration found for "', ident, '" at line ', ALine + 1);
-          end;
-
+          sz := fs.Size;
+          SetLength(unitSource, sz);
+          if sz > 0 then
+            fs.Read(unitSource[1], sz);
         finally
-          parser.Free;
+          fs.Free;
         end;
-      finally
-        engine.Free;
+      except
+        Continue;
       end;
-    finally
-      scanner.Free;
+      // Scan interface only
+      match := ScanSourceForDecl(unitSource, ident, True);
+      if match.Found then
+      begin
+        Result.Found := True;
+        Result.DeclFile := unitPath;
+        Result.DeclLine := match.Line;
+        Result.DeclName := match.Name;
+        Exit;
+      end;
     end;
   finally
-    resolver.Free;
-  end;
-  except
-    { Catch any cleanup exceptions }
+    usedUnits.Free;
   end;
 end;
 
