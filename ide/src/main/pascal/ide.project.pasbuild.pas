@@ -806,15 +806,22 @@ begin
       P.Parameters.Add('-m');
       P.Parameters.Add(AModule);
     end;
-    P.CurrentDirectory := FProjectDir;
+    { For aggregator child modules, run from the aggregator root and
+      pass -f to point to the root project.xml }
+    if FAggregatorDir <> '' then
+    begin
+      P.CurrentDirectory := FAggregatorDir;
+      P.Parameters.Add('-f');
+      P.Parameters.Add(FAggregatorDir + 'project.xml');
+      if (AModule = '') and (FAggregatorModule <> '') then
+      begin
+        P.Parameters.Add('-m');
+        P.Parameters.Add(FAggregatorModule);
+      end;
+    end
+    else
+      P.CurrentDirectory := FProjectDir;
     P.Options := [poUsePipes];
-
-    {$IFDEF DEBUG}
-    WriteLn('DEBUG: TPasBuildProjectBackend.InvokePasBuildResolve');
-    WriteLn('  Executable: ', P.Executable);
-    WriteLn('  Parameters: ', P.Parameters.Text);
-    WriteLn('  Directory:  ', P.CurrentDirectory);
-    {$ENDIF}
 
     try
       P.Execute;
@@ -842,13 +849,7 @@ begin
     P.WaitOnExit;
 
     if P.ExitCode <> 0 then
-    begin
-      {$IFDEF DEBUG}
-      WriteLn('DEBUG: pasbuild resolve failed with exit code ', P.ExitCode);
-      WriteLn('  Output: ', Buf);
-      {$ENDIF}
       Exit;
-    end;
 
     Result := Buf;
   finally
@@ -1094,11 +1095,7 @@ begin
     Result := True;
   except
     on E: Exception do
-    begin
-      {$IFDEF DEBUG}
-      WriteLn('DEBUG: Failed to parse project.xml: ', E.Message);
-      {$ENDIF}
-    end;
+      ; // silently ignore parse failures
   end;
 end;
 
@@ -1147,12 +1144,7 @@ var
 begin
   JSONOutput := InvokePasBuildResolve(AProfiles);
   if JSONOutput = '' then
-  begin
-    {$IFDEF DEBUG}
-    WriteLn('DEBUG: pasbuild resolve returned empty output');
-    {$ENDIF}
     Exit;
-  end;
 
   if IsAggregator then
     ParseAggregatorJSON(JSONOutput)
