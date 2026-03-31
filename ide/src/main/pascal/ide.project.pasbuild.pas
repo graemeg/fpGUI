@@ -806,7 +806,21 @@ begin
       P.Parameters.Add('-m');
       P.Parameters.Add(AModule);
     end;
-    P.CurrentDirectory := FProjectDir;
+    { For aggregator child modules, run from the aggregator root and
+      pass -f to point to the root project.xml }
+    if FAggregatorDir <> '' then
+    begin
+      P.CurrentDirectory := FAggregatorDir;
+      P.Parameters.Add('-f');
+      P.Parameters.Add(FAggregatorDir + 'project.xml');
+      if (AModule = '') and (FAggregatorModule <> '') then
+      begin
+        P.Parameters.Add('-m');
+        P.Parameters.Add(FAggregatorModule);
+      end;
+    end
+    else
+      P.CurrentDirectory := FProjectDir;
     P.Options := [poUsePipes];
 
     {$IFDEF DEBUG}

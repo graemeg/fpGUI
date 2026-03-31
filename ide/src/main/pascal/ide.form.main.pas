@@ -1016,6 +1016,7 @@ begin
         end;
       keyB:  { Ctrl+B: go to declaration }
         begin
+          writeln('DEBUG: Ctrl+B shortcut to miGoToDeclaration');
           miGoToDeclaration(nil);
           consumed := True;
         end;
@@ -1969,38 +1970,140 @@ begin
 end;
 
 procedure TMainForm.miGoToDeclaration(Sender: TObject);
+
+  procedure AddPathIfNew(AList: TStringList; const APath: string);
+  begin
+    if AList.IndexOf(APath) < 0 then
+      AList.Add(APath);
+  end;
+
+  function MakeAbsolute(const ABase, APath: string): string;
+  begin
+    {$ifdef unix}
+    if (Length(APath) > 0) and (APath[1] = '/') then
+    {$else}
+    if (Length(APath) > 1) and (APath[2] = ':') then
+    {$endif}
+      Result := APath
+    else
+      Result := IncludeTrailingPathDelimiter(ABase) + APath;
+  end;
+
+  procedure AddSubdirectories(AList: TStringList; const ADir: string);
+  var
+    sr: TSearchRec;
+    full: string;
+  begin
+    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
+    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
+    try
+      repeat
+        if (sr.Attr and faDirectory) <> 0 then
+          if (sr.Name <> '.') and (sr.Name <> '..') then
+          begin
+            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
+            if Pos('target', sr.Name) = 0 then
+              AddSubdirectories(AList, full);
+          end;
+      until FindNext(sr) <> 0;
+    finally
+      FindClose(sr);
+    end;
+  end;
+
+  procedure CollectPaths(AModule: TPasBuildModule;
+    AUnitPaths, AIncludePaths: TStringList);
+  var
+    i: Integer;
+    p, absPath: string;
+    dep: TPasBuildDependency;
+  begin
+    { Add module's own source paths (skip compiled output dirs) }
+    for i := 0 to AModule.UnitPaths.Count - 1 do
+    begin
+      p := AModule.UnitPaths[i];
+      if Pos('target/', p) > 0 then
+        Continue;
+      absPath := MakeAbsolute(AModule.ProjectDir, p);
+      AddPathIfNew(AUnitPaths, absPath);
+    end;
+    for i := 0 to AModule.IncludePaths.Count - 1 do
+    begin
+      p := AModule.IncludePaths[i];
+      if Pos('target/', p) > 0 then
+        Continue;
+      absPath := MakeAbsolute(AModule.ProjectDir, p);
+      AddPathIfNew(AIncludePaths, absPath);
+    end;
+    { Add dependency source directories -- recursively scan for subdirs
+      because dep.SourceDir points to the base (e.g. src/main/pascal) while
+      actual unit sources live in subdirectories (corelib, gui, etc.) }
+    for i := 0 to AModule.Dependencies.Count - 1 do
+    begin
+      dep := TPasBuildDependency(AModule.Dependencies[i]);
+      if dep.SourceDir <> '' then
+        AddSubdirectories(AUnitPaths, dep.SourceDir);
+    end;
+  end;
+
 var
   edt: TfpgTextEdit;
   decl: TDeclarationResult;
   ts: TfpgTabSheet;
   pb: TPasBuildProjectBackend;
   m: TPasBuildModule;
+  ownedUnitPaths, ownedIncludePaths: TStringList;
   unitPaths, includePaths: TStrings;
+  i: Integer;
 begin
   if pcEditor.ActivePage = nil then
     Exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
 
-  { Get unit/include paths from project }
+  { Build unit/include paths from project and dependencies }
+  ownedUnitPaths := nil;
+  ownedIncludePaths := nil;
   unitPaths := nil;
   includePaths := nil;
   if GProject.ProjectFormat = pfPasBuild then
   begin
     pb := TPasBuildProjectBackend(GProject);
+    { Ensure project is resolved -- may not be if session had no profiles }
+    if not pb.Resolved then
+    begin
+      WriteLn('DEBUG: Project not resolved, calling Resolve. ActiveProfiles=', pb.ActiveProfiles.CommaText);
+      pb.Resolve;
+    end;
+    WriteLn('DEBUG: Resolved=', pb.Resolved, ' ModuleCount=', pb.Modules.Count);
     m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
+    WriteLn('DEBUG: FindModuleForFile("', pcEditor.ActivePage.Hint, '") = ', m <> nil);
     if m <> nil then
     begin
-      unitPaths := m.UnitPaths;
-      includePaths := m.IncludePaths;
+      ownedUnitPaths := TStringList.Create;
+      ownedIncludePaths := TStringList.Create;
+      CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
+      WriteLn('DEBUG: CollectPaths unitPaths.Count=', ownedUnitPaths.Count,
+        ' includePaths.Count=', ownedIncludePaths.Count);
+      {$IFDEF DEBUG}
+      for i := 0 to ownedUnitPaths.Count - 1 do
+        WriteLn('DEBUG:   unitPath[', i, ']=', ownedUnitPaths[i]);
+      {$ENDIF}
+      unitPaths := ownedUnitPaths;
+      includePaths := ownedIncludePaths;
     end;
   end;
   if unitPaths = nil then
     unitPaths := GProject.UnitDirs;
 
-  decl := FindDeclaration(FHighlightCache.PascalHighlighter, edt.Lines,
-    pcEditor.ActivePage.Hint, edt.CaretPos_V, edt.CaretPos_H,
-    unitPaths, includePaths);
+  try
+    decl := FindDeclaration(FHighlightCache.PascalHighlighter, edt.Lines,
+      pcEditor.ActivePage.Hint, edt.CaretPos_V, edt.CaretPos_H,
+      unitPaths, includePaths);
+  finally
+    ownedUnitPaths.Free;
+    ownedIncludePaths.Free;
+  end;
   if decl.Found then
   begin
     RecordCursorLocation;

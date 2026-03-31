@@ -1,7 +1,7 @@
 {
     fpGUI IDE - Go to Declaration
 
-    Copyright (C) 2006 - 2026 See the file AUTHORS.txt, included in this
+    Copyright (C) 2026 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -55,6 +55,7 @@ type
     FUnitPaths: TStrings;        { borrowed }
     FIncludePaths: TStrings;     { borrowed }
     FParsing: TStringList;       { tracks units currently being parsed -- circular use guard }
+    FParsedModules: TStringList; { cache: uppercase unit name -> TPasModule (shared) }
     FSubEngines: TFPList;        { sub-engines kept alive until root cleanup }
     FSubObjects: TFPList;        { parsers/scanners/resolvers kept alive until root cleanup }
     FOwnsHub: Boolean;           { True for root engine, False for sub-engines }
@@ -63,11 +64,13 @@ type
   public
     constructor Create;
     constructor CreateSub(AHub: TPasResolverHub; AParsing: TStringList;
+      AParsedModules: TStringList;
       ASubEngines: TFPList; ASubObjects: TFPList);
     destructor Destroy; override;
     function FindUnit(const AName, InFilename: String;
       NameExpr, InFileExpr: TPasExpr): TPasModule; override;
     procedure UsedInterfacesFinished(Section: TPasSection); override;
+    procedure FinishScope(ScopeType: TPasScopeType; El: TPasElement); override;
     property UnitPaths: TStrings read FUnitPaths write FUnitPaths;
     property IncludePaths: TStrings read FIncludePaths write FIncludePaths;
   end;
@@ -168,18 +171,22 @@ begin
   FOwnsHub := True;
   FParsing := TStringList.Create;
   FParsing.Sorted := True;
+  FParsedModules := TStringList.Create;
+  FParsedModules.Sorted := True;
   FOwnsParsing := True;
   FSubEngines := TFPList.Create;
   FSubObjects := TFPList.Create;
 end;
 
 constructor TDeclarationEngine.CreateSub(AHub: TPasResolverHub;
-  AParsing: TStringList; ASubEngines: TFPList; ASubObjects: TFPList);
+  AParsing: TStringList; AParsedModules: TStringList;
+  ASubEngines: TFPList; ASubObjects: TFPList);
 begin
   inherited Create;
   Hub := AHub;
   FOwnsHub := False;
   FParsing := AParsing;
+  FParsedModules := AParsedModules;  { shared with root }
   FOwnsParsing := False;
   FSubEngines := ASubEngines;  { shared with root }
   FSubObjects := ASubObjects;  { shared with root }
@@ -201,6 +208,7 @@ begin
       TObject(FSubObjects[i]).Free;
     FSubObjects.Free;
     FParsing.Free;
+    FParsedModules.Free;
   end;
   { Save and detach Hub before inherited Destroy calls Clear }
   h := Hub;
@@ -232,7 +240,7 @@ begin
     { Each unit needs its own engine instance, sharing Hub and parsing guard.
       Sub-engines are kept alive until root engine cleanup (AST nodes are
       owned by the engine that created them). }
-    subEngine := TDeclarationEngine.CreateSub(Hub, FParsing, FSubEngines, FSubObjects);
+    subEngine := TDeclarationEngine.CreateSub(Hub, FParsing, FParsedModules, FSubEngines, FSubObjects);
     subEngine.UnitPaths := FUnitPaths;
     subEngine.IncludePaths := FIncludePaths;
     subEngine.AddObjFPCBuiltInIdentifiers;
@@ -257,7 +265,7 @@ begin
       subParser.ParseUnit(Result);
     except
       on E: Exception do
-        Result := nil;
+        { Keep partially-parsed Result -- ParseUnit assigns it early }
     end;
   finally
     FParsing.Delete(FParsing.IndexOf(UpperCase(AName)));
@@ -273,6 +281,22 @@ begin
   inherited UsedInterfacesFinished(Section);
 end;
 
+procedure TDeclarationEngine.FinishScope(ScopeType: TPasScopeType;
+  El: TPasElement);
+begin
+  { Lenient mode: catch resolution errors per-scope so parsing continues.
+    Without this, any unresolved identifier (e.g. RTL types, or framework
+    types when source paths are incomplete) aborts the entire parse.
+    Scopes that fail are simply left unresolved -- the AST visitor will
+    find no resolved reference for those nodes. }
+  try
+    inherited FinishScope(ScopeType, El);
+  except
+    on EPasResolve do
+      { skip this scope, continue parsing }
+  end;
+end;
+
 function TDeclarationEngine.FindUnit(const AName, InFilename: String;
   NameExpr, InFileExpr: TPasExpr): TPasModule;
 var
@@ -280,8 +304,17 @@ var
   fs: TFileStream;
   ss: TStringStream;
   searchResolver: TDeclarationFileResolver;
+  idx: Integer;
 begin
   Result := nil;
+
+  { Check module cache first -- avoids re-parsing the same unit thousands of times }
+  idx := FParsedModules.IndexOf(UpperCase(AName));
+  if idx >= 0 then
+  begin
+    Result := TPasModule(FParsedModules.Objects[idx]);
+    Exit;
+  end;
 
   { Circular use guard }
   if FParsing.IndexOf(UpperCase(AName)) >= 0 then
@@ -302,7 +335,19 @@ begin
   end;
 
   if filePath = '' then
+  begin
+    { Unit source not found -- return a stub module so the resolver
+      can continue parsing.  Without this, FindModule raises
+      nCantFindUnitX which aborts the entire parse. }
+    Result := SubParseUnit(AName, AName + '.pas',
+      'unit ' + AName + ';' + LineEnding +
+      'interface' + LineEnding +
+      'implementation' + LineEnding +
+      'end.');
+    if Result <> nil then
+      FParsedModules.AddObject(UpperCase(AName), Result);
     Exit;
+  end;
 
   { Load file content }
   ss := TStringStream.Create('');
@@ -320,6 +365,17 @@ begin
 
   Result := SubParseUnit(AName, filePath, ss.DataString);
   ss.Free;
+  { If parsing the real source failed, fall back to a stub so the
+    resolver doesn't abort with "can't find unit" }
+  if Result = nil then
+    Result := SubParseUnit(AName, AName + '_stub.pas',
+      'unit ' + AName + ';' + LineEnding +
+      'interface' + LineEnding +
+      'implementation' + LineEnding +
+      'end.');
+  { Cache the result (real module or stub) to avoid re-parsing }
+  if Result <> nil then
+    FParsedModules.AddObject(UpperCase(AName), Result);
 end;
 
 
@@ -368,9 +424,17 @@ type
   end;
   PDeclSearchData = ^TDeclSearchData;
 
-  { TDeclVisitor - helper for ForEachCall which requires an 'of object' callback }
+  { TDeclVisitor - walks resolved references to find declarations }
 
   TDeclVisitor = class
+  public
+    procedure VisitElement(El: TPasElement; arg: Pointer);
+  end;
+
+  { TDeclNameVisitor - fallback: finds declarations by name when resolver
+    didn't produce resolved references (e.g. incomplete source tree) }
+
+  TDeclNameVisitor = class
   public
     procedure VisitElement(El: TPasElement; arg: Pointer);
   end;
@@ -405,6 +469,28 @@ begin
   Data^.FoundDecl := TResolvedReference(El.CustomData).Declaration;
 end;
 
+procedure TDeclNameVisitor.VisitElement(El: TPasElement; arg: Pointer);
+var
+  Data: PDeclSearchData;
+begin
+  Data := PDeclSearchData(arg);
+  if Data^.FoundDecl <> nil then
+    Exit;
+  { Match named declarations: procedures, variables, types, constants, properties }
+  if El.Name = '' then
+    Exit;
+  if CompareText(El.Name, Data^.TargetName) <> 0 then
+    Exit;
+  { Skip the usage site itself -- we want the declaration, not the reference }
+  if (El.SourceFilename = Data^.TargetFile) and
+     (El.SourceLinenumber = Data^.TargetLine) then
+    Exit;
+  { Accept declarations: procedures, variables, types, constants, properties }
+  if (El is TPasProcedure) or (El is TPasVariable) or (El is TPasType) or
+     (El is TPasConst) or (El is TPasProperty) then
+    Data^.FoundDecl := El;
+end;
+
 
 function FindDeclaration(AHighlighter: TPascalHighlighter;
   ALines: TStrings; const AFilename: string;
@@ -420,6 +506,7 @@ var
   sourceStream: TStringStream;
   searchData: TDeclSearchData;
   visitor: TDeclVisitor;
+  nameVisitor: TDeclNameVisitor;
 begin
   Result.Found := False;
   Result.DeclFile := '';
@@ -429,7 +516,10 @@ begin
   { Step 1: Extract identifier at cursor }
   ident := GetIdentifierAtCursor(AHighlighter, ALines, ALine, ACol);
   if ident = '' then
+  begin
+    writeln('DEBUG: GetIdentifierAtCursor exit early');
     Exit;
+  end;
 
   { Step 2: Create the parsing pipeline }
   module := nil;
@@ -462,22 +552,31 @@ begin
         try
           parser.ImplicitUses.Clear;
 
-          { Step 3: Parse }
+          { Step 3: Parse -- module is created early by ParseMain.
+            If the resolver fails partway through (e.g. unresolved types
+            from framework units), the AST up to that point still has
+            valid resolved references we can walk. }
           try
             parser.ParseMain(module);
           except
+            { Continue with partially-resolved module }
             on E: Exception do
-              module := nil;
+              writeln('DEBUG: ParseMain() execption: ' + e.Message);
           end;
 
           if module = nil then
+          begin
+            writeln('DEBUG: module = nil. Exit early');
             Exit;
+          end;
 
           { Step 4: Walk AST }
           searchData.TargetFile := AFilename;
           searchData.TargetLine := ALine + 1;  { convert 0-based to 1-based }
           searchData.TargetName := ident;
           searchData.FoundDecl := nil;
+          WriteLn('DEBUG: Walking AST for ident="', ident, '" file="', AFilename,
+            '" line=', ALine + 1);
 
           visitor := TDeclVisitor.Create;
           try
@@ -486,13 +585,40 @@ begin
             visitor.Free;
           end;
 
-          { Step 5: Extract result }
+          { Step 5: Extract result from resolved references }
           if searchData.FoundDecl <> nil then
           begin
             Result.Found := True;
             Result.DeclFile := searchData.FoundDecl.SourceFilename;
             Result.DeclLine := searchData.FoundDecl.SourceLinenumber;
             Result.DeclName := searchData.FoundDecl.Name;
+            WriteLn('DEBUG: Found via resolved ref: "', Result.DeclName,
+              '" at ', Result.DeclFile, ':', Result.DeclLine);
+          end
+          else
+          begin
+            { Fallback: name-based declaration search.  When the resolver
+              couldn't fully resolve scopes (e.g. incomplete source tree),
+              resolved references are absent.  Search the AST for a
+              declaration with the matching name instead. }
+            WriteLn('DEBUG: No resolved ref, trying name-based fallback for "', ident, '"');
+            nameVisitor := TDeclNameVisitor.Create;
+            try
+              module.ForEachCall(@nameVisitor.VisitElement, @searchData);
+            finally
+              nameVisitor.Free;
+            end;
+            if searchData.FoundDecl <> nil then
+            begin
+              Result.Found := True;
+              Result.DeclFile := searchData.FoundDecl.SourceFilename;
+              Result.DeclLine := searchData.FoundDecl.SourceLinenumber;
+              Result.DeclName := searchData.FoundDecl.Name;
+              WriteLn('DEBUG: Found via name fallback: "', Result.DeclName,
+                '" at ', Result.DeclFile, ':', Result.DeclLine);
+            end
+            else
+              WriteLn('DEBUG: No declaration found for "', ident, '" at line ', ALine + 1);
           end;
 
         finally
