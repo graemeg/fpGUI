@@ -23,38 +23,4 @@
     <module>../framework</module>
   </moduleDependencies>
 
-  <profiles>
-    <profile>
-      <id>debug</id>
-      <defines>
-        <define>DEBUG</define>
-      </defines>
-      <compilerOptions>
-        <option>-gw</option>
-        <option>-godwarfsets -godwarfmethodclassprefix</option>
-        <option>-gl</option>
-      </compilerOptions>
-    </profile>
-
-    <profile>
-      <id>release</id>
-      <defines>
-        <define>RELEASE</define>
-      </defines>
-      <compilerOptions>
-        <option>-O3</option>
-        <option>-CX</option>
-        <option>-Xs</option>
-        <option>-XX</option>
-      </compilerOptions>
-    </profile>
-
-    <profile>
-      <id>profiler</id>
-      <compilerOptions>
-        <option>-pg</option>
-        <option>-O-</option>
-      </compilerOptions>
-    </profile>
-  </profiles>
 </project>

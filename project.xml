@@ -17,4 +17,82 @@
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>debug</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gw</option>
+        <option>-godwarfsets -godwarfmethodclassprefix</option>
+        <option>-gl</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>memleak</id>
+      <compilerOptions>
+        <option>-gh</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>profiler</id>
+      <compilerOptions>
+        <option>-pg</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <defines>
+        <define>RELEASE</define>
+      </defines>
+      <compilerOptions>
+        <option>-O3</option>
+        <option>-CX</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>unix</id>
+      <defines>
+         <define>X11</define>
+         <define>UseCThreads</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>windows</id>
+      <defines>
+         <define>GDI</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>macos</id>
+      <defines>
+         <define>cocoa</define>
+         <define>AggCanvas</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>agg</id>
+      <defines>
+         <define>AggCanvas</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>freetype</id>
+      <defines>
+         <define>FORCE_FREETYPE</define>
+      </defines>
+    </profile>
+  </profiles>
+
 </project>
