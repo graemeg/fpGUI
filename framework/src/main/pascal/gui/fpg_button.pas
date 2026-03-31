@@ -607,7 +607,13 @@ begin
     Include(lBtnFlags, btfDisabled);
 
   // In the UI Designer we want the button more visible
-  if not (csDesigning in ComponentState) then
+  if (csDesigning in ComponentState) then
+  begin
+    { while in the designer we want hover effect all the time }
+    if FFlat then
+      Include(lBtnFlags, btfHover);
+  end
+  else
   begin
     if FFlat and (FState = 1) then  // mouse over
       Include(lBtnFlags, btfHover)
@@ -619,12 +625,6 @@ begin
       if FState = 1 then
         Include(lBtnFlags, btfHover);
     end;
-  end
-  else
-  begin
-    { while in the designer we want hover effect all the time }
-    if FFlat then
-      Include(lBtnFlags, btfHover);
   end;
 
   if (not FFlat) and FDefault then
