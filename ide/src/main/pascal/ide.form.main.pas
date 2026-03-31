@@ -2072,23 +2072,14 @@ begin
     { Ensure project is resolved -- may not be if session had no profiles }
     if not pb.Resolved then
     begin
-      WriteLn('DEBUG: Project not resolved, calling Resolve. ActiveProfiles=', pb.ActiveProfiles.CommaText);
       pb.Resolve;
     end;
-    WriteLn('DEBUG: Resolved=', pb.Resolved, ' ModuleCount=', pb.Modules.Count);
     m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
-    WriteLn('DEBUG: FindModuleForFile("', pcEditor.ActivePage.Hint, '") = ', m <> nil);
     if m <> nil then
     begin
       ownedUnitPaths := TStringList.Create;
       ownedIncludePaths := TStringList.Create;
       CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
-      WriteLn('DEBUG: CollectPaths unitPaths.Count=', ownedUnitPaths.Count,
-        ' includePaths.Count=', ownedIncludePaths.Count);
-      {$IFDEF DEBUG}
-      for i := 0 to ownedUnitPaths.Count - 1 do
-        WriteLn('DEBUG:   unitPath[', i, ']=', ownedUnitPaths[i]);
-      {$ENDIF}
       unitPaths := ownedUnitPaths;
       includePaths := ownedIncludePaths;
     end;

@@ -823,13 +823,6 @@ begin
       P.CurrentDirectory := FProjectDir;
     P.Options := [poUsePipes];
 
-    {$IFDEF DEBUG}
-    WriteLn('DEBUG: TPasBuildProjectBackend.InvokePasBuildResolve');
-    WriteLn('  Executable: ', P.Executable);
-    WriteLn('  Parameters: ', P.Parameters.Text);
-    WriteLn('  Directory:  ', P.CurrentDirectory);
-    {$ENDIF}
-
     try
       P.Execute;
     except
@@ -856,13 +849,7 @@ begin
     P.WaitOnExit;
 
     if P.ExitCode <> 0 then
-    begin
-      {$IFDEF DEBUG}
-      WriteLn('DEBUG: pasbuild resolve failed with exit code ', P.ExitCode);
-      WriteLn('  Output: ', Buf);
-      {$ENDIF}
       Exit;
-    end;
 
     Result := Buf;
   finally
@@ -1108,11 +1095,7 @@ begin
     Result := True;
   except
     on E: Exception do
-    begin
-      {$IFDEF DEBUG}
-      WriteLn('DEBUG: Failed to parse project.xml: ', E.Message);
-      {$ENDIF}
-    end;
+      ; // silently ignore parse failures
   end;
 end;
 
@@ -1161,12 +1144,7 @@ var
 begin
   JSONOutput := InvokePasBuildResolve(AProfiles);
   if JSONOutput = '' then
-  begin
-    {$IFDEF DEBUG}
-    WriteLn('DEBUG: pasbuild resolve returned empty output');
-    {$ENDIF}
     Exit;
-  end;
 
   if IsAggregator then
     ParseAggregatorJSON(JSONOutput)
