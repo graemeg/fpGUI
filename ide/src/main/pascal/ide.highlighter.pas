@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  PScanner;
+  PScanner, ide.pascal.tokeniser;
 
 type
 
