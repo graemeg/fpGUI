@@ -49,10 +49,13 @@ uses
   {$ENDIF}
   ;
 
-{ Constants missing on windows unit }
+{ Constants missing from the FPC Windows unit }
 const
-  VER_PLATFORM_WIN32_CE = 3;
-  CLEARTYPE_QUALITY     = 5;
+  VER_PLATFORM_WIN32_CE       = 3;
+  CLEARTYPE_QUALITY           = 5;
+  MONITOR_DEFAULTTOPRIMARY    = $00000001;
+
+function MonitorFromPoint(pt: TPOINT; dwFlags: DWORD): HMONITOR; stdcall; external 'user32.dll' name 'MonitorFromPoint';
 
 var
   { Unicode selection variables }
@@ -1698,7 +1701,7 @@ var
   pt: TPOINT;
 begin
   // 1. FPGUI_SCALE_FACTOR - explicit fpGUI override (fractional, e.g. "1.5")
-  EnvVal := GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
+  EnvVal := SysUtils.GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
   if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
   begin
     Result := Round(96 * ScaleFactor);
