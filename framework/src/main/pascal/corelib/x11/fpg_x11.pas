@@ -317,6 +317,9 @@ type
     { X11 window grouping }
     FLeaderWindow: TfpgWinHandle;
     FClientLeaderAtom: TAtom;
+    { Cached effective DPI resolved at startup }
+    FEffectiveDPI: integer;
+    function    GetPhysicalDPI: integer;
     procedure   SetDrag(const AValue: TfpgX11Drag);
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
@@ -516,6 +519,7 @@ uses
   fpg_x11_wakechannel,
   cursorfont,
   xatom,            // used for XA_WM_NAME
+  xresource,
   keysym,
   math,
   dynlibs;
@@ -1632,6 +1636,88 @@ begin
   FreeMem(pc);
 end;
 
+{  DetectEffectiveDPI
+   Determines the logical DPI using a priority chain inspired by Qt/GTK:
+     1. FPGUI_SCALE_FACTOR env var  - fpGUI-specific override (fractional, e.g. 1.5)
+     2. Xft.dpi X resource          - set by KDE/Gnome desktop scaling settings
+     3. QT_SCALE_FACTOR env var     - fractional scale factor used by Qt apps
+     4. GDK_SCALE env var           - integer scale factor used by GTK apps
+     5. Physical monitor dimensions - fallback (unreliable on some 4K displays)
+   Returns the effective DPI as an integer (e.g. 96, 120, 144, 192). }
+function DetectEffectiveDPI(ADisplay: PDisplay; APhysicalDPI: integer): integer;
+
+  { Parse a floating-point scale factor from a string.
+    Uses Val to avoid locale issues (env vars always use '.' as decimal separator). }
+  function ParseScaleFactor(const S: string; out AValue: Double): Boolean;
+  var
+    Code: Integer;
+  begin
+    Val(S, AValue, Code);
+    Result := (Code = 0) and (AValue > 0);
+  end;
+
+var
+  EnvVal: string;
+  ScaleFactor: Double;
+  RMS: PChar;
+  DB: TXrmDatabase;
+  Value: TXrmValue;
+  StrType: PChar;
+  DPI: Integer;
+begin
+  // 1. FPGUI_SCALE_FACTOR - explicit fpGUI override (fractional, e.g. "1.5")
+  EnvVal := GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    Exit;
+  end;
+
+  // 2. Xft.dpi from X resource manager (KDE/Gnome desktop scaling)
+  XrmInitialize;
+  RMS := XResourceManagerString(ADisplay);
+  if RMS <> nil then
+  begin
+    DB := XrmGetStringDatabase(RMS);
+    try
+      if XrmGetResource(DB, 'Xft.dpi', 'Xft.Dpi', @StrType, @Value) <> 0 then
+      begin
+        DPI := StrToIntDef(Value.addr, 0);
+        if DPI > 0 then
+        begin
+          Result := DPI;
+          Exit;
+        end;
+      end;
+    finally
+      XrmDestroyDatabase(DB);
+    end;
+  end;
+
+  // 3. QT_SCALE_FACTOR - fractional scale factor (e.g. "1.25")
+  EnvVal := GetEnvironmentVariable('QT_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    Exit;
+  end;
+
+  // 4. GDK_SCALE - integer scale factor only (e.g. "2")
+  EnvVal := GetEnvironmentVariable('GDK_SCALE');
+  if EnvVal <> '' then
+  begin
+    DPI := StrToIntDef(EnvVal, 0);
+    if DPI > 0 then
+    begin
+      Result := 96 * DPI;
+      Exit;
+    end;
+  end;
+
+  // 5. Fallback to physical monitor dimensions
+  Result := APhysicalDPI;
+end;
+
 constructor TfpgX11Application.Create(const AParams: string);
 var
   s: string;
@@ -1661,6 +1747,9 @@ begin
 
   //Writeln('display depth: ',DisplayDepth);
   DefaultColorMap := XDefaultColorMap(FDisplay, DefaultScreen);
+
+  // Detect effective DPI from desktop environment, env vars, or physical display
+  FEffectiveDPI := DetectEffectiveDPI(FDisplay, GetPhysicalDPI);
 
   // Initialize atoms
   xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', TBool(False));
@@ -2567,39 +2656,35 @@ begin
   end;
 end;
 
-function TfpgX11Application.Screen_dpi_x: integer;
+function TfpgX11Application.GetPhysicalDPI: integer;
 var
   mm: integer;
 begin
-  // 25.4 is millimeters per inch
-  mm := 0;
-  mm := DisplayWidthMM(Display, DefaultScreen);
-  if mm > 0 then
-    Result := Round((GetScreenWidth * 25.4) / mm)
-  else
-    Result := 96; // seems to be a well known default. :-(
-end;
-
-function TfpgX11Application.Screen_dpi_y: integer;
-var
-  mm: integer;
-begin
-  // 25.4 is millimeters per inch
-  mm := 0;
+  // Calculate DPI from physical display dimensions (25.4 mm per inch)
   mm := DisplayHeightMM(Display, DefaultScreen);
   if mm > 0 then
     Result := Round((GetScreenHeight * 25.4) / mm)
   else
-    Result := Screen_dpi_x; // same as width
+    Result := 96;
+end;
+
+function TfpgX11Application.Screen_dpi_x: integer;
+begin
+  Result := FEffectiveDPI;
+end;
+
+function TfpgX11Application.Screen_dpi_y: integer;
+begin
+  Result := FEffectiveDPI;
 end;
 
 function TfpgX11Application.Screen_dpi: integer;
 begin
-  Result := Screen_dpi_y;
+  Result := FEffectiveDPI;
   {$IFDEF GDEBUG}
   writeln('Display width in mm: ', DisplayWidthMM(Display, DefaultScreen));
   writeln('Display height in mm: ', DisplayHeightMM(Display, DefaultScreen));
-  writeln('Display dpi: ', Result);
+  writeln('Effective DPI: ', Result);
   {$ENDIF}
 end;
 
