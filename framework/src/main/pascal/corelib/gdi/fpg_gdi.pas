@@ -234,6 +234,7 @@ type
   private
     FDrag: TfpgGDIDrag;
     FMonitorList: array of TfpgScreenInfo;
+    FEffectiveDPI: integer;  { Cached effective DPI resolved at startup }
     procedure   DoWakeMainThread(Sender: TObject);
     procedure   SetDrag(const AValue: TfpgGDIDrag);
     property    Drag: TfpgGDIDrag read FDrag write SetDrag;
@@ -1400,6 +1401,11 @@ var
   mi: tagMONITORINFO;
   info: TfpgScreenInfo;
   coll: PMonitorCollector;
+  hShCore: THandle;
+  GetDpiForMon: function(hmon: HMONITOR; dpiType: Integer;
+    out dpiX, dpiY: UINT): HRESULT; stdcall;
+  monDpiX, monDpiY: UINT;
+  GotPerMonitorDpi: Boolean;
 begin
   coll := PMonitorCollector(dwData);
   FillChar(mi, SizeOf(mi), 0);
@@ -1413,10 +1419,30 @@ begin
       mi.rcWork.Right  - mi.rcWork.Left,
       mi.rcWork.Bottom - mi.rcWork.Top);
   info.Primary := (mi.dwFlags and MONITORINFOF_PRIMARY) <> 0;
-  { DPI via the monitor's device context — same for all monitors on pre-8.1 Windows.
-    GetDpiForMonitor (SHCore.dll, Win 8.1+) is a future enhancement. }
-  info.DpiX := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSX);
-  info.DpiY := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSY);
+  { Per-monitor DPI: try GetDpiForMonitor (Win 8.1+) first, then
+    fall back to GetDeviceCaps which reports the same DPI for all
+    monitors on pre-8.1 Windows. }
+  GotPerMonitorDpi := False;
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(GetDpiForMon) := GetProcAddress(hShCore, 'GetDpiForMonitor');
+    if Assigned(GetDpiForMon) then
+    begin
+      if GetDpiForMon(hMonitor, 0 {MDT_EFFECTIVE_DPI}, monDpiX, monDpiY) = S_OK then
+      begin
+        info.DpiX := monDpiX;
+        info.DpiY := monDpiY;
+        GotPerMonitorDpi := True;
+      end;
+    end;
+    FreeLibrary(hShCore);
+  end;
+  if not GotPerMonitorDpi then
+  begin
+    info.DpiX := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSX);
+    info.DpiY := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSY);
+  end;
   SetLength(coll^.List, Length(coll^.List) + 1);
   coll^.List[High(coll^.List)] := info;
   Result := True;
@@ -1601,12 +1627,124 @@ begin
   Result := FHiddenWindow;
 end;
 
+{ Declare per-monitor DPI awareness so Windows reports true DPI values
+  instead of virtualising at 96 DPI. Must be called before any GetDC or
+  GetDeviceCaps calls.
+    - Win 8.1+: SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+    - Vista/7:  SetProcessDPIAware
+  Both are loaded dynamically to avoid hard dependencies on OS version. }
+procedure DeclareDPIAwareness;
+var
+  hShCore: THandle;
+  hUser32: THandle;
+  SetDpiAwareness: function(value: Integer): HRESULT; stdcall;
+  SetDPIAware: function: BOOL; stdcall;
+begin
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(SetDpiAwareness) := GetProcAddress(hShCore, 'SetProcessDpiAwareness');
+    if Assigned(SetDpiAwareness) then
+    begin
+      SetDpiAwareness(2); // PROCESS_PER_MONITOR_DPI_AWARE
+      {$IFDEF DEBUG}
+      writeln('DPI: declared PROCESS_PER_MONITOR_DPI_AWARE via shcore.dll');
+      {$ENDIF}
+      FreeLibrary(hShCore);
+      Exit;
+    end;
+    FreeLibrary(hShCore);
+  end;
+  // Vista/7 fallback — also loaded dynamically
+  hUser32 := LoadLibrary('user32.dll');
+  if hUser32 <> 0 then
+  begin
+    Pointer(SetDPIAware) := GetProcAddress(hUser32, 'SetProcessDPIAware');
+    if Assigned(SetDPIAware) then
+    begin
+      SetDPIAware;
+      {$IFDEF DEBUG}
+      writeln('DPI: declared DPI-aware via user32.dll (Vista/7 fallback)');
+      {$ENDIF}
+    end;
+    FreeLibrary(hUser32);
+  end;
+end;
+
+{  DetectEffectiveDPI
+   Determines the logical DPI using a priority chain:
+     1. FPGUI_SCALE_FACTOR env var  - fpGUI-specific override (fractional, e.g. 1.5)
+     2. GetDpiForMonitor (Win 8.1+) - per-monitor DPI from shcore.dll
+     3. GetDeviceCaps(LOGPIXELSY)   - legacy fallback
+   Returns the effective DPI as an integer (e.g. 96, 120, 144, 192). }
+function DetectEffectiveDPI(ADisplay: HDC): integer;
+
+  function ParseScaleFactor(const S: string; out AValue: Double): Boolean;
+  var
+    Code: Integer;
+  begin
+    Val(S, AValue, Code);
+    Result := (Code = 0) and (AValue > 0);
+  end;
+
+var
+  EnvVal: string;
+  ScaleFactor: Double;
+  hShCore: THandle;
+  GetDpiForMon: function(hmon: HMONITOR; dpiType: Integer;
+    out dpiX, dpiY: UINT): HRESULT; stdcall;
+  Mon: HMONITOR;
+  dpiX, dpiY: UINT;
+  pt: TPOINT;
+begin
+  // 1. FPGUI_SCALE_FACTOR - explicit fpGUI override (fractional, e.g. "1.5")
+  EnvVal := GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    {$IFDEF DEBUG}
+    writeln('DPI: FPGUI_SCALE_FACTOR=', EnvVal, ' -> ', Result);
+    {$ENDIF}
+    Exit;
+  end;
+
+  // 2. GetDpiForMonitor (Win 8.1+) - per-monitor DPI
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(GetDpiForMon) := GetProcAddress(hShCore, 'GetDpiForMonitor');
+    if Assigned(GetDpiForMon) then
+    begin
+      pt.X := 0; pt.Y := 0;
+      Mon := MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
+      if GetDpiForMon(Mon, 0 {MDT_EFFECTIVE_DPI}, dpiX, dpiY) = S_OK then
+      begin
+        FreeLibrary(hShCore);
+        Result := dpiY;
+        {$IFDEF DEBUG}
+        writeln('DPI: GetDpiForMonitor -> ', Result);
+        {$ENDIF}
+        Exit;
+      end;
+    end;
+    FreeLibrary(hShCore);
+  end;
+
+  // 3. Legacy fallback
+  Result := GetDeviceCaps(ADisplay, LOGPIXELSY);
+  {$IFDEF DEBUG}
+  writeln('DPI: GetDeviceCaps fallback -> ', Result);
+  {$ENDIF}
+end;
+
 constructor TfpgGDIApplication.Create(const AParams: string);
 var
   coll: TMonitorCollector;
 begin
   inherited Create(AParams);
+  DeclareDPIAwareness;
   FDisplay        := Windows.GetDC(0);
+  FEffectiveDPI   := DetectEffectiveDPI(FDisplay);
 
   { Enumerate connected monitors. This runs before TfpgApplication.Create
     calls GetMonitorCount/GetMonitorInfo (those are called after inherited returns). }
@@ -1750,17 +1888,17 @@ end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;
 begin
-  Result := GetDeviceCaps(wapplication.display, LOGPIXELSX)
+  Result := FEffectiveDPI;
 end;
 
 function TfpgGDIApplication.Screen_dpi_y: integer;
 begin
-  Result := GetDeviceCaps(wapplication.display, LOGPIXELSY)
+  Result := FEffectiveDPI;
 end;
 
 function TfpgGDIApplication.Screen_dpi: integer;
 begin
-  Result := Screen_dpi_y;
+  Result := FEffectiveDPI;
 end;
 
 function TfpgGDIApplication.GetMonitorCount: Integer;
