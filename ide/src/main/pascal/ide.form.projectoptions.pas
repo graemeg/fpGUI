@@ -621,6 +621,7 @@ begin
   Name := 'ProjectOptionsForm';
   SetPosition(317, 177, 609, 570);
   WindowTitle := 'Project Options';
+  WindowPosition := wpMainFormCenter;
   Hint := '';
   ShowHint := True;
   OnKeyPress := @FormKeyPressed;

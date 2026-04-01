@@ -258,7 +258,7 @@ begin
   SetPosition(300, 200, 560, 400);
   WindowTitle := 'Navigate to File';
   Hint := '';
-  WindowPosition := wpOneThirdDown;
+  WindowPosition := wpMainFormCenter;
 
   edtSearch := TfpgEdit.Create(self);
   with edtSearch do

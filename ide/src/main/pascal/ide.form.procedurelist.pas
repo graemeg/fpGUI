@@ -773,7 +773,7 @@ begin
   WindowTitle := 'Procedure List';
   Hint := '';
   ShowHint := True;
-  WindowPosition := wpOneThirdDown;
+  WindowPosition := wpMainFormCenter;
 
   Bevel1 := TfpgBevel.Create(self);
   with Bevel1 do

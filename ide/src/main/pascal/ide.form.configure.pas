@@ -290,7 +290,7 @@ begin
   WindowTitle := 'Configure IDE';
   Hint := '';
   ShowHint := True;
-  WindowPosition := wpOneThirdDown;
+  WindowPosition := wpMainFormCenter;
   OnKeyPress := @FormKeyPressed;
 
   btnCancel := TfpgButton.Create(self);

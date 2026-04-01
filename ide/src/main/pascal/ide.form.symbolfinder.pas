@@ -269,7 +269,7 @@ begin
   SetPosition(300, 200, 600, 400);
   WindowTitle := 'Navigate to Symbol';
   Hint := '';
-  WindowPosition := wpOneThirdDown;
+  WindowPosition := wpMainFormCenter;
 
   edtSearch := TfpgEdit.Create(self);
   with edtSearch do

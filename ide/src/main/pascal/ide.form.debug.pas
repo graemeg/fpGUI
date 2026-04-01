@@ -60,6 +60,7 @@ begin
   Name := 'DebugForm';
   SetPosition(690, 193, 512, 247);
   WindowTitle := 'Debug Window';
+  WindowPosition := wpMainFormCenter;
   Hint := '';
 
   PageControl1 := TfpgPageControl.Create(self);
