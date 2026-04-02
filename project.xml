@@ -30,9 +30,9 @@
         <define>DEBUG</define>
       </defines>
       <compilerOptions>
-        <option>-gw</option>
-        <option>-godwarfsets -godwarfmethodclassprefix</option>
+        <option>-gO</option>
         <option>-gl</option>
+        <option>-O-</option>
       </compilerOptions>
     </profile>
 
