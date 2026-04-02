@@ -192,6 +192,7 @@ type
     procedure   miJumpToImplementation(Sender: TObject);
     procedure   miJumpToggleIntfImpl(Sender: TObject);
     procedure   miGoToDeclaration(Sender: TObject);
+    procedure   miFindUsages(Sender: TObject);
     function    GetCurrentCursorLocation: TCursorLocation;
     procedure   RecordCursorLocation;
     procedure   NavigateToLocation(const ALoc: TCursorLocation);
@@ -240,6 +241,8 @@ uses
   ,ide.session
   ,ide.navigation
   ,ide.declaration
+  ,ide.findusages
+  ,ide.form.findusages
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
@@ -1038,10 +1041,15 @@ begin
         end;
     end;
   end;
-  { Alt+Left/Right: navigate back/forward in cursor history }
+  { Alt shortcuts: F7 Find Usages, Left/Right navigate history }
   if not consumed and (ssAlt in shiftstate) and not (ssCtrl in shiftstate) and not (ssShift in shiftstate) then
   begin
     case keycode of
+      keyF7:
+        begin
+          miFindUsages(nil);
+          consumed := True;
+        end;
       keyLeft:
         begin
           miNavigateBack(nil);
@@ -2135,6 +2143,85 @@ begin
   end;
 end;
 
+procedure TMainForm.miFindUsages(Sender: TObject);
+var
+  edt: TfpgTextEdit;
+  Ident: string;
+  pb: TPasBuildProjectBackend;
+  mi: TAggregatorModuleInfo;
+  Exts: TStringList;
+  Files: TFileEntryArray;
+  Groups: TUsageGroupArray;
+  TotalCount: Integer;
+  Res: TFindUsagesResult;
+  ts: TfpgTabSheet;
+  i: Integer;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+
+  Ident := GetIdentifierAtCursor(FHighlightCache.PascalHighlighter,
+    edt.Lines, edt.CaretPos_V, edt.CaretPos_H);
+  if Ident = '' then
+  begin
+    AddMessage('Find Usages: no identifier at cursor');
+    Exit;
+  end;
+
+  { Collect project source files (same pattern as miNavigateToSymbol) }
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  Exts := TStringList.Create;
+  try
+    Exts.Add('.pas');
+    Exts.Add('.pp');
+    Exts.Add('.lpr');
+    Exts.Add('.dpr');
+    SetLength(Files, 0);
+    if pb.IsAggregator then
+    begin
+      for i := 0 to pb.ModuleInfos.Count - 1 do
+      begin
+        mi := TAggregatorModuleInfo(pb.ModuleInfos[i]);
+        if not mi.IsAggregator then
+          CollectSourceFiles(mi.ProjectDir + mi.SourceDirectory,
+            pb.ProjectDir, Exts, Files);
+      end;
+    end
+    else
+      CollectSourceFiles(pb.ProjectDir + pb.SourceDirectory,
+        pb.ProjectDir, Exts, Files);
+  finally
+    Exts.Free;
+  end;
+
+  { Scan all files for usages }
+  SetLength(Groups, 0);
+  TotalCount := FindAllUsages(Ident, Files, Groups);
+
+  if TotalCount = 0 then
+  begin
+    AddMessage(Format('No usages of ''%s'' found', [Ident]));
+    Exit;
+  end;
+
+  { Show results dialog }
+  Res := DisplayFindUsages(Ident, Groups, TotalCount);
+  if Res.FullPath <> '' then
+  begin
+    RecordCursorLocation;
+    ts := OpenEditorPage(Res.FullPath);
+    if ts <> nil then
+    begin
+      edt := TfpgTextEdit(ts.Components[0]);
+      edt.GotoLine(Res.Line);
+    end;
+  end;
+end;
+
 function TMainForm.GetCurrentCursorLocation: TCursorLocation;
 var
   edt: TfpgTextEdit;
@@ -2830,6 +2917,7 @@ begin
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
     AddMenuItem('Toggle Interface/Implementation', rsKeyCtrl+rsKeyShift+'J', @miJumpToggleIntfImpl);
     AddMenuItem('Go to Declaration', rsKeyCtrl+'B', @miGoToDeclaration);
+    AddMenuItem('Find Usages', rsKeyAlt+'F7', @miFindUsages);
     AddSeparator;
     AddMenuItem('Navigate Back', rsKeyAlt+'Left', @miNavigateBack);
     AddMenuItem('Navigate Forward', rsKeyAlt+'Right', @miNavigateForward);
