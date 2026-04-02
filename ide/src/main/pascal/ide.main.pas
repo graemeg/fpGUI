@@ -41,6 +41,8 @@ uses
   ide.utils,
   ide.builder.thread,
   ide.runner.thread,
+  ide.debug.adapter,
+  ide.debug.worker,
   ide.images,
   ide.stringhelpers,
   ide.form.procedurelist,

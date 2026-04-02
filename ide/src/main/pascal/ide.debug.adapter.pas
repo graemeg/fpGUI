@@ -1,0 +1,343 @@
+{
+    fpGUI IDE - Maximus
+
+    Copyright (C) 2012 - 2026 Graeme Geldenhuys
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      IDE debug adapter — bridges the PDR debugger engine to the IDE's
+      GUI thread. Owns the PDR component lifecycle (adapters + engine)
+      and dispatches blocking execution commands to a worker thread.
+      Events are posted back to the main thread via Synchronize.
+}
+
+unit ide.debug.adapter;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils,
+  pdr_ports, pdr_engine,
+  ide.debug.worker;
+
+type
+  TIDEDebugState = (
+    idsIdle,        // No debug session
+    idsStarting,    // Loading program, setting initial breakpoints
+    idsRunning,     // Tracee is running (worker thread blocked in FpWaitPid)
+    idsPaused,      // Tracee stopped at breakpoint/step/signal
+    idsTerminated   // Tracee exited
+  );
+
+  TDebugStopEvent = procedure(Sender: TObject; AState: TIDEDebugState;
+    const AFile: String; ALine: Integer) of object;
+
+  TDebugOutputEvent = procedure(Sender: TObject;
+    const AMessage: String) of object;
+
+  TIDEDebugAdapter = class(TObject)
+  private
+    FEngine: TDebuggerEngine;
+    FProcessController: IProcessController;
+    FDebugInfoReader: IDebugInfoReader;
+    FArchAdapter: IArchAdapter;
+    FWorkerThread: TDebugWorkerThread;
+    FState: TIDEDebugState;
+    FOnStopped: TDebugStopEvent;
+    FOnTerminated: TNotifyEvent;
+    FOnOutput: TDebugOutputEvent;
+    procedure DispatchCommand(ACommand: TDebugCommand);
+    procedure HandleWorkerStopped;
+    procedure SendOutput(const AMsg: String);
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    { Session management }
+    function  StartSession(const ABinaryPath: String): Boolean;
+    procedure EndSession;
+
+    { Execution control — dispatches to worker thread }
+    procedure Run;
+    procedure Continue;
+    procedure StepInto;
+    procedure StepOver;
+    procedure StepLine;
+    procedure Pause;
+
+    { Inspection — call only when State = idsPaused }
+    function  GetLocalVariables: TVariableValueArray;
+    function  GetCallStack(ALimit: Integer = 0): TStringArray;
+    function  EvaluateExpression(const AExpr: String): TVariableValue;
+
+    { Breakpoints — can be called when session is active }
+    function  SetBreakpoint(const ALocation: String): TBreakpointHandle;
+    function  RemoveBreakpoint(AHandle: TBreakpointHandle): Boolean;
+
+    { State }
+    property State: TIDEDebugState read FState;
+    property Engine: TDebuggerEngine read FEngine;
+    property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
+    property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated;
+    property OnOutput: TDebugOutputEvent read FOnOutput write FOnOutput;
+  end;
+
+implementation
+
+uses
+  {$IFDEF UNIX}
+  BaseUnix,
+  {$ENDIF}
+  pdr_linux_ptrace, pdr_opdf_adapter, pdr_arch_adapters;
+
+
+{ TIDEDebugAdapter }
+
+constructor TIDEDebugAdapter.Create;
+begin
+  inherited Create;
+  FState := idsIdle;
+  FEngine := nil;
+  FWorkerThread := nil;
+end;
+
+destructor TIDEDebugAdapter.Destroy;
+begin
+  EndSession;
+  inherited Destroy;
+end;
+
+procedure TIDEDebugAdapter.SendOutput(const AMsg: String);
+begin
+  if Assigned(FOnOutput) then
+    FOnOutput(Self, AMsg);
+end;
+
+function TIDEDebugAdapter.StartSession(const ABinaryPath: String): Boolean;
+begin
+  Result := False;
+
+  { Clean up any previous session }
+  if FState <> idsIdle then
+    EndSession;
+
+  try
+    { Create platform-specific adapters — same wiring as PDR CLI }
+    FProcessController := TLinuxPtraceAdapter.Create;
+    FDebugInfoReader := TOPDFReaderAdapter.Create;
+    {$IFDEF CPUX86_64}
+    FArchAdapter := TArchX86_64Adapter.Create(FProcessController);
+    {$ENDIF}
+    {$IFDEF CPUI386}
+    FArchAdapter := TArchX86Adapter.Create(FProcessController);
+    {$ENDIF}
+
+    { Create the debugger engine }
+    FEngine := TDebuggerEngine.Create(FProcessController, FDebugInfoReader, FArchAdapter);
+
+    { Load program and OPDF debug information }
+    if not FEngine.LoadProgram(ABinaryPath) then
+    begin
+      SendOutput('Failed to load debug information from: ' + ABinaryPath);
+      EndSession;
+      Exit;
+    end;
+
+    FState := idsStarting;
+    SendOutput('Debug session started: ' + ABinaryPath);
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      SendOutput('Error starting debug session: ' + E.Message);
+      EndSession;
+    end;
+  end;
+end;
+
+procedure TIDEDebugAdapter.EndSession;
+begin
+  { Kill the worker thread if it's still running }
+  if FWorkerThread <> nil then
+  begin
+    { Send SIGSTOP to unblock the worker, then let it die }
+    {$IFDEF UNIX}
+    if (FEngine <> nil) and (FEngine.AttachedPID > 0) then
+      FpKill(FEngine.AttachedPID, SIGKILL);
+    {$ENDIF}
+    FWorkerThread := nil;
+  end;
+
+  { Detach/clean up the engine }
+  if FEngine <> nil then
+  begin
+    if FEngine.State in [dsRunning, dsPaused] then
+      FEngine.Detach;
+    FreeAndNil(FEngine);
+  end;
+
+  { Release interface references }
+  FProcessController := nil;
+  FDebugInfoReader := nil;
+  FArchAdapter := nil;
+  FState := idsIdle;
+end;
+
+procedure TIDEDebugAdapter.DispatchCommand(ACommand: TDebugCommand);
+begin
+  if FEngine = nil then
+    Exit;
+  if FWorkerThread <> nil then
+  begin
+    SendOutput('Debugger is busy — command ignored.');
+    Exit;
+  end;
+
+  FState := idsRunning;
+  FWorkerThread := TDebugWorkerThread.Create(FEngine, ACommand,
+    @HandleWorkerStopped);
+  FWorkerThread.Start;
+end;
+
+procedure TIDEDebugAdapter.HandleWorkerStopped;
+var
+  EngineState: TDebuggerState;
+  LineInfo: TLineInfo;
+  StopFile: String;
+  StopLine: Integer;
+  CurrentAddr: QWord;
+begin
+  FWorkerThread := nil;
+
+  if FEngine = nil then
+    Exit;
+
+  EngineState := FEngine.GetState;
+
+  if EngineState = dsTerminated then
+  begin
+    FState := idsTerminated;
+    SendOutput('Process terminated.');
+    if Assigned(FOnTerminated) then
+      FOnTerminated(Self);
+    Exit;
+  end;
+
+  if EngineState = dsPaused then
+  begin
+    FState := idsPaused;
+
+    { Resolve source location from the current instruction pointer }
+    StopFile := '';
+    StopLine := 0;
+    CurrentAddr := FProcessController.GetCurrentAddress;
+    if FDebugInfoReader.FindLineByAddress(CurrentAddr, LineInfo) then
+    begin
+      StopFile := LineInfo.FileName;
+      StopLine := Integer(LineInfo.LineNumber);
+    end;
+
+    if Assigned(FOnStopped) then
+      FOnStopped(Self, FState, StopFile, StopLine);
+  end
+  else
+  begin
+    { Unexpected state — report it }
+    SendOutput('Debugger in unexpected state after command.');
+    FState := idsIdle;
+  end;
+end;
+
+procedure TIDEDebugAdapter.Run;
+begin
+  if FState in [idsStarting, idsPaused] then
+    DispatchCommand(dcRun);
+end;
+
+procedure TIDEDebugAdapter.Continue;
+begin
+  if FState = idsPaused then
+    DispatchCommand(dcContinue);
+end;
+
+procedure TIDEDebugAdapter.StepInto;
+begin
+  if FState = idsPaused then
+    DispatchCommand(dcStepInto);
+end;
+
+procedure TIDEDebugAdapter.StepOver;
+begin
+  if FState = idsPaused then
+    DispatchCommand(dcStepOver);
+end;
+
+procedure TIDEDebugAdapter.StepLine;
+begin
+  if FState = idsPaused then
+    DispatchCommand(dcStepLine);
+end;
+
+procedure TIDEDebugAdapter.Pause;
+begin
+  {$IFDEF UNIX}
+  if (FState = idsRunning) and (FEngine <> nil) and
+     (FEngine.AttachedPID > 0) then
+    FpKill(FEngine.AttachedPID, SIGSTOP);
+  {$ENDIF}
+end;
+
+function TIDEDebugAdapter.GetLocalVariables: TVariableValueArray;
+begin
+  if (FState = idsPaused) and (FEngine <> nil) then
+    Result := FEngine.GetLocalVariables
+  else
+    SetLength(Result, 0);
+end;
+
+function TIDEDebugAdapter.GetCallStack(ALimit: Integer): TStringArray;
+begin
+  if (FState = idsPaused) and (FEngine <> nil) then
+    Result := FEngine.GetCallStack(ALimit)
+  else
+    SetLength(Result, 0);
+end;
+
+function TIDEDebugAdapter.EvaluateExpression(const AExpr: String): TVariableValue;
+begin
+  if (FState = idsPaused) and (FEngine <> nil) then
+    Result := FEngine.EvaluateExpression(AExpr)
+  else
+  begin
+    Result.Name := AExpr;
+    Result.Value := '<not available>';
+    Result.IsValid := False;
+  end;
+end;
+
+function TIDEDebugAdapter.SetBreakpoint(const ALocation: String): TBreakpointHandle;
+begin
+  if FEngine <> nil then
+    Result := FEngine.SetBreakpoint(ALocation)
+  else
+    Result := 0;
+end;
+
+function TIDEDebugAdapter.RemoveBreakpoint(AHandle: TBreakpointHandle): Boolean;
+begin
+  if FEngine <> nil then
+    Result := FEngine.RemoveBreakpoint(AHandle)
+  else
+    Result := False;
+end;
+
+
+end.
