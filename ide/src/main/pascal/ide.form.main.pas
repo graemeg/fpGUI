@@ -31,7 +31,8 @@ uses
   ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
   ide.editor.tabs, ide.profiles, ide.project.pasbuild,
   ide.cursorhistory, ide.filefinder, ide.form.filefinder,
-  ide.symbolfinder, ide.form.symbolfinder;
+  ide.symbolfinder, ide.form.symbolfinder,
+  ide.quickdoc;
 
 type
 
@@ -96,6 +97,7 @@ type
     FLastFindOptions: TfpgFindOptions;
     FLastFindBackward: Boolean;
     FLastFileDir: TfpgString;
+    FQuickDocHint: TQuickDocHintWindow;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -193,6 +195,7 @@ type
     procedure   miJumpToggleIntfImpl(Sender: TObject);
     procedure   miGoToDeclaration(Sender: TObject);
     procedure   miFindUsages(Sender: TObject);
+    procedure   miQuickDoc(Sender: TObject);
     function    GetCurrentCursorLocation: TCursorLocation;
     procedure   RecordCursorLocation;
     procedure   NavigateToLocation(const ALoc: TCursorLocation);
@@ -1017,9 +1020,13 @@ begin
           pcEditor.ActivePageIndex := idx;
           consumed := True;
         end;
+      keyF1:  { Ctrl+F1: Quick Documentation }
+        begin
+          miQuickDoc(nil);
+          consumed := True;
+        end;
       keyB:  { Ctrl+B: go to declaration }
         begin
-          writeln('DEBUG: Ctrl+B shortcut to miGoToDeclaration');
           miGoToDeclaration(nil);
           consumed := True;
         end;
@@ -2246,6 +2253,194 @@ begin
   end;
 end;
 
+procedure TMainForm.miQuickDoc(Sender: TObject);
+
+  procedure AddPathIfNew(AList: TStringList; const APath: string);
+  begin
+    if AList.IndexOf(APath) < 0 then
+      AList.Add(APath);
+  end;
+
+  function MakeAbsolute(const ABase, APath: string): string;
+  begin
+    {$ifdef unix}
+    if (Length(APath) > 0) and (APath[1] = '/') then
+    {$else}
+    if (Length(APath) > 1) and (APath[2] = ':') then
+    {$endif}
+      Result := APath
+    else
+      Result := IncludeTrailingPathDelimiter(ABase) + APath;
+  end;
+
+  procedure AddSubdirectories(AList: TStringList; const ADir: string);
+  var
+    sr: TSearchRec;
+    full: string;
+  begin
+    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
+    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
+    try
+      repeat
+        if (sr.Attr and faDirectory) <> 0 then
+          if (sr.Name <> '.') and (sr.Name <> '..') then
+          begin
+            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
+            if Pos('target', sr.Name) = 0 then
+              AddSubdirectories(AList, full);
+          end;
+      until FindNext(sr) <> 0;
+    finally
+      FindClose(sr);
+    end;
+  end;
+
+  procedure CollectPaths(AModule: TPasBuildModule;
+    AUnitPaths, AIncludePaths: TStringList);
+  var
+    i: Integer;
+    p, absPath: string;
+    dep: TPasBuildDependency;
+  begin
+    for i := 0 to AModule.UnitPaths.Count - 1 do
+    begin
+      p := AModule.UnitPaths[i];
+      if Pos('target/', p) > 0 then
+        Continue;
+      absPath := MakeAbsolute(AModule.ProjectDir, p);
+      AddPathIfNew(AUnitPaths, absPath);
+    end;
+    for i := 0 to AModule.IncludePaths.Count - 1 do
+    begin
+      p := AModule.IncludePaths[i];
+      if Pos('target/', p) > 0 then
+        Continue;
+      absPath := MakeAbsolute(AModule.ProjectDir, p);
+      AddPathIfNew(AIncludePaths, absPath);
+    end;
+    for i := 0 to AModule.Dependencies.Count - 1 do
+    begin
+      dep := TPasBuildDependency(AModule.Dependencies[i]);
+      if dep.SourceDir <> '' then
+        AddSubdirectories(AUnitPaths, dep.SourceDir);
+    end;
+  end;
+
+var
+  edt: TfpgTextEdit;
+  Ident: string;
+  decl: TDeclarationResult;
+  doc: TQuickDocInfo;
+  hintWnd: TQuickDocHintWindow;
+  pb: TPasBuildProjectBackend;
+  m: TPasBuildModule;
+  ownedUnitPaths, ownedIncludePaths: TStringList;
+  unitPaths, includePaths: TStrings;
+  fpcSrcDir: string;
+  Xp, Yp: Integer;
+  pt: TPoint;
+  i: Integer;
+  declFile: string;
+begin
+  if pcEditor.ActivePage = nil then
+    Exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  FHighlightCache.EnsurePascalTokenised(edt, edt.Lines);
+
+  Ident := GetIdentifierAtCursor(FHighlightCache.PascalHighlighter,
+    edt.Lines, edt.CaretPos_V, edt.CaretPos_H);
+  if Ident = '' then
+    Exit;
+
+  { Build unit/include paths (same as miGoToDeclaration) }
+  ownedUnitPaths := nil;
+  ownedIncludePaths := nil;
+  unitPaths := nil;
+  includePaths := nil;
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    if not pb.Resolved then
+      pb.Resolve;
+    m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
+    if m <> nil then
+    begin
+      ownedUnitPaths := TStringList.Create;
+      ownedIncludePaths := TStringList.Create;
+      CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
+      unitPaths := ownedUnitPaths;
+      includePaths := ownedIncludePaths;
+    end;
+  end;
+  if unitPaths = nil then
+    unitPaths := GProject.UnitDirs;
+
+  fpcSrcDir := gINI.ReadString(cEnvironment, 'FPCSrcDir', '');
+  if fpcSrcDir <> '' then
+  begin
+    fpcSrcDir := IncludeTrailingPathDelimiter(fpcSrcDir);
+    if DirectoryExists(fpcSrcDir) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        ownedUnitPaths.Assign(unitPaths);
+        unitPaths := ownedUnitPaths;
+      end;
+      if DirectoryExists(fpcSrcDir + 'rtl') then
+        AddSubdirectories(ownedUnitPaths, fpcSrcDir + 'rtl');
+      if DirectoryExists(fpcSrcDir + 'packages') then
+        AddSubdirectories(ownedUnitPaths, fpcSrcDir + 'packages');
+    end;
+  end;
+
+  try
+    decl := FindDeclaration(FHighlightCache.PascalHighlighter, edt.Lines,
+      pcEditor.ActivePage.Hint, edt.CaretPos_V, edt.CaretPos_H,
+      unitPaths, includePaths);
+  finally
+    ownedUnitPaths.Free;
+    ownedIncludePaths.Free;
+  end;
+
+  if not decl.Found then
+    Exit;
+
+  { Determine the declaration file }
+  if (decl.DeclFile <> '') then
+    declFile := decl.DeclFile
+  else
+    declFile := pcEditor.ActivePage.Hint;
+
+  { Extract documentation info }
+  doc := ExtractQuickDoc(declFile, decl.DeclLine, decl.DeclName);
+  if not doc.Found then
+    Exit;
+
+  { Dismiss any previous hint }
+  if Assigned(FQuickDocHint) then
+  begin
+    FQuickDocHint.Hide;
+    FreeAndNil(FQuickDocHint);
+  end;
+
+  { Calculate popup position below the caret }
+  Xp := (edt.CaretPos_H - edt.ScrollPos_H) * edt.FontWidth +
+    edt.GetClientRect.Left + edt.GutterWidth;
+  Yp := (edt.CaretPos_V - edt.TopLine + 1) * edt.FontHeight + 1;
+  pt := edt.WidgetToScreen(edt, Point(Xp, Yp));
+
+  { Create and show hint window }
+  hintWnd := TQuickDocHintWindow.Create(nil);
+  hintWnd.SetDocInfo(doc);
+  hintWnd.CalcSize;
+  hintWnd.Left := pt.X;
+  hintWnd.Top := pt.Y;
+  hintWnd.Time := 10000;
+  hintWnd.Show;
+  FQuickDocHint := hintWnd;
+end;
+
 function TMainForm.GetCurrentCursorLocation: TCursorLocation;
 var
   edt: TfpgTextEdit;
@@ -2498,6 +2693,11 @@ var
   editor: TfpgTextEdit;
 begin
   CloseAction := caFree;
+  if Assigned(FQuickDocHint) then
+  begin
+    FQuickDocHint.Hide;
+    FreeAndNil(FQuickDocHint);
+  end;
   gINI.WriteInteger(Name + 'State', 'Left', Left);
   gINI.WriteInteger(Name + 'State', 'Top', Top);
   gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
@@ -2561,6 +2761,7 @@ begin
     Name := 'btnQuit';
     PreferredSize := fpgSize(24, 24);
     Text := '';
+    Hint := 'Quit Maximus';
     Embedded := True;
     ImageMargin := 0;
     ImageName := 'stdimg.quit';
@@ -2573,6 +2774,7 @@ begin
     Name := 'btnOpen';
     PreferredSize := fpgSize(24, 24);
     Text := '';
+    Hint := 'Open a source file...';
     Embedded := True;
     ImageMargin := 0;
     ImageName := 'stdimg.open';
@@ -2585,6 +2787,7 @@ begin
     Name := 'btnSave';
     PreferredSize := fpgSize(24, 24);
     Text := '';
+    Hint := 'Save current source file...';
     Embedded := True;
     ImageMargin := 0;
     ImageName := 'stdimg.save';
@@ -2597,6 +2800,7 @@ begin
     Name := 'btnSaveAll';
     PreferredSize := fpgSize(24, 24);
     Text := '';
+    Hint := 'Save all open files';
     Embedded := True;
     Enabled := False;
     ImageMargin := 0;
@@ -2942,6 +3146,7 @@ begin
     AddMenuItem('Toggle Interface/Implementation', rsKeyCtrl+rsKeyShift+'J', @miJumpToggleIntfImpl);
     AddMenuItem('Go to Declaration', rsKeyCtrl+'B', @miGoToDeclaration);
     AddMenuItem('Find Usages', rsKeyAlt+'F7', @miFindUsages);
+    AddMenuItem('Quick Documentation', rsKeyCtrl+'F1', @miQuickDoc);
     AddSeparator;
     AddMenuItem('Navigate Back', rsKeyAlt+'Left', @miNavigateBack);
     AddMenuItem('Navigate Forward', rsKeyAlt+'Right', @miNavigateForward);
@@ -2998,7 +3203,7 @@ begin
   begin
     Name := 'mnuTools';
     AddMenuItem('fpGUI UI Designer...', 'F12', nil);
-    AddMenuItem('fpGUI DocView...', rsKeyCtrl+'F1', nil);
+    AddMenuItem('fpGUI DocView...', '', nil);
   end;
 
   mnuSettings := TfpgPopupMenu.Create(self);
@@ -3054,6 +3259,8 @@ begin
   WindowPosition := wpOneThirdDown;
   MinWidth := 580;
   MinHeight := 400;
+  ShowHint := true;
+  fpgApplication.ShowHint := True;
 
   { Top-level MigLayout for the form }
   mig := TfpgMigLayoutManager.Create;

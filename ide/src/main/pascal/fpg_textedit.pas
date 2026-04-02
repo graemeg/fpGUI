@@ -167,6 +167,7 @@ type
     fwheelsensitivity: double;
     function    GetGutterShowLineNumbers: Boolean;
     function    GetGutterVisible: Boolean;
+    function    GetGutterWidth: Integer;
     function    GetHScrollPos: Integer;
     function    GetVScrollPos: Integer;
     function    GetCaretPosH: Integer;
@@ -283,6 +284,7 @@ type
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
     property    VisibleLines: Integer read FVisLines;
+    property    GutterWidth: Integer read GetGutterWidth;
     property    RightEdge: Boolean read FRightEdge write SetRightEdge default False;
     property    RightEdgeCol: Integer read FRightEdgeCol write SetRightEdgeCol default 80;
     { Elastic Tabstops: Automatically aligns tab-separated columns across multiple lines.
@@ -758,6 +760,14 @@ end;
 function TfpgBaseTextEdit.GetGutterVisible: Boolean;
 begin
   Result := FGutterPan.Visible;
+end;
+
+function TfpgBaseTextEdit.GetGutterWidth: Integer;
+begin
+  if FGutterPan.Visible then
+    Result := FGutterPan.Width
+  else
+    Result := 0;
 end;
 
 function TfpgBaseTextEdit.GetHScrollPos: Integer;
