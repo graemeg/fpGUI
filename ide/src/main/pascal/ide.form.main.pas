@@ -1771,24 +1771,47 @@ var
   edt: TfpgTextEdit;
   segs: TRenderSegmentArray;
   lastCol: Integer;
+  LineBg: TfpgColor;
+  BgCol: TfpgColor;
 begin
   edt := TfpgTextEdit(Sender);
   if not Assigned(AHighlighter) then
     Exit;
   AllowSelfDraw := False;
+
+  { Determine current line highlight colour (must match DrawLine logic) }
+  LineBg := clNone;
+  if (ALineIndex = edt.CaretPos_V) and edt.Focused then
+  begin
+    if edt.LineHighlightColor <> clNone then
+      LineBg := edt.LineHighlightColor
+    else
+    begin
+      BgCol := fpgColorToRGB(edt.BackgroundColor);
+      if fpgGetRed(BgCol) + fpgGetGreen(BgCol) + fpgGetBlue(BgCol) > 384 then
+        LineBg := fpgDarker(BgCol, 95)
+      else
+        LineBg := fpgLighter(BgCol, 95);
+    end;
+  end;
+
   segs := BuildRenderSegments(AHighlighter, ALineText, ALineIndex,
     FTheme, FBracketMatch, AShowBracketMatch);
   if Length(segs) = 0 then
   begin
-    { Empty line — fill background }
-    ACanvas.Color := FTheme.Chrome.Background;
+    { Empty line — fill background (line highlight already drawn by DrawLine) }
+    if LineBg <> clNone then
+      ACanvas.Color := LineBg
+    else
+      ACanvas.Color := FTheme.Chrome.Background;
     ACanvas.FillRectangle(ATextRect);
     Exit;
   end;
   PaintSegments(segs, ALineText, edt.FontWidth, ACanvas, ATextRect,
-    FTheme, edt.FontDesc);
+    FTheme, edt.FontDesc, LineBg);
   lastCol := segs[High(segs)].Column + segs[High(segs)].Length;
-  PaintTrailingGap(lastCol, ALineText, edt.FontWidth, ACanvas, ATextRect, FTheme);
+  PaintTrailingGap(lastCol, ALineText, edt.FontWidth, ACanvas, ATextRect,
+    FTheme, LineBg);
 end;
 
 procedure TMainForm.HighlightObjectPascal(Sender: TObject; ALineText: TfpgString;

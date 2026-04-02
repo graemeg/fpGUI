@@ -96,7 +96,9 @@ function BuildPatchRenderSegments(
   const ATheme: TEditorTheme
 ): TRenderSegmentArray;
 
-{ Draws pre-computed segments onto a canvas. }
+{ Draws pre-computed segments onto a canvas.
+  ALineBackground: when not clNone, replaces the default theme background
+  on this line (used for current-line highlighting). }
 procedure PaintSegments(
   const ASegments: TRenderSegmentArray;
   const ALineText: TfpgString;
@@ -104,17 +106,20 @@ procedure PaintSegments(
   ACanvas: TfpgCanvas;
   ATextRect: TfpgRect;
   const ATheme: TEditorTheme;
-  const AEditorFontDesc: string
+  const AEditorFontDesc: string;
+  ALineBackground: TfpgColor = clNone
 );
 
-{ Draws the trailing area after the last segment. }
+{ Draws the trailing area after the last segment.
+  ALineBackground: when not clNone, replaces the default theme background. }
 procedure PaintTrailingGap(
   ALastCol: Integer;
   const ALineText: TfpgString;
   AFontWidth: Integer;
   ACanvas: TfpgCanvas;
   ATextRect: TfpgRect;
-  const ATheme: TEditorTheme
+  const ATheme: TEditorTheme;
+  ALineBackground: TfpgColor = clNone
 );
 
 
@@ -394,7 +399,8 @@ procedure PaintSegments(
   ACanvas: TfpgCanvas;
   ATextRect: TfpgRect;
   const ATheme: TEditorTheme;
-  const AEditorFontDesc: string
+  const AEditorFontDesc: string;
+  ALineBackground: TfpgColor = clNone
 );
 var
   oldfont: TfpgFontResourceBase;
@@ -402,6 +408,7 @@ var
   r: TfpgRect;
   lFontDesc: string;
   lNeedFont: Boolean;
+  lBg: TfpgColor;
   i: Integer;
 begin
   oldfont := TfpgFontResourceBase(ACanvas.Font);
@@ -425,7 +432,12 @@ begin
     r.SetRect(ATextRect.Left + (AFontWidth * seg.Column), ATextRect.Top,
         (AFontWidth * seg.Length), ATextRect.Height);
 
-    ACanvas.Color := seg.Background;
+    { Substitute line highlight background for the default theme background }
+    lBg := seg.Background;
+    if (ALineBackground <> clNone) and (lBg = ATheme.Chrome.Background) then
+      lBg := ALineBackground;
+
+    ACanvas.Color := lBg;
     ACanvas.TextColor := seg.Foreground;
     ACanvas.FillRectangle(r);
     ACanvas.DrawString(r.Left, r.Top, seg.Text);
@@ -441,7 +453,8 @@ procedure PaintTrailingGap(
   AFontWidth: Integer;
   ACanvas: TfpgCanvas;
   ATextRect: TfpgRect;
-  const ATheme: TEditorTheme
+  const ATheme: TEditorTheme;
+  ALineBackground: TfpgColor = clNone
 );
 var
   r: TfpgRect;
@@ -450,7 +463,10 @@ begin
   begin
     r.SetRect(ATextRect.Left + (AFontWidth * ALastCol), ATextRect.Top,
         ATextRect.Width - (AFontWidth * ALastCol), ATextRect.Height);
-    ACanvas.Color := ATheme.Chrome.Background;
+    if ALineBackground <> clNone then
+      ACanvas.Color := ALineBackground
+    else
+      ACanvas.Color := ATheme.Chrome.Background;
     ACanvas.FillRectangle(r);
     if ALastCol < System.Length(ALineText) then
     begin
