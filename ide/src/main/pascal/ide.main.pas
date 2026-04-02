@@ -40,6 +40,7 @@ uses
   ide.form.projectoptions,
   ide.utils,
   ide.builder.thread,
+  ide.runner.thread,
   ide.images,
   ide.stringhelpers,
   ide.form.procedurelist,

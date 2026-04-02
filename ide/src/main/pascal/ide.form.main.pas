@@ -26,39 +26,42 @@ uses
   SysUtils,
   Classes,
   fpg_base,
-  fpg_imagelist,
-  fpg_mru,
-  fpg_main,
-  fpg_form,
-  fpg_menu,
-  fpg_panel,
   fpg_button,
+  fpg_form,
+  fpg_grid,
+  fpg_imagelist,
+  fpg_label,
+  fpg_main,
+  fpg_memo,
+  fpg_menu,
+  fpg_mig_cc,
+  fpg_mig_lc,
+  fpg_miglayout,
+  fpg_mru,
+  fpg_mru,
+  fpg_panel,
   fpg_splitter,
   fpg_tab,
-  fpg_memo,
-  fpg_label,
-  fpg_grid,
-  fpg_tree,
   fpg_textedit,
-  fpg_miglayout,
-  fpg_mig_lc,
-  fpg_mig_cc,
-  ide.filemonitor,
-  ide.highlighter,
-  ide.editor.theme,
+  fpg_tree,
   ide.bracketmatch,
-  ide.highlight.renderer,
   ide.build.dispatch,
-  ide.projecttree,
+  ide.cursorhistory,
   ide.editor.tabs,
+  ide.editor.tabs,
+  ide.editor.theme,
+  ide.filefinder,
+  ide.filemonitor,
+  ide.form.filefinder,
+  ide.form.symbolfinder,
+  ide.highlight.renderer,
+  ide.highlighter,
   ide.profiles,
   ide.project.pasbuild,
-  ide.cursorhistory,
-  ide.filefinder,
-  ide.form.filefinder,
-  ide.symbolfinder,
-  ide.form.symbolfinder,
-  ide.quickdoc;
+  ide.projecttree,
+  ide.quickdoc,
+  ide.runner.thread,
+  ide.symbolfinder;
 
 type
 
@@ -83,6 +86,8 @@ type
     tsScribble: TfpgTabSheet;
     memScribble: TfpgMemo;
     tsTerminal: TfpgTabSheet;
+    tsOutput: TfpgTabSheet;
+    grdOutput: TfpgStringGrid;
     pnlTool: TfpgPageControl;
     tsProject: TfpgTabSheet;
     tvProject: TfpgTreeView;
@@ -124,6 +129,7 @@ type
     FLastFindBackward: Boolean;
     FLastFileDir: TfpgString;
     FQuickDocHint: TQuickDocHintWindow;
+    FRunnerThread: TRunnerThread;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -156,6 +162,10 @@ type
     procedure   miRunClean(Sender: TObject);
     procedure   miRunRebuild(Sender: TObject);
     procedure   miRunTest(Sender: TObject);
+    procedure   miRunProgram(Sender: TObject);
+    procedure   miStopProgram(Sender: TObject);
+    procedure   RunnerOutput(Sender: TObject; const ALine: string);
+    procedure   RunnerTerminated(Sender: TObject);
     procedure   StartBuildGoal(const AGoal: string);
     procedure   miProjectDependencyTree(Sender: TObject);
     procedure   pmTreeDependencyTreeClick(Sender: TObject);
@@ -202,6 +212,8 @@ type
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
+    procedure   AddOutputLine(const AMsg: TfpgString);
+    procedure   ClearOutputWindow;
     procedure   CloseAllTabs;
     procedure   SaveSession;
     procedure   LoadProject(const AFilename: TfpgString);
@@ -750,6 +762,79 @@ end;
 procedure TMainForm.miRunTest(Sender: TObject);
 begin
   StartBuildGoal('test');
+end;
+
+procedure TMainForm.miRunProgram(Sender: TObject);
+var
+  ExePath: string;
+  WorkDir: string;
+  thd: TRunnerThread;
+begin
+  if FRunnerThread <> nil then
+  begin
+    AddMessage('A program is already running. Stop it first (Ctrl+F2).');
+    Exit;
+  end;
+
+  ExePath := ResolveProjectExecutablePath;
+  if ExePath = '' then
+  begin
+    AddMessage('Cannot determine executable path. Is a project loaded?');
+    Exit;
+  end;
+
+  if not FileExists(ExePath) then
+  begin
+    AddMessage('Executable not found: ' + ExePath);
+    AddMessage('Build the project first (Ctrl+F9).');
+    Exit;
+  end;
+
+  ClearOutputWindow;
+  AddOutputLine('Running: ' + ExePath);
+  AddOutputLine('');
+  pnlWindow.ActivePage := tsOutput;
+
+  WorkDir := GProject.ProjectDir;
+
+  thd := TRunnerThread.Create(True);
+  thd.ExecutablePath := ExePath;
+  thd.WorkingDirectory := WorkDir;
+  thd.OnAvailableOutput := @RunnerOutput;
+  thd.OnTerminate := @RunnerTerminated;
+  FRunnerThread := thd;
+  UpdateStatus('Running...');
+  thd.Resume;
+end;
+
+procedure TMainForm.miStopProgram(Sender: TObject);
+begin
+  if FRunnerThread = nil then
+  begin
+    UpdateStatus('No program running.');
+    Exit;
+  end;
+  FRunnerThread.TerminateProcess;
+  UpdateStatus('Stopping...');
+end;
+
+procedure TMainForm.RunnerOutput(Sender: TObject; const ALine: string);
+begin
+  AddOutputLine(ALine);
+end;
+
+procedure TMainForm.RunnerTerminated(Sender: TObject);
+var
+  thd: TRunnerThread;
+begin
+  thd := TRunnerThread(Sender);
+  FRunnerThread := nil;
+  AddOutputLine('');
+  if thd.WasTerminated then
+    AddOutputLine('Process terminated by user.')
+  else
+    AddOutputLine('Process exited with code ' + IntToStr(thd.ExitCode) + '.');
+  UpdateStatus('');
 end;
 
 procedure TMainForm.StartBuildGoal(const AGoal: string);
@@ -1534,6 +1619,20 @@ end;
 procedure TMainForm.ClearMessagesWindow;
 begin
   grdMessages.RowCount := 0;
+end;
+
+procedure TMainForm.AddOutputLine(const AMsg: TfpgString);
+begin
+  grdOutput.BeginUpdate;
+  grdOutput.RowCount := grdOutput.RowCount + 1;
+  grdOutput.Cells[0, grdOutput.RowCount - 1] := AMsg;
+  grdOutput.FocusRow := grdOutput.RowCount;
+  grdOutput.EndUpdate;
+end;
+
+procedure TMainForm.ClearOutputWindow;
+begin
+  grdOutput.RowCount := 0;
 end;
 
 procedure TMainForm.CloseAllTabs;
@@ -2723,6 +2822,14 @@ var
   editor: TfpgTextEdit;
 begin
   CloseAction := caFree;
+  { Kill any running program before closing }
+  if FRunnerThread <> nil then
+  begin
+    FRunnerThread.OnTerminate := nil;
+    FRunnerThread.OnAvailableOutput := nil;
+    FRunnerThread.TerminateProcess;
+    FRunnerThread := nil;
+  end;
   if Assigned(FQuickDocHint) then
   begin
     FQuickDocHint.Hide;
@@ -3071,6 +3178,27 @@ begin
     Name := 'tsTerminal';
     Text := 'Terminal';
   end;
+
+  tsOutput := TfpgTabSheet.Create(pnlWindow);
+  with tsOutput do
+  begin
+    Name := 'tsOutput';
+    Text := 'Output';
+  end;
+
+  grdOutput := TfpgStringGrid.Create(tsOutput);
+  with grdOutput do
+  begin
+    Name := 'grdOutput';
+    Align := alClient;
+    BackgroundColor := TfpgColor($80000002);
+    AddColumn('New', 2000, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    RowCount := 0;
+    RowSelect := True;
+    ShowHeader := False;
+  end;
   {%endregion}
 
   { Context menu for editor tabs }
@@ -3225,8 +3353,9 @@ begin
     AddMenuItem('Rebuild', '', @miRunRebuild);
     AddMenuItem('Test', rsKeyCtrl+rsKeyShift+'F10', @miRunTest);
     AddSeparator;
-    AddMenuItem('Run', 'F9', nil);
-    AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);
+    AddMenuItem('Run', rsKeyShift+'F9', @miRunProgram);
+    AddMenuItem('Stop', rsKeyCtrl+'F2', @miStopProgram);
+    AddMenuItem('Run Parameters...', '', nil);
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);

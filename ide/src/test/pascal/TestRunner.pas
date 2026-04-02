@@ -35,7 +35,8 @@ uses
   ide.test.filefinder,
   ide.test.symbolfinder,
   ide.test.declaration,
-  ide.test.pascal.tokeniser;
+  ide.test.pascal.tokeniser,
+  ide.test.runner;
 
 var
   Application: TTestRunner;
