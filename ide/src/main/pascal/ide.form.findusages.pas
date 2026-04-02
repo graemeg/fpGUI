@@ -43,6 +43,8 @@ type
     FRowMap: TRowMapArray;
     FResult: TFindUsagesResult;
     FTotalCount: Integer;
+    FIdent: string;
+    FIdentLen: Integer;
     procedure GridKeyPressed(Sender: TObject; var KeyCode: word;
       var ShiftState: TShiftState; var Consumed: boolean);
     procedure GridDoubleClicked(Sender: TObject; AButton: TMouseButton;
@@ -81,6 +83,8 @@ begin
   frm := TFindUsagesForm.Create(nil);
   try
     frm.WindowTitle := 'Usages of ''' + AIdent + '''';
+    frm.FIdent := AIdent;
+    frm.FIdentLen := Length(AIdent);
     frm.Groups := AGroups;
     frm.TotalCount := ATotalCount;
     frm.FillGrid;
@@ -124,54 +128,109 @@ procedure TFindUsagesForm.GridDrawCell(Sender: TObject; const ARow,
   var ADefaultDrawing: boolean);
 var
   r: TfpgRect;
-  txt: string;
+  txt, seg: string;
   IsSelected: boolean;
-  BgColor, FgColor: TfpgColor;
+  BgColor, FgColor, HighlightBg, HighlightFg, NormalFg: TfpgColor;
+  x, MatchPos: Integer;
 begin
   if (ARow < 0) or (ARow > High(FRowMap)) then
     Exit;
 
-  { Only custom-draw group header rows }
-  if not FRowMap[ARow].IsGroupHeader then
-    Exit;
+  IsSelected := (ARow = grdUsages.FocusRow);
 
-  { For group headers, only draw the File column (col 0) with emphasis }
-  if ACol <> 0 then
+  { --- Group header rows: grey background across all columns --- }
+  if FRowMap[ARow].IsGroupHeader then
   begin
-    { Suppress default drawing for Line and Context columns on headers }
     ADefaultDrawing := False;
-    IsSelected := (ARow = grdUsages.FocusRow);
     if IsSelected then
-      BgColor := clGridSelection
+    begin
+      BgColor := clGridSelection;
+      FgColor := clGridSelectionText;
+    end
     else
-      BgColor := TfpgColor($FFE8E8E8);  // light grey background
+    begin
+      BgColor := TfpgColor($FFE8E8E8);
+      FgColor := clText1;
+    end;
     grdUsages.Canvas.SetColor(BgColor);
     grdUsages.Canvas.FillRectangle(ARect);
+    if ACol = 0 then
+    begin
+      grdUsages.Canvas.SetTextColor(FgColor);
+      grdUsages.Canvas.DrawString(ARect.Left + 4,
+        ARect.Top + (ARect.Height - grdUsages.Canvas.Font.GetHeight) div 2,
+        grdUsages.Cells[0, ARow]);
+    end;
     Exit;
   end;
 
-  ADefaultDrawing := False;
-  IsSelected := (ARow = grdUsages.FocusRow);
+  { --- Context column (col 2): highlight the identifier --- }
+  if ACol <> 2 then
+    Exit;
 
+  txt := grdUsages.Cells[2, ARow];
+  if Length(txt) = 0 then
+    Exit;
+
+  { Find the identifier in the context text (case-insensitive) }
+  MatchPos := Pos(UpperCase(FIdent), UpperCase(txt));
+  if MatchPos = 0 then
+    Exit;  // no match found, let default drawing handle it
+
+  ADefaultDrawing := False;
+
+  { Colour scheme matching symbol finder }
   if IsSelected then
   begin
+    NormalFg := clGridSelectionText;
+    HighlightBg := TfpgColor($FF1E5A9E);
+    HighlightFg := clGridSelectionText;
     BgColor := clGridSelection;
-    FgColor := clGridSelectionText;
   end
   else
   begin
-    BgColor := TfpgColor($FFE8E8E8);  // light grey for file group headers
-    FgColor := clText1;
+    NormalFg := clText1;
+    HighlightBg := TfpgColor($FFFFFFA0);
+    HighlightFg := clText1;
+    BgColor := grdUsages.BackgroundColor;
   end;
 
-  r := ARect;
+  { Fill row background }
   grdUsages.Canvas.SetColor(BgColor);
-  grdUsages.Canvas.FillRectangle(r);
-  grdUsages.Canvas.SetTextColor(FgColor);
+  grdUsages.Canvas.FillRectangle(ARect);
 
-  txt := grdUsages.Cells[0, ARow];
-  grdUsages.Canvas.DrawString(r.Left + 4,
-    r.Top + (r.Height - grdUsages.Canvas.Font.GetHeight) div 2, txt);
+  r := ARect;
+  r.Left := r.Left + 2;
+  x := r.Left;
+
+  { Draw text before the match }
+  if MatchPos > 1 then
+  begin
+    seg := Copy(txt, 1, MatchPos - 1);
+    grdUsages.Canvas.SetTextColor(NormalFg);
+    grdUsages.Canvas.DrawString(x,
+      r.Top + (r.Height - grdUsages.Canvas.Font.GetHeight) div 2, seg);
+    Inc(x, grdUsages.Canvas.Font.GetTextWidth(seg));
+  end;
+
+  { Draw the highlighted identifier }
+  seg := Copy(txt, MatchPos, FIdentLen);
+  grdUsages.Canvas.SetColor(HighlightBg);
+  grdUsages.Canvas.FillRectangle(x, r.Top,
+    grdUsages.Canvas.Font.GetTextWidth(seg), r.Height);
+  grdUsages.Canvas.SetTextColor(HighlightFg);
+  grdUsages.Canvas.DrawString(x,
+    r.Top + (r.Height - grdUsages.Canvas.Font.GetHeight) div 2, seg);
+  Inc(x, grdUsages.Canvas.Font.GetTextWidth(seg));
+
+  { Draw text after the match }
+  if MatchPos + FIdentLen <= Length(txt) then
+  begin
+    seg := Copy(txt, MatchPos + FIdentLen, MaxInt);
+    grdUsages.Canvas.SetTextColor(NormalFg);
+    grdUsages.Canvas.DrawString(x,
+      r.Top + (r.Height - grdUsages.Canvas.Font.GetHeight) div 2, seg);
+  end;
 end;
 
 procedure TFindUsagesForm.SelectCurrentAndClose;
