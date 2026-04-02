@@ -154,6 +154,7 @@ type
     FSelectionTextColor: TfpgColor;
     FLineHighlightColor: TfpgColor;
     FUndoManager: TUndoManager;
+    FOnCtrlClick: TNotifyEvent;
 
     FLastScrollEventTime: TTime; // in milliseconds
     FLastScrollEventTimeBefore: TTime; // in milliseconds
@@ -246,6 +247,7 @@ type
     property    OnFindText: TfpgFindText read FOnFindText write FOnFindText;
     property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
     property    OnReplaceText: TfpgReplaceText read FOnReplaceText write FOnReplaceText;
+    property    OnCtrlClick: TNotifyEvent read FOnCtrlClick write FOnCtrlClick;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -330,6 +332,7 @@ type
     property    OnFindText;
     property    OnSearchEnd;
     property    OnReplaceText;
+    property    OnCtrlClick;
   end;
 
 
@@ -1627,6 +1630,16 @@ begin
   GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
   CaretPos.X := CNo;
   SetCaretPosV(RNo);
+
+  { Ctrl+Click: position caret then fire the OnCtrlClick event }
+  if (ssCtrl in shiftstate) and not (ssShift in shiftstate) then
+  begin
+    CheckCaretChanged;
+    if Assigned(FOnCtrlClick) then
+      FOnCtrlClick(Self);
+    Exit;  //==>
+  end;
+
   if FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo)) then
   begin
     FSelDrag := sdMightDrag;
@@ -1678,6 +1691,13 @@ var
   RNo, CNo: Integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
+
+  { Show hand cursor when Ctrl is held, indicating Ctrl+Click navigation }
+  if Assigned(FOnCtrlClick) and (ssCtrl in shiftstate) then
+    MouseCursor := mcHand
+  else
+    MouseCursor := mcIBeam;
+
   if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
   begin
     GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);

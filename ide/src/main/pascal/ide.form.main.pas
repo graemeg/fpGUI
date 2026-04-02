@@ -1722,6 +1722,7 @@ begin
           begin
             editor.OnDrawLine := @HighlightObjectPascal;
             editor.OnCaretChange := @EditorCaretChanged;
+            editor.OnCtrlClick := @miGoToDeclaration;
             RetokeniseEditor(editor);
           end;
         hkPatch:
