@@ -13,8 +13,11 @@
     Description:
       IDE debug adapter — bridges the PDR debugger engine to the IDE's
       GUI thread. Owns the PDR component lifecycle (adapters + engine)
-      and dispatches blocking execution commands to a worker thread.
-      Events are posted back to the main thread via Synchronize.
+      and dispatches all commands to a persistent worker thread.
+
+      All ptrace operations must happen on the same thread that forked
+      the tracee, so the worker thread owns the entire ptrace
+      relationship and collects stop info before posting back.
 }
 
 unit ide.debug.adapter;
@@ -54,8 +57,7 @@ type
     FOnStopped: TDebugStopEvent;
     FOnTerminated: TNotifyEvent;
     FOnOutput: TDebugOutputEvent;
-    procedure DispatchCommand(ACommand: TDebugCommand);
-    procedure HandleWorkerStopped;
+    procedure HandleCommandDone;
     procedure SendOutput(const AMsg: String);
   public
     constructor Create;
@@ -73,7 +75,11 @@ type
     procedure StepLine;
     procedure Pause;
 
-    { Inspection — call only when State = idsPaused }
+    { Inspection — call only when State = idsPaused.
+      TODO: These currently call through to the engine directly from
+      the main thread. Since ptrace requires calls from the forking
+      thread, these will need to be routed through the worker thread
+      when we implement the Variables/Call Stack panels (steps 5.6-5.8). }
     function  GetLocalVariables: TVariableValueArray;
     function  GetCallStack(ALimit: Integer = 0): TStringArray;
     function  EvaluateExpression(const AExpr: String): TVariableValue;
@@ -151,6 +157,13 @@ begin
       Exit;
     end;
 
+    { Create the persistent worker thread — it will own the ptrace
+      relationship by being the thread that calls FEngine.Run (which
+      forks the tracee). }
+    FWorkerThread := TDebugWorkerThread.Create(FEngine, FProcessController,
+      FDebugInfoReader, @HandleCommandDone);
+    FWorkerThread.Start;
+
     FState := idsStarting;
     SendOutput('Debug session started: ' + ABinaryPath);
     Result := True;
@@ -165,24 +178,26 @@ end;
 
 procedure TIDEDebugAdapter.EndSession;
 begin
-  { Kill the worker thread if it's still running }
+  { Stop the worker thread — it will detach from the tracee on its
+    own thread (the ptrace owner) before exiting. }
   if FWorkerThread <> nil then
   begin
-    { Send SIGSTOP to unblock the worker, then let it die }
+    { If tracee is running, kill it to unblock FpWaitPid in the worker }
     {$IFDEF UNIX}
-    if (FEngine <> nil) and (FEngine.AttachedPID > 0) then
+    if (FState = idsRunning) and (FEngine <> nil) and
+       (FEngine.AttachedPID > 0) then
       FpKill(FEngine.AttachedPID, SIGKILL);
     {$ENDIF}
-    FWorkerThread := nil;
+    FWorkerThread.SendCommand(dcQuit);
+    FWorkerThread.WaitFor;
+    FreeAndNil(FWorkerThread);
   end;
 
-  { Detach/clean up the engine }
-  if FEngine <> nil then
-  begin
-    if FEngine.State in [dsRunning, dsPaused] then
-      FEngine.Detach;
-    FreeAndNil(FEngine);
-  end;
+  { Clean up the engine.
+    Do NOT call FEngine.Detach here — the tracee has already been
+    killed (SIGKILL above), and Detach issues ptrace calls which
+    must come from the worker thread. Just free the engine. }
+  FreeAndNil(FEngine);
 
   { Release interface references }
   FProcessController := nil;
@@ -191,38 +206,16 @@ begin
   FState := idsIdle;
 end;
 
-procedure TIDEDebugAdapter.DispatchCommand(ACommand: TDebugCommand);
-begin
-  if FEngine = nil then
-    Exit;
-  if FWorkerThread <> nil then
-  begin
-    SendOutput('Debugger is busy — command ignored.');
-    Exit;
-  end;
-
-  FState := idsRunning;
-  FWorkerThread := TDebugWorkerThread.Create(FEngine, ACommand,
-    @HandleWorkerStopped);
-  FWorkerThread.Start;
-end;
-
-procedure TIDEDebugAdapter.HandleWorkerStopped;
+procedure TIDEDebugAdapter.HandleCommandDone;
 var
-  EngineState: TDebuggerState;
-  LineInfo: TLineInfo;
-  StopFile: String;
-  StopLine: Integer;
-  CurrentAddr: QWord;
+  R: TDebugWorkerResult;
 begin
-  FWorkerThread := nil;
-
-  if FEngine = nil then
+  if FWorkerThread = nil then
     Exit;
 
-  EngineState := FEngine.GetState;
+  R := FWorkerThread.LastResult;
 
-  if EngineState = dsTerminated then
+  if R.EngineState = dsTerminated then
   begin
     FState := idsTerminated;
     SendOutput('Process terminated.');
@@ -231,26 +224,14 @@ begin
     Exit;
   end;
 
-  if EngineState = dsPaused then
+  if R.EngineState = dsPaused then
   begin
     FState := idsPaused;
-
-    { Resolve source location from the current instruction pointer }
-    StopFile := '';
-    StopLine := 0;
-    CurrentAddr := FProcessController.GetCurrentAddress;
-    if FDebugInfoReader.FindLineByAddress(CurrentAddr, LineInfo) then
-    begin
-      StopFile := LineInfo.FileName;
-      StopLine := Integer(LineInfo.LineNumber);
-    end;
-
     if Assigned(FOnStopped) then
-      FOnStopped(Self, FState, StopFile, StopLine);
+      FOnStopped(Self, FState, R.StopFile, R.StopLine);
   end
   else
   begin
-    { Unexpected state — report it }
     SendOutput('Debugger in unexpected state after command.');
     FState := idsIdle;
   end;
@@ -258,32 +239,47 @@ end;
 
 procedure TIDEDebugAdapter.Run;
 begin
-  if FState in [idsStarting, idsPaused] then
-    DispatchCommand(dcRun);
+  if (FState in [idsStarting, idsPaused]) and (FWorkerThread <> nil) then
+  begin
+    FState := idsRunning;
+    FWorkerThread.SendCommand(dcRun);
+  end;
 end;
 
 procedure TIDEDebugAdapter.Continue;
 begin
-  if FState = idsPaused then
-    DispatchCommand(dcContinue);
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FState := idsRunning;
+    FWorkerThread.SendCommand(dcContinue);
+  end;
 end;
 
 procedure TIDEDebugAdapter.StepInto;
 begin
-  if FState = idsPaused then
-    DispatchCommand(dcStepInto);
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FState := idsRunning;
+    FWorkerThread.SendCommand(dcStepInto);
+  end;
 end;
 
 procedure TIDEDebugAdapter.StepOver;
 begin
-  if FState = idsPaused then
-    DispatchCommand(dcStepOver);
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FState := idsRunning;
+    FWorkerThread.SendCommand(dcStepOver);
+  end;
 end;
 
 procedure TIDEDebugAdapter.StepLine;
 begin
-  if FState = idsPaused then
-    DispatchCommand(dcStepLine);
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FState := idsRunning;
+    FWorkerThread.SendCommand(dcStepLine);
+  end;
 end;
 
 procedure TIDEDebugAdapter.Pause;

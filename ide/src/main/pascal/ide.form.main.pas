@@ -47,6 +47,7 @@ uses
   ide.bracketmatch,
   ide.build.dispatch,
   ide.cursorhistory,
+  ide.debug.adapter,
   ide.editor.tabs,
   ide.editor.tabs,
   ide.editor.theme,
@@ -130,6 +131,8 @@ type
     FLastFileDir: TfpgString;
     FQuickDocHint: TQuickDocHintWindow;
     FRunnerThread: TRunnerThread;
+    FDebugAdapter: TIDEDebugAdapter;
+    FDebugBuildPending: Boolean;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -166,6 +169,12 @@ type
     procedure   miStopProgram(Sender: TObject);
     procedure   RunnerOutput(Sender: TObject; const ALine: string);
     procedure   RunnerTerminated(Sender: TObject);
+    procedure   miDebugRun(Sender: TObject);
+    procedure   DebugBuildTerminated(Sender: TObject);
+    procedure   LaunchDebugSession;
+    procedure   DebugStopped(Sender: TObject; AState: TIDEDebugState; const AFile: String; ALine: Integer);
+    procedure   DebugTerminated(Sender: TObject);
+    procedure   DebugOutput(Sender: TObject; const AMessage: String);
     procedure   StartBuildGoal(const AGoal: string);
     procedure   miProjectDependencyTree(Sender: TObject);
     procedure   pmTreeDependencyTreeClick(Sender: TObject);
@@ -809,13 +818,23 @@ end;
 
 procedure TMainForm.miStopProgram(Sender: TObject);
 begin
-  if FRunnerThread = nil then
+  { Stop debug session if active }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
   begin
-    UpdateStatus('No program running.');
+    FDebugAdapter.EndSession;
+    AddOutputLine('');
+    AddOutputLine('Debug session stopped by user.');
+    UpdateStatus('');
     Exit;
   end;
-  FRunnerThread.TerminateProcess;
-  UpdateStatus('Stopping...');
+  { Stop running program if active }
+  if FRunnerThread <> nil then
+  begin
+    FRunnerThread.TerminateProcess;
+    UpdateStatus('Stopping...');
+    Exit;
+  end;
+  UpdateStatus('No program running.');
 end;
 
 procedure TMainForm.RunnerOutput(Sender: TObject; const ALine: string);
@@ -835,6 +854,158 @@ begin
   else
     AddOutputLine('Process exited with code ' + IntToStr(thd.ExitCode) + '.');
   UpdateStatus('');
+end;
+
+procedure TMainForm.miDebugRun(Sender: TObject);
+var
+  thd: TBuilderThread;
+  pb: TPasBuildProjectBackend;
+  ModInfo: TAggregatorModuleInfo;
+  FilePath: TfpgString;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+  begin
+    AddMessage('Debug run requires a PasBuild project.');
+    Exit;
+  end;
+
+  { If already in a debug session and paused, continue instead }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    FDebugAdapter.Continue;
+    UpdateStatus('Running (debug)...');
+    Exit;
+  end;
+
+  { If already running (debug or normal), don't start another }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning) then
+    Exit;
+  if FRunnerThread <> nil then
+  begin
+    AddMessage('A program is already running. Stop it first (Ctrl+F2).');
+    Exit;
+  end;
+
+  { Ensure the debug profile is active }
+  pb := TPasBuildProjectBackend(GProject);
+  if pb.ActiveProfiles.IndexOf('debug') < 0 then
+  begin
+    pb.ActiveProfiles.Add('debug');
+    pb.Resolve(pb.ActiveProfiles.CommaText);
+    UpdateProfilesDisplay;
+  end;
+
+  { Build with debug profile, then launch debugger on success }
+  ClearMessagesWindow;
+  AddMessage('Building with debug profile...');
+  FDebugBuildPending := True;
+
+  thd := TBuilderThread.Create(True);
+  if pb.IsAggregator and (pcEditor.ActivePage <> nil) then
+  begin
+    FilePath := pcEditor.ActivePage.Hint;
+    if FilePath <> '' then
+    begin
+      ModInfo := pb.FindModuleInfoForFile(FilePath);
+      if ModInfo <> nil then
+        thd.BuildModule := ModInfo.Name;
+    end;
+  end;
+  thd.OnTerminate := @DebugBuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+  UpdateStatus('Building (debug)...');
+end;
+
+procedure TMainForm.DebugBuildTerminated(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread(Sender);
+  FDebugBuildPending := False;
+
+  if thd.BuildExitCode <> 0 then
+  begin
+    AddMessage('Build failed — cannot start debug session.');
+    UpdateStatus('Build failed.');
+    Exit;
+  end;
+
+  AddMessage('Build succeeded.');
+  LaunchDebugSession;
+end;
+
+procedure TMainForm.LaunchDebugSession;
+var
+  ExePath: string;
+begin
+  ExePath := ResolveProjectExecutablePath;
+  if ExePath = '' then
+  begin
+    AddMessage('Cannot determine executable path.');
+    UpdateStatus('');
+    Exit;
+  end;
+
+  if not FileExists(ExePath) then
+  begin
+    AddMessage('Executable not found: ' + ExePath);
+    UpdateStatus('');
+    Exit;
+  end;
+
+  { Create the debug adapter if needed }
+  if FDebugAdapter = nil then
+  begin
+    FDebugAdapter := TIDEDebugAdapter.Create;
+    FDebugAdapter.OnStopped := @DebugStopped;
+    FDebugAdapter.OnTerminated := @DebugTerminated;
+    FDebugAdapter.OnOutput := @DebugOutput;
+  end;
+
+  { Start the debug session }
+  if not FDebugAdapter.StartSession(ExePath) then
+  begin
+    AddMessage('Failed to start debug session.');
+    UpdateStatus('');
+    Exit;
+  end;
+
+  ClearOutputWindow;
+  AddOutputLine('Debug session: ' + ExePath);
+  AddOutputLine('');
+  pnlWindow.ActivePage := tsOutput;
+
+  { Run the program under the debugger }
+  FDebugAdapter.Run;
+  UpdateStatus('Running (debug)...');
+end;
+
+procedure TMainForm.DebugStopped(Sender: TObject; AState: TIDEDebugState;
+  const AFile: String; ALine: Integer);
+begin
+  if AFile <> '' then
+  begin
+    AddOutputLine('Stopped at ' + AFile + ':' + IntToStr(ALine));
+    UpdateStatus('Paused at ' + ExtractFileName(AFile) + ':' + IntToStr(ALine));
+  end
+  else
+  begin
+    AddOutputLine('Stopped (no source information).');
+    UpdateStatus('Paused');
+  end;
+end;
+
+procedure TMainForm.DebugTerminated(Sender: TObject);
+begin
+  AddOutputLine('');
+  AddOutputLine('Debug session ended.');
+  UpdateStatus('');
+end;
+
+procedure TMainForm.DebugOutput(Sender: TObject; const AMessage: String);
+begin
+  AddOutputLine(AMessage);
 end;
 
 procedure TMainForm.StartBuildGoal(const AGoal: string);
@@ -2822,6 +2993,15 @@ var
   editor: TfpgTextEdit;
 begin
   CloseAction := caFree;
+  { End any active debug session }
+  if FDebugAdapter <> nil then
+  begin
+    FDebugAdapter.OnStopped := nil;
+    FDebugAdapter.OnTerminated := nil;
+    FDebugAdapter.OnOutput := nil;
+    FDebugAdapter.EndSession;
+    FreeAndNil(FDebugAdapter);
+  end;
   { Kill any running program before closing }
   if FRunnerThread <> nil then
   begin
@@ -3353,9 +3533,9 @@ begin
     AddMenuItem('Rebuild', '', @miRunRebuild);
     AddMenuItem('Test', rsKeyCtrl+rsKeyShift+'F10', @miRunTest);
     AddSeparator;
+    AddMenuItem('Debug Run', 'F9', @miDebugRun);
     AddMenuItem('Run', rsKeyShift+'F9', @miRunProgram);
     AddMenuItem('Stop', rsKeyCtrl+'F2', @miStopProgram);
-    AddMenuItem('Run Parameters...', '', nil);
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);
