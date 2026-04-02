@@ -23,6 +23,7 @@ type
   TFindUsagesResult = record
     FullPath: string;
     Line: Integer;
+    Column: Integer;      // 1-based column of identifier
   end;
 
   { Row map entry: maps a grid row to either a group header or a usage entry }
@@ -249,18 +250,21 @@ begin
       grp := FGroups[rme.GroupIndex];
       FResult.FullPath := grp.FullPath;
       FResult.Line := 1;
+      FResult.Column := 1;
     end
     else
     begin
       grp := FGroups[rme.GroupIndex];
       FResult.FullPath := grp.Entries[rme.EntryIndex].FullPath;
       FResult.Line := grp.Entries[rme.EntryIndex].Line;
+      FResult.Column := grp.Entries[rme.EntryIndex].Column;
     end;
   end
   else
   begin
     FResult.FullPath := '';
     FResult.Line := 0;
+    FResult.Column := 1;
   end;
   Close;
 end;

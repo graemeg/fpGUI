@@ -2218,6 +2218,7 @@ begin
     begin
       edt := TfpgTextEdit(ts.Components[0]);
       edt.GotoLine(Res.Line);
+      edt.CaretPos_H := Res.Column - 1;  // Column is 1-based, CaretPos_H is 0-based
     end;
   end;
 end;
