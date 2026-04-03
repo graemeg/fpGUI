@@ -175,6 +175,7 @@ type
     procedure   DebugStopped(Sender: TObject; AState: TIDEDebugState; const AFile: String; ALine: Integer);
     procedure   DebugTerminated(Sender: TObject);
     procedure   DebugOutput(Sender: TObject; const AMessage: String);
+    procedure   ClearAllExecutionLines;
     procedure   StartBuildGoal(const AGoal: string);
     procedure   miProjectDependencyTree(Sender: TObject);
     procedure   pmTreeDependencyTreeClick(Sender: TObject);
@@ -821,6 +822,7 @@ begin
   { Stop debug session if active }
   if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
   begin
+    ClearAllExecutionLines;
     FDebugAdapter.EndSession;
     AddOutputLine('');
     AddOutputLine('Debug session stopped by user.');
@@ -872,6 +874,7 @@ begin
   { If already in a debug session and paused, continue instead }
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
+    ClearAllExecutionLines;
     FDebugAdapter.Continue;
     UpdateStatus('Running (debug)...');
     Exit;
@@ -981,13 +984,33 @@ begin
   UpdateStatus('Running (debug)...');
 end;
 
+procedure TMainForm.ClearAllExecutionLines;
+var
+  i: Integer;
+begin
+  for i := 0 to pcEditor.PageCount - 1 do
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).ExecutionLine := -1;
+end;
+
 procedure TMainForm.DebugStopped(Sender: TObject; AState: TIDEDebugState;
   const AFile: String; ALine: Integer);
+var
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
 begin
+  ClearAllExecutionLines;
   if AFile <> '' then
   begin
     AddOutputLine('Stopped at ' + AFile + ':' + IntToStr(ALine));
     UpdateStatus('Paused at ' + ExtractFileName(AFile) + ':' + IntToStr(ALine));
+    { Navigate to source and mark the execution line }
+    ts := OpenEditorPage(AFile);
+    if ts <> nil then
+    begin
+      editor := TfpgTextEdit(ts.Components[0]);
+      editor.ExecutionLine := ALine - 1;  { ALine is 1-based; ExecutionLine is 0-based }
+      editor.GotoLine(ALine);             { scroll to show the line }
+    end;
   end
   else
   begin
@@ -998,6 +1021,7 @@ end;
 
 procedure TMainForm.DebugTerminated(Sender: TObject);
 begin
+  ClearAllExecutionLines;
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
   UpdateStatus('');
@@ -1966,6 +1990,7 @@ begin
   m.SelectionColor := FTheme.Chrome.Selection;
   m.SelectionTextColor := FTheme.Chrome.SelectionText;
   m.LineHighlightColor := FTheme.Chrome.CurrentLine;
+  m.ExecutionLineColor := FTheme.Chrome.ExecutionLine;
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -2086,9 +2111,12 @@ begin
     Exit;
   AllowSelfDraw := False;
 
-  { Determine current line highlight colour (must match DrawLine logic) }
+  { Determine line background colour — must match DrawLine priority logic.
+    Execution line takes priority; caret line highlight applies when focused. }
   LineBg := clNone;
-  if (ALineIndex = edt.CaretPos_V) and edt.Focused then
+  if (edt.ExecutionLine >= 0) and (ALineIndex = edt.ExecutionLine) then
+    LineBg := edt.ExecutionLineColor
+  else if (ALineIndex = edt.CaretPos_V) and edt.Focused then
   begin
     if edt.LineHighlightColor <> clNone then
       LineBg := edt.LineHighlightColor
@@ -2957,6 +2985,7 @@ begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionColor := FTheme.Chrome.Selection;
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionTextColor := FTheme.Chrome.SelectionText;
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).LineHighlightColor := FTheme.Chrome.CurrentLine;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).ExecutionLineColor := FTheme.Chrome.ExecutionLine;
   end;
 end;
 

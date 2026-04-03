@@ -153,6 +153,8 @@ type
     FSelectionColor: TfpgColor;
     FSelectionTextColor: TfpgColor;
     FLineHighlightColor: TfpgColor;
+    FExecutionLine: Integer;        // 0-based; -1 = no highlight
+    FExecutionLineColor: TfpgColor;
     FUndoManager: TUndoManager;
     FOnCtrlClick: TNotifyEvent;
 
@@ -240,6 +242,8 @@ type
     property    SelectionColor: TfpgColor read FSelectionColor write FSelectionColor;
     property    SelectionTextColor: TfpgColor read FSelectionTextColor write FSelectionTextColor;
     property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
+    property    ExecutionLine: Integer read FExecutionLine write FExecutionLine;
+    property    ExecutionLineColor: TfpgColor read FExecutionLineColor write FExecutionLineColor;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
     property    OnCaretChange: TfpgCaretChangeEvent read FOnCaretChange write FOnCaretChange;
@@ -321,6 +325,8 @@ type
     property    SelectionColor;
     property    SelectionTextColor;
     property    LineHighlightColor;
+    property    ExecutionLine;
+    property    ExecutionLineColor;
     property    Lines;
     property    RightEdge;
     property    ScrollBarStyle;
@@ -2447,8 +2453,24 @@ begin
   else
     GSz := GetClientRect.Left + 1; // gutter size if no gutter panel
 
+  { Execution line highlight (debugger) — visible even when not focused.
+    Takes priority over the caret line highlight. }
+  if (FExecutionLine >= 0) and (ALineIndex = FExecutionLine) then
+  begin
+    R.SetRect(GSz, Y, GetClientRect.Width, FChrH);
+    Canvas.Color := FExecutionLineColor;
+    Canvas.FillRectangle(R);
+    if FRightEdge then
+    begin
+      Canvas.Color := clShadow1;
+      X := (FRightEdgeCol * FChrW) - (HPos * FChrW);
+      if FGutterPan.Visible then
+        X := X + FGutterPan.ActualWidth;
+      Canvas.DrawLine(X, Y, X, Y + FChrH);
+    end;
+  end
   { Current line highlighting — fill full line width before text renders on top }
-  if (ALineIndex = CaretPos.Y) and Focused then
+  else if (ALineIndex = CaretPos.Y) and Focused then
   begin
     if FLineHighlightColor <> clNone then
       HighlightCol := FLineHighlightColor
@@ -2708,6 +2730,8 @@ begin
   FSelectionColor := clSelection;
   FSelectionTextColor := clWhite;
   FLineHighlightColor := clNone;
+  FExecutionLine := -1;
+  FExecutionLineColor := TfpgColor($ffFFF3A3);  // pale yellow fallback; overridden by theme
   FMaxScrollH   := 1;
   VPos          := 0;
   HPos          := 0;

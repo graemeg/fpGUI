@@ -49,6 +49,7 @@ type
     Background: TfpgColor;        // editor text area background
     Foreground: TfpgColor;        // default text colour
     CurrentLine: TfpgColor;       // current line highlight (clNone = auto)
+    ExecutionLine: TfpgColor;     // debugger execution position highlight
     Selection: TfpgColor;         // selection background
     SelectionText: TfpgColor;     // selection foreground
     GutterBackground: TfpgColor;  // gutter / line-number area background
@@ -257,6 +258,7 @@ begin
     Background      := clWhite;
     Foreground      := clBlack;
     CurrentLine     := TfpgColor($ffFFFAE3);
+    ExecutionLine   := TfpgColor($ffFFF3A3);  // pale yellow — debugger stop marker
     Selection       := TfpgColor($ff3399FF);
     SelectionText   := clWhite;
     GutterBackground := TfpgColor($ffF0F0F0);
@@ -297,6 +299,7 @@ begin
     Background      := TfpgColor($ff2B2B2B);
     Foreground      := TfpgColor($ffA9B7C6);
     CurrentLine     := TfpgColor($ff323232);
+    ExecutionLine   := TfpgColor($ff3D3D1A);  // dark olive yellow — debugger stop marker
     Selection       := TfpgColor($ff214283);
     SelectionText   := TfpgColor($ffA9B7C6);
     GutterBackground := TfpgColor($ff313335);
@@ -355,6 +358,7 @@ begin
     Background      := base03;
     Foreground      := base0;
     CurrentLine     := base02;
+    ExecutionLine   := TfpgColor($ff3A3500);  // dark yellow tint — debugger stop marker
     Selection       := base01;
     SelectionText   := base2;
     GutterBackground := base02;
@@ -413,6 +417,7 @@ begin
     Background      := base3;
     Foreground      := base0;
     CurrentLine     := base2;
+    ExecutionLine   := TfpgColor($ffFFF3CC);  // warm yellow — debugger stop marker
     Selection       := base1;
     SelectionText   := base03;
     GutterBackground := base2;
@@ -467,6 +472,7 @@ begin
       Background      := HexToColor(ini.ReadString(cSectEditor, 'Background', ''), Background);
       Foreground      := HexToColor(ini.ReadString(cSectEditor, 'Foreground', ''), Foreground);
       CurrentLine     := HexToColor(ini.ReadString(cSectEditor, 'CurrentLine', ''), CurrentLine);
+      ExecutionLine   := HexToColor(ini.ReadString(cSectEditor, 'ExecutionLine', ''), ExecutionLine);
       Selection       := HexToColor(ini.ReadString(cSectEditor, 'Selection', ''), Selection);
       SelectionText   := HexToColor(ini.ReadString(cSectEditor, 'SelectionText', ''), SelectionText);
       GutterBackground := HexToColor(ini.ReadString(cSectEditor, 'GutterBackground', ''), GutterBackground);
@@ -511,6 +517,7 @@ begin
       ini.WriteString(cSectEditor, 'Background', ColorToHex(Background));
       ini.WriteString(cSectEditor, 'Foreground', ColorToHex(Foreground));
       ini.WriteString(cSectEditor, 'CurrentLine', ColorToHex(CurrentLine));
+      ini.WriteString(cSectEditor, 'ExecutionLine', ColorToHex(ExecutionLine));
       ini.WriteString(cSectEditor, 'Selection', ColorToHex(Selection));
       ini.WriteString(cSectEditor, 'SelectionText', ColorToHex(SelectionText));
       ini.WriteString(cSectEditor, 'GutterBackground', ColorToHex(GutterBackground));
