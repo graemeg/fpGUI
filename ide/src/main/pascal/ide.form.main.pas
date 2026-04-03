@@ -23,7 +23,6 @@ unit ide.form.main;
 interface
 
 uses
-<<<<<<< HEAD
   SysUtils,
   Classes,
   fpg_base,
@@ -64,7 +63,8 @@ uses
   ide.projecttree,
   ide.quickdoc,
   ide.runner.thread,
-  ide.symbolfinder;
+  ide.symbolfinder,
+  pdr_ports;
 
 type
 
@@ -306,11 +306,14 @@ uses
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
 <<<<<<< HEAD
+<<<<<<< HEAD
   ,fpg_hvif
   ,fpg_iconstore
 =======
   ,pdr_ports
 >>>>>>> 52f55606 (feat: add breakpoint management to IDE (step 5.4))
+=======
+>>>>>>> 767d7f9d (fix: move pdr_ports to interface uses for TBreakpointHandle visibility)
   ;
 
 
