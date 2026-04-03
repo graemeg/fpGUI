@@ -23,6 +23,7 @@ unit ide.form.main;
 interface
 
 uses
+<<<<<<< HEAD
   SysUtils,
   Classes,
   fpg_base,
@@ -45,6 +46,7 @@ uses
   fpg_textedit,
   fpg_tree,
   ide.bracketmatch,
+  ide.breakpoint,
   ide.build.dispatch,
   ide.cursorhistory,
   ide.debug.adapter,
@@ -133,6 +135,11 @@ type
     FRunnerThread: TRunnerThread;
     FDebugAdapter: TIDEDebugAdapter;
     FDebugBuildPending: Boolean;
+    FBreakpoints: TBreakpointList;
+    procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
+    procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
+    procedure   ToggleBreakpointAtCursor;
+    procedure   InstallBreakpoints;
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -297,8 +304,12 @@ uses
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
+<<<<<<< HEAD
   ,fpg_hvif
   ,fpg_iconstore
+=======
+  ,pdr_ports
+>>>>>>> 52f55606 (feat: add breakpoint management to IDE (step 5.4))
   ;
 
 
@@ -823,6 +834,7 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
   begin
     ClearAllExecutionLines;
+    FBreakpoints.ClearHandles;
     FDebugAdapter.EndSession;
     AddOutputLine('');
     AddOutputLine('Debug session stopped by user.');
@@ -979,6 +991,10 @@ begin
   AddOutputLine('');
   pnlWindow.ActivePage := tsOutput;
 
+  { Pass breakpoints to the worker thread so it can install them after
+    the process forks — ptrace writes must happen on the ptrace owner thread. }
+  InstallBreakpoints;
+
   { Run the program under the debugger }
   FDebugAdapter.Run;
   UpdateStatus('Running (debug)...');
@@ -1022,6 +1038,7 @@ end;
 procedure TMainForm.DebugTerminated(Sender: TObject);
 begin
   ClearAllExecutionLines;
+  FBreakpoints.ClearHandles;
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
   UpdateStatus('');
@@ -1030,6 +1047,105 @@ end;
 procedure TMainForm.DebugOutput(Sender: TObject; const AMessage: String);
 begin
   AddOutputLine(AMessage);
+end;
+
+procedure TMainForm.EditorGutterClick(Sender: TObject; ALine: Integer);
+var
+  ts: TfpgTabSheet;
+  FilePath: String;
+  Idx: Integer;
+  Handle: TBreakpointHandle;
+begin
+  { Identify which tab this editor belongs to }
+  ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+  FBreakpoints.Toggle(FilePath, ALine);
+  { Repaint the editor to update breakpoint indicators in the gutter }
+  TfpgTextEdit(Sender).Invalidate;
+  { If a debug session is active, install the newly added breakpoint live }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused]) then
+  begin
+    if FBreakpoints.HasBreakpoint(FilePath, ALine) then
+    begin
+      { Newly added — install in debugger }
+      Idx := FBreakpoints.FindIndex(FilePath, ALine);
+      if Idx >= 0 then
+      begin
+        Handle := FDebugAdapter.SetBreakpoint(
+            ExtractFileName(FilePath) + ':' + IntToStr(ALine));
+        FBreakpoints.SetHandle(Idx, Integer(Handle));
+      end;
+    end;
+    { Removal during live session: breakpoint already removed from FBreakpoints
+      by Toggle; the handle was cleared. A full session restart re-installs all
+      remaining breakpoints so no live removal is needed for now. }
+  end;
+end;
+
+procedure TMainForm.EditorGutterLine(Sender: TObject; ALine: Integer;
+  ACanvas: TfpgCanvas; const ARect: TfpgRect);
+var
+  ts: TfpgTabSheet;
+  FilePath: String;
+  CX, CY, R: Integer;
+begin
+  ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+  if not FBreakpoints.HasBreakpoint(FilePath, ALine) then
+    Exit;
+  { Draw a red filled circle centred in the gutter line rect }
+  R  := (ARect.Height - 4) div 2;
+  CX := ARect.Left + R + 2;
+  CY := ARect.Top + (ARect.Height div 2);
+  ACanvas.SetColor(clRed);
+  ACanvas.FillArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi);
+end;
+
+procedure TMainForm.ToggleBreakpointAtCursor;
+var
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+  FilePath: String;
+  ALine: Integer;
+begin
+  ts := pcEditor.ActivePage;
+  if ts = nil then
+    Exit;
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+  editor := TfpgTextEdit(ts.Components[0]);
+  ALine := editor.CaretPos_V + 1;  { CaretPos_V is 0-based; breakpoints are 1-based }
+  EditorGutterClick(editor, ALine);
+end;
+
+procedure TMainForm.InstallBreakpoints;
+var
+  i, Count: Integer;
+  BP: TBreakpoint;
+  Locs: array of String;
+begin
+  if FDebugAdapter = nil then
+    Exit;
+  FBreakpoints.ClearHandles;
+  { Collect enabled breakpoint locations for the worker thread to install }
+  SetLength(Locs, FBreakpoints.Count);
+  Count := 0;
+  for i := 0 to FBreakpoints.Count - 1 do
+  begin
+    BP := FBreakpoints.GetItem(i);
+    if BP.Enabled then
+    begin
+      Locs[Count] := ExtractFileName(BP.FileName) + ':' + IntToStr(BP.Line);
+      Inc(Count);
+    end;
+  end;
+  SetLength(Locs, Count);
+  FDebugAdapter.PrepareInitialBreakpoints(Locs);
 end;
 
 procedure TMainForm.StartBuildGoal(const AGoal: string);
@@ -1375,6 +1491,17 @@ begin
       keyRight:
         begin
           miNavigateForward(nil);
+          consumed := True;
+        end;
+    end;
+  end;
+  { F5 — toggle breakpoint at cursor (no modifier) }
+  if not consumed and (shiftstate = []) then
+  begin
+    case keycode of
+      keyF5:
+        begin
+          ToggleBreakpointAtCursor;
           consumed := True;
         end;
     end;
@@ -1877,6 +2004,7 @@ begin
       end;
     end;
     Session.Save;
+    FBreakpoints.SaveToFile(IncludeTrailingPathDelimiter(GProject.ProjectDir) + '.ide' + PathDelim + 'breakpoints.json');
   finally
     Session.Free;
   end;
@@ -1967,6 +2095,7 @@ begin
   UpdateProfilesDisplay;
   UpdateGitBranch;
   CheckGitIgnoreForIdeDir;
+  FBreakpoints.LoadFromFile(IncludeTrailingPathDelimiter(GProject.ProjectDir) + '.ide' + PathDelim + 'breakpoints.json');
   AddMessage('Project loaded');
 end;
 
@@ -1991,6 +2120,8 @@ begin
   m.SelectionTextColor := FTheme.Chrome.SelectionText;
   m.LineHighlightColor := FTheme.Chrome.CurrentLine;
   m.ExecutionLineColor := FTheme.Chrome.ExecutionLine;
+  m.OnGutterClick := @EditorGutterClick;
+  m.OnGutterLine := @EditorGutterLine;
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -3072,6 +3203,7 @@ begin
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
   FHighlightCache := THighlighterCache.Create;
   FCursorHistory := TCursorHistory.Create(50);
+  FBreakpoints := TBreakpointList.Create;
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -3092,6 +3224,7 @@ begin
   FFileMonitor.Free;
   FreeAndNil(FHighlightCache);
   FreeAndNil(FCursorHistory);
+  FreeAndNil(FBreakpoints);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);

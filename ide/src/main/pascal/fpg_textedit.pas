@@ -49,10 +49,12 @@ type
     procedure   SetSpace(const AValue: Integer);
     procedure   SetStartNum(const AValue: Integer);
     procedure   DrawLineNums;
+    procedure   DrawGutterIndicators;
     procedure   SetZeroStart(const AValue: Boolean);
     procedure   UpdateSize;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
   public
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
@@ -67,6 +69,11 @@ type
     property    ZeroStart: Boolean read FZeroStart write SetZeroStart default False;
   end;
 
+
+  TfpgGutterClickEvent = procedure(Sender: TObject; ALine: Integer) of object;
+
+  TfpgGutterLineEvent = procedure(Sender: TObject; ALine: Integer;
+      ACanvas: TfpgCanvas; const ARect: TfpgRect) of object;
 
   TfpgDrawLineEvent = procedure(Sender: TObject; ALineText: TfpgString;
       ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
@@ -157,6 +164,8 @@ type
     FExecutionLineColor: TfpgColor;
     FUndoManager: TUndoManager;
     FOnCtrlClick: TNotifyEvent;
+    FOnGutterClick: TfpgGutterClickEvent;
+    FOnGutterLine: TfpgGutterLineEvent;
 
     FLastScrollEventTime: TTime; // in milliseconds
     FLastScrollEventTimeBefore: TTime; // in milliseconds
@@ -253,6 +262,8 @@ type
     property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
     property    OnReplaceText: TfpgReplaceText read FOnReplaceText write FOnReplaceText;
     property    OnCtrlClick: TNotifyEvent read FOnCtrlClick write FOnCtrlClick;
+    property    OnGutterClick: TfpgGutterClickEvent read FOnGutterClick write FOnGutterClick;
+    property    OnGutterLine: TfpgGutterLineEvent read FOnGutterLine write FOnGutterLine;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -341,6 +352,8 @@ type
     property    OnSearchEnd;
     property    OnReplaceText;
     property    OnCtrlClick;
+    property    OnGutterClick;
+    property    OnGutterLine;
   end;
 
 
@@ -554,6 +567,26 @@ begin
   end;
 end;
 
+procedure TfpgGutter.DrawGutterIndicators;
+var
+  i, MaxI, H: Integer;
+  lNum: Integer;
+  R: TfpgRect;
+begin
+  if not Assigned(FOwner.FOnGutterLine) then
+    Exit;
+  H    := FOwner.FChrH;
+  MaxI := FOwner.FVisLines;
+  for i := 0 to MaxI do
+  begin
+    lNum := FStartNum + i;
+    if lNum > FOwner.Lines.Count then
+      Break;
+    R.SetRect(0, i * H, GetClientRect.Width - FSpace - 1, H);
+    FOwner.FOnGutterLine(FOwner, lNum, Canvas, R);
+  end;
+end;
+
 procedure TfpgGutter.SetZeroStart(const AValue: Boolean);
 begin
   if FZeroStart=AValue then exit;
@@ -581,6 +614,20 @@ begin
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
   DrawLineNums;
+  DrawGutterIndicators;
+end;
+
+procedure TfpgGutter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  LineIdx: Integer;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if Assigned(FOwner.FOnGutterClick) then
+  begin
+    LineIdx := FOwner.FTopLine + (y div FOwner.FChrH) + 1;  { 1-based }
+    if (LineIdx >= 1) and (LineIdx <= FOwner.Lines.Count) then
+      FOwner.FOnGutterClick(FOwner, LineIdx);
+  end;
 end;
 
 procedure TfpgGutter.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;

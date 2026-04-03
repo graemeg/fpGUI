@@ -69,6 +69,7 @@ type
 
     { Execution control — dispatches to worker thread }
     procedure Run;
+    procedure PrepareInitialBreakpoints(const ALocations: array of String);
     procedure Continue;
     procedure StepInto;
     procedure StepOver;
@@ -244,6 +245,12 @@ begin
     FState := idsRunning;
     FWorkerThread.SendCommand(dcRun);
   end;
+end;
+
+procedure TIDEDebugAdapter.PrepareInitialBreakpoints(const ALocations: array of String);
+begin
+  if FWorkerThread <> nil then
+    FWorkerThread.SetInitialBreakpoints(ALocations);
 end;
 
 procedure TIDEDebugAdapter.Continue;

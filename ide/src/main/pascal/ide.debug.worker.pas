@@ -61,6 +61,7 @@ type
     FCommandEvent: PRTLEvent;
     FResult: TDebugWorkerResult;
     FOnCommandDone: TThreadMethod;
+    FInitialBreakpoints: array of String;  { set before dcRun; installed on worker thread }
     procedure CollectStopInfo;
   protected
     procedure Execute; override;
@@ -72,6 +73,8 @@ type
     destructor Destroy; override;
     { Post a command from the main thread. Thread-safe. }
     procedure SendCommand(ACmd: TDebugCommand);
+    { Set breakpoint locations to install at program launch. Call before SendCommand(dcRun). }
+    procedure SetInitialBreakpoints(const ALocations: array of String);
     { Result from the last command — read after OnCommandDone fires }
     property LastResult: TDebugWorkerResult read FResult;
   end;
@@ -107,6 +110,15 @@ begin
   RTLEventSetEvent(FCommandEvent);
 end;
 
+procedure TDebugWorkerThread.SetInitialBreakpoints(const ALocations: array of String);
+var
+  i: Integer;
+begin
+  SetLength(FInitialBreakpoints, Length(ALocations));
+  for i := 0 to High(ALocations) do
+    FInitialBreakpoints[i] := ALocations[i];
+end;
+
 procedure TDebugWorkerThread.CollectStopInfo;
 var
   LineInfo: TLineInfo;
@@ -132,6 +144,7 @@ end;
 procedure TDebugWorkerThread.Execute;
 var
   Cmd: TDebugCommand;
+  i: Integer;
 begin
   while not Terminated do
   begin
@@ -157,7 +170,20 @@ begin
 
     { Execute the blocking PDR command on this thread }
     case Cmd of
-      dcRun:      FEngine.Run;
+      dcRun:
+        begin
+          FEngine.Run;
+          { Process is now paused at entry point — install any pre-registered
+            breakpoints while still on the ptrace owner thread, then
+            auto-continue so the user sees the first real stop. }
+          if Length(FInitialBreakpoints) > 0 then
+          begin
+            for i := 0 to High(FInitialBreakpoints) do
+              FEngine.SetBreakpoint(FInitialBreakpoints[i]);
+            SetLength(FInitialBreakpoints, 0);
+            FEngine.Continue;  { blocks until next stop }
+          end;
+        end;
       dcContinue: FEngine.Continue;
       dcStepInto: FEngine.StepInto;
       dcStepOver: FEngine.StepOver;
