@@ -2968,6 +2968,7 @@ end;
 procedure TMainForm.FormShow(Sender: TObject);
 var
   lErrPos: integer;
+  lLastProject: TfpgString;
 begin
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
@@ -2981,6 +2982,13 @@ begin
 
   TextEditor.Clear;
   TextEditor.SetFocus;
+
+  if gINI.ReadBool(cPreferences, 'OpenLastProject', True) then
+  begin
+    lLastProject := gINI.ReadString(cPreferences, cINILastProject, '');
+    if (lLastProject <> '') and fpgFileExists(lLastProject) then
+      LoadProject(lLastProject);
+  end;
 
   FFileMonitor.Resume;
 end;
@@ -3019,6 +3027,9 @@ begin
   gINI.WriteInteger(Name + 'State', 'Top', Top);
   gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
   gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
+
+  if GProject.ProjectFile <> '' then
+    gINI.WriteString(cPreferences, cINILastProject, GProject.ProjectFile);
 
   SaveSession;
 end;
@@ -3186,11 +3197,11 @@ begin
   pmProfileMenu := TfpgPopupMenu.Create(self);
 
   pnlStatusBar.LayoutManager := FStatusBarLayout;
-  FStatusBarLayout.LC.InsetsAll('2lp').FillX;
+  FStatusBarLayout.LC.InsetsAll('2lp').FillX.Debug;
   FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
   FStatusBarLayout.AddLayoutComponent(lblCursorPos, TfpgMigCC.Create.AlignX('right'));
-  FStatusBarLayout.AddLayoutComponent(lblGitBranch, TfpgMigCC.Create.AlignX('right'));
-  FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right'));
+  FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right').GrowX);
+  FStatusBarLayout.AddLayoutComponent(lblGitBranch, TfpgMigCC.Create.AlignX('right').GrowX);
 end;
 
 procedure TMainForm.uiCreateClientArea;
