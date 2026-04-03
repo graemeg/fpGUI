@@ -390,6 +390,8 @@ begin
   if AProjectFile = '' then
     raise Exception.Create('You need to specify a Project filename');
 
+  FProjectFile := AProjectFile;
+
   if not Assigned(FIniFile) then
     FIniFile := TfpgINIFile.CreateExt(AProjectFile);
 
