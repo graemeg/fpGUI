@@ -140,6 +140,7 @@ type
     procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
     procedure   ToggleBreakpointAtCursor;
     procedure   InstallBreakpoints;
+    procedure   HandleBreakpointSet(Sender: TObject; AHandle: TBreakpointHandle; ATag: Integer);
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -976,6 +977,7 @@ begin
     FDebugAdapter.OnStopped := @DebugStopped;
     FDebugAdapter.OnTerminated := @DebugTerminated;
     FDebugAdapter.OnOutput := @DebugOutput;
+    FDebugAdapter.OnBreakpointSet := @HandleBreakpointSet;
   end;
 
   { Start the debug session }
@@ -1054,34 +1056,57 @@ var
   ts: TfpgTabSheet;
   FilePath: String;
   Idx: Integer;
-  Handle: TBreakpointHandle;
+  OldHandle: TBreakpointHandle;
+  WasSet: Boolean;
 begin
-  { Identify which tab this editor belongs to }
   ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
   FilePath := ts.Hint;
   if FilePath = '' then
     Exit;
-  FBreakpoints.Toggle(FilePath, ALine);
-  { Repaint the editor to update breakpoint indicators in the gutter }
-  TfpgTextEdit(Sender).Invalidate;
-  { If a debug session is active, install the newly added breakpoint live }
-  if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused]) then
+
+  { Remember state before toggle so we know whether to add or remove live }
+  WasSet := FBreakpoints.HasBreakpoint(FilePath, ALine);
+  if WasSet then
   begin
-    if FBreakpoints.HasBreakpoint(FilePath, ALine) then
+    Idx := FBreakpoints.FindIndex(FilePath, ALine);
+    OldHandle := TBreakpointHandle(FBreakpoints.GetItem(Idx).Handle);
+  end
+  else
+    OldHandle := -1;
+
+  FBreakpoints.Toggle(FilePath, ALine);
+  TfpgTextEdit(Sender).Invalidate;
+
+  { Live session — route through worker thread so ptrace calls stay on the
+    ptrace owner thread. Only valid when the process is paused. }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    if WasSet then
     begin
-      { Newly added — install in debugger }
+      { Breakpoint removed — tell the debugger to restore the original byte.
+        Use tag -1 for removals (no handle to store back). }
+      if OldHandle <> -1 then
+        FDebugAdapter.RemoveBreakpointLive(OldHandle, -1);
+    end
+    else
+    begin
+      { Breakpoint added — install on the ptrace owner thread.
+        Pass the list index as the tag so HandleBreakpointSet can store the handle. }
       Idx := FBreakpoints.FindIndex(FilePath, ALine);
       if Idx >= 0 then
-      begin
-        Handle := FDebugAdapter.SetBreakpoint(
-            ExtractFileName(FilePath) + ':' + IntToStr(ALine));
-        FBreakpoints.SetHandle(Idx, Integer(Handle));
-      end;
+        FDebugAdapter.SetBreakpointLive(
+            ExtractFileName(FilePath) + ':' + IntToStr(ALine), Idx);
     end;
-    { Removal during live session: breakpoint already removed from FBreakpoints
-      by Toggle; the handle was cleared. A full session restart re-installs all
-      remaining breakpoints so no live removal is needed for now. }
   end;
+end;
+
+procedure TMainForm.HandleBreakpointSet(Sender: TObject;
+  AHandle: TBreakpointHandle; ATag: Integer);
+begin
+  { ATag >= 0 means it was a SetBreakpointLive call; store the returned handle.
+    ATag = -1 means it was a RemoveBreakpointLive call; nothing to store. }
+  if ATag >= 0 then
+    FBreakpoints.SetHandle(ATag, Integer(AHandle));
 end;
 
 procedure TMainForm.EditorGutterLine(Sender: TObject; ALine: Integer;

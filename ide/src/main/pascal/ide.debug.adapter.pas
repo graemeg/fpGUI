@@ -46,6 +46,13 @@ type
   TDebugOutputEvent = procedure(Sender: TObject;
     const AMessage: String) of object;
 
+  { Fired on the main thread after a live SetBreakpointLive call completes.
+    AHandle is the PDR handle (-1 means the engine could not install it).
+    ATag is whatever integer the caller passed to SetBreakpointLive — use it
+    to identify which breakpoint in the list to update. }
+  TBreakpointSetEvent = procedure(Sender: TObject;
+    AHandle: TBreakpointHandle; ATag: Integer) of object;
+
   TIDEDebugAdapter = class(TObject)
   private
     FEngine: TDebuggerEngine;
@@ -57,7 +64,10 @@ type
     FOnStopped: TDebugStopEvent;
     FOnTerminated: TNotifyEvent;
     FOnOutput: TDebugOutputEvent;
+    FOnBreakpointSet: TBreakpointSetEvent;
+    FPendingBPTag: Integer;
     procedure HandleCommandDone;
+    procedure HandleBPDone;
     procedure SendOutput(const AMsg: String);
   public
     constructor Create;
@@ -85,9 +95,16 @@ type
     function  GetCallStack(ALimit: Integer = 0): TStringArray;
     function  EvaluateExpression(const AExpr: String): TVariableValue;
 
-    { Breakpoints — can be called when session is active }
+    { Breakpoints — synchronous; safe only when no session is active }
     function  SetBreakpoint(const ALocation: String): TBreakpointHandle;
     function  RemoveBreakpoint(AHandle: TBreakpointHandle): Boolean;
+
+    { Live breakpoint changes during an active session — routed through the
+      worker thread so all ptrace calls happen on the ptrace owner thread.
+      ATag is passed through to OnBreakpointSet so callers can identify which
+      entry to update. Only valid when State = idsPaused. }
+    procedure SetBreakpointLive(const ALocation: String; ATag: Integer);
+    procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
 
     { State }
     property State: TIDEDebugState read FState;
@@ -95,6 +112,10 @@ type
     property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
     property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated;
     property OnOutput: TDebugOutputEvent read FOnOutput write FOnOutput;
+    { Fired on the main thread after SetBreakpointLive or RemoveBreakpointLive
+      completes. For Remove, AHandle will be 0. }
+    property OnBreakpointSet: TBreakpointSetEvent
+      read FOnBreakpointSet write FOnBreakpointSet;
   end;
 
 implementation
@@ -235,6 +256,30 @@ begin
   begin
     SendOutput('Debugger in unexpected state after command.');
     FState := idsIdle;
+  end;
+end;
+
+procedure TIDEDebugAdapter.HandleBPDone;
+begin
+  if Assigned(FOnBreakpointSet) and (FWorkerThread <> nil) then
+    FOnBreakpointSet(Self, FWorkerThread.LastBPHandle, FPendingBPTag);
+end;
+
+procedure TIDEDebugAdapter.SetBreakpointLive(const ALocation: String; ATag: Integer);
+begin
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FPendingBPTag := ATag;
+    FWorkerThread.SendSetBreakpoint(ALocation, @HandleBPDone);
+  end;
+end;
+
+procedure TIDEDebugAdapter.RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
+begin
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FPendingBPTag := ATag;
+    FWorkerThread.SendRemoveBreakpoint(AHandle, @HandleBPDone);
   end;
 end;
 

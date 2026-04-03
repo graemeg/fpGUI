@@ -569,7 +569,7 @@ end;
 
 procedure TfpgGutter.DrawGutterIndicators;
 var
-  i, MaxI, H: Integer;
+  i, MaxI, H, GW: Integer;
   lNum: Integer;
   R: TfpgRect;
 begin
@@ -577,12 +577,13 @@ begin
     Exit;
   H    := FOwner.FChrH;
   MaxI := FOwner.FVisLines;
+  GW   := GetClientRect.Width;
   for i := 0 to MaxI do
   begin
     lNum := FStartNum + i;
     if lNum > FOwner.Lines.Count then
       Break;
-    R.SetRect(0, i * H, GetClientRect.Width - FSpace - 1, H);
+    R.SetRect(0, i * H, GW - FSpace - 1, H);
     FOwner.FOnGutterLine(FOwner, lNum, Canvas, R);
   end;
 end;

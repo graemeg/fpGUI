@@ -41,7 +41,9 @@ type
     dcStepInto,
     dcStepOver,
     dcStepLine,
-    dcQuit         // Tells the thread to exit its loop
+    dcSetBreakpoint,    // Install one breakpoint; result in LastBPHandle
+    dcRemoveBreakpoint, // Remove one breakpoint by handle
+    dcQuit              // Tells the thread to exit its loop
   );
 
   { Result data collected on the worker thread, read on the main thread }
@@ -62,6 +64,11 @@ type
     FResult: TDebugWorkerResult;
     FOnCommandDone: TThreadMethod;
     FInitialBreakpoints: array of String;  { set before dcRun; installed on worker thread }
+    { Breakpoint command fields — written by main thread before SendSetBreakpoint/
+      SendRemoveBreakpoint; read by worker thread after RTLEventWaitFor }
+    FBPLocation: String;
+    FBPHandle: TBreakpointHandle;
+    FOnBPDone: TThreadMethod;
     procedure CollectStopInfo;
   protected
     procedure Execute; override;
@@ -75,8 +82,16 @@ type
     procedure SendCommand(ACmd: TDebugCommand);
     { Set breakpoint locations to install at program launch. Call before SendCommand(dcRun). }
     procedure SetInitialBreakpoints(const ALocations: array of String);
-    { Result from the last command — read after OnCommandDone fires }
+    { Install a single breakpoint on the ptrace owner thread. AOnDone is called on the
+      main thread when complete; read LastBPHandle for the resulting handle. }
+    procedure SendSetBreakpoint(const ALocation: String; AOnDone: TThreadMethod);
+    { Remove a single breakpoint by handle on the ptrace owner thread. AOnDone is called
+      on the main thread when complete. }
+    procedure SendRemoveBreakpoint(AHandle: TBreakpointHandle; AOnDone: TThreadMethod);
+    { Result from the last run/pause command — read after OnCommandDone fires }
     property LastResult: TDebugWorkerResult read FResult;
+    { Handle from the last dcSetBreakpoint command — read after OnBPDone fires }
+    property LastBPHandle: TBreakpointHandle read FBPHandle;
   end;
 
 implementation
@@ -107,6 +122,25 @@ end;
 procedure TDebugWorkerThread.SendCommand(ACmd: TDebugCommand);
 begin
   FCommand := ACmd;
+  RTLEventSetEvent(FCommandEvent);
+end;
+
+procedure TDebugWorkerThread.SendSetBreakpoint(const ALocation: String;
+  AOnDone: TThreadMethod);
+begin
+  FBPLocation := ALocation;
+  FBPHandle   := 0;
+  FOnBPDone   := AOnDone;
+  FCommand    := dcSetBreakpoint;
+  RTLEventSetEvent(FCommandEvent);
+end;
+
+procedure TDebugWorkerThread.SendRemoveBreakpoint(AHandle: TBreakpointHandle;
+  AOnDone: TThreadMethod);
+begin
+  FBPHandle := AHandle;
+  FOnBPDone := AOnDone;
+  FCommand  := dcRemoveBreakpoint;
   RTLEventSetEvent(FCommandEvent);
 end;
 
@@ -167,6 +201,23 @@ begin
 
     if Cmd = dcNone then
       System.Continue;
+
+    { Breakpoint commands post a separate callback and do not collect stop info }
+    if Cmd = dcSetBreakpoint then
+    begin
+      FBPHandle := FEngine.SetBreakpoint(FBPLocation);
+      if not Terminated then
+        Synchronize(FOnBPDone);
+      System.Continue;
+    end;
+
+    if Cmd = dcRemoveBreakpoint then
+    begin
+      FEngine.RemoveBreakpoint(FBPHandle);
+      if not Terminated then
+        Synchronize(FOnBPDone);
+      System.Continue;
+    end;
 
     { Execute the blocking PDR command on this thread }
     case Cmd of
