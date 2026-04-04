@@ -191,6 +191,10 @@ type
     procedure   DebugBuildTerminated(Sender: TObject);
     procedure   LaunchDebugSession;
     procedure   DebugStopped(Sender: TObject; AState: TIDEDebugState; const AFile: String; ALine: Integer);
+    function    ResolveSourceFile(const AFile: string): string;
+    procedure   AddAggregatorSourceDirs(AModuleInfos: TList; AList: TStringList);
+    procedure   AddPathIfNew(AList: TStringList; const APath: string);
+    procedure   AddSubdirectories(AList: TStringList; const ADir: string);
     procedure   DebugTerminated(Sender: TObject);
     procedure   DebugOutput(Sender: TObject; const AMessage: String);
     procedure   miDebugStepInto(Sender: TObject);
@@ -1060,6 +1064,104 @@ begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).ExecutionLine := -1;
 end;
 
+procedure TMainForm.AddPathIfNew(AList: TStringList; const APath: string);
+begin
+  if AList.IndexOf(APath) < 0 then
+    AList.Add(APath);
+end;
+
+procedure TMainForm.AddSubdirectories(AList: TStringList; const ADir: string);
+var
+  sr: TSearchRec;
+  full: string;
+begin
+  AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
+  if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
+  try
+    repeat
+      if (sr.Attr and faDirectory) <> 0 then
+        if (sr.Name <> '.') and (sr.Name <> '..') then
+        begin
+          full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
+          if Pos('target', sr.Name) = 0 then
+            AddSubdirectories(AList, full);
+        end;
+    until FindNext(sr) <> 0;
+  finally
+    FindClose(sr);
+  end;
+end;
+
+procedure TMainForm.AddAggregatorSourceDirs(AModuleInfos: TList; AList: TStringList);
+{ Recursively add every module's source directory tree to AList, including
+  modules nested inside pom sub-aggregators (stored in SubModules). }
+var
+  i: Integer;
+  mi: TAggregatorModuleInfo;
+  srcRoot: string;
+begin
+  for i := 0 to AModuleInfos.Count - 1 do
+  begin
+    mi := TAggregatorModuleInfo(AModuleInfos[i]);
+    srcRoot := IncludeTrailingPathDelimiter(mi.ProjectDir)
+             + SetDirSeparators(mi.SourceDirectory);
+    if DirectoryExists(srcRoot) then
+      AddSubdirectories(AList, srcRoot);
+    if mi.SubModules.Count > 0 then
+      AddAggregatorSourceDirs(mi.SubModules, AList);
+  end;
+end;
+
+function TMainForm.ResolveSourceFile(const AFile: string): string;
+{ Resolve a source file path that may be relative to a module root.
+  Debug info stores paths relative to the module that compiled the unit
+  (e.g. './src/main/pascal/corelib/fpg_base.pas' relative to framework/).
+  For aggregator projects we try every module's ProjectDir as a base,
+  recursing into nested pom sub-aggregators. }
+var
+  pb: TPasBuildProjectBackend;
+  relPath: string;
+
+  function SearchModules(AModuleInfos: TList): string;
+  var
+    j: Integer;
+    mi: TAggregatorModuleInfo;
+    candidate: string;
+  begin
+    Result := '';
+    for j := 0 to AModuleInfos.Count - 1 do
+    begin
+      mi := TAggregatorModuleInfo(AModuleInfos[j]);
+      candidate := IncludeTrailingPathDelimiter(mi.ProjectDir)
+                 + SetDirSeparators(relPath);
+      if fpgFileExists(candidate) then
+        Exit(candidate);
+      if mi.SubModules.Count > 0 then
+      begin
+        Result := SearchModules(mi.SubModules);
+        if Result <> '' then
+          Exit;
+      end;
+    end;
+  end;
+
+begin
+  Result := AFile;
+  if fpgFileExists(AFile) then
+    Exit;
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  if not pb.IsAggregator then
+    Exit;
+  relPath := AFile;
+  if (Length(relPath) >= 2) and (relPath[1] = '.') and (relPath[2] = '/') then
+    Delete(relPath, 1, 2);
+  Result := SearchModules(pb.ModuleInfos);
+  if Result = '' then
+    Result := AFile;
+end;
+
 procedure TMainForm.DebugStopped(Sender: TObject; AState: TIDEDebugState;
   const AFile: String; ALine: Integer);
 var
@@ -1072,7 +1174,7 @@ begin
     AddOutputLine('Stopped at ' + AFile + ':' + IntToStr(ALine));
     UpdateStatus('Paused at ' + ExtractFileName(AFile) + ':' + IntToStr(ALine));
     { Navigate to source and mark the execution line }
-    ts := OpenEditorPage(AFile);
+    ts := OpenEditorPage(ResolveSourceFile(AFile));
     if ts <> nil then
     begin
       editor := TfpgTextEdit(ts.Components[0]);
@@ -2609,12 +2711,6 @@ end;
 
 procedure TMainForm.miGoToDeclaration(Sender: TObject);
 
-  procedure AddPathIfNew(AList: TStringList; const APath: string);
-  begin
-    if AList.IndexOf(APath) < 0 then
-      AList.Add(APath);
-  end;
-
   function MakeAbsolute(const ABase, APath: string): string;
   begin
     {$ifdef unix}
@@ -2625,28 +2721,6 @@ procedure TMainForm.miGoToDeclaration(Sender: TObject);
       Result := APath
     else
       Result := IncludeTrailingPathDelimiter(ABase) + APath;
-  end;
-
-  procedure AddSubdirectories(AList: TStringList; const ADir: string);
-  var
-    sr: TSearchRec;
-    full: string;
-  begin
-    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
-    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
-    try
-      repeat
-        if (sr.Attr and faDirectory) <> 0 then
-          if (sr.Name <> '.') and (sr.Name <> '..') then
-          begin
-            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
-            if Pos('target', sr.Name) = 0 then
-              AddSubdirectories(AList, full);
-          end;
-      until FindNext(sr) <> 0;
-    finally
-      FindClose(sr);
-    end;
   end;
 
   procedure CollectPaths(AModule: TPasBuildModule;
@@ -2710,9 +2784,7 @@ begin
     pb := TPasBuildProjectBackend(GProject);
     { Ensure project is resolved -- may not be if session had no profiles }
     if not pb.Resolved then
-    begin
       pb.Resolve;
-    end;
     m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
     if m <> nil then
     begin
@@ -2721,6 +2793,19 @@ begin
       CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
       unitPaths := ownedUnitPaths;
       includePaths := ownedIncludePaths;
+    end;
+    { For aggregator projects, add every module's source tree so cross-module
+      navigation works even when resolve hasn't run or dep.SourceDir is absent.
+      FModuleInfos is populated from project.xml at load time — no resolve needed.
+      AddAggregatorSourceDirs recurses into nested pom sub-aggregators. }
+    if pb.IsAggregator and (pb.ModuleInfos.Count > 0) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        unitPaths := ownedUnitPaths;
+      end;
+      AddAggregatorSourceDirs(pb.ModuleInfos, ownedUnitPaths);
     end;
   end;
   if unitPaths = nil then
@@ -2854,12 +2939,6 @@ end;
 
 procedure TMainForm.miQuickDoc(Sender: TObject);
 
-  procedure AddPathIfNew(AList: TStringList; const APath: string);
-  begin
-    if AList.IndexOf(APath) < 0 then
-      AList.Add(APath);
-  end;
-
   function MakeAbsolute(const ABase, APath: string): string;
   begin
     {$ifdef unix}
@@ -2870,28 +2949,6 @@ procedure TMainForm.miQuickDoc(Sender: TObject);
       Result := APath
     else
       Result := IncludeTrailingPathDelimiter(ABase) + APath;
-  end;
-
-  procedure AddSubdirectories(AList: TStringList; const ADir: string);
-  var
-    sr: TSearchRec;
-    full: string;
-  begin
-    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
-    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
-    try
-      repeat
-        if (sr.Attr and faDirectory) <> 0 then
-          if (sr.Name <> '.') and (sr.Name <> '..') then
-          begin
-            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
-            if Pos('target', sr.Name) = 0 then
-              AddSubdirectories(AList, full);
-          end;
-      until FindNext(sr) <> 0;
-    finally
-      FindClose(sr);
-    end;
   end;
 
   procedure CollectPaths(AModule: TPasBuildModule;
@@ -2969,6 +3026,15 @@ begin
       CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
       unitPaths := ownedUnitPaths;
       includePaths := ownedIncludePaths;
+    end;
+    if pb.IsAggregator and (pb.ModuleInfos.Count > 0) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        unitPaths := ownedUnitPaths;
+      end;
+      AddAggregatorSourceDirs(pb.ModuleInfos, ownedUnitPaths);
     end;
   end;
   if unitPaths = nil then
