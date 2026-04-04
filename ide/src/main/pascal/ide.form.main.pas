@@ -116,11 +116,14 @@ type
     btnDbgStepInto: TfpgButton;
     btnDbgStepOver: TfpgButton;
     btnDbgStepOut: TfpgButton;
+    tsBreakpoints: TfpgTabSheet;
+    tvBreakpoints: TfpgTreeView;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
     pmProjectTreeMenu: TfpgPopupMenu;
+    pmBreakpointMenu: TfpgPopupMenu;
     pmProfileMenu: TfpgPopupMenu;
     FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
@@ -151,6 +154,14 @@ type
     procedure   ToggleBreakpointAtCursor;
     procedure   InstallBreakpoints;
     procedure   HandleBreakpointSet(Sender: TObject; AHandle: TBreakpointHandle; ATag: Integer);
+    procedure   RefreshBreakpointTree;
+    procedure   InvalidateEditorForBreakpoint(ABPIndex: Integer);
+    procedure   tvBreakpointsStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+    procedure   tvBreakpointsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   tvBreakpointsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   pmBPGoToSourceClick(Sender: TObject);
+    procedure   pmBPToggleEnabledClick(Sender: TObject);
+    procedure   pmBPRemoveClick(Sender: TObject);
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1293,6 +1304,7 @@ begin
 
   FBreakpoints.Toggle(FilePath, ALine);
   TfpgTextEdit(Sender).Invalidate;
+  RefreshBreakpointTree;
 
   { Live session — route through worker thread so ptrace calls stay on the
     ptrace owner thread. Only valid when the process is paused. }
@@ -1326,25 +1338,204 @@ begin
     FBreakpoints.SetHandle(ATag, Integer(AHandle));
 end;
 
+procedure TMainForm.RefreshBreakpointTree;
+var
+  i: Integer;
+  BP: TBreakpoint;
+  Node: TfpgTreeNode;
+begin
+  tvBreakpoints.BeginUpdate;
+  try
+    tvBreakpoints.RootNode.Clear;
+    for i := 0 to FBreakpoints.Count - 1 do
+    begin
+      BP := FBreakpoints.GetItem(i);
+      Node := tvBreakpoints.RootNode.AppendText(
+          ExtractFileName(BP.FileName) + ':' + IntToStr(BP.Line));
+      if BP.Enabled then
+        Node.StateImageIndex := 1
+      else
+        Node.StateImageIndex := 0;
+      Node.Data := Pointer(PtrInt(i));
+    end;
+  finally
+    tvBreakpoints.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.InvalidateEditorForBreakpoint(ABPIndex: Integer);
+var
+  i: Integer;
+  ets: TfpgTabSheet;
+  BP: TBreakpoint;
+begin
+  if (ABPIndex < 0) or (ABPIndex >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(ABPIndex);
+  for i := 0 to pcEditor.PageCount - 1 do
+  begin
+    ets := pcEditor.Pages[i];
+    if ets.Hint = BP.FileName then
+      TfpgTextEdit(ets.Components[0]).Invalidate;
+  end;
+end;
+
+procedure TMainForm.tvBreakpointsStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Idx: Integer;
+begin
+  Idx := Integer(PtrInt(ANode.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  FBreakpoints.SetEnabled(Idx, not FBreakpoints.GetItem(Idx).Enabled);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    ANode.StateImageIndex := 1
+  else
+    ANode.StateImageIndex := 0;
+  tvBreakpoints.Invalidate;
+  InvalidateEditorForBreakpoint(Idx);
+end;
+
+procedure TMainForm.tvBreakpointsDoubleClick(Sender: TObject; AButton: TMouseButton;
+    AShift: TShiftState; const AMousePos: TPoint);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then
+    Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if BP.FileName = '' then
+    Exit;
+  ts := OpenEditorPage(BP.FileName);
+  if ts <> nil then
+  begin
+    editor := TfpgTextEdit(ts.Components[0]);
+    editor.GotoLine(BP.Line);
+  end;
+end;
+
+procedure TMainForm.tvBreakpointsKeyPressed(Sender: TObject; var KeyCode: word;
+    var ShiftState: TShiftState; var Consumed: boolean);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+begin
+  if KeyCode <> keyDelete then
+    Exit;
+  Node := tvBreakpoints.Selection;
+  if Node = nil then
+    Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(Idx);
+
+  { Remove from live debug session if active and handle is known }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) and
+     (BP.Handle <> -1) then
+    FDebugAdapter.RemoveBreakpointLive(TBreakpointHandle(BP.Handle), -1);
+
+  { Invalidate editor gutter before removing from the model }
+  InvalidateEditorForBreakpoint(Idx);
+  FBreakpoints.Toggle(BP.FileName, BP.Line);
+  RefreshBreakpointTree;
+  Consumed := True;
+end;
+
+procedure TMainForm.pmBPGoToSourceClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if BP.FileName = '' then Exit;
+  ts := OpenEditorPage(BP.FileName);
+  if ts <> nil then
+  begin
+    editor := TfpgTextEdit(ts.Components[0]);
+    editor.GotoLine(BP.Line);
+  end;
+end;
+
+procedure TMainForm.pmBPToggleEnabledClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  FBreakpoints.SetEnabled(Idx, not FBreakpoints.GetItem(Idx).Enabled);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    Node.StateImageIndex := 1
+  else
+    Node.StateImageIndex := 0;
+  tvBreakpoints.Invalidate;
+  InvalidateEditorForBreakpoint(Idx);
+end;
+
+procedure TMainForm.pmBPRemoveClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) and
+     (BP.Handle <> -1) then
+    FDebugAdapter.RemoveBreakpointLive(TBreakpointHandle(BP.Handle), -1);
+  InvalidateEditorForBreakpoint(Idx);
+  FBreakpoints.Toggle(BP.FileName, BP.Line);
+  RefreshBreakpointTree;
+end;
+
 procedure TMainForm.EditorGutterLine(Sender: TObject; ALine: Integer;
   ACanvas: TfpgCanvas; const ARect: TfpgRect);
 var
   ts: TfpgTabSheet;
   FilePath: String;
-  CX, CY, R: Integer;
+  CX, CY, R, Idx: Integer;
 begin
   ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
   FilePath := ts.Hint;
   if FilePath = '' then
     Exit;
-  if not FBreakpoints.HasBreakpoint(FilePath, ALine) then
+  Idx := FBreakpoints.FindIndex(FilePath, ALine);
+  if Idx < 0 then
     Exit;
-  { Draw a red filled circle centred in the gutter line rect }
   R  := (ARect.Height - 4) div 2;
   CX := ARect.Left + R + 2;
   CY := ARect.Top + (ARect.Height div 2);
   ACanvas.SetColor(clRed);
-  ACanvas.FillArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    { Enabled — filled red circle }
+    ACanvas.FillArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi)
+  else
+  begin
+    { Disabled — red circle outline only }
+    ACanvas.DrawArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi);
+  end;
 end;
 
 procedure TMainForm.ToggleBreakpointAtCursor;
@@ -2338,6 +2529,7 @@ begin
   UpdateGitBranch;
   CheckGitIgnoreForIdeDir;
   FBreakpoints.LoadFromFile(IncludeTrailingPathDelimiter(GProject.ProjectDir) + '.ide' + PathDelim + 'breakpoints.json');
+  RefreshBreakpointTree;
   AddMessage('Project loaded');
 end;
 
@@ -3712,6 +3904,28 @@ begin
     Options := Options + [go_SmoothScroll];
   end;
 
+  tsBreakpoints := TfpgTabSheet.Create(pnlTool);
+  with tsBreakpoints do
+  begin
+    Name := 'tsBreakpoints';
+    Text := 'Breakpoints';
+  end;
+
+  tvBreakpoints := TfpgTreeView.Create(tsBreakpoints);
+  with tvBreakpoints do
+  begin
+    Name := 'tvBreakpoints';
+    Align := alClient;
+    FontDesc := '#Label1';
+    ShowImages := True;
+    StateImageList := FProfileStateImages;
+    IndentNodeWithNoImage := False;
+    Hint := 'Click checkbox: enable/disable | Double-click: go to source | Del: remove';
+    OnDoubleClick := @tvBreakpointsDoubleClick;
+    OnKeyPress := @tvBreakpointsKeyPressed;
+    OnStateImageClicked := @tvBreakpointsStateImageClicked;
+  end;
+
   { Vertical splitter — between tool panel and editor }
   SplitterV := TfpgMigSplitter.Create(pnlClientArea);
   with SplitterV do
@@ -3868,6 +4082,17 @@ begin
   begin
     AddMenuItem('Show Dependency Tree', '', @pmTreeDependencyTreeClick);
   end;
+
+  { Context menu for breakpoints panel }
+  pmBreakpointMenu := TfpgPopupMenu.Create(self);
+  with pmBreakpointMenu do
+  begin
+    AddMenuItem('Go to Source', '', @pmBPGoToSourceClick);
+    AddSeparator;
+    AddMenuItem('Toggle Enable/Disable', '', @pmBPToggleEnabledClick);
+    AddMenuItem('Remove Breakpoint', '', @pmBPRemoveClick);
+  end;
+  tvBreakpoints.PopupMenu := pmBreakpointMenu;
 
   SplitterH.Control := pnlWindow;
 

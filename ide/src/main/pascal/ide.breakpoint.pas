@@ -53,6 +53,7 @@ type
     function  Count: Integer;
     function  GetItem(AIndex: Integer): TBreakpoint;
     procedure SetHandle(AIndex: Integer; AHandle: Integer);
+    procedure SetEnabled(AIndex: Integer; AEnabled: Boolean);
     procedure ClearHandles;
     procedure Clear;
     procedure SaveToFile(const AFileName: String);
@@ -129,6 +130,12 @@ procedure TBreakpointList.SetHandle(AIndex: Integer; AHandle: Integer);
 begin
   if (AIndex >= 0) and (AIndex < FCount) then
     FItems[AIndex].Handle := AHandle;
+end;
+
+procedure TBreakpointList.SetEnabled(AIndex: Integer; AEnabled: Boolean);
+begin
+  if (AIndex >= 0) and (AIndex < FCount) then
+    FItems[AIndex].Enabled := AEnabled;
 end;
 
 procedure TBreakpointList.ClearHandles;
