@@ -27,6 +27,12 @@
 unit ide.debug.worker;
 
 {$mode objfpc}{$H+}
+{ This unit requires FPC 3.3.x (HAS_OPDF_DEBUG). On FPC 3.2.x the IDE
+  uses ide.debug.adapter.stub instead and this unit is never compiled. }
+{$I ide.debug.config.inc}
+{$IFNDEF HAS_OPDF_DEBUG}
+  {$FATAL ide.debug.worker requires FPC 3.3.x or later (OPDF debug support)}
+{$ENDIF}
 
 interface
 

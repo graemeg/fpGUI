@@ -19,6 +19,7 @@
 unit ide.form.main;
 
 {$mode objfpc}{$H+}
+{$I ide.debug.config.inc}
 
 interface
 
@@ -38,7 +39,6 @@ uses
   fpg_mig_lc,
   fpg_miglayout,
   fpg_mru,
-  fpg_mru,
   fpg_panel,
   fpg_splitter,
   fpg_tab,
@@ -48,8 +48,6 @@ uses
   ide.breakpoint,
   ide.build.dispatch,
   ide.cursorhistory,
-  ide.debug.adapter,
-  ide.editor.tabs,
   ide.editor.tabs,
   ide.editor.theme,
   ide.filefinder,
@@ -64,7 +62,13 @@ uses
   ide.quickdoc,
   ide.runner.thread,
   ide.symbolfinder,
-  pdr_ports;
+  {$IFDEF HAS_OPDF_DEBUG}
+  ide.debug.adapter,
+  pdr_ports
+  {$ELSE}
+  ide.debug.adapter.stub
+  {$ENDIF}
+  ;
 
 type
 
@@ -335,15 +339,8 @@ uses
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
-<<<<<<< HEAD
-<<<<<<< HEAD
   ,fpg_hvif
   ,fpg_iconstore
-=======
-  ,pdr_ports
->>>>>>> 52f55606 (feat: add breakpoint management to IDE (step 5.4))
-=======
->>>>>>> 767d7f9d (fix: move pdr_ports to interface uses for TBreakpointHandle visibility)
   ;
 
 
