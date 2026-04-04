@@ -110,6 +110,12 @@ type
     mnuTools: TfpgPopupMenu;
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
+    btnDbgContinue: TfpgButton;
+    btnDbgPause: TfpgButton;
+    btnDbgStop: TfpgButton;
+    btnDbgStepInto: TfpgButton;
+    btnDbgStepOver: TfpgButton;
+    btnDbgStepOut: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
@@ -120,6 +126,10 @@ type
     FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
+    miDbgStepInto: TfpgMenuItem;
+    miDbgStepOver: TfpgMenuItem;
+    miDbgStepOut: TfpgMenuItem;
+    miDbgPause: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
@@ -183,6 +193,11 @@ type
     procedure   DebugStopped(Sender: TObject; AState: TIDEDebugState; const AFile: String; ALine: Integer);
     procedure   DebugTerminated(Sender: TObject);
     procedure   DebugOutput(Sender: TObject; const AMessage: String);
+    procedure   miDebugStepInto(Sender: TObject);
+    procedure   miDebugStepOver(Sender: TObject);
+    procedure   miDebugStepOut(Sender: TObject);
+    procedure   miDebugPause(Sender: TObject);
+    procedure   UpdateDebugControls;
     procedure   ClearAllExecutionLines;
     procedure   StartBuildGoal(const AGoal: string);
     procedure   miProjectDependencyTree(Sender: TObject);
@@ -843,6 +858,7 @@ begin
     AddOutputLine('');
     AddOutputLine('Debug session stopped by user.');
     UpdateStatus('');
+    UpdateDebugControls;
     Exit;
   end;
   { Stop running program if active }
@@ -893,10 +909,13 @@ begin
     ClearAllExecutionLines;
     FDebugAdapter.Continue;
     UpdateStatus('Running (debug)...');
+    UpdateDebugControls;
     Exit;
   end;
 
   { If already running (debug or normal), don't start another }
+  if FDebugBuildPending then
+    Exit;
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning) then
     Exit;
   if FRunnerThread <> nil then
@@ -927,7 +946,12 @@ begin
     begin
       ModInfo := pb.FindModuleInfoForFile(FilePath);
       if ModInfo <> nil then
+      begin
         thd.BuildModule := ModInfo.Name;
+        { Align executable resolution with the build target so LaunchDebugSession
+          picks the right binary when the aggregator project is open. }
+        pb.ActiveModule := pb.FindModuleForFile(FilePath);
+      end;
     end;
   end;
   thd.OnTerminate := @DebugBuildTerminated;
@@ -947,6 +971,7 @@ begin
   begin
     AddMessage('Build failed — cannot start debug session.');
     UpdateStatus('Build failed.');
+    UpdateDebugControls;
     Exit;
   end;
 
@@ -957,7 +982,28 @@ end;
 procedure TMainForm.LaunchDebugSession;
 var
   ExePath: string;
+  pb2: TPasBuildProjectBackend;
+  ActiveFilePath: TfpgString;
+  ActiveMod: TPasBuildModule;
 begin
+  { For aggregator projects: ensure ActiveModule reflects the file being edited,
+    not just whatever was selected last in the project tree. This mirrors the
+    build-module deduction in miDebugRun so the debug binary matches the build. }
+  if (GProject <> nil) and (GProject.ProjectFormat = pfPasBuild) then
+  begin
+    pb2 := TPasBuildProjectBackend(GProject);
+    if pb2.IsAggregator and (pcEditor.ActivePage <> nil) then
+    begin
+      ActiveFilePath := pcEditor.ActivePage.Hint;
+      if ActiveFilePath <> '' then
+      begin
+        ActiveMod := pb2.FindModuleForFile(ActiveFilePath);
+        if ActiveMod <> nil then
+          pb2.ActiveModule := ActiveMod;
+      end;
+    end;
+  end;
+
   ExePath := ResolveProjectExecutablePath;
   if ExePath = '' then
   begin
@@ -1003,6 +1049,7 @@ begin
   { Run the program under the debugger }
   FDebugAdapter.Run;
   UpdateStatus('Running (debug)...');
+  UpdateDebugControls;
 end;
 
 procedure TMainForm.ClearAllExecutionLines;
@@ -1038,6 +1085,7 @@ begin
     AddOutputLine('Stopped (no source information).');
     UpdateStatus('Paused');
   end;
+  UpdateDebugControls;
 end;
 
 procedure TMainForm.DebugTerminated(Sender: TObject);
@@ -1047,11 +1095,75 @@ begin
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
   UpdateStatus('');
+  UpdateDebugControls;
 end;
 
 procedure TMainForm.DebugOutput(Sender: TObject; const AMessage: String);
 begin
   AddOutputLine(AMessage);
+end;
+
+procedure TMainForm.miDebugStepInto(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    FDebugAdapter.StepInto;
+    UpdateStatus('Stepping (into)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.miDebugStepOver(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    FDebugAdapter.StepOver;
+    UpdateStatus('Stepping (over)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.miDebugStepOut(Sender: TObject);
+begin
+  AddMessage('Step Out is not yet supported by the PDR debugger engine.');
+end;
+
+procedure TMainForm.miDebugPause(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning) then
+  begin
+    FDebugAdapter.Pause;
+    UpdateStatus('Pausing...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.UpdateDebugControls;
+var
+  IsPaused: Boolean;
+  IsRunning: Boolean;
+  InSession: Boolean;
+begin
+  IsPaused  := (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused);
+  IsRunning := (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning);
+  InSession := (FDebugAdapter <> nil) and
+               (FDebugAdapter.State in [idsStarting, idsRunning, idsPaused]);
+
+  { Toolbar buttons }
+  btnDbgContinue.Enabled := IsPaused;
+  btnDbgPause.Enabled    := IsRunning;
+  btnDbgStop.Enabled     := InSession;
+  btnDbgStepInto.Enabled := IsPaused;
+  btnDbgStepOver.Enabled := IsPaused;
+  btnDbgStepOut.Enabled  := False;  { not yet supported by PDR engine }
+
+  { Menu items }
+  miDbgStepInto.Enabled := IsPaused;
+  miDbgStepOver.Enabled := IsPaused;
+  miDbgStepOut.Enabled  := False;   { not yet supported by PDR engine }
+  miDbgPause.Enabled    := IsRunning;
 end;
 
 procedure TMainForm.EditorGutterClick(Sender: TObject; ALine: Integer);
@@ -3326,12 +3438,92 @@ begin
     ImageName := 'stdimg.saveall';
   end;
 
+  { Debug execution control buttons — initially disabled (no active session) }
+  btnDbgContinue := TfpgButton.Create(Toolbar);
+  with btnDbgContinue do
+  begin
+    Name := 'btnDbgContinue';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Continue';
+    Hint := 'Continue (F9)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugRun;
+  end;
+
+  btnDbgPause := TfpgButton.Create(Toolbar);
+  with btnDbgPause do
+  begin
+    Name := 'btnDbgPause';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Pause';
+    Hint := 'Pause debug execution';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugPause;
+  end;
+
+  btnDbgStop := TfpgButton.Create(Toolbar);
+  with btnDbgStop do
+  begin
+    Name := 'btnDbgStop';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Stop';
+    Hint := 'Stop program (Ctrl+F2)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miStopProgram;
+  end;
+
+  btnDbgStepInto := TfpgButton.Create(Toolbar);
+  with btnDbgStepInto do
+  begin
+    Name := 'btnDbgStepInto';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Into';
+    Hint := 'Step Into (F7)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepInto;
+  end;
+
+  btnDbgStepOver := TfpgButton.Create(Toolbar);
+  with btnDbgStepOver do
+  begin
+    Name := 'btnDbgStepOver';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Over';
+    Hint := 'Step Over (F8)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepOver;
+  end;
+
+  btnDbgStepOut := TfpgButton.Create(Toolbar);
+  with btnDbgStepOut do
+  begin
+    Name := 'btnDbgStepOut';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Out';
+    Hint := 'Step Out (Shift+F8) - not yet available';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepOut;
+  end;
+
   Toolbar.LayoutManager := mig;
   mig.LC.InsetsAll('2lp').Fill;
   mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnSave, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnSaveAll, TfpgMigCC.Create.MinWidth('24lp').PushX);
+  { Debug controls — grouped on the right side of the toolbar }
+  mig.AddLayoutComponent(btnDbgContinue, TfpgMigCC.Create.GapBefore('14lp').MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgPause, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStop, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepInto, TfpgMigCC.Create.GapBefore('8lp').MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepOver, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepOut, TfpgMigCC.Create.MinWidth('48lp'));
 end;
 
 procedure TMainForm.uiCreateStatusBar;
@@ -3737,6 +3929,15 @@ begin
     AddMenuItem('Debug Run', 'F9', @miDebugRun);
     AddMenuItem('Run', rsKeyShift+'F9', @miRunProgram);
     AddMenuItem('Stop', rsKeyCtrl+'F2', @miStopProgram);
+    AddSeparator;
+    miDbgStepInto := AddMenuItem('Step Into', 'F7', @miDebugStepInto);
+    miDbgStepOver := AddMenuItem('Step Over', 'F8', @miDebugStepOver);
+    miDbgStepOut  := AddMenuItem('Step Out', rsKeyShift+'F8', @miDebugStepOut);
+    miDbgPause    := AddMenuItem('Pause', '', @miDebugPause);
+    miDbgStepInto.Enabled := False;
+    miDbgStepOver.Enabled := False;
+    miDbgStepOut.Enabled  := False;
+    miDbgPause.Enabled    := False;
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);
