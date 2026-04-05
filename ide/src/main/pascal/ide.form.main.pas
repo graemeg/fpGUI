@@ -62,6 +62,7 @@ uses
   ide.quickdoc,
   ide.runner.thread,
   ide.symbolfinder,
+  ide.variables,
   {$IFDEF HAS_OPDF_DEBUG}
   ide.debug.adapter,
   pdr_ports
@@ -122,12 +123,18 @@ type
     btnDbgStepOut: TfpgButton;
     tsBreakpoints: TfpgTabSheet;
     tvBreakpoints: TfpgTreeView;
+    tsVariables: TfpgTabSheet;
+    btnVarOptions: TfpgButton;
+    tvVariables: TfpgTreeView;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
     pmProjectTreeMenu: TfpgPopupMenu;
     pmBreakpointMenu: TfpgPopupMenu;
+    pmVarsMenu: TfpgPopupMenu;
+    miVarShowType: TfpgMenuItem;
+    miVarShowScope: TfpgMenuItem;
     pmProfileMenu: TfpgPopupMenu;
     FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
@@ -153,6 +160,9 @@ type
     FDebugAdapter: TIDEDebugAdapter;
     FDebugBuildPending: Boolean;
     FBreakpoints: TBreakpointList;
+    FVarNodeDataList: TList;        { owns all TVarNodeData instances }
+    FVarShowType: Boolean;          { cog option: append ': TypeName' to node text }
+    FVarShowScope: Boolean;         { cog option: show enclosing scope group }
     procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
     procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
     procedure   ToggleBreakpointAtCursor;
@@ -163,6 +173,14 @@ type
     procedure   tvBreakpointsStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
     procedure   tvBreakpointsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   tvBreakpointsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    { Variables panel }
+    procedure   RefreshVariablesTree;
+    procedure   ClearVariablesTree;
+    procedure   AppendVarNode(AParent: TfpgTreeNode; AData: TVarNodeData);
+    procedure   tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
+    procedure   btnVarOptionsClicked(Sender: TObject);
+    procedure   miVarShowTypeClick(Sender: TObject);
+    procedure   miVarShowScopeClick(Sender: TObject);
     procedure   pmBPGoToSourceClick(Sender: TObject);
     procedure   pmBPToggleEnabledClick(Sender: TObject);
     procedure   pmBPRemoveClick(Sender: TObject);
@@ -919,6 +937,7 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearVariablesTree;
     FDebugAdapter.Continue;
     UpdateStatus('Running (debug)...');
     UpdateDebugControls;
@@ -1195,12 +1214,15 @@ begin
     AddOutputLine('Stopped (no source information).');
     UpdateStatus('Paused');
   end;
+  RefreshVariablesTree;
+  pnlTool.ActivePage := tsVariables;
   UpdateDebugControls;
 end;
 
 procedure TMainForm.DebugTerminated(Sender: TObject);
 begin
   ClearAllExecutionLines;
+  ClearVariablesTree;
   FBreakpoints.ClearHandles;
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
@@ -1218,6 +1240,7 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearVariablesTree;
     FDebugAdapter.StepInto;
     UpdateStatus('Stepping (into)...');
     UpdateDebugControls;
@@ -1229,6 +1252,7 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearVariablesTree;
     FDebugAdapter.StepOver;
     UpdateStatus('Stepping (over)...');
     UpdateDebugControls;
@@ -1446,6 +1470,149 @@ begin
   FBreakpoints.Toggle(BP.FileName, BP.Line);
   RefreshBreakpointTree;
   Consumed := True;
+end;
+
+{ ---------------------------------------------------------------------------
+  Variables Panel
+  --------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearVariablesTree;
+var
+  i: Integer;
+begin
+  if Assigned(tvVariables) then
+    tvVariables.RootNode.Clear;
+  if Assigned(FVarNodeDataList) then
+  begin
+    for i := 0 to FVarNodeDataList.Count - 1 do
+      TObject(FVarNodeDataList[i]).Free;
+    FVarNodeDataList.Clear;
+  end;
+end;
+
+{ Append a single TVarNodeData as a child node of AParent.
+  Registers the data object in FVarNodeDataList so it can be freed later. }
+procedure TMainForm.AppendVarNode(AParent: TfpgTreeNode;
+    AData: TVarNodeData);
+var
+  Node: TfpgTreeNode;
+begin
+  Node := AParent.AppendText(
+      BuildVarNodeText(AData.Name, AData.Value, AData.TypeName, FVarShowType));
+  Node.Data := AData;
+  if AData.IsExpandable then
+  begin
+    Node.HasChildren := True;
+    { Placeholder child makes the expand icon visible and signals that
+      the node has not yet been lazily populated. }
+    Node.AppendText('');
+  end;
+  FVarNodeDataList.Add(AData);
+end;
+
+procedure TMainForm.RefreshVariablesTree;
+var
+  CurrentVars, AllVars: TVariableValueArray;
+  CurrentCount, i: Integer;
+  Data: TVarNodeData;
+  ScopeNode: TfpgTreeNode;
+begin
+  tvVariables.BeginUpdate;
+  try
+    ClearVariablesTree;
+
+    if FVarShowScope then
+    begin
+      CurrentVars := FDebugAdapter.GetLocalVariables;
+      AllVars     := FDebugAdapter.GetLocalVariablesWithParents;
+      CurrentCount := Length(CurrentVars);
+    end
+    else
+    begin
+      AllVars      := FDebugAdapter.GetLocalVariables;
+      CurrentCount := Length(AllVars);
+    end;
+
+    { Current-scope variables }
+    for i := 0 to CurrentCount - 1 do
+    begin
+      Data := TVarNodeData.Create(
+          AllVars[i].Name,
+          AllVars[i].Value,
+          AllVars[i].TypeName,
+          AllVars[i].Name);
+      AppendVarNode(tvVariables.RootNode, Data);
+    end;
+
+    { Enclosing-scope variables (only when ShowScope is on and there are any) }
+    if FVarShowScope and (Length(AllVars) > CurrentCount) then
+    begin
+      ScopeNode := tvVariables.RootNode.AppendText('[Enclosing scope]');
+      ScopeNode.TextColor := $808080;
+      for i := CurrentCount to High(AllVars) do
+      begin
+        Data := TVarNodeData.Create(
+            AllVars[i].Name,
+            AllVars[i].Value,
+            AllVars[i].TypeName,
+            AllVars[i].Name);
+        AppendVarNode(ScopeNode, Data);
+      end;
+    end;
+  finally
+    tvVariables.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Data: TVarNodeData;
+  Children: TVarNodeDataArray;
+  i: Integer;
+  PlaceholderNode: TfpgTreeNode;
+begin
+  Data := TVarNodeData(ANode.Data);
+  if Data = nil then
+    Exit;
+  { Check if the node was already populated (has real children, not the placeholder) }
+  PlaceholderNode := ANode.FirstSubNode;
+  if (PlaceholderNode <> nil) and (PlaceholderNode.Text <> '') then
+    Exit;  { already expanded with real content }
+
+  { Remove placeholder }
+  if PlaceholderNode <> nil then
+    ANode.Remove(PlaceholderNode);
+
+  { Parse children from the stored value string }
+  Children := ParseVarChildren(Data.FullPath, Data.Value);
+  tvVariables.BeginUpdate;
+  try
+    for i := 0 to High(Children) do
+      AppendVarNode(ANode, Children[i]);
+  finally
+    tvVariables.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.btnVarOptionsClicked(Sender: TObject);
+begin
+  pmVarsMenu.ShowAt(btnVarOptions, 0, btnVarOptions.ActualHeight);
+end;
+
+procedure TMainForm.miVarShowTypeClick(Sender: TObject);
+begin
+  FVarShowType := not FVarShowType;
+  miVarShowType.Checked := FVarShowType;
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
+end;
+
+procedure TMainForm.miVarShowScopeClick(Sender: TObject);
+begin
+  FVarShowScope := not FVarShowScope;
+  miVarShowScope.Checked := FVarShowScope;
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
 end;
 
 procedure TMainForm.pmBPGoToSourceClick(Sender: TObject);
@@ -3599,6 +3766,9 @@ begin
   FHighlightCache := THighlighterCache.Create;
   FCursorHistory := TCursorHistory.Create(50);
   FBreakpoints := TBreakpointList.Create;
+  FVarNodeDataList := TList.Create;
+  FVarShowType  := True;
+  FVarShowScope := True;
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -3620,6 +3790,8 @@ begin
   FreeAndNil(FHighlightCache);
   FreeAndNil(FCursorHistory);
   FreeAndNil(FBreakpoints);
+  ClearVariablesTree;
+  FreeAndNil(FVarNodeDataList);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);
@@ -3923,6 +4095,36 @@ begin
     OnStateImageClicked := @tvBreakpointsStateImageClicked;
   end;
 
+  tsVariables := TfpgTabSheet.Create(pnlTool);
+  with tsVariables do
+  begin
+    Name := 'tsVariables';
+    Text := 'Variables';
+  end;
+
+  { Thin toolbar row above the variables tree for the options button.
+    Created first so HandleAlignments processes alTop before alClient. }
+  btnVarOptions := TfpgButton.Create(tsVariables);
+  with btnVarOptions do
+  begin
+    Name    := 'btnVarOptions';
+    Align   := alTop;
+    Height  := 22;
+    Text    := 'Options...';
+    Flat    := True;
+    Hint    := 'Show/hide type names and enclosing scope variables';
+    OnClick := @btnVarOptionsClicked;
+  end;
+
+  tvVariables := TfpgTreeView.Create(tsVariables);
+  with tvVariables do
+  begin
+    Name      := 'tvVariables';
+    Align     := alClient;
+    FontDesc  := '#Label1';
+    OnExpand  := @tvVariablesExpand;
+  end;
+
   { Vertical splitter — between tool panel and editor }
   SplitterV := TfpgMigSplitter.Create(pnlClientArea);
   with SplitterV do
@@ -4079,6 +4281,13 @@ begin
   begin
     AddMenuItem('Show Dependency Tree', '', @pmTreeDependencyTreeClick);
   end;
+
+  { Options menu for the Variables panel }
+  pmVarsMenu := TfpgPopupMenu.Create(self);
+  miVarShowType := pmVarsMenu.AddMenuItem('Show Type', '', @miVarShowTypeClick);
+  miVarShowType.Checked := FVarShowType;
+  miVarShowScope := pmVarsMenu.AddMenuItem('Show Enclosing Scope', '', @miVarShowScopeClick);
+  miVarShowScope.Checked := FVarShowScope;
 
   { Context menu for breakpoints panel }
   pmBreakpointMenu := TfpgPopupMenu.Create(self);

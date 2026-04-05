@@ -85,6 +85,7 @@ type
     procedure Pause;
 
     function  GetLocalVariables: TVariableValueArray;
+    function  GetLocalVariablesWithParents: TVariableValueArray;
     function  GetCallStack(ALimit: Integer = 0): TStringArray;
     function  EvaluateExpression(const AExpr: String): TVariableValue;
 
@@ -152,6 +153,11 @@ begin
 end;
 
 function TIDEDebugAdapter.GetLocalVariables: TVariableValueArray;
+begin
+  SetLength(Result, 0);
+end;
+
+function TIDEDebugAdapter.GetLocalVariablesWithParents: TVariableValueArray;
 begin
   SetLength(Result, 0);
 end;

@@ -100,6 +100,7 @@ type
       thread, these will need to be routed through the worker thread
       when we implement the Variables/Call Stack panels (steps 5.6-5.8). }
     function  GetLocalVariables: TVariableValueArray;
+    function  GetLocalVariablesWithParents: TVariableValueArray;
     function  GetCallStack(ALimit: Integer = 0): TStringArray;
     function  EvaluateExpression(const AExpr: String): TVariableValue;
 
@@ -355,6 +356,14 @@ function TIDEDebugAdapter.GetLocalVariables: TVariableValueArray;
 begin
   if (FState = idsPaused) and (FEngine <> nil) then
     Result := FEngine.GetLocalVariables
+  else
+    SetLength(Result, 0);
+end;
+
+function TIDEDebugAdapter.GetLocalVariablesWithParents: TVariableValueArray;
+begin
+  if (FState = idsPaused) and (FEngine <> nil) then
+    Result := FEngine.GetLocalVariablesWithParents
   else
     SetLength(Result, 0);
 end;

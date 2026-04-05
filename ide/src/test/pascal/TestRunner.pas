@@ -38,7 +38,8 @@ uses
   ide.test.pascal.tokeniser,
   ide.test.runner,
   ide.test.debug.adapter,
-  ide.test.breakpoint;
+  ide.test.breakpoint,
+  ide.test.variables;
 
 var
   Application: TTestRunner;
