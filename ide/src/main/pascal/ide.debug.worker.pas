@@ -31,8 +31,10 @@ unit ide.debug.worker;
   uses ide.debug.adapter.stub instead and this unit is never compiled. }
 {$I ide.debug.config.inc}
 {$IFNDEF HAS_OPDF_DEBUG}
-  {$FATAL ide.debug.worker requires FPC 3.3.x or later (OPDF debug support)}
-{$ENDIF}
+  {. $FATAL ide.debug.worker requires FPC 3.3.x or later (OPDF debug support)}
+  interface
+  implementation
+{$ELSE}
 
 interface
 
@@ -256,4 +258,5 @@ begin
   end;
 end;
 
+{$ENDIF}
 end.
