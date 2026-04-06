@@ -60,6 +60,10 @@ type
     StopFile: String;
     StopLine: Integer;
     CurrentAddress: QWord;
+    { Variables collected while still on the ptrace owner thread.
+      Populated whenever EngineState = dsPaused. }
+    LocalVars:            TVariableValueArray;
+    LocalVarsWithParents: TVariableValueArray;
   end;
 
   TDebugWorkerThread = class(TThread)
@@ -170,6 +174,8 @@ begin
   FResult.StopFile := '';
   FResult.StopLine := 0;
   FResult.CurrentAddress := 0;
+  SetLength(FResult.LocalVars, 0);
+  SetLength(FResult.LocalVarsWithParents, 0);
 
   if FResult.EngineState = dsPaused then
   begin
@@ -180,6 +186,12 @@ begin
       FResult.StopFile := LineInfo.FileName;
       FResult.StopLine := Integer(LineInfo.LineNumber);
     end;
+    { Collect local variables while still on the ptrace owner thread.
+      These are exposed via TIDEDebugAdapter.LastLocal* properties and
+      consumed by RefreshVariablesTree on the main thread — no further
+      ptrace calls needed from the main thread. }
+    FResult.LocalVars            := FEngine.GetLocalVariables;
+    FResult.LocalVarsWithParents := FEngine.GetLocalVariablesWithParents;
   end;
 end;
 

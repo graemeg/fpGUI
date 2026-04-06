@@ -23,7 +23,7 @@
     <module>../framework</module>
   </moduleDependencies>
 
-<!--
+
   <dependencies>
     <dependency>
       <name>opdf-lib</name>
@@ -38,6 +38,6 @@
       <version>0.3.1</version>
     </dependency>
   </dependencies>
--->
+
 
 </project>

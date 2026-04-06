@@ -1512,7 +1512,7 @@ end;
 
 procedure TMainForm.RefreshVariablesTree;
 var
-  CurrentVars, AllVars: TVariableValueArray;
+  AllVars: TVariableValueArray;
   CurrentCount, i: Integer;
   Data: TVarNodeData;
   ScopeNode: TfpgTreeNode;
@@ -1521,15 +1521,16 @@ begin
   try
     ClearVariablesTree;
 
+    { Use variables pre-collected on the ptrace owner thread — never call
+      GetLocalVariables* directly from the main thread (ptrace violation). }
     if FVarShowScope then
     begin
-      CurrentVars := FDebugAdapter.GetLocalVariables;
-      AllVars     := FDebugAdapter.GetLocalVariablesWithParents;
-      CurrentCount := Length(CurrentVars);
+      AllVars      := FDebugAdapter.LastLocalVarsWithParents;
+      CurrentCount := Length(FDebugAdapter.LastLocalVars);
     end
     else
     begin
-      AllVars      := FDebugAdapter.GetLocalVariables;
+      AllVars      := FDebugAdapter.LastLocalVars;
       CurrentCount := Length(AllVars);
     end;
 

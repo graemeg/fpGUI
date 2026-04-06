@@ -74,6 +74,9 @@ type
     FOnOutput: TDebugOutputEvent;
     FOnBreakpointSet: TBreakpointSetEvent;
     FPendingBPTag: Integer;
+    { Cached from the last pause — collected on the ptrace owner thread }
+    FLastLocalVars:            TVariableValueArray;
+    FLastLocalVarsWithParents: TVariableValueArray;
     procedure HandleCommandDone;
     procedure HandleBPDone;
     procedure SendOutput(const AMsg: String);
@@ -117,6 +120,10 @@ type
 
     { State }
     property State: TIDEDebugState read FState;
+    { Variables from the last pause — collected on the ptrace owner thread,
+      safe to read from the main thread inside a DebugStopped handler. }
+    property LastLocalVars:            TVariableValueArray read FLastLocalVars;
+    property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property Engine: TDebuggerEngine read FEngine;
     property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
     property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated;
@@ -249,6 +256,8 @@ begin
   if R.EngineState = dsTerminated then
   begin
     FState := idsTerminated;
+    SetLength(FLastLocalVars, 0);
+    SetLength(FLastLocalVarsWithParents, 0);
     SendOutput('Process terminated.');
     if Assigned(FOnTerminated) then
       FOnTerminated(Self);
@@ -258,6 +267,8 @@ begin
   if R.EngineState = dsPaused then
   begin
     FState := idsPaused;
+    FLastLocalVars            := R.LocalVars;
+    FLastLocalVarsWithParents := R.LocalVarsWithParents;
     if Assigned(FOnStopped) then
       FOnStopped(Self, FState, R.StopFile, R.StopLine);
   end

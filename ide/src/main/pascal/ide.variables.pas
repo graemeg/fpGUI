@@ -1,4 +1,4 @@
-{
+(*
     fpGUI IDE - Variables Panel Logic
 
     Copyright (C) 2026 See the file AUTHORS.txt, included in this
@@ -21,7 +21,7 @@
         Class  : TypeName(@$ADDR) { Field1: val1, Field2: val2 }
         Nil    : nil
         Simple : the value directly (integer, string, boolean, ...)
-}
+*)
 unit ide.variables;
 
 {$mode objfpc}{$H+}
@@ -53,15 +53,15 @@ type
 function BuildVarNodeText(const AName, AValue, ATypeName: string;
     AShowType: Boolean): string;
 
-{ Returns True when AValue represents an expandable composite (record or
-  class) — i.e. it contains the substring ' { '. }
+(* Returns True when AValue represents an expandable composite (record or
+  class) — i.e. it contains the substring ' { '. *)
 function VarValueIsExpandable(const AValue: string): Boolean;
 
-{ Extracts the Pascal type name embedded at the start of a composite value
+(* Extracts the Pascal type name embedded at the start of a composite value
   string.  Returns an empty string for simple (non-composite) values.
     'TMyRec { X: 1, Y: 2 }'           -> 'TMyRec'
     'TMyClass(@$1234ABCD) { F: 1 }'   -> 'TMyClass'
-    '42'                               -> ''              }
+    '42'                               -> ''              *)
 function ExtractVarTypeName(const AValue: string): string;
 
 { Parse the direct child entries from a composite value string.
@@ -125,9 +125,9 @@ end;
   ParseVarChildren helpers
   --------------------------------------------------------------------------- }
 
-{ Extract the text between the outermost { } of a composite value string.
+(* Extract the text between the outermost { } of a composite value string.
   Returns True and sets AContent when braces are found and balanced.
-  Returns False for simple values. }
+  Returns False for simple values. *)
 function ExtractBraceContent(const AValue: string; out AContent: string): Boolean;
 var
   StartPos, EndPos, Depth, i: Integer;
@@ -159,9 +159,9 @@ begin
   Result   := True;
 end;
 
-{ Split AContent into top-level field entries, respecting nested { } and
+(* Split AContent into top-level field entries, respecting nested { } and
   Pascal string literals delimited by single quotes.
-  Entries are separated by ', ' at brace/string depth zero. }
+  Entries are separated by ', ' at brace/string depth zero. *)
 procedure SplitFieldEntries(const AContent: string; AResult: TStringList);
 var
   i, Len, BraceDepth: Integer;

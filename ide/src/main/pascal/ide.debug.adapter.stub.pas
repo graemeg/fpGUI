@@ -64,7 +64,9 @@ type
   { TIDEDebugAdapter — stub, all methods are no-ops }
   TIDEDebugAdapter = class(TObject)
   private
-    FState:          TIDEDebugState;
+    FState:                    TIDEDebugState;
+    FLastLocalVars:            TVariableValueArray;
+    FLastLocalVarsWithParents: TVariableValueArray;
     FOnStopped:      TDebugStopEvent;
     FOnTerminated:   TNotifyEvent;
     FOnOutput:       TDebugOutputEvent;
@@ -95,6 +97,8 @@ type
     procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
 
     property State:          TIDEDebugState  read FState;
+    property LastLocalVars:            TVariableValueArray read FLastLocalVars;
+    property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property OnStopped:      TDebugStopEvent read FOnStopped      write FOnStopped;
     property OnTerminated:   TNotifyEvent    read FOnTerminated    write FOnTerminated;
     property OnOutput:       TDebugOutputEvent read FOnOutput      write FOnOutput;
