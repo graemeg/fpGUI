@@ -268,8 +268,8 @@ begin
   end;
 
   { Token styles — IntelliJ IDEA-inspired }
-  Result.TokenStyles[hcKeyword1]  := MakeTokenStyle(TfpgColor($ff000080), [tsfBold]);   // dark blue, bold
-  Result.TokenStyles[hcKeyword2]  := MakeTokenStyle(TfpgColor($ff000080), [tsfBold]);
+  Result.TokenStyles[hcKeyword1]  := MakeTokenStyle(TfpgColor($ff000080), [tsfBold]);   // dark blue, bold — reserved words
+  Result.TokenStyles[hcKeyword2]  := MakeTokenStyle(TfpgColor($ff000080), []);           // dark blue, plain — modifiers/directives
   Result.TokenStyles[hcKeyword3]  := MakeTokenStyle(TfpgColor($ff000080), []);
   Result.TokenStyles[hcIdentifier] := MakeTokenStyle(clBlack, []);
   Result.TokenStyles[hcString1]   := MakeTokenStyle(TfpgColor($ff008000), []);           // green
@@ -310,8 +310,8 @@ begin
 
   { Token styles — Darcula-inspired }
   Result.TokenStyles[hcWhitespace] := MakeTokenStyle(TfpgColor($ffA9B7C6), []);
-  Result.TokenStyles[hcKeyword1]  := MakeTokenStyle(TfpgColor($ffCC7832), [tsfBold]);   // orange, bold
-  Result.TokenStyles[hcKeyword2]  := MakeTokenStyle(TfpgColor($ffCC7832), [tsfBold]);
+  Result.TokenStyles[hcKeyword1]  := MakeTokenStyle(TfpgColor($ffCC7832), [tsfBold]);   // orange, bold — reserved words
+  Result.TokenStyles[hcKeyword2]  := MakeTokenStyle(TfpgColor($ffCC7832), []);           // orange, plain — modifiers/directives
   Result.TokenStyles[hcKeyword3]  := MakeTokenStyle(TfpgColor($ffCC7832), []);
   Result.TokenStyles[hcIdentifier] := MakeTokenStyle(TfpgColor($ffA9B7C6), []);         // light grey-blue
   Result.TokenStyles[hcString1]   := MakeTokenStyle(TfpgColor($ff6A8759), []);           // muted green

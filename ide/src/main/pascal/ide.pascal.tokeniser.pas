@@ -37,6 +37,7 @@ type
     fptkLineEnding,
     fptkIdentifier,
     fptkKeyword,
+    fptkModifier,     // context-sensitive directives: private, override, stdcall, …
     fptkNumber,
     fptkString,
     fptkComment,
@@ -86,6 +87,12 @@ type
 
 { Returns True if AText is a Pascal keyword (case-insensitive). }
 function FpgPasIsKeyword(const AText: string): Boolean;
+
+{ Returns True if AText is a Pascal modifier/directive (case-insensitive).
+  Modifiers are context-sensitive words that are not reserved but carry
+  structural meaning: visibility (private, protected), method qualifiers
+  (override, virtual, abstract), calling conventions (stdcall, cdecl), etc. }
+function FpgPasIsModifier(const AText: string): Boolean;
 
 
 implementation
@@ -138,11 +145,60 @@ begin
   end;
 end;
 
+const
+  { Sorted list of context-sensitive Pascal modifier/directive words.
+    These are not reserved words but have structural meaning in class,
+    object, interface, and procedure declarations. }
+  ModifierCount = 33;
+  Modifiers: array[0..ModifierCount - 1] of string = (
+    'ABSTRACT', 'ASSEMBLER',
+    'CDECL',
+    'DEPRECATED', 'DISPID', 'DYNAMIC',
+    'EXPERIMENTAL', 'EXPORT', 'EXTERNAL',
+    'FAR', 'FINAL', 'FORWARD',
+    'INTERRUPT', 'IOCHECK',
+    'MESSAGE',
+    'NEAR', 'NORETURN',
+    'OVERLOAD', 'OVERRIDE',
+    'PASCAL', 'PLATFORM', 'PRIVATE', 'PROTECTED', 'PUBLIC', 'PUBLISHED',
+    'REGISTER', 'REINTRODUCE',
+    'SAFECALL', 'STDCALL', 'STRICT',
+    'UNIMPLEMENTED',
+    'VARARGS', 'VIRTUAL'
+  );
+
+function BinarySearchModifier(const AText: string): Boolean;
+var
+  Lo, Hi, Mid, Cmp: Integer;
+begin
+  Result := False;
+  Lo := 0;
+  Hi := ModifierCount - 1;
+  while Lo <= Hi do
+  begin
+    Mid := (Lo + Hi) shr 1;
+    Cmp := CompareStr(AText, Modifiers[Mid]);
+    if Cmp < 0 then
+      Hi := Mid - 1
+    else if Cmp > 0 then
+      Lo := Mid + 1
+    else
+      Exit(True);
+  end;
+end;
+
 function FpgPasIsKeyword(const AText: string): Boolean;
 begin
   if AText = '' then
     Exit(False);
   Result := BinarySearchKeyword(UpCase(AText));
+end;
+
+function FpgPasIsModifier(const AText: string): Boolean;
+begin
+  if AText = '' then
+    Exit(False);
+  Result := BinarySearchModifier(UpCase(AText));
 end;
 
 { TFpgPascalTokeniser }
@@ -218,13 +274,18 @@ begin
 end;
 
 procedure TFpgPascalTokeniser.ReadIdentifierOrKeyword;
+var
+  Upper: string;
 begin
   while (FPos <= Length(FSource)) and
         (FSource[FPos] in ['A'..'Z', 'a'..'z', '0'..'9', '_']) do
     Advance;
   FToken.Len := FPos - FToken.TextStart;
-  if BinarySearchKeyword(UpCase(TokenText)) then
+  Upper := UpCase(TokenText);
+  if BinarySearchKeyword(Upper) then
     FToken.Kind := fptkKeyword
+  else if BinarySearchModifier(Upper) then
+    FToken.Kind := fptkModifier
   else
     FToken.Kind := fptkIdentifier;
 end;
