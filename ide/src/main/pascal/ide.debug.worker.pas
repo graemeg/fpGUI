@@ -179,7 +179,14 @@ begin
 
   if FResult.EngineState = dsPaused then
   begin
-    Addr := FProcessController.GetCurrentAddress;
+    { Use the saved breakpoint address (RIP before single-step) for correct
+      line resolution. After HandleBreakpointHit single-steps the tracee,
+      GetCurrentAddress returns the address of the *next* instruction, which
+      maps to the wrong source line. GetLastBreakpointAddress returns the
+      original INT3 address — consistent with how pdr_engine.pas resolves lines. }
+    Addr := FProcessController.GetLastBreakpointAddress;
+    if Addr = 0 then
+      Addr := FProcessController.GetCurrentAddress;
     FResult.CurrentAddress := Addr;
     if FDebugInfoReader.FindLineByAddress(Addr, LineInfo) then
     begin
