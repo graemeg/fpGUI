@@ -119,6 +119,11 @@ type
     procedure SetBreakpointLive(const ALocation: String; ATag: Integer);
     procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
 
+    { Variable collection flags — propagated to the worker thread so it only
+      fetches what the UI will display. Safe to call at any time. }
+    procedure SetVarCollectScope(AValue: Boolean);
+    procedure SetVarCollectGlobals(AValue: Boolean);
+
     { State }
     property State: TIDEDebugState read FState;
     { Variables from the last pause — collected on the ptrace owner thread,
@@ -365,6 +370,18 @@ begin
      (FEngine.AttachedPID > 0) then
     FpKill(FEngine.AttachedPID, SIGSTOP);
   {$ENDIF}
+end;
+
+procedure TIDEDebugAdapter.SetVarCollectScope(AValue: Boolean);
+begin
+  if FWorkerThread <> nil then
+    FWorkerThread.CollectScope := AValue;
+end;
+
+procedure TIDEDebugAdapter.SetVarCollectGlobals(AValue: Boolean);
+begin
+  if FWorkerThread <> nil then
+    FWorkerThread.CollectGlobals := AValue;
 end;
 
 function TIDEDebugAdapter.GetLocalVariables: TVariableValueArray;

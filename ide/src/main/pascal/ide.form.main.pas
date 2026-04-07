@@ -135,6 +135,7 @@ type
     pmVarsMenu: TfpgPopupMenu;
     miVarShowType: TfpgMenuItem;
     miVarShowScope: TfpgMenuItem;
+    miVarShowGlobals: TfpgMenuItem;
     pmProfileMenu: TfpgPopupMenu;
     FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
@@ -163,6 +164,7 @@ type
     FVarNodeDataList: TList;        { owns all TVarNodeData instances }
     FVarShowType: Boolean;          { cog option: append ': TypeName' to node text }
     FVarShowScope: Boolean;         { cog option: show enclosing scope group }
+    FVarShowGlobals: Boolean;       { cog option: show globals group }
     procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
     procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
     procedure   ToggleBreakpointAtCursor;
@@ -181,6 +183,7 @@ type
     procedure   btnVarOptionsClicked(Sender: TObject);
     procedure   miVarShowTypeClick(Sender: TObject);
     procedure   miVarShowScopeClick(Sender: TObject);
+    procedure   miVarShowGlobalsClick(Sender: TObject);
     procedure   pmBPGoToSourceClick(Sender: TObject);
     procedure   pmBPToggleEnabledClick(Sender: TObject);
     procedure   pmBPRemoveClick(Sender: TObject);
@@ -1058,6 +1061,9 @@ begin
     FDebugAdapter.OnTerminated := @DebugTerminated;
     FDebugAdapter.OnOutput := @DebugOutput;
     FDebugAdapter.OnBreakpointSet := @HandleBreakpointSet;
+    { Push current display options so the worker collects only what's needed }
+    FDebugAdapter.SetVarCollectScope(FVarShowScope);
+    FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
   end;
 
   { Start the debug session }
@@ -1574,8 +1580,8 @@ begin
       end;
     end;
 
-    { Global variables }
-    if Length(GlobalVars) > 0 then
+    { Global variables (only when ShowGlobals is on and engine collected them) }
+    if FVarShowGlobals and (Length(GlobalVars) > 0) then
     begin
       GlobalsNode := tvVariables.RootNode.AppendText('[Globals]');
       GlobalsNode.Collapsed := False;
@@ -1642,6 +1648,16 @@ procedure TMainForm.miVarShowScopeClick(Sender: TObject);
 begin
   FVarShowScope := not FVarShowScope;
   miVarShowScope.Checked := FVarShowScope;
+  FDebugAdapter.SetVarCollectScope(FVarShowScope);
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
+end;
+
+procedure TMainForm.miVarShowGlobalsClick(Sender: TObject);
+begin
+  FVarShowGlobals := not FVarShowGlobals;
+  miVarShowGlobals.Checked := FVarShowGlobals;
+  FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
   if FDebugAdapter.State = idsPaused then
     RefreshVariablesTree;
 end;
@@ -2618,6 +2634,9 @@ begin
     Session.ActiveTab := pcEditor.ActivePageIndex;
     Session.ToolPanelWidth := pnlTool.PreferredSize.W;
     Session.BottomPanelHeight := pnlWindow.PreferredSize.H;
+    Session.VarShowType    := FVarShowType;
+    Session.VarShowScope   := FVarShowScope;
+    Session.VarShowGlobals := FVarShowGlobals;
     if GProject.ProjectFormat = pfPasBuild then
       Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
     for I := 0 to pcEditor.PageCount - 1 do
@@ -2700,6 +2719,19 @@ begin
         pnlWindow.PreferredSize := fpgSize(pnlWindow.PreferredSize.W, Session.BottomPanelHeight);
       if (Session.ToolPanelWidth > 0) or (Session.BottomPanelHeight > 0) then
         pnlClientArea.Realign;
+      { Restore Variables panel display options }
+      FVarShowType    := Session.VarShowType;
+      FVarShowScope   := Session.VarShowScope;
+      FVarShowGlobals := Session.VarShowGlobals;
+      miVarShowType.Checked    := FVarShowType;
+      miVarShowScope.Checked   := FVarShowScope;
+      miVarShowGlobals.Checked := FVarShowGlobals;
+      { FDebugAdapter is created lazily at session start — push flags then }
+      if FDebugAdapter <> nil then
+      begin
+        FDebugAdapter.SetVarCollectScope(FVarShowScope);
+        FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
+      end;
     end;
   finally
     Session.Free;
@@ -3798,8 +3830,9 @@ begin
   FCursorHistory := TCursorHistory.Create(50);
   FBreakpoints := TBreakpointList.Create;
   FVarNodeDataList := TList.Create;
-  FVarShowType  := True;
-  FVarShowScope := True;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -4319,6 +4352,8 @@ begin
   miVarShowType.Checked := FVarShowType;
   miVarShowScope := pmVarsMenu.AddMenuItem('Show Enclosing Scope', '', @miVarShowScopeClick);
   miVarShowScope.Checked := FVarShowScope;
+  miVarShowGlobals := pmVarsMenu.AddMenuItem('Show Globals', '', @miVarShowGlobalsClick);
+  miVarShowGlobals.Checked := FVarShowGlobals;
 
   { Context menu for breakpoints panel }
   pmBreakpointMenu := TfpgPopupMenu.Create(self);

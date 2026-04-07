@@ -82,6 +82,10 @@ type
     FBPLocation: String;
     FBPHandle: TBreakpointHandle;
     FOnBPDone: TThreadMethod;
+    { Collection flags — written from main thread, read in CollectStopInfo.
+      Safe without locks: only written when the worker is blocked on ptrace. }
+    FCollectScope: Boolean;
+    FCollectGlobals: Boolean;
     procedure CollectStopInfo;
   protected
     procedure Execute; override;
@@ -105,6 +109,9 @@ type
     property LastResult: TDebugWorkerResult read FResult;
     { Handle from the last dcSetBreakpoint command — read after OnBPDone fires }
     property LastBPHandle: TBreakpointHandle read FBPHandle;
+    { Collection flags — set from the main thread to control what CollectStopInfo fetches }
+    property CollectScope: Boolean read FCollectScope write FCollectScope;
+    property CollectGlobals: Boolean read FCollectGlobals write FCollectGlobals;
   end;
 
 implementation
@@ -122,7 +129,9 @@ begin
   FProcessController := AProcessController;
   FDebugInfoReader := ADebugInfoReader;
   FOnCommandDone := AOnCommandDone;
-  FCommand := dcNone;
+  FCommand        := dcNone;
+  FCollectScope   := True;
+  FCollectGlobals := True;
   FCommandEvent := RTLEventCreate;
 end;
 
@@ -198,10 +207,14 @@ begin
     { Collect variables while still on the ptrace owner thread.
       These are exposed via TIDEDebugAdapter properties and consumed by
       RefreshVariablesTree on the main thread — no further ptrace calls
-      needed from the main thread. }
-    FResult.LocalVars            := FEngine.GetLocalVariables;
-    FResult.LocalVarsWithParents := FEngine.GetLocalVariablesWithParents;
-    FResult.GlobalVars           := FEngine.GetGlobalVariables;
+      needed from the main thread. Only fetch what the UI will display. }
+    FResult.LocalVars := FEngine.GetLocalVariables;
+    if FCollectScope then
+      FResult.LocalVarsWithParents := FEngine.GetLocalVariablesWithParents
+    else
+      FResult.LocalVarsWithParents := FResult.LocalVars;
+    if FCollectGlobals then
+      FResult.GlobalVars := FEngine.GetGlobalVariables;
   end;
 end;
 

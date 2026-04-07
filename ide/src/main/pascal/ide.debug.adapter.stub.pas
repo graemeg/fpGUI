@@ -96,6 +96,8 @@ type
     function  RemoveBreakpoint(AHandle: TBreakpointHandle): Boolean;
     procedure SetBreakpointLive(const ALocation: String; ATag: Integer);
     procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
+    procedure SetVarCollectScope(AValue: Boolean);
+    procedure SetVarCollectGlobals(AValue: Boolean);
 
     property State:          TIDEDebugState  read FState;
     property LastLocalVars:            TVariableValueArray read FLastLocalVars;
@@ -195,6 +197,14 @@ begin
 end;
 
 procedure TIDEDebugAdapter.RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
+begin
+end;
+
+procedure TIDEDebugAdapter.SetVarCollectScope(AValue: Boolean);
+begin
+end;
+
+procedure TIDEDebugAdapter.SetVarCollectGlobals(AValue: Boolean);
 begin
 end;
 

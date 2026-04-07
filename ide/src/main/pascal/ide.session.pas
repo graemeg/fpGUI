@@ -44,6 +44,9 @@ type
     FActiveProfiles: TStringList;
     FToolPanelWidth: Integer;
     FBottomPanelHeight: Integer;
+    FVarShowType: Boolean;
+    FVarShowScope: Boolean;
+    FVarShowGlobals: Boolean;
     function GetOpenFileCount: Integer;
     function GetOpenFile(AIndex: Integer): TOpenFileInfo;
   public
@@ -61,6 +64,9 @@ type
     property ActiveProfiles: TStringList read FActiveProfiles;
     property ToolPanelWidth: Integer read FToolPanelWidth write FToolPanelWidth;
     property BottomPanelHeight: Integer read FBottomPanelHeight write FBottomPanelHeight;
+    property VarShowType: Boolean read FVarShowType write FVarShowType;
+    property VarShowScope: Boolean read FVarShowScope write FVarShowScope;
+    property VarShowGlobals: Boolean read FVarShowGlobals write FVarShowGlobals;
     property SessionFile: TfpgString read FSessionFile;
   end;
 
@@ -81,6 +87,9 @@ begin
   FActiveTab := -1;
   FToolPanelWidth := -1;
   FBottomPanelHeight := -1;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
   FActiveProfiles := TStringList.Create;
   FActiveProfiles.Delimiter := ',';
   FActiveProfiles.StrictDelimiter := True;
@@ -110,6 +119,9 @@ begin
   FActiveProfiles.Clear;
   FToolPanelWidth := -1;
   FBottomPanelHeight := -1;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
 end;
 
 procedure TIDESession.AddOpenFile(const AAbsPath: TfpgString;
@@ -174,6 +186,12 @@ begin
         FToolPanelWidth := SessionObj.Integers['toolPanelWidth'];
       if SessionObj.IndexOfName('bottomPanelHeight') >= 0 then
         FBottomPanelHeight := SessionObj.Integers['bottomPanelHeight'];
+      if SessionObj.IndexOfName('varShowType') >= 0 then
+        FVarShowType := SessionObj.Booleans['varShowType'];
+      if SessionObj.IndexOfName('varShowScope') >= 0 then
+        FVarShowScope := SessionObj.Booleans['varShowScope'];
+      if SessionObj.IndexOfName('varShowGlobals') >= 0 then
+        FVarShowGlobals := SessionObj.Booleans['varShowGlobals'];
     end;
 
     { Open files }
@@ -240,6 +258,9 @@ begin
       SessionObj.Add('toolPanelWidth', FToolPanelWidth);
     if FBottomPanelHeight > 0 then
       SessionObj.Add('bottomPanelHeight', FBottomPanelHeight);
+    SessionObj.Add('varShowType',    FVarShowType);
+    SessionObj.Add('varShowScope',   FVarShowScope);
+    SessionObj.Add('varShowGlobals', FVarShowGlobals);
     RootObj.Add('session', SessionObj);
 
     { Open files }
