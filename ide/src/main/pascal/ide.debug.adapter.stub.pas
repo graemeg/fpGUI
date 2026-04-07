@@ -67,6 +67,7 @@ type
     FState:                    TIDEDebugState;
     FLastLocalVars:            TVariableValueArray;
     FLastLocalVarsWithParents: TVariableValueArray;
+    FLastGlobalVars:           TVariableValueArray;
     FOnStopped:      TDebugStopEvent;
     FOnTerminated:   TNotifyEvent;
     FOnOutput:       TDebugOutputEvent;
@@ -99,6 +100,7 @@ type
     property State:          TIDEDebugState  read FState;
     property LastLocalVars:            TVariableValueArray read FLastLocalVars;
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
+    property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
     property OnStopped:      TDebugStopEvent read FOnStopped      write FOnStopped;
     property OnTerminated:   TNotifyEvent    read FOnTerminated    write FOnTerminated;
     property OnOutput:       TDebugOutputEvent read FOnOutput      write FOnOutput;

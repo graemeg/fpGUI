@@ -1513,9 +1513,10 @@ end;
 procedure TMainForm.RefreshVariablesTree;
 var
   AllVars: TVariableValueArray;
+  GlobalVars: TVariableValueArray;
   CurrentCount, i: Integer;
   Data: TVarNodeData;
-  ScopeNode: TfpgTreeNode;
+  LocalsNode, ScopeNode, GlobalsNode: TfpgTreeNode;
 begin
   tvVariables.BeginUpdate;
   try
@@ -1534,6 +1535,18 @@ begin
       CurrentCount := Length(AllVars);
     end;
 
+    GlobalVars := FDebugAdapter.LastGlobalVars;
+
+    { Add a [Locals] group node whenever there are local variables or globals
+      (so the grouping is always consistent once we have anything to show). }
+    if (CurrentCount > 0) or (Length(GlobalVars) > 0) then
+    begin
+      LocalsNode := tvVariables.RootNode.AppendText('[Locals]');
+      LocalsNode.Collapsed := False;
+    end
+    else
+      LocalsNode := tvVariables.RootNode;
+
     { Current-scope variables }
     for i := 0 to CurrentCount - 1 do
     begin
@@ -1542,13 +1555,13 @@ begin
           AllVars[i].Value,
           AllVars[i].TypeName,
           AllVars[i].Name);
-      AppendVarNode(tvVariables.RootNode, Data);
+      AppendVarNode(LocalsNode, Data);
     end;
 
     { Enclosing-scope variables (only when ShowScope is on and there are any) }
     if FVarShowScope and (Length(AllVars) > CurrentCount) then
     begin
-      ScopeNode := tvVariables.RootNode.AppendText('[Enclosing scope]');
+      ScopeNode := LocalsNode.AppendText('[Enclosing scope]');
       ScopeNode.TextColor := $808080;
       for i := CurrentCount to High(AllVars) do
       begin
@@ -1558,6 +1571,23 @@ begin
             AllVars[i].TypeName,
             AllVars[i].Name);
         AppendVarNode(ScopeNode, Data);
+      end;
+    end;
+
+    { Global variables }
+    if Length(GlobalVars) > 0 then
+    begin
+      GlobalsNode := tvVariables.RootNode.AppendText('[Globals]');
+      GlobalsNode.Collapsed := False;
+      GlobalsNode.TextColor := $808080;
+      for i := 0 to High(GlobalVars) do
+      begin
+        Data := TVarNodeData.Create(
+            GlobalVars[i].Name,
+            GlobalVars[i].Value,
+            GlobalVars[i].TypeName,
+            GlobalVars[i].Name);
+        AppendVarNode(GlobalsNode, Data);
       end;
     end;
   finally
