@@ -39,7 +39,8 @@ uses
   ide.test.runner,
   ide.test.debug.adapter,
   ide.test.breakpoint,
-  ide.test.variables;
+  ide.test.variables,
+  ide.test.callstack;
 
 var
   Application: TTestRunner;

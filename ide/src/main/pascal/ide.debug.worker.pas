@@ -65,6 +65,9 @@ type
     LocalVars:            TVariableValueArray;
     LocalVarsWithParents: TVariableValueArray;
     GlobalVars:           TVariableValueArray;
+    { Call stack collected while still on the ptrace owner thread.
+      Each string is '#N FuncName at file.pas:line (0xADDR)' or shorter. }
+    CallStack:            TStringArray;
   end;
 
   TDebugWorkerThread = class(TThread)
@@ -187,6 +190,7 @@ begin
   SetLength(FResult.LocalVars, 0);
   SetLength(FResult.LocalVarsWithParents, 0);
   SetLength(FResult.GlobalVars, 0);
+  SetLength(FResult.CallStack, 0);
 
   if FResult.EngineState = dsPaused then
   begin
@@ -215,6 +219,8 @@ begin
       FResult.LocalVarsWithParents := FResult.LocalVars;
     if FCollectGlobals then
       FResult.GlobalVars := FEngine.GetGlobalVariables;
+    { Collect call stack while still on the ptrace owner thread }
+    FResult.CallStack := FEngine.GetCallStack(0);
   end;
 end;
 

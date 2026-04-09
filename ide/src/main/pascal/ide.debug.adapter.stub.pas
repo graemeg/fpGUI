@@ -68,6 +68,7 @@ type
     FLastLocalVars:            TVariableValueArray;
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
+    FLastCallStack:            TStringArray;
     FOnStopped:      TDebugStopEvent;
     FOnTerminated:   TNotifyEvent;
     FOnOutput:       TDebugOutputEvent;
@@ -103,6 +104,7 @@ type
     property LastLocalVars:            TVariableValueArray read FLastLocalVars;
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
+    property LastCallStack:            TStringArray        read FLastCallStack;
     property OnStopped:      TDebugStopEvent read FOnStopped      write FOnStopped;
     property OnTerminated:   TNotifyEvent    read FOnTerminated    write FOnTerminated;
     property OnOutput:       TDebugOutputEvent read FOnOutput      write FOnOutput;

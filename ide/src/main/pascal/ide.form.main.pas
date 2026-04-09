@@ -47,6 +47,7 @@ uses
   ide.bracketmatch,
   ide.breakpoint,
   ide.build.dispatch,
+  ide.callstack,
   ide.cursorhistory,
   ide.editor.tabs,
   ide.editor.theme,
@@ -126,6 +127,8 @@ type
     tsVariables: TfpgTabSheet;
     btnVarOptions: TfpgButton;
     tvVariables: TfpgTreeView;
+    tsCallStack: TfpgTabSheet;
+    tvCallStack: TfpgTreeView;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
@@ -165,6 +168,7 @@ type
     FVarShowType: Boolean;          { cog option: append ': TypeName' to node text }
     FVarShowScope: Boolean;         { cog option: show enclosing scope group }
     FVarShowGlobals: Boolean;       { cog option: show globals group }
+    FCallStackDataList: TList;      { owns all TCallStackFrameData instances }
     procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
     procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
     procedure   ToggleBreakpointAtCursor;
@@ -178,6 +182,11 @@ type
     { Variables panel }
     procedure   RefreshVariablesTree;
     procedure   ClearVariablesTree;
+    { Call Stack panel }
+    procedure   RefreshCallStackPanel;
+    procedure   ClearCallStackPanel;
+    procedure   tvCallStackDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    function    FindSourceByBaseName(const ABaseName: string): string;
     procedure   AppendVarNode(AParent: TfpgTreeNode; AData: TVarNodeData);
     procedure   tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
     procedure   btnVarOptionsClicked(Sender: TObject);
@@ -887,6 +896,7 @@ begin
   begin
     ClearAllExecutionLines;
     ClearVariablesTree;
+    ClearCallStackPanel;
     FBreakpoints.ClearHandles;
     FDebugAdapter.EndSession;
     AddOutputLine('');
@@ -942,6 +952,7 @@ begin
   begin
     ClearAllExecutionLines;
     ClearVariablesTree;
+    ClearCallStackPanel;
     FDebugAdapter.Continue;
     UpdateStatus('Running (debug)...');
     UpdateDebugControls;
@@ -1222,6 +1233,7 @@ begin
     UpdateStatus('Paused');
   end;
   RefreshVariablesTree;
+  RefreshCallStackPanel;
   pnlTool.ActivePage := tsVariables;
   UpdateDebugControls;
 end;
@@ -1230,6 +1242,7 @@ procedure TMainForm.DebugTerminated(Sender: TObject);
 begin
   ClearAllExecutionLines;
   ClearVariablesTree;
+  ClearCallStackPanel;
   FBreakpoints.ClearHandles;
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
@@ -1248,6 +1261,7 @@ begin
   begin
     ClearAllExecutionLines;
     ClearVariablesTree;
+    ClearCallStackPanel;
     FDebugAdapter.StepInto;
     UpdateStatus('Stepping (into)...');
     UpdateDebugControls;
@@ -1260,6 +1274,7 @@ begin
   begin
     ClearAllExecutionLines;
     ClearVariablesTree;
+    ClearCallStackPanel;
     FDebugAdapter.StepOver;
     UpdateStatus('Stepping (over)...');
     UpdateDebugControls;
@@ -1661,6 +1676,136 @@ begin
   FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
   if FDebugAdapter.State = idsPaused then
     RefreshVariablesTree;
+end;
+
+{ ---------------------------------------------------------------------------
+  Call Stack Panel
+  --------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearCallStackPanel;
+var
+  i: Integer;
+begin
+  if Assigned(tvCallStack) then
+    tvCallStack.RootNode.Clear;
+  if Assigned(FCallStackDataList) then
+  begin
+    for i := 0 to FCallStackDataList.Count - 1 do
+      TCallStackFrameData(FCallStackDataList[i]).Free;
+    FCallStackDataList.Clear;
+  end;
+end;
+
+procedure TMainForm.RefreshCallStackPanel;
+var
+  Frames: TCallStackFrameArray;
+  i:      Integer;
+  Data:   TCallStackFrameData;
+  Node:   TfpgTreeNode;
+begin
+  tvCallStack.BeginUpdate;
+  try
+    ClearCallStackPanel;
+    if FDebugAdapter = nil then
+      Exit;
+    Frames := ParseCallStack(FDebugAdapter.LastCallStack);
+    if Length(Frames) = 0 then
+      Exit;
+    for i := 0 to High(Frames) do
+    begin
+      Data := TCallStackFrameData.Create(Frames[i]);
+      FCallStackDataList.Add(Data);
+      Node := tvCallStack.RootNode.AppendText(CallStackFrameDisplay(Frames[i]));
+      Node.Data := Data;
+    end;
+  finally
+    tvCallStack.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.tvCallStackDoubleClick(Sender: TObject;
+    AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+var
+  Node:     TfpgTreeNode;
+  Data:     TCallStackFrameData;
+  FullPath: string;
+  ts:       TfpgTabSheet;
+begin
+  Node := tvCallStack.Selection;
+  if Node = nil then
+    Exit;
+  Data := TCallStackFrameData(Node.Data);
+  if (Data = nil) or not Data.Frame.HasSource then
+    Exit;
+
+  { Attempt to locate the source file — prefer the same resolution used for
+    the debug stop event; fall back to a basename search in source dirs. }
+  FullPath := FindSourceByBaseName(Data.Frame.FileName);
+  if FullPath = '' then
+    Exit;
+
+  FCursorHistory.RecordBeforeJump(GetCurrentCursorLocation);
+  ts := OpenEditorPage(FullPath);
+  if (ts <> nil) and (Data.Frame.LineNumber > 0) then
+    TfpgTextEdit(ts.Components[0]).GotoLine(Data.Frame.LineNumber);
+end;
+
+function TMainForm.FindSourceByBaseName(const ABaseName: string): string;
+{ Locate a source file given only its basename (as returned by the call
+  stack parser).  Searches all known source directories in the project,
+  including sub-directories. Returns empty string when not found. }
+var
+  Dirs:      TStringList;
+  i:         Integer;
+  Candidate: string;
+
+  procedure CollectSourceDirs;
+  var
+    pb: TPasBuildProjectBackend;
+  begin
+    { Always try the directory that contains the active project file }
+    AddPathIfNew(Dirs, ExtractFilePath(GProject.ProjectFile));
+    if GProject.ProjectFormat <> pfPasBuild then
+      Exit;
+    pb := TPasBuildProjectBackend(GProject);
+    if pb.IsAggregator then
+      AddAggregatorSourceDirs(pb.ModuleInfos, Dirs)
+    else
+    begin
+      AddSubdirectories(Dirs,
+        IncludeTrailingPathDelimiter(ExtractFilePath(GProject.ProjectFile))
+        + 'src' + PathDelim + 'main' + PathDelim + 'pascal');
+    end;
+  end;
+
+begin
+  Result := '';
+  if ABaseName = '' then
+    Exit;
+
+  { 1. If the name is already an absolute path that exists, use it directly }
+  if fpgFileExists(ABaseName) then
+  begin
+    Result := ABaseName;
+    Exit;
+  end;
+
+  { 2. Search source directories }
+  Dirs := TStringList.Create;
+  try
+    CollectSourceDirs;
+    for i := 0 to Dirs.Count - 1 do
+    begin
+      Candidate := IncludeTrailingPathDelimiter(Dirs[i]) + ABaseName;
+      if fpgFileExists(Candidate) then
+      begin
+        Result := Candidate;
+        Exit;
+      end;
+    end;
+  finally
+    Dirs.Free;
+  end;
 end;
 
 procedure TMainForm.pmBPGoToSourceClick(Sender: TObject);
@@ -3830,7 +3975,8 @@ begin
   FHighlightCache := THighlighterCache.Create;
   FCursorHistory := TCursorHistory.Create(50);
   FBreakpoints := TBreakpointList.Create;
-  FVarNodeDataList := TList.Create;
+  FVarNodeDataList    := TList.Create;
+  FCallStackDataList  := TList.Create;
   FVarShowType    := True;
   FVarShowScope   := True;
   FVarShowGlobals := True;
@@ -3857,6 +4003,8 @@ begin
   FreeAndNil(FBreakpoints);
   ClearVariablesTree;
   FreeAndNil(FVarNodeDataList);
+  ClearCallStackPanel;
+  FreeAndNil(FCallStackDataList);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);
@@ -4188,6 +4336,23 @@ begin
     Align     := alClient;
     FontDesc  := '#Label1';
     OnExpand  := @tvVariablesExpand;
+  end;
+
+  tsCallStack := TfpgTabSheet.Create(pnlTool);
+  with tsCallStack do
+  begin
+    Name := 'tsCallStack';
+    Text := 'Call Stack';
+  end;
+
+  tvCallStack := TfpgTreeView.Create(tsCallStack);
+  with tvCallStack do
+  begin
+    Name         := 'tvCallStack';
+    Align        := alClient;
+    FontDesc     := '#Label1';
+    Hint         := 'Double-click a frame to navigate to source';
+    OnDoubleClick := @tvCallStackDoubleClick;
   end;
 
   { Vertical splitter — between tool panel and editor }

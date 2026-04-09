@@ -78,6 +78,7 @@ type
     FLastLocalVars:            TVariableValueArray;
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
+    FLastCallStack:            TStringArray;
     procedure HandleCommandDone;
     procedure HandleBPDone;
     procedure SendOutput(const AMsg: String);
@@ -131,6 +132,7 @@ type
     property LastLocalVars:            TVariableValueArray read FLastLocalVars;
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
+    property LastCallStack:            TStringArray        read FLastCallStack;
     property Engine: TDebuggerEngine read FEngine;
     property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
     property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated;
@@ -266,6 +268,7 @@ begin
     SetLength(FLastLocalVars, 0);
     SetLength(FLastLocalVarsWithParents, 0);
     SetLength(FLastGlobalVars, 0);
+    SetLength(FLastCallStack, 0);
     SendOutput('Process terminated.');
     if Assigned(FOnTerminated) then
       FOnTerminated(Self);
@@ -278,6 +281,7 @@ begin
     FLastLocalVars            := R.LocalVars;
     FLastLocalVarsWithParents := R.LocalVarsWithParents;
     FLastGlobalVars           := R.GlobalVars;
+    FLastCallStack            := R.CallStack;
     if Assigned(FOnStopped) then
       FOnStopped(Self, FState, R.StopFile, R.StopLine);
   end
