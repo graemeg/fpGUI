@@ -886,6 +886,7 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
   begin
     ClearAllExecutionLines;
+    ClearVariablesTree;
     FBreakpoints.ClearHandles;
     FDebugAdapter.EndSession;
     AddOutputLine('');
