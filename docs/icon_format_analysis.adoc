@@ -21,7 +21,15 @@ on-disk/authoring format for the Icon-O-Matic tool. The canonical format
 reference is the Haiku OS C++ source (`src/libs/icon/Archive.cpp` and
 `PathSource.cpp`), not any third-party parser.
 See https://git.haiku-os.org/haiku/tree/src/libs/icon and this very useful
-article https://blog.leahhanson.us/post/recursecenter2016/haiku_icons.html  
+article https://blog.leahhanson.us/post/recursecenter2016/haiku_icons.html
+
+For convenience, I've cloned the Haiku git repository to:
+  /data/devel/haiku
+and the HVIF icon code is located in the subdirectory src/libs/icon
+
+I believe these is a very small test code in:
+  /data/devel/haiku/src/test/libs/icon/flat_icon/
+
 
 [cols="3,1,1,1", options="header"]
 |===
