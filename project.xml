@@ -16,6 +16,7 @@
     <module>docview</module>
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
+    <module activeByDefault="false">tools/svg2hvif</module>
   </modules>
 
   <profiles>
