@@ -30,7 +30,6 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_fontmanager,
   agg_2D;
 
 type
@@ -448,7 +447,7 @@ begin
   end
   else
   begin
-    stride := Integer(TfpgImage(img).ScanLine[1]) - Integer(TfpgImage(img).ScanLine[0]);
+    stride := Integer(PByte(TfpgImage(img).ScanLine[1]) - PByte(TfpgImage(img).ScanLine[0]));
     if stride < 0 then
       buffer := TfpgImage(img).ScanLine[imgH - 1]
     else
@@ -496,6 +495,7 @@ var
   poly: array of double;
   c: agg_2D.Color;
 begin
+  poly := nil;
   if Length(Points) < 2 then
     Exit;
   SetLength(poly, (Length(Points) * 2) + 1);
