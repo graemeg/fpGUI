@@ -17,6 +17,7 @@
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
     <module activeByDefault="false">tools/svg2hvif</module>
+    <module activeByDefault="false">tools/hvif_dump</module>
   </modules>
 
   <profiles>
