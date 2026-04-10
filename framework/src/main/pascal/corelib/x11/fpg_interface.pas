@@ -31,7 +31,11 @@ uses
 type
   TfpgFontResourceImpl  = class(TfpgX11FontResource);
   TfpgImageImpl         = class(TfpgX11Image);
+  { Suppress deprecation hint: TfpgCanvasImpl retains the native canvas
+    during the transition period. Remove once THybridCanvas is the sole base. }
+  {$NOTES OFF}
   TfpgCanvasImpl        = class(TfpgX11Canvas);
+  {$NOTES ON}
   TfpgWindowImpl        = class(TfpgX11Window);
   TfpgApplicationImpl   = class(TfpgX11Application);
   TfpgClipboardImpl     = class(TfpgX11Clipboard);
@@ -46,10 +50,13 @@ implementation
 
 {$ifdef AGGCanvas}
 uses
-  fpg_hybrid_canvas;
+  fpg_hybrid_canvas,
+  fpg_fontmanager,
+  fpg_freetype_agg_fontresource;
 
 initialization
-  CreateBufferManager := @CreateX11BufferManager;
+  CreateBufferManager  := @CreateX11BufferManager;
+  AggFontResourceClass := TfpgFreeTypeFontResource;
 {$endif}
 
 end.

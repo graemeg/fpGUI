@@ -8,9 +8,11 @@
 {$WARN 5024 off : Parameter "$1" not used}
 
 
-// To enable the AggPas hybrid canvas (software rendered 2D + cached glyph text).
-// On Windows this requires freetype.dll until native glyph extraction is implemented.
-{.$define AGGCanvas}
+// The AggPas hybrid canvas is enabled by default on all platforms.
+// Font rendering uses FreeType on Linux/FreeBSD/macOS (system library) and
+// the Win32 GDI TrueType engine on Windows (no external DLL required).
+// Use the 'agg' pasbuild profile to explicitly request this canvas.
+{$define AggCanvas}
 
 
 // **** Feature specific defines ****

@@ -507,6 +507,12 @@ end;
 
 function TfpgWidget.GetCanvas: TfpgCanvas;
 begin
+  { TODO: When native canvas classes are removed, TfpgCanvas should inherit
+    THybridCanvas directly and this cast will be correct. Until then, when
+    AggCanvas is active DefaultCanvasClass = THybridCanvas, so the object
+    here is a THybridCanvas — not a TfpgCanvas descendant. The cast is
+    technically invalid but safe in practice: TfpgCanvas methods only call
+    virtual TfpgCanvasBase methods that THybridCanvas implements. }
   Result := TfpgCanvas(inherited GetCanvas);
 end;
 

@@ -13,7 +13,7 @@
       measurement and rendering are always consistent.
 }
 
-unit fpg_fontresource_freetype;
+unit fpg_freetype_agg_fontresource;
 
 {$mode objfpc}{$H+}
 
@@ -41,6 +41,9 @@ type
     function GetDescent: integer; override;
     function GetHeight: integer; override;
     function GetTextWidth(const txt: string): integer; override;
+    procedure DrawTextToBuffer(ABuf: PByte; AStride, ABufW, ABufH,
+      AX, AY: Integer; const AText: string; AColor: TfpgColor;
+      AClipX1, AClipY1, AClipX2, AClipY2: Integer); override;
   end;
 
 
@@ -87,6 +90,14 @@ end;
 function TfpgFreeTypeFontResource.GetTextWidth(const txt: string): integer;
 begin
   Result := FGlyphCache.TextWidth(txt);
+end;
+
+procedure TfpgFreeTypeFontResource.DrawTextToBuffer(ABuf: PByte;
+  AStride, ABufW, ABufH, AX, AY: Integer; const AText: string;
+  AColor: TfpgColor; AClipX1, AClipY1, AClipX2, AClipY2: Integer);
+begin
+  FGlyphCache.DrawText(ABuf, AStride, ABufW, ABufH, AX, AY, AText, AColor,
+    AClipX1, AClipY1, AClipX2, AClipY2);
 end;
 
 
