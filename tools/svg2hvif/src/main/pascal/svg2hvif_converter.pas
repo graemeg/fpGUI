@@ -1,6 +1,14 @@
 {
     svg2hvif_converter.pas — SVG to HVIF conversion logic.
 
+    Copyright (c) 2026 Graeme Geldenhuys
+
+    This program is part of the fpGUI Toolkit project.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
     Converts a subset of SVG to the Haiku Vector Icon Format (HVIF).
 
     Supported SVG features (v3):

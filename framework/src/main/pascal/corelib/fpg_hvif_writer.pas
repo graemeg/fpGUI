@@ -1,5 +1,11 @@
 {
-    This unit is part of the fpGUI Toolkit project.
+    Copyright (c) 2026 Graeme Geldenhuys
+
+    This program is part of the fpGUI Toolkit project.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
       HVIF (Haiku Vector Icon Format) binary serialiser for fpGUI.
