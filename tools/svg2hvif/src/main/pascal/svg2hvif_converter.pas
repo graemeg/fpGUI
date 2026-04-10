@@ -3,29 +3,32 @@
 
     Converts a subset of SVG to the Haiku Vector Icon Format (HVIF).
 
-    Supported SVG features (v2):
+    Supported SVG features (v3):
       - <path> elements with 'd' attribute
       - <rect>, <circle>, <ellipse>, <polygon>, <polyline>, <line> elements
-      - Path commands: M m L l H h V v C c S s Q q T t Z z
-      - Arc commands (A a) are silently skipped
+      - <g> group elements with transform propagation
+      - Path commands: M m L l H h V v C c S s Q q T t A a Z z
+      - Arc (A a) commands converted to cubic bezier segments
+      - transform attribute: translate, scale, rotate, skewX, skewY, matrix
       - fill attribute: #RRGGBB, #RGB, rgb(R,G,B), named colours
       - fill-opacity and opacity attributes
       - style="" inline CSS (fill, fill-opacity, opacity)
+      - display:none / visibility:hidden filtering
       - viewBox attribute on <svg> for coordinate scaling
       - Linear and radial gradients via <defs>/<linearGradient>/<radialGradient>
       - url(#id) fill references resolved to gradient styles
       - xlink:href gradient inheritance for stop colours
+      - Style deduplication (identical styles share one HVIF style entry)
 
     Limitations:
-      - <g> element transforms not applied (children processed individually)
       - stroke not converted
-      - Arc-to-bezier conversion not implemented (arcs silently dropped)
       - Gradient objectBoundingBox units use viewBox as bounding box approximation
       - HVIF renderer uses only first and last gradient stop colours
 
     Coordinate transform:
       SVG viewBox is fitted uniformly into the HVIF 64 x 64 unit space.
       Scale = 64 / max(viewBoxWidth, viewBoxHeight).
+      Group and shape transforms are composed using full affine matrix math.
 }
 
 unit svg2hvif_converter;
@@ -285,6 +288,209 @@ end;
 
 
 { =========================================================
+  SVG affine matrix type and operations
+  ========================================================= }
+
+type
+  { 2D affine transform.
+    x' = A*x + C*y + TX
+    y' = B*x + D*y + TY }
+  TSvgMatrix = record
+    A, B, C, D: Double;
+    TX, TY: Double;
+  end;
+
+function SvgIdentityMatrix: TSvgMatrix;
+begin
+  Result.A  := 1.0; Result.B  := 0.0;
+  Result.C  := 0.0; Result.D  := 1.0;
+  Result.TX := 0.0; Result.TY := 0.0;
+end;
+
+{ Compose P after Q: result(p) = P(Q(p)).
+  Used to accumulate transforms left-to-right as in SVG transform attribute. }
+function SvgMatrixMul(const P, Q: TSvgMatrix): TSvgMatrix;
+begin
+  Result.A  := P.A * Q.A  + P.C * Q.B;
+  Result.B  := P.B * Q.A  + P.D * Q.B;
+  Result.C  := P.A * Q.C  + P.C * Q.D;
+  Result.D  := P.B * Q.C  + P.D * Q.D;
+  Result.TX := P.A * Q.TX + P.C * Q.TY + P.TX;
+  Result.TY := P.B * Q.TX + P.D * Q.TY + P.TY;
+end;
+
+{ Build the root viewBox matrix: uniform scale + offset so SVG maps to 0..64. }
+function MakeViewBoxMatrix(vbX, vbY, vbW, vbH: Double): TSvgMatrix;
+var
+  s: Double;
+begin
+  s := 64.0 / Max(vbW, vbH);
+  Result.A  := s;   Result.B  := 0.0;
+  Result.C  := 0.0; Result.D  := s;
+  Result.TX := -vbX * s;
+  Result.TY := -vbY * s;
+end;
+
+{ Apply matrix to x coordinate. }
+function MX(const M: TSvgMatrix; x, y: Double): Single;
+begin
+  Result := Single(M.A * x + M.C * y + M.TX);
+end;
+
+{ Apply matrix to y coordinate. }
+function MY(const M: TSvgMatrix; x, y: Double): Single;
+begin
+  Result := Single(M.B * x + M.D * y + M.TY);
+end;
+
+
+{ =========================================================
+  SVG transform attribute parser
+  ========================================================= }
+
+{ Parse a single number from a string starting at position APos.
+  Advances APos past the number and any following whitespace/commas. }
+function ParseTransformNum(const s: string; var APos: Integer): Double;
+var
+  start: Integer;
+  numStr: string;
+begin
+  { skip leading ws/comma }
+  while (APos <= Length(s)) and (s[APos] in [' ', #9, ',']) do
+    Inc(APos);
+  start := APos;
+  if (APos <= Length(s)) and (s[APos] in ['-', '+']) then
+    Inc(APos);
+  while (APos <= Length(s)) and (s[APos] in ['0'..'9']) do
+    Inc(APos);
+  if (APos <= Length(s)) and (s[APos] = '.') then
+  begin
+    Inc(APos);
+    while (APos <= Length(s)) and (s[APos] in ['0'..'9']) do
+      Inc(APos);
+  end;
+  if (APos <= Length(s)) and (s[APos] in ['E', 'e']) then
+  begin
+    Inc(APos);
+    if (APos <= Length(s)) and (s[APos] in ['-', '+']) then
+      Inc(APos);
+    while (APos <= Length(s)) and (s[APos] in ['0'..'9']) do
+      Inc(APos);
+  end;
+  numStr := Copy(s, start, APos - start);
+  Result := SvgStrToFloatDef(numStr, 0.0);
+  { skip trailing ws/comma }
+  while (APos <= Length(s)) and (s[APos] in [' ', #9, ',']) do
+    Inc(APos);
+end;
+
+{ Parse the SVG transform attribute string and return the composed matrix.
+  Multiple functions (e.g. "translate(10,20) rotate(45)") are composed
+  left-to-right (each new transform post-multiplied onto the result). }
+function ParseSvgTransform(const s: string): TSvgMatrix;
+var
+  i, nameStart, nameEnd, parenEnd: Integer;
+  funcName: string;
+  args: array[0..5] of Double;
+  nArgs, j: Integer;
+  M, T: TSvgMatrix;
+  tx, ty, sx, sy, ang, cosA, sinA, cx, cy: Double;
+begin
+  Result := SvgIdentityMatrix;
+  i := 1;
+  while i <= Length(s) do
+  begin
+    { skip whitespace }
+    while (i <= Length(s)) and (s[i] in [' ', #9, #10, #13, ',']) do
+      Inc(i);
+    if i > Length(s) then Break;
+
+    { read function name }
+    nameStart := i;
+    while (i <= Length(s)) and (s[i] in ['A'..'Z', 'a'..'z']) do
+      Inc(i);
+    nameEnd := i - 1;
+    if nameEnd < nameStart then begin Inc(i); Continue; end;
+    funcName := LowerCase(Copy(s, nameStart, nameEnd - nameStart + 1));
+
+    { find opening paren }
+    while (i <= Length(s)) and (s[i] <> '(') do Inc(i);
+    if i > Length(s) then Break;
+    Inc(i); { skip '(' }
+
+    { find closing paren }
+    parenEnd := i;
+    while (parenEnd <= Length(s)) and (s[parenEnd] <> ')') do
+      Inc(parenEnd);
+
+    { parse up to 6 numeric arguments }
+    nArgs := 0;
+    for j := 0 to 5 do args[j] := 0.0;
+    while (i < parenEnd) and (nArgs < 6) do
+    begin
+      args[nArgs] := ParseTransformNum(s, i);
+      Inc(nArgs);
+    end;
+    i := parenEnd + 1; { skip ')' }
+
+    { Build the individual transform matrix T }
+    T := SvgIdentityMatrix;
+
+    if funcName = 'translate' then
+    begin
+      tx := args[0];
+      if nArgs >= 2 then ty := args[1] else ty := 0.0;
+      T.TX := tx; T.TY := ty;
+    end
+    else if funcName = 'scale' then
+    begin
+      sx := args[0];
+      if nArgs >= 2 then sy := args[1] else sy := sx;
+      T.A := sx; T.D := sy;
+    end
+    else if funcName = 'rotate' then
+    begin
+      ang  := args[0] * (Pi / 180.0);
+      cosA := Cos(ang); sinA := Sin(ang);
+      if nArgs >= 3 then
+      begin
+        cx := args[1]; cy := args[2];
+        { rotate around (cx,cy): translate to origin, rotate, translate back }
+        T.A := cosA;  T.B := sinA;
+        T.C := -sinA; T.D := cosA;
+        T.TX := cx - cosA * cx + sinA * cy;
+        T.TY := cy - sinA * cx - cosA * cy;
+      end
+      else
+      begin
+        T.A := cosA;  T.B := sinA;
+        T.C := -sinA; T.D := cosA;
+      end;
+    end
+    else if funcName = 'skewx' then
+    begin
+      T.C := Tan(args[0] * (Pi / 180.0));
+    end
+    else if funcName = 'skewy' then
+    begin
+      T.B := Tan(args[0] * (Pi / 180.0));
+    end
+    else if funcName = 'matrix' then
+    begin
+      { SVG matrix(a,b,c,d,e,f): x' = a*x + c*y + e, y' = b*x + d*y + f }
+      T.A := args[0]; T.B := args[1];
+      T.C := args[2]; T.D := args[3];
+      T.TX := args[4]; T.TY := args[5];
+    end;
+
+    { Post-multiply: Result = Result ∘ T  (T applied first, then Result) }
+    M := SvgMatrixMul(Result, T);
+    Result := M;
+  end;
+end;
+
+
+{ =========================================================
   viewBox parser
   ========================================================= }
 
@@ -335,8 +541,7 @@ type
   private
     FStr: string;
     FPos: Integer;
-    FScale: Double;
-    FOffX, FOffY: Double;
+    FMatrix: TSvgMatrix;
 
     FCurX, FCurY: Double;
     FStartX, FStartY: Double;
@@ -352,8 +557,8 @@ type
     function  IsNumericStart: Boolean;
     function  ReadNumber: Double;
 
-    function  TX(x: Double): Single;
-    function  TY(y: Double): Single;
+    function  TX(x, y: Double): Single;
+    function  TY(x, y: Double): Single;
 
     procedure FinishSubPath(AClosed: Boolean);
     procedure EnsureStartPoint;
@@ -370,21 +575,19 @@ type
     procedure DoQuad(rel: Boolean);
     procedure DoSmoothQuad(rel: Boolean);
     procedure DoClose;
-    procedure SkipArc(rel: Boolean);
+    procedure DoArc(rel: Boolean);
 
   public
-    constructor Create(const AStr: string; AScale, AOffX, AOffY: Double);
+    constructor Create(const AStr: string; const AMatrix: TSvgMatrix);
     function  Parse: TPathList;
   end;
 
 
-constructor TSvgPathParser.Create(const AStr: string; AScale, AOffX, AOffY: Double);
+constructor TSvgPathParser.Create(const AStr: string; const AMatrix: TSvgMatrix);
 begin
   FStr    := AStr;
   FPos    := 1;
-  FScale  := AScale;
-  FOffX   := AOffX;
-  FOffY   := AOffY;
+  FMatrix := AMatrix;
   FCurX   := 0; FCurY   := 0;
   FStartX := 0; FStartY := 0;
   FLastCPX  := 0; FLastCPY  := 0;
@@ -459,14 +662,14 @@ begin
   Result := SvgStrToFloat(numStr);
 end;
 
-function TSvgPathParser.TX(x: Double): Single;
+function TSvgPathParser.TX(x, y: Double): Single;
 begin
-  Result := Single((x - FOffX) * FScale);
+  Result := MX(FMatrix, x, y);
 end;
 
-function TSvgPathParser.TY(y: Double): Single;
+function TSvgPathParser.TY(x, y: Double): Single;
 begin
-  Result := Single((y - FOffY) * FScale);
+  Result := MY(FMatrix, x, y);
 end;
 
 procedure TSvgPathParser.FinishSubPath(AClosed: Boolean);
@@ -493,9 +696,9 @@ begin
   if Length(FCurPoints) = 0 then
   begin
     SetLength(FCurPoints, 1);
-    pt.X   := TX(FCurX); pt.Y   := TY(FCurY);
-    pt.InX := pt.X;      pt.InY := pt.Y;
-    pt.OutX:= pt.X;      pt.OutY:= pt.Y;
+    pt.X   := TX(FCurX, FCurY); pt.Y   := TY(FCurX, FCurY);
+    pt.InX := pt.X;             pt.InY := pt.Y;
+    pt.OutX:= pt.X;             pt.OutY:= pt.Y;
     FCurPoints[0] := pt;
   end;
 end;
@@ -506,9 +709,9 @@ var
 begin
   EnsureStartPoint;
   SetLength(FCurPoints, Length(FCurPoints) + 1);
-  pt.X   := TX(x); pt.Y   := TY(y);
-  pt.InX := pt.X;  pt.InY := pt.Y;
-  pt.OutX:= pt.X;  pt.OutY:= pt.Y;
+  pt.X   := TX(x, y); pt.Y   := TY(x, y);
+  pt.InX := pt.X;     pt.InY := pt.Y;
+  pt.OutX:= pt.X;     pt.OutY:= pt.Y;
   FCurPoints[High(FCurPoints)] := pt;
   FCurX := x; FCurY := y;
 end;
@@ -518,12 +721,12 @@ var
   pt: THvifPoint;
 begin
   EnsureStartPoint;
-  FCurPoints[High(FCurPoints)].OutX := TX(c1x);
-  FCurPoints[High(FCurPoints)].OutY := TY(c1y);
+  FCurPoints[High(FCurPoints)].OutX := TX(c1x, c1y);
+  FCurPoints[High(FCurPoints)].OutY := TY(c1x, c1y);
   SetLength(FCurPoints, Length(FCurPoints) + 1);
-  pt.X   := TX(x);   pt.Y   := TY(y);
-  pt.InX := TX(c2x); pt.InY := TY(c2y);
-  pt.OutX:= pt.X;    pt.OutY:= pt.Y;
+  pt.X   := TX(x,   y);   pt.Y   := TY(x,   y);
+  pt.InX := TX(c2x, c2y); pt.InY := TY(c2x, c2y);
+  pt.OutX:= pt.X;          pt.OutY:= pt.Y;
   FCurPoints[High(FCurPoints)] := pt;
   FCurX := x; FCurY := y;
   FLastCPX := c2x; FLastCPY := c2y;
@@ -703,19 +906,151 @@ begin
   FLastCmd := 'Z';
 end;
 
-procedure TSvgPathParser.SkipArc(rel: Boolean);
+{ Convert SVG arc to one or more cubic bezier segments.
+  Implements SVG Appendix F.6.5 endpoint-to-centre parameterisation. }
+procedure TSvgPathParser.DoArc(rel: Boolean);
+var
+  arx, ary, phi, x2, y2: Double;
+  fA, fS: Integer;
+  x1, y1: Double;
+  dx, dy: Double;
+  cphi, sphi: Double;
+  x1p, y1p: Double;
+  lam, sqLam: Double;
+  num, den, sq: Double;
+  sign: Double;
+  cxp, cyp: Double;
+  cx, cy: Double;
+  ux, uy, vx, vy: Double;
+  dotUV, magU, magV, angSign: Double;
+  theta1, dtheta: Double;
+  nSegs, k: Integer;
+  segDth, alpha: Double;
+  th1, th2: Double;
+  p1ux, p1uy, p2ux, p2uy: Double;
+  c1ux, c1uy, c2ux, c2uy: Double;
+  exC1x, eyC1y, exC2x, eyC2y, exP2x, eyP2y: Double;
+  halfFmt: TFormatSettings;
 begin
+  halfFmt := GSvgFmt; { unused but keep compiler happy }
   while IsNumericStart do
   begin
-    ReadNumber; SkipWS;  { rx }
-    ReadNumber; SkipWS;  { ry }
-    ReadNumber; SkipWS;  { x-rotation }
-    ReadNumber; SkipWS;  { large-arc-flag }
-    ReadNumber; SkipWS;  { sweep-flag }
-    ReadNumber; SkipWS;  { x }
-    ReadNumber; SkipWS;  { y }
+    arx  := Abs(ReadNumber); SkipWS;
+    ary  := Abs(ReadNumber); SkipWS;
+    phi  := ReadNumber * (Pi / 180.0); SkipWS;
+    { large-arc-flag and sweep-flag are single digits (0 or 1) }
+    fA   := Round(ReadNumber); SkipWS;
+    fS   := Round(ReadNumber); SkipWS;
+    x2   := ReadNumber; SkipWS;
+    y2   := ReadNumber; SkipWS;
+
+    if rel then
+    begin
+      x2 := FCurX + x2;
+      y2 := FCurY + y2;
+    end;
+
+    x1 := FCurX; y1 := FCurY;
+
+    { Degenerate: start = end → skip }
+    if (Abs(x1 - x2) < 1e-10) and (Abs(y1 - y2) < 1e-10) then Continue;
+    { Degenerate: zero radii → straight line }
+    if (arx < 1e-10) or (ary < 1e-10) then
+    begin
+      AddLineTo(x2, y2);
+      Continue;
+    end;
+
+    cphi := Cos(phi); sphi := Sin(phi);
+    dx := (x1 - x2) / 2.0; dy := (y1 - y2) / 2.0;
+    x1p :=  cphi * dx + sphi * dy;
+    y1p := -sphi * dx + cphi * dy;
+
+    { Fix radii if they are too small }
+    lam := Sqr(x1p / arx) + Sqr(y1p / ary);
+    if lam > 1.0 then
+    begin
+      sqLam := Sqrt(lam);
+      arx := sqLam * arx;
+      ary := sqLam * ary;
+    end;
+
+    { Compute (cx', cy') }
+    num := Sqr(arx) * Sqr(ary) - Sqr(arx) * Sqr(y1p) - Sqr(ary) * Sqr(x1p);
+    den := Sqr(arx) * Sqr(y1p) + Sqr(ary) * Sqr(x1p);
+    if den < 1e-20 then
+      sq := 0.0
+    else
+      sq := Sqrt(Max(0.0, num / den));
+    if fA = fS then sign := -1.0 else sign := 1.0;
+    cxp :=  sign * sq * (arx * y1p / ary);
+    cyp :=  sign * sq * (-ary * x1p / arx);
+
+    { Compute centre in original coordinate space }
+    cx := cphi * cxp - sphi * cyp + (x1 + x2) / 2.0;
+    cy := sphi * cxp + cphi * cyp + (y1 + y2) / 2.0;
+
+    { Compute theta1 and dtheta }
+    ux := (x1p - cxp) / arx; uy := (y1p - cyp) / ary;
+    vx := (-x1p - cxp) / arx; vy := (-y1p - cyp) / ary;
+
+    magU := Sqrt(ux * ux + uy * uy);
+    if magU < 1e-20 then magU := 1e-20;
+    dotUV := EnsureRange(ux / magU, -1.0, 1.0);
+    angSign := uy; { sign of (1*uy - 0*ux) }
+    if angSign < 0 then theta1 := -ArcCos(dotUV)
+    else theta1 := ArcCos(dotUV);
+
+    magU := Sqrt(ux * ux + uy * uy);
+    magV := Sqrt(vx * vx + vy * vy);
+    if (magU < 1e-20) or (magV < 1e-20) then
+      dtheta := 0.0
+    else
+    begin
+      dotUV := EnsureRange((ux * vx + uy * vy) / (magU * magV), -1.0, 1.0);
+      angSign := ux * vy - uy * vx;
+      if angSign < 0 then dtheta := -ArcCos(dotUV)
+      else dtheta := ArcCos(dotUV);
+    end;
+
+    { Adjust dtheta for sweep direction }
+    if (fS = 0) and (dtheta > 0) then dtheta := dtheta - 2.0 * Pi;
+    if (fS = 1) and (dtheta < 0) then dtheta := dtheta + 2.0 * Pi;
+
+    { Generate cubic bezier segments (at most one per 90 degrees) }
+    nSegs := Max(1, Ceil(Abs(dtheta) / (Pi / 2.0)));
+    segDth := dtheta / nSegs;
+    alpha  := 4.0 / 3.0 * Tan(segDth / 4.0);
+
+    for k := 0 to nSegs - 1 do
+    begin
+      th1 := theta1 + k * segDth;
+      th2 := theta1 + (k + 1) * segDth;
+
+      { Unit circle anchor and control points for this segment }
+      p1ux := Cos(th1); p1uy := Sin(th1);
+      p2ux := Cos(th2); p2uy := Sin(th2);
+
+      c1ux := p1ux - alpha * p1uy;
+      c1uy := p1uy + alpha * p1ux;
+      c2ux := p2ux + alpha * p2uy;
+      c2uy := p2uy - alpha * p2ux;
+
+      { Map unit circle → ellipse in SVG coordinate space:
+        Ex(ux,uy) = cx + cphi*arx*ux - sphi*ary*uy
+        Ey(ux,uy) = cy + sphi*arx*ux + cphi*ary*uy }
+      exC1x := cx + cphi * arx * c1ux - sphi * ary * c1uy;
+      eyC1y := cy + sphi * arx * c1ux + cphi * ary * c1uy;
+      exC2x := cx + cphi * arx * c2ux - sphi * ary * c2uy;
+      eyC2y := cy + sphi * arx * c2ux + cphi * ary * c2uy;
+      exP2x := cx + cphi * arx * p2ux - sphi * ary * p2uy;
+      eyP2y := cy + sphi * arx * p2ux + cphi * ary * p2uy;
+
+      AddCubicTo(exC1x, eyC1y, exC2x, eyC2y, exP2x, eyP2y);
+    end;
+
+    FLastCmd := 'A';
   end;
-  FLastCmd := 'A';
 end;
 
 
@@ -752,8 +1087,8 @@ begin
         'q': DoQuad(True);
         'T': DoSmoothQuad(False);
         't': DoSmoothQuad(True);
-        'A': SkipArc(False);
-        'a': SkipArc(True);
+        'A': DoArc(False);
+        'a': DoArc(True);
         'Z', 'z': DoClose;
       end;
     end
@@ -766,7 +1101,7 @@ end;
 
 
 { =========================================================
-  Shape element path builders
+  Shape element path builders (all accept TSvgMatrix)
   ========================================================= }
 
 const
@@ -806,10 +1141,9 @@ begin
   end;
 end;
 
-{ Build a simple straight-segment path from a flat coordinate array.
-  AScale, AOffX, AOffY apply the SVG->HVIF transform. }
+{ Build a simple straight-segment path from a flat coordinate array. }
 function BuildPolygonPath(const pts: TDoubleArray; AClosed: Boolean;
-  AScale, AOffX, AOffY: Double): THvifPath;
+  const AMatrix: TSvgMatrix): THvifPath;
 var
   n, i: Integer;
   hx, hy: Single;
@@ -824,8 +1158,8 @@ begin
   SetLength(Result.Points, n);
   for i := 0 to n - 1 do
   begin
-    hx := Single((pts[i*2]     - AOffX) * AScale);
-    hy := Single((pts[i*2 + 1] - AOffY) * AScale);
+    hx := MX(AMatrix, pts[i*2], pts[i*2+1]);
+    hy := MY(AMatrix, pts[i*2], pts[i*2+1]);
     Result.Points[i].X    := hx;
     Result.Points[i].Y    := hy;
     Result.Points[i].InX  := hx;
@@ -838,14 +1172,23 @@ end;
 { Build a closed ellipse/circle path using four cubic Bezier quarter-arcs.
   The path goes clockwise: N -> E -> S -> W. }
 function BuildEllipsePath(cx, cy, rx, ry: Double;
-  AScale, AOffX, AOffY: Double): THvifPath;
+  const AMatrix: TSvgMatrix): THvifPath;
 var
   hcx, hcy, hrx, hry, k: Single;
+  { For ellipses, scale only by the matrix scale component (not translation).
+    Since ellipses are centred shapes, we approximate by extracting scale
+    from the matrix diagonal. For non-uniform or rotated matrices this is an
+    approximation, but SVG icons rarely use rotated ellipses with group transforms. }
+  scaleX, scaleY: Double;
 begin
-  hcx := Single((cx - AOffX) * AScale);
-  hcy := Single((cy - AOffY) * AScale);
-  hrx := Single(rx * AScale);
-  hry := Single(ry * AScale);
+  { Apply centre through full matrix }
+  hcx := MX(AMatrix, cx, cy);
+  hcy := MY(AMatrix, cx, cy);
+  { Scale radii by the matrix scale components }
+  scaleX := Sqrt(AMatrix.A * AMatrix.A + AMatrix.B * AMatrix.B);
+  scaleY := Sqrt(AMatrix.C * AMatrix.C + AMatrix.D * AMatrix.D);
+  hrx := Single(rx * scaleX);
+  hry := Single(ry * scaleY);
   k   := KAPPA;
 
   Result.Closed := True;
@@ -854,50 +1197,53 @@ begin
   { N: top of ellipse at (cx, cy-ry) }
   Result.Points[0].X    := hcx;
   Result.Points[0].Y    := hcy - hry;
-  Result.Points[0].InX  := hcx - k * hrx;   { from W->N closing arc }
+  Result.Points[0].InX  := hcx - k * hrx;
   Result.Points[0].InY  := hcy - hry;
-  Result.Points[0].OutX := hcx + k * hrx;   { to N->E arc }
+  Result.Points[0].OutX := hcx + k * hrx;
   Result.Points[0].OutY := hcy - hry;
 
   { E: right of ellipse at (cx+rx, cy) }
   Result.Points[1].X    := hcx + hrx;
   Result.Points[1].Y    := hcy;
-  Result.Points[1].InX  := hcx + hrx;       { from N->E arc }
+  Result.Points[1].InX  := hcx + hrx;
   Result.Points[1].InY  := hcy - k * hry;
-  Result.Points[1].OutX := hcx + hrx;       { to E->S arc }
+  Result.Points[1].OutX := hcx + hrx;
   Result.Points[1].OutY := hcy + k * hry;
 
   { S: bottom of ellipse at (cx, cy+ry) }
   Result.Points[2].X    := hcx;
   Result.Points[2].Y    := hcy + hry;
-  Result.Points[2].InX  := hcx + k * hrx;   { from E->S arc }
+  Result.Points[2].InX  := hcx + k * hrx;
   Result.Points[2].InY  := hcy + hry;
-  Result.Points[2].OutX := hcx - k * hrx;   { to S->W arc }
+  Result.Points[2].OutX := hcx - k * hrx;
   Result.Points[2].OutY := hcy + hry;
 
   { W: left of ellipse at (cx-rx, cy) }
   Result.Points[3].X    := hcx - hrx;
   Result.Points[3].Y    := hcy;
-  Result.Points[3].InX  := hcx - hrx;       { from S->W arc }
+  Result.Points[3].InX  := hcx - hrx;
   Result.Points[3].InY  := hcy + k * hry;
-  Result.Points[3].OutX := hcx - hrx;       { to W->N closing arc }
+  Result.Points[3].OutX := hcx - hrx;
   Result.Points[3].OutY := hcy - k * hry;
 end;
 
 { Build a closed rectangle path with optional rounded corners.
   rx=ry=0 produces a simple 4-point rect; otherwise 8 points with arcs. }
 function BuildRectPath(x, y, w, h, rx, ry: Double;
-  AScale, AOffX, AOffY: Double): THvifPath;
+  const AMatrix: TSvgMatrix): THvifPath;
 var
   lx1, ly1, lx2, ly2: Single;
   lrx, lry, lk: Single;
+  scaleX, scaleY: Double;
 begin
-  lx1 := Single((x     - AOffX) * AScale);
-  ly1 := Single((y     - AOffY) * AScale);
-  lx2 := Single((x + w - AOffX) * AScale);
-  ly2 := Single((y + h - AOffY) * AScale);
-  lrx := Single(rx * AScale);
-  lry := Single(ry * AScale);
+  lx1 := MX(AMatrix, x,     y);
+  ly1 := MY(AMatrix, x,     y);
+  lx2 := MX(AMatrix, x + w, y + h);
+  ly2 := MY(AMatrix, x + w, y + h);
+  scaleX := Sqrt(AMatrix.A * AMatrix.A + AMatrix.B * AMatrix.B);
+  scaleY := Sqrt(AMatrix.C * AMatrix.C + AMatrix.D * AMatrix.D);
+  lrx := Single(rx * scaleX);
+  lry := Single(ry * scaleY);
   lk  := KAPPA;
 
   Result.Closed := True;
@@ -924,80 +1270,71 @@ begin
   end
   else
   begin
-    { Rounded rectangle: 8 points (clockwise from TL arc end).
-      Arc direction: each corner arc curves inward from edge to edge.
-      P0: TL arc end = (x+rx, y)
-      P1: TR arc start = (x+w-rx, y)
-      P2: TR arc end = (x+w, y+ry)
-      P3: BR arc start = (x+w, y+h-ry)
-      P4: BR arc end = (x+w-rx, y+h)
-      P5: BL arc start = (x+rx, y+h)
-      P6: BL arc end = (x, y+h-ry)
-      P7: TL arc start = (x, y+ry) }
+    { Rounded rectangle: 8 points (clockwise from TL arc end) }
     SetLength(Result.Points, 8);
 
     { P0: TL arc end }
     Result.Points[0].X    := lx1 + lrx;
     Result.Points[0].Y    := ly1;
-    Result.Points[0].InX  := lx1 + lrx - lk * lrx;  { c2 of TL arc }
+    Result.Points[0].InX  := lx1 + lrx - lk * lrx;
     Result.Points[0].InY  := ly1;
-    Result.Points[0].OutX := lx1 + lrx;              { straight to P1 }
+    Result.Points[0].OutX := lx1 + lrx;
     Result.Points[0].OutY := ly1;
 
     { P1: TR arc start }
     Result.Points[1].X    := lx2 - lrx;
     Result.Points[1].Y    := ly1;
-    Result.Points[1].InX  := lx2 - lrx;              { straight from P0 }
+    Result.Points[1].InX  := lx2 - lrx;
     Result.Points[1].InY  := ly1;
-    Result.Points[1].OutX := lx2 - lrx + lk * lrx;  { c1 of TR arc }
+    Result.Points[1].OutX := lx2 - lrx + lk * lrx;
     Result.Points[1].OutY := ly1;
 
     { P2: TR arc end }
     Result.Points[2].X    := lx2;
     Result.Points[2].Y    := ly1 + lry;
-    Result.Points[2].InX  := lx2;                    { c2 of TR arc }
+    Result.Points[2].InX  := lx2;
     Result.Points[2].InY  := ly1 + lry - lk * lry;
-    Result.Points[2].OutX := lx2;                    { straight to P3 }
+    Result.Points[2].OutX := lx2;
     Result.Points[2].OutY := ly1 + lry;
 
     { P3: BR arc start }
     Result.Points[3].X    := lx2;
     Result.Points[3].Y    := ly2 - lry;
-    Result.Points[3].InX  := lx2;                    { straight from P2 }
+    Result.Points[3].InX  := lx2;
     Result.Points[3].InY  := ly2 - lry;
-    Result.Points[3].OutX := lx2;                    { c1 of BR arc }
+    Result.Points[3].OutX := lx2;
     Result.Points[3].OutY := ly2 - lry + lk * lry;
 
     { P4: BR arc end }
     Result.Points[4].X    := lx2 - lrx;
     Result.Points[4].Y    := ly2;
-    Result.Points[4].InX  := lx2 - lrx + lk * lrx;  { c2 of BR arc }
+    Result.Points[4].InX  := lx2 - lrx + lk * lrx;
     Result.Points[4].InY  := ly2;
-    Result.Points[4].OutX := lx2 - lrx;              { straight to P5 }
+    Result.Points[4].OutX := lx2 - lrx;
     Result.Points[4].OutY := ly2;
 
     { P5: BL arc start }
     Result.Points[5].X    := lx1 + lrx;
     Result.Points[5].Y    := ly2;
-    Result.Points[5].InX  := lx1 + lrx;              { straight from P4 }
+    Result.Points[5].InX  := lx1 + lrx;
     Result.Points[5].InY  := ly2;
-    Result.Points[5].OutX := lx1 + lrx - lk * lrx;  { c1 of BL arc }
+    Result.Points[5].OutX := lx1 + lrx - lk * lrx;
     Result.Points[5].OutY := ly2;
 
     { P6: BL arc end }
     Result.Points[6].X    := lx1;
     Result.Points[6].Y    := ly2 - lry;
-    Result.Points[6].InX  := lx1;                    { c2 of BL arc }
+    Result.Points[6].InX  := lx1;
     Result.Points[6].InY  := ly2 - lry + lk * lry;
-    Result.Points[6].OutX := lx1;                    { straight to P7 }
+    Result.Points[6].OutX := lx1;
     Result.Points[6].OutY := ly2 - lry;
 
     { P7: TL arc start }
     Result.Points[7].X    := lx1;
     Result.Points[7].Y    := ly1 + lry;
-    Result.Points[7].InX  := lx1;                    { straight from P6 }
+    Result.Points[7].InX  := lx1;
     Result.Points[7].InY  := ly1 + lry;
-    Result.Points[7].OutX := lx1;                    { c1 of TL arc }
+    Result.Points[7].OutX := lx1;
     Result.Points[7].OutY := ly1 + lry - lk * lry;
   end;
 end;
@@ -1124,12 +1461,11 @@ begin
 end;
 
 { Build a THvifStyle for a gradient definition.
-  AScale/AOffX/AOffY: the SVG->HVIF coordinate transform.
-  AvbW/AvbH: viewBox dimensions used as bounding-box approximation for
-             objectBoundingBox gradient units.
+  AViewBox{W,H}: viewBox dimensions used as bounding-box approximation for
+                 objectBoundingBox gradient units.
   ADefs: the full gradient dictionary for resolving xlink:href stop inheritance. }
 function BuildGradientStyle(def: TSvgGradientDef; ADefs: TStringList;
-  AScale, AOffX, AOffY, AvbW, AvbH: Double): THvifStyle;
+  const ARootMatrix: TSvgMatrix; AvbW, AvbH: Double): THvifStyle;
 var
   stops: array of TSvgGradientStop;
   refIdx: Integer;
@@ -1138,6 +1474,7 @@ var
   hcx, hcy, hr: Double;
   tx, ty, sx, shy: Double;
   i: Integer;
+  scale: Double;
 begin
   FillChar(Result, SizeOf(Result), 0);
   Result.StyleType      := hstGradient;
@@ -1170,35 +1507,34 @@ begin
     Result.Stops[i].Color.A   := stops[i].Color.A;
   end;
 
+  { Extract uniform scale factor from root matrix for gradient coords }
+  scale := Sqrt(ARootMatrix.A * ARootMatrix.A + ARootMatrix.B * ARootMatrix.B);
+
   case def.Kind of
     sgkLinear:
     begin
       Result.GradientType := hgtLinear;
 
-      { Convert SVG gradient endpoints to HVIF 64-unit space }
       if SameText(def.GradientUnits, 'userSpaceOnUse') then
       begin
-        hx1 := (def.X1 - AOffX) * AScale;
-        hy1 := (def.Y1 - AOffY) * AScale;
-        hx2 := (def.X2 - AOffX) * AScale;
-        hy2 := (def.Y2 - AOffY) * AScale;
+        hx1 := MX(ARootMatrix, def.X1, def.Y1);
+        hy1 := MY(ARootMatrix, def.X1, def.Y1);
+        hx2 := MX(ARootMatrix, def.X2, def.Y2);
+        hy2 := MY(ARootMatrix, def.X2, def.Y2);
       end
       else
       begin
         { objectBoundingBox: fractions 0..1 relative to bounding box.
           Approximate bounding box with the full viewBox. }
-        hx1 := def.X1 * AvbW * AScale;
-        hy1 := def.Y1 * AvbH * AScale;
-        hx2 := def.X2 * AvbW * AScale;
-        hy2 := def.Y2 * AvbH * AScale;
+        hx1 := def.X1 * AvbW * scale;
+        hy1 := def.Y1 * AvbH * scale;
+        hx2 := def.X2 * AvbW * scale;
+        hy2 := def.Y2 * AvbH * scale;
       end;
 
       { Map to HVIF gradient transform.
         Renderer decodes: p1 = (tx - sx*64, ty - shy*64)
-                          p2 = (tx + sx*64, ty + shy*64)
-        Therefore: tx  = (hx1+hx2)/2, ty  = (hy1+hy2)/2
-                   sx  = (hx2-hx1)/128
-                   shy = (hy2-hy1)/128 }
+                          p2 = (tx + sx*64, ty + shy*64) }
       tx  := (hx1 + hx2) / 2.0;
       ty  := (hy1 + hy2) / 2.0;
       sx  := (hx2 - hx1) / 128.0;
@@ -1218,15 +1554,15 @@ begin
 
       if SameText(def.GradientUnits, 'userSpaceOnUse') then
       begin
-        hcx := (def.CX - AOffX) * AScale;
-        hcy := (def.CY - AOffY) * AScale;
-        hr  := def.R * AScale;
+        hcx := MX(ARootMatrix, def.CX, def.CY);
+        hcy := MY(ARootMatrix, def.CX, def.CY);
+        hr  := def.R * scale;
       end
       else
       begin
-        hcx := def.CX * AvbW * AScale;
-        hcy := def.CY * AvbH * AScale;
-        hr  := def.R * Min(AvbW, AvbH) * AScale;
+        hcx := def.CX * AvbW * scale;
+        hcy := def.CY * AvbH * scale;
+        hr  := def.R * Min(AvbW, AvbH) * scale;
       end;
 
       { Renderer decodes: r = 64 * sqrt(sx^2 + shy^2)
@@ -1243,7 +1579,7 @@ end;
 
 
 { =========================================================
-  SVG element traversal helpers
+  Helper: element attribute access
   ========================================================= }
 
 function GetAttr(elem: TDOMElement; const name: string): string;
@@ -1251,33 +1587,31 @@ begin
   Result := elem.GetAttribute(name);
 end;
 
-{ Collect all visible shape elements (<path>, <rect>, <circle>, <ellipse>,
-  <polygon>, <polyline>, <line>) via a depth-first DOM walk.
-  <defs> subtrees are skipped (they contain only definitions, not shapes). }
-procedure CollectShapeElements(node: TDOMNode; AList: TList);
+{ Returns True if the element should be excluded from rendering.
+  Checks display:none and visibility:hidden in both the style attribute
+  and direct presentation attributes. }
+function IsElementVisible(elem: TDOMElement): Boolean;
 var
-  child: TDOMNode;
-  name: string;
+  styleProps: TStringList;
+  dispStr, visStr: string;
 begin
-  if node.NodeType <> ELEMENT_NODE then Exit;
+  Result := True;
 
-  name := LowerCase(node.NodeName);
+  dispStr := LowerCase(Trim(GetAttr(elem, 'display')));
+  visStr  := LowerCase(Trim(GetAttr(elem, 'visibility')));
 
-  { Skip <defs> — their contents are definitions, not rendered shapes }
-  if SameText(name, 'defs') then Exit;
-
-  if SameText(name, 'path')     or SameText(name, 'rect')     or
-     SameText(name, 'circle')   or SameText(name, 'ellipse')  or
-     SameText(name, 'polygon')  or SameText(name, 'polyline') or
-     SameText(name, 'line') then
-    AList.Add(node);
-
-  child := node.FirstChild;
-  while Assigned(child) do
-  begin
-    CollectShapeElements(child, AList);
-    child := child.NextSibling;
+  styleProps := ParseInlineStyle(GetAttr(elem, 'style'));
+  try
+    if styleProps.IndexOfName('display') >= 0 then
+      dispStr := LowerCase(Trim(styleProps.Values['display']));
+    if styleProps.IndexOfName('visibility') >= 0 then
+      visStr := LowerCase(Trim(styleProps.Values['visibility']));
+  finally
+    styleProps.Free;
   end;
+
+  if dispStr = 'none' then Result := False;
+  if visStr  = 'hidden' then Result := False;
 end;
 
 
@@ -1289,27 +1623,324 @@ class procedure TfpgSvgToHvif.Convert(const ASvgFile, AHvifFile: string);
 var
   doc: TXMLDocument;
   svgRoot: TDOMElement;
-  elemList: TList;
-  elem: TDOMElement;
   gradDefs: TStringList;
-  vbStr, fillStr, opacStr, styleStr, gradId, elemName: string;
-  vbX, vbY, vbW, vbH, scale: Double;
-  svgColor: TSvgColor;
-  opacity: Double;
+  vbStr: string;
+  vbX, vbY, vbW, vbH: Double;
+  rootMatrix: TSvgMatrix;
   writer: THvifWriter;
-  parser: TSvgPathParser;
-  paths: TPathList;
-  path: THvifPath;
-  hvifStyle: THvifStyle;
-  hvifShape: THvifShape;
-  nextStyleIdx, nextPathIdx: Integer;
-  i, j: Integer;
-  styleProps: TStringList;
-  def: TSvgGradientDef;
-  defIdx: Integer;
-  pts: TDoubleArray;
-  rx, ry, cx, cy, r, x1, y1, x2, y2: Double;
-  attrW, attrH, attrX, attrY: Double;
+  nextPathIdx: Integer;
+  addedStyles: array of THvifStyle;
+  addedStyleCount: Integer;
+  i: Integer;
+
+  { ---- Style deduplication ---- }
+  function StylesEqual(const A, B: THvifStyle): Boolean;
+  var
+    k, n: Integer;
+  begin
+    Result := False;
+    if A.StyleType <> B.StyleType then Exit;
+    if A.StyleType = hstSolidColor then
+    begin
+      Result := (A.Color.R = B.Color.R) and
+                (A.Color.G = B.Color.G) and
+                (A.Color.B = B.Color.B) and
+                (A.Color.A = B.Color.A);
+      Exit;
+    end;
+    if A.StyleType = hstGradient then
+    begin
+      if A.GradientType <> B.GradientType then Exit;
+      if A.HasGradTransform <> B.HasGradTransform then Exit;
+      for k := 0 to 5 do
+        if A.GradTransform[k] <> B.GradTransform[k] then Exit;
+      n := Length(A.Stops);
+      if n <> Length(B.Stops) then Exit;
+      for k := 0 to n - 1 do
+      begin
+        if A.Stops[k].Color.R <> B.Stops[k].Color.R then Exit;
+        if A.Stops[k].Color.G <> B.Stops[k].Color.G then Exit;
+        if A.Stops[k].Color.B <> B.Stops[k].Color.B then Exit;
+        if A.Stops[k].Color.A <> B.Stops[k].Color.A then Exit;
+        if A.Stops[k].Offset  <> B.Stops[k].Offset  then Exit;
+      end;
+      Result := True;
+      Exit;
+    end;
+    { Other style types: compare colour only }
+    Result := (A.Color.R = B.Color.R) and
+              (A.Color.G = B.Color.G) and
+              (A.Color.B = B.Color.B) and
+              (A.Color.A = B.Color.A);
+  end;
+
+  function FindOrAddStyle(const s: THvifStyle): Integer;
+  var
+    k: Integer;
+  begin
+    for k := 0 to addedStyleCount - 1 do
+      if StylesEqual(addedStyles[k], s) then
+      begin
+        Result := k;
+        Exit;
+      end;
+    { Not found — append }
+    if addedStyleCount >= Length(addedStyles) then
+      SetLength(addedStyles, addedStyleCount + 32);
+    addedStyles[addedStyleCount] := s;
+    Inc(addedStyleCount);
+    writer.AddStyle(s);
+    Result := addedStyleCount - 1;
+  end;
+
+  { ---- Recursive element processor ---- }
+  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix); forward;
+
+  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix);
+  var
+    elemName: string;
+    localMatrix, childMatrix: TSvgMatrix;
+    transformStr, fillStr, opacStr, styleStr, gradId, elemName2: string;
+    svgColor: TSvgColor;
+    opacity: Double;
+    hvifStyle: THvifStyle;
+    hvifShape: THvifShape;
+    paths: TPathList;
+    path: THvifPath;
+    parser: TSvgPathParser;
+    pts: TDoubleArray;
+    rx, ry, cx, cy, r, x1, y1, x2, y2: Double;
+    attrW, attrH, attrX, attrY: Double;
+    child: TDOMNode;
+    styleIdx, j: Integer;
+    def: TSvgGradientDef;
+    defIdx: Integer;
+    styleProps: TStringList;
+  begin
+    if not IsElementVisible(elem) then Exit;
+
+    elemName := LowerCase(elem.NodeName);
+
+    { Skip <defs> subtrees entirely }
+    if SameText(elemName, 'defs') then Exit;
+
+    { Apply this element's transform onto the group matrix }
+    transformStr := GetAttr(elem, 'transform');
+    if transformStr <> '' then
+      localMatrix := SvgMatrixMul(groupMatrix, ParseSvgTransform(transformStr))
+    else
+      localMatrix := groupMatrix;
+
+    { Recurse into <g> and <svg> containers }
+    if SameText(elemName, 'g') or SameText(elemName, 'svg') then
+    begin
+      child := elem.FirstChild;
+      while Assigned(child) do
+      begin
+        if child.NodeType = ELEMENT_NODE then
+          ProcessElement(TDOMElement(child), localMatrix);
+        child := child.NextSibling;
+      end;
+      Exit;
+    end;
+
+    { Only handle the seven drawable shape elements }
+    if not (SameText(elemName, 'path')     or SameText(elemName, 'rect')     or
+            SameText(elemName, 'circle')   or SameText(elemName, 'ellipse')  or
+            SameText(elemName, 'polygon')  or SameText(elemName, 'polyline') or
+            SameText(elemName, 'line')) then
+      Exit;
+
+    { ---- Resolve fill colour with inline style override ---- }
+    fillStr := GetAttr(elem, 'fill');
+    opacStr := '';
+
+    styleStr := GetAttr(elem, 'style');
+    if styleStr <> '' then
+    begin
+      styleProps := ParseInlineStyle(styleStr);
+      try
+        if styleProps.IndexOfName('fill') >= 0 then
+          fillStr := styleProps.Values['fill'];
+        if styleProps.IndexOfName('fill-opacity') >= 0 then
+          opacStr := styleProps.Values['fill-opacity'];
+        if styleProps.IndexOfName('opacity') >= 0 then
+        begin
+          if opacStr = '' then
+            opacStr := styleProps.Values['opacity']
+          else
+          begin
+            opacity := SvgStrToFloatDef(opacStr, 1.0) *
+                       SvgStrToFloatDef(styleProps.Values['opacity'], 1.0);
+            Str(opacity:0:6, opacStr);
+          end;
+        end;
+      finally
+        styleProps.Free;
+      end;
+    end;
+
+    if fillStr = '' then fillStr := 'black';
+
+    if opacStr = '' then opacStr := GetAttr(elem, 'fill-opacity');
+    if opacStr = '' then opacStr := GetAttr(elem, 'opacity');
+
+    { ---- Build HVIF style record ---- }
+    FillChar(hvifStyle, SizeOf(hvifStyle), 0);
+
+    if IsUrlRef(fillStr, gradId) then
+    begin
+      defIdx := gradDefs.IndexOf(gradId);
+      if defIdx < 0 then Exit;
+      def := TSvgGradientDef(gradDefs.Objects[defIdx]);
+      hvifStyle := BuildGradientStyle(def, gradDefs, rootMatrix, vbW, vbH);
+      if opacStr <> '' then
+      begin
+        opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
+        for j := 0 to High(hvifStyle.Stops) do
+          hvifStyle.Stops[j].Color.A :=
+            Byte(Round(hvifStyle.Stops[j].Color.A * opacity));
+      end;
+    end
+    else
+    begin
+      svgColor := ParseSvgColor(fillStr);
+      if svgColor.IsNone then Exit;
+
+      if opacStr <> '' then
+      begin
+        opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
+        svgColor.A := Byte(Round(svgColor.A * opacity));
+      end;
+
+      hvifStyle.StyleType := hstSolidColor;
+      hvifStyle.Color.R   := svgColor.R;
+      hvifStyle.Color.G   := svgColor.G;
+      hvifStyle.Color.B   := svgColor.B;
+      hvifStyle.Color.A   := svgColor.A;
+    end;
+
+    styleIdx := FindOrAddStyle(hvifStyle);
+
+    { ---- Generate path(s) for the element ---- }
+    SetLength(paths, 0);
+    elemName2 := elemName; { suppress warning about using loop var in nested }
+
+    if SameText(elemName2, 'path') then
+    begin
+      parser := TSvgPathParser.Create(GetAttr(elem, 'd'), localMatrix);
+      try
+        paths := parser.Parse;
+      finally
+        parser.Free;
+      end;
+    end
+    else if SameText(elemName2, 'rect') then
+    begin
+      attrX := SvgStrToFloatDef(GetAttr(elem, 'x'), 0);
+      attrY := SvgStrToFloatDef(GetAttr(elem, 'y'), 0);
+      attrW := SvgStrToFloatDef(GetAttr(elem, 'width'),  0);
+      attrH := SvgStrToFloatDef(GetAttr(elem, 'height'), 0);
+      rx    := SvgStrToFloatDef(GetAttr(elem, 'rx'), 0);
+      ry    := SvgStrToFloatDef(GetAttr(elem, 'ry'), 0);
+      if (rx = 0) and (ry > 0) then rx := ry;
+      if (ry = 0) and (rx > 0) then ry := rx;
+      if (attrW > 0) and (attrH > 0) then
+      begin
+        SetLength(paths, 1);
+        paths[0] := BuildRectPath(attrX, attrY, attrW, attrH, rx, ry, localMatrix);
+      end;
+    end
+    else if SameText(elemName2, 'circle') then
+    begin
+      cx := SvgStrToFloatDef(GetAttr(elem, 'cx'), 0);
+      cy := SvgStrToFloatDef(GetAttr(elem, 'cy'), 0);
+      r  := SvgStrToFloatDef(GetAttr(elem, 'r'),  0);
+      if r > 0 then
+      begin
+        SetLength(paths, 1);
+        paths[0] := BuildEllipsePath(cx, cy, r, r, localMatrix);
+      end;
+    end
+    else if SameText(elemName2, 'ellipse') then
+    begin
+      cx := SvgStrToFloatDef(GetAttr(elem, 'cx'), 0);
+      cy := SvgStrToFloatDef(GetAttr(elem, 'cy'), 0);
+      rx := SvgStrToFloatDef(GetAttr(elem, 'rx'), 0);
+      ry := SvgStrToFloatDef(GetAttr(elem, 'ry'), 0);
+      if (rx > 0) and (ry > 0) then
+      begin
+        SetLength(paths, 1);
+        paths[0] := BuildEllipsePath(cx, cy, rx, ry, localMatrix);
+      end;
+    end
+    else if SameText(elemName2, 'polygon') then
+    begin
+      pts := ParseSvgPoints(GetAttr(elem, 'points'));
+      if Length(pts) >= 4 then
+      begin
+        SetLength(paths, 1);
+        paths[0] := BuildPolygonPath(pts, True, localMatrix);
+      end;
+    end
+    else if SameText(elemName2, 'polyline') then
+    begin
+      pts := ParseSvgPoints(GetAttr(elem, 'points'));
+      if Length(pts) >= 4 then
+      begin
+        SetLength(paths, 1);
+        paths[0] := BuildPolygonPath(pts, False, localMatrix);
+      end;
+    end
+    else if SameText(elemName2, 'line') then
+    begin
+      x1 := SvgStrToFloatDef(GetAttr(elem, 'x1'), 0);
+      y1 := SvgStrToFloatDef(GetAttr(elem, 'y1'), 0);
+      x2 := SvgStrToFloatDef(GetAttr(elem, 'x2'), 0);
+      y2 := SvgStrToFloatDef(GetAttr(elem, 'y2'), 0);
+      SetLength(pts, 4);
+      pts[0] := x1; pts[1] := y1;
+      pts[2] := x2; pts[3] := y2;
+      SetLength(paths, 1);
+      paths[0] := BuildPolygonPath(pts, False, localMatrix);
+    end;
+
+    if Length(paths) = 0 then Exit;
+
+    { Filter out degenerate paths (fewer than 2 points) }
+    j := 0;
+    while j <= High(paths) do
+    begin
+      if Length(paths[j].Points) < 2 then
+      begin
+        path := paths[j];
+        Move(paths[j+1], paths[j],
+          (Length(paths) - j - 1) * SizeOf(THvifPath));
+        SetLength(paths, Length(paths) - 1);
+      end
+      else
+        Inc(j);
+    end;
+
+    if Length(paths) = 0 then Exit;
+
+    { Add all sub-paths to the writer }
+    for j := 0 to High(paths) do
+      writer.AddPath(paths[j]);
+
+    { Build shape referencing this style and all its paths }
+    FillChar(hvifShape, SizeOf(hvifShape), 0);
+    hvifShape.StyleIndex     := Byte(styleIdx);
+    hvifShape.HasTransform   := False;
+    hvifShape.HasTranslation := False;
+    SetLength(hvifShape.PathIndices, Length(paths));
+    for j := 0 to High(paths) do
+      hvifShape.PathIndices[j] := Byte(nextPathIdx + j);
+    writer.AddShape(hvifShape);
+
+    Inc(nextPathIdx, Length(paths));
+  end;
+
 begin
   ReadXMLFile(doc, ASvgFile);
   try
@@ -1322,7 +1953,7 @@ begin
       vbW := SvgStrToFloatDef(GetAttr(svgRoot, 'width'),  64);
       vbH := SvgStrToFloatDef(GetAttr(svgRoot, 'height'), 64);
     end;
-    scale := 64.0 / Max(vbW, vbH);
+    rootMatrix := MakeViewBoxMatrix(vbX, vbY, vbW, vbH);
 
     { ---- First pass: collect gradient definitions from <defs> ---- }
     gradDefs := TStringList.Create;
@@ -1332,236 +1963,12 @@ begin
 
       writer := THvifWriter.Create;
       try
-        nextStyleIdx := 0;
-        nextPathIdx  := 0;
+        nextPathIdx    := 0;
+        addedStyleCount := 0;
+        SetLength(addedStyles, 32);
 
-        { ---- Second pass: collect and process all shape elements ---- }
-        elemList := TList.Create;
-        try
-          CollectShapeElements(doc.DocumentElement, elemList);
-
-          for i := 0 to elemList.Count - 1 do
-          begin
-            elem     := TDOMElement(elemList[i]);
-            elemName := LowerCase(elem.NodeName);
-
-            { ---- Resolve fill colour with inline style override ---- }
-            fillStr := GetAttr(elem, 'fill');
-            opacStr := '';
-
-            styleStr := GetAttr(elem, 'style');
-            if styleStr <> '' then
-            begin
-              styleProps := ParseInlineStyle(styleStr);
-              try
-                { Inline style takes precedence over presentation attributes }
-                if styleProps.IndexOfName('fill') >= 0 then
-                  fillStr := styleProps.Values['fill'];
-                if styleProps.IndexOfName('fill-opacity') >= 0 then
-                  opacStr := styleProps.Values['fill-opacity'];
-                if styleProps.IndexOfName('opacity') >= 0 then
-                begin
-                  { When both are present, multiply; store in opacStr for now }
-                  if opacStr = '' then
-                    opacStr := styleProps.Values['opacity']
-                  else
-                  begin
-                    opacity := SvgStrToFloatDef(opacStr, 1.0) *
-                               SvgStrToFloatDef(styleProps.Values['opacity'], 1.0);
-                    Str(opacity:0:6, opacStr);
-                  end;
-                end;
-              finally
-                styleProps.Free;
-              end;
-            end;
-
-            if fillStr = '' then fillStr := 'black';
-
-            { ---- Apply fill-opacity and opacity from direct attributes
-                   (only if not already set by inline style) ---- }
-            if opacStr = '' then
-              opacStr := GetAttr(elem, 'fill-opacity');
-            if opacStr = '' then
-              opacStr := GetAttr(elem, 'opacity');
-
-            { ---- Build HVIF style record ---- }
-            FillChar(hvifStyle, SizeOf(hvifStyle), 0);
-
-            if IsUrlRef(fillStr, gradId) then
-            begin
-              { Gradient fill: look up definition }
-              defIdx := gradDefs.IndexOf(gradId);
-              if defIdx < 0 then Continue; { Unknown gradient — skip shape }
-              def := TSvgGradientDef(gradDefs.Objects[defIdx]);
-              hvifStyle := BuildGradientStyle(def, gradDefs,
-                             scale, vbX, vbY, vbW, vbH);
-              { Apply overall opacity to gradient stops }
-              if opacStr <> '' then
-              begin
-                opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
-                for j := 0 to High(hvifStyle.Stops) do
-                  hvifStyle.Stops[j].Color.A :=
-                    Byte(Round(hvifStyle.Stops[j].Color.A * opacity));
-              end;
-            end
-            else
-            begin
-              { Solid colour fill }
-              svgColor := ParseSvgColor(fillStr);
-              if svgColor.IsNone then Continue;
-
-              if opacStr <> '' then
-              begin
-                opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
-                svgColor.A := Byte(Round(svgColor.A * opacity));
-              end;
-
-              hvifStyle.StyleType := hstSolidColor;
-              hvifStyle.Color.R   := svgColor.R;
-              hvifStyle.Color.G   := svgColor.G;
-              hvifStyle.Color.B   := svgColor.B;
-              hvifStyle.Color.A   := svgColor.A;
-            end;
-
-            writer.AddStyle(hvifStyle);
-
-            { ---- Generate path(s) for the element ---- }
-            SetLength(paths, 0);
-
-            if SameText(elemName, 'path') then
-            begin
-              parser := TSvgPathParser.Create(
-                GetAttr(elem, 'd'), scale, vbX, vbY);
-              try
-                paths := parser.Parse;
-              finally
-                parser.Free;
-              end;
-            end
-            else if SameText(elemName, 'rect') then
-            begin
-              attrX := SvgStrToFloatDef(GetAttr(elem, 'x'), 0);
-              attrY := SvgStrToFloatDef(GetAttr(elem, 'y'), 0);
-              attrW := SvgStrToFloatDef(GetAttr(elem, 'width'),  0);
-              attrH := SvgStrToFloatDef(GetAttr(elem, 'height'), 0);
-              rx    := SvgStrToFloatDef(GetAttr(elem, 'rx'), 0);
-              ry    := SvgStrToFloatDef(GetAttr(elem, 'ry'), 0);
-              { SVG spec: if only one of rx/ry is given, the other equals it }
-              if (rx = 0) and (ry > 0) then rx := ry;
-              if (ry = 0) and (rx > 0) then ry := rx;
-              if (attrW > 0) and (attrH > 0) then
-              begin
-                SetLength(paths, 1);
-                paths[0] := BuildRectPath(
-                  attrX, attrY, attrW, attrH, rx, ry, scale, vbX, vbY);
-              end;
-            end
-            else if SameText(elemName, 'circle') then
-            begin
-              cx := SvgStrToFloatDef(GetAttr(elem, 'cx'), 0);
-              cy := SvgStrToFloatDef(GetAttr(elem, 'cy'), 0);
-              r  := SvgStrToFloatDef(GetAttr(elem, 'r'),  0);
-              if r > 0 then
-              begin
-                SetLength(paths, 1);
-                paths[0] := BuildEllipsePath(cx, cy, r, r, scale, vbX, vbY);
-              end;
-            end
-            else if SameText(elemName, 'ellipse') then
-            begin
-              cx := SvgStrToFloatDef(GetAttr(elem, 'cx'), 0);
-              cy := SvgStrToFloatDef(GetAttr(elem, 'cy'), 0);
-              rx := SvgStrToFloatDef(GetAttr(elem, 'rx'), 0);
-              ry := SvgStrToFloatDef(GetAttr(elem, 'ry'), 0);
-              if (rx > 0) and (ry > 0) then
-              begin
-                SetLength(paths, 1);
-                paths[0] := BuildEllipsePath(cx, cy, rx, ry, scale, vbX, vbY);
-              end;
-            end
-            else if SameText(elemName, 'polygon') then
-            begin
-              pts := ParseSvgPoints(GetAttr(elem, 'points'));
-              if Length(pts) >= 4 then
-              begin
-                SetLength(paths, 1);
-                paths[0] := BuildPolygonPath(pts, True, scale, vbX, vbY);
-              end;
-            end
-            else if SameText(elemName, 'polyline') then
-            begin
-              pts := ParseSvgPoints(GetAttr(elem, 'points'));
-              if Length(pts) >= 4 then
-              begin
-                SetLength(paths, 1);
-                paths[0] := BuildPolygonPath(pts, False, scale, vbX, vbY);
-              end;
-            end
-            else if SameText(elemName, 'line') then
-            begin
-              x1 := SvgStrToFloatDef(GetAttr(elem, 'x1'), 0);
-              y1 := SvgStrToFloatDef(GetAttr(elem, 'y1'), 0);
-              x2 := SvgStrToFloatDef(GetAttr(elem, 'x2'), 0);
-              y2 := SvgStrToFloatDef(GetAttr(elem, 'y2'), 0);
-              { Build as a two-point open polygon }
-              SetLength(pts, 4);
-              pts[0] := x1; pts[1] := y1;
-              pts[2] := x2; pts[3] := y2;
-              SetLength(paths, 1);
-              paths[0] := BuildPolygonPath(pts, False, scale, vbX, vbY);
-            end;
-
-            { Skip if no valid geometry produced }
-            if Length(paths) = 0 then
-            begin
-              Inc(nextStyleIdx);
-              Continue;
-            end;
-
-            { Filter out degenerate paths (fewer than 2 points) }
-            j := 0;
-            while j <= High(paths) do
-            begin
-              if Length(paths[j].Points) < 2 then
-              begin
-                { Remove this path by shifting remaining down }
-                path := paths[j];
-                Move(paths[j+1], paths[j],
-                  (Length(paths) - j - 1) * SizeOf(THvifPath));
-                SetLength(paths, Length(paths) - 1);
-              end
-              else
-                Inc(j);
-            end;
-
-            if Length(paths) = 0 then
-            begin
-              Inc(nextStyleIdx);
-              Continue;
-            end;
-
-            { Add all sub-paths to the writer }
-            for j := 0 to High(paths) do
-              writer.AddPath(paths[j]);
-
-            { Build shape referencing this style and all its paths }
-            FillChar(hvifShape, SizeOf(hvifShape), 0);
-            hvifShape.StyleIndex     := nextStyleIdx;
-            hvifShape.HasTransform   := False;
-            hvifShape.HasTranslation := False;
-            SetLength(hvifShape.PathIndices, Length(paths));
-            for j := 0 to High(paths) do
-              hvifShape.PathIndices[j] := nextPathIdx + j;
-            writer.AddShape(hvifShape);
-
-            Inc(nextStyleIdx);
-            Inc(nextPathIdx, Length(paths));
-          end;
-
-        finally
-          elemList.Free;
-        end;
+        { ---- Second pass: traverse all elements recursively ---- }
+        ProcessElement(svgRoot, rootMatrix);
 
         writer.SaveToFile(AHvifFile);
       finally
@@ -1569,7 +1976,6 @@ begin
       end;
 
     finally
-      { Free the TSvgGradientDef objects owned by gradDefs }
       for i := 0 to gradDefs.Count - 1 do
         gradDefs.Objects[i].Free;
       gradDefs.Free;

@@ -875,17 +875,22 @@ begin
               AAgg.fillRadialGradient(tx, ty, r, c1, c2);
             end;
 
-          else
+          hgtDiamond:
             begin
-              { Diamond/Conic/XY/SqrtXY: v1 fallback to first stop colour }
-              {$IFDEF DEBUG}
-              WriteLn('fpg_hvif: gradient type ', Ord(style.GradientType),
-                      ' not supported in v1 — using solid fallback');
-              {$ENDIF}
-              AAgg.fillColor(style.Stops[0].Color.R,
-                             style.Stops[0].Color.G,
-                             style.Stops[0].Color.B,
-                             style.Stops[0].Color.A);
+              r := 64.0 * Sqrt(sx * sx + shy * shy);
+              AAgg.fillDiamondGradient(tx, ty, r, c1, c2);
+            end;
+
+          hgtConic:
+            begin
+              r := 64.0 * Sqrt(sx * sx + shy * shy);
+              AAgg.fillConicGradient(tx, ty, r, c1, c2);
+            end;
+
+          hgtXY, hgtSqrtXY:
+            begin
+              r := 64.0 * Sqrt(sx * sx + shy * shy);
+              AAgg.fillXYGradient(tx, ty, r, c1, c2);
             end;
         end;
       end;
