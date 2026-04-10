@@ -82,6 +82,7 @@ implementation
 
 uses
   agg_basics,
+  agg_font_engine,
   agg_font_cache_manager,
   agg_font_win32_tt,
   fpg_main,
@@ -202,6 +203,11 @@ begin
     This matches how TfpgGDIFontResource.OpenFontByDesc computes lfHeight. }
   dpi := GetDeviceCaps(FDC, LOGPIXELSY);
   PFontEngine(FEnginePtr)^.resolution_(dpi);
+
+  { GetGlyphOutline returns outlines in Y-up (mathematical) coordinates.
+    Flipping Y maps them to screen coordinates (Y-down) so glyphs render
+    the right way up. }
+  PFontEngine(FEnginePtr)^.flip_y_(True);
 
   weight := FW_NORMAL;
   if FBold then weight := FW_BOLD;

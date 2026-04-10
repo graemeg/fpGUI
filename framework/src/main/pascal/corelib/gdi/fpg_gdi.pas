@@ -2362,9 +2362,21 @@ end;
 procedure TfpgGDIWindow.DoSetWindowVisible(const AValue: Boolean);
 var
   r: TRect;
+  msgp: TfpgMessageParams;
 begin
   if AValue then
   begin
+    { X11 sends a configure-notify when a window is first mapped, which
+      triggers the layout manager before the first paint. Windows does not
+      generate WM_SIZE on first show when the window is already at its
+      constructed size (the deduplication guard in the WM_SIZE handler
+      swallows it). Send an explicit FPGM_RESIZE *before* ShowWindow so
+      any pending layout pass runs before UpdateWindow forces the first
+      paint — matching X11 behaviour. }
+    msgp.rect.Width  := FSize.W;
+    msgp.rect.Height := FSize.H;
+    fpgSendMessage(nil, PrimaryWidget, FPGM_RESIZE, msgp);
+
     FSkipResizeMessage := True;
     BringWindowToTop(FWinHandle);
 
