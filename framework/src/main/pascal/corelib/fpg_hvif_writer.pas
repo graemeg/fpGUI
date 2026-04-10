@@ -36,7 +36,7 @@ interface
 
 uses
   Classes, SysUtils,
-  fpg_hvif;
+  fpg_hvif_model;
 
 
 { =========================================================

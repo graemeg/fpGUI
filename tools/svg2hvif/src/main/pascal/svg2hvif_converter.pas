@@ -39,7 +39,7 @@ interface
 
 uses
   SysUtils, Math, Classes,
-  fpg_hvif, fpg_hvif_writer;
+  fpg_hvif_model, fpg_hvif_writer;
 
 type
   EsvgConvertError = class(Exception);

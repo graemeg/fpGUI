@@ -8,10 +8,11 @@
     <projectType>application</projectType>
     <mainSource>svg2hvif.lpr</mainSource>
     <executableName>svg2hvif</executableName>
-  </build>
 
-  <moduleDependencies>
-    <module>../../framework</module>
-  </moduleDependencies>
+    <unitPaths>
+      <path>../../framework/src/main/pascal/corelib</path>
+    </unitPaths>
+
+  </build>
 
 </project>

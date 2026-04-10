@@ -31,4 +31,9 @@
     </frameworkOptions>
   </test>
 
+  <!-- only because we want the tool for resource compilation -->
+  <moduleDependencies>
+    <module>../tools/svg2hvif</module>
+  </moduleDependencies>
+
 </project>
