@@ -2,11 +2,11 @@
 <project>
   <name>fpgui-svg2hvif</name>
   <author>Graeme Geldenhuys</author>
-  <license>LGPL</license>
+  <license>BSD-3-Clause</license>
 
   <build>
     <projectType>application</projectType>
-    <mainSource>svg2hvif.lpr</mainSource>
+    <mainSource>svg2hvif.pas</mainSource>
     <executableName>svg2hvif</executableName>
 
     <unitPaths>

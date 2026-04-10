@@ -1,7 +1,13 @@
 {
     svg2hvif — SVG to Haiku Vector Icon Format (HVIF) converter.
 
+    Copyright (c) 2026 Graeme Geldenhuys
+
     This program is part of the fpGUI Toolkit project.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Usage:
       svg2hvif [options] <input.svg> [<output.hvif>]
