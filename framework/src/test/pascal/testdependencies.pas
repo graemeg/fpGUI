@@ -35,7 +35,8 @@ uses
   tctimer,
   tcmsgcoalesce,
   tcasynctask,
-  tchvif;
+  tchvif,
+  tchvif_writer;
 
 implementation
 
