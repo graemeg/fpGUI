@@ -69,6 +69,7 @@ type
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
     FLastCallStack:            TStringArray;
+    FLastEvalResult:           TVariableValue;
     FOnStopped:      TDebugStopEvent;
     FOnTerminated:   TNotifyEvent;
     FOnOutput:       TDebugOutputEvent;
@@ -97,6 +98,7 @@ type
     function  RemoveBreakpoint(AHandle: TBreakpointHandle): Boolean;
     procedure SetBreakpointLive(const ALocation: String; ATag: Integer);
     procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
+    procedure EvaluateExpressionLive(const AExpr: String; AOnDone: TNotifyEvent);
     procedure SetVarCollectScope(AValue: Boolean);
     procedure SetVarCollectGlobals(AValue: Boolean);
 
@@ -105,6 +107,7 @@ type
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
     property LastCallStack:            TStringArray        read FLastCallStack;
+    property LastEvalResult:           TVariableValue      read FLastEvalResult;
     property OnStopped:      TDebugStopEvent read FOnStopped      write FOnStopped;
     property OnTerminated:   TNotifyEvent    read FOnTerminated    write FOnTerminated;
     property OnOutput:       TDebugOutputEvent read FOnOutput      write FOnOutput;
@@ -200,6 +203,17 @@ end;
 
 procedure TIDEDebugAdapter.RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
 begin
+end;
+
+procedure TIDEDebugAdapter.EvaluateExpressionLive(const AExpr: String;
+  AOnDone: TNotifyEvent);
+begin
+  { Stub: populate a placeholder result and fire the callback immediately }
+  FLastEvalResult.Name    := AExpr;
+  FLastEvalResult.Value   := '<debug not available — requires FPC 3.3.x>';
+  FLastEvalResult.IsValid := False;
+  if Assigned(AOnDone) then
+    AOnDone(Self);
 end;
 
 procedure TIDEDebugAdapter.SetVarCollectScope(AValue: Boolean);

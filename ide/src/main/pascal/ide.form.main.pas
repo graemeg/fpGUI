@@ -53,6 +53,7 @@ uses
   ide.editor.theme,
   ide.filefinder,
   ide.filemonitor,
+  ide.form.evalexpr,
   ide.form.filefinder,
   ide.form.symbolfinder,
   ide.highlight.renderer,
@@ -148,6 +149,7 @@ type
     miDbgStepOver: TfpgMenuItem;
     miDbgStepOut: TfpgMenuItem;
     miDbgPause: TfpgMenuItem;
+    miDbgEvalExpr: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
@@ -246,6 +248,7 @@ type
     procedure   miDebugStepOver(Sender: TObject);
     procedure   miDebugStepOut(Sender: TObject);
     procedure   miDebugPause(Sender: TObject);
+    procedure   miDebugEvalExpr(Sender: TObject);
     procedure   UpdateDebugControls;
     procedure   ClearAllExecutionLines;
     procedure   StartBuildGoal(const AGoal: string);
@@ -1296,6 +1299,12 @@ begin
   end;
 end;
 
+procedure TMainForm.miDebugEvalExpr(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+    ShowEvalExprDialog(FDebugAdapter);
+end;
+
 procedure TMainForm.UpdateDebugControls;
 var
   IsPaused: Boolean;
@@ -1316,10 +1325,11 @@ begin
   btnDbgStepOut.Enabled  := False;  { not yet supported by PDR engine }
 
   { Menu items }
-  miDbgStepInto.Enabled := IsPaused;
-  miDbgStepOver.Enabled := IsPaused;
-  miDbgStepOut.Enabled  := False;   { not yet supported by PDR engine }
-  miDbgPause.Enabled    := IsRunning;
+  miDbgStepInto.Enabled  := IsPaused;
+  miDbgStepOver.Enabled  := IsPaused;
+  miDbgStepOut.Enabled   := False;   { not yet supported by PDR engine }
+  miDbgPause.Enabled     := IsRunning;
+  miDbgEvalExpr.Enabled  := IsPaused;
 end;
 
 procedure TMainForm.EditorGutterClick(Sender: TObject; ALine: Integer);
@@ -4663,10 +4673,13 @@ begin
     miDbgStepOver := AddMenuItem('Step Over', 'F8', @miDebugStepOver);
     miDbgStepOut  := AddMenuItem('Step Out', rsKeyShift+'F8', @miDebugStepOut);
     miDbgPause    := AddMenuItem('Pause', '', @miDebugPause);
-    miDbgStepInto.Enabled := False;
-    miDbgStepOver.Enabled := False;
-    miDbgStepOut.Enabled  := False;
-    miDbgPause.Enabled    := False;
+    AddSeparator;
+    miDbgEvalExpr := AddMenuItem('Evaluate Expression...', rsKeyCtrl+rsKeyAlt+'F8', @miDebugEvalExpr);
+    miDbgStepInto.Enabled  := False;
+    miDbgStepOver.Enabled  := False;
+    miDbgStepOut.Enabled   := False;
+    miDbgPause.Enabled     := False;
+    miDbgEvalExpr.Enabled  := False;
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);

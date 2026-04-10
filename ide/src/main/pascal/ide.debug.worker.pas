@@ -51,6 +51,7 @@ type
     dcStepLine,
     dcSetBreakpoint,    // Install one breakpoint; result in LastBPHandle
     dcRemoveBreakpoint, // Remove one breakpoint by handle
+    dcEvaluate,         // Evaluate an expression; result in LastEvalResult
     dcQuit              // Tells the thread to exit its loop
   );
 
@@ -85,6 +86,10 @@ type
     FBPLocation: String;
     FBPHandle: TBreakpointHandle;
     FOnBPDone: TThreadMethod;
+    { Evaluate command fields — written by main thread before SendEvaluateExpression }
+    FEvalExpression: String;
+    FEvalResult:     TVariableValue;
+    FOnEvalDone:     TThreadMethod;
     { Collection flags — written from main thread, read in CollectStopInfo.
       Safe without locks: only written when the worker is blocked on ptrace. }
     FCollectScope: Boolean;
@@ -108,10 +113,15 @@ type
     { Remove a single breakpoint by handle on the ptrace owner thread. AOnDone is called
       on the main thread when complete. }
     procedure SendRemoveBreakpoint(AHandle: TBreakpointHandle; AOnDone: TThreadMethod);
+    { Evaluate an expression on the ptrace owner thread. AOnDone is called on the
+      main thread when complete; read LastEvalResult for the result. }
+    procedure SendEvaluateExpression(const AExpr: String; AOnDone: TThreadMethod);
     { Result from the last run/pause command — read after OnCommandDone fires }
     property LastResult: TDebugWorkerResult read FResult;
     { Handle from the last dcSetBreakpoint command — read after OnBPDone fires }
     property LastBPHandle: TBreakpointHandle read FBPHandle;
+    { Result from the last dcEvaluate command — read after OnEvalDone fires }
+    property LastEvalResult: TVariableValue read FEvalResult;
     { Collection flags — set from the main thread to control what CollectStopInfo fetches }
     property CollectScope: Boolean read FCollectScope write FCollectScope;
     property CollectGlobals: Boolean read FCollectGlobals write FCollectGlobals;
@@ -166,6 +176,16 @@ begin
   FBPHandle := AHandle;
   FOnBPDone := AOnDone;
   FCommand  := dcRemoveBreakpoint;
+  RTLEventSetEvent(FCommandEvent);
+end;
+
+procedure TDebugWorkerThread.SendEvaluateExpression(const AExpr: String;
+  AOnDone: TThreadMethod);
+begin
+  FEvalExpression    := AExpr;
+  FEvalResult.IsValid := False;
+  FOnEvalDone        := AOnDone;
+  FCommand           := dcEvaluate;
   RTLEventSetEvent(FCommandEvent);
 end;
 
@@ -265,6 +285,14 @@ begin
       FEngine.RemoveBreakpoint(FBPHandle);
       if not Terminated then
         Synchronize(FOnBPDone);
+      System.Continue;
+    end;
+
+    if Cmd = dcEvaluate then
+    begin
+      FEvalResult := FEngine.EvaluateExpression(FEvalExpression);
+      if not Terminated then
+        Synchronize(FOnEvalDone);
       System.Continue;
     end;
 

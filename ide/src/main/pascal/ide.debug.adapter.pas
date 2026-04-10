@@ -79,8 +79,12 @@ type
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
     FLastCallStack:            TStringArray;
+    { Expression evaluation — result cached from the worker thread }
+    FLastEvalResult: TVariableValue;
+    FOnEvalDone:     TNotifyEvent;
     procedure HandleCommandDone;
     procedure HandleBPDone;
+    procedure HandleEvalDone;
     procedure SendOutput(const AMsg: String);
   public
     constructor Create;
@@ -119,6 +123,10 @@ type
       entry to update. Only valid when State = idsPaused. }
     procedure SetBreakpointLive(const ALocation: String; ATag: Integer);
     procedure RemoveBreakpointLive(AHandle: TBreakpointHandle; ATag: Integer);
+    { Evaluate an expression on the ptrace owner thread. AOnDone is called on
+      the main thread when complete; read LastEvalResult for the result.
+      Only valid when State = idsPaused. }
+    procedure EvaluateExpressionLive(const AExpr: String; AOnDone: TNotifyEvent);
 
     { Variable collection flags — propagated to the worker thread so it only
       fetches what the UI will display. Safe to call at any time. }
@@ -133,6 +141,7 @@ type
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
     property LastCallStack:            TStringArray        read FLastCallStack;
+    property LastEvalResult:           TVariableValue      read FLastEvalResult;
     property Engine: TDebuggerEngine read FEngine;
     property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
     property OnTerminated: TNotifyEvent read FOnTerminated write FOnTerminated;
@@ -298,6 +307,14 @@ begin
     FOnBreakpointSet(Self, FWorkerThread.LastBPHandle, FPendingBPTag);
 end;
 
+procedure TIDEDebugAdapter.HandleEvalDone;
+begin
+  if FWorkerThread <> nil then
+    FLastEvalResult := FWorkerThread.LastEvalResult;
+  if Assigned(FOnEvalDone) then
+    FOnEvalDone(Self);
+end;
+
 procedure TIDEDebugAdapter.SetBreakpointLive(const ALocation: String; ATag: Integer);
 begin
   if (FState = idsPaused) and (FWorkerThread <> nil) then
@@ -313,6 +330,16 @@ begin
   begin
     FPendingBPTag := ATag;
     FWorkerThread.SendRemoveBreakpoint(AHandle, @HandleBPDone);
+  end;
+end;
+
+procedure TIDEDebugAdapter.EvaluateExpressionLive(const AExpr: String;
+  AOnDone: TNotifyEvent);
+begin
+  if (FState = idsPaused) and (FWorkerThread <> nil) then
+  begin
+    FOnEvalDone := AOnDone;
+    FWorkerThread.SendEvaluateExpression(AExpr, @HandleEvalDone);
   end;
 end;
 
