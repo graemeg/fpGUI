@@ -76,14 +76,6 @@
       <id>macos</id>
       <defines>
          <define>cocoa</define>
-         <define>AggCanvas</define>
-      </defines>
-    </profile>
-
-    <profile>
-      <id>agg</id>
-      <defines>
-         <define>AggCanvas</define>
       </defines>
     </profile>
 
