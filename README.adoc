@@ -10,8 +10,9 @@
 fpGUI is a cross-platform GUI toolkit written entirely in Object Pascal using the
 https://www.freepascal.org[Free Pascal Compiler]. It provides a custom-drawn widget
 set that renders consistently across all supported platforms, with no external widget
-toolkit dependencies. Applications can use native platform APIs (X11, GDI, Cocoa) or
-the built-in AggPas software rendering canvas for fully platform-independent output.
+toolkit dependencies. All rendering is done through the built-in AggPas hybrid canvas,
+which uses platform APIs (X11, GDI, Cocoa) for window management and input while
+delivering fully platform-independent, pixel-perfect output via software rasterisation.
 
 image:https://img.shields.io/badge/FPC-3.2.2+-blue.svg[FPC Version]
 image:https://img.shields.io/badge/license-LGPL--2.1%20with%20linking%20exception-green.svg[License]
@@ -21,7 +22,7 @@ toc::[]
 == Features
 
 * **Cross-platform**: Linux (X11), Windows (GDI), macOS (Cocoa), FreeBSD, OpenSolaris
-* **Dual rendering backends**: Native platform canvas or 100% Object Pascal AggPas software canvas
+* **AggPas hybrid canvas**: Platform-independent rendering via 100% Object Pascal software rasteriser
 * **No external dependencies**: No GTK, Qt, or other widget toolkit required
 * **Custom-drawn widgets**: Consistent look and feel across all platforms
 * **Themeable**: Multiple built-in styles including plastic and dark themes
@@ -66,15 +67,11 @@ Install the X11 development libraries:
 sudo apt-get install libx11-dev libxft-dev
 ----
 
-==== AggPas Canvas (optional)
+==== AggPas Canvas
 
-When using the AggPas rendering backend, ensure the Liberation Sans font is installed
-on Linux/FreeBSD. On Windows, the AggPas canvas uses Arial, which is included with
-the OS.
-
-The AggPas canvas on Windows defaults to the native Win32 TrueType font engine. You
-can optionally switch to the FreeType font engine by compiling with the `freetype`
-build profile, though this requires distributing `freetype.dll` with your application.
+fpGUI uses the AggPas hybrid canvas on all platforms. Ensure the Liberation Sans font
+is installed on Linux/FreeBSD. On Windows, the canvas uses Arial (included with the OS)
+via the native Win32 TrueType font engine — no external DLL required.
 
 === Compiling the Framework
 
@@ -82,17 +79,13 @@ Using PasBuild from the project root:
 
 [source,bash]
 ----
-# Linux with AggPas canvas
-pasbuild compile -p unix,agg
+# Linux / FreeBSD
+pasbuild compile -m fpgui-framework -p unix
+pasbuild compile -m fpgui-framework -p unix,debug   # with debug symbols
 
-# Linux with native X11 canvas
-pasbuild compile -p unix
-
-# Windows with AggPas canvas and native font engine
-pasbuild compile -p windows,agg
-
-# Windows with AggPas canvas and freetype font engine
-pasbuild compile -p windows,agg,freetype
+# Windows
+pasbuild compile -m fpgui-framework -p windows
+pasbuild compile -m fpgui-framework -p windows,debug  # with debug symbols
 ----
 
 === Running Tests

@@ -2,7 +2,7 @@
   Release notes for fpGUI
   =======================
 
-v2.1.0 (unreleased) - last used SHA1 d353b99e
+v2.1.0 (unreleased) - last used SHA1 175e867e
 
   - Event Loop Rearchitecture
     * Wake channel infrastructure (IWakeChannel interface) enables worker
@@ -25,34 +25,50 @@ v2.1.0 (unreleased) - last used SHA1 d353b99e
       tasks that publish progress to the GUI thread safely.
     * New fpgInvokeLater() for scheduling work on the main thread from
       any thread.
-  - Hybrid Canvas (new)
-    * New hybrid canvas backend combining AggPas 2D rendering with native
-      text output. Activated via the AGGCanvas compiler define.
+  - Hybrid Canvas (AggCanvas) — now default on all platforms
+    * The AggPas hybrid canvas is now the default on all platforms.
+      No extra build profile is required; the 'agg' and 'freetype'
+      profiles have been removed.
     * Cached bitmap glyph rendering for fast syntax-highlighted text.
     * Deferred text rendering for correct z-order with alien widgets.
     * Platform buffer managers added for Windows (GDI) and macOS (Cocoa).
     * Performance: fast-path for opaque rectangle fills, bypassing AggPas
       blending when alpha is not needed.
+    * Fixed several Windows-specific rendering issues: upside-down text on
+      32-bit FPC 3.2.2, layout not applied on first show of modal dialogs,
+      and a compilation error on 32-bit targets.
+    * Legacy Agg2D canvas moved out of the framework source to extras/aggpas/.
   - Fusion Style (new)
     * Added Fusion Light and Fusion Dark application styles, inspired by
       Qt5 Fusion. Fusion Light is now the default IDE style.
     * Fusion-style page control tabs and body rendering.
     * Checkbox, radio button, and progress bar painting delegated to
       TfpgStyle, enabling per-style customisation.
+  - HiDPI improvements
+    * Improved HiDPI scaling for the GDI (Windows) and X11 backends.
   - Maximus IDE
     * PasBuild backend integration (Phase 3.2): TPasBuildProjectBackend
       bridges the IDE with the PasBuild build system.
     * Project tree redesign (Phase 3.4): displays modules, dependencies,
       and build profiles as tree nodes with accent colour category headers.
     * Multi-module UI with aggregator project support (Phase 3.6).
+    * Dependency tree visualisation added to the project tree (Phase 3.7).
     * Build actions: clean, rebuild, and test added to IDE toolbar.
     * INI and XML syntax highlighting added.
-    * Interface/implementation section navigation added.
     * MigLayout used throughout the IDE UI, including a TfpgMigSplitter
       and MigLayout-managed status bar.
     * Session persistence: open files, window layout, and file dialog
       directories are saved and restored per project.
     * Edit menu: Duplicate Line, Delete Line, Undo, and Redo added.
+    * Status bar shows cursor position, file path, and current git branch.
+    * Go to Declaration (Ctrl+B / Ctrl+Click) with cross-unit resolution
+      including FPC RTL and packages.
+    * Find Usages (Alt+F7) with highlighted context column.
+    * Quick Documentation popup (Ctrl+F1).
+    * Navigate to File and Navigate to Symbol dialogs with fuzzy matching.
+    * Cursor history back/forward navigation.
+    * Custom Pascal tokeniser replacing vendored fcl-passrc, used by the
+      highlighter, symbol finder, procedure list, and declaration finder.
   - DocView
     * Project restructured and added as a PasBuild module.
     * Fixed rendering stopping prematurely, leaving a blank area at the
@@ -74,6 +90,7 @@ v2.1.0 (unreleased) - last used SHA1 d353b99e
     * Added wpMainFormCenter window position option; centralised window
       positioning logic into fpg_form.pas.
     * Experimental multi-monitor and per-screen DPI support.
+    * Fixed several bounds-checking issues in the text editor component.
   - Code Hygiene
     * Replaced bundled SynRegExpr with FPC's standard RegExpr unit.
     * Replaced bundled mPasLex with FPC's fcl-passrc for Procedure List.
@@ -82,6 +99,9 @@ v2.1.0 (unreleased) - last used SHA1 d353b99e
     * Removed VLC units (now part of FPC's Free Component Library).
     * Removed MigLayout Java reference source (porting complete).
     * Removed unused and empty style units.
+    * Removed vendored fcl-passrc (replaced by custom Pascal tokeniser).
+    * Moved documentation and Lazarus IDE integration package out of the
+      framework source tree.
 
 v2.0.3 (2026-02-14)
   - Bug Fixes

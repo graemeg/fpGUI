@@ -2267,8 +2267,10 @@ procedure Agg2D.font(
            italic : boolean = false;
            ch : FontCacheType = VectorFontCache;
            angle : double = 0.0 );
+{$IFDEF AGG2D_USE_WINFONTS}
 var
  b : int;
+{$ENDIF }
 
 begin
  m_textAngle    :=angle;

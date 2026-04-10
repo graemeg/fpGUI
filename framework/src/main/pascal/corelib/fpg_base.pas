@@ -334,6 +334,13 @@ type
     function    GetCanvasRef: TObject; virtual;
     // IFontEngine end
     function    HandleIsValid: boolean; virtual; abstract;
+    { Render AText into an BGRA pixel buffer — used by the hybrid canvas
+      (AggCanvas). AX, AY define the baseline position (caller has already
+      added GetAscent to the top-of-line Y). Clip rect is in buffer pixels.
+      Non-hybrid-canvas font resources inherit the default no-op. }
+    procedure   DrawTextToBuffer(ABuf: PByte; AStride, ABufW, ABufH,
+                  AX, AY: Integer; const AText: string; AColor: TfpgColor;
+                  AClipX1, AClipY1, AClipX2, AClipY2: Integer); virtual;
     property    FontDesc: string read FFontDesc;
   end;
 
@@ -3344,6 +3351,14 @@ begin
   // Font manager owns font resources and handles cleanup
   // No need to notify - cache will free fonts when destroyed
   inherited Destroy;
+end;
+
+procedure TfpgFontResourceBase.DrawTextToBuffer(ABuf: PByte;
+  AStride, ABufW, ABufH, AX, AY: Integer; const AText: string;
+  AColor: TfpgColor; AClipX1, AClipY1, AClipX2, AClipY2: Integer);
+begin
+  { Default no-op: native font resources (X11, GDI) do not render to
+    pixel buffers. Override in AggCanvas font resources. }
 end;
 
 

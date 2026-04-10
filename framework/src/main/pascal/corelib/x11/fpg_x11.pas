@@ -225,7 +225,7 @@ type
     constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
-  end;
+  end deprecated 'Native X11 canvas superseded by THybridCanvas (AggCanvas). Will be removed in a future release.';
 
 
   TfpgX11Window = class(TfpgWindowBase)

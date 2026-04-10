@@ -30,27 +30,25 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_fontmanager,
-  fpg_fontresource_freetype,
-  agg_2D,
-  fpg_glyph_cache;
+  agg_2D;
 
 type
 
-  { THybridCanvas — composes a clean Agg2D object for 2D rendering
-    with TGlyphCache for cached FreeType bitmap glyph text rendering
-    and IBufferManager for platform-specific pixel buffer operations.
+  { THybridCanvas — composes a clean Agg2D object for 2D rendering and
+    IBufferManager for platform-specific pixel buffer operations.
 
     Inherits from TfpgCanvasBase to satisfy the fpGUI canvas contract.
     All 2D operations are forwarded to the internal Agg2D object.
-    Text is rendered directly into the buffer via glyph cache.
+    Text is rendered via TfpgFontResourceBase.DrawTextToBuffer, which is
+    implemented by the platform's registered AggFontResourceClass (e.g.
+    TfpgFreeTypeFontResource on Unix/macOS, TfpgGDIAggFontResource on
+    Windows). The canvas itself has no font-engine dependency.
 
     No platform-specific code, no include files. }
 
   THybridCanvas = class(TfpgCanvasBase)
   private
     FAgg: agg_2D.Agg2D;
-    FGlyphCache: TGlyphCache;
     FBufferManager: IBufferManager;
     FCurrentTextColor: TfpgColor;
     FWindowAttached: Boolean;
@@ -141,7 +139,6 @@ constructor THybridCanvas.Create(awidget: TfpgWidgetBase);
 begin
   inherited Create(awidget);
   FAgg.Construct;
-  FGlyphCache := TGlyphCache.Create;
   FCurrentTextColor := 0;
   FWindowAttached := False;
   FAttachedWindow := nil;
@@ -155,7 +152,6 @@ end;
 
 destructor THybridCanvas.Destroy;
 begin
-  FGlyphCache.Free;
   if Assigned(FBufferManager) then
   begin
     FBufferManager.FreeBuffer;
@@ -193,27 +189,23 @@ procedure THybridCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 var
   cb: agg_2D.RectD;
 begin
-  if Length(txt) < 1 then
+  if (Length(txt) < 1) or (FBufData = nil) or not Assigned(FFont) then
     Exit;
-  if FBufData = nil then
-    Exit;
-  { Position at baseline (Y = top + ascent).  Use the same ascent value that
-    widget layout uses (FFont.GetAscent, from the native font resource) so
-    text lands exactly where the layout engine intended.  The glyph cache's
-    own FreeType ascent may differ slightly from the native (Xft) ascent due
-    to hinting/rounding differences, which would cause vertical misalignment. }
-  { Pass the current AggPas clip box so the glyph cache clips text rendering
-    to the same region as 2D operations — required for clipped text redraws
-    like selection highlighting in TfpgEdit. }
+  { AY passed to DrawTextToBuffer is the baseline (top + ascent).
+    The clip box from Agg2D is forwarded so text clips to the same region
+    as 2D operations — required for selection-highlight redraws in TfpgEdit. }
   cb := FAgg.clipBox;
-  FGlyphCache.DrawText(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
+  FFont.DrawTextToBuffer(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
     x + FDeltaX, y + FDeltaY + FFont.GetAscent, txt, FCurrentTextColor,
     Trunc(cb.x1), Trunc(cb.y1), Trunc(cb.x2), Trunc(cb.y2));
 end;
 
 procedure THybridCanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
-  FGlyphCache.SetFont(fntres);
+  { Font resource is stored in FFont by the base class SetFont call.
+    Each AggCanvas font resource (TfpgFreeTypeFontResource,
+    TfpgGDIAggFontResource) is self-contained — no extra canvas-side
+    glyph-cache state to synchronise here. }
 end;
 
 procedure THybridCanvas.DoSetTextColor(cl: TfpgColor);
@@ -455,7 +447,7 @@ begin
   end
   else
   begin
-    stride := Integer(TfpgImage(img).ScanLine[1]) - Integer(TfpgImage(img).ScanLine[0]);
+    stride := Integer(PByte(TfpgImage(img).ScanLine[1]) - PByte(TfpgImage(img).ScanLine[0]));
     if stride < 0 then
       buffer := TfpgImage(img).ScanLine[imgH - 1]
     else
@@ -503,6 +495,7 @@ var
   poly: array of double;
   c: agg_2D.Color;
 begin
+  poly := nil;
   if Length(Points) < 2 then
     Exit;
   SetLength(poly, (Length(Points) * 2) + 1);
@@ -739,7 +732,8 @@ begin
 end;
 
 
-initialization
-  AggFontResourceClass := TfpgFreeTypeFontResource;
+{ AggFontResourceClass is registered by each platform's fpg_interface.pas
+  initialisation block, not here, so this unit remains free of any
+  font-engine dependency. }
 
 end.

@@ -82,9 +82,9 @@ type
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
-  end;
-  
-  
+  end deprecated 'Native Cocoa canvas superseded by THybridCanvas (AggCanvas). Will be removed in a future release.';
+
+
   { Window delegate for handling window events }
   TfpgCocoaWindowDelegate = objcclass(NSObject)
   public
