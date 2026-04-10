@@ -41,9 +41,7 @@ interface
 uses
   Classes, SysUtils, Math,
   fpg_base,
-  fpg_main,
-  agg_2D,
-  agg_color;
+  fpg_main;
 
 
 { ==================== Exception types ==================== }
@@ -180,8 +178,6 @@ type
 
     { Rendering }
     procedure RenderIntoImage(AImg: TfpgImage);
-    procedure ApplyStyleFill(var AAgg: Agg2D; AStyleIdx: Byte; AScale: Double);
-    procedure RenderPath(var AAgg: Agg2D; const APath: THvifPath);
 
   public
     destructor Destroy; override;
@@ -207,7 +203,23 @@ type
 implementation
 
 uses
-  agg_basics;   { int8u_ptr = PByte }
+  agg_basics,                   { int8u_ptr = PByte }
+  agg_color,
+  agg_rendering_buffer,
+  agg_pixfmt,
+  agg_pixfmt_rgba,
+  agg_renderer_base,
+  agg_scanline_u,
+  agg_scanline_bin,
+  agg_span_allocator,
+  agg_rasterizer_compound_aa,
+  agg_renderer_scanline,
+  agg_trans_affine,
+  agg_path_storage,
+  agg_conv_curve,
+  agg_conv_transform,
+  agg_span_gradient,
+  agg_span_interpolator_linear;
 
 
 { ===================================================================
@@ -794,123 +806,82 @@ end;
 
 
 { ===================================================================
-  Rendering
+  Compound renderer support types
   =================================================================== }
 
-{ Apply fill style to the Agg2D canvas for the given style index.
-  Gradient coordinates are derived from the gradient transform matrix.
-
-  Gradient transform convention (from Haiku IconRenderer.cpp):
-    The gradient transform maps gradient PARAMETER space → icon (64-unit) space.
-    For linear gradient (start=-64, end=64):
-      left end  = transform(-64, 0) = (tx - sx*64, ty - shy*64)
-      right end = transform( 64, 0) = (tx + sx*64, ty + shy*64)
-    For radial gradient (start=0, end=64):
-      center = transform(0, 0) = (tx, ty)
-      radius = 64 * sqrt(sx^2 + shy^2)
-
-  v1 limitation: only the first and last stops are used for gradient colour.
-  Diamond/Conic/XY/SqrtXY fall back to the first stop's solid colour.
-}
-procedure THvifIcon.ApplyStyleFill(var AAgg: Agg2D; AStyleIdx: Byte;
-  AScale: Double);
-var
-  style: THvifStyle;
-  c1, c2: Color;
-  sx, shy, tx, ty, r: Double;
-
-  function HvifToAggColor(const C: THvifColor): Color;
-  begin
-    Result.Construct(C.R, C.G, C.B, C.A);
+type
+  { Per-gradient entry.  All pointer fields (Interp.m_trans, SpanGen pointers)
+    refer to sibling fields within the SAME record.
+    Stability: styleEntries dynamic array is SetLength'd once before any entry
+    is initialised, and never resized afterwards. }
+  THvifGradEntry = record
+    Matrix:    trans_affine;             { screen-pixels -> gradient-local 64-unit }
+    ColorFunc: gradient_linear_color;    { 2-stop colour LUT (no heap; safe to drop) }
+    Alloc:     span_allocator;           { internal span buffer (heap; call Destruct) }
+    Interp:    span_interpolator_linear; { stores @Matrix -- no separate Destruct }
+    SpanGen:   span_gradient;            { stores @Interp, @ColorFunc, GradFunc ptr }
+    { One instance per gradient function type; only the matching one is used. }
+    GFLinear:  gradient_x;
+    GFCircle:  gradient_circle;
+    GFDiamond: gradient_diamond;
+    GFConic:   gradient_conic;
+    GFXY:      gradient_xy;
+    GFSqrtXY:  gradient_sqrt_xy;
   end;
 
+  THvifStyleEntry = record
+    IsSolid:    Boolean;
+    SolidColor: aggclr;
+    Grad:       THvifGradEntry;   { valid only when IsSolid = False }
+  end;
+
+  { Implements style_handler for the compound rasterizer.
+    FData points to styleEntries[0] in the dynamic array. }
+  THvifStyleHandler = object(style_handler)
+    FData:  ^THvifStyleEntry;
+    FCount: Integer;
+    function  is_solid     (style : unsigned) : boolean; virtual;
+    function  color        (style : unsigned) : aggclr_ptr; virtual;
+    procedure generate_span(span  : aggclr_ptr;
+                            x, y  : int;
+                            len, style : unsigned); virtual;
+  end;
+
+function THvifStyleHandler.is_solid(style: unsigned): boolean;
 begin
-  AAgg.noLine;
-
-  if AStyleIdx >= Length(FStyles) then
-  begin
-    { Out-of-range style index: render transparent }
-    AAgg.fillColor(0, 0, 0, 0);
-    Exit;
-  end;
-
-  style := FStyles[AStyleIdx];
-
-  case style.StyleType of
-    hstSolidColor, hstSolidColorNoAlpha:
-      AAgg.fillColor(style.Color.R, style.Color.G, style.Color.B, style.Color.A);
-
-    hstSolidGray, hstSolidGrayNoAlpha:
-      AAgg.fillColor(style.Color.R, style.Color.G, style.Color.B, style.Color.A);
-
-    hstGradient:
-      begin
-        if Length(style.Stops) = 0 then
-        begin
-          AAgg.fillColor(0, 0, 0, 255);
-          Exit;
-        end;
-
-        c1 := HvifToAggColor(style.Stops[0].Color);
-        c2 := HvifToAggColor(style.Stops[High(style.Stops)].Color);
-
-        { Extract key matrix values: m[sx, shy, shx, sy, tx, ty] }
-        sx  := style.GradTransform[0];
-        shy := style.GradTransform[1];
-        tx  := style.GradTransform[4];
-        ty  := style.GradTransform[5];
-
-        case style.GradientType of
-          hgtLinear:
-            { Endpoints in icon (64-unit) space:
-              start = transform(-64, 0), end = transform(64, 0) }
-            AAgg.fillLinearGradient(
-              tx - sx * 64, ty - shy * 64,
-              tx + sx * 64, ty + shy * 64,
-              c1, c2);
-
-          hgtCircular:
-            begin
-              r := 64.0 * Sqrt(sx * sx + shy * shy);
-              AAgg.fillRadialGradient(tx, ty, r, c1, c2);
-            end;
-
-          hgtDiamond:
-            begin
-              r := 64.0 * Sqrt(sx * sx + shy * shy);
-              AAgg.fillDiamondGradient(tx, ty, r, c1, c2);
-            end;
-
-          hgtConic:
-            begin
-              r := 64.0 * Sqrt(sx * sx + shy * shy);
-              AAgg.fillConicGradient(tx, ty, r, c1, c2);
-            end;
-
-          hgtXY, hgtSqrtXY:
-            begin
-              r := 64.0 * Sqrt(sx * sx + shy * shy);
-              AAgg.fillXYGradient(tx, ty, r, c1, c2);
-            end;
-        end;
-      end;
-
-    else
-      AAgg.fillColor(0, 0, 0, 255);
-  end;
+  if style >= unsigned(FCount) then
+    Result := True
+  else
+    Result := FData[style].IsSolid;
 end;
 
-{ Emit AggPas path commands for one HVIF path.
-  Rendering rule (from Haiku VectorPath / PathSourceShape):
-    Point 0 → moveTo
-    Point i (i>0):
-      if prev.OutX=prev.X and prev.OutY=prev.Y and pt.InX=pt.X and pt.InY=pt.Y
-        → lineTo(pt.X, pt.Y)
-      else
-        → cubicCurveTo(prev.OutX, prev.OutY, pt.InX, pt.InY, pt.X, pt.Y)
-    If path.Closed → closePolygon
-}
-procedure THvifIcon.RenderPath(var AAgg: Agg2D; const APath: THvifPath);
+function THvifStyleHandler.color(style: unsigned): aggclr_ptr;
+begin
+  if style >= unsigned(FCount) then
+    Result := @FData[0].SolidColor
+  else
+    Result := @FData[style].SolidColor;
+end;
+
+procedure THvifStyleHandler.generate_span(span: aggclr_ptr; x, y: int;
+  len, style: unsigned);
+var
+  src: aggclr_ptr;
+begin
+  FData[style].Grad.Alloc.allocate(len);
+  src := FData[style].Grad.SpanGen.generate(x, y, len);
+  Move(src^, span^, len * SizeOf(aggclr));
+end;
+
+
+{ ===================================================================
+  Path emission helper
+  =================================================================== }
+
+{ Emit HVIF path commands into path_storage.
+  Point 0: move_to. Subsequent points: line_to or curve4 depending on
+  whether adjacent control points are collapsed to the anchor. }
+procedure EmitHvifPath(const APath: THvifPath; var APS: path_storage);
 var
   n, i: Integer;
   prev, pt: THvifPoint;
@@ -920,8 +891,7 @@ begin
   if n = 0 then
     Exit;
 
-  AAgg.resetPath;
-  AAgg.moveTo(APath.Points[0].X, APath.Points[0].Y);
+  APS.move_to(APath.Points[0].X, APath.Points[0].Y);
 
   for i := 1 to n - 1 do
   begin
@@ -930,103 +900,291 @@ begin
 
     isLine := (Abs(prev.OutX - prev.X) < 1e-6) and
               (Abs(prev.OutY - prev.Y) < 1e-6) and
-              (Abs(pt.InX - pt.X) < 1e-6) and
-              (Abs(pt.InY - pt.Y) < 1e-6);
+              (Abs(pt.InX   - pt.X)   < 1e-6) and
+              (Abs(pt.InY   - pt.Y)   < 1e-6);
 
     if isLine then
-      AAgg.lineTo(pt.X, pt.Y)
+      APS.line_to(pt.X, pt.Y)
     else
-      AAgg.cubicCurveTo(
-        prev.OutX, prev.OutY,
-        pt.InX,    pt.InY,
-        pt.X,      pt.Y);
+      APS.curve4(prev.OutX, prev.OutY,
+                 pt.InX,    pt.InY,
+                 pt.X,      pt.Y);
   end;
 
   if APath.Closed then
-    AAgg.closePolygon;
+    APS.close_polygon;
 end;
 
-{ Render all shapes into AImg using a standalone Agg2D object.
-  The icon's 64×64 native coordinate space is scaled uniformly to fit AImg. }
+
+{ ===================================================================
+  Rendering
+  =================================================================== }
+
+{ Render all shapes into AImg in a single pass using AGG's compound rasterizer.
+  Each pixel is visited once; overlapping shapes are blended by style in one
+  scanline sweep instead of being re-painted per shape.
+
+  Coordinate conventions:
+    Path points and HVIF GradTransform are in 64-unit icon space.
+    Shape-to-screen matrix: Scale x ShapeAffine (right-multiply, matching
+      the legacy Agg2D pattern of agg.scale then agg.affine).
+    Gradient matrix: GradTransform[sx,shy,shx,sy,tx,ty] maps gradient-local
+      64-unit space to icon space.  Multiplied by scale and inverted so the
+      span interpolator maps screen pixels back to gradient-local coords.
+    d1/d2 for span_gradient are in gradient-local 64-unit space:
+      linear  d1=-64, d2=64  (gradient x-axis spans [-64, 64])
+      others  d1=0,   d2=64  (radial distance spans [0, 64])  }
 procedure THvifIcon.RenderIntoImage(AImg: TfpgImage);
 var
-  buf: array of Byte;
   W, H: Integer;
-  agg: Agg2D;
+  buf:  array of Byte;
   scale: Double;
-  tr: Transformations_;
-  trp: Transformations_ptr;
-  i, pidx: Integer;
-  shape: THvifShape;
-  pathIdx: Byte;
-begin
-  W := AImg.Width;
-  H := AImg.Height;
 
-  { Allocate BGRA32 pixel buffer, cleared to fully transparent }
+  { AGG rendering pipeline }
+  rbuf:     rendering_buffer;
+  pixf:     pixel_formats;
+  renBase:  renderer_base;
+  ras:      rasterizer_compound_aa_int;
+  slAA:     scanline_u8;
+  slBin:    scanline_bin;
+  mixAlloc: span_allocator;
+
+  { Path pipeline -- shared across all shapes }
+  ps:    path_storage;
+  curve: conv_curve;
+  ct:    conv_transform;
+
+  { Per-style data }
+  styleEntries: array of THvifStyleEntry;
+  sh:           THvifStyleHandler;
+
+  { Style setup locals }
+  si:    Integer;
+  styl:  THvifStyle;
+  c1Agg, c2Agg: aggclr;
+  entry: ^THvifStyleEntry;
+
+  { Shape processing locals }
+  i, pidx: Integer;
+  shape:   THvifShape;
+  shapeMatrix, ta: trans_affine;
+  pathIdx: Byte;
+
+begin
+  W     := AImg.Width;
+  H     := AImg.Height;
+  scale := Min(W, H) / 64.0;
+
+  { BGRA32 pixel buffer, fully transparent }
   SetLength(buf, W * H * 4);
   FillChar(buf[0], W * H * 4, 0);
 
-  agg.Construct;
+  { ---- AGG pipeline ---- }
+  rbuf.Construct(@buf[0], W, H, W * 4);
+  pixfmt_bgra32(pixf, @rbuf);
+  renBase.Construct(@pixf);
+
+  ras.Construct;
+  slAA.Construct;
+  slBin.Construct;
+  mixAlloc.Construct;
+  ras.clip_box(0, 0, W, H);
+
+  { ---- Per-style setup ---- }
+  { SetLength once: ensures intra-record pointer fields stay stable }
+  SetLength(styleEntries, Length(FStyles));
+
+  for si := 0 to High(FStyles) do
+  begin
+    styl  := FStyles[si];
+    entry := @styleEntries[si];
+
+    case styl.StyleType of
+      hstSolidColor, hstSolidColorNoAlpha,
+      hstSolidGray,  hstSolidGrayNoAlpha:
+        begin
+          entry^.IsSolid := True;
+          entry^.SolidColor.ConstrInt(
+            styl.Color.R, styl.Color.G,
+            styl.Color.B, styl.Color.A);
+        end;
+
+      hstGradient:
+        begin
+          if Length(styl.Stops) = 0 then
+          begin
+            entry^.IsSolid := True;
+            entry^.SolidColor.ConstrInt(0, 0, 0, 255);
+          end
+          else
+          begin
+            entry^.IsSolid := False;
+
+            { Forward matrix: gradient-local 64-unit to screen pixels }
+            entry^.Grad.Matrix.Construct(
+              scale * styl.GradTransform[0],
+              scale * styl.GradTransform[1],
+              scale * styl.GradTransform[2],
+              scale * styl.GradTransform[3],
+              scale * styl.GradTransform[4],
+              scale * styl.GradTransform[5]);
+            { Invert: screen-pixels to gradient-local }
+            entry^.Grad.Matrix.invert;
+
+            { Colour LUT: first and last stops (v1 limitation) }
+            c1Agg.ConstrInt(
+              styl.Stops[0].Color.R,
+              styl.Stops[0].Color.G,
+              styl.Stops[0].Color.B,
+              styl.Stops[0].Color.A);
+            c2Agg.ConstrInt(
+              styl.Stops[High(styl.Stops)].Color.R,
+              styl.Stops[High(styl.Stops)].Color.G,
+              styl.Stops[High(styl.Stops)].Color.B,
+              styl.Stops[High(styl.Stops)].Color.A);
+            entry^.Grad.ColorFunc.Construct(@c1Agg, @c2Agg);
+
+            { Span allocator + interpolator (Interp stores @Matrix) }
+            entry^.Grad.Alloc.Construct;
+            entry^.Grad.Interp.Construct(@entry^.Grad.Matrix);
+
+            { Gradient function + span generator }
+            case styl.GradientType of
+              hgtLinear:
+                begin
+                  entry^.Grad.GFLinear.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc,    @entry^.Grad.Interp,
+                    @entry^.Grad.GFLinear, @entry^.Grad.ColorFunc,
+                    -64.0, 64.0);
+                end;
+              hgtCircular:
+                begin
+                  entry^.Grad.GFCircle.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc,    @entry^.Grad.Interp,
+                    @entry^.Grad.GFCircle, @entry^.Grad.ColorFunc,
+                    0.0, 64.0);
+                end;
+              hgtDiamond:
+                begin
+                  entry^.Grad.GFDiamond.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc,     @entry^.Grad.Interp,
+                    @entry^.Grad.GFDiamond, @entry^.Grad.ColorFunc,
+                    0.0, 64.0);
+                end;
+              hgtConic:
+                begin
+                  entry^.Grad.GFConic.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc,   @entry^.Grad.Interp,
+                    @entry^.Grad.GFConic, @entry^.Grad.ColorFunc,
+                    0.0, 64.0);
+                end;
+              hgtXY:
+                begin
+                  entry^.Grad.GFXY.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc, @entry^.Grad.Interp,
+                    @entry^.Grad.GFXY,  @entry^.Grad.ColorFunc,
+                    0.0, 64.0);
+                end;
+              hgtSqrtXY:
+                begin
+                  entry^.Grad.GFSqrtXY.Construct;
+                  entry^.Grad.SpanGen.Construct(
+                    @entry^.Grad.Alloc,     @entry^.Grad.Interp,
+                    @entry^.Grad.GFSqrtXY,  @entry^.Grad.ColorFunc,
+                    0.0, 64.0);
+                end;
+            end; { case GradientType }
+          end;
+        end; { hstGradient }
+
+      else
+        begin
+          entry^.IsSolid := True;
+          entry^.SolidColor.ConstrInt(0, 0, 0, 255);
+        end;
+    end; { case StyleType }
+  end;
+
+  { ---- Wire up style handler ---- }
+  if Length(styleEntries) > 0 then
+    sh.FData := @styleEntries[0]
+  else
+    sh.FData := nil;
+  sh.FCount := Length(styleEntries);
+
+  { ---- Path pipeline ---- }
+  ps.Construct;
+  curve.Construct(@ps);
+
   try
-    agg.attach(@buf[0], W, H, W * 4);
-    { Default fill is white after attach — override to transparent }
-    agg.fillColor(0, 0, 0, 0);
-    agg.noLine;
-
-    { Uniform scale: map 64×64 native canvas to output rectangle }
-    scale := Min(W, H) / 64.0;
-
+    { ---- Add all shapes to the compound rasterizer ---- }
     for i := 0 to High(FShapes) do
     begin
       shape := FShapes[i];
 
-      { Build canvas transform for this shape }
-      agg.resetTransformations;
-      agg.scale(scale, scale);
+      { Shape-to-screen: Scale x ShapeAffine via right-multiply,
+        matching the legacy Agg2D agg.scale + agg.affine pattern. }
+      shapeMatrix.Construct;
+      shapeMatrix.scale(scale, scale);
 
-      trp := @tr;
       if shape.HasTransform then
       begin
-        tr.affineMatrix[0] := shape.Transform[0];
-        tr.affineMatrix[1] := shape.Transform[1];
-        tr.affineMatrix[2] := shape.Transform[2];
-        tr.affineMatrix[3] := shape.Transform[3];
-        tr.affineMatrix[4] := shape.Transform[4];
-        tr.affineMatrix[5] := shape.Transform[5];
-        agg.affine(trp);
+        ta.Construct(
+          shape.Transform[0], shape.Transform[1],
+          shape.Transform[2], shape.Transform[3],
+          shape.Transform[4], shape.Transform[5]);
+        shapeMatrix.multiply(@ta);
       end
       else if shape.HasTranslation then
       begin
-        tr.affineMatrix[0] := 1.0;
-        tr.affineMatrix[1] := 0.0;
-        tr.affineMatrix[2] := 0.0;
-        tr.affineMatrix[3] := 1.0;
-        tr.affineMatrix[4] := shape.TranslateX;
-        tr.affineMatrix[5] := shape.TranslateY;
-        agg.affine(trp);
+        ta.Construct(1.0, 0.0, 0.0, 1.0,
+                     shape.TranslateX, shape.TranslateY);
+        shapeMatrix.multiply(@ta);
       end;
 
-      { Apply fill style }
-      ApplyStyleFill(agg, shape.StyleIndex, scale);
+      { ct holds @curve and @shapeMatrix -- both live on the stack
+        for the lifetime of RenderIntoImage, so pointers stay valid. }
+      ct.Construct(@curve, @shapeMatrix);
 
-      { Render each path referenced by this shape }
       for pidx := 0 to High(shape.PathIndices) do
       begin
         pathIdx := shape.PathIndices[pidx];
         if pathIdx >= Length(FPaths) then
           Continue;
-        RenderPath(agg, FPaths[pathIdx]);
-        agg.drawPath(FillOnly);
+
+        ps.remove_all;
+        EmitHvifPath(FPaths[pathIdx], ps);
+
+        ras.styles(shape.StyleIndex, -1);
+        ras.add_path(@ct);
       end;
     end;
 
+    { ---- Single-pass compound render ---- }
+    render_scanlines_compound(@ras, @slAA, @slBin, @renBase, @mixAlloc, @sh);
+
   finally
-    agg.Destruct;
+    curve.Destruct;
+    ps.Destruct;
+
+    { Free span allocators (Alloc.Destruct is safe on NIL spans) }
+    for si := 0 to High(styleEntries) do
+      if not styleEntries[si].IsSolid then
+        styleEntries[si].Grad.Alloc.Destruct;
+
+    ras.Destruct;
+    slAA.Destruct;
+    slBin.Destruct;
+    mixAlloc.Destruct;
+    rbuf.Destruct;
   end;
 
-  { Copy BGRA32 buffer to TfpgImage.
-    On little-endian: BGRA32 bytes = ARGB uint32 = byte-compatible. }
+  { Copy BGRA32 buffer to TfpgImage (byte-identical on little-endian) }
   Move(buf[0], AImg.ImageData^, W * H * 4);
   AImg.UpdateImage;
 end;
