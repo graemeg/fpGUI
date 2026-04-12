@@ -241,7 +241,7 @@ begin
   lOldColor := ACanvas.TextColor;
   if not AEnabled then
     ACanvas.SetTextColor(clText4)
-  else
+  else if fpgIsNamedColor(lOldColor) then
     ACanvas.SetTextColor(clText1);
   if lOldColor = clShadow1 then
     ACanvas.SetTextColor(clHilite2);

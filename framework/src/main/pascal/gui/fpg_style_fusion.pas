@@ -273,7 +273,7 @@ begin
     Exit;
   if not AEnabled then
     ACanvas.SetTextColor(clText4)
-  else
+  else if fpgIsNamedColor(ACanvas.TextColor) then
     ACanvas.SetTextColor(clText1);
   ACanvas.DrawString(x, y, AText);
 end;
