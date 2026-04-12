@@ -2741,6 +2741,7 @@ end;
 procedure TMainForm.ClearMessagesWindow;
 begin
   grdMessages.RowCount := 0;
+  pnlWindow.ActivePage := tsMessages;
 end;
 
 procedure TMainForm.AddOutputLine(const AMsg: TfpgString);
@@ -4184,7 +4185,7 @@ begin
   with pnlStatusBar do
   begin
     Name := 'pnlStatusBar';
-    PreferredSize := fpgSize(600, 22);
+    PreferredSize := fpgSize(600, 24);
     Style := bsLowered;
   end;
 
@@ -4210,7 +4211,7 @@ begin
   with lblGitBranch do
   begin
     Name := 'lblGitBranch';
-    PreferredSize := fpgSize(100, 16);
+//    PreferredSize := fpgSize(100, 16);
     FontDesc := '#Label1';
     Text := '';
   end;
@@ -4221,7 +4222,7 @@ begin
     Name := 'lblProfiles';
     PreferredSize := fpgSize(150, 16);
     FontDesc := '#Label1';
-    Hint := 'Active build profiles — click to change';
+    Hint := 'Active build profiles - click to change';
     Text := '';
     OnClick := @lblProfilesClicked;
   end;
@@ -4229,7 +4230,7 @@ begin
   pmProfileMenu := TfpgPopupMenu.Create(self);
 
   pnlStatusBar.LayoutManager := FStatusBarLayout;
-  FStatusBarLayout.LC.InsetsAll('2lp').FillX.Debug;
+  FStatusBarLayout.LC.InsetsAll('2lp').FillX;
   FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
   FStatusBarLayout.AddLayoutComponent(lblCursorPos, TfpgMigCC.Create.AlignX('right'));
   FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right').GrowX);
@@ -4779,7 +4780,7 @@ begin
 
   mig.AddLayoutComponent(mainmenu, TfpgMigCC.Create.DockNorth.GrowX.Height('24lp!'));
   mig.AddLayoutComponent(Toolbar, TfpgMigCC.Create.DockNorth.GrowX.Height('28lp!'));
-  mig.AddLayoutComponent(pnlStatusBar, TfpgMigCC.Create.DockSouth.GrowX.Height('22lp!'));
+  mig.AddLayoutComponent(pnlStatusBar, TfpgMigCC.Create.DockSouth.GrowX.Height('24lp!'));
   mig.AddLayoutComponent(pnlClientArea, TfpgMigCC.Create.GrowX.GrowY.Push);
 end;
 
