@@ -366,7 +366,6 @@ begin
     Name := 'bvlStatusBar';
     PreferredSize := fpgSize(600, 24);
     Style := bsLowered;
-    BackgroundColor := clDarkKhaki;
   end;
 
   lblStatus := TfpgLabel.Create(bvlStatusBar);
