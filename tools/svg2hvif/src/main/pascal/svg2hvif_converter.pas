@@ -564,6 +564,7 @@ type
     function  PeekChar: Char;
     function  IsNumericStart: Boolean;
     function  ReadNumber: Double;
+    function  ReadFlag: Integer;
 
     function  TX(x, y: Double): Single;
     function  TY(x, y: Double): Single;
@@ -668,6 +669,23 @@ begin
       'SVG path: expected number at position %d', [FPos]);
 
   Result := SvgStrToFloat(numStr);
+end;
+
+{ Reads a single arc flag digit (0 or 1). Flags may appear with no separator
+  between them (e.g. "01" for large-arc=0, sweep=1), so ReadNumber must not
+  be used here as it would consume both digits as one token. }
+function TSvgPathParser.ReadFlag: Integer;
+begin
+  SkipWS;
+  if (FPos <= Length(FStr)) and (FStr[FPos] in ['0', '1']) then
+  begin
+    Result := Ord(FStr[FPos]) - Ord('0');
+    Inc(FPos);
+    SkipWS;
+  end
+  else
+    raise EsvgConvertError.CreateFmt(
+      'SVG path: expected arc flag (0 or 1) at position %d', [FPos]);
 end;
 
 function TSvgPathParser.TX(x, y: Double): Single;
@@ -946,9 +964,10 @@ begin
     arx  := Abs(ReadNumber); SkipWS;
     ary  := Abs(ReadNumber); SkipWS;
     phi  := ReadNumber * (Pi / 180.0); SkipWS;
-    { large-arc-flag and sweep-flag are single digits (0 or 1) }
-    fA   := Round(ReadNumber); SkipWS;
-    fS   := Round(ReadNumber); SkipWS;
+    { Flags are single digits: use ReadFlag so adjacent flags (e.g. "01")
+      are not consumed as a single token by ReadNumber. }
+    fA   := ReadFlag;
+    fS   := ReadFlag;
     x2   := ReadNumber; SkipWS;
     y2   := ReadNumber; SkipWS;
 
@@ -1709,6 +1728,8 @@ var
     elemName: string;
     localMatrix, childMatrix: TSvgMatrix;
     transformStr, fillStr, opacStr, styleStr, gradId, elemName2: string;
+    strokeStr, strokeWidthStr, strokeCapStr, strokeJoinStr: string;
+    strokeMiterLimitStr, strokeOpacStr: string;
     svgColor: TSvgColor;
     opacity: Double;
     hvifStyle: THvifStyle;
@@ -1724,6 +1745,15 @@ var
     def: TSvgGradientDef;
     defIdx: Integer;
     styleProps: TStringList;
+    fillIsNone, strokeIsNone: Boolean;
+    strokeColor: TSvgColor;
+    svgStrokeWidth, strokeOpacity, strokeMiterLimit: Double;
+    strokeLineCap, strokeLineJoin: Byte;
+    hvifStrokeStyle: THvifStyle;
+    strokeStyleIdx: Integer;
+    hvifStrokeShape: THvifShape;
+    pathStartIdx: Integer;
+    strokeScaleX: Double;
   begin
     if not IsElementVisible(elem) then Exit;
 
@@ -1759,9 +1789,15 @@ var
             SameText(elemName, 'line')) then
       Exit;
 
-    { ---- Resolve fill colour with inline style override ---- }
-    fillStr := GetAttr(elem, 'fill');
-    opacStr := '';
+    { ---- Resolve fill and stroke attributes (presentation + inline style) ---- }
+    fillStr           := GetAttr(elem, 'fill');
+    opacStr           := '';
+    strokeStr         := GetAttr(elem, 'stroke');
+    strokeWidthStr    := GetAttr(elem, 'stroke-width');
+    strokeCapStr      := GetAttr(elem, 'stroke-linecap');
+    strokeJoinStr     := GetAttr(elem, 'stroke-linejoin');
+    strokeMiterLimitStr := GetAttr(elem, 'stroke-miterlimit');
+    strokeOpacStr     := GetAttr(elem, 'stroke-opacity');
 
     styleStr := GetAttr(elem, 'style');
     if styleStr <> '' then
@@ -1783,52 +1819,118 @@ var
             Str(opacity:0:6, opacStr);
           end;
         end;
+        if styleProps.IndexOfName('stroke') >= 0 then
+          strokeStr := styleProps.Values['stroke'];
+        if styleProps.IndexOfName('stroke-width') >= 0 then
+          strokeWidthStr := styleProps.Values['stroke-width'];
+        if styleProps.IndexOfName('stroke-linecap') >= 0 then
+          strokeCapStr := styleProps.Values['stroke-linecap'];
+        if styleProps.IndexOfName('stroke-linejoin') >= 0 then
+          strokeJoinStr := styleProps.Values['stroke-linejoin'];
+        if styleProps.IndexOfName('stroke-miterlimit') >= 0 then
+          strokeMiterLimitStr := styleProps.Values['stroke-miterlimit'];
+        if styleProps.IndexOfName('stroke-opacity') >= 0 then
+          strokeOpacStr := styleProps.Values['stroke-opacity'];
       finally
         styleProps.Free;
       end;
     end;
 
     if fillStr = '' then fillStr := 'black';
-
     if opacStr = '' then opacStr := GetAttr(elem, 'fill-opacity');
     if opacStr = '' then opacStr := GetAttr(elem, 'opacity');
 
-    { ---- Build HVIF style record ---- }
+    { ---- Resolve fill ---- }
+    fillIsNone := False;
     FillChar(hvifStyle, SizeOf(hvifStyle), 0);
+    styleIdx := 0;
 
     if IsUrlRef(fillStr, gradId) then
     begin
       defIdx := gradDefs.IndexOf(gradId);
-      if defIdx < 0 then Exit;
-      def := TSvgGradientDef(gradDefs.Objects[defIdx]);
-      hvifStyle := BuildGradientStyle(def, gradDefs, rootMatrix, vbW, vbH);
-      if opacStr <> '' then
+      if defIdx < 0 then
+        fillIsNone := True
+      else
       begin
-        opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
-        for j := 0 to High(hvifStyle.Stops) do
-          hvifStyle.Stops[j].Color.A :=
-            Byte(Round(hvifStyle.Stops[j].Color.A * opacity));
+        def := TSvgGradientDef(gradDefs.Objects[defIdx]);
+        hvifStyle := BuildGradientStyle(def, gradDefs, rootMatrix, vbW, vbH);
+        if opacStr <> '' then
+        begin
+          opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
+          for j := 0 to High(hvifStyle.Stops) do
+            hvifStyle.Stops[j].Color.A :=
+              Byte(Round(hvifStyle.Stops[j].Color.A * opacity));
+        end;
       end;
     end
     else
     begin
       svgColor := ParseSvgColor(fillStr);
-      if svgColor.IsNone then Exit;
-
-      if opacStr <> '' then
+      if svgColor.IsNone then
+        fillIsNone := True
+      else
       begin
-        opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
-        svgColor.A := Byte(Round(svgColor.A * opacity));
+        if opacStr <> '' then
+        begin
+          opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
+          svgColor.A := Byte(Round(svgColor.A * opacity));
+        end;
+        hvifStyle.StyleType := hstSolidColor;
+        hvifStyle.Color.R   := svgColor.R;
+        hvifStyle.Color.G   := svgColor.G;
+        hvifStyle.Color.B   := svgColor.B;
+        hvifStyle.Color.A   := svgColor.A;
       end;
-
-      hvifStyle.StyleType := hstSolidColor;
-      hvifStyle.Color.R   := svgColor.R;
-      hvifStyle.Color.G   := svgColor.G;
-      hvifStyle.Color.B   := svgColor.B;
-      hvifStyle.Color.A   := svgColor.A;
     end;
 
-    styleIdx := FindOrAddStyle(hvifStyle);
+    if not fillIsNone then
+      styleIdx := FindOrAddStyle(hvifStyle);
+
+    { ---- Resolve stroke ---- }
+    strokeIsNone := (strokeStr = '') or SameText(Trim(strokeStr), 'none');
+    strokeStyleIdx  := 0;
+    strokeLineCap   := 0;  { butt }
+    strokeLineJoin  := 0;  { miter }
+    strokeMiterLimit := 4.0;
+    svgStrokeWidth  := 1.0;
+
+    if not strokeIsNone then
+    begin
+      strokeColor := ParseSvgColor(strokeStr);
+      if strokeColor.IsNone then
+        strokeIsNone := True
+      else
+      begin
+        strokeOpacity := EnsureRange(SvgStrToFloatDef(strokeOpacStr, 1.0), 0.0, 1.0);
+        strokeColor.A := Byte(Round(strokeColor.A * strokeOpacity));
+
+        FillChar(hvifStrokeStyle, SizeOf(hvifStrokeStyle), 0);
+        hvifStrokeStyle.StyleType := hstSolidColor;
+        hvifStrokeStyle.Color.R   := strokeColor.R;
+        hvifStrokeStyle.Color.G   := strokeColor.G;
+        hvifStrokeStyle.Color.B   := strokeColor.B;
+        hvifStrokeStyle.Color.A   := strokeColor.A;
+        strokeStyleIdx := FindOrAddStyle(hvifStrokeStyle);
+
+        svgStrokeWidth := SvgStrToFloatDef(strokeWidthStr, 1.0);
+        { Scale stroke width from SVG user units to HVIF 64-unit space }
+        strokeScaleX   := Sqrt(localMatrix.A * localMatrix.A +
+                               localMatrix.B * localMatrix.B);
+        svgStrokeWidth := svgStrokeWidth * strokeScaleX;
+
+        strokeMiterLimit := SvgStrToFloatDef(strokeMiterLimitStr, 4.0);
+
+        if SameText(Trim(strokeCapStr), 'round') then strokeLineCap := 2
+        else if SameText(Trim(strokeCapStr), 'square') then strokeLineCap := 1
+        else strokeLineCap := 0;  { butt (SVG default) }
+
+        if SameText(Trim(strokeJoinStr), 'round') then strokeLineJoin := 2
+        else if SameText(Trim(strokeJoinStr), 'bevel') then strokeLineJoin := 3
+        else strokeLineJoin := 0;  { miter (SVG default) }
+      end;
+    end;
+
+    if fillIsNone and strokeIsNone then Exit;
 
     { ---- Generate path(s) for the element ---- }
     SetLength(paths, 0);
@@ -1932,21 +2034,42 @@ var
 
     if Length(paths) = 0 then Exit;
 
-    { Add all sub-paths to the writer }
+    { Add all sub-paths to the writer (once, shared by fill and stroke shapes) }
+    pathStartIdx := nextPathIdx;
     for j := 0 to High(paths) do
       writer.AddPath(paths[j]);
-
-    { Build shape referencing this style and all its paths }
-    FillChar(hvifShape, SizeOf(hvifShape), 0);
-    hvifShape.StyleIndex     := Byte(styleIdx);
-    hvifShape.HasTransform   := False;
-    hvifShape.HasTranslation := False;
-    SetLength(hvifShape.PathIndices, Length(paths));
-    for j := 0 to High(paths) do
-      hvifShape.PathIndices[j] := Byte(nextPathIdx + j);
-    writer.AddShape(hvifShape);
-
     Inc(nextPathIdx, Length(paths));
+
+    { Build fill shape (if fill is not none) }
+    if not fillIsNone then
+    begin
+      FillChar(hvifShape, SizeOf(hvifShape), 0);
+      hvifShape.StyleIndex     := Byte(styleIdx);
+      hvifShape.HasTransform   := False;
+      hvifShape.HasTranslation := False;
+      SetLength(hvifShape.PathIndices, Length(paths));
+      for j := 0 to High(paths) do
+        hvifShape.PathIndices[j] := Byte(pathStartIdx + j);
+      writer.AddShape(hvifShape);
+    end;
+
+    { Build stroke shape (if stroke is not none) }
+    if not strokeIsNone then
+    begin
+      FillChar(hvifStrokeShape, SizeOf(hvifStrokeShape), 0);
+      hvifStrokeShape.StyleIndex      := Byte(strokeStyleIdx);
+      hvifStrokeShape.HasTransform    := False;
+      hvifStrokeShape.HasTranslation  := False;
+      hvifStrokeShape.HasStroke       := True;
+      hvifStrokeShape.StrokeWidth     := Single(svgStrokeWidth);
+      hvifStrokeShape.StrokeLineCap   := strokeLineCap;
+      hvifStrokeShape.StrokeLineJoin  := strokeLineJoin;
+      hvifStrokeShape.StrokeMiterLimit := Single(strokeMiterLimit);
+      SetLength(hvifStrokeShape.PathIndices, Length(paths));
+      for j := 0 to High(paths) do
+        hvifStrokeShape.PathIndices[j] := Byte(pathStartIdx + j);
+      writer.AddShape(hvifStrokeShape);
+    end;
   end;
 
 begin

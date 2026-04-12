@@ -452,10 +452,10 @@ begin
             end;
           TRANSFORMER_TYPE_CONTOUR:
             begin
-              p := r.ReadByte; { width }
-              WriteLn('         [', t, '] CONTOUR  width=', Integer(p)-128,
-                      '  join=', r.ReadByte,
-                      '  miter=', r.ReadByte);
+              { Width and miterLimit use coord encoding; options byte same layout as STROKE }
+              WriteLn('         [', t, '] CONTOUR  width=', Format('%.4f', [r.ReadCoord]),
+                      '  options=', IntToHex(r.ReadByte, 2),
+                      '  miter=', Format('%.4f', [r.ReadCoord]));
             end;
           TRANSFORMER_TYPE_PERSPECTIVE:
             begin
@@ -470,10 +470,12 @@ begin
             end;
           TRANSFORMER_TYPE_STROKE:
             begin
-              p := r.ReadByte; { width }
-              WriteLn('         [', t, '] STROKE  width=', Integer(p)-128,
+              { Width and miterLimit use coord encoding (1 or 2 bytes each).
+                Options byte: (lineJoin shl 4) or lineCap — same constants as AggPas
+                agg_math_stroke: butt=0, square=1, round=2; miter=0, round=2, bevel=3 }
+              WriteLn('         [', t, '] STROKE  width=', Format('%.4f', [r.ReadCoord]),
                       '  options=', IntToHex(r.ReadByte, 2),
-                      '  miter=', r.ReadByte);
+                      '  miter=', Format('%.4f', [r.ReadCoord]));
             end;
           else
           begin

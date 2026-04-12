@@ -101,6 +101,15 @@ type
     { Translation-only (2 coords, applied when HasTransform=False) }
     TranslateX, TranslateY: Single;
     HasTranslation: Boolean;
+    { Stroke transformer (TRANSFORMER_TYPE_STROKE = 23).
+      Width and MiterLimit are in HVIF 64-unit icon space.
+      LineCap:  0=butt, 1=square, 2=round  (AggPas agg_math_stroke constants)
+      LineJoin: 0=miter, 2=round, 3=bevel  (AggPas agg_math_stroke constants) }
+    HasStroke:        Boolean;
+    StrokeWidth:      Single;
+    StrokeLineCap:    Byte;
+    StrokeLineJoin:   Byte;
+    StrokeMiterLimit: Single;
   end;
 
 

@@ -144,6 +144,8 @@ uses
   agg_trans_affine,
   agg_path_storage,
   agg_conv_curve,
+  agg_conv_stroke,
+  agg_math_stroke,
   agg_conv_transform,
   agg_span_gradient,
   agg_span_interpolator_linear;
@@ -602,8 +604,13 @@ begin
             end;
           TRANSFORMER_TYPE_STROKE:
             begin
-              { width (byte), lineOptions (byte), miterLimit (byte) }
-              Inc(FPos, 3);
+              { width (coord), lineOptions (byte: join<<4 | cap), miterLimit (coord) }
+              FShapes[i].StrokeWidth      := ReadCoord;
+              tagLen                       := ReadByte;  { reuse tagLen as lineOpts }
+              FShapes[i].StrokeLineCap    := tagLen and $0F;
+              FShapes[i].StrokeLineJoin   := (tagLen shr 4) and $0F;
+              FShapes[i].StrokeMiterLimit := ReadCoord;
+              FShapes[i].HasStroke        := True;
             end;
           else
           begin
@@ -877,9 +884,11 @@ var
   mixAlloc: span_allocator;
 
   { Path pipeline -- shared across all shapes }
-  ps:    path_storage;
-  curve: conv_curve;
-  ct:    conv_transform;
+  ps:     path_storage;
+  curve:  conv_curve;
+  ct:     conv_transform;
+  stroke:    conv_stroke;
+  ct_stroke: conv_transform;
 
   { Per-style data }
   styleEntries: array of THvifStyleEntry;
@@ -1047,6 +1056,7 @@ begin
   { ---- Path pipeline ---- }
   ps.Construct;
   curve.Construct(@ps);
+  stroke.Construct(@curve);
 
   try
     { ---- Add all shapes to the compound rasterizer ---- }
@@ -1074,10 +1084,6 @@ begin
         shapeMatrix.multiply(@ta);
       end;
 
-      { ct holds @curve and @shapeMatrix -- both live on the stack
-        for the lifetime of RenderIntoImage, so pointers stay valid. }
-      ct.Construct(@curve, @shapeMatrix);
-
       for pidx := 0 to High(shape.PathIndices) do
       begin
         pathIdx := shape.PathIndices[pidx];
@@ -1088,7 +1094,23 @@ begin
         EmitHvifPath(FPaths[pathIdx], ps);
 
         ras.styles(shape.StyleIndex, -1);
-        ras.add_path(@ct);
+
+        if shape.HasStroke then
+        begin
+          { Route through conv_stroke to expand the centre-line into a filled outline }
+          stroke.width_(shape.StrokeWidth * scale);
+          stroke.line_cap_(shape.StrokeLineCap);
+          stroke.line_join_(shape.StrokeLineJoin);
+          stroke.miter_limit_(shape.StrokeMiterLimit);
+          stroke.approximation_scale_(scale);
+          ct_stroke.Construct(@stroke, @shapeMatrix);
+          ras.add_path(@ct_stroke);
+        end
+        else
+        begin
+          ct.Construct(@curve, @shapeMatrix);
+          ras.add_path(@ct);
+        end;
       end;
     end;
 
@@ -1096,6 +1118,7 @@ begin
     render_scanlines_compound(@ras, @slAA, @slBin, @renBase, @mixAlloc, @sh);
 
   finally
+    stroke.Destruct;
     curve.Destruct;
     ps.Destruct;
 

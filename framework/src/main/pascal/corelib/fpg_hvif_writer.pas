@@ -372,9 +372,11 @@ end;
 
 procedure THvifWriter.WriteShape(const ASh: THvifShape);
 const
-  SHAPE_TYPE_PATH_SOURCE = 10;
-  SHAPE_FLAG_TRANSFORM   = 1 shl 1;
-  SHAPE_FLAG_TRANSLATION = 1 shl 5;
+  SHAPE_TYPE_PATH_SOURCE      = 10;
+  SHAPE_FLAG_TRANSFORM        = 1 shl 1;
+  SHAPE_FLAG_HAS_TRANSFORMERS = 1 shl 4;
+  SHAPE_FLAG_TRANSLATION      = 1 shl 5;
+  TRANSFORMER_TYPE_STROKE     = 23;
 var
   flags: Byte;
   i: Integer;
@@ -390,6 +392,8 @@ begin
     flags := flags or SHAPE_FLAG_TRANSFORM
   else if ASh.HasTranslation then
     flags := flags or SHAPE_FLAG_TRANSLATION;
+  if ASh.HasStroke then
+    flags := flags or SHAPE_FLAG_HAS_TRANSFORMERS;
   WByte(flags);
 
   if ASh.HasTransform then
@@ -399,6 +403,15 @@ begin
   begin
     WCoord(ASh.TranslateX);
     WCoord(ASh.TranslateY);
+  end;
+
+  if ASh.HasStroke then
+  begin
+    WByte(1);                       { transformer count }
+    WByte(TRANSFORMER_TYPE_STROKE); { transformer type  }
+    WCoord(ASh.StrokeWidth);
+    WByte((ASh.StrokeLineJoin shl 4) or ASh.StrokeLineCap);
+    WCoord(ASh.StrokeMiterLimit);
   end;
 end;
 
