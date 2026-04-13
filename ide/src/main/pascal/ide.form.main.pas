@@ -249,8 +249,12 @@ uses
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
+  ,fpg_hvif
+  ,fpg_iconstore
   ;
 
+
+{$I ../resources/ide.hvificons.inc}
 
 const
   cTitle = 'Maximus IDE - %s';
@@ -2744,8 +2748,16 @@ end;
 procedure TMainForm.uiCreateToolBar;
 var
   mig: TfpgMigLayoutManager;
+  icon: THvifIcon;
+  img: TfpgImage;
 begin
   mig := TfpgMigLayoutManager.Create;
+
+
+  icon := THvifIcon.CreateFromFile('/data/devel/fpgui-icon-o-matic/ide/target/icons/build.hvif');
+  img := icon.GetImage(16, 16);
+  fpgImages.AddImage('ide.test', img);
+  icon.Free;
 
   Toolbar := TfpgBevel.Create(self);
   with Toolbar do
@@ -2777,7 +2789,8 @@ begin
     Hint := 'Open a source file...';
     Embedded := True;
     ImageMargin := 0;
-    ImageName := 'stdimg.open';
+    IconName := 'ide.folder_src';
+    IconSize := 16;
     OnClick := @btnOpenFileClicked;
   end;
 
@@ -3274,6 +3287,17 @@ begin
     Name := 'mainmenu';
     PreferredSize := fpgSize(600, 24);
   end;
+
+  { Register IDE HVIF icons from embedded const arrays }
+  fpgIcons.RegisterFromConst('ide.build',      @ide_build,      SizeOf(ide_build));
+  fpgIcons.RegisterFromConst('ide.diff',       @ide_diff,       SizeOf(ide_diff));
+  fpgIcons.RegisterFromConst('ide.folder_src', @ide_folder_src, SizeOf(ide_folder_src));
+  fpgIcons.RegisterFromConst('ide.readme',     @ide_readme,     SizeOf(ide_readme));
+  fpgIcons.RegisterFromConst('ide.release',    @ide_release,    SizeOf(ide_release));
+  fpgIcons.RegisterFromConst('ide.search',     @ide_search,     SizeOf(ide_search));
+  fpgIcons.RegisterFromConst('ide.settings',   @ide_settings,   SizeOf(ide_settings));
+  fpgIcons.RegisterFromConst('ide.todo',       @ide_todo,       SizeOf(ide_todo));
+  fpgIcons.RegisterFromConst('ide.xml',        @ide_xml,        SizeOf(ide_xml));
 
   uiCreateToolBar;
   uiCreateStatusBar;
