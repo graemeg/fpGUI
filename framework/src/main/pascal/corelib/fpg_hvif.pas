@@ -120,6 +120,10 @@ type
       Raises EHvifError if the icon has no renderable shapes. }
     function GetImage(AWidth, AHeight: Integer): TfpgImage;
 
+    { Frees all cached rendered images so they will be re-rendered on next
+      GetImage call. Call this after a DPI change. }
+    procedure ClearCache;
+
     { Diagnostic: number of parsed styles/paths/shapes }
     function StyleCount: Integer;
     function PathCount: Integer;
@@ -720,6 +724,15 @@ begin
   inherited Destroy;
 end;
 
+
+procedure THvifIcon.ClearCache;
+var
+  i: Integer;
+begin
+  for i := 0 to High(FCachedImages) do
+    FCachedImages[i].Image.Free;
+  SetLength(FCachedImages, 0);
+end;
 
 { ===================================================================
   Image cache
