@@ -157,6 +157,10 @@ type
     function    GetImage(const imgid: string): TfpgImage;
     function    AddBMP(const imgid: string; bmpdata: pointer; bmpsize: integer): TfpgImage;
     function    AddMaskedBMP(const imgid: string; bmpdata: pointer; bmpsize: integer; mcx, mcy: integer): TfpgImage;
+    function    AddPNGFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
+    function    AddBMPFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
     procedure   ListImages(var sl: TStringList);
   end;
 
@@ -585,6 +589,7 @@ uses
   fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
+  fpg_imgfmt_png,
   fpg_stdimages,
   fpg_translations,
   fpg_widget,
@@ -3215,6 +3220,37 @@ procedure TfpgImages.ListImages(var sl: TStringList);
 begin
   if sl <> nil then
     sl.Assign(FImages);
+end;
+
+function TfpgImages.AddPNGFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+begin
+  Result := LoadImage_PNG(AInst, AResName, RT_RCDATA);
+  if Result <> nil then
+    AddImage(AImageID, Result);
+end;
+
+function TfpgImages.AddBMPFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+var
+  res: TResourceStream;
+  ms:  TMemoryStream;
+begin
+  Result := nil;
+  res := TResourceStream.Create(AInst, AResName, RT_RCDATA);
+  try
+    ms := TMemoryStream.Create;
+    try
+      ms.CopyFrom(res, res.Size);
+      Result := CreateImage_BMP(ms.Memory, ms.Size);
+    finally
+      ms.Free;
+    end;
+  finally
+    res.Free;
+  end;
+  if Result <> nil then
+    AddImage(AImageID, Result);
 end;
 
 
