@@ -14,10 +14,12 @@
       svg2hvif [options] -o <dir> <input1.svg> [<input2.svg> ...]
 
     Options:
-      -o <dir>     Write output file(s) to <dir> instead of alongside the source
-      -v           Verbose: print each conversion as it happens
-      --overwrite  Overwrite existing output files (default: skip if present)
-      --help       Show this help and exit
+      -o <dir>       Write output file(s) to <dir> instead of alongside the source
+      -v             Verbose: print each conversion as it happens
+      --overwrite    Overwrite existing output files (default: skip if present)
+      --inc          Also write a Pascal .inc file with a const byte array
+      --prefix <p>   Const name prefix for --inc (default: hvif_)
+      --help         Show this help and exit
 
     Output filename:
       When no explicit output file is given, the output file is placed in the
@@ -50,10 +52,12 @@ begin
   WriteLn('       svg2hvif [options] -o <dir> <input1.svg> [<input2.svg> ...]');
   WriteLn;
   WriteLn('Options:');
-  WriteLn('  -o <dir>     Write output(s) to <dir>');
-  WriteLn('  -v           Verbose output');
-  WriteLn('  --overwrite  Overwrite existing output files');
-  WriteLn('  --help       Show this help');
+  WriteLn('  -o <dir>       Write output(s) to <dir>');
+  WriteLn('  -v             Verbose output');
+  WriteLn('  --overwrite    Overwrite existing output files');
+  WriteLn('  --inc          Also write a Pascal .inc file (const byte array)');
+  WriteLn('  --prefix <p>   Const name prefix for --inc (default: hvif_)');
+  WriteLn('  --help         Show this help');
   WriteLn;
   WriteLn('Converts SVG files to HVIF binary format.');
   WriteLn('Supported: path, rect, circle, ellipse, polygon, polyline, line,');
@@ -78,22 +82,101 @@ begin
     Result := ChangeFileExtension(ASrc, '.hvif');
 end;
 
+{ Write AHvifFile as a Pascal const byte-array include file.
+  The const identifier is APrefix + base-name-of-file (sanitised).
+  Returns True on success, False on error. }
+function WriteIncFile(const AHvifFile, APrefix: string): Boolean;
+const
+  Indent = '     ';
+  MaxLineLen = 72;
+var
+  InStream: TFileStream;
+  OutStream: TStringStream;
+  incFile, constName, line, toAdd: string;
+  count, i: LongInt;
+  b: Byte;
+
+  function Sanitize(const s: string): string;
+  var
+    x: Integer;
+  begin
+    Result := s;
+    for x := 1 to Length(Result) do
+      if not (Result[x] in ['0'..'9', 'A'..'Z', 'a'..'z', '_']) then
+        Result[x] := '_';
+  end;
+
+begin
+  Result := False;
+  incFile   := ChangeFileExtension(AHvifFile, '.inc');
+  constName := APrefix + Sanitize(ChangeFileExtension(ExtractFileName(AHvifFile), ''));
+
+  InStream  := nil;
+  OutStream := TStringStream.Create('');
+  try
+    try
+      InStream := TFileStream.Create(AHvifFile, fmOpenRead);
+    except
+      on E: Exception do
+      begin
+        WriteLn('Error reading HVIF for --inc: ', E.Message);
+        Exit;
+      end;
+    end;
+
+    count := InStream.Size;
+    OutStream.WriteString(LineEnding + 'const' + LineEnding);
+    OutStream.WriteString(Format('  %s: array[0..%d] of byte = (' + LineEnding,
+      [constName, count - 1]));
+    line := Indent;
+    for i := 1 to count do
+    begin
+      InStream.Read(b, 1);
+      toAdd := Format('%3d', [b]);
+      if i < count then
+        toAdd := toAdd + ',';
+      line := line + toAdd;
+      if Length(line) >= MaxLineLen then
+      begin
+        OutStream.WriteString(line + LineEnding);
+        line := Indent;
+      end;
+    end;
+    OutStream.WriteString(line + ');' + LineEnding + LineEnding);
+
+    with TFileStream.Create(incFile, fmCreate) do
+    try
+      WriteBuffer(Pointer(OutStream.DataString)^, Length(OutStream.DataString));
+    finally
+      Free;
+    end;
+    Result := True;
+  finally
+    InStream.Free;
+    OutStream.Free;
+  end;
+end;
+
 
 var
   outDir: string;
-  verbose, overwrite: Boolean;
+  verbose, overwrite, genInc: Boolean;
+  incPrefix: string;
   inputFiles: TStringList;
   explicitOutput: string;
   i: Integer;
   arg, srcFile, dstFile: string;
   anyError: Boolean;
-  nextIsOutDir: Boolean;
+  nextIsOutDir, nextIsPrefix: Boolean;
 begin
   outDir        := '';
   verbose       := False;
   overwrite     := False;
+  genInc        := False;
+  incPrefix     := 'hvif_';
   anyError      := False;
   nextIsOutDir  := False;
+  nextIsPrefix  := False;
   explicitOutput := '';
 
   inputFiles := TStringList.Create;
@@ -111,6 +194,13 @@ begin
         Continue;
       end;
 
+      if nextIsPrefix then
+      begin
+        incPrefix    := arg;
+        nextIsPrefix := False;
+        Continue;
+      end;
+
       if (arg = '--help') or (arg = '-h') then
       begin
         PrintUsage;
@@ -123,6 +213,10 @@ begin
         verbose := True
       else if arg = '-o' then
         nextIsOutDir := True
+      else if arg = '--inc' then
+        genInc := True
+      else if arg = '--prefix' then
+        nextIsPrefix := True
       else if (arg <> '') and (arg[1] = '-') then
       begin
         WriteLn('Error: unknown option: ', arg);
@@ -136,6 +230,13 @@ begin
     if nextIsOutDir then
     begin
       WriteLn('Error: -o requires a directory argument');
+      ExitCode := 1;
+      Exit;
+    end;
+
+    if nextIsPrefix then
+    begin
+      WriteLn('Error: --prefix requires a value argument');
       ExitCode := 1;
       Exit;
     end;
@@ -197,6 +298,16 @@ begin
         TfpgSvgToHvif.Convert(srcFile, dstFile);
         if verbose then
           WriteLn('Converted: ', srcFile, ' -> ', dstFile);
+        if genInc then
+        begin
+          if WriteIncFile(dstFile, incPrefix) then
+          begin
+            if verbose then
+              WriteLn('  inc: ', ChangeFileExtension(dstFile, '.inc'));
+          end
+          else
+            anyError := True;
+        end;
       except
         on E: Exception do
         begin
