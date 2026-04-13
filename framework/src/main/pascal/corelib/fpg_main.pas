@@ -590,6 +590,8 @@ uses
 {$ENDIF}
   fpg_imgfmt_bmp,
   fpg_imgfmt_png,
+  fpg_iconstore,
+  fpg_stdicons,
   fpg_stdimages,
   fpg_translations,
   fpg_widget,
@@ -1906,8 +1908,11 @@ begin
 
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
+  fpgIcons      := TfpgIconStore.Create;
+  fpgIcons.SetDPI(Screen_dpi);
 
   fpgCreateStandardImages;
+  fpgRegisterStandardIcons;
 
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
