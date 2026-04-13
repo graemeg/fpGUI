@@ -18,6 +18,7 @@
     <module>docview</module>
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
+    <module activeByDefault="false">tools/imageconvert</module>
   </modules>
 
   <profiles>
