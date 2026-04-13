@@ -254,7 +254,7 @@ uses
   ;
 
 
-{$I ../resources/ide.hvificons.inc}
+{$I ide.hvificons.inc}
 
 const
   cTitle = 'Maximus IDE - %s';
