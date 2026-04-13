@@ -43,6 +43,8 @@ type
     FImageLayout: TImageLayout;
     FFlat: Boolean;
     FImageName: string;
+    FIconName: string;
+    FIconSize: integer;
     FClicked: Boolean;
     FShowImage: Boolean;
     FClickOnPush: Boolean;    { Used for group buttons where click happens on "down" state. Normal buttons, the click happens on "release" state }
@@ -58,6 +60,9 @@ type
     procedure   SetDown(AValue: Boolean);
     procedure   SetImageMargin(const Value: integer);
     procedure   SetImageSpacing(const Value: integer);
+    procedure   SetIconName(const AValue: string);
+    procedure   SetIconSize(AValue: integer);
+    procedure   UpdateIconImage;
     function    GetAllowDown: Boolean;
     procedure   SetAllowDown(const Value: Boolean);
     procedure   SetAllowAllUp(const Value: boolean);
@@ -102,6 +107,11 @@ type
     property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
     property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
     property    ImageName: string read FImageName write SetImageName;
+    { HVIF icon id registered in fpgIcons.  When set, takes priority over ImageName.
+      The icon is rendered at IconSize logical pixels scaled to the screen DPI. }
+    property    IconName: string read FIconName write SetIconName;
+    { Logical icon size in pixels at 96 DPI (default 16).  Only used for HVIF icons. }
+    property    IconSize: integer read FIconSize write SetIconSize default 16;
     property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
     property    ImageLayout: TImageLayout read FImageLayout write SetImageLayout default ilImageLeft;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult default mrNone;
@@ -145,6 +155,8 @@ type
     property    GroupIndex;
     property    Height;
     property    Hint;
+    property    IconName;
+    property    IconSize;
     property    ImageLayout;
     property    ImageMargin;
     property    ImageName;
@@ -184,6 +196,7 @@ function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
 implementation
 
 uses
+  fpg_iconstore,
   fpg_form; {$Note Try and remove this fpg_form dependency.}
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
@@ -491,6 +504,39 @@ begin
   Repaint;
 end;
 
+procedure TfpgBaseButton.UpdateIconImage;
+begin
+  if (FIconName <> '') and Assigned(fpgIcons) and fpgIcons.HasIcon(FIconName) then
+    FImage := fpgIcons.GetIcon(FIconName, FIconSize)
+  else if FImageName <> '' then
+    FImage := fpgImages.GetImage(FImageName)
+  else
+    FImage := nil;
+end;
+
+procedure TfpgBaseButton.SetIconName(const AValue: string);
+begin
+  if FIconName = AValue then
+    Exit;
+  FIconName := AValue;
+  UpdateIconImage;
+  Repaint;
+end;
+
+procedure TfpgBaseButton.SetIconSize(AValue: integer);
+begin
+  if AValue <= 0 then
+    AValue := 16;
+  if FIconSize = AValue then
+    Exit;
+  FIconSize := AValue;
+  if FIconName <> '' then
+  begin
+    UpdateIconImage;
+    Repaint;
+  end;
+end;
+
 procedure TfpgBaseButton.SetDefault(const AValue: boolean);
 var
   i: integer;
@@ -557,6 +603,8 @@ begin
   FGroupIndex   := 0;
   FImage        := nil;
   FImageName    := '';
+  FIconName     := '';
+  FIconSize     := 16;
   FShowImage    := True;
   FImageLayout  := ilImageLeft;
   FImageMargin  := 3;   // image is 3 pixels from edge of button. -1 will centre image.
