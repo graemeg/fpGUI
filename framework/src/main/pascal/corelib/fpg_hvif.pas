@@ -827,16 +827,30 @@ begin
     Result := @FData[0].SolidColor
   else
     Result := @FData[style].SolidColor;
+  { The compound renderer expects premultiplied alpha colours.
+    Without this, antialiased edge pixels get dark fringing because
+    AGG blends (R,G,B) at partial coverage without accounting for
+    the alpha channel.  See Haiku IconRenderer.cpp line 178. }
+  Result^.premultiply;
 end;
 
 procedure THvifStyleHandler.generate_span(span: aggclr_ptr; x, y: int;
   len, style: unsigned);
 var
-  src: aggclr_ptr;
+  src, p: aggclr_ptr;
+  i: unsigned;
 begin
   FData[style].Grad.Alloc.allocate(len);
   src := FData[style].Grad.SpanGen.generate(x, y, len);
   Move(src^, span^, len * SizeOf(aggclr));
+  { Premultiply each gradient span pixel — same requirement as
+    the solid colour path above. }
+  p := span;
+  for i := 0 to len - 1 do
+  begin
+    p^.premultiply;
+    Inc(p);
+  end;
 end;
 
 
@@ -939,9 +953,10 @@ var
   shapeMatrix, ta: trans_affine;
   pathIdx: Byte;
 
-  { Debug: pixel statistics }
+  { Debug: pixel statistics / de-premultiply }
   dbgNonZero, dbgOpaque: Integer;
   dbgPix: PLongWord;
+  maskAlpha: LongWord;
 
 begin
   W     := AImg.Width;
@@ -952,9 +967,14 @@ begin
   SetLength(buf, W * H * 4);
   FillChar(buf[0], W * H * 4, 0);
 
-  { ---- AGG pipeline ---- }
+  { ---- AGG pipeline ----
+    Use premultiplied pixel format (pixfmt_bgra32_pre) so that the compound
+    renderer blends antialiased edges correctly.  Haiku's IconRenderer uses
+    fBaseRendererPre for the same reason.  The buffer is de-premultiplied
+    before copying to TfpgImage (which the hybrid canvas treats as straight
+    alpha). }
   rbuf.Construct(@buf[0], W, H, W * 4);
-  pixfmt_bgra32(pixf, @rbuf);
+  pixfmt_bgra32_pre(pixf, @rbuf);
   renBase.Construct(@pixf);
 
   ras.Construct;
@@ -1221,6 +1241,23 @@ begin
     slBin.Destruct;
     mixAlloc.Destruct;
     rbuf.Destruct;
+  end;
+
+  { De-premultiply the buffer: the compound renderer produced premultiplied
+    BGRA pixels, but TfpgImage / the hybrid canvas expects straight alpha.
+    For each pixel with A > 0, recover straight RGB = premultiplied RGB * 255 / A. }
+  dbgPix := @buf[0];
+  for si := 0 to W * H - 1 do
+  begin
+    maskAlpha := (dbgPix^ shr 24) and $FF;  { alpha byte in BGRA32 }
+    if (maskAlpha > 0) and (maskAlpha < 255) then
+    begin
+      dbgPix^ := (LongWord(((dbgPix^        and $FF) * 255 + maskAlpha shr 1) div maskAlpha)) or
+                 (LongWord((((dbgPix^ shr 8) and $FF) * 255 + maskAlpha shr 1) div maskAlpha) shl 8) or
+                 (LongWord((((dbgPix^ shr 16) and $FF) * 255 + maskAlpha shr 1) div maskAlpha) shl 16) or
+                 (LongWord(maskAlpha) shl 24);
+    end;
+    Inc(dbgPix);
   end;
 
   { Copy BGRA32 buffer to TfpgImage (byte-identical on little-endian) }
