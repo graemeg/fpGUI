@@ -409,9 +409,11 @@ begin
   begin
     WByte(1);                       { transformer count }
     WByte(TRANSFORMER_TYPE_STROKE); { transformer type  }
-    WCoord(ASh.StrokeWidth);
-    WByte((ASh.StrokeLineJoin shl 4) or ASh.StrokeLineCap);
-    WCoord(ASh.StrokeMiterLimit);
+    { 3 raw uint8 bytes — matches Haiku FlatIconImporter.cpp:
+        width = Round(float + 128), lineOptions (join | cap<<4), miterLimit }
+    WByte(Byte(Round(ASh.StrokeWidth + 128.0)));
+    WByte((ASh.StrokeLineCap shl 4) or ASh.StrokeLineJoin);
+    WByte(Byte(Round(ASh.StrokeMiterLimit)));
   end;
 end;
 

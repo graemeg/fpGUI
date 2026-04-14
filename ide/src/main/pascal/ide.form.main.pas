@@ -2807,7 +2807,7 @@ begin
     Hint := 'Open a source file...';
     Embedded := True;
     ImageMargin := 0;
-    IconName := 'ide.folder_src';
+    IconName := 'ide.build';
     IconSize := 16;
     OnClick := @btnOpenFileClicked;
   end;
@@ -3316,6 +3316,8 @@ begin
   fpgIcons.RegisterFromConst('ide.settings',   @ide_settings,   SizeOf(ide_settings));
   fpgIcons.RegisterFromConst('ide.todo',       @ide_todo,       SizeOf(ide_todo));
   fpgIcons.RegisterFromConst('ide.xml',        @ide_xml,        SizeOf(ide_xml));
+  fpgIcons.RegisterFromConst('ide.settings2',        @ide_settings_2,        SizeOf(ide_settings_2));
+
 
   uiCreateToolBar;
   uiCreateStatusBar;

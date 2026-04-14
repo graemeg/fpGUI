@@ -532,6 +532,7 @@ begin
   for i := 0 to ACount - 1 do
   begin
     FillChar(FShapes[i], SizeOf(THvifShape), 0);
+    WriteLn('[HVIF DEBUG] ParseShapes: shape[', i, '] start pos=', FPos, ' len=', Length(FData));
     shapeType := ReadByte;
 
     if shapeType <> SHAPE_TYPE_PATH_SOURCE then
@@ -608,12 +609,15 @@ begin
             end;
           TRANSFORMER_TYPE_STROKE:
             begin
-              { width (coord), lineOptions (byte: join<<4 | cap), miterLimit (coord) }
-              FShapes[i].StrokeWidth      := ReadCoord;
+              { 3 raw uint8 bytes — see Haiku FlatIconImporter.cpp line 501-520:
+                  width      : uint8, float = width - 128.0
+                  lineOptions: uint8, join = low nibble, cap = high nibble
+                  miterLimit : uint8, float = raw value }
+              FShapes[i].StrokeWidth      := ReadByte - 128.0;
               tagLen                       := ReadByte;  { reuse tagLen as lineOpts }
-              FShapes[i].StrokeLineCap    := tagLen and $0F;
-              FShapes[i].StrokeLineJoin   := (tagLen shr 4) and $0F;
-              FShapes[i].StrokeMiterLimit := ReadCoord;
+              FShapes[i].StrokeLineJoin   := tagLen and $0F;
+              FShapes[i].StrokeLineCap    := (tagLen shr 4) and $0F;
+              FShapes[i].StrokeMiterLimit := ReadByte;
               FShapes[i].HasStroke        := True;
             end;
           else
@@ -651,12 +655,17 @@ begin
     raise EHvifFormatError.Create('HVIF: invalid magic — not an HVIF file');
 
   nStyles := ReadByte;
+  WriteLn('[HVIF DEBUG] ParseFrom: nStyles=', nStyles, ' pos=', FPos, ' len=', Length(FData));
   ParseStyles(nStyles);
 
+  WriteLn('[HVIF DEBUG] ParseFrom: after styles pos=', FPos);
   nPaths := ReadByte;
+  WriteLn('[HVIF DEBUG] ParseFrom: nPaths=', nPaths, ' pos=', FPos);
   ParsePaths(nPaths);
 
+  WriteLn('[HVIF DEBUG] ParseFrom: after paths pos=', FPos);
   nShapes := ReadByte;
+  WriteLn('[HVIF DEBUG] ParseFrom: nShapes=', nShapes, ' pos=', FPos);
   ParseShapes(nShapes);
 end;
 
@@ -783,16 +792,26 @@ type
   end;
 
   { Implements style_handler for the compound rasterizer.
-    FData points to styleEntries[0] in the dynamic array. }
+    FData points to styleEntries[0] in the dynamic array.
+    NOTE: Must call Init before use — FPC object VMT is only set by a constructor. }
   THvifStyleHandler = object(style_handler)
     FData:  ^THvifStyleEntry;
     FCount: Integer;
+    constructor Init;  { no-op — call to force FPC VMT initialisation }
     function  is_solid     (style : unsigned) : boolean; virtual;
     function  color        (style : unsigned) : aggclr_ptr; virtual;
     procedure generate_span(span  : aggclr_ptr;
                             x, y  : int;
                             len, style : unsigned); virtual;
   end;
+
+constructor THvifStyleHandler.Init;
+begin
+  { No-op — called only to force FPC VMT pointer initialisation for this
+    stack-allocated object.  Without a constructor call, FPC leaves the VMT
+    pointer uninitialised, causing a crash at address 0 on the first virtual
+    dispatch inside render_scanlines_compound. }
+end;
 
 function THvifStyleHandler.is_solid(style: unsigned): boolean;
 begin
@@ -873,8 +892,9 @@ end;
 
   Coordinate conventions:
     Path points and HVIF GradTransform are in 64-unit icon space.
-    Shape-to-screen matrix: Scale x ShapeAffine (right-multiply, matching
-      the legacy Agg2D pattern of agg.scale then agg.affine).
+    Shape-to-screen matrix: ShapeAffine first (in icon space), then Scale
+      to screen pixels.  Scale must come last so that translations in the
+      shape affine remain in 64-unit space before being scaled down.
     Gradient matrix: GradTransform[sx,shy,shx,sy,tx,ty] maps gradient-local
       64-unit space to icon space.  Multiplied by scale and inverted so the
       span interpolator maps screen pixels back to gradient-local coords.
@@ -918,6 +938,10 @@ var
   shape:   THvifShape;
   shapeMatrix, ta: trans_affine;
   pathIdx: Byte;
+
+  { Debug: pixel statistics }
+  dbgNonZero, dbgOpaque: Integer;
+  dbgPix: PLongWord;
 
 begin
   W     := AImg.Width;
@@ -1059,12 +1083,27 @@ begin
     end; { case StyleType }
   end;
 
-  { ---- Wire up style handler ---- }
+  { ---- Wire up style handler ----
+    Init must be called first to set the FPC object VMT pointer; without it
+    virtual dispatch in render_scanlines_compound crashes at address 0. }
+  sh.Init;
   if Length(styleEntries) > 0 then
     sh.FData := @styleEntries[0]
   else
     sh.FData := nil;
   sh.FCount := Length(styleEntries);
+
+  for si := 0 to High(styleEntries) do
+  begin
+    if styleEntries[si].IsSolid then
+      WriteLn('[HVIF DEBUG] Style[', si, '] SOLID rgba=(',
+        styleEntries[si].SolidColor.r, ',',
+        styleEntries[si].SolidColor.g, ',',
+        styleEntries[si].SolidColor.b, ',',
+        styleEntries[si].SolidColor.a, ')')
+    else
+      WriteLn('[HVIF DEBUG] Style[', si, '] GRADIENT');
+  end;
 
   { ---- Path pipeline ---- }
   ps.Construct;
@@ -1077,10 +1116,11 @@ begin
     begin
       shape := FShapes[i];
 
-      { Shape-to-screen: Scale x ShapeAffine via right-multiply,
-        matching the legacy Agg2D agg.scale + agg.affine pattern. }
+      { Shape-to-screen: ShapeAffine first (in 64-unit icon space),
+        then scale to screen pixels.  Order matters — applying scale
+        before the shape transform would scale translations into
+        icon-space units, pushing geometry off the target bitmap. }
       shapeMatrix.Construct;
-      shapeMatrix.scale(scale, scale);
 
       if shape.HasTransform then
       begin
@@ -1089,19 +1129,48 @@ begin
           shape.Transform[2], shape.Transform[3],
           shape.Transform[4], shape.Transform[5]);
         shapeMatrix.multiply(@ta);
+        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
+          ' transform=[', shape.Transform[0]:0:4, ',', shape.Transform[1]:0:4,
+          ',', shape.Transform[2]:0:4, ',', shape.Transform[3]:0:4,
+          ',', shape.Transform[4]:0:4, ',', shape.Transform[5]:0:4, ']',
+          ' hasStroke=', shape.HasStroke,
+          ' strokeW=', shape.StrokeWidth:0:4,
+          ' cap=', shape.StrokeLineCap, ' join=', shape.StrokeLineJoin,
+          ' paths=', Length(shape.PathIndices));
       end
       else if shape.HasTranslation then
       begin
         ta.Construct(1.0, 0.0, 0.0, 1.0,
                      shape.TranslateX, shape.TranslateY);
         shapeMatrix.multiply(@ta);
-      end;
+        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
+          ' translate=(', shape.TranslateX:0:4, ',', shape.TranslateY:0:4, ')',
+          ' hasStroke=', shape.HasStroke,
+          ' paths=', Length(shape.PathIndices));
+      end
+      else
+        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
+          ' noTransform hasStroke=', shape.HasStroke,
+          ' paths=', Length(shape.PathIndices));
+
+      shapeMatrix.scale(scale, scale);
 
       for pidx := 0 to High(shape.PathIndices) do
       begin
         pathIdx := shape.PathIndices[pidx];
         if pathIdx >= Length(FPaths) then
+        begin
+          WriteLn('[HVIF DEBUG]   path[', pathIdx, '] OUT OF RANGE (max=', Length(FPaths)-1, ')');
           Continue;
+        end;
+
+        WriteLn('[HVIF DEBUG]   path[', pathIdx, '] points=', Length(FPaths[pathIdx].Points),
+          ' closed=', FPaths[pathIdx].Closed);
+        if Length(FPaths[pathIdx].Points) > 0 then
+          WriteLn('[HVIF DEBUG]     first=(', FPaths[pathIdx].Points[0].X:0:2,
+            ',', FPaths[pathIdx].Points[0].Y:0:2, ')  last=(',
+            FPaths[pathIdx].Points[High(FPaths[pathIdx].Points)].X:0:2, ',',
+            FPaths[pathIdx].Points[High(FPaths[pathIdx].Points)].Y:0:2, ')');
 
         ps.remove_all;
         EmitHvifPath(FPaths[pathIdx], ps);
@@ -1110,8 +1179,12 @@ begin
 
         if shape.HasStroke then
         begin
-          { Route through conv_stroke to expand the centre-line into a filled outline }
-          stroke.width_(shape.StrokeWidth * scale);
+          { Route through conv_stroke to expand the centre-line into a filled outline.
+          StrokeWidth is in 64-unit icon space; shapeMatrix already applies 'scale'
+          when transforming to screen pixels, so do NOT multiply by scale here —
+          doing so would apply the scaling twice, making strokes sub-pixel at small
+          render sizes (e.g. 0.25 px at 16×16). }
+          stroke.width_(shape.StrokeWidth);
           stroke.line_cap_(shape.StrokeLineCap);
           stroke.line_join_(shape.StrokeLineJoin);
           stroke.miter_limit_(shape.StrokeMiterLimit);
@@ -1126,6 +1199,9 @@ begin
         end;
       end;
     end;
+
+    { ---- Debug: check rasterizer state ---- }
+    WriteLn('[HVIF DEBUG] Rasterizer min_y=', ras.min_y, ' max_y=', ras.max_y);
 
     { ---- Single-pass compound render ---- }
     render_scanlines_compound(@ras, @slAA, @slBin, @renBase, @mixAlloc, @sh);
@@ -1150,6 +1226,26 @@ begin
   { Copy BGRA32 buffer to TfpgImage (byte-identical on little-endian) }
   Move(buf[0], AImg.ImageData^, W * H * 4);
   AImg.UpdateImage;
+
+  { ---- Debug: scan the rendered buffer for non-zero pixels ---- }
+  dbgNonZero := 0;
+  dbgOpaque  := 0;
+  dbgPix     := @buf[0];
+  for si := 0 to W * H - 1 do
+  begin
+    if dbgPix^ <> 0 then
+      Inc(dbgNonZero);
+    if (dbgPix^ and $FF000000) <> 0 then
+      Inc(dbgOpaque);
+    Inc(dbgPix);
+  end;
+  WriteLn('[HVIF DEBUG] RenderIntoImage: ', W, 'x', H,
+    ' scale=', scale:0:4,
+    ' styles=', Length(FStyles),
+    ' paths=', Length(FPaths),
+    ' shapes=', Length(FShapes),
+    ' nonZeroPixels=', dbgNonZero,
+    ' opaquePixels=', dbgOpaque);
 end;
 
 
