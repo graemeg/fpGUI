@@ -1204,6 +1204,9 @@ begin
           when transforming to screen pixels, so do NOT multiply by scale here —
           doing so would apply the scaling twice, making strokes sub-pixel at small
           render sizes (e.g. 0.25 px at 16×16). }
+          WriteLn('[HVIF DEBUG]   stroke: w=', shape.StrokeWidth:0:2,
+            ' cap=', shape.StrokeLineCap, ' join=', shape.StrokeLineJoin,
+            ' miter=', shape.StrokeMiterLimit:0:1);
           stroke.width_(shape.StrokeWidth);
           stroke.line_cap_(shape.StrokeLineCap);
           stroke.line_join_(shape.StrokeLineJoin);
@@ -1218,13 +1221,16 @@ begin
           ras.add_path(@ct);
         end;
       end;
+
+      { ---- Per-shape compound render pass ----
+        Commit each shape individually to avoid sub-pixel seams at style
+        boundaries where overlapping shapes (e.g. round stroke caps) would
+        split coverage in a single compound pass.  Haiku's IconRenderer
+        does multi-pass for transparent styles; we extend this to all
+        shapes for correct edge blending. }
+      render_scanlines_compound(@ras, @slAA, @slBin, @renBase, @mixAlloc, @sh);
+      ras.reset;
     end;
-
-    { ---- Debug: check rasterizer state ---- }
-    WriteLn('[HVIF DEBUG] Rasterizer min_y=', ras.min_y, ' max_y=', ras.max_y);
-
-    { ---- Single-pass compound render ---- }
-    render_scanlines_compound(@ras, @slAA, @slBin, @renBase, @mixAlloc, @sh);
 
   finally
     stroke.Destruct;
