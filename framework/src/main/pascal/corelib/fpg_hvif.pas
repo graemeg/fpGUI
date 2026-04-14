@@ -532,7 +532,6 @@ begin
   for i := 0 to ACount - 1 do
   begin
     FillChar(FShapes[i], SizeOf(THvifShape), 0);
-    WriteLn('[HVIF DEBUG] ParseShapes: shape[', i, '] start pos=', FPos, ' len=', Length(FData));
     shapeType := ReadByte;
 
     if shapeType <> SHAPE_TYPE_PATH_SOURCE then
@@ -655,17 +654,12 @@ begin
     raise EHvifFormatError.Create('HVIF: invalid magic — not an HVIF file');
 
   nStyles := ReadByte;
-  WriteLn('[HVIF DEBUG] ParseFrom: nStyles=', nStyles, ' pos=', FPos, ' len=', Length(FData));
   ParseStyles(nStyles);
 
-  WriteLn('[HVIF DEBUG] ParseFrom: after styles pos=', FPos);
   nPaths := ReadByte;
-  WriteLn('[HVIF DEBUG] ParseFrom: nPaths=', nPaths, ' pos=', FPos);
   ParsePaths(nPaths);
 
-  WriteLn('[HVIF DEBUG] ParseFrom: after paths pos=', FPos);
   nShapes := ReadByte;
-  WriteLn('[HVIF DEBUG] ParseFrom: nShapes=', nShapes, ' pos=', FPos);
   ParseShapes(nShapes);
 end;
 
@@ -972,10 +966,9 @@ var
   shapeMatrix, ta: trans_affine;
   pathIdx: Byte;
 
-  { Debug: pixel statistics / de-premultiply }
-  dbgNonZero, dbgOpaque: Integer;
-  dbgPix: PLongWord;
-  maskAlpha: LongWord;
+  { De-premultiply pass }
+  pxPtr: PLongWord;
+  pxAlpha: LongWord;
 
 begin
   W     := AImg.Width;
@@ -1132,18 +1125,6 @@ begin
     sh.FData := nil;
   sh.FCount := Length(styleEntries);
 
-  for si := 0 to High(styleEntries) do
-  begin
-    if styleEntries[si].IsSolid then
-      WriteLn('[HVIF DEBUG] Style[', si, '] SOLID rgba=(',
-        styleEntries[si].SolidColor.r, ',',
-        styleEntries[si].SolidColor.g, ',',
-        styleEntries[si].SolidColor.b, ',',
-        styleEntries[si].SolidColor.a, ')')
-    else
-      WriteLn('[HVIF DEBUG] Style[', si, '] GRADIENT');
-  end;
-
   { ---- Path pipeline ---- }
   ps.Construct;
   curve.Construct(@ps);
@@ -1168,29 +1149,13 @@ begin
           shape.Transform[2], shape.Transform[3],
           shape.Transform[4], shape.Transform[5]);
         shapeMatrix.multiply(@ta);
-        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
-          ' transform=[', shape.Transform[0]:0:4, ',', shape.Transform[1]:0:4,
-          ',', shape.Transform[2]:0:4, ',', shape.Transform[3]:0:4,
-          ',', shape.Transform[4]:0:4, ',', shape.Transform[5]:0:4, ']',
-          ' hasStroke=', shape.HasStroke,
-          ' strokeW=', shape.StrokeWidth:0:4,
-          ' cap=', shape.StrokeLineCap, ' join=', shape.StrokeLineJoin,
-          ' paths=', Length(shape.PathIndices));
       end
       else if shape.HasTranslation then
       begin
         ta.Construct(1.0, 0.0, 0.0, 1.0,
                      shape.TranslateX, shape.TranslateY);
         shapeMatrix.multiply(@ta);
-        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
-          ' translate=(', shape.TranslateX:0:4, ',', shape.TranslateY:0:4, ')',
-          ' hasStroke=', shape.HasStroke,
-          ' paths=', Length(shape.PathIndices));
-      end
-      else
-        WriteLn('[HVIF DEBUG] Shape[', i, '] styleIdx=', shape.StyleIndex,
-          ' noTransform hasStroke=', shape.HasStroke,
-          ' paths=', Length(shape.PathIndices));
+      end;
 
       shapeMatrix.scale(scale, scale);
 
@@ -1198,18 +1163,7 @@ begin
       begin
         pathIdx := shape.PathIndices[pidx];
         if pathIdx >= Length(FPaths) then
-        begin
-          WriteLn('[HVIF DEBUG]   path[', pathIdx, '] OUT OF RANGE (max=', Length(FPaths)-1, ')');
           Continue;
-        end;
-
-        WriteLn('[HVIF DEBUG]   path[', pathIdx, '] points=', Length(FPaths[pathIdx].Points),
-          ' closed=', FPaths[pathIdx].Closed);
-        if Length(FPaths[pathIdx].Points) > 0 then
-          WriteLn('[HVIF DEBUG]     first=(', FPaths[pathIdx].Points[0].X:0:2,
-            ',', FPaths[pathIdx].Points[0].Y:0:2, ')  last=(',
-            FPaths[pathIdx].Points[High(FPaths[pathIdx].Points)].X:0:2, ',',
-            FPaths[pathIdx].Points[High(FPaths[pathIdx].Points)].Y:0:2, ')');
 
         ps.remove_all;
         EmitHvifPath(FPaths[pathIdx], ps);
@@ -1223,9 +1177,6 @@ begin
           when transforming to screen pixels, so do NOT multiply by scale here —
           doing so would apply the scaling twice, making strokes sub-pixel at small
           render sizes (e.g. 0.25 px at 16×16). }
-          WriteLn('[HVIF DEBUG]   stroke: w=', shape.StrokeWidth:0:2,
-            ' cap=', shape.StrokeLineCap, ' join=', shape.StrokeLineJoin,
-            ' miter=', shape.StrokeMiterLimit:0:1);
           stroke.width_(shape.StrokeWidth);
           stroke.line_cap_(shape.StrokeLineCap);
           stroke.line_join_(shape.StrokeLineJoin);
@@ -1271,43 +1222,24 @@ begin
   { De-premultiply the buffer: the compound renderer produced premultiplied
     BGRA pixels, but TfpgImage / the hybrid canvas expects straight alpha.
     For each pixel with A > 0, recover straight RGB = premultiplied RGB * 255 / A. }
-  dbgPix := @buf[0];
+  pxPtr := @buf[0];
   for si := 0 to W * H - 1 do
   begin
-    maskAlpha := (dbgPix^ shr 24) and $FF;  { alpha byte in BGRA32 }
-    if (maskAlpha > 0) and (maskAlpha < 255) then
+    pxAlpha := (pxPtr^ shr 24) and $FF;  { alpha byte in BGRA32 }
+    if (pxAlpha > 0) and (pxAlpha < 255) then
     begin
-      dbgPix^ := (LongWord(((dbgPix^        and $FF) * 255 + maskAlpha shr 1) div maskAlpha)) or
-                 (LongWord((((dbgPix^ shr 8) and $FF) * 255 + maskAlpha shr 1) div maskAlpha) shl 8) or
-                 (LongWord((((dbgPix^ shr 16) and $FF) * 255 + maskAlpha shr 1) div maskAlpha) shl 16) or
-                 (LongWord(maskAlpha) shl 24);
+      pxPtr^ := (LongWord(((pxPtr^        and $FF) * 255 + pxAlpha shr 1) div pxAlpha)) or
+                 (LongWord((((pxPtr^ shr 8) and $FF) * 255 + pxAlpha shr 1) div pxAlpha) shl 8) or
+                 (LongWord((((pxPtr^ shr 16) and $FF) * 255 + pxAlpha shr 1) div pxAlpha) shl 16) or
+                 (LongWord(pxAlpha) shl 24);
     end;
-    Inc(dbgPix);
+    Inc(pxPtr);
   end;
 
   { Copy BGRA32 buffer to TfpgImage (byte-identical on little-endian) }
   Move(buf[0], AImg.ImageData^, W * H * 4);
   AImg.UpdateImage;
 
-  { ---- Debug: scan the rendered buffer for non-zero pixels ---- }
-  dbgNonZero := 0;
-  dbgOpaque  := 0;
-  dbgPix     := @buf[0];
-  for si := 0 to W * H - 1 do
-  begin
-    if dbgPix^ <> 0 then
-      Inc(dbgNonZero);
-    if (dbgPix^ and $FF000000) <> 0 then
-      Inc(dbgOpaque);
-    Inc(dbgPix);
-  end;
-  WriteLn('[HVIF DEBUG] RenderIntoImage: ', W, 'x', H,
-    ' scale=', scale:0:4,
-    ' styles=', Length(FStyles),
-    ' paths=', Length(FPaths),
-    ' shapes=', Length(FShapes),
-    ' nonZeroPixels=', dbgNonZero,
-    ' opaquePixels=', dbgOpaque);
 end;
 
 

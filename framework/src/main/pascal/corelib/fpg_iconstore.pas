@@ -218,8 +218,6 @@ begin
     ms.Free;
   end;
   DoRegisterHVIF(AId, icon);
-  WriteLn('[HVIF DEBUG] RegisterFromConst: "', AId, '" size=', ASize,
-    ' styles=', icon.StyleCount, ' paths=', icon.PathCount, ' shapes=', icon.ShapeCount);
 end;
 
 procedure TfpgIconStore.RegisterFromStream(const AId: string; AStream: TStream);
@@ -276,20 +274,13 @@ begin
   Result := nil;
   idx := FEntries.IndexOf(AId);
   if idx < 0 then
-  begin
-    WriteLn('[HVIF DEBUG] GetIcon: "', AId, '" NOT FOUND in store');
     Exit;
-  end;
   entry := TfpgIconEntry(FEntries.Objects[idx]);
   case entry.Kind of
     ikHVIF:
       begin
         phys   := PhysicalSize(ASize);
         Result := entry.HVIF.GetImage(phys, phys);
-        WriteLn('[HVIF DEBUG] GetIcon: "', AId, '" logical=', ASize,
-          ' physical=', phys,
-          ' result=', (Result <> nil),
-          ' masked=', Result.Masked);
       end;
     ikBitmap:
       Result := entry.Bitmap;
