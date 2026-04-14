@@ -891,7 +891,26 @@ begin
                  pt.X,      pt.Y);
   end;
 
-  if APath.Closed then
+  if APath.Closed and (n >= 2) then
+  begin
+    { Emit the closing segment from the last point back to the first.
+      Without this, close_polygon draws a straight line, which flattens
+      one edge of shapes like circles defined with 4 bezier points. }
+    prev := APath.Points[n - 1];
+    pt   := APath.Points[0];
+
+    isLine := (Abs(prev.OutX - prev.X) < 1e-6) and
+              (Abs(prev.OutY - prev.Y) < 1e-6) and
+              (Abs(pt.InX   - pt.X)   < 1e-6) and
+              (Abs(pt.InY   - pt.Y)   < 1e-6);
+
+    if not isLine then
+      APS.curve4(prev.OutX, prev.OutY,
+                 pt.InX,    pt.InY,
+                 pt.X,      pt.Y);
+    APS.close_polygon;
+  end
+  else if APath.Closed then
     APS.close_polygon;
 end;
 
