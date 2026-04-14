@@ -308,6 +308,38 @@ type
     TX, TY: Double;
   end;
 
+  { Inherited SVG presentation attributes.  In CSS, properties like fill,
+    stroke, stroke-width etc. are inherited from parent elements when not
+    set on a child.  We thread this record through ProcessElement so that
+    <g fill="none"> correctly propagates to child <path> elements. }
+  TSvgInheritedStyle = record
+    Fill:            string;
+    FillOpacity:     string;
+    Opacity:         string;
+    Stroke:          string;
+    StrokeWidth:     string;
+    StrokeLineCap:   string;
+    StrokeLineJoin:  string;
+    StrokeMiterLimit: string;
+    StrokeOpacity:   string;
+  end;
+
+function SvgDefaultInheritedStyle: TSvgInheritedStyle;
+begin
+  { All string fields default to '' in FPC (managed type initialisation),
+    meaning "not inherited".  The SVG spec default fill=black is applied
+    only when neither the element nor any ancestor sets the attribute. }
+  Result.Fill            := '';
+  Result.FillOpacity     := '';
+  Result.Opacity         := '';
+  Result.Stroke          := '';
+  Result.StrokeWidth     := '';
+  Result.StrokeLineCap   := '';
+  Result.StrokeLineJoin  := '';
+  Result.StrokeMiterLimit := '';
+  Result.StrokeOpacity   := '';
+end;
+
 function SvgIdentityMatrix: TSvgMatrix;
 begin
   Result.A  := 1.0; Result.B  := 0.0;
@@ -1721,12 +1753,16 @@ var
   end;
 
   { ---- Recursive element processor ---- }
-  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix); forward;
+  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix;
+    const parentStyle: TSvgInheritedStyle); forward;
 
-  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix);
+  procedure ProcessElement(elem: TDOMElement; const groupMatrix: TSvgMatrix;
+    const parentStyle: TSvgInheritedStyle);
   var
     elemName: string;
     localMatrix, childMatrix: TSvgMatrix;
+    childInherited: TSvgInheritedStyle;
+    grpAttr: string;
     transformStr, fillStr, opacStr, styleStr, gradId, elemName2: string;
     strokeStr, strokeWidthStr, strokeCapStr, strokeJoinStr: string;
     strokeMiterLimitStr, strokeOpacStr: string;
@@ -1772,11 +1808,62 @@ var
     { Recurse into <g> and <svg> containers }
     if SameText(elemName, 'g') or SameText(elemName, 'svg') then
     begin
+      { Build inherited style for children: group attributes override
+        what was inherited from further up, but only when explicitly set.
+        This implements SVG CSS inheritance for presentation attributes. }
+      childInherited := parentStyle;
+      grpAttr := GetAttr(elem, 'fill');
+      if grpAttr <> '' then childInherited.Fill := grpAttr;
+      grpAttr := GetAttr(elem, 'fill-opacity');
+      if grpAttr <> '' then childInherited.FillOpacity := grpAttr;
+      grpAttr := GetAttr(elem, 'opacity');
+      if grpAttr <> '' then childInherited.Opacity := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke');
+      if grpAttr <> '' then childInherited.Stroke := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke-width');
+      if grpAttr <> '' then childInherited.StrokeWidth := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke-linecap');
+      if grpAttr <> '' then childInherited.StrokeLineCap := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke-linejoin');
+      if grpAttr <> '' then childInherited.StrokeLineJoin := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke-miterlimit');
+      if grpAttr <> '' then childInherited.StrokeMiterLimit := grpAttr;
+      grpAttr := GetAttr(elem, 'stroke-opacity');
+      if grpAttr <> '' then childInherited.StrokeOpacity := grpAttr;
+      { Also check inline style on the group }
+      styleStr := GetAttr(elem, 'style');
+      if styleStr <> '' then
+      begin
+        styleProps := ParseInlineStyle(styleStr);
+        try
+          if styleProps.IndexOfName('fill') >= 0 then
+            childInherited.Fill := styleProps.Values['fill'];
+          if styleProps.IndexOfName('fill-opacity') >= 0 then
+            childInherited.FillOpacity := styleProps.Values['fill-opacity'];
+          if styleProps.IndexOfName('opacity') >= 0 then
+            childInherited.Opacity := styleProps.Values['opacity'];
+          if styleProps.IndexOfName('stroke') >= 0 then
+            childInherited.Stroke := styleProps.Values['stroke'];
+          if styleProps.IndexOfName('stroke-width') >= 0 then
+            childInherited.StrokeWidth := styleProps.Values['stroke-width'];
+          if styleProps.IndexOfName('stroke-linecap') >= 0 then
+            childInherited.StrokeLineCap := styleProps.Values['stroke-linecap'];
+          if styleProps.IndexOfName('stroke-linejoin') >= 0 then
+            childInherited.StrokeLineJoin := styleProps.Values['stroke-linejoin'];
+          if styleProps.IndexOfName('stroke-miterlimit') >= 0 then
+            childInherited.StrokeMiterLimit := styleProps.Values['stroke-miterlimit'];
+          if styleProps.IndexOfName('stroke-opacity') >= 0 then
+            childInherited.StrokeOpacity := styleProps.Values['stroke-opacity'];
+        finally
+          styleProps.Free;
+        end;
+      end;
+
       child := elem.FirstChild;
       while Assigned(child) do
       begin
         if child.NodeType = ELEMENT_NODE then
-          ProcessElement(TDOMElement(child), localMatrix);
+          ProcessElement(TDOMElement(child), localMatrix, childInherited);
         child := child.NextSibling;
       end;
       Exit;
@@ -1836,9 +1923,22 @@ var
       end;
     end;
 
+    { ---- CSS inheritance: fall back to parent group values ---- }
+    if fillStr = '' then fillStr := parentStyle.Fill;
+    if opacStr = '' then opacStr := parentStyle.FillOpacity;
+    if strokeStr = '' then strokeStr := parentStyle.Stroke;
+    if strokeWidthStr = '' then strokeWidthStr := parentStyle.StrokeWidth;
+    if strokeCapStr = '' then strokeCapStr := parentStyle.StrokeLineCap;
+    if strokeJoinStr = '' then strokeJoinStr := parentStyle.StrokeLineJoin;
+    if strokeMiterLimitStr = '' then strokeMiterLimitStr := parentStyle.StrokeMiterLimit;
+    if strokeOpacStr = '' then strokeOpacStr := parentStyle.StrokeOpacity;
+
+    { ---- SVG spec defaults (only when neither element nor ancestor set it) ---- }
     if fillStr = '' then fillStr := 'black';
     if opacStr = '' then opacStr := GetAttr(elem, 'fill-opacity');
     if opacStr = '' then opacStr := GetAttr(elem, 'opacity');
+    if (opacStr = '') and (parentStyle.Opacity <> '') then
+      opacStr := parentStyle.Opacity;
 
     { ---- Resolve fill ---- }
     fillIsNone := False;
@@ -2099,7 +2199,7 @@ begin
         SetLength(addedStyles, 32);
 
         { ---- Second pass: traverse all elements recursively ---- }
-        ProcessElement(svgRoot, rootMatrix);
+        ProcessElement(svgRoot, rootMatrix, SvgDefaultInheritedStyle);
 
         writer.SaveToFile(AHvifFile);
       finally
