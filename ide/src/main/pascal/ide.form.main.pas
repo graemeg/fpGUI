@@ -2748,16 +2748,8 @@ end;
 procedure TMainForm.uiCreateToolBar;
 var
   mig: TfpgMigLayoutManager;
-  icon: THvifIcon;
-  img: TfpgImage;
 begin
   mig := TfpgMigLayoutManager.Create;
-
-
-  icon := THvifIcon.CreateFromFile('/data/devel/fpgui-icon-o-matic/ide/target/icons/build.hvif');
-  img := icon.GetImage(16, 16);
-  fpgImages.AddImage('ide.test', img);
-  icon.Free;
 
   Toolbar := TfpgBevel.Create(self);
   with Toolbar do
