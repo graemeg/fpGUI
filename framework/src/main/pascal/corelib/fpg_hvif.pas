@@ -106,6 +106,11 @@ type
     { Rendering }
     procedure RenderIntoImage(AImg: TfpgImage);
 
+    { Property getters for Styles[], Paths[], Shapes[] }
+    function GetStyle(AIndex: Integer): THvifStyle;
+    function GetPath(AIndex: Integer): THvifPath;
+    function GetShape(AIndex: Integer): THvifShape;
+
   public
     destructor Destroy; override;
 
@@ -128,6 +133,12 @@ type
     function StyleCount: Integer;
     function PathCount: Integer;
     function ShapeCount: Integer;
+
+    { Raw data accessors for the document model (e.g. TIomDocument.FromHvifArrays).
+      Indices are 0-based. Results are deep copies of the internal records. }
+    property Styles[AIndex: Integer]: THvifStyle read GetStyle;
+    property Paths[AIndex: Integer]:  THvifPath  read GetPath;
+    property Shapes[AIndex: Integer]: THvifShape read GetShape;
   end;
 
 
@@ -1287,6 +1298,30 @@ end;
 function THvifIcon.ShapeCount: Integer;
 begin
   Result := Length(FShapes);
+end;
+
+function THvifIcon.GetStyle(AIndex: Integer): THvifStyle;
+begin
+  if (AIndex < 0) or (AIndex >= Length(FStyles)) then
+    raise EHvifError.CreateFmt('THvifIcon.GetStyle: index %d out of range [0..%d]',
+      [AIndex, Length(FStyles) - 1]);
+  Result := FStyles[AIndex];
+end;
+
+function THvifIcon.GetPath(AIndex: Integer): THvifPath;
+begin
+  if (AIndex < 0) or (AIndex >= Length(FPaths)) then
+    raise EHvifError.CreateFmt('THvifIcon.GetPath: index %d out of range [0..%d]',
+      [AIndex, Length(FPaths) - 1]);
+  Result := FPaths[AIndex];
+end;
+
+function THvifIcon.GetShape(AIndex: Integer): THvifShape;
+begin
+  if (AIndex < 0) or (AIndex >= Length(FShapes)) then
+    raise EHvifError.CreateFmt('THvifIcon.GetShape: index %d out of range [0..%d]',
+      [AIndex, Length(FShapes) - 1]);
+  Result := FShapes[AIndex];
 end;
 
 
