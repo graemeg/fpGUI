@@ -182,6 +182,8 @@ type
   public
     procedure AfterCreate; override;
     destructor Destroy; override;
+    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
+                             var consumed: boolean); override;
   end;
 
 
@@ -1699,12 +1701,41 @@ begin
     WindowTitle := base;
 end;
 
+procedure TVertexMainForm.HandleKeyPress(var keycode: word;
+    var shiftstate: TShiftState; var consumed: boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if consumed then Exit;
+  { Tool shortcuts — only when no modifier held }
+  if shiftstate = [] then
+    case keycode of
+      Ord('s'), Ord('S'):
+        begin
+          ToolBtnClick(FBtnToolSelect);
+          consumed := True;
+        end;
+      Ord('n'), Ord('N'):
+        begin
+          ToolBtnClick(FBtnToolNode);
+          consumed := True;
+        end;
+      Ord('p'), Ord('P'):
+        begin
+          ToolBtnClick(FBtnToolPan);
+          consumed := True;
+        end;
+    end;
+end;
+
 procedure TVertexMainForm.miHelpAboutClick(Sender: TObject);
 begin
   ShowMessage(
-      'Vertex' + LineEnding +
-      'HVIF icon editor for the fpGUI toolkit.' + LineEnding + LineEnding +
-      'Step 9: Save (.hvif) and Export as .inc',
+      'Vertex — HVIF Icon Editor' + LineEnding +
+      'Built with the fpGUI toolkit.' + LineEnding + LineEnding +
+      'Tools: Sel / Node / Pan (toolbox)' + LineEnding +
+      'Zoom:  Ctrl+scroll or zoom toolbar' + LineEnding +
+      'Pan:   scroll or Pan tool' + LineEnding +
+      'Grid:  Grid/Snap buttons in toolbar',
       'About Vertex');
 end;
 
