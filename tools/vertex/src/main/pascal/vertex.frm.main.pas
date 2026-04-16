@@ -64,6 +64,9 @@ type
     FBtnShapeDel:   TfpgButton;
     FBtnShapeUp:    TfpgButton;
     FBtnShapeDown:  TfpgButton;
+    FPathBar:       TfpgBevel;       { path management button bar }
+    FBtnPathAdd:    TfpgButton;
+    FBtnPathDel:    TfpgButton;
     FStylePanel:    TVertexStylePanel;
     FPathPanel:     TVertexPathPanel;
     FShapePanel:    TVertexShapePanel;
@@ -444,30 +447,48 @@ begin
   FObjectTree.OnChange := @ObjectTreeChanged;
   rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY().PushY());
 
-  { Shape management button bar: [+] [-] [Up] [Down] }
+  { Path management button bar: [+ Path] [-] }
+  FPathBar := TfpgBevel.Create(FRightPanel);
+  FPathBar.Name  := 'pathBar';
+  FPathBar.Style := bsFlat;
+  FPathBar.PreferredSize := fpgSize(220, 26);
+
+  FBtnPathAdd := TfpgButton.Create(FPathBar);
+  FBtnPathAdd.Text    := '+ Path';
+  FBtnPathAdd.SetPosition(2, 2, 66, 22);
+  FBtnPathAdd.OnClick := @PathMenuAddFreehand;
+
+  FBtnPathDel := TfpgButton.Create(FPathBar);
+  FBtnPathDel.Text    := '- Path';
+  FBtnPathDel.SetPosition(70, 2, 66, 22);
+  FBtnPathDel.OnClick := @PathMenuRemove;
+
+  rmig.AddLayoutComponent(FPathBar, TfpgMigCC.Create().GrowX());
+
+  { Shape management button bar: [+ Shape] [-] [Up] [Down] }
   FShapeBar := TfpgBevel.Create(FRightPanel);
   FShapeBar.Name  := 'shapeBar';
   FShapeBar.Style := bsFlat;
   FShapeBar.PreferredSize := fpgSize(220, 26);
 
   FBtnShapeAdd := TfpgButton.Create(FShapeBar);
-  FBtnShapeAdd.Text    := '+';
-  FBtnShapeAdd.SetPosition(2, 2, 46, 22);
+  FBtnShapeAdd.Text    := '+ Shape';
+  FBtnShapeAdd.SetPosition(2, 2, 62, 22);
   FBtnShapeAdd.OnClick := @ShapeAdd;
 
   FBtnShapeDel := TfpgButton.Create(FShapeBar);
   FBtnShapeDel.Text    := '-';
-  FBtnShapeDel.SetPosition(50, 2, 46, 22);
+  FBtnShapeDel.SetPosition(66, 2, 32, 22);
   FBtnShapeDel.OnClick := @ShapeDelete;
 
   FBtnShapeUp := TfpgButton.Create(FShapeBar);
   FBtnShapeUp.Text    := 'Up';
-  FBtnShapeUp.SetPosition(98, 2, 54, 22);
+  FBtnShapeUp.SetPosition(100, 2, 50, 22);
   FBtnShapeUp.OnClick := @ShapeMoveUp;
 
   FBtnShapeDown := TfpgButton.Create(FShapeBar);
   FBtnShapeDown.Text    := 'Down';
-  FBtnShapeDown.SetPosition(154, 2, 54, 22);
+  FBtnShapeDown.SetPosition(152, 2, 58, 22);
   FBtnShapeDown.OnClick := @ShapeMoveDown;
 
   rmig.AddLayoutComponent(FShapeBar, TfpgMigCC.Create().GrowX());
@@ -551,14 +572,14 @@ begin
       st := FDocument.Styles[i];
       case st.StyleType of
         hstSolidColor, hstSolidColorNoAlpha:
-          s := Format('Style %d  solid #%2.2X%2.2X%2.2X A=%d',
-               [i, st.Color.R, st.Color.G, st.Color.B, st.Color.A]);
+          s := Format('%s  #%2.2X%2.2X%2.2X  A=%d',
+               [st.Name, st.Color.R, st.Color.G, st.Color.B, st.Color.A]);
         hstSolidGray, hstSolidGrayNoAlpha:
-          s := Format('Style %d  gray K=%d', [i, st.Color.R]);
+          s := Format('%s  gray K=%d', [st.Name, st.Color.R]);
         hstGradient:
-          s := Format('Style %d  gradient', [i]);
+          s := Format('%s  gradient (%d stops)', [st.Name, st.StopCount]);
       else
-        s := Format('Style %d', [i]);
+        s := st.Name;
       end;
       nStyles.AppendText(s);
     end;
@@ -589,8 +610,10 @@ begin
     for i := 0 to FDocument.ShapeCount - 1 do
     begin
       sh := FDocument.Shapes[i];
-      s := Format('Shape %d  style=%d  paths=%d',
-           [i, FDocument.IndexOfStyle(sh.Style), sh.PathCount]);
+      if sh.Style <> nil then
+        s := Format('%s  [%s]  %d path(s)', [sh.Name, sh.Style.Name, sh.PathCount])
+      else
+        s := Format('%s  (no style)  %d path(s)', [sh.Name, sh.PathCount]);
       n := nShapes.AppendText(s);
       n.Data := Pointer(PtrUInt(i));   { store shape index for tree → canvas selection }
 
