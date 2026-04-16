@@ -4,13 +4,21 @@ unit vertex.wgt.stylepanel;
   TVertexStylePanel — shows and edits the style of the currently selected shape.
 
   Step #7: solid-colour style editing with undo support (no Apply button).
+  Step #10: gradient style type switching + gradient preview + editor popup.
 
   Controls:
-    FSwatch   — clickable colour rectangle; opens fpgSelectColorDialog on click.
-    FHexEdit  — "#RRGGBB" text field; parsed and committed on focus-loss.
-    FAlphaBar — horizontal trackbar; direct mutation for live preview, committed
-                on mouse-up (same model as canvas node drag).
-    FAlphaSpin — numeric spin edit for alpha; committed on focus-loss.
+    FTypeCombo — "Solid" / "Gradient" combo; fires TVertexCmdSetStyleType on change.
+
+    Solid-colour controls (visible when StyleType = solid):
+      FSwatch   — clickable colour rectangle; opens fpgSelectColorDialog on click.
+      FHexEdit  — "#RRGGBB" text field; parsed and committed on focus-loss.
+      FAlphaBar — horizontal trackbar; direct mutation for live preview, committed
+                  on mouse-up (same model as canvas node drag).
+      FAlphaSpin — numeric spin edit for alpha; committed on focus-loss.
+
+    Gradient controls (visible when StyleType = gradient):
+      FGradSwatch  — read-only painted preview of the gradient (click opens editor).
+      FBtnEditGrad — "Edit gradient…" button.
 
   Commit model (identical to canvas drag):
     Every completed gesture creates one TVertexCmdSetStyleColour entry on the undo
@@ -34,9 +42,11 @@ uses
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_widget, fpg_panel,
   fpg_label, fpg_spinedit, fpg_edit, fpg_trackbar,
+  fpg_combobox, fpg_button,
   fpg_dialogs,
   fpg_hvif_model,
-  fpg_vertex_document;
+  fpg_vertex_document,
+  vertex.wgt.gradienteditor;
 
 
 type
@@ -58,6 +68,24 @@ type
   end;
 
 
+  { ── TVertexGradientSwatch ──────────────────────────────────────────────────── }
+  { Clickable gradient preview bar.  Paints a horizontal colour interpolation of
+    the style's gradient stops, or a grey bar when the style has no stops. }
+  TVertexGradientSwatch = class(TfpgWidget)
+  private
+    FStyle:   TVertexStyle;    { weak ref; may be nil }
+    FOnClick: TNotifyEvent;
+    function InterpolateColor(t: Single): THvifColor;
+  protected
+    procedure HandlePaint; override;
+    procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property Style:   TVertexStyle read FStyle   write FStyle;
+    property OnClick: TNotifyEvent read FOnClick write FOnClick;
+  end;
+
+
   { ── TVertexStylePanel ──────────────────────────────────────────────────────── }
   TVertexStylePanel = class(TfpgBevel)
   private
@@ -68,21 +96,35 @@ type
     FUpdating:    Boolean;        { guards recursive OnChange loops }
 
     FLblHeader:   TfpgLabel;
-    FLblType:     TfpgLabel;
+    FLblType:     TfpgLabel;      { "No shape selected" or "Solid colour" / "Gradient" }
+
+    { Style type selector }
+    FTypeCombo:   TfpgComboBox;
+
+    { Solid-colour controls }
     FSwatch:      TVertexColorSwatch;
     FHexEdit:     TfpgEdit;
     FLblA:        TfpgLabel;
     FAlphaBar:    TfpgTrackBar;
     FAlphaSpin:   TfpgSpinEdit;
 
+    { Gradient controls }
+    FGradSwatch:  TVertexGradientSwatch;
+    FBtnEditGrad: TfpgButton;
+
+    { Gradient editor popup (owned by this panel) }
+    FGradEditor:  TVertexGradientEditor;
+
     procedure SetupControls;
     procedure UpdateControls;
-    procedure SetControlsEnabled(AEnabled: Boolean);
+    procedure ShowSolidControls(AVisible: Boolean);
+    procedure ShowGradientControls(AVisible: Boolean);
 
     { Commit helpers }
     procedure CommitColor(const ANew: THvifColor);
 
     { Control event handlers }
+    procedure TypeComboChanged(Sender: TObject);
     procedure SwatchClick(Sender: TObject);
     procedure HexEditExit(Sender: TObject);
     procedure AlphaBarChanged(Sender: TObject; APosition: integer);
@@ -90,6 +132,8 @@ type
                               AShift: TShiftState; const AMousePos: TPoint);
     procedure AlphaSpinChanged(Sender: TObject);
     procedure AlphaSpinExit(Sender: TObject);
+    procedure GradSwatchClick(Sender: TObject);
+    procedure BtnEditGradClick(Sender: TObject);
 
     { Read the live RGBA values from the editing controls }
     function  CurrentColor: THvifColor;
@@ -129,20 +173,34 @@ const
   ASPIN_X   = ALP_X + ALP_W + 4;
   ASPIN_W   = 54;   { alpha spin width }
 
+  COMBO_W   = 210;  { type combo width }
+
   ROW0      = 4;
   ROW1      = 26;
-  ROW2      = 48;                       { colour row }
-  ROW3      = ROW2 + SW_H + 6;          { alpha row }
-  PANEL_H   = ROW3 + SPH  + 6;          { total panel height }
+  ROW2      = 48;   { type combo row }
+  ROW3      = ROW2 + SPH + 6;             { colour row }
+  ROW4      = ROW3 + SW_H + 6;            { alpha row }
+  PANEL_H   = ROW4 + SPH  + 6;            { total panel height }
 
 
-{ ── Helpers ──────────────────────────────────────────────────────────────── }
+{ ── Helpers ──────────────────────────────────────────────────────────────────── }
 
 procedure FpgColorToHvifRGB(ACol: TfpgColor; out R, G, B: Byte);
 begin
   R := Byte((ACol shr 16) and $FF);
   G := Byte((ACol shr  8) and $FF);
   B := Byte( ACol         and $FF);
+end;
+
+function HvifColorToFpg(const C: THvifColor): TfpgColor;
+begin
+  Result := (TfpgColor($FF) shl 24) or (TfpgColor(C.R) shl 16) or
+            (TfpgColor(C.G) shl 8)  or TfpgColor(C.B);
+end;
+
+function LerpByte(a, b: Byte; t: Single): Byte;
+begin
+  Result := Byte(Round(a + (b - a) * t));
 end;
 
 
@@ -187,15 +245,107 @@ begin
 end;
 
 
+{ ── TVertexGradientSwatch ──────────────────────────────────────────────────── }
+
+constructor TVertexGradientSwatch.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FStyle      := nil;
+  MouseCursor := mcHand;
+end;
+
+function TVertexGradientSwatch.InterpolateColor(t: Single): THvifColor;
+var
+  i:          Integer;
+  t0, t1, f: Single;
+  c0, c1:    THvifColor;
+begin
+  Result.R := 128; Result.G := 128; Result.B := 128; Result.A := 255;
+  if (FStyle = nil) or (FStyle.StopCount = 0) then
+    Exit;
+  if FStyle.StopCount = 1 then
+  begin
+    Result := FStyle.Stops[0].Color;
+    Exit;
+  end;
+  for i := 0 to FStyle.StopCount - 2 do
+  begin
+    t0 := FStyle.Stops[i].Offset;
+    t1 := FStyle.Stops[i + 1].Offset;
+    if t <= t0 then
+    begin
+      Result := FStyle.Stops[i].Color;
+      Exit;
+    end;
+    if t <= t1 then
+    begin
+      if t1 > t0 then
+        f := (t - t0) / (t1 - t0)
+      else
+        f := 0;
+      c0 := FStyle.Stops[i].Color;
+      c1 := FStyle.Stops[i + 1].Color;
+      Result.R := LerpByte(c0.R, c1.R, f);
+      Result.G := LerpByte(c0.G, c1.G, f);
+      Result.B := LerpByte(c0.B, c1.B, f);
+      Result.A := LerpByte(c0.A, c1.A, f);
+      Exit;
+    end;
+  end;
+  Result := FStyle.Stops[FStyle.StopCount - 1].Color;
+end;
+
+procedure TVertexGradientSwatch.HandlePaint;
+var
+  x:   Integer;
+  col: THvifColor;
+  t:   Single;
+begin
+  Canvas.BeginDraw;
+  try
+    if (FStyle = nil) or (FStyle.StopCount = 0) then
+    begin
+      Canvas.SetColor($FF808080);
+      Canvas.FillRectangle(0, 0, Width, Height);
+    end
+    else
+    begin
+      for x := 0 to Width - 1 do
+      begin
+        if Width > 1 then
+          t := x / (Width - 1)
+        else
+          t := 0;
+        col := InterpolateColor(t);
+        Canvas.SetColor(HvifColorToFpg(col));
+        Canvas.FillRectangle(x, 0, 1, Height);
+      end;
+    end;
+    Canvas.SetColor($FF444444);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  finally
+    Canvas.EndDraw;
+  end;
+end;
+
+procedure TVertexGradientSwatch.HandleLMouseDown(x, y: integer;
+    shiftstate: TShiftState);
+begin
+  if Assigned(FOnClick) then
+    FOnClick(Self);
+end;
+
+
 { ── TVertexStylePanel ──────────────────────────────────────────────────────── }
 
 constructor TVertexStylePanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FDocument  := nil;
-  FStyle     := nil;
-  FDragAlpha := False;
-  FUpdating  := False;
+  FDocument    := nil;
+  FStyle       := nil;
+  FDragAlpha   := False;
+  FUpdating    := False;
+  FGradEditor  := nil;
   PreferredSize := fpgSize(220, PANEL_H);
   SetupControls;
   UpdateControls;
@@ -212,23 +362,32 @@ begin
   FLblType.SetPosition(LBL_X, ROW1, 210, 18);
   FLblType.Text := 'No shape selected';
 
+  { Style type combo (Solid / Gradient) }
+  FTypeCombo := TfpgComboBox.Create(Self);
+  FTypeCombo.SetPosition(LBL_X, ROW2, COMBO_W, SPH);
+  FTypeCombo.Items.Add('Solid colour');
+  FTypeCombo.Items.Add('Gradient');
+  FTypeCombo.FocusItem := 0;
+  FTypeCombo.OnChange  := @TypeComboChanged;
+  FTypeCombo.Enabled   := False;
+
   { Colour row: swatch + hex edit }
   FSwatch := TVertexColorSwatch.Create(Self);
-  FSwatch.SetPosition(LBL_X, ROW2, SW_W, SW_H);
+  FSwatch.SetPosition(LBL_X, ROW3, SW_W, SW_H);
   FSwatch.OnClick := @SwatchClick;
 
   FHexEdit := TfpgEdit.Create(Self);
-  FHexEdit.SetPosition(HEX_X, ROW2 + 2, HEX_W, SPH);
+  FHexEdit.SetPosition(HEX_X, ROW3 + 2, HEX_W, SPH);
   FHexEdit.Text   := '';
   FHexEdit.OnExit := @HexEditExit;
 
   { Alpha row: "A:" label + trackbar + spin }
   FLblA := TfpgLabel.Create(Self);
-  FLblA.SetPosition(LBL_X, ROW3 + 4, ALP_LBL_W, 18);
+  FLblA.SetPosition(LBL_X, ROW4 + 4, ALP_LBL_W, 18);
   FLblA.Text := 'A:';
 
   FAlphaBar := TfpgTrackBar.Create(Self);
-  FAlphaBar.SetPosition(ALP_X, ROW3, ALP_W, SPH);
+  FAlphaBar.SetPosition(ALP_X, ROW4, ALP_W, SPH);
   FAlphaBar.Min      := 0;
   FAlphaBar.Max      := 255;
   FAlphaBar.Position := 255;
@@ -236,74 +395,95 @@ begin
   FAlphaBar.OnMouseUp := @AlphaBarMouseUp;
 
   FAlphaSpin := TfpgSpinEdit.Create(Self);
-  FAlphaSpin.SetPosition(ASPIN_X, ROW3, ASPIN_W, SPH);
+  FAlphaSpin.SetPosition(ASPIN_X, ROW4, ASPIN_W, SPH);
   FAlphaSpin.MinValue := 0;
   FAlphaSpin.MaxValue := 255;
   FAlphaSpin.Value    := 255;
   FAlphaSpin.OnChange := @AlphaSpinChanged;
   FAlphaSpin.OnExit   := @AlphaSpinExit;
+
+  { Gradient preview swatch }
+  FGradSwatch := TVertexGradientSwatch.Create(Self);
+  FGradSwatch.SetPosition(LBL_X, ROW3, SW_W + HEX_W + 4, SW_H);
+  FGradSwatch.OnClick := @GradSwatchClick;
+  FGradSwatch.Visible := False;
+
+  { "Edit gradient…" button }
+  FBtnEditGrad := TfpgButton.Create(Self);
+  FBtnEditGrad.SetPosition(LBL_X, ROW4, 120, SPH);
+  FBtnEditGrad.Text    := 'Edit gradient…';
+  FBtnEditGrad.OnClick := @BtnEditGradClick;
+  FBtnEditGrad.Visible := False;
 end;
 
-procedure TVertexStylePanel.SetControlsEnabled(AEnabled: Boolean);
+procedure TVertexStylePanel.ShowSolidControls(AVisible: Boolean);
 begin
-  FSwatch.Enabled   := AEnabled;
-  FHexEdit.Enabled  := AEnabled;
-  FLblA.Enabled     := AEnabled;
-  FAlphaBar.Enabled := AEnabled;
-  FAlphaSpin.Enabled:= AEnabled;
+  FSwatch.Visible   := AVisible;
+  FHexEdit.Visible  := AVisible;
+  FLblA.Visible     := AVisible;
+  FAlphaBar.Visible := AVisible;
+  FAlphaSpin.Visible:= AVisible;
 end;
 
-procedure TVertexStylePanel.LoadColorToControls(const AColor: THvifColor);
+procedure TVertexStylePanel.ShowGradientControls(AVisible: Boolean);
 begin
-  FUpdating := True;
-  try
-    FSwatch.Color      := AColor;
-    FHexEdit.Text      := Format('#%2.2X%2.2X%2.2X', [AColor.R, AColor.G, AColor.B]);
-    FAlphaBar.Position := AColor.A;
-    FAlphaSpin.Value   := AColor.A;
-  finally
-    FUpdating := False;
-  end;
-end;
-
-function TVertexStylePanel.CurrentColor: THvifColor;
-begin
-  Result   := FSwatch.Color;
-  Result.A := Byte(FAlphaSpin.Value);
+  FGradSwatch.Visible  := AVisible;
+  FBtnEditGrad.Visible := AVisible;
 end;
 
 procedure TVertexStylePanel.UpdateControls;
 var
-  editable: Boolean;
+  isGradient: Boolean;
 begin
   if FStyle = nil then
   begin
     FLblType.Text := 'No shape selected';
-    SetControlsEnabled(False);
+    FTypeCombo.Enabled := False;
+    ShowSolidControls(False);
+    ShowGradientControls(False);
     FHexEdit.Text := '';
     Exit;
   end;
 
-  editable := False;
-  case FStyle.StyleType of
-    hstSolidColor, hstSolidColorNoAlpha,
-    hstSolidGray,  hstSolidGrayNoAlpha:
-    begin
-      FLblType.Text := 'Solid colour';
-      editable      := True;
-    end;
-    hstGradient:
-      FLblType.Text := 'Gradient (view only)';
-  else
-    FLblType.Text := 'Unknown style';
+  FTypeCombo.Enabled := True;
+  isGradient := FStyle.StyleType = hstGradient;
+
+  FUpdating := True;
+  try
+    if isGradient then
+      FTypeCombo.FocusItem := 1
+    else
+      FTypeCombo.FocusItem := 0;
+  finally
+    FUpdating := False;
   end;
 
-  SetControlsEnabled(editable);
-
-  if editable then
-    LoadColorToControls(FStyle.Color)
+  if isGradient then
+  begin
+    FLblType.Text := 'Gradient';
+    ShowSolidControls(False);
+    ShowGradientControls(True);
+    FGradSwatch.Style := FStyle;
+    FGradSwatch.Repaint;
+  end
   else
-    FHexEdit.Text := '';
+  begin
+    case FStyle.StyleType of
+      hstSolidColor, hstSolidColorNoAlpha,
+      hstSolidGray,  hstSolidGrayNoAlpha:
+        FLblType.Text := 'Solid colour';
+    else
+      FLblType.Text := 'Unknown style';
+    end;
+    ShowSolidControls(True);
+    ShowGradientControls(False);
+    FSwatch.Enabled   := True;
+    FHexEdit.Enabled  := True;
+    FLblA.Enabled     := True;
+    FAlphaBar.Enabled := True;
+    FAlphaSpin.Enabled:= True;
+    LoadColorToControls(FStyle.Color);
+  end;
 end;
 
 
@@ -325,6 +505,26 @@ end;
 
 
 { ── Control event handlers ───────────────────────────────────────────────── }
+
+procedure TVertexStylePanel.TypeComboChanged(Sender: TObject);
+var
+  wantGradient: Boolean;
+  wantType:     THvifStyleType;
+  cmd:          TVertexCmdSetStyleType;
+begin
+  if FUpdating or (FDocument = nil) or (FStyle = nil) then
+    Exit;
+  wantGradient := FTypeCombo.FocusItem = 1;
+  if wantGradient then
+    wantType := hstGradient
+  else
+    wantType := hstSolidColor;
+  if FStyle.StyleType = wantType then
+    Exit;
+  cmd := TVertexCmdSetStyleType.Create(FStyle, wantType);
+  FDocument.UndoStack.Execute(cmd);
+  UpdateControls;
+end;
 
 procedure TVertexStylePanel.SwatchClick(Sender: TObject);
 var
@@ -429,6 +629,43 @@ begin
   CommitColor(CurrentColor);
 end;
 
+procedure TVertexStylePanel.GradSwatchClick(Sender: TObject);
+begin
+  BtnEditGradClick(Sender);
+end;
+
+procedure TVertexStylePanel.BtnEditGradClick(Sender: TObject);
+begin
+  if (FDocument = nil) or (FStyle = nil) then
+    Exit;
+  if FGradEditor = nil then
+    FGradEditor := TVertexGradientEditor.Create(Self);
+  FGradEditor.SetDocumentAndStyle(FDocument, FStyle);
+  FGradEditor.Show;
+end;
+
+
+{ ── Colour control helpers ───────────────────────────────────────────────── }
+
+procedure TVertexStylePanel.LoadColorToControls(const AColor: THvifColor);
+begin
+  FUpdating := True;
+  try
+    FSwatch.Color      := AColor;
+    FHexEdit.Text      := Format('#%2.2X%2.2X%2.2X', [AColor.R, AColor.G, AColor.B]);
+    FAlphaBar.Position := AColor.A;
+    FAlphaSpin.Value   := AColor.A;
+  finally
+    FUpdating := False;
+  end;
+end;
+
+function TVertexStylePanel.CurrentColor: THvifColor;
+begin
+  Result   := FSwatch.Color;
+  Result.A := Byte(FAlphaSpin.Value);
+end;
+
 
 { ── Public interface ─────────────────────────────────────────────────────── }
 
@@ -450,7 +687,11 @@ end;
 procedure TVertexStylePanel.DocumentChanged;
 begin
   if FStyle <> nil then
+  begin
     UpdateControls;
+    if (FGradEditor <> nil) and FGradEditor.Visible then
+      FGradEditor.DocumentChanged;
+  end;
 end;
 
 end.

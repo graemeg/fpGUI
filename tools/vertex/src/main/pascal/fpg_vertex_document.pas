@@ -664,6 +664,50 @@ type
   end;
 
 
+  { Switch a style between solid colour and gradient. When switching to gradient
+    a basic 2-stop linear gradient is initialised automatically if no stops are
+    present. The old state (type, colour, stops, gradient type, transform) is
+    saved in full so the Undo is complete. }
+  TVertexCmdSetStyleType = class(TVertexCommand)
+  private
+    FStyle:            TVertexStyle;
+    FOldStyleType:     THvifStyleType;
+    FNewStyleType:     THvifStyleType;
+    FOldColor:         THvifColor;
+    FOldStops:         array of TVertexGradientStop;
+    FOldGradType:      THvifGradientType;
+    FOldGradTransform: array[0..5] of Single;
+  public
+    constructor Create(AStyle: TVertexStyle; ANewStyleType: THvifStyleType);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Action performed by TVertexCmdSetGradientStop. }
+  TVertexGradStopAction = (gsaAdd, gsaRemove, gsaUpdate);
+
+  { Add, remove, or update a single gradient stop on a TVertexStyle.
+    For gsaAdd:    AIndex = insertion position; ANewStop = stop to insert.
+    For gsaRemove: AIndex = index to remove; FOldStop is captured in the
+                   constructor.
+    For gsaUpdate: AIndex = index to update; ANewStop = new values; FOldStop is
+                   captured in the constructor. }
+  TVertexCmdSetGradientStop = class(TVertexCommand)
+  private
+    FStyle:   TVertexStyle;
+    FAction:  TVertexGradStopAction;
+    FIndex:   Integer;
+    FOldStop: TVertexGradientStop;
+    FNewStop: TVertexGradientStop;
+  public
+    constructor Create(AStyle: TVertexStyle; AAction: TVertexGradStopAction;
+                       AIndex: Integer; const ANewStop: TVertexGradientStop);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
 { ==================== TUndoStack ==================== }
 
 type
@@ -1752,6 +1796,136 @@ end;
 procedure TVertexCmdSetTransformer.Undo;
 begin
   FShape.Transformer := FOldTransformer;
+end;
+
+
+{ TVertexCmdSetStyleType }
+
+constructor TVertexCmdSetStyleType.Create(AStyle: TVertexStyle;
+    ANewStyleType: THvifStyleType);
+var
+  i: Integer;
+begin
+  inherited Create;
+  FStyle        := AStyle;
+  FOldStyleType := AStyle.StyleType;
+  FNewStyleType := ANewStyleType;
+  FOldColor     := AStyle.Color;
+  FOldGradType  := AStyle.GradientType;
+  AStyle.GetGradTransform(FOldGradTransform);
+  SetLength(FOldStops, AStyle.StopCount);
+  for i := 0 to AStyle.StopCount - 1 do
+    FOldStops[i] := AStyle.Stops[i];
+  Description := 'Set style type';
+end;
+
+procedure TVertexCmdSetStyleType.Execute;
+var
+  identMatrix: array[0..5] of Single;
+  blackColor, whiteColor: THvifColor;
+  i: Integer;
+begin
+  FStyle.StyleType := FNewStyleType;
+  if FNewStyleType = hstGradient then
+  begin
+    { Ensure at least two stops exist }
+    if FStyle.StopCount = 0 then
+    begin
+      blackColor.R := 0;   blackColor.G := 0;   blackColor.B := 0;   blackColor.A := 255;
+      whiteColor.R := 255; whiteColor.G := 255; whiteColor.B := 255; whiteColor.A := 255;
+      FStyle.AddStop(0.0, blackColor);
+      FStyle.AddStop(1.0, whiteColor);
+    end;
+    FStyle.GradientType := hgtLinear;
+    { Identity affine: sx=1, shy=0, shx=0, sy=1, tx=0, ty=0 }
+    identMatrix[0] := 1.0; identMatrix[1] := 0.0; identMatrix[2] := 0.0;
+    identMatrix[3] := 1.0; identMatrix[4] := 0.0; identMatrix[5] := 0.0;
+    FStyle.SetGradTransform(identMatrix);
+  end
+  else
+  begin
+    { Switching back to solid: clear all stops }
+    for i := FStyle.StopCount - 1 downto 0 do
+      FStyle.DeleteStop(i);
+    FStyle.StyleType := hstSolidColor;
+    FStyle.Color     := FOldColor;
+  end;
+end;
+
+procedure TVertexCmdSetStyleType.Undo;
+var
+  i: Integer;
+begin
+  { Clear all current stops }
+  for i := FStyle.StopCount - 1 downto 0 do
+    FStyle.DeleteStop(i);
+  { Restore all saved fields }
+  FStyle.StyleType    := FOldStyleType;
+  FStyle.Color        := FOldColor;
+  FStyle.GradientType := FOldGradType;
+  FStyle.SetGradTransform(FOldGradTransform);
+  for i := 0 to High(FOldStops) do
+    FStyle.AddStop(FOldStops[i].Offset, FOldStops[i].Color);
+end;
+
+
+{ TVertexCmdSetGradientStop }
+
+constructor TVertexCmdSetGradientStop.Create(AStyle: TVertexStyle;
+    AAction: TVertexGradStopAction; AIndex: Integer;
+    const ANewStop: TVertexGradientStop);
+begin
+  inherited Create;
+  FStyle   := AStyle;
+  FAction  := AAction;
+  FIndex   := AIndex;
+  FNewStop := ANewStop;
+  { Capture the existing stop for gsaRemove / gsaUpdate }
+  if AAction in [gsaRemove, gsaUpdate] then
+    FOldStop := AStyle.Stops[AIndex];
+  case AAction of
+    gsaAdd:    Description := 'Add gradient stop';
+    gsaRemove: Description := 'Remove gradient stop';
+    gsaUpdate: Description := 'Update gradient stop';
+  end;
+end;
+
+procedure TVertexCmdSetGradientStop.Execute;
+begin
+  case FAction of
+    gsaAdd:
+      FStyle.AddStop(FNewStop.Offset, FNewStop.Color);
+    gsaRemove:
+      FStyle.DeleteStop(FIndex);
+    gsaUpdate:
+      FStyle.Stops[FIndex] := FNewStop;
+  end;
+end;
+
+procedure TVertexCmdSetGradientStop.Undo;
+var
+  tmp: TVertexGradientStop;
+  j:   Integer;
+begin
+  case FAction of
+    gsaAdd:
+      { The new stop was appended via AddStop; remove the last one. }
+      FStyle.DeleteStop(FStyle.StopCount - 1);
+    gsaRemove:
+      begin
+        { Re-append the saved stop, then shift it into FIndex }
+        FStyle.AddStop(FOldStop.Offset, FOldStop.Color);
+        if FIndex < FStyle.StopCount - 1 then
+        begin
+          tmp := FStyle.Stops[FStyle.StopCount - 1];
+          for j := FStyle.StopCount - 1 downto FIndex + 1 do
+            FStyle.Stops[j] := FStyle.Stops[j - 1];
+          FStyle.Stops[FIndex] := tmp;
+        end;
+      end;
+    gsaUpdate:
+      FStyle.Stops[FIndex] := FOldStop;
+  end;
 end;
 
 
