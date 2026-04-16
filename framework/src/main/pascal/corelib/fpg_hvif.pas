@@ -31,8 +31,8 @@
       - Pixel format: Agg2D produces BGRA32; TfpgImage stores ARGB.
         On little-endian (x86/x64/ARM64) these are byte-identical.
       - Big-endian targets are NOT supported (requires a channel-swap pass).
-      - Gradient rendering: 2-stop approximation only (first and last stop).
-        Multi-stop intermediate colours are not rendered in v1.
+      - Gradient rendering: full multi-stop support via a 256-entry pre-computed LUT.
+        All intermediate stops are interpolated using their normalised Offset values.
         Diamond/Conic/XY gradient types fall back to the first stop's solid colour.
       - Thread safety: NOT thread-safe. Caller must use from the fpGUI main thread.
       - Image cache: linear scan, 8 entries max per icon instance.
@@ -146,6 +146,7 @@ implementation
 
 uses
   agg_basics,                   { int8u_ptr = PByte }
+  agg_array,                    { array_base }
   agg_color,
   agg_rendering_buffer,
   agg_pixfmt,
@@ -771,16 +772,33 @@ end;
   =================================================================== }
 
 type
+  { 256-entry pre-computed colour LUT for multi-stop gradients.
+    Inherits array_base so it can be passed directly to span_gradient as the
+    color_function parameter.  All 256 aggclr entries are computed once in
+    Build() by linearly interpolating between the HVIF gradient stops using
+    their normalised Offset values. }
+  THvifColorTable = object(array_base)
+    FTable: array[0..255] of aggclr;
+
+    { Must be called once before first use to initialise the FPC VMT pointer.
+      Builds the 256-entry LUT from AStops. Safe to call with 0 or 1 stops. }
+    constructor Build(const AStops: array of THvifGradientStop);
+
+    function size  : unsigned; virtual;
+    function entry : unsigned; virtual;
+    function array_operator(i: unsigned): pointer; virtual;
+  end;
+
   { Per-gradient entry.  All pointer fields (Interp.m_trans, SpanGen pointers)
     refer to sibling fields within the SAME record.
     Stability: styleEntries dynamic array is SetLength'd once before any entry
     is initialised, and never resized afterwards. }
   THvifGradEntry = record
-    Matrix:    trans_affine;             { screen-pixels -> gradient-local 64-unit }
-    ColorFunc: gradient_linear_color;    { 2-stop colour LUT (no heap; safe to drop) }
-    Alloc:     span_allocator;           { internal span buffer (heap; call Destruct) }
-    Interp:    span_interpolator_linear; { stores @Matrix -- no separate Destruct }
-    SpanGen:   span_gradient;            { stores @Interp, @ColorFunc, GradFunc ptr }
+    Matrix:     trans_affine;             { screen-pixels -> gradient-local 64-unit }
+    ColorTable: THvifColorTable;          { 256-entry multi-stop colour LUT }
+    Alloc:      span_allocator;           { internal span buffer (heap; call Destruct) }
+    Interp:     span_interpolator_linear; { stores @Matrix -- no separate Destruct }
+    SpanGen:    span_gradient;            { stores @Interp, @ColorTable, GradFunc ptr }
     { One instance per gradient function type; only the matching one is used. }
     GFLinear:  gradient_x;
     GFCircle:  gradient_circle;
@@ -809,6 +827,89 @@ type
                             x, y  : int;
                             len, style : unsigned); virtual;
   end;
+
+{ ===================================================================
+  THvifColorTable
+  =================================================================== }
+
+constructor THvifColorTable.Build(const AStops: array of THvifGradientStop);
+var
+  nStops, i, lo, hi: Integer;
+  t, frac, r, g, b, a: Double;
+  ofs0, ofs1: Double;
+begin
+  nStops := Length(AStops);
+  if nStops = 0 then
+  begin
+    { No stops — fill with opaque black }
+    for i := 0 to 255 do
+      FTable[i].ConstrInt(0, 0, 0, 255);
+    Exit;
+  end;
+  if nStops = 1 then
+  begin
+    { Single stop — fill with that colour }
+    for i := 0 to 255 do
+      FTable[i].ConstrInt(
+        AStops[0].Color.R, AStops[0].Color.G,
+        AStops[0].Color.B, AStops[0].Color.A);
+    Exit;
+  end;
+  { Multiple stops: for each of the 256 table entries find the surrounding
+    stops and lerp. }
+  for i := 0 to 255 do
+  begin
+    t := i / 255.0;
+    { Find the segment [lo, lo+1] that brackets t }
+    lo := 0;
+    hi := nStops - 1;
+    while (hi - lo > 1) do
+    begin
+      { Binary search not needed for typical stop counts (≤16), linear is fine }
+      if t >= AStops[lo + 1].Offset then
+        Inc(lo)
+      else
+        Break;
+    end;
+    hi := lo + 1;
+    if hi >= nStops then hi := nStops - 1;
+    ofs0 := AStops[lo].Offset;
+    ofs1 := AStops[hi].Offset;
+    if (ofs1 <= ofs0) or (lo = hi) then
+      frac := 0.0
+    else
+      frac := (t - ofs0) / (ofs1 - ofs0);
+    if frac < 0.0 then frac := 0.0;
+    if frac > 1.0 then frac := 1.0;
+    r := AStops[lo].Color.R + frac * (AStops[hi].Color.R - AStops[lo].Color.R);
+    g := AStops[lo].Color.G + frac * (AStops[hi].Color.G - AStops[lo].Color.G);
+    b := AStops[lo].Color.B + frac * (AStops[hi].Color.B - AStops[lo].Color.B);
+    a := AStops[lo].Color.A + frac * (AStops[hi].Color.A - AStops[lo].Color.A);
+    FTable[i].ConstrInt(
+      Round(r), Round(g), Round(b), Round(a));
+  end;
+end;
+
+function THvifColorTable.size: unsigned;
+begin
+  Result := 256;
+end;
+
+function THvifColorTable.entry: unsigned;
+begin
+  Result := SizeOf(aggclr);
+end;
+
+function THvifColorTable.array_operator(i: unsigned): pointer;
+begin
+  if i >= 256 then i := 255;
+  Result := @FTable[i];
+end;
+
+
+{ ===================================================================
+  THvifStyleHandler
+  =================================================================== }
 
 constructor THvifStyleHandler.Init;
 begin
@@ -968,7 +1069,6 @@ var
   { Style setup locals }
   si:    Integer;
   styl:  THvifStyle;
-  c1Agg, c2Agg: aggclr;
   entry: ^THvifStyleEntry;
 
   { Shape processing locals }
@@ -1047,18 +1147,8 @@ begin
             { Invert: screen-pixels to gradient-local }
             entry^.Grad.Matrix.invert;
 
-            { Colour LUT: first and last stops (v1 limitation) }
-            c1Agg.ConstrInt(
-              styl.Stops[0].Color.R,
-              styl.Stops[0].Color.G,
-              styl.Stops[0].Color.B,
-              styl.Stops[0].Color.A);
-            c2Agg.ConstrInt(
-              styl.Stops[High(styl.Stops)].Color.R,
-              styl.Stops[High(styl.Stops)].Color.G,
-              styl.Stops[High(styl.Stops)].Color.B,
-              styl.Stops[High(styl.Stops)].Color.A);
-            entry^.Grad.ColorFunc.Construct(@c1Agg, @c2Agg);
+            { Colour LUT: pre-compute 256 entries interpolating across all stops }
+            entry^.Grad.ColorTable.Build(styl.Stops);
 
             { Span allocator + interpolator (Interp stores @Matrix) }
             entry^.Grad.Alloc.Construct;
@@ -1071,7 +1161,7 @@ begin
                   entry^.Grad.GFLinear.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc,    @entry^.Grad.Interp,
-                    @entry^.Grad.GFLinear, @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFLinear, @entry^.Grad.ColorTable,
                     -64.0, 64.0);
                 end;
               hgtCircular:
@@ -1079,7 +1169,7 @@ begin
                   entry^.Grad.GFCircle.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc,    @entry^.Grad.Interp,
-                    @entry^.Grad.GFCircle, @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFCircle, @entry^.Grad.ColorTable,
                     0.0, 64.0);
                 end;
               hgtDiamond:
@@ -1087,7 +1177,7 @@ begin
                   entry^.Grad.GFDiamond.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc,     @entry^.Grad.Interp,
-                    @entry^.Grad.GFDiamond, @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFDiamond, @entry^.Grad.ColorTable,
                     0.0, 64.0);
                 end;
               hgtConic:
@@ -1095,7 +1185,7 @@ begin
                   entry^.Grad.GFConic.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc,   @entry^.Grad.Interp,
-                    @entry^.Grad.GFConic, @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFConic, @entry^.Grad.ColorTable,
                     0.0, 64.0);
                 end;
               hgtXY:
@@ -1103,7 +1193,7 @@ begin
                   entry^.Grad.GFXY.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc, @entry^.Grad.Interp,
-                    @entry^.Grad.GFXY,  @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFXY,  @entry^.Grad.ColorTable,
                     0.0, 64.0);
                 end;
               hgtSqrtXY:
@@ -1111,7 +1201,7 @@ begin
                   entry^.Grad.GFSqrtXY.Construct;
                   entry^.Grad.SpanGen.Construct(
                     @entry^.Grad.Alloc,     @entry^.Grad.Interp,
-                    @entry^.Grad.GFSqrtXY,  @entry^.Grad.ColorFunc,
+                    @entry^.Grad.GFSqrtXY,  @entry^.Grad.ColorTable,
                     0.0, 64.0);
                 end;
             end; { case GradientType }

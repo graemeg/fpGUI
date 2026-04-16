@@ -859,7 +859,7 @@ begin
   Result.Color        := FColor;
   Result.GradientType := FGradientType;
   Move(FGradTransform[0], Result.GradTransform[0], SizeOf(FGradTransform));
-  Result.HasGradTransform := not IsGradient; { populated only for gradients }
+  Result.HasGradTransform := IsGradient; { gradient styles always carry a transform }
   SetLength(Result.Stops, Length(FStops));
   for i := 0 to High(FStops) do
   begin

@@ -84,6 +84,26 @@ begin
   Result := StrToFloatDef(Trim(s), ADefault, GSvgFmt);
 end;
 
+{ Strip trailing SVG length unit suffix (px, pt, em, ex, rem, cm, mm, in, pc)
+  so that "48px" parses as 48.  All absolute units are treated as user units
+  (1 user unit ≈ 1 px in SVG's default coordinate space). }
+function SvgLengthToFloat(const s: string; ADefault: Double): Double;
+var
+  t: string;
+  i: Integer;
+begin
+  t := Trim(s);
+  { Strip trailing alphabetic characters }
+  i := Length(t);
+  while (i >= 1) and (t[i] in ['a'..'z', 'A'..'Z', '%']) do
+    Dec(i);
+  t := Trim(Copy(t, 1, i));
+  if t = '' then
+    Result := ADefault
+  else
+    Result := StrToFloatDef(t, ADefault, GSvgFmt);
+end;
+
 
 { =========================================================
   SVG colour record, gradient types
@@ -97,6 +117,14 @@ type
   end;
 
   TDoubleArray = array of Double;
+
+  { 2D affine transform — declared early so TSvgGradientDef can embed it.
+    x' = A*x + C*y + TX
+    y' = B*x + D*y + TY }
+  TSvgMatrix = record
+    A, B, C, D: Double;
+    TX, TY: Double;
+  end;
 
   TSvgGradientStop = record
     Offset: Double;
@@ -116,6 +144,9 @@ type
     Stops:         array of TSvgGradientStop;
     { xlink:href target id for stop inheritance (without leading '#') }
     HrefId:        string;
+    { Optional gradientTransform attribute, identity when not set }
+    GradTransformMatrix: TSvgMatrix;
+    HasGradTransform: Boolean;
   end;
 
   TPathList = array of THvifPath;
@@ -300,14 +331,6 @@ end;
   ========================================================= }
 
 type
-  { 2D affine transform.
-    x' = A*x + C*y + TX
-    y' = B*x + D*y + TY }
-  TSvgMatrix = record
-    A, B, C, D: Double;
-    TX, TY: Double;
-  end;
-
   { Inherited SVG presentation attributes.  In CSS, properties like fill,
     stroke, stroke-width etc. are inherited from parent elements when not
     set on a child.  We thread this record through ProcessElement so that
@@ -1287,114 +1310,140 @@ begin
 end;
 
 { Build a closed rectangle path with optional rounded corners.
-  rx=ry=0 produces a simple 4-point rect; otherwise 8 points with arcs. }
+  rx=ry=0 produces a simple 4-point rect; otherwise 8 points with arcs.
+
+  All four corners are individually transformed through AMatrix so that
+  rotation and shear are handled correctly.  The arc control-point offsets
+  are expressed in local (pre-transform) space and then mapped through the
+  matrix columns, which preserves the correct tangent directions under any
+  affine transform. }
 function BuildRectPath(x, y, w, h, rx, ry: Double;
   const AMatrix: TSvgMatrix): THvifPath;
 var
-  lx1, ly1, lx2, ly2: Single;
-  lrx, lry, lk: Single;
-  scaleX, scaleY: Double;
+  { Transformed corners }
+  tlx, tly: Single;   { top-left     (x,       y    ) }
+  trx, try_: Single;  { top-right    (x+w,     y    ) }
+  brx, bry: Single;   { bottom-right (x+w,     y+h  ) }
+  blx, bly: Single;   { bottom-left  (x,       y+h  ) }
+
+  { Arc offset vectors in transformed space (dx=rx, dy=0) and (dx=0, dy=ry) }
+  axX, axY: Single;   { how (rx, 0) maps under AMatrix columns }
+  ayX, ayY: Single;   { how (0, ry) maps under AMatrix columns }
+  lk: Single;
 begin
-  lx1 := MX(AMatrix, x,     y);
-  ly1 := MY(AMatrix, x,     y);
-  lx2 := MX(AMatrix, x + w, y + h);
-  ly2 := MY(AMatrix, x + w, y + h);
-  scaleX := Sqrt(AMatrix.A * AMatrix.A + AMatrix.B * AMatrix.B);
-  scaleY := Sqrt(AMatrix.C * AMatrix.C + AMatrix.D * AMatrix.D);
-  lrx := Single(rx * scaleX);
-  lry := Single(ry * scaleY);
+  { Transform all four corners }
+  tlx := MX(AMatrix, x,     y);     tly := MY(AMatrix, x,     y);
+  trx := MX(AMatrix, x + w, y);     try_:= MY(AMatrix, x + w, y);
+  brx := MX(AMatrix, x + w, y + h); bry := MY(AMatrix, x + w, y + h);
+  blx := MX(AMatrix, x,     y + h); bly := MY(AMatrix, x,     y + h);
+
   lk  := KAPPA;
 
   Result.Closed := True;
 
-  if (lrx < 0.001) or (lry < 0.001) then
+  if (rx < 0.001) or (ry < 0.001) then
   begin
-    { Simple rectangle: TL, TR, BR, BL (all straight) }
+    { Simple rectangle: TL, TR, BR, BL (all straight/sharp corners) }
     SetLength(Result.Points, 4);
-    Result.Points[0].X := lx1; Result.Points[0].Y := ly1;
-    Result.Points[0].InX := lx1; Result.Points[0].InY := ly1;
-    Result.Points[0].OutX := lx1; Result.Points[0].OutY := ly1;
 
-    Result.Points[1].X := lx2; Result.Points[1].Y := ly1;
-    Result.Points[1].InX := lx2; Result.Points[1].InY := ly1;
-    Result.Points[1].OutX := lx2; Result.Points[1].OutY := ly1;
+    Result.Points[0].X   := tlx; Result.Points[0].Y   := tly;
+    Result.Points[0].InX := tlx; Result.Points[0].InY := tly;
+    Result.Points[0].OutX:= tlx; Result.Points[0].OutY:= tly;
 
-    Result.Points[2].X := lx2; Result.Points[2].Y := ly2;
-    Result.Points[2].InX := lx2; Result.Points[2].InY := ly2;
-    Result.Points[2].OutX := lx2; Result.Points[2].OutY := ly2;
+    Result.Points[1].X   := trx; Result.Points[1].Y   := try_;
+    Result.Points[1].InX := trx; Result.Points[1].InY := try_;
+    Result.Points[1].OutX:= trx; Result.Points[1].OutY:= try_;
 
-    Result.Points[3].X := lx1; Result.Points[3].Y := ly2;
-    Result.Points[3].InX := lx1; Result.Points[3].InY := ly2;
-    Result.Points[3].OutX := lx1; Result.Points[3].OutY := ly2;
+    Result.Points[2].X   := brx; Result.Points[2].Y   := bry;
+    Result.Points[2].InX := brx; Result.Points[2].InY := bry;
+    Result.Points[2].OutX:= brx; Result.Points[2].OutY:= bry;
+
+    Result.Points[3].X   := blx; Result.Points[3].Y   := bly;
+    Result.Points[3].InX := blx; Result.Points[3].InY := bly;
+    Result.Points[3].OutX:= blx; Result.Points[3].OutY:= bly;
   end
   else
   begin
-    { Rounded rectangle: 8 points (clockwise from TL arc end) }
+    { Rounded rectangle: 8 points (clockwise from TL arc end).
+
+      axX/axY = how the horizontal radius (rx, 0) transforms under the
+                linear part of AMatrix (columns A, B).
+      ayX/ayY = how the vertical   radius (0, ry) transforms under the
+                linear part of AMatrix (columns C, D).
+
+      These arc offset vectors are used to push the bezier control handles
+      in the correct transformed direction without re-applying the matrix. }
+    axX := Single(AMatrix.A * rx);
+    axY := Single(AMatrix.B * rx);
+    ayX := Single(AMatrix.C * ry);
+    ayY := Single(AMatrix.D * ry);
+
     SetLength(Result.Points, 8);
 
-    { P0: TL arc end }
-    Result.Points[0].X    := lx1 + lrx;
-    Result.Points[0].Y    := ly1;
-    Result.Points[0].InX  := lx1 + lrx - lk * lrx;
-    Result.Points[0].InY  := ly1;
-    Result.Points[0].OutX := lx1 + lrx;
-    Result.Points[0].OutY := ly1;
+    { P0: TL — point on top edge leaving the TL corner arc }
+    Result.Points[0].X    := tlx + axX;
+    Result.Points[0].Y    := tly + axY;
+    Result.Points[0].InX  := tlx + axX - lk * axX;
+    Result.Points[0].InY  := tly + axY - lk * axY;
+    Result.Points[0].OutX := tlx + axX;
+    Result.Points[0].OutY := tly + axY;
 
-    { P1: TR arc start }
-    Result.Points[1].X    := lx2 - lrx;
-    Result.Points[1].Y    := ly1;
-    Result.Points[1].InX  := lx2 - lrx;
-    Result.Points[1].InY  := ly1;
-    Result.Points[1].OutX := lx2 - lrx + lk * lrx;
-    Result.Points[1].OutY := ly1;
+    { P1: TR — point on top edge entering the TR corner arc }
+    Result.Points[1].X    := trx - axX;
+    Result.Points[1].Y    := try_ - axY;
+    Result.Points[1].InX  := trx - axX;
+    Result.Points[1].InY  := try_ - axY;
+    Result.Points[1].OutX := trx - axX + lk * axX;
+    Result.Points[1].OutY := try_ - axY + lk * axY;
 
-    { P2: TR arc end }
-    Result.Points[2].X    := lx2;
-    Result.Points[2].Y    := ly1 + lry;
-    Result.Points[2].InX  := lx2;
-    Result.Points[2].InY  := ly1 + lry - lk * lry;
-    Result.Points[2].OutX := lx2;
-    Result.Points[2].OutY := ly1 + lry;
+    { P2: TR — point on right edge leaving the TR corner arc }
+    Result.Points[2].X    := trx + ayX;
+    Result.Points[2].Y    := try_ + ayY;
+    Result.Points[2].InX  := trx + ayX - lk * ayX;
+    Result.Points[2].InY  := try_ + ayY - lk * ayY;
+    Result.Points[2].OutX := trx + ayX;
+    Result.Points[2].OutY := try_ + ayY;
 
-    { P3: BR arc start }
-    Result.Points[3].X    := lx2;
-    Result.Points[3].Y    := ly2 - lry;
-    Result.Points[3].InX  := lx2;
-    Result.Points[3].InY  := ly2 - lry;
-    Result.Points[3].OutX := lx2;
-    Result.Points[3].OutY := ly2 - lry + lk * lry;
+    { P3: BR — point on right edge entering the BR corner arc }
+    Result.Points[3].X    := brx - ayX;
+    Result.Points[3].Y    := bry - ayY;
+    Result.Points[3].InX  := brx - ayX;
+    Result.Points[3].InY  := bry - ayY;
+    Result.Points[3].OutX := brx - ayX + lk * ayX;
+    Result.Points[3].OutY := bry - ayY + lk * ayY;
 
-    { P4: BR arc end }
-    Result.Points[4].X    := lx2 - lrx;
-    Result.Points[4].Y    := ly2;
-    Result.Points[4].InX  := lx2 - lrx + lk * lrx;
-    Result.Points[4].InY  := ly2;
-    Result.Points[4].OutX := lx2 - lrx;
-    Result.Points[4].OutY := ly2;
+    { P4: BR — point on bottom edge leaving the BR corner arc }
+    Result.Points[4].X    := brx - axX;
+    Result.Points[4].Y    := bry - axY;
+    Result.Points[4].InX  := brx - axX + lk * axX;
+    Result.Points[4].InY  := bry - axY + lk * axY;
+    Result.Points[4].OutX := brx - axX;
+    Result.Points[4].OutY := bry - axY;
 
-    { P5: BL arc start }
-    Result.Points[5].X    := lx1 + lrx;
-    Result.Points[5].Y    := ly2;
-    Result.Points[5].InX  := lx1 + lrx;
-    Result.Points[5].InY  := ly2;
-    Result.Points[5].OutX := lx1 + lrx - lk * lrx;
-    Result.Points[5].OutY := ly2;
+    { P5: BL — point on bottom edge entering the BL corner arc }
+    Result.Points[5].X    := blx + axX;
+    Result.Points[5].Y    := bly + axY;
+    Result.Points[5].InX  := blx + axX;
+    Result.Points[5].InY  := bly + axY;
+    Result.Points[5].OutX := blx + axX - lk * axX;
+    Result.Points[5].OutY := bly + axY - lk * axY;
 
-    { P6: BL arc end }
-    Result.Points[6].X    := lx1;
-    Result.Points[6].Y    := ly2 - lry;
-    Result.Points[6].InX  := lx1;
-    Result.Points[6].InY  := ly2 - lry + lk * lry;
-    Result.Points[6].OutX := lx1;
-    Result.Points[6].OutY := ly2 - lry;
+    { P6: BL — point on left edge leaving the BL corner arc }
+    Result.Points[6].X    := blx - ayX;
+    Result.Points[6].Y    := bly - ayY;
+    Result.Points[6].InX  := blx - ayX + lk * ayX;
+    Result.Points[6].InY  := bly - ayY + lk * ayY;
+    Result.Points[6].OutX := blx - ayX;
+    Result.Points[6].OutY := bly - ayY;
 
-    { P7: TL arc start }
-    Result.Points[7].X    := lx1;
-    Result.Points[7].Y    := ly1 + lry;
-    Result.Points[7].InX  := lx1;
-    Result.Points[7].InY  := ly1 + lry;
-    Result.Points[7].OutX := lx1;
-    Result.Points[7].OutY := ly1 + lry - lk * lry;
+    { P7: TL — point on left edge entering the TL corner arc }
+    { original-space point is (x, y+ry) which lies below TL, so +ayX/+ayY }
+    Result.Points[7].X    := tlx + ayX;
+    Result.Points[7].Y    := tly + ayY;
+    Result.Points[7].InX  := tlx + ayX;            { straight segment: handle = point }
+    Result.Points[7].InY  := tly + ayY;
+    Result.Points[7].OutX := tlx + ayX - lk * ayX; { toward TL corner }
+    Result.Points[7].OutY := tly + ayY - lk * ayY;
   end;
 end;
 
@@ -1483,6 +1532,19 @@ begin
     if def.GradientUnits = '' then
       def.GradientUnits := 'objectBoundingBox';
 
+    { Optional gradientTransform }
+    hrefVal := elem.GetAttribute('gradientTransform');
+    if hrefVal <> '' then
+    begin
+      def.GradTransformMatrix := ParseSvgTransform(hrefVal);
+      def.HasGradTransform := True;
+    end
+    else
+    begin
+      def.GradTransformMatrix := SvgIdentityMatrix;
+      def.HasGradTransform := False;
+    end;
+
     { xlink:href for stop inheritance }
     hrefVal := elem.GetAttribute('href');
     if hrefVal = '' then
@@ -1520,11 +1582,14 @@ begin
 end;
 
 { Build a THvifStyle for a gradient definition.
+  ALocalMatrix: the accumulated CTM of the element referencing this gradient.
+                For userSpaceOnUse gradients it is composed with the gradient's
+                own gradientTransform to produce the final placement.
   AViewBox{W,H}: viewBox dimensions used as bounding-box approximation for
                  objectBoundingBox gradient units.
   ADefs: the full gradient dictionary for resolving xlink:href stop inheritance. }
 function BuildGradientStyle(def: TSvgGradientDef; ADefs: TStringList;
-  const ARootMatrix: TSvgMatrix; AvbW, AvbH: Double): THvifStyle;
+  const ALocalMatrix: TSvgMatrix; AvbW, AvbH: Double): THvifStyle;
 var
   stops: array of TSvgGradientStop;
   refIdx: Integer;
@@ -1534,6 +1599,7 @@ var
   tx, ty, sx, shy: Double;
   i: Integer;
   scale: Double;
+  effectiveMatrix: TSvgMatrix;
 begin
   FillChar(Result, SizeOf(Result), 0);
   Result.StyleType      := hstGradient;
@@ -1566,8 +1632,19 @@ begin
     Result.Stops[i].Color.A   := stops[i].Color.A;
   end;
 
-  { Extract uniform scale factor from root matrix for gradient coords }
-  scale := Sqrt(ARootMatrix.A * ARootMatrix.A + ARootMatrix.B * ARootMatrix.B);
+  { Compose the effective matrix.
+    For userSpaceOnUse: effectiveMatrix = localMatrix ∘ gradientTransform
+      — gradient coords are in the same user space as the element, so we apply
+        both the element's CTM and the gradient's own transform.
+    For objectBoundingBox: we only use the scale factor from localMatrix as an
+      approximation (full bbox mapping is not implemented). }
+  if def.HasGradTransform then
+    effectiveMatrix := SvgMatrixMul(ALocalMatrix, def.GradTransformMatrix)
+  else
+    effectiveMatrix := ALocalMatrix;
+
+  scale := Sqrt(effectiveMatrix.A * effectiveMatrix.A +
+                effectiveMatrix.B * effectiveMatrix.B);
 
   case def.Kind of
     sgkLinear:
@@ -1576,10 +1653,10 @@ begin
 
       if SameText(def.GradientUnits, 'userSpaceOnUse') then
       begin
-        hx1 := MX(ARootMatrix, def.X1, def.Y1);
-        hy1 := MY(ARootMatrix, def.X1, def.Y1);
-        hx2 := MX(ARootMatrix, def.X2, def.Y2);
-        hy2 := MY(ARootMatrix, def.X2, def.Y2);
+        hx1 := MX(effectiveMatrix, def.X1, def.Y1);
+        hy1 := MY(effectiveMatrix, def.X1, def.Y1);
+        hx2 := MX(effectiveMatrix, def.X2, def.Y2);
+        hy2 := MY(effectiveMatrix, def.X2, def.Y2);
       end
       else
       begin
@@ -1592,19 +1669,28 @@ begin
       end;
 
       { Map to HVIF gradient transform.
-        Renderer decodes: p1 = (tx - sx*64, ty - shy*64)
-                          p2 = (tx + sx*64, ty + shy*64) }
+        GradTransform = [sx, shy, shx, sy, tx, ty] (AGG convention).
+        The renderer applies this as:
+          icon_x = sx*gx + shx*gy + tx
+          icon_y = shy*gx + sy*gy  + ty
+        then inverts to get gradient coord from screen position.
+
+        The linear span runs from d=-64 to d=+64 along the gradient X axis.
+        We set the gradient X axis (sx, shy) to point from p1 to p2 over 128
+        units, and the gradient Y axis (shx, sy) to the perpendicular so the
+        2×2 block is a proper rotation and the matrix stays invertible. }
       tx  := (hx1 + hx2) / 2.0;
       ty  := (hy1 + hy2) / 2.0;
-      sx  := (hx2 - hx1) / 128.0;
-      shy := (hy2 - hy1) / 128.0;
+      sx  := (hx2 - hx1) / 128.0;   { column 0: X component of gradient axis }
+      shy := (hy2 - hy1) / 128.0;   { column 0: Y component of gradient axis }
+      { column 1 = perpendicular of column 0, same length }
 
-      Result.GradTransform[0] := Single(sx);
-      Result.GradTransform[1] := Single(shy);
-      Result.GradTransform[2] := 0.0;
-      Result.GradTransform[3] := 0.0;
-      Result.GradTransform[4] := Single(tx);
-      Result.GradTransform[5] := Single(ty);
+      Result.GradTransform[0] := Single(sx);    { sx  }
+      Result.GradTransform[1] := Single(shy);   { shy }
+      Result.GradTransform[2] := Single(-shy);  { shx = perpendicular X }
+      Result.GradTransform[3] := Single(sx);    { sy  = perpendicular Y }
+      Result.GradTransform[4] := Single(tx);    { tx  }
+      Result.GradTransform[5] := Single(ty);    { ty  }
     end;
 
     sgkRadial:
@@ -1613,8 +1699,8 @@ begin
 
       if SameText(def.GradientUnits, 'userSpaceOnUse') then
       begin
-        hcx := MX(ARootMatrix, def.CX, def.CY);
-        hcy := MY(ARootMatrix, def.CX, def.CY);
+        hcx := MX(effectiveMatrix, def.CX, def.CY);
+        hcy := MY(effectiveMatrix, def.CX, def.CY);
         hr  := def.R * scale;
       end
       else
@@ -1624,14 +1710,15 @@ begin
         hr  := def.R * Min(AvbW, AvbH) * scale;
       end;
 
-      { Renderer decodes: r = 64 * sqrt(sx^2 + shy^2)
-        For a circular gradient: sx = r/64, shy = 0 }
-      Result.GradTransform[0] := Single(hr / 64.0);
-      Result.GradTransform[1] := 0.0;
-      Result.GradTransform[2] := 0.0;
-      Result.GradTransform[3] := 0.0;
-      Result.GradTransform[4] := Single(hcx);
-      Result.GradTransform[5] := Single(hcy);
+      { The circular span function returns r = sqrt(gx^2 + gy^2), spanning 0..64.
+        We need a uniform scale matrix: sx = sy = hr/64, shx = shy = 0.
+        sy must be non-zero so the matrix is invertible by the renderer. }
+      Result.GradTransform[0] := Single(hr / 64.0);  { sx  }
+      Result.GradTransform[1] := 0.0;                { shy }
+      Result.GradTransform[2] := 0.0;                { shx }
+      Result.GradTransform[3] := Single(hr / 64.0);  { sy  (was 0 — non-invertible!) }
+      Result.GradTransform[4] := Single(hcx);        { tx  }
+      Result.GradTransform[5] := Single(hcy);        { ty  }
     end;
   end;
 end;
@@ -1953,7 +2040,7 @@ var
       else
       begin
         def := TSvgGradientDef(gradDefs.Objects[defIdx]);
-        hvifStyle := BuildGradientStyle(def, gradDefs, rootMatrix, vbW, vbH);
+        hvifStyle := BuildGradientStyle(def, gradDefs, localMatrix, vbW, vbH);
         if opacStr <> '' then
         begin
           opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
@@ -1996,37 +2083,80 @@ var
 
     if not strokeIsNone then
     begin
-      strokeColor := ParseSvgColor(strokeStr);
-      if strokeColor.IsNone then
-        strokeIsNone := True
+      if IsUrlRef(strokeStr, gradId) then
+      begin
+        { Gradient stroke: build the gradient style and attach it to the
+          stroke shape.  HVIF gradient styles apply to the rendered area of
+          any shape (fill or stroke transformer alike), so this gives a
+          proper gradient-coloured stroke.
+          Resolve the def, walking xlink:href until we find one with geometry. }
+        defIdx := gradDefs.IndexOf(gradId);
+        while (defIdx >= 0) and
+              (Length(TSvgGradientDef(gradDefs.Objects[defIdx]).Stops) = 0) and
+              (TSvgGradientDef(gradDefs.Objects[defIdx]).HrefId <> '') do
+          defIdx := gradDefs.IndexOf(TSvgGradientDef(gradDefs.Objects[defIdx]).HrefId);
+        if defIdx < 0 then
+          strokeIsNone := True
+        else
+        begin
+          def := TSvgGradientDef(gradDefs.Objects[gradDefs.IndexOf(gradId)]);
+          hvifStrokeStyle := BuildGradientStyle(def, gradDefs, localMatrix, vbW, vbH);
+          if opacStr <> '' then
+          begin
+            opacity := EnsureRange(SvgStrToFloatDef(opacStr, 1.0), 0.0, 1.0);
+            for j := 0 to High(hvifStrokeStyle.Stops) do
+              hvifStrokeStyle.Stops[j].Color.A :=
+                Byte(Round(hvifStrokeStyle.Stops[j].Color.A * opacity));
+          end;
+          strokeStyleIdx := FindOrAddStyle(hvifStrokeStyle);
+
+          svgStrokeWidth := SvgStrToFloatDef(strokeWidthStr, 1.0);
+          strokeScaleX   := Sqrt(localMatrix.A * localMatrix.A +
+                                 localMatrix.B * localMatrix.B);
+          svgStrokeWidth := svgStrokeWidth * strokeScaleX;
+          strokeMiterLimit := SvgStrToFloatDef(strokeMiterLimitStr, 4.0);
+          if SameText(Trim(strokeCapStr), 'round') then strokeLineCap := 2
+          else if SameText(Trim(strokeCapStr), 'square') then strokeLineCap := 1
+          else strokeLineCap := 0;
+          if SameText(Trim(strokeJoinStr), 'round') then strokeLineJoin := 2
+          else if SameText(Trim(strokeJoinStr), 'bevel') then strokeLineJoin := 3
+          else strokeLineJoin := 0;
+        end;
+      end
       else
       begin
-        strokeOpacity := EnsureRange(SvgStrToFloatDef(strokeOpacStr, 1.0), 0.0, 1.0);
-        strokeColor.A := Byte(Round(strokeColor.A * strokeOpacity));
+        strokeColor := ParseSvgColor(strokeStr);
+        if strokeColor.IsNone then
+          strokeIsNone := True
+        else
+        begin
+          strokeOpacity := EnsureRange(SvgStrToFloatDef(strokeOpacStr, 1.0), 0.0, 1.0);
+          strokeColor.A := Byte(Round(strokeColor.A * strokeOpacity));
 
-        FillChar(hvifStrokeStyle, SizeOf(hvifStrokeStyle), 0);
-        hvifStrokeStyle.StyleType := hstSolidColor;
-        hvifStrokeStyle.Color.R   := strokeColor.R;
-        hvifStrokeStyle.Color.G   := strokeColor.G;
-        hvifStrokeStyle.Color.B   := strokeColor.B;
-        hvifStrokeStyle.Color.A   := strokeColor.A;
-        strokeStyleIdx := FindOrAddStyle(hvifStrokeStyle);
+          FillChar(hvifStrokeStyle, SizeOf(hvifStrokeStyle), 0);
+          hvifStrokeStyle.StyleType := hstSolidColor;
+          hvifStrokeStyle.Color.R   := strokeColor.R;
+          hvifStrokeStyle.Color.G   := strokeColor.G;
+          hvifStrokeStyle.Color.B   := strokeColor.B;
+          hvifStrokeStyle.Color.A   := strokeColor.A;
+          strokeStyleIdx := FindOrAddStyle(hvifStrokeStyle);
 
-        svgStrokeWidth := SvgStrToFloatDef(strokeWidthStr, 1.0);
-        { Scale stroke width from SVG user units to HVIF 64-unit space }
-        strokeScaleX   := Sqrt(localMatrix.A * localMatrix.A +
-                               localMatrix.B * localMatrix.B);
-        svgStrokeWidth := svgStrokeWidth * strokeScaleX;
+          svgStrokeWidth := SvgStrToFloatDef(strokeWidthStr, 1.0);
+          { Scale stroke width from SVG user units to HVIF 64-unit space }
+          strokeScaleX   := Sqrt(localMatrix.A * localMatrix.A +
+                                 localMatrix.B * localMatrix.B);
+          svgStrokeWidth := svgStrokeWidth * strokeScaleX;
 
-        strokeMiterLimit := SvgStrToFloatDef(strokeMiterLimitStr, 4.0);
+          strokeMiterLimit := SvgStrToFloatDef(strokeMiterLimitStr, 4.0);
 
-        if SameText(Trim(strokeCapStr), 'round') then strokeLineCap := 2
-        else if SameText(Trim(strokeCapStr), 'square') then strokeLineCap := 1
-        else strokeLineCap := 0;  { butt (SVG default) }
+          if SameText(Trim(strokeCapStr), 'round') then strokeLineCap := 2
+          else if SameText(Trim(strokeCapStr), 'square') then strokeLineCap := 1
+          else strokeLineCap := 0;  { butt (SVG default) }
 
-        if SameText(Trim(strokeJoinStr), 'round') then strokeLineJoin := 2
-        else if SameText(Trim(strokeJoinStr), 'bevel') then strokeLineJoin := 3
-        else strokeLineJoin := 0;  { miter (SVG default) }
+          if SameText(Trim(strokeJoinStr), 'round') then strokeLineJoin := 2
+          else if SameText(Trim(strokeJoinStr), 'bevel') then strokeLineJoin := 3
+          else strokeLineJoin := 0;  { miter (SVG default) }
+        end;
       end;
     end;
 
@@ -2181,8 +2311,9 @@ begin
     if not ParseViewBox(vbStr, vbX, vbY, vbW, vbH) then
     begin
       vbX := 0; vbY := 0;
-      vbW := SvgStrToFloatDef(GetAttr(svgRoot, 'width'),  64);
-      vbH := SvgStrToFloatDef(GetAttr(svgRoot, 'height'), 64);
+      { SvgLengthToFloat strips unit suffixes such as "px" before parsing }
+      vbW := SvgLengthToFloat(GetAttr(svgRoot, 'width'),  64);
+      vbH := SvgLengthToFloat(GetAttr(svgRoot, 'height'), 64);
     end;
     rootMatrix := MakeViewBoxMatrix(vbX, vbY, vbW, vbH);
 
