@@ -33,7 +33,8 @@ uses
   fpg_hvif_model,
   fpg_iom_document,
   iom.wgt.canvas,
-  iom.wgt.stylepanel;
+  iom.wgt.stylepanel,
+  iom.wgt.previewbar;
 
 
 type
@@ -48,6 +49,7 @@ type
     FToolLabel:   TfpgLabel;
     FIomCanvas:   TIomCanvasWidget;
     FRightPanel:  TfpgBevel;
+    FPreviewBar:  TIomPreviewBar;
     FObjectTree:  TfpgTreeView;
     FStylePanel:  TIomStylePanel;
 
@@ -90,6 +92,7 @@ implementation
 destructor TIomMainForm.Destroy;
 begin
   FDocument.OnChange := nil;    { clear before widgets are torn down }
+  FPreviewBar.SetDocument(nil);
   FStylePanel.SetDocument(nil);
   FIomCanvas.SetDocument(nil);
   FDocument.Free;
@@ -107,6 +110,7 @@ begin
   FDocument.OnChange := @HandleDocumentChange;
   FIomCanvas.SetDocument(FDocument);
   FStylePanel.SetDocument(FDocument);
+  FPreviewBar.SetDocument(FDocument);
 end;
 
 procedure TIomMainForm.SetupMenus;
@@ -184,6 +188,10 @@ begin
   rmig.LC.Fill.WrapAfter(1);
   FRightPanel.LayoutManager := rmig;
 
+  FPreviewBar := TIomPreviewBar.Create(FRightPanel);
+  FPreviewBar.Name := 'previewBar';
+  rmig.AddLayoutComponent(FPreviewBar, TfpgMigCC.Create().GrowX());
+
   FObjectTree := TfpgTreeView.Create(FRightPanel);
   FObjectTree.Name     := 'objectTree';
   FObjectTree.PreferredSize := fpgSize(220, 200);
@@ -205,6 +213,7 @@ procedure TIomMainForm.HandleDocumentChange(Sender: TIomDocument;
 begin
   FIomCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
+  FPreviewBar.DocumentChanged;
 end;
 
 
@@ -335,8 +344,9 @@ begin
     end;
   end;
 
-  { Notify canvas of the load; clear style panel selection }
+  { Notify canvas and preview bar of the load; clear style panel selection }
   FIomCanvas.DocumentChanged;
+  FPreviewBar.DocumentChanged;
   FIomCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
