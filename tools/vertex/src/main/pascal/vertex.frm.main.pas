@@ -40,6 +40,10 @@ uses
   vertex.wgt.previewbar;
 
 
+{ Show a Yes / No / Cancel message dialog. Returns mrYes, mrNo, or mrCancel. }
+function YesNoCancelDialog(const AMsg, ATitle: string): TfpgModalResult;
+
+
 type
   TVertexMainForm = class(TfpgForm)
   private
@@ -81,6 +85,7 @@ type
     procedure HandleDocumentChange(Sender: TVertexDocument; ACmd: TVertexCommand);
 
     { Menu handlers }
+    procedure miFileNewClick(Sender: TObject);
     procedure miFileOpenClick(Sender: TObject);
     procedure miFileSaveClick(Sender: TObject);
     procedure miFileSaveAsClick(Sender: TObject);
@@ -94,6 +99,16 @@ type
     procedure DoSaveToFile(const AFileName: string);
     procedure ExportAsInc(const AFileName: string);
     procedure UpdateTitle;
+
+    { Returns True if it's safe to discard the current document (saved or user OK'd).
+      Prompts the user to save if the document is dirty. }
+    function PromptSaveIfDirty: Boolean;
+
+    { Replace the current document with a fresh blank one. }
+    procedure NewDocument;
+
+    { Close-query handler — blocks close if user cancels on dirty document. }
+    procedure FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
 
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
@@ -114,6 +129,92 @@ type
 
 
 implementation
+
+
+{ ── YesNoCancelDialog ────────────────────────────────────────────────────────── }
+
+type
+  TYNCDialog = class(TfpgForm)
+  private
+    FResult:  TfpgModalResult;
+    FLabel:   TfpgLabel;
+    FBtnYes:  TfpgButton;
+    FBtnNo:   TfpgButton;
+    FBtnCancel: TfpgButton;
+    procedure BtnYesClick(Sender: TObject);
+    procedure BtnNoClick(Sender: TObject);
+    procedure BtnCancelClick(Sender: TObject);
+  public
+    procedure AfterCreate; override;
+    procedure SetMessage(const AMsg: string);
+    property  Result: TfpgModalResult read FResult;
+  end;
+
+procedure TYNCDialog.AfterCreate;
+begin
+  inherited AfterCreate;
+  WindowTitle  := 'Vertex';
+  SetPosition(0, 0, 340, 120);
+  WindowPosition := wpScreenCenter;
+  Sizeable := False;
+
+  FLabel := TfpgLabel.Create(Self);
+  FLabel.SetPosition(12, 12, 316, 52);
+  FLabel.WrapText := True;
+
+  FBtnYes := TfpgButton.Create(Self);
+  FBtnYes.SetPosition(58, 82, 68, 26);
+  FBtnYes.Text    := 'Yes';
+  FBtnYes.OnClick := @BtnYesClick;
+
+  FBtnNo := TfpgButton.Create(Self);
+  FBtnNo.SetPosition(134, 82, 68, 26);
+  FBtnNo.Text    := 'No';
+  FBtnNo.OnClick := @BtnNoClick;
+
+  FBtnCancel := TfpgButton.Create(Self);
+  FBtnCancel.SetPosition(210, 82, 68, 26);
+  FBtnCancel.Text    := 'Cancel';
+  FBtnCancel.OnClick := @BtnCancelClick;
+end;
+
+procedure TYNCDialog.SetMessage(const AMsg: string);
+begin
+  FLabel.Text := AMsg;
+end;
+
+procedure TYNCDialog.BtnYesClick(Sender: TObject);
+begin
+  FResult := mrYes;
+  Close;
+end;
+
+procedure TYNCDialog.BtnNoClick(Sender: TObject);
+begin
+  FResult := mrNo;
+  Close;
+end;
+
+procedure TYNCDialog.BtnCancelClick(Sender: TObject);
+begin
+  FResult := mrCancel;
+  Close;
+end;
+
+function YesNoCancelDialog(const AMsg, ATitle: string): TfpgModalResult;
+var
+  dlg: TYNCDialog;
+begin
+  dlg := TYNCDialog.Create(nil);
+  try
+    dlg.WindowTitle := ATitle;
+    dlg.SetMessage(AMsg);
+    dlg.ShowModal;
+    Result := dlg.Result;
+  finally
+    dlg.Free;
+  end;
+end;
 
 
 { ── TVertexMainForm ─────────────────────────────────────────────────────────── }
@@ -144,6 +245,7 @@ begin
   FPathPanel.SetDocument(FDocument);
   FShapePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
+  OnCloseQuery := @FormCloseQuery;
 end;
 
 procedure TVertexMainForm.SetupMenus;
@@ -152,6 +254,7 @@ begin
   with FMnuFile do
   begin
     Name := 'mnuFile';
+    AddMenuItem('New',            rsKeyCtrl + 'N',              @miFileNewClick);
     AddMenuItem('Open...',        rsKeyCtrl + 'O',              @miFileOpenClick);
     AddSeparator;
     AddMenuItem('Save',           rsKeyCtrl + 'S',              @miFileSaveClick);
@@ -570,7 +673,89 @@ begin
 end;
 
 
+{ ── Document helpers ─────────────────────────────────────────────────────── }
+
+function TVertexMainForm.PromptSaveIfDirty: Boolean;
+var
+  res: TfpgModalResult;
+begin
+  Result := True;
+  if not FDocument.Dirty then
+    Exit;
+  res := YesNoCancelDialog('The document has unsaved changes.' + LineEnding +
+      'Do you want to save before continuing?', 'Vertex');
+  case res of
+    mrYes:
+      begin
+        { Inline save — mirror miFileSaveClick logic }
+        if FCurrentFile <> '' then
+          DoSaveToFile(FCurrentFile)
+        else
+        begin
+          FCurrentFile := SelectFileDialog(sfdSave,
+              'HVIF files (*.hvif)|*.hvif|All files (*)|*', '');
+          if FCurrentFile = '' then
+          begin
+            Result := False;   { user cancelled the save dialog }
+            Exit;
+          end;
+          if ExtractFileExt(FCurrentFile) = '' then
+            FCurrentFile := FCurrentFile + '.hvif';
+          DoSaveToFile(FCurrentFile);
+        end;
+      end;
+    mrNo:
+      { Discard changes — proceed without saving }
+      ;
+    mrCancel:
+      Result := False;
+  end;
+end;
+
+procedure TVertexMainForm.NewDocument;
+var
+  newDoc: TVertexDocument;
+begin
+  newDoc := TVertexDocument.Create;
+  { Disconnect all widgets from the old document }
+  FDocument.OnChange := nil;
+  FPreviewBar.SetDocument(nil);
+  FStylePanel.SetDocument(nil);
+  FPathPanel.SetDocument(nil);
+  FShapePanel.SetDocument(nil);
+  FVertexCanvas.SetDocument(nil);
+  FDocument.Free;
+
+  FDocument    := newDoc;
+  FCurrentFile := '';
+
+  { Connect all widgets to the new document }
+  FDocument.OnChange := @HandleDocumentChange;
+  FVertexCanvas.SetDocument(FDocument);
+  FStylePanel.SetDocument(FDocument);
+  FPathPanel.SetDocument(FDocument);
+  FShapePanel.SetDocument(FDocument);
+  FPreviewBar.SetDocument(FDocument);
+
+  FVertexCanvas.SelectedShapeIndex := -1;
+  ClearObjectTree;
+  UpdateTitle;
+end;
+
+procedure TVertexMainForm.FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
+begin
+  ACanClose := PromptSaveIfDirty;
+end;
+
+
 { ── Menu handlers ────────────────────────────────────────────────────────── }
+
+procedure TVertexMainForm.miFileNewClick(Sender: TObject);
+begin
+  if not PromptSaveIfDirty then
+    Exit;
+  NewDocument;
+end;
 
 procedure TVertexMainForm.miFileOpenClick(Sender: TObject);
 var
