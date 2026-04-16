@@ -66,10 +66,13 @@ type
     FStylePanel:    TVertexStylePanel;
     FPathPanel:     TVertexPathPanel;
     FShapePanel:    TVertexShapePanel;
+    FStatusBar:     TfpgLabel;        { bottom status bar }
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
     FCurrentFile: string;             { '' when unsaved/untitled }
+    FHvifByteCount: Integer;          { cached HVIF serialised size, updated on document change }
+    FStatusCursorX, FStatusCursorY: Single;  { last known cursor position in HVIF units }
     FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
     FPathsNode:   TfpgTreeNode;    { weak ref into the paths subtree }
 
@@ -109,6 +112,12 @@ type
 
     { Close-query handler — blocks close if user cancels on dirty document. }
     procedure FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
+
+    { Canvas cursor-move callback — updates the status bar. }
+    procedure CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
+
+    { Refresh the status bar text from the current document/selection state. }
+    procedure UpdateStatusBar;
 
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
@@ -246,6 +255,7 @@ begin
   FShapePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
   OnCloseQuery := @FormCloseQuery;
+  FVertexCanvas.OnCursorMove := @CanvasCursorMove;
 end;
 
 procedure TVertexMainForm.SetupMenus;
@@ -380,6 +390,14 @@ begin
   rmig.AddLayoutComponent(FShapePanel, TfpgMigCC.Create().GrowX());
 
   mig.AddLayoutComponent(FRightPanel, TfpgMigCC.Create().DockEast);
+
+  { Status bar — fixed height at the bottom }
+  FStatusBar := TfpgLabel.Create(Self);
+  FStatusBar.Name := 'statusBar';
+  FStatusBar.PreferredSize := fpgSize(600, 20);
+  FStatusBar.Text := 'Ready';
+  FStatusBar.FontDesc := '#Label1';
+  mig.AddLayoutComponent(FStatusBar, TfpgMigCC.Create().DockSouth.GrowX());
 end;
 
 
@@ -394,6 +412,7 @@ begin
   FShapePanel.DocumentChanged;
   FPreviewBar.DocumentChanged;
   UpdateTitle;
+  UpdateStatusBar;
 end;
 
 
@@ -650,6 +669,7 @@ begin
     FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     FShapePanel.SetShape(nil);
+    UpdateStatusBar;
     Exit;
   end;
 
@@ -661,6 +681,7 @@ begin
     FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
     FPathPanel.SetPath(nil);
     FShapePanel.SetShape(FDocument.Shapes[idx]);
+    UpdateStatusBar;
     Exit;
   end;
 
@@ -669,7 +690,7 @@ begin
   FStylePanel.SetStyle(nil);
   FPathPanel.SetPath(nil);
   FShapePanel.SetShape(nil);
-  FShapePanel.SetShape(nil);
+  UpdateStatusBar;
 end;
 
 
@@ -737,9 +758,11 @@ begin
   FShapePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
 
+  FVertexCanvas.OnCursorMove := @CanvasCursorMove;
   FVertexCanvas.SelectedShapeIndex := -1;
   ClearObjectTree;
   UpdateTitle;
+  UpdateStatusBar;
 end;
 
 procedure TVertexMainForm.FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
@@ -948,6 +971,100 @@ begin
     ms.Free;
     sl.Free;
   end;
+end;
+
+procedure TVertexMainForm.UpdateStatusBar;
+var
+  ms:      TMemoryStream;
+  selName: string;
+  nodeInfo: string;
+  node:    TfpgTreeNode;
+  idx:     Integer;
+begin
+  if FDocument = nil then
+  begin
+    FStatusBar.Text := 'Ready';
+    Exit;
+  end;
+
+  { Refresh cached HVIF byte count }
+  ms := TMemoryStream.Create;
+  try
+    FDocument.SaveToStream(ms);
+    FHvifByteCount := ms.Size;
+  finally
+    ms.Free;
+  end;
+
+  { Selected item name and node info }
+  selName  := '';
+  nodeInfo := '';
+  node := FObjectTree.Selection;
+  if node <> nil then
+  begin
+    if (FPathsNode <> nil) and (node.Parent = FPathsNode) then
+    begin
+      idx := Integer(PtrUInt(node.Data));
+      if (idx >= 0) and (idx < FDocument.PathCount) then
+      begin
+        selName  := FDocument.Paths[idx].Name;
+        nodeInfo := Format('nodes: %d', [FDocument.Paths[idx].PointCount]);
+      end;
+    end
+    else if (FShapesNode <> nil) and (node.Parent = FShapesNode) then
+    begin
+      idx := Integer(PtrUInt(node.Data));
+      if (idx >= 0) and (idx < FDocument.ShapeCount) then
+        selName := FDocument.Shapes[idx].Name;
+    end;
+  end;
+
+  if selName <> '' then
+    FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %s  |  %s  |  %d bytes HVIF',
+        [FStatusCursorX, FStatusCursorY, selName, nodeInfo, FHvifByteCount])
+  else
+    FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %d bytes HVIF',
+        [FStatusCursorX, FStatusCursorY, FHvifByteCount]);
+end;
+
+procedure TVertexMainForm.CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
+var
+  selName:  string;
+  nodeInfo: string;
+  node:     TfpgTreeNode;
+  idx:      Integer;
+begin
+  FStatusCursorX := AHvifX;
+  FStatusCursorY := AHvifY;
+
+  selName  := '';
+  nodeInfo := '';
+  node := FObjectTree.Selection;
+  if node <> nil then
+  begin
+    if (FPathsNode <> nil) and (node.Parent = FPathsNode) then
+    begin
+      idx := Integer(PtrUInt(node.Data));
+      if (idx >= 0) and (idx < FDocument.PathCount) then
+      begin
+        selName  := FDocument.Paths[idx].Name;
+        nodeInfo := Format('nodes: %d', [FDocument.Paths[idx].PointCount]);
+      end;
+    end
+    else if (FShapesNode <> nil) and (node.Parent = FShapesNode) then
+    begin
+      idx := Integer(PtrUInt(node.Data));
+      if (idx >= 0) and (idx < FDocument.ShapeCount) then
+        selName := FDocument.Shapes[idx].Name;
+    end;
+  end;
+
+  if selName <> '' then
+    FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %s  |  %s  |  %d bytes HVIF',
+        [AHvifX, AHvifY, selName, nodeInfo, FHvifByteCount])
+  else
+    FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %d bytes HVIF',
+        [AHvifX, AHvifY, FHvifByteCount]);
 end;
 
 procedure TVertexMainForm.UpdateTitle;

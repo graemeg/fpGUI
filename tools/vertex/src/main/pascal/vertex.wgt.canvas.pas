@@ -50,6 +50,7 @@ uses
 
 type
   TDragTarget = (dtNone, dtAnchor, dtInHandle, dtOutHandle);
+  TVertexCursorMoveEvent = procedure(Sender: TObject; AHvifX, AHvifY: Single) of object;
 
   TVertexCanvasWidget = class(TfpgWidget)
   private
@@ -74,6 +75,9 @@ type
     FDragTarget:   TDragTarget;
     FDragOffX, FDragOffY: Integer;  { mouse offset from exact node screen position }
     FDragPtBefore: TVertexPoint;       { snapshot of the point at drag-start }
+
+    { Events }
+    FOnCursorMove: TVertexCursorMoveEvent;
 
     { Coordinate helpers }
     function  HvifToScreenX(AHvif: Single): Integer;
@@ -123,6 +127,10 @@ type
 
     property SelectedShapeIndex: Integer
         read FSelectedShapeIdx write SetSelectedShapeIndex;
+
+    { Fires on every mouse-move, passing cursor position in HVIF units (0–64). }
+    property OnCursorMove: TVertexCursorMoveEvent
+        read FOnCursorMove write FOnCursorMove;
   end;
 
 
@@ -749,6 +757,10 @@ var
   hvx, hvy: Single;
   newPt: TVertexPoint;
 begin
+  { Always fire cursor-move so the status bar can show the HVIF coordinates }
+  if Assigned(FOnCursorMove) then
+    FOnCursorMove(Self, ScreenToHvifX(x), ScreenToHvifY(y));
+
   if (FDragTarget = dtNone) or (FActivePath = nil) then
     Exit;
 
