@@ -79,6 +79,11 @@ type
     { Zoom — negative means "fit to widget" }
     FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
 
+    { Grid }
+    FShowGrid:  Boolean;
+    FGridStep:  Integer;   { grid step in HVIF units; default 8 }
+    FSnapToGrid: Boolean;
+
     { Events }
     FOnCursorMove: TVertexCursorMoveEvent;
 
@@ -93,6 +98,7 @@ type
     procedure RebuildIcon;
     procedure DrawCheckerboard;
     procedure DrawHvifImage;
+    procedure DrawGrid;
     procedure DrawEmptyHint;
     procedure DrawControlOverlay;
     procedure DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
@@ -108,6 +114,9 @@ type
 
     procedure SetSelectedShapeIndex(AValue: Integer);
     procedure SetZoom(AValue: Integer);
+    procedure SetShowGrid(AValue: Boolean);
+    procedure SetGridStep(AValue: Integer);
+    function  SnapCoord(AHvif: Single): Single;
 
   protected
     procedure HandlePaint; override;
@@ -135,6 +144,11 @@ type
     { Zoom level: -1 = fit to widget; 50 / 100 / 200 / 400 = fixed percentage.
       Changing this repaints the canvas. }
     property Zoom: Integer read FZoom write SetZoom;
+
+    { Grid overlay — when ShowGrid is True, draws a grid at GridStep HVIF-unit intervals. }
+    property ShowGrid:  Boolean read FShowGrid  write SetShowGrid;
+    property GridStep:  Integer read FGridStep  write SetGridStep;
+    property SnapToGrid: Boolean read FSnapToGrid write FSnapToGrid;
 
     { Fires on every mouse-move, passing cursor position in HVIF units (0–64). }
     property OnCursorMove: TVertexCursorMoveEvent
@@ -218,6 +232,9 @@ begin
   FDragTarget       := dtNone;
   FScale            := 4.0;   { default: 256px / 64 units }
   FZoom             := -1;    { -1 = fit to widget }
+  FShowGrid         := False;
+  FGridStep         := 8;
+  FSnapToGrid       := False;
 end;
 
 destructor TVertexCanvasWidget.Destroy;
@@ -265,6 +282,30 @@ begin
   UpdateIconGeometry;
   FIconDirty := True;
   Repaint;
+end;
+
+procedure TVertexCanvasWidget.SetShowGrid(AValue: Boolean);
+begin
+  if FShowGrid = AValue then Exit;
+  FShowGrid := AValue;
+  Repaint;
+end;
+
+procedure TVertexCanvasWidget.SetGridStep(AValue: Integer);
+begin
+  if AValue < 1 then AValue := 1;
+  if FGridStep = AValue then Exit;
+  FGridStep := AValue;
+  if FShowGrid then
+    Repaint;
+end;
+
+function TVertexCanvasWidget.SnapCoord(AHvif: Single): Single;
+begin
+  if FSnapToGrid and (FGridStep > 0) then
+    Result := Round(AHvif / FGridStep) * FGridStep
+  else
+    Result := AHvif;
 end;
 
 { ── Coordinate helpers ───────────────────────────────────────────────────── }
@@ -366,6 +407,39 @@ begin
   end;
 end;
 
+procedure TVertexCanvasWidget.DrawGrid;
+var
+  step, sx, sy: Integer;
+  hvifStep: Single;
+begin
+  if not FShowGrid or (FGridStep <= 0) or (FScale <= 0) then
+    Exit;
+  hvifStep := FGridStep;
+  step     := Round(hvifStep * FScale);
+  if step < 2 then
+    Exit;  { grid too dense to be visible }
+
+  Canvas.SetColor($C0C0C0C0);  { light grey, semi-transparent hint }
+
+  { Vertical lines }
+  sx := 0;
+  while sx <= 64 do
+  begin
+    Canvas.DrawLine(FIconOX + Round(sx * FScale), FIconOY,
+                    FIconOX + Round(sx * FScale), FIconOY + FIconSZ);
+    sx := sx + FGridStep;
+  end;
+
+  { Horizontal lines }
+  sy := 0;
+  while sy <= 64 do
+  begin
+    Canvas.DrawLine(FIconOX, FIconOY + Round(sy * FScale),
+                    FIconOX + FIconSZ, FIconOY + Round(sy * FScale));
+    sy := sy + FGridStep;
+  end;
+end;
+
 procedure TVertexCanvasWidget.DrawHvifImage;
 var
   img: TfpgImage;
@@ -463,6 +537,7 @@ begin
 
     DrawCheckerboard;
     DrawHvifImage;
+    DrawGrid;
     Canvas.SetColor(COL_BORDER);
     Canvas.DrawRectangle(FIconOX - 1, FIconOY - 1, FIconSZ + 2, FIconSZ + 2);
     DrawControlOverlay;
@@ -797,8 +872,8 @@ begin
   case FDragTarget of
     dtAnchor:
     begin
-      hvx := ScreenToHvifX(x - FDragOffX);
-      hvy := ScreenToHvifY(y - FDragOffY);
+      hvx := SnapCoord(ScreenToHvifX(x - FDragOffX));
+      hvy := SnapCoord(ScreenToHvifY(y - FDragOffY));
       newPt.InX  := hvx + (FDragPtBefore.InX  - FDragPtBefore.X);
       newPt.InY  := hvy + (FDragPtBefore.InY  - FDragPtBefore.Y);
       newPt.OutX := hvx + (FDragPtBefore.OutX - FDragPtBefore.X);
@@ -808,13 +883,13 @@ begin
     end;
     dtInHandle:
     begin
-      newPt.InX := ScreenToHvifX(x - FDragOffX);
-      newPt.InY := ScreenToHvifY(y - FDragOffY);
+      newPt.InX := SnapCoord(ScreenToHvifX(x - FDragOffX));
+      newPt.InY := SnapCoord(ScreenToHvifY(y - FDragOffY));
     end;
     dtOutHandle:
     begin
-      newPt.OutX := ScreenToHvifX(x - FDragOffX);
-      newPt.OutY := ScreenToHvifY(y - FDragOffY);
+      newPt.OutX := SnapCoord(ScreenToHvifX(x - FDragOffX));
+      newPt.OutY := SnapCoord(ScreenToHvifY(y - FDragOffY));
     end;
   end;
 

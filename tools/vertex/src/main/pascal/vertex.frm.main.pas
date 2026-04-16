@@ -77,6 +77,8 @@ type
     FBtnZoomFit:    TfpgButton;
     FMnuPath:       TfpgPopupMenu;    { right-click on a path node }
     FMnuShape:      TfpgPopupMenu;    { right-click on a shape node }
+    FBtnGrid:       TfpgButton;       { toggle grid overlay }
+    FBtnSnap:       TfpgButton;       { toggle snap-to-grid }
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
@@ -128,6 +130,8 @@ type
 
     { Zoom button handlers }
     procedure ZoomBtnClick(Sender: TObject);
+    procedure GridBtnClick(Sender: TObject);
+    procedure SnapBtnClick(Sender: TObject);
 
     { Path context menu handlers }
     procedure PathMenuAddFreehand(Sender: TObject);
@@ -385,6 +389,18 @@ begin
   FZoomLabel := TfpgLabel.Create(FZoomBar);
   FZoomLabel.Text := 'Fit';
   FZoomLabel.SetPosition(248, 5, 60, 18);
+
+  FBtnGrid := TfpgButton.Create(FZoomBar);
+  FBtnGrid.Text    := 'Grid';
+  FBtnGrid.Tag     := 0;   { 0=off, 1=on }
+  FBtnGrid.SetPosition(316, 2, 46, 22);
+  FBtnGrid.OnClick := @GridBtnClick;
+
+  FBtnSnap := TfpgButton.Create(FZoomBar);
+  FBtnSnap.Text    := 'Snap';
+  FBtnSnap.Tag     := 0;   { 0=off, 1=on }
+  FBtnSnap.SetPosition(364, 2, 50, 22);
+  FBtnSnap.OnClick := @SnapBtnClick;
 
   mig.AddLayoutComponent(FZoomBar, TfpgMigCC.Create().DockNorth.GrowX());
 
@@ -1402,6 +1418,26 @@ begin
     FZoomLabel.Text := 'Fit'
   else
     FZoomLabel.Text := Format('%d%%', [z]);
+end;
+
+procedure TVertexMainForm.GridBtnClick(Sender: TObject);
+begin
+  FBtnGrid.Tag := 1 - FBtnGrid.Tag;   { toggle }
+  FVertexCanvas.ShowGrid := FBtnGrid.Tag = 1;
+  if FBtnGrid.Tag = 1 then
+    FBtnGrid.Text := 'Grid ON'
+  else
+    FBtnGrid.Text := 'Grid';
+end;
+
+procedure TVertexMainForm.SnapBtnClick(Sender: TObject);
+begin
+  FBtnSnap.Tag := 1 - FBtnSnap.Tag;   { toggle }
+  FVertexCanvas.SnapToGrid := FBtnSnap.Tag = 1;
+  if FBtnSnap.Tag = 1 then
+    FBtnSnap.Text := 'Snap ON'
+  else
+    FBtnSnap.Text := 'Snap';
 end;
 
 procedure TVertexMainForm.miFileExportPngClick(Sender: TObject);
