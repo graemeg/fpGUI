@@ -708,6 +708,26 @@ type
   end;
 
 
+  { Bake a shape's HasTranslation (TranslateX/Y) into its referenced path points,
+    then clear the translation.  All path point snapshots are stored for full Undo. }
+  TVertexCmdFreezeTransform = class(TVertexCommand)
+  private
+    type TPathSnapshot = record
+      Path:   TVertexPath;
+      Points: array of TVertexPoint;
+    end;
+  private
+    FShape:        TVertexShape;
+    FPathSnaps:    array of TPathSnapshot;
+    FOldHasTrans:  Boolean;
+    FOldTX, FOldTY: Single;
+  public
+    constructor Create(AShape: TVertexShape);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
 { ==================== TUndoStack ==================== }
 
 type
@@ -2351,6 +2371,69 @@ procedure TVertexDocument.MarkClean;
 begin
   FDirty := False;
   FUndoStack.Clear;
+end;
+
+
+{ TVertexCmdFreezeTransform }
+
+constructor TVertexCmdFreezeTransform.Create(AShape: TVertexShape);
+var
+  i, j: Integer;
+begin
+  inherited Create;
+  FShape       := AShape;
+  FOldHasTrans := AShape.HasTranslation;
+  FOldTX       := AShape.TranslateX;
+  FOldTY       := AShape.TranslateY;
+  SetLength(FPathSnaps, AShape.PathCount);
+  for i := 0 to AShape.PathCount - 1 do
+  begin
+    FPathSnaps[i].Path := AShape.Paths[i];
+    SetLength(FPathSnaps[i].Points, AShape.Paths[i].PointCount);
+    for j := 0 to AShape.Paths[i].PointCount - 1 do
+      FPathSnaps[i].Points[j] := AShape.Paths[i].Points[j];
+  end;
+end;
+
+procedure TVertexCmdFreezeTransform.Execute;
+var
+  i, j: Integer;
+  ph:   TVertexPath;
+  pt:   TVertexPoint;
+begin
+  if not FShape.HasTranslation then
+    Exit;
+  for i := 0 to FShape.PathCount - 1 do
+  begin
+    ph := FShape.Paths[i];
+    for j := 0 to ph.PointCount - 1 do
+    begin
+      pt       := ph.Points[j];
+      pt.X     := pt.X    + FShape.TranslateX;
+      pt.Y     := pt.Y    + FShape.TranslateY;
+      pt.InX   := pt.InX  + FShape.TranslateX;
+      pt.InY   := pt.InY  + FShape.TranslateY;
+      pt.OutX  := pt.OutX + FShape.TranslateX;
+      pt.OutY  := pt.OutY + FShape.TranslateY;
+      ph.Points[j] := pt;
+    end;
+  end;
+  FShape.HasTranslation := False;
+  FShape.TranslateX     := 0;
+  FShape.TranslateY     := 0;
+end;
+
+procedure TVertexCmdFreezeTransform.Undo;
+var
+  i, j: Integer;
+begin
+  { Restore all path points from snapshots }
+  for i := 0 to High(FPathSnaps) do
+    for j := 0 to High(FPathSnaps[i].Points) do
+      FPathSnaps[i].Path.Points[j] := FPathSnaps[i].Points[j];
+  FShape.HasTranslation := FOldHasTrans;
+  FShape.TranslateX     := FOldTX;
+  FShape.TranslateY     := FOldTY;
 end;
 
 

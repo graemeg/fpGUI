@@ -146,6 +146,7 @@ procedure TVertexPreviewBar.DrawCell(AX, AY, ASize: Integer);
 var
   col, row: Integer;
   img:      TfpgImage;
+  r: TfpgRect;
 begin
   if FChkChecker.Checked then
   begin
@@ -179,7 +180,9 @@ begin
   end;
 
   Canvas.SetColor(COL_CELL_BDR);
-  Canvas.DrawRectangle(AX, AY, ASize, ASize);
+  r.SetRect(AX, AY, ASize, ASize);
+  r.InflateRect(1, 1);
+  Canvas.DrawRectangle(r);
 end;
 
 procedure TVertexPreviewBar.HandlePaint;

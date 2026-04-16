@@ -157,6 +157,7 @@ type
     procedure ShapeMenuAddEmpty(Sender: TObject);
     procedure ShapeMenuDuplicate(Sender: TObject);
     procedure ShapeMenuResetTransform(Sender: TObject);
+    procedure ShapeMenuFreezeTransform(Sender: TObject);
     procedure ShapeMenuRemove(Sender: TObject);
 
     { Canvas cursor-move callback — updates the status bar. }
@@ -976,6 +977,7 @@ begin
   FShapePanel.SetShape(nil);
   PopulateObjectTree;
   UpdateTitle;
+  UpdateStatusBar;
 end;
 
 procedure TVertexMainForm.miFileSaveClick(Sender: TObject);
@@ -1187,6 +1189,7 @@ begin
     AddMenuItem('Duplicate',          '', @ShapeMenuDuplicate);
     AddSeparator;
     AddMenuItem('Reset transformation', '', @ShapeMenuResetTransform);
+    AddMenuItem('Freeze transformation', '', @ShapeMenuFreezeTransform);
     AddSeparator;
     AddMenuItem('Remove',             '', @ShapeMenuRemove);
   end;
@@ -1470,6 +1473,23 @@ begin
   if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
   shape := FDocument.Shapes[idx];
   cmd := TVertexCmdSetShapeTranslation.Create(shape, False, 0, 0);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.ShapeMenuFreezeTransform(Sender: TObject);
+var
+  node:  TfpgTreeNode;
+  idx:   Integer;
+  shape: TVertexShape;
+  cmd:   TVertexCmdFreezeTransform;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
+  shape := FDocument.Shapes[idx];
+  if not shape.HasTranslation then Exit;  { nothing to freeze }
+  cmd := TVertexCmdFreezeTransform.Create(shape);
   FDocument.UndoStack.Execute(cmd);
 end;
 
