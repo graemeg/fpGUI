@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-icon-o-matic</name>
+  <author>Graeme Geldenhuys</author>
+  <license>BSD-3-Clause</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>iom.pas</mainSource>
+    <executableName>icon-o-matic</executableName>
+    <sourceDirectory>src/main/pascal</sourceDirectory>
+  </build>
+
+  <moduleDependencies>
+    <module>../../framework</module>
+  </moduleDependencies>
+
+</project>
