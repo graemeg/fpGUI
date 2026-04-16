@@ -158,6 +158,7 @@ type
     procedure ShapeMenuDuplicate(Sender: TObject);
     procedure ShapeMenuResetTransform(Sender: TObject);
     procedure ShapeMenuFreezeTransform(Sender: TObject);
+    procedure ShapeMenuSetTransformer(Sender: TObject);
     procedure ShapeMenuRemove(Sender: TObject);
 
     { Canvas cursor-move callback — updates the status bar. }
@@ -1191,6 +1192,11 @@ begin
     AddMenuItem('Reset transformation', '', @ShapeMenuResetTransform);
     AddMenuItem('Freeze transformation', '', @ShapeMenuFreezeTransform);
     AddSeparator;
+    with AddMenuItem('Set transformer: Stroke',      '', @ShapeMenuSetTransformer) do Tag := 1;
+    with AddMenuItem('Set transformer: Contour',     '', @ShapeMenuSetTransformer) do Tag := 2;
+    with AddMenuItem('Set transformer: Perspective', '', @ShapeMenuSetTransformer) do Tag := 3;
+    with AddMenuItem('Remove transformer',           '', @ShapeMenuSetTransformer) do Tag := 0;
+    AddSeparator;
     AddMenuItem('Remove',             '', @ShapeMenuRemove);
   end;
 end;
@@ -1490,6 +1496,40 @@ begin
   shape := FDocument.Shapes[idx];
   if not shape.HasTranslation then Exit;  { nothing to freeze }
   cmd := TVertexCmdFreezeTransform.Create(shape);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.ShapeMenuSetTransformer(Sender: TObject);
+var
+  node:     TfpgTreeNode;
+  idx:      Integer;
+  shape:    TVertexShape;
+  newTrans: TVertexTransformer;
+  cmd:      TVertexCmdSetTransformer;
+  tt:       Integer;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
+  shape := FDocument.Shapes[idx];
+  tt    := TfpgMenuItem(Sender).Tag;  { 0=None, 1=Stroke, 2=Contour, 3=Perspective }
+  newTrans := Default(TVertexTransformer);
+  case tt of
+    1: begin
+         newTrans.TransType  := ittStroke;
+         newTrans.Width      := 1.0;
+         newTrans.MiterLimit := 4.0;
+       end;
+    2: begin
+         newTrans.TransType := ittContour;
+         newTrans.Width     := 1.0;
+       end;
+    3: newTrans.TransType := ittPerspective;
+  { 0: ittNone — already the default }
+  end;
+  if newTrans.TransType = shape.Transformer.TransType then Exit;
+  cmd := TVertexCmdSetTransformer.Create(shape, newTrans);
   FDocument.UndoStack.Execute(cmd);
 end;
 

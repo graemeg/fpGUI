@@ -261,6 +261,8 @@ begin
   FTransCombo.SetPosition(LBL_X, R12, 210, ROW_H);
   FTransCombo.Items.Add('None');
   FTransCombo.Items.Add('Stroke');
+  FTransCombo.Items.Add('Contour');
+  FTransCombo.Items.Add('Perspective');
   FTransCombo.FocusItem := 0;
   FTransCombo.OnChange  := @TransComboChanged;
 
@@ -359,13 +361,21 @@ end;
 
 procedure TVertexShapePanel.UpdateTransformerControls;
 var
-  isStroke: Boolean;
+  tt: TVertexTransformerType;
+  isStroke, hasWidth: Boolean;
   t: TVertexTransformer;
   joinIdx: Integer;
 begin
-  isStroke := (FShape <> nil) and (FShape.Transformer.TransType = ittStroke);
-  FLblWidth.Visible   := isStroke;
-  FWidthSpin.Visible  := isStroke;
+  if FShape <> nil then
+    tt := FShape.Transformer.TransType
+  else
+    tt := ittNone;
+
+  isStroke := tt = ittStroke;
+  hasWidth := tt in [ittStroke, ittContour];
+
+  FLblWidth.Visible   := hasWidth;
+  FWidthSpin.Visible  := hasWidth;
   FLblCaps.Visible    := isStroke;
   FCapsCombo.Visible  := isStroke;
   FLblJoins.Visible   := isStroke;
@@ -373,10 +383,12 @@ begin
   FLblMiter.Visible   := isStroke;
   FMiterSpin.Visible  := isStroke;
 
-  if not isStroke then Exit;
+  if not hasWidth then Exit;
 
   t := FShape.Transformer;
   FWidthSpin.Value := t.Width;
+  if not isStroke then Exit;
+
   FCapsCombo.FocusItem := t.LineCap;
   case t.LineJoin of
     2:   joinIdx := 1;
@@ -426,7 +438,9 @@ begin
     FVisibleChk.Checked := FShape.Visible;
 
     case FShape.Transformer.TransType of
-      ittStroke: FTransCombo.FocusItem := 1;
+      ittStroke:      FTransCombo.FocusItem := 1;
+      ittContour:     FTransCombo.FocusItem := 2;
+      ittPerspective: FTransCombo.FocusItem := 3;
     else
       FTransCombo.FocusItem := 0;
     end;
@@ -622,13 +636,19 @@ var
 begin
   if (FShape = nil) or (FDocument = nil) then Exit;
   newTrans := Default(TVertexTransformer);
-  if FTransCombo.FocusItem = 1 then
-  begin
-    newTrans.TransType  := ittStroke;
-    newTrans.Width      := FWidthSpin.Value;
-    newTrans.LineCap    := FCapsCombo.FocusItem;
-    newTrans.LineJoin   := joinMap[FJoinsCombo.FocusItem];
-    newTrans.MiterLimit := FMiterSpin.Value;
+  case FTransCombo.FocusItem of
+    1: begin
+         newTrans.TransType  := ittStroke;
+         newTrans.Width      := FWidthSpin.Value;
+         newTrans.LineCap    := FCapsCombo.FocusItem;
+         newTrans.LineJoin   := joinMap[FJoinsCombo.FocusItem];
+         newTrans.MiterLimit := FMiterSpin.Value;
+       end;
+    2: begin
+         newTrans.TransType := ittContour;
+         newTrans.Width     := FWidthSpin.Value;
+       end;
+    3: newTrans.TransType := ittPerspective;
   end;
   { Only commit if something changed }
   if (newTrans.TransType  = FShape.Transformer.TransType) and
