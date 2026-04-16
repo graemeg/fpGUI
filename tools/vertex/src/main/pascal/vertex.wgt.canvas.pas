@@ -54,9 +54,12 @@ type
 
   { Active editing tool }
   TVertexToolMode = (
-    tmSelect,    { click/drag to select and translate shapes }
-    tmNode,      { drag path nodes and Bezier handles — default mode }
-    tmPan        { drag to pan the viewport }
+    tmSelect,      { click/drag to select and translate shapes }
+    tmNode,        { drag path nodes and Bezier handles — default mode }
+    tmPan,         { drag to pan the viewport }
+    tmAddPoint,    { click on a segment to insert a node }
+    tmDeletePoint, { click on a node to remove it }
+    tmZoom         { left-click zoom in, Alt+click zoom out }
   );
 
   TVertexCanvasWidget = class(TfpgWidget)
@@ -853,9 +856,11 @@ var
   newOutX,  newOutY:  Single;
   nextInX,  nextInY:  Single;
   cmd: TVertexCmdAddPoint;
+  cmdDel: TVertexCmdDeletePoint;
   pt: TVertexPoint;
   shapeIdx: Integer;
   sh: TVertexShape;
+  curIdxZ, newIdxZ, iZ: Integer;
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
@@ -885,6 +890,91 @@ begin
       FSelectDragShapeIdx  := shapeIdx;
       FSelectDragShapeOX   := sh.TranslateX;
       FSelectDragShapeOY   := sh.TranslateY;
+    end;
+    Exit;
+  end;
+
+  { ── Zoom-tool mode ─────────────────────────────────────────────────────── }
+  if FToolMode = tmZoom then
+  begin
+    { Zoom levels: -1(fit), 50, 100, 200, 400 }
+    curIdxZ := 0;
+    if      FZoom = 50  then curIdxZ := 1
+    else if FZoom = 100 then curIdxZ := 2
+    else if FZoom = 200 then curIdxZ := 3
+    else if FZoom = 400 then curIdxZ := 4;
+    if ssAlt in shiftstate then
+      newIdxZ := Max(curIdxZ - 1, 0)
+    else
+      newIdxZ := Min(curIdxZ + 1, 4);
+    if newIdxZ <> curIdxZ then
+    begin
+      case newIdxZ of
+        0: SetZoom(-1);
+        1: SetZoom(50);
+        2: SetZoom(100);
+        3: SetZoom(200);
+        4: SetZoom(400);
+      end;
+    end;
+    Exit;
+  end;
+
+  { ── Add-point mode ───────────────────────────────────────────────────────── }
+  if FToolMode = tmAddPoint then
+  begin
+    if (FDocument <> nil) and HitTestSegments(x, y, segPath, segIdx, segT) then
+    begin
+      prevIdx := segIdx;
+      nextIdx := (segIdx + 1) mod segPath.PointCount;
+      if (segPath.Closed) and (segIdx = segPath.PointCount - 1) then
+        insertIdx := segPath.PointCount
+      else
+        insertIdx := segIdx + 1;
+      n0 := segPath.Points[prevIdx];
+      n1 := segPath.Points[nextIdx];
+      SplitCubicBezier(
+          n0.X, n0.Y, n0.OutX, n0.OutY,
+          n1.InX, n1.InY, n1.X, n1.Y,
+          segT,
+          splitX, splitY,
+          prevOutX, prevOutY,
+          newInX,  newInY,
+          newOutX, newOutY,
+          nextInX, nextInY);
+      newPt        := Default(TVertexPoint);
+      newPt.X      := splitX;   newPt.Y      := splitY;
+      newPt.InX    := newInX;   newPt.InY    := newInY;
+      newPt.OutX   := newOutX;  newPt.OutY   := newOutY;
+      newPt.Smooth := False;
+      prevAfter      := n0;
+      prevAfter.OutX := prevOutX;  prevAfter.OutY := prevOutY;
+      nextAfter      := n1;
+      nextAfter.InX  := nextInX;   nextAfter.InY  := nextInY;
+      cmd := TVertexCmdAddPoint.Create(segPath, insertIdx, prevIdx, nextIdx,
+                 newPt, n0, prevAfter, n1, nextAfter);
+      FDocument.UndoStack.Execute(cmd);
+      FActivePath      := segPath;
+      FSelectedNodeIdx := insertIdx;
+      FDragTarget      := dtNone;
+      Repaint;
+    end;
+    Exit;
+  end;
+
+  { ── Delete-point mode ───────────────────────────────────────────────────── }
+  if FToolMode = tmDeletePoint then
+  begin
+    if (FDocument <> nil) and HitTestNodes(x, y, hitPath, hitNode, hitTarget) then
+    begin
+      if (hitTarget = dtAnchor) and (hitPath.PointCount > MIN_PATH_NODES) then
+      begin
+        cmdDel := TVertexCmdDeletePoint.Create(hitPath, hitNode);
+        FActivePath      := nil;
+        FSelectedNodeIdx := -1;
+        FDocument.UndoStack.Execute(cmdDel);
+        Repaint;
+      end;
     end;
     Exit;
   end;

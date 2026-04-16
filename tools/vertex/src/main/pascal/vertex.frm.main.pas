@@ -58,6 +58,9 @@ type
     FBtnToolSelect: TfpgButton;   { Select / move shapes tool }
     FBtnToolNode:   TfpgButton;   { Node edit tool (default) }
     FBtnToolPan:    TfpgButton;   { Pan viewport tool }
+    FBtnToolAddPt:  TfpgButton;   { Add point tool }
+    FBtnToolDelPt:  TfpgButton;   { Delete point tool }
+    FBtnToolZoom:   TfpgButton;   { Zoom tool }
     FVertexCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
     FPreviewBar:    TVertexPreviewBar;
@@ -449,6 +452,27 @@ begin
   FBtnToolPan.SetPosition(2, 80, 60, 26);
   FBtnToolPan.OnClick := @ToolBtnClick;
   FBtnToolPan.FontDesc := '#Label1';
+
+  FBtnToolAddPt := TfpgButton.Create(FToolBox);
+  FBtnToolAddPt.Text    := '+Pt';
+  FBtnToolAddPt.Tag     := 3;   { tmAddPoint }
+  FBtnToolAddPt.SetPosition(2, 108, 60, 26);
+  FBtnToolAddPt.OnClick := @ToolBtnClick;
+  FBtnToolAddPt.FontDesc := '#Label1';
+
+  FBtnToolDelPt := TfpgButton.Create(FToolBox);
+  FBtnToolDelPt.Text    := '-Pt';
+  FBtnToolDelPt.Tag     := 4;   { tmDeletePoint }
+  FBtnToolDelPt.SetPosition(2, 136, 60, 26);
+  FBtnToolDelPt.OnClick := @ToolBtnClick;
+  FBtnToolDelPt.FontDesc := '#Label1';
+
+  FBtnToolZoom := TfpgButton.Create(FToolBox);
+  FBtnToolZoom.Text    := 'Zoom';
+  FBtnToolZoom.Tag     := 5;   { tmZoom }
+  FBtnToolZoom.SetPosition(2, 164, 60, 26);
+  FBtnToolZoom.OnClick := @ToolBtnClick;
+  FBtnToolZoom.FontDesc := '#Label1';
 
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
@@ -1152,6 +1176,9 @@ begin
     0: mode := tmSelect;
     1: mode := tmNode;
     2: mode := tmPan;
+    3: mode := tmAddPoint;
+    4: mode := tmDeletePoint;
+    5: mode := tmZoom;
   else
     mode := tmNode;
   end;
@@ -1160,6 +1187,9 @@ begin
   FBtnToolSelect.FontDesc := '#Label1';
   FBtnToolNode.FontDesc   := '#Label1';
   FBtnToolPan.FontDesc    := '#Label1';
+  FBtnToolAddPt.FontDesc  := '#Label1';
+  FBtnToolDelPt.FontDesc  := '#Label1';
+  FBtnToolZoom.FontDesc   := '#Label1';
   TfpgButton(Sender).FontDesc := '#Label1:bold';
 end;
 
