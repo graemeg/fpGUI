@@ -27,11 +27,12 @@ interface
 
 uses
   Classes, SysUtils,
+  FPImage, FPWritePNG,
   fpg_base, fpg_main, fpg_form, fpg_constants,
   fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   fpg_dialogs,
-  fpg_hvif_model,
+  fpg_hvif_model, fpg_hvif,
   fpg_vertex_document,
   vertex.wgt.canvas,
   vertex.wgt.stylepanel,
@@ -93,6 +94,7 @@ type
     procedure miFileSaveClick(Sender: TObject);
     procedure miFileSaveAsClick(Sender: TObject);
     procedure miFileExportIncClick(Sender: TObject);
+    procedure miFileExportPngClick(Sender: TObject);
     procedure miFileExitClick(Sender: TObject);
     procedure miEditUndoClick(Sender: TObject);
     procedure miEditRedoClick(Sender: TObject);
@@ -101,6 +103,7 @@ type
     { Save / export helpers }
     procedure DoSaveToFile(const AFileName: string);
     procedure ExportAsInc(const AFileName: string);
+    procedure ExportAsPng(const ABasePath: string);
     procedure UpdateTitle;
 
     { Returns True if it's safe to discard the current document (saved or user OK'd).
@@ -271,6 +274,7 @@ begin
     AddMenuItem('Save As...',     rsKeyCtrl + rsKeyShift + 'S', @miFileSaveAsClick);
     AddSeparator;
     AddMenuItem('Export as .inc...', '', @miFileExportIncClick);
+    AddMenuItem('Export as PNG...', '',  @miFileExportPngClick);
     AddSeparator;
     AddMenuItem('Exit', rsKeyCtrl + 'Q', @miFileExitClick);
   end;
@@ -971,6 +975,88 @@ begin
     ms.Free;
     sl.Free;
   end;
+end;
+
+procedure TVertexMainForm.miFileExportPngClick(Sender: TObject);
+var
+  fn:      string;
+  initDir: string;
+begin
+  if FCurrentFile <> '' then
+    initDir := ExtractFilePath(FCurrentFile)
+  else
+    initDir := '';
+  fn := SelectFileDialog(sfdSave,
+      'PNG files (*.png)|*.png|All files (*)|*', initDir);
+  if fn = '' then
+    Exit;
+  { Strip extension — we'll append _<size>.png ourselves }
+  fn := ChangeFileExt(fn, '');
+  ExportAsPng(fn);
+end;
+
+procedure TVertexMainForm.ExportAsPng(const ABasePath: string);
+const
+  kSizes: array[0..3] of Integer = (16, 32, 48, 64);
+var
+  ms:       TMemoryStream;
+  icon:     THvifIcon;
+  img:      TfpgImage;
+  fpImg:    TFPMemoryImage;
+  writer:   TFPWriterPNG;
+  sz, x, y: Integer;
+  fn:       string;
+  c:        TfpgColor;
+  fpc:      TFPColor;
+  exported: Integer;
+begin
+  ms := TMemoryStream.Create;
+  try
+    FDocument.SaveToStream(ms);
+    ms.Position := 0;
+    icon := THvifIcon.CreateFromStream(ms);
+  finally
+    ms.Free;
+  end;
+
+  exported := 0;
+  try
+    for sz in kSizes do
+    begin
+      img   := icon.GetImage(sz, sz);   { owned by icon — do NOT free }
+      fpImg := TFPMemoryImage.Create(sz, sz);
+      try
+        for y := 0 to sz - 1 do
+          for x := 0 to sz - 1 do
+          begin
+            c := img.Colors[x, y];
+            { TfpgColor layout: bits 31-24 alpha, 23-16 red, 15-8 green, 7-0 blue }
+            fpc.Alpha := ((c shr 24) and $FF) * $0101;
+            fpc.Red   := ((c shr 16) and $FF) * $0101;
+            fpc.Green := ((c shr 8)  and $FF) * $0101;
+            fpc.Blue  := (c          and $FF) * $0101;
+            fpImg.Colors[x, y] := fpc;
+          end;
+
+        fn     := Format('%s_%d.png', [ABasePath, sz]);
+        writer := TFPWriterPNG.Create;
+        try
+          writer.UseAlpha := True;
+          fpImg.SaveToFile(fn, writer);
+          Inc(exported);
+        finally
+          writer.Free;
+        end;
+      finally
+        fpImg.Free;
+      end;
+    end;
+  finally
+    icon.Free;
+  end;
+
+  ShowMessage(Format('Exported %d PNG file(s) from %s.',
+      [exported, ExtractFileName(ABasePath)]), 'Vertex');
 end;
 
 procedure TVertexMainForm.UpdateStatusBar;
