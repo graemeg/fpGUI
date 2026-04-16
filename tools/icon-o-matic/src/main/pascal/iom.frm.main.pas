@@ -196,7 +196,7 @@ begin
   FObjectTree.Name     := 'objectTree';
   FObjectTree.PreferredSize := fpgSize(220, 200);
   FObjectTree.OnChange := @ObjectTreeChanged;
-  rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY());
+  rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY().PushY());
 
   FStylePanel := TIomStylePanel.Create(FRightPanel);
   FStylePanel.Name := 'stylePanel';
