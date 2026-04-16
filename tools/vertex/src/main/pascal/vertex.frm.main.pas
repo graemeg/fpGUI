@@ -5,6 +5,7 @@ unit vertex.frm.main;
 
   Step #5: wire TVertexDocument + interactive editing + undo/redo.
   Step #7: style editing panel with RGBA spin edits + Apply (undo-aware).
+  Step #9: File > Save (.hvif) and File > Export as .inc (Pascal const array).
 
   Layout (MiG docking):
     ┌──────────────────────────────────────────────────┐
@@ -59,8 +60,9 @@ type
     FStylePanel:    TVertexStylePanel;
 
     { Data }
-    FDocument:   TVertexDocument;    { owned }
-    FShapesNode: TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
+    FDocument:    TVertexDocument;    { owned }
+    FCurrentFile: string;             { '' when unsaved/untitled }
+    FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
 
     { Setup helpers }
     procedure SetupMenus;
@@ -75,10 +77,18 @@ type
 
     { Menu handlers }
     procedure miFileOpenClick(Sender: TObject);
+    procedure miFileSaveClick(Sender: TObject);
+    procedure miFileSaveAsClick(Sender: TObject);
+    procedure miFileExportIncClick(Sender: TObject);
     procedure miFileExitClick(Sender: TObject);
     procedure miEditUndoClick(Sender: TObject);
     procedure miEditRedoClick(Sender: TObject);
     procedure miHelpAboutClick(Sender: TObject);
+
+    { Save / export helpers }
+    procedure DoSaveToFile(const AFileName: string);
+    procedure ExportAsInc(const AFileName: string);
+    procedure UpdateTitle;
 
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
@@ -133,7 +143,12 @@ begin
   with FMnuFile do
   begin
     Name := 'mnuFile';
-    AddMenuItem('Open...', rsKeyCtrl + 'O', @miFileOpenClick);
+    AddMenuItem('Open...',        rsKeyCtrl + 'O',              @miFileOpenClick);
+    AddSeparator;
+    AddMenuItem('Save',           rsKeyCtrl + 'S',              @miFileSaveClick);
+    AddMenuItem('Save As...',     rsKeyCtrl + rsKeyShift + 'S', @miFileSaveAsClick);
+    AddSeparator;
+    AddMenuItem('Export as .inc...', '', @miFileExportIncClick);
     AddSeparator;
     AddMenuItem('Exit', rsKeyCtrl + 'Q', @miFileExitClick);
   end;
@@ -256,6 +271,7 @@ begin
   FVertexCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
   FPreviewBar.DocumentChanged;
+  UpdateTitle;
 end;
 
 
@@ -524,12 +540,70 @@ begin
   end;
 
   { Notify canvas and preview bar of the load; clear style panel selection }
+  FCurrentFile := fn;
   FVertexCanvas.DocumentChanged;
   FPreviewBar.DocumentChanged;
   FVertexCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
-  WindowTitle := 'Vertex — ' + ExtractFileName(fn);
+  UpdateTitle;
+end;
+
+procedure TVertexMainForm.miFileSaveClick(Sender: TObject);
+var
+  fn: string;
+begin
+  if FCurrentFile <> '' then
+  begin
+    DoSaveToFile(FCurrentFile);
+    Exit;
+  end;
+  { No current file — fall through to Save As }
+  fn := SelectFileDialog(sfdSave, 'HVIF files (*.hvif)|*.hvif|All files (*)|*', '');
+  if fn = '' then
+    Exit;
+  if ExtractFileExt(fn) = '' then
+    fn := fn + '.hvif';
+  DoSaveToFile(fn);
+  FCurrentFile := fn;
+  UpdateTitle;
+end;
+
+procedure TVertexMainForm.miFileSaveAsClick(Sender: TObject);
+var
+  fn:     string;
+  initDir: string;
+begin
+  if FCurrentFile <> '' then
+    initDir := ExtractFilePath(FCurrentFile)
+  else
+    initDir := '';
+  fn := SelectFileDialog(sfdSave, 'HVIF files (*.hvif)|*.hvif|All files (*)|*', initDir);
+  if fn = '' then
+    Exit;
+  if ExtractFileExt(fn) = '' then
+    fn := fn + '.hvif';
+  DoSaveToFile(fn);
+  FCurrentFile := fn;
+  UpdateTitle;
+end;
+
+procedure TVertexMainForm.miFileExportIncClick(Sender: TObject);
+var
+  fn:      string;
+  initDir: string;
+begin
+  if FCurrentFile <> '' then
+    initDir := ExtractFilePath(FCurrentFile)
+  else
+    initDir := '';
+  fn := SelectFileDialog(sfdSave,
+      'Pascal include files (*.inc)|*.inc|All files (*)|*', initDir);
+  if fn = '' then
+    Exit;
+  if ExtractFileExt(fn) = '' then
+    fn := fn + '.inc';
+  ExportAsInc(fn);
 end;
 
 procedure TVertexMainForm.miFileExitClick(Sender: TObject);
@@ -560,12 +634,100 @@ begin
   end;
 end;
 
+procedure TVertexMainForm.DoSaveToFile(const AFileName: string);
+begin
+  try
+    FDocument.SaveToFile(AFileName);   { sets Dirty=False internally }
+    UpdateTitle;
+  except
+    on E: Exception do
+      ShowMessage('Save failed: ' + E.Message, 'Vertex');
+  end;
+end;
+
+procedure TVertexMainForm.ExportAsInc(const AFileName: string);
+const
+  kBytesPerRow = 16;
+var
+  ms:       TMemoryStream;
+  buf:      PByte;
+  total, i: Integer;
+  constName: string;
+  row:      string;
+  sl:       TStringList;
+begin
+  { Derive a valid Pascal identifier from the filename }
+  constName := ExtractFileName(ChangeFileExt(AFileName, ''));
+  if (constName = '') or not (constName[1] in ['A'..'Z', 'a'..'z', '_']) then
+    constName := 'kIcon'
+  else
+    constName := 'k' + UpperCase(constName[1]) + Copy(constName, 2, MaxInt);
+
+  ms := TMemoryStream.Create;
+  sl := TStringList.Create;
+  try
+    FDocument.SaveToStream(ms);
+    total := ms.Size;
+    buf   := PByte(ms.Memory);
+
+    sl.Add('{ Generated by Vertex — HVIF icon data }');
+    sl.Add('const');
+    sl.Add(Format('  %s: array[0..%d] of Byte = (', [constName, total - 1]));
+
+    i := 0;
+    while i < total do
+    begin
+      row := '    ';
+      while i < total do
+      begin
+        row := row + Format('$%2.2X', [buf[i]]);
+        Inc(i);
+        if i >= total then
+          Break;           { last byte — no comma }
+        row := row + ', ';
+        if (i mod kBytesPerRow) = 0 then
+          Break;           { end of this row }
+      end;
+      sl.Add(row);
+    end;
+
+    sl.Add('  );');
+
+    try
+      sl.SaveToFile(AFileName);
+    except
+      on E: Exception do
+      begin
+        ShowMessage('Export failed: ' + E.Message, 'Vertex');
+        Exit;
+      end;
+    end;
+  finally
+    ms.Free;
+    sl.Free;
+  end;
+end;
+
+procedure TVertexMainForm.UpdateTitle;
+var
+  base: string;
+begin
+  if FCurrentFile <> '' then
+    base := 'Vertex — ' + ExtractFileName(FCurrentFile)
+  else
+    base := 'Vertex';
+  if FDocument.Dirty then
+    WindowTitle := base + ' *'
+  else
+    WindowTitle := base;
+end;
+
 procedure TVertexMainForm.miHelpAboutClick(Sender: TObject);
 begin
   ShowMessage(
       'Vertex' + LineEnding +
       'HVIF icon editor for the fpGUI toolkit.' + LineEnding + LineEnding +
-      'Step 8: Shape/path management (add, delete, reorder)',
+      'Step 9: Save (.hvif) and Export as .inc',
       'About Vertex');
 end;
 
