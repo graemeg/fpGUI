@@ -75,6 +75,8 @@ type
     FBtnZoom200:    TfpgButton;
     FBtnZoom400:    TfpgButton;
     FBtnZoomFit:    TfpgButton;
+    FMnuPath:       TfpgPopupMenu;    { right-click on a path node }
+    FMnuShape:      TfpgPopupMenu;    { right-click on a shape node }
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
@@ -87,6 +89,7 @@ type
     { Setup helpers }
     procedure SetupMenus;
     procedure SetupLayout;
+    procedure SetupContextMenus;
 
     { Object tree helpers }
     procedure PopulateObjectTree;
@@ -126,6 +129,23 @@ type
     { Zoom button handlers }
     procedure ZoomBtnClick(Sender: TObject);
 
+    { Path context menu handlers }
+    procedure PathMenuAddFreehand(Sender: TObject);
+    procedure PathMenuAddRect(Sender: TObject);
+    procedure PathMenuAddCircle(Sender: TObject);
+    procedure PathMenuDuplicate(Sender: TObject);
+    procedure PathMenuReverse(Sender: TObject);
+    procedure PathMenuCleanUp(Sender: TObject);
+    procedure PathMenuRotateFwd(Sender: TObject);
+    procedure PathMenuRotateBwd(Sender: TObject);
+    procedure PathMenuRemove(Sender: TObject);
+
+    { Shape context menu handlers }
+    procedure ShapeMenuAddEmpty(Sender: TObject);
+    procedure ShapeMenuDuplicate(Sender: TObject);
+    procedure ShapeMenuResetTransform(Sender: TObject);
+    procedure ShapeMenuRemove(Sender: TObject);
+
     { Canvas cursor-move callback — updates the status bar. }
     procedure CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
 
@@ -143,6 +163,8 @@ type
 
     { Select the given shape index in the object tree (after repopulation). }
     procedure SelectShapeInTree(AShapeIdx: Integer);
+    { Select the given path index in the object tree (after repopulation). }
+    procedure SelectPathInTree(APathIdx: Integer);
 
   public
     procedure AfterCreate; override;
@@ -261,6 +283,7 @@ begin
   SetPosition(80, 80, 960, 640);
   SetupMenus;
   SetupLayout;
+  SetupContextMenus;
   FDocument.OnChange := @HandleDocumentChange;
   FVertexCanvas.SetDocument(FDocument);
   FStylePanel.SetDocument(FDocument);
@@ -587,6 +610,24 @@ begin
   end;
 end;
 
+procedure TVertexMainForm.SelectPathInTree(APathIdx: Integer);
+var
+  n: TfpgTreeNode;
+begin
+  if (FPathsNode = nil) or (APathIdx < 0) then
+    Exit;
+  n := FPathsNode.FirstSubNode;
+  while n <> nil do
+  begin
+    if Integer(PtrUInt(n.Data)) = APathIdx then
+    begin
+      FObjectTree.Selection := n;
+      Exit;
+    end;
+    n := n.Next;
+  end;
+end;
+
 procedure TVertexMainForm.ShapeAdd(Sender: TObject);
 var
   style:  TVertexStyle;
@@ -725,6 +766,7 @@ begin
     FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     FShapePanel.SetShape(nil);
+    FObjectTree.PopupMenu := FMnuPath;
     UpdateStatusBar;
     Exit;
   end;
@@ -737,6 +779,7 @@ begin
     FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
     FPathPanel.SetPath(nil);
     FShapePanel.SetShape(FDocument.Shapes[idx]);
+    FObjectTree.PopupMenu := FMnuShape;
     UpdateStatusBar;
     Exit;
   end;
@@ -746,6 +789,7 @@ begin
   FStylePanel.SetStyle(nil);
   FPathPanel.SetPath(nil);
   FShapePanel.SetShape(nil);
+  FObjectTree.PopupMenu := nil;
   UpdateStatusBar;
 end;
 
@@ -1027,6 +1071,325 @@ begin
     ms.Free;
     sl.Free;
   end;
+end;
+
+procedure TVertexMainForm.SetupContextMenus;
+begin
+  FMnuPath := TfpgPopupMenu.Create(Self);
+  with FMnuPath do
+  begin
+    AddMenuItem('Add freehand path',  '', @PathMenuAddFreehand);
+    AddMenuItem('Add rect path',      '', @PathMenuAddRect);
+    AddMenuItem('Add circle path',    '', @PathMenuAddCircle);
+    AddSeparator;
+    AddMenuItem('Duplicate',          '', @PathMenuDuplicate);
+    AddSeparator;
+    AddMenuItem('Reverse',            '', @PathMenuReverse);
+    AddMenuItem('Clean up',           '', @PathMenuCleanUp);
+    AddMenuItem('Rotate indices >>',  '', @PathMenuRotateFwd);
+    AddMenuItem('<< Rotate indices',  '', @PathMenuRotateBwd);
+    AddSeparator;
+    AddMenuItem('Remove',             '', @PathMenuRemove);
+  end;
+
+  FMnuShape := TfpgPopupMenu.Create(Self);
+  with FMnuShape do
+  begin
+    AddMenuItem('Add empty shape',    '', @ShapeMenuAddEmpty);
+    AddSeparator;
+    AddMenuItem('Duplicate',          '', @ShapeMenuDuplicate);
+    AddSeparator;
+    AddMenuItem('Reset transformation', '', @ShapeMenuResetTransform);
+    AddSeparator;
+    AddMenuItem('Remove',             '', @ShapeMenuRemove);
+  end;
+end;
+
+{ ── Path context menu handlers ────────────────────────────────────────────── }
+
+procedure TVertexMainForm.PathMenuAddFreehand(Sender: TObject);
+var
+  path: TVertexPath;
+  pt:   TVertexPoint;
+  cmd:  TVertexCmdAddPath;
+  idx:  Integer;
+begin
+  if FDocument = nil then Exit;
+  path        := TVertexPath.Create(FDocument.UniqueName('path'));
+  path.Closed := False;
+  FillChar(pt, SizeOf(pt), 0);
+  pt.X := 20; pt.Y := 32; pt.InX := 20; pt.InY := 32; pt.OutX := 20; pt.OutY := 32;
+  path.AddPoint(pt);
+  pt.X := 44; pt.Y := 32; pt.InX := 44; pt.InY := 32; pt.OutX := 44; pt.OutY := 32;
+  path.AddPoint(pt);
+  cmd := TVertexCmdAddPath.Create(FDocument, path);
+  FDocument.UndoStack.Execute(cmd);
+  idx := FDocument.PathCount - 1;
+  PopulateObjectTree;
+  SelectPathInTree(idx);
+end;
+
+procedure TVertexMainForm.PathMenuAddRect(Sender: TObject);
+var
+  path: TVertexPath;
+  pt:   TVertexPoint;
+  cmd:  TVertexCmdAddPath;
+  idx:  Integer;
+begin
+  if FDocument = nil then Exit;
+  path        := TVertexPath.Create(FDocument.UniqueName('path'));
+  path.Closed := True;
+  FillChar(pt, SizeOf(pt), 0);
+  { Four corners of a rect centred at (32,32), 20×20 }
+  pt.X := 22; pt.Y := 22; pt.InX := 22; pt.InY := 22; pt.OutX := 22; pt.OutY := 22;
+  path.AddPoint(pt);
+  pt.X := 42; pt.Y := 22; pt.InX := 42; pt.InY := 22; pt.OutX := 42; pt.OutY := 22;
+  path.AddPoint(pt);
+  pt.X := 42; pt.Y := 42; pt.InX := 42; pt.InY := 42; pt.OutX := 42; pt.OutY := 42;
+  path.AddPoint(pt);
+  pt.X := 22; pt.Y := 42; pt.InX := 22; pt.InY := 42; pt.OutX := 22; pt.OutY := 42;
+  path.AddPoint(pt);
+  cmd := TVertexCmdAddPath.Create(FDocument, path);
+  FDocument.UndoStack.Execute(cmd);
+  idx := FDocument.PathCount - 1;
+  PopulateObjectTree;
+  SelectPathInTree(idx);
+end;
+
+procedure TVertexMainForm.PathMenuAddCircle(Sender: TObject);
+const
+  { Bezier circle approximation constant ≈ 0.5523 × radius }
+  K = 7.07;   { 0.5523 × 12.8 ≈ 7.07 for radius ~12.8 }
+var
+  path: TVertexPath;
+  pt:   TVertexPoint;
+  cmd:  TVertexCmdAddPath;
+  idx:  Integer;
+  cx, cy, r: Single;
+begin
+  if FDocument = nil then Exit;
+  cx := 32; cy := 32; r := 14;
+  path        := TVertexPath.Create(FDocument.UniqueName('path'));
+  path.Closed := True;
+  FillChar(pt, SizeOf(pt), 0);
+  { Top }
+  pt.X := cx;    pt.Y := cy - r; pt.InX := cx - K; pt.InY := cy - r; pt.OutX := cx + K; pt.OutY := cy - r; path.AddPoint(pt);
+  { Right }
+  pt.X := cx + r; pt.Y := cy;    pt.InX := cx + r; pt.InY := cy - K; pt.OutX := cx + r; pt.OutY := cy + K; path.AddPoint(pt);
+  { Bottom }
+  pt.X := cx;    pt.Y := cy + r; pt.InX := cx + K; pt.InY := cy + r; pt.OutX := cx - K; pt.OutY := cy + r; path.AddPoint(pt);
+  { Left }
+  pt.X := cx - r; pt.Y := cy;    pt.InX := cx - r; pt.InY := cy + K; pt.OutX := cx - r; pt.OutY := cy - K; path.AddPoint(pt);
+  cmd := TVertexCmdAddPath.Create(FDocument, path);
+  FDocument.UndoStack.Execute(cmd);
+  idx := FDocument.PathCount - 1;
+  PopulateObjectTree;
+  SelectPathInTree(idx);
+end;
+
+procedure TVertexMainForm.PathMenuDuplicate(Sender: TObject);
+var
+  node:    TfpgTreeNode;
+  src:     TVertexPath;
+  dup:     TVertexPath;
+  cmd:     TVertexCmdAddPath;
+  i, idx:  Integer;
+  pt:      TVertexPoint;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  src := FDocument.Paths[idx];
+  dup := TVertexPath.Create(FDocument.UniqueName(src.Name));
+  dup.Closed := src.Closed;
+  for i := 0 to src.PointCount - 1 do
+  begin
+    pt := src.Points[i];
+    dup.AddPoint(pt);
+  end;
+  cmd := TVertexCmdAddPath.Create(FDocument, dup);
+  FDocument.UndoStack.Execute(cmd);
+  PopulateObjectTree;
+end;
+
+procedure TVertexMainForm.PathMenuReverse(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  cmd:  TVertexCmdReversePath;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  cmd := TVertexCmdReversePath.Create(FDocument.Paths[idx]);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.PathMenuCleanUp(Sender: TObject);
+var
+  node:    TfpgTreeNode;
+  idx, i:  Integer;
+  path:    TVertexPath;
+  pt, npt: TVertexPoint;
+  toRemove: array of Integer;
+  count:   Integer;
+  dx, dy:  Single;
+  cmd2:    TVertexCmdDeletePoint;
+const
+  kMinDist = 0.5;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  path := FDocument.Paths[idx];
+  { Collect indices of near-duplicate points (dist < 0.5 HVIF units from successor) }
+  count := 0;
+  SetLength(toRemove, path.PointCount);
+  i := 0;
+  while i < path.PointCount - 1 do
+  begin
+    pt  := path.Points[i];
+    npt := path.Points[i + 1];
+    dx  := npt.X - pt.X;
+    dy  := npt.Y - pt.Y;
+    if Sqrt(dx * dx + dy * dy) < kMinDist then
+    begin
+      toRemove[count] := i + 1;
+      Inc(count);
+    end;
+    Inc(i);
+  end;
+  { Remove in reverse order so indices stay valid }
+  i := count - 1;
+  while i >= 0 do
+  begin
+    if path.PointCount > 2 then
+    begin
+      cmd2 := TVertexCmdDeletePoint.Create(path, toRemove[i]);
+      FDocument.UndoStack.Execute(cmd2);
+    end;
+    Dec(i);
+  end;
+  if count > 0 then
+    PopulateObjectTree;
+end;
+
+procedure TVertexMainForm.PathMenuRotateFwd(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  cmd:  TVertexCmdRotatePathIndices;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  cmd := TVertexCmdRotatePathIndices.Create(FDocument.Paths[idx], 1);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.PathMenuRotateBwd(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  cmd:  TVertexCmdRotatePathIndices;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  cmd := TVertexCmdRotatePathIndices.Create(FDocument.Paths[idx], -1);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.PathMenuRemove(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  path: TVertexPath;
+  cmd:  TVertexCmdDeletePath;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FPathsNode = nil) or (node.Parent <> FPathsNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.PathCount) then Exit;
+  path := FDocument.Paths[idx];
+  { Don't delete if any shape still references this path }
+  cmd := TVertexCmdDeletePath.Create(FDocument, path);
+  try
+    FDocument.UndoStack.Execute(cmd);
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Cannot remove path: ' + E.Message, 'Vertex');
+      Exit;
+    end;
+  end;
+  FPathPanel.SetPath(nil);
+  FObjectTree.PopupMenu := nil;
+  PopulateObjectTree;
+end;
+
+{ ── Shape context menu handlers ───────────────────────────────────────────── }
+
+procedure TVertexMainForm.ShapeMenuAddEmpty(Sender: TObject);
+begin
+  { Reuse the existing ShapeAdd logic }
+  ShapeAdd(Sender);
+end;
+
+procedure TVertexMainForm.ShapeMenuDuplicate(Sender: TObject);
+var
+  node:  TfpgTreeNode;
+  idx:   Integer;
+  src:   TVertexShape;
+  dup:   TVertexShape;
+  cmd:   TVertexCmdAddShape;
+  i:     Integer;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
+  src := FDocument.Shapes[idx];
+  dup := TVertexShape.Create(FDocument.UniqueName(src.Name));
+  dup.Style   := src.Style;
+  dup.Visible := src.Visible;
+  for i := 0 to src.PathCount - 1 do
+    dup.AddPathRef(src.Paths[i]);
+  dup.Transformer := src.Transformer;
+  dup.HasTranslation := src.HasTranslation;
+  dup.TranslateX := src.TranslateX;
+  dup.TranslateY := src.TranslateY;
+  cmd := TVertexCmdAddShape.Create(FDocument, dup);
+  FDocument.UndoStack.Execute(cmd);
+  PopulateObjectTree;
+  SelectShapeInTree(FDocument.ShapeCount - 1);
+end;
+
+procedure TVertexMainForm.ShapeMenuResetTransform(Sender: TObject);
+var
+  node:  TfpgTreeNode;
+  idx:   Integer;
+  shape: TVertexShape;
+  cmd:   TVertexCmdSetShapeTranslation;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
+  shape := FDocument.Shapes[idx];
+  cmd := TVertexCmdSetShapeTranslation.Create(shape, False, 0, 0);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.ShapeMenuRemove(Sender: TObject);
+begin
+  { Reuse the existing ShapeDelete logic }
+  ShapeDelete(Sender);
 end;
 
 procedure TVertexMainForm.ZoomBtnClick(Sender: TObject);
