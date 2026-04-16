@@ -537,6 +537,126 @@ type
   end;
 
 
+  { Toggle the Closed flag of a path. }
+  TVertexCmdSetPathClosed = class(TVertexCommand)
+  private
+    FPath:      TVertexPath;
+    FOldClosed: Boolean;
+    FNewClosed: Boolean;
+  public
+    constructor Create(APath: TVertexPath; ANewClosed: Boolean);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Reverse the order of all points in a path (swapping In/Out handles per point). }
+  TVertexCmdReversePath = class(TVertexCommand)
+  private
+    FPath:        TVertexPath;
+    FSavedPoints: array of TVertexPoint;
+  public
+    constructor Create(APath: TVertexPath);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Rotate path point indices by ASteps positions.
+    Positive = shift start forwards; negative = shift backwards. }
+  TVertexCmdRotatePathIndices = class(TVertexCommand)
+  private
+    FPath:  TVertexPath;
+    FSteps: Integer;
+  public
+    constructor Create(APath: TVertexPath; ASteps: Integer);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Reassign a shape's style reference. }
+  TVertexCmdSetShapeStyle = class(TVertexCommand)
+  private
+    FShape:    TVertexShape;
+    FOldStyle: TVertexStyle;
+    FNewStyle: TVertexStyle;
+  public
+    constructor Create(AShape: TVertexShape; ANewStyle: TVertexStyle);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Add or remove a path reference from a shape. }
+  TVertexCmdSetShapePathRef = class(TVertexCommand)
+  private
+    FShape:  TVertexShape;
+    FPath:   TVertexPath;
+    FAdding: Boolean;
+  public
+    constructor Create(AShape: TVertexShape; APath: TVertexPath; AAdding: Boolean);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Change a shape's translation offset (HasTranslation + TranslateX/Y). }
+  TVertexCmdSetShapeTranslation = class(TVertexCommand)
+  private
+    FShape:  TVertexShape;
+    FOldHas: Boolean;
+    FOldX:   Single;
+    FOldY:   Single;
+    FNewHas: Boolean;
+    FNewX:   Single;
+    FNewY:   Single;
+  public
+    constructor Create(AShape: TVertexShape; ANewHas: Boolean; ANewX, ANewY: Single);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Change a shape's Level-of-Detail range. }
+  TVertexCmdSetShapeLOD = class(TVertexCommand)
+  private
+    FShape:  TVertexShape;
+    FOldLOD: TVertexLOD;
+    FNewLOD: TVertexLOD;
+  public
+    constructor Create(AShape: TVertexShape; const ANewLOD: TVertexLOD);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Toggle a shape's Visible flag. }
+  TVertexCmdSetShapeVisible = class(TVertexCommand)
+  private
+    FShape:  TVertexShape;
+    FOldVis: Boolean;
+    FNewVis: Boolean;
+  public
+    constructor Create(AShape: TVertexShape; ANewVisible: Boolean);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Replace a shape's transformer (type + all parameters) in one undo step. }
+  TVertexCmdSetTransformer = class(TVertexCommand)
+  private
+    FShape:          TVertexShape;
+    FOldTransformer: TVertexTransformer;
+    FNewTransformer: TVertexTransformer;
+  public
+    constructor Create(AShape: TVertexShape; const ANew: TVertexTransformer);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
 { ==================== TUndoStack ==================== }
 
 type
@@ -1344,6 +1464,272 @@ begin
   FPath.DeletePoint(FInsertIndex);
   FPath.Points[FPrevNodeIdx] := FPrevPtBefore;
   FPath.Points[FNextNodeIdx] := FNextPtBefore;
+end;
+
+
+{ TVertexCmdSetPathClosed }
+
+constructor TVertexCmdSetPathClosed.Create(APath: TVertexPath; ANewClosed: Boolean);
+begin
+  inherited Create;
+  FPath      := APath;
+  FOldClosed := APath.Closed;
+  FNewClosed := ANewClosed;
+  if ANewClosed then
+    Description := 'Close path'
+  else
+    Description := 'Open path';
+end;
+
+procedure TVertexCmdSetPathClosed.Execute;
+begin
+  FPath.Closed := FNewClosed;
+end;
+
+procedure TVertexCmdSetPathClosed.Undo;
+begin
+  FPath.Closed := FOldClosed;
+end;
+
+
+{ TVertexCmdReversePath }
+
+constructor TVertexCmdReversePath.Create(APath: TVertexPath);
+var
+  i: Integer;
+begin
+  inherited Create;
+  FPath := APath;
+  SetLength(FSavedPoints, APath.PointCount);
+  for i := 0 to APath.PointCount - 1 do
+    FSavedPoints[i] := APath.Points[i];
+  Description := 'Reverse path';
+end;
+
+procedure TVertexCmdReversePath.Execute;
+var
+  i, n: Integer;
+  tmp:  TVertexPoint;
+begin
+  n := Length(FSavedPoints);
+  for i := 0 to n - 1 do
+  begin
+    tmp      := FSavedPoints[i];
+    tmp.InX  := FSavedPoints[i].OutX;
+    tmp.InY  := FSavedPoints[i].OutY;
+    tmp.OutX := FSavedPoints[i].InX;
+    tmp.OutY := FSavedPoints[i].InY;
+    FPath.Points[n - 1 - i] := tmp;
+  end;
+end;
+
+procedure TVertexCmdReversePath.Undo;
+var
+  i: Integer;
+begin
+  for i := 0 to FPath.PointCount - 1 do
+    FPath.Points[i] := FSavedPoints[i];
+end;
+
+
+{ TVertexCmdRotatePathIndices }
+
+constructor TVertexCmdRotatePathIndices.Create(APath: TVertexPath; ASteps: Integer);
+begin
+  inherited Create;
+  FPath  := APath;
+  FSteps := ASteps;
+  if ASteps > 0 then
+    Description := 'Rotate indices forwards'
+  else
+    Description := 'Rotate indices backwards';
+end;
+
+procedure TVertexCmdRotatePathIndices.Execute;
+var
+  n, steps, i: Integer;
+  buf:          array of TVertexPoint;
+begin
+  n := FPath.PointCount;
+  if n < 2 then Exit;
+  steps := ((FSteps mod n) + n) mod n;
+  if steps = 0 then Exit;
+  SetLength(buf, n);
+  for i := 0 to n - 1 do
+    buf[i] := FPath.Points[(i + steps) mod n];
+  for i := 0 to n - 1 do
+    FPath.Points[i] := buf[i];
+end;
+
+procedure TVertexCmdRotatePathIndices.Undo;
+var
+  n, steps, i: Integer;
+  buf:          array of TVertexPoint;
+begin
+  n := FPath.PointCount;
+  if n < 2 then Exit;
+  steps := (((-FSteps) mod n) + n) mod n;
+  if steps = 0 then Exit;
+  SetLength(buf, n);
+  for i := 0 to n - 1 do
+    buf[i] := FPath.Points[(i + steps) mod n];
+  for i := 0 to n - 1 do
+    FPath.Points[i] := buf[i];
+end;
+
+
+{ TVertexCmdSetShapeStyle }
+
+constructor TVertexCmdSetShapeStyle.Create(AShape: TVertexShape; ANewStyle: TVertexStyle);
+begin
+  inherited Create;
+  FShape    := AShape;
+  FOldStyle := AShape.Style;
+  FNewStyle := ANewStyle;
+  Description := 'Set style';
+end;
+
+procedure TVertexCmdSetShapeStyle.Execute;
+begin
+  FShape.Style := FNewStyle;
+end;
+
+procedure TVertexCmdSetShapeStyle.Undo;
+begin
+  FShape.Style := FOldStyle;
+end;
+
+
+{ TVertexCmdSetShapePathRef }
+
+constructor TVertexCmdSetShapePathRef.Create(AShape: TVertexShape; APath: TVertexPath;
+    AAdding: Boolean);
+begin
+  inherited Create;
+  FShape  := AShape;
+  FPath   := APath;
+  FAdding := AAdding;
+  if AAdding then
+    Description := 'Add path to shape'
+  else
+    Description := 'Remove path from shape';
+end;
+
+procedure TVertexCmdSetShapePathRef.Execute;
+begin
+  if FAdding then
+    FShape.AddPathRef(FPath)
+  else
+    FShape.RemovePathRef(FPath);
+end;
+
+procedure TVertexCmdSetShapePathRef.Undo;
+begin
+  if FAdding then
+    FShape.RemovePathRef(FPath)
+  else
+    FShape.AddPathRef(FPath);
+end;
+
+
+{ TVertexCmdSetShapeTranslation }
+
+constructor TVertexCmdSetShapeTranslation.Create(AShape: TVertexShape;
+    ANewHas: Boolean; ANewX, ANewY: Single);
+begin
+  inherited Create;
+  FShape  := AShape;
+  FOldHas := AShape.HasTranslation;
+  FOldX   := AShape.TranslateX;
+  FOldY   := AShape.TranslateY;
+  FNewHas := ANewHas;
+  FNewX   := ANewX;
+  FNewY   := ANewY;
+  Description := 'Set translation';
+end;
+
+procedure TVertexCmdSetShapeTranslation.Execute;
+begin
+  FShape.HasTranslation := FNewHas;
+  FShape.TranslateX     := FNewX;
+  FShape.TranslateY     := FNewY;
+end;
+
+procedure TVertexCmdSetShapeTranslation.Undo;
+begin
+  FShape.HasTranslation := FOldHas;
+  FShape.TranslateX     := FOldX;
+  FShape.TranslateY     := FOldY;
+end;
+
+
+{ TVertexCmdSetShapeLOD }
+
+constructor TVertexCmdSetShapeLOD.Create(AShape: TVertexShape; const ANewLOD: TVertexLOD);
+begin
+  inherited Create;
+  FShape  := AShape;
+  FOldLOD := AShape.LOD;
+  FNewLOD := ANewLOD;
+  Description := 'Set LOD';
+end;
+
+procedure TVertexCmdSetShapeLOD.Execute;
+begin
+  FShape.LOD := FNewLOD;
+end;
+
+procedure TVertexCmdSetShapeLOD.Undo;
+begin
+  FShape.LOD := FOldLOD;
+end;
+
+
+{ TVertexCmdSetShapeVisible }
+
+constructor TVertexCmdSetShapeVisible.Create(AShape: TVertexShape; ANewVisible: Boolean);
+begin
+  inherited Create;
+  FShape  := AShape;
+  FOldVis := AShape.Visible;
+  FNewVis := ANewVisible;
+  if ANewVisible then
+    Description := 'Show shape'
+  else
+    Description := 'Hide shape';
+end;
+
+procedure TVertexCmdSetShapeVisible.Execute;
+begin
+  FShape.Visible := FNewVis;
+end;
+
+procedure TVertexCmdSetShapeVisible.Undo;
+begin
+  FShape.Visible := FOldVis;
+end;
+
+
+{ TVertexCmdSetTransformer }
+
+constructor TVertexCmdSetTransformer.Create(AShape: TVertexShape;
+    const ANew: TVertexTransformer);
+begin
+  inherited Create;
+  FShape          := AShape;
+  FOldTransformer := AShape.Transformer;
+  FNewTransformer := ANew;
+  Description := 'Set transformer';
+end;
+
+procedure TVertexCmdSetTransformer.Execute;
+begin
+  FShape.Transformer := FNewTransformer;
+end;
+
+procedure TVertexCmdSetTransformer.Undo;
+begin
+  FShape.Transformer := FOldTransformer;
 end;
 
 
