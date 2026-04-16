@@ -78,9 +78,10 @@ unit fpg_iom_document;
 interface
 
 uses
-  Classes, SysUtils, Contnrs,
+  Classes, SysUtils, Contnrs, Math,
   fpg_hvif_model,
-  fpg_hvif;
+  fpg_hvif,
+  fpg_hvif_writer;
 
 
 { ==================== Forward declarations ==================== }
@@ -144,6 +145,10 @@ type
 
     { Delete the point at AIndex; shifts higher indices down. }
     procedure DeletePoint(AIndex: Integer);
+
+    { Insert APt at AIndex, shifting higher indices up.
+      AIndex = PointCount is equivalent to AddPoint (append). }
+    procedure InsertPoint(AIndex: Integer; const APt: TIomPoint);
 
     { True when this is a straight-lines-only path (all control handles equal
       their anchor). Used to choose the HVIF NO_CURVES encoding on save. }
@@ -442,6 +447,45 @@ type
   end;
 
 
+  { Delete one path node at ANodeIndex. Stores the full TIomPoint for Undo.
+    Will not execute if deleting would leave fewer than 2 nodes. }
+  TIomCmdDeletePoint = class(TIomCommand)
+  private
+    FPath:       TIomPath;
+    FNodeIndex:  Integer;
+    FSavedPoint: TIomPoint;
+  public
+    constructor Create(APath: TIomPath; ANodeIndex: Integer);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Insert one path node produced by splitting a bezier segment via de Casteljau.
+    Stores the new node, the insert index, and the before/after snapshots of both
+    adjacent nodes (their control handles change as a result of the split). }
+  TIomCmdAddPoint = class(TIomCommand)
+  private
+    FPath:         TIomPath;
+    FInsertIndex:  Integer;   { index at which the new node is inserted }
+    FPrevNodeIdx:  Integer;   { index of the preceding node }
+    FNextNodeIdx:  Integer;   { index of the following node (before insert) }
+    FNewPoint:     TIomPoint;
+    FPrevPtBefore: TIomPoint; { preceding node before split }
+    FPrevPtAfter:  TIomPoint; { preceding node after split (OutHandle updated) }
+    FNextPtBefore: TIomPoint; { following node before split }
+    FNextPtAfter:  TIomPoint; { following node after split (InHandle updated) }
+  public
+    constructor Create(APath: TIomPath;
+                       AInsertIndex, APrevNodeIdx, ANextNodeIdx: Integer;
+                       const ANewPoint: TIomPoint;
+                       const APrevPtBefore, APrevPtAfter: TIomPoint;
+                       const ANextPtBefore, ANextPtAfter: TIomPoint);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
   { Rename any named document object. Works for TIomPath, TIomStyle, TIomShape
     by passing the object's Name field as a PString. }
   TIomCmdRename = class(TIomCommand)
@@ -465,11 +509,13 @@ type
 type
   TUndoStack = class
   private
-    FStack:    TObjectList;   { owns TIomCommand instances }
-    FCursor:   Integer;       { index of next undo position; -1 = nothing to undo }
+    FStack:     TObjectList;   { owns TIomCommand instances }
+    FCursor:    Integer;       { index of next undo position; -1 = nothing to undo }
     FMaxLevels: Integer;
+    FOnChange:  TNotifyEvent;  { fired after every Execute, Undo, Redo }
 
     procedure TrimToMaxLevels;
+    procedure NotifyChange;
 
   public
     constructor Create;
@@ -484,6 +530,9 @@ type
 
     { Re-apply one command forward. No-op if CanRedo is False. }
     procedure Redo;
+
+    { Fired after every Execute, Undo or Redo. Connect to TIomDocument or the UI. }
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
 
     function CanUndo: Boolean;
     function CanRedo: Boolean;
@@ -519,8 +568,8 @@ type
     function  GetStyle(AIndex: Integer): TIomStyle;
     function  GetShape(AIndex: Integer): TIomShape;
 
-    { Called by TUndoStack after every Execute/Undo/Redo. }
     procedure NotifyChange(ACmd: TIomCommand);
+    procedure HandleUndoChange(Sender: TObject);
 
     { Generate a unique name within the document with the given prefix.
       E.g. UniqueName('path') → 'path_0', 'path_1', etc. }
@@ -592,15 +641,16 @@ type
     { Reset Dirty and clear the undo stack (call after save). }
     procedure MarkClean;
 
+    { Fire OnChange without creating an undo entry — use for live-preview
+      mutations that are committed to the undo stack on gesture completion. }
+    procedure NotifyChanged;
+
     { --- Change notification --- }
     property OnChange: TIomChangeEvent read FOnChange write FOnChange;
   end;
 
 
 implementation
-
-uses
-  fpg_hvif_writer;
 
 
 { ==================== TIomCommand ==================== }
@@ -650,6 +700,17 @@ begin
   for i := AIndex to Length(FPoints) - 2 do
     FPoints[i] := FPoints[i + 1];
   SetLength(FPoints, Length(FPoints) - 1);
+end;
+
+procedure TIomPath.InsertPoint(AIndex: Integer; const APt: TIomPoint);
+var
+  i, n: Integer;
+begin
+  n := Length(FPoints);
+  SetLength(FPoints, n + 1);
+  for i := n downto AIndex + 1 do
+    FPoints[i] := FPoints[i - 1];
+  FPoints[AIndex] := APt;
 end;
 
 function TIomPath.IsLinearOnly: Boolean;
@@ -1124,6 +1185,68 @@ begin
 end;
 
 
+{ TIomCmdDeletePoint }
+
+constructor TIomCmdDeletePoint.Create(APath: TIomPath; ANodeIndex: Integer);
+begin
+  inherited Create;
+  FPath       := APath;
+  FNodeIndex  := ANodeIndex;
+  FSavedPoint := APath.Points[ANodeIndex];
+  Description := 'Delete node';
+end;
+
+procedure TIomCmdDeletePoint.Execute;
+begin
+  FPath.DeletePoint(FNodeIndex);
+end;
+
+procedure TIomCmdDeletePoint.Undo;
+begin
+  FPath.InsertPoint(FNodeIndex, FSavedPoint);
+end;
+
+
+{ TIomCmdAddPoint }
+
+constructor TIomCmdAddPoint.Create(APath: TIomPath;
+    AInsertIndex, APrevNodeIdx, ANextNodeIdx: Integer;
+    const ANewPoint: TIomPoint;
+    const APrevPtBefore, APrevPtAfter: TIomPoint;
+    const ANextPtBefore, ANextPtAfter: TIomPoint);
+begin
+  inherited Create;
+  FPath         := APath;
+  FInsertIndex  := AInsertIndex;
+  FPrevNodeIdx  := APrevNodeIdx;
+  FNextNodeIdx  := ANextNodeIdx;
+  FNewPoint     := ANewPoint;
+  FPrevPtBefore := APrevPtBefore;
+  FPrevPtAfter  := APrevPtAfter;
+  FNextPtBefore := ANextPtBefore;
+  FNextPtAfter  := ANextPtAfter;
+  Description   := 'Add node';
+end;
+
+procedure TIomCmdAddPoint.Execute;
+begin
+  { Update adjacent handles first, then insert the new node.
+    The insert shifts FNextNodeIdx up by one, but we update it before that. }
+  FPath.Points[FPrevNodeIdx] := FPrevPtAfter;
+  FPath.Points[FNextNodeIdx] := FNextPtAfter;
+  FPath.InsertPoint(FInsertIndex, FNewPoint);
+end;
+
+procedure TIomCmdAddPoint.Undo;
+begin
+  { Delete the new node first (restores FNextNodeIdx to its original index),
+    then restore both adjacent node snapshots. }
+  FPath.DeletePoint(FInsertIndex);
+  FPath.Points[FPrevNodeIdx] := FPrevPtBefore;
+  FPath.Points[FNextNodeIdx] := FNextPtBefore;
+end;
+
+
 { ==================== TUndoStack ==================== }
 
 constructor TUndoStack.Create;
@@ -1138,6 +1261,12 @@ destructor TUndoStack.Destroy;
 begin
   FStack.Free;
   inherited;
+end;
+
+procedure TUndoStack.NotifyChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
 end;
 
 procedure TUndoStack.TrimToMaxLevels;
@@ -1163,6 +1292,7 @@ begin
   FStack.Add(ACmd);
   FCursor := FStack.Count - 1;
   TrimToMaxLevels;
+  NotifyChange;
 end;
 
 procedure TUndoStack.Undo;
@@ -1171,6 +1301,7 @@ begin
     Exit;
   TIomCommand(FStack[FCursor]).Undo;
   Dec(FCursor);
+  NotifyChange;
 end;
 
 procedure TUndoStack.Redo;
@@ -1179,6 +1310,7 @@ begin
     Exit;
   Inc(FCursor);
   TIomCommand(FStack[FCursor]).Redo;
+  NotifyChange;
 end;
 
 function TUndoStack.CanUndo: Boolean;
@@ -1223,6 +1355,7 @@ begin
   FStyles    := TObjectList.Create(True);  { owns TIomStyle }
   FShapes    := TObjectList.Create(True);  { owns TIomShape }
   FUndoStack := TUndoStack.Create;
+  FUndoStack.OnChange := @HandleUndoChange;
   FDirty     := False;
   FOnChange  := nil;
 end;
@@ -1249,6 +1382,16 @@ begin
   FDirty := True;
   if Assigned(FOnChange) then
     FOnChange(Self, ACmd);
+end;
+
+procedure TIomDocument.NotifyChanged;
+begin
+  NotifyChange(nil);
+end;
+
+procedure TIomDocument.HandleUndoChange(Sender: TObject);
+begin
+  NotifyChange(nil);
 end;
 
 function TIomDocument.UniqueName(const APrefix: string): string;
@@ -1351,6 +1494,7 @@ var
   path:   TIomPath;
   shape:  TIomShape;
   pIdx:   Byte;
+  xf:     TIomTransformer;
 begin
   FUndoStack.Clear;
   FPaths.Clear;
@@ -1391,12 +1535,13 @@ begin
     shape.TranslateY     := AShapes[i].TranslateY;
     if AShapes[i].HasStroke then
     begin
-      shape.Transformer := Default(TIomTransformer);
-      shape.Transformer.TransType  := ittStroke;
-      shape.Transformer.Width      := AShapes[i].StrokeWidth;
-      shape.Transformer.LineCap    := AShapes[i].StrokeLineCap;
-      shape.Transformer.LineJoin   := AShapes[i].StrokeLineJoin;
-      shape.Transformer.MiterLimit := AShapes[i].StrokeMiterLimit;
+      xf := Default(TIomTransformer);
+      xf.TransType  := ittStroke;
+      xf.Width      := AShapes[i].StrokeWidth;
+      xf.LineCap    := AShapes[i].StrokeLineCap;
+      xf.LineJoin   := AShapes[i].StrokeLineJoin;
+      xf.MiterLimit := AShapes[i].StrokeMiterLimit;
+      shape.Transformer := xf;
     end;
     FShapes.Add(shape);
   end;
@@ -1446,29 +1591,29 @@ end;
 
 procedure TIomDocument.LoadFromStream(AStream: TStream);
 var
-  icon:   THvifIcon;
-  styles: array of THvifStyle;
-  paths:  array of THvifPath;
-  shapes: array of THvifShape;
-  i:      Integer;
+  icon:      THvifIcon;
+  rawStyles: array of THvifStyle;
+  rawPaths:  array of THvifPath;
+  rawShapes: array of THvifShape;
+  i:         Integer;
 begin
   icon := THvifIcon.CreateFromStream(AStream);
   try
-    SetLength(styles, icon.StyleCount);
+    SetLength(rawStyles, icon.StyleCount);
     for i := 0 to icon.StyleCount - 1 do
-      styles[i] := icon.Styles[i];
+      rawStyles[i] := icon.Styles[i];
 
-    SetLength(paths, icon.PathCount);
+    SetLength(rawPaths, icon.PathCount);
     for i := 0 to icon.PathCount - 1 do
-      paths[i] := icon.Paths[i];
+      rawPaths[i] := icon.Paths[i];
 
-    SetLength(shapes, icon.ShapeCount);
+    SetLength(rawShapes, icon.ShapeCount);
     for i := 0 to icon.ShapeCount - 1 do
-      shapes[i] := icon.Shapes[i];
+      rawShapes[i] := icon.Shapes[i];
   finally
     icon.Free;
   end;
-  FromHvifArrays(styles, paths, shapes);
+  FromHvifArrays(rawStyles, rawPaths, rawShapes);
 end;
 
 procedure TIomDocument.SaveToStream(AStream: TStream);
