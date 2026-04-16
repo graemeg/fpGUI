@@ -35,6 +35,7 @@ uses
   fpg_vertex_document,
   vertex.wgt.canvas,
   vertex.wgt.stylepanel,
+  vertex.wgt.pathpanel,
   vertex.wgt.previewbar;
 
 
@@ -58,11 +59,13 @@ type
     FBtnShapeUp:    TfpgButton;
     FBtnShapeDown:  TfpgButton;
     FStylePanel:    TVertexStylePanel;
+    FPathPanel:     TVertexPathPanel;
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
     FCurrentFile: string;             { '' when unsaved/untitled }
     FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
+    FPathsNode:   TfpgTreeNode;    { weak ref into the paths subtree }
 
     { Setup helpers }
     procedure SetupMenus;
@@ -118,6 +121,7 @@ begin
   FDocument.OnChange := nil;    { clear before widgets are torn down }
   FPreviewBar.SetDocument(nil);
   FStylePanel.SetDocument(nil);
+  FPathPanel.SetDocument(nil);
   FVertexCanvas.SetDocument(nil);
   FDocument.Free;
   inherited Destroy;
@@ -134,6 +138,7 @@ begin
   FDocument.OnChange := @HandleDocumentChange;
   FVertexCanvas.SetDocument(FDocument);
   FStylePanel.SetDocument(FDocument);
+  FPathPanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
 end;
 
@@ -259,6 +264,10 @@ begin
   FStylePanel.Name := 'stylePanel';
   rmig.AddLayoutComponent(FStylePanel, TfpgMigCC.Create().GrowX());
 
+  FPathPanel := TVertexPathPanel.Create(FRightPanel);
+  FPathPanel.Name := 'pathPanel';
+  rmig.AddLayoutComponent(FPathPanel, TfpgMigCC.Create().GrowX());
+
   mig.AddLayoutComponent(FRightPanel, TfpgMigCC.Create().DockEast);
 end;
 
@@ -270,6 +279,7 @@ procedure TVertexMainForm.HandleDocumentChange(Sender: TVertexDocument;
 begin
   FVertexCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
+  FPathPanel.DocumentChanged;
   FPreviewBar.DocumentChanged;
   UpdateTitle;
 end;
@@ -280,6 +290,7 @@ end;
 procedure TVertexMainForm.ClearObjectTree;
 begin
   FShapesNode := nil;
+  FPathsNode  := nil;
   FObjectTree.BeginUpdate;
   FObjectTree.RootNode.Clear;
   FObjectTree.EndUpdate;
@@ -302,6 +313,7 @@ begin
   try
     FObjectTree.RootNode.Clear;
     FShapesNode := nil;
+    FPathsNode  := nil;
 
     { ── Styles ── }
     nStyles := FObjectTree.RootNode.AppendText(
@@ -329,15 +341,17 @@ begin
     nPaths := FObjectTree.RootNode.AppendText(
         Format('Paths (%d)', [FDocument.PathCount]));
     nPaths.Expand;
+    FPathsNode := nPaths;
 
     for i := 0 to FDocument.PathCount - 1 do
     begin
       ph := FDocument.Paths[i];
       if ph.Closed then
-        s := Format('Path %d  %d pts  closed', [i, ph.PointCount])
+        s := Format('%s  %d pts  closed', [ph.Name, ph.PointCount])
       else
-        s := Format('Path %d  %d pts  open',   [i, ph.PointCount]);
-      nPaths.AppendText(s);
+        s := Format('%s  %d pts  open',   [ph.Name, ph.PointCount]);
+      n := nPaths.AppendText(s);
+      n.Data := Pointer(PtrUInt(i));
     end;
 
     { ── Shapes ── }
@@ -457,6 +471,7 @@ begin
 
   FVertexCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
   PopulateObjectTree;
   if newSel >= 0 then
     SelectShapeInTree(newSel);
@@ -508,14 +523,39 @@ end;
 procedure TVertexMainForm.ObjectTreeChanged(Sender: TObject);
 var
   node: TfpgTreeNode;
-  idx: Integer;
+  idx:  Integer;
 begin
   node := FObjectTree.Selection;
-  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
+  if node = nil then
     Exit;
-  idx := Integer(PtrUInt(node.Data));
-  FVertexCanvas.SelectedShapeIndex := idx;
-  FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
+
+  { Path selected }
+  if (FPathsNode <> nil) and (node.Parent = FPathsNode) then
+  begin
+    idx := Integer(PtrUInt(node.Data));
+    FPathPanel.SetPath(FDocument.Paths[idx]);
+    { Clear shape-related selections }
+    FVertexCanvas.SelectedShapeIndex := -1;
+    FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
+    Exit;
+  end;
+
+  { Shape selected }
+  if (FShapesNode <> nil) and (node.Parent = FShapesNode) then
+  begin
+    idx := Integer(PtrUInt(node.Data));
+    FVertexCanvas.SelectedShapeIndex := idx;
+    FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
+    FPathPanel.SetPath(nil);
+    Exit;
+  end;
+
+  { Any other node (header, style) — clear all selections }
+  FVertexCanvas.SelectedShapeIndex := -1;
+  FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
+  FPathPanel.SetPath(nil);
 end;
 
 
@@ -545,6 +585,7 @@ begin
   FPreviewBar.DocumentChanged;
   FVertexCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
   PopulateObjectTree;
   UpdateTitle;
 end;
@@ -619,6 +660,7 @@ begin
     { Tree structure may have changed (e.g. undo of AddShape) — repopulate. }
     FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
     PopulateObjectTree;
   end;
 end;
@@ -630,6 +672,7 @@ begin
     FDocument.UndoStack.Redo;
     FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
+  FPathPanel.SetPath(nil);
     PopulateObjectTree;
   end;
 end;

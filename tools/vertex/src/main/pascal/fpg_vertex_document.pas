@@ -158,6 +158,9 @@ type
     function  ToHvifPath: THvifPath;
     procedure FromHvifPath(const ASrc: THvifPath);
 
+    { Returns a pointer to the internal FName field for use with TVertexCmdRename. }
+    function NamePtr: PString;
+
     property Name:   string  read FName   write FName;
     property Closed: Boolean read FClosed write FClosed;
   end;
@@ -203,6 +206,8 @@ type
     { Convert to/from the HVIF record type for serialisation. }
     function  ToHvifStyle: THvifStyle;
     procedure FromHvifStyle(const ASrc: THvifStyle);
+
+    function NamePtr: PString;
 
     property Name:          string           read FName         write FName;
     property StyleType:     THvifStyleType   read FStyleType    write FStyleType;
@@ -290,6 +295,8 @@ type
       since TVertexShape holds object references, not numeric indices. }
     function ToHvifShape(AStyleIndex: Byte;
                          const APathIndices: array of Byte): THvifShape;
+
+    function NamePtr: PString;
 
     property Name:           string           read FName            write FName;
     property Style:          TVertexStyle        read FStyle           write FStyle;
@@ -868,6 +875,11 @@ begin
   FPoints[AIndex] := APt;
 end;
 
+function TVertexPath.NamePtr: PString;
+begin
+  Result := @FName;
+end;
+
 function TVertexPath.IsLinearOnly: Boolean;
 var
   i: Integer;
@@ -966,6 +978,11 @@ begin
   SetLength(FStops, Length(FStops) - 1);
 end;
 
+function TVertexStyle.NamePtr: PString;
+begin
+  Result := @FName;
+end;
+
 function TVertexStyle.IsGradient: Boolean;
 begin
   Result := FStyleType = hstGradient;
@@ -1048,6 +1065,11 @@ destructor TVertexShape.Destroy;
 begin
   FPaths.Free;   { does not free the path objects — they are owned by TVertexDocument }
   inherited;
+end;
+
+function TVertexShape.NamePtr: PString;
+begin
+  Result := @FName;
 end;
 
 function TVertexShape.GetPathCount: Integer;
