@@ -47,7 +47,7 @@ type
     FMnuHelp:     TfpgPopupMenu;
     FToolBox:       TfpgBevel;
     FToolLabel:     TfpgLabel;
-    FCanvas:     TVertexCanvasWidget;
+    FVertexCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
     FPreviewBar:    TVertexPreviewBar;
     FObjectTree:    TfpgTreeView;
@@ -108,7 +108,7 @@ begin
   FDocument.OnChange := nil;    { clear before widgets are torn down }
   FPreviewBar.SetDocument(nil);
   FStylePanel.SetDocument(nil);
-  FCanvas.SetDocument(nil);
+  FVertexCanvas.SetDocument(nil);
   FDocument.Free;
   inherited Destroy;
 end;
@@ -122,7 +122,7 @@ begin
   SetupMenus;
   SetupLayout;
   FDocument.OnChange := @HandleDocumentChange;
-  FCanvas.SetDocument(FDocument);
+  FVertexCanvas.SetDocument(FDocument);
   FStylePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
 end;
@@ -187,10 +187,10 @@ begin
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
   { Canvas — centre, takes all remaining space }
-  FCanvas := TVertexCanvasWidget.Create(Self);
-  FCanvas.Name := 'vertexCanvas';
-  FCanvas.PreferredSize := fpgSize(512, 512);
-  mig.AddLayoutComponent(FCanvas, TfpgMigCC.Create().GrowX().GrowY());
+  FVertexCanvas := TVertexCanvasWidget.Create(Self);
+  FVertexCanvas.Name := 'vertexCanvas';
+  FVertexCanvas.PreferredSize := fpgSize(512, 512);
+  mig.AddLayoutComponent(FVertexCanvas, TfpgMigCC.Create().GrowX().GrowY());
 
   { Right panel — contains object tree (top, grows) + style panel (bottom, fixed) }
   FRightPanel := TfpgBevel.Create(Self);
@@ -253,7 +253,7 @@ end;
 procedure TVertexMainForm.HandleDocumentChange(Sender: TVertexDocument;
     ACmd: TVertexCommand);
 begin
-  FCanvas.DocumentChanged;
+  FVertexCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
   FPreviewBar.DocumentChanged;
 end;
@@ -439,7 +439,7 @@ begin
   cmd := TVertexCmdDeleteShape.Create(FDocument, shape);
   FDocument.UndoStack.Execute(cmd);
 
-  FCanvas.SelectedShapeIndex := -1;
+  FVertexCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
   if newSel >= 0 then
@@ -498,7 +498,7 @@ begin
   if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
     Exit;
   idx := Integer(PtrUInt(node.Data));
-  FCanvas.SelectedShapeIndex := idx;
+  FVertexCanvas.SelectedShapeIndex := idx;
   FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
 end;
 
@@ -524,9 +524,9 @@ begin
   end;
 
   { Notify canvas and preview bar of the load; clear style panel selection }
-  FCanvas.DocumentChanged;
+  FVertexCanvas.DocumentChanged;
   FPreviewBar.DocumentChanged;
-  FCanvas.SelectedShapeIndex := -1;
+  FVertexCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
   WindowTitle := 'Vertex — ' + ExtractFileName(fn);
@@ -543,7 +543,7 @@ begin
   begin
     FDocument.UndoStack.Undo;
     { Tree structure may have changed (e.g. undo of AddShape) — repopulate. }
-    FCanvas.SelectedShapeIndex := -1;
+    FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     PopulateObjectTree;
   end;
@@ -554,7 +554,7 @@ begin
   if FDocument.UndoStack.CanRedo then
   begin
     FDocument.UndoStack.Redo;
-    FCanvas.SelectedShapeIndex := -1;
+    FVertexCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     PopulateObjectTree;
   end;
