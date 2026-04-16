@@ -57,6 +57,7 @@ type
     FToolLabel:     TfpgLabel;
     FBtnToolSelect: TfpgButton;   { Select / move shapes tool }
     FBtnToolNode:   TfpgButton;   { Node edit tool (default) }
+    FBtnToolPan:    TfpgButton;   { Pan viewport tool }
     FVertexCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
     FPreviewBar:    TVertexPreviewBar;
@@ -437,6 +438,13 @@ begin
   FBtnToolNode.SetPosition(2, 52, 60, 26);
   FBtnToolNode.OnClick := @ToolBtnClick;
   FBtnToolNode.FontDesc := '#Label1';
+
+  FBtnToolPan := TfpgButton.Create(FToolBox);
+  FBtnToolPan.Text    := 'Pan';
+  FBtnToolPan.Tag     := 2;   { tmPan }
+  FBtnToolPan.SetPosition(2, 80, 60, 26);
+  FBtnToolPan.OnClick := @ToolBtnClick;
+  FBtnToolPan.FontDesc := '#Label1';
 
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
@@ -1138,6 +1146,7 @@ begin
   case TfpgButton(Sender).Tag of
     0: mode := tmSelect;
     1: mode := tmNode;
+    2: mode := tmPan;
   else
     mode := tmNode;
   end;
@@ -1145,6 +1154,7 @@ begin
   { Visual feedback: bold the active tool button }
   FBtnToolSelect.FontDesc := '#Label1';
   FBtnToolNode.FontDesc   := '#Label1';
+  FBtnToolPan.FontDesc    := '#Label1';
   TfpgButton(Sender).FontDesc := '#Label1:bold';
 end;
 

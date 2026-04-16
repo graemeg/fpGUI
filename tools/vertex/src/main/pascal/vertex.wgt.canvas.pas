@@ -55,7 +55,8 @@ type
   { Active editing tool }
   TVertexToolMode = (
     tmSelect,    { click/drag to select and translate shapes }
-    tmNode       { drag path nodes and Bezier handles — default mode }
+    tmNode,      { drag path nodes and Bezier handles — default mode }
+    tmPan        { drag to pan the viewport }
   );
 
   TVertexCanvasWidget = class(TfpgWidget)
@@ -84,6 +85,14 @@ type
 
     { Tool mode }
     FToolMode: TVertexToolMode;
+
+    { Pan offset (pixels) — applied on top of centred geometry when zoomed }
+    FPanX, FPanY: Integer;
+
+    { Pan-tool drag state }
+    FPanDragActive: Boolean;
+    FPanDragStartX, FPanDragStartY: Integer;
+    FPanDragOX, FPanDragOY: Integer;
 
     { Select-mode drag state }
     FSelectDragActive: Boolean;
@@ -146,6 +155,8 @@ type
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
                              var consumed: boolean); override;
     procedure HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+                                delta: smallint); override;
 
   public
     constructor Create(AOwner: TComponent); override;
@@ -260,6 +271,9 @@ begin
   FToolMode         := tmNode;
   FSelectDragActive := False;
   FSelectDragShapeIdx := -1;
+  FPanX             := 0;
+  FPanY             := 0;
+  FPanDragActive    := False;
 end;
 
 destructor TVertexCanvasWidget.Destroy;
@@ -304,6 +318,11 @@ begin
   if FZoom = AValue then
     Exit;
   FZoom := AValue;
+  if FZoom < 0 then
+  begin
+    FPanX := 0;
+    FPanY := 0;
+  end;
   UpdateIconGeometry;
   FIconDirty := True;
   Repaint;
@@ -378,8 +397,8 @@ begin
     sz := (256 * FZoom) div 100;
   end;
   FIconSZ := sz;
-  FIconOX := (Width  - FIconSZ) div 2;
-  FIconOY := (Height - FIconSZ) div 2;
+  FIconOX := (Width  - FIconSZ) div 2 + FPanX;
+  FIconOY := (Height - FIconSZ) div 2 + FPanY;
   FScale  := FIconSZ / 64.0;
 end;
 
@@ -728,6 +747,40 @@ begin
 end;
 
 
+procedure TVertexCanvasWidget.HandleMouseScroll(x, y: integer;
+    shiftstate: TShiftState; delta: smallint);
+const
+  kZoomLevels: array[0..4] of Integer = (-1, 50, 100, 200, 400);
+var
+  curIdx, newIdx: Integer;
+  i: Integer;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  { Ctrl+scroll = zoom; plain scroll = pan vertically }
+  if ssCtrl in shiftstate then
+  begin
+    { Find current zoom level in the table }
+    curIdx := 0;
+    for i := 0 to High(kZoomLevels) do
+      if kZoomLevels[i] = FZoom then begin curIdx := i; Break; end;
+    if delta > 0 then
+      newIdx := Min(curIdx + 1, High(kZoomLevels))
+    else
+      newIdx := Max(curIdx - 1, 0);
+    if newIdx <> curIdx then
+      SetZoom(kZoomLevels[newIdx]);
+  end
+  else
+  begin
+    { Plain scroll — pan the viewport }
+    if delta > 0 then
+      Inc(FPanY, 16)
+    else
+      Dec(FPanY, 16);
+    Repaint;
+  end;
+end;
+
 function TVertexCanvasWidget.HitTestShapeBBox(AX, AY: Integer): Integer;
 var
   i, j, k:    Integer;
@@ -806,6 +859,17 @@ var
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
+
+  { ── Pan-tool mode ───────────────────────────────────────────────────────── }
+  if FToolMode = tmPan then
+  begin
+    FPanDragActive  := True;
+    FPanDragStartX  := x;
+    FPanDragStartY  := y;
+    FPanDragOX      := FPanX;
+    FPanDragOY      := FPanY;
+    Exit;
+  end;
 
   { ── Select-tool mode: click to select / drag to translate shape ─────────── }
   if FToolMode = tmSelect then
@@ -925,6 +989,13 @@ var
   newX, newY: Single;
   newHas:   Boolean;
 begin
+  { ── Pan-tool mode: commit pan ────────────────────────────────────────── }
+  if FToolMode = tmPan then
+  begin
+    FPanDragActive := False;
+    Exit;
+  end;
+
   { ── Select-tool mode: commit drag translation ─────────────────────────── }
   if FToolMode = tmSelect then
   begin
@@ -996,6 +1067,18 @@ begin
   { Always fire cursor-move so the status bar can show the HVIF coordinates }
   if Assigned(FOnCursorMove) then
     FOnCursorMove(Self, ScreenToHvifX(x), ScreenToHvifY(y));
+
+  { ── Pan-tool mode: live pan ──────────────────────────────────────────── }
+  if FToolMode = tmPan then
+  begin
+    if FPanDragActive then
+    begin
+      FPanX := FPanDragOX + (x - FPanDragStartX);
+      FPanY := FPanDragOY + (y - FPanDragStartY);
+      Repaint;
+    end;
+    Exit;
+  end;
 
   { ── Select-tool mode: live-preview shape drag ────────────────────────── }
   if FToolMode = tmSelect then
