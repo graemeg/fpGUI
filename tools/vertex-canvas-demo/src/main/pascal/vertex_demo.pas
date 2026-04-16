@@ -1,7 +1,7 @@
-program iom_demo;
+program vertex_demo;
 
 {
-  AggPas Canvas Prototype — fpGUI Icon-O-Matic risk-reducer.
+  AggPas Canvas Prototype — fpGUI Vertex risk-reducer.
 
   Proves:
     1. A HVIF path renders correctly on an fpGUI canvas via THvifIcon.GetImage.
@@ -126,13 +126,13 @@ begin
 end;
 
 
-{ ── TIomDemoCanvas ───────────────────────────────────────────────────────── }
+{ ── TVertexDemoCanvas ───────────────────────────────────────────────────────── }
 
 type
   { Drag target: which part of which point is being dragged }
   TDragTarget = (dtNone, dtAnchor, dtInHandle, dtOutHandle);
 
-  TIomDemoCanvas = class(TfpgWidget)
+  TVertexDemoCanvas = class(TfpgWidget)
   private
     FPath:    THvifPath;    { editable path in HVIF coords }
     FStyle:   THvifStyle;
@@ -173,7 +173,7 @@ type
   end;
 
 
-constructor TIomDemoCanvas.Create(AOwner: TComponent);
+constructor TVertexDemoCanvas.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FSelectedNode       := -1;
@@ -188,14 +188,14 @@ begin
   RebuildIcon;
 end;
 
-destructor TIomDemoCanvas.Destroy;
+destructor TVertexDemoCanvas.Destroy;
 begin
   FIcon.Free;
   inherited Destroy;
 end;
 
 { Rebuild the HVIF writer → byte stream → THvifIcon }
-procedure TIomDemoCanvas.RebuildIcon;
+procedure TVertexDemoCanvas.RebuildIcon;
 var
   writer: THvifWriter;
   ms: TMemoryStream;
@@ -220,7 +220,7 @@ begin
 end;
 
 { Draw a checkerboard background to make alpha visible }
-procedure TIomDemoCanvas.DrawCheckerboard;
+procedure TVertexDemoCanvas.DrawCheckerboard;
 const
   CELL = 8;
 var
@@ -246,7 +246,7 @@ begin
 end;
 
 { Blit the rendered HVIF image onto the canvas }
-procedure TIomDemoCanvas.DrawHvifImage;
+procedure TVertexDemoCanvas.DrawHvifImage;
 var
   img: TfpgImage;
 begin
@@ -258,7 +258,7 @@ begin
 end;
 
 { Draw a filled circle with a border; orange border when selected }
-procedure TIomDemoCanvas.DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
+procedure TVertexDemoCanvas.DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
                                          AFill, ABorder: TfpgColor;
                                          ASelected: Boolean);
 var
@@ -279,7 +279,7 @@ begin
 end;
 
 { Draw the control-point overlay: anchor nodes, handle circles, arm lines }
-procedure TIomDemoCanvas.DrawControlOverlay;
+procedure TVertexDemoCanvas.DrawControlOverlay;
 var
   i, ax, ay, ihx, ihy, ohx, ohy: Integer;
   pt: THvifPoint;
@@ -314,7 +314,7 @@ begin
   end;
 end;
 
-procedure TIomDemoCanvas.HandlePaint;
+procedure TVertexDemoCanvas.HandlePaint;
 var
   err_s: string;
 begin
@@ -348,7 +348,7 @@ begin
 end;
 
 { Hit-test anchor nodes; returns True and sets ANodeIdx if within HIT_RADIUS }
-function TIomDemoCanvas.HitTestAnchor(AX, AY: Integer;
+function TVertexDemoCanvas.HitTestAnchor(AX, AY: Integer;
                                        out ANodeIdx: Integer): Boolean;
 var
   i, sx, sy, dx, dy: Integer;
@@ -371,7 +371,7 @@ begin
 end;
 
 { Hit-test bezier handles; returns True and sets ANodeIdx + ATarget }
-function TIomDemoCanvas.HitTestHandle(AX, AY: Integer;
+function TVertexDemoCanvas.HitTestHandle(AX, AY: Integer;
                                        out ANodeIdx: Integer;
                                        out ATarget: TDragTarget): Boolean;
 var
@@ -405,7 +405,7 @@ begin
   end;
 end;
 
-procedure TIomDemoCanvas.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TVertexDemoCanvas.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   ni: Integer;
   tgt: TDragTarget;
@@ -443,7 +443,7 @@ begin
   end;
 end;
 
-procedure TIomDemoCanvas.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TVertexDemoCanvas.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   hx, hy: Single;
   bx, by: Integer;
@@ -481,7 +481,7 @@ begin
   Repaint;
 end;
 
-procedure TIomDemoCanvas.HandleMouseMove(x, y: integer; btnstate: word;
+procedure TVertexDemoCanvas.HandleMouseMove(x, y: integer; btnstate: word;
                                           shiftstate: TShiftState);
 var
   ni: Integer;
@@ -535,19 +535,19 @@ end;
 type
   TMainForm = class(TfpgForm)
   private
-    FDemoCanvas: TIomDemoCanvas;
+    FDemoCanvas: TVertexDemoCanvas;
   public
     procedure AfterCreate; override;
   end;
 
 procedure TMainForm.AfterCreate;
 begin
-  WindowTitle := 'fpGUI Icon-O-Matic — Canvas Prototype';
+  WindowTitle := 'Vertex — Canvas Prototype';
   SetPosition(100, 100,
               CANVAS_OX + PREVIEW_SIZE + CANVAS_OX,
               CANVAS_OY + PREVIEW_SIZE + 48 + CANVAS_OY);
 
-  FDemoCanvas := TIomDemoCanvas.Create(Self);
+  FDemoCanvas := TVertexDemoCanvas.Create(Self);
   FDemoCanvas.SetPosition(0, 0, Width, Height);
 end;
 

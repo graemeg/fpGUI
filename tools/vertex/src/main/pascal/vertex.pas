@@ -1,7 +1,7 @@
-program iom;
+program vertex;
 
 {
-  fpGUI Icon-O-Matic — HVIF icon editor.
+  Vertex — fpGUI HVIF icon editor.
 
   Main entry point. Initialises the fpGUI application and opens the
   main editor window.
@@ -12,17 +12,17 @@ program iom;
 uses
   fpg_base,
   fpg_main,
-  iom.frm.main;
+  vertex.frm.main;
 
 
 { ── Entry point ──────────────────────────────────────────────────────────── }
 
 procedure MainProc;
 var
-  frm: TIomMainForm;
+  frm: TVertexMainForm;
 begin
   fpgApplication.Initialize;
-  frm := TIomMainForm.Create(nil);
+  frm := TVertexMainForm.Create(nil);
   try
     frm.Show;
     fpgApplication.Run;

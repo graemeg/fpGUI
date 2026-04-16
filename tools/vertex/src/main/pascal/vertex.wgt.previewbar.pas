@@ -1,7 +1,7 @@
-unit iom.wgt.previewbar;
+unit vertex.wgt.previewbar;
 
 {
-  TIomPreviewBar — renders the HVIF icon simultaneously at 16, 32, 48 and 64 px.
+  TVertexPreviewBar — renders the HVIF icon simultaneously at 16, 32, 48 and 64 px.
 
   Sits at the top of the right panel.  Rebuilds the icon from the document
   whenever DocumentChanged is called (same trigger as the main canvas).
@@ -26,13 +26,13 @@ uses
   fpg_base, fpg_main, fpg_widget,
   fpg_checkbox,
   fpg_hvif, fpg_hvif_writer,
-  fpg_iom_document;
+  fpg_vertex_document;
 
 
 type
-  TIomPreviewBar = class(TfpgWidget)
+  TVertexPreviewBar = class(TfpgWidget)
   private
-    FDocument:   TIomDocument;   { not owned }
+    FDocument:   TVertexDocument;   { not owned }
     FIcon:       THvifIcon;      { owned; rebuilt when FIconDirty is True }
     FIconDirty:  Boolean;
     FChkChecker: TfpgCheckBox;   { owned; toggles checkerboard background }
@@ -49,7 +49,7 @@ type
     destructor  Destroy; override;
 
     { Connect to the document. Pass nil to disconnect. }
-    procedure SetDocument(ADoc: TIomDocument);
+    procedure SetDocument(ADoc: TVertexDocument);
 
     { Mark icon as dirty and repaint — call whenever the document changes. }
     procedure DocumentChanged;
@@ -77,9 +77,9 @@ const
   COL_BG:       TfpgColor = $FFD0D0D0;
 
 
-{ ── TIomPreviewBar ────────────────────────────────────────────────────────── }
+{ ── TVertexPreviewBar ────────────────────────────────────────────────────────── }
 
-constructor TIomPreviewBar.Create(AOwner: TComponent);
+constructor TVertexPreviewBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDocument  := nil;
@@ -94,13 +94,13 @@ begin
   FChkChecker.SetPosition(MARGIN_X, CELLS_H + (FOOTER_H - CHK_H) div 2, CHK_W, CHK_H);
 end;
 
-destructor TIomPreviewBar.Destroy;
+destructor TVertexPreviewBar.Destroy;
 begin
   FIcon.Free;
   inherited Destroy;
 end;
 
-procedure TIomPreviewBar.SetDocument(ADoc: TIomDocument);
+procedure TVertexPreviewBar.SetDocument(ADoc: TVertexDocument);
 begin
   FDocument  := ADoc;
   FIconDirty := (ADoc <> nil);
@@ -108,18 +108,18 @@ begin
   Repaint;
 end;
 
-procedure TIomPreviewBar.DocumentChanged;
+procedure TVertexPreviewBar.DocumentChanged;
 begin
   FIconDirty := True;
   Repaint;
 end;
 
-procedure TIomPreviewBar.ChkCheckerChanged(Sender: TObject);
+procedure TVertexPreviewBar.ChkCheckerChanged(Sender: TObject);
 begin
   Repaint;
 end;
 
-procedure TIomPreviewBar.RebuildIcon;
+procedure TVertexPreviewBar.RebuildIcon;
 var
   writer: THvifWriter;
   ms:     TMemoryStream;
@@ -142,7 +142,7 @@ begin
   end;
 end;
 
-procedure TIomPreviewBar.DrawCell(AX, AY, ASize: Integer);
+procedure TVertexPreviewBar.DrawCell(AX, AY, ASize: Integer);
 var
   col, row: Integer;
   img:      TfpgImage;
@@ -182,7 +182,7 @@ begin
   Canvas.DrawRectangle(AX, AY, ASize, ASize);
 end;
 
-procedure TIomPreviewBar.HandlePaint;
+procedure TVertexPreviewBar.HandlePaint;
 var
   i, cx, cy: Integer;
 begin

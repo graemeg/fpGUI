@@ -8,44 +8,44 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Icon-O-Matic document model — class-based representation of an HVIF icon
+      Vertex document model — class-based representation of an HVIF icon
       suitable for interactive editing.
 
       This unit is the single source of truth for the in-memory state of an
       icon being edited. It is intentionally decoupled from all UI concerns
       (no TfpgWidget, no canvas, no event routing). The UI observes changes
-      via the TIomDocument.OnChange callback.
+      via the TVertexDocument.OnChange callback.
 
     Architecture overview:
 
-      TIomDocument                  — root; owns all paths, styles, shapes
-        TObjectList (TIomPath)
-        TObjectList (TIomStyle)
-        TObjectList (TIomShape)
+      TVertexDocument               — root; owns all paths, styles, shapes
+        TObjectList (TVertexPath)
+        TObjectList (TVertexStyle)
+        TObjectList (TVertexShape)
         TUndoStack                  — command pattern; max 100 levels
 
       All edits go through TUndoStack.Execute(cmd). Calling Execute:
         1. Calls cmd.Execute (mutates the model)
         2. Pushes cmd onto the undo stack
-        3. Fires TIomDocument.OnChange
+        3. Fires TVertexDocument.OnChange
 
-      TIomCommand  (abstract)
-        TIomCmdMoveNode             — drag one path point (main + both handles)
-        TIomCmdMoveHandle           — drag one Bezier handle only
-        TIomCmdSetStyleColour       — change a style's solid colour
-        TIomCmdAddShape             — add a new shape (Undo removes it)
-        TIomCmdDeleteShape          — delete a shape (Undo restores it)
-        TIomCmdAddPath              — add a new path (Undo removes it)
-        TIomCmdDeletePath           — delete a path (Undo restores it)
-        TIomCmdSetShapeName         — rename any named object
+      TVertexCommand  (abstract)
+        TVertexCmdMoveNode          — drag one path point (main + both handles)
+        TVertexCmdMoveHandle        — drag one Bezier handle only
+        TVertexCmdSetStyleColour    — change a style's solid colour
+        TVertexCmdAddShape          — add a new shape (Undo removes it)
+        TVertexCmdDeleteShape       — delete a shape (Undo restores it)
+        TVertexCmdAddPath           — add a new path (Undo removes it)
+        TVertexCmdDeletePath        — delete a path (Undo restores it)
+        TVertexCmdRename            — rename any named object
 
     HVIF round-trip:
 
       Load:  binary stream → THvifIcon (reader)
              THvifIcon exposes raw arrays via accessor methods (see NOTE below)
-             → TIomDocument.FromHvifArrays
+             → TVertexDocument.FromHvifArrays
 
-      Save:  TIomDocument.ToHvifArrays → THvifStyles/Paths/Shapes arrays
+      Save:  TVertexDocument.ToHvifArrays → THvifStyles/Paths/Shapes arrays
              → fpg_hvif_writer → binary stream
 
       NOTE: THvifIcon currently stores FStyles/FPaths/FShapes as private fields.
@@ -57,21 +57,21 @@
 
     Coordinate space:
       HVIF icons use a fixed 64×64 unit coordinate space (0.0..64.0 on each axis).
-      All TIomPoint.X/Y values are in HVIF units. The canvas layer handles the
+      All TVertexPoint.X/Y values are in HVIF units. The canvas layer handles the
       mapping to screen pixels (zoom, pan, widget origin).
 
     Object naming:
       HVIF binary format does not store names. When loading, objects receive
       auto-generated names: path_0, path_1 ... style_0 ... shape_0 ...
       Names are unique within a document, not globally. The user may rename any
-      object at any time (TIomCmdSetShapeName handles undo).
+      object at any time (TVertexCmdRename handles undo).
 
     Thread safety:
       NOT thread-safe. All access must occur on the fpGUI main thread.
       The editor is single-threaded (standard fpGUI event-driven model).
 }
 
-unit fpg_iom_document;
+unit fpg_vertex_document;
 
 {$mode objfpc}{$H+}
 
@@ -87,11 +87,11 @@ uses
 { ==================== Forward declarations ==================== }
 
 type
-  TIomDocument = class;
-  TIomPath     = class;
-  TIomStyle    = class;
-  TIomShape    = class;
-  TIomCommand  = class;
+  TVertexDocument = class;
+  TVertexPath     = class;
+  TVertexStyle    = class;
+  TVertexShape    = class;
+  TVertexCommand  = class;
   TUndoStack   = class;
 
 
@@ -100,8 +100,8 @@ type
 type
   { Fired after every Execute, Undo, or Redo that mutates the document.
     ACommand is the command that was executed/undone/redone.
-    UI components connect to TIomDocument.OnChange to refresh. }
-  TIomChangeEvent = procedure(Sender: TIomDocument; ACommand: TIomCommand) of object;
+    UI components connect to TVertexDocument.OnChange to refresh. }
+  TVertexChangeEvent = procedure(Sender: TVertexDocument; ACommand: TVertexCommand) of object;
 
 
 { ==================== Path point ==================== }
@@ -112,7 +112,7 @@ type
     ending at this point). OutX/OutY is the outgoing handle (curve starting
     here). For a straight-line node: InX=X, InY=Y, OutX=X, OutY=Y.
     Smooth=True means the two handles are kept collinear through the anchor. }
-  TIomPoint = record
+  TVertexPoint = record
     X,    Y:    Single;
     InX,  InY:  Single;
     OutX, OutY: Single;
@@ -120,35 +120,35 @@ type
   end;
 
 
-{ ==================== TIomPath ==================== }
+{ ==================== TVertexPath ==================== }
 
 type
-  TIomPath = class
+  TVertexPath = class
   private
     FName:   string;
     FClosed: Boolean;
-    FPoints: array of TIomPoint;
+    FPoints: array of TVertexPoint;
 
     function  GetPointCount: Integer;
-    function  GetPoint(AIndex: Integer): TIomPoint;
-    procedure SetPoint(AIndex: Integer; const AValue: TIomPoint);
+    function  GetPoint(AIndex: Integer): TVertexPoint;
+    procedure SetPoint(AIndex: Integer; const AValue: TVertexPoint);
 
   public
     constructor Create(const AName: string);
 
     { Point access }
     property PointCount: Integer read GetPointCount;
-    property Points[AIndex: Integer]: TIomPoint read GetPoint write SetPoint;
+    property Points[AIndex: Integer]: TVertexPoint read GetPoint write SetPoint;
 
     { Append a new point; returns its index. }
-    function AddPoint(const APt: TIomPoint): Integer;
+    function AddPoint(const APt: TVertexPoint): Integer;
 
     { Delete the point at AIndex; shifts higher indices down. }
     procedure DeletePoint(AIndex: Integer);
 
     { Insert APt at AIndex, shifting higher indices up.
       AIndex = PointCount is equivalent to AddPoint (append). }
-    procedure InsertPoint(AIndex: Integer; const APt: TIomPoint);
+    procedure InsertPoint(AIndex: Integer; const APt: TVertexPoint);
 
     { True when this is a straight-lines-only path (all control handles equal
       their anchor). Used to choose the HVIF NO_CURVES encoding on save. }
@@ -166,34 +166,34 @@ type
 { ==================== Gradient stop ==================== }
 
 type
-  TIomGradientStop = record
+  TVertexGradientStop = record
     Offset: Single;       { normalised 0.0..1.0 }
     Color:  THvifColor;
   end;
 
 
-{ ==================== TIomStyle ==================== }
+{ ==================== TVertexStyle ==================== }
 
 type
-  TIomStyle = class
+  TVertexStyle = class
   private
     FName:         string;
     FStyleType:    THvifStyleType;
     FColor:        THvifColor;
     FGradientType: THvifGradientType;
     FGradTransform: array[0..5] of Single;
-    FStops:        array of TIomGradientStop;
+    FStops:        array of TVertexGradientStop;
 
     function  GetStopCount: Integer;
-    function  GetStop(AIndex: Integer): TIomGradientStop;
-    procedure SetStop(AIndex: Integer; const AValue: TIomGradientStop);
+    function  GetStop(AIndex: Integer): TVertexGradientStop;
+    procedure SetStop(AIndex: Integer; const AValue: TVertexGradientStop);
 
   public
     constructor Create(const AName: string);
 
     { Stop management (for gradient styles) }
     property StopCount: Integer read GetStopCount;
-    property Stops[AIndex: Integer]: TIomGradientStop read GetStop write SetStop;
+    property Stops[AIndex: Integer]: TVertexGradientStop read GetStop write SetStop;
     function  AddStop(AOffset: Single; AColor: THvifColor): Integer;
     procedure DeleteStop(AIndex: Integer);
 
@@ -219,15 +219,15 @@ type
 { ==================== Transformer ==================== }
 
 type
-  TIomTransformerType = (
+  TVertexTransformerType = (
     ittNone        = 0,
     ittStroke      = 1,
     ittContour     = 2,
     ittPerspective = 3
   );
 
-  TIomTransformer = record
-    TransType:        TIomTransformerType;
+  TVertexTransformer = record
+    TransType:        TVertexTransformerType;
     { Stroke / Contour parameters }
     Width:            Single;   { in HVIF 64-unit space }
     MiterLimit:       Single;
@@ -242,74 +242,74 @@ type
   { Controls visibility of a shape based on the rendered icon size.
     The shape is visible when: MinSize <= rendered_size_px <= MaxSize.
     Use 0 for MinSize and MaxSingle for MaxSize to mean "always visible". }
-  TIomLOD = record
+  TVertexLOD = record
     MinSize: Single;   { minimum rendered size in pixels; 0 = no lower bound }
     MaxSize: Single;   { maximum rendered size in pixels; MaxSingle = no upper bound }
   end;
 
 
-{ ==================== TIomShape ==================== }
+{ ==================== TVertexShape ==================== }
 
 type
-  { A shape references one TIomStyle and one or more TIomPath instances.
-    It does NOT own the style or paths — those are owned by TIomDocument.
+  { A shape references one TVertexStyle and one or more TVertexPath instances.
+    It does NOT own the style or paths — those are owned by TVertexDocument.
 
     One shape can reference multiple paths (all rendered together using the
     same style). This is a key HVIF efficiency feature: one outline path
     shared by a fill shape and a stroke shape. }
-  TIomShape = class
+  TVertexShape = class
   private
     FName:         string;
-    FStyle:        TIomStyle;       { reference into TIomDocument.Styles; not owned }
-    FPaths:        TList;           { list of TIomPath references; not owned }
+    FStyle:        TVertexStyle;       { reference into TVertexDocument.Styles; not owned }
+    FPaths:        TList;           { list of TVertexPath references; not owned }
     FTransform:    array[0..5] of Single;
     FHasTransform: Boolean;
     FTranslateX:   Single;
     FTranslateY:   Single;
     FHasTranslation: Boolean;
-    FLOD:          TIomLOD;
+    FLOD:          TVertexLOD;
     FVisible:      Boolean;
-    FTransformer:  TIomTransformer;
+    FTransformer:  TVertexTransformer;
 
     function  GetPathCount: Integer;
-    function  GetPath(AIndex: Integer): TIomPath;
+    function  GetPath(AIndex: Integer): TVertexPath;
 
   public
     constructor Create(const AName: string);
     destructor  Destroy; override;
 
-    { Path references. These are references into TIomDocument.Paths; not owned. }
+    { Path references. These are references into TVertexDocument.Paths; not owned. }
     property PathCount: Integer read GetPathCount;
-    property Paths[AIndex: Integer]: TIomPath read GetPath;
-    procedure AddPathRef(APath: TIomPath);
-    procedure RemovePathRef(APath: TIomPath);
-    function  IndexOfPath(APath: TIomPath): Integer;
+    property Paths[AIndex: Integer]: TVertexPath read GetPath;
+    procedure AddPathRef(APath: TVertexPath);
+    procedure RemovePathRef(APath: TVertexPath);
+    function  IndexOfPath(APath: TVertexPath): Integer;
 
     { Convert to/from the HVIF record type for serialisation.
-      AStyleIndex and APathIndices must be provided by TIomDocument.ToHvifArrays
-      since TIomShape holds object references, not numeric indices. }
+      AStyleIndex and APathIndices must be provided by TVertexDocument.ToHvifArrays
+      since TVertexShape holds object references, not numeric indices. }
     function ToHvifShape(AStyleIndex: Byte;
                          const APathIndices: array of Byte): THvifShape;
 
     property Name:           string           read FName            write FName;
-    property Style:          TIomStyle        read FStyle           write FStyle;
+    property Style:          TVertexStyle        read FStyle           write FStyle;
     property HasTransform:   Boolean          read FHasTransform    write FHasTransform;
     property TranslateX:     Single           read FTranslateX      write FTranslateX;
     property TranslateY:     Single           read FTranslateY      write FTranslateY;
     property HasTranslation: Boolean          read FHasTranslation  write FHasTranslation;
-    property LOD:            TIomLOD          read FLOD             write FLOD;
+    property LOD:            TVertexLOD          read FLOD             write FLOD;
     property Visible:        Boolean          read FVisible         write FVisible;
-    property Transformer:    TIomTransformer  read FTransformer     write FTransformer;
+    property Transformer:    TVertexTransformer  read FTransformer     write FTransformer;
 
     procedure GetTransform(out AMatrix: array of Single);
     procedure SetTransform(const AMatrix: array of Single);
   end;
 
 
-{ ==================== TIomCommand (abstract) ==================== }
+{ ==================== TVertexCommand (abstract) ==================== }
 
 type
-  TIomCommand = class
+  TVertexCommand = class
   private
     FDescription: string;
   public
@@ -332,66 +332,66 @@ type
 
 type
   { Move one path node (anchor point + both Bezier handles as a unit).
-    Stores before/after snapshots of the full TIomPoint record. }
-  TIomCmdMoveNode = class(TIomCommand)
+    Stores before/after snapshots of the full TVertexPoint record. }
+  TVertexCmdMoveNode = class(TVertexCommand)
   private
-    FPath:      TIomPath;
+    FPath:      TVertexPath;
     FNodeIndex: Integer;
-    FOldPoint:  TIomPoint;
-    FNewPoint:  TIomPoint;
+    FOldPoint:  TVertexPoint;
+    FNewPoint:  TVertexPoint;
   public
-    constructor Create(APath: TIomPath; ANodeIndex: Integer;
-                       const AOldPoint, ANewPoint: TIomPoint);
+    constructor Create(APath: TVertexPath; ANodeIndex: Integer;
+                       const AOldPoint, ANewPoint: TVertexPoint);
     procedure Execute; override;
     procedure Undo;    override;
 
-    property Path:      TIomPath read FPath;
+    property Path:      TVertexPath read FPath;
     property NodeIndex: Integer  read FNodeIndex;
   end;
 
 
   { Move one Bezier handle independently (InX/InY or OutX/OutY), without
     moving the anchor. Used when smooth=False allows asymmetric handles. }
-  TIomCmdMoveHandle = class(TIomCommand)
+  TVertexCmdMoveHandle = class(TVertexCommand)
   private
-    FPath:      TIomPath;
+    FPath:      TVertexPath;
     FNodeIndex: Integer;
     FIsInHandle: Boolean;   { True = incoming handle, False = outgoing }
-    FOldPoint:  TIomPoint;
-    FNewPoint:  TIomPoint;
+    FOldPoint:  TVertexPoint;
+    FNewPoint:  TVertexPoint;
   public
-    constructor Create(APath: TIomPath; ANodeIndex: Integer; AIsInHandle: Boolean;
-                       const AOldPoint, ANewPoint: TIomPoint);
+    constructor Create(APath: TVertexPath; ANodeIndex: Integer; AIsInHandle: Boolean;
+                       const AOldPoint, ANewPoint: TVertexPoint);
     procedure Execute; override;
     procedure Undo;    override;
   end;
 
 
-  { Change the solid colour of a TIomStyle. }
-  TIomCmdSetStyleColour = class(TIomCommand)
+  { Change the solid colour of a TVertexStyle. }
+  TVertexCmdSetStyleColour = class(TVertexCommand)
   private
-    FStyle:    TIomStyle;
+    FStyle:    TVertexStyle;
     FOldColor: THvifColor;
     FNewColor: THvifColor;
   public
-    constructor Create(AStyle: TIomStyle;
+    constructor Create(AStyle: TVertexStyle;
                        const AOldColor, ANewColor: THvifColor);
     procedure Execute; override;
     procedure Undo;    override;
   end;
 
 
-  { Add a new TIomShape to the document. The command takes ownership of the
+  { Add a new TVertexShape to the document. The command takes ownership of the
     shape until Execute is called; after Execute the document owns it.
     Undo transfers ownership back to the command. }
-  TIomCmdAddShape = class(TIomCommand)
+  TVertexCmdAddShape = class(TVertexCommand)
   private
-    FDocument:    TIomDocument;
-    FShape:       TIomShape;
+    FDocument:    TVertexDocument;
+    FShape:       TVertexShape;
     FInsertIndex: Integer;    { -1 = append }
     FOwnsShape:   Boolean;    { True when command holds ownership }
   public
-    constructor Create(ADocument: TIomDocument; AShape: TIomShape;
+    constructor Create(ADocument: TVertexDocument; AShape: TVertexShape;
                        AInsertIndex: Integer = -1);
     destructor  Destroy; override;
     procedure Execute; override;
@@ -399,16 +399,16 @@ type
   end;
 
 
-  { Remove a TIomShape from the document. The document releases ownership on
+  { Remove a TVertexShape from the document. The document releases ownership on
     Execute; Undo returns it. }
-  TIomCmdDeleteShape = class(TIomCommand)
+  TVertexCmdDeleteShape = class(TVertexCommand)
   private
-    FDocument:  TIomDocument;
-    FShape:     TIomShape;
+    FDocument:  TVertexDocument;
+    FShape:     TVertexShape;
     FSavedIndex: Integer;
     FOwnsShape: Boolean;
   public
-    constructor Create(ADocument: TIomDocument; AShape: TIomShape);
+    constructor Create(ADocument: TVertexDocument; AShape: TVertexShape);
     destructor  Destroy; override;
     procedure Execute; override;
     procedure Undo;    override;
@@ -417,13 +417,13 @@ type
 
   { Move a shape from AOldIndex to ANewIndex within the document's shape list.
     In HVIF, later shapes draw on top, so reordering changes the rendering order. }
-  TIomCmdMoveShape = class(TIomCommand)
+  TVertexCmdMoveShape = class(TVertexCommand)
   private
-    FDocument: TIomDocument;
+    FDocument: TVertexDocument;
     FOldIndex: Integer;
     FNewIndex: Integer;
   public
-    constructor Create(ADocument: TIomDocument; AOldIndex, ANewIndex: Integer);
+    constructor Create(ADocument: TVertexDocument; AOldIndex, ANewIndex: Integer);
     procedure Execute; override;
     procedure Undo;    override;
   end;
@@ -432,31 +432,31 @@ type
   { Create a brand-new shape complete with its own style and path.
     All three objects are owned by the command until Execute; after Execute the
     document owns them.  Undo removes all three from the document. }
-  TIomCmdNewShape = class(TIomCommand)
+  TVertexCmdNewShape = class(TVertexCommand)
   private
-    FDocument: TIomDocument;
-    FStyle:    TIomStyle;
-    FPath:     TIomPath;
-    FShape:    TIomShape;
+    FDocument: TVertexDocument;
+    FStyle:    TVertexStyle;
+    FPath:     TVertexPath;
+    FShape:    TVertexShape;
     FOwns:     Boolean;
   public
-    constructor Create(ADocument: TIomDocument;
-                       AStyle: TIomStyle; APath: TIomPath; AShape: TIomShape);
+    constructor Create(ADocument: TVertexDocument;
+                       AStyle: TVertexStyle; APath: TVertexPath; AShape: TVertexShape);
     destructor  Destroy; override;
     procedure Execute; override;
     procedure Undo;    override;
   end;
 
 
-  { Add a new TIomPath to the document. }
-  TIomCmdAddPath = class(TIomCommand)
+  { Add a new TVertexPath to the document. }
+  TVertexCmdAddPath = class(TVertexCommand)
   private
-    FDocument:    TIomDocument;
-    FPath:        TIomPath;
+    FDocument:    TVertexDocument;
+    FPath:        TVertexPath;
     FInsertIndex: Integer;
     FOwnsPath:    Boolean;
   public
-    constructor Create(ADocument: TIomDocument; APath: TIomPath;
+    constructor Create(ADocument: TVertexDocument; APath: TVertexPath;
                        AInsertIndex: Integer = -1);
     destructor  Destroy; override;
     procedure Execute; override;
@@ -464,31 +464,31 @@ type
   end;
 
 
-  { Remove a TIomPath from the document. Fails (raises) if any shape
+  { Remove a TVertexPath from the document. Fails (raises) if any shape
     still references the path — caller must remove the reference first. }
-  TIomCmdDeletePath = class(TIomCommand)
+  TVertexCmdDeletePath = class(TVertexCommand)
   private
-    FDocument:   TIomDocument;
-    FPath:       TIomPath;
+    FDocument:   TVertexDocument;
+    FPath:       TVertexPath;
     FSavedIndex: Integer;
     FOwnsPath:   Boolean;
   public
-    constructor Create(ADocument: TIomDocument; APath: TIomPath);
+    constructor Create(ADocument: TVertexDocument; APath: TVertexPath);
     destructor  Destroy; override;
     procedure Execute; override;
     procedure Undo;    override;
   end;
 
 
-  { Delete one path node at ANodeIndex. Stores the full TIomPoint for Undo.
+  { Delete one path node at ANodeIndex. Stores the full TVertexPoint for Undo.
     Will not execute if deleting would leave fewer than 2 nodes. }
-  TIomCmdDeletePoint = class(TIomCommand)
+  TVertexCmdDeletePoint = class(TVertexCommand)
   private
-    FPath:       TIomPath;
+    FPath:       TVertexPath;
     FNodeIndex:  Integer;
-    FSavedPoint: TIomPoint;
+    FSavedPoint: TVertexPoint;
   public
-    constructor Create(APath: TIomPath; ANodeIndex: Integer);
+    constructor Create(APath: TVertexPath; ANodeIndex: Integer);
     procedure Execute; override;
     procedure Undo;    override;
   end;
@@ -497,31 +497,31 @@ type
   { Insert one path node produced by splitting a bezier segment via de Casteljau.
     Stores the new node, the insert index, and the before/after snapshots of both
     adjacent nodes (their control handles change as a result of the split). }
-  TIomCmdAddPoint = class(TIomCommand)
+  TVertexCmdAddPoint = class(TVertexCommand)
   private
-    FPath:         TIomPath;
+    FPath:         TVertexPath;
     FInsertIndex:  Integer;   { index at which the new node is inserted }
     FPrevNodeIdx:  Integer;   { index of the preceding node }
     FNextNodeIdx:  Integer;   { index of the following node (before insert) }
-    FNewPoint:     TIomPoint;
-    FPrevPtBefore: TIomPoint; { preceding node before split }
-    FPrevPtAfter:  TIomPoint; { preceding node after split (OutHandle updated) }
-    FNextPtBefore: TIomPoint; { following node before split }
-    FNextPtAfter:  TIomPoint; { following node after split (InHandle updated) }
+    FNewPoint:     TVertexPoint;
+    FPrevPtBefore: TVertexPoint; { preceding node before split }
+    FPrevPtAfter:  TVertexPoint; { preceding node after split (OutHandle updated) }
+    FNextPtBefore: TVertexPoint; { following node before split }
+    FNextPtAfter:  TVertexPoint; { following node after split (InHandle updated) }
   public
-    constructor Create(APath: TIomPath;
+    constructor Create(APath: TVertexPath;
                        AInsertIndex, APrevNodeIdx, ANextNodeIdx: Integer;
-                       const ANewPoint: TIomPoint;
-                       const APrevPtBefore, APrevPtAfter: TIomPoint;
-                       const ANextPtBefore, ANextPtAfter: TIomPoint);
+                       const ANewPoint: TVertexPoint;
+                       const APrevPtBefore, APrevPtAfter: TVertexPoint;
+                       const ANextPtBefore, ANextPtAfter: TVertexPoint);
     procedure Execute; override;
     procedure Undo;    override;
   end;
 
 
-  { Rename any named document object. Works for TIomPath, TIomStyle, TIomShape
+  { Rename any named document object. Works for TVertexPath, TVertexStyle, TVertexShape
     by passing the object's Name field as a PString. }
-  TIomCmdRename = class(TIomCommand)
+  TVertexCmdRename = class(TVertexCommand)
   private
     FNameField: PString;    { pointer into the object's FName field }
     FOldName:   string;
@@ -542,7 +542,7 @@ type
 type
   TUndoStack = class
   private
-    FStack:     TObjectList;   { owns TIomCommand instances }
+    FStack:     TObjectList;   { owns TVertexCommand instances }
     FCursor:    Integer;       { index of next undo position; -1 = nothing to undo }
     FMaxLevels: Integer;
     FOnChange:  TNotifyEvent;  { fired after every Execute, Undo, Redo }
@@ -556,7 +556,7 @@ type
 
     { Execute ACmd and push it onto the stack. Any previously undone commands
       above FCursor are discarded. ACmd ownership transfers to the stack. }
-    procedure Execute(ACmd: TIomCommand);
+    procedure Execute(ACmd: TVertexCommand);
 
     { Step one command back. No-op if CanUndo is False. }
     procedure Undo;
@@ -564,7 +564,7 @@ type
     { Re-apply one command forward. No-op if CanRedo is False. }
     procedure Redo;
 
-    { Fired after every Execute, Undo or Redo. Connect to TIomDocument or the UI. }
+    { Fired after every Execute, Undo or Redo. Connect to TVertexDocument or the UI. }
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
 
     function CanUndo: Boolean;
@@ -582,26 +582,26 @@ type
   end;
 
 
-{ ==================== TIomDocument ==================== }
+{ ==================== TVertexDocument ==================== }
 
 type
-  TIomDocument = class
+  TVertexDocument = class
   private
-    FPaths:     TObjectList;   { owns TIomPath instances }
-    FStyles:    TObjectList;   { owns TIomStyle instances }
-    FShapes:    TObjectList;   { owns TIomShape instances }
+    FPaths:     TObjectList;   { owns TVertexPath instances }
+    FStyles:    TObjectList;   { owns TVertexStyle instances }
+    FShapes:    TObjectList;   { owns TVertexShape instances }
     FUndoStack: TUndoStack;
     FDirty:     Boolean;
-    FOnChange:  TIomChangeEvent;
+    FOnChange:  TVertexChangeEvent;
 
     function  GetPathCount:  Integer;
     function  GetStyleCount: Integer;
     function  GetShapeCount: Integer;
-    function  GetPath(AIndex: Integer):  TIomPath;
-    function  GetStyle(AIndex: Integer): TIomStyle;
-    function  GetShape(AIndex: Integer): TIomShape;
+    function  GetPath(AIndex: Integer):  TVertexPath;
+    function  GetStyle(AIndex: Integer): TVertexStyle;
+    function  GetShape(AIndex: Integer): TVertexShape;
 
-    procedure NotifyChange(ACmd: TIomCommand);
+    procedure NotifyChange(ACmd: TVertexCommand);
     procedure HandleUndoChange(Sender: TObject);
 
   public
@@ -612,19 +612,19 @@ type
     property PathCount:  Integer    read GetPathCount;
     property StyleCount: Integer    read GetStyleCount;
     property ShapeCount: Integer    read GetShapeCount;
-    property Paths[AIndex: Integer]:  TIomPath  read GetPath;
-    property Styles[AIndex: Integer]: TIomStyle read GetStyle;
-    property Shapes[AIndex: Integer]: TIomShape read GetShape;
+    property Paths[AIndex: Integer]:  TVertexPath  read GetPath;
+    property Styles[AIndex: Integer]: TVertexStyle read GetStyle;
+    property Shapes[AIndex: Integer]: TVertexShape read GetShape;
 
     { Index lookup by object reference (-1 if not found). }
-    function IndexOfPath(APath:   TIomPath):  Integer;
-    function IndexOfStyle(AStyle: TIomStyle): Integer;
-    function IndexOfShape(AShape: TIomShape): Integer;
+    function IndexOfPath(APath:   TVertexPath):  Integer;
+    function IndexOfStyle(AStyle: TVertexStyle): Integer;
+    function IndexOfShape(AShape: TVertexShape): Integer;
 
     { Index lookup by name (case-sensitive; -1 if not found). }
-    function FindPathByName(const AName:  string): TIomPath;
-    function FindStyleByName(const AName: string): TIomStyle;
-    function FindShapeByName(const AName: string): TIomShape;
+    function FindPathByName(const AName:  string): TVertexPath;
+    function FindStyleByName(const AName: string): TVertexStyle;
+    function FindShapeByName(const AName: string): TVertexShape;
 
     { Check whether AName is already in use (across all object types). }
     function NameExists(const AName: string): Boolean;
@@ -635,12 +635,12 @@ type
 
     { --- Direct list manipulation (called by command Execute/Undo only) ---
       UI code must go through TUndoStack.Execute rather than calling these. }
-    procedure InternalAddPath(APath: TIomPath; AIndex: Integer = -1);
-    procedure InternalRemovePath(APath: TIomPath);
-    procedure InternalAddStyle(AStyle: TIomStyle; AIndex: Integer = -1);
-    procedure InternalRemoveStyle(AStyle: TIomStyle);
-    procedure InternalAddShape(AShape: TIomShape; AIndex: Integer = -1);
-    procedure InternalRemoveShape(AShape: TIomShape);
+    procedure InternalAddPath(APath: TVertexPath; AIndex: Integer = -1);
+    procedure InternalRemovePath(APath: TVertexPath);
+    procedure InternalAddStyle(AStyle: TVertexStyle; AIndex: Integer = -1);
+    procedure InternalRemoveStyle(AStyle: TVertexStyle);
+    procedure InternalAddShape(AShape: TVertexShape; AIndex: Integer = -1);
+    procedure InternalRemoveShape(AShape: TVertexShape);
     { Move a shape from AOldIndex to ANewIndex (both in current list space). }
     procedure InternalMoveShape(AOldIndex, ANewIndex: Integer);
 
@@ -681,24 +681,24 @@ type
     procedure NotifyChanged;
 
     { --- Change notification --- }
-    property OnChange: TIomChangeEvent read FOnChange write FOnChange;
+    property OnChange: TVertexChangeEvent read FOnChange write FOnChange;
   end;
 
 
 implementation
 
 
-{ ==================== TIomCommand ==================== }
+{ ==================== TVertexCommand ==================== }
 
-procedure TIomCommand.Redo;
+procedure TVertexCommand.Redo;
 begin
   Execute;
 end;
 
 
-{ ==================== TIomPath ==================== }
+{ ==================== TVertexPath ==================== }
 
-constructor TIomPath.Create(const AName: string);
+constructor TVertexPath.Create(const AName: string);
 begin
   inherited Create;
   FName   := AName;
@@ -706,29 +706,29 @@ begin
   SetLength(FPoints, 0);
 end;
 
-function TIomPath.GetPointCount: Integer;
+function TVertexPath.GetPointCount: Integer;
 begin
   Result := Length(FPoints);
 end;
 
-function TIomPath.GetPoint(AIndex: Integer): TIomPoint;
+function TVertexPath.GetPoint(AIndex: Integer): TVertexPoint;
 begin
   Result := FPoints[AIndex];
 end;
 
-procedure TIomPath.SetPoint(AIndex: Integer; const AValue: TIomPoint);
+procedure TVertexPath.SetPoint(AIndex: Integer; const AValue: TVertexPoint);
 begin
   FPoints[AIndex] := AValue;
 end;
 
-function TIomPath.AddPoint(const APt: TIomPoint): Integer;
+function TVertexPath.AddPoint(const APt: TVertexPoint): Integer;
 begin
   Result := Length(FPoints);
   SetLength(FPoints, Result + 1);
   FPoints[Result] := APt;
 end;
 
-procedure TIomPath.DeletePoint(AIndex: Integer);
+procedure TVertexPath.DeletePoint(AIndex: Integer);
 var
   i: Integer;
 begin
@@ -737,7 +737,7 @@ begin
   SetLength(FPoints, Length(FPoints) - 1);
 end;
 
-procedure TIomPath.InsertPoint(AIndex: Integer; const APt: TIomPoint);
+procedure TVertexPath.InsertPoint(AIndex: Integer; const APt: TVertexPoint);
 var
   i, n: Integer;
 begin
@@ -748,7 +748,7 @@ begin
   FPoints[AIndex] := APt;
 end;
 
-function TIomPath.IsLinearOnly: Boolean;
+function TVertexPath.IsLinearOnly: Boolean;
 var
   i: Integer;
 begin
@@ -764,7 +764,7 @@ begin
   Result := True;
 end;
 
-function TIomPath.ToHvifPath: THvifPath;
+function TVertexPath.ToHvifPath: THvifPath;
 var
   i: Integer;
 begin
@@ -781,7 +781,7 @@ begin
   end;
 end;
 
-procedure TIomPath.FromHvifPath(const ASrc: THvifPath);
+procedure TVertexPath.FromHvifPath(const ASrc: THvifPath);
 var
   i: Integer;
 begin
@@ -800,9 +800,9 @@ begin
 end;
 
 
-{ ==================== TIomStyle ==================== }
+{ ==================== TVertexStyle ==================== }
 
-constructor TIomStyle.Create(const AName: string);
+constructor TVertexStyle.Create(const AName: string);
 begin
   inherited Create;
   FName      := AName;
@@ -814,22 +814,22 @@ begin
   SetLength(FStops, 0);
 end;
 
-function TIomStyle.GetStopCount: Integer;
+function TVertexStyle.GetStopCount: Integer;
 begin
   Result := Length(FStops);
 end;
 
-function TIomStyle.GetStop(AIndex: Integer): TIomGradientStop;
+function TVertexStyle.GetStop(AIndex: Integer): TVertexGradientStop;
 begin
   Result := FStops[AIndex];
 end;
 
-procedure TIomStyle.SetStop(AIndex: Integer; const AValue: TIomGradientStop);
+procedure TVertexStyle.SetStop(AIndex: Integer; const AValue: TVertexGradientStop);
 begin
   FStops[AIndex] := AValue;
 end;
 
-function TIomStyle.AddStop(AOffset: Single; AColor: THvifColor): Integer;
+function TVertexStyle.AddStop(AOffset: Single; AColor: THvifColor): Integer;
 begin
   Result := Length(FStops);
   SetLength(FStops, Result + 1);
@@ -837,7 +837,7 @@ begin
   FStops[Result].Color  := AColor;
 end;
 
-procedure TIomStyle.DeleteStop(AIndex: Integer);
+procedure TVertexStyle.DeleteStop(AIndex: Integer);
 var
   i: Integer;
 begin
@@ -846,12 +846,12 @@ begin
   SetLength(FStops, Length(FStops) - 1);
 end;
 
-function TIomStyle.IsGradient: Boolean;
+function TVertexStyle.IsGradient: Boolean;
 begin
   Result := FStyleType = hstGradient;
 end;
 
-function TIomStyle.ToHvifStyle: THvifStyle;
+function TVertexStyle.ToHvifStyle: THvifStyle;
 var
   i: Integer;
 begin
@@ -868,7 +868,7 @@ begin
   end;
 end;
 
-procedure TIomStyle.FromHvifStyle(const ASrc: THvifStyle);
+procedure TVertexStyle.FromHvifStyle(const ASrc: THvifStyle);
 var
   i: Integer;
 begin
@@ -884,20 +884,20 @@ begin
   end;
 end;
 
-procedure TIomStyle.GetGradTransform(out AMatrix: array of Single);
+procedure TVertexStyle.GetGradTransform(out AMatrix: array of Single);
 begin
   Move(FGradTransform[0], AMatrix[0], 6 * SizeOf(Single));
 end;
 
-procedure TIomStyle.SetGradTransform(const AMatrix: array of Single);
+procedure TVertexStyle.SetGradTransform(const AMatrix: array of Single);
 begin
   Move(AMatrix[0], FGradTransform[0], 6 * SizeOf(Single));
 end;
 
 
-{ ==================== TIomShape ==================== }
+{ ==================== TVertexShape ==================== }
 
-constructor TIomShape.Create(const AName: string);
+constructor TVertexShape.Create(const AName: string);
 var
   i: Integer;
 begin
@@ -924,39 +924,39 @@ begin
   FTransform[3] := 1.0;
 end;
 
-destructor TIomShape.Destroy;
+destructor TVertexShape.Destroy;
 begin
-  FPaths.Free;   { does not free the path objects — they are owned by TIomDocument }
+  FPaths.Free;   { does not free the path objects — they are owned by TVertexDocument }
   inherited;
 end;
 
-function TIomShape.GetPathCount: Integer;
+function TVertexShape.GetPathCount: Integer;
 begin
   Result := FPaths.Count;
 end;
 
-function TIomShape.GetPath(AIndex: Integer): TIomPath;
+function TVertexShape.GetPath(AIndex: Integer): TVertexPath;
 begin
-  Result := TIomPath(FPaths[AIndex]);
+  Result := TVertexPath(FPaths[AIndex]);
 end;
 
-procedure TIomShape.AddPathRef(APath: TIomPath);
+procedure TVertexShape.AddPathRef(APath: TVertexPath);
 begin
   if FPaths.IndexOf(APath) < 0 then
     FPaths.Add(APath);
 end;
 
-procedure TIomShape.RemovePathRef(APath: TIomPath);
+procedure TVertexShape.RemovePathRef(APath: TVertexPath);
 begin
   FPaths.Remove(APath);
 end;
 
-function TIomShape.IndexOfPath(APath: TIomPath): Integer;
+function TVertexShape.IndexOfPath(APath: TVertexPath): Integer;
 begin
   Result := FPaths.IndexOf(APath);
 end;
 
-function TIomShape.ToHvifShape(AStyleIndex: Byte;
+function TVertexShape.ToHvifShape(AStyleIndex: Byte;
                                 const APathIndices: array of Byte): THvifShape;
 var
   i: Integer;
@@ -978,12 +978,12 @@ begin
   Result.StrokeMiterLimit := FTransformer.MiterLimit;
 end;
 
-procedure TIomShape.GetTransform(out AMatrix: array of Single);
+procedure TVertexShape.GetTransform(out AMatrix: array of Single);
 begin
   Move(FTransform[0], AMatrix[0], 6 * SizeOf(Single));
 end;
 
-procedure TIomShape.SetTransform(const AMatrix: array of Single);
+procedure TVertexShape.SetTransform(const AMatrix: array of Single);
 begin
   Move(AMatrix[0], FTransform[0], 6 * SizeOf(Single));
 end;
@@ -991,10 +991,10 @@ end;
 
 { ==================== Concrete commands ==================== }
 
-{ TIomCmdMoveNode }
+{ TVertexCmdMoveNode }
 
-constructor TIomCmdMoveNode.Create(APath: TIomPath; ANodeIndex: Integer;
-                                    const AOldPoint, ANewPoint: TIomPoint);
+constructor TVertexCmdMoveNode.Create(APath: TVertexPath; ANodeIndex: Integer;
+                                    const AOldPoint, ANewPoint: TVertexPoint);
 begin
   inherited Create;
   FPath      := APath;
@@ -1004,22 +1004,22 @@ begin
   Description := 'Move node';
 end;
 
-procedure TIomCmdMoveNode.Execute;
+procedure TVertexCmdMoveNode.Execute;
 begin
   FPath.Points[FNodeIndex] := FNewPoint;
 end;
 
-procedure TIomCmdMoveNode.Undo;
+procedure TVertexCmdMoveNode.Undo;
 begin
   FPath.Points[FNodeIndex] := FOldPoint;
 end;
 
 
-{ TIomCmdMoveHandle }
+{ TVertexCmdMoveHandle }
 
-constructor TIomCmdMoveHandle.Create(APath: TIomPath; ANodeIndex: Integer;
+constructor TVertexCmdMoveHandle.Create(APath: TVertexPath; ANodeIndex: Integer;
                                       AIsInHandle: Boolean;
-                                      const AOldPoint, ANewPoint: TIomPoint);
+                                      const AOldPoint, ANewPoint: TVertexPoint);
 begin
   inherited Create;
   FPath        := APath;
@@ -1033,20 +1033,20 @@ begin
     Description := 'Move outgoing handle';
 end;
 
-procedure TIomCmdMoveHandle.Execute;
+procedure TVertexCmdMoveHandle.Execute;
 begin
   FPath.Points[FNodeIndex] := FNewPoint;
 end;
 
-procedure TIomCmdMoveHandle.Undo;
+procedure TVertexCmdMoveHandle.Undo;
 begin
   FPath.Points[FNodeIndex] := FOldPoint;
 end;
 
 
-{ TIomCmdSetStyleColour }
+{ TVertexCmdSetStyleColour }
 
-constructor TIomCmdSetStyleColour.Create(AStyle: TIomStyle;
+constructor TVertexCmdSetStyleColour.Create(AStyle: TVertexStyle;
                                           const AOldColor, ANewColor: THvifColor);
 begin
   inherited Create;
@@ -1056,20 +1056,20 @@ begin
   Description := 'Set colour';
 end;
 
-procedure TIomCmdSetStyleColour.Execute;
+procedure TVertexCmdSetStyleColour.Execute;
 begin
   FStyle.Color := FNewColor;
 end;
 
-procedure TIomCmdSetStyleColour.Undo;
+procedure TVertexCmdSetStyleColour.Undo;
 begin
   FStyle.Color := FOldColor;
 end;
 
 
-{ TIomCmdAddShape }
+{ TVertexCmdAddShape }
 
-constructor TIomCmdAddShape.Create(ADocument: TIomDocument; AShape: TIomShape;
+constructor TVertexCmdAddShape.Create(ADocument: TVertexDocument; AShape: TVertexShape;
                                     AInsertIndex: Integer);
 begin
   inherited Create;
@@ -1080,29 +1080,29 @@ begin
   Description  := 'Add shape';
 end;
 
-destructor TIomCmdAddShape.Destroy;
+destructor TVertexCmdAddShape.Destroy;
 begin
   if FOwnsShape then
     FShape.Free;
   inherited;
 end;
 
-procedure TIomCmdAddShape.Execute;
+procedure TVertexCmdAddShape.Execute;
 begin
   FDocument.InternalAddShape(FShape, FInsertIndex);
   FOwnsShape := False;
 end;
 
-procedure TIomCmdAddShape.Undo;
+procedure TVertexCmdAddShape.Undo;
 begin
   FDocument.InternalRemoveShape(FShape);
   FOwnsShape := True;
 end;
 
 
-{ TIomCmdDeleteShape }
+{ TVertexCmdDeleteShape }
 
-constructor TIomCmdDeleteShape.Create(ADocument: TIomDocument; AShape: TIomShape);
+constructor TVertexCmdDeleteShape.Create(ADocument: TVertexDocument; AShape: TVertexShape);
 begin
   inherited Create;
   FDocument   := ADocument;
@@ -1112,29 +1112,29 @@ begin
   Description := 'Delete shape';
 end;
 
-destructor TIomCmdDeleteShape.Destroy;
+destructor TVertexCmdDeleteShape.Destroy;
 begin
   if FOwnsShape then
     FShape.Free;
   inherited;
 end;
 
-procedure TIomCmdDeleteShape.Execute;
+procedure TVertexCmdDeleteShape.Execute;
 begin
   FDocument.InternalRemoveShape(FShape);
   FOwnsShape := True;
 end;
 
-procedure TIomCmdDeleteShape.Undo;
+procedure TVertexCmdDeleteShape.Undo;
 begin
   FDocument.InternalAddShape(FShape, FSavedIndex);
   FOwnsShape := False;
 end;
 
 
-{ TIomCmdMoveShape }
+{ TVertexCmdMoveShape }
 
-constructor TIomCmdMoveShape.Create(ADocument: TIomDocument;
+constructor TVertexCmdMoveShape.Create(ADocument: TVertexDocument;
     AOldIndex, ANewIndex: Integer);
 begin
   inherited Create;
@@ -1144,21 +1144,21 @@ begin
   Description := 'Move shape';
 end;
 
-procedure TIomCmdMoveShape.Execute;
+procedure TVertexCmdMoveShape.Execute;
 begin
   FDocument.InternalMoveShape(FOldIndex, FNewIndex);
 end;
 
-procedure TIomCmdMoveShape.Undo;
+procedure TVertexCmdMoveShape.Undo;
 begin
   FDocument.InternalMoveShape(FNewIndex, FOldIndex);
 end;
 
 
-{ TIomCmdNewShape }
+{ TVertexCmdNewShape }
 
-constructor TIomCmdNewShape.Create(ADocument: TIomDocument;
-    AStyle: TIomStyle; APath: TIomPath; AShape: TIomShape);
+constructor TVertexCmdNewShape.Create(ADocument: TVertexDocument;
+    AStyle: TVertexStyle; APath: TVertexPath; AShape: TVertexShape);
 begin
   inherited Create;
   FDocument   := ADocument;
@@ -1169,7 +1169,7 @@ begin
   Description := 'Add shape';
 end;
 
-destructor TIomCmdNewShape.Destroy;
+destructor TVertexCmdNewShape.Destroy;
 begin
   if FOwns then
   begin
@@ -1180,7 +1180,7 @@ begin
   inherited;
 end;
 
-procedure TIomCmdNewShape.Execute;
+procedure TVertexCmdNewShape.Execute;
 begin
   FDocument.InternalAddStyle(FStyle);
   FDocument.InternalAddPath(FPath);
@@ -1188,7 +1188,7 @@ begin
   FOwns := False;
 end;
 
-procedure TIomCmdNewShape.Undo;
+procedure TVertexCmdNewShape.Undo;
 begin
   FDocument.InternalRemoveShape(FShape);
   FDocument.InternalRemovePath(FPath);
@@ -1197,9 +1197,9 @@ begin
 end;
 
 
-{ TIomCmdAddPath }
+{ TVertexCmdAddPath }
 
-constructor TIomCmdAddPath.Create(ADocument: TIomDocument; APath: TIomPath;
+constructor TVertexCmdAddPath.Create(ADocument: TVertexDocument; APath: TVertexPath;
                                    AInsertIndex: Integer);
 begin
   inherited Create;
@@ -1210,29 +1210,29 @@ begin
   Description  := 'Add path';
 end;
 
-destructor TIomCmdAddPath.Destroy;
+destructor TVertexCmdAddPath.Destroy;
 begin
   if FOwnsPath then
     FPath.Free;
   inherited;
 end;
 
-procedure TIomCmdAddPath.Execute;
+procedure TVertexCmdAddPath.Execute;
 begin
   FDocument.InternalAddPath(FPath, FInsertIndex);
   FOwnsPath := False;
 end;
 
-procedure TIomCmdAddPath.Undo;
+procedure TVertexCmdAddPath.Undo;
 begin
   FDocument.InternalRemovePath(FPath);
   FOwnsPath := True;
 end;
 
 
-{ TIomCmdDeletePath }
+{ TVertexCmdDeletePath }
 
-constructor TIomCmdDeletePath.Create(ADocument: TIomDocument; APath: TIomPath);
+constructor TVertexCmdDeletePath.Create(ADocument: TVertexDocument; APath: TVertexPath);
 begin
   inherited Create;
   FDocument   := ADocument;
@@ -1242,29 +1242,29 @@ begin
   Description := 'Delete path';
 end;
 
-destructor TIomCmdDeletePath.Destroy;
+destructor TVertexCmdDeletePath.Destroy;
 begin
   if FOwnsPath then
     FPath.Free;
   inherited;
 end;
 
-procedure TIomCmdDeletePath.Execute;
+procedure TVertexCmdDeletePath.Execute;
 begin
   FDocument.InternalRemovePath(FPath);
   FOwnsPath := True;
 end;
 
-procedure TIomCmdDeletePath.Undo;
+procedure TVertexCmdDeletePath.Undo;
 begin
   FDocument.InternalAddPath(FPath, FSavedIndex);
   FOwnsPath := False;
 end;
 
 
-{ TIomCmdRename }
+{ TVertexCmdRename }
 
-constructor TIomCmdRename.Create(ANameField: PString;
+constructor TVertexCmdRename.Create(ANameField: PString;
                                   const AOldName, ANewName: string);
 begin
   inherited Create;
@@ -1274,20 +1274,20 @@ begin
   Description := Format('Rename to "%s"', [ANewName]);
 end;
 
-procedure TIomCmdRename.Execute;
+procedure TVertexCmdRename.Execute;
 begin
   FNameField^ := FNewName;
 end;
 
-procedure TIomCmdRename.Undo;
+procedure TVertexCmdRename.Undo;
 begin
   FNameField^ := FOldName;
 end;
 
 
-{ TIomCmdDeletePoint }
+{ TVertexCmdDeletePoint }
 
-constructor TIomCmdDeletePoint.Create(APath: TIomPath; ANodeIndex: Integer);
+constructor TVertexCmdDeletePoint.Create(APath: TVertexPath; ANodeIndex: Integer);
 begin
   inherited Create;
   FPath       := APath;
@@ -1296,24 +1296,24 @@ begin
   Description := 'Delete node';
 end;
 
-procedure TIomCmdDeletePoint.Execute;
+procedure TVertexCmdDeletePoint.Execute;
 begin
   FPath.DeletePoint(FNodeIndex);
 end;
 
-procedure TIomCmdDeletePoint.Undo;
+procedure TVertexCmdDeletePoint.Undo;
 begin
   FPath.InsertPoint(FNodeIndex, FSavedPoint);
 end;
 
 
-{ TIomCmdAddPoint }
+{ TVertexCmdAddPoint }
 
-constructor TIomCmdAddPoint.Create(APath: TIomPath;
+constructor TVertexCmdAddPoint.Create(APath: TVertexPath;
     AInsertIndex, APrevNodeIdx, ANextNodeIdx: Integer;
-    const ANewPoint: TIomPoint;
-    const APrevPtBefore, APrevPtAfter: TIomPoint;
-    const ANextPtBefore, ANextPtAfter: TIomPoint);
+    const ANewPoint: TVertexPoint;
+    const APrevPtBefore, APrevPtAfter: TVertexPoint;
+    const ANextPtBefore, ANextPtAfter: TVertexPoint);
 begin
   inherited Create;
   FPath         := APath;
@@ -1328,7 +1328,7 @@ begin
   Description   := 'Add node';
 end;
 
-procedure TIomCmdAddPoint.Execute;
+procedure TVertexCmdAddPoint.Execute;
 begin
   { Update adjacent handles first, then insert the new node.
     The insert shifts FNextNodeIdx up by one, but we update it before that. }
@@ -1337,7 +1337,7 @@ begin
   FPath.InsertPoint(FInsertIndex, FNewPoint);
 end;
 
-procedure TIomCmdAddPoint.Undo;
+procedure TVertexCmdAddPoint.Undo;
 begin
   { Delete the new node first (restores FNextNodeIdx to its original index),
     then restore both adjacent node snapshots. }
@@ -1380,7 +1380,7 @@ begin
     FCursor := -1;
 end;
 
-procedure TUndoStack.Execute(ACmd: TIomCommand);
+procedure TUndoStack.Execute(ACmd: TVertexCommand);
 var
   i: Integer;
 begin
@@ -1399,7 +1399,7 @@ procedure TUndoStack.Undo;
 begin
   if not CanUndo then
     Exit;
-  TIomCommand(FStack[FCursor]).Undo;
+  TVertexCommand(FStack[FCursor]).Undo;
   Dec(FCursor);
   NotifyChange;
 end;
@@ -1409,7 +1409,7 @@ begin
   if not CanRedo then
     Exit;
   Inc(FCursor);
-  TIomCommand(FStack[FCursor]).Redo;
+  TVertexCommand(FStack[FCursor]).Redo;
   NotifyChange;
 end;
 
@@ -1426,7 +1426,7 @@ end;
 function TUndoStack.UndoDescription: string;
 begin
   if CanUndo then
-    Result := TIomCommand(FStack[FCursor]).Description
+    Result := TVertexCommand(FStack[FCursor]).Description
   else
     Result := '';
 end;
@@ -1434,7 +1434,7 @@ end;
 function TUndoStack.RedoDescription: string;
 begin
   if CanRedo then
-    Result := TIomCommand(FStack[FCursor + 1]).Description
+    Result := TVertexCommand(FStack[FCursor + 1]).Description
   else
     Result := '';
 end;
@@ -1446,21 +1446,21 @@ begin
 end;
 
 
-{ ==================== TIomDocument ==================== }
+{ ==================== TVertexDocument ==================== }
 
-constructor TIomDocument.Create;
+constructor TVertexDocument.Create;
 begin
   inherited Create;
-  FPaths     := TObjectList.Create(True);  { owns TIomPath }
-  FStyles    := TObjectList.Create(True);  { owns TIomStyle }
-  FShapes    := TObjectList.Create(True);  { owns TIomShape }
+  FPaths     := TObjectList.Create(True);  { owns TVertexPath }
+  FStyles    := TObjectList.Create(True);  { owns TVertexStyle }
+  FShapes    := TObjectList.Create(True);  { owns TVertexShape }
   FUndoStack := TUndoStack.Create;
   FUndoStack.OnChange := @HandleUndoChange;
   FDirty     := False;
   FOnChange  := nil;
 end;
 
-destructor TIomDocument.Destroy;
+destructor TVertexDocument.Destroy;
 begin
   FUndoStack.Free;
   FShapes.Free;
@@ -1469,32 +1469,32 @@ begin
   inherited;
 end;
 
-function TIomDocument.GetPathCount:  Integer; begin Result := FPaths.Count;  end;
-function TIomDocument.GetStyleCount: Integer; begin Result := FStyles.Count; end;
-function TIomDocument.GetShapeCount: Integer; begin Result := FShapes.Count; end;
+function TVertexDocument.GetPathCount:  Integer; begin Result := FPaths.Count;  end;
+function TVertexDocument.GetStyleCount: Integer; begin Result := FStyles.Count; end;
+function TVertexDocument.GetShapeCount: Integer; begin Result := FShapes.Count; end;
 
-function TIomDocument.GetPath(AIndex: Integer):  TIomPath;  begin Result := TIomPath(FPaths[AIndex]);   end;
-function TIomDocument.GetStyle(AIndex: Integer): TIomStyle; begin Result := TIomStyle(FStyles[AIndex]); end;
-function TIomDocument.GetShape(AIndex: Integer): TIomShape; begin Result := TIomShape(FShapes[AIndex]); end;
+function TVertexDocument.GetPath(AIndex: Integer):  TVertexPath;  begin Result := TVertexPath(FPaths[AIndex]);   end;
+function TVertexDocument.GetStyle(AIndex: Integer): TVertexStyle; begin Result := TVertexStyle(FStyles[AIndex]); end;
+function TVertexDocument.GetShape(AIndex: Integer): TVertexShape; begin Result := TVertexShape(FShapes[AIndex]); end;
 
-procedure TIomDocument.NotifyChange(ACmd: TIomCommand);
+procedure TVertexDocument.NotifyChange(ACmd: TVertexCommand);
 begin
   FDirty := True;
   if Assigned(FOnChange) then
     FOnChange(Self, ACmd);
 end;
 
-procedure TIomDocument.NotifyChanged;
+procedure TVertexDocument.NotifyChanged;
 begin
   NotifyChange(nil);
 end;
 
-procedure TIomDocument.HandleUndoChange(Sender: TObject);
+procedure TVertexDocument.HandleUndoChange(Sender: TObject);
 begin
   NotifyChange(nil);
 end;
 
-function TIomDocument.UniqueName(const APrefix: string): string;
+function TVertexDocument.UniqueName(const APrefix: string): string;
 var
   n: Integer;
 begin
@@ -1505,48 +1505,48 @@ begin
   until not NameExists(Result);
 end;
 
-function TIomDocument.IndexOfPath(APath: TIomPath):   Integer; begin Result := FPaths.IndexOf(APath);   end;
-function TIomDocument.IndexOfStyle(AStyle: TIomStyle): Integer; begin Result := FStyles.IndexOf(AStyle); end;
-function TIomDocument.IndexOfShape(AShape: TIomShape): Integer; begin Result := FShapes.IndexOf(AShape); end;
+function TVertexDocument.IndexOfPath(APath: TVertexPath):   Integer; begin Result := FPaths.IndexOf(APath);   end;
+function TVertexDocument.IndexOfStyle(AStyle: TVertexStyle): Integer; begin Result := FStyles.IndexOf(AStyle); end;
+function TVertexDocument.IndexOfShape(AShape: TVertexShape): Integer; begin Result := FShapes.IndexOf(AShape); end;
 
-function TIomDocument.FindPathByName(const AName: string): TIomPath;
+function TVertexDocument.FindPathByName(const AName: string): TVertexPath;
 var
   i: Integer;
 begin
   for i := 0 to FPaths.Count - 1 do
-    if TIomPath(FPaths[i]).Name = AName then
-      Exit(TIomPath(FPaths[i]));
+    if TVertexPath(FPaths[i]).Name = AName then
+      Exit(TVertexPath(FPaths[i]));
   Result := nil;
 end;
 
-function TIomDocument.FindStyleByName(const AName: string): TIomStyle;
+function TVertexDocument.FindStyleByName(const AName: string): TVertexStyle;
 var
   i: Integer;
 begin
   for i := 0 to FStyles.Count - 1 do
-    if TIomStyle(FStyles[i]).Name = AName then
-      Exit(TIomStyle(FStyles[i]));
+    if TVertexStyle(FStyles[i]).Name = AName then
+      Exit(TVertexStyle(FStyles[i]));
   Result := nil;
 end;
 
-function TIomDocument.FindShapeByName(const AName: string): TIomShape;
+function TVertexDocument.FindShapeByName(const AName: string): TVertexShape;
 var
   i: Integer;
 begin
   for i := 0 to FShapes.Count - 1 do
-    if TIomShape(FShapes[i]).Name = AName then
-      Exit(TIomShape(FShapes[i]));
+    if TVertexShape(FShapes[i]).Name = AName then
+      Exit(TVertexShape(FShapes[i]));
   Result := nil;
 end;
 
-function TIomDocument.NameExists(const AName: string): Boolean;
+function TVertexDocument.NameExists(const AName: string): Boolean;
 begin
   Result := Assigned(FindPathByName(AName))
          or Assigned(FindStyleByName(AName))
          or Assigned(FindShapeByName(AName));
 end;
 
-procedure TIomDocument.InternalAddPath(APath: TIomPath; AIndex: Integer);
+procedure TVertexDocument.InternalAddPath(APath: TVertexPath; AIndex: Integer);
 begin
   if AIndex < 0 then
     FPaths.Add(APath)
@@ -1554,12 +1554,12 @@ begin
     FPaths.Insert(AIndex, APath);
 end;
 
-procedure TIomDocument.InternalRemovePath(APath: TIomPath);
+procedure TVertexDocument.InternalRemovePath(APath: TVertexPath);
 begin
   FPaths.Extract(APath);   { removes without freeing }
 end;
 
-procedure TIomDocument.InternalAddStyle(AStyle: TIomStyle; AIndex: Integer);
+procedure TVertexDocument.InternalAddStyle(AStyle: TVertexStyle; AIndex: Integer);
 begin
   if AIndex < 0 then
     FStyles.Add(AStyle)
@@ -1567,12 +1567,12 @@ begin
     FStyles.Insert(AIndex, AStyle);
 end;
 
-procedure TIomDocument.InternalRemoveStyle(AStyle: TIomStyle);
+procedure TVertexDocument.InternalRemoveStyle(AStyle: TVertexStyle);
 begin
   FStyles.Extract(AStyle);
 end;
 
-procedure TIomDocument.InternalAddShape(AShape: TIomShape; AIndex: Integer);
+procedure TVertexDocument.InternalAddShape(AShape: TVertexShape; AIndex: Integer);
 begin
   if AIndex < 0 then
     FShapes.Add(AShape)
@@ -1580,12 +1580,12 @@ begin
     FShapes.Insert(AIndex, AShape);
 end;
 
-procedure TIomDocument.InternalRemoveShape(AShape: TIomShape);
+procedure TVertexDocument.InternalRemoveShape(AShape: TVertexShape);
 begin
   FShapes.Extract(AShape);
 end;
 
-procedure TIomDocument.InternalMoveShape(AOldIndex, ANewIndex: Integer);
+procedure TVertexDocument.InternalMoveShape(AOldIndex, ANewIndex: Integer);
 var
   obj: TObject;
 begin
@@ -1597,16 +1597,16 @@ begin
     FShapes.Insert(ANewIndex, obj);
 end;
 
-procedure TIomDocument.FromHvifArrays(const AStyles: array of THvifStyle;
+procedure TVertexDocument.FromHvifArrays(const AStyles: array of THvifStyle;
                                        const APaths:  array of THvifPath;
                                        const AShapes: array of THvifShape);
 var
   i, j:   Integer;
-  style:  TIomStyle;
-  path:   TIomPath;
-  shape:  TIomShape;
+  style:  TVertexStyle;
+  path:   TVertexPath;
+  shape:  TVertexShape;
   pIdx:   Byte;
-  xf:     TIomTransformer;
+  xf:     TVertexTransformer;
 begin
   FUndoStack.Clear;
   FPaths.Clear;
@@ -1615,30 +1615,30 @@ begin
 
   for i := 0 to High(AStyles) do
   begin
-    style := TIomStyle.Create(UniqueName('style'));
+    style := TVertexStyle.Create(UniqueName('style'));
     style.FromHvifStyle(AStyles[i]);
     FStyles.Add(style);
   end;
 
   for i := 0 to High(APaths) do
   begin
-    path := TIomPath.Create(UniqueName('path'));
+    path := TVertexPath.Create(UniqueName('path'));
     path.FromHvifPath(APaths[i]);
     FPaths.Add(path);
   end;
 
   for i := 0 to High(AShapes) do
   begin
-    shape := TIomShape.Create(UniqueName('shape'));
+    shape := TVertexShape.Create(UniqueName('shape'));
     { Resolve style index → object reference }
     if AShapes[i].StyleIndex < FStyles.Count then
-      shape.Style := TIomStyle(FStyles[AShapes[i].StyleIndex]);
+      shape.Style := TVertexStyle(FStyles[AShapes[i].StyleIndex]);
     { Resolve path indices → object references }
     for j := 0 to High(AShapes[i].PathIndices) do
     begin
       pIdx := AShapes[i].PathIndices[j];
       if pIdx < FPaths.Count then
-        shape.AddPathRef(TIomPath(FPaths[pIdx]));
+        shape.AddPathRef(TVertexPath(FPaths[pIdx]));
     end;
     { Copy transform, LOD, transformer from raw record }
     shape.HasTransform   := AShapes[i].HasTransform;
@@ -1647,7 +1647,7 @@ begin
     shape.TranslateY     := AShapes[i].TranslateY;
     if AShapes[i].HasStroke then
     begin
-      xf := Default(TIomTransformer);
+      xf := Default(TVertexTransformer);
       xf.TransType  := ittStroke;
       xf.Width      := AShapes[i].StrokeWidth;
       xf.LineCap    := AShapes[i].StrokeLineCap;
@@ -1661,10 +1661,10 @@ begin
   FDirty := False;
 end;
 
-function TIomDocument.BuildWriter: THvifWriter;
+function TVertexDocument.BuildWriter: THvifWriter;
 var
   i, j:     Integer;
-  shape:    TIomShape;
+  shape:    TVertexShape;
   pathIdxs: array of Byte;
   sIdx:     Integer;
   writer:   THvifWriter;
@@ -1672,14 +1672,14 @@ begin
   writer := THvifWriter.Create;
   try
     for i := 0 to FStyles.Count - 1 do
-      writer.AddStyle(TIomStyle(FStyles[i]).ToHvifStyle);
+      writer.AddStyle(TVertexStyle(FStyles[i]).ToHvifStyle);
 
     for i := 0 to FPaths.Count - 1 do
-      writer.AddPath(TIomPath(FPaths[i]).ToHvifPath);
+      writer.AddPath(TVertexPath(FPaths[i]).ToHvifPath);
 
     for i := 0 to FShapes.Count - 1 do
     begin
-      shape := TIomShape(FShapes[i]);
+      shape := TVertexShape(FShapes[i]);
       sIdx  := FStyles.IndexOf(shape.Style);
       if sIdx < 0 then
         raise EHvifError.CreateFmt(
@@ -1701,7 +1701,7 @@ begin
   end;
 end;
 
-procedure TIomDocument.LoadFromStream(AStream: TStream);
+procedure TVertexDocument.LoadFromStream(AStream: TStream);
 var
   icon:      THvifIcon;
   rawStyles: array of THvifStyle;
@@ -1728,7 +1728,7 @@ begin
   FromHvifArrays(rawStyles, rawPaths, rawShapes);
 end;
 
-procedure TIomDocument.SaveToStream(AStream: TStream);
+procedure TVertexDocument.SaveToStream(AStream: TStream);
 var
   writer: THvifWriter;
 begin
@@ -1740,7 +1740,7 @@ begin
   end;
 end;
 
-procedure TIomDocument.LoadFromFile(const AFileName: string);
+procedure TVertexDocument.LoadFromFile(const AFileName: string);
 var
   fs: TFileStream;
 begin
@@ -1752,7 +1752,7 @@ begin
   end;
 end;
 
-procedure TIomDocument.SaveToFile(const AFileName: string);
+procedure TVertexDocument.SaveToFile(const AFileName: string);
 var
   fs: TFileStream;
 begin
@@ -1765,7 +1765,7 @@ begin
   MarkClean;
 end;
 
-procedure TIomDocument.MarkClean;
+procedure TVertexDocument.MarkClean;
 begin
   FDirty := False;
   FUndoStack.Clear;

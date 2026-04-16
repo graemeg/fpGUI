@@ -19,8 +19,8 @@
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
     <module activeByDefault="false">tools/imageconvert</module>
-    <module activeByDefault="false">tools/iom-canvas-demo</module>
-    <module activeByDefault="false">tools/icon-o-matic</module>
+    <module activeByDefault="false">tools/vertex-canvas-demo</module>
+    <module activeByDefault="false">tools/vertex</module>
   </modules>
 
   <profiles>

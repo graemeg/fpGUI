@@ -1,9 +1,9 @@
-unit iom.frm.main;
+unit vertex.frm.main;
 
 {
-  TIomMainForm — the top-level editor window.
+  TVertexMainForm — the top-level editor window.
 
-  Step #5: wire TIomDocument + interactive editing + undo/redo.
+  Step #5: wire TVertexDocument + interactive editing + undo/redo.
   Step #7: style editing panel with RGBA spin edits + Apply (undo-aware).
 
   Layout (MiG docking):
@@ -31,14 +31,14 @@ uses
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   fpg_dialogs,
   fpg_hvif_model,
-  fpg_iom_document,
-  iom.wgt.canvas,
-  iom.wgt.stylepanel,
-  iom.wgt.previewbar;
+  fpg_vertex_document,
+  vertex.wgt.canvas,
+  vertex.wgt.stylepanel,
+  vertex.wgt.previewbar;
 
 
 type
-  TIomMainForm = class(TfpgForm)
+  TVertexMainForm = class(TfpgForm)
   private
     { Widgets }
     FMenuBar:     TfpgMenuBar;
@@ -47,19 +47,19 @@ type
     FMnuHelp:     TfpgPopupMenu;
     FToolBox:       TfpgBevel;
     FToolLabel:     TfpgLabel;
-    FIomCanvas:     TIomCanvasWidget;
+    FCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
-    FPreviewBar:    TIomPreviewBar;
+    FPreviewBar:    TVertexPreviewBar;
     FObjectTree:    TfpgTreeView;
     FShapeBar:      TfpgBevel;
     FBtnShapeAdd:   TfpgButton;
     FBtnShapeDel:   TfpgButton;
     FBtnShapeUp:    TfpgButton;
     FBtnShapeDown:  TfpgButton;
-    FStylePanel:    TIomStylePanel;
+    FStylePanel:    TVertexStylePanel;
 
     { Data }
-    FDocument:   TIomDocument;    { owned }
+    FDocument:   TVertexDocument;    { owned }
     FShapesNode: TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
 
     { Setup helpers }
@@ -71,7 +71,7 @@ type
     procedure ClearObjectTree;
 
     { Document change handler — owns FDocument.OnChange; dispatches to canvas + style panel }
-    procedure HandleDocumentChange(Sender: TIomDocument; ACmd: TIomCommand);
+    procedure HandleDocumentChange(Sender: TVertexDocument; ACmd: TVertexCommand);
 
     { Menu handlers }
     procedure miFileOpenClick(Sender: TObject);
@@ -101,33 +101,33 @@ type
 implementation
 
 
-{ ── TIomMainForm ─────────────────────────────────────────────────────────── }
+{ ── TVertexMainForm ─────────────────────────────────────────────────────────── }
 
-destructor TIomMainForm.Destroy;
+destructor TVertexMainForm.Destroy;
 begin
   FDocument.OnChange := nil;    { clear before widgets are torn down }
   FPreviewBar.SetDocument(nil);
   FStylePanel.SetDocument(nil);
-  FIomCanvas.SetDocument(nil);
+  FCanvas.SetDocument(nil);
   FDocument.Free;
   inherited Destroy;
 end;
 
-procedure TIomMainForm.AfterCreate;
+procedure TVertexMainForm.AfterCreate;
 begin
   inherited AfterCreate;
-  FDocument   := TIomDocument.Create;
-  WindowTitle := 'Icon-O-Matic';
+  FDocument   := TVertexDocument.Create;
+  WindowTitle := 'Vertex';
   SetPosition(80, 80, 960, 640);
   SetupMenus;
   SetupLayout;
   FDocument.OnChange := @HandleDocumentChange;
-  FIomCanvas.SetDocument(FDocument);
+  FCanvas.SetDocument(FDocument);
   FStylePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
 end;
 
-procedure TIomMainForm.SetupMenus;
+procedure TVertexMainForm.SetupMenus;
 begin
   FMnuFile := TfpgPopupMenu.Create(Self);
   with FMnuFile do
@@ -160,7 +160,7 @@ begin
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FMnuHelp;
 end;
 
-procedure TIomMainForm.SetupLayout;
+procedure TVertexMainForm.SetupLayout;
 var
   mig:     TfpgMigLayoutManager;
   rmig:    TfpgMigLayoutManager;
@@ -187,10 +187,10 @@ begin
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
   { Canvas — centre, takes all remaining space }
-  FIomCanvas := TIomCanvasWidget.Create(Self);
-  FIomCanvas.Name := 'iomCanvas';
-  FIomCanvas.PreferredSize := fpgSize(512, 512);
-  mig.AddLayoutComponent(FIomCanvas, TfpgMigCC.Create().GrowX().GrowY());
+  FCanvas := TVertexCanvasWidget.Create(Self);
+  FCanvas.Name := 'vertexCanvas';
+  FCanvas.PreferredSize := fpgSize(512, 512);
+  mig.AddLayoutComponent(FCanvas, TfpgMigCC.Create().GrowX().GrowY());
 
   { Right panel — contains object tree (top, grows) + style panel (bottom, fixed) }
   FRightPanel := TfpgBevel.Create(Self);
@@ -202,7 +202,7 @@ begin
   rmig.LC.Fill.WrapAfter(1);
   FRightPanel.LayoutManager := rmig;
 
-  FPreviewBar := TIomPreviewBar.Create(FRightPanel);
+  FPreviewBar := TVertexPreviewBar.Create(FRightPanel);
   FPreviewBar.Name := 'previewBar';
   rmig.AddLayoutComponent(FPreviewBar, TfpgMigCC.Create().GrowX());
 
@@ -240,7 +240,7 @@ begin
 
   rmig.AddLayoutComponent(FShapeBar, TfpgMigCC.Create().GrowX());
 
-  FStylePanel := TIomStylePanel.Create(FRightPanel);
+  FStylePanel := TVertexStylePanel.Create(FRightPanel);
   FStylePanel.Name := 'stylePanel';
   rmig.AddLayoutComponent(FStylePanel, TfpgMigCC.Create().GrowX());
 
@@ -250,10 +250,10 @@ end;
 
 { ── Document change handler ──────────────────────────────────────────────── }
 
-procedure TIomMainForm.HandleDocumentChange(Sender: TIomDocument;
-    ACmd: TIomCommand);
+procedure TVertexMainForm.HandleDocumentChange(Sender: TVertexDocument;
+    ACmd: TVertexCommand);
 begin
-  FIomCanvas.DocumentChanged;
+  FCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
   FPreviewBar.DocumentChanged;
 end;
@@ -261,7 +261,7 @@ end;
 
 { ── Object tree ──────────────────────────────────────────────────────────── }
 
-procedure TIomMainForm.ClearObjectTree;
+procedure TVertexMainForm.ClearObjectTree;
 begin
   FShapesNode := nil;
   FObjectTree.BeginUpdate;
@@ -269,14 +269,14 @@ begin
   FObjectTree.EndUpdate;
 end;
 
-procedure TIomMainForm.PopulateObjectTree;
+procedure TVertexMainForm.PopulateObjectTree;
 var
   nStyles, nPaths, nShapes: TfpgTreeNode;
   n: TfpgTreeNode;
   i: Integer;
-  st: TIomStyle;
-  ph: TIomPath;
-  sh: TIomShape;
+  st: TVertexStyle;
+  ph: TVertexPath;
+  sh: TVertexShape;
   s: string;
 begin
   if FDocument = nil then
@@ -352,7 +352,7 @@ end;
 
 { ── Shape management ─────────────────────────────────────────────────────── }
 
-procedure TIomMainForm.SelectShapeInTree(AShapeIdx: Integer);
+procedure TVertexMainForm.SelectShapeInTree(AShapeIdx: Integer);
 var
   n: TfpgTreeNode;
 begin
@@ -370,24 +370,24 @@ begin
   end;
 end;
 
-procedure TIomMainForm.ShapeAdd(Sender: TObject);
+procedure TVertexMainForm.ShapeAdd(Sender: TObject);
 var
-  style:  TIomStyle;
-  path:   TIomPath;
-  shape:  TIomShape;
-  pt:     TIomPoint;
+  style:  TVertexStyle;
+  path:   TVertexPath;
+  shape:  TVertexShape;
+  pt:     TVertexPoint;
   col:    THvifColor;
-  cmd:    TIomCmdNewShape;
+  cmd:    TVertexCmdNewShape;
   newIdx: Integer;
 begin
   { New solid-colour style: opaque blue }
-  style           := TIomStyle.Create(FDocument.UniqueName('style'));
+  style           := TVertexStyle.Create(FDocument.UniqueName('style'));
   style.StyleType := hstSolidColor;
   col.R := $44; col.G := $88; col.B := $FF; col.A := $FF;
   style.Color := col;
 
   { New diamond path centred in the 64×64 HVIF coordinate space }
-  path        := TIomPath.Create(FDocument.UniqueName('path'));
+  path        := TVertexPath.Create(FDocument.UniqueName('path'));
   path.Closed := True;
   FillChar(pt, SizeOf(pt), 0);
 
@@ -401,12 +401,12 @@ begin
   path.AddPoint(pt);
 
   { New shape referencing style and path }
-  shape         := TIomShape.Create(FDocument.UniqueName('shape'));
+  shape         := TVertexShape.Create(FDocument.UniqueName('shape'));
   shape.Style   := style;
   shape.Visible := True;
   shape.AddPathRef(path);
 
-  cmd := TIomCmdNewShape.Create(FDocument, style, path, shape);
+  cmd := TVertexCmdNewShape.Create(FDocument, style, path, shape);
   FDocument.UndoStack.Execute(cmd);
 
   newIdx := FDocument.ShapeCount - 1;
@@ -414,12 +414,12 @@ begin
   SelectShapeInTree(newIdx);
 end;
 
-procedure TIomMainForm.ShapeDelete(Sender: TObject);
+procedure TVertexMainForm.ShapeDelete(Sender: TObject);
 var
   node:   TfpgTreeNode;
   idx:    Integer;
-  shape:  TIomShape;
-  cmd:    TIomCmdDeleteShape;
+  shape:  TVertexShape;
+  cmd:    TVertexCmdDeleteShape;
   newSel: Integer;
 begin
   node := FObjectTree.Selection;
@@ -436,21 +436,21 @@ begin
   if FDocument.ShapeCount <= 1 then
     newSel := -1;
 
-  cmd := TIomCmdDeleteShape.Create(FDocument, shape);
+  cmd := TVertexCmdDeleteShape.Create(FDocument, shape);
   FDocument.UndoStack.Execute(cmd);
 
-  FIomCanvas.SelectedShapeIndex := -1;
+  FCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
   if newSel >= 0 then
     SelectShapeInTree(newSel);
 end;
 
-procedure TIomMainForm.ShapeMoveUp(Sender: TObject);
+procedure TVertexMainForm.ShapeMoveUp(Sender: TObject);
 var
   node: TfpgTreeNode;
   idx:  Integer;
-  cmd:  TIomCmdMoveShape;
+  cmd:  TVertexCmdMoveShape;
 begin
   node := FObjectTree.Selection;
   if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
@@ -459,18 +459,18 @@ begin
   if idx <= 0 then
     Exit;
 
-  cmd := TIomCmdMoveShape.Create(FDocument, idx, idx - 1);
+  cmd := TVertexCmdMoveShape.Create(FDocument, idx, idx - 1);
   FDocument.UndoStack.Execute(cmd);
 
   PopulateObjectTree;
   SelectShapeInTree(idx - 1);
 end;
 
-procedure TIomMainForm.ShapeMoveDown(Sender: TObject);
+procedure TVertexMainForm.ShapeMoveDown(Sender: TObject);
 var
   node: TfpgTreeNode;
   idx:  Integer;
-  cmd:  TIomCmdMoveShape;
+  cmd:  TVertexCmdMoveShape;
 begin
   node := FObjectTree.Selection;
   if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
@@ -479,7 +479,7 @@ begin
   if idx >= FDocument.ShapeCount - 1 then
     Exit;
 
-  cmd := TIomCmdMoveShape.Create(FDocument, idx, idx + 1);
+  cmd := TVertexCmdMoveShape.Create(FDocument, idx, idx + 1);
   FDocument.UndoStack.Execute(cmd);
 
   PopulateObjectTree;
@@ -489,7 +489,7 @@ end;
 
 { ── Tree event handler ───────────────────────────────────────────────────── }
 
-procedure TIomMainForm.ObjectTreeChanged(Sender: TObject);
+procedure TVertexMainForm.ObjectTreeChanged(Sender: TObject);
 var
   node: TfpgTreeNode;
   idx: Integer;
@@ -498,14 +498,14 @@ begin
   if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
     Exit;
   idx := Integer(PtrUInt(node.Data));
-  FIomCanvas.SelectedShapeIndex := idx;
+  FCanvas.SelectedShapeIndex := idx;
   FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
 end;
 
 
 { ── Menu handlers ────────────────────────────────────────────────────────── }
 
-procedure TIomMainForm.miFileOpenClick(Sender: TObject);
+procedure TVertexMainForm.miFileOpenClick(Sender: TObject);
 var
   fn: string;
 begin
@@ -518,55 +518,55 @@ begin
   except
     on E: Exception do
     begin
-      ShowMessage('Open failed: ' + E.Message, 'Icon-O-Matic');
+      ShowMessage('Open failed: ' + E.Message, 'Vertex');
       Exit;
     end;
   end;
 
   { Notify canvas and preview bar of the load; clear style panel selection }
-  FIomCanvas.DocumentChanged;
+  FCanvas.DocumentChanged;
   FPreviewBar.DocumentChanged;
-  FIomCanvas.SelectedShapeIndex := -1;
+  FCanvas.SelectedShapeIndex := -1;
   FStylePanel.SetStyle(nil);
   PopulateObjectTree;
-  WindowTitle := 'Icon-O-Matic — ' + ExtractFileName(fn);
+  WindowTitle := 'Vertex — ' + ExtractFileName(fn);
 end;
 
-procedure TIomMainForm.miFileExitClick(Sender: TObject);
+procedure TVertexMainForm.miFileExitClick(Sender: TObject);
 begin
   Close;
 end;
 
-procedure TIomMainForm.miEditUndoClick(Sender: TObject);
+procedure TVertexMainForm.miEditUndoClick(Sender: TObject);
 begin
   if FDocument.UndoStack.CanUndo then
   begin
     FDocument.UndoStack.Undo;
     { Tree structure may have changed (e.g. undo of AddShape) — repopulate. }
-    FIomCanvas.SelectedShapeIndex := -1;
+    FCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     PopulateObjectTree;
   end;
 end;
 
-procedure TIomMainForm.miEditRedoClick(Sender: TObject);
+procedure TVertexMainForm.miEditRedoClick(Sender: TObject);
 begin
   if FDocument.UndoStack.CanRedo then
   begin
     FDocument.UndoStack.Redo;
-    FIomCanvas.SelectedShapeIndex := -1;
+    FCanvas.SelectedShapeIndex := -1;
     FStylePanel.SetStyle(nil);
     PopulateObjectTree;
   end;
 end;
 
-procedure TIomMainForm.miHelpAboutClick(Sender: TObject);
+procedure TVertexMainForm.miHelpAboutClick(Sender: TObject);
 begin
   ShowMessage(
-      'fpGUI Icon-O-Matic' + LineEnding +
+      'Vertex' + LineEnding +
       'HVIF icon editor for the fpGUI toolkit.' + LineEnding + LineEnding +
       'Step 8: Shape/path management (add, delete, reorder)',
-      'About Icon-O-Matic');
+      'About Vertex');
 end;
 
 end.

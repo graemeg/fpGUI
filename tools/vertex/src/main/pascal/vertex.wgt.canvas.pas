@@ -1,10 +1,10 @@
-unit iom.wgt.canvas;
+unit vertex.wgt.canvas;
 
 {
-  TIomCanvasWidget — renders the HVIF icon from TIomDocument and provides
+  TVertexCanvasWidget — renders the HVIF icon from TVertexDocument and provides
   interactive path editing via drag of anchor nodes and Bezier handles.
 
-  Step #5: interactive editing wired to TIomDocument + undo stack.
+  Step #5: interactive editing wired to TVertexDocument + undo stack.
   Step #6: node add (click on segment) and delete (Delete/Backspace key).
 
   Rendering:
@@ -18,15 +18,15 @@ unit iom.wgt.canvas;
   Drag model (snapshot-on-down, live-update, commit-on-up):
     MouseDown  — snapshot FDragPtBefore; record which node/handle was hit.
     MouseMove  — update path point directly (bypasses undo stack for live preview).
-    MouseUp    — create TIomCmdMoveNode / TIomCmdMoveHandle with before/after
+    MouseUp    — create TVertexCmdMoveNode / TVertexCmdMoveHandle with before/after
                  snapshots and call FDocument.UndoStack.Execute(cmd).
 
   Node add:
     Click on a bezier segment → de Casteljau split at hit parameter t.
-    Creates TIomCmdAddPoint which updates adjacent handles and inserts the node.
+    Creates TVertexCmdAddPoint which updates adjacent handles and inserts the node.
 
   Node delete:
-    Delete or Backspace when a node is selected → TIomCmdDeletePoint.
+    Delete or Backspace when a node is selected → TVertexCmdDeletePoint.
     Blocked when the path would have fewer than 2 nodes remaining.
 
   Coordinate mapping:
@@ -45,16 +45,16 @@ uses
   Classes, SysUtils, Math,
   fpg_base, fpg_main, fpg_widget,
   fpg_hvif, fpg_hvif_writer,
-  fpg_iom_document;
+  fpg_vertex_document;
 
 
 type
   TDragTarget = (dtNone, dtAnchor, dtInHandle, dtOutHandle);
 
-  TIomCanvasWidget = class(TfpgWidget)
+  TVertexCanvasWidget = class(TfpgWidget)
   private
     { Data (not owned) }
-    FDocument: TIomDocument;
+    FDocument: TVertexDocument;
 
     { Rendered image cache (owned) }
     FIcon:      THvifIcon;
@@ -68,12 +68,12 @@ type
     { Selection }
     FSelectedShapeIdx: Integer;   { -1 = none }
     FSelectedNodeIdx:  Integer;   { -1 = none; index within FActivePath }
-    FActivePath:       TIomPath;  { nil = none; which path owns the selected node }
+    FActivePath:       TVertexPath;  { nil = none; which path owns the selected node }
 
     { Drag state }
     FDragTarget:   TDragTarget;
     FDragOffX, FDragOffY: Integer;  { mouse offset from exact node screen position }
-    FDragPtBefore: TIomPoint;       { snapshot of the point at drag-start }
+    FDragPtBefore: TVertexPoint;       { snapshot of the point at drag-start }
 
     { Coordinate helpers }
     function  HvifToScreenX(AHvif: Single): Integer;
@@ -92,10 +92,10 @@ type
                               AFill, ABorder: TfpgColor; ASelected: Boolean);
 
     { Hit-testing }
-    function HitTestNodes(AX, AY: Integer; out APath: TIomPath;
+    function HitTestNodes(AX, AY: Integer; out APath: TVertexPath;
                           out ANodeIdx: Integer;
                           out ATarget: TDragTarget): Boolean;
-    function HitTestSegments(AX, AY: Integer; out APath: TIomPath;
+    function HitTestSegments(AX, AY: Integer; out APath: TVertexPath;
                              out ASegmentIdx: Integer;
                              out AT: Single): Boolean;
 
@@ -116,7 +116,7 @@ type
     destructor  Destroy; override;
 
     { Assign the document to render and edit. Pass nil to clear. }
-    procedure SetDocument(ADoc: TIomDocument);
+    procedure SetDocument(ADoc: TVertexDocument);
 
     { Call after an external change (undo/redo from main form menu). }
     procedure DocumentChanged;
@@ -187,9 +187,9 @@ begin
 end;
 
 
-{ ── TIomCanvasWidget ─────────────────────────────────────────────────────── }
+{ ── TVertexCanvasWidget ─────────────────────────────────────────────────────── }
 
-constructor TIomCanvasWidget.Create(AOwner: TComponent);
+constructor TVertexCanvasWidget.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable         := True;
@@ -203,13 +203,13 @@ begin
   FScale            := 4.0;   { default: 256px / 64 units }
 end;
 
-destructor TIomCanvasWidget.Destroy;
+destructor TVertexCanvasWidget.Destroy;
 begin
   FIcon.Free;
   inherited Destroy;
 end;
 
-procedure TIomCanvasWidget.SetDocument(ADoc: TIomDocument);
+procedure TVertexCanvasWidget.SetDocument(ADoc: TVertexDocument);
 begin
   if FDocument = ADoc then
     Exit;
@@ -223,13 +223,13 @@ begin
   Repaint;
 end;
 
-procedure TIomCanvasWidget.DocumentChanged;
+procedure TVertexCanvasWidget.DocumentChanged;
 begin
   FIconDirty := True;
   Repaint;
 end;
 
-procedure TIomCanvasWidget.SetSelectedShapeIndex(AValue: Integer);
+procedure TVertexCanvasWidget.SetSelectedShapeIndex(AValue: Integer);
 begin
   if FSelectedShapeIdx = AValue then
     Exit;
@@ -242,17 +242,17 @@ end;
 
 { ── Coordinate helpers ───────────────────────────────────────────────────── }
 
-function TIomCanvasWidget.HvifToScreenX(AHvif: Single): Integer;
+function TVertexCanvasWidget.HvifToScreenX(AHvif: Single): Integer;
 begin
   Result := FIconOX + Round(AHvif * FScale);
 end;
 
-function TIomCanvasWidget.HvifToScreenY(AHvif: Single): Integer;
+function TVertexCanvasWidget.HvifToScreenY(AHvif: Single): Integer;
 begin
   Result := FIconOY + Round(AHvif * FScale);
 end;
 
-function TIomCanvasWidget.ScreenToHvifX(AScreen: Integer): Single;
+function TVertexCanvasWidget.ScreenToHvifX(AScreen: Integer): Single;
 begin
   if FScale > 0 then
     Result := (AScreen - FIconOX) / FScale
@@ -260,7 +260,7 @@ begin
     Result := 0;
 end;
 
-function TIomCanvasWidget.ScreenToHvifY(AScreen: Integer): Single;
+function TVertexCanvasWidget.ScreenToHvifY(AScreen: Integer): Single;
 begin
   if FScale > 0 then
     Result := (AScreen - FIconOY) / FScale
@@ -268,7 +268,7 @@ begin
     Result := 0;
 end;
 
-procedure TIomCanvasWidget.UpdateIconGeometry;
+procedure TVertexCanvasWidget.UpdateIconGeometry;
 var
   sz: Integer;
 begin
@@ -284,7 +284,7 @@ end;
 
 { ── Rendering ────────────────────────────────────────────────────────────── }
 
-procedure TIomCanvasWidget.RebuildIcon;
+procedure TVertexCanvasWidget.RebuildIcon;
 var
   writer: THvifWriter;
   ms:     TMemoryStream;
@@ -307,7 +307,7 @@ begin
   end;
 end;
 
-procedure TIomCanvasWidget.DrawCheckerboard;
+procedure TVertexCanvasWidget.DrawCheckerboard;
 var
   col, row: Integer;
 begin
@@ -330,7 +330,7 @@ begin
   end;
 end;
 
-procedure TIomCanvasWidget.DrawHvifImage;
+procedure TVertexCanvasWidget.DrawHvifImage;
 var
   img: TfpgImage;
 begin
@@ -341,14 +341,14 @@ begin
     Canvas.DrawImage(FIconOX, FIconOY, img);
 end;
 
-procedure TIomCanvasWidget.DrawEmptyHint;
+procedure TVertexCanvasWidget.DrawEmptyHint;
 begin
   Canvas.SetTextColor($FF888888);
   Canvas.DrawString(Width div 2 - 90, Height div 2 - 8,
       'File > Open to load an HVIF icon');
 end;
 
-procedure TIomCanvasWidget.DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
+procedure TVertexCanvasWidget.DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
     AFill, ABorder: TfpgColor; ASelected: Boolean);
 var
   bx, by, bd: Integer;
@@ -365,12 +365,12 @@ begin
   Canvas.DrawArc(bx, by, bd, bd, 0, 360);
 end;
 
-procedure TIomCanvasWidget.DrawControlOverlay;
+procedure TVertexCanvasWidget.DrawControlOverlay;
 var
-  shape: TIomShape;
+  shape: TVertexShape;
   pi, ni: Integer;
-  path: TIomPath;
-  pt: TIomPoint;
+  path: TVertexPath;
+  pt: TVertexPoint;
   ax, ay, ihx, ihy, ohx, ohy: Integer;
   isSelNode: Boolean;
 begin
@@ -404,7 +404,7 @@ begin
   end;
 end;
 
-procedure TIomCanvasWidget.HandlePaint;
+procedure TVertexCanvasWidget.HandlePaint;
 begin
   Canvas.BeginDraw;
   try
@@ -435,7 +435,7 @@ begin
   end;
 end;
 
-procedure TIomCanvasWidget.HandleResize(awidth, aheight: TfpgCoord);
+procedure TVertexCanvasWidget.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   if FIcon <> nil then
@@ -447,13 +447,13 @@ end;
 
 { ── Hit-testing ──────────────────────────────────────────────────────────── }
 
-function TIomCanvasWidget.HitTestNodes(AX, AY: Integer; out APath: TIomPath;
+function TVertexCanvasWidget.HitTestNodes(AX, AY: Integer; out APath: TVertexPath;
     out ANodeIdx: Integer; out ATarget: TDragTarget): Boolean;
 var
-  shape: TIomShape;
+  shape: TVertexShape;
   pi, ni: Integer;
-  path: TIomPath;
-  pt: TIomPoint;
+  path: TVertexPath;
+  pt: TVertexPoint;
   sx, sy, dx, dy: Integer;
 begin
   Result := False;
@@ -496,13 +496,13 @@ begin
   end;
 end;
 
-function TIomCanvasWidget.HitTestSegments(AX, AY: Integer;
-    out APath: TIomPath; out ASegmentIdx: Integer; out AT: Single): Boolean;
+function TVertexCanvasWidget.HitTestSegments(AX, AY: Integer;
+    out APath: TVertexPath; out ASegmentIdx: Integer; out AT: Single): Boolean;
 var
-  shape: TIomShape;
+  shape: TVertexShape;
   pi, ni, si, segCount: Integer;
-  path: TIomPath;
-  n0, n1: TIomPoint;
+  path: TVertexPath;
+  n0, n1: TVertexPoint;
   t, bx, by, dx, dy, dist2, bestDist2: Single;
   sx0, sy0, sx1, sy1, sx2, sy2, sx3, sy3: Single;
   u: Single;
@@ -563,10 +563,10 @@ end;
 
 { ── Keyboard handling ────────────────────────────────────────────────────── }
 
-procedure TIomCanvasWidget.HandleKeyPress(var keycode: word;
+procedure TVertexCanvasWidget.HandleKeyPress(var keycode: word;
     var shiftstate: TShiftState; var consumed: boolean);
 var
-  cmd: TIomCmdDeletePoint;
+  cmd: TVertexCmdDeletePoint;
 begin
   if (keycode = keyDelete) or (keycode = keyBackSpace) then
   begin
@@ -574,7 +574,7 @@ begin
        (FActivePath <> nil) and
        (FActivePath.PointCount > MIN_PATH_NODES) then
     begin
-      cmd := TIomCmdDeletePoint.Create(FActivePath, FSelectedNodeIdx);
+      cmd := TVertexCmdDeletePoint.Create(FActivePath, FSelectedNodeIdx);
       { Adjust selection before firing the command so the overlay is consistent }
       if FSelectedNodeIdx >= FActivePath.PointCount - 1 then
         FSelectedNodeIdx := FActivePath.PointCount - 2
@@ -594,26 +594,26 @@ end;
 
 { ── Mouse event handling ─────────────────────────────────────────────────── }
 
-procedure TIomCanvasWidget.HandleLMouseDown(x, y: integer;
+procedure TVertexCanvasWidget.HandleLMouseDown(x, y: integer;
     shiftstate: TShiftState);
 var
-  hitPath:   TIomPath;
+  hitPath:   TVertexPath;
   hitNode:   Integer;
   hitTarget: TDragTarget;
-  segPath:   TIomPath;
+  segPath:   TVertexPath;
   segIdx:    Integer;
   segT:      Single;
-  n0, n1:    TIomPoint;
+  n0, n1:    TVertexPoint;
   prevIdx, nextIdx, insertIdx: Integer;
-  newPt:     TIomPoint;
-  prevAfter, nextAfter: TIomPoint;
+  newPt:     TVertexPoint;
+  prevAfter, nextAfter: TVertexPoint;
   splitX, splitY: Single;
   prevOutX, prevOutY: Single;
   newInX,   newInY:   Single;
   newOutX,  newOutY:  Single;
   nextInX,  nextInY:  Single;
-  cmd: TIomCmdAddPoint;
-  pt: TIomPoint;
+  cmd: TVertexCmdAddPoint;
+  pt: TVertexPoint;
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
@@ -675,7 +675,7 @@ begin
         nextInX, nextInY);
 
     { Build the new node }
-    newPt        := Default(TIomPoint);
+    newPt        := Default(TVertexPoint);
     newPt.X      := splitX;   newPt.Y      := splitY;
     newPt.InX    := newInX;   newPt.InY    := newInY;
     newPt.OutX   := newOutX;  newPt.OutY   := newOutY;
@@ -688,7 +688,7 @@ begin
     nextAfter      := n1;
     nextAfter.InX  := nextInX;   nextAfter.InY  := nextInY;
 
-    cmd := TIomCmdAddPoint.Create(segPath, insertIdx, prevIdx, nextIdx,
+    cmd := TVertexCmdAddPoint.Create(segPath, insertIdx, prevIdx, nextIdx,
                newPt, n0, prevAfter, n1, nextAfter);
     FDocument.UndoStack.Execute(cmd);
 
@@ -707,11 +707,11 @@ begin
   Repaint;
 end;
 
-procedure TIomCanvasWidget.HandleLMouseUp(x, y: integer;
+procedure TVertexCanvasWidget.HandleLMouseUp(x, y: integer;
     shiftstate: TShiftState);
 var
-  ptAfter: TIomPoint;
-  cmd: TIomCommand;
+  ptAfter: TVertexPoint;
+  cmd: TVertexCommand;
 begin
   if (FDragTarget = dtNone) or (FActivePath = nil) then
     Exit;
@@ -725,13 +725,13 @@ begin
   begin
     case FDragTarget of
       dtAnchor:
-        cmd := TIomCmdMoveNode.Create(
+        cmd := TVertexCmdMoveNode.Create(
                    FActivePath, FSelectedNodeIdx, FDragPtBefore, ptAfter);
       dtInHandle:
-        cmd := TIomCmdMoveHandle.Create(
+        cmd := TVertexCmdMoveHandle.Create(
                    FActivePath, FSelectedNodeIdx, True, FDragPtBefore, ptAfter);
       dtOutHandle:
-        cmd := TIomCmdMoveHandle.Create(
+        cmd := TVertexCmdMoveHandle.Create(
                    FActivePath, FSelectedNodeIdx, False, FDragPtBefore, ptAfter);
     else
       cmd := nil;
@@ -743,11 +743,11 @@ begin
   FDragTarget := dtNone;
 end;
 
-procedure TIomCanvasWidget.HandleMouseMove(x, y: integer; btnstate: word;
+procedure TVertexCanvasWidget.HandleMouseMove(x, y: integer; btnstate: word;
     shiftstate: TShiftState);
 var
   hvx, hvy: Single;
-  newPt: TIomPoint;
+  newPt: TVertexPoint;
 begin
   if (FDragTarget = dtNone) or (FActivePath = nil) then
     Exit;

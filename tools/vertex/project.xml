@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-  <name>fpgui-iom-canvas-demo</name>
+  <name>fpgui-vertex</name>
   <author>Graeme Geldenhuys</author>
   <license>BSD-3-Clause</license>
 
   <build>
     <projectType>application</projectType>
-    <mainSource>iom_demo.pas</mainSource>
-    <executableName>iom-canvas-demo</executableName>
+    <mainSource>vertex.pas</mainSource>
+    <executableName>vertex</executableName>
     <sourceDirectory>src/main/pascal</sourceDirectory>
   </build>
 

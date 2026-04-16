@@ -1,7 +1,7 @@
-unit iom.wgt.stylepanel;
+unit vertex.wgt.stylepanel;
 
 {
-  TIomStylePanel — shows and edits the style of the currently selected shape.
+  TVertexStylePanel — shows and edits the style of the currently selected shape.
 
   Step #7: solid-colour style editing with undo support (no Apply button).
 
@@ -13,7 +13,7 @@ unit iom.wgt.stylepanel;
     FAlphaSpin — numeric spin edit for alpha; committed on focus-loss.
 
   Commit model (identical to canvas drag):
-    Every completed gesture creates one TIomCmdSetStyleColour entry on the undo
+    Every completed gesture creates one TVertexCmdSetStyleColour entry on the undo
     stack.  In-progress drags (alpha trackbar) mutate FStyle.Color directly and
     call FDocument.NotifyChanged so the canvas repaints live — no undo entry is
     added until the user releases the slider.
@@ -36,14 +36,14 @@ uses
   fpg_label, fpg_spinedit, fpg_edit, fpg_trackbar,
   fpg_dialogs,
   fpg_hvif_model,
-  fpg_iom_document;
+  fpg_vertex_document;
 
 
 type
-  { ── TIomColorSwatch ─────────────────────────────────────────────────────── }
+  { ── TVertexColorSwatch ─────────────────────────────────────────────────────── }
   { Clickable colour preview rectangle.  Alpha is shown separately by the
     trackbar; the swatch always fills with the solid RGB. }
-  TIomColorSwatch = class(TfpgWidget)
+  TVertexColorSwatch = class(TfpgWidget)
   private
     FColor:   THvifColor;
     FOnClick: TNotifyEvent;
@@ -58,18 +58,18 @@ type
   end;
 
 
-  { ── TIomStylePanel ──────────────────────────────────────────────────────── }
-  TIomStylePanel = class(TfpgBevel)
+  { ── TVertexStylePanel ──────────────────────────────────────────────────────── }
+  TVertexStylePanel = class(TfpgBevel)
   private
-    FDocument:    TIomDocument;   { not owned }
-    FStyle:       TIomStyle;      { current style, not owned; nil = no selection }
+    FDocument:    TVertexDocument;   { not owned }
+    FStyle:       TVertexStyle;      { current style, not owned; nil = no selection }
     FOrigColor:   THvifColor;     { last-committed colour — undo baseline }
     FDragAlpha:   Boolean;        { True while the user is dragging FAlphaBar }
     FUpdating:    Boolean;        { guards recursive OnChange loops }
 
     FLblHeader:   TfpgLabel;
     FLblType:     TfpgLabel;
-    FSwatch:      TIomColorSwatch;
+    FSwatch:      TVertexColorSwatch;
     FHexEdit:     TfpgEdit;
     FLblA:        TfpgLabel;
     FAlphaBar:    TfpgTrackBar;
@@ -100,10 +100,10 @@ type
     constructor Create(AOwner: TComponent); override;
 
     { Connect to the document. Must be called before SetStyle. }
-    procedure SetDocument(ADoc: TIomDocument);
+    procedure SetDocument(ADoc: TVertexDocument);
 
     { Show the given style. Pass nil to clear / show "no selection". }
-    procedure SetStyle(AStyle: TIomStyle);
+    procedure SetStyle(AStyle: TVertexStyle);
 
     { Refresh controls from the current style after an undo/redo. }
     procedure DocumentChanged;
@@ -146,9 +146,9 @@ begin
 end;
 
 
-{ ── TIomColorSwatch ─────────────────────────────────────────────────────── }
+{ ── TVertexColorSwatch ─────────────────────────────────────────────────────── }
 
-constructor TIomColorSwatch.Create(AOwner: TComponent);
+constructor TVertexColorSwatch.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FColor      := Default(THvifColor);
@@ -156,13 +156,13 @@ begin
   MouseCursor := mcHand;
 end;
 
-procedure TIomColorSwatch.SetColor(const AValue: THvifColor);
+procedure TVertexColorSwatch.SetColor(const AValue: THvifColor);
 begin
   FColor := AValue;
   Repaint;
 end;
 
-procedure TIomColorSwatch.HandlePaint;
+procedure TVertexColorSwatch.HandlePaint;
 var
   col: TfpgColor;
 begin
@@ -179,7 +179,7 @@ begin
   end;
 end;
 
-procedure TIomColorSwatch.HandleLMouseDown(x, y: integer;
+procedure TVertexColorSwatch.HandleLMouseDown(x, y: integer;
     shiftstate: TShiftState);
 begin
   if Assigned(FOnClick) then
@@ -187,9 +187,9 @@ begin
 end;
 
 
-{ ── TIomStylePanel ──────────────────────────────────────────────────────── }
+{ ── TVertexStylePanel ──────────────────────────────────────────────────────── }
 
-constructor TIomStylePanel.Create(AOwner: TComponent);
+constructor TVertexStylePanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDocument  := nil;
@@ -201,7 +201,7 @@ begin
   UpdateControls;
 end;
 
-procedure TIomStylePanel.SetupControls;
+procedure TVertexStylePanel.SetupControls;
 begin
   FLblHeader := TfpgLabel.Create(Self);
   FLblHeader.SetPosition(LBL_X, ROW0, 210, 18);
@@ -213,7 +213,7 @@ begin
   FLblType.Text := 'No shape selected';
 
   { Colour row: swatch + hex edit }
-  FSwatch := TIomColorSwatch.Create(Self);
+  FSwatch := TVertexColorSwatch.Create(Self);
   FSwatch.SetPosition(LBL_X, ROW2, SW_W, SW_H);
   FSwatch.OnClick := @SwatchClick;
 
@@ -244,7 +244,7 @@ begin
   FAlphaSpin.OnExit   := @AlphaSpinExit;
 end;
 
-procedure TIomStylePanel.SetControlsEnabled(AEnabled: Boolean);
+procedure TVertexStylePanel.SetControlsEnabled(AEnabled: Boolean);
 begin
   FSwatch.Enabled   := AEnabled;
   FHexEdit.Enabled  := AEnabled;
@@ -253,7 +253,7 @@ begin
   FAlphaSpin.Enabled:= AEnabled;
 end;
 
-procedure TIomStylePanel.LoadColorToControls(const AColor: THvifColor);
+procedure TVertexStylePanel.LoadColorToControls(const AColor: THvifColor);
 begin
   FUpdating := True;
   try
@@ -266,13 +266,13 @@ begin
   end;
 end;
 
-function TIomStylePanel.CurrentColor: THvifColor;
+function TVertexStylePanel.CurrentColor: THvifColor;
 begin
   Result   := FSwatch.Color;
   Result.A := Byte(FAlphaSpin.Value);
 end;
 
-procedure TIomStylePanel.UpdateControls;
+procedure TVertexStylePanel.UpdateControls;
 var
   editable: Boolean;
 begin
@@ -309,16 +309,16 @@ end;
 
 { ── Commit helper ────────────────────────────────────────────────────────── }
 
-procedure TIomStylePanel.CommitColor(const ANew: THvifColor);
+procedure TVertexStylePanel.CommitColor(const ANew: THvifColor);
 var
-  cmd: TIomCmdSetStyleColour;
+  cmd: TVertexCmdSetStyleColour;
 begin
   if (FDocument = nil) or (FStyle = nil) then
     Exit;
   if (ANew.R = FOrigColor.R) and (ANew.G = FOrigColor.G) and
      (ANew.B = FOrigColor.B) and (ANew.A = FOrigColor.A) then
     Exit;  { no change — skip }
-  cmd := TIomCmdSetStyleColour.Create(FStyle, FOrigColor, ANew);
+  cmd := TVertexCmdSetStyleColour.Create(FStyle, FOrigColor, ANew);
   FDocument.UndoStack.Execute(cmd);
   FOrigColor := ANew;   { advance snapshot for the next gesture }
 end;
@@ -326,7 +326,7 @@ end;
 
 { ── Control event handlers ───────────────────────────────────────────────── }
 
-procedure TIomStylePanel.SwatchClick(Sender: TObject);
+procedure TVertexStylePanel.SwatchClick(Sender: TObject);
 var
   preset, picked: TfpgColor;
   c: THvifColor;
@@ -350,7 +350,7 @@ begin
   CommitColor(CurrentColor);
 end;
 
-procedure TIomStylePanel.HexEditExit(Sender: TObject);
+procedure TVertexStylePanel.HexEditExit(Sender: TObject);
 var
   s:       string;
   r, g, b: Integer;
@@ -380,7 +380,7 @@ begin
   CommitColor(CurrentColor);
 end;
 
-procedure TIomStylePanel.AlphaBarChanged(Sender: TObject; APosition: integer);
+procedure TVertexStylePanel.AlphaBarChanged(Sender: TObject; APosition: integer);
 var
   c: THvifColor;
 begin
@@ -403,7 +403,7 @@ begin
   end;
 end;
 
-procedure TIomStylePanel.AlphaBarMouseUp(Sender: TObject; AButton: TMouseButton;
+procedure TVertexStylePanel.AlphaBarMouseUp(Sender: TObject; AButton: TMouseButton;
     AShift: TShiftState; const AMousePos: TPoint);
 begin
   if FDragAlpha then
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-procedure TIomStylePanel.AlphaSpinChanged(Sender: TObject);
+procedure TVertexStylePanel.AlphaSpinChanged(Sender: TObject);
 begin
   if FUpdating then Exit;
   FUpdating := True;
@@ -424,7 +424,7 @@ begin
   end;
 end;
 
-procedure TIomStylePanel.AlphaSpinExit(Sender: TObject);
+procedure TVertexStylePanel.AlphaSpinExit(Sender: TObject);
 begin
   CommitColor(CurrentColor);
 end;
@@ -432,14 +432,14 @@ end;
 
 { ── Public interface ─────────────────────────────────────────────────────── }
 
-procedure TIomStylePanel.SetDocument(ADoc: TIomDocument);
+procedure TVertexStylePanel.SetDocument(ADoc: TVertexDocument);
 begin
   FDocument := ADoc;
   FStyle    := nil;
   UpdateControls;
 end;
 
-procedure TIomStylePanel.SetStyle(AStyle: TIomStyle);
+procedure TVertexStylePanel.SetStyle(AStyle: TVertexStyle);
 begin
   FStyle := AStyle;
   if AStyle <> nil then
@@ -447,7 +447,7 @@ begin
   UpdateControls;
 end;
 
-procedure TIomStylePanel.DocumentChanged;
+procedure TVertexStylePanel.DocumentChanged;
 begin
   if FStyle <> nil then
     UpdateControls;
