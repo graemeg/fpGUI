@@ -55,6 +55,8 @@ type
     FMnuHelp:     TfpgPopupMenu;
     FToolBox:       TfpgBevel;
     FToolLabel:     TfpgLabel;
+    FBtnToolSelect: TfpgButton;   { Select / move shapes tool }
+    FBtnToolNode:   TfpgButton;   { Node edit tool (default) }
     FVertexCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
     FPreviewBar:    TVertexPreviewBar;
@@ -130,6 +132,9 @@ type
 
     { Close-query handler — blocks close if user cancels on dirty document. }
     procedure FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
+
+    { Tool button handlers }
+    procedure ToolBtnClick(Sender: TObject);
 
     { Zoom button handlers }
     procedure ZoomBtnClick(Sender: TObject);
@@ -416,8 +421,22 @@ begin
   FToolLabel := TfpgLabel.Create(FToolBox);
   FToolLabel.Name    := 'lblTools';
   FToolLabel.Text    := 'Tools';
-  FToolLabel.SetPosition(4, 4, 56, 20);
+  FToolLabel.SetPosition(4, 4, 56, 18);
   FToolLabel.FontDesc := '#Label1';
+
+  FBtnToolSelect := TfpgButton.Create(FToolBox);
+  FBtnToolSelect.Text    := 'Sel';
+  FBtnToolSelect.Tag     := 0;   { tmSelect }
+  FBtnToolSelect.SetPosition(2, 24, 60, 26);
+  FBtnToolSelect.OnClick := @ToolBtnClick;
+  FBtnToolSelect.FontDesc := '#Label1';
+
+  FBtnToolNode := TfpgButton.Create(FToolBox);
+  FBtnToolNode.Text    := 'Node';
+  FBtnToolNode.Tag     := 1;   { tmNode }
+  FBtnToolNode.SetPosition(2, 52, 60, 26);
+  FBtnToolNode.OnClick := @ToolBtnClick;
+  FBtnToolNode.FontDesc := '#Label1';
 
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
@@ -1110,6 +1129,23 @@ begin
     ms.Free;
     sl.Free;
   end;
+end;
+
+procedure TVertexMainForm.ToolBtnClick(Sender: TObject);
+var
+  mode: TVertexToolMode;
+begin
+  case TfpgButton(Sender).Tag of
+    0: mode := tmSelect;
+    1: mode := tmNode;
+  else
+    mode := tmNode;
+  end;
+  FVertexCanvas.ToolMode := mode;
+  { Visual feedback: bold the active tool button }
+  FBtnToolSelect.FontDesc := '#Label1';
+  FBtnToolNode.FontDesc   := '#Label1';
+  TfpgButton(Sender).FontDesc := '#Label1:bold';
 end;
 
 procedure TVertexMainForm.SetupContextMenus;

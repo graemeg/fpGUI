@@ -52,6 +52,12 @@ type
   TDragTarget = (dtNone, dtAnchor, dtInHandle, dtOutHandle);
   TVertexCursorMoveEvent = procedure(Sender: TObject; AHvifX, AHvifY: Single) of object;
 
+  { Active editing tool }
+  TVertexToolMode = (
+    tmSelect,    { click/drag to select and translate shapes }
+    tmNode       { drag path nodes and Bezier handles — default mode }
+  );
+
   TVertexCanvasWidget = class(TfpgWidget)
   private
     { Data (not owned) }
@@ -75,6 +81,15 @@ type
     FDragTarget:   TDragTarget;
     FDragOffX, FDragOffY: Integer;  { mouse offset from exact node screen position }
     FDragPtBefore: TVertexPoint;       { snapshot of the point at drag-start }
+
+    { Tool mode }
+    FToolMode: TVertexToolMode;
+
+    { Select-mode drag state }
+    FSelectDragActive: Boolean;
+    FSelectDragStartX, FSelectDragStartY: Integer;   { screen px at drag start }
+    FSelectDragShapeIdx: Integer;                    { shape being dragged, -1=none }
+    FSelectDragShapeOX, FSelectDragShapeOY: Single;  { shape translation at drag start }
 
     { Zoom — negative means "fit to widget" }
     FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
@@ -112,6 +127,10 @@ type
                              out ASegmentIdx: Integer;
                              out AT: Single): Boolean;
 
+    { Returns the index of the topmost shape whose path bounding-box contains
+      the given screen coordinates, or -1 if none. }
+    function HitTestShapeBBox(AX, AY: Integer): Integer;
+
     procedure SetSelectedShapeIndex(AValue: Integer);
     procedure SetZoom(AValue: Integer);
     procedure SetShowGrid(AValue: Boolean);
@@ -144,6 +163,9 @@ type
     { Zoom level: -1 = fit to widget; 50 / 100 / 200 / 400 = fixed percentage.
       Changing this repaints the canvas. }
     property Zoom: Integer read FZoom write SetZoom;
+
+    { Active tool mode — determines how mouse events are interpreted. }
+    property ToolMode: TVertexToolMode read FToolMode write FToolMode;
 
     { Grid overlay — when ShowGrid is True, draws a grid at GridStep HVIF-unit intervals. }
     property ShowGrid:  Boolean read FShowGrid  write SetShowGrid;
@@ -235,6 +257,9 @@ begin
   FShowGrid         := False;
   FGridStep         := 8;
   FSnapToGrid       := False;
+  FToolMode         := tmNode;
+  FSelectDragActive := False;
+  FSelectDragShapeIdx := -1;
 end;
 
 destructor TVertexCanvasWidget.Destroy;
@@ -703,6 +728,57 @@ begin
 end;
 
 
+function TVertexCanvasWidget.HitTestShapeBBox(AX, AY: Integer): Integer;
+var
+  i, j, k:    Integer;
+  sh:          TVertexShape;
+  ph:          TVertexPath;
+  pt:          TVertexPoint;
+  minX, minY, maxX, maxY: Single;
+  hvx, hvy:   Single;
+const
+  kSlop = 4;  { HVIF units of extra hit margin }
+begin
+  Result := -1;
+  if FDocument = nil then Exit;
+  hvx := ScreenToHvifX(AX);
+  hvy := ScreenToHvifY(AY);
+  { Iterate shapes top-to-bottom (last shape is on top, drawn last) }
+  for i := FDocument.ShapeCount - 1 downto 0 do
+  begin
+    sh := FDocument.Shapes[i];
+    if not sh.Visible then Continue;
+    for j := 0 to sh.PathCount - 1 do
+    begin
+      ph := sh.Paths[j];
+      if ph.PointCount = 0 then Continue;
+      pt := ph.Points[0];
+      minX := pt.X; maxX := pt.X;
+      minY := pt.Y; maxY := pt.Y;
+      for k := 1 to ph.PointCount - 1 do
+      begin
+        pt := ph.Points[k];
+        if pt.X < minX then minX := pt.X;
+        if pt.X > maxX then maxX := pt.X;
+        if pt.Y < minY then minY := pt.Y;
+        if pt.Y > maxY then maxY := pt.Y;
+      end;
+      { Apply optional shape translation }
+      if sh.HasTranslation then
+      begin
+        minX := minX + sh.TranslateX; maxX := maxX + sh.TranslateX;
+        minY := minY + sh.TranslateY; maxY := maxY + sh.TranslateY;
+      end;
+      if (hvx >= minX - kSlop) and (hvx <= maxX + kSlop) and
+         (hvy >= minY - kSlop) and (hvy <= maxY + kSlop) then
+      begin
+        Result := i;
+        Exit;
+      end;
+    end;
+  end;
+end;
+
 { ── Mouse event handling ─────────────────────────────────────────────────── }
 
 procedure TVertexCanvasWidget.HandleLMouseDown(x, y: integer;
@@ -725,10 +801,31 @@ var
   nextInX,  nextInY:  Single;
   cmd: TVertexCmdAddPoint;
   pt: TVertexPoint;
+  shapeIdx: Integer;
+  sh: TVertexShape;
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
 
+  { ── Select-tool mode: click to select / drag to translate shape ─────────── }
+  if FToolMode = tmSelect then
+  begin
+    shapeIdx := HitTestShapeBBox(x, y);
+    if shapeIdx >= 0 then
+    begin
+      SetSelectedShapeIndex(shapeIdx);
+      sh := FDocument.Shapes[shapeIdx];
+      FSelectDragActive    := True;
+      FSelectDragStartX    := x;
+      FSelectDragStartY    := y;
+      FSelectDragShapeIdx  := shapeIdx;
+      FSelectDragShapeOX   := sh.TranslateX;
+      FSelectDragShapeOY   := sh.TranslateY;
+    end;
+    Exit;
+  end;
+
+  { ── Node-edit mode (default) ─────────────────────────────────────────────── }
   { 1. Try to hit an existing node or handle }
   if HitTestNodes(x, y, hitPath, hitNode, hitTarget) then
   begin
@@ -821,9 +918,43 @@ end;
 procedure TVertexCanvasWidget.HandleLMouseUp(x, y: integer;
     shiftstate: TShiftState);
 var
-  ptAfter: TVertexPoint;
-  cmd: TVertexCommand;
+  ptAfter:  TVertexPoint;
+  cmd:      TVertexCommand;
+  sh:       TVertexShape;
+  cmdTrans: TVertexCmdSetShapeTranslation;
+  newX, newY: Single;
+  newHas:   Boolean;
 begin
+  { ── Select-tool mode: commit drag translation ─────────────────────────── }
+  if FToolMode = tmSelect then
+  begin
+    if FSelectDragActive and (FSelectDragShapeIdx >= 0) then
+    begin
+      sh   := FDocument.Shapes[FSelectDragShapeIdx];
+      newX := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX) + FSelectDragShapeOX;
+      newY := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY) + FSelectDragShapeOY;
+      newHas := (newX <> 0) or (newY <> 0);
+      { Reset shape to original position so the command captures the right before-state }
+      sh.TranslateX    := FSelectDragShapeOX;
+      sh.TranslateY    := FSelectDragShapeOY;
+      sh.HasTranslation := (FSelectDragShapeOX <> 0) or (FSelectDragShapeOY <> 0);
+      if (newX <> FSelectDragShapeOX) or (newY <> FSelectDragShapeOY) then
+      begin
+        cmdTrans := TVertexCmdSetShapeTranslation.Create(sh, newHas, newX, newY);
+        FDocument.UndoStack.Execute(cmdTrans);
+      end else
+      begin
+        { No real movement — just repaint to clear live preview }
+        FIconDirty := True;
+        Repaint;
+      end;
+    end;
+    FSelectDragActive   := False;
+    FSelectDragShapeIdx := -1;
+    Exit;
+  end;
+
+  { ── Node-edit mode ────────────────────────────────────────────────────── }
   if (FDragTarget = dtNone) or (FActivePath = nil) then
     Exit;
 
@@ -858,11 +989,30 @@ procedure TVertexCanvasWidget.HandleMouseMove(x, y: integer; btnstate: word;
     shiftstate: TShiftState);
 var
   hvx, hvy: Single;
-  newPt: TVertexPoint;
+  newPt:    TVertexPoint;
+  sh2:      TVertexShape;
+  dx, dy:   Single;
 begin
   { Always fire cursor-move so the status bar can show the HVIF coordinates }
   if Assigned(FOnCursorMove) then
     FOnCursorMove(Self, ScreenToHvifX(x), ScreenToHvifY(y));
+
+  { ── Select-tool mode: live-preview shape drag ────────────────────────── }
+  if FToolMode = tmSelect then
+  begin
+    if FSelectDragActive and (FSelectDragShapeIdx >= 0) then
+    begin
+      sh2 := FDocument.Shapes[FSelectDragShapeIdx];
+      dx  := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX);
+      dy  := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY);
+      sh2.HasTranslation := True;
+      sh2.TranslateX     := FSelectDragShapeOX + dx;
+      sh2.TranslateY     := FSelectDragShapeOY + dy;
+      FIconDirty := True;
+      Repaint;
+    end;
+    Exit;
+  end;
 
   if (FDragTarget = dtNone) or (FActivePath = nil) then
     Exit;
