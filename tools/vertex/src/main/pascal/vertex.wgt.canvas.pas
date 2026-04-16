@@ -76,6 +76,9 @@ type
     FDragOffX, FDragOffY: Integer;  { mouse offset from exact node screen position }
     FDragPtBefore: TVertexPoint;       { snapshot of the point at drag-start }
 
+    { Zoom — negative means "fit to widget" }
+    FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
+
     { Events }
     FOnCursorMove: TVertexCursorMoveEvent;
 
@@ -104,6 +107,7 @@ type
                              out AT: Single): Boolean;
 
     procedure SetSelectedShapeIndex(AValue: Integer);
+    procedure SetZoom(AValue: Integer);
 
   protected
     procedure HandlePaint; override;
@@ -127,6 +131,10 @@ type
 
     property SelectedShapeIndex: Integer
         read FSelectedShapeIdx write SetSelectedShapeIndex;
+
+    { Zoom level: -1 = fit to widget; 50 / 100 / 200 / 400 = fixed percentage.
+      Changing this repaints the canvas. }
+    property Zoom: Integer read FZoom write SetZoom;
 
     { Fires on every mouse-move, passing cursor position in HVIF units (0–64). }
     property OnCursorMove: TVertexCursorMoveEvent
@@ -209,6 +217,7 @@ begin
   FActivePath       := nil;
   FDragTarget       := dtNone;
   FScale            := 4.0;   { default: 256px / 64 units }
+  FZoom             := -1;    { -1 = fit to widget }
 end;
 
 destructor TVertexCanvasWidget.Destroy;
@@ -248,6 +257,16 @@ begin
   Repaint;
 end;
 
+procedure TVertexCanvasWidget.SetZoom(AValue: Integer);
+begin
+  if FZoom = AValue then
+    Exit;
+  FZoom := AValue;
+  UpdateIconGeometry;
+  FIconDirty := True;
+  Repaint;
+end;
+
 { ── Coordinate helpers ───────────────────────────────────────────────────── }
 
 function TVertexCanvasWidget.HvifToScreenX(AHvif: Single): Integer;
@@ -280,9 +299,18 @@ procedure TVertexCanvasWidget.UpdateIconGeometry;
 var
   sz: Integer;
 begin
-  sz := Min(Width - 40, Height - 40);
-  if sz < 16 then sz := 16;
-  sz := (sz div 4) * 4;
+  if FZoom < 0 then
+  begin
+    { Fit mode: scale to fill the widget with a 40px margin }
+    sz := Min(Width - 40, Height - 40);
+    if sz < 16 then sz := 16;
+    sz := (sz div 4) * 4;
+  end
+  else
+  begin
+    { Fixed zoom: 100% = 256px (4 px per HVIF unit) }
+    sz := (256 * FZoom) div 100;
+  end;
   FIconSZ := sz;
   FIconOX := (Width  - FIconSZ) div 2;
   FIconOY := (Height - FIconSZ) div 2;

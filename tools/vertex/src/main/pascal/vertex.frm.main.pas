@@ -68,6 +68,13 @@ type
     FPathPanel:     TVertexPathPanel;
     FShapePanel:    TVertexShapePanel;
     FStatusBar:     TfpgLabel;        { bottom status bar }
+    FZoomBar:       TfpgBevel;        { zoom toolbar strip above canvas }
+    FZoomLabel:     TfpgLabel;        { shows current zoom % }
+    FBtnZoom50:     TfpgButton;
+    FBtnZoom100:    TfpgButton;
+    FBtnZoom200:    TfpgButton;
+    FBtnZoom400:    TfpgButton;
+    FBtnZoomFit:    TfpgButton;
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
@@ -115,6 +122,9 @@ type
 
     { Close-query handler — blocks close if user cancels on dirty document. }
     procedure FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
+
+    { Zoom button handlers }
+    procedure ZoomBtnClick(Sender: TObject);
 
     { Canvas cursor-move callback — updates the status bar. }
     procedure CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
@@ -312,6 +322,48 @@ begin
 
   { Menu bar — spans full width at top }
   mig.AddLayoutComponent(FMenuBar, TfpgMigCC.Create().DockNorth);
+
+  { Zoom toolbar — sits below menu, spans full width }
+  FZoomBar := TfpgBevel.Create(Self);
+  FZoomBar.Name  := 'zoomBar';
+  FZoomBar.Style := bsFlat;
+  FZoomBar.PreferredSize := fpgSize(600, 26);
+
+  FBtnZoomFit := TfpgButton.Create(FZoomBar);
+  FBtnZoomFit.Text    := 'Fit';
+  FBtnZoomFit.Tag     := -1;
+  FBtnZoomFit.SetPosition(2, 2, 36, 22);
+  FBtnZoomFit.OnClick := @ZoomBtnClick;
+
+  FBtnZoom50 := TfpgButton.Create(FZoomBar);
+  FBtnZoom50.Text    := '50%';
+  FBtnZoom50.Tag     := 50;
+  FBtnZoom50.SetPosition(40, 2, 44, 22);
+  FBtnZoom50.OnClick := @ZoomBtnClick;
+
+  FBtnZoom100 := TfpgButton.Create(FZoomBar);
+  FBtnZoom100.Text    := '100%';
+  FBtnZoom100.Tag     := 100;
+  FBtnZoom100.SetPosition(86, 2, 50, 22);
+  FBtnZoom100.OnClick := @ZoomBtnClick;
+
+  FBtnZoom200 := TfpgButton.Create(FZoomBar);
+  FBtnZoom200.Text    := '200%';
+  FBtnZoom200.Tag     := 200;
+  FBtnZoom200.SetPosition(138, 2, 50, 22);
+  FBtnZoom200.OnClick := @ZoomBtnClick;
+
+  FBtnZoom400 := TfpgButton.Create(FZoomBar);
+  FBtnZoom400.Text    := '400%';
+  FBtnZoom400.Tag     := 400;
+  FBtnZoom400.SetPosition(190, 2, 50, 22);
+  FBtnZoom400.OnClick := @ZoomBtnClick;
+
+  FZoomLabel := TfpgLabel.Create(FZoomBar);
+  FZoomLabel.Text := 'Fit';
+  FZoomLabel.SetPosition(248, 5, 60, 18);
+
+  mig.AddLayoutComponent(FZoomBar, TfpgMigCC.Create().DockNorth.GrowX());
 
   { Left toolbox placeholder — fixed 64px wide }
   FToolBox := TfpgBevel.Create(Self);
@@ -975,6 +1027,18 @@ begin
     ms.Free;
     sl.Free;
   end;
+end;
+
+procedure TVertexMainForm.ZoomBtnClick(Sender: TObject);
+var
+  z: Integer;
+begin
+  z := TfpgButton(Sender).Tag;
+  FVertexCanvas.Zoom := z;
+  if z < 0 then
+    FZoomLabel.Text := 'Fit'
+  else
+    FZoomLabel.Text := Format('%d%%', [z]);
 end;
 
 procedure TVertexMainForm.miFileExportPngClick(Sender: TObject);
