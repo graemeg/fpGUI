@@ -415,6 +415,39 @@ type
   end;
 
 
+  { Move a shape from AOldIndex to ANewIndex within the document's shape list.
+    In HVIF, later shapes draw on top, so reordering changes the rendering order. }
+  TIomCmdMoveShape = class(TIomCommand)
+  private
+    FDocument: TIomDocument;
+    FOldIndex: Integer;
+    FNewIndex: Integer;
+  public
+    constructor Create(ADocument: TIomDocument; AOldIndex, ANewIndex: Integer);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Create a brand-new shape complete with its own style and path.
+    All three objects are owned by the command until Execute; after Execute the
+    document owns them.  Undo removes all three from the document. }
+  TIomCmdNewShape = class(TIomCommand)
+  private
+    FDocument: TIomDocument;
+    FStyle:    TIomStyle;
+    FPath:     TIomPath;
+    FShape:    TIomShape;
+    FOwns:     Boolean;
+  public
+    constructor Create(ADocument: TIomDocument;
+                       AStyle: TIomStyle; APath: TIomPath; AShape: TIomShape);
+    destructor  Destroy; override;
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
   { Add a new TIomPath to the document. }
   TIomCmdAddPath = class(TIomCommand)
   private
@@ -571,10 +604,6 @@ type
     procedure NotifyChange(ACmd: TIomCommand);
     procedure HandleUndoChange(Sender: TObject);
 
-    { Generate a unique name within the document with the given prefix.
-      E.g. UniqueName('path') → 'path_0', 'path_1', etc. }
-    function UniqueName(const APrefix: string): string;
-
   public
     constructor Create;
     destructor  Destroy; override;
@@ -600,6 +629,10 @@ type
     { Check whether AName is already in use (across all object types). }
     function NameExists(const AName: string): Boolean;
 
+    { Generate a unique name within the document with the given prefix.
+      E.g. UniqueName('path') → 'path_0', 'path_1', etc. }
+    function UniqueName(const APrefix: string): string;
+
     { --- Direct list manipulation (called by command Execute/Undo only) ---
       UI code must go through TUndoStack.Execute rather than calling these. }
     procedure InternalAddPath(APath: TIomPath; AIndex: Integer = -1);
@@ -608,6 +641,8 @@ type
     procedure InternalRemoveStyle(AStyle: TIomStyle);
     procedure InternalAddShape(AShape: TIomShape; AIndex: Integer = -1);
     procedure InternalRemoveShape(AShape: TIomShape);
+    { Move a shape from AOldIndex to ANewIndex (both in current list space). }
+    procedure InternalMoveShape(AOldIndex, ANewIndex: Integer);
 
     { --- Undo/redo pass-through --- }
     property UndoStack: TUndoStack read FUndoStack;
@@ -1097,6 +1132,71 @@ begin
 end;
 
 
+{ TIomCmdMoveShape }
+
+constructor TIomCmdMoveShape.Create(ADocument: TIomDocument;
+    AOldIndex, ANewIndex: Integer);
+begin
+  inherited Create;
+  FDocument   := ADocument;
+  FOldIndex   := AOldIndex;
+  FNewIndex   := ANewIndex;
+  Description := 'Move shape';
+end;
+
+procedure TIomCmdMoveShape.Execute;
+begin
+  FDocument.InternalMoveShape(FOldIndex, FNewIndex);
+end;
+
+procedure TIomCmdMoveShape.Undo;
+begin
+  FDocument.InternalMoveShape(FNewIndex, FOldIndex);
+end;
+
+
+{ TIomCmdNewShape }
+
+constructor TIomCmdNewShape.Create(ADocument: TIomDocument;
+    AStyle: TIomStyle; APath: TIomPath; AShape: TIomShape);
+begin
+  inherited Create;
+  FDocument   := ADocument;
+  FStyle      := AStyle;
+  FPath       := APath;
+  FShape      := AShape;
+  FOwns       := True;
+  Description := 'Add shape';
+end;
+
+destructor TIomCmdNewShape.Destroy;
+begin
+  if FOwns then
+  begin
+    FShape.Free;   { shape does not own its style/path refs }
+    FPath.Free;
+    FStyle.Free;
+  end;
+  inherited;
+end;
+
+procedure TIomCmdNewShape.Execute;
+begin
+  FDocument.InternalAddStyle(FStyle);
+  FDocument.InternalAddPath(FPath);
+  FDocument.InternalAddShape(FShape);
+  FOwns := False;
+end;
+
+procedure TIomCmdNewShape.Undo;
+begin
+  FDocument.InternalRemoveShape(FShape);
+  FDocument.InternalRemovePath(FPath);
+  FDocument.InternalRemoveStyle(FStyle);
+  FOwns := True;
+end;
+
+
 { TIomCmdAddPath }
 
 constructor TIomCmdAddPath.Create(ADocument: TIomDocument; APath: TIomPath;
@@ -1483,6 +1583,18 @@ end;
 procedure TIomDocument.InternalRemoveShape(AShape: TIomShape);
 begin
   FShapes.Extract(AShape);
+end;
+
+procedure TIomDocument.InternalMoveShape(AOldIndex, ANewIndex: Integer);
+var
+  obj: TObject;
+begin
+  obj := FShapes[AOldIndex];
+  FShapes.Extract(obj);
+  if ANewIndex >= FShapes.Count then
+    FShapes.Add(obj)
+  else
+    FShapes.Insert(ANewIndex, obj);
 end;
 
 procedure TIomDocument.FromHvifArrays(const AStyles: array of THvifStyle;

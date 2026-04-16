@@ -27,7 +27,7 @@ interface
 uses
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_constants,
-  fpg_menu, fpg_panel, fpg_label, fpg_tree,
+  fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   fpg_dialogs,
   fpg_hvif_model,
@@ -45,13 +45,18 @@ type
     FMnuFile:     TfpgPopupMenu;
     FMnuEdit:     TfpgPopupMenu;
     FMnuHelp:     TfpgPopupMenu;
-    FToolBox:     TfpgBevel;
-    FToolLabel:   TfpgLabel;
-    FIomCanvas:   TIomCanvasWidget;
-    FRightPanel:  TfpgBevel;
-    FPreviewBar:  TIomPreviewBar;
-    FObjectTree:  TfpgTreeView;
-    FStylePanel:  TIomStylePanel;
+    FToolBox:       TfpgBevel;
+    FToolLabel:     TfpgLabel;
+    FIomCanvas:     TIomCanvasWidget;
+    FRightPanel:    TfpgBevel;
+    FPreviewBar:    TIomPreviewBar;
+    FObjectTree:    TfpgTreeView;
+    FShapeBar:      TfpgBevel;
+    FBtnShapeAdd:   TfpgButton;
+    FBtnShapeDel:   TfpgButton;
+    FBtnShapeUp:    TfpgButton;
+    FBtnShapeDown:  TfpgButton;
+    FStylePanel:    TIomStylePanel;
 
     { Data }
     FDocument:   TIomDocument;    { owned }
@@ -77,6 +82,15 @@ type
 
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
+
+    { Shape management handlers }
+    procedure ShapeAdd(Sender: TObject);
+    procedure ShapeDelete(Sender: TObject);
+    procedure ShapeMoveUp(Sender: TObject);
+    procedure ShapeMoveDown(Sender: TObject);
+
+    { Select the given shape index in the object tree (after repopulation). }
+    procedure SelectShapeInTree(AShapeIdx: Integer);
 
   public
     procedure AfterCreate; override;
@@ -198,6 +212,34 @@ begin
   FObjectTree.OnChange := @ObjectTreeChanged;
   rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY().PushY());
 
+  { Shape management button bar: [+] [-] [Up] [Down] }
+  FShapeBar := TfpgBevel.Create(FRightPanel);
+  FShapeBar.Name  := 'shapeBar';
+  FShapeBar.Style := bsFlat;
+  FShapeBar.PreferredSize := fpgSize(220, 26);
+
+  FBtnShapeAdd := TfpgButton.Create(FShapeBar);
+  FBtnShapeAdd.Text    := '+';
+  FBtnShapeAdd.SetPosition(2, 2, 46, 22);
+  FBtnShapeAdd.OnClick := @ShapeAdd;
+
+  FBtnShapeDel := TfpgButton.Create(FShapeBar);
+  FBtnShapeDel.Text    := '-';
+  FBtnShapeDel.SetPosition(50, 2, 46, 22);
+  FBtnShapeDel.OnClick := @ShapeDelete;
+
+  FBtnShapeUp := TfpgButton.Create(FShapeBar);
+  FBtnShapeUp.Text    := 'Up';
+  FBtnShapeUp.SetPosition(98, 2, 54, 22);
+  FBtnShapeUp.OnClick := @ShapeMoveUp;
+
+  FBtnShapeDown := TfpgButton.Create(FShapeBar);
+  FBtnShapeDown.Text    := 'Down';
+  FBtnShapeDown.SetPosition(154, 2, 54, 22);
+  FBtnShapeDown.OnClick := @ShapeMoveDown;
+
+  rmig.AddLayoutComponent(FShapeBar, TfpgMigCC.Create().GrowX());
+
   FStylePanel := TIomStylePanel.Create(FRightPanel);
   FStylePanel.Name := 'stylePanel';
   rmig.AddLayoutComponent(FStylePanel, TfpgMigCC.Create().GrowX());
@@ -308,6 +350,143 @@ begin
 end;
 
 
+{ ── Shape management ─────────────────────────────────────────────────────── }
+
+procedure TIomMainForm.SelectShapeInTree(AShapeIdx: Integer);
+var
+  n: TfpgTreeNode;
+begin
+  if (FShapesNode = nil) or (AShapeIdx < 0) then
+    Exit;
+  n := FShapesNode.FirstSubNode;
+  while n <> nil do
+  begin
+    if Integer(PtrUInt(n.Data)) = AShapeIdx then
+    begin
+      FObjectTree.Selection := n;
+      Exit;
+    end;
+    n := n.Next;
+  end;
+end;
+
+procedure TIomMainForm.ShapeAdd(Sender: TObject);
+var
+  style:  TIomStyle;
+  path:   TIomPath;
+  shape:  TIomShape;
+  pt:     TIomPoint;
+  col:    THvifColor;
+  cmd:    TIomCmdNewShape;
+  newIdx: Integer;
+begin
+  { New solid-colour style: opaque blue }
+  style           := TIomStyle.Create(FDocument.UniqueName('style'));
+  style.StyleType := hstSolidColor;
+  col.R := $44; col.G := $88; col.B := $FF; col.A := $FF;
+  style.Color := col;
+
+  { New diamond path centred in the 64×64 HVIF coordinate space }
+  path        := TIomPath.Create(FDocument.UniqueName('path'));
+  path.Closed := True;
+  FillChar(pt, SizeOf(pt), 0);
+
+  pt.X := 32; pt.Y := 24; pt.InX := 32; pt.InY := 24; pt.OutX := 32; pt.OutY := 24;
+  path.AddPoint(pt);
+  pt.X := 40; pt.Y := 32; pt.InX := 40; pt.InY := 32; pt.OutX := 40; pt.OutY := 32;
+  path.AddPoint(pt);
+  pt.X := 32; pt.Y := 40; pt.InX := 32; pt.InY := 40; pt.OutX := 32; pt.OutY := 40;
+  path.AddPoint(pt);
+  pt.X := 24; pt.Y := 32; pt.InX := 24; pt.InY := 32; pt.OutX := 24; pt.OutY := 32;
+  path.AddPoint(pt);
+
+  { New shape referencing style and path }
+  shape         := TIomShape.Create(FDocument.UniqueName('shape'));
+  shape.Style   := style;
+  shape.Visible := True;
+  shape.AddPathRef(path);
+
+  cmd := TIomCmdNewShape.Create(FDocument, style, path, shape);
+  FDocument.UndoStack.Execute(cmd);
+
+  newIdx := FDocument.ShapeCount - 1;
+  PopulateObjectTree;
+  SelectShapeInTree(newIdx);
+end;
+
+procedure TIomMainForm.ShapeDelete(Sender: TObject);
+var
+  node:   TfpgTreeNode;
+  idx:    Integer;
+  shape:  TIomShape;
+  cmd:    TIomCmdDeleteShape;
+  newSel: Integer;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
+    Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then
+    Exit;
+
+  shape  := FDocument.Shapes[idx];
+  newSel := idx - 1;
+  if newSel < 0 then
+    newSel := 0;
+  if FDocument.ShapeCount <= 1 then
+    newSel := -1;
+
+  cmd := TIomCmdDeleteShape.Create(FDocument, shape);
+  FDocument.UndoStack.Execute(cmd);
+
+  FIomCanvas.SelectedShapeIndex := -1;
+  FStylePanel.SetStyle(nil);
+  PopulateObjectTree;
+  if newSel >= 0 then
+    SelectShapeInTree(newSel);
+end;
+
+procedure TIomMainForm.ShapeMoveUp(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  cmd:  TIomCmdMoveShape;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
+    Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if idx <= 0 then
+    Exit;
+
+  cmd := TIomCmdMoveShape.Create(FDocument, idx, idx - 1);
+  FDocument.UndoStack.Execute(cmd);
+
+  PopulateObjectTree;
+  SelectShapeInTree(idx - 1);
+end;
+
+procedure TIomMainForm.ShapeMoveDown(Sender: TObject);
+var
+  node: TfpgTreeNode;
+  idx:  Integer;
+  cmd:  TIomCmdMoveShape;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then
+    Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if idx >= FDocument.ShapeCount - 1 then
+    Exit;
+
+  cmd := TIomCmdMoveShape.Create(FDocument, idx, idx + 1);
+  FDocument.UndoStack.Execute(cmd);
+
+  PopulateObjectTree;
+  SelectShapeInTree(idx + 1);
+end;
+
+
 { ── Tree event handler ───────────────────────────────────────────────────── }
 
 procedure TIomMainForm.ObjectTreeChanged(Sender: TObject);
@@ -361,14 +540,24 @@ end;
 procedure TIomMainForm.miEditUndoClick(Sender: TObject);
 begin
   if FDocument.UndoStack.CanUndo then
+  begin
     FDocument.UndoStack.Undo;
-  { UndoStack.Undo fires OnChange → canvas HandleDocumentChange → Repaint }
+    { Tree structure may have changed (e.g. undo of AddShape) — repopulate. }
+    FIomCanvas.SelectedShapeIndex := -1;
+    FStylePanel.SetStyle(nil);
+    PopulateObjectTree;
+  end;
 end;
 
 procedure TIomMainForm.miEditRedoClick(Sender: TObject);
 begin
   if FDocument.UndoStack.CanRedo then
+  begin
     FDocument.UndoStack.Redo;
+    FIomCanvas.SelectedShapeIndex := -1;
+    FStylePanel.SetStyle(nil);
+    PopulateObjectTree;
+  end;
 end;
 
 procedure TIomMainForm.miHelpAboutClick(Sender: TObject);
@@ -376,7 +565,7 @@ begin
   ShowMessage(
       'fpGUI Icon-O-Matic' + LineEnding +
       'HVIF icon editor for the fpGUI toolkit.' + LineEnding + LineEnding +
-      'Step 7: Style editing with undo/redo',
+      'Step 8: Shape/path management (add, delete, reorder)',
       'About Icon-O-Matic');
 end;
 
