@@ -1,0 +1,227 @@
+= Vertex Editor — Remaining Work
+:toc:
+:toc-placement: preamble
+:icons: font
+
+Tracks outstanding features for the Vertex HVIF icon editor.
+Tick items off as they are completed.
+
+== Completed Steps
+
+* [x] Step 1 — HVIF reader/writer (binary round-trip)
+* [x] Step 2 — AggPas canvas render (HVIF → screen)
+* [x] Step 3 — Document model (`TVertexDocument`, undo stack)
+* [x] Step 4 — Canvas widget with zoom/pan primitives
+* [x] Step 5 — Interactive node drag + Bezier handle editing
+* [x] Step 6 — Node add/delete (de Casteljau split + keyboard delete)
+* [x] Step 7 — Style panel — solid-colour editing with undo
+* [x] Step 8 — Shape/path management — add, delete, reorder shapes
+* [x] Step 9 — File > Save (.hvif) and File > Export as .inc
+* [x] Step 10 — Path properties panel (name, closed, reverse, rotate)
+* [x] Step 11 — Shape properties panel (name, style, paths, transform, LOD, visible, transformer)
+* [x] Step 12 — Gradient style editing (type switcher, ramp widget, editor popup)
+* [x] Step 13 — File > New, dirty-check on open/close
+* [x] Step 14 — Status bar (cursor X/Y, selection info, HVIF byte count)
+* [x] Step 15 — File > Export as PNG (16/32/48/64 px via AggPas off-screen)
+* [x] Step 16 — Zoom toolbar (Fit, 50%, 100%, 200%, 400%)
+* [x] Step 17 — Context menus for path and shape nodes
+* [x] Step 18 — Select tool (click to select shape, drag to translate) and Node tool toggle
+* [x] Step 19 — Object tree improvements (names, path management buttons)
+
+== Pending Work
+
+=== File / Document
+
+* [x] File > New — create a blank document (prompt to save dirty document first)
+* [x] File > Export as PNG — render at configurable sizes (16, 32, 48, 64 px) via AggPas off-screen canvas
+* [x] Dirty-check on close — prompt "Save changes?" when closing an unsaved document
+
+=== Canvas Interaction Model — Selection-Driven Mode
+
+The canvas behaviour is driven by *what is selected in the object tree*, mirroring the
+Haiku Icon-o-Matic approach.  Selecting a node type automatically arms the canvas with the
+appropriate interaction mode — the user does not need to switch tools manually.
+
+* Selecting a *shape* node → canvas enters shape-transform mode: a bounding box with
+  handles is shown; drag to translate, rotate, scale, or shear.
+* Selecting a *path* node → canvas enters path-edit mode: individual anchor points and
+  Bezier handles are shown; drag to move nodes or adjust curve handles.
+* Selecting a *style* node → canvas renders normally with no overlay; editing happens
+  entirely in the style panel.
+
+This replaces the current explicit Select / Node tool toggle for the primary workflow.
+The remaining dedicated toolbar tools (Add Point, Delete Point, Pen, Rectangle, Ellipse,
+Zoom, Pan) continue to exist as secondary tools that override the selection-driven mode
+while active.
+
+* [x] When the tree selection changes to a shape node, automatically switch the canvas to
+  shape-transform mode (bounding box overlay, no path node editing).
+* [x] When the tree selection changes to a path node, automatically switch the canvas to
+  path-edit mode (anchor points and curve handles, no bounding box).
+* [x] Node overlay scoped to selected path only; hit-testing restricted to that path.
+* [ ] Keyboard shortcut: pressing Escape while a secondary tool is active returns to
+  selection-driven mode without changing the tree selection.
+* [ ] Retire (or repurpose) the explicit Select and Node toolbar buttons now that mode
+  is driven by tree selection; keep Add Point, Delete Point, Pen, Rectangle, Ellipse,
+  Zoom, Pan as secondary tools.
+
+=== Toolbar Tools
+
+* [x] Select tool — click to select shape, drag to translate with live preview and undo
+* [x] Node tool — activate path node editing mode (drag nodes and Bezier handles)
+* [x] Add Point tool — click on a path segment to insert a node
+* [x] Delete Point tool — click a node to remove it
+* [ ] Rectangle tool — drag to create a new rectangular closed path
+* [ ] Ellipse tool — drag to create a new elliptical closed path (4-point Bezier)
+* [ ] Pen tool — click to place nodes and build a new freehand path
+* [x] Zoom tool — click to zoom in, Alt+click to zoom out
+* [x] Pan tool — drag the canvas viewport
+
+=== Canvas Enhancements
+
+* [x] Zoom toolbar — buttons for 50%, 100%, 200%, 400% (and a numeric display)
+* [x] Grid overlay — configurable grid step (px); toggle on/off; snap-to-grid
+* [x] Status bar — display: cursor X/Y in HVIF units · selected item name · node N/total · HVIF byte count
+
+=== Style Panel — Gradient Support
+
+The current style panel handles solid colours only.
+
+* [x] Style type selector — dropdown to switch between Solid and Gradient; switching type creates an undo entry
+* [x] Gradient preview swatch — replaces the flat colour swatch when the style is a gradient; shows the ramp as a horizontal gradient fill; clicking opens the gradient editor popup
+* [x] Gradient editor popup (`TVertexGradientEditor`):
+** Gradient type dropdown (Linear, Radial, Diamond, Conic, XY, Square)
+** Gradient ramp widget — horizontal bar rendering the current gradient; draggable triangular handles below it for each stop position; click on empty ramp area to add a stop; drag a handle off the ramp to remove a stop
+** Selected stop colour swatch — clicking opens the colour dialog
+** Selected stop alpha trackbar + spin edit
+** Selected stop offset spin edit (0.00–1.00)
+** Add stop / Remove stop buttons
+** All edits produce undo entries via `TVertexCmdSetGradientStop` (new command)
+
+=== Shape Properties Panel
+
+A dedicated panel (or in-panel section) showing properties of the currently selected shape.
+
+* [x] Shape name edit field — committed on focus-loss; uses `TVertexCmdRename`
+* [x] Style assignment — combobox showing all document styles; change fires `TVertexCmdSetShapeStyle`
+* [x] Path assignment list — lists paths attached to this shape; add/remove buttons wired to `TVertexCmdSetShapePathRef`
+* [x] X offset / Y offset spin edits — maps to `HasTranslation` + `TranslateX`/`TranslateY`; committed on focus-loss with undo
+* [x] LOD min / LOD max spin edits — bound to `TVertexShape.LOD`; undo-aware
+* [x] Visible checkbox — toggles `TVertexShape.Visible`; undo-aware
+* [x] Transformer sub-section:
+** Type dropdown — None / Stroke / Contour / Perspective
+** Stroke parameters (shown when Stroke selected): Width, Line cap (Butt/Square/Round), Line join (Miter/Round/Bevel), Miter limit
+** Contour parameter: Width
+** All changes undo-aware
+
+=== Shape Affine Transform — Bounding Box Interaction
+
+HVIF shapes carry a full 6-element affine matrix (`Transform[sx, shy, shx, sy, tx, ty]`)
+that encodes rotation, scale, shear, and translation in one step.  Currently Vertex
+round-trips the matrix correctly but offers no way to inspect or edit it.  Raw matrix
+editing is too low-level for typical users.
+
+The bounding box is shown automatically whenever a shape node is selected in the object
+tree (selection-driven mode — see section above).  This matches the Haiku Icon-o-Matic
+and Inkscape model.
+
+==== Canvas — Bounding Box Overlay
+
+* [ ] When a shape node is selected, draw a dashed bounding box around its path geometry,
+  accounting for the shape's current affine transform.
+* [ ] Draw eight handles: one at each corner (rotation) and one at the mid-point of each
+  edge (scale/shear).
+* [ ] Plain drag anywhere inside the box — translates the shape (existing `HasTranslation`
+  path, upgraded to full matrix when combined with other transforms).
+* [ ] Corner handle drag — rotates the shape around its centre; cursor changes to a
+  rotation arc on hover.
+* [ ] Edge handle drag — scales the shape along the corresponding axis.
+* [ ] Ctrl + edge handle drag — shears along that axis, matching Icon-o-Matic behaviour.
+* [ ] Holding Shift during scale constrains to uniform scale.
+* [ ] Live preview during drag: apply the in-progress matrix to the render without
+  committing to the undo stack.
+* [ ] On mouse-up, commit the final matrix via `TVertexCmdSetShapeTransform` (see below).
+* [ ] Escape during drag cancels the operation and reverts the live preview.
+
+==== Shape Properties Panel — Transform Read-Out
+
+* [ ] Add a read-only "Transform" sub-section that becomes visible whenever `HasTransform`
+  is True.  Display the decomposed values: rotation angle (degrees), X scale, Y scale,
+  shear.  These are informational — editing is done on the canvas.
+* [ ] When `HasTransform` is False (translation-only), the sub-section is hidden (or shows
+  "No affine transform").
+* [ ] "Reset transform" in the shape context menu must clear the full matrix back to
+  identity (currently it only clears `HasTranslation`); update `ShapeMenuResetTransform`
+  accordingly.
+* [ ] "Freeze transformation" must bake the full affine matrix into path point coordinates,
+  not just the translation; update `TVertexCmdFreezeTransform` accordingly.
+
+==== New Undo Command
+
+* [ ] `TVertexCmdSetShapeTransform` — stores old and new 6-element affine matrix for a
+  shape; sets `HasTransform := True` (or False when matrix is identity); Description:
+  `'Set shape transform'`.
+
+=== Path Properties Panel
+
+A dedicated panel showing properties of the currently selected path.
+
+* [x] Path name edit field — committed on focus-loss; uses `TVertexCmdRename`
+* [x] Closed checkbox — toggles `TVertexPath.Closed`; undo-aware
+* [x] Reverse path button — reverses the order of all points; undo-aware
+* [ ] Clean up button — removes degenerate (near-duplicate) points; undo-aware (available via context menu)
+* [x] Rotate indices forwards / backwards — shifts the start-point index; undo-aware
+
+=== Object List Panel Improvements
+
+The current single tree widget needs to be split (or significantly extended) into three
+separate labelled panels matching the Haiku Icon-o-Matic layout.
+
+* [ ] Shapes panel — shows each shape with two sub-lines: style name and path name(s); has +/- buttons and a context menu
+* [ ] Paths panel — shows path name, node count, open/closed indicator; expand arrow to show which shapes reference the path; has +/- buttons and a context menu
+* [ ] Styles panel — shows style name with a small colour swatch (solid) or gradient thumbnail (gradient); has +/- buttons
+
+=== Context Menus
+
+* [x] Path panel context menu:
+** Add (new freehand path)
+** Add rect (rectangular closed path)
+** Add circle (4-point Bezier circle)
+** Duplicate
+** Reverse
+** Clean up
+** Rotate indices forwards
+** Rotate indices backwards
+** Remove
+
+* [x] Shape panel context menu:
+** Add empty (new shape, no style or path)
+** Duplicate
+** Reset transformation
+** Remove
+
+* [ ] Shape panel context menu (remaining):
+** Add with path (selects an existing path)
+** Add with style (selects an existing style)
+** Add with path & style
+** [x] Freeze transformation (bake shape transform into path point coordinates)
+
+* [x] Transformer context menu (within shape panel):
+** Add → Contour
+** Add → Stroke
+** Add → Perspective
+
+=== Undo Commands Still Needed
+
+* [x] `TVertexCmdSetPathClosed` — toggle Closed on a path
+* [x] `TVertexCmdReversePath` — reverse point order
+* [x] `TVertexCmdRotatePathIndices` — shift start index
+* [x] `TVertexCmdSetStyleType` — switch Solid ↔ Gradient
+* [x] `TVertexCmdSetGradientStop` — add/remove/move/recolour a gradient stop
+* [x] `TVertexCmdSetShapeStyle` — reassign a shape's style reference
+* [x] `TVertexCmdSetShapePathRef` — add or remove a path reference from a shape
+* [x] `TVertexCmdSetShapeTranslation` — change X/Y offset
+* [x] `TVertexCmdSetShapeLOD` — change LOD min/max
+* [x] `TVertexCmdSetShapeVisible` — toggle visibility
+* [x] `TVertexCmdSetTransformer` — change transformer type and parameters
+* [x] `TVertexCmdFreezeTransform` — bake shape transform into path points
