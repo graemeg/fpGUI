@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2017 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -513,11 +513,10 @@ begin
     Name := 'btnPicker';
     SetPosition(167, 230, 23, 23);
     Text := '';
-    FontDesc := '#Label1';
-    Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.colpicker';
-    FShowHint := True;
+    ImageSize := 20;
+    ShowHint := True;
     TabOrder := 24;
     OnColorPicked := @btnColorPicked;
   end;
@@ -528,7 +527,8 @@ begin
     Name := 'chkContinuous';
     SetPosition(167, 258, 130, 20);
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Continuous tracking of the picker';
+    ShowHint := True;
     TabOrder := 25;
     Text := 'Continuous';
     OnChange := @chkContinuousChanged;

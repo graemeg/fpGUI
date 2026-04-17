@@ -98,6 +98,8 @@ begin
   fpgIcons.RegisterFromConst('stdimg.caret.left',     @hvif_std_caret_left,               SizeOf(hvif_std_caret_left));
   fpgIcons.RegisterFromConst('stdimg.caret.right',    @hvif_std_caret_right,              SizeOf(hvif_std_caret_right));
   fpgIcons.RegisterFromConst('stdimg.clear',          @hvif_std_clear,                    SizeOf(hvif_std_clear));
+  fpgIcons.RegisterFromConst('stdimg.colpicker',      @hvif_std_color_picker,             SizeOf(hvif_std_color_picker));
+  fpgIcons.RegisterFromConst('stdimg.configure',      @hvif_std_configure,                SizeOf(hvif_std_configure));
   fpgIcons.RegisterFromConst('stdimg.dialog.apply',   @hvif_std_dialog_apply,             SizeOf(hvif_std_dialog_apply));
   fpgIcons.RegisterFromConst('stdimg.dialog.error',   @hvif_std_dialog_error,             SizeOf(hvif_std_dialog_error));
   fpgIcons.RegisterFromConst('stdimg.dialog.info',    @hvif_std_dialog_information,       SizeOf(hvif_std_dialog_information));
