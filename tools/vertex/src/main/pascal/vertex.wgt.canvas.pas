@@ -1303,8 +1303,8 @@ begin
     if FSelectDragActive and (FSelectDragShapeIdx >= 0) then
     begin
       sh   := FDocument.Shapes[FSelectDragShapeIdx];
-      newX := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX) + FSelectDragShapeOX;
-      newY := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY) + FSelectDragShapeOY;
+      newX := SnapCoord(ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX) + FSelectDragShapeOX);
+      newY := SnapCoord(ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY) + FSelectDragShapeOY);
       newHas := (newX <> 0) or (newY <> 0);
       { Reset shape to original position so the command captures the right before-state }
       sh.TranslateX    := FSelectDragShapeOX;
@@ -1390,8 +1390,8 @@ begin
       dx  := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX);
       dy  := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY);
       sh2.HasTranslation := True;
-      sh2.TranslateX     := FSelectDragShapeOX + dx;
-      sh2.TranslateY     := FSelectDragShapeOY + dy;
+      sh2.TranslateX     := SnapCoord(FSelectDragShapeOX + dx);
+      sh2.TranslateY     := SnapCoord(FSelectDragShapeOY + dy);
       FIconDirty := True;
       Repaint;
     end;

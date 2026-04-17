@@ -31,7 +31,7 @@ uses
   fpg_base, fpg_main, fpg_form, fpg_constants,
   fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
-  fpg_dialogs, fpg_iniutils, fpg_mru,
+  fpg_dialogs, fpg_iniutils, fpg_mru, fpg_combobox,
   fpg_hvif_model, fpg_hvif,
   fpg_vertex_document,
   vertex.wgt.canvas,
@@ -87,7 +87,8 @@ type
     FMnuPath:       TfpgPopupMenu;    { right-click on a path node }
     FMnuShape:      TfpgPopupMenu;    { right-click on a shape node }
     FBtnGrid:       TfpgButton;       { toggle grid overlay }
-    FBtnSnap:       TfpgButton;       { toggle snap-to-grid }
+    FSnapLabel:     TfpgLabel;        { "Snap:" label beside the snap combo }
+    FSnapCombo:     TfpgComboBox;     { grid/snap size: Off / 4 / 8 / 16 / 32 }
     FStyleBar:      TfpgBevel;        { style management button bar }
     FBtnStyleAdd:   TfpgButton;
     FBtnStyleDel:   TfpgButton;
@@ -155,7 +156,7 @@ type
     { Zoom button handlers }
     procedure ZoomBtnClick(Sender: TObject);
     procedure GridBtnClick(Sender: TObject);
-    procedure SnapBtnClick(Sender: TObject);
+    procedure SnapComboChange(Sender: TObject);
 
     { Path context menu handlers }
     procedure PathMenuAddFreehand(Sender: TObject);
@@ -347,12 +348,37 @@ begin
 end;
 
 procedure TVertexMainForm.FormShow(Sender: TObject);
+var
+  snapVal: Integer;
+  snapIdx: Integer;
 begin
   Left   := gINI.ReadInteger(Name + 'State', 'Left',   Left);
   Top    := gINI.ReadInteger(Name + 'State', 'Top',    Top);
   Width  := gINI.ReadInteger(Name + 'State', 'Width',  Width);
   Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
   UpdatePosition;
+
+  { Restore snap/grid size — 0 = off, otherwise the grid step in HVIF units }
+  snapVal := gINI.ReadInteger(Name + 'State', 'SnapGrid', 16);
+  case snapVal of
+     0: snapIdx := 0;
+     1: snapIdx := 1;
+     2: snapIdx := 2;
+     4: snapIdx := 3;
+     8: snapIdx := 4;
+    16: snapIdx := 5;
+    32: snapIdx := 6;
+  else
+    snapIdx := 5;  { default to 16 }
+  end;
+  FSnapCombo.FocusItem := snapIdx;
+  if snapVal = 0 then
+    FVertexCanvas.SnapToGrid := False
+  else
+  begin
+    FVertexCanvas.GridStep   := snapVal;
+    FVertexCanvas.SnapToGrid := True;
+  end;
 end;
 
 procedure TVertexMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -483,11 +509,21 @@ begin
   FBtnGrid.SetPosition(544, 38, 46, 22);
   FBtnGrid.OnClick := @GridBtnClick;
 
-  FBtnSnap := TfpgButton.Create(FZoomBar);
-  FBtnSnap.Text    := 'Snap';
-  FBtnSnap.Tag     := 0;   { 0=off, 1=on }
-  FBtnSnap.SetPosition(592, 38, 50, 22);
-  FBtnSnap.OnClick := @SnapBtnClick;
+  FSnapLabel := TfpgLabel.Create(FZoomBar);
+  FSnapLabel.Text := 'Snap:';
+  FSnapLabel.SetPosition(594, 41, 36, 18);
+
+  FSnapCombo := TfpgComboBox.Create(FZoomBar);
+  FSnapCombo.SetPosition(632, 38, 68, 22);
+  FSnapCombo.Items.Add('Off');
+  FSnapCombo.Items.Add('1');
+  FSnapCombo.Items.Add('2');
+  FSnapCombo.Items.Add('4');
+  FSnapCombo.Items.Add('8');
+  FSnapCombo.Items.Add('16');
+  FSnapCombo.Items.Add('32');
+  FSnapCombo.FocusItem := 5;   { default: 16 }
+  FSnapCombo.OnChange  := @SnapComboChange;
 
   mig.AddLayoutComponent(FZoomBar, TfpgMigCC.Create().DockNorth.GrowX());
 
@@ -1806,14 +1842,27 @@ begin
     FBtnGrid.Text := 'Grid';
 end;
 
-procedure TVertexMainForm.SnapBtnClick(Sender: TObject);
+procedure TVertexMainForm.SnapComboChange(Sender: TObject);
+var
+  s:   string;
+  val: Integer;
 begin
-  FBtnSnap.Tag := 1 - FBtnSnap.Tag;   { toggle }
-  FVertexCanvas.SnapToGrid := FBtnSnap.Tag = 1;
-  if FBtnSnap.Tag = 1 then
-    FBtnSnap.Text := 'Snap ON'
+  s := FSnapCombo.Items[FSnapCombo.FocusItem];
+  if s = 'Off' then
+  begin
+    FVertexCanvas.SnapToGrid := False;
+    val := 0;
+  end
   else
-    FBtnSnap.Text := 'Snap';
+  begin
+    val := StrToIntDef(s, 16);
+    FVertexCanvas.GridStep   := val;
+    FVertexCanvas.SnapToGrid := True;
+  end;
+  { Grid display step follows the snap size }
+  if val > 0 then
+    FVertexCanvas.GridStep := val;
+  gINI.WriteInteger(Name + 'State', 'SnapGrid', val);
 end;
 
 procedure TVertexMainForm.miFileExportPngClick(Sender: TObject);
@@ -2065,7 +2114,7 @@ begin
       'Tools: Sel / Node / Pan (toolbox)' + LineEnding +
       'Zoom:  Ctrl+scroll or zoom toolbar' + LineEnding +
       'Pan:   scroll or Pan tool' + LineEnding +
-      'Grid:  Grid/Snap buttons in toolbar',
+      'Grid:  Grid button + Snap combo in toolbar',
       'About Vertex');
 end;
 
