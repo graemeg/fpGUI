@@ -127,6 +127,7 @@ type
     procedure DrawHvifImage;
     procedure DrawGrid;
     procedure DrawEmptyHint;
+    procedure DrawShapeBoundingBox;
     procedure DrawNodeOverlayForPath(APath: TVertexPath);
     procedure DrawControlOverlay;
     procedure DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
@@ -535,6 +536,122 @@ begin
   Canvas.DrawArc(bx, by, bd, bd, 0, 360);
 end;
 
+procedure TVertexCanvasWidget.DrawShapeBoundingBox;
+const
+  COL_BBOX    = $FF0080FF;   { bright blue }
+  DASH_ON     = 6;           { pixels drawn }
+  DASH_OFF    = 4;           { pixels skipped }
+  PAD         = 4;           { screen-pixel padding around the tight bbox }
+
+  procedure DashedHLine(x1, x2, y: Integer);
+  var x, phase: Integer;
+  begin
+    x := x1; phase := 0;
+    while x <= x2 do
+    begin
+      if phase < DASH_ON then
+        Canvas.DrawLine(x, y, x + 1, y);
+      Inc(x);
+      Inc(phase);
+      if phase >= DASH_ON + DASH_OFF then phase := 0;
+    end;
+  end;
+
+  procedure DashedVLine(x, y1, y2: Integer);
+  var y, phase: Integer;
+  begin
+    y := y1; phase := 0;
+    while y <= y2 do
+    begin
+      if phase < DASH_ON then
+        Canvas.DrawLine(x, y, x, y + 1);
+      Inc(y);
+      Inc(phase);
+      if phase >= DASH_ON + DASH_OFF then phase := 0;
+    end;
+  end;
+
+var
+  shape: TVertexShape;
+  pi, ni: Integer;
+  path: TVertexPath;
+  pt: TVertexPoint;
+  minHX, minHY, maxHX, maxHY: Single;
+  first: Boolean;
+  sx1, sy1, sx2, sy2: Integer;
+
+  procedure ExpandBy(hx, hy: Single);
+  begin
+    if first then
+    begin
+      minHX := hx; maxHX := hx;
+      minHY := hy; maxHY := hy;
+      first := False;
+    end
+    else
+    begin
+      if hx < minHX then minHX := hx;
+      if hx > maxHX then maxHX := hx;
+      if hy < minHY then minHY := hy;
+      if hy > maxHY then maxHY := hy;
+    end;
+  end;
+
+begin
+  if (FDocument = nil) or (FSelectedShapeIdx < 0) or
+     (FSelectedShapeIdx >= FDocument.ShapeCount) then Exit;
+
+  shape := FDocument.Shapes[FSelectedShapeIdx];
+  first := True;
+
+  { Collect bounding box over all anchor points and Bezier handles of all paths,
+    then apply shape translation offset. }
+  for pi := 0 to shape.PathCount - 1 do
+  begin
+    path := shape.Paths[pi];
+    for ni := 0 to path.PointCount - 1 do
+    begin
+      pt := path.Points[ni];
+      ExpandBy(pt.X, pt.Y);
+      ExpandBy(pt.InX, pt.InY);
+      ExpandBy(pt.OutX, pt.OutY);
+    end;
+  end;
+
+  if first then Exit;  { no points found }
+
+  { Apply shape translation (affine matrix support to follow) }
+  if shape.HasTranslation then
+  begin
+    minHX := minHX + shape.TranslateX;  maxHX := maxHX + shape.TranslateX;
+    minHY := minHY + shape.TranslateY;  maxHY := maxHY + shape.TranslateY;
+  end;
+
+  { Convert to screen coordinates and add padding }
+  sx1 := HvifToScreenX(minHX) - PAD;
+  sy1 := HvifToScreenY(minHY) - PAD;
+  sx2 := HvifToScreenX(maxHX) + PAD;
+  sy2 := HvifToScreenY(maxHY) + PAD;
+
+  Canvas.SetColor(COL_BBOX);
+  DashedHLine(sx1, sx2, sy1);   { top }
+  DashedHLine(sx1, sx2, sy2);   { bottom }
+  DashedVLine(sx1, sy1, sy2);   { left }
+  DashedVLine(sx2, sy1, sy2);   { right }
+
+  { Corner handles — small solid squares at each corner }
+  Canvas.FillRectangle(sx1 - 3, sy1 - 3, 7, 7);
+  Canvas.FillRectangle(sx2 - 3, sy1 - 3, 7, 7);
+  Canvas.FillRectangle(sx1 - 3, sy2 - 3, 7, 7);
+  Canvas.FillRectangle(sx2 - 3, sy2 - 3, 7, 7);
+
+  { Edge midpoint handles — small solid squares at mid-points of each edge }
+  Canvas.FillRectangle((sx1 + sx2) div 2 - 3, sy1 - 3, 7, 7);   { top mid }
+  Canvas.FillRectangle((sx1 + sx2) div 2 - 3, sy2 - 3, 7, 7);   { bottom mid }
+  Canvas.FillRectangle(sx1 - 3, (sy1 + sy2) div 2 - 3, 7, 7);   { left mid }
+  Canvas.FillRectangle(sx2 - 3, (sy1 + sy2) div 2 - 3, 7, 7);   { right mid }
+end;
+
 procedure TVertexCanvasWidget.DrawNodeOverlayForPath(APath: TVertexPath);
 var
   ni: Integer;
@@ -571,8 +688,12 @@ var
 begin
   if FDocument = nil then Exit;
 
-  { Shape-transform mode: no node overlay — bounding box will be drawn instead. }
-  if FToolMode = tmSelect then Exit;
+  { Shape-transform mode: draw bounding box with handles, no node overlay. }
+  if FToolMode = tmSelect then
+  begin
+    DrawShapeBoundingBox;
+    Exit;
+  end;
 
   { Path-edit mode: draw nodes for the active path only.
     FActivePath is set by SetEditPath when the user selects a path in the tree. }
