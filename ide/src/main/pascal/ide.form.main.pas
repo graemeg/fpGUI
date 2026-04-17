@@ -2807,8 +2807,8 @@ begin
     Hint := 'Open a source file...';
     Embedded := True;
     ImageMargin := 0;
-    IconName := 'ide.build';
-    IconSize := 16;
+    ImageName := 'stdimg.open';
+    ImageSize := 16;
     OnClick := @btnOpenFileClicked;
   end;
 
