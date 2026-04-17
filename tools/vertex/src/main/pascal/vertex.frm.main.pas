@@ -176,6 +176,9 @@ type
     procedure ShapeMenuSetTransformer(Sender: TObject);
     procedure ShapeMenuRemove(Sender: TObject);
 
+    { Shape panel path double-click — jump to that path in the tree for editing. }
+    procedure ShapePanelPathDblClick(Sender: TObject);
+
     { Canvas cursor-move callback — updates the status bar. }
     procedure CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
 
@@ -334,6 +337,7 @@ begin
   OnCloseQuery := @FormCloseQuery;
   FVertexCanvas.OnCursorMove    := @CanvasCursorMove;
   FVertexCanvas.OnShapeSelected := @CanvasShapeSelected;
+  FShapePanel.OnPathDblClick    := @ShapePanelPathDblClick;
 end;
 
 procedure TVertexMainForm.SetupMenus;
@@ -1923,6 +1927,19 @@ begin
   else
     FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %d bytes HVIF',
         [FStatusCursorX, FStatusCursorY, FHvifByteCount]);
+end;
+
+procedure TVertexMainForm.ShapePanelPathDblClick(Sender: TObject);
+var
+  path: TVertexPath;
+  idx:  Integer;
+begin
+  path := FShapePanel.SelectedPath;
+  if path = nil then Exit;
+  idx := FDocument.IndexOfPath(path);
+  if idx < 0 then Exit;
+  SelectPathInTree(idx);
+  ObjectTreeChanged(nil);
 end;
 
 procedure TVertexMainForm.CanvasShapeSelected(Sender: TObject);

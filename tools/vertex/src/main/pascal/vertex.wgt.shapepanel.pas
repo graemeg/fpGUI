@@ -34,9 +34,10 @@ uses
 type
   TVertexShapePanel = class(TfpgBevel)
   private
-    FDocument: TVertexDocument;   { not owned }
-    FShape:    TVertexShape;      { current shape, not owned; nil = no selection }
-    FUpdating: Boolean;
+    FDocument:       TVertexDocument;   { not owned }
+    FShape:          TVertexShape;      { current shape, not owned; nil = no selection }
+    FUpdating:       Boolean;
+    FOnPathDblClick: TNotifyEvent;
 
     { Name row }
     FLblHeader:    TfpgLabel;
@@ -104,6 +105,8 @@ type
     procedure MiterSpinExit(Sender: TObject);
 
     procedure CommitTransformer;
+    procedure PathListDblClick(Sender: TObject; AButton: TMouseButton;
+        AShift: TShiftState; const AMousePos: TPoint);
 
   public
     constructor Create(AOwner: TComponent); override;
@@ -111,6 +114,12 @@ type
     procedure SetDocument(ADoc: TVertexDocument);
     procedure SetShape(AShape: TVertexShape);
     procedure DocumentChanged;
+
+    { Returns the TVertexPath currently highlighted in the path list, or nil. }
+    function  SelectedPath: TVertexPath;
+
+    { Fired when the user double-clicks a path entry in the list. }
+    property  OnPathDblClick: TNotifyEvent read FOnPathDblClick write FOnPathDblClick;
   end;
 
 
@@ -188,6 +197,7 @@ begin
 
   FPathList := TfpgListBox.Create(Self);
   FPathList.SetPosition(LBL_X, R4, 210, 50);
+  FPathList.OnDoubleClick := @PathListDblClick;
 
   FBtnPathAdd := TfpgButton.Create(Self);
   FBtnPathAdd.SetPosition(LBL_X, R5, 100, ROW_H);
@@ -705,6 +715,24 @@ procedure TVertexShapePanel.DocumentChanged;
 begin
   if FShape <> nil then
     UpdateControls;
+end;
+
+function TVertexShapePanel.SelectedPath: TVertexPath;
+var
+  idx: Integer;
+begin
+  Result := nil;
+  if FShape = nil then Exit;
+  idx := FPathList.FocusItem;
+  if (idx >= 0) and (idx < FShape.PathCount) then
+    Result := FShape.Paths[idx];
+end;
+
+procedure TVertexShapePanel.PathListDblClick(Sender: TObject; AButton: TMouseButton;
+    AShift: TShiftState; const AMousePos: TPoint);
+begin
+  if Assigned(FOnPathDblClick) and (SelectedPath <> nil) then
+    FOnPathDblClick(Self);
 end;
 
 
