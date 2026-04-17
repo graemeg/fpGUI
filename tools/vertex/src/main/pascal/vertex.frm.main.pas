@@ -1768,9 +1768,10 @@ var
 begin
   idx := FVertexCanvas.SelectedShapeIndex;
   if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
-  { SelectShapeInTree updates the tree selection, which triggers
-    ObjectTreeChanged → updates style panel, shape panel, popup menu. }
+  { Programmatically setting Selection does not fire OnChange, so we
+    update the tree node first then refresh all panels explicitly. }
   SelectShapeInTree(idx);
+  ObjectTreeChanged(nil);
 end;
 
 procedure TVertexMainForm.CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
