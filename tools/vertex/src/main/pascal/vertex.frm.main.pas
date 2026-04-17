@@ -791,6 +791,7 @@ var
   idx:    Integer;
   style:  TVertexStyle;
   i:      Integer;
+  users:  string;
   cmd:    TVertexCmdDeleteStyle;
 begin
   node := FObjectTree.Selection;
@@ -800,15 +801,18 @@ begin
   if (idx < 0) or (idx >= FDocument.StyleCount) then
     Exit;
   style := FDocument.Styles[idx];
-  { Refuse if any shape still references this style }
+  { Refuse if any shape still references this style — collect all names }
+  users := '';
   for i := 0 to FDocument.ShapeCount - 1 do
     if FDocument.Shapes[i].Style = style then
-    begin
-      ShowMessage('Cannot delete style: it is used by shape "' +
-          FDocument.Shapes[i].Name + '".' + LineEnding +
-          'Remove the style from all shapes first.', 'Vertex');
-      Exit;
-    end;
+      users := users + '  ' + FDocument.Shapes[i].Name + LineEnding;
+  if users <> '' then
+  begin
+    ShowMessage('Cannot delete style "' + style.Name +
+        '": it is used by:' + LineEnding + users +
+        'Remove the style from all those shapes first.', 'Vertex');
+    Exit;
+  end;
   cmd := TVertexCmdDeleteStyle.Create(FDocument, style);
   FDocument.UndoStack.Execute(cmd);
   FStylePanel.SetStyle(nil);
