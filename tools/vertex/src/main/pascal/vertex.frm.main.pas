@@ -486,7 +486,7 @@ begin
   FRightPanel := TfpgBevel.Create(Self);
   FRightPanel.Name  := 'rightPanel';
   FRightPanel.Style := bsFlat;
-  FRightPanel.PreferredSize := fpgSize(226, 400);
+  FRightPanel.PreferredSize := fpgSize(240, 400);
 
   rmig := TfpgMigLayoutManager.Create;
   rmig.LC.Fill.WrapAfter(1);
