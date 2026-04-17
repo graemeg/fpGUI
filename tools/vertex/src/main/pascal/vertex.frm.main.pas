@@ -213,6 +213,9 @@ type
     destructor Destroy; override;
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
                              var consumed: boolean); override;
+  private
+    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
   end;
 
 
@@ -322,6 +325,7 @@ end;
 procedure TVertexMainForm.AfterCreate;
 begin
   inherited AfterCreate;
+  Name        := 'VertexMainForm';
   FDocument   := TVertexDocument.Create;
   WindowTitle := 'Vertex';
   SetPosition(80, 80, 960, 640);
@@ -335,9 +339,28 @@ begin
   FShapePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
   OnCloseQuery := @FormCloseQuery;
+  OnShow       := @FormShow;
+  OnClose      := @FormClose;
   FVertexCanvas.OnCursorMove    := @CanvasCursorMove;
   FVertexCanvas.OnShapeSelected := @CanvasShapeSelected;
   FShapePanel.OnPathDblClick    := @ShapePanelPathDblClick;
+end;
+
+procedure TVertexMainForm.FormShow(Sender: TObject);
+begin
+  Left   := gINI.ReadInteger(Name + 'State', 'Left',   Left);
+  Top    := gINI.ReadInteger(Name + 'State', 'Top',    Top);
+  Width  := gINI.ReadInteger(Name + 'State', 'Width',  Width);
+  Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
+  UpdatePosition;
+end;
+
+procedure TVertexMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  gINI.WriteInteger(Name + 'State', 'Left',   Left);
+  gINI.WriteInteger(Name + 'State', 'Top',    Top);
+  gINI.WriteInteger(Name + 'State', 'Width',  ActualWidth);
+  gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
 end;
 
 procedure TVertexMainForm.SetupMenus;
