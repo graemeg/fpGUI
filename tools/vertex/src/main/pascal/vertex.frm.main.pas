@@ -31,7 +31,7 @@ uses
   fpg_base, fpg_main, fpg_form, fpg_constants,
   fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
-  fpg_dialogs,
+  fpg_dialogs, fpg_iniutils, fpg_mru,
   fpg_hvif_model, fpg_hvif,
   fpg_vertex_document,
   vertex.wgt.canvas,
@@ -92,6 +92,9 @@ type
     { Data }
     FDocument:    TVertexDocument;    { owned }
     FCurrentFile: string;             { '' when unsaved/untitled }
+    FLastOpenDir: string;             { last directory used in the Open dialog }
+    FRecentFiles: TfpgMRU;            { MRU list — persisted to gINI }
+    FMnuOpenRecent: TfpgPopupMenu;    { submenu populated by TfpgMRU }
     FHvifByteCount: Integer;          { cached HVIF serialised size, updated on document change }
     FStatusCursorX, FStatusCursorY: Single;  { last known cursor position in HVIF units }
     FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
@@ -112,6 +115,7 @@ type
     { Menu handlers }
     procedure miFileNewClick(Sender: TObject);
     procedure miFileOpenClick(Sender: TObject);
+    procedure miRecentFileClick(Sender: TObject; const FileName: string);
     procedure miFileSaveClick(Sender: TObject);
     procedure miFileSaveAsClick(Sender: TObject);
     procedure miFileExportIncClick(Sender: TObject);
@@ -122,6 +126,7 @@ type
     procedure miHelpAboutClick(Sender: TObject);
 
     { Save / export helpers }
+    procedure DoOpenFile(const AFileName: string);
     procedure DoSaveToFile(const AFileName: string);
     procedure ExportAsInc(const AFileName: string);
     procedure ExportAsPng(const ABasePath: string);
@@ -323,13 +328,27 @@ begin
 end;
 
 procedure TVertexMainForm.SetupMenus;
+var
+  miRecent: TfpgMenuItem;
 begin
+  FMnuOpenRecent := TfpgPopupMenu.Create(Self);
+  FMnuOpenRecent.Name := 'mnuOpenRecent';
+
+  FRecentFiles := TfpgMRU.Create(Self);
+  FRecentFiles.ParentMenuItem := FMnuOpenRecent;
+  FRecentFiles.MaxItems       := 15;
+  FRecentFiles.ShowFullPath   := True;
+  FRecentFiles.OnClick        := @miRecentFileClick;
+  FRecentFiles.LoadMRU;
+
   FMnuFile := TfpgPopupMenu.Create(Self);
   with FMnuFile do
   begin
     Name := 'mnuFile';
     AddMenuItem('New',            rsKeyCtrl + 'N',              @miFileNewClick);
     AddMenuItem('Open...',        rsKeyCtrl + 'O',              @miFileOpenClick);
+    miRecent         := AddMenuItem('Open Recent', '', nil);
+    miRecent.SubMenu := FMnuOpenRecent;
     AddSeparator;
     AddMenuItem('Save',           rsKeyCtrl + 'S',              @miFileSaveClick);
     AddMenuItem('Save As...',     rsKeyCtrl + rsKeyShift + 'S', @miFileSaveAsClick);
@@ -987,16 +1006,10 @@ begin
   NewDocument;
 end;
 
-procedure TVertexMainForm.miFileOpenClick(Sender: TObject);
-var
-  fn: string;
+procedure TVertexMainForm.DoOpenFile(const AFileName: string);
 begin
-  fn := SelectFileDialog(sfdOpen, 'HVIF files (*.hvif)|*.hvif|All files (*)|*', '');
-  if fn = '' then
-    Exit;
-
   try
-    FDocument.LoadFromFile(fn);
+    FDocument.LoadFromFile(AFileName);
   except
     on E: Exception do
     begin
@@ -1005,8 +1018,10 @@ begin
     end;
   end;
 
-  { Notify canvas and preview bar of the load; clear style panel selection }
-  FCurrentFile := fn;
+  FCurrentFile := AFileName;
+  FLastOpenDir := ExtractFilePath(AFileName);
+  FRecentFiles.AddItem(AFileName);
+
   FVertexCanvas.DocumentChanged;
   FPreviewBar.DocumentChanged;
   FVertexCanvas.SelectedShapeIndex := -1;
@@ -1016,6 +1031,29 @@ begin
   PopulateObjectTree;
   UpdateTitle;
   UpdateStatusBar;
+end;
+
+procedure TVertexMainForm.miFileOpenClick(Sender: TObject);
+var
+  fn: string;
+begin
+  fn := SelectFileDialog(sfdOpen, 'HVIF files (*.hvif)|*.hvif|All files (*)|*', FLastOpenDir);
+  if fn = '' then
+    Exit;
+  DoOpenFile(fn);
+end;
+
+procedure TVertexMainForm.miRecentFileClick(Sender: TObject; const FileName: string);
+begin
+  if not FileExists(FileName) then
+  begin
+    ShowMessage('File not found:' + LineEnding + FileName, 'Vertex');
+    FRecentFiles.RemoveItem(FileName);
+    Exit;
+  end;
+  if not PromptSaveIfDirty then
+    Exit;
+  DoOpenFile(FileName);
 end;
 
 procedure TVertexMainForm.miFileSaveClick(Sender: TObject);
