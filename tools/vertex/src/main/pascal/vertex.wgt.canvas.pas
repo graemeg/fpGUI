@@ -968,52 +968,80 @@ begin
 end;
 
 function TVertexCanvasWidget.HitTestShapeBBox(AX, AY: Integer): Integer;
-var
-  i, j, k:    Integer;
-  sh:          TVertexShape;
-  ph:          TVertexPath;
-  pt:          TVertexPoint;
-  minX, minY, maxX, maxY: Single;
-  hvx, hvy:   Single;
+{ Hit-test in screen space using the same bbox as DrawShapeBoundingBox.
+  A fixed screen-pixel margin (PAD = 4) is used so the clickable area
+  exactly matches the drawn box regardless of zoom level. }
 const
-  kSlop = 4;  { HVIF units of extra hit margin }
+  PAD = 4;  { screen pixels — must match DrawShapeBoundingBox PAD constant }
+var
+  i, j, k: Integer;
+  sh:       TVertexShape;
+  ph:       TVertexPath;
+  pt:       TVertexPoint;
+  minHX, minHY, maxHX, maxHY: Single;
+  first:    Boolean;
+  sx1, sy1, sx2, sy2: Integer;
 begin
   Result := -1;
   if FDocument = nil then Exit;
-  hvx := ScreenToHvifX(AX);
-  hvy := ScreenToHvifY(AY);
-  { Iterate shapes top-to-bottom (last shape is on top, drawn last) }
+
+  { Iterate top-to-bottom so the topmost (last-drawn) shape wins on overlap }
   for i := FDocument.ShapeCount - 1 downto 0 do
   begin
     sh := FDocument.Shapes[i];
     if not sh.Visible then Continue;
+
+    { Compute bbox over all anchors + Bezier handles across all paths,
+      matching DrawShapeBoundingBox exactly. }
+    first := True;
+    minHX := 0; minHY := 0; maxHX := 0; maxHY := 0;
+
     for j := 0 to sh.PathCount - 1 do
     begin
       ph := sh.Paths[j];
-      if ph.PointCount = 0 then Continue;
-      pt := ph.Points[0];
-      minX := pt.X; maxX := pt.X;
-      minY := pt.Y; maxY := pt.Y;
-      for k := 1 to ph.PointCount - 1 do
+      for k := 0 to ph.PointCount - 1 do
       begin
         pt := ph.Points[k];
-        if pt.X < minX then minX := pt.X;
-        if pt.X > maxX then maxX := pt.X;
-        if pt.Y < minY then minY := pt.Y;
-        if pt.Y > maxY then maxY := pt.Y;
+        if first then
+        begin
+          minHX := pt.X;   maxHX := pt.X;
+          minHY := pt.Y;   maxHY := pt.Y;
+          first := False;
+        end;
+        if pt.X   < minHX then minHX := pt.X;
+        if pt.X   > maxHX then maxHX := pt.X;
+        if pt.Y   < minHY then minHY := pt.Y;
+        if pt.Y   > maxHY then maxHY := pt.Y;
+        if pt.InX < minHX then minHX := pt.InX;
+        if pt.InX > maxHX then maxHX := pt.InX;
+        if pt.InY < minHY then minHY := pt.InY;
+        if pt.InY > maxHY then maxHY := pt.InY;
+        if pt.OutX < minHX then minHX := pt.OutX;
+        if pt.OutX > maxHX then maxHX := pt.OutX;
+        if pt.OutY < minHY then minHY := pt.OutY;
+        if pt.OutY > maxHY then maxHY := pt.OutY;
       end;
-      { Apply optional shape translation }
-      if sh.HasTranslation then
-      begin
-        minX := minX + sh.TranslateX; maxX := maxX + sh.TranslateX;
-        minY := minY + sh.TranslateY; maxY := maxY + sh.TranslateY;
-      end;
-      if (hvx >= minX - kSlop) and (hvx <= maxX + kSlop) and
-         (hvy >= minY - kSlop) and (hvy <= maxY + kSlop) then
-      begin
-        Result := i;
-        Exit;
-      end;
+    end;
+
+    if first then Continue;  { shape has no points }
+
+    { Apply shape translation }
+    if sh.HasTranslation then
+    begin
+      minHX := minHX + sh.TranslateX;  maxHX := maxHX + sh.TranslateX;
+      minHY := minHY + sh.TranslateY;  maxHY := maxHY + sh.TranslateY;
+    end;
+
+    { Convert to screen coords + same PAD as the drawn box }
+    sx1 := HvifToScreenX(minHX) - PAD;
+    sy1 := HvifToScreenY(minHY) - PAD;
+    sx2 := HvifToScreenX(maxHX) + PAD;
+    sy2 := HvifToScreenY(maxHY) + PAD;
+
+    if (AX >= sx1) and (AX <= sx2) and (AY >= sy1) and (AY <= sy2) then
+    begin
+      Result := i;
+      Exit;
     end;
   end;
 end;
