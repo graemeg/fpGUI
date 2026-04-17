@@ -929,15 +929,13 @@ end;
 
 function THvifStyleHandler.color(style: unsigned): aggclr_ptr;
 begin
+  { SolidColor is already premultiplied at setup time (see RenderToImage).
+    Calling premultiply here again would compound the multiplication on every
+    scan-line span, decaying RGB to zero within a few pixels. }
   if style >= unsigned(FCount) then
     Result := @FData[0].SolidColor
   else
     Result := @FData[style].SolidColor;
-  { The compound renderer expects premultiplied alpha colours.
-    Without this, antialiased edge pixels get dark fringing because
-    AGG blends (R,G,B) at partial coverage without accounting for
-    the alpha channel.  See Haiku IconRenderer.cpp line 178. }
-  Result^.premultiply;
 end;
 
 procedure THvifStyleHandler.generate_span(span: aggclr_ptr; x, y: int;
@@ -1123,6 +1121,9 @@ begin
           entry^.SolidColor.ConstrInt(
             styl.Color.R, styl.Color.G,
             styl.Color.B, styl.Color.A);
+          { Premultiply once here; color() returns this pointer directly
+            so premultiplying there would compound on every span call. }
+          entry^.SolidColor.premultiply;
         end;
 
       hstGradient:
