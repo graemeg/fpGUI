@@ -112,7 +112,8 @@ type
     FSnapToGrid: Boolean;
 
     { Events }
-    FOnCursorMove: TVertexCursorMoveEvent;
+    FOnCursorMove:    TVertexCursorMoveEvent;
+    FOnShapeSelected: TNotifyEvent;   { fires when user clicks a shape in the canvas }
 
     { Coordinate helpers }
     function  HvifToScreenX(AHvif: Single): Integer;
@@ -146,6 +147,7 @@ type
     function HitTestShapeBBox(AX, AY: Integer): Integer;
 
     procedure SetSelectedShapeIndex(AValue: Integer);
+    procedure SelectShapeByClick(AIndex: Integer);   { sets index + fires OnShapeSelected }
     procedure SetZoom(AValue: Integer);
     procedure SetShowGrid(AValue: Boolean);
     procedure SetGridStep(AValue: Integer);
@@ -195,6 +197,11 @@ type
     { Fires on every mouse-move, passing cursor position in HVIF units (0–64). }
     property OnCursorMove: TVertexCursorMoveEvent
         read FOnCursorMove write FOnCursorMove;
+
+    { Fires when the user clicks a shape in the canvas, changing the selection.
+      The form should respond by syncing the tree and property panels. }
+    property OnShapeSelected: TNotifyEvent
+        read FOnShapeSelected write FOnShapeSelected;
   end;
 
 
@@ -320,6 +327,13 @@ begin
   FActivePath       := nil;
   FDragTarget       := dtNone;
   Repaint;
+end;
+
+procedure TVertexCanvasWidget.SelectShapeByClick(AIndex: Integer);
+begin
+  SetSelectedShapeIndex(AIndex);
+  if Assigned(FOnShapeSelected) then
+    FOnShapeSelected(Self);
 end;
 
 procedure TVertexCanvasWidget.SetEditPath(APath: TVertexPath);
@@ -1051,7 +1065,7 @@ begin
     shapeIdx := HitTestShapeBBox(x, y);
     if shapeIdx >= 0 then
     begin
-      SetSelectedShapeIndex(shapeIdx);
+      SelectShapeByClick(shapeIdx);   { updates canvas + notifies form to sync tree }
       sh := FDocument.Shapes[shapeIdx];
       FSelectDragActive    := True;
       FSelectDragStartX    := x;

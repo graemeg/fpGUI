@@ -170,6 +170,10 @@ type
     { Canvas cursor-move callback — updates the status bar. }
     procedure CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
 
+    { Canvas shape-selected callback — syncs tree and panels when user
+      clicks a different shape directly on the canvas. }
+    procedure CanvasShapeSelected(Sender: TObject);
+
     { Refresh the status bar text from the current document/selection state. }
     procedure UpdateStatusBar;
 
@@ -314,7 +318,8 @@ begin
   FShapePanel.SetDocument(FDocument);
   FPreviewBar.SetDocument(FDocument);
   OnCloseQuery := @FormCloseQuery;
-  FVertexCanvas.OnCursorMove := @CanvasCursorMove;
+  FVertexCanvas.OnCursorMove    := @CanvasCursorMove;
+  FVertexCanvas.OnShapeSelected := @CanvasShapeSelected;
 end;
 
 procedure TVertexMainForm.SetupMenus;
@@ -1755,6 +1760,17 @@ begin
   else
     FStatusBar.Text := Format('X: %.1f  Y: %.1f  |  %d bytes HVIF',
         [FStatusCursorX, FStatusCursorY, FHvifByteCount]);
+end;
+
+procedure TVertexMainForm.CanvasShapeSelected(Sender: TObject);
+var
+  idx: Integer;
+begin
+  idx := FVertexCanvas.SelectedShapeIndex;
+  if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
+  { SelectShapeInTree updates the tree selection, which triggers
+    ObjectTreeChanged → updates style panel, shape panel, popup menu. }
+  SelectShapeInTree(idx);
 end;
 
 procedure TVertexMainForm.CanvasCursorMove(Sender: TObject; AHvifX, AHvifY: Single);
