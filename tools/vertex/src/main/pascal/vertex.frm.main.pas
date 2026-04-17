@@ -88,6 +88,9 @@ type
     FMnuShape:      TfpgPopupMenu;    { right-click on a shape node }
     FBtnGrid:       TfpgButton;       { toggle grid overlay }
     FBtnSnap:       TfpgButton;       { toggle snap-to-grid }
+    FStyleBar:      TfpgBevel;        { style management button bar }
+    FBtnStyleAdd:   TfpgButton;
+    FBtnStyleDel:   TfpgButton;
 
     { Data }
     FDocument:    TVertexDocument;    { owned }
@@ -97,6 +100,7 @@ type
     FMnuOpenRecent: TfpgPopupMenu;    { submenu populated by TfpgMRU }
     FHvifByteCount: Integer;          { cached HVIF serialised size, updated on document change }
     FStatusCursorX, FStatusCursorY: Single;  { last known cursor position in HVIF units }
+    FStylesNode:  TfpgTreeNode;    { weak ref into the styles subtree }
     FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
     FPathsNode:   TfpgTreeNode;    { weak ref into the paths subtree }
 
@@ -185,13 +189,18 @@ type
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
 
+    { Style management handlers }
+    procedure StyleAdd(Sender: TObject);
+    procedure StyleDelete(Sender: TObject);
+
     { Shape management handlers }
     procedure ShapeAdd(Sender: TObject);
     procedure ShapeDelete(Sender: TObject);
     procedure ShapeMoveUp(Sender: TObject);
     procedure ShapeMoveDown(Sender: TObject);
 
-    { Select the given shape index in the object tree (after repopulation). }
+    { Select the given style/shape/path index in the object tree. }
+    procedure SelectStyleInTree(AStyleIdx: Integer);
     procedure SelectShapeInTree(AShapeIdx: Integer);
     { Select the given path index in the object tree (after repopulation). }
     procedure SelectPathInTree(APathIdx: Integer);
@@ -393,56 +402,64 @@ begin
   { Menu bar — spans full width at top }
   mig.AddLayoutComponent(FMenuBar, TfpgMigCC.Create().DockNorth);
 
-  { Zoom toolbar — sits below menu, spans full width }
+  { Zoom toolbar — sits below menu, spans full width.
+    The preview bar (98px tall) is embedded at the left; all zoom/grid/snap
+    buttons are positioned to its right, vertically centred (BY = 38). }
   FZoomBar := TfpgBevel.Create(Self);
   FZoomBar.Name  := 'zoomBar';
   FZoomBar.Style := bsFlat;
-  FZoomBar.PreferredSize := fpgSize(600, 26);
+  FZoomBar.PreferredSize := fpgSize(800, 100);
 
+  { Preview bar — left side of the zoom strip }
+  FPreviewBar := TVertexPreviewBar.Create(FZoomBar);
+  FPreviewBar.Name := 'previewBar';
+  FPreviewBar.SetPosition(2, 2, 220, 96);
+
+  { Zoom buttons — right of preview bar; BX = 230, BY = 38 (centred in 100px) }
   FBtnZoomFit := TfpgButton.Create(FZoomBar);
   FBtnZoomFit.Text    := 'Fit';
   FBtnZoomFit.Tag     := -1;
-  FBtnZoomFit.SetPosition(2, 2, 36, 22);
+  FBtnZoomFit.SetPosition(230, 38, 36, 22);
   FBtnZoomFit.OnClick := @ZoomBtnClick;
 
   FBtnZoom50 := TfpgButton.Create(FZoomBar);
   FBtnZoom50.Text    := '50%';
   FBtnZoom50.Tag     := 50;
-  FBtnZoom50.SetPosition(40, 2, 44, 22);
+  FBtnZoom50.SetPosition(268, 38, 44, 22);
   FBtnZoom50.OnClick := @ZoomBtnClick;
 
   FBtnZoom100 := TfpgButton.Create(FZoomBar);
   FBtnZoom100.Text    := '100%';
   FBtnZoom100.Tag     := 100;
-  FBtnZoom100.SetPosition(86, 2, 50, 22);
+  FBtnZoom100.SetPosition(314, 38, 50, 22);
   FBtnZoom100.OnClick := @ZoomBtnClick;
 
   FBtnZoom200 := TfpgButton.Create(FZoomBar);
   FBtnZoom200.Text    := '200%';
   FBtnZoom200.Tag     := 200;
-  FBtnZoom200.SetPosition(138, 2, 50, 22);
+  FBtnZoom200.SetPosition(366, 38, 50, 22);
   FBtnZoom200.OnClick := @ZoomBtnClick;
 
   FBtnZoom400 := TfpgButton.Create(FZoomBar);
   FBtnZoom400.Text    := '400%';
   FBtnZoom400.Tag     := 400;
-  FBtnZoom400.SetPosition(190, 2, 50, 22);
+  FBtnZoom400.SetPosition(418, 38, 50, 22);
   FBtnZoom400.OnClick := @ZoomBtnClick;
 
   FZoomLabel := TfpgLabel.Create(FZoomBar);
   FZoomLabel.Text := 'Fit';
-  FZoomLabel.SetPosition(248, 5, 60, 18);
+  FZoomLabel.SetPosition(476, 41, 60, 18);
 
   FBtnGrid := TfpgButton.Create(FZoomBar);
   FBtnGrid.Text    := 'Grid';
   FBtnGrid.Tag     := 0;   { 0=off, 1=on }
-  FBtnGrid.SetPosition(316, 2, 46, 22);
+  FBtnGrid.SetPosition(544, 38, 46, 22);
   FBtnGrid.OnClick := @GridBtnClick;
 
   FBtnSnap := TfpgButton.Create(FZoomBar);
   FBtnSnap.Text    := 'Snap';
   FBtnSnap.Tag     := 0;   { 0=off, 1=on }
-  FBtnSnap.SetPosition(364, 2, 50, 22);
+  FBtnSnap.SetPosition(592, 38, 50, 22);
   FBtnSnap.OnClick := @SnapBtnClick;
 
   mig.AddLayoutComponent(FZoomBar, TfpgMigCC.Create().DockNorth.GrowX());
@@ -519,15 +536,29 @@ begin
   rmig.LC.Fill.WrapAfter(1);
   FRightPanel.LayoutManager := rmig;
 
-  FPreviewBar := TVertexPreviewBar.Create(FRightPanel);
-  FPreviewBar.Name := 'previewBar';
-  rmig.AddLayoutComponent(FPreviewBar, TfpgMigCC.Create().GrowX());
-
   FObjectTree := TfpgTreeView.Create(FRightPanel);
   FObjectTree.Name     := 'objectTree';
   FObjectTree.PreferredSize := fpgSize(220, 200);
   FObjectTree.OnChange := @ObjectTreeChanged;
   rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY().PushY());
+
+  { Style management button bar: [+ Style] [-] }
+  FStyleBar := TfpgBevel.Create(FRightPanel);
+  FStyleBar.Name  := 'styleBar';
+  FStyleBar.Style := bsFlat;
+  FStyleBar.PreferredSize := fpgSize(220, 26);
+
+  FBtnStyleAdd := TfpgButton.Create(FStyleBar);
+  FBtnStyleAdd.Text    := '+ Style';
+  FBtnStyleAdd.SetPosition(2, 2, 66, 22);
+  FBtnStyleAdd.OnClick := @StyleAdd;
+
+  FBtnStyleDel := TfpgButton.Create(FStyleBar);
+  FBtnStyleDel.Text    := '- Style';
+  FBtnStyleDel.SetPosition(70, 2, 66, 22);
+  FBtnStyleDel.OnClick := @StyleDelete;
+
+  rmig.AddLayoutComponent(FStyleBar, TfpgMigCC.Create().GrowX());
 
   { Path management button bar: [+ Path] [-] }
   FPathBar := TfpgBevel.Create(FRightPanel);
@@ -641,6 +672,7 @@ begin
   FObjectTree.BeginUpdate;
   try
     FObjectTree.RootNode.Clear;
+    FStylesNode := nil;
     FShapesNode := nil;
     FPathsNode  := nil;
 
@@ -648,6 +680,7 @@ begin
     nStyles := FObjectTree.RootNode.AppendText(
         Format('Styles (%d)', [FDocument.StyleCount]));
     nStyles.Expand;
+    FStylesNode := nStyles;
 
     for i := 0 to FDocument.StyleCount - 1 do
     begin
@@ -663,7 +696,8 @@ begin
       else
         s := st.Name;
       end;
-      nStyles.AppendText(s);
+      n := nStyles.AppendText(s);
+      n.Data := Pointer(PtrUInt(i));
     end;
 
     { ── Paths ── }
@@ -708,6 +742,78 @@ begin
   finally
     FObjectTree.EndUpdate;
   end;
+end;
+
+
+{ ── Style management ─────────────────────────────────────────────────────── }
+
+procedure TVertexMainForm.SelectStyleInTree(AStyleIdx: Integer);
+var
+  n: TfpgTreeNode;
+begin
+  if (FStylesNode = nil) or (AStyleIdx < 0) then
+    Exit;
+  n := FStylesNode.FirstSubNode;
+  while n <> nil do
+  begin
+    if Integer(PtrUInt(n.Data)) = AStyleIdx then
+    begin
+      FObjectTree.Selection := n;
+      Exit;
+    end;
+    n := n.Next;
+  end;
+end;
+
+procedure TVertexMainForm.StyleAdd(Sender: TObject);
+var
+  style: TVertexStyle;
+  col:   THvifColor;
+  cmd:   TVertexCmdAddStyle;
+  newIdx: Integer;
+begin
+  { New solid white opaque style }
+  style           := TVertexStyle.Create(FDocument.UniqueName('style'));
+  style.StyleType := hstSolidColor;
+  col.R := 255; col.G := 255; col.B := 255; col.A := 255;
+  style.Color := col;
+  cmd := TVertexCmdAddStyle.Create(FDocument, style);
+  FDocument.UndoStack.Execute(cmd);
+  newIdx := FDocument.StyleCount - 1;
+  PopulateObjectTree;
+  SelectStyleInTree(newIdx);
+  ObjectTreeChanged(nil);
+end;
+
+procedure TVertexMainForm.StyleDelete(Sender: TObject);
+var
+  node:   TfpgTreeNode;
+  idx:    Integer;
+  style:  TVertexStyle;
+  i:      Integer;
+  cmd:    TVertexCmdDeleteStyle;
+begin
+  node := FObjectTree.Selection;
+  if (node = nil) or (FStylesNode = nil) or (node.Parent <> FStylesNode) then
+    Exit;
+  idx := Integer(PtrUInt(node.Data));
+  if (idx < 0) or (idx >= FDocument.StyleCount) then
+    Exit;
+  style := FDocument.Styles[idx];
+  { Refuse if any shape still references this style }
+  for i := 0 to FDocument.ShapeCount - 1 do
+    if FDocument.Shapes[i].Style = style then
+    begin
+      ShowMessage('Cannot delete style: it is used by shape "' +
+          FDocument.Shapes[i].Name + '".' + LineEnding +
+          'Remove the style from all shapes first.', 'Vertex');
+      Exit;
+    end;
+  cmd := TVertexCmdDeleteStyle.Create(FDocument, style);
+  FDocument.UndoStack.Execute(cmd);
+  FStylePanel.SetStyle(nil);
+  FObjectTree.PopupMenu := nil;
+  PopulateObjectTree;
 end;
 
 
@@ -878,6 +984,21 @@ begin
   node := FObjectTree.Selection;
   if node = nil then
     Exit;
+
+  { Style selected → show style properties; clear canvas selection }
+  if (FStylesNode <> nil) and (node.Parent = FStylesNode) then
+  begin
+    idx := Integer(PtrUInt(node.Data));
+    FStylePanel.SetStyle(FDocument.Styles[idx]);
+    FPathPanel.SetPath(nil);
+    FShapePanel.SetShape(nil);
+    FVertexCanvas.SelectedShapeIndex := -1;
+    FVertexCanvas.SetEditPath(nil);
+    FObjectTree.PopupMenu := nil;
+    ApplyToolMode(tmSelect);
+    UpdateStatusBar;
+    Exit;
+  end;
 
   { Path selected → path-edit mode: show anchor points and curve handles }
   if (FPathsNode <> nil) and (node.Parent = FPathsNode) then

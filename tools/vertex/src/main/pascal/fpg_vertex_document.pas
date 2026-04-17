@@ -35,6 +35,8 @@
         TVertexCmdSetStyleColour    — change a style's solid colour
         TVertexCmdAddShape          — add a new shape (Undo removes it)
         TVertexCmdDeleteShape       — delete a shape (Undo restores it)
+        TVertexCmdAddStyle          — add a new style (Undo removes it)
+        TVertexCmdDeleteStyle       — delete a style (Undo restores it)
         TVertexCmdAddPath           — add a new path (Undo removes it)
         TVertexCmdDeletePath        — delete a path (Undo restores it)
         TVertexCmdRename            — rename any named object
@@ -481,6 +483,36 @@ type
     FOwnsPath:   Boolean;
   public
     constructor Create(ADocument: TVertexDocument; APath: TVertexPath);
+    destructor  Destroy; override;
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Add a new TVertexStyle to the document. Undo removes it. }
+  TVertexCmdAddStyle = class(TVertexCommand)
+  private
+    FDocument:   TVertexDocument;
+    FStyle:      TVertexStyle;
+    FOwnsStyle:  Boolean;
+  public
+    constructor Create(ADocument: TVertexDocument; AStyle: TVertexStyle);
+    destructor  Destroy; override;
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
+  { Remove a TVertexStyle from the document. Undo restores it.
+    Caller must ensure no shape references this style beforehand. }
+  TVertexCmdDeleteStyle = class(TVertexCommand)
+  private
+    FDocument:   TVertexDocument;
+    FStyle:      TVertexStyle;
+    FSavedIndex: Integer;
+    FOwnsStyle:  Boolean;
+  public
+    constructor Create(ADocument: TVertexDocument; AStyle: TVertexStyle);
     destructor  Destroy; override;
     procedure Execute; override;
     procedure Undo;    override;
@@ -1400,6 +1432,69 @@ begin
   FDocument.InternalRemovePath(FPath);
   FDocument.InternalRemoveStyle(FStyle);
   FOwns := True;
+end;
+
+
+{ TVertexCmdAddStyle }
+
+constructor TVertexCmdAddStyle.Create(ADocument: TVertexDocument; AStyle: TVertexStyle);
+begin
+  inherited Create;
+  FDocument  := ADocument;
+  FStyle     := AStyle;
+  FOwnsStyle := True;
+  Description := 'Add style';
+end;
+
+destructor TVertexCmdAddStyle.Destroy;
+begin
+  if FOwnsStyle then
+    FStyle.Free;
+  inherited;
+end;
+
+procedure TVertexCmdAddStyle.Execute;
+begin
+  FDocument.InternalAddStyle(FStyle);
+  FOwnsStyle := False;
+end;
+
+procedure TVertexCmdAddStyle.Undo;
+begin
+  FDocument.InternalRemoveStyle(FStyle);
+  FOwnsStyle := True;
+end;
+
+
+{ TVertexCmdDeleteStyle }
+
+constructor TVertexCmdDeleteStyle.Create(ADocument: TVertexDocument; AStyle: TVertexStyle);
+begin
+  inherited Create;
+  FDocument   := ADocument;
+  FStyle      := AStyle;
+  FSavedIndex := ADocument.IndexOfStyle(AStyle);
+  FOwnsStyle  := False;
+  Description := 'Delete style';
+end;
+
+destructor TVertexCmdDeleteStyle.Destroy;
+begin
+  if FOwnsStyle then
+    FStyle.Free;
+  inherited;
+end;
+
+procedure TVertexCmdDeleteStyle.Execute;
+begin
+  FDocument.InternalRemoveStyle(FStyle);
+  FOwnsStyle := True;
+end;
+
+procedure TVertexCmdDeleteStyle.Undo;
+begin
+  FDocument.InternalAddStyle(FStyle, FSavedIndex);
+  FOwnsStyle := False;
 end;
 
 
