@@ -127,6 +127,7 @@ type
     procedure DrawHvifImage;
     procedure DrawGrid;
     procedure DrawEmptyHint;
+    procedure DrawNodeOverlayForPath(APath: TVertexPath);
     procedure DrawControlOverlay;
     procedure DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
                               AFill, ABorder: TfpgColor; ASelected: Boolean);
@@ -173,6 +174,10 @@ type
 
     property SelectedShapeIndex: Integer
         read FSelectedShapeIdx write SetSelectedShapeIndex;
+
+    { Set the path whose nodes are shown in path-edit mode.
+      Pass nil to clear node editing state. }
+    procedure SetEditPath(APath: TVertexPath);
 
     { Zoom level: -1 = fit to widget; 50 / 100 / 200 / 400 = fixed percentage.
       Changing this repaints the canvas. }
@@ -313,6 +318,14 @@ begin
   FSelectedNodeIdx  := -1;
   FActivePath       := nil;
   FDragTarget       := dtNone;
+  Repaint;
+end;
+
+procedure TVertexCanvasWidget.SetEditPath(APath: TVertexPath);
+begin
+  FActivePath      := APath;
+  FSelectedNodeIdx := -1;
+  FDragTarget      := dtNone;
   Repaint;
 end;
 
@@ -522,43 +535,60 @@ begin
   Canvas.DrawArc(bx, by, bd, bd, 0, 360);
 end;
 
-procedure TVertexCanvasWidget.DrawControlOverlay;
+procedure TVertexCanvasWidget.DrawNodeOverlayForPath(APath: TVertexPath);
 var
-  shape: TVertexShape;
-  pi, ni: Integer;
-  path: TVertexPath;
+  ni: Integer;
   pt: TVertexPoint;
   ax, ay, ihx, ihy, ohx, ohy: Integer;
   isSelNode: Boolean;
 begin
-  if (FDocument = nil) or (FSelectedShapeIdx < 0) or
-     (FSelectedShapeIdx >= FDocument.ShapeCount) then
+  for ni := 0 to APath.PointCount - 1 do
+  begin
+    pt  := APath.Points[ni];
+    ax  := HvifToScreenX(pt.X);
+    ay  := HvifToScreenY(pt.Y);
+    ihx := HvifToScreenX(pt.InX);
+    ihy := HvifToScreenY(pt.InY);
+    ohx := HvifToScreenX(pt.OutX);
+    ohy := HvifToScreenY(pt.OutY);
+    isSelNode := (APath = FActivePath) and (ni = FSelectedNodeIdx);
+    Canvas.SetColor(COL_HANDLE_ARM);
+    Canvas.DrawLine(ax, ay, ihx, ihy);
+    Canvas.DrawLine(ax, ay, ohx, ohy);
+    DrawNodeCircle(ihx, ihy, HANDLE_RADIUS, COL_HANDLE_FILL, $FF000000,
+                   isSelNode and (FDragTarget = dtInHandle));
+    DrawNodeCircle(ohx, ohy, HANDLE_RADIUS, COL_HANDLE_FILL, $FF000000,
+                   isSelNode and (FDragTarget = dtOutHandle));
+    DrawNodeCircle(ax, ay, NODE_RADIUS, COL_ANCHOR_FILL, $FF000000,
+                   isSelNode);
+  end;
+end;
+
+procedure TVertexCanvasWidget.DrawControlOverlay;
+var
+  shape: TVertexShape;
+  pi: Integer;
+begin
+  if FDocument = nil then Exit;
+
+  { Shape-transform mode: no node overlay — bounding box will be drawn instead. }
+  if FToolMode = tmSelect then Exit;
+
+  { Path-edit mode: draw nodes for the active path only.
+    FActivePath is set by SetEditPath when the user selects a path in the tree. }
+  if FActivePath <> nil then
+  begin
+    DrawNodeOverlayForPath(FActivePath);
+    Exit;
+  end;
+
+  { Fallback (Node tool active but no path explicitly selected in tree):
+    draw nodes for all paths of the selected shape so the user can click one. }
+  if (FSelectedShapeIdx < 0) or (FSelectedShapeIdx >= FDocument.ShapeCount) then
     Exit;
   shape := FDocument.Shapes[FSelectedShapeIdx];
   for pi := 0 to shape.PathCount - 1 do
-  begin
-    path := shape.Paths[pi];
-    for ni := 0 to path.PointCount - 1 do
-    begin
-      pt  := path.Points[ni];
-      ax  := HvifToScreenX(pt.X);
-      ay  := HvifToScreenY(pt.Y);
-      ihx := HvifToScreenX(pt.InX);
-      ihy := HvifToScreenY(pt.InY);
-      ohx := HvifToScreenX(pt.OutX);
-      ohy := HvifToScreenY(pt.OutY);
-      isSelNode := (path = FActivePath) and (ni = FSelectedNodeIdx);
-      Canvas.SetColor(COL_HANDLE_ARM);
-      Canvas.DrawLine(ax, ay, ihx, ihy);
-      Canvas.DrawLine(ax, ay, ohx, ohy);
-      DrawNodeCircle(ihx, ihy, HANDLE_RADIUS, COL_HANDLE_FILL, $FF000000,
-                     isSelNode and (FDragTarget = dtInHandle));
-      DrawNodeCircle(ohx, ohy, HANDLE_RADIUS, COL_HANDLE_FILL, $FF000000,
-                     isSelNode and (FDragTarget = dtOutHandle));
-      DrawNodeCircle(ax, ay, NODE_RADIUS, COL_ANCHOR_FILL, $FF000000,
-                     isSelNode);
-    end;
-  end;
+    DrawNodeOverlayForPath(shape.Paths[pi]);
 end;
 
 procedure TVertexCanvasWidget.HandlePaint;
@@ -609,48 +639,61 @@ function TVertexCanvasWidget.HitTestNodes(AX, AY: Integer; out APath: TVertexPat
     out ANodeIdx: Integer; out ATarget: TDragTarget): Boolean;
 var
   shape: TVertexShape;
-  pi, ni: Integer;
-  path: TVertexPath;
-  pt: TVertexPoint;
-  sx, sy, dx, dy: Integer;
+  pi: Integer;
+
+  procedure TestOnePath(ATestPath: TVertexPath);
+  var
+    lni: Integer;
+    lpt: TVertexPoint;
+    lsx, lsy, ldx, ldy: Integer;
+  begin
+    for lni := 0 to ATestPath.PointCount - 1 do
+    begin
+      lpt := ATestPath.Points[lni];
+      lsx := HvifToScreenX(lpt.X);  lsy := HvifToScreenY(lpt.Y);
+      ldx := AX - lsx; ldy := AY - lsy;
+      if (ldx*ldx + ldy*ldy) <= (HIT_RADIUS*HIT_RADIUS) then
+      begin
+        APath := ATestPath; ANodeIdx := lni; ATarget := dtAnchor;
+        Result := True; Exit;
+      end;
+      lsx := HvifToScreenX(lpt.InX); lsy := HvifToScreenY(lpt.InY);
+      ldx := AX - lsx; ldy := AY - lsy;
+      if (ldx*ldx + ldy*ldy) <= (HIT_RADIUS*HIT_RADIUS) then
+      begin
+        APath := ATestPath; ANodeIdx := lni; ATarget := dtInHandle;
+        Result := True; Exit;
+      end;
+      lsx := HvifToScreenX(lpt.OutX); lsy := HvifToScreenY(lpt.OutY);
+      ldx := AX - lsx; ldy := AY - lsy;
+      if (ldx*ldx + ldy*ldy) <= (HIT_RADIUS*HIT_RADIUS) then
+      begin
+        APath := ATestPath; ANodeIdx := lni; ATarget := dtOutHandle;
+        Result := True; Exit;
+      end;
+    end;
+  end;
+
 begin
   Result := False;
   APath := nil; ANodeIdx := -1; ATarget := dtNone;
-  if (FDocument = nil) or (FSelectedShapeIdx < 0) or
-     (FSelectedShapeIdx >= FDocument.ShapeCount) then
+  if FDocument = nil then Exit;
+
+  { When a specific path is active (selected in tree), only hit-test that path. }
+  if FActivePath <> nil then
+  begin
+    TestOnePath(FActivePath);
+    Exit;
+  end;
+
+  { Fallback: test all paths of the selected shape. }
+  if (FSelectedShapeIdx < 0) or (FSelectedShapeIdx >= FDocument.ShapeCount) then
     Exit;
   shape := FDocument.Shapes[FSelectedShapeIdx];
   for pi := 0 to shape.PathCount - 1 do
   begin
-    path := shape.Paths[pi];
-    for ni := 0 to path.PointCount - 1 do
-    begin
-      pt := path.Points[ni];
-      { Test anchor first (highest priority) }
-      sx := HvifToScreenX(pt.X);  sy := HvifToScreenY(pt.Y);
-      dx := AX - sx; dy := AY - sy;
-      if (dx*dx + dy*dy) <= (HIT_RADIUS*HIT_RADIUS) then
-      begin
-        APath := path; ANodeIdx := ni; ATarget := dtAnchor;
-        Result := True; Exit;
-      end;
-      { In handle }
-      sx := HvifToScreenX(pt.InX); sy := HvifToScreenY(pt.InY);
-      dx := AX - sx; dy := AY - sy;
-      if (dx*dx + dy*dy) <= (HIT_RADIUS*HIT_RADIUS) then
-      begin
-        APath := path; ANodeIdx := ni; ATarget := dtInHandle;
-        Result := True; Exit;
-      end;
-      { Out handle }
-      sx := HvifToScreenX(pt.OutX); sy := HvifToScreenY(pt.OutY);
-      dx := AX - sx; dy := AY - sy;
-      if (dx*dx + dy*dy) <= (HIT_RADIUS*HIT_RADIUS) then
-      begin
-        APath := path; ANodeIdx := ni; ATarget := dtOutHandle;
-        Result := True; Exit;
-      end;
-    end;
+    TestOnePath(shape.Paths[pi]);
+    if Result then Exit;
   end;
 end;
 
@@ -658,64 +701,69 @@ function TVertexCanvasWidget.HitTestSegments(AX, AY: Integer;
     out APath: TVertexPath; out ASegmentIdx: Integer; out AT: Single): Boolean;
 var
   shape: TVertexShape;
-  pi, ni, si, segCount: Integer;
-  path: TVertexPath;
-  n0, n1: TVertexPoint;
-  t, bx, by, dx, dy, dist2, bestDist2: Single;
-  sx0, sy0, sx1, sy1, sx2, sy2, sx3, sy3: Single;
-  u: Single;
-begin
-  Result := False;
-  APath := nil; ASegmentIdx := -1; AT := 0;
-  if (FDocument = nil) or (FSelectedShapeIdx < 0) or
-     (FSelectedShapeIdx >= FDocument.ShapeCount) then
-    Exit;
+  pi: Integer;
+  bestDist2: Single;   { shared with TestOneSeg via closure }
 
-  bestDist2 := Sqr(HIT_RADIUS);
-
-  shape := FDocument.Shapes[FSelectedShapeIdx];
-  for pi := 0 to shape.PathCount - 1 do
+  procedure TestOneSeg(ATestPath: TVertexPath);
+  var
+    lni, lsi, lsegCount: Integer;
+    ln0, ln1: TVertexPoint;
+    lt, lbx, lby, ldx, ldy, ldist2: Single;
+    lsx0, lsy0, lsx1, lsy1, lsx2, lsy2, lsx3, lsy3: Single;
+    lu: Single;
   begin
-    path := shape.Paths[pi];
-    if path.PointCount < 2 then
-      Continue;
-
-    if path.Closed then
-      segCount := path.PointCount       { last segment wraps back to node 0 }
+    if ATestPath.PointCount < 2 then Exit;
+    if ATestPath.Closed then
+      lsegCount := ATestPath.PointCount
     else
-      segCount := path.PointCount - 1;
-
-    for ni := 0 to segCount - 1 do
+      lsegCount := ATestPath.PointCount - 1;
+    for lni := 0 to lsegCount - 1 do
     begin
-      n0 := path.Points[ni];
-      n1 := path.Points[(ni + 1) mod path.PointCount];
-
-      { Convert segment control points to screen space for distance testing }
-      sx0 := HvifToScreenX(n0.X);    sy0 := HvifToScreenY(n0.Y);
-      sx1 := HvifToScreenX(n0.OutX); sy1 := HvifToScreenY(n0.OutY);
-      sx2 := HvifToScreenX(n1.InX);  sy2 := HvifToScreenY(n1.InY);
-      sx3 := HvifToScreenX(n1.X);    sy3 := HvifToScreenY(n1.Y);
-
-      for si := 1 to SEG_SAMPLES - 1 do
+      ln0 := ATestPath.Points[lni];
+      ln1 := ATestPath.Points[(lni + 1) mod ATestPath.PointCount];
+      lsx0 := HvifToScreenX(ln0.X);    lsy0 := HvifToScreenY(ln0.Y);
+      lsx1 := HvifToScreenX(ln0.OutX); lsy1 := HvifToScreenY(ln0.OutY);
+      lsx2 := HvifToScreenX(ln1.InX);  lsy2 := HvifToScreenY(ln1.InY);
+      lsx3 := HvifToScreenX(ln1.X);    lsy3 := HvifToScreenY(ln1.Y);
+      for lsi := 1 to SEG_SAMPLES - 1 do
       begin
-        t := si / SEG_SAMPLES;
-        u := 1.0 - t;
-        { Cubic bezier evaluation }
-        bx := u*u*u*sx0 + 3.0*u*u*t*sx1 + 3.0*u*t*t*sx2 + t*t*t*sx3;
-        by := u*u*u*sy0 + 3.0*u*u*t*sy1 + 3.0*u*t*t*sy2 + t*t*t*sy3;
-        dx := AX - bx;  dy := AY - by;
-        dist2 := dx*dx + dy*dy;
-        if dist2 < bestDist2 then
+        lt := lsi / SEG_SAMPLES;
+        lu := 1.0 - lt;
+        lbx := lu*lu*lu*lsx0 + 3.0*lu*lu*lt*lsx1 + 3.0*lu*lt*lt*lsx2 + lt*lt*lt*lsx3;
+        lby := lu*lu*lu*lsy0 + 3.0*lu*lu*lt*lsy1 + 3.0*lu*lt*lt*lsy2 + lt*lt*lt*lsy3;
+        ldx := AX - lbx;  ldy := AY - lby;
+        ldist2 := ldx*ldx + ldy*ldy;
+        if ldist2 < bestDist2 then
         begin
-          bestDist2  := dist2;
-          APath      := path;
-          ASegmentIdx := ni;
-          AT         := t;
-          Result     := True;
+          bestDist2   := ldist2;
+          APath       := ATestPath;
+          ASegmentIdx := lni;
+          AT          := lt;
+          Result      := True;
         end;
       end;
     end;
   end;
+
+begin
+  Result := False;
+  APath := nil; ASegmentIdx := -1; AT := 0;
+  if FDocument = nil then Exit;
+  bestDist2 := Sqr(HIT_RADIUS);
+
+  { When a specific path is active (selected in tree), only test that path. }
+  if FActivePath <> nil then
+  begin
+    TestOneSeg(FActivePath);
+    Exit;
+  end;
+
+  { Fallback: test all paths of the selected shape. }
+  if (FSelectedShapeIdx < 0) or (FSelectedShapeIdx >= FDocument.ShapeCount) then
+    Exit;
+  shape := FDocument.Shapes[FSelectedShapeIdx];
+  for pi := 0 to shape.PathCount - 1 do
+    TestOneSeg(shape.Paths[pi]);
 end;
 
 

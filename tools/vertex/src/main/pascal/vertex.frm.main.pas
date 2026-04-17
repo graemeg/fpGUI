@@ -137,6 +137,9 @@ type
     { Close-query handler — blocks close if user cancels on dirty document. }
     procedure FormCloseQuery(Sender: TObject; var ACanClose: Boolean);
 
+    { Set canvas tool mode and sync toolbar button bold state. }
+    procedure ApplyToolMode(AMode: TVertexToolMode);
+
     { Tool button handlers }
     procedure ToolBtnClick(Sender: TObject);
 
@@ -852,34 +855,39 @@ begin
   if node = nil then
     Exit;
 
-  { Path selected }
+  { Path selected → path-edit mode: show anchor points and curve handles }
   if (FPathsNode <> nil) and (node.Parent = FPathsNode) then
   begin
     idx := Integer(PtrUInt(node.Data));
     FPathPanel.SetPath(FDocument.Paths[idx]);
     FVertexCanvas.SelectedShapeIndex := -1;
+    FVertexCanvas.SetEditPath(FDocument.Paths[idx]);
     FStylePanel.SetStyle(nil);
     FShapePanel.SetShape(nil);
     FObjectTree.PopupMenu := FMnuPath;
+    ApplyToolMode(tmNode);
     UpdateStatusBar;
     Exit;
   end;
 
-  { Shape selected }
+  { Shape selected → shape-transform mode: show bounding box / translate handles }
   if (FShapesNode <> nil) and (node.Parent = FShapesNode) then
   begin
     idx := Integer(PtrUInt(node.Data));
     FVertexCanvas.SelectedShapeIndex := idx;
+    FVertexCanvas.SetEditPath(nil);
     FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
     FPathPanel.SetPath(nil);
     FShapePanel.SetShape(FDocument.Shapes[idx]);
     FObjectTree.PopupMenu := FMnuShape;
+    ApplyToolMode(tmSelect);
     UpdateStatusBar;
     Exit;
   end;
 
-  { Any other node — clear all selections }
+  { Any other node (header rows, style nodes) — clear all }
   FVertexCanvas.SelectedShapeIndex := -1;
+  FVertexCanvas.SetEditPath(nil);
   FStylePanel.SetStyle(nil);
   FPathPanel.SetPath(nil);
   FShapePanel.SetShape(nil);
@@ -1168,6 +1176,26 @@ begin
   end;
 end;
 
+procedure TVertexMainForm.ApplyToolMode(AMode: TVertexToolMode);
+begin
+  FVertexCanvas.ToolMode := AMode;
+  { Sync toolbar button bold state }
+  FBtnToolSelect.FontDesc := '#Label1';
+  FBtnToolNode.FontDesc   := '#Label1';
+  FBtnToolPan.FontDesc    := '#Label1';
+  FBtnToolAddPt.FontDesc  := '#Label1';
+  FBtnToolDelPt.FontDesc  := '#Label1';
+  FBtnToolZoom.FontDesc   := '#Label1';
+  case AMode of
+    tmSelect:      FBtnToolSelect.FontDesc := '#Label1:bold';
+    tmNode:        FBtnToolNode.FontDesc   := '#Label1:bold';
+    tmPan:         FBtnToolPan.FontDesc    := '#Label1:bold';
+    tmAddPoint:    FBtnToolAddPt.FontDesc  := '#Label1:bold';
+    tmDeletePoint: FBtnToolDelPt.FontDesc  := '#Label1:bold';
+    tmZoom:        FBtnToolZoom.FontDesc   := '#Label1:bold';
+  end;
+end;
+
 procedure TVertexMainForm.ToolBtnClick(Sender: TObject);
 var
   mode: TVertexToolMode;
@@ -1182,15 +1210,7 @@ begin
   else
     mode := tmNode;
   end;
-  FVertexCanvas.ToolMode := mode;
-  { Visual feedback: bold the active tool button }
-  FBtnToolSelect.FontDesc := '#Label1';
-  FBtnToolNode.FontDesc   := '#Label1';
-  FBtnToolPan.FontDesc    := '#Label1';
-  FBtnToolAddPt.FontDesc  := '#Label1';
-  FBtnToolDelPt.FontDesc  := '#Label1';
-  FBtnToolZoom.FontDesc   := '#Label1';
-  TfpgButton(Sender).FontDesc := '#Label1:bold';
+  ApplyToolMode(mode);
 end;
 
 procedure TVertexMainForm.SetupContextMenus;
