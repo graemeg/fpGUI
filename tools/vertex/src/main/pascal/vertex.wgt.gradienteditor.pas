@@ -30,11 +30,27 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  fpg_base, fpg_main, fpg_widget, fpg_form, fpg_panel,
+  fpg_base, fpg_main, fpg_widget, fpg_form,
   fpg_label, fpg_spinedit, fpg_trackbar, fpg_button, fpg_combobox,
   fpg_dialogs,
   fpg_hvif_model,
   fpg_vertex_document;
+
+
+{ ── TVertexColorSwatch ───────────────────────────────────────────────────────── }
+{ Small widget that paints a solid colour rectangle. Owns its HandlePaint so  }
+{ repaints always show the current colour, unlike TfpgBevel which overwrites.  }
+
+type
+  TVertexColorSwatch = class(TfpgWidget)
+  private
+    FColor: TfpgColor;
+  protected
+    procedure HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property Color: TfpgColor read FColor write FColor;
+  end;
 
 
 { ── TVertexGradRamp ─────────────────────────────────────────────────────────── }
@@ -102,7 +118,7 @@ type
 
     { Selected-stop controls }
     FLblColor:    TfpgLabel;
-    FColorSwatch: TfpgBevel;          { clickable painted swatch }
+    FColorSwatch: TVertexColorSwatch; { clickable painted swatch }
     FSwatchColor: THvifColor;         { colour currently shown in the swatch }
 
     FLblAlpha:    TfpgLabel;
@@ -116,9 +132,6 @@ type
 
     procedure SetupControls;
     procedure UpdateStopControls;
-
-    { Paint the colour swatch bevel }
-    procedure PaintSwatch;
 
     { Event handlers }
     procedure TypeComboChanged(Sender: TObject);
@@ -144,18 +157,19 @@ implementation
 
 { ── Layout constants ─────────────────────────────────────────────────────────── }
 const
-  PAD       = 6;
-  LBL_W     = 90;
-  CTRL_H    = 24;
-  RAMP_W    = 336;   { width of the gradient ramp widget }
-  RAMP_H    = 36;    { total height: 24 bar + 12 handles }
-  BAR_H     = 24;    { height of the colour bar portion }
-  HDL_HALF  = 5;     { half-width of each handle triangle }
-  SWATCH_W  = 44;
-  SWATCH_H  = 28;
-  COMBO_W   = 160;
-  ASPIN_W   = 56;
-  ALP_W     = 170;
+  PAD        = 6;
+  LBL_W      = 90;
+  CTRL_H     = 24;
+  RAMP_W     = 336;   { width of the gradient ramp widget }
+  RAMP_H     = 36;    { total height: 24 bar + 12 handles }
+  BAR_H      = 24;    { height of the colour bar portion }
+  HDL_HALF   = 5;     { half-width of each handle triangle }
+  RAMP_MARGIN = 8;    { left/right margin so edge handles are fully visible }
+  SWATCH_W   = 44;
+  SWATCH_H   = 28;
+  COMBO_W    = 160;
+  ASPIN_W    = 56;
+  ALP_W      = 170;
 
   FORM_W    = PAD + RAMP_W + PAD;
   ROW0      = PAD;                              { type row }
@@ -189,6 +203,29 @@ begin
 end;
 
 
+{ ── TVertexColorSwatch ───────────────────────────────────────────────────────── }
+
+constructor TVertexColorSwatch.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FColor    := clBlack;
+  Focusable := False;
+end;
+
+procedure TVertexColorSwatch.HandlePaint;
+begin
+  Canvas.BeginDraw;
+  try
+    Canvas.SetColor(FColor);
+    Canvas.FillRectangle(0, 0, Width, Height);
+    Canvas.SetColor($FF444444);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  finally
+    Canvas.EndDraw;
+  end;
+end;
+
+
 { ── TVertexGradRamp ─────────────────────────────────────────────────────────── }
 
 constructor TVertexGradRamp.Create(AOwner: TComponent);
@@ -202,16 +239,25 @@ begin
 end;
 
 function TVertexGradRamp.OffsetToX(AOffset: Single): Integer;
+var
+  usableW: Integer;
 begin
-  Result := Round(AOffset * (Width - 1));
+  usableW := Width - 2 * RAMP_MARGIN;
+  if usableW < 1 then usableW := 1;
+  Result := RAMP_MARGIN + Round(AOffset * (usableW - 1));
 end;
 
 function TVertexGradRamp.XToOffset(AX: Integer): Single;
+var
+  usableW: Integer;
 begin
-  if Width <= 1 then
-    Result := 0
-  else
-    Result := AX / (Width - 1);
+  usableW := Width - 2 * RAMP_MARGIN;
+  if usableW <= 1 then
+  begin
+    Result := 0;
+    Exit;
+  end;
+  Result := (AX - RAMP_MARGIN) / (usableW - 1);
   if Result < 0.0 then Result := 0.0;
   if Result > 1.0 then Result := 1.0;
 end;
@@ -279,30 +325,40 @@ end;
 
 procedure TVertexGradRamp.PaintGradientBar;
 var
-  x:    Integer;
-  col:  THvifColor;
-  t:    Single;
+  x:            Integer;
+  col:          THvifColor;
+  t:            Single;
+  barX, barW:   Integer;
 begin
+  barX := RAMP_MARGIN;
+  barW := Width - 2 * RAMP_MARGIN;
+  if barW < 1 then barW := 1;
+
+  { Fill side margins with the handle-area background }
+  Canvas.SetColor($FFD0D0D0);
+  Canvas.FillRectangle(0, 0, barX, BAR_H);
+  Canvas.FillRectangle(barX + barW, 0, Width - (barX + barW), BAR_H);
+
   if (FStyle = nil) or (FStyle.StopCount = 0) then
   begin
     Canvas.SetColor($FF808080);
-    Canvas.FillRectangle(0, 0, Width, BAR_H);
+    Canvas.FillRectangle(barX, 0, barW, BAR_H);
     Exit;
   end;
-  { Paint column by column }
-  for x := 0 to Width - 1 do
+  { Paint column by column within the usable bar area }
+  for x := barX to barX + barW - 1 do
   begin
-    if Width > 1 then
-      t := x / (Width - 1)
+    if barW > 1 then
+      t := (x - barX) / (barW - 1)
     else
       t := 0;
     col := InterpolateColor(t);
     Canvas.SetColor(HvifColorToFpg(col));
     Canvas.FillRectangle(x, 0, 1, BAR_H);
   end;
-  { Border }
+  { Border around bar only }
   Canvas.SetColor($FF444444);
-  Canvas.DrawRectangle(0, 0, Width, BAR_H);
+  Canvas.DrawRectangle(barX, 0, barW, BAR_H);
 end;
 
 procedure TVertexGradRamp.PaintHandles;
@@ -518,7 +574,7 @@ begin
   FLblColor.SetPosition(LBL_X, ROW2 + 4, LBL_W, CTRL_H);
   FLblColor.Text := 'Colour:';
 
-  FColorSwatch := TfpgBevel.Create(Self);
+  FColorSwatch := TVertexColorSwatch.Create(Self);
   FColorSwatch.SetPosition(LBL_X + LBL_W + 2, ROW2, SWATCH_W, SWATCH_H);
   FColorSwatch.OnClick := @SwatchClick;
   FColorSwatch.MouseCursor := mcHand;
@@ -560,22 +616,6 @@ begin
   FBtnClose.OnClick := @BtnCloseClick;
 end;
 
-procedure TVertexGradientEditor.PaintSwatch;
-var
-  col: TfpgColor;
-begin
-  col := HvifColorToFpg(FSwatchColor);
-  FColorSwatch.Canvas.BeginDraw;
-  try
-    FColorSwatch.Canvas.SetColor(col);
-    FColorSwatch.Canvas.FillRectangle(0, 0, FColorSwatch.Width, FColorSwatch.Height);
-    FColorSwatch.Canvas.SetColor($FF444444);
-    FColorSwatch.Canvas.DrawRectangle(0, 0, FColorSwatch.Width, FColorSwatch.Height);
-  finally
-    FColorSwatch.Canvas.EndDraw;
-  end;
-end;
-
 procedure TVertexGradientEditor.UpdateStopControls;
 var
   idx: Integer;
@@ -604,7 +644,8 @@ begin
   stop := FStyle.Stops[idx];
   FSwatchColor := stop.Color;
   FSwatchColor.A := 255;   { swatch shows RGB only }
-  PaintSwatch;
+  FColorSwatch.Color := HvifColorToFpg(FSwatchColor);
+  FColorSwatch.Repaint;
 
   FUpdating := True;
   try
@@ -657,7 +698,8 @@ begin
   FDocument.UndoStack.Execute(cmd);
   FSwatchColor := newStop.Color;
   FSwatchColor.A := 255;
-  PaintSwatch;
+  FColorSwatch.Color := HvifColorToFpg(FSwatchColor);
+  FColorSwatch.Repaint;
   FGradRamp.Repaint;
 end;
 
