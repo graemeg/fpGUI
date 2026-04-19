@@ -418,13 +418,16 @@ begin
   end
   else if (FStyle <> nil) and (FDocument <> nil) and (y < BAR_H) then
   begin
-    { Add a new stop at this position }
+    { Add a new stop, inserted at the sorted position by offset }
     newStop.Offset := XToOffset(x);
     newStop.Color  := InterpolateColor(newStop.Offset);
-    cmd := TVertexCmdSetGradientStop.Create(FStyle, gsaAdd,
-             FStyle.StopCount, newStop);
+    hit := 0;
+    while (hit < FStyle.StopCount) and
+          (FStyle.Stops[hit].Offset <= newStop.Offset) do
+      Inc(hit);
+    cmd := TVertexCmdSetGradientStop.Create(FStyle, gsaAdd, hit, newStop);
     FDocument.UndoStack.Execute(cmd);
-    FSelectedStop := FStyle.StopCount - 1;
+    FSelectedStop := hit;
     Repaint;
     if Assigned(FOnStopSelected) then
       FOnStopSelected(Self);
@@ -443,7 +446,14 @@ begin
      (FSelectedStop >= FStyle.StopCount) then
     Exit;
   newOff := XToOffset(x);
-  stop   := FStyle.Stops[FSelectedStop];
+  { Clamp to adjacent stops so the array stays sorted during drag }
+  if FSelectedStop > 0 then
+    if newOff < FStyle.Stops[FSelectedStop - 1].Offset then
+      newOff := FStyle.Stops[FSelectedStop - 1].Offset;
+  if FSelectedStop < FStyle.StopCount - 1 then
+    if newOff > FStyle.Stops[FSelectedStop + 1].Offset then
+      newOff := FStyle.Stops[FSelectedStop + 1].Offset;
+  stop := FStyle.Stops[FSelectedStop];
   stop.Offset := newOff;
   FStyle.Stops[FSelectedStop] := stop;
   if FDocument <> nil then
@@ -465,6 +475,13 @@ begin
      (FSelectedStop < 0) or (FSelectedStop >= FStyle.StopCount) then
     Exit;
   newOff := XToOffset(x);
+  { Apply same adjacent-stop clamp used in HandleMouseMove }
+  if FSelectedStop > 0 then
+    if newOff < FStyle.Stops[FSelectedStop - 1].Offset then
+      newOff := FStyle.Stops[FSelectedStop - 1].Offset;
+  if FSelectedStop < FStyle.StopCount - 1 then
+    if newOff > FStyle.Stops[FSelectedStop + 1].Offset then
+      newOff := FStyle.Stops[FSelectedStop + 1].Offset;
   { Only commit if actually moved }
   if Abs(newOff - FDragOrigOffset) < 0.0001 then
     Exit;

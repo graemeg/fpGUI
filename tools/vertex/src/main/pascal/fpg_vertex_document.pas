@@ -200,6 +200,7 @@ type
     property StopCount: Integer read GetStopCount;
     property Stops[AIndex: Integer]: TVertexGradientStop read GetStop write SetStop;
     function  AddStop(AOffset: Single; AColor: THvifColor): Integer;
+    procedure InsertStop(AIndex: Integer; AOffset: Single; AColor: THvifColor);
     procedure DeleteStop(AIndex: Integer);
 
     { True if this style is a gradient kind. }
@@ -1103,6 +1104,18 @@ begin
   SetLength(FStops, Result + 1);
   FStops[Result].Offset := AOffset;
   FStops[Result].Color  := AColor;
+end;
+
+procedure TVertexStyle.InsertStop(AIndex: Integer; AOffset: Single; AColor: THvifColor);
+var
+  i, n: Integer;
+begin
+  n := Length(FStops);
+  SetLength(FStops, n + 1);
+  for i := n downto AIndex + 1 do
+    FStops[i] := FStops[i - 1];
+  FStops[AIndex].Offset := AOffset;
+  FStops[AIndex].Color  := AColor;
 end;
 
 procedure TVertexStyle.DeleteStop(AIndex: Integer);
@@ -2092,7 +2105,7 @@ procedure TVertexCmdSetGradientStop.Execute;
 begin
   case FAction of
     gsaAdd:
-      FStyle.AddStop(FNewStop.Offset, FNewStop.Color);
+      FStyle.InsertStop(FIndex, FNewStop.Offset, FNewStop.Color);
     gsaRemove:
       FStyle.DeleteStop(FIndex);
     gsaUpdate:
@@ -2101,26 +2114,12 @@ begin
 end;
 
 procedure TVertexCmdSetGradientStop.Undo;
-var
-  tmp: TVertexGradientStop;
-  j:   Integer;
 begin
   case FAction of
     gsaAdd:
-      { The new stop was appended via AddStop; remove the last one. }
-      FStyle.DeleteStop(FStyle.StopCount - 1);
+      FStyle.DeleteStop(FIndex);
     gsaRemove:
-      begin
-        { Re-append the saved stop, then shift it into FIndex }
-        FStyle.AddStop(FOldStop.Offset, FOldStop.Color);
-        if FIndex < FStyle.StopCount - 1 then
-        begin
-          tmp := FStyle.Stops[FStyle.StopCount - 1];
-          for j := FStyle.StopCount - 1 downto FIndex + 1 do
-            FStyle.Stops[j] := FStyle.Stops[j - 1];
-          FStyle.Stops[FIndex] := tmp;
-        end;
-      end;
+      FStyle.InsertStop(FIndex, FOldStop.Offset, FOldStop.Color);
     gsaUpdate:
       FStyle.Stops[FIndex] := FOldStop;
   end;
