@@ -157,6 +157,10 @@ type
     function    GetImage(const imgid: string): TfpgImage;
     function    AddBMP(const imgid: string; bmpdata: pointer; bmpsize: integer): TfpgImage;
     function    AddMaskedBMP(const imgid: string; bmpdata: pointer; bmpsize: integer; mcx, mcy: integer): TfpgImage;
+    function    AddPNGFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
+    function    AddBMPFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
     procedure   ListImages(var sl: TStringList);
   end;
 
@@ -585,6 +589,9 @@ uses
   fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
+  fpg_imgfmt_png,
+  fpg_iconstore,
+  fpg_stdicons,
   fpg_stdimages,
   fpg_translations,
   fpg_widget,
@@ -1901,8 +1908,11 @@ begin
 
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
+  fpgIcons      := TfpgIconStore.Create;
+  fpgIcons.SetDPI(Screen_dpi);
 
   fpgCreateStandardImages;
+  fpgRegisterStandardIcons;
 
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
@@ -2639,29 +2649,54 @@ end;
 procedure TfpgStyle.DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags);
 var
   img: TfpgImage;
+  imgOwned: Boolean;  { True when caller must free img }
   lx: TfpgCoord;
   ly: TfpgCoord;
 begin
   if mifChecked in AFlags then
   begin
-    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
-    if mifSelected in AFlags then
-      img.Invert;  // invert modifies the original image, so we must restore it later
-    ACanvas.DrawImage(x, y, img);
-    if mifSelected in AFlags then
-      img.Invert;  // restore image to original state
+    imgOwned := False;
+    if Assigned(fpgIcons) and fpgIcons.HasIcon('stdimg.check') then
+    begin
+      { GetIconCopy returns a new image; invert is safe and caller frees it }
+      img := fpgIcons.GetIconCopy('stdimg.check', 16);
+      imgOwned := True;
+    end
+    else
+      img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+    if img <> nil then
+    begin
+      if mifSelected in AFlags then
+        img.Invert;
+      ACanvas.DrawImage(x, y, img);
+      if (not imgOwned) and (mifSelected in AFlags) then
+        img.Invert;  // restore borrowed image to original state
+      if imgOwned then
+        img.Free;
+    end;
   end;
   if mifSubMenu in AFlags then
   begin
-    img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
-    lx := (r.height div 2) - 3;
-    lx := r.right-lx-2;
-    ly := y + ((r.Height-img.Height) div 2);
-    if mifSelected in AFlags then
-      img.Invert;  // invert modifies the original image, so we must restore it later
-    ACanvas.DrawImage(lx, ly, img);
-    if mifSelected in AFlags then
-      img.Invert;  // restore image to original state
+    imgOwned := False;
+    if Assigned(fpgIcons) and fpgIcons.HasIcon('sys.sb.right') then
+    begin
+      img := fpgIcons.GetIconCopy('sys.sb.right', 16);
+      imgOwned := True;
+    end
+    else
+      img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
+    if img <> nil then
+    begin
+      lx := r.right - img.Width - Round(4 * fpgApplication.Screen_dpi / 96.0);  { 4px padding, scaled for HiDPI }
+      ly := y + ((r.Height-img.Height) div 2);
+      if mifSelected in AFlags then
+        img.Invert;
+      ACanvas.DrawImage(lx, ly, img);
+      if (not imgOwned) and (mifSelected in AFlags) then
+        img.Invert;  // restore borrowed image to original state
+      if imgOwned then
+        img.Free;
+    end;
   end;
 end;
 
@@ -3215,6 +3250,37 @@ procedure TfpgImages.ListImages(var sl: TStringList);
 begin
   if sl <> nil then
     sl.Assign(FImages);
+end;
+
+function TfpgImages.AddPNGFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+begin
+  Result := LoadImage_PNG(AInst, AResName, RT_RCDATA);
+  if Result <> nil then
+    AddImage(AImageID, Result);
+end;
+
+function TfpgImages.AddBMPFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+var
+  res: TResourceStream;
+  ms:  TMemoryStream;
+begin
+  Result := nil;
+  res := TResourceStream.Create(AInst, AResName, RT_RCDATA);
+  try
+    ms := TMemoryStream.Create;
+    try
+      ms.CopyFrom(res, res.Size);
+      Result := CreateImage_BMP(ms.Memory, ms.Size);
+    finally
+      ms.Free;
+    end;
+  finally
+    res.Free;
+  end;
+  if Result <> nil then
+    AddImage(AImageID, Result);
 end;
 
 

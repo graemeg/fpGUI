@@ -100,6 +100,9 @@ type
 
 implementation
 
+uses
+  fpg_iconstore;
+
 const
   cMinSliderLength = 20;
 
@@ -346,7 +349,10 @@ begin
     dy := 0;
   end;
   Canvas.SetColor(clText1);
-  img := fpgImages.GetImage(imgname);
+  if Assigned(fpgIcons) and fpgIcons.HasIcon(imgname) then
+    img := fpgIcons.GetIcon(imgname, 16)
+  else
+    img := fpgImages.GetImage(imgname);
   if img <> nil then
   begin
     if ButtonEnabled then

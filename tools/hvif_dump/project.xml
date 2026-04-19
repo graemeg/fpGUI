@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-hvif-dump</name>
+  <author>Graeme Geldenhuys</author>
+  <license>LGPL</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>hvif_dump.lpr</mainSource>
+    <executableName>hvif_dump</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../framework</module>
+  </moduleDependencies>
+
+</project>

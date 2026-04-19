@@ -557,13 +557,14 @@ begin
   with btnBack do
   begin
     Name := 'btnBack';
-    PreferredSize := fpgSize(32, 24);
+    PreferredSize := fpgSize(28, 28);
     Text := '';
     Flat := True;
     Hint := 'Previous history item';
     ImageMargin := -1;
-    ImageName := 'dv.arrowleft';
+    ImageName := 'stdimg.go.previous';
     ImageSpacing := 0;
+    ImageSize := 26;
     TabOrder := 2;
     Focusable := False;
     OnClick := @btnBackHistClick;
@@ -573,13 +574,14 @@ begin
   with btnFwd do
   begin
     Name := 'btnFwd';
-    PreferredSize := fpgSize(32, 24);
+    PreferredSize := fpgSize(28, 28);
     Text := '';
     Flat := True;
     Hint := 'Next history item';
     ImageMargin := -1;
-    ImageName := 'dv.arrowright';
+    ImageName := 'stdimg.go.next';
     ImageSpacing := 0;
+    ImageSize := 26;
     TabOrder := 3;
     Focusable := False;
     OnClick := @btnFwdHistClick;
@@ -589,13 +591,14 @@ begin
   with btnPrev do
   begin
     Name := 'btnPrev';
-    PreferredSize := fpgSize(32, 24);
+    PreferredSize := fpgSize(28, 28);
     Text := '';
     Flat := True;
     Hint := 'Previous Topic';
     ImageMargin := -1;
-    ImageName := 'dv.arrowup';
+    ImageName := 'stdimg.go.up';
     ImageSpacing := 0;
+    ImageSize := 26;
     TabOrder := 4;
     Focusable := False;
     OnClick := @btnPrevClick;
@@ -605,13 +608,14 @@ begin
   with btnNext do
   begin
     Name := 'btnNext';
-    PreferredSize := fpgSize(32, 24);
+    PreferredSize := fpgSize(28, 28);
     Text := '';
     Flat := True;
     Hint := 'Next Topic';
     ImageMargin := -1;
-    ImageName := 'dv.arrowdown';
+    ImageName := 'stdimg.go.down';
     ImageSpacing := 0;
+    ImageSize := 26;
     TabOrder := 5;
     Focusable := False;
     OnClick := @btnNextClick;

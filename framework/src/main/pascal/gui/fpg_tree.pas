@@ -241,7 +241,9 @@ type
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     procedure   BeginUpdate;
     procedure   EndUpdate;
+    function    GetNodeRowHeight: Integer;
     property    Font: TfpgFontResourceBase read FFont;
+    property    YOffset: Integer read FYOffset;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
@@ -1068,6 +1070,11 @@ end;
 function TfpgTreeview.GetNodeHeight: integer;
 begin
   Result := FFont.GetHeight + 6;
+end;
+
+function TfpgTreeView.GetNodeRowHeight: Integer;
+begin
+  Result := GetNodeHeight;
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;

@@ -23,15 +23,41 @@ unit ide.form.main;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
-  fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_imagelist, fpg_mru,
-  fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
-  ide.filemonitor, ide.highlighter, ide.editor.theme, ide.bracketmatch,
-  ide.highlight.renderer, ide.build.dispatch, ide.projecttree,
-  ide.editor.tabs, ide.profiles, ide.project.pasbuild,
-  ide.cursorhistory, ide.filefinder, ide.form.filefinder,
-  ide.symbolfinder, ide.form.symbolfinder,
+  SysUtils,
+  Classes,
+  fpg_base,
+  fpg_imagelist,
+  fpg_mru,
+  fpg_main,
+  fpg_form,
+  fpg_menu,
+  fpg_panel,
+  fpg_button,
+  fpg_splitter,
+  fpg_tab,
+  fpg_memo,
+  fpg_label,
+  fpg_grid,
+  fpg_tree,
+  fpg_textedit,
+  fpg_miglayout,
+  fpg_mig_lc,
+  fpg_mig_cc,
+  ide.filemonitor,
+  ide.highlighter,
+  ide.editor.theme,
+  ide.bracketmatch,
+  ide.highlight.renderer,
+  ide.build.dispatch,
+  ide.projecttree,
+  ide.editor.tabs,
+  ide.profiles,
+  ide.project.pasbuild,
+  ide.cursorhistory,
+  ide.filefinder,
+  ide.form.filefinder,
+  ide.symbolfinder,
+  ide.form.symbolfinder,
   ide.quickdoc;
 
 type
@@ -249,8 +275,12 @@ uses
   ,ide.highlighter.ini
   ,ide.highlighter.xml
   ,fpg_imgfmt_bmp
+  ,fpg_hvif
+  ,fpg_iconstore
   ;
 
+
+{$I ide.hvificons.inc}
 
 const
   cTitle = 'Maximus IDE - %s';
@@ -2778,6 +2808,7 @@ begin
     Embedded := True;
     ImageMargin := 0;
     ImageName := 'stdimg.open';
+    ImageSize := 16;
     OnClick := @btnOpenFileClicked;
   end;
 
@@ -3274,6 +3305,19 @@ begin
     Name := 'mainmenu';
     PreferredSize := fpgSize(600, 24);
   end;
+
+  { Register IDE HVIF icons from embedded const arrays }
+  fpgIcons.RegisterFromConst('ide.build',      @ide_build,      SizeOf(ide_build));
+  fpgIcons.RegisterFromConst('ide.diff',       @ide_diff,       SizeOf(ide_diff));
+  fpgIcons.RegisterFromConst('ide.folder_src', @ide_folder_src, SizeOf(ide_folder_src));
+  fpgIcons.RegisterFromConst('ide.readme',     @ide_readme,     SizeOf(ide_readme));
+  fpgIcons.RegisterFromConst('ide.release',    @ide_release,    SizeOf(ide_release));
+  fpgIcons.RegisterFromConst('ide.search',     @ide_search,     SizeOf(ide_search));
+  fpgIcons.RegisterFromConst('ide.settings',   @ide_settings,   SizeOf(ide_settings));
+  fpgIcons.RegisterFromConst('ide.todo',       @ide_todo,       SizeOf(ide_todo));
+  fpgIcons.RegisterFromConst('ide.xml',        @ide_xml,        SizeOf(ide_xml));
+  fpgIcons.RegisterFromConst('ide.settings2',        @ide_settings_2,        SizeOf(ide_settings_2));
+
 
   uiCreateToolBar;
   uiCreateStatusBar;

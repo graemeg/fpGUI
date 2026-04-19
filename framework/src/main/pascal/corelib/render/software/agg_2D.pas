@@ -175,7 +175,7 @@ type
  FontEngine = font_engine_win32_tt_int32;
 {$ENDIF }
 
- Gradient  = (Solid ,Linear ,Radial );
+ Gradient  = (Solid ,Linear ,Radial ,Diamond ,Conic ,GradXY );
  Direction = (CW, CCW );
 
  LineJoin_  = int;
@@ -317,8 +317,11 @@ type
    m_fillGradientInterpolator ,
    m_lineGradientInterpolator : span_interpolator_linear;
 
-   m_linearGradientFunction : gradient_x;
-   m_radialGradientFunction : gradient_circle;
+   m_linearGradientFunction  : gradient_x;
+   m_radialGradientFunction  : gradient_circle;
+   m_diamondGradientFunction : gradient_diamond;
+   m_conicGradientFunction   : gradient_conic;
+   m_xyGradientFunction      : gradient_xy;
 
    m_lineWidth   : double;
    m_evenOddFlag : boolean;
@@ -422,6 +425,10 @@ type
 
    procedure fillRadialGradient(x ,y ,r : double ); overload;
    procedure lineRadialGradient(x ,y ,r : double ); overload;
+
+   procedure fillDiamondGradient(x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
+   procedure fillConicGradient  (x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
+   procedure fillXYGradient     (x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
 
    procedure lineWidth (w : double );
    function  lineWidth_(w : double ) : double;
@@ -1734,6 +1741,141 @@ begin
 
  m_lineGradientD1:=0;
 
+end;
+
+{ FILLDIAMONDGRADIENT }
+procedure Agg2D.fillDiamondGradient(x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
+var
+ i ,startGradient ,endGradient : int;
+ k : double;
+ c : Color;
+ clr : aggclr;
+ tat : trans_affine_translation;
+begin
+ startGradient:=128 - Trunc(profile * 127.0 );
+ endGradient  :=128 + Trunc(profile * 127.0 );
+ if endGradient <= startGradient then
+  endGradient:=startGradient + 1;
+ k:=1.0 / (endGradient - startGradient );
+ i:=0;
+ while i < startGradient do
+  begin
+   clr.Construct(c1 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < endGradient do
+  begin
+   c:=c1.gradient(c2 ,(i - startGradient ) * k );
+   clr.Construct(c );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < 256 do
+  begin
+   clr.Construct(c2 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ m_fillGradientD2:=worldToScreen(r );
+ worldToScreen(@x ,@y );
+ m_fillGradientMatrix.reset;
+ tat.Construct(x ,y );
+ m_fillGradientMatrix.multiply(@tat );
+ m_fillGradientMatrix.invert;
+ m_fillGradientD1  :=0;
+ m_fillGradientFlag:=Diamond;
+ m_fillColor.Construct(0 ,0 ,0 );
+end;
+
+{ FILLCONICGRADIENT }
+procedure Agg2D.fillConicGradient(x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
+var
+ i ,startGradient ,endGradient : int;
+ k : double;
+ c : Color;
+ clr : aggclr;
+ tat : trans_affine_translation;
+begin
+ startGradient:=128 - Trunc(profile * 127.0 );
+ endGradient  :=128 + Trunc(profile * 127.0 );
+ if endGradient <= startGradient then
+  endGradient:=startGradient + 1;
+ k:=1.0 / (endGradient - startGradient );
+ i:=0;
+ while i < startGradient do
+  begin
+   clr.Construct(c1 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < endGradient do
+  begin
+   c:=c1.gradient(c2 ,(i - startGradient ) * k );
+   clr.Construct(c );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < 256 do
+  begin
+   clr.Construct(c2 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ m_fillGradientD2:=worldToScreen(r );
+ worldToScreen(@x ,@y );
+ m_fillGradientMatrix.reset;
+ tat.Construct(x ,y );
+ m_fillGradientMatrix.multiply(@tat );
+ m_fillGradientMatrix.invert;
+ m_fillGradientD1  :=0;
+ m_fillGradientFlag:=Conic;
+ m_fillColor.Construct(0 ,0 ,0 );
+end;
+
+{ FILLXYGRADIENT }
+procedure Agg2D.fillXYGradient(x ,y ,r : double; c1 ,c2 : Color; profile : double = 1.0 );
+var
+ i ,startGradient ,endGradient : int;
+ k : double;
+ c : Color;
+ clr : aggclr;
+ tat : trans_affine_translation;
+begin
+ startGradient:=128 - Trunc(profile * 127.0 );
+ endGradient  :=128 + Trunc(profile * 127.0 );
+ if endGradient <= startGradient then
+  endGradient:=startGradient + 1;
+ k:=1.0 / (endGradient - startGradient );
+ i:=0;
+ while i < startGradient do
+  begin
+   clr.Construct(c1 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < endGradient do
+  begin
+   c:=c1.gradient(c2 ,(i - startGradient ) * k );
+   clr.Construct(c );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ while i < 256 do
+  begin
+   clr.Construct(c2 );
+   move(clr ,m_fillGradient.array_operator(i )^ ,sizeof(aggclr ) );
+   inc (i );
+  end;
+ m_fillGradientD2:=worldToScreen(r );
+ worldToScreen(@x ,@y );
+ m_fillGradientMatrix.reset;
+ tat.Construct(x ,y );
+ m_fillGradientMatrix.multiply(@tat );
+ m_fillGradientMatrix.invert;
+ m_fillGradientD1  :=0;
+ m_fillGradientFlag:=GradXY;
+ m_fillColor.Construct(0 ,0 ,0 );
 end;
 
 { LINEWIDTH }
@@ -3286,6 +3428,48 @@ begin
      render_scanlines(@gr.m_rasterizer ,@gr.m_scanline ,@ren );
 
     end
+ else
+  if (fillColor_ and (gr.m_fillGradientFlag = Diamond )) or
+     (not fillColor_ and (gr.m_lineGradientFlag = Diamond )) then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_diamondGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(@gr.m_rasterizer ,@gr.m_scanline ,@ren );
+   end
+ else
+  if (fillColor_ and (gr.m_fillGradientFlag = Conic )) or
+     (not fillColor_ and (gr.m_lineGradientFlag = Conic )) then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_conicGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(@gr.m_rasterizer ,@gr.m_scanline ,@ren );
+   end
+ else
+  if (fillColor_ and (gr.m_fillGradientFlag = GradXY )) or
+     (not fillColor_ and (gr.m_lineGradientFlag = GradXY )) then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_xyGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(@gr.m_rasterizer ,@gr.m_scanline ,@ren );
+   end
   else
    begin
     if fillColor_ then
@@ -3322,10 +3506,8 @@ begin
     @gr.m_fillGradient ,
     gr.m_fillGradientD1 ,
     gr.m_fillGradientD2 );
-
    ren.Construct   (renBase ,@span );
    render_scanlines(ras ,sl ,@ren );
-
   end
  else
   if gr.m_fillGradientFlag = Radial then
@@ -3337,17 +3519,53 @@ begin
      @gr.m_fillGradient ,
      gr.m_fillGradientD1 ,
      gr.m_fillGradientD2 );
-
     ren.Construct   (renBase ,@span );
     render_scanlines(ras ,sl ,@ren );
-
+   end
+ else
+  if gr.m_fillGradientFlag = Diamond then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_diamondGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(ras ,sl ,@ren );
+   end
+ else
+  if gr.m_fillGradientFlag = Conic then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_conicGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(ras ,sl ,@ren );
+   end
+ else
+  if gr.m_fillGradientFlag = GradXY then
+   begin
+    span.Construct(
+     @gr.m_allocator ,
+     @gr.m_fillGradientInterpolator ,
+     @gr.m_xyGradientFunction ,
+     @gr.m_fillGradient ,
+     gr.m_fillGradientD1 ,
+     gr.m_fillGradientD2 );
+    ren.Construct   (renBase ,@span );
+    render_scanlines(ras ,sl ,@ren );
    end
   else
    begin
     clr.Construct   (gr.m_fillColor );
     renSolid.color_ (@clr );
     render_scanlines(ras ,sl ,renSolid );
-
    end;
 
 end;

@@ -11,11 +11,16 @@
 
   <!-- List child modules in build order -->
   <modules>
+    <module>tools/svg2hvif</module>
+    <module>tools/hvif_dump</module>
     <module>framework</module>
     <module>ide</module>
     <module>docview</module>
     <module>uidesigner</module>
     <module activeByDefault="false">examples</module>
+    <module activeByDefault="false">tools/imageconvert</module>
+    <module activeByDefault="false">tools/vertex-canvas-demo</module>
+    <module>tools/vertex</module>
   </modules>
 
   <profiles>
