@@ -26,10 +26,10 @@ unit vertex.frm.main;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, IniFiles,
   FPImage, FPWritePNG,
   fpg_base, fpg_main, fpg_form, fpg_constants,
-  fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button,
+  fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button, fpg_edit,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
   fpg_dialogs, fpg_iniutils, fpg_mru, fpg_combobox,
   fpg_hvif_model, fpg_hvif,
@@ -107,6 +107,9 @@ type
     FStylesNode:  TfpgTreeNode;    { weak ref into the styles subtree }
     FShapesNode:  TfpgTreeNode;    { weak ref into the tree; nil when tree is empty }
     FPathsNode:   TfpgTreeNode;    { weak ref into the paths subtree }
+    FInlineEdit:      TfpgEdit;       { floating edit overlay for inline rename }
+    FInlineEditNode:  TfpgTreeNode;   { node being renamed; nil = not renaming }
+    FInlineRenaming:  Boolean;        { re-entrancy guard }
 
     { Setup helpers }
     procedure SetupMenus;
@@ -199,6 +202,22 @@ type
 
     { Tree event handler }
     procedure ObjectTreeChanged(Sender: TObject);
+
+    { Inline rename — F2 or double-click on a style/path/shape tree node }
+    procedure StartInlineRename;
+    procedure CommitInlineRename;
+    procedure CancelInlineRename;
+    procedure TreeDblClick(Sender: TObject; AButton: TMouseButton;
+                           AShift: TShiftState; const APos: TPoint);
+    procedure TreeKeyPressHandler(Sender: TObject; var keycode: word;
+                                  var shiftstate: TShiftState; var consumed: Boolean);
+    procedure InlineEditKeyPress(Sender: TObject; var keycode: word;
+                                 var shiftstate: TShiftState; var consumed: Boolean);
+    procedure InlineEditExit(Sender: TObject);
+
+    { Sidecar metadata file (.hvif.vertex) }
+    procedure LoadSidecar(const AHvifFile: string);
+    procedure SaveSidecar(const AHvifFile: string);
 
     { Style management handlers }
     procedure StyleAdd(Sender: TObject);
@@ -629,10 +648,19 @@ begin
   FRightPanel.LayoutManager := rmig;
 
   FObjectTree := TfpgTreeView.Create(FRightPanel);
-  FObjectTree.Name     := 'objectTree';
+  FObjectTree.Name          := 'objectTree';
   FObjectTree.PreferredSize := fpgSize(220, 200);
-  FObjectTree.OnChange := @ObjectTreeChanged;
+  FObjectTree.OnChange      := @ObjectTreeChanged;
+  FObjectTree.OnDoubleClick := @TreeDblClick;
+  FObjectTree.OnKeyPress    := @TreeKeyPressHandler;
   rmig.AddLayoutComponent(FObjectTree, TfpgMigCC.Create().GrowX().GrowY().PushY());
+
+  { Inline rename edit — hidden by default, shown over the selected tree node }
+  FInlineEdit := TfpgEdit.Create(FRightPanel);
+  FInlineEdit.Name       := 'inlineEdit';
+  FInlineEdit.Visible    := False;
+  FInlineEdit.OnKeyPress := @InlineEditKeyPress;
+  FInlineEdit.OnExit     := @InlineEditExit;
 
   { Style management button bar: [+ Style] [-] }
   FStyleBar := TfpgBevel.Create(FRightPanel);
@@ -787,6 +815,12 @@ var
 begin
   if FDocument = nil then
     Exit;
+
+  { Dismiss any in-progress inline rename before rebuilding the tree }
+  if FInlineEdit <> nil then
+    FInlineEdit.Visible := False;
+  FInlineEditNode := nil;
+  FInlineRenaming := False;
 
   FObjectTree.BeginUpdate;
   try
@@ -1269,6 +1303,8 @@ begin
     end;
   end;
 
+  LoadSidecar(AFileName);
+
   FCurrentFile := AFileName;
   FLastOpenDir := ExtractFilePath(AFileName);
   FRecentFiles.AddItem(AFileName);
@@ -1400,6 +1436,7 @@ procedure TVertexMainForm.DoSaveToFile(const AFileName: string);
 begin
   try
     FDocument.SaveToFile(AFileName);   { sets Dirty=False internally }
+    SaveSidecar(AFileName);
     UpdateTitle;
   except
     on E: Exception do
@@ -2210,5 +2247,214 @@ begin
       'Grid:  Grid button + Snap combo in toolbar',
       'About Vertex');
 end;
+
+{ ── Inline tree rename ────────────────────────────────────────────────────── }
+
+procedure TVertexMainForm.TreeDblClick(Sender: TObject; AButton: TMouseButton;
+                                       AShift: TShiftState; const APos: TPoint);
+begin
+  if AButton = mbLeft then
+    StartInlineRename;
+end;
+
+procedure TVertexMainForm.TreeKeyPressHandler(Sender: TObject; var keycode: word;
+    var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  if keycode = keyF2 then
+  begin
+    StartInlineRename;
+    consumed := True;
+  end;
+end;
+
+procedure TVertexMainForm.StartInlineRename;
+var
+  node:    TfpgTreeNode;
+  cur:     TfpgTreeNode;
+  i, nh:   Integer;
+  nodeY:   Integer;
+  idx:     Integer;
+  nameStr: string;
+begin
+  node := FObjectTree.Selection;
+  if node = nil then Exit;
+  { Only rename direct leaf items — not category headers or shape sub-nodes }
+  if (node.Parent <> FStylesNode) and
+     (node.Parent <> FPathsNode)  and
+     (node.Parent <> FShapesNode) then Exit;
+
+  idx := Integer(PtrUInt(node.Data));
+  if (FDocument = nil) or (idx < 0) then Exit;
+
+  { Extract the plain name for the edit field }
+  if node.Parent = FStylesNode then
+    nameStr := FDocument.Styles[idx].Name
+  else if node.Parent = FPathsNode then
+    nameStr := FDocument.Paths[idx].Name
+  else
+    nameStr := FDocument.Shapes[idx].Name;
+
+  { Compute node screen Y (visible row index × row height − scroll offset) }
+  nh := FObjectTree.GetNodeRowHeight;
+  i  := 0;
+  cur := node;
+  while (cur <> nil) and (cur <> FObjectTree.RootNode) do
+  begin
+    cur := FObjectTree.PrevVisualNode(cur);
+    Inc(i);
+  end;
+  nodeY := (i - 1) * nh - FObjectTree.YOffset;
+
+  FInlineEditNode := node;
+  FInlineRenaming := True;
+
+  FInlineEdit.SetPosition(FObjectTree.Left, FObjectTree.Top + nodeY,
+                          FObjectTree.Width - 18, nh);
+  FInlineEdit.Text := nameStr;
+  FInlineEdit.SelectAll;
+  FInlineEdit.Visible := True;
+  FInlineEdit.SetFocus;
+end;
+
+procedure TVertexMainForm.CommitInlineRename;
+var
+  newName: string;
+  idx:     Integer;
+  namePtr: PString;
+  oldName: string;
+  cmd:     TVertexCmdRename;
+begin
+  if not FInlineRenaming or (FInlineEditNode = nil) then Exit;
+  FInlineRenaming := False;
+  FInlineEdit.Visible := False;
+
+  newName := Trim(FInlineEdit.Text);
+  idx     := Integer(PtrUInt(FInlineEditNode.Data));
+  namePtr := nil;
+  oldName := '';
+
+  if (FDocument = nil) or (idx < 0) then
+  begin
+    FInlineEditNode := nil;
+    Exit;
+  end;
+
+  if FInlineEditNode.Parent = FStylesNode then
+  begin
+    oldName := FDocument.Styles[idx].Name;
+    namePtr := FDocument.Styles[idx].NamePtr;
+  end
+  else if FInlineEditNode.Parent = FPathsNode then
+  begin
+    oldName := FDocument.Paths[idx].Name;
+    namePtr := FDocument.Paths[idx].NamePtr;
+  end
+  else if FInlineEditNode.Parent = FShapesNode then
+  begin
+    oldName := FDocument.Shapes[idx].Name;
+    namePtr := FDocument.Shapes[idx].NamePtr;
+  end;
+
+  FInlineEditNode := nil;
+
+  if (namePtr = nil) or (newName = '') or (newName = oldName) then Exit;
+  if FDocument.NameExists(newName) then Exit;
+
+  cmd := TVertexCmdRename.Create(namePtr, oldName, newName);
+  FDocument.UndoStack.Execute(cmd);
+end;
+
+procedure TVertexMainForm.CancelInlineRename;
+begin
+  FInlineRenaming := False;
+  FInlineEditNode := nil;
+  if FInlineEdit <> nil then
+    FInlineEdit.Visible := False;
+end;
+
+procedure TVertexMainForm.InlineEditKeyPress(Sender: TObject; var keycode: word;
+    var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  case keycode of
+    keyReturn:
+      begin
+        CommitInlineRename;
+        consumed := True;
+      end;
+    keyEscape:
+      begin
+        CancelInlineRename;
+        consumed := True;
+      end;
+  end;
+end;
+
+procedure TVertexMainForm.InlineEditExit(Sender: TObject);
+begin
+  CommitInlineRename;
+end;
+
+
+{ ── Sidecar metadata file ─────────────────────────────────────────────────── }
+
+procedure TVertexMainForm.LoadSidecar(const AHvifFile: string);
+var
+  sidecar: string;
+  ini:     TIniFile;
+  i:       Integer;
+  nameStr: string;
+begin
+  if FDocument = nil then Exit;
+  sidecar := AHvifFile + '.vertex';
+  if not FileExists(sidecar) then Exit;
+  ini := TIniFile.Create(sidecar);
+  try
+    for i := 0 to FDocument.StyleCount - 1 do
+    begin
+      nameStr := ini.ReadString('styles', IntToStr(i), '');
+      if nameStr <> '' then
+        FDocument.Styles[i].NamePtr^ := nameStr;
+    end;
+    for i := 0 to FDocument.PathCount - 1 do
+    begin
+      nameStr := ini.ReadString('paths', IntToStr(i), '');
+      if nameStr <> '' then
+        FDocument.Paths[i].NamePtr^ := nameStr;
+    end;
+    for i := 0 to FDocument.ShapeCount - 1 do
+    begin
+      nameStr := ini.ReadString('shapes', IntToStr(i), '');
+      if nameStr <> '' then
+        FDocument.Shapes[i].NamePtr^ := nameStr;
+    end;
+  finally
+    ini.Free;
+  end;
+end;
+
+procedure TVertexMainForm.SaveSidecar(const AHvifFile: string);
+var
+  sidecar: string;
+  ini:     TIniFile;
+  i:       Integer;
+begin
+  if FDocument = nil then Exit;
+  sidecar := AHvifFile + '.vertex';
+  ini := TIniFile.Create(sidecar);
+  try
+    ini.EraseSection('styles');
+    ini.EraseSection('paths');
+    ini.EraseSection('shapes');
+    for i := 0 to FDocument.StyleCount - 1 do
+      ini.WriteString('styles', IntToStr(i), FDocument.Styles[i].Name);
+    for i := 0 to FDocument.PathCount - 1 do
+      ini.WriteString('paths', IntToStr(i), FDocument.Paths[i].Name);
+    for i := 0 to FDocument.ShapeCount - 1 do
+      ini.WriteString('shapes', IntToStr(i), FDocument.Shapes[i].Name);
+  finally
+    ini.Free;
+  end;
+end;
+
 
 end.
