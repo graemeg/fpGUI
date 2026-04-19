@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-imgcnv</name>
+  <author>Graeme Geldenhuys</author>
+  <license>LGPL</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>imgcnv.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>imgcnv</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../framework</module>
+  </moduleDependencies>
+
+</project>
