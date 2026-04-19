@@ -726,6 +726,10 @@ end;
 
 procedure TVertexMainForm.HandleDocumentChange(Sender: TVertexDocument;
     ACmd: TVertexCommand);
+var
+  selNode:   TfpgTreeNode;
+  selCat:    Integer;  { 1=style, 2=path, 3=shape, 0=none }
+  selIdx:    Integer;
 begin
   FVertexCanvas.DocumentChanged;
   FStylePanel.DocumentChanged;
@@ -734,6 +738,29 @@ begin
   FPreviewBar.DocumentChanged;
   UpdateTitle;
   UpdateStatusBar;
+
+  { Repopulate the tree so path/style/shape labels stay in sync (open↔closed,
+    point count, renames, etc.).  Save selection identity before the tree is
+    cleared, then restore it afterwards so the user's position is preserved. }
+  selNode := FObjectTree.Selection;
+  selCat  := 0;
+  selIdx  := -1;
+  if selNode <> nil then
+  begin
+    selIdx := Integer(PtrUInt(selNode.Data));
+    if selNode.Parent = FStylesNode then      selCat := 1
+    else if selNode.Parent = FPathsNode  then selCat := 2
+    else if selNode.Parent = FShapesNode then selCat := 3;
+  end;
+
+  PopulateObjectTree;
+  { FStylesNode/FPathsNode/FShapesNode now point to freshly created nodes }
+
+  case selCat of
+    1: SelectStyleInTree(selIdx);
+    2: SelectPathInTree(selIdx);
+    3: SelectShapeInTree(selIdx);
+  end;
 end;
 
 
