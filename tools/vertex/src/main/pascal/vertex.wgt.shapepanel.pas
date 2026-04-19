@@ -239,9 +239,9 @@ begin
 
   FLODMinSpin := TfpgSpinEditFloat.Create(Self);
   FLODMinSpin.SetPosition(CTL_X, R8, CTL_W, ROW_H);
-  FLODMinSpin.MinValue := 0;
-  FLODMinSpin.MaxValue := 9999;
-  FLODMinSpin.Decimals := 0;
+  FLODMinSpin.MinValue := 0.0;
+  FLODMinSpin.MaxValue := 4.0;
+  FLODMinSpin.Decimals := 2;
   FLODMinSpin.OnExit   := @LODMinSpinExit;
 
   FLblLODMax := TfpgLabel.Create(Self);
@@ -250,9 +250,9 @@ begin
 
   FLODMaxSpin := TfpgSpinEditFloat.Create(Self);
   FLODMaxSpin.SetPosition(CTL_X, R9, CTL_W, ROW_H);
-  FLODMaxSpin.MinValue := 0;
-  FLODMaxSpin.MaxValue := 9999;
-  FLODMaxSpin.Decimals := 0;
+  FLODMaxSpin.MinValue := 0.0;
+  FLODMaxSpin.MaxValue := 4.0;
+  FLODMaxSpin.Decimals := 2;
   FLODMaxSpin.OnExit   := @LODMaxSpinExit;
 
   { Visible }
@@ -440,10 +440,7 @@ begin
 
     lod := FShape.LOD;
     FLODMinSpin.Value := lod.MinSize;
-    if lod.MaxSize >= MaxSingle / 2 then
-      FLODMaxSpin.Value := 0
-    else
-      FLODMaxSpin.Value := lod.MaxSize;
+    FLODMaxSpin.Value := lod.MaxSize;
 
     FVisibleChk.Checked := FShape.Visible;
 
@@ -596,7 +593,7 @@ var
 begin
   if FUpdating or (FShape = nil) or (FDocument = nil) then Exit;
   newMin := FLODMinSpin.Value;
-  if SameValue(newMin, FShape.LOD.MinSize, 0.05) then Exit;
+  if SameValue(newMin, FShape.LOD.MinSize, 0.001) then Exit;
   newLOD := FShape.LOD;
   newLOD.MinSize := newMin;
   cmd := TVertexCmdSetShapeLOD.Create(FShape, newLOD);
@@ -610,11 +607,8 @@ var
   cmd:    TVertexCmdSetShapeLOD;
 begin
   if FUpdating or (FShape = nil) or (FDocument = nil) then Exit;
-  if FLODMaxSpin.Value = 0 then
-    newMax := MaxSingle
-  else
-    newMax := FLODMaxSpin.Value;
-  if SameValue(newMax, FShape.LOD.MaxSize, 0.05) then Exit;
+  newMax := FLODMaxSpin.Value;
+  if SameValue(newMax, FShape.LOD.MaxSize, 0.001) then Exit;
   newLOD := FShape.LOD;
   newLOD.MaxSize := newMax;
   cmd := TVertexCmdSetShapeLOD.Create(FShape, newLOD);

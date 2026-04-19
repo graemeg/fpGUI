@@ -590,9 +590,10 @@ begin
 
     if (shapeFlags and SHAPE_FLAG_LOD_SCALE) <> 0 then
     begin
-      { min/max visibility scale: 2 bytes, ignored in rendering }
-      ReadByte;
-      ReadByte;
+      { min/max visibility scale: encoded as byte = Round(scale * 63.75) }
+      FShapes[i].MinVisScale := ReadByte / 63.75;
+      FShapes[i].MaxVisScale := ReadByte / 63.75;
+      FShapes[i].HasLODScale := True;
     end;
 
     if (shapeFlags and SHAPE_FLAG_HAS_TRANSFORMERS) <> 0 then
@@ -1237,6 +1238,13 @@ begin
     for i := 0 to High(FShapes) do
     begin
       shape := FShapes[i];
+
+      { LOD visibility: skip shapes whose scale range excludes the current size.
+        Matches Haiku PathSourceShape::Visible(float scale). }
+      if shape.HasLODScale then
+        if not ((scale >= shape.MinVisScale) and
+                ((scale <= shape.MaxVisScale) or (shape.MaxVisScale >= 4.0))) then
+          Continue;
 
       { Shape-to-screen: ShapeAffine first (in 64-unit icon space),
         then scale to screen pixels.  Order matters — applying scale

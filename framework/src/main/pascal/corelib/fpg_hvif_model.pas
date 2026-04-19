@@ -110,6 +110,11 @@ type
     StrokeLineCap:    Byte;
     StrokeLineJoin:   Byte;
     StrokeMiterLimit: Single;
+    { LOD: min/max visibility scale (0.0..4.0, where scale = rendered_px / 64).
+      HasLODScale=False means always visible (defaults: min=0, max=4). }
+    HasLODScale:  Boolean;
+    MinVisScale:  Single;
+    MaxVisScale:  Single;
   end;
 
 

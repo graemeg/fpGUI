@@ -247,11 +247,12 @@ type
 
 type
   { Controls visibility of a shape based on the rendered icon size.
-    The shape is visible when: MinSize <= rendered_size_px <= MaxSize.
-    Use 0 for MinSize and MaxSingle for MaxSize to mean "always visible". }
+    Uses HVIF visibility scale: scale = rendered_px / 64.  Range 0.0..4.0.
+    Visible when MinSize <= scale <= MaxSize (MaxSize >= 4.0 means no upper bound).
+    Defaults: MinSize=0.0 (no lower bound), MaxSize=4.0 (no upper bound). }
   TVertexLOD = record
-    MinSize: Single;   { minimum rendered size in pixels; 0 = no lower bound }
-    MaxSize: Single;   { maximum rendered size in pixels; MaxSingle = no upper bound }
+    MinSize: Single;   { minimum visibility scale (0.0..4.0); 0.0 = no lower bound }
+    MaxSize: Single;   { maximum visibility scale (0.0..4.0); 4.0 = no upper bound }
   end;
 
 
@@ -1181,8 +1182,8 @@ begin
   FHasTranslation := False;
   FTranslateX     := 0;
   FTranslateY     := 0;
-  FLOD.MinSize    := 0;
-  FLOD.MaxSize    := MaxSingle;
+  FLOD.MinSize := 0.0;
+  FLOD.MaxSize := 4.0;
   FVisible        := True;
   FTransformer.TransType := ittNone;
   FTransformer.Width     := 1.0;
@@ -1247,6 +1248,10 @@ begin
   Result.HasTranslation := FHasTranslation;
   Result.TranslateX     := FTranslateX;
   Result.TranslateY     := FTranslateY;
+  { LOD visibility scale }
+  Result.HasLODScale  := (FLOD.MinSize > 0.0) or (FLOD.MaxSize < 4.0);
+  Result.MinVisScale  := FLOD.MinSize;
+  Result.MaxVisScale  := FLOD.MaxSize;
   { Stroke transformer }
   Result.HasStroke        := FTransformer.TransType = ittStroke;
   Result.StrokeWidth      := FTransformer.Width;
@@ -2402,6 +2407,7 @@ var
   i, j:   Integer;
   style:  TVertexStyle;
   path:   TVertexPath;
+  lod:    TVertexLOD;
   shape:  TVertexShape;
   pIdx:   Byte;
   xf:     TVertexTransformer;
@@ -2444,6 +2450,13 @@ begin
     shape.HasTranslation := AShapes[i].HasTranslation;
     shape.TranslateX     := AShapes[i].TranslateX;
     shape.TranslateY     := AShapes[i].TranslateY;
+    { LOD visibility scale: use decoded values when present }
+    if AShapes[i].HasLODScale then
+    begin
+      lod.MinSize := AShapes[i].MinVisScale;
+      lod.MaxSize := AShapes[i].MaxVisScale;
+      shape.LOD := lod;
+    end;
     if AShapes[i].HasStroke then
     begin
       xf := Default(TVertexTransformer);

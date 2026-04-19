@@ -30,7 +30,7 @@
     Limitations (v1):
       - No COMMANDS path format (writer always uses NO_CURVES or CURVES).
       - Gradient stops always written with alpha and full RGB.
-      - No LOD-scale or transformer sections emitted.
+      - LOD-scale emitted when min > 0 or max < 4.0 (non-default bounds only).
       - Big-endian targets are NOT supported.
 }
 
@@ -374,12 +374,15 @@ procedure THvifWriter.WriteShape(const ASh: THvifShape);
 const
   SHAPE_TYPE_PATH_SOURCE      = 10;
   SHAPE_FLAG_TRANSFORM        = 1 shl 1;
+  SHAPE_FLAG_LOD_SCALE        = 1 shl 3;
   SHAPE_FLAG_HAS_TRANSFORMERS = 1 shl 4;
   SHAPE_FLAG_TRANSLATION      = 1 shl 5;
   TRANSFORMER_TYPE_STROKE     = 23;
+  LOD_SCALE_FACTOR            = 63.75;   { byte = Round(scale * factor) }
 var
   flags: Byte;
   i: Integer;
+  emitLOD: Boolean;
 begin
   WByte(SHAPE_TYPE_PATH_SOURCE);
   WByte(ASh.StyleIndex);
@@ -387,11 +390,16 @@ begin
   for i := 0 to High(ASh.PathIndices) do
     WByte(ASh.PathIndices[i]);
 
+  { Emit LOD only when the bounds are non-default (min>0 or max<4). }
+  emitLOD := ASh.HasLODScale and ((ASh.MinVisScale > 0.0) or (ASh.MaxVisScale < 4.0));
+
   flags := 0;
   if ASh.HasTransform then
     flags := flags or SHAPE_FLAG_TRANSFORM
   else if ASh.HasTranslation then
     flags := flags or SHAPE_FLAG_TRANSLATION;
+  if emitLOD then
+    flags := flags or SHAPE_FLAG_LOD_SCALE;
   if ASh.HasStroke then
     flags := flags or SHAPE_FLAG_HAS_TRANSFORMERS;
   WByte(flags);
@@ -403,6 +411,13 @@ begin
   begin
     WCoord(ASh.TranslateX);
     WCoord(ASh.TranslateY);
+  end;
+
+  { LOD section comes after transform, before transformers (per HVIF spec) }
+  if emitLOD then
+  begin
+    WByte(Byte(Round(ASh.MinVisScale * LOD_SCALE_FACTOR)));
+    WByte(Byte(Round(ASh.MaxVisScale * LOD_SCALE_FACTOR)));
   end;
 
   if ASh.HasStroke then
