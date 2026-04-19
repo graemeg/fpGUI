@@ -763,6 +763,19 @@ type
   end;
 
 
+  { Change the gradient transform matrix of a style, with full Undo support. }
+  TVertexCmdSetGradientTransform = class(TVertexCommand)
+  private
+    FStyle:     TVertexStyle;
+    FOldMatrix: array[0..5] of Single;
+    FNewMatrix: array[0..5] of Single;
+  public
+    constructor Create(AStyle: TVertexStyle; const ANewMatrix: array of Single);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
   { Bake a shape's transform (HasTransform matrix or HasTranslation) into its
     referenced path points, then clear the transform.  All path point snapshots
     are stored for full Undo. }
@@ -2106,6 +2119,29 @@ begin
     gsaUpdate:
       FStyle.Stops[FIndex] := FOldStop;
   end;
+end;
+
+
+{ TVertexCmdSetGradientTransform }
+
+constructor TVertexCmdSetGradientTransform.Create(AStyle: TVertexStyle;
+    const ANewMatrix: array of Single);
+begin
+  inherited Create;
+  FStyle := AStyle;
+  AStyle.GetGradTransform(FOldMatrix);
+  Move(ANewMatrix[0], FNewMatrix[0], 6 * SizeOf(Single));
+  Description := 'Set gradient transform';
+end;
+
+procedure TVertexCmdSetGradientTransform.Execute;
+begin
+  FStyle.SetGradTransform(FNewMatrix);
+end;
+
+procedure TVertexCmdSetGradientTransform.Undo;
+begin
+  FStyle.SetGradTransform(FOldMatrix);
 end;
 
 

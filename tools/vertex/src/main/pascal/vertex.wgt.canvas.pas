@@ -44,7 +44,7 @@ interface
 uses
   Classes, SysUtils, Math,
   fpg_base, fpg_main, fpg_widget,
-  fpg_hvif, fpg_hvif_writer,
+  fpg_hvif_model, fpg_hvif, fpg_hvif_writer,
   fpg_vertex_document;
 
 
@@ -128,6 +128,15 @@ type
     FBBoxRawMaxX,
     FBBoxRawMaxY:  Single;   { raw (pre-transform) bbox bounds }
 
+    { Gradient handle editing state (set when user selects a gradient style in tree) }
+    FEditGradStyle:     TVertexStyle;
+    FGradHandleSX:      array[0..1] of Integer;  { screen X of gradient handles }
+    FGradHandleSY:      array[0..1] of Integer;  { screen Y of gradient handles }
+    FGradHandleValid:   Boolean;
+    FGradDragActive:    Boolean;
+    FGradDragHandle:    Integer;  { 0 = origin, 1 = radius/direction }
+    FGradDragOldMatrix: array[0..5] of Single;
+
     { Zoom — negative means "fit to widget" }
     FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
 
@@ -158,6 +167,10 @@ type
     procedure DrawControlOverlay;
     procedure DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
                               AFill, ABorder: TfpgColor; ASelected: Boolean);
+
+    { Gradient handle rendering and hit-testing }
+    procedure DrawGradientHandles;
+    function  HitTestGradHandle(AX, AY: Integer): Integer;
 
     { Hit-testing }
     function HitTestNodes(AX, AY: Integer; out APath: TVertexPath;
@@ -212,6 +225,10 @@ type
     { Set the path whose nodes are shown in path-edit mode.
       Pass nil to clear node editing state. }
     procedure SetEditPath(APath: TVertexPath);
+
+    { Set the gradient style whose transform handles are shown on the canvas.
+      Pass nil to hide gradient handles. }
+    procedure SetEditGradient(AStyle: TVertexStyle);
 
     { Zoom level: -1 = fit to widget; 50 / 100 / 200 / 400 = fixed percentage.
       Changing this repaints the canvas. }
@@ -397,6 +414,10 @@ begin
   FSelectDragShapeIdx := -1;
   FSelectDragHandle   := -1;
   FBBoxValid          := False;
+  FEditGradStyle      := nil;
+  FGradHandleValid    := False;
+  FGradDragActive     := False;
+  FGradDragHandle     := -1;
   FPanX               := 0;
   FPanY               := 0;
   FPanDragActive      := False;
@@ -417,6 +438,9 @@ begin
   FSelectedNodeIdx  := -1;
   FActivePath       := nil;
   FDragTarget       := dtNone;
+  FEditGradStyle    := nil;
+  FGradHandleValid  := False;
+  FGradDragActive   := False;
   FreeAndNil(FIcon);
   FIconDirty := (FDocument <> nil);
   Repaint;
@@ -424,8 +448,9 @@ end;
 
 procedure TVertexCanvasWidget.DocumentChanged;
 begin
-  FIconDirty := True;
-  FBBoxValid  := False;
+  FIconDirty       := True;
+  FBBoxValid       := False;
+  FGradHandleValid := False;
   Repaint;
 end;
 
@@ -453,6 +478,14 @@ begin
   FActivePath      := APath;
   FSelectedNodeIdx := -1;
   FDragTarget      := dtNone;
+  Repaint;
+end;
+
+procedure TVertexCanvasWidget.SetEditGradient(AStyle: TVertexStyle);
+begin
+  FEditGradStyle   := AStyle;
+  FGradHandleValid := False;
+  FGradDragActive  := False;
   Repaint;
 end;
 
@@ -818,6 +851,73 @@ begin
   end;
 end;
 
+procedure TVertexCanvasWidget.DrawGradientHandles;
+{ Render interactive handles for the currently edited gradient style.
+  Handle 0 (orange) = gradient origin, at HVIF (M[4], M[5]).
+  Handle 1 (green)  = gradient direction, at HVIF (M[4]+64*M[0], M[5]+64*M[1]).
+  For circular gradients a radius circle is also drawn. }
+const
+  COL_GRAD_ORIG = $FFFF6600;   { orange }
+  COL_GRAD_DIR  = $FF00CC66;   { green }
+  COL_GRAD_LINE = $FFBBBBBB;
+var
+  M:             array[0..5] of Single;
+  ox, oy, dx, dy: Single;
+  osx, osy, dsx, dsy: Integer;
+  r: Single;
+  ri: Integer;
+begin
+  FGradHandleValid := False;
+  if (FEditGradStyle = nil) or (not FEditGradStyle.IsGradient) then
+    Exit;
+
+  FEditGradStyle.GetGradTransform(M);
+  ox := M[4];              oy := M[5];
+  dx := M[4] + 64.0*M[0]; dy := M[5] + 64.0*M[1];
+
+  osx := HvifToScreenX(ox);  osy := HvifToScreenY(oy);
+  dsx := HvifToScreenX(dx);  dsy := HvifToScreenY(dy);
+
+  FGradHandleSX[0] := osx;  FGradHandleSY[0] := osy;
+  FGradHandleSX[1] := dsx;  FGradHandleSY[1] := dsy;
+  FGradHandleValid := True;
+
+  { Line from origin to direction handle }
+  Canvas.SetColor(COL_GRAD_LINE);
+  Canvas.DrawLine(osx, osy, dsx, dsy);
+
+  { For circular gradient: draw radius circle around origin }
+  if FEditGradStyle.GradientType = hgtCircular then
+  begin
+    r  := Sqrt(Sqr(Single(dsx - osx)) + Sqr(Single(dsy - osy)));
+    ri := Round(r);
+    if ri > 1 then
+    begin
+      Canvas.SetColor(COL_GRAD_LINE);
+      Canvas.DrawArc(osx - ri, osy - ri, ri*2, ri*2, 0, 360);
+    end;
+  end;
+
+  { Filled circles for both handles }
+  DrawNodeCircle(osx, osy, HANDLE_RADIUS + 2, COL_GRAD_ORIG, $FF000000, False);
+  DrawNodeCircle(dsx, dsy, HANDLE_RADIUS + 2, COL_GRAD_DIR,  $FF000000, False);
+end;
+
+function TVertexCanvasWidget.HitTestGradHandle(AX, AY: Integer): Integer;
+const
+  GRAD_HIT = 8;
+begin
+  Result := -1;
+  if not FGradHandleValid then Exit;
+  { Origin handle (0) takes priority }
+  if (Abs(AX - FGradHandleSX[0]) <= GRAD_HIT) and
+     (Abs(AY - FGradHandleSY[0]) <= GRAD_HIT) then
+    Result := 0
+  else if (Abs(AX - FGradHandleSX[1]) <= GRAD_HIT) and
+          (Abs(AY - FGradHandleSY[1]) <= GRAD_HIT) then
+    Result := 1;
+end;
+
 procedure TVertexCanvasWidget.DrawControlOverlay;
 var
   shape: TVertexShape;
@@ -876,6 +976,8 @@ begin
     Canvas.SetColor(COL_BORDER);
     Canvas.DrawRectangle(FIconOX - 1, FIconOY - 1, FIconSZ + 2, FIconSZ + 2);
     DrawControlOverlay;
+    if FEditGradStyle <> nil then
+      DrawGradientHandles;
   finally
     Canvas.EndDraw;
   end;
@@ -1033,6 +1135,19 @@ var
   cmd: TVertexCmdDeletePoint;
   sh:  TVertexShape;
 begin
+  { Escape cancels an in-progress gradient drag }
+  if (keycode = keyEscape) and FGradDragActive then
+  begin
+    if FEditGradStyle <> nil then
+      FEditGradStyle.SetGradTransform(FGradDragOldMatrix);
+    FGradDragActive  := False;
+    FGradHandleValid := False;
+    FIconDirty       := True;
+    Repaint;
+    consumed := True;
+    Exit;
+  end;
+
   { Escape cancels an in-progress bbox drag (rotation, scale, or matrix translate) }
   if keycode = keyEscape then
   begin
@@ -1253,6 +1368,19 @@ var
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
+
+  { ── Gradient handle interaction (active when a gradient style is selected) ── }
+  if (FEditGradStyle <> nil) and FGradHandleValid then
+  begin
+    handleIdx := HitTestGradHandle(x, y);
+    if handleIdx >= 0 then
+    begin
+      FGradDragActive  := True;
+      FGradDragHandle  := handleIdx;
+      FEditGradStyle.GetGradTransform(FGradDragOldMatrix);
+      Exit;
+    end;
+  end;
 
   { ── Pan-tool mode ───────────────────────────────────────────────────────── }
   if FToolMode = tmPan then
@@ -1562,15 +1690,31 @@ end;
 procedure TVertexCanvasWidget.HandleLMouseUp(x, y: integer;
     shiftstate: TShiftState);
 var
-  ptAfter:   TVertexPoint;
-  cmd:       TVertexCommand;
-  sh:        TVertexShape;
-  cmdTrans:  TVertexCmdSetShapeTranslation;
-  cmdMatrix: TVertexCmdSetShapeTransform;
+  ptAfter:    TVertexPoint;
+  cmd:        TVertexCommand;
+  sh:         TVertexShape;
+  cmdTrans:   TVertexCmdSetShapeTranslation;
+  cmdMatrix:  TVertexCmdSetShapeTransform;
+  cmdGrad:    TVertexCmdSetGradientTransform;
   newX, newY: Single;
-  newHas:    Boolean;
-  finalM:    array[0..5] of Single;
+  newHas:     Boolean;
+  finalM:     array[0..5] of Single;
+  newGradM:   array[0..5] of Single;
 begin
+  { ── Gradient handle drag: commit via undo command ─────────────────────── }
+  if FGradDragActive then
+  begin
+    FGradDragActive := False;
+    if FEditGradStyle <> nil then
+    begin
+      FEditGradStyle.GetGradTransform(newGradM);
+      FEditGradStyle.SetGradTransform(FGradDragOldMatrix);  { restore before command }
+      cmdGrad := TVertexCmdSetGradientTransform.Create(FEditGradStyle, newGradM);
+      FDocument.UndoStack.Execute(cmdGrad);
+    end;
+    Exit;
+  end;
+
   { ── Pan-tool mode: commit pan ────────────────────────────────────────── }
   if FToolMode = tmPan then
   begin
@@ -1687,10 +1831,49 @@ var
   dx, dy:   Single;
   angle, delta, sf, dot: Single;
   R, S, newM: array[0..5] of Single;
+  gradM:    array[0..5] of Single;
+  gradCX, gradCY, gradR: Single;
 begin
   { Always fire cursor-move so the status bar can show the HVIF coordinates }
   if Assigned(FOnCursorMove) then
     FOnCursorMove(Self, ScreenToHvifX(x), ScreenToHvifY(y));
+
+  { ── Gradient handle drag (live preview) ─────────────────────────────── }
+  if FGradDragActive and (FEditGradStyle <> nil) then
+  begin
+    hvx := ScreenToHvifX(x);
+    hvy := ScreenToHvifY(y);
+    Move(FGradDragOldMatrix[0], gradM[0], SizeOf(gradM));
+    case FGradDragHandle of
+      0: { origin: translate entire gradient }
+      begin
+        gradM[4] := hvx;
+        gradM[5] := hvy;
+      end;
+      1: { radius/direction }
+      begin
+        gradCX := FGradDragOldMatrix[4];
+        gradCY := FGradDragOldMatrix[5];
+        if FEditGradStyle.GradientType = hgtCircular then
+        begin
+          gradR := Sqrt(Sqr(hvx - gradCX) + Sqr(hvy - gradCY)) / 64.0;
+          if gradR < 0.001 then gradR := 0.001;
+          gradM[0] := gradR;  gradM[1] := 0.0;
+          gradM[2] := 0.0;    gradM[3] := gradR;
+        end
+        else
+        begin
+          gradM[0] := (hvx - gradCX) / 64.0;
+          gradM[1] := (hvy - gradCY) / 64.0;
+        end;
+      end;
+    end;
+    FEditGradStyle.SetGradTransform(gradM);
+    FIconDirty       := True;
+    FGradHandleValid := False;
+    Repaint;
+    Exit;
+  end;
 
   { ── Pan-tool mode: live pan ──────────────────────────────────────────── }
   if FToolMode = tmPan then

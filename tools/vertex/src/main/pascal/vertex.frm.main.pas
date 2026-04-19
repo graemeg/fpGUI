@@ -1061,6 +1061,10 @@ begin
     FShapePanel.SetShape(nil);
     FVertexCanvas.SelectedShapeIndex := -1;
     FVertexCanvas.SetEditPath(nil);
+    if FDocument.Styles[idx].IsGradient then
+      FVertexCanvas.SetEditGradient(FDocument.Styles[idx])
+    else
+      FVertexCanvas.SetEditGradient(nil);
     FObjectTree.PopupMenu := nil;
     ApplyToolMode(tmSelect);
     UpdateStatusBar;
@@ -1074,6 +1078,7 @@ begin
     FPathPanel.SetPath(FDocument.Paths[idx]);
     FVertexCanvas.SelectedShapeIndex := -1;
     FVertexCanvas.SetEditPath(FDocument.Paths[idx]);
+    FVertexCanvas.SetEditGradient(nil);
     FStylePanel.SetStyle(nil);
     FShapePanel.SetShape(nil);
     FObjectTree.PopupMenu := FMnuPath;
@@ -1088,6 +1093,7 @@ begin
     idx := Integer(PtrUInt(node.Data));
     FVertexCanvas.SelectedShapeIndex := idx;
     FVertexCanvas.SetEditPath(nil);
+    FVertexCanvas.SetEditGradient(nil);
     FStylePanel.SetStyle(FDocument.Shapes[idx].Style);
     FPathPanel.SetPath(nil);
     FShapePanel.SetShape(FDocument.Shapes[idx]);
@@ -1100,6 +1106,7 @@ begin
   { Any other node (header rows, style nodes) — clear all }
   FVertexCanvas.SelectedShapeIndex := -1;
   FVertexCanvas.SetEditPath(nil);
+  FVertexCanvas.SetEditGradient(nil);
   FStylePanel.SetStyle(nil);
   FPathPanel.SetPath(nil);
   FShapePanel.SetShape(nil);
