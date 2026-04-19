@@ -27,6 +27,7 @@ Tick items off as they are completed.
 * [x] Step 17 — Context menus for path and shape nodes
 * [x] Step 18 — Select tool (click to select shape, drag to translate) and Node tool toggle
 * [x] Step 19 — Object tree improvements (names, path management buttons)
+* [x] Step 20 — Gradient canvas handles (origin + radius/direction drag, undo-aware)
 
 == Pending Work
 
@@ -46,7 +47,9 @@ appropriate interaction mode — the user does not need to switch tools manually
   handles is shown; drag to translate, rotate, scale, or shear.
 * Selecting a *path* node → canvas enters path-edit mode: individual anchor points and
   Bezier handles are shown; drag to move nodes or adjust curve handles.
-* Selecting a *style* node → canvas renders normally with no overlay; editing happens
+* Selecting a *gradient style* node → canvas shows interactive gradient transform handles
+  (origin and direction/radius); editing colour stops happens in the style panel.
+* Selecting a *solid style* node → canvas renders normally with no overlay; editing happens
   entirely in the style panel.
 
 This replaces the current explicit Select / Node tool toggle for the primary workflow.
@@ -97,6 +100,19 @@ The current style panel handles solid colours only.
 ** Selected stop offset spin edit (0.00–1.00)
 ** Add stop / Remove stop buttons
 ** All edits produce undo entries via `TVertexCmdSetGradientStop` (new command)
+
+=== Gradient Canvas Handles
+
+Interactive transform handles rendered on the canvas whenever a gradient style is selected
+in the object tree.  These allow positioning the gradient origin and controlling direction /
+radius without editing raw matrix numbers.
+
+* [x] `TVertexCmdSetGradientTransform` — undo command storing old/new 6-element gradient transform matrix
+* [x] Canvas handle rendering — orange circle at gradient origin `(M[4], M[5])`; green circle at direction/radius point `(M[4]+64·M[0], M[5]+64·M[1])`; dashed radius circle for circular gradients
+* [x] Handle drag — origin handle: translates gradient; direction/radius handle: resizes (circular, isotropic) or adjusts direction (linear and other types)
+* [x] Drag model — snapshot-on-down, live preview during move, commit via `TVertexCmdSetGradientTransform` on mouse-up
+* [x] Wire `ObjectTreeChanged` — selecting a gradient style in the tree activates handles; selecting any other node clears them
+* [x] Escape during gradient drag cancels and reverts to snapshot
 
 === Shape Properties Panel
 
@@ -225,3 +241,4 @@ separate labelled panels matching the Haiku Icon-o-Matic layout.
 * [x] `TVertexCmdSetShapeVisible` — toggle visibility
 * [x] `TVertexCmdSetTransformer` — change transformer type and parameters
 * [x] `TVertexCmdFreezeTransform` — bake shape transform into path points
+* [x] `TVertexCmdSetGradientTransform` — change gradient transform matrix (origin, direction, radius)
