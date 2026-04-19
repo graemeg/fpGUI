@@ -657,6 +657,29 @@ type
   end;
 
 
+  { Set a shape's full 6-element affine transform (HasTransform + matrix).
+    Saves and restores the complete transform state for a full Undo, including
+    HasTranslation/TranslateX/Y, because HasTransform takes priority over
+    HasTranslation in the renderer and the two must stay consistent. }
+  TVertexCmdSetShapeTransform = class(TVertexCommand)
+  private
+    FShape:     TVertexShape;
+    FOldHasM:   Boolean;
+    FOldMatrix: array[0..5] of Single;
+    FOldHasTr:  Boolean;
+    FOldTX:     Single;
+    FOldTY:     Single;
+    FNewHasM:   Boolean;
+    FNewMatrix: array[0..5] of Single;
+  public
+    { ANewMatrix must have exactly 6 elements [sx, shy, shx, sy, tx, ty]. }
+    constructor Create(AShape: TVertexShape; ANewHasM: Boolean;
+                       const ANewMatrix: array of Single);
+    procedure Execute; override;
+    procedure Undo;    override;
+  end;
+
+
   { Change a shape's Level-of-Detail range. }
   TVertexCmdSetShapeLOD = class(TVertexCommand)
   private
@@ -740,8 +763,9 @@ type
   end;
 
 
-  { Bake a shape's HasTranslation (TranslateX/Y) into its referenced path points,
-    then clear the translation.  All path point snapshots are stored for full Undo. }
+  { Bake a shape's transform (HasTransform matrix or HasTranslation) into its
+    referenced path points, then clear the transform.  All path point snapshots
+    are stored for full Undo. }
   TVertexCmdFreezeTransform = class(TVertexCommand)
   private
     type TPathSnapshot = record
@@ -749,10 +773,12 @@ type
       Points: array of TVertexPoint;
     end;
   private
-    FShape:        TVertexShape;
-    FPathSnaps:    array of TPathSnapshot;
-    FOldHasTrans:  Boolean;
+    FShape:         TVertexShape;
+    FPathSnaps:     array of TPathSnapshot;
+    FOldHasTrans:   Boolean;
     FOldTX, FOldTY: Single;
+    FOldHasM:       Boolean;
+    FOldMatrix:     array[0..5] of Single;
   public
     constructor Create(AShape: TVertexShape);
     procedure Execute; override;
@@ -1844,6 +1870,45 @@ begin
 end;
 
 
+{ TVertexCmdSetShapeTransform }
+
+constructor TVertexCmdSetShapeTransform.Create(AShape: TVertexShape;
+    ANewHasM: Boolean; const ANewMatrix: array of Single);
+begin
+  inherited Create;
+  FShape    := AShape;
+  FOldHasM  := AShape.HasTransform;
+  AShape.GetTransform(FOldMatrix);
+  FOldHasTr := AShape.HasTranslation;
+  FOldTX    := AShape.TranslateX;
+  FOldTY    := AShape.TranslateY;
+  FNewHasM  := ANewHasM;
+  Move(ANewMatrix[0], FNewMatrix[0], 6 * SizeOf(Single));
+  Description := 'Set shape transform';
+end;
+
+procedure TVertexCmdSetShapeTransform.Execute;
+begin
+  FShape.HasTransform := FNewHasM;
+  FShape.SetTransform(FNewMatrix);
+  if FNewHasM then
+  begin
+    FShape.HasTranslation := False;
+    FShape.TranslateX     := 0;
+    FShape.TranslateY     := 0;
+  end;
+end;
+
+procedure TVertexCmdSetShapeTransform.Undo;
+begin
+  FShape.HasTransform   := FOldHasM;
+  FShape.SetTransform(FOldMatrix);
+  FShape.HasTranslation := FOldHasTr;
+  FShape.TranslateX     := FOldTX;
+  FShape.TranslateY     := FOldTY;
+end;
+
+
 { TVertexCmdSetShapeLOD }
 
 constructor TVertexCmdSetShapeLOD.Create(AShape: TVertexShape; const ANewLOD: TVertexLOD);
@@ -2339,6 +2404,7 @@ begin
     end;
     { Copy transform, LOD, transformer from raw record }
     shape.HasTransform   := AShapes[i].HasTransform;
+    shape.SetTransform(AShapes[i].Transform);
     shape.HasTranslation := AShapes[i].HasTranslation;
     shape.TranslateX     := AShapes[i].TranslateX;
     shape.TranslateY     := AShapes[i].TranslateY;
@@ -2476,10 +2542,12 @@ var
   i, j: Integer;
 begin
   inherited Create;
-  FShape       := AShape;
-  FOldHasTrans := AShape.HasTranslation;
-  FOldTX       := AShape.TranslateX;
-  FOldTY       := AShape.TranslateY;
+  FShape        := AShape;
+  FOldHasTrans  := AShape.HasTranslation;
+  FOldTX        := AShape.TranslateX;
+  FOldTY        := AShape.TranslateY;
+  FOldHasM      := AShape.HasTransform;
+  AShape.GetTransform(FOldMatrix);
   SetLength(FPathSnaps, AShape.PathCount);
   for i := 0 to AShape.PathCount - 1 do
   begin
@@ -2488,34 +2556,65 @@ begin
     for j := 0 to AShape.Paths[i].PointCount - 1 do
       FPathSnaps[i].Points[j] := AShape.Paths[i].Points[j];
   end;
+  Description := 'Freeze transformation';
 end;
 
 procedure TVertexCmdFreezeTransform.Execute;
 var
-  i, j: Integer;
-  ph:   TVertexPath;
-  pt:   TVertexPoint;
+  i, j:   Integer;
+  ph:     TVertexPath;
+  pt:     TVertexPoint;
+  M:      array[0..5] of Single;
+  identM: array[0..5] of Single;
+  nx, ny: Single;
 begin
-  if not FShape.HasTranslation then
-    Exit;
-  for i := 0 to FShape.PathCount - 1 do
+  identM[0] := 1.0;  identM[1] := 0.0;  identM[2] := 0.0;
+  identM[3] := 1.0;  identM[4] := 0.0;  identM[5] := 0.0;
+  if FShape.HasTransform then
   begin
-    ph := FShape.Paths[i];
-    for j := 0 to ph.PointCount - 1 do
+    FShape.GetTransform(M);
+    for i := 0 to FShape.PathCount - 1 do
     begin
-      pt       := ph.Points[j];
-      pt.X     := pt.X    + FShape.TranslateX;
-      pt.Y     := pt.Y    + FShape.TranslateY;
-      pt.InX   := pt.InX  + FShape.TranslateX;
-      pt.InY   := pt.InY  + FShape.TranslateY;
-      pt.OutX  := pt.OutX + FShape.TranslateX;
-      pt.OutY  := pt.OutY + FShape.TranslateY;
-      ph.Points[j] := pt;
+      ph := FShape.Paths[i];
+      for j := 0 to ph.PointCount - 1 do
+      begin
+        pt      := ph.Points[j];
+        nx      := M[0]*pt.X    + M[2]*pt.Y    + M[4];
+        ny      := M[1]*pt.X    + M[3]*pt.Y    + M[5];
+        pt.X    := nx;  pt.Y    := ny;
+        nx      := M[0]*pt.InX  + M[2]*pt.InY  + M[4];
+        ny      := M[1]*pt.InX  + M[3]*pt.InY  + M[5];
+        pt.InX  := nx;  pt.InY  := ny;
+        nx      := M[0]*pt.OutX + M[2]*pt.OutY + M[4];
+        ny      := M[1]*pt.OutX + M[3]*pt.OutY + M[5];
+        pt.OutX := nx;  pt.OutY := ny;
+        ph.Points[j] := pt;
+      end;
     end;
+    FShape.HasTransform := False;
+    FShape.SetTransform(identM);
+  end
+  else if FShape.HasTranslation then
+  begin
+    for i := 0 to FShape.PathCount - 1 do
+    begin
+      ph := FShape.Paths[i];
+      for j := 0 to ph.PointCount - 1 do
+      begin
+        pt       := ph.Points[j];
+        pt.X     := pt.X    + FShape.TranslateX;
+        pt.Y     := pt.Y    + FShape.TranslateY;
+        pt.InX   := pt.InX  + FShape.TranslateX;
+        pt.InY   := pt.InY  + FShape.TranslateY;
+        pt.OutX  := pt.OutX + FShape.TranslateX;
+        pt.OutY  := pt.OutY + FShape.TranslateY;
+        ph.Points[j] := pt;
+      end;
+    end;
+    FShape.HasTranslation := False;
+    FShape.TranslateX     := 0;
+    FShape.TranslateY     := 0;
   end;
-  FShape.HasTranslation := False;
-  FShape.TranslateX     := 0;
-  FShape.TranslateY     := 0;
 end;
 
 procedure TVertexCmdFreezeTransform.Undo;
@@ -2529,6 +2628,8 @@ begin
   FShape.HasTranslation := FOldHasTrans;
   FShape.TranslateX     := FOldTX;
   FShape.TranslateY     := FOldTY;
+  FShape.HasTransform   := FOldHasM;
+  FShape.SetTransform(FOldMatrix);
 end;
 
 

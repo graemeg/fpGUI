@@ -127,21 +127,21 @@ and Inkscape model.
 
 ==== Canvas — Bounding Box Overlay
 
-* [ ] When a shape node is selected, draw a dashed bounding box around its path geometry,
+* [x] When a shape node is selected, draw a dashed bounding box around its path geometry,
   accounting for the shape's current affine transform.
-* [ ] Draw eight handles: one at each corner (rotation) and one at the mid-point of each
+* [x] Draw eight handles: one at each corner (rotation) and one at the mid-point of each
   edge (scale/shear).
-* [ ] Plain drag anywhere inside the box — translates the shape (existing `HasTranslation`
+* [x] Plain drag anywhere inside the box — translates the shape (existing `HasTranslation`
   path, upgraded to full matrix when combined with other transforms).
-* [ ] Corner handle drag — rotates the shape around its centre; cursor changes to a
+* [x] Corner handle drag — rotates the shape around its centre; cursor changes to a
   rotation arc on hover.
-* [ ] Edge handle drag — scales the shape along the corresponding axis.
+* [x] Edge handle drag — scales the shape along the corresponding axis.
 * [ ] Ctrl + edge handle drag — shears along that axis, matching Icon-o-Matic behaviour.
 * [ ] Holding Shift during scale constrains to uniform scale.
-* [ ] Live preview during drag: apply the in-progress matrix to the render without
+* [x] Live preview during drag: apply the in-progress matrix to the render without
   committing to the undo stack.
-* [ ] On mouse-up, commit the final matrix via `TVertexCmdSetShapeTransform` (see below).
-* [ ] Escape during drag cancels the operation and reverts the live preview.
+* [x] On mouse-up, commit the final matrix via `TVertexCmdSetShapeTransform` (see below).
+* [x] Escape during drag cancels the operation and reverts the live preview.
 
 ==== Shape Properties Panel — Transform Read-Out
 
@@ -150,15 +150,15 @@ and Inkscape model.
   shear.  These are informational — editing is done on the canvas.
 * [ ] When `HasTransform` is False (translation-only), the sub-section is hidden (or shows
   "No affine transform").
-* [ ] "Reset transform" in the shape context menu must clear the full matrix back to
-  identity (currently it only clears `HasTranslation`); update `ShapeMenuResetTransform`
-  accordingly.
-* [ ] "Freeze transformation" must bake the full affine matrix into path point coordinates,
-  not just the translation; update `TVertexCmdFreezeTransform` accordingly.
+* [x] "Reset transform" in the shape context menu must clear the full matrix back to
+  identity (correctly handles both `HasTransform` and `HasTranslation`); updated
+  `ShapeMenuResetTransform` accordingly.
+* [x] "Freeze transformation" must bake the full affine matrix into path point coordinates,
+  not just the translation; updated `TVertexCmdFreezeTransform` accordingly.
 
 ==== New Undo Command
 
-* [ ] `TVertexCmdSetShapeTransform` — stores old and new 6-element affine matrix for a
+* [x] `TVertexCmdSetShapeTransform` — stores old and new 6-element affine matrix for a
   shape; sets `HasTransform := True` (or False when matrix is identity); Description:
   `'Set shape transform'`.
 

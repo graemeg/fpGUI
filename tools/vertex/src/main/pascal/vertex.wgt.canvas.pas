@@ -102,6 +102,31 @@ type
     FSelectDragStartX, FSelectDragStartY: Integer;   { screen px at drag start }
     FSelectDragShapeIdx: Integer;                    { shape being dragged, -1=none }
     FSelectDragShapeOX, FSelectDragShapeOY: Single;  { shape translation at drag start }
+    { -1=unset, 0-3=corner(rotate), 4-7=edge(scale), 8=inside(translate) }
+    FSelectDragHandle:    Integer;
+    FSelectDragHasM:      Boolean;    { shape.HasTransform at drag start }
+    FSelectDragHasTr:     Boolean;    { shape.HasTranslation at drag start }
+    FSelectDragMatrix:    array[0..5] of Single;   { effective matrix at drag start }
+    FSelectDragCHX,
+    FSelectDragCHY:       Single;     { bbox center in HVIF space (rotation pivot) }
+    FSelectDragAngle0:    Single;     { initial angle for rotation drag }
+    FSelectDragAnchorHX,
+    FSelectDragAnchorHY:  Single;     { scale anchor in HVIF space }
+    FSelectDragHVecX,
+    FSelectDragHVecY:     Single;     { handle vector from anchor in HVIF space }
+    FSelectDragHVecLen2:  Single;     { |HVec|^2 }
+    FSelectDragScaleIsX:  Boolean;    { True = scale X axis, False = scale Y axis }
+    FSelectDragAnchorRaw: Single;     { anchor coord in raw shape space }
+
+    { Bounding-box handle cache — populated by DrawShapeBoundingBox,
+      consumed by HitTestBBoxHandle and the drag initialisers }
+    FBBoxValid:    Boolean;
+    FBBoxHandleSX: array[0..7] of Integer;   { screen X of each handle }
+    FBBoxHandleSY: array[0..7] of Integer;   { screen Y of each handle }
+    FBBoxRawMinX,
+    FBBoxRawMinY,
+    FBBoxRawMaxX,
+    FBBoxRawMaxY:  Single;   { raw (pre-transform) bbox bounds }
 
     { Zoom — negative means "fit to widget" }
     FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
@@ -145,6 +170,12 @@ type
     { Returns the index of the topmost shape whose path bounding-box contains
       the given screen coordinates, or -1 if none. }
     function HitTestShapeBBox(AX, AY: Integer): Integer;
+
+    { Hit-test against the 8 handles of the selected shape's bounding box.
+      Returns 0-3 for corner handles (rotate), 4-7 for edge midpoint handles
+      (scale), 8 if inside the bbox (translate), -1 if no hit.
+      FBBoxValid must be True before calling. }
+    function HitTestBBoxHandle(AX, AY: Integer): Integer;
 
     procedure SetSelectedShapeIndex(AValue: Integer);
     procedure SelectShapeByClick(AIndex: Integer);   { sets index + fires OnShapeSelected }
@@ -266,6 +297,83 @@ begin
 end;
 
 
+{ ── Affine matrix helpers ────────────────────────────────────────────────── }
+{ AggPas trans_affine order: M = [sx, shy, shx, sy, tx, ty]
+  Point transform: x' = sx*x + shx*y + tx  (M[0]*x + M[2]*y + M[4])
+                   y' = shy*x + sy*y  + ty  (M[1]*x + M[3]*y + M[5]) }
+
+procedure MatApply(const M: array of Single; X, Y: Single; out OX, OY: Single);
+begin
+  OX := M[0]*X + M[2]*Y + M[4];
+  OY := M[1]*X + M[3]*Y + M[5];
+end;
+
+{ Compose: apply A first in shape space, then B in canvas space.
+  Result maps p → B(A(p)). }
+procedure MatCompose(const A, B: array of Single; out R: array of Single);
+begin
+  R[0] := B[0]*A[0] + B[2]*A[1];
+  R[1] := B[1]*A[0] + B[3]*A[1];
+  R[2] := B[0]*A[2] + B[2]*A[3];
+  R[3] := B[1]*A[2] + B[3]*A[3];
+  R[4] := B[0]*A[4] + B[2]*A[5] + B[4];
+  R[5] := B[1]*A[4] + B[3]*A[5] + B[5];
+end;
+
+{ Rotation around (CX, CY) by AAngle radians, in canvas (HVIF) space. }
+procedure MatRotateAround(AAngle, CX, CY: Single; out R: array of Single);
+var
+  cosA, sinA: Single;
+begin
+  cosA  := cos(AAngle);
+  sinA  := sin(AAngle);
+  R[0]  := cosA;
+  R[1]  := sinA;
+  R[2]  := -sinA;
+  R[3]  := cosA;
+  R[4]  := CX*(1.0 - cosA) + CY*sinA;
+  R[5]  := CY*(1.0 - cosA) - CX*sinA;
+end;
+
+{ Build effective matrix from shape's transform fields. }
+procedure GetShapeMatrix(AShape: TVertexShape; out M: array of Single);
+begin
+  if AShape.HasTransform then
+    AShape.GetTransform(M)
+  else
+  begin
+    M[0] := 1.0;  M[1] := 0.0;
+    M[2] := 0.0;  M[3] := 1.0;
+    if AShape.HasTranslation then
+    begin
+      M[4] := AShape.TranslateX;
+      M[5] := AShape.TranslateY;
+    end
+    else
+    begin
+      M[4] := 0.0;  M[5] := 0.0;
+    end;
+  end;
+end;
+
+{ True if point (PX,PY) is inside the convex quad (X0,Y0)..(X3,Y3) in order. }
+function PointInConvexQuad(PX, PY, X0, Y0, X1, Y1, X2, Y2, X3, Y3: Integer): Boolean;
+  function Cross(ax, ay, bx, by, cx, cy: Integer): Integer;
+  begin
+    Result := (bx - ax)*(cy - ay) - (by - ay)*(cx - ax);
+  end;
+var
+  d0, d1, d2, d3: Integer;
+begin
+  d0 := Cross(X0, Y0, X1, Y1, PX, PY);
+  d1 := Cross(X1, Y1, X2, Y2, PX, PY);
+  d2 := Cross(X2, Y2, X3, Y3, PX, PY);
+  d3 := Cross(X3, Y3, X0, Y0, PX, PY);
+  Result := ((d0 >= 0) and (d1 >= 0) and (d2 >= 0) and (d3 >= 0)) or
+            ((d0 <= 0) and (d1 <= 0) and (d2 <= 0) and (d3 <= 0));
+end;
+
+
 { ── TVertexCanvasWidget ─────────────────────────────────────────────────────── }
 
 constructor TVertexCanvasWidget.Create(AOwner: TComponent);
@@ -284,12 +392,14 @@ begin
   FShowGrid         := False;
   FGridStep         := 8;
   FSnapToGrid       := False;
-  FToolMode         := tmNode;
-  FSelectDragActive := False;
+  FToolMode           := tmNode;
+  FSelectDragActive   := False;
   FSelectDragShapeIdx := -1;
-  FPanX             := 0;
-  FPanY             := 0;
-  FPanDragActive    := False;
+  FSelectDragHandle   := -1;
+  FBBoxValid          := False;
+  FPanX               := 0;
+  FPanY               := 0;
+  FPanDragActive      := False;
 end;
 
 destructor TVertexCanvasWidget.Destroy;
@@ -315,6 +425,7 @@ end;
 procedure TVertexCanvasWidget.DocumentChanged;
 begin
   FIconDirty := True;
+  FBBoxValid  := False;
   Repaint;
 end;
 
@@ -326,6 +437,7 @@ begin
   FSelectedNodeIdx  := -1;
   FActivePath       := nil;
   FDragTarget       := dtNone;
+  FBBoxValid        := False;
   Repaint;
 end;
 
@@ -551,119 +663,130 @@ begin
 end;
 
 procedure TVertexCanvasWidget.DrawShapeBoundingBox;
+{ Draws a transform-aware bounding box around the selected shape.
+  The 8 handle positions are cached in FBBoxHandleSX/SY for hit-testing.
+  Handle index convention (also used in select-drag interactions):
+    0=TL corner, 1=TR corner, 2=BR corner, 3=BL corner  (rotation handles)
+    4=top mid, 5=right mid, 6=bottom mid, 7=left mid     (scale handles)
+  Edges connect corners: TL-TR, TR-BR, BR-BL, BL-TL. }
 const
-  COL_BBOX    = $FF0080FF;   { bright blue }
-  DASH_ON     = 6;           { pixels drawn }
-  DASH_OFF    = 4;           { pixels skipped }
-  PAD         = 4;           { screen-pixel padding around the tight bbox }
+  COL_BBOX    = $FF0080FF;
+  DASH_ON     = 6;
+  DASH_OFF    = 4;
+  HANDLE_HALF = 3;   { half-size of the square handle in screen px }
 
-  procedure DashedHLine(x1, x2, y: Integer);
-  var x, phase: Integer;
+  procedure DashedSegment(x1, y1, x2, y2: Integer);
+  var
+    dx, dy, len, t, tEnd: Single;
   begin
-    x := x1; phase := 0;
-    while x <= x2 do
+    dx  := x2 - x1;
+    dy  := y2 - y1;
+    len := Sqrt(dx*dx + dy*dy);
+    if len < 0.5 then Exit;
+    t := 0;
+    while t < len do
     begin
-      if phase < DASH_ON then
-        Canvas.DrawLine(x, y, x + 1, y);
-      Inc(x);
-      Inc(phase);
-      if phase >= DASH_ON + DASH_OFF then phase := 0;
-    end;
-  end;
-
-  procedure DashedVLine(x, y1, y2: Integer);
-  var y, phase: Integer;
-  begin
-    y := y1; phase := 0;
-    while y <= y2 do
-    begin
-      if phase < DASH_ON then
-        Canvas.DrawLine(x, y, x, y + 1);
-      Inc(y);
-      Inc(phase);
-      if phase >= DASH_ON + DASH_OFF then phase := 0;
+      tEnd := Min(t + DASH_ON, len);
+      Canvas.DrawLine(
+        Round(x1 + t/len*dx),    Round(y1 + t/len*dy),
+        Round(x1 + tEnd/len*dx), Round(y1 + tEnd/len*dy));
+      t := t + DASH_ON + DASH_OFF;
     end;
   end;
 
 var
-  shape: TVertexShape;
+  shape:  TVertexShape;
   pi, ni: Integer;
-  path: TVertexPath;
-  pt: TVertexPoint;
-  minHX, minHY, maxHX, maxHY: Single;
-  first: Boolean;
-  sx1, sy1, sx2, sy2: Integer;
+  path:   TVertexPath;
+  pt:     TVertexPoint;
+  minRX, minRY, maxRX, maxRY: Single;
+  first:  Boolean;
+  midRX, midRY: Single;
+  M:      array[0..5] of Single;
+  rawX:   array[0..7] of Single;
+  rawY:   array[0..7] of Single;
+  hx, hy: Single;
+  i:      Integer;
 
-  procedure ExpandBy(hx, hy: Single);
+  procedure ExpandRaw(rx, ry: Single);
   begin
     if first then
     begin
-      minHX := hx; maxHX := hx;
-      minHY := hy; maxHY := hy;
+      minRX := rx;  maxRX := rx;
+      minRY := ry;  maxRY := ry;
       first := False;
     end
     else
     begin
-      if hx < minHX then minHX := hx;
-      if hx > maxHX then maxHX := hx;
-      if hy < minHY then minHY := hy;
-      if hy > maxHY then maxHY := hy;
+      if rx < minRX then minRX := rx;
+      if rx > maxRX then maxRX := rx;
+      if ry < minRY then minRY := ry;
+      if ry > maxRY then maxRY := ry;
     end;
   end;
 
 begin
+  FBBoxValid := False;
   if (FDocument = nil) or (FSelectedShapeIdx < 0) or
      (FSelectedShapeIdx >= FDocument.ShapeCount) then Exit;
 
   shape := FDocument.Shapes[FSelectedShapeIdx];
   first := True;
 
-  { Collect bounding box over all anchor points and Bezier handles of all paths,
-    then apply shape translation offset. }
+  { Collect raw (pre-transform) bounding box over all anchors and handles }
   for pi := 0 to shape.PathCount - 1 do
   begin
     path := shape.Paths[pi];
     for ni := 0 to path.PointCount - 1 do
     begin
       pt := path.Points[ni];
-      ExpandBy(pt.X, pt.Y);
-      ExpandBy(pt.InX, pt.InY);
-      ExpandBy(pt.OutX, pt.OutY);
+      ExpandRaw(pt.X,    pt.Y);
+      ExpandRaw(pt.InX,  pt.InY);
+      ExpandRaw(pt.OutX, pt.OutY);
     end;
   end;
+  if first then Exit;
 
-  if first then Exit;  { no points found }
+  { Store raw bounds for drag computations }
+  FBBoxRawMinX := minRX;  FBBoxRawMinY := minRY;
+  FBBoxRawMaxX := maxRX;  FBBoxRawMaxY := maxRY;
+  midRX := (minRX + maxRX) * 0.5;
+  midRY := (minRY + maxRY) * 0.5;
 
-  { Apply shape translation (affine matrix support to follow) }
-  if shape.HasTranslation then
+  { Get the effective transform (HasTransform → full matrix; else identity+translate) }
+  GetShapeMatrix(shape, M);
+
+  { Raw positions of the 8 handles (in shape/raw space) }
+  rawX[0] := minRX;  rawY[0] := minRY;   { TL corner }
+  rawX[1] := maxRX;  rawY[1] := minRY;   { TR corner }
+  rawX[2] := maxRX;  rawY[2] := maxRY;   { BR corner }
+  rawX[3] := minRX;  rawY[3] := maxRY;   { BL corner }
+  rawX[4] := midRX;  rawY[4] := minRY;   { top mid }
+  rawX[5] := maxRX;  rawY[5] := midRY;   { right mid }
+  rawX[6] := midRX;  rawY[6] := maxRY;   { bottom mid }
+  rawX[7] := minRX;  rawY[7] := midRY;   { left mid }
+
+  { Transform and cache screen positions }
+  for i := 0 to 7 do
   begin
-    minHX := minHX + shape.TranslateX;  maxHX := maxHX + shape.TranslateX;
-    minHY := minHY + shape.TranslateY;  maxHY := maxHY + shape.TranslateY;
+    MatApply(M, rawX[i], rawY[i], hx, hy);
+    FBBoxHandleSX[i] := HvifToScreenX(hx);
+    FBBoxHandleSY[i] := HvifToScreenY(hy);
   end;
 
-  { Convert to screen coordinates and add padding }
-  sx1 := HvifToScreenX(minHX) - PAD;
-  sy1 := HvifToScreenY(minHY) - PAD;
-  sx2 := HvifToScreenX(maxHX) + PAD;
-  sy2 := HvifToScreenY(maxHY) + PAD;
-
+  { Draw dashed quadrilateral (corners 0-1-2-3-0) }
   Canvas.SetColor(COL_BBOX);
-  DashedHLine(sx1, sx2, sy1);   { top }
-  DashedHLine(sx1, sx2, sy2);   { bottom }
-  DashedVLine(sx1, sy1, sy2);   { left }
-  DashedVLine(sx2, sy1, sy2);   { right }
+  DashedSegment(FBBoxHandleSX[0], FBBoxHandleSY[0], FBBoxHandleSX[1], FBBoxHandleSY[1]);
+  DashedSegment(FBBoxHandleSX[1], FBBoxHandleSY[1], FBBoxHandleSX[2], FBBoxHandleSY[2]);
+  DashedSegment(FBBoxHandleSX[2], FBBoxHandleSY[2], FBBoxHandleSX[3], FBBoxHandleSY[3]);
+  DashedSegment(FBBoxHandleSX[3], FBBoxHandleSY[3], FBBoxHandleSX[0], FBBoxHandleSY[0]);
 
-  { Corner handles — small solid squares at each corner }
-  Canvas.FillRectangle(sx1 - 3, sy1 - 3, 7, 7);
-  Canvas.FillRectangle(sx2 - 3, sy1 - 3, 7, 7);
-  Canvas.FillRectangle(sx1 - 3, sy2 - 3, 7, 7);
-  Canvas.FillRectangle(sx2 - 3, sy2 - 3, 7, 7);
+  { Draw handles }
+  for i := 0 to 7 do
+    Canvas.FillRectangle(FBBoxHandleSX[i] - HANDLE_HALF, FBBoxHandleSY[i] - HANDLE_HALF,
+                         HANDLE_HALF*2 + 1, HANDLE_HALF*2 + 1);
 
-  { Edge midpoint handles — small solid squares at mid-points of each edge }
-  Canvas.FillRectangle((sx1 + sx2) div 2 - 3, sy1 - 3, 7, 7);   { top mid }
-  Canvas.FillRectangle((sx1 + sx2) div 2 - 3, sy2 - 3, 7, 7);   { bottom mid }
-  Canvas.FillRectangle(sx1 - 3, (sy1 + sy2) div 2 - 3, 7, 7);   { left mid }
-  Canvas.FillRectangle(sx2 - 3, (sy1 + sy2) div 2 - 3, 7, 7);   { right mid }
+  FBBoxValid := True;
 end;
 
 procedure TVertexCanvasWidget.DrawNodeOverlayForPath(APath: TVertexPath);
@@ -908,7 +1031,42 @@ procedure TVertexCanvasWidget.HandleKeyPress(var keycode: word;
     var shiftstate: TShiftState; var consumed: boolean);
 var
   cmd: TVertexCmdDeletePoint;
+  sh:  TVertexShape;
 begin
+  { Escape cancels an in-progress bbox drag (rotation, scale, or matrix translate) }
+  if keycode = keyEscape then
+  begin
+    if FSelectDragActive and (FSelectDragShapeIdx >= 0) and
+       (FSelectDragHandle >= 0) and (FSelectDragHandle <= 7) then
+    begin
+      sh := FDocument.Shapes[FSelectDragShapeIdx];
+      sh.HasTransform   := FSelectDragHasM;
+      sh.SetTransform(FSelectDragMatrix);
+      sh.HasTranslation := FSelectDragHasTr;
+      sh.TranslateX     := FSelectDragShapeOX;
+      sh.TranslateY     := FSelectDragShapeOY;
+      FSelectDragActive   := False;
+      FSelectDragShapeIdx := -1;
+      FSelectDragHandle   := -1;
+      FIconDirty := True;
+      Repaint;
+      consumed := True;
+    end
+    else if FSelectDragActive and (FSelectDragShapeIdx >= 0) and
+            (FSelectDragHandle = 8) and FSelectDragHasM then
+    begin
+      sh := FDocument.Shapes[FSelectDragShapeIdx];
+      sh.HasTransform   := FSelectDragHasM;
+      sh.SetTransform(FSelectDragMatrix);
+      FSelectDragActive   := False;
+      FSelectDragShapeIdx := -1;
+      FSelectDragHandle   := -1;
+      FIconDirty := True;
+      Repaint;
+      consumed := True;
+    end;
+  end;
+
   if (keycode = keyDelete) or (keycode = keyBackSpace) then
   begin
     if (FDocument <> nil) and (FSelectedNodeIdx >= 0) and
@@ -968,82 +1126,101 @@ begin
 end;
 
 function TVertexCanvasWidget.HitTestShapeBBox(AX, AY: Integer): Integer;
-{ Hit-test in screen space using the same bbox as DrawShapeBoundingBox.
-  A fixed screen-pixel margin (PAD = 4) is used so the clickable area
-  exactly matches the drawn box regardless of zoom level. }
-const
-  PAD = 4;  { screen pixels — must match DrawShapeBoundingBox PAD constant }
+{ Hit-test using the transform-aware bounding box: transforms the 4 raw bbox
+  corners through the effective matrix and tests for point-in-convex-quad. }
 var
   i, j, k: Integer;
   sh:       TVertexShape;
   ph:       TVertexPath;
   pt:       TVertexPoint;
-  minHX, minHY, maxHX, maxHY: Single;
+  minRX, minRY, maxRX, maxRY: Single;
   first:    Boolean;
-  sx1, sy1, sx2, sy2: Integer;
+  M:        array[0..5] of Single;
+  hx, hy:   Single;
+  cx:       array[0..3] of Integer;
+  cy:       array[0..3] of Integer;
+
+  procedure ExpandRaw(rx, ry: Single);
+  begin
+    if first then
+    begin
+      minRX := rx;  maxRX := rx;
+      minRY := ry;  maxRY := ry;
+      first := False;
+    end
+    else
+    begin
+      if rx < minRX then minRX := rx;
+      if rx > maxRX then maxRX := rx;
+      if ry < minRY then minRY := ry;
+      if ry > maxRY then maxRY := ry;
+    end;
+  end;
+
 begin
   Result := -1;
   if FDocument = nil then Exit;
 
-  { Iterate top-to-bottom so the topmost (last-drawn) shape wins on overlap }
   for i := FDocument.ShapeCount - 1 downto 0 do
   begin
     sh := FDocument.Shapes[i];
     if not sh.Visible then Continue;
 
-    { Compute bbox over all anchors + Bezier handles across all paths,
-      matching DrawShapeBoundingBox exactly. }
     first := True;
-    minHX := 0; minHY := 0; maxHX := 0; maxHY := 0;
-
     for j := 0 to sh.PathCount - 1 do
     begin
       ph := sh.Paths[j];
       for k := 0 to ph.PointCount - 1 do
       begin
         pt := ph.Points[k];
-        if first then
-        begin
-          minHX := pt.X;   maxHX := pt.X;
-          minHY := pt.Y;   maxHY := pt.Y;
-          first := False;
-        end;
-        if pt.X   < minHX then minHX := pt.X;
-        if pt.X   > maxHX then maxHX := pt.X;
-        if pt.Y   < minHY then minHY := pt.Y;
-        if pt.Y   > maxHY then maxHY := pt.Y;
-        if pt.InX < minHX then minHX := pt.InX;
-        if pt.InX > maxHX then maxHX := pt.InX;
-        if pt.InY < minHY then minHY := pt.InY;
-        if pt.InY > maxHY then maxHY := pt.InY;
-        if pt.OutX < minHX then minHX := pt.OutX;
-        if pt.OutX > maxHX then maxHX := pt.OutX;
-        if pt.OutY < minHY then minHY := pt.OutY;
-        if pt.OutY > maxHY then maxHY := pt.OutY;
+        ExpandRaw(pt.X,   pt.Y);
+        ExpandRaw(pt.InX, pt.InY);
+        ExpandRaw(pt.OutX,pt.OutY);
       end;
     end;
+    if first then Continue;
 
-    if first then Continue;  { shape has no points }
+    GetShapeMatrix(sh, M);
 
-    { Apply shape translation }
-    if sh.HasTranslation then
-    begin
-      minHX := minHX + sh.TranslateX;  maxHX := maxHX + sh.TranslateX;
-      minHY := minHY + sh.TranslateY;  maxHY := maxHY + sh.TranslateY;
-    end;
+    MatApply(M, minRX, minRY, hx, hy);  cx[0] := HvifToScreenX(hx);  cy[0] := HvifToScreenY(hy);
+    MatApply(M, maxRX, minRY, hx, hy);  cx[1] := HvifToScreenX(hx);  cy[1] := HvifToScreenY(hy);
+    MatApply(M, maxRX, maxRY, hx, hy);  cx[2] := HvifToScreenX(hx);  cy[2] := HvifToScreenY(hy);
+    MatApply(M, minRX, maxRY, hx, hy);  cx[3] := HvifToScreenX(hx);  cy[3] := HvifToScreenY(hy);
 
-    { Convert to screen coords + same PAD as the drawn box }
-    sx1 := HvifToScreenX(minHX) - PAD;
-    sy1 := HvifToScreenY(minHY) - PAD;
-    sx2 := HvifToScreenX(maxHX) + PAD;
-    sy2 := HvifToScreenY(maxHY) + PAD;
-
-    if (AX >= sx1) and (AX <= sx2) and (AY >= sy1) and (AY <= sy2) then
+    if PointInConvexQuad(AX, AY,
+        cx[0], cy[0], cx[1], cy[1], cx[2], cy[2], cx[3], cy[3]) then
     begin
       Result := i;
       Exit;
     end;
   end;
+end;
+
+function TVertexCanvasWidget.HitTestBBoxHandle(AX, AY: Integer): Integer;
+const
+  HANDLE_HIT = 8;  { screen pixels from centre of handle }
+var
+  i: Integer;
+begin
+  Result := -1;
+  if not FBBoxValid then Exit;
+
+  { Corner and edge handles take priority over the "inside" check }
+  for i := 0 to 7 do
+    if (Abs(AX - FBBoxHandleSX[i]) <= HANDLE_HIT) and
+       (Abs(AY - FBBoxHandleSY[i]) <= HANDLE_HIT) then
+    begin
+      Result := i;
+      Exit;
+    end;
+
+  { Inside the convex quad (corners 0-1-2-3) → translate }
+  if PointInConvexQuad(AX, AY,
+      FBBoxHandleSX[0], FBBoxHandleSY[0],
+      FBBoxHandleSX[1], FBBoxHandleSY[1],
+      FBBoxHandleSX[2], FBBoxHandleSY[2],
+      FBBoxHandleSX[3], FBBoxHandleSY[3]) then
+    Result := 8;
 end;
 
 { ── Mouse event handling ─────────────────────────────────────────────────── }
@@ -1072,6 +1249,7 @@ var
   shapeIdx: Integer;
   sh: TVertexShape;
   curIdxZ, newIdxZ, iZ: Integer;
+  handleIdx: Integer;
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
@@ -1087,20 +1265,121 @@ begin
     Exit;
   end;
 
-  { ── Select-tool mode: click to select / drag to translate shape ─────────── }
+  { ── Select-tool mode ────────────────────────────────────────────────────── }
   if FToolMode = tmSelect then
   begin
-    shapeIdx := HitTestShapeBBox(x, y);
-    if shapeIdx >= 0 then
+    if FDocument = nil then Exit;
+
+    { First: try to hit a handle on the already-selected shape }
+    handleIdx := -1;
+    if FBBoxValid and (FSelectedShapeIdx >= 0) then
+      handleIdx := HitTestBBoxHandle(x, y);
+
+    if handleIdx >= 0 then
     begin
-      SelectShapeByClick(shapeIdx);   { updates canvas + notifies form to sync tree }
-      sh := FDocument.Shapes[shapeIdx];
+      { Interact with a bbox handle of the current selection }
+      sh := FDocument.Shapes[FSelectedShapeIdx];
       FSelectDragActive    := True;
+      FSelectDragHandle    := handleIdx;
       FSelectDragStartX    := x;
       FSelectDragStartY    := y;
-      FSelectDragShapeIdx  := shapeIdx;
+      FSelectDragShapeIdx  := FSelectedShapeIdx;
       FSelectDragShapeOX   := sh.TranslateX;
       FSelectDragShapeOY   := sh.TranslateY;
+      FSelectDragHasM      := sh.HasTransform;
+      FSelectDragHasTr     := sh.HasTranslation;
+      GetShapeMatrix(sh, FSelectDragMatrix);
+
+      { Precompute interaction parameters }
+      FSelectDragCHX := (FBBoxRawMinX + FBBoxRawMaxX) * 0.5;
+      FSelectDragCHY := (FBBoxRawMinY + FBBoxRawMaxY) * 0.5;
+      { Transform centre to HVIF canvas space }
+      MatApply(FSelectDragMatrix, FSelectDragCHX, FSelectDragCHY,
+               FSelectDragCHX, FSelectDragCHY);
+
+      case handleIdx of
+        0..3:
+          { Rotation: capture initial angle from centre to mouse in HVIF space }
+          FSelectDragAngle0 := ArcTan2(ScreenToHvifY(y) - FSelectDragCHY,
+                                       ScreenToHvifX(x) - FSelectDragCHX);
+
+        4..7:
+        begin
+          { Scale: compute anchor point + h-vector in HVIF space }
+          FSelectDragScaleIsX := handleIdx in [5, 7];
+          case handleIdx of
+            4: { top edge — anchor = bottom mid }
+              begin
+                FSelectDragAnchorRaw := FBBoxRawMaxY;
+                MatApply(FSelectDragMatrix,
+                         (FBBoxRawMinX+FBBoxRawMaxX)*0.5, FBBoxRawMaxY,
+                         FSelectDragAnchorHX, FSelectDragAnchorHY);
+                { h-vector: anchor to handle }
+                MatApply(FSelectDragMatrix,
+                         (FBBoxRawMinX+FBBoxRawMaxX)*0.5, FBBoxRawMinY,
+                         FSelectDragHVecX, FSelectDragHVecY);
+              end;
+            5: { right edge — anchor = left mid }
+              begin
+                FSelectDragAnchorRaw := FBBoxRawMinX;
+                MatApply(FSelectDragMatrix,
+                         FBBoxRawMinX, (FBBoxRawMinY+FBBoxRawMaxY)*0.5,
+                         FSelectDragAnchorHX, FSelectDragAnchorHY);
+                MatApply(FSelectDragMatrix,
+                         FBBoxRawMaxX, (FBBoxRawMinY+FBBoxRawMaxY)*0.5,
+                         FSelectDragHVecX, FSelectDragHVecY);
+              end;
+            6: { bottom edge — anchor = top mid }
+              begin
+                FSelectDragAnchorRaw := FBBoxRawMinY;
+                MatApply(FSelectDragMatrix,
+                         (FBBoxRawMinX+FBBoxRawMaxX)*0.5, FBBoxRawMinY,
+                         FSelectDragAnchorHX, FSelectDragAnchorHY);
+                MatApply(FSelectDragMatrix,
+                         (FBBoxRawMinX+FBBoxRawMaxX)*0.5, FBBoxRawMaxY,
+                         FSelectDragHVecX, FSelectDragHVecY);
+              end;
+            7: { left edge — anchor = right mid }
+              begin
+                FSelectDragAnchorRaw := FBBoxRawMaxX;
+                MatApply(FSelectDragMatrix,
+                         FBBoxRawMaxX, (FBBoxRawMinY+FBBoxRawMaxY)*0.5,
+                         FSelectDragAnchorHX, FSelectDragAnchorHY);
+                MatApply(FSelectDragMatrix,
+                         FBBoxRawMinX, (FBBoxRawMinY+FBBoxRawMaxY)*0.5,
+                         FSelectDragHVecX, FSelectDragHVecY);
+              end;
+          end;
+          { Convert h-vector from absolute to relative (subtract anchor) }
+          FSelectDragHVecX   := FSelectDragHVecX - FSelectDragAnchorHX;
+          FSelectDragHVecY   := FSelectDragHVecY - FSelectDragAnchorHY;
+          FSelectDragHVecLen2 := FSelectDragHVecX*FSelectDragHVecX +
+                                 FSelectDragHVecY*FSelectDragHVecY;
+        end;
+        { 8 = inside/translate — no extra setup needed }
+      end;
+    end
+    else
+    begin
+      { No handle hit: try to select/re-select a shape }
+      shapeIdx := HitTestShapeBBox(x, y);
+      if shapeIdx >= 0 then
+      begin
+        SelectShapeByClick(shapeIdx);
+        sh := FDocument.Shapes[shapeIdx];
+        FSelectDragActive    := True;
+        FSelectDragHandle    := 8;   { translate }
+        FSelectDragStartX    := x;
+        FSelectDragStartY    := y;
+        FSelectDragShapeIdx  := shapeIdx;
+        FSelectDragShapeOX   := sh.TranslateX;
+        FSelectDragShapeOY   := sh.TranslateY;
+        FSelectDragHasM      := sh.HasTransform;
+        FSelectDragHasTr     := sh.HasTranslation;
+        GetShapeMatrix(sh, FSelectDragMatrix);
+      end
+      else
+        SetSelectedShapeIndex(-1);   { click on empty canvas: deselect }
     end;
     Exit;
   end;
@@ -1283,12 +1562,14 @@ end;
 procedure TVertexCanvasWidget.HandleLMouseUp(x, y: integer;
     shiftstate: TShiftState);
 var
-  ptAfter:  TVertexPoint;
-  cmd:      TVertexCommand;
-  sh:       TVertexShape;
-  cmdTrans: TVertexCmdSetShapeTranslation;
+  ptAfter:   TVertexPoint;
+  cmd:       TVertexCommand;
+  sh:        TVertexShape;
+  cmdTrans:  TVertexCmdSetShapeTranslation;
+  cmdMatrix: TVertexCmdSetShapeTransform;
   newX, newY: Single;
-  newHas:   Boolean;
+  newHas:    Boolean;
+  finalM:    array[0..5] of Single;
 begin
   { ── Pan-tool mode: commit pan ────────────────────────────────────────── }
   if FToolMode = tmPan then
@@ -1297,32 +1578,72 @@ begin
     Exit;
   end;
 
-  { ── Select-tool mode: commit drag translation ─────────────────────────── }
+  { ── Select-tool mode: commit drag ────────────────────────────────────── }
   if FToolMode = tmSelect then
   begin
     if FSelectDragActive and (FSelectDragShapeIdx >= 0) then
     begin
-      sh   := FDocument.Shapes[FSelectDragShapeIdx];
-      newX := SnapCoord(ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX) + FSelectDragShapeOX);
-      newY := SnapCoord(ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY) + FSelectDragShapeOY);
-      newHas := (newX <> 0) or (newY <> 0);
-      { Reset shape to original position so the command captures the right before-state }
-      sh.TranslateX    := FSelectDragShapeOX;
-      sh.TranslateY    := FSelectDragShapeOY;
-      sh.HasTranslation := (FSelectDragShapeOX <> 0) or (FSelectDragShapeOY <> 0);
-      if (newX <> FSelectDragShapeOX) or (newY <> FSelectDragShapeOY) then
-      begin
-        cmdTrans := TVertexCmdSetShapeTranslation.Create(sh, newHas, newX, newY);
-        FDocument.UndoStack.Execute(cmdTrans);
-      end else
-      begin
-        { No real movement — just repaint to clear live preview }
+      sh := FDocument.Shapes[FSelectDragShapeIdx];
+
+      case FSelectDragHandle of
+        0..7:
+        begin
+          { Rotation or scale — shape.HasTransform was set during live preview.
+            Grab final matrix, reset to original state, then commit via command. }
+          sh.GetTransform(finalM);
+          sh.HasTransform   := FSelectDragHasM;
+          sh.SetTransform(FSelectDragMatrix);
+          sh.HasTranslation := FSelectDragHasTr;
+          sh.TranslateX     := FSelectDragShapeOX;
+          sh.TranslateY     := FSelectDragShapeOY;
+          cmdMatrix := TVertexCmdSetShapeTransform.Create(sh, True, finalM);
+          FDocument.UndoStack.Execute(cmdMatrix);
+        end;
+
+        8:
+        begin
+          if FSelectDragHasM then
+          begin
+            { Shape had a full affine transform: commit updated tx/ty in matrix }
+            sh.GetTransform(finalM);
+            sh.HasTransform   := FSelectDragHasM;
+            sh.SetTransform(FSelectDragMatrix);
+            sh.HasTranslation := FSelectDragHasTr;
+            sh.TranslateX     := FSelectDragShapeOX;
+            sh.TranslateY     := FSelectDragShapeOY;
+            cmdMatrix := TVertexCmdSetShapeTransform.Create(sh, True, finalM);
+            FDocument.UndoStack.Execute(cmdMatrix);
+          end
+          else
+          begin
+            { Simple translation }
+            newX   := SnapCoord(ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX) + FSelectDragShapeOX);
+            newY   := SnapCoord(ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY) + FSelectDragShapeOY);
+            newHas := (newX <> 0) or (newY <> 0);
+            sh.TranslateX     := FSelectDragShapeOX;
+            sh.TranslateY     := FSelectDragShapeOY;
+            sh.HasTranslation := (FSelectDragShapeOX <> 0) or (FSelectDragShapeOY <> 0);
+            if (newX <> FSelectDragShapeOX) or (newY <> FSelectDragShapeOY) then
+            begin
+              cmdTrans := TVertexCmdSetShapeTranslation.Create(sh, newHas, newX, newY);
+              FDocument.UndoStack.Execute(cmdTrans);
+            end
+            else
+            begin
+              FIconDirty := True;
+              Repaint;
+            end;
+          end;
+        end;
+
+      else
         FIconDirty := True;
         Repaint;
       end;
     end;
     FSelectDragActive   := False;
     FSelectDragShapeIdx := -1;
+    FSelectDragHandle   := -1;
     Exit;
   end;
 
@@ -1364,6 +1685,8 @@ var
   newPt:    TVertexPoint;
   sh2:      TVertexShape;
   dx, dy:   Single;
+  angle, delta, sf, dot: Single;
+  R, S, newM: array[0..5] of Single;
 begin
   { Always fire cursor-move so the status bar can show the HVIF coordinates }
   if Assigned(FOnCursorMove) then
@@ -1387,11 +1710,68 @@ begin
     if FSelectDragActive and (FSelectDragShapeIdx >= 0) then
     begin
       sh2 := FDocument.Shapes[FSelectDragShapeIdx];
-      dx  := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX);
-      dy  := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY);
-      sh2.HasTranslation := True;
-      sh2.TranslateX     := SnapCoord(FSelectDragShapeOX + dx);
-      sh2.TranslateY     := SnapCoord(FSelectDragShapeOY + dy);
+      case FSelectDragHandle of
+        0..3:
+        begin
+          { Rotation around bbox centre }
+          angle := ArcTan2(ScreenToHvifY(y) - FSelectDragCHY,
+                           ScreenToHvifX(x) - FSelectDragCHX);
+          delta := angle - FSelectDragAngle0;
+          MatRotateAround(delta, FSelectDragCHX, FSelectDragCHY, R);
+          MatCompose(FSelectDragMatrix, R, newM);
+          sh2.HasTransform := True;
+          sh2.SetTransform(newM);
+        end;
+        4..7:
+        begin
+          { Scale along one axis anchored at the opposite edge }
+          dot := (ScreenToHvifX(x) - FSelectDragAnchorHX) * FSelectDragHVecX +
+                 (ScreenToHvifY(y) - FSelectDragAnchorHY) * FSelectDragHVecY;
+          if FSelectDragHVecLen2 > 0.0001 then
+            sf := dot / FSelectDragHVecLen2
+          else
+            sf := 1.0;
+          if sf < 0.01 then sf := 0.01;   { prevent degenerate matrix }
+          if FSelectDragScaleIsX then
+          begin
+            S[0] := sf;   S[1] := 0.0;
+            S[2] := 0.0;  S[3] := 1.0;
+            S[4] := FSelectDragAnchorRaw*(1.0 - sf);
+            S[5] := 0.0;
+          end
+          else
+          begin
+            S[0] := 1.0;  S[1] := 0.0;
+            S[2] := 0.0;  S[3] := sf;
+            S[4] := 0.0;
+            S[5] := FSelectDragAnchorRaw*(1.0 - sf);
+          end;
+          MatCompose(S, FSelectDragMatrix, newM);
+          sh2.HasTransform := True;
+          sh2.SetTransform(newM);
+        end;
+        8:
+        begin
+          { Translation }
+          dx := ScreenToHvifX(x) - ScreenToHvifX(FSelectDragStartX);
+          dy := ScreenToHvifY(y) - ScreenToHvifY(FSelectDragStartY);
+          if FSelectDragHasM then
+          begin
+            { Shape already has a full transform: update tx/ty in the matrix }
+            newM := FSelectDragMatrix;
+            newM[4] := FSelectDragMatrix[4] + dx;
+            newM[5] := FSelectDragMatrix[5] + dy;
+            sh2.HasTransform := True;
+            sh2.SetTransform(newM);
+          end
+          else
+          begin
+            sh2.HasTranslation := True;
+            sh2.TranslateX     := SnapCoord(FSelectDragShapeOX + dx);
+            sh2.TranslateY     := SnapCoord(FSelectDragShapeOY + dy);
+          end;
+        end;
+      end;
       FIconDirty := True;
       Repaint;
     end;

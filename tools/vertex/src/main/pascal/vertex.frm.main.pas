@@ -1748,19 +1748,30 @@ begin
 end;
 
 procedure TVertexMainForm.ShapeMenuResetTransform(Sender: TObject);
+const
+  kIdentity: array[0..5] of Single = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 var
-  node:  TfpgTreeNode;
-  idx:   Integer;
-  shape: TVertexShape;
-  cmd:   TVertexCmdSetShapeTranslation;
+  node:   TfpgTreeNode;
+  idx:    Integer;
+  shape:  TVertexShape;
+  cmdM:   TVertexCmdSetShapeTransform;
+  cmdT:   TVertexCmdSetShapeTranslation;
 begin
   node := FObjectTree.Selection;
   if (node = nil) or (FShapesNode = nil) or (node.Parent <> FShapesNode) then Exit;
   idx := Integer(PtrUInt(node.Data));
   if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
   shape := FDocument.Shapes[idx];
-  cmd := TVertexCmdSetShapeTranslation.Create(shape, False, 0, 0);
-  FDocument.UndoStack.Execute(cmd);
+  if shape.HasTransform then
+  begin
+    cmdM := TVertexCmdSetShapeTransform.Create(shape, False, kIdentity);
+    FDocument.UndoStack.Execute(cmdM);
+  end
+  else if shape.HasTranslation then
+  begin
+    cmdT := TVertexCmdSetShapeTranslation.Create(shape, False, 0, 0);
+    FDocument.UndoStack.Execute(cmdT);
+  end;
 end;
 
 procedure TVertexMainForm.ShapeMenuFreezeTransform(Sender: TObject);
@@ -1775,7 +1786,7 @@ begin
   idx := Integer(PtrUInt(node.Data));
   if (idx < 0) or (idx >= FDocument.ShapeCount) then Exit;
   shape := FDocument.Shapes[idx];
-  if not shape.HasTranslation then Exit;  { nothing to freeze }
+  if (not shape.HasTranslation) and (not shape.HasTransform) then Exit;
   cmd := TVertexCmdFreezeTransform.Create(shape);
   FDocument.UndoStack.Execute(cmd);
 end;
