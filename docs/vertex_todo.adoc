@@ -29,6 +29,11 @@ Tick items off as they are completed.
 * [x] Step 19 — Object tree improvements (names, path management buttons)
 * [x] Step 20 — Gradient canvas handles (origin + radius/direction drag, undo-aware)
 * [x] Step 21 — Rectangle, Ellipse, and Pen toolbar tools (drag-create + click-to-place)
+* [x] Step 22 — Always-visible Bezier path outline in node-edit overlay (blue polyline)
+* [x] Step 23 — Inline tree rename (F2 / double-click) for styles, paths, and shapes
+* [x] Step 24 — Sidecar metadata file (`.hvif.vertex`) persists user-defined names across save/load
+* [x] Step 25 — Shift+edge drag: uniform scale around bbox centre
+* [x] Step 26 — Ctrl+edge drag: shear along perpendicular axis (top/bottom → shear X; left/right → shear Y)
 
 == Pending Work
 
@@ -37,6 +42,7 @@ Tick items off as they are completed.
 * [x] File > New — create a blank document (prompt to save dirty document first)
 * [x] File > Export as PNG — render at configurable sizes (16, 32, 48, 64 px) via AggPas off-screen canvas
 * [x] Dirty-check on close — prompt "Save changes?" when closing an unsaved document
+* [x] Sidecar metadata file — on save, writes `<file>.hvif.vertex` (INI format) storing style/path/shape names; loaded automatically on open to restore user-defined names
 
 === Canvas Interaction Model — Selection-Driven Mode
 
@@ -65,9 +71,8 @@ while active.
 * [x] Node overlay scoped to selected path only; hit-testing restricted to that path.
 * [ ] Keyboard shortcut: pressing Escape while a secondary tool is active returns to
   selection-driven mode without changing the tree selection.
-* [ ] Retire (or repurpose) the explicit Select and Node toolbar buttons now that mode
-  is driven by tree selection; keep Add Point, Delete Point, Pen, Rectangle, Ellipse,
-  Zoom, Pan as secondary tools.
+* [~] Retire (or repurpose) the explicit Select and Node toolbar buttons — decided to
+  keep them; they remain useful for manually overriding the selection-driven mode.
 
 === Toolbar Tools
 
@@ -86,6 +91,7 @@ while active.
 * [x] Zoom toolbar — buttons for 50%, 100%, 200%, 400% (and a numeric display)
 * [x] Grid overlay — configurable grid step (px); toggle on/off; snap-to-grid
 * [x] Status bar — display: cursor X/Y in HVIF units · selected item name · node N/total · HVIF byte count
+* [x] Path outline always visible in node-edit overlay — Bezier curve segments drawn in blue (20 samples/segment) beneath control-point handles
 
 === Style Panel — Gradient Support
 
@@ -153,8 +159,8 @@ and Inkscape model.
 * [x] Corner handle drag — rotates the shape around its centre; cursor changes to a
   rotation arc on hover.
 * [x] Edge handle drag — scales the shape along the corresponding axis.
-* [ ] Ctrl + edge handle drag — shears along that axis, matching Icon-o-Matic behaviour.
-* [ ] Holding Shift during scale constrains to uniform scale.
+* [x] Ctrl + edge handle drag — shears along that axis, matching Icon-o-Matic behaviour.
+* [x] Holding Shift during scale constrains to uniform scale.
 * [x] Live preview during drag: apply the in-progress matrix to the render without
   committing to the undo stack.
 * [x] On mouse-up, commit the final matrix via `TVertexCmdSetShapeTransform` (see below).
@@ -162,11 +168,8 @@ and Inkscape model.
 
 ==== Shape Properties Panel — Transform Read-Out
 
-* [ ] Add a read-only "Transform" sub-section that becomes visible whenever `HasTransform`
-  is True.  Display the decomposed values: rotation angle (degrees), X scale, Y scale,
-  shear.  These are informational — editing is done on the canvas.
-* [ ] When `HasTransform` is False (translation-only), the sub-section is hidden (or shows
-  "No affine transform").
+* [~] Add a read-only "Transform" sub-section displaying decomposed values — won't do; not worth the complexity for informational-only data.
+* [x] When `HasTransform` is False, the "has transform" sub-node is absent from the tree — already implemented; the sub-node is only appended when `sh.HasTransform` is True (and disappears after Freeze transformation).
 * [x] "Reset transform" in the shape context menu must clear the full matrix back to
   identity (correctly handles both `HasTransform` and `HasTranslation`); updated
   `ShapeMenuResetTransform` accordingly.
@@ -194,9 +197,10 @@ A dedicated panel showing properties of the currently selected path.
 The current single tree widget needs to be split (or significantly extended) into three
 separate labelled panels matching the Haiku Icon-o-Matic layout.
 
-* [ ] Shapes panel — shows each shape with two sub-lines: style name and path name(s); has +/- buttons and a context menu
-* [ ] Paths panel — shows path name, node count, open/closed indicator; expand arrow to show which shapes reference the path; has +/- buttons and a context menu
-* [ ] Styles panel — shows style name with a small colour swatch (solid) or gradient thumbnail (gradient); has +/- buttons
+* [x] Inline rename — F2 or double-click any style, path, or shape node to edit its name directly in the tree; Enter commits, Escape cancels; undo-aware via `TVertexCmdRename`
+* [~] Shapes panel — won't do; the unified treeview with inline rename and rich node labels covers this sufficiently
+* [~] Paths panel — won't do; same rationale as above
+* [~] Styles panel — won't do; same rationale as above
 
 === Context Menus
 
@@ -217,10 +221,10 @@ separate labelled panels matching the Haiku Icon-o-Matic layout.
 ** Reset transformation
 ** Remove
 
-* [ ] Shape panel context menu (remaining):
-** Add with path (selects an existing path)
-** Add with style (selects an existing style)
-** Add with path & style
+* [x] Shape panel context menu (remaining):
+** [x] Add with path — picker dialog selects existing path; new default style created
+** [x] Add with style — picker dialog selects existing style; shape has no path initially
+** [x] Add with path & style — delegates to existing + Shape button (ShapeAdd)
 ** [x] Freeze transformation (bake shape transform into path point coordinates)
 
 * [x] Transformer context menu (within shape panel):
