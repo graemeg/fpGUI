@@ -31,7 +31,7 @@ uses
   fpg_base, fpg_main, fpg_form, fpg_constants,
   fpg_menu, fpg_panel, fpg_label, fpg_tree, fpg_button, fpg_edit,
   fpg_miglayout, fpg_mig_lc, fpg_mig_cc,
-  fpg_dialogs, fpg_iniutils, fpg_mru, fpg_combobox,
+  fpg_dialogs, fpg_iniutils, fpg_mru, fpg_combobox, fpg_listbox,
   fpg_hvif_model, fpg_hvif,
   fpg_vertex_document,
   vertex.wgt.canvas,
@@ -177,6 +177,9 @@ type
 
     { Shape context menu handlers }
     procedure ShapeMenuAddEmpty(Sender: TObject);
+    procedure ShapeMenuAddWithPath(Sender: TObject);
+    procedure ShapeMenuAddWithStyle(Sender: TObject);
+    procedure ShapeMenuAddWithPathAndStyle(Sender: TObject);
     procedure ShapeMenuDuplicate(Sender: TObject);
     procedure ShapeMenuResetTransform(Sender: TObject);
     procedure ShapeMenuFreezeTransform(Sender: TObject);
@@ -1575,7 +1578,10 @@ begin
   FMnuShape := TfpgPopupMenu.Create(Self);
   with FMnuShape do
   begin
-    AddMenuItem('Add empty shape',    '', @ShapeMenuAddEmpty);
+    AddMenuItem('Add empty shape',         '', @ShapeMenuAddEmpty);
+    AddMenuItem('Add with path...',        '', @ShapeMenuAddWithPath);
+    AddMenuItem('Add with style...',       '', @ShapeMenuAddWithStyle);
+    AddMenuItem('Add with path && style',  '', @ShapeMenuAddWithPathAndStyle);
     AddSeparator;
     AddMenuItem('Duplicate',          '', @ShapeMenuDuplicate);
     AddSeparator;
@@ -1821,9 +1827,173 @@ end;
 
 { ── Shape context menu handlers ───────────────────────────────────────────── }
 
-procedure TVertexMainForm.ShapeMenuAddEmpty(Sender: TObject);
+{ Simple modal list-picker: shows AItems in a listbox, returns chosen index or -1. }
+function PickFromList(const ATitle, APrompt: string;
+                      const AItems: array of string): Integer;
+var
+  frm:    TfpgForm;
+  lbl:    TfpgLabel;
+  lb:     TfpgListBox;
+  btnOK:  TfpgButton;
+  btnCan: TfpgButton;
+  i:      Integer;
 begin
-  { Reuse the existing ShapeAdd logic }
+  Result := -1;
+  if Length(AItems) = 0 then Exit;
+
+  frm := TfpgForm.Create(nil);
+  try
+    frm.WindowTitle := ATitle;
+    frm.SetPosition(0, 0, 280, 200);
+    frm.WindowPosition := wpScreenCenter;
+
+    lbl := TfpgLabel.Create(frm);
+    lbl.Text := APrompt;
+    lbl.SetPosition(8, 8, 264, 18);
+
+    lb := TfpgListBox.Create(frm);
+    lb.SetPosition(8, 30, 264, 120);
+    for i := 0 to High(AItems) do
+      lb.Items.Add(AItems[i]);
+    lb.FocusItem := 0;
+
+    btnOK := TfpgButton.Create(frm);
+    btnOK.Text    := 'OK';
+    btnOK.ModalResult := mrOK;
+    btnOK.SetPosition(116, 162, 70, 26);
+
+    btnCan := TfpgButton.Create(frm);
+    btnCan.Text   := 'Cancel';
+    btnCan.ModalResult := mrCancel;
+    btnCan.SetPosition(196, 162, 76, 26);
+
+    if frm.ShowModal = mrOK then
+      Result := lb.FocusItem;
+  finally
+    frm.Free;
+  end;
+end;
+
+
+procedure TVertexMainForm.ShapeMenuAddEmpty(Sender: TObject);
+var
+  shape:   TVertexShape;
+  style:   TVertexStyle;
+  col:     THvifColor;
+  cmdSt:   TVertexCmdAddStyle;
+  cmdSh:   TVertexCmdAddShape;
+  newIdx:  Integer;
+begin
+  if FDocument = nil then Exit;
+  shape         := TVertexShape.Create(FDocument.UniqueName('shape'));
+  shape.Visible := True;
+  { HVIF requires every shape to reference a style; reuse first existing or create one }
+  if FDocument.StyleCount > 0 then
+    shape.Style := FDocument.Styles[0]
+  else
+  begin
+    style           := TVertexStyle.Create(FDocument.UniqueName('style'));
+    style.StyleType := hstSolidColor;
+    col.R := 0; col.G := 0; col.B := 0; col.A := $FF;
+    style.Color := col;
+    cmdSt := TVertexCmdAddStyle.Create(FDocument, style);
+    FDocument.UndoStack.Execute(cmdSt);
+    shape.Style := style;
+  end;
+  cmdSh := TVertexCmdAddShape.Create(FDocument, shape);
+  FDocument.UndoStack.Execute(cmdSh);
+  newIdx := FDocument.ShapeCount - 1;
+  PopulateObjectTree;
+  SelectShapeInTree(newIdx);
+end;
+
+procedure TVertexMainForm.ShapeMenuAddWithPath(Sender: TObject);
+var
+  names:  array of string;
+  i, idx: Integer;
+  path:   TVertexPath;
+  style:  TVertexStyle;
+  shape:  TVertexShape;
+  col:    THvifColor;
+  cmdSt:  TVertexCmdAddStyle;
+  cmdSh:  TVertexCmdAddShape;
+  newIdx: Integer;
+begin
+  if (FDocument = nil) or (FDocument.PathCount = 0) then
+  begin
+    ShowMessage('No paths exist yet. Create a path first.', 'Vertex');
+    Exit;
+  end;
+  SetLength(names, FDocument.PathCount);
+  for i := 0 to FDocument.PathCount - 1 do
+    names[i] := FDocument.Paths[i].Name;
+
+  idx := PickFromList('Add shape with path', 'Select path:', names);
+  if idx < 0 then Exit;
+
+  path  := FDocument.Paths[idx];
+
+  { New solid-colour style }
+  style           := TVertexStyle.Create(FDocument.UniqueName('style'));
+  style.StyleType := hstSolidColor;
+  col.R := $44; col.G := $88; col.B := $FF; col.A := $FF;
+  style.Color := col;
+
+  { New shape referencing existing path + new style }
+  shape         := TVertexShape.Create(FDocument.UniqueName('shape'));
+  shape.Style   := style;
+  shape.Visible := True;
+  shape.AddPathRef(path);
+
+  cmdSt := TVertexCmdAddStyle.Create(FDocument, style);
+  FDocument.UndoStack.Execute(cmdSt);
+
+  cmdSh := TVertexCmdAddShape.Create(FDocument, shape);
+  FDocument.UndoStack.Execute(cmdSh);
+
+  newIdx := FDocument.ShapeCount - 1;
+  PopulateObjectTree;
+  SelectShapeInTree(newIdx);
+end;
+
+procedure TVertexMainForm.ShapeMenuAddWithStyle(Sender: TObject);
+var
+  names:  array of string;
+  i, idx: Integer;
+  style:  TVertexStyle;
+  shape:  TVertexShape;
+  cmdSh:  TVertexCmdAddShape;
+  newIdx: Integer;
+begin
+  if (FDocument = nil) or (FDocument.StyleCount = 0) then
+  begin
+    ShowMessage('No styles exist yet. Create a style first.', 'Vertex');
+    Exit;
+  end;
+  SetLength(names, FDocument.StyleCount);
+  for i := 0 to FDocument.StyleCount - 1 do
+    names[i] := FDocument.Styles[i].Name;
+
+  idx := PickFromList('Add shape with style', 'Select style:', names);
+  if idx < 0 then Exit;
+
+  style := FDocument.Styles[idx];
+
+  { New shape referencing existing style, no path assigned yet }
+  shape         := TVertexShape.Create(FDocument.UniqueName('shape'));
+  shape.Style   := style;
+  shape.Visible := True;
+
+  cmdSh := TVertexCmdAddShape.Create(FDocument, shape);
+  FDocument.UndoStack.Execute(cmdSh);
+
+  newIdx := FDocument.ShapeCount - 1;
+  PopulateObjectTree;
+  SelectShapeInTree(newIdx);
+end;
+
+procedure TVertexMainForm.ShapeMenuAddWithPathAndStyle(Sender: TObject);
+begin
   ShapeAdd(Sender);
 end;
 
