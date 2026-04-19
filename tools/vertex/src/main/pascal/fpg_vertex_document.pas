@@ -2479,6 +2479,7 @@ begin
     for i := 0 to FShapes.Count - 1 do
     begin
       shape := TVertexShape(FShapes[i]);
+      if not shape.Visible then Continue;   { hidden during editing — skip }
       sIdx  := FStyles.IndexOf(shape.Style);
       if sIdx < 0 then
         raise EHvifError.CreateFmt(
