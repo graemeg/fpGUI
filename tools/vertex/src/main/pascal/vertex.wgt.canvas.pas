@@ -2274,7 +2274,7 @@ begin
         end;
         4..7:
         begin
-          { Scale along one axis anchored at the opposite edge }
+          { Scale anchored at opposite edge; Shift = uniform scale around centre }
           dot := (ScreenToHvifX(x) - FSelectDragAnchorHX) * FSelectDragHVecX +
                  (ScreenToHvifY(y) - FSelectDragAnchorHY) * FSelectDragHVecY;
           if FSelectDragHVecLen2 > 0.0001 then
@@ -2282,7 +2282,15 @@ begin
           else
             sf := 1.0;
           if sf < 0.01 then sf := 0.01;   { prevent degenerate matrix }
-          if FSelectDragScaleIsX then
+          if ssShift in shiftstate then
+          begin
+            { Uniform scale around bbox centre }
+            S[0] := sf;   S[1] := 0.0;
+            S[2] := 0.0;  S[3] := sf;
+            S[4] := FSelectDragCHX * (1.0 - sf);
+            S[5] := FSelectDragCHY * (1.0 - sf);
+          end
+          else if FSelectDragScaleIsX then
           begin
             S[0] := sf;   S[1] := 0.0;
             S[2] := 0.0;  S[3] := 1.0;
