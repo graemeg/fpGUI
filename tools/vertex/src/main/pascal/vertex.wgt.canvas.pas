@@ -2174,7 +2174,7 @@ var
   newPt:    TVertexPoint;
   sh2:      TVertexShape;
   dx, dy:   Single;
-  angle, delta, sf, dot: Single;
+  angle, delta, sf, dot, shf, perp_dot: Single;
   R, S, newM: array[0..5] of Single;
   gradM:    array[0..5] of Single;
   gradCX, gradCY, gradR: Single;
@@ -2289,6 +2289,34 @@ begin
             S[2] := 0.0;  S[3] := sf;
             S[4] := FSelectDragCHX * (1.0 - sf);
             S[5] := FSelectDragCHY * (1.0 - sf);
+          end
+          else if ssCtrl in shiftstate then
+          begin
+            { Shear along the axis perpendicular to the drag direction }
+            perp_dot := (ScreenToHvifX(x) - FSelectDragAnchorHX) * (-FSelectDragHVecY) +
+                        (ScreenToHvifY(y) - FSelectDragAnchorHY) * FSelectDragHVecX;
+            if FSelectDragHVecLen2 > 0.0001 then
+              shf := perp_dot / FSelectDragHVecLen2
+            else
+              shf := 0.0;
+            if FSelectDragScaleIsX then
+            begin
+              { X-axis handles (right/left): shear Y — shy = M[1] }
+              S[0] := 1.0;  S[1] := shf;
+              S[2] := 0.0;  S[3] := 1.0;
+              S[4] := 0.0;
+              S[5] := -shf * FSelectDragAnchorRaw;
+            end
+            else
+            begin
+              { Y-axis handles (top/bottom): shear X — shx = M[2]
+                Negate shf: the h-vec points away in screen Y so the perpendicular
+                dot product has the opposite sign to the desired shear direction. }
+              S[0] := 1.0;  S[1] := 0.0;
+              S[2] := -shf; S[3] := 1.0;
+              S[4] := shf * FSelectDragAnchorRaw;
+              S[5] := 0.0;
+            end;
           end
           else if FSelectDragScaleIsX then
           begin
