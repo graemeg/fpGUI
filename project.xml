@@ -20,7 +20,7 @@
     <module activeByDefault="false">examples</module>
     <module activeByDefault="false">tools/imageconvert</module>
     <module activeByDefault="false">tools/vertex-canvas-demo</module>
-    <module activeByDefault="false">tools/vertex</module>
+    <module>tools/vertex</module>
   </modules>
 
   <profiles>
