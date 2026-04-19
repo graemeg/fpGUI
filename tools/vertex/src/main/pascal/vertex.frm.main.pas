@@ -55,12 +55,15 @@ type
     FMnuHelp:     TfpgPopupMenu;
     FToolBox:       TfpgBevel;
     FToolLabel:     TfpgLabel;
-    FBtnToolSelect: TfpgButton;   { Select / move shapes tool }
-    FBtnToolNode:   TfpgButton;   { Node edit tool (default) }
-    FBtnToolPan:    TfpgButton;   { Pan viewport tool }
-    FBtnToolAddPt:  TfpgButton;   { Add point tool }
-    FBtnToolDelPt:  TfpgButton;   { Delete point tool }
-    FBtnToolZoom:   TfpgButton;   { Zoom tool }
+    FBtnToolSelect:  TfpgButton;   { Select / move shapes tool }
+    FBtnToolNode:    TfpgButton;   { Node edit tool (default) }
+    FBtnToolPan:     TfpgButton;   { Pan viewport tool }
+    FBtnToolAddPt:   TfpgButton;   { Add point tool }
+    FBtnToolDelPt:   TfpgButton;   { Delete point tool }
+    FBtnToolZoom:    TfpgButton;   { Zoom tool }
+    FBtnToolRect:    TfpgButton;   { Rectangle drag-create tool }
+    FBtnToolEllipse: TfpgButton;   { Ellipse drag-create tool }
+    FBtnToolPen:     TfpgButton;   { Pen (click-to-place) tool }
     FVertexCanvas:     TVertexCanvasWidget;
     FRightPanel:    TfpgBevel;
     FPreviewBar:    TVertexPreviewBar;
@@ -186,6 +189,10 @@ type
     { Canvas shape-selected callback — syncs tree and panels when user
       clicks a different shape directly on the canvas. }
     procedure CanvasShapeSelected(Sender: TObject);
+
+    { Canvas path-added callback — repopulates tree and selects the new path
+      after a Rect, Ellipse, or Pen tool commits a path. }
+    procedure CanvasPathAdded(Sender: TObject);
 
     { Refresh the status bar text from the current document/selection state. }
     procedure UpdateStatusBar;
@@ -344,6 +351,7 @@ begin
   OnClose      := @FormClose;
   FVertexCanvas.OnCursorMove    := @CanvasCursorMove;
   FVertexCanvas.OnShapeSelected := @CanvasShapeSelected;
+  FVertexCanvas.OnPathAdded     := @CanvasPathAdded;
   FShapePanel.OnPathDblClick    := @ShapePanelPathDblClick;
 end;
 
@@ -531,7 +539,7 @@ begin
   FToolBox := TfpgBevel.Create(Self);
   FToolBox.Name  := 'toolBox';
   FToolBox.Style := bsLowered;
-  FToolBox.PreferredSize := fpgSize(64, 200);
+  FToolBox.PreferredSize := fpgSize(64, 290);
 
   FToolLabel := TfpgLabel.Create(FToolBox);
   FToolLabel.Name    := 'lblTools';
@@ -580,6 +588,27 @@ begin
   FBtnToolZoom.SetPosition(2, 164, 60, 26);
   FBtnToolZoom.OnClick := @ToolBtnClick;
   FBtnToolZoom.FontDesc := '#Label1';
+
+  FBtnToolRect := TfpgButton.Create(FToolBox);
+  FBtnToolRect.Text    := 'Rect';
+  FBtnToolRect.Tag     := 6;   { tmRect }
+  FBtnToolRect.SetPosition(2, 192, 60, 26);
+  FBtnToolRect.OnClick := @ToolBtnClick;
+  FBtnToolRect.FontDesc := '#Label1';
+
+  FBtnToolEllipse := TfpgButton.Create(FToolBox);
+  FBtnToolEllipse.Text    := 'Ellipse';
+  FBtnToolEllipse.Tag     := 7;   { tmEllipse }
+  FBtnToolEllipse.SetPosition(2, 220, 60, 26);
+  FBtnToolEllipse.OnClick := @ToolBtnClick;
+  FBtnToolEllipse.FontDesc := '#Label1';
+
+  FBtnToolPen := TfpgButton.Create(FToolBox);
+  FBtnToolPen.Text    := 'Pen';
+  FBtnToolPen.Tag     := 8;   { tmPen }
+  FBtnToolPen.SetPosition(2, 248, 60, 26);
+  FBtnToolPen.OnClick := @ToolBtnClick;
+  FBtnToolPen.FontDesc := '#Label1';
 
   mig.AddLayoutComponent(FToolBox, TfpgMigCC.Create().DockWest);
 
@@ -1418,19 +1447,25 @@ procedure TVertexMainForm.ApplyToolMode(AMode: TVertexToolMode);
 begin
   FVertexCanvas.ToolMode := AMode;
   { Sync toolbar button bold state }
-  FBtnToolSelect.FontDesc := '#Label1';
-  FBtnToolNode.FontDesc   := '#Label1';
-  FBtnToolPan.FontDesc    := '#Label1';
-  FBtnToolAddPt.FontDesc  := '#Label1';
-  FBtnToolDelPt.FontDesc  := '#Label1';
-  FBtnToolZoom.FontDesc   := '#Label1';
+  FBtnToolSelect.FontDesc  := '#Label1';
+  FBtnToolNode.FontDesc    := '#Label1';
+  FBtnToolPan.FontDesc     := '#Label1';
+  FBtnToolAddPt.FontDesc   := '#Label1';
+  FBtnToolDelPt.FontDesc   := '#Label1';
+  FBtnToolZoom.FontDesc    := '#Label1';
+  FBtnToolRect.FontDesc    := '#Label1';
+  FBtnToolEllipse.FontDesc := '#Label1';
+  FBtnToolPen.FontDesc     := '#Label1';
   case AMode of
-    tmSelect:      FBtnToolSelect.FontDesc := '#Label1:bold';
-    tmNode:        FBtnToolNode.FontDesc   := '#Label1:bold';
-    tmPan:         FBtnToolPan.FontDesc    := '#Label1:bold';
-    tmAddPoint:    FBtnToolAddPt.FontDesc  := '#Label1:bold';
-    tmDeletePoint: FBtnToolDelPt.FontDesc  := '#Label1:bold';
-    tmZoom:        FBtnToolZoom.FontDesc   := '#Label1:bold';
+    tmSelect:      FBtnToolSelect.FontDesc  := '#Label1:bold';
+    tmNode:        FBtnToolNode.FontDesc    := '#Label1:bold';
+    tmPan:         FBtnToolPan.FontDesc     := '#Label1:bold';
+    tmAddPoint:    FBtnToolAddPt.FontDesc   := '#Label1:bold';
+    tmDeletePoint: FBtnToolDelPt.FontDesc   := '#Label1:bold';
+    tmZoom:        FBtnToolZoom.FontDesc    := '#Label1:bold';
+    tmRect:        FBtnToolRect.FontDesc    := '#Label1:bold';
+    tmEllipse:     FBtnToolEllipse.FontDesc := '#Label1:bold';
+    tmPen:         FBtnToolPen.FontDesc     := '#Label1:bold';
   end;
 end;
 
@@ -1445,6 +1480,9 @@ begin
     3: mode := tmAddPoint;
     4: mode := tmDeletePoint;
     5: mode := tmZoom;
+    6: mode := tmRect;
+    7: mode := tmEllipse;
+    8: mode := tmPen;
   else
     mode := tmNode;
   end;
@@ -2041,6 +2079,16 @@ begin
   { Programmatically setting Selection does not fire OnChange, so we
     update the tree node first then refresh all panels explicitly. }
   SelectShapeInTree(idx);
+  ObjectTreeChanged(nil);
+end;
+
+procedure TVertexMainForm.CanvasPathAdded(Sender: TObject);
+var
+  idx: Integer;
+begin
+  idx := FDocument.PathCount - 1;
+  PopulateObjectTree;
+  SelectPathInTree(idx);
   ObjectTreeChanged(nil);
 end;
 

@@ -59,7 +59,10 @@ type
     tmPan,         { drag to pan the viewport }
     tmAddPoint,    { click on a segment to insert a node }
     tmDeletePoint, { click on a node to remove it }
-    tmZoom         { left-click zoom in, Alt+click zoom out }
+    tmZoom,        { left-click zoom in, Alt+click zoom out }
+    tmRect,        { drag to create a new rectangular closed path }
+    tmEllipse,     { drag to create a new elliptical closed path (4-point Bezier) }
+    tmPen          { click to place nodes; click first node or Enter to commit }
   );
 
   TVertexCanvasWidget = class(TfpgWidget)
@@ -137,6 +140,18 @@ type
     FGradDragHandle:    Integer;  { 0 = origin, 1 = radius/direction }
     FGradDragOldMatrix: array[0..5] of Single;
 
+    { Rectangle / ellipse drag-create state }
+    FShapeDragActive:  Boolean;
+    FShapeDragStartHX,
+    FShapeDragStartHY: Single;   { HVIF start corner }
+    FShapeDragCurHX,
+    FShapeDragCurHY:   Single;   { HVIF current corner }
+
+    { Pen tool state — FPenPath is owned by canvas until committed }
+    FPenPath:    TVertexPath;
+    FPenPreviewX,
+    FPenPreviewY: Single;        { HVIF coords of the current mouse position }
+
     { Zoom — negative means "fit to widget" }
     FZoom: Integer;        { -1 = fit; 50/100/200/400 = fixed % }
 
@@ -148,6 +163,7 @@ type
     { Events }
     FOnCursorMove:    TVertexCursorMoveEvent;
     FOnShapeSelected: TNotifyEvent;   { fires when user clicks a shape in the canvas }
+    FOnPathAdded:     TNotifyEvent;   { fires after a tool creates and commits a new path }
 
     { Coordinate helpers }
     function  HvifToScreenX(AHvif: Single): Integer;
@@ -167,6 +183,12 @@ type
     procedure DrawControlOverlay;
     procedure DrawNodeCircle(AScreenX, AScreenY, ARadius: Integer;
                               AFill, ABorder: TfpgColor; ASelected: Boolean);
+
+    { Rubber-band overlays for drag-create tools }
+    procedure DrawShapeDragOverlay;
+    procedure DrawPenOverlay;
+    { Builds and commits the rect/ellipse path after the drag-create mouse-up }
+    procedure CommitDragCreatePath;
 
     { Gradient handle rendering and hit-testing }
     procedure DrawGradientHandles;
@@ -250,6 +272,11 @@ type
       The form should respond by syncing the tree and property panels. }
     property OnShapeSelected: TNotifyEvent
         read FOnShapeSelected write FOnShapeSelected;
+
+    { Fires after a Rect, Ellipse, or Pen tool creates and commits a new path.
+      The form should repopulate the tree and select the new path. }
+    property OnPathAdded: TNotifyEvent
+        read FOnPathAdded write FOnPathAdded;
   end;
 
 
@@ -418,6 +445,8 @@ begin
   FGradHandleValid    := False;
   FGradDragActive     := False;
   FGradDragHandle     := -1;
+  FShapeDragActive    := False;
+  FPenPath            := nil;
   FPanX               := 0;
   FPanY               := 0;
   FPanDragActive      := False;
@@ -426,6 +455,7 @@ end;
 destructor TVertexCanvasWidget.Destroy;
 begin
   FIcon.Free;
+  FPenPath.Free;   { cancel any in-progress pen path }
   inherited Destroy;
 end;
 
@@ -441,6 +471,8 @@ begin
   FEditGradStyle    := nil;
   FGradHandleValid  := False;
   FGradDragActive   := False;
+  FShapeDragActive  := False;
+  FreeAndNil(FPenPath);
   FreeAndNil(FIcon);
   FIconDirty := (FDocument <> nil);
   Repaint;
@@ -851,6 +883,173 @@ begin
   end;
 end;
 
+procedure TVertexCanvasWidget.CommitDragCreatePath;
+{ Builds a rect or 4-point Bezier ellipse from the current drag bounds
+  and commits it as a new TVertexPath via TVertexCmdAddPath. }
+const
+  KAPPA = 0.5523;  { Bezier circle approximation constant }
+var
+  path:     TVertexPath;
+  pt:       TVertexPoint;
+  x1, y1, x2, y2: Single;
+  cx, cy, rx, ry, k: Single;
+begin
+  if FDocument = nil then Exit;
+  x1 := Min(FShapeDragStartHX, FShapeDragCurHX);
+  y1 := Min(FShapeDragStartHY, FShapeDragCurHY);
+  x2 := Max(FShapeDragStartHX, FShapeDragCurHX);
+  y2 := Max(FShapeDragStartHY, FShapeDragCurHY);
+  { Ignore trivially small shapes }
+  if (Abs(x2 - x1) < 0.5) or (Abs(y2 - y1) < 0.5) then Exit;
+
+  path := TVertexPath.Create(FDocument.UniqueName('path'));
+  path.Closed := True;
+  FillChar(pt, SizeOf(pt), 0);
+
+  if FToolMode = tmRect then
+  begin
+    pt.X := x1; pt.Y := y1; pt.InX := x1; pt.InY := y1; pt.OutX := x1; pt.OutY := y1; path.AddPoint(pt);
+    pt.X := x2; pt.Y := y1; pt.InX := x2; pt.InY := y1; pt.OutX := x2; pt.OutY := y1; path.AddPoint(pt);
+    pt.X := x2; pt.Y := y2; pt.InX := x2; pt.InY := y2; pt.OutX := x2; pt.OutY := y2; path.AddPoint(pt);
+    pt.X := x1; pt.Y := y2; pt.InX := x1; pt.InY := y2; pt.OutX := x1; pt.OutY := y2; path.AddPoint(pt);
+  end
+  else  { tmEllipse }
+  begin
+    cx := (x1 + x2) * 0.5;  cy := (y1 + y2) * 0.5;
+    rx := (x2 - x1) * 0.5;  ry := (y2 - y1) * 0.5;
+    k  := KAPPA;
+    { Top }
+    pt.X := cx;      pt.Y := cy - ry;
+    pt.InX  := cx - rx*k;  pt.InY  := cy - ry;
+    pt.OutX := cx + rx*k;  pt.OutY := cy - ry;
+    path.AddPoint(pt);
+    { Right }
+    pt.X := cx + rx;  pt.Y := cy;
+    pt.InX  := cx + rx;  pt.InY  := cy - ry*k;
+    pt.OutX := cx + rx;  pt.OutY := cy + ry*k;
+    path.AddPoint(pt);
+    { Bottom }
+    pt.X := cx;      pt.Y := cy + ry;
+    pt.InX  := cx + rx*k;  pt.InY  := cy + ry;
+    pt.OutX := cx - rx*k;  pt.OutY := cy + ry;
+    path.AddPoint(pt);
+    { Left }
+    pt.X := cx - rx;  pt.Y := cy;
+    pt.InX  := cx - rx;  pt.InY  := cy + ry*k;
+    pt.OutX := cx - rx;  pt.OutY := cy - ry*k;
+    path.AddPoint(pt);
+  end;
+
+  FDocument.UndoStack.Execute(TVertexCmdAddPath.Create(FDocument, path));
+  if Assigned(FOnPathAdded) then FOnPathAdded(Self);
+end;
+
+procedure TVertexCanvasWidget.DrawShapeDragOverlay;
+{ Draws a dashed rectangle or ellipse from FShapeDragStart to FShapeDragCur. }
+const
+  COL_DRAG = $FF0080FF;
+  DASH_ON  = 5;
+  DASH_OFF = 4;
+
+  procedure DashLine(x1, y1, x2, y2: Integer);
+  var dx, dy, len, t, tEnd: Single;
+  begin
+    dx := x2 - x1;  dy := y2 - y1;
+    len := Sqrt(dx*dx + dy*dy);
+    if len < 0.5 then Exit;
+    t := 0;
+    while t < len do
+    begin
+      tEnd := Min(t + DASH_ON, len);
+      Canvas.DrawLine(Round(x1 + t/len*dx),    Round(y1 + t/len*dy),
+                      Round(x1 + tEnd/len*dx), Round(y1 + tEnd/len*dy));
+      t := t + DASH_ON + DASH_OFF;
+    end;
+  end;
+
+var
+  x1, y1, x2, y2: Integer;
+  cx, cy, rw, rh: Integer;
+  nx, ny: Single;
+  i: Integer;
+  ang, dAng: Single;
+  pts: array[0..35] of TPoint;  { polyline approx for ellipse }
+begin
+  if not FShapeDragActive then Exit;
+  Canvas.SetColor(COL_DRAG);
+  x1 := HvifToScreenX(Min(FShapeDragStartHX, FShapeDragCurHX));
+  y1 := HvifToScreenY(Min(FShapeDragStartHY, FShapeDragCurHY));
+  x2 := HvifToScreenX(Max(FShapeDragStartHX, FShapeDragCurHX));
+  y2 := HvifToScreenY(Max(FShapeDragStartHY, FShapeDragCurHY));
+  if FToolMode = tmRect then
+  begin
+    DashLine(x1, y1, x2, y1);
+    DashLine(x2, y1, x2, y2);
+    DashLine(x2, y2, x1, y2);
+    DashLine(x1, y2, x1, y1);
+  end
+  else  { tmEllipse }
+  begin
+    cx := (x1 + x2) div 2;
+    cy := (y1 + y2) div 2;
+    rw := (x2 - x1) div 2;
+    rh := (y2 - y1) div 2;
+    if (rw < 1) or (rh < 1) then Exit;
+    dAng := 2 * Pi / 36;
+    for i := 0 to 35 do
+    begin
+      ang := i * dAng;
+      pts[i].X := cx + Round(rw * Cos(ang));
+      pts[i].Y := cy + Round(rh * Sin(ang));
+    end;
+    for i := 0 to 35 do
+      Canvas.DrawLine(pts[i].X, pts[i].Y, pts[(i+1) mod 36].X, pts[(i+1) mod 36].Y);
+  end;
+end;
+
+procedure TVertexCanvasWidget.DrawPenOverlay;
+{ Draws committed pen nodes, connecting lines, and a rubber-band to the mouse. }
+const
+  COL_PEN_LINE = $FF4488FF;
+  COL_PEN_NODE = $FF4488FF;
+  COL_RUBBER   = $FFAAAAAA;
+var
+  i:       Integer;
+  pt, npt: TVertexPoint;
+  ax, ay, nx, ny: Integer;
+begin
+  if FPenPath = nil then Exit;
+
+  Canvas.SetColor(COL_PEN_LINE);
+  { Draw lines between placed nodes }
+  for i := 0 to FPenPath.PointCount - 2 do
+  begin
+    pt  := FPenPath.Points[i];
+    npt := FPenPath.Points[i + 1];
+    Canvas.DrawLine(HvifToScreenX(pt.X),  HvifToScreenY(pt.Y),
+                    HvifToScreenX(npt.X), HvifToScreenY(npt.Y));
+  end;
+
+  { Rubber-band from last node to current mouse position }
+  if FPenPath.PointCount > 0 then
+  begin
+    pt := FPenPath.Points[FPenPath.PointCount - 1];
+    Canvas.SetColor(COL_RUBBER);
+    Canvas.DrawLine(HvifToScreenX(pt.X), HvifToScreenY(pt.Y),
+                    HvifToScreenX(FPenPreviewX), HvifToScreenY(FPenPreviewY));
+  end;
+
+  { Draw anchor circles }
+  for i := 0 to FPenPath.PointCount - 1 do
+  begin
+    pt := FPenPath.Points[i];
+    ax := HvifToScreenX(pt.X);
+    ay := HvifToScreenY(pt.Y);
+    DrawNodeCircle(ax, ay, NODE_RADIUS, COL_PEN_NODE, $FF000000,
+                   i = FPenPath.PointCount - 1);
+  end;
+end;
+
 procedure TVertexCanvasWidget.DrawGradientHandles;
 { Render interactive handles for the currently edited gradient style.
   Handle 0 (orange) = gradient origin, at HVIF (M[4], M[5]).
@@ -924,6 +1123,20 @@ var
   pi: Integer;
 begin
   if FDocument = nil then Exit;
+
+  { Drag-create tools: rubber-band overlay only }
+  if FToolMode in [tmRect, tmEllipse] then
+  begin
+    DrawShapeDragOverlay;
+    Exit;
+  end;
+
+  { Pen tool: in-progress path + rubber-band segment }
+  if FToolMode = tmPen then
+  begin
+    DrawPenOverlay;
+    Exit;
+  end;
 
   { Shape-transform mode: draw bounding box with handles, no node overlay. }
   if FToolMode = tmSelect then
@@ -1135,6 +1348,38 @@ var
   cmd: TVertexCmdDeletePoint;
   sh:  TVertexShape;
 begin
+  { Escape / Enter for pen tool }
+  if FToolMode = tmPen then
+  begin
+    if keycode = keyEscape then
+    begin
+      FreeAndNil(FPenPath);
+      Repaint;
+      consumed := True;
+      Exit;
+    end;
+    if keycode = keyReturn then
+    begin
+      if (FPenPath <> nil) and (FPenPath.PointCount >= 2) then
+      begin
+        FDocument.UndoStack.Execute(TVertexCmdAddPath.Create(FDocument, FPenPath));
+        FPenPath := nil;
+        if Assigned(FOnPathAdded) then FOnPathAdded(Self);
+      end;
+      consumed := True;
+      Exit;
+    end;
+  end;
+
+  { Escape cancels rect/ellipse drag }
+  if (keycode = keyEscape) and FShapeDragActive then
+  begin
+    FShapeDragActive := False;
+    Repaint;
+    consumed := True;
+    Exit;
+  end;
+
   { Escape cancels an in-progress gradient drag }
   if (keycode = keyEscape) and FGradDragActive then
   begin
@@ -1365,6 +1610,7 @@ var
   sh: TVertexShape;
   curIdxZ, newIdxZ, iZ: Integer;
   handleIdx: Integer;
+  hvx, hvy: Single;
 begin
   { Claim keyboard focus so Delete/Backspace reach HandleKeyPress }
   SetFocus;
@@ -1509,6 +1755,58 @@ begin
       else
         SetSelectedShapeIndex(-1);   { click on empty canvas: deselect }
     end;
+    Exit;
+  end;
+
+  { ── Rect / Ellipse drag-create mode ────────────────────────────────────── }
+  if FToolMode in [tmRect, tmEllipse] then
+  begin
+    if FDocument = nil then Exit;
+    FShapeDragActive  := True;
+    FShapeDragStartHX := SnapCoord(ScreenToHvifX(x));
+    FShapeDragStartHY := SnapCoord(ScreenToHvifY(y));
+    FShapeDragCurHX   := FShapeDragStartHX;
+    FShapeDragCurHY   := FShapeDragStartHY;
+    Exit;
+  end;
+
+  { ── Pen tool mode ───────────────────────────────────────────────────────── }
+  if FToolMode = tmPen then
+  begin
+    if FDocument = nil then Exit;
+    hvx := SnapCoord(ScreenToHvifX(x));
+    hvy := SnapCoord(ScreenToHvifY(y));
+
+    if FPenPath = nil then
+    begin
+      { Start a new path }
+      FPenPath := TVertexPath.Create('pen');
+      FPenPath.Closed := False;
+    end
+    else
+    begin
+      { Click near the first node → close and commit }
+      pt := FPenPath.Points[0];
+      if (FPenPath.PointCount >= 2) and
+         (Sqr(HvifToScreenX(pt.X) - x) + Sqr(HvifToScreenY(pt.Y) - y) <= Sqr(HIT_RADIUS + 2)) then
+      begin
+        FPenPath.Closed := True;
+        FDocument.UndoStack.Execute(TVertexCmdAddPath.Create(FDocument, FPenPath));
+        FPenPath := nil;
+        if Assigned(FOnPathAdded) then FOnPathAdded(Self);
+        Exit;
+      end;
+    end;
+    { Append new anchor (handles coincident with anchor = straight-line segment) }
+    newPt        := Default(TVertexPoint);
+    newPt.X      := hvx;  newPt.Y      := hvy;
+    newPt.InX    := hvx;  newPt.InY    := hvy;
+    newPt.OutX   := hvx;  newPt.OutY   := hvy;
+    newPt.Smooth := False;
+    FPenPath.AddPoint(newPt);
+    FPenPreviewX := hvx;
+    FPenPreviewY := hvy;
+    Repaint;
     Exit;
   end;
 
@@ -1701,6 +1999,17 @@ var
   finalM:     array[0..5] of Single;
   newGradM:   array[0..5] of Single;
 begin
+  { ── Rect / Ellipse drag-create: commit path on mouse-up ─────────────── }
+  if FToolMode in [tmRect, tmEllipse] then
+  begin
+    if FShapeDragActive then
+    begin
+      FShapeDragActive := False;
+      CommitDragCreatePath;
+    end;
+    Exit;
+  end;
+
   { ── Gradient handle drag: commit via undo command ─────────────────────── }
   if FGradDragActive then
   begin
@@ -1872,6 +2181,28 @@ begin
     FIconDirty       := True;
     FGradHandleValid := False;
     Repaint;
+    Exit;
+  end;
+
+  { ── Rect / Ellipse drag-create: live rubber-band ────────────────────── }
+  if FToolMode in [tmRect, tmEllipse] then
+  begin
+    if FShapeDragActive then
+    begin
+      FShapeDragCurHX := SnapCoord(ScreenToHvifX(x));
+      FShapeDragCurHY := SnapCoord(ScreenToHvifY(y));
+      Repaint;
+    end;
+    Exit;
+  end;
+
+  { ── Pen tool: update rubber-band preview ─────────────────────────────── }
+  if FToolMode = tmPen then
+  begin
+    FPenPreviewX := ScreenToHvifX(x);
+    FPenPreviewY := ScreenToHvifY(y);
+    if FPenPath <> nil then
+      Repaint;
     Exit;
   end;
 

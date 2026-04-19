@@ -28,6 +28,7 @@ Tick items off as they are completed.
 * [x] Step 18 — Select tool (click to select shape, drag to translate) and Node tool toggle
 * [x] Step 19 — Object tree improvements (names, path management buttons)
 * [x] Step 20 — Gradient canvas handles (origin + radius/direction drag, undo-aware)
+* [x] Step 21 — Rectangle, Ellipse, and Pen toolbar tools (drag-create + click-to-place)
 
 == Pending Work
 
@@ -74,9 +75,9 @@ while active.
 * [x] Node tool — activate path node editing mode (drag nodes and Bezier handles)
 * [x] Add Point tool — click on a path segment to insert a node
 * [x] Delete Point tool — click a node to remove it
-* [ ] Rectangle tool — drag to create a new rectangular closed path
-* [ ] Ellipse tool — drag to create a new elliptical closed path (4-point Bezier)
-* [ ] Pen tool — click to place nodes and build a new freehand path
+* [x] Rectangle tool — drag to create a new rectangular closed path
+* [x] Ellipse tool — drag to create a new elliptical closed path (4-point Bezier)
+* [x] Pen tool — click to place nodes; click first node to close and commit, Enter commits open path, Escape cancels
 * [x] Zoom tool — click to zoom in, Alt+click to zoom out
 * [x] Pan tool — drag the canvas viewport
 
