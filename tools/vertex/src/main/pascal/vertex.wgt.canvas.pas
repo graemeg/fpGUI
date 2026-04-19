@@ -855,12 +855,48 @@ begin
 end;
 
 procedure TVertexCanvasWidget.DrawNodeOverlayForPath(APath: TVertexPath);
+const
+  COL_PATH_CURVE = $FF0055CC;  { blue path outline }
 var
-  ni: Integer;
-  pt: TVertexPoint;
+  ni, segCount, si: Integer;
+  pt, npt: TVertexPoint;
   ax, ay, ihx, ihy, ohx, ohy: Integer;
   isSelNode: Boolean;
+  t, u: Single;
+  p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y: Single;
+  bx, by, prevBx, prevBy: Single;
 begin
+  { ── Pass 1: draw the actual Bezier curve segments ── }
+  if APath.PointCount >= 2 then
+  begin
+    if APath.Closed then
+      segCount := APath.PointCount
+    else
+      segCount := APath.PointCount - 1;
+
+    Canvas.SetColor(COL_PATH_CURVE);
+    for ni := 0 to segCount - 1 do
+    begin
+      pt  := APath.Points[ni];
+      npt := APath.Points[(ni + 1) mod APath.PointCount];
+      p0x := HvifToScreenX(pt.X);    p0y := HvifToScreenY(pt.Y);
+      p1x := HvifToScreenX(pt.OutX); p1y := HvifToScreenY(pt.OutY);
+      p2x := HvifToScreenX(npt.InX); p2y := HvifToScreenY(npt.InY);
+      p3x := HvifToScreenX(npt.X);   p3y := HvifToScreenY(npt.Y);
+      prevBx := p0x;  prevBy := p0y;
+      for si := 1 to SEG_SAMPLES do
+      begin
+        t := si / SEG_SAMPLES;
+        u := 1.0 - t;
+        bx := u*u*u*p0x + 3*u*u*t*p1x + 3*u*t*t*p2x + t*t*t*p3x;
+        by := u*u*u*p0y + 3*u*u*t*p1y + 3*u*t*t*p2y + t*t*t*p3y;
+        Canvas.DrawLine(Round(prevBx), Round(prevBy), Round(bx), Round(by));
+        prevBx := bx;  prevBy := by;
+      end;
+    end;
+  end;
+
+  { ── Pass 2: draw handle arms and node circles on top ── }
   for ni := 0 to APath.PointCount - 1 do
   begin
     pt  := APath.Points[ni];
