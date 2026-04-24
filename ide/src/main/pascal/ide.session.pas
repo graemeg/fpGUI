@@ -47,6 +47,7 @@ type
     FVarShowType: Boolean;
     FVarShowScope: Boolean;
     FVarShowGlobals: Boolean;
+    FWatches: TStringList;
     function GetOpenFileCount: Integer;
     function GetOpenFile(AIndex: Integer): TOpenFileInfo;
   public
@@ -67,6 +68,8 @@ type
     property VarShowType: Boolean read FVarShowType write FVarShowType;
     property VarShowScope: Boolean read FVarShowScope write FVarShowScope;
     property VarShowGlobals: Boolean read FVarShowGlobals write FVarShowGlobals;
+    { Persisted watch expressions. Caller populates before Save; reads after Load. }
+    property Watches: TStringList read FWatches;
     property SessionFile: TfpgString read FSessionFile;
   end;
 
@@ -93,11 +96,13 @@ begin
   FActiveProfiles := TStringList.Create;
   FActiveProfiles.Delimiter := ',';
   FActiveProfiles.StrictDelimiter := True;
+  FWatches := TStringList.Create;
   SetLength(FOpenFiles, 0);
 end;
 
 destructor TIDESession.Destroy;
 begin
+  FWatches.Free;
   FActiveProfiles.Free;
   inherited Destroy;
 end;
@@ -117,6 +122,7 @@ begin
   SetLength(FOpenFiles, 0);
   FActiveTab := -1;
   FActiveProfiles.Clear;
+  FWatches.Clear;
   FToolPanelWidth := -1;
   FBottomPanelHeight := -1;
   FVarShowType    := True;
@@ -194,6 +200,15 @@ begin
         FVarShowGlobals := SessionObj.Booleans['varShowGlobals'];
     end;
 
+    { Watch expressions }
+    if RootObj.IndexOfName('watches') >= 0 then
+    begin
+      FilesArr := RootObj.Arrays['watches'];
+      for I := 0 to FilesArr.Count - 1 do
+        if FilesArr.Strings[I] <> '' then
+          FWatches.Add(FilesArr.Strings[I]);
+    end;
+
     { Open files }
     if RootObj.IndexOfName('openFiles') >= 0 then
     begin
@@ -262,6 +277,15 @@ begin
     SessionObj.Add('varShowScope',   FVarShowScope);
     SessionObj.Add('varShowGlobals', FVarShowGlobals);
     RootObj.Add('session', SessionObj);
+
+    { Watch expressions }
+    if FWatches.Count > 0 then
+    begin
+      ProfilesArr := TJSONArray.Create;
+      for I := 0 to FWatches.Count - 1 do
+        ProfilesArr.Add(FWatches[I]);
+      RootObj.Add('watches', ProfilesArr);
+    end;
 
     { Open files }
     FilesArr := TJSONArray.Create;

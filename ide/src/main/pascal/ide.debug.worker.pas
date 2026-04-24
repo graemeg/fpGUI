@@ -69,6 +69,11 @@ type
     { Call stack collected while still on the ptrace owner thread.
       Each string is '#N FuncName at file.pas:line (0xADDR)' or shorter. }
     CallStack:            TStringArray;
+    { Watch results: parallel array to the watch expressions set via
+      SetWatchExpressions. IsValid=False means <not in scope>. }
+    WatchResults:         TVariableValueArray;
+    { Exception info from the last HandleExceptionBreakpoint call. }
+    ExceptionInfo:        TExceptionInfo;
   end;
 
   TDebugWorkerThread = class(TThread)
@@ -94,6 +99,9 @@ type
       Safe without locks: only written when the worker is blocked on ptrace. }
     FCollectScope: Boolean;
     FCollectGlobals: Boolean;
+    { Watch expressions — written from main thread before each command.
+      Safe without locks: same guarantee as FCollectScope/FCollectGlobals. }
+    FWatchExpressions: TStringArray;
     procedure CollectStopInfo;
   protected
     procedure Execute; override;
@@ -125,6 +133,10 @@ type
     { Collection flags — set from the main thread to control what CollectStopInfo fetches }
     property CollectScope: Boolean read FCollectScope write FCollectScope;
     property CollectGlobals: Boolean read FCollectGlobals write FCollectGlobals;
+    { Watch expressions — update from the main thread before each command.
+      The worker evaluates them all in CollectStopInfo and stores results in
+      LastResult.WatchResults. }
+    procedure SetWatchExpressions(const AExprs: TStringArray);
   end;
 
 implementation
@@ -198,10 +210,20 @@ begin
     FInitialBreakpoints[i] := ALocations[i];
 end;
 
+procedure TDebugWorkerThread.SetWatchExpressions(const AExprs: TStringArray);
+var
+  i: Integer;
+begin
+  SetLength(FWatchExpressions, Length(AExprs));
+  for i := 0 to High(AExprs) do
+    FWatchExpressions[i] := AExprs[i];
+end;
+
 procedure TDebugWorkerThread.CollectStopInfo;
 var
   LineInfo: TLineInfo;
   Addr: QWord;
+  I: Integer;
 begin
   FResult.EngineState := FEngine.GetState;
   FResult.StopFile := '';
@@ -211,6 +233,8 @@ begin
   SetLength(FResult.LocalVarsWithParents, 0);
   SetLength(FResult.GlobalVars, 0);
   SetLength(FResult.CallStack, 0);
+  SetLength(FResult.WatchResults, 0);
+  FResult.ExceptionInfo.IsValid := False;
 
   if FResult.EngineState = dsPaused then
   begin
@@ -241,6 +265,15 @@ begin
       FResult.GlobalVars := FEngine.GetGlobalVariables;
     { Collect call stack while still on the ptrace owner thread }
     FResult.CallStack := FEngine.GetCallStack(0);
+    { Evaluate all watch expressions on the ptrace owner thread }
+    if Length(FWatchExpressions) > 0 then
+    begin
+      SetLength(FResult.WatchResults, Length(FWatchExpressions));
+      for I := 0 to High(FWatchExpressions) do
+        FResult.WatchResults[I] := FEngine.EvaluateExpression(FWatchExpressions[I]);
+    end;
+    { Retrieve exception info set by HandleExceptionBreakpoint (if any) }
+    FResult.ExceptionInfo := FEngine.LastException;
   end;
 end;
 

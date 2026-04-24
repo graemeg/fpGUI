@@ -52,6 +52,16 @@ type
   TVariableValueArray = array of TVariableValue;
   TStringArray        = array of String;
 
+  { Exception info — matches pdr_ports.TExceptionInfo }
+  TExceptionInfo = record
+    IsValid:    Boolean;
+    ClassName:  String;
+    Message:    String;
+    RaiseAddr:  QWord;
+    SourceFile: String;
+    SourceLine: Integer;
+  end;
+
   TDebugStopEvent = procedure(Sender: TObject; AState: TIDEDebugState;
       const AFile: String; ALine: Integer) of object;
 
@@ -69,6 +79,8 @@ type
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
     FLastCallStack:            TStringArray;
+    FLastWatchResults:         TVariableValueArray;
+    FLastExceptionInfo:        TExceptionInfo;
     FLastEvalResult:           TVariableValue;
     FOnStopped:      TDebugStopEvent;
     FOnTerminated:   TNotifyEvent;
@@ -101,12 +113,15 @@ type
     procedure EvaluateExpressionLive(const AExpr: String; AOnDone: TNotifyEvent);
     procedure SetVarCollectScope(AValue: Boolean);
     procedure SetVarCollectGlobals(AValue: Boolean);
+    procedure SetWatches(const AExprs: TStringArray);
 
     property State:          TIDEDebugState  read FState;
     property LastLocalVars:            TVariableValueArray read FLastLocalVars;
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
     property LastCallStack:            TStringArray        read FLastCallStack;
+    property LastWatchResults:         TVariableValueArray read FLastWatchResults;
+    property LastExceptionInfo:        TExceptionInfo      read FLastExceptionInfo;
     property LastEvalResult:           TVariableValue      read FLastEvalResult;
     property OnStopped:      TDebugStopEvent read FOnStopped      write FOnStopped;
     property OnTerminated:   TNotifyEvent    read FOnTerminated    write FOnTerminated;
@@ -221,6 +236,10 @@ begin
 end;
 
 procedure TIDEDebugAdapter.SetVarCollectGlobals(AValue: Boolean);
+begin
+end;
+
+procedure TIDEDebugAdapter.SetWatches(const AExprs: TStringArray);
 begin
 end;
 

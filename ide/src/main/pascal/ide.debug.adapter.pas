@@ -79,6 +79,8 @@ type
     FLastLocalVarsWithParents: TVariableValueArray;
     FLastGlobalVars:           TVariableValueArray;
     FLastCallStack:            TStringArray;
+    FLastWatchResults:         TVariableValueArray;
+    FLastExceptionInfo:        TExceptionInfo;
     { Expression evaluation — result cached from the worker thread }
     FLastEvalResult: TVariableValue;
     FOnEvalDone:     TNotifyEvent;
@@ -133,6 +135,10 @@ type
     procedure SetVarCollectScope(AValue: Boolean);
     procedure SetVarCollectGlobals(AValue: Boolean);
 
+    { Watch expressions — update before each Continue/Step command so the worker
+      evaluates them in CollectStopInfo. AExprs is a plain array of expressions. }
+    procedure SetWatches(const AExprs: TStringArray);
+
     { State }
     property State: TIDEDebugState read FState;
     { Variables from the last pause — collected on the ptrace owner thread,
@@ -141,6 +147,8 @@ type
     property LastLocalVarsWithParents: TVariableValueArray read FLastLocalVarsWithParents;
     property LastGlobalVars:           TVariableValueArray read FLastGlobalVars;
     property LastCallStack:            TStringArray        read FLastCallStack;
+    property LastWatchResults:         TVariableValueArray read FLastWatchResults;
+    property LastExceptionInfo:        TExceptionInfo      read FLastExceptionInfo;
     property LastEvalResult:           TVariableValue      read FLastEvalResult;
     property Engine: TDebuggerEngine read FEngine;
     property OnStopped: TDebugStopEvent read FOnStopped write FOnStopped;
@@ -278,6 +286,8 @@ begin
     SetLength(FLastLocalVarsWithParents, 0);
     SetLength(FLastGlobalVars, 0);
     SetLength(FLastCallStack, 0);
+    SetLength(FLastWatchResults, 0);
+    FLastExceptionInfo.IsValid := False;
     SendOutput('Process terminated.');
     if Assigned(FOnTerminated) then
       FOnTerminated(Self);
@@ -291,6 +301,8 @@ begin
     FLastLocalVarsWithParents := R.LocalVarsWithParents;
     FLastGlobalVars           := R.GlobalVars;
     FLastCallStack            := R.CallStack;
+    FLastWatchResults         := R.WatchResults;
+    FLastExceptionInfo        := R.ExceptionInfo;
     if Assigned(FOnStopped) then
       FOnStopped(Self, FState, R.StopFile, R.StopLine);
   end
@@ -413,6 +425,12 @@ procedure TIDEDebugAdapter.SetVarCollectGlobals(AValue: Boolean);
 begin
   if FWorkerThread <> nil then
     FWorkerThread.CollectGlobals := AValue;
+end;
+
+procedure TIDEDebugAdapter.SetWatches(const AExprs: TStringArray);
+begin
+  if FWorkerThread <> nil then
+    FWorkerThread.SetWatchExpressions(AExprs);
 end;
 
 function TIDEDebugAdapter.GetLocalVariables: TVariableValueArray;
