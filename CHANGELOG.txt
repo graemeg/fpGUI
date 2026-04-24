@@ -2,30 +2,20 @@
   Release notes for fpGUI
   =======================
 
-v2.1.0 (unreleased) - last used SHA1 175e867e
+v2.1.0 (2026-04-26)
 
   - Event Loop Rearchitecture
-    * Wake channel infrastructure (IWakeChannel interface) enables worker
-      threads to wake the main thread's event loop instantly on all
-      platforms, without depending on mouse movement or timer timeouts.
-    * X11: self-pipe monitored alongside the X display fd in fpSelect().
-    * GDI: posts WM_FPGUI_WAKE to a hidden message-only window, waking
-      MsgWaitForMultipleObjects.
-    * Cocoa: posts a dummy NSApplicationDefined event to wake
-      nextEventMatchingMask.
-    * fpgPostMessage now wakes the event loop after enqueuing, giving
-      sub-millisecond delivery from worker threads.
-    * Hooked FPC's Classes.WakeMainThread on all three backends so that
-      TThread.Queue() and TThread.Synchronize() wake the event loop
-      automatically.
-    * Message coalescing: duplicate FPGM_PAINT and FPGM_RESIZE messages
-      for the same widget are automatically merged, reducing redundant
-      paint and resize processing during high-frequency updates.
-    * New TfpgAsyncTask base class (SwingWorker-inspired) for background
-      tasks that publish progress to the GUI thread safely.
-    * New fpgInvokeLater() for scheduling work on the main thread from
-      any thread.
-  - Hybrid Canvas (AggCanvas) — now default on all platforms
+    * Worker threads can now wake the main event loop instantly on all
+      platforms without waiting for mouse movement or timer expiry.
+    * TThread.Queue() and TThread.Synchronize() wake the event loop
+      automatically via FPC's WakeMainThread hook.
+    * Duplicate FPGM_PAINT and FPGM_RESIZE messages for the same widget
+      are coalesced, reducing redundant processing under high load.
+    * New TfpgAsyncTask class for background tasks that safely publish
+      progress updates to the GUI thread (SwingWorker-inspired).
+    * New fpgInvokeLater() schedules work on the main thread from any
+      thread.
+  - Hybrid Canvas (new) — now default on all platforms
     * The AggPas hybrid canvas is now the default on all platforms.
       No extra build profile is required; the 'agg' and 'freetype'
       profiles have been removed.
@@ -37,7 +27,6 @@ v2.1.0 (unreleased) - last used SHA1 175e867e
     * Fixed several Windows-specific rendering issues: upside-down text on
       32-bit FPC 3.2.2, layout not applied on first show of modal dialogs,
       and a compilation error on 32-bit targets.
-    * Legacy Agg2D canvas moved out of the framework source to extras/aggpas/.
   - Fusion Style (new)
     * Added Fusion Light and Fusion Dark application styles, inspired by
       Qt5 Fusion. Fusion Light is now the default IDE style.
@@ -47,12 +36,12 @@ v2.1.0 (unreleased) - last used SHA1 175e867e
   - HiDPI improvements
     * Improved HiDPI scaling for the GDI (Windows) and X11 backends.
   - Maximus IDE
-    * PasBuild backend integration (Phase 3.2): TPasBuildProjectBackend
+    * PasBuild backend integration: TPasBuildProjectBackend
       bridges the IDE with the PasBuild build system.
-    * Project tree redesign (Phase 3.4): displays modules, dependencies,
+    * Project tree redesign: displays modules, dependencies,
       and build profiles as tree nodes with accent colour category headers.
-    * Multi-module UI with aggregator project support (Phase 3.6).
-    * Dependency tree visualisation added to the project tree (Phase 3.7).
+    * Multi-module UI with aggregator project support.
+    * Dependency tree visualisation added to the project tree.
     * Build actions: clean, rebuild, and test added to IDE toolbar.
     * INI and XML syntax highlighting added.
     * MigLayout used throughout the IDE UI, including a TfpgMigSplitter
@@ -69,6 +58,29 @@ v2.1.0 (unreleased) - last used SHA1 175e867e
     * Cursor history back/forward navigation.
     * Custom Pascal tokeniser replacing vendored fcl-passrc, used by the
       highlighter, symbol finder, procedure list, and declaration finder.
+    * Debug session lifecycle: F9 starts a debug run, Ctrl+F2 stops it.
+    * Breakpoints panel and full breakpoint add/remove management; live
+      breakpoints routed through the ptrace owner thread.
+    * Execution line highlighted in the editor at each debugger stop.
+    * Variables panel showing Locals and Globals groups; Show Globals
+      toggle persisted across sessions.
+    * Call Stack panel.
+    * Watches panel.
+    * Evaluate Expression dialog.
+    * Exception notification bar.
+    * OPDF/PDR integration via a dedicated debugger worker thread.
+      Requires FPC 3.3.1 + OPDF debug format support.
+      Linux x86_64 only, until OPDF support more platforms.
+    * Support for building the IDE with FPC 3.2.2 via a stub debugger
+      adapter (OPDF dependencies disabled by default).
+    * Cross-module source file resolution for Ctrl+B navigation and
+      debugger stop-line lookup.
+    * 'Reopen last project on startup' preference added.
+    * Messages tab now activates automatically when a build is triggered.
+    * Quick Documentation popup signature search stops at the
+      class/record declaration header.
+    * Pascal modifiers and directives (virtual, override, stdcall, etc.)
+      now highlighted as secondary keywords.
   - DocView
     * Project restructured and added as a PasBuild module.
     * Fixed rendering stopping prematurely, leaving a blank area at the
@@ -102,6 +114,50 @@ v2.1.0 (unreleased) - last used SHA1 175e867e
     * Removed vendored fcl-passrc (replaced by custom Pascal tokeniser).
     * Moved documentation and Lazarus IDE integration package out of the
       framework source tree.
+    * Legacy Agg2D canvas moved out of the framework source to
+      extras/aggpas/.
+    * GDI & X11 native canvas classes marked "Deprecated" for future
+      removal.
+    * TfpgCanvas.DrawXXX methods for widget painting marked "deprecated"
+      for future removal.
+  - HVIF (Haiku Vector Icon File) Icon Format
+    * New HVIF binary reader with AggPas renderer and unit tests.
+    * New HVIF binary writer with unit tests.
+    * svg2hvif CLI tool converts SVG files to HVIF; --inc flag emits a
+      Pascal byte-array include file for embedding icons in source.
+    * hvif_dump inspection tool for examining HVIF binary files.
+    * Full rendering pipeline: multi-stop gradient LUT, gradient strokes,
+      transforms, arc segments, and LOD visibility scale.
+    * TfpgIconStore: DPI-aware HVIF icon registry; fpgIcons global
+      initialised automatically in TfpgApplication.
+    * HVIF icons wired into core framework widgets.
+    * New IconName and IconSize properties on TfpgBaseButton for
+      icon-store–driven button icons.
+    * imageconvert utility added to the PasBuild ecosystem.
+  - Vertex HVIF Icon Editor (new application)
+    * Full HVIF vector icon editor added to the primary build.
+    * Tools: Select, Node edit, Pan, Zoom, Rectangle, Ellipse, and Pen.
+    * Bounding box and affine transform interactions; Shift+drag for
+      uniform scale, Ctrl+drag for shear.
+    * Gradient style editing with multi-stop ramp widget and editor popup.
+    * Grid overlay with configurable snap-to-grid.
+    * Object tree with inline rename and sidecar metadata file.
+    * Bezier path outline overlay in node-edit mode.
+    * Undo support for path and shape property edits.
+    * File > New, Open, Save (.hvif), Export as .inc, and Export as PNG
+      at 16/32/48/64 px.
+    * File > Open Recent with persistent last-used directory.
+    * Window position and size restored across sessions.
+  - Framework Bug Fixes
+    * Deprecated old DrawXXX widget paint methods in TfpgCanvas.
+    * Fixed ComboBox text not clipped to exclude the dropdown button area.
+    * Fixed TfpgLabel not auto-sizing to text content when no
+      PreferredSize was set.
+    * Fixed developer-set text colour ignored by style DrawString.
+    * Fixed DocView statusbar colour being reset to the wrong default.
+    * Fixed popup calendar generating deprecation warnings.
+    * DocView navigation toolbar now uses HVIF vector icons.
+
 
 v2.0.3 (2026-02-14)
   - Bug Fixes
