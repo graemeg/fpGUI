@@ -77,6 +77,12 @@ type
     { Conditional compilation directives }
     procedure TestIfdefDirective;
     procedure TestIfdefSkippedContent;
+
+    { Modifier/directive keywords (hcKeyword2) }
+    procedure TestVisibilityModifiers;
+    procedure TestMethodModifiers;
+    procedure TestCallingConventions;
+    procedure TestModifierMixedWithKeyword;
   end;
 
 
@@ -350,6 +356,94 @@ begin
   tokens := FHL.GetLineTokens(2);
   AssertTrue('ENDIF token exists', tokens <> nil);
   AssertTrue('ENDIF category', tokens[0].Category = hcDirective);
+end;
+
+procedure TTestPascalHighlighter.TestVisibilityModifiers;
+begin
+  { private, protected, public, published — visibility sections }
+  FHL.Tokenise('private');
+  CheckToken(0, 0, 0, 7, hcKeyword2, 'private modifier');
+
+  FHL.Tokenise('protected');
+  CheckToken(0, 0, 0, 9, hcKeyword2, 'protected modifier');
+
+  FHL.Tokenise('public');
+  CheckToken(0, 0, 0, 6, hcKeyword2, 'public modifier');
+
+  FHL.Tokenise('published');
+  CheckToken(0, 0, 0, 9, hcKeyword2, 'published modifier');
+
+  FHL.Tokenise('strict');
+  CheckToken(0, 0, 0, 6, hcKeyword2, 'strict modifier');
+end;
+
+procedure TTestPascalHighlighter.TestMethodModifiers;
+begin
+  { override, virtual, abstract, final, dynamic }
+  FHL.Tokenise('override');
+  CheckToken(0, 0, 0, 8, hcKeyword2, 'override modifier');
+
+  FHL.Tokenise('virtual');
+  CheckToken(0, 0, 0, 7, hcKeyword2, 'virtual modifier');
+
+  FHL.Tokenise('abstract');
+  CheckToken(0, 0, 0, 8, hcKeyword2, 'abstract modifier');
+
+  FHL.Tokenise('final');
+  CheckToken(0, 0, 0, 5, hcKeyword2, 'final modifier');
+
+  FHL.Tokenise('dynamic');
+  CheckToken(0, 0, 0, 7, hcKeyword2, 'dynamic modifier');
+
+  FHL.Tokenise('reintroduce');
+  CheckToken(0, 0, 0, 11, hcKeyword2, 'reintroduce modifier');
+
+  FHL.Tokenise('overload');
+  CheckToken(0, 0, 0, 8, hcKeyword2, 'overload modifier');
+end;
+
+procedure TTestPascalHighlighter.TestCallingConventions;
+begin
+  FHL.Tokenise('stdcall');
+  CheckToken(0, 0, 0, 7, hcKeyword2, 'stdcall modifier');
+
+  FHL.Tokenise('cdecl');
+  CheckToken(0, 0, 0, 5, hcKeyword2, 'cdecl modifier');
+
+  FHL.Tokenise('register');
+  CheckToken(0, 0, 0, 8, hcKeyword2, 'register modifier');
+
+  FHL.Tokenise('safecall');
+  CheckToken(0, 0, 0, 8, hcKeyword2, 'safecall modifier');
+end;
+
+procedure TTestPascalHighlighter.TestModifierMixedWithKeyword;
+var
+  tokens: THighlightTokenArray;
+  i: Integer;
+  foundVirtual, foundOverride: Boolean;
+begin
+  { "procedure Foo; virtual; override;" — mix of keyword and modifiers.
+    Token sequence (whitespace skipped): procedure Foo ; virtual ; override ;
+    Indices:                              0         1   2 3       4 5        6 }
+  FHL.Tokenise('procedure Foo; virtual; override;');
+  tokens := FHL.GetLineTokens(0);
+  AssertTrue('has tokens', Length(tokens) >= 7);
+  AssertEquals('procedure is keyword1', Ord(hcKeyword1), Ord(tokens[0].Category));
+  AssertEquals('virtual col',  15, tokens[3].Column);
+  AssertEquals('virtual cat',  Ord(hcKeyword2), Ord(tokens[3].Category));
+  AssertEquals('override col', 24, tokens[5].Column);
+  AssertEquals('override cat', Ord(hcKeyword2), Ord(tokens[5].Category));
+  { Also verify no modifier was misclassified as keyword1 }
+  foundVirtual  := False;
+  foundOverride := False;
+  for i := 0 to High(tokens) do
+  begin
+    if tokens[i].Column = 15 then foundVirtual  := tokens[i].Category = hcKeyword2;
+    if tokens[i].Column = 24 then foundOverride := tokens[i].Category = hcKeyword2;
+  end;
+  AssertTrue('virtual is hcKeyword2',  foundVirtual);
+  AssertTrue('override is hcKeyword2', foundOverride);
 end;
 
 initialization

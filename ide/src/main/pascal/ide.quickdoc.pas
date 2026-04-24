@@ -109,24 +109,38 @@ begin
     { --- Extract signature --- }
     Sig := Trim(Lines[LineIdx]);
     i := LineIdx + 1;
-    { Continue reading if line doesn't end with ; and we haven't hit
-      begin/var/const/type or another declaration keyword }
-    while (i < Lines.Count) and (Pos(';', Sig) = 0) do
+    { For class/record/object/interface declarations, the body follows on
+      subsequent lines — do not read past the opening declaration line.
+      Use a simple heuristic: if the trimmed line contains '= class',
+      '= record', '= object', or '= interface' it is a type declaration
+      header and we stop immediately. }
+    if not (
+        (Pos('= class', LowerCase(Sig)) > 0) or
+        (Pos('= record', LowerCase(Sig)) > 0) or
+        (Pos('= object', LowerCase(Sig)) > 0) or
+        (Pos('= interface', LowerCase(Sig)) > 0) or
+        (Pos('= packed record', LowerCase(Sig)) > 0)
+       ) then
     begin
-      Trimmed := Trim(Lines[i]);
-      if (Trimmed = '') or
-         (CompareText(Copy(Trimmed, 1, 5), 'begin') = 0) or
-         (CompareText(Copy(Trimmed, 1, 3), 'var') = 0) or
-         (CompareText(Copy(Trimmed, 1, 4), 'type') = 0) or
-         (CompareText(Copy(Trimmed, 1, 5), 'const') = 0) then
-        Break;
-      Sig := Sig + ' ' + Trimmed;
-      Inc(i);
+      { Continue reading if line doesn't end with ; and we haven't hit
+        begin/var/const/type or another declaration keyword }
+      while (i < Lines.Count) and (Pos(';', Sig) = 0) do
+      begin
+        Trimmed := Trim(Lines[i]);
+        if (Trimmed = '') or
+           (CompareText(Copy(Trimmed, 1, 5), 'begin') = 0) or
+           (CompareText(Copy(Trimmed, 1, 3), 'var') = 0) or
+           (CompareText(Copy(Trimmed, 1, 4), 'type') = 0) or
+           (CompareText(Copy(Trimmed, 1, 5), 'const') = 0) then
+          Break;
+        Sig := Sig + ' ' + Trimmed;
+        Inc(i);
+      end;
+      { Truncate at first semicolon }
+      i := Pos(';', Sig);
+      if i > 0 then
+        Sig := Copy(Sig, 1, i);
     end;
-    { Truncate at first semicolon }
-    i := Pos(';', Sig);
-    if i > 0 then
-      Sig := Copy(Sig, 1, i);
     Result.Signature := Sig;
 
     { --- Extract doc comment above declaration --- }

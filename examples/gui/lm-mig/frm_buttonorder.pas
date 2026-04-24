@@ -89,6 +89,7 @@ begin
   lblTitle := TfpgLabel.Create(Self);
   lblTitle.Name := 'lblTitle';
   lblTitle.Text := 'Select a platform to see different button ordering:';
+  lblTitle.FontDesc := '#Label2';
   mig.AddLayoutComponent(lblTitle, TfpgMigCC.Create().SpanX().Wrap());
 
   // Platform selection label

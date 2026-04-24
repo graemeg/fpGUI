@@ -29,6 +29,8 @@ type
   TProjectFormat = (pfLegacy, pfPasBuild);
 
   TIDEProjectBackend = class(TObject)
+  protected
+    FProjectFile: TfpgString;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -63,6 +65,7 @@ type
     property    UnitList: TUnitList read GetUnitList;
     property    UnitDirs: TStringList read GetUnitDirs;
     property    ProjectFormat: TProjectFormat read GetProjectFormat;
+    property    ProjectFile: TfpgString read FProjectFile;
   end;
 
   TIDEProjectBackendClass = class of TIDEProjectBackend;

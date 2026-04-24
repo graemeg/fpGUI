@@ -178,13 +178,10 @@ procedure TProcedureListForm.SetFilename(const AValue: string);
 var
   LoadTime: QWord;
 begin
-  if FFilename=AValue then exit;
+  if FFilename=AValue then
+    exit;
   FFilename:=AValue;
-//  if IsCpp(FileName) or IsC(FileName) or IsH(FileName) then
-//    Language := ltCpp
-//  else
-    Language := ltPas;
-
+  Language := ltPas;
   LoadTime := fpgGetTickCount;
   InitializeForm;
   LoadTime := fpgGetTickCount - LoadTime;
@@ -202,7 +199,6 @@ begin
   FObjectStrings.Sorted := True;
   FObjectStrings.Duplicates := dupIgnore;
   ClearObjectStrings;
-
   FSortOnColumn := 1;
 
   FProcList := TStringList.Create;

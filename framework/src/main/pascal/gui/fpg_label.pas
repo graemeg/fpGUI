@@ -190,6 +190,15 @@ begin
   begin
     Width := Font.GetTextWidth(FText);
     Height:= Font.GetHeight;
+  end
+  else if (FPreferredSize.W = 0) and (FPreferredSize.H = 0) then
+  begin
+    { No explicit preferred size — preferred size is calculated dynamically from
+      text content. Notify the parent layout manager to re-run layout so it can
+      query the updated preferred size (via GetPreferredSize -> DoCalculatePreferredSize). }
+    if Assigned(Parent) and (Parent is TfpgWidget) and
+       Assigned(TfpgWidget(Parent).LayoutManager) then
+      TfpgWidget(Parent).Realign;
   end;
   UpdatePosition;
   RePaint;
@@ -202,7 +211,10 @@ begin
   FontDesc          := '#Label1';  // Use property to set font (calls inherited SetFontDesc)
   FHeight           := Font.GetHeight;
   FWidth            := 80;
-  FPreferredSize.SetSize(FWidth, FHeight);
+  { Do not set FPreferredSize here. Leaving it at (0,0) allows GetPreferredSize
+    to call DoCalculatePreferredSize, which computes width dynamically from the
+    text content. If a developer needs a fixed size they can set PreferredSize
+    explicitly after construction. }
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FAutoSize         := False;
@@ -220,33 +232,19 @@ begin
 end;
 
 procedure TfpgCustomLabel.DoCalculatePreferredSize(var ASize: TfpgSize);
-var
-  CalculatedW, CalculatedH: integer;
 begin
-  // 1. First, determine the natural size based on content (text and font).
+  { This method is only called by GetPreferredSize when FPreferredSize is (0,0),
+    meaning no explicit size was set. Calculate purely from text content. }
   if Assigned(Font) then
   begin
-    CalculatedW := Font.GetTextWidth(FText);
-    CalculatedH := Font.GetHeight;
+    ASize.W := Font.GetTextWidth(FText);
+    ASize.H := Font.GetHeight;
   end
   else
   begin
-    // As a fallback, use the minimum size.
-    CalculatedW := FMinWidth;
-    CalculatedH := FMinHeight;
+    ASize.W := FMinWidth;
+    ASize.H := FMinHeight;
   end;
-
-  // 2. Use the explicitly set PreferredSize.W, otherwise use the calculated width.
-  if FPreferredSize.W > 0 then
-    ASize.W := FPreferredSize.W
-  else
-    ASize.W := CalculatedW;
-
-  // 3. Use the explicitly set PreferredSize.H, otherwise use the calculated height.
-  if FPreferredSize.H > 0 then
-    ASize.H := FPreferredSize.H
-  else
-    ASize.H := CalculatedH;
 end;
 
 procedure TfpgCustomLabel.HandlePaint;

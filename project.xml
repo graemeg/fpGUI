@@ -31,8 +31,20 @@
       </defines>
       <compilerOptions>
         <option>-gw</option>
-        <option>-godwarfsets -godwarfmethodclassprefix</option>
         <option>-gl</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>debug-opdf</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gO</option>
+        <option>-gl</option>
+        <option>-O-</option>
       </compilerOptions>
     </profile>
 

@@ -34,6 +34,8 @@ const
   // INI Environment
   cEnvironment    = 'Environment';
   cEditor         = 'Editor';
+  cPreferences    = 'Preferences';
+  cINILastProject = 'LastProjectFile';
   cShortcuts      = 'Shortcuts';
   cINIMakeOption  = 'MakeOption';
   cINIMakeOptionGrid = 'MakeOptionEnabled';

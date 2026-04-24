@@ -33,6 +33,7 @@ type
     FBuildMode: integer;
     FBuildGoal: string;
     FBuildModule: string;
+    FBuildExitCode: Integer;
     FOnAvailableOutput: TOutputLineEvent;
     FOutputQueue: TStringList;
     FOutputLock: TCriticalSection;
@@ -50,6 +51,7 @@ type
     property  BuildGoal: string read FBuildGoal write FBuildGoal;
     { For aggregator projects: build a specific module. Empty = build all. }
     property  BuildModule: string read FBuildModule write FBuildModule;
+    property  BuildExitCode: Integer read FBuildExitCode;
     property  OnAvailableOutput: TOutputLineEvent read FOnAvailableOutput write FOnAvailableOutput;
   end;
 
@@ -75,6 +77,7 @@ begin
   FBuildMode := -1;  // signals use of project's default build mode
   FBuildGoal := '';
   FBuildModule := '';
+  FBuildExitCode := -1;
   FreeOnTerminate := True;
   FOutputQueue := TStringList.Create;
   FOutputLock  := TCriticalSection.Create;
@@ -225,7 +228,7 @@ begin
       else
         c := GProject.GenerateGoalCmdLine('compile');
       SendOutput('Compiling: ' + c);
-      RunCommand(c, pb.GetBuildDir);
+      FBuildExitCode := RunCommand(c, pb.GetBuildDir);
     end
     else
     begin
@@ -235,7 +238,7 @@ begin
       else
         c := GProject.GenerateGoalCmdLine(Goal);
       SendOutput('Running: ' + c);
-      RunCommand(c, pb.GetBuildDir);
+      FBuildExitCode := RunCommand(c, pb.GetBuildDir);
     end;
     Exit;
   end;
@@ -248,13 +251,13 @@ begin
     begin
       c := pb.GenerateModuleGoalCmdLine('compile', FBuildModule);
       SendOutput('Compiling module ' + FBuildModule + ': ' + c);
-      RunCommand(c, pb.GetBuildDir);
+      FBuildExitCode := RunCommand(c, pb.GetBuildDir);
     end
     else
     begin
       c := GProject.GenerateCmdLine(False, BuildMode);
       SendOutput('Compiling: ' + c);
-      RunCommand(c, pb.GetBuildDir);
+      FBuildExitCode := RunCommand(c, pb.GetBuildDir);
     end;
   end
   else
@@ -273,7 +276,7 @@ begin
     c := c + GProject.GenerateCmdLine(False, BuildMode);
     c := GMacroList.ExpandMacro(c);
     SendOutput('Compiling: ' + c);
-    RunCommand(c, GProject.ProjectDir);
+    FBuildExitCode := RunCommand(c, GProject.ProjectDir);
   end;
 end;
 

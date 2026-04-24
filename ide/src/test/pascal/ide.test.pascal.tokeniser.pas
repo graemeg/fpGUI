@@ -120,6 +120,16 @@ type
     procedure TestIsKeyword_True;
     procedure TestIsKeyword_False;
     procedure TestIsKeyword_CaseInsensitive;
+
+    { --- FpgPasIsModifier + fptkModifier token kind --- }
+    procedure TestModifier_VisibilityTokens;
+    procedure TestModifier_MethodModifierTokens;
+    procedure TestModifier_CallingConventionTokens;
+    procedure TestIsModifier_True;
+    procedure TestIsModifier_False;
+    procedure TestIsModifier_CaseInsensitive;
+    procedure TestModifier_NotKeyword;
+    procedure TestKeyword_NotModifier;
   end;
 
 
@@ -784,6 +794,116 @@ begin
   AssertTrue('bEgIn', FpgPasIsKeyword('bEgIn'));
 end;
 
+
+{ --- FpgPasIsModifier + fptkModifier token kind --- }
+
+procedure TTestPascalTokeniser.TestModifier_VisibilityTokens;
+var
+  kinds: array of TFpgPasTokenKind;
+  texts: array of string;
+begin
+  CollectTokens('private', kinds, texts);
+  AssertEquals('private count', 1, Length(kinds));
+  AssertEquals('private kind', Ord(fptkModifier), Ord(kinds[0]));
+  AssertEquals('private text', 'private', texts[0]);
+
+  CollectTokens('protected', kinds, texts);
+  AssertEquals('protected kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('public', kinds, texts);
+  AssertEquals('public kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('published', kinds, texts);
+  AssertEquals('published kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('strict', kinds, texts);
+  AssertEquals('strict kind', Ord(fptkModifier), Ord(kinds[0]));
+end;
+
+procedure TTestPascalTokeniser.TestModifier_MethodModifierTokens;
+var
+  kinds: array of TFpgPasTokenKind;
+  texts: array of string;
+begin
+  CollectTokens('override', kinds, texts);
+  AssertEquals('override kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('virtual', kinds, texts);
+  AssertEquals('virtual kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('abstract', kinds, texts);
+  AssertEquals('abstract kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('final', kinds, texts);
+  AssertEquals('final kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('overload', kinds, texts);
+  AssertEquals('overload kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('reintroduce', kinds, texts);
+  AssertEquals('reintroduce kind', Ord(fptkModifier), Ord(kinds[0]));
+end;
+
+procedure TTestPascalTokeniser.TestModifier_CallingConventionTokens;
+var
+  kinds: array of TFpgPasTokenKind;
+  texts: array of string;
+begin
+  CollectTokens('stdcall', kinds, texts);
+  AssertEquals('stdcall kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('cdecl', kinds, texts);
+  AssertEquals('cdecl kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('register', kinds, texts);
+  AssertEquals('register kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('safecall', kinds, texts);
+  AssertEquals('safecall kind', Ord(fptkModifier), Ord(kinds[0]));
+end;
+
+procedure TTestPascalTokeniser.TestIsModifier_True;
+begin
+  AssertTrue('private is modifier',    FpgPasIsModifier('private'));
+  AssertTrue('override is modifier',   FpgPasIsModifier('override'));
+  AssertTrue('stdcall is modifier',    FpgPasIsModifier('stdcall'));
+  AssertTrue('virtual is modifier',    FpgPasIsModifier('virtual'));
+  AssertTrue('deprecated is modifier', FpgPasIsModifier('deprecated'));
+  AssertTrue('external is modifier',   FpgPasIsModifier('external'));
+end;
+
+procedure TTestPascalTokeniser.TestIsModifier_False;
+begin
+  AssertFalse('MyVar is not modifier', FpgPasIsModifier('MyVar'));
+  AssertFalse('empty is not modifier', FpgPasIsModifier(''));
+  AssertFalse('overrideX not modifier', FpgPasIsModifier('overrideX'));
+end;
+
+procedure TTestPascalTokeniser.TestIsModifier_CaseInsensitive;
+begin
+  AssertTrue('PRIVATE',   FpgPasIsModifier('PRIVATE'));
+  AssertTrue('Private',   FpgPasIsModifier('Private'));
+  AssertTrue('OVERRIDE',  FpgPasIsModifier('OVERRIDE'));
+  AssertTrue('StdCall',   FpgPasIsModifier('StdCall'));
+end;
+
+procedure TTestPascalTokeniser.TestModifier_NotKeyword;
+begin
+  { Modifier words must not be classified as keywords }
+  AssertFalse('private not keyword',  FpgPasIsKeyword('private'));
+  AssertFalse('override not keyword', FpgPasIsKeyword('override'));
+  AssertFalse('virtual not keyword',  FpgPasIsKeyword('virtual'));
+  AssertFalse('stdcall not keyword',  FpgPasIsKeyword('stdcall'));
+end;
+
+procedure TTestPascalTokeniser.TestKeyword_NotModifier;
+begin
+  { Reserved words must not be classified as modifiers }
+  AssertFalse('begin not modifier',     FpgPasIsModifier('begin'));
+  AssertFalse('procedure not modifier', FpgPasIsModifier('procedure'));
+  AssertFalse('class not modifier',     FpgPasIsModifier('class'));
+  AssertFalse('interface not modifier', FpgPasIsModifier('interface'));
+end;
 
 initialization
   RegisterTest(TTestPascalTokeniser);

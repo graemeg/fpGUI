@@ -35,7 +35,13 @@ uses
   ide.test.filefinder,
   ide.test.symbolfinder,
   ide.test.declaration,
-  ide.test.pascal.tokeniser;
+  ide.test.pascal.tokeniser,
+  ide.test.runner,
+  ide.test.debug.adapter,
+  ide.test.breakpoint,
+  ide.test.variables,
+  ide.test.callstack,
+  ide.test.watches;
 
 var
   Application: TTestRunner;

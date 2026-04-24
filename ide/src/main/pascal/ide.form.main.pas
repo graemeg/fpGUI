@@ -19,6 +19,7 @@
 unit ide.form.main;
 
 {$mode objfpc}{$H+}
+{$I ide.debug.config.inc}
 
 interface
 
@@ -26,39 +27,52 @@ uses
   SysUtils,
   Classes,
   fpg_base,
-  fpg_imagelist,
-  fpg_mru,
-  fpg_main,
-  fpg_form,
-  fpg_menu,
-  fpg_panel,
   fpg_button,
+  fpg_form,
+  fpg_grid,
+  fpg_imagelist,
+  fpg_label,
+  fpg_main,
+  fpg_memo,
+  fpg_menu,
+  fpg_mig_cc,
+  fpg_mig_lc,
+  fpg_miglayout,
+  fpg_mru,
+  fpg_panel,
   fpg_splitter,
   fpg_tab,
-  fpg_memo,
-  fpg_label,
-  fpg_grid,
-  fpg_tree,
   fpg_textedit,
-  fpg_miglayout,
-  fpg_mig_lc,
-  fpg_mig_cc,
-  ide.filemonitor,
-  ide.highlighter,
-  ide.editor.theme,
+  fpg_tree,
   ide.bracketmatch,
-  ide.highlight.renderer,
+  ide.breakpoint,
   ide.build.dispatch,
-  ide.projecttree,
+  ide.callstack,
+  ide.cursorhistory,
   ide.editor.tabs,
+  ide.editor.theme,
+  ide.filefinder,
+  ide.filemonitor,
+  ide.form.evalexpr,
+  ide.form.filefinder,
+  ide.form.symbolfinder,
+  ide.highlight.renderer,
+  ide.highlighter,
   ide.profiles,
   ide.project.pasbuild,
-  ide.cursorhistory,
-  ide.filefinder,
-  ide.form.filefinder,
+  ide.projecttree,
+  ide.quickdoc,
+  ide.runner.thread,
   ide.symbolfinder,
-  ide.form.symbolfinder,
-  ide.quickdoc;
+  ide.variables,
+  ide.watches,
+  {$IFDEF HAS_OPDF_DEBUG}
+  ide.debug.adapter,
+  pdr_ports
+  {$ELSE}
+  ide.debug.adapter.stub
+  {$ENDIF}
+  ;
 
 type
 
@@ -83,6 +97,8 @@ type
     tsScribble: TfpgTabSheet;
     memScribble: TfpgMemo;
     tsTerminal: TfpgTabSheet;
+    tsOutput: TfpgTabSheet;
+    grdOutput: TfpgStringGrid;
     pnlTool: TfpgPageControl;
     tsProject: TfpgTabSheet;
     tvProject: TfpgTreeView;
@@ -102,16 +118,50 @@ type
     mnuTools: TfpgPopupMenu;
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
+    btnDbgContinue: TfpgButton;
+    btnDbgPause: TfpgButton;
+    btnDbgStop: TfpgButton;
+    btnDbgStepInto: TfpgButton;
+    btnDbgStepOver: TfpgButton;
+    btnDbgStepOut: TfpgButton;
+    tsBreakpoints: TfpgTabSheet;
+    tvBreakpoints: TfpgTreeView;
+    tsVariables: TfpgTabSheet;
+    btnVarOptions: TfpgButton;
+    tvVariables: TfpgTreeView;
+    tsCallStack: TfpgTabSheet;
+    tvCallStack: TfpgTreeView;
+    tsWatches: TfpgTabSheet;
+    pnlWatchToolbar: TfpgBevel;
+    btnAddWatch: TfpgButton;
+    btnRemoveWatch: TfpgButton;
+    tvWatches: TfpgTreeView;
+    { Exception notification bar — shown inside tsOutput when an exception stop occurs }
+    pnlExcNotify: TfpgBevel;
+    lblExcInfo: TfpgLabel;
+    lblExcLocation: TfpgLabel;
+    btnExcContinue: TfpgButton;
+    btnExcStop: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
     pmModuleMenu: TfpgPopupMenu;
     pmProjectTreeMenu: TfpgPopupMenu;
+    pmBreakpointMenu: TfpgPopupMenu;
+    pmVarsMenu: TfpgPopupMenu;
+    miVarShowType: TfpgMenuItem;
+    miVarShowScope: TfpgMenuItem;
+    miVarShowGlobals: TfpgMenuItem;
     pmProfileMenu: TfpgPopupMenu;
     FProfileStateImages: TfpgImageList;
     FLastTabClickPos: TPoint;
     miFile: TfpgMenuItem;
     miRecentProjects: TfpgMenuItem;
+    miDbgStepInto: TfpgMenuItem;
+    miDbgStepOver: TfpgMenuItem;
+    miDbgStepOut: TfpgMenuItem;
+    miDbgPause: TfpgMenuItem;
+    miDbgEvalExpr: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FTheme: TEditorTheme;
     FFileMonitor: TFileMonitor;
@@ -124,6 +174,57 @@ type
     FLastFindBackward: Boolean;
     FLastFileDir: TfpgString;
     FQuickDocHint: TQuickDocHintWindow;
+    FRunnerThread: TRunnerThread;
+    FDebugAdapter: TIDEDebugAdapter;
+    FDebugBuildPending: Boolean;
+    FBreakpoints: TBreakpointList;
+    FVarNodeDataList: TList;        { owns all TVarNodeData instances }
+    FVarShowType: Boolean;          { cog option: append ': TypeName' to node text }
+    FVarShowScope: Boolean;         { cog option: show enclosing scope group }
+    FVarShowGlobals: Boolean;       { cog option: show globals group }
+    FCallStackDataList: TList;      { owns all TCallStackFrameData instances }
+    FWatchList: TWatchList;         { user-defined watch expressions }
+    FLastWatchResults: TVariableValueArray;
+    FWatchNodeDataList: TList;      { owns TVarNodeData for the Watches tree }
+    procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
+    procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
+    procedure   ToggleBreakpointAtCursor;
+    procedure   InstallBreakpoints;
+    procedure   HandleBreakpointSet(Sender: TObject; AHandle: TBreakpointHandle; ATag: Integer);
+    procedure   RefreshBreakpointTree;
+    procedure   InvalidateEditorForBreakpoint(ABPIndex: Integer);
+    procedure   tvBreakpointsStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+    procedure   tvBreakpointsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   tvBreakpointsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    { Variables panel }
+    procedure   RefreshVariablesTree;
+    procedure   ClearVariablesTree;
+    { Call Stack panel }
+    procedure   RefreshCallStackPanel;
+    procedure   ClearCallStackPanel;
+    procedure   tvCallStackDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    { Watches panel }
+    procedure   RefreshWatchesPanel;
+    procedure   ClearWatchesPanel;
+    procedure   btnAddWatchClicked(Sender: TObject);
+    procedure   btnRemoveWatchClicked(Sender: TObject);
+    procedure   tvWatchesKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   tvWatchesExpand(Sender: TObject; ANode: TfpgTreeNode);
+    { Exception notification bar }
+    procedure   ShowExceptionNotification;
+    procedure   HideExceptionNotification;
+    procedure   btnExcContinueClicked(Sender: TObject);
+    procedure   btnExcStopClicked(Sender: TObject);
+    function    FindSourceByBaseName(const ABaseName: string): string;
+    procedure   AppendVarNode(AParent: TfpgTreeNode; AData: TVarNodeData);
+    procedure   tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
+    procedure   btnVarOptionsClicked(Sender: TObject);
+    procedure   miVarShowTypeClick(Sender: TObject);
+    procedure   miVarShowScopeClick(Sender: TObject);
+    procedure   miVarShowGlobalsClick(Sender: TObject);
+    procedure   pmBPGoToSourceClick(Sender: TObject);
+    procedure   pmBPToggleEnabledClick(Sender: TObject);
+    procedure   pmBPRemoveClick(Sender: TObject);
     procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -156,6 +257,27 @@ type
     procedure   miRunClean(Sender: TObject);
     procedure   miRunRebuild(Sender: TObject);
     procedure   miRunTest(Sender: TObject);
+    procedure   miRunProgram(Sender: TObject);
+    procedure   miStopProgram(Sender: TObject);
+    procedure   RunnerOutput(Sender: TObject; const ALine: string);
+    procedure   RunnerTerminated(Sender: TObject);
+    procedure   miDebugRun(Sender: TObject);
+    procedure   DebugBuildTerminated(Sender: TObject);
+    procedure   LaunchDebugSession;
+    procedure   DebugStopped(Sender: TObject; AState: TIDEDebugState; const AFile: String; ALine: Integer);
+    function    ResolveSourceFile(const AFile: string): string;
+    procedure   AddAggregatorSourceDirs(AModuleInfos: TList; AList: TStringList);
+    procedure   AddPathIfNew(AList: TStringList; const APath: string);
+    procedure   AddSubdirectories(AList: TStringList; const ADir: string);
+    procedure   DebugTerminated(Sender: TObject);
+    procedure   DebugOutput(Sender: TObject; const AMessage: String);
+    procedure   miDebugStepInto(Sender: TObject);
+    procedure   miDebugStepOver(Sender: TObject);
+    procedure   miDebugStepOut(Sender: TObject);
+    procedure   miDebugPause(Sender: TObject);
+    procedure   miDebugEvalExpr(Sender: TObject);
+    procedure   UpdateDebugControls;
+    procedure   ClearAllExecutionLines;
     procedure   StartBuildGoal(const AGoal: string);
     procedure   miProjectDependencyTree(Sender: TObject);
     procedure   pmTreeDependencyTreeClick(Sender: TObject);
@@ -202,6 +324,8 @@ type
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   ClearMessagesWindow;
+    procedure   AddOutputLine(const AMsg: TfpgString);
+    procedure   ClearOutputWindow;
     procedure   CloseAllTabs;
     procedure   SaveSession;
     procedure   LoadProject(const AFilename: TfpgString);
@@ -752,6 +876,1335 @@ begin
   StartBuildGoal('test');
 end;
 
+procedure TMainForm.miRunProgram(Sender: TObject);
+var
+  ExePath: string;
+  WorkDir: string;
+  thd: TRunnerThread;
+begin
+  if FRunnerThread <> nil then
+  begin
+    AddMessage('A program is already running. Stop it first (Ctrl+F2).');
+    Exit;
+  end;
+
+  ExePath := ResolveProjectExecutablePath;
+  if ExePath = '' then
+  begin
+    AddMessage('Cannot determine executable path. Is a project loaded?');
+    Exit;
+  end;
+
+  if not FileExists(ExePath) then
+  begin
+    AddMessage('Executable not found: ' + ExePath);
+    AddMessage('Build the project first (Ctrl+F9).');
+    Exit;
+  end;
+
+  ClearOutputWindow;
+  AddOutputLine('Running: ' + ExePath);
+  AddOutputLine('');
+  pnlWindow.ActivePage := tsOutput;
+
+  WorkDir := GProject.ProjectDir;
+
+  thd := TRunnerThread.Create(True);
+  thd.ExecutablePath := ExePath;
+  thd.WorkingDirectory := WorkDir;
+  thd.OnAvailableOutput := @RunnerOutput;
+  thd.OnTerminate := @RunnerTerminated;
+  FRunnerThread := thd;
+  UpdateStatus('Running...');
+  thd.Resume;
+end;
+
+procedure TMainForm.miStopProgram(Sender: TObject);
+begin
+  { Stop debug session if active }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    HideExceptionNotification;
+    FBreakpoints.ClearHandles;
+    FDebugAdapter.EndSession;
+    AddOutputLine('');
+    AddOutputLine('Debug session stopped by user.');
+    UpdateStatus('');
+    UpdateDebugControls;
+    Exit;
+  end;
+  { Stop running program if active }
+  if FRunnerThread <> nil then
+  begin
+    FRunnerThread.TerminateProcess;
+    UpdateStatus('Stopping...');
+    Exit;
+  end;
+  UpdateStatus('No program running.');
+end;
+
+procedure TMainForm.RunnerOutput(Sender: TObject; const ALine: string);
+begin
+  AddOutputLine(ALine);
+end;
+
+procedure TMainForm.RunnerTerminated(Sender: TObject);
+var
+  thd: TRunnerThread;
+begin
+  thd := TRunnerThread(Sender);
+  FRunnerThread := nil;
+  AddOutputLine('');
+  if thd.WasTerminated then
+    AddOutputLine('Process terminated by user.')
+  else
+    AddOutputLine('Process exited with code ' + IntToStr(thd.ExitCode) + '.');
+  UpdateStatus('');
+end;
+
+procedure TMainForm.miDebugRun(Sender: TObject);
+var
+  thd: TBuilderThread;
+  pb: TPasBuildProjectBackend;
+  ModInfo: TAggregatorModuleInfo;
+  FilePath: TfpgString;
+begin
+  if GProject.ProjectFormat <> pfPasBuild then
+  begin
+    AddMessage('Debug run requires a PasBuild project.');
+    Exit;
+  end;
+
+  { If already in a debug session and paused, continue instead }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+    FDebugAdapter.Continue;
+    UpdateStatus('Running (debug)...');
+    UpdateDebugControls;
+    Exit;
+  end;
+
+  { If already running (debug or normal), don't start another }
+  if FDebugBuildPending then
+    Exit;
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning) then
+    Exit;
+  if FRunnerThread <> nil then
+  begin
+    AddMessage('A program is already running. Stop it first (Ctrl+F2).');
+    Exit;
+  end;
+
+  { Ensure the debug profile is active }
+  pb := TPasBuildProjectBackend(GProject);
+  if pb.ActiveProfiles.IndexOf('debug') < 0 then
+  begin
+    pb.ActiveProfiles.Add('debug');
+    pb.Resolve(pb.ActiveProfiles.CommaText);
+    UpdateProfilesDisplay;
+  end;
+
+  { Build with debug profile, then launch debugger on success }
+  ClearMessagesWindow;
+  AddMessage('Building with debug profile...');
+  FDebugBuildPending := True;
+
+  thd := TBuilderThread.Create(True);
+  if pb.IsAggregator and (pcEditor.ActivePage <> nil) then
+  begin
+    FilePath := pcEditor.ActivePage.Hint;
+    if FilePath <> '' then
+    begin
+      ModInfo := pb.FindModuleInfoForFile(FilePath);
+      if ModInfo <> nil then
+      begin
+        thd.BuildModule := ModInfo.Name;
+        { Align executable resolution with the build target so LaunchDebugSession
+          picks the right binary when the aggregator project is open. }
+        pb.ActiveModule := pb.FindModuleForFile(FilePath);
+      end;
+    end;
+  end;
+  thd.OnTerminate := @DebugBuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
+  thd.Resume;
+  UpdateStatus('Building (debug)...');
+end;
+
+procedure TMainForm.DebugBuildTerminated(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread(Sender);
+  FDebugBuildPending := False;
+
+  if thd.BuildExitCode <> 0 then
+  begin
+    AddMessage('Build failed — cannot start debug session.');
+    UpdateStatus('Build failed.');
+    UpdateDebugControls;
+    Exit;
+  end;
+
+  AddMessage('Build succeeded.');
+  LaunchDebugSession;
+end;
+
+procedure TMainForm.LaunchDebugSession;
+var
+  ExePath: string;
+  pb2: TPasBuildProjectBackend;
+  ActiveFilePath: TfpgString;
+  ActiveMod: TPasBuildModule;
+begin
+  { For aggregator projects: ensure ActiveModule reflects the file being edited,
+    not just whatever was selected last in the project tree. This mirrors the
+    build-module deduction in miDebugRun so the debug binary matches the build. }
+  if (GProject <> nil) and (GProject.ProjectFormat = pfPasBuild) then
+  begin
+    pb2 := TPasBuildProjectBackend(GProject);
+    if pb2.IsAggregator and (pcEditor.ActivePage <> nil) then
+    begin
+      ActiveFilePath := pcEditor.ActivePage.Hint;
+      if ActiveFilePath <> '' then
+      begin
+        ActiveMod := pb2.FindModuleForFile(ActiveFilePath);
+        if ActiveMod <> nil then
+          pb2.ActiveModule := ActiveMod;
+      end;
+    end;
+  end;
+
+  ExePath := ResolveProjectExecutablePath;
+  if ExePath = '' then
+  begin
+    AddMessage('Cannot determine executable path.');
+    UpdateStatus('');
+    Exit;
+  end;
+
+  if not FileExists(ExePath) then
+  begin
+    AddMessage('Executable not found: ' + ExePath);
+    UpdateStatus('');
+    Exit;
+  end;
+
+  { Create the debug adapter if needed }
+  if FDebugAdapter = nil then
+  begin
+    FDebugAdapter := TIDEDebugAdapter.Create;
+    FDebugAdapter.OnStopped := @DebugStopped;
+    FDebugAdapter.OnTerminated := @DebugTerminated;
+    FDebugAdapter.OnOutput := @DebugOutput;
+    FDebugAdapter.OnBreakpointSet := @HandleBreakpointSet;
+    { Push current display options so the worker collects only what's needed }
+    FDebugAdapter.SetVarCollectScope(FVarShowScope);
+    FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
+  end;
+
+  { Start the debug session }
+  if not FDebugAdapter.StartSession(ExePath) then
+  begin
+    AddMessage('Failed to start debug session.');
+    UpdateStatus('');
+    Exit;
+  end;
+
+  ClearOutputWindow;
+  AddOutputLine('Debug session: ' + ExePath);
+  AddOutputLine('');
+  pnlWindow.ActivePage := tsOutput;
+
+  { Pass breakpoints to the worker thread so it can install them after
+    the process forks — ptrace writes must happen on the ptrace owner thread. }
+  InstallBreakpoints;
+
+  { Run the program under the debugger }
+  FDebugAdapter.Run;
+  UpdateStatus('Running (debug)...');
+  UpdateDebugControls;
+end;
+
+procedure TMainForm.ClearAllExecutionLines;
+var
+  i: Integer;
+begin
+  for i := 0 to pcEditor.PageCount - 1 do
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).ExecutionLine := -1;
+end;
+
+procedure TMainForm.AddPathIfNew(AList: TStringList; const APath: string);
+begin
+  if AList.IndexOf(APath) < 0 then
+    AList.Add(APath);
+end;
+
+procedure TMainForm.AddSubdirectories(AList: TStringList; const ADir: string);
+var
+  sr: TSearchRec;
+  full: string;
+begin
+  AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
+  if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
+  try
+    repeat
+      if (sr.Attr and faDirectory) <> 0 then
+        if (sr.Name <> '.') and (sr.Name <> '..') then
+        begin
+          full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
+          if Pos('target', sr.Name) = 0 then
+            AddSubdirectories(AList, full);
+        end;
+    until FindNext(sr) <> 0;
+  finally
+    FindClose(sr);
+  end;
+end;
+
+procedure TMainForm.AddAggregatorSourceDirs(AModuleInfos: TList; AList: TStringList);
+{ Recursively add every module's source directory tree to AList, including
+  modules nested inside pom sub-aggregators (stored in SubModules). }
+var
+  i: Integer;
+  mi: TAggregatorModuleInfo;
+  srcRoot: string;
+begin
+  for i := 0 to AModuleInfos.Count - 1 do
+  begin
+    mi := TAggregatorModuleInfo(AModuleInfos[i]);
+    srcRoot := IncludeTrailingPathDelimiter(mi.ProjectDir)
+             + SetDirSeparators(mi.SourceDirectory);
+    if DirectoryExists(srcRoot) then
+      AddSubdirectories(AList, srcRoot);
+    if mi.SubModules.Count > 0 then
+      AddAggregatorSourceDirs(mi.SubModules, AList);
+  end;
+end;
+
+function TMainForm.ResolveSourceFile(const AFile: string): string;
+{ Resolve a source file path that may be relative to a module root.
+  Debug info stores paths relative to the module that compiled the unit
+  (e.g. './src/main/pascal/corelib/fpg_base.pas' relative to framework/).
+  For aggregator projects we try every module's ProjectDir as a base,
+  recursing into nested pom sub-aggregators. }
+var
+  pb: TPasBuildProjectBackend;
+  relPath: string;
+
+  function SearchModules(AModuleInfos: TList): string;
+  var
+    j: Integer;
+    mi: TAggregatorModuleInfo;
+    candidate: string;
+  begin
+    Result := '';
+    for j := 0 to AModuleInfos.Count - 1 do
+    begin
+      mi := TAggregatorModuleInfo(AModuleInfos[j]);
+      candidate := IncludeTrailingPathDelimiter(mi.ProjectDir)
+                 + SetDirSeparators(relPath);
+      if fpgFileExists(candidate) then
+        Exit(candidate);
+      if mi.SubModules.Count > 0 then
+      begin
+        Result := SearchModules(mi.SubModules);
+        if Result <> '' then
+          Exit;
+      end;
+    end;
+  end;
+
+begin
+  Result := AFile;
+  if fpgFileExists(AFile) then
+    Exit;
+  if GProject.ProjectFormat <> pfPasBuild then
+    Exit;
+  pb := TPasBuildProjectBackend(GProject);
+  if not pb.IsAggregator then
+    Exit;
+  relPath := AFile;
+  if (Length(relPath) >= 2) and (relPath[1] = '.') and (relPath[2] = '/') then
+    Delete(relPath, 1, 2);
+  Result := SearchModules(pb.ModuleInfos);
+  if Result = '' then
+    Result := AFile;
+end;
+
+procedure TMainForm.DebugStopped(Sender: TObject; AState: TIDEDebugState;
+  const AFile: String; ALine: Integer);
+var
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  ClearAllExecutionLines;
+  if AFile <> '' then
+  begin
+    AddOutputLine('Stopped at ' + AFile + ':' + IntToStr(ALine));
+    UpdateStatus('Paused at ' + ExtractFileName(AFile) + ':' + IntToStr(ALine));
+    { Navigate to source and mark the execution line }
+    ts := OpenEditorPage(ResolveSourceFile(AFile));
+    if ts <> nil then
+    begin
+      editor := TfpgTextEdit(ts.Components[0]);
+      editor.ExecutionLine := ALine - 1;  { ALine is 1-based; ExecutionLine is 0-based }
+      editor.GotoLine(ALine);             { scroll to show the line }
+    end;
+  end
+  else
+  begin
+    AddOutputLine('Stopped (no source information).');
+    UpdateStatus('Paused');
+  end;
+  { Refresh watches — results already collected on the worker thread }
+  FLastWatchResults := FDebugAdapter.LastWatchResults;
+  RefreshWatchesPanel;
+  RefreshVariablesTree;
+  RefreshCallStackPanel;
+  { Show exception notification if this stop was caused by a raised exception }
+  if FDebugAdapter.LastExceptionInfo.IsValid then
+    ShowExceptionNotification
+  else
+    HideExceptionNotification;
+  pnlTool.ActivePage := tsVariables;
+  UpdateDebugControls;
+end;
+
+procedure TMainForm.DebugTerminated(Sender: TObject);
+begin
+  ClearAllExecutionLines;
+  ClearWatchesPanel;
+  ClearVariablesTree;
+  ClearCallStackPanel;
+  HideExceptionNotification;
+  FBreakpoints.ClearHandles;
+  AddOutputLine('');
+  AddOutputLine('Debug session ended.');
+  UpdateStatus('');
+  UpdateDebugControls;
+end;
+
+procedure TMainForm.DebugOutput(Sender: TObject; const AMessage: String);
+begin
+  AddOutputLine(AMessage);
+end;
+
+procedure TMainForm.miDebugStepInto(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+    FDebugAdapter.StepInto;
+    UpdateStatus('Stepping (into)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.miDebugStepOver(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+    FDebugAdapter.StepOver;
+    UpdateStatus('Stepping (over)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.miDebugStepOut(Sender: TObject);
+begin
+  AddMessage('Step Out is not yet supported by the PDR debugger engine.');
+end;
+
+procedure TMainForm.miDebugPause(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning) then
+  begin
+    FDebugAdapter.Pause;
+    UpdateStatus('Pausing...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.miDebugEvalExpr(Sender: TObject);
+begin
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+    ShowEvalExprDialog(FDebugAdapter);
+end;
+
+procedure TMainForm.UpdateDebugControls;
+var
+  IsPaused: Boolean;
+  IsRunning: Boolean;
+  InSession: Boolean;
+begin
+  IsPaused  := (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused);
+  IsRunning := (FDebugAdapter <> nil) and (FDebugAdapter.State = idsRunning);
+  InSession := (FDebugAdapter <> nil) and
+               (FDebugAdapter.State in [idsStarting, idsRunning, idsPaused]);
+
+  { Toolbar buttons }
+  btnDbgContinue.Enabled := IsPaused;
+  btnDbgPause.Enabled    := IsRunning;
+  btnDbgStop.Enabled     := InSession;
+  btnDbgStepInto.Enabled := IsPaused;
+  btnDbgStepOver.Enabled := IsPaused;
+  btnDbgStepOut.Enabled  := False;  { not yet supported by PDR engine }
+
+  { Menu items }
+  miDbgStepInto.Enabled  := IsPaused;
+  miDbgStepOver.Enabled  := IsPaused;
+  miDbgStepOut.Enabled   := False;   { not yet supported by PDR engine }
+  miDbgPause.Enabled     := IsRunning;
+  miDbgEvalExpr.Enabled  := IsPaused;
+end;
+
+procedure TMainForm.EditorGutterClick(Sender: TObject; ALine: Integer);
+var
+  ts: TfpgTabSheet;
+  FilePath: String;
+  Idx: Integer;
+  OldHandle: TBreakpointHandle;
+  WasSet: Boolean;
+begin
+  ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+
+  { Remember state before toggle so we know whether to add or remove live }
+  WasSet := FBreakpoints.HasBreakpoint(FilePath, ALine);
+  if WasSet then
+  begin
+    Idx := FBreakpoints.FindIndex(FilePath, ALine);
+    OldHandle := TBreakpointHandle(FBreakpoints.GetItem(Idx).Handle);
+  end
+  else
+    OldHandle := -1;
+
+  FBreakpoints.Toggle(FilePath, ALine);
+  TfpgTextEdit(Sender).Invalidate;
+  RefreshBreakpointTree;
+
+  { Live session — route through worker thread so ptrace calls stay on the
+    ptrace owner thread. Only valid when the process is paused. }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    if WasSet then
+    begin
+      { Breakpoint removed — tell the debugger to restore the original byte.
+        Use tag -1 for removals (no handle to store back). }
+      if OldHandle <> -1 then
+        FDebugAdapter.RemoveBreakpointLive(OldHandle, -1);
+    end
+    else
+    begin
+      { Breakpoint added — install on the ptrace owner thread.
+        Pass the list index as the tag so HandleBreakpointSet can store the handle. }
+      Idx := FBreakpoints.FindIndex(FilePath, ALine);
+      if Idx >= 0 then
+        FDebugAdapter.SetBreakpointLive(
+            ExtractFileName(FilePath) + ':' + IntToStr(ALine), Idx);
+    end;
+  end;
+end;
+
+procedure TMainForm.HandleBreakpointSet(Sender: TObject;
+  AHandle: TBreakpointHandle; ATag: Integer);
+begin
+  { ATag >= 0 means it was a SetBreakpointLive call; store the returned handle.
+    ATag = -1 means it was a RemoveBreakpointLive call; nothing to store. }
+  if ATag >= 0 then
+    FBreakpoints.SetHandle(ATag, Integer(AHandle));
+end;
+
+procedure TMainForm.RefreshBreakpointTree;
+var
+  i: Integer;
+  BP: TBreakpoint;
+  Node: TfpgTreeNode;
+begin
+  tvBreakpoints.BeginUpdate;
+  try
+    tvBreakpoints.RootNode.Clear;
+    for i := 0 to FBreakpoints.Count - 1 do
+    begin
+      BP := FBreakpoints.GetItem(i);
+      Node := tvBreakpoints.RootNode.AppendText(
+          ExtractFileName(BP.FileName) + ':' + IntToStr(BP.Line));
+      if BP.Enabled then
+        Node.StateImageIndex := 1
+      else
+        Node.StateImageIndex := 0;
+      Node.Data := Pointer(PtrInt(i));
+    end;
+  finally
+    tvBreakpoints.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.InvalidateEditorForBreakpoint(ABPIndex: Integer);
+var
+  i: Integer;
+  ets: TfpgTabSheet;
+  BP: TBreakpoint;
+begin
+  if (ABPIndex < 0) or (ABPIndex >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(ABPIndex);
+  for i := 0 to pcEditor.PageCount - 1 do
+  begin
+    ets := pcEditor.Pages[i];
+    if ets.Hint = BP.FileName then
+      TfpgTextEdit(ets.Components[0]).Invalidate;
+  end;
+end;
+
+procedure TMainForm.tvBreakpointsStateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Idx: Integer;
+begin
+  Idx := Integer(PtrInt(ANode.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  FBreakpoints.SetEnabled(Idx, not FBreakpoints.GetItem(Idx).Enabled);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    ANode.StateImageIndex := 1
+  else
+    ANode.StateImageIndex := 0;
+  tvBreakpoints.Invalidate;
+  InvalidateEditorForBreakpoint(Idx);
+end;
+
+procedure TMainForm.tvBreakpointsDoubleClick(Sender: TObject; AButton: TMouseButton;
+    AShift: TShiftState; const AMousePos: TPoint);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then
+    Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if BP.FileName = '' then
+    Exit;
+  ts := OpenEditorPage(BP.FileName);
+  if ts <> nil then
+  begin
+    editor := TfpgTextEdit(ts.Components[0]);
+    editor.GotoLine(BP.Line);
+  end;
+end;
+
+procedure TMainForm.tvBreakpointsKeyPressed(Sender: TObject; var KeyCode: word;
+    var ShiftState: TShiftState; var Consumed: boolean);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+begin
+  if KeyCode <> keyDelete then
+    Exit;
+  Node := tvBreakpoints.Selection;
+  if Node = nil then
+    Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then
+    Exit;
+  BP := FBreakpoints.GetItem(Idx);
+
+  { Remove from live debug session if active and handle is known }
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) and
+     (BP.Handle <> -1) then
+    FDebugAdapter.RemoveBreakpointLive(TBreakpointHandle(BP.Handle), -1);
+
+  { Invalidate editor gutter before removing from the model }
+  InvalidateEditorForBreakpoint(Idx);
+  FBreakpoints.Toggle(BP.FileName, BP.Line);
+  RefreshBreakpointTree;
+  Consumed := True;
+end;
+
+{ ---------------------------------------------------------------------------
+  Variables Panel
+  --------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearVariablesTree;
+var
+  i: Integer;
+begin
+  if Assigned(tvVariables) then
+    tvVariables.RootNode.Clear;
+  if Assigned(FVarNodeDataList) then
+  begin
+    for i := 0 to FVarNodeDataList.Count - 1 do
+      TObject(FVarNodeDataList[i]).Free;
+    FVarNodeDataList.Clear;
+  end;
+end;
+
+{ Append a single TVarNodeData as a child node of AParent.
+  Registers the data object in FVarNodeDataList so it can be freed later. }
+procedure TMainForm.AppendVarNode(AParent: TfpgTreeNode;
+    AData: TVarNodeData);
+var
+  Node: TfpgTreeNode;
+begin
+  Node := AParent.AppendText(
+      BuildVarNodeText(AData.Name, AData.Value, AData.TypeName, FVarShowType));
+  Node.Data := AData;
+  if AData.IsExpandable then
+  begin
+    Node.HasChildren := True;
+    { Placeholder child makes the expand icon visible and signals that
+      the node has not yet been lazily populated. }
+    Node.AppendText('');
+  end;
+  FVarNodeDataList.Add(AData);
+end;
+
+procedure TMainForm.RefreshVariablesTree;
+var
+  AllVars: TVariableValueArray;
+  GlobalVars: TVariableValueArray;
+  CurrentCount, i: Integer;
+  Data: TVarNodeData;
+  LocalsNode, ScopeNode, GlobalsNode: TfpgTreeNode;
+begin
+  tvVariables.BeginUpdate;
+  try
+    ClearVariablesTree;
+
+    { Use variables pre-collected on the ptrace owner thread — never call
+      GetLocalVariables* directly from the main thread (ptrace violation). }
+    if FVarShowScope then
+    begin
+      AllVars      := FDebugAdapter.LastLocalVarsWithParents;
+      CurrentCount := Length(FDebugAdapter.LastLocalVars);
+    end
+    else
+    begin
+      AllVars      := FDebugAdapter.LastLocalVars;
+      CurrentCount := Length(AllVars);
+    end;
+
+    GlobalVars := FDebugAdapter.LastGlobalVars;
+
+    { Add a [Locals] group node whenever there are local variables or globals
+      (so the grouping is always consistent once we have anything to show). }
+    if (CurrentCount > 0) or (Length(GlobalVars) > 0) then
+    begin
+      LocalsNode := tvVariables.RootNode.AppendText('[Locals]');
+      LocalsNode.Collapsed := False;
+    end
+    else
+      LocalsNode := tvVariables.RootNode;
+
+    { Current-scope variables }
+    for i := 0 to CurrentCount - 1 do
+    begin
+      Data := TVarNodeData.Create(
+          AllVars[i].Name,
+          AllVars[i].Value,
+          AllVars[i].TypeName,
+          AllVars[i].Name);
+      AppendVarNode(LocalsNode, Data);
+    end;
+
+    { Enclosing-scope variables (only when ShowScope is on and there are any) }
+    if FVarShowScope and (Length(AllVars) > CurrentCount) then
+    begin
+      ScopeNode := LocalsNode.AppendText('[Enclosing scope]');
+      ScopeNode.TextColor := $808080;
+      for i := CurrentCount to High(AllVars) do
+      begin
+        Data := TVarNodeData.Create(
+            AllVars[i].Name,
+            AllVars[i].Value,
+            AllVars[i].TypeName,
+            AllVars[i].Name);
+        AppendVarNode(ScopeNode, Data);
+      end;
+    end;
+
+    { Global variables (only when ShowGlobals is on and engine collected them) }
+    if FVarShowGlobals and (Length(GlobalVars) > 0) then
+    begin
+      GlobalsNode := tvVariables.RootNode.AppendText('[Globals]');
+      GlobalsNode.Collapsed := False;
+      GlobalsNode.TextColor := $808080;
+      for i := 0 to High(GlobalVars) do
+      begin
+        Data := TVarNodeData.Create(
+            GlobalVars[i].Name,
+            GlobalVars[i].Value,
+            GlobalVars[i].TypeName,
+            GlobalVars[i].Name);
+        AppendVarNode(GlobalsNode, Data);
+      end;
+    end;
+  finally
+    tvVariables.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Data: TVarNodeData;
+  Children: TVarNodeDataArray;
+  i: Integer;
+  PlaceholderNode: TfpgTreeNode;
+begin
+  Data := TVarNodeData(ANode.Data);
+  if Data = nil then
+    Exit;
+  { Check if the node was already populated (has real children, not the placeholder) }
+  PlaceholderNode := ANode.FirstSubNode;
+  if (PlaceholderNode <> nil) and (PlaceholderNode.Text <> '') then
+    Exit;  { already expanded with real content }
+
+  { Remove placeholder }
+  if PlaceholderNode <> nil then
+    ANode.Remove(PlaceholderNode);
+
+  { Parse children from the stored value string }
+  Children := ParseVarChildren(Data.FullPath, Data.Value);
+  tvVariables.BeginUpdate;
+  try
+    for i := 0 to High(Children) do
+      AppendVarNode(ANode, Children[i]);
+  finally
+    tvVariables.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.btnVarOptionsClicked(Sender: TObject);
+begin
+  pmVarsMenu.ShowAt(btnVarOptions, 0, btnVarOptions.ActualHeight);
+end;
+
+procedure TMainForm.miVarShowTypeClick(Sender: TObject);
+begin
+  FVarShowType := not FVarShowType;
+  miVarShowType.Checked := FVarShowType;
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
+end;
+
+procedure TMainForm.miVarShowScopeClick(Sender: TObject);
+begin
+  FVarShowScope := not FVarShowScope;
+  miVarShowScope.Checked := FVarShowScope;
+  FDebugAdapter.SetVarCollectScope(FVarShowScope);
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
+end;
+
+procedure TMainForm.miVarShowGlobalsClick(Sender: TObject);
+begin
+  FVarShowGlobals := not FVarShowGlobals;
+  miVarShowGlobals.Checked := FVarShowGlobals;
+  FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
+  if FDebugAdapter.State = idsPaused then
+    RefreshVariablesTree;
+end;
+
+{ ---------------------------------------------------------------------------
+  Call Stack Panel
+  --------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearCallStackPanel;
+var
+  i: Integer;
+begin
+  if Assigned(tvCallStack) then
+    tvCallStack.RootNode.Clear;
+  if Assigned(FCallStackDataList) then
+  begin
+    for i := 0 to FCallStackDataList.Count - 1 do
+      TCallStackFrameData(FCallStackDataList[i]).Free;
+    FCallStackDataList.Clear;
+  end;
+end;
+
+procedure TMainForm.RefreshCallStackPanel;
+var
+  Frames: TCallStackFrameArray;
+  i:      Integer;
+  Data:   TCallStackFrameData;
+  Node:   TfpgTreeNode;
+begin
+  tvCallStack.BeginUpdate;
+  try
+    ClearCallStackPanel;
+    if FDebugAdapter = nil then
+      Exit;
+    Frames := ParseCallStack(FDebugAdapter.LastCallStack);
+    if Length(Frames) = 0 then
+      Exit;
+    for i := 0 to High(Frames) do
+    begin
+      Data := TCallStackFrameData.Create(Frames[i]);
+      FCallStackDataList.Add(Data);
+      Node := tvCallStack.RootNode.AppendText(CallStackFrameDisplay(Frames[i]));
+      Node.Data := Data;
+    end;
+  finally
+    tvCallStack.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.tvCallStackDoubleClick(Sender: TObject;
+    AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+var
+  Node:     TfpgTreeNode;
+  Data:     TCallStackFrameData;
+  FullPath: string;
+  ts:       TfpgTabSheet;
+begin
+  Node := tvCallStack.Selection;
+  if Node = nil then
+    Exit;
+  Data := TCallStackFrameData(Node.Data);
+  if (Data = nil) or not Data.Frame.HasSource then
+    Exit;
+
+  { Attempt to locate the source file — prefer the same resolution used for
+    the debug stop event; fall back to a basename search in source dirs. }
+  FullPath := FindSourceByBaseName(Data.Frame.FileName);
+  if FullPath = '' then
+    Exit;
+
+  FCursorHistory.RecordBeforeJump(GetCurrentCursorLocation);
+  ts := OpenEditorPage(FullPath);
+  if (ts <> nil) and (Data.Frame.LineNumber > 0) then
+    TfpgTextEdit(ts.Components[0]).GotoLine(Data.Frame.LineNumber);
+end;
+
+{ -------------------------------------------------------------------------
+  Watches panel
+  ------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearWatchesPanel;
+var
+  I: Integer;
+begin
+  if Assigned(tvWatches) then
+    tvWatches.RootNode.Clear;
+  if Assigned(FWatchNodeDataList) then
+  begin
+    for I := 0 to FWatchNodeDataList.Count - 1 do
+      TObject(FWatchNodeDataList[I]).Free;
+    FWatchNodeDataList.Clear;
+  end;
+end;
+
+procedure TMainForm.RefreshWatchesPanel;
+var
+  I: Integer;
+  Data: TVarNodeData;
+  Node: TfpgTreeNode;
+  R: TVariableValue;
+  DisplayVal, TypeName: String;
+begin
+  ClearWatchesPanel;
+  if FWatchList.Count = 0 then
+    Exit;
+  tvWatches.BeginUpdate;
+  try
+    for I := 0 to FWatchList.Count - 1 do
+    begin
+      if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused)
+          and (I < Length(FLastWatchResults)) then
+      begin
+        R := FLastWatchResults[I];
+        if R.IsValid then
+        begin
+          DisplayVal := R.Value;
+          TypeName   := R.TypeName;
+        end
+        else
+        begin
+          DisplayVal := '<not in scope>';
+          TypeName   := '';
+        end;
+      end
+      else
+      begin
+        DisplayVal := '<no debug session>';
+        TypeName   := '';
+      end;
+      Data := TVarNodeData.Create(FWatchList.Expression[I], DisplayVal,
+                                  TypeName, FWatchList.Expression[I]);
+      FWatchNodeDataList.Add(Data);
+      Node := tvWatches.RootNode.AppendText(
+        BuildVarNodeText(FWatchList.Expression[I], DisplayVal, TypeName, FVarShowType));
+      Node.Data := Data;
+      if Data.IsExpandable then
+        Node.AppendText('');  { placeholder for lazy expansion }
+    end;
+  finally
+    tvWatches.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.btnAddWatchClicked(Sender: TObject);
+var
+  Expr: TfpgString;
+begin
+  Expr := '';
+  if not fpgInputQuery('Add Watch', 'Expression to watch:', Expr) then
+    Exit;
+  Expr := Trim(Expr);
+  if Expr = '' then
+    Exit;
+  FWatchList.AddWatch(Expr);
+  { Push the updated expression list to the worker so results are collected
+    on the next stop. Refresh the panel immediately with whatever we have. }
+  if FDebugAdapter <> nil then
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+  RefreshWatchesPanel;
+end;
+
+procedure TMainForm.btnRemoveWatchClicked(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  I: Integer;
+  Expr: String;
+begin
+  Node := tvWatches.Selection;
+  if Node = nil then
+    Exit;
+  { Find which watch this node belongs to by matching expression text }
+  for I := 0 to FWatchList.Count - 1 do
+    if FWatchList.Expression[I] = TVarNodeData(Node.Data).Name then
+    begin
+      Expr := FWatchList.Expression[I];
+      FWatchList.RemoveWatch(I);
+      Break;
+    end;
+  RefreshWatchesPanel;
+end;
+
+procedure TMainForm.tvWatchesKeyPressed(Sender: TObject;
+    var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+var
+  Node: TfpgTreeNode;
+  I: Integer;
+begin
+  if KeyCode = keyDelete then
+  begin
+    Node := tvWatches.Selection;
+    if Node = nil then
+      Exit;
+    for I := 0 to FWatchList.Count - 1 do
+      if FWatchList.Expression[I] = TVarNodeData(Node.Data).Name then
+      begin
+        FWatchList.RemoveWatch(I);
+        Break;
+      end;
+    RefreshWatchesPanel;
+    Consumed := True;
+  end;
+end;
+
+procedure TMainForm.tvWatchesExpand(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Data: TVarNodeData;
+  Children: TVarNodeDataArray;
+  I: Integer;
+  ChildNode: TfpgTreeNode;
+begin
+  Data := TVarNodeData(ANode.Data);
+  if (Data = nil) or not Data.IsExpandable then
+    Exit;
+  { Remove placeholder }
+  ANode.Clear;
+  Children := ParseVarChildren(Data.FullPath, Data.Value);
+  tvWatches.BeginUpdate;
+  try
+    for I := 0 to High(Children) do
+    begin
+      FWatchNodeDataList.Add(Children[I]);
+      ChildNode := ANode.AppendText(
+        BuildVarNodeText(Children[I].Name, Children[I].Value,
+                         Children[I].TypeName, FVarShowType));
+      ChildNode.Data := Children[I];
+      if Children[I].IsExpandable then
+        ChildNode.AppendText('');
+    end;
+  finally
+    tvWatches.EndUpdate;
+  end;
+end;
+
+{ -------------------------------------------------------------------------
+  Exception notification bar
+  ------------------------------------------------------------------------- }
+
+procedure TMainForm.ShowExceptionNotification;
+var
+  Info: TExceptionInfo;
+  Msg: String;
+begin
+  Info := FDebugAdapter.LastExceptionInfo;
+  if Info.Message <> '' then
+    Msg := Info.ClassName + ': ''' + Info.Message + ''''
+  else
+    Msg := Info.ClassName;
+  lblExcInfo.Text := 'Exception raised: ' + Msg;
+  if (Info.SourceFile <> '') and (Info.SourceLine > 0) then
+    lblExcLocation.Text := '  raised at ' + ExtractFileName(Info.SourceFile)
+                           + ':' + IntToStr(Info.SourceLine)
+  else
+    lblExcLocation.Text := '';
+  pnlExcNotify.Visible := True;
+  pnlWindow.ActivePage := tsOutput;
+end;
+
+procedure TMainForm.HideExceptionNotification;
+begin
+  if Assigned(pnlExcNotify) then
+    pnlExcNotify.Visible := False;
+end;
+
+procedure TMainForm.btnExcContinueClicked(Sender: TObject);
+begin
+  HideExceptionNotification;
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+    FDebugAdapter.Continue;
+    UpdateStatus('Running (debug)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.btnExcStopClicked(Sender: TObject);
+begin
+  HideExceptionNotification;
+  miStopProgram(nil);
+end;
+
+function TMainForm.FindSourceByBaseName(const ABaseName: string): string;
+{ Locate a source file given only its basename (as returned by the call
+  stack parser).  Searches all known source directories in the project,
+  including sub-directories. Returns empty string when not found. }
+var
+  Dirs:      TStringList;
+  i:         Integer;
+  Candidate: string;
+
+  procedure CollectSourceDirs;
+  var
+    pb: TPasBuildProjectBackend;
+  begin
+    { Always try the directory that contains the active project file }
+    AddPathIfNew(Dirs, ExtractFilePath(GProject.ProjectFile));
+    if GProject.ProjectFormat <> pfPasBuild then
+      Exit;
+    pb := TPasBuildProjectBackend(GProject);
+    if pb.IsAggregator then
+      AddAggregatorSourceDirs(pb.ModuleInfos, Dirs)
+    else
+    begin
+      AddSubdirectories(Dirs,
+        IncludeTrailingPathDelimiter(ExtractFilePath(GProject.ProjectFile))
+        + 'src' + PathDelim + 'main' + PathDelim + 'pascal');
+    end;
+  end;
+
+begin
+  Result := '';
+  if ABaseName = '' then
+    Exit;
+
+  { 1. If the name is already an absolute path that exists, use it directly }
+  if fpgFileExists(ABaseName) then
+  begin
+    Result := ABaseName;
+    Exit;
+  end;
+
+  { 2. Search source directories }
+  Dirs := TStringList.Create;
+  try
+    CollectSourceDirs;
+    for i := 0 to Dirs.Count - 1 do
+    begin
+      Candidate := IncludeTrailingPathDelimiter(Dirs[i]) + ABaseName;
+      if fpgFileExists(Candidate) then
+      begin
+        Result := Candidate;
+        Exit;
+      end;
+    end;
+  finally
+    Dirs.Free;
+  end;
+end;
+
+procedure TMainForm.pmBPGoToSourceClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if BP.FileName = '' then Exit;
+  ts := OpenEditorPage(BP.FileName);
+  if ts <> nil then
+  begin
+    editor := TfpgTextEdit(ts.Components[0]);
+    editor.GotoLine(BP.Line);
+  end;
+end;
+
+procedure TMainForm.pmBPToggleEnabledClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  FBreakpoints.SetEnabled(Idx, not FBreakpoints.GetItem(Idx).Enabled);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    Node.StateImageIndex := 1
+  else
+    Node.StateImageIndex := 0;
+  tvBreakpoints.Invalidate;
+  InvalidateEditorForBreakpoint(Idx);
+end;
+
+procedure TMainForm.pmBPRemoveClick(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  Idx: Integer;
+  BP: TBreakpoint;
+begin
+  Node := tvBreakpoints.Selection;
+  if Node = nil then Exit;
+  Idx := Integer(PtrInt(Node.Data));
+  if (Idx < 0) or (Idx >= FBreakpoints.Count) then Exit;
+  BP := FBreakpoints.GetItem(Idx);
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) and
+     (BP.Handle <> -1) then
+    FDebugAdapter.RemoveBreakpointLive(TBreakpointHandle(BP.Handle), -1);
+  InvalidateEditorForBreakpoint(Idx);
+  FBreakpoints.Toggle(BP.FileName, BP.Line);
+  RefreshBreakpointTree;
+end;
+
+procedure TMainForm.EditorGutterLine(Sender: TObject; ALine: Integer;
+  ACanvas: TfpgCanvas; const ARect: TfpgRect);
+var
+  ts: TfpgTabSheet;
+  FilePath: String;
+  CX, CY, R, Idx: Integer;
+begin
+  ts := TfpgTabSheet(TfpgTextEdit(Sender).Parent);
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+  Idx := FBreakpoints.FindIndex(FilePath, ALine);
+  if Idx < 0 then
+    Exit;
+  R  := (ARect.Height - 4) div 2;
+  CX := ARect.Left + R + 2;
+  CY := ARect.Top + (ARect.Height div 2);
+  ACanvas.SetColor(clRed);
+  if FBreakpoints.GetItem(Idx).Enabled then
+    { Enabled — filled red circle }
+    ACanvas.FillArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi)
+  else
+  begin
+    { Disabled — red circle outline only }
+    ACanvas.DrawArc(CX - R, CY - R, R * 2, R * 2, 0, 2 * Pi);
+  end;
+end;
+
+procedure TMainForm.ToggleBreakpointAtCursor;
+var
+  ts: TfpgTabSheet;
+  editor: TfpgTextEdit;
+  FilePath: String;
+  ALine: Integer;
+begin
+  ts := pcEditor.ActivePage;
+  if ts = nil then
+    Exit;
+  FilePath := ts.Hint;
+  if FilePath = '' then
+    Exit;
+  editor := TfpgTextEdit(ts.Components[0]);
+  ALine := editor.CaretPos_V + 1;  { CaretPos_V is 0-based; breakpoints are 1-based }
+  EditorGutterClick(editor, ALine);
+end;
+
+procedure TMainForm.InstallBreakpoints;
+var
+  i, Count: Integer;
+  BP: TBreakpoint;
+  Locs: array of String;
+begin
+  if FDebugAdapter = nil then
+    Exit;
+  FBreakpoints.ClearHandles;
+  { Collect enabled breakpoint locations for the worker thread to install }
+  SetLength(Locs, FBreakpoints.Count);
+  Count := 0;
+  for i := 0 to FBreakpoints.Count - 1 do
+  begin
+    BP := FBreakpoints.GetItem(i);
+    if BP.Enabled then
+    begin
+      Locs[Count] := ExtractFileName(BP.FileName) + ':' + IntToStr(BP.Line);
+      Inc(Count);
+    end;
+  end;
+  SetLength(Locs, Count);
+  FDebugAdapter.PrepareInitialBreakpoints(Locs);
+end;
+
 procedure TMainForm.StartBuildGoal(const AGoal: string);
 var
   thd: TBuilderThread;
@@ -1095,6 +2548,17 @@ begin
       keyRight:
         begin
           miNavigateForward(nil);
+          consumed := True;
+        end;
+    end;
+  end;
+  { F5 — toggle breakpoint at cursor (no modifier) }
+  if not consumed and (shiftstate = []) then
+  begin
+    case keycode of
+      keyF5:
+        begin
+          ToggleBreakpointAtCursor;
           consumed := True;
         end;
     end;
@@ -1534,6 +2998,21 @@ end;
 procedure TMainForm.ClearMessagesWindow;
 begin
   grdMessages.RowCount := 0;
+  pnlWindow.ActivePage := tsMessages;
+end;
+
+procedure TMainForm.AddOutputLine(const AMsg: TfpgString);
+begin
+  grdOutput.BeginUpdate;
+  grdOutput.RowCount := grdOutput.RowCount + 1;
+  grdOutput.Cells[0, grdOutput.RowCount - 1] := AMsg;
+  grdOutput.FocusRow := grdOutput.RowCount;
+  grdOutput.EndUpdate;
+end;
+
+procedure TMainForm.ClearOutputWindow;
+begin
+  grdOutput.RowCount := 0;
 end;
 
 procedure TMainForm.CloseAllTabs;
@@ -1569,6 +3048,13 @@ begin
     Session.ActiveTab := pcEditor.ActivePageIndex;
     Session.ToolPanelWidth := pnlTool.PreferredSize.W;
     Session.BottomPanelHeight := pnlWindow.PreferredSize.H;
+    Session.VarShowType    := FVarShowType;
+    Session.VarShowScope   := FVarShowScope;
+    Session.VarShowGlobals := FVarShowGlobals;
+    { Persist watch expressions }
+    Session.Watches.Clear;
+    for I := 0 to FWatchList.Count - 1 do
+      Session.Watches.Add(FWatchList.Expression[I]);
     if GProject.ProjectFormat = pfPasBuild then
       Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
     for I := 0 to pcEditor.PageCount - 1 do
@@ -1583,6 +3069,7 @@ begin
       end;
     end;
     Session.Save;
+    FBreakpoints.SaveToFile(IncludeTrailingPathDelimiter(GProject.ProjectDir) + '.ide' + PathDelim + 'breakpoints.json');
   finally
     Session.Free;
   end;
@@ -1650,6 +3137,27 @@ begin
         pnlWindow.PreferredSize := fpgSize(pnlWindow.PreferredSize.W, Session.BottomPanelHeight);
       if (Session.ToolPanelWidth > 0) or (Session.BottomPanelHeight > 0) then
         pnlClientArea.Realign;
+      { Restore Variables panel display options }
+      FVarShowType    := Session.VarShowType;
+      FVarShowScope   := Session.VarShowScope;
+      FVarShowGlobals := Session.VarShowGlobals;
+      miVarShowType.Checked    := FVarShowType;
+      miVarShowScope.Checked   := FVarShowScope;
+      miVarShowGlobals.Checked := FVarShowGlobals;
+      { FDebugAdapter is created lazily at session start — push flags then }
+      if FDebugAdapter <> nil then
+      begin
+        FDebugAdapter.SetVarCollectScope(FVarShowScope);
+        FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
+      end;
+      { Restore watch expressions }
+      if Session.Watches.Count > 0 then
+      begin
+        FWatchList.Clear;
+        for I := 0 to Session.Watches.Count - 1 do
+          FWatchList.AddWatch(Session.Watches[I]);
+        RefreshWatchesPanel;
+      end;
     end;
   finally
     Session.Free;
@@ -1673,6 +3181,8 @@ begin
   UpdateProfilesDisplay;
   UpdateGitBranch;
   CheckGitIgnoreForIdeDir;
+  FBreakpoints.LoadFromFile(IncludeTrailingPathDelimiter(GProject.ProjectDir) + '.ide' + PathDelim + 'breakpoints.json');
+  RefreshBreakpointTree;
   AddMessage('Project loaded');
 end;
 
@@ -1696,6 +3206,9 @@ begin
   m.SelectionColor := FTheme.Chrome.Selection;
   m.SelectionTextColor := FTheme.Chrome.SelectionText;
   m.LineHighlightColor := FTheme.Chrome.CurrentLine;
+  m.ExecutionLineColor := FTheme.Chrome.ExecutionLine;
+  m.OnGutterClick := @EditorGutterClick;
+  m.OnGutterLine := @EditorGutterLine;
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -1816,9 +3329,12 @@ begin
     Exit;
   AllowSelfDraw := False;
 
-  { Determine current line highlight colour (must match DrawLine logic) }
+  { Determine line background colour — must match DrawLine priority logic.
+    Execution line takes priority; caret line highlight applies when focused. }
   LineBg := clNone;
-  if (ALineIndex = edt.CaretPos_V) and edt.Focused then
+  if (edt.ExecutionLine >= 0) and (ALineIndex = edt.ExecutionLine) then
+    LineBg := edt.ExecutionLineColor
+  else if (ALineIndex = edt.CaretPos_V) and edt.Focused then
   begin
     if edt.LineHighlightColor <> clNone then
       LineBg := edt.LineHighlightColor
@@ -2040,12 +3556,6 @@ end;
 
 procedure TMainForm.miGoToDeclaration(Sender: TObject);
 
-  procedure AddPathIfNew(AList: TStringList; const APath: string);
-  begin
-    if AList.IndexOf(APath) < 0 then
-      AList.Add(APath);
-  end;
-
   function MakeAbsolute(const ABase, APath: string): string;
   begin
     {$ifdef unix}
@@ -2056,28 +3566,6 @@ procedure TMainForm.miGoToDeclaration(Sender: TObject);
       Result := APath
     else
       Result := IncludeTrailingPathDelimiter(ABase) + APath;
-  end;
-
-  procedure AddSubdirectories(AList: TStringList; const ADir: string);
-  var
-    sr: TSearchRec;
-    full: string;
-  begin
-    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
-    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
-    try
-      repeat
-        if (sr.Attr and faDirectory) <> 0 then
-          if (sr.Name <> '.') and (sr.Name <> '..') then
-          begin
-            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
-            if Pos('target', sr.Name) = 0 then
-              AddSubdirectories(AList, full);
-          end;
-      until FindNext(sr) <> 0;
-    finally
-      FindClose(sr);
-    end;
   end;
 
   procedure CollectPaths(AModule: TPasBuildModule;
@@ -2141,9 +3629,7 @@ begin
     pb := TPasBuildProjectBackend(GProject);
     { Ensure project is resolved -- may not be if session had no profiles }
     if not pb.Resolved then
-    begin
       pb.Resolve;
-    end;
     m := pb.FindModuleForFile(pcEditor.ActivePage.Hint);
     if m <> nil then
     begin
@@ -2152,6 +3638,19 @@ begin
       CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
       unitPaths := ownedUnitPaths;
       includePaths := ownedIncludePaths;
+    end;
+    { For aggregator projects, add every module's source tree so cross-module
+      navigation works even when resolve hasn't run or dep.SourceDir is absent.
+      FModuleInfos is populated from project.xml at load time — no resolve needed.
+      AddAggregatorSourceDirs recurses into nested pom sub-aggregators. }
+    if pb.IsAggregator and (pb.ModuleInfos.Count > 0) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        unitPaths := ownedUnitPaths;
+      end;
+      AddAggregatorSourceDirs(pb.ModuleInfos, ownedUnitPaths);
     end;
   end;
   if unitPaths = nil then
@@ -2285,12 +3784,6 @@ end;
 
 procedure TMainForm.miQuickDoc(Sender: TObject);
 
-  procedure AddPathIfNew(AList: TStringList; const APath: string);
-  begin
-    if AList.IndexOf(APath) < 0 then
-      AList.Add(APath);
-  end;
-
   function MakeAbsolute(const ABase, APath: string): string;
   begin
     {$ifdef unix}
@@ -2301,28 +3794,6 @@ procedure TMainForm.miQuickDoc(Sender: TObject);
       Result := APath
     else
       Result := IncludeTrailingPathDelimiter(ABase) + APath;
-  end;
-
-  procedure AddSubdirectories(AList: TStringList; const ADir: string);
-  var
-    sr: TSearchRec;
-    full: string;
-  begin
-    AddPathIfNew(AList, IncludeTrailingPathDelimiter(ADir));
-    if FindFirst(IncludeTrailingPathDelimiter(ADir) + '*', faDirectory, sr) = 0 then
-    try
-      repeat
-        if (sr.Attr and faDirectory) <> 0 then
-          if (sr.Name <> '.') and (sr.Name <> '..') then
-          begin
-            full := IncludeTrailingPathDelimiter(ADir) + sr.Name;
-            if Pos('target', sr.Name) = 0 then
-              AddSubdirectories(AList, full);
-          end;
-      until FindNext(sr) <> 0;
-    finally
-      FindClose(sr);
-    end;
   end;
 
   procedure CollectPaths(AModule: TPasBuildModule;
@@ -2400,6 +3871,15 @@ begin
       CollectPaths(m, ownedUnitPaths, ownedIncludePaths);
       unitPaths := ownedUnitPaths;
       includePaths := ownedIncludePaths;
+    end;
+    if pb.IsAggregator and (pb.ModuleInfos.Count > 0) then
+    begin
+      if ownedUnitPaths = nil then
+      begin
+        ownedUnitPaths := TStringList.Create;
+        unitPaths := ownedUnitPaths;
+      end;
+      AddAggregatorSourceDirs(pb.ModuleInfos, ownedUnitPaths);
     end;
   end;
   if unitPaths = nil then
@@ -2687,6 +4167,7 @@ begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionColor := FTheme.Chrome.Selection;
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).SelectionTextColor := FTheme.Chrome.SelectionText;
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).LineHighlightColor := FTheme.Chrome.CurrentLine;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).ExecutionLineColor := FTheme.Chrome.ExecutionLine;
   end;
 end;
 
@@ -2698,6 +4179,7 @@ end;
 procedure TMainForm.FormShow(Sender: TObject);
 var
   lErrPos: integer;
+  lLastProject: TfpgString;
 begin
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
@@ -2712,6 +4194,13 @@ begin
   TextEditor.Clear;
   TextEditor.SetFocus;
 
+  if gINI.ReadBool(cPreferences, 'OpenLastProject', True) then
+  begin
+    lLastProject := gINI.ReadString(cPreferences, cINILastProject, '');
+    if (lLastProject <> '') and fpgFileExists(lLastProject) then
+      LoadProject(lLastProject);
+  end;
+
   FFileMonitor.Resume;
 end;
 
@@ -2723,6 +4212,23 @@ var
   editor: TfpgTextEdit;
 begin
   CloseAction := caFree;
+  { End any active debug session }
+  if FDebugAdapter <> nil then
+  begin
+    FDebugAdapter.OnStopped := nil;
+    FDebugAdapter.OnTerminated := nil;
+    FDebugAdapter.OnOutput := nil;
+    FDebugAdapter.EndSession;
+    FreeAndNil(FDebugAdapter);
+  end;
+  { Kill any running program before closing }
+  if FRunnerThread <> nil then
+  begin
+    FRunnerThread.OnTerminate := nil;
+    FRunnerThread.OnAvailableOutput := nil;
+    FRunnerThread.TerminateProcess;
+    FRunnerThread := nil;
+  end;
   if Assigned(FQuickDocHint) then
   begin
     FQuickDocHint.Hide;
@@ -2732,6 +4238,9 @@ begin
   gINI.WriteInteger(Name + 'State', 'Top', Top);
   gINI.WriteInteger(Name + 'State', 'Width', ActualWidth);
   gINI.WriteInteger(Name + 'State', 'Height', ActualHeight);
+
+  if GProject.ProjectFile <> '' then
+    gINI.WriteString(cPreferences, cINILastProject, GProject.ProjectFile);
 
   SaveSession;
 end;
@@ -2745,6 +4254,14 @@ begin
   FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
   FHighlightCache := THighlighterCache.Create;
   FCursorHistory := TCursorHistory.Create(50);
+  FBreakpoints := TBreakpointList.Create;
+  FVarNodeDataList    := TList.Create;
+  FCallStackDataList  := TList.Create;
+  FWatchList          := TWatchList.Create;
+  FWatchNodeDataList  := TList.Create;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
   FTheme := DefaultTheme;
 
   { Build state image list for tree checkboxes (16x16 masked BMPs) }
@@ -2765,6 +4282,14 @@ begin
   FFileMonitor.Free;
   FreeAndNil(FHighlightCache);
   FreeAndNil(FCursorHistory);
+  FreeAndNil(FBreakpoints);
+  ClearVariablesTree;
+  FreeAndNil(FVarNodeDataList);
+  ClearCallStackPanel;
+  FreeAndNil(FCallStackDataList);
+  ClearWatchesPanel;
+  FreeAndNil(FWatchNodeDataList);
+  FreeAndNil(FWatchList);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);
@@ -2838,12 +4363,92 @@ begin
     ImageName := 'stdimg.saveall';
   end;
 
+  { Debug execution control buttons — initially disabled (no active session) }
+  btnDbgContinue := TfpgButton.Create(Toolbar);
+  with btnDbgContinue do
+  begin
+    Name := 'btnDbgContinue';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Continue';
+    Hint := 'Continue (F9)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugRun;
+  end;
+
+  btnDbgPause := TfpgButton.Create(Toolbar);
+  with btnDbgPause do
+  begin
+    Name := 'btnDbgPause';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Pause';
+    Hint := 'Pause debug execution';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugPause;
+  end;
+
+  btnDbgStop := TfpgButton.Create(Toolbar);
+  with btnDbgStop do
+  begin
+    Name := 'btnDbgStop';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Stop';
+    Hint := 'Stop program (Ctrl+F2)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miStopProgram;
+  end;
+
+  btnDbgStepInto := TfpgButton.Create(Toolbar);
+  with btnDbgStepInto do
+  begin
+    Name := 'btnDbgStepInto';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Into';
+    Hint := 'Step Into (F7)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepInto;
+  end;
+
+  btnDbgStepOver := TfpgButton.Create(Toolbar);
+  with btnDbgStepOver do
+  begin
+    Name := 'btnDbgStepOver';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Over';
+    Hint := 'Step Over (F8)';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepOver;
+  end;
+
+  btnDbgStepOut := TfpgButton.Create(Toolbar);
+  with btnDbgStepOut do
+  begin
+    Name := 'btnDbgStepOut';
+    PreferredSize := fpgSize(48, 24);
+    Text := 'Out';
+    Hint := 'Step Out (Shift+F8) - not yet available';
+    Embedded := True;
+    Enabled := False;
+    OnClick := @miDebugStepOut;
+  end;
+
   Toolbar.LayoutManager := mig;
   mig.LC.InsetsAll('2lp').Fill;
   mig.AddLayoutComponent(btnQuit, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnOpen, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnSave, TfpgMigCC.Create.MinWidth('24lp'));
   mig.AddLayoutComponent(btnSaveAll, TfpgMigCC.Create.MinWidth('24lp').PushX);
+  { Debug controls — grouped on the right side of the toolbar }
+  mig.AddLayoutComponent(btnDbgContinue, TfpgMigCC.Create.GapBefore('14lp').MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgPause, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStop, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepInto, TfpgMigCC.Create.GapBefore('8lp').MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepOver, TfpgMigCC.Create.MinWidth('48lp'));
+  mig.AddLayoutComponent(btnDbgStepOut, TfpgMigCC.Create.MinWidth('48lp'));
 end;
 
 procedure TMainForm.uiCreateStatusBar;
@@ -2854,7 +4459,7 @@ begin
   with pnlStatusBar do
   begin
     Name := 'pnlStatusBar';
-    PreferredSize := fpgSize(600, 22);
+    PreferredSize := fpgSize(600, 24);
     Style := bsLowered;
   end;
 
@@ -2880,7 +4485,7 @@ begin
   with lblGitBranch do
   begin
     Name := 'lblGitBranch';
-    PreferredSize := fpgSize(100, 16);
+//    PreferredSize := fpgSize(100, 16);
     FontDesc := '#Label1';
     Text := '';
   end;
@@ -2891,7 +4496,7 @@ begin
     Name := 'lblProfiles';
     PreferredSize := fpgSize(150, 16);
     FontDesc := '#Label1';
-    Hint := 'Active build profiles — click to change';
+    Hint := 'Active build profiles - click to change';
     Text := '';
     OnClick := @lblProfilesClicked;
   end;
@@ -2902,8 +4507,8 @@ begin
   FStatusBarLayout.LC.InsetsAll('2lp').FillX;
   FStatusBarLayout.AddLayoutComponent(lblStatus, TfpgMigCC.Create.GrowX.PushX);
   FStatusBarLayout.AddLayoutComponent(lblCursorPos, TfpgMigCC.Create.AlignX('right'));
-  FStatusBarLayout.AddLayoutComponent(lblGitBranch, TfpgMigCC.Create.AlignX('right'));
-  FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right'));
+  FStatusBarLayout.AddLayoutComponent(lblProfiles, TfpgMigCC.Create.AlignX('right').GrowX);
+  FStatusBarLayout.AddLayoutComponent(lblGitBranch, TfpgMigCC.Create.AlignX('right').GrowX);
 end;
 
 procedure TMainForm.uiCreateClientArea;
@@ -2964,6 +4569,125 @@ begin
     Name := 'grdFiles';
     Align := alClient;
     Options := Options + [go_SmoothScroll];
+  end;
+
+  tsBreakpoints := TfpgTabSheet.Create(pnlTool);
+  with tsBreakpoints do
+  begin
+    Name := 'tsBreakpoints';
+    Text := 'Breakpoints';
+  end;
+
+  tvBreakpoints := TfpgTreeView.Create(tsBreakpoints);
+  with tvBreakpoints do
+  begin
+    Name := 'tvBreakpoints';
+    Align := alClient;
+    FontDesc := '#Label1';
+    ShowImages := True;
+    StateImageList := FProfileStateImages;
+    IndentNodeWithNoImage := False;
+    Hint := 'Click checkbox: enable/disable | Double-click: go to source | Del: remove';
+    OnDoubleClick := @tvBreakpointsDoubleClick;
+    OnKeyPress := @tvBreakpointsKeyPressed;
+    OnStateImageClicked := @tvBreakpointsStateImageClicked;
+  end;
+
+  tsVariables := TfpgTabSheet.Create(pnlTool);
+  with tsVariables do
+  begin
+    Name := 'tsVariables';
+    Text := 'Variables';
+  end;
+
+  { Thin toolbar row above the variables tree for the options button.
+    Created first so HandleAlignments processes alTop before alClient. }
+  btnVarOptions := TfpgButton.Create(tsVariables);
+  with btnVarOptions do
+  begin
+    Name    := 'btnVarOptions';
+    Align   := alTop;
+    Height  := 22;
+    Text    := 'Options...';
+    Flat    := True;
+    Hint    := 'Show/hide type names and enclosing scope variables';
+    OnClick := @btnVarOptionsClicked;
+  end;
+
+  tvVariables := TfpgTreeView.Create(tsVariables);
+  with tvVariables do
+  begin
+    Name      := 'tvVariables';
+    Align     := alClient;
+    FontDesc  := '#Label1';
+    OnExpand  := @tvVariablesExpand;
+  end;
+
+  tsCallStack := TfpgTabSheet.Create(pnlTool);
+  with tsCallStack do
+  begin
+    Name := 'tsCallStack';
+    Text := 'Call Stack';
+  end;
+
+  tvCallStack := TfpgTreeView.Create(tsCallStack);
+  with tvCallStack do
+  begin
+    Name         := 'tvCallStack';
+    Align        := alClient;
+    FontDesc     := '#Label1';
+    Hint         := 'Double-click a frame to navigate to source';
+    OnDoubleClick := @tvCallStackDoubleClick;
+  end;
+
+  { Watches panel — evaluates user expressions on every debugger stop }
+  tsWatches := TfpgTabSheet.Create(pnlTool);
+  with tsWatches do
+  begin
+    Name := 'tsWatches';
+    Text := 'Watches';
+  end;
+
+  pnlWatchToolbar := TfpgBevel.Create(tsWatches);
+  with pnlWatchToolbar do
+  begin
+    Name  := 'pnlWatchToolbar';
+    Align := alTop;
+    Height := 24;
+    Style := bsFlat;
+  end;
+
+  btnAddWatch := TfpgButton.Create(pnlWatchToolbar);
+  with btnAddWatch do
+  begin
+    Name    := 'btnAddWatch';
+    SetPosition(1, 1, 52, 22);
+    Text    := '+ Watch';
+    Flat    := True;
+    Hint    := 'Add a new watch expression (evaluates on each debugger stop)';
+    OnClick := @btnAddWatchClicked;
+  end;
+
+  btnRemoveWatch := TfpgButton.Create(pnlWatchToolbar);
+  with btnRemoveWatch do
+  begin
+    Name    := 'btnRemoveWatch';
+    SetPosition(55, 1, 52, 22);
+    Text    := '- Remove';
+    Flat    := True;
+    Hint    := 'Remove selected watch';
+    OnClick := @btnRemoveWatchClicked;
+  end;
+
+  tvWatches := TfpgTreeView.Create(tsWatches);
+  with tvWatches do
+  begin
+    Name      := 'tvWatches';
+    Align     := alClient;
+    FontDesc  := '#Label1';
+    Hint      := 'Del: remove watch | Double-click to expand composite values';
+    OnExpand  := @tvWatchesExpand;
+    OnKeyPress := @tvWatchesKeyPressed;
   end;
 
   { Vertical splitter — between tool panel and editor }
@@ -3071,6 +4795,77 @@ begin
     Name := 'tsTerminal';
     Text := 'Terminal';
   end;
+
+  tsOutput := TfpgTabSheet.Create(pnlWindow);
+  with tsOutput do
+  begin
+    Name := 'tsOutput';
+    Text := 'Output';
+  end;
+
+  { Exception notification bar — shown when the debugger pauses on a raised exception.
+    Sits at the top of the Output tab; normally invisible. }
+  pnlExcNotify := TfpgBevel.Create(tsOutput);
+  with pnlExcNotify do
+  begin
+    Name    := 'pnlExcNotify';
+    Align   := alTop;
+    Height  := 52;
+    Style   := bsRaised;
+    Visible := False;
+  end;
+
+  lblExcInfo := TfpgLabel.Create(pnlExcNotify);
+  with lblExcInfo do
+  begin
+    Name     := 'lblExcInfo';
+    SetPosition(4, 4, 600, 20);
+    FontDesc := '#Label1:Bold';
+    Text     := '';
+  end;
+
+  lblExcLocation := TfpgLabel.Create(pnlExcNotify);
+  with lblExcLocation do
+  begin
+    Name     := 'lblExcLocation';
+    SetPosition(4, 26, 600, 18);
+    FontDesc := '#Label1';
+    Text     := '';
+  end;
+
+  btnExcContinue := TfpgButton.Create(pnlExcNotify);
+  with btnExcContinue do
+  begin
+    Name    := 'btnExcContinue';
+    SetPosition(620, 6, 90, 22);
+    Text    := 'Continue (F9)';
+    Flat    := False;
+    OnClick := @btnExcContinueClicked;
+  end;
+
+  btnExcStop := TfpgButton.Create(pnlExcNotify);
+  with btnExcStop do
+  begin
+    Name    := 'btnExcStop';
+    SetPosition(714, 6, 80, 22);
+    Text    := 'Stop';
+    Flat    := False;
+    OnClick := @btnExcStopClicked;
+  end;
+
+  grdOutput := TfpgStringGrid.Create(tsOutput);
+  with grdOutput do
+  begin
+    Name := 'grdOutput';
+    Align := alClient;
+    BackgroundColor := TfpgColor($80000002);
+    AddColumn('New', 2000, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    RowCount := 0;
+    RowSelect := True;
+    ShowHeader := False;
+  end;
   {%endregion}
 
   { Context menu for editor tabs }
@@ -3101,6 +4896,26 @@ begin
   begin
     AddMenuItem('Show Dependency Tree', '', @pmTreeDependencyTreeClick);
   end;
+
+  { Options menu for the Variables panel }
+  pmVarsMenu := TfpgPopupMenu.Create(self);
+  miVarShowType := pmVarsMenu.AddMenuItem('Show Type', '', @miVarShowTypeClick);
+  miVarShowType.Checked := FVarShowType;
+  miVarShowScope := pmVarsMenu.AddMenuItem('Show Enclosing Scope', '', @miVarShowScopeClick);
+  miVarShowScope.Checked := FVarShowScope;
+  miVarShowGlobals := pmVarsMenu.AddMenuItem('Show Globals', '', @miVarShowGlobalsClick);
+  miVarShowGlobals.Checked := FVarShowGlobals;
+
+  { Context menu for breakpoints panel }
+  pmBreakpointMenu := TfpgPopupMenu.Create(self);
+  with pmBreakpointMenu do
+  begin
+    AddMenuItem('Go to Source', '', @pmBPGoToSourceClick);
+    AddSeparator;
+    AddMenuItem('Toggle Enable/Disable', '', @pmBPToggleEnabledClick);
+    AddMenuItem('Remove Breakpoint', '', @pmBPRemoveClick);
+  end;
+  tvBreakpoints.PopupMenu := pmBreakpointMenu;
 
   SplitterH.Control := pnlWindow;
 
@@ -3225,8 +5040,21 @@ begin
     AddMenuItem('Rebuild', '', @miRunRebuild);
     AddMenuItem('Test', rsKeyCtrl+rsKeyShift+'F10', @miRunTest);
     AddSeparator;
-    AddMenuItem('Run', 'F9', nil);
-    AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);
+    AddMenuItem('Debug Run', 'F9', @miDebugRun);
+    AddMenuItem('Run', rsKeyShift+'F9', @miRunProgram);
+    AddMenuItem('Stop', rsKeyCtrl+'F2', @miStopProgram);
+    AddSeparator;
+    miDbgStepInto := AddMenuItem('Step Into', 'F7', @miDebugStepInto);
+    miDbgStepOver := AddMenuItem('Step Over', 'F8', @miDebugStepOver);
+    miDbgStepOut  := AddMenuItem('Step Out', rsKeyShift+'F8', @miDebugStepOut);
+    miDbgPause    := AddMenuItem('Pause', '', @miDebugPause);
+    AddSeparator;
+    miDbgEvalExpr := AddMenuItem('Evaluate Expression...', rsKeyCtrl+rsKeyAlt+'F8', @miDebugEvalExpr);
+    miDbgStepInto.Enabled  := False;
+    miDbgStepOver.Enabled  := False;
+    miDbgStepOut.Enabled   := False;
+    miDbgPause.Enabled     := False;
+    miDbgEvalExpr.Enabled  := False;
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);
@@ -3326,7 +5154,7 @@ begin
 
   mig.AddLayoutComponent(mainmenu, TfpgMigCC.Create.DockNorth.GrowX.Height('24lp!'));
   mig.AddLayoutComponent(Toolbar, TfpgMigCC.Create.DockNorth.GrowX.Height('28lp!'));
-  mig.AddLayoutComponent(pnlStatusBar, TfpgMigCC.Create.DockSouth.GrowX.Height('22lp!'));
+  mig.AddLayoutComponent(pnlStatusBar, TfpgMigCC.Create.DockSouth.GrowX.Height('24lp!'));
   mig.AddLayoutComponent(pnlClientArea, TfpgMigCC.Create.GrowX.GrowY.Push);
 end;
 

@@ -44,6 +44,10 @@ type
     FActiveProfiles: TStringList;
     FToolPanelWidth: Integer;
     FBottomPanelHeight: Integer;
+    FVarShowType: Boolean;
+    FVarShowScope: Boolean;
+    FVarShowGlobals: Boolean;
+    FWatches: TStringList;
     function GetOpenFileCount: Integer;
     function GetOpenFile(AIndex: Integer): TOpenFileInfo;
   public
@@ -61,6 +65,11 @@ type
     property ActiveProfiles: TStringList read FActiveProfiles;
     property ToolPanelWidth: Integer read FToolPanelWidth write FToolPanelWidth;
     property BottomPanelHeight: Integer read FBottomPanelHeight write FBottomPanelHeight;
+    property VarShowType: Boolean read FVarShowType write FVarShowType;
+    property VarShowScope: Boolean read FVarShowScope write FVarShowScope;
+    property VarShowGlobals: Boolean read FVarShowGlobals write FVarShowGlobals;
+    { Persisted watch expressions. Caller populates before Save; reads after Load. }
+    property Watches: TStringList read FWatches;
     property SessionFile: TfpgString read FSessionFile;
   end;
 
@@ -81,14 +90,19 @@ begin
   FActiveTab := -1;
   FToolPanelWidth := -1;
   FBottomPanelHeight := -1;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
   FActiveProfiles := TStringList.Create;
   FActiveProfiles.Delimiter := ',';
   FActiveProfiles.StrictDelimiter := True;
+  FWatches := TStringList.Create;
   SetLength(FOpenFiles, 0);
 end;
 
 destructor TIDESession.Destroy;
 begin
+  FWatches.Free;
   FActiveProfiles.Free;
   inherited Destroy;
 end;
@@ -108,8 +122,12 @@ begin
   SetLength(FOpenFiles, 0);
   FActiveTab := -1;
   FActiveProfiles.Clear;
+  FWatches.Clear;
   FToolPanelWidth := -1;
   FBottomPanelHeight := -1;
+  FVarShowType    := True;
+  FVarShowScope   := True;
+  FVarShowGlobals := True;
 end;
 
 procedure TIDESession.AddOpenFile(const AAbsPath: TfpgString;
@@ -174,6 +192,21 @@ begin
         FToolPanelWidth := SessionObj.Integers['toolPanelWidth'];
       if SessionObj.IndexOfName('bottomPanelHeight') >= 0 then
         FBottomPanelHeight := SessionObj.Integers['bottomPanelHeight'];
+      if SessionObj.IndexOfName('varShowType') >= 0 then
+        FVarShowType := SessionObj.Booleans['varShowType'];
+      if SessionObj.IndexOfName('varShowScope') >= 0 then
+        FVarShowScope := SessionObj.Booleans['varShowScope'];
+      if SessionObj.IndexOfName('varShowGlobals') >= 0 then
+        FVarShowGlobals := SessionObj.Booleans['varShowGlobals'];
+    end;
+
+    { Watch expressions }
+    if RootObj.IndexOfName('watches') >= 0 then
+    begin
+      FilesArr := RootObj.Arrays['watches'];
+      for I := 0 to FilesArr.Count - 1 do
+        if FilesArr.Strings[I] <> '' then
+          FWatches.Add(FilesArr.Strings[I]);
     end;
 
     { Open files }
@@ -240,7 +273,19 @@ begin
       SessionObj.Add('toolPanelWidth', FToolPanelWidth);
     if FBottomPanelHeight > 0 then
       SessionObj.Add('bottomPanelHeight', FBottomPanelHeight);
+    SessionObj.Add('varShowType',    FVarShowType);
+    SessionObj.Add('varShowScope',   FVarShowScope);
+    SessionObj.Add('varShowGlobals', FVarShowGlobals);
     RootObj.Add('session', SessionObj);
+
+    { Watch expressions }
+    if FWatches.Count > 0 then
+    begin
+      ProfilesArr := TJSONArray.Create;
+      for I := 0 to FWatches.Count - 1 do
+        ProfilesArr.Add(FWatches[I]);
+      RootObj.Add('watches', ProfilesArr);
+    end;
 
     { Open files }
     FilesArr := TJSONArray.Create;

@@ -49,10 +49,12 @@ type
     procedure   SetSpace(const AValue: Integer);
     procedure   SetStartNum(const AValue: Integer);
     procedure   DrawLineNums;
+    procedure   DrawGutterIndicators;
     procedure   SetZeroStart(const AValue: Boolean);
     procedure   UpdateSize;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
   public
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
@@ -67,6 +69,11 @@ type
     property    ZeroStart: Boolean read FZeroStart write SetZeroStart default False;
   end;
 
+
+  TfpgGutterClickEvent = procedure(Sender: TObject; ALine: Integer) of object;
+
+  TfpgGutterLineEvent = procedure(Sender: TObject; ALine: Integer;
+      ACanvas: TfpgCanvas; const ARect: TfpgRect) of object;
 
   TfpgDrawLineEvent = procedure(Sender: TObject; ALineText: TfpgString;
       ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
@@ -153,8 +160,12 @@ type
     FSelectionColor: TfpgColor;
     FSelectionTextColor: TfpgColor;
     FLineHighlightColor: TfpgColor;
+    FExecutionLine: Integer;        // 0-based; -1 = no highlight
+    FExecutionLineColor: TfpgColor;
     FUndoManager: TUndoManager;
     FOnCtrlClick: TNotifyEvent;
+    FOnGutterClick: TfpgGutterClickEvent;
+    FOnGutterLine: TfpgGutterLineEvent;
 
     FLastScrollEventTime: TTime; // in milliseconds
     FLastScrollEventTimeBefore: TTime; // in milliseconds
@@ -240,6 +251,8 @@ type
     property    SelectionColor: TfpgColor read FSelectionColor write FSelectionColor;
     property    SelectionTextColor: TfpgColor read FSelectionTextColor write FSelectionTextColor;
     property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
+    property    ExecutionLine: Integer read FExecutionLine write FExecutionLine;
+    property    ExecutionLineColor: TfpgColor read FExecutionLineColor write FExecutionLineColor;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
     property    OnCaretChange: TfpgCaretChangeEvent read FOnCaretChange write FOnCaretChange;
@@ -249,6 +262,8 @@ type
     property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
     property    OnReplaceText: TfpgReplaceText read FOnReplaceText write FOnReplaceText;
     property    OnCtrlClick: TNotifyEvent read FOnCtrlClick write FOnCtrlClick;
+    property    OnGutterClick: TfpgGutterClickEvent read FOnGutterClick write FOnGutterClick;
+    property    OnGutterLine: TfpgGutterLineEvent read FOnGutterLine write FOnGutterLine;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -321,6 +336,8 @@ type
     property    SelectionColor;
     property    SelectionTextColor;
     property    LineHighlightColor;
+    property    ExecutionLine;
+    property    ExecutionLineColor;
     property    Lines;
     property    RightEdge;
     property    ScrollBarStyle;
@@ -335,6 +352,8 @@ type
     property    OnSearchEnd;
     property    OnReplaceText;
     property    OnCtrlClick;
+    property    OnGutterClick;
+    property    OnGutterLine;
   end;
 
 
@@ -548,6 +567,27 @@ begin
   end;
 end;
 
+procedure TfpgGutter.DrawGutterIndicators;
+var
+  i, MaxI, H, GW: Integer;
+  lNum: Integer;
+  R: TfpgRect;
+begin
+  if not Assigned(FOwner.FOnGutterLine) then
+    Exit;
+  H    := FOwner.FChrH;
+  MaxI := FOwner.FVisLines;
+  GW   := GetClientRect.Width;
+  for i := 0 to MaxI do
+  begin
+    lNum := FStartNum + i;
+    if lNum > FOwner.Lines.Count then
+      Break;
+    R.SetRect(0, i * H, GW - FSpace - 1, H);
+    FOwner.FOnGutterLine(FOwner, lNum, Canvas, R);
+  end;
+end;
+
 procedure TfpgGutter.SetZeroStart(const AValue: Boolean);
 begin
   if FZeroStart=AValue then exit;
@@ -575,6 +615,20 @@ begin
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
   DrawLineNums;
+  DrawGutterIndicators;
+end;
+
+procedure TfpgGutter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  LineIdx: Integer;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if Assigned(FOwner.FOnGutterClick) then
+  begin
+    LineIdx := FOwner.FTopLine + (y div FOwner.FChrH) + 1;  { 1-based }
+    if (LineIdx >= 1) and (LineIdx <= FOwner.Lines.Count) then
+      FOwner.FOnGutterClick(FOwner, LineIdx);
+  end;
 end;
 
 procedure TfpgGutter.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
@@ -2447,8 +2501,24 @@ begin
   else
     GSz := GetClientRect.Left + 1; // gutter size if no gutter panel
 
+  { Execution line highlight (debugger) — visible even when not focused.
+    Takes priority over the caret line highlight. }
+  if (FExecutionLine >= 0) and (ALineIndex = FExecutionLine) then
+  begin
+    R.SetRect(GSz, Y, GetClientRect.Width, FChrH);
+    Canvas.Color := FExecutionLineColor;
+    Canvas.FillRectangle(R);
+    if FRightEdge then
+    begin
+      Canvas.Color := clShadow1;
+      X := (FRightEdgeCol * FChrW) - (HPos * FChrW);
+      if FGutterPan.Visible then
+        X := X + FGutterPan.ActualWidth;
+      Canvas.DrawLine(X, Y, X, Y + FChrH);
+    end;
+  end
   { Current line highlighting — fill full line width before text renders on top }
-  if (ALineIndex = CaretPos.Y) and Focused then
+  else if (ALineIndex = CaretPos.Y) and Focused then
   begin
     if FLineHighlightColor <> clNone then
       HighlightCol := FLineHighlightColor
@@ -2708,6 +2778,8 @@ begin
   FSelectionColor := clSelection;
   FSelectionTextColor := clWhite;
   FLineHighlightColor := clNone;
+  FExecutionLine := -1;
+  FExecutionLineColor := TfpgColor($ffFFF3A3);  // pale yellow fallback; overridden by theme
   FMaxScrollH   := 1;
   VPos          := 0;
   HPos          := 0;

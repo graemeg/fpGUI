@@ -110,7 +110,6 @@ type
   { PasBuild project.xml backend }
   TPasBuildProjectBackend = class(TIDEProjectBackend)
   private
-    FProjectFile: TfpgString;
     FProjectDir: TfpgString;
     FProjectName: TfpgString;
     FVersion: TfpgString;
@@ -178,7 +177,6 @@ type
     function  IsAggregator: Boolean;
     function  GetBuildDir: TfpgString;
     { Properties }
-    property  ProjectFile: TfpgString read FProjectFile;
     property  Version: TfpgString read FVersion;
     property  ProjectType: TfpgString read FProjectType;
     property  SourceDirectory: TfpgString read FSourceDirectory;

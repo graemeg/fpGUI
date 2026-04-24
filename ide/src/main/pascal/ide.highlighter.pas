@@ -275,6 +275,7 @@ begin
       // Map token kind to highlight category
       case Tok.Kind of
         fptkKeyword:    Category := hcKeyword1;
+        fptkModifier:   Category := hcKeyword2;
         fptkIdentifier: Category := hcIdentifier;
         fptkString:     Category := hcString1;
         fptkNumber:     Category := hcNumber;

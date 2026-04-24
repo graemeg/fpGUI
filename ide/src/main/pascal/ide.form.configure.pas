@@ -78,6 +78,8 @@ type
     btnColor: TfpgButton;
     lblEditorTheme: TfpgLabel;
     cbEditorTheme: TfpgComboBox;
+    tsPreferences: TfpgTabSheet;
+    cbOpenLastProject: TfpgCheckBox;
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
@@ -189,6 +191,7 @@ begin
     gINI.ReadString(cEditor, 'Theme', 'Default'));
   if cbEditorTheme.FocusItem < 0 then
     cbEditorTheme.FocusItem := 0;
+  cbOpenLastProject.Checked := gINI.ReadBool(cPreferences, 'OpenLastProject', True);
 end;
 
 procedure TConfigureIDEForm.SaveSettings;
@@ -208,6 +211,8 @@ begin
   gINI.WriteBool(cEditor, 'SyntaxHighlighting', cbSyntaxHighlighting.Checked);
   if (cbEditorTheme.FocusItem >= 0) and (cbEditorTheme.FocusItem < cbEditorTheme.Items.Count) then
     gINI.WriteString(cEditor, 'Theme', cbEditorTheme.Items[cbEditorTheme.FocusItem]);
+
+  gINI.WriteBool(cPreferences, 'OpenLastProject', cbOpenLastProject.Checked);
 
   SaveToMacroList(GMacroList);
 end;
@@ -876,6 +881,27 @@ begin
     Hint := '';
     FocusItem := 0;
     TabOrder := 9;
+  end;
+
+  tsPreferences := TfpgTabSheet.Create(pcSettings);
+  with tsPreferences do
+  begin
+    Name := 'tsPreferences';
+    SetPosition(3, 3, 442, 424);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Text := 'Preferences';
+  end;
+
+  cbOpenLastProject := TfpgCheckBox.Create(tsPreferences);
+  with cbOpenLastProject do
+  begin
+    Name := 'cbOpenLastProject';
+    SetPosition(8, 8, 404, 20);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 1;
+    Text := 'Reopen last project on startup';
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}
