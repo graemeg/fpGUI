@@ -173,13 +173,13 @@ type
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
-    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
-    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload;
-    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload;
-    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection); overload;
-    procedure   DrawFocusRect(r: TfpgRect);
+    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawFocusRect(r: TfpgRect); deprecated 'Use fpgStyle instead. Since: 2026-04-01';
     function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
