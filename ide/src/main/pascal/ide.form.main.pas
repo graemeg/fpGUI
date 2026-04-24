@@ -65,6 +65,7 @@ uses
   ide.runner.thread,
   ide.symbolfinder,
   ide.variables,
+  ide.watches,
   {$IFDEF HAS_OPDF_DEBUG}
   ide.debug.adapter,
   pdr_ports
@@ -130,6 +131,17 @@ type
     tvVariables: TfpgTreeView;
     tsCallStack: TfpgTabSheet;
     tvCallStack: TfpgTreeView;
+    tsWatches: TfpgTabSheet;
+    pnlWatchToolbar: TfpgBevel;
+    btnAddWatch: TfpgButton;
+    btnRemoveWatch: TfpgButton;
+    tvWatches: TfpgTreeView;
+    { Exception notification bar — shown inside tsOutput when an exception stop occurs }
+    pnlExcNotify: TfpgBevel;
+    lblExcInfo: TfpgLabel;
+    lblExcLocation: TfpgLabel;
+    btnExcContinue: TfpgButton;
+    btnExcStop: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     pmOpenRecentMenu: TfpgPopupMenu;
     pmTabMenu: TfpgPopupMenu;
@@ -171,6 +183,9 @@ type
     FVarShowScope: Boolean;         { cog option: show enclosing scope group }
     FVarShowGlobals: Boolean;       { cog option: show globals group }
     FCallStackDataList: TList;      { owns all TCallStackFrameData instances }
+    FWatchList: TWatchList;         { user-defined watch expressions }
+    FLastWatchResults: TVariableValueArray;
+    FWatchNodeDataList: TList;      { owns TVarNodeData for the Watches tree }
     procedure   EditorGutterClick(Sender: TObject; ALine: Integer);
     procedure   EditorGutterLine(Sender: TObject; ALine: Integer; ACanvas: TfpgCanvas; const ARect: TfpgRect);
     procedure   ToggleBreakpointAtCursor;
@@ -188,6 +203,18 @@ type
     procedure   RefreshCallStackPanel;
     procedure   ClearCallStackPanel;
     procedure   tvCallStackDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    { Watches panel }
+    procedure   RefreshWatchesPanel;
+    procedure   ClearWatchesPanel;
+    procedure   btnAddWatchClicked(Sender: TObject);
+    procedure   btnRemoveWatchClicked(Sender: TObject);
+    procedure   tvWatchesKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   tvWatchesExpand(Sender: TObject; ANode: TfpgTreeNode);
+    { Exception notification bar }
+    procedure   ShowExceptionNotification;
+    procedure   HideExceptionNotification;
+    procedure   btnExcContinueClicked(Sender: TObject);
+    procedure   btnExcStopClicked(Sender: TObject);
     function    FindSourceByBaseName(const ABaseName: string): string;
     procedure   AppendVarNode(AParent: TfpgTreeNode; AData: TVarNodeData);
     procedure   tvVariablesExpand(Sender: TObject; ANode: TfpgTreeNode);
@@ -898,8 +925,10 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State in [idsRunning, idsPaused, idsStarting]) then
   begin
     ClearAllExecutionLines;
+    ClearWatchesPanel;
     ClearVariablesTree;
     ClearCallStackPanel;
+    HideExceptionNotification;
     FBreakpoints.ClearHandles;
     FDebugAdapter.EndSession;
     AddOutputLine('');
@@ -954,8 +983,11 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearWatchesPanel;
     ClearVariablesTree;
     ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
     FDebugAdapter.Continue;
     UpdateStatus('Running (debug)...');
     UpdateDebugControls;
@@ -1235,8 +1267,16 @@ begin
     AddOutputLine('Stopped (no source information).');
     UpdateStatus('Paused');
   end;
+  { Refresh watches — results already collected on the worker thread }
+  FLastWatchResults := FDebugAdapter.LastWatchResults;
+  RefreshWatchesPanel;
   RefreshVariablesTree;
   RefreshCallStackPanel;
+  { Show exception notification if this stop was caused by a raised exception }
+  if FDebugAdapter.LastExceptionInfo.IsValid then
+    ShowExceptionNotification
+  else
+    HideExceptionNotification;
   pnlTool.ActivePage := tsVariables;
   UpdateDebugControls;
 end;
@@ -1244,8 +1284,10 @@ end;
 procedure TMainForm.DebugTerminated(Sender: TObject);
 begin
   ClearAllExecutionLines;
+  ClearWatchesPanel;
   ClearVariablesTree;
   ClearCallStackPanel;
+  HideExceptionNotification;
   FBreakpoints.ClearHandles;
   AddOutputLine('');
   AddOutputLine('Debug session ended.');
@@ -1263,8 +1305,11 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearWatchesPanel;
     ClearVariablesTree;
     ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
     FDebugAdapter.StepInto;
     UpdateStatus('Stepping (into)...');
     UpdateDebugControls;
@@ -1276,8 +1321,11 @@ begin
   if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
   begin
     ClearAllExecutionLines;
+    ClearWatchesPanel;
     ClearVariablesTree;
     ClearCallStackPanel;
+    HideExceptionNotification;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
     FDebugAdapter.StepOver;
     UpdateStatus('Stepping (over)...');
     UpdateDebugControls;
@@ -1758,6 +1806,215 @@ begin
   ts := OpenEditorPage(FullPath);
   if (ts <> nil) and (Data.Frame.LineNumber > 0) then
     TfpgTextEdit(ts.Components[0]).GotoLine(Data.Frame.LineNumber);
+end;
+
+{ -------------------------------------------------------------------------
+  Watches panel
+  ------------------------------------------------------------------------- }
+
+procedure TMainForm.ClearWatchesPanel;
+var
+  I: Integer;
+begin
+  if Assigned(tvWatches) then
+    tvWatches.RootNode.Clear;
+  if Assigned(FWatchNodeDataList) then
+  begin
+    for I := 0 to FWatchNodeDataList.Count - 1 do
+      TObject(FWatchNodeDataList[I]).Free;
+    FWatchNodeDataList.Clear;
+  end;
+end;
+
+procedure TMainForm.RefreshWatchesPanel;
+var
+  I: Integer;
+  Data: TVarNodeData;
+  Node: TfpgTreeNode;
+  R: TVariableValue;
+  DisplayVal, TypeName: String;
+begin
+  ClearWatchesPanel;
+  if FWatchList.Count = 0 then
+    Exit;
+  tvWatches.BeginUpdate;
+  try
+    for I := 0 to FWatchList.Count - 1 do
+    begin
+      if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused)
+          and (I < Length(FLastWatchResults)) then
+      begin
+        R := FLastWatchResults[I];
+        if R.IsValid then
+        begin
+          DisplayVal := R.Value;
+          TypeName   := R.TypeName;
+        end
+        else
+        begin
+          DisplayVal := '<not in scope>';
+          TypeName   := '';
+        end;
+      end
+      else
+      begin
+        DisplayVal := '<no debug session>';
+        TypeName   := '';
+      end;
+      Data := TVarNodeData.Create(FWatchList.Expression[I], DisplayVal,
+                                  TypeName, FWatchList.Expression[I]);
+      FWatchNodeDataList.Add(Data);
+      Node := tvWatches.RootNode.AppendText(
+        BuildVarNodeText(FWatchList.Expression[I], DisplayVal, TypeName, FVarShowType));
+      Node.Data := Data;
+      if Data.IsExpandable then
+        Node.AppendText('');  { placeholder for lazy expansion }
+    end;
+  finally
+    tvWatches.EndUpdate;
+  end;
+end;
+
+procedure TMainForm.btnAddWatchClicked(Sender: TObject);
+var
+  Expr: TfpgString;
+begin
+  Expr := '';
+  if not fpgInputQuery('Add Watch', 'Expression to watch:', Expr) then
+    Exit;
+  Expr := Trim(Expr);
+  if Expr = '' then
+    Exit;
+  FWatchList.AddWatch(Expr);
+  { Push the updated expression list to the worker so results are collected
+    on the next stop. Refresh the panel immediately with whatever we have. }
+  if FDebugAdapter <> nil then
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+  RefreshWatchesPanel;
+end;
+
+procedure TMainForm.btnRemoveWatchClicked(Sender: TObject);
+var
+  Node: TfpgTreeNode;
+  I: Integer;
+  Expr: String;
+begin
+  Node := tvWatches.Selection;
+  if Node = nil then
+    Exit;
+  { Find which watch this node belongs to by matching expression text }
+  for I := 0 to FWatchList.Count - 1 do
+    if FWatchList.Expression[I] = TVarNodeData(Node.Data).Name then
+    begin
+      Expr := FWatchList.Expression[I];
+      FWatchList.RemoveWatch(I);
+      Break;
+    end;
+  RefreshWatchesPanel;
+end;
+
+procedure TMainForm.tvWatchesKeyPressed(Sender: TObject;
+    var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+var
+  Node: TfpgTreeNode;
+  I: Integer;
+begin
+  if KeyCode = keyDelete then
+  begin
+    Node := tvWatches.Selection;
+    if Node = nil then
+      Exit;
+    for I := 0 to FWatchList.Count - 1 do
+      if FWatchList.Expression[I] = TVarNodeData(Node.Data).Name then
+      begin
+        FWatchList.RemoveWatch(I);
+        Break;
+      end;
+    RefreshWatchesPanel;
+    Consumed := True;
+  end;
+end;
+
+procedure TMainForm.tvWatchesExpand(Sender: TObject; ANode: TfpgTreeNode);
+var
+  Data: TVarNodeData;
+  Children: TVarNodeDataArray;
+  I: Integer;
+  ChildNode: TfpgTreeNode;
+begin
+  Data := TVarNodeData(ANode.Data);
+  if (Data = nil) or not Data.IsExpandable then
+    Exit;
+  { Remove placeholder }
+  ANode.Clear;
+  Children := ParseVarChildren(Data.FullPath, Data.Value);
+  tvWatches.BeginUpdate;
+  try
+    for I := 0 to High(Children) do
+    begin
+      FWatchNodeDataList.Add(Children[I]);
+      ChildNode := ANode.AppendText(
+        BuildVarNodeText(Children[I].Name, Children[I].Value,
+                         Children[I].TypeName, FVarShowType));
+      ChildNode.Data := Children[I];
+      if Children[I].IsExpandable then
+        ChildNode.AppendText('');
+    end;
+  finally
+    tvWatches.EndUpdate;
+  end;
+end;
+
+{ -------------------------------------------------------------------------
+  Exception notification bar
+  ------------------------------------------------------------------------- }
+
+procedure TMainForm.ShowExceptionNotification;
+var
+  Info: TExceptionInfo;
+  Msg: String;
+begin
+  Info := FDebugAdapter.LastExceptionInfo;
+  if Info.Message <> '' then
+    Msg := Info.ClassName + ': ''' + Info.Message + ''''
+  else
+    Msg := Info.ClassName;
+  lblExcInfo.Text := 'Exception raised: ' + Msg;
+  if (Info.SourceFile <> '') and (Info.SourceLine > 0) then
+    lblExcLocation.Text := '  raised at ' + ExtractFileName(Info.SourceFile)
+                           + ':' + IntToStr(Info.SourceLine)
+  else
+    lblExcLocation.Text := '';
+  pnlExcNotify.Visible := True;
+  pnlWindow.ActivePage := tsOutput;
+end;
+
+procedure TMainForm.HideExceptionNotification;
+begin
+  if Assigned(pnlExcNotify) then
+    pnlExcNotify.Visible := False;
+end;
+
+procedure TMainForm.btnExcContinueClicked(Sender: TObject);
+begin
+  HideExceptionNotification;
+  if (FDebugAdapter <> nil) and (FDebugAdapter.State = idsPaused) then
+  begin
+    ClearAllExecutionLines;
+    ClearWatchesPanel;
+    ClearVariablesTree;
+    ClearCallStackPanel;
+    FDebugAdapter.SetWatches(FWatchList.GetExpressions);
+    FDebugAdapter.Continue;
+    UpdateStatus('Running (debug)...');
+    UpdateDebugControls;
+  end;
+end;
+
+procedure TMainForm.btnExcStopClicked(Sender: TObject);
+begin
+  HideExceptionNotification;
+  miStopProgram(nil);
 end;
 
 function TMainForm.FindSourceByBaseName(const ABaseName: string): string;
@@ -2794,6 +3051,10 @@ begin
     Session.VarShowType    := FVarShowType;
     Session.VarShowScope   := FVarShowScope;
     Session.VarShowGlobals := FVarShowGlobals;
+    { Persist watch expressions }
+    Session.Watches.Clear;
+    for I := 0 to FWatchList.Count - 1 do
+      Session.Watches.Add(FWatchList.Expression[I]);
     if GProject.ProjectFormat = pfPasBuild then
       Session.ActiveProfiles.Assign(TPasBuildProjectBackend(GProject).ActiveProfiles);
     for I := 0 to pcEditor.PageCount - 1 do
@@ -2888,6 +3149,14 @@ begin
       begin
         FDebugAdapter.SetVarCollectScope(FVarShowScope);
         FDebugAdapter.SetVarCollectGlobals(FVarShowGlobals);
+      end;
+      { Restore watch expressions }
+      if Session.Watches.Count > 0 then
+      begin
+        FWatchList.Clear;
+        for I := 0 to Session.Watches.Count - 1 do
+          FWatchList.AddWatch(Session.Watches[I]);
+        RefreshWatchesPanel;
       end;
     end;
   finally
@@ -3988,6 +4257,8 @@ begin
   FBreakpoints := TBreakpointList.Create;
   FVarNodeDataList    := TList.Create;
   FCallStackDataList  := TList.Create;
+  FWatchList          := TWatchList.Create;
+  FWatchNodeDataList  := TList.Create;
   FVarShowType    := True;
   FVarShowScope   := True;
   FVarShowGlobals := True;
@@ -4016,6 +4287,9 @@ begin
   FreeAndNil(FVarNodeDataList);
   ClearCallStackPanel;
   FreeAndNil(FCallStackDataList);
+  ClearWatchesPanel;
+  FreeAndNil(FWatchNodeDataList);
+  FreeAndNil(FWatchList);
   if Assigned(tvProject) then
     tvProject.StateImageList := nil;
   FreeAndNil(FProfileStateImages);
@@ -4366,6 +4640,56 @@ begin
     OnDoubleClick := @tvCallStackDoubleClick;
   end;
 
+  { Watches panel — evaluates user expressions on every debugger stop }
+  tsWatches := TfpgTabSheet.Create(pnlTool);
+  with tsWatches do
+  begin
+    Name := 'tsWatches';
+    Text := 'Watches';
+  end;
+
+  pnlWatchToolbar := TfpgBevel.Create(tsWatches);
+  with pnlWatchToolbar do
+  begin
+    Name  := 'pnlWatchToolbar';
+    Align := alTop;
+    Height := 24;
+    Style := bsFlat;
+  end;
+
+  btnAddWatch := TfpgButton.Create(pnlWatchToolbar);
+  with btnAddWatch do
+  begin
+    Name    := 'btnAddWatch';
+    SetPosition(1, 1, 52, 22);
+    Text    := '+ Watch';
+    Flat    := True;
+    Hint    := 'Add a new watch expression (evaluates on each debugger stop)';
+    OnClick := @btnAddWatchClicked;
+  end;
+
+  btnRemoveWatch := TfpgButton.Create(pnlWatchToolbar);
+  with btnRemoveWatch do
+  begin
+    Name    := 'btnRemoveWatch';
+    SetPosition(55, 1, 52, 22);
+    Text    := '- Remove';
+    Flat    := True;
+    Hint    := 'Remove selected watch';
+    OnClick := @btnRemoveWatchClicked;
+  end;
+
+  tvWatches := TfpgTreeView.Create(tsWatches);
+  with tvWatches do
+  begin
+    Name      := 'tvWatches';
+    Align     := alClient;
+    FontDesc  := '#Label1';
+    Hint      := 'Del: remove watch | Double-click to expand composite values';
+    OnExpand  := @tvWatchesExpand;
+    OnKeyPress := @tvWatchesKeyPressed;
+  end;
+
   { Vertical splitter — between tool panel and editor }
   SplitterV := TfpgMigSplitter.Create(pnlClientArea);
   with SplitterV do
@@ -4477,6 +4801,56 @@ begin
   begin
     Name := 'tsOutput';
     Text := 'Output';
+  end;
+
+  { Exception notification bar — shown when the debugger pauses on a raised exception.
+    Sits at the top of the Output tab; normally invisible. }
+  pnlExcNotify := TfpgBevel.Create(tsOutput);
+  with pnlExcNotify do
+  begin
+    Name    := 'pnlExcNotify';
+    Align   := alTop;
+    Height  := 52;
+    Style   := bsRaised;
+    Visible := False;
+  end;
+
+  lblExcInfo := TfpgLabel.Create(pnlExcNotify);
+  with lblExcInfo do
+  begin
+    Name     := 'lblExcInfo';
+    SetPosition(4, 4, 600, 20);
+    FontDesc := '#Label1:Bold';
+    Text     := '';
+  end;
+
+  lblExcLocation := TfpgLabel.Create(pnlExcNotify);
+  with lblExcLocation do
+  begin
+    Name     := 'lblExcLocation';
+    SetPosition(4, 26, 600, 18);
+    FontDesc := '#Label1';
+    Text     := '';
+  end;
+
+  btnExcContinue := TfpgButton.Create(pnlExcNotify);
+  with btnExcContinue do
+  begin
+    Name    := 'btnExcContinue';
+    SetPosition(620, 6, 90, 22);
+    Text    := 'Continue (F9)';
+    Flat    := False;
+    OnClick := @btnExcContinueClicked;
+  end;
+
+  btnExcStop := TfpgButton.Create(pnlExcNotify);
+  with btnExcStop do
+  begin
+    Name    := 'btnExcStop';
+    SetPosition(714, 6, 80, 22);
+    Text    := 'Stop';
+    Flat    := False;
+    OnClick := @btnExcStopClicked;
   end;
 
   grdOutput := TfpgStringGrid.Create(tsOutput);
