@@ -40,7 +40,8 @@ uses
   ide.test.debug.adapter,
   ide.test.breakpoint,
   ide.test.variables,
-  ide.test.callstack;
+  ide.test.callstack,
+  ide.test.watches;
 
 var
   Application: TTestRunner;
