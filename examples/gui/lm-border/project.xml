@@ -3,7 +3,7 @@
   <name>examples-gui-lmborder</name>
 
   <build>
-    <mainSource>lm-border.lpr</mainSource>
+    <mainSource>lm-border.pas</mainSource>
     <sourceDirectory>.</sourceDirectory>
     <executableName>lm-border</executableName>
   </build>
