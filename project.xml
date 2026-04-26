@@ -18,6 +18,7 @@
     <module>uidesigner</module>
     <module>tools/vertex</module>
     <module activeByDefault="false">examples</module>
+    <module activeByDefault="false">tools/docs-compile</module>
     <module activeByDefault="false">tools/hvif_dump</module>
     <module activeByDefault="false">tools/imageconvert</module>
     <module activeByDefault="false">tools/vertex-canvas-demo</module>

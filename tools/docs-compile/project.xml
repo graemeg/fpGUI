@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>pasbuild-docs-compile</name>
+  <author>Graeme Geldenhuys</author>
+  <license>LGPL with static linking exception</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>pasbuild_docs_compile.pas</mainSource>
+    <executableName>pasbuild-docs-compile</executableName>
+  </build>
+
+</project>
