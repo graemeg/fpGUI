@@ -2043,6 +2043,9 @@ begin
   end
   else
     InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+
+  // this could be an option
+  FSelected:=False;
 end;
 
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
