@@ -612,6 +612,11 @@ uses
   fpg_tab,
   fpg_async;
 
+{$ifdef MSWINDOWS}
+const
+  RT_RCDATA = PChar(10);
+{$endif}
+
 var
   fpgTimers: TList;
   fpgNamedColors: array[0..255] of TfpgColor;
